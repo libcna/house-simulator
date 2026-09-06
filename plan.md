@@ -1531,14 +1531,65 @@ system update order, the settings file, the logging, and a CI that runs lints an
             (`HOUSE-00111`) and `drawCallMicroseconds = 8.15` (`HOUSE-00106`). The draw budget is
             computed from that last one rather than from a remembered rule of thumb, and it is a
             field rather than a constant because a different machine has a different number.
-- [ ] HOUSE-00142 — Implement `ContentRegistry`: content name ↔ asset id ↔ pack, loaded from `assets.manifest.json`
+- [x] HOUSE-00142 — Implement `ContentRegistry`: content name ↔ asset id ↔ pack, loaded from `assets.manifest.json`
       dep: HOUSE-00028 · sys: content · plat: ALL · pri: MUST
-- [ ] HOUSE-00143 — Implement `TextureCache`, `ModelCache`, `SoundCache`, `EffectCache` over `ContentManager`, with fallback assets and a load-failure policy
+      note: (2026-09-06) `content::ContentRegistry`, loading the runtime subset of
+            `assets.manifest.json` (`cna-house.md` §20.3): id, kind, content name, residency pack.
+            The manifest's source hashes, licence and review status are for the offline tooling and
+            the phase-4 audit and are deliberately **not** modelled here — none of it is read at run
+            time. Verified by `ContentRegistryTests.*`.
+      finding: the indirection earns itself three times over, and none of them is optional.
+            **Residency** promotes and evicts by *pack*, and nothing in a content name says which
+            pack an asset is in. **Ids** let world data reference a prop without a path, so renaming
+            a file is not a world-data migration. **Validation** catches a bad row at startup,
+            naming it, rather than as a `ContentLoadException` when a player walks into the room.
+      finding: **every bad row is reported, not the first** (`docs/conventions.md` §5.1) — fixing
+            forty authoring mistakes one build at a time is intolerable, and a manifest is exactly
+            the file that accumulates them. A failed load leaves the registry **empty** rather than
+            half-populated, because a half-loaded manifest would start the game and then fail at the
+            first asset that happened to be in the missing half.
+- [x] HOUSE-00143 — Implement `TextureCache`, `ModelCache`, `SoundCache`, `EffectCache` over `ContentManager`, with fallback assets and a load-failure policy
       dep: HOUSE-00142 · sys: content · plat: ALL · pri: MUST
       accept: a missing asset yields the typed fallback, logs once, and does not throw
       verify: unit ContentCacheTests.*
-- [ ] HOUSE-00144 — Author the fallback assets: grey box model, mid-grey texture, magenta debug texture, silent sound
+      note: (2026-09-06) `content::AssetCache<T>` plus `Caches`. All three acceptance points hold,
+            verified by `CachesTests.*` — an **integration** test, deliberately, because
+            `Load<Model>` needs a real `GraphicsDevice` and a stubbed `ContentManager` would be
+            testing the stub when the whole behaviour under test is what happens at the XNA content
+            boundary.
+      finding: the policy is the design. A missing asset **yields the fallback** — a house with one
+            missing prop should still be walkable, and an exception here would turn a content
+            mistake, the most common kind this project will have, into an unplayable build. It
+            **logs once** — verified with 500 requests producing exactly one message — because a
+            missing texture is requested every time the room is drawn, and `util::Log`'s *per-frame*
+            limiter is not enough when the same asset fails every frame forever. And it **does not
+            throw**, because the caller is a draw path (§5.2).
+      finding: one template rather than four hand-written caches, so their policies cannot drift
+            apart. The loaders differ only because `Load<T>` has three shapes (`HOUSE-00070`,
+            `HOUSE-00087`, `HOUSE-00098`), and wrapping each once here keeps that inconsistency in
+            one file instead of at every call site.
+      finding: `Clear()` also clears the **failure** record, deliberately: after a content rebuild
+            an asset that was missing may now be present, and a cache that remembered forever would
+            keep showing the fallback.
+- [x] HOUSE-00144 — Author the fallback assets: grey box model, mid-grey texture, magenta debug texture, silent sound
       dep: HOUSE-00143 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-06) `tools/assets/make_fallback_assets.py` generates all four, and all four
+            compile through the pipeline and load at run time (`CachesTests.EveryFallbackAsset
+            ActuallyLoads`): a 1 m grey box `.glb` (2 036 B), a 4×4 mid-grey PNG (75 B), a 16×16
+            magenta/black checker (92 B) and a quarter-second silent WAV (22 kB).
+      finding: **authoring them procedurally settles their provenance completely** (ADR-0012):
+            there is no source to trace, no licence to read and no redistribution question. That
+            matters more for these than for any other asset, because a fallback ships in every build
+            and is the one asset guaranteed to reach a player's screen if anything goes wrong.
+      finding: they are deliberately **ugly**, and the two texture fallbacks are deliberately
+            **different**. A fallback that looks plausible hides a missing asset until someone
+            notices the fridge is a grey box — possibly months. A missing *albedo* gets neutral grey
+            so the lighting still reads correctly and a missing texture does not also look like a
+            lighting bug; a missing *required* texture gets a magenta **checker**, checkered rather
+            than flat because flat magenta can be mistaken for an authored colour and a checker
+            cannot. The box is 1 m on a side so a missing prop does not also look like a scale bug,
+            and the silent WAV is a real quarter second rather than an empty file, because a
+            zero-length sound is a different failure from a successfully-loaded silent one.
 - [x] HOUSE-00145 — Implement `SpriteFont` loading and a `TextRenderer` helper (measure, draw, drop shadow, virtual-unit scaling)
       dep: HOUSE-00143 · sys: ui · plat: ALL · pri: MUST
       note: (2026-09-06) `ui::TextRenderer` with measure, anchored draw, drop shadow and virtual-unit

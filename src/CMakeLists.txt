@@ -23,6 +23,10 @@ add_library(cnahouse_core STATIC
     # player -- input first, because nothing else may read the devices
     player/KeyboardMouseSource.cpp
 
+    # content
+    content/ContentRegistry.cpp
+    content/Caches.cpp
+
     # ui
     ui/TextRenderer.cpp
 
