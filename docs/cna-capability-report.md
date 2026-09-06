@@ -91,7 +91,7 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | G-16 | `DrawInstancedPrimitives` is present in the API | `GraphicsDevice.hpp:424` | **`PASS`, and it is worth using** | `HOUSE-00093` | 200 instances in one instanced draw: **0.156 ms** against **2.144 ms** for 200 separate draws — **13.7× faster**. |
 | G-19 | Multiple render targets: a compiled two-output effect reaches attachment 1 | `HOUSE-00086` scope note | **`PASS`** | `HOUSE-00086`, `HOUSE-00087` | A `COLOR0`/`COLOR1` technique wrote `(255,128,64)` to attachment 0 and its own distinct `(32,223,96)` to attachment 1. `BL-03` does not hold for compiled effects. |
 | G-17 | `Texture2D::SetData`/`GetData`/`FromStream`/`SaveAsPng`, NPOT sizes | feature matrix | **`PASS`** (`GetData`, `SetData`) | `HOUSE-00065`, `HOUSE-00078`, `HOUSE-00110` | 4×4 `Color` texture, 16/16 texels byte-exact — **against the premultiplied model**; see the finding. `SetData`/`FromStream`/`SaveAsPng` and NPOT are not yet probed. |
-| G-18 | WebGL context-loss handling is implemented and browser-qualified | `docs/web-emscripten-graphics-limitations.md` | `NOT PROBED` | — | Deferred to the Web phases (47–48). `HOUSE-00108` probes the desktop `DebugSimulateContextLoss` path only. |
+| G-18 | WebGL context-loss handling is implemented and browser-qualified | `docs/web-emscripten-graphics-limitations.md` | `NOT PROBED` | — | Deferred to the Web phases (47–48). `HOUSE-00108` could **not** use `DebugSimulateContextLoss` — it is a `CNA::Internal` call behind a `CNA/` include and ADR-0001 forbids it twice over — so the XNA-legal `GraphicsDevice::Reset()` path was probed instead. |
 
 ## §5.4 Audio
 
@@ -130,7 +130,7 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | P-04 | `.spritefont` (+ TTF via FreeType) → `SpriteFont` | same | **`PASS`** | `HOUSE-00066` | `CNA.FontDescriptionImporter -> CNA.FontDescriptionProcessor -> CNA.SpriteFontContentWriter`; FreeType 2.13.3. `<FontName>` resolves a file beside the descriptor before any system font. |
 | P-05 | `.fx` → `Effect`, **`--format xnb` only** | same | `PENDING` | `HOUSE-00087` | — |
 | P-06 | `.fxb` (already-compiled bytecode) → `Effect` | same | `PENDING` | `HOUSE-00087` | — |
-| P-07 | video → `CnbVideoData` → `Video` (deployed, not decoded, at build time) | same | `PENDING` | `HOUSE-00098` | — |
+| P-07 | video → `CnbVideoData` → `Video` (deployed, not decoded, at build time) | same | **`PASS`** | `HOUSE-00098` | `CNA.VideoImporter -> CNA.VideoProcessor -> CNA.VideoContentWriter`, one `.cnb` plus the deployed `.mp4`. Metadata (64×64, 10 fps, 2.000 s) matches the authored clip exactly. |
 | P-08 | `cna_add_content(TARGET … SOURCE_DIR … OUTPUT_DIR … CONFIG_FILE … WORKERS …)` is the CMake integration | `cmake/ToolContentPipeline.cmake:48` | `PENDING` | `HOUSE-00126` | Phase 2 consumes it; phase 1 drives `cna-content` directly. |
 | P-09 | `.fx` compilation is driven through an external compiler with `--fx-compiler <fxc> --fx-compiler-launcher wine` | `docs/content-pipeline.md:409-424` | `PENDING` | `HOUSE-00087` | — |
 
@@ -163,7 +163,7 @@ recorded here.
 | `BL-09` / `Q-01` | Can a `SurfaceFormat::Single` 2048² `RenderTarget2D` be created, rendered to and read back? | `HOUSE-00083` | **SETTLED — YES, all four stages.** Created with `Depth24`, rendered into, read back with `GetData(float*)` **bit-exactly** (0.625 in, 0.625 out over 3 396 649 texels), and bound as an effect texture and sampled (159/255). **Tier E uses a real float shadow map**; the RGBA8 packing fallback is not needed. |
 | `BL-02` | Is `ClearOptions::Stencil` ignored and `ReferenceStencil` inert? | `HOUSE-00085` | **SETTLED — the premise is FALSE. Stencilling works.** A two-pass mask stamped `ReferenceStencil = 1` over the left half and then drew the full quad under `CompareFunction::Equal`: left half **2048/2048** lit, right half **0/2048**. `cna-house.md` §6 `BL-02` is corrected. |
 | `BL-03` | Does EasyGL MRT attachment 1 stay black? | `HOUSE-00086`, `HOUSE-00087` | **SETTLED — the premise is FALSE for compiled effects.** With a *stock* effect, which declares one output, attachment 1 stays `(0,0,0)` — the renderer does not broadcast. With a **compiled two-output technique**, attachment 1 receives its own `COLOR1` exactly: `(32,223,96)` for an authored `(0.125, 0.875, 0.375)`. MRT works; `cna-house.md` §6 `BL-03` is corrected. |
-| `BL-05` | Does `VideoPlayer::Play()` throw `NotSupportedException` without the backend? | `HOUSE-00099` | `PENDING` |
+| `BL-05` | Does `VideoPlayer::Play()` throw `NotSupportedException` without the backend? | `HOUSE-00099` | **SETTLED — yes, and the rest still links.** Built with `CNA_ENABLE_VIDEO=OFF`: `Play()` throws *"Video playback is unavailable because CNA was built without the optional FFmpeg video backend…"*, naming the fix. `Load<Video>` still **succeeds** — only playback is gated — and the player stays a usable object afterwards. |
 | `BL-11` | Does `DopplerScale = 0` with zero velocities produce no pitch change? | `HOUSE-00096` | `PENDING` |
 | `BL-12` | Is `Model::Meshes[i].BoundingSphere` populated from `.cnb`? | `HOUSE-00073` | **SETTLED — yes, and it is conservative rather than minimal.** Non-degenerate and it contains every vertex, but on the test box its radius is 7.686 against a minimal 6.225 (**+23 %**) and its centre is 1.55 off in Y. Usable for a cheap reject; not usable as a tight bound. |
 
@@ -1295,6 +1295,151 @@ Two facts are established regardless, and both change how the camera is written:
 
 `HOUSE-00100` stays **unchecked** in `plan.md`. It needs a session with the pointer actually over the
 window, and `HOUSE-00115` lists it as such.
+
+
+### `HOUSE-00098` / `HOUSE-00099` — video · **PASS**
+
+The clip is generated locally by `ffmpeg` from `lavfi` sources: 64×64, 2 seconds, 10 fps, colour
+changing every half second — red, green, blue, white — over a 440 Hz sine. **Nothing is downloaded
+and no third party's media is involved**, so there is no licensing question and the expected pixel
+at any timestamp is known by construction.
+
+Frame advance is *measured*, not assumed. The texture is read back sixteen times across the clip and
+each centre texel classified against the four authored colours:
+
+```
+  [--] GetTexture calls    16, of which 0 returned null
+  [--] sampled frame colours   R R R  G G G G  B B B B B  W W W W
+  [--] PlayPosition at each sample
+       0.12 0.24 0.36 0.48 0.60 0.72 0.84 0.96 1.08 1.21 1.33 1.45 1.57 1.69 1.81 1.93
+```
+
+Exactly the authored sequence, at the authored timestamps. A player handing back the first frame
+forever would pass a test that only asked "did a texture come back"; this one it could not pass. The
+audio mixer opened a real device for the clip (`44100 Hz stereo`), so the soundtrack is live.
+
+**`HOUSE-00099` / `BL-05` — settled, with one detail the blocker did not anticipate.** Built in
+`build-consumer/` with `CNA_ENABLE_VIDEO=OFF`:
+
+* `VideoPlayer` still **constructs** and reports `Stopped`;
+* **`Load<Video>` still succeeds** — content loading is not gated, only playback is;
+* `Play()` throws *"Video playback is unavailable because CNA was built without the optional FFmpeg
+  video backend. Configure with `-DCNA_ENABLE_VIDEO=ON`, or use AUTO with all required FFmpeg
+  development packages installed."* — a refusal that names its own fix;
+* the player is still a usable object afterwards and `Stop()` is still callable.
+
+The linking half is the half that matters: phase 21's television can be a feature that is absent on a
+platform without the rest of the house failing to build.
+
+**Finding — a third `Load<T>` shape.** `Load<Video>` returns **by value**, like `Model` and unlike
+`Effect` (whose reader is registered for `shared_ptr<Effect>`). The three are not consistent and none
+is guessable, but CNA says so precisely when asked wrongly: *"'P1Clip.cnb' holds a Video asset, which
+is not the type requested for 'P1Clip'."*
+
+### `HOUSE-00105` — the `HEADLESS` renderer · **PASS**
+
+The acceptance criterion is taken literally: **600 frames with no display server**. The probe asserts
+from *inside the process* that `DISPLAY` and `WAYLAND_DISPLAY` are both unset, because a test that
+silently ran against a live X server would prove nothing about CI and is the easiest possible thing
+to get wrong.
+
+```
+$ env -u DISPLAY -u WAYLAND_DISPLAY ./build-consumer/p1-headless
+[INFO][RENDER] CNA: graphics renderer: HEADLESS
+  [ok] no display server is reachable from this process
+  [ok] Initialize ran
+  [ok] Update ran for 600 frames        600
+  [--] Draw calls                       599
+  [ok] GameTime advances                0.0116 s across 600 updates
+p1-headless: 5/5 checks passed        # exit 0
+```
+
+`Draw` runs too, so the whole frame loop is exercised rather than just `Update`. Phase 44's automated
+tests and phase 2's CI have a foundation.
+
+### `HOUSE-00108` — resource rebuild after a device reset · **PASS, through a different door**
+
+The task named EasyGL's `DebugSimulateContextLoss`. That call is declared in
+`CNA/Internal/Renderers/Common/IGraphicsRenderer.hpp` — a `CNA/` include of a `CNA::Internal::`
+type — so **ADR-0001 forbids it twice over** and `cna-house` can never call it, in a probe or
+anywhere else. Reaching for it to "just measure once" would have been exactly the erosion the rule
+exists to prevent.
+
+The question the task was really for was asked through the XNA 4.0 surface instead —
+`GraphicsDevice::Reset()` with the `DeviceLost` / `DeviceResetting` / `DeviceReset` events:
+
+| | Result |
+|---|---|
+| `GraphicsDevice::Reset()` | callable, no exception |
+| Events raised | `DeviceResetting` ×1, `DeviceReset` ×1 (**`DeviceLost` ×0**) |
+| Texture, vertex and index buffers rebuilt from the same CPU state | all three |
+| The rebuilt scene, sampled | `(128,128,128)` — **identical** to before the reset |
+
+So the property the Web port needs — resources reconstructible from CPU-side state, with an event to
+say when — holds on Linux and is testable there. Note that **`DeviceLost` does not fire**: a game
+that hung its rebuild on that event alone would never rebuild. `DeviceReset` is the one to use.
+
+### `HOUSE-00109` — anisotropic filtering · **available and effective**
+
+| | Linear (trilinear) | Anisotropic |
+|---|---|---|
+| Pixels differing between the two images | — | **3 056** of 65 536 |
+| Mean per-row far-field contrast | 6.04 | **8.90** (**1.47×**) |
+| Best single row | 0.00 (fully blurred out) | **47.68** (fully resolved) |
+
+**Verdict: available and effective; the `linux` profile enables it.** This is measured once here and
+written into the profile — it is what `HOUSE-00916` keys off, and it is never a runtime query.
+
+Two fixture corrections were needed before the measurement meant anything, and both are worth
+recording because they are the standard ways to fake this result:
+
+1. The first fixture used a **4-texel checker repeated 60×**. That is minified so hard that *both*
+   modes collapse to flat grey across the whole floor, and the probe dutifully reported a contrast
+   of 0.00 for each — a measurement of the fixture, not the driver. A realistic 32-texel tile at 16
+   repeats is what discriminates.
+2. The first summary statistic counted **rows improved versus rows worsened**. With a checkerboard
+   that oscillates with wherever a tile boundary happens to fall, and it swung 21 against 28 even
+   while the image as a whole gained 47 % more contrast. The aggregate over every lit row is the
+   statistic that is not an artefact of tile phase.
+
+
+### `HOUSE-00091` — the same measurements under `OPENGL33` · **the grid approximation is validated**
+
+`build-consumer/` was reconfigured from the same source directory with
+`-DCNA_GRAPHICS_RENDERER=OPENGL33` and the whole performance probe re-run against
+`OpenGL 4.6 (Core Profile) Mesa 25.0.7`. (The probe's own "configuration" line is a compile-time
+constant and still says `OPENGLES3`; the renderer actually in use is on CNA's `[RENDER]` log line
+immediately above it. Recorded rather than trusted.)
+
+**The decisive result, and the reason this task existed:**
+
+| `OcclusionQuery::PixelCount` for a quad of analytic area 16 384 | |
+|---|---|
+| `OPENGLES3` | **1** |
+| `OPENGL33` | **16 384** — exact |
+
+Same probe, same fixture, same driver, same GPU. So `BL-07`'s boolean degradation is a property of
+the **ES profile's query target**, not of CNA and not of this hardware — exactly as `cna-house.md`
+§5 claims — and the N×N grid approximation phase 9 is designed around is validated against a
+renderer that returns a true count. That is what the task asked for and it is now answered.
+
+**The rest of the tranche, for comparison. These differences matter to `HOUSE-00115`:**
+
+| Measurement | `OPENGLES3` | `OPENGL33` |
+|---|---|---|
+| `OcclusionQuery` on a 16 384-pixel quad | 1 (boolean) | **16 384** (real tally) |
+| `EffectPass::Apply()` | 0.184 µs | 0.202 µs |
+| CPU per `DrawIndexedPrimitives` | **8.15 µs** | **12.23 µs** |
+| 1 000 small draws, to GPU completion | 13.44 ms | 12.6–23.8 ms (run to run) |
+| 2 000 dynamic quads, to completion | **0.171 ms** | 0.316–0.570 ms |
+| 200 instances vs 200 draws | 13.7× | 12.8× |
+| 4 MiB `Texture2D::SetData` | 9.30 ms, 430 MiB/s | 9.14 ms, 438 MiB/s |
+
+Two things follow. **`OPENGLES3` submits draws about 1.5× more cheaply** than `OPENGL33` on this
+driver, which is the opposite of what one might expect and reinforces ADR-0002's renderer choice.
+And **the draw-call budget, the instancing win and the upload bandwidth are all renderer-independent
+to within run-to-run noise** — so those three numbers can be treated as properties of the machine
+rather than of the renderer, while the occlusion verdict emphatically cannot.
 
 
 ---

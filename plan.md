@@ -770,8 +770,21 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             grid approximation stays in the design** for phase 9. `isPixelCountPreciseEXT()` exists
             but is a `CNAEXT` identifier and is therefore forbidden — which is exactly why this has
             to be measured once here and encoded into the platform profile.
-- [ ] HOUSE-00091 — Probe: the same under `OPENGL33` to confirm a real `GL_SAMPLES_PASSED` count, validating the grid approximation later
+- [x] HOUSE-00091 — Probe: the same under `OPENGL33` to confirm a real `GL_SAMPLES_PASSED` count, validating the grid approximation later
       dep: HOUSE-00090 · sys: rendering · plat: LNX · pri: SHOULD
+      note: (2026-09-06) **Confirmed, decisively.** `build-consumer/` reconfigured from the same
+            source directory with `-DCNA_GRAPHICS_RENDERER=OPENGL33` (`OpenGL 4.6 Core, Mesa
+            25.0.7`) and the whole performance probe re-run. For a quad of analytic area 16 384:
+            `OPENGLES3` reports **1**, `OPENGL33` reports **16 384** — exact. Same probe, same
+            fixture, same driver, same GPU, so the boolean degradation is a property of the **ES
+            profile's query target**, not of CNA and not of this hardware. The N×N grid
+            approximation of phase 9 is validated against a renderer that returns a true count.
+      finding: the cross-renderer comparison also shows **`OPENGLES3` submits draws about 1.5×
+            more cheaply** than `OPENGL33` here — 8.15 µs against 12.23 µs of CPU per
+            `DrawIndexedPrimitives` — which reinforces ADR-0002's renderer choice. Instancing
+            (13.7× vs 12.8×) and texture upload (430 vs 438 MiB/s) are renderer-independent to
+            within run-to-run noise, so those may be treated as properties of the machine; the
+            occlusion verdict emphatically may not. Feeds `HOUSE-00115`.
 - [x] HOUSE-00092 — Probe: `DynamicVertexBuffer` + `SetData(..., SetDataOptions::Discard)` at 2 000 quads per frame; measure the cost
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
       accept: a number in ms, recorded in the performance log; it sizes the particle budget
@@ -835,10 +848,34 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             the acceptance criterion asked for does not exist as a CNA-reported value. The 32-voice
             budget is therefore a design decision `cna-house` must **enforce itself** — CNA will not
             tell us when the mixer has been overcommitted. Sizes `HOUSE-00795` and phase 31.
-- [ ] HOUSE-00098 — Probe: `Video` + `VideoPlayer::GetTexture()` on a transcoded test clip; confirm frame advance and audio
+- [x] HOUSE-00098 — Probe: `Video` + `VideoPlayer::GetTexture()` on a transcoded test clip; confirm frame advance and audio
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
-- [ ] HOUSE-00099 — Probe: `VideoPlayer` behaviour with `CNA_ENABLE_VIDEO=OFF` — confirm `NotSupportedException` and that the rest still links (BL-05)
+      note: (2026-09-06) PASS, 9/9. The clip is generated locally by `ffmpeg` from `lavfi` sources —
+            64×64, 2 s, 10 fps, colour changing every half second over a 440 Hz sine. **Nothing
+            downloaded, no third party's media**, so there is no licensing question and the expected
+            pixel at any timestamp is known by construction. Compiled through
+            `CNA.VideoImporter -> CNA.VideoProcessor -> CNA.VideoContentWriter`; metadata matches
+            exactly. **Frame advance measured, not assumed:** sixteen `GetTexture` readbacks across
+            the clip classified as `R R R G G G G B B B B B W W W W` at play positions 0.12 s …
+            1.93 s — exactly the authored sequence. A player handing back frame 0 forever would pass
+            a test that only asked "did a texture come back"; it could not pass this one. The mixer
+            opened a real 44.1 kHz stereo device, so the soundtrack is live.
+      finding: **a third `Load<T>` shape.** `Load<Video>` returns **by value**, like `Model` and
+            unlike `Effect` (registered for `shared_ptr<Effect>`). None of the three is guessable,
+            but CNA says so precisely when asked wrongly: *"holds a Video asset, which is not the
+            type requested"*.
+- [x] HOUSE-00099 — Probe: `VideoPlayer` behaviour with `CNA_ENABLE_VIDEO=OFF` — confirm `NotSupportedException` and that the rest still links (BL-05)
       dep: HOUSE-00098 · sys: rendering · plat: LNX · pri: MUST
+      note: (2026-09-06) **`BL-05` settled**, 6/6, built in `build-consumer/` with
+            `CNA_ENABLE_VIDEO=OFF`. `Play()` throws *"Video playback is unavailable because CNA was
+            built without the optional FFmpeg video backend. Configure with `-DCNA_ENABLE_VIDEO=ON`,
+            or use AUTO with all required FFmpeg development packages installed."* — a refusal that
+            names its own fix. The probe deliberately keeps using the media API afterwards, because
+            the linking half is the half that matters: `VideoPlayer` still constructs, still reports
+            `Stopped`, and `Stop()` is still callable.
+      finding: **`Load<Video>` still SUCCEEDS with the backend absent** — content loading is not
+            gated, only playback is. So phase 21 can load its television content unconditionally and
+            fail only at `Play`, which is a much easier shape to write than a load-time branch.
 - [ ] HOUSE-00100 — Probe: `Mouse::GetState` + `SetPosition` recentring loop; measure the delta accuracy and any drift over 10 000 frames
       dep: HOUSE-00062 · sys: player · plat: LNX · pri: MUST
       status: **OPEN — INCONCLUSIVE, not failed.** The full 10 000 frames were run (deliberately not
@@ -908,9 +945,17 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             `Disjoint` for inside/straddling/behind/beyond-far, and a sphere **tangent** to a side
             plane and a box **face-touching** another both count as intersecting — the two cases an
             epsilon error flips. Phase 9 can be built on these.
-- [ ] HOUSE-00105 — Probe: build and run under the `HEADLESS` renderer; confirm `Update` runs with no window and no GPU
+- [x] HOUSE-00105 — Probe: build and run under the `HEADLESS` renderer; confirm `Update` runs with no window and no GPU
       dep: HOUSE-00062 · sys: app · plat: CI · pri: MUST
       accept: a 600-frame headless run with no display server (`unset DISPLAY`)
+      note: (2026-09-06) PASS, 5/5, exit 0. Built in `build-consumer/` with
+            `-DCNA_GRAPHICS_RENDERER=HEADLESS` and run under
+            `env -u DISPLAY -u WAYLAND_DISPLAY`. The probe **asserts from inside the process** that
+            neither display variable is set, because a run that silently reached a live X server
+            would prove nothing about CI and is the easiest possible thing to get wrong. 600
+            `Update` calls, 599 `Draw` calls — so the whole frame loop runs, not just `Update` —
+            and `GameTime` advances. Phase 44's automated tests and phase 2's CI have a
+            foundation.
 - [x] HOUSE-00106 — Probe: measure `EffectPass::Apply()` cost and the cost of 1 000 small `DrawIndexedPrimitives` calls, to calibrate the draw budget
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
       note: (2026-09-06) `EffectPass::Apply()` **0.184 µs each** (0.184 ms for 1 000).
@@ -930,11 +975,40 @@ that produced it; `BL-09` is settled; every probe binary is removed.
       finding: the fix follows directly from the linearity: promote **≈1 MiB per frame** and spread
             a large texture over four frames. The streaming design of phase 42 must split
             promotions; it may not treat 4 MiB as one step. Sizes `HOUSE-00772`.
-- [ ] HOUSE-00108 — Probe: EasyGL `DebugSimulateContextLoss` on desktop; confirm resources can be rebuilt from CPU state
+- [x] HOUSE-00108 — Probe: ~~EasyGL `DebugSimulateContextLoss` on desktop~~ → **the XNA-legal device-reset path**; confirm resources can be rebuilt from CPU state
       dep: HOUSE-00084 · sys: rendering · plat: LNX · pri: SHOULD
       accept: it is a supported path we can test against on Linux, de-risking the Web port
-- [ ] HOUSE-00109 — Probe: anisotropic filtering availability and its visual effect at grazing angles on the floor
+      correction: (2026-09-06) **the named call cannot be used at all.**
+            `DebugSimulateContextLoss` is declared in
+            `CNA/Internal/Renderers/Common/IGraphicsRenderer.hpp` — a `CNA/` include of a
+            `CNA::Internal::` type — so ADR-0001 forbids it **twice over**, in a probe as much as in
+            the runtime. Reaching for it "just to measure once" would be exactly the erosion the
+            rule exists to prevent. The task is repurposed to the path `cna-house` would actually
+            use, and the acceptance criterion is met by it.
+      note: (2026-09-06) PASS, 5/5, via `GraphicsDevice::Reset()` and the
+            `DeviceLost`/`DeviceResetting`/`DeviceReset` events. `Reset()` is callable; a texture,
+            a vertex buffer and an index buffer were all rebuilt from the same CPU-side state
+            afterwards; and the rebuilt scene sampled `(128,128,128)` — **identical** to before.
+            So the property the Web port needs (resources reconstructible from CPU state, with an
+            event to say when) holds on Linux and is testable there.
+      finding: **`DeviceLost` does NOT fire** — only `DeviceResetting` and `DeviceReset` do. A game
+            that hung its rebuild on `DeviceLost` alone would never rebuild. Sizes phase 47.
+- [x] HOUSE-00109 — Probe: anisotropic filtering availability and its visual effect at grazing angles on the floor
       dep: HOUSE-00065 · sys: rendering · plat: LNX · pri: OPT
+      note: (2026-09-06) **Available AND effective.** The same grazing floor rendered under
+            `LinearClamp` and `AnisotropicClamp` differs in **3 056 of 65 536** pixels; mean
+            per-row far-field contrast rises from **6.04 to 8.90 (1.47×)**, and one row goes from
+            0.00 (fully blurred out) to 47.68 (fully resolved). "Accepted as a state" was
+            deliberately not treated as the answer — a driver can accept `AnisotropicClamp` and
+            silently do trilinear.
+      finding: two fixture corrections were needed before the measurement meant anything, and both
+            are the standard ways to fake this result. (1) A **4-texel checker repeated 60×** is
+            minified so hard that *both* modes collapse to flat grey, and the probe reported a
+            contrast of 0.00 for each — measuring the fixture, not the driver; a realistic 32-texel
+            tile at 16 repeats is what discriminates. (2) Counting **rows improved versus worsened**
+            oscillates with wherever a tile boundary falls, and swung 21 against 28 even while the
+            image as a whole gained 47 % contrast; the aggregate over every lit row is the statistic
+            that is not an artefact of tile phase.
       verify: the verdict is recorded in `docs/cna-capability-report.md` as a property of the build/platform profile, and is what HOUSE-00916 keys off — it is measured once here, never queried at runtime
 - [x] HOUSE-00110 — Probe: `SurfaceFormat` support survey — which formats can be created as textures and as render targets on this driver
       dep: HOUSE-00083 · sys: rendering · plat: LNX · pri: MUST
