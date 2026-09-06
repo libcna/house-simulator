@@ -98,3 +98,37 @@ is visible with `--explain`:
 It re-checks fingerprints rather than re-reading sources, and it does not scan the output tree. When
 `assets-src/` holds a house rather than five fallbacks, that is the property that matters, and it is
 recorded now so a later regression has something to be compared against.
+
+
+## Why `Effects/*.xnb` is committed (BL-04)
+
+`.fx` needs Microsoft's legacy `fxc` at profile `fx_2_0`. CNA embeds no HLSL compiler and no
+portable substitute exists — a modern standalone `d3dcompiler` cannot write a legacy effect at all.
+On Linux that means Wine plus a DirectX SDK (June 2010) extraction, which is a great deal to ask of
+someone who only wants to build the game.
+
+So the compiled `.xnb` is committed **next to the `.fx` that produced it**, and CMake copies it into
+`content-fx/` when this machine has no compiler. `cmake` says which route it took:
+
+```
+-- cna-house: Tier E effects come from the effect compiler
+-- cna-house: Tier E effects come from the committed baseline
+```
+
+**Compiling wins when a compiler is available**, and that is the right way round: a source edited
+without re-running `build_effects.sh` would otherwise be silently ignored in favour of a stale
+committed file, which is the failure every baseline like this eventually produces. On a machine
+without one, `build_effects.sh --check` catches the same staleness by hash, without needing to
+compile anything.
+
+`COMPILER.txt` is the record that makes the committed bytes accountable: the `cna-content` hash, the
+`fxc` hash and size, the Wine version, and the hash of every source and every output. It carries **no
+timestamp and no hostname** — a record that changed on every run would produce a diff on every run,
+and a file that always has a diff is a file nobody reads.
+
+### Changing an effect
+
+```bash
+tools/effects/build_effects.sh --fxc /path/to/fxc.exe   # rebuilds the .xnb and COMPILER.txt
+git add assets-src/Effects                              # both, in the same commit
+```

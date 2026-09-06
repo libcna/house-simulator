@@ -2367,13 +2367,66 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             scan the output tree — which is the property that will matter when `assets-src/` holds a
             house instead of five fallbacks, and is recorded now so a later regression has a
             baseline.
-- [ ] HOUSE-00183 — Wire the effects tree with `--format xnb --fx-compiler --fx-compiler-launcher`, driven by CMake cache variables so a machine without Wine can skip it
+- [x] HOUSE-00183 — Wire the effects tree with `--format xnb --fx-compiler --fx-compiler-launcher`, driven by CMake cache variables so a machine without Wine can skip it
       dep: HOUSE-00087, HOUSE-00182 · sys: content · plat: TOOL · pri: MUST
       accept: with `CNAHOUSE_TIER_E=OFF` the tree is skipped and the committed `.xnb` files are used instead
-- [ ] HOUSE-00184 — `tools/effects/build_effects.sh`: the reproducible wrapper around the wine+fxc invocation, with the compiler hash recorded
+      note: (2026-09-07) `CNAHOUSE_FXC` and `CNAHOUSE_FXC_LAUNCHER` are the cache variables; the
+            launcher defaults to `tools/effects/fxc-wine.sh`, which `HOUSE-00087` measured to be
+            necessary because bare `wine` hands `fxc` Unix paths it reads as options.
+      note: **the acceptance line conflates two different cases and both are now handled.** With
+            `CNAHOUSE_TIER_E=OFF` the tree is skipped *and nothing is used*, because there is no
+            Tier E to feed — verified on the `headless` preset, which turns Tier E off by itself.
+            The case where the committed `.xnb` IS used is `CNAHOUSE_TIER_E=ON` with **no compiler**,
+            which is the machine BL-04 is about. Verified both ways by configuring with and without
+            `-DCNAHOUSE_FXC`: CMake prints `Tier E effects come from the effect compiler` or
+            `Tier E effects come from the committed baseline`, and the game logs
+            `Tier E active: the compiled effect set loaded` in both.
+      finding: **compiling WINS over the committed baseline when a compiler is available**, and that
+            ordering is the whole safety of the scheme. The other way round, a `.fx` edited without
+            re-running `build_effects.sh` would be silently ignored in favour of a stale committed
+            file — the failure every baseline like this eventually produces.
+      finding: the baseline copy depends on the committed `.xnb`, **not** on the `.fx`. Depending on
+            the source would make a target that re-copies forever without becoming up to date, on
+            precisely the machines that cannot fix it.
+- [x] HOUSE-00184 — `tools/effects/build_effects.sh`: the reproducible wrapper around the wine+fxc invocation, with the compiler hash recorded
       dep: HOUSE-00183 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00185 — Commit the baseline compiled `Effects/*.xnb` alongside their `.fx` sources, with a README explaining why (BL-04)
+      note: (2026-09-07) `tools/effects/build_effects.sh`, with a `--check` mode. It writes
+            `assets-src/Effects/COMPILER.txt`: the `cna-content` hash, the `fxc` hash and size, the
+            Wine version, the fxc **reported version**, and the hash of every source and output.
+      finding: **the pipeline's own manifest carries a better compiler identity than any hash** —
+            the processor version reads `CNA.EffectSourceProcessor/1+fxc-9.29.952.3111-fx_2_0`, so
+            the record now extracts `fxc-9.29.952.3111-fx_2_0`. That is the number Microsoft put in
+            the binary rather than a property of one copy of it, and it is what a reader six months
+            from now can actually compare against.
+      finding: `COMPILER.txt` carries **no timestamp and no hostname**, deliberately. A record that
+            changed on every run would produce a diff on every run, and a file that always has a
+            diff is a file nobody reads.
+      finding: `--check` **needs no compiler**, which is what makes it a gate rather than a
+            convenience: it compares hashes. It is wired into `tools/ci/run_checks.sh` and into the
+            CI lint job, where there is no Wine — a stale baseline is otherwise invisible on every
+            machine that cannot compile effects, which is most of them. Verified to fire: appending
+            one comment line to `P1Probe.fx` produced `STALE: P1Probe.fx has changed since the
+            committed .xnb was built` with both hashes and exit status 1.
+      finding: the script removes `cna-content`'s manifest and lock from the source tree afterwards.
+            That also makes the next baseline build **cold**, which is what is wanted before
+            committing bytes: an incremental "skip" would let a stale `.xnb` survive a change nobody
+            noticed.
+      finding: MEASURED — `cna-content` has **no `--version`**; it answers *"the first argument must
+            be 'build' or 'clean'"*. The binary's own hash is its identity in the record, and the
+            line that would always have read `unknown` was removed rather than kept.
+- [x] HOUSE-00185 — Commit the baseline compiled `Effects/*.xnb` alongside their `.fx` sources, with a README explaining why (BL-04)
       dep: HOUSE-00184 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `assets-src/Effects/P1Probe.xnb` (3 424 B) and `COMPILER.txt` are committed
+            beside `P1Probe.fx`; `assets-src/README.md` carries the explanation and the
+            change-an-effect recipe.
+      finding: **`cna-house.md` §18.4 and BL-04 disagreed about WHERE the baseline lives, and BL-04
+            was right.** §18.4 said `content/` was gitignored "except for a tiny committed baseline",
+            and `.gitignore` carried three exceptions — `/content/Fonts/`, `/content/Effects/`,
+            `/content/Textures/Debug/` — for files that **never existed**: the build writes to
+            `${CMAKE_BINARY_DIR}/content`, and the top-level `content/` holds one `.gitkeep`. Beside
+            the source is better anyway: a reviewer sees the `.fx` and the `.xnb` change together,
+            and tracked files inside an otherwise-generated tree make an accidental
+            `git add content/` far too easy. §18.4 and `.gitignore` are both corrected.
 - [ ] HOUSE-00186 — `tools/assets/gltf_validate.py`: run `gltf-validator` if present plus a CNA importer pass with warnings-as-errors
       dep: HOUSE-00181 · sys: content · plat: TOOL · pri: MUST
       accept: rejects a deliberately broken glTF with a useful message

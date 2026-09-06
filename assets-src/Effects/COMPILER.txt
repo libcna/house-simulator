@@ -1,0 +1,9 @@
+generated-by: tools/effects/build_effects.sh
+cna-content-sha256: bd228405443da56b745829c65cc8c482a4e670602643e65176a7ccb4b13e5556
+fxc-path-basename: fxc.exe
+fxc-sha256: 0e81a142e52f2852a6e4fa438c8617a4b230d92c306d42a24d5a5d4ea6c73a7b
+fxc-size-bytes: 174936
+wine: wine-10.0 (Debian 10.0~repack-6)
+fxc-reported-version: fxc-9.29.952.3111-fx_2_0
+source P1Probe.fx: 798801c84110b1562c747441474b463eed34b57a77b008132068b609d86368b4
+output P1Probe.xnb: fa7c196314b4c08de11ecb25dce723136fd0968c6779f73505507bf13fc2e065

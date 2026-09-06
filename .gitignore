@@ -17,21 +17,30 @@
 # ---------------------------------------------------------------------------
 # Generated content.
 #
-# content/ is produced by cna-content from assets-src/ and is reproducible
-# (cna-house.md §18.4). Only the small committed baseline is tracked: the
-# fonts, the debug textures and the compiled Effects/*.xnb, which are committed
-# precisely so that a contributor without Wine can still build (BL-04).
-# Everything else here is build output and must never be committed.
+# content/ and content-fx/ are produced by cna-content from assets-src/ and are
+# reproducible (cna-house.md §18.4). Nothing in them is ever committed.
+#
+# Corrected 2026-09-07 (HOUSE-00185). This block used to carve exceptions out of
+# /content/ for a committed baseline -- Fonts/, Effects/, Textures/Debug/ -- and
+# no such file ever existed there, because the baseline lives BESIDE ITS SOURCE
+# in assets-src/Effects/*.xnb, which is what BL-04 says and what
+# tools/effects/build_effects.sh produces. Keeping tracked files inside an
+# otherwise-generated tree also makes an accidental `git add content/` far too
+# easy. The build writes to ${CMAKE_BINARY_DIR}/content anyway, so the top-level
+# directory is only a placeholder.
 # ---------------------------------------------------------------------------
 /content/*
 !/content/.gitkeep
-!/content/Fonts/
-!/content/Effects/
-!/content/Textures/Debug/
+/content-fx/
 
 # ---------------------------------------------------------------------------
 # Authoring leftovers
 # ---------------------------------------------------------------------------
+# cna-content's own bookkeeping, if anyone runs it by hand with a source tree as the
+# output root. tools/effects/build_effects.sh removes both; this is the safety net.
+assets-src/**/.cna-content-manifest.json
+assets-src/**/.cna-content.lock
+
 assets-src/**/*.blend1
 assets-src/**/*.blend2
 assets-src/**/*.blend@

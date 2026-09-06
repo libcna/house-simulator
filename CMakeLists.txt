@@ -207,37 +207,74 @@ set(CNAHOUSE_FXC_LAUNCHER "${CMAKE_CURRENT_SOURCE_DIR}/tools/effects/fxc-wine.sh
 file(GLOB_RECURSE CNAHOUSE_EFFECT_SOURCES CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/assets-src/Effects/*.fx")
 
+# Whether the committed baseline `.xnb` can be used instead of compiling. `HOUSE-00185`/BL-04: the
+# compiled effects are committed BESIDE their `.fx` precisely so a contributor with no Wine and no
+# DirectX SDK can still build and run Tier E. `tools/effects/build_effects.sh` produces them and
+# records the compiler identity in `assets-src/Effects/COMPILER.txt`.
+#
+# Compiling WINS when a compiler is available, and that is the right way round: a source edited
+# without re-running the script would otherwise be silently ignored in favour of a stale committed
+# file, which is the failure mode a baseline like this always eventually produces.
 if(CNAHOUSE_TIER_E AND CNAHOUSE_EFFECT_SOURCES)
-    if(NOT CNAHOUSE_FXC OR NOT EXISTS "${CNAHOUSE_FXC}")
-        message(STATUS
-            "cna-house: Tier E is on but no effect compiler is configured, so no .fx is built. "
-            "Set -DCNAHOUSE_FXC=<path to fxc.exe>; Tier S is unaffected (ADR-0003).")
-    else()
+    set(_effect_outputs "")
+    set(_effect_mode "")
+
+    set(_can_compile OFF)
+    if(CNAHOUSE_FXC AND EXISTS "${CNAHOUSE_FXC}")
         find_program(CNAHOUSE_CNA_CONTENT_TOOL
             NAMES cna-content
             HINTS "${CNAHOUSE_CNA_ROOT}/build" "${CMAKE_BINARY_DIR}/CNA_BUILD"
             NO_DEFAULT_PATH)
-        if(NOT CNAHOUSE_CNA_CONTENT_TOOL)
-            message(STATUS "cna-house: no cna-content tool found; no .fx is built.")
-        else()
-            set(_effect_outputs "")
-            foreach(_fx IN LISTS CNAHOUSE_EFFECT_SOURCES)
-                cmake_path(GET _fx STEM _stem)
-                set(_out "${CMAKE_BINARY_DIR}/content-fx/Effects/${_stem}.xnb")
-                add_custom_command(
-                    OUTPUT "${_out}"
-                    COMMAND "${CNAHOUSE_CNA_CONTENT_TOOL}" build "${_fx}" -o "${_out}"
-                            --format xnb
-                            --fx-compiler "${CNAHOUSE_FXC}"
-                            --fx-compiler-launcher "${CNAHOUSE_FXC_LAUNCHER}"
-                    DEPENDS "${_fx}" "${CNAHOUSE_FXC_LAUNCHER}"
-                    COMMENT "Compiling effect ${_stem}.fx through fxc"
-                    VERBATIM)
-                list(APPEND _effect_outputs "${_out}")
-            endforeach()
-            add_custom_target(cnahouse_effects DEPENDS ${_effect_outputs})
-            add_dependencies(cna-house cnahouse_effects)
+        if(CNAHOUSE_CNA_CONTENT_TOOL)
+            set(_can_compile ON)
         endif()
+    endif()
+
+    foreach(_fx IN LISTS CNAHOUSE_EFFECT_SOURCES)
+        cmake_path(GET _fx STEM _stem)
+        cmake_path(REPLACE_EXTENSION _fx LAST_ONLY "xnb" OUTPUT_VARIABLE _committed)
+        set(_out "${CMAKE_BINARY_DIR}/content-fx/Effects/${_stem}.xnb")
+
+        if(_can_compile)
+            add_custom_command(
+                OUTPUT "${_out}"
+                COMMAND "${CNAHOUSE_CNA_CONTENT_TOOL}" build "${_fx}" -o "${_out}"
+                        --format xnb
+                        --fx-compiler "${CNAHOUSE_FXC}"
+                        --fx-compiler-launcher "${CNAHOUSE_FXC_LAUNCHER}"
+                DEPENDS "${_fx}" "${CNAHOUSE_FXC_LAUNCHER}"
+                COMMENT "Compiling effect ${_stem}.fx through fxc"
+                VERBATIM)
+            list(APPEND _effect_outputs "${_out}")
+            set(_effect_mode "the effect compiler")
+        elseif(EXISTS "${_committed}")
+            # COPIED, not compiled. It depends on the committed `.xnb` and not on the `.fx`, because
+            # this machine cannot turn one into the other -- making it depend on the source would
+            # produce a target that re-copies forever without ever becoming up to date.
+            add_custom_command(
+                OUTPUT "${_out}"
+                COMMAND "${CMAKE_COMMAND}" -E copy_if_different "${_committed}" "${_out}"
+                DEPENDS "${_committed}"
+                COMMENT "Using the committed baseline ${_stem}.xnb (no effect compiler here)"
+                VERBATIM)
+            list(APPEND _effect_outputs "${_out}")
+            set(_effect_mode "the committed baseline")
+        endif()
+    endforeach()
+
+    if(_effect_outputs)
+        add_custom_target(cnahouse_effects DEPENDS ${_effect_outputs})
+        add_dependencies(cna-house cnahouse_effects)
+        message(STATUS "cna-house: Tier E effects come from ${_effect_mode}")
+    else()
+        # Tier E was asked for, there are sources, and neither route is available. NOT an error:
+        # ADR-0003 makes Tier S complete, and `ActivateTierE` falls back at load with one logged
+        # line. Said out loud so it is not a surprise at run time.
+        message(STATUS
+            "cna-house: Tier E is on, but there is no effect compiler and no committed baseline "
+            ".xnb -- no effects are built. Set -DCNAHOUSE_FXC=<fxc.exe>, or run "
+            "tools/effects/build_effects.sh on a machine that has one and commit its output. "
+            "Tier S is unaffected (ADR-0003).")
     endif()
 endif()
 

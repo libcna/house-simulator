@@ -37,6 +37,13 @@ jobs:
       - name: Run the gates
         working-directory: cna-house
         run: tools/ci/run_checks.sh
+      - name: The committed effect baseline must match its source
+        working-directory: cna-house
+        # Runs on a runner with no Wine and no DirectX SDK, which is the whole point: a stale
+        # `.xnb` is invisible on every machine that cannot compile effects, and this compares
+        # hashes rather than compiling (`HOUSE-00185`).
+        run: tools/effects/build_effects.sh --check
+
       - name: The XNA-only gate must detect what it claims to
         working-directory: cna-house
         # A gate that has never been shown to fire is a gate nobody should trust. `--selftest`

@@ -94,6 +94,10 @@ check_format()
 run_gate "layout"     python3 tools/ci/check_layout.py
 run_gate "xna-only"   python3 tools/ci/check_xna_only.py
 run_gate "clang-format" check_format
+# Needs no compiler and no Wine, which is exactly why it can be a gate: it compares the committed
+# `.xnb` against the committed `.fx` by hash (`HOUSE-00185`). A stale baseline is otherwise invisible
+# on every machine that cannot compile effects -- which is most of them.
+run_gate "effects-baseline" tools/effects/build_effects.sh --check
 
 echo
 if [[ ${#FAILED[@]} -eq 0 ]]; then

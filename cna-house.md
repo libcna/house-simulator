@@ -1792,9 +1792,18 @@ Daylight atlases add the same again. See §72.
 
 * Every tool takes a `--seed` and defaults to a fixed one.
 * Every generated file's header records the tool name, version, input hashes and seed.
-* `content/` is **gitignored** except for a tiny committed baseline (the fonts, the four debug
-  textures and the compiled `Effects/*.xnb`, which are committed precisely so contributors
-  without Wine can build — BL-04).
+* `content/` is **gitignored entirely**; nothing generated is committed. The one baseline that *is*
+  committed lives **beside its source** — `assets-src/Effects/*.xnb`, next to the `.fx` that
+  produced it, which is what BL-04 says and what `tools/effects/build_effects.sh` writes. *(Corrected
+  2026-09-07 by `HOUSE-00185`: this line previously described the baseline as living inside
+  `content/`, and the `.gitignore` carried three exceptions for files that never existed there.
+  Beside the source is better anyway — a reviewer sees the `.fx` and the `.xnb` change together, and
+  tracked files inside an otherwise-generated tree make an accidental `git add content/` far too
+  easy.)*
+* `assets-src/Effects/COMPILER.txt` records what produced those bytes: the `cna-content` hash, the
+  `fxc` hash and size, the Wine version, and the source and output hashes.
+  `tools/effects/build_effects.sh --check` verifies them and **needs no compiler**, which is the
+  point — it is the check a contributor without Wine, and a CI job without Wine, can both run.
 * A `make content-verify` target rebuilds everything and asserts the hashes match; drift is a
   build failure.
 
