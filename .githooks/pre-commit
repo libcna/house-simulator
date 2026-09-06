@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# cna-house pre-commit hook: run the same static gates CI runs, over the staged change.
+#
+# Enable it once per clone:
+#     git config core.hooksPath .githooks
+#
+# Bypass it only when you know why:
+#     git commit --no-verify
+#
+# The hook does not build and does not run tests -- it is meant to be fast enough that nobody is
+# tempted to disable it. The definition of done (docs/workflow.md) still requires both.
+
+set -uo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+if ! "$ROOT/tools/ci/run_checks.sh" --staged; then
+    cat >&2 <<'MSG'
+
+pre-commit: a static gate failed. Fix it, or run with --no-verify if you are certain.
+  tools/ci/run_checks.sh --fix     reformat in place, then re-check
+MSG
+    exit 1
+fi
+
+# Whitespace damage, which clang-format does not see in non-C++ files.
+if ! git diff --cached --check; then
+    echo >&2 "pre-commit: whitespace errors in the staged change (git diff --cached --check)."
+    exit 1
+fi
+
+exit 0

@@ -3,10 +3,11 @@
 **Project:** `cna-house`
 **Repository:** `/rv/data/development/github.com/openeggbert/cna-house`
 **Document status:** design baseline for the planning pass completed 2026-09-06.
-**Implementation status:** NOT STARTED. See `plan.md`.
+**Implementation status:** IN PROGRESS since 2026-09-06 — phase 0. See `plan.md` for the ledger.
 
-> `plan.md` carries the line `STATUS: AWAITING USER APPROVAL — IMPLEMENTATION FORBIDDEN`.
-> Nothing in this document authorises writing gameplay code.
+> Implementation was approved by the project owner on 2026-09-06. This document remains the
+> architecture baseline: it is corrected when implementation establishes a durable fact that
+> differs from it, and is not rewritten after every source change.
 
 ---
 
@@ -1715,14 +1716,15 @@ CMake wiring:
 
 ```cmake
 cna_add_content(TARGET cnahouse_content
-                SOURCE_DIR assets-src/content
+                SOURCE_DIR assets-src            # Models/ Textures/ Audio/ Fonts/ Video/;
+                                                 # Effects/ and world/ are excluded by the config
                 OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/content
-                CONFIG_FILE assets-src/content/.cna-content.json
+                CONFIG_FILE assets-src/.cna-content.json
                 WORKERS 8)
 cna_add_content(TARGET cnahouse_effects   # only when CNAHOUSE_TIER_E
-                SOURCE_DIR assets-src/effects
+                SOURCE_DIR assets-src/Effects
                 OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/content/Effects
-                CONFIG_FILE assets-src/effects/.cna-content.json)
+                CONFIG_FILE assets-src/Effects/.cna-content.json)
 ```
 
 `.cna-content.json` sets per-asset processor parameters: `generateChildAssets` for multi-group
@@ -5005,7 +5007,7 @@ images.
 | Gate | Tool | Fails the build when |
 |---|---|---|
 | XNA-only | `tools/ci/check_xna_only.py` | A runtime source does **any** of: includes a header under `CNA/`; names `CNA::` in any form; contains an identifier matching `*EXT*` (`getSkinsEXTProperty`, `setOwnedResources`, `SkinnedModelEXT`, …); calls `SupportsCapability`; names `ShaderEffect`, `PbrEffect`, `SkinnedPbrEffect` or `AvatarRenderer`; reads `Model::Tag` or `Model::getTagProperty` (§47.0); names a `Graphics::SkinningData`/`AnimationClip`/`Keyframe`/`AnimationPlayer` type from CNA; touches GL/GLES/EGL/Vulkan/WebGPU/D3D/Metal/SDL-rendering symbols. Or the CMake cache has `CNA_CNAEXT=ON`. **There is no allowlist and no deviation register to consult** (§4.3) |
-| Custom shaders are XNA `Effect`s | the same script | A `.fx` is authored outside `assets-src/effects/`, or any GLSL/SPIR-V source appears in the tree |
+| Custom shaders are XNA `Effect`s | the same script | A `.fx` is authored outside `assets-src/Effects/`, or any GLSL/SPIR-V source appears in the tree |
 | No CNAEXT in the linked binary | `nm -C` in CI (`HOUSE-00136`) | Any `CNA::Graphics::` symbol is present in `cna-house` |
 | Animation assets bind | `tools/ci/check_anim_assets.py` | A `.chanim` sidecar's joint list disagrees with its model's `Model::Bones`, or a source `.glb` declares more than one skin (`HOUSE-00225`) |
 | No booleans for continuous weather | the same script | A member matching `is(Raining|Snowing|Windy|Stormy)` appears |

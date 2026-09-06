@@ -1,10 +1,19 @@
 # CNA House Master Implementation Plan
 
-`STATUS: AWAITING USER APPROVAL — IMPLEMENTATION FORBIDDEN`
+`STATUS: APPROVED — IMPLEMENTATION IN PROGRESS (approved 2026-09-06)`
 
-No implementation task in this file may be started. This document and
-[`cna-house.md`](cna-house.md) are the complete output of the planning pass. Work begins only
-after the project owner replies with `APPROVED: START IMPLEMENTATION`.
+The project owner approved implementation on 2026-09-06. This file is now the **execution
+ledger**: a task's checkbox moves to `[x]` only when its acceptance criteria are genuinely
+satisfied and its `verify:` step has been run. Task ids are permanent and are never renumbered.
+
+| | |
+|---|---|
+| Phase in progress | 0 — repository, conventions and decisions |
+| Completed | 34 of 1 297 tasks |
+| Baseline commit | `96d21db` (the approved planning baseline) |
+
+Corrections made to the planning documents during implementation are recorded in
+[Planning corrections](#planning-corrections) at the end of this file, never applied silently.
 
 ---
 
@@ -153,7 +162,7 @@ rule true.
 **Exit.** `cmake --build build` produces a binary that opens a window and clears it; CI runs the
 lint gates and an empty test suite; every ADR listed below exists.
 
-- [ ] HOUSE-00001 — Create the repository skeleton: directories per `cna-house.md` §17.5, with a `.gitkeep` in each empty one
+- [x] HOUSE-00001 — Create the repository skeleton: directories per `cna-house.md` §17.5, with a `.gitkeep` in each empty one
       dep: — · sys: app · plat: ALL · pri: MUST
       files: (directories only)
       accept: every directory in §17.5 exists; `git status` is clean after the first commit
@@ -162,65 +171,98 @@ lint gates and an empty test suite; every ADR listed below exists.
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       accept: a new contributor can build from the README alone
       verify: manual, plus a CI check that the build commands in the README are the ones CI runs
-- [ ] HOUSE-00003 — Choose and add the project licence and `NOTICE.md`
+      status: WRITTEN, NOT TICKED (2026-09-06). `README.md` is complete, including the
+              prerequisites, the exact build/run/test commands and the gate list. The
+              acceptance criterion is that a contributor can *build* from it, which cannot be
+              true before `HOUSE-00121` authors `CMakeLists.txt`. The README carries a visible
+              note saying so; the checkbox moves when the build exists and the commands are
+              executed from a fresh clone.
+- [x] HOUSE-00003 — Choose and add the project licence and `NOTICE.md`
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       accept: licence file present; `NOTICE.md` explains that content assets carry their own licences and points at `licenses/`
       verify: `verify_licences.py` step 0
-- [ ] HOUSE-00004 — Add `.gitignore`: `build*/`, `content/` (except the committed baseline), `*.log`, editor dirs, `assets-src/**/.blend1`
+      note: (2026-09-06) accepted on the stated criteria, checked by hand — `LICENSE` carries
+            the Ms-PL text, `NOTICE.md` states that content assets carry their own licences and
+            points at `licenses/`. `verify_licences.py` itself is phase 4 (`HOUSE-00261`+); it
+            re-checks this row automatically when it lands.
+- [x] HOUSE-00004 — Add `.gitignore`: `build*/`, `content/` (except the committed baseline), `*.log`, editor dirs, `assets-src/**/.blend1`
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       accept: a full build leaves `git status` clean
       verify: CI runs a build then `git diff --exit-code`
-- [ ] HOUSE-00005 — Add `.editorconfig` and `.clang-format` matching CNA's own style (4 spaces, 110 columns, Allman for types)
+      note: (2026-09-06) verified by synthesising exactly what a full build and a run leave
+            behind — `build/`, `build-asan/`, `build-ubsan/`, `build-probe/`,
+            `build-consumer/`, `content/**`, `*.log`, `screenshots/`, `test-output/`,
+            `*.blend1` — and asserting `git status --porcelain -uall` reported none of them,
+            while `content/.gitkeep` stayed trackable. The CI build-then-diff form of the same
+            check lands with `HOUSE-00121`.
+- [x] HOUSE-00005 — Add `.editorconfig` and `.clang-format` matching CNA's own style (4 spaces, 110 columns, Allman for types)
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       verify: `clang-format --dry-run -Werror` over the tree
-- [ ] HOUSE-00006 — Add `AGENTS.md`/`CLAUDE.md` for this repository: the XNA-only rule, the build-directory rules, ccache, the ID convention, the "commit after each task" rule
+- [x] HOUSE-00006 — Add `AGENTS.md`/`CLAUDE.md` for this repository: the XNA-only rule, the build-directory rules, ccache, the ID convention, the "commit after each task" rule
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       accept: it restates the openeggbert build rules and adds only project-specific rules
-- [ ] HOUSE-00007 — ADR-0001: XNA-only interpretation and the three-tier A/P/C policy — pure XNA, project-owned `cnahouse::` code, forbidden CNA API, with no middle tier and no allowlist
+- [x] HOUSE-00007 — ADR-0001: XNA-only interpretation and the three-tier A/P/C policy — pure XNA, project-owned `cnahouse::` code, forbidden CNA API, with no middle tier and no allowlist
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       files: docs/decisions/ADR-0001-xna-only.md
       accept: reproduces `cna-house.md` §4 as a decision record with the alternatives considered
-- [ ] HOUSE-00008 — ADR-0002: renderer selection (`OPENGLES3`), with the rejected alternatives and their reasons
+- [x] HOUSE-00008 — ADR-0002: renderer selection (`OPENGLES3`), with the rejected alternatives and their reasons
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00009 — ADR-0003: two rendering tiers, and why Tier S must be complete alone
+- [x] HOUSE-00009 — ADR-0003: two rendering tiers, and why Tier S must be complete alone
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00010 — ADR-0004: portal visibility with frustum reduction; stencil, PVS and BSP rejected with reasons
+- [x] HOUSE-00010 — ADR-0004: portal visibility with frustum reduction; stencil, PVS and BSP rejected with reasons
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00011 — ADR-0005: data-driven world; JSON schemas; the closed expression vocabulary
+- [x] HOUSE-00011 — ADR-0005: data-driven world; JSON schemas; the closed expression vocabulary
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00012 — ADR-0006: composition over ECS, with the entity-count argument
+- [x] HOUSE-00012 — ADR-0006: composition over ECS, with the entity-count argument
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00013 — ADR-0007: project-owned kinematic collision; Bullet/Jolt rejected; the swap-in seam named
+- [x] HOUSE-00013 — ADR-0007: project-owned kinematic collision; Bullet/Jolt rejected; the swap-in seam named
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00014 — ADR-0008: delta save format, versioning and migration policy
+- [x] HOUSE-00014 — ADR-0008: delta save format, versioning and migration policy
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00015 — ADR-0009: 24-minute simulated day, with the 20-vs-24-vs-48 analysis
+- [x] HOUSE-00015 — ADR-0009: 24-minute simulated day, with the 20-vs-24-vs-48 analysis
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00016 — ADR-0010: room-aware audio computed over the portal graph rather than by `Apply3D`
+- [x] HOUSE-00016 — ADR-0010: room-aware audio computed over the portal graph rather than by `Apply3D`
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00017 — ADR-0011: no third-party runtime dependencies; the candidate table and each verdict
+- [x] HOUSE-00017 — ADR-0011: no third-party runtime dependencies; the candidate table and each verdict
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00018 — ADR-0012: asset licensing policy and the "no row, no build" rule
+- [x] HOUSE-00018 — ADR-0012: asset licensing policy and the "no row, no build" rule
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00019 — Create `docs/xna-deviations.md`: the Tier A/P/C policy of `cna-house.md` §4.3, the seven Tier-P project-owned subsystem rows (OWN-01…07), and an explicit statement that the file grants **no permission to call any CNA symbol**
+- [x] HOUSE-00019 — Create `docs/xna-deviations.md`: the Tier A/P/C policy of `cna-house.md` §4.3, the seven Tier-P project-owned subsystem rows (OWN-01…07), and an explicit statement that the file grants **no permission to call any CNA symbol**
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
       accept: (1) zero rows permit a CNA API call; (2) each Tier-P row names the subsystem, what XNA 4.0 lacks and the owning document section; (3) the file states that `check_xna_only.py` reads no allowlist from it
-- [ ] HOUSE-00020 — Write `tools/ci/check_xna_only.py` — the strict gate of `cna-house.md` §70.1, with **no allowlist**: reject in any runtime source a `CNA/` include, a `CNA::` reference, any `*EXT*` identifier (`getSkinsEXTProperty`, `setOwnedResources`, `SkinnedModelEXT`, …), `SupportsCapability`, `ShaderEffect`/`PbrEffect`/`SkinnedPbrEffect`/`AvatarRenderer`, a `Model::Tag`/`getTagProperty` read, a CNA `Graphics::SkinningData`/`AnimationClip`/`Keyframe`/`AnimationPlayer` type, a GL/GLES/EGL/Vulkan/WebGPU/D3D/Metal/SDL-rendering symbol, or `CNA_CNAEXT=ON` in the CMake cache
+- [x] HOUSE-00020 — Write `tools/ci/check_xna_only.py` — the strict gate of `cna-house.md` §70.1, with **no allowlist**: reject in any runtime source a `CNA/` include, a `CNA::` reference, any `*EXT*` identifier (`getSkinsEXTProperty`, `setOwnedResources`, `SkinnedModelEXT`, …), `SupportsCapability`, `ShaderEffect`/`PbrEffect`/`SkinnedPbrEffect`/`AvatarRenderer`, a `Model::Tag`/`getTagProperty` read, a CNA `Graphics::SkinningData`/`AnimationClip`/`Keyframe`/`AnimationPlayer` type, a GL/GLES/EGL/Vulkan/WebGPU/D3D/Metal/SDL-rendering symbol, or `CNA_CNAEXT=ON` in the CMake cache
       dep: HOUSE-00019 · sys: ci · plat: CI · pri: MUST
       files: tools/ci/check_xna_only.py
       accept: (1) a deliberately-planted violation of each class is detected; (2) the clean tree passes; (3) the script consults no per-symbol exception list — a violation cannot be argued into the build, only rewritten as `cnahouse::` code
       verify: the script's own self-test with 14 planted-violation fixtures, one per rejected class
-- [ ] HOUSE-00021 — Extend `check_xna_only.py` with the "no `isRaining`-style boolean" lint, the "no `std::filesystem` outside `SaveStore`" lint, and the "custom shaders are XNA `Effect`s" lint (no GLSL/SPIR-V source anywhere in the tree; `.fx` only under `assets-src/effects/`)
+- [x] HOUSE-00021 — Extend `check_xna_only.py` with the "no `isRaining`-style boolean" lint, the "no `std::filesystem` outside `SaveStore`" lint, and the "custom shaders are XNA `Effect`s" lint (no GLSL/SPIR-V source anywhere in the tree; `.fx` only under `assets-src/Effects/`)
       dep: HOUSE-00020 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00022 — Write `tools/ci/check_layout.py` — the directory-set and file-placement gate
+      correction: (2026-09-06) the path is `assets-src/Effects/`, PascalCase. This task and
+                  `cna-house.md` §70.1 said `assets-src/effects/` while §18.1's pipeline
+                  diagram, §17.5 and the "directories are PascalCase" rule of §8.3 all said
+                  `Effects/`. The lint needs one canonical spelling; PascalCase wins because
+                  three statements support it and one did not. `cna-house.md` §70.1 and the
+                  §18.1 CMake snippet were corrected in the same commit.
+      note: the three lints are implemented in `tools/ci/check_xna_only.py` alongside
+            `HOUSE-00020`'s and are covered by the same `--selftest` fixture set
+            (`weather-boolean`, `std-filesystem`, `shader-source`, `fx-placement`).
+- [x] HOUSE-00022 — Write `tools/ci/check_layout.py` — the directory-set and file-placement gate
       dep: HOUSE-00001 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00023 — Establish the naming conventions document: ids, files, namespaces, content names, JSON keys
+- [x] HOUSE-00023 — Establish the naming conventions document: ids, files, namespaces, content names, JSON keys
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       files: docs/conventions.md
       accept: covers cell/portal/light/interactable/asset/material/sound id grammars with examples and the regex each must match
-- [ ] HOUSE-00024 — Define the C++ error-handling policy: `Result<T>` for recoverable, exceptions only at the `Game` boundary and for genuinely exceptional content failures, `assert` for invariants
+- [x] HOUSE-00024 — Define the C++ error-handling policy: `Result<T>` for recoverable, exceptions only at the `Game` boundary and for genuinely exceptional content failures, `assert` for invariants
       dep: HOUSE-00023 · sys: util · plat: ALL · pri: MUST
       files: docs/conventions.md, include/cnahouse/util/Result.hpp
+      note: (2026-09-06) `Result<T>`, `Result<void>`, `Error` and `ErrorCode` are implemented
+            and were verified by compiling a standalone behavioural check against the header
+            with `-std=c++23 -Wall -Wextra -Wpedantic -Werror`, in both the assert-enabled and
+            `-O2 -DNDEBUG` configurations, and running it: value and error paths, context
+            accumulation, `ValueOr`, move-only payloads, `operator->`, `Result<void>` and error
+            equality all pass. The header is self-contained and `clang-format`-clean. Its
+            permanent GoogleTest unit test lands with the test harness in phase 2 — no test
+            file was committed that this session could not run.
 - [ ] HOUSE-00025 — Define the logging policy and implement `util/Log`: levels, categories, rate limiting, ring buffer, file + stderr sinks
       dep: HOUSE-00024 · sys: util · plat: ALL · pri: MUST
       files: src/util/Log.cpp|hpp
@@ -240,30 +282,30 @@ lint gates and an empty test suite; every ADR listed below exists.
       verify: unit JsonTests.* with 20 malformed fixtures
 - [ ] HOUSE-00029 — Implement `util/SmallVector` and `util/FixedString`, or decide against them after measuring; record the decision
       dep: HOUSE-00024 · sys: util · plat: ALL · pri: SHOULD
-- [ ] HOUSE-00030 — Set up the git hooks / CI pre-commit equivalent running clang-format and the lint gates
+- [x] HOUSE-00030 — Set up the git hooks / CI pre-commit equivalent running clang-format and the lint gates
       dep: HOUSE-00020, HOUSE-00022 · sys: ci · plat: CI · pri: SHOULD
-- [ ] HOUSE-00031 — Write `docs/performance-log.md` with its row format and the first (empty) table
+- [x] HOUSE-00031 — Write `docs/performance-log.md` with its row format and the first (empty) table
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00032 — Write `docs/content-authoring.md`: the authoring conventions of `cna-house.md` §18.2 in checklist form for whoever makes an asset
+- [x] HOUSE-00032 — Write `docs/content-authoring.md`: the authoring conventions of `cna-house.md` §18.2 in checklist form for whoever makes an asset
       dep: HOUSE-00023 · sys: — · plat: TOOL · pri: MUST
-- [ ] HOUSE-00033 — Write `docs/world-format.md`: the JSON schemas of §15 as a reference, with a worked example per file
+- [x] HOUSE-00033 — Write `docs/world-format.md`: the JSON schemas of §15 as a reference, with a worked example per file
       dep: HOUSE-00023 · sys: — · plat: TOOL · pri: MUST
-- [ ] HOUSE-00034 — Decide and record the versioning scheme (`MAJOR.MINOR.PATCH+gHASH`) and where the version string lives
+- [x] HOUSE-00034 — Decide and record the versioning scheme (`MAJOR.MINOR.PATCH+gHASH`) and where the version string lives
       dep: HOUSE-00001 · sys: app · plat: ALL · pri: MUST
 - [ ] HOUSE-00035 — Add `CMakePresets.json` with the presets `linux-debug`, `linux-release`, `linux-asan`, `linux-ubsan`, `headless`, `gl33`, `web` (unbuilt for now)
       dep: HOUSE-00001 · sys: app · plat: ALL · pri: MUST
       accept: each preset sets `CCACHE_DIR`/`CCACHE_BASEDIR` launchers and the right build directory from the closed list
-- [ ] HOUSE-00036 — Record the openeggbert build rules compliance checklist in `AGENTS.md`: one ccache, reuse build dirs, never build in `/tmp`, `~/deps` for third-party, watch RAM
+- [x] HOUSE-00036 — Record the openeggbert build rules compliance checklist in `AGENTS.md`: one ccache, reuse build dirs, never build in `/tmp`, `~/deps` for third-party, watch RAM
       dep: HOUSE-00006 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00037 — Create `licenses/` with `THIRD-PARTY-ASSETS.md` as a generated stub and the generator's contract
+- [x] HOUSE-00037 — Create `licenses/` with `THIRD-PARTY-ASSETS.md` as a generated stub and the generator's contract
       dep: HOUSE-00003 · sys: — · plat: TOOL · pri: MUST
-- [ ] HOUSE-00038 — Define the issue/task workflow: one task = one commit, commit message references the `HOUSE-` id, statuses updated in this file
+- [x] HOUSE-00038 — Define the issue/task workflow: one task = one commit, commit message references the `HOUSE-` id, statuses updated in this file
       dep: HOUSE-00006 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00039 — Define and document the screenshot-scene naming scheme used by the render tests and the docs
+- [x] HOUSE-00039 — Define and document the screenshot-scene naming scheme used by the render tests and the docs
       dep: HOUSE-00023 · sys: debug · plat: ALL · pri: MUST
-- [ ] HOUSE-00040 — Add `docs/asset-review/` with the hero-asset sign-off template (4 views, reference photo, verdict, reviewer, date)
+- [x] HOUSE-00040 — Add `docs/asset-review/` with the hero-asset sign-off template (4 views, reference photo, verdict, reviewer, date)
       dep: HOUSE-00018 · sys: — · plat: TOOL · pri: MUST
-- [ ] HOUSE-00041 — Record the definition of done for a task: builds, tests pass, lint green, docs updated, plan checkbox ticked, one commit
+- [x] HOUSE-00041 — Record the definition of done for a task: builds, tests pass, lint green, docs updated, plan checkbox ticked, one commit
       dep: HOUSE-00038 · sys: — · plat: ALL · pri: MUST
 - [ ] HOUSE-00042 — First commit: the skeleton, the documents, the gates
       dep: HOUSE-00001…HOUSE-00041 · sys: — · plat: ALL · pri: MUST
@@ -3384,9 +3426,41 @@ documents cannot disagree.
 
 ---
 
+## Planning corrections
+
+Corrections made to `cna-house.md` or to this file *during* implementation, with the evidence that
+forced each one. Nothing is changed silently, and an accepted decision is not redesigned without
+evidence that it fails.
+
+| Date | Task | Correction | Why |
+|---|---|---|---|
+| 2026-09-06 | `HOUSE-00021` | `assets-src/effects/` → `assets-src/Effects/` in `cna-house.md` §70.1, in the §18.1 CMake snippet and in this task's text | Four statements in the two documents disagreed on the case of one path. §18.1's pipeline diagram, §17.5 and the "directories are PascalCase" rule of §8.3 said `Effects/`; §70.1 and the §18.1 CMake snippet said `effects/`. `check_xna_only.py` enforces where a `.fx` may live and needs exactly one spelling. |
+| 2026-09-06 | `HOUSE-00021` | `SOURCE_DIR assets-src/content` → `SOURCE_DIR assets-src` in the §18.1 CMake snippet, with the config file moved to `assets-src/.cna-content.json` | The same snippet placed the ContentManager-bound trees under `assets-src/content/`, while §18.1's own diagram, §17.5 and §15.1 place `Models/`, `Textures/`, `Audio/`, `Fonts/`, `Video/`, `Effects/` and `world/` directly under `assets-src/`. The directory skeleton created by `HOUSE-00001` follows the majority, and `check_layout.py` asserts it. |
+| 2026-09-06 | — | `cna-house.md` header and this file's header now record implementation as in progress rather than forbidden | The project owner approved implementation on 2026-09-06. |
+
+---
+
 ## Status
 
-`STATUS: AWAITING USER APPROVAL — IMPLEMENTATION FORBIDDEN`
+`STATUS: APPROVED — IMPLEMENTATION IN PROGRESS`
 
-No task above may be started. `HOUSE-00001` begins only after
-`APPROVED: START IMPLEMENTATION`.
+**Phase 0 — 34 of 42 tasks complete.**
+
+Done: `HOUSE-00001`, `HOUSE-00003`–`HOUSE-00024`, `HOUSE-00030`–`HOUSE-00034`,
+`HOUSE-00036`–`HOUSE-00041`.
+
+Open, and why:
+
+| Task | Why it is still open |
+|---|---|
+| `HOUSE-00002` | The README is written; its acceptance criterion is that a contributor can build from it, which needs `HOUSE-00121`. |
+| `HOUSE-00025` `util/Log` | Needs the GoogleTest harness (phase 2) to satisfy `verify: unit LogTests.*`. |
+| `HOUSE-00026` `util/Ids` | Same — `verify: unit IdsTests.*`. |
+| `HOUSE-00027` `util/Rng` | Same — `verify: unit RngTests.*`. |
+| `HOUSE-00028` `util/Json` | Same, and it additionally needs `System::Text::Json` linked, i.e. the CMake project. |
+| `HOUSE-00029` `util/SmallVector` | Explicitly gated on a measurement, which needs a build. |
+| `HOUSE-00035` `CMakePresets.json` | Its acceptance criterion is that each preset configures; that needs `CMakeLists.txt`. |
+| `HOUSE-00042` | The phase's closing commit: "CI green on a fresh clone", which needs CI and a build. |
+
+The next coherent batch is therefore `HOUSE-00121` onwards (phase 2's build skeleton), after which
+`HOUSE-00002`, `HOUSE-00025`–`HOUSE-00029`, `HOUSE-00035` and `HOUSE-00042` close phase 0.

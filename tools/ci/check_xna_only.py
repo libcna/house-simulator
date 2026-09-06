@@ -1,0 +1,549 @@
+#!/usr/bin/env python3
+"""check_xna_only.py -- the XNA-only build gate for cna-house.
+
+Implements the static gates of `cna-house.md` section 70.1 and the policy of
+`docs/decisions/ADR-0001-xna-only.md`.
+
+THERE IS NO ALLOWLIST.
+
+This script consults no exception file, no per-symbol allowlist and no deviation register.
+`docs/xna-deviations.md` is *not* read: it records the project-owned `cnahouse::` subsystems and
+grants permission to call nothing. A violation therefore cannot be argued into the build -- it can
+only be rewritten as `cnahouse::` code, which is what an XNA 4.0 developer would have had to do
+anyway.
+
+Fourteen rejected classes, each with a planted-violation fixture in --selftest:
+
+    forbidden-include     a #include of a CNA/ or native-graphics header
+    cna-namespace         any CNA:: reference
+    ext-identifier        any identifier carrying an embedded uppercase EXT marker
+    cnaext-convenience    a named CNAEXT convenience call on an otherwise-XNA type
+    capability-query      SupportsCapability and friends
+    forbidden-effect-api  ShaderEffect / PbrEffect / SkinnedPbrEffect / AvatarRenderer
+    model-tag             a Model::Tag / getTagProperty read
+    cna-animation-type    CNA's sample-derived SkinningData / AnimationClip / AnimationPlayer
+    native-graphics       GL / GLES / EGL / Vulkan / WebGPU / D3D / Metal / SDL-rendering symbols
+    cmake-cnaext          CNA_CNAEXT enabled in any CMake input or cache
+    weather-boolean       an is(Raining|Snowing|Windy|Stormy) member
+    std-filesystem        std::filesystem outside SaveStore
+    shader-source         GLSL / SPIR-V / WGSL / Metal shader source anywhere in the tree
+    fx-placement          a .fx / .fxh outside assets-src/Effects/
+
+Usage:
+    check_xna_only.py [--root DIR] [--format text|json]
+    check_xna_only.py --selftest
+
+Exit status: 0 clean, 1 violations found, 2 usage error, 3 self-test failure.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import sys
+import tempfile
+from dataclasses import dataclass
+from pathlib import Path
+
+# --------------------------------------------------------------------------------------------
+# What is scanned
+# --------------------------------------------------------------------------------------------
+
+# Game code: the XNA-only rule applies here in full.
+RUNTIME_ROOTS = ("src", "include")
+
+# Test code: not the shipped runtime, but it exercises the game through the same API and has no
+# business touching CNA either. The std::filesystem restriction is a *game code* rule
+# (`cna-house.md` section 8.3) and so does not extend here; everything else does.
+TEST_ROOTS = ("tests",)
+
+CXX_SUFFIXES = {".cpp", ".cc", ".cxx", ".hpp", ".h", ".hh", ".hxx", ".inl", ".ipp"}
+
+CMAKE_NAMES = {"CMakeLists.txt", "CMakeCache.txt", "CMakePresets.json", "CMakeUserPresets.json"}
+CMAKE_SUFFIXES = {".cmake"}
+
+# Shader sources that are not XNA Effects. Custom shaders in this project are `.fx` compiled to
+# Direct3D 9 Effect-Framework bytecode (ADR-0003); GLSL and SPIR-V would mean `ShaderEffect`,
+# which is Tier C.
+SHADER_SOURCE_SUFFIXES = {
+    ".glsl", ".vert", ".frag", ".geom", ".tesc", ".tese", ".comp", ".vsh", ".fsh",
+    ".spv", ".spvasm", ".wgsl", ".metal",
+}
+FX_SUFFIXES = {".fx", ".fxh"}
+FX_ROOT = "assets-src/Effects"
+
+# Never descend into these, wherever they appear.
+SKIP_DIRS_ANYWHERE = {".git", "__pycache__", ".idea", ".vscode", ".vs", ".cache", "node_modules"}
+
+# Skipped only at the repository root. `src/content/` is game code and must be scanned; the
+# generated `content/` tree beside it must not, and neither must a build directory.
+SKIP_DIRS_AT_ROOT = {
+    "build", "build-asan", "build-ubsan", "build-tsan", "build-probe", "build-consumer",
+    "content",
+}
+
+# The one file family permitted to use std::filesystem: `SaveStore`'s desktop implementation.
+# This is the policy of `cna-house.md` section 8.3 -- saves reach the disk through
+# StorageDevice/ISaveStore so that the Web port is a swap, not a rewrite -- and not an
+# exception mechanism: it is keyed on the file name the policy names, and admits no symbol
+# that any other rule rejects.
+SAVESTORE_STEM_PREFIX = "SaveStore"
+
+# --------------------------------------------------------------------------------------------
+# Rules
+# --------------------------------------------------------------------------------------------
+
+RULE_HELP = {
+    "forbidden-include": "Include only Microsoft/Xna/..., System/..., the C++ standard library "
+                         "and cnahouse/... headers.",
+    "cna-namespace": "CNA:: is Tier C (ADR-0001). Write the behaviour in cnahouse:: instead.",
+    "ext-identifier": "CNAEXT-marked convenience API is Tier C. There is no XNA 4.0 equivalent "
+                      "to reach for, so write it yourself.",
+    "cnaext-convenience": "This is a CNA extension on an otherwise-XNA type, not XNA 4.0 API.",
+    "capability-query": "XNA 4.0 has no capability query. Tier selection is a build fact plus a "
+                        "guarded content load (ADR-0003).",
+    "forbidden-effect-api": "Custom shaders are XNA Effects compiled from .fx (ADR-0003).",
+    "model-tag": "The runtime never reads Model::Tag (BL-01). Animation data travels in a "
+                 ".chanim sidecar (OWN-07).",
+    "cna-animation-type": "These are CNA's copies of Skinned Model *Sample* classes, never XNA "
+                          "Framework API. Use cnahouse::anim (OWN-01, OWN-02).",
+    "native-graphics": "The runtime talks to the GPU only through XNA's GraphicsDevice.",
+    "cmake-cnaext": "CNA_CNAEXT must stay OFF: with it off the engine layer is not in the binary.",
+    "weather-boolean": "Weather quantities are continuous. Use the float, not a boolean "
+                       "(cna-house.md section 36.1).",
+    "std-filesystem": "Game code reaches the disk through StorageDevice / ISaveStore so the Web "
+                      "port is a swap, not a rewrite (cna-house.md section 8.3).",
+    "shader-source": "GLSL/SPIR-V source would mean CNA::Graphics::ShaderEffect, which is Tier C. "
+                     "Author .fx under assets-src/Effects/ instead.",
+    "fx-placement": "Effect sources live in assets-src/Effects/ so the content build and this "
+                    "gate can both find them.",
+}
+
+# Identifier-level denylists. These are denylists, not allowlists: nothing here can grant access.
+FORBIDDEN_IDENTIFIERS = {
+    "cnaext-convenience": {
+        "CNAEXT", "setOwnedResources", "getSkinsEXTProperty",
+        "SetAssemblyTitleEXT", "GetAssemblyTitleEXT",
+    },
+    "capability-query": {"SupportsCapability", "GraphicsCapability"},
+    "forbidden-effect-api": {"ShaderEffect", "PbrEffect", "SkinnedPbrEffect", "AvatarRenderer",
+                             "SkinnedModelEXT"},
+    "model-tag": {"getTagProperty", "setTagProperty", "TagProperty"},
+    "cna-animation-type": {"SkinningData", "AnimationClip", "AnimationPlayer"},
+}
+
+# Regexes applied to comment- and literal-stripped C++ text.
+CODE_PATTERNS = [
+    ("cna-namespace", re.compile(r"\bCNA\s*::")),
+    ("model-tag", re.compile(r"\bModel\s*::\s*Tag\b")),
+    ("cna-animation-type", re.compile(r"\bGraphics\s*::\s*Keyframe\b")),
+    # Native graphics: entry points are calls, constants are SCREAMING_CASE with a fixed prefix.
+    ("native-graphics", re.compile(r"\bgl[A-Z]\w*\s*\(")),
+    ("native-graphics", re.compile(r"\begl[A-Z]\w*\s*\(")),
+    ("native-graphics", re.compile(r"\bvk[A-Z]\w*\s*\(")),
+    ("native-graphics", re.compile(r"\b(?:GL|EGL|VK|WGPU|MTL)_[A-Z0-9_]+\b")),
+    ("native-graphics", re.compile(r"\b(?:Vk|MTL|WGPU)[A-Z]\w*\b")),
+    ("native-graphics", re.compile(r"\bwgpu[A-Z]\w*\b")),
+    ("native-graphics", re.compile(r"\b(?:ID3D|IDirect3D|D3D)\w*\b")),
+    ("native-graphics", re.compile(r"\bSDL_\w+\b")),
+    ("native-graphics", re.compile(r"\b(?:glslang|SPIRV|spvc?)[A-Za-z_]\w*\b")),
+    ("std-filesystem", re.compile(r"\bstd\s*::\s*filesystem\b")),
+]
+
+INCLUDE_RE = re.compile(r"^\s*#\s*include\s*[<\"]([^>\"]+)[>\"]")
+
+FORBIDDEN_INCLUDE_PREFIXES = ("CNA/",)
+NATIVE_INCLUDE_PREFIXES = (
+    "GL/", "GLES/", "GLES2/", "GLES3/", "GLES31/", "EGL/", "KHR/", "glad/", "GLFW/",
+    "vulkan/", "webgpu/", "wgpu/", "SDL/", "SDL2/", "SDL3/", "Metal/", "QuartzCore/",
+)
+NATIVE_INCLUDE_NAMES = (
+    "SDL.h", "SDL_render.h", "SDL3.h", "glad.h", "d3d9.h", "d3d11.h", "d3d12.h", "dxgi.h",
+    "vulkan.h", "webgpu.h",
+)
+
+IDENTIFIER_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+EMBEDDED_EXT_RE = re.compile(r"[a-z0-9]EXT")
+WEATHER_BOOL_RE = re.compile(r"[Ii]s(?:Raining|Snowing|Windy|Stormy)\b")
+
+CMAKE_CNAEXT_RE = re.compile(r"CNA_CNAEXT[^\r\n]*")
+TRUTHY_RE = re.compile(r"\b(ON|TRUE|YES|Y|1)\b", re.IGNORECASE)
+FALSY_RE = re.compile(r"\b(OFF|FALSE|NO|N|0)\b", re.IGNORECASE)
+
+
+@dataclass(frozen=True)
+class Violation:
+    path: str
+    line: int
+    rule: str
+    text: str
+
+    def render(self) -> str:
+        return (f"{self.path}:{self.line}: [{self.rule}] {self.text}\n"
+                f"    -> {RULE_HELP[self.rule]}")
+
+
+# --------------------------------------------------------------------------------------------
+# C++ text preparation
+# --------------------------------------------------------------------------------------------
+
+def strip_cxx(text: str) -> str:
+    """Blank out comments and string/char literals, preserving line and column positions.
+
+    Symbol rules run on the result, so prose that *names* a forbidden symbol -- a comment
+    explaining why it is forbidden, a log message, a test fixture string -- is not a violation.
+    Calling one is.
+    """
+    out = []
+    i, n = 0, len(text)
+    while i < n:
+        c = text[i]
+        two = text[i:i + 2]
+        if two == "//":
+            while i < n and text[i] != "\n":
+                out.append(" ")
+                i += 1
+        elif two == "/*":
+            out.append("  ")
+            i += 2
+            while i < n and text[i:i + 2] != "*/":
+                out.append("\n" if text[i] == "\n" else " ")
+                i += 1
+            if i < n:
+                out.append("  ")
+                i += 2
+        elif c == 'R' and text[i:i + 2] == 'R"':
+            close = text.find("(", i + 2)
+            if close == -1:
+                out.append(c)
+                i += 1
+                continue
+            delim = text[i + 2:close]
+            end = text.find(')' + delim + '"', close)
+            end = n if end == -1 else end + len(delim) + 2
+            for j in range(i, end):
+                out.append("\n" if text[j] == "\n" else " ")
+            i = end
+        elif c in "\"'":
+            quote = c
+            out.append(" ")
+            i += 1
+            while i < n and text[i] != quote:
+                if text[i] == "\\" and i + 1 < n:
+                    out.append("  ")
+                    i += 2
+                    continue
+                out.append("\n" if text[i] == "\n" else " ")
+                i += 1
+            if i < n:
+                out.append(" ")
+                i += 1
+        else:
+            out.append(c)
+            i += 1
+    return "".join(out)
+
+
+# --------------------------------------------------------------------------------------------
+# Checks
+# --------------------------------------------------------------------------------------------
+
+def check_includes(rel: str, raw_lines: list[str], out: list[Violation]) -> None:
+    for number, line in enumerate(raw_lines, start=1):
+        match = INCLUDE_RE.match(line)
+        if not match:
+            continue
+        header = match.group(1)
+        if header.startswith(FORBIDDEN_INCLUDE_PREFIXES):
+            out.append(Violation(rel, number, "forbidden-include",
+                                 f'#include "{header}" -- CNA headers are Tier C'))
+        elif header.startswith(NATIVE_INCLUDE_PREFIXES) or header in NATIVE_INCLUDE_NAMES:
+            out.append(Violation(rel, number, "native-graphics",
+                                 f'#include "{header}" -- native graphics header'))
+        elif header == "filesystem":
+            out.append(Violation(rel, number, "std-filesystem",
+                                 "#include <filesystem>"))
+
+
+def check_code(rel: str, code: str, out: list[Violation], *, allow_filesystem: bool) -> None:
+    lines = code.split("\n")
+    for number, line in enumerate(lines, start=1):
+        for rule, pattern in CODE_PATTERNS:
+            if rule == "std-filesystem" and allow_filesystem:
+                continue
+            match = pattern.search(line)
+            if match:
+                out.append(Violation(rel, number, rule, match.group(0).strip()))
+        for ident in IDENTIFIER_RE.findall(line):
+            if EMBEDDED_EXT_RE.search(ident):
+                out.append(Violation(rel, number, "ext-identifier", ident))
+                continue
+            if WEATHER_BOOL_RE.search(ident):
+                out.append(Violation(rel, number, "weather-boolean", ident))
+                continue
+            for rule, names in FORBIDDEN_IDENTIFIERS.items():
+                if ident in names:
+                    out.append(Violation(rel, number, rule, ident))
+                    break
+
+
+def check_cmake(rel: str, raw_lines: list[str], out: list[Violation]) -> None:
+    for number, line in enumerate(raw_lines, start=1):
+        for hit in CMAKE_CNAEXT_RE.findall(line):
+            tail = hit.split("CNA_CNAEXT", 1)[1]
+            truthy = TRUTHY_RE.search(tail)
+            falsy = FALSY_RE.search(tail)
+            if truthy and (falsy is None or truthy.start() < falsy.start()):
+                out.append(Violation(rel, number, "cmake-cnaext", hit.strip()))
+
+
+def check_placement(rel: str, suffix: str, out: list[Violation]) -> None:
+    if suffix in SHADER_SOURCE_SUFFIXES:
+        out.append(Violation(rel, 1, "shader-source", f"{suffix} shader source in the tree"))
+    elif suffix in FX_SUFFIXES and not rel.startswith(FX_ROOT + "/"):
+        out.append(Violation(rel, 1, "fx-placement", f"{rel} is outside {FX_ROOT}/"))
+
+
+# --------------------------------------------------------------------------------------------
+# Walk
+# --------------------------------------------------------------------------------------------
+
+def iter_files(root: Path):
+    for dirpath, dirnames, filenames in os.walk(root):
+        at_root = Path(dirpath) == root
+        dirnames[:] = sorted(
+            d for d in dirnames
+            if d not in SKIP_DIRS_ANYWHERE and not (at_root and d in SKIP_DIRS_AT_ROOT))
+        for name in sorted(filenames):
+            yield Path(dirpath) / name
+
+
+def scan(root: Path) -> list[Violation]:
+    root = root.resolve()
+    violations: list[Violation] = []
+    for path in iter_files(root):
+        rel = path.relative_to(root).as_posix()
+        top = rel.split("/", 1)[0]
+        suffix = path.suffix
+
+        check_placement(rel, suffix, violations)
+
+        if path.name in CMAKE_NAMES or suffix in CMAKE_SUFFIXES:
+            try:
+                raw = path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            check_cmake(rel, raw.split("\n"), violations)
+
+        if suffix not in CXX_SUFFIXES:
+            continue
+        if top not in RUNTIME_ROOTS and top not in TEST_ROOTS:
+            continue
+        try:
+            raw = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+
+        is_test = top in TEST_ROOTS
+        is_savestore = path.stem.startswith(SAVESTORE_STEM_PREFIX)
+        allow_filesystem = is_test or is_savestore
+
+        raw_lines = raw.split("\n")
+        if not allow_filesystem:
+            check_includes(rel, raw_lines, violations)
+        else:
+            check_includes_without_filesystem(rel, raw_lines, violations)
+        check_code(rel, strip_cxx(raw), violations, allow_filesystem=allow_filesystem)
+
+    violations.sort(key=lambda v: (v.path, v.line, v.rule))
+    return violations
+
+
+def check_includes_without_filesystem(rel: str, raw_lines: list[str],
+                                      out: list[Violation]) -> None:
+    collected: list[Violation] = []
+    check_includes(rel, raw_lines, collected)
+    out.extend(v for v in collected if v.rule != "std-filesystem")
+
+
+# --------------------------------------------------------------------------------------------
+# Self-test: one planted violation per rejected class
+# --------------------------------------------------------------------------------------------
+
+CLEAN_SOURCE = """// SPDX-License-Identifier: MS-PL
+#pragma once
+
+#include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
+#include "cnahouse/util/Result.hpp"
+
+#include <vector>
+
+// This comment names CNA::Graphics::ShaderEffect, SupportsCapability, getSkinsEXTProperty and
+// std::filesystem on purpose: prose about the rule is not a violation of it.
+namespace cnahouse::rendering
+{
+    class RoomPass
+    {
+    public:
+        void Draw(Microsoft::Xna::Framework::Graphics::BasicEffect& effect, float rainfall);
+
+    private:
+        std::vector<int> m_chunks;
+        float m_rainfallRate = 0.0F;
+    };
+}
+"""
+
+FIXTURES: dict[str, tuple[str, str]] = {
+    "forbidden-include": (
+        "src/rendering/PlantedInclude.cpp",
+        '#include "CNA/Graphics/SkyEngine.hpp"\nvoid f() {}\n'),
+    "cna-namespace": (
+        "src/rendering/PlantedNamespace.cpp",
+        "void f()\n{\n    CNA::Graphics::HdrPipeline pipeline;\n}\n"),
+    "ext-identifier": (
+        "src/content/PlantedExt.cpp",
+        "void f(Model& model)\n{\n    auto skins = model.getSkinsEXTProperty();\n}\n"),
+    "cnaext-convenience": (
+        "src/content/PlantedConvenience.cpp",
+        "void f(Model& model)\n{\n    model.setOwnedResources(true);\n}\n"),
+    "capability-query": (
+        "src/rendering/PlantedCapability.cpp",
+        "bool f(GraphicsDevice& device)\n{\n    return device.SupportsCapability(7);\n}\n"),
+    "forbidden-effect-api": (
+        "src/rendering/PlantedEffectApi.cpp",
+        "void f()\n{\n    ShaderEffect effect;\n}\n"),
+    "model-tag": (
+        "src/animation/PlantedTag.cpp",
+        "void f(Model& model)\n{\n    auto tag = Model::Tag;\n}\n"),
+    "cna-animation-type": (
+        "src/animation/PlantedAnimType.cpp",
+        "void f()\n{\n    AnimationPlayer player;\n}\n"),
+    "native-graphics": (
+        "src/rendering/PlantedNative.cpp",
+        "void f()\n{\n    glBindTexture(0, 0);\n}\n"),
+    "cmake-cnaext": (
+        "CMakeLists.txt",
+        'set(CNA_CNAEXT ON CACHE BOOL "" FORCE)\n'),
+    "weather-boolean": (
+        "src/weather/PlantedBoolean.hpp",
+        "struct WeatherState\n{\n    bool isRaining = false;\n};\n"),
+    "std-filesystem": (
+        "src/persistence/PlantedFilesystem.cpp",
+        "#include <filesystem>\nvoid f()\n{\n    std::filesystem::path p;\n}\n"),
+    "shader-source": (
+        "assets-src/Effects/planted.frag",
+        "void main() {}\n"),
+    "fx-placement": (
+        "src/rendering/planted.fx",
+        "technique T { pass P { } }\n"),
+}
+
+
+def _write(root: Path, rel: str, text: str) -> None:
+    path = root / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def _clean_tree(root: Path) -> None:
+    _write(root, "src/rendering/RoomPass.hpp", CLEAN_SOURCE)
+    _write(root, "include/cnahouse/rendering/RoomPass.hpp", CLEAN_SOURCE)
+    _write(root, "tests/unit/rendering/RoomPassTests.cpp",
+           '#include <filesystem>\n#include "cnahouse/rendering/RoomPass.hpp"\n'
+           "void t()\n{\n    std::filesystem::path fixture;\n}\n")
+    _write(root, "src/persistence/SaveStore.cpp",
+           '#include <filesystem>\n#include "cnahouse/persistence/SaveStore.hpp"\n'
+           "namespace cnahouse::persistence\n{\n"
+           "    void SaveStore::Flush()\n    {\n"
+           "        std::filesystem::path path;\n    }\n}\n")
+    _write(root, "assets-src/Effects/RoomLit.fx", "technique Lit { pass P { } }\n")
+    _write(root, "CMakeLists.txt",
+           'set(CNA_CNAEXT OFF CACHE BOOL "" FORCE)\n'
+           'set(CNA_GRAPHICS_RENDERER "OPENGLES3" CACHE STRING "" FORCE)\n')
+    # A tree that *looks* like it offers an exception mechanism. The scanner must ignore it
+    # completely: there is no allowlist, and adding one changes nothing.
+    _write(root, "tools/ci/xna-allowlist.txt", "CNA::Graphics::HdrPipeline\nShaderEffect\n")
+    _write(root, ".xna-allow", "*\n")
+
+
+def selftest() -> int:
+    failures: list[str] = []
+
+    with tempfile.TemporaryDirectory(prefix="cnahouse-xnaonly-") as tmp:
+        root = Path(tmp)
+        _clean_tree(root)
+        clean = scan(root)
+        if clean:
+            failures.append("the clean tree was rejected:\n  " +
+                            "\n  ".join(v.render() for v in clean))
+
+    for rule, (rel, body) in FIXTURES.items():
+        with tempfile.TemporaryDirectory(prefix="cnahouse-xnaonly-") as tmp:
+            root = Path(tmp)
+            _clean_tree(root)
+            _write(root, rel, body)
+            found = scan(root)
+            hit = [v for v in found if v.rule == rule and v.path == rel]
+            if not hit:
+                failures.append(f"planted [{rule}] in {rel} was NOT detected; "
+                                f"scanner reported: {[ (v.rule, v.path) for v in found ] or 'nothing'}")
+
+    expected = set(RULE_HELP)
+    planted = set(FIXTURES)
+    if planted != expected:
+        failures.append(f"fixture set does not cover every rejected class: "
+                        f"missing {sorted(expected - planted)}, extra {sorted(planted - expected)}")
+    if len(FIXTURES) != 14:
+        failures.append(f"expected 14 planted-violation fixtures, found {len(FIXTURES)}")
+
+    if failures:
+        print("check_xna_only self-test FAILED", file=sys.stderr)
+        for failure in failures:
+            print("  - " + failure, file=sys.stderr)
+        return 3
+
+    print(f"check_xna_only self-test passed: {len(FIXTURES)} planted-violation fixtures "
+          f"detected, clean tree accepted, no allowlist consulted.")
+    return 0
+
+
+# --------------------------------------------------------------------------------------------
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--root", default=None,
+                        help="repository root to scan (default: the repository this script is in)")
+    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--selftest", action="store_true",
+                        help="run the planted-violation fixtures and exit")
+    args = parser.parse_args(argv)
+
+    if args.selftest:
+        return selftest()
+
+    root = Path(args.root) if args.root else Path(__file__).resolve().parents[2]
+    if not root.is_dir():
+        print(f"check_xna_only: not a directory: {root}", file=sys.stderr)
+        return 2
+
+    violations = scan(root)
+
+    if args.format == "json":
+        print(json.dumps([v.__dict__ for v in violations], indent=2))
+    else:
+        for violation in violations:
+            print(violation.render())
+        if violations:
+            print(f"\ncheck_xna_only: {len(violations)} violation(s) in {root}", file=sys.stderr)
+            print("There is no allowlist. Rewrite the code in cnahouse:: -- see "
+                  "docs/decisions/ADR-0001-xna-only.md.", file=sys.stderr)
+        else:
+            print(f"check_xna_only: clean ({root})")
+    return 1 if violations else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

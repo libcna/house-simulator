@@ -1,0 +1,57 @@
+# ---------------------------------------------------------------------------
+# cna-house — ignored paths
+#
+# The openeggbert build rules fix a CLOSED list of build-directory names
+# (AGENTS.md rule 2). They all live in the repository root; nowhere else is a
+# build tree allowed, so the pattern is anchored and directory-only. An
+# unanchored "build*" once swallowed a tools/ source file in CNA — do not
+# un-anchor this.
+# ---------------------------------------------------------------------------
+/build/
+/build-asan/
+/build-ubsan/
+/build-tsan/
+/build-probe/
+/build-consumer/
+
+# ---------------------------------------------------------------------------
+# Generated content.
+#
+# content/ is produced by cna-content from assets-src/ and is reproducible
+# (cna-house.md §18.4). Only the small committed baseline is tracked: the
+# fonts, the debug textures and the compiled Effects/*.xnb, which are committed
+# precisely so that a contributor without Wine can still build (BL-04).
+# Everything else here is build output and must never be committed.
+# ---------------------------------------------------------------------------
+/content/*
+!/content/.gitkeep
+!/content/Fonts/
+!/content/Effects/
+!/content/Textures/Debug/
+
+# ---------------------------------------------------------------------------
+# Authoring leftovers
+# ---------------------------------------------------------------------------
+assets-src/**/*.blend1
+assets-src/**/*.blend2
+assets-src/**/*.blend@
+
+# ---------------------------------------------------------------------------
+# Logs, saves and local run output
+# ---------------------------------------------------------------------------
+*.log
+/screenshots/
+/test-output/
+
+# ---------------------------------------------------------------------------
+# Editors and tooling
+# ---------------------------------------------------------------------------
+.idea/
+.vscode/
+.vs/
+*.swp
+*~
+__pycache__/
+*.pyc
+.cache/
+compile_commands.json
