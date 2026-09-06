@@ -1780,8 +1780,39 @@ system update order, the settings file, the logging, and a CI that runs lints an
       finding: sampler slots are tracked independently and an out-of-range slot is ignored rather
             than counted. One remembered sampler would skip slot 1 because slot 0 already held that
             object, and the second texture would be sampled with the wrong filter.
-- [ ] HOUSE-00159 — Implement `Renderer` with the pass list of `cna-house.md` §7.5 as empty passes
+- [x] HOUSE-00159 — Implement `Renderer` with the pass list of `cna-house.md` §7.5 as empty passes
       dep: HOUSE-00158 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-06) `rendering/Renderer.{hpp,cpp}`: a `Pass` enum in §7.5 order, `IRenderPass`,
+            a `PassContext`, and a `Renderer` that walks the enum. Eleven tests.
+      note: **"empty passes" is taken as scaffolding, and this project's rules require scaffolding
+            to be real infrastructure rather than a dead layer.** No placeholder pass is shipped:
+            an uninstalled pass is skipped and counted, which is exactly what an empty frame should
+            report. What IS real from the first commit is the part that is painful to retrofit —
+            the order, the tier gate, the state invalidation between passes and the per-pass timing.
+            The one pass that exists, `Pass::Hud`, is the game's actual HUD wired through the
+            renderer, so the layer is exercised by every frame the application draws rather than
+            waiting for phase 12 to find out whether it works.
+      finding: **the enum order IS the frame order, and there is no way to reorder it.** Sky before
+            opaque so the dome is overdrawn rather than overdrawing; alpha-test before transparent
+            so cut-outs write the depth the sorted pass tests against. Those are architectural
+            decisions, and a runtime-sortable list would let a caller discover them by getting one
+            wrong.
+      finding: the tier gate lives in `Renderer::WillRun` and nowhere else. `PassIsTierEOnly` is
+            true for exactly two passes — shadow and composite — and a test asserts the count is
+            two, because ADR-0003's promise that Tier S is *complete* holds only while the Tier-E
+            passes are the ones whose absence changes how the frame LOOKS rather than what it
+            contains.
+      finding: `IRenderPass::DisturbsDeviceState()` is what makes HOUSE-00158's tracker safe in a
+            multi-pass frame. `SpriteBatch::Begin`/`End` sets and restores several states together,
+            so the renderer invalidates after any pass that says yes. Both directions are tested:
+            with the flag, two passes setting the *same* `BlendState::Opaque` produce two real
+            applies; without it, one apply and one skip. The second test is the control — without
+            it, "two applies" would also be consistent with a renderer that invalidated after every
+            pass, which would make the flag meaningless.
+      finding: `IsActive()` is asked once per frame by the renderer rather than left to each pass to
+            return early, so that *ran* and *had nothing to do* are different numbers. A pass that
+            quietly did nothing for a hundred frames is a bug that looks exactly like a pass that is
+            working.
 - [x] HOUSE-00160 — Implement `render::RenderTier`: the build-time tier fact (`CNAHOUSE_TIER_E`, HOUSE-00122) plus the runtime-resolved active tier, published once and read by everything else. **No device capability query anywhere** — nothing in the type touches `GraphicsDevice` for this purpose.
       dep: HOUSE-00159, HOUSE-00122 · sys: rendering · plat: ALL · pri: MUST
       files: src/rendering/RenderTier.cpp|hpp

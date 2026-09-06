@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "Microsoft/Xna/Framework/Content/ContentManager.hpp"
@@ -17,6 +18,8 @@
 #include "cnahouse/debug/Timing.hpp"
 #include "cnahouse/player/KeyboardMouseSource.hpp"
 #include "cnahouse/rendering/RenderTier.hpp"
+#include "cnahouse/rendering/Renderer.hpp"
+#include "cnahouse/rendering/StateTracker.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
 
 namespace cnahouse::app
@@ -108,6 +111,10 @@ namespace cnahouse::app
         void RenderFrame();
         void DrawHud();
 
+        /// @brief The `Pass::Hud` implementation, defined in the .cpp because it is an adapter onto
+        ///        `DrawHud` and nothing else needs its name.
+        class HudPass;
+
         /// @brief Loads the Tier-E effect set, or falls back to Tier S. Called once, from
         ///        `LoadContent`.
         void ActivateTierE();
@@ -121,6 +128,16 @@ namespace cnahouse::app
         FrameTimer timer_;
         Platform platform_;
         rendering::RenderTier tier_;
+
+        /// The draw side of `cna-house.md` §7.5. Constructed with the tier, so the two Tier-E-only
+        /// passes are gated in ONE place rather than at each pass. Only the HUD pass is installed
+        /// today; phases 12 onwards install the rest and the frame's shape does not change when
+        /// they do.
+        rendering::Renderer renderer_;
+
+        /// Needs a `GraphicsDevice`, so it cannot be a plain member: built in `Initialize`, once
+        /// the device exists.
+        std::optional<rendering::StateTracker> states_;
 
         /// A second `ContentManager`, over the `.xnb` effect tree. `HOUSE-00076` measured that one
         /// built with a null service provider throws at the first load, so it takes the `Game`'s.

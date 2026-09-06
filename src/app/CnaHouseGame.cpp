@@ -65,6 +65,7 @@ namespace cnahouse::app
         // Constructed from the REQUESTED tier, which `ResolveTier` already narrows to what this
         // binary contains. `ActivateTierE` narrows it a second time if the content does not load.
         , tier_(options_.tier)
+        , renderer_(tier_)
     {
         graphics_.setPreferredBackBufferWidthProperty(settings_.backBufferWidth);
         graphics_.setPreferredBackBufferHeightProperty(settings_.backBufferHeight);
@@ -98,6 +99,41 @@ namespace cnahouse::app
     };
 
     CnaHouseGame::~CnaHouseGame() = default;
+
+    /// The HUD as a §7.5 pass. An adapter, deliberately: `DrawHud` is where the HUD is drawn and
+    /// duplicating it here to satisfy an interface would be the dead abstraction layer this project
+    /// forbids. What the adapter adds is real -- the pass declares that it disturbs device state, so
+    /// `Renderer` invalidates the tracker after it, and it declares itself inactive when there is no
+    /// font, so an empty HUD is a *skipped* pass in the counters rather than a pass that silently
+    /// did nothing.
+    class CnaHouseGame::HudPass final : public rendering::IRenderPass
+    {
+    public:
+        explicit HudPass(CnaHouseGame& game) noexcept
+            : game_(&game)
+        {
+        }
+
+        void Draw(rendering::PassContext&) override
+        {
+            game_->DrawHud();
+        }
+
+        [[nodiscard]] bool IsActive() const override
+        {
+            return game_->contentLoaded_ && game_->hud_ != nullptr && game_->hud_->font.has_value();
+        }
+
+        [[nodiscard]] bool DisturbsDeviceState() const override
+        {
+            // `SpriteBatch::Begin`/`End` sets and restores blend, depth, rasteriser and sampler
+            // state together. MEASURED (`HOUSE-00065`): `Begin()` selects `BlendState::AlphaBlend`.
+            return true;
+        }
+
+    private:
+        CnaHouseGame* game_;
+    };
 
     std::string CnaHouseGame::VersionLine()
     {
@@ -139,6 +175,13 @@ namespace cnahouse::app
         platform_.displayWidth = mode.getWidthProperty();
         platform_.displayHeight = mode.getHeightProperty();
         platform_.adapterDescription = adapter.getDescriptionProperty();
+
+        // Both need the device, so neither can be a plain member. `Initialize` is the first point
+        // where it exists, and installing the HUD pass here rather than in `LoadContent` keeps the
+        // pass list a fact about the build rather than about what content happened to load --
+        // `HudPass::IsActive` is what answers the content question, once per frame.
+        states_.emplace(getGraphicsDeviceProperty());
+        renderer_.Install(rendering::Pass::Hud, std::make_unique<HudPass>(*this));
 
         player::InputConfig inputConfig;
         inputConfig.sensitivity = settings_.mouseSensitivity;
@@ -449,7 +492,8 @@ namespace cnahouse::app
     void CnaHouseGame::RenderFrame()
     {
         getGraphicsDeviceProperty().Clear(ClearColour());
-        DrawHud();
+        rendering::PassContext context{getGraphicsDeviceProperty(), *states_, counters_, smoothedDelta_};
+        renderer_.Draw(context);
     }
 
     void CnaHouseGame::DrawHud()

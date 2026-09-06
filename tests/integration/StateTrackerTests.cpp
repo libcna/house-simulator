@@ -22,6 +22,8 @@
 #include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
 
+#include "integration/DeviceHost.hpp"
+
 namespace
 {
     namespace Gfx = Microsoft::Xna::Framework::Graphics;
@@ -29,74 +31,20 @@ namespace
     using cnahouse::rendering::StateFor;
     using cnahouse::rendering::StateTracker;
 
-    /// Runs the body once inside a real frame, with a live device, then exits.
-    class TrackerHost final : public Microsoft::Xna::Framework::Game
+    StateTracker::Counts RunWithTracker(const std::function<void(StateTracker&)>& body)
     {
-    public:
-        using Body = std::function<void(StateTracker&)>;
-
-        explicit TrackerHost(Body body)
-            : gdm_(this)
-            , body_(std::move(body))
-        {
-            gdm_.setPreferredBackBufferWidthProperty(320);
-            gdm_.setPreferredBackBufferHeightProperty(240);
-            gdm_.setSynchronizeWithVerticalRetraceProperty(false);
-            setIsFixedTimeStepProperty(false);
-        }
-
-        [[nodiscard]] bool Ran() const noexcept
-        {
-            return ran_;
-        }
-
-        [[nodiscard]] const std::string& Failure() const noexcept
-        {
-            return failure_;
-        }
-
-        [[nodiscard]] const StateTracker::Counts& Counts() const noexcept
-        {
-            return counts_;
-        }
-
-    protected:
-        void Draw(const Microsoft::Xna::Framework::GameTime& gameTime) override
-        {
-            Game::Draw(gameTime);
-            if (ran_)
+        StateTracker::Counts counts;
+        cnahouse::testsupport::DeviceHost host(
+            [&](Gfx::GraphicsDevice& device)
             {
-                return;
-            }
-            ran_ = true;
-            try
-            {
-                StateTracker tracker(getGraphicsDeviceProperty());
-                body_(tracker);
-                counts_ = tracker.Current();
-            }
-            catch (const std::exception& e)
-            {
-                failure_ = e.what();
-            }
-            Exit();
-        }
-
-    private:
-        Microsoft::Xna::Framework::GraphicsDeviceManager gdm_;
-        Body body_;
-        bool ran_ = false;
-        std::string failure_;
-        StateTracker::Counts counts_;
-    };
-
-    StateTracker::Counts RunWithTracker(TrackerHost::Body body)
-    {
-        TrackerHost host(std::move(body));
+                StateTracker tracker(device);
+                body(tracker);
+                counts = tracker.Current();
+            });
         host.Run();
         EXPECT_TRUE(host.Ran()) << "the frame that does the measuring never ran";
         EXPECT_EQ(host.Failure(), "") << "the device rejected a state the tracker set";
-        return host.Counts();
+        return counts;
     }
 
     TEST(StateTrackerTests, TheFirstSetOfEachKindIsAppliedAndTheRepeatIsSkipped)
@@ -206,7 +154,7 @@ namespace
         // The counters are the point of the class -- a renderer that changes blend state 900 times
         // to issue 300 draws is sorting its render list wrongly, and that is invisible without a
         // per-frame number to look at.
-        TrackerHost host(
+        RunWithTracker(
             [](StateTracker& tracker)
             {
                 tracker.SetBlend(Gfx::BlendState::Opaque);
@@ -226,8 +174,6 @@ namespace
                 EXPECT_EQ(tracker.Current().blendApplied, 1u);
                 EXPECT_EQ(tracker.Current().blendSkipped, 0u);
             });
-        host.Run();
-        EXPECT_TRUE(host.Ran());
-        EXPECT_EQ(host.Failure(), "");
     }
+
 } // namespace
