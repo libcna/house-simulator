@@ -59,7 +59,7 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | C-01 | `Game`, `GraphicsDeviceManager`, `GameTime`, `GameComponent` are available | `modules/runtime/` | **`PASS`** | `HOUSE-00062` | A `Game` subclass with a `GraphicsDeviceManager` ran 300 frames at 1600×900 and exited cleanly. |
 | C-02 | `Game::Run()` is a blocking lifetime on desktop and on Emscripten | `docs/emscripten-mainloop-game-lifetime.md` | **`PASS`** (desktop half) | `HOUSE-00062` | `Run()` blocked until `Exit()`, then returned; `main` printed its summary and exited 0. The Emscripten half is phase 48. |
 | C-03 | `ContentManager::Load<T>()`, `RootDirectory`, `Unload()` exist, and resolution order is `.xnb` first, then a literal path, then `.cnj`/`.cnb` | `docs/xnb-content-pipeline-support.md` §Scope | **`PASS`** | `HOUSE-00064` | Same content name as both `.xnb` (red) and `.cnb` (blue): the red texels came back — **`.xnb` wins**. The literal-path middle tier was not exercised. |
-| C-04 | `System::*` from sharp-runtime — `Text.Json`, `IO`, `Xml.Serialization`, `IO.IsolatedStorage` — are available as CMake components | `sharp-runtimenext/modules/text-json/CMakeLists.txt` | `PENDING` | `HOUSE-00103` | — |
+| C-04 | `System::*` from sharp-runtime — `Text.Json`, `IO`, `Xml.Serialization`, `IO.IsolatedStorage` — are available as CMake components | `sharp-runtimenext/modules/text-json/CMakeLists.txt` | **`PASS`** (`Text.Json`, `IO`) | `HOUSE-00076`, `HOUSE-00103` | Both used to read a sidecar from disk. **`Text.Json` is not in CNA's default component set** and CNA does not link it, so a consumer must add it to `SHARP_RUNTIME_COMPONENTS` *and* link `SharpRuntime::Text.Json` itself. Sizes `HOUSE-00121`/`HOUSE-00122`. |
 | C-05 | `StorageDevice`/`StorageContainer` work; Linux root is `$XDG_DATA_HOME/<app>` else `~/.local/share/<app>` | `modules/storage/src/StorageDevice.cpp:88-109` | `PENDING` | `HOUSE-00102` | — |
 
 ## §5.2 Math and volumes
@@ -74,7 +74,7 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | # | Claim | §5 evidence | Verdict | Probe | Measured |
 |---|---|---|---|---|---|
 | G-01 | `BasicEffect` with 3 directional lights, specular, fog and per-pixel lighting | `docs/basiceffect-support.md` | `PENDING` | `HOUSE-00082` | — |
-| G-02 | `SkinnedEffect`, `MaxBones = 72`, `WeightsPerVertex` 1/2/4 | `docs/skinnedeffect-support.md` | `PENDING` | `HOUSE-00075`, `HOUSE-00077` | — |
+| G-02 | `SkinnedEffect`, `MaxBones = 72`, `WeightsPerVertex` 1/2/4 | `docs/skinnedeffect-support.md` | **`PASS`** | `HOUSE-00075`, `HOUSE-00077` | `MaxBones == 72`; 72 accepted, 73 throws `boneTransforms exceeds MaxBones.`. Visible deformation confirmed by pixel comparison, not by absence of an exception. **`LightingEnabled = false` is refused** — as XNA 4.0 refuses it. |
 | G-03 | `DualTextureEffect` (albedo × lightmap, two UV channels) | `docs/dualtextureeffect-support.md` | `PENDING` | `HOUSE-00078` | — |
 | G-04 | `AlphaTestEffect` | `docs/alphatesteffect-support.md` | `PENDING` | `HOUSE-00080` | — |
 | G-05 | `EnvironmentMapEffect` including the Fresnel term, `TextureCube` sampling | `docs/environmentmapeffect-support.md` | `PENDING` | `HOUSE-00081` | — |
@@ -82,7 +82,7 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | G-07 | A compiled `Effect` works end-to-end in a real scene: two techniques switched by name, `Single` 2048² render target with `Depth24`, that target rebound as an effect texture | `cna-samples/plan.md:785` | `PENDING` | `HOUSE-00083`, `HOUSE-00088` | — |
 | G-08 | `Model`/`ModelMesh`/`ModelMeshPart`/`ModelBone` and `CopyAbsoluteBoneTransformsTo` | `docs/model-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | Depth-3 hierarchy with a sibling branch: every local and absolute transform equals the matrix computed offline, to 2e-5. `Copy*BoneTransformsTo` require a **pre-sized** destination and throw `destinationBoneTransforms` otherwise. |
 | G-09 | `Model` from compiled content carries a real bone hierarchy via `.cnb` | `docs/xnb-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | 4 authored nodes → 5 bones: CNA inserts a **synthetic `Root`** above the scene root. Parent links, `Index`, `Children` and mesh `ParentBone` all as authored. |
-| G-10 | A skinned glTF compiles to `.cnb` and its joints are recoverable **without reading `Model::Tag`** | `docs/content-pipeline.md:456-458` | `PENDING` | `HOUSE-00074` | — |
+| G-10 | A skinned glTF compiles to `.cnb` and its joints are recoverable **without reading `Model::Tag`** | `docs/content-pipeline.md:456-458` | **`PASS`** | `HOUSE-00074`, `HOUSE-00076` | Recoverable by **name lookup into `Model::Bones`**, which is all a sidecar carries. Blend indices are **skin-local**, not bone indices, so the sidecar *must* carry the joint-name list — acceptance path (4), not (2). `Model::Tag` and `getSkinsEXTProperty()` are never read. |
 | G-11 | `VertexBuffer`, `IndexBuffer`, `DynamicVertexBuffer`; EasyGL has a real 32-bit index factory | feature matrix | `PENDING` | `HOUSE-00092`, `HOUSE-00094` | — |
 | G-12 | `RenderTarget2D`, `RenderTargetCube`, mip chains, MSAA on EasyGL | feature matrix | `PENDING` | `HOUSE-00083`, `HOUSE-00084` | — |
 | G-13 | `BlendState`, `DepthStencilState` compare functions, `RasterizerState`, 16 per-slot `SamplerState`s | feature matrix | `PENDING` | `HOUSE-00079` | — |
@@ -703,6 +703,128 @@ from reading `cna-house.md` §5.
    late; `HOUSE-00136` should gate it.
 3. **`Matrix::Identity` is `Matrix::getIdentityProperty()`** and `Vector3::Up` is a plain static —
    the property-name mapping is not uniform, so it is read per type rather than guessed.
+
+
+### `HOUSE-00074` — the skinned binding, and the one fact that fixes the `.chanim` format · **PASS**
+
+Fixture `P1Skin.glb`: a two-column, five-row ribbon bound to a three-joint chain, with rows 1 and 3
+authored as exact 50/50 blends so a *dropped* weight is distinguishable from a *swapped* one. The
+probe matches each compiled vertex to its authored counterpart **by position**, never by array
+index, and then tests the blend index against both hypotheses at once.
+
+```
+  [--] bone count  6                    # five authored nodes + the synthetic Root
+  [--] vertex declaration  stride=68 Position@0:Vector3 Normal@12:Vector3 Tangent@24:Vector4
+                           TexCoord@40:Vector2 BlendWeight@48:Vector4 BlendIndices@64:Byte4
+  [ok] blend weights equal the authored weights                       10/10
+  [--] blend-index meaning  indexes Model::Bones on 0/10 vertices;
+                            indexes the skin joint list on 10/10
+  [--] name -> bone-index map a sidecar would carry   P1J0->2 P1J1->3 P1J2->4
+p1-skin: 20/20 checks passed
+```
+
+**The verdict: blend indices are SKIN-LOCAL.** They are `0..N-1` in the order the glTF `skin.joints`
+array declares, **not** indices into `Model::Bones`. On this fixture the two differ by two, because
+of the synthetic `Root` and the skin root node.
+
+This is acceptance path **(4)** of `HOUSE-00074`, not path (2), and it settles `R-16` and the
+`.chanim` format of `HOUSE-00166`:
+
+* the sidecar **must** carry the skin's joint names **in blend-index order**; that list *is* the
+  binding, and nothing in the compiled `Model` reproduces it;
+* at load the runtime resolves each name to a `Model::Bones` index (`bones[name]` — the collection
+  has a by-name indexer, so this needs no search of our own);
+* the skinning palette handed to `SkinnedEffect::SetBoneTransforms` is indexed by **skin-local**
+  joint index, so it is built in the sidecar's order, not the bone order.
+
+Two supporting measurements:
+
+* **The compiled `.cnb` is byte-identical across rebuilds** — two builds of the same source both
+  hashed `dc702b15…f06379` — so the joint order is stable, which is criterion (2)'s real content.
+* The skinned vertex is **68 bytes**: the 48-byte static layout plus `BlendWeight` (`Vector4`, @48)
+  and `BlendIndices` (`Byte4`, @64). `Byte4` caps a skin at 256 joints at the vertex level, well
+  above `SkinnedEffect`'s own 72.
+
+### `HOUSE-00075` / `HOUSE-00077` — project-owned animation and the bone cap · **PASS**
+
+`p1-skinanim` implements the evaluator `cnahouse::anim` will ship: per-joint TRS keyframe tracks,
+`Lerp`/`Slerp` sampling, composition in XNA's order, a parent walk to absolute matrices, and a
+palette built with **inverse bind matrices the project owns** — taken from the source asset offline,
+never from a CNA query.
+
+It is checked analytically *before* anything is drawn: the bind pose must skin to the identity for
+every joint (or the inverse bind matrices are wrong), and the evaluated bend must carry the tip from
+`(0,4,0)` to exactly `(-2,2,0)`. Both hold.
+
+Deformation is then measured, not assumed:
+
+| | Covered pixels | Ink bounding box |
+|---|---|---|
+| Bind pose | 1 785 | `x[118,138] y[86,170]` |
+| Bent 90° about +Z at the middle joint | 1 569 | `x[86,143] y[118,170]` |
+
+1 800 pixels differ against a bind-pose coverage of 1 785; the silhouette extends 32 px further
+**left** and starts 32 px **lower**, which is what a +90° turn about `+Z` at the middle joint
+predicts and what a merely-scaled or merely-translated result would not produce.
+
+`HOUSE-00077`: `SkinnedEffect::MaxBones == 72`; `SetBoneTransforms` accepts exactly 72 and throws
+`boneTransforms exceeds MaxBones.` at 73. The cap is real and enforced.
+
+**Finding — `SkinnedEffect` refuses `LightingEnabled = false`**, throwing *"SkinnedEffect does not
+support setting LightingEnabled to false."*, exactly as XNA 4.0's does. There is no flat unlit
+skinned draw. Anything `cna-house` wants to draw unlit and skinned must use a full ambient term
+(`AmbientLightColor = (1,1,1)` with the directional lights off), which is what the probe does.
+
+### `HOUSE-00076` — one skin per runtime asset · **PASS, with the task's premise corrected**
+
+The task says to confirm *"the split parts render identically to the unsplit source"*. The first run
+established that **there is no loadable unsplit source**: `CNA.ModelProcessor` refuses a multi-skin
+glTF outright.
+
+```
+$ cna-content build build-probe/p1-fixtures/P1TwoSkin.glb -o .../P1TwoSkin.cnb --format cnb
+  Process (CNA.ModelProcessor): glTF produced 2 Model documents; set ModelProcessor bool
+  parameter 'generateChildAssets' to true to publish the deterministic multi-Model output set.
+Built: 0  Skipped: 0  Failed: 1
+```
+
+That is *better* than the architecture assumed — a multi-skin source cannot silently reach the
+runtime, so the rule enforces itself at build time — but it means the comparison had to be
+reformulated. What the probe measures instead is that the **two independent split routes agree
+pixel for pixel**, driven from one pose of one shared skeleton evaluated once:
+
+| Route | How | Assets produced |
+|---|---|---|
+| **Pipeline** | `"generateChildAssets": {"type":"bool","value":true}` in the asset config | `P1TwoSkin.cnb` (primary — the lexicographically first group) and `P1TwoSkin_P1SkinB.cnb` (child), both ordinary `Load<Model>()` names |
+| **Offline** | `p1-split-skins.py`, the project-owned splitter | `P1PartA.glb` / `P1PartB.glb`, each single-skin, plus a `.attach.json` record |
+
+```
+  [--] offline-split route coverage   2576 px (1287 left, 1289 right)
+  [ok] both parts actually drew       1287 / 1289
+  [ok] the pipeline split and the offline split are pixel-identical   0 differing pixels
+p1-skinsplit: 13/13 checks passed
+```
+
+**The pipeline route becomes the default** (`cna-house.md` §21.3 updated): one line of asset config
+replaces a project-owned tool, and the child names are ordinary logical content names. The offline
+splitter stays as the fallback for sources whose generated child names are unacceptable, and it is
+what `HOUSE-00224` implements.
+
+The **attachment record** is what makes the parts reassemble, and it round-trips through
+`System::Text::Json` in the probe exactly as the runtime will read it: the shared skeleton root, the
+part's attachment bone, and the skin's joint names in blend-index order.
+
+**Finding — `Text.Json` is not in CNA's default sharp-runtime component set.** Including
+`System/Text/Json/JsonDocument.hpp` does not compile until the consumer both adds `Text.Json` to
+`SHARP_RUNTIME_COMPONENTS` *and* links `SharpRuntime::Text.Json` directly, because CNA does not link
+it and so does not propagate its include directories. `cna-house`'s world data, save files and
+sidecars are all `System::Text::Json`, so phase 2's CMake (`HOUSE-00121`, `HOUSE-00122`) must carry
+both lines.
+
+**Finding — a second `ContentManager` needs the `Game`'s service provider.** `ContentManager(nullptr)`
+throws *"ContentManager: no GraphicsDevice is available from the service provider."* at the first
+`Load<Model>`; `ContentManager(&game.getServicesProperty())` works. Relevant to `HOUSE-00858`'s
+per-pack managers.
 
 
 ---

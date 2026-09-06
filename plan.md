@@ -529,18 +529,79 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             Phase 9 and phase 41 must treat it as a cheap conservative reject only; wherever a tight
             bound is wanted, `cna-house` computes its own from the vertex data it already reads
             back. Sizes `HOUSE-00761` and the culling work.
-- [ ] HOUSE-00074 — **Probe: skinned glTF → `.cnb` → `Model`, and prove a project-owned sidecar can bind to it** (settles R-16). Read the skin's joint names and order from the source `.glb`, compile the model, compare against `Model::Bones`. `Model::Tag` is not read.
+- [x] HOUSE-00074 — **Probe: skinned glTF → `.cnb` → `Model`, and prove a project-owned sidecar can bind to it** (settles R-16). Read the skin's joint names and order from the source `.glb`, compile the model, compare against `Model::Bones`. `Model::Tag` is not read.
       dep: HOUSE-00072 · sys: content · plat: LNX · pri: MUST
       accept: (1) every glTF skin joint has a same-named `Model::Bones` entry; (2) the joint order the vertex blend indices reference is recoverable and stable across rebuilds; (3) `ParentBone`/`Transform` agree with the source hierarchy; (4) if any of these fails, the fallback — an explicit joint-name→bone-index map emitted into the sidecar — is recorded instead
       verify: probe `p1-skin`, output recorded in the capability report; the answer fixes the `.chanim` format of HOUSE-00166
-- [ ] HOUSE-00075 — Probe: animate that model through a hand-written clip evaluator and `SkinnedEffect::SetBoneTransforms`; confirm visible deformation
+      note: (2026-09-06) PASS, 20/20. Criterion (1) holds — all three skin joints resolve by name in
+            `Model::Bones`. Criterion (3) holds — parents and local transforms match the source.
+            Criterion (2) holds for stability: two builds of the same source produced a
+            **byte-identical** `.cnb` (`dc702b15…f06379`).
+      finding: **the answer is criterion (4), not (2): blend indices are SKIN-LOCAL.** They are
+            `0..N-1` in `skin.joints` declaration order, **not** `Model::Bones` indices — measured
+            0/10 vertices under the bone hypothesis and 10/10 under the skin-local one. So the
+            `.chanim` sidecar of `HOUSE-00166` **must** carry the skin's joint names in blend-index
+            order; nothing in the compiled `Model` reproduces that list. At load the runtime maps
+            name → `Model::Bones` index (the collection has a by-name indexer), and the palette
+            handed to `SkinnedEffect::SetBoneTransforms` is built in the **sidecar's** order.
+            R-16 is settled without `Model::Tag` and without `getSkinsEXTProperty()`.
+            The skinned vertex is 68 bytes: the 48-byte static layout plus `BlendWeight`
+            (`Vector4`@48) and `BlendIndices` (`Byte4`@64) — `Byte4` caps a skin at 256 joints at
+            the vertex level, well above `SkinnedEffect`'s 72.
+- [x] HOUSE-00075 — Probe: animate that model through a hand-written clip evaluator and `SkinnedEffect::SetBoneTransforms`; confirm visible deformation
       dep: HOUSE-00074 · sys: animation · plat: LNX · pri: MUST
-- [ ] HOUSE-00076 — Probe: a two-skin glTF **split offline into one `.glb` per skin**; confirm each part compiles to a single-skin `Model` that binds to its own sidecar and that the parts reassemble on a shared skeleton. `getSkinsEXTProperty()` is not called and must not be needed.
+      note: (2026-09-06) PASS, 11/11 in probe `p1-skinanim`, which implements the evaluator
+            `cnahouse::anim` will ship — per-joint TRS tracks, `Lerp`/`Slerp`, composition in XNA's
+            order, a parent walk to absolute matrices, and a palette built from **project-owned**
+            inverse bind matrices. Checked analytically before anything was drawn: the bind pose
+            skins to the identity for every joint, and the bend carries the tip from `(0,4,0)` to
+            exactly `(-2,2,0)`. Deformation then **measured**: bind pose 1 785 px, bbox
+            `x[118,138] y[86,170]`; bent pose 1 569 px, bbox `x[86,143] y[118,170]`; 1 800 pixels
+            differ. The silhouette moves 32 px left and 32 px down — what a +90° turn about `+Z` at
+            the middle joint predicts, and what a scale or a translation would not produce.
+      finding: **`SkinnedEffect` refuses `LightingEnabled = false`** — *"SkinnedEffect does not
+            support setting LightingEnabled to false."* — exactly as XNA 4.0's does. There is no
+            flat unlit skinned draw. Anything drawn unlit and skinned uses a full ambient term
+            instead. Sizes the avatar and creature work of phases 33–37.
+- [x] HOUSE-00076 — Probe: a two-skin glTF **split offline into one `.glb` per skin**; confirm each part compiles to a single-skin `Model` that binds to its own sidecar and that the parts reassemble on a shared skeleton. `getSkinsEXTProperty()` is not called and must not be needed.
       dep: HOUSE-00074 · sys: content · plat: LNX · pri: MUST
       accept: (1) the split parts render identically to the unsplit source; (2) the attachment-bone record round-trips; (3) the finding is written into `cna-house.md` §21.3 and sizes HOUSE-00224
       verify: probe `p1-skinsplit`
-- [ ] HOUSE-00077 — Probe: `SkinnedEffect` bone-count limit — confirm 72 accepted, 73 throws
+      correction: (2026-09-06) criterion (1) as written is unmeasurable, because **there is no
+            loadable unsplit source.** `CNA.ModelProcessor` refuses a multi-skin glTF outright —
+            *"glTF produced 2 Model documents; set ModelProcessor bool parameter
+            `generateChildAssets` to true to publish the deterministic multi-Model output set"*,
+            exit 1. That is stronger than the architecture assumed (the one-skin rule enforces
+            itself at build time), but it means the comparison had to be reformulated: the probe
+            measures that the **two independent split routes agree pixel for pixel**, driven from
+            one pose of one shared skeleton evaluated once.
+      note: (2026-09-06) PASS, 13/13. Route (a), the pipeline's own split via
+            `"generateChildAssets": {"type":"bool","value":true}` in the asset config, publishes
+            `P1TwoSkin.cnb` (the lexicographically first group) and `P1TwoSkin_P1SkinB.cnb`, both
+            ordinary `Load<Model>()` names. Route (b), the project-owned `p1-split-skins.py`,
+            publishes one `.glb` per skin plus a `.attach.json`. **0 differing pixels** between the
+            two routes; both parts drew (1 287 px left, 1 289 px right). Criterion (2) holds: the
+            attachment record round-trips through `System::Text::Json` — shared skeleton root,
+            attachment bone, and the skin's joint names in blend-index order. Criterion (3) done:
+            `cna-house.md` §21.3 rewritten.
+      finding: **route (a) becomes the default** — one line of asset config replaces a project-owned
+            tool, and the child assets are ordinary logical content names. `HOUSE-00224` implements
+            the offline splitter as the fallback for sources whose generated child names are
+            unacceptable, not as the primary route.
+      finding: **`Text.Json` is not in CNA's default sharp-runtime component set**, and CNA does not
+            link it, so its include directories do not reach a consumer through the `CNA` target.
+            A consumer must add `Text.Json` to `SHARP_RUNTIME_COMPONENTS` **and** link
+            `SharpRuntime::Text.Json` itself. `cna-house`'s world data, saves and sidecars are all
+            `System::Text::Json`, so `HOUSE-00121`/`HOUSE-00122` must carry both lines.
+      finding: a second `ContentManager` needs the `Game`'s service provider —
+            `ContentManager(nullptr)` throws *"no GraphicsDevice is available from the service
+            provider"* at the first `Load<Model>`. Sizes `HOUSE-00858`'s per-pack managers.
+- [x] HOUSE-00077 — Probe: `SkinnedEffect` bone-count limit — confirm 72 accepted, 73 throws
       dep: HOUSE-00075 · sys: rendering · plat: LNX · pri: MUST
+      note: (2026-09-06) PASS. `SkinnedEffect::MaxBones == 72`; `SetBoneTransforms` accepts exactly
+            72 and throws `boneTransforms exceeds MaxBones.` at 73. The cap is real and enforced,
+            so the avatar rig of phase 35 is budgeted against 72, not against a hoped-for larger
+            number.
 - [ ] HOUSE-00078 — Probe: `DualTextureEffect` — albedo × lightmap on a quad with two UV channels; confirm the second channel reaches the effect
       dep: HOUSE-00070 · sys: rendering · plat: LNX · pri: MUST
       accept: a checker albedo × a gradient lightmap produces the analytic product within 2/255
