@@ -30,7 +30,7 @@ after the project owner replies with `APPROVED: START IMPLEMENTATION`.
 | Secondary renderers | `HEADLESS` (CI/logic tests), `OPENGL33` (occlusion-count validation only) |
 | Platform backend | `CNA_PLATFORM=SDL3`; audio `CNA_AUDIO_PLATFORM=SDL3` |
 | Engine layer | `CNA_CNAEXT=OFF` — permanently, non-negotiable |
-| Compiled effects | `CNA_EASYGL_COMPILED_EFFECTS=ON` |
+| Compiled effects | `CNA_EASYGL_COMPILED_EFFECTS=ON` — and this build-time fact, not any runtime query, is what selects Tier E (`cna-house.md` §7.3) |
 | Video | `CNA_ENABLE_VIDEO=AUTO` (FFmpeg present on this host) |
 | Offline toolchain | Blender 4.3.2 (`/usr/bin/blender`), ffmpeg 7.1.5, Python 3.11.9, `fxc.exe` from the DirectX SDK June 2010 at `/rv/tmp/samples/_tools/directx-sdk-june-2010/extract/DXSDK/Utilities/bin/x86/fxc.exe` run through Wine, official XNA 4.0 content pipeline under `WINEPREFIX=~/.wine-cna-xna40` |
 | ccache | `CCACHE_DIR=/rv/cnaccache`, `CCACHE_BASEDIR=/rv`, launchers passed to CMake |
@@ -90,8 +90,8 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 |---|---|---|---|---|
 | 0 | Repository, conventions, decisions | 00001–00060 | 42 | The repo builds an empty `Game` and CI is green |
 | 1 | CNA capability verification | 00061–00120 | 60 | Every §5 claim re-proved; `BL-09` settled; probes deleted |
-| 2 | Build skeleton and CI | 00121–00180 | 45 | `Game` clears the screen; HEADLESS tests run in CI |
-| 3 | Content pipeline | 00181–00260 | 42 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
+| 2 | Build skeleton and CI | 00121–00180 | 47 | `Game` clears the screen; HEADLESS tests run in CI |
+| 3 | Content pipeline | 00181–00260 | 45 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 80 | The full layout authored, validated and loaded |
 | 6 | Blockout house geometry | 00451–00540 | 34 | The generated shell renders |
@@ -176,7 +176,7 @@ lint gates and an empty test suite; every ADR listed below exists.
 - [ ] HOUSE-00006 — Add `AGENTS.md`/`CLAUDE.md` for this repository: the XNA-only rule, the build-directory rules, ccache, the ID convention, the "commit after each task" rule
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       accept: it restates the openeggbert build rules and adds only project-specific rules
-- [ ] HOUSE-00007 — ADR-0001: XNA-only interpretation and the four-tier deviation policy
+- [ ] HOUSE-00007 — ADR-0001: XNA-only interpretation and the three-tier A/P/C policy — pure XNA, project-owned `cnahouse::` code, forbidden CNA API, with no middle tier and no allowlist
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       files: docs/decisions/ADR-0001-xna-only.md
       accept: reproduces `cna-house.md` §4 as a decision record with the alternatives considered
@@ -202,15 +202,15 @@ lint gates and an empty test suite; every ADR listed below exists.
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
 - [ ] HOUSE-00018 — ADR-0012: asset licensing policy and the "no row, no build" rule
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00019 — Create `docs/xna-deviations.md` with the three seed rows (DEV-001…003) and its own format description
+- [ ] HOUSE-00019 — Create `docs/xna-deviations.md`: the Tier A/P/C policy of `cna-house.md` §4.3, the seven Tier-P project-owned subsystem rows (OWN-01…07), and an explicit statement that the file grants **no permission to call any CNA symbol**
       dep: HOUSE-00007 · sys: — · plat: ALL · pri: MUST
-      accept: each row names the symbol, the tier, the XNA-side reason and the call sites
-- [ ] HOUSE-00020 — Write `tools/ci/check_xna_only.py`: reject `CNA/Graphics/*` engine includes, `CNA::Graphics::` references, unregistered `*EXT*` symbols, `CNA_CNAEXT=ON` in the CMake cache, and direct GL/Vulkan/SDL/WebGPU symbols
+      accept: (1) zero rows permit a CNA API call; (2) each Tier-P row names the subsystem, what XNA 4.0 lacks and the owning document section; (3) the file states that `check_xna_only.py` reads no allowlist from it
+- [ ] HOUSE-00020 — Write `tools/ci/check_xna_only.py` — the strict gate of `cna-house.md` §70.1, with **no allowlist**: reject in any runtime source a `CNA/` include, a `CNA::` reference, any `*EXT*` identifier (`getSkinsEXTProperty`, `setOwnedResources`, `SkinnedModelEXT`, …), `SupportsCapability`, `ShaderEffect`/`PbrEffect`/`SkinnedPbrEffect`/`AvatarRenderer`, a `Model::Tag`/`getTagProperty` read, a CNA `Graphics::SkinningData`/`AnimationClip`/`Keyframe`/`AnimationPlayer` type, a GL/GLES/EGL/Vulkan/WebGPU/D3D/Metal/SDL-rendering symbol, or `CNA_CNAEXT=ON` in the CMake cache
       dep: HOUSE-00019 · sys: ci · plat: CI · pri: MUST
       files: tools/ci/check_xna_only.py
-      accept: (1) a deliberately-planted violation of each class is detected; (2) clean tree passes
-      verify: the script's own self-test with 8 planted-violation fixtures
-- [ ] HOUSE-00021 — Extend `check_xna_only.py` with the "no `isRaining`-style boolean" lint and the "no `std::filesystem` outside `SaveStore`" lint
+      accept: (1) a deliberately-planted violation of each class is detected; (2) the clean tree passes; (3) the script consults no per-symbol exception list — a violation cannot be argued into the build, only rewritten as `cnahouse::` code
+      verify: the script's own self-test with 14 planted-violation fixtures, one per rejected class
+- [ ] HOUSE-00021 — Extend `check_xna_only.py` with the "no `isRaining`-style boolean" lint, the "no `std::filesystem` outside `SaveStore`" lint, and the "custom shaders are XNA `Effect`s" lint (no GLSL/SPIR-V source anywhere in the tree; `.fx` only under `assets-src/effects/`)
       dep: HOUSE-00020 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00022 — Write `tools/ci/check_layout.py` — the directory-set and file-placement gate
       dep: HOUSE-00001 · sys: ci · plat: CI · pri: MUST
@@ -315,14 +315,16 @@ that produced it; `BL-09` is settled; every probe binary is removed.
 - [ ] HOUSE-00073 — Probe: `Model::Meshes[i].BoundingSphere` is populated from `.cnb` (it is not from `.model.json` — BL-12)
       dep: HOUSE-00072 · sys: content · plat: LNX · pri: MUST
       accept: a non-degenerate sphere per mesh; if degenerate, record it as a new blocker and plan to compute bounds offline
-- [ ] HOUSE-00074 — **Probe: skinned glTF → `.cnb` → `Model` with `SkinningData` on `Model::Tag`** (settles R-16)
+- [ ] HOUSE-00074 — **Probe: skinned glTF → `.cnb` → `Model`, and prove a project-owned sidecar can bind to it** (settles R-16). Read the skin's joint names and order from the source `.glb`, compile the model, compare against `Model::Bones`. `Model::Tag` is not read.
       dep: HOUSE-00072 · sys: content · plat: LNX · pri: MUST
-      accept: (1) `Tag` is non-null and castable to `SkinningData`; (2) `BindPose`/`InverseBindPose`/`SkeletonHierarchy` sizes agree; (3) the clip list is present and named
-      verify: probe `p1-skin`, output recorded in the capability report
+      accept: (1) every glTF skin joint has a same-named `Model::Bones` entry; (2) the joint order the vertex blend indices reference is recoverable and stable across rebuilds; (3) `ParentBone`/`Transform` agree with the source hierarchy; (4) if any of these fails, the fallback — an explicit joint-name→bone-index map emitted into the sidecar — is recorded instead
+      verify: probe `p1-skin`, output recorded in the capability report; the answer fixes the `.chanim` format of HOUSE-00166
 - [ ] HOUSE-00075 — Probe: animate that model through a hand-written clip evaluator and `SkinnedEffect::SetBoneTransforms`; confirm visible deformation
       dep: HOUSE-00074 · sys: animation · plat: LNX · pri: MUST
-- [ ] HOUSE-00076 — Probe: `Model::getSkinsEXTProperty()` on a two-skin glTF; confirm the multi-skin path and record whether we need it
-      dep: HOUSE-00074 · sys: content · plat: LNX · pri: SHOULD
+- [ ] HOUSE-00076 — Probe: a two-skin glTF **split offline into one `.glb` per skin**; confirm each part compiles to a single-skin `Model` that binds to its own sidecar and that the parts reassemble on a shared skeleton. `getSkinsEXTProperty()` is not called and must not be needed.
+      dep: HOUSE-00074 · sys: content · plat: LNX · pri: MUST
+      accept: (1) the split parts render identically to the unsplit source; (2) the attachment-bone record round-trips; (3) the finding is written into `cna-house.md` §21.3 and sizes HOUSE-00224
+      verify: probe `p1-skinsplit`
 - [ ] HOUSE-00077 — Probe: `SkinnedEffect` bone-count limit — confirm 72 accepted, 73 throws
       dep: HOUSE-00075 · sys: rendering · plat: LNX · pri: MUST
 - [ ] HOUSE-00078 — Probe: `DualTextureEffect` — albedo × lightmap on a quad with two UV channels; confirm the second channel reaches the effect
@@ -442,8 +444,10 @@ system update order, the settings file, the logging, and a CI that runs lints an
 - [ ] HOUSE-00121 — Root `CMakeLists.txt`: project, C++23, the CNA/sharp-runtime cache variables of `cna-house.md` §8.1, `add_subdirectory(../cnanext CNA_BUILD)`
       dep: HOUSE-00120 · sys: app · plat: ALL · pri: MUST
       accept: configures and builds against the sibling checkouts with no vendoring
-- [ ] HOUSE-00122 — CMake option `CNAHOUSE_TIER_E` (default ON where `CNA_EASYGL_COMPILED_EFFECTS` is on) and `CNAHOUSE_DEBUG_TOOLS`
+- [ ] HOUSE-00122 — CMake: derive `CNAHOUSE_TIER_E` from the CNA configuration this build has just set — the selected `CNA_GRAPHICS_RENDERER` and that renderer's compiled-effect option (`CNA_EASYGL_COMPILED_EFFECTS`, or its `SDL_GPU`/`VULKAN` sibling) — and add `CNAHOUSE_DEBUG_TOOLS`. This is the **only** place the Tier-E decision is made; no runtime code queries the device.
       dep: HOUSE-00121 · sys: app · plat: ALL · pri: MUST
+      files: CMakeLists.txt, cmake/TierSelection.cmake
+      accept: (1) with the renderer's compiled-effect option off, `CNAHOUSE_TIER_E` is off and the Tier-E sources and `.fx` tree are not compiled; (2) a user can force it off, never on; (3) the resolved value is printed at configure time and baked into the version string
 - [ ] HOUSE-00123 — CMake: the `cnahouse_core` library and the `cna-house` executable, with the `src/` subdirectory structure
       dep: HOUSE-00121 · sys: app · plat: ALL · pri: MUST
 - [ ] HOUSE-00124 — CMake: warnings-as-errors, `-Wall -Wextra -Wpedantic -Werror`, and the sanitizer presets
@@ -533,19 +537,32 @@ system update order, the settings file, the logging, and a CI that runs lints an
       verify: unit StateTrackerTests.* replaying a recorded command list
 - [ ] HOUSE-00159 — Implement `Renderer` with the pass list of `cna-house.md` §7.5 as empty passes
       dep: HOUSE-00158 · sys: rendering · plat: ALL · pri: MUST
-- [ ] HOUSE-00160 — Implement the capability query layer: one place that asks `SupportsCapability` and publishes a `RenderCaps` struct
-      dep: HOUSE-00159 · sys: rendering · plat: ALL · pri: MUST
-      accept: no other file calls `SupportsCapability`
-- [ ] HOUSE-00161 — Implement the Tier S / Tier E selection from `RenderCaps` + settings, with a forced-Tier-S command-line switch
+- [ ] HOUSE-00160 — Implement `render::RenderTier`: the build-time tier fact (`CNAHOUSE_TIER_E`, HOUSE-00122) plus the runtime-resolved active tier, published once and read by everything else. **No device capability query anywhere** — nothing in the type touches `GraphicsDevice` for this purpose.
+      dep: HOUSE-00159, HOUSE-00122 · sys: rendering · plat: ALL · pri: MUST
+      files: src/rendering/RenderTier.cpp|hpp
+      accept: (1) with `CNAHOUSE_TIER_E=OFF` the Tier-E branch is absent from the binary; (2) `check_xna_only.py` proves no file calls `SupportsCapability`; (3) the active tier is logged once and shown in the debug overlay
+      verify: unit RenderTierTests.*; one build of each configuration
+- [ ] HOUSE-00161 — Implement Tier-E activation as a guarded content load: in `LoadContent`, load the Tier-E effect set inside one `try`/`catch (ContentLoadException | NotSupportedException)`; any failure selects Tier S, logs once with the failing asset, and disables the settings toggle. Add `--tier=s` and the settings entry, which force Tier S and can never force Tier E.
       dep: HOUSE-00160 · sys: rendering · plat: ALL · pri: MUST
+      accept: (1) deleting one Tier-E `.xnb` yields a fully playable Tier-S run with one logged line and no exception escaping `LoadContent`; (2) `--tier=s` on a Tier-E build renders the Tier-S path; (3) no code path can turn Tier E on
+      verify: integration TierFallbackTests.MissingEffectFallsBackToTierS; render test `tier-fallback-01`
 - [ ] HOUSE-00162 — Implement `MaterialBinder` skeleton: material id → effect instance + parameters
       dep: HOUSE-00161 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00163 — Implement the shared `RasterizerState` objects (`CullClockwise` default for glTF-derived geometry, `CullCounterClockwise` for mirrored, `CullNone` for foliage/sky)
       dep: HOUSE-00071 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00164 — Add the first render regression test harness: fixed pose, fixed clock, render, compare PNG with tolerance
       dep: HOUSE-00151, HOUSE-00138 · sys: ci · plat: CI · pri: MUST
+- [ ] HOUSE-00166 — Define `docs/anim-format.md`: the project-owned `.chanim` binary sidecar — magic, version, joint list by name in skin-joint order, parent indices, bind and inverse-bind poses, clips as per-bone TRS keyframe tracks, stride length and foot-plant markers
+      dep: HOUSE-00074, HOUSE-00028 · sys: animation · plat: ALL · pri: MUST
+      files: docs/anim-format.md
+      accept: (1) fully specified with byte offsets and a worked example; (2) a version field and a rejection rule for unknown versions; (3) nothing in it could only have come from a CNA type
+- [ ] HOUSE-00167 — Implement `anim::Skeleton`, `anim::Clip`, `anim::ClipLibrary`, the `.chanim` reader over `TitleContainer::OpenStream` + `System::IO::BinaryReader`, `ClipLibrary::BindTo(const Model&)`, and an `AnimationCache` alongside the other content caches
+      dep: HOUSE-00166, HOUSE-00143 · sys: animation · plat: ALL · pri: MUST
+      files: src/animation/Skeleton.cpp|hpp, src/animation/ClipLibrary.cpp|hpp, src/animation/ChanimReader.cpp|hpp
+      accept: (1) a hand-written fixture round-trips; (2) `BindTo` fills `modelBoneIndex` for a matching model; (3) a joint absent from `Model::Bones` is a **fatal** load error naming the joint, never a silent deformation; (4) a truncated or wrong-version file is rejected with a precise message; (5) no CNA symbol appears in any of these files
+      verify: unit ChanimReaderTests.*, ClipLibraryTests.BindMismatchIsFatal
 - [ ] HOUSE-00165 — Phase-2 review and commit; update the performance log with the empty-scene frame time
-      dep: HOUSE-00121…HOUSE-00164 · sys: — · plat: ALL · pri: MUST
+      dep: HOUSE-00121…HOUSE-00167 · sys: — · plat: ALL · pri: MUST
 
 ---
 
@@ -647,8 +664,18 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       dep: HOUSE-00193 · sys: content · plat: TOOL · pri: SHOULD
 - [ ] HOUSE-00221 — `tools/assets/dull_variants.py`: produce the low-passed "dull" variants for the 22 muffle-critical sounds
       dep: HOUSE-00193 · sys: content · plat: TOOL · pri: MUST
+- [ ] HOUSE-00223 — `tools/assets/anim_extract.py`: read a source `.glb` and write its `.chanim` sidecar — skeleton in skin-joint order, bind and inverse-bind poses, every clip as per-bone TRS keyframe tracks
+      dep: HOUSE-00166, HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
+      files: tools/assets/anim_extract.py
+      accept: (1) deterministic output, hash recorded in the manifest; (2) keyframes decimated only within a stated tolerance; (3) stride length (`measure_stride.py`) and foot-plant markers written into the same file
+- [ ] HOUSE-00224 — `tools/assets/skin_split.py`: split a multi-skin source `.glb` into one file per skin, record each part's attachment bone in the manifest, and extend `gltf_validate.py` to **reject** any `.glb` entering the build that declares more than one skin
+      dep: HOUSE-00076, HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
+      accept: (1) the split parts render identically to the source; (2) a two-skin file fails validation with a message naming both skins and pointing at the splitter; (3) the rule is documented in `docs/content-authoring.md`
+- [ ] HOUSE-00225 — `tools/ci/check_anim_assets.py`: for every character, assert the `.chanim` joint list matches the compiled `.cnb` `Model::Bones` name-for-name and in order, and that no source `.glb` declares more than one skin
+      dep: HOUSE-00223, HOUSE-00224 · sys: ci · plat: CI · pri: MUST
+      accept: a deliberately renamed joint and a deliberately reintroduced second skin both fail the content build
 - [ ] HOUSE-00222 — Phase-3 review and commit; run `budget_report.py` for the first time
-      dep: HOUSE-00181…HOUSE-00221 · sys: — · plat: ALL · pri: MUST
+      dep: HOUSE-00181…HOUSE-00225 · sys: — · plat: ALL · pri: MUST
 
 ---
 
@@ -2402,8 +2429,8 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-02041 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-02043 — Author or retarget the 8 dog clips (idle, sit, lie, walk, trot, trot_stairs, bark, eat)
       dep: HOUSE-02042 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-02044 — Build the dog through the pipeline to `.cnb` and verify `SkinningData` and the clip list
-      dep: HOUSE-02043, HOUSE-00074 · sys: content · plat: TOOL · pri: MUST
+- [ ] HOUSE-02044 — Build the dog through the pipeline to `.cnb`, extract its `.chanim` sidecar, and verify the skeleton and clip list bind to the model (`check_anim_assets.py`)
+      dep: HOUSE-02043, HOUSE-00223, HOUSE-00225 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-02045 — Implement `Pet` base: transform, capsule, cell tracking, model, `ClipPlayer`
       dep: HOUSE-02044 · sys: animals · plat: ALL · pri: MUST
       dep-note: `ClipPlayer` arrives in phase 37; a single-clip player suffices until then
@@ -2484,8 +2511,8 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 35 — Third-person avatar
 
-- [ ] HOUSE-02131 — Build the two base bodies through the pipeline and verify their `SkinningData` and bone lists
-      dep: HOUSE-00294, HOUSE-00074 · sys: content · plat: TOOL · pri: MUST
+- [ ] HOUSE-02131 — Build the two base bodies through the pipeline, extract their `.chanim` sidecars, and verify the skeletons and bone lists bind to the models (`check_anim_assets.py`)
+      dep: HOUSE-00294, HOUSE-00223, HOUSE-00225 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-02132 — Implement `PlayerAvatar`: the model set, the shared bone palette, and the multi-mesh draw
       dep: HOUSE-02131 · sys: player · plat: ALL · pri: MUST
 - [ ] HOUSE-02133 — Implement the load-time bone-list compatibility check across all customisation meshes
@@ -2562,8 +2589,8 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 37 — Character animation
 
-- [ ] HOUSE-02211 — Implement TRS decomposition of the loaded clip keyframes at load time
-      dep: HOUSE-00074 · sys: animation · plat: ALL · pri: MUST
+- [ ] HOUSE-02211 — Implement TRS handling of the loaded clip keyframes at load time (the `.chanim` sidecar already stores TRS; this is the validation and the fallback decomposition for any matrix-valued track)
+      dep: HOUSE-00167 · sys: animation · plat: ALL · pri: MUST
       accept: decomposition round-trips to the original matrices within 1e-5
 - [ ] HOUSE-02212 — Implement `ClipPlayer`: single-track evaluation producing local transforms
       dep: HOUSE-02211 · sys: animation · plat: ALL · pri: MUST
@@ -2576,8 +2603,8 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-02214 · sys: animation · plat: ALL · pri: MUST
 - [ ] HOUSE-02216 — Implement clip rate scaling (`SetRate`) and looping/one-shot handling with end events
       dep: HOUSE-02212 · sys: animation · plat: ALL · pri: MUST
-- [ ] HOUSE-02217 — Implement `AnimationSet`: the named clip table per actor, loaded from the model
-      dep: HOUSE-02212 · sys: animation · plat: ALL · pri: MUST
+- [ ] HOUSE-02217 — Implement `AnimationSet`: the named clip table per actor, built from the actor's `anim::ClipLibrary` (never from `Model::Tag`)
+      dep: HOUSE-02212, HOUSE-00167 · sys: animation · plat: ALL · pri: MUST
 - [ ] HOUSE-02218 — Wire `ClipPlayer` into `SkinnedEffect::SetBoneTransforms` for the avatar and both pets
       dep: HOUSE-02213, HOUSE-00895 · sys: animation · plat: ALL · pri: MUST
 - [ ] HOUSE-02219 — Author or retarget the 18 player clips (both sexes where the gait differs)
@@ -3068,7 +3095,7 @@ their features; this phase closes the gaps and makes the suite a first-class art
       dep: HOUSE-02782 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-02786 — Verify the "zero TODO/TBD/FIXME in shipping paths" rule
       dep: HOUSE-02782 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-02787 — Verify `docs/xna-deviations.md` is complete and the lint enforces it
+- [ ] HOUSE-02787 — Verify `docs/xna-deviations.md` is complete, that it still grants no permission to call a CNA symbol, and that the lint enforces the §70.1 rule with no allowlist
       dep: HOUSE-02782, HOUSE-00020 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-02788 — Verify every asset is manifested and licensed, and regenerate `THIRD-PARTY-ASSETS.md`
       dep: HOUSE-00299 · sys: ci · plat: CI · pri: MUST
@@ -3270,7 +3297,7 @@ their features; this phase closes the gaps and makes the suite a first-class art
       dep: HOUSE-03071 · sys: — · plat: ALL · pri: MUST
 - [ ] HOUSE-03073 — Final content audit: every asset used, no orphans, every licence recorded, `THIRD-PARTY-ASSETS.md` regenerated
       dep: HOUSE-03072 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-03074 — Final XNA-only audit: the lint, the symbol check, and a manual review of `docs/xna-deviations.md`
+- [ ] HOUSE-03074 — Final XNA-only audit: the lint, the `nm -C` symbol check, `check_anim_assets.py`, and a manual review confirming that no runtime source calls a CNA-specific graphics or model API — no `SupportsCapability`, no `*EXT*` call, no `Model::Tag` read
       dep: HOUSE-03073 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-03075 — Final documentation pass: `cna-house.md`, `README.md`, `docs/*` all reflect the shipped software
       dep: HOUSE-03074 · sys: — · plat: ALL · pri: MUST
@@ -3312,11 +3339,11 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 292 numbered tasks across 53 phases.**
+**1 297 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
-| Foundations, capability proof, build, pipeline, assets | 0–4 | 231 |
+| Foundations, capability proof, build, pipeline, assets | 0–4 | 236 |
 | World data, blockout, collision, camera, visibility | 5–9 | 200 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 130 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
@@ -3324,7 +3351,7 @@ Recorded so nobody has to re-derive the decision.
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 161 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 292** |
+| **Total** | **0–52** | **1 297** |
 
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never

@@ -130,7 +130,9 @@ The four decisions that shape everything else:
    baseline the game must be fully playable and visually coherent in, on every renderer. *Tier E*
    adds compiled XNA `Effect`s (real `.fx` compiled by `fxc` through the CNA content pipeline) for
    shadow mapping, single-pass room lighting, sky, wet/snow surfaces and glare. Tier E is
-   additive and is switched on by `GraphicsCapability::CompiledEffects`.
+   additive and is a **build configuration**, not a runtime question: it is compiled only when the
+   CNA build this binary links against enables compiled effects, and it is activated only if its
+   compiled effect set actually loads. Nothing at runtime asks CNA what it can do.
 4. **Offline conversion, XNA-shaped runtime.** Source assets are glTF 2.0 / GLB, PNG, WAV, TTF and
    `.fx`. `cna-content` (CNA's own content pipeline) compiles them to `.cnb` / `.xnb`. The runtime
    loads them exclusively through `ContentManager::Load<T>()`. No runtime glTF, no CNAEXT engine
@@ -217,7 +219,10 @@ Runtime code in `cna-house` may call:
 * `System::*` from `sharp-runtime` (the project's .NET runtime reimplementation), because XNA
   itself is written against .NET and `Stream`, `TimeSpan`, `Exception`, JSON and file I/O are
   .NET, not graphics;
-* the C++ standard library.
+* the C++ standard library;
+* **its own code**, in the `cnahouse::` namespace, for everything XNA 4.0 does not provide —
+  including the animation skeleton and clip types that Microsoft's own Skinned Model Sample kept
+  on the game side rather than in the framework (§47.0).
 
 Runtime code in `cna-house` may **not** call:
 
@@ -230,7 +235,16 @@ Runtime code in `cna-house` may **not** call:
   XNA's `Effect` with compiled Effect-Framework bytecode instead (§7.4);
 * OpenGL, OpenGL ES, Vulkan, WebGPU, Direct3D, Metal, SDL rendering, or any renderer handle;
 * `AvatarRenderer`, `SkinnedModelEXT`, `SkinnedPbrEffect`, `PbrEffect` and the rest of the
-  Avatar/PBR extension surface.
+  Avatar/PBR extension surface;
+* any `CNAEXT`-marked convenience call on an otherwise-XNA graphics or model type — in particular
+  `Model::getSkinsEXTProperty()` and `Model::setOwnedResources()`. `cna-house` never constructs a
+  `Model` itself and never asks CNA for a multi-skin view of one (§21.3, §47.0);
+* `GraphicsDevice::SupportsCapability` and every other CNA-specific runtime capability query. XNA
+  4.0 has no such call, so neither do we; tier selection is a build configuration (§7.3);
+* CNA's `Graphics::SkinningData`, `Graphics::AnimationClip`, `Graphics::Keyframe` and
+  `Graphics::AnimationPlayer`. These reproduce **sample-side** classes from Microsoft's XNA Skinned
+  Model Sample; they were never XNA Framework API. `cna-house` owns its equivalents (§47.0),
+  exactly as an original XNA title built on that sample would have done.
 
 A CMake-time and a source-lint gate enforce this (§70.1, tasks `HOUSE-00019`–`HOUSE-00022` and `HOUSE-00136`).
 
@@ -251,26 +265,35 @@ The rule constrains the **running program**. It does not constrain the build. `c
 None of them exist at runtime. The runtime sees only `.cnb`/`.xnb` files and
 `ContentManager::Load<T>()`.
 
-### 4.3 The XNA deviation register
+### 4.3 Classification, and why there is no deviation allowance
 
-Four categories of things exist that are *not literally* XNA 4.0. Each is classified, and the
-register is a checked-in file (`docs/xna-deviations.md`) with a CI check that no unlisted
-`CNAEXT`-marked symbol appears in `cna-house` sources.
+Everything `cna-house` compiles falls into exactly three classes. There is deliberately **no
+middle tier**: nothing in the runtime is allowed to be "CNA-specific, but justified".
 
 | Tier | Definition | Policy |
 |---|---|---|
-| **A** | Pure XNA 4.0 API | Default. No justification needed. |
-| **B1** | `CNAEXT`-marked symbols inside `Microsoft::Xna::Framework::*` that reproduce **official Microsoft XNA sample code** — `SkinningData`, `Keyframe`, `AnimationClip`, `AnimationPlayer` (`modules/graphics/include/Microsoft/Xna/Framework/Graphics/AnimationPlayer.hpp` says so in its own doc comment: *"Mirrors the well-known 'SkinningData' class … most ported XNA samples needing skeletal animation include a copy of this exact class"*). Every real XNA game that did skinning shipped a copy of these classes. | **Allowed, registered.** `cna-house` uses `SkinningData` as the shape of the data on `Model::Tag` — exactly the convention the XNA Skinned Model Sample established — and implements its own blending clip player on top of it rather than using `AnimationPlayer` (§47.3). |
-| **B2** | `CNAEXT`-marked symbols that are unavoidable C++ ergonomics with no XNA equivalent, e.g. `Model::setOwnedResources`, `Model::getSkinsEXTProperty` | **Allowed only where there is no Tier-A route**, one register row each, with the XNA-side reason. Currently expected: 0–3 rows. |
-| **C** | `CNA::Graphics` engine layer, renderer internals, native graphics APIs | **Forbidden.** No exceptions. |
+| **A** | Pure XNA 4.0 API as implemented by CNA, plus `System::*` from `sharp-runtime` and the C++ standard library | Default. No justification needed. |
+| **P** | **Project-owned** code in the `cnahouse::` namespace implementing something XNA 4.0 does not provide, written over Tier-A types and over data produced by our own offline tooling | Allowed and expected — this is *game code*, not a deviation. Every real XNA title had a great deal of it. Each subsystem is listed in `docs/xna-deviations.md` with what XNA lacks. |
+| **C** | `CNA::` in any form — the CNAEXT engine layer, renderer contracts, native graphics APIs — **and** every `CNAEXT`-marked convenience call on an otherwise-XNA graphics or model type, including `Model::getSkinsEXTProperty()`, `Model::setOwnedResources()` and `GraphicsDevice::SupportsCapability` | **Forbidden. No exceptions, no register rows, no allowlist.** |
 
-The register's first rows are fixed now:
+`docs/xna-deviations.md` therefore contains **zero permissive rows**. It is a record of the
+Tier-P subsystems and, for each, what XNA 4.0 lacks and what we wrote instead:
 
-| ID | Symbol | Tier | Why there is no Tier-A route |
+| ID | Project-owned subsystem | What XNA 4.0 does not provide | Where |
 |---|---|---|---|
-| DEV-001 | `Graphics::SkinningData` (on `Model::Tag`) | B1 | XNA's own `Model` has no skeleton container; Microsoft's sample put `SkinningData` on `Model.Tag` and CNA's glTF→CNB pipeline writes exactly that (`Model.hpp:159-171`, `AnimationPlayer.hpp:39-48`) |
-| DEV-002 | `Graphics::AnimationClip` / `Keyframe` | B1 | The keyframe container the same sample defines; the pipeline emits it |
-| DEV-003 | `Model::getSkinsEXTProperty()` | B2 | A glTF file may carry several skins; XNA's single `Tag` slot cannot express that. Read-only use, one call site. |
+| OWN-01 | `cnahouse::anim::Skeleton` / `Clip` / `Keyframe` / `ClipLibrary` | XNA's `Model` has no skeleton or clip container. Microsoft's Skinned Model Sample solved this **in the sample**, on the game side; CNA ships a convenience copy of those sample classes and we deliberately do not use it. | §47.0 |
+| OWN-02 | `cnahouse::anim::ClipPlayer` | No blending, layering, masking or rate control anywhere in XNA (BL-10) | §47.3 |
+| OWN-03 | `cnahouse::visibility` portal traversal with frustum reduction | XNA has `BoundingFrustum` and nothing above it | §25 |
+| OWN-04 | `cnahouse::physics` kinematic capsule collision | XNA 4.0 has no collision or physics | §49 |
+| OWN-05 | `cnahouse::audio` portal-path gain, occlusion and muffling | `Apply3D` is pan + attenuation only (BL-11) | §64 |
+| OWN-06 | `cnahouse::render::RenderTier` | Tier selection is a build configuration plus a guarded content load; XNA has no capability query and CNA's is forbidden | §7.3 |
+| OWN-07 | `cnahouse::content` `.chanim` sidecar format and reader | XNA's answer was a custom content processor writing a custom type into `Model.Tag`; we cannot add a processor to CNA's pipeline without changing CNA, so the same custom data travels beside the model | §47.0 |
+
+The mechanical consequence is the point of the whole section: `tools/ci/check_xna_only.py` has
+**no symbol allowlist to consult**. Any `CNA::` reference, any `CNAEXT`-marked call, any `*EXT*`
+identifier, any `Model::Tag` read in a runtime source fails the build outright (§70.1). A future
+contributor cannot argue a symbol into the runtime; they can only write the missing behaviour in
+`cnahouse::`, which is what an XNA developer would have had to do anyway.
 
 ### 4.4 What happens when XNA cannot do something
 
@@ -278,9 +301,10 @@ The procedure, applied to every feature in this document:
 
 1. Prove the limitation from CNA source, CNA documentation or a measured probe.
 2. Record it in the blocker table (§6) with evidence.
-3. Design a Tier-A workaround, or a Tier-E (compiled `Effect`) workaround, or a reduced but
-   coherent behaviour.
-4. Never reach for `CNA::Graphics`.
+3. Design a Tier-A workaround, a Tier-P subsystem of our own, a Tier-E (compiled `Effect`)
+   workaround, or a reduced but coherent behaviour.
+4. Never reach for a CNA symbol — not the engine layer, not a `CNAEXT` convenience call, not a
+   capability query. If XNA cannot do it, we write it (Tier P) or we do without it.
 
 Worked examples in this document: no stencil buffer → no stencil portals or stencil mirrors, use
 render-to-texture and frustum-clipped portals (§25.4, BL-02); no MRT on EasyGL → forward rendering
@@ -328,7 +352,7 @@ orthographic projection to the view frustum every frame
 | Compiled `Effect` proven end-to-end in a real game scene | **Yes** — SAMPLE-038 ShadowMapping: two techniques switched by name per draw, `SurfaceFormat.Single` 2048×2048 render target with `DepthFormat.Depth24`, that target rebound as an effect texture parameter, on native OPENGLES3 **and** in real Chrome WEBGL2 | `cna-samples/plan.md:785` |
 | `Model` / `ModelMesh` / `ModelMeshPart` / `ModelBone`, `CopyAbsoluteBoneTransformsTo` | Fully audited against FNA | `docs/model-content-pipeline-support.md` §"Model's runtime API" |
 | `Model` from compiled content with real bone hierarchy | Yes, via `.xnb` `ModelReader` and via `.cnb` | `docs/xnb-content-pipeline-support.md` `ModelReader` row |
-| Skinned/animated `Model` from glTF, with clips embedded and `SkinningData` on `Model::Tag` | Yes, via `cna-content` glTF → CNB | `docs/content-pipeline.md:456-458`; `CnbModelData.hpp` `animations`, `Model.hpp:159-171` |
+| Skinned/animated `Model` from glTF, with clips embedded and `SkinningData` on `Model::Tag` | Yes, via `cna-content` glTF → CNB — `cna-house` uses the `Model` and ignores the `Tag` (§47.0) | `docs/content-pipeline.md:456-458`; `CnbModelData.hpp` `animations`, `Model.hpp:159-171` |
 | `VertexBuffer`, `IndexBuffer`, `DynamicVertexBuffer`, 16- and 32-bit indices | Available; EasyGL has a real 32-bit index factory | feature matrix "All-renderer 32-bit index audit" |
 | `RenderTarget2D`, `RenderTargetCube`, mip chains, MSAA | Available on EasyGL | feature matrix "RenderTarget / MSAA / mip / depth" |
 | `BlendState`, `DepthStencilState` (compare func), `RasterizerState`, per-slot `SamplerState` (16) | Available on EasyGL | feature matrix "GraphicsDevice state objects" |
@@ -375,7 +399,7 @@ relative-mouse mode (`Mouse.hpp:67,74`) — **not used**, Tier C-adjacent and un
 
 | Source | Importer | Processed | Writer | Runtime type |
 |---|---|---|---|---|
-| `.gltf`, `.glb` | `CNA.GltfImporter/2` | `ImportedModelDocument` | `CNA.ModelContentWriter/3` | `Model` (+ embedded `AnimationClip`s, `SkinningData` on `Tag`) |
+| `.gltf`, `.glb` | `CNA.GltfImporter/2` | `ImportedModelDocument` | `CNA.ModelContentWriter/3` | `Model` (+ embedded `AnimationClip`s and `SkinningData` on `Tag`, both unused by `cna-house` — §47.0) |
 | `.png`, `.jpg`, `.dds` | image front end | `CnbTexture2DData` | texture writer | `Texture2D` |
 | `.wav` | wav front end | `CnbSoundEffectData` | audio writer | `SoundEffect` |
 | `.spritefont` (+ TTF, FreeType) | `SpriteFontContentPipeline` | — | — | `SpriteFont` |
@@ -426,7 +450,7 @@ eventually be modified — `cna-house` never modifies CNA.
 
 | ID | Subsystem | Exact limitation | Source evidence | Sev | Workaround in `cna-house` | CNA change needed? | Can we proceed? |
 |---|---|---|---|---|---|---|---|
-| **BL-01** | Content / animation | The **XNB** writer emits `null tags only` for `Model`, so an XNB-compiled model cannot carry `SkinningData` on `Model::Tag` | `docs/content-pipeline.md:1068` | L | Compile all models to **`.cnb`**, whose schema-1 Model embeds every animation clip and sets `Model::Tag`/`getSkinsEXTProperty` | No | Yes |
+| **BL-01** | Content / animation | The **XNB** writer emits `null tags only` for `Model`, so an XNB-compiled model cannot carry `SkinningData` on `Model::Tag` | `docs/content-pipeline.md:1068` | L | Irrelevant to `cna-house` either way: the runtime never reads `Model::Tag`. Models are compiled to **`.cnb`** for the bone hierarchy, bounds and materials; skeleton and clip data come from a project-owned `.chanim` sidecar (§47.0) | No | Yes |
 | **BL-02** | Graphics / stencil | `GraphicsDevice::Clear` **ignores `ClearOptions::Stencil`** on EasyGL, Vulkan and Bgfx (Task 871, open) and `GraphicsDevice::ReferenceStencil` has **no renderer connection** on EasyGL (Task 872, open); EasyGL render targets always allocate `DepthComponent24` with **no stencil** (Task 877) | feature matrix "GraphicsDevice state objects"; `docs/rendertarget-support.md:193` | M | **No stencil-based technique anywhere.** Portal visibility is frustum-clipping, not stencil portals. Mirrors, if used, are render-to-texture. No stencil shadow volumes. | Yes, eventually | Yes |
 | **BL-03** | Graphics / MRT | EasyGL `EasyGL_MRT_TwoAttachments`: attachment 1 stays black (Task 145) | `docs/rendertarget-support.md:198` | M | **Forward rendering only.** No deferred shading, no G-buffer, no single-pass depth+normal prepass | Yes, eventually | Yes |
 | **BL-04** | Graphics / effects | CNA embeds no HLSL compiler. `.fx` needs an external `fxc`; CNA's own doc says the route is *"not verified against a genuine Microsoft `fxc`"* | `docs/fx-compiled-effects.md` §1; `docs/content-pipeline.md:444` | M | Tier E uses `--fx-compiler <DXSDK June 2010 fxc.exe> --fx-compiler-launcher wine`. The compiled `.xnb` **is committed** next to the `.fx` so contributors without Wine can still build. Tier S must be complete without any custom effect. Evidence the loading path works: SAMPLE-038. | No | Yes |
@@ -435,12 +459,12 @@ eventually be modified — `cna-house` never modifies CNA.
 | **BL-07** | Graphics / queries | On the ES 3.x profile the driver has no `GL_SAMPLES_PASSED`; `OcclusionQuery::PixelCount` degrades to a boolean 0/1. Measured: a query rectangle covering 9 788 pixels answered **1** | `docs/occlusionquery-support.md` §"The count is a count only where…" | L | Sun/moon glare uses an **N×N grid of independent point queries** (default 3×3), giving 10 quantised coverage levels on any driver; on a driver with a real count the same code refines to per-query pixel counts | No | Yes |
 | **BL-08** | Graphics / textures | `Texture2D` mip-level `SetData` (level > 0) is a silent no-op on Vulkan and Bgfx; correct on EasyGL | feature matrix "Texture2D mip-level SetData" | L | We ship pre-generated mip chains in content and only target EasyGL. Recorded so a renderer change is a conscious decision. | Yes, eventually | Yes |
 | **BL-09** | Graphics / formats | The feature matrix marks non-`Color` `SurfaceFormat` for real GPU texture data as **BLOCKED (Task 732)**, yet SAMPLE-038 successfully used a `SurfaceFormat.Single` 2048×2048 **render target** | feature matrix "Non-`Color` SurfaceFormat" vs `cna-samples/plan.md:785` | M | Treat the matrix row as **stale for render targets** and verify explicitly before Tier E shadow mapping: `HOUSE-00083` builds a throwaway probe (outside this repo) that creates a `Single` and an `HalfSingle` `RenderTarget2D`, renders depth into it and reads it back. If `Single` fails, the shadow map packs depth into RGBA8 (a standard SM 3.0 technique) instead. | Row needs a refresh | Yes |
-| **BL-10** | Animation | `AnimationPlayer` plays exactly one clip; `Update()` overwrites every bone. No blending, no layering, no additive tracks | `AnimationPlayer.hpp:107-169` | L | `cna-house` implements `ClipPlayer` — the same evaluation with 2-clip cross-fade and an upper-body mask — over the same `SkinningData`/`AnimationClip` data. Pure XNA `Matrix`/`Quaternion` math. | No | Yes |
+| **BL-10** | Animation | `AnimationPlayer` plays exactly one clip; `Update()` overwrites every bone. No blending, no layering, no additive tracks | `AnimationPlayer.hpp:107-169` | L | `cna-house` implements `cnahouse::anim::ClipPlayer` — the same evaluation with 2-clip cross-fade, an upper-body mask and rate control — over its **own** `Skeleton`/`Clip` types (§47.0), not CNA's sample copies. Pure XNA `Matrix`/`Quaternion` math. | No | Yes |
 | **BL-11** | Audio / 3D | `Apply3D` is a simplified stereo pan + attenuation + Doppler; no cones, curves, filters, reverb or HRTF. Doppler carries a documented up-to-4× pitch risk when velocity units are wrong | `cna_audio_deep_audit_2026-07-17.md:131,161` | M | `SoundEffect::DopplerScale = 0` and zero listener/emitter velocities by default (settings-exposed). Room-aware attenuation, occlusion and "sound through the doorway" repositioning are implemented **in `cna-house`** over the portal graph (§64); muffling is a two-instance bright/dull cross-fade on the ~20 sounds that need it | Would be nice | Yes |
 | **BL-12** | Content | The legacy `.model.json` `ModelTypeReader` synthesises exactly one bone and never sets `ParentBone`, `BoundingSphere` or `Tag` | `docs/model-content-pipeline-support.md` summary table | — | Not used. `cna-house` uses `.cnb`. Recorded so nobody reaches for it. | No | Yes |
 | **BL-13** | Android | CNA selects the **2D-only `SDL_RENDERER`** on Android (`CMAKE_SYSTEM_NAME` is `Android`, not `Linux`), and the Android cross-compile currently fails in two `sharp-runtime` NDK-portability bugs before reaching any graphics code (upstream Task 920). No CNA graphics has ever run on Android. | `docs/android-graphics-limitations.md` | **H** *(Android phase)* | Android phase 49 begins with an upstream gate: `OPENGLES3` must be selectable and buildable for `arm64-v8a`. `cna-house` does not fix CNA. | **Yes — required** | Not for Android |
 | **BL-14** | Web | `WEBGL2` has no implicit WebGL 1 fallback; the Web build needs Asyncify + JS exceptions; SharedArrayBuffer needs COOP/COEP headers for the threaded variant | `docs/web-emscripten-graphics-limitations.md` | M | Single-threaded WebGL 2 build in phase 48; threads only if measurement demands them | No | Yes (later) |
-| **BL-15** | Graphics / effects | `SpriteBatch::Begin(effect)` on a renderer without `CompiledEffects` throws | `docs/fx-compiled-effects.md` §3 | L | Every Tier-E path is guarded by `device.SupportsCapability(CompiledEffects)` and has a Tier-S fallback | No | Yes |
+| **BL-15** | Graphics / effects | `SpriteBatch::Begin(effect)` on a renderer without `CompiledEffects` throws | `docs/fx-compiled-effects.md` §3 | L | Tier E is a build configuration, never a runtime query (§7.3): `SpriteBatch::Begin(effect)` is compiled only into a Tier-E build and is reached only after that build's effect set has loaded successfully. Every Tier-E path has a named Tier-S fallback | No | Yes |
 
 **Manufactured blockers are not welcome.** Things that are merely *work* — writing a portal
 system, baking lightmaps, authoring 640 interactables — are not blockers and do not appear here.
@@ -457,8 +481,14 @@ targeting an OpenGL ES 3.0 context. Rationale:
 * It is the **exact configuration 80 ported XNA samples are verified on**
   (`cna-samples/CMakeLists.txt:23`), including the shadow-mapping and skinning samples this
   project depends on.
-* GLES 3.0 ≡ WebGL 2, so the Web port is the *same renderer family* rather than a second
-  implementation. Anything that renders on `OPENGLES3` renders on `WEBGL2` with the same shaders.
+* GLES 3.0 and WebGL 2 are closely related API families, and CNA's `WEBGL2` is the same EasyGL
+  implementation over the second of them. That makes Linux `OPENGLES3` an **excellent portability
+  baseline** for the later Web target: the same renderer code path, the same shaders, the same
+  feature floor. It is a baseline, not a guarantee — running successfully under Linux `OPENGLES3`
+  does **not** by itself establish that the same scene will run under WebGL 2 / Emscripten, which
+  adds constraints the desktop build never exercises (Asyncify, JS exceptions, no threads, real
+  context loss, browser texture-format and canvas rules — §9.1, BL-14). Those are settled by the
+  dedicated Web phases (47–48) and their own validation, never by extrapolation from Linux.
 * It is also the correct Android target once BL-13 is lifted upstream.
 * EasyGL is the only renderer where `OcclusionQuery` is both wired **and** pixel-verified in both
   directions (`docs/occlusionquery-support.md` support matrix).
@@ -495,8 +525,27 @@ and material swaps.
 ### 7.3 Tier E — compiled XNA `Effect`s
 
 Tier E adds real `.fx` shaders, compiled to Direct3D 9 Effect-Framework bytecode by `fxc` and
-loaded through `ContentManager::Load<std::shared_ptr<Effect>>()`. It is enabled when
-`device.SupportsCapability(CNA::GraphicsCapability::CompiledEffects)` is true. The shader set:
+loaded through `ContentManager::Load<std::shared_ptr<Effect>>()`.
+
+**How Tier E is selected — without asking CNA anything at runtime.** Whether compiled effects
+exist at all is a property of the CNA build this binary links against, and `cna-house` chooses
+that build itself (§8.1). The decision is therefore made where the knowledge already lives:
+
+1. **Build time — the primary mechanism.** `cna-house`'s own CMake reads the CNA configuration it
+   has just set: the selected `CNA_GRAPHICS_RENDERER` and that renderer's compiled-effect option
+   (`CNA_EASYGL_COMPILED_EFFECTS` for `OPENGLES3`, its `SDL_GPU`/`VULKAN` siblings otherwise). From
+   that it sets `CNAHOUSE_TIER_E`. When it is off, the Tier-E sources and the `.fx` content tree
+   are **not compiled at all** and the binary contains only Tier S.
+2. **Load time — the safety net.** When Tier E is compiled in, `LoadContent` loads the effect set
+   inside one `try`/`catch`. A `ContentLoadException` or `NotSupportedException` — a missing
+   `.xnb`, a driver that will not accept the bytecode — selects Tier S, logs once, and the game
+   continues. That is ordinary XNA content loading, not a capability query, and it also covers the
+   content failure a capability query would have missed.
+3. **User choice.** `--tier=s` and the graphics settings force Tier S at any time. There is no
+   switch that forces Tier E into a build that does not have it.
+
+Tier S is never a degraded mode arrived at by accident: it is the project's default configuration
+and the one every feature in this document is specified against. The shader set:
 
 | Effect | Techniques | Replaces (Tier S) |
 |---|---|---|
@@ -524,7 +573,8 @@ ways.** The visual difference is allowed to be large; the *scene content* must b
 layer (`docs/shader-effect-vs-fx-bytecode.md`). It is Tier C: forbidden. XNA 4.0's own answer to
 "I want a custom shader" is `Effect`, and CNA implements it for exactly that
 (`Effect(GraphicsDevice&, byte[])` + `EffectReader`). Using `Effect` also means one authored
-`.fx` runs on every renderer that reports `CompiledEffects`, instead of one source per backend.
+`.fx` runs on every renderer whose CNA build enables compiled effects, instead of one source per
+backend.
 
 ### 7.5 Frame structure
 
@@ -626,7 +676,7 @@ Everything below is *planned now, built later* (phases 47–48).
 
 | Concern | Finding | Consequence for the architecture today |
 |---|---|---|
-| Renderer | `WEBGL2` is EasyGL over WebGL 2 ≡ GLES 3.0; **no implicit WebGL 1 fallback** | Already the desktop renderer family. Nothing to change. |
+| Renderer | `WEBGL2` is EasyGL over WebGL 2, the same API family as GLES 3.0; **no implicit WebGL 1 fallback** | Already the desktop renderer family, so the port starts from a working baseline rather than a rewrite — but it still has to be proved in a browser (phases 47–48). Desktop success is not evidence of browser success. |
 | Main loop | `Game::Run()` blocks and returns, via Asyncify + `EM_ASYNC_JS` `requestAnimationFrame` | `Game` must own the loop; **never** write our own `while(true)` or `emscripten_set_main_loop` |
 | Exceptions | JS-lowered exceptions, `-fexceptions -sDISABLE_EXCEPTION_CATCHING=0`, cannot combine native Wasm EH with Asyncify | Use exceptions sparingly and only for genuinely exceptional paths; never in the frame loop |
 | Threads | Opt-in `-pthread`; changes the module ABI; needs `crossOriginIsolated` | Stay single-threaded (§8.4) |
@@ -1575,7 +1625,8 @@ cna-house/
 ├── LICENSE
 ├── NOTICE.md
 ├── docs/
-│   ├── xna-deviations.md            ← the Tier-B register (§4.3)
+│   ├── xna-deviations.md            ← the Tier-P project-owned register (§4.3)
+│   ├── anim-format.md               ← the project-owned `.chanim` format (§47.0)
 │   ├── content-authoring.md
 │   ├── world-format.md
 │   ├── performance-log.md
@@ -1589,7 +1640,8 @@ cna-house/
 │   ├── content/      ContentRegistry, caches, ResidencySystem, packs
 │   ├── physics/      PhysicsSystem, Capsule, SweepTests, GroundProbe, CollisionBuild
 │   ├── player/       PlayerController, FirstPersonCamera, ThirdPersonCamera, WalkModes, Avatar
-│   ├── animation/    ClipPlayer, BonePalette, FootIk, AnimationSet, StairBlend
+│   ├── animation/    Skeleton, Clip, ClipLibrary, ChanimReader, ClipPlayer, BonePalette,
+│   │                  FootIk, AnimationSet, StairBlend
 │   ├── animals/      Pet, DogBrain, CatBrain, NavGraph, PetAnimation
 │   ├── interaction/  InteractionSystem, Targeting, Prompt, behaviours/{Door,Window,Light,
 │   │                 Container,Faucet,Toilet,Television,GarageDoor,Appliance,Pickup,Seat,Gate}
@@ -1640,11 +1692,16 @@ assets-src/                                        content/
                            --fx-compiler-launcher wine
 
   world/*.json         ──→ validate + copy    ───→ world/*.json         → read directly
+
+  Models/**.glb        ──→ anim_extract.py    ───→ Anim/*.chanim        → cnahouse::anim::ClipLibrary
+   (the skinned ones)                                                     (§47.0, TitleContainer)
 ```
 
 `ContentManager::Load<T>()` tries `.xnb` first, then a literal path, then `.cnb`
 (`docs/xnb-content-pipeline-support.md`), so the two output formats coexist in one `content/` tree
-with no ambiguity: only effects are `.xnb`.
+with no ambiguity: only effects are `.xnb`. `Anim/*.chanim` and `world/*.json` are not
+`ContentManager` assets at all: they are project-owned files opened with `TitleContainer::OpenStream`
+and parsed by our own reader, which is why neither depends on a CNA content type.
 
 CMake wiring:
 
@@ -1909,8 +1966,10 @@ runtime" rule the brief asks for, and it is CNA's own documented pipeline
 * **Skinned models**: mesh placements are grouped by skin; one group = one `Model`; a
   single-group animated glTF keeps every clip embedded in Model schema 1
   (`docs/content-pipeline.md:453-457`).
-* **`SkinningData` on `Model::Tag`** and `getSkinsEXTProperty()` for multi-skin files
-  (`Model.hpp:159-171`) — the XNA Skinned Model Sample convention (DEV-001).
+* **`SkinningData` on `Model::Tag`** for the first skin (`Model.hpp:159-171`). `cna-house` does
+  **not** read it and never calls the multi-skin accessor: skeleton and clip data come from a
+  project-owned `.chanim` sidecar (§47.0), and every runtime `.glb` carries exactly one skin
+  (§21.3).
 * **`AnimationClip`s** with keyframes, embedded in the model (`CnbModelData.hpp` `animations`).
 * **Multi-group files** (a character plus separate static props in one glTF) need
   `generateChildAssets: true` and produce named child Models/Textures/Clips. We avoid needing it
@@ -1926,6 +1985,7 @@ runtime" rule the brief asks for, and it is CNA's own documented pipeline
 | **Emissive** is not a `BasicEffect` texture | Emissive surfaces are split into their own material and drawn unlit with `BasicEffect { LightingEnabled=false; DiffuseColor = emissive; }` |
 | **Vertex colours** | Preserved; `VertexColorEnabled` where the material declares it |
 | **Multiple UV sets** | Channel 0 = albedo, channel 1 = lightmap. `DualTextureEffect` uses exactly two, which is what it is for |
+| **Several skins in one glTF** | Not allowed into the build. `tools/assets/skin_split.py` splits a multi-skin source into one `.glb` per skin — recording each part's attachment bone in the manifest — and `gltf_validate.py` rejects any file that still declares more than one. Every runtime `Model` is therefore single-skin, and CNA's `getSkinsEXTProperty()` is never needed (§47.0) |
 | **Draco compression** | Supported by CNA only with `libdraco-dev` present; we do **not** use it — sources stay uncompressed for reproducibility, and size is handled by the pack system |
 | **Scale drift** | `scale_check.py` asserts every asset's bounds against its category (§70.5) *before* it enters the build |
 
@@ -1956,9 +2016,11 @@ manifest row with `origin.kind = "generated"` recording the generator, its versi
    files sharing the skeleton, so customisation is a matter of which meshes are drawn.
 4. Locomotion clips are retargeted from CMU mocap, cleaned, loop-trimmed and exported.
 5. One `.glb` per (body, clip-set); a second per clothing piece; a third per hair piece.
-6. `cna-content` produces a `Model` per file with `SkinningData` on `Tag`; the game verifies at
-   load that all customisation meshes share an identical bone list (name-for-name) and refuses
-   otherwise — a real content bug caught at load, not a silent deformation.
+6. `cna-content` produces a `Model` per file; `tools/assets/anim_extract.py` produces one
+   `.chanim` sidecar carrying the body's skeleton and clip set (§47.0). The game verifies at load
+   that the sidecar's joint list and every customisation mesh's bone list are identical
+   name-for-name, and refuses otherwise — a real content bug caught at load, not a silent
+   deformation.
 
 The pets follow the same path with their own rigs (dog 38 bones, cat 34).
 
@@ -3446,6 +3508,82 @@ Deterministic, so tests and screenshots are stable.
 
 ## 47. Character animation
 
+### 47.0 Project-owned animation data
+
+`SkinningData`, `AnimationClip` and `Keyframe` come from Microsoft's **XNA Skinned Model Sample**.
+They were *sample* classes — code Microsoft shipped for game developers to copy into their own
+projects — not part of the XNA 4.0 Framework. CNA provides `CNAEXT`-marked copies as a convenience
+for ported samples. `cna-house` does not use them, for the same reason it uses no other
+CNA-specific type: they are not XNA 4.0 API. It owns its equivalents instead, which is precisely
+what an original XNA title built on that sample did.
+
+```cpp
+namespace cnahouse::anim {
+
+struct Keyframe { int bone; float time; Vector3 translation; Quaternion rotation; Vector3 scale; };
+
+struct Clip {
+    std::string           name;
+    float                 duration;        // seconds
+    std::vector<Keyframe> keys;            // sorted by bone, then by time
+    std::vector<int>      boneFirstKey;    // index of each bone's first key, size = boneCount + 1
+    float                 strideLength;    // 0 for non-locomotion clips (§47.4)
+    std::vector<float>    footPlants;      // contact times, per foot (§48)
+};
+
+struct Skeleton {
+    std::vector<std::string> boneNames;        // in glTF skin-joint order — the blend-index order
+    std::vector<int>         parent;           // -1 for the root
+    std::vector<Matrix>      bindPose;         // local, per bone
+    std::vector<Matrix>      inverseBindPose;  // world -> bone
+    std::vector<int>         modelBoneIndex;   // filled at bind time: -> Model::Bones
+};
+
+struct ClipLibrary {
+    Skeleton                             skeleton;
+    std::vector<Clip>                    clips;
+    std::unordered_map<std::string, int> byName;
+    void BindTo(const Model& model);           // validates and fills modelBoneIndex; throws on mismatch
+};
+
+}   // namespace cnahouse::anim
+```
+
+Every member is a `Microsoft::Xna::Framework` math type or a standard-library container. Tier P
+(§4.3, OWN-01).
+
+**Where the data comes from.** Not from `Model::Tag`, which the runtime never reads. Offline,
+`tools/assets/anim_extract.py` reads the same source `.glb` that `cna-content` compiles and writes
+a sidecar `Content/Anim/<actor>.chanim`: a small, versioned binary file in our own format
+(`docs/anim-format.md`, `HOUSE-00166`). At runtime it is opened with `TitleContainer::OpenStream`
+and read with `System::IO::BinaryReader` — both XNA 4.0 / .NET API, neither of them graphics. The
+mesh itself still arrives as a plain `Model` from `ContentManager::Load<Model>`, and the bone
+palette still goes to `SkinnedEffect::SetBoneTransforms`. Nothing about the rendering path changes.
+
+**Why a sidecar rather than the `Tag`.** XNA's own answer to "the framework has no place for my
+skeleton" was a custom content processor writing a custom type into `Model.Tag`. We cannot add a
+processor to CNA's pipeline without modifying CNA, so the same custom data travels *beside* the
+model instead of inside it. The runtime shape is identical; only the transport differs. It also
+removes BL-01 entirely — the XNB writer's null-`Tag` limitation cannot affect data we never put
+there.
+
+**The one thing that must agree.** The vertex blend indices baked into the `.cnb` reference the
+glTF skin's joint order. The sidecar stores that same order *and* the joint names. `BindTo` checks
+every joint name against `Model::Bones` and fills `modelBoneIndex`; a mismatch is a **fatal content
+error** naming the offending joint, never a silent deformation (`HOUSE-00167`). `HOUSE-00074`
+proves the ordering assumption against a real skinned asset in phase 1, before anything depends on
+it, and `tools/ci/check_anim_assets.py` re-checks it for every character on every content build
+(`HOUSE-00225`).
+
+**One skin per runtime model.** Externally sourced characters sometimes carry several glTF skins in
+one file. Rather than ask CNA for a multi-skin view of a `Model`, the rule is offline and absolute:
+a `.glb` entering the build has **exactly one skin**. `tools/assets/skin_split.py` splits a
+multi-skin source into one file per skin, recording each part's attachment bone in the asset
+manifest, and `gltf_validate.py` rejects any remaining multi-skin file (`HOUSE-00224`). A
+multi-part character is then drawn the way the customisation system already draws one (§46):
+several `Model`s sharing a single skeleton and a single bone palette. `getSkinsEXTProperty()` is
+never called, and the CI gate makes calling it impossible (§70.1).
+
 ### 47.1 Clip set
 
 | Clip | Length | Loop | Notes |
@@ -3489,19 +3627,20 @@ mocap, retargeted and cleaned in Blender, exported in the body `.glb`.
 
 ### 47.3 `ClipPlayer` — why we write our own
 
-CNA's `AnimationPlayer` plays exactly one clip and overwrites every bone (BL-10). `cna-house`
-therefore implements `ClipPlayer` over the same `SkinningData` / `AnimationClip` data:
+CNA's `AnimationPlayer` is a copy of the Skinned Model Sample's player: it plays exactly one clip
+and overwrites every bone (BL-10). It is also sample code rather than XNA API, so `cna-house` does
+not use it at all. `ClipPlayer` is written over the project-owned data of §47.0:
 
 ```cpp
-class ClipPlayer {
-    const SkinningData* skinning_;
-    struct Track { const AnimationClip* clip; double time; float weight; bool loop; };
+class ClipPlayer {                              // cnahouse::anim
+    const Skeleton* skeleton_;
+    struct Track { const Clip* clip; double time; float weight; bool loop; };
     Track base_, blend_;            // cross-fade pair
     Track upper_;                   // masked layer
     std::vector<Matrix> local_, world_, skin_;
 public:
-    void Play(const AnimationClip& clip, float blendSeconds, bool loop);
-    void PlayUpper(const AnimationClip& clip, float blendSeconds);
+    void Play(const Clip& clip, float blendSeconds, bool loop);
+    void PlayUpper(const Clip& clip, float blendSeconds);
     void SetRate(float rate);       // stride matching
     void Update(TimeSpan dt);
     const std::vector<Matrix>& GetSkinTransforms() const;   // → SkinnedEffect::SetBoneTransforms
@@ -3513,7 +3652,8 @@ matrices once at load into position/rotation/scale so blending is a `Vector3::Le
 `Quaternion::Slerp`, not a matrix lerp), blends by weight, applies the upper-body mask by bone
 index, composes parent→child into world transforms, and multiplies by the inverse bind pose to
 produce skin transforms. Every operation is `Microsoft::Xna::Framework::Matrix`,
-`Quaternion` and `Vector3` — Tier A, no CNAEXT, ~250 lines.
+`Quaternion` and `Vector3` over `cnahouse::anim` data — Tier A math, Tier P code, no CNA symbol of
+any kind, ~250 lines.
 
 ### 47.4 Stride matching (no foot sliding)
 
@@ -3523,7 +3663,7 @@ rate = horizontalSpeed / (clipStrideLength / clipDuration)
 
 clamped to [0.6, 1.6]; outside that range the state machine switches clip instead of stretching
 one. `clipStrideLength` is measured offline per clip by `tools/assets/measure_stride.py` and
-stored in the animation metadata. This single number is what removes foot sliding, and it costs
+stored in the `.chanim` sidecar's `Clip::strideLength` (§47.0). This single number is what removes foot sliding, and it costs
 nothing at runtime.
 
 ### 47.5 Foot placement (IK-lite)
@@ -4820,7 +4960,10 @@ images.
 
 | Gate | Tool | Fails the build when |
 |---|---|---|
-| XNA-only | `tools/ci/check_xna_only.py` | Any source includes a `CNA/Graphics/*` engine header, references `CNA::Graphics::`, calls a `*EXT*` symbol not in `docs/xna-deviations.md`, or the CMake cache has `CNA_CNAEXT=ON` |
+| XNA-only | `tools/ci/check_xna_only.py` | A runtime source does **any** of: includes a header under `CNA/`; names `CNA::` in any form; contains an identifier matching `*EXT*` (`getSkinsEXTProperty`, `setOwnedResources`, `SkinnedModelEXT`, …); calls `SupportsCapability`; names `ShaderEffect`, `PbrEffect`, `SkinnedPbrEffect` or `AvatarRenderer`; reads `Model::Tag` or `Model::getTagProperty` (§47.0); names a `Graphics::SkinningData`/`AnimationClip`/`Keyframe`/`AnimationPlayer` type from CNA; touches GL/GLES/EGL/Vulkan/WebGPU/D3D/Metal/SDL-rendering symbols. Or the CMake cache has `CNA_CNAEXT=ON`. **There is no allowlist and no deviation register to consult** (§4.3) |
+| Custom shaders are XNA `Effect`s | the same script | A `.fx` is authored outside `assets-src/effects/`, or any GLSL/SPIR-V source appears in the tree |
+| No CNAEXT in the linked binary | `nm -C` in CI (`HOUSE-00136`) | Any `CNA::Graphics::` symbol is present in `cna-house` |
+| Animation assets bind | `tools/ci/check_anim_assets.py` | A `.chanim` sidecar's joint list disagrees with its model's `Model::Bones`, or a source `.glb` declares more than one skin (`HOUSE-00225`) |
 | No booleans for continuous weather | the same script | A member matching `is(Raining|Snowing|Windy|Stormy)` appears |
 | Manifest completeness | `check_manifest.py` | A file under `assets-src/` has no manifest row, or a hash mismatches |
 | Licence completeness | `verify_licences.py` | A manifest row lacks a licence, or references a licence file that does not exist, or is marked `PROVENANCE UNKNOWN` in a packaging build |
@@ -5084,7 +5227,8 @@ Per-asset triangle budgets:
 | Missing content asset | Load a typed fallback (grey box of the right size / mid-grey texture / silence), log once with the asset name, continue. In a development build the fallback is magenta and the frame counter turns red; a packaging build fails instead of shipping. |
 | World data fails validation at load | **Fatal, with a precise message** naming the file, the rule and the offending id. A broken house is not playable and pretending otherwise wastes everyone's time. |
 | Save corrupt | §65.5 |
-| Renderer lacks `CompiledEffects` | Fall back to Tier S silently; log the capability once; the settings screen shows "Stock effects (this renderer does not support compiled effects)" |
+| Built without Tier E (`CNAHOUSE_TIER_E=OFF`) | Tier S is the whole binary; the settings screen shows "Stock effects (this build has no compiled effects)" and the tier toggle is absent |
+| The Tier-E effect set fails to load (missing `.xnb`, or the driver rejects the bytecode) | Caught at `LoadContent`; fall back to Tier S silently, log once with the failing asset name, disable the tier toggle (§7.3) |
 | Renderer lacks `OcclusionQuery` | Sun glare uses a pure depth-buffer heuristic (sample the depth buffer at the sun's position via a 1×1 `RenderTarget2D` readback every 4th frame); the clock overlay drops the coverage condition |
 | `SurfaceFormat::Single` render target unsupported (BL-09) | Shadow map packs depth into RGBA8; a settings note explains the small precision loss |
 | FFmpeg absent / video unsupported (BL-05) | `SequenceTvSource`; no error shown to the player |
@@ -5187,7 +5331,7 @@ and phase 9 must precede 13.
 | R-13 | Scope creep in furnishing (2 400 placements is a lot of authoring) | High | Medium | Kit-based placement, per-room placement tasks with fixed counts, and a "good enough, move on" rule enforced by the phase's exit criteria |
 | R-14 | The weather system becomes a research project | Medium | Medium | The archetype table and the rate-limit table are fixed *now*; tuning is a bounded task, not an open-ended one |
 | R-15 | Save-format churn during development invalidates test saves | High | Low | The migration chain is built in phase 39 before any content depends on it; test fixtures are regenerated by a script |
-| R-16 | `Model::Tag`/`SkinningData` behaviour differs from what the docs say | Low | High | Phase 1 probes it directly with a real skinned glTF before anything depends on it |
+| R-16 | The `.cnb`'s skin-joint order or bone naming differs from the source `.glb`, so a project-owned `.chanim` sidecar cannot be bound to its `Model` | Low | High | `HOUSE-00074` probes it directly with a real skinned glTF in phase 1; `ClipLibrary::BindTo` makes any disagreement a fatal load error (`HOUSE-00167`) and CI re-checks every character (`HOUSE-00225`) |
 | R-17 | The 24-bit → 16-bit audio conversion degrades the NOX material audibly | Low | Low | 16-bit at 44.1 kHz is CD quality; a listening check on 10 files in phase 4 |
 | R-18 | The house is so large that authoring it is the whole project | Medium | High | This is the real risk. Mitigations: procedural shell generation, kit-based furnishing, per-room task granularity, and an explicit "playable but sparsely furnished" milestone (§78) reached long before the furnishing is done |
 
@@ -5314,7 +5458,7 @@ Every requirement in the brief, on Linux, at the quality bar this document sets.
 * [ ] The full test suite green: ~900 unit, ~220 integration, ~120 render, 10 performance
 * [ ] Every asset manifested and licensed; `THIRD-PARTY-ASSETS.md` generated and shown in-game
 * [ ] Zero `TODO`, `TBD` or `FIXME` in shipping code paths
-* [ ] `docs/xna-deviations.md` complete and enforced
+* [ ] `docs/xna-deviations.md` complete and enforced; no runtime source names a CNA symbol
 
 **Exit criteria:** the checklist, plus a 2-hour unattended soak test at 60 FPS with no leak
 (RSS growth < 20 MB/hour), no crash, no audio starvation, and no save corruption across 200
@@ -5325,6 +5469,10 @@ autosave cycles.
 ## 80. Portability readiness criteria
 
 ### 80.1 Web readiness (entering phase 48)
+
+Meeting every criterion below on Linux makes the Web port *likely* to succeed; it does not make it
+certain. The desktop `OPENGLES3` build is a strong baseline (§7.1), and the browser adds
+constraints no desktop run exercises. Phase 47's Emscripten spike is what actually settles it.
 
 | Criterion | How it is proved |
 |---|---|
@@ -5365,7 +5513,7 @@ Every numbered requirement area of the brief, mapped to this document and to `pl
 | Brief § | Requirement | Doc § | Plan phase | Task IDs | MUST/SHOULD/OPT |
 |---|---|---|---|---|---|
 | 1 | Two documents only; approval gate | — | — | — | MUST |
-| 2 | XNA 4.0 only; no CNAEXT graphics | 4, 7 | 0, 1, 2 | HOUSE-00007, 00019–00021, 00063, 00121–00122, 00136, 03074 | MUST |
+| 2 | XNA 4.0 only; no CNAEXT graphics | 4, 7, 47.0 | 0, 1, 2, 3 | HOUSE-00007, 00019–00021, 00063, 00076, 00121–00122, 00136, 00160–00161, 00166–00167, 00223–00225, 03074 | MUST |
 | 3 | Linux first; Web/Android later | 8, 9, 80 | 0, 2, 47–51 | HOUSE-00035, 00121, 02841–03042 | MUST |
 | 4 | Project concept, coherence, no asset flip | 1, 2, 19, 59 | 12, 13, 45 | HOUSE-00891–01034, 02681–02714 | MUST |
 | 5 | World layout, believable bounds | 10, 11 | 5, 10 | HOUSE-00366–00372, 00761–00783 | MUST |
@@ -5385,7 +5533,7 @@ Every numbered requirement area of the brief, mapped to this document and to `pl
 | 19 | First-person camera | 44 | 8 | HOUSE-00621–00634 | MUST |
 | 20 | Two walk speeds, Shift toggles | 43 | 7 | HOUSE-00555–00558 | MUST |
 | 21 | Third-person realistic character | 45, 46 | 35, 36 | HOUSE-02131–02187 | MUST |
-| 22 | Character animation incl. stairs | 47, 48 | 37, 38 | HOUSE-02211–02284 | MUST |
+| 22 | Character animation incl. stairs | 47, 48 | 2, 3, 37, 38 | HOUSE-00166–00167, 00223, 02211–02284 | MUST |
 | 23 | Physics/collision | 49 | 7 | HOUSE-00541–00620 | MUST |
 | 24 | Contextual interaction system | 50 | 14 | HOUSE-01121–01146 | MUST |
 | 25 | Doors | 51 | 15 | HOUSE-01181–01190, 01198, 01200–01202 | MUST |
@@ -5469,8 +5617,8 @@ is a decision, a measurement, or a cited fact.
 | `.fx` route needs `--fx-compiler` + `--fx-compiler-launcher wine` | `docs/content-pipeline.md:389-432` |
 | glTF → CNB Model with embedded clips; `generateChildAssets`; skin grouping | `docs/content-pipeline.md:370-475` |
 | `cna_add_content()` CMake function | `cnanext/cmake/ToolContentPipeline.cmake:48` |
-| `SkinningData`/`AnimationClip`/`AnimationPlayer` mirror Microsoft's XNA Skinned Model Sample | `modules/graphics/include/Microsoft/Xna/Framework/Graphics/AnimationPlayer.hpp:18-48,100-107` |
-| `Model::Tag` carries the first skin's `SkinningData`; `getSkinsEXTProperty` | `modules/graphics/include/Microsoft/Xna/Framework/Graphics/Model.hpp:152-171,277-285` |
+| `SkinningData`/`AnimationClip`/`AnimationPlayer` mirror Microsoft's XNA Skinned Model Sample — i.e. they are *sample* code, not XNA Framework API, which is why `cna-house` owns its own (§47.0) | `modules/graphics/include/Microsoft/Xna/Framework/Graphics/AnimationPlayer.hpp:18-48,100-107` |
+| `Model::Tag` carries the first skin's `SkinningData`; `getSkinsEXTProperty` is a `CNAEXT` multi-skin accessor — neither is used by `cna-house` | `modules/graphics/include/Microsoft/Xna/Framework/Graphics/Model.hpp:152-171,277-285` |
 | glTF and XNA agree on handedness/up/forward; no conversion; winding differs | `docs/gltf-conventions.md:15-25` |
 | EasyGL ignores `ClearOptions::Stencil`; `ReferenceStencil` unconnected; RT depth is always `DepthComponent24`, no stencil | `docs/graphics-renderer-feature-matrix.md` state-object table; `docs/rendertarget-support.md:193` |
 | EasyGL MRT attachment 1 stays black | `docs/rendertarget-support.md:198` |
