@@ -2512,8 +2512,31 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       finding: the stamp at the foot names the **manifest's own sha256** and carries no timestamp,
             for the same reason as `COMPILER.txt`: a file that changes on every run produces a diff
             on every run, and a file that always has a diff is a file nobody reads.
-- [ ] HOUSE-00199 — `make content-verify`: rebuild everything and assert byte-identical output
+- [x] HOUSE-00199 — `make content-verify`: rebuild everything and assert byte-identical output
       dep: HOUSE-00182 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-07) `tools/ci/content_verify.py` plus a CMake target `content-verify` — this
+            project has no Makefile, so "`make content-verify`" is
+            `cmake --build build --target content-verify`. Deliberately **not** part of `all`: it
+            builds every content root twice and is a check someone asks for, not a cost every
+            incremental build pays. Wired into CI on the `linux-release` job only, because the
+            answer cannot depend on the compiler flags of a program that does not participate in it.
+      finding: **each of the two builds goes into a FRESH output directory.** Reusing one would let
+            the pipeline's own incremental skip answer the question instead of the pipeline —
+            "identical because nothing was rebuilt" is not the claim being tested.
+      finding: **it was shown to fail before it was trusted.** `--selftest` flips one byte in the
+            middle of one output and requires the comparison to catch it; it reported four corrupted
+            outputs and exited 0 (the selftest inverts the status). A determinism check that has
+            never failed is a check that reports green forever, and `--selftest` runs in CI first.
+      finding: **same-machine determinism holds for all five outputs**, which is what §18.4 asks
+            for. Cross-machine reproducibility is a different and currently weaker property, and the
+            tool names the one asset that breaks it — `Fonts/Hud.cnb` embeds glyphs rasterised from
+            the machine's installed DejaVu Sans (`HOUSE-00181`). It is listed as a known hazard
+            rather than silently passed, so the check does not appear to prove more than it does.
+            `HOUSE-00200` closes it.
+      finding: `cna-content`'s own `.cna-content-manifest.json` is excluded from the comparison. It
+            records absolute output paths and a build ordering, so it differs between two runs **by
+            design** and is not content; comparing it would make the check fail for a reason that
+            says nothing about the assets.
 - [ ] HOUSE-00200 — Author the two UI fonts as `.spritefont` (UI face at 16/22/30, mono at 13/16) and verify glyph coverage for the languages we ship (English only, but with the full Latin-1 set)
       dep: HOUSE-00066 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00201 — Content smoke scene: load one model, one texture, one font, one sound, one effect, one video and display/play them

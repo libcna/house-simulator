@@ -93,6 +93,17 @@ jobs:
         run: |
           cmake --preset ${{ matrix.preset }}
           cmake --build --preset ${{ matrix.preset }} -j"$(nproc)"
+      - name: Content determinism
+        if: matrix.preset == 'linux-release'
+        working-directory: cna-house
+        # `HOUSE-00199`. Once, on one preset: it builds every content root twice and the answer
+        # cannot depend on the compiler flags of the program that does not participate in it.
+        # `--selftest` first, because a determinism check that has never been shown to fail is a
+        # check that reports green forever.
+        run: |
+          python3 tools/ci/content_verify.py --selftest
+          python3 tools/ci/content_verify.py --hashes
+
       - name: Unit tests
         working-directory: cna-house
         # Unit tests need no GPU and no display by construction: anything that does belongs in

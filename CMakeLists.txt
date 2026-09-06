@@ -278,6 +278,21 @@ if(CNAHOUSE_TIER_E AND CNAHOUSE_EFFECT_SOURCES)
     endif()
 endif()
 
+# --- content-verify (`HOUSE-00199`) ---------------------------------------------------------------
+#
+# `cna-house.md` §18.4: rebuild everything and assert the hashes match; drift is a build failure.
+# NOT part of `all`: it builds every content root twice and is a check someone asks for, not a cost
+# every incremental build pays.
+#
+#     cmake --build build --target content-verify
+add_custom_target(content-verify
+    COMMAND "${CMAKE_COMMAND}" -E echo "Verifying content determinism..."
+    COMMAND python3 "${CMAKE_CURRENT_SOURCE_DIR}/tools/ci/content_verify.py"
+            --work-dir "${CMAKE_BINARY_DIR}/content-verify"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "content-verify: rebuilding every content root twice and comparing"
+    VERBATIM)
+
 # ------------------------------------------------------------------------------------------------
 # Tests (`HOUSE-00125`)
 # ------------------------------------------------------------------------------------------------
