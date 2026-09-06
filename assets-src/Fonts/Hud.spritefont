@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The HUD font. The first content this project loads, and deliberately the smallest useful thing:
+  a version string, a frame time, and the debug overlay's numbers.
+
+  NO FONT BINARY IS COMMITTED. `HOUSE-00066` measured that CNA resolves `<FontName>` to a file
+  beside this descriptor FIRST and falls back to a system font only when there is none, so this
+  builds on any machine that has DejaVu Sans installed and will build from a committed `.ttf` the
+  moment one is placed here -- with no change to this file.
+
+  Which font actually SHIPS is a licensing decision, not a build decision, and it belongs to the
+  phase-4 asset-provenance work (ADR-0012). DejaVu Sans is a strong candidate: it is distributed
+  under the Bitstream Vera licence, which explicitly permits redistribution, and its provenance is
+  traceable through Debian's `fonts-dejavu-core` to https://dejavu-fonts.github.io/. That case has
+  to be recorded in `licenses/` and `NOTICE.md` before the binary enters this repository, and until
+  it is, the technical ability to load the font is not permission to distribute it.
+
+  A build with no font at all is not an error: `CnaHouseGame::LoadContent` logs one warning and
+  runs without the HUD, so a fresh clone starts rather than crashing.
+-->
+<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <Asset Type="Graphics:FontDescription">
+    <FontName>DejaVu Sans</FontName>
+    <Size>16</Size>
+    <Spacing>0</Spacing>
+    <UseKerning>true</UseKerning>
+    <Style>Regular</Style>
+    <DefaultCharacter>?</DefaultCharacter>
+    <CharacterRegions>
+      <CharacterRegion>
+        <Start>&#32;</Start>
+        <End>&#126;</End>
+      </CharacterRegion>
+      <CharacterRegion>
+        <!-- The middle dot the version line uses to separate its fields, and the degree sign the
+             debug overlay uses for angles. Both are outside ASCII and both would otherwise render
+             as the default character. -->
+        <Start>&#176;</Start>
+        <End>&#183;</End>
+      </CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>

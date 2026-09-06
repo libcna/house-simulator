@@ -83,6 +83,10 @@ ALLOWED_ROOT_ENTRIES = {
     ".gitignore", ".gitattributes", ".clang-format", ".editorconfig",
     # directories
     "docs", "include", "src", "tools", "tests", "assets-src", "content", "licenses",
+    # CMake modules. `cmake/TierSelection.cmake` is named by HOUSE-00122 as the one place the
+    # Tier-E decision is made, and a `cmake/` directory is the standard home for it; §17.5 simply
+    # predated there being a build.
+    "cmake",
     ".git", ".github", ".githooks",
 }
 

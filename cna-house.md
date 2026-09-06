@@ -1650,6 +1650,8 @@ and become dynamic instances.
 cna-house/
 ├── CMakeLists.txt
 ├── CMakePresets.json
+├── cmake/
+│   └── TierSelection.cmake          ← the ONLY place the Tier-E decision is made (§7.3)
 ├── cna-house.md                     ← this document
 ├── plan.md                          ← the master task list
 ├── README.md

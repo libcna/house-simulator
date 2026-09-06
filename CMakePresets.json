@@ -1,0 +1,138 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 24, "patch": 0 },
+
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache"
+      },
+      "environment": {
+        "CCACHE_DIR": "$env{HOME}/.cache/ccache",
+        "CCACHE_BASEDIR": "/rv"
+      }
+    },
+
+    {
+      "name": "linux-debug",
+      "displayName": "Linux debug (OPENGLES3)",
+      "description": "The everyday build. Asserts on, warnings as errors.",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CNAHOUSE_RENDERER": "OPENGLES3"
+      }
+    },
+    {
+      "name": "linux-release",
+      "displayName": "Linux release (OPENGLES3)",
+      "description": "What ships, and the only build a performance number may come from.",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CNAHOUSE_RENDERER": "OPENGLES3"
+      }
+    },
+
+    {
+      "name": "linux-asan",
+      "displayName": "Linux AddressSanitizer",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-asan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CNAHOUSE_RENDERER": "OPENGLES3",
+        "CMAKE_CXX_FLAGS": "-fsanitize=address -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address"
+      }
+    },
+    {
+      "name": "linux-ubsan",
+      "displayName": "Linux UndefinedBehaviorSanitizer",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-ubsan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CNAHOUSE_RENDERER": "OPENGLES3",
+        "CMAKE_CXX_FLAGS": "-fsanitize=undefined -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=undefined"
+      }
+    },
+
+    {
+      "name": "headless",
+      "displayName": "Headless (CI integration tests)",
+      "description": "No window, no GPU. HOUSE-00105 measured 600 frames with DISPLAY unset.",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-consumer",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CNAHOUSE_RENDERER": "HEADLESS"
+      }
+    },
+    {
+      "name": "gl33",
+      "displayName": "Desktop OpenGL 3.3 (diagnostic only)",
+      "description": "Never ships. Exists because HOUSE-00091 measured OcclusionQuery returning a real pixel count here and a boolean under OPENGLES3, so a visibility question can be cross-checked.",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-consumer",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CNAHOUSE_RENDERER": "OPENGL33"
+      }
+    },
+    {
+      "name": "web",
+      "displayName": "Web / WEBGL2 (phase 48, not yet buildable)",
+      "description": "Reserved. Phase 47 is the first task that configures it; BL-14 gates it.",
+      "inherits": "base",
+      "binaryDir": "${sourceDir}/build-consumer",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CNAHOUSE_RENDERER": "WEBGL2"
+      }
+    }
+  ],
+
+  "buildPresets": [
+    { "name": "linux-debug", "configurePreset": "linux-debug" },
+    { "name": "linux-release", "configurePreset": "linux-release" },
+    { "name": "linux-asan", "configurePreset": "linux-asan" },
+    { "name": "linux-ubsan", "configurePreset": "linux-ubsan" },
+    { "name": "headless", "configurePreset": "headless" },
+    { "name": "gl33", "configurePreset": "gl33" }
+  ],
+
+  "testPresets": [
+    {
+      "name": "unit",
+      "configurePreset": "linux-debug",
+      "filter": { "include": { "label": "unit" } },
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "integration",
+      "configurePreset": "headless",
+      "filter": { "include": { "label": "integration" } },
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "render",
+      "configurePreset": "linux-release",
+      "filter": { "include": { "label": "render" } },
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "perf",
+      "configurePreset": "linux-release",
+      "filter": { "include": { "label": "perf" } },
+      "output": { "outputOnFailure": true }
+    }
+  ]
+}

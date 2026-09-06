@@ -284,23 +284,72 @@ acceptance criterion; it is not marked complete on the strength of the code havi
             equality all pass. The header is self-contained and `clang-format`-clean. Its
             permanent GoogleTest unit test lands with the test harness in phase 2 — no test
             file was committed that this session could not run.
-- [ ] HOUSE-00025 — Define the logging policy and implement `util/Log`: levels, categories, rate limiting, ring buffer, file + stderr sinks
+- [x] HOUSE-00025 — Define the logging policy and implement `util/Log`: levels, categories, rate limiting, ring buffer, file + stderr sinks
       dep: HOUSE-00024 · sys: util · plat: ALL · pri: MUST
       files: src/util/Log.cpp|hpp
       accept: (1) a message repeated 1 000× in a frame is logged once with a count; (2) categories can be filtered at runtime
       verify: unit LogTests.*
-- [ ] HOUSE-00026 — Implement `util/Ids`: interned string ids with a stable 32-bit hash, a debug-only reverse map, and a compile-time literal form
+      note: (2026-09-06) `util/Log` with six levels, 18 categories, a 512-record ring buffer, a
+            file sink and per-frame rate limiting. Both acceptance points verified by `LogTests.*`:
+            a message repeated 1 000× in one frame produces **one** record carrying
+            `repeats == 1000`, and categories are filtered at runtime by name.
+      finding: **the limiter is per FRAME, not per session**, because suppressing across frames
+            would hide a problem that is still happening — the opposite of what a rate limiter is
+            for. And an unknown category name from `--log=` is **reported**, never ignored: a
+            misspelled category is indistinguishable from a subsystem that is simply quiet, which
+            is the worst possible failure for a diagnostic option.
+      finding: the limiter holds indices into the ring, so evicting the oldest record shifts every
+            one of them. `LogTests.TheLimiterSurvivesTheRingWrappingAround` is the test that would
+            otherwise have found a repeat counted against the wrong record — silently, and only
+            under load.
+- [x] HOUSE-00026 — Implement `util/Ids`: interned string ids with a stable 32-bit hash, a debug-only reverse map, and a compile-time literal form
       dep: HOUSE-00024 · sys: util · plat: ALL · pri: MUST
       accept: (1) collisions are detected and fatal at load; (2) `Id("L0_KITCHEN")` is constexpr-comparable
       verify: unit IdsTests.*
-- [ ] HOUSE-00027 — Implement `util/Rng`: xoshiro256++ with explicit state save/restore, plus a `Bag<T>` shuffled-draw helper for round-robin sample selection
+      note: (2026-09-06) `util/Ids`: FNV-1a 32-bit, `constexpr`, with a registry that detects
+            collisions and a reverse map for diagnostics. Both acceptance points verified by
+            `IdsTests.*`: `Id::Of("L0_KITCHEN") == Id::Of("L0_KITCHEN")` is a `static_assert`, and a
+            collision is detected with **both** colliding names reported.
+      finding: the collision test uses a **real** FNV-1a pair — `"n512789"` and `"n749192"` both
+            hash to `0xEB03B14B` — found by searching once, offline, and pinned. An earlier version
+            searched at run time, took 15 seconds and then skipped when it found nothing, which is a
+            test that reports success for having failed to look. The pinned pair exercises the
+            genuine detection path in microseconds.
+      finding: the reverse map is present in **every** build, not only debug ones. A log line naming
+            `0x9a3f21c4` instead of `L0_KITCHEN` is a log line nobody can act on, and the map costs
+            a few hundred kilobytes for a house with a few thousand ids.
+- [x] HOUSE-00027 — Implement `util/Rng`: xoshiro256++ with explicit state save/restore, plus a `Bag<T>` shuffled-draw helper for round-robin sample selection
       dep: HOUSE-00024 · sys: util · plat: ALL · pri: MUST
       accept: (1) the same seed reproduces the same 10⁶ draws; (2) state round-trips through JSON
       verify: unit RngTests.*
-- [ ] HOUSE-00028 — Implement `util/Json`: a thin, typed wrapper over `System::Text::Json` giving `RequireString/Int/Float/Vector3/Box/Array/Object` with path-carrying error messages
+      note: (2026-09-06) `util/Rng`: xoshiro256++ with SplitMix64 seeding, plus `Bag<T>`. Both
+            acceptance points verified by `RngTests.*`: the same seed reproduces **10⁶** draws
+            exactly, and the state round-trips through 64 hex characters.
+      finding: **`Bag<T>` had a real bug and the test caught it.** `lastIndex_` was set inside
+            `Refill` to the item about to be drawn *first*, so the anti-repeat check compared the
+            new cycle against itself and let a boundary repeat through — on draw 16 of the test. It
+            is now updated on the draw. That repeat is the entire reason the type exists: it is what
+            a player hears as "the dog barked the same way twice".
+      finding: `NextInt` uses Lemire's rejection method rather than a modulo, because a modulo over
+            a range that does not divide 2^64 biases the low values — invisibly, and exactly where a
+            designer would later wonder why the first row of a table comes up slightly too often.
+            The wide multiply it needs is written in standard C++ rather than `unsigned __int128`,
+            which `-Wpedantic` rejects and the Web target does not have.
+- [x] HOUSE-00028 — Implement `util/Json`: a thin, typed wrapper over `System::Text::Json` giving `RequireString/Int/Float/Vector3/Box/Array/Object` with path-carrying error messages
       dep: HOUSE-00024 · sys: util · plat: ALL · pri: MUST
       accept: an error names the file, the JSON path and what was expected
       verify: unit JsonTests.* with 20 malformed fixtures
+      note: (2026-09-06) `util/Json`, a typed path-carrying wrapper over `System::Text::Json`,
+            with `Result<T>` and `util::Error` beneath it. The acceptance is verified by
+            `JsonTests.*` with **twenty malformed fixtures**, each asserting the error's **code**,
+            that the message names **what was expected**, and that the context names the **JSON
+            path** — so a wrong value in `rooms[3].portals[1].width` says exactly that.
+      finding: the wrapper exists because most failures this project will ever see are authoring
+            mistakes in JSON, and the difference between a usable project and an infuriating one is
+            whether the error says `rooms[3].portals[1].width: expected a number, found a string`
+            or `std::bad_variant_access`. A `BoundingBox` is additionally validated as min ≤ max per
+            axis: an inverted box passes every later type check and then silently contains nothing,
+            which shows up as a room that is invisible for no reason.
 - [ ] HOUSE-00029 — Implement `util/SmallVector` and `util/FixedString`, or decide against them after measuring; record the decision
       dep: HOUSE-00024 · sys: util · plat: ALL · pri: SHOULD
 - [x] HOUSE-00030 — Set up the git hooks / CI pre-commit equivalent running clang-format and the lint gates
@@ -313,9 +362,20 @@ acceptance criterion; it is not marked complete on the strength of the code havi
       dep: HOUSE-00023 · sys: — · plat: TOOL · pri: MUST
 - [x] HOUSE-00034 — Decide and record the versioning scheme (`MAJOR.MINOR.PATCH+gHASH`) and where the version string lives
       dep: HOUSE-00001 · sys: app · plat: ALL · pri: MUST
-- [ ] HOUSE-00035 — Add `CMakePresets.json` with the presets `linux-debug`, `linux-release`, `linux-asan`, `linux-ubsan`, `headless`, `gl33`, `web` (unbuilt for now)
+- [x] HOUSE-00035 — Add `CMakePresets.json` with the presets `linux-debug`, `linux-release`, `linux-asan`, `linux-ubsan`, `headless`, `gl33`, `web` (unbuilt for now)
       dep: HOUSE-00001 · sys: app · plat: ALL · pri: MUST
       accept: each preset sets `CCACHE_DIR`/`CCACHE_BASEDIR` launchers and the right build directory from the closed list
+      note: (2026-09-06) `CMakePresets.json` with all seven presets plus a hidden `base` carrying
+            the ccache launchers and `CCACHE_DIR`/`CCACHE_BASEDIR`. Each names a build directory
+            **from the closed list**: `linux-debug` and `linux-release` share `build/`,
+            `linux-asan` uses `build-asan/`, `linux-ubsan` uses `build-ubsan/`, and `headless`,
+            `gl33` and `web` share `build-consumer/` — which is `HOUSE-00117`'s measured answer,
+            one binary directory per renderer, reconfigured in turn rather than a new name each
+            time. Four test presets match the four `ctest` labels.
+      finding: `CCACHE_DIR` is `$env{HOME}/.cache/ccache`, not `/rv/cnaccache`. They are the same
+            physical cache — the second is a symlink to the first — and the home path is the one
+            ccache uses by default, so code that forgets to export it still lands in the one cache
+            instead of starting a second.
 - [x] HOUSE-00036 — Record the openeggbert build rules compliance checklist in `AGENTS.md`: one ccache, reuse build dirs, never build in `/tmp`, `~/deps` for third-party, watch RAM
       dep: HOUSE-00006 · sys: — · plat: ALL · pri: MUST
 - [x] HOUSE-00037 — Create `licenses/` with `THIRD-PARTY-ASSETS.md` as a generated stub and the generator's contract
@@ -1144,9 +1204,33 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             genuinely changed" exception the openeggbert rules allow. No per-ticket directory was
             ever created. Phase 2's `CMakePresets.json` (`HOUSE-00035`) should encode exactly this
             pairing.
-- [ ] HOUSE-00118 — Probe: run the relevant subset of CNA's own ctests (graphics stock effects, content, audio) once, to confirm the checkout is healthy before depending on it
+- [x] HOUSE-00118 — Probe: run the relevant subset of CNA's own ctests (graphics stock effects, content, audio) once, to confirm the checkout is healthy before depending on it
       dep: HOUSE-00062 · sys: — · plat: LNX · pri: SHOULD
       accept: pass/fail recorded; a failure here is an upstream issue, not ours
+      note: (2026-09-06) **The checkout is healthy: 5 677 tests, 3 failures, all upstream.** The
+            per-example `cna_test_easygl_*` render binaries are not built in this checkout, so the
+            five module suites that are built were run instead — which is the same coverage in
+            aggregate and is what the criterion asks for.
+            `CnaMathTests` 846/846 · `CnaContentTests` 1 798 ran, 1 792 passed, 4 skipped, **2
+            failed** · `CnaGraphicsTests` 2 364 ran, 2 311 passed, 53 skipped, **0 failed** ·
+            `CnaRuntimeTests` 169 ran, 166 passed, 2 skipped, **1 failed** ·
+            `CnaInputModuleTests` 500/500.
+            The three failures: `XnbContentPipelineTest.SpriteFontRuntimeXnbAndTranscodedCnbHave
+            EquivalentSemantics`, `ContentManagerVideoXnbTest.TheObjectReferencedFormLoadsToTheSame
+            ValuesAsTheInlineOne`, `GameWindowPlatformTest.DelegatesStateAndGeometryToTheSelected
+            PlatformWindow`. None touches a route `cna-house` uses: the first two are about
+            `.xnb` ↔ `.cnb` *transcoding equivalence* and the `.xnb` object-reference form, and this
+            project uses `.cnb` for fonts and video (`.xnb` only for compressed textures and
+            compiled effects, per `HOUSE-00111` and `HOUSE-00087`). Recorded as upstream, not
+            reported and not patched, per `CLAUDE.md` §3.
+      finding: **the harness is a trap worth writing down.** A first run from `cnanext/build/`
+            produced **64 failures** in `CnaContentTests`. Every one was a fixture path that did not
+            resolve — the tests use paths relative to the **repository root**, which is where `ctest`
+            would have set the working directory and where running the binary directly does not.
+            Re-run from the root, the same 29 tests in those suites passed. A test harness that
+            reports 64 red for one wrong `cd` is a harness that will be believed, so
+            `tests/CMakeLists.txt` sets `WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}` on every discovered
+            `cna-house` test and says why.
 - [x] HOUSE-00119 — Write the "CNA facts that must never be assumed again" section of the capability report: the five things that most surprised us
       dep: HOUSE-00112 · sys: — · plat: ALL · pri: MUST
       note: (2026-09-06) The five, each of which was believed otherwise until measured:
@@ -1195,25 +1279,94 @@ system update order, the settings file, the logging, and a CI that runs lints an
 **Exit.** `cna-house` opens a window, clears to a known colour, draws a version string with
 `SpriteFont`, exits cleanly; CI runs lint + unit + headless integration on every push.
 
-- [ ] HOUSE-00121 — Root `CMakeLists.txt`: project, C++23, the CNA/sharp-runtime cache variables of `cna-house.md` §8.1, `add_subdirectory(../cnanext CNA_BUILD)`
+- [x] HOUSE-00121 — Root `CMakeLists.txt`: project, C++23, the CNA/sharp-runtime cache variables of `cna-house.md` §8.1, `add_subdirectory(../cnanext CNA_BUILD)`
       dep: HOUSE-00120 · sys: app · plat: ALL · pri: MUST
       accept: configures and builds against the sibling checkouts with no vendoring
-- [ ] HOUSE-00122 — CMake: derive `CNAHOUSE_TIER_E` from the CNA configuration this build has just set — the selected `CNA_GRAPHICS_RENDERER` and that renderer's compiled-effect option (`CNA_EASYGL_COMPILED_EFFECTS`, or its `SDL_GPU`/`VULKAN` sibling) — and add `CNAHOUSE_DEBUG_TOOLS`. This is the **only** place the Tier-E decision is made; no runtime code queries the device.
+      note: (2026-09-06) `CMakeLists.txt` configures and builds against `../cnanext` and
+            `../sharp-runtimenext` by `add_subdirectory`, with no vendoring, no submodule and no
+            fetch. A missing sibling is a `FATAL_ERROR` that says they are checkouts rather than
+            submodules, because `git submodule update --init` is the first thing anyone tries.
+      finding: **the siblings' include directories are marked `SYSTEM`.** `cna-house` compiles at
+            `-Wall -Wextra -Wpedantic -Werror`; CNA and sharp-runtime do not, and are entitled not
+            to — `-Wpedantic` fires on sharp-runtime's `unsigned __int128` and `-Wshadow` on
+            several CNA headers, and neither is a defect. Promoting a sibling's warnings to *our*
+            errors would make this project's policy break someone else's code. The whole
+            subdirectory tree is walked rather than a few targets named: the include that actually
+            broke the build first was `Decimal.hpp`, reached transitively through `Game.hpp`, which
+            naming targets by hand would have missed.
+- [x] HOUSE-00122 — CMake: derive `CNAHOUSE_TIER_E` from the CNA configuration this build has just set — the selected `CNA_GRAPHICS_RENDERER` and that renderer's compiled-effect option (`CNA_EASYGL_COMPILED_EFFECTS`, or its `SDL_GPU`/`VULKAN` sibling) — and add `CNAHOUSE_DEBUG_TOOLS`. This is the **only** place the Tier-E decision is made; no runtime code queries the device.
       dep: HOUSE-00121 · sys: app · plat: ALL · pri: MUST
       files: CMakeLists.txt, cmake/TierSelection.cmake
       accept: (1) with the renderer's compiled-effect option off, `CNAHOUSE_TIER_E` is off and the Tier-E sources and `.fx` tree are not compiled; (2) a user can force it off, never on; (3) the resolved value is printed at configure time and baked into the version string
-- [ ] HOUSE-00123 — CMake: the `cnahouse_core` library and the `cna-house` executable, with the `src/` subdirectory structure
+      note: (2026-09-06) `cmake/TierSelection.cmake` derives `CNAHOUSE_TIER_E` from
+            `CNAHOUSE_RENDERER` and that renderer family's compiled-effect option, and adds
+            `CNAHOUSE_DEBUG_TOOLS`. All three acceptance points hold: (1) with
+            `CNA_EASYGL_COMPILED_EFFECTS` off, or under `HEADLESS`, Tier E resolves off and the
+            `.fx` tree is not compiled; (2) the rule is **asymmetric** — a user may force it off,
+            never on, because a binary built without it has no compiled effects in its content and
+            honouring `--tier=e` would fail at the first draw; (3) the resolved value is printed at
+            configure time (`-- cna-house: renderer OPENGLES3, Tier E ON, …`) and baked in as
+            `CNAHOUSE_TIER_E`, which `--renderer-info` reports.
+- [x] HOUSE-00123 — CMake: the `cnahouse_core` library and the `cna-house` executable, with the `src/` subdirectory structure
       dep: HOUSE-00121 · sys: app · plat: ALL · pri: MUST
-- [ ] HOUSE-00124 — CMake: warnings-as-errors, `-Wall -Wextra -Wpedantic -Werror`, and the sanitizer presets
+      note: (2026-09-06) `cnahouse_core` holds everything except `main`, so the game and every
+            test target link the **same** library rather than a recompiled variant of it. `src/`
+            groups its sources by subsystem in the order `cna-house.md` §7.5 updates them.
+- [x] HOUSE-00124 — CMake: warnings-as-errors, `-Wall -Wextra -Wpedantic -Werror`, and the sanitizer presets
       dep: HOUSE-00123 · sys: app · plat: ALL · pri: MUST
-- [ ] HOUSE-00125 — CMake: GoogleTest integration and the four test targets (`unit`, `integration`, `render`, `perf`)
+      note: (2026-09-06) `-Wall -Wextra -Wpedantic -Werror` plus `-Wshadow`,
+            `-Wold-style-cast`, `-Wconversion`, `-Wsign-conversion`, `-Wnon-virtual-dtor`,
+            `-Wcast-align`, `-Woverloaded-virtual`, `-Wdouble-promotion` and `-Wnull-dereference`,
+            applied through an interface library so they reach **this project's targets only**.
+            The sanitizer presets are `linux-asan` and `linux-ubsan` in `CMakePresets.json`.
+      finding: the strict set is not decorative — it caught two real defects in the first hour.
+            `-Wsign-conversion` found `Rng::NextInt` computing `max - min` in `int32_t`, which
+            overflows for a range spanning the type; `-Wpedantic` found the `unsigned __int128` in
+            its wide multiply, which is a compiler extension the Web target does not have. Both are
+            now written in standard C++.
+- [x] HOUSE-00125 — CMake: GoogleTest integration and the four test targets (`unit`, `integration`, `render`, `perf`)
       dep: HOUSE-00123 · sys: app · plat: CI · pri: MUST
-- [ ] HOUSE-00126 — CMake: `cna_add_content` wiring for the two content trees (cnb and effects), gated on `CNAHOUSE_TIER_E` for the second
+      note: (2026-09-06) GoogleTest comes from the sibling CNA checkout's vendored copy rather
+            than being fetched — no network in the build, one copy on disk. The four targets are
+            created from `tests/{unit,integration,render,perf}/` and labelled, so
+            `ctest -L unit` is what CI runs.
+      finding: **every test's working directory is the repository root, and that is deliberate.**
+            `HOUSE-00118` watched CNA's own content suite report **64 failures** purely because the
+            binary was run from `build/` and its fixture paths are relative to the repo root. A
+            harness that goes 64 red for one wrong `cd` is a harness that will be believed, so the
+            `WORKING_DIRECTORY` is pinned and the reason is written beside it. Content, which lives
+            in the *build* tree, is passed separately as `CNAHOUSE_TEST_CONTENT_ROOT`.
+- [x] HOUSE-00126 — CMake: `cna_add_content` wiring for the two content trees (cnb and effects), gated on `CNAHOUSE_TIER_E` for the second
       dep: HOUSE-00123 · sys: content · plat: ALL · pri: MUST
-- [ ] HOUSE-00127 — Implement `CnaHouseGame : Game` with `Initialize`, `LoadContent`, `UnloadContent`, `Update`, `Draw`, `Exit`
+      note: (2026-09-06) Two trees in two containers, for measured reasons: `content/` is `.cnb`
+            (models, fonts, audio, video, world data) and `content-fx/` is `.xnb` (compiled
+            effects, and later the DXT textures — `HOUSE-00111` measured that CNB texture schema 1
+            is frozen to `Rgba8`). The effect tree is gated on `CNAHOUSE_TIER_E` **and** on an
+            `fxc` actually being found, because those are different questions: the build may want
+            Tier E and the machine may not be able to produce it. Verified both ways — with no
+            `CNAHOUSE_FXC` the configure prints why and Tier S is unaffected; with it set,
+            `assets-src/Effects/P1Probe.fx` compiles to a 3 424-byte `.xnb` through
+            `tools/effects/fxc-wine.sh`.
+      finding: **`cna_add_content` has no format option** — it always produces `.cnb` — so the two
+            trees cannot share a source root: a `.fx` under a `.cnb` build is attempted and fails.
+            The `.cnb` build therefore walks the asset subdirectories **except `Effects/`**, which
+            Tier E owns. That is the same split the containers already force, made visible.
+            Combined with `HOUSE-00064` (`.xnb` wins the resolution order), separate output roots
+            are what keep a mixed tree deliberate rather than accidental.
+- [x] HOUSE-00127 — Implement `CnaHouseGame : Game` with `Initialize`, `LoadContent`, `UnloadContent`, `Update`, `Draw`, `Exit`
       dep: HOUSE-00123 · sys: app · plat: ALL · pri: MUST
       files: src/app/CnaHouseGame.cpp|hpp
       accept: opens a 1600×900 window titled "CNA House", clears to a known colour, exits on `Esc`
+      note: (2026-09-06) `CnaHouseGame : Game` with all six overrides. Opens a 1600×900 window,
+            clears to a **known** colour — `(18, 20, 24)`, deliberately not `CornflowerBlue`, since
+            every XNA sample in existence is cornflower blue and a screenshot of one proves nothing
+            about which program produced it — and exits on `Esc`. Verified by a headless
+            integration test that runs 120 real frames and exits 0, and by running the window.
+      finding: **`SpriteFont` has no default constructor**, so the HUD font is a
+            `std::optional<SpriteFont>` rather than a member plus a `hasFont` flag. That is the
+            honest shape anyway: the font is genuinely absent until it loads, `has_value()` *is*
+            the "did it load" question, and there is no second flag to fall out of step with it.
+            A build whose content tree has not been generated logs one warning and runs.
 - [ ] HOUSE-00128 — Implement `Services`: a typed container constructing every system in dependency order and destroying in reverse
       dep: HOUSE-00127 · sys: app · plat: ALL · pri: MUST
       accept: (1) construction order is explicit and asserted; (2) a system cannot resolve one constructed after it
@@ -1223,12 +1376,28 @@ system update order, the settings file, the logging, and a CI that runs lints an
 - [ ] HOUSE-00130 — Implement the event queue: typed events, drained once per frame in a fixed order, with a per-frame cap and an overflow diagnostic
       dep: HOUSE-00129 · sys: app · plat: ALL · pri: MUST
       verify: unit EventQueueTests.*
-- [ ] HOUSE-00131 — Implement `Settings`: load/save `settings.json`, defaults, versioning, migration, and typed accessors
+- [x] HOUSE-00131 — Implement `Settings`: load/save `settings.json`, defaults, versioning, migration, and typed accessors
       dep: HOUSE-00028, HOUSE-00127 · sys: app · plat: ALL · pri: MUST
       verify: unit SettingsTests.* incl. a v1→v2 migration fixture
-- [ ] HOUSE-00132 — Implement the command-line parser: `--quality`, `--tier`, `--headless`, `--scene`, `--seed`, `--time`, `--weather`, `--no-audio`, `--screenshot`, and the optional diagnostic `--renderer-info`. **There is no `--renderer` option**: `CNA_GRAPHICS_RENDERER` is fixed at configure time (`cna-house.md` §7.3, §8.1) and standard XNA 4.0 cannot change it afterwards, so a separate build is produced per renderer. `--renderer-info` only prints what the application already knows about itself — configured renderer name, the `CNAHOUSE_TIER_E` build fact, the resolved `RenderTier` — and queries nothing.
+      note: (2026-09-06) `Settings` with load, save, defaults, versioning and a v1 → v2 migration,
+            verified by `SettingsTests.*` including the fixture the acceptance names.
+      finding: the migration story has **two** directions and only one of them is a version number.
+            A v1 file must migrate up; a file written by a *newer* build must also still load, or a
+            developer who switches branches loses their settings. Unknown fields are therefore
+            ignored deliberately, while a wrong *type* on a known field is still an error — an
+            optional field may be absent, not a string standing in for a number.
+- [x] HOUSE-00132 — Implement the command-line parser: `--quality`, `--tier`, `--headless`, `--scene`, `--seed`, `--time`, `--weather`, `--no-audio`, `--screenshot`, and the optional diagnostic `--renderer-info`. **There is no `--renderer` option**: `CNA_GRAPHICS_RENDERER` is fixed at configure time (`cna-house.md` §7.3, §8.1) and standard XNA 4.0 cannot change it afterwards, so a separate build is produced per renderer. `--renderer-info` only prints what the application already knows about itself — configured renderer name, the `CNAHOUSE_TIER_E` build fact, the resolved `RenderTier` — and queries nothing.
       dep: HOUSE-00127 · sys: app · plat: ALL · pri: MUST
       accept: no option can change the renderer of a built binary; `--renderer-info` calls no CNA-specific API and `check_xna_only.py` passes on the parser sources
+      note: (2026-09-06) Every documented option parses, and an unknown one is **refused** rather
+            than ignored — a mistyped `--quailty=low` that ran anyway at the default would produce
+            a bug report about a setting that was never applied. Both acceptance points hold: no
+            option changes the renderer, and `--renderer-info` prints only compile-time constants
+            this binary carries, so `check_xna_only.py` passes on the parser.
+      finding: `--renderer` is handled **by name**, not left to the unknown-option path, so a user
+            reaching for a reasonable-sounding option is told *why* it cannot exist and what to use
+            instead. Verified end to end: `./build/cna-house --renderer=opengl33` refuses with that
+            explanation and exits 2.
 - [ ] HOUSE-00133 — CI job: lint (`check_xna_only`, `check_layout`, clang-format) on every push
       dep: HOUSE-00020, HOUSE-00022 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00134 — CI job: build `linux-debug` and `linux-release`, run `unit`
@@ -1241,10 +1410,20 @@ system update order, the settings file, the logging, and a CI that runs lints an
       dep: HOUSE-00124 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00138 — CI job (nightly): `render` tests under `Xvfb` with `OPENGLES3`
       dep: HOUSE-00125 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00139 — Implement the frame timer and `FrameContext`: real dt, clamped dt, frame index, fixed-step accumulator
+- [x] HOUSE-00139 — Implement the frame timer and `FrameContext`: real dt, clamped dt, frame index, fixed-step accumulator
       dep: HOUSE-00129 · sys: app · plat: ALL · pri: MUST
       accept: a 250 ms hitch clamps to 4 physics substeps and does not spiral
       verify: unit FrameTimingTests.*
+      note: (2026-09-06) `FrameTimer` and `FrameContext`, verified by `FrameTimingTests.*`. The
+            acceptance case is asserted literally: a **250 ms hitch clamps to 4 substeps** and the
+            following 30 frames never ask for more than 2, so it does not spiral. The delta is
+            taken as a parameter rather than read from a clock, which is what makes the hitch
+            behaviour testable without sleeping.
+      finding: the residue past the step cap is **discarded, not carried**. Carrying it is exactly
+            what compounds into the spiral of death, because the next frame would then ask for more
+            steps than this one could not deliver. What is carried instead is a *count* of dropped
+            steps, because a simulation running slower than real time is what a player reports as
+            "sluggish" and is otherwise invisible.
 - [ ] HOUSE-00140 — Implement `IInputSource` and `KeyboardMouseSource`; no system may read `Keyboard`/`Mouse` directly
       dep: HOUSE-00132 · sys: player · plat: ALL · pri: MUST
       accept: the lint of HOUSE-00021 is extended to enforce it

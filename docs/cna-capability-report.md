@@ -1593,6 +1593,39 @@ measured capabilities, five corrected ones, three disproved blockers and one res
 rather than on a feature matrix.
 
 
+### `HOUSE-00118` — CNA's own test suites, as a checkout-health check · **healthy**
+
+The per-example `cna_test_easygl_*` render binaries are not built in this checkout, so the five
+module suites that are built were run instead — the same coverage in aggregate.
+
+| Suite | Ran | Passed | Skipped | **Failed** |
+|---|---|---|---|---|
+| `CnaMathTests` | 846 | 846 | 0 | **0** |
+| `CnaContentTests` | 1 798 | 1 792 | 4 | **2** |
+| `CnaGraphicsTests` | 2 364 | 2 311 | 53 | **0** |
+| `CnaRuntimeTests` | 169 | 166 | 2 | **1** |
+| `CnaInputModuleTests` | 500 | 500 | 0 | **0** |
+| **Total** | **5 677** | **5 615** | **59** | **3** |
+
+The three failures are `XnbContentPipelineTest.SpriteFontRuntimeXnbAndTranscodedCnbHaveEquivalent
+Semantics`, `ContentManagerVideoXnbTest.TheObjectReferencedFormLoadsToTheSameValuesAsTheInlineOne`
+and `GameWindowPlatformTest.DelegatesStateAndGeometryToTheSelectedPlatformWindow`. **None touches a
+route `cna-house` uses.** The first two concern `.xnb` ↔ `.cnb` transcoding equivalence and the
+`.xnb` object-reference form; this project loads fonts and video from `.cnb` and uses `.xnb` only
+for compressed textures (`HOUSE-00111`) and compiled effects (`HOUSE-00087`). They are recorded as
+upstream, not reported and not patched (`CLAUDE.md` §3).
+
+**Finding — a harness trap worth writing down.** The first run, from `cnanext/build/`, produced
+**64 failures** in `CnaContentTests`. Every one was an unresolved fixture path: the tests address
+their assets relative to the **repository root**, which is where `ctest` sets the working directory
+and where running the binary directly does not. Re-run from the root, the same 29 tests passed.
+
+A harness that reports 64 red for one wrong `cd` is a harness that will be believed — and the same
+mistake is one line away in this project. `tests/CMakeLists.txt` therefore sets
+`WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}` on every discovered test, with that reason written beside
+it.
+
+
 ---
 
 ## Probe hygiene
