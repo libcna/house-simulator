@@ -1781,20 +1781,62 @@ system update order, the settings file, the logging, and a CI that runs lints an
             512 looping instances reported `Playing` and CNA refused nothing, so a budget is a design
             decision this project must enforce itself — it belongs with the voice manager in phase 31
             (`cna-house.md` §31), not in the device skeleton.
-- [ ] HOUSE-00155 — Implement the user-gesture audio gate (title screen "press any key") on every platform
+- [x] HOUSE-00155 — Implement the user-gesture audio gate (title screen "press any key") on every platform
       dep: HOUSE-00154 · sys: audio · plat: ALL · pri: MUST
-      note: (2026-09-06) **Half done, and deliberately not ticked.** The gate MECHANISM is complete
-            and running: `AudioSystem` starts in `Waiting` and opens the device only from
-            `NoteUserGesture()`; `InputState::anyPressed` is a new edge meaning *any* key or mouse
-            button went down — separate from every bound action, because a browser waits for any
-            interaction and a gate wired to one named key is a gate the player can fail to find; and
-            `Update` calls the gesture once and logs the resulting state. It is uniform on every
-            platform on purpose, so the path is exercised in every build rather than only in the Web
-            one that needs it. What is missing is the **title screen that says "press any key"**,
-            which needs `HOUSE-00156`'s loading screen and `MenuStack`. Ticking this now would be
-            claiming an acceptance criterion that is knowingly unmet.
-- [ ] HOUSE-00156 — Implement the loading screen and the `MenuStack` skeleton
+      note: (2026-09-06) Done in two commits, and left OPEN between them rather than ticked early.
+            The MECHANISM landed with `HOUSE-00154`: `AudioSystem` starts in `Waiting` and opens the
+            device only from `NoteUserGesture()`, and `InputState::anyPressed` is a new edge meaning
+            *any* key or mouse button went down — separate from every bound action, because a
+            browser waits for any interaction and a gate wired to one named key is a gate the player
+            can fail to find. The **title screen** landed with `HOUSE-00156` and completes it: the
+            loading screen shows a pulsing `Press any key to begin`, and its own `Update` is what
+            calls back into the audio system. Verified by screenshot at 1600×900 and by an
+            integration test that runs 30 headless frames and asserts the screen is still up and the
+            device still closed.
+      finding: **the loading screen, the title screen and the audio gate are ONE screen, and that is
+            what makes the gate free.** A browser will not open an audio device until the user has
+            interacted with the page, so something must wait for a key press before play starts.
+            Making that the loading screen means the wait costs nothing — the player reads the prompt
+            while content is still loading, and the gate is satisfied before it could block anything.
+      finding: the gesture is recognised in exactly ONE place. The `Game` does not check
+            `anyPressed` itself; the screen does, and calls back. Two places recognising the same
+            gesture is two places to disagree about whether it has happened, and the audio device
+            would be opened twice or not at all.
+      finding: the callback fires on the FIRST press rather than on the dismissing one, and exactly
+            once. Early, so a player who presses a key during load does not then wait again for the
+            mixer; once, so holding a key does not re-probe the device every frame.
+- [x] HOUSE-00156 — Implement the loading screen and the `MenuStack` skeleton
       dep: HOUSE-00145 · sys: ui · plat: ALL · pri: MUST
+      note: (2026-09-06) `ui/MenuStack.{hpp,cpp}` (`IScreen`, `ScreenId` for §67.3's six screens plus
+            `Loading`, `ScreenAction`) and `ui/LoadingScreen.{hpp,cpp}`. Fifteen unit tests plus one
+            end-to-end integration test. Wired into the game: pushed at the end of `LoadContent`,
+            updated before every system, drawn inside the HUD's single `SpriteBatch`.
+      finding: **only the top screen updates, but more than one may draw.** That asymmetry is the
+            whole design. A `Confirm` over a `PauseMenu` must show the menu behind it and must be
+            the only thing that hears the keyboard — if both heard it, `Escape` would close both at
+            once, which reads as the confirmation having been *answered* when it was only dismissed.
+            `Draw` therefore walks down from the top to the first opaque screen and draws upward
+            from there, so nothing hidden costs a pass.
+      finding: `WorldIsPaused()` asks **every** screen in the stack, not the top one. A `Confirm` is
+            translucent and does not itself pause, but the `PauseMenu` under it may, and the world
+            must not resume because a dialogue opened on top of it. The default is *not* paused,
+            which is §67.3's decision rather than an omission: the pause menu keeps the clock
+            running because a house that stops when you look away is less convincing.
+      finding: `ScreenAction::Quit` is **reported**, not acted on — the stack never calls `Exit()`.
+            Ending the session is the `Game`'s business, and a UI widget that can stop the process is
+            one that can stop it by accident.
+      finding: the loading screen's `Loading…` line is currently unreachable in the real app, and
+            that is honest rather than dead: content loads synchronously inside `LoadContent`, so
+            `contentLoaded_` is already true on the first frame that updates. The condition is a
+            real flag and the line appears the moment phase 3's residency makes loading take time.
+      finding: **MEASURED — `Color(bytecs, bytecs, bytecs, bytecs)` is `CNAEXT`.** The plain XNA 4.0
+            constructors take `intcs` or `float`. A `std::uint8_t` alpha for the prompt's pulse
+            compiled straight into an ADR-0001 violation, caught only because the byte overload is
+            *also* ambiguous against the int one — had it not been, it would have compiled silently.
+            This is the **third** CNAEXT-overload trap after `setMasterVolumeProperty` and
+            `KeyboardState()`, and `check_xna_only.py` can see none of them. `docs/conventions.md`
+            §5a now carries the rule that the header of any XNA type is read before it is first
+            constructed.
 - [x] HOUSE-00157 — Implement the quality-tier table and the auto-detect heuristic (from `GraphicsAdapter` — standard XNA — and the project-owned effective feature set of `cna-house.md` §68; no CNA-specific capability query)
       dep: HOUSE-00131 · sys: rendering · plat: ALL · pri: MUST
       note: (2026-09-06) `rendering/Quality.{hpp,cpp}`: `QualitySettings` (§68's Graphics tab

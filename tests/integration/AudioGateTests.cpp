@@ -9,6 +9,7 @@
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/audio/AudioSystem.hpp"
+#include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/util/Log.hpp"
 
 namespace
@@ -62,6 +63,30 @@ namespace
         EXPECT_EQ(game.Audio().State(), AudioState::Waiting)
             << "the device must not be opened by anything other than a user gesture";
         EXPECT_FLOAT_EQ(game.Audio().EffectiveVolume(cnahouse::audio::Category::World), 0.0f);
+    }
+
+    TEST(AudioGateTests, TheTitleScreenIsUpForTheWholeSessionUntilSomethingIsPressed)
+    {
+        // `HOUSE-00155` / `HOUSE-00156` end to end. No input arrives in a headless run, so the
+        // title screen must still be on the stack after 30 real frames -- which is exactly the
+        // browser-tab state, and the frames prove the game is drawing rather than blocked.
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+
+        CnaHouseGame game(options, SmallSettings());
+        game.SetFrameLimit(30);
+        game.Run();
+
+        EXPECT_EQ(game.ExitCode(), 0);
+        EXPECT_GE(game.FramesDrawn(), 30u);
+        ASSERT_FALSE(game.Menus().Empty()) << "the title screen dismissed with nothing pressed";
+        ASSERT_NE(game.Menus().Top(), nullptr);
+        EXPECT_EQ(game.Menus().Top()->Id(), cnahouse::ui::ScreenId::Loading);
+        EXPECT_TRUE(game.Menus().WorldIsPaused())
+            << "the house has not been built yet, so there is nothing to keep running";
+        EXPECT_EQ(game.Audio().State(), AudioState::Waiting)
+            << "and the audio device is still closed, which is the point of the gate";
     }
 
     TEST(AudioGateTests, TheStartupLogSaysWhatTheAudioStateIs)

@@ -18,6 +18,7 @@
 
 #include "cnahouse/debug/Screenshot.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
+#include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/util/Log.hpp"
 
 namespace cnahouse::app
@@ -226,6 +227,21 @@ namespace cnahouse::app
         // resolved against the pre-narrowing tier would offer post-processing that cannot run.
         ResolveQuality();
 
+        // The loading screen IS the title screen IS the audio gate (`HOUSE-00155`,
+        // `HOUSE-00156`). Pushed before anything else so the player has something to press during
+        // load rather than after it.
+        auto loading =
+            std::make_unique<ui::LoadingScreen>(SessionLine(),
+                                                [this]
+                                                {
+                                                    if (audio_.NoteUserGesture())
+                                                    {
+                                                        Log::Info(LogCat::Audio, "{}", audio_.Summary());
+                                                    }
+                                                });
+        loading_ = loading.get();
+        menus_.Replace(std::move(loading));
+
         // The font is the first content this project loads, and it is allowed to be absent: a build
         // whose content tree has not been generated yet must still start and still say so, or the
         // first thing a new contributor sees is a crash. `docs/conventions.md` §5.2 puts the catch
@@ -384,13 +400,25 @@ namespace cnahouse::app
                 input_.Update(frame.deltaSeconds);
             }
 
-            // The user-gesture audio gate (`HOUSE-00155`). The device is not touched until the
-            // player has actually pressed something, because that is what a browser requires -- and
-            // doing it on desktop too means the path is exercised in every build rather than only
-            // in the one that needs it.
-            if (input_.Current().anyPressed && audio_.NoteUserGesture())
+            // Content is loaded by the time the first frame updates, so the title screen is free to
+            // dismiss as soon as the player presses something. This is the line phases 3 onwards
+            // replace with the real residency check.
+            if (loading_ != nullptr)
             {
-                Log::Info(LogCat::Audio, "{}", audio_.Summary());
+                loading_->SetReady(contentLoaded_);
+            }
+
+            // The screen stack owns the input while any screen is up. That is what routes the
+            // user-gesture audio gate (`HOUSE-00155`): the loading screen's own `Update` sees
+            // `anyPressed` and calls back into `audio_`, so there is ONE place the gesture is
+            // recognised rather than one in the game and one in the screen.
+            if (menus_.Update(input_.Current(), frame.deltaSeconds))
+            {
+                Exit();
+            }
+            if (menus_.Empty())
+            {
+                loading_ = nullptr;
             }
 
             // A short exponential average. The instantaneous delta jitters by a millisecond or two
@@ -564,6 +592,11 @@ namespace cnahouse::app
         // ONE batch for the whole HUD. `HOUSE-00106` measured a draw call at 8.15 us of CPU, so
         // a batch per string would spend more on submission than the rest of the frame does.
         hud_->batch.Begin();
+        // The menus draw INSIDE the HUD's one batch (`HOUSE-00106`: a draw call is 8.15 us, so a
+        // second batch would cost more than everything in it) and BEFORE the corner lines, so the
+        // version and frame time stay readable over a title screen.
+        menus_.Draw(hud_->batch, text_);
+
         text_.DrawShadowed(hud_->batch,
                            SessionLine(),
                            Microsoft::Xna::Framework::Vector2(12.0f, 10.0f),

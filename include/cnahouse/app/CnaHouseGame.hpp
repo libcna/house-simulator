@@ -22,6 +22,8 @@
 #include "cnahouse/rendering/RenderTier.hpp"
 #include "cnahouse/rendering/Renderer.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
+#include "cnahouse/ui/LoadingScreen.hpp"
+#include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
 
 namespace cnahouse::app
@@ -95,6 +97,12 @@ namespace cnahouse::app
         [[nodiscard]] const audio::AudioSystem& Audio() const noexcept
         {
             return audio_;
+        }
+
+        /// @brief The screen stack. Readable after `Run()` for the integration tests.
+        [[nodiscard]] const ui::MenuStack& Menus() const noexcept
+        {
+            return menus_;
         }
 
         /// @brief The frame-time line: milliseconds and the frames-per-second it implies.
@@ -172,6 +180,12 @@ namespace cnahouse::app
         audio::AudioSystem audio_;
         player::KeyboardMouseSource input_;
         ui::TextRenderer text_;
+        /// The screen stack of §67.3. The loading/title screen is pushed onto it at `LoadContent`
+        /// and pops itself once the player has pressed something AND content is ready.
+        ui::MenuStack menus_;
+        /// Non-owning, valid only while the loading screen is on the stack. Cleared the frame the
+        /// stack empties, which is the only frame it can dangle in.
+        ui::LoadingScreen* loading_ = nullptr;
         /// A short average, so the HUD's number is readable rather than flickering every frame.
         float smoothedDelta_ = 1.0f / 60.0f;
 
