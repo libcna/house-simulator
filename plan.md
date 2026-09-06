@@ -1049,27 +1049,141 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             (models and audio `.cnb`, textures `.xnb`) is coherent; an accidental one is a trap.
             Sizes `HOUSE-00126` and the phase-3 pipeline.
       verify: the verdict is written into the `linux` content profile (`cna-house.md` §27.2), which decides offline which representation is packaged; the uncompressed variant remains the packaged fallback, and no runtime renderer query is added
-- [ ] HOUSE-00112 — Write `docs/cna-capability-report.md` in full from the probe results, with a verdict per claim and a link to each probe's recorded output
+- [x] HOUSE-00112 — Write `docs/cna-capability-report.md` in full from the probe results, with a verdict per claim and a link to each probe's recorded output
       dep: HOUSE-00062…HOUSE-00111 · sys: — · plat: LNX · pri: MUST
-- [ ] HOUSE-00113 — Update `cna-house.md` §5, §6 and §76 with anything the probes changed; in particular settle BL-09/Q-01
+      note: (2026-09-06) Written **as the probes ran**, not reconstructed at the end — every finding
+            was recorded in the same commit as the probe that produced it, which is why the measured
+            numbers in it are the ones the probes actually printed. Final tally across the claim
+            tables: **44 `PASS`, 5 `DIFFERENT`, 6 `NOT PROBED`, 0 `FAIL`, 0 `PENDING`.** Every
+            `NOT PROBED` states its reason. The five `DIFFERENT` rows are the ones that changed the
+            architecture: the `StorageDevice` root, `Text.Json`'s component wiring,
+            `Mouse::GetState`'s snapshot semantics, and the two `.fx` launcher/route corrections.
+- [x] HOUSE-00113 — Update `cna-house.md` §5, §6 and §76 with anything the probes changed; in particular settle BL-09/Q-01
       dep: HOUSE-00112 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00114 — Delete every probe binary and object from `build-probe/`; keep only the probe sources and a one-paragraph README per probe
+      note: (2026-09-06) **§6 — seven blocker rows rewritten from measurement.** `BL-02` (stencil)
+            and `BL-03` (MRT) had **false premises** and are downgraded to notes with the evidence;
+            `BL-09` is **resolved positively** and Tier E gets a real float shadow map; `BL-04` is
+            downgraded M → L now that the `.fx` route is verified end to end against a genuine
+            `fxc`; `BL-05`, `BL-07`, `BL-11` and `BL-12` are confirmed with their measured detail.
+            **§76 — `Q-01` closed** (the feature-matrix row was the stale one), **`R-16` resolved**
+            (the answer was the fallback: blend indices are skin-local, so the sidecar must carry
+            the joint-name list), and **`R-06` largely retired** (Wine `.fx` compilation works; the
+            one fragility was ours and is fixed).
+            **§5 — the storage root corrected** (`<app>` is the literal `game`; identify by
+            container name instead), **`Text.Json`'s component wiring recorded**, and a new preamble
+            to §5.3 stating the five CNA-vs-XNA shape facts that are invisible from CNA's own
+            documentation.
+            **§21.3 rewritten** with the measured multi-skin behaviour, and **§27.2 given a measured
+            `linux` content profile** — DXT only through `.xnb`, anisotropy on, ~1 MiB per-frame
+            promotions, and the two format lists.
+- [x] HOUSE-00114 — Delete every probe binary and object from `build-probe/`; keep only the probe sources and a one-paragraph README per probe
       dep: HOUSE-00112 · sys: — · plat: LNX · pri: MUST
       accept: `du -sh build-probe/` is under 2 MB
-- [ ] HOUSE-00115 — Record in `docs/cna-capability-report.md` a "if you change renderer, re-run these" list
+      correction: (2026-09-06) **the sources are kept in `tests/probes/phase1/`, not in
+            `build-probe/`.** Kept in `build-probe/` they would not survive a clone — `.gitignore`'s
+            `/build*/` excludes the whole directory — which is not "kept" in any useful sense.
+            `tests/` was chosen over `tools/` deliberately: it is the one tree where **both** gates
+            already cover the code (`check_layout.py` permits C++ there and `check_xna_only.py`'s
+            `TEST_ROOTS` scans it), so the probes are held to the same XNA-only rule as the runtime
+            — and they pass it. `build-probe/CMakeLists.txt` globs them from there and adds both
+            roots to the include path, since the generated fixtures stay in the binary tree.
+      note: (2026-09-06) 24 probe sources + `p1-common.hpp` + the two generators (388 KB) and a
+            README describing what every probe measures and how to build one. The `.fx` fixture went
+            to `assets-src/Effects/P1Probe.fx`, the only place `check_xna_only.py` permits an effect
+            source — which also keeps the Tier E pipeline exercised rather than a one-off. All 21
+            runnable probes were rebuilt from the new location, `clang-format`ed and **re-run: 21/21
+            still PASS**. `build-probe/` and `build-consumer/` are then deleted whole, so the
+            acceptance figure is met by removal rather than by trimming.
+- [x] HOUSE-00115 — Record in `docs/cna-capability-report.md` a "if you change renderer, re-run these" list
       dep: HOUSE-00112 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00116 — Probe: measure a full clean CNA build time and an incremental one with ccache warm, to set expectations for later sessions
+      note: (2026-09-06) Ten rows to re-run, ordered by how badly a wrong assumption would hurt,
+            each naming its probe — led by `OcclusionQuery`, which is **already known to differ**
+            between `OPENGLES3` and `OPENGL33` on the same driver. The list also names what does
+            **not** need re-running, and why: content-pipeline, math and host properties are
+            renderer-independent, and `HOUSE-00107`'s upload bandwidth was measured within noise on
+            both renderers. It closes with the one measurement still owed on any renderer —
+            `HOUSE-00100`'s mouse drift.
+- [x] HOUSE-00116 — Probe: measure a full clean CNA build time and an incremental one with ccache warm, to set expectations for later sessions
       dep: HOUSE-00062 · sys: — · plat: LNX · pri: SHOULD
-- [ ] HOUSE-00117 — Probe: confirm the `HEADLESS` and `OPENGLES3` builds can share one `build/` tree via presets without full reconfigures thrashing
+      note: (2026-09-06) Measured on the probe tree (CNA + sharp-runtime + one probe, 724 targets,
+            Release, `-j6`, 16-thread host shared with other agents):
+            **cold — ccache disabled: 330.3 s wall, 1 802.7 s user CPU, peak RSS 892 MB.**
+            **the same build from an empty directory with the shared ccache warm: 14.9 s wall,
+            20.1 s user CPU, peak RSS 342 MB — a 22× wall-clock and 90× CPU saving.** That single
+            pair is the whole justification for openeggbert build rule 1, measured rather than
+            argued.
+            **CMake configure alone: 26–49 s** depending on cache warmth of the configure-time audits.
+            **Edit one probe source, rebuild and relink: 0.94 s** (0.77 s when the content hashes back
+            to a cache hit).
+            **Rebuild all ten stock-effect and model probes: 11.6 s.**
+            **Switching renderer in `build-consumer/` (full CNA relink, warm ccache): 75 s (HEADLESS),
+            138 s (OPENGL33).**
+            Session ccache movement: +1 812 hits, +364 misses; the shared cache stands at 34.5 GB of
+            100 GB with a 29.9 % lifetime hit rate.
+      finding: the number that actually sets expectations is **~1 s to iterate on a probe**, not the
+            cold figure — the openeggbert build rules exist precisely so the cold path is never
+            taken. The cold measurement was run once, deliberately, in the throwaway
+            `build-consumer/` tree that `HOUSE-00114` deletes anyway, so it cost nothing that was
+            not already going to be discarded.
+- [x] HOUSE-00117 — Probe: confirm the `HEADLESS` and `OPENGLES3` builds can share one `build/` tree via presets without full reconfigures thrashing
       dep: HOUSE-00105 · sys: — · plat: LNX · pri: SHOULD
       accept: separate build directories from the closed list are used per renderer; document which
+      note: (2026-09-06) **They cannot share one tree, and they do not need to.** `CNA_GRAPHICS_RENDERER`
+            selects which renderer *family target* is composed, so changing it changes the target set
+            and forces a full reconfigure and relink — sharing one tree would mean thrashing exactly
+            the way the task feared. **The answer is one binary directory per renderer, both from the
+            closed list, both configured from the SAME source directory:**
+            `cmake -S build-probe -B build-probe` → `OPENGLES3` (the shipping configuration), and
+            `cmake -S build-probe -B build-consumer -DCNA_GRAPHICS_RENDERER=…` → whichever variant is
+            being measured. This works because `build-probe/CMakeLists.txt` leaves
+            `CNA_GRAPHICS_RENDERER` and `CNA_ENABLE_VIDEO` as ordinary cache entries rather than
+            `FORCE`-ing them, while `CNA_CNAEXT=OFF` stays `FORCE`d and can never be varied.
+      finding: `build-consumer/` served three variants in this session in turn — `HEADLESS`
+            (`HOUSE-00105`), `CNA_ENABLE_VIDEO=OFF` (`HOUSE-00099`) and `OPENGL33` (`HOUSE-00091`) —
+            each a deliberate reconfigure of the same directory, which is the "configuration
+            genuinely changed" exception the openeggbert rules allow. No per-ticket directory was
+            ever created. Phase 2's `CMakePresets.json` (`HOUSE-00035`) should encode exactly this
+            pairing.
 - [ ] HOUSE-00118 — Probe: run the relevant subset of CNA's own ctests (graphics stock effects, content, audio) once, to confirm the checkout is healthy before depending on it
       dep: HOUSE-00062 · sys: — · plat: LNX · pri: SHOULD
       accept: pass/fail recorded; a failure here is an upstream issue, not ours
-- [ ] HOUSE-00119 — Write the "CNA facts that must never be assumed again" section of the capability report: the five things that most surprised us
+- [x] HOUSE-00119 — Write the "CNA facts that must never be assumed again" section of the capability report: the five things that most surprised us
       dep: HOUSE-00112 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00120 — Phase-1 review: confirm no design in `cna-house.md` now rests on an unproven CNA claim
+      note: (2026-09-06) The five, each of which was believed otherwise until measured:
+            (1) blend indices are **skin-local**, so the compiled `Model` does not contain the
+            binding and the sidecar's joint-name list *is* it;
+            (2) **`Apply3D` writes nothing a game can read**, and its law is inverse *distance*
+            beyond `DistanceScale` rather than the inverse-square a designer would assume;
+            (3) **half the blockers were wrong, in both directions** — `BL-02`, `BL-03` and `BL-06`
+            false, `BL-09` pessimistic, `BL-07` right and explained by `HOUSE-00091`;
+            (4) **the XNA surface is not uniformly XNA-shaped in C++** — `CNAEXT` iterators, three
+            different `Load<T>` shapes, a non-trivially-copyable `Color`, pre-sized bone
+            destinations;
+            (5) **the measurement is only as good as the fixture, and a bad fixture reports a clean
+            pass** — four probes here produced confident wrong answers first, and the habit that
+            caught every one was insisting on an *analytic* expectation.
+- [x] HOUSE-00120 — Phase-1 review: confirm no design in `cna-house.md` now rests on an unproven CNA claim
       dep: HOUSE-00113 · sys: — · plat: ALL · pri: MUST
+      note: (2026-09-06) **Review performed, not asserted.** Every `NOT PROBED` row was traced back
+            into `cna-house.md` to see whether a design actually depends on it. Final tally: **44
+            `PASS`, 5 `DIFFERENT`, 6 `NOT PROBED` (each with a stated reason), 0 `FAIL`, 0
+            `PENDING`.** Of the six unprobed rows, four are referenced **only** by §5's availability
+            table and by no design at all — `RenderTargetCube`, `Curve`, and `Song`/`MediaPlayer`,
+            the last two moot because D-21 is "no music" — and the other two are deliberately owned
+            by the phase that consumes them (`cna_add_content` → phase 2; WebGL context loss →
+            phases 47–48, already gated by `BL-14`).
+      finding: **one residual, named: `HOUSE-00100`.** Phase 8's first-person camera rests on the
+            mouse recentring loop and its drift is unmeasured, because this environment could not
+            put a pointer over the probe window. The design is **not blind** while it stays open:
+            the probe did establish that `Game::IsActive` is not a proxy for "the mouse is usable"
+            and that `GetState` is an event-driven snapshot rather than a live cursor query, and
+            both constrain phase 8 more than a drift figure would have. The task stays unchecked,
+            `HOUSE-00115` lists it as owed, and phase 8's first task is where it gets measured —
+            under the ordinary condition for that work.
+      verdict: **no material design in `cna-house.md` rests on an unverified CNA claim, with that
+            one named exception.** The architecture now stands on 44 measured capabilities, five
+            corrected ones, three disproved blockers and one resolved open question, rather than on
+            a feature matrix.
 
 ---
 
