@@ -67,6 +67,7 @@ jobs:
         run: |
           python3 tools/assets/scale_check.py --selftest
           python3 tools/assets/origin_check.py --selftest
+          python3 tools/assets/pbr_to_stock.py --selftest
 
       - name: The XNA-only gate must detect what it claims to
         working-directory: cna-house

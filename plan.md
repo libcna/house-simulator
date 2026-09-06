@@ -2504,8 +2504,33 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: LOD1 ≈ 35 %, LOD2 ≈ 12 % of LOD0 triangles; silhouette error under a stated threshold
 - [ ] HOUSE-00190 — `tools/blender/collision_proxy.py`: generate `<name>_COL` as a box or convex decomposition, ≤ 64 triangles
       dep: HOUSE-00189 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00191 — `tools/assets/pbr_to_stock.py`: metallic-roughness → `DiffuseColor`/`SpecularColor`/`SpecularPower` with a fixed documented mapping
+- [x] HOUSE-00191 — `tools/assets/pbr_to_stock.py`: metallic-roughness → `DiffuseColor`/`SpecularColor`/`SpecularPower` with a fixed documented mapping
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) The mapping had to be **chosen**: `cna-house.md` §82.3 requires it be
+            "documented and fixed" but does not give the formula. Three lines, each with its reason
+            in the module docstring, and eleven selftest assertions in CI.
+            `diffuse = base x (1 - metallic)`;
+            `specular = lerp(0.04, base, metallic)`;
+            `specularPower = clamp(2/alpha^2 - 2, 4, 256)` with `alpha = roughness^2`.
+      finding: the specular line **is** the metallic workflow, restated for an effect that has no
+            metallic parameter. A dielectric reflects ~4 % achromatically (F0 = 0.04, an IOR of
+            about 1.5 — glass, most plastics, most paint); a metal's reflection is **tinted by its
+            base colour**, which is why gold has a gold highlight and plastic has a white one.
+            Interpolating on `metallic` is the whole of it.
+      finding: `alpha = roughness^2` is glTF's own perceptual remapping and `2/alpha^2 - 2` is the
+            standard GGX-to-Blinn-Phong lobe match. **The clamp is not cosmetic**: at roughness 0
+            the formula diverges, and an exponent above ~256 makes a highlight smaller than a pixel
+            that aliases into a crawling sparkle as the camera moves — worse than no highlight. The
+            floor of 4 stops a matte surface becoming a uniform sheen that reads as fog.
+      finding: glTF's defaults for an unspecified material are `metallic = 1, roughness = 1` — a
+            fully rough **metal**, not plastic. Using `(0, 1)` because it "looks more sensible"
+            would silently make every untagged material a dielectric, so the tool uses the spec's
+            defaults and the choice is written down where someone will look for it.
+      finding: what the mapping does NOT do is stated in the tool itself — no energy conservation,
+            no angular Fresnel, no image-based lighting, because `BasicEffect` has no inputs for
+            them. The goal is that a metallic-roughness source lands somewhere defensible and
+            **consistent between the two tiers**, not that Tier S becomes a PBR renderer. Tier E's
+            `RoomLit.fx` consumes the same three parameters, so neither tier invents its own look.
       accept: the mapping is written down in `docs/content-authoring.md` and is reversible enough to review
 - [ ] HOUSE-00192 — `tools/assets/atlas_pack.py`: pack small-prop textures into shared atlases and rewrite the models' UVs
       dep: HOUSE-00191 · sys: content · plat: TOOL · pri: SHOULD
