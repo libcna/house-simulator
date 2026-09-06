@@ -73,11 +73,11 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 
 | # | Claim | §5 evidence | Verdict | Probe | Measured |
 |---|---|---|---|---|---|
-| G-01 | `BasicEffect` with 3 directional lights, specular, fog and per-pixel lighting | `docs/basiceffect-support.md` | `PENDING` | `HOUSE-00082` | — |
+| G-01 | `BasicEffect` with 3 directional lights, specular, fog and per-pixel lighting | `docs/basiceffect-support.md` | **`PASS`** | `HOUSE-00082` | All six terms at once agree with the analytic model **to the byte**: `(92,90,86)` measured, `(92,90,86)` computed. Per-vertex and per-pixel agree on a constant-normal surface. |
 | G-02 | `SkinnedEffect`, `MaxBones = 72`, `WeightsPerVertex` 1/2/4 | `docs/skinnedeffect-support.md` | **`PASS`** | `HOUSE-00075`, `HOUSE-00077` | `MaxBones == 72`; 72 accepted, 73 throws `boneTransforms exceeds MaxBones.`. Visible deformation confirmed by pixel comparison, not by absence of an exception. **`LightingEnabled = false` is refused** — as XNA 4.0 refuses it. |
-| G-03 | `DualTextureEffect` (albedo × lightmap, two UV channels) | `docs/dualtextureeffect-support.md` | `PENDING` | `HOUSE-00078` | — |
-| G-04 | `AlphaTestEffect` | `docs/alphatesteffect-support.md` | `PENDING` | `HOUSE-00080` | — |
-| G-05 | `EnvironmentMapEffect` including the Fresnel term, `TextureCube` sampling | `docs/environmentmapeffect-support.md` | `PENDING` | `HOUSE-00081` | — |
+| G-03 | `DualTextureEffect` (albedo × lightmap, two UV channels) | `docs/dualtextureeffect-support.md` | **`PASS`** | `HOUSE-00078` | 64/64 texels within **1/255** of the analytic product, with the two channels carrying *different* coordinates so a TEXCOORD0-for-both implementation would fail. The FNA `*2` doubling factor is present (128×128 → 128). |
+| G-04 | `AlphaTestEffect` | `docs/alphatesteffect-support.md` | **`PASS`** | `HOUSE-00080` | The cutoff is exact to one alpha value for all six comparison functions, measured on a 256-column alpha ramp. Two-sided foliage works under `CullNone`; a back-facing card is correctly invisible under the single-sided state. |
+| G-05 | `EnvironmentMapEffect` including the Fresnel term, `TextureCube` sampling | `docs/environmentmapeffect-support.md` | **`PASS`** | `HOUSE-00081` | The sampled cube face equals `reflect(-E, N)` at three tilts, checked against six distinctly coloured faces. `EnvironmentMapAmount` blends linearly (0 → 0, 0.5 → half, 1 → the environment). Fresnel raises grazing reflectivity for factors 1 and 4. `AmbientLightColor` **does** reach this effect. |
 | G-06 | `Effect` from compiled Effect-Framework bytecode, behind `CNA_EASYGL_COMPILED_EFFECTS=ON` (MojoShader) | `docs/fx-compiled-effects.md` §10 | `PENDING` | `HOUSE-00087` | — |
 | G-07 | A compiled `Effect` works end-to-end in a real scene: two techniques switched by name, `Single` 2048² render target with `Depth24`, that target rebound as an effect texture | `cna-samples/plan.md:785` | `PENDING` | `HOUSE-00083`, `HOUSE-00088` | — |
 | G-08 | `Model`/`ModelMesh`/`ModelMeshPart`/`ModelBone` and `CopyAbsoluteBoneTransformsTo` | `docs/model-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | Depth-3 hierarchy with a sibling branch: every local and absolute transform equals the matrix computed offline, to 2e-5. `Copy*BoneTransformsTo` require a **pre-sized** destination and throw `destinationBoneTransforms` otherwise. |
@@ -85,7 +85,7 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | G-10 | A skinned glTF compiles to `.cnb` and its joints are recoverable **without reading `Model::Tag`** | `docs/content-pipeline.md:456-458` | **`PASS`** | `HOUSE-00074`, `HOUSE-00076` | Recoverable by **name lookup into `Model::Bones`**, which is all a sidecar carries. Blend indices are **skin-local**, not bone indices, so the sidecar *must* carry the joint-name list — acceptance path (4), not (2). `Model::Tag` and `getSkinsEXTProperty()` are never read. |
 | G-11 | `VertexBuffer`, `IndexBuffer`, `DynamicVertexBuffer`; EasyGL has a real 32-bit index factory | feature matrix | `PENDING` | `HOUSE-00092`, `HOUSE-00094` | — |
 | G-12 | `RenderTarget2D`, `RenderTargetCube`, mip chains, MSAA on EasyGL | feature matrix | `PENDING` | `HOUSE-00083`, `HOUSE-00084` | — |
-| G-13 | `BlendState`, `DepthStencilState` compare functions, `RasterizerState`, 16 per-slot `SamplerState`s | feature matrix | `PENDING` | `HOUSE-00079` | — |
+| G-13 | `BlendState`, `DepthStencilState` compare functions, `RasterizerState`, 16 per-slot `SamplerState`s | feature matrix | **`PASS`** (the Tier S subset) | `HOUSE-00079`, `HOUSE-00080` | `BlendState::Opaque`/`Additive`, `CompareFunction::Equal` depth with writes off, all three `CullMode`s and per-slot `PointClamp` on slots 0 and 1 all behave. Additive sums are **exact** and a depth-equal second pass reaches every pixel of the first. |
 | G-14 | `SpriteBatch` (all overloads, sort modes, custom `Effect`) and `SpriteFont` | feature matrix | **`PASS`** (SpriteFont + `Begin`/`DrawString`/`End`) | `HOUSE-00066`, `HOUSE-00089` | Text drawn into a `RenderTarget2D` and read back: 440 lit pixels, ink inside the `MeasureString` box. Sort modes and custom-`Effect` overloads remain for `HOUSE-00089`. |
 | G-15 | `OcclusionQuery` exists; `PixelCount` is a real count **only** where the driver exposes `GL_SAMPLES_PASSED`, which the ES 3.2 profile does not — so it degrades to 0/1 (`BL-07`) | `docs/occlusionquery-support.md` | `PENDING` | `HOUSE-00090`, `HOUSE-00091` | — |
 | G-16 | `DrawInstancedPrimitives` is present in the API | `GraphicsDevice.hpp:424` | `PENDING` | `HOUSE-00093` | — |
@@ -825,6 +825,120 @@ both lines.
 throws *"ContentManager: no GraphicsDevice is available from the service provider."* at the first
 `Load<Model>`; `ContentManager(&game.getServicesProperty())` works. Relevant to `HOUSE-00858`'s
 per-pack managers.
+
+
+### `HOUSE-00078` — `DualTextureEffect` · **PASS**
+
+The albedo is an 8×8 checker of 240/80 and the lightmap an 8×8 gradient `16x + 2y`, both opaque, both
+built with `SetData` so no premultiplication policy enters the arithmetic. Every texel is compared
+against the formula FNA defines and CNA implements — `color = tex0; color.rgb *= 2; color *= tex1`.
+
+**64/64 texels within 1/255. Worst absolute delta: 1.**
+
+The fixture makes the *second-channel* half of the claim falsifiable: channel 1 carries a
+**mirrored** X coordinate, so an implementation that fed `TEXCOORD0` to both samplers would produce
+a symmetric image, and the checker guarantees most texels would then be wrong. None were.
+
+The probe also keeps a permanent witness for the `*2` doubling factor — the bug CNA's own Task 383
+found and fixed — because it is invisible to any test using saturated 0/1 values: 128 × 128 must
+read back as 128, not 64. It reads back as **128**.
+
+**Consequence for `cna-house`:** a lightmap authored at 0.5 grey means "no change", not "half
+brightness". The bake in phase 12 targets that midpoint.
+
+### `HOUSE-00079` — multi-pass additive lighting · **PASS**
+
+This is the Tier S lighting mechanism, so both of its assumptions were measured. The fixture is a
+quad **tilted in depth**, deliberately: a screen-parallel quad has constant interpolated depth and
+would pass a depth-equal test even on hardware whose passes disagree.
+
+| | Result |
+|---|---|
+| First pass (`Opaque`, depth write) | 3 249 px at exactly 60 |
+| Second pass (`Additive`, `CompareFunction::Equal`, no depth write) | 3 249 px at exactly **100** |
+| Pixels rejected by the depth-equal test | **0** |
+| Three passes, 60 + 40 + 40 | 3 249 px at exactly **140** |
+
+Additive accumulation is exact and depth-equal invariance holds. Tier S's three-light room is sound.
+
+**Finding — a re-bound render target needs `RenderTargetUsage::PreserveContents`.** The default is
+`DiscardContents`, so the natural "draw pass 1, unbind, read back, rebind, draw pass 2" sequence
+loses the first pass. The probe uses the explicit usage; phase 16 must too.
+
+### `HOUSE-00080` — `AlphaTestEffect` · **PASS**
+
+Measured on a 256×1 alpha ramp — one texel per alpha value — so the cutoff column *is* the
+threshold, read off rather than estimated.
+
+| `AlphaFunction` (reference 128) | First surviving alpha | Count |
+|---|---|---|
+| `Greater` | 129 | 127 |
+| `GreaterEqual` | 128 | 128 |
+| `Less` | 0 | 128 |
+| `Equal` | 128 | 1 |
+| `Always` | 0 | 256 |
+| `Never` | — | 0 |
+
+Every one is exactly XNA's semantics, to a single alpha value. Two-sided rendering: a back-facing
+card is invisible under `CullClockwise`, appears under `CullCounterClockwise`, and `CullNone` draws
+it from both sides with identical coverage — the foliage state works.
+
+**Finding — procedurally authored geometry does not inherit the glTF winding convention.** The
+first version of this probe wound its quad top-left → top-right → bottom-right, which in normalised
+device coordinates (where **+Y is up**) is *clockwise*, and the entire quad vanished under
+`CullClockwise`. Every check failed for one fixture reason. `cna-house` generates geometry
+procedurally in phases 6, 10, 25 and 27; each generator must be wound counter-clockwise to match
+what the imported assets use, and each needs a coverage assertion of its own.
+
+### `HOUSE-00081` — `EnvironmentMapEffect` · **PASS**
+
+The `TextureCube` carries six distinctly coloured faces, so "which face was sampled" is one pixel
+read, compared against `reflect(-E, N)` computed in C++.
+
+| Quad orientation | `reflect(-E, N)` | Expected face | Measured |
+|---|---|---|---|
+| head-on | `(0, 0, 1)` | `+Z` magenta | `(200,10,200)` ✓ |
+| +45° about `+Y` | `(1, 0, 0)` | `+X` red | `(200,10,10)` ✓ |
+| −45° about `+Y` | `(-1, 0, 0)` | `-X` green | `(10,200,10)` ✓ |
+
+`EnvironmentMapAmount` is a linear blend weight: 0 → `(0,0,0)`, 0.5 → `(100,5,100)`, 1 →
+`(200,10,200)`. Fresnel behaves as its definition requires — at factors 1 and 4 the grazing angle is
+markedly more reflective than head-on, and at factor 0 (`pow(x,0) == 1`) the weighting is uniform.
+
+`AmbientLightColor` **does** reach this effect (0.5 grey ambient → `(128,128,128)`), even though it
+appears in no uniform of EasyGL's environment-map fragment shader — it is folded into the emissive
+term before upload. Recorded because the shader source alone would suggest otherwise.
+
+### `HOUSE-00082` — `BasicEffect`, everything at once · **PASS, byte-exact**
+
+Tier S *is* `BasicEffect`, so the probe implements the lighting model in C++ and asserts the pixel,
+adding one contribution at a time so a disagreement would localise to a single term.
+
+| Configuration | Measured | Analytic | Δ |
+|---|---|---|---|
+| ambient + emissive | `(25,25,25)` | `(26,26,26)` | 1 |
+| + three directional diffuse terms | `(107,107,87)` | `(107,107,87)` | **0** |
+| + three specular terms | `(158,129,95)` | `(158,129,95)` | **0** |
+| + fog — **all six terms together** | `(92,90,86)` | `(92,90,86)` | **0** |
+| at `FogStart` (no fog yet) | `(158,129,95)` | `(158,129,95)` | **0** |
+| past `FogEnd` (pure fog colour) | `(25,51,76)` | `(26,51,77)` | 1 |
+
+The three lights were given different directions *and* different colours precisely so that a model
+dropping one of them could not still look plausible. `PreferPerPixelLighting` on and off agree
+exactly on a constant-normal surface, as they must.
+
+The model confirmed, in CNA's own terms:
+
+```
+lightSum    = ambient + Σ lightDiffuse_i · max(dot(N, -dir_i), 0)
+litRGB      = lightSum · DiffuseColor + EmissiveColor
+spec_i      = pow(max(dot(normalize(E - dir_i), N), 0) · step(0, dot(N,-dir_i)), SpecularPower)
+FragColor   = litRGB;  FragColor.rgb += Σ spec_i · lightSpecular_i · SpecularColor · alpha
+FragColor.rgb = mix(FogColor, FragColor.rgb, fogFactor),  fogFactor = 1 - (d - FogStart)/(FogEnd - FogStart)
+```
+
+Specular is added **after** the diffuse product and **before** fog, and is scaled by the final
+alpha. Phase 12's material mapping and phase 16's light budget can be computed against this.
 
 
 ---

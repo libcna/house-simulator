@@ -602,18 +602,71 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             72 and throws `boneTransforms exceeds MaxBones.` at 73. The cap is real and enforced,
             so the avatar rig of phase 35 is budgeted against 72, not against a hoped-for larger
             number.
-- [ ] HOUSE-00078 — Probe: `DualTextureEffect` — albedo × lightmap on a quad with two UV channels; confirm the second channel reaches the effect
+- [x] HOUSE-00078 — Probe: `DualTextureEffect` — albedo × lightmap on a quad with two UV channels; confirm the second channel reaches the effect
       dep: HOUSE-00070 · sys: rendering · plat: LNX · pri: MUST
       accept: a checker albedo × a gradient lightmap produces the analytic product within 2/255
-- [ ] HOUSE-00079 — Probe: multi-pass additive lighting — draw the same chunk twice with `Opaque` then `Additive` + `DepthStencilState` depth-equal, and confirm no z-fighting and correct addition
+      note: (2026-09-06) PASS. **64/64 texels within 1/255**, worst delta 1. Channel 1 carries a
+            *mirrored* X coordinate, so a `TEXCOORD0`-for-both implementation would have failed on
+            most texels; none did. XNA has no built-in two-channel vertex type — the probe declares
+            its own 28-byte `VertexDeclaration`, which is what phase 12 does too.
+      finding: the FNA `*2` doubling factor is present — 128 × 128 reads back as **128**, not 64.
+            So a lightmap texel of 0.5 grey means *no change*, not half brightness, and the phase-12
+            bake targets that midpoint. This is invisible to any test using saturated 0/1 values.
+- [x] HOUSE-00079 — Probe: multi-pass additive lighting — draw the same chunk twice with `Opaque` then `Additive` + `DepthStencilState` depth-equal, and confirm no z-fighting and correct addition
       dep: HOUSE-00078 · sys: rendering · plat: LNX · pri: MUST
       accept: the sum is exact; a depth-equal second pass draws every pixel of the first
-- [ ] HOUSE-00080 — Probe: `AlphaTestEffect` cutoff behaviour and two-sided rendering for foliage
+      note: (2026-09-06) PASS, both criteria. **0 pixels rejected** by the depth-equal test, and the
+            sum is exact on all 3 249 covered pixels: 60 + 40 = 100, and 60 + 40 + 40 = 140 for the
+            three-light case. Measured on a quad **tilted in depth** on purpose — a screen-parallel
+            quad has constant interpolated depth and would pass even on hardware whose two passes
+            disagree, so it would measure nothing. Tier S's three-light room is sound.
+      finding: **a re-bound render target needs `RenderTargetUsage::PreserveContents`.** The default
+            is `DiscardContents`, so the natural draw/unbind/read/rebind/draw sequence silently
+            loses the first pass. Sizes `HOUSE-00631` and the phase-16 light passes.
+- [x] HOUSE-00080 — Probe: `AlphaTestEffect` cutoff behaviour and two-sided rendering for foliage
       dep: HOUSE-00070 · sys: rendering · plat: LNX · pri: MUST
-- [ ] HOUSE-00081 — Probe: `EnvironmentMapEffect` with a baked `TextureCube`; confirm sampling and the Fresnel term
+      note: (2026-09-06) PASS, 10/10. Measured on a 256×1 alpha ramp — one texel per alpha value —
+            so the cutoff column *is* the threshold. At reference 128: `Greater` keeps 129…255 (127
+            texels), `GreaterEqual` keeps 128…255 (128), `Less` keeps 0…127 (128), `Equal` keeps
+            exactly one, `Always` all 256, `Never` none. Every one is XNA's semantics **to a single
+            alpha value**. Two-sided: a back-facing card is invisible under `CullClockwise`, appears
+            under `CullCounterClockwise`, and `CullNone` draws it from both sides with identical
+            coverage — the foliage state works.
+      finding: **procedurally authored geometry does not inherit the glTF winding convention.** The
+            probe's first quad was wound top-left → top-right → bottom-right, which in normalised
+            device coordinates (+Y is **up**) is *clockwise*, and the whole quad vanished under
+            `CullClockwise` — every check failed for one fixture reason. `cna-house` generates
+            geometry procedurally in phases 6, 10, 25 and 27; each generator must be wound
+            counter-clockwise to match the imported assets, and each needs its own coverage
+            assertion.
+- [x] HOUSE-00081 — Probe: `EnvironmentMapEffect` with a baked `TextureCube`; confirm sampling and the Fresnel term
       dep: HOUSE-00070 · sys: rendering · plat: LNX · pri: SHOULD
-- [ ] HOUSE-00082 — Probe: `BasicEffect` three directional lights + ambient + specular + fog, all simultaneously
+      note: (2026-09-06) PASS, 10/10. Six distinctly coloured cube faces make "which face was
+            sampled" a single pixel read, compared against `reflect(-E, N)` computed in C++: head-on
+            → `+Z`, +45° about `+Y` → `+X`, −45° → `-X`, all exact. `EnvironmentMapAmount` is a
+            linear blend weight (0 → `(0,0,0)`, 0.5 → `(100,5,100)`, 1 → `(200,10,200)`). Fresnel
+            behaves as defined: at factors 1 and 4 the grazing angle is markedly more reflective
+            than head-on; at factor 0 the weighting is uniform, which is the control.
+      finding: `AmbientLightColor` **does** reach this effect (0.5 grey → `(128,128,128)`), although
+            it appears in no uniform of EasyGL's environment-map fragment shader — it is folded into
+            the emissive term before upload. Recorded because reading the shader alone would suggest
+            the opposite.
+- [x] HOUSE-00082 — Probe: `BasicEffect` three directional lights + ambient + specular + fog, all simultaneously
       dep: HOUSE-00070 · sys: rendering · plat: LNX · pri: MUST
+      note: (2026-09-06) PASS, **byte-exact**. Tier S *is* `BasicEffect`, so the probe implements
+            the lighting model in C++ and asserts the pixel, adding one term at a time so a
+            disagreement would localise. All six terms together: measured `(92,90,86)`, computed
+            `(92,90,86)`, delta **0**. Diffuse-only and specular-only stages also delta 0; the two
+            ends of the fog ramp are within 1/255. The three lights were given different directions
+            *and* different colours precisely so a model that dropped one could not still look
+            plausible. `PreferPerPixelLighting` on and off agree exactly on a constant-normal
+            surface, as they must.
+      finding: the confirmed composition order is `litRGB = (ambient + Σ diffuse_i·NdotL_i)·
+            DiffuseColor + Emissive`, then **specular added after the diffuse product and scaled by
+            the final alpha**, then `mix(FogColor, colour, fogFactor)` with
+            `fogFactor = 1 - (d - FogStart)/(FogEnd - FogStart)` on the **view-space** distance.
+            Phase 12's material mapping and phase 16's light budget are computed against this, not
+            against a remembered formula.
 - [ ] HOUSE-00083 — **Probe: `RenderTarget2D` with `SurfaceFormat::Single`, 2048², `DepthFormat::Depth24` — create, render depth, bind as an effect texture, read back** (settles `BL-09` / `Q-01`)
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
       accept: either it works (record: Tier E uses a float shadow map) or it fails (record the exact error; Tier E packs depth into RGBA8)
