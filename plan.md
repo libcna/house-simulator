@@ -1127,6 +1127,15 @@ that produced it; `BL-09` is settled; every probe binary is removed.
       verify: the verdict is written into the `linux` content profile (`cna-house.md` §27.2), which decides offline which representation is packaged; the uncompressed variant remains the packaged fallback, and no runtime renderer query is added
 - [x] HOUSE-00112 — Write `docs/cna-capability-report.md` in full from the probe results, with a verdict per claim and a link to each probe's recorded output
       dep: HOUSE-00062…HOUSE-00111 · sys: — · plat: LNX · pri: MUST
+      note: (2026-09-06, phase 2) **The file shipped with its second half duplicated** — 1 373 lines
+            repeating `## Findings` onwards from an earlier tranche, superseded line for line by the
+            copy above it. Found while reading the measured `BasicEffect`/`DualTextureEffect` facts
+            for HOUSE-00162 and removed: 3 084 lines → 1 708. Nothing was lost; the 29 lines unique
+            to the stale copy were older statements of the probe-hygiene table and the ccache
+            paragraph that the kept copy states more completely, and every task `HOUSE-00062`
+            through `HOUSE-00120` still has its section. The duplication came from appending to the
+            report rather than editing it — worth naming, because a document with two `## Findings`
+            headings is one a reader stops trusting.
       note: (2026-09-06) Written **as the probes ran**, not reconstructed at the end — every finding
             was recorded in the same commit as the probe that produced it, which is why the measured
             numbers in it are the ones the probes actually printed. Final tally across the claim
