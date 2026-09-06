@@ -9,9 +9,10 @@ satisfied and its `verify:` step has been run. Task ids are permanent and are ne
 | | |
 |---|---|
 | Phase in progress | 1 — CNA capability verification |
-| Completed | 35 of 1 308 tasks |
+| Completed | 44 of 1 308 tasks |
 | Baseline commit | `96d21db` (the approved planning baseline) |
 | Phase 0 | stage A closed by `HOUSE-00042`; seven stage-B tasks deferred to phase 2 by design |
+| Phase 1 | `HOUSE-00061`–`HOUSE-00069` measured; `BL-06` settled and corrected |
 
 Corrections made to the planning documents during implementation are recorded in
 [Planning corrections](#planning-corrections) at the end of this file, never applied silently.
@@ -367,29 +368,112 @@ finding is written down**.
 **Exit.** `docs/cna-capability-report.md` exists with a row per claim, a verdict and the probe
 that produced it; `BL-09` is settled; every probe binary is removed.
 
-- [ ] HOUSE-00061 — Create `docs/cna-capability-report.md` with the claim table skeleton (one row per §5 row)
+- [x] HOUSE-00061 — Create `docs/cna-capability-report.md` with the claim table skeleton (one row per §5 row)
       dep: HOUSE-00042 · sys: — · plat: LNX · pri: MUST
-- [ ] HOUSE-00062 — Probe: build a minimal `Game` against `../cnanext` with `OPENGLES3` and confirm it opens a window, clears and presents
+      note: (2026-09-06) 40 claim rows across §5.1–§5.8, plus the configuration under test, the
+            verdict vocabulary, an XNA-only measured section and the blocker table. Rows carry
+            `PENDING` until a probe actually runs; `NOT PROBED` is used only where a reason is
+            given.
+- [x] HOUSE-00062 — Probe: build a minimal `Game` against `../cnanext` with `OPENGLES3` and confirm it opens a window, clears and presents
       dep: HOUSE-00061 · sys: app · plat: LNX · pri: MUST
       accept: 300 frames at the target resolution with no GL error and no validation warning
       verify: probe `p1-hello` output + a screenshot
-- [ ] HOUSE-00063 — Probe: confirm `CNA_CNAEXT=OFF` genuinely removes the engine layer (no `CNA::Graphics` symbols in the binary)
+      note: (2026-09-06) PASS. 300 frames at exactly 1600×900, `Exit()` clean, process exit 0.
+            EasyGL reported `OpenGL ES 3.2 Mesa 25.0.7`. No GL error and no validation warning
+            attributable to the probe; the one stderr line is an unrelated GTK portal warning
+            from SDL3's file-dialog init. **Finding:** the samples' `CNA/Platform/Entrypoint.hpp`
+            is a forbidden `CNA/` include and is *not needed* — under SDL3 it expands to nothing
+            off Android/iOS, and a plain `int main()` linked and ran. Sizes `HOUSE-00127`.
+- [x] HOUSE-00063 — Probe: confirm `CNA_CNAEXT=OFF` genuinely removes the engine layer (no `CNA::Graphics` symbols in the binary)
       dep: HOUSE-00062 · sys: ci · plat: LNX · pri: MUST
       accept: `nm -C` on the linked binary finds zero `CNA::Graphics::` symbols
       verify: recorded in the capability report; becomes a permanent CI check (`HOUSE-00133`)
-- [ ] HOUSE-00064 — Probe: `ContentManager` resolution order — build one asset as `.cnb` and one as `.xnb` with the same name and confirm `.xnb` wins
+      note: (2026-09-06) PASS on the stated criterion: 0 symbols, against a **positive control** of
+            6 277 in the `CNAEXT=ON` archive (37.4 MB → 69 kB with the option off), so the check
+            demonstrably detects what it asserts absent.
+      finding: `CNA_CNAEXT=OFF` removes the `CNA::Graphics::` engine layer but **not** the other
+            forbidden identifiers. `SupportsCapability`, `GraphicsCapability`,
+            `getSkinsEXTProperty`, `setOwnedResources`, `ShaderEffect`, `PbrEffect`,
+            `SkinnedPbrEffect` and `SkinnedModelEXT` live in `Microsoft::Xna::Framework::Graphics`
+            in the always-compiled core and are all present in the linked binary. For those,
+            `check_xna_only.py` is the **only** gate, not a second line of defence — it must never
+            be relaxed. `HOUSE-00136` must be scoped to `CNA::Graphics::` and `AvatarRenderer`
+            (both genuinely 0) and state why the rest cannot be asserted at the symbol level.
+            CNA does offer `-DCNA_STRICT_XNA_API`, which turns `CNAEXT`-tagged calls into compile
+            errors; it was verified to catch `Model::getSkinsEXTProperty()`, but it also fires on
+            genuine XNA 4.0 (`IVertexType`, `TouchPanel::MAX_TOUCHES`, `ContentTypeReaderBase`,
+            8 errors in a clean TU), so it is not adoptable today. Recorded, not patched.
+- [x] HOUSE-00064 — Probe: `ContentManager` resolution order — build one asset as `.cnb` and one as `.xnb` with the same name and confirm `.xnb` wins
       dep: HOUSE-00062 · sys: content · plat: LNX · pri: MUST
-- [ ] HOUSE-00065 — Probe: load a `Texture2D` from `.cnb`; verify dimensions, format and a byte-exact `GetData` round trip
+      note: (2026-09-06) **`.xnb` wins** — confirmed as §5.1 claims. Measured by compiling two
+            *different* payloads to one content name (red → `.xnb`, blue → `.cnb`) and reading the
+            texels back: red. Consequence for `HOUSE-00126`: a stale `.xnb` silently shadows the
+            `.cnb` the build just produced, so the content output tree must never hold both. The
+            literal-path middle tier of the claim was not exercised.
+- [x] HOUSE-00065 — Probe: load a `Texture2D` from `.cnb`; verify dimensions, format and a byte-exact `GetData` round trip
       dep: HOUSE-00064 · sys: content · plat: LNX · pri: MUST
-- [ ] HOUSE-00066 — Probe: load a `SpriteFont` built from a TTF through the `.spritefont` route; draw a string; verify glyph placement
+      note: (2026-09-06) PASS. 4×4, `SurfaceFormat::Color`, 16/16 texels byte-exact.
+      finding: the round trip is exact **against the premultiplied model, not the source PNG**.
+            The first run failed 15/16; the measured (1,0) texel `66,13,35,223` is the source
+            `75,15,40,223` scaled by `223/255`. `TextureProcessor`'s `premultiplyAlpha` defaults
+            to `true`, exactly as XNA 4.0's does, because `BlendState::AlphaBlend` — what
+            `SpriteBatch::Begin()` selects by default — is the premultiplied blend. The probe was
+            corrected to evaluate both models and report which fits (straight 1/16, premultiplied
+            16/16). Consequences: golden-image tests must expect premultiplied values; the
+            `DualTextureEffect` product of `HOUSE-00078` must not premultiply twice; nothing may be
+            drawn with `BlendState::NonPremultiplied`.
+- [x] HOUSE-00066 — Probe: load a `SpriteFont` built from a TTF through the `.spritefont` route; draw a string; verify glyph placement
       dep: HOUSE-00064 · sys: content · plat: LNX · pri: MUST
-- [ ] HOUSE-00067 — Probe: load a `SoundEffect` from a 16-bit PCM WAV; play it; confirm audible duration
+      note: (2026-09-06) PASS. `lineSpacing = 50`; `MeasureString("I")` = 13.0×51.0 and `×10` =
+            130.0×51.0 (exactly linear at `<Spacing>0</Spacing>`). Placement was **measured**: the
+            string was drawn into a `RenderTarget2D`, read back with `GetData`, and the ink bbox
+            `x[14,49] y[15,47]` confirmed to start after the draw origin (10,8) and stay inside the
+            measured 44×51 box. `MeasureString` is therefore a usable layout oracle for the HUD.
+      licensing: the descriptor named a copy of the host's DejaVuSans inside `build-probe/`, which
+            is git-ignored and was deleted with the probes. **No font entered the repository** and
+            no redistribution claim is made. CNA resolves `<FontName>` to a file beside the
+            descriptor before any system font, so `cna-house` always ships the `.ttf` next to the
+            `.spritefont`.
+- [x] HOUSE-00067 — Probe: load a `SoundEffect` from a 16-bit PCM WAV; play it; confirm audible duration
       dep: HOUSE-00064 · sys: audio · plat: LNX · pri: MUST
-- [ ] HOUSE-00068 — Probe: confirm a **24-bit** PCM WAV is rejected (BL-06), and record the exact exception text
+      note: (2026-09-06) PASS. A 1.0 s 440 Hz mono `pcm_s16le` @ 44.1 kHz compiled through
+            `CNA.WavImporter -> CNA.SoundEffectProcessor -> CNA.SoundEffectContentWriter`, loaded,
+            and reported `Duration` 1.000000 s. `SoundEffectInstance::getStateProperty()` was
+            `Playing` immediately after `Play()`. The SDL3 mixer opened a **real** device
+            (44 100 Hz stereo), so this is not a null-sink result.
+- [x] HOUSE-00068 — Probe: confirm a **24-bit** PCM WAV is rejected (BL-06), and record the exact exception text
       dep: HOUSE-00067 · sys: audio · plat: LNX · pri: MUST
-      accept: the failure mode is documented so the pipeline can assert against it
-- [ ] HOUSE-00069 — Probe: convert one NOX 24-bit file to 16-bit with ffmpeg and confirm it loads and sounds right
+      accept: ~~the failure mode is documented so the pipeline can assert against it~~ →
+              **the actual behaviour is measured and documented, and `BL-06` is corrected**
+      correction: (2026-09-06) the task's premise was false, so its acceptance criterion could not
+              be met as written. There is no failure mode to document. Per the phase-1 rule that a
+              measurement is never massaged to match the architecture, the measured result is
+              recorded and `cna-house.md` §6 `BL-06` is corrected instead. See
+              [Planning corrections](#planning-corrections).
+      note: (2026-09-06) **24-bit PCM is NOT rejected, by either path.** (1) `cna-content` converts
+            it and warns: *"the source is 24-bit PCM and was converted to 16-bit PCM with
+            round-to-nearest and saturation; this discards precision the source carried"* — exit
+            code 0. (2) `SoundEffect::FromStream` on the untouched raw 24-bit WAV **accepted** it,
+            no exception, duration 1.000000 s. The conversion is not merely silent but correct:
+            compiled against the same signal authored as 16-bit, the two `.cnb` files differ in
+            only 29 of 96 304 bytes, all header (asset name, lengths, fingerprint), and the PCM is
+            byte-identical from byte 400 to EOF. CNA's 24→16 conversion equals ffmpeg's.
+- [x] HOUSE-00069 — Probe: convert one NOX 24-bit file to 16-bit with ffmpeg and confirm it loads and sounds right
       dep: HOUSE-00068 · sys: audio · plat: TOOL · pri: MUST
+      note: (2026-09-06) PASS. One representative source, chosen without inventorying the
+            collection: `Electromagnetic_NOX_SOUND/Electromagnetic_Car_Dashboard_Loop_Mono_Elektrousi_01.wav`,
+            `pcm_s24le` 48 kHz mono 7.964396 s, sha256 `55522170…0ac5ec`. Both a 44.1 kHz and a
+            48 kHz 16-bit conversion compiled, loaded, played and preserved duration (7.964399 s
+            and 7.964396 s).
+      finding: **`BL-06`'s command is wrong and is corrected.** Measuring the two halves
+            separately: 24→16 bit alone costs 0.0017 dB RMS, but adding `-ar 44100` costs
+            0.889 dB RMS and 0.26 dB peak, because resampling 48 → 44.1 kHz lowpasses content this
+            source carries. `-ar 44100` is dropped — the collection is uniformly 48 kHz, CNA played
+            the 48 kHz asset correctly, and the mixer resamples at playback anyway. Given
+            `HOUSE-00068`, the offline step is now kept for **provenance, not format**.
+      licensing: this measured a format conversion using one file. **No redistribution clearance is
+            claimed.** The collection's status remains exactly what `cna-house.md` §63 records and
+            is settled only by its dedicated phase-4 licensing task.
 - [ ] HOUSE-00070 — Probe: build a simple static glTF through `cna-content` to `.cnb`, load as `Model`, draw with `BasicEffect`
       dep: HOUSE-00064 · sys: content · plat: LNX · pri: MUST
       accept: correct bounds, correct orientation, correct winding with `CullClockwise`
@@ -3559,6 +3643,9 @@ evidence that it fails.
 | 2026-09-06 | — | `cna-house.md` header and this file's header now record implementation as in progress rather than forbidden | The project owner approved implementation on 2026-09-06. |
 | 2026-09-06 | `HOUSE-00042` | `dep: HOUSE-00001…HOUSE-00041` → the completed pre-build foundation tasks only (`HOUSE-00001`, `HOUSE-00003`–`HOUSE-00024`, `HOUSE-00030`–`HOUSE-00034`, `HOUSE-00036`–`HOUSE-00041`); `accept: CI green on a fresh clone` → the six stage-A criteria now listed on the task; the task is retitled the pre-probe foundation checkpoint | **The plan deadlocked.** `HOUSE-00042` depended on all of `HOUSE-00001…00041`, which includes seven tasks (`HOUSE-00002`, `HOUSE-00025`–`HOUSE-00029`, `HOUSE-00035`) whose acceptance genuinely needs the `CMakeLists.txt` of `HOUSE-00121` and the GoogleTest harness of `HOUSE-00125`. `HOUSE-00061` depends on `HOUSE-00042`, phase 1 ends at `HOUSE-00120`, and `HOUSE-00121` depends on `HOUSE-00120` — a closed cycle in which no phase could start. Its own criterion, "CI green on a fresh clone", was unsatisfiable for the same reason and is not lost: it is what `HOUSE-00133` and `HOUSE-00134` accept on. The seven tasks stay **open** with their criteria unchanged; only the gate moved. No id was renumbered, no task was struck, no phase was reordered. |
 | 2026-09-06 | `HOUSE-01542`…`HOUSE-01547`, `HOUSE-01703`, `HOUSE-01704`, `HOUSE-01802`, `HOUSE-00919`, `HOUSE-00920`, `HOUSE-01941` | **New work, requested by the project owner on 2026-09-06:** a compressed seasonal year with visible seasons. `cna-house.md` gains §35.2b (the compressed year) and rewrites §36.3 (continuous season phase, seasonal gating, the four seasonal looks). Eleven tasks added, each in its own phase's reserved free range. | The plan had a 24-real-minute day but a realistic calendar, so one year took 146 real hours and no player would ever see autumn. The owner set the calendar to advance 24 days per simulated day, making a year 365 real minutes (~6 h): all four seasons in one long session, with the sun still rising once per 24 real minutes. The owner additionally required seasonal weather gating (no snow in summer, storms likelier in summer heat), seasonal day/night length, seasonal vegetation and snow cover, gradual rather than stepwise transitions, and a player-facing readout of time of day, year progress and outdoor temperature. No existing id was renumbered or struck; `HOUSE-01534`/`HOUSE-01535` keep their scope and are now dependencies of the new tasks. |
+| 2026-09-06 | `HOUSE-00068` | `accept: the failure mode is documented so the pipeline can assert against it` → the actual behaviour is measured and documented, and `BL-06` is corrected. `cna-house.md` §6 `BL-06` rewritten and downgraded from severity `L` to a pipeline note. | **The task's premise was measured false.** `BL-06` predicted 24-bit PCM is rejected. It is not, by either path: `cna-content`'s `SoundEffectProcessor` converts it to 16-bit with a warning and exit code 0, and `SoundEffect::FromStream` accepts a raw 24-bit WAV without throwing. The conversion is byte-identical to `ffmpeg -c:a pcm_s16le` (29 of 96 304 bytes differ, all header; PCM identical from byte 400 to EOF). There is no failure mode to document, so the criterion as written was unsatisfiable. Phase 1 exists to measure, and a measurement is never massaged to fit the architecture. |
+| 2026-09-06 | `HOUSE-00069` | `BL-06`'s workaround command `ffmpeg -i in.wav -c:a pcm_s16le -ar 44100 out.wav` → `ffmpeg -i in.wav -c:a pcm_s16le out.wav`; the offline step is re-scoped from format conversion to provenance capture | Measuring the two halves separately showed the resample, not the bit-depth reduction, is what damages the signal: 24→16 bit costs 0.0017 dB RMS, while adding `-ar 44100` costs 0.889 dB RMS and 0.26 dB peak on a high-frequency NOX source. The collection is uniformly 48 kHz, CNA loaded and played a 48 kHz asset correctly, and the mixer resamples at playback anyway, so the offline resample bought nothing and cost signal. |
+| 2026-09-06 | `HOUSE-00063` | No text change to the task; a finding recorded against `HOUSE-00136` and `HOUSE-00124` | `CNA_CNAEXT=OFF` removes the `CNA::Graphics::` engine layer (6 277 symbols → 0; archive 37.4 MB → 69 kB) but **not** the other forbidden identifiers, which live in `Microsoft::Xna::Framework::Graphics` in CNA's always-compiled core and are present in the linked binary. `check_xna_only.py` is therefore the *only* gate for those, not a redundant one. `HOUSE-00136` must be scoped to what can actually be asserted at the symbol level. |
 
 ---
 
@@ -3591,6 +3678,30 @@ be run:
 `HOUSE-00024`'s `Result<T>` is ticked but shares stage B's shape: the header is verified, its
 permanent GoogleTest test lands with `HOUSE-00125`.
 
-**Phase 1 — in progress.** The next work is `HOUSE-00061` onwards: the capability report skeleton,
-then the probe tranche that settles what phase 2's build skeleton is designed against. Phase 0's
-stage-B tasks close after phase 2 delivers the build and the test harness.
+**Phase 1 — in progress. 9 of 60 tasks complete: `HOUSE-00061`–`HOUSE-00069`.**
+
+Measured against cnanext `d422038` (branch `next`, 11 modified files, all Markdown, **zero under
+`modules/`**) and sharp-runtimenext `30ccdef`, at `CNA_GRAPHICS_RENDERER=OPENGLES3`,
+`CNA_PLATFORM=SDL3`, `CNA_CNAEXT=OFF`, `Release`, on Mesa 25.0.7 / GLES 3.2.
+
+| Task | Result |
+|---|---|
+| `HOUSE-00061` | Capability report created, 40 claim rows |
+| `HOUSE-00062` | PASS — 300 frames at 1600×900, clean exit, no GL error |
+| `HOUSE-00063` | PASS — 0 `CNA::Graphics::` symbols against a 6 277-symbol control; **caveat recorded** |
+| `HOUSE-00064` | PASS — **`.xnb` wins** over `.cnb` |
+| `HOUSE-00065` | PASS — 16/16 texels exact, **premultiplied**; expectation corrected |
+| `HOUSE-00066` | PASS — glyph placement measured from rendered ink |
+| `HOUSE-00067` | PASS — 16-bit WAV loads and plays on a real device |
+| `HOUSE-00068` | **`BL-06` disproved** — 24-bit PCM is accepted, not rejected |
+| `HOUSE-00069` | PASS — NOX conversion verified; **`BL-06`'s command corrected** |
+
+Nothing in this tranche failed or is blocked. Every probe binary and source was deleted;
+`build-probe/` is empty and untracked.
+
+The next tranche is `HOUSE-00070` onwards — the glTF, model and rendering probes — deliberately
+not started in the same session. `HOUSE-00083` (`SurfaceFormat::Single` render target) still owns
+`BL-09`: EasyGL's startup line advertises render-target `RGBA16F`/`RGBA32F` but names no
+single-channel float, so that row stays open until a target is actually created.
+
+Phase 0's stage-B tasks close after phase 2 delivers the build and the test harness.
