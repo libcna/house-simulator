@@ -2248,12 +2248,18 @@ system update order, the settings file, the logging, and a CI that runs lints an
             "`cna-house` opens a window, clears to a known colour, draws a version string with
             `SpriteFont`, exits cleanly; CI runs lint + unit + headless integration on every push" —
             is demonstrated by a 1600×900 screenshot and by `.github/workflows/ci.yml`'s six jobs.
-      note: **Test counts, in three real configurations.** `linux-debug` OPENGLES3: 290 unit +
-            integration, 4 render (under `LIBGL_ALWAYS_SOFTWARE=1`), 1 perf. `linux-release`
-            OPENGLES3 with debug tools off: 286 — the four missing ones are the debug-overlay tests
-            correctly compiled out, which is itself evidence the gate works. `headless` Tier-S:
-            286. Every gate green; `nm -C build/cna-house | grep -c 'CNA::Graphics::'` is **0** and
-            so is `AvatarRenderer`, in the Release binary.
+      note: **Test counts, in three real configurations, counted rather than estimated.**
+            `linux-debug` OPENGLES3: **286** unit + integration, 4 render (under
+            `LIBGL_ALWAYS_SOFTWARE=1`), 4 perf — **294** in total. `headless` Tier-S: 286 unit +
+            integration, and the identical count is itself worth noting, because it means no test in
+            the suite is silently skipped by the renderer. `linux-release` with debug tools off:
+            286 as well. Every gate green; `nm -C build/cna-house | grep -c 'CNA::Graphics::'` is
+            **0** and so is `AvatarRenderer`, in the Release binary.
+            *(Corrected 2026-09-06 during `HOUSE-00181`: this note first gave a split — "290 unit +
+            integration, 4 render, 1 perf" — whose parts did not add up to the 291 total actually
+            observed. The total was measured; the split was not, and writing an unmeasured
+            breakdown beside a measured total is exactly the habit this plan's `finding:` lines
+            exist to prevent.)*
       finding: **the second and third configurations earned their keep three times.** The `headless`
             Tier-S build caught two tests whose assertions were only true where Tier E exists
             (`HOUSE-00160`, `HOUSE-00157`), and the Release build caught the debug-tools default
@@ -2311,10 +2317,56 @@ system update order, the settings file, the logging, and a CI that runs lints an
 **Exit.** `make content` builds `assets-src/` into `content/`; `make content-verify` proves
 determinism; a smoke scene loads a model, a texture, a font, a sound, an effect and a video.
 
-- [ ] HOUSE-00181 — Create `assets-src/` with its subdirectories and a `.cna-content.json` per tree
+- [x] HOUSE-00181 — Create `assets-src/` with its subdirectories and a `.cna-content.json` per tree
       dep: HOUSE-00126 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00182 — Wire `cna_add_content` for the main tree; confirm an incremental no-op build is fast
+      note: (2026-09-06) The subdirectories already existed from phase 0; this task added
+            `assets-src/Textures/.cna-content.json`, `assets-src/Effects/.cna-content.json` and
+            `assets-src/README.md`, which is where the reasons live because JSON carries no comments.
+      finding: **`cna-house.md` §18.1's single-root sketch does not work, and that is measured.**
+            §18.1 shows one `cna_add_content(SOURCE_DIR assets-src)` with "`Effects/` and `world/`
+            excluded by the config". The version-1 configuration format has **no exclusion
+            mechanism** — it maps per-asset overrides and named source roots and nothing else — and
+            a single-root build was actually run: it discovers `Effects/P1Probe.fx`, tries to
+            compile it into the `.cnb` tree, and **fails the whole build** with
+            `no usable effect compiler: fxc`. Building the six subdirectories as separate roots is
+            what the format supports, which is what `CMakeLists.txt` already did; the correction is
+            to the architecture's sketch, and it is written into `assets-src/README.md` rather than
+            left to be rediscovered.
+      finding: **the config must therefore live in each ROOT, not at `assets-src/`.**
+            `cna-content` reads `.cna-content.json` from the source root of the build that is
+            running, and asset keys are relative to that root — so a file at `assets-src/` is never
+            read by a build rooted at `assets-src/Textures`. It was tried first and changed no output
+            byte, which is how the placement was settled.
+      finding: **both configs are verified READ, not assumed read.** Flipping `generateMipmaps` to
+            `true` moved `grey.cnb` from 448 to 564 bytes and `missing.cnb` from 1 408 to 1 940;
+            an invalid `profile` in the effects config failed the build with
+            `EffectSourceProcessor parameter 'profile' must be 'reach' or 'hidef'`. A configuration
+            file that has never been shown to change anything is a file that may not be read at all.
+      finding: `profile` is set to **`reach`**, not §18.1's `hidef`. `P1Probe.fx` compiles at
+            `vs_2_0`/`ps_2_0`, which is Reach. `hidef` is right for the phase-12 effect set that
+            will use shader model 3; setting it now, on a 2.0 source, would be a value nobody had a
+            reason for that changes the build fingerprint anyway.
+      finding: **`Hud.spritefont` is not reproducible across machines, and `cna-content` says so on
+            every build**: `<FontName> 'DejaVu Sans' was resolved to the installed font
+            /usr/share/fonts/.../DejaVuSans.ttf`. Two machines with different DejaVu versions produce
+            different `Fonts/Hud.cnb` bytes. That is exactly what `HOUSE-00199`'s `content-verify` is
+            for and what `HOUSE-00200` must fix by vendoring an OFL face beside the descriptor; it is
+            recorded in `assets-src/README.md` so it is not rediscovered from a red CI job.
+- [x] HOUSE-00182 — Wire `cna_add_content` for the main tree; confirm an incremental no-op build is fast
       dep: HOUSE-00181 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-06) Wired in phase 2 by `HOUSE-00127`'s `CMakeLists.txt`; this task confirmed
+            the incremental behaviour and recorded the numbers.
+      finding: `cna-content` alone on the `Fonts` root — the largest asset at 136 kB of compiled
+            `SpriteFont` — takes **0.08 s** cold and **0.04–0.05 s** for a no-op. Through
+            `cmake --build --target cnahouse_content` both cold and no-op measure **0.25–0.29 s**,
+            and **that number is Ninja's overhead across six custom targets, not the pipeline's**:
+            the whole tree is five assets, so cold and no-op are indistinguishable through the build
+            system. Quoting the 0.28 s as "the content build time" would be quoting the wrong thing.
+      finding: `--explain` gives the reason a no-op is cheap: `fingerprint and published output
+            digests unchanged`. It re-checks fingerprints rather than re-reading sources and does not
+            scan the output tree — which is the property that will matter when `assets-src/` holds a
+            house instead of five fallbacks, and is recorded now so a later regression has a
+            baseline.
 - [ ] HOUSE-00183 — Wire the effects tree with `--format xnb --fx-compiler --fx-compiler-launcher`, driven by CMake cache variables so a machine without Wine can skip it
       dep: HOUSE-00087, HOUSE-00182 · sys: content · plat: TOOL · pri: MUST
       accept: with `CNAHOUSE_TIER_E=OFF` the tree is skipped and the committed `.xnb` files are used instead

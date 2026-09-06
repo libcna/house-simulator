@@ -1,0 +1,100 @@
+# `assets-src/` — the authored truth
+
+Every runtime asset starts here and is compiled into `content/` (`.cnb`) or `content-fx/` (`.xnb`)
+by `cna-content`. Nothing under `content*/` is edited or committed; it is all derived.
+
+## The two trees, and why they are two
+
+```
+assets-src/Models Textures Audio Fonts Video world   ──→  content/      (.cnb)
+assets-src/Effects                                    ──→  content-fx/   (.xnb)
+```
+
+`cna_add_content` has **no format option** — it always produces `.cnb` — so effects, which must be
+`.xnb`, cannot go through the same call. That is why `CMakeLists.txt` drives the effect tree with an
+explicit `cna-content build --format xnb` custom command instead.
+
+**The main tree is built one subdirectory at a time, not as one root, and that is measured rather
+than stylistic.** `cna-house.md` §18.1 sketched a single `cna_add_content(SOURCE_DIR assets-src)`
+with "`Effects/` and `world/` excluded by the config". The version-1 configuration format has **no
+exclusion mechanism** — it maps per-asset overrides and named source roots, and nothing else — and a
+single-root build was tried (`HOUSE-00181`): it discovers `Effects/P1Probe.fx`, tries to compile it
+into the `.cnb` tree, and **fails the whole build** when no `fxc` is configured. Building
+`Models/`, `Textures/`, `Audio/`, `Fonts/`, `Video/` and `world/` as separate roots is what the
+format actually supports.
+
+## Where the `.cna-content.json` files live, and why not at the top
+
+`cna-content` reads `.cna-content.json` **from the source root of the build that is running**, and
+asset keys inside it are relative to that root. Because the main tree is built one subdirectory at a
+time (above), a single file at `assets-src/` would never be read by anything. It was tried:
+placing one there changed no output byte. The configs therefore sit in the roots that actually have
+a choice to make — `assets-src/Textures/` and `assets-src/Effects/` — and a subdirectory with no
+content-affecting choice has no file, because an empty config is a file someone has to read to
+learn it says nothing.
+
+**Both are verified read, not assumed read.** Flipping `generateMipmaps` to `true` in the textures
+config moved `grey.cnb` from 448 to 564 bytes and `missing.cnb` from 1 408 to 1 940 bytes; putting
+an invalid `profile` in the effects config failed the build with
+`EffectSourceProcessor parameter 'profile' must be 'reach' or 'hidef'`. A configuration file that
+has never been shown to change anything is a file that may not be being read at all.
+
+## The `.cna-content.json` files
+
+JSON carries no comments, so the reasons live here.
+
+### `assets-src/Textures/.cna-content.json`
+
+| Asset | Parameter | Value | Why |
+|---|---|---|---|
+| `Fallback/grey.png` | `generateMipmaps` | `false` | A single flat colour. A mip chain of one colour is the same colour at every level and costs a third more memory for nothing. |
+| | `premultiplyAlpha` | `true` | Pinned, not defaulted. It **is** the pipeline default, and `HOUSE-00065` measured that `SpriteBatch::Begin()` selects `BlendState::AlphaBlend` — the premultiplied blend — so straight alpha would fringe. Writing it down means a change to CNA's default cannot silently change our pixels; the parameter enters the build fingerprint, so such a change rebuilds instead of being absorbed. |
+| `Fallback/missing.png` | `generateMipmaps` | `false` | The magenta checker exists to be **unmissable**. Mipping a high-frequency checker averages it toward flat pink at distance, which is exactly the failure it is there to prevent. |
+| | `premultiplyAlpha` | `true` | As above. |
+
+### `assets-src/Effects/.cna-content.json`
+
+| Asset | Parameter | Value | Why |
+|---|---|---|---|
+| `P1Probe.fx` | `profile` | `reach` | The source compiles at `vs_2_0`/`ps_2_0`, which is Reach. §18.1 names `hidef` for the effect set, and that is right for the phase-12 effects that will use shader model 3 — setting it here, on a 2.0 source, would be a value nobody had a reason for that changes the fingerprint anyway. |
+| | `debug` | `false` | Pinned for the same reason as `premultiplyAlpha`: a compiler default that changed under us would otherwise ship a debug shader silently. |
+
+## Known reproducibility hazard: `Hud.spritefont`
+
+`cna-content` warns on every build:
+
+> `<FontName> 'DejaVu Sans' was resolved to the installed font
+> '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'. That makes this build depend on what is
+> installed on this machine; put the font file beside the .spritefont and name it there for a
+> reproducible build.
+
+It is correct and the warning is not noise: two machines with different DejaVu versions produce
+different `Fonts/Hud.cnb` bytes, which `HOUSE-00199`'s `content-verify` is meant to catch and
+`HOUSE-00200` is meant to fix by vendoring an OFL-licensed face beside the descriptor. Until then
+the font is the one asset in this tree whose output is **not** machine-independent, and it is
+recorded here rather than left for someone to rediscover from a red CI job.
+
+
+## Build cost, measured (`HOUSE-00182`)
+
+`cna-content` alone, on the `Fonts` root — the largest asset in the tree at 136 kB of compiled
+`SpriteFont`:
+
+| | |
+|---|---|
+| Cold (output removed first) | **0.08 s** |
+| Incremental no-op | **0.04–0.05 s** |
+
+Through `cmake --build --target cnahouse_content`, both cold and no-op measure **0.25–0.29 s**, and
+that number is Ninja's own overhead across six custom targets rather than the pipeline's: the whole
+tree is five assets. The figure worth remembering is the pipeline's, and the reason a no-op is cheap
+is visible with `--explain`:
+
+```
+[SKIP] Fallback/grey -> .../grey.cnb
+  reason: fingerprint and published output digests unchanged
+```
+
+It re-checks fingerprints rather than re-reading sources, and it does not scan the output tree. When
+`assets-src/` holds a house rather than five fallbacks, that is the property that matters, and it is
+recorded now so a later regression has something to be compared against.

@@ -1,0 +1,18 @@
+{
+  "format": "CNA.ContentPipeline.Config",
+  "version": 1,
+  "assets": {
+    "Fallback/grey.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": false },
+        "premultiplyAlpha": { "type": "bool", "value": true }
+      }
+    },
+    "Fallback/missing.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": false },
+        "premultiplyAlpha": { "type": "bool", "value": true }
+      }
+    }
+  }
+}

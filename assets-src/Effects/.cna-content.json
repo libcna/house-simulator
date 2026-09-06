@@ -1,0 +1,12 @@
+{
+  "format": "CNA.ContentPipeline.Config",
+  "version": 1,
+  "assets": {
+    "P1Probe.fx": {
+      "parameters": {
+        "profile": { "type": "string", "value": "reach" },
+        "debug": { "type": "bool", "value": false }
+      }
+    }
+  }
+}
