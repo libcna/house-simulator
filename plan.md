@@ -711,18 +711,54 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             `(255,128,64)` and attachment 1 held `(0,0,0)`.
       scope: this shows the renderer does not broadcast a single-output draw to every attachment,
             and that binding two targets is not itself an error. It does **not** show what a
-            *compiled* `.fx` declaring two outputs would do — that is a Tier E question that only
-            becomes answerable once `HOUSE-00087` settles whether compiled effects work at all.
-            Recorded as such rather than overclaimed. Tier S writes one attachment and is
-            unaffected either way.
-- [ ] HOUSE-00087 — **Probe: compile a trivial `.fx` through `cna-content --format xnb --fx-compiler <fxc> --fx-compiler-launcher wine`, load it as `Effect`, and draw with it**
+            *compiled* `.fx` declaring two outputs would do — so the task was **reopened** once
+            `HOUSE-00087` proved compiled effects work.
+      correction: (2026-09-06) **`BL-03`'s premise is FALSE.** A technique declaring `COLOR0` and
+            `COLOR1` with deliberately different values wrote `(255,128,64)` to attachment 0 and its
+            **own** `(32,223,96)` to attachment 1 — matching the authored `(0.125, 0.875, 0.375)` to
+            within a rounding step. MRT works on EasyGL; attachment 1 stays black only because a
+            stock effect never writes to it. `cna-house.md` §6 `BL-03` is corrected and Tier E may
+            use multiple render targets.
+- [x] HOUSE-00087 — **Probe: compile a trivial `.fx` through `cna-content --format xnb --fx-compiler <fxc> --fx-compiler-launcher wine`, load it as `Effect`, and draw with it**
       dep: HOUSE-00062 · sys: content · plat: LNX · pri: MUST
       accept: (1) the build succeeds; (2) `CompiledEffects` is true; (3) a named technique is selectable; (4) a parameter set changes the output
       verify: probe `p1-fx`; if it fails, `BL-04` is escalated and Tier E is deferred without blocking anything
-- [ ] HOUSE-00088 — Probe: a two-technique `.fx` with techniques switched by name per draw, mirroring SAMPLE-038
+      note: (2026-09-06) **PASS on all four acceptance points — Tier E is viable**, 17/17 in probe
+            `p1-fxload`. `fxc.exe` from the June 2010 DirectX SDK under Wine, through
+            `CNA.EffectSourceImporter -> CNA.EffectSourceProcessor -> CNA.XnbEffectWriter`, to a
+            3 424-byte `.xnb`. At runtime: 2 techniques and 3 parameters discovered by name;
+            `TintColor = (1, 0.5, 0.25, 1)` arrives as exactly `(255,128,64)`; changing it to
+            `(0.25, 0.75, 1, 1)` gives exactly `(64,191,255)`. `BL-04` is closed, not escalated.
+      finding: **the documented `--fx-compiler-launcher wine` does not work on its own, and the fix
+            is ours.** `cna-content` builds the `fxc` command line with Unix absolute paths, and
+            `fxc` is a Windows tool that introduces *options* with `/`, so it reports
+            *"Unknown or invalid option '/tmp/cna-fx-0-…/effect.fxb'"*. Neither side is wrong — two
+            conventions collide, and `--fx-compiler-launcher` is exactly the seam for it.
+            `tools/effects/fxc-wine.sh` is now that launcher: it translates through `winepath -w`
+            any argument that names an **existing** path, plus any argument following a path-taking
+            option. Offline tooling, so ADR-0001 does not reach it; a machine without Wine simply
+            builds no Tier E, which ADR-0003 already requires. Sizes `HOUSE-00230`.
+      finding: **`Load<Effect>` does not compile.** `Effect` is neither copyable nor
+            default-constructible and its reader is registered for `std::shared_ptr<Effect>`, so the
+            call is `Load<std::shared_ptr<Effect>>(name)` — whereas `Load<Model>` returns *by value*.
+            The two are not consistent and neither is guessable; both are now recorded.
+- [x] HOUSE-00088 — Probe: a two-technique `.fx` with techniques switched by name per draw, mirroring SAMPLE-038
       dep: HOUSE-00087 · sys: rendering · plat: LNX · pri: MUST
-- [ ] HOUSE-00089 — Probe: `SpriteBatch::Begin(effect)` with a compiled effect
+      note: (2026-09-06) PASS. `Tint` and `Textured` were selected by name and drawn alternately
+            within one frame. The fixture makes the switch **numerically** decidable rather than
+            visually: a uniform 0.5-grey texture means `Textured` must halve every channel, so the
+            same tint gives `(255,128,64)` under `Tint` and `(128,64,32)` under `Textured`.
+            Switching back restored `(255,128,64)` bit-identically — an implementation that had
+            silently kept one technique bound could not produce that pattern.
+- [x] HOUSE-00089 — Probe: `SpriteBatch::Begin(effect)` with a compiled effect
       dep: HOUSE-00087 · sys: rendering · plat: LNX · pri: SHOULD
+      note: (2026-09-06) PASS. `Begin(SpriteSortMode::Immediate, &BlendState::Opaque,
+            &SamplerState::PointClamp, &DepthStencilState::None, &RasterizerState::CullNone,
+            effect)` accepted the compiled effect and drew the sprite through it — a 0.5-grey sprite
+            arrived at `(128,128,128)`. SpriteBatch supplies its own vertices but **not** the
+            effect's transform: the effect's `WorldViewProj` had to be set to the equivalent
+            `CreateOrthographicOffCenter` projection by hand, exactly as an XNA game does. Sizes the
+            phase-43 debug overlay and phase-45 post-processing.
 - [ ] HOUSE-00090 — Probe: `OcclusionQuery` — visible and occluded quads; record whether `PixelCount` is a real count or a boolean on this driver at `OPENGLES3`
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
       accept: the boolean/count verdict is recorded and drives the N×N grid design

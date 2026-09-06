@@ -78,8 +78,8 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | G-03 | `DualTextureEffect` (albedo × lightmap, two UV channels) | `docs/dualtextureeffect-support.md` | **`PASS`** | `HOUSE-00078` | 64/64 texels within **1/255** of the analytic product, with the two channels carrying *different* coordinates so a TEXCOORD0-for-both implementation would fail. The FNA `*2` doubling factor is present (128×128 → 128). |
 | G-04 | `AlphaTestEffect` | `docs/alphatesteffect-support.md` | **`PASS`** | `HOUSE-00080` | The cutoff is exact to one alpha value for all six comparison functions, measured on a 256-column alpha ramp. Two-sided foliage works under `CullNone`; a back-facing card is correctly invisible under the single-sided state. |
 | G-05 | `EnvironmentMapEffect` including the Fresnel term, `TextureCube` sampling | `docs/environmentmapeffect-support.md` | **`PASS`** | `HOUSE-00081` | The sampled cube face equals `reflect(-E, N)` at three tilts, checked against six distinctly coloured faces. `EnvironmentMapAmount` blends linearly (0 → 0, 0.5 → half, 1 → the environment). Fresnel raises grazing reflectivity for factors 1 and 4. `AmbientLightColor` **does** reach this effect. |
-| G-06 | `Effect` from compiled Effect-Framework bytecode, behind `CNA_EASYGL_COMPILED_EFFECTS=ON` (MojoShader) | `docs/fx-compiled-effects.md` §10 | `PENDING` | `HOUSE-00087` | — |
-| G-07 | A compiled `Effect` works end-to-end in a real scene: two techniques switched by name, `Single` 2048² render target with `Depth24`, that target rebound as an effect texture | `cna-samples/plan.md:785` | `PENDING` | `HOUSE-00083`, `HOUSE-00088` | — |
+| G-06 | `Effect` from compiled Effect-Framework bytecode, behind `CNA_EASYGL_COMPILED_EFFECTS=ON` (MojoShader) | `docs/fx-compiled-effects.md` §10 | **`PASS`** | `HOUSE-00087` | `.fx` → `fxc` under Wine → `.xnb` → MojoShader → a draw, end to end. Requires the project-side path-translating launcher `tools/effects/fxc-wine.sh`; the bare `--fx-compiler-launcher wine` fails. |
+| G-07 | A compiled `Effect` works end-to-end in a real scene: two techniques switched by name, `Single` 2048² render target with `Depth24`, that target rebound as an effect texture | `cna-samples/plan.md:785` | **`PASS`** | `HOUSE-00083`, `HOUSE-00088` | All three halves measured: techniques `Tint`/`Textured` switched by name and back within one frame with numerically different results; the 2048² `Single`+`Depth24` target rendered, read back bit-exactly and sampled. |
 | G-08 | `Model`/`ModelMesh`/`ModelMeshPart`/`ModelBone` and `CopyAbsoluteBoneTransformsTo` | `docs/model-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | Depth-3 hierarchy with a sibling branch: every local and absolute transform equals the matrix computed offline, to 2e-5. `Copy*BoneTransformsTo` require a **pre-sized** destination and throw `destinationBoneTransforms` otherwise. |
 | G-09 | `Model` from compiled content carries a real bone hierarchy via `.cnb` | `docs/xnb-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | 4 authored nodes → 5 bones: CNA inserts a **synthetic `Root`** above the scene root. Parent links, `Index`, `Children` and mesh `ParentBone` all as authored. |
 | G-10 | A skinned glTF compiles to `.cnb` and its joints are recoverable **without reading `Model::Tag`** | `docs/content-pipeline.md:456-458` | **`PASS`** | `HOUSE-00074`, `HOUSE-00076` | Recoverable by **name lookup into `Model::Bones`**, which is all a sidecar carries. Blend indices are **skin-local**, not bone indices, so the sidecar *must* carry the joint-name list — acceptance path (4), not (2). `Model::Tag` and `getSkinsEXTProperty()` are never read. |
@@ -89,6 +89,7 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | G-14 | `SpriteBatch` (all overloads, sort modes, custom `Effect`) and `SpriteFont` | feature matrix | **`PASS`** (SpriteFont + `Begin`/`DrawString`/`End`) | `HOUSE-00066`, `HOUSE-00089` | Text drawn into a `RenderTarget2D` and read back: 440 lit pixels, ink inside the `MeasureString` box. Sort modes and custom-`Effect` overloads remain for `HOUSE-00089`. |
 | G-15 | `OcclusionQuery` exists; `PixelCount` is a real count **only** where the driver exposes `GL_SAMPLES_PASSED`, which the ES 3.2 profile does not — so it degrades to 0/1 (`BL-07`) | `docs/occlusionquery-support.md` | `PENDING` | `HOUSE-00090`, `HOUSE-00091` | — |
 | G-16 | `DrawInstancedPrimitives` is present in the API | `GraphicsDevice.hpp:424` | `PENDING` | `HOUSE-00093` | — |
+| G-19 | Multiple render targets: a compiled two-output effect reaches attachment 1 | `HOUSE-00086` scope note | **`PASS`** | `HOUSE-00086`, `HOUSE-00087` | A `COLOR0`/`COLOR1` technique wrote `(255,128,64)` to attachment 0 and its own distinct `(32,223,96)` to attachment 1. `BL-03` does not hold for compiled effects. |
 | G-17 | `Texture2D::SetData`/`GetData`/`FromStream`/`SaveAsPng`, NPOT sizes | feature matrix | **`PASS`** (`GetData`, `SetData`) | `HOUSE-00065`, `HOUSE-00078`, `HOUSE-00110` | 4×4 `Color` texture, 16/16 texels byte-exact — **against the premultiplied model**; see the finding. `SetData`/`FromStream`/`SaveAsPng` and NPOT are not yet probed. |
 | G-18 | WebGL context-loss handling is implemented and browser-qualified | `docs/web-emscripten-graphics-limitations.md` | `NOT PROBED` | — | Deferred to the Web phases (47–48). `HOUSE-00108` probes the desktop `DebugSimulateContextLoss` path only. |
 
@@ -161,7 +162,7 @@ recorded here.
 | `BL-07` | Is `OcclusionQuery::PixelCount` a count or a boolean here? | `HOUSE-00090`, `HOUSE-00091` | `PENDING` |
 | `BL-09` / `Q-01` | Can a `SurfaceFormat::Single` 2048² `RenderTarget2D` be created, rendered to and read back? | `HOUSE-00083` | **SETTLED — YES, all four stages.** Created with `Depth24`, rendered into, read back with `GetData(float*)` **bit-exactly** (0.625 in, 0.625 out over 3 396 649 texels), and bound as an effect texture and sampled (159/255). **Tier E uses a real float shadow map**; the RGBA8 packing fallback is not needed. |
 | `BL-02` | Is `ClearOptions::Stencil` ignored and `ReferenceStencil` inert? | `HOUSE-00085` | **SETTLED — the premise is FALSE. Stencilling works.** A two-pass mask stamped `ReferenceStencil = 1` over the left half and then drew the full quad under `CompareFunction::Equal`: left half **2048/2048** lit, right half **0/2048**. `cna-house.md` §6 `BL-02` is corrected. |
-| `BL-03` | Does EasyGL MRT attachment 1 stay black? | `HOUSE-00086` | **SETTLED for the stock-effect case — yes.** Two targets bound with `SetRenderTargets`: attachment 0 received `(255,128,64)`, attachment 1 stayed `(0,0,0)`. **Scope:** a stock effect declares one output, so this shows the renderer does not broadcast; whether a *compiled* two-output `.fx` reaches attachment 1 is a Tier E question and is not answered here. |
+| `BL-03` | Does EasyGL MRT attachment 1 stay black? | `HOUSE-00086`, `HOUSE-00087` | **SETTLED — the premise is FALSE for compiled effects.** With a *stock* effect, which declares one output, attachment 1 stays `(0,0,0)` — the renderer does not broadcast. With a **compiled two-output technique**, attachment 1 receives its own `COLOR1` exactly: `(32,223,96)` for an authored `(0.125, 0.875, 0.375)`. MRT works; `cna-house.md` §6 `BL-03` is corrected. |
 | `BL-05` | Does `VideoPlayer::Play()` throw `NotSupportedException` without the backend? | `HOUSE-00099` | `PENDING` |
 | `BL-11` | Does `DopplerScale = 0` with zero velocities produce no pitch change? | `HOUSE-00096` | `PENDING` |
 | `BL-12` | Is `Model::Meshes[i].BoundingSphere` populated from `.cnb`? | `HOUSE-00073` | **SETTLED — yes, and it is conservative rather than minimal.** Non-degenerate and it contains every vertex, but on the test box its radius is 7.686 against a minimal 6.225 (**+23 %**) and its centre is 1.55 off in Y. Usable for a cheap reject; not usable as a tight bound. |
@@ -1053,6 +1054,60 @@ is worth a build-gate of our own.
 assets that want it must be built as `.xnb`, not `.cnb`.** Combined with `HOUSE-00064`'s finding
 that `.xnb` wins the resolution order, a deliberately mixed tree (models and audio as `.cnb`,
 textures as `.xnb`) is coherent; an accidental one is a trap.
+
+
+### `HOUSE-00087` / `HOUSE-00088` / `HOUSE-00089` — compiled effects · **PASS. Tier E is viable.**
+
+All four of `HOUSE-00087`'s acceptance points hold, and the two dependent tasks with them: 17/17
+checks in `p1-fxload`.
+
+**The build.** `fxc.exe` from the June 2010 DirectX SDK, run under Wine, via `cna-content`:
+
+```
+$ cna-content build build-probe/p1-fx/P1Effect.fx -o .../P1Effect.xnb --format xnb \
+      --fx-compiler <fxc.exe> --fx-compiler-launcher tools/effects/fxc-wine.sh
+[BUILD] P1Effect -> .../P1Effect.xnb (3424 bytes;
+        CNA.EffectSourceImporter -> CNA.EffectSourceProcessor -> CNA.XnbEffectWriter)
+```
+
+**Finding — the documented `--fx-compiler-launcher wine` does not work on its own, and the fix is
+ours.** `cna-content` builds the `fxc` command line with ordinary Unix absolute paths, and `fxc` is
+a Windows tool that introduces *options* with `/`:
+
+```
+error: Unknown or invalid option '/tmp/cna-fx-0-140733683835328/effect.fxb', use /? for help
+```
+
+Neither side is wrong; two conventions collide, and `--fx-compiler-launcher` is precisely the seam
+for it. `tools/effects/fxc-wine.sh` is that launcher: it translates any argument naming a path that
+**exists**, and any argument following a path-taking option, through `winepath -w`, and passes
+everything else through. (Testing the *parent* directory instead of the argument would translate
+`/T` as well, because `dirname /T` is `/` — a mistake the script's first version made and its
+comment now prevents.) It is offline tooling, so the XNA-only rule does not reach it; a machine with
+no Wine simply builds no Tier E, which is what ADR-0003 already requires.
+
+**The runtime.**
+
+| Measurement | Result |
+|---|---|
+| Techniques discovered | 2 — `Tint`, `Textured` (plus `MultiTarget`, added later) |
+| Parameters discovered | 3 — `WorldViewProj`, `TintColor`, `BaseTexture` |
+| `technique["Tint"]` selected by name, `TintColor = (1, 0.5, 0.25, 1)` | `(255,128,64)` — the parameter reaches the shader **exactly** |
+| Same technique, `TintColor = (0.25, 0.75, 1, 1)` | `(64,191,255)` — a parameter change changes the output |
+| `technique["Textured"]`, same tint, 0.5-grey texture | `(128,64,32)` — each channel halved, so the technique really switched |
+| Switched back to `Tint` within the same frame | `(255,128,64)` — bit-identical to the first draw |
+| `SpriteBatch::Begin(..., effect)` (`HOUSE-00089`) | `(128,128,128)` — the sprite is drawn through the custom effect |
+
+**Finding — `Load<Effect>` does not compile.** `Effect` is neither copyable nor
+default-constructible and its reader is registered for `std::shared_ptr<Effect>`, so the call is
+`content.Load<std::shared_ptr<Effect>>(name)`. Worth stating because `Load<Model>` *does* return by
+value, so the two are not consistent and neither is guessable.
+
+**Finding — `BL-03` is false for compiled effects** (`HOUSE-00086` reopened and closed). With a
+stock effect, which declares one output, attachment 1 stays black — the renderer does not broadcast.
+With a technique declaring `COLOR0` and `COLOR1` carrying deliberately different values, attachment 0
+received `(255,128,64)` and attachment 1 received its **own** `(32,223,96)`, matching the authored
+`(0.125, 0.875, 0.375)` to within a rounding step. MRT works. Tier E may use it.
 
 
 ---
