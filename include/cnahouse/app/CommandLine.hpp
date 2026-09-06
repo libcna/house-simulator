@@ -62,6 +62,15 @@ namespace cnahouse::app
         /// root so their fixture paths are stable, and the content they need is in the build tree.
         /// Exposing that as a user-facing option would invite it to be used as one.
         std::string contentRoot = "content";
+
+        /// @brief Where the Tier-E effect tree lives. A SECOND root, deliberately.
+        ///
+        /// `HOUSE-00111` measured that CNB texture schema 1 is frozen to `Rgba8`, so compressed
+        /// textures must be `.xnb`; `HOUSE-00087` produces compiled effects as `.xnb` too. And
+        /// `HOUSE-00064` measured that **`.xnb` wins** the content resolution order, so a single
+        /// tree holding both containers lets a stale `.xnb` silently shadow the `.cnb` a build just
+        /// produced. Two roots is what keeps that impossible rather than merely unlikely.
+        std::string effectRoot = "content-fx";
     };
 
     /// @brief Parses `argv`. An unknown option is an error, never a silent no-op.

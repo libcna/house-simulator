@@ -5,7 +5,10 @@
 #include <optional>
 
 #include "Microsoft/Xna/Framework/Color.hpp"
+#include "Microsoft/Xna/Framework/Content/ContentManager.hpp"
+#include "Microsoft/Xna/Framework/GameServiceContainer.hpp"
 #include "Microsoft/Xna/Framework/GameTime.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsAdapter.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
 #include "Microsoft/Xna/Framework/Graphics/RenderTarget2D.hpp"
@@ -59,6 +62,9 @@ namespace cnahouse::app
         : options_(std::move(options))
         , settings_(std::move(settings))
         , graphics_(this)
+        // Constructed from the REQUESTED tier, which `ResolveTier` already narrows to what this
+        // binary contains. `ActivateTierE` narrows it a second time if the content does not load.
+        , tier_(options_.tier)
     {
         graphics_.setPreferredBackBufferWidthProperty(settings_.backBufferWidth);
         graphics_.setPreferredBackBufferHeightProperty(settings_.backBufferHeight);
@@ -99,6 +105,17 @@ namespace cnahouse::app
                            CNAHOUSE_VERSION,
                            CNAHOUSE_RENDERER_NAME,
                            CNAHOUSE_TIER_E ? "S+E" : "S");
+    }
+
+    std::string CnaHouseGame::SessionLine() const
+    {
+        // Only when they disagree, so the common case stays short: a Tier-S-only build already says
+        // "Tier S" and repeating it would be noise in the corner of every frame.
+        if (rendering::RenderTier::CompiledIn() && !tier_.IsTierE())
+        {
+            return VersionLine() + " · running S";
+        }
+        return VersionLine();
     }
 
     std::string CnaHouseGame::FrameTimeLine(float deltaSeconds)
@@ -152,6 +169,7 @@ namespace cnahouse::app
         Game::LoadContent();
         hud_ = std::make_unique<Hud>(getGraphicsDeviceProperty());
         text_.SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
+        ActivateTierE();
 
         // The font is the first content this project loads, and it is allowed to be absent: a build
         // whose content tree has not been generated yet must still start and still say so, or the
@@ -173,12 +191,78 @@ namespace cnahouse::app
         contentLoaded_ = true;
     }
 
+    void CnaHouseGame::ActivateTierE()
+    {
+        // ADR-0003 and `HOUSE-00161`: Tier E is activated by TRYING, not by asking. A capability
+        // query would answer the wrong question -- a device that supports compiled effects can
+        // still be handed a build whose content tree has none -- and `SupportsCapability` is
+        // forbidden by ADR-0001 besides.
+        if constexpr (!rendering::RenderTier::CompiledIn())
+        {
+            // `if constexpr`, not a plain `if`. `HOUSE-00160`'s acceptance is that the Tier-E branch
+            // is ABSENT from a Tier-S binary, and an ordinary branch leaves the second
+            // `ContentManager`, the effect-set load and the asset names in the image -- merely
+            // unreached, which is not the same claim. Verified on the `headless` preset, where
+            // `TierSelection.cmake` turns Tier E off on its own: `Effects/` does not appear in the
+            // binary's strings at all.
+            Log::Info(LogCat::Rendering, "Tier S: this binary has no Tier E compiled in");
+        }
+        else
+        {
+            if (!tier_.IsTierE())
+            {
+                Log::Info(LogCat::Rendering, "Tier S (requested, or narrowed by --tier=s)");
+                return;
+            }
+
+            if (effectContent_ == nullptr)
+            {
+                // MEASURED (`HOUSE-00076`): `ContentManager(nullptr)` throws "no GraphicsDevice is
+                // available from the service provider" at the first load, so it takes the Game's.
+                //
+                // A SECOND content manager, because `HOUSE-00064` measured that `.xnb` wins the
+                // resolution order over `.cnb` within one root: the two trees are two roots so that
+                // the Tier-E `.xnb` effects cannot shadow a Tier-S `.cnb` asset of the same name.
+                effectContent_ = std::make_unique<Microsoft::Xna::Framework::Content::ContentManager>(
+                    &getServicesProperty());
+                effectContent_->setRootDirectoryProperty(options_.effectRoot);
+            }
+
+            try
+            {
+                // The whole Tier-E effect set in ONE try, so a partial load is impossible: half a
+                // tier is a renderer that works until it reaches the pass whose effect is missing,
+                // which would fail in the middle of a frame rather than at load.
+                //
+                // Only `P1Probe` exists so far; phase 12 onwards adds the real set here, and the
+                // shape of this function does not change when it does.
+                auto probe =
+                    effectContent_->Load<std::shared_ptr<Microsoft::Xna::Framework::Graphics::Effect>>(
+                        "Effects/P1Probe");
+                if (probe == nullptr)
+                {
+                    tier_.FallBackToS("the Tier E effect set loaded as null");
+                    return;
+                }
+                Log::Info(LogCat::Rendering, "Tier E active: the compiled effect set loaded");
+            }
+            catch (const std::exception& e)
+            {
+                // `ContentLoadException` and `NotSupportedException` both land here, and both mean
+                // the same thing to the caller: this binary cannot draw Tier E. Logged ONCE, with
+                // the failing asset, and the settings toggle is disabled by `TierEselectable()`.
+                tier_.FallBackToS(e.what());
+            }
+        }
+    }
+
     void CnaHouseGame::UnloadContent()
     {
         // Cleared BEFORE the font it points at is destroyed. A renderer holding a dangling font is
         // a use-after-free at shutdown, which is the hardest kind to reproduce.
         text_.SetFont(nullptr);
         hud_.reset();
+        effectContent_.reset();
         contentLoaded_ = false;
         Game::UnloadContent();
     }
@@ -381,7 +465,7 @@ namespace cnahouse::app
         // a batch per string would spend more on submission than the rest of the frame does.
         hud_->batch.Begin();
         text_.DrawShadowed(hud_->batch,
-                           VersionLine(),
+                           SessionLine(),
                            Microsoft::Xna::Framework::Vector2(12.0f, 10.0f),
                            ui::Anchor::TopLeft,
                            Microsoft::Xna::Framework::Color::White);

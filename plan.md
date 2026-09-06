@@ -1751,24 +1751,134 @@ system update order, the settings file, the logging, and a CI that runs lints an
       dep: HOUSE-00145 · sys: ui · plat: ALL · pri: MUST
 - [ ] HOUSE-00157 — Implement the quality-tier table and the auto-detect heuristic (from `GraphicsAdapter` — standard XNA — and the project-owned effective feature set of `cna-house.md` §68; no CNA-specific capability query)
       dep: HOUSE-00131 · sys: rendering · plat: ALL · pri: MUST
-- [ ] HOUSE-00158 — Implement the `StateTracker`: skip redundant `BlendState`/`DepthStencilState`/`RasterizerState`/`SamplerState` sets, and count changes
+- [x] HOUSE-00158 — Implement the `StateTracker`: skip redundant `BlendState`/`DepthStencilState`/`RasterizerState`/`SamplerState` sets, and count changes
       dep: HOUSE-00127 · sys: rendering · plat: ALL · pri: MUST
       verify: unit StateTrackerTests.* replaying a recorded command list
+      note: (2026-09-06) `rendering/StateTracker.{hpp,cpp}`. Comparison is by **pointer identity**,
+            not by value: every state this project sets is a shared singleton — `RenderStates.hpp`'s
+            three, or XNA's own `BlendState::Opaque` and friends — so identity is the right
+            question, and a member-by-member comparison would cost more than the set it avoids.
+      note: the tests landed in `tests/integration/`, **not** `tests/unit/` as the `verify:` line
+            assumed, and the plan line is left as written rather than rewritten to match. The class
+            exists to talk to a `GraphicsDevice`; a unit test with a mock device in its place would
+            verify only that the mock and the tracker agree. Under the `headless` preset it gets a
+            real device with no window, so `setBlendStateProperty` is really called and a state the
+            device rejects fails here rather than in a nightly render job. Six tests.
+      finding: **the counters are the point of this class, not the skipping.** `HOUSE-00106`
+            measured `EffectPass::Apply()` at 0.184 µs against a draw call at 8.15 µs — a ratio of
+            44 — so the saving from a skipped state set is close to noise. What is *not* noise is
+            the number: a renderer that changes blend state 900 times to issue 300 draws is sorting
+            its render list wrongly, and nothing else in the frame makes that visible. The counters
+            are therefore compiled always, like `debug::Counters`, and not behind
+            `CNAHOUSE_DEBUG_TOOLS` — a perf test that measured a different program would be
+            measuring nothing.
+      finding: `Invalidate()` clears **everything**, not the one kind that changed. `SpriteBatch::End`
+            restores several states at once and a render-target change resets others; tracking which
+            would be a second model of XNA's behaviour to keep in sync, and a tracker that believes
+            a stale binding skips the set that was actually needed — a frame drawn with someone
+            else's blend state, which is far worse than a redundant set.
+      finding: sampler slots are tracked independently and an out-of-range slot is ignored rather
+            than counted. One remembered sampler would skip slot 1 because slot 0 already held that
+            object, and the second texture would be sampled with the wrong filter.
 - [ ] HOUSE-00159 — Implement `Renderer` with the pass list of `cna-house.md` §7.5 as empty passes
       dep: HOUSE-00158 · sys: rendering · plat: ALL · pri: MUST
-- [ ] HOUSE-00160 — Implement `render::RenderTier`: the build-time tier fact (`CNAHOUSE_TIER_E`, HOUSE-00122) plus the runtime-resolved active tier, published once and read by everything else. **No device capability query anywhere** — nothing in the type touches `GraphicsDevice` for this purpose.
+- [x] HOUSE-00160 — Implement `render::RenderTier`: the build-time tier fact (`CNAHOUSE_TIER_E`, HOUSE-00122) plus the runtime-resolved active tier, published once and read by everything else. **No device capability query anywhere** — nothing in the type touches `GraphicsDevice` for this purpose.
       dep: HOUSE-00159, HOUSE-00122 · sys: rendering · plat: ALL · pri: MUST
       files: src/rendering/RenderTier.cpp|hpp
       accept: (1) with `CNAHOUSE_TIER_E=OFF` the Tier-E branch is absent from the binary; (2) `check_xna_only.py` proves no file calls `SupportsCapability`; (3) the active tier is logged once and shown in the debug overlay
       verify: unit RenderTierTests.*; one build of each configuration
-- [ ] HOUSE-00161 — Implement Tier-E activation as a guarded content load: in `LoadContent`, load the Tier-E effect set inside one `try`/`catch (ContentLoadException | NotSupportedException)`; any failure selects Tier S, logs once with the failing asset, and disables the settings toggle. Add `--tier=s` and the settings entry, which force Tier S and can never force Tier E.
+      note: (2026-09-06) `rendering/RenderTier.{hpp,cpp}`. Built **before** its stated dependency
+            HOUSE-00159 (`Renderer` pass list), and that ordering is deliberate rather than an
+            oversight: `RenderTier` has no `Renderer` in it, the dependency was a sequencing guess
+            made when the plan was written, and HOUSE-00161/00163 both needed the tier first.
+            HOUSE-00159 is unblocked and unchanged.
+      note: accept (1) — with `CNAHOUSE_TIER_E=OFF` the Tier-E branch is absent — is satisfied by
+            `if constexpr`, not by an ordinary `if`. This is the difference between *absent* and
+            *unreached*: the first version used a plain early return, which left the second
+            `ContentManager`, the effect-set load and the asset name `Effects/P1Probe` in the image.
+            Verified on the `headless` preset, where `TierSelection.cmake` turns Tier E off by
+            itself, `strings -a build-consumer/cna-house | grep -c 'Effects/P1Probe'` returns **0**
+            against **1** for `build/cna-house`, and a control string present in both rules out a
+            stripped binary.
+      note: accept (2) — `check_xna_only.py` reports clean, and nothing in the type touches
+            `GraphicsDevice` at all. accept (3) — the active tier is logged once from `LoadContent`
+            and drawn every frame in the corner line (see the `SessionLine` finding below).
+      finding: **the type is asymmetric on purpose: `FallBackToS` narrows and there is no
+            `PromoteToE`.** A binary without compiled effects in its content tree cannot acquire
+            them at run time, and a method implying otherwise would eventually be called.
+            `FallBackToS` returns whether it *changed* the tier, so a repeated failure produces one
+            log line rather than one per frame, and the first reason is kept rather than the last —
+            later failures are consequences of the first.
+      finding: `TierEselectable()` goes false after a fallback. Offering a settings toggle that
+            cannot work is worse than offering none, because the user will try it and conclude the
+            game is broken.
+      finding: the unit tests assert against `RenderTier::CompiledIn()` rather than against a
+            literal `true`/`false`, so they are meaningful in **both** configurations instead of
+            only in the one the author happened to build.
+      finding: **building the second configuration is what made the tests worth having.** One
+            assertion — that `FallBackToS` records its reason — passed on the Tier-E build and
+            failed on `headless`, because the type's real invariant is narrower than it looked: a
+            non-empty `FallbackReason()` means the tier was *moved at run time*, and on a Tier-S-only
+            build nothing was moved. The assertion was wrong, not the code; reporting a fallback that
+            did not occur would be a false diagnostic in a bug report. Both configurations now run
+            190/190.
+- [x] HOUSE-00161 — Implement Tier-E activation as a guarded content load: in `LoadContent`, load the Tier-E effect set inside one `try`/`catch (ContentLoadException | NotSupportedException)`; any failure selects Tier S, logs once with the failing asset, and disables the settings toggle. Add `--tier=s` and the settings entry, which force Tier S and can never force Tier E.
       dep: HOUSE-00160 · sys: rendering · plat: ALL · pri: MUST
       accept: (1) deleting one Tier-E `.xnb` yields a fully playable Tier-S run with one logged line and no exception escaping `LoadContent`; (2) `--tier=s` on a Tier-E build renders the Tier-S path; (3) no code path can turn Tier E on
       verify: integration TierFallbackTests.MissingEffectFallsBackToTierS; render test `tier-fallback-01`
+      note: (2026-09-06) `CnaHouseGame::ActivateTierE`, called once from `LoadContent`, plus
+            `tests/integration/TierFallbackTests.cpp` (3 tests, including the one this line names).
+            The render test `tier-fallback-01` waits for HOUSE-00164's harness and is recorded there
+            rather than claimed here.
+      note: the whole effect set loads inside **one** `try`, so a partial load is impossible. Half a
+            tier is a renderer that works until it reaches the pass whose effect is missing, which
+            fails in the middle of a frame instead of at load. Only `Effects/P1Probe` is in the set
+            so far; phase 12 adds the real one and the shape of the function does not change.
+      note: accept (1) verified for real, and not by deleting a file: the test points `effectRoot`
+            at a directory with no `Effects/` subtree, which is the exact shape of a build whose
+            `content-fx` tree was never generated — and that is not hypothetical, it happened during
+            this task's first run. 30 frames drawn, exit code 0, tier S, one logged line.
+            accept (2) `--tier=s` on this Tier-E build logs `Tier S (requested, or narrowed by
+            --tier=s)` and never touches the effect content. accept (3) there is no code path that
+            turns Tier E on: `TierSelection.cmake` refuses to force it on at configure time and
+            `RenderTier` has no widening method.
+      finding: **Tier E needs a SECOND `ContentManager`, with `content-fx` as its root.**
+            `HOUSE-00064` measured that `.xnb` wins the resolution order over `.cnb` within one
+            root, so a single tree would let a Tier-E `.xnb` effect silently shadow a Tier-S `.cnb`
+            asset of the same name. Two roots make that impossible rather than unlikely.
+      finding: the drawn corner line had to be split in two. `VersionLine()` is static and names
+            what the **build** contains (`Tier S+E`); `SessionLine()` names what the **session** is
+            running and appends `· running S` when they disagree. A `--tier=s` screenshot of a
+            Tier-E build previously read `Tier S+E`, which misattributes the frame it is a
+            screenshot of — and a screenshot is the primary bug-report artefact.
+      finding: `catch (const std::exception&)` is the right width here and not a swallow.
+            `ContentLoadException` and `NotSupportedException` are the two documented failures and
+            both mean one thing to the caller — this binary cannot draw Tier E — so distinguishing
+            them would produce two branches that do the same thing. The message is preserved
+            verbatim in `FallbackReason()` and logged.
 - [ ] HOUSE-00162 — Implement `MaterialBinder` skeleton: material id → effect instance + parameters
       dep: HOUSE-00161 · sys: rendering · plat: ALL · pri: MUST
-- [ ] HOUSE-00163 — Implement the shared `RasterizerState` objects (`CullClockwise` default for glTF-derived geometry, `CullCounterClockwise` for mirrored, `CullNone` for foliage/sky)
+- [x] HOUSE-00163 — Implement the shared `RasterizerState` objects (`CullClockwise` default for glTF-derived geometry, `CullCounterClockwise` for mirrored, `CullNone` for foliage/sky)
       dep: HOUSE-00071 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-06) `rendering/RenderStates.{hpp,cpp}`: a `CullPolicy` enum, `StateFor(policy)`
+            returning a reference to the shared state, and `PolicyForDeterminant(det, twoSided)`.
+            Seven unit tests in `tests/unit/RenderTierTests.cpp`.
+      note: the enum has **four** members for three states. `ProceduralFront` is the same
+            `CullClockwise` as `ImportedFront` under its own name, because
+            **procedural geometry does not inherit the glTF winding convention** and forgetting that
+            is silent. `HOUSE-00080`'s first fixture was wound top-left → top-right → bottom-right,
+            which in NDC (+Y up) is *clockwise*, and the entire quad vanished: ten checks failed for
+            one fixture reason. The separate name is where the next generator author is told.
+      finding: `PolicyForDeterminant` exists so that the mirroring rule is applied in one place. A
+            negative world determinant means an odd number of axes were flipped, so the winding seen
+            by the rasteriser reverses and the cull state must reverse with it; a mirrored prop drawn
+            with `ImportedFront` is inside-out, which reads as a *hole* rather than as a backwards
+            object. Two-sided wins over mirrored: a foliage card is meant to be seen from behind
+            whether or not its placement mirrors.
+      finding: the states are shared objects compared by address, which is what makes
+            `StateTracker`'s pointer-identity skip correct. XNA state objects are immutable after
+            first use anyway, and `HOUSE-00106` measured a draw call at 8.15 µs of CPU — there is no
+            room in that for a per-draw allocation.
 - [ ] HOUSE-00164 — Add the first render regression test harness: fixed pose, fixed clock, render, compare PNG with tolerance
       dep: HOUSE-00151, HOUSE-00138 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00166 — Define `docs/anim-format.md`: the project-owned `.chanim` binary sidecar — magic, version, joint list by name in skin-joint order, parent indices, bind and inverse-bind poses, clips as per-bone TRS keyframe tracks, stride length and foot-plant markers

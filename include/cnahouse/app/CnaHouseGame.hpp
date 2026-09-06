@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 
+#include "Microsoft/Xna/Framework/Content/ContentManager.hpp"
 #include "Microsoft/Xna/Framework/Game.hpp"
 #include "Microsoft/Xna/Framework/GraphicsDeviceManager.hpp"
 
@@ -15,6 +16,7 @@
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
 #include "cnahouse/player/KeyboardMouseSource.hpp"
+#include "cnahouse/rendering/RenderTier.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
 
 namespace cnahouse::app
@@ -58,6 +60,25 @@ namespace cnahouse::app
         /// @brief The version line drawn in the corner and printed at startup.
         [[nodiscard]] static std::string VersionLine();
 
+        /// @brief The version line plus what this SESSION is actually running.
+        ///
+        /// `VersionLine()` names what the build contains -- it is static because that is a build
+        /// fact and the tests ask for it without a `Game`. This one names the build fact *and* the
+        /// active tier, and the two differ whenever `--tier=s` or a failed Tier-E load narrowed it.
+        /// The drawn corner line and the startup banner use this one, because a screenshot that
+        /// reported only the build fact would misattribute the frame it is a screenshot of.
+        [[nodiscard]] std::string SessionLine() const;
+
+        /// @brief The tier this session settled on, readable after `Run()` has returned.
+        ///
+        /// Read by the Tier-fallback integration test, which is the only way to check the ADR-0003
+        /// narrowing end to end: the decision is made inside `LoadContent`, so nothing outside a
+        /// frame can observe it otherwise.
+        [[nodiscard]] const rendering::RenderTier& Tier() const noexcept
+        {
+            return tier_;
+        }
+
         /// @brief The frame-time line: milliseconds and the frames-per-second it implies.
         ///
         /// Both, deliberately. Milliseconds is the number a budget is written in and the one that
@@ -87,6 +108,10 @@ namespace cnahouse::app
         void RenderFrame();
         void DrawHud();
 
+        /// @brief Loads the Tier-E effect set, or falls back to Tier S. Called once, from
+        ///        `LoadContent`.
+        void ActivateTierE();
+
         /// @brief Records a crash, attempts an emergency save, and asks the game to stop.
         void HandleCrash(std::string_view where, const std::exception* what);
 
@@ -95,6 +120,11 @@ namespace cnahouse::app
         Microsoft::Xna::Framework::GraphicsDeviceManager graphics_;
         FrameTimer timer_;
         Platform platform_;
+        rendering::RenderTier tier_;
+
+        /// A second `ContentManager`, over the `.xnb` effect tree. `HOUSE-00076` measured that one
+        /// built with a null service provider throws at the first load, so it takes the `Game`'s.
+        std::unique_ptr<Microsoft::Xna::Framework::Content::ContentManager> effectContent_;
         player::KeyboardMouseSource input_;
         ui::TextRenderer text_;
         /// A short average, so the HUD's number is readable rather than flickering every frame.

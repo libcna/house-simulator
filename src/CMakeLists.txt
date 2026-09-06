@@ -30,6 +30,11 @@ add_library(cnahouse_core STATIC
     # persistence
     persistence/DesktopSaveStore.cpp
 
+    # rendering
+    rendering/RenderTier.cpp
+    rendering/RenderStates.cpp
+    rendering/StateTracker.cpp
+
     # ui
     ui/TextRenderer.cpp
 
