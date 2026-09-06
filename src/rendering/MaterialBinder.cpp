@@ -268,12 +268,15 @@ namespace cnahouse::rendering
                 // The palette is fixed-length, so a shorter one is padded with identities. MEASURED
                 // (`HOUSE-00075`): blend indices are SKIN-LOCAL, so slot i is joint i of this skin and
                 // padding beyond the skin's joint count is never referenced.
-                std::vector<Matrix> palette(kMaxBones, Identity());
+                //
+                // REUSED, not rebuilt. MEASURED (`HOUSE-00029`): a fresh 72-matrix vector costs
+                // 149 ns against 107 ns to refill one, on a per-skinned-draw path.
+                palette_.assign(kMaxBones, Identity());
                 for (std::size_t i = 0; i < draw.bones->size(); ++i)
                 {
-                    palette[i] = (*draw.bones)[i];
+                    palette_[i] = (*draw.bones)[i];
                 }
-                effect.SetBoneTransforms(palette);
+                effect.SetBoneTransforms(palette_);
                 return &effect;
             }
         }

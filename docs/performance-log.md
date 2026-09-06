@@ -87,6 +87,10 @@ costs nothing detectable while it is hidden, not that it costs 0.02 ms. The rows
 anyway, because a later phase comparing against "the empty scene" needs to know which build the
 number came from.
 
+| 2026-09-06 | HOUSE-00029 | `std::vector<int>` of 8, built and discarded, vs `std::array` + count | Release / — / — / medians of 9 runs × 200 000 | perf `SmallContainerTests` | 15.5 ns vs **0.8 ns** | — | baseline | A 20× ratio, and it settles nothing on its own: 11 300 such containers per frame would be needed to reach 1 % of the budget. `util::SmallVector` **rejected** on this number. |
+| 2026-09-06 | HOUSE-00029 | `std::string` construction, 10 chars (SSO) vs 57 chars (allocates) | Release / — / — / medians of 9 runs × 200 000 | perf `SmallContainerTests` | **0.4 ns** vs 12.5 ns | — | baseline | Short-string optimisation already removes the allocation `util::FixedString` would have removed. **Rejected.** |
+| 2026-09-06 | HOUSE-00029 | 72-matrix bone palette: fresh `std::vector` per draw vs a reused buffer | Release / — / — / medians of 9 runs × 200 000 | perf `SmallContainerTests` | 149.1 ns vs **106.8 ns** | 8.15 µs (one draw) | 0.5 % of a draw | The one real per-draw allocation the measurement found. Fixed in `MaterialBinder` by reusing a member buffer — not because 42 ns mattered, but because removing it cost one line. |
+
 ## Budgets this log is measured against
 
 Recorded here for convenience; `cna-house.md` §71–72 is authoritative.

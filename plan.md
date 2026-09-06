@@ -366,8 +366,37 @@ acceptance criterion; it is not marked complete on the strength of the code havi
             or `std::bad_variant_access`. A `BoundingBox` is additionally validated as min ≤ max per
             axis: an inverted box passes every later type check and then silently contains nothing,
             which shows up as a room that is invisible for no reason.
-- [ ] HOUSE-00029 — Implement `util/SmallVector` and `util/FixedString`, or decide against them after measuring; record the decision
+- [x] HOUSE-00029 — Implement `util/SmallVector` and `util/FixedString`, or decide against them after measuring; record the decision
       dep: HOUSE-00024 · sys: util · plat: ALL · pri: SHOULD
+      note: (2026-09-06, phase 2) **DECIDED AGAINST BOTH, with numbers.** The task offered either
+            outcome and the measurement chose. `tests/perf/SmallContainerTests.cpp` is the
+            measurement and stays in the tree, so the decision can be revisited against evidence
+            rather than re-argued. Release, medians of nine runs, reference hardware:
+      finding: a `std::vector<int>` of 8 elements, built and discarded, costs **15.5 ns** against
+            **0.8 ns** for a stack array plus a count — a 20× ratio and 14.7 ns of real saving. The
+            ratio is not the question; the COUNT is. To reach even 1 % of the 16.67 ms frame budget
+            a frame would have to build **11 300** such containers, and nothing in this design comes
+            near that: phase 11's visibility set builds one per visible cell, which is dozens.
+            `util::SmallVector` would be a new type on every call site to buy a fraction of a
+            percent that cannot be measured in a frame.
+      finding: `util::FixedString` buys **nothing at all** for the strings this project actually
+            builds. Short-string optimisation already makes a 10-character `std::string`
+            (`"L0_KITCHEN"`) cost **0.4 ns and no allocation**; a 57-character asset path costs
+            12.5 ns because it allocates, and asset paths are built at load, not per frame. A
+            fixed-capacity string would be a second string type in the codebase to avoid an
+            allocation that libstdc++ already avoids.
+      finding: **the measurement did find one real per-draw allocation, and it was fixed.**
+            `HOUSE-00162`'s `MaterialBinder::Bind` built a fresh 72-matrix skinning palette on every
+            skinned draw: **149 ns** against **107 ns** to refill a reused buffer, so 42 ns of pure
+            allocation on a per-draw path. Against `HOUSE-00106`'s 8.15 µs draw call that is 0.5 %
+            — small — and it is removed anyway, because a member vector is one line and there is
+            nothing to weigh against it. Note that this is NOT a `SmallVector` case either: 72 × 64 B
+            is 4 608 B, which belongs on the heap once rather than on the stack every call.
+      note: the decision is reversible and the condition is written down: if a profile ever shows a
+            frame building thousands of short-lived containers — the plausible candidate is phase
+            11's per-cell frustum lists at a cell count nobody has measured yet — this task's
+            benchmark is here to re-run and the answer may change. What must not happen is adding
+            the type first and looking for the justification afterwards.
 - [x] HOUSE-00030 — Set up the git hooks / CI pre-commit equivalent running clang-format and the lint gates
       dep: HOUSE-00020, HOUSE-00022 · sys: ci · plat: CI · pri: SHOULD
 - [x] HOUSE-00031 — Write `docs/performance-log.md` with its row format and the first (empty) table
@@ -2237,6 +2266,16 @@ system update order, the settings file, the logging, and a CI that runs lints an
             which is exactly what the banner is for. Fixed in `cmake/TierSelection.cmake`, the one
             place the decision is made; a user may still force either way, only the DEFAULT follows
             the build type.
+      finding: **and fixing that exposed a second, quieter one.** `linux-debug` and `linux-release`
+            share `build/` — openeggbert build rule 2 keeps the directory list closed — and
+            `option()` never overwrites an existing cache entry, so switching back to `linux-debug`
+            straight afterwards produced a *Debug* build with the debug tools off and four tests
+            silently absent. The first fix re-derived the value on a build-type change, and it
+            **discarded an explicit `-DCNAHOUSE_DEBUG_TOOLS=ON` given on the same command line** —
+            a mechanism that overrides what the user just asked for is worse than the bug it fixes,
+            so it was replaced by a configure-time **warning**. It changes nothing and only makes
+            the disagreement impossible to miss, which is all that was ever missing. Verified in
+            both directions, and verified silent once corrected.
       finding: the empty scene costs **0.21 ms median** in the shipping configuration — **1.2 % of
             the 16.67 ms budget**. That is the floor, not a scene: there is no house yet. Its value
             is that every later phase can spend its budget on the house rather than on the harness.

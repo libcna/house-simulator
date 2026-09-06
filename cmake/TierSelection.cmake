@@ -16,14 +16,35 @@ option(CNAHOUSE_TIER_E "Build the Tier E renderer path (compiled .fx effects)" O
 # `cna-house.md` §69: ON for `Debug` and `RelWithDebInfo`, OFF for `Release`. Derived from the build
 # type rather than defaulted to ON, because "ON everywhere" is what a shipped build with an F1
 # overlay in it looks like -- and `HOUSE-00165` found exactly that: a Release binary printing
-# "debug on". A user may still force either way; only the DEFAULT follows the build type.
+# "debug on" in its own version banner.
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
     set(_debug_tools_default OFF)
 else()
     set(_debug_tools_default ON)
 endif()
+
 option(CNAHOUSE_DEBUG_TOOLS "Build the debug overlay, DebugDraw and the developer commands"
        ${_debug_tools_default})
+
+# And it SAYS SO when the cached value disagrees with the build type, because the failure this
+# guards was silent. The `linux-debug` and `linux-release` presets share `build/` (openeggbert build
+# rule 2 keeps the directory list closed), and `option()` never overwrites an existing cache entry --
+# so immediately after `HOUSE-00165` fixed the Release default, switching back to `linux-debug`
+# produced a Debug build with the debug tools off and four tests silently absent.
+#
+# A WARNING and not a `FORCE`. The first attempt at this re-derived the value on a build-type change,
+# and it discarded an explicit `-DCNAHOUSE_DEBUG_TOOLS=ON` given on the same command line -- a
+# mechanism that overrides what the user just asked for is worse than the bug it fixes. This one
+# never changes anything; it only makes the disagreement impossible to miss, which is all that was
+# missing.
+if((CNAHOUSE_DEBUG_TOOLS AND NOT _debug_tools_default)
+        OR (NOT CNAHOUSE_DEBUG_TOOLS AND _debug_tools_default))
+    message(WARNING
+            "cna-house: CNAHOUSE_DEBUG_TOOLS is ${CNAHOUSE_DEBUG_TOOLS}, but a ${CMAKE_BUILD_TYPE} "
+            "build defaults to ${_debug_tools_default} (cna-house.md §69). If that was not "
+            "deliberate it is a stale cache entry left by a different build type in this directory: "
+            "re-configure with -DCNAHOUSE_DEBUG_TOOLS=${_debug_tools_default}.")
+endif()
 
 # Which CNA option gates compiled effects depends on the renderer family. Only the families
 # `cna-house` targets are listed; an unlisted one is refused rather than guessed at, because

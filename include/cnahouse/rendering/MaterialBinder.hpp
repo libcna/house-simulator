@@ -6,14 +6,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Microsoft/Xna/Framework/Matrix.hpp"
+
 #include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Result.hpp"
-
-namespace Microsoft::Xna::Framework
-{
-    struct Matrix;
-}
 
 namespace Microsoft::Xna::Framework::Graphics
 {
@@ -174,6 +171,16 @@ namespace cnahouse::rendering
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::AlphaTestEffect> alphaTest_;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::SkinnedEffect> skinned_;
         std::size_t effectsCreated_ = 0;
+
+        /// The 72-matrix skinning palette, allocated once and refilled per draw.
+        ///
+        /// MEASURED (`HOUSE-00029`): a fresh `std::vector` of 72 matrices costs **149 ns** against
+        /// **107 ns** to refill a reused one -- 42 ns of pure allocation on a path that runs per
+        /// skinned draw. Against `HOUSE-00106`'s 8.15 us draw call that is 0.5 %, which is small;
+        /// it is removed anyway because a member vector is one line and there is nothing to weigh
+        /// against it. It is NOT a `SmallVector`: 72 x 64 B is 4 608 B, which belongs on the heap
+        /// once rather than on the stack every call.
+        std::vector<Microsoft::Xna::Framework::Matrix> palette_;
     };
 
 } // namespace cnahouse::rendering
