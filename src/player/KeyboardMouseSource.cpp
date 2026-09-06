@@ -100,6 +100,17 @@ namespace cnahouse::player
         state_.toggleOverlayPressed = edge(Edge::ToggleOverlay, Keys::F1);
         state_.screenshotPressed = edge(Edge::Screenshot, Keys::F12);
 
+        // ANY input, as one edge. `GetPressedKeys()` is plain XNA 4.0 -- the CNAEXT markings on
+        // `KeyboardState` are on its default and set constructors and on `ToString`, not on this.
+        // Mouse buttons count too: "click to start" is what a browser actually waits for.
+        const bool anyDown =
+            !keyboard.GetPressedKeys().empty() ||
+            mouse.getLeftButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed ||
+            mouse.getRightButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed ||
+            mouse.getMiddleButtonProperty() == Microsoft::Xna::Framework::Input::ButtonState::Pressed;
+        state_.anyPressed = anyDown && !anyDownPreviously_;
+        anyDownPreviously_ = anyDown;
+
         // --- look ------------------------------------------------------------------------------------
         const int x = mouse.getXProperty();
         const int y = mouse.getYProperty();

@@ -13,6 +13,7 @@
 #include "cnahouse/app/FrameTimer.hpp"
 #include "cnahouse/app/Platform.hpp"
 #include "cnahouse/app/Settings.hpp"
+#include "cnahouse/audio/AudioSystem.hpp"
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
@@ -90,6 +91,12 @@ namespace cnahouse::app
             return quality_;
         }
 
+        /// @brief The audio device and mix. Readable after `Run()` for the integration tests.
+        [[nodiscard]] const audio::AudioSystem& Audio() const noexcept
+        {
+            return audio_;
+        }
+
         /// @brief The frame-time line: milliseconds and the frames-per-second it implies.
         ///
         /// Both, deliberately. Milliseconds is the number a budget is written in and the one that
@@ -159,6 +166,10 @@ namespace cnahouse::app
         /// A second `ContentManager`, over the `.xnb` effect tree. `HOUSE-00076` measured that one
         /// built with a null service provider throws at the first load, so it takes the `Game`'s.
         std::unique_ptr<Microsoft::Xna::Framework::Content::ContentManager> effectContent_;
+        /// Constructed silent and opened by the first user gesture (`HOUSE-00155`), which is what a
+        /// browser requires and what the desktop build therefore does too, so the path is exercised
+        /// everywhere rather than only in the build that needs it.
+        audio::AudioSystem audio_;
         player::KeyboardMouseSource input_;
         ui::TextRenderer text_;
         /// A short average, so the HUD's number is readable rather than flickering every frame.

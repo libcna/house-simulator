@@ -253,6 +253,23 @@ void CnaHouseGame::Initialize()
 }
 ```
 
+**Watch for a `CNAEXT` overload of a method whose other overload is plain XNA.** The gate cannot see
+this: it matches names, and here the name is fine and only *overload resolution* is wrong.
+
+```cpp
+// forbidden -- binds to `CNAEXT static void setMasterVolumeProperty(float&&)`
+SoundEffect::setMasterVolumeProperty(0.8f);
+
+// required -- a named lvalue binds to `static void setMasterVolumeProperty(const float&)`
+const float volume = 0.8f;
+SoundEffect::setMasterVolumeProperty(volume);
+```
+
+Two cases are known so far and both were found by reading a CNA header, not by running the gate:
+this one (`HOUSE-00154`) and `KeyboardState`'s default constructor (`HOUSE-00140`). **Read the header
+of any XNA type you construct or assign for the first time**, and look for `CNAEXT` on a constructor
+or on one overload of a setter.
+
 `HOUSE-00157` found this the expensive way: the platform profile was filled after the base call, so
 the quality auto-detect that runs inside `LoadContent` saw an empty profile, logged
 `adapter unknown`, and forced anisotropy to 1 on a machine that has it. Nothing failed, nothing

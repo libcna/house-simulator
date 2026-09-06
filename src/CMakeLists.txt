@@ -19,6 +19,7 @@ add_library(cnahouse_core STATIC
     app/CommandLine.cpp
     app/FrameTimer.cpp
     app/Platform.cpp
+    audio/AudioSystem.cpp
 
     # player -- input first, because nothing else may read the devices
     player/KeyboardMouseSource.cpp

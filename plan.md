@@ -1751,11 +1751,48 @@ system update order, the settings file, the logging, and a CI that runs lints an
             than allowed to mask the original crash. That is the classic way a crash report ends up
             describing the handler instead of the bug. `HandleCrash` is also re-entrant-safe: a
             second failure while handling the first returns immediately rather than recursing.
-- [ ] HOUSE-00154 — Implement `AudioSystem` skeleton: device init, graceful `NoAudioHardwareException` handling, master volume
+- [x] HOUSE-00154 — Implement `AudioSystem` skeleton: device init, graceful `NoAudioHardwareException` handling, master volume
       dep: HOUSE-00097 · sys: audio · plat: ALL · pri: MUST
       accept: `--no-audio` and a missing device both leave the game fully playable
+      note: (2026-09-06) `audio/AudioSystem.{hpp,cpp}`: three states (`Waiting`, `Ready`, `Silent`),
+            §68's five mix categories with their defaults, a clamped master, and a `Summary()` line
+            for the log header. Nine unit tests and three integration tests; both acceptance clauses
+            are exercised by a whole `Game` running 30 frames and exiting 0.
+      finding: **`SoundEffect::setMasterVolumeProperty` IS the device probe, and that is measured.**
+            It is one of the five entry points in `modules/audio/src/Xna/SoundEffect.cpp` that force
+            CNA's mixer up and convert the internal failure into `NoAudioHardwareException` — exactly
+            as FNA's `SoundEffect.Device()` does. So the device is opened by setting the volume, in
+            plain XNA, with nothing CNA-specific asked of it and no separate init call to invent.
+      finding: **`setMasterVolumeProperty` has TWO overloads and the `float&&` one is `CNAEXT`.**
+            `SoundEffect::setMasterVolumeProperty(0.8f)` compiles, runs, and violates ADR-0001 —
+            overload resolution picks the rvalue overload for a literal or a temporary. The fix is a
+            named lvalue. **`check_xna_only.py` cannot see this class of violation**, because it is
+            an overload-resolution outcome and not a name; it is the second such case after
+            `KeyboardState`'s default constructor, and both are now written into
+            `docs/conventions.md` §5a.
+      finding: silence is a supported way to run, not an error path, so nothing here throws and the
+            "no audio hardware" case is logged at **Info** rather than Error — an error line would
+            send someone looking for a fault that is not there. `--no-audio` is `Silent` immediately
+            and never touches the device at all, which matters because it is the option someone
+            reaches for when the device is what is broken.
+      finding: `EffectiveVolume` returns **0 whenever audio is not ready**, rather than the mix, so a
+            caller that forgot to check cannot play into a device that is not there.
+      finding: the voice ceiling is not here and that is deliberate. MEASURED (`HOUSE-00097`): 512 of
+            512 looping instances reported `Playing` and CNA refused nothing, so a budget is a design
+            decision this project must enforce itself — it belongs with the voice manager in phase 31
+            (`cna-house.md` §31), not in the device skeleton.
 - [ ] HOUSE-00155 — Implement the user-gesture audio gate (title screen "press any key") on every platform
       dep: HOUSE-00154 · sys: audio · plat: ALL · pri: MUST
+      note: (2026-09-06) **Half done, and deliberately not ticked.** The gate MECHANISM is complete
+            and running: `AudioSystem` starts in `Waiting` and opens the device only from
+            `NoteUserGesture()`; `InputState::anyPressed` is a new edge meaning *any* key or mouse
+            button went down — separate from every bound action, because a browser waits for any
+            interaction and a gate wired to one named key is a gate the player can fail to find; and
+            `Update` calls the gesture once and logs the resulting state. It is uniform on every
+            platform on purpose, so the path is exercised in every build rather than only in the Web
+            one that needs it. What is missing is the **title screen that says "press any key"**,
+            which needs `HOUSE-00156`'s loading screen and `MenuStack`. Ticking this now would be
+            claiming an acceptance criterion that is knowingly unmet.
 - [ ] HOUSE-00156 — Implement the loading screen and the `MenuStack` skeleton
       dep: HOUSE-00145 · sys: ui · plat: ALL · pri: MUST
 - [x] HOUSE-00157 — Implement the quality-tier table and the auto-detect heuristic (from `GraphicsAdapter` — standard XNA — and the project-owned effective feature set of `cna-house.md` §68; no CNA-specific capability query)

@@ -36,6 +36,14 @@ namespace cnahouse::player
         bool cancelPressed = false;
         bool menuPressed = false;
 
+        /// @brief ANY key or mouse button went down this frame. The user-gesture signal.
+        ///
+        /// Separate from every other edge on purpose (`HOUSE-00155`): a browser will not open an
+        /// audio device until the user has interacted with the page, and "interacted" means any
+        /// input at all -- not `E`, not `Escape`, not a bound action. A gate wired to a specific key
+        /// would be a gate the player can fail to find.
+        bool anyPressed = false;
+
         /// @brief Debug toggles, compiled out of a build without debug tools.
         bool toggleOverlayPressed = false;
         bool screenshotPressed = false;

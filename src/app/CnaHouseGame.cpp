@@ -66,6 +66,7 @@ namespace cnahouse::app
         // binary contains. `ActivateTierE` narrows it a second time if the content does not load.
         , tier_(options_.tier)
         , renderer_(tier_)
+        , audio_(!options_.noAudio)
     {
         graphics_.setPreferredBackBufferWidthProperty(settings_.backBufferWidth);
         graphics_.setPreferredBackBufferHeightProperty(settings_.backBufferHeight);
@@ -207,6 +208,7 @@ namespace cnahouse::app
         renderer_.Install(rendering::Pass::Hud, std::make_unique<HudPass>(*this));
 
         Log::Info(LogCat::App, "{}", platform_.Summary());
+        Log::Info(LogCat::Audio, "{}", audio_.Summary());
         Log::Info(LogCat::App,
                   "back buffer {}x{}, vsync {}",
                   settings_.backBufferWidth,
@@ -380,6 +382,15 @@ namespace cnahouse::app
             {
                 const debug::Timing::Scope scope(timing_, UpdateStage::Input);
                 input_.Update(frame.deltaSeconds);
+            }
+
+            // The user-gesture audio gate (`HOUSE-00155`). The device is not touched until the
+            // player has actually pressed something, because that is what a browser requires -- and
+            // doing it on desktop too means the path is exercised in every build rather than only
+            // in the one that needs it.
+            if (input_.Current().anyPressed && audio_.NoteUserGesture())
+            {
+                Log::Info(LogCat::Audio, "{}", audio_.Summary());
             }
 
             // A short exponential average. The instantaneous delta jitters by a millisecond or two

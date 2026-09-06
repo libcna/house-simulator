@@ -107,6 +107,9 @@ namespace cnahouse::player
         InputConfig config_;
         InputState state_;
         std::array<bool, static_cast<std::size_t>(Edge::Count)> previousEdges_{};
+        /// Not one of the `Edge` slots: this is "was ANYTHING down", not one named action, and
+        /// giving it a slot would put it in a table whose entries are all bound keys.
+        bool anyDownPreviously_ = false;
         int previousMouseX_ = 0;
         int previousMouseY_ = 0;
         bool hasPreviousMouse_ = false;
