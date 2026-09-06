@@ -27,6 +27,9 @@ add_library(cnahouse_core STATIC
     content/ContentRegistry.cpp
     content/Caches.cpp
 
+    # persistence
+    persistence/DesktopSaveStore.cpp
+
     # ui
     ui/TextRenderer.cpp
 

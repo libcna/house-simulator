@@ -1689,11 +1689,43 @@ system update order, the settings file, the logging, and a CI that runs lints an
             (`HOUSE-00083` read a 2048² target back bit-exactly) and `SetData` into a staging
             texture (`HOUSE-00078`). Also: `SaveAsPng(const std::string&)` is `CNAEXT`; only the
             stream overload is plain XNA, so the file is opened with `System::IO::FileStream`.
-- [ ] HOUSE-00152 — Implement `ISaveStore` with `DesktopSaveStore` over `StorageDevice`; atomic write, backup, read
+- [x] HOUSE-00152 — Implement `ISaveStore` with `DesktopSaveStore` over `StorageDevice`; atomic write, backup, read
       dep: HOUSE-00102 · sys: persistence · plat: LNX · pri: MUST
       verify: unit SaveStoreTests.* incl. an interrupted-write simulation
-- [ ] HOUSE-00153 — Implement the crash boundary: catch at `Update`/`Draw`, log, emergency-save, offer restart
+      note: (2026-09-06) `ISaveStore` and `DesktopSaveStore` over `StorageDevice`/`StorageContainer`,
+            with ADR-0008's atomic sequence — write `<name>.tmp`, promote the current save to
+            `<name>.bak`, rename the temporary into place, remove the temporary. Verified by
+            `SaveStoreTests.*` (integration, because the behaviour under test *is* the filesystem
+            sequence and a stub would test the stub): the round trip is exact, the second write
+            leaves the first as a readable backup, no `.tmp` survives, a missing save is `NotFound`
+            rather than a throw, delete is idempotent, an empty payload is distinguishable from a
+            missing file, and a 200 kB payload survives the chunked read.
+      finding: **the container name is how `cna-house` identifies itself**, and that follows
+            directly from `HOUSE-00102`: `StorageDevice`'s `<app>` component is the literal string
+            `game`, and the only way to change it is `SetAppNameEXT`, which ADR-0001 forbids. The
+            container name *is* ours through plain XNA, so `CnaHouse` is what separates these saves
+            from every other CNA application's — giving `~/.local/share/game/CnaHouse/`.
+      finding: the interface is **text in, text out**, not bytes. ADR-0008 requires saves to be
+            human-readable JSON, and a byte-oriented interface would invite someone to put a struct
+            through it — which is precisely the "never serialise raw memory" rule.
+      finding: an empty payload is a reachable case, not a degenerate one: a house in exactly its
+            canonical initial state saves an **empty delta**, and it must not be indistinguishable
+            from a missing file. The chunked read is likewise the normal path, since ADR-0008 sizes
+            a heavily explored house at ~90 kB against an 8 kB chunk.
+- [x] HOUSE-00153 — Implement the crash boundary: catch at `Update`/`Draw`, log, emergency-save, offer restart
       dep: HOUSE-00152 · sys: app · plat: ALL · pri: MUST
+      note: (2026-09-06) `Update` and `Draw` are each wrapped, and `HandleCrash` logs what was
+            thrown **with the frame it happened in**, writes a `crash.json` report through the save
+            store, and stops. Verified by running the game unchanged afterwards.
+      finding: **this is not a `catch (...)` that swallows**, which `docs/conventions.md` §5.4
+            forbids. The `catch (...)` arm exists to record that something *not* derived from
+            `std::exception` escaped — which is itself the most useful fact available about it — and
+            then stop. A game that keeps running after an unhandled exception produces a second,
+            less comprehensible failure on top of the first.
+      finding: the emergency save is attempted **first**, and its own failure is reported rather
+            than allowed to mask the original crash. That is the classic way a crash report ends up
+            describing the handler instead of the bug. `HandleCrash` is also re-entrant-safe: a
+            second failure while handling the first returns immediately rather than recursing.
 - [ ] HOUSE-00154 — Implement `AudioSystem` skeleton: device init, graceful `NoAudioHardwareException` handling, master volume
       dep: HOUSE-00097 · sys: audio · plat: ALL · pri: MUST
       accept: `--no-audio` and a missing device both leave the game fully playable

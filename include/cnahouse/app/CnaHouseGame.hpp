@@ -87,6 +87,9 @@ namespace cnahouse::app
         void RenderFrame();
         void DrawHud();
 
+        /// @brief Records a crash, attempts an emergency save, and asks the game to stop.
+        void HandleCrash(std::string_view where, const std::exception* what);
+
         Options options_;
         Settings settings_;
         Microsoft::Xna::Framework::GraphicsDeviceManager graphics_;
@@ -114,6 +117,15 @@ namespace cnahouse::app
         std::unique_ptr<Capture> capture_;
         std::string pendingScreenshot_;
         bool exitAfterScreenshot_ = false;
+
+        /// @brief Set when `Update` or `Draw` threw. The frame after, the game stops.
+        ///
+        /// **A crash boundary is not a `catch (...)` that swallows** -- `docs/conventions.md` §5.4
+        /// forbids exactly that. It catches, logs what was thrown with the frame it happened in,
+        /// attempts an emergency save, and then *stops*, because a game that keeps running after an
+        /// unhandled exception is a game producing a second, less comprehensible failure.
+        bool crashed_ = false;
+        std::string crashMessage_;
 
         class Hud;
         std::unique_ptr<Hud> hud_;

@@ -14,6 +14,7 @@
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
 #include "cnahouse/debug/Screenshot.hpp"
+#include "cnahouse/persistence/DesktopSaveStore.hpp"
 #include "cnahouse/util/Log.hpp"
 
 namespace cnahouse::app
@@ -184,90 +185,181 @@ namespace cnahouse::app
 
     void CnaHouseGame::Update(Microsoft::Xna::Framework::GameTime& gameTime)
     {
-        Game::Update(gameTime);
-
-        const auto elapsed =
-            static_cast<float>(gameTime.getElapsedGameTimeProperty().getTotalSecondsProperty());
-        const FrameContext frame = timer_.Advance(elapsed);
-        Log::BeginFrame(frame.frameIndex);
-        counters_.BeginFrame();
-        timing_.BeginFrame();
-        overlay_.PushFrameTime(frame.deltaSeconds * 1000.0f);
-
-        // The ONE place the devices are read (`HOUSE-00140`). Every system downstream sees
-        // `InputState`, which is expressed in game terms, so none of them can be written against a
-        // key.
+        if (crashed_)
         {
-            const debug::Timing::Scope scope(timing_, UpdateStage::Input);
-            input_.Update(frame.deltaSeconds);
+            Exit();
+            return;
         }
+        try
+        {
+            Game::Update(gameTime);
 
-        // A short exponential average. The instantaneous delta jitters by a millisecond or two
-        // every frame, which makes the HUD number unreadable and makes a real regression invisible
-        // inside the noise; 0.1 settles in about a fifth of a second, fast enough to see a hitch.
-        smoothedDelta_ += (frame.deltaSeconds - smoothedDelta_) * 0.1f;
+            const auto elapsed =
+                static_cast<float>(gameTime.getElapsedGameTimeProperty().getTotalSecondsProperty());
+            const FrameContext frame = timer_.Advance(elapsed);
+            Log::BeginFrame(frame.frameIndex);
+            counters_.BeginFrame();
+            timing_.BeginFrame();
+            overlay_.PushFrameTime(frame.deltaSeconds * 1000.0f);
+
+            // The ONE place the devices are read (`HOUSE-00140`). Every system downstream sees
+            // `InputState`, which is expressed in game terms, so none of them can be written against a
+            // key.
+            {
+                const debug::Timing::Scope scope(timing_, UpdateStage::Input);
+                input_.Update(frame.deltaSeconds);
+            }
+
+            // A short exponential average. The instantaneous delta jitters by a millisecond or two
+            // every frame, which makes the HUD number unreadable and makes a real regression invisible
+            // inside the noise; 0.1 settles in about a fifth of a second, fast enough to see a hitch.
+            smoothedDelta_ += (frame.deltaSeconds - smoothedDelta_) * 0.1f;
 
 #if CNAHOUSE_DEBUG_TOOLS
-        if (input_.Current().screenshotPressed && pendingScreenshot_.empty())
-        {
-            pendingScreenshot_ = debug::Screenshot::TimestampedName(".");
-        }
-        if (input_.Current().toggleOverlayPressed)
-        {
-            overlay_.Toggle();
-            Log::Info(LogCat::Debug, "performance overlay {}", overlay_.Visible() ? "shown" : "hidden");
-        }
+            if (input_.Current().screenshotPressed && pendingScreenshot_.empty())
+            {
+                pendingScreenshot_ = debug::Screenshot::TimestampedName(".");
+            }
+            if (input_.Current().toggleOverlayPressed)
+            {
+                overlay_.Toggle();
+                Log::Info(LogCat::Debug, "performance overlay {}", overlay_.Visible() ? "shown" : "hidden");
+            }
 #endif
 
-        if (input_.Current().cancelPressed)
+            if (input_.Current().cancelPressed)
+            {
+                Log::Info(LogCat::App, "cancel pressed; exiting after {} frames", framesDrawn_);
+                Exit();
+            }
+        }
+        catch (const std::exception& e)
         {
-            Log::Info(LogCat::App, "cancel pressed; exiting after {} frames", framesDrawn_);
-            Exit();
+            HandleCrash("Update", &e);
+        }
+        catch (...)
+        {
+            // NOT a swallow. `docs/conventions.md` §5.4 forbids a `catch (...)` that hides a
+            // failure; this one records that something not derived from `std::exception` escaped,
+            // which is itself the most useful fact available about it, and then stops.
+            HandleCrash("Update", nullptr);
         }
     }
 
     void CnaHouseGame::Draw(const Microsoft::Xna::Framework::GameTime& gameTime)
     {
-        Game::Draw(gameTime);
-
-        // A pending screenshot renders the SAME frame into a capture target first, then to the
-        // back buffer. Rendering it twice rather than reading the presented buffer back is not
-        // wasteful thinking: XNA offers no way to read the back buffer, and drawing into a target
-        // also makes the image independent of the compositor -- no title bar, no cursor, nothing on
-        // top -- which is the only form usable as a regression fixture (`HOUSE-00164`).
-        if (!pendingScreenshot_.empty())
+        if (crashed_)
         {
-            if (capture_ == nullptr)
-            {
-                capture_ = std::make_unique<Capture>(
-                    getGraphicsDeviceProperty(), settings_.backBufferWidth, settings_.backBufferHeight);
-            }
-            getGraphicsDeviceProperty().SetRenderTarget(&capture_->target);
-            RenderFrame();
-            getGraphicsDeviceProperty().SetRenderTarget(nullptr);
+            Exit();
+            return;
+        }
+        try
+        {
+            Game::Draw(gameTime);
 
-            if (auto saved = debug::Screenshot::Save(
-                    getGraphicsDeviceProperty(), capture_->target, pendingScreenshot_);
-                !saved)
+            // A pending screenshot renders the SAME frame into a capture target first, then to the
+            // back buffer. Rendering it twice rather than reading the presented buffer back is not
+            // wasteful thinking: XNA offers no way to read the back buffer, and drawing into a target
+            // also makes the image independent of the compositor -- no title bar, no cursor, nothing on
+            // top -- which is the only form usable as a regression fixture (`HOUSE-00164`).
+            if (!pendingScreenshot_.empty())
             {
-                Log::Error(LogCat::Debug, "screenshot failed: {}", saved.Error().ToString());
-                exitCode_ = 1;
+                if (capture_ == nullptr)
+                {
+                    capture_ = std::make_unique<Capture>(
+                        getGraphicsDeviceProperty(), settings_.backBufferWidth, settings_.backBufferHeight);
+                }
+                getGraphicsDeviceProperty().SetRenderTarget(&capture_->target);
+                RenderFrame();
+                getGraphicsDeviceProperty().SetRenderTarget(nullptr);
+
+                if (auto saved = debug::Screenshot::Save(
+                        getGraphicsDeviceProperty(), capture_->target, pendingScreenshot_);
+                    !saved)
+                {
+                    Log::Error(LogCat::Debug, "screenshot failed: {}", saved.Error().ToString());
+                    exitCode_ = 1;
+                }
+                pendingScreenshot_.clear();
+                if (exitAfterScreenshot_)
+                {
+                    Exit();
+                }
             }
-            pendingScreenshot_.clear();
-            if (exitAfterScreenshot_)
+
+            RenderFrame();
+
+            ++framesDrawn_;
+            if (frameLimit_ != 0 && framesDrawn_ >= frameLimit_)
             {
+                Log::Info(LogCat::App, "frame limit of {} reached; exiting", frameLimit_);
                 Exit();
             }
         }
-
-        RenderFrame();
-
-        ++framesDrawn_;
-        if (frameLimit_ != 0 && framesDrawn_ >= frameLimit_)
+        catch (const std::exception& e)
         {
-            Log::Info(LogCat::App, "frame limit of {} reached; exiting", frameLimit_);
-            Exit();
+            HandleCrash("Draw", &e);
         }
+        catch (...)
+        {
+            HandleCrash("Draw", nullptr);
+        }
+    }
+
+    void CnaHouseGame::HandleCrash(std::string_view where, const std::exception* what)
+    {
+        if (crashed_)
+        {
+            return; // a second failure while handling the first must not recurse
+        }
+        crashed_ = true;
+        crashMessage_ = what != nullptr ? what->what() : "a non-std exception";
+        exitCode_ = 1;
+
+        Log::Fatal(
+            LogCat::App, "unhandled exception in {} at frame {}: {}", where, framesDrawn_, crashMessage_);
+
+        // The emergency save is attempted BEFORE anything else, and its own failure is reported
+        // rather than allowed to mask the original crash -- which is the classic way a crash report
+        // ends up describing the handler instead of the bug.
+        try
+        {
+            auto store = persistence::DesktopSaveStore::Open();
+            if (store)
+            {
+                const std::string report =
+                    std::format("{{\n  \"schema\": \"cna-house/crash/1\",\n  \"version\": \"{}\",\n"
+                                "  \"where\": \"{}\",\n  \"frame\": {},\n  \"message\": \"{}\",\n"
+                                "  \"platform\": \"{}\"\n}}\n",
+                                CNAHOUSE_VERSION,
+                                where,
+                                framesDrawn_,
+                                crashMessage_,
+                                platform_.Summary());
+                if (auto saved = (*store)->Write("crash.json", report); !saved)
+                {
+                    Log::Error(LogCat::Persistence,
+                               "the crash report could not be written: {}",
+                               saved.Error().ToString());
+                }
+                else
+                {
+                    Log::Info(
+                        LogCat::Persistence, "crash report written to {}/crash.json", (*store)->Location());
+                }
+            }
+            else
+            {
+                Log::Error(
+                    LogCat::Persistence, "no save store for the crash report: {}", store.Error().ToString());
+            }
+        }
+        catch (const std::exception& e)
+        {
+            Log::Error(LogCat::Persistence, "the crash handler itself failed: {}", e.what());
+        }
+
+        Exit();
     }
 
     void CnaHouseGame::RenderFrame()
