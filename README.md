@@ -9,7 +9,8 @@ listening to the house, and finding it exactly as you left it the next time you 
 * **Architecture and design:** [`cna-house.md`](cna-house.md) — the authoritative design baseline.
 * **Master task list:** [`plan.md`](plan.md) — 1 297 tasks in 53 phases; the execution ledger.
 * **Status:** implementation started 2026-09-06. Phase 0 (repository, conventions, decisions) is in
-  progress. There is no runnable binary yet — see [Building](#building).
+  progress. `cna-house` builds and runs today: it opens a window, clears to a known colour and
+  draws its version string and frame time. There is no house in it yet — see the plan.
 
 ---
 
@@ -80,15 +81,26 @@ checkout that already contains the committed content baseline.
 
 ## Building
 
-> **Not yet.** The CMake project is authored in phase 2 (`HOUSE-00121`). Until then this section
-> is the specification of the build commands, and CI runs the gates in
-> [Checks](#checks-run-them-before-every-commit) only. This note is removed when the build lands.
+`cna-house` builds **against `../cnanext` and `../sharp-runtimenext` as sibling checkouts**, by
+`add_subdirectory` — no vendoring, no submodules, no fetch. Clone all three side by side:
+
+```
+some-directory/
+├── cna-house/          ← this repository
+├── cnanext/            ← CNA
+└── sharp-runtimenext/  ← sharp-runtime
+```
+
+`git submodule update --init` will not fetch them, and a configure without them fails with a
+message saying exactly this.
 
 Always export the shared ccache first. There is exactly one, it is shared by every openeggbert
-repository on the machine, and pointing `CCACHE_DIR` anywhere else throws work away:
+repository on the machine, and pointing `CCACHE_DIR` anywhere else throws work away. Measured:
+a cold build of CNA plus this project is **330 s**; the same build from an empty directory with the
+cache warm is **14.9 s**.
 
 ```bash
-export CCACHE_DIR=/rv/cnaccache
+export CCACHE_DIR="$HOME/.cache/ccache"
 export CCACHE_BASEDIR=/rv
 ```
 
@@ -108,7 +120,22 @@ cmake --build build --parallel
 
 The presets set `CNA_GRAPHICS_RENDERER=OPENGLES3` (EasyGL), `CNA_CNAEXT=OFF`,
 `CNA_EASYGL_COMPILED_EFFECTS=ON` and the ccache compiler launchers. `CNA_CNAEXT=OFF` is forced and
-is not a knob: a configure that would enable it fails.
+is not a knob.
+
+Other presets exist for the cases that need a different renderer, each with its own build directory
+from the closed list — `headless` (CI integration tests), `gl33` (diagnostic only), `linux-asan`
+and `linux-ubsan`. The renderer cannot be changed after configure and there is deliberately no
+`--renderer` option; one binary is built per renderer.
+
+Tier E — compiled `.fx` effects — additionally needs an `fxc` and Wine:
+
+```bash
+cmake --preset linux-debug -DCNAHOUSE_FXC=/path/to/fxc.exe
+```
+
+Without it the configure says so and builds Tier S only, which is complete by design. **Use
+`tools/effects/fxc-wine.sh` as the launcher, not bare `wine`**: `cna-content` passes Unix absolute
+paths and `fxc` reads a leading `/` as an option. The preset already points at it.
 
 ## Running
 
@@ -119,10 +146,16 @@ is not a knob: a configure that would enable it fails.
 | Option | Effect |
 |---|---|
 | `--tier=s` | Force Tier S (stock XNA effects only), whatever the build supports |
-| `--renderer-info` | Print the configured renderer, the `CNAHOUSE_TIER_E` build fact and the resolved render tier, then continue |
-| `--reset-house` | Start from the canonical initial state, ignoring the save |
+| `--renderer-info` | Print the configured renderer, the `CNAHOUSE_TIER_E` build fact and the resolved render tier, then exit |
+| `--screenshot=<path>` | Write one PNG and exit |
+| `--log=<categories>` | Comma-separated log categories, e.g. `world,content` |
+| `--help` | Every option |
+| `--reset-house` | Start from the canonical initial state, ignoring the save *(phase 40)* |
 
-Saves and settings live in `${XDG_DATA_HOME:-~/.local/share}/cna-house/`.
+Saves live in `${XDG_DATA_HOME:-~/.local/share}/**game/CnaHouse**/`. The `game` component is
+literal and is not a mistake: `StorageDevice` uses it unless `SetAppNameEXT` is called, and that
+call is `CNAEXT`, which this project forbids. The *container* name is what identifies `cna-house`,
+and it is plain XNA.
 
 ## Testing
 

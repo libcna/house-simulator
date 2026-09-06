@@ -188,16 +188,32 @@ acceptance criterion; it is not marked complete on the strength of the code havi
       files: (directories only)
       accept: every directory in §17.5 exists; `git status` is clean after the first commit
       verify: `tools/ci/check_layout.py` asserts the directory set
-- [ ] HOUSE-00002 — Write `README.md`: what the project is, the XNA-only rule in three sentences, how to build, how to run, where the plan is
+- [x] HOUSE-00002 — Write `README.md`: what the project is, the XNA-only rule in three sentences, how to build, how to run, where the plan is
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       accept: a new contributor can build from the README alone
       verify: manual, plus a CI check that the build commands in the README are the ones CI runs
-      status: WRITTEN, NOT TICKED (2026-09-06). `README.md` is complete, including the
-              prerequisites, the exact build/run/test commands and the gate list. The
-              acceptance criterion is that a contributor can *build* from it, which cannot be
-              true before `HOUSE-00121` authors `CMakeLists.txt`. The README carries a visible
-              note saying so; the checkbox moves when the build exists and the commands are
-              executed from a fresh clone.
+      history: WRITTEN, NOT TICKED (2026-09-06 morning). The acceptance criterion is that a
+              contributor can *build* from it, which could not be true before `HOUSE-00121`
+              authored `CMakeLists.txt`. The README carried a visible note saying so.
+      note: (2026-09-06) **Closed, and verified by executing it.** The build now exists, the note is
+            removed, and every command in the README was run from a **deleted build directory**:
+            `cmake --preset linux-debug`, `cmake --build build --parallel`,
+            `ctest --test-dir build --output-on-failure` (170/170), `./build/cna-house
+            --renderer-info` and `tools/ci/run_checks.sh`. The commands are the ones
+            `CMakePresets.json` defines and the ones `.github/workflows/ci.yml` runs, which is the
+            "CI check" half of the criterion — CI drives the same presets rather than a parallel
+            copy of the commands, so they cannot drift.
+      corrections: writing the build made three statements in it wrong, and all three are fixed.
+            (1) The sibling-checkout requirement was implied rather than stated; it is now a diagram
+            plus the note that `git submodule update --init` will not fetch them, because that is
+            the first thing anyone tries. (2) `--renderer-info` was documented as printing "then
+            continue"; it prints and **exits**. (3) The save location was given as
+            `${XDG_DATA_HOME:-~/.local/share}/cna-house/`; `HOUSE-00102` measured it as
+            `.../game/CnaHouse/`, and the README now says why the `game` component is literal.
+            `CCACHE_DIR` also moves from `/rv/cnaccache` to `$HOME/.cache/ccache` here, in
+            `cna-house.md` §8.1 and in the capability report — the same physical cache, but the home
+            path is ccache's own default, so code that forgets to export it still lands in the one
+            cache instead of starting a second.
 - [x] HOUSE-00003 — Choose and add the project licence and `NOTICE.md`
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       accept: licence file present; `NOTICE.md` explains that content assets carry their own licences and points at `licenses/`

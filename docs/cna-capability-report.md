@@ -181,9 +181,14 @@ recorded, because a measurement against an unrecorded tree is not reproducible.
 were present before this session and were not made by it; they are listed so a later session can
 tell whether a differing result comes from a different tree.
 
-Measured 2026-09-06, `git status --porcelain` in `cnanext`: **11 modified files, all Markdown**
-— `.gitignore`, `NEXT.md`, `NEXT_gltf.md`, three `integration/BATCH_*_STABILIZATION.md`, two
-`integration/lanes/*.md`, two `modularization/**/*.md` and `plans/plan_binding.md`.
+Measured 2026-09-06, `git status --porcelain` in `cnanext`: **11 modified files** — `.gitignore`
+plus ten Markdown files (`NEXT.md`, `NEXT_gltf.md`, three `integration/BATCH_*_STABILIZATION.md`,
+two `integration/lanes/*.md`, two `modularization/**/*.md` and `plans/plan_binding.md`). An earlier
+revision of this paragraph called all eleven Markdown; `.gitignore` is not, and the count and the
+file list are otherwise unchanged.
+
+**Re-checked at the end of the session: still exactly those 11 files, still zero under `modules/`,
+and `sharp-runtimenext` is completely clean.** Neither sibling was modified by this work.
 
 **Zero files under `modules/` are modified.** Every measurement below is therefore against
 pristine CNA source at `d422038`; only planning prose differs from the committed tree.
@@ -3042,7 +3047,7 @@ than a plausible-looking one.
 ## Probe hygiene
 
 Every probe in this tranche was built in `build-probe/` — in this repository, never `/tmp`, never
-the session scratchpad, never a per-ticket directory — with `CCACHE_DIR=/rv/cnaccache` and
+the session scratchpad, never a per-ticket directory — with `CCACHE_DIR="$HOME/.cache/ccache"` and
 `CCACHE_BASEDIR=/rv`, and each source carried a `p1-` (or `p0-`) file-name prefix:
 
 | Probe | Task | Fate |

@@ -663,7 +663,10 @@ exist in the binary*. That is the strongest possible mechanical guarantee of the
 
 Build directories follow the openeggbert build rules: `build/`, `build-asan/`, `build-ubsan/`,
 `build-probe/`, `build-consumer/` — the closed list, in-repo, never in `/tmp` or the scratchpad.
-`CCACHE_DIR=/rv/cnaccache`, `CCACHE_BASEDIR=/rv`, launchers passed to CMake.
+`CCACHE_DIR="$HOME/.cache/ccache"`, `CCACHE_BASEDIR=/rv`, launchers passed to CMake.
+`/rv/cnaccache` is a symlink to the same physical cache; the home path is ccache's own
+default, so code that forgets to export it still lands in the one cache rather than starting
+a second one. `CMakePresets.json` sets both.
 
 ### 8.2 Runtime environment
 
