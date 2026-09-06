@@ -83,12 +83,12 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | G-08 | `Model`/`ModelMesh`/`ModelMeshPart`/`ModelBone` and `CopyAbsoluteBoneTransformsTo` | `docs/model-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | Depth-3 hierarchy with a sibling branch: every local and absolute transform equals the matrix computed offline, to 2e-5. `Copy*BoneTransformsTo` require a **pre-sized** destination and throw `destinationBoneTransforms` otherwise. |
 | G-09 | `Model` from compiled content carries a real bone hierarchy via `.cnb` | `docs/xnb-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | 4 authored nodes → 5 bones: CNA inserts a **synthetic `Root`** above the scene root. Parent links, `Index`, `Children` and mesh `ParentBone` all as authored. |
 | G-10 | A skinned glTF compiles to `.cnb` and its joints are recoverable **without reading `Model::Tag`** | `docs/content-pipeline.md:456-458` | **`PASS`** | `HOUSE-00074`, `HOUSE-00076` | Recoverable by **name lookup into `Model::Bones`**, which is all a sidecar carries. Blend indices are **skin-local**, not bone indices, so the sidecar *must* carry the joint-name list — acceptance path (4), not (2). `Model::Tag` and `getSkinsEXTProperty()` are never read. |
-| G-11 | `VertexBuffer`, `IndexBuffer`, `DynamicVertexBuffer`; EasyGL has a real 32-bit index factory | feature matrix | `PENDING` | `HOUSE-00092`, `HOUSE-00094` | — |
+| G-11 | `VertexBuffer`, `IndexBuffer`, `DynamicVertexBuffer`; EasyGL has a real 32-bit index factory | feature matrix | **`PASS`** | `HOUSE-00092`, `HOUSE-00094` | 70 000-vertex buffer with 32-bit indices draws the triangle addressed by 17-bit indices (106 261 lit px against an analytic ~106 000). 2 000 dynamic quads/frame with `Discard` cost 0.171 ms to GPU completion. |
 | G-12 | `RenderTarget2D`, `RenderTargetCube`, mip chains, MSAA on EasyGL | feature matrix | **`PASS`** (`RenderTarget2D`) | `HOUSE-00083`, `HOUSE-00084` | 2048² `Single`+`Depth24` and 64² `Color` with a 7-level mip chain, at MSAA 0 and 4, all create, render, unbind and sample. `RenderTargetCube` not probed. |
 | G-13 | `BlendState`, `DepthStencilState` compare functions, `RasterizerState`, 16 per-slot `SamplerState`s | feature matrix | **`PASS`** (the Tier S subset) | `HOUSE-00079`, `HOUSE-00080` | `BlendState::Opaque`/`Additive`, `CompareFunction::Equal` depth with writes off, all three `CullMode`s and per-slot `PointClamp` on slots 0 and 1 all behave. Additive sums are **exact** and a depth-equal second pass reaches every pixel of the first. |
 | G-14 | `SpriteBatch` (all overloads, sort modes, custom `Effect`) and `SpriteFont` | feature matrix | **`PASS`** (SpriteFont + `Begin`/`DrawString`/`End`) | `HOUSE-00066`, `HOUSE-00089` | Text drawn into a `RenderTarget2D` and read back: 440 lit pixels, ink inside the `MeasureString` box. Sort modes and custom-`Effect` overloads remain for `HOUSE-00089`. |
-| G-15 | `OcclusionQuery` exists; `PixelCount` is a real count **only** where the driver exposes `GL_SAMPLES_PASSED`, which the ES 3.2 profile does not — so it degrades to 0/1 (`BL-07`) | `docs/occlusionquery-support.md` | `PENDING` | `HOUSE-00090`, `HOUSE-00091` | — |
-| G-16 | `DrawInstancedPrimitives` is present in the API | `GraphicsDevice.hpp:424` | `PENDING` | `HOUSE-00093` | — |
+| G-15 | `OcclusionQuery` exists; `PixelCount` is a real count **only** where the driver exposes `GL_SAMPLES_PASSED`, which the ES 3.2 profile does not — so it degrades to 0/1 (`BL-07`) | `docs/occlusionquery-support.md` | **`PASS`** (the claim is correct) | `HOUSE-00090` | A quad covering an analytic **16 384** pixels reported `PixelCount == 1`; fully occluded reported `0`. It is a boolean here, exactly as §5 says. |
+| G-16 | `DrawInstancedPrimitives` is present in the API | `GraphicsDevice.hpp:424` | **`PASS`, and it is worth using** | `HOUSE-00093` | 200 instances in one instanced draw: **0.156 ms** against **2.144 ms** for 200 separate draws — **13.7× faster**. |
 | G-19 | Multiple render targets: a compiled two-output effect reaches attachment 1 | `HOUSE-00086` scope note | **`PASS`** | `HOUSE-00086`, `HOUSE-00087` | A `COLOR0`/`COLOR1` technique wrote `(255,128,64)` to attachment 0 and its own distinct `(32,223,96)` to attachment 1. `BL-03` does not hold for compiled effects. |
 | G-17 | `Texture2D::SetData`/`GetData`/`FromStream`/`SaveAsPng`, NPOT sizes | feature matrix | **`PASS`** (`GetData`, `SetData`) | `HOUSE-00065`, `HOUSE-00078`, `HOUSE-00110` | 4×4 `Color` texture, 16/16 texels byte-exact — **against the premultiplied model**; see the finding. `SetData`/`FromStream`/`SaveAsPng` and NPOT are not yet probed. |
 | G-18 | WebGL context-loss handling is implemented and browser-qualified | `docs/web-emscripten-graphics-limitations.md` | `NOT PROBED` | — | Deferred to the Web phases (47–48). `HOUSE-00108` probes the desktop `DebugSimulateContextLoss` path only. |
@@ -159,7 +159,7 @@ recorded here.
 | Blocker | Question | Settled by | Status |
 |---|---|---|---|
 | `BL-06` | Is 24-bit PCM really rejected, and with what exact error? | `HOUSE-00068` | **SETTLED — the premise was false.** It is not rejected by either path; the pipeline converts it bit-identically to ffmpeg. `cna-house.md` §6 updated. |
-| `BL-07` | Is `OcclusionQuery::PixelCount` a count or a boolean here? | `HOUSE-00090`, `HOUSE-00091` | `PENDING` |
+| `BL-07` | Is `OcclusionQuery::PixelCount` a count or a boolean here? | `HOUSE-00090` | **SETTLED — it is a BOOLEAN.** A quad of analytic area 16 384 reported `1`. The N×N grid approximation is required, and a coverage ratio computed from this count would be `1/area`, not a fraction. |
 | `BL-09` / `Q-01` | Can a `SurfaceFormat::Single` 2048² `RenderTarget2D` be created, rendered to and read back? | `HOUSE-00083` | **SETTLED — YES, all four stages.** Created with `Depth24`, rendered into, read back with `GetData(float*)` **bit-exactly** (0.625 in, 0.625 out over 3 396 649 texels), and bound as an effect texture and sampled (159/255). **Tier E uses a real float shadow map**; the RGBA8 packing fallback is not needed. |
 | `BL-02` | Is `ClearOptions::Stencil` ignored and `ReferenceStencil` inert? | `HOUSE-00085` | **SETTLED — the premise is FALSE. Stencilling works.** A two-pass mask stamped `ReferenceStencil = 1` over the left half and then drew the full quad under `CompareFunction::Equal`: left half **2048/2048** lit, right half **0/2048**. `cna-house.md` §6 `BL-02` is corrected. |
 | `BL-03` | Does EasyGL MRT attachment 1 stay black? | `HOUSE-00086`, `HOUSE-00087` | **SETTLED — the premise is FALSE for compiled effects.** With a *stock* effect, which declares one output, attachment 1 stays `(0,0,0)` — the renderer does not broadcast. With a **compiled two-output technique**, attachment 1 receives its own `COLOR1` exactly: `(32,223,96)` for an authored `(0.125, 0.875, 0.375)`. MRT works; `cna-house.md` §6 `BL-03` is corrected. |
@@ -1108,6 +1108,65 @@ stock effect, which declares one output, attachment 1 stays black — the render
 With a technique declaring `COLOR0` and `COLOR1` carrying deliberately different values, attachment 0
 received `(255,128,64)` and attachment 1 received its **own** `(32,223,96)`, matching the authored
 `(0.125, 0.875, 0.375)` to within a rounding step. MRT works. Tier E may use it.
+
+
+### `HOUSE-00090` / `HOUSE-00092` / `HOUSE-00093` / `HOUSE-00094` / `HOUSE-00106` / `HOUSE-00107` — the performance tranche · **PASS**
+
+**Method, stated once because every number below depends on it.** Release (`-O3 -DNDEBUG`),
+`OPENGLES3`/EasyGL, AMD Radeon 780M (radeonsi, phoenix), Mesa 25.0.7, into a 512×512
+`RenderTarget2D`. **3 warm-up rounds are discarded**, then **21 samples** are taken and the
+**median** reported — an odd count, so the median is an actual sample rather than an average of two.
+
+CPU submission and GPU completion are reported **separately**, because a loop that only fills a
+command buffer says nothing about a frame. Every "to completion" figure ends with a **one-texel**
+`GetData` on the render target, which forces the GPU to finish. One texel and not the whole surface:
+a full 512² readback would cost more than the work being measured. (The whole-surface `GetData`
+overload correctly refuses a short buffer — *"elementCount is less than the number of pixels in the
+requested region"* — so the rect overload is the right tool, not a workaround.)
+
+| # | Measurement | CPU | To GPU completion |
+|---|---|---|---|
+| `HOUSE-00092` | 2 000 dynamic quads/frame, `SetDataOptions::Discard` | **0.055 ms** | **0.171 ms** |
+| `HOUSE-00106` | 1 000 × `EffectPass::Apply()` alone | **0.184 ms** (**0.184 µs each**) | — |
+| `HOUSE-00106` | 1 000 × (`Apply` + `DrawIndexedPrimitives`) | **8.15 ms** (**8.15 µs per draw**) | **13.44 ms** |
+| `HOUSE-00093` | 200 instances, one `DrawInstancedPrimitives` | — | **0.156 ms** |
+| `HOUSE-00093` | the same 200 as separate draws | — | **2.144 ms** |
+| `HOUSE-00107` | 4 MiB `Texture2D::SetData` (1024²) | 8.57 ms | **9.30 ms** → **430 MiB/s** |
+| `HOUSE-00107` | 1 MiB `Texture2D::SetData` (512²) | — | **2.47 ms** → **405 MiB/s** |
+
+**What these numbers mean for the design, in order of how much they change it.**
+
+1. **The draw call is the budget, and `Apply()` is not.** `EffectPass::Apply()` costs 0.184 µs —
+   effectively free, and 44× cheaper than the draw that follows it. A `DrawIndexedPrimitives` costs
+   **8.15 µs of CPU**, so **1 000 draw calls is 8.15 ms of CPU submission alone** — half a 60 Hz
+   frame before any game logic runs. The room/portal design's job is therefore to reduce *draw
+   calls*, not to reduce state changes: batching by material is worth far less than not submitting
+   the room at all. A practical ceiling of **300–400 draws per frame** leaves room for everything
+   else.
+2. **Instancing is worth 13.7×** and should be the vegetation and neighbourhood path, as
+   `HOUSE-00093` hoped. **Scope:** `BasicEffect` has no per-instance input, so this measures the
+   *draw path* — that `DrawInstancedPrimitives` works, consumes a second stream at instance
+   frequency 1, and is dramatically cheaper. A stock effect cannot actually *read* the per-instance
+   offset; consuming it needs a Tier E `.fx`, which `HOUSE-00087` has now shown to be available.
+3. **A 4 MiB per-frame texture promotion does not fit.** At 9.3 ms it is more than half a 60 Hz
+   frame. The 1 MiB measurement shows the cost is **linear and bandwidth-bound** (430 vs 405 MiB/s),
+   not a fixed per-call overhead — so the fix is simply to promote **≈1 MiB per frame** (2.47 ms) and
+   spread a large texture over four frames. The streaming design must split promotions; it cannot
+   treat 4 MiB as one atomic step.
+4. **Dynamic geometry is nearly free.** 2 000 quads streamed with `Discard` cost 0.171 ms to
+   completion, so a particle budget in the low thousands is not the constraint anyone expected it to
+   be.
+5. **`BL-07` is real.** `OcclusionQuery::PixelCount` returned **1** for a quad covering an analytic
+   **16 384** pixels, and **0** when fully occluded. It is a boolean on this driver, exactly as §5
+   claims. Any coverage ratio computed from it would be `1/area`. The N×N grid approximation stays
+   in the design.
+6. **32-bit indices are real.** A 70 000-vertex buffer with a triangle addressed by indices needing
+   17 bits drew 106 261 lit pixels against an analytic ~106 000 — so the indices were not truncated
+   to 16 bits, which is the failure a smaller fixture could not have detected.
+
+**Finding — `Color` is not trivially copyable**, so a custom vertex struct containing one cannot go
+through the `SetData<T>`/`GetData<T>` templates; the `static_assert` fires. Custom vertex layouts
+store the packed `std::uint32_t` that `VertexElementFormat::Color` reads anyway.
 
 
 ---

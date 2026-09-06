@@ -759,19 +759,43 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             effect's transform: the effect's `WorldViewProj` had to be set to the equivalent
             `CreateOrthographicOffCenter` projection by hand, exactly as an XNA game does. Sizes the
             phase-43 debug overlay and phase-45 post-processing.
-- [ ] HOUSE-00090 — Probe: `OcclusionQuery` — visible and occluded quads; record whether `PixelCount` is a real count or a boolean on this driver at `OPENGLES3`
+- [x] HOUSE-00090 — Probe: `OcclusionQuery` — visible and occluded quads; record whether `PixelCount` is a real count or a boolean on this driver at `OPENGLES3`
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
       accept: the boolean/count verdict is recorded and drives the N×N grid design
+      note: (2026-09-06) **It is a BOOLEAN — `BL-07` confirmed.** A visible quad covering an
+            *analytic* 16 384 pixels reported `PixelCount == 1`; the same quad fully occluded
+            reported `0`. The analytic area is what makes this decisive: a real tally would have
+            returned ~16 384, and no threshold guessing was needed.
+      finding: a coverage ratio computed from this count is `1/area`, not a fraction, so the **N×N
+            grid approximation stays in the design** for phase 9. `isPixelCountPreciseEXT()` exists
+            but is a `CNAEXT` identifier and is therefore forbidden — which is exactly why this has
+            to be measured once here and encoded into the platform profile.
 - [ ] HOUSE-00091 — Probe: the same under `OPENGL33` to confirm a real `GL_SAMPLES_PASSED` count, validating the grid approximation later
       dep: HOUSE-00090 · sys: rendering · plat: LNX · pri: SHOULD
-- [ ] HOUSE-00092 — Probe: `DynamicVertexBuffer` + `SetData(..., SetDataOptions::Discard)` at 2 000 quads per frame; measure the cost
+- [x] HOUSE-00092 — Probe: `DynamicVertexBuffer` + `SetData(..., SetDataOptions::Discard)` at 2 000 quads per frame; measure the cost
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
       accept: a number in ms, recorded in the performance log; it sizes the particle budget
-- [ ] HOUSE-00093 — Probe: `DrawInstancedPrimitives` — does it work on EasyGL, and is it faster than N draws for 200 identical props?
+      note: (2026-09-06) **CPU submit 0.055 ms, 0.171 ms to GPU completion**, median of 21 samples
+            after 3 discarded warm-up rounds, Release, 512² target. Dynamic geometry is nearly free
+            — a particle budget in the low thousands is not the constraint the design assumed.
+- [x] HOUSE-00093 — Probe: `DrawInstancedPrimitives` — does it work on EasyGL, and is it faster than N draws for 200 identical props?
       dep: HOUSE-00092 · sys: rendering · plat: LNX · pri: SHOULD
       accept: a measurement and a verdict; if it works well it becomes the vegetation and neighbourhood path
-- [ ] HOUSE-00094 — Probe: 32-bit index buffers on EasyGL with a > 65 535-vertex chunk
+      note: (2026-09-06) **It works, and it is 13.7× faster.** 200 instances: one
+            `DrawInstancedPrimitives` **0.156 ms** against **2.144 ms** for 200 separate draws. It
+            becomes the vegetation and neighbourhood path, as the task hoped.
+      scope: `BasicEffect` has no per-instance input, so this measures the **draw path** — that
+            `DrawInstancedPrimitives` works, consumes a second stream at instance frequency 1, and
+            is dramatically cheaper. A stock effect cannot *read* the per-instance offset; consuming
+            it needs a Tier E `.fx`, which `HOUSE-00087` has now shown to be available. Sizes
+            `HOUSE-00541` and phase 11.
+- [x] HOUSE-00094 — Probe: 32-bit index buffers on EasyGL with a > 65 535-vertex chunk
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
+      note: (2026-09-06) PASS. A 70 000-vertex buffer with `IndexElementSize::ThirtyTwoBits`, whose
+            drawn triangle is addressed by the **last three** indices — values needing 17 bits —
+            produced 106 261 lit pixels against an analytic ~106 000. Truncation to 16 bits would
+            have drawn different geometry entirely, which a smaller fixture could not have
+            detected.
 - [ ] HOUSE-00095 — Probe: `AudioListener`/`AudioEmitter`/`Apply3D` — pan and attenuation across a 20 m sweep; record the curve
       dep: HOUSE-00067 · sys: audio · plat: LNX · pri: MUST
       accept: the measured attenuation curve is recorded so our own gain model can be calibrated against it
@@ -797,10 +821,25 @@ that produced it; `BL-09` is settled; every probe binary is removed.
 - [ ] HOUSE-00105 — Probe: build and run under the `HEADLESS` renderer; confirm `Update` runs with no window and no GPU
       dep: HOUSE-00062 · sys: app · plat: CI · pri: MUST
       accept: a 600-frame headless run with no display server (`unset DISPLAY`)
-- [ ] HOUSE-00106 — Probe: measure `EffectPass::Apply()` cost and the cost of 1 000 small `DrawIndexedPrimitives` calls, to calibrate the draw budget
+- [x] HOUSE-00106 — Probe: measure `EffectPass::Apply()` cost and the cost of 1 000 small `DrawIndexedPrimitives` calls, to calibrate the draw budget
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
-- [ ] HOUSE-00107 — Probe: `Texture2D` upload bandwidth for a 4 MB residency budget; confirm the per-frame promotion budget is realistic
+      note: (2026-09-06) `EffectPass::Apply()` **0.184 µs each** (0.184 ms for 1 000).
+            `Apply` + `DrawIndexedPrimitives` **8.15 µs of CPU per draw** — 8.15 ms of CPU for
+            1 000, 13.44 ms to GPU completion.
+      finding: **the draw call is the budget and `Apply()` is not** — the draw is 44× the cost of
+            the state application before it. So phase 9's job is to reduce **draw calls**, not state
+            changes: batching by material is worth far less than not submitting the room at all.
+            A practical ceiling of **300–400 draws per frame** leaves room for game logic. This
+            replaces any assumed budget in `cna-house.md` §41 and sizes `HOUSE-00745`.
+- [x] HOUSE-00107 — Probe: `Texture2D` upload bandwidth for a 4 MB residency budget; confirm the per-frame promotion budget is realistic
       dep: HOUSE-00065 · sys: content · plat: LNX · pri: SHOULD
+      note: (2026-09-06) **It is NOT realistic as one atomic step.** 4 MiB (1024²) `SetData` costs
+            **9.30 ms** to completion — more than half a 60 Hz frame — at **430 MiB/s**. A 1 MiB
+            (512²) upload costs **2.47 ms** at **405 MiB/s**, so the cost is **linear and
+            bandwidth-bound**, not a fixed per-call overhead.
+      finding: the fix follows directly from the linearity: promote **≈1 MiB per frame** and spread
+            a large texture over four frames. The streaming design of phase 42 must split
+            promotions; it may not treat 4 MiB as one step. Sizes `HOUSE-00772`.
 - [ ] HOUSE-00108 — Probe: EasyGL `DebugSimulateContextLoss` on desktop; confirm resources can be rebuilt from CPU state
       dep: HOUSE-00084 · sys: rendering · plat: LNX · pri: SHOULD
       accept: it is a supported path we can test against on Linux, de-risking the Web port
