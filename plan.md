@@ -796,28 +796,118 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             produced 106 261 lit pixels against an analytic ~106 000. Truncation to 16 bits would
             have drawn different geometry entirely, which a smaller fixture could not have
             detected.
-- [ ] HOUSE-00095 — Probe: `AudioListener`/`AudioEmitter`/`Apply3D` — pan and attenuation across a 20 m sweep; record the curve
+- [x] HOUSE-00095 — Probe: `AudioListener`/`AudioEmitter`/`Apply3D` — pan and attenuation across a 20 m sweep; record the curve
       dep: HOUSE-00067 · sys: audio · plat: LNX · pri: MUST
       accept: the measured attenuation curve is recorded so our own gain model can be calibrated against it
-- [ ] HOUSE-00096 — Probe: confirm `DopplerScale = 0` and zero velocities produce no pitch change (BL-11)
+      finding: **`Apply3D` does not touch the public `Volume`, `Pan` or `Pitch`.** The first version
+            of this probe read them back across a 20 m sweep and an ±10 m pan sweep and saw a flat
+            curve — a probe bug with a real finding inside it. `Apply3D` stores attenuation, pan and
+            Doppler in private state and composes them with the caller's values only when writing
+            the mixer track. **A game cannot read back what CNA applied**, so `cna-house` must model
+            the same curve rather than query it. Sizes phase 32.
+      note: (2026-09-06) 7/7. What is measured and what is read are kept apart. **Measured:** the
+            public properties are unchanged at every distance and position; and `Apply3D` is *not*
+            inert — an instance put into pan mode and then played **refuses** a later `Apply3D`
+            (*"Apply3D cannot be called on a playing instance that is not using 3D audio."*) while
+            one aimed in 3D before playing accepts it while playing. An inert implementation could
+            not produce that distinction. **Read from
+            `modules/audio/src/Xna/SoundEffectInstance.cpp`, and labelled as read:**
+            `attenuation = normalized >= 1 ? clamp(1/normalized, 0, 1) : 1` where
+            `normalized = distance / DistanceScale`; `pan = clamp(rightDisplacement / distance,
+            -1, 1)`. At `DistanceScale = 1`: 1 m → 1.0000, 2 m → 0.5000, 5 m → 0.2000,
+            10 m → 0.1000, 20 m → 0.0500. **Full volume inside `DistanceScale`, then inverse
+            *distance* beyond it** — not inverse-square, and not a falloff from zero. No HRTF, no
+            cone or orientation term; `rightDisplacement` is projected onto the listener's own
+            `Forward × Up` axis, so a rotated listener is handled.
+- [x] HOUSE-00096 — Probe: confirm `DopplerScale = 0` and zero velocities produce no pitch change (BL-11)
       dep: HOUSE-00095 · sys: audio · plat: LNX · pri: MUST
-- [ ] HOUSE-00097 — Probe: concurrent `SoundEffectInstance` count — find the practical ceiling on this host
+      note: (2026-09-06) **`BL-11` holds, for a stronger reason than the blocker assumed.** When
+            `emitter.DopplerScale * SoundEffect::DopplerScale` is zero the factor is set to exactly
+            `1.0f` **without evaluating the Doppler math at all**, so there is no rounding path by
+            which a pitch change could appear; zero velocities alone would also give 1.0. The public
+            `Pitch` property is untouched by `Apply3D` in either case, which the probe measured.
+- [x] HOUSE-00097 — Probe: concurrent `SoundEffectInstance` count — find the practical ceiling on this host
       dep: HOUSE-00095 · sys: audio · plat: LNX · pri: MUST
       accept: the number, recorded; the voice budget is set from it (32 is the design target)
+      note: (2026-09-06) **512 of 512** looping instances reported `Playing`; CNA refused nothing up
+            to the probe's own ceiling.
+      finding: **there is no hardware limit discoverable through the XNA surface**, so the number
+            the acceptance criterion asked for does not exist as a CNA-reported value. The 32-voice
+            budget is therefore a design decision `cna-house` must **enforce itself** — CNA will not
+            tell us when the mixer has been overcommitted. Sizes `HOUSE-00795` and phase 31.
 - [ ] HOUSE-00098 — Probe: `Video` + `VideoPlayer::GetTexture()` on a transcoded test clip; confirm frame advance and audio
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
 - [ ] HOUSE-00099 — Probe: `VideoPlayer` behaviour with `CNA_ENABLE_VIDEO=OFF` — confirm `NotSupportedException` and that the rest still links (BL-05)
       dep: HOUSE-00098 · sys: rendering · plat: LNX · pri: MUST
 - [ ] HOUSE-00100 — Probe: `Mouse::GetState` + `SetPosition` recentring loop; measure the delta accuracy and any drift over 10 000 frames
       dep: HOUSE-00062 · sys: player · plat: LNX · pri: MUST
-- [ ] HOUSE-00101 — Probe: `Keyboard`, `GamePad`, and the presence/behaviour of `TouchPanel` on desktop
+      status: **OPEN — INCONCLUSIVE, not failed.** The full 10 000 frames were run (deliberately not
+            shortened: a fractional per-frame error is invisible in 100 frames and ruins a camera in
+            10 000), but the environment could not supply the input the criterion needs.
+      note: (2026-09-06) **Measured:** `Mouse::SetPosition(400,300)` **is** reflected by a
+            `GetState` in the same frame; every one of the 10 000 subsequent frames then read
+            `(0,0)`. **Cause**, from `modules/input/src/Xna/Mouse.cpp:117`: `GetState` returns a
+            *snapshot* the platform layer maintains from SDL mouse-motion events. On an unattended
+            desktop the pointer never enters or moves over the probe window, no motion event
+            arrives, and the snapshot never leaves its initial value — so **no delta measured here
+            is a delta** and no drift figure from this run means anything. Recorded as inconclusive
+            rather than rounded to a pass. Needs a session with the pointer actually over the
+            window; `HOUSE-00115` lists it.
+      finding: two facts ARE established, and both change how the camera is written.
+            (1) **`Game::IsActive` is not a proxy for "the mouse is usable"** — it was `true` on all
+            9 999 frames while the snapshot never advanced, so a camera gating only on `IsActive`
+            would consume garbage.
+            (2) **`GetState` is event-driven, not a live cursor query** — the camera must seed its
+            previous position from a real motion event and must never assume the cursor starts
+            centred. Sizes phase 8.
+- [x] HOUSE-00101 — Probe: `Keyboard`, `GamePad`, and the presence/behaviour of `TouchPanel` on desktop
       dep: HOUSE-00100 · sys: player · plat: LNX · pri: MUST
-- [ ] HOUSE-00102 — Probe: `StorageDevice`/`StorageContainer` — write, read, list and delete a file; record the resolved path
+      note: (2026-09-06) PASS. `Keyboard::GetState` answers and `IsKeyDown` agrees with
+            `GetPressedKeys` on every reported key; a key that is not on the keyboard reads as up.
+            All four `GamePad` slots report **not connected**, and `GetCapabilities` agrees with
+            `GetState` on every one — the *agreement* is the point, since a game trusting only one
+            of them would be wrong half the time. `TouchPanel::GetCapabilities` and `GetState` can
+            be called on desktop **without throwing**, report `IsConnected = false` and **0
+            touches**, so phase 50 may poll them unconditionally rather than branching on platform.
+      note: this task's dependency on `HOUSE-00100` is satisfied in substance — the probe ran and
+            its input findings are recorded — even though `HOUSE-00100` itself stays open for a
+            criterion this environment cannot exercise.
+- [x] HOUSE-00102 — Probe: `StorageDevice`/`StorageContainer` — write, read, list and delete a file; record the resolved path
       dep: HOUSE-00062 · sys: persistence · plat: LNX · pri: MUST
-- [ ] HOUSE-00103 — Probe: `System::Text::Json` — serialise and deserialise a nested object with arrays and floats; check round-trip precision
+      note: (2026-09-06) PASS, 13/13. `BeginShowSelector`/`EndShowSelector` complete with no UI on
+            desktop; the device reports connected with 243 GB free; a container opens; a 276-byte
+            file is written, appears in `GetFileNames`, reads back **byte-identical**, and deletes.
+      finding: **the resolved path is not what `cna-house.md` §5 records.** §5 says
+            `$XDG_DATA_HOME/<app>` with `<app>` implied to be the game.
+            `StorageDevice.cpp:75` is `appName_.empty() ? "game" : appName_`, and the **only**
+            setter is `SetAppNameEXT` — a `CNAEXT` identifier ADR-0001 forbids. Measured root:
+            **`~/.local/share/game/P1Probe`**. An XNA-only game's saves therefore land under a
+            directory literally called `game`, shared with every other CNA application.
+            **The fix needs no extension:** the *container* name is ours through plain XNA, so
+            `BeginOpenContainer("CnaHouse")` gives `.../game/CnaHouse/`. `HOUSE-00113` corrects §5
+            and ADR-0008; sizes `HOUSE-00700`.
+- [x] HOUSE-00103 — Probe: `System::Text::Json` — serialise and deserialise a nested object with arrays and floats; check round-trip precision
       dep: HOUSE-00102 · sys: persistence · plat: LNX · pri: MUST
-- [ ] HOUSE-00104 — Probe: `BoundingFrustum::GetCorners`, `Intersects(BoundingBox)`, `BoundingBox::CreateFromPoints`, `Ray::Intersects` — verify against analytic answers
+      note: (2026-09-06) PASS. **6/6 floats return bit-identical**, compared by **bit pattern rather
+            than epsilon** — a save that drifts one ulp per cycle still corrupts a long-running
+            house, only slowly. The values were chosen to break a naive serialiser: `1/3`, `0.1`
+            (repeating in binary), `1.1754944e-38`, `3.4028235e+38`, `-0.0` and `2.0`. Nested
+            objects resolve by name to depth 4, a string array round-trips in order, and an integer
+            stays an integer. `Text.Json` had to be added to `SHARP_RUNTIME_COMPONENTS` and linked
+            directly — see `HOUSE-00076`.
+- [x] HOUSE-00104 — Probe: `BoundingFrustum::GetCorners`, `Intersects(BoundingBox)`, `BoundingBox::CreateFromPoints`, `Ray::Intersects` — verify against analytic answers
       dep: HOUSE-00062 · sys: visibility · plat: LNX · pri: MUST
+      note: (2026-09-06) PASS, **24/24**, every expectation computed by hand. The frustum is
+            **orthographic and axis-aligned** on purpose: its corners are then exactly the corners
+            of a box with the projection's own extents, with no perspective divide to force a
+            tolerance — measured `x[-2,2] y[-1,1] z[-11,-1]`, exact. Ray distances 4.0, 3.0 and 3.0
+            against box, sphere and plane; a ray starting **inside** returns 0.0; a ray pointing
+            **away** misses although its line would hit — the case a naive line-intersection
+            implementation gets wrong. `CreateFromPoints` on an unordered list with duplicates gives
+            `min(-2,-1,-4) max(3,5,9)`. Frustum vs box gives `Contains`/`Intersects`/`Disjoint`/
+            `Disjoint` for inside/straddling/behind/beyond-far, and a sphere **tangent** to a side
+            plane and a box **face-touching** another both count as intersecting — the two cases an
+            epsilon error flips. Phase 9 can be built on these.
 - [ ] HOUSE-00105 — Probe: build and run under the `HEADLESS` renderer; confirm `Update` runs with no window and no GPU
       dep: HOUSE-00062 · sys: app · plat: CI · pri: MUST
       accept: a 600-frame headless run with no display server (`unset DISPLAY`)

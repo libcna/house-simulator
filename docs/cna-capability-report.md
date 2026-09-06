@@ -60,14 +60,14 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | C-02 | `Game::Run()` is a blocking lifetime on desktop and on Emscripten | `docs/emscripten-mainloop-game-lifetime.md` | **`PASS`** (desktop half) | `HOUSE-00062` | `Run()` blocked until `Exit()`, then returned; `main` printed its summary and exited 0. The Emscripten half is phase 48. |
 | C-03 | `ContentManager::Load<T>()`, `RootDirectory`, `Unload()` exist, and resolution order is `.xnb` first, then a literal path, then `.cnj`/`.cnb` | `docs/xnb-content-pipeline-support.md` §Scope | **`PASS`** | `HOUSE-00064` | Same content name as both `.xnb` (red) and `.cnb` (blue): the red texels came back — **`.xnb` wins**. The literal-path middle tier was not exercised. |
 | C-04 | `System::*` from sharp-runtime — `Text.Json`, `IO`, `Xml.Serialization`, `IO.IsolatedStorage` — are available as CMake components | `sharp-runtimenext/modules/text-json/CMakeLists.txt` | **`PASS`** (`Text.Json`, `IO`) | `HOUSE-00076`, `HOUSE-00103` | Both used to read a sidecar from disk. **`Text.Json` is not in CNA's default component set** and CNA does not link it, so a consumer must add it to `SHARP_RUNTIME_COMPONENTS` *and* link `SharpRuntime::Text.Json` itself. Sizes `HOUSE-00121`/`HOUSE-00122`. |
-| C-05 | `StorageDevice`/`StorageContainer` work; Linux root is `$XDG_DATA_HOME/<app>` else `~/.local/share/<app>` | `modules/storage/src/StorageDevice.cpp:88-109` | `PENDING` | `HOUSE-00102` | — |
+| C-05 | `StorageDevice`/`StorageContainer` work; Linux root is `$XDG_DATA_HOME/<app>` else `~/.local/share/<app>` | `modules/storage/src/StorageDevice.cpp:88-109` | **`DIFFERENT`** | `HOUSE-00102` | Write, read, list and delete all work. But `<app>` is **the literal string `game`**, not the title: the only setter is `SetAppNameEXT`, which ADR-0001 forbids. Measured root: `~/.local/share/game/P1Probe`. The container name is ours, so a distinctive container is the XNA-only fix. |
 
 ## §5.2 Math and volumes
 
 | # | Claim | §5 evidence | Verdict | Probe | Measured |
 |---|---|---|---|---|---|
-| M-01 | The XNA math surface is complete: `Vector2/3/4`, `Matrix`, `Quaternion`, `Plane`, `Ray`, `BoundingBox`, `BoundingSphere`, `BoundingFrustum`, `ContainmentType`, `Curve`, `MathHelper`, `Point`, `Rectangle`, `Color` | `modules/math/include/Microsoft/Xna/Framework/` | `PENDING` | `HOUSE-00104` | — |
-| M-02 | `BoundingFrustum::GetCorners`, `BoundingBox::CreateFromPoints`, `Ray::Intersects` and `BoundingFrustum::Intersects(BoundingBox)` agree with analytic answers | SAMPLE-038 | `PENDING` | `HOUSE-00104` | — |
+| M-01 | The XNA math surface is complete: `Vector2/3/4`, `Matrix`, `Quaternion`, `Plane`, `Ray`, `BoundingBox`, `BoundingSphere`, `BoundingFrustum`, `ContainmentType`, `Curve`, `MathHelper`, `Point`, `Rectangle`, `Color` | `modules/math/include/Microsoft/Xna/Framework/` | **`PASS`** (the phase-9 subset) | `HOUSE-00104` | Every type the room/portal system uses was constructed and exercised. `Curve` was not probed. **`Color` is not trivially copyable** — it cannot go in a vertex struct passed to `SetData<T>`. |
+| M-02 | `BoundingFrustum::GetCorners`, `BoundingBox::CreateFromPoints`, `Ray::Intersects` and `BoundingFrustum::Intersects(BoundingBox)` agree with analytic answers | SAMPLE-038 | **`PASS`** | `HOUSE-00104` | 24/24 against hand-computed answers, in an orthographic frame chosen so every expectation is exact. Frustum corners `x[-2,2] y[-1,1] z[-11,-1]`; ray distances 4.0, 3.0, 3.0 and 0.0 exactly. |
 
 ## §5.3 Graphics
 
@@ -1167,6 +1167,134 @@ requested region"* — so the rect overload is the right tool, not a workaround.
 **Finding — `Color` is not trivially copyable**, so a custom vertex struct containing one cannot go
 through the `SetData<T>`/`GetData<T>` templates; the `static_assert` fires. Custom vertex layouts
 store the packed `std::uint32_t` that `VertexElementFormat::Color` reads anyway.
+
+
+### `HOUSE-00095` / `HOUSE-00096` / `HOUSE-00097` — 3-D audio · **PASS, after the observable was corrected**
+
+The first version of this probe read `Volume`, `Pan` and `Pitch` back after `Apply3D` and reported a
+flat curve. That was a **probe bug with a real finding inside it**:
+
+> **`Apply3D` does not touch the public `Volume`, `Pan` or `Pitch` properties.** It stores
+> attenuation, pan and Doppler in private state (`attenuation_`, `spatialPan_`, `dopplerFactor_`)
+> and composes them with the caller's values only when writing the mixer track. The properties keep
+> returning whatever the caller last set — measured across a 20 m sweep and an ±10 m pan sweep, all
+> readings unchanged.
+
+So a game **cannot read back what CNA applied**, and `cna-house` — which owns room/portal occlusion
+(§32) — must model the same curve itself rather than query it.
+
+What the probe measures, and what it reads, are kept strictly apart:
+
+**Measured.** The public properties are unchanged (above). `Apply3D` is *not* inert: an instance put
+into pan mode and then played **refuses** a later `Apply3D` — *"Apply3D cannot be called on a playing
+instance that is not using 3D audio."* — while an instance aimed in 3D before playing accepts it
+while playing. An implementation where `Apply3D` did nothing could not produce that distinction.
+
+**Read from `modules/audio/src/Xna/SoundEffectInstance.cpp`, and labelled as read.** The curve
+`cna-house` must calibrate against:
+
+```
+normalized  = distance / SoundEffect::DistanceScale
+attenuation = normalized >= 1 ? clamp(1 / normalized, 0, 1) : 1
+pan         = distance > 0 ? clamp(rightDisplacement / distance, -1, 1) : 0
+```
+
+At the default `DistanceScale = 1`: `0 m → 1.0000, 1 m → 1.0000, 2 m → 0.5000, 3 m → 0.3333,
+5 m → 0.2000, 8 m → 0.1250, 10 m → 0.1000, 15 m → 0.0667, 20 m → 0.0500`.
+
+In words: **full volume inside `DistanceScale`, then inverse *distance* beyond it** — not
+inverse-square, and not a continuous falloff from zero. Pan is the listener-relative rightward
+displacement over distance, clamped — a linear approximation with **no HRTF and no cone or
+orientation term**. `rightDisplacement` is projected onto the listener's own `Forward × Up` axis, so
+a rotated listener is handled correctly.
+
+**`BL-11` holds, for a stronger reason than the blocker assumed** (`HOUSE-00096`). When
+`emitter.DopplerScale * SoundEffect::DopplerScale` is zero, the factor is set to exactly `1.0f`
+*without evaluating the Doppler math at all* — there is no rounding path by which a pitch change
+could appear. Zero velocities alone would also give 1.0.
+
+**`HOUSE-00097` — the voice ceiling is ours to impose.** 512 of 512 looping instances reported
+`Playing`; **CNA refused nothing** up to the probe's own ceiling. There is no hardware limit
+discoverable through the XNA surface, so the 32-voice budget is a design decision `cna-house` must
+enforce itself — CNA will not tell us when the mixer has been overcommitted.
+
+### `HOUSE-00102` / `HOUSE-00103` — storage and JSON · **PASS, with §5 corrected**
+
+Write, read, list and delete all work through `StorageDevice`/`StorageContainer`, and a 276-byte
+save read back byte-identical.
+
+**Finding — the save path is not what §5 says.** `cna-house.md` §5 records the Linux root as
+`$XDG_DATA_HOME/<app>` or `~/.local/share/<app>`, with `<app>` implied to be the game. It is not:
+`StorageDevice.cpp:75` is `appName_.empty() ? "game" : appName_`, and the **only** setter is
+`SetAppNameEXT` — a `CNAEXT` identifier ADR-0001 forbids. The measured root is:
+
+```
+/home/<user>/.local/share/game/P1Probe
+```
+
+So an XNA-only game's saves land under a directory literally called `game`, shared with every other
+CNA application on the machine. **The fix needs no extension:** the *container* name is ours through
+plain XNA, so `BeginOpenContainer("CnaHouse")` gives `.../game/CnaHouse/`, which is unambiguous. The
+probe verified the container name really is a directory level by finding its own. `HOUSE-00113`
+corrects §5 and ADR-0008.
+
+**`HOUSE-00103` — float round-trip is bit-exact.** The awkward values were chosen to break a naive
+serialiser — `1/3`, `0.1` (repeating in binary), `1.1754944e-38`, `3.4028235e+38`, `-0.0`, `2.0` —
+and compared by **bit pattern**, not epsilon, because a save that drifts one ulp per cycle still
+corrupts a long-running house, only slowly. **6/6 returned bit-identical.** Nested objects, string
+arrays in order, and integers-staying-integers all hold.
+
+### `HOUSE-00104` — the math the room/portal system rests on · **PASS, 24/24**
+
+Every expectation is a number computed by hand, in a frame chosen so it is exact: the frustum is
+**orthographic and axis-aligned**, so its eight corners are exactly the corners of a box with the
+projection's own extents and there is no perspective divide to force a tolerance.
+
+| Call | Expected | Measured |
+|---|---|---|
+| `BoundingFrustum::GetCorners` extents | `x[-2,2] y[-1,1] z[-11,-1]` | exact |
+| `Ray::Intersects(BoundingBox)`, aimed from 5 units at a face at z = 1 | `4.0` | `4.000000` |
+| `Ray::Intersects(BoundingSphere)`, r = 2 | `3.0` | `3.000000` |
+| `Ray::Intersects(Plane)`, from y = 3 to y = 0 | `3.0` | `3.000000` |
+| `Ray` starting **inside** the box | `0.0` | `0.000000` |
+| `Ray` pointing **away** (its line would hit) | miss | miss |
+| `BoundingBox::CreateFromPoints` on an unordered list with duplicates | `min(-2,-1,-4) max(3,5,9)` | exact |
+| Frustum vs box: inside / straddling / behind / beyond far | `Contains` / `Intersects` / `Disjoint` / `Disjoint` | all four |
+| A sphere **tangent** to a side plane | intersects | intersects |
+| A box **face-touching** another | intersects | intersects |
+
+The last two are the cases an epsilon error flips, and the "ray pointing away" case is the one a
+naive line-intersection implementation gets wrong. Phase 9 can be built on these.
+
+### `HOUSE-00100` / `HOUSE-00101` — input · **`HOUSE-00101` PASS; `HOUSE-00100` INCONCLUSIVE, and left open**
+
+`HOUSE-00101` is settled. `Keyboard::GetState` answers and `IsKeyDown` agrees with
+`GetPressedKeys`. All four `GamePad` slots report **not connected**, and `GetCapabilities` agrees
+with `GetState` on every one — the consistency is the point, since a game that trusted only one of
+them would be wrong half the time. `TouchPanel::GetCapabilities` and `GetState` can be called on
+desktop **without throwing**, report `IsConnected = false` and **0 touches**, so a game may poll
+them unconditionally.
+
+`HOUSE-00100` ran its full **10 000 frames** — deliberately not shortened, since a fractional
+per-frame error is invisible in 100 frames and ruins a camera in 10 000 — and the result is
+**inconclusive for the drift criterion**, which is recorded rather than rounded to a pass:
+
+* **Measured:** `Mouse::SetPosition(400, 300)` **is** reflected by a `GetState` in the same frame.
+* **Measured:** every one of the 10 000 subsequent frames read `(0, 0)`.
+* **Cause, from `modules/input/src/Xna/Mouse.cpp:117`:** `GetState` returns a *snapshot* the platform
+  layer maintains from SDL mouse-motion events. On an unattended desktop the pointer never enters or
+  moves over the probe window, no motion event arrives, and the snapshot never leaves its initial
+  value. **No delta measured here is a delta**, so no drift figure from this run means anything.
+
+Two facts are established regardless, and both change how the camera is written:
+
+1. **`Game::IsActive` is not a proxy for "the mouse is usable".** It was `true` on all 9 999 frames
+   while the snapshot never advanced. A camera gating only on `IsActive` would consume garbage.
+2. **`GetState` is event-driven, not a live cursor query.** The camera must seed its previous
+   position from a real motion event and must never assume the cursor starts centred.
+
+`HOUSE-00100` stays **unchecked** in `plan.md`. It needs a session with the pointer actually over the
+window, and `HOUSE-00115` lists it as such.
 
 
 ---
