@@ -34,8 +34,13 @@ function(cnahouse_test_target kind)
     # Tests run from the repository root so their FIXTURE paths are stable, but the content the
     # build produced is in the build tree. The two roots are different questions and are answered
     # separately rather than by moving one of them.
+    # A third root, for what a test WRITES. Render fixtures capture PNGs, and they belong in the
+    # build tree rather than beside the sources they are compared against -- a `git status` that
+    # lists a captured frame every time the suite runs teaches people to ignore `git status`.
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/test-output")
     target_compile_definitions(${_target} PRIVATE
-        CNAHOUSE_TEST_CONTENT_ROOT="${CMAKE_BINARY_DIR}/content")
+        CNAHOUSE_TEST_CONTENT_ROOT="${CMAKE_BINARY_DIR}/content"
+        CNAHOUSE_TEST_OUTPUT_DIR="${CMAKE_BINARY_DIR}/test-output")
     set_target_properties(${_target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
     # The working directory is the REPOSITORY ROOT, not the build directory, so a test's fixture
     # paths are stable wherever the build tree lives. This is not a detail: running CNA's own suites

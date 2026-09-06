@@ -1990,8 +1990,10 @@ system update order, the settings file, the logging, and a CI that runs lints an
       verify: integration TierFallbackTests.MissingEffectFallsBackToTierS; render test `tier-fallback-01`
       note: (2026-09-06) `CnaHouseGame::ActivateTierE`, called once from `LoadContent`, plus
             `tests/integration/TierFallbackTests.cpp` (3 tests, including the one this line names).
-            The render test `tier-fallback-01` waits for HOUSE-00164's harness and is recorded there
-            rather than claimed here.
+            The render test `tier-fallback-01` is still outstanding: `HOUSE-00164`'s harness now
+            exists and `title-01` uses it, but a *tier* fixture needs a scene whose two tiers look
+            different, and Tier E currently draws exactly what Tier S does. It is recorded against
+            phase 12, where the first Tier-E effect makes the comparison mean something.
       note: the whole effect set loads inside **one** `try`, so a partial load is impossible. Half a
             tier is a renderer that works until it reaches the pass whose effect is missing, which
             fails in the middle of a frame instead of at load. Only `Effects/P1Probe` is in the set
@@ -2079,8 +2081,41 @@ system update order, the settings file, the logging, and a CI that runs lints an
             `StateTracker`'s pointer-identity skip correct. XNA state objects are immutable after
             first use anyway, and `HOUSE-00106` measured a draw call at 8.15 µs of CPU — there is no
             room in that for a per-draw allocation.
-- [ ] HOUSE-00164 — Add the first render regression test harness: fixed pose, fixed clock, render, compare PNG with tolerance
+- [x] HOUSE-00164 — Add the first render regression test harness: fixed pose, fixed clock, render, compare PNG with tolerance
       dep: HOUSE-00151, HOUSE-00138 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-06) `tests/render/ImageCompare.hpp` (header-only, so the unit lane can test the
+            comparison without the render lane's cost), `tests/render/RenderHarness.{hpp,cpp}`, the
+            fixture `title-01` and its committed reference. Four render tests plus eight unit tests
+            of the comparison itself.
+      note: **the harness drives `--screenshot`, the production capture path.** A harness that
+            rendered its own frame would be testing a second renderer the player never sees, and it
+            would be the first thing to drift. Decoding is `Texture2D::FromStream`, which is plain
+            XNA 4.0 — the `assetName` constructors and `SaveAsPng(filename)` are the CNAEXT ones.
+      finding: **the reference frame is generated under `LIBGL_ALWAYS_SOFTWARE=1`, and that is the
+            decision that makes the whole thing work.** A hardware reference could never be
+            reproduced on a machine nobody owns; llvmpipe is what `HOUSE-00138`'s CI job already
+            uses, so the same bytes come out there. On hardware the pixel test SKIPS with an
+            explanation and the three driver-independent tests still run — which is exactly what
+            `HOUSE-00115` says to do when the driver is not the one phase 1 measured against.
+      finding: `ImageDiff` reports **four** numbers, not one. A single "percentage different" hides
+            the distinction that matters: every pixel off by one is Mesa version drift; 0.3 % of
+            pixels off by 200 is a missing object. A unit test puts ONE maximally wrong pixel in
+            4 096 and asserts the mean stays under 0.05 — which is why the mean is never the
+            assertion.
+      finding: the corner frame-time readout genuinely differs between two runs, so it is excluded
+            by an explicit **region**, never by widening the tolerance. Raising the per-channel
+            tolerance to 255 to absorb it would absorb every real regression with it.
+      finding: **the harness was shown to FAIL before it was trusted.** The clear colour was moved
+            by 10 in one channel, the suite rebuilt, and the reference test reported
+            `1 407 000 of 1 411 200 pixels differ (99.70%), max channel delta 10` and failed; the
+            perturbation was then reverted and all four went green again. A regression harness whose
+            comparison has never been shown to fail is one that reports green forever.
+      finding: determinism is asserted separately and first, at tolerance **0**: two captures of the
+            same build are bit-identical. Without that the reference comparison cannot mean anything,
+            and a flaky render test is worse than none because it teaches people to ignore it.
+      note: captures are written to `${CMAKE_BINARY_DIR}/test-output`, not beside the reference. A
+            `git status` that lists a captured frame after every test run teaches people to ignore
+            `git status`.
 - [ ] HOUSE-00166 — Define `docs/anim-format.md`: the project-owned `.chanim` binary sidecar — magic, version, joint list by name in skin-joint order, parent indices, bind and inverse-bind poses, clips as per-bone TRS keyframe tracks, stride length and foot-plant markers
       dep: HOUSE-00074, HOUSE-00028 · sys: animation · plat: ALL · pri: MUST
       files: docs/anim-format.md
