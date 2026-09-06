@@ -667,16 +667,54 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             `fogFactor = 1 - (d - FogStart)/(FogEnd - FogStart)` on the **view-space** distance.
             Phase 12's material mapping and phase 16's light budget are computed against this, not
             against a remembered formula.
-- [ ] HOUSE-00083 — **Probe: `RenderTarget2D` with `SurfaceFormat::Single`, 2048², `DepthFormat::Depth24` — create, render depth, bind as an effect texture, read back** (settles `BL-09` / `Q-01`)
+- [x] HOUSE-00083 — **Probe: `RenderTarget2D` with `SurfaceFormat::Single`, 2048², `DepthFormat::Depth24` — create, render depth, bind as an effect texture, read back** (settles `BL-09` / `Q-01`)
       dep: HOUSE-00062 · sys: rendering · plat: LNX · pri: MUST
       accept: either it works (record: Tier E uses a float shadow map) or it fails (record the exact error; Tier E packs depth into RGBA8)
       verify: probe `p1-rtsingle`; the answer is written into `docs/cna-capability-report.md` and `cna-house.md` §6 BL-09 is updated
-- [ ] HOUSE-00084 — Probe: `RenderTarget2D` `Color` with mips and MSAA; bind, clear, draw, unbind, sample
+      note: (2026-09-06) **IT WORKS — `BL-09`/`Q-01` settled positively, 10/10.** All four stages
+            executed separately: create 2048² `Single`+`Depth24`; bind, clear and draw; read back
+            with `GetData(float*)`; bind as an effect texture and sample. The readback is
+            **bit-exact** — 3 396 649 drawn texels all exactly `0.625` (a value chosen because it is
+            exactly representable, so any change would be real rather than rounding), 797 655
+            cleared texels exactly `0`, nothing else. Sampled through `BasicEffect` it arrives as
+            159/255.
+      finding: **Tier E uses a real float shadow map.** The RGBA8 depth-packing fallback is not
+            needed, and the pack/unpack in every shadow lookup goes away. The fallback path was
+            exercised in the same probe anyway, so it is known good whichever way this went. Sizes
+            `HOUSE-00633` and the phase-16 shadow work.
+- [x] HOUSE-00084 — Probe: `RenderTarget2D` `Color` with mips and MSAA; bind, clear, draw, unbind, sample
       dep: HOUSE-00083 · sys: rendering · plat: LNX · pri: MUST
-- [ ] HOUSE-00085 — Probe: confirm `Clear(ClearOptions::Stencil)` is ignored and `ReferenceStencil` has no effect (BL-02), and record it
+      note: (2026-09-06) PASS at MSAA 0 **and** MSAA 4. A 64×64 mipped `Color` target reports the
+            full 7-level chain and, at MSAA 4, reports `MultiSampleCount == 4` — so the multisample
+            allocation is real, not silently dropped. Level 0 holds exactly the drawn `(128,64,191)`
+            in both cases, and after unbinding it samples back through `BasicEffect` as exactly
+            `(128,64,191)` — the step an implicit-resolve bug would break.
+- [x] HOUSE-00085 — Probe: confirm `Clear(ClearOptions::Stencil)` is ignored and `ReferenceStencil` has no effect (BL-02), and record it
       dep: HOUSE-00084 · sys: rendering · plat: LNX · pri: MUST
-- [ ] HOUSE-00086 — Probe: confirm EasyGL MRT attachment 1 stays black (BL-03), and record it
+      correction: (2026-09-06) **the premise is FALSE — stencilling works**, so the task could not
+            be closed as written. Per the phase-1 rule, the measurement is recorded and
+            `cna-house.md` §6 `BL-02` is corrected rather than the measurement massaged. Same
+            pattern as `HOUSE-00068`.
+      note: (2026-09-06) The probe was built so a working stencil and an inert one give *different
+            images*, and so neither verdict could be inferred from an absent exception: clear
+            colour/depth/stencil to 0 on a `Depth24Stencil8` target; pass 1 stamps
+            `ReferenceStencil = 1` with `Always`+`Replace` over the **left half only**; pass 2 draws
+            the **whole** quad white under `Equal`. An inert `ReferenceStencil` would cover
+            everything. Measured: **left half 2048/2048 lit, right half 0/2048.**
+      finding: the stencil buffer is available to `cna-house` after all. Anything designed around an
+            inert stencil — mirror and window-portal masking in particular — may use it. Sizes
+            phases 9 and 15.
+- [x] HOUSE-00086 — Probe: confirm EasyGL MRT attachment 1 stays black (BL-03), and record it
       dep: HOUSE-00084 · sys: rendering · plat: LNX · pri: MUST
+      note: (2026-09-06) Confirmed **for the stock-effect case**. `SetRenderTargets` with two
+            `Color` targets bound at once succeeded; after one `BasicEffect` draw, attachment 0 held
+            `(255,128,64)` and attachment 1 held `(0,0,0)`.
+      scope: this shows the renderer does not broadcast a single-output draw to every attachment,
+            and that binding two targets is not itself an error. It does **not** show what a
+            *compiled* `.fx` declaring two outputs would do — that is a Tier E question that only
+            becomes answerable once `HOUSE-00087` settles whether compiled effects work at all.
+            Recorded as such rather than overclaimed. Tier S writes one attachment and is
+            unaffected either way.
 - [ ] HOUSE-00087 — **Probe: compile a trivial `.fx` through `cna-content --format xnb --fx-compiler <fxc> --fx-compiler-launcher wine`, load it as `Effect`, and draw with it**
       dep: HOUSE-00062 · sys: content · plat: LNX · pri: MUST
       accept: (1) the build succeeds; (2) `CompiledEffects` is true; (3) a named technique is selectable; (4) a parameter set changes the output
@@ -733,11 +771,44 @@ that produced it; `BL-09` is settled; every probe binary is removed.
 - [ ] HOUSE-00109 — Probe: anisotropic filtering availability and its visual effect at grazing angles on the floor
       dep: HOUSE-00065 · sys: rendering · plat: LNX · pri: OPT
       verify: the verdict is recorded in `docs/cna-capability-report.md` as a property of the build/platform profile, and is what HOUSE-00916 keys off — it is measured once here, never queried at runtime
-- [ ] HOUSE-00110 — Probe: `SurfaceFormat` support survey — which formats can be created as textures and as render targets on this driver
+- [x] HOUSE-00110 — Probe: `SurfaceFormat` support survey — which formats can be created as textures and as render targets on this driver
       dep: HOUSE-00083 · sys: rendering · plat: LNX · pri: MUST
-- [ ] HOUSE-00111 — Probe: DXT compressed texture support and whether the pipeline's DXT output stays compressed on EasyGL
+      note: (2026-09-06) Complete, and every render-target candidate was **used** — bound, cleared
+            and drawn into — not merely created, because a driver can accept a format at creation
+            and fail on first use.
+            **As `Texture2D`:** `Color`, `Bgr565`, `Bgra5551`, `Bgra4444`, `Dxt1`, `Dxt3`, `Dxt5`,
+            `NormalizedByte2`, `NormalizedByte4`.
+            **As `RenderTarget2D`:** `Color`, `Single`, `Vector2`, `Vector4`, `HalfSingle`,
+            `HalfVector2`, `HalfVector4`.
+      finding: **only `Color` is in both lists.** `SurfaceFormat::Single` is a perfectly good render
+            target — `HOUSE-00083` rendered, read back and sampled one — but a `Texture2D` of that
+            format **cannot be created by the application at all**. Any float data `cna-house` wants
+            on the GPU must arrive as the output of a render pass, never as an uploaded texture.
+      finding: surveyed at **both** graphics profiles, because `GraphicsDeviceManager` defaults to
+            `GraphicsProfile::Reach` and XNA 4.0's Reach forbids float formats outright — a survey
+            at the default alone would blame the driver for an XNA rule. The **lists are identical**
+            at `Reach` and `HiDef` here; only the refusal message changes. So the limit is EasyGL's,
+            and moving `cna-house` to `HiDef` would buy nothing on this platform. This is what
+            `HOUSE-00916` keys off, measured once, never queried at runtime.
+- [x] HOUSE-00111 — Probe: DXT compressed texture support and whether the pipeline's DXT output stays compressed on EasyGL
       dep: HOUSE-00110 · sys: content · plat: LNX · pri: SHOULD
       accept: a verdict that sizes the texture-memory budget
+      note: (2026-09-06) **It works — but only through `.xnb`.** Same 64×64 source, same
+            `textureFormat` parameter, two containers:
+            `.cnb` Dxt1 → 16 752 B, runtime format `Color`; `.cnb` Dxt5 → 16 752 B, `Color`;
+            `.xnb` Dxt1 → **2 235 B**, runtime format **`Dxt1`**; `.xnb` Dxt5 → **4 283 B**,
+            **`Dxt5`**; uncompressed `.xnb` → 16 571 B, `Color`. So the blocks survive to the GPU:
+            **8× for `Dxt1`, 4× for `Dxt5`.**
+      finding: **CNB texture schema 1 is frozen to Rgba8.** The pipeline warns rather than fails —
+            *"textureFormat Dxt1 has no representation in CNB texture schema 1, which stores Rgba8
+            only; this .cnb keeps the uncompressed pixels. Build with --format xnb to get the
+            compressed texture."* — so the asset is silently 8× larger and the warning is easy to
+            lose in a large build. `cna-house` needs a build gate of its own for it.
+      finding: consequence for the `linux` content profile (`cna-house.md` §27.2): **texture assets
+            that want compression must be built as `.xnb`, not `.cnb`.** Combined with
+            `HOUSE-00064`'s finding that `.xnb` wins the resolution order, a deliberately mixed tree
+            (models and audio `.cnb`, textures `.xnb`) is coherent; an accidental one is a trap.
+            Sizes `HOUSE-00126` and the phase-3 pipeline.
       verify: the verdict is written into the `linux` content profile (`cna-house.md` §27.2), which decides offline which representation is packaged; the uncompressed variant remains the packaged fallback, and no runtime renderer query is added
 - [ ] HOUSE-00112 — Write `docs/cna-capability-report.md` in full from the probe results, with a verdict per claim and a link to each probe's recorded output
       dep: HOUSE-00062…HOUSE-00111 · sys: — · plat: LNX · pri: MUST

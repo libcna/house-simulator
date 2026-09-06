@@ -84,12 +84,12 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | G-09 | `Model` from compiled content carries a real bone hierarchy via `.cnb` | `docs/xnb-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | 4 authored nodes → 5 bones: CNA inserts a **synthetic `Root`** above the scene root. Parent links, `Index`, `Children` and mesh `ParentBone` all as authored. |
 | G-10 | A skinned glTF compiles to `.cnb` and its joints are recoverable **without reading `Model::Tag`** | `docs/content-pipeline.md:456-458` | **`PASS`** | `HOUSE-00074`, `HOUSE-00076` | Recoverable by **name lookup into `Model::Bones`**, which is all a sidecar carries. Blend indices are **skin-local**, not bone indices, so the sidecar *must* carry the joint-name list — acceptance path (4), not (2). `Model::Tag` and `getSkinsEXTProperty()` are never read. |
 | G-11 | `VertexBuffer`, `IndexBuffer`, `DynamicVertexBuffer`; EasyGL has a real 32-bit index factory | feature matrix | `PENDING` | `HOUSE-00092`, `HOUSE-00094` | — |
-| G-12 | `RenderTarget2D`, `RenderTargetCube`, mip chains, MSAA on EasyGL | feature matrix | `PENDING` | `HOUSE-00083`, `HOUSE-00084` | — |
+| G-12 | `RenderTarget2D`, `RenderTargetCube`, mip chains, MSAA on EasyGL | feature matrix | **`PASS`** (`RenderTarget2D`) | `HOUSE-00083`, `HOUSE-00084` | 2048² `Single`+`Depth24` and 64² `Color` with a 7-level mip chain, at MSAA 0 and 4, all create, render, unbind and sample. `RenderTargetCube` not probed. |
 | G-13 | `BlendState`, `DepthStencilState` compare functions, `RasterizerState`, 16 per-slot `SamplerState`s | feature matrix | **`PASS`** (the Tier S subset) | `HOUSE-00079`, `HOUSE-00080` | `BlendState::Opaque`/`Additive`, `CompareFunction::Equal` depth with writes off, all three `CullMode`s and per-slot `PointClamp` on slots 0 and 1 all behave. Additive sums are **exact** and a depth-equal second pass reaches every pixel of the first. |
 | G-14 | `SpriteBatch` (all overloads, sort modes, custom `Effect`) and `SpriteFont` | feature matrix | **`PASS`** (SpriteFont + `Begin`/`DrawString`/`End`) | `HOUSE-00066`, `HOUSE-00089` | Text drawn into a `RenderTarget2D` and read back: 440 lit pixels, ink inside the `MeasureString` box. Sort modes and custom-`Effect` overloads remain for `HOUSE-00089`. |
 | G-15 | `OcclusionQuery` exists; `PixelCount` is a real count **only** where the driver exposes `GL_SAMPLES_PASSED`, which the ES 3.2 profile does not — so it degrades to 0/1 (`BL-07`) | `docs/occlusionquery-support.md` | `PENDING` | `HOUSE-00090`, `HOUSE-00091` | — |
 | G-16 | `DrawInstancedPrimitives` is present in the API | `GraphicsDevice.hpp:424` | `PENDING` | `HOUSE-00093` | — |
-| G-17 | `Texture2D::SetData`/`GetData`/`FromStream`/`SaveAsPng`, NPOT sizes | feature matrix | **`PASS`** (`GetData`) | `HOUSE-00065` | 4×4 `Color` texture, 16/16 texels byte-exact — **against the premultiplied model**; see the finding. `SetData`/`FromStream`/`SaveAsPng` and NPOT are not yet probed. |
+| G-17 | `Texture2D::SetData`/`GetData`/`FromStream`/`SaveAsPng`, NPOT sizes | feature matrix | **`PASS`** (`GetData`, `SetData`) | `HOUSE-00065`, `HOUSE-00078`, `HOUSE-00110` | 4×4 `Color` texture, 16/16 texels byte-exact — **against the premultiplied model**; see the finding. `SetData`/`FromStream`/`SaveAsPng` and NPOT are not yet probed. |
 | G-18 | WebGL context-loss handling is implemented and browser-qualified | `docs/web-emscripten-graphics-limitations.md` | `NOT PROBED` | — | Deferred to the Web phases (47–48). `HOUSE-00108` probes the desktop `DebugSimulateContextLoss` path only. |
 
 ## §5.4 Audio
@@ -159,9 +159,9 @@ recorded here.
 |---|---|---|---|
 | `BL-06` | Is 24-bit PCM really rejected, and with what exact error? | `HOUSE-00068` | **SETTLED — the premise was false.** It is not rejected by either path; the pipeline converts it bit-identically to ffmpeg. `cna-house.md` §6 updated. |
 | `BL-07` | Is `OcclusionQuery::PixelCount` a count or a boolean here? | `HOUSE-00090`, `HOUSE-00091` | `PENDING` |
-| `BL-09` / `Q-01` | Can a `SurfaceFormat::Single` 2048² `RenderTarget2D` be created, rendered to and read back? | `HOUSE-00083` | `PENDING` |
-| `BL-02` | Is `ClearOptions::Stencil` ignored and `ReferenceStencil` inert? | `HOUSE-00085` | `PENDING` |
-| `BL-03` | Does EasyGL MRT attachment 1 stay black? | `HOUSE-00086` | `PENDING` |
+| `BL-09` / `Q-01` | Can a `SurfaceFormat::Single` 2048² `RenderTarget2D` be created, rendered to and read back? | `HOUSE-00083` | **SETTLED — YES, all four stages.** Created with `Depth24`, rendered into, read back with `GetData(float*)` **bit-exactly** (0.625 in, 0.625 out over 3 396 649 texels), and bound as an effect texture and sampled (159/255). **Tier E uses a real float shadow map**; the RGBA8 packing fallback is not needed. |
+| `BL-02` | Is `ClearOptions::Stencil` ignored and `ReferenceStencil` inert? | `HOUSE-00085` | **SETTLED — the premise is FALSE. Stencilling works.** A two-pass mask stamped `ReferenceStencil = 1` over the left half and then drew the full quad under `CompareFunction::Equal`: left half **2048/2048** lit, right half **0/2048**. `cna-house.md` §6 `BL-02` is corrected. |
+| `BL-03` | Does EasyGL MRT attachment 1 stay black? | `HOUSE-00086` | **SETTLED for the stock-effect case — yes.** Two targets bound with `SetRenderTargets`: attachment 0 received `(255,128,64)`, attachment 1 stayed `(0,0,0)`. **Scope:** a stock effect declares one output, so this shows the renderer does not broadcast; whether a *compiled* two-output `.fx` reaches attachment 1 is a Tier E question and is not answered here. |
 | `BL-05` | Does `VideoPlayer::Play()` throw `NotSupportedException` without the backend? | `HOUSE-00099` | `PENDING` |
 | `BL-11` | Does `DopplerScale = 0` with zero velocities produce no pitch change? | `HOUSE-00096` | `PENDING` |
 | `BL-12` | Is `Model::Meshes[i].BoundingSphere` populated from `.cnb`? | `HOUSE-00073` | **SETTLED — yes, and it is conservative rather than minimal.** Non-degenerate and it contains every vertex, but on the test box its radius is 7.686 against a minimal 6.225 (**+23 %**) and its centre is 1.55 off in Y. Usable for a cheap reject; not usable as a tight bound. |
@@ -939,6 +939,120 @@ FragColor.rgb = mix(FogColor, FragColor.rgb, fogFactor),  fogFactor = 1 - (d - F
 
 Specular is added **after** the diffuse product and **before** fog, and is scaled by the final
 alpha. Phase 12's material mapping and phase 16's light budget can be computed against this.
+
+
+### `HOUSE-00083` — `SurfaceFormat::Single` 2048² render target · **`BL-09` / `Q-01` SETTLED POSITIVELY**
+
+Four stages, executed separately because each failure would lead somewhere different, and all four
+succeeded:
+
+| Stage | Result |
+|---|---|
+| Create 2048×2048 `Single` + `Depth24` | ✓ — reports its own format and depth format back correctly |
+| Bind, clear, draw depth-varying geometry | ✓ |
+| `GetData(float*)` over all 4 194 304 texels | ✓ — 3 396 649 drawn texels, **every one exactly `0.625`**, 797 655 cleared texels exactly `0`, **0 anything else** |
+| Bind it as an effect texture and sample it | ✓ — `0.625` arrives in the shader as `159/255` |
+
+**Tier E gets a real float shadow map.** The RGBA8 depth-packing fallback the architecture kept in
+reserve is not needed, and the extra pack/unpack in every shadow lookup goes away. The fallback path
+was nonetheless exercised in the same probe, so it is known to work whichever way this went.
+
+The value `0.625` was chosen because it is exactly representable in binary: a round trip that
+changed it at all would be a real difference, not a rounding artefact.
+
+### `HOUSE-00084` — mip chains and MSAA · **PASS**
+
+A 64×64 `Color` target with `mipMap = true`, at MSAA 0 and MSAA 4:
+
+| | MSAA 0 | MSAA 4 |
+|---|---|---|
+| `LevelCount` | 7 (64 → 1, the full chain) | 7 |
+| `MultiSampleCount` | 0 | **4** |
+| Level 0 after drawing `(128,64,191)` | `(128,64,191)` | `(128,64,191)` |
+| Sampled back through `BasicEffect` after unbinding | `(128,64,191)` | `(128,64,191)` |
+
+MSAA 4 is genuinely allocated (the target reports it) and resolves to the exact drawn colour, which
+is the step an implicit-resolve bug would break.
+
+### `HOUSE-00085` — `BL-02` · **the premise is FALSE; stencilling works**
+
+The probe was built so that a working stencil and an inert one produce *different images*, and so
+that neither verdict could be inferred from an absent exception:
+
+1. clear colour, depth and stencil to 0 on a `Depth24Stencil8` target;
+2. pass 1 — `CompareFunction::Always` + `StencilOperation::Replace`, `ReferenceStencil = 1`, drawn
+   over the **left half only**, writing black;
+3. pass 2 — `CompareFunction::Equal`, `ReferenceStencil = 1`, drawn over the **whole** quad in white.
+
+If `ReferenceStencil` were inert, pass 2 would cover everything.
+
+```
+  [--] stencil mask result   left half 2048/2048 lit, right half 0/2048 lit
+  [--] BL-02 verdict         STENCIL WORKS -- the mask confined the second pass
+```
+
+`BL-02` is corrected. Anything in `cna-house` that was designed around an inert stencil — mirror
+and window-portal masking in particular — may use the stencil buffer after all.
+
+### `HOUSE-00086` — `BL-03`, MRT attachment 1 · **confirmed, with its scope stated**
+
+`SetRenderTargets` with two `Color` targets bound at once succeeded. After one `BasicEffect` draw:
+attachment 0 held `(255,128,64)`, attachment 1 held `(0,0,0)`.
+
+**What this does and does not show.** It shows the renderer does not broadcast a single-output draw
+to every attachment, and that binding two targets is not itself an error. It does **not** show what
+a *compiled* `.fx` declaring two outputs would do — that is a Tier E question, and `BL-03` as it
+affects Tier E is only answerable once `HOUSE-00087` establishes whether compiled effects work at
+all. Recorded as such rather than overclaimed. Tier S writes one attachment and is unaffected.
+
+### `HOUSE-00110` — the `SurfaceFormat` survey · **complete, and the two lists barely overlap**
+
+Every format was *used*, not merely created: each render-target candidate was bound, cleared and
+drawn into, because a driver can accept a format at creation and fail on first use.
+
+| | Supported |
+|---|---|
+| **As a `Texture2D`** | `Color`, `Bgr565`, `Bgra5551`, `Bgra4444`, **`Dxt1`, `Dxt3`, `Dxt5`**, `NormalizedByte2`, `NormalizedByte4` |
+| **As a `RenderTarget2D`** | `Color`, **`Single`, `Vector2`, `Vector4`, `HalfSingle`, `HalfVector2`, `HalfVector4`** |
+
+**Only `Color` is in both lists.** In particular `SurfaceFormat::Single` is a perfectly good render
+target — `HOUSE-00083` rendered, read back and sampled one — but a `Texture2D` of that format
+**cannot be created by the application at all**. Any float data `cna-house` wants on the GPU has to
+arrive as the output of a render pass, never as an uploaded texture.
+
+Surveyed at **both** graphics profiles, because `GraphicsDeviceManager` defaults to
+`GraphicsProfile::Reach` and XNA 4.0's Reach profile forbids float formats outright — a survey run
+only at the default would blame the driver for an XNA rule. The **lists are identical** at `Reach`
+and `HiDef` on this renderer; only the refusal *message* changes (`"not available on
+GraphicsProfile"` versus `"not implemented by the selected renderer"`). So the limit here is
+EasyGL's, and switching `cna-house` to `HiDef` would buy nothing on this platform.
+
+### `HOUSE-00111` — DXT · **it works, but only through `.xnb`**
+
+| Source | Container | File size | Runtime `SurfaceFormat` |
+|---|---|---|---|
+| 64×64 RGBA, `textureFormat: Dxt1` | `.cnb` | 16 752 B | **`Color`** |
+| 64×64 RGBA, `textureFormat: Dxt5` | `.cnb` | 16 752 B | **`Color`** |
+| 64×64 RGBA, `textureFormat: Dxt1` | `.xnb` | **2 235 B** | **`Dxt1`** |
+| 64×64 RGBA, `textureFormat: Dxt5` | `.xnb` | **4 283 B** | **`Dxt5`** |
+| 64×64 RGBA, no parameter | `.xnb` | 16 571 B | `Color` |
+
+**CNB texture schema 1 is frozen to Rgba8.** The pipeline says so itself rather than failing:
+
+```
+warning (CNA.TextureProcessor): textureFormat Dxt1 has no representation in CNB texture schema 1,
+which stores Rgba8 only; this .cnb keeps the uncompressed pixels. Build with --format xnb to get
+the compressed texture.
+```
+
+That warning is easy to miss in a large build and the resulting asset is silently 8× larger, so it
+is worth a build-gate of our own.
+
+**Consequence for the Linux content profile (`cna-house.md` §27.2):** block compression is real —
+8× for `Dxt1`, 4× for `Dxt5`, and the blocks stay compressed all the way to the GPU — but **texture
+assets that want it must be built as `.xnb`, not `.cnb`.** Combined with `HOUSE-00064`'s finding
+that `.xnb` wins the resolution order, a deliberately mixed tree (models and audio as `.cnb`,
+textures as `.xnb`) is coherent; an accidental one is a trap.
 
 
 ---
