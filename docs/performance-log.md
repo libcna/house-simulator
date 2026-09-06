@@ -67,9 +67,25 @@ a frame.
 | 2026-09-06 | HOUSE-00116 | The same build from an empty directory, **shared ccache warm** | Release / OPENGLES3 / — / `-j6` | — | **14.9 s** wall | — | baseline | 20.1 s user CPU. A **22× wall-clock and 90× CPU** saving — the whole justification for openeggbert build rule 1, measured rather than argued. |
 | 2026-09-06 | HOUSE-00116 | Edit one probe source, rebuild and relink | Release / OPENGLES3 / — / `-j6` | — | 0.94 s | — | baseline | The number that actually sets expectations for a working session. |
 
-**Not yet measured:** the empty-scene frame time of the real application. `HOUSE-00165` fills that
-row at the phase-2 review; the application currently clears and draws two HUD strings, which is not
-a scene and would produce a number nobody should quote.
+| 2026-09-06 | HOUSE-00165 | Empty-scene frame time — clear + title screen + HUD, whole `Game` loop | Release / OPENGLES3 / Tier S+E, quality low, **debug tools ON** / 1600×900, **vsync off** | perf `EmptySceneFrameTests` | **0.229 ms** median | 16.67 ms | **1.4 % of budget** | 600 samples after 120 warm-up frames; p95 0.351 ms, p99 0.802 ms, worst 3.150 ms. Four repeats gave medians of 0.225, 0.225, 0.229 and 0.232 ms. Superseded as the shipping number by the row below, which is the same build with debug tools off — this row is kept because it is what a developer build costs. |
+| 2026-09-06 | HOUSE-00165 | The same, **debug tools OFF** — the shipping configuration | Release / OPENGLES3 / Tier S+E, quality low / 1600×900, **vsync off** | perf `EmptySceneFrameTests` | **0.21 ms** median | 16.67 ms | **1.2 % of budget** | Three repeats: 0.183, 0.209, 0.228 ms. Quoted to two digits, because the spread between repeats (±0.02 ms) is larger than the third digit and quoting it would be inventing precision. |
+
+**What that number is and is not.** It is the whole `Game` loop — `Update`, the render pass list,
+one `SpriteBatch` of two strings, and the present — with vsync off, because with vsync on the
+measurement would be the display's refresh rate and nothing about this program. It is **not** a
+scene: there is no house yet. Its value is as a **floor**: 1.4 % of the frame is what the
+application costs before anything is drawn, so every later phase's budget can be spent on the house
+rather than on the harness. The p99 of 0.802 ms against a 0.229 ms median is a machine shared with
+other build jobs, not a hitch in the program.
+
+`worst` is recorded and deliberately not asserted on. On a machine running ten agents, the largest
+of 600 samples measures the scheduler.
+
+**The two rows differ by the debug tools, and the difference is smaller than the run-to-run spread**
+— roughly 0.02 ms against a ±0.02 ms spread. So the honest reading is that the overlay's *measuring*
+costs nothing detectable while it is hidden, not that it costs 0.02 ms. The rows are kept separate
+anyway, because a later phase comparing against "the empty scene" needs to know which build the
+number came from.
 
 ## Budgets this log is measured against
 

@@ -13,7 +13,17 @@
 include_guard(GLOBAL)
 
 option(CNAHOUSE_TIER_E "Build the Tier E renderer path (compiled .fx effects)" ON)
-option(CNAHOUSE_DEBUG_TOOLS "Build the debug overlay, DebugDraw and the developer commands" ON)
+# `cna-house.md` §69: ON for `Debug` and `RelWithDebInfo`, OFF for `Release`. Derived from the build
+# type rather than defaulted to ON, because "ON everywhere" is what a shipped build with an F1
+# overlay in it looks like -- and `HOUSE-00165` found exactly that: a Release binary printing
+# "debug on". A user may still force either way; only the DEFAULT follows the build type.
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+    set(_debug_tools_default OFF)
+else()
+    set(_debug_tools_default ON)
+endif()
+option(CNAHOUSE_DEBUG_TOOLS "Build the debug overlay, DebugDraw and the developer commands"
+       ${_debug_tools_default})
 
 # Which CNA option gates compiled effects depends on the renderer family. Only the families
 # `cna-house` targets are listed; an unlisted one is refused rather than guessed at, because

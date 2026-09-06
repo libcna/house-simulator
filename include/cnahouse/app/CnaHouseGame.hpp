@@ -4,6 +4,7 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "Microsoft/Xna/Framework/Content/ContentManager.hpp"
 #include "Microsoft/Xna/Framework/Game.hpp"
@@ -99,6 +100,16 @@ namespace cnahouse::app
             return audio_;
         }
 
+        /// @brief Every frame's CPU delta in milliseconds, oldest first.
+        ///
+        /// **Recorded only while a frame limit is set**, which is exactly the benchmark and test
+        /// case. An unbounded play session would grow this vector forever for a number nobody reads,
+        /// and a perf harness that had to sample from outside could not see individual frames at all.
+        [[nodiscard]] const std::vector<float>& FrameTimes() const noexcept
+        {
+            return frameTimes_;
+        }
+
         /// @brief The screen stack. Readable after `Run()` for the integration tests.
         [[nodiscard]] const ui::MenuStack& Menus() const noexcept
         {
@@ -188,6 +199,8 @@ namespace cnahouse::app
         ui::LoadingScreen* loading_ = nullptr;
         /// A short average, so the HUD's number is readable rather than flickering every frame.
         float smoothedDelta_ = 1.0f / 60.0f;
+        /// Per-frame CPU deltas, in milliseconds. Filled only when `frameLimit_ != 0`.
+        std::vector<float> frameTimes_;
 
         // The measurements are compiled ALWAYS; only the overlay that presents them is gated on
         // `CNAHOUSE_DEBUG_TOOLS`. A counter that exists only in a debug build cannot be asserted by

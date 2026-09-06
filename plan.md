@@ -2213,8 +2213,54 @@ system update order, the settings file, the logging, and a CI that runs lints an
       files: src/animation/Skeleton.cpp|hpp, src/animation/ClipLibrary.cpp|hpp, src/animation/ChanimReader.cpp|hpp
       accept: (1) a hand-written fixture round-trips; (2) `BindTo` fills `modelBoneIndex` for a matching model; (3) a joint absent from `Model::Bones` is a **fatal** load error naming the joint, never a silent deformation; (4) a truncated or wrong-version file is rejected with a precise message; (5) no CNA symbol appears in any of these files
       verify: unit ChanimReaderTests.*, ClipLibraryTests.BindMismatchIsFatal
-- [ ] HOUSE-00165 — Phase-2 review and commit; update the performance log with the empty-scene frame time
+- [x] HOUSE-00165 — Phase-2 review and commit; update the performance log with the empty-scene frame time
       dep: HOUSE-00121…HOUSE-00167 · sys: — · plat: ALL · pri: MUST
+      note: (2026-09-06) **Phase 2 is complete: 47 of 47 tasks.** The phase's own exit criterion —
+            "`cna-house` opens a window, clears to a known colour, draws a version string with
+            `SpriteFont`, exits cleanly; CI runs lint + unit + headless integration on every push" —
+            is demonstrated by a 1600×900 screenshot and by `.github/workflows/ci.yml`'s six jobs.
+      note: **Test counts, in three real configurations.** `linux-debug` OPENGLES3: 290 unit +
+            integration, 4 render (under `LIBGL_ALWAYS_SOFTWARE=1`), 1 perf. `linux-release`
+            OPENGLES3 with debug tools off: 286 — the four missing ones are the debug-overlay tests
+            correctly compiled out, which is itself evidence the gate works. `headless` Tier-S:
+            286. Every gate green; `nm -C build/cna-house | grep -c 'CNA::Graphics::'` is **0** and
+            so is `AvatarRenderer`, in the Release binary.
+      finding: **the second and third configurations earned their keep three times.** The `headless`
+            Tier-S build caught two tests whose assertions were only true where Tier E exists
+            (`HOUSE-00160`, `HOUSE-00157`), and the Release build caught the debug-tools default
+            below. A suite that only ever runs in the configuration its author built is a suite that
+            tests one build.
+      finding: **`CNAHOUSE_DEBUG_TOOLS` defaulted ON in every configuration, including `Release`.**
+            `cna-house.md` §69 says ON for `Debug` and `RelWithDebInfo`, OFF for `Release`, and the
+            option had simply been written `ON`. The symptom was a Release binary printing
+            `debug on` in its own version banner — found by reading that banner during this review,
+            which is exactly what the banner is for. Fixed in `cmake/TierSelection.cmake`, the one
+            place the decision is made; a user may still force either way, only the DEFAULT follows
+            the build type.
+      finding: the empty scene costs **0.21 ms median** in the shipping configuration — **1.2 % of
+            the 16.67 ms budget**. That is the floor, not a scene: there is no house yet. Its value
+            is that every later phase can spend its budget on the house rather than on the harness.
+            Recorded with both configurations, because the difference between debug tools on and off
+            (≈0.02 ms) is **smaller than the run-to-run spread** (±0.02 ms), and the honest reading
+            is that the hidden overlay costs nothing detectable rather than that it costs 0.02 ms.
+      finding: three `CNAEXT`-overload traps were found this phase — `setMasterVolumeProperty`'s
+            `float&&`, `Color(bytecs,…)`, and `KeyboardState()` from phase 1 — and
+            **`check_xna_only.py` can see none of them**, because each is an overload-resolution
+            outcome rather than a name. That is now the standing rule in `docs/conventions.md` §5a:
+            read the header of any XNA type before first constructing or assigning it. It is the
+            largest known gap in the ADR-0001 enforcement and it is a gap in the *gate*, not in the
+            rule.
+      finding: two documents were corrected against the code rather than the other way round.
+            `docs/conventions.md` said members are `m_camelCase` (111 of them carry a trailing
+            underscore; three files carry `m_`) and named a `cnahouse::render` alias nothing used;
+            `cna-house.md` §47.0's sketch said `BindTo` throws where §5.4 says content failures are
+            `Result`s. Each was the smallest correction that made the documents describe what is
+            true.
+      note: **still open and carried forward.** `HOUSE-00100` (mouse-delta measurement,
+            INCONCLUSIVE — needs a session with the pointer over the window) and `HOUSE-00029`
+            (`util::SmallVector`/`FixedString`, or a measured decision against them) are the two
+            tasks left behind by phases 1 and 0. The render fixture `tier-fallback-01` named by
+            `HOUSE-00161` waits for phase 12, when the two tiers first look different.
 
 ---
 

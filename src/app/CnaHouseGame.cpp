@@ -426,6 +426,15 @@ namespace cnahouse::app
             // inside the noise; 0.1 settles in about a fifth of a second, fast enough to see a hitch.
             smoothedDelta_ += (frame.deltaSeconds - smoothedDelta_) * 0.1f;
 
+            if (frameLimit_ != 0)
+            {
+                // The RAW delta, not the smoothed one. A perf number taken from an exponential
+                // average is a number about the average, not about the frame -- and the whole point
+                // of recording samples rather than a mean is to be able to take a median and see a
+                // hitch.
+                frameTimes_.push_back(frame.deltaSeconds * 1000.0f);
+            }
+
 #if CNAHOUSE_DEBUG_TOOLS
             if (input_.Current().screenshotPressed && pendingScreenshot_.empty())
             {
