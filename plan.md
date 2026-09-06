@@ -1896,8 +1896,46 @@ system update order, the settings file, the logging, and a CI that runs lints an
             both mean one thing to the caller — this binary cannot draw Tier E — so distinguishing
             them would produce two branches that do the same thing. The message is preserved
             verbatim in `FallbackReason()` and logged.
-- [ ] HOUSE-00162 — Implement `MaterialBinder` skeleton: material id → effect instance + parameters
+- [x] HOUSE-00162 — Implement `MaterialBinder` skeleton: material id → effect instance + parameters
       dep: HOUSE-00161 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-06) `rendering/MaterialBinder.{hpp,cpp}`: a `MaterialKind` of four, a
+            device-independent `MaterialDesc` loaded from data, a `DrawParams` for what a material
+            cannot know, `Register` / `Find` / `CullFor` / `Bind`. Twelve tests against a real
+            device, so every parameter written is one the effect really accepted.
+      note: `MaterialKind` has **four** members and the list is closed for Tier S. ADR-0003 promises
+            Tier S is complete on stock effects only, and phase 1 measured all four end to end
+            against analytic expectations — `HOUSE-00082` (`BasicEffect`, byte-exact),
+            `HOUSE-00078` (`DualTextureEffect`), `HOUSE-00080` (`AlphaTestEffect`),
+            `HOUSE-00075`/`HOUSE-00077` (`SkinnedEffect`). A fifth kind is a fifth thing to measure.
+      finding: **one effect instance per KIND, not per material.** An XNA effect object holds
+            whatever parameters were last written to it, so they are set per draw whatever happens;
+            an instance per material would buy nothing and cost one shader object per material in
+            the house. `HOUSE-00106` measured `EffectPass::Apply()` at 0.184 µs against 8.15 µs for
+            the draw, so re-writing parameters is not where the frame goes. Instances are created on
+            first use, not at registration — a test asserts `EffectsCreated() == 0` after two
+            registrations.
+      finding: **what the binder REFUSES is the point of it.** Two phase-1 measurements are enforced
+            at registration or bind, where the error can name the material, rather than being left
+            to throw two hundred draws later where it could only name the effect: an unlit skinned
+            material (`HOUSE-00077` — `SkinnedEffect` throws *"does not support setting
+            LightingEnabled to false"*, exactly as XNA 4.0 does), and a bone palette over 72
+            (`HOUSE-00077` — 72 accepted, 73 throws). Both are returned as `util::Result` errors and
+            not thrown: a skin one bone over the limit is a content problem, and the frame should
+            say so and keep going. The 72 case is asserted against a real `SkinnedEffect`, so it is
+            still a measurement and not a remembered number.
+      finding: a duplicate material id is refused rather than replacing silently. Replacing is the
+            worse failure — two rooms sharing a material name would render correctly for whichever
+            loaded second, a bug that reproduces one room at a time.
+      finding: a `DualTexture` material with no second texture is refused as `InvalidData`. Left
+            alone it draws black, because `HOUSE-00078`'s lightmap product is with nothing; what the
+            author meant was `Basic`. The `*2` doubling factor that probe found is documented at the
+            bind site with an explicit instruction NOT to compensate for it a second time.
+      finding: the constructor as well as the destructor had to move into the .cpp. The effect
+            members are `unique_ptr`s to forward-declared XNA types, and an inline constructor needs
+            their complete types for the exception path that unwinds a partly built object — which
+            would drag `BasicEffect`, `SkinnedEffect` and the rest into every translation unit that
+            merely names a material. The out-of-line destructor alone is not enough, which is the
+            half of the pimpl idiom that is usually left out.
 - [x] HOUSE-00163 — Implement the shared `RasterizerState` objects (`CullClockwise` default for glTF-derived geometry, `CullCounterClockwise` for mirrored, `CullNone` for foliage/sky)
       dep: HOUSE-00071 · sys: rendering · plat: ALL · pri: MUST
       note: (2026-09-06) `rendering/RenderStates.{hpp,cpp}`: a `CullPolicy` enum, `StateFor(policy)`
