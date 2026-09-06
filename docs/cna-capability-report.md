@@ -80,8 +80,8 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 | G-05 | `EnvironmentMapEffect` including the Fresnel term, `TextureCube` sampling | `docs/environmentmapeffect-support.md` | `PENDING` | `HOUSE-00081` | — |
 | G-06 | `Effect` from compiled Effect-Framework bytecode, behind `CNA_EASYGL_COMPILED_EFFECTS=ON` (MojoShader) | `docs/fx-compiled-effects.md` §10 | `PENDING` | `HOUSE-00087` | — |
 | G-07 | A compiled `Effect` works end-to-end in a real scene: two techniques switched by name, `Single` 2048² render target with `Depth24`, that target rebound as an effect texture | `cna-samples/plan.md:785` | `PENDING` | `HOUSE-00083`, `HOUSE-00088` | — |
-| G-08 | `Model`/`ModelMesh`/`ModelMeshPart`/`ModelBone` and `CopyAbsoluteBoneTransformsTo` | `docs/model-content-pipeline-support.md` | `PENDING` | `HOUSE-00072` | — |
-| G-09 | `Model` from compiled content carries a real bone hierarchy via `.cnb` | `docs/xnb-content-pipeline-support.md` | `PENDING` | `HOUSE-00072` | — |
+| G-08 | `Model`/`ModelMesh`/`ModelMeshPart`/`ModelBone` and `CopyAbsoluteBoneTransformsTo` | `docs/model-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | Depth-3 hierarchy with a sibling branch: every local and absolute transform equals the matrix computed offline, to 2e-5. `Copy*BoneTransformsTo` require a **pre-sized** destination and throw `destinationBoneTransforms` otherwise. |
+| G-09 | `Model` from compiled content carries a real bone hierarchy via `.cnb` | `docs/xnb-content-pipeline-support.md` | **`PASS`** | `HOUSE-00072` | 4 authored nodes → 5 bones: CNA inserts a **synthetic `Root`** above the scene root. Parent links, `Index`, `Children` and mesh `ParentBone` all as authored. |
 | G-10 | A skinned glTF compiles to `.cnb` and its joints are recoverable **without reading `Model::Tag`** | `docs/content-pipeline.md:456-458` | `PENDING` | `HOUSE-00074` | — |
 | G-11 | `VertexBuffer`, `IndexBuffer`, `DynamicVertexBuffer`; EasyGL has a real 32-bit index factory | feature matrix | `PENDING` | `HOUSE-00092`, `HOUSE-00094` | — |
 | G-12 | `RenderTarget2D`, `RenderTargetCube`, mip chains, MSAA on EasyGL | feature matrix | `PENDING` | `HOUSE-00083`, `HOUSE-00084` | — |
@@ -123,7 +123,7 @@ driver. `HOUSE-00115` records which rows must be re-run when the renderer change
 
 | # | Claim | §5 evidence | Verdict | Probe | Measured |
 |---|---|---|---|---|---|
-| P-01 | `.gltf`/`.glb` → `CNA.GltfImporter/2` → `CNA.ModelContentWriter/3` → `Model` | `docs/content-pipeline.md:370-382` | `PENDING` | `HOUSE-00070` | — |
+| P-01 | `.gltf`/`.glb` → `CNA.GltfImporter/2` → `CNA.ModelContentWriter/3` → `Model` | `docs/content-pipeline.md:370-382` | **`PASS`** | `HOUSE-00070`, `HOUSE-00071` | `CNA.GltfImporter -> CNA.ModelProcessor -> CNA.ModelContentWriter`. Positions, normals and UVs bit-exact against the authored `.glb`; indices unreversed; bounds exact. **`CullClockwise` is the correct draw state.** The emitted vertex is **48 bytes, not `VertexPositionNormalTexture`** — see the finding. |
 | P-02 | `.png`/`.jpg`/`.dds` → `Texture2D` | same | **`PASS`** (`.png`) | `HOUSE-00065` | `CNA.ImageImporter -> CNA.TextureProcessor -> CNA.Texture2DContentWriter`. `premultiplyAlpha` defaults true. `.jpg`/`.dds` not probed. |
 | P-03 | `.wav` → `SoundEffect` | same | **`PASS`** | `HOUSE-00067`, `HOUSE-00068`, `HOUSE-00069` | `CNA.WavImporter -> CNA.SoundEffectProcessor -> CNA.SoundEffectContentWriter`, for 16-bit and (by conversion) 24-bit sources. |
 | P-04 | `.spritefont` (+ TTF via FreeType) → `SpriteFont` | same | **`PASS`** | `HOUSE-00066` | `CNA.FontDescriptionImporter -> CNA.FontDescriptionProcessor -> CNA.SpriteFontContentWriter`; FreeType 2.13.3. `<FontName>` resolves a file beside the descriptor before any system font. |
@@ -164,7 +164,7 @@ recorded here.
 | `BL-03` | Does EasyGL MRT attachment 1 stay black? | `HOUSE-00086` | `PENDING` |
 | `BL-05` | Does `VideoPlayer::Play()` throw `NotSupportedException` without the backend? | `HOUSE-00099` | `PENDING` |
 | `BL-11` | Does `DopplerScale = 0` with zero velocities produce no pitch change? | `HOUSE-00096` | `PENDING` |
-| `BL-12` | Is `Model::Meshes[i].BoundingSphere` populated from `.cnb`? | `HOUSE-00073` | `PENDING` |
+| `BL-12` | Is `Model::Meshes[i].BoundingSphere` populated from `.cnb`? | `HOUSE-00073` | **SETTLED — yes, and it is conservative rather than minimal.** Non-degenerate and it contains every vertex, but on the test box its radius is 7.686 against a minimal 6.225 (**+23 %**) and its centre is 1.55 off in Y. Usable for a cheap reject; not usable as a tight bound. |
 
 ---
 
@@ -575,6 +575,135 @@ asset manifest of ADR-0012 wants both hashes recorded, and an explicit step is w
 **No redistribution claim is made here.** This probe used one file to measure a format conversion.
 The collection's licence status remains exactly what `cna-house.md` §63 says it is, and is settled
 only by its dedicated phase-4 licensing task.
+
+### `HOUSE-00070` / `HOUSE-00071` — static glTF → `.cnb` → `Model`, and the winding verdict · **PASS**
+
+Fixture: `p1-make-gltf.py` writes `P1Static.glb`, an axis-aligned box whose six plane coordinates
+are all distinct (`min(-1,-2,-3) max(4,5,6)`), with per-vertex-unique asymmetric UVs. Self-authored,
+so every number the probe compares against is derivable from the generator rather than from another
+CNA call. `p1-static` loads the compiled `.cnb`, reads the vertex and index buffers back with the
+plain XNA `GetData` overloads, and compares element by element.
+
+```
+$ cna-content build build-probe/p1-fixtures/P1Static.glb \
+      -o build-probe/p1-content/P1Static.cnb --format cnb
+[BUILD] P1Static -> ... (2440 bytes; CNA.GltfImporter -> CNA.ModelProcessor -> CNA.ModelContentWriter)
+$ ./build-probe/p1-static
+  [ok] positions pass through bit-exact (no axis remap or flip)  0 of 24 differ
+  [ok] normals pass through unchanged                            0 differ
+  [ok] UVs pass through bit-exact (no V flip)                    0 differ
+  [ok] indices are the source order, unreversed                  0 differ
+  [ok] vertex-buffer bounds equal the authored bounds            min(-1,-2,-3) max(4,5,6)
+  [ok] screen-space extents match the analytic projection (+Y is up)
+       measured x[88,167] y[72,183] vs analytic x[88.0,168.0] y[72.0,184.0]
+p1-static: 21/21 checks passed
+```
+
+`docs/gltf-conventions.md`'s claim of *no axis remap, no handedness negation and no V flip* is
+therefore confirmed by measurement and not only by reading the importer.
+
+**Winding (`HOUSE-00071`), measured numerically:**
+
+| Cull mode | Pixels covered |
+|---|---|
+| `CullNone` | 8 960 |
+| `CullClockwise` | **8 960** |
+| `CullCounterClockwise` | **0** |
+
+**`CullClockwise` is the correct state for glTF-authored geometry**, exactly as §5 claims.
+
+This measurement needed a *second* fixture, and the reason is worth recording because it is an easy
+mistake to repeat: **a closed solid cannot measure winding.** Run against the box, all three modes
+covered an identical 8 960 pixels — with front faces culled you simply see the far faces through the
+near ones, and the silhouette is unchanged. `P1Quad.glb`, an open single-sided quad, is what makes
+the wrong cull mode render literally nothing.
+
+**Finding — the vertex layout is not a built-in XNA vertex type.** `CNA.ModelProcessor` emits a
+**48-byte** vertex for a primitive carrying `POSITION`/`NORMAL`/`TEXCOORD_0`:
+
+| Offset | Usage | Format |
+|---|---|---|
+| 0 | `Position` | `Vector3` |
+| 12 | `Normal` | `Vector3` |
+| 24 | **`Tangent`** | `Vector4` |
+| 40 | `TextureCoordinate` (index 0) | `Vector2` |
+
+`VertexPositionNormalTexture` is 40 bytes, and the source `.glb` authored **no** `TANGENT`
+attribute — the processor synthesises one. A first version of this probe read the buffer as
+`VertexPositionNormalTexture` and got vertex 0 right and every later vertex wrong, because the
+stride mismatch walked it off the data. Consequences: any `cna-house` code that reads model
+geometry back (collision meshes, offline bake verification, the phase-44 asset tests) must declare
+its own 48-byte struct and check it against `VertexDeclaration::GetVertexElements()` at load, never
+name a built-in type.
+
+### `HOUSE-00072` — bone hierarchy, `ParentBone`, `Root`, `CopyAbsoluteBoneTransformsTo` · **PASS**
+
+Fixture `P1Hier.glb`: four nodes, depth three plus a sibling branch, a 90° rotation about Z that
+does not commute with its translation, a non-uniform scale `(2, 0.5, 4)`, and one node authored as
+an explicit glTF `matrix` rather than TRS — the only place CNA's importer converts a layout at all.
+The generator computes every expected local and absolute matrix **in XNA's own convention**
+(row-major storage, row-vector transform, `local = S·R·T`, `absolute = local · absolute(parent)`)
+and emits them as C++ literals, so the probe compares CNA against arithmetic, not against CNA.
+
+`p1-hier` reports 22/22, including a check that distinguishes a *transposed* result from a merely
+wrong one — the failure mode that a transform-convention mistake actually produces.
+
+```
+  [--] bone count   5              [--] mesh count   4
+  [--] bone[0] Root    index=0 parent=<none>  children=1
+  [--] bone[1] P1Base  index=1 parent=Root    children=2  [1 0 0 0 | 0 1 0 0 | 0 0 1 0 | 10 0 0 1]
+  [--] bone[2] P1Mid   index=2 parent=P1Base  children=1
+  [--] bone[3] P1Tip   index=3 parent=P1Mid   children=0  [2 0 0 0 | 0 0.5 0 0 | 0 0 4 0 | 0 0 3 1]
+  [--] bone[4] P1Wing  index=4 parent=P1Base  children=0
+  [ok] P1Tip: local Transform            # authored as an explicit glTF matrix
+  [ok] P1Tip: absolute transform
+  [ok] an undersized destination is rejected, not silently grown   threw: destinationBoneTransforms
+p1-hier: 22/22 checks passed
+```
+
+Four facts fall out of it:
+
+* **CNA inserts a synthetic `Root` bone** above the glTF scene root. Bone count is *nodes + 1*, and
+  `Model::Root` is that synthetic bone, not the first authored node. Any `cna-house` bone-index
+  table must be built by **name lookup**, never by assuming node *i* is bone *i*.
+* `Bones[i]->Index == i` holds, and every bone reaches `Root` by following `Parent`.
+* The explicit-`matrix` node round-trips correctly, so `ConvertGltfMatrix` does what
+  `docs/gltf-conventions.md` says.
+* `CopyAbsoluteBoneTransformsTo` / `CopyBoneTransformsTo` **require a destination already sized to
+  `Bones.Count`** and throw `std::invalid_argument("destinationBoneTransforms")` otherwise. They do
+  not grow the vector. This is XNA 4.0's array contract preserved literally in C++.
+
+### `HOUSE-00073` — `ModelMesh::BoundingSphere` from `.cnb` · **PASS, with a caveat that matters**
+
+Populated and non-degenerate; it contains every vertex. It is **not minimal**:
+
+| | Measured | Minimal for this box |
+|---|---|---|
+| Centre | `(1.726, -0.049, 2.114)` | `(1.5, 1.5, 1.5)` |
+| Radius | `7.686` | `6.225` |
+
+23 % over on radius, and the centre is 1.55 off in Y — the signature of an incremental
+(Ritter-style) construction rather than a minimal enclosing sphere. `BL-12` is settled *positively*:
+no offline bounds computation is needed for correctness. But the phase-9 and phase-41 visibility
+work must treat it as a **cheap conservative reject only**; anywhere a tight bound is wanted,
+`cna-house` computes its own from the vertex data it already reads back.
+
+### Three CNA-versus-XNA shape differences these probes exposed
+
+None of them is a defect; all three change how `cna-house` must be written, and none is visible
+from reading `cna-house.md` §5.
+
+1. **`ContentManager::Load<T>` returns `T` by value.** `Model` is a value type in CNA where XNA
+   4.0's is a reference type. `Model* m = content.Load<Model>(...)` does not compile.
+2. **Collection iterators are `CNAEXT`.** `ModelMeshCollection`, `ModelBoneCollection`,
+   `ModelMeshPartCollection` and `EffectPassCollection` all mark `begin()`/`end()` `CNAEXT`, so a
+   range-`for` over them is forbidden under ADR-0001 even though `foreach` over the same collection
+   is ordinary XNA 4.0 in C#. **Every loop over an XNA collection in `cna-house` is an index loop**
+   over `getCountProperty()`. This is pervasive, cheap to comply with, and expensive to discover
+   late; `HOUSE-00136` should gate it.
+3. **`Matrix::Identity` is `Matrix::getIdentityProperty()`** and `Vector3::Up` is a plain static —
+   the property-name mapping is not uniform, so it is read per type rather than guessed.
+
 
 ---
 

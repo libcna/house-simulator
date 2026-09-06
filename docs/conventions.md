@@ -194,6 +194,36 @@ guard are also covered by unit tests, so a disabled assert never hides an untest
 
 ---
 
+## 5a. Calling the XNA surface from C++
+
+CNA exposes XNA 4.0 in C++, and three of the shape differences are not guesses to be made per call
+site. All three were measured in phase 1 (`docs/cna-capability-report.md`), and the second one is a
+rule, not a preference.
+
+**Iterate XNA collections by index, never with a range-`for`.** `ModelMeshCollection`,
+`ModelBoneCollection`, `ModelMeshPartCollection` and `EffectPassCollection` mark their
+`begin()`/`end()` `CNAEXT`. A `foreach` over the same collection is ordinary XNA 4.0 in C#, but in
+CNA the iterator is an extension, so ADR-0001 forbids it:
+
+```cpp
+// forbidden -- begin()/end() are CNAEXT
+for (ModelMesh* mesh : model.getMeshesProperty()) { ... }
+
+// required
+const auto& meshes = model.getMeshesProperty();
+for (int i = 0; i < meshes.getCountProperty(); ++i) { ModelMesh* mesh = meshes[i]; ... }
+```
+
+**`ContentManager::Load<T>()` returns `T` by value.** `Model` is a value type in CNA where XNA
+4.0's is a reference type, so `Model* m = content.Load<Model>(name)` does not compile and the
+loaded instance must be kept alive by the caller that will draw it.
+
+**The property-name mapping is not uniform.** `Matrix::getIdentityProperty()` is a property;
+`Vector3::Up` is a plain static. Read the header for the type rather than extrapolating from
+another one.
+
+---
+
 ## 6. Task ids and commits
 
 Task ids are `HOUSE-` plus five digits, permanent, never renumbered, and each belongs to its

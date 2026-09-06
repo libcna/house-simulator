@@ -474,16 +474,61 @@ that produced it; `BL-09` is settled; every probe binary is removed.
       licensing: this measured a format conversion using one file. **No redistribution clearance is
             claimed.** The collection's status remains exactly what `cna-house.md` §63 records and
             is settled only by its dedicated phase-4 licensing task.
-- [ ] HOUSE-00070 — Probe: build a simple static glTF through `cna-content` to `.cnb`, load as `Model`, draw with `BasicEffect`
+- [x] HOUSE-00070 — Probe: build a simple static glTF through `cna-content` to `.cnb`, load as `Model`, draw with `BasicEffect`
       dep: HOUSE-00064 · sys: content · plat: LNX · pri: MUST
       accept: correct bounds, correct orientation, correct winding with `CullClockwise`
-- [ ] HOUSE-00071 — Probe: confirm the glTF winding conclusion — render the same model with `CullClockwise` and `CullCounterClockwise` and record which is correct
+      note: (2026-09-06) PASS, 21/21 checks in probe `p1-static`. A self-authored `P1Static.glb`
+            box with six distinct plane coordinates compiled through
+            `CNA.GltfImporter -> CNA.ModelProcessor -> CNA.ModelContentWriter`. Bounds exact
+            (`min(-1,-2,-3) max(4,5,6)`); positions, normals and UVs **bit-exact** against the
+            authored values read back with the plain XNA `GetData`; indices in source order.
+            Orientation confirmed twice — by the readback and by comparing the render's ink bbox
+            `x[88,167] y[72,183]` against the analytic projection `x[88,168] y[72,184]`.
+      finding: **the emitted vertex is 48 bytes, not `VertexPositionNormalTexture` (40).** The
+            layout is Position@0/Normal@12/**Tangent(Vector4)@24**/TexCoord0@40 — the processor
+            synthesises a `TANGENT` the source never authored. Reading a `Model` back with a
+            built-in XNA vertex type silently misaligns every vertex after the first. Any
+            `cna-house` geometry readback declares its own struct and validates it against
+            `VertexDeclaration::GetVertexElements()`. Sizes `HOUSE-00126` and phase 44.
+- [x] HOUSE-00071 — Probe: confirm the glTF winding conclusion — render the same model with `CullClockwise` and `CullCounterClockwise` and record which is correct
       dep: HOUSE-00070 · sys: rendering · plat: LNX · pri: MUST
-- [ ] HOUSE-00072 — Probe: `Model` with a real multi-bone hierarchy from `.cnb` — verify `Bones`, `ParentBone`, `Root` and `CopyAbsoluteBoneTransformsTo`
+      note: (2026-09-06) **`CullClockwise` is correct**, measured by pixel count into a 256²
+            `RenderTarget2D`: `CullNone` 8 960 px, `CullClockwise` 8 960 px,
+            `CullCounterClockwise` **0** px.
+      finding: **a closed solid cannot measure winding.** Run against the box fixture, all three
+            cull modes covered an identical 8 960 px — with the near faces culled you see the far
+            faces through them and the silhouette does not change. The measurement needed a second
+            fixture, `P1Quad.glb`, an open single-sided quad, where the wrong cull mode renders
+            literally nothing. Recorded because it is an easy mistake to repeat in phase 6.
+- [x] HOUSE-00072 — Probe: `Model` with a real multi-bone hierarchy from `.cnb` — verify `Bones`, `ParentBone`, `Root` and `CopyAbsoluteBoneTransformsTo`
       dep: HOUSE-00070 · sys: content · plat: LNX · pri: MUST
-- [ ] HOUSE-00073 — Probe: `Model::Meshes[i].BoundingSphere` is populated from `.cnb` (it is not from `.model.json` — BL-12)
+      note: (2026-09-06) PASS, 22/22 in probe `p1-hier`. `P1Hier.glb`: four nodes, depth three plus
+            a sibling, a 90° Z rotation that does not commute with its translation, a non-uniform
+            scale `(2, 0.5, 4)`, and one node authored as an explicit glTF `matrix`. The generator
+            computes every expected local and absolute matrix in XNA's own convention and emits
+            them as C++ literals, so the probe compares CNA against arithmetic rather than against
+            another CNA call, and reports a *transposed* result distinctly from a merely wrong one.
+      finding: three facts that change how `cna-house` is written.
+            (1) **CNA inserts a synthetic `Root` bone** above the glTF scene root — bone count is
+            *nodes + 1* and `Model::Root` is that synthetic bone, so every bone-index table must be
+            built by **name lookup**, never by assuming node *i* is bone *i*. This is what
+            `HOUSE-00074`'s joint mapping must be built on.
+            (2) `CopyAbsoluteBoneTransformsTo`/`CopyBoneTransformsTo` **require a destination
+            already sized to `Bones.Count`** and throw `destinationBoneTransforms` otherwise; they
+            do not grow the vector.
+            (3) The explicit-`matrix` node round-trips exactly, confirming `ConvertGltfMatrix`.
+- [x] HOUSE-00073 — Probe: `Model::Meshes[i].BoundingSphere` is populated from `.cnb` (it is not from `.model.json` — BL-12)
       dep: HOUSE-00072 · sys: content · plat: LNX · pri: MUST
       accept: a non-degenerate sphere per mesh; if degenerate, record it as a new blocker and plan to compute bounds offline
+      note: (2026-09-06) PASS on the stated criterion — the sphere is populated, non-degenerate and
+            provably contains every vertex, so **`BL-12` is settled positively** and no offline
+            bounds computation is needed for correctness.
+      finding: it is **conservative, not minimal.** On the test box: centre `(1.726, -0.049, 2.114)`
+            radius `7.686`, against the minimal `(1.5, 1.5, 1.5)` radius `6.225` — **23 % over** on
+            radius and 1.55 off in Y, the signature of an incremental (Ritter-style) construction.
+            Phase 9 and phase 41 must treat it as a cheap conservative reject only; wherever a tight
+            bound is wanted, `cna-house` computes its own from the vertex data it already reads
+            back. Sizes `HOUSE-00761` and the culling work.
 - [ ] HOUSE-00074 — **Probe: skinned glTF → `.cnb` → `Model`, and prove a project-owned sidecar can bind to it** (settles R-16). Read the skin's joint names and order from the source `.glb`, compile the model, compare against `Model::Bones`. `Model::Tag` is not read.
       dep: HOUSE-00072 · sys: content · plat: LNX · pri: MUST
       accept: (1) every glTF skin joint has a same-named `Model::Bones` entry; (2) the joint order the vertex blend indices reference is recoverable and stable across rebuilds; (3) `ParentBone`/`Transform` agree with the source hierarchy; (4) if any of these fails, the fallback — an explicit joint-name→bone-index map emitted into the sidecar — is recorded instead
