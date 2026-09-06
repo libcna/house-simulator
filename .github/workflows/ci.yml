@@ -62,6 +62,12 @@ jobs:
         # rejected with a message that names the reason.
         run: python3 tools/assets/gltf_validate.py --selftest
 
+      - name: The scale and origin gates must reject what they claim to
+        working-directory: cna-house
+        run: |
+          python3 tools/assets/scale_check.py --selftest
+          python3 tools/assets/origin_check.py --selftest
+
       - name: The XNA-only gate must detect what it claims to
         working-directory: cna-house
         # A gate that has never been shown to fire is a gate nobody should trust. `--selftest`

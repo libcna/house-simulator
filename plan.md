@@ -2455,10 +2455,50 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             `CNA.ModelProcessor` refuses a multi-skin glTF anyway. This turns a late failure deep in
             a content build into an early one that names the file and the remedy — and it also
             catches a file that `skin_split.py` split incorrectly, which the processor would not.
-- [ ] HOUSE-00187 — `tools/assets/scale_check.py`: assert an asset's bounds against its category table (`cna-house.md` §70.5)
+- [x] HOUSE-00187 — `tools/assets/scale_check.py`: assert an asset's bounds against its category table (`cna-house.md` §70.5)
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00188 — `tools/assets/origin_check.py`: assert the origin is at the support point (or the wall plane for wall-mounted) within 2 cm
+      note: (2026-09-07) §70.5's table transcribed, driven by the manifest row's `category` — so the
+            same record that carries the licence decides the size rule, and an asset with no row is
+            caught by `check_manifest.py` first. Gated in `run_checks.sh`; `--selftest` in CI.
+      finding: **the rule names an AXIS, not a largest dimension.** A door is checked on its height
+            AND its width; checking a bounding box's biggest side instead would pass a door lying on
+            its side. Axes are glTF's, +Y up and −Z forward (`HOUSE-00070`).
+      finding: bounds are read from the **accessors' own declared `min`/`max`**, which glTF requires
+            on a POSITION accessor. They are authoritative, already in metres, and available without
+            decoding a buffer — which is what keeps this tool free of a glTF library. A file that
+            omits them is **refused**, not guessed at.
+      finding: **an unknown category is an error, never a silent skip.** The failure this whole check
+            exists to prevent is a model nobody looked at, and "unknown category, so no check" is
+            precisely that. Categories with no size expectation are listed explicitly, each with the
+            reason it is unsized.
+      finding: the failure message names the **ratio** to the nearest bound, because that is what
+            identifies the mistake: 100× is centimetres, 2.54× is inches, 0.01× is a scaled-down
+            scene. "Outside the tolerance" tells an author to change a number; "97× the bound" tells
+            them which export setting is wrong.
+      finding: **the selftest caught a bug in the SELFTEST, not in the checker**, and that is worth
+            recording. The first fixture was a 2.04 m *cube*, which the door-width rule correctly
+            rejected — the checker was right and the fixture was wrong. A second assertion looked
+            for `"100"` in the message and was matching the constant advice string
+            `100x is centimetres` rather than anything computed; it now asserts on the measured
+            `204.000 m`. A test that passes on its own error message is worse than no test.
+- [x] HOUSE-00188 — `tools/assets/origin_check.py`: assert the origin is at the support point (or the wall plane for wall-mounted) within 2 cm
       dep: HOUSE-00187 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) Seven selftest cases, both directions, including one 1.5 cm out that must
+            PASS — a tolerance that rejects everything is not a tolerance.
+      finding: **why this matters more than it looks.** Every placement in `assets-src/world/*.json`
+            is a position for the ORIGIN, so an origin 30 cm above the floor puts the whole prop 30
+            cm in the air and an origin at a fridge's centre buries half of it. Both read as a
+            physics or a layout bug and are neither, which is how a day gets spent in the wrong file.
+      finding: X and Z are checked as well as Y. An object whose origin is off to one side **rotates
+            about a point outside itself**, which is invisible until a door swings or a chair is
+            turned — and by then the placement data has been authored around it.
+      finding: 2 cm is chosen from both ends: below what reads as wrong at eye height, above what a
+            decimation or a normal transfer can move a vertex by. A tighter tolerance would fail on
+            `lod_gen.py`'s own output.
+      finding: the wall-mounted case checks the **back face at Z = 0** rather than the centre, and
+            the sign is written down in the source, because "which face touches the wall" under
+            glTF's −Z-forward convention is exactly the kind of thing each author would otherwise
+            re-derive and half of them would get backwards.
 - [ ] HOUSE-00189 — `tools/blender/lod_gen.py`: decimate to LOD1/LOD2 with normal transfer, UV preservation and a triangle-budget target
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
       accept: LOD1 ≈ 35 %, LOD2 ≈ 12 % of LOD0 triangles; silhouette error under a stated threshold

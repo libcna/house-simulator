@@ -106,6 +106,10 @@ run_gate "licences"   python3 tools/assets/verify_licences.py --check
 # Every glTF in the tree must import cleanly, warnings included (`HOUSE-00186`). Cheap while the
 # tree is small; when it is not, it moves to the content job.
 run_gate "gltf"       python3 tools/assets/gltf_validate.py
+# Size and origin, driven by the manifest's `category` (`HOUSE-00187`, `HOUSE-00188`). A scale error
+# is the commonest defect in a downloaded asset and the hardest to see in isolation.
+run_gate "scale"      python3 tools/assets/scale_check.py
+run_gate "origin"     python3 tools/assets/origin_check.py
 
 echo
 if [[ ${#FAILED[@]} -eq 0 ]]; then
