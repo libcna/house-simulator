@@ -195,6 +195,34 @@ pristine CNA source at `d422038`; only planning prose differs from the committed
 
 `sharp-runtimenext` at `30ccdef` was not modified by this session either.
 
+### The CNA checkout moved during phase 2 (recorded 2026-09-07)
+
+Every measurement above was taken against `cnanext` at **`d422038`**. By the end of phase 2 the
+checkout stood at **`cde325ec`** — one commit ahead, made by someone else, and **it touches the
+renderer this report measured against**:
+
+```
+modules/renderers/easygl/src/EasyGLRenderer.cpp    | 29 +-
+.../easygl_thread_context_lease_exclusion_test.cpp | 200 +++
+```
+
+Nothing in this project was modified in response, and nothing needed to be: the whole `cna-house`
+suite — 286 unit and integration tests under `OPENGLES3` and again under `HEADLESS`, plus 4 render
+tests under `LIBGL_ALWAYS_SOFTWARE=1` — passes against `cde325ec`. But a passing test suite is not
+the same claim as a re-measured capability, and the difference is worth being exact about:
+
+* the **behavioural** rows here (does `Apply3D` write back, is `PixelCount` a boolean, does
+  `SkinnedEffect` refuse `LightingEnabled = false`) are properties of the core modules, which did
+  not change;
+* the **timing** rows of `HOUSE-00106`, `HOUSE-00091` and `HOUSE-00092` were taken through EasyGL
+  and are the ones a renderer change can move. They are not invalidated — a thread-context lease is
+  not on the submission path — but they were not re-taken either, and anyone comparing a new
+  measurement against them should re-run `HOUSE-00115`'s list first.
+
+`cna-house` did not modify `cnanext` at any point; the tree moved on its own, and this section
+exists so that a later reader is not left comparing numbers from two different trees without knowing
+it.
+
 ---
 
 ## Findings
@@ -1706,3 +1734,31 @@ Measured 2026-09-06, `git status --porcelain` in `cnanext`: **11 modified files,
 pristine CNA source at `d422038`; only planning prose differs from the committed tree.
 
 `sharp-runtimenext` at `30ccdef` was not modified by this session either.
+
+### The CNA checkout moved during phase 2 (recorded 2026-09-07)
+
+Every measurement above was taken against `cnanext` at **`d422038`**. By the end of phase 2 the
+checkout stood at **`cde325ec`** — one commit ahead, made by someone else, and **it touches the
+renderer this report measured against**:
+
+```
+modules/renderers/easygl/src/EasyGLRenderer.cpp    | 29 +-
+.../easygl_thread_context_lease_exclusion_test.cpp | 200 +++
+```
+
+Nothing in this project was modified in response, and nothing needed to be: the whole `cna-house`
+suite — 286 unit and integration tests under `OPENGLES3` and again under `HEADLESS`, plus 4 render
+tests under `LIBGL_ALWAYS_SOFTWARE=1` — passes against `cde325ec`. But a passing test suite is not
+the same claim as a re-measured capability, and the difference is worth being exact about:
+
+* the **behavioural** rows here (does `Apply3D` write back, is `PixelCount` a boolean, does
+  `SkinnedEffect` refuse `LightingEnabled = false`) are properties of the core modules, which did
+  not change;
+* the **timing** rows of `HOUSE-00106`, `HOUSE-00091` and `HOUSE-00092` were taken through EasyGL
+  and are the ones a renderer change can move. They are not invalidated — a thread-context lease is
+  not on the submission path — but they were not re-taken either, and anyone comparing a new
+  measurement against them should re-run `HOUSE-00115`'s list first.
+
+`cna-house` did not modify `cnanext` at any point; the tree moved on its own, and this section
+exists so that a later reader is not left comparing numbers from two different trees without knowing
+it.

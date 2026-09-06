@@ -2301,6 +2301,15 @@ system update order, the settings file, the logging, and a CI that runs lints an
             `cna-house.md` §47.0's sketch said `BindTo` throws where §5.4 says content failures are
             `Result`s. Each was the smallest correction that made the documents describe what is
             true.
+      finding: (recorded 2026-09-07) **the `cnanext` checkout moved during phase 2**, from `d422038`
+            — the tree every phase-1 measurement was taken against — to `cde325ec`, one commit ahead
+            and made by someone else. It touches `modules/renderers/easygl/src/EasyGLRenderer.cpp`,
+            the renderer this project measures through. Nothing here was changed in response and
+            nothing needed to be: the whole suite passes against the new tree. But a passing suite is
+            not a re-measured capability, and `docs/cna-capability-report.md` now says which rows a
+            renderer change could move (the `HOUSE-00106`/`00091`/`00092` timings) and which it
+            cannot (the behavioural rows, which are core-module properties). `cna-house` modified
+            nothing in `cnanext` at any point.
       note: **still open and carried forward.** `HOUSE-00100` (mouse-delta measurement,
             INCONCLUSIVE — needs a session with the pointer over the window) and `HOUSE-00029`
             (`util::SmallVector`/`FixedString`, or a measured decision against them) are the two
