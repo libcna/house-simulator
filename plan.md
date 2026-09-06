@@ -8,9 +8,10 @@ satisfied and its `verify:` step has been run. Task ids are permanent and are ne
 
 | | |
 |---|---|
-| Phase in progress | 0 — repository, conventions and decisions |
-| Completed | 34 of 1 297 tasks |
+| Phase in progress | 1 — CNA capability verification |
+| Completed | 35 of 1 297 tasks |
 | Baseline commit | `96d21db` (the approved planning baseline) |
+| Phase 0 | stage A closed by `HOUSE-00042`; seven stage-B tasks deferred to phase 2 by design |
 
 Corrections made to the planning documents during implementation are recorded in
 [Planning corrections](#planning-corrections) at the end of this file, never applied silently.
@@ -162,6 +163,25 @@ rule true.
 **Exit.** `cmake --build build` produces a binary that opens a window and clears it; CI runs the
 lint gates and an empty test suite; every ADR listed below exists.
 
+**Phase 0 closes in two stages, deliberately.** Its exit criterion names a build and a test suite,
+and neither exists until phase 2 authors `CMakeLists.txt` (`HOUSE-00121`) and the GoogleTest
+harness (`HOUSE-00125`). Phase 1 must not wait for them: capability probing needs only the sibling
+CNA checkout, and its whole purpose is to settle the facts phase 2's build skeleton is designed
+against. The two stages are therefore:
+
+* **Stage A — the pre-probe foundation, gated by `HOUSE-00042`.** Everything that can be finished
+  and proved *before* the application build exists: the directory skeleton, the twelve ADRs, the
+  conventions, workflow, licensing, content-authoring and world-format documents, the enforcement
+  gates and their self-test, and the header-only `Result<T>`. `HOUSE-00042` certifies exactly this
+  set, and it is the gate `HOUSE-00061` opens phase 1 on.
+* **Stage B — the deferred verifications.** `HOUSE-00002`, `HOUSE-00025`–`HOUSE-00029` and
+  `HOUSE-00035` stay **open**. Each is blocked on infrastructure phase 2 creates, and each closes
+  when its own `verify:` step becomes executable — not before, and never by relaxing its
+  acceptance criteria. They are listed with their unblocking task in [Status](#status).
+
+This is dependency staging, not ignored work. A stage-B task is a real open task with a real
+acceptance criterion; it is not marked complete on the strength of the code having been written.
+
 - [x] HOUSE-00001 — Create the repository skeleton: directories per `cna-house.md` §17.5, with a `.gitkeep` in each empty one
       dep: — · sys: app · plat: ALL · pri: MUST
       files: (directories only)
@@ -307,9 +327,32 @@ lint gates and an empty test suite; every ADR listed below exists.
       dep: HOUSE-00018 · sys: — · plat: TOOL · pri: MUST
 - [x] HOUSE-00041 — Record the definition of done for a task: builds, tests pass, lint green, docs updated, plan checkbox ticked, one commit
       dep: HOUSE-00038 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00042 — First commit: the skeleton, the documents, the gates
-      dep: HOUSE-00001…HOUSE-00041 · sys: — · plat: ALL · pri: MUST
-      accept: CI green on a fresh clone
+- [x] HOUSE-00042 — Pre-probe foundation checkpoint: the skeleton, the documents and the gates are established, and capability probing may begin
+      dep: HOUSE-00001, HOUSE-00003…HOUSE-00024, HOUSE-00030…HOUSE-00034, HOUSE-00036…HOUSE-00041 ·
+           sys: — · plat: ALL · pri: MUST
+      accept: (1) the §17.5 directory skeleton exists and `check_layout.py` asserts it; (2) all
+              twelve ADRs exist; (3) the conventions, workflow, versioning, screenshot-scene,
+              content-authoring, world-format, xna-deviations, performance-log, asset-review and
+              licensing documents exist; (4) `tools/ci/run_checks.sh` is green on the committed
+              tree and `check_xna_only.py --selftest` detects all 14 planted violations;
+              (5) `Result<T>` compiles and behaves under `-Wall -Wextra -Wpedantic -Werror` in both
+              the assert-enabled and `-O2 -DNDEBUG` configurations; (6) the tree is clean and no
+              build product is tracked
+      verify: `tools/ci/check_xna_only.py --selftest`; `tools/ci/run_checks.sh`;
+              `python3 -m py_compile tools/ci/*.py`; probe `p0-result-check`; `git diff --check`;
+              `git status --porcelain`
+      correction: (2026-09-06) this task was "First commit: the skeleton, the documents, the gates /
+                  dep: HOUSE-00001…HOUSE-00041 / accept: CI green on a fresh clone". Both the
+                  dependency list and the acceptance criterion were unsatisfiable, and they
+                  deadlocked the plan — see [Planning corrections](#planning-corrections). It is now
+                  the **stage-A gate**: it certifies the foundation that can exist before the
+                  application build, and nothing else. The seven stage-B tasks it no longer depends
+                  on stay open with their own criteria intact.
+      note: (2026-09-06) all six criteria checked at `5631b95` + the planning correction.
+            `run_checks.sh` green (layout, xna-only, clang-format); the self-test detected 14/14
+            fixtures; `p0-result-check` passed in both configurations and was then deleted.
+            "CI green on a fresh clone" is not lost — it is the acceptance criterion of
+            `HOUSE-00133` (lint CI) and `HOUSE-00134` (build + `unit` CI), where it is executable.
 
 ---
 
@@ -3437,6 +3480,7 @@ evidence that it fails.
 | 2026-09-06 | `HOUSE-00021` | `assets-src/effects/` → `assets-src/Effects/` in `cna-house.md` §70.1, in the §18.1 CMake snippet and in this task's text | Four statements in the two documents disagreed on the case of one path. §18.1's pipeline diagram, §17.5 and the "directories are PascalCase" rule of §8.3 said `Effects/`; §70.1 and the §18.1 CMake snippet said `effects/`. `check_xna_only.py` enforces where a `.fx` may live and needs exactly one spelling. |
 | 2026-09-06 | `HOUSE-00021` | `SOURCE_DIR assets-src/content` → `SOURCE_DIR assets-src` in the §18.1 CMake snippet, with the config file moved to `assets-src/.cna-content.json` | The same snippet placed the ContentManager-bound trees under `assets-src/content/`, while §18.1's own diagram, §17.5 and §15.1 place `Models/`, `Textures/`, `Audio/`, `Fonts/`, `Video/`, `Effects/` and `world/` directly under `assets-src/`. The directory skeleton created by `HOUSE-00001` follows the majority, and `check_layout.py` asserts it. |
 | 2026-09-06 | — | `cna-house.md` header and this file's header now record implementation as in progress rather than forbidden | The project owner approved implementation on 2026-09-06. |
+| 2026-09-06 | `HOUSE-00042` | `dep: HOUSE-00001…HOUSE-00041` → the completed pre-build foundation tasks only (`HOUSE-00001`, `HOUSE-00003`–`HOUSE-00024`, `HOUSE-00030`–`HOUSE-00034`, `HOUSE-00036`–`HOUSE-00041`); `accept: CI green on a fresh clone` → the six stage-A criteria now listed on the task; the task is retitled the pre-probe foundation checkpoint | **The plan deadlocked.** `HOUSE-00042` depended on all of `HOUSE-00001…00041`, which includes seven tasks (`HOUSE-00002`, `HOUSE-00025`–`HOUSE-00029`, `HOUSE-00035`) whose acceptance genuinely needs the `CMakeLists.txt` of `HOUSE-00121` and the GoogleTest harness of `HOUSE-00125`. `HOUSE-00061` depends on `HOUSE-00042`, phase 1 ends at `HOUSE-00120`, and `HOUSE-00121` depends on `HOUSE-00120` — a closed cycle in which no phase could start. Its own criterion, "CI green on a fresh clone", was unsatisfiable for the same reason and is not lost: it is what `HOUSE-00133` and `HOUSE-00134` accept on. The seven tasks stay **open** with their criteria unchanged; only the gate moved. No id was renumbered, no task was struck, no phase was reordered. |
 
 ---
 
@@ -3444,23 +3488,31 @@ evidence that it fails.
 
 `STATUS: APPROVED — IMPLEMENTATION IN PROGRESS`
 
-**Phase 0 — 34 of 42 tasks complete.**
+**Phase 0 — 35 of 42 tasks complete. Stage A is closed; stage B is deferred by design.**
 
 Done: `HOUSE-00001`, `HOUSE-00003`–`HOUSE-00024`, `HOUSE-00030`–`HOUSE-00034`,
-`HOUSE-00036`–`HOUSE-00041`.
+`HOUSE-00036`–`HOUSE-00042`.
 
-Open, and why:
+`HOUSE-00042` — the pre-probe foundation checkpoint — closed on 2026-09-06. **Phase 1 is
+unblocked.**
 
-| Task | Why it is still open |
-|---|---|
-| `HOUSE-00002` | The README is written; its acceptance criterion is that a contributor can build from it, which needs `HOUSE-00121`. |
-| `HOUSE-00025` `util/Log` | Needs the GoogleTest harness (phase 2) to satisfy `verify: unit LogTests.*`. |
-| `HOUSE-00026` `util/Ids` | Same — `verify: unit IdsTests.*`. |
-| `HOUSE-00027` `util/Rng` | Same — `verify: unit RngTests.*`. |
-| `HOUSE-00028` `util/Json` | Same, and it additionally needs `System::Text::Json` linked, i.e. the CMake project. |
-| `HOUSE-00029` `util/SmallVector` | Explicitly gated on a measurement, which needs a build. |
-| `HOUSE-00035` `CMakePresets.json` | Its acceptance criterion is that each preset configures; that needs `CMakeLists.txt`. |
-| `HOUSE-00042` | The phase's closing commit: "CI green on a fresh clone", which needs CI and a build. |
+Stage B: still open, each blocked on infrastructure a later phase creates. These are real open
+tasks. None of them is complete, and none will be ticked until its own `verify:` step can actually
+be run:
 
-The next coherent batch is therefore `HOUSE-00121` onwards (phase 2's build skeleton), after which
-`HOUSE-00002`, `HOUSE-00025`–`HOUSE-00029`, `HOUSE-00035` and `HOUSE-00042` close phase 0.
+| Task | Why it is still open | Closes after |
+|---|---|---|
+| `HOUSE-00002` `README.md` | The README is written and carries a visible note saying so. Its criterion is that a contributor can *build* from it. | `HOUSE-00121` |
+| `HOUSE-00025` `util/Log` | `verify: unit LogTests.*` needs the GoogleTest harness. | `HOUSE-00125` |
+| `HOUSE-00026` `util/Ids` | Same — `verify: unit IdsTests.*`. | `HOUSE-00125` |
+| `HOUSE-00027` `util/Rng` | Same — `verify: unit RngTests.*`. | `HOUSE-00125` |
+| `HOUSE-00028` `util/Json` | Same, and it additionally needs `System::Text::Json` linked, i.e. the CMake project. | `HOUSE-00121`, `HOUSE-00125` |
+| `HOUSE-00029` `util/SmallVector` | Explicitly gated on a measurement, which needs a build. | `HOUSE-00125` |
+| `HOUSE-00035` `CMakePresets.json` | Its criterion is that each preset configures; that needs `CMakeLists.txt`. | `HOUSE-00121` |
+
+`HOUSE-00024`'s `Result<T>` is ticked but shares stage B's shape: the header is verified, its
+permanent GoogleTest test lands with `HOUSE-00125`.
+
+**Phase 1 — in progress.** The next work is `HOUSE-00061` onwards: the capability report skeleton,
+then the probe tranche that settles what phase 2's build skeleton is designed against. Phase 0's
+stage-B tasks close after phase 2 delivers the build and the test harness.
