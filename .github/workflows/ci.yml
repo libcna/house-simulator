@@ -55,6 +55,13 @@ jobs:
           python3 tools/assets/verify_licences.py --packaging \
             || echo "note: the packaging gate refuses the assets listed above; see licenses/THIRD-PARTY-ASSETS.md"
 
+      - name: The glTF gate must reject what it claims to
+        working-directory: cna-house
+        # `--selftest` plants three broken files -- a truncated header, wrong magic, and a
+        # structurally valid file that breaks the one-skin project rule -- and requires each to be
+        # rejected with a message that names the reason.
+        run: python3 tools/assets/gltf_validate.py --selftest
+
       - name: The XNA-only gate must detect what it claims to
         working-directory: cna-house
         # A gate that has never been shown to fire is a gate nobody should trust. `--selftest`

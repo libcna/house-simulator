@@ -2427,9 +2427,34 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             the source is better anyway: a reviewer sees the `.fx` and the `.xnb` change together,
             and tracked files inside an otherwise-generated tree make an accidental
             `git add content/` far too easy. §18.4 and `.gitignore` are both corrected.
-- [ ] HOUSE-00186 — `tools/assets/gltf_validate.py`: run `gltf-validator` if present plus a CNA importer pass with warnings-as-errors
+- [x] HOUSE-00186 — `tools/assets/gltf_validate.py`: run `gltf-validator` if present plus a CNA importer pass with warnings-as-errors
       dep: HOUSE-00181 · sys: content · plat: TOOL · pri: MUST
       accept: rejects a deliberately broken glTF with a useful message
+      note: (2026-09-07) In `tools/ci/run_checks.sh`, and `--selftest` runs in the CI lint job.
+            `assets-src/Models/Fallback/box.glb` passes all three passes.
+      note: the acceptance is met by `--selftest`, which plants three broken files and requires each
+            to be rejected **with a message naming the reason**: a truncated header
+            (`is shorter than a glTF binary header`), wrong magic (`has magic 0x45504f4e, not
+            'glTF'`), and a structurally valid `.glb` that breaks a project rule (`declares 2 skins;
+            §47.0 allows exactly one`). "Rejects a broken file" is easy; rejecting it usefully is
+            the part worth testing.
+      finding: **the CNA importer pass is the authoritative one, and its warnings are treated as
+            errors.** The question is not "is this valid glTF" but "does the pipeline this project
+            actually uses import it without complaining" — and a warning from `cna-content` is a
+            statement that something was *guessed at*, which in an asset is a bug waiting for a
+            screenshot.
+      finding: `gltf-validator` is optional and its absence is **reported, never hidden**. It is a
+            Node package nobody should be made to install to build the game, but a run that silently
+            checked less than the reader assumed is how a gate becomes decorative. The same applies
+            to the importer pass when no `cna-content` has been built yet.
+      finding: the `.glb` container is parsed by hand — twelve-byte header, length-prefixed chunks —
+            rather than with a library, for the same reason the validator is optional: this tool has
+            no dependency to install. That also means the malformed-container cases are caught here
+            rather than as an exception from someone else's parser.
+      finding: the one-skin rule is enforced here even though `HOUSE-00076` measured that
+            `CNA.ModelProcessor` refuses a multi-skin glTF anyway. This turns a late failure deep in
+            a content build into an early one that names the file and the remedy — and it also
+            catches a file that `skin_split.py` split incorrectly, which the processor would not.
 - [ ] HOUSE-00187 — `tools/assets/scale_check.py`: assert an asset's bounds against its category table (`cna-house.md` §70.5)
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00188 — `tools/assets/origin_check.py`: assert the origin is at the support point (or the wall plane for wall-mounted) within 2 cm
