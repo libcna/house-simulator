@@ -11,6 +11,9 @@ add_library(cnahouse_core STATIC
     util/Json.cpp
 
     # app -- the frame, the services, the settings
+    animation/Animation.cpp
+    animation/AnimationCache.cpp
+    animation/ChanimReader.cpp
     app/CnaHouseGame.cpp
     app/ISystem.cpp
     app/Services.cpp

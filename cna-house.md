@@ -3692,7 +3692,10 @@ struct ClipLibrary {
     Skeleton                             skeleton;
     std::vector<Clip>                    clips;
     std::unordered_map<std::string, int> byName;
-    void BindTo(const Model& model);           // validates and fills modelBoneIndex; throws on mismatch
+    // Validates and fills modelBoneIndex. RETURNS the failure (corrected 2026-09-06, HOUSE-00167):
+    // docs/conventions.md §5.4 makes malformed content a recoverable failure, and a Result still
+    // lets a caller treat a mismatch as fatal while a throw does not let it do anything else.
+    util::Result<void> BindTo(const Model& model);
 };
 
 }   // namespace cnahouse::anim

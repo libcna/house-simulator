@@ -2163,8 +2163,53 @@ system update order, the settings file, the logging, and a CI that runs lints an
             (`HOUSE-00167`).
       files: docs/anim-format.md
       accept: (1) fully specified with byte offsets and a worked example; (2) a version field and a rejection rule for unknown versions; (3) nothing in it could only have come from a CNA type
-- [ ] HOUSE-00167 — Implement `anim::Skeleton`, `anim::Clip`, `anim::ClipLibrary`, the `.chanim` reader over `TitleContainer::OpenStream` + `System::IO::BinaryReader`, `ClipLibrary::BindTo(const Model&)`, and an `AnimationCache` alongside the other content caches
+- [x] HOUSE-00167 — Implement `anim::Skeleton`, `anim::Clip`, `anim::ClipLibrary`, the `.chanim` reader over `TitleContainer::OpenStream` + `System::IO::BinaryReader`, `ClipLibrary::BindTo(const Model&)`, and an `AnimationCache` alongside the other content caches
       dep: HOUSE-00166, HOUSE-00143 · sys: animation · plat: ALL · pri: MUST
+      note: (2026-09-06) `animation/Animation.{hpp,cpp}` (Keyframe, Clip, Skeleton, ClipLibrary),
+            `animation/ChanimReader.{hpp,cpp}` and `animation/AnimationCache.{hpp,cpp}`. Eighteen
+            unit tests of the reader, all building a `.chanim` byte-for-byte in memory, plus six
+            integration tests of `BindTo` and the cache against a real `Model`.
+      finding: **MEASURED — `ModelBoneCollection`'s by-name indexer THROWS for an unknown name.**
+            `bones[name]` raises *"ModelBoneCollection: bone not found: <name>"*; it does not return
+            null, which is what the first version of `BindTo` assumed and what the deliberately
+            wrong-joint test caught within a minute of being written. The fix is
+            `TryGetValue(name, bone)`, which is plain XNA 4.0 on this collection — only its
+            iterators are `CNAEXT` — and which turns the miss into the `util::Result` this project
+            reports failures with instead of an exception crossing a non-content boundary. The
+            capability report's `HOUSE-00074` note said the collection "has a by-name indexer, so
+            this needs no search of our own", which is true and was *not* the whole story.
+      finding: **`BindTo` RETURNS its error rather than throwing, correcting `cna-house.md` §47.0.**
+            §47.0's code sketch says `throws on mismatch`; `docs/conventions.md` §5.4 says malformed
+            content is a recoverable failure reported as a `Result`. The two authoritative documents
+            disagreed. The smallest correction is the sketch: a `Result` still lets a caller treat
+            the failure as fatal, while a throw does not let it do anything else — and the prose of
+            §47.0 ("a fatal content error naming the offending joint") is satisfied either way.
+      finding: a failed bind clears **every** index back to -1 rather than leaving the ones that had
+            already resolved. A half-bound skeleton deforms silently, which is the single outcome
+            this entire mechanism exists to prevent, and it is asserted by its own test.
+      finding: the error names the joint **and its blend index**. "The skeleton does not match"
+            would leave someone comparing two lists of sixty-two names by eye; "skin joint 41 is
+            named 'hand_L', which the model has no bone for" is one grep.
+      finding: **`AnimationCache` is deliberately not a `content::AssetCache`, and the reason is not
+            the loader signature.** `AssetCache` exists to substitute a fallback — a missing texture
+            becomes grey and the room still reads. **There is no fallback skeleton.** A character
+            whose skeleton did not load cannot be drawn at all, and substituting one would produce
+            exactly the silent wrong deformation `HOUSE-00074` and `BindTo` guard against. So it
+            returns the error and the caller decides. It keeps `AssetCache`'s "log once" property,
+            because that path runs every frame the character is drawn; `Clear()` forgets the
+            failures too, since a content reload exists in order to try again.
+      finding: the duration check is `!(duration > 0)` and not `duration <= 0`, so a **NaN** is
+            rejected. A NaN compares false against everything and walks straight through a `<=`,
+            and a NaN duration turns every later sample into a NaN pose. There is a test for it.
+      finding: key times are checked ascending **within each bone's track**, after the keys are read,
+            because the `boneFirstKey` partition is what says where a track starts. The sampler
+            binary-searches, so unsorted input does not fail — it silently returns the wrong pose.
+      note: strings are `u16` length + UTF-8, **not** `BinaryReader::ReadString`. That method's
+            7-bit-encoded length prefix is a .NET-specific encoding and hostile to any other writer
+            of this format — and `tools/assets/anim_extract.py` (`HOUSE-00223`) is a Python writer.
+      note: truncation is caught by the `catch` around the whole read, because `BinaryReader` throws
+            at end of stream. It is the one failure the field-by-field checks cannot see, and it
+            must be an error rather than a skeleton quietly missing its last joints.
       files: src/animation/Skeleton.cpp|hpp, src/animation/ClipLibrary.cpp|hpp, src/animation/ChanimReader.cpp|hpp
       accept: (1) a hand-written fixture round-trips; (2) `BindTo` fills `modelBoneIndex` for a matching model; (3) a joint absent from `Model::Bones` is a **fatal** load error naming the joint, never a silent deformation; (4) a truncated or wrong-version file is rejected with a precise message; (5) no CNA symbol appears in any of these files
       verify: unit ChanimReaderTests.*, ClipLibraryTests.BindMismatchIsFatal

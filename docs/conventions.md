@@ -86,15 +86,25 @@ authoring habits, hyphens match the content-name grammar.
 | Type | `PascalCase` | `PortalRuntime` |
 | Function / method | `PascalCase` for anything XNA-facing or public, matching CNA and XNA | `Update`, `SweepCapsule` |
 | Local variable, parameter | `camelCase` | `visibleCells` |
-| Member variable | `m_camelCase` | `m_apertureFraction` |
+| Member variable | `camelCase_` — a TRAILING underscore | `apertureFraction_` |
 | Constant, `constexpr` | `kPascalCase` | `kMaxBonesPerModel` |
 | Enum | `enum class`, `PascalCase` type, `PascalCase` enumerators | `PortalOpacity::OpaqueWhenClosed` |
 | Macro | avoid; where unavoidable, `CNAHOUSE_SCREAMING_CASE` | `CNAHOUSE_TIER_E` |
 | Include guard | `#pragma once` | |
 
-Namespaces map one-to-one onto the 18 subsystem directories, with two aliases the architecture
-already uses in prose: `cnahouse::anim` for `src/animation/` and `cnahouse::render` for
-`src/rendering/`. `check_layout.py` asserts the directory set; reviewers assert the namespace.
+*Corrected 2026-09-06 (`HOUSE-00167`).* This table previously said `m_camelCase`, and the code has
+never used it: 111 members across `include/` carry a trailing underscore and three files carry `m_`
+— `util/Result.hpp`, which predates the rest, and two `.cpp`s that copied it. The doc is what was
+wrong. Renaming 111 members to match a line of prose is churn with no reader on the other end;
+correcting the line is one edit. `util/Result.hpp` keeps `m_` rather than being rewritten for
+consistency alone, and is the one file where a reader will see it.
+
+Namespaces map one-to-one onto the 18 subsystem directories, with **one** alias the architecture
+uses in its own code: `cnahouse::anim` for `src/animation/` (`cna-house.md` §47.0 writes it that
+way). `src/rendering/` is `cnahouse::rendering`, following the one-to-one rule — an earlier draft of
+this file named `cnahouse::render` as a second alias, but nothing ever used it and the one-to-one
+name is what twelve headers now carry. `check_layout.py` asserts the directory set; reviewers assert
+the namespace.
 
 **Ordering of includes** (clang-format sorts within each block; the blocks are ours):
 
