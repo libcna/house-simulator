@@ -12,6 +12,9 @@ add_library(cnahouse_core STATIC
 
     # app -- the frame, the services, the settings
     app/CnaHouseGame.cpp
+    app/ISystem.cpp
+    app/Services.cpp
+    app/EventQueue.cpp
     app/Settings.cpp
     app/CommandLine.cpp
     app/FrameTimer.cpp

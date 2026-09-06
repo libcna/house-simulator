@@ -1,0 +1,233 @@
+# cna-house CI.
+#
+# The jobs mirror `plan.md` HOUSE-00133..HOUSE-00138 one for one, and the split is by COST rather
+# than by convenience: lint runs in seconds and gates every push, the sanitizer and render jobs are
+# nightly because they are slow and because a red nightly is a message rather than a blocked merge.
+#
+# `cna-house` builds against `../cnanext` and `../sharp-runtimenext` as SIBLING checkouts
+# (`cna-house.md` §8.1), so every build job checks all three out into that shape. There is no
+# vendoring and no submodule to init; a runner that skipped a sibling would fail at configure with
+# the message the root `CMakeLists.txt` prints, which is the intended behaviour.
+name: ci
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Nightly, after most working days have ended in Europe.
+    - cron: "0 2 * * *"
+
+env:
+  # One ccache, always, and `CCACHE_BASEDIR` is what unifies hashes across build trees. The
+  # openeggbert build rules exist because the alternative measured 330 s per build instead of 15 s.
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+  CCACHE_BASEDIR: ${{ github.workspace }}
+  CCACHE_MAXSIZE: 2G
+
+jobs:
+  # --- HOUSE-00133 -------------------------------------------------------------------------------
+  lint:
+    name: lint (xna-only, layout, clang-format)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: cna-house }
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+      - name: Run the gates
+        working-directory: cna-house
+        run: tools/ci/run_checks.sh
+      - name: The XNA-only gate must detect what it claims to
+        working-directory: cna-house
+        # A gate that has never been shown to fire is a gate nobody should trust. `--selftest`
+        # plants a violation of each of the fourteen rejected classes and requires each to be found.
+        run: tools/ci/check_xna_only.py --selftest
+
+  # --- HOUSE-00134 -------------------------------------------------------------------------------
+  build-and-unit:
+    name: build ${{ matrix.preset }} + unit
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [linux-debug, linux-release]
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: cna-house }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/cnanext, path: cnanext }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ matrix.preset }}-${{ github.sha }}
+          restore-keys: ccache-${{ matrix.preset }}-
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build ccache g++-14 \
+            libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev \
+            libfreetype-dev
+      - name: Configure and build
+        working-directory: cna-house
+        run: |
+          cmake --preset ${{ matrix.preset }}
+          cmake --build --preset ${{ matrix.preset }} -j"$(nproc)"
+      - name: Unit tests
+        working-directory: cna-house
+        # Unit tests need no GPU and no display by construction: anything that does belongs in
+        # `integration` or `render`.
+        run: ctest --preset unit
+
+  # --- HOUSE-00135 -------------------------------------------------------------------------------
+  headless-integration:
+    name: headless integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: cna-house }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/cnanext, path: cnanext }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-headless-${{ github.sha }}
+          restore-keys: ccache-headless-
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build ccache g++-14 libfreetype-dev \
+            libasound2-dev libpulse-dev
+      - name: Configure and build
+        working-directory: cna-house
+        run: |
+          cmake --preset headless
+          cmake --build --preset headless -j"$(nproc)"
+      - name: Integration tests with no display server
+        working-directory: cna-house
+        # `DISPLAY` and `WAYLAND_DISPLAY` are unset deliberately. HOUSE-00105 measured 600 frames
+        # under exactly these conditions, and a run that silently found an X server would prove
+        # nothing about CI.
+        run: env -u DISPLAY -u WAYLAND_DISPLAY ctest --preset integration
+
+  # --- HOUSE-00136 -------------------------------------------------------------------------------
+  symbol-check:
+    name: "no CNA::Graphics:: symbol is linked"
+    runs-on: ubuntu-latest
+    needs: build-and-unit
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: cna-house }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/cnanext, path: cnanext }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-linux-release-${{ github.sha }}
+          restore-keys: ccache-linux-release-
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build ccache g++-14 binutils \
+            libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libfreetype-dev
+      - name: Build
+        working-directory: cna-house
+        run: |
+          cmake --preset linux-release
+          cmake --build --preset linux-release --target cna-house -j"$(nproc)"
+      - name: Assert the engine layer is absent from the binary
+        working-directory: cna-house
+        # SCOPE, measured by HOUSE-00063 and not to be widened without re-measuring: `CNA_CNAEXT=OFF`
+        # removes `CNA::Graphics::` and `AvatarRenderer` -- 0 symbols against a control of 6 277 --
+        # but it does NOT remove `SupportsCapability`, `GraphicsCapability`, `getSkinsEXTProperty`,
+        # `setOwnedResources`, `ShaderEffect`, `PbrEffect`, `SkinnedPbrEffect` or `SkinnedModelEXT`,
+        # which live in `Microsoft::Xna::Framework::Graphics` in the always-compiled core and are
+        # linked regardless. For those, `check_xna_only.py` is the ONLY gate -- not a second line of
+        # defence -- which is why it must never be relaxed.
+        run: |
+          set -euo pipefail
+          binary=build/cna-house
+          test -f "$binary"
+          for symbol in 'CNA::Graphics::' 'AvatarRenderer'; do
+            count=$(nm -C "$binary" | grep -c "$symbol" || true)
+            echo "$symbol: $count"
+            if [ "$count" -ne 0 ]; then
+              echo "FAIL: $count occurrences of '$symbol' were linked into the binary." >&2
+              exit 1
+            fi
+          done
+          echo "OK: the CNAEXT engine layer is absent from the linked binary."
+
+  # --- HOUSE-00137 (nightly) ---------------------------------------------------------------------
+  sanitizers:
+    name: ${{ matrix.preset }}
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [linux-asan, linux-ubsan]
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: cna-house }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/cnanext, path: cnanext }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build ccache g++-14 xvfb \
+            libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libfreetype-dev
+      - name: Configure and build
+        working-directory: cna-house
+        run: |
+          cmake --preset ${{ matrix.preset }}
+          cmake --build --preset ${{ matrix.preset }} -j"$(nproc)"
+      - name: Unit and integration under the sanitizer
+        working-directory: cna-house
+        # ADR-0003 and HOUSE-00106 both note that sanitizer binaries in these projects reach
+        # 400-900 MB; only one variant is built per job for that reason.
+        run: |
+          ctest --test-dir build-${{ matrix.preset == 'linux-asan' && 'asan' || 'ubsan' }} \
+                -L 'unit|integration' --output-on-failure
+
+  # --- HOUSE-00138 (nightly) ---------------------------------------------------------------------
+  render-tests:
+    name: render tests under Xvfb (OPENGLES3)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { path: cna-house }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/cnanext, path: cnanext }
+      - uses: actions/checkout@v4
+        with: { repository: openeggbert/sharp-runtime, path: sharp-runtimenext }
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build ccache g++-14 xvfb mesa-utils \
+            libgl1-mesa-dev libegl1-mesa-dev libasound2-dev libpulse-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libfreetype-dev
+      - name: Configure and build
+        working-directory: cna-house
+        run: |
+          cmake --preset linux-release
+          cmake --build --preset linux-release -j"$(nproc)"
+      - name: Render tests
+        working-directory: cna-house
+        # A software rasteriser, so the numbers are reproducible and the job needs no GPU runner.
+        # It is NOT the driver phase 1 measured against, so a render test asserts geometry and
+        # coverage rather than exact shading -- see docs/cna-capability-report.md HOUSE-00115.
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: xvfb-run -a --server-args="-screen 0 1600x900x24" ctest --preset render

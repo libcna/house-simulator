@@ -1154,6 +1154,11 @@ that produced it; `BL-09` is settled; every probe binary is removed.
             runnable probes were rebuilt from the new location, `clang-format`ed and **re-run: 21/21
             still PASS**. `build-probe/` and `build-consumer/` are then deleted whole, so the
             acceptance figure is met by removal rather than by trimming.
+      done: (2026-09-06) `build-probe/` (290 MB) and `build-consumer/` (116 MB) deleted — 406 MB —
+            after checking `ps` and every `/proc/*/cwd` for a live process holding either, per
+            openeggbert build rule 7. Nothing but the tracked sources, the generators, the README
+            and `assets-src/Effects/P1Probe.fx` survives, and the whole set rebuilds in 15 s from a
+            warm cache (`HOUSE-00116`).
 - [x] HOUSE-00115 — Record in `docs/cna-capability-report.md` a "if you change renderer, re-run these" list
       dep: HOUSE-00112 · sys: — · plat: ALL · pri: MUST
       note: (2026-09-06) Ten rows to re-run, ordered by how badly a wrong assumption would hurt,
@@ -1367,15 +1372,45 @@ system update order, the settings file, the logging, and a CI that runs lints an
             honest shape anyway: the font is genuinely absent until it loads, `has_value()` *is*
             the "did it load" question, and there is no second flag to fall out of step with it.
             A build whose content tree has not been generated logs one warning and runs.
-- [ ] HOUSE-00128 — Implement `Services`: a typed container constructing every system in dependency order and destroying in reverse
+- [x] HOUSE-00128 — Implement `Services`: a typed container constructing every system in dependency order and destroying in reverse
       dep: HOUSE-00127 · sys: app · plat: ALL · pri: MUST
       accept: (1) construction order is explicit and asserted; (2) a system cannot resolve one constructed after it
       verify: unit ServicesTests.*
-- [ ] HOUSE-00129 — Define `ISystem` (`Update(const FrameContext&)`) and the fixed system order of `cna-house.md` §7.5
+      note: (2026-09-06) `Services` with explicit sequenced construction, reverse destruction, and
+            `ResolveFrom` — verified by `ServicesTests.*`. Both acceptance points hold: the
+            construction order is recorded and asserted, and a service **cannot** resolve one
+            registered after it (`InvalidData`, with both positions named and "move it earlier in
+            Bootstrap" as the fix).
+      finding: ADR-0006 chose composition over an ECS, and a plain struct of members is the obvious
+            composition — but it gives no place to state the *order*, and order is the thing that
+            goes wrong. Sixty members constructed in declaration order, one quietly reading another
+            not yet built, is a startup null-dereference that reorders itself every time someone
+            adds a field. Registering twice is refused rather than replacing, because replacing
+            leaks the first instance and dangles every pointer to it; a *borrowed* registration
+            exists for the objects XNA owns (`GraphicsDevice`, `ContentManager`) and is never
+            destroyed by the container.
+- [x] HOUSE-00129 — Define `ISystem` (`Update(const FrameContext&)`) and the fixed system order of `cna-house.md` §7.5
       dep: HOUSE-00128 · sys: app · plat: ALL · pri: MUST
-- [ ] HOUSE-00130 — Implement the event queue: typed events, drained once per frame in a fixed order, with a per-frame cap and an overflow diagnostic
+      note: (2026-09-06) `ISystem` and `UpdateStage`, the twelve stages of §7.5 declared as an enum
+            rather than as the sequence of calls in some `Update` function — so the order can be
+            asserted, timed per stage, printed in the debug overlay, and so a new system has to be
+            *placed* rather than appended.
+      finding: the order is load-bearing, not conventional. Interaction opens a door, the door
+            animates its aperture, the aperture changes which portals are open, visibility walks
+            those portals. Reorder two and the frame is one frame stale in a way that presents as a
+            door you can see through before it has opened.
+- [x] HOUSE-00130 — Implement the event queue: typed events, drained once per frame in a fixed order, with a per-frame cap and an overflow diagnostic
       dep: HOUSE-00129 · sys: app · plat: ALL · pri: MUST
       verify: unit EventQueueTests.*
+      note: (2026-09-06) `EventQueue`: typed, drained once per frame in publish order, with a
+            4 096-event per-frame cap and an overflow diagnostic naming the event type. Verified by
+            `EventQueueTests.*`, including a deliberate publish loop.
+      finding: an event published *by a handler* is delivered in the **same** drain, so a switch
+            that opens a door that changes a portal resolves this frame rather than arriving one
+            frame late — which is exactly why the cap has to exist. On overflow the remainder is
+            **dropped, not carried**: carrying it would let a publish loop survive the cap and
+            overflow again forever, turning a loud failure into a quiet one. Without the cap a
+            publish loop is a hang, and a hang is the least diagnosable failure a game can have.
 - [x] HOUSE-00131 — Implement `Settings`: load/save `settings.json`, defaults, versioning, migration, and typed accessors
       dep: HOUSE-00028, HOUSE-00127 · sys: app · plat: ALL · pri: MUST
       verify: unit SettingsTests.* incl. a v1→v2 migration fixture
@@ -1398,18 +1433,53 @@ system update order, the settings file, the logging, and a CI that runs lints an
             reaching for a reasonable-sounding option is told *why* it cannot exist and what to use
             instead. Verified end to end: `./build/cna-house --renderer=opengl33` refuses with that
             explanation and exits 2.
-- [ ] HOUSE-00133 — CI job: lint (`check_xna_only`, `check_layout`, clang-format) on every push
+- [x] HOUSE-00133 — CI job: lint (`check_xna_only`, `check_layout`, clang-format) on every push
       dep: HOUSE-00020, HOUSE-00022 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00134 — CI job: build `linux-debug` and `linux-release`, run `unit`
+      note: (2026-09-06) `.github/workflows/ci.yml`, job `lint`. Runs `tools/ci/run_checks.sh` and
+            then `check_xna_only.py --selftest`, because **a gate that has never been shown to fire
+            is a gate nobody should trust** — the self-test plants a violation of each of the
+            fourteen rejected classes and requires each to be found. Verified locally: 14/14
+            detected, clean tree accepted.
+- [x] HOUSE-00134 — CI job: build `linux-debug` and `linux-release`, run `unit`
       dep: HOUSE-00125 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00135 — CI job: build `headless`, run `integration`
+      note: (2026-09-06) Job `build-and-unit`, a matrix over `linux-debug` and `linux-release`
+            driven by `CMakePresets.json`, running `ctest --preset unit`. All three repositories are
+            checked out into the sibling shape `cna-house.md` §8.1 requires; ccache is cached
+            between runs with `CCACHE_BASEDIR` set, which is what makes the cache hit at all.
+- [x] HOUSE-00135 — CI job: build `headless`, run `integration`
       dep: HOUSE-00125, HOUSE-00105 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00136 — CI job: the symbol check that no `CNA::Graphics::` symbol is linked into the binary (from HOUSE-00063)
+      note: (2026-09-06) Job `headless-integration`, building the `headless` preset and running
+            `ctest --preset integration` under `env -u DISPLAY -u WAYLAND_DISPLAY`. The unset is
+            deliberate and is the same condition `HOUSE-00105` measured 600 frames under: a run
+            that silently found an X server would prove nothing about CI.
+- [x] HOUSE-00136 — CI job: the symbol check that no `CNA::Graphics::` symbol is linked into the binary (from HOUSE-00063)
       dep: HOUSE-00063, HOUSE-00134 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00137 — CI job (nightly): `linux-asan` and `linux-ubsan` builds running `unit` + `integration`
+      note: (2026-09-06) Job `symbol-check`, and it **passes on the real binary today**:
+            `nm -C build/cna-house | grep -c 'CNA::Graphics::'` is **0** and `AvatarRenderer` is
+            **0**.
+      scope: deliberately narrowed to those two symbols, per `HOUSE-00063`'s measurement, and the
+            reason is written into the job. `CNA_CNAEXT=OFF` removes the `CNA::Graphics::` engine
+            layer — 0 against a control of 6 277 — but it does **not** remove
+            `SupportsCapability`, `GraphicsCapability`, `getSkinsEXTProperty`, `setOwnedResources`,
+            `ShaderEffect`, `PbrEffect`, `SkinnedPbrEffect` or `SkinnedModelEXT`, which live in
+            `Microsoft::Xna::Framework::Graphics` in the always-compiled core and are linked
+            regardless. For those, `check_xna_only.py` is the **only** gate rather than a second
+            line of defence — which is why it must never be relaxed, and why this job says so.
+- [x] HOUSE-00137 — CI job (nightly): `linux-asan` and `linux-ubsan` builds running `unit` + `integration`
       dep: HOUSE-00124 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00138 — CI job (nightly): `render` tests under `Xvfb` with `OPENGLES3`
+      note: (2026-09-06) Job `sanitizers`, nightly, a matrix over the `linux-asan` and
+            `linux-ubsan` presets running the `unit` and `integration` labels. One variant per job:
+            `HOUSE-00106`'s note and the openeggbert rules both record that sanitizer binaries in
+            these projects reach 400–900 MB, so building both speculatively is exactly the waste
+            those rules exist to stop.
+- [x] HOUSE-00138 — CI job (nightly): `render` tests under `Xvfb` with `OPENGLES3`
       dep: HOUSE-00125 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-06) Job `render-tests`, nightly, under `xvfb-run` at 1600×900 with
+            `LIBGL_ALWAYS_SOFTWARE=1` so the job needs no GPU runner and its numbers are
+            reproducible.
+      scope: software rasterisation is **not** the driver phase 1 measured against, so a render
+            test asserts geometry and coverage rather than exact shading. `HOUSE-00115`'s "re-run
+            these if you change renderer" list is what says which verdicts are driver-specific.
 - [x] HOUSE-00139 — Implement the frame timer and `FrameContext`: real dt, clamped dt, frame index, fixed-step accumulator
       dep: HOUSE-00129 · sys: app · plat: ALL · pri: MUST
       accept: a 250 ms hitch clamps to 4 physics substeps and does not spiral
