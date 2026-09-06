@@ -3074,6 +3074,48 @@ from the settings menu with the presets above and a free numeric entry. The brie
 is retained as a preset. The reason 24 wins is not aesthetic — it is that `1 s = 1 min` removes an
 entire class of arithmetic mistakes from every test, log and settings dialogue in the project.
 
+### 35.2b The compressed year: 15.208333 simulated days
+
+The 24-real-minute day of §35.2 settles how fast the *sun* moves. It leaves the calendar running
+at one calendar day per simulated day, and that is far too slow to ever be seen: four seasons
+would need 365 simulated days, which at 24 real minutes each is **146 real hours** of play. A
+player would never witness autumn.
+
+**Decision (project owner, 2026-09-06): the calendar is compressed so that one simulated day
+advances the calendar by 24 calendar days.**
+
+| Quantity | Value |
+|---|---|
+| Real minutes per simulated day | 24 (unchanged — `timeScale = 60`) |
+| Calendar days advanced per simulated day | **24** |
+| Simulated days per year | 365 / 24 = **15.208333…** |
+| **Real minutes per year** | 15.208333… × 24 = **365** |
+| **Real hours per year** | **6.0833…** (6 h 5 min) |
+| Real minutes per season | 91.25 (1 h 31 min) |
+| Starting season | **Spring** — a new game begins at the vernal equinox |
+
+The number that matters is the last-but-two: **one full year takes 365 real minutes**, so a single
+long session shows the whole house in all four seasons, while the sun still rises and sets once
+every 24 real minutes rather than once a minute. The two rates are deliberately decoupled: the
+*diurnal* rate is chosen for how the sun should look, the *annual* rate for how long a player
+should have to wait to see winter.
+
+The mnemonic falls out cleanly: **1 real second = 1 simulated minute; 1 real minute = 1 simulated
+hour; 1 real hour ≈ 2.5 simulated days ≈ 2 simulated months.**
+
+Two consequences are load-bearing and are why this is recorded as a decision rather than a
+constant:
+
+* **The solar declination must advance 24× faster than the hour angle.** Sunrise and sunset drift
+  measurably from one simulated day to the next — which is the point: §35.3's day-length variation
+  becomes visible within a session instead of being theoretical.
+* **Nothing may key off an integer season.** A season boundary crossed every 91 real minutes is
+  frequent enough that a stepwise change would read as a glitch. Season is therefore a
+  **continuous phase**, not an enum — see §36.3.
+
+`SimClock` gains one field, `calendarDaysPerSimDay` (default 24.0), so the compression is
+configurable and can be set to 1.0 for a realistic-calendar debug run.
+
 ### 35.3 What the cycle drives
 
 Sun and moon position and colour; sky dome colours and cloud tint; star visibility; outdoor
@@ -3148,10 +3190,51 @@ special-casing, and a spring storm can produce sleet.
 
 ### 36.3 Seasons
 
-Four transition matrices (winter / spring / summer / autumn), selected by day-of-year, differing
-in archetype probabilities and dwell times. Summer favours `W_CLEAR`/`W_PARTLY` with occasional
-sharp `W_THUNDERSTORM`; winter favours `W_OVERCAST`/`W_SNOW`; autumn favours `W_RAIN` and
-`W_FOG`; spring is the most variable.
+Four transition matrices (winter / spring / summer / autumn), differing in archetype probabilities
+and dwell times. Summer favours `W_CLEAR`/`W_PARTLY` with occasional sharp `W_THUNDERSTORM`;
+winter favours `W_OVERCAST`/`W_SNOW`; autumn favours `W_RAIN` and `W_FOG`; spring is the most
+variable.
+
+**Season is a continuous phase, never an enum.** Under the compressed year of §35.2b a boundary is
+crossed every 91 real minutes, so a matrix that switched at an instant would be visible as a
+glitch. The clock exposes:
+
+```cpp
+struct SeasonPhase {
+    float  yearFraction;   // 0 .. 1, 0 = vernal equinox (a new game starts here)
+    int    primary;        // 0 spring, 1 summer, 2 autumn, 3 winter
+    int    secondary;      // the season being blended towards
+    float  blend;          // 0 .. 1, how far towards `secondary`
+};
+```
+
+`blend` is 0 through the middle of a season and ramps over the outer 20 % at each end, so the last
+fifth of autumn is already partly winter. Every seasonal quantity — the transition matrix, the
+temperature curve, vegetation colour, foliage density, snow-cover probability, the ambience bed —
+is the `blend`-weighted mix of the two neighbouring seasons' values, never a switch.
+
+**Hard seasonal gates are expressed as probability, not as prohibition, with one exception.**
+`W_SNOW` has probability zero in summer: it is gated on the outdoor temperature the §36.2
+curve produces, so snow in July is impossible by construction rather than by a special case.
+Conversely `W_THUNDERSTORM`'s probability rises with the summer temperature excess, so the hottest
+part of the year is the stormiest — which is both what the brief asked for and what real
+continental summers do.
+
+### 36.3.1 What each season looks like
+
+The four looks below are the acceptance target for the seasonal art and material work. Each is
+reached by blending, never by switching.
+
+| Season | Vegetation | Ground | Weather bias | Ambience |
+|---|---|---|---|---|
+| **Spring** | Light, fresh green; blossom on the fruit trees; flower beds in bloom | Damp, vivid grass | The most variable; frequent light rain | Dawn chorus, birdsong through the day |
+| **Summer** | Dense, dark green canopy | Grass dries and yellows during heat waves | Mostly clear, with sharp afternoon thunderstorms in the heat | Insects, distant traffic, quiet nights |
+| **Autumn** | Yellow → orange → red, then leaf fall over the last fifth of the season | Fallen leaves accumulate, then thin | More wind and sustained rain; fog | Wind in bare branches, fewer birds |
+| **Winter** | Bare branches | Snow cover on the garden, the roof, the fence and the cars; frost and ice | Overcast and snow; the coldest temperatures | Muffled, still; snow damps the ambience |
+
+Snow cover, leaf litter and grass dryness are **accumulating state**, not instantaneous functions
+of the season: they build and melt over simulated hours so a warm spell mid-winter visibly clears
+the drive.
 
 ### 36.4 Determinism
 

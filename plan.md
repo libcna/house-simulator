@@ -9,7 +9,7 @@ satisfied and its `verify:` step has been run. Task ids are permanent and are ne
 | | |
 |---|---|
 | Phase in progress | 1 — CNA capability verification |
-| Completed | 35 of 1 297 tasks |
+| Completed | 35 of 1 308 tasks |
 | Baseline commit | `96d21db` (the approved planning baseline) |
 | Phase 0 | stage A closed by `HOUSE-00042`; seven stage-B tasks deferred to phase 2 by design |
 
@@ -110,7 +110,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 9 | Room/portal visibility | 00661–00760 | 37 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 23 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 15 | The house is not floating in nothing |
-| 12 | Materials and textures | 00891–00970 | 28 | The blockout reads as a building |
+| 12 | Materials and textures | 00891–00970 | 30 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 64 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
@@ -120,16 +120,16 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 19 | Plumbing and water | 01411–01460 | 19 | |
 | 20 | Toilets | 01461–01490 | 14 | |
 | 21 | Television and video | 01491–01530 | 14 | Both backends |
-| 22 | Time | 01531–01560 | 11 | |
+| 22 | Time | 01531–01560 | 17 | |
 | 23 | Sun, glare, sun-clock | 01561–01600 | 18 | |
 | 24 | Moon and stars | 01601–01640 | 19 | |
 | 25 | Sky and clouds | 01641–01680 | 15 | |
-| 26 | Weather core | 01681–01740 | 22 | |
+| 26 | Weather core | 01681–01740 | 24 | |
 | 27 | Rain | 01741–01790 | 16 | |
-| 28 | Snow | 01791–01830 | 11 | |
+| 28 | Snow | 01791–01830 | 12 | |
 | 29 | Storm, lightning, thunder | 01831–01870 | 14 | |
 | 30 | Hail and wind | 01871–01910 | 20 | |
-| 31 | Audio foundation | 01911–01990 | 30 | |
+| 31 | Audio foundation | 01911–01990 | 31 | |
 | 32 | Room-aware 3-D audio | 01991–02040 | 19 | |
 | 33 | Dog | 02041–02090 | 21 | |
 | 34 | Cat | 02091–02130 | 16 | |
@@ -1505,6 +1505,17 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       accept: on a profile without anisotropy the renderer samples trilinear and the settings row is absent; `check_xna_only.py` proves no file calls `SupportsCapability`
 - [ ] HOUSE-00917 — Render tests: a materials sheet scene plus 12 room poses at the new materials
       dep: HOUSE-00912 · sys: ci · plat: CI · pri: MUST
+- [ ] HOUSE-00919 — Author the seasonal vegetation material set — spring light green with blossom, summer dense dark green, autumn yellow/orange/red, winter bare — and blend between them from `SeasonPhase`
+      dep: HOUSE-01543, HOUSE-00897 · sys: rendering · plat: ALL · pri: MUST
+      accept: (1) four looks per species, reached by blending and never by switching; (2) the
+              transition is imperceptible frame to frame; (3) Tier S only — a tint and a texture
+              swap, no custom effect
+      verify: render test vegetation-season-01..04 at the four solstice/equinox points
+- [ ] HOUSE-00920 — Implement the autumn leaf-fall transition: foliage density ramps down over the last 20 % of autumn, leaf litter accumulates on the ground, and the branches finish bare
+      dep: HOUSE-00919 · sys: rendering · plat: ALL · pri: MUST
+      accept: (1) density is a continuous function of `SeasonPhase`, not a step; (2) litter
+              accumulates then thins; (3) by the start of winter the deciduous trees are bare
+      verify: render test vegetation-leaffall-01..05 sampling the last fifth of autumn
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -2053,8 +2064,48 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01533 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-01540 — Test: a frame hitch of 250 ms advances the clock by the real elapsed time, and the physics accumulator clamps
       dep: HOUSE-01531, HOUSE-00549 · sys: ci · plat: CI · pri: MUST
+- [ ] HOUSE-01542 — Implement the compressed year of `cna-house.md` §35.2b: `SimClock::calendarDaysPerSimDay` (default 24.0), so one simulated day advances the calendar by 24 days and a year takes 365 real minutes
+      dep: HOUSE-01532 · sys: environment · plat: ALL · pri: MUST
+      files: src/environment/SimClock.cpp|hpp
+      accept: (1) at `timeScale = 60` and the default compression, 365 real minutes advance the
+              calendar by exactly one year; (2) the solar hour angle still completes one turn per
+              24 real minutes while the declination completes one turn per 365 real minutes;
+              (3) `calendarDaysPerSimDay = 1.0` restores a realistic calendar for debugging
+      verify: unit ClockTests.CompressedYear
+- [ ] HOUSE-01543 — Implement `SeasonPhase` (`yearFraction`, `primary`, `secondary`, `blend`) as a **continuous** value per `cna-house.md` §36.3; a new game starts at the vernal equinox
+      dep: HOUSE-01542, HOUSE-01534 · sys: environment · plat: ALL · pri: MUST
+      files: src/environment/SeasonPhase.cpp|hpp
+      accept: (1) a fresh save starts in spring at `yearFraction == 0`; (2) `blend` is 0 through the
+              middle of a season and ramps over the outer 20 % at each end; (3) `yearFraction` is
+              continuous and monotonic across the year wrap; (4) **no consumer reads an integer
+              season without a blend weight** — asserted by a lint over `src/`
+      verify: unit SeasonPhaseTests.*
+- [ ] HOUSE-01544 — Implement seasonal day-length variation: sunrise and sunset drift with the declination, so the shortest and longest days are visibly different within one 6-hour year
+      dep: HOUSE-01542, HOUSE-01561 · sys: environment · plat: ALL · pri: MUST
+      accept: (1) at the configured latitude, midsummer and midwinter daylight lengths differ by the
+              analytic amount within 2 simulated minutes; (2) the drift is smooth frame to frame
+      verify: unit SunTests.SeasonalDayLength; screenshot scene sun-season-01..04
+- [ ] HOUSE-01545 — Implement the outdoor temperature model: seasonal base curve + diurnal curve + weather `Δtemp`, driven by `SeasonPhase` and blended, never switched
+      dep: HOUSE-01543, HOUSE-01535 · sys: environment · plat: ALL · pri: MUST
+      accept: (1) the annual minimum and maximum land in winter and summer respectively; (2) the
+              diurnal minimum is near dawn; (3) the curve is continuous across every season
+              boundary; (4) it is the single source `W_SNOW` gating and storm probability read
+      verify: unit TemperatureTests.* sampling a full year
+- [ ] HOUSE-01546 — Implement the in-game environment readout: time of day, season, progress through the year, and the outdoor temperature
+      dep: HOUSE-01545, HOUSE-01543 · sys: ui · plat: ALL · pri: MUST
+      accept: (1) it is a **player-facing** readout, not the `F8` debug overlay; (2) it shows the
+              simulated clock time, the current season, year progress, and the outdoor temperature
+              in °C; (3) units and the exact presentation are settled during the task — the
+              requirement is that all four values are legible, not a particular widget;
+              (4) it can be hidden from settings
+      verify: render test hud-season-01; manual read-through of one full simulated year
+- [ ] HOUSE-01547 — Test: one uninterrupted 365-real-minute run passes through all four seasons exactly once, starting and ending in spring
+      dep: HOUSE-01546 · sys: ci · plat: CI · pri: MUST
+      accept: run headless with the clock driven at a large `timeScale`; assert the season sequence,
+              that `blend` never jumps, and that the temperature curve is continuous throughout
+      verify: integration SeasonCycleTests.FullYear
 - [ ] HOUSE-01541 — Phase-22 review and commit
-      dep: HOUSE-01531…HOUSE-01540 · sys: — · plat: ALL · pri: MUST
+      dep: HOUSE-01531…HOUSE-01540, HOUSE-01542…HOUSE-01547 · sys: — · plat: ALL · pri: MUST
 
 ---
 
@@ -2238,6 +2289,20 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-00021 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-01701 — Tune the archetype table and the transition matrices against a subjective "does a week of weather feel right?" review over 7 simulated days
       dep: HOUSE-01698 · sys: weather · plat: LNX · pri: MUST
+- [ ] HOUSE-01703 — Blend the four seasonal transition matrices continuously from `SeasonPhase::blend` instead of selecting one by day-of-year
+      dep: HOUSE-01543, HOUSE-01683 · sys: weather · plat: ALL · pri: MUST
+      accept: (1) the effective archetype probabilities are the blend-weighted mix of the two
+              neighbouring seasons; (2) crossing a season boundary changes no probability
+              discontinuously; (3) determinism is preserved — the same seed still reproduces the
+              same weather sequence
+      verify: unit WeatherSeasonTests.BlendedMatrices
+- [ ] HOUSE-01704 — Gate the archetypes on the measured outdoor temperature: `W_SNOW` impossible in summer, `W_THUNDERSTORM` probability rising with the summer temperature excess
+      dep: HOUSE-01703, HOUSE-01545 · sys: weather · plat: ALL · pri: MUST
+      accept: (1) over a full simulated year, `W_SNOW` is never selected while the outdoor
+              temperature is above its threshold — **zero occurrences in summer**; (2) storm
+              frequency correlates positively with summer temperature; (3) the gate is expressed
+              through the temperature curve, not as a hardcoded month test
+      verify: integration WeatherSeasonTests.NoSummerSnow over a 10-year headless run
 - [ ] HOUSE-01702 — Phase-26 review and commit
       dep: HOUSE-01681…HOUSE-01701 · sys: — · plat: ALL · pri: MUST
 
@@ -2305,6 +2370,12 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01794 · sys: — · plat: LNX · pri: MUST
 - [ ] HOUSE-01800 — Render tests: light snow, blizzard, 5 cm accumulation, 30 cm accumulation, melt in progress
       dep: HOUSE-01797 · sys: ci · plat: CI · pri: MUST
+- [ ] HOUSE-01802 — Implement accumulating seasonal snow cover on the garden, the roof, the fence and the cars, building and melting with the outdoor temperature rather than with the season index
+      dep: HOUSE-01704, HOUSE-01793 · sys: weather · plat: ALL · pri: MUST
+      accept: (1) cover builds over simulated hours of snowfall and melts over simulated hours
+              above freezing; (2) a warm spell mid-winter visibly clears the drive; (3) the depth
+              is saved; (4) the four surfaces accumulate independently
+      verify: render test snow-cover-01..04; integration SnowCoverTests.MeltCycle
 - [ ] HOUSE-01801 — Phase-28 review and commit
       dep: HOUSE-01791…HOUSE-01800 · sys: — · plat: ALL · pri: MUST
 
@@ -2457,6 +2528,12 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01919 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-01939 — Listening review: walk the house and list every sound that is wrong, missing or too loud; fix
       dep: HOUSE-01931 · sys: audio · plat: LNX · pri: MUST
+- [ ] HOUSE-01941 — Make the exterior ambience bed seasonal: spring birdsong and dawn chorus, summer insects, autumn wind in bare branches, winter muffled stillness — cross-faded on `SeasonPhase`
+      dep: HOUSE-01543, HOUSE-01925 · sys: audio · plat: ALL · pri: MUST
+      accept: (1) the bed is the blend-weighted mix of the two neighbouring seasons, cross-faded
+              rather than switched; (2) birdsong is absent in winter and densest in spring;
+              (3) it respects the room-aware attenuation of §64 — the bed is quieter indoors
+      verify: manual listen across one simulated year; unit AmbienceTests.SeasonalWeights
 - [ ] HOUSE-01940 — Phase-31 review and commit
       dep: HOUSE-01911…HOUSE-01939 · sys: — · plat: ALL · pri: MUST
 
@@ -3481,6 +3558,7 @@ evidence that it fails.
 | 2026-09-06 | `HOUSE-00021` | `SOURCE_DIR assets-src/content` → `SOURCE_DIR assets-src` in the §18.1 CMake snippet, with the config file moved to `assets-src/.cna-content.json` | The same snippet placed the ContentManager-bound trees under `assets-src/content/`, while §18.1's own diagram, §17.5 and §15.1 place `Models/`, `Textures/`, `Audio/`, `Fonts/`, `Video/`, `Effects/` and `world/` directly under `assets-src/`. The directory skeleton created by `HOUSE-00001` follows the majority, and `check_layout.py` asserts it. |
 | 2026-09-06 | — | `cna-house.md` header and this file's header now record implementation as in progress rather than forbidden | The project owner approved implementation on 2026-09-06. |
 | 2026-09-06 | `HOUSE-00042` | `dep: HOUSE-00001…HOUSE-00041` → the completed pre-build foundation tasks only (`HOUSE-00001`, `HOUSE-00003`–`HOUSE-00024`, `HOUSE-00030`–`HOUSE-00034`, `HOUSE-00036`–`HOUSE-00041`); `accept: CI green on a fresh clone` → the six stage-A criteria now listed on the task; the task is retitled the pre-probe foundation checkpoint | **The plan deadlocked.** `HOUSE-00042` depended on all of `HOUSE-00001…00041`, which includes seven tasks (`HOUSE-00002`, `HOUSE-00025`–`HOUSE-00029`, `HOUSE-00035`) whose acceptance genuinely needs the `CMakeLists.txt` of `HOUSE-00121` and the GoogleTest harness of `HOUSE-00125`. `HOUSE-00061` depends on `HOUSE-00042`, phase 1 ends at `HOUSE-00120`, and `HOUSE-00121` depends on `HOUSE-00120` — a closed cycle in which no phase could start. Its own criterion, "CI green on a fresh clone", was unsatisfiable for the same reason and is not lost: it is what `HOUSE-00133` and `HOUSE-00134` accept on. The seven tasks stay **open** with their criteria unchanged; only the gate moved. No id was renumbered, no task was struck, no phase was reordered. |
+| 2026-09-06 | `HOUSE-01542`…`HOUSE-01547`, `HOUSE-01703`, `HOUSE-01704`, `HOUSE-01802`, `HOUSE-00919`, `HOUSE-00920`, `HOUSE-01941` | **New work, requested by the project owner on 2026-09-06:** a compressed seasonal year with visible seasons. `cna-house.md` gains §35.2b (the compressed year) and rewrites §36.3 (continuous season phase, seasonal gating, the four seasonal looks). Eleven tasks added, each in its own phase's reserved free range. | The plan had a 24-real-minute day but a realistic calendar, so one year took 146 real hours and no player would ever see autumn. The owner set the calendar to advance 24 days per simulated day, making a year 365 real minutes (~6 h): all four seasons in one long session, with the sun still rising once per 24 real minutes. The owner additionally required seasonal weather gating (no snow in summer, storms likelier in summer heat), seasonal day/night length, seasonal vegetation and snow cover, gradual rather than stepwise transitions, and a player-facing readout of time of day, year progress and outdoor temperature. No existing id was renumbered or struck; `HOUSE-01534`/`HOUSE-01535` keep their scope and are now dependencies of the new tasks. |
 
 ---
 
