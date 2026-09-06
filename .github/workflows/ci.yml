@@ -44,6 +44,17 @@ jobs:
         # hashes rather than compiling (`HOUSE-00185`).
         run: tools/effects/build_effects.sh --check
 
+      - name: Asset provenance
+        working-directory: cna-house
+        # Separate from `run_checks.sh` so the CI log shows WHICH provenance rule failed. The
+        # packaging run is the shipping gate (ADR-0012) and is allowed to fail here: it names the
+        # assets that are development-only, which is information rather than a broken build.
+        run: |
+          python3 tools/ci/check_manifest.py
+          python3 tools/assets/verify_licences.py --check
+          python3 tools/assets/verify_licences.py --packaging \
+            || echo "note: the packaging gate refuses the assets listed above; see licenses/THIRD-PARTY-ASSETS.md"
+
       - name: The XNA-only gate must detect what it claims to
         working-directory: cna-house
         # A gate that has never been shown to fire is a gate nobody should trust. `--selftest`

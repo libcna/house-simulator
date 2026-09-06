@@ -2449,14 +2449,69 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: deterministic output; both hashes recorded in the manifest
 - [ ] HOUSE-00194 — `tools/assets/measure_stride.py`: measure a locomotion clip's stride length and duration for rate matching
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00195 — `tools/assets/manifest.py`: add/update a manifest row, compute hashes, validate the schema
+- [x] HOUSE-00195 — `tools/assets/manifest.py`: add/update a manifest row, compute hashes, validate the schema
       dep: HOUSE-00181 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00196 — `tools/ci/check_manifest.py`: no unlisted file under `assets-src/`, no hash mismatch
+      note: (2026-09-07) `tools/assets/manifest.py` with `validate`, `rehash`, `add` and `list`, and
+            `assets-src/assets.manifest.json` with **six rows** — every asset currently in the tree.
+      finding: **the four redistribution booleans default to FALSE** when a row is added. A row
+            created without thinking about them then says "we may not do any of this", which is the
+            safe direction to be wrong in; the opposite default would let an unconsidered asset
+            claim permissions nobody granted.
+      finding: they are validated as **JSON booleans**, not truthy values. A string `"true"` is the
+            classic way a permission check silently passes, and it is rejected by type.
+      finding: `origin.kind` decides which other fields are required. Only a `downloaded` asset must
+            record `url`, `author` and `retrieved` — demanding them of something this project
+            generated would fill the manifest with `n/a`, which is how a provenance record stops
+            meaning anything.
+      finding: rows are saved sorted by id with a stable two-space indent and no ASCII escaping,
+            because every one of those is about the **diff**: a manifest whose order depended on
+            when a row was added would produce a reordering diff on every change, and an escaped
+            non-ASCII author name is unreadable in review.
+- [x] HOUSE-00196 — `tools/ci/check_manifest.py`: no unlisted file under `assets-src/`, no hash mismatch
       dep: HOUSE-00195 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00197 — `tools/assets/verify_licences.py`: every row has a licence, a licence file and the redistribution booleans; packaging refuses `PROVENANCE UNKNOWN`
+      note: (2026-09-07) In `tools/ci/run_checks.sh` and in the CI lint job. Reports
+            `6 listed, 8 exempt, 14 file(s)`.
+      finding: **both failure modes were shown to fire before the gate was trusted.** Copying a
+            texture to an unlisted path produced `assets-src/Textures/stray.png: no manifest row`;
+            appending one newline to `P1Probe.fx` produced `sourceSha256 does not match the file`
+            with both hashes. A gate never seen to fail is a gate nobody should rely on.
+      finding: the exemptions are **exact names and exact rules, never wildcards over an extension**,
+            and each carries the reason it is exempt. A blanket `*.json` exemption would silently
+            exempt a future `world/*.json`, which very much is an asset. The one rule-based
+            exemption is `<name>.xnb` beside `<name>.fx`, whose provenance IS the `.fx`'s and whose
+            staleness `build_effects.sh --check` already gates — giving it a row of its own would
+            mean a second hash to update on every effect change, which is a rule people work around
+            rather than follow.
+      finding: a row pointing at a **deleted** file is checked too. It is the mirror image of an
+            unlisted file and just as wrong: the manifest would keep asserting a licence for
+            something that is gone.
+- [x] HOUSE-00197 — `tools/assets/verify_licences.py`: every row has a licence, a licence file and the redistribution booleans; packaging refuses `PROVENANCE UNKNOWN`
       dep: HOUSE-00195 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00198 — `licenses/THIRD-PARTY-ASSETS.md` generator from the manifest
+      finding: **the packaging gate already refuses something, on day one, and it is the right
+            thing.** `FONT_HUD` has `redistributeSource: true` and `redistributeDerived: false`:
+            the `.spritefont` descriptor is ours, but `cna-content` resolves `<FontName>`
+            `'DejaVu Sans'` to whatever is installed and **embeds its rasterised glyphs**, so
+            `content/Fonts/Hud.cnb` carries third-party glyph data this project has not cleared or
+            vendored. That is exactly the case §20.1's two separate booleans exist for, and the
+            technical ability to compile the font is not permission to distribute it. It clears when
+            `HOUSE-00200` vendors an OFL or Bitstream-Vera face beside the descriptor.
+      finding: the shipping refusals are **separate messages**, one per condition, because each has
+            a different remedy. "Cannot ship" without saying why is a message that gets ignored.
+- [x] HOUSE-00198 — `licenses/THIRD-PARTY-ASSETS.md` generator from the manifest
       dep: HOUSE-00197 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `verify_licences.py --emit` writes it; `--check` regenerates into a buffer
+            and fails if the committed file differs, so a hand edit cannot survive. Both are gated.
+      finding: **verification and generation are one tool on purpose.** A generator that could run
+            on unverified rows would produce a credits page asserting licences nobody had checked —
+            which is worse than no credits page, because it looks like diligence.
+      finding: the document lists **third-party assets only**. Listing the six assets this project
+            authored would bury the ones that actually need attribution among the ones that do not,
+            which is how an attribution document stops being read. The two sections that DO appear
+            are the ones a reader must act on: provenance-unknown assets, and assets whose source
+            ships but whose compiled form does not.
+      finding: the stamp at the foot names the **manifest's own sha256** and carries no timestamp,
+            for the same reason as `COMPILER.txt`: a file that changes on every run produces a diff
+            on every run, and a file that always has a diff is a file nobody reads.
 - [ ] HOUSE-00199 — `make content-verify`: rebuild everything and assert byte-identical output
       dep: HOUSE-00182 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00200 — Author the two UI fonts as `.spritefont` (UI face at 16/22/30, mono at 13/16) and verify glyph coverage for the languages we ship (English only, but with the full Latin-1 set)

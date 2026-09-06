@@ -98,6 +98,11 @@ run_gate "clang-format" check_format
 # `.xnb` against the committed `.fx` by hash (`HOUSE-00185`). A stale baseline is otherwise invisible
 # on every machine that cannot compile effects -- which is most of them.
 run_gate "effects-baseline" tools/effects/build_effects.sh --check
+# `cna-house.md` §20.1: no row, no build. An unlisted file under `assets-src/` is a file whose
+# licence nobody has looked at, and a gate is the only moment anyone reliably looks (`HOUSE-00196`).
+run_gate "manifest"   python3 tools/ci/check_manifest.py
+# And the credits document cannot drift from the manifest it is generated from (`HOUSE-00198`).
+run_gate "licences"   python3 tools/assets/verify_licences.py --check
 
 echo
 if [[ ${#FAILED[@]} -eq 0 ]]; then

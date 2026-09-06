@@ -1,0 +1,113 @@
+{
+  "schema": "cna-house/assets/1",
+  "assets": [
+    {
+      "id": "EFFECT_P1PROBE",
+      "category": "effect",
+      "sourceFile": "assets-src/Effects/P1Probe.fx",
+      "sourceSha256": "798801c84110b1562c747441474b463eed34b57a77b008132068b609d86368b4",
+      "origin": {
+        "kind": "authored",
+        "name": "Phase-1 technique and parameter probe effect",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Written for HOUSE-00087..HOUSE-00089 and kept because it is the only .fx keeping the Tier E pipeline exercised."
+      }
+    },
+    {
+      "id": "FONT_HUD",
+      "category": "font",
+      "sourceFile": "assets-src/Fonts/Hud.spritefont",
+      "sourceSha256": "4cb024934c91cd7ca987d53db8687ecf6f2499e89ef9714f80bc48b05cc463d7",
+      "origin": {
+        "kind": "authored",
+        "name": "HUD font descriptor",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": false,
+        "commercialUse": true,
+        "modification": true,
+        "note": "The DESCRIPTOR is ours and redistributable. The COMPILED output is not yet: cna-content resolves <FontName> 'DejaVu Sans' to whatever is installed on the build machine and embeds its rasterised glyphs, so content/Fonts/Hud.cnb carries third-party glyph data this project has not cleared or vendored. redistributeDerived is therefore false until HOUSE-00200 places an OFL or Bitstream-Vera face beside this descriptor and records it here. HOUSE-00181 also measured that this makes the compiled bytes machine-dependent."
+      }
+    },
+    {
+      "id": "MODEL_FALLBACK_BOX",
+      "category": "fallback",
+      "sourceFile": "assets-src/Models/Fallback/box.glb",
+      "sourceSha256": "405b251c4f78dca34eeea88c3d1bf526cb4b9a8ce210448705c5c4cc2a7f9090",
+      "origin": {
+        "kind": "generated",
+        "name": "Fallback box",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Authored procedurally by tools/assets/make_fallback_assets.py (HOUSE-00144). No upstream source exists to trace."
+      }
+    },
+    {
+      "id": "SOUND_FALLBACK_SILENT",
+      "category": "fallback",
+      "sourceFile": "assets-src/Audio/Fallback/silent.wav",
+      "sourceSha256": "c0ef0f9f67f2ebed85190169cebe1071babbd5df7c476693a93bc1409906648e",
+      "origin": {
+        "kind": "generated",
+        "name": "Fallback silence",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Authored procedurally by tools/assets/make_fallback_assets.py (HOUSE-00144)."
+      }
+    },
+    {
+      "id": "TEXTURE_FALLBACK_GREY",
+      "category": "fallback",
+      "sourceFile": "assets-src/Textures/Fallback/grey.png",
+      "sourceSha256": "497325ca10dc09147044e36ec12ef96455b55f14acc1061d8b8ad809a2deb245",
+      "origin": {
+        "kind": "generated",
+        "name": "Fallback neutral grey",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Authored procedurally by tools/assets/make_fallback_assets.py (HOUSE-00144)."
+      }
+    },
+    {
+      "id": "TEXTURE_FALLBACK_MISSING",
+      "category": "fallback",
+      "sourceFile": "assets-src/Textures/Fallback/missing.png",
+      "sourceSha256": "fd1b8885c1d9b2cbaaf877cda9208439a228cd5d00fc4bf2ad977b64dc5a06bd",
+      "origin": {
+        "kind": "generated",
+        "name": "Missing-texture magenta checker",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Authored procedurally by tools/assets/make_fallback_assets.py (HOUSE-00144). Deliberately ugly; see that script."
+      }
+    }
+  ]
+}
