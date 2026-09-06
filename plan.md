@@ -404,11 +404,13 @@ that produced it; `BL-09` is settled; every probe binary is removed.
       accept: it is a supported path we can test against on Linux, de-risking the Web port
 - [ ] HOUSE-00109 — Probe: anisotropic filtering availability and its visual effect at grazing angles on the floor
       dep: HOUSE-00065 · sys: rendering · plat: LNX · pri: OPT
+      verify: the verdict is recorded in `docs/cna-capability-report.md` as a property of the build/platform profile, and is what HOUSE-00916 keys off — it is measured once here, never queried at runtime
 - [ ] HOUSE-00110 — Probe: `SurfaceFormat` support survey — which formats can be created as textures and as render targets on this driver
       dep: HOUSE-00083 · sys: rendering · plat: LNX · pri: MUST
 - [ ] HOUSE-00111 — Probe: DXT compressed texture support and whether the pipeline's DXT output stays compressed on EasyGL
       dep: HOUSE-00110 · sys: content · plat: LNX · pri: SHOULD
       accept: a verdict that sizes the texture-memory budget
+      verify: the verdict is written into the `linux` content profile (`cna-house.md` §27.2), which decides offline which representation is packaged; the uncompressed variant remains the packaged fallback, and no runtime renderer query is added
 - [ ] HOUSE-00112 — Write `docs/cna-capability-report.md` in full from the probe results, with a verdict per claim and a link to each probe's recorded output
       dep: HOUSE-00062…HOUSE-00111 · sys: — · plat: LNX · pri: MUST
 - [ ] HOUSE-00113 — Update `cna-house.md` §5, §6 and §76 with anything the probes changed; in particular settle BL-09/Q-01
@@ -472,8 +474,9 @@ system update order, the settings file, the logging, and a CI that runs lints an
 - [ ] HOUSE-00131 — Implement `Settings`: load/save `settings.json`, defaults, versioning, migration, and typed accessors
       dep: HOUSE-00028, HOUSE-00127 · sys: app · plat: ALL · pri: MUST
       verify: unit SettingsTests.* incl. a v1→v2 migration fixture
-- [ ] HOUSE-00132 — Implement the command-line parser: `--quality`, `--renderer`, `--headless`, `--scene`, `--seed`, `--time`, `--weather`, `--no-audio`, `--screenshot`
+- [ ] HOUSE-00132 — Implement the command-line parser: `--quality`, `--tier`, `--headless`, `--scene`, `--seed`, `--time`, `--weather`, `--no-audio`, `--screenshot`, and the optional diagnostic `--renderer-info`. **There is no `--renderer` option**: `CNA_GRAPHICS_RENDERER` is fixed at configure time (`cna-house.md` §7.3, §8.1) and standard XNA 4.0 cannot change it afterwards, so a separate build is produced per renderer. `--renderer-info` only prints what the application already knows about itself — configured renderer name, the `CNAHOUSE_TIER_E` build fact, the resolved `RenderTier` — and queries nothing.
       dep: HOUSE-00127 · sys: app · plat: ALL · pri: MUST
+      accept: no option can change the renderer of a built binary; `--renderer-info` calls no CNA-specific API and `check_xna_only.py` passes on the parser sources
 - [ ] HOUSE-00133 — CI job: lint (`check_xna_only`, `check_layout`, clang-format) on every push
       dep: HOUSE-00020, HOUSE-00022 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00134 — CI job: build `linux-debug` and `linux-release`, run `unit`
@@ -530,7 +533,7 @@ system update order, the settings file, the logging, and a CI that runs lints an
       dep: HOUSE-00154 · sys: audio · plat: ALL · pri: MUST
 - [ ] HOUSE-00156 — Implement the loading screen and the `MenuStack` skeleton
       dep: HOUSE-00145 · sys: ui · plat: ALL · pri: MUST
-- [ ] HOUSE-00157 — Implement the quality-tier table and the auto-detect heuristic (from `GraphicsAdapter` and the capability profile)
+- [ ] HOUSE-00157 — Implement the quality-tier table and the auto-detect heuristic (from `GraphicsAdapter` — standard XNA — and the project-owned effective feature set of `cna-house.md` §68; no CNA-specific capability query)
       dep: HOUSE-00131 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00158 — Implement the `StateTracker`: skip redundant `BlendState`/`DepthStencilState`/`RasterizerState`/`SamplerState` sets, and count changes
       dep: HOUSE-00127 · sys: rendering · plat: ALL · pri: MUST
@@ -1412,8 +1415,9 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       dep: HOUSE-00142 · sys: content · plat: ALL · pri: MUST
 - [ ] HOUSE-00915 — Measure texture memory against the 300 MB budget; adjust sizes where over
       dep: HOUSE-00914, HOUSE-00203 · sys: — · plat: LNX · pri: MUST
-- [ ] HOUSE-00916 — Implement anisotropic filtering selection with the capability gate and the trilinear fallback
+- [ ] HOUSE-00916 — Implement anisotropic filtering selection from the project-owned effective feature set (`cna-house.md` §68): request `SamplerState::MaxAnisotropy` only on a build/platform profile validated to permit it (HOUSE-00109), and sample **trilinear** (`TextureFilter::Linear` with mips) everywhere else. No CNA-specific runtime capability query — the setting row is simply not offered on a profile that does not permit it.
       dep: HOUSE-00109 · sys: rendering · plat: ALL · pri: SHOULD
+      accept: on a profile without anisotropy the renderer samples trilinear and the settings row is absent; `check_xna_only.py` proves no file calls `SupportsCapability`
 - [ ] HOUSE-00917 — Render tests: a materials sheet scene plus 12 room poses at the new materials
       dep: HOUSE-00912 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
@@ -2904,9 +2908,9 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-00156, HOUSE-00131 · sys: ui · plat: ALL · pri: MUST
 - [ ] HOUSE-02517 — Implement the Display tab (resolution, window mode, v-sync, frame cap, FOV, UI scale)
       dep: HOUSE-02516 · sys: ui · plat: ALL · pri: MUST
-- [ ] HOUSE-02518 — Implement the Graphics tab, with options filtered by the live capability query
+- [ ] HOUSE-02518 — Implement the Graphics tab, with options filtered by the project-owned **effective feature set** (`cna-house.md` §68) — `RenderTier` + build/platform profile + validated standard-XNA behaviour, all of it known to the application already
       dep: HOUSE-02516, HOUSE-00160 · sys: ui · plat: ALL · pri: MUST
-      accept: no meaningless toggle is ever shown; a tier that cannot draw shadow maps does not offer them
+      accept: no meaningless toggle is ever shown; a build whose profile cannot draw shadow maps does not offer them; the tab calls `SupportsCapability()` or another CNA extension query nowhere, and `check_xna_only.py` passes on the UI sources
 - [ ] HOUSE-02519 — Implement the Audio tab with live application
       dep: HOUSE-02516, HOUSE-01935 · sys: ui · plat: ALL · pri: MUST
 - [ ] HOUSE-02520 — Implement the Controls tab including full key remapping through `IInputSource`

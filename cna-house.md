@@ -286,7 +286,7 @@ Tier-P subsystems and, for each, what XNA 4.0 lacks and what we wrote instead:
 | OWN-03 | `cnahouse::visibility` portal traversal with frustum reduction | XNA has `BoundingFrustum` and nothing above it | §25 |
 | OWN-04 | `cnahouse::physics` kinematic capsule collision | XNA 4.0 has no collision or physics | §49 |
 | OWN-05 | `cnahouse::audio` portal-path gain, occlusion and muffling | `Apply3D` is pan + attenuation only (BL-11) | §64 |
-| OWN-06 | `cnahouse::render::RenderTier` | Tier selection is a build configuration plus a guarded content load; XNA has no capability query and CNA's is forbidden | §7.3 |
+| OWN-06 | `cnahouse::render::RenderTier` | Tier selection is a build configuration plus a guarded content load; XNA has no capability query and CNA's is forbidden. It is one term of the project-owned effective feature set (§68) | §7.3, §68 |
 | OWN-07 | `cnahouse::content` `.chanim` sidecar format and reader | XNA's answer was a custom content processor writing a custom type into `Model.Tag`; we cannot add a processor to CNA's pipeline without changing CNA, so the same custom data travels beside the model | §47.0 |
 
 The mechanical consequence is the point of the whole section: `tools/ci/check_xna_only.py` has
@@ -544,6 +544,14 @@ that build itself (§8.1). The decision is therefore made where the knowledge al
 3. **User choice.** `--tier=s` and the graphics settings force Tier S at any time. There is no
    switch that forces Tier E into a build that does not have it.
 
+**The renderer itself is not switchable at runtime.** `CNA_GRAPHICS_RENDERER` is fixed when the
+binary is configured (§8.1), and standard XNA 4.0 exposes no way to change it afterwards, so
+`cna-house` ships **no `--renderer` option** — offering one would be a lie about what the binary
+can do. A separate build is produced per renderer. The optional diagnostic `--renderer-info`
+prints only what the application already knows about itself — the configured renderer name, the
+`CNAHOUSE_TIER_E` build fact and the resolved `RenderTier` — and then continues; it queries
+nothing.
+
 Tier S is never a degraded mode arrived at by accident: it is the project's default configuration
 and the one every feature in this document is specified against. The shader set:
 
@@ -684,8 +692,8 @@ Everything below is *planned now, built later* (phases 47–48).
 | Audio | Browsers require a user gesture before audio starts | A "Click to enter" title screen that also serves as the loading screen; audio engine start is deferred until the first input event on every platform, so the desktop path exercises the same code |
 | Filesystem / saves | No POSIX filesystem; IndexedDB via `IO.IsolatedStorage` | `ISaveStore` abstraction from day one (§8.3) |
 | Download size | Whole content tree must be preloaded or fetched | Content is split into **packs** (`core`, `house-l0`, `house-l1`, `house-l2`, `house-b1`, `house-l3`, `exterior`, `neighbourhood`, `audio-core`, `audio-ambience`, `video`) from the start, even though the desktop build loads all of them |
-| Texture memory | Narrower guaranteed formats; compressed-texture extensions vary | All runtime textures are `SurfaceFormat::Color` with pre-generated mips. DXT is authored but only used where the renderer reports it |
-| Anisotropic filtering | Needs `EXT_texture_filter_anisotropic`; falls back to trilinear | Never depend on it visually |
+| Texture memory | Narrower guaranteed formats; compressed-texture extensions vary | All runtime textures are `SurfaceFormat::Color` with pre-generated mips. Compressed (DXT) variants are produced **offline** and are selected by the target's content profile (§27.2), never by a runtime renderer query; an uncompressed variant is always packaged as the fallback |
+| Anisotropic filtering | Needs `EXT_texture_filter_anisotropic`; falls back to trilinear | Never depend on it visually. The Web content profile simply does not permit it, so the Web build samples trilinear (§68) |
 | Context loss | Real and handled by CNA (`webglcontextlost`/`restored`), qualified in Chrome | All GPU resources must be reconstructible from CPU-side state; no resource may be the only copy of its data |
 | Canvas as display | No `DisplayMode` list | Resolution settings must degrade to "use the canvas size" |
 
@@ -2529,6 +2537,17 @@ Content is partitioned into packs from day one, because the Web build needs them
 | `audio-core` | footsteps, interaction sounds, UI | 30 MB |
 | `audio-ambience` | room tones, weather, exterior ambience | 55 MB |
 | `video` | television media | 25 MB |
+
+**Platform content profiles.** A pack is built once per **content profile** — `linux`, `web`,
+`android` — and the profile, not the running renderer, decides which representation of an asset is
+packaged. Compressed (DXT/DXT1) variants are produced **offline** by `cna-content` alongside the
+uncompressed ones; the profile's manifest names exactly one representation per asset, and the
+uncompressed variant stays available as the documented fallback wherever a profile does not permit
+compression. Texture sizes, LOD counts and audio bit depth are chosen the same way. The runtime
+loads whatever the manifest names through ordinary `ContentManager::Load<T>()` and **never asks
+the renderer what it supports** — a profile is validated once, offline, by the Phase-1 probes and
+recorded in `docs/cna-capability-report.md`. Linux, Web and Android differences are absorbed here,
+which is why no runtime detection is needed for them.
 
 ### 27.3 Residency tiers
 
@@ -4917,7 +4936,32 @@ Stored in `settings.json` beside the save, versioned and migrated the same way. 
 | | Save slots | 1 / 3 | 1 |
 
 Nothing meaningless is exposed. There is no "enable shadows" toggle that does nothing on a tier
-that cannot draw them: the shadow options are filtered by the live capability query.
+that cannot draw them. The filter is a **project-owned effective feature set**, computed by
+`cna-house` from facts `cna-house` already holds:
+
+```
+effective feature set = RenderTier + build/platform profile + validated standard-XNA behaviour
+```
+
+| Term | Where it comes from |
+|---|---|
+| `RenderTier` | The build-time `CNAHOUSE_TIER_E` fact plus the load-time Tier-S/Tier-E resolution (§7.3, OWN-06) |
+| Build/platform profile | The CNA configuration this binary was built against (`CNA_GRAPHICS_RENDERER`, `CNA_EASYGL_COMPILED_EFFECTS`, `CNA_ENABLE_VIDEO`; §8.1), the target platform (Linux / Web / Android; §9) and its content profile (§27.2) |
+| Validated standard-XNA behaviour | What the Phase-1 probes measured for that profile and recorded in `docs/cna-capability-report.md` — established once, offline |
+
+The result is a plain `cnahouse::` structure, seeded at build time and finalised once after
+`LoadContent`. The Graphics tab reads it and offers only the rows it marks available: a build
+whose profile has no shadow maps shows no shadow-map options, and a Tier-S-only build shows no
+post-processing row.
+
+**No CNA-specific runtime capability API is involved anywhere in this.** The UI never calls
+`GraphicsDevice::SupportsCapability()` or any other CNA extension query — those are Tier C and
+forbidden (§4.3), and `check_xna_only.py` rejects them outright (§70.1). Where a feature is
+genuinely optional on the hardware rather than on the build, the profile decides in advance and
+the fallback is a documented standard-XNA path: **anisotropic filtering** is requested through
+`SamplerState::MaxAnisotropy` only on profiles validated to permit it, and every other profile
+samples **trilinear** (`TextureFilter::Linear` with mips) — the setting row is simply not offered
+there.
 
 ---
 
@@ -5179,7 +5223,7 @@ cost what. Exceeding a **hard fail** number fails CI.
 | Category | Budget | Notes |
 |---|---|---|
 | **GPU total** | 550 MB | On a 1 GB iGPU sharing system memory |
-| — Textures (albedo, normal) | 300 MB | ~1 400 textures after atlasing, mostly DXT where supported |
+| — Textures (albedo, normal) | 300 MB | ~1 400 textures after atlasing, mostly DXT where the content profile packages it (§27.2) |
 | — Lightmaps | 60 MB | 21 art atlases + 21 daylight atlases, 2048² DXT1 |
 | — Vertex/index buffers | 120 MB | ~6.2 M vertices resident across all packs |
 | — Render targets | 40 MB | shadow map 2048² + 2 composite targets at native |
