@@ -2116,8 +2116,51 @@ system update order, the settings file, the logging, and a CI that runs lints an
       note: captures are written to `${CMAKE_BINARY_DIR}/test-output`, not beside the reference. A
             `git status` that lists a captured frame after every test run teaches people to ignore
             `git status`.
-- [ ] HOUSE-00166 — Define `docs/anim-format.md`: the project-owned `.chanim` binary sidecar — magic, version, joint list by name in skin-joint order, parent indices, bind and inverse-bind poses, clips as per-bone TRS keyframe tracks, stride length and foot-plant markers
+- [x] HOUSE-00166 — Define `docs/anim-format.md`: the project-owned `.chanim` binary sidecar — magic, version, joint list by name in skin-joint order, parent indices, bind and inverse-bind poses, clips as per-bone TRS keyframe tracks, stride length and foot-plant markers
       dep: HOUSE-00074, HOUSE-00028 · sys: animation · plat: ALL · pri: MUST
+      note: (2026-09-06) `docs/anim-format.md`, 206 lines, normative. Version 1: `CHAN` magic, a
+            whole-file version, the skeleton as name + parent + bind + inverse-bind per joint in
+            **blend-index order**, then clips as per-bone TRS tracks with a `boneFirstKey` partition,
+            stride length and foot-plant times.
+      finding: **the joint-name list in blend-index order is the entire reason this file exists.**
+            `HOUSE-00074` measured that vertex blend indices are SKIN-LOCAL, not `Model::Bones`
+            indices, and that nothing in the compiled `Model` reproduces which bone slot *i* is. The
+            list *is* the binding. Everything else in the format could in principle be derived from
+            the source asset; that list could not be recovered at all.
+      finding: **no section offsets and no index table.** The file is read forward once by a
+            `BinaryReader`. An offset table is a second description of the layout that can disagree
+            with the first, and a full character is a few hundred kilobytes — random access buys
+            nothing. For the same reason there is no alignment padding: nothing is memory-mapped or
+            cast over.
+      finding: a key carries **no bone index**. `boneFirstKey` is the same information without
+            repeating it 100 000 times: a key is 40 bytes, and a bone index would add 10 % to the
+            largest section of the file for something already implied by position. It has
+            `boneCount + 1` entries so bone *b*'s track is `[first[b], first[b+1])` with no special
+            case for the last bone, and an empty range is legal — that bone holds its bind pose.
+      finding: `boneCount` is capped at **256**, not at 72. `Byte4` blend indices cannot address
+            more (`HOUSE-00074`), while `SkinnedEffect::MaxBones == 72` limits what one DRAW may
+            use, not what a skeleton may contain — a character split across several models (§47.0)
+            exceeds it in total. The 72-bone check belongs at the draw, and `HOUSE-00162`'s
+            `MaterialBinder` makes it there.
+      finding: both the bind and the inverse-bind pose are stored, though either derives from the
+            other. Deriving costs a matrix inverse per joint at load, and — more importantly — a
+            mismatch between the two is the single most useful thing a validator can check.
+            `HOUSE-00075`'s analytic test is that **the bind pose must skin to the identity for
+            every joint**, and that test only exists if both are present.
+      finding: parents strictly precede children, as a constraint on the file rather than a hint. It
+            makes the absolute-transform walk one forward pass with no recursion and no visited set,
+            and it makes a cycle **unrepresentable** rather than merely unlikely.
+      finding: quaternions are stored `x y z w` — **w last** — matching XNA's constructor and glTF
+            rather than the w-first order some maths libraries use. Written down because it is
+            invisible in a hex dump and produces a plausible-looking wrong pose.
+      finding: scale is stored per key even though this project never scales a joint. Three floats
+            against the alternative: a format that cannot represent a retargeted asset that does
+            scale, discovered halfway through phase 37.
+      note: what the reader must reject is a table of thirteen distinct conditions with a distinct
+            message each, because `docs/conventions.md` §5.4 makes malformed content a recoverable
+            failure that names the file. The one check that is NOT the reader's is the joint names
+            against the model's: the reader has no model, so `ClipLibrary::BindTo` does it
+            (`HOUSE-00167`).
       files: docs/anim-format.md
       accept: (1) fully specified with byte offsets and a worked example; (2) a version field and a rejection rule for unknown versions; (3) nothing in it could only have come from a CNA type
 - [ ] HOUSE-00167 — Implement `anim::Skeleton`, `anim::Clip`, `anim::ClipLibrary`, the `.chanim` reader over `TitleContainer::OpenStream` + `System::IO::BinaryReader`, `ClipLibrary::BindTo(const Model&)`, and an `AnimationCache` alongside the other content caches
