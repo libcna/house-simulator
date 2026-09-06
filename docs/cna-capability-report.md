@@ -1508,11 +1508,14 @@ believing one is a design that routes around a limitation that does not exist.
 **4. The XNA surface is not uniformly XNA-shaped in C++.** Collection iterators are `CNAEXT`, so
 every `foreach` becomes an index loop. `Load<T>` returns by value for `Model` and `Video` but a
 `shared_ptr` for `Effect`. `Matrix::getIdentityProperty()` is a property while `Vector3::Up` is a
-plain static. `Color` is not trivially copyable, so it cannot go in a vertex struct. `Copy*Bone
+plain static. `Color` is not trivially copyable, so it cannot go in a vertex struct. `SpriteFont`
+has no default constructor. **`KeyboardState()` and `MouseState()` are themselves `CNAEXT`**, so an
+input-state member cannot be default-constructed — and that one is invisible to
+`check_xna_only.py`, because the identifier in the source is just the type name. `Copy*Bone
 TransformsTo` requires a pre-sized destination. None of these is guessable from the C# API, and each
 one is a compile error or a silent misread waiting in code that assumed otherwise — the
 `VertexPositionNormalTexture` assumption read vertex 0 correctly and every later vertex from the
-wrong offset.
+wrong offset. `docs/conventions.md` §5a carries the working rules.
 
 **5. The measurement is only as good as the fixture, and a bad fixture reports a clean pass.** Four
 probes in this phase produced confident, wrong answers before their fixtures were corrected: a

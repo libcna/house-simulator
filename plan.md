@@ -1494,11 +1494,43 @@ system update order, the settings file, the logging, and a CI that runs lints an
             steps than this one could not deliver. What is carried instead is a *count* of dropped
             steps, because a simulation running slower than real time is what a player reports as
             "sluggish" and is otherwise invisible.
-- [ ] HOUSE-00140 — Implement `IInputSource` and `KeyboardMouseSource`; no system may read `Keyboard`/`Mouse` directly
+- [x] HOUSE-00140 — Implement `IInputSource` and `KeyboardMouseSource`; no system may read `Keyboard`/`Mouse` directly
       dep: HOUSE-00132 · sys: player · plat: ALL · pri: MUST
       accept: the lint of HOUSE-00021 is extended to enforce it
-- [ ] HOUSE-00141 — Implement the `Platform` capability struct and its desktop population
+      note: (2026-09-06) `IInputSource` and `KeyboardMouseSource`. Nothing in `InputState` mentions
+            a key, a button or a pixel: `move` is a direction, `look` is an angular delta **in
+            radians**, and presses are **edges computed once here** — two systems each tracking "was
+            it down last frame" is two chances to disagree about the frame. That translation is why
+            gamepad support, remapping and the phase-50 touch UI are changes to one class rather
+            than to every system that reads input. Verified by `InputTests.*`, including that
+            diagonal movement is not faster than cardinal.
+      finding: **the mouse handling is written against what `HOUSE-00100` measured, not against
+            what one would assume**, and these tests are where that is pinned down since the probe
+            itself could not get real pointer motion. The previous position is seeded from the first
+            *real* sample rather than an assumed window centre — assuming the centre makes the first
+            frame one enormous bogus delta, the classic "camera snaps on startup". A capture change
+            discards the history, or the first delta after closing a menu is the whole distance the
+            pointer travelled. And an unchanged sample yields **no** look and `LookAvailable() ==
+            false`, because "the player held still" and "no motion event arrived" are
+            indistinguishable from here and neither should move the camera.
+      finding: **`KeyboardState()` and `MouseState()` are `CNAEXT`-marked**; only the
+            `initializer_list` constructor is plain XNA 4.0. So an input-state member cannot be
+            default-constructed, and `check_xna_only.py` cannot see it — the identifier in the
+            source is just the type name. `KeyboardMouseSource` keeps five booleans for the edges it
+            reports instead, which is also all it needs. Recorded in `docs/conventions.md` §5a.
+- [x] HOUSE-00141 — Implement the `Platform` capability struct and its desktop population
       dep: HOUSE-00140 · sys: app · plat: ALL · pri: MUST
+      note: (2026-09-06) `app::Platform`, and every field says which of three kinds of fact it is:
+            a **build constant** baked in by CMake, a **standard XNA query**
+            (`GraphicsAdapter::CurrentDisplayMode` and the adapter description — plain XNA 4.0, not
+            a capability query), or a **phase-1 measurement** encoded into the platform profile.
+            A field that could only be filled by a forbidden query does not exist.
+      finding: the measured fields are the phase-1 verdicts made actionable —
+            `anisotropicFiltering` (`HOUSE-00109`), `floatRenderTargets` (`HOUSE-00083`),
+            `occlusionQueryIsBoolean` (`HOUSE-00090`/`00091`), `blockCompressedTextures`
+            (`HOUSE-00111`) and `drawCallMicroseconds = 8.15` (`HOUSE-00106`). The draw budget is
+            computed from that last one rather than from a remembered rule of thumb, and it is a
+            field rather than a constant because a different machine has a different number.
 - [ ] HOUSE-00142 — Implement `ContentRegistry`: content name ↔ asset id ↔ pack, loaded from `assets.manifest.json`
       dep: HOUSE-00028 · sys: content · plat: ALL · pri: MUST
 - [ ] HOUSE-00143 — Implement `TextureCache`, `ModelCache`, `SoundCache`, `EffectCache` over `ContentManager`, with fallback assets and a load-failure policy
@@ -1507,10 +1539,32 @@ system update order, the settings file, the logging, and a CI that runs lints an
       verify: unit ContentCacheTests.*
 - [ ] HOUSE-00144 — Author the fallback assets: grey box model, mid-grey texture, magenta debug texture, silent sound
       dep: HOUSE-00143 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00145 — Implement `SpriteFont` loading and a `TextRenderer` helper (measure, draw, drop shadow, virtual-unit scaling)
+- [x] HOUSE-00145 — Implement `SpriteFont` loading and a `TextRenderer` helper (measure, draw, drop shadow, virtual-unit scaling)
       dep: HOUSE-00143 · sys: ui · plat: ALL · pri: MUST
-- [ ] HOUSE-00146 — Draw the version string and frame time in the corner; the first real thing on screen
+      note: (2026-09-06) `ui::TextRenderer` with measure, anchored draw, drop shadow and virtual-unit
+            scaling. Verified by `TextRendererTests.*` for everything reachable without a
+            `GraphicsDevice`; anchoring needs `MeasureString` and therefore a device, so it belongs
+            to `HOUSE-00164`'s render harness rather than to a stub that would prove nothing.
+      finding: **virtual units are the point.** The HUD is authored against 1600×900 and the window
+            can be anything, so a position in pixels is right on one machine and wrong on every
+            other. The scale is **uniform and takes the smaller of the two ratios**, so text never
+            overflows the tighter axis and the glyphs are never stretched.
+      finding: the drop shadow is not decoration. White text on a bright window frame or a sunlit
+            wall is unreadable and this house has both; one offset copy at 60 % black makes every
+            string legible against every background the game produces, for one extra `DrawString`.
+- [x] HOUSE-00146 — Draw the version string and frame time in the corner; the first real thing on screen
       dep: HOUSE-00145 · sys: ui · plat: ALL · pri: MUST
+      note: (2026-09-06) The version string is top-left and the frame time top-right, both through
+            `TextRenderer::DrawShadowed`, in **one** `SpriteBatch` — `HOUSE-00106` measured a draw
+            call at 8.15 µs of CPU, so a batch per string would spend more on submission than the
+            rest of the frame does. Verified by running the game: the HUD font loads from the built
+            content tree and the strings draw.
+      finding: the frame-time line shows **both** milliseconds and frames per second, deliberately.
+            Milliseconds is the number a budget is written in and the one that adds up across
+            systems; fps is the number a person feels. Showing only fps hides that 60 → 50 is a
+            bigger regression than 30 → 28. The value is a short exponential average (α = 0.1),
+            because the instantaneous delta jitters by a millisecond or two every frame and makes a
+            real regression invisible inside the noise.
 - [ ] HOUSE-00147 — Implement `DebugDraw`: lines, wire boxes, wire spheres, wire frusta, filled quads, all on `BasicEffect`
       dep: HOUSE-00127 · sys: debug · plat: ALL · pri: MUST
       accept: compiled out entirely when `CNAHOUSE_DEBUG_TOOLS=OFF`

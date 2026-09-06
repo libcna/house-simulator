@@ -9,7 +9,10 @@
 
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/FrameTimer.hpp"
+#include "cnahouse/app/Platform.hpp"
 #include "cnahouse/app/Settings.hpp"
+#include "cnahouse/player/KeyboardMouseSource.hpp"
+#include "cnahouse/ui/TextRenderer.hpp"
 
 namespace cnahouse::app
 {
@@ -52,6 +55,19 @@ namespace cnahouse::app
         /// @brief The version line drawn in the corner and printed at startup.
         [[nodiscard]] static std::string VersionLine();
 
+        /// @brief The frame-time line: milliseconds and the frames-per-second it implies.
+        ///
+        /// Both, deliberately. Milliseconds is the number a budget is written in and the one that
+        /// adds up across systems; frames per second is the number a person feels. Showing only fps
+        /// hides that 60 → 50 is a bigger regression than 30 → 28.
+        [[nodiscard]] static std::string FrameTimeLine(float deltaSeconds);
+
+        /// @brief What this build and machine can do. Populated at `Initialize`.
+        [[nodiscard]] const Platform& GetPlatform() const noexcept
+        {
+            return platform_;
+        }
+
     protected:
         void Initialize() override;
         void LoadContent() override;
@@ -66,6 +82,11 @@ namespace cnahouse::app
         Settings settings_;
         Microsoft::Xna::Framework::GraphicsDeviceManager graphics_;
         FrameTimer timer_;
+        Platform platform_;
+        player::KeyboardMouseSource input_;
+        ui::TextRenderer text_;
+        /// A short average, so the HUD's number is readable rather than flickering every frame.
+        float smoothedDelta_ = 1.0f / 60.0f;
 
         class Hud;
         std::unique_ptr<Hud> hud_;

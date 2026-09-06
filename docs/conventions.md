@@ -222,6 +222,22 @@ loaded instance must be kept alive by the caller that will draw it.
 `Vector3::Up` is a plain static. Read the header for the type rather than extrapolating from
 another one.
 
+**Some default constructors are `CNAEXT`-marked, so a member of that type cannot be
+default-constructed.** `KeyboardState()` and `MouseState()` are both extensions; the plain XNA 4.0
+constructors are `KeyboardState(std::initializer_list<Keys>)` and the eight-argument `MouseState`.
+A `KeyboardState previous_;` member therefore reaches for an extension without naming one, which
+`check_xna_only.py` cannot see — the identifier in the source is just the type name.
+
+The rule that follows: **do not hold an XNA input-state type as a default-constructed member.**
+`KeyboardMouseSource` keeps five booleans for the edges it reports instead, which is also all it
+needs. Where a default-constructed instance is genuinely wanted, `KeyboardState{}` is an empty
+initializer list rather than the extension default, and it compiles to the same thing.
+
+Other types are affected the same way — `Effect` is neither copyable nor default-constructible at
+all, `SpriteFont` has no default constructor, and `Color` is not trivially copyable so it cannot go
+in a vertex struct passed to `SetData<T>`. All four were found by writing code, not by reading
+headers, which is why they are listed here rather than left to be rediscovered.
+
 ---
 
 ## 6. Task ids and commits

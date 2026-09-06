@@ -1,0 +1,70 @@
+// SPDX-License-Identifier: MIT
+#pragma once
+
+#include <cstdint>
+
+#include "Microsoft/Xna/Framework/Vector2.hpp"
+
+namespace cnahouse::player
+{
+
+    /// @brief One frame of player intent, in game terms rather than device terms.
+    ///
+    /// Nothing here mentions a key, a button or a pixel. `move` is a direction the player wants to go,
+    /// not W-A-S-D; `look` is an angular delta in radians, not mouse counts. That translation is the
+    /// whole job of an `IInputSource`, and it is why gamepad support, remapping and the phase-50 touch
+    /// UI are all changes to *one* class rather than to every system that reads input.
+    struct InputState
+    {
+        /// @brief Desired movement in the camera's own plane, each component in [-1, 1].
+        Microsoft::Xna::Framework::Vector2 move{};
+        /// @brief Desired look change this frame, in RADIANS. X is yaw, Y is pitch.
+        ///
+        /// Radians, not mouse counts, because sensitivity and inversion are settings and must be
+        /// applied once, here, rather than by every consumer.
+        Microsoft::Xna::Framework::Vector2 look{};
+
+        bool run = false;
+        bool crouch = false;
+        bool jump = false;
+
+        /// @brief The interact button went down this frame. An edge, not a level.
+        ///
+        /// Edges are computed by the source, not by consumers: two systems each tracking "was it down
+        /// last frame" is two chances to disagree about what frame it is.
+        bool interactPressed = false;
+        bool cancelPressed = false;
+        bool menuPressed = false;
+
+        /// @brief Debug toggles, compiled out of a build without debug tools.
+        bool toggleOverlayPressed = false;
+        bool screenshotPressed = false;
+    };
+
+    /// @brief Where `InputState` comes from. The only thing in the project that reads XNA input.
+    ///
+    /// `HOUSE-00140`'s rule: **no system may read `Keyboard` or `Mouse` directly.** Not a style
+    /// preference -- a system that polls the keyboard cannot be driven by a replay, cannot be tested
+    /// without a window, and cannot be remapped. The lint of `HOUSE-00021` enforces the boundary.
+    class IInputSource
+    {
+    public:
+        virtual ~IInputSource() = default;
+
+        /// @brief Samples the devices and produces this frame's intent.
+        /// @param deltaSeconds the clamped frame delta, for any rate-based conversion.
+        virtual void Update(float deltaSeconds) = 0;
+
+        [[nodiscard]] virtual const InputState& Current() const noexcept = 0;
+
+        /// @brief Whether look input should be consumed at all this frame.
+        ///
+        /// False when the window is not focused or the pointer has not been captured.
+        /// **`HOUSE-00100` measured why this is separate from "is the window active":**
+        /// `Game::IsActive` was true on all 9 999 frames of that probe while `Mouse::GetState`'s
+        /// event-driven snapshot never advanced past `(0,0)`. A camera gating only on `IsActive` would
+        /// have consumed a garbage delta every frame.
+        [[nodiscard]] virtual bool LookAvailable() const noexcept = 0;
+    };
+
+} // namespace cnahouse::player

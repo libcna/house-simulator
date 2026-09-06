@@ -18,6 +18,13 @@ add_library(cnahouse_core STATIC
     app/Settings.cpp
     app/CommandLine.cpp
     app/FrameTimer.cpp
+    app/Platform.cpp
+
+    # player -- input first, because nothing else may read the devices
+    player/KeyboardMouseSource.cpp
+
+    # ui
+    ui/TextRenderer.cpp
 )
 
 target_include_directories(cnahouse_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../include")
