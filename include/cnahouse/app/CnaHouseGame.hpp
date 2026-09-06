@@ -17,6 +17,7 @@
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
 #include "cnahouse/player/KeyboardMouseSource.hpp"
+#include "cnahouse/rendering/Quality.hpp"
 #include "cnahouse/rendering/RenderTier.hpp"
 #include "cnahouse/rendering/Renderer.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
@@ -82,6 +83,13 @@ namespace cnahouse::app
             return tier_;
         }
 
+        /// @brief The resolved §68 Graphics settings this session is running. Valid after
+        ///        `LoadContent`.
+        [[nodiscard]] const rendering::QualitySettings& Quality() const noexcept
+        {
+            return quality_;
+        }
+
         /// @brief The frame-time line: milliseconds and the frames-per-second it implies.
         ///
         /// Both, deliberately. Milliseconds is the number a budget is written in and the one that
@@ -119,6 +127,10 @@ namespace cnahouse::app
         ///        `LoadContent`.
         void ActivateTierE();
 
+        /// @brief Settles the quality preset and its resolved settings. Called once, AFTER
+        ///        `ActivateTierE`, because both depend on the final tier.
+        void ResolveQuality();
+
         /// @brief Records a crash, attempts an emergency save, and asks the game to stop.
         void HandleCrash(std::string_view where, const std::exception* what);
 
@@ -138,6 +150,11 @@ namespace cnahouse::app
         /// Needs a `GraphicsDevice`, so it cannot be a plain member: built in `Initialize`, once
         /// the device exists.
         std::optional<rendering::StateTracker> states_;
+
+        /// The §68 Graphics tab, resolved: the preset's row with everything this build and profile
+        /// cannot do removed. Settled at the END of `LoadContent`, because it depends on the final
+        /// tier and the tier is not final until the Tier-E effect set has been tried.
+        rendering::QualitySettings quality_;
 
         /// A second `ContentManager`, over the `.xnb` effect tree. `HOUSE-00076` measured that one
         /// built with a null service provider throws at the first load, so it takes the `Game`'s.

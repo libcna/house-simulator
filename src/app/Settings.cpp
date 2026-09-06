@@ -25,6 +25,10 @@ namespace cnahouse::app
             {
                 return QualityPreset::High;
             }
+            if (name == "ultra")
+            {
+                return QualityPreset::Ultra;
+            }
             return fallback;
         }
 

@@ -163,25 +163,24 @@ namespace cnahouse::app
 
     void CnaHouseGame::Initialize()
     {
-        Game::Initialize();
-
+        // EVERYTHING that `LoadContent` reads is set BEFORE the base call, and that is MEASURED,
+        // not stylistic: CNA's `Game::Initialize()` calls `LoadContent()` at its end
+        // (`modules/runtime/src/Game.cpp`), exactly as XNA 4.0 does. A field assigned after the
+        // base call is therefore still empty while content loads -- which is where the render tier
+        // and the quality preset are resolved, from exactly these fields. The first version of this
+        // function set them afterwards and auto-detect ran against a blank profile: it logged
+        // "adapter unknown" and forced anisotropy to 1 on a machine that has it.
         platform_ = Platform::FromBuild();
         // `GraphicsAdapter` is plain XNA 4.0 -- NOT a CNA capability query. It is the one thing
         // about the machine this project is allowed to ask for, and it goes straight into the
-        // bug-report header where it belongs.
+        // bug-report header where it belongs. It is a static adapter query, so it answers before
+        // the device exists.
         const auto& adapter =
             Microsoft::Xna::Framework::Graphics::GraphicsAdapter::getDefaultAdapterProperty();
         const auto& mode = adapter.getCurrentDisplayModeProperty();
         platform_.displayWidth = mode.getWidthProperty();
         platform_.displayHeight = mode.getHeightProperty();
         platform_.adapterDescription = adapter.getDescriptionProperty();
-
-        // Both need the device, so neither can be a plain member. `Initialize` is the first point
-        // where it exists, and installing the HUD pass here rather than in `LoadContent` keeps the
-        // pass list a fact about the build rather than about what content happened to load --
-        // `HudPass::IsActive` is what answers the content question, once per frame.
-        states_.emplace(getGraphicsDeviceProperty());
-        renderer_.Install(rendering::Pass::Hud, std::make_unique<HudPass>(*this));
 
         player::InputConfig inputConfig;
         inputConfig.sensitivity = settings_.mouseSensitivity;
@@ -190,8 +189,6 @@ namespace cnahouse::app
         inputConfig.recentreY = settings_.backBufferHeight / 2;
         input_.SetConfig(inputConfig);
 
-        Log::Info(LogCat::App, "{}", platform_.Summary());
-
         if (options_.screenshot.has_value())
         {
             // `--screenshot` takes one frame and exits, which is what makes it usable from a script
@@ -199,12 +196,22 @@ namespace cnahouse::app
             pendingScreenshot_ = *options_.screenshot;
             exitAfterScreenshot_ = true;
         }
+
+        Game::Initialize();
+
+        // AFTER the base call, because both need the `GraphicsDevice` that it is what creates.
+        // Installing the HUD pass here rather than in `LoadContent` keeps the pass list a fact
+        // about the build rather than about what content happened to load -- `HudPass::IsActive` is
+        // what answers the content question, once per frame.
+        states_.emplace(getGraphicsDeviceProperty());
+        renderer_.Install(rendering::Pass::Hud, std::make_unique<HudPass>(*this));
+
+        Log::Info(LogCat::App, "{}", platform_.Summary());
         Log::Info(LogCat::App,
-                  "back buffer {}x{}, vsync {}, quality {}",
+                  "back buffer {}x{}, vsync {}",
                   settings_.backBufferWidth,
                   settings_.backBufferHeight,
-                  settings_.verticalSync ? "on" : "off",
-                  QualityPresetName(settings_.quality));
+                  settings_.verticalSync ? "on" : "off");
     }
 
     void CnaHouseGame::LoadContent()
@@ -213,6 +220,9 @@ namespace cnahouse::app
         hud_ = std::make_unique<Hud>(getGraphicsDeviceProperty());
         text_.SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
         ActivateTierE();
+        // AFTER `ActivateTierE`, never before: a failed Tier-E load narrows the tier, and a quality
+        // resolved against the pre-narrowing tier would offer post-processing that cannot run.
+        ResolveQuality();
 
         // The font is the first content this project loads, and it is allowed to be absent: a build
         // whose content tree has not been generated yet must still start and still say so, or the
@@ -296,6 +306,41 @@ namespace cnahouse::app
                 // the failing asset, and the settings toggle is disabled by `TierEselectable()`.
                 tier_.FallBackToS(e.what());
             }
+        }
+    }
+
+    void CnaHouseGame::ResolveQuality()
+    {
+        const bool detected = !options_.quality.has_value();
+        settings_.quality = detected ? rendering::AutoDetect(platform_, tier_) : *options_.quality;
+
+        const rendering::QualitySettings requested = rendering::SettingsFor(settings_.quality);
+        quality_ = rendering::Restrict(requested, platform_, tier_);
+
+        // ALWAYS logged, and with the resolved knobs rather than only the preset name. A bug report
+        // that says "high" is ambiguous -- the same preset draws differently on a Tier-S build and
+        // on a profile without float render targets -- and this is the line that disambiguates it.
+        Log::Info(LogCat::Rendering,
+                  "quality {} ({}): shadows {}, particles {}, view {:.2f}x, lod {:+d}, "
+                  "anisotropy {}x, post-processing {}",
+                  QualityPresetName(settings_.quality),
+                  detected ? "auto-detected" : "requested",
+                  rendering::ShadowQualityName(quality_.shadows),
+                  rendering::ParticleQualityName(quality_.particles),
+                  static_cast<double>(quality_.viewDistance),
+                  quality_.lodBias,
+                  quality_.anisotropy,
+                  quality_.postProcessing ? "on" : "off");
+
+        if (quality_.shadows != requested.shadows || quality_.postProcessing != requested.postProcessing ||
+            quality_.anisotropy != requested.anisotropy)
+        {
+            // A second line, only when the effective feature set actually took something away, so
+            // that "the preset you asked for is not what you got" is never silent.
+            Log::Info(LogCat::Rendering,
+                      "the {} row was narrowed by this build's effective feature set "
+                      "(cna-house.md §68); the line above is what is drawn",
+                      QualityPresetName(settings_.quality));
         }
     }
 

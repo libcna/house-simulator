@@ -238,6 +238,26 @@ all, `SpriteFont` has no default constructor, and `Color` is not trivially copya
 in a vertex struct passed to `SetData<T>`. All four were found by writing code, not by reading
 headers, which is why they are listed here rather than left to be rediscovered.
 
+**`Game::Initialize()` calls `LoadContent()` at its end**, exactly as XNA 4.0 does — see
+`modules/runtime/src/Game.cpp` in the CNA checkout. So in a `Game::Initialize` override, **anything
+`LoadContent` will read must be assigned before the base call**, and only the members that genuinely
+need the `GraphicsDevice` may be created after it:
+
+```cpp
+void CnaHouseGame::Initialize()
+{
+    platform_ = Platform::FromBuild();          // read by LoadContent -- must be BEFORE
+    ...                                          // GraphicsAdapter is static; it answers here
+    Game::Initialize();                          // <- this is where LoadContent() runs
+    states_.emplace(getGraphicsDeviceProperty()); // needs the device -- must be AFTER
+}
+```
+
+`HOUSE-00157` found this the expensive way: the platform profile was filled after the base call, so
+the quality auto-detect that runs inside `LoadContent` saw an empty profile, logged
+`adapter unknown`, and forced anisotropy to 1 on a machine that has it. Nothing failed, nothing
+threw, and the only symptom was one wrong word in a log line.
+
 ---
 
 ## 6. Task ids and commits

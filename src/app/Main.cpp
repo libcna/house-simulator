@@ -53,7 +53,10 @@ int main(int argc, char** argv)
     }
 
     app::Settings settings = app::Settings::Defaults();
-    settings.quality = options->quality;
+    // `--quality` is NOT applied here. The preset is resolved in `LoadContent`, because auto-detect
+    // needs the adapter and the FINAL render tier, and the tier is not final until the Tier-E
+    // effect set has been tried (`HOUSE-00161`). Applying it here as well would give two places
+    // that decide, and the earlier one would be the wrong one.
     if (const std::string clamped = settings.ClampToSupportedRanges(); !clamped.empty())
     {
         util::Log::Warn(util::LogCat::App, "settings clamped into range: {}", clamped);

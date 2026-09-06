@@ -12,11 +12,18 @@ namespace cnahouse::app
 {
 
     /// @brief Which quality preset a session runs at.
+    /// @brief The quality rows of `cna-house.md` §68.
+    ///
+    /// **`Custom` is deliberately absent.** §68 lists it as a fifth value, but "Custom" means
+    /// "whatever the user set in the Graphics tab", and there is no Graphics tab yet — a `Custom`
+    /// that resolved to a fixed row would be a placeholder pretending to be a feature. It arrives
+    /// with the settings UI, where it has something to be custom about.
     enum class QualityPreset
     {
         Low,
         Medium,
         High,
+        Ultra,
     };
 
     /// @brief Which render tier a session uses, subject to what the build actually contains.
@@ -37,7 +44,13 @@ namespace cnahouse::app
     /// application already knows about itself and queries nothing.
     struct Options
     {
-        QualityPreset quality = QualityPreset::High;
+        /// @brief What `--quality` asked for, or **unset for auto-detect**.
+        ///
+        /// Unset is the default because `cna-house.md` §68 gives the quality preset the default
+        /// "auto-detected", and a fixed default would make `AutoDetect` unreachable for anyone who
+        /// did not know to ask for it. What unset resolves to is decided in `LoadContent`, once the
+        /// render tier is final.
+        std::optional<QualityPreset> quality;
         /// @brief The tier the user asked for. What they actually get is `ResolveTier`.
         RenderTier tier = RenderTier::E;
         bool headless = false;

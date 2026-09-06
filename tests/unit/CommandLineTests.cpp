@@ -24,7 +24,10 @@ namespace
     {
         auto options = Parse({});
         ASSERT_TRUE(options);
-        EXPECT_EQ(options->quality, QualityPreset::High);
+        // UNSET, not `High`: `cna-house.md` §68 gives the quality preset the default
+        // "auto-detected", and a fixed default here would make `rendering::AutoDetect` unreachable
+        // for anyone who did not know to ask for it.
+        EXPECT_FALSE(options->quality.has_value());
         EXPECT_FALSE(options->headless);
         EXPECT_FALSE(options->seed.has_value());
     }
@@ -42,7 +45,7 @@ namespace
                               "--screenshot=/tmp/shot.png",
                               "--log=world,content"});
         ASSERT_TRUE(options) << options.Error().ToString();
-        EXPECT_EQ(options->quality, QualityPreset::Low);
+        EXPECT_EQ(options->quality.value_or(QualityPreset::High), QualityPreset::Low);
         EXPECT_EQ(options->tier, RenderTier::S);
         EXPECT_TRUE(options->headless);
         EXPECT_TRUE(options->noAudio);
@@ -87,7 +90,10 @@ namespace
 
     TEST(CommandLineTests, BadValuesAreRejectedWithTheirRange)
     {
-        EXPECT_FALSE(Parse({"--quality=ultra"}));
+        // `ultra` became a real preset with HOUSE-00157, so this asserts on a name that is not one
+        // rather than on a name that merely had not been implemented yet.
+        EXPECT_FALSE(Parse({"--quality=cinematic"}));
+        EXPECT_TRUE(Parse({"--quality=ultra"})) << "ultra is a §68 row and must parse";
         EXPECT_FALSE(Parse({"--tier=x"}));
         EXPECT_FALSE(Parse({"--seed=abc"}));
         EXPECT_FALSE(Parse({"--time=notanumber"}));

@@ -34,6 +34,7 @@ add_library(cnahouse_core STATIC
     rendering/RenderTier.cpp
     rendering/Renderer.cpp
     rendering/MaterialBinder.cpp
+    rendering/Quality.cpp
     rendering/RenderStates.cpp
     rendering/StateTracker.cpp
 

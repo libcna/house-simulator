@@ -78,8 +78,12 @@ namespace cnahouse::app
             {
                 return QualityPreset::High;
             }
+            if (text == "ultra")
+            {
+                return QualityPreset::Ultra;
+            }
             return Error(ErrorCode::InvalidData,
-                         std::format("expected low, medium or high, found '{}'", text),
+                         std::format("expected low, medium, high or ultra, found '{}'", text),
                          "--quality");
         }
 
@@ -108,6 +112,8 @@ namespace cnahouse::app
                 return "medium";
             case QualityPreset::High:
                 return "high";
+            case QualityPreset::Ultra:
+                return "ultra";
         }
         return "?";
     }
@@ -133,7 +139,8 @@ namespace cnahouse::app
     {
         return "cna-house " CNAHOUSE_VERSION "\n"
                "\n"
-               "  --quality=low|medium|high   Quality preset (default: high)\n"
+               "  --quality=low|medium|high|ultra\n"
+               "                              Quality preset (default: auto-detected)\n"
                "  --tier=s|e                  Render tier. Tier E can be turned OFF, never ON: a binary\n"
                "                              built without it has no compiled effects to load.\n"
                "  --headless                  Run with no window (requires a HEADLESS build)\n"
@@ -322,7 +329,8 @@ namespace cnahouse::app
                            RenderTierName(options.tier),
                            RenderTierName(resolved),
                            CNAHOUSE_DEBUG_TOOLS ? "yes" : "no",
-                           QualityPresetName(options.quality));
+                           options.quality.has_value() ? QualityPresetName(*options.quality)
+                                                       : std::string_view("auto-detect"));
     }
 
 } // namespace cnahouse::app

@@ -1758,8 +1758,51 @@ system update order, the settings file, the logging, and a CI that runs lints an
       dep: HOUSE-00154 · sys: audio · plat: ALL · pri: MUST
 - [ ] HOUSE-00156 — Implement the loading screen and the `MenuStack` skeleton
       dep: HOUSE-00145 · sys: ui · plat: ALL · pri: MUST
-- [ ] HOUSE-00157 — Implement the quality-tier table and the auto-detect heuristic (from `GraphicsAdapter` — standard XNA — and the project-owned effective feature set of `cna-house.md` §68; no CNA-specific capability query)
+- [x] HOUSE-00157 — Implement the quality-tier table and the auto-detect heuristic (from `GraphicsAdapter` — standard XNA — and the project-owned effective feature set of `cna-house.md` §68; no CNA-specific capability query)
       dep: HOUSE-00131 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-06) `rendering/Quality.{hpp,cpp}`: `QualitySettings` (§68's Graphics tab
+            resolved), `SettingsFor(preset)` as a pure table, `Restrict(settings, platform, tier)`
+            as the effective feature set applied, and `AutoDetect(platform, tier)`. Fourteen tests,
+            and they are **unit** tests — which is itself the claim: if any of this needed a
+            `GraphicsDevice` it would be a capability query, and it compiles and runs without one
+            because it is not.
+      note: `QualityPreset` gained `Ultra`, so the table has §68's four fixed rows. **`Custom` was
+            deliberately not added**: it means "whatever the user set in the Graphics tab", and
+            there is no Graphics tab yet — a `Custom` resolving to a fixed row would be a
+            placeholder pretending to be a feature. It arrives with the settings UI.
+      note: `Options::quality` became `std::optional`, because §68 gives the preset the default
+            *auto-detected* and a fixed default would have made `AutoDetect` unreachable for anyone
+            who did not know to ask for it. Two existing tests failed on this and both were right to:
+            one asserted the old fixed default, and one asserted that `--quality=ultra` was rejected.
+      finding: **the heuristic is deliberately coarse, and the honest reason is that standard XNA
+            4.0 has nothing to be precise with.** `GraphicsAdapter` gives a description string and
+            the display modes; there is no VRAM figure, no GPU class, no feature level, and ADR-0001
+            forbids asking CNA for more. So it acts confidently on the one reliable signal — a
+            software rasteriser by name (`llvmpipe`, `softpipe`, `swrast`, Mesa offscreen), which no
+            quality setting makes fast, and which CI runs on deliberately (`HOUSE-00138` sets
+            `LIBGL_ALWAYS_SOFTWARE=1`) — steps down one row at 3 840 pixels wide because the same
+            GPU must fill four times 1080p and this project has no dynamic resolution, and otherwise
+            guesses. **It never returns `Ultra`.** Guessing a machine into the top row from a name
+            string is exactly the confidence the available facts do not support.
+      finding: `Restrict` is where "nothing meaningless is offered" becomes true rather than stated.
+            Tier S keeps **blob** shadows and loses only the two Tier-E passes — which is what makes
+            ADR-0003's "Tier S is complete" a fact: a Tier-S session still has shadows, cheaper ones.
+            Without `HOUSE-00083`'s float render targets the shadow map drops to blobs rather than
+            shipping an untested RGBA8 packing; without `HOUSE-00109`'s anisotropy every preset
+            samples trilinear (`anisotropy == 1`, which is §68's named fallback, not "filtering off").
+      finding: **MEASURED — CNA's `Game::Initialize()` calls `LoadContent()` at its end**, exactly as
+            XNA 4.0 does (`modules/runtime/src/Game.cpp`). Everything this override assigned *after*
+            the base call was therefore still empty while content loaded, which is where the tier and
+            the quality are resolved. The first run auto-detected against a blank profile: it logged
+            "adapter unknown" and forced anisotropy to 1 on a machine that has it. `Initialize` now
+            sets the platform profile **before** `Game::Initialize()` and creates only the
+            device-dependent members after it. This belongs in `docs/conventions.md` §5a, and is
+            there.
+      finding: the resolved knobs are logged every start, not just the preset name. "high" is
+            ambiguous — the same preset draws differently on a Tier-S build and on a profile without
+            float render targets — so the line names shadows, particles, view distance, LOD bias,
+            anisotropy and post-processing, and a second line fires only when the feature set
+            actually took something away.
 - [x] HOUSE-00158 — Implement the `StateTracker`: skip redundant `BlendState`/`DepthStencilState`/`RasterizerState`/`SamplerState` sets, and count changes
       dep: HOUSE-00127 · sys: rendering · plat: ALL · pri: MUST
       verify: unit StateTrackerTests.* replaying a recorded command list
