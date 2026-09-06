@@ -1565,17 +1565,79 @@ system update order, the settings file, the logging, and a CI that runs lints an
             bigger regression than 30 → 28. The value is a short exponential average (α = 0.1),
             because the instantaneous delta jitters by a millisecond or two every frame and makes a
             real regression invisible inside the noise.
-- [ ] HOUSE-00147 — Implement `DebugDraw`: lines, wire boxes, wire spheres, wire frusta, filled quads, all on `BasicEffect`
+- [x] HOUSE-00147 — Implement `DebugDraw`: lines, wire boxes, wire spheres, wire frusta, filled quads, all on `BasicEffect`
       dep: HOUSE-00127 · sys: debug · plat: ALL · pri: MUST
       accept: compiled out entirely when `CNAHOUSE_DEBUG_TOOLS=OFF`
-- [ ] HOUSE-00148 — Implement the counters system: named per-frame counters with min/avg/max over a 240-frame window
+      note: (2026-09-06) `debug::DebugDraw` with lines, wire boxes, wire spheres, wire frusta and
+            filled quads, all on `BasicEffect`. Compiled always; the OVERLAY is what
+            `CNAHOUSE_DEBUG_TOOLS` gates, because a counter that exists only in a debug build cannot
+            be asserted by a perf test — which would make the perf tests measure a different
+            program.
+      finding: **everything is batched into one dynamic vertex buffer and drawn in one call per
+            primitive type.** The obvious implementation — a `DrawUserPrimitives` per wire box —
+            would cost more than the scene it annotates and would move the very timings the overlay
+            reports: `HOUSE-00106` measured 8.15 µs of CPU per draw call, while `HOUSE-00092`
+            measured 2 000 dynamic quads at 0.171 ms. A sphere is three orthogonal circles rather
+            than a mesh, because a mesh reads as a solid at a glance and hides what is behind it.
+            `DepthRead` rather than `DepthStencilState::None`, so a line genuinely behind a wall is
+            hidden and the overlay stays legible in a house rather than becoming a thicket.
+      finding: the vertex struct holds a **packed `std::uint32_t`** colour, not a `Color` — `Color`
+            is not trivially copyable and so cannot go in a struct passed to `SetData<T>`, measured
+            while writing the phase-1 probes.
+- [x] HOUSE-00148 — Implement the counters system: named per-frame counters with min/avg/max over a 240-frame window
       dep: HOUSE-00147 · sys: debug · plat: ALL · pri: MUST
-- [ ] HOUSE-00149 — Implement the CPU timing scopes and the per-system timing breakdown
+      note: (2026-09-06) `debug::Counters`: named counters with min, average and max over a rolling
+            240-frame window, resolved to a handle once and incremented by index thereafter — lookup
+            by string every frame would put a string hash on a per-frame path for nothing. Verified
+            by `CountersTests.*`.
+      finding: **a window rather than an instantaneous value**, because "what is it now" is the
+            least useful question: draws spike when a room comes into view, visible cells spike at a
+            doorway, and the number a person happens to see is whichever frame their eye landed on.
+            240 frames is four seconds at 60 Hz — long enough that walking through a doorway is
+            entirely inside it, short enough that the numbers still respond while someone moves
+            around looking for the spike.
+- [x] HOUSE-00149 — Implement the CPU timing scopes and the per-system timing breakdown
       dep: HOUSE-00148 · sys: debug · plat: ALL · pri: MUST
-- [ ] HOUSE-00150 — Implement the `F1` performance overlay (FPS, frame graph, system times, counters)
+      note: (2026-09-06) `debug::Timing` with an RAII `Scope`, per-`UpdateStage`, over the same
+            240-frame window so the overlay's columns agree. Verified by `CountersTests.Timing*`.
+      finding: time **accumulates within a frame** rather than overwriting: `Physics` runs up to
+            four times per frame (`FrameTimer::kMaxFixedSteps`) and a budget cares what the frame
+            cost, not what the last substep cost. Per **stage** rather than per system, because
+            `UpdateStage` is the unit a budget is written in and a per-system list is one nobody can
+            hold in their head. **CPU time, not GPU**: `HOUSE-00106` measured that submission alone
+            is 8.15 µs per draw, so the CPU is the budget that binds here — and a GPU number needs a
+            sync, which distorts the thing being measured. The phase-1 probes paid that cost
+            deliberately; a per-frame overlay must not.
+- [x] HOUSE-00150 — Implement the `F1` performance overlay (FPS, frame graph, system times, counters)
       dep: HOUSE-00149 · sys: debug · plat: ALL · pri: MUST
-- [ ] HOUSE-00151 — Implement the screenshot command and the `--screenshot` flag (writes PNG via `Texture2D::SaveAsPng`)
+      note: (2026-09-06) The `F1` overlay: build summary, CPU total against the 16.67 ms budget, a
+            frame graph, the per-stage table and the counters. Verified by `OverlayTests.*` —
+            possible **without a device** because the overlay is a *presenter* that owns no
+            measurement and returns its content as text.
+      finding: the graph's ceiling is **33.3 ms, not 16.6**. A graph whose ceiling is the target
+            clips exactly when something goes wrong, which is the moment the shape matters most. And
+            the graph exists at all because an average tells you the cost while the *shape* tells
+            you whether something hitches every two seconds — which is the bug that actually gets
+            reported and is invisible in an average. It is a **text** graph deliberately: no vertex
+            buffer, no second effect, works identically under `HEADLESS`, and assertable in a test.
+- [x] HOUSE-00151 — Implement the screenshot command and the `--screenshot` flag (writes PNG via `Texture2D::SaveAsPng`)
       dep: HOUSE-00146 · sys: debug · plat: ALL · pri: MUST
+      note: (2026-09-06) `debug::Screenshot` plus the `--screenshot` flag and `F12`. **Verified end
+            to end**: `./build/cna-house --screenshot=shot.png` wrote a 1600×900 8-bit RGBA PNG
+            showing the clear colour, the version string and the frame time — which is also the
+            Phase-2 exit criterion demonstrated as an image rather than asserted.
+      finding: **the capture renders the frame again into a `RenderTarget2D` rather than reading the
+            back buffer**, because XNA offers no way to read the presented buffer — and because
+            drawing into a target makes the image independent of the compositor (no title bar, no
+            cursor, nothing on top), which is the only form usable as a regression fixture
+            (`HOUSE-00164`). `RenderFrame()` is factored out so the capture draws exactly what the
+            player sees rather than a second path that could drift from it.
+      finding: **`SaveAsPng` on a render target throws** *"no CPU-side pixel data available"* — its
+            pixels are on the GPU and the const save path has no shadow copy. The fix is not a
+            workaround but the two calls phase 1 already proved: `GetData` into a `Color` array
+            (`HOUSE-00083` read a 2048² target back bit-exactly) and `SetData` into a staging
+            texture (`HOUSE-00078`). Also: `SaveAsPng(const std::string&)` is `CNAEXT`; only the
+            stream overload is plain XNA, so the file is opened with `System::IO::FileStream`.
 - [ ] HOUSE-00152 — Implement `ISaveStore` with `DesktopSaveStore` over `StorageDevice`; atomic write, backup, read
       dep: HOUSE-00102 · sys: persistence · plat: LNX · pri: MUST
       verify: unit SaveStoreTests.* incl. an interrupted-write simulation

@@ -11,6 +11,9 @@
 #include "cnahouse/app/FrameTimer.hpp"
 #include "cnahouse/app/Platform.hpp"
 #include "cnahouse/app/Settings.hpp"
+#include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/debug/Overlay.hpp"
+#include "cnahouse/debug/Timing.hpp"
 #include "cnahouse/player/KeyboardMouseSource.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
 
@@ -76,6 +79,12 @@ namespace cnahouse::app
         void Draw(const Microsoft::Xna::Framework::GameTime& gameTime) override;
 
     private:
+        /// @brief Everything the frame draws, into whatever target is currently bound.
+        ///
+        /// Separated from `Draw` so a capture frame renders exactly what the player sees, rather
+        /// than a second code path that could drift from it -- which is what makes a screenshot
+        /// usable as a regression fixture at all.
+        void RenderFrame();
         void DrawHud();
 
         Options options_;
@@ -87,6 +96,24 @@ namespace cnahouse::app
         ui::TextRenderer text_;
         /// A short average, so the HUD's number is readable rather than flickering every frame.
         float smoothedDelta_ = 1.0f / 60.0f;
+
+        // The measurements are compiled ALWAYS; only the overlay that presents them is gated on
+        // `CNAHOUSE_DEBUG_TOOLS`. A counter that exists only in a debug build cannot be asserted by
+        // a perf test, which would make the perf tests measure a different program.
+        debug::Counters counters_;
+        debug::Timing timing_;
+        debug::Overlay overlay_;
+
+        /// The render target the frame is drawn into when a screenshot is wanted.
+        ///
+        /// There is no XNA way to read the presented back buffer, so a capture frame is rendered
+        /// into a target of the same size and saved from there. That also makes the image
+        /// independent of what the compositor did with the window -- no title bar, no cursor,
+        /// nothing on top -- which is the only way a screenshot is usable as a regression fixture.
+        class Capture;
+        std::unique_ptr<Capture> capture_;
+        std::string pendingScreenshot_;
+        bool exitAfterScreenshot_ = false;
 
         class Hud;
         std::unique_ptr<Hud> hud_;

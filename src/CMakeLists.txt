@@ -25,6 +25,14 @@ add_library(cnahouse_core STATIC
 
     # ui
     ui/TextRenderer.cpp
+
+    # debug -- compiled always; the OVERLAY is what CNAHOUSE_DEBUG_TOOLS gates, not the counters,
+    # because a counter that only exists in a debug build cannot be asserted by a perf test.
+    debug/Counters.cpp
+    debug/Timing.cpp
+    debug/DebugDraw.cpp
+    debug/Overlay.cpp
+    debug/Screenshot.cpp
 )
 
 target_include_directories(cnahouse_core PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../include")

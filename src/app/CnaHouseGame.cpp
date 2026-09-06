@@ -8,10 +8,12 @@
 #include "Microsoft/Xna/Framework/GameTime.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsAdapter.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
+#include "Microsoft/Xna/Framework/Graphics/RenderTarget2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteBatch.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteFont.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
+#include "cnahouse/debug/Screenshot.hpp"
 #include "cnahouse/util/Log.hpp"
 
 namespace cnahouse::app
@@ -66,6 +68,28 @@ namespace cnahouse::app
         getContentProperty().setRootDirectoryProperty(options_.contentRoot);
     }
 
+    /// The render target a capture frame is drawn into. Created on demand, because most sessions
+    /// never take a screenshot and a spare full-size target is several megabytes of GPU memory.
+    class CnaHouseGame::Capture
+    {
+    public:
+        Capture(Microsoft::Xna::Framework::Graphics::GraphicsDevice& device, int width, int height)
+            : target(device,
+                     width,
+                     height,
+                     false,
+                     Microsoft::Xna::Framework::Graphics::SurfaceFormat::Color,
+                     Microsoft::Xna::Framework::Graphics::DepthFormat::Depth24,
+                     0,
+                     // MEASURED (`HOUSE-00079`): the default is `DiscardContents`, so a target that
+                     // is unbound and then read gives nothing. `PreserveContents` is required here.
+                     Microsoft::Xna::Framework::Graphics::RenderTargetUsage::PreserveContents)
+        {
+        }
+
+        Microsoft::Xna::Framework::Graphics::RenderTarget2D target;
+    };
+
     CnaHouseGame::~CnaHouseGame() = default;
 
     std::string CnaHouseGame::VersionLine()
@@ -106,6 +130,14 @@ namespace cnahouse::app
         input_.SetConfig(inputConfig);
 
         Log::Info(LogCat::App, "{}", platform_.Summary());
+
+        if (options_.screenshot.has_value())
+        {
+            // `--screenshot` takes one frame and exits, which is what makes it usable from a script
+            // and from the render regression harness.
+            pendingScreenshot_ = *options_.screenshot;
+            exitAfterScreenshot_ = true;
+        }
         Log::Info(LogCat::App,
                   "back buffer {}x{}, vsync {}, quality {}",
                   settings_.backBufferWidth,
@@ -158,16 +190,34 @@ namespace cnahouse::app
             static_cast<float>(gameTime.getElapsedGameTimeProperty().getTotalSecondsProperty());
         const FrameContext frame = timer_.Advance(elapsed);
         Log::BeginFrame(frame.frameIndex);
+        counters_.BeginFrame();
+        timing_.BeginFrame();
+        overlay_.PushFrameTime(frame.deltaSeconds * 1000.0f);
 
         // The ONE place the devices are read (`HOUSE-00140`). Every system downstream sees
         // `InputState`, which is expressed in game terms, so none of them can be written against a
         // key.
-        input_.Update(frame.deltaSeconds);
+        {
+            const debug::Timing::Scope scope(timing_, UpdateStage::Input);
+            input_.Update(frame.deltaSeconds);
+        }
 
         // A short exponential average. The instantaneous delta jitters by a millisecond or two
         // every frame, which makes the HUD number unreadable and makes a real regression invisible
         // inside the noise; 0.1 settles in about a fifth of a second, fast enough to see a hitch.
         smoothedDelta_ += (frame.deltaSeconds - smoothedDelta_) * 0.1f;
+
+#if CNAHOUSE_DEBUG_TOOLS
+        if (input_.Current().screenshotPressed && pendingScreenshot_.empty())
+        {
+            pendingScreenshot_ = debug::Screenshot::TimestampedName(".");
+        }
+        if (input_.Current().toggleOverlayPressed)
+        {
+            overlay_.Toggle();
+            Log::Info(LogCat::Debug, "performance overlay {}", overlay_.Visible() ? "shown" : "hidden");
+        }
+#endif
 
         if (input_.Current().cancelPressed)
         {
@@ -179,8 +229,38 @@ namespace cnahouse::app
     void CnaHouseGame::Draw(const Microsoft::Xna::Framework::GameTime& gameTime)
     {
         Game::Draw(gameTime);
-        getGraphicsDeviceProperty().Clear(ClearColour());
-        DrawHud();
+
+        // A pending screenshot renders the SAME frame into a capture target first, then to the
+        // back buffer. Rendering it twice rather than reading the presented buffer back is not
+        // wasteful thinking: XNA offers no way to read the back buffer, and drawing into a target
+        // also makes the image independent of the compositor -- no title bar, no cursor, nothing on
+        // top -- which is the only form usable as a regression fixture (`HOUSE-00164`).
+        if (!pendingScreenshot_.empty())
+        {
+            if (capture_ == nullptr)
+            {
+                capture_ = std::make_unique<Capture>(
+                    getGraphicsDeviceProperty(), settings_.backBufferWidth, settings_.backBufferHeight);
+            }
+            getGraphicsDeviceProperty().SetRenderTarget(&capture_->target);
+            RenderFrame();
+            getGraphicsDeviceProperty().SetRenderTarget(nullptr);
+
+            if (auto saved = debug::Screenshot::Save(
+                    getGraphicsDeviceProperty(), capture_->target, pendingScreenshot_);
+                !saved)
+            {
+                Log::Error(LogCat::Debug, "screenshot failed: {}", saved.Error().ToString());
+                exitCode_ = 1;
+            }
+            pendingScreenshot_.clear();
+            if (exitAfterScreenshot_)
+            {
+                Exit();
+            }
+        }
+
+        RenderFrame();
 
         ++framesDrawn_;
         if (frameLimit_ != 0 && framesDrawn_ >= frameLimit_)
@@ -188,6 +268,12 @@ namespace cnahouse::app
             Log::Info(LogCat::App, "frame limit of {} reached; exiting", frameLimit_);
             Exit();
         }
+    }
+
+    void CnaHouseGame::RenderFrame()
+    {
+        getGraphicsDeviceProperty().Clear(ClearColour());
+        DrawHud();
     }
 
     void CnaHouseGame::DrawHud()
@@ -212,6 +298,9 @@ namespace cnahouse::app
                            Microsoft::Xna::Framework::Vector2(12.0f, 10.0f),
                            ui::Anchor::TopRight,
                            Microsoft::Xna::Framework::Color::White);
+#if CNAHOUSE_DEBUG_TOOLS
+        overlay_.Draw(hud_->batch, text_, platform_, timing_, counters_);
+#endif
         hud_->batch.End();
     }
 
