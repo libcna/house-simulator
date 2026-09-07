@@ -59,20 +59,48 @@ JSON carries no comments, so the reasons live here.
 | `P1Probe.fx` | `profile` | `reach` | The source compiles at `vs_2_0`/`ps_2_0`, which is Reach. §18.1 names `hidef` for the effect set, and that is right for the phase-12 effects that will use shader model 3 — setting it here, on a 2.0 source, would be a value nobody had a reason for that changes the fingerprint anyway. |
 | | `debug` | `false` | Pinned for the same reason as `premultiplyAlpha`: a compiler default that changed under us would otherwise ship a debug shader silently. |
 
-## Known reproducibility hazard: `Hud.spritefont`
+## The fonts are vendored, and that is load-bearing (`HOUSE-00200`)
 
-`cna-content` warns on every build:
+`Fonts/` holds two committed `.ttf` files and the five `.spritefont` descriptors that rasterise
+them:
 
-> `<FontName> 'DejaVu Sans' was resolved to the installed font
-> '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'. That makes this build depend on what is
-> installed on this machine; put the font file beside the .spritefont and name it there for a
-> reproducible build.
+```
+Fonts/NotoSans-Regular.ttf       Noto Sans 2.015, hinted        →  ui-16, ui-22, ui-30
+Fonts/NotoSansMono-Regular.ttf   Noto Sans Mono 2.014, hinted   →  mono-13, mono-16
+```
 
-It is correct and the warning is not noise: two machines with different DejaVu versions produce
-different `Fonts/Hud.cnb` bytes, which `HOUSE-00199`'s `content-verify` is meant to catch and
-`HOUSE-00200` is meant to fix by vendoring an OFL-licensed face beside the descriptor. Until then
-the font is the one asset in this tree whose output is **not** machine-independent, and it is
-recorded here rather than left for someone to rediscover from a red CI job.
+Both are unmodified official Noto release artifacts under the SIL Open Font License 1.1. The full
+evidence — release tags, both canonical URLs, the SHA-256 of each file, the licence checks, and why
+the *hinted* build was chosen over `unhinted/` and `full/` — is
+[`docs/font-provenance.md`](../docs/font-provenance.md).
+
+**`<FontName>` names a FILE IN THIS DIRECTORY, not an installed family.** The importer tries
+`<FontName>`, then `<FontName>.ttf`, beside the descriptor, and searches `/usr/share/fonts` only if
+neither exists. That search is the hazard this section used to describe: it succeeds with a
+**warning**, not an error.
+
+It is not hypothetical. This machine has
+`/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf` at version **2.004** and
+`NotoSansMono-Regular.ttf` at **2.006** — the filename stems collide with ours exactly. Delete the
+vendored files and the build still passes, silently rasterising the host's older faces, and all five
+outputs change. `tools/ci/check_fonts.py` therefore fails a descriptor whose font file is missing,
+because a warning in a build log is not a defence.
+
+**Measured, and no longer a hazard:** building the `Fonts` root inside a mount namespace with every
+system font directory replaced by an empty one produces byte-identical output. The five compiled
+fonts do not depend on what is installed. `content_verify.py`'s `KNOWN_CROSS_MACHINE_HAZARDS` is now
+empty, and `Fonts/Hud.cnb` — which used to be its only entry — no longer exists; `Fonts/ui-16`
+replaced it, and `CnaHouseGame::LoadContent` loads that.
+
+Two traps worth knowing before editing a descriptor:
+
+* **`<Size>` is points at 96 dpi, not pixels.** `<Size>16</Size>` is a 21.3 px em and a 29 px line.
+* **A character the face cannot draw fails the build**, and Noto Sans Mono has no U+00AD. The
+  regions are ASCII plus Latin-1 *minus soft hyphen*: 190 characters. Widening them is how a green
+  build becomes a red one.
+
+Compiled sizes, for the budget: `ui-16` 272 kB, `ui-22` 534 kB, `ui-30` 1 058 kB, `mono-13` 272 kB,
+`mono-16` 272 kB.
 
 
 ## Build cost, measured (`HOUSE-00182`)

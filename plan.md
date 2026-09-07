@@ -2636,8 +2636,79 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             records absolute output paths and a build ordering, so it differs between two runs **by
             design** and is not content; comparing it would make the check fail for a reason that
             says nothing about the assets.
-- [ ] HOUSE-00200 — Author the two UI fonts as `.spritefont` (UI face at 16/22/30, mono at 13/16) and verify glyph coverage for the languages we ship (English only, but with the full Latin-1 set)
+- [x] HOUSE-00200 — Author the two UI fonts as `.spritefont` (UI face at 16/22/30, mono at 13/16) and verify glyph coverage for the languages we ship (English only, but with the full Latin-1 set)
       dep: HOUSE-00066 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) Five descriptors — `ui-16`, `ui-22`, `ui-30`, `mono-13`, `mono-16` — over
+            two **vendored** faces: Noto Sans 2.015 and Noto Sans Mono 2.014, both the official
+            `hinted/ttf` release artifacts, both unmodified, both OFL-1.1. The owner authorised the
+            family and the permanent redistribution, including a possible commercial Steam release,
+            conditional on the licence verification below. `Hud.spritefont` is gone: it *was* the UI
+            face at 16, and `CnaHouseGame::LoadContent` now loads `Fonts/ui-16`. New gate
+            `tools/ci/check_fonts.py`; new suites `FontMetricsTests` (7) and `FontRenderTests` (5).
+            Full evidence in `docs/font-provenance.md`.
+      finding: **the system-font fallback is a WARNING, not an error, and the stems collide.** The
+            importer resolves `<FontName>` beside the descriptor first and only then searches
+            `/usr/share/fonts`. This machine carries `NotoSans-Regular.ttf` at 2.004 and
+            `NotoSansMono-Regular.ttf` at 2.006 — the same filename stems as the vendored 2.015 and
+            2.014. Deleting the vendored files and rebuilding **succeeded**, with five warnings and
+            five different hashes. A build log nobody reads is not a defence, so `check_fonts.py`
+            fails a descriptor whose font file is missing.
+      finding: **hiding every system font changes nothing.** The `Fonts` root built inside a mount
+            namespace with `/usr/share/fonts` and `/usr/local/share/fonts` bind-mounted over by an
+            empty directory produced byte-identical output for all five. The repository `.ttf` is
+            the source of truth, and the negative control above proves the test is not vacuous. No
+            host path reaches the output either: the only printable string in the five `.cnb` files
+            is `Microsoft.Xna.Framework.Graphics.SpriteFont`.
+      finding: **`<Size>` is POINTS AT 96 DPI, not pixels** — `FT_Set_Char_Size(…, 96, 96)`. So the
+            five assets have 21.3/29.3/40.0 and 17.3/21.3 px em boxes and line spacings of
+            29/40/54 and 24/29 px. `cna-house.md` §67.1 calls them "16/22/30 px" and "13/16 px";
+            the numbers are the `.spritefont` `<Size>` values, which is the XNA convention, but the
+            unit is wrong and the rendered text is about a third larger than "px" implies. Corrected
+            in §67.1 rather than by changing the sizes, which are what the task and the owner
+            specified.
+      finding: **Noto Sans Mono has no U+00AD, and a missing glyph FAILS the build** rather than
+            substituting the default character. The repertoire is therefore ASCII plus Latin-1
+            *minus soft hyphen* — 190 characters — and both faces declare the same set so they stay
+            diff-comparable. Soft hyphen is an invisible line-break hint and there is no
+            line-breaking engine here to honour one, so nothing is lost.
+      finding: **the mono face is exactly monospaced at 16 and out by one pixel at 13**, which the
+            obvious assertion would have got wrong. All 190 characters advance 600/1000 em in the
+            source, `post.isFixedPitch` is nonetheless 0 in both files, and the pipeline truncates
+            the grid-fitted advance with `slot->advance.x >> 6`. At `<Size>16` that is 12.8 px →
+            13 for all 190; at `<Size>13` it is 10.4 px → 10 for 176 and 11 for 14. Asserted as
+            spread 0 and spread ≤ 1 rather than behind a loose tolerance a proportional face would
+            also pass.
+      finding: **the *hinted* build was chosen on measured grounds.** Hinted and unhinted carry
+            identical outlines (0 of 3 884 glyphs differ) and identical `hmtx`; they differ only in
+            the four hinting tables and 2 995 glyph programs — yet they compile to **different**
+            `.cnb` bytes, which proves FreeType's bytecode interpreter is live and upstream's
+            ttfautohint instructions are genuinely consumed at 13–30 px. `full/` was rejected as
+            631 glyphs we never rasterise.
+      finding: **licence verified against authoritative sources, not a search snippet.** The OFL
+            body in Noto's `OFL.txt` is identical to SIL's own text at `openfontlicense.org`; both
+            families ship the same `OFL.txt`; `name` ID 13/14 inside both binaries assert OFL-1.1;
+            **no Reserved Font Name is declared** (the phrase appears only in the licence's own
+            definitions), so clause 5 restricts nothing. SIL FAQ 1.4 permits selling a package
+            containing the fonts and names "games and entertainment software"; FAQ 1.3 and 1.13
+            confirm the OFL does not reach the program or anything drawn with it. "Noto" is a
+            Google LLC trademark — recorded, and harmless because the files are unmodified and the
+            name is not our branding. Both `.ttf` files were fetched from the release zip **and**
+            from `notofonts.github.io` and are byte-identical, so two official distribution points
+            agree on the hashes.
+      finding: **the packaging gate now passes.** `FONT_HUD` carried `redistributeDerived: false`
+            because its compiled bytes embedded unvetted host glyphs, which would have refused a
+            shipping build. The seven rows replacing it are all true on all four booleans, and
+            `content_verify.py`'s `KNOWN_CROSS_MACHINE_HAZARDS` is now empty — kept as an empty dict
+            rather than deleted, because it is where the next such asset gets recorded.
+      finding: every check here was **shown to fail before it was trusted**: the gate against a
+            deleted `.ttf`, a narrowed region and a region asking for U+00AD; `FontMetricsTests`
+            against a proportional face and against a repertoire including soft hyphen;
+            `FontRenderTests` against a character outside the declared regions, which correctly
+            reported that it had rendered as the `?` default.
+      risk: cross-**toolchain** reproducibility is still open, and vendoring a font cannot close it:
+            the atlas is what a particular FreeType rasterised. This build used FreeType 2.13.3.
+            Recorded so a future byte-difference in `Fonts/*.cnb` is diagnosed as a toolchain change
+            rather than misread as asset drift.
 - [ ] HOUSE-00201 — Content smoke scene: load one model, one texture, one font, one sound, one effect, one video and display/play them
       dep: HOUSE-00182…HOUSE-00200 · sys: content · plat: LNX · pri: MUST
       verify: render test `content-smoke-01`

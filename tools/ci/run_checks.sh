@@ -110,6 +110,11 @@ run_gate "gltf"       python3 tools/assets/gltf_validate.py
 # is the commonest defect in a downloaded asset and the hardest to see in isolation.
 run_gate "scale"      python3 tools/assets/scale_check.py
 run_gate "origin"     python3 tools/assets/origin_check.py
+# Every `.spritefont` must rasterise a face FROM THIS REPOSITORY (`HOUSE-00200`). The content
+# pipeline only WARNS when it falls back to an installed font, and a warning does not stop a build
+# that then embeds the host's glyphs; this gate does. It also catches a region asking for a
+# character the face cannot draw, which the pipeline treats as fatal but only once it runs.
+run_gate "fonts"      python3 tools/ci/check_fonts.py
 
 echo
 if [[ ${#FAILED[@]} -eq 0 ]]; then

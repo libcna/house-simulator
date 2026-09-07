@@ -8,10 +8,12 @@ and asserts the hashes match; drift is a build failure."
 directories in the same process, on the same machine, and compares every produced file byte for
 byte. That is *same-machine determinism*: it catches a pipeline that embeds a timestamp, a path, a
 hash-map iteration order or a random seed. It does **not** prove cross-machine reproducibility,
-which is a different and currently weaker property -- `assets-src/Fonts/Hud.spritefont` resolves
-`<FontName>` to whatever font is installed, so its output genuinely differs between machines
-(`HOUSE-00181`). The per-asset hashes are printed so that comparison can be made deliberately rather
-than accidentally.
+which is a different property. As of `HOUSE-00200` no asset in the tree is known to break it: the
+last one that did was `Fonts/Hud.spritefont`, which resolved `<FontName>` to whatever font was
+installed (`HOUSE-00181`) and has been replaced by five descriptors naming TTFs vendored beside
+them. `KNOWN_CROSS_MACHINE_HAZARDS` is therefore empty, and deliberately kept rather than deleted --
+it is where the next such asset gets recorded. The per-asset hashes are printed so that a
+cross-machine comparison can be made deliberately rather than accidentally.
 
     tools/ci/content_verify.py                      # build twice, compare
     tools/ci/content_verify.py --hashes             # also print every output hash
@@ -39,12 +41,10 @@ CNB_ROOTS = ("Models", "Textures", "Audio", "Fonts", "Video", "world")
 #: Assets whose output is known NOT to be reproducible across machines, with the reason and the
 #: task that will fix it. They are still checked for SAME-machine determinism -- an asset that
 #: differs between two runs on one machine is broken in a way no amount of vendoring fixes.
-KNOWN_CROSS_MACHINE_HAZARDS = {
-    "Fonts/Hud.cnb": (
-        "embeds glyphs rasterised from the machine's installed 'DejaVu Sans' "
-        "(HOUSE-00181); fixed by HOUSE-00200 vendoring a face beside the descriptor"
-    ),
-}
+#: EMPTY, and that is the finding rather than an oversight. `Fonts/Hud.cnb` lived here until
+#: `HOUSE-00200`; it was removed when the five descriptors that replaced it were measured to
+#: produce byte-identical output with every system font directory hidden behind a bind mount.
+KNOWN_CROSS_MACHINE_HAZARDS: dict[str, str] = {}
 
 
 def find_cna_content() -> Path | None:

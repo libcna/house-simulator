@@ -249,13 +249,13 @@ namespace cnahouse::app
         try
         {
             hud_->font.emplace(
-                getContentProperty().Load<Microsoft::Xna::Framework::Graphics::SpriteFont>("Fonts/Hud"));
+                getContentProperty().Load<Microsoft::Xna::Framework::Graphics::SpriteFont>("Fonts/ui-16"));
             text_.SetFont(&*hud_->font);
         }
         catch (const std::exception& e)
         {
             Log::Warn(LogCat::Content,
-                      "the HUD font 'Fonts/Hud' did not load, so the version string will not be "
+                      "the HUD font 'Fonts/ui-16' did not load, so the version string will not be "
                       "drawn: {}",
                       e.what());
         }

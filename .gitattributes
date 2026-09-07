@@ -1,0 +1,35 @@
+# Attributes that two project rules would otherwise disagree about.
+
+# ------------------------------------------------------------------------------------------------
+# Archived licence texts are VERBATIM and must never be tidied.
+# ------------------------------------------------------------------------------------------------
+#
+# ADR-0012 and `licenses/README.md`: "Licence texts are copied verbatim, never summarised", so that
+# a later reader can compare our copy against upstream's and get a byte-for-byte answer.
+#
+# The pre-commit hook runs `git diff --cached --check`, which rejects trailing whitespace. The SIL
+# Open Font License 1.1, as published by SIL and as shipped in every Noto release, has a trailing
+# space on the line "fonts, including any derivative works, can be bundled, embedded,". Stripping it
+# would make `licenses/ofl-1.1/LICENCE.txt` differ from the licence it claims to reproduce -- which
+# is precisely the thing the archive exists to prevent -- and would break the hash comparison in
+# `docs/font-provenance.md`.
+#
+# So the whitespace check is turned off for archived licence texts and for nothing else. It still
+# applies to `licenses/THIRD-PARTY-ASSETS.md`, which this project generates.
+licenses/*/LICENCE.txt -whitespace
+
+# ------------------------------------------------------------------------------------------------
+# Asset binaries
+# ------------------------------------------------------------------------------------------------
+#
+# Declared rather than left to Git's heuristic. A font or a compiled effect that was ever treated as
+# text -- by an eol conversion on a Windows clone, say -- would fail its manifest hash with no
+# obvious cause, and `assets-src/` is going to fill up with binaries.
+*.ttf  binary
+*.otf  binary
+*.ttc  binary
+*.glb  binary
+*.png  binary
+*.wav  binary
+*.xnb  binary
+*.cnb  binary

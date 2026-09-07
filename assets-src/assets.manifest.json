@@ -20,21 +20,135 @@
       }
     },
     {
-      "id": "FONT_HUD",
+      "id": "FONT_MONO_13",
       "category": "font",
-      "sourceFile": "assets-src/Fonts/Hud.spritefont",
-      "sourceSha256": "4cb024934c91cd7ca987d53db8687ecf6f2499e89ef9714f80bc48b05cc463d7",
+      "sourceFile": "assets-src/Fonts/mono-13.spritefont",
+      "sourceSha256": "cd06ac44c94f3f9d579d1cd993b02a29cebe81c91f34e562eb248a0bcc99ddc0",
       "origin": {
         "kind": "authored",
-        "name": "HUD font descriptor",
+        "name": "monospace debug face at 13 px",
         "licence": "Ms-PL",
         "licenceFile": "LICENSE",
         "attribution": "",
         "redistributeSource": true,
-        "redistributeDerived": false,
+        "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "The DESCRIPTOR is ours and redistributable. The COMPILED output is not yet: cna-content resolves <FontName> 'DejaVu Sans' to whatever is installed on the build machine and embeds its rasterised glyphs, so content/Fonts/Hud.cnb carries third-party glyph data this project has not cleared or vendored. redistributeDerived is therefore false until HOUSE-00200 places an OFL or Bitstream-Vera face beside this descriptor and records it here. HOUSE-00181 also measured that this makes the compiled bytes machine-dependent."
+        "note": "Descriptor authored by this project; the glyphs it rasterises come from Noto Sans Mono Regular (FONT_NOTO_SANS_MONO_REGULAR), which is OFL-1.1 and cleared for redistribution in compiled form. redistributeDerived is TRUE -- unlike the phase-0 FONT_HUD row it replaces -- because the face is now vendored beside the descriptor instead of resolved from whatever the build machine had installed."
+      }
+    },
+    {
+      "id": "FONT_MONO_16",
+      "category": "font",
+      "sourceFile": "assets-src/Fonts/mono-16.spritefont",
+      "sourceSha256": "93e05fc06c9f69b757bbfddf099906d707d5494e1beeba3888affcf27c9b4359",
+      "origin": {
+        "kind": "authored",
+        "name": "monospace debug face at 16 px",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Descriptor authored by this project; the glyphs it rasterises come from Noto Sans Mono Regular (FONT_NOTO_SANS_MONO_REGULAR), which is OFL-1.1 and cleared for redistribution in compiled form. redistributeDerived is TRUE -- unlike the phase-0 FONT_HUD row it replaces -- because the face is now vendored beside the descriptor instead of resolved from whatever the build machine had installed."
+      }
+    },
+    {
+      "id": "FONT_NOTO_SANS_MONO_REGULAR",
+      "category": "font",
+      "sourceFile": "assets-src/Fonts/NotoSansMono-Regular.ttf",
+      "sourceSha256": "65b5e2b2c4a1fba9ae8be1f026cb35b03dcb8886d9b2a4147054fde12f7e767d",
+      "origin": {
+        "kind": "downloaded",
+        "name": "Noto Sans Mono Regular 2.014",
+        "author": "The Noto Project Authors",
+        "url": "https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSansMono-v2.014/NotoSansMono-v2.014.zip",
+        "retrieved": "2026-09-07",
+        "licence": "OFL-1.1",
+        "licenceFile": "licenses/ofl-1.1/LICENCE.txt",
+        "attribution": "Copyright 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "The debug-overlay face. UNMODIFIED release artifact, member 'NotoSansMono/hinted/ttf/NotoSansMono-Regular.ttf' of the official NotoSansMono-v2.014 release zip, byte-identical to notofonts.github.io. This family's latest release is 2.014 while Noto Sans is at 2.015; they are released independently from the same repository and the version skew is upstream's, not a mistake here. MEASURED: it carries no glyph for U+00AD, and every one of the 190 characters the descriptors ask for advances exactly 600/1000 em despite post.isFixedPitch being 0. See docs/font-provenance.md."
+      }
+    },
+    {
+      "id": "FONT_NOTO_SANS_REGULAR",
+      "category": "font",
+      "sourceFile": "assets-src/Fonts/NotoSans-Regular.ttf",
+      "sourceSha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+      "origin": {
+        "kind": "downloaded",
+        "name": "Noto Sans Regular 2.015",
+        "author": "The Noto Project Authors",
+        "url": "https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.015/NotoSans-v2.015.zip",
+        "retrieved": "2026-09-07",
+        "licence": "OFL-1.1",
+        "licenceFile": "licenses/ofl-1.1/LICENCE.txt",
+        "attribution": "Copyright 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "The UI face. UNMODIFIED release artifact, member 'NotoSans/hinted/ttf/NotoSans-Regular.ttf' of the official NotoSans-v2.015 release zip; byte-identical to the same path in notofonts.github.io, so two official distribution points agree. The 'hinted' build is chosen over 'unhinted' on measured grounds: the two carry IDENTICAL outlines and hmtx and differ only in the four hinting tables and 2 995 glyph programs, and the compiled .cnb bytes differ between them -- so FreeType's bytecode interpreter is live here and the project's own ttfautohint instructions are genuinely consumed at 13-30 px. 'full' was rejected: 631 extra glyphs we never rasterise. No Reserved Font Name is declared, so OFL 1.1 clause 5 does not restrict the name. 'Noto' is a Google LLC trademark, which constrains a MODIFIED version's branding; we ship it unmodified and do not use the name for this product, so it does not bite. See docs/font-provenance.md."
+      }
+    },
+    {
+      "id": "FONT_UI_16",
+      "category": "font",
+      "sourceFile": "assets-src/Fonts/ui-16.spritefont",
+      "sourceSha256": "7b83a6c0adbe890dd30b150457ef3ddbbb6728f291ab82d61b6f3d14eacc2d91",
+      "origin": {
+        "kind": "authored",
+        "name": "UI face at 16 px",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Descriptor authored by this project; the glyphs it rasterises come from Noto Sans Regular (FONT_NOTO_SANS_REGULAR), which is OFL-1.1 and cleared for redistribution in compiled form. redistributeDerived is TRUE -- unlike the phase-0 FONT_HUD row it replaces -- because the face is now vendored beside the descriptor instead of resolved from whatever the build machine had installed."
+      }
+    },
+    {
+      "id": "FONT_UI_22",
+      "category": "font",
+      "sourceFile": "assets-src/Fonts/ui-22.spritefont",
+      "sourceSha256": "64ab2365b1ef053741a1b4d47b564747aa2193fa5c637b471cfc98e6af860dfe",
+      "origin": {
+        "kind": "authored",
+        "name": "UI face at 22 px",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Descriptor authored by this project; the glyphs it rasterises come from Noto Sans Regular (FONT_NOTO_SANS_REGULAR), which is OFL-1.1 and cleared for redistribution in compiled form. redistributeDerived is TRUE -- unlike the phase-0 FONT_HUD row it replaces -- because the face is now vendored beside the descriptor instead of resolved from whatever the build machine had installed."
+      }
+    },
+    {
+      "id": "FONT_UI_30",
+      "category": "font",
+      "sourceFile": "assets-src/Fonts/ui-30.spritefont",
+      "sourceSha256": "9fd6b4a8989237360b246a77f20158fb42770228566d38cd534abc76858b8344",
+      "origin": {
+        "kind": "authored",
+        "name": "UI face at 30 px",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Descriptor authored by this project; the glyphs it rasterises come from Noto Sans Regular (FONT_NOTO_SANS_REGULAR), which is OFL-1.1 and cleared for redistribution in compiled form. redistributeDerived is TRUE -- unlike the phase-0 FONT_HUD row it replaces -- because the face is now vendored beside the descriptor instead of resolved from whatever the build machine had installed."
       }
     },
     {

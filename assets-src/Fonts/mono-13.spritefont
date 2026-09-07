@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The monospace face at 13 px. The dense debug overlay: frame times, counters, the pass table.
+
+  Same vendoring rule as ui-*.spritefont: <FontName> names `NotoSansMono-Regular.ttf` in THIS
+  directory, and the host's /usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf (version 2.006,
+  against the vendored 2.014) is never consulted.
+
+  Monospaced is a MEASURED property here, not a promise from the name. `post.isFixedPitch` is 0 in
+  this face, which would let a reader conclude it is proportional; every one of the 190 characters
+  in the regions below in fact advances 600/1000 em. `FontMetricsTests` asserts that through
+  `MeasureString`, so a future font swap that broke column alignment would fail a test rather than
+  quietly ruin the debug overlays.
+
+  Sizes are 13/16 (cna-house.md 67.1).
+-->
+<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <Asset Type="Graphics:FontDescription">
+    <FontName>NotoSansMono-Regular</FontName>
+    <Size>13</Size>
+    <Spacing>0</Spacing>
+    <UseKerning>true</UseKerning>
+    <Style>Regular</Style>
+    <DefaultCharacter>?</DefaultCharacter>
+    <CharacterRegions>
+      <!-- Printable ASCII. -->
+      <CharacterRegion>
+        <Start>&#32;</Start>
+        <End>&#126;</End>
+      </CharacterRegion>
+      <!-- Latin-1 supplement minus U+00AD SOFT HYPHEN, which this face does not carry. See
+           ui-16.spritefont for why that is a hard build failure rather than a missing glyph. -->
+      <CharacterRegion>
+        <Start>&#160;</Start>
+        <End>&#172;</End>
+      </CharacterRegion>
+      <CharacterRegion>
+        <Start>&#174;</Start>
+        <End>&#255;</End>
+      </CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>

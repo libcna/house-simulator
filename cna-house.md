@@ -5006,9 +5006,16 @@ compass. What is on screen:
 | Loading indicator | Only at start-up |
 | Vignette | A very slight permanent one; deepens during a toilet action and while adapting to darkness |
 
-Everything is `SpriteBatch` + `SpriteFont`. Two fonts: a UI face at 16/22/30 px and a monospace
-face at 13/16 px for the debug overlays, both from an OFL-licensed family, compiled through the
-`.spritefont` route.
+Everything is `SpriteBatch` + `SpriteFont`. Two fonts: a UI face at `<Size>` 16/22/30 and a
+monospace face at `<Size>` 13/16 for the debug overlays, both from an OFL-licensed family, compiled
+through the `.spritefont` route. `HOUSE-00200` vendored those faces — Noto Sans and Noto Sans Mono,
+OFL-1.1, committed under `assets-src/Fonts/` (`docs/font-provenance.md`).
+
+**Those numbers are points at 96 dpi, not pixels**, which is the XNA `.spritefont` convention and
+was measured rather than assumed: the pipeline calls `FT_Set_Char_Size(…, 96, 96)`, so the em box is
+`<Size> × 4/3` and the rendered line heights are 29/40/54 px for the UI face and 24/29 px for the
+mono face. This paragraph said "px" until `HOUSE-00200` measured otherwise. Size a HUD element
+against those line heights, not against the `<Size>` number.
 
 ### 67.2 Layout and scaling
 

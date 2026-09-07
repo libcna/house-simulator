@@ -22,6 +22,40 @@ The rules that keep this true are in
 [`docs/decisions/ADR-0012-asset-licensing.md`](docs/decisions/ADR-0012-asset-licensing.md) and
 `cna-house.md` §20. The short version: **no manifest row, no build.**
 
+### Fonts — SIL Open Font License 1.1
+
+Two font files are redistributed with this project, in source form under `assets-src/Fonts/` and in
+rasterised form inside the compiled `Fonts/*.cnb`. Both are **unmodified** official Noto release
+artifacts:
+
+> Copyright 2022 The Noto Project Authors
+> (<https://github.com/notofonts/latin-greek-cyrillic>)
+>
+> This Font Software is licensed under the SIL Open Font License, Version 1.1.
+> This license is copied at [`licenses/ofl-1.1/LICENCE.txt`](licenses/ofl-1.1/LICENCE.txt) and is
+> also available with a FAQ at <https://openfontlicense.org>.
+
+| File | Family | Upstream version | SHA-256 |
+|---|---|---|---|
+| `assets-src/Fonts/NotoSans-Regular.ttf` | Noto Sans | `NotoSans-v2.015` | `478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823` |
+| `assets-src/Fonts/NotoSansMono-Regular.ttf` | Noto Sans Mono | `NotoSansMono-v2.014` | `65b5e2b2c4a1fba9ae8be1f026cb35b03dcb8886d9b2a4147054fde12f7e767d` |
+
+**The OFL applies to the font software, and to nothing else in this repository.** OFL 1.1 says so
+itself — "The requirement for fonts to remain under this license does not apply to any document
+created using the Font Software" — and SIL's own FAQ 1.3 and 1.13 confirm that bundling an OFL font
+with a program neither makes the program open source nor changes the licence of anything drawn with
+it. `cna-house` remains Ms-PL. FAQ 1.4 permits selling a software package containing these fonts and
+names "games and entertainment software" among its examples; the one prohibition that matters is
+OFL clause 1, which forbids selling the fonts **by themselves**, and this project does not.
+
+No Reserved Font Name is declared for either family, so clause 5 places no restriction on naming.
+"Noto" is a trademark of Google LLC; it is used here only as the factual name of the unmodified
+upstream files and is not part of this product's branding.
+
+The evidence behind every one of these statements — the URLs, the retrieval date, the hashes, and
+which authoritative page each claim came from — is in
+[`docs/font-provenance.md`](docs/font-provenance.md).
+
 ---
 
 ## Runtime dependencies

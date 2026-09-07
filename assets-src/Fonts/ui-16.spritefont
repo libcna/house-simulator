@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The UI face at 16 px. The HUD size: the version line, the interaction prompt, toasts. Replaces the phase-0 `Hud.spritefont`, which named an installed 'DejaVu Sans' and so compiled differently on every machine.
+
+  <FontName> names a FILE IN THIS DIRECTORY, not an installed family. `HOUSE-00066` measured that
+  `FontDescriptionImporter` tries "<FontName>", then "<FontName>.ttf", beside this descriptor
+  BEFORE it looks at /usr/share/fonts, and enrols whatever it finds in the build's byte-hashed
+  input set. `NotoSans-Regular.ttf` is committed beside this file, so the compiled glyphs come
+  from the repository on every machine and replacing the .ttf rebuilds the font.
+
+  This matters more than it looks: this machine also has
+  /usr/share/fonts/truetype/noto/NotoSans-Regular.ttf at version 2.004, against the vendored
+  2.015. The stems collide exactly. If the vendored file were ever deleted the pipeline would
+  resolve to the host's older copy and emit DIFFERENT bytes behind a single warning, which is why
+  `tools/ci/check_fonts.py` fails when a descriptor's font file is missing rather than letting the
+  fallback happen quietly.
+
+  Sizes are 16/22/30 (cna-house.md 67.1). They are separate compiled assets, not one asset scaled:
+  a SpriteFont is a rasterised atlas, and scaling 16 px art to 30 px is exactly the blurring the
+  three sizes exist to avoid.
+-->
+<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <Asset Type="Graphics:FontDescription">
+    <FontName>NotoSans-Regular</FontName>
+    <Size>16</Size>
+    <Spacing>0</Spacing>
+    <UseKerning>true</UseKerning>
+    <Style>Regular</Style>
+    <DefaultCharacter>?</DefaultCharacter>
+    <CharacterRegions>
+      <!-- Printable ASCII. -->
+      <CharacterRegion>
+        <Start>&#32;</Start>
+        <End>&#126;</End>
+      </CharacterRegion>
+      <!-- Latin-1 supplement, U+00A0..U+00FF, minus U+00AD SOFT HYPHEN. The hole is not an
+           oversight and not a taste decision: Noto Sans Mono ships no glyph for U+00AD, and the
+           processor FAILS THE BUILD on a character a region asks for and the face cannot draw
+           (measured — it is a hard error, not a warning). SOFT HYPHEN is an invisible line-break
+           hint with nothing to draw and no line-breaking engine here to honour it, so both faces
+           declare the same repertoire and stay diff-comparable. -->
+      <CharacterRegion>
+        <Start>&#160;</Start>
+        <End>&#172;</End>
+      </CharacterRegion>
+      <CharacterRegion>
+        <Start>&#174;</Start>
+        <End>&#255;</End>
+      </CharacterRegion>
+    </CharacterRegions>
+  </Asset>
+</XnaContent>
