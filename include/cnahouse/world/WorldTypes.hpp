@@ -1,0 +1,626 @@
+// SPDX-License-Identifier: MIT
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include "Microsoft/Xna/Framework/Vector3.hpp"
+#include "cnahouse/util/Ids.hpp"
+#include "cnahouse/util/Result.hpp"
+
+/// @file
+/// The row types of the world files, as the runtime holds them (`HOUSE-00342`, `cna-house.md` §15).
+///
+/// One struct per row of one authored file, in the same order the file writes them, so that a
+/// reader with `docs/world-format.md` open can follow both at once. Three things change on the way
+/// in and each is deliberate:
+///
+/// * every **id** becomes a `util::Id` — a 32-bit interned hash — because ids are compared on every
+///   physics step and every camera move, and a string compare there is a string compare a hundred
+///   thousand times a second. The name survives in `util::IdRegistry::NameOf` so a log line can
+///   still say `L0_KITCHEN`;
+/// * every **enum-valued string** becomes an enum, parsed once at load, so that an unknown value is
+///   a load-time error naming the file and the field rather than a silent default at frame 4000;
+/// * `null` becomes `std::optional`, never a sentinel number. `docs/world-format.md` is explicit
+///   that `null` means "use the documented default" and is **never** a synonym for zero, and an
+///   `optional` is the only spelling that cannot be confused with a real value.
+///
+/// Nothing here allocates after load and nothing here is mutable: see `WorldData`.
+
+namespace cnahouse::world
+{
+
+    /// @brief A footprint rectangle, `{"x": [min, max], "z": [min, max]}` in metres.
+    ///
+    /// Not a `BoundingBox`: a cell's footprint is authored in two axes and its vertical extent
+    /// comes from the level or from `yOverride`, so a 3-D box here would have to invent a Y before
+    /// the level table has been read.
+    struct Footprint
+    {
+        float minX = 0.0F;
+        float maxX = 0.0F;
+        float minZ = 0.0F;
+        float maxZ = 0.0F;
+
+        [[nodiscard]] constexpr bool Contains(float x, float z, float margin = 0.0F) const noexcept
+        {
+            return x >= minX - margin && x <= maxX + margin && z >= minZ - margin && z <= maxZ + margin;
+        }
+
+        [[nodiscard]] constexpr float Area() const noexcept
+        {
+            return (maxX - minX) * (maxZ - minZ);
+        }
+    };
+
+    /// @brief A cell's floor and ceiling Y, resolved from `yOverride` or from its level.
+    struct Extent
+    {
+        float floorY = 0.0F;
+        float ceilingY = 0.0F;
+
+        [[nodiscard]] constexpr bool Contains(float y, float margin = 0.0F) const noexcept
+        {
+            return y >= floorY - margin && y <= ceilingY + margin;
+        }
+
+        [[nodiscard]] constexpr float Height() const noexcept
+        {
+            return ceilingY - floorY;
+        }
+    };
+
+    // ------------------------------------------------------------------------------- vocabularies
+
+    enum class CellKind : std::uint8_t
+    {
+        Room,
+        Corridor,
+        Stair,
+        Closet,
+        Garage,
+        Exterior,
+        Void,
+    };
+
+    enum class PortalKind : std::uint8_t
+    {
+        CasedOpening,
+        Door,
+        DoubleDoor,
+        Slider,
+        Window,
+        GarageDoor,
+        StairWell,
+        ExteriorDoor,
+        Hatch,
+    };
+
+    enum class PortalOpacity : std::uint8_t
+    {
+        Open,
+        OpaqueWhenClosed,
+        Translucent,
+        Glass,
+    };
+
+    /// @brief Which axis a portal's plane is perpendicular to.
+    ///
+    /// `Y` is a horizontal plane: a stair well or a hatch. Both are in the portal vocabulary and
+    /// neither is a hole in a wall, and without this case no stair could join the floors it climbs
+    /// (`HOUSE-00358`). On `Y`, `u` is world X and `v` is world Z.
+    enum class PlaneAxis : std::uint8_t
+    {
+        X,
+        Y,
+        Z,
+    };
+
+    enum class OpeningKind : std::uint8_t
+    {
+        Door,
+        Window,
+    };
+
+    enum class HingeSide : std::uint8_t
+    {
+        Left,
+        Right,
+    };
+
+    enum class LightType : std::uint8_t
+    {
+        Point,
+        Spot,
+        Directional,
+        AreaProxy,
+        EmissiveOnly,
+    };
+
+    enum class AlphaMode : std::uint8_t
+    {
+        Opaque,
+        Mask,
+        Blend,
+    };
+
+    /// @brief The Tier S effect a material asks for: XNA 4.0's four stock effects and no others.
+    enum class EffectTier : std::uint8_t
+    {
+        Basic,
+        DualTexture,
+        AlphaTest,
+        Skinned,
+    };
+
+    enum class PropCollision : std::uint8_t
+    {
+        Proxy,
+        None,
+        Box,
+    };
+
+    enum class VisibilityHint : std::uint8_t
+    {
+        Opaque,
+        Open,
+    };
+
+    enum class Orientation : std::uint8_t
+    {
+        N,
+        NE,
+        E,
+        SE,
+        S,
+        SW,
+        W,
+        NW,
+    };
+
+    /// @brief Which animals an edge, perch, bed or bowl is for.
+    ///
+    /// A bitmask rather than an enum because §61's answer for most of the graph is "both", and a
+    /// pair of booleans would have to be kept in step by hand at every call site.
+    enum class Species : std::uint8_t
+    {
+        None = 0,
+        Dog = 1 << 0,
+        Cat = 1 << 1,
+        Both = Dog | Cat,
+    };
+
+    [[nodiscard]] constexpr Species operator|(Species a, Species b) noexcept
+    {
+        return static_cast<Species>(static_cast<std::uint8_t>(a) | static_cast<std::uint8_t>(b));
+    }
+
+    [[nodiscard]] constexpr bool Includes(Species set, Species one) noexcept
+    {
+        return (static_cast<std::uint8_t>(set) & static_cast<std::uint8_t>(one)) != 0;
+    }
+
+    /// @brief Which of the three pet markers a `NavMarker` is.
+    enum class MarkerKind : std::uint8_t
+    {
+        Perch,
+        Bed,
+        Bowl,
+    };
+
+    // The stable spelling of every vocabulary, and the parse back. Both directions exist because a
+    // diagnostic that says "kind 3" is a diagnostic nobody can act on, and because a round trip is
+    // the only cheap way to prove the two tables agree.
+    [[nodiscard]] std::string_view ToStringView(CellKind value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(PortalKind value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(PortalOpacity value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(PlaneAxis value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(OpeningKind value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(HingeSide value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(LightType value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(AlphaMode value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(EffectTier value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(PropCollision value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(VisibilityHint value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(Orientation value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(MarkerKind value) noexcept;
+
+    [[nodiscard]] util::Result<CellKind> ParseCellKind(std::string_view text);
+    [[nodiscard]] util::Result<PortalKind> ParsePortalKind(std::string_view text);
+    [[nodiscard]] util::Result<PortalOpacity> ParsePortalOpacity(std::string_view text);
+    [[nodiscard]] util::Result<PlaneAxis> ParsePlaneAxis(std::string_view text);
+    [[nodiscard]] util::Result<OpeningKind> ParseOpeningKind(std::string_view text);
+    [[nodiscard]] util::Result<HingeSide> ParseHingeSide(std::string_view text);
+    [[nodiscard]] util::Result<LightType> ParseLightType(std::string_view text);
+    [[nodiscard]] util::Result<AlphaMode> ParseAlphaMode(std::string_view text);
+    [[nodiscard]] util::Result<EffectTier> ParseEffectTier(std::string_view text);
+    [[nodiscard]] util::Result<PropCollision> ParsePropCollision(std::string_view text);
+    [[nodiscard]] util::Result<VisibilityHint> ParseVisibilityHint(std::string_view text);
+    [[nodiscard]] util::Result<Orientation> ParseOrientation(std::string_view text);
+    [[nodiscard]] util::Result<Species> ParseSpecies(std::string_view text);
+
+    /// @brief Whether a person can walk through a portal of this kind when nothing is holding it.
+    ///
+    /// A window is never a way through, whatever its opacity: it is a hole for light and for sound.
+    /// `validate_world.py` rule 5 and `report_graph.py` make the same distinction, and the three
+    /// must agree or the validator is passing a house the game cannot be walked around.
+    [[nodiscard]] constexpr bool IsPassable(PortalKind kind) noexcept
+    {
+        return kind != PortalKind::Window;
+    }
+
+    /// @brief Whether a portal of this kind is open whether or not anybody has touched anything.
+    [[nodiscard]] constexpr bool IsAlwaysOpen(PortalKind kind) noexcept
+    {
+        return kind == PortalKind::CasedOpening || kind == PortalKind::StairWell;
+    }
+
+    // -------------------------------------------------------------------------------- the rows --
+
+    /// @brief `layout.levels.json`: one storey.
+    struct Level
+    {
+        util::Id id;
+        std::string name;
+        float ffl = 0.0F;
+        /// The underside of the ceiling above. Absent on a rafter-bounded level: `L3` is bounded by
+        /// `roof`, not by a plane, and a cell there must carry its own `yOverride`.
+        std::optional<float> ceiling;
+        float structureDepth = 0.0F;
+        util::Id roof;
+    };
+
+    /// @brief `layout.levels.json` `construction`: §12.2's constants, in metres.
+    struct Construction
+    {
+        float wallExterior = 0.0F;
+        float wallPartition = 0.0F;
+        float wallPlumbing = 0.0F;
+        float wallGarage = 0.0F;
+        float foundationWall = 0.0F;
+        float kneeWallHeight = 0.0F;
+        float ridgeY = 0.0F;
+        float roofPitch = 0.0F;
+        float skirting = 0.0F;
+        float cornice = 0.0F;
+        float balustrade = 0.0F;
+        float railing = 0.0F;
+    };
+
+    /// @brief `layout.levels.json` `plumbing.stacks`: one of §12.5's STACK-A…F.
+    struct PlumbingStack
+    {
+        util::Id id;
+        std::vector<util::Id> cells;
+        Footprint chase;
+        util::Id dropTo;
+    };
+
+    struct CellAcoustic
+    {
+        util::Id roomTone;
+        float absorption = 0.0F;
+        std::string reverbHint;
+    };
+
+    struct CellThermal
+    {
+        bool heated = false;
+        util::Id ductBranch;
+    };
+
+    struct CellDaylight
+    {
+        std::vector<util::Id> windowIds;
+        std::optional<Orientation> orientation;
+        float exposure = 0.0F;
+    };
+
+    /// @brief `layout.cells.json`: the unit of visibility, audio, lighting and residency.
+    struct Cell
+    {
+        util::Id id;
+        util::Id level;
+        std::string name;
+        CellKind kind = CellKind::Room;
+        std::vector<Footprint> boxes;
+        std::optional<Extent> yOverride;
+        util::Id floorMaterial;
+        util::Id wallMaterial;
+        util::Id ceilingMaterial;
+        std::string footstepSurface;
+        CellAcoustic acoustic;
+        CellThermal thermal;
+        std::vector<util::Id> lightGroups;
+        CellDaylight daylight;
+        std::string residencyPack;
+        std::int32_t lodBias = 0;
+        VisibilityHint visibilityHint = VisibilityHint::Opaque;
+        util::Id navMeshRegion;
+    };
+
+    /// @brief `layout.portals.json`: an axis-aligned rectangle on an axis-aligned plane.
+    struct Portal
+    {
+        util::Id id;
+        util::Id cellA;
+        util::Id cellB;
+        PlaneAxis axis = PlaneAxis::X;
+        float planeValue = 0.0F;
+        /// The rectangle in the plane. On `X` and `Z`, `u` is the other horizontal axis and `v` is
+        /// world Y; on `Y`, `u` is world X and `v` is world Z.
+        float minU = 0.0F;
+        float maxU = 0.0F;
+        float minV = 0.0F;
+        float maxV = 0.0F;
+        PortalKind kind = PortalKind::CasedOpening;
+        util::Id aperture;
+        PortalOpacity opacity = PortalOpacity::Open;
+        std::optional<std::int32_t> maxDepth;
+        float soundLossOpen = 0.0F;
+        float soundLossClosed = 0.0F;
+        /// §70.5 exempts a deliberately low portal from the 1.95 m capsule clearance.
+        bool crouch = false;
+
+        [[nodiscard]] constexpr float Width() const noexcept
+        {
+            return maxU - minU;
+        }
+
+        [[nodiscard]] constexpr float Height() const noexcept
+        {
+            return maxV - minV;
+        }
+    };
+
+    struct Leaf
+    {
+        float width = 0.0F;
+        float height = 0.0F;
+        float thickness = 0.0F;
+    };
+
+    /// @brief `layout.openings.json`: a door or a window as geometry plus entity.
+    struct Opening
+    {
+        util::Id id;
+        OpeningKind kind = OpeningKind::Door;
+        util::Id portal;
+        Leaf leaf;
+        std::optional<HingeSide> hinge;
+        std::string swing;
+        float maxAngleDeg = 0.0F;
+        util::Id frameAsset;
+        float casing = 0.0F;
+        util::Id asset;
+        util::Id material;
+        bool solid = false;
+        bool lockable = false;
+    };
+
+    struct Landing
+    {
+        std::int32_t at = 0;
+        float depth = 0.0F;
+    };
+
+    /// @brief `layout.stairs.json`: one flight.
+    struct StairFlight
+    {
+        util::Id id;
+        util::Id fromCell;
+        util::Id toCell;
+        std::int32_t risers = 0;
+        float rise = 0.0F;
+        float going = 0.0F;
+        float width = 0.0F;
+        std::vector<Landing> landings;
+        bool collisionRamp = false;
+        std::string surface;
+
+        /// @brief `risers × rise`: how far the flight actually climbs.
+        [[nodiscard]] constexpr float Climb() const noexcept
+        {
+            return static_cast<float>(risers) * rise;
+        }
+
+        /// @brief §70.5's `2·rise + going`, the number that says whether a stair is climbable.
+        [[nodiscard]] constexpr float Blondel() const noexcept
+        {
+            return 2.0F * rise + going;
+        }
+    };
+
+    /// @brief `layout.lights.json`: one light.
+    struct Light
+    {
+        util::Id id;
+        util::Id cell;
+        util::Id group;
+        LightType type = LightType::Point;
+        Microsoft::Xna::Framework::Vector3 position;
+        Microsoft::Xna::Framework::Vector3 direction;
+        float colorK = 2700.0F;
+        float intensityLm = 0.0F;
+        float range = 0.0F;
+        float coneInnerDeg = 0.0F;
+        float coneOuterDeg = 0.0F;
+        util::Id fixtureProp;
+        std::string emissiveMaterialSlot;
+        bool castsBlobShadow = false;
+        bool bakedIntoLightmap = false;
+        bool defaultOn = false;
+    };
+
+    struct WetResponse
+    {
+        float albedoDarken = 0.0F;
+        float specularBoost = 0.0F;
+        float powerBoost = 0.0F;
+    };
+
+    struct SnowResponse
+    {
+        bool coverable = false;
+        float slopeLimitDeg = 0.0F;
+    };
+
+    /// @brief `layout.materials.json`: §22's material definition.
+    struct Material
+    {
+        util::Id id;
+        std::string materialClass;
+        std::string albedo;
+        std::string normal;
+        std::int32_t lightmapChannel = 0;
+        Microsoft::Xna::Framework::Vector3 tint{1.0F, 1.0F, 1.0F};
+        Microsoft::Xna::Framework::Vector3 specularColor;
+        float specularPower = 0.0F;
+        AlphaMode alphaMode = AlphaMode::Opaque;
+        std::optional<float> alphaCutoff;
+        bool twoSided = false;
+        float uvScaleU = 1.0F;
+        float uvScaleV = 1.0F;
+        WetResponse wet;
+        SnowResponse snow;
+        std::string footstepSurface;
+        float audioAbsorption = 0.0F;
+        EffectTier effectTierS = EffectTier::Basic;
+        std::string effectTierE;
+    };
+
+    /// @brief `layout.props.json`: one placement.
+    struct Prop
+    {
+        util::Id id;
+        util::Id asset;
+        util::Id cell;
+        Microsoft::Xna::Framework::Vector3 position;
+        float yawDeg = 0.0F;
+        float scale = 1.0F;
+        bool isStatic = true;
+        util::Id lodGroup;
+        PropCollision collision = PropCollision::Proxy;
+        util::Id material;
+        util::Id interactable;
+        /// The §12.5 stack this fixture drains to, if it is a fixture at all.
+        util::Id plumbing;
+    };
+
+    struct NavNode
+    {
+        util::Id id;
+        util::Id cell;
+        Microsoft::Xna::Framework::Vector3 position;
+        std::string kind;
+    };
+
+    struct NavEdge
+    {
+        util::Id a;
+        util::Id b;
+        util::Id portal;
+        float cost = 0.0F;
+        Species species = Species::Both;
+    };
+
+    /// @brief A perch, a bed or a bowl: three files' worth of the same three fields.
+    struct NavMarker
+    {
+        util::Id id;
+        MarkerKind kind = MarkerKind::Perch;
+        util::Id cell;
+        util::Id prop;
+        Microsoft::Xna::Framework::Vector3 position;
+        Species species = Species::Both;
+    };
+
+    struct NavForbidden
+    {
+        util::Id cell;
+        Species species = Species::None;
+    };
+
+    struct AudioZone
+    {
+        util::Id id;
+        util::Id cell;
+        util::Id bed;
+        float gain = 1.0F;
+    };
+
+    struct AudioEmitter
+    {
+        util::Id id;
+        util::Id cell;
+        Microsoft::Xna::Framework::Vector3 position;
+        util::Id loop;
+        float gain = 1.0F;
+        float radius = 0.0F;
+        util::Id interactable;
+    };
+
+    struct Terrain
+    {
+        std::string heightfield;
+        float sizeX = 0.0F;
+        float sizeZ = 0.0F;
+        Microsoft::Xna::Framework::Vector3 origin;
+        float yScale = 1.0F;
+        util::Id material;
+    };
+
+    struct Road
+    {
+        std::vector<Microsoft::Xna::Framework::Vector3> centreline;
+        float width = 0.0F;
+        util::Id material;
+    };
+
+    struct Fence
+    {
+        util::Id id;
+        util::Id asset;
+        std::vector<Microsoft::Xna::Framework::Vector3> path;
+        float height = 0.0F;
+        util::Id gate;
+    };
+
+    struct NeighbourBuilding
+    {
+        util::Id id;
+        util::Id asset;
+        Microsoft::Xna::Framework::Vector3 position;
+        float yawDeg = 0.0F;
+        util::Id lodGroup;
+        float impostorFrom = 0.0F;
+    };
+
+    struct VegetationInstance
+    {
+        Microsoft::Xna::Framework::Vector3 position;
+        float yawDeg = 0.0F;
+        float scale = 1.0F;
+    };
+
+    struct VegetationGroup
+    {
+        util::Id id;
+        util::Id asset;
+        std::vector<VegetationInstance> instances;
+    };
+
+    /// @brief `layout.exterior.json`, whole.
+    struct Exterior
+    {
+        Terrain terrain;
+        Road road;
+        std::vector<Fence> fences;
+        std::vector<NeighbourBuilding> neighbourhood;
+        std::vector<VegetationGroup> vegetation;
+    };
+
+} // namespace cnahouse::world

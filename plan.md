@@ -4909,8 +4909,31 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             other, which it cannot do either. Two selftest claims assert the *negative* — a portal
             naming cells that do not exist passes, and a box with `min > max` passes — so that
             `HOUSE-00358` is not written on the assumption that the schema already caught them.
-- [ ] HOUSE-00342 — Implement `WorldData`: the immutable in-memory model (levels, cells, portals, openings, stairs, lights, materials, props, nav, audio, exterior)
+- [x] HOUSE-00342 — Implement `WorldData`: the immutable in-memory model (levels, cells, portals, openings, stairs, lights, materials, props, nav, audio, exterior)
       dep: HOUSE-00341, HOUSE-00028 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `include/cnahouse/world/WorldTypes.hpp` (the row structs and the
+            vocabularies) and `WorldData.hpp` (the container). Immutable **by construction**: the
+            loader fills a `WorldData::Contents`, `Create` indexes it and moves it in, and after
+            that there is no non-const accessor and no way to add a row — which is what lets every
+            other system hold a `const WorldData&` and a raw index into it for the life of the
+            process. 25 unit tests; five injected bugs, five caught.
+      note: three things change on the way in and each is deliberate: every id becomes a
+            `util::Id` (compared on every physics step; a string compare there is a string compare
+            a hundred thousand times a second), every enum-valued string becomes an enum parsed
+            once (an unknown value is a load-time error, not a silent default at frame 4000), and
+            `null` becomes `std::optional` — `world-format.md` says `null` is never a synonym for
+            zero and an `optional` is the only spelling that cannot be confused with a real value.
+      note: `Create` checks the two invariants an index cannot be built without — no id twice, no
+            row without one — and nothing else. A portal's cells existing, its rectangle lying in
+            their plane, the graph being connected: those are `validate_world.py`'s eleven rules
+            and `HOUSE-00357`'s C++ mirror. A third copy here could disagree with the other two.
+      finding: a portal is grouped under **both** its cells. Every caller of `PortalsOf` —
+            visibility, nav, audio transmission — asks "what leads out of this cell", and a portal
+            listed only under `cellA` is invisible from the room on the other side of it. The
+            injected-bug run confirms the test that says so fails without it.
+      finding: `-Wchanges-meaning` rejected an accessor called `NavForbidden()` beside the row type
+            `NavForbidden`, and it was right to: the name would mean two things inside one class.
+            The accessor is `ForbiddenZones()`.
       files: src/world/WorldData.cpp|hpp
 - [ ] HOUSE-00343 — Implement `WorldLoader` for `world.manifest.json` + `layout.levels.json`
       dep: HOUSE-00342 · sys: world · plat: ALL · pri: MUST

@@ -32,6 +32,11 @@ add_library(cnahouse_core STATIC
     content/Caches.cpp
     content/SmokeScene.cpp
 
+    # world -- the data model the house is (`cna-house.md` §15). Above rendering because every
+    # system below reads it and none of them writes it.
+    world/WorldTypes.cpp
+    world/WorldData.cpp
+
     # persistence
     persistence/DesktopSaveStore.cpp
 
