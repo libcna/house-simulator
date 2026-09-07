@@ -3387,9 +3387,52 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       dep: HOUSE-00212 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00214 — `tools/world/build_snowshell.py`: generate the snow-shell meshes from up-facing exterior surfaces, respecting per-material slope limits
       dep: HOUSE-00212 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00215 — `tools/world/build_chunks.py`: batch per-cell static props into ≤ 6 chunks by (effect, material, light groups, alpha mode), pre-transformed to world space, with per-sub-range bounds
+- [x] HOUSE-00215 — `tools/world/build_chunks.py`: batch per-cell static props into ≤ 6 chunks by (effect, material, light groups, alpha mode), pre-transformed to world space, with per-sub-range bounds
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
       accept: ≤ 6 chunks per cell; ≤ 65 535 vertices per chunk where 16-bit indices are used
+      note: (2026-09-07) `tools/world/build_chunks.py` and `docs/chunk-format.md`, the normative
+            `CCHK` version 1 spec. 48 selftest claims; `--selftest` runs in CI. 17 injected bugs,
+            all caught — six missed first time, and **two of those six were missed because the
+            fixture was a cube**: a 1 m cube with up-facing normals is invariant under the yaw
+            this tool bakes in, so "yaw dropped" and "normals not rotated" both passed. The
+            fixture is now chiral, 0.5 m across x by 2.0 m along z with every normal along +x, and
+            both bugs fail loudly. A fixture has to be able to tell the answers apart.
+      finding: **§17.4's four-part key has one free part.** `alphaMode` is a field of the material
+            and so is `class`, which decides the effect; `lightGroups` lives on the cell and a
+            chunk never spans two cells. So `(effectClass, material, lightGroupSet, alphaMode)`
+            collapses exactly and without loss to **the material id**, and "≤ 6 chunks per cell"
+            means "≤ 6 distinct materials among a cell's static props" — which is the sentence to
+            give an author, because it is the thing they control. The key is still built from all
+            four parts so a later per-prop light-group schema keeps working, and the report prints
+            how many chunks the other three actually separated (today: none) rather than a comment
+            asserting it.
+      finding: **a chunk must not use CNA's 48-byte model vertex**, and it is wrong in both
+            directions at once. §349's layout has *no second UV*, and §17.4's chunks are drawn with
+            `DualTextureEffect` whose whole purpose is albedo × lightmap on two channels; and it
+            carries a normal and a tangent that `DualTextureEffect` never reads, because that
+            effect is unlit — the lightmap *is* the lighting. A chunk is uploaded into our own
+            `VertexBuffer`, so it declares what its own effect reads: 28 bytes for
+            `DualTextureEffect`, 32 for `BasicEffect`, 20 for `AlphaTestEffect`, against 48. Since
+            chunks are grouped by effect class, a chunk always has exactly one layout.
+      finding: **§17.4's two limits pull against each other** and the resolution has to be stated.
+            A group over 65 535 vertices must be split to stay on 16-bit indices, and splitting
+            makes more chunks — the other limit. Splits fall on **prop boundaries**, because a
+            sub-range is a prop already and one straddling two buffers could not have a bounding
+            box; a single prop over the cap cannot be split at all, so that chunk takes 32-bit
+            indices. Both are reported and the tool exits non-zero over the six, because a cell
+            needing eight chunks is an authoring problem rather than something to resolve quietly.
+      finding: the placement is **baked into the vertices**, because §17.3 draws a chunk with
+            `setWorldProperty(Matrix::Identity)` — a chunk has no transform, so a prop's position
+            and yaw are in the geometry or they are nowhere. Normals are rotated but not scaled; a
+            non-uniform scale would need the inverse transpose and is refused rather than producing
+            normals wrong by a factor no wireframe shows.
+      finding: an unrecognised material `class` is an **error naming the class**, never a fallback
+            to `BasicEffect`. A material quietly drawn with the wrong effect is a rendering bug
+            that presents as an art bug and gets looked for in the wrong place.
+      finding: `_COL` proxies are stripped here as well as extracted by `HOUSE-00210` — §18 says
+            the build does both. A proxy left in a chunk is invisible geometry the GPU still
+            transforms, and on a model whose proxy shares the source mesh it doubles the vertex
+            count with nothing to show for it.
 - [ ] HOUSE-00216 — Content build orchestration: one `make content` target running validators, generators and `cna-content` in the right order with dependency tracking
       dep: HOUSE-00205…HOUSE-00215 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00217 — Add the content-build documentation: what each tool does, in what order, and how to rebuild one asset

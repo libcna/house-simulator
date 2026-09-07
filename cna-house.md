@@ -1666,6 +1666,7 @@ cna-house/
 │   ├── collision-format.md          ← the project-owned `collision.bin` format (§49.2)
 │   ├── nav-format.md                ← the project-owned `nav.bin` pet graph (§60.3)
 │   ├── coverage-format.md           ← the project-owned `coverage.bin` roof mask (§37.2)
+│   ├── chunk-format.md              ← the project-owned `chunks.bin` static batches (§17.4)
 │   ├── content-authoring.md
 │   ├── world-format.md
 │   ├── performance-log.md

@@ -141,6 +141,15 @@ jobs:
         # field that would stop the rain 0.25 m out in the open.
         run: python3 tools/world/build_coverage.py --selftest
 
+      - name: Static props must batch into chunks the runtime can draw
+        working-directory: cna-house
+        # `HOUSE-00215`. The fixture's box is deliberately CHIRAL -- 0.5 m across x, 2.0 m along z,
+        # every normal along +x -- because a cube with up-facing normals is invariant under the yaw
+        # this tool bakes in, and two injected bugs walked straight through the cube version. It
+        # also carries a 30 400-vertex model so the 16-bit split is exercised by props that each
+        # fit and together do not, rather than by one that never fitted.
+        run: python3 tools/world/build_chunks.py --selftest
+
       - name: The stride measurement must survive both animation conventions
         working-directory: cna-house
         # `HOUSE-00194`. The fixture is an analytically exact walk -- 1.4 m of stride over 1.0 s --
