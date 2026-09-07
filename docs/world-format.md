@@ -443,6 +443,12 @@ does for vision and sound. One authored graph, four consumers.
 Every emitter carries a cell id, because the portal-path solver
 ([ADR-0010](decisions/ADR-0010-room-aware-audio.md)) starts from cells, not from positions.
 
+`transmission` is §64.3's table in the form a portal carries: `loss = 1 − 10^(−dB/20)`, so a 16 dB
+door loses 0.842 of the amplitude. It is the **source**; a portal's `soundLoss` is a cache of the
+row its leaf's type selects, and rule 6 checks each portal against it. Both exist because the
+runtime wants the number per portal and the design states it per class, and two copies of one fact
+drift otherwise (`HOUSE-00388`).
+
 ## `layout.exterior.json`
 
 Terrain reference, road, fences, gates, driveway, neighbourhood instances and vegetation

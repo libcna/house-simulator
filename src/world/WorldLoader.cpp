@@ -2830,25 +2830,28 @@ namespace cnahouse::world
             {
                 return transmission.Error().WithContext("layout.audio.json");
             }
-            // The table is an object keyed by construction kind, and `JsonValue` reads named
-            // fields rather than enumerating them, so the kinds are the ones §64.3 names. A kind
-            // the file has and this list does not is not silently dropped: the count is compared
-            // below and a mismatch is reported.
-            static constexpr std::array<std::string_view, 6> kKinds{
-                "door_hollow", "door_solid", "door_glazed", "window", "opening", "hatch"};
-            for (const std::string_view kind : kKinds)
+            // The table is an object keyed by §64.3's class name, and the classes are the
+            // document's, not this reader's: it used to hold a hardcoded list of six names
+            // invented before §64.3 was authored, and the seven the design actually names --
+            // `door_exterior`, `slider_glass`, `window_single`, `window_hopper`, `door_garage`,
+            // `hatch_loft`, `appliance` -- were silently dropped, which `HOUSE-00388` found by
+            // authoring them. The comment beside that list claimed a count comparison "below"
+            // that did not exist. Enumerating the object has no list to keep in step.
+            const Result<std::vector<std::pair<std::string, JsonValue>>> kinds =
+                transmission.Value().Members();
+            if (!kinds)
             {
-                if (!transmission.Value().Has(kind))
-                {
-                    continue;
-                }
+                return kinds.Error().WithContext("layout.audio.json");
+            }
+            for (const auto& [kind, entry] : kinds.Value())
+            {
                 const Result<JsonValue> pair = transmission.Value().RequireObject(kind);
                 if (!pair)
                 {
                     return pair.Error().WithContext("layout.audio.json");
                 }
                 AudioTransmission row;
-                row.kind = std::string(kind);
+                row.kind = kind;
                 for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, float*>>{
                          {"open", &row.open}, {"closed", &row.closed}})
                 {

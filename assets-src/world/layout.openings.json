@@ -25,7 +25,7 @@
   // `layout.materials.json`, and rule 6 holds it to them the moment that file exists.
   "schema": "cna-house/openings/1",
   "openings": [
-    // ---- D_INT_PASSAGE x28 -- §12.3's 0.86 x 2.05 interior leaf, latch only.
+    // ---- D_INT_PASSAGE x27 -- §12.3's 0.86 x 2.05 interior leaf, latch only.
     {
       "id": "DOOR_B1_STAIR__B1_MECHANICAL", "kind": "door", "type": "D_INT_PASSAGE",
       "portal": "P_B1_STAIR__B1_MECHANICAL",
@@ -49,15 +49,6 @@
       "portal": "P_B1_CINEMA__B1_UTILITY",
       "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
       "hinge": "left", "swing": "B1_UTILITY", "maxAngleDeg": 95.0,
-      "frame": { "asset": null, "casing": 0.070 },
-      "asset": null, "material": "MAT_DOOR_PAINTED",
-      "solid": false, "lockable": false
-    },
-    {
-      "id": "DOOR_B1_HALL__B1_CINEMA", "kind": "door", "type": "D_INT_PASSAGE",
-      "portal": "P_B1_HALL__B1_CINEMA",
-      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
-      "hinge": "left", "swing": "B1_CINEMA", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
       "solid": false, "lockable": false
@@ -279,7 +270,7 @@
       "solid": false, "lockable": false
     },
 
-    // ---- D_INT_PRIVACY x23 -- the same leaf with a thumb-turn: bathrooms, WCs, bedrooms, the
+    // ---- D_INT_PRIVACY x22 -- the same leaf with a thumb-turn: bathrooms, WCs, bedrooms, the
     // office.
     {
       "id": "DOOR_B1_HALL__B1_WC7", "kind": "door", "type": "D_INT_PRIVACY",
@@ -313,15 +304,6 @@
       "portal": "P_L0_OFFICE__L0_CLOSET_W",
       "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
       "hinge": "left", "swing": "L0_CLOSET_W", "maxAngleDeg": 95.0,
-      "frame": { "asset": null, "casing": 0.070 },
-      "asset": null, "material": "MAT_DOOR_PAINTED",
-      "solid": false, "lockable": true
-    },
-    {
-      "id": "DOOR_L1_HALL__L1_MASTER_BED", "kind": "door", "type": "D_INT_PRIVACY",
-      "portal": "P_L1_HALL__L1_MASTER_BED",
-      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
-      "hinge": "left", "swing": "L1_HALL", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
       "solid": false, "lockable": true
@@ -499,6 +481,27 @@
       "frame": { "asset": null, "casing": 0.060 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
       "solid": false, "lockable": false
+    },
+
+    // ---- D_INT_SOLID x2 -- §64.3's solid-core doors: 24 dB closed against a hollow door's 16.
+    // ---- The cinema and the master bedroom; the study's is the double door, which is solid already.
+    {
+      "id": "DOOR_B1_HALL__B1_CINEMA", "kind": "door", "type": "D_INT_SOLID",
+      "portal": "P_B1_HALL__B1_CINEMA",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.045 },
+      "hinge": "left", "swing": "B1_CINEMA", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "solid": true, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_HALL__L1_MASTER_BED", "kind": "door", "type": "D_INT_SOLID",
+      "portal": "P_L1_HALL__L1_MASTER_BED",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.045 },
+      "hinge": "left", "swing": "L1_HALL", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "solid": true, "lockable": true
     },
 
     // ---- D_STAIRHEAD x1 -- the basement stair. Its PORTAL is the 2.30 x 3.30 hole in the L0 floor,

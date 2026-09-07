@@ -807,6 +807,27 @@ def _asset_ids(world: World) -> set[str]:
     return out
 
 
+#: Which §64.3 row a portal's loss comes from. Keyed on the leaf's `type` where there is one,
+#: because a solid-core door and a hollow one are the same portal kind and 8 dB apart.
+TRANSMISSION_BY_TYPE = {
+    "D_INT_PASSAGE": "door_hollow", "D_INT_PRIVACY": "door_hollow", "D_INT_LOW": "door_hollow",
+    "D_STAIRHEAD": "door_hollow", "D_INT_SOLID": "door_solid", "D_DOUBLE": "door_solid",
+    "D_ENTRY": "door_exterior", "D_EXT_SIDE": "door_exterior", "D_SLIDER": "slider_glass",
+    "D_GARAGE": "door_garage", "D_APPLIANCE": "appliance", "H_LID": "appliance",
+    "H_LOFT": "hatch_loft", "W_BASEMENT": "window_hopper",
+}
+
+
+def _transmission_class(portal: dict, leaf: dict | None) -> str:
+    """§64.3's row for this portal: by leaf type, and by kind for the two that have no leaf."""
+    if portal.get("kind") in ("cased_opening", "stair_well"):
+        return "opening"
+    kind = (leaf or {}).get("type")
+    if isinstance(kind, str) and kind.startswith("W_"):
+        return TRANSMISSION_BY_TYPE.get(kind, "window_single")
+    return TRANSMISSION_BY_TYPE.get(kind, "door_hollow")
+
+
 def rule_6_references(world: World) -> list[Problem]:
     """Every referenced material, asset, light group, sound, nav region and cell exists.
 
@@ -913,6 +934,48 @@ def rule_6_references(world: World) -> list[Problem]:
 
     for index, zone in enumerate(world.audio_zones):
         check("audio", index, "cell", zone.get("cell"), cells, "cell", have_cells)
+
+    # Emitters, whose JSON path is `emitters/N` and not `zones/N`: `layout_io` names the file by
+    # its principal array and `check` builds the path from that, which would send a reader to the
+    # wrong row.
+    audio = world.layout.get("audio") or {}
+    for index, emitter in enumerate(audio.get("emitters", [])):
+        for field, universe, name, loaded in (
+                ("cell", cells, "cell", have_cells),
+                ("interactable", interactables, "interactable", have_interactables)):
+            value = emitter.get(field)
+            if value is None or not loaded or value in universe:
+                continue
+            problems.append(Problem(
+                6, FILE_OF["audio"], f"emitters/{index}/{field}",
+                f"{field} {value!r} is not a known {name}"))
+
+    # A portal's `soundLoss` is a CACHE of §64.3's transmission class, not an independent number.
+    # Both are in the data because the runtime wants it per portal and the design states it per
+    # class, and two copies of one fact drift (`HOUSE-00388`). The class comes from the leaf, so
+    # this needs both files; without them it says nothing rather than guessing.
+    transmission = audio.get("transmission") or {}
+    if transmission and world.openings:
+        leaf_of = {row.get("portal"): row for row in world.openings}
+        for index, portal in enumerate(world.portals):
+            declared = portal.get("soundLoss")
+            if not isinstance(declared, dict):
+                continue
+            name = _transmission_class(portal, leaf_of.get(portal.get("id")))
+            wanted = transmission.get(name)
+            if wanted is None:
+                problems.append(Problem(
+                    6, FILE_OF["portals"], f"portals/{index}/soundLoss",
+                    f"portal {portal.get('id')} is a {name!r} and "
+                    f"{FILE_OF['audio']} declares no such transmission class"))
+                continue
+            for field in ("open", "closed"):
+                if abs(float(declared.get(field, 0.0)) - float(wanted.get(field, 0.0))) > 5e-4:
+                    problems.append(Problem(
+                        6, FILE_OF["portals"], f"portals/{index}/soundLoss/{field}",
+                        f"portal {portal.get('id')} says {field} {declared.get(field)} and its "
+                        f"transmission class {name!r} says {wanted.get(field)}; §64.3 is the one "
+                        f"that decides"))
 
     for index, item in enumerate(world.interactables):
         check("interactables", index, "cell", item.get("cell"), cells, "cell", have_cells)
@@ -1558,11 +1621,11 @@ def fixture() -> dict[str, dict]:
         portal("P_FOYER__HALL", "L0_FOYER", "L0_HALL", "z", 4.0,
                (-0.5, 0.5), (0.60, 2.65), "cased_opening"),
         portal("P_HALL__WC1", "L0_HALL", "L0_WC1", "x", 2.0,
-               (4.6, 5.5), (0.60, 2.62), "door", aperture="DOOR_WC1"),
+               (4.6, 5.5), (0.60, 2.62), "door", aperture="DOOR_WC1", soundLoss={"open": 0.109, "closed": 0.842}),
         portal("P_HALL__STAIR", "L0_HALL", "L0_STAIR", "x", -2.0,
                (5.0, 6.0), (0.60, 2.65), "cased_opening"),
         portal("P_FOYER__TERRACE", "L0_FOYER", "L0_TERRACE", "z", 0.0,
-               (-0.5, 0.5), (0.60, 2.65), "exterior_door", aperture="DOOR_TERRACE"),
+               (-0.5, 0.5), (0.60, 2.65), "exterior_door", aperture="DOOR_TERRACE", soundLoss={"open": 0.109, "closed": 0.968}),
         # The horizontal one. L0_STAIR's yOverride reaches 3.65, which is L1_LANDING's floor.
         portal("P_STAIR__LANDING", "L0_STAIR", "L1_LANDING", "y", 3.65,
                (-5.5, -2.5), (4.5, 7.5), "stair_well"),
@@ -1571,22 +1634,25 @@ def fixture() -> dict[str, dict]:
         portal("P_L1HALL__LANDING", "L1_HALL", "L1_LANDING", "x", -2.0,
                (5.0, 6.0), (3.65, 5.70), "cased_opening"),
         portal("P_L1HALL__WC4", "L1_HALL", "L1_WC4", "x", 2.0,
-               (4.6, 5.5), (3.65, 5.67), "door", aperture="DOOR_WC4"),
+               (4.6, 5.5), (3.65, 5.67), "door", aperture="DOOR_WC4", soundLoss={"open": 0.109, "closed": 0.937}),
     ]}
 
     openings = {"schema": "cna-house/openings/1", "openings": [
-        {"id": "DOOR_WC1", "kind": "door", "portal": "P_HALL__WC1",
+        {"id": "DOOR_WC1", "kind": "door", "type": "D_INT_PRIVACY",
+         "portal": "P_HALL__WC1",
          "leaf": {"width": 0.86, "height": 2.02, "thickness": 0.040},
          # `swing` names the cell the leaf opens into -- a reference, checked by rule 6, and not
          # `docs/world-format.md`'s original `"into_L0_WC1"`, which nothing could resolve.
          "swing": "L0_WC1", "hinge": "left",
          "asset": "MODEL_DOOR_LEAF", "material": "MAT_PAINT"},
-        {"id": "DOOR_WC4", "kind": "door", "portal": "P_L1HALL__WC4",
+        {"id": "DOOR_WC4", "kind": "door", "type": "D_INT_SOLID",
+         "portal": "P_L1HALL__WC4",
          "leaf": {"width": 0.86, "height": 2.02, "thickness": 0.040},
          "asset": "MODEL_DOOR_LEAF", "material": "MAT_PAINT"},
         # An exterior door: §70.5's interior leaf range does not apply, and this row proves the
         # exemption is real by being 2.15 m tall.
-        {"id": "DOOR_TERRACE", "kind": "door", "portal": "P_FOYER__TERRACE",
+        {"id": "DOOR_TERRACE", "kind": "door", "type": "D_ENTRY",
+         "portal": "P_FOYER__TERRACE",
          "leaf": {"width": 0.92, "height": 2.15, "thickness": 0.055},
          "asset": "MODEL_DOOR_LEAF", "material": "MAT_PAINT"},
     ]}
@@ -1626,6 +1692,21 @@ def fixture() -> dict[str, dict]:
          "actions": [{"verb": "Open", "do": "open(SHELF_CLOSET)"}]},
     ]}
 
+    # §64.3's classes and one zone, so rule 6 can check a portal's cached `soundLoss` against the
+    # class its leaf implies. The two doors below are deliberately different types: a hollow-core
+    # WC door and a solid-core one, 8 dB apart, so the check can be shown to read the LEAF and not
+    # the portal kind, which is `door` for both.
+    audio = {"schema": "cna-house/audio/1",
+             "zones": [{"id": "AZ_HALL", "cell": "L0_HALL", "bed": "AMB_ROOM_QUIET", "gain": 0.3}],
+             "emitters": [{"id": "EM_CLOCK", "cell": "L0_HALL", "position": [0.0, 2.4, 7.0],
+                           "loop": "AMB_CLOCK_TICK", "gain": 0.3, "radius": 5.0,
+                           "interactable": None}],
+             "transmission": {"opening": {"open": 0.0, "closed": 0.0},
+                              "door_hollow": {"open": 0.109, "closed": 0.842},
+                              "door_solid": {"open": 0.109, "closed": 0.937},
+                              "door_exterior": {"open": 0.109, "closed": 0.968},
+                              "window_single": {"open": 0.109, "closed": 0.921}}}
+
     assets = {"schema": "cna-house/assets/1", "assets": [
         {"id": "MODEL_WC", "file": "Models/Fixtures/wc.glb"},
         {"id": "MODEL_DOOR_LEAF", "file": "Models/Doors/leaf.glb"},
@@ -1633,7 +1714,7 @@ def fixture() -> dict[str, dict]:
 
     return {"levels": levels, "cells": cells, "portals": portals, "openings": openings,
             "stairs": stairs, "lights": lights, "materials": materials, "props": props,
-            "interactables": interactables, "assets": assets}
+            "interactables": interactables, "assets": assets, "audio": audio}
 
 
 def write_fixture(directory: Path, documents: dict[str, dict]) -> None:
@@ -1932,6 +2013,38 @@ def selftest() -> int:
         require(any("1.98" in x.message for x in problems),
                 f"a 1.60 m interior door is caught too -- the exemption is the declared `type`, "
                 f"never the measurement ({[str(x) for x in problems]})")
+
+        def validate_world_problems(documents, directory, rule):
+            write_fixture(directory, documents)
+            return validate(directory, wanted=[rule])[1]
+
+        # A portal's `soundLoss` is a cache of §64.3's class, and two copies of one fact drift.
+        # The class comes from the LEAF, not the portal kind: the fixture's two WC doors are both
+        # `kind: door` and are hollow-core and solid-core, 8 dB apart (`HOUSE-00388`).
+        require(not validate_world_problems(base, workspace / "loss-agree", 6),
+                "a portal whose soundLoss matches its class is silent")
+
+        drifted = copy.deepcopy(base)
+        row(drifted, "portals", "P_HALL__WC1")["soundLoss"] = {"open": 0.109, "closed": 0.937}
+        problems = validate_world_problems(drifted, workspace / "loss-drift", 6)
+        require(any("§64.3 is the one that decides" in x.message for x in problems),
+                f"a hollow-core door carrying the SOLID door's 24 dB is caught, though 0.937 is a "
+                f"number that exists elsewhere in the table ({[str(x) for x in problems]})")
+
+        unknown = copy.deepcopy(base)
+        del unknown["audio"]["transmission"]["door_hollow"]
+        problems = validate_world_problems(unknown, workspace / "loss-unknown", 6)
+        require(any("no such transmission class" in x.message for x in problems),
+                f"and a portal whose class the audio file does not declare ({[str(x) for x in problems]})")
+
+        # An emitter names a cell too -- §64's portal-path solver starts from cells, not from
+        # positions (ADR-0010), so an emitter in a cell that does not exist is a sound with no
+        # room to be heard from.
+        lost = copy.deepcopy(base)
+        lost["audio"]["emitters"][0]["cell"] = "L0_NOWHERE"
+        problems = validate_world_problems(lost, workspace / "emitter-lost", 6)
+        require(any("is not a known cell" in x.message for x in problems),
+                f"an emitter in a cell that does not exist is caught ({[str(x) for x in problems]})")
 
         # A light switch's state fields are the groups it controls, so a typo in one is a gang
         # that toggles nothing. Nothing else could see it: `state` is free-form by design

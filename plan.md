@@ -5935,8 +5935,36 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             §12.5's six rows into it.
 - [ ] HOUSE-00387 — Author the HVAC duct/register description as data, for audio placement
       dep: HOUSE-00386 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00388 — Author `layout.audio.json`: per-cell room tone, absorption, reverb hint; per-portal transmission losses (§64.3)
+- [x] HOUSE-00388 — Author `layout.audio.json`: per-cell room tone, absorption, reverb hint; per-portal transmission losses (§64.3)
       dep: HOUSE-00367…HOUSE-00372 · sys: world · plat: TOOL · pri: MUST
+      finding: **the C++ loader dropped seven of §64.3's ten transmission classes without a
+            word.** `LoadAudio` held a hardcoded list of six class names — `door_hollow`,
+            `door_solid`, `door_glazed`, `window`, `opening`, `hatch` — invented before §64.3 was
+            authored, and the names the design actually uses (`door_exterior`, `slider_glass`,
+            `window_single`, `window_hopper`, `door_garage`, and the two added below) matched none
+            of them. The comment beside the list claimed "the count is compared below and a
+            mismatch is reported"; there was no such comparison. It enumerates the object now,
+            with `JsonValue::Members()`, so there is no list to keep in step. A new
+            `AuthoredWorldTest` found it the first time the C++ reader saw the real table.
+      finding: **§64.3 had no row for a hatch or an appliance door**, and both are portals: the
+            garage loft hatch and the refrigerator door and chest-freezer lid. Two rows added —
+            loft hatch 1/18 dB, gasketed appliance 2/34 dB.
+      finding: **`soundLoss` and §64.3 were two copies of one fact.** Every portal carried a
+            hand-picked pair and §64.3 stated the same thing per class, in decibels. §64.3 is the
+            source now: `layout.audio.json`'s `transmission` block is that table as fractions
+            (`loss = 1 − 10^(−dB/20)`), all 179 portals are derived from it, and rule 6 checks each
+            portal against the class its **leaf type** selects — a solid-core door and a hollow one
+            are the same portal kind and 8 dB apart, which the injected-bug test pins.
+      note: §64.3 names the study, the master and the cinema as solid-core. The study is entered
+            through a double door, which was solid already; the other two are now `D_INT_SOLID`,
+            a thirteenth door type, and the file says why.
+      note: 92 zones — every cell that is not a container or `EXT_WORLD` — sharing **eight** beds
+            rather than one each: room tone is a bed, and 92 of them would be 92 samples nobody
+            could tell apart. `acoustic.roomTone` was empty on every cell until now.
+      note: 29 emitters, all of §62.6's table that can be placed yet: the furnace and water heater,
+            the refrigerator and freezer, three clocks, the garage motor, the doorbell, six pipe
+            runs on §12.5's own chases, and the 14 creak points spread over the storeys. The duct
+            registers wait for `HOUSE-00387`, which authors the ducts.
 - [ ] HOUSE-00389 — Author `layout.nav.json`: ~300 nodes, edges, 22 perches, 2 beds, 2 bowls, forbidden zones
       dep: HOUSE-00367…HOUSE-00372 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00390 — Author `layout.exterior.json`: terrain reference, road segments, sidewalks, kerbs, driveway, paths, fences, gates, shed

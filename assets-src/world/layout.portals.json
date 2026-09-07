@@ -29,133 +29,155 @@
       "id": "P_B1_STAIR__B1_HALL", "cellA": "B1_STAIR", "cellB": "B1_HALL",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-17.85, -16.65], "v": [-2.3, -0.1] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L0_FOYER__L0_HALL", "cellA": "L0_FOYER", "cellB": "L0_HALL",
       "plane": { "axis": "z", "value": -18.3 },
       "rect": { "u": [-1.5, 1.5], "v": [0.6, 3.2] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L0_FOYER__L0_STAIR", "cellA": "L0_FOYER", "cellB": "L0_STAIR_MAIN",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-17.1, -15.5], "v": [0.6, 2.8] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L0_STAIR__L0_MUDROOM", "cellA": "L0_STAIR_MAIN", "cellB": "L0_MUDROOM",
       "plane": { "axis": "x", "value": 4.9 },
       "rect": { "u": [-16.85, -15.75], "v": [0.6, 2.8] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L0_HALL__L0_KITCHEN", "cellA": "L0_HALL", "cellB": "L0_KITCHEN",
       "plane": { "axis": "z", "value": -23.0 },
       "rect": { "u": [-1.0, 1.0], "v": [0.6, 2.8] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L0_LIVING__L0_DINING", "cellA": "L0_LIVING", "cellB": "L0_DINING",
       "plane": { "axis": "z", "value": -20.2 },
       "rect": { "u": [-6.5, -3.9], "v": [0.6, 2.8] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L0_DINING__L0_KITCHEN", "cellA": "L0_DINING", "cellB": "L0_KITCHEN",
       "plane": { "axis": "z", "value": -23.0 },
       "rect": { "u": [-6.0, -4.4], "v": [0.6, 2.8] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L0_KITCHEN__L0_BUTLERS", "cellA": "L0_KITCHEN", "cellB": "L0_BUTLERS",
       "plane": { "axis": "x", "value": -8.2 },
       "rect": { "u": [-24.55, -23.45], "v": [0.6, 2.8] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L0_KITCHEN__L0_FAMILY", "cellA": "L0_KITCHEN", "cellB": "L0_FAMILY",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-26.6, -23.5], "v": [0.6, 3.2] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L0_KITCHEN__L0_SUNROOM", "cellA": "L0_KITCHEN", "cellB": "L0_SUNROOM",
       "plane": { "axis": "z", "value": -27.1 },
       "rect": { "u": [-4.25, -0.25], "v": [0.6, 3.2] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L1_LANDING__L1_HALL", "cellA": "L1_LANDING", "cellB": "L1_HALL",
       "plane": { "axis": "z", "value": -18.3 },
       "rect": { "u": [-1.1, 1.1], "v": [3.65, 5.85] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L1_HALL__L1_HALL_W", "cellA": "L1_HALL", "cellB": "L1_HALL_W",
       "plane": { "axis": "x", "value": -2.2 },
       "rect": { "u": [-20.25, -18.65], "v": [3.65, 5.85] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L1_STAIR__L1_LANDING", "cellA": "L1_STAIR_MAIN", "cellB": "L1_LANDING",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-17.1, -15.5], "v": [3.65, 5.85] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L2_LANDING__L2_HALL", "cellA": "L2_LANDING", "cellB": "L2_HALL",
       "plane": { "axis": "z", "value": -18.3 },
       "rect": { "u": [-1.1, 1.1], "v": [6.55, 8.75] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L2_HALL__L2_HALL_W", "cellA": "L2_HALL", "cellB": "L2_HALL_W",
       "plane": { "axis": "x", "value": -2.2 },
       "rect": { "u": [-20.25, -18.65], "v": [6.55, 8.75] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L2_STAIR__L2_LANDING", "cellA": "L2_STAIR_MAIN", "cellB": "L2_LANDING",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-17.1, -15.5], "v": [6.55, 8.75] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L3_HEAD__L3_ROOM", "cellA": "L3_STAIR_HEAD", "cellB": "L3_ROOM",
       "plane": { "axis": "x", "value": 4.9 },
       "rect": { "u": [-18.2, -17.1], "v": [9.3, 11.3] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L3_ROOM__L3_STORE_N", "cellA": "L3_ROOM", "cellB": "L3_STORE_N",
       "plane": { "axis": "z", "value": -24.0 },
       "rect": { "u": [-1.35, 0.25], "v": [9.3, 11.1] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true,
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L3_ROOM__L3_STORE_S", "cellA": "L3_ROOM", "cellB": "L3_STORE_S",
       "plane": { "axis": "z", "value": -17.0 },
       "rect": { "u": [-1.35, 0.25], "v": [9.3, 10.9] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true,
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L3_ROOM__L3_STORE_W", "cellA": "L3_ROOM", "cellB": "L3_STORE_W",
       "plane": { "axis": "x", "value": -6.0 },
       "rect": { "u": [-21.3, -19.7], "v": [9.3, 11.1] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true,
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L3_HEAD__L3_STORE_E", "cellA": "L3_STAIR_HEAD", "cellB": "L3_STORE_E",
       "plane": { "axis": "z", "value": -18.3 },
       "rect": { "u": [6.25, 7.35], "v": [9.3, 11.1] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true,
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_L3_STORE_W__L3_STORE_N", "cellA": "L3_STORE_W", "cellB": "L3_STORE_N",
       "plane": { "axis": "x", "value": -6.0 },
       "rect": { "u": [-26.15, -24.95], "v": [9.3, 10.9] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true,
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     // `P_L3_STORE_W__L3_STORE_S` was here and is gone (`HOUSE-00376`). The west dormer bay now
     // runs X -6.00…-3.60 through to the eaves, which is exactly the corner where the two roof
@@ -165,91 +187,106 @@
       "id": "P_L3_STORE_E__L3_STORE_N", "cellA": "L3_STORE_E", "cellB": "L3_STORE_N",
       "plane": { "axis": "x", "value": 4.9 },
       "rect": { "u": [-26.15, -24.95], "v": [9.3, 10.9] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true,
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_FRONT_W__L0_PORCH", "cellA": "EXT_FRONTYARD_W", "cellB": "L0_PORCH",
       "plane": { "axis": "z", "value": -11.6 },
       "rect": { "u": [-3.5, -1.1], "v": [0.6, 3.2] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_FRONT_E__L0_PORCH", "cellA": "EXT_FRONTYARD_E", "cellB": "L0_PORCH",
       "plane": { "axis": "z", "value": -11.6 },
       "rect": { "u": [1.1, 3.5], "v": [0.6, 3.2] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_WALK__L0_PORCH", "cellA": "EXT_WALK", "cellB": "L0_PORCH",
       "plane": { "axis": "z", "value": -11.6 },
       "rect": { "u": [-1.0, 1.0], "v": [0.6, 3.2] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_ROAD__EXT_WALK", "cellA": "EXT_ROAD", "cellB": "EXT_WALK",
       "plane": { "axis": "z", "value": 0.0 },
       "rect": { "u": [-1.0, 1.0], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_ROAD__EXT_FRONT_W", "cellA": "EXT_ROAD", "cellB": "EXT_FRONTYARD_W",
       "plane": { "axis": "z", "value": 0.0 },
       "rect": { "u": [-11.0, -3.0], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_ROAD__EXT_FRONT_E", "cellA": "EXT_ROAD", "cellB": "EXT_FRONTYARD_E",
       "plane": { "axis": "z", "value": 0.0 },
       "rect": { "u": [2.15, 8.15], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_ROAD__EXT_DRIVEWAY", "cellA": "EXT_ROAD", "cellB": "EXT_DRIVEWAY",
       "plane": { "axis": "z", "value": 0.0 },
       "rect": { "u": [10.2, 16.2], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_ROAD__EXT_SIDE_W", "cellA": "EXT_ROAD", "cellB": "EXT_SIDEYARD_W",
       "plane": { "axis": "z", "value": 0.0 },
       "rect": { "u": [-20.75, -14.75], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_ROAD__EXT_SIDE_E", "cellA": "EXT_ROAD", "cellB": "EXT_SIDEYARD_E",
       "plane": { "axis": "z", "value": 0.0 },
       "rect": { "u": [17.8, 21.8], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_FRONT_W__EXT_SIDE_W", "cellA": "EXT_FRONTYARD_W", "cellB": "EXT_SIDEYARD_W",
       "plane": { "axis": "x", "value": -13.0 },
       "rect": { "u": [-8.8, -2.8], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_FRONT_E__EXT_DRIVEWAY", "cellA": "EXT_FRONTYARD_E", "cellB": "EXT_DRIVEWAY",
       "plane": { "axis": "x", "value": 9.3 },
       "rect": { "u": [-8.8, -2.8], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_DRIVEWAY__EXT_SIDE_E", "cellA": "EXT_DRIVEWAY", "cellB": "EXT_SIDEYARD_E",
       "plane": { "axis": "x", "value": 17.1 },
       "rect": { "u": [-8.65, -4.65], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_SIDE_W__EXT_BACKYARD", "cellA": "EXT_SIDEYARD_W", "cellB": "EXT_BACKYARD",
       "plane": { "axis": "x", "value": -13.0 },
       "rect": { "u": [-31.75, -27.75], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_SIDE_E__EXT_BACKYARD", "cellA": "EXT_SIDEYARD_E", "cellB": "EXT_BACKYARD",
       "plane": { "axis": "z", "value": -27.4 },
       "rect": { "u": [11.05, 15.05], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       // From the terrace deck at +0.45 and not from the lawn: `STEPS_TERRACE_LAWN` climbs the
@@ -257,25 +294,29 @@
       "id": "P_EXT_BACKYARD__EXT_TERRACE", "cellA": "EXT_BACKYARD", "cellB": "EXT_TERRACE",
       "plane": { "axis": "z", "value": -36.0 },
       "rect": { "u": [-3.0, 3.0], "v": [0.45, 3.05] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_BACKYARD__EXT_GARDEN", "cellA": "EXT_BACKYARD", "cellB": "EXT_GARDEN",
       "plane": { "axis": "x", "value": -13.0 },
       "rect": { "u": [-43.7, -40.7], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_BACKYARD__EXT_ORCHARD", "cellA": "EXT_BACKYARD", "cellB": "EXT_ORCHARD",
       "plane": { "axis": "x", "value": 12.0 },
       "rect": { "u": [-44.0, -40.0], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_SIDE_W__EXT_GARDEN", "cellA": "EXT_SIDEYARD_W", "cellB": "EXT_GARDEN",
       "plane": { "axis": "x", "value": -20.0 },
       "rect": { "u": [-42.25, -38.25], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       // The shed is an `exterior` cell that is indoors -- roofed, `visibilityHint: opaque`, a
@@ -287,37 +328,42 @@
       "plane": { "axis": "x", "value": -16.6 },
       "rect": { "u": [-42.65, -41.75], "v": [0.0, 2.05] },
       "kind": "exterior_door", "aperture": "DOOR_EXT_GARDEN__EXT_SHED", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.1, "closed": 0.74 }
+      "soundLoss": { "open": 0.109, "closed": 0.968 }
     },
     {
       "id": "P_EXT_BACKYARD__EXT_NORTHSTRIP", "cellA": "EXT_BACKYARD", "cellB": "EXT_NORTHSTRIP",
       "plane": { "axis": "z", "value": -48.0 },
       "rect": { "u": [-0.95, 5.05], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_EXT_WORLD__EXT_ROAD", "cellA": "EXT_WORLD", "cellB": "EXT_ROAD",
       "plane": { "axis": "z", "value": 13.4 },
       "rect": { "u": [-4.0, 4.0], "v": [0.0, 2.6] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open"
+      "kind": "cased_opening", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_STAIR_L0_L1", "cellA": "L0_STAIR_MAIN", "cellB": "L1_STAIR_MAIN",
       "plane": { "axis": "y", "value": 3.65 },
       "rect": { "u": [2.4, 4.7], "v": [-19.7, -14.8] },
-      "kind": "stair_well", "aperture": null, "opacity": "open"
+      "kind": "stair_well", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_STAIR_L1_L2", "cellA": "L1_STAIR_MAIN", "cellB": "L2_STAIR_MAIN",
       "plane": { "axis": "y", "value": 6.55 },
       "rect": { "u": [2.4, 4.7], "v": [-19.7, -14.8] },
-      "kind": "stair_well", "aperture": null, "opacity": "open"
+      "kind": "stair_well", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     {
       "id": "P_STAIR_L2_L3", "cellA": "L2_STAIR_ATTIC", "cellB": "L3_STAIR_HEAD",
       "plane": { "axis": "y", "value": 9.3 },
       "rect": { "u": [5.2, 8.4], "v": [-17.8, -14.8] },
-      "kind": "stair_well", "aperture": null, "opacity": "open"
+      "kind": "stair_well", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
 
     // ----------------------------------------------------------------------------
@@ -338,434 +384,434 @@
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-21.15, -20.25], "v": [-2.3, -0.7] },
       "kind": "door", "aperture": "DOOR_B1_HALL__B1_UNDERSTAIR", "opacity": "opaque_when_closed", "crouch": true,
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_STAIR__B1_MECHANICAL", "cellA": "B1_STAIR", "cellB": "B1_MECHANICAL",
       "plane": { "axis": "x", "value": 4.9 },
       "rect": { "u": [-16.75, -15.85], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_STAIR__B1_MECHANICAL", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_STAIR__B1_ELECTRICAL", "cellA": "B1_STAIR", "cellB": "B1_ELECTRICAL",
       "plane": { "axis": "x", "value": 4.9 },
       "rect": { "u": [-19.7, -18.8], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_STAIR__B1_ELECTRICAL", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_CINEMA__B1_UTILITY", "cellA": "B1_CINEMA", "cellB": "B1_UTILITY",
       "plane": { "axis": "z", "value": -23.0 },
       "rect": { "u": [6.35, 7.25], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_CINEMA__B1_UTILITY", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_HALL__B1_CINEMA", "cellA": "B1_HALL", "cellB": "B1_CINEMA",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-25.5, -24.6], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_HALL__B1_CINEMA", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.937 }
     },
     {
       "id": "P_B1_HALL__B1_WC7", "cellA": "B1_HALL", "cellB": "B1_WC7",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-22.55, -21.65], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_HALL__B1_WC7", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_HALL__B1_GYM", "cellA": "B1_HALL", "cellB": "B1_GYM",
       "plane": { "axis": "x", "value": -2.2 },
       "rect": { "u": [-16.75, -15.85], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_HALL__B1_GYM", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_HALL__B1_HOBBY", "cellA": "B1_HALL", "cellB": "B1_HOBBY",
       "plane": { "axis": "x", "value": -2.2 },
       "rect": { "u": [-21.6, -20.7], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_HALL__B1_HOBBY", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_HALL__B1_LAUNDRY2", "cellA": "B1_HALL", "cellB": "B1_LAUNDRY2",
       "plane": { "axis": "x", "value": -2.2 },
       "rect": { "u": [-26.0, -25.1], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_HALL__B1_LAUNDRY2", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_GYM__B1_WORKSHOP", "cellA": "B1_GYM", "cellB": "B1_WORKSHOP",
       "plane": { "axis": "x", "value": -8.2 },
       "rect": { "u": [-16.75, -15.85], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_GYM__B1_WORKSHOP", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_HOBBY__B1_STOR1", "cellA": "B1_HOBBY", "cellB": "B1_STOR1",
       "plane": { "axis": "x", "value": -8.2 },
       "rect": { "u": [-20.6, -19.7], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_HOBBY__B1_STOR1", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_HOBBY__B1_STOR2", "cellA": "B1_HOBBY", "cellB": "B1_STOR2",
       "plane": { "axis": "x", "value": -8.2 },
       "rect": { "u": [-23.45, -22.55], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_HOBBY__B1_STOR2", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_B1_HOBBY__B1_CELLAR", "cellA": "B1_HOBBY", "cellB": "B1_CELLAR",
       "plane": { "axis": "z", "value": -24.0 },
       "rect": { "u": [-6.85, -5.95], "v": [-2.3, -0.2] },
       "kind": "door", "aperture": "DOOR_B1_HOBBY__B1_CELLAR", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_HALL__L0_WC1", "cellA": "L0_HALL", "cellB": "L0_WC1",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-21.55, -20.65], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_HALL__L0_WC1", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_HALL__L0_FAMILY", "cellA": "L0_HALL", "cellB": "L0_FAMILY",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-22.95, -22.05], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_HALL__L0_FAMILY", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_MUDROOM__L0_LAUNDRY", "cellA": "L0_MUDROOM", "cellB": "L0_LAUNDRY",
       "plane": { "axis": "z", "value": -18.3 },
       "rect": { "u": [6.35, 7.25], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_MUDROOM__L0_LAUNDRY", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_FAMILY__L0_LAUNDRY", "cellA": "L0_FAMILY", "cellB": "L0_LAUNDRY",
       "plane": { "axis": "z", "value": -22.0 },
       "rect": { "u": [6.35, 7.25], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_FAMILY__L0_LAUNDRY", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_LIVING__L0_WC2", "cellA": "L0_LIVING", "cellB": "L0_WC2",
       "plane": { "axis": "x", "value": -8.2 },
       "rect": { "u": [-19.7, -18.8], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_LIVING__L0_WC2", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_OFFICE__L0_CLOSET_W", "cellA": "L0_OFFICE", "cellB": "L0_CLOSET_W",
       "plane": { "axis": "z", "value": -18.3 },
       "rect": { "u": [-12.0, -11.1], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_OFFICE__L0_CLOSET_W", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_DINING__L0_STOR", "cellA": "L0_DINING", "cellB": "L0_STOR",
       "plane": { "axis": "x", "value": -8.2 },
       "rect": { "u": [-21.85, -20.95], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_DINING__L0_STOR", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_KITCHEN__L0_PANTRY", "cellA": "L0_KITCHEN", "cellB": "L0_PANTRY",
       "plane": { "axis": "x", "value": -8.2 },
       "rect": { "u": [-26.5, -25.6], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_KITCHEN__L0_PANTRY", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_BUTLERS__L0_PANTRY", "cellA": "L0_BUTLERS", "cellB": "L0_PANTRY",
       "plane": { "axis": "z", "value": -25.0 },
       "rect": { "u": [-10.9, -10.0], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_BUTLERS__L0_PANTRY", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_STOR__L0_BUTLERS", "cellA": "L0_STOR", "cellB": "L0_BUTLERS",
       "plane": { "axis": "z", "value": -22.6 },
       "rect": { "u": [-10.9, -10.0], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_STOR__L0_BUTLERS", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_HALL__L1_MASTER_BED", "cellA": "L1_HALL", "cellB": "L1_MASTER_BED",
       "plane": { "axis": "z", "value": -22.0 },
       "rect": { "u": [-0.45, 0.45], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_HALL__L1_MASTER_BED", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.937 }
     },
     {
       "id": "P_L1_MASTER_BED__L1_MASTER_CLOSET", "cellA": "L1_MASTER_BED", "cellB": "L1_MASTER_CLOSET",
       "plane": { "axis": "x", "value": -7.0 },
       "rect": { "u": [-25.0, -24.1], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_MASTER_BED__L1_MASTER_CLOSET", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_MASTER_CLOSET__L1_MASTER_BATH", "cellA": "L1_MASTER_CLOSET", "cellB": "L1_MASTER_BATH",
       "plane": { "axis": "x", "value": -9.4 },
       "rect": { "u": [-25.0, -24.1], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_MASTER_CLOSET__L1_MASTER_BATH", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_HALL__L1_WC4", "cellA": "L1_HALL", "cellB": "L1_WC4",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-21.55, -20.65], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_HALL__L1_WC4", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_LINEN__L1_BED2", "cellA": "L1_LINEN", "cellB": "L1_BED2",
       "plane": { "axis": "z", "value": -22.9 },
       "rect": { "u": [3.1, 4.0], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_LINEN__L1_BED2", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_STOR__L1_BED2", "cellA": "L1_STOR", "cellB": "L1_BED2",
       "plane": { "axis": "z", "value": -22.9 },
       "rect": { "u": [6.35, 7.25], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_STOR__L1_BED2", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_BATH3__L1_STOR", "cellA": "L1_BATH3", "cellB": "L1_STOR",
       "plane": { "axis": "z", "value": -22.0 },
       "rect": { "u": [6.35, 7.25], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_BATH3__L1_STOR", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_HALL_W__L1_BED3", "cellA": "L1_HALL_W", "cellB": "L1_BED3",
       "plane": { "axis": "z", "value": -18.3 },
       "rect": { "u": [-9.4, -8.5], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_HALL_W__L1_BED3", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_HALL_W__L1_BED4", "cellA": "L1_HALL_W", "cellB": "L1_BED4",
       "plane": { "axis": "z", "value": -18.3 },
       "rect": { "u": [-5.65, -4.75], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_HALL_W__L1_BED4", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_HALL_W__L1_BATH2", "cellA": "L1_HALL_W", "cellB": "L1_BATH2",
       "plane": { "axis": "x", "value": -9.7 },
       "rect": { "u": [-19.9, -19.0], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_HALL_W__L1_BATH2", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_HALL_W__L1_WC3", "cellA": "L1_HALL_W", "cellB": "L1_WC3",
       "plane": { "axis": "z", "value": -20.6 },
       "rect": { "u": [-6.15, -5.25], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_HALL_W__L1_WC3", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_HALL_W__L1_CLOSET_2", "cellA": "L1_HALL_W", "cellB": "L1_CLOSET_2",
       "plane": { "axis": "z", "value": -20.6 },
       "rect": { "u": [-8.8, -7.9], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_HALL_W__L1_CLOSET_2", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_HALL_W__L1_CLOSET_3", "cellA": "L1_HALL_W", "cellB": "L1_CLOSET_3",
       "plane": { "axis": "z", "value": -20.6 },
       "rect": { "u": [-3.75, -2.85], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_HALL_W__L1_CLOSET_3", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_STAIR__L1_BED5", "cellA": "L1_STAIR_MAIN", "cellB": "L1_BED5",
       "plane": { "axis": "x", "value": 4.9 },
       "rect": { "u": [-16.75, -15.85], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_STAIR__L1_BED5", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L1_BED5__L1_BATH3", "cellA": "L1_BED5", "cellB": "L1_BATH3",
       "plane": { "axis": "z", "value": -18.3 },
       "rect": { "u": [6.35, 7.25], "v": [3.65, 5.75] },
       "kind": "door", "aperture": "DOOR_L1_BED5__L1_BATH3", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_STAIR__L2_STAIR_ATTIC", "cellA": "L2_STAIR_MAIN", "cellB": "L2_STAIR_ATTIC",
       "plane": { "axis": "x", "value": 4.9 },
       "rect": { "u": [-16.75, -15.85], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_STAIR__L2_STAIR_ATTIC", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_LANDING__L2_LIBRARY", "cellA": "L2_LANDING", "cellB": "L2_LIBRARY",
       "plane": { "axis": "x", "value": -2.2 },
       "rect": { "u": [-16.75, -15.85], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_LANDING__L2_LIBRARY", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_LIBRARY__L2_BED6", "cellA": "L2_LIBRARY", "cellB": "L2_BED6",
       "plane": { "axis": "x", "value": -8.2 },
       "rect": { "u": [-16.75, -15.85], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_LIBRARY__L2_BED6", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_HALL_W__L2_BATH4", "cellA": "L2_HALL_W", "cellB": "L2_BATH4",
       "plane": { "axis": "x", "value": -9.7 },
       "rect": { "u": [-19.9, -19.0], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_HALL_W__L2_BATH4", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_HALL_W__L2_CLOSET_4", "cellA": "L2_HALL_W", "cellB": "L2_CLOSET_4",
       "plane": { "axis": "z", "value": -20.6 },
       "rect": { "u": [-8.8, -7.9], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_HALL_W__L2_CLOSET_4", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_HALL_W__L2_WC5", "cellA": "L2_HALL_W", "cellB": "L2_WC5",
       "plane": { "axis": "z", "value": -20.6 },
       "rect": { "u": [-6.15, -5.25], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_HALL_W__L2_WC5", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_HALL_W__L2_LINEN2", "cellA": "L2_HALL_W", "cellB": "L2_LINEN2",
       "plane": { "axis": "z", "value": -20.6 },
       "rect": { "u": [-3.75, -2.85], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_HALL_W__L2_LINEN2", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_BATH4__L2_BED7", "cellA": "L2_BATH4", "cellB": "L2_BED7",
       "plane": { "axis": "z", "value": -22.0 },
       "rect": { "u": [-11.65, -10.75], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_BATH4__L2_BED7", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_HALL__L2_GAMES", "cellA": "L2_HALL", "cellB": "L2_GAMES",
       "plane": { "axis": "z", "value": -22.0 },
       "rect": { "u": [-0.45, 0.45], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_HALL__L2_GAMES", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_HALL__L2_WC6", "cellA": "L2_HALL", "cellB": "L2_WC6",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-21.55, -20.65], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_HALL__L2_WC6", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_GAMES__L2_STOR2", "cellA": "L2_GAMES", "cellB": "L2_STOR2",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-22.9, -22.0], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_GAMES__L2_STOR2", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_STOR2__L2_SITTING", "cellA": "L2_STOR2", "cellB": "L2_SITTING",
       "plane": { "axis": "z", "value": -22.9 },
       "rect": { "u": [5.0, 5.9], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_STOR2__L2_SITTING", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L2_STOR2__L2_BATH5", "cellA": "L2_STOR2", "cellB": "L2_BATH5",
       "plane": { "axis": "z", "value": -22.0 },
       "rect": { "u": [6.35, 7.25], "v": [6.55, 8.65] },
       "kind": "door", "aperture": "DOOR_L2_STOR2__L2_BATH5", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_FOYER__L0_LIVING", "cellA": "L0_FOYER", "cellB": "L0_LIVING",
       "plane": { "axis": "x", "value": -2.2 },
       "rect": { "u": [-17.2, -15.4], "v": [0.6, 2.75] },
       "kind": "double_door", "aperture": "DOOR_L0_FOYER__L0_LIVING", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.5 }
+      "soundLoss": { "open": 0.109, "closed": 0.937 }
     },
     {
       "id": "P_L0_HALL__L0_DINING", "cellA": "L0_HALL", "cellB": "L0_DINING",
       "plane": { "axis": "x", "value": -2.2 },
       "rect": { "u": [-22.5, -20.7], "v": [0.6, 2.75] },
       "kind": "double_door", "aperture": "DOOR_L0_HALL__L0_DINING", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.5 }
+      "soundLoss": { "open": 0.109, "closed": 0.937 }
     },
     {
       "id": "P_L0_LIVING__L0_OFFICE", "cellA": "L0_LIVING", "cellB": "L0_OFFICE",
       "plane": { "axis": "x", "value": -8.2 },
       "rect": { "u": [-17.2, -15.4], "v": [0.6, 2.75] },
       "kind": "double_door", "aperture": "DOOR_L0_LIVING__L0_OFFICE", "opacity": "translucent", "maxDepth": 2,
-      "soundLoss": { "open": 0.05, "closed": 0.4 }
+      "soundLoss": { "open": 0.109, "closed": 0.937 }
     },
     {
       "id": "P_L0_PORCH__L0_FOYER", "cellA": "L0_PORCH", "cellB": "L0_FOYER",
       "plane": { "axis": "z", "value": -14.3 },
       "rect": { "u": [-0.5, 0.5], "v": [0.6, 2.75] },
       "kind": "exterior_door", "aperture": "DOOR_L0_PORCH__L0_FOYER", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.1, "closed": 0.82 }
+      "soundLoss": { "open": 0.109, "closed": 0.968 }
     },
     {
       "id": "P_L0_SUNROOM__EXT_TERRACE", "cellA": "L0_SUNROOM", "cellB": "EXT_TERRACE",
       "plane": { "axis": "z", "value": -32.1 },
       "rect": { "u": [-3.2, -0.8], "v": [0.6, 2.75] },
       "kind": "slider", "aperture": "DOOR_L0_SUNROOM__EXT_TERRACE", "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.1, "closed": 0.7 }
+      "soundLoss": { "open": 0.109, "closed": 0.937 }
     },
     {
       "id": "P_L1_MASTER_BED__L1_BALCONY_REAR", "cellA": "L1_MASTER_BED", "cellB": "L1_BALCONY_REAR",
       "plane": { "axis": "z", "value": -27.1 },
       "rect": { "u": [-3.45, -1.05], "v": [3.65, 5.8] },
       "kind": "slider", "aperture": "DOOR_L1_MASTER_BED__L1_BALCONY_REAR", "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.1, "closed": 0.7 }
+      "soundLoss": { "open": 0.109, "closed": 0.937 }
     },
     {
       "id": "P_L1_LANDING__L1_BALCONY_FRONT", "cellA": "L1_LANDING", "cellB": "L1_BALCONY_FRONT",
       "plane": { "axis": "z", "value": -14.3 },
       "rect": { "u": [-0.5, 0.5], "v": [3.65, 5.8] },
       "kind": "exterior_door", "aperture": "DOOR_L1_LANDING__L1_BALCONY_FRONT", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.1, "closed": 0.78 }
+      "soundLoss": { "open": 0.109, "closed": 0.968 }
     },
     {
       "id": "P_L2_LANDING__L2_BALCONY_JULIET", "cellA": "L2_LANDING", "cellB": "L2_BALCONY_JULIET",
       "plane": { "axis": "z", "value": -14.3 },
       "rect": { "u": [-0.8, 0.8], "v": [6.55, 8.7] },
       "kind": "double_door", "aperture": "DOOR_L2_LANDING__L2_BALCONY_JULIET", "opacity": "glass", "maxDepth": 1,
-      "soundLoss": { "open": 0.1, "closed": 0.68 }
+      "soundLoss": { "open": 0.109, "closed": 0.937 }
     },
     {
       "id": "P_L0_MUDROOM__L0_GARAGE", "cellA": "L0_MUDROOM", "cellB": "L0_GARAGE",
       "plane": { "axis": "x", "value": 8.7 },
       "rect": { "u": [-16.75, -15.85], "v": [0.6, 2.7] },
       "kind": "door", "aperture": "DOOR_L0_MUDROOM__L0_GARAGE", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.06, "closed": 0.78 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_GARAGE__EXT_SIDEYARD_E", "cellA": "L0_GARAGE", "cellB": "EXT_SIDEYARD_E",
       "plane": { "axis": "x", "value": 17.1 },
       "rect": { "u": [-17.95, -17.05], "v": [0.15, 2.25] },
       "kind": "exterior_door", "aperture": "DOOR_L0_GARAGE__EXT_SIDEYARD_E", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.1, "closed": 0.8 }
+      "soundLoss": { "open": 0.109, "closed": 0.968 }
     },
     {
       "id": "P_L0_STAIR__B1_STAIR", "cellA": "B1_STAIR", "cellB": "L0_STAIR_MAIN",
       "plane": { "axis": "y", "value": 0.6 },
       "rect": { "u": [2.4, 4.7], "v": [-19.7, -16.4] },
       "kind": "door", "aperture": "DOOR_L0_STAIR__B1_STAIR", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.05, "closed": 0.6 }
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     // ----------------------------------------------------------------------------
     // container sub-cells (`HOUSE-00373`): 2 portals
@@ -783,14 +829,14 @@
       "rect": { "u": [0.4, 2.0], "v": [0.7, 2.45] },
       "kind": "door", "aperture": "FRIDGE_L0_KITCHEN", "opacity": "opaque_when_closed",
       "crouch": true,
-      "soundLoss": { "open": 0.10, "closed": 0.70 }
+      "soundLoss": { "open": 0.206, "closed": 0.980 }
     },
     {
       "id": "P_FREEZER_INTERIOR", "cellA": "L0_PANTRY", "cellB": "CELL_FREEZER_INTERIOR",
       "plane": { "axis": "y", "value": 1.35 },
       "rect": { "u": [-12.4, -11.0], "v": [-26.9, -26.2] },
       "kind": "hatch", "aperture": "FREEZER_L0_PANTRY", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.10, "closed": 0.72 }
+      "soundLoss": { "open": 0.206, "closed": 0.980 }
     },
 
     {
@@ -803,7 +849,7 @@
       "rect": { "u": [10.75, 15.65], "v": [0.15, 2.55] },
       "kind": "garage_door", "aperture": "DOOR_GARAGE_SECTIONAL",
       "opacity": "opaque_when_closed", "maxDepth": 4,
-      "soundLoss": { "open": 0.08, "closed": 0.62 }
+      "soundLoss": { "open": 0.206, "closed": 0.950 }
     },
     {
       // The loft hatch: a horizontal portal in the loft's own floor, which is the third use for
@@ -814,7 +860,7 @@
       "rect": { "u": [12.40, 13.30], "v": [-18.60, -17.70] },
       "kind": "hatch", "aperture": "HATCH_GARAGE_LOFT",
       "opacity": "opaque_when_closed", "crouch": true,
-      "soundLoss": { "open": 0.10, "closed": 0.58 }
+      "soundLoss": { "open": 0.109, "closed": 0.874 }
     },
     // ================================================================================ windows
     // `HOUSE-00376`. 66 window portals. A window is a portal like any other: `kind: "window"`,
@@ -836,7 +882,7 @@
       "rect": { "u": [6.35, 7.25], "v": [-0.45, 0.15] },
       "kind": "window", "aperture": "WIN_B1_MECHANICAL_1",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.06, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.950 }
     },
     {
       // W_BASEMENT.
@@ -845,7 +891,7 @@
       "rect": { "u": [-7.50, -6.60], "v": [-0.45, 0.15] },
       "kind": "window", "aperture": "WIN_B1_GYM_1",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.06, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.950 }
     },
     {
       // W_BASEMENT.
@@ -854,7 +900,7 @@
       "rect": { "u": [-5.20, -4.30], "v": [-0.45, 0.15] },
       "kind": "window", "aperture": "WIN_B1_GYM_2",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.06, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.950 }
     },
     {
       // W_BASEMENT.
@@ -863,7 +909,7 @@
       "rect": { "u": [-16.75, -15.85], "v": [-0.45, 0.15] },
       "kind": "window", "aperture": "WIN_B1_WORKSHOP_1",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.06, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.950 }
     },
     {
       // W_BASEMENT.
@@ -872,7 +918,7 @@
       "rect": { "u": [-10.90, -10.00], "v": [-0.45, 0.15] },
       "kind": "window", "aperture": "WIN_B1_WORKSHOP_2",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.06, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.950 }
     },
     {
       // W_BASEMENT.
@@ -881,7 +927,7 @@
       "rect": { "u": [-20.60, -19.70], "v": [-0.45, 0.15] },
       "kind": "window", "aperture": "WIN_B1_STOR1_1",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.06, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.950 }
     },
     {
       // W_BASEMENT.
@@ -890,7 +936,7 @@
       "rect": { "u": [-25.00, -24.10], "v": [-0.45, 0.15] },
       "kind": "window", "aperture": "WIN_B1_STOR2_1",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.06, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.950 }
     },
     {
       // W_BASEMENT.
@@ -899,7 +945,7 @@
       "rect": { "u": [-10.90, -10.00], "v": [-0.45, 0.15] },
       "kind": "window", "aperture": "WIN_B1_STOR2_2",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.06, "closed": 0.55 }
+      "soundLoss": { "open": 0.109, "closed": 0.950 }
     },
 
     // ---- L0 ------------------------------------------------------------------------------------
@@ -910,7 +956,7 @@
       "rect": { "u": [-0.85, -0.55], "v": [0.70, 2.75] },
       "kind": "window", "aperture": "WIN_L0_FOYER_1",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.05, "closed": 0.50 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_SIDELIGHT, sidelights.
@@ -919,7 +965,7 @@
       "rect": { "u": [0.55, 0.85], "v": [0.70, 2.75] },
       "kind": "window", "aperture": "WIN_L0_FOYER_2",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.05, "closed": 0.50 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_TRANSOM, over the front door.
@@ -928,7 +974,7 @@
       "rect": { "u": [-0.50, 0.50], "v": [2.80, 3.20] },
       "kind": "window", "aperture": "WIN_L0_FOYER_3",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.05, "closed": 0.50 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD, half-landing.
@@ -937,7 +983,7 @@
       "rect": { "u": [3.65, 4.85], "v": [1.50, 3.00] },
       "kind": "window", "aperture": "WIN_L0_STAIR_MAIN_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -946,7 +992,7 @@
       "rect": { "u": [6.20, 7.40], "v": [1.50, 3.00] },
       "kind": "window", "aperture": "WIN_L0_MUDROOM_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_PICTURE.
@@ -955,7 +1001,7 @@
       "rect": { "u": [4.50, 6.90], "v": [1.45, 3.05] },
       "kind": "window", "aperture": "WIN_L0_FAMILY_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.03, "closed": 0.40 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_PICTURE, east elevation.
@@ -964,7 +1010,7 @@
       "rect": { "u": [-25.75, -23.35], "v": [1.45, 3.05] },
       "kind": "window", "aperture": "WIN_L0_FAMILY_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.03, "closed": 0.40 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_BAY, bay.
@@ -973,7 +1019,7 @@
       "rect": { "u": [-8.00, -5.20], "v": [1.15, 2.85] },
       "kind": "window", "aperture": "WIN_L0_LIVING_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.03, "closed": 0.40 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_TALL, tall.
@@ -982,7 +1028,7 @@
       "rect": { "u": [-4.90, -3.70], "v": [1.20, 3.00] },
       "kind": "window", "aperture": "WIN_L0_LIVING_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.46 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_TALL.
@@ -991,7 +1037,7 @@
       "rect": { "u": [-9.80, -8.60], "v": [1.20, 3.00] },
       "kind": "window", "aperture": "WIN_L0_OFFICE_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.46 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_TALL.
@@ -1000,7 +1046,7 @@
       "rect": { "u": [-16.90, -15.70], "v": [1.20, 3.00] },
       "kind": "window", "aperture": "WIN_L0_OFFICE_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.46 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1009,7 +1055,7 @@
       "rect": { "u": [-24.40, -23.20], "v": [1.50, 3.00] },
       "kind": "window", "aperture": "WIN_L0_BUTLERS_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1018,7 +1064,7 @@
       "rect": { "u": [-26.65, -25.45], "v": [1.50, 3.00] },
       "kind": "window", "aperture": "WIN_L0_PANTRY_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1027,7 +1073,7 @@
       "rect": { "u": [-8.05, -6.85], "v": [1.50, 3.00] },
       "kind": "window", "aperture": "WIN_L0_KITCHEN_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_INTERNAL, borrowed light.
@@ -1036,7 +1082,7 @@
       "rect": { "u": [-4.60, -3.40], "v": [1.55, 2.65] },
       "kind": "window", "aperture": "WIN_L0_KITCHEN_2",
       "opacity": "glass", "maxDepth": 2,
-      "soundLoss": { "open": 0.06, "closed": 0.52 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_PANEL.
@@ -1045,7 +1091,7 @@
       "rect": { "u": [-29.90, -28.10], "v": [0.90, 3.00] },
       "kind": "window", "aperture": "WIN_L0_SUNROOM_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.03, "closed": 0.38 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_PANEL.
@@ -1054,7 +1100,7 @@
       "rect": { "u": [-31.90, -30.10], "v": [0.90, 3.00] },
       "kind": "window", "aperture": "WIN_L0_SUNROOM_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.03, "closed": 0.38 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_PANEL.
@@ -1063,7 +1109,7 @@
       "rect": { "u": [-29.90, -28.10], "v": [0.90, 3.00] },
       "kind": "window", "aperture": "WIN_L0_SUNROOM_3",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.03, "closed": 0.38 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_PANEL.
@@ -1072,7 +1118,7 @@
       "rect": { "u": [-31.90, -30.10], "v": [0.90, 3.00] },
       "kind": "window", "aperture": "WIN_L0_SUNROOM_4",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.03, "closed": 0.38 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_PANEL, beside the slider.
@@ -1081,7 +1127,7 @@
       "rect": { "u": [0.40, 2.20], "v": [0.90, 3.00] },
       "kind": "window", "aperture": "WIN_L0_SUNROOM_5",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.03, "closed": 0.38 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD, garage wing.
@@ -1090,7 +1136,7 @@
       "rect": { "u": [-20.20, -19.00], "v": [1.05, 2.55] },
       "kind": "window", "aperture": "WIN_L0_GARAGE_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
 
     // ---- L1 ------------------------------------------------------------------------------------
@@ -1101,7 +1147,7 @@
       "rect": { "u": [-2.10, -0.90], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_LANDING_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1110,7 +1156,7 @@
       "rect": { "u": [0.90, 2.10], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_LANDING_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1119,7 +1165,7 @@
       "rect": { "u": [3.65, 4.85], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_STAIR_MAIN_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1128,7 +1174,7 @@
       "rect": { "u": [-6.40, -5.20], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_MASTER_BED_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1137,7 +1183,7 @@
       "rect": { "u": [-4.90, -3.70], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_MASTER_BED_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1146,7 +1192,7 @@
       "rect": { "u": [0.40, 1.60], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_MASTER_BED_3",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_BATH, obscured.
@@ -1155,7 +1201,7 @@
       "rect": { "u": [-24.85, -24.25], "v": [5.05, 5.95] },
       "kind": "window", "aperture": "WIN_L1_MASTER_BATH_1",
       "opacity": "translucent", "maxDepth": 1,
-      "soundLoss": { "open": 0.05, "closed": 0.52 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1164,7 +1210,7 @@
       "rect": { "u": [5.10, 6.30], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_BED2_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD, east elevation.
@@ -1173,7 +1219,7 @@
       "rect": { "u": [-25.60, -24.40], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_BED2_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1182,7 +1228,7 @@
       "rect": { "u": [-11.05, -9.85], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_BED3_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1191,7 +1237,7 @@
       "rect": { "u": [-16.90, -15.70], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_BED3_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1200,7 +1246,7 @@
       "rect": { "u": [-7.65, -6.45], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_BED4_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1209,7 +1255,7 @@
       "rect": { "u": [-5.35, -4.15], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_BED4_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_BATH, obscured.
@@ -1218,7 +1264,7 @@
       "rect": { "u": [-20.45, -19.85], "v": [5.05, 5.95] },
       "kind": "window", "aperture": "WIN_L1_BATH2_1",
       "opacity": "translucent", "maxDepth": 1,
-      "soundLoss": { "open": 0.05, "closed": 0.52 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1227,7 +1273,7 @@
       "rect": { "u": [6.20, 7.40], "v": [4.55, 6.05] },
       "kind": "window", "aperture": "WIN_L1_BED5_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
 
     // ---- L2 ------------------------------------------------------------------------------------
@@ -1238,7 +1284,7 @@
       "rect": { "u": [-2.10, -0.90], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_LANDING_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1247,7 +1293,7 @@
       "rect": { "u": [0.90, 2.10], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_LANDING_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1256,7 +1302,7 @@
       "rect": { "u": [3.65, 4.85], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_STAIR_MAIN_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1265,7 +1311,7 @@
       "rect": { "u": [-7.65, -6.45], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_LIBRARY_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1274,7 +1320,7 @@
       "rect": { "u": [-5.35, -4.15], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_LIBRARY_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1283,7 +1329,7 @@
       "rect": { "u": [-11.05, -9.85], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_BED6_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1292,7 +1338,7 @@
       "rect": { "u": [-16.90, -15.70], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_BED6_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_BATH, obscured.
@@ -1301,7 +1347,7 @@
       "rect": { "u": [-20.45, -19.85], "v": [7.95, 8.85] },
       "kind": "window", "aperture": "WIN_L2_BATH4_1",
       "opacity": "translucent", "maxDepth": 1,
-      "soundLoss": { "open": 0.05, "closed": 0.52 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1310,7 +1356,7 @@
       "rect": { "u": [-25.15, -23.95], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_BED7_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1319,7 +1365,7 @@
       "rect": { "u": [-10.45, -9.25], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_BED7_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1328,7 +1374,7 @@
       "rect": { "u": [-5.40, -4.20], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_GAMES_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1337,7 +1383,7 @@
       "rect": { "u": [-0.80, 0.40], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_GAMES_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD.
@@ -1346,7 +1392,7 @@
       "rect": { "u": [5.10, 6.30], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_SITTING_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DH_STD, east elevation.
@@ -1355,7 +1401,7 @@
       "rect": { "u": [-25.60, -24.40], "v": [7.45, 8.95] },
       "kind": "window", "aperture": "WIN_L2_SITTING_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
 
     // ---- L3 ------------------------------------------------------------------------------------
@@ -1366,7 +1412,7 @@
       "rect": { "u": [-5.90, -4.90], "v": [10.05, 11.15] },
       "kind": "window", "aperture": "WIN_L3_ROOM_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.05, "closed": 0.50 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DORMER, dormer bay.
@@ -1375,7 +1421,7 @@
       "rect": { "u": [-4.70, -3.70], "v": [10.05, 11.15] },
       "kind": "window", "aperture": "WIN_L3_ROOM_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.05, "closed": 0.50 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DORMER, dormer bay.
@@ -1384,7 +1430,7 @@
       "rect": { "u": [3.75, 4.75], "v": [10.05, 11.15] },
       "kind": "window", "aperture": "WIN_L3_ROOM_3",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.05, "closed": 0.50 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DORMER.
@@ -1393,7 +1439,7 @@
       "rect": { "u": [2.80, 3.80], "v": [10.05, 11.15] },
       "kind": "window", "aperture": "WIN_L3_STORE_N_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.05, "closed": 0.50 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_DORMER.
@@ -1402,7 +1448,7 @@
       "rect": { "u": [3.80, 4.80], "v": [10.05, 11.15] },
       "kind": "window", "aperture": "WIN_L3_STORE_N_2",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.05, "closed": 0.50 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_GABLE, gable louvre.
@@ -1411,7 +1457,7 @@
       "rect": { "u": [-21.10, -20.30], "v": [11.30, 12.10] },
       "kind": "window", "aperture": "WIN_L3_STORE_W_1",
       "opacity": "translucent", "maxDepth": 1,
-      "soundLoss": { "open": 0.18, "closed": 0.18 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
     {
       // W_GABLE, gable louvre.
@@ -1420,7 +1466,7 @@
       "rect": { "u": [-24.80, -24.00], "v": [11.30, 12.10] },
       "kind": "window", "aperture": "WIN_L3_STORE_E_1",
       "opacity": "translucent", "maxDepth": 1,
-      "soundLoss": { "open": 0.18, "closed": 0.18 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
 
     // ---- L0 ------------------------------------------------------------------------------------
@@ -1431,7 +1477,7 @@
       "rect": { "u": [-43.60, -42.40], "v": [0.75, 2.25] },
       "kind": "window", "aperture": "WIN_EXT_SHED_1",
       "opacity": "glass", "maxDepth": 3,
-      "soundLoss": { "open": 0.04, "closed": 0.48 }
+      "soundLoss": { "open": 0.109, "closed": 0.921 }
     }
   ]
 }

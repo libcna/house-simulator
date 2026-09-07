@@ -1,0 +1,194 @@
+{
+  // §64's room-aware audio, as data. `HOUSE-00388`.
+  //
+  // Three parts. **Zones** give every cell its ambient bed and its gain; the beds are
+  // shared rather than one per room, because room tone is a bed and ninety-six of them
+  // would be ninety-six samples nobody could tell apart. **Emitters** are §62.6's own
+  // sounds, placed from §12.5's stacks and the mechanical room -- that is what makes them
+  // coherent rather than sprinkled. **Transmission** is §64.3's table, once, as the
+  // classes every portal's `soundLoss` is derived from.
+  //
+  // The conversion is `loss = 1 - 10^(-dB/20)`: a 16 dB door passes 15.8 % of the
+  // amplitude, so it loses 84.2 % of it, and that fraction is what a portal row carries.
+  // §15.7 rule 6 checks every portal against its class, so the two cannot drift.
+  "schema": "cna-house/audio/1",
+  "zones": [
+    { "id": "AZ_B1_STAIR", "cell": "B1_STAIR", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_HALL", "cell": "B1_HALL", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_MECHANICAL", "cell": "B1_MECHANICAL", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_ELECTRICAL", "cell": "B1_ELECTRICAL", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_UTILITY", "cell": "B1_UTILITY", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_CINEMA", "cell": "B1_CINEMA", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_WC7", "cell": "B1_WC7", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_GYM", "cell": "B1_GYM", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_WORKSHOP", "cell": "B1_WORKSHOP", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_STOR1", "cell": "B1_STOR1", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_STOR2", "cell": "B1_STOR2", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_HOBBY", "cell": "B1_HOBBY", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_CELLAR", "cell": "B1_CELLAR", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_LAUNDRY2", "cell": "B1_LAUNDRY2", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_B1_UNDERSTAIR", "cell": "B1_UNDERSTAIR", "bed": "AMB_BASEMENT", "gain": 0.40 },
+    { "id": "AZ_L0_FOYER", "cell": "L0_FOYER", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_HALL", "cell": "L0_HALL", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_STAIR_MAIN", "cell": "L0_STAIR_MAIN", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_MUDROOM", "cell": "L0_MUDROOM", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_LAUNDRY", "cell": "L0_LAUNDRY", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_WC1", "cell": "L0_WC1", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L0_FAMILY", "cell": "L0_FAMILY", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_LIVING", "cell": "L0_LIVING", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_OFFICE", "cell": "L0_OFFICE", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_WC2", "cell": "L0_WC2", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L0_CLOSET_W", "cell": "L0_CLOSET_W", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_DINING", "cell": "L0_DINING", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_STOR", "cell": "L0_STOR", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L0_BUTLERS", "cell": "L0_BUTLERS", "bed": "AMB_KITCHEN", "gain": 0.35 },
+    { "id": "AZ_L0_PANTRY", "cell": "L0_PANTRY", "bed": "AMB_KITCHEN", "gain": 0.35 },
+    { "id": "AZ_L0_KITCHEN", "cell": "L0_KITCHEN", "bed": "AMB_KITCHEN", "gain": 0.35 },
+    { "id": "AZ_L0_SUNROOM", "cell": "L0_SUNROOM", "bed": "AMB_KITCHEN", "gain": 0.35 },
+    { "id": "AZ_L0_GARAGE", "cell": "L0_GARAGE", "bed": "AMB_GARAGE", "gain": 0.40 },
+    { "id": "AZ_L0_PORCH", "cell": "L0_PORCH", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_L1_LANDING", "cell": "L1_LANDING", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_STAIR_MAIN", "cell": "L1_STAIR_MAIN", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_HALL", "cell": "L1_HALL", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_HALL_W", "cell": "L1_HALL_W", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_MASTER_BED", "cell": "L1_MASTER_BED", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_MASTER_BATH", "cell": "L1_MASTER_BATH", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L1_MASTER_CLOSET", "cell": "L1_MASTER_CLOSET", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_BED2", "cell": "L1_BED2", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_LINEN", "cell": "L1_LINEN", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_STOR", "cell": "L1_STOR", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_BED3", "cell": "L1_BED3", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_BED4", "cell": "L1_BED4", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_BATH2", "cell": "L1_BATH2", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L1_WC3", "cell": "L1_WC3", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L1_CLOSET_2", "cell": "L1_CLOSET_2", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_CLOSET_3", "cell": "L1_CLOSET_3", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_BED5", "cell": "L1_BED5", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L1_BATH3", "cell": "L1_BATH3", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L1_WC4", "cell": "L1_WC4", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L1_BALCONY_REAR", "cell": "L1_BALCONY_REAR", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_L1_BALCONY_FRONT", "cell": "L1_BALCONY_FRONT", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_L2_LANDING", "cell": "L2_LANDING", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_STAIR_MAIN", "cell": "L2_STAIR_MAIN", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_STAIR_ATTIC", "cell": "L2_STAIR_ATTIC", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_HALL", "cell": "L2_HALL", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_HALL_W", "cell": "L2_HALL_W", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_LIBRARY", "cell": "L2_LIBRARY", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_BED6", "cell": "L2_BED6", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_BATH4", "cell": "L2_BATH4", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L2_CLOSET_4", "cell": "L2_CLOSET_4", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_WC5", "cell": "L2_WC5", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L2_LINEN2", "cell": "L2_LINEN2", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_BED7", "cell": "L2_BED7", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_GAMES", "cell": "L2_GAMES", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_SITTING", "cell": "L2_SITTING", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_STOR2", "cell": "L2_STOR2", "bed": "AMB_ROOM_QUIET", "gain": 0.30 },
+    { "id": "AZ_L2_BATH5", "cell": "L2_BATH5", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L2_WC6", "cell": "L2_WC6", "bed": "AMB_BATH", "gain": 0.30 },
+    { "id": "AZ_L2_BALCONY_JULIET", "cell": "L2_BALCONY_JULIET", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_L3_STAIR_HEAD", "cell": "L3_STAIR_HEAD", "bed": "AMB_ATTIC", "gain": 0.45 },
+    { "id": "AZ_L3_ROOM", "cell": "L3_ROOM", "bed": "AMB_ATTIC", "gain": 0.45 },
+    { "id": "AZ_L3_STORE_W", "cell": "L3_STORE_W", "bed": "AMB_ATTIC", "gain": 0.45 },
+    { "id": "AZ_L3_STORE_E", "cell": "L3_STORE_E", "bed": "AMB_ATTIC", "gain": 0.45 },
+    { "id": "AZ_L3_STORE_N", "cell": "L3_STORE_N", "bed": "AMB_ATTIC", "gain": 0.45 },
+    { "id": "AZ_L3_STORE_S", "cell": "L3_STORE_S", "bed": "AMB_ATTIC", "gain": 0.45 },
+    { "id": "AZ_EXT_ROAD", "cell": "EXT_ROAD", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_WALK", "cell": "EXT_WALK", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_FRONTYARD_W", "cell": "EXT_FRONTYARD_W", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_FRONTYARD_E", "cell": "EXT_FRONTYARD_E", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_DRIVEWAY", "cell": "EXT_DRIVEWAY", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_SIDEYARD_W", "cell": "EXT_SIDEYARD_W", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_SIDEYARD_E", "cell": "EXT_SIDEYARD_E", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_TERRACE", "cell": "EXT_TERRACE", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_BACKYARD", "cell": "EXT_BACKYARD", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_GARDEN", "cell": "EXT_GARDEN", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_SHED", "cell": "EXT_SHED", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_ORCHARD", "cell": "EXT_ORCHARD", "bed": "AMB_OUTDOOR", "gain": 0.55 },
+    { "id": "AZ_EXT_NORTHSTRIP", "cell": "EXT_NORTHSTRIP", "bed": "AMB_OUTDOOR", "gain": 0.55 }
+  ],
+
+  "emitters": [
+    // §62.6: the burner and blower, on a thermostat cycle, audible through the ducts everywhere
+    { "id": "EM_FURNACE", "cell": "B1_MECHANICAL", "position": [5.80, -1.40, -16.30],
+      "loop": "AMB_FURNACE", "gain": 0.60, "radius": 9.0, "interactable": null },
+    // a slow cycle, and after hot water is used
+    { "id": "EM_WATER_HEATER", "cell": "B1_MECHANICAL", "position": [7.80, -1.40, -16.30],
+      "loop": "AMB_WATER_HEATER", "gain": 0.35, "radius": 6.0, "interactable": null },
+    // §55.2's compressor. `interactable` is null until the refrigerator row exists
+    { "id": "EM_FRIDGE_HUM", "cell": "L0_KITCHEN", "position": [1.20, 0.90, -26.70],
+      "loop": "AMB_FRIDGE_HUM", "gain": 0.35, "radius": 4.0, "interactable": null },
+    // the chest freezer, on a slower cycle than the refrigerator
+    { "id": "EM_FREEZER_HUM", "cell": "L0_PANTRY", "position": [-10.45, 1.20, -26.05],
+      "loop": "AMB_FREEZER_HUM", "gain": 0.28, "radius": 3.5, "interactable": null },
+    // §62.6's three clocks: a tick a simulated minute, and this one chimes the hour
+    { "id": "EM_CLOCK_HALL", "cell": "L0_HALL", "position": [0.00, 2.40, -20.65],
+      "loop": "AMB_CLOCK_TICK", "gain": 0.30, "radius": 5.0, "interactable": null },
+    { "id": "EM_CLOCK_KITCHEN", "cell": "L0_KITCHEN", "position": [-1.00, 2.60, -25.05],
+      "loop": "AMB_CLOCK_TICK", "gain": 0.22, "radius": 4.0, "interactable": null },
+    { "id": "EM_CLOCK_GAMES", "cell": "L2_GAMES", "position": [-2.40, 8.45, -24.55],
+      "loop": "AMB_CLOCK_TICK", "gain": 0.22, "radius": 4.0, "interactable": null },
+    // rail rumble and an end-of-travel clunk; driven by the sectional door
+    { "id": "EM_GARAGE_MOTOR", "cell": "L0_GARAGE", "position": [13.20, 3.00, -14.00],
+      "loop": "AMB_GARAGE_MOTOR", "gain": 0.55, "radius": 10.0, "interactable": null },
+    // never rings on its own: a debug command and one scripted event
+    { "id": "EM_DOORBELL", "cell": "L0_PORCH", "position": [0.90, 2.60, -14.20],
+      "loop": "SFX_DOORBELL", "gain": 0.80, "radius": 12.0, "interactable": null },
+    // hiss while an outlet flows and the hammer when a tap shuts, on the stack
+    { "id": "EM_PIPES_STACK_A", "cell": "B1_UTILITY", "position": [3.55, -0.20, -21.10],
+      "loop": "AMB_PIPE_RUN", "gain": 0.25, "radius": 5.0, "interactable": null },
+    { "id": "EM_PIPES_STACK_B", "cell": "B1_STOR1", "position": [-10.05, -0.20, -19.25],
+      "loop": "AMB_PIPE_RUN", "gain": 0.25, "radius": 5.0, "interactable": null },
+    { "id": "EM_PIPES_STACK_C", "cell": "B1_STOR2", "position": [-12.50, -0.20, -23.80],
+      "loop": "AMB_PIPE_RUN", "gain": 0.25, "radius": 5.0, "interactable": null },
+    { "id": "EM_PIPES_STACK_D", "cell": "B1_UTILITY", "position": [6.80, -0.20, -20.15],
+      "loop": "AMB_PIPE_RUN", "gain": 0.25, "radius": 5.0, "interactable": null },
+    { "id": "EM_PIPES_STACK_E", "cell": "B1_STOR2", "position": [-4.00, -0.20, -27.10],
+      "loop": "AMB_PIPE_RUN", "gain": 0.25, "radius": 5.0, "interactable": null },
+    { "id": "EM_PIPES_STACK_F", "cell": "B1_LAUNDRY2", "position": [-0.40, -0.20, -24.15],
+      "loop": "AMB_PIPE_RUN", "gain": 0.25, "radius": 5.0, "interactable": null },
+    // §62.6's 14 creak points, weighted by the rate of change of outdoor temperature so the house
+    // ticks as it cools at dusk
+    { "id": "EM_CREAK_01", "cell": "B1_HALL", "position": [-1.80, 0.10, -26.70],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_02", "cell": "B1_CINEMA", "position": [2.60, 0.10, -26.70],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_03", "cell": "L0_FOYER", "position": [-1.80, 3.15, -17.90],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_04", "cell": "L0_LIVING", "position": [-7.80, 3.15, -19.80],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_05", "cell": "L0_KITCHEN", "position": [-7.80, 3.15, -26.70],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_06", "cell": "L0_FAMILY", "position": [2.60, 3.15, -26.70],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_07", "cell": "L1_LANDING", "position": [-1.80, 6.05, -17.90],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_08", "cell": "L1_MASTER_BED", "position": [-6.60, 6.05, -26.70],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_09", "cell": "L1_BED2", "position": [2.60, 6.05, -26.70],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_10", "cell": "L2_LANDING", "position": [-1.80, 8.85, -17.90],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_11", "cell": "L2_LIBRARY", "position": [-7.80, 8.85, -17.90],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_12", "cell": "L2_GAMES", "position": [-6.60, 8.85, -26.70],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_13", "cell": "L3_ROOM", "position": [-5.60, 12.45, -23.60],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+    { "id": "EM_CREAK_14", "cell": "L3_STORE_W", "position": [-12.30, 13.75, -26.70],
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null }
+  ],
+
+  // §64.3, in decibels, as the fractions a portal carries.
+  "transmission": {
+    "opening": { "open": 0.000, "closed": 0.000 },   // 0 dB / 0 dB
+    "door_hollow": { "open": 0.109, "closed": 0.842 },   // 1 dB / 16 dB
+    "door_solid": { "open": 0.109, "closed": 0.937 },   // 1 dB / 24 dB
+    "door_exterior": { "open": 0.109, "closed": 0.968 },   // 1 dB / 30 dB
+    "slider_glass": { "open": 0.109, "closed": 0.937 },   // 1 dB / 24 dB
+    "window_single": { "open": 0.109, "closed": 0.921 },   // 1 dB / 22 dB
+    "window_hopper": { "open": 0.109, "closed": 0.950 },   // 1 dB / 26 dB
+    "door_garage": { "open": 0.206, "closed": 0.950 },   // 2 dB / 26 dB
+    "hatch_loft": { "open": 0.109, "closed": 0.874 },   // 1 dB / 18 dB
+    "appliance": { "open": 0.206, "closed": 0.980 }    // 2 dB / 34 dB
+  }
+}

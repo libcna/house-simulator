@@ -483,8 +483,9 @@ namespace
                   "interactable": "FRIDGE_L0_KITCHEN" }
               ],
               "transmission": {
-                "door_hollow": { "open": 0.05, "closed": 0.55 },
-                "door_solid":  { "open": 0.05, "closed": 0.78 }
+                "door_hollow":   { "open": 0.05, "closed": 0.55 },
+                "door_solid":    { "open": 0.05, "closed": 0.78 },
+                "slider_glass":  { "open": 0.05, "closed": 0.70 }
               }
             })";
         }
@@ -2287,10 +2288,15 @@ namespace
         EXPECT_FLOAT_EQ(fridge.radius, 4.0F);
         EXPECT_EQ(fridge.interactable, Intern("FRIDGE_L0_KITCHEN"));
 
-        ASSERT_EQ(contents.audioTransmission.size(), 2U);
+        // Three, and the third is the point: the reader used to hold a hardcoded list of six
+        // class names invented before §64.3 was written, and every class the design actually
+        // names -- `slider_glass` among them -- was dropped without a word (`HOUSE-00388`).
+        ASSERT_EQ(contents.audioTransmission.size(), 3U);
         EXPECT_EQ(contents.audioTransmission[0].kind, "door_hollow");
         EXPECT_FLOAT_EQ(contents.audioTransmission[0].closed, 0.55F);
         EXPECT_FLOAT_EQ(contents.audioTransmission[1].closed, 0.78F);
+        EXPECT_EQ(contents.audioTransmission[2].kind, "slider_glass");
+        EXPECT_FLOAT_EQ(contents.audioTransmission[2].closed, 0.70F);
     }
 
     TEST_F(WorldLoaderTest, AnEmitterCarriesItsCellBecauseTheSolverStartsFromCells)
@@ -3120,6 +3126,54 @@ namespace
             const std::set<cnahouse::util::Id> actual =
                 found == groupsIn.end() ? std::set<cnahouse::util::Id>{} : found->second;
             EXPECT_EQ(listed, actual) << "cell " << cell.id.Value();
+        }
+
+        IdRegistry::ResetForTesting();
+    }
+
+    TEST(AuthoredWorldTest, TheAuthoredPortalsCarrySection643sLosses)
+    {
+        IdRegistry::ResetForTesting();
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/layout.audio.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
+        }
+
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadPortals(directory, contents));
+        const auto audio = world::WorldLoader::LoadAudio(directory, contents);
+        ASSERT_TRUE(audio) << audio.Error().ToString();
+
+        // §64.3, as fractions: `loss = 1 - 10^(-dB/20)`. The check that matters is that every
+        // portal's cached loss is one of the declared classes' -- rule 6 says WHICH class in
+        // Python, and this says the C++ reader sees the same numbers (`HOUSE-00388`).
+        ASSERT_FALSE(contents.audioTransmission.empty());
+        const auto classOf = [&contents](const char* name) -> const world::AudioTransmission&
+        {
+            const auto found =
+                std::find_if(contents.audioTransmission.begin(),
+                             contents.audioTransmission.end(),
+                             [name](const world::AudioTransmission& row) { return row.kind == name; });
+            EXPECT_NE(found, contents.audioTransmission.end()) << name;
+            return *found;
+        };
+        EXPECT_NEAR(classOf("door_hollow").closed, 0.842F, 1e-3F) << "16 dB";
+        EXPECT_NEAR(classOf("door_solid").closed, 0.937F, 1e-3F) << "24 dB";
+        EXPECT_NEAR(classOf("opening").closed, 0.0F, 1e-6F) << "a cased opening loses nothing";
+
+        // Compared with a tolerance, because these are floats that travelled through two JSON
+        // parses: exact equality here would be a test about `strtof` and not about the house.
+        for (const world::Portal& portal : contents.portals)
+        {
+            const bool known = std::any_of(contents.audioTransmission.begin(),
+                                           contents.audioTransmission.end(),
+                                           [&portal](const world::AudioTransmission& row)
+                                           { return std::abs(row.closed - portal.soundLossClosed) < 1e-3F; });
+            EXPECT_TRUE(known) << "portal " << portal.id.Value() << " carries a closed loss of "
+                               << portal.soundLossClosed << ", which no §64.3 class declares";
         }
 
         IdRegistry::ResetForTesting();
