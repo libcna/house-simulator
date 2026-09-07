@@ -716,4 +716,19 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Blender does not propagate a script's exit status; see tools/blender/blender_env.py, which
+    # takes this sentinel as the authority and treats a missing one as a failure. Without it this
+    # tool reports failure on a clean run -- so its CI gate was red for a passing selftest, and
+    # could never have gone red for a failing one either.
+    try:
+        _status = main()
+    except SystemExit as _exit:
+        _status = int(_exit.code or 0)
+    except BaseException:  # noqa: BLE001
+        import traceback
+
+        traceback.print_exc()
+        print("lightmap_unwrap: EXIT 1")
+        raise
+    print(f"lightmap_unwrap: EXIT {_status}")
+    sys.exit(_status)

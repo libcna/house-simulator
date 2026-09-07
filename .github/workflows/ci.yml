@@ -265,6 +265,18 @@ jobs:
           CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
             python3 tools/blender/lightmap_unwrap.py --selftest
 
+      - name: A lightmap must be irradiance, not a picture of a lit room
+        working-directory: cna-house
+        # `HOUSE-00206`. Four settings decide whether this produces a lightmap or a photograph of
+        # one, and each has its own claim: `use_pass_color=False` (the fixture's RED wall bakes to
+        # a grey value and comes out red the moment it is on), `view_transform=Standard` (Blender
+        # 4.x defaults to AgX and would tone-map the lighting), the SECOND UV set, and a recorded
+        # normalisation scale because an 8-bit PNG cannot hold irradiance -- the fixture bakes to
+        # 20. Cycles runs on CPU at 32px/16 samples here; the claims are about properties.
+        run: |
+          CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
+            python3 tools/blender/lightmap_bake.py --selftest
+
       - name: The impostor atlas must be eight different views, none of them cropped
         working-directory: cna-house
         # `HOUSE-00204`. EEVEE renders headless here. The two claims that earn their place: no

@@ -3183,6 +3183,12 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             taller than they are wide, and a square cell spends half its texels on empty sky.
       accept: eight yaws, one consistent camera, alpha silhouette, correct bounds, packed atlas,
             metadata that states the baked lighting explicitly, and byte-identical repeatability
+      finding: (corrected 2026-09-07, while writing `HOUSE-00206`) `impostor_render.py` never printed
+            `blender_env.py`'s `"<tool>: EXIT <n>"` sentinel. Blender does not propagate a script's
+            exit status, so that sentinel is the authority and a missing one is treated as a
+            failure — this tool therefore **reported failure in CI on a clean run**, and could
+            never have reported failure on a broken one either. `collision_proxy.py` had it
+            right from the start; the fix is copied from there.
 - [x] HOUSE-00205 — `tools/blender/lightmap_unwrap.py`: second-UV atlas packing at a configurable texel density with a 4-texel gutter
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `tools/blender/lightmap_unwrap.py`. 16 selftest claims against a **room
@@ -3229,9 +3235,67 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: no overlapping islands where forbidden; the configured texel density reached; a
             4-texel gutter measured as four empty texels; no degenerate UVs; UV0 intact byte for
             byte; repeatable
-- [ ] HOUSE-00206 — `tools/blender/lightmap_bake.py`: per-cell, per-light-group diffuse+indirect bake with denoising, plus the daylight bake
+      finding: (corrected 2026-09-07, while writing `HOUSE-00206`) `lightmap_unwrap.py` never printed
+            `blender_env.py`'s `"<tool>: EXIT <n>"` sentinel. Blender does not propagate a script's
+            exit status, so that sentinel is the authority and a missing one is treated as a
+            failure — this tool therefore **reported failure in CI on a clean run**, and could
+            never have reported failure on a broken one either. `collision_proxy.py` had it
+            right from the start; the fix is copied from there.
+- [x] HOUSE-00206 — `tools/blender/lightmap_bake.py`: per-cell, per-light-group diffuse+indirect bake with denoising, plus the daylight bake
       dep: HOUSE-00205 · sys: content · plat: TOOL · pri: MUST
       accept: deterministic given a seed; a shell-geometry hash is embedded so a stale bake is detected
+      note: (2026-09-07) `tools/blender/lightmap_bake.py`. 24 selftest claims over a two-room
+            fixture with a doorway and a skylight; `--selftest` runs in the CI Blender job. 17
+            injected bugs, all caught — but see the finding below about the first two sweeps,
+            which caught nothing at all while reporting sixteen out of sixteen.
+      finding: **`use_pass_color = False` is the setting this tool exists to get right.** A
+            lightmap is irradiance, not lit colour; with the colour pass on, the albedo is baked
+            in and then multiplied a second time by `DualTextureEffect` at runtime. Measured on
+            the fixture: the RED wall bakes to `[3.09, 3.09, 3.09]` — a grey value, identical in
+            kind to the white wall beside it — and to `[0.99, 0.0, 0.0]` the moment the pass is
+            turned on.
+      finding: **Blender 4.x defaults to AgX**, a filmic tone map. Left alone it rolls the
+            highlights off the pendant's pool of light and lifts the shadows, producing a
+            photograph of the room's lighting rather than a measurement of it, and nothing about
+            the saved PNG looks wrong. `view_transform = Standard` and a `Non-Color` bake target,
+            both asserted and both recorded in the sidecar.
+      finding: **an 8-bit PNG cannot hold irradiance, and §18.3 step 4 exports PNG.** The fixture
+            bakes to 20.7 with a single ordinary lamp; saved straight, everything bright clips to
+            flat white and the *shape* §28.3 says the bake exists to capture is exactly what is
+            lost. Each atlas is divided by its own peak and the scale recorded; §23.4's runtime
+            sum is `lightmapArt.rgb * artLevels`, so the scale folds into `artLevels` for free.
+            The Tier-E packed atlas needed the same treatment **per channel** and did not get it
+            at first: written raw it clamped 565 of 1 024 fixture texels to a flat 1.0, throwing
+            away precisely the shape it exists to carry while the per-group atlases beside it
+            were correct.
+      finding: **the first two bug-injection sweeps were worthless, and reported 16 of 16.**
+            `blender_env.py` takes a `"<tool>: EXIT <n>"` sentinel as the authority because
+            Blender does not propagate a script's exit status — and this tool did not print one,
+            so it returned 1 on a *clean* run. Every injection therefore "failed" and was scored
+            as caught. Fixed, and the honest re-run scored 11 of 16; the five that had been
+            passing were all claims that set the very thing they were measuring (switching the
+            indirect pass on themselves, hiding the lamps themselves) and so could not notice that
+            the tool had not. They were rewritten to assert against the tool's own configuration
+            and against `bake_cell`'s own output files, and one injected "bug" was withdrawn as
+            ill-posed rather than left as a miss.
+      finding: **`lightmap_unwrap.py` (`HOUSE-00205`) and `impostor_render.py` (`HOUSE-00204`) had
+            the same defect**, found by looking for it. Both omitted the sentinel, so both CI gates
+            reported failure for a passing selftest — and could never have reported failure for a
+            failing one either. Both fixed here; the third Blender tool, `collision_proxy.py`, had
+            it right and is what the fix was copied from.
+      finding: the fixture's first version was a pair of hand-wound rooms and **four of its
+            thirteen faces were lit**: a quad wound the wrong way produces no warning and no hole,
+            just a black face whose normal points out of the room. Winding is now chosen by where
+            the room is. The second version was then a *sealed* pair of boxes, so the daylight bake
+            measured stray light on the outsides of walls and read a suspiciously exact 1.0 — a
+            skylight was added, and `max(day)` was reading the ALPHA channel, which is 1.0
+            everywhere and reports bright daylight for a scene in total darkness.
+      finding: faces are found **by position**, never by the order the fixture emitted them. A
+            hardcoded face index is correct right up until the fixture gains a skylight, at which
+            point every claim downstream measures a different face and still passes.
+      finding: the shell hash covers geometry, lightmap UVs **and the lights**. A hash over
+            geometry alone calls a relit room fresh, and moving a lamp changes the bake as
+            completely as moving a wall.
 - [ ] HOUSE-00207 — `tools/blender/shading_factor.py`: precompute per-window sun shading on a 12×24 (altitude, azimuth) grid by ray casting
       dep: HOUSE-00206 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00208 — `tools/blender/sun_patch.py`: precompute the sun-patch polygons cast through each window onto floors and walls, same grid
