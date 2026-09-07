@@ -1766,6 +1766,16 @@ system update order, the settings file, the logging, and a CI that runs lints an
             canonical initial state saves an **empty delta**, and it must not be indistinguishable
             from a missing file. The chunked read is likewise the normal path, since ADR-0008 sizes
             a heavily explored house at ~90 kB against an 8 kB chunk.
+      finding: (2026-09-07, `HOUSE-00204`'s session) **the save-store tests were not parallel-safe,
+            and CI could never have found out.** Every test in the fixture used one fixed file name
+            in the user's REAL save directory and deleted it in both `SetUp` and `TearDown`, so two
+            `ctest -j2` processes running two of these tests at once deleted each other's file
+            mid-test. Measured: `ctest -L integration -j2` failed
+            `TheSecondWriteLeavesTheFirstAsABackup` while that same test passed five times out of
+            five on its own. CI runs `ctest --preset integration` with no `-j`, so it was serial
+            and green throughout. The name is now unique per process; three consecutive `-j2` runs
+            are clean where one had failed. A test that fails only under parallelism is a test
+            people learn to ignore.
 - [x] HOUSE-00153 — Implement the crash boundary: catch at `Update`/`Draw`, log, emergency-save, offer restart
       dep: HOUSE-00152 · sys: app · plat: ALL · pri: MUST
       note: (2026-09-06) `Update` and `Draw` are each wrapped, and `HandleCrash` logs what was
