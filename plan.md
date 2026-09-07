@@ -3159,8 +3159,48 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       dep: HOUSE-00216 · sys: — · plat: TOOL · pri: MUST
 - [ ] HOUSE-00218 — Measure and record a full content build time; set the expectation for later sessions
       dep: HOUSE-00216 · sys: — · plat: TOOL · pri: SHOULD
-- [ ] HOUSE-00219 — `tools/assets/video_transcode.py`: transcode source footage to the runtime video format and to the frame-strip atlases
+- [x] HOUSE-00219 — `tools/assets/video_transcode.py`: transcode source footage to the runtime video format and to the frame-strip atlases
       dep: HOUSE-00098 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/assets/video_transcode.py`, producing both of §58.3's backends:
+            a 512×288 24 fps Theora `.ogv` with the `VideoProcessor` parameters CNA requires, and
+            the 8×8 frame-strip atlases with their soundtrack. 24 selftest claims; `--selftest`
+            runs in CI.
+      finding: **the atlas is 2048 × 1152, not §58.3's "2048²"**, and that is the smallest
+            correction that makes the arithmetic true: 8 × 256 is 2048 and 8 × 144 is 1152.
+            Rounding the height up leaves 896 rows — **44 % of the texture, 7.3 MB of 16.8 MB** —
+            holding nothing, per atlas, in a 25 MB pack. `--square` restores the padded layout and
+            reports what it costs. NPOT is not assumed: OpenGL ES 3.0 requires it for an
+            unmipmapped clamped texture, and a 2048 × 1152 PNG was compiled through
+            `CNA.ImageImporter -> CNA.TextureProcessor` to confirm.
+      finding: **the frame-strip backend does not fit its own pack as `.cnb`, and this sizes phase
+            21.** That compile produced **9 437 552 bytes** — exactly 2048 × 1152 × 4 plus a header
+            — because CNB texture schema 1 is frozen to `Rgba8` (`HOUSE-00111`). At 9.44 MB per
+            5.33 s atlas, §27.2's 25 MB `video` pack holds **2 atlases: 14 seconds of television,
+            for four channels.** The same atlas as DXT1 through `.xnb` is 1.18 MB — eight times
+            smaller — and 25 MB then holds 21 atlases, **113 seconds**. The strip backend is
+            therefore only viable through the `.xnb` texture route §27.2 already names for the
+            `web` and `android` profiles, which is exactly where `SequenceTvSource` is needed.
+            Recorded in `cna-house.md` §58.3.
+      finding: **the frame-by-frame check is the point of the fixture.** Every source frame carries
+            a black bar whose LENGTH is its own index, so a decoded atlas cell says exactly which
+            frame it holds. Six seconds at 12 fps is 72 frames, deliberately more than one atlas:
+            all 64 cells of the first are verified to hold their own frame, and the second atlas's
+            first cell is verified to hold frame **64** — a transposed grid, an off-by-one or a
+            frame dropped at the boundary all survive a check that only counts atlases.
+      finding: the unused tail of the last atlas is **black, not the last frame repeated**. A
+            television that runs out of frames should go dark rather than freeze on one, and the
+            metadata's frame count is what stops the timer reaching those cells at all.
+      finding: determinism is reported **split by what can actually be promised**. The atlases and
+            the soundtrack are written by this project's own encoders and are byte-identical run to
+            run; the `.ogv` is byte-identical *for this ffmpeg* and not across builds, because
+            Theora's bitstream depends on the encoder — the same finding `HOUSE-00201` recorded,
+            stated rather than papered over.
+      finding: a source with no audio is a **warning**, not a failure — a static channel has no
+            soundtrack and is still a channel — while a file with no video stream is refused. And
+            when both exist, a soundtrack more than 0.5 s out of step with the strip is warned
+            about, because `SequenceTvSource` advances both from one timer and they would drift.
+      accept: runtime transcode, frame-strip atlas, timing metadata, dimensions, frame count and
+            audio handling all verified; determinism recorded exactly as far as the codec permits
 - [x] HOUSE-00220 — `tools/assets/reverb_variants.py`: produce the dry/small/large pre-reverberated variants for the 30 transient sounds
       dep: HOUSE-00193 · sys: content · plat: TOOL · pri: SHOULD
       note: (2026-09-07) `tools/assets/reverb_variants.py`. 18 selftest claims; `--selftest` runs

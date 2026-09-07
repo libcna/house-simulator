@@ -76,6 +76,17 @@ jobs:
           python3 tools/assets/dull_variants.py --selftest
           python3 tools/assets/reverb_variants.py --selftest
 
+      - name: The video transcode must put every frame in the right cell
+        working-directory: cna-house
+        # `HOUSE-00219`. The fixture's every frame carries a black bar whose LENGTH is its own
+        # index, so a decoded atlas cell says exactly which source frame it holds -- which is the
+        # only way to catch a transposed grid, an off-by-one, or a frame dropped at the boundary
+        # between the first atlas and the second. Six seconds at 12 fps is 72 frames, so the
+        # second atlas exists and its first cell can be shown to hold frame 64.
+        run: |
+          python3 -m pip install --break-system-packages --user numpy pillow
+          python3 tools/assets/video_transcode.py --selftest
+
       - name: The glTF gate must reject what it claims to
         working-directory: cna-house
         # `--selftest` plants three broken files -- a truncated header, wrong magic, and a

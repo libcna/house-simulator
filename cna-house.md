@@ -4369,7 +4369,26 @@ flickers with the picture.
 | Implementation | Platform | Mechanism |
 |---|---|---|
 | `VideoTvSource` | Linux/macOS with FFmpeg | `Video` + `VideoPlayer` as above |
-| `SequenceTvSource` | Emscripten, Android, or any build where `CNA_VIDEO_AVAILABLE` is absent | A pre-baked **frame-strip atlas**: 8 × 8 frames of 256 × 144 per 2048² texture, 12 fps, 5.3 s per atlas, N atlases per "channel", advanced by a timer; audio is a separate looping `SoundEffect` kept in sync by the same timer |
+| `SequenceTvSource` | Emscripten, Android, or any build where `CNA_VIDEO_AVAILABLE` is absent | A pre-baked **frame-strip atlas**: 8 × 8 frames of 256 × 144 per **2048 × 1152** texture, 12 fps, 5.33 s per atlas, N atlases per "channel", advanced by a timer; audio is a separate looping `SoundEffect` kept in sync by the same timer |
+
+**Two corrections to that row, both measured by `HOUSE-00219`.**
+
+The atlas is **2048 × 1152, not 2048²**: 8 × 256 is 2048 and 8 × 144 is 1152, and rounding the
+height up would leave 896 rows — 44 % of the texture, 7.3 MB of 16.8 MB — holding nothing, per
+atlas, in a 25 MB pack. Non-power-of-two is safe here: OpenGL ES 3.0 requires it for a texture with
+no mip chain and clamped addressing, and a 2048 × 1152 PNG was compiled through
+`CNA.ImageImporter -> CNA.TextureProcessor` to confirm it.
+
+**And the strip backend does not fit its pack as `.cnb`.** That compile produced **9 437 552
+bytes** — exactly 2048 × 1152 × 4 plus a header — because CNB texture schema 1 is frozen to `Rgba8`
+and a `textureFormat` asking for DXT is warned about and silently kept uncompressed
+(`HOUSE-00111`). At 9.44 MB per 5.33 s atlas, §27.2's 25 MB `video` pack holds **2 atlases — 14
+seconds of television, for four channels**. The same atlas as **DXT1 through `.xnb`** is 1.18 MB,
+eight times smaller, and the same 25 MB then holds 21 atlases — **113 seconds**. So the frame-strip
+backend is only viable through the `.xnb` texture route §27.2 already names for the `web` and
+`android` content profiles, which is exactly the profile that needs `SequenceTvSource` in the first
+place. Phase 21 must package these atlases as `.xnb` DXT1 or reduce the frame size; it cannot ship
+them as `.cnb`.
 
 `SequenceTvSource` is not a placeholder — it is a real, deliberately low-bandwidth television that
 looks correct on a 55″ screen seen from 3 m in a game. It is also built and testable on Linux
