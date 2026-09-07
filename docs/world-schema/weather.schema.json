@@ -102,6 +102,9 @@
           "id": {
             "$ref": "#/$defs/id"
           },
+          "modifier": {
+            "type": "boolean"
+          },
           "precipIntensity": {
             "$ref": "#/$defs/unitInterval"
           },
@@ -116,6 +119,9 @@
           },
           "temperatureOffsetC": {
             "$ref": "#/$defs/interval"
+          },
+          "thunderProbability": {
+            "$ref": "#/$defs/unitInterval"
           },
           "weight": {
             "minimum": 0,

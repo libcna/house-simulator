@@ -3358,8 +3358,10 @@ in CI rejects one.
 
 ### 36.2 Archetypes
 
-Twelve named archetypes are *targets*, not states. The live state always interpolates toward the
-current target under rate limits.
+**Fourteen** rows below: thirteen named archetypes and one modifier. They are *targets*, not
+states; the live state always interpolates toward the current target under rate limits. (This
+paragraph said "twelve" until 2026-09-08, when `HOUSE-00393` authored the table as data and
+counted it.)
 
 | ID | Name | cover | cumuli | precip | intensity | wind | gust | fog | thunder | Δtemp |
 |---|---|---|---|---|---|---|---|---|---|---|

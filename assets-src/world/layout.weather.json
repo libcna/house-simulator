@@ -1,0 +1,214 @@
+{
+  // §36's weather. `HOUSE-00393`. Every quantity is a RANGE and not a value: §36.2's
+  // table gives the archetype's centre and the live state interpolates toward a target
+  // drawn from the band around it, which is why two thunderstorms are not identical.
+  //
+  // There is no `isRaining` anywhere, here or in the code: §36.1 says so and a CI lint
+  // rejects one. `precipType` here is the archetype's NOMINAL type and §36.2 derives the
+  // real one from the temperature -- above 2.5 °C rain, below 0 snow, between sleet -- so
+  // it snows in January and rains in July with no special case.
+  //
+  // §36.3 asks for four seasonal transition matrices. This is one base matrix and four
+  // seasonal weight vectors, which is the same thing in 13 numbers a season instead of
+  // 169: the matrix says what follows what, and the season says what the year is fond of.
+  "schema": "cna-house/weather/1",
+  "archetypes": [
+    // Clear / calm.
+    { "id": "W_CLEAR", "precipType": "None",
+      "cloudCover": [0.0, 0.1], "cloudCumuliform": [0.45, 0.75],
+      "precipIntensity": [0.0, 0.1], "windSpeed": [1.05, 2.03],
+      "gustFactor": [0.02, 0.18], "fogDensity": [0.0, 0.07],
+      "temperatureOffsetC": [0.5, 3.5], "humidity": [0.292, 0.453],
+      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+    // Mostly clear.
+    { "id": "W_MOSTLY_CLEAR", "precipType": "None",
+      "cloudCover": [0.17, 0.27], "cloudCumuliform": [0.65, 0.95],
+      "precipIntensity": [0.0, 0.1], "windSpeed": [1.75, 3.38],
+      "gustFactor": [0.12, 0.28], "fogDensity": [0.0, 0.08],
+      "temperatureOffsetC": [-0.5, 2.5], "humidity": [0.369, 0.529],
+      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+    // Partly cloudy.
+    { "id": "W_PARTLY", "precipType": "None",
+      "cloudCover": [0.4, 0.5], "cloudCumuliform": [0.75, 1.0],
+      "precipIntensity": [0.0, 0.1], "windSpeed": [2.45, 4.73],
+      "gustFactor": [0.22, 0.38], "fogDensity": [0.0, 0.09],
+      "temperatureOffsetC": [-1.5, 1.5], "humidity": [0.472, 0.632],
+      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+    // Cloudy.
+    { "id": "W_CLOUDY", "precipType": "None",
+      "cloudCover": [0.67, 0.77], "cloudCumuliform": [0.35, 0.65],
+      "precipIntensity": [0.0, 0.1], "windSpeed": [3.15, 6.08],
+      "gustFactor": [0.27, 0.43], "fogDensity": [0.01, 0.11],
+      "temperatureOffsetC": [-2.5, 0.5], "humidity": [0.594, 0.754],
+      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+    // Overcast.
+    { "id": "W_OVERCAST", "precipType": "None",
+      "cloudCover": [0.9, 1.0], "cloudCumuliform": [0.0, 0.25],
+      "precipIntensity": [0.0, 0.1], "windSpeed": [2.1, 4.05],
+      "gustFactor": [0.12, 0.28], "fogDensity": [0.07, 0.17],
+      "temperatureOffsetC": [-3.5, -0.5], "humidity": [0.698, 0.857],
+      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+    // Light rain.
+    { "id": "W_DRIZZLE", "precipType": "Rain",
+      "cloudCover": [0.87, 0.97], "cloudCumuliform": [0.05, 0.35],
+      "precipIntensity": [0.12, 0.32], "windSpeed": [2.8, 5.4],
+      "gustFactor": [0.22, 0.38], "fogDensity": [0.17, 0.27],
+      "temperatureOffsetC": [-3.5, -0.5], "humidity": [0.728, 0.888],
+      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+    // Rain.
+    { "id": "W_RAIN", "precipType": "Rain",
+      "cloudCover": [0.92, 1.0], "cloudCumuliform": [0.15, 0.45],
+      "precipIntensity": [0.45, 0.65], "windSpeed": [4.55, 8.78],
+      "gustFactor": [0.37, 0.53], "fogDensity": [0.23, 0.33],
+      "temperatureOffsetC": [-4.5, -1.5], "humidity": [0.817, 0.976],
+      "thunderProbability": [0.0, 0.1], "modifier": false, "weight": 1.0 },
+    // Heavy rain.
+    { "id": "W_HEAVY_RAIN", "precipType": "Rain",
+      "cloudCover": [0.95, 1.0], "cloudCumuliform": [0.25, 0.55],
+      "precipIntensity": [0.8, 1.0], "windSpeed": [6.3, 12.15],
+      "gustFactor": [0.52, 0.68], "fogDensity": [0.3, 0.4],
+      "temperatureOffsetC": [-5.5, -2.5], "humidity": [0.9, 1.0],
+      "thunderProbability": [0.1, 0.2], "modifier": false, "weight": 1.0 },
+    // Thunderstorm.
+    { "id": "W_THUNDERSTORM", "precipType": "Rain",
+      "cloudCover": [0.95, 1.0], "cloudCumuliform": [0.85, 1.0],
+      "precipIntensity": [0.75, 0.95], "windSpeed": [8.4, 16.2],
+      "gustFactor": [0.77, 0.93], "fogDensity": [0.25, 0.35],
+      "temperatureOffsetC": [-6.5, -3.5], "humidity": [0.89, 1.0],
+      "thunderProbability": [0.8, 0.9], "modifier": false, "weight": 1.0 },
+    // Hail squall.
+    { "id": "W_HAIL", "precipType": "Hail",
+      "cloudCover": [0.95, 1.0], "cloudCumuliform": [0.85, 1.0],
+      "precipIntensity": [0.6, 0.8], "windSpeed": [7.7, 14.85],
+      "gustFactor": [0.72, 0.88], "fogDensity": [0.2, 0.3],
+      "temperatureOffsetC": [-8.5, -5.5], "humidity": [0.86, 1.0],
+      "thunderProbability": [0.5, 0.6], "modifier": false, "weight": 1.0 },
+    // Snow.
+    { "id": "W_SNOW", "precipType": "Snow",
+      "cloudCover": [0.91, 1.0], "cloudCumuliform": [0.15, 0.45],
+      "precipIntensity": [0.35, 0.55], "windSpeed": [2.45, 4.73],
+      "gustFactor": [0.22, 0.38], "fogDensity": [0.35, 0.45],
+      "temperatureOffsetC": [-5.5, -2.5], "humidity": [0.792, 0.952],
+      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+    // Heavy snow / blizzard.
+    { "id": "W_HEAVY_SNOW", "precipType": "Snow",
+      "cloudCover": [0.95, 1.0], "cloudCumuliform": [0.35, 0.65],
+      "precipIntensity": [0.85, 1.0], "windSpeed": [9.8, 18.9],
+      "gustFactor": [0.67, 0.83], "fogDensity": [0.65, 0.75],
+      "temperatureOffsetC": [-7.5, -4.5], "humidity": [0.91, 1.0],
+      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+    // W_WINDY is a MODIFIER, not a state (§36.2): it combines with any precipitation archetype,
+    // which is how "windy heavy rain" and "blizzard" arise without a combinatorial state list. Its
+    // weight is zero because nothing transitions TO it, and its unconstrained bands say it
+    // constrains nothing but the wind.
+    { "id": "W_WINDY", "precipType": "None",
+      "cloudCover": [0.0, 1.0], "cloudCumuliform": [0.0, 1.0],
+      "precipIntensity": [0.0, 0.0], "windSpeed": [12.0, 20.8],
+      "gustFactor": [0.82, 0.98], "fogDensity": [0.0, 1.0],
+      "temperatureOffsetC": [-1.0, 1.0], "humidity": [0.0, 1.0],
+      "thunderProbability": [0.0, 1.0], "modifier": true, "weight": 0.0 },
+    // Fog.
+    { "id": "W_FOG", "precipType": "None",
+      "cloudCover": [0.8, 0.9], "cloudCumuliform": [0.0, 0.15],
+      "precipIntensity": [0.0, 0.1], "windSpeed": [0.7, 1.35],
+      "gustFactor": [0.0, 0.13], "fogDensity": [0.87, 0.97],
+      "temperatureOffsetC": [-2.5, 0.5], "humidity": [0.652, 0.812],
+      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 }
+  ],
+
+  // What follows what. Each row sums to 1: it is a distribution over the NEXT target,
+  // not a set of independent chances. Neighbouring rows are likeliest, which is what
+  // makes the sky move through overcast on its way from clear to rain rather than
+  // jumping; fog is the exception, because it follows calm and overcast weather and not
+  // a blizzard, whatever the ordering of a list says.
+  "transitions": {
+    "W_CLEAR": { "W_CLOUDY": 0.0465, "W_DRIZZLE": 0.0136, "W_FOG": 0.1169, "W_HAIL": 0.0033,
+      "W_HEAVY_RAIN": 0.0061, "W_HEAVY_SNOW": 0.0021, "W_MOSTLY_CLEAR": 0.6493,
+      "W_OVERCAST": 0.0233, "W_PARTLY": 0.123, "W_RAIN": 0.0088, "W_SNOW": 0.0026,
+      "W_THUNDERSTORM": 0.0044 },
+    "W_MOSTLY_CLEAR": { "W_CLEAR": 0.3942, "W_CLOUDY": 0.0747, "W_DRIZZLE": 0.0142, "W_FOG": 0.071,
+      "W_HAIL": 0.0027, "W_HEAVY_RAIN": 0.0054, "W_HEAVY_SNOW": 0.0016, "W_OVERCAST":
+      0.0282, "W_PARTLY": 0.3942, "W_RAIN": 0.0083, "W_SNOW": 0.002, "W_THUNDERSTORM":
+      0.0037 },
+    "W_PARTLY": { "W_CLEAR": 0.0744, "W_CLOUDY": 0.3927, "W_DRIZZLE": 0.0281, "W_FOG": 0.0016,
+      "W_HAIL": 0.0037, "W_HEAVY_RAIN": 0.0082, "W_HEAVY_SNOW": 0.002, "W_MOSTLY_CLEAR":
+      0.3927, "W_OVERCAST": 0.0744, "W_RAIN": 0.0141, "W_SNOW": 0.0027, "W_THUNDERSTORM":
+      0.0053 },
+    "W_CLOUDY": { "W_CLEAR": 0.0274, "W_DRIZZLE": 0.0725, "W_FOG": 0.002, "W_HAIL": 0.0052,
+      "W_HEAVY_RAIN": 0.0137, "W_HEAVY_SNOW": 0.0026, "W_MOSTLY_CLEAR": 0.0725,
+      "W_OVERCAST": 0.3826, "W_PARTLY": 0.3826, "W_RAIN": 0.0274, "W_SNOW": 0.0036,
+      "W_THUNDERSTORM": 0.008 },
+    "W_OVERCAST": { "W_CLEAR": 0.0127, "W_CLOUDY": 0.3549, "W_DRIZZLE": 0.3549, "W_FOG": 0.0639,
+      "W_HAIL": 0.0075, "W_HEAVY_RAIN": 0.0254, "W_HEAVY_SNOW": 0.0033, "W_MOSTLY_CLEAR":
+      0.0254, "W_PARTLY": 0.0672, "W_RAIN": 0.0672, "W_SNOW": 0.0048, "W_THUNDERSTORM":
+      0.0127 },
+    "W_DRIZZLE": { "W_CLEAR": 0.0074, "W_CLOUDY": 0.067, "W_FOG": 0.0636, "W_HAIL": 0.0127,
+      "W_HEAVY_RAIN": 0.067, "W_HEAVY_SNOW": 0.0048, "W_MOSTLY_CLEAR": 0.0127,
+      "W_OVERCAST": 0.3534, "W_PARTLY": 0.0253, "W_RAIN": 0.3534, "W_SNOW": 0.0074,
+      "W_THUNDERSTORM": 0.0253 },
+    "W_RAIN": { "W_CLEAR": 0.0051, "W_CLOUDY": 0.0269, "W_DRIZZLE": 0.3755, "W_FOG": 0.0051,
+      "W_HAIL": 0.0269, "W_HEAVY_RAIN": 0.3755, "W_HEAVY_SNOW": 0.0079, "W_MOSTLY_CLEAR":
+      0.0079, "W_OVERCAST": 0.0712, "W_PARTLY": 0.0135, "W_SNOW": 0.0135,
+      "W_THUNDERSTORM": 0.0712 },
+    "W_HEAVY_RAIN": { "W_CLEAR": 0.0035, "W_CLOUDY": 0.0135, "W_DRIZZLE": 0.0713, "W_FOG": 0.0079,
+      "W_HAIL": 0.0713, "W_HEAVY_SNOW": 0.0135, "W_MOSTLY_CLEAR": 0.0051, "W_OVERCAST":
+      0.0269, "W_PARTLY": 0.0079, "W_RAIN": 0.3761, "W_SNOW": 0.0269, "W_THUNDERSTORM":
+      0.3761 },
+    "W_THUNDERSTORM": { "W_CLEAR": 0.0026, "W_CLOUDY": 0.0079, "W_DRIZZLE": 0.0271, "W_FOG": 0.0136,
+      "W_HAIL": 0.3781, "W_HEAVY_RAIN": 0.3781, "W_HEAVY_SNOW": 0.0271, "W_MOSTLY_CLEAR":
+      0.0036, "W_OVERCAST": 0.0136, "W_PARTLY": 0.0051, "W_RAIN": 0.0717, "W_SNOW": 0.0717 },
+    "W_HAIL": { "W_CLEAR": 0.002, "W_CLOUDY": 0.0052, "W_DRIZZLE": 0.0137, "W_FOG": 0.0274,
+      "W_HEAVY_RAIN": 0.0725, "W_HEAVY_SNOW": 0.0725, "W_MOSTLY_CLEAR": 0.0026,
+      "W_OVERCAST": 0.008, "W_PARTLY": 0.0036, "W_RAIN": 0.0274, "W_SNOW": 0.3826,
+      "W_THUNDERSTORM": 0.3826 },
+    "W_SNOW": { "W_CLEAR": 0.0016, "W_CLOUDY": 0.0037, "W_DRIZZLE": 0.0082, "W_FOG": 0.0744,
+      "W_HAIL": 0.3927, "W_HEAVY_RAIN": 0.0281, "W_HEAVY_SNOW": 0.3927, "W_MOSTLY_CLEAR":
+      0.002, "W_OVERCAST": 0.0053, "W_PARTLY": 0.0027, "W_RAIN": 0.0141, "W_THUNDERSTORM":
+      0.0744 },
+    "W_HEAVY_SNOW": { "W_CLEAR": 0.0014, "W_CLOUDY": 0.0029, "W_DRIZZLE": 0.0058, "W_FOG": 0.4237,
+      "W_HAIL": 0.0803, "W_HEAVY_RAIN": 0.0152, "W_MOSTLY_CLEAR": 0.0017, "W_OVERCAST":
+      0.004, "W_PARTLY": 0.0022, "W_RAIN": 0.0089, "W_SNOW": 0.4237, "W_THUNDERSTORM":
+      0.0303 },
+    "W_FOG": { "W_CLEAR": 0.0185, "W_CLOUDY": 0.2778, "W_DRIZZLE": 0.0185, "W_HAIL": 0.0185,
+      "W_HEAVY_RAIN": 0.0185, "W_HEAVY_SNOW": 0.0185, "W_MOSTLY_CLEAR": 0.2778,
+      "W_OVERCAST": 0.2778, "W_PARTLY": 0.0185, "W_RAIN": 0.0185, "W_SNOW": 0.0185,
+      "W_THUNDERSTORM": 0.0185 }
+  },
+
+  // §42.2's anti-absurdity guarantee: what stops a clear sky becoming a thunderstorm
+  // in four seconds. Per simulated minute, and every continuous quantity has one.
+  "rates": {
+    "cloudCoverPerMin": 0.06,
+    "cloudCumuliformPerMin": 0.08,
+    "precipIntensityPerMin": 0.10,
+    "windSpeedPerMin": 1.2,
+    "gustFactorPerMin": 0.15,
+    "fogDensityPerMin": 0.05,
+    "temperatureOffsetCPerMin": 0.4,
+    "humidityPerMin": 0.08,
+    "thunderProbabilityPerMin": 0.20
+  },
+
+  // §36.3's four seasons. A weight multiplies the transition probability of arriving
+  // at that archetype; an archetype a season does not name keeps weight 1. Season is a
+  // continuous phase (§36.3) and these are blended, never switched.
+  "seasons": [
+    // ---- SPRING -- the most variable, and the only season with no bias at all towards one look.
+    { "id": "SPRING", "months": [3, 4, 5],
+      "weights": { "W_CLEAR": 1.0, "W_DRIZZLE": 1.6, "W_FOG": 0.9, "W_HEAVY_SNOW": 0.05, "W_PARTLY":
+        1.4, "W_RAIN": 1.3, "W_SNOW": 0.2, "W_THUNDERSTORM": 0.7 } },
+    // ---- SUMMER -- §36.3's sharp afternoon storms in the heat; snow is weight ZERO, not merely
+    // unlikely.
+    { "id": "SUMMER", "months": [6, 7, 8],
+      "weights": { "W_CLEAR": 2.2, "W_FOG": 0.3, "W_HAIL": 0.4, "W_HEAVY_RAIN": 0.8, "W_HEAVY_SNOW":
+        0.0, "W_MOSTLY_CLEAR": 1.8, "W_PARTLY": 1.5, "W_SNOW": 0.0, "W_THUNDERSTORM": 1.4 } },
+    // ---- AUTUMN -- wind, sustained rain and fog.
+    { "id": "AUTUMN", "months": [9, 10, 11],
+      "weights": { "W_CLEAR": 0.7, "W_DRIZZLE": 1.4, "W_FOG": 2.0, "W_HEAVY_SNOW": 0.15, "W_OVERCAST":
+        1.5, "W_RAIN": 1.8, "W_SNOW": 0.4, "W_THUNDERSTORM": 0.4 } },
+    // ---- WINTER -- overcast and snow, and the coldest temperatures.
+    { "id": "WINTER", "months": [12, 1, 2],
+      "weights": { "W_CLEAR": 0.6, "W_CLOUDY": 1.4, "W_DRIZZLE": 0.5, "W_HAIL": 0.6, "W_HEAVY_SNOW":
+        1.2, "W_OVERCAST": 2.0, "W_SNOW": 2.4, "W_THUNDERSTORM": 0.1 } }
+  ]
+}

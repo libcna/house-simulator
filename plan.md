@@ -6065,8 +6065,30 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             nothing validates.
       note: the jitter is fixed-seed, like `HOUSE-00391`'s: the garden is the same in every build,
             so a screenshot comparison means something.
-- [ ] HOUSE-00393 — Author `layout.weather.json`: the 14 archetypes, 4 seasonal transition matrices, dwell and transition distributions, rate limits
+- [x] HOUSE-00393 — Author `layout.weather.json`: the 14 archetypes, 4 seasonal transition matrices, dwell and transition distributions, rate limits
       dep: HOUSE-00341 · sys: world · plat: TOOL · pri: MUST
+      finding: **§36.2 says "twelve named archetypes" over a table of fourteen rows.** Thirteen
+            states and one modifier. Corrected there with the count.
+      finding: **the format could not carry two of §36.2's own columns.** The table has a `thunder`
+            column with nowhere to go, and a `W_WINDY` row that is a **modifier** — it combines
+            with any precipitation archetype, which is how "windy heavy rain" arises without a
+            combinatorial state list — and nothing said so. `thunderProbability` and `modifier`
+            added to the schema; rule 6 now refuses a transition INTO the modifier, because §36.2
+            says it combines with a state rather than being one.
+      finding: **nothing checked that a transition row is a distribution.** A row summing to 0.8
+            does not fail loudly at runtime: the sky favours whatever the sampler reaches first and
+            the weather is subtly wrong forever. Rule 10 checks the sum, rule 6 checks that every
+            state has a row to leave by — a state with none is a sky that arrives and never moves.
+      note: §36.3 asks for four seasonal transition matrices; this is **one base matrix and four
+            seasonal weight vectors**, which is the same thing in 13 numbers a season instead of
+            169. The matrix says what follows what; the season says what the year is fond of. The
+            reduction is recorded in the file and in `docs/world-format.md` rather than left as a
+            silent simplification.
+      note: every quantity is a range and not a value, because §36.2's numbers are an archetype's
+            centre and the target is drawn from the band around it. Two thunderstorms are not
+            identical, and that falls out of the data rather than out of a special case.
+      note: summer weights `W_SNOW` and `W_HEAVY_SNOW` at **zero**, not merely low — §36.3's one
+            hard seasonal gate, and the only zero in the four vectors.
 - [ ] HOUSE-00394 — Author `layout.sky.json`: the zenith and horizon LUTs, cloud layer definitions, the sun/moon colour LUTs, the star catalogue reference
       dep: HOUSE-00341 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00395 — Author `initialstate.json` exactly as `cna-house.md` §65.6 specifies

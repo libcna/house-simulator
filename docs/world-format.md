@@ -536,6 +536,19 @@ there is no `isRaining`.
 `rates` is the anti-absurdity guarantee (`cna-house.md` §42.2): it is what stops a clear sky
 becoming a thunderstorm in four seconds.
 
+Every quantity is a **range**, not a value: §36.2's table gives the archetype's centre and the
+target is drawn from the band, which is why two thunderstorms are not identical. `thunderProbability`
+and `modifier` were added by `HOUSE-00393` — §36.2's table has a thunder column with nowhere to go,
+and its `W_WINDY` row is a modifier that combines with any precipitation archetype rather than a
+state you transition into.
+
+§36.3 asks for four seasonal transition matrices; this is one base matrix and four seasonal weight
+vectors, which is the same thing in 13 numbers a season instead of 169 — the matrix says what
+follows what and the season says what the year is fond of. Rule 6 checks that a transition names
+states and that every state has a row to leave by; rule 10 checks that each row sums to 1, because
+a row summing to 0.8 does not fail loudly — the sky just favours whatever the sampler reaches
+first and the weather is subtly wrong forever.
+
 ## `layout.sky.json`
 
 Sky gradient lookup tables by solar elevation, cloud layer definitions and the star catalogue

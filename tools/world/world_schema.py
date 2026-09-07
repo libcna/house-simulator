@@ -406,6 +406,12 @@ def build() -> dict[str, dict]:
                  "fogDensity": {"$ref": "#/$defs/unitInterval"},
                  "temperatureOffsetC": INTERVAL,
                  "humidity": {"$ref": "#/$defs/unitInterval"},
+                 # §36.2's table has a `thunder` column and this file had nowhere to put it, and a
+                 # `W_WINDY` row that is a MODIFIER rather than a state -- it combines with any
+                 # precipitation archetype, which is how "windy heavy rain" arises without a
+                 # combinatorial state list. Both added by `HOUSE-00393`.
+                 "thunderProbability": {"$ref": "#/$defs/unitInterval"},
+                 "modifier": BOOL,
                  "weight": {"type": "number", "minimum": 0}})},
             "transitions": {"type": "object", "additionalProperties": {
                 "type": "object", "additionalProperties": UNIT}},

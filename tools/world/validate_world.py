@@ -996,6 +996,33 @@ def rule_6_references(world: World) -> list[Problem]:
                 f"which joins {sorted(x for x in ends if x)}; a route through a door goes "
                 f"through that door"))
 
+    # The weather file (`HOUSE-00393`): a transition names archetypes, and every state has a row
+    # to leave by. A state with no row is a sky that arrives and never moves again.
+    weather = world.layout.get("weather") or {}
+    archetypes = {row.get("id"): row for row in weather.get("archetypes", [])}
+    states = {name for name, row in archetypes.items() if not row.get("modifier")}
+    if archetypes:
+        for source, targets in (weather.get("transitions") or {}).items():
+            if source not in states:
+                problems.append(Problem(
+                    6, FILE_OF["weather"], f"transitions/{source}",
+                    f"{source!r} has a transition row and is not a weather state"))
+            for target in sorted(targets or {}):
+                if target not in states:
+                    problems.append(Problem(
+                        6, FILE_OF["weather"], f"transitions/{source}/{target}",
+                        f"{source} can become {target!r}, which is not a weather state"))
+        for name in sorted(states - set(weather.get("transitions") or {})):
+            problems.append(Problem(
+                6, FILE_OF["weather"], "transitions",
+                f"state {name} has no transition row; a sky that arrives there never moves again"))
+        for index, season in enumerate(weather.get("seasons", [])):
+            for name in sorted(season.get("weights") or {}):
+                if name not in archetypes:
+                    problems.append(Problem(
+                        6, FILE_OF["weather"], f"seasons/{index}/weights/{name}",
+                        f"season {season.get('id')} weights {name!r}, which is not an archetype"))
+
     # The exterior file's own references (`HOUSE-00390`): a gate hangs in a fence, and a
     # structure that is enterable names the cell you are in when you are inside it.
     exterior = world.layout.get("exterior") or {}
@@ -1447,6 +1474,23 @@ def rule_10_realism(world: World) -> list[Problem]:
                 10, FILE_OF["portals"], f"portals/{index}/rect/v",
                 f"portal {portal.get('id')}: {height:.3f} m high, under the player capsule's "
                 f"{CAPSULE_HEIGHT:.2f} m, and it is not marked crouch"))
+    # A transition row is a distribution over what comes next, so it sums to 1. Rows that sum to
+    # 0.8 or 1.3 do not fail loudly at runtime: the sky simply favours whatever the sampler reaches
+    # first, and the weather is subtly wrong forever (`HOUSE-00393`).
+    weather = world.layout.get("weather") or {}
+    for source, targets in (weather.get("transitions") or {}).items():
+        if not targets:
+            continue
+        try:
+            total = sum(float(value) for value in targets.values())
+        except (TypeError, ValueError):
+            continue
+        if abs(total - 1.0) > 1e-3:
+            problems.append(Problem(
+                10, FILE_OF["weather"], f"transitions/{source}",
+                f"{source}'s transition row sums to {total:.4f}, not 1; it is a distribution over "
+                f"what comes next, not a set of independent chances"))
+
     # An enterable structure has to CONTAIN the cell you stand in when you are inside it. The
     # shed's shell is 3.6 m and its cell 3.2 m, which is the 0.2 m of wall; a shell that did not
     # contain its own interior would be a building drawn beside its inside (`HOUSE-00390`).
@@ -1885,6 +1929,23 @@ def fixture() -> dict[str, dict]:
                       "position": [1.5, 0.64, 9.0], "species": ["dog", "cat"]}],
            "forbidden": [{"cell": "L0_STAIR", "species": ["dog"]}]}
 
+    weather = {"schema": "cna-house/weather/1",
+               "archetypes": [
+                   {"id": "W_CLEAR", "cloudCover": [0.0, 0.1], "precipType": "None",
+                    "precipIntensity": [0.0, 0.0], "windSpeed": [1.0, 2.0], "modifier": False,
+                    "weight": 1.0},
+                   {"id": "W_RAIN", "cloudCover": [0.9, 1.0], "precipType": "Rain",
+                    "precipIntensity": [0.4, 0.7], "windSpeed": [4.0, 8.0], "modifier": False,
+                    "weight": 1.0},
+                   {"id": "W_WINDY", "cloudCover": [0.0, 1.0], "precipType": "None",
+                    "precipIntensity": [0.0, 0.0], "windSpeed": [12.0, 20.0], "modifier": True,
+                    "weight": 0.0}],
+               "transitions": {"W_CLEAR": {"W_RAIN": 1.0}, "W_RAIN": {"W_CLEAR": 1.0}},
+               "rates": {"cloudCoverPerMin": 0.06, "precipIntensityPerMin": 0.10,
+                         "windSpeedPerMin": 1.2},
+               "seasons": [{"id": "SUMMER", "months": [6, 7, 8],
+                            "weights": {"W_CLEAR": 2.0, "W_RAIN": 0.5}}]}
+
     exterior = {"schema": "cna-house/exterior/1",
                 "terrain": {"heightfield": "world/terrain.r16", "size": [40.0, 40.0],
                             "origin": [-20.0, -3.0, -20.0], "yScale": 6.0,
@@ -1918,7 +1979,7 @@ def fixture() -> dict[str, dict]:
     return {"levels": levels, "cells": cells, "portals": portals, "openings": openings,
             "stairs": stairs, "lights": lights, "materials": materials, "props": props,
             "interactables": interactables, "assets": assets, "audio": audio,
-            "nav": nav, "exterior": exterior}
+            "nav": nav, "exterior": exterior, "weather": weather}
 
 
 def write_fixture(directory: Path, documents: dict[str, dict]) -> None:
@@ -2221,6 +2282,34 @@ def selftest() -> int:
         def validate_world_problems(documents, directory, rule):
             write_fixture(directory, documents)
             return validate(directory, wanted=[rule])[1]
+
+        # The weather file (`HOUSE-00393`). A transition row is a distribution over what comes
+        # next: one that sums to 0.8 does not fail loudly, the sky just favours whatever the
+        # sampler reaches first and the weather is subtly wrong forever.
+        lopsided = copy.deepcopy(base)
+        lopsided["weather"]["transitions"]["W_CLEAR"] = {"W_RAIN": 0.8}
+        skewed = workspace / "weather-sum"
+        write_fixture(skewed, lopsided)
+        _, problems = validate(skewed, wanted=[10])
+        require(any("not 1" in x.message for x in problems),
+                f"a transition row that does not sum to 1 is caught ({[str(x) for x in problems]})")
+
+        stranded_state = copy.deepcopy(base)
+        del stranded_state["weather"]["transitions"]["W_RAIN"]
+        no_exit = workspace / "weather-no-exit"
+        write_fixture(no_exit, stranded_state)
+        _, problems = validate(no_exit, wanted=[6])
+        require(any("never moves again" in x.message for x in problems),
+                f"a state with no transition row is caught ({[str(x) for x in problems]})")
+
+        to_modifier = copy.deepcopy(base)
+        to_modifier["weather"]["transitions"]["W_CLEAR"] = {"W_WINDY": 1.0}
+        windy = workspace / "weather-modifier"
+        write_fixture(windy, to_modifier)
+        _, problems = validate(windy, wanted=[6])
+        require(any("W_WINDY" in x.message for x in problems),
+                f"and a transition INTO the modifier: §36.2 says W_WINDY combines with a state "
+                f"rather than being one ({[str(x) for x in problems]})")
 
         # The exterior file (`HOUSE-00390`): a gate hangs in a fence, and an enterable structure
         # contains the cell you stand in inside it.
