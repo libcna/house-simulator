@@ -101,7 +101,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 |---|---|---|---|---|
 | 0 | Repository, conventions, decisions | 00001–00060 | 42 | The repo builds an empty `Game` and CI is green |
 | 1 | CNA capability verification | 00061–00120 | 60 | Every §5 claim re-proved; `BL-09` settled; probes deleted |
-| 2 | Build skeleton and CI | 00121–00180 | 47 | `Game` clears the screen; HEADLESS tests run in CI |
+| 2 | Build skeleton and CI | 00121–00180 | 48 | `Game` clears the screen; HEADLESS tests run in CI |
 | 3 | Content pipeline | 00181–00260 | 45 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 80 | The full layout authored, validated and loaded |
@@ -2310,6 +2310,43 @@ system update order, the settings file, the logging, and a CI that runs lints an
             renderer change could move (the `HOUSE-00106`/`00091`/`00092` timings) and which it
             cannot (the behavioural rows, which are core-module properties). `cna-house` modified
             nothing in `cnanext` at any point.
+- [x] HOUSE-00168 — `tools/ci/check_xna_strict.py`: ask the COMPILER which overload each call selected, so a `CNAEXT` member reached through overload resolution cannot pass the source-text lint
+      dep: HOUSE-00121 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-07) **New task, next free id in phase 2's reserved 00121–00180 range.** Not a
+            renumbering and not a change to any existing task: `HOUSE-00123`'s `check_xna_only.py`
+            does exactly what it was specified to do, and this closes a gap that specification could
+            not have closed. Wired into `run_checks.sh` for full runs only — it needs a compile
+            database and ~25 s, and the pre-commit hook's whole value is being fast enough that
+            nobody disables it. CI runs the full script.
+      finding: **CNA already had the mechanism and this project was not using it.** `CNAEXT` expands
+            to nothing normally and to `[[deprecated]]` when `CNA_STRICT_XNA_API` is defined.
+            Recompiling each translation unit with that macro plus `-Wdeprecated-declarations` makes
+            the compiler name every call that *actually resolves* to a CNAEXT declaration, with the
+            file, line and chosen signature. No modification to CNA was needed or made.
+      finding: **all three of the traps named as theoretical were real and present in this
+            repository.** (1) `src/ui/TextRenderer.cpp:112` selected the CNAEXT
+            `Color(bytecs, bytecs, bytecs, bytecs)` — the code cast deliberately to `std::uint8_t`,
+            believing that was the correct route; the XNA constructor is `Color(intcs, …)`.
+            (2) `tests/unit/InputTests.cpp` selected the CNAEXT `KeyboardState()` **16 times**.
+            (3) `SoundEffectInstance::setIsLoopedProperty(bool&&)` is CNAEXT and
+            `tests/probes/phase1/p1-audio3d.cpp:283` calls it with a prvalue. All fixed except the
+            phase-1 probe, which is deleted at phase 1 exit and is not in the compile database.
+      finding: **the `KeyboardState` case is the one worth remembering, because the source said the
+            opposite.** `InputTests.cpp` carried a comment asserting that "`KeyboardState{}` is an
+            empty list rather than the extension default". It is not: for `T{}`, C++ prefers the
+            **default constructor** over an `initializer_list` one when both exist, so every "no
+            keys held" line selected the CNAEXT default. `KeyboardState({})` passes an explicitly
+            empty list and selects the XNA constructor. A careful, documented, *wrong* belief about
+            overload resolution is precisely what no text-matching lint can catch.
+      finding: **destructors are exempt, by shape and with the reason recorded.** CNA tags
+            `~Texture2D()`, `~SpriteBatch()` and `~RenderTarget2D()` as CNAEXT, which is accurate
+            documentation — XNA is C# and has no destructors — but is not a prohibition anyone can
+            obey, since every C++ object with automatic storage runs one. 14 such hits are excluded.
+            That is the whole exemption list; a rule with a long one is not a rule.
+      finding: the two gates are complementary and neither replaces the other. `check_xna_only.py`
+            runs in milliseconds with no compiler and catches forbidden **identifiers**, including
+            in files that never compile. `check_xna_strict.py` needs the toolchain and catches
+            forbidden **resolutions**. 70 translation units clean at time of writing.
       note: **still open and carried forward.** `HOUSE-00100` (mouse-delta measurement,
             INCONCLUSIVE — needs a session with the pointer over the window) and `HOUSE-00029`
             (`util::SmallVector`/`FixedString`, or a measured decision against them) are the two
@@ -5686,11 +5723,11 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 297 numbered tasks across 53 phases.**
+**1 298 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
-| Foundations, capability proof, build, pipeline, assets | 0–4 | 236 |
+| Foundations, capability proof, build, pipeline, assets | 0–4 | 237 |
 | World data, blockout, collision, camera, visibility | 5–9 | 200 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 130 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
@@ -5698,7 +5735,7 @@ Recorded so nobody has to re-derive the decision.
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 161 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 297** |
+| **Total** | **0–52** | **1 298** |
 
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never

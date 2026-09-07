@@ -48,7 +48,12 @@ cannot do something, write it in `cnahouse::` or do without it. See
 `CNA_CNAEXT=OFF` is forced by this project's CMake and must never be weakened. Offline tooling
 (Blender, ffmpeg, `fxc`, Python, `cna-content`) is not runtime and is unconstrained.
 
-Run `tools/ci/check_xna_only.py` before you commit. It will find you.
+Run `tools/ci/run_checks.sh` before you commit. It will find you. Two gates enforce this
+rule and they see different things: `check_xna_only.py` matches forbidden **identifiers**
+in milliseconds, and `check_xna_strict.py` recompiles with `CNA_STRICT_XNA_API` to catch a
+`CNAEXT` member reached through **overload resolution**, where no forbidden identifier
+appears at all — `KeyboardState{}`, `Color(byte,byte,byte,byte)`,
+`setIsLoopedProperty(true)`. See [ADR-0001](docs/decisions/ADR-0001-xna-only.md).
 
 ---
 

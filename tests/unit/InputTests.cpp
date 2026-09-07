@@ -24,7 +24,15 @@ namespace
 
     // `KeyboardState`'s only plain-XNA constructor takes an `initializer_list`; the default and the
     // set-taking ones are `CNAEXT` in CNA, so `KeyboardState{...}` is what both these tests and the
-    // runtime use, and `KeyboardState{}` is an empty list rather than the extension default.
+    // runtime use.
+    //
+    // **An empty state is `KeyboardState({})`, NOT `KeyboardState({})`**, and this comment used to
+    // claim the opposite. `T{}` prefers the DEFAULT constructor over an `initializer_list` one when
+    // both exist, so `KeyboardState({})` silently selected the `CNAEXT` default and every "no keys
+    // held" line in this file was an ADR-0001 violation -- with a comment above it asserting it was
+    // not. `KeyboardState({})` passes an explicitly empty list and selects the XNA constructor.
+    // Measured, and now enforced by `tools/ci/check_xna_strict.py` (`HOUSE-00168`); no
+    // source-text lint can see the difference, because both spellings name the same type.
 
     MouseState At(int x, int y)
     {
@@ -73,7 +81,7 @@ namespace
         // Two systems each tracking "was it down last frame" is two chances to disagree about what
         // frame it is, so the edge is computed by the source and nowhere else.
         KeyboardMouseSource source;
-        source.Apply(KeyboardState{}, At(0, 0), 0.016f);
+        source.Apply(KeyboardState({}), At(0, 0), 0.016f);
         EXPECT_FALSE(source.Current().interactPressed);
 
         source.Apply(KeyboardState{Keys::E}, At(0, 0), 0.016f);
@@ -82,7 +90,7 @@ namespace
         source.Apply(KeyboardState{Keys::E}, At(0, 0), 0.016f);
         EXPECT_FALSE(source.Current().interactPressed) << "held is not pressed";
 
-        source.Apply(KeyboardState{}, At(0, 0), 0.016f);
+        source.Apply(KeyboardState({}), At(0, 0), 0.016f);
         source.Apply(KeyboardState{Keys::E}, At(0, 0), 0.016f);
         EXPECT_TRUE(source.Current().interactPressed) << "and again after a release";
     }
@@ -93,7 +101,7 @@ namespace
         // centre makes the first real sample an enormous bogus delta. `HOUSE-00100` measured that
         // `Mouse::GetState` is an event-driven snapshot, so where it starts is not something to guess.
         KeyboardMouseSource source;
-        source.Apply(KeyboardState{}, At(4000, 3000), 0.016f);
+        source.Apply(KeyboardState({}), At(4000, 3000), 0.016f);
         EXPECT_FLOAT_EQ(source.Current().look.X, 0.0f);
         EXPECT_FLOAT_EQ(source.Current().look.Y, 0.0f);
         EXPECT_FALSE(source.LookAvailable());
@@ -102,8 +110,8 @@ namespace
     TEST(InputTests, LookIsADeltaInRadians)
     {
         KeyboardMouseSource source;
-        source.Apply(KeyboardState{}, At(100, 100), 0.016f); // seeds
-        source.Apply(KeyboardState{}, At(200, 100), 0.016f); // +100 px of yaw
+        source.Apply(KeyboardState({}), At(100, 100), 0.016f); // seeds
+        source.Apply(KeyboardState({}), At(200, 100), 0.016f); // +100 px of yaw
 
         EXPECT_TRUE(source.LookAvailable());
         EXPECT_NEAR(source.Current().look.X, 100.0f * InputConfig::kRadiansPerPixel, 1e-6f)
@@ -117,8 +125,8 @@ namespace
         config.sensitivity = 2.0f;
         config.invertY = true;
         KeyboardMouseSource source(config);
-        source.Apply(KeyboardState{}, At(0, 0), 0.016f);
-        source.Apply(KeyboardState{}, At(10, 10), 0.016f);
+        source.Apply(KeyboardState({}), At(0, 0), 0.016f);
+        source.Apply(KeyboardState({}), At(10, 10), 0.016f);
 
         EXPECT_NEAR(source.Current().look.X, 10.0f * InputConfig::kRadiansPerPixel * 2.0f, 1e-6f);
         EXPECT_NEAR(source.Current().look.Y, -10.0f * InputConfig::kRadiansPerPixel * 2.0f, 1e-6f)
@@ -132,8 +140,8 @@ namespace
         // "no motion event arrived" are indistinguishable from here, so neither contributes look --
         // which is the safe reading of both.
         KeyboardMouseSource source;
-        source.Apply(KeyboardState{}, At(400, 300), 0.016f);
-        source.Apply(KeyboardState{}, At(400, 300), 0.016f);
+        source.Apply(KeyboardState({}), At(400, 300), 0.016f);
+        source.Apply(KeyboardState({}), At(400, 300), 0.016f);
         EXPECT_FALSE(source.LookAvailable());
         EXPECT_FLOAT_EQ(source.Current().look.X, 0.0f);
     }
@@ -144,13 +152,13 @@ namespace
         // re-capturing is the whole distance it travelled -- "the camera snaps when you close the
         // menu".
         KeyboardMouseSource source;
-        source.Apply(KeyboardState{}, At(100, 100), 0.016f);
-        source.Apply(KeyboardState{}, At(110, 100), 0.016f);
+        source.Apply(KeyboardState({}), At(100, 100), 0.016f);
+        source.Apply(KeyboardState({}), At(110, 100), 0.016f);
         ASSERT_TRUE(source.LookAvailable());
 
         source.SetMouseCaptured(true);
         EXPECT_FALSE(source.LookAvailable());
-        source.Apply(KeyboardState{}, At(900, 700), 0.016f);
+        source.Apply(KeyboardState({}), At(900, 700), 0.016f);
         EXPECT_FLOAT_EQ(source.Current().look.X, 0.0f)
             << "the first sample after a capture change re-seeds instead of producing a jump";
     }
@@ -158,7 +166,7 @@ namespace
     TEST(InputTests, DebugTogglesAreEdgesToo)
     {
         KeyboardMouseSource source;
-        source.Apply(KeyboardState{}, At(0, 0), 0.016f);
+        source.Apply(KeyboardState({}), At(0, 0), 0.016f);
         source.Apply(KeyboardState{Keys::F1}, At(0, 0), 0.016f);
         EXPECT_TRUE(source.Current().toggleOverlayPressed);
         source.Apply(KeyboardState{Keys::F1}, At(0, 0), 0.016f);
@@ -173,7 +181,7 @@ namespace
         EXPECT_TRUE(source.Current().run);
         source.Apply(KeyboardState{Keys::LeftShift}, At(0, 0), 0.016f);
         EXPECT_TRUE(source.Current().run) << "still held, still running";
-        source.Apply(KeyboardState{}, At(0, 0), 0.016f);
+        source.Apply(KeyboardState({}), At(0, 0), 0.016f);
         EXPECT_FALSE(source.Current().run);
     }
 

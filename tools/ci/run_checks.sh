@@ -115,6 +115,18 @@ run_gate "origin"     python3 tools/assets/origin_check.py
 # that then embeds the host's glyphs; this gate does. It also catches a region asking for a
 # character the face cannot draw, which the pipeline treats as fatal but only once it runs.
 run_gate "fonts"      python3 tools/ci/check_fonts.py
+# The XNA-only rule, asked of the COMPILER rather than of the source text (`HOUSE-00168`).
+# `check_xna_only.py` matches identifiers and therefore cannot see a call that reaches a CNAEXT
+# member through overload resolution -- `KeyboardState{}`, `Color(byte,byte,byte,byte)`,
+# `setIsLoopedProperty(true)`. This recompiles every translation unit with `CNA_STRICT_XNA_API`,
+# which turns CNA's own CNAEXT tag into `[[deprecated]]`, and reports what the compiler actually
+# chose.
+#
+# NOT in the pre-commit path: it needs a compile database and about 25 s, and the hook's whole
+# value is being fast enough that nobody disables it. CI runs the full script, so CI runs this.
+if [[ "$MODE" != "staged" ]]; then
+    run_gate "xna-strict" python3 tools/ci/check_xna_strict.py --all
+fi
 
 echo
 if [[ ${#FAILED[@]} -eq 0 ]]; then

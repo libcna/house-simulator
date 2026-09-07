@@ -16,7 +16,13 @@ namespace cnahouse::ui
         /// One virtual unit of offset. Small enough to read as a shadow rather than as a second string,
         /// large enough to separate the glyph from its background at every scale this game runs at.
         constexpr float kShadowOffset = 1.5f;
-        constexpr std::uint8_t kShadowAlpha = 153; // 60 %
+        /// 60 %. An `int`, not a `std::uint8_t`, and that is not a style choice: `Color` has both
+        /// `Color(intcs, intcs, intcs, intcs)` — the XNA 4.0 constructor — and a CNAEXT
+        /// `Color(bytecs, bytecs, bytecs, bytecs)` convenience overload. Byte arguments select the
+        /// CNAEXT one, which ADR-0001 forbids, and no forbidden identifier appears at the call site
+        /// for `check_xna_only.py` to find. `tools/ci/check_xna_strict.py` catches it by asking the
+        /// compiler which overload it actually chose (`HOUSE-00168`).
+        constexpr int kShadowAlpha = 153;
 
     } // namespace
 
@@ -103,13 +109,7 @@ namespace cnahouse::ui
         // so a 60 % shadow is `(0, 0, 0, 153)` with the colour channels already multiplied down, which
         // for black is zero either way. Written out because the next translucent colour drawn here will
         // NOT be black and will need the multiplication.
-        batch.DrawString(*font_,
-                         std::string(text),
-                         shadow,
-                         Color(static_cast<std::uint8_t>(0),
-                               static_cast<std::uint8_t>(0),
-                               static_cast<std::uint8_t>(0),
-                               kShadowAlpha));
+        batch.DrawString(*font_, std::string(text), shadow, Color(0, 0, 0, kShadowAlpha));
         batch.DrawString(*font_, std::string(text), position, colour);
     }
 

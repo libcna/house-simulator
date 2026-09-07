@@ -56,6 +56,38 @@ Three consequences follow, and they are the whole decision:
    does not merely go uncalled — it is not in the binary. That is the strongest mechanical
    guarantee available, and CI re-checks it with `nm -C` (`HOUSE-00136`).
 
+### The gap a text lint cannot close (`HOUSE-00168`)
+
+`check_xna_only.py` matches **identifiers**, and a `CNAEXT` member can be reached with no forbidden
+identifier anywhere in the source, through ordinary overload resolution. Three real examples, all
+of which were present in this repository and all of which the lint passed:
+
+```cpp
+Color(uint8_t{0}, uint8_t{0}, uint8_t{0}, alpha);  // the byte ctor is CNAEXT; XNA's takes int
+KeyboardState{};                                   // T{} prefers the DEFAULT ctor, which is CNAEXT
+instance.setIsLoopedProperty(true);                // prvalue binds to the CNAEXT bool&& overload
+```
+
+The second is the instructive one: `InputTests.cpp` carried a comment asserting that
+`KeyboardState{}` selected the empty-`initializer_list` constructor. It does not — for `T{}` a
+default constructor wins over an `initializer_list` one — so a careful, deliberate, *documented*
+belief about overload resolution was simply wrong, sixteen times. No amount of work on a
+text-matching lint would have found it.
+
+**`tools/ci/check_xna_strict.py` asks the compiler instead.** CNA's `CNAEXT` macro expands to
+`[[deprecated]]` when `CNA_STRICT_XNA_API` is defined, so recompiling each translation unit with
+that macro and `-Wdeprecated-declarations` names every call that *actually resolves* to a CNAEXT
+declaration, with the file, the line and the signature chosen. It requires the toolchain, so it runs
+in CI rather than in the pre-commit hook, and it is complementary rather than a replacement:
+`check_xna_only.py` catches forbidden **identifiers** in milliseconds and in files that never
+compile; this catches forbidden **resolutions**.
+
+Its one exemption is **destructors**, excluded by shape rather than by name. CNA tags
+`~Texture2D()`, `~SpriteBatch()` and `~RenderTarget2D()` as CNAEXT — accurate documentation, since
+XNA is C# and has no destructors, but not a prohibition anyone can obey when every C++ object with
+automatic storage runs one. There is no other exemption and no allowlist file, for the reason given
+in consequence 2.
+
 **Offline tooling is not runtime.** The rule constrains the running program. `cna-content`,
 Blender, `fxc` under Wine, ffmpeg and Python are unconstrained; none of them exists at runtime, and
 the runtime sees only `.cnb`/`.xnb` and `ContentManager::Load<T>()`.
