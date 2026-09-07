@@ -160,6 +160,15 @@ jobs:
         # also changed answers would not be an optimisation.
         run: python3 tools/world/build_skyexposure.py --selftest
 
+      - name: Snow must settle on decks and on nothing else
+        working-directory: cna-house
+        # `HOUSE-00214`. The slope test is measured from +Y rather than |Y|, so a deck's underside
+        # (180 degrees) is excluded by the same comparison as a wall (90) -- a snow shell hanging
+        # under the balcony is the one artefact this technique exists to make impossible. The
+        # fixture puts identical tables indoors and out, and the shell carries FACE normals, which
+        # the fixture model's authored +X normals would fail loudly if it did not.
+        run: python3 tools/world/build_snowshell.py --selftest
+
       - name: The stride measurement must survive both animation conventions
         working-directory: cna-house
         # `HOUSE-00194`. The fixture is an analytically exact walk -- 1.4 m of stride over 1.0 s --

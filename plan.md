@@ -3444,8 +3444,52 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: a sealed cell measures exactly 0 and an open one strictly more; the eight facades
             average to the sky exposure; the broad phase changes no answer; two builds are
             byte-identical
-- [ ] HOUSE-00214 — `tools/world/build_snowshell.py`: generate the snow-shell meshes from up-facing exterior surfaces, respecting per-material slope limits
+- [x] HOUSE-00214 — `tools/world/build_snowshell.py`: generate the snow-shell meshes from up-facing exterior surfaces, respecting per-material slope limits
       dep: HOUSE-00212 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/world/build_snowshell.py` and `docs/snowshell-format.md`, the
+            normative `CSNW` version 1 spec. 40 selftest claims; `--selftest` runs in CI. 16
+            injected bugs, all caught.
+      finding: **§38 asks for two things a static vertex buffer cannot both have.** "Offset along
+            the surface normal by `snowDepth`" and "it needs no shader" hold together only while
+            `snowDepth` is fixed, and it integrates from 0 to 0.35 m and back; baking one offset
+            in picks a depth and is wrong at every other, with the shell floating a hand's width
+            above the roof at full depth while the alpha says it is barely there. Resolved by
+            shipping **base positions and normals, unoffset**, and letting the runtime do
+            `p + n·snowDepth` — one multiply-add, on a buffer rewritten only when the depth has
+            moved (`dD/dt = 0.0009·intensity` puts a full 0→0.35 m at ~390 s, so a 1 cm threshold
+            fires about every 11 s in the heaviest snowfall). The plan already agrees:
+            `HOUSE-01793` renders the shell and `HOUSE-01794` displaces it, two runtime tasks, so
+            the displacement was never this file's to bake.
+      finding: **the slope test is measured from +Y, never from |Y|.** A deck's underside is as
+            flat as its top and points the other way, and `abs(dot(n, up))` would hang a snow
+            shell under the balcony — the one artefact the whole technique exists to prevent.
+            Measuring from +Y makes "snow does not cling to walls" (90°) and "snow does not cling
+            to soffits" (180°) the same comparison.
+      finding: **the normal written is the FACE normal, not the model's.** The slope test is a test
+            of a face, so a vertex is in the file only because its face passed; offsetting along a
+            smoothed vertex normal pushes it off the surface it was accepted for, and at a hard
+            edge two faces pull the shared vertex in a compromise direction and open a gap along
+            the crease at every depth. The shell is flat-shaded by construction and vertices are
+            welded on **(position, face normal)**. Measured on the fixture: `build_chunks`'s chiral
+            model has every authored normal along +X, so a shell that copied them would offset the
+            snow sideways off the table.
+      finding: the deck quad's first winding was the box's reading order — x0z0, x1z0, x1z1, x0z1 —
+            whose cross product points **down**, so the terrace was rejected as a soffit by its own
+            slope test and produced no shell at all. Deriving the normal from the winding rather
+            than asserting +Y is what caught it, and is why authored boxes and imported prop
+            geometry go through the same rule.
+      finding: a material with no `snowResponse` gets a documented 40° default (§22.1's own example
+            value) and is **named in the report**, never a silent 90 that snows on walls.
+            `coverable: false` excludes a surface at any pitch, which is what glass and water are
+            for. A degenerate face is rejected *and counted as degenerate*: it has no normal, so it
+            would otherwise fall through as "facing down" and be miscounted.
+      finding: two of §38's six sources cannot be read yet — **roofs** wait on `HOUSE-00470`'s
+            shell and **terrain tiles** on `layout.exterior.json`'s height field. Both are named in
+            the report rather than quietly absent, because a shell covering half of what §38 lists
+            and saying nothing looks exactly like a complete one.
+      accept: no shell exists on a face steeper than its material's limit, on a downward face, or
+            in an indoor cell; positions are unoffset and normals are the face's; two builds are
+            byte-identical
 - [x] HOUSE-00215 — `tools/world/build_chunks.py`: batch per-cell static props into ≤ 6 chunks by (effect, material, light groups, alpha mode), pre-transformed to world space, with per-sub-range bounds
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
       accept: ≤ 6 chunks per cell; ≤ 65 535 vertices per chunk where 16-bit indices are used

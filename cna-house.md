@@ -1668,6 +1668,7 @@ cna-house/
 │   ├── coverage-format.md           ← the project-owned `coverage.bin` roof mask (§37.2)
 │   ├── chunk-format.md              ← the project-owned `chunks.bin` static batches (§17.4)
 │   ├── skyexposure-format.md        ← the project-owned `skyexposure.bin` (§64.6)
+│   ├── snowshell-format.md          ← the project-owned `snowshell.bin` (§38)
 │   ├── content-authoring.md
 │   ├── world-format.md
 │   ├── performance-log.md
