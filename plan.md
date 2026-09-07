@@ -2658,8 +2658,70 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             **consistent between the two tiers**, not that Tier S becomes a PBR renderer. Tier E's
             `RoomLit.fx` consumes the same three parameters, so neither tier invents its own look.
       accept: the mapping is written down in `docs/content-authoring.md` and is reversible enough to review
-- [ ] HOUSE-00192 — `tools/assets/atlas_pack.py`: pack small-prop textures into shared atlases and rewrite the models' UVs
+- [x] HOUSE-00192 — `tools/assets/atlas_pack.py`: pack small-prop textures into shared atlases and rewrite the models' UVs
       dep: HOUSE-00191 · sys: content · plat: TOOL · pri: SHOULD
+      note: (2026-09-07) `tools/assets/atlas_pack.py`, with `--selftest`, `--verify` and
+            `--make-fixture`. 26 selftest claims over a prop set the tool authors itself; nothing is
+            committed. Measured on 40 props of 256² albedo + normal: a 2048² pair of atlases in
+            **1.3 s**, mip-safe to level 3. `--selftest` runs in the CI lint job.
+      finding: **the packing unit is the MATERIAL's whole texture set, not the image**, and getting
+            this wrong is silent. One set of UVs addresses a material's albedo *and* its normal, so
+            the two must land at the same coordinates in their respective atlases. Packing images
+            independently by size — the obvious implementation — puts a 64² normal somewhere
+            different from its 64² albedo and the prop samples a *neighbour's* normals, which reads
+            as a lighting bug rather than as an atlas bug. The layout is therefore computed once
+            over texture sets and every channel atlas is stamped from it.
+      finding: the consequence is a **refusal**: a material whose maps differ in size has no single
+            region. The tool names the material and its sizes rather than rescaling somebody's
+            normal map behind their back.
+      finding: **UVs outside [0, 1] are refused, not handled.** Inside an atlas `REPEAT` wraps the
+            whole atlas, not the region, so a prop authored with UVs 0..2 tiles its *neighbours*
+            across itself. No UV transform fixes this; baking the repeat into one texture is a
+            different task. The atlased samplers are written `CLAMP_TO_EDGE` for the same reason.
+      finding: a `TEXCOORD_0` accessor **shared by two primitives with different materials** cannot
+            be rewritten in place — the two need different transforms. Each `(accessor, transform)`
+            pair gets its own accessor and the accessor is reused only when the transform is truly
+            identical. The fixture contains this case because a real exporter produces it whenever
+            two material slots sit on one mesh.
+      finding: output `TEXCOORD_0` is **always FLOAT**, whatever came in. A normalized `ushort` that
+            resolved 1/65535 of a 64² source would, after the rewrite, resolve 1/65535 of the whole
+            2048² atlas — the same bits now spread over 32× the area, which is visible drift.
+      finding: **the buffer is compacted, or the atlas makes files bigger.** Dropping the embedded
+            texture without rebuilding the buffer leaves it in the `.glb` as an orphan bufferView.
+            The rewrite keeps only live accessors and their views; the fixture prop goes 2192 → 1692
+            bytes, and a selftest claim asserts no dead accessor or bufferView survives.
+      finding: **the mip-safety rule this tool first used was wrong, and wrong in the direction that
+            makes the tool look broken.** The obvious rule — level `L` is safe while `2**L` divides
+            every region origin and size — reported **level 1** for the fixture. The condition that
+            actually matters is narrower: averaging a region's edge with its *own* replicated gutter
+            is harmless, and only a reduced texel that mixes **two different props' content** is
+            fatal. Snapping each region outward to the `2**L` grid and checking it touches no other
+            region gives the true answer for the same layout: **level 3**. Two levels of mip chain
+            were being given away by a rule that sounded right.
+      finding: the gutter is filled by **replicating the region's edge texels outward**, never with
+            transparent black — black is the classic dark atlas seam under bilinear filtering.
+      finding: the PNG **encoder is this project's own** so the atlas bytes do not depend on which
+            Pillow is installed; Pillow decodes sources only. What is *not* guaranteed across
+            toolchains is the DEFLATE stream, `zlib.compress(level=9)` being stable per zlib version
+            rather than across them. `--verify` therefore compares decoded pixels, and this is
+            recorded so a future byte-difference is diagnosed as a toolchain change (as
+            `HOUSE-00200` records for FreeType) rather than misread as asset drift.
+      finding: **the selftest was shown to fail before it was trusted, and it caught a tautology in
+            itself.** 15 injected bugs; 13 of the first 14 were detected immediately. The two that
+            were not are the point: (a) changing the neutral normal fill to black passed, because
+            the assertion compared the atlas against the very constant that had produced it — the
+            check now writes `(128, 128, 255, 255)` out as a literal; (b) removing the layout sort
+            passed, because the "reverse the command line" check is **vacuous** — `collect()` sorts
+            the paths, so both runs were the same run. Renaming the models with prefixes that
+            *invert* the sorted order is the test that discriminates, and it is now the one used.
+            A third pass added a check that no dead accessor survives (an injection that kept them
+            all had passed) and a `POSITION`/`TEXCOORD_0` count check in `--verify`.
+      finding: the packer's own contract is **enforced, not trusted** — a pairwise box-overlap and
+            bounds check after layout. A packer bug that overlaps two boxes produces a wrong
+            *picture*, not a crash, which is the kind of bug that ships. Proven to fire by removing
+            both of `shelf_pack`'s bounds tests.
+      accept: deterministic image, model and metadata output; every rewritten UV verified from the
+            written file to lie inside its assigned region; both refusals demonstrated
 - [x] HOUSE-00193 — `tools/assets/convert_audio.py`: 24→16-bit, ~~48→44.1 kHz~~ **sample rate preserved**, trim, normalise, loop points, and the dull-variant filter
       dep: HOUSE-00069 · sys: content · plat: TOOL · pri: MUST
       accept: deterministic output; both hashes recorded in the manifest

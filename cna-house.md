@@ -2140,6 +2140,21 @@ A material is bound once per draw batch. To avoid a texture change per prop, com
 `MAT_ATLAS_GARDEN_SMALL`. Atlas packing is done by `tools/assets/atlas_pack.py` and recorded in
 the manifest.
 
+Two consequences of atlasing, both **measured** by `HOUSE-00192` rather than assumed:
+
+* **An atlased prop may not tile its texture.** Inside an atlas `REPEAT` wraps the whole atlas, not
+  the region, so a prop with UVs outside [0, 1] samples its neighbours. `atlas_pack.py` refuses such
+  a prop; the fix is to bake the repeat into one texture before atlasing, not to atlas it anyway.
+  Atlas samplers are `CLAMP_TO_EDGE`.
+* **The mip chain is finite.** With the default 4-texel edge-replicated gutter, a representative
+  40-prop 2048² atlas is mip-safe to **level 3** — the level above that averages two props' texels
+  together, and no gutter fixes it. Content that needs a full chain needs its own texture. The tool
+  computes and records the level per atlas (`mipSafeLevels`) rather than the project asserting one.
+
+A material's *whole* texture set — albedo, normal, metallic-roughness, occlusion, emissive — is
+packed as one unit at one region, because one set of UVs addresses all of them. That is why a
+material whose maps differ in size cannot be atlased until they are made to match.
+
 ---
 
 ## 23. Static rendering
