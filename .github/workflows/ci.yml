@@ -300,6 +300,18 @@ jobs:
           CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
             python3 tools/blender/sun_patch.py --selftest
 
+      - name: Mirror cube maps must be six faces that agree with each other
+        working-directory: cna-house
+        # `HOUSE-00209`. `HOUSE-00081` measured which face a direction samples against CNA itself;
+        # what it did not measure is the orientation WITHIN a face, so the selftest checks the six
+        # against each other instead: adjacent faces share an edge rendered from the same point,
+        # and all twelve pairs must look in identical directions along it. That catches every
+        # per-face error and leaves only a global handedness flip, which `docs/cubemap-format.md`
+        # flags for a probe when the first mirror is placed.
+        run: |
+          CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
+            python3 tools/blender/cubemap_bake.py --selftest
+
       - name: The impostor atlas must be eight different views, none of them cropped
         working-directory: cna-house
         # `HOUSE-00204`. EEVEE renders headless here. The two claims that earn their place: no

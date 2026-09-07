@@ -1671,6 +1671,7 @@ cna-house/
 │   ├── snowshell-format.md          ← the project-owned `snowshell.bin` (§38)
 │   ├── shading-format.md            ← the project-owned `shading.bin` sun shading (§22)
 │   ├── sunpatch-format.md           ← the project-owned `sunpatch.bin` decals (§29.1)
+│   ├── cubemap-format.md            ← the baked mirror cube maps (§59)
 │   ├── content-authoring.md
 │   ├── world-format.md
 │   ├── performance-log.md

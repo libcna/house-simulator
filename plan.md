@@ -3391,8 +3391,45 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: every patch lands inside the room behind the window plane; every node has the same
             point count in the same order; the patch sweeps monotonically with altitude; two bakes
             are byte-identical
-- [ ] HOUSE-00209 — `tools/blender/cubemap_bake.py`: bake the 4 mirror cube maps
+- [x] HOUSE-00209 — `tools/blender/cubemap_bake.py`: bake the 4 mirror cube maps
       dep: HOUSE-00206 · sys: content · plat: TOOL · pri: SHOULD
+      note: (2026-09-07) `tools/blender/cubemap_bake.py` and `docs/cubemap-format.md`. Six sRGB
+            PNGs per mirror in Direct3D's face order plus a `cubemaps.json` sidecar; 24 selftest
+            claims; `--selftest` runs in the CI Blender job. 13 injected bugs, all caught. §59's
+            four mirrors at 256² are 4.5 MB uncompressed, 1.1 MB as DXT1.
+      finding: **the face convention is half measured and half asserted, and the tool says which
+            half.** `HOUSE-00081` measured *which* face a direction samples against CNA itself —
+            `(0,0,1)` → `+Z`, `(1,0,0)` → `+X`, `(-1,0,0)` → `−X` — so that mapping is known. What
+            it did **not** measure is the orientation *within* a face, and a face rendered upside
+            down or mirrored still reflects the right room: it fails only when someone reads a
+            clock in it. `docs/cubemap-format.md` carries an explicit open item for a
+            `HOUSE-00081`-style probe when the first mirror is placed.
+      finding: **what can be checked without CNA is that the six faces agree with each other.**
+            Adjacent faces are rendered from the same point and share an edge, so the rays along
+            that edge are the same rays; all twelve adjacent pairs are asserted to look in
+            identical directions along their shared edge. That catches every per-face error — one
+            rotated, one flipped, one up-vector wrong — and leaves exactly one thing it cannot
+            catch, a global handedness flip, which is why the open item above exists.
+      finding: **there IS a handedness flip, and the selftest pins its direction.** D3D's cube
+            faces are described in a left-handed space, §14's world is right-handed, and a Blender
+            camera basis can only be right-handed — so the camera's right vector is the exact
+            negation of D3D's on all six faces, asserted face by face. Every rendered face is
+            mirrored horizontally on write; without it every reflection in the house is inside
+            out, and looks fine.
+      finding: **`render(write_still=True)` stamps metadata into the PNG**, so two bakes that are
+            pixel-identical produce files that are not — measured, 971 bytes each and different.
+            `HOUSE-00199` rebuilds everything and asserts byte-identical output, so that gate
+            would have failed for a render that never changed. Re-saving through `image.save()`
+            writes no such chunk, and the flip needed a re-save anyway, so one operation does both.
+      finding: 90° is not a choice. A face's half-extent at unit distance is `tan(fov/2)`, so
+            `tan 45° = 1` **is** the condition that six faces close a cube; narrower leaves a wedge
+            of the room in no face at all, wider puts it in two and the seam doubles.
+      finding: the mirror hides itself and is **unhidden afterwards** — a camera at the mirror's
+            own position bakes the mirror's back into its own reflection, and hiding that is not
+            undone leaves the second mirror baking a room the first one emptied.
+      accept: each face shows the wall it points at; all twelve adjacent pairs are continuous
+            across their seam; the mirror is absent from its own reflection and present in the
+            next one's; two bakes are byte-identical
 - [x] HOUSE-00210 — `tools/world/build_collision.py`: layout + `_COL` proxies → `content/world/collision.bin`
       dep: HOUSE-00190 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `tools/world/build_collision.py` plus `tools/world/layout_io.py`, the
