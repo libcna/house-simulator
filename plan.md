@@ -6267,8 +6267,27 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             every one is reachable from somewhere a player can stand.
       note: seeding the name counter with §65.6's three was not optional — the butler's-pantry door
             derives `DOOR_L0_PANTRY` from its own swing cell, and rule 1 caught the collision.
-- [ ] HOUSE-00402 — Author rows for the 62 openable windows
+- [x] HOUSE-00402 — Author rows for the 54 openable windows
       dep: HOUSE-00376 · sys: world · plat: TOOL · pri: MUST
+      note: 54, not 62. §12.6's twelve fixed lights are not interactables — the two picture
+            windows, the two gable louvres, the transom, the two sidelights and the sunroom's five
+            glazed panels — because a light that does not open is geometry and nothing else. The
+            62/19 split was never reachable from §13's per-room column, which `HOUSE-00376`
+            recorded when it authored the 66; this is the openable half of the measured breakdown.
+      note: named `WIN_<cell>_<facade><n>`, which is §65.6's own `WIN_L1_MASTER_N2` shape and
+            cannot collide with the **opening** ids, which are `WIN_<cell>_<n>` — rule 1 caught
+            that collision on the first attempt. The facade letter earns its place: "the second
+            north window of bedroom 2" is a thing a person can find in a house with 66 of them.
+      finding: **`initialstate.json`'s last dangling reference now resolves**, and the obligation
+            `HOUSE-00395` recorded is a check: rule 6 refuses a delta that sets an interactable
+            nobody declares. All four of §65.6's rows — three doors and this window — point at
+            rows that exist.
+      finding: **the load-time budget is exceeded, and authoring cannot fix it.** 273 ms for
+            885 KiB, before materials and props. Per file the cost is a flat ≈ 3.3 KiB/ms across
+            every loader, which says the throughput is `System::Text::Json`'s and not any one
+            reader. Recorded against the phase-5 exit criterion with the per-file numbers, because
+            "the world got slower" is not something anybody can act on and "the parser does
+            3.3 KiB/ms and the world is 885 KiB" is.
 - [ ] HOUSE-00403 — Author rows for the 84 light groups and their switch plates
       dep: HOUSE-00384 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00404 — Author rows for the 62 kitchen containers

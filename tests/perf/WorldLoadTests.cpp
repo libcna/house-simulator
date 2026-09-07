@@ -140,6 +140,54 @@ namespace
         IdRegistry::ResetForTesting();
     }
 
+    /// Where the time goes, file by file. `HOUSE-00402` pushed the total past §15.1's budget and
+    /// "the world got slower" is not a finding anybody can act on; "the interactables are 60 % of
+    /// it and cost 1.5 ms a row" is.
+    TEST(WorldLoadTests, WhereTheLoadTimeGoes)
+    {
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/layout.cells.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
+        }
+        using Loader = cnahouse::util::Result<void> (*)(std::string_view, world::WorldData::Contents&);
+        const std::vector<std::pair<const char*, Loader>> files{
+            {"layout.levels.json", &world::WorldLoader::LoadLevels},
+            {"layout.cells.json", &world::WorldLoader::LoadCells},
+            {"layout.portals.json", &world::WorldLoader::LoadPortals},
+            {"layout.openings.json", &world::WorldLoader::LoadOpenings},
+            {"layout.stairs.json", &world::WorldLoader::LoadStairs},
+            {"layout.lights.json", &world::WorldLoader::LoadLights},
+            {"layout.nav.json", &world::WorldLoader::LoadNav},
+            {"layout.audio.json", &world::WorldLoader::LoadAudio},
+            {"layout.exterior.json", &world::WorldLoader::LoadExterior},
+            {"interactables.json", &world::WorldLoader::LoadInteractables},
+            {"initialstate.json", &world::WorldLoader::LoadInitialState},
+        };
+        for (const auto& [file, load] : files)
+        {
+            if (!std::filesystem::exists(directory + "/" + file))
+            {
+                continue;
+            }
+            double best = 1e9;
+            for (int index = 0; index < 5; ++index)
+            {
+                IdRegistry::ResetForTesting();
+                world::WorldData::Contents contents;
+                const auto started = std::chrono::steady_clock::now();
+                const auto read = load(directory, contents);
+                const double ms =
+                    std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started)
+                        .count();
+                EXPECT_TRUE(read) << file;
+                best = std::min(best, ms);
+            }
+            std::printf("[ world    ] %-24s %6.1f ms\n", file, best);
+        }
+        IdRegistry::ResetForTesting();
+    }
+
     TEST(WorldLoadTests, ValidatingTheHouseCostsLessThanReadingIt)
     {
         const std::string directory = "content/world";

@@ -1050,6 +1050,17 @@ def rule_6_references(world: World) -> list[Problem]:
                 problems.append(Problem(
                     6, FILE_OF["initialstate"], f"pets/{name}/bed",
                     f"{name}'s bed {row['bed']!r} is not one {FILE_OF['nav']} declares"))
+        # ...and the delta names interactables that exist. `HOUSE-00395` authored the four rows
+        # §65.6 lists and recorded them as an obligation on the task that would author the door and
+        # window interactables; `HOUSE-00401` and `HOUSE-00402` are that task, so the obligation is
+        # a check now.
+        for name in sorted(initial.get("interactables") or {}):
+            if have_interactables and name not in interactables:
+                problems.append(Problem(
+                    6, FILE_OF["initialstate"], f"interactables/{name}",
+                    f"the initial state sets {name!r}, which {FILE_OF['interactables']} does not "
+                    f"declare"))
+
         target = (initial.get("weather") or {}).get("target")
         if target is not None and archetypes and target not in archetypes:
             problems.append(Problem(
@@ -2449,6 +2460,15 @@ def selftest() -> int:
         require(any("does not declare" in x.message for x in problems),
                 f"a cat starting on a perch nobody declared is caught "
                 f"({[str(x) for x in problems]})")
+
+        ghost_row = copy.deepcopy(base)
+        ghost_row["initialstate"]["interactables"]["DOOR_NOWHERE"] = {"openFraction": 0.5}
+        no_row = workspace / "start-interactable"
+        write_fixture(no_row, ghost_row)
+        _, problems = validate(no_row, wanted=[6])
+        require(any("does not declare" in x.message for x in problems),
+                f"a delta that sets an interactable nobody authored is caught -- the obligation "
+                f"`HOUSE-00395` recorded, now a check ({[str(x) for x in problems]})")
 
         ghost_target = copy.deepcopy(base)
         ghost_target["initialstate"]["weather"]["target"] = "W_NOWHERE"
