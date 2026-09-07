@@ -114,6 +114,11 @@ run_gate "gltf"       python3 tools/assets/gltf_validate.py
 # is the commonest defect in a downloaded asset and the hardest to see in isolation.
 run_gate "scale"      python3 tools/assets/scale_check.py
 run_gate "origin"     python3 tools/assets/origin_check.py
+# `HOUSE-00225`. Two silent failures: a `.chanim` whose joint list does not resolve in the compiled
+# model's `Model::Bones` -- fatal at LOAD, in the game, for an asset that built cleanly -- and a
+# source `.glb` with two skins. The first needs a build tree and is skipped without one; the second
+# is checked over the whole source tree either way.
+run_gate "anim"       python3 tools/ci/check_anim_assets.py
 # Every `.spritefont` must rasterise a face FROM THIS REPOSITORY (`HOUSE-00200`). The content
 # pipeline only WARNS when it falls back to an installed font, and a warning does not stop a build
 # that then embeds the host's glyphs; this gate does. It also catches a region asking for a

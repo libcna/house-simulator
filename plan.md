@@ -3271,8 +3271,46 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             round-trips; skinned-vertex equivalence against the source is demonstrated, and the
             check is demonstrated to fail
       accept: (1) the split parts render identically to the source; (2) a two-skin file fails validation with a message naming both skins and pointing at the splitter; (3) the rule is documented in `docs/content-authoring.md`
-- [ ] HOUSE-00225 — `tools/ci/check_anim_assets.py`: for every character, assert the `.chanim` joint list matches the compiled `.cnb` `Model::Bones` name-for-name and in order, and that no source `.glb` declares more than one skin
+- [x] HOUSE-00225 — `tools/ci/check_anim_assets.py`: for every character, assert the `.chanim` joint list matches the compiled `.cnb` `Model::Bones` name-for-name and in order, and that no source `.glb` declares more than one skin
       dep: HOUSE-00223, HOUSE-00224 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-07) `tools/ci/check_anim_assets.py`, gated in `run_checks.sh`, plus
+            `tools/assets/cnb_model.py` — a reader for the compiled `.cnb`'s bone table, written
+            against `cnanext/docs/cnb-format.md`. 15 selftest claims, including an END-TO-END one
+            that compiles the fixture with the real `cna-content` and binds the sidecar to what
+            comes out. Today it reports "2 source model(s) scanned, all single-skin; 0 sidecar(s)
+            bind"; the second half becomes live the moment a character exists.
+      correction: the title says "name-for-name **and in order**". Measured against
+            `ClipLibrary::BindTo`, that second clause is **not what binds and cannot be required**:
+            `BindTo` resolves each joint by NAME through `ModelBoneCollection::TryGetValue`, and
+            `Model::Bones` is the whole scene graph — the fixture's compiled model has seven bones
+            (`Root`, the five joints, `Body`) for a five-joint skin. The joints are a SUBSET in a
+            different indexing, which is precisely why `HOUSE-00074` concluded the sidecar must
+            carry the names at all. The gate therefore asserts what actually binds: every joint
+            name resolves, exactly once. Requiring identical order would fail every real character.
+      finding: **the comparison is against the compiled `.cnb`, not the source `.glb`**, and that
+            is the point of the task. What ships is the `.cnb` and what the game binds against is
+            the bone table inside it; a check against the source passes happily while an importer
+            change, a renamed node or a stale build makes the shipped pair disagree. `cnb_model.py`
+            reads the header, the table of contents, `MSTR` and `MBON` from the bytes — and
+            verifies **both CRC-32Cs**, because a reader that skipped them would report a corrupt
+            file as a wrong bone list, the least useful diagnosis available.
+      finding: CRC-32C is **Castagnoli** (`0x82F63B78` reflected), not `zlib.crc32`. Using the
+            wrong one produces a plausible number for every input and fails nothing until a real
+            file arrives, so the standard check value is pinned in the selftest:
+            `crc32c("123456789") == 0xE3069283`.
+      finding: **two bones with one name is a real failure and no importer produces one.**
+            `TryGetValue` resolves by name, so which of the two it returns is an implementation
+            detail and the wrong one deforms silently. The fixture for it is built BYTE BY BYTE —
+            the only way that case can exist to be tested at all, and the reason the selftest has a
+            hand-written `.cnb` writer beside its real one.
+      finding: pairing is `<content>/Anim/<name>.chanim` to the one `<content>/Models/**/<name>.cnb`.
+            **None** and **several** are both reported rather than guessed at: a sidecar for an
+            asset not in the build, and an ambiguity a naming convention cannot resolve, are
+            different bugs and both are silent otherwise.
+      accept: a joint the model has no bone for is caught by name; a duplicate bone name is caught;
+            a corrupt `.cnb` is reported as corrupt; a two-skin source is caught and its split parts
+            pass; and the whole check is demonstrated against a model the real content pipeline
+            compiled
       accept: a deliberately renamed joint and a deliberately reintroduced second skin both fail the content build
 - [ ] HOUSE-00222 — Phase-3 review and commit; run `budget_report.py` for the first time
       dep: HOUSE-00181…HOUSE-00225 · sys: — · plat: ALL · pri: MUST

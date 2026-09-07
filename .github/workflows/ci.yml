@@ -101,6 +101,15 @@ jobs:
         # SHARED skeleton's pose, at rest and in motion, and the two must agree to 10 microns.
         run: python3 tools/assets/skin_split.py --selftest
 
+      - name: A .chanim must bind to the model the game will load
+        working-directory: cna-house
+        # `HOUSE-00225`. The comparison is against the COMPILED `.cnb`, not the source `.glb`: what
+        # ships is the `.cnb` and what `ClipLibrary::BindTo` resolves against is the bone table
+        # inside it. The selftest builds the pair by hand -- the only way a fixture with a
+        # DUPLICATE bone name can exist, since no importer produces one -- and, where cna-content
+        # is available, also compiles a real model and binds the sidecar to that.
+        run: python3 tools/ci/check_anim_assets.py --selftest
+
       - name: The smoke-scene assets must be what they claim to be
         working-directory: cna-house
         # `HOUSE-00201`. The PNG, WAV and GLB are written byte for byte by the script and are
