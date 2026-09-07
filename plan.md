@@ -5445,8 +5445,22 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: `L1_STAIR_MAIN` overrides up to +6.55 because the flight continues to L2: it pierces
             this level's ceiling as well as its floor, and `stair` is exempt from both bounds for
             exactly that reason.
-- [ ] HOUSE-00370 — Author `layout.cells.json` for `L2`: 18 cells per §13.5
+- [x] HOUSE-00370 — Author `layout.cells.json` for `L2`: 18 cells per §13.5
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
+      finding: **§13.5's attic stair leaves 4.00 m² of the envelope in no cell.** It is tabulated
+            at X +5.40…+8.20 (11.2 m²) inside a bay that runs +4.90…+8.70, so there are 0.50 m
+            strips either side belonging to nothing — and §16.4 step 4 says a point inside the
+            shell and in no cell is a world-data bug. Authored at the full bay, 15.2 m². The
+            document's own arithmetic decides it: the interior then totals **273.9 m²**, exactly
+            the envelope and exactly what B1, L0 and L1 come to, where 269.9 was 4.0 short.
+            §13.6's `L3_STAIR_HEAD` has the same footprint and the same fix.
+      finding: rule 3 forbids overlap and says nothing about **gaps**, yet §16.4 step 4 says the
+            validator "is supposed to have caught" a point inside the shell that is in no cell. No
+            coverage check was added here: "the shell" is not declared anywhere in §15, and the
+            strips above are open to the north face, so neither a bounding box nor a flood fill
+            from outside would have found them. Recorded rather than invented — measuring each
+            level's total against its envelope is what found this one, and that is a comparison a
+            person makes, not a rule.
 - [ ] HOUSE-00371 — Author `layout.cells.json` for `L3`: 6 cells per §13.6, with the rafter-envelope description
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00372 — Author the 17 exterior cells per §13.7, including `EXT_WORLD` and the 4 attached cells

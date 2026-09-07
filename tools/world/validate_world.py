@@ -862,6 +862,13 @@ def rule_10_realism(world: World) -> list[Problem]:
     for index, cell in enumerate(world.cells):
         if cell.get("kind") not in ("room", "corridor"):
             continue
+        # §70.5's 2.35–3.10 m is a range for a room with a **flat** ceiling. A rafter-bounded
+        # level has none: §13.6's attic room runs 2.4 m at the knee wall to 5.0 m at the ridge, and
+        # a cell there is a bounding volume rather than a height. Checking it would report every
+        # attic room in every house ever built.
+        level = world.level_by_id.get(cell.get("level"))
+        if level is not None and level.get("ceiling") is None:
+            continue
         extent = world.extent(cell)
         if extent is None:
             continue
@@ -1576,6 +1583,32 @@ def selftest() -> int:
         _, problems = validate(roofed, wanted=[2])
         require(len(problems) == 1 and "L0_CLOSET" in problems[0].message,
                 f"and the same cell is refused once a room is put over it "
+                f"({[str(p) for p in problems]})")
+
+        # §70.5's clear-height range is a range for a FLAT ceiling. The attic has none -- §13.6's
+        # room runs 2.4 m at the knee wall to 5.0 m at the ridge -- so a cell on a rafter-bounded
+        # level is a bounding volume rather than a height, and checking it would report every
+        # attic room in every house ever built.
+        docs = copy.deepcopy(base)
+        docs["levels"]["levels"].append(
+            {"id": "L3", "name": "Attic", "ffl": 9.30, "ceiling": None, "structureDepth": 0.30})
+        docs["cells"]["cells"].append(
+            {"id": "L3_ROOM", "level": "L3", "kind": "room",
+             "boxes": [{"x": [-2.0, 2.0], "z": [4.0, 10.0]}],
+             "yOverride": [9.30, 12.60]})
+        attic = workspace / "attic"
+        write_fixture(attic, docs)
+        _, problems = validate(attic, wanted=[10])
+        require(not problems,
+                f"a 3.30 m room under a collar tie is not a §70.5 violation, because §70.5's "
+                f"range is about a flat ceiling ({[str(p) for p in problems]})")
+
+        docs["levels"]["levels"][-1]["ceiling"] = 12.60
+        flat = workspace / "flat"
+        write_fixture(flat, docs)
+        _, problems = validate(flat, wanted=[10])
+        require(len(problems) == 1 and "L3_ROOM" in problems[0].message,
+                f"and the same 3.30 m room IS a violation once its level declares a ceiling plane "
                 f"({[str(p) for p in problems]})")
 
         # 13. The tolerances and the guards, each pinned by a case that turns on it alone. Every

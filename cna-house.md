@@ -1158,7 +1158,7 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 |---|---|---|---|---|---|---|---|---|
 | `L2_LANDING` | Stair landing | −2.20 … +2.20 | −18.30 … −14.30 | 17.6 | 2 | 2 | 1 (juliet) | Juliet balcony over the front |
 | `L2_STAIR_MAIN` | Staircase L2 head | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | 1 | 0 | |
-| `L2_STAIR_ATTIC` | Attic stair | +5.40 … +8.20 | −18.30 … −14.30 | 11.2 | 1 | — | 1 | Straight, narrow, painted timber, a bare bulb on a pull cord |
+| `L2_STAIR_ATTIC` | Attic stair | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | — | 1 | Straight, narrow, painted timber, a bare bulb on a pull cord |
 | `L2_HALL` | Upper hall | −2.20 … +2.20 | −22.00 … −18.30 | 16.3 | 2 | — | 0 | |
 | `L2_HALL_W` | West corridor | −9.70 … −2.20 | −20.60 … −18.30 | 17.3 | 2 | — | 0 | |
 | `L2_LIBRARY` | Library | −8.20 … −2.20 | −18.30 … −14.30 | 24.0 | 3 | 2 | 1 | Floor-to-ceiling shelves, reading chairs, a globe, a ladder |
@@ -1175,7 +1175,13 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 | `L2_WC6` | WC | +2.20 … +4.90 | −22.00 … −20.20 | 4.9 | 1 | 1 obscured | 1 | STACK-A |
 | `L2_BALCONY_JULIET` | Juliet balcony (exterior) | −1.00 … +1.00 | −14.30 … −13.85 | 0.9 | — | — | — | Doors open onto a railing; standing room only |
 
-**18 cells. 270.1 m².**
+**18 cells. 273.9 m² interior + 0.9 m² juliet balcony.**
+
+> Corrected 2026-09-07 by `HOUSE-00370`. `L2_STAIR_ATTIC` read "+5.40 … +8.20 | 11.2", which
+> leaves 0.50 m strips either side of it — 4.00 m² of the envelope in no cell at all, which §16.4
+> step 4 calls a world-data bug. At the full bay the interior totals 273.9 m², exactly the
+> envelope and exactly what `B1`, `L0` and `L1` come to. `L3_STAIR_HEAD` had the same footprint
+> and the same fix.
 
 ### 13.6 `L3` — Attic · floor +9.30, rafter ceiling to +14.30
 
@@ -1185,14 +1191,15 @@ insulation batts between the joists in the unfinished bays, and rough boarding o
 
 | ID | Name | X | Z | Area | Head-room | Lights | Win | Notes |
 |---|---|---|---|---|---|---|---|---|
-| `L3_STAIR_HEAD` | Attic stair head | +5.40 … +8.20 | −18.30 … −14.30 | 11.2 | 2.2 → 3.4 m | 1 | — | Dormer above the head gives standing room |
+| `L3_STAIR_HEAD` | Attic stair head | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 2.2 → 3.4 m | 1 | — | Dormer above the head gives standing room |
 | `L3_ROOM` | Finished attic room | −6.00 … +4.90 | −24.00 … −17.00 | 76.3 | 2.4 → 5.0 m | 2 | 3 dormers | Boarded floor, plastered collar ceiling, an old sofa, a desk, boxes, a rocking horse, a train set |
 | `L3_STORE_W` | West attic store | −12.70 … −6.00 | −27.10 … −14.30 | 85.8 | 1.2 → 4.6 m | 1 | 1 gable louvre | Unfinished: rafters, insulation, walkway boards, 40 boxes, a wardrobe, suitcases |
 | `L3_STORE_E` | East attic / services | +4.90 … +8.70 | −27.10 … −18.30 | 33.4 | 1.2 → 4.2 m | 1 | 1 gable louvre | Header tank, HVAC branch ducts, an aerial mast, cable runs |
 | `L3_STORE_N` | North attic store | −6.00 … +4.90 | −27.10 … −24.00 | 33.8 | 1.2 → 3.2 m | 1 | 2 dormers | Christmas decorations, a cot, framed pictures |
 | `L3_STORE_S` | South attic store | −6.00 … +4.90 | −17.00 … −14.30 | 29.4 | 1.2 → 3.0 m | 1 | — | Roof-space void behind the front knee wall |
 
-**6 cells, 269.9 m² gross, ≈ 163 m² with ≥ 1.90 m headroom.** Player movement in the attic uses a
+**6 cells, 273.9 m² gross, ≈ 163 m² with ≥ 1.90 m headroom.** (Corrected 2026-09-07 with
+`L2_STAIR_ATTIC`; see §13.5.) Player movement in the attic uses a
 **headroom-aware capsule**: below 1.85 m of clearance the controller automatically crouches
 (capsule 1.25 m, eye 1.15 m, speed ×0.55) and the avatar plays a stooped walk. This is the only
 place crouching exists, and it exists because the roof geometry demands it.

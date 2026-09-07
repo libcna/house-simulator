@@ -2,8 +2,8 @@
   // The cells of the house. `cna-house.md` §13 is the authority: one row per room, corridor,
   // stair, closet, garage bay and exterior region, with the footprints §13.2-§13.7 tabulate.
   //
-  // `B1`, `L0` and `L1` so far (`HOUSE-00367`…`HOUSE-00369`); `HOUSE-00370`…`HOUSE-00372` add L2,
-  // L3 and the exterior regions to this same file.
+  // `B1`, `L0`, `L1` and `L2` so far (`HOUSE-00367`…`HOUSE-00370`); `HOUSE-00371` and
+  // `HOUSE-00372` add L3 and the exterior regions to this same file.
   //
   // Four fields are deliberately left unset on every row and each is a forward reference, not an
   // omission. Filling them here would make this file the source of truth for a table another task
@@ -599,6 +599,187 @@
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 1.00 },
       "residencyPack": "house-l1", "visibilityHint": "open"
+    },
+
+    // ---------------------------------------------------------------------------- L2, §13.5 ----
+    // Upper floor 2. FFL +6.55, ceiling +9.00, clear 2.45 m. Seventeen interior cells plus the
+    // juliet balcony.
+    //
+    // One correction, and §13.5's own arithmetic makes it: the attic stair is tabulated at
+    // X +5.40…+8.20 (11.2 m²), which leaves 0.50 m strips either side of it -- 4.00 m² of the
+    // envelope in no cell at all, which §16.4 step 4 calls a world-data bug. Authored at the full
+    // bay, X +4.90…+8.70, 15.2 m². The interior then totals 273.9 m², exactly the envelope and
+    // exactly what B1, L0 and L1 come to. `L3_STAIR_HEAD` has the same footprint and the same fix.
+    {
+      "id": "L2_LANDING", "level": "L2", "name": "Stair Landing", "kind": "room",
+      "boxes": [{ "x": [-2.20, 2.20], "z": [-18.30, -14.30] }],
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.26, "reverbHint": "tall_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
+      "daylight": { "orientation": "N", "exposure": 0.44 },
+      "residencyPack": "house-l2", "visibilityHint": "open"
+    },
+    {
+      "id": "L2_STAIR_MAIN", "level": "L2", "name": "Staircase L2 Head", "kind": "stair",
+      "boxes": [{ "x": [2.20, 4.90], "z": [-20.20, -14.30] }],
+      // The main flight ends here; the attic is reached by its own stair.
+      "footstepSurface": "stair_wood_open",
+      "acoustic": { "absorption": 0.20, "reverbHint": "tall_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
+      "daylight": { "orientation": "E", "exposure": 0.24 },
+      "residencyPack": "house-l2", "visibilityHint": "open"
+    },
+    {
+      "id": "L2_STAIR_ATTIC", "level": "L2", "name": "Attic Stair", "kind": "stair",
+      // The full bay, not §13.5's +5.40…+8.20: see the note above.
+      "boxes": [{ "x": [4.90, 8.70], "z": [-18.30, -14.30] }],
+      // Straight, narrow, painted timber, a bare bulb on a pull cord. It climbs through the slab,
+      // so its extent reaches L3's floor.
+      "yOverride": [6.55, 9.30],
+      "footstepSurface": "stair_wood",
+      "acoustic": { "absorption": 0.16, "reverbHint": "narrow_hard" },
+      "thermal": { "heated": true, "ductBranch": null },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_HALL", "level": "L2", "name": "Upper Hall", "kind": "corridor",
+      "boxes": [{ "x": [-2.20, 2.20], "z": [-22.00, -18.30] }],
+      "footstepSurface": "carpet",
+      "acoustic": { "absorption": 0.42, "reverbHint": "corridor_soft" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_HALL_W", "level": "L2", "name": "West Corridor", "kind": "corridor",
+      "boxes": [{ "x": [-9.70, -2.20], "z": [-20.60, -18.30] }],
+      "footstepSurface": "carpet",
+      "acoustic": { "absorption": 0.44, "reverbHint": "corridor_soft" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_LIBRARY", "level": "L2", "name": "Library", "kind": "room",
+      "boxes": [{ "x": [-8.20, -2.20], "z": [-18.30, -14.30] }],
+      // Floor-to-ceiling shelves: books are the most absorbent wall in a house.
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.56, "reverbHint": "medium_soft" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
+      "daylight": { "orientation": "NW", "exposure": 0.36 },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_BED6", "level": "L2", "name": "Bedroom 6", "kind": "room",
+      "boxes": [{ "x": [-12.70, -8.20], "z": [-18.30, -14.30] }],
+      "footstepSurface": "carpet",
+      "acoustic": { "absorption": 0.50, "reverbHint": "small_soft" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
+      "daylight": { "orientation": "NW", "exposure": 0.36 },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_BATH4", "level": "L2", "name": "Bathroom 4", "kind": "room",
+      "boxes": [{ "x": [-12.70, -9.70], "z": [-22.00, -18.30] }],
+      // The top of STACK-B.
+      "footstepSurface": "tile",
+      "acoustic": { "absorption": 0.10, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
+      "daylight": { "orientation": "W", "exposure": 0.12 },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_CLOSET_4", "level": "L2", "name": "Hall Closet 4", "kind": "closet",
+      "boxes": [{ "x": [-9.70, -7.00], "z": [-22.00, -20.60] }],
+      "footstepSurface": "carpet",
+      "acoustic": { "absorption": 0.46, "reverbHint": "tiny_soft" },
+      "thermal": { "heated": true, "ductBranch": null },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_WC5", "level": "L2", "name": "WC 5", "kind": "room",
+      "boxes": [{ "x": [-7.00, -4.40], "z": [-22.00, -20.60] }],
+      "footstepSurface": "tile",
+      "acoustic": { "absorption": 0.09, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_LINEN2", "level": "L2", "name": "Linen Closet 2", "kind": "closet",
+      "boxes": [{ "x": [-4.40, -2.20], "z": [-22.00, -20.60] }],
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.48, "reverbHint": "tiny_soft" },
+      "thermal": { "heated": true, "ductBranch": null },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_BED7", "level": "L2", "name": "Bedroom 7", "kind": "room",
+      "boxes": [{ "x": [-12.70, -7.00], "z": [-27.10, -22.00] }],
+      // A store-room-in-waiting: furnished as a bedroom, used as neither.
+      "footstepSurface": "carpet",
+      "acoustic": { "absorption": 0.46, "reverbHint": "medium_soft" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
+      "daylight": { "orientation": "SW", "exposure": 0.42 },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_GAMES", "level": "L2", "name": "Games Room", "kind": "room",
+      "boxes": [{ "x": [-7.00, 2.20], "z": [-27.10, -22.00] }],
+      // Pool table, dartboard, sofa, arcade cabinet. The largest room on the level, directly over
+      // the master bedroom -- which is why §64 cares what its floor is made of.
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.34, "reverbHint": "large_soft" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
+      "daylight": { "orientation": "S", "exposure": 0.48 },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_SITTING", "level": "L2", "name": "Secondary Sitting Room", "kind": "room",
+      "boxes": [{ "x": [2.20, 8.70], "z": [-27.10, -22.90] }],
+      "footstepSurface": "carpet",
+      "acoustic": { "absorption": 0.50, "reverbHint": "medium_soft" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_EAST" },
+      "daylight": { "orientation": "S", "exposure": 0.46 },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_STOR2", "level": "L2", "name": "Upper Store 2", "kind": "closet",
+      "boxes": [{ "x": [2.20, 8.70], "z": [-22.90, -22.00] }],
+      // Shallow but long: 0.90 m deep and 6.50 m wide, so it is reached into along its length.
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.36, "reverbHint": "tiny_soft" },
+      "thermal": { "heated": true, "ductBranch": null },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_BATH5", "level": "L2", "name": "Bathroom 5", "kind": "room",
+      "boxes": [{ "x": [4.90, 8.70], "z": [-22.00, -18.30] }],
+      // The top of STACK-D.
+      "footstepSurface": "tile",
+      "acoustic": { "absorption": 0.11, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_EAST" },
+      "daylight": { "orientation": "E", "exposure": 0.14 },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_WC6", "level": "L2", "name": "WC 6", "kind": "room",
+      "boxes": [{ "x": [2.20, 4.90], "z": [-22.00, -20.20] }],
+      // The top of STACK-A: L0_WC1, L1_WC4, L2_WC6, perfectly aligned on all three floors.
+      "footstepSurface": "tile",
+      "acoustic": { "absorption": 0.09, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L2_EAST" },
+      "daylight": { "orientation": "E", "exposure": 0.08 },
+      "residencyPack": "house-l2", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L2_BALCONY_JULIET", "level": "L2", "name": "Juliet Balcony", "kind": "exterior",
+      "boxes": [{ "x": [-1.00, 1.00], "z": [-14.30, -13.85] }],
+      // 0.9 m²: doors open onto a railing and there is standing room and nothing else. Open to
+      // the sky, hence the extent to +9.00 and no ceiling of its own.
+      "yOverride": [6.55, 9.00],
+      "footstepSurface": "metal",
+      "acoustic": { "absorption": 0.85, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "N", "exposure": 1.00 },
+      "residencyPack": "house-l2", "visibilityHint": "open"
     }
   ]
 }
