@@ -2795,8 +2795,26 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             authoritative about facts; `SOURCE.md` holds how the licence was established, what was
             checked and **what was rejected and why**, and is authoritative about reasoning. Hashes
             are not repeated in it, because a copy that can drift is worse than a reference.
-- [ ] HOUSE-00262 — Verify the **Poly Haven** licence; archive the licence page and terms; record redistribution and modification rights
+- [x] HOUSE-00262 — Verify the **Poly Haven** licence; archive the licence page and terms; record redistribution and modification rights
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `docs/licence-evidence/polyhaven.md`; CC0 text archived at
+            `licenses/cc0-1.0/LICENCE.txt` from Creative Commons' own `legalcode.txt`.
+      finding: **APPROVED.** CC0 1.0 for every asset, stated on the publisher's own licence page,
+            explicitly covering commercial use, redistribution and "even in a product you sell",
+            with no attribution required.
+      finding: **the provenance claim is unusually strong and is why this source ranks above the
+            aggregators.** The page states the assets are "the original work of Poly Haven staff, or
+            artists who willingly and directly donate/sell their work to Poly Haven" — a first-party
+            warranty of chain of title, which is exactly what ADR-0012 says an aggregator's restated
+            label cannot give.
+      finding: **the site ToS forbids scraping** (§3.2, "Web scraping or data mining without express
+            permission"), which the asset licence does not override. `HOUSE-00296`/`HOUSE-00297`
+            must fetch the specific assets they name, not bulk-mirror the library. Consistent with
+            this project's own rule against indiscriminate downloads, but easy to breach with a
+            well-meant script.
+      finding: **preview renders are NOT CC0** — ToS §4.1 reserves everything that is not the asset
+            itself, naming example renders and page text. Unlike ambientCG, which grants its preview
+            renders explicitly. Do not use a Poly Haven preview as a texture or as document art.
 - [ ] HOUSE-00263 — Verify the **ambientCG** licence, same treatment
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00264 — Verify the **Khronos glTF-Sample-Assets** per-asset licences and record which are usable
