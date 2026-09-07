@@ -6052,8 +6052,19 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             to be invented to satisfy it.
       note: positions are deterministic — one fixed seed for the jitter — so the street is the same
             in every build and a screenshot comparison means something.
-- [ ] HOUSE-00392 — Author the vegetation instance list: 34 street trees, property trees, shrubs, hedges, flower beds
+- [x] HOUSE-00392 — Author the vegetation instance list: 34 street trees, property trees, shrubs, hedges, flower beds
       dep: HOUSE-00390 · sys: world · plat: TOOL · pri: MUST
+      note: seven groups, 229 instances: §11.4's 34 street trees stepped around the pedestrian
+            gate, §11.6's two mature maples and the birch, the four fruit trees in the orchard,
+            §11.4's 60 shrubs across the west border, the foundation planting and the rear lawn,
+            §10.4's privet hedge, and §11.6's six raised beds plus the flower bed against the
+            porch.
+      note: a hedge is an extruded strip and the schema has instance arrays, so it is **one 1 m
+            section per instance** — 121 of them. That is not a workaround: a hedge with a gap in
+            it is a hedge with a gap in it, and 121 sections are cheaper to check than a polyline
+            nothing validates.
+      note: the jitter is fixed-seed, like `HOUSE-00391`'s: the garden is the same in every build,
+            so a screenshot comparison means something.
 - [ ] HOUSE-00393 — Author `layout.weather.json`: the 14 archetypes, 4 seasonal transition matrices, dwell and transition distributions, rate limits
       dep: HOUSE-00341 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00394 — Author `layout.sky.json`: the zenith and horizon LUTs, cloud layer definitions, the sun/moon colour LUTs, the star catalogue reference
