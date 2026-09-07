@@ -5461,8 +5461,24 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             from outside would have found them. Recorded rather than invented — measuring each
             level's total against its envelope is what found this one, and that is a comparison a
             person makes, not a rule.
-- [ ] HOUSE-00371 — Author `layout.cells.json` for `L3`: 6 cells per §13.6, with the rafter-envelope description
+- [x] HOUSE-00371 — Author `layout.cells.json` for `L3`: 6 cells per §13.6, with the rafter-envelope description
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) **79 cells now exist across all five levels** — 15 + 19 + 21 + 18 + 6 —
+            and every one of §15.7's eleven rules passes over them.
+      note: every attic cell declares its own `yOverride`, because `layout.levels.json` gives `L3`
+            a null ceiling and `WorldData::ExtentOf` refuses to invent one. That refusal is what
+            makes the null mean "there is no ceiling plane" rather than "the ceiling is at zero",
+            and this is the level it was written for. The upper bound is §13.6's **maximum**
+            head-room plus the floor: a cell is an axis-aligned bounding volume and the rafter
+            slope inside it is geometry, not extent.
+      finding: `L3_ROOM`'s clear height is 3.30 m, outside §70.5's 2.35–3.10 m for a habitable
+            room, and it is not a violation: that range is a range for a **flat** ceiling, and
+            §13.6 gives the room 2.4 m at the knee wall rising to 5.0 m at the ridge. Rule 10 now
+            skips a cell whose level is rafter-bounded — checking it would report every attic room
+            in every house ever built. Two claims pin the distinction.
+      note: `L3_STAIR_HEAD` takes the same full-bay correction as `L2_STAIR_ATTIC`
+            (`HOUSE-00370`), and the six cells then cover 273.9 m² — the envelope, and the same
+            total as every other level.
 - [ ] HOUSE-00372 — Author the 17 exterior cells per §13.7, including `EXT_WORLD` and the 4 attached cells
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00373 — Author the 2 container sub-cells for the refrigerator and freezer interiors, and the pattern for future ones

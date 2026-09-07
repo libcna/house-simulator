@@ -2,8 +2,8 @@
   // The cells of the house. `cna-house.md` §13 is the authority: one row per room, corridor,
   // stair, closet, garage bay and exterior region, with the footprints §13.2-§13.7 tabulate.
   //
-  // `B1`, `L0`, `L1` and `L2` so far (`HOUSE-00367`…`HOUSE-00370`); `HOUSE-00371` and
-  // `HOUSE-00372` add L3 and the exterior regions to this same file.
+  // Every level (`HOUSE-00367`…`HOUSE-00371`); `HOUSE-00372` adds the exterior regions to this
+  // same file.
   //
   // Four fields are deliberately left unset on every row and each is a forward reference, not an
   // omission. Filling them here would make this file the source of truth for a table another task
@@ -780,6 +780,91 @@
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 1.00 },
       "residencyPack": "house-l2", "visibilityHint": "open"
+    },
+
+    // ---------------------------------------------------------------------------- L3, §13.6 ----
+    // Attic. Floor +9.30, and no ceiling plane at all: knee walls 1.20 m tall stand 1.60 m in from
+    // the eaves, the finished part has a collar-tie ceiling at +12.60, and the rest is open to the
+    // rafters up to the ridge at +14.30.
+    //
+    // Every cell here therefore declares its own `yOverride` -- `layout.levels.json` gives `L3` a
+    // null ceiling and `WorldData::ExtentOf` refuses to invent one, which is the whole point of
+    // that null. The upper bound is §13.6's MAXIMUM head-room plus the floor: a cell is an
+    // axis-aligned bounding volume and the rafter slope inside it is geometry, not extent.
+    //
+    // `L3_STAIR_HEAD` takes the same full-bay correction as `L2_STAIR_ATTIC` below it, and the six
+    // cells then cover 273.9 m² -- the envelope, and the same total as every other level.
+    {
+      "id": "L3_STAIR_HEAD", "level": "L3", "name": "Attic Stair Head", "kind": "stair",
+      "boxes": [{ "x": [4.90, 8.70], "z": [-18.30, -14.30] }],
+      // 2.2 → 3.4 m: the dormer above the head is what gives standing room at the top of a stair
+      // that would otherwise arrive under a rafter.
+      "yOverride": [9.30, 12.70],
+      "footstepSurface": "stair_wood",
+      "acoustic": { "absorption": 0.18, "reverbHint": "narrow_hard" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "residencyPack": "house-l3", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L3_ROOM", "level": "L3", "name": "Attic Room", "kind": "room",
+      "boxes": [{ "x": [-6.00, 4.90], "z": [-24.00, -17.00] }],
+      // The finished part: boarded floor, plastered collar ceiling at +12.60, an old sofa, a desk,
+      // boxes, a rocking horse, a train set. 2.4 → 5.0 m of head-room, so its clear height is
+      // 3.30 m -- outside §70.5's 2.35-3.10 for a habitable room, and not a violation, because
+      // that range is a range for a FLAT ceiling. Rule 10 skips a rafter-bounded level for
+      // exactly this room.
+      "yOverride": [9.30, 12.60],
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.40, "reverbHint": "attic_soft" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_L3_ROOM" },
+      "daylight": { "orientation": "S", "exposure": 0.40 },
+      "residencyPack": "house-l3", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L3_STORE_W", "level": "L3", "name": "West Attic Store", "kind": "closet",
+      "boxes": [{ "x": [-12.70, -6.00], "z": [-27.10, -14.30] }],
+      // Unfinished: rafters, insulation batts, walkway boards, 40 boxes, a wardrobe, suitcases.
+      // 1.2 → 4.6 m, so most of it is crouch-only -- §13.6's headroom-aware capsule, the one
+      // place in the house where crouching exists.
+      "yOverride": [9.30, 13.90],
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.66, "reverbHint": "attic_soft" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "W", "exposure": 0.08 },
+      "residencyPack": "house-l3", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L3_STORE_E", "level": "L3", "name": "East Attic Services", "kind": "closet",
+      "boxes": [{ "x": [4.90, 8.70], "z": [-27.10, -18.30] }],
+      // Header tank, HVAC branch ducts, an aerial mast, cable runs. 1.2 → 4.2 m.
+      "yOverride": [9.30, 13.50],
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.58, "reverbHint": "attic_soft" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "E", "exposure": 0.06 },
+      "residencyPack": "house-l3", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L3_STORE_N", "level": "L3", "name": "North Attic Store", "kind": "closet",
+      "boxes": [{ "x": [-6.00, 4.90], "z": [-27.10, -24.00] }],
+      // Christmas decorations, a cot, framed pictures. 1.2 → 3.2 m, two dormers.
+      // §16.3 makes this the far end of the house's longest path: EXT_ROAD to here is 11 hops.
+      "yOverride": [9.30, 12.50],
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.60, "reverbHint": "attic_soft" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "S", "exposure": 0.22 },
+      "residencyPack": "house-l3", "visibilityHint": "opaque"
+    },
+    {
+      "id": "L3_STORE_S", "level": "L3", "name": "South Attic Store", "kind": "closet",
+      "boxes": [{ "x": [-6.00, 4.90], "z": [-17.00, -14.30] }],
+      // The roof-space void behind the front knee wall: 1.2 → 3.0 m and no window at all.
+      "yOverride": [9.30, 12.30],
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.62, "reverbHint": "attic_soft" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "residencyPack": "house-l3", "visibilityHint": "opaque"
     }
   ]
 }
