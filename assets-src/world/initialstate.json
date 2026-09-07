@@ -1,0 +1,90 @@
+{
+  // §65.6's canonical initial state, exactly. `HOUSE-00395`. Deterministic, so every test and
+  // every screenshot starts identically -- which is the whole reason this file is data and not a
+  // constructor.
+  //
+  // It is a DELTA. `interactables.json` declares every field and its default; this says only
+  // which of them start somewhere else, and a row that repeated the defaults would be a second
+  // place for them to be wrong.
+  "schema": "cna-house/initialstate/1",
+
+  // §65.6: on the road, facing north. `position` is the player's FEET (§49: the eye is at
+  // `playerPosition + (0, eyeHeight, 0)`, 1.68 m up), so it is grade and not §65.6's +3.32 --
+  // corrected there, with the reason.
+  "player": {
+    "cell": "EXT_ROAD",
+    "position": [0.00, 0.00, 5.20],
+    "yawDeg": 0.0
+  },
+
+  // Saturday 14 June 2031, 09:20 local. `utcOffsetMinutes` is -240 and not §32's -300 because
+  // June is inside US DST, which is what §65.6's "(UTC-4 DST)" says. The location is §32's
+  // default: 40.05° N, -75.30°, suburban Philadelphia.
+  //
+  // `epochSeconds` is seconds since the Unix epoch -- the only reading under which a calendar
+  // date is expressible at all, which is what §65.6 states. 1939209600 is 2031-06-14T13:20:00Z,
+  // and 14 June 2031 really is a Saturday.
+  "clock": {
+    "epochSeconds": 1939209600.0,
+    "timeScale": 60.0,
+    "latitudeDeg": 40.05,
+    "longitudeDeg": -75.30,
+    "utcOffsetMinutes": -240
+  },
+
+  // §65.6's weather, reached rather than transitioning: `W_PARTLY` with 140 simulated minutes
+  // before the next target is drawn. The RNG seed is part of the state (§36.4), so the weather
+  // future is reproducible from here.
+  "weather": {
+    "target": "W_PARTLY",
+    "cloudCover": 0.35,
+    "cloudCumuliform": 0.90,
+    "precipType": "None",
+    "precipIntensity": 0.0,
+    "windSpeed": 3.2,
+    "windDirectionDeg": 225.0,
+    "gustFactor": 0.28,
+    "fogDensity": 0.03,
+    "thunderIntensity": 0.0,
+    "temperatureC": 21.5,
+    "humidity": 0.55,
+    "surfaceWetness": 0.0,
+    "snowDepth": 0.0,
+    "targetExpiryMinutes": 140.0,
+    "rngState": "0x5EEDC0DEC0FFEE01"
+  },
+
+  // The delta. Everything §65.6 lists as "all closed", "all off" or "all zero" is the default and
+  // is therefore absent: the four rows below are the only things that do not start at rest.
+  //
+  // These four ids are an obligation on the task that authors the door and window interactables.
+  // `interactables.json` holds the 80 switch plates so far (`HOUSE-00384`), so none of the four
+  // resolves yet -- exactly like the `MAT_*` references in `layout.openings.json`, and rule 6
+  // will hold this file to them the moment those rows exist.
+  "interactables": {
+    // Ajar, so the first upstairs door you meet is already telling you doors move.
+    "DOOR_L1_MASTER": { "openFraction": 0.35 },
+    // Wide open: §13.3 puts the chest freezer in here and the pantry is a working room.
+    "DOOR_L0_PANTRY": { "openFraction": 1.00 },
+    // Closed, and listed anyway, because §65.6 says so: the attic is a discovery and a reader of
+    // this file should not have to infer that from an absence.
+    "DOOR_L2_ATTIC":  { "openFraction": 0.00 },
+    // The one open window, so weather audio through an opening is testable from the first minute.
+    "WIN_L1_MASTER_N2": { "openFraction": 0.50 }
+  },
+
+  // §60 and §61. The dog is on its bed in the family room; the cat is on the landing window seat,
+  // which is `PERCH_L1_WINDOWSEAT` in `layout.nav.json` (`HOUSE-00389`).
+  "pets": {
+    "PET_DOG": {
+      "cell": "L0_FAMILY", "position": [5.20, 0.60, -24.80], "yawDeg": 92.0,
+      "state": "Lie", "stateTimer": 0.0,
+      "arousal": 0.10, "affection": 0.40, "boredom": 0.20, "bed": "BED_DOG_FAMILY"
+    },
+    "PET_CAT": {
+      "cell": "L1_LANDING", "position": [0.40, 3.65, -15.10], "yawDeg": 180.0,
+      "state": "Perch", "stateTimer": 0.0, "perch": "PERCH_L1_WINDOWSEAT",
+      "arousal": 0.05, "affection": 0.15, "boredom": 0.35
+    }
+  }
+}

@@ -817,8 +817,13 @@ namespace cnahouse::world
     /// @brief `initialstate.json`: the clock a fresh start begins on.
     struct ClockStart
     {
-        /// Seconds into the simulated day. A double, not a float: at 60x a float loses the second
+        /// Seconds since the Unix epoch. A double, not a float: at 60x a float loses the second
         /// hand before the first in-game week is out.
+        ///
+        /// Seconds since the epoch and not seconds into the day, which is what this comment said
+        /// until `HOUSE-00395`: §65.6 starts the game on "Saturday 14 June 2031, 09:20", and a
+        /// calendar date -- which the season, the moon phase and the sun's position all need -- is
+        /// not expressible in an offset into a day.
         double epochSeconds = 0.0;
         float timeScale = 1.0F;
         float latitudeDeg = 0.0F;

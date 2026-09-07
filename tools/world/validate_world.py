@@ -1023,6 +1023,39 @@ def rule_6_references(world: World) -> list[Problem]:
                         6, FILE_OF["weather"], f"seasons/{index}/weights/{name}",
                         f"season {season.get('id')} weights {name!r}, which is not an archetype"))
 
+    # `initialstate.json`'s references (`HOUSE-00395`): the cells it starts things in, the weather
+    # target it begins at, and the perch and bed the pets are on.
+    initial = world.layout.get("initialstate") or {}
+    if initial:
+        player_cell = (initial.get("player") or {}).get("cell")
+        if player_cell is not None and have_cells and player_cell not in cells:
+            problems.append(Problem(
+                6, FILE_OF["initialstate"], "player/cell",
+                f"the player starts in cell {player_cell!r}, which does not exist"))
+        nav = world.layout.get("nav") or {}
+        perches = {row.get("id") for row in nav.get("perches", [])}
+        beds = {row.get("id") for row in nav.get("beds", [])}
+        for name, row in sorted((initial.get("pets") or {}).items()):
+            value = row.get("cell")
+            if value is not None and have_cells and value not in cells:
+                problems.append(Problem(
+                    6, FILE_OF["initialstate"], f"pets/{name}/cell",
+                    f"{name} starts in cell {value!r}, which does not exist"))
+            if row.get("perch") is not None and perches and row["perch"] not in perches:
+                problems.append(Problem(
+                    6, FILE_OF["initialstate"], f"pets/{name}/perch",
+                    f"{name} starts on perch {row['perch']!r}, which "
+                    f"{FILE_OF['nav']} does not declare"))
+            if row.get("bed") is not None and beds and row["bed"] not in beds:
+                problems.append(Problem(
+                    6, FILE_OF["initialstate"], f"pets/{name}/bed",
+                    f"{name}'s bed {row['bed']!r} is not one {FILE_OF['nav']} declares"))
+        target = (initial.get("weather") or {}).get("target")
+        if target is not None and archetypes and target not in archetypes:
+            problems.append(Problem(
+                6, FILE_OF["initialstate"], "weather/target",
+                f"the weather starts heading for {target!r}, which is not an archetype"))
+
     # The exterior file's own references (`HOUSE-00390`): a gate hangs in a fence, and a
     # structure that is enterable names the cell you are in when you are inside it.
     exterior = world.layout.get("exterior") or {}
@@ -1474,6 +1507,38 @@ def rule_10_realism(world: World) -> list[Problem]:
                 10, FILE_OF["portals"], f"portals/{index}/rect/v",
                 f"portal {portal.get('id')}: {height:.3f} m high, under the player capsule's "
                 f"{CAPSULE_HEIGHT:.2f} m, and it is not marked crouch"))
+    # `initialstate.json` (`HOUSE-00395`): the player and the pets start somewhere real. A start
+    # position outside its own cell is a first frame spent falling, and it is the one frame every
+    # test and every screenshot begins on.
+    initial = world.layout.get("initialstate") or {}
+    starts = [("player", initial.get("player") or {})]
+    starts += [(f"pets/{name}", row) for name, row in sorted((initial.get("pets") or {}).items())]
+    for where, row in starts:
+        cell = world.cell_by_id.get(row.get("cell"))
+        position = row.get("position")
+        if cell is None or not (isinstance(position, list) and len(position) == 3):
+            continue
+        try:
+            x, y, z = (float(value) for value in position)
+        except (TypeError, ValueError):
+            continue
+        if not any(x0 - PLANE_TOLERANCE <= x <= x1 + PLANE_TOLERANCE
+                   and z0 - PLANE_TOLERANCE <= z <= z1 + PLANE_TOLERANCE
+                   for x0, x1, z0, z1 in boxes_of(cell)):
+            problems.append(Problem(
+                10, FILE_OF["initialstate"], f"{where}/position",
+                f"{where} starts at x {x:.2f} z {z:.2f}, which is not inside cell "
+                f"{cell.get('id')}"))
+            continue
+        extent = world.extent(cell)
+        if extent is not None and not (extent[0] - PLANE_TOLERANCE <= y
+                                       <= extent[1] + PLANE_TOLERANCE):
+            problems.append(Problem(
+                10, FILE_OF["initialstate"], f"{where}/position",
+                f"{where} starts at y {y:.2f}, outside cell {cell.get('id')}'s extent "
+                f"{extent[0]:.2f}..{extent[1]:.2f}; a start above the floor is a first frame "
+                f"spent falling"))
+
     # The sky file (`HOUSE-00394`). Three properties, each of which is silent at runtime when it
     # is wrong: a gradient out of order interpolates backwards, a gap in the cloud-alpha bands is
     # a cloud cover with no clouds drawn, and a sun table out of order reddens at noon.
@@ -1971,6 +2036,17 @@ def fixture() -> dict[str, dict]:
                       "position": [1.5, 0.64, 9.0], "species": ["dog", "cat"]}],
            "forbidden": [{"cell": "L0_STAIR", "species": ["dog"]}]}
 
+    initialstate = {
+        "schema": "cna-house/initialstate/1",
+        "player": {"cell": "L0_FOYER", "position": [0.0, 0.60, 2.0], "yawDeg": 0.0},
+        "clock": {"epochSeconds": 1939209600.0, "timeScale": 60.0,
+                  "latitudeDeg": 40.05, "longitudeDeg": -75.30, "utcOffsetMinutes": -240},
+        "weather": {"target": "W_CLEAR", "cloudCover": 0.05, "windSpeed": 1.5},
+        "interactables": {"SWITCH_HALL": {"LG_HALL": True}},
+        "pets": {"PET_CAT": {"cell": "L0_HALL", "position": [0.0, 0.60, 7.0], "yawDeg": 0.0,
+                             "state": "Sit", "perch": "PERCH_HALL"}},
+    }
+
     sky = {"schema": "cna-house/sky/1",
            "gradient": [{"sunElevationDeg": -18.0, "zenith": [0.01, 0.01, 0.03],
                          "horizon": [0.02, 0.02, 0.05]},
@@ -2040,7 +2116,8 @@ def fixture() -> dict[str, dict]:
     return {"levels": levels, "cells": cells, "portals": portals, "openings": openings,
             "stairs": stairs, "lights": lights, "materials": materials, "props": props,
             "interactables": interactables, "assets": assets, "audio": audio,
-            "nav": nav, "exterior": exterior, "weather": weather, "sky": sky}
+            "nav": nav, "exterior": exterior, "weather": weather, "sky": sky,
+            "initialstate": initialstate}
 
 
 def write_fixture(directory: Path, documents: dict[str, dict]) -> None:
@@ -2343,6 +2420,43 @@ def selftest() -> int:
         def validate_world_problems(documents, directory, rule):
             write_fixture(directory, documents)
             return validate(directory, wanted=[rule])[1]
+
+        # `initialstate.json` (`HOUSE-00395`). This is the one frame every test and every
+        # screenshot begins on, so a start position outside its own cell is a first frame spent
+        # falling and every reference here is one the first second of the game follows.
+        floating_player = copy.deepcopy(base)
+        floating_player["initialstate"]["player"]["position"] = [0.0, 40.0, 2.0]
+        in_the_air = workspace / "start-air"
+        write_fixture(in_the_air, floating_player)
+        _, problems = validate(in_the_air, wanted=[10])
+        require(any("first frame spent falling" in x.message for x in problems),
+                f"a player starting above the ceiling is caught ({[str(x) for x in problems]})")
+
+        elsewhere = copy.deepcopy(base)
+        elsewhere["initialstate"]["pets"]["PET_CAT"]["position"] = [40.0, 0.60, 7.0]
+        wrong_room = workspace / "start-elsewhere"
+        write_fixture(wrong_room, elsewhere)
+        _, problems = validate(wrong_room, wanted=[10])
+        require(any("not inside cell" in x.message for x in problems),
+                f"and a pet starting outside the room it says it is in "
+                f"({[str(x) for x in problems]})")
+
+        ghost_perch = copy.deepcopy(base)
+        ghost_perch["initialstate"]["pets"]["PET_CAT"]["perch"] = "PERCH_NOWHERE"
+        no_perch = workspace / "start-perch"
+        write_fixture(no_perch, ghost_perch)
+        _, problems = validate(no_perch, wanted=[6])
+        require(any("does not declare" in x.message for x in problems),
+                f"a cat starting on a perch nobody declared is caught "
+                f"({[str(x) for x in problems]})")
+
+        ghost_target = copy.deepcopy(base)
+        ghost_target["initialstate"]["weather"]["target"] = "W_NOWHERE"
+        no_target = workspace / "start-weather"
+        write_fixture(no_target, ghost_target)
+        _, problems = validate(no_target, wanted=[6])
+        require(any("not an archetype" in x.message for x in problems),
+                f"and a weather target that is not an archetype ({[str(x) for x in problems]})")
 
         # The sky file (`HOUSE-00394`). Each of these is silent at runtime when it is wrong.
         backwards = copy.deepcopy(base)

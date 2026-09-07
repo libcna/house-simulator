@@ -3201,6 +3201,35 @@ namespace
         IdRegistry::ResetForTesting();
     }
 
+    TEST(AuthoredWorldTest, TheAuthoredInitialStateStartsOnTheRoad)
+    {
+        IdRegistry::ResetForTesting();
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/initialstate.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
+        }
+
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory, contents));
+        const auto initial = world::WorldLoader::LoadInitialState(directory, contents);
+        ASSERT_TRUE(initial) << initial.Error().ToString();
+
+        // §65.6, and the two numbers it had wrong. The player's feet are at grade, not 3.32 m
+        // above the road; and the clock is seconds since the Unix epoch, because a calendar date
+        // is what the season, the moon phase and the sun's position all need (`HOUSE-00395`).
+        EXPECT_EQ(contents.initialState.player.cell, Intern("EXT_ROAD"));
+        EXPECT_FLOAT_EQ(contents.initialState.player.position.Y, 0.0F);
+        EXPECT_FLOAT_EQ(contents.initialState.player.yawDeg, 0.0F) << "facing north";
+        EXPECT_DOUBLE_EQ(contents.initialState.clock.epochSeconds, 1939209600.0)
+            << "2031-06-14T13:20:00Z, which is 09:20 local at UTC-4";
+        EXPECT_EQ(contents.initialState.clock.utcOffsetMinutes, -240) << "June is inside US DST";
+        EXPECT_FLOAT_EQ(contents.initialState.clock.timeScale, 60.0F);
+
+        IdRegistry::ResetForTesting();
+    }
+
     TEST(AuthoredWorldTest, TheAuthoredSwitchPlatesNameRealGroups)
     {
         IdRegistry::ResetForTesting();

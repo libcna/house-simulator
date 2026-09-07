@@ -5053,15 +5053,15 @@ tester says "the fridge was open". Size is not a concern at 90 KB.
       "avatar": { "sex": "female", "skin": 3, "face": 1, "hair": 2, "hairColour": 4,
                   "top": 1, "topColour": 2, "bottom": 0, "shoes": 2 }
     },
-    "clock": { "epochSeconds": 21563411.5, "timeScale": 60.0,
+    "clock": { "epochSeconds": 1939473011.5, "timeScale": 60.0,
                "latitudeDeg": 40.05, "longitudeDeg": -75.30, "utcOffsetMinutes": -300 },
     "weather": { "cloudCover": 0.81, "cloudCumuliform": 0.34, "precipType": "Rain",
                  "precipIntensity": 0.42, "windSpeed": 6.1, "windDirectionDeg": 231.0,
                  "gustFactor": 0.38, "fogDensity": 0.19, "thunderIntensity": 0.02,
                  "temperatureC": 9.4, "humidity": 0.88,
                  "surfaceWetness": 0.71, "snowDepth": 0.0,
-                 "target": "W_RAIN", "targetExpiry": 21569000.0,
-                 "transitionEnd": 21563900.0, "rngState": "0x9E3779B97F4A7C15" },
+                 "target": "W_RAIN", "targetExpiry": 1939478600.0,
+                 "transitionEnd": 1939473500.0, "rngState": "0x9E3779B97F4A7C15" },
     "interactables": {                 // DELTA only
       "DOOR_L0_FRONT":        { "openFraction": 0.0, "latched": true, "locked": true },
       "DOOR_L1_MASTER":       { "openFraction": 0.53 },
@@ -5142,7 +5142,7 @@ Deterministic, so every test and screenshot starts identically.
 | Simulated date/time | **Saturday 14 June 2031, 09:20 local (UTC−4 DST)** — a summer morning, sun at altitude 42°, azimuth 96° (ESE). Long day, good light, plenty of time before dark. |
 | Moon | Phase 0.62 (waning gibbous), below the horizon at start, rises at 23:41 — so the first night has a bright moon |
 | Weather | `W_PARTLY` reached: `cloudCover 0.35`, `cumuliform 0.9`, no precipitation, `windSpeed 3.2 m/s` from 225° (SW), `fogDensity 0.03`, `temperatureC 21.5`, `humidity 0.55`, `surfaceWetness 0.0`, `snowDepth 0.0`. Target `W_PARTLY`, expiry +140 sim min. RNG seed `0x5EEDC0DEC0FFEE01`. |
-| Player | On the road at `(0.00, 3.32, +5.20)` facing **north** (yaw 0°, pitch −3°), first person, normal walk, holding nothing. Avatar: the default of §46.3. |
+| Player | On the road at `(0.00, 0.00, +5.20)` facing **north** (yaw 0°, pitch −3°), first person, normal walk, holding nothing. Avatar: the default of §46.3. (Y corrected from +3.32 on 2026-09-08 by `HOUSE-00395`: §49 makes `playerPosition` the **feet** and puts the eye at `+ (0, eyeHeight, 0)`, so +3.32 started the game 3.3 m above the road.) |
 | Pedestrian gate | **Closed, unlocked** — the first interaction is opening your own gate, which teaches the interaction system with zero instruction |
 | Vehicle gate | Closed |
 | Front door | Closed, **unlocked** |

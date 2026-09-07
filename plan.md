@@ -6111,8 +6111,35 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             bands run contiguously from 0 to 1, because a cover in a gap is a sky with no clouds
             drawn at all. Five injected bugs, all caught once the band-start fixture was added.
       note: 1 500 stars, per §34, and not the 1 800 in `docs/world-format.md`'s example.
-- [ ] HOUSE-00395 — Author `initialstate.json` exactly as `cna-house.md` §65.6 specifies
+- [x] HOUSE-00395 — Author `initialstate.json` exactly as `cna-house.md` §65.6 specifies
       dep: HOUSE-00355 · sys: world · plat: TOOL · pri: MUST
+      finding: **the game started 3.3 m above the road.** §65.6 puts the player at
+            `(0.00, 3.32, +5.20)`, and §49 makes `playerPosition` the **feet** with the eye at
+            `+ (0, eyeHeight, 0)`. Corrected to grade, and rule 10 now checks that the player and
+            both pets start inside the cell they name, in footprint and in extent — this is the
+            one frame every test and every screenshot begins on, and a start above the floor is a
+            first frame spent falling.
+      finding: **`epochSeconds` was documented as "seconds into the simulated day".** §65.6 starts
+            the game on "Saturday 14 June 2031, 09:20", and a calendar date — which the season, the
+            moon phase and the sun's position all need — is not expressible as an offset into a
+            day. It is seconds since the Unix epoch: 1939209600 is 2031-06-14T13:20:00Z, 09:20 at
+            UTC−4, and 14 June 2031 really is a Saturday. The C++ comment is corrected and §65.2's
+            save example, which carried a value that was neither reading, with it.
+      finding: **§65.6 names `PERCH_L1_WINDOWSEAT` and `HOUSE-00389` had called it
+            `PERCH_L1_LANDING_SEAT`.** The document named it first, in two places; the nav file is
+            renamed to match rather than the other way round.
+      note: `utcOffsetMinutes` is −240, not §32's −300: June is inside US DST, which is what
+            §65.6's "(UTC−4 DST)" says and what the season and the sun's azimuth depend on.
+      note: the file is a **delta**. Everything §65.6 lists as "all closed", "all off" or "all
+            zero" is the default and is absent; the four rows that are there are the only things
+            not starting at rest. Those four ids — three doors and the master's open window — are
+            an obligation on the task that authors door and window interactables, exactly as
+            `layout.openings.json`'s `MAT_*` ids are on `HOUSE-00385`, and rule 6 will hold this
+            file to them the moment those rows exist.
+      note: rule 6 also checks the weather target is an archetype, the pets' perch and bed are ones
+            `layout.nav.json` declares, and every cell named exists. Four injected bugs, all
+            caught. `AuthoredWorldTest` asserts the corrected position and clock through the C++
+            loader.
       accept: every field in §65.6 is present; the three named open doors and the one open window are explicit
 - [x] HOUSE-00396 — Run `report_graph.py` and reconcile its output with `cna-house.md` §16.3; fix whichever is wrong
       dep: HOUSE-00374…HOUSE-00377 · sys: world · plat: TOOL · pri: MUST

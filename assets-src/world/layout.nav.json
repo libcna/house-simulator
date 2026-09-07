@@ -1033,7 +1033,7 @@
   // what makes it read as a cat, so these are the cat's alone.
   "perches": [
     // §13.4's window seat, the cat's favourite
-    { "id": "PERCH_L1_LANDING_SEAT", "cell": "L1_LANDING", "position": [0.00, 4.10, -17.90], "species": ["cat"] },
+    { "id": "PERCH_L1_WINDOWSEAT", "cell": "L1_LANDING", "position": [0.00, 4.10, -17.90], "species": ["cat"] },
     // the top of the wall cabinets
     { "id": "PERCH_L0_KITCHEN_CABINET", "cell": "L0_KITCHEN", "position": [-6.64, 2.85, -26.77], "species": ["cat"] },
     // the back of the sofa
