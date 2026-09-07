@@ -140,6 +140,47 @@ namespace cnahouse::world
         EmissiveOnly,
     };
 
+    /// @brief §22.2's closed class vocabulary.
+    ///
+    /// Closed and parsed once, because the class is what the effect tier, the footstep sound and
+    /// the snow response all fall back to. A free-text class would make every one of those
+    /// fallbacks silently pick a default for a typo.
+    enum class MaterialClass : std::uint8_t
+    {
+        Paint,
+        Wood,
+        Carpet,
+        Tile,
+        Stone,
+        Concrete,
+        Metal,
+        Plastic,
+        Glass,
+        Fabric,
+        Skin,
+        Hair,
+        Fur,
+        Foliage,
+        Asphalt,
+        Gravel,
+        Grass,
+        Soil,
+        Water,
+        Emissive,
+    };
+
+    /// @brief §22.2's `wet_<class>` and `snow_<class>` forms, as a modifier rather than 60 classes.
+    ///
+    /// They are derived spellings of the same class -- `wet_wood` is wood with a darkened albedo,
+    /// not a different material class -- so the base and the state are read apart. That is also
+    /// what lets the effect-tier fallback consult one table of twenty rows and not three.
+    enum class SurfaceState : std::uint8_t
+    {
+        Dry,
+        Wet,
+        Snowy,
+    };
+
     enum class AlphaMode : std::uint8_t
     {
         Opaque,
@@ -241,6 +282,32 @@ namespace cnahouse::world
     [[nodiscard]] util::Result<VisibilityHint> ParseVisibilityHint(std::string_view text);
     [[nodiscard]] util::Result<Orientation> ParseOrientation(std::string_view text);
     [[nodiscard]] util::Result<Species> ParseSpecies(std::string_view text);
+
+    [[nodiscard]] std::string_view ToStringView(MaterialClass value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(SurfaceState value) noexcept;
+
+    /// @brief A `class` string as its base class and its surface state.
+    struct MaterialClassSpec
+    {
+        MaterialClass base = MaterialClass::Paint;
+        SurfaceState state = SurfaceState::Dry;
+    };
+
+    /// @brief Parses `tile`, `wet_tile` or `snow_tile`.
+    [[nodiscard]] util::Result<MaterialClassSpec> ParseMaterialClass(std::string_view text);
+
+    /// @brief The spelling `ParseMaterialClass` accepts, for a diagnostic or a round trip.
+    [[nodiscard]] std::string SpellMaterialClass(MaterialClassSpec spec);
+
+    /// @brief §22.2's Tier S effect for a class, the documented fallback when `effectTierS` is
+    /// absent.
+    ///
+    /// The **static** reading of the table: `wood` is `DualTextureEffect` static and `BasicEffect`
+    /// dynamic, and only static props are batched (§17.4), so the static column is the one the
+    /// batcher uses. `tools/world/build_chunks.py` reads the same table for the same reason, and a
+    /// unit test asserts the two agree row for row -- a chunk built with one vertex layout and
+    /// drawn with the effect the other chose is a wrong-looking surface nobody can trace.
+    [[nodiscard]] EffectTier DefaultEffectTier(MaterialClass value) noexcept;
 
     /// @brief Whether a person can walk through a portal of this kind when nothing is holding it.
     ///
@@ -472,7 +539,8 @@ namespace cnahouse::world
     struct Material
     {
         util::Id id;
-        std::string materialClass;
+        MaterialClass materialClass = MaterialClass::Paint;
+        SurfaceState surfaceState = SurfaceState::Dry;
         std::string albedo;
         std::string normal;
         std::int32_t lightmapChannel = 0;

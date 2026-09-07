@@ -184,7 +184,7 @@ namespace
 
         world::Material tile;
         tile.id = Intern("MAT_TILE");
-        tile.materialClass = "tile";
+        tile.materialClass = world::MaterialClass::Tile;
         contents.materials = {tile};
 
         return contents;
@@ -238,7 +238,7 @@ namespace
         auto contents = Fixture();
         world::Material clash;
         clash.id = Intern("L0_HALL");
-        clash.materialClass = "paint";
+        clash.materialClass = world::MaterialClass::Paint;
         contents.materials.push_back(clash);
 
         auto world = world::WorldData::Create(std::move(contents));

@@ -68,6 +68,12 @@ namespace cnahouse::world
         [[nodiscard]] static util::Result<void> LoadLevels(std::string_view directory,
                                                            WorldData::Contents& contents);
 
+        /// @brief Reads `layout.materials.json` into @p contents.
+        ///
+        /// Read before the cells, because a cell names three of them.
+        [[nodiscard]] static util::Result<void> LoadMaterials(std::string_view directory,
+                                                              WorldData::Contents& contents);
+
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
         /// As each `HOUSE-00344`…`HOUSE-00355` lands, its file joins this sequence. Until then the

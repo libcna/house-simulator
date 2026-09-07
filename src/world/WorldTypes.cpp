@@ -156,6 +156,25 @@ namespace cnahouse::world
             {MarkerKind::Bowl, "bowl"},
         }};
 
+        constexpr std::array<std::pair<MaterialClass, std::string_view>, 20> kMaterialClasses{{
+            {MaterialClass::Paint, "paint"},     {MaterialClass::Wood, "wood"},
+            {MaterialClass::Carpet, "carpet"},   {MaterialClass::Tile, "tile"},
+            {MaterialClass::Stone, "stone"},     {MaterialClass::Concrete, "concrete"},
+            {MaterialClass::Metal, "metal"},     {MaterialClass::Plastic, "plastic"},
+            {MaterialClass::Glass, "glass"},     {MaterialClass::Fabric, "fabric"},
+            {MaterialClass::Skin, "skin"},       {MaterialClass::Hair, "hair"},
+            {MaterialClass::Fur, "fur"},         {MaterialClass::Foliage, "foliage"},
+            {MaterialClass::Asphalt, "asphalt"}, {MaterialClass::Gravel, "gravel"},
+            {MaterialClass::Grass, "grass"},     {MaterialClass::Soil, "soil"},
+            {MaterialClass::Water, "water"},     {MaterialClass::Emissive, "emissive"},
+        }};
+
+        constexpr std::array<std::pair<SurfaceState, std::string_view>, 3> kSurfaceStates{{
+            {SurfaceState::Dry, "dry"},
+            {SurfaceState::Wet, "wet"},
+            {SurfaceState::Snowy, "snow"},
+        }};
+
         constexpr std::array<std::pair<Species, std::string_view>, 2> kSpecies{{
             {Species::Dog, "dog"},
             {Species::Cat, "cat"},
@@ -290,6 +309,95 @@ namespace cnahouse::world
     util::Result<Species> ParseSpecies(std::string_view text)
     {
         return Read(kSpecies, text, "species");
+    }
+
+    std::string_view ToStringView(MaterialClass value) noexcept
+    {
+        return Spell(kMaterialClasses, value);
+    }
+
+    std::string_view ToStringView(SurfaceState value) noexcept
+    {
+        return Spell(kSurfaceStates, value);
+    }
+
+    util::Result<MaterialClassSpec> ParseMaterialClass(std::string_view text)
+    {
+        MaterialClassSpec spec;
+        std::string_view base = text;
+        if (base.starts_with("wet_"))
+        {
+            spec.state = SurfaceState::Wet;
+            base.remove_prefix(4);
+        }
+        else if (base.starts_with("snow_"))
+        {
+            spec.state = SurfaceState::Snowy;
+            base.remove_prefix(5);
+        }
+
+        const util::Result<MaterialClass> parsed = Read(kMaterialClasses, base, "material class");
+        if (!parsed)
+        {
+            // The message must quote what was AUTHORED, not the stem left after the prefix was
+            // taken off: `wet_marble` is the typo, and telling the author that `marble` is not a
+            // class sends them looking for a field that does not say that.
+            return util::Err(util::ErrorCode::InvalidData,
+                             std::string("'") + std::string(text) + "' is not a §22.2 material class; " +
+                                 parsed.Error().Message());
+        }
+        spec.base = parsed.Value();
+        return spec;
+    }
+
+    std::string SpellMaterialClass(MaterialClassSpec spec)
+    {
+        std::string text;
+        if (spec.state == SurfaceState::Wet)
+        {
+            text = "wet_";
+        }
+        else if (spec.state == SurfaceState::Snowy)
+        {
+            text = "snow_";
+        }
+        text += ToStringView(spec.base);
+        return text;
+    }
+
+    EffectTier DefaultEffectTier(MaterialClass value) noexcept
+    {
+        switch (value)
+        {
+            case MaterialClass::Paint:
+            case MaterialClass::Wood:
+            case MaterialClass::Carpet:
+            case MaterialClass::Tile:
+            case MaterialClass::Stone:
+            case MaterialClass::Concrete:
+            case MaterialClass::Asphalt:
+            case MaterialClass::Gravel:
+            case MaterialClass::Grass:
+            case MaterialClass::Soil:
+                return EffectTier::DualTexture;
+            case MaterialClass::Foliage:
+            case MaterialClass::Hair:
+                return EffectTier::AlphaTest;
+            case MaterialClass::Skin:
+            case MaterialClass::Fur:
+                // §22.2 draws both with `SkinnedEffect`. `build_chunks.py` refuses to batch a
+                // static prop wearing one rather than choosing a layout, because a skinned prop is
+                // an animated prop and batching it would freeze it in its bind pose inside a wall.
+                return EffectTier::Skinned;
+            case MaterialClass::Metal:
+            case MaterialClass::Plastic:
+            case MaterialClass::Glass:
+            case MaterialClass::Fabric:
+            case MaterialClass::Water:
+            case MaterialClass::Emissive:
+                return EffectTier::Basic;
+        }
+        return EffectTier::Basic;
     }
 
 } // namespace cnahouse::world

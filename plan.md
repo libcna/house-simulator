@@ -4968,8 +4968,25 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00348 — `WorldLoader`: lights and light groups
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
-- [ ] HOUSE-00349 — `WorldLoader`: materials
+- [x] HOUSE-00349 — `WorldLoader`: materials
       dep: HOUSE-00343 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadMaterials`, read **before** the cells because a cell
+            names three of them. 8 new unit tests; eight injected bugs, eight caught.
+      note: §22.2's twenty classes become a closed `MaterialClass` enum, and its `wet_<class>` /
+            `snow_<class>` forms become a `SurfaceState` modifier rather than sixty classes —
+            `wet_wood` is wood with a darkened albedo, not a different class. Reading them apart is
+            what lets the effect-tier fallback consult one table of twenty rows instead of three.
+      finding: the §22.2 class→effect table now exists **twice**, here as `DefaultEffectTier` and
+            in `build_chunks.py` as `CLASS_TO_LAYOUT`, and it has to: one chooses the effect the
+            game draws with, the other the vertex layout the content build bakes. A chunk built
+            with one layout and drawn with the effect the other chose is a wrong-looking surface
+            nobody can trace back to a table, so a unit test asserts the two agree row for row.
+      note: the texture paths stay `std::string` and are not interned. They are handed to
+            `ContentManager` and never compared, so interning would put a few hundred
+            never-looked-up names into the id registry for nothing.
+      finding: a `mask` material with no `alphaCutoff` is refused. There is no threshold to test
+            against, and the stock `AlphaTestEffect` would quietly use its own default instead of
+            the author's — a foliage card with the wrong fringe, everywhere, and nothing to look at.
 - [ ] HOUSE-00350 — `WorldLoader`: prop placements with LOD group, collision reference and interactable reference
       dep: HOUSE-00349 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00351 — `WorldLoader`: nav graph, perches, beds, forbidden zones

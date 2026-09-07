@@ -108,11 +108,45 @@ namespace
             })";
         }
 
-        /// The smallest world the loader can finish on: a manifest and the levels it lists.
+        static std::string Materials()
+        {
+            return R"({
+              "schema": "cna-house/materials/1",
+              "materials": [
+                {
+                  "id": "MAT_TILE_PORCELAIN_GREY", "class": "tile",
+                  "albedo": "Textures/Architecture/tile-porcelain-grey", "normal": null,
+                  "lightmapChannel": 1, "tint": [1.0, 1.0, 1.0],
+                  "specularPower": 48.0, "specularColor": [0.30, 0.30, 0.30],
+                  "alphaMode": "opaque", "alphaCutoff": null, "twoSided": false,
+                  "uvScale": [4.0, 4.0],
+                  "wetResponse": {"albedoDarken": 0.22, "specularBoost": 2.1, "powerBoost": 2.5},
+                  "snowResponse": {"coverable": true, "slopeLimitDeg": 40},
+                  "footstepSurface": "tile", "audioAbsorption": 0.06,
+                  "effectTierS": "DualTexture", "effectTierE": "RoomLit"
+                },
+                { "id": "MAT_LEAF", "class": "foliage", "alphaMode": "mask", "alphaCutoff": 0.5,
+                  "twoSided": true },
+                { "id": "MAT_LAMP", "class": "emissive" },
+                { "id": "MAT_DECK_WET", "class": "wet_wood" },
+                { "id": "MAT_DRIVE_SNOW", "class": "snow_asphalt" }
+              ]
+            })";
+        }
+
+        /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
             Write("layout.levels.json", Levels());
             WriteManifest({"layout.levels.json"});
+        }
+
+        /// The same, plus the materials, for the tests that go all the way through `Load`.
+        void WriteWorldWithMaterials() const
+        {
+            Write("layout.levels.json", Levels());
+            Write("layout.materials.json", Materials());
+            WriteManifest({"layout.levels.json", "layout.materials.json"});
         }
 
         std::string directory_;
@@ -390,11 +424,169 @@ namespace
         ASSERT_FALSE(world::WorldLoader::LoadLevels(directory_, contents));
     }
 
+    // --- the materials --------------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, AMaterialIsReadWithEveryFieldItCarries)
+    {
+        Write("layout.materials.json", Materials());
+        world::WorldData::Contents contents;
+        const auto materials = world::WorldLoader::LoadMaterials(directory_, contents);
+        ASSERT_TRUE(materials) << materials.Error().ToString();
+
+        ASSERT_EQ(contents.materials.size(), 5U);
+        const world::Material& tile = contents.materials[0];
+        EXPECT_EQ(tile.id, Intern("MAT_TILE_PORCELAIN_GREY"));
+        EXPECT_EQ(tile.materialClass, world::MaterialClass::Tile);
+        EXPECT_EQ(tile.surfaceState, world::SurfaceState::Dry);
+        EXPECT_EQ(tile.albedo, "Textures/Architecture/tile-porcelain-grey");
+        EXPECT_EQ(tile.normal, "") << "a null texture is not specified, not a path called \"null\"";
+        EXPECT_EQ(tile.lightmapChannel, 1);
+        EXPECT_FLOAT_EQ(tile.specularPower, 48.0F);
+        EXPECT_EQ(tile.alphaMode, world::AlphaMode::Opaque);
+        EXPECT_FALSE(tile.alphaCutoff.has_value());
+        EXPECT_FLOAT_EQ(tile.uvScaleU, 4.0F);
+        EXPECT_FLOAT_EQ(tile.wet.albedoDarken, 0.22F);
+        EXPECT_TRUE(tile.snow.coverable);
+        EXPECT_FLOAT_EQ(tile.snow.slopeLimitDeg, 40.0F);
+        EXPECT_EQ(tile.footstepSurface, "tile");
+        EXPECT_FLOAT_EQ(tile.audioAbsorption, 0.06F);
+        EXPECT_EQ(tile.effectTierS, world::EffectTier::DualTexture);
+        EXPECT_EQ(tile.effectTierE, "RoomLit");
+    }
+
+    TEST_F(WorldLoaderTest, AWetOrSnowyClassIsTheSameClassInAnotherState)
+    {
+        // §22.2's `wet_<class>` and `snow_<class>` are derived spellings, not sixty classes:
+        // `wet_wood` is wood with a darkened albedo. Reading them apart is what lets the effect
+        // fallback consult one table of twenty rows.
+        Write("layout.materials.json", Materials());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadMaterials(directory_, contents));
+
+        const world::Material& wet = contents.materials[3];
+        EXPECT_EQ(wet.materialClass, world::MaterialClass::Wood);
+        EXPECT_EQ(wet.surfaceState, world::SurfaceState::Wet);
+        EXPECT_EQ(world::SpellMaterialClass({wet.materialClass, wet.surfaceState}), "wet_wood");
+
+        const world::Material& snowy = contents.materials[4];
+        EXPECT_EQ(snowy.materialClass, world::MaterialClass::Asphalt);
+        EXPECT_EQ(snowy.surfaceState, world::SurfaceState::Snowy);
+    }
+
+    TEST_F(WorldLoaderTest, AClassOutsideParagraph22Point2IsRefusedAndQuotedAsAuthored)
+    {
+        // The message must quote what was WRITTEN. Told that `marble` is not a class, an author
+        // looking at a field that says `wet_marble` goes hunting for a field that does not exist.
+        Write("layout.materials.json",
+              R"({"schema": "cna-house/materials/1",
+                  "materials": [{"id": "MAT_X", "class": "wet_marble"}]})");
+        world::WorldData::Contents contents;
+        const auto materials = world::WorldLoader::LoadMaterials(directory_, contents);
+        ASSERT_FALSE(materials);
+        EXPECT_EQ(materials.Error().Code(), ErrorCode::InvalidData);
+        EXPECT_NE(materials.Error().Message().find("wet_marble"), std::string::npos)
+            << materials.Error().ToString();
+        EXPECT_NE(materials.Error().Message().find("concrete"), std::string::npos)
+            << "and list the vocabulary: " << materials.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AnAbsentEffectTierFallsBackToTheClassTable)
+    {
+        // §22.2's table is the *documented* fallback, and `build_chunks.py` applies the same one to
+        // choose a vertex layout. The `foliage` row states no tier and must come out AlphaTest.
+        Write("layout.materials.json", Materials());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadMaterials(directory_, contents));
+
+        EXPECT_EQ(contents.materials[1].materialClass, world::MaterialClass::Foliage);
+        EXPECT_EQ(contents.materials[1].effectTierS, world::EffectTier::AlphaTest)
+            << "foliage with no effectTierS must fall back to §22.2's AlphaTestEffect";
+        EXPECT_EQ(contents.materials[2].effectTierS, world::EffectTier::Basic)
+            << "and emissive to BasicEffect";
+    }
+
+    TEST_F(WorldLoaderTest, TheClassTableAgreesWithBuildChunksRowForRow)
+    {
+        // The two readings of §22.2 that must not drift: this one and `build_chunks.py`'s
+        // `CLASS_TO_LAYOUT`. A chunk built with one vertex layout and drawn with the effect the
+        // other chose is a wrong-looking surface nobody can trace back to a table.
+        using world::DefaultEffectTier;
+        using MC = world::MaterialClass;
+        using ET = world::EffectTier;
+
+        for (const MC value : {MC::Paint,
+                               MC::Wood,
+                               MC::Carpet,
+                               MC::Tile,
+                               MC::Stone,
+                               MC::Concrete,
+                               MC::Asphalt,
+                               MC::Gravel,
+                               MC::Grass,
+                               MC::Soil})
+        {
+            EXPECT_EQ(DefaultEffectTier(value), ET::DualTexture) << world::ToStringView(value);
+        }
+        for (const MC value : {MC::Metal, MC::Plastic, MC::Glass, MC::Fabric, MC::Water, MC::Emissive})
+        {
+            EXPECT_EQ(DefaultEffectTier(value), ET::Basic) << world::ToStringView(value);
+        }
+        for (const MC value : {MC::Foliage, MC::Hair})
+        {
+            EXPECT_EQ(DefaultEffectTier(value), ET::AlphaTest) << world::ToStringView(value);
+        }
+        // `build_chunks.py` has no layout for these two and refuses to batch a static prop wearing
+        // one, because a skinned prop is an animated prop and batching it would freeze it in its
+        // bind pose inside a wall. Here they are the effect §22.2 names.
+        for (const MC value : {MC::Skin, MC::Fur})
+        {
+            EXPECT_EQ(DefaultEffectTier(value), ET::Skinned) << world::ToStringView(value);
+        }
+    }
+
+    TEST_F(WorldLoaderTest, AMaskedMaterialWithoutACutoffIsRefused)
+    {
+        // There is no threshold to test against, and `AlphaTestEffect` would quietly use its own
+        // default rather than the author's -- a foliage card with the wrong fringe, everywhere.
+        Write("layout.materials.json",
+              R"({"schema": "cna-house/materials/1",
+                  "materials": [{"id": "MAT_LEAF", "class": "foliage", "alphaMode": "mask"}]})");
+        world::WorldData::Contents contents;
+        const auto materials = world::WorldLoader::LoadMaterials(directory_, contents);
+        ASSERT_FALSE(materials);
+        EXPECT_NE(materials.Error().Context().find("alphaCutoff"), std::string::npos)
+            << materials.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, ARangeCheckedFieldOutsideItsRangeIsRefused)
+    {
+        for (const std::string row :
+             {R"({"id": "MAT_X", "class": "tile", "lightmapChannel": 2})",
+              R"({"id": "MAT_X", "class": "tile", "snowResponse": {"slopeLimitDeg": 400}})"})
+        {
+            Write("layout.materials.json",
+                  R"({"schema": "cna-house/materials/1", "materials": [)" + row + "]}");
+            world::WorldData::Contents contents;
+            const auto materials = world::WorldLoader::LoadMaterials(directory_, contents);
+            ASSERT_FALSE(materials) << "accepted " << row;
+            EXPECT_EQ(materials.Error().Code(), ErrorCode::OutOfRange) << row;
+        }
+    }
+
+    TEST_F(WorldLoaderTest, AMaterialsFileIsRequiredBeforeTheCellsThatNameIt)
+    {
+        WriteMinimalWorld();
+        world::WorldData::Contents contents;
+        const auto materials = world::WorldLoader::LoadMaterials(directory_, contents);
+        ASSERT_FALSE(materials);
+        EXPECT_EQ(materials.Error().Code(), ErrorCode::NotFound);
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
     {
-        WriteMinimalWorld();
+        WriteWorldWithMaterials();
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_TRUE(world) << world.Error().ToString();
 
@@ -403,6 +595,9 @@ namespace
         EXPECT_FLOAT_EQ(world.Value().FindLevel(Intern("L1"))->ffl, 3.65F);
         EXPECT_NE(world.Value().FindPlumbingStack(Intern("STACK_A")), nullptr);
         EXPECT_FLOAT_EQ(world.Value().GetConstruction().roofPitch, 0.594F);
+        EXPECT_EQ(world.Value().Materials().size(), 5U);
+        ASSERT_NE(world.Value().FindMaterial(Intern("MAT_LEAF")), nullptr);
+        EXPECT_EQ(world.Value().FindMaterial(Intern("MAT_LEAF"))->effectTierS, world::EffectTier::AlphaTest);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -426,7 +621,8 @@ namespace
                   "levels": [{"id": "L0", "ffl": 0.6, "ceiling": 3.3},
                              {"id": "L0", "ffl": 3.6, "ceiling": 6.2}],
                   "construction": {}})");
-        WriteManifest({"layout.levels.json"});
+        Write("layout.materials.json", Materials());
+        WriteManifest({"layout.levels.json", "layout.materials.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

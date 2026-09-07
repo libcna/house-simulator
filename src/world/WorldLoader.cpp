@@ -7,6 +7,9 @@
 #include <utility>
 #include <vector>
 
+#include "Microsoft/Xna/Framework/Vector2.hpp"
+#include "Microsoft/Xna/Framework/Vector3.hpp"
+
 #include "System/IO/Directory.hpp"
 #include "System/IO/File.hpp"
 
@@ -519,6 +522,251 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadMaterials(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.materials.json", "materials", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+
+        const Result<JsonValue> materials = document.Value().Root().RequireArray("materials");
+        if (!materials)
+        {
+            return materials.Error().WithContext("layout.materials.json");
+        }
+        const Result<std::vector<JsonValue>> rows = materials.Value().Elements();
+        if (!rows)
+        {
+            return rows.Error().WithContext("layout.materials.json");
+        }
+
+        for (const JsonValue& row : rows.Value())
+        {
+            Material material;
+            const Result<util::Id> id = RequireId(row, "id");
+            if (!id)
+            {
+                return id.Error().WithContext("layout.materials.json");
+            }
+            material.id = id.Value();
+
+            const Result<std::string> className = row.RequireString("class");
+            if (!className)
+            {
+                return className.Error().WithContext("layout.materials.json");
+            }
+            const Result<MaterialClassSpec> spec = ParseMaterialClass(className.Value());
+            if (!spec)
+            {
+                return spec.Error().WithContext(row.Path() + "/class").WithContext("layout.materials.json");
+            }
+            material.materialClass = spec.Value().base;
+            material.surfaceState = spec.Value().state;
+
+            // The texture paths are content names, not ids: they are handed to `ContentManager`
+            // and never compared to anything, so interning them would put a few hundred
+            // never-looked-up names into the id registry for nothing.
+            const auto text = [&row](std::string_view field) -> Result<std::string>
+            {
+                if (!row.Has(field) || row.IsNull(field))
+                {
+                    return std::string{};
+                }
+                return row.RequireString(field);
+            };
+            for (const auto& [field, target] :
+                 std::initializer_list<std::pair<std::string_view, std::string*>>{
+                     {"albedo", &material.albedo},
+                     {"normal", &material.normal},
+                     {"footstepSurface", &material.footstepSurface},
+                     {"effectTierE", &material.effectTierE}})
+            {
+                const Result<std::string> value = text(field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.materials.json");
+                }
+                *target = value.Value();
+            }
+
+            const Result<std::int64_t> channel = row.OptionalInt("lightmapChannel", 0);
+            if (!channel)
+            {
+                return channel.Error().WithContext("layout.materials.json");
+            }
+            if (channel.Value() < 0 || channel.Value() > 1)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "a lightmap channel is 0 or 1; this is " + std::to_string(channel.Value()),
+                           "layout.materials.json/" + row.Path() + "/lightmapChannel");
+            }
+            material.lightmapChannel = static_cast<std::int32_t>(channel.Value());
+
+            for (const auto& [field, target] :
+                 std::initializer_list<std::pair<std::string_view, Microsoft::Xna::Framework::Vector3*>>{
+                     {"tint", &material.tint}, {"specularColor", &material.specularColor}})
+            {
+                if (!row.Has(field) || row.IsNull(field))
+                {
+                    continue;
+                }
+                const Result<Microsoft::Xna::Framework::Vector3> value = row.RequireVector3(field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.materials.json");
+                }
+                *target = value.Value();
+            }
+
+            const Result<float> power = row.OptionalFloat("specularPower", 0.0F);
+            if (!power)
+            {
+                return power.Error().WithContext("layout.materials.json");
+            }
+            material.specularPower = power.Value();
+
+            const Result<std::string> alphaMode = row.OptionalString("alphaMode", "opaque");
+            if (!alphaMode)
+            {
+                return alphaMode.Error().WithContext("layout.materials.json");
+            }
+            const Result<AlphaMode> mode = ParseAlphaMode(alphaMode.Value());
+            if (!mode)
+            {
+                return mode.Error()
+                    .WithContext(row.Path() + "/alphaMode")
+                    .WithContext("layout.materials.json");
+            }
+            material.alphaMode = mode.Value();
+
+            if (row.Has("alphaCutoff") && !row.IsNull("alphaCutoff"))
+            {
+                const Result<float> cutoff = row.RequireFloat("alphaCutoff");
+                if (!cutoff)
+                {
+                    return cutoff.Error().WithContext("layout.materials.json");
+                }
+                material.alphaCutoff = cutoff.Value();
+            }
+            // A masked material without a cutoff has no threshold to test against, and the stock
+            // `AlphaTestEffect` would silently use its own default rather than the author's.
+            if (material.alphaMode == AlphaMode::Mask && !material.alphaCutoff.has_value())
+            {
+                return Err(ErrorCode::InvalidData,
+                           "alphaMode is \"mask\" and alphaCutoff is not set; there is no threshold "
+                           "to test against",
+                           "layout.materials.json/" + row.Path() + "/alphaCutoff");
+            }
+
+            const Result<bool> twoSided = row.OptionalBool("twoSided", false);
+            if (!twoSided)
+            {
+                return twoSided.Error().WithContext("layout.materials.json");
+            }
+            material.twoSided = twoSided.Value();
+
+            if (row.Has("uvScale") && !row.IsNull("uvScale"))
+            {
+                const Result<Microsoft::Xna::Framework::Vector2> scale = row.RequireVector2("uvScale");
+                if (!scale)
+                {
+                    return scale.Error().WithContext("layout.materials.json");
+                }
+                material.uvScaleU = scale.Value().X;
+                material.uvScaleV = scale.Value().Y;
+            }
+
+            if (row.Has("wetResponse") && !row.IsNull("wetResponse"))
+            {
+                const Result<JsonValue> wet = row.RequireObject("wetResponse");
+                if (!wet)
+                {
+                    return wet.Error().WithContext("layout.materials.json");
+                }
+                const Result<float> darken = wet.Value().OptionalFloat("albedoDarken", 0.0F);
+                if (!darken)
+                {
+                    return darken.Error().WithContext("layout.materials.json");
+                }
+                const Result<float> boost = wet.Value().OptionalFloat("specularBoost", 0.0F);
+                if (!boost)
+                {
+                    return boost.Error().WithContext("layout.materials.json");
+                }
+                const Result<float> powerBoost = wet.Value().OptionalFloat("powerBoost", 0.0F);
+                if (!powerBoost)
+                {
+                    return powerBoost.Error().WithContext("layout.materials.json");
+                }
+                material.wet = {darken.Value(), boost.Value(), powerBoost.Value()};
+            }
+
+            if (row.Has("snowResponse") && !row.IsNull("snowResponse"))
+            {
+                const Result<JsonValue> snow = row.RequireObject("snowResponse");
+                if (!snow)
+                {
+                    return snow.Error().WithContext("layout.materials.json");
+                }
+                const Result<bool> coverable = snow.Value().OptionalBool("coverable", false);
+                if (!coverable)
+                {
+                    return coverable.Error().WithContext("layout.materials.json");
+                }
+                const Result<float> limit = snow.Value().OptionalFloat("slopeLimitDeg", 0.0F);
+                if (!limit)
+                {
+                    return limit.Error().WithContext("layout.materials.json");
+                }
+                if (limit.Value() < 0.0F || limit.Value() > 90.0F)
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "a slope limit is 0..90 degrees; this is " + std::to_string(limit.Value()),
+                               "layout.materials.json/" + row.Path() + "/snowResponse/slopeLimitDeg");
+                }
+                material.snow = {coverable.Value(), limit.Value()};
+            }
+
+            const Result<float> absorption = row.OptionalFloat("audioAbsorption", 0.0F);
+            if (!absorption)
+            {
+                return absorption.Error().WithContext("layout.materials.json");
+            }
+            material.audioAbsorption = absorption.Value();
+
+            // `effectTierS` is stated rather than inferred, and §22.2's class table is the
+            // documented fallback when it is absent. `build_chunks.py` reads the same two rules to
+            // choose a chunk's vertex layout: a chunk built with one layout and drawn with the
+            // effect the other chose is a wrong-looking surface nobody can trace.
+            if (row.Has("effectTierS") && !row.IsNull("effectTierS"))
+            {
+                const Result<std::string> tier = row.RequireString("effectTierS");
+                if (!tier)
+                {
+                    return tier.Error().WithContext("layout.materials.json");
+                }
+                const Result<EffectTier> parsed = ParseEffectTier(tier.Value());
+                if (!parsed)
+                {
+                    return parsed.Error()
+                        .WithContext(row.Path() + "/effectTierS")
+                        .WithContext("layout.materials.json");
+                }
+                material.effectTierS = parsed.Value();
+            }
+            else
+            {
+                material.effectTierS = DefaultEffectTier(material.materialClass);
+            }
+
+            contents.materials.push_back(std::move(material));
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -533,7 +781,16 @@ namespace cnahouse::world
             return levels.Error();
         }
 
-        util::Log::Info(util::LogCat::World, "loaded {} level(s) from {}", contents.levels.size(), directory);
+        if (const Result<void> materials = LoadMaterials(directory, contents); !materials)
+        {
+            return materials.Error();
+        }
+
+        util::Log::Info(util::LogCat::World,
+                        "loaded {} level(s) and {} material(s) from {}",
+                        contents.levels.size(),
+                        contents.materials.size(),
+                        directory);
         return WorldData::Create(std::move(contents));
     }
 
