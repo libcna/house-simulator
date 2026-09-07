@@ -111,6 +111,21 @@ jobs:
           python3 tools/assets/origin_check.py --selftest
           python3 tools/assets/pbr_to_stock.py --selftest
 
+      - name: The world files must have a schema a machine can check
+        working-directory: cna-house
+        # `HOUSE-00341`. The sixteen schemas are generated from one source, so what this proves is
+        # that they still reject what they claim to: a lower-case id, a cell with no footprint, an
+        # unknown field, a header borrowed from another kind. It also proves the two things they
+        # deliberately do NOT do -- a portal naming cells that do not exist, and a box with
+        # min > max, both pass -- because those need the whole layout at once and belong to
+        # `validate_world.py` (`HOUSE-00358`), not to a second weaker copy of it here.
+        #
+        # `--check` runs in the lint gate above and needs no jsonschema; only the selftest and
+        # `--validate` do, which is why the install is here and not there.
+        run: |
+          python3 -m pip install --break-system-packages --user jsonschema
+          python3 tools/world/world_schema.py --selftest
+
       - name: Rooms must become walls, and the collision file must read back
         working-directory: cna-house
         # `HOUSE-00210`. The fixture is three rooms chosen so that every rule has something to

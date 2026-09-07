@@ -5,6 +5,10 @@ files under `assets-src/world/` are the single source of truth for geometry, col
 lighting zones, audio zones, interaction placement and asset residency. This document is the
 reference; `cna-house.md` §15 is the authority behind it.
 
+Each file also has a machine-checkable [JSON Schema](world-schema/) — see
+[The machine-checkable half](#the-machine-checkable-half) below for what it does and does not
+decide.
+
 The authored files are JSONC (comments permitted); the build strips comments and deploys plain
 JSON beside the compiled content, where the runtime reads them with `System::IO::File` +
 `System::Text::Json`. They are data the *game* owns, not framework content, so no
@@ -461,10 +465,30 @@ The asset manifest ([ADR-0012](decisions/ADR-0012-asset-licensing.md)). One row 
 
 ---
 
+## The machine-checkable half
+
+This document is the reference a person reads. Beside it, [`world-schema/`](world-schema/) carries
+the same sixteen files as **JSON Schema draft 2020-12** — one `<kind>.schema.json` each — which an
+editor can attach for completion and diagnostics as you type, and which
+[`validate_world.py`](../tools/world/validate_world.py) runs before any of its own rules.
+
+They are generated from a single source, [`tools/world/world_schema.py`](../tools/world/world_schema.py),
+so that the id pattern, the `[x, y, z]` vector, the `{"x": [min, max], "z": [min, max]}` range and
+the `schema` header rule are one definition rather than sixteen that can quietly disagree.
+`world_schema.py --check` is a CI gate; regenerate with `--emit` after changing a shape here.
+
+The schemas check **shape**: presence, type, range, and that an id looks like an id, each problem
+reported against the field that carries it. They deliberately do **not** check the eleven rules
+below. Rules 4, 5, 6, 7, 9 and 11 span two files or the whole layout, and JSON Schema cannot see
+across a file boundary; rules 2, 3, 8 and 10 compare two numbers to each other, which it also
+cannot do. A schema that attempted them would be a second, weaker validator — so a portal naming a
+cell that does not exist, and a box whose `min` exceeds its `max`, both pass the schema and fail
+the validator.
+
 ## Validation
 
 `tools/world/validate_world.py`, mirrored by a C++ validator the unit tests use, enforces eleven
-rules (`cna-house.md` §15.7). It runs in CI and as a pre-build step, and a failure **fails the
+rules (`cna-house.md` §15.7) on top of the schemas above. It runs in CI and as a pre-build step, and a failure **fails the
 build**:
 
 1. every id is unique and matches `^[A-Z][A-Z0-9_]*$`;

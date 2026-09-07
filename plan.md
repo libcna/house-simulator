@@ -4884,8 +4884,28 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
 
 ### 5.1 Schema and loader
 
-- [ ] HOUSE-00341 — Define and document the JSON schema files for all 16 world files (`docs/world-format.md` + machine-checkable JSON Schema)
+- [x] HOUSE-00341 — Define and document the JSON schema files for all 16 world files (`docs/world-format.md` + machine-checkable JSON Schema)
       dep: HOUSE-00033 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/world/world_schema.py` generates all sixteen draft-2020-12
+            schemas into `docs/world-schema/` from **one** source, so the id pattern, the
+            `[x, y, z]` vector, the `{"x": [min,max], "z": [min,max]}` range and the
+            `cna-house/<kind>/<n>` header rule are one definition, not sixteen that can quietly
+            disagree — sixteen schemas that accept a lower-case id in one file and not another
+            look exactly like sixteen correct schemas. `--check` is a gate in `run_checks.sh` and
+            needs only the standard library; `--validate DIR` and `--selftest` need `jsonschema`,
+            which CI installs for them alone. 101 selftest claims, 15/15 injected bugs caught.
+            `docs/world-format.md` gains a "machine-checkable half" section.
+      note: the sixteen are `layout_io.FILES` **minus `assets.manifest.json`**. `world-format.md`
+            says "seventeen JSON files under `assets-src/world/`" and both counts are right: the
+            seventeenth is the *asset* manifest, whose schema is `cna-house.md` §20.3 and whose
+            gate is `check_manifest.py`. A selftest claim pins this so the next reader does not
+            have to rediscover it.
+      finding: the schemas check **shape only**, and this is a decision rather than a limitation.
+            Of §15.7's eleven rules, 4, 5, 6, 7, 9 and 11 span two files or the whole layout,
+            which JSON Schema cannot see across, and 2, 3, 8 and 10 compare two numbers to each
+            other, which it cannot do either. Two selftest claims assert the *negative* — a portal
+            naming cells that do not exist passes, and a box with `min > max` passes — so that
+            `HOUSE-00358` is not written on the assumption that the schema already caught them.
 - [ ] HOUSE-00342 — Implement `WorldData`: the immutable in-memory model (levels, cells, portals, openings, stairs, lights, materials, props, nav, audio, exterior)
       dep: HOUSE-00341, HOUSE-00028 · sys: world · plat: ALL · pri: MUST
       files: src/world/WorldData.cpp|hpp

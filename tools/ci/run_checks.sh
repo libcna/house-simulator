@@ -111,6 +111,10 @@ run_gate "budget"     python3 tools/ci/budget_report.py --check
 # graph, so a stage added without regenerating it is a documented order that is no longer
 # the order. This is the same idiom the budget report uses, for the same reason.
 run_gate "content-doc" python3 tools/ci/build_content.py --check-docs
+# `HOUSE-00341`. The sixteen world files' JSON Schemas are generated from one source so that the
+# shared id pattern, vector and range cannot drift between them; docs/world-schema/ is what an
+# editor and `validate_world.py` read, and a stale copy of it is worse than none.
+run_gate "world-schema" python3 tools/world/world_schema.py --check
 # `HOUSE-00280`. The surface map is counted from the manifest, so importing or dropping a
 # footstep sample changes it. A stale map is HOUSE-00281 sourcing the wrong list.
 run_gate "footsteps" python3 tools/assets/footstep_map.py --check
