@@ -1058,7 +1058,10 @@ Three more types the data needed and this table did not list, added 2026-09-07 b
 
 Counts per elevation. **Measured** from `assets-src/world/layout.portals.json` after `HOUSE-00376`
 authored it, replacing the designed counts that stood here before; the planes are the rooms' own
-faces, which is why the front reads `z = −14.30` and not the outer face `z = −14.0`:
+faces, which is why the front reads `z = −14.30` and not the outer face `z = −14.0`. The table
+below is a **gate**: `tools/world/window_schedule.py --check` compares it with the layout cell by
+cell and fails when the two drift (`HOUSE-00380`). The per-window schedule is
+[`docs/window-schedule.md`](docs/window-schedule.md), generated from the same data:
 
 | Façade | B1 | L0 | L1 | L2 | L3 | Total |
 |---|---|---|---|---|---|---|

@@ -5748,8 +5748,30 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             and reading a missing field as 0.00 would make the porch steps climb from the basement.
             It refuses a flight that declares one and not the other. `AuthoredWorldTest` asserts
             rule 8 over the deployed world from the other implementation, as it now does rule 7.
-- [ ] HOUSE-00380 — Author the window schedule per façade per level (§12.6), and cross-check counts against the portals file
+- [x] HOUSE-00380 — Author the window schedule per façade per level (§12.6), and cross-check counts against the portals file
       dep: HOUSE-00376 · sys: world · plat: TOOL · pri: MUST
+      finding: **`layout.windows.json` does not exist and should not.** §12.6 said "full schedule
+            lives in `layout.windows.json`", and a window is already two rows — a portal and a
+            leaf. A third file repeating both would be a third thing to keep in step and a third
+            place to be wrong. The schedule is **derived**: `tools/world/window_schedule.py`
+            writes `docs/window-schedule.md` from the layout, and §12.6 now points at it.
+      note: the deliverable with teeth is the **cross-check**, not the document. §12.6's counts
+            table is written and maintained by a human, and `HOUSE-00376` already found it fifteen
+            windows out. `--check` parses it out of `cna-house.md` and compares it cell by cell
+            with the data, so a window added to one and not the other is a failed gate rather than
+            a discrepancy nobody notices for a year. Wired as the `window-schedule` gate and as a
+            CI selftest step.
+      note: façade names are matched through a normalisation, not by string equality: §12.6 writes
+            "South (front, `z = −14.30`)" and the tool's list says "South (front)". Comparing the
+            raw strings would fail the day somebody adds the coordinate a reader needs.
+      note: the size in the schedule is the **portal's**, which is the hole, and not the leaf's,
+            which is 20–40 mm smaller. Both are in the data and only one is the opening in the
+            wall; a claim pins which, because the two look equally plausible in a table.
+      note: six injected bugs, all caught — a door scheduled as a window, the leaf's size reported
+            instead of the hole's, a missing §12.6 table passing, a drifted count not reported, an
+            unplaced window not reported, and the schedule left in the portals file's order. The
+            last two needed the fixtures sharpening: the ordering claim only bites when the
+            out-of-order window also sorts first by id.
 - [ ] HOUSE-00381 — Author `layout.lights.json` for `B1` and `L0`: fixtures, groups, colour temperatures, ranges, defaults
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00382 — Author `layout.lights.json` for `L1`, `L2`, `L3`

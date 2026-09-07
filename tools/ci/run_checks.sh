@@ -138,6 +138,10 @@ run_gate "world-rules" check_world
 # (`HOUSE-00364`). A stale deploy is a house that does not match the one in the repository, and
 # nothing in the frame would say so. `--check` writes nothing and passes when nothing is deployed
 # yet, which is the state a fresh checkout is in.
+# `HOUSE-00380`. §12.6's counts table is maintained by hand and has already been found fifteen
+# windows out (`HOUSE-00376`). This compares it, cell by cell, with the layout, and regenerates
+# docs/window-schedule.md -- the per-window schedule §12.6 said lived in a file that never existed.
+run_gate "window-schedule" python3 tools/world/window_schedule.py --check
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
 # `HOUSE-00280`. The surface map is counted from the manifest, so importing or dropping a
 # footstep sample changes it. A stale map is HOUSE-00281 sourcing the wrong list.

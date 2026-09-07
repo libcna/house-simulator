@@ -168,6 +168,16 @@ jobs:
           python3 -m pip install --break-system-packages --user jsonschema
           python3 tools/world/report_graph.py --selftest
 
+      - name: The window schedule must be measured, and §12.6 must agree with it
+        working-directory: cna-house
+        # `HOUSE-00380`. §12.6's counts table is maintained by hand and `HOUSE-00376` found it
+        # fifteen windows out. The claims that matter: a door in the same wall is not a window; the
+        # size reported is the PORTAL's, which is the hole, not the leaf's; a drifted count is
+        # named with both numbers; a window on no known façade is reported rather than quietly
+        # dropped; and a cna-house.md with no table at all fails instead of passing.
+        run: |
+          python3 tools/world/window_schedule.py --selftest
+
       - name: Rooms must become walls, and the collision file must read back
         working-directory: cna-house
         # `HOUSE-00210`. The fixture is three rooms chosen so that every rule has something to
