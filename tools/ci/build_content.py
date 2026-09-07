@@ -152,12 +152,24 @@ def default_stages() -> list[Stage]:
         Stage("anim", "validate", ["python3", "tools/ci/check_anim_assets.py"],
               inputs=["assets-src/Models/**/*.glb"], outputs=[],
               description="single-skin models, and every sidecar binds"),
-
         # --- the world chain (`HOUSE-00210`…`HOUSE-00215`) --------------------------------------
+        # `HOUSE-00363`. The layout gate comes first in this chain, because `build_collision.py`
+        # and the five tools after it read the layout and believe it; §15.7 says a validation
+        # failure fails the build, and the only moment that can be true is before the first
+        # generator has read a portal.
+        #
+        # It is in the world group and not in `validate` deliberately. `with_validator_gate` wires
+        # every stage in that group to every generator, which is right for the licence and
+        # manifest gates -- they speak for the whole tree -- and wrong for this one: an unauthored
+        # layout is no reason to stop compiling the textures.
+        Stage("world-rules", "world",
+              ["python3", "tools/world/validate_world.py", "assets-src/world"],
+              inputs=["assets-src/world/*.json"], outputs=[], needs=["manifest"],
+              description="the eleven rules of §15.7 over the authored layout"),
         Stage("collision", "world",
               ["python3", "tools/world/build_collision.py"],
               inputs=["assets-src/world/*.json", "assets-src/assets.manifest.json"],
-              outputs=["content/world/collision.bin"], needs=["manifest"],
+              outputs=["content/world/collision.bin"], needs=["world-rules"],
               description="rooms become walls; the layout and the _COL proxies"),
         Stage("nav", "world", ["python3", "tools/world/build_nav.py"],
               inputs=["assets-src/world/*.json"], outputs=["content/world/nav.bin"],

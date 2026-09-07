@@ -89,6 +89,23 @@ check_format()
     clang-format --dry-run -Werror "${files[@]}"
 }
 
+# `HOUSE-00363`. The eleven rules of §15.7 over the authored layout. Skipped, loudly, until
+# `HOUSE-00366` writes the first world file -- a gate over nothing must say so rather than print
+# a green line that means "there was nothing to check". Unlike the rest of this script it needs
+# `jsonschema`, so a checkout without it is told, not quietly passed.
+check_world()
+{
+    if ! compgen -G "assets-src/world/*.json" >/dev/null; then
+        echo "no world files yet (HOUSE-00366 writes the first) -- nothing to validate"
+        return 0
+    fi
+    if ! python3 -c 'import jsonschema' 2>/dev/null; then
+        echo "validate_world needs jsonschema: python3 -m pip install --user jsonschema" >&2
+        return 1
+    fi
+    python3 tools/world/validate_world.py assets-src/world
+}
+
 # ---------------------------------------------------------------------------------------------
 
 run_gate "layout"     python3 tools/ci/check_layout.py
@@ -115,6 +132,7 @@ run_gate "content-doc" python3 tools/ci/build_content.py --check-docs
 # shared id pattern, vector and range cannot drift between them; docs/world-schema/ is what an
 # editor and `validate_world.py` read, and a stale copy of it is worse than none.
 run_gate "world-schema" python3 tools/world/world_schema.py --check
+run_gate "world-rules" check_world
 # `HOUSE-00280`. The surface map is counted from the manifest, so importing or dropping a
 # footstep sample changes it. A stale map is HOUSE-00281 sourcing the wrong list.
 run_gate "footsteps" python3 tools/assets/footstep_map.py --check

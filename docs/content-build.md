@@ -70,13 +70,14 @@ the generators would be reporting on assets the pipeline had already consumed.
 | 8 | **`cnb-media`** | compile | compile assets-src/Media to content with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Media/**/*` | — (a gate) |
 | 9 | **`cnb-models`** | compile | compile assets-src/Models to content/Models with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Models/**/*` | — (a gate) |
 | 10 | **`cnb-textures`** | compile | compile assets-src/Textures to content/Textures with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Textures/**/*` | — (a gate) |
-| 11 | **`collision`** | world | rooms become walls; the layout and the _COL proxies | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/assets.manifest.json` | `content/world/collision.bin` |
-| 12 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/chunks.bin` |
-| 13 | **`cnb-world`** | compile | compile assets-src/world to content/world with cna-content | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/**/*` | — (a gate) |
-| 14 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/coverage.bin` |
-| 15 | **`nav`** | world | the pet waypoint graph | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/nav.bin` |
-| 16 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
-| 17 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
+| 11 | **`world-rules`** | world | the eleven rules of §15.7 over the authored layout | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | — (a gate) |
+| 12 | **`collision`** | world | rooms become walls; the layout and the _COL proxies | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json`<br>`assets-src/assets.manifest.json` | `content/world/collision.bin` |
+| 13 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/chunks.bin` |
+| 14 | **`cnb-world`** | compile | compile assets-src/world to content/world with cna-content | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/**/*` | — (a gate) |
+| 15 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/coverage.bin` |
+| 16 | **`nav`** | world | the pet waypoint graph | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/nav.bin` |
+| 17 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
+| 18 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
 
 The command each stage runs:
 
@@ -91,6 +92,7 @@ cnb-fonts      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_B
 cnb-media      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Media -o content --quiet
 cnb-models     /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Models -o content/Models --quiet
 cnb-textures   /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Textures -o content/Textures --quiet
+world-rules    python3 tools/world/validate_world.py assets-src/world
 collision      python3 tools/world/build_collision.py
 chunks         python3 tools/world/build_chunks.py
 cnb-world      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/world -o content/world --quiet

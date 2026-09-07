@@ -5013,8 +5013,21 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             `hatch` exempt, and a horizontal portal measured across its narrowest dimension since
             both of its dimensions are horizontal). The acceptance names **all 186 portals**, so
             this task closes when `HOUSE-00374`…`HOUSE-00379` have authored them.
-- [ ] HOUSE-00363 — Wire `validate_world.py` into the content build and CI
+- [x] HOUSE-00363 — Wire `validate_world.py` into the content build and CI
       dep: HOUSE-00358 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-07) a `world-rules` stage at the head of the world chain in
+            `build_content.py`, and a `world-rules` gate in `run_checks.sh`. §15.7 says a
+            validation failure fails the build, and the only moment that can be true is before
+            `build_collision.py` has read a portal.
+      finding: it is deliberately **not** in the `validate` group. `with_validator_gate` wires
+            every stage in that group to every generator, which is right for the licence and
+            manifest gates — they speak for the whole tree — and wrong for this one: putting it
+            there blocked `cnb-textures`, `cnb-audio`, `cnb-fonts`, `cnb-models` and `cnb-media`
+            because the layout is not authored yet. An unauthored layout is no reason to stop
+            compiling the textures.
+      note: until `HOUSE-00366` writes the first world file the gate prints why it has nothing to
+            check rather than a bare green line, and it is the one gate in `run_checks.sh` that
+            needs `jsonschema`, so a checkout without it is told rather than quietly passed.
 - [ ] HOUSE-00364 — Implement `world.manifest.json` hashing and the `worldHash` used by the save system
       dep: HOUSE-00343 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00365 — Measure world load time; assert < 250 ms
