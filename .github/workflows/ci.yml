@@ -75,6 +75,27 @@ jobs:
         # plants a violation of each of the fourteen rejected classes and requires each to be found.
         run: tools/ci/check_xna_only.py --selftest
 
+      - name: The fonts gate, and the audio converter's own claims
+        working-directory: cna-house
+        # `HOUSE-00193`: the audio selftest proves determinism AND proves that the naive ffmpeg
+        # command embeds a toolchain fingerprint, so the flags that remove it cannot rot into
+        # decoration.
+        run: |
+          sudo apt-get install -y ffmpeg
+          python3 tools/ci/check_fonts.py
+          python3 tools/assets/convert_audio.py --selftest
+
+      - name: The LOD generator must hit its ratios and keep its silhouettes
+        working-directory: cna-house
+        # `HOUSE-00189`. Blender's glTF I/O needs numpy and Debian's Blender embeds the SYSTEM
+        # python, so numpy is installed for that interpreter rather than assumed -- see
+        # `tools/blender/blender_env.py`. The selftest authors its own fixture; nothing is committed.
+        run: |
+          sudo apt-get install -y blender
+          /usr/bin/python3 -m pip install --break-system-packages --user numpy || true
+          CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
+            python3 tools/blender/lod_gen.py --selftest
+
   # --- HOUSE-00134 -------------------------------------------------------------------------------
   build-and-unit:
     name: build ${{ matrix.preset }} + unit
@@ -117,6 +138,15 @@ jobs:
         run: |
           python3 tools/ci/content_verify.py --selftest
           python3 tools/ci/content_verify.py --hashes
+
+      - name: The XNA-only rule, asked of the compiler
+        if: matrix.preset == 'linux-debug'
+        working-directory: cna-house
+        # `HOUSE-00168`. It belongs HERE rather than in `lint`, because it needs
+        # `build/compile_commands.json` and a compiler: it recompiles each translation unit with
+        # `CNA_STRICT_XNA_API` and reports every call that actually RESOLVES to a CNAEXT member.
+        # `check_xna_only.py` cannot see those -- `KeyboardState{}` names no forbidden identifier.
+        run: python3 tools/ci/check_xna_strict.py --all
 
       - name: Unit tests
         working-directory: cna-house

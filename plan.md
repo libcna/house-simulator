@@ -2545,9 +2545,50 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             the sign is written down in the source, because "which face touches the wall" under
             glTF's −Z-forward convention is exactly the kind of thing each author would otherwise
             re-derive and half of them would get backwards.
-- [ ] HOUSE-00189 — `tools/blender/lod_gen.py`: decimate to LOD1/LOD2 with normal transfer, UV preservation and a triangle-budget target
+- [x] HOUSE-00189 — `tools/blender/lod_gen.py`: decimate to LOD1/LOD2 with normal transfer, UV preservation and a triangle-budget target
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
       accept: LOD1 ≈ 35 %, LOD2 ≈ 12 % of LOD0 triangles; silhouette error under a stated threshold
+      note: (2026-09-07) **ACCEPTED, measured: LOD1 = 0.350 and LOD2 = 0.120 exactly**, silhouette
+            error 0.0000 and 0.0056 against budgets of 0.03 and 0.10. 13 selftest checks. The first
+            Blender tool, so it also establishes `tools/blender/blender_env.py`, which the seven
+            that follow (`HOUSE-00190`, `00204`–`00209`) reuse.
+      finding: **the stated silhouette threshold is 3 % for LOD1 and 10 % for LOD2**, as a fraction
+            of LOD0's silhouette area over 8 yaws, measured by projecting and filling the triangles
+            rather than by rendering — the question is purely geometric and EEVEE would drag
+            lighting and colour management into it. The budget is calibrated, not guessed: at the
+            specified 0.12 ratio LOD2 measures 0.0056, and forcing 0.01 pushes it to 0.1390, which
+            the gate rejects. A triangle count cannot see a destroyed outline; this can.
+      finding: **`blender --background` does NOT propagate a script's exit status.** Measured on
+            4.3.2: `sys.exit(1)` inside `--python`, and an uncaught exception, both leave `blender`
+            returning **0**. Every Blender gate in this project would have silently passed. Each
+            tool now prints `"<tool>: EXIT <n>"` as its last line and `blender_env` treats that as
+            the authority; a missing sentinel is itself a failure.
+      finding: **Debian's Blender embeds the SYSTEM python (3.13) and glTF needs numpy**, which is
+            not installed for it here. Worse, the operator *exists* —
+            `hasattr(bpy.ops.export_scene, "gltf")` is `True` — and only fails when actually run,
+            as a traceback out of the addon. Fixed per `AGENTS.md` rule 4 with one shared copy at
+            `~/deps/blender-python`, activated by `PYTHONPATH` **plus `--python-use-system-env`**,
+            without which Blender drops the variable silently. No `apt`, no system change; deleting
+            the directory is a complete undo.
+      finding: **the normal-transfer check was measuring the wrong normals and would have passed a
+            do-nothing modifier.** `Data Transfer` writes CUSTOM SPLIT normals, which live per
+            loop; `MeshVertex.normal` is recomputed from geometry and never shows them, so with the
+            transfer on and off the figure was identical to three decimals (55.205°). Measured over
+            `mesh.corner_normals` instead, the transfer is worth 12.732° against 13.473°. The check
+            survives only because it compares on-against-off rather than testing one absolute
+            number.
+      finding: **Blender's datablock uniquifying leaked `.001` into the exported mesh names**, so
+            the file carried `armchair_LOD1.001` where §18 names `<name>_LOD1` exactly — invisible
+            from inside Blender, and enough to make a consumer matching on the name miss the mesh.
+            The cause is removing the old datablock *after* renaming the new one. Asserted now by
+            reading the mesh names back out of the exported `.glb`.
+      finding: output is **byte-identical across runs**, and so is the fixture, so a LOD rebuild
+            does not churn the content tree.
+      note: the fixture is a parametric armchair — the "large furniture" category §26.2 gives
+            LOD0/1 — with bevelled panels, curved cushions, four thin legs that a naive decimation
+            deletes, angle-based smooth shading and a real `smart_project` unwrap. 5 568 triangles.
+            **Nothing is committed**: `--make-fixture` authors it deterministically, so downstream
+            Blender tasks share the fixture without a binary entering the repository.
 - [ ] HOUSE-00190 — `tools/blender/collision_proxy.py`: generate `<name>_COL` as a box or convex decomposition, ≤ 64 triangles
       dep: HOUSE-00189 · sys: content · plat: TOOL · pri: MUST
 - [x] HOUSE-00191 — `tools/assets/pbr_to_stock.py`: metallic-roughness → `DiffuseColor`/`SpecularColor`/`SpecularPower` with a fixed documented mapping
