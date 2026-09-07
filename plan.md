@@ -5400,8 +5400,28 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       finding: (2026-09-07, corrected by `HOUSE-00421`) the manifest indexed `assets-src/world`,
             and `VerifyManifest` rehashes what the loader **reads** — the deployed copy. It now
             indexes `content/world`, is written by `deploy_world.py`, and is not authored at all.
-- [ ] HOUSE-00365 — Measure world load time; assert < 250 ms
+- [x] HOUSE-00365 — Measure world load time; assert < 250 ms
       dep: HOUSE-00357 · sys: world · plat: LNX · pri: MUST
+      finding: **167 ms median against a 250 ms budget, with the biggest file still unwritten.**
+            710 KiB over thirteen files — 96 cells, 179 portals, 133 leaves, 243 lights, 333 nav
+            nodes, 80 interactables — and `layout.props.json`'s ~2 400 placements are not among
+            them. The budget is at 67 % before the largest file exists, which is a number to act on
+            now rather than to discover at `HOUSE-00450`. Recorded, not fixed: the fix is either a
+            faster parse or a binary deploy, and both are decisions rather than tweaks.
+      note: the manifest is 10.6 ms of the 167 — `VerifyManifest` rehashes all thirteen files
+            before reading them (`HOUSE-00364`). Broken out in the printed line so a later
+            regression can be attributed to the hashing or to the parse rather than guessed at.
+      note: **validation costs 1.8 ms Fast and 2.0 ms Full**, against a 167 ms read. That answers
+            the question `HOUSE-00357` left open — whether §15.7 belongs in the debug load path —
+            with a number instead of an opinion. The second perf test records the relationship and
+            not just the figure, because it is the relationship that would justify moving it out.
+      note: the measurement is of the thirteen files that exist, not of `Load`, which requires all
+            sixteen: `layout.materials.json` and `layout.props.json` are `HOUSE-00385` and later.
+            A measurement that waited for them would be a measurement nobody has at the point where
+            it is cheapest to act on.
+      note: on a machine shared with other build agents the median is stable at 167–170 ms and the
+            worst sample has been seen at 308 ms. The assertion is on the **median**, and §70.4
+            says perf tests never gate.
 
 ### 5.2 Authoring the layout
 
