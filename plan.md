@@ -5848,8 +5848,32 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             hang them on; `HOUSE-00391` adds them when the houses exist.
       note: the whole house now holds **239 fixtures in 134 groups**, asserted through the C++
             loader by `AuthoredWorldTest` alongside rule 6's per-cell index.
-- [ ] HOUSE-00384 — Author the switch plates: position, gang count, group mapping, including the two three-way pairs
+- [x] HOUSE-00384 — Author the switch plates: position, gang count, group mapping, including the two three-way pairs
       dep: HOUSE-00382 · sys: world · plat: TOOL · pri: MUST
+      finding: **two rooms could not have their own switch.** §53 puts a plate at 1.20 m beside
+            the doorway and §15.7 rule 11 asks for a standing eye position to reach it; the garage
+            loft is 1.40 m under its rafters and the under-stair cupboard 1.75 m, so neither has
+            one. Both are switched from the next room — the loft at the bottom of its ladder, the
+            cupboard from the hall — which is what a house does anyway, and the rule found it
+            before a play-test would have.
+      note: **the gang is the group.** A plate's state field is named after the light group it
+            controls, `state.LG_L0_HALL_MAIN`, which is what makes §53's three-way pair
+            expressible: "a group with two switch props" is two plates whose gangs name the same
+            group, and §53's "one bit per group" is that field. Rule 6 now checks every
+            `light_switch` state field against the declared groups — `state` is free-form by
+            design (`HOUSE-00354`), so a typo in a gang would otherwise be a switch that toggles
+            nothing, and a claim proves the check reads `kind` rather than every row with a state.
+      note: placement is derived: beside the room's entry doorway (a door into a corridor first,
+            then any way in), 0.30 m clear of the opening on the side with more wall beside it,
+            0.06 m into the room, at 1.20 m above that cell's floor. Rule 11 then **proves** all
+            80 are reachable, which is the point of putting them in data rather than in an editor.
+      note: 80 plates, 121 gangs. 15 groups have no plate, exactly as §53 lists: the table and
+            floor lamps are switched at the lamp, the refrigerator's interior light by its door,
+            and the porch lanterns and street lights by a dusk sensor.
+      note: this is the first content of `interactables.json`. §53 wants 640 rows there in twelve
+            behaviour classes; these are the light switches and the file grows.
+      note: `AuthoredWorldTest` asserts the 80 plates, the 121 gangs, that every gang names a real
+            group, and that exactly two groups are on two plates each.
 - [ ] HOUSE-00385 — Author `layout.materials.json`: the material class table of §22.2 with all fields
       dep: HOUSE-00296 · sys: world · plat: TOOL · pri: MUST
 - [x] HOUSE-00421 — Deploy `assets-src/world/*.json` to `content/world/` with the comments stripped

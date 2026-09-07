@@ -872,6 +872,17 @@ def rule_6_references(world: World) -> list[Problem]:
         for field in ("cellA", "cellB"):
             check("portals", index, field, portal.get(field), cells, "cell", have_cells)
 
+    # A light switch's state fields ARE the groups it controls: §53's multi-gang plate is one
+    # action per gang, and naming the field after the group is what lets two plates share one bit
+    # for a three-way pair. So they are references, and a typo in one is a gang that toggles
+    # nothing (`HOUSE-00384`).
+    for index, item in enumerate(world.interactables):
+        if item.get("kind") != "light_switch":
+            continue
+        for field in sorted((item.get("state") or {})):
+            check("interactables", index, f"state/{field}", field, light_groups,
+                  "light group", have_lights)
+
     for index, opening in enumerate(world.openings):
         check("openings", index, "portal", opening.get("portal"), portals, "portal", have_portals)
         # `swing` names the cell the leaf opens into, so it is a reference and is checked like one.
@@ -1607,8 +1618,11 @@ def fixture() -> dict[str, dict]:
         {"id": "SWITCH_HALL", "kind": "light_switch", "cell": "L0_HALL",
          "focus": {"point": [1.90, 1.80, 5.00], "normal": [-1.0, 0.0, 0.0], "radius": 0.05},
          "actions": [{"verb": "Toggle", "do": "toggle(LG_HALL)"}]},
+        # A container's state fields are its own business and are NOT light groups. It is here so
+        # that the gang check can be shown to look at `kind` and not at every row with a `state`.
         {"id": "SHELF_CLOSET", "kind": "container", "cell": "L0_CLOSET",
          "focus": {"point": [2.45, 1.20, 7.00], "normal": [-1.0, 0.0, 0.0], "radius": 0.05},
+         "state": {"tidied": False, "openFraction": 0.0},
          "actions": [{"verb": "Open", "do": "open(SHELF_CLOSET)"}]},
     ]}
 
@@ -1918,6 +1932,25 @@ def selftest() -> int:
         require(any("1.98" in x.message for x in problems),
                 f"a 1.60 m interior door is caught too -- the exemption is the declared `type`, "
                 f"never the measurement ({[str(x) for x in problems]})")
+
+        # A light switch's state fields are the groups it controls, so a typo in one is a gang
+        # that toggles nothing. Nothing else could see it: `state` is free-form by design
+        # (`HOUSE-00354`), so the field name has to be checked against the light groups
+        # (`HOUSE-00384`).
+        typo = copy.deepcopy(base)
+        switch = row(typo, "interactables", "SWITCH_HALL")
+        switch["kind"] = "light_switch"
+        switch["state"] = {"LG_HALL": False, "LG_HAL": False}
+        mistyped = workspace / "switch-typo"
+        write_fixture(mistyped, typo)
+        _, problems = validate(mistyped, wanted=[6])
+        require(any("is not a known light group" in x.message for x in problems)
+                and not any("'LG_HALL'" in x.message for x in problems),
+                f"a gang naming a group that does not exist is caught, and the one beside it that "
+                f"does is not ({[str(x) for x in problems]})")
+
+        require(not any("tidied" in x.message for x in validate(mistyped, wanted=[6])[1]),
+                "and a container's own state fields are not read as light groups")
 
         # A light is inside the cell it names. Rule 6 checks that the cell exists, and a fixture
         # 30 m away resolves perfectly while lighting nothing and baking a lightmap for a room it

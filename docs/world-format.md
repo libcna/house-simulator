@@ -538,6 +538,15 @@ interactable's own typed state fields, with an unknown token a load-time error.
 }
 ```
 
+### Light switches
+
+A switch plate is one row with one action per gang, and its **state field is named after the light
+group** the gang controls: `state.LG_L0_HALL_MAIN`. That is what makes §53's three-way pair
+expressible — "a group with two switch props" is two plates whose gangs name the same group — and
+what §53's "one bit per group" persists. Rule 6 checks every state field of a `light_switch` row
+against the declared groups, because `state` is free-form by design and a typo in a gang is a
+switch that toggles nothing (`HOUSE-00384`).
+
 ### The expression vocabulary
 
 `when` and `do` are parsed at load into a fixed tree over **this row's own** `state` fields

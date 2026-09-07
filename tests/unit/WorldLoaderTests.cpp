@@ -3125,6 +3125,59 @@ namespace
         IdRegistry::ResetForTesting();
     }
 
+    TEST(AuthoredWorldTest, TheAuthoredSwitchPlatesNameRealGroups)
+    {
+        IdRegistry::ResetForTesting();
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/interactables.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
+        }
+
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadLights(directory, contents));
+        const auto items = world::WorldLoader::LoadInteractables(directory, contents);
+        ASSERT_TRUE(items) << items.Error().ToString();
+
+        // §53's plates. A gang's state field IS the group it controls, which is what lets two
+        // plates share one bit for a three-way pair (`HOUSE-00384`).
+        std::set<cnahouse::util::Id> groups;
+        for (const world::Light& light : contents.lights)
+        {
+            groups.insert(light.group);
+        }
+        int plates = 0;
+        int gangs = 0;
+        std::map<std::string, int> platesPerGroup;
+        for (const world::Interactable& item : contents.interactables)
+        {
+            if (item.kind != "light_switch")
+            {
+                continue;
+            }
+            ++plates;
+            EXPECT_FALSE(item.state.Empty()) << "a plate with no gang is not a plate";
+            for (const world::StateTable::Field& gang : item.state.Fields())
+            {
+                ++gangs;
+                EXPECT_EQ(groups.count(Intern(gang.name)), 1U)
+                    << "gang " << gang.name << " on " << item.id.Value() << " names no light group";
+                ++platesPerGroup[gang.name];
+            }
+        }
+        EXPECT_EQ(plates, 80);
+        EXPECT_EQ(gangs, 121);
+        // ...and exactly two groups are on two plates each: §53's three-way pairs.
+        const auto shared = std::count_if(platesPerGroup.begin(),
+                                          platesPerGroup.end(),
+                                          [](const auto& entry) { return entry.second == 2; });
+        EXPECT_EQ(shared, 2) << "L0_STAIR_MAIN's lights and the L1_HALL lights";
+
+        IdRegistry::ResetForTesting();
+    }
+
     TEST(AuthoredWorldTest, TheAuthoredFlightsClimbWhatTheyClaim)
     {
         IdRegistry::ResetForTesting();
