@@ -6321,8 +6321,25 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       dep: HOUSE-00404 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00412 — Author rows for the 17 water outlets, with their basins, plugs and stacks
       dep: HOUSE-00386 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00413 — Author rows for the 13 toilets
+- [x] HOUSE-00413 — Author rows for the 12 toilets
       dep: HOUSE-00386 · sys: world · plat: TOOL · pri: MUST
+      finding: **twelve, not thirteen.** §13.8 says "8 WC-only rooms" over a list of **seven** —
+            `WC1`…`WC7`, a complete run with no gap — so its "13 (8 WCs + 5 bathrooms)" is one too
+            many. Seven WCs and five bathrooms is twelve. §13.8, §57's opening line and phase 14's
+            checklist are all corrected against the rooms that exist.
+      finding: **two toilets drained nowhere.** Placing each pan against the wall its §12.5 stack
+            runs in is what turned it up: `L1_WC3` and `L2_WC5` are on no stack at all, and they
+            sit directly above one another. `STACK_G` is the run they share, dropping into
+            `B1_HOBBY`'s ceiling void, and §12.5 has the row now. Rule 9 could not have caught it —
+            it checks fixtures **against** stacks, and a fixture with no stack to name is invisible
+            to it until somebody places one.
+      note: placing from the chase is what makes the position data rather than decoration: move a
+            stack and the toilets move with it. The focus is the flush handle on the cistern,
+            0.78 m up, which is the thing you reach for.
+      note: §57.1's state in full — `urine`, `solids`, `lidOpen`, `seatUp`, `flushPhase`,
+            `paperLeft` — and §57.2's verbs with the preconditions it gives: the lid before the
+            seat, the seat before the second of the two long actions. Matter-of-fact and
+            proportionate, as §57 asks.
 - [ ] HOUSE-00414 — Author rows for the 3 televisions
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00415 — Author rows for the 11 appliances

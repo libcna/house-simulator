@@ -243,6 +243,14 @@
         "dropTo": "B1_STOR2"
       },
       {
+        // `HOUSE-00413`. §12.5 has six stacks and `L1_WC3` and `L2_WC5` are on none of them --
+        // two WCs, one directly above the other, draining nowhere. They share a footprint, so
+        // they share a chase, and it drops into `B1_HOBBY`'s ceiling void to the main run.
+        "id": "STACK_G", "cells": ["L1_WC3", "L2_WC5"],
+        "chase": { "x": [-7.00, -6.40], "z": [-22.00, -21.30] },
+        "dropTo": "B1_HOBBY"
+      },
+      {
         // Not a vertical stack at all: both fixtures are already in the basement and drain into
         // the run under the slab, so the "chase" is that run's footprint and `dropTo` is null --
         // it drops to an ejector pit, which is machinery and not a cell.

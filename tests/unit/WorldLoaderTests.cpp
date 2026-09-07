@@ -3022,10 +3022,12 @@ namespace
         }
         EXPECT_EQ(registers, 54);
 
-        // §12.5's six stacks (`HOUSE-00386`). Two of them branch on one floor -- the kitchen sink
+        // §12.5's stacks (`HOUSE-00386`). Two of them branch on one floor -- the kitchen sink
         // with the sunroom's wet bar, and the two basement fixtures -- which is what plumbing
-        // does and what §15.7 rule 9 stopped forbidding.
-        ASSERT_EQ(contents.plumbing.size(), 6U);
+        // does and what §15.7 rule 9 stopped forbidding. Seven, not six: `HOUSE-00413` placed the
+        // toilets against the walls their stacks run in and found `L1_WC3` and `L2_WC5`, one
+        // directly above the other, draining nowhere at all.
+        ASSERT_EQ(contents.plumbing.size(), 7U);
         EXPECT_EQ(contents.plumbing[0].id, Intern("STACK_A"));
         EXPECT_EQ(contents.plumbing[0].dropTo, Intern("B1_UTILITY"));
         const auto stack = [&contents](const char* name) -> const world::PlumbingStack&

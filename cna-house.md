@@ -1022,10 +1022,15 @@ schedule and is a first-class reason several rooms are where they are.
 | **STACK-D** (guest east) | `L0_LAUNDRY`, `L1_BATH3`, `L2_BATH5` | X +4.90…+8.70, Z −22.00…−18.30 — perfectly aligned | `B1_UTILITY` |
 | **STACK-E** (kitchen) | `L0_KITCHEN` sink + dishwasher, `L0_SUNROOM` wet bar | north wall of the kitchen, `x ≈ −4.0` | `B1_STOR2` |
 | **STACK-F** (basement) | `B1_WC7`, laundry tub in `B1_LAUNDRY2` | at the drain | ejector pit |
+| **STACK-G** (centre-west) | `L1_WC3`, `L2_WC5` | X −7.00…−6.40, Z −22.00…−21.30 — the two are directly above one another | `B1_HOBBY` ceiling void → main run |
 | Water main | enters `B1_MECHANICAL` through the **south** foundation wall (from the street) | | |
 | Sanitary drain | leaves `B1_UTILITY` through the **north** foundation wall | | |
 | Gas | meter on the west elevation → `B1_MECHANICAL` | | |
 | HVAC | air handler + furnace in `B1_MECHANICAL`; trunk ducts in the basement ceiling; a vertical chase X +2.20…+2.60 beside the stair serves L1/L2/L3 | | |
+
+> STACK-G was added 2026-09-08 by `HOUSE-00413`, which placed the toilets against the walls their
+> stacks run in and found two — `L1_WC3` and `L2_WC5`, one directly above the other — draining
+> nowhere at all.
 
 These are not decoration: the mechanical room's boiler hum, the water-hammer thump when a tap
 closes, the pipe-run creak in the basement ceiling and the duct rumble when the furnace starts are
@@ -1289,9 +1294,9 @@ container interiors of `HOUSE-00373` and the garage storage loft of `HOUSE-00377
 
 | Required | Delivered |
 |---|---|
-| ≥ 3 toilets / WCs | **8 WC-only rooms**: `B1_WC7`, `L0_WC1`, `L0_WC2`, `L1_WC3`, `L1_WC4`, `L2_WC5`, `L2_WC6`, plus a WC in each bathroom |
+| ≥ 3 toilets / WCs | **7 WC-only rooms**: `B1_WC7`, `L0_WC1`, `L0_WC2`, `L1_WC3`, `L1_WC4`, `L2_WC5`, `L2_WC6`, plus a WC in each bathroom (said "8" over a list of seven until 2026-09-08, `HOUSE-00413`; the ids run `WC1`…`WC7` with no gap) |
 | ≥ 3 bathrooms | **5 bathrooms**: `L1_MASTER_BATH`, `L1_BATH2`, `L1_BATH3`, `L2_BATH4`, `L2_BATH5` |
-| Toilet fixtures total | **13** (8 WCs + 5 bathrooms) |
+| Toilet fixtures total | **12** (7 WCs + 5 bathrooms) |
 | Showers / baths | 3 showers, 3 baths (master has both) |
 | Bedrooms | 7 (`L1_MASTER_BED`, `L1_BED2..5`, `L2_BED6`, `L2_BED7`) |
 | Basement spaces | 14 |
@@ -4411,7 +4416,8 @@ half full is half full.
 
 ## 57. Toilets and waste-state simulation
 
-Matter-of-fact, small, and proportionate. 13 toilets.
+Matter-of-fact, small, and proportionate. 12 toilets — seven WC-only rooms and the five
+bathrooms, counted from §13's own room schedule (`HOUSE-00413`).
 
 ### 57.1 State
 
@@ -5888,7 +5894,7 @@ Every requirement in the brief, on Linux, at the quality bar this document sets.
 * [ ] All 640 interactables implemented, data-driven, persisted
 * [ ] Kitchen complete, refrigerator with 32 items and its interior portal
 * [ ] 17 water outlets, 3 fillable baths, 3 showers
-* [ ] 13 toilets with the full waste-state model
+* [ ] 12 toilets with the full waste-state model
 * [ ] 3 televisions with both backends
 * [ ] 214 containers with fill kits
 * [ ] 84 light groups, baked + dynamic, with the daylight and flood model
