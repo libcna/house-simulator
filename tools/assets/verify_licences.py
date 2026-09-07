@@ -4,7 +4,8 @@
 `HOUSE-00197` and `HOUSE-00198`. Two jobs that must not be separated:
 
 * **verify** -- every manifest row has a licence, a licence file that exists, and the four
-  redistribution booleans; a packaging build refuses `PROVENANCE UNKNOWN`.
+  redistribution booleans; every directory holding a DOWNLOADED asset has a `SOURCE.md` that names
+  it (`HOUSE-00261`); a packaging build refuses `PROVENANCE UNKNOWN`.
 * **emit** -- generate `licenses/THIRD-PARTY-ASSETS.md` from those same rows, so attribution is
   impossible to forget (`cna-house.md` §20.1) and impossible to drift.
 
@@ -55,8 +56,49 @@ dependency notices are in [`../NOTICE.md`](../NOTICE.md). This file covers **con
 """
 
 
-def verify(document: dict, *, packaging: bool) -> list[str]:
+def verify_source_records(document: dict) -> list[str]:
+    """`HOUSE-00261`: a downloaded asset lives in a directory that says where it came from.
+
+    The manifest already carries the licence, the URL and the hash. What it cannot carry is the
+    *reasoning* -- which publisher page was read, what was checked, what was rejected and why -- and
+    that is exactly what gets lost between the session that acquired an asset and the person asking
+    six months later whether it can ship.
+
+    **The check is that the record NAMES each asset**, not merely that a file exists. A `SOURCE.md`
+    written for one font and never updated when a second arrived would otherwise pass forever, which
+    is the failure mode of every "please document it" convention that is not enforced.
+    """
     problems: list[str] = []
+    by_directory: dict[Path, list[str]] = {}
+    for row in document.get("assets", []):
+        origin = row.get("origin") or {}
+        if origin.get("kind") != "downloaded":
+            continue
+        source = row.get("sourceFile", "")
+        if not source:
+            continue
+        by_directory.setdefault(Path(source).parent, []).append(row.get("id", ""))
+
+    for directory, ids in sorted(by_directory.items()):
+        record = REPO / directory / "SOURCE.md"
+        if not record.is_file():
+            problems.append(
+                f"{directory}/: holds downloaded asset(s) {', '.join(sorted(ids))} but has no "
+                f"SOURCE.md. Copy docs/asset-review/SOURCE-TEMPLATE.md and fill it in (HOUSE-00261)."
+            )
+            continue
+        text = record.read_text(encoding="utf-8")
+        for asset_id in sorted(ids):
+            if asset_id and asset_id not in text:
+                problems.append(
+                    f"{directory}/SOURCE.md does not mention '{asset_id}', so that asset's "
+                    f"provenance was never written down (HOUSE-00261)."
+                )
+    return problems
+
+
+def verify(document: dict, *, packaging: bool) -> list[str]:
+    problems: list[str] = verify_source_records(document)
     for row in document.get("assets", []):
         where = row.get("id") or row.get("sourceFile") or "<row>"
         origin = row.get("origin") or {}

@@ -59,6 +59,27 @@ JSON carries no comments, so the reasons live here.
 | `P1Probe.fx` | `profile` | `reach` | The source compiles at `vs_2_0`/`ps_2_0`, which is Reach. §18.1 names `hidef` for the effect set, and that is right for the phase-12 effects that will use shader model 3 — setting it here, on a 2.0 source, would be a value nobody had a reason for that changes the fingerprint anyway. |
 | | `debug` | `false` | Pinned for the same reason as `premultiplyAlpha`: a compiler default that changed under us would otherwise ship a debug shader silently. |
 
+## `SOURCE.md`: every downloaded asset says where it came from (`HOUSE-00261`)
+
+Any directory here that holds a **downloaded** asset must carry a `SOURCE.md`, copied from
+[`docs/asset-review/SOURCE-TEMPLATE.md`](../docs/asset-review/SOURCE-TEMPLATE.md).
+`tools/assets/verify_licences.py` fails the build if one is missing — and, more usefully, if one
+exists but does not mention every downloaded asset in that directory **by its manifest id**. A
+record written for the first asset and never updated when a second arrived would otherwise pass
+forever, which is how every unenforced "please document it" convention ends.
+
+It is not a duplicate of the manifest. The manifest holds the facts a machine checks: hashes, the
+four rights booleans, the licence file. `SOURCE.md` holds what a JSON field cannot — *how* the
+licence was established, *what* was checked, and *what was rejected and why*. Negative findings
+belong there too; a variant considered and dropped is worth more to the next reader than a bare
+statement of what was chosen.
+
+**"Free download" is not "redistributable".** Read the licence on the publisher's own page, never an
+aggregator's label, and archive the text under `licenses/<slug>/` rather than linking to it. If the
+terms are unclear the asset is unusable until they are resolved: say so, and mark the row
+`PROVENANCE UNKNOWN — DO NOT SHIP`.
+
+
 ## The fonts are vendored, and that is load-bearing (`HOUSE-00200`)
 
 `Fonts/` holds two committed `.ttf` files and the five `.spritefont` descriptors that rasterise

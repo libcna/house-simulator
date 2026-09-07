@@ -37,6 +37,9 @@ EXEMPT_NAMES = {
     ".gitkeep": "a placeholder that keeps an empty directory in git",
     "COMPILER.txt": "a provenance record this repository generates (HOUSE-00184)",
     "assets.manifest.json": "the manifest itself; it cannot list itself",
+    "SOURCE.md": "the directory's own provenance record (HOUSE-00261); required BY "
+                 "verify_licences.py wherever a downloaded asset lives, so it is enforced rather "
+                 "than merely exempt",
 }
 
 

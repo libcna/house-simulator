@@ -2777,8 +2777,24 @@ legal exists and works; and the licences of every candidate source are actually 
 **Exit.** Every source in `cna-house.md` §19.2 has a verified licence record; the NOX collection
 is imported and manifested; the hero-asset research tasks have concrete answers.
 
-- [ ] HOUSE-00261 — Establish `assets-src/` provenance discipline: a `SOURCE.md` per downloaded asset directory recording where it came from
+- [x] HOUSE-00261 — Establish `assets-src/` provenance discipline: a `SOURCE.md` per downloaded asset directory recording where it came from
       dep: HOUSE-00195 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `docs/asset-review/SOURCE-TEMPLATE.md` is the template;
+            `assets-src/Fonts/SOURCE.md` is the first filled-in record, covering the two Noto faces
+            `HOUSE-00200` vendored. The discipline is enforced by `verify_licences.py`, which
+            already runs in `run_checks.sh` and in the packaging gate, so no new gate was added.
+            `SOURCE.md` is exempt from needing a manifest row of its own — it is enforced elsewhere
+            rather than merely tolerated.
+      finding: **the check is that the record NAMES each asset, not that a file exists.** A
+            `SOURCE.md` written for one asset and never updated when a second arrived would pass
+            forever otherwise, which is how every unenforced "please document it" convention ends.
+            Both failure modes were injected and both were caught: the file removed, and one asset
+            id renamed out of it.
+      finding: the record is deliberately **not** a duplicate of the manifest. The manifest holds
+            what a machine checks — hashes, the four rights booleans, the licence file — and is
+            authoritative about facts; `SOURCE.md` holds how the licence was established, what was
+            checked and **what was rejected and why**, and is authoritative about reasoning. Hashes
+            are not repeated in it, because a copy that can drift is worse than a reference.
 - [ ] HOUSE-00262 — Verify the **Poly Haven** licence; archive the licence page and terms; record redistribution and modification rights
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00263 — Verify the **ambientCG** licence, same treatment
