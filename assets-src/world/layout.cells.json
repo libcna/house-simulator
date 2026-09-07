@@ -1231,7 +1231,7 @@
       "acoustic": { "absorption": 0.96, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
-      "lightGroups": ["LG_EXT_STREET"],
+      "lightGroups": ["LG_EXT_STREET", "LG_EXT_NEIGHBOUR_PORCH"],
       "residencyPack": "neighbourhood", "visibilityHint": "open"
     },
 

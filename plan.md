@@ -6032,8 +6032,26 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             added.
       note: the road runs the full ±220 m and not §10.4's accessible ±35: the geometry continues
             past where the player can walk, which is what makes the barrier believable.
-- [ ] HOUSE-00391 — Author the neighbourhood instance list: N1–N60 with positions, LOD class and material palette
+- [x] HOUSE-00391 — Author the neighbourhood instance list: N1–N60 with positions, LOD class and impostor distance
       dep: HOUSE-00390 · sys: world · plat: TOOL · pri: MUST
+      note: §11.4's sixty buildings in four LOD bands — the two adjacent houses at full detail, six
+            across the street at medium, sixteen further out at low, and thirty-six impostor cards
+            on a ring at 120–260 m — plus the street furniture: five utility poles, four signs,
+            twelve mailboxes, three parked cars, two bin clusters and the basketball hoop. 87 rows.
+            The nine street lights are **not** among them: they are lights and live in
+            `layout.lights.json` (`HOUSE-00383`).
+      note: **the neighbours' porch lights are placed now**, which is what `HOUSE-00383` deferred
+            and said why: their positions are N1's and N2's, and the two houses did not exist. Two
+            per facade, `EXT_WORLD`, on the same dusk sensor as ours and not player-controlled.
+            Rule 6 caught the index the moment they landed — `EXT_WORLD` had lights in a group it
+            did not list — which is the check `HOUSE-00381` added doing its job on a task written
+            two days later.
+      note: this task's title said "material palette"; the schema has no such field and the design
+            does not name one per building. `lodGroup` and `impostorFrom` are what a neighbourhood
+            row carries, and the title now says so rather than promising a field that would have
+            to be invented to satisfy it.
+      note: positions are deterministic — one fixed seed for the jitter — so the street is the same
+            in every build and a screenshot comparison means something.
 - [ ] HOUSE-00392 — Author the vegetation instance list: 34 street trees, property trees, shrubs, hedges, flower beds
       dep: HOUSE-00390 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00393 — Author `layout.weather.json`: the 14 archetypes, 4 seasonal transition matrices, dwell and transition distributions, rate limits

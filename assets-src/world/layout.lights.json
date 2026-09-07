@@ -2227,6 +2227,41 @@
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    // ---- LG_EXT_NEIGHBOUR_PORCH x4 -- §53's neighbours' porch lights, which `HOUSE-00383` could
+    // ---- not place: their positions are N1's and N2's, and the two houses did not exist until
+    // ---- `HOUSE-00391`. Not player-controlled; on the same dusk sensor as ours.
+    {
+      "id": "LIGHT_EXT_NEIGHBOUR_N1_1", "cell": "EXT_WORLD", "group": "LG_EXT_NEIGHBOUR_PORCH",
+      "type": "point", "position": [-33.10, 2.60, -16.40],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 380.0, "range": 6.50,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_NEIGHBOUR_N1_2", "cell": "EXT_WORLD", "group": "LG_EXT_NEIGHBOUR_PORCH",
+      "type": "point", "position": [-34.90, 2.60, -16.40],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 380.0, "range": 6.50,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_NEIGHBOUR_N2_1", "cell": "EXT_WORLD", "group": "LG_EXT_NEIGHBOUR_PORCH",
+      "type": "point", "position": [35.10, 2.60, -16.40],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 380.0, "range": 6.50,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_NEIGHBOUR_N2_2", "cell": "EXT_WORLD", "group": "LG_EXT_NEIGHBOUR_PORCH",
+      "type": "point", "position": [36.90, 2.60, -16.40],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 380.0, "range": 6.50,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
     }
   ]
 }

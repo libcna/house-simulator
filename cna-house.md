@@ -4268,10 +4268,10 @@ decal. That is the right scope.
 
 ## 53. Lights and switches
 
-* **128 switch groups** control **220 fixtures** inside the house, plus the exterior lights below.
-  A group is what a real wall switch controls — the four kitchen down-lights, the two porch
-  lanterns, the single closet bulb. Corrected 2026-09-08 from "84 groups, 169 fixtures", which
-  §13's own per-room column never added up to (`HOUSE-00382`).
+* **128 switch groups** control **220 fixtures** inside the house; **135 groups and 243 fixtures**
+  counting the exterior. A group is what a real wall switch controls — the four kitchen
+  down-lights, the two porch lanterns, the single closet bulb. Corrected 2026-09-08 from "84
+  groups, 169 fixtures", which §13's own per-room column never added up to (`HOUSE-00382`).
 * Switch plates are interactables placed at 1.20 m on the correct side of each doorway
   (data-driven, validated for reachability by §15.7 rule 11). Multi-gang plates offer one action
   per gang: `[E] Kitchen lights   ·   [F] Under-cabinet`.
@@ -4288,7 +4288,9 @@ decal. That is the right scope.
 * Persistence: one bit per group plus a dimmer byte for the 6 dimmable groups.
 * Exterior lights: 2 porch lanterns, 1 garage flood, 2 rear terrace lights, 4 path lights,
   1 shed light, plus the 9 street lights and the neighbours' porch lights (not player-controlled).
-  The **balconies** are missing from that list and §13.4 gives them three groups — two wall
+  The neighbours' porch lights are two per facade on N1 and N2, placed by `HOUSE-00391` with the
+  houses they hang on. The **balconies** are missing from that list and §13.4 gives them three
+  groups — two wall
   lanterns and a festoon on the rear balcony, one lantern on the front. They are `L1` rows, so
   `HOUSE-00382` authored them with the rest of `L1`.
 
@@ -5145,7 +5147,7 @@ Deterministic, so every test and screenshot starts identically.
 | Garage door | Closed. Garage side door closed. Garage↔mudroom door closed. |
 | Interior doors | All closed, **except three**, listed explicitly so the initial state is reproducible: `DOOR_L1_MASTER` at 0.35, `DOOR_L0_PANTRY` at 1.00, `DOOR_L2_ATTIC` at 0.00 (closed — the attic is a discovery) |
 | Windows | All closed **except** `WIN_L1_MASTER_N2` at 0.50 — so weather audio through an open window is testable from the first minute |
-| Lights | **All 134 groups off.** The porch lanterns and the street lights are on their dusk sensor and are therefore off at 09:20. (84 → 134 corrected 2026-09-08; see §28.2.) |
+| Lights | **All 135 groups off.** The porch lanterns and the street lights are on their dusk sensor and are therefore off at 09:20. (84 → 134 corrected 2026-09-08; see §28.2.) |
 | Refrigerator | Closed, full (24 + 8 items), compressor idle, next cycle in 7 sim minutes |
 | Taps, showers | All off; all plugs out; baths empty |
 | Toilets | All clean, lids **down**, seats down, paper full |
