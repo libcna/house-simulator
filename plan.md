@@ -5386,7 +5386,7 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             would carry already exists in `world.manifest.json` — gated at build **and verified by
             `WorldLoader` at load**, which a row is not. Two hashes for one file is the shape of
             rule people work around.
-- [x] HOUSE-00367 — Author `layout.cells.json` for `B1`: 14 cells per §13.2, with materials, footstep surfaces, acoustics, light groups and residency
+- [x] HOUSE-00367 — Author `layout.cells.json` for `B1`: ~~14~~ **15** cells per §13.2, with materials, footstep surfaces, acoustics, light groups and residency
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
       finding: **§13.2's `B1_WC7` sits inside `B1_UNDERSTAIR`.** The table gives the store the
             whole block X +2.20…+4.90, Z −23.00…−20.20 (7.6 m²) and gives the WC a rectangle
@@ -5407,6 +5407,12 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             already 113); `concrete` is the nearest of the twenty and the mat is a prop.
       note: `B1_UNDERSTAIR` carries a `yOverride` because §13.2 calls it "low, sloped ceiling" —
             it is under the flight, so its ceiling is not the level's.
+      finding: (2026-09-07) **§13.2's table has 15 rows and its summary says "14 cells".** Counted:
+            fifteen `B1_*` ids are tabulated, and the authored file has all fifteen. The summary
+            line is the same one that gives 276.9 m² by double-counting `B1_WC7` inside
+            `B1_UNDERSTAIR`, so both halves of it are wrong in the same place — dropping the WC
+            from the count and adding its area to the store. The task title inherits the 14.
+            Corrected count: **15 cells, 273.92 m²**, which is §13.2's own stated envelope.
 - [x] HOUSE-00368 — Author `layout.cells.json` for `L0`: 19 cells per §13.3
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
       note: (2026-09-07) §13.3 needed **no** correction: measured, every one of the nineteen areas

@@ -1088,8 +1088,14 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 | `B1_LAUNDRY2` | Secondary laundry / drying | −4.60 … −2.20 | −27.10 … −24.00 | 7.4 | 1 | — | 1 | Deep sink, drying rack, STACK-F |
 | `B1_UNDERSTAIR` | Under-stair store | +2.20 … +4.90 | −23.00 … −20.20 | 7.6 | 1 | — | 1 | Low, sloped ceiling; the classic junk cupboard |
 
-**14 cells. 276.9 m²** (≈ the 273.9 m² internal envelope; the difference is partition-centre-line
-accounting).
+**15 cells. 273.9 m²**, which is the internal envelope exactly.
+
+> Corrected 2026-09-07 by `HOUSE-00367`, which authored this table and measured it. It read
+> "14 cells. 276.9 m² (≈ the 273.9 m² internal envelope; the difference is partition-centre-line
+> accounting)". Both numbers were wrong in the same place: `B1_WC7` is tabulated **inside**
+> `B1_UNDERSTAIR`, so the count dropped it and the area counted it twice. The store is the
+> L-shaped remainder, 4.68 m² rather than 7.6, and the fifteen cells then cover the envelope with
+> no overlap and no gap.
 
 ### 13.3 `L0` — Main floor · FFL +0.60, ceiling +3.30, clear 2.70 m
 
