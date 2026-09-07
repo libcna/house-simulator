@@ -3045,8 +3045,34 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             per-asset check carries the claim rather than the source's reputation.
 - [ ] HOUSE-00266 — Verify **BlenderKit free tier** licensing model and whether per-asset licences are machine-readable
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
-- [ ] HOUSE-00267 — Verify **Sketchfab CC0** filter semantics: does the filter guarantee CC0, and what evidence do we archive per asset?
+- [x] HOUSE-00267 — Verify **Sketchfab CC0** filter semantics: does the filter guarantee CC0, and what evidence do we archive per asset?
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `docs/licence-evidence/sketchfab.md`. Both questions answered; one thing
+            could **not** be verified and is recorded as such rather than papered over.
+      finding: **the filter does not guarantee CC0.** A filter is a query over a metadata field the
+            uploader set when publishing; selecting a value in a search URL cannot turn a
+            self-declaration into a warranty. Same structure as Freesound's filter and Poly Pizza's
+            per-asset licences. Sketchfab therefore ranks at the bottom of this project's provenance
+            order with Blend Swap — below Freesound, whose terms at least make the uploader warrant
+            and indemnify, and far below Poly Haven and ambientCG. **Never a hero-asset source.**
+      finding: **a trap worth naming: `sketchfab.com/licenses` is about PURCHASED royalty-free
+            assets, not the free Creative Commons downloads**, and it defines an "editorial" tier
+            that "cannot be used for any commercial or promotional use" — NC by another name, and
+            rejected. That page is what a search for "Sketchfab license" returns, so the two systems
+            are easy to conflate in exactly the direction that causes harm.
+      finding: per-asset evidence is fixed: model page URL and id, uploader name, **the licence as
+            displayed on that model page that day**, retrieval date, the `license.txt` Sketchfab
+            bundles into a Creative Commons download, and hashes of both the archive and the
+            extracted asset.
+      finding: **NOT VERIFIED, and named:** the help-centre articles documenting the Creative
+            Commons filter now 404, the help search endpoint 404s, and `sketchfab.com/tos` renders
+            in JavaScript, so no automated read returns its licensing clauses — Sketchfab having
+            been absorbed into Epic's Fab. The conclusions above are reasoned from the structure of
+            an uploader-declared field and this project's own rules, **not quoted from a Sketchfab
+            terms page**. Operationally harmless: the disposition is conservative throughout and **no
+            current task requires Sketchfab** — `HOUSE-00291`…`HOUSE-00293` can satisfy their three
+            sourcing attempts from stronger sources. If it is ever actually reached for, the terms
+            page must be read first, by a human with a browser if necessary.
 - [x] HOUSE-00268 — Verify **Blend Swap CC0** the same way
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
       note: (2026-09-07) `docs/licence-evidence/blendswap.md`.
