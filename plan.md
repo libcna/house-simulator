@@ -2818,8 +2818,31 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
 - [ ] HOUSE-00272 — Verify **Freesound CC0** filter semantics and the per-sound evidence we must archive
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00273 — Verify the **font** licences (OFL) and archive them
+- [x] HOUSE-00273 — Verify the **font** licences (OFL) and archive them
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) Largely discharged by `HOUSE-00200`, which had to verify the licence
+            before the binaries could enter the repository; this task adds what that one did not —
+            the **archived FAQ evidence**. `docs/licence-evidence/ofl-1.1-sil-faq.md` quotes SIL's
+            own answers verbatim, with the FAQ's own version identifier (1.1-update7, November 2023)
+            and the retrieval date, so no conclusion rests on a web page that may since have
+            changed. `docs/licence-evidence/` is new and is where `HOUSE-00262`…`HOUSE-00276` should
+            archive their sources' terms.
+      finding: **verified, and safe for a commercial release.** OFL-1.1, no Reserved Font Name
+            (FAQ 5.7 — none are reserved by default in 1.1, and Noto declares none after its
+            copyright statement). FAQ 1.4 permits selling a package containing the fonts and names
+            "games and entertainment software"; FAQ 1.3 and 1.13 confirm the OFL reaches neither the
+            program nor artwork made with it. The archived licence body is identical to SIL's own
+            published text.
+      finding: **the one obligation that can be broken by accident is packaging.** FAQ 1.20: a
+            bundled font must travel with the copyright statement, the licence notice and the
+            licence text. A packaging step that dropped `licenses/` would breach the OFL while every
+            existing gate stayed green — no check can see a step that has not been written yet. It
+            is recorded in `NOTICE.md`, `assets-src/Fonts/SOURCE.md` and the evidence file, and it
+            is a requirement on the eventual packaging task rather than something closed here.
+      finding: the "Noto" trademark (Google LLC, `name` ID 7 in both binaries) sits **outside** the
+            OFL — FAQ 3.7 is explicit that the licence grants no trademark rights. It does not bite:
+            the files ship unmodified so the notice stays where it is, and the name is not used as
+            this product's branding.
 - [ ] HOUSE-00274 — Verify the **lunar albedo map** and **star catalogue** provenance (public domain expected)
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00275 — Verify the **video footage** sources for the television channels
