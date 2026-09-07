@@ -148,6 +148,14 @@ namespace cnahouse::world
         [[nodiscard]] static util::Result<void> LoadExterior(std::string_view directory,
                                                              WorldData::Contents& contents);
 
+        /// @brief Reads `interactables.json` into @p contents.
+        ///
+        /// A row's `state` is read **before** its `actions`, because every `when` and `do` is
+        /// parsed against it. That ordering is the whole reason the expression vocabulary can be
+        /// closed without a global list of setter verbs (`InteractableExpr.hpp`).
+        [[nodiscard]] static util::Result<void> LoadInteractables(std::string_view directory,
+                                                                  WorldData::Contents& contents);
+
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
         /// As each `HOUSE-00344`…`HOUSE-00355` lands, its file joins this sequence. Until then the

@@ -156,6 +156,11 @@ namespace cnahouse::world
         {
             return step.Error();
         }
+        if (auto step = BuildIndex(rows.interactables, "interactable", world.m_interactableIndex, seen);
+            !step)
+        {
+            return step.Error();
+        }
 
         GroupByCell(
             world.m_contents.lights,
@@ -277,6 +282,12 @@ namespace cnahouse::world
     {
         const std::uint32_t* at = Lookup(m_plumbingIndex, id);
         return at == nullptr ? nullptr : &m_contents.plumbing[*at];
+    }
+
+    const Interactable* WorldData::FindInteractable(util::Id id) const noexcept
+    {
+        const std::uint32_t* at = Lookup(m_interactableIndex, id);
+        return at == nullptr ? nullptr : &m_contents.interactables[*at];
     }
 
     namespace

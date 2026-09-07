@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "cnahouse/util/Result.hpp"
@@ -109,6 +110,15 @@ namespace cnahouse::util
 
         // --- arrays --------------------------------------------------------------------------------
         [[nodiscard]] Result<std::vector<JsonValue>> Elements() const;
+
+        /// @brief An object's members, in the order the file writes them.
+        ///
+        /// The counterpart of `Elements` for an object whose KEYS are data rather than a fixed
+        /// schema. `interactables.json`'s `state` is the case that needs it: the field names are
+        /// the interactable's own and no reader can know them in advance (`HOUSE-00354`). File
+        /// order, not sorted, because that is what an author sees and what a diagnostic should
+        /// quote back.
+        [[nodiscard]] Result<std::vector<std::pair<std::string, JsonValue>>> Members() const;
         [[nodiscard]] Result<std::size_t> Count() const;
 
         /// @brief This value read as a string/number/etc., for elements of an array.

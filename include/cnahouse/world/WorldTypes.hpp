@@ -10,6 +10,7 @@
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Result.hpp"
+#include "cnahouse/world/InteractableExpr.hpp"
 
 /// @file
 /// The row types of the world files, as the runtime holds them (`HOUSE-00342`, `cna-house.md` §15).
@@ -724,6 +725,47 @@ namespace cnahouse::world
         util::Id id;
         util::Id asset;
         std::vector<VegetationInstance> instances;
+    };
+
+    /// @brief One row of an interactable's `actions`.
+    struct InteractableAction
+    {
+        std::string verb;
+        /// Parsed at load. An absent `when` is the predicate that is always true.
+        Predicate when = Predicate::AlwaysTrue();
+        /// Parsed at load. An absent `do` changes nothing, which is right for an action whose
+        /// whole effect is a sound.
+        Effect effect = Effect::Nothing();
+        util::Id sound;
+        std::string anim;
+        float duration = 0.0F;
+    };
+
+    /// @brief `interactables.json`: one of the 640 rows.
+    struct Interactable
+    {
+        util::Id id;
+        /// The kind, e.g. `refrigerator`. Finer than §50.4's twelve behaviour classes — the map
+        /// from a kind to a behaviour belongs to the interaction framework, not to the loader,
+        /// which would otherwise have to be edited to add a 641st row.
+        std::string kind;
+        util::Id cell;
+        util::Id prop;
+        Microsoft::Xna::Framework::Vector3 focusPoint;
+        Microsoft::Xna::Framework::Vector3 focusNormal;
+        float focusRadius = 0.0F;
+        Microsoft::Xna::Framework::Vector3 boundsMin;
+        Microsoft::Xna::Framework::Vector3 boundsMax;
+        std::vector<InteractableAction> actions;
+        std::vector<util::Id> childInteractables;
+        /// The typed state the actions are parsed against.
+        StateTable state;
+        /// Exactly the fields the save carries. §65: a field not listed is derived or transient
+        /// and is recomputed on load, which is what keeps a save at ~90 KB.
+        std::vector<std::string> persist;
+        util::Id audioLoop;
+        Microsoft::Xna::Framework::Vector3 audioEmitter;
+        util::Id portal;
     };
 
     /// @brief `layout.exterior.json`, whole.

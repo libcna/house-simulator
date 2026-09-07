@@ -5138,10 +5138,39 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       finding: `impostorFrom: 0` is kept as a real choice (always an impostor, which is right for
             the far row of houses) while a **negative** distance is refused: that is a sign error
             that swaps the two branches and draws a full mesh at the horizon.
-- [ ] HOUSE-00354 — `WorldLoader`: interactables, with the closed-vocabulary predicate/effect parser
+- [x] HOUSE-00354 — `WorldLoader`: interactables, with the closed-vocabulary predicate/effect parser
       dep: HOUSE-00350 · sys: world · plat: ALL · pri: MUST
       accept: an unknown token is a load-time error naming the file, the id and the token
       verify: unit InteractableExprTests.* with 20 valid and 20 invalid expressions
+      note: (2026-09-07) `InteractableExpr.hpp` (the grammar) and `WorldLoader::LoadInteractables`.
+            Both acceptance lines are met: `InteractableExprTests` carries exactly 20 valid and 20
+            invalid predicates plus 10 invalid effects, and the message reads
+            `interactables.json/FRIDGE_L0_KITCHEN Open when [offset 6 …]: this interactable has no
+            state field "doorAjar"` — file, id, action, token and offset. 14 + 10 unit tests;
+            twelve injected bugs, twelve caught.
+      finding: **the grammar did not exist.** `docs/world-format.md` states the requirement in one
+            sentence — "parsed at load time into a fixed expression tree over this interactable's
+            own typed state fields, with an unknown token a load-time error" — and gives one
+            example, `setDoor(true)`. Nothing anywhere defines the vocabulary, so this task had to.
+      finding: the *operations* are closed and the *field names* are not a list, and the example's
+            `setDoor` had to go. §50.4 has twelve behaviour classes with ~40 distinct state fields
+            between them; a closed list of setter verbs would be a 40-entry table kept in step with
+            every behaviour class, and "adding a 641st interactable is a JSON row" would stop being
+            true. Checking each field against the row's **own** `state` is closed by construction,
+            catches a typo identically, and lets the message list the fields that do exist — which
+            is also exactly what the one authoritative sentence asks for. `world-format.md`'s
+            example now reads `state.doorOpen = true` and the grammar is documented beside it.
+      finding: a row's `state` must be read **before** its `actions`, and a test pins it. That
+            ordering is the only reason the vocabulary can be closed at all.
+      finding: types are checked at **parse**, not at run. `state.doorOpen == 0.5` against a
+            boolean field would otherwise be a silent `false` for the life of the build.
+      note: `util::JsonValue` gained `Members()` — the counterpart of `Elements()` for an object
+            whose KEYS are data. A `state` block's field names are the interactable's own and no
+            reader can know them in advance; there was no way to enumerate them (`HOUSE-00028`'s
+            file, smallest correction, in file order so a diagnostic quotes what the author sees).
+      note: evaluation walks the tree with an explicit stack. The tree comes from data, and a
+            2 000-term predicate — far past anything an author would write — must not be able to
+            overflow the game's stack. A test builds one.
 - [ ] HOUSE-00355 — `WorldLoader`: `initialstate.json` into the canonical state table
       dep: HOUSE-00354 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00356 — Implement `SpatialIndex`: the 2 m × 2 m × level grid over cells, built at load

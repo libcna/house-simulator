@@ -9,6 +9,7 @@
 #include "System/IO/File.hpp"
 #include "System/Text/Json/JsonDocument.hpp"
 #include "System/Text/Json/JsonElement.hpp"
+#include "System/Text/Json/JsonProperty.hpp"
 #include "System/Text/Json/JsonValueKind.hpp"
 
 namespace cnahouse::util
@@ -443,6 +444,22 @@ namespace cnahouse::util
         for (std::size_t i = 0; i < raw.size(); ++i)
         {
             out.emplace_back(JsonValue(impl_->document, raw[i], std::format("{}[{}]", path_, i)));
+        }
+        return out;
+    }
+
+    Result<std::vector<std::pair<std::string, JsonValue>>> JsonValue::Members() const
+    {
+        if (!IsValid() || GetKind() != Kind::Object)
+        {
+            return Expected(std::format("an object, found {}", KindName(GetKind())), path_);
+        }
+        std::vector<std::pair<std::string, JsonValue>> out;
+        for (const auto& property : impl_->element.EnumerateObject())
+        {
+            out.emplace_back(
+                property.getNameProperty(),
+                JsonValue(impl_->document, property.getValueProperty(), Child(property.getNameProperty())));
         }
         return out;
     }

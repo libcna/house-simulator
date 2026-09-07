@@ -2926,6 +2926,369 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadInteractables(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "interactables.json", "interactables", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+
+        const Result<JsonValue> array = document.Value().Root().RequireArray("interactables");
+        if (!array)
+        {
+            return array.Error().WithContext("interactables.json");
+        }
+        const Result<std::vector<JsonValue>> rows = array.Value().Elements();
+        if (!rows)
+        {
+            return rows.Error().WithContext("interactables.json");
+        }
+
+        for (const JsonValue& row : rows.Value())
+        {
+            Interactable item;
+            const Result<util::Id> id = RequireId(row, "id");
+            if (!id)
+            {
+                return id.Error().WithContext("interactables.json");
+            }
+            item.id = id.Value();
+
+            const Result<std::string> kind = row.RequireString("kind");
+            if (!kind)
+            {
+                return kind.Error().WithContext("interactables.json");
+            }
+            item.kind = kind.Value();
+
+            const Result<util::Id> cell = RequireId(row, "cell");
+            if (!cell)
+            {
+                return cell.Error().WithContext("interactables.json");
+            }
+            item.cell = cell.Value();
+
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, util::Id*>>{
+                     {"prop", &item.prop}, {"portal", &item.portal}})
+            {
+                const Result<util::Id> value = OptionalId(row, field);
+                if (!value)
+                {
+                    return value.Error().WithContext("interactables.json");
+                }
+                *target = value.Value();
+            }
+
+            // `focus` is what §15.7 rule 11 proves reachable, so it is required: an interactable
+            // with no focus point is one the reachability proof silently skips.
+            const Result<JsonValue> focus = row.RequireObject("focus");
+            if (!focus)
+            {
+                return focus.Error().WithContext("interactables.json");
+            }
+            const Result<Microsoft::Xna::Framework::Vector3> point = focus.Value().RequireVector3("point");
+            if (!point)
+            {
+                return point.Error().WithContext("interactables.json");
+            }
+            item.focusPoint = point.Value();
+            if (focus.Value().Has("normal") && !focus.Value().IsNull("normal"))
+            {
+                const Result<Microsoft::Xna::Framework::Vector3> normal =
+                    focus.Value().RequireVector3("normal");
+                if (!normal)
+                {
+                    return normal.Error().WithContext("interactables.json");
+                }
+                item.focusNormal = normal.Value();
+            }
+            const Result<float> radius = focus.Value().OptionalFloat("radius", 0.0F);
+            if (!radius)
+            {
+                return radius.Error().WithContext("interactables.json");
+            }
+            if (radius.Value() < 0.0F)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "a focus radius is not negative; this is " + std::to_string(radius.Value()),
+                           "interactables.json/" + row.Path() + "/focus/radius");
+            }
+            item.focusRadius = radius.Value();
+
+            if (row.Has("bounds") && !row.IsNull("bounds"))
+            {
+                const Result<JsonValue> bounds = row.RequireObject("bounds");
+                if (!bounds)
+                {
+                    return bounds.Error().WithContext("interactables.json");
+                }
+                const Result<Microsoft::Xna::Framework::Vector3> low = bounds.Value().RequireVector3("min");
+                if (!low)
+                {
+                    return low.Error().WithContext("interactables.json");
+                }
+                const Result<Microsoft::Xna::Framework::Vector3> high = bounds.Value().RequireVector3("max");
+                if (!high)
+                {
+                    return high.Error().WithContext("interactables.json");
+                }
+                if (high.Value().X < low.Value().X || high.Value().Y < low.Value().Y ||
+                    high.Value().Z < low.Value().Z)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "bounds are min..max; this box has a max below its min on at least "
+                               "one axis, which makes it a box nothing is ever inside",
+                               "interactables.json/" + row.Path() + "/bounds");
+                }
+                item.boundsMin = low.Value();
+                item.boundsMax = high.Value();
+            }
+
+            // The state comes BEFORE the actions, because the actions are parsed against it. That
+            // ordering is the whole reason the vocabulary can be closed without a global list of
+            // setter verbs.
+            if (row.Has("state") && !row.IsNull("state"))
+            {
+                const Result<JsonValue> state = row.RequireObject("state");
+                if (!state)
+                {
+                    return state.Error().WithContext("interactables.json");
+                }
+                const Result<std::vector<std::pair<std::string, JsonValue>>> fields = state.Value().Members();
+                if (!fields)
+                {
+                    return fields.Error().WithContext("interactables.json");
+                }
+                for (const auto& [name, value] : fields.Value())
+                {
+                    switch (value.GetKind())
+                    {
+                        case util::JsonValue::Kind::Boolean:
+                        {
+                            const Result<bool> flag = state.Value().RequireBool(name);
+                            if (!flag)
+                            {
+                                return flag.Error().WithContext("interactables.json");
+                            }
+                            item.state.Declare(name, flag.Value());
+                            break;
+                        }
+                        case util::JsonValue::Kind::Number:
+                        {
+                            const Result<double> number = state.Value().RequireNumber(name);
+                            if (!number)
+                            {
+                                return number.Error().WithContext("interactables.json");
+                            }
+                            item.state.Declare(name, number.Value());
+                            break;
+                        }
+                        case util::JsonValue::Kind::String:
+                        {
+                            const Result<std::string> text = state.Value().RequireString(name);
+                            if (!text)
+                            {
+                                return text.Error().WithContext("interactables.json");
+                            }
+                            item.state.Declare(name, text.Value());
+                            break;
+                        }
+                        default:
+                            // Arrays and objects are not state the expression vocabulary can talk
+                            // about. `contents[]` in §50.4 is a behaviour's own storage, not an
+                            // expression field, and silently accepting it here would let a
+                            // predicate name something it can never compare.
+                            return Err(ErrorCode::InvalidData,
+                                       "a state field is a boolean, a number or a string; \"" + name +
+                                           "\" is neither, and an expression could not compare it",
+                                       "interactables.json/" + row.Path() + "/state/" + name);
+                    }
+                }
+            }
+
+            const Result<JsonValue> actions = row.RequireArray("actions");
+            if (!actions)
+            {
+                return actions.Error().WithContext("interactables.json");
+            }
+            const Result<std::vector<JsonValue>> actionRows = actions.Value().Elements();
+            if (!actionRows)
+            {
+                return actionRows.Error().WithContext("interactables.json");
+            }
+            for (const JsonValue& actionRow : actionRows.Value())
+            {
+                InteractableAction action;
+                const Result<std::string> verb = actionRow.RequireString("verb");
+                if (!verb)
+                {
+                    return verb.Error().WithContext("interactables.json");
+                }
+                action.verb = verb.Value();
+
+                const auto expression = [&actionRow](std::string_view field) -> Result<std::string>
+                {
+                    if (!actionRow.Has(field) || actionRow.IsNull(field))
+                    {
+                        return std::string{};
+                    }
+                    return actionRow.RequireString(field);
+                };
+
+                const Result<std::string> when = expression("when");
+                if (!when)
+                {
+                    return when.Error().WithContext("interactables.json");
+                }
+                const Result<Predicate> predicate = Predicate::Parse(when.Value(), item.state);
+                if (!predicate)
+                {
+                    // The acceptance criterion: the file, the id, and the token. The parser
+                    // supplies the token and the offset; this supplies the other two.
+                    return predicate.Error()
+                        .WithContext(Name(item.id) + " " + action.verb + " when")
+                        .WithContext("interactables.json");
+                }
+                action.when = predicate.Value();
+
+                const Result<std::string> effectText = expression("do");
+                if (!effectText)
+                {
+                    return effectText.Error().WithContext("interactables.json");
+                }
+                const Result<Effect> effect = Effect::Parse(effectText.Value(), item.state);
+                if (!effect)
+                {
+                    return effect.Error()
+                        .WithContext(Name(item.id) + " " + action.verb + " do")
+                        .WithContext("interactables.json");
+                }
+                action.effect = effect.Value();
+
+                const Result<util::Id> sound = OptionalId(actionRow, "sound");
+                if (!sound)
+                {
+                    return sound.Error().WithContext("interactables.json");
+                }
+                action.sound = sound.Value();
+
+                if (actionRow.Has("anim") && !actionRow.IsNull("anim"))
+                {
+                    const Result<std::string> anim = actionRow.RequireString("anim");
+                    if (!anim)
+                    {
+                        return anim.Error().WithContext("interactables.json");
+                    }
+                    action.anim = anim.Value();
+                }
+
+                const Result<float> duration = actionRow.OptionalFloat("duration", 0.0F);
+                if (!duration)
+                {
+                    return duration.Error().WithContext("interactables.json");
+                }
+                if (duration.Value() < 0.0F)
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "a duration is not negative; this is " + std::to_string(duration.Value()),
+                               "interactables.json/" + actionRow.Path() + "/duration");
+                }
+                action.duration = duration.Value();
+
+                item.actions.push_back(std::move(action));
+            }
+
+            if (row.Has("childInteractables") && !row.IsNull("childInteractables"))
+            {
+                const Result<JsonValue> children = row.RequireArray("childInteractables");
+                if (!children)
+                {
+                    return children.Error().WithContext("interactables.json");
+                }
+                const Result<std::vector<JsonValue>> childRows = children.Value().Elements();
+                if (!childRows)
+                {
+                    return childRows.Error().WithContext("interactables.json");
+                }
+                for (const JsonValue& child : childRows.Value())
+                {
+                    const Result<std::string> name = child.AsString();
+                    if (!name)
+                    {
+                        return name.Error().WithContext("interactables.json");
+                    }
+                    item.childInteractables.push_back(util::Intern(name.Value()));
+                }
+            }
+
+            // `persist` names exactly the fields the save carries, so a name that is not a state
+            // field is a field the save would look for and never find -- and §65's ~90 KB budget
+            // depends on the list being exactly right.
+            if (row.Has("persist") && !row.IsNull("persist"))
+            {
+                const Result<JsonValue> persist = row.RequireArray("persist");
+                if (!persist)
+                {
+                    return persist.Error().WithContext("interactables.json");
+                }
+                const Result<std::vector<JsonValue>> persistRows = persist.Value().Elements();
+                if (!persistRows)
+                {
+                    return persistRows.Error().WithContext("interactables.json");
+                }
+                for (const JsonValue& entry : persistRows.Value())
+                {
+                    const Result<std::string> name = entry.AsString();
+                    if (!name)
+                    {
+                        return name.Error().WithContext("interactables.json");
+                    }
+                    if (item.state.Find(name.Value()) == nullptr)
+                    {
+                        return Err(ErrorCode::InvalidData,
+                                   "\"" + name.Value() +
+                                       "\" is persisted and is not a state field; this "
+                                       "interactable declares " +
+                                       item.state.Names(),
+                                   "interactables.json/" + entry.Path());
+                    }
+                    item.persist.push_back(name.Value());
+                }
+            }
+
+            if (row.Has("audio") && !row.IsNull("audio"))
+            {
+                const Result<JsonValue> audio = row.RequireObject("audio");
+                if (!audio)
+                {
+                    return audio.Error().WithContext("interactables.json");
+                }
+                const Result<util::Id> loop = OptionalId(audio.Value(), "loop");
+                if (!loop)
+                {
+                    return loop.Error().WithContext("interactables.json");
+                }
+                item.audioLoop = loop.Value();
+                if (audio.Value().Has("emitter") && !audio.Value().IsNull("emitter"))
+                {
+                    const Result<Microsoft::Xna::Framework::Vector3> emitter =
+                        audio.Value().RequireVector3("emitter");
+                    if (!emitter)
+                    {
+                        return emitter.Error().WithContext("interactables.json");
+                    }
+                    item.audioEmitter = emitter.Value();
+                }
+            }
+
+            contents.interactables.push_back(std::move(item));
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -2981,6 +3344,10 @@ namespace cnahouse::world
         if (const Result<void> exterior = LoadExterior(directory, contents); !exterior)
         {
             return exterior.Error();
+        }
+        if (const Result<void> interactables = LoadInteractables(directory, contents); !interactables)
+        {
+            return interactables.Error();
         }
 
         util::Log::Info(util::LogCat::World,

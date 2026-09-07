@@ -13,6 +13,7 @@
 #include <fstream>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "cnahouse/util/Ids.hpp"
@@ -514,6 +515,86 @@ namespace
             })";
         }
 
+        /// The refrigerator of `world-format.md`'s example, and a light switch that states no
+        /// `when` at all -- the case most of the 640 rows are.
+        static std::string Interactables()
+        {
+            return R"JSON({
+              "schema": "cna-house/interactables/1",
+              "interactables": [
+                {
+                  "id": "FRIDGE_L0_KITCHEN", "kind": "refrigerator", "cell": "L0_KITCHEN",
+                  "prop": "PROP_L0_KITCHEN_FRIDGE",
+                  "focus":  { "point": [1.20, 1.40, -26.40], "normal": [0, 0, 1],
+                              "radius": 0.85 },
+                  "bounds": { "min": [0.30, 0.60, -27.05], "max": [2.10, 2.55, -26.35] },
+                  "state":  { "doorOpen": false, "temperatureC": 4.0, "programme": "eco" },
+                  "actions": [
+                    { "verb": "Open",  "when": "state.doorOpen == false",
+                      "do": "state.doorOpen = true",
+                      "sound": "SFX_FRIDGE_OPEN",  "anim": "door", "duration": 0.9 },
+                    { "verb": "Close", "when": "state.doorOpen == true",
+                      "do": "state.doorOpen = false",
+                      "sound": "SFX_FRIDGE_CLOSE", "anim": "door", "duration": 0.7 }
+                  ],
+                  "childInteractables": ["FRIDGE_ITEM_MILK_1"],
+                  "persist": ["doorOpen"],
+                  "audio":  { "loop": "AMB_FRIDGE_HUM", "emitter": [1.20, 0.90, -26.70] },
+                  "portal": "P_FRIDGE_INTERIOR"
+                },
+                {
+                  "id": "SWITCH_L0_HALL", "kind": "light_switch", "cell": "L0_HALL",
+                  "focus": { "point": [1.90, 1.20, 5.00], "normal": [-1, 0, 0], "radius": 0.05 },
+                  "state": { "on": false },
+                  "actions": [ { "verb": "Toggle", "do": "toggle(state.on)",
+                                 "sound": "SFX_SWITCH" } ]
+                }
+              ]
+            })JSON";
+        }
+
+        /// The fridge's `Open` action with one field replaced, for the expression cases.
+        static std::string OneInteractable(const std::string& patch)
+        {
+            const std::size_t colon = patch.find(':');
+            const std::string key = patch.substr(0, colon);
+            std::vector<std::pair<std::string, std::string>> action{
+                {"\"verb\"", "\"Open\""},
+                {"\"when\"", "\"state.doorOpen == false\""},
+                {"\"do\"", "\"state.doorOpen = true\""},
+            };
+            bool replaced = false;
+            for (auto& field : action)
+            {
+                if (field.first == key)
+                {
+                    field.second = patch.substr(colon + 1);
+                    replaced = true;
+                }
+            }
+            if (!replaced)
+            {
+                ADD_FAILURE() << "the Open action has no field " << key;
+            }
+
+            std::string body;
+            for (std::size_t index = 0; index < action.size(); ++index)
+            {
+                if (index != 0)
+                {
+                    body += ',';
+                }
+                body += action[index].first + ':' + action[index].second;
+            }
+            return R"({"schema": "cna-house/interactables/1",
+                       "interactables": [{"id": "FRIDGE_L0_KITCHEN", "kind": "refrigerator",
+                                          "cell": "L0_KITCHEN",
+                                          "focus": {"point": [1.2, 1.4, -26.4]},
+                                          "state": {"doorOpen": false},
+                                          "actions": [{)" +
+                   body + "}]}]}";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -536,6 +617,7 @@ namespace
             Write("layout.nav.json", Nav());
             Write("layout.audio.json", Audio());
             Write("layout.exterior.json", Exterior());
+            Write("interactables.json", Interactables());
             WriteManifest({"layout.levels.json",
                            "layout.materials.json",
                            "layout.cells.json",
@@ -546,7 +628,8 @@ namespace
                            "layout.props.json",
                            "layout.nav.json",
                            "layout.audio.json",
-                           "layout.exterior.json"});
+                           "layout.exterior.json",
+                           "interactables.json"});
         }
 
         std::string directory_;
@@ -2176,6 +2259,189 @@ namespace
             << exterior.Error().ToString();
     }
 
+    // --- the interactables ------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, AnInteractableIsReadWithItsStateAndItsParsedActions)
+    {
+        Write("interactables.json", Interactables());
+        world::WorldData::Contents contents;
+        const auto items = world::WorldLoader::LoadInteractables(directory_, contents);
+        ASSERT_TRUE(items) << items.Error().ToString();
+
+        ASSERT_EQ(contents.interactables.size(), 2U);
+        const world::Interactable& fridge = contents.interactables[0];
+        EXPECT_EQ(fridge.id, Intern("FRIDGE_L0_KITCHEN"));
+        EXPECT_EQ(fridge.kind, "refrigerator");
+        EXPECT_EQ(fridge.cell, Intern("L0_KITCHEN"));
+        EXPECT_EQ(fridge.prop, Intern("PROP_L0_KITCHEN_FRIDGE"));
+        EXPECT_FLOAT_EQ(fridge.focusPoint.Y, 1.40F);
+        EXPECT_FLOAT_EQ(fridge.focusRadius, 0.85F);
+        EXPECT_FLOAT_EQ(fridge.boundsMax.Y, 2.55F);
+        EXPECT_EQ(fridge.audioLoop, Intern("AMB_FRIDGE_HUM"));
+        EXPECT_EQ(fridge.portal, Intern("P_FRIDGE_INTERIOR"));
+        ASSERT_EQ(fridge.childInteractables.size(), 1U);
+        EXPECT_EQ(fridge.childInteractables[0], Intern("FRIDGE_ITEM_MILK_1"));
+
+        ASSERT_EQ(fridge.state.Fields().size(), 3U);
+        EXPECT_EQ(fridge.state.Fields()[0].name, "doorOpen");
+        EXPECT_FALSE(std::get<bool>(fridge.state.Find("doorOpen")->value));
+        EXPECT_DOUBLE_EQ(std::get<double>(fridge.state.Find("temperatureC")->value), 4.0);
+        EXPECT_EQ(std::get<std::string>(fridge.state.Find("programme")->value), "eco");
+
+        ASSERT_EQ(fridge.actions.size(), 2U);
+        EXPECT_EQ(fridge.actions[0].verb, "Open");
+        EXPECT_EQ(fridge.actions[0].sound, Intern("SFX_FRIDGE_OPEN"));
+        EXPECT_EQ(fridge.actions[0].anim, "door");
+        EXPECT_FLOAT_EQ(fridge.actions[0].duration, 0.9F);
+    }
+
+    TEST_F(WorldLoaderTest, AnActionsPredicateAndEffectRunAgainstTheRowsOwnState)
+    {
+        // The whole point of reading `state` before `actions`: the expressions are parsed against
+        // the fields this row declares, so the same text is valid here and a load error next door.
+        Write("interactables.json", Interactables());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadInteractables(directory_, contents));
+
+        world::Interactable& fridge = contents.interactables[0];
+        const auto canOpen = fridge.actions[0].when.Evaluate(fridge.state);
+        ASSERT_TRUE(canOpen);
+        EXPECT_TRUE(canOpen.Value()) << "the door starts shut, so Open is available";
+
+        ASSERT_TRUE(fridge.actions[0].effect.Apply(fridge.state));
+        EXPECT_TRUE(std::get<bool>(fridge.state.Find("doorOpen")->value));
+
+        const auto stillOpenable = fridge.actions[0].when.Evaluate(fridge.state);
+        ASSERT_TRUE(stillOpenable);
+        EXPECT_FALSE(stillOpenable.Value()) << "and not once it is open";
+
+        const auto canClose = fridge.actions[1].when.Evaluate(fridge.state);
+        ASSERT_TRUE(canClose);
+        EXPECT_TRUE(canClose.Value());
+    }
+
+    TEST_F(WorldLoaderTest, AnUnknownTokenNamesTheFileTheIdAndTheToken)
+    {
+        // `HOUSE-00354`'s acceptance criterion, in as many words. The parser supplies the token
+        // and the offset; the loader supplies the file and the id, and without those a message
+        // about `doorAjar` could be about any of 640 rows.
+        Write("interactables.json", OneInteractable(R"("when": "state.doorAjar == true")"));
+        world::WorldData::Contents contents;
+        const auto items = world::WorldLoader::LoadInteractables(directory_, contents);
+        ASSERT_FALSE(items);
+
+        const std::string context = items.Error().Context();
+        EXPECT_NE(context.find("interactables.json"), std::string::npos) << context;
+        EXPECT_NE(context.find("FRIDGE_L0_KITCHEN"), std::string::npos) << context;
+        EXPECT_NE(context.find("Open"), std::string::npos) << "and which action of that row: " << context;
+        EXPECT_NE(items.Error().Message().find("doorAjar"), std::string::npos) << items.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AnUnknownTokenInTheEffectIsCaughtToo)
+    {
+        Write("interactables.json", OneInteractable(R"JSON("do": "setDoor(true)")JSON"));
+        world::WorldData::Contents contents;
+        const auto items = world::WorldLoader::LoadInteractables(directory_, contents);
+        ASSERT_FALSE(items);
+        EXPECT_NE(items.Error().Message().find("setDoor"), std::string::npos) << items.Error().ToString();
+        EXPECT_NE(items.Error().Context().find("do"), std::string::npos) << items.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AnAbsentWhenIsAlwaysTrueAndAnAbsentDoChangesNothing)
+    {
+        // Most of the 640 rows have no condition, and an action whose whole effect is a sound has
+        // nothing to assign.
+        Write("interactables.json", Interactables());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadInteractables(directory_, contents));
+
+        const world::Interactable& lightSwitch = contents.interactables[1];
+        ASSERT_EQ(lightSwitch.actions.size(), 1U);
+        EXPECT_TRUE(lightSwitch.actions[0].when.IsAlwaysTrue());
+        EXPECT_FALSE(lightSwitch.actions[0].effect.IsEmpty()) << "it does toggle the light";
+    }
+
+    TEST_F(WorldLoaderTest, AStateFieldThatIsNotABooleanNumberOrStringIsRefused)
+    {
+        // `contents[]` in §50.4 is a behaviour's own storage, not an expression field. Accepting
+        // it here would let a predicate name something it can never compare.
+        Write("interactables.json",
+              R"({"schema": "cna-house/interactables/1",
+                  "interactables": [{"id": "I", "kind": "container", "cell": "C",
+                                     "focus": {"point": [0, 1, 0]},
+                                     "state": {"contents": []},
+                                     "actions": []}]})");
+        world::WorldData::Contents contents;
+        const auto items = world::WorldLoader::LoadInteractables(directory_, contents);
+        ASSERT_FALSE(items);
+        EXPECT_NE(items.Error().Message().find("contents"), std::string::npos) << items.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, APersistedFieldThatIsNotAStateFieldIsRefused)
+    {
+        // `persist` names exactly the fields the save carries. A name that is not a state field is
+        // one the save would look for and never find, and §65's ~90 KB budget depends on the list
+        // being exactly right.
+        Write("interactables.json",
+              R"({"schema": "cna-house/interactables/1",
+                  "interactables": [{"id": "I", "kind": "container", "cell": "C",
+                                     "focus": {"point": [0, 1, 0]},
+                                     "state": {"doorOpen": false},
+                                     "persist": ["doorOpen", "removedItems"],
+                                     "actions": []}]})");
+        world::WorldData::Contents contents;
+        const auto items = world::WorldLoader::LoadInteractables(directory_, contents);
+        ASSERT_FALSE(items);
+        EXPECT_NE(items.Error().Message().find("removedItems"), std::string::npos)
+            << items.Error().ToString();
+        EXPECT_NE(items.Error().Message().find("doorOpen"), std::string::npos)
+            << "and list what this row does declare: " << items.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AnInteractableWithoutAFocusIsRefused)
+    {
+        // §15.7 rule 11 proves the focus point reachable. A row with none is a row the proof
+        // silently skips, which is the one failure a reachability check must not have.
+        Write("interactables.json",
+              R"({"schema": "cna-house/interactables/1",
+                  "interactables": [{"id": "I", "kind": "switch", "cell": "C",
+                                     "actions": []}]})");
+        world::WorldData::Contents contents;
+        const auto items = world::WorldLoader::LoadInteractables(directory_, contents);
+        ASSERT_FALSE(items);
+        EXPECT_NE(items.Error().Context().find("focus"), std::string::npos) << items.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AnInvertedBoundsBoxIsRefused)
+    {
+        Write("interactables.json",
+              R"({"schema": "cna-house/interactables/1",
+                  "interactables": [{"id": "I", "kind": "switch", "cell": "C",
+                                     "focus": {"point": [0, 1, 0]},
+                                     "bounds": {"min": [0, 0, 0], "max": [1, -1, 1]},
+                                     "actions": []}]})");
+        world::WorldData::Contents contents;
+        const auto items = world::WorldLoader::LoadInteractables(directory_, contents);
+        ASSERT_FALSE(items);
+        EXPECT_NE(items.Error().Message().find("nothing is ever inside"), std::string::npos)
+            << items.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, TheStateKeepsTheOrderTheFileWritesIt)
+    {
+        // The order is what a diagnostic lists, and what a slot index means. Sorted or hashed, the
+        // "this row declares ..." message would differ between machines.
+        Write("interactables.json", Interactables());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadInteractables(directory_, contents));
+
+        const auto fields = contents.interactables[0].state.Fields();
+        ASSERT_EQ(fields.size(), 3U);
+        EXPECT_EQ(fields[0].name, "doorOpen");
+        EXPECT_EQ(fields[1].name, "temperatureC");
+        EXPECT_EQ(fields[2].name, "programme");
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -2204,6 +2470,8 @@ namespace
         EXPECT_EQ(world.Value().AudioZones().size(), 2U);
         EXPECT_NE(world.Value().FindTransmission("door_solid"), nullptr);
         EXPECT_EQ(world.Value().GetExterior().vegetation.size(), 2U);
+        EXPECT_EQ(world.Value().Interactables().size(), 2U);
+        EXPECT_NE(world.Value().FindInteractable(Intern("SWITCH_L0_HALL")), nullptr);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -2237,6 +2505,7 @@ namespace
         Write("layout.nav.json", Nav());
         Write("layout.audio.json", Audio());
         Write("layout.exterior.json", Exterior());
+        Write("interactables.json", Interactables());
         WriteManifest({"layout.levels.json",
                        "layout.materials.json",
                        "layout.cells.json",
@@ -2247,7 +2516,8 @@ namespace
                        "layout.props.json",
                        "layout.nav.json",
                        "layout.audio.json",
-                       "layout.exterior.json"});
+                       "layout.exterior.json",
+                       "interactables.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

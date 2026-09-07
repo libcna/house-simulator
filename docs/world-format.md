@@ -447,9 +447,9 @@ interactable's own typed state fields, with an unknown token a load-time error.
       "focus":  { "point": [1.20, 1.40, -26.40], "normal": [0, 0, 1], "radius": 0.85 },
       "bounds": { "min": [0.30, 0.60, -27.05], "max": [2.10, 2.55, -26.35] },
       "actions": [
-        { "verb": "Open",  "when": "state.doorOpen == false", "do": "setDoor(true)",
+        { "verb": "Open",  "when": "state.doorOpen == false", "do": "state.doorOpen = true",
           "sound": "SFX_FRIDGE_OPEN",  "anim": "door", "duration": 0.9 },
-        { "verb": "Close", "when": "state.doorOpen == true",  "do": "setDoor(false)",
+        { "verb": "Close", "when": "state.doorOpen == true",  "do": "state.doorOpen = false",
           "sound": "SFX_FRIDGE_CLOSE", "anim": "door", "duration": 0.7 }
       ],
       "childInteractables": ["FRIDGE_ITEM_MILK_1"],
@@ -460,6 +460,41 @@ interactable's own typed state fields, with an unknown token a load-time error.
     }
   ]
 }
+```
+
+### The expression vocabulary
+
+`when` and `do` are parsed at load into a fixed tree over **this row's own** `state` fields
+(`HOUSE-00354`, [`InteractableExpr.hpp`](../include/cnahouse/world/InteractableExpr.hpp)):
+
+```
+when := or
+or   := and ( "||" and )*
+and  := cmp ( "&&" cmp )*
+cmp  := "!" cmp | "(" or ")" | term [ ("=="|"!="|"<"|"<="|">"|">=") term ]
+term := "state." IDENT | NUMBER | "true" | "false" | "'" TEXT "'"
+
+do   := stmt ( ";" stmt )*
+stmt := "state." IDENT ("="|"+="|"-=") term | "toggle" "(" "state." IDENT ")"
+```
+
+`&&` binds tighter than `||`, and `!` tighter than both. An absent `when` is always true; an
+absent `do` changes nothing, which is right for an action whose whole effect is a sound. Types are
+checked at **parse**: `state.doorOpen == 0.5` is a load error when `doorOpen` is declared `false`,
+and `<` orders numbers only.
+
+The *operations* are closed and the *field names* are not a list. §50.4 has twelve behaviour
+classes with about forty distinct state fields between them, so a closed list of setter verbs —
+`setDoor`, `setFlow`, `setChannel` — would be a forty-entry table that has to be kept in step with
+every behaviour class, and adding the 641st interactable would stop being "a JSON row". Checking
+each field against the row's own `state` is closed by construction, catches a typo in exactly the
+same way, and lets the message name the fields that do exist.
+
+An unknown token is a load-time error naming the file, the interactable, the action and the token:
+
+```
+interactables.json/FRIDGE_L0_KITCHEN Open when [offset 6 of "state.doorAjar == true"]:
+  this interactable has no state field "doorAjar"; it declares doorOpen, temperatureC, programme
 ```
 
 `persist` names exactly the fields the save carries. A field not listed is derived or transient and

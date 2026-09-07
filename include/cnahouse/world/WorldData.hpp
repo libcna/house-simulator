@@ -79,6 +79,7 @@ namespace cnahouse::world
             std::vector<AudioZone> audioZones;
             std::vector<AudioEmitter> audioEmitters;
             std::vector<AudioTransmission> audioTransmission;
+            std::vector<Interactable> interactables;
             Exterior exterior;
         };
 
@@ -188,6 +189,13 @@ namespace cnahouse::world
         /// @brief The named loss pair, or null when the table does not have that kind.
         [[nodiscard]] const AudioTransmission* FindTransmission(std::string_view kind) const noexcept;
 
+        [[nodiscard]] std::span<const Interactable> Interactables() const noexcept
+        {
+            return m_contents.interactables;
+        }
+
+        [[nodiscard]] const Interactable* FindInteractable(util::Id id) const noexcept;
+
         [[nodiscard]] const Exterior& GetExterior() const noexcept
         {
             return m_contents.exterior;
@@ -269,6 +277,7 @@ namespace cnahouse::world
         Index m_materialIndex;
         Index m_propIndex;
         Index m_plumbingIndex;
+        Index m_interactableIndex;
 
         /// Cell id -> the slice of the flat array below that belongs to it.
         std::unordered_map<util::Id, detail::CellRange> m_portalsOfCell;
