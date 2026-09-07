@@ -3072,8 +3072,34 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             rigs. The community asset repository — clothes, hair, skins, poses — carries per-asset
             licences, so a *dressed* character is not automatically CC0. `HOUSE-00294` must record
             per asset whether it is core or community, and a community asset's own terms.
-- [ ] HOUSE-00270 — **Verify the CMU Motion Capture Database terms** (Q-04): may retargeted, baked derivatives be redistributed?
+- [x] HOUSE-00270 — **Verify the CMU Motion Capture Database terms** (Q-04): may retargeted, baked derivatives be redistributed?
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `docs/licence-evidence/cmu-mocap.md`.
+      finding: **Q-04 answered YES for derivatives and NO for the source, and the difference is the
+            finding.** Verbatim: "This data is free for use in research projects. **You may include
+            this data in commercially-sold products, but you may not resell this data directly, even
+            in converted form.**" A retargeted clip baked into a `.chanim` is *included in a
+            product*; the raw `.asf`/`.amc`/`.bvh` sitting in a **published** `assets-src/` offers
+            the database itself, as data. The clause literally forbids reselling and a free
+            repository is not a sale — but "even in converted form" shows the intent, and ADR-0012's
+            rule for an unclear permission is that we do not take it.
+      finding: this is the second source where `redistributeSource` and `redistributeDerived`
+            genuinely diverge. For Quaternius the divergence disqualified the source; here it does
+            not, because the derivative is what this project needs. **CMU is therefore an explicit
+            exception to §18's "everything starts in `assets-src/`"**: the clips are fetched outside
+            the repository and never committed, the committed artefact is the `.chanim` from
+            `anim_extract.py`, and that row records the source URL, subject/trial numbers, retrieval
+            date and **the source clip's SHA-256** — so the derivation stays auditable with its
+            input absent. That is what a hash in a manifest is for.
+      finding: `HOUSE-00295` must record the **six subject and trial numbers**, not "six CMU walk
+            clips": the database holds several takes per subject, its own page warns that
+            low-numbered subjects are early sessions of lower quality, and that the toe and hand
+            joints are noisy and may need smoothing.
+      finding: the requested acknowledgement — "The data used in this project was obtained from
+            mocap.cs.cmu.edu. The database was created with funding from NSF EIA-0196217." — is
+            phrased as a request tied to publishing results rather than a licence condition. Carried
+            anyway, in the manifest's `attribution` field, so it reaches the generated credits
+            automatically. As with Poly Haven, the page also asks that the database not be crawled.
 - [ ] HOUSE-00271 — Verify **Mixamo** terms and record the verdict; expected outcome is "not used for shipped files"
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
 - [x] HOUSE-00272 — Verify **Freesound CC0** filter semantics and the per-sound evidence we must archive
