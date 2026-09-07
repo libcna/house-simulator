@@ -3129,8 +3129,52 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             over-budget path demonstrated to fire
 - [ ] HOUSE-00204 — `tools/blender/impostor_render.py`: render 8-yaw impostor atlases with EEVEE, pack, and emit the metadata
       dep: HOUSE-00189 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00205 — `tools/blender/lightmap_unwrap.py`: second-UV atlas packing at a configurable texel density with a 4-texel gutter
+- [x] HOUSE-00205 — `tools/blender/lightmap_unwrap.py`: second-UV atlas packing at a configurable texel density with a 4-texel gutter
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/blender/lightmap_unwrap.py`. 16 selftest claims against a **room
+            shell** fixture — floor, ceiling, four walls, a doorway and a window — rather than a
+            synthetic triangle, because the failures this guards are architectural. `--selftest`
+            runs in the CI Blender job.
+      finding: **`uv.average_islands_scale` and `uv.pack_islands` silently CANCEL in background
+            mode**, and this cost an hour before it was found. They act on the UV selection, and
+            with no UV editor there is none unless `scene.tool_settings.use_uv_select_sync` is on.
+            Nothing raises: the unwrap completes, the UVs look plausible, and the density even
+            measures *uniform* — because `smart_project`'s own output happens to be nearly uniform
+            for flat architecture. Only the gutter gave it away, at one texel. Every UV operator is
+            now checked against `FINISHED`, and `_require` names the likely cause.
+      finding: **"a 4-texel gutter" is four EMPTY texels, not a Chebyshev distance of four.** Two
+            islands one texel apart have a gutter of zero. The first version measured distance and
+            reported a passing layout as failing by exactly one; the measurement now reports empty
+            texels between, which is the quantity a bilinear tap at the mip level actually reads.
+            Measured on the fixture: no two islands come within five texels of each other.
+      finding: the overlap test is **face-to-face, not island-to-island, and samples texel
+            CENTRES** — which is what the baker does. A lightmap texel is one light sample, so two
+            faces over one texel are two surfaces lit by one measurement and the brighter wins.
+            Centre sampling is also what stops faces that merely share an edge counting as
+            overlapping. Demonstrated by stacking two faces: 1 610 shared texels found.
+      finding: **below about 80 texels the GUTTER sets the atlas size, not the density**, and that
+            is not the obvious answer. A 4-texel gutter around eleven islands needs a certain
+            atlas whatever the density is, so the attic's 2 texels/m lands on the *same* 128² as
+            the bathroom's 8 and is over-resolved at 11.56. §18.3's per-cell densities therefore do
+            not translate into proportional memory for coarse cells, and §22's 21-atlas budget
+            should be read with that in mind. Asking for MORE density does behave: 32 texels/m
+            gives 512² against 8's 128².
+      finding: **a power-of-two atlas cannot hit an arbitrary density**, so a 5 % shortfall is
+            accepted and the achieved density reported. The next size up costs four times the
+            memory for at most twice the density; refusing the shortfall would quadruple the
+            lightmap budget to buy something nobody can see.
+      finding: the atlas size is found by **packing at each candidate**, not by extrapolating from
+            one. The gutter is a fixed number of texels, so its cost as a fraction of the atlas
+            halves every time the size doubles — an extrapolation is wrong by that factor, and
+            badly wrong at the small sizes where the gutter dominates. At 32 texels a 4-texel
+            gutter collapsed islands to zero area while `pack_islands` reported `FINISHED`.
+      finding: the fixture's first version emitted a **zero-area face** — a doorway reaching the
+            floor has no wall below it — which is how the degenerate check was first exercised, and
+            which is why a zero-area input face is now refused before anything is unwrapped rather
+            than surfacing three steps later as "every face has zero UV area".
+      accept: no overlapping islands where forbidden; the configured texel density reached; a
+            4-texel gutter measured as four empty texels; no degenerate UVs; UV0 intact byte for
+            byte; repeatable
 - [ ] HOUSE-00206 — `tools/blender/lightmap_bake.py`: per-cell, per-light-group diffuse+indirect bake with denoising, plus the daylight bake
       dep: HOUSE-00205 · sys: content · plat: TOOL · pri: MUST
       accept: deterministic given a seed; a shell-geometry hash is embedded so a stale bake is detected

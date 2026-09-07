@@ -187,6 +187,16 @@ jobs:
           CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
             python3 tools/blender/collision_proxy.py --selftest
 
+      - name: The lightmap unwrap must hit its density and keep its gutter
+        working-directory: cna-house
+        # `HOUSE-00205`. The fixture is a room shell -- floor, ceiling, four walls, a doorway and a
+        # window -- because the failures this tool guards are architectural. Every claim is
+        # measured from the packed UVs: the density per face, the empty texels between islands, and
+        # a texel-centre rasterisation that catches two faces sharing one light sample.
+        run: |
+          CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
+            python3 tools/blender/lightmap_unwrap.py --selftest
+
   # --- HOUSE-00134 -------------------------------------------------------------------------------
   build-and-unit:
     name: build ${{ matrix.preset }} + unit
