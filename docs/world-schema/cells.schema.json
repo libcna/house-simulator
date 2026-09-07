@@ -183,6 +183,9 @@
           "navMeshRegion": {
             "$ref": "#/$defs/idOrNull"
           },
+          "parent": {
+            "$ref": "#/$defs/idOrNull"
+          },
           "residencyPack": {
             "anyOf": [
               {

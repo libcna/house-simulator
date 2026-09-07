@@ -5505,8 +5505,28 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             `EXT_WORLD`, so 18 exterior. The summary counted three interior cells that are
             tabulated nowhere and left `EXT_WORLD` out of the exterior count. Both places
             corrected, and this task's own title inherited the 17.
-- [ ] HOUSE-00373 — Author the 2 container sub-cells for the refrigerator and freezer interiors, and the pattern for future ones
+- [x] HOUSE-00373 — Author the 2 container sub-cells for the refrigerator and freezer interiors, and the pattern for future ones
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
+      finding: **the format had no way to say "inside".** §54 and §56.1 both describe a container
+            as a sub-cell with its own portal, and §15.3's cell record has no field for it — so
+            `CELL_FRIDGE_INTERIOR` is a cell whose footprint is inside `L0_KITCHEN`'s, which rule 3
+            reads as two rooms overlapping. A cell gains `parent`.
+      note: the parent is **declared, not inferred**. A room accidentally drawn inside another
+            looks identical to a validator otherwise; and declaring it does not switch rule 3 off,
+            because a declared sub-cell is then checked to lie inside its parent in all three axes
+            and to be only one level deep — a container inside a container is a depth the
+            visibility solver does not walk. Five selftest claims, including the one that matters:
+            the same cell **without** the declaration is still an overlap.
+      note: the alternative was carving each container out of the room around it, which would make
+            `L0_KITCHEN` a sixty-three-box polygon whose area changed every time a drawer moved.
+      note: the pattern for the other 212 is written into `layout.cells.json` beside the two rows —
+            `kind: closet`, a `parent`, a footprint and `yOverride` strictly inside it taken from
+            the prop's `bounds` less the carcass, `visibilityHint: opaque` because the door is the
+            portal, the parent's residency pack, and `heated: false` because §57's temperature
+            model reads it.
+      note: the chest freezer opens upward, so its portal will be a **horizontal** one — the second
+            use for `plane.axis: "y"` after the stair well that forced it into the vocabulary
+            (`HOUSE-00358`).
 - [ ] HOUSE-00374 — Author `layout.portals.json` — the 41 always-open portals (cased openings, stair wells)
       dep: HOUSE-00367…HOUSE-00372 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00375 — Author the 62 door portals with hinge, swing and opacity

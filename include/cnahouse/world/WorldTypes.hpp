@@ -408,6 +408,14 @@ namespace cnahouse::world
         std::int32_t lodBias = 0;
         VisibilityHint visibilityHint = VisibilityHint::Opaque;
         util::Id navMeshRegion;
+        /// @brief The cell this one is nested in, for a container sub-cell.
+        ///
+        /// §54: "a container is a tiny sub-cell with its own portal, so this falls out of the
+        /// visibility system rather than being a special case". The fridge and freezer interiors
+        /// (§56.1) are cells inside the kitchen and the pantry; declaring the parent is what lets
+        /// rule 3 tell that from two rooms drawn on top of each other, and what would otherwise
+        /// force each of §54's 214 containers to be carved out of the room around it.
+        util::Id parent;
     };
 
     /// @brief `layout.portals.json`: an axis-aligned rectangle on an axis-aligned plane.

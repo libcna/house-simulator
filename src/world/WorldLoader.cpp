@@ -1002,7 +1002,8 @@ namespace cnahouse::world
                      {"floorMaterial", &cell.floorMaterial},
                      {"wallMaterial", &cell.wallMaterial},
                      {"ceilingMaterial", &cell.ceilingMaterial},
-                     {"navMeshRegion", &cell.navMeshRegion}})
+                     {"navMeshRegion", &cell.navMeshRegion},
+                     {"parent", &cell.parent}})
             {
                 const Result<util::Id> value = OptionalId(row, field);
                 if (!value)

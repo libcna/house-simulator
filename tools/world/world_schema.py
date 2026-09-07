@@ -195,7 +195,13 @@ def build() -> dict[str, dict]:
          "residencyPack": {"anyOf": [STR, {"type": "null"}]},
          "lodBias": {"type": "integer"},
          "visibilityHint": {"enum": ["opaque", "open"]},
-         "navMeshRegion": ID_OR_NULL})))
+         "navMeshRegion": ID_OR_NULL,
+         # §54: "a container is a tiny sub-cell with its own portal, so this falls out of the
+         # visibility system rather than being a special case". A sub-cell names the cell it is
+         # nested in; without that, rule 3 has no way to tell a fridge interior from two rooms
+         # drawn on top of each other, and 214 containers would each have to be carved out of the
+         # room around them.
+         "parent": ID_OR_NULL})))
 
     schemas["portals"] = envelope("portals", "layout.portals.json", rows("portals", obj(
         ["id", "cellA", "cellB", "plane", "rect", "kind"],

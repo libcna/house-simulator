@@ -1073,6 +1073,55 @@
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
       "residencyPack": "neighbourhood", "visibilityHint": "open"
+    },
+
+    // ----------------------------------------------------------------- container sub-cells ----
+    // §54: "a container is a tiny sub-cell with its own portal, so this falls out of the
+    // visibility system rather than being a special case"; §56.1 names these two.
+    //
+    // A sub-cell declares the cell it is nested in. Without that, rule 3 cannot tell a fridge
+    // interior from two rooms drawn on top of each other, and each of §54's 214 containers would
+    // have to be carved out of the room around it -- which would make `L0_KITCHEN` a
+    // sixty-three-box polygon and change its area every time a drawer moved. Declaring it is not a
+    // way of switching the rule off: a declared sub-cell is then checked to be inside its parent
+    // in all three axes, and to be only one level deep.
+    //
+    // **The pattern for the other 212.** A container sub-cell is:
+    //   * `kind: "closet"` -- it is a small enclosed volume reached into rather than walked in,
+    //     which is exactly what §15.7 rule 11's neighbour search already handles;
+    //   * `parent` = the cell it sits in;
+    //   * a footprint and a `yOverride` strictly inside that cell's, taken from the prop's own
+    //     `bounds` less the carcass;
+    //   * `visibilityHint: "opaque"` -- the door is the portal, and a shut door shows nothing;
+    //   * the parent's `residencyPack`, because the contents load and unload with the room;
+    //   * `thermal.heated: false` -- a fridge interior is not on a duct, and §57's temperature
+    //     model reads this.
+    // The portal into it (`P_FRIDGE_INTERIOR` and friends) is `HOUSE-00374`'s, with the door's
+    // `openFraction` as its aperture.
+    {
+      "id": "CELL_FRIDGE_INTERIOR", "level": "L0", "name": "Refrigerator Interior",
+      "kind": "closet", "parent": "L0_KITCHEN",
+      // Inside the fridge's bounds (min [0.30, 0.60, -27.05], max [2.10, 2.55, -26.35]) less the
+      // carcass: 1.60 × 0.50 × 1.75, which is a large American refrigerator-freezer.
+      "boxes": [{ "x": [0.40, 2.00], "z": [-26.95, -26.45] }],
+      "yOverride": [0.70, 2.45],
+      "footstepSurface": null,
+      "acoustic": { "absorption": 0.20, "reverbHint": "tiny_hard" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "residencyPack": "house-l0", "visibilityHint": "opaque"
+    },
+    {
+      "id": "CELL_FREEZER_INTERIOR", "level": "L0", "name": "Chest Freezer Interior",
+      "kind": "closet", "parent": "L0_PANTRY",
+      // §13.3 puts the chest freezer in the walk-in pantry. A chest opens upward, so its portal
+      // is a horizontal one -- `plane.axis: "y"` -- which is the second thing that case was added
+      // for after the stair well (`HOUSE-00358`).
+      "boxes": [{ "x": [-12.40, -11.00], "z": [-26.90, -26.20] }],
+      "yOverride": [0.75, 1.35],
+      "footstepSurface": null,
+      "acoustic": { "absorption": 0.22, "reverbHint": "tiny_hard" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "residencyPack": "house-l0", "visibilityHint": "opaque"
     }
   ]
 }

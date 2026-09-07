@@ -392,12 +392,22 @@ def rule_2_boxes(world: World) -> list[Problem]:
 
 
 def rule_3_overlap(world: World) -> list[Problem]:
-    """No two cells on a level overlap by more than 1 cm² -- when they also share vertical space.
+    """No two cells on a level overlap by more than 1 cm² -- unless one is nested in the other.
 
-    The vertical guard is not a weakening of §15.7. Two cells on the *same* level legitimately
-    share a footprint when one carries a `yOverride`: a stair void open to the floor below sits
-    over the room it looks into, and both are cells on the level named in their rows. Without the
-    guard the rule would forbid the one arrangement the format has a field for.
+    Two guards, and neither is a weakening of §15.7.
+
+    **Vertical.** Two cells on the same level legitimately share a footprint when one carries a
+    `yOverride`: a stair void open to the floor below sits over the room it looks into, and both
+    are cells on the level named in their rows. Without the guard the rule would forbid the one
+    arrangement the format has a field for.
+
+    **Nesting.** §54: "a container is a tiny sub-cell with its own portal, so this falls out of the
+    visibility system rather than being a special case", and §56.1 names two of them --
+    `CELL_FRIDGE_INTERIOR` and `CELL_FREEZER_INTERIOR`. A sub-cell is inside its parent by
+    construction. It has to **declare** the parent, because a room accidentally drawn inside
+    another looks identical from here; and declaring it is not a way of switching the rule off,
+    because a declared sub-cell is then checked to be inside its parent in all three axes, and to
+    be only one level deep.
     """
     problems = []
     entries = []
@@ -407,11 +417,52 @@ def rule_3_overlap(world: World) -> list[Problem]:
             continue
         entries.append((index, cell, boxes_of(cell), extent))
 
+    # A sub-cell IS inside its parent, and says so. §54: "a container is a tiny sub-cell with its
+    # own portal, so this falls out of the visibility system rather than being a special case."
+    # The nesting is declared rather than inferred, because a room accidentally drawn inside
+    # another looks exactly the same from here -- and it is checked below, so declaring it is not
+    # a way of switching the rule off.
+    for index, cell in enumerate(world.cells):
+        parent_id = cell.get("parent")
+        if parent_id is None:
+            continue
+        parent = world.cell_by_id.get(parent_id)
+        if parent is None:
+            continue  # rule 6
+        if parent.get("parent") is not None:
+            problems.append(Problem(
+                3, FILE_OF["cells"], f"cells/{index}/parent",
+                f"cell {cell.get('id')} nests in {parent_id}, which is itself nested; a container "
+                f"inside a container is a depth the visibility solver does not walk"))
+        inside = all(
+            any(px0 - 1e-6 <= x0 and x1 <= px1 + 1e-6 and pz0 - 1e-6 <= z0 and z1 <= pz1 + 1e-6
+                for px0, px1, pz0, pz1 in boxes_of(parent))
+            for x0, x1, z0, z1 in boxes_of(cell))
+        if not inside:
+            problems.append(Problem(
+                3, FILE_OF["cells"], f"cells/{index}/boxes",
+                f"cell {cell.get('id')} says it nests in {parent_id} and is not inside it; a "
+                f"sub-cell that pokes out of its parent is two rooms overlapping by another name"))
+        child_extent = world.extent(cell)
+        parent_extent = world.extent(parent)
+        if (child_extent is not None and parent_extent is not None
+                and (child_extent[0] < parent_extent[0] - 1e-6
+                     or child_extent[1] > parent_extent[1] + 1e-6)):
+            problems.append(Problem(
+                3, FILE_OF["cells"], f"cells/{index}/yOverride",
+                f"cell {cell.get('id')} nests in {parent_id} and reaches outside its vertical "
+                f"extent {parent_extent[0]:.2f}..{parent_extent[1]:.2f}"))
+
+    def nested(a: dict, b: dict) -> bool:
+        return a.get("parent") == b.get("id") or b.get("parent") == a.get("id")
+
     for i in range(len(entries)):
         index_a, cell_a, boxes_a, (low_a, high_a) = entries[i]
         for j in range(i + 1, len(entries)):
             index_b, cell_b, boxes_b, (low_b, high_b) = entries[j]
             if cell_a.get("level") != cell_b.get("level"):
+                continue
+            if nested(cell_a, cell_b):
                 continue
             if overlap((low_a, high_a), (low_b, high_b)) <= 0.0:
                 continue
@@ -1609,6 +1660,59 @@ def selftest() -> int:
         _, problems = validate(flat, wanted=[10])
         require(len(problems) == 1 and "L3_ROOM" in problems[0].message,
                 f"and the same 3.30 m room IS a violation once its level declares a ceiling plane "
+                f"({[str(p) for p in problems]})")
+
+        # Nesting: a container sub-cell is inside its parent and says so, and saying so is not a
+        # way of switching rule 3 off.
+        def with_fridge(parent="L0_KITCHEN", boxes=None, override=None):
+            docs = copy.deepcopy(base)
+            docs["cells"]["cells"].append(
+                {"id": "CELL_FRIDGE_INTERIOR", "level": "L0", "kind": "closet",
+                 "boxes": boxes or [{"x": [0.0, 1.0], "z": [5.0, 6.0]}],
+                 "yOverride": override or [0.70, 2.45], "parent": parent})
+            return docs
+
+        # The kitchen stand-in is the hall: the fridge sits inside it.
+        nested = workspace / "nested"
+        write_fixture(nested, with_fridge(parent="L0_HALL"))
+        _, problems = validate(nested, wanted=[3])
+        require(not problems,
+                f"a sub-cell inside the cell it declares as its parent is not an overlap "
+                f"({[str(p) for p in problems]})")
+
+        undeclared = workspace / "undeclared"
+        docs = with_fridge(parent=None)
+        docs["cells"]["cells"][-1].pop("parent")
+        write_fixture(undeclared, docs)
+        _, problems = validate(undeclared, wanted=[3])
+        require(len(problems) == 1 and "overlaps" in problems[0].message,
+                f"...and the SAME cell without the declaration is an overlap, so nesting is "
+                f"authored rather than inferred ({[str(p) for p in problems]})")
+
+        poking = workspace / "poking"
+        write_fixture(poking, with_fridge(parent="L0_HALL",
+                                          boxes=[{"x": [0.0, 9.0], "z": [5.0, 6.0]}]))
+        _, problems = validate(poking, wanted=[3])
+        require(any("not inside it" in p.message for p in problems),
+                f"a sub-cell that pokes out of its parent is refused "
+                f"({[str(p) for p in problems]})")
+
+        tall = workspace / "tall"
+        write_fixture(tall, with_fridge(parent="L0_HALL", override=[0.70, 9.00]))
+        _, problems = validate(tall, wanted=[3])
+        require(any("vertical extent" in p.message for p in problems),
+                f"and so is one that reaches out of it in Y ({[str(p) for p in problems]})")
+
+        deep = workspace / "deep"
+        docs = with_fridge(parent="L0_HALL")
+        docs["cells"]["cells"].append(
+            {"id": "CELL_FRIDGE_SHELF", "level": "L0", "kind": "closet",
+             "boxes": [{"x": [0.1, 0.9], "z": [5.1, 5.9]}], "yOverride": [0.80, 1.00],
+             "parent": "CELL_FRIDGE_INTERIOR"})
+        write_fixture(deep, docs)
+        _, problems = validate(deep, wanted=[3])
+        require(any("itself nested" in p.message for p in problems),
+                f"a container inside a container is a depth the visibility solver does not walk "
                 f"({[str(p) for p in problems]})")
 
         # 13. The tolerances and the guards, each pinned by a case that turns on it alone. Every

@@ -163,6 +163,26 @@ wrong room. `footstepSurface` and `absorption` live here rather than on the mate
 are properties of the *room* as experienced, and a room with three floor materials still has one
 dominant footstep sound.
 
+### Container sub-cells
+
+`cna-house.md` §54: "a container is a tiny sub-cell with its own portal, so this falls out of the
+visibility system rather than being a special case". A sub-cell is an ordinary cell with a
+`parent`:
+
+```jsonc
+{
+  "id": "CELL_FRIDGE_INTERIOR", "level": "L0", "kind": "closet", "parent": "L0_KITCHEN",
+  "boxes": [{ "x": [0.40, 2.00], "z": [-26.95, -26.45] }],
+  "yOverride": [0.70, 2.45]
+}
+```
+
+The parent is **declared, not inferred**, because a room accidentally drawn inside another looks
+identical to a validator otherwise — and declaring it does not switch rule 3 off: a sub-cell is
+then checked to lie inside its parent in all three axes, and to be only one level deep. Without
+the field, each of §54's 214 containers would have to be carved out of the room around it, which
+would make `L0_KITCHEN` a sixty-three-box polygon whose area changed every time a drawer moved.
+
 ## `layout.portals.json`
 
 A portal is always an **axis-aligned rectangle on an axis-aligned plane**. That restriction makes
