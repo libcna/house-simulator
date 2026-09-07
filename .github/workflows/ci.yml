@@ -64,6 +64,18 @@ jobs:
           python3 tools/assets/manifest.py packs
           python3 tools/ci/budget_report.py --selftest
 
+      - name: The audio-derivative tools must measure what they claim
+        working-directory: cna-house
+        # `HOUSE-00220`/`HOUSE-00221`. Both make claims a listener cannot check in a build log --
+        # "a 4th-order low-pass at 900 Hz", "the tail is 0.15 s", "it does not clip" -- so both
+        # selftests MEASURE them: tone-by-tone response for the filter, and the impulse response
+        # itself for the reverb tails. `audio_probe.py` decodes the WAV rather than asking ffmpeg,
+        # so the measurement is of the bytes and not of the intention.
+        run: |
+          sudo apt-get install -y ffmpeg
+          python3 tools/assets/dull_variants.py --selftest
+          python3 tools/assets/reverb_variants.py --selftest
+
       - name: The glTF gate must reject what it claims to
         working-directory: cna-house
         # `--selftest` plants three broken files -- a truncated header, wrong magic, and a

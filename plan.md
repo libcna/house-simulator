@@ -3161,10 +3161,71 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       dep: HOUSE-00216 · sys: — · plat: TOOL · pri: SHOULD
 - [ ] HOUSE-00219 — `tools/assets/video_transcode.py`: transcode source footage to the runtime video format and to the frame-strip atlases
       dep: HOUSE-00098 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00220 — `tools/assets/reverb_variants.py`: produce the dry/small/large pre-reverberated variants for the 30 transient sounds
+- [x] HOUSE-00220 — `tools/assets/reverb_variants.py`: produce the dry/small/large pre-reverberated variants for the 30 transient sounds
       dep: HOUSE-00193 · sys: content · plat: TOOL · pri: SHOULD
-- [ ] HOUSE-00221 — `tools/assets/dull_variants.py`: produce the low-passed "dull" variants for the 22 muffle-critical sounds
+      note: (2026-09-07) `tools/assets/reverb_variants.py`. 18 selftest claims; `--selftest` runs
+            in CI. Stated plainly in the tool itself: this is an **application-level acoustic
+            approximation**, not a claim about room acoustics. No room is measured and no impulse
+            response is convolved; two tap patterns are chosen and then what they actually did is
+            measured on every file written.
+      finding: **the dry variant is the source copied byte for byte**, not re-encoded. §64.7 has
+            the profile *select* one of the three rather than cross-fade them, so the dry version
+            must be exactly the sound every other reference already means; a re-encode would differ
+            from its own source by a dither's worth of noise for nothing.
+      finding: **the tails are measured from the impulse response, not read off the preset.** An
+            impulse in, and the decay out must end at the preset's own last tap — 31.0 ms measured
+            against 31 ms authored for `small`, 97.0 ms against 97 ms for `large`. The arithmetic
+            and the audio agreeing is what says the filter did what the numbers describe.
+      finding: **the clipping guard is load-bearing, but not for the sounds the section names, and
+            the measurement corrected the assumption.** A fast transient's taps land 11 ms or more
+            after its peak, by which time the direct sound has decayed — the door-slam fixture comes
+            back at −2.2 dBFS with or without the pre-attenuation. It is a SUSTAINED sound (a bark's
+            body, a flush, a motor) whose taps land on the signal still playing: without the
+            attenuation that reaches exactly 0.00 dBFS — clipping — and with it, −5.67. The
+            selftest's first version claimed the transient proved it and was simply wrong.
+      finding: the attenuation is a property of the **preset**, not of the file: `1 / (1 + Σ decays)`,
+            the worst case in which every tap lines up with the direct sound. A per-file
+            normalisation would break the mix — two sounds balanced dry would come back at
+            different levels wet — and halving the source is shown to halve the variant, 6.02 dB.
+      finding: a variant that still exceeds the ceiling is a **refusal**, not a warning, and a
+            reverberated variant that is not LONGER than its source is refused too: it has no tail,
+            which means the filter did not run.
+      accept: the dry reference is preserved; the presets are reproducible; gain clipping is
+            avoided and the guard demonstrated; the tail duration is documented per file
+- [x] HOUSE-00221 — `tools/assets/dull_variants.py`: produce the low-passed "dull" variants for the 22 muffle-critical sounds
       dep: HOUSE-00193 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/assets/dull_variants.py`, with `tools/assets/audio_probe.py` — a
+            WAV decoder and measurement module written so both audio tools' claims are *measured*
+            rather than asserted. 14 selftest claims; `--selftest` runs in CI.
+      finding: **§64.5's "4th-order low-pass" is a Linkwitz-Riley, not a Butterworth, and the
+            corner is at −6 dB rather than −3.** ffmpeg's `lowpass` at `p=2` is one Butterworth
+            (Q = 0.707) 2nd-order section; cascading two squares the magnitude response, which is
+            the definition of a 4th-order Linkwitz-Riley. That is the *right* answer here rather
+            than an approximation to be apologised for: −6 dB at the crossover is exactly what a
+            pair of complementary gains `(1 − muffle)` and `muffle` wants. A true 4th-order
+            Butterworth would need sections at Q = 0.541 and Q = 1.307, which `lowpass` cannot
+            express. **Measured:** the corner drops 9.02 dB (−6 filter, −3 tilt), 100 Hz drops
+            3.00 dB (the tilt alone), the octave above the corner loses a further 18.7 dB and the
+            next 24.2 — approaching 24 dB/octave as it leaves the knee.
+      finding: the section count is shown to be **load-bearing**: the same file through one section
+            loses 9.4 dB per octave against two sections' 18.7. Without that comparison "4th order"
+            is a word in a docstring.
+      finding: **the "−3 dB tilt" is applied flat, and that is a decision rather than a reading.**
+            A spectral tilt is the literal meaning, but after a 900 Hz 4th-order low-pass there is
+            almost nothing above 2 kHz left to tilt — a high shelf changes the file by a fraction
+            of a decibel. What §64.5 describes is a sound through a wall being duller *and quieter*,
+            and a flat −3 dB is that, exactly. `--shelf-hz` applies a real shelf where one is
+            wanted, and the selftest shows it leaves 100 Hz within 0.04 dB where the flat tilt takes
+            the full 3.
+      finding: **rate, channel count and length are pinned to the source's and checked afterwards.**
+            §64.5 cross-fades the pair sample-aligned, so a filter chain that silently resampled
+            would desynchronise the two halves of every muffled sound — a failure with no error
+            message anywhere. The source itself is never touched: it IS the bright half.
+      finding: determinism is proved the way `HOUSE-00193` proved it, including the negative half —
+            the naive ffmpeg command stamps `ISFT` with the libavformat version into the file and
+            the flags used here remove it, so those flags cannot rot into decoration.
+      accept: measured low-pass parameters, predictable level, no unintended resampling,
+            deterministic output
 - [x] HOUSE-00223 — `tools/assets/anim_extract.py`: read a source `.glb` and write its `.chanim` sidecar — skeleton in skin-joint order, bind and inverse-bind poses, every clip as per-bone TRS keyframe tracks
       dep: HOUSE-00166, HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
       files: tools/assets/anim_extract.py, tests/unit/ChanimRoundTripTests.cpp
