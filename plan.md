@@ -4086,8 +4086,33 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             pass; and the whole check is demonstrated against a model the real content pipeline
             compiled
       accept: a deliberately renamed joint and a deliberately reintroduced second skin both fail the content build
-- [ ] HOUSE-00222 — Phase-3 review and commit; run `budget_report.py` for the first time
+- [x] HOUSE-00222 — Phase-3 review and commit; run `budget_report.py` for the first time
       dep: HOUSE-00181…HOUSE-00225 · sys: — · plat: ALL · pri: MUST
+      note: (2026-09-07) **Phase 3 closes.** All three exit criteria met and measured, not
+            asserted:
+            (1) `make content` builds `assets-src/` into `content/` — 25 files, 0.77 s cold;
+            (2) `make content-verify` proves determinism — 12 output files byte-identical across
+            two builds over 6 roots;
+            (3) the smoke scene loads all six content types — `ContentSmokeTests`
+            `.AllSixContentTypesLoad` passes, with the model drawn through its compiled effect and
+            the font and video panel both carrying pixels.
+            The full suite is **326 tests, all passing**: 324 on hardware GL, plus the two
+            committed-reference frame comparisons which skip there by design (the reference is a
+            software-rasteriser frame, `HOUSE-00138`) and pass under `LIBGL_ALWAYS_SOFTWARE=1`.
+            The skip message names that flag, which is why closing the loop took one command
+            rather than an investigation.
+      finding: **`budget_report.py`'s first run against a real compiled tree, and the fonts are
+            the whole of it.** Source-only it reported 0.04 MB for `core`; against `content/` the
+            same pack is **2.43 MB**, and 2.41 MB of that is five `.spritefont` descriptors:
+            `FONT_UI_30` alone expands from 2 555 bytes to **1 058 336** — 414×. The three UI
+            sizes scale as their atlas area (16 → 271 KB, 22 → 534 KB, 30 → 1 058 KB, each step
+            roughly doubling), so a fourth size is not a small ask. That is 4.4 % of `core`'s 55 MB
+            budget spent before a single texture or model, and it is exactly the kind of number
+            §72 is written against — the source column would never have shown it.
+      finding: the report's own discipline held up: with no build tree the compiled column was
+            `--` throughout and the header said why, rather than reporting zero. `HOUSE-00203`
+            built it that way and this is the run that proves it was worth doing — a report that
+            had shown 0.00 MB compiled would have said every budget was comfortably met.
 
 ---
 
