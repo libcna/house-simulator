@@ -123,6 +123,93 @@
       "required": [],
       "type": "object"
     },
+    "hvac": {
+      "additionalProperties": false,
+      "properties": {
+        "branches": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "cells": {
+                "items": {
+                  "$ref": "#/$defs/id"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "registers": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "cell": {
+                      "$ref": "#/$defs/id"
+                    },
+                    "kind": {
+                      "enum": [
+                        "floor",
+                        "ceiling",
+                        "wall"
+                      ]
+                    },
+                    "position": {
+                      "$ref": "#/$defs/vector3"
+                    }
+                  },
+                  "required": [
+                    "cell",
+                    "position"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "trunk": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "cells"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "plant": {
+          "additionalProperties": false,
+          "properties": {
+            "cell": {
+              "$ref": "#/$defs/id"
+            },
+            "chase": {
+              "$ref": "#/$defs/box"
+            },
+            "position": {
+              "$ref": "#/$defs/vector3"
+            }
+          },
+          "required": [
+            "cell"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "plant",
+        "branches"
+      ],
+      "type": "object"
+    },
     "levels": {
       "items": {
         "additionalProperties": false,

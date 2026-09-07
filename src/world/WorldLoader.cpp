@@ -552,6 +552,118 @@ namespace cnahouse::world
 
         // §12.5's stacks, optional because a world under construction may not have them yet and
         // `validate_world.py` rule 9 is the thing that decides whether that is acceptable.
+        // §12.5's HVAC row (`HOUSE-00387`). Read for the same reason as `plumbing`: §62.6 places
+        // the duct rumble and tick at the registers, so the registers have to reach the runtime.
+        if (root.Has("hvac") && !root.IsNull("hvac"))
+        {
+            const Result<JsonValue> hvac = root.RequireObject("hvac");
+            if (!hvac)
+            {
+                return hvac.Error().WithContext("layout.levels.json");
+            }
+            const Result<JsonValue> branches = hvac.Value().RequireArray("branches");
+            if (!branches)
+            {
+                return branches.Error().WithContext("layout.levels.json");
+            }
+            const Result<std::vector<JsonValue>> branchRows = branches.Value().Elements();
+            if (!branchRows)
+            {
+                return branchRows.Error().WithContext("layout.levels.json");
+            }
+            for (const JsonValue& row : branchRows.Value())
+            {
+                HvacBranch branch;
+                const Result<util::Id> id = RequireId(row, "id");
+                if (!id)
+                {
+                    return id.Error().WithContext("layout.levels.json");
+                }
+                branch.id = id.Value();
+
+                const Result<JsonValue> served = row.RequireArray("cells");
+                if (!served)
+                {
+                    return served.Error().WithContext("layout.levels.json");
+                }
+                const Result<std::vector<JsonValue>> servedRows = served.Value().Elements();
+                if (!servedRows)
+                {
+                    return servedRows.Error().WithContext("layout.levels.json");
+                }
+                for (const JsonValue& cell : servedRows.Value())
+                {
+                    const Result<std::string> name = cell.AsString();
+                    if (!name)
+                    {
+                        return name.Error().WithContext("layout.levels.json");
+                    }
+                    branch.cells.push_back(util::Intern(name.Value()));
+                }
+                if (branch.cells.empty())
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a duct branch serves at least one cell; this one serves none",
+                               "layout.levels.json/" + row.Path() + "/cells");
+                }
+
+                if (row.Has("trunk") && !row.IsNull("trunk"))
+                {
+                    const Result<std::string> trunk = row.RequireString("trunk");
+                    if (!trunk)
+                    {
+                        return trunk.Error().WithContext("layout.levels.json");
+                    }
+                    branch.trunk = trunk.Value();
+                }
+
+                if (row.Has("registers") && !row.IsNull("registers"))
+                {
+                    const Result<JsonValue> registers = row.RequireArray("registers");
+                    if (!registers)
+                    {
+                        return registers.Error().WithContext("layout.levels.json");
+                    }
+                    const Result<std::vector<JsonValue>> registerRows = registers.Value().Elements();
+                    if (!registerRows)
+                    {
+                        return registerRows.Error().WithContext("layout.levels.json");
+                    }
+                    for (const JsonValue& entry : registerRows.Value())
+                    {
+                        HvacRegister grille;
+                        const Result<util::Id> cell = RequireId(entry, "cell");
+                        if (!cell)
+                        {
+                            return cell.Error().WithContext("layout.levels.json");
+                        }
+                        grille.cell = cell.Value();
+
+                        const Result<Microsoft::Xna::Framework::Vector3> position =
+                            entry.RequireVector3("position");
+                        if (!position)
+                        {
+                            return position.Error().WithContext("layout.levels.json");
+                        }
+                        grille.position = position.Value();
+
+                        if (entry.Has("kind") && !entry.IsNull("kind"))
+                        {
+                            const Result<std::string> kind = entry.RequireString("kind");
+                            if (!kind)
+                            {
+                                return kind.Error().WithContext("layout.levels.json");
+                            }
+                            grille.kind = kind.Value();
+                        }
+                        branch.registers.push_back(std::move(grille));
+                    }
+                }
+
+                contents.hvac.push_back(std::move(branch));
+            }
+        }
+
         if (root.Has("plumbing"))
         {
             const Result<JsonValue> plumbing = root.RequireObject("plumbing");

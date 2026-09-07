@@ -64,6 +64,7 @@ namespace cnahouse::world
         {
             std::vector<Level> levels;
             Construction construction;
+            std::vector<HvacBranch> hvac;
             std::vector<PlumbingStack> plumbing;
             std::vector<Cell> cells;
             std::vector<Portal> portals;
@@ -112,6 +113,11 @@ namespace cnahouse::world
         [[nodiscard]] std::span<const PlumbingStack> PlumbingStacks() const noexcept
         {
             return m_contents.plumbing;
+        }
+
+        [[nodiscard]] std::span<const HvacBranch> HvacBranches() const noexcept
+        {
+            return m_contents.hvac;
         }
 
         [[nodiscard]] std::span<const Cell> Cells() const noexcept

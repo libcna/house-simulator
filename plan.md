@@ -5933,8 +5933,26 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             (`id`, `cells`, `chase`, `dropTo`) and a prop's `plumbing` field, added under
             `HOUSE-00358` because rule 9 could not be written without them. This task authors
             §12.5's six rows into it.
-- [ ] HOUSE-00387 — Author the HVAC duct/register description as data, for audio placement
+- [x] HOUSE-00387 — Author the HVAC duct/register description as data, for audio placement
       dep: HOUSE-00386 · sys: world · plat: TOOL · pri: MUST
+      finding: **the format had no HVAC block at all**, and 42 cells already named a duct branch
+            in `thermal.ductBranch` that nothing declared or checked. §12.5 describes the plant,
+            the trunk and the chase in one table row and §62.6 places the duct rumble "at each
+            register", so `layout.levels.json` gains `hvac` beside `plumbing`: the plant, §12.5's
+            chase at X +2.20…+2.60, **14 branches and 54 registers**.
+      note: the registers live here and **not** as 54 more audio emitters. §62.6 places the rumble
+            at each register, and an emitter per register would be the same fact written twice —
+            the mistake `HOUSE-00388` had just finished undoing for the transmission losses.
+      note: branch membership is not repeated either: a cell names its branch and the branch lists
+            its cells, and rule 6 checks the two against each other, as it does a cell's
+            `lightGroups` against its lights. A branch that has lost a room is a room the furnace
+            is silent in, and neither half of the pair can see that alone. Four claims, four
+            injected bugs, all caught.
+      note: a register is in the **floor** upstairs, where the branch runs in the joist space
+            below, and in the **ceiling** in the basement, where the trunk is exposed under the
+            `L0` slab — which is also §62.6's reason for the rumble being loudest in `B1`. The C++
+            loader reads the block and `AuthoredWorldTest` asserts both, so the registers reach the
+            runtime that needs them rather than sitting in a file nothing opens.
 - [x] HOUSE-00388 — Author `layout.audio.json`: per-cell room tone, absorption, reverb hint; per-portal transmission losses (§64.3)
       dep: HOUSE-00367…HOUSE-00372 · sys: world · plat: TOOL · pri: MUST
       finding: **the C++ loader dropped seven of §64.3's ten transmission classes without a

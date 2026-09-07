@@ -103,6 +103,32 @@ The five levels and the construction constants everything else derives from.
 }
 ```
 
+The optional `hvac` block carries §12.5's HVAC row: the plant, the vertical chase beside the
+stair, and the branches with their registers.
+
+```jsonc
+"hvac": {
+  "plant": { "cell": "B1_MECHANICAL", "position": [6.80, -1.40, -16.30],
+             "chase": { "x": [2.20, 2.60], "z": [-20.20, -19.40] } },
+  "branches": [
+    { "id": "DUCT_L0_WEST", "trunk": "joist space below",
+      "cells": ["L0_LIVING", "L0_DINING"],
+      "registers": [ { "cell": "L0_LIVING", "position": [-4.60, 0.62, -17.85],
+                       "kind": "floor" } ] }
+  ]
+}
+```
+
+A register is in the **floor** upstairs, where the branch runs in the joist space below, and in the
+**ceiling** in the basement, where the trunk is exposed under the `L0` slab — which is also why
+§62.6's duct rumble is loudest in `B1`. The registers live here rather than as audio emitters
+because §62.6 places the rumble "at each register", and an emitter per register would be the same
+fact written twice.
+
+Branch membership is not repeated: a cell names its branch in `thermal.ductBranch` and the branch
+lists its cells, and rule 6 checks the two against each other — a branch that has lost a room is a
+room the furnace is silent in, and neither half can see that alone (`HOUSE-00387`).
+
 The optional `plumbing` block carries §12.5's stacks, because they are house-wide structural
 constants like `construction` and because validator rule 9 needs them:
 

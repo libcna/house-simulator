@@ -171,6 +171,18 @@ def build() -> dict[str, dict]:
             # are house-wide structural constants, which is what this file already holds, and
             # because `validate_world.py` rule 9 needs them to exist before `HOUSE-00386`
             # authors the rows.
+            # §12.5's HVAC row, as data (`HOUSE-00387`). Beside `plumbing` and for the same
+            # reasons: it is a house-wide structural constant, and §62.6 places the duct rumble
+            # and tick "at each register", which needs the registers to exist somewhere.
+            "hvac": obj(["plant", "branches"], {
+                "plant": obj(["cell"], {"cell": ID, "position": VEC3, "chase": BOX}),
+                "branches": {"type": "array", "items": obj(
+                    ["id", "cells"],
+                    {"id": ID, "cells": {"type": "array", "items": ID, "minItems": 1},
+                     "trunk": {"anyOf": [STR, {"type": "null"}]},
+                     "registers": {"type": "array", "items": obj(
+                         ["cell", "position"], {"cell": ID, "position": VEC3,
+                                                "kind": {"enum": ["floor", "ceiling", "wall"]}})}})}}),
             "plumbing": obj(["stacks"], {"stacks": {"type": "array", "items": obj(
                 ["id", "cells", "chase"],
                 {"id": ID, "cells": {"type": "array", "items": ID, "minItems": 1},

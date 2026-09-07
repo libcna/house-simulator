@@ -367,6 +367,25 @@ namespace cnahouse::world
         util::Id dropTo;
     };
 
+    //! One supply register: the grille §62.6 places the duct rumble and tick at.
+    struct HvacRegister
+    {
+        util::Id cell;
+        Microsoft::Xna::Framework::Vector3 position;
+        //! `floor` upstairs, where the branch runs in the joist space below; `ceiling` in the
+        //! basement, where the trunk is exposed under the L0 slab -- which is why §62.6's rumble
+        //! is loudest down there.
+        std::string kind;
+    };
+
+    struct HvacBranch
+    {
+        util::Id id;
+        std::vector<util::Id> cells;
+        std::string trunk;
+        std::vector<HvacRegister> registers;
+    };
+
     struct CellAcoustic
     {
         util::Id roomTone;

@@ -25,6 +25,179 @@
       "roof": "ROOF_MAIN" }
   ],
 
+  // §12.5's HVAC row, as data. `HOUSE-00387`. Beside `plumbing` and for the same
+  // reasons: the plant, the chase and the branches are house-wide constants, and
+  // §62.6 puts the duct rumble and tick "at each register", which needs the
+  // registers to exist somewhere. They live here and not as 43 more audio emitters:
+  // an emitter per register would be the same fact written twice.
+  //
+  // Branch membership is NOT repeated from the cells -- each branch lists the cells
+  // that name it in `thermal.ductBranch`, and §15.7 rule 6 checks the two against
+  // each other the way it checks a cell's `lightGroups` against its lights.
+  //
+  // A register is in the FLOOR upstairs, where the branch runs in the joist space
+  // below, and in the CEILING in the basement, where the trunk is exposed under the
+  // L0 slab -- which is also why §62.6's rumble is loudest in `B1`.
+  "hvac": {
+    "plant": {
+      "cell": "B1_MECHANICAL", "position": [6.80, -1.40, -16.30],
+      // §12.5: "a vertical chase X +2.20…+2.60 beside the stair serves L1/L2/L3".
+      "chase": { "x": [2.20, 2.60], "z": [-20.20, -19.40] }
+    },
+    "branches": [
+      {
+        "id": "DUCT_B1_EAST", "trunk": "basement ceiling",
+        "cells": ["B1_UTILITY", "B1_CINEMA", "B1_WC7"],
+        "registers": [
+          { "cell": "B1_UTILITY", "position": [7.40, 0.15, -22.40], "kind": "ceiling" },
+          { "cell": "B1_CINEMA", "position": [6.05, 0.15, -25.65], "kind": "ceiling" },
+          { "cell": "B1_WC7", "position": [3.60, 0.15, -22.70], "kind": "ceiling" }
+        ]
+      },
+      {
+        "id": "DUCT_B1_SPINE", "trunk": "basement ceiling",
+        "cells": ["B1_HALL"],
+        "registers": [
+          { "cell": "B1_HALL", "position": [0.60, 0.15, -21.30], "kind": "ceiling" }
+        ]
+      },
+      {
+        "id": "DUCT_B1_WEST", "trunk": "basement ceiling",
+        "cells": ["B1_GYM", "B1_WORKSHOP", "B1_STOR1", "B1_STOR2", "B1_HOBBY", "B1_LAUNDRY2"],
+        "registers": [
+          { "cell": "B1_GYM", "position": [-4.60, 0.15, -16.90], "kind": "ceiling" },
+          { "cell": "B1_WORKSHOP", "position": [-9.85, 0.15, -16.90], "kind": "ceiling" },
+          { "cell": "B1_STOR1", "position": [-9.85, 0.15, -20.75], "kind": "ceiling" },
+          { "cell": "B1_STOR2", "position": [-9.85, 0.15, -25.15], "kind": "ceiling" },
+          { "cell": "B1_HOBBY", "position": [-4.60, 0.15, -21.75], "kind": "ceiling" },
+          { "cell": "B1_LAUNDRY2", "position": [-2.80, 0.15, -26.15], "kind": "ceiling" }
+        ]
+      },
+      {
+        "id": "DUCT_L0_CENTRE", "trunk": "joist space below",
+        "cells": ["L0_FOYER", "L0_HALL", "L0_STAIR_MAIN"],
+        "registers": [
+          { "cell": "L0_FOYER", "position": [0.60, 0.62, -16.90], "kind": "floor" },
+          { "cell": "L0_HALL", "position": [0.60, 0.62, -21.25], "kind": "floor" },
+          { "cell": "L0_STAIR_MAIN", "position": [4.15, 0.62, -17.85], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L0_EAST", "trunk": "joist space below",
+        "cells": ["L0_MUDROOM", "L0_LAUNDRY", "L0_WC1", "L0_FAMILY"],
+        "registers": [
+          { "cell": "L0_MUDROOM", "position": [7.40, 0.62, -16.90], "kind": "floor" },
+          { "cell": "L0_LAUNDRY", "position": [7.40, 0.62, -20.75], "kind": "floor" },
+          { "cell": "L0_WC1", "position": [4.15, 0.62, -21.70], "kind": "floor" },
+          { "cell": "L0_FAMILY", "position": [6.05, 0.62, -25.15], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L0_REAR", "trunk": "joist space below",
+        "cells": ["L0_SUNROOM"],
+        "registers": [
+          { "cell": "L0_SUNROOM", "position": [-1.40, 0.62, -30.20], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L0_WEST", "trunk": "joist space below",
+        "cells": ["L0_LIVING",
+                  "L0_OFFICE",
+                  "L0_WC2",
+                  "L0_DINING",
+                  "L0_BUTLERS",
+                  "L0_PANTRY",
+                  "L0_KITCHEN"],
+        "registers": [
+          { "cell": "L0_LIVING", "position": [-4.60, 0.62, -17.85], "kind": "floor" },
+          { "cell": "L0_OFFICE", "position": [-9.85, 0.62, -16.90], "kind": "floor" },
+          { "cell": "L0_WC2", "position": [-8.70, 0.62, -19.85], "kind": "floor" },
+          { "cell": "L0_DINING", "position": [-4.60, 0.62, -22.20], "kind": "floor" },
+          { "cell": "L0_BUTLERS", "position": [-9.85, 0.62, -24.40], "kind": "floor" },
+          { "cell": "L0_PANTRY", "position": [-9.85, 0.62, -26.65], "kind": "floor" },
+          { "cell": "L0_KITCHEN", "position": [-2.40, 0.62, -25.65], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L1_CENTRE", "trunk": "joist space below",
+        "cells": ["L1_LANDING", "L1_STAIR_MAIN", "L1_HALL", "L1_MASTER_BED"],
+        "registers": [
+          { "cell": "L1_LANDING", "position": [0.60, 3.67, -16.90], "kind": "floor" },
+          { "cell": "L1_STAIR_MAIN", "position": [4.15, 3.67, -17.85], "kind": "floor" },
+          { "cell": "L1_HALL", "position": [0.60, 3.67, -20.75], "kind": "floor" },
+          { "cell": "L1_MASTER_BED", "position": [-1.80, 3.67, -25.15], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L1_EAST", "trunk": "joist space below",
+        "cells": ["L1_BED2", "L1_BED5", "L1_BATH3", "L1_WC4"],
+        "registers": [
+          { "cell": "L1_BED2", "position": [6.05, 3.67, -25.60], "kind": "floor" },
+          { "cell": "L1_BED5", "position": [7.40, 3.67, -16.90], "kind": "floor" },
+          { "cell": "L1_BATH3", "position": [7.40, 3.67, -20.75], "kind": "floor" },
+          { "cell": "L1_WC4", "position": [4.15, 3.67, -21.70], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L1_WEST", "trunk": "joist space below",
+        "cells": ["L1_HALL_W",
+                  "L1_MASTER_BATH",
+                  "L1_MASTER_CLOSET",
+                  "L1_BED3",
+                  "L1_BED4",
+                  "L1_BATH2",
+                  "L1_WC3"],
+        "registers": [
+          { "cell": "L1_HALL_W", "position": [-5.35, 3.67, -20.05], "kind": "floor" },
+          { "cell": "L1_MASTER_BATH", "position": [-10.45, 3.67, -25.15], "kind": "floor" },
+          { "cell": "L1_MASTER_CLOSET", "position": [-7.60, 3.67, -25.15], "kind": "floor" },
+          { "cell": "L1_BED3", "position": [-9.85, 3.67, -16.90], "kind": "floor" },
+          { "cell": "L1_BED4", "position": [-4.60, 3.67, -16.90], "kind": "floor" },
+          { "cell": "L1_BATH2", "position": [-10.60, 3.67, -20.75], "kind": "floor" },
+          { "cell": "L1_WC3", "position": [-5.10, 3.67, -21.90], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L2_CENTRE", "trunk": "joist space below",
+        "cells": ["L2_LANDING", "L2_STAIR_MAIN", "L2_HALL", "L2_GAMES"],
+        "registers": [
+          { "cell": "L2_LANDING", "position": [0.60, 6.57, -16.90], "kind": "floor" },
+          { "cell": "L2_STAIR_MAIN", "position": [4.15, 6.57, -17.85], "kind": "floor" },
+          { "cell": "L2_HALL", "position": [0.60, 6.57, -20.75], "kind": "floor" },
+          { "cell": "L2_GAMES", "position": [-1.80, 6.57, -25.15], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L2_EAST", "trunk": "joist space below",
+        "cells": ["L2_SITTING", "L2_BATH5", "L2_WC6"],
+        "registers": [
+          { "cell": "L2_SITTING", "position": [6.05, 6.57, -25.60], "kind": "floor" },
+          { "cell": "L2_BATH5", "position": [7.40, 6.57, -20.75], "kind": "floor" },
+          { "cell": "L2_WC6", "position": [4.15, 6.57, -21.70], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L2_WEST", "trunk": "joist space below",
+        "cells": ["L2_HALL_W", "L2_LIBRARY", "L2_BED6", "L2_BATH4", "L2_WC5", "L2_BED7"],
+        "registers": [
+          { "cell": "L2_HALL_W", "position": [-5.35, 6.57, -20.05], "kind": "floor" },
+          { "cell": "L2_LIBRARY", "position": [-4.60, 6.57, -16.90], "kind": "floor" },
+          { "cell": "L2_BED6", "position": [-9.85, 6.57, -16.90], "kind": "floor" },
+          { "cell": "L2_BATH4", "position": [-10.60, 6.57, -20.75], "kind": "floor" },
+          { "cell": "L2_WC5", "position": [-5.10, 6.57, -21.90], "kind": "floor" },
+          { "cell": "L2_BED7", "position": [-9.25, 6.57, -25.15], "kind": "floor" }
+        ]
+      },
+      {
+        "id": "DUCT_L3_ROOM", "trunk": "joist space below",
+        "cells": ["L3_ROOM"],
+        "registers": [
+          { "cell": "L3_ROOM", "position": [0.05, 9.32, -21.10], "kind": "floor" }
+        ]
+      }
+    ]
+  },
+
   // §12.5's stacks. `HOUSE-00386`. They live here rather than in a file of their own because they
   // are house-wide structural constants like `construction`, and because rule 9 reads them.
   //

@@ -3001,6 +3001,27 @@ namespace
         // different roof; a test is the cheapest place to say which reading this is.
         EXPECT_NEAR(contents.construction.roofPitch, 7.0F / 12.0F, 1e-4F);
 
+        // §12.5's HVAC row (`HOUSE-00387`): 14 branches and 54 registers, which is where §62.6
+        // puts the duct rumble. A register is in the floor upstairs and in the basement's ceiling.
+        ASSERT_EQ(contents.hvac.size(), 14U);
+        int registers = 0;
+        for (const world::HvacBranch& branch : contents.hvac)
+        {
+            EXPECT_FALSE(branch.cells.empty()) << "a branch serves at least one room";
+            registers += static_cast<int>(branch.registers.size());
+            for (const world::HvacRegister& grille : branch.registers)
+            {
+                EXPECT_TRUE(std::find(branch.cells.begin(), branch.cells.end(), grille.cell) !=
+                            branch.cells.end())
+                    << "a register is in a room its branch serves";
+                const bool basement = branch.id.Value() == Intern("DUCT_B1_EAST").Value() ||
+                                      branch.id.Value() == Intern("DUCT_B1_WEST").Value() ||
+                                      branch.id.Value() == Intern("DUCT_B1_SPINE").Value();
+                EXPECT_EQ(grille.kind, basement ? "ceiling" : "floor");
+            }
+        }
+        EXPECT_EQ(registers, 54);
+
         // §12.5's six stacks (`HOUSE-00386`). Two of them branch on one floor -- the kitchen sink
         // with the sunroom's wet bar, and the two basement fixtures -- which is what plumbing
         // does and what §15.7 rule 9 stopped forbidding.

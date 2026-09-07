@@ -938,6 +938,47 @@ def rule_6_references(world: World) -> list[Problem]:
     # Emitters, whose JSON path is `emitters/N` and not `zones/N`: `layout_io` names the file by
     # its principal array and `check` builds the path from that, which would send a reader to the
     # wrong row.
+    # A cell names its duct branch and the branch lists its cells: the same index, both ways, as
+    # `lightGroups` (`HOUSE-00387`). §62.6 places the duct rumble at the registers, so a branch
+    # that has lost a room is a room the furnace is silent in.
+    hvac = (world.layout.get("levels") or {}).get("hvac") or {}
+    branches = {row.get("id"): row for row in hvac.get("branches", [])}
+    if branches:
+        for index, cell in enumerate(world.cells):
+            named = (cell.get("thermal") or {}).get("ductBranch")
+            if named is None:
+                continue
+            branch = branches.get(named)
+            if branch is None:
+                problems.append(Problem(
+                    6, FILE_OF["cells"], f"cells/{index}/thermal/ductBranch",
+                    f"cell {cell.get('id')} is on duct branch {named!r}, which "
+                    f"{FILE_OF['levels']} does not declare"))
+            elif cell.get("id") not in (branch.get("cells") or []):
+                problems.append(Problem(
+                    6, FILE_OF["cells"], f"cells/{index}/thermal/ductBranch",
+                    f"cell {cell.get('id')} says it is on {named!r} and that branch does not "
+                    f"list it"))
+        served = {cell.get("id"): (cell.get("thermal") or {}).get("ductBranch")
+                  for cell in world.cells}
+        for index, branch in enumerate(hvac.get("branches", [])):
+            for position, cell_id in enumerate(branch.get("cells") or []):
+                if cell_id not in served:
+                    problems.append(Problem(
+                        6, FILE_OF["levels"], f"hvac/branches/{index}/cells/{position}",
+                        f"branch {branch.get('id')} names cell {cell_id!r}, which does not exist"))
+                elif served[cell_id] != branch.get("id"):
+                    problems.append(Problem(
+                        6, FILE_OF["levels"], f"hvac/branches/{index}/cells/{position}",
+                        f"branch {branch.get('id')} claims {cell_id}, which is on "
+                        f"{served[cell_id]!r}"))
+            for position, register in enumerate(branch.get("registers") or []):
+                if register.get("cell") not in (branch.get("cells") or []):
+                    problems.append(Problem(
+                        6, FILE_OF["levels"], f"hvac/branches/{index}/registers/{position}/cell",
+                        f"branch {branch.get('id')} has a register in "
+                        f"{register.get('cell')!r}, which is not one of its cells"))
+
     audio = world.layout.get("audio") or {}
     for index, emitter in enumerate(audio.get("emitters", [])):
         for field, universe, name, loaded in (
@@ -1696,6 +1737,20 @@ def fixture() -> dict[str, dict]:
     # class its leaf implies. The two doors below are deliberately different types: a hollow-core
     # WC door and a solid-core one, 8 dB apart, so the check can be shown to read the LEAF and not
     # the portal kind, which is `door` for both.
+    HVAC = {
+        "plant": {"cell": "L0_STAIR", "position": [-4.0, 1.0, 6.0]},
+        "branches": [
+            {"id": "DUCT_L0", "trunk": "joist space below",
+             "cells": ["L0_HALL", "L0_WC1"],
+             "registers": [{"cell": "L0_HALL", "position": [0.6, 0.62, 6.4], "kind": "floor"},
+                           {"cell": "L0_WC1", "position": [3.0, 0.62, 5.0], "kind": "floor"}]},
+        ],
+    }
+    levels["hvac"] = HVAC
+    for row in cells["cells"]:
+        if row["id"] in ("L0_HALL", "L0_WC1"):
+            row.setdefault("thermal", {})["ductBranch"] = "DUCT_L0"
+
     audio = {"schema": "cna-house/audio/1",
              "zones": [{"id": "AZ_HALL", "cell": "L0_HALL", "bed": "AMB_ROOM_QUIET", "gain": 0.3}],
              "emitters": [{"id": "EM_CLOCK", "cell": "L0_HALL", "position": [0.0, 2.4, 7.0],
@@ -2017,6 +2072,34 @@ def selftest() -> int:
         def validate_world_problems(documents, directory, rule):
             write_fixture(directory, documents)
             return validate(directory, wanted=[rule])[1]
+
+        # A cell names its duct branch and the branch lists its cells. §62.6 puts the duct
+        # rumble at the registers, so a branch that has lost a room is a room the furnace is
+        # silent in, and neither half of the pair can see that on its own (`HOUSE-00387`).
+        orphaned = copy.deepcopy(base)
+        orphaned["levels"]["hvac"]["branches"][0]["cells"] = ["L0_HALL"]
+        problems = validate_world_problems(orphaned, workspace / "duct-orphan", 6)
+        require(any("that branch does not list it" in x.message for x in problems),
+                f"a cell on a branch that has dropped it is caught ({[str(x) for x in problems]})")
+
+        claimed = copy.deepcopy(base)
+        claimed["levels"]["hvac"]["branches"][0]["cells"].append("L0_CLOSET")
+        problems = validate_world_problems(claimed, workspace / "duct-claim", 6)
+        require(any("which is on None" in x.message for x in problems),
+                f"and a branch claiming a room that names no branch ({[str(x) for x in problems]})")
+
+        stray = copy.deepcopy(base)
+        stray["levels"]["hvac"]["branches"][0]["registers"][0]["cell"] = "L0_STAIR"
+        problems = validate_world_problems(stray, workspace / "duct-register", 6)
+        require(any("not one of its cells" in x.message for x in problems),
+                f"and a register in a room the branch does not serve "
+                f"({[str(x) for x in problems]})")
+
+        unknown_branch = copy.deepcopy(base)
+        row(unknown_branch, "cells", "L0_HALL")["thermal"]["ductBranch"] = "DUCT_NOWHERE"
+        problems = validate_world_problems(unknown_branch, workspace / "duct-unknown", 6)
+        require(any("does not declare" in x.message for x in problems),
+                f"and a cell on a branch nobody declared ({[str(x) for x in problems]})")
 
         # A portal's `soundLoss` is a cache of §64.3's class, and two copies of one fact drift.
         # The class comes from the LEAF, not the portal kind: the fixture's two WC doors are both
