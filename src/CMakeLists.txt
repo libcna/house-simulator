@@ -36,6 +36,7 @@ add_library(cnahouse_core STATIC
     # system below reads it and none of them writes it.
     world/WorldTypes.cpp
     world/WorldData.cpp
+    world/WorldLoader.cpp
 
     # persistence
     persistence/DesktopSaveStore.cpp

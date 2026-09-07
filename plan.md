@@ -4935,8 +4935,29 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             `NavForbidden`, and it was right to: the name would mean two things inside one class.
             The accessor is `ForbiddenZones()`.
       files: src/world/WorldData.cpp|hpp
-- [ ] HOUSE-00343 — Implement `WorldLoader` for `world.manifest.json` + `layout.levels.json`
+- [x] HOUSE-00343 — Implement `WorldLoader` for `world.manifest.json` + `layout.levels.json`
       dep: HOUSE-00342 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadManifest`, `LoadLevels` and `Load`, plus the pieces
+            every later reader needs: `Open` (which checks the `schema` header before a single row
+            is read), `RequireId`/`OptionalId`, `ReadFootprint`. 24 unit tests against fixtures
+            written to a real directory and read back through `System::IO` — the manifest's whole
+            job is a statement about a *directory*, and a test that never touched one could not
+            fail on either half of it. Seven injected bugs, seven caught.
+      note: the file order is the **dependency** order, not §15.1's printing order: materials and
+            levels before cells, cells before portals, portals before openings. A reference is then
+            always into something already read, so a dangling one is reported against the row that
+            carries it instead of at the end of the load. A test pins the order.
+      note: hash verification is deliberately **not** here. `HOUSE-00364` owns `worldHash`; what
+            this checks is both directions of §15.1's presence rule — a member the directory does
+            not have, and a world file the manifest does not list. The second is the one that is
+            easy to leave out, and it matters because an unlisted file is a second source of truth
+            that nothing hashes.
+      finding: `util::JsonValue` could not tell `null` from "present and the wrong type".
+            `Has()` is true for a `null` field, so `OptionalFloat("ceiling", 0)` read `L3`'s
+            rafter-bounded `null` as **0.0** — an attic whose ceiling is below its floor, which
+            looks like a geometry bug and is a read bug. `world-format.md` is explicit that `null`
+            is never a synonym for zero, so `JsonValue::IsNull(field)` was added (`HOUSE-00028`'s
+            file, smallest correction) and every later loader task needs it too.
 - [ ] HOUSE-00344 — `WorldLoader`: cells, including multi-box cells and the `yOverride` case
       dep: HOUSE-00343 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00345 — `WorldLoader`: portals, including plane/rect validation against both cells

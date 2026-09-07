@@ -98,6 +98,15 @@ namespace cnahouse::util
 
         [[nodiscard]] bool Has(std::string_view field) const;
 
+        /// @brief Is @p field present **and** explicitly `null`?
+        ///
+        /// `Has` cannot answer this and the three cases are genuinely different in the world files.
+        /// `docs/world-format.md` is explicit that `null` means "not specified, use the documented
+        /// default" and is **never** a synonym for zero, so a reader has to tell "absent" from
+        /// "null" from "present and the wrong type" -- and without this, `null` and a string that
+        /// failed to parse look identical to a caller (`HOUSE-00343`).
+        [[nodiscard]] bool IsNull(std::string_view field) const;
+
         // --- arrays --------------------------------------------------------------------------------
         [[nodiscard]] Result<std::vector<JsonValue>> Elements() const;
         [[nodiscard]] Result<std::size_t> Count() const;

@@ -152,6 +152,20 @@ namespace cnahouse::util
         return impl_->element.TryGetProperty(std::string(field), found);
     }
 
+    bool JsonValue::IsNull(std::string_view field) const
+    {
+        if (!IsValid() || GetKind() != Kind::Object)
+        {
+            return false;
+        }
+        SysJson found;
+        if (!impl_->element.TryGetProperty(std::string(field), found))
+        {
+            return false;
+        }
+        return KindOf(found) == Kind::Null;
+    }
+
     namespace
     {
 
