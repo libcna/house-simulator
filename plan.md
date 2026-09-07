@@ -3238,8 +3238,63 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       dep: HOUSE-00207 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00209 — `tools/blender/cubemap_bake.py`: bake the 4 mirror cube maps
       dep: HOUSE-00206 · sys: content · plat: TOOL · pri: SHOULD
-- [ ] HOUSE-00210 — `tools/world/build_collision.py`: layout + `_COL` proxies → `content/world/collision.bin`
+- [x] HOUSE-00210 — `tools/world/build_collision.py`: layout + `_COL` proxies → `content/world/collision.bin`
       dep: HOUSE-00190 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/world/build_collision.py` plus `tools/world/layout_io.py`, the
+            JSONC reader `HOUSE-00211`…`HOUSE-00215` will share, and
+            `docs/collision-format.md`, the normative `CCOL` version 1 spec. 44 selftest claims
+            over a three-room fixture; both `--selftest`s run in CI. 18 injected bugs, all caught
+            — but **six of the eighteen were missed by the first version of the selftest**, and
+            each miss was a claim that did not exercise what its sentence said: the grid claim
+            asked whether every shape was in *some* bucket (a corner-only index passes), and the
+            prop-yaw claim used a proxy centred on its own origin, which rotation cannot move.
+            The claims were rewritten against the injected bug, not the other way round.
+      finding: **the layout contains no walls, and deriving them is four decisions, not a step.**
+            (1) A wall is **centred on the boundary plane**: `world-format.md`'s validator rule 4
+            makes two abutting cells share one plane exactly, so there is no authored gap for a
+            wall to sit in and it must take half its thickness from each room. (2) A side is
+            **segmented by what is on the other side of it** — the fixture's hall has one side that
+            is 0.25 garage partition for three metres and 0.30 exterior for two. (3) A wall between
+            two boxes of the **same** cell does not exist; an L-shaped room is authored as several
+            boxes and that edge is the middle of the room. (4) A portal is a hole, and a hole in a
+            rectangle is up to four rectangles.
+      finding: **rule 3 is the one that would have shipped.** An L-shaped lounge with a wall across
+            its own internal edge renders correctly, lightmaps correctly, validates correctly, and
+            stops the player in mid-air in the middle of the room. It is now the same subtraction
+            that punches a doorway, so there is one mechanism and not two.
+      finding: the neighbour test compared the wrong face of the neighbour's box — its far face
+            instead of the one touching the plane. The symptom was not "no wall": **both cells
+            still built a wall, at different thicknesses**, because each side of the plane
+            classified the other as absent. The two walls then failed to pool and sat in the same
+            place at 0.30 and 0.15. Caught by asserting the thickness of a named segment, which is
+            why that claim names a number rather than checking a wall exists.
+      finding: **shapes are pooled globally and cells reference them by index.** A partition bounds
+            the room on each side and must be collided with from both, but it is one wall. On the
+            three-room fixture that is 7 of 38 references costing nothing; on the real house the
+            shared fraction is far larger. §49.2's "~4 300 OBBs" is a count of *shapes*, and only
+            the pooled file means what that estimate says.
+      finding: **most `_COL` proxies are boxes and must not become triangle meshes.** Components
+            are found by welding vertices **by position** — the glTF exporter splits them per face,
+            so index adjacency finds one component where there are five — and "is a box" needs
+            three clauses, not two: 8 distinct vertices and 12 triangles **also** describes a box
+            with a corner pushed in, and the dent is exactly where a player would walk in.
+      finding: the loose grid is **x/z, not x/y/z**. A cell is one storey tall, so a third axis
+            multiplies buckets without dividing shapes — the floor slab alone spans every bucket of
+            every vertical layer — while the vertical reject is one comparison the sweep already
+            makes. Measured on the fixture: mean bucket occupancy 3.53 shapes, worst 7, against
+            §49.2's "about six shapes, not nine hundred".
+      finding: the stair wedge is **closed**, and closure is asserted by counting edges rather than
+            by looking at it. The first version had the left face twice and the walking surface not
+            at all; it had ten triangles, looked like a staircase in every summary, and a sweep from
+            below would have passed through the flight.
+      finding: `HOUSE-00472` ("generate `_COL` proxies for the shell") is **not** a second source
+            for walls. This task precedes the shell by three phases and can only derive shell
+            collision from the layout, which is what §49.2's "built offline from the layout" says;
+            read `HOUSE-00472` as supplying proxies for what the layout cannot express — the
+            rafter envelope, curved surfaces — and not as re-deriving the rectilinear shell.
+      accept: every wall implied by two abutting cells exists once, at the thickness its neighbours
+            imply, with a hole at every portal and no wall inside a single cell; the file reads
+            back byte-for-byte through its own reader; two builds of one layout are identical
 - [ ] HOUSE-00211 — `tools/world/build_nav.py`: layout → the pet waypoint graph with perches
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00212 — `tools/world/build_coverage.py`: the rain/roof coverage height field on a 0.5 m grid

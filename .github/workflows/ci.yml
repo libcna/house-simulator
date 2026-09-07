@@ -111,6 +111,17 @@ jobs:
           python3 tools/assets/origin_check.py --selftest
           python3 tools/assets/pbr_to_stock.py --selftest
 
+      - name: Rooms must become walls, and the collision file must read back
+        working-directory: cna-house
+        # `HOUSE-00210`. The fixture is three rooms chosen so that every rule has something to
+        # prove: an L-shaped cell (whose own internal edge must NOT become a wall), a shared wall
+        # carrying both a door and a window, and one side that is garage partition for part of its
+        # length and exterior for the rest. `read_back` parses the bytes the writer just produced,
+        # so the format cannot drift from a C++ reader that does not exist yet (`HOUSE-00541`).
+        run: |
+          python3 tools/world/layout_io.py --selftest
+          python3 tools/world/build_collision.py --selftest
+
       - name: The stride measurement must survive both animation conventions
         working-directory: cna-house
         # `HOUSE-00194`. The fixture is an analytically exact walk -- 1.4 m of stride over 1.0 s --
