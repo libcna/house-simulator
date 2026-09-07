@@ -436,6 +436,21 @@ def build() -> dict[str, dict]:
                 ["id", "texture", "altitude"],
                 {"id": ID, "texture": STR, "altitude": NUM,
                  "scrollScale": NUM, "opacity": UNIT})},
+            # §31.3's per-layer alphas by sky state, and §32/§33's sun and moon disc colours by
+            # elevation. The file had the dome gradient and the layers' textures and nowhere to put
+            # either (`HOUSE-00394`).
+            "cloudAlpha": {"type": "array", "items": obj(
+                ["cloudCover", "high", "mid", "low"],
+                {"cloudCover": INTERVAL, "high": UNIT, "mid": UNIT, "low": UNIT,
+                 "midTint": {"anyOf": [STR, {"type": "null"}]}})},
+            "sun": {"type": "array", "minItems": 2, "items": obj(
+                ["elevationDeg", "color"],
+                {"elevationDeg": {"type": "number", "minimum": -90, "maximum": 90},
+                 "color": RGB, "intensity": NUM})},
+            "moon": {"type": "array", "minItems": 2, "items": obj(
+                ["elevationDeg", "color"],
+                {"elevationDeg": {"type": "number", "minimum": -90, "maximum": 90},
+                 "color": RGB, "intensity": NUM})},
             "stars": obj(["catalogue"], {
                 "catalogue": STR, "count": {"type": "integer", "minimum": 0},
                 "magnitudeLimit": NUM})}})

@@ -6089,8 +6089,28 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             identical, and that falls out of the data rather than out of a special case.
       note: summer weights `W_SNOW` and `W_HEAVY_SNOW` at **zero**, not merely low — §36.3's one
             hard seasonal gate, and the only zero in the four vectors.
-- [ ] HOUSE-00394 — Author `layout.sky.json`: the zenith and horizon LUTs, cloud layer definitions, the sun/moon colour LUTs, the star catalogue reference
+- [x] HOUSE-00394 — Author `layout.sky.json`: the zenith and horizon LUTs, cloud layer definitions, the sun/moon colour LUTs, the star catalogue reference
       dep: HOUSE-00341 · sys: world · plat: TOOL · pri: MUST
+      finding: **the file had nowhere to put the sun, the moon or §31.3's cloud alphas.** The
+            schema had a dome gradient, the layers' textures and the star reference. `cloudAlpha`,
+            `sun` and `moon` added — §31.3's table of per-layer alphas by sky state and §32/§33's
+            disc colour and brightness by elevation are design the format could not carry.
+      note: §31.2 describes a 32 × 8 zenith LUT and a 32 × 8 × 16 horizon LUT — sun altitude by
+            cloud cover, and by angle from the sun's azimuth. This file carries the **clear-sky**
+            curve over sun altitude alone, 32 entries, because §31.2's own pseudocode already
+            applies the other two axes analytically: `mix(c, overcastGrey, cloudCover^1.5)` is the
+            cloud axis and `sunGlowTerm(angleToSun)` the azimuth one. One 32-entry table plus two
+            terms the shader computes is the same sky as a 4096-entry table, and it is one a person
+            can art-direct. Recorded in the file and in `docs/world-format.md`, not assumed.
+      note: the entries are smoothstep interpolations between **eleven hand-tuned anchors** — the
+            three twilight bands, the sunrise horizon, midday — and not a Preetham evaluation. If
+            the look needs the physical model later, this table is what it replaces, in the same
+            shape, and the file says so rather than implying the numbers are physical.
+      note: rule 10 checks the three elevation tables ascend — one that does not interpolates
+            backwards, and a sun table out of order reddens at noon — and that the cloud-alpha
+            bands run contiguously from 0 to 1, because a cover in a gap is a sky with no clouds
+            drawn at all. Five injected bugs, all caught once the band-start fixture was added.
+      note: 1 500 stars, per §34, and not the 1 800 in `docs/world-format.md`'s example.
 - [ ] HOUSE-00395 — Author `initialstate.json` exactly as `cna-house.md` §65.6 specifies
       dep: HOUSE-00355 · sys: world · plat: TOOL · pri: MUST
       accept: every field in §65.6 is present; the three named open doors and the one open window are explicit

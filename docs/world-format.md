@@ -566,6 +566,19 @@ reference.
 }
 ```
 
+§31.2 describes the colouring as a 32 × 8 zenith LUT and a 32 × 8 × 16 horizon LUT — sun altitude
+by cloud cover, and by angle from the sun's azimuth. This file carries the **clear-sky** curve over
+sun altitude alone, because §31.2's own pseudocode applies the other two axes analytically:
+`mix(c, overcastGrey, cloudCover^1.5)` is the cloud axis and `sunGlowTerm(angleToSun)` the azimuth
+one. One 32-entry table plus two terms the shader computes is the same sky as a 4096-entry table,
+and it is a sky somebody can art-direct by hand (`HOUSE-00394`).
+
+`cloudAlpha`, `sun` and `moon` were added with it: §31.3's per-layer alphas by sky state and
+§32/§33's disc colours by elevation had nowhere to live. Rule 10 checks that the three elevation
+tables are in ascending order — one that is not interpolates backwards, and a sun table out of
+order reddens at noon — and that the cloud-alpha bands are contiguous from 0 to 1, because a cover
+in a gap is a sky with no clouds drawn at all.
+
 ## `interactables.json`
 
 The 640 rows. `kind` selects one of the 12 behaviours; `actions` are declarative and use the

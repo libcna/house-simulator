@@ -80,6 +80,43 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "cloudAlpha": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "cloudCover": {
+            "$ref": "#/$defs/interval"
+          },
+          "high": {
+            "$ref": "#/$defs/unit"
+          },
+          "low": {
+            "$ref": "#/$defs/unit"
+          },
+          "mid": {
+            "$ref": "#/$defs/unit"
+          },
+          "midTint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "cloudCover",
+          "high",
+          "mid",
+          "low"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
     "cloudLayers": {
       "items": {
         "additionalProperties": false,
@@ -135,6 +172,31 @@
       "minItems": 2,
       "type": "array"
     },
+    "moon": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "$ref": "#/$defs/rgb"
+          },
+          "elevationDeg": {
+            "maximum": 90,
+            "minimum": -90,
+            "type": "number"
+          },
+          "intensity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "elevationDeg",
+          "color"
+        ],
+        "type": "object"
+      },
+      "minItems": 2,
+      "type": "array"
+    },
     "schema": {
       "pattern": "^cna-house/sky/\\d+$",
       "type": "string"
@@ -157,6 +219,31 @@
         "catalogue"
       ],
       "type": "object"
+    },
+    "sun": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "$ref": "#/$defs/rgb"
+          },
+          "elevationDeg": {
+            "maximum": 90,
+            "minimum": -90,
+            "type": "number"
+          },
+          "intensity": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "elevationDeg",
+          "color"
+        ],
+        "type": "object"
+      },
+      "minItems": 2,
+      "type": "array"
     }
   },
   "required": [

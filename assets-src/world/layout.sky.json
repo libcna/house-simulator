@@ -1,0 +1,99 @@
+{
+  // §31's sky. `HOUSE-00394`.
+  //
+  // §31.2 describes the colouring as a 32 x 8 zenith LUT and a 32 x 8 x 16 horizon LUT --
+  // sun altitude by cloud cover, and by angle from the sun's azimuth. This file carries
+  // the **clear-sky** curve over sun altitude alone, 32 entries, because §31.2's own
+  // pseudocode already applies the other two axes analytically: `mix(c, overcastGrey,
+  // cloudCover^1.5)` is the cloud axis and `sunGlowTerm(angleToSun)` is the azimuth one.
+  // One 32-entry table plus two terms the shader computes is the same sky as a 4096-entry
+  // table, and it is a sky somebody can art-direct by hand.
+  //
+  // The entries are smoothstep interpolations between eleven hand-tuned anchors -- the
+  // twilight bands, the sunrise horizon, midday -- and not a Preetham evaluation. If the
+  // look needs the physical model later, this table is what it replaces, in the same
+  // shape.
+  "schema": "cna-house/sky/1",
+  "gradient": [
+    { "sunElevationDeg": -18.00, "zenith": [0.0100, 0.0120, 0.0300], "horizon": [0.0180, 0.0200, 0.0480] },
+    { "sunElevationDeg": -14.52, "zenith": [0.0162, 0.0207, 0.0498], "horizon": [0.0347, 0.0373, 0.0802] },
+    { "sunElevationDeg": -11.03, "zenith": [0.0224, 0.0298, 0.0696], "horizon": [0.0572, 0.0565, 0.1084] },
+    { "sunElevationDeg":  -7.55, "zenith": [0.0492, 0.0711, 0.1521], "horizon": [0.1910, 0.1498, 0.2001] },
+    { "sunElevationDeg":  -4.06, "zenith": [0.0765, 0.1134, 0.2369], "horizon": [0.4110, 0.2464, 0.2248] },
+    { "sunElevationDeg":  -0.58, "zenith": [0.1478, 0.2217, 0.4215], "horizon": [0.8828, 0.5052, 0.2698] },
+    { "sunElevationDeg":   2.90, "zenith": [0.1681, 0.2726, 0.5396], "horizon": [0.9419, 0.6559, 0.4429] },
+    { "sunElevationDeg":   6.39, "zenith": [0.1700, 0.2905, 0.5950], "horizon": [0.8980, 0.7080, 0.5499] },
+    { "sunElevationDeg":   9.87, "zenith": [0.1700, 0.3100, 0.6599], "horizon": [0.8202, 0.7599, 0.6797] },
+    { "sunElevationDeg":  13.35, "zenith": [0.1694, 0.3132, 0.6689], "horizon": [0.8047, 0.7600, 0.6978] },
+    { "sunElevationDeg":  16.84, "zenith": [0.1678, 0.3209, 0.6904], "horizon": [0.7679, 0.7600, 0.7408] },
+    { "sunElevationDeg":  20.32, "zenith": [0.1662, 0.3292, 0.7138], "horizon": [0.7278, 0.7600, 0.7876] },
+    { "sunElevationDeg":  23.81, "zenith": [0.1651, 0.3346, 0.7287], "horizon": [0.7021, 0.7600, 0.8175] },
+    { "sunElevationDeg":  27.29, "zenith": [0.1648, 0.3355, 0.7315], "horizon": [0.6978, 0.7596, 0.8225] },
+    { "sunElevationDeg":  30.77, "zenith": [0.1640, 0.3380, 0.7381], "horizon": [0.6879, 0.7580, 0.8341] },
+    { "sunElevationDeg":  34.26, "zenith": [0.1628, 0.3417, 0.7478], "horizon": [0.6733, 0.7556, 0.8511] },
+    { "sunElevationDeg":  37.74, "zenith": [0.1615, 0.3455, 0.7580], "horizon": [0.6580, 0.7530, 0.8690] },
+    { "sunElevationDeg":  41.23, "zenith": [0.1605, 0.3486, 0.7663], "horizon": [0.6456, 0.7509, 0.8835] },
+    { "sunElevationDeg":  44.71, "zenith": [0.1600, 0.3500, 0.7700], "horizon": [0.6400, 0.7500, 0.8900] },
+    { "sunElevationDeg":  48.19, "zenith": [0.1600, 0.3500, 0.7712], "horizon": [0.6377, 0.7488, 0.8912] },
+    { "sunElevationDeg":  51.68, "zenith": [0.1600, 0.3500, 0.7742], "horizon": [0.6316, 0.7458, 0.8942] },
+    { "sunElevationDeg":  55.16, "zenith": [0.1600, 0.3500, 0.7775], "horizon": [0.6249, 0.7425, 0.8975] },
+    { "sunElevationDeg":  58.65, "zenith": [0.1600, 0.3500, 0.7798], "horizon": [0.6205, 0.7402, 0.8998] },
+    { "sunElevationDeg":  62.13, "zenith": [0.1599, 0.3500, 0.7801], "horizon": [0.6199, 0.7400, 0.9001] },
+    { "sunElevationDeg":  65.61, "zenith": [0.1595, 0.3500, 0.7809], "horizon": [0.6191, 0.7400, 0.9005] },
+    { "sunElevationDeg":  69.10, "zenith": [0.1589, 0.3500, 0.7822], "horizon": [0.6178, 0.7400, 0.9011] },
+    { "sunElevationDeg":  72.58, "zenith": [0.1581, 0.3500, 0.7838], "horizon": [0.6162, 0.7400, 0.9019] },
+    { "sunElevationDeg":  76.06, "zenith": [0.1572, 0.3500, 0.7855], "horizon": [0.6145, 0.7400, 0.9028] },
+    { "sunElevationDeg":  79.55, "zenith": [0.1564, 0.3500, 0.7872], "horizon": [0.6128, 0.7400, 0.9036] },
+    { "sunElevationDeg":  83.03, "zenith": [0.1557, 0.3500, 0.7886], "horizon": [0.6114, 0.7400, 0.9043] },
+    { "sunElevationDeg":  86.52, "zenith": [0.1552, 0.3500, 0.7896], "horizon": [0.6104, 0.7400, 0.9048] },
+    { "sunElevationDeg":  90.00, "zenith": [0.1550, 0.3500, 0.7900], "horizon": [0.6100, 0.7400, 0.9050] }
+  ],
+
+  // §31.3's three concentric rings, at the radii it gives, with the scroll rates it
+  // gives as a multiple of wind speed.
+  "cloudLayers": [
+    // §31.3's high ring: wisps in clear and mostly-clear weather.
+    { "id": "CL_HIGH", "texture": "Textures/Sky/cloud_cirrus", "altitude": 880.0,
+      "scrollScale": 0.15, "opacity": 0.50 },
+    // the main cloud body.
+    { "id": "CL_MID", "texture": "Textures/Sky/cloud_cumulus", "altitude": 860.0,
+      "scrollScale": 0.60, "opacity": 0.70 },
+    // overcast and storm.
+    { "id": "CL_LOW", "texture": "Textures/Sky/cloud_stratus", "altitude": 830.0,
+      "scrollScale": 1.00, "opacity": 0.85 }
+  ],
+
+  // §31.3's table of layer alphas by sky state. The bands are contiguous and cover
+  // 0..1: a cloud cover with no row would be a sky with no clouds drawn at all.
+  "cloudAlpha": [
+    { "cloudCover": [0.00, 0.10], "high": 0.15, "mid": 0.00, "low": 0.00, "midTint": null },   // clear
+    { "cloudCover": [0.10, 0.30], "high": 0.35, "mid": 0.20, "low": 0.00, "midTint": "white" },   // mostly clear
+    { "cloudCover": [0.30, 0.60], "high": 0.30, "mid": 0.60, "low": 0.05, "midTint": "white_grey" },   // partly cloudy
+    { "cloudCover": [0.60, 0.85], "high": 0.20, "mid": 0.85, "low": 0.30, "midTint": "grey" },   // cloudy
+    { "cloudCover": [0.85, 1.00], "high": 0.05, "mid": 0.70, "low": 0.90, "midTint": "storm_grey" }    // overcast and storm
+  ],
+
+  // The sun and moon discs (§32, §33): colour and brightness by their own elevation, so
+  // the sun reddens as it sets without a special case at the horizon.
+  "sun": [
+    { "elevationDeg":  -6.0, "color": [0.35, 0.16, 0.08], "intensity": 0.00 },
+    { "elevationDeg":  -1.0, "color": [0.95, 0.42, 0.18], "intensity": 0.25 },
+    { "elevationDeg":   0.0, "color": [1.00, 0.55, 0.26], "intensity": 0.45 },
+    { "elevationDeg":   3.0, "color": [1.00, 0.72, 0.46], "intensity": 0.75 },
+    { "elevationDeg":  10.0, "color": [1.00, 0.92, 0.78], "intensity": 0.95 },
+    { "elevationDeg":  30.0, "color": [1.00, 0.98, 0.94], "intensity": 1.00 },
+    { "elevationDeg":  90.0, "color": [1.00, 1.00, 1.00], "intensity": 1.00 }
+  ],
+
+  "moon": [
+    { "elevationDeg":  -6.0, "color": [0.30, 0.33, 0.42], "intensity": 0.00 },
+    { "elevationDeg":   0.0, "color": [0.72, 0.70, 0.66], "intensity": 0.30 },
+    { "elevationDeg":   8.0, "color": [0.86, 0.87, 0.92], "intensity": 0.70 },
+    { "elevationDeg":  30.0, "color": [0.92, 0.94, 1.00], "intensity": 1.00 },
+    { "elevationDeg":  90.0, "color": [0.94, 0.96, 1.00], "intensity": 1.00 }
+  ],
+
+  // §34: the 1 500 brightest stars, generated offline from a public-domain catalogue.
+  // The file is `HOUSE-00445`'s; this is the reference and the count §34 asks for.
+  "stars": { "catalogue": "world/stars.bin", "count": 1500, "magnitudeLimit": 5.5 }
+}

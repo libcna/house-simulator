@@ -1474,6 +1474,48 @@ def rule_10_realism(world: World) -> list[Problem]:
                 10, FILE_OF["portals"], f"portals/{index}/rect/v",
                 f"portal {portal.get('id')}: {height:.3f} m high, under the player capsule's "
                 f"{CAPSULE_HEIGHT:.2f} m, and it is not marked crouch"))
+    # The sky file (`HOUSE-00394`). Three properties, each of which is silent at runtime when it
+    # is wrong: a gradient out of order interpolates backwards, a gap in the cloud-alpha bands is
+    # a cloud cover with no clouds drawn, and a sun table out of order reddens at noon.
+    sky = world.layout.get("sky") or {}
+    for name in ("gradient", "sun", "moon"):
+        field = "sunElevationDeg" if name == "gradient" else "elevationDeg"
+        rows = sky.get(name) or []
+        previous = None
+        for index, row in enumerate(rows):
+            value = row.get(field)
+            if not isinstance(value, (int, float)):
+                continue
+            if previous is not None and float(value) <= previous:
+                problems.append(Problem(
+                    10, FILE_OF["sky"], f"{name}/{index}/{field}",
+                    f"{name} is a lookup table over elevation and this entry's {value} does not "
+                    f"follow {previous}; a table out of order interpolates backwards"))
+            previous = float(value)
+
+    bands = sky.get("cloudAlpha") or []
+    edge = None
+    for index, band in enumerate(bands):
+        span = band.get("cloudCover")
+        if not (isinstance(span, list) and len(span) == 2):
+            continue
+        low, high = float(span[0]), float(span[1])
+        if edge is None and abs(low) > 1e-6:
+            problems.append(Problem(
+                10, FILE_OF["sky"], f"cloudAlpha/{index}/cloudCover",
+                f"the cloud-alpha bands start at {low}, not 0; a cover below the first band is a "
+                f"sky with no clouds drawn at all"))
+        if edge is not None and abs(low - edge) > 1e-6:
+            problems.append(Problem(
+                10, FILE_OF["sky"], f"cloudAlpha/{index}/cloudCover",
+                f"the cloud-alpha bands leave a gap: the last ended at {edge} and this starts at "
+                f"{low}"))
+        edge = high
+    if bands and edge is not None and abs(edge - 1.0) > 1e-6:
+        problems.append(Problem(
+            10, FILE_OF["sky"], "cloudAlpha",
+            f"the cloud-alpha bands end at {edge}, not 1; a full overcast would have no row"))
+
     # A transition row is a distribution over what comes next, so it sums to 1. Rows that sum to
     # 0.8 or 1.3 do not fail loudly at runtime: the sky simply favours whatever the sampler reaches
     # first, and the weather is subtly wrong forever (`HOUSE-00393`).
@@ -1929,6 +1971,25 @@ def fixture() -> dict[str, dict]:
                       "position": [1.5, 0.64, 9.0], "species": ["dog", "cat"]}],
            "forbidden": [{"cell": "L0_STAIR", "species": ["dog"]}]}
 
+    sky = {"schema": "cna-house/sky/1",
+           "gradient": [{"sunElevationDeg": -18.0, "zenith": [0.01, 0.01, 0.03],
+                         "horizon": [0.02, 0.02, 0.05]},
+                        {"sunElevationDeg": 0.0, "zenith": [0.16, 0.24, 0.45],
+                         "horizon": [0.95, 0.55, 0.28]},
+                        {"sunElevationDeg": 60.0, "zenith": [0.16, 0.35, 0.78],
+                         "horizon": [0.62, 0.74, 0.90]}],
+           "cloudLayers": [{"id": "CL_HIGH", "texture": "Textures/Sky/cirrus", "altitude": 880.0,
+                            "scrollScale": 0.15, "opacity": 0.5}],
+           "cloudAlpha": [{"cloudCover": [0.0, 0.5], "high": 0.2, "mid": 0.1, "low": 0.0,
+                           "midTint": None},
+                          {"cloudCover": [0.5, 1.0], "high": 0.1, "mid": 0.8, "low": 0.6,
+                           "midTint": "grey"}],
+           "sun": [{"elevationDeg": -6.0, "color": [0.35, 0.16, 0.08], "intensity": 0.0},
+                   {"elevationDeg": 30.0, "color": [1.0, 0.98, 0.94], "intensity": 1.0}],
+           "moon": [{"elevationDeg": -6.0, "color": [0.30, 0.33, 0.42], "intensity": 0.0},
+                    {"elevationDeg": 30.0, "color": [0.92, 0.94, 1.0], "intensity": 1.0}],
+           "stars": {"catalogue": "world/stars.bin", "count": 1500, "magnitudeLimit": 5.5}}
+
     weather = {"schema": "cna-house/weather/1",
                "archetypes": [
                    {"id": "W_CLEAR", "cloudCover": [0.0, 0.1], "precipType": "None",
@@ -1979,7 +2040,7 @@ def fixture() -> dict[str, dict]:
     return {"levels": levels, "cells": cells, "portals": portals, "openings": openings,
             "stairs": stairs, "lights": lights, "materials": materials, "props": props,
             "interactables": interactables, "assets": assets, "audio": audio,
-            "nav": nav, "exterior": exterior, "weather": weather}
+            "nav": nav, "exterior": exterior, "weather": weather, "sky": sky}
 
 
 def write_fixture(directory: Path, documents: dict[str, dict]) -> None:
@@ -2282,6 +2343,50 @@ def selftest() -> int:
         def validate_world_problems(documents, directory, rule):
             write_fixture(directory, documents)
             return validate(directory, wanted=[rule])[1]
+
+        # The sky file (`HOUSE-00394`). Each of these is silent at runtime when it is wrong.
+        backwards = copy.deepcopy(base)
+        backwards["sky"]["gradient"][1]["sunElevationDeg"] = -30.0
+        unordered = workspace / "sky-order"
+        write_fixture(unordered, backwards)
+        _, problems = validate(unordered, wanted=[10])
+        require(any("interpolates backwards" in x.message for x in problems),
+                f"a gradient out of elevation order is caught ({[str(x) for x in problems]})")
+
+        noon_red = copy.deepcopy(base)
+        noon_red["sky"]["sun"][1]["elevationDeg"] = -20.0
+        sun_order = workspace / "sky-sun"
+        write_fixture(sun_order, noon_red)
+        _, problems = validate(sun_order, wanted=[10])
+        require(any("sun is a lookup table" in x.message for x in problems),
+                f"and so is the sun table, which would otherwise redden at noon "
+                f"({[str(x) for x in problems]})")
+
+        gap = copy.deepcopy(base)
+        gap["sky"]["cloudAlpha"][1]["cloudCover"] = [0.7, 1.0]
+        holed = workspace / "sky-gap"
+        write_fixture(holed, gap)
+        _, problems = validate(holed, wanted=[10])
+        require(any("leave a gap" in x.message for x in problems),
+                f"a gap in the cloud-alpha bands is caught: a cover in the gap is a sky with no "
+                f"clouds drawn ({[str(x) for x in problems]})")
+
+        short = copy.deepcopy(base)
+        short["sky"]["cloudAlpha"][1]["cloudCover"] = [0.5, 0.9]
+        truncated = workspace / "sky-short"
+        write_fixture(truncated, short)
+        _, problems = validate(truncated, wanted=[10])
+        require(any("would have no row" in x.message for x in problems),
+                f"and bands that stop short of full overcast ({[str(x) for x in problems]})")
+
+        floating = copy.deepcopy(base)
+        floating["sky"]["cloudAlpha"][0]["cloudCover"] = [0.2, 0.5]
+        offset_bands = workspace / "sky-start"
+        write_fixture(offset_bands, floating)
+        _, problems = validate(offset_bands, wanted=[10])
+        require(any("not 0" in x.message for x in problems),
+                f"...and bands that start above zero: a clear sky would have no row either "
+                f"({[str(x) for x in problems]})")
 
         # The weather file (`HOUSE-00393`). A transition row is a distribution over what comes
         # next: one that sums to 0.8 does not fail loudly, the sky just favours whatever the
