@@ -3077,6 +3077,52 @@ namespace
         IdRegistry::ResetForTesting();
     }
 
+    TEST(AuthoredWorldTest, TheAuthoredLightsIndexTheirCells)
+    {
+        IdRegistry::ResetForTesting();
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/layout.lights.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
+        }
+
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory, contents));
+        const auto lights = world::WorldLoader::LoadLights(directory, contents);
+        ASSERT_TRUE(lights) << lights.Error().ToString();
+
+        // `HOUSE-00381`: `B1` and `L0` only; `HOUSE-00382` and `HOUSE-00383` finish the house.
+        EXPECT_EQ(contents.lights.size(), 97U);
+        std::map<cnahouse::util::Id, std::set<cnahouse::util::Id>> groupsIn;
+        for (const world::Light& light : contents.lights)
+        {
+            EXPECT_GT(light.range, 0.0F) << "a light reaches the room it is in";
+            EXPECT_GE(light.colorK, 1000.0F);
+            groupsIn[light.cell].insert(light.group);
+        }
+        std::set<cnahouse::util::Id> distinct;
+        for (const auto& [cell, groups] : groupsIn)
+        {
+            (void)cell;
+            distinct.insert(groups.begin(), groups.end());
+        }
+        EXPECT_EQ(distinct.size(), 55U) << "§13's Lights column for B1 and L0, less the porch";
+
+        // §15.7 rule 6's index, asserted by the other implementation: a cell's `lightGroups` is
+        // exactly the groups its own lights belong to, and §28.1 walks it once per frame.
+        for (const world::Cell& cell : contents.cells)
+        {
+            const std::set<cnahouse::util::Id> listed(cell.lightGroups.begin(), cell.lightGroups.end());
+            const auto found = groupsIn.find(cell.id);
+            const std::set<cnahouse::util::Id> actual =
+                found == groupsIn.end() ? std::set<cnahouse::util::Id>{} : found->second;
+            EXPECT_EQ(listed, actual) << "cell " << cell.id.Value();
+        }
+
+        IdRegistry::ResetForTesting();
+    }
+
     TEST(AuthoredWorldTest, TheAuthoredFlightsClimbWhatTheyClaim)
     {
         IdRegistry::ResetForTesting();

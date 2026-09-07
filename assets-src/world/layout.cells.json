@@ -35,6 +35,7 @@
       "footstepSurface": "stair_wood",
       "acoustic": { "absorption": 0.14, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": null },
+      "lightGroups": ["LG_B1_STAIR_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -45,6 +46,7 @@
       "footstepSurface": "concrete",
       "acoustic": { "absorption": 0.12, "reverbHint": "corridor_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_SPINE" },
+      "lightGroups": ["LG_B1_HALL_MAIN_S", "LG_B1_HALL_MAIN_C", "LG_B1_HALL_MAIN_N"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -56,6 +58,7 @@
       "acoustic": { "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "E", "exposure": 0.10 },
+      "lightGroups": ["LG_B1_MECHANICAL_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -64,6 +67,7 @@
       "footstepSurface": "concrete",
       "acoustic": { "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": false, "ductBranch": null },
+      "lightGroups": ["LG_B1_ELECTRICAL_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -73,6 +77,7 @@
       "footstepSurface": "concrete",
       "acoustic": { "absorption": 0.10, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_EAST" },
+      "lightGroups": ["LG_B1_UTILITY_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -83,6 +88,7 @@
       "footstepSurface": "carpet",
       "acoustic": { "absorption": 0.62, "reverbHint": "dead" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_EAST" },
+      "lightGroups": ["LG_B1_CINEMA_MAIN", "LG_B1_CINEMA_AISLE"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -93,6 +99,7 @@
       "footstepSurface": "tile",
       "acoustic": { "absorption": 0.08, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_EAST" },
+      "lightGroups": ["LG_B1_WC7_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -105,6 +112,7 @@
       "acoustic": { "absorption": 0.30, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
       "daylight": { "orientation": "N", "exposure": 0.18 },
+      "lightGroups": ["LG_B1_GYM_MAIN", "LG_B1_GYM_MIRROR"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -114,6 +122,7 @@
       "acoustic": { "absorption": 0.16, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
       "daylight": { "orientation": "NW", "exposure": 0.18 },
+      "lightGroups": ["LG_B1_WORKSHOP_MAIN", "LG_B1_WORKSHOP_BENCH"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -124,6 +133,7 @@
       "acoustic": { "absorption": 0.22, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
       "daylight": { "orientation": "W", "exposure": 0.12 },
+      "lightGroups": ["LG_B1_STOR1_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -134,6 +144,7 @@
       "acoustic": { "absorption": 0.24, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
       "daylight": { "orientation": "W", "exposure": 0.12 },
+      "lightGroups": ["LG_B1_STOR2_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -142,6 +153,7 @@
       "footstepSurface": "carpet",
       "acoustic": { "absorption": 0.34, "reverbHint": "small_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
+      "lightGroups": ["LG_B1_HOBBY_MAIN", "LG_B1_HOBBY_TABLE"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -152,6 +164,7 @@
       "footstepSurface": "rock",
       "acoustic": { "absorption": 0.11, "reverbHint": "small_hard" },
       "thermal": { "heated": false, "ductBranch": null },
+      "lightGroups": ["LG_B1_CELLAR_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -161,6 +174,7 @@
       "footstepSurface": "tile",
       "acoustic": { "absorption": 0.13, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
+      "lightGroups": ["LG_B1_LAUNDRY2_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
     {
@@ -183,6 +197,7 @@
       "footstepSurface": "concrete",
       "acoustic": { "absorption": 0.20, "reverbHint": "tiny_hard" },
       "thermal": { "heated": false, "ductBranch": null },
+      "lightGroups": ["LG_B1_UNDERSTAIR_MAIN"],
       "residencyPack": "house-b1", "visibilityHint": "opaque"
     },
 
@@ -201,6 +216,7 @@
       "acoustic": { "absorption": 0.16, "reverbHint": "medium_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_CENTRE" },
       "daylight": { "orientation": "N", "exposure": 0.35 },
+      "lightGroups": ["LG_L0_FOYER_MAIN", "LG_L0_FOYER_ACCENT"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -210,6 +226,7 @@
       "footstepSurface": "hardwood",
       "acoustic": { "absorption": 0.20, "reverbHint": "corridor_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_CENTRE" },
+      "lightGroups": ["LG_L0_HALL_MAIN", "LG_L0_HALL_GALLERY"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -223,6 +240,7 @@
       "acoustic": { "absorption": 0.18, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_CENTRE" },
       "daylight": { "orientation": "E", "exposure": 0.28 },
+      "lightGroups": ["LG_L0_STAIR_MAIN_MAIN", "LG_L0_STAIR_MAIN_STEP"],
       "residencyPack": "house-l0", "visibilityHint": "open"
     },
     {
@@ -233,6 +251,7 @@
       "acoustic": { "absorption": 0.22, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_EAST" },
       "daylight": { "orientation": "E", "exposure": 0.22 },
+      "lightGroups": ["LG_L0_MUDROOM_MAIN"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -243,6 +262,7 @@
       "acoustic": { "absorption": 0.15, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_EAST" },
       "daylight": { "orientation": "E", "exposure": 0.20 },
+      "lightGroups": ["LG_L0_LAUNDRY_MAIN"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -253,6 +273,7 @@
       "acoustic": { "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_EAST" },
       "daylight": { "orientation": "E", "exposure": 0.08 },
+      "lightGroups": ["LG_L0_WC1_MAIN"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -264,6 +285,7 @@
       "acoustic": { "absorption": 0.38, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_EAST" },
       "daylight": { "orientation": "S", "exposure": 0.52 },
+      "lightGroups": ["LG_L0_FAMILY_MAIN", "LG_L0_FAMILY_MEDIA", "LG_L0_FAMILY_READING"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -274,6 +296,7 @@
       "acoustic": { "absorption": 0.32, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
       "daylight": { "orientation": "NW", "exposure": 0.46 },
+      "lightGroups": ["LG_L0_LIVING_MAIN", "LG_L0_LIVING_FIRE", "LG_L0_LIVING_PIANO"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -285,6 +308,7 @@
       "acoustic": { "absorption": 0.44, "reverbHint": "small_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
       "daylight": { "orientation": "NW", "exposure": 0.40 },
+      "lightGroups": ["LG_L0_OFFICE_MAIN", "LG_L0_OFFICE_DESK"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -295,6 +319,7 @@
       "acoustic": { "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
       "daylight": { "orientation": "W", "exposure": 0.07 },
+      "lightGroups": ["LG_L0_WC2_MAIN"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -303,6 +328,7 @@
       "footstepSurface": "carpet",
       "acoustic": { "absorption": 0.40, "reverbHint": "tiny_soft" },
       "thermal": { "heated": true, "ductBranch": null },
+      "lightGroups": ["LG_L0_CLOSET_W_MAIN"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -313,6 +339,7 @@
       "acoustic": { "absorption": 0.28, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
       "daylight": { "orientation": "W", "exposure": 0.24 },
+      "lightGroups": ["LG_L0_DINING_CHANDELIER", "LG_L0_DINING_SIDE"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -321,6 +348,7 @@
       "footstepSurface": "hardwood",
       "acoustic": { "absorption": 0.24, "reverbHint": "tiny_hard" },
       "thermal": { "heated": true, "ductBranch": null },
+      "lightGroups": ["LG_L0_STOR_MAIN"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -331,6 +359,7 @@
       "acoustic": { "absorption": 0.18, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
       "daylight": { "orientation": "W", "exposure": 0.14 },
+      "lightGroups": ["LG_L0_BUTLERS_MAIN"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -341,6 +370,7 @@
       "acoustic": { "absorption": 0.20, "reverbHint": "tiny_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
       "daylight": { "orientation": "W", "exposure": 0.10 },
+      "lightGroups": ["LG_L0_PANTRY_MAIN"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -352,6 +382,10 @@
       "acoustic": { "absorption": 0.28, "reverbHint": "medium_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
       "daylight": { "orientation": "S", "exposure": 0.44 },
+      "lightGroups": ["LG_L0_KITCHEN_MAIN",
+                       "LG_L0_KITCHEN_ISLAND",
+                       "LG_L0_KITCHEN_UNDERCAB",
+                       "LG_L0_KITCHEN_SINK"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -363,6 +397,7 @@
       "acoustic": { "absorption": 0.17, "reverbHint": "bright_glass" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_REAR" },
       "daylight": { "orientation": "S", "exposure": 0.82 },
+      "lightGroups": ["LG_L0_SUNROOM_MAIN", "LG_L0_SUNROOM_BAR"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -381,6 +416,7 @@
       "acoustic": { "absorption": 0.11, "reverbHint": "large_hard" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "E", "exposure": 0.26 },
+      "lightGroups": ["LG_L0_GARAGE_MAIN", "LG_L0_GARAGE_OPENER"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -397,6 +433,7 @@
       "footstepSurface": "hardwood",
       "acoustic": { "absorption": 0.16, "reverbHint": "small_hard" },
       "thermal": { "heated": false, "ductBranch": null },
+      "lightGroups": ["LG_L0_GARAGE_LOFT_MAIN"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
@@ -1177,6 +1214,7 @@
       "footstepSurface": null,
       "acoustic": { "absorption": 0.20, "reverbHint": "tiny_hard" },
       "thermal": { "heated": false, "ductBranch": null },
+      "lightGroups": ["LG_CELL_FRIDGE_INTERIOR_LAMP"],
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {

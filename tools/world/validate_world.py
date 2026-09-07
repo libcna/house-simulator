@@ -834,6 +834,7 @@ def rule_6_references(world: World) -> list[Problem]:
                 6, FILE_OF[kind], f"{key}/{index}/{field}",
                 f"{field} {value!r} is not a known {universe_name}"))
 
+    have_lights = bool(world.lights)
     have_materials = "materials" in world.layout
     have_assets = "assets" in world.layout
     have_cells = "cells" in world.layout
@@ -843,6 +844,26 @@ def rule_6_references(world: World) -> list[Problem]:
     for index, cell in enumerate(world.cells):
         for field in ("floorMaterial", "wallMaterial", "ceilingMaterial"):
             check("cells", index, field, cell.get(field), materials, "material", have_materials)
+        # ...and the cell's list has to be exactly the groups its own lights belong to. It is an
+        # index -- §28.1 walks `cell.lightGroups` once per frame -- and an index that has drifted
+        # is worse than none: a group missing from it is a switch the room does not respond to,
+        # and one too many is a lightmap pass over a group with nothing in the room to light
+        # (`HOUSE-00381`).
+        if have_lights and "lights" in world.layout:
+            listed = set(cell.get("lightGroups", []) or [])
+            actual = {light.get("group") for light in world.lights
+                      if light.get("cell") == cell.get("id")}
+            for group in sorted(listed - actual):
+                problems.append(Problem(
+                    6, FILE_OF["cells"], f"cells/{index}/lightGroups",
+                    f"cell {cell.get('id')} lists group {group!r} and no light in that cell "
+                    f"belongs to it"))
+            for group in sorted(actual - listed):
+                problems.append(Problem(
+                    6, FILE_OF["cells"], f"cells/{index}/lightGroups",
+                    f"cell {cell.get('id')} has lights in group {group!r} and does not list it; "
+                    f"§28.1 walks this list once per frame"))
+
         for group_index, group in enumerate(cell.get("lightGroups", []) or []):
             check("cells", index, f"lightGroups/{group_index}", group, light_groups,
                   "light group (no light declares it)", "lights" in world.layout)
@@ -1683,6 +1704,27 @@ def selftest() -> int:
         @mutation(6, "a prop pointing at an asset that does not exist")
         def _(docs):
             row(docs, "props", "PROP_WC1_PAN")["asset"] = "MODEL_MISSING"
+
+        # A cell's `lightGroups` is an index into the lights file and §28.1 walks it once per
+        # frame. An index that has drifted is worse than none: a group missing from it is a switch
+        # the room does not respond to (`HOUSE-00381`).
+        unlisted = copy.deepcopy(base)
+        row(unlisted, "cells", "L0_HALL")["lightGroups"] = []
+        dropped = workspace / "unlisted-group"
+        write_fixture(dropped, unlisted)
+        _, problems = validate(dropped, wanted=[6])
+        require(any("does not list it" in x.message for x in problems),
+                f"a cell with lights in a group it does not list is caught "
+                f"({[str(x) for x in problems]})")
+
+        phantom = copy.deepcopy(base)
+        row(phantom, "cells", "L0_WC1")["lightGroups"] = ["LG_HALL"]
+        borrowed = workspace / "borrowed-group"
+        write_fixture(borrowed, phantom)
+        _, problems = validate(borrowed, wanted=[6])
+        require(any("no light in that cell" in x.message for x in problems),
+                f"and so is a cell listing a group whose lights are somewhere else -- the group "
+                f"exists, so the old check said nothing ({[str(x) for x in problems]})")
 
         # ...and a swing that names no cell is a reference to nothing, exactly like a missing
         # asset. It is a reference because `HOUSE-00378` made it one.

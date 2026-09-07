@@ -327,6 +327,12 @@ A light belongs to exactly one **group**, and a group is what a switch toggles a
 is baked per. `bakedIntoLightmap` and `castsBlobShadow` are independent: a baked light still needs
 a blob shadow for the dynamic objects the bake never saw.
 
+A cell's `lightGroups` is the **index** of the groups its own lights belong to, and §28.1 walks it
+once per frame. Rule 6 checks it both ways: a group in the list with no light of that group in the
+cell, and a light in the cell whose group the list omits, are both errors. An index that has
+drifted is worse than none — one way round it is a switch the room does not respond to, the other
+a lightmap pass over a group with nothing in the room to light (`HOUSE-00381`).
+
 ## `layout.props.json`
 
 Static and dynamic placements. A prop that never moves is batched offline into its cell's chunks

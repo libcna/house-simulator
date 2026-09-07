@@ -1537,7 +1537,9 @@ surprise. This keeps the data declarative without inventing a VM.
    is what let `EXT_SHED` be authored with no door at all (`HOUSE-00374`): an `exterior` cell that
    is roofed and `visibilityHint: opaque` is a building, and a building you cannot enter is the
    same defect as a room you cannot enter;
-6. every referenced material, asset, light group, sound, nav region and animation exists;
+6. every referenced material, asset, light group, sound, nav region and animation exists — and a
+   cell's `lightGroups` is exactly the set of groups its own lights belong to, which §28.1 walks
+   once per frame (`HOUSE-00381`);
 7. every door has exactly one portal and every window has exactly one portal, **and the portal
    names the leaf back** in `aperture` — `aperture: null` means "always fully open", so a door that
    leaves it null claims to be a hole. Every kind with something that opens is covered,

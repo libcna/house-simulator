@@ -5772,8 +5772,36 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             unplaced window not reported, and the schedule left in the portals file's order. The
             last two needed the fixtures sharpening: the ordering claim only bites when the
             out-of-order window also sorts first by id.
-- [ ] HOUSE-00381 — Author `layout.lights.json` for `B1` and `L0`: fixtures, groups, colour temperatures, ranges, defaults
+- [x] HOUSE-00381 — Author `layout.lights.json` for `B1` and `L0`: fixtures, groups, colour temperatures, ranges, defaults
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
+      finding: **§28.2 and §13 disagree about how many switch groups the house has.** §28.2 and
+            §53 both say "84 switch groups, 169 fixtures"; §13's `Lights` column, which §13.1 says
+            counts groups, totals **128** across the five levels. `B1` and `L0` alone account for
+            55 of them and 97 fixtures. §13 wins for authoring, because it names the room; the
+            reconciliation belongs to `HOUSE-00382`, which finishes the set and can then correct
+            §28.2 and §53 against a complete count rather than half of one.
+      finding: **no cell declared its `lightGroups`.** The field is §28.1's per-frame index and
+            every one of the 96 cells had it empty, which rule 6 could not see: it only checked
+            that a listed group exists, and an empty list lists nothing. Rule 6 now checks the
+            index **both ways** — a group listed with no light of that group in the cell, and a
+            light in the cell whose group the list omits. One direction is a switch the room does
+            not respond to; the other is a lightmap pass over a group with nothing to light.
+      note: positions are derived, not eyeballed: fixtures sit on a 1×N or 2×M grid in the cell's
+            largest box, inset so N fixtures divide the room into N+1 bands, at the ceiling less
+            the mounting drop for their kind — 0.02 m for a recessed can, 0.85 m for a pendant,
+            1.05 m for a sconce. `range` is the distance to the farthest corner of the cell plus
+            half a metre, so a light reaches its own room and does not leak two rooms further.
+      note: `L0_PORCH`'s group is deliberately **not** here. §13.3 counts it, and `HOUSE-00383`
+            authors the exterior lights including the two lanterns; authoring it twice is how a
+            group ends up defined in two places with different ids.
+      note: `CELL_FRIDGE_INTERIOR` gets a light §13 does not count, because §13's tables do not
+            list container sub-cells. It is `emissive_only`, not baked, and §53 drives it from the
+            door rather than from a switch.
+      note: `fixtureProp` is null throughout — the props are `HOUSE-00450` onwards and a made-up id
+            would point at nothing. `emissiveMaterialSlot` is not null where the fixture has a
+            visible lit part, because §53 lights that slot when the group comes on.
+      note: `AuthoredWorldTest` asserts the 97 fixtures, the 55 groups and rule 6's index through
+            the C++ loader.
 - [ ] HOUSE-00382 — Author `layout.lights.json` for `L1`, `L2`, `L3`
       dep: HOUSE-00381 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00383 — Author the exterior lights: porch, garage flood, terrace, path, shed, plus the street and neighbour lights
