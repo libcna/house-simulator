@@ -3899,9 +3899,51 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             under this machine's build rules. Only the converted subset enters `assets-src/`; the
             originals' hashes in the manifest are what keep the conversion auditable after the
             source directory is gone.
-- [ ] HOUSE-00277 — Select the NOX subset to ship: ~430 files, listed explicitly with the category each serves
+- [x] HOUSE-00277 — Select the NOX subset to ship: ~430 files, listed explicitly with the category each serves
       dep: HOUSE-00276 · sys: audio · plat: TOOL · pri: MUST
       accept: the exclusion of the Azores flows, the combat voices and the truck pack is explicit
+      note: (2026-09-07) `tools/assets/nox_select.py`, and the selection it produces:
+            `docs/asset-selection/nox-subset.json` (machine-readable, hashed, with the category
+            each file serves) and `nox-subset.md`. **445 of 1 644 files ship**; 624 are excluded by
+            rule, 575 fail a measurement or a cap, and **0 are unclaimed**. 16 selftest claims;
+            `--selftest` runs in CI against a fixture, since the pool is scratch space.
+      finding: **selection is rules over measurements, not a hand-picked list.** Every file is
+            measured — duration, rate, channels, bit depth, peak, RMS — and passed through
+            exclusions, quality thresholds and a per-group cap, each written down with its reason.
+            Measuring 1 644 files needed a numpy WAV reader (`audio_probe.measure`): `ffmpeg -af
+            volumedetect` per file takes **eighteen minutes**, reading the `data` chunk once takes
+            **24 seconds**. 24-bit is assembled from its three bytes explicitly, because numpy has
+            no 24-bit type and a naive `frombuffer` misreads it — without the sign extension every
+            negative sample reads positive and every file reports a peak of exactly 0 dBFS.
+      finding: **which files inside a cap is chosen by farthest-point sampling in (duration, RMS)**,
+            starting from the median-duration file. Consecutive takes from one recording session
+            are the most similar files in a group, so "the first six" is the one selection
+            guaranteed to sound repetitive. Of twelve grass walks the rule keeps 0, 1, 3, 6, 8 and
+            11 — both extremes and a spread between, rather than 0–5.
+      finding: **every one of the 1 644 files is accounted for exactly once**, and that is asserted
+            rather than assumed: selected + excluded + rejected + unclaimed = the pool, with no
+            file in two lists. A file no rule claims is LISTED, never dropped — the first run had
+            **317** of them (the voice rules matched `Voice_Male/` where the directory is
+            `Voice_Essential_Male/`, so not one voice file was selected, and the Iceland jumps are
+            `Jump_Land`/`Jump_Start` rather than `Jump`). A selection that had silently dropped
+            them would have looked complete.
+      finding: the exclusions the acceptance names are all explicit and each carries its reason,
+            and three more were added from §63.3 and `HOUSE-00276`: the paid `Sample_A_Sound_Effect`
+            sampler, the big and moderate Icelandic waterfalls (only the LIGHT stream loops serve
+            the gutter), the car's drive and engine loops (the car does not move), the acted
+            expressions, the vocalised jumps, and the dramatic breaths — gasps, shocked, shivering
+            — which a house has no use for.
+      finding: **§72's audio budget priced one-shots and not loops, and the selection proves it.**
+            445 clips is §72's own count and comes to **156 MB** at 16 bit against its 95: the
+            **373 one-shots are 21 MB** while **72 loops carry 1 106 seconds and 136 MB**. 95 MB
+            over 430 clips is 0.22 MB each — about one second of mono — and a 30-second stereo rain
+            bed is 5.8 MB. **Trimming every loop to 10 s brings the total to 91 MB**, inside the
+            budget, so the row is achievable but only as a constraint on the CONVERSION
+            (`HOUSE-00278`, `convert_audio.py --trim`) and not on the selection. Recorded in §72.
+      finding: what this tool does **not** do is stated in it: it does not listen. Level, duration
+            and channel count are measurable and measured; whether a recording is *clean* is not.
+            Each group therefore names its shortest, longest, quietest and loudest file, so an
+            aural check has somewhere to start rather than 445 files and no order.
 - [ ] HOUSE-00278 — Convert the selected NOX subset with `convert_audio.py`; verify a listening check on 10 files (R-17)
       dep: HOUSE-00277, HOUSE-00193 · sys: audio · plat: TOOL · pri: MUST
 - [ ] HOUSE-00279 — Manifest every converted NOX file with both hashes, duration, channels and its target category

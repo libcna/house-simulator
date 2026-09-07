@@ -76,6 +76,16 @@ jobs:
           python3 tools/assets/dull_variants.py --selftest
           python3 tools/assets/reverb_variants.py --selftest
 
+      - name: The NOX selection rules must select what they claim
+        working-directory: cna-house
+        # `HOUSE-00277`. The pool itself lives in scratch space and is not in CI, so what runs here
+        # is the RULES against a fixture the selftest builds: one file for each exclusion, a
+        # clipped file, a silent file, a group over its cap, and one no rule claims. The claim that
+        # matters most is the partition -- every file selected, excluded, rejected or listed, none
+        # of them twice -- because a selection that lost a file in the middle looks exactly like a
+        # selection that did not want it.
+        run: python3 tools/assets/nox_select.py --selftest
+
       - name: The video transcode must put every frame in the right cell
         working-directory: cna-house
         # `HOUSE-00219`. The fixture's every frame carries a black bar whose LENGTH is its own

@@ -5478,7 +5478,7 @@ cost what. Exceeding a **hard fail** number fails CI.
 | **CPU RSS** | 1 600 MB | |
 | — Content (CPU copies, needed for WebGL context-loss recovery) | 480 MB | |
 | — World data, collision, nav | 40 MB | |
-| — Audio buffers | 140 MB | ~430 clips at 16-bit 44.1 kHz mono/stereo, ≈ 95 MB, plus 22 dull variants |
+| — Audio buffers | 140 MB | ~430 clips at 16-bit, ≈ 95 MB **only if every loop is trimmed** — see below — plus 22 dull variants |
 | — Runtime structures | 90 MB | |
 | — CNA + SDL + FFmpeg + allocator overhead | 450 MB | |
 | — Slack | 400 MB | |
@@ -5487,6 +5487,16 @@ cost what. Exceeding a **hard fail** number fails CI.
 | — binaries | 90 MB | |
 | — licences, docs | 10 MB | |
 | **Source repository** | ≤ 3.5 GB | `assets-src/` dominates; large binaries are hash-pinned and fetched, not committed, except the small committed baseline |
+
+**The audio row's "≈ 95 MB" priced one-shots and not loops**, measured by `HOUSE-00277` against the
+real NOX selection. 445 clips — the row's own count — come to **156 MB** at 16 bit, and the split
+says why: **373 one-shots are 21 MB** while **72 loops carry 1 106 seconds and 136 MB**. 95 MB over
+430 clips is 0.22 MB each, about one second of mono; a 30-second stereo rain bed is 5.8 MB and a
+108-second computer hum is 10 MB. Trimming every loop to **10 seconds** brings the total to
+**91 MB**, inside the row — so the budget is achievable, but it is a constraint on the *conversion*
+(`HOUSE-00278`, `convert_audio.py --trim`) and not something the selection can meet by choosing
+fewer files. Ten seconds of rain or of a fan does not read as a repeat behind everything else in a
+house; thirty is what the recordist supplied.
 | **Cold start** | ≤ 4.0 s | to a playable frame on the dev machine; measured by `HOUSE-02451` |
 | **Save file** | ≤ 150 KB | typical 90 KB |
 
