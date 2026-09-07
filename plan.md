@@ -5527,10 +5527,61 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: the chest freezer opens upward, so its portal will be a **horizontal** one — the second
             use for `plane.axis: "y"` after the stair well that forced it into the vocabulary
             (`HOUSE-00358`).
-- [ ] HOUSE-00374 — Author `layout.portals.json` — the 41 always-open portals (cased openings, stair wells)
+- [x] HOUSE-00374 — Author `layout.portals.json` — the 47 always-open portals (cased openings, stair wells)
       dep: HOUSE-00367…HOUSE-00372 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00375 — Author the 62 door portals with hinge, swing and opacity
+- [x] HOUSE-00375 — Author the 62 door portals with hinge, swing and opacity
       dep: HOUSE-00374 · sys: world · plat: TOOL · pri: MUST
+      note: **one commit for two tasks, deliberately.** §15.7 rule 5 is a property of the whole
+            portal set, not of one portal: a house with its cased openings and no doors leaves
+            about thirty rooms unreachable, so `HOUSE-00374` alone cannot satisfy the rule it is
+            supposed to satisfy and the two halves cannot be validated apart. `plan.md` splits
+            them because they are different authoring work, and they were done in that order.
+      finding: **§16.3's "41 always-open" is 47.** Composed: 27 interior cased openings, 17
+            exterior links and 3 stair wells. Six of the difference is the exterior ring, which
+            grew when `HOUSE-00372` corrected §13.7 from 14 exterior cells to 18 — a ring of 18
+            cells needs more links than a ring of 14. §16.3 now carries the measured breakdown and
+            says which rows are measured and which are still design figures.
+      finding: **`EXT_SHED` had no portal at all**, and no rule could see it. §15.7 rule 5 said
+            "every **interior** cell is reachable from `L0_FOYER`", and the shed is `kind:
+            exterior` — an exterior cell that is indoors: roofed, `yOverride` [0.0, 2.35],
+            `visibilityHint: opaque`, its own `footstepSurface: hardwood`. A building you cannot
+            enter is the same defect as a room you cannot enter, so rule 5 now walks every cell
+            that is not `void`. Nothing is exempted, `EXT_WORLD` included: it is where the road
+            runs off the map, so it has a portal like everything else, and a rule with no
+            exceptions is one fewer place for the next unreachable cell to hide. §15.7 and
+            `docs/world-format.md` both corrected; the shed gained its east door, in the face it
+            shares with `EXT_GARDEN` at X −16.6, which `daylight.orientation: "E"` already implied.
+      finding: **`report_graph.py` reported "largest component with all doors closed: 1 cells"**
+            beside an exterior ring of eighteen cased openings. `components()` orders its groups by
+            their smallest member — deliberately, so the list diffs cleanly — and the report took
+            `[0]` as the largest. On this house that is `B1_CELLAR`, alone behind its door. Fixed
+            to `max`, with a claim on a fixture whose first group is a 1-cell WC so the two answers
+            differ; the same claim on the unmodified fixture passes either way, which is why the
+            bug survived `HOUSE-00359`.
+      finding: **eight portals were under the 1.95 m standing capsule** — seven between the attic
+            store rooms under the 1.20 m knee wall, one into `B1_UNDERSTAIR`. They are correct as
+            authored: those are crawl spaces. They carry `"crouch": true` so that `HOUSE-00362`'s
+            clearance check can tell "you must duck here" from "this doorway is a mistake".
+      finding: **eight portals had no shared plane**, all of them between a room and an outdoor
+            deck across a 0.30 m exterior wall: the two cells stopped either side of it, so there
+            was no plane in both. Fixed in the geometry rather than by loosening rule 4's 1 cm —
+            `L0_PORCH` and `L1_BALCONY_FRONT` extended to Z −14.30, `EXT_TERRACE` to Z −32.10,
+            `L0_GARAGE` to X 8.70, `EXT_SIDEYARD_E`'s slot box removed and `EXT_FRONTYARD_E` /
+            `EXT_BACKYARD` adjusted to suit. A deck that does not touch the wall it is against is
+            a modelling error, and rule 4 was right to say so.
+      note: rule 4 gained the container case. A portal into a sub-cell is not in a shared wall: the
+            sub-cell is inside its parent, so the opening is in the sub-cell's OWN face — the
+            fridge door, the chest lid — and the parent has no face there. Four claims, including
+            the two that matter: a portal in NEITHER face is still refused, and one taller than the
+            container it opens into is still refused.
+      note: rule 7 (every door has exactly one portal) stands down while `layout.openings.json`
+            does not exist. Portals are authored before leaves (`HOUSE-00378`), and a bijection
+            between two files of which only one exists is not a claim the data has made. It is the
+            file's presence, not its contents — an empty openings file beside 62 doors is a claim,
+            and a wrong one.
+      note: measured after authoring, by `tools/world/report_graph.py`: one component through open
+            doors, diameter 13 hops (`EXT_SHED` → `L2_BATH5`), 58 components with every door shut
+            and the largest of them the 18-cell exterior ring.
 - [ ] HOUSE-00376 — Author the 81 window portals (62 openable + 19 fixed) with `opacity: glass` and `maxDepth`
       dep: HOUSE-00374 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00377 — Author the garage-door portal and the 1 hatch portal

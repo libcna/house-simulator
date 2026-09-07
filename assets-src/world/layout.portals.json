@@ -1,0 +1,796 @@
+{
+  // Every portal in the house: the holes, and what is in them.
+  //
+  // `cna-house.md` §16.1 tabulates L0 and §16.2 the vertical ones; the upper floors and the
+  // basement follow the same reading of §13's room schedule. A portal is always an axis-aligned
+  // rectangle on an axis-aligned plane (§15.4), and rule 4 checks every one of them lies in
+  // BOTH cells' faces -- so these numbers are derived from the cell footprints, never guessed.
+  //
+  // Windows are `HOUSE-00376`, the garage door and the hatch are `HOUSE-00377`.
+  "schema": "cna-house/portals/1",
+
+  "portals": [
+
+    // ----------------------------------------------------------------------------
+    // always open — cased openings, stair wells and the open outdoors (`HOUSE-00374`): 47 portals
+    // A cased opening is open whether or not anybody has touched anything, and so is a stair
+    // well: `IsAlwaysOpen` in `WorldTypes.hpp`, `ALWAYS_OPEN` in `report_graph.py`, and §16.3's
+    // second graph -- the one that says the house falls into pieces when every door is shut.
+    //
+    // Every rectangle here is DERIVED from the two cells' shared wall rather than measured by
+    // hand: the run they share, the opening centred in it, and the head above the higher of the
+    // two floors. §12.3's cased opening is 1.60 x 2.20 and the wider ones are §16.1's own numbers.
+    //
+    // The seventeen `EXT_*` to `EXT_*` openings are not in §16.1, which tabulates the house. They
+    // are what makes the outdoors one connected place: without them the garden, the orchard and
+    // the terrace are each an island, and a pet that walked out of the back door could not reach
+    // any of them.
+    {
+      "id": "P_B1_STAIR__B1_HALL", "cellA": "B1_STAIR", "cellB": "B1_HALL",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-17.85, -16.65], "v": [-2.3, -0.1] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L0_FOYER__L0_HALL", "cellA": "L0_FOYER", "cellB": "L0_HALL",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [-1.5, 1.5], "v": [0.6, 3.2] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L0_FOYER__L0_STAIR", "cellA": "L0_FOYER", "cellB": "L0_STAIR_MAIN",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-17.1, -15.5], "v": [0.6, 2.8] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L0_STAIR__L0_MUDROOM", "cellA": "L0_STAIR_MAIN", "cellB": "L0_MUDROOM",
+      "plane": { "axis": "x", "value": 4.9 },
+      "rect": { "u": [-16.85, -15.75], "v": [0.6, 2.8] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L0_HALL__L0_KITCHEN", "cellA": "L0_HALL", "cellB": "L0_KITCHEN",
+      "plane": { "axis": "z", "value": -23.0 },
+      "rect": { "u": [-1.0, 1.0], "v": [0.6, 2.8] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L0_LIVING__L0_DINING", "cellA": "L0_LIVING", "cellB": "L0_DINING",
+      "plane": { "axis": "z", "value": -20.2 },
+      "rect": { "u": [-6.5, -3.9], "v": [0.6, 2.8] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L0_DINING__L0_KITCHEN", "cellA": "L0_DINING", "cellB": "L0_KITCHEN",
+      "plane": { "axis": "z", "value": -23.0 },
+      "rect": { "u": [-6.0, -4.4], "v": [0.6, 2.8] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L0_KITCHEN__L0_BUTLERS", "cellA": "L0_KITCHEN", "cellB": "L0_BUTLERS",
+      "plane": { "axis": "x", "value": -8.2 },
+      "rect": { "u": [-24.55, -23.45], "v": [0.6, 2.8] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L0_KITCHEN__L0_FAMILY", "cellA": "L0_KITCHEN", "cellB": "L0_FAMILY",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-26.6, -23.5], "v": [0.6, 3.2] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L0_KITCHEN__L0_SUNROOM", "cellA": "L0_KITCHEN", "cellB": "L0_SUNROOM",
+      "plane": { "axis": "z", "value": -27.1 },
+      "rect": { "u": [-4.25, -0.25], "v": [0.6, 3.2] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L1_LANDING__L1_HALL", "cellA": "L1_LANDING", "cellB": "L1_HALL",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [-1.1, 1.1], "v": [3.65, 5.85] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L1_HALL__L1_HALL_W", "cellA": "L1_HALL", "cellB": "L1_HALL_W",
+      "plane": { "axis": "x", "value": -2.2 },
+      "rect": { "u": [-20.25, -18.65], "v": [3.65, 5.85] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L1_STAIR__L1_LANDING", "cellA": "L1_STAIR_MAIN", "cellB": "L1_LANDING",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-17.1, -15.5], "v": [3.65, 5.85] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L2_LANDING__L2_HALL", "cellA": "L2_LANDING", "cellB": "L2_HALL",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [-1.1, 1.1], "v": [6.55, 8.75] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L2_HALL__L2_HALL_W", "cellA": "L2_HALL", "cellB": "L2_HALL_W",
+      "plane": { "axis": "x", "value": -2.2 },
+      "rect": { "u": [-20.25, -18.65], "v": [6.55, 8.75] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L2_STAIR__L2_LANDING", "cellA": "L2_STAIR_MAIN", "cellB": "L2_LANDING",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-17.1, -15.5], "v": [6.55, 8.75] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L3_HEAD__L3_ROOM", "cellA": "L3_STAIR_HEAD", "cellB": "L3_ROOM",
+      "plane": { "axis": "x", "value": 4.9 },
+      "rect": { "u": [-18.2, -17.1], "v": [9.3, 11.3] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_L3_ROOM__L3_STORE_N", "cellA": "L3_ROOM", "cellB": "L3_STORE_N",
+      "plane": { "axis": "z", "value": -24.0 },
+      "rect": { "u": [-1.35, 0.25], "v": [9.3, 11.1] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+    },
+    {
+      "id": "P_L3_ROOM__L3_STORE_S", "cellA": "L3_ROOM", "cellB": "L3_STORE_S",
+      "plane": { "axis": "z", "value": -17.0 },
+      "rect": { "u": [-1.35, 0.25], "v": [9.3, 10.9] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+    },
+    {
+      "id": "P_L3_ROOM__L3_STORE_W", "cellA": "L3_ROOM", "cellB": "L3_STORE_W",
+      "plane": { "axis": "x", "value": -6.0 },
+      "rect": { "u": [-21.3, -19.7], "v": [9.3, 11.1] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+    },
+    {
+      "id": "P_L3_HEAD__L3_STORE_E", "cellA": "L3_STAIR_HEAD", "cellB": "L3_STORE_E",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [6.25, 7.35], "v": [9.3, 11.1] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+    },
+    {
+      "id": "P_L3_STORE_W__L3_STORE_N", "cellA": "L3_STORE_W", "cellB": "L3_STORE_N",
+      "plane": { "axis": "x", "value": -6.0 },
+      "rect": { "u": [-26.15, -24.95], "v": [9.3, 10.9] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+    },
+    {
+      "id": "P_L3_STORE_W__L3_STORE_S", "cellA": "L3_STORE_W", "cellB": "L3_STORE_S",
+      "plane": { "axis": "x", "value": -6.0 },
+      "rect": { "u": [-16.25, -15.05], "v": [9.3, 10.9] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+    },
+    {
+      "id": "P_L3_STORE_E__L3_STORE_N", "cellA": "L3_STORE_E", "cellB": "L3_STORE_N",
+      "plane": { "axis": "x", "value": 4.9 },
+      "rect": { "u": [-26.15, -24.95], "v": [9.3, 10.9] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
+    },
+    {
+      "id": "P_EXT_FRONT_W__L0_PORCH", "cellA": "EXT_FRONTYARD_W", "cellB": "L0_PORCH",
+      "plane": { "axis": "z", "value": -11.6 },
+      "rect": { "u": [-3.5, -1.1], "v": [0.6, 3.2] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_FRONT_E__L0_PORCH", "cellA": "EXT_FRONTYARD_E", "cellB": "L0_PORCH",
+      "plane": { "axis": "z", "value": -11.6 },
+      "rect": { "u": [1.1, 3.5], "v": [0.6, 3.2] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_WALK__L0_PORCH", "cellA": "EXT_WALK", "cellB": "L0_PORCH",
+      "plane": { "axis": "z", "value": -11.6 },
+      "rect": { "u": [-1.0, 1.0], "v": [0.6, 3.2] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_ROAD__EXT_WALK", "cellA": "EXT_ROAD", "cellB": "EXT_WALK",
+      "plane": { "axis": "z", "value": 0.0 },
+      "rect": { "u": [-1.0, 1.0], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_ROAD__EXT_FRONT_W", "cellA": "EXT_ROAD", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": 0.0 },
+      "rect": { "u": [-11.0, -3.0], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_ROAD__EXT_FRONT_E", "cellA": "EXT_ROAD", "cellB": "EXT_FRONTYARD_E",
+      "plane": { "axis": "z", "value": 0.0 },
+      "rect": { "u": [2.15, 8.15], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_ROAD__EXT_DRIVEWAY", "cellA": "EXT_ROAD", "cellB": "EXT_DRIVEWAY",
+      "plane": { "axis": "z", "value": 0.0 },
+      "rect": { "u": [10.2, 16.2], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_ROAD__EXT_SIDE_W", "cellA": "EXT_ROAD", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "z", "value": 0.0 },
+      "rect": { "u": [-20.75, -14.75], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_ROAD__EXT_SIDE_E", "cellA": "EXT_ROAD", "cellB": "EXT_SIDEYARD_E",
+      "plane": { "axis": "z", "value": 0.0 },
+      "rect": { "u": [17.8, 21.8], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_FRONT_W__EXT_SIDE_W", "cellA": "EXT_FRONTYARD_W", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -13.0 },
+      "rect": { "u": [-8.8, -2.8], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_FRONT_E__EXT_DRIVEWAY", "cellA": "EXT_FRONTYARD_E", "cellB": "EXT_DRIVEWAY",
+      "plane": { "axis": "x", "value": 9.3 },
+      "rect": { "u": [-8.8, -2.8], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_DRIVEWAY__EXT_SIDE_E", "cellA": "EXT_DRIVEWAY", "cellB": "EXT_SIDEYARD_E",
+      "plane": { "axis": "x", "value": 17.1 },
+      "rect": { "u": [-8.65, -4.65], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_SIDE_W__EXT_BACKYARD", "cellA": "EXT_SIDEYARD_W", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "x", "value": -13.0 },
+      "rect": { "u": [-31.75, -27.75], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_SIDE_E__EXT_BACKYARD", "cellA": "EXT_SIDEYARD_E", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "z", "value": -27.4 },
+      "rect": { "u": [11.05, 15.05], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_BACKYARD__EXT_TERRACE", "cellA": "EXT_BACKYARD", "cellB": "EXT_TERRACE",
+      "plane": { "axis": "z", "value": -36.0 },
+      "rect": { "u": [-3.0, 3.0], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_BACKYARD__EXT_GARDEN", "cellA": "EXT_BACKYARD", "cellB": "EXT_GARDEN",
+      "plane": { "axis": "x", "value": -13.0 },
+      "rect": { "u": [-43.7, -40.7], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_BACKYARD__EXT_ORCHARD", "cellA": "EXT_BACKYARD", "cellB": "EXT_ORCHARD",
+      "plane": { "axis": "x", "value": 12.0 },
+      "rect": { "u": [-44.0, -40.0], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_SIDE_W__EXT_GARDEN", "cellA": "EXT_SIDEYARD_W", "cellB": "EXT_GARDEN",
+      "plane": { "axis": "x", "value": -20.0 },
+      "rect": { "u": [-42.25, -38.25], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      // The shed is an `exterior` cell that is indoors -- roofed, `visibilityHint: opaque`, a
+      // finite `yOverride` -- and without this door it is a building with no way in. The garden is
+      // the ring around it (`HOUSE-00372`), so the two share a face at X -16.6 exactly, and the
+      // door is in it: `daylight.orientation: "E"` on the cell is this door and the window beside
+      // it (`HOUSE-00376`).
+      "id": "P_EXT_GARDEN__EXT_SHED", "cellA": "EXT_GARDEN", "cellB": "EXT_SHED",
+      "plane": { "axis": "x", "value": -16.6 },
+      "rect": { "u": [-42.65, -41.75], "v": [0.0, 2.05] },
+      "kind": "exterior_door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.1, "closed": 0.74 }
+    },
+    {
+      "id": "P_EXT_BACKYARD__EXT_NORTHSTRIP", "cellA": "EXT_BACKYARD", "cellB": "EXT_NORTHSTRIP",
+      "plane": { "axis": "z", "value": -48.0 },
+      "rect": { "u": [-0.95, 5.05], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_EXT_WORLD__EXT_ROAD", "cellA": "EXT_WORLD", "cellB": "EXT_ROAD",
+      "plane": { "axis": "z", "value": 13.4 },
+      "rect": { "u": [-4.0, 4.0], "v": [0.0, 2.6] },
+      "kind": "cased_opening", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_STAIR_L0_L1", "cellA": "L0_STAIR_MAIN", "cellB": "L1_STAIR_MAIN",
+      "plane": { "axis": "y", "value": 3.65 },
+      "rect": { "u": [2.4, 4.7], "v": [-19.7, -14.8] },
+      "kind": "stair_well", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_STAIR_L1_L2", "cellA": "L1_STAIR_MAIN", "cellB": "L2_STAIR_MAIN",
+      "plane": { "axis": "y", "value": 6.55 },
+      "rect": { "u": [2.4, 4.7], "v": [-19.7, -14.8] },
+      "kind": "stair_well", "aperture": null, "opacity": "open"
+    },
+    {
+      "id": "P_STAIR_L2_L3", "cellA": "L2_STAIR_ATTIC", "cellB": "L3_STAIR_HEAD",
+      "plane": { "axis": "y", "value": 9.3 },
+      "rect": { "u": [5.2, 8.4], "v": [-17.8, -14.8] },
+      "kind": "stair_well", "aperture": null, "opacity": "open"
+    },
+
+    // ----------------------------------------------------------------------------
+    // doors (`HOUSE-00375`): 62 portals
+    // §12.3: an interior door leaf is 0.86 x 2.05 in a 0.90 x 2.10 rough opening, which is what
+    // the rectangles below are -- the opening, not the leaf. `layout.openings.json`
+    // (`HOUSE-00378`) carries the leaf, the hinge and the swing.
+    //
+    // `opacity` is what the visibility solver reads. `opaque_when_closed` is the ordinary door;
+    // `translucent` is §13.3's glazed pair between the living room and the study, the one portal
+    // in the house where vision passes and the player does not; `glass` is a slider.
+    //
+    // `soundLoss` is §64.3's: 0.55 closed for a hollow-core leaf, 0.78-0.82 for the solid and
+    // exterior ones, 0.68-0.70 for glass. A door that is quieter shut than open would be a
+    // sign-flipped pair, which `WorldLoader` refuses.
+    {
+      "id": "P_B1_HALL__B1_UNDERSTAIR", "cellA": "B1_HALL", "cellB": "B1_UNDERSTAIR",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-21.15, -20.25], "v": [-2.3, -0.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed", "crouch": true,
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_STAIR__B1_MECHANICAL", "cellA": "B1_STAIR", "cellB": "B1_MECHANICAL",
+      "plane": { "axis": "x", "value": 4.9 },
+      "rect": { "u": [-16.75, -15.85], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_STAIR__B1_ELECTRICAL", "cellA": "B1_STAIR", "cellB": "B1_ELECTRICAL",
+      "plane": { "axis": "x", "value": 4.9 },
+      "rect": { "u": [-19.7, -18.8], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_CINEMA__B1_UTILITY", "cellA": "B1_CINEMA", "cellB": "B1_UTILITY",
+      "plane": { "axis": "z", "value": -23.0 },
+      "rect": { "u": [6.35, 7.25], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_HALL__B1_CINEMA", "cellA": "B1_HALL", "cellB": "B1_CINEMA",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-25.5, -24.6], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_HALL__B1_WC7", "cellA": "B1_HALL", "cellB": "B1_WC7",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-22.55, -21.65], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_HALL__B1_GYM", "cellA": "B1_HALL", "cellB": "B1_GYM",
+      "plane": { "axis": "x", "value": -2.2 },
+      "rect": { "u": [-16.75, -15.85], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_HALL__B1_HOBBY", "cellA": "B1_HALL", "cellB": "B1_HOBBY",
+      "plane": { "axis": "x", "value": -2.2 },
+      "rect": { "u": [-21.6, -20.7], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_HALL__B1_LAUNDRY2", "cellA": "B1_HALL", "cellB": "B1_LAUNDRY2",
+      "plane": { "axis": "x", "value": -2.2 },
+      "rect": { "u": [-26.0, -25.1], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_GYM__B1_WORKSHOP", "cellA": "B1_GYM", "cellB": "B1_WORKSHOP",
+      "plane": { "axis": "x", "value": -8.2 },
+      "rect": { "u": [-16.75, -15.85], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_HOBBY__B1_STOR1", "cellA": "B1_HOBBY", "cellB": "B1_STOR1",
+      "plane": { "axis": "x", "value": -8.2 },
+      "rect": { "u": [-20.6, -19.7], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_HOBBY__B1_STOR2", "cellA": "B1_HOBBY", "cellB": "B1_STOR2",
+      "plane": { "axis": "x", "value": -8.2 },
+      "rect": { "u": [-23.45, -22.55], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_B1_HOBBY__B1_CELLAR", "cellA": "B1_HOBBY", "cellB": "B1_CELLAR",
+      "plane": { "axis": "z", "value": -24.0 },
+      "rect": { "u": [-6.85, -5.95], "v": [-2.3, -0.2] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_HALL__L0_WC1", "cellA": "L0_HALL", "cellB": "L0_WC1",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-21.55, -20.65], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_HALL__L0_FAMILY", "cellA": "L0_HALL", "cellB": "L0_FAMILY",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-22.95, -22.05], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_MUDROOM__L0_LAUNDRY", "cellA": "L0_MUDROOM", "cellB": "L0_LAUNDRY",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [6.35, 7.25], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_FAMILY__L0_LAUNDRY", "cellA": "L0_FAMILY", "cellB": "L0_LAUNDRY",
+      "plane": { "axis": "z", "value": -22.0 },
+      "rect": { "u": [6.35, 7.25], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_LIVING__L0_WC2", "cellA": "L0_LIVING", "cellB": "L0_WC2",
+      "plane": { "axis": "x", "value": -8.2 },
+      "rect": { "u": [-19.7, -18.8], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_OFFICE__L0_CLOSET_W", "cellA": "L0_OFFICE", "cellB": "L0_CLOSET_W",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [-12.0, -11.1], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_DINING__L0_STOR", "cellA": "L0_DINING", "cellB": "L0_STOR",
+      "plane": { "axis": "x", "value": -8.2 },
+      "rect": { "u": [-21.85, -20.95], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_KITCHEN__L0_PANTRY", "cellA": "L0_KITCHEN", "cellB": "L0_PANTRY",
+      "plane": { "axis": "x", "value": -8.2 },
+      "rect": { "u": [-26.5, -25.6], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_BUTLERS__L0_PANTRY", "cellA": "L0_BUTLERS", "cellB": "L0_PANTRY",
+      "plane": { "axis": "z", "value": -25.0 },
+      "rect": { "u": [-10.9, -10.0], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_STOR__L0_BUTLERS", "cellA": "L0_STOR", "cellB": "L0_BUTLERS",
+      "plane": { "axis": "z", "value": -22.6 },
+      "rect": { "u": [-10.9, -10.0], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_HALL__L1_MASTER_BED", "cellA": "L1_HALL", "cellB": "L1_MASTER_BED",
+      "plane": { "axis": "z", "value": -22.0 },
+      "rect": { "u": [-0.45, 0.45], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_MASTER_BED__L1_MASTER_CLOSET", "cellA": "L1_MASTER_BED", "cellB": "L1_MASTER_CLOSET",
+      "plane": { "axis": "x", "value": -7.0 },
+      "rect": { "u": [-25.0, -24.1], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_MASTER_CLOSET__L1_MASTER_BATH", "cellA": "L1_MASTER_CLOSET", "cellB": "L1_MASTER_BATH",
+      "plane": { "axis": "x", "value": -9.4 },
+      "rect": { "u": [-25.0, -24.1], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_HALL__L1_WC4", "cellA": "L1_HALL", "cellB": "L1_WC4",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-21.55, -20.65], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_LINEN__L1_BED2", "cellA": "L1_LINEN", "cellB": "L1_BED2",
+      "plane": { "axis": "z", "value": -22.9 },
+      "rect": { "u": [3.1, 4.0], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_STOR__L1_BED2", "cellA": "L1_STOR", "cellB": "L1_BED2",
+      "plane": { "axis": "z", "value": -22.9 },
+      "rect": { "u": [6.35, 7.25], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_BATH3__L1_STOR", "cellA": "L1_BATH3", "cellB": "L1_STOR",
+      "plane": { "axis": "z", "value": -22.0 },
+      "rect": { "u": [6.35, 7.25], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_HALL_W__L1_BED3", "cellA": "L1_HALL_W", "cellB": "L1_BED3",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [-9.4, -8.5], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_HALL_W__L1_BED4", "cellA": "L1_HALL_W", "cellB": "L1_BED4",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [-5.65, -4.75], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_HALL_W__L1_BATH2", "cellA": "L1_HALL_W", "cellB": "L1_BATH2",
+      "plane": { "axis": "x", "value": -9.7 },
+      "rect": { "u": [-19.9, -19.0], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_HALL_W__L1_WC3", "cellA": "L1_HALL_W", "cellB": "L1_WC3",
+      "plane": { "axis": "z", "value": -20.6 },
+      "rect": { "u": [-6.15, -5.25], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_HALL_W__L1_CLOSET_2", "cellA": "L1_HALL_W", "cellB": "L1_CLOSET_2",
+      "plane": { "axis": "z", "value": -20.6 },
+      "rect": { "u": [-8.8, -7.9], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_HALL_W__L1_CLOSET_3", "cellA": "L1_HALL_W", "cellB": "L1_CLOSET_3",
+      "plane": { "axis": "z", "value": -20.6 },
+      "rect": { "u": [-3.75, -2.85], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_STAIR__L1_BED5", "cellA": "L1_STAIR_MAIN", "cellB": "L1_BED5",
+      "plane": { "axis": "x", "value": 4.9 },
+      "rect": { "u": [-16.75, -15.85], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L1_BED5__L1_BATH3", "cellA": "L1_BED5", "cellB": "L1_BATH3",
+      "plane": { "axis": "z", "value": -18.3 },
+      "rect": { "u": [6.35, 7.25], "v": [3.65, 5.75] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_STAIR__L2_STAIR_ATTIC", "cellA": "L2_STAIR_MAIN", "cellB": "L2_STAIR_ATTIC",
+      "plane": { "axis": "x", "value": 4.9 },
+      "rect": { "u": [-16.75, -15.85], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_LANDING__L2_LIBRARY", "cellA": "L2_LANDING", "cellB": "L2_LIBRARY",
+      "plane": { "axis": "x", "value": -2.2 },
+      "rect": { "u": [-16.75, -15.85], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_LIBRARY__L2_BED6", "cellA": "L2_LIBRARY", "cellB": "L2_BED6",
+      "plane": { "axis": "x", "value": -8.2 },
+      "rect": { "u": [-16.75, -15.85], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_HALL_W__L2_BATH4", "cellA": "L2_HALL_W", "cellB": "L2_BATH4",
+      "plane": { "axis": "x", "value": -9.7 },
+      "rect": { "u": [-19.9, -19.0], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_HALL_W__L2_CLOSET_4", "cellA": "L2_HALL_W", "cellB": "L2_CLOSET_4",
+      "plane": { "axis": "z", "value": -20.6 },
+      "rect": { "u": [-8.8, -7.9], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_HALL_W__L2_WC5", "cellA": "L2_HALL_W", "cellB": "L2_WC5",
+      "plane": { "axis": "z", "value": -20.6 },
+      "rect": { "u": [-6.15, -5.25], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_HALL_W__L2_LINEN2", "cellA": "L2_HALL_W", "cellB": "L2_LINEN2",
+      "plane": { "axis": "z", "value": -20.6 },
+      "rect": { "u": [-3.75, -2.85], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_BATH4__L2_BED7", "cellA": "L2_BATH4", "cellB": "L2_BED7",
+      "plane": { "axis": "z", "value": -22.0 },
+      "rect": { "u": [-11.65, -10.75], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_HALL__L2_GAMES", "cellA": "L2_HALL", "cellB": "L2_GAMES",
+      "plane": { "axis": "z", "value": -22.0 },
+      "rect": { "u": [-0.45, 0.45], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_HALL__L2_WC6", "cellA": "L2_HALL", "cellB": "L2_WC6",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-21.55, -20.65], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_GAMES__L2_STOR2", "cellA": "L2_GAMES", "cellB": "L2_STOR2",
+      "plane": { "axis": "x", "value": 2.2 },
+      "rect": { "u": [-22.9, -22.0], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_STOR2__L2_SITTING", "cellA": "L2_STOR2", "cellB": "L2_SITTING",
+      "plane": { "axis": "z", "value": -22.9 },
+      "rect": { "u": [5.0, 5.9], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L2_STOR2__L2_BATH5", "cellA": "L2_STOR2", "cellB": "L2_BATH5",
+      "plane": { "axis": "z", "value": -22.0 },
+      "rect": { "u": [6.35, 7.25], "v": [6.55, 8.65] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.55 }
+    },
+    {
+      "id": "P_L0_FOYER__L0_LIVING", "cellA": "L0_FOYER", "cellB": "L0_LIVING",
+      "plane": { "axis": "x", "value": -2.2 },
+      "rect": { "u": [-17.2, -15.4], "v": [0.6, 2.75] },
+      "kind": "double_door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.5 }
+    },
+    {
+      "id": "P_L0_HALL__L0_DINING", "cellA": "L0_HALL", "cellB": "L0_DINING",
+      "plane": { "axis": "x", "value": -2.2 },
+      "rect": { "u": [-22.5, -20.7], "v": [0.6, 2.75] },
+      "kind": "double_door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.5 }
+    },
+    {
+      "id": "P_L0_LIVING__L0_OFFICE", "cellA": "L0_LIVING", "cellB": "L0_OFFICE",
+      "plane": { "axis": "x", "value": -8.2 },
+      "rect": { "u": [-17.2, -15.4], "v": [0.6, 2.75] },
+      "kind": "double_door", "aperture": null, "opacity": "translucent", "maxDepth": 2,
+      "soundLoss": { "open": 0.05, "closed": 0.4 }
+    },
+    {
+      "id": "P_L0_PORCH__L0_FOYER", "cellA": "L0_PORCH", "cellB": "L0_FOYER",
+      "plane": { "axis": "z", "value": -14.3 },
+      "rect": { "u": [-0.5, 0.5], "v": [0.6, 2.75] },
+      "kind": "exterior_door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.1, "closed": 0.82 }
+    },
+    {
+      "id": "P_L0_SUNROOM__EXT_TERRACE", "cellA": "L0_SUNROOM", "cellB": "EXT_TERRACE",
+      "plane": { "axis": "z", "value": -32.1 },
+      "rect": { "u": [-3.2, -0.8], "v": [0.6, 2.75] },
+      "kind": "slider", "aperture": null, "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.1, "closed": 0.7 }
+    },
+    {
+      "id": "P_L1_MASTER_BED__L1_BALCONY_REAR", "cellA": "L1_MASTER_BED", "cellB": "L1_BALCONY_REAR",
+      "plane": { "axis": "z", "value": -27.1 },
+      "rect": { "u": [-3.45, -1.05], "v": [3.65, 5.8] },
+      "kind": "slider", "aperture": null, "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.1, "closed": 0.7 }
+    },
+    {
+      "id": "P_L1_LANDING__L1_BALCONY_FRONT", "cellA": "L1_LANDING", "cellB": "L1_BALCONY_FRONT",
+      "plane": { "axis": "z", "value": -14.3 },
+      "rect": { "u": [-0.5, 0.5], "v": [3.65, 5.8] },
+      "kind": "exterior_door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.1, "closed": 0.78 }
+    },
+    {
+      "id": "P_L2_LANDING__L2_BALCONY_JULIET", "cellA": "L2_LANDING", "cellB": "L2_BALCONY_JULIET",
+      "plane": { "axis": "z", "value": -14.3 },
+      "rect": { "u": [-0.8, 0.8], "v": [6.55, 8.7] },
+      "kind": "double_door", "aperture": null, "opacity": "glass", "maxDepth": 1,
+      "soundLoss": { "open": 0.1, "closed": 0.68 }
+    },
+    {
+      "id": "P_L0_MUDROOM__L0_GARAGE", "cellA": "L0_MUDROOM", "cellB": "L0_GARAGE",
+      "plane": { "axis": "x", "value": 8.7 },
+      "rect": { "u": [-16.75, -15.85], "v": [0.6, 2.7] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.06, "closed": 0.78 }
+    },
+    {
+      "id": "P_L0_GARAGE__EXT_SIDEYARD_E", "cellA": "L0_GARAGE", "cellB": "EXT_SIDEYARD_E",
+      "plane": { "axis": "x", "value": 17.1 },
+      "rect": { "u": [-17.95, -17.05], "v": [0.15, 2.25] },
+      "kind": "exterior_door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.1, "closed": 0.8 }
+    },
+    {
+      "id": "P_L0_STAIR__B1_STAIR", "cellA": "B1_STAIR", "cellB": "L0_STAIR_MAIN",
+      "plane": { "axis": "y", "value": 0.6 },
+      "rect": { "u": [2.4, 4.7], "v": [-19.7, -16.4] },
+      "kind": "door", "aperture": null, "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.05, "closed": 0.6 }
+    },
+    // ----------------------------------------------------------------------------
+    // container sub-cells (`HOUSE-00373`): 2 portals
+    //
+    // §54: "a container is a tiny sub-cell with its own portal, so this falls out of the
+    // visibility system rather than being a special case". The aperture is the door's own
+    // `openFraction`, so contents are drawn when it exceeds 0.15 without anything here knowing
+    // that -- the visibility solver already clips through a partly-open portal.
+    //
+    // The freezer is a CHEST: its lid opens upward, so its plane is horizontal. That is the second
+    // use for `plane.axis: "y"` after the stair well that forced it into the vocabulary.
+    {
+      "id": "P_FRIDGE_INTERIOR", "cellA": "L0_KITCHEN", "cellB": "CELL_FRIDGE_INTERIOR",
+      "plane": { "axis": "z", "value": -26.45 },
+      "rect": { "u": [0.4, 2.0], "v": [0.7, 2.45] },
+      "kind": "door", "aperture": "FRIDGE_L0_KITCHEN", "opacity": "opaque_when_closed",
+      "crouch": true,
+      "soundLoss": { "open": 0.10, "closed": 0.70 }
+    },
+    {
+      "id": "P_FREEZER_INTERIOR", "cellA": "L0_PANTRY", "cellB": "CELL_FREEZER_INTERIOR",
+      "plane": { "axis": "y", "value": 1.35 },
+      "rect": { "u": [-12.4, -11.0], "v": [-26.9, -26.2] },
+      "kind": "hatch", "aperture": "FREEZER_L0_PANTRY", "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.10, "closed": 0.72 }
+    }
+  ]
+}

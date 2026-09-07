@@ -605,8 +605,11 @@ build**:
 3. no two cells on a level overlap by more than 1 cm²;
 4. every portal rectangle lies in both cells' boundary planes within 1 cm, and its `v` range lies
    inside both cells' vertical extent;
-5. the portal graph is connected — every interior cell is reachable from `L0_FOYER` through
-   always-open or door portals;
+5. the portal graph is connected — every cell that is not `void` is reachable from `L0_FOYER`
+   through always-open or door portals. Not "every interior cell": `EXT_SHED` is an `exterior`
+   cell that is indoors, and under the narrower wording it was authored with no door
+   (`HOUSE-00374`). Nothing is exempt, `EXT_WORLD` included — it is where the road runs off the
+   map, so it has a portal like everything else;
 6. every referenced material, asset, light group, sound, nav region and animation exists;
 7. every door has exactly one portal, and every window has exactly one portal;
 8. stair flights connect the declared cells and their total rise equals the level difference to

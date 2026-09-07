@@ -1224,7 +1224,9 @@ place crouching exists, and it exists because the roof geometry demands it.
 | `L0_PORCH`, `L1_BALCONY_REAR`, `L1_BALCONY_FRONT`, `L2_BALCONY_JULIET` | see above | | Exterior cells attached to the house |
 | `EXT_WORLD` | Everything beyond the fences | the rest | One huge cell holding terrain, road, neighbourhood, sky; internally culled by frustum + distance + LOD |
 
-**18 exterior cells** (counting the 4 attached ones), **75 interior cells**, **93 total**.
+**18 exterior cells** (counting the 4 attached ones), **75 interior cells**, **93 total** —
+plus the 2 container sub-cells `HOUSE-00373` authored, which are cells in the data but not
+rooms in this schedule, so `layout.cells.json` holds **95**.
 
 > Corrected 2026-09-07 by `HOUSE-00372`, which authored these and counted the tables. It read
 > "17 exterior cells (counting the 4 attached ones), 78 interior cells, 95 total". Counted from
@@ -1475,8 +1477,11 @@ surprise. This keeps the data declarative without inventing a VM.
 3. no two cells on the same level overlap by more than 1 cm²;
 4. every portal's rectangle lies **in** both cells' boundary planes within 1 cm, and its `v` range
    lies inside both cells' vertical extent;
-5. the portal graph is connected: every interior cell is reachable from `L0_FOYER` through
-   *always-open or door* portals;
+5. the portal graph is connected: every cell that is not `void` is reachable from `L0_FOYER`
+   through *always-open or door* portals — corrected 2026-09-07 from "every interior cell", which
+   is what let `EXT_SHED` be authored with no door at all (`HOUSE-00374`): an `exterior` cell that
+   is roofed and `visibilityHint: opaque` is a building, and a building you cannot enter is the
+   same defect as a room you cannot enter;
 6. every referenced material, asset, light group, sound, nav region and animation exists;
 7. every door has exactly one portal and every window has exactly one portal;
 8. stair flights connect the declared cells and their total rise equals the level difference to
@@ -1548,19 +1553,26 @@ asks for, and it falls out of the data, not out of special cases.
 
 ### 16.3 Graph shape
 
+The design figures below were written before the layout existed. `HOUSE-00374` and `HOUSE-00375`
+authored 112 of the portals, so the rows marked **measured** are now
+`tools/world/report_graph.py assets-src/world`'s output rather than an estimate; the rest are still
+design figures and `HOUSE-00376`/`HOUSE-00377` will confirm or correct them the same way.
+
 | Metric | Value |
 |---|---|
-| Cells | 93 (75 interior + 18 exterior) — corrected 2026-09-07, see §13.7 |
-| Portals total | 186 |
-| — always-open (cased/stair) | 41 |
-| — hinged/double/slider doors | 62 |
-| — windows (glass) | 81 |
-| — garage door | 1 |
-| — hatches | 1 |
-| Mean interior cell degree | 3.9 |
-| Max interior cell degree | `L0_KITCHEN` = 8 |
-| Graph diameter (through open doors) | 11 hops (`EXT_ROAD` → `L3_STORE_N`) |
-| Diameter with all doors closed | ∞ — the graph fragments into 34 components, which is the whole point |
+| Cells | 95 — 75 interior rooms + 2 container sub-cells (§54) + 18 exterior — **measured** |
+| Portals total | 195 when complete; **112 authored** — 47 + 63 + 2 |
+| — always-open (cased/stair) | **47** — 27 interior cased openings, 17 exterior, 3 stair wells |
+| — hinged/double/slider/exterior doors | **63** |
+| — container portals (fridge door, freezer lid) | **2** |
+| — windows (glass) | 81 — `HOUSE-00376` |
+| — garage door | 1 — `HOUSE-00377` |
+| — attic hatch | 1 — `HOUSE-00377` |
+| Mean interior cell degree | **2.29** through doors and openings alone; windows will raise it |
+| Max interior cell degree | `B1_HALL` = **7** — **measured**; the design said `L0_KITCHEN` = 8 |
+| Graph diameter (through open doors) | **13 hops** (`EXT_SHED` → `L2_BATH5`) — **measured**; the design said 11 (`EXT_ROAD` → `L3_STORE_N`), which is what the graph measured before the garden shed had a door |
+| Diameter with all doors closed | ∞ — **58 components**, which is the whole point; the design said 34 |
+| Largest component with all doors closed | **18 cells** — the exterior ring, which is all cased openings |
 
 ### 16.4 Cell-membership lookup
 

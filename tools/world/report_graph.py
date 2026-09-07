@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """report_graph.py -- §16's room/portal graph, measured from the data rather than written down.
 
-`HOUSE-00359`. `cna-house.md` §16.1-§16.3 states what the house's graph is: 95 cells, 186 portals,
-a mean interior degree of 3.9, a diameter of 11 hops, and 34 components once every door is shut.
-Those numbers were designed before the layout existed. This computes them from
+`HOUSE-00359`. `cna-house.md` §16.1-§16.3 states what the house's graph is. Those numbers were
+designed before the layout existed -- 186 portals, a mean interior degree of 3.9, a diameter of 11
+hops, 34 components once every door is shut -- and `HOUSE-00374` replaced five of them with what
+the data actually says, including a "largest component" this tool had been reporting wrongly.
+This computes them from
 `assets-src/world/` so that the design and the data can be compared, and so that a portal quietly
 dropped during authoring shows up as a number that moved rather than as a room nobody can enter.
 
@@ -170,8 +172,12 @@ def measure(directory: Path) -> dict:
         },
         "openGraph": {"diameter": hops, "diameterBetween": list(pair) if pair else None,
                       "components": len(components(ids, open_graph))},
+        # `max`, not `[0]`. `components` orders its groups by their smallest member so that the
+        # list diffs cleanly, so `[0]` is the group holding the alphabetically first cell -- which
+        # on the authored house is `B1_CELLAR`, alone behind its door. It reported "largest
+        # component: 1 cells" beside an exterior ring of 18 cased openings (`HOUSE-00374`).
         "shutGraph": {"components": len(shut_components),
-                      "largestComponent": len(shut_components[0]) if shut_components else 0},
+                      "largestComponent": max((len(g) for g in shut_components), default=0)},
         "rows": adjacency_rows(cells, portals),
     }
 
@@ -314,6 +320,29 @@ def selftest() -> int:
         require(report["shutGraph"]["components"] == 4,
                 f"and the house falls into 4 pieces: the two WCs and the terrace each become "
                 f"their own ({report['shutGraph']['components']})")
+        # The LARGEST piece, not the first one listed. `components` orders its groups by their
+        # smallest member so the list diffs cleanly, so the two answers coincide only while the
+        # alphabetically first cell happens to be in the biggest group. Renaming one WC so that it
+        # sorts first separates them: the authored house does this by itself, where `B1_CELLAR` is
+        # alone behind its door and the report said "largest component: 1 cells" next to an
+        # exterior ring of eighteen (`HOUSE-00374`).
+        renamed = copy.deepcopy(base)
+        for cell in renamed["cells"]["cells"]:
+            if cell["id"] == "L0_WC1":
+                cell["id"] = "B1_WC1"
+        for portal in renamed["portals"]["portals"]:
+            for end in ("cellA", "cellB"):
+                if portal[end] == "L0_WC1":
+                    portal[end] = "B1_WC1"
+        first_last = workspace / "first-last"
+        validate_world.write_fixture(first_last, renamed)
+        renamed_report = measure(first_last)
+        groups = components([c["id"] for c in renamed["cells"]["cells"]],
+                            edges(renamed["portals"]["portals"], ALWAYS_OPEN))
+        require(len(groups[0]) == 1 and renamed_report["shutGraph"]["largestComponent"] == 6,
+                f"the largest piece is the 6-cell one even when the FIRST piece listed is a "
+                f"1-cell WC ({len(groups[0])} vs "
+                f"{renamed_report['shutGraph']['largestComponent']})")
 
         # 2. A window is not a way through, in either graph. `validate_world.py` rule 5 makes the
         #    same distinction; if these two ever disagree, one of them is letting a player walk

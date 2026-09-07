@@ -28,6 +28,10 @@
     {
       "id": "B1_STAIR", "level": "B1", "name": "Basement Stair Foot", "kind": "stair",
       "boxes": [{ "x": [2.20, 4.90], "z": [-20.20, -14.30] }],
+      // Up to L0's floor, because §16.2's basement door is "at the head, on L0": the opening is
+      // where the flight passes the slab, so the two stair cells have to meet there for the portal
+      // to have a plane to sit in. `stair` is exempt from rule 2's slab bounds for this reason.
+      "yOverride": [-2.30, 0.60],
       "footstepSurface": "stair_wood",
       "acoustic": { "absorption": 0.14, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -363,7 +367,11 @@
     },
     {
       "id": "L0_GARAGE", "level": "L0", "name": "Garage", "kind": "garage",
-      "boxes": [{ "x": [9.30, 17.10], "z": [-21.70, -13.30] }],
+      // From X +8.70, the mudroom's interior face, and not §13.3's +9.30: §12.3 puts a 0.25 m
+      // fire-rated party wall between the garage and the house, so the two abut and the
+      // house-to-garage door has a plane. It also closes a 0.30 m slot between two buildings that
+      // a player could otherwise walk into.
+      "boxes": [{ "x": [8.70, 17.10], "z": [-21.70, -13.30] }],
       // A single-storey wing with a roof of its own: §12.2 puts the slab at +0.15 and the ceiling
       // at +4.30, a 4.15 m bay. Nothing on L1 reaches over it, which is what lets rule 2 accept a
       // ceiling above L1's slab underside -- and the reason that rule asks what is actually above
@@ -377,7 +385,11 @@
     },
     {
       "id": "L0_PORCH", "level": "L0", "name": "Front Porch", "kind": "exterior",
-      "boxes": [{ "x": [-3.60, 3.60], "z": [-14.00, -11.60] }],
+      // To Z -14.30, the foyer's interior face, and not §13.3's -14.00: the 0.30 m exterior wall
+      // between them is drawn by the building and belongs to no cell, so an outdoor cell that
+      // abuts the house runs to the face the front door is in. Without that the door has no plane
+      // both cells reach and rule 4 refuses it.
+      "boxes": [{ "x": [-3.60, 3.60], "z": [-14.30, -11.60] }],
       // Outdoors, but roofed: the front balcony at +3.65 is its ceiling, which is why it is not
       // open to the sky and why rain stops at its edge (`build_coverage.py`). Two rockers, a
       // doormat and a wall lantern each side of the door.
@@ -590,7 +602,8 @@
     },
     {
       "id": "L1_BALCONY_FRONT", "level": "L1", "name": "Front Balcony", "kind": "exterior",
-      "boxes": [{ "x": [-3.60, 3.60], "z": [-14.00, -11.60] }],
+      // To the landing's interior face, for the same reason as the porch below it.
+      "boxes": [{ "x": [-3.60, 3.60], "z": [-14.30, -11.60] }],
       // The porch roof, and the porch's ceiling. Two chairs and a small table.
       "yOverride": [3.65, 9.00],
       "footstepSurface": "hardwood",
@@ -925,8 +938,9 @@
     },
     {
       "id": "EXT_FRONTYARD_E", "level": "L0", "name": "Front Lawn East", "kind": "exterior",
+      // Squared to the garage's new west face at X +8.70 (see `L0_GARAGE`).
       "boxes": [{ "x": [1.0, 9.3], "z": [-11.6, 0.0] },
-                { "x": [3.6, 9.3], "z": [-14.0, -11.6] }],
+                { "x": [3.6, 8.7], "z": [-14.0, -11.6] }],
       "yOverride": [0.0, 20.0],
       "footstepSurface": "grass",
       "acoustic": { "absorption": 0.92, "reverbHint": "outdoor_open" },
@@ -964,8 +978,9 @@
       "id": "EXT_SIDEYARD_E", "level": "L0", "name": "East Side Yard", "kind": "exterior",
       // Four boxes: it also holds the 0.30 m slot between the house and the garage, which belongs
       // to nothing else and which a player can walk into.
+      // Three boxes: the slot between the house and the garage closed when the garage was moved
+      // to the party wall (see `L0_GARAGE`).
       "boxes": [{ "x": [17.1, 22.5], "z": [-48.0, 0.0] },
-                { "x": [9.0, 9.3], "z": [-21.7, -14.0] },
                 { "x": [9.0, 22.5], "z": [-27.4, -21.7] },
                 { "x": [17.1, 22.5], "z": [-21.7, -14.0] }],
       "yOverride": [0.0, 20.0],
@@ -979,7 +994,8 @@
       "id": "EXT_TERRACE", "level": "L0", "name": "Rear Terrace", "kind": "exterior",
       // Flagged, one step down from the sunroom's slider (§16.1), and under the rear balcony's
       // outer edge -- which is why `build_coverage.py` has anything to measure here.
-      "boxes": [{ "x": [-6.7, 6.7], "z": [-36.0, -32.4] }],
+      // To Z -32.10, the sunroom's interior face: the slider needs a plane both cells reach.
+      "boxes": [{ "x": [-6.7, 6.7], "z": [-36.0, -32.1] }],
       "yOverride": [0.0, 20.0],
       "footstepSurface": "bluestone",
       "acoustic": { "absorption": 0.86, "reverbHint": "outdoor_open" },
@@ -991,9 +1007,12 @@
       "id": "EXT_BACKYARD", "level": "L0", "name": "Rear Lawn", "kind": "exterior",
       // Eight boxes: the lawn between the side yards, with the sunroom, the terrace and the
       // orchard carved out of it.
+      // The band at Z -32.4…-32.1 is split, because the terrace now runs north to the sunroom's
+      // interior face and takes the middle of it.
       "boxes": [{ "x": [-13.0, -6.7], "z": [-32.1, -27.4] },
                 { "x": [2.7, 17.1], "z": [-32.1, -27.4] },
-                { "x": [-13.0, 17.1], "z": [-32.4, -32.1] },
+                { "x": [-13.0, -6.7], "z": [-32.4, -32.1] },
+                { "x": [6.7, 17.1], "z": [-32.4, -32.1] },
                 { "x": [-13.0, -6.7], "z": [-36.0, -32.4] },
                 { "x": [6.7, 17.1], "z": [-36.0, -32.4] },
                 { "x": [-13.0, 17.1], "z": [-38.0, -36.0] },

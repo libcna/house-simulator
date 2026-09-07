@@ -557,6 +557,23 @@ def rule_4_portal_planes(world: World) -> list[Problem]:
                                     f"portal {portal_id}: rect u {[u0, u1]} v {[v0, v1]} is "
                                     f"degenerate or inverted"))
             continue
+        # A portal into a container sub-cell is not in a shared WALL: the sub-cell is inside its
+        # parent, so the opening lies in the sub-cell's own face -- the fridge door, the chest lid
+        # -- and the parent has no face there at all. Checked against the child, plus that the
+        # opening is inside the parent's volume, which is the same statement one nesting deeper.
+        cell_a = world.cell_by_id.get(portal.get("cellA"))
+        cell_b = world.cell_by_id.get(portal.get("cellB"))
+        if cell_a is not None and cell_b is not None:
+            child = None
+            if cell_a.get("parent") == cell_b.get("id"):
+                child, parent = cell_a, cell_b
+            elif cell_b.get("parent") == cell_a.get("id"):
+                child, parent = cell_b, cell_a
+            if child is not None:
+                problems.extend(_nested_problems(world, portal, index, child, parent,
+                                                 str(axis), float(value), (u0, u1, v0, v1)))
+                continue
+
         if axis == "y":
             problems.extend(_horizontal_problems(world, portal, index, float(value),
                                                  (u0, u1, v0, v1)))
@@ -591,8 +608,64 @@ def rule_4_portal_planes(world: World) -> list[Problem]:
     return problems
 
 
+def _nested_problems(world: World, portal: dict, index: int, child: dict, parent: dict,
+                     axis: str, value: float, rect: tuple[float, float, float, float],
+                     ) -> list[Problem]:
+    """Rule 4 for a portal between a container sub-cell and the cell it nests in."""
+    where = f"portals/{index}"
+    portal_id = portal.get("id")
+    u0, u1, v0, v1 = rect
+    problems = []
+
+    if axis == "y":
+        extent = world.extent(child)
+        if extent is not None and min(abs(extent[0] - value), abs(extent[1] - value)) > PLANE_TOLERANCE:
+            problems.append(Problem(
+                4, FILE_OF["portals"], f"{where}/plane",
+                f"portal {portal_id}: y = {value:.3f} is neither the floor nor the lid of "
+                f"{child.get('id')}, whose extent is {extent[0]:.3f}..{extent[1]:.3f}"))
+        if not all(point_in_boxes(x, z, boxes_of(child), margin=PLANE_TOLERANCE)
+                   for x, z in ((u0, v0), (u0, v1), (u1, v0), (u1, v1))):
+            problems.append(Problem(
+                4, FILE_OF["portals"], f"{where}/rect",
+                f"portal {portal_id}: the opening is not inside {child.get('id')}'s footprint"))
+        return problems
+
+    runs = _boundary_span(child, axis, value)
+    if not runs:
+        problems.append(Problem(
+            4, FILE_OF["portals"], f"{where}/plane",
+            f"portal {portal_id}: {child.get('id')} nests in {parent.get('id')}, so the opening "
+            f"is in ITS face -- and it has none on {axis} = {value:.3f} within "
+            f"{PLANE_TOLERANCE * 100:.0f} cm"))
+    elif not any(run[0] - PLANE_TOLERANCE <= u0 and u1 <= run[1] + PLANE_TOLERANCE
+                 for run in runs):
+        problems.append(Problem(
+            4, FILE_OF["portals"], f"{where}/rect/u",
+            f"portal {portal_id}: the opening is not inside {child.get('id')}'s face on that "
+            f"plane"))
+
+    extent = world.extent(child)
+    if extent is not None and (v0 < extent[0] - PLANE_TOLERANCE or v1 > extent[1] + PLANE_TOLERANCE):
+        problems.append(Problem(
+            4, FILE_OF["portals"], f"{where}/rect/v",
+            f"portal {portal_id}: the opening is taller than {child.get('id')}"))
+    return problems
+
+
 def rule_5_connected(world: World) -> list[Problem]:
-    """Every interior cell is reachable from `L0_FOYER` through always-open or door portals.
+    """Every cell is reachable from `L0_FOYER` through always-open or door portals.
+
+    §15.7 rule 5 and `docs/world-format.md` both say **interior** cell, and `HOUSE-00374` found
+    what that misses: `EXT_SHED` is an `exterior` cell that is indoors -- roofed, `yOverride`
+    [0.0, 2.35], `visibilityHint: opaque` -- and it had no portal at all. A building you cannot
+    enter is the same defect as a room you cannot enter, and the word "interior" was the only
+    reason the rule could not see it. So the walk now covers every cell that is not `void`.
+
+    Nothing is exempted, `EXT_WORLD` included. It is §16.4 step 4's fallback and it would have
+    been defensible to exclude it, but it does not need excluding: it is where the road runs off
+    the map, so it has a portal for the same reason every other exterior cell does, and a rule
+    with no exceptions is one fewer place for the next unreachable cell to hide.
 
     The rule needs a graph to walk, and a layout under construction does not have one yet: the
     cells are authored a level at a time (`HOUSE-00367`…`HOUSE-00372`) and the portals come after
@@ -604,9 +677,8 @@ def rule_5_connected(world: World) -> list[Problem]:
     who authored a graph and no front door, and that is exactly the mistake this rule is for.
     """
     problems = []
-    interior = {cell.get("id") for cell in world.cells
-                if cell.get("kind") not in ("exterior", "void")}
-    if not interior:
+    walkable = {cell.get("id") for cell in world.cells if cell.get("kind") != "void"}
+    if not walkable:
         return problems
     if "portals" not in world.layout:
         return problems
@@ -637,10 +709,10 @@ def rule_5_connected(world: World) -> list[Problem]:
 
     for index, cell in enumerate(world.cells):
         cell_id = cell.get("id")
-        if cell_id in interior and cell_id not in reached:
+        if cell_id in walkable and cell_id not in reached:
             problems.append(Problem(
                 5, FILE_OF["cells"], f"cells/{index}",
-                f"interior cell {cell_id} is not reachable from {ROOT_CELL} through open or door "
+                f"cell {cell_id} is not reachable from {ROOT_CELL} through open or door "
                 f"portals; it has {len(adjacency.get(cell_id, ()))} passable portal(s)"))
     return problems
 
@@ -747,8 +819,20 @@ def rule_7_openings(world: World) -> list[Problem]:
 
     Both directions. A door with no portal is a leaf that swings in a solid wall; a portal claimed
     by two doors is two leaves in one hole, and neither of those can be seen by looking at one row.
+
+    The rule needs both files. Portals are authored before leaves (`HOUSE-00375` then
+    `HOUSE-00378`), so it stands down until `layout.openings.json` exists -- the same arrangement
+    rule 5 makes for the portals file, and for the same reason: reporting every door in the house
+    against a file nobody has written yet is a gate somebody turns off.
     """
     problems = []
+    # The bijection is a statement about two files, and a layout under construction has only one:
+    # `HOUSE-00375` authors the door portals and `HOUSE-00378` the leaves. Until
+    # `layout.openings.json` exists the data has claimed nothing about leaves, and reporting every
+    # door in the house for a file nobody has written yet is a gate somebody turns off.
+    if "openings" not in world.layout:
+        return problems
+
     claimed: dict[str, list[str]] = {}
     for index, opening in enumerate(world.openings):
         portal_id = opening.get("portal")
@@ -1584,6 +1668,57 @@ def selftest() -> int:
                 f"two runs over one directory report the same {len(first)} problem(s) in the "
                 f"same order")
 
+        # A portal into a container sub-cell is not in a shared WALL: the sub-cell is inside its
+        # parent, so the opening is in the sub-cell's own face -- the fridge door, the chest lid --
+        # and the parent has no face there at all.
+        def with_container(portal_patch=None, y=False):
+            docs = copy.deepcopy(base)
+            docs["cells"]["cells"].append(
+                {"id": "CELL_FRIDGE_INTERIOR", "level": "L0", "kind": "closet",
+                 "parent": "L0_HALL",
+                 "boxes": [{"x": [0.0, 1.0], "z": [5.0, 6.0]}],
+                 "yOverride": [0.70, 2.45]})
+            door = {"id": "P_FRIDGE_INTERIOR", "cellA": "L0_HALL",
+                    "cellB": "CELL_FRIDGE_INTERIOR",
+                    "plane": {"axis": "z", "value": 6.0},
+                    "rect": {"u": [0.0, 1.0], "v": [0.70, 2.45]},
+                    "kind": "door", "opacity": "opaque_when_closed", "crouch": True}
+            if y:
+                door["plane"] = {"axis": "y", "value": 2.45}
+                door["rect"] = {"u": [0.0, 1.0], "v": [5.0, 6.0]}
+                door["kind"] = "hatch"
+            if portal_patch:
+                door.update(portal_patch)
+            docs["portals"]["portals"].append(door)
+            return docs
+
+        fridge = workspace / "fridge"
+        write_fixture(fridge, with_container())
+        _, problems = validate(fridge, wanted=[4])
+        require(not problems,
+                f"a portal in a sub-cell's OWN face is accepted, though its parent has no face "
+                f"there ({[str(p) for p in problems]})")
+
+        chest = workspace / "chest"
+        write_fixture(chest, with_container(y=True))
+        _, problems = validate(chest, wanted=[4])
+        require(not problems,
+                f"and so is a chest lid, which is horizontal ({[str(p) for p in problems]})")
+
+        askew = workspace / "askew"
+        write_fixture(askew, with_container({"plane": {"axis": "z", "value": 5.5}}))
+        _, problems = validate(askew, wanted=[4])
+        require(any("has none on" in p.message for p in problems),
+                f"a portal in NEITHER cell's face is still refused "
+                f"({[str(p) for p in problems]})")
+
+        tall_door = workspace / "tall-door"
+        write_fixture(tall_door, with_container({"rect": {"u": [0.0, 1.0], "v": [0.70, 3.20]}}))
+        _, problems = validate(tall_door, wanted=[4])
+        require(any("taller than" in p.message for p in problems),
+                f"and so is one taller than the container it opens into "
+                f"({[str(p) for p in problems]})")
+
         # ...and the same question the other way up. The stair cell's `yOverride` starts at 0.60,
         # which is L0's floor; a wing whose slab is BELOW its level's floor structure is only wrong
         # where there is a storey underneath to sink into.
@@ -1797,10 +1932,40 @@ def selftest() -> int:
         cut_off = workspace / "cut-off"
         write_fixture(cut_off, docs)
         _, problems = validate(cut_off, wanted=[5])
-        require(len(problems) == 7,
-                f"when the foyer is walled off, the SEVEN rooms cut off from it are the failures "
+        # Eight, not seven: the fixture's exterior cell reaches the house through the foyer's
+        # front door like everything else, and rule 5 stopped saying "interior" on `HOUSE-00374`.
+        require(len(problems) == 8,
+                f"when the foyer is walled off, the EIGHT cells cut off from it are the failures "
                 f"-- the walk starts at {ROOT_CELL}, not at whichever cell is written first, and "
-                f"the two answers differ by six ({len(problems)})")
+                f"the two answers differ by seven ({len(problems)})")
+
+        # `HOUSE-00374`: the rule used to say "interior cell", and `EXT_SHED` -- an `exterior`
+        # cell that is indoors, roofed and `visibilityHint: opaque` -- had no portal at all. A
+        # building you cannot enter is the same defect as a room you cannot enter.
+        docs = copy.deepcopy(base)
+        docs["cells"]["cells"].append(
+            {"id": "EXT_SHED", "level": "L0", "kind": "exterior",
+             "boxes": [{"x": [30.0, 33.0], "z": [30.0, 33.0]}],
+             "yOverride": [0.0, 2.35]})
+        shed = workspace / "shed"
+        write_fixture(shed, docs)
+        _, problems = validate(shed, wanted=[5])
+        require(len(problems) == 1 and "EXT_SHED" in problems[0].message,
+                f"an EXTERIOR cell with no portal is unreachable too, and rule 5 no longer stops "
+                f"at the word \"interior\" ({[str(x) for x in problems]})")
+
+        # Rule 7 needs both files, and a layout under construction has only one: portals are
+        # authored before leaves. It stands down until `layout.openings.json` exists, and bites as
+        # hard as before once it does -- the two cases either side of this are that.
+        docs = copy.deepcopy(base)
+        del docs["openings"]
+        leafless = workspace / "leafless"
+        write_fixture(leafless, docs)
+        _, problems = validate(leafless, wanted=[7])
+        require(not problems,
+                f"with no openings file the data has claimed nothing about leaves, and rule 7 "
+                f"says nothing rather than reporting every door in the house "
+                f"({[str(p) for p in problems]})")
 
         docs = copy.deepcopy(base)
         second = copy.deepcopy(row(docs, "openings", "DOOR_WC1"))
