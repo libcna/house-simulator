@@ -118,7 +118,15 @@ constants like `construction` and because validator rule 9 needs them:
 
 A prop that is a plumbing fixture names the stack it drains to in its own `plumbing` field; every
 other prop leaves it `null`. Rule 9 checks both directions — that each fixture is in a cell its
-stack lists, and that each stack's cells are on distinct levels, overlap the chase and land on a
+stack lists, and that each stack's cells exist, are listed once each, overlap the chase and land on
+a cell.
+
+`chase` is the footprint the stack rises within — §12.5's "vertical alignment" — and not the pipe:
+rule 9 asks whether a cell is above the drop, and a box the width of a 100 mm pipe answers a
+question nobody is asking. Several cells may sit on **one** level: a kitchen sink and a wet bar on
+the same floor branch into the same stack, which is what §12.5's STACK-E is, and requiring one cell
+per level was a rule that §12.5's own data broke (`HOUSE-00386`). `dropTo` may be `null` for a
+stack already at the bottom — STACK-F drains into an ejector pit, which is machinery and not a
 cell.
 
 `ffl` is finished floor level; `ceiling` is the underside of the ceiling above it. `L3`'s

@@ -21,7 +21,7 @@
   //
   // `asset` and `frame.asset` are null throughout. They are model references and the models are
   // phase 6 work; a made-up id here would point at nothing and rule 6 could not tell. `material`
-  // is NOT null: those ten ids are an obligation on `HOUSE-00381`, which authors
+  // is NOT null: those ten ids are an obligation on `HOUSE-00385`, which authors
   // `layout.materials.json`, and rule 6 holds it to them the moment that file exists.
   "schema": "cna-house/openings/1",
   "openings": [

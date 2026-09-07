@@ -25,6 +25,61 @@
       "roof": "ROOF_MAIN" }
   ],
 
+  // §12.5's stacks. `HOUSE-00386`. They live here rather than in a file of their own because they
+  // are house-wide structural constants like `construction`, and because rule 9 reads them.
+  //
+  // `chase` is the footprint the stack rises within -- §12.5's "vertical alignment" column -- and
+  // not the 100 mm pipe itself: rule 9 asks whether each cell is above the drop, and a box the
+  // width of the pipe would answer a question nobody is asking. Where §12.5 gives a real chase
+  // (STACK-B's shared corner, STACK-C's west wall) the box is that chase.
+  //
+  // §12.5's other four rows -- the water main, the sanitary drain, the gas meter and the HVAC
+  // trunk -- are services and not stacks. The ducts are `HOUSE-00387`'s.
+  "plumbing": {
+    "stacks": [
+      {
+        // Perfectly aligned on all three floors, which is why the three WCs are where they are.
+        "id": "STACK_A", "cells": ["L0_WC1", "L1_WC4", "L2_WC6"],
+        "chase": { "x": [2.20, 4.90], "z": [-22.00, -20.20] },
+        "dropTo": "B1_UTILITY"
+      },
+      {
+        // A real chase: 0.70 x 1.90 in the corner the three wet rooms share.
+        "id": "STACK_B", "cells": ["L0_WC2", "L1_BATH2", "L2_BATH4"],
+        "chase": { "x": [-10.40, -9.70], "z": [-20.20, -18.30] },
+        "dropTo": "B1_STOR1"
+      },
+      {
+        // One fixture room. The chase runs in the west wall over `L0_BUTLERS`, which is why that
+        // room and `L0_PANTRY` are under the master bathroom and not somewhere more convenient.
+        "id": "STACK_C", "cells": ["L1_MASTER_BATH"],
+        "chase": { "x": [-12.70, -12.30], "z": [-25.00, -22.60] },
+        "dropTo": "B1_STOR2"
+      },
+      {
+        "id": "STACK_D", "cells": ["L0_LAUNDRY", "L1_BATH3", "L2_BATH5"],
+        "chase": { "x": [4.90, 8.70], "z": [-22.00, -18.30] },
+        "dropTo": "B1_UTILITY"
+      },
+      {
+        // Two fixtures on ONE floor: the kitchen sink and the sunroom's wet bar branch into the
+        // same stack at the kitchen's north wall. §15.7 rule 9 used to require one cell per level
+        // and this is the row that showed the rule was wrong (`HOUSE-00386`).
+        "id": "STACK_E", "cells": ["L0_KITCHEN", "L0_SUNROOM"],
+        "chase": { "x": [-4.20, -3.80], "z": [-27.30, -26.90] },
+        "dropTo": "B1_STOR2"
+      },
+      {
+        // Not a vertical stack at all: both fixtures are already in the basement and drain into
+        // the run under the slab, so the "chase" is that run's footprint and `dropTo` is null --
+        // it drops to an ejector pit, which is machinery and not a cell.
+        "id": "STACK_F", "cells": ["B1_WC7", "B1_LAUNDRY2"],
+        "chase": { "x": [-4.60, 3.80], "z": [-27.10, -21.20] },
+        "dropTo": null
+      }
+    ]
+  },
+
   "construction": {
     // §12.3, in metres.
     "wallExterior":   0.30,

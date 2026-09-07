@@ -2995,6 +2995,22 @@ namespace
         // different roof; a test is the cheapest place to say which reading this is.
         EXPECT_NEAR(contents.construction.roofPitch, 7.0F / 12.0F, 1e-4F);
 
+        // §12.5's six stacks (`HOUSE-00386`). Two of them branch on one floor -- the kitchen sink
+        // with the sunroom's wet bar, and the two basement fixtures -- which is what plumbing
+        // does and what §15.7 rule 9 stopped forbidding.
+        ASSERT_EQ(contents.plumbing.size(), 6U);
+        EXPECT_EQ(contents.plumbing[0].id, Intern("STACK_A"));
+        EXPECT_EQ(contents.plumbing[0].dropTo, Intern("B1_UTILITY"));
+        const auto stack = [&contents](const char* name) -> const world::PlumbingStack&
+        {
+            return *std::find_if(contents.plumbing.begin(),
+                                 contents.plumbing.end(),
+                                 [name](const world::PlumbingStack& row) { return row.id == Intern(name); });
+        };
+        EXPECT_EQ(stack("STACK_E").cells.size(), 2U) << "the kitchen sink and the wet bar";
+        EXPECT_FALSE(stack("STACK_F").dropTo.IsValid())
+            << "the basement stack drops into an ejector pit, which is machinery and not a cell";
+
         IdRegistry::ResetForTesting();
     }
 

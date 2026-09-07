@@ -5702,7 +5702,7 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             hand would be a hundred and thirty chances to be arbitrary in a different way.
       note: `asset` and `frame.asset` are null throughout and say so in the file: they are model
             references and the models are phase 6. `material` is not null — those ten `MAT_*` ids
-            are an obligation on `HOUSE-00381`, and rule 6 holds it to them the moment
+            are an obligation on `HOUSE-00385`, and rule 6 holds it to them the moment
             `layout.materials.json` exists.
       note: 12 door types and 12 window types, not the 7 and 10 in this task's title. The extra
             doors are the ones later tasks created: the appliance door and the freezer lid
@@ -5815,8 +5815,26 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       finding: a file that is deployed and no longer authored is reported rather than left. The
             manifest would not list it and the loader would not read it, so it would be a room
             that exists in the game's directory and nowhere else.
-- [ ] HOUSE-00386 — Author the plumbing stack description (STACK-A…F) as data, so the validator can check fixture placement
+- [x] HOUSE-00386 — Author the plumbing stack description (STACK-A…F) as data, so the validator can check fixture placement
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
+      finding: **§15.7 rule 9 required one cell per level and §12.5's own data breaks it twice.**
+            STACK-E takes the kitchen sink and the sunroom's wet bar, both on `L0`; STACK-F takes
+            two basement fixtures. Several fixtures on one floor branch into the same stack, which
+            is what plumbing does. The rule now checks that no cell is listed twice instead — the
+            check it lost caught nothing real, and the one that does, "this cell is not over the
+            drop", is untouched and pinned by its own claim.
+      note: `chase` is the footprint the stack rises **within** — §12.5's "vertical alignment"
+            column — and not the 100 mm pipe. Rule 9 asks whether a cell is above the drop; a box
+            the width of the pipe would answer a question nobody is asking. Where §12.5 gives a
+            real chase, STACK-B's shared corner and STACK-C's west wall, the box is that chase.
+      note: STACK-F is not a vertical stack at all. Both its fixtures are already in the basement,
+            so its "chase" is the footprint of the drain run under the slab and `dropTo` is null:
+            it drops into an ejector pit, which is machinery and not a cell. The format already
+            allowed a null `dropTo`; this is the first row that needed it.
+      note: §12.5's other four rows — the water main, the sanitary drain, the gas meter and the
+            HVAC trunk — are services, not stacks. `HOUSE-00387` authors the ducts.
+      note: `AuthoredWorldTest` asserts the six stacks through the C++ loader, including the two
+            that branch and the null drop.
       note: (2026-09-07) the **format** now exists: `layout.levels.json` `plumbing.stacks`
             (`id`, `cells`, `chase`, `dropTo`) and a prop's `plumbing` field, added under
             `HOUSE-00358` because rule 9 could not be written without them. This task authors

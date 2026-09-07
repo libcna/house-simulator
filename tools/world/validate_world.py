@@ -1039,9 +1039,15 @@ def rule_9_plumbing(world: World) -> list[Problem]:
     """Every plumbing fixture's cell appears in a declared stack, and every stack is plausible.
 
     §12.5's stacks are a first-class reason several rooms are where they are, so the rule checks
-    the stack too, not only the fixture: its cells must exist, be on distinct levels, and each
-    must overlap the chase the stack declares. A stack whose three WCs are not actually above one
-    another is a drawing, not a drain.
+    the stack too, not only the fixture: its cells must exist, none twice, and each must overlap
+    the chase the stack declares. A stack whose three WCs are not actually above one another is a
+    drawing, not a drain.
+
+    It used to require one cell per level as well, and `HOUSE-00386` found that wrong on §12.5's
+    own data: STACK-E takes the kitchen sink and the sunroom's wet bar, both on `L0`, and STACK-F
+    takes two basement fixtures. Several fixtures on one floor branch into the same stack, which is
+    what plumbing does. The check that survives is the one that catches the real mistake -- a cell
+    that is not over the drop -- and "no cell listed twice" replaces the one that did not.
     """
     problems = []
     if "levels" not in world.layout:
@@ -1065,7 +1071,7 @@ def rule_9_plumbing(world: World) -> list[Problem]:
                 9, FILE_OF["levels"], f"{where}/dropTo",
                 f"stack {stack_id} drops to {drop_to!r}, which is not a cell; §12.5 requires "
                 f"every stack to land on a basement drain run"))
-        levels_used: dict[str, str] = {}
+        listed: set[str] = set()
         for cell_index, cell_id in enumerate(stack.get("cells", [])):
             cell = world.cell_by_id.get(cell_id)
             if cell is None:
@@ -1074,13 +1080,11 @@ def rule_9_plumbing(world: World) -> list[Problem]:
                         9, FILE_OF["levels"], f"{where}/cells/{cell_index}",
                         f"stack {stack_id} names cell {cell_id!r}, which does not exist"))
                 continue
-            level_id = str(cell.get("level"))
-            if level_id in levels_used:
+            if cell_id in listed:
                 problems.append(Problem(
                     9, FILE_OF["levels"], f"{where}/cells/{cell_index}",
-                    f"stack {stack_id} has both {levels_used[level_id]} and {cell_id} on level "
-                    f"{level_id}; a stack rises through the levels, one cell each"))
-            levels_used[level_id] = str(cell_id)
+                    f"stack {stack_id} lists {cell_id} twice; a cell drains to a stack once"))
+            listed.add(str(cell_id))
             area = sum(overlap((x0, x1), cx) * overlap((z0, z1), cz)
                        for x0, x1, z0, z1 in boxes_of(cell))
             if area <= OVERLAP_AREA_TOLERANCE:
@@ -1796,6 +1800,39 @@ def selftest() -> int:
         @mutation(9, "a stack dropping to a cell that does not exist")
         def _(docs):
             docs["levels"]["plumbing"]["stacks"][0]["dropTo"] = "B1_NOPE"
+
+        # §12.5's STACK-E takes the kitchen sink and the sunroom's wet bar, both on L0, and
+        # STACK-F takes two basement fixtures. Several fixtures on one floor branch into the same
+        # stack; requiring one cell per level was a rule the design's own data broke
+        # (`HOUSE-00386`).
+        branched = copy.deepcopy(base)
+        stack = branched["levels"]["plumbing"]["stacks"][0]
+        stack["cells"] = ["L0_WC1", "L0_CLOSET", "L1_WC4"]
+        stack["chase"] = {"x": [2.0, 4.0], "z": [4.0, 8.0]}
+        branch = workspace / "branched-stack"
+        write_fixture(branch, branched)
+        _, problems = validate(branch, wanted=[9])
+        require(not problems,
+                f"two fixture cells on ONE floor branch into the same stack, which is what "
+                f"plumbing does ({[str(x) for x in problems]})")
+
+        twice = copy.deepcopy(branched)
+        twice["levels"]["plumbing"]["stacks"][0]["cells"] = ["L0_WC1", "L0_WC1", "L1_WC4"]
+        doubled = workspace / "doubled-stack"
+        write_fixture(doubled, twice)
+        _, problems = validate(doubled, wanted=[9])
+        require(any("twice" in x.message for x in problems),
+                f"...but the same cell listed twice is still an error ({[str(x) for x in problems]})")
+
+        # ...and the check that actually catches a stack that is not a stack survives untouched.
+        adrift = copy.deepcopy(branched)
+        adrift["levels"]["plumbing"]["stacks"][0]["chase"] = {"x": [-6.0, -5.0], "z": [4.0, 5.0]}
+        floating = workspace / "floating-stack"
+        write_fixture(floating, adrift)
+        _, problems = validate(floating, wanted=[9])
+        require(any("not above the drop" in x.message for x in problems),
+                f"a cell that does not sit over the chase is still caught "
+                f"({[str(x) for x in problems]})")
 
         @mutation(10, "a 2.40 m interior door")
         def _(docs):
