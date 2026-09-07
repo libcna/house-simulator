@@ -252,9 +252,11 @@
       "kind": "cased_opening", "aperture": null, "opacity": "open"
     },
     {
+      // From the terrace deck at +0.45 and not from the lawn: `STEPS_TERRACE_LAWN` climbs the
+      // three steps and this is the opening at the top of them (`HOUSE-00379`).
       "id": "P_EXT_BACKYARD__EXT_TERRACE", "cellA": "EXT_BACKYARD", "cellB": "EXT_TERRACE",
       "plane": { "axis": "z", "value": -36.0 },
-      "rect": { "u": [-3.0, 3.0], "v": [0.0, 2.6] },
+      "rect": { "u": [-3.0, 3.0], "v": [0.45, 3.05] },
       "kind": "cased_opening", "aperture": null, "opacity": "open"
     },
     {

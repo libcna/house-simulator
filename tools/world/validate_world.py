@@ -960,7 +960,19 @@ def rule_7_openings(world: World) -> list[Problem]:
 
 
 def rule_8_stairs(world: World) -> list[Problem]:
-    """A flight's risers add up to the difference between the floors it connects, to within 1 mm."""
+    """A flight's risers add up to the difference between the floors it connects, to within 1 mm.
+
+    Which floors depends on the flight. Four of the eight climb between storeys and the levels'
+    FFLs say what that is. The other four -- the porch, terrace, garage and terrace-lawn steps --
+    connect two cells on **one** level, where that difference is zero and the flight is the only
+    thing that knows what it climbs, so it declares `fromY` and `toY` and is checked against those
+    (`HOUSE-00379`). A same-level flight that declares neither is reported, because the alternative
+    is a rule that quietly says nothing about half the stairs in the house.
+
+    `rise` is a magnitude -- the schema will not accept a negative one -- so the climb is compared
+    as a magnitude too, and §12.4's "L0 +0.60 → B1 −2.30" is the same flight whichever end it is
+    authored from. Direction lives in `fromCell` and `toCell`.
+    """
     problems = []
     for index, flight in enumerate(world.flights):
         where = f"flights/{index}"
@@ -979,14 +991,42 @@ def rule_8_stairs(world: World) -> list[Problem]:
         except (KeyError, TypeError, ValueError):
             continue
         climbed = risers * rise
-        wanted = float(target_level.get("ffl", 0.0)) - float(source_level.get("ffl", 0.0))
-        if abs(climbed - wanted) > RISE_TOLERANCE:
+
+        same_level = source_level.get("id") == target_level.get("id")
+        declared = isinstance(flight.get("fromY"), (int, float)) and isinstance(
+            flight.get("toY"), (int, float))
+        if declared:
+            wanted = float(flight["toY"]) - float(flight["fromY"])
+            against = f"{float(flight['fromY']):.2f} to {float(flight['toY']):.2f}"
+        elif same_level:
+            problems.append(Problem(
+                8, FILE_OF["stairs"], where,
+                f"flight {flight_id} joins two cells on {source_level.get('id')} and declares no "
+                f"fromY/toY; one level has no level difference to check {risers} x {rise:.4f} m "
+                f"against"))
+            continue
+        else:
+            wanted = float(target_level.get("ffl", 0.0)) - float(source_level.get("ffl", 0.0))
+            against = f"{source_level.get('id')} to {target_level.get('id')}"
+
+        if abs(climbed - abs(wanted)) > RISE_TOLERANCE:
             problems.append(Problem(
                 8, FILE_OF["stairs"], where,
                 f"flight {flight_id}: {risers} risers x {rise:.4f} m = {climbed:.4f} m, but "
-                f"{source_level.get('id')} to {target_level.get('id')} is {wanted:.4f} m "
-                f"(out by {abs(climbed - wanted) * 1000:.1f} mm, tolerance "
+                f"{against} is {abs(wanted):.4f} m "
+                f"(out by {abs(climbed - abs(wanted)) * 1000:.1f} mm, tolerance "
                 f"{RISE_TOLERANCE * 1000:.0f} mm)"))
+
+        # ...and the two cells have to be joined by a portal, or the flight is a staircase into a
+        # wall. Nothing else says so: rule 5 walks portals and never looks at a flight.
+        if "portals" in world.layout and not any(
+                {portal.get("cellA"), portal.get("cellB")}
+                == {source.get("id"), target.get("id")} for portal in world.portals):
+            problems.append(Problem(
+                8, FILE_OF["stairs"], where,
+                f"flight {flight_id} climbs from {source.get('id')} to {target.get('id')} and no "
+                f"portal joins them; a flight between two cells you cannot walk between is a "
+                f"staircase into a wall"))
     return problems
 
 
@@ -1132,6 +1172,14 @@ def rule_10_realism(world: World) -> list[Problem]:
             continue
         blondel = 2.0 * rise + going
         low, high = STAIR_2R_G
+        # Exterior steps may exceed the upper bound and the porch does, at 680 mm: a shallower,
+        # deeper step is the right thing outdoors and §12.4 marks it "(exterior, permitted)". They
+        # may not go UNDER it -- a steep step is a steep step in the rain as much as on the
+        # landing -- so the exemption is one-sided (`HOUSE-00379`).
+        outdoors = any((world.cell_by_id.get(flight.get(end)) or {}).get("kind") == "exterior"
+                       for end in ("fromCell", "toCell"))
+        if outdoors and blondel > high:
+            continue
         if not low - 1e-9 <= blondel <= high + 1e-9:
             problems.append(Problem(
                 10, FILE_OF["stairs"], f"flights/{index}",
@@ -1650,6 +1698,100 @@ def selftest() -> int:
         @mutation(8, "one riser fewer than the storey needs")
         def _(docs):
             row(docs, "stairs", "STAIR_L0_L1")["risers"] = 16
+
+        # Rule 8 for the four flights that connect two cells on ONE level. The level difference
+        # is zero there, so the flight declares what it climbs and is checked against that; a
+        # same-level flight that declares nothing is reported rather than passed (`HOUSE-00379`).
+        def with_steps(**patch):
+            docs = copy.deepcopy(base)
+            step = {"id": "STEPS_TERRACE", "fromCell": "L0_TERRACE", "toCell": "L0_FOYER",
+                    "risers": 1, "rise": 0.150, "going": 0.350, "width": 3.60,
+                    "fromY": 0.45, "toY": 0.60, "collisionRamp": False, "surface": "bluestone"}
+            step.update(patch)
+            docs["stairs"]["flights"].append(step)
+            docs["portals"]["portals"].append(
+                {"id": "P_TERRACE__FOYER_STEP", "cellA": "L0_TERRACE", "cellB": "L0_FOYER",
+                 "plane": {"axis": "z", "value": 0.0},
+                 "rect": {"u": [-1.8, 1.8], "v": [0.60, 2.65]},
+                 "kind": "cased_opening", "opacity": "open"})
+            return docs
+
+        stepped = workspace / "stepped"
+        write_fixture(stepped, with_steps())
+        _, problems = validate(stepped, wanted=[8])
+        require(not problems,
+                f"a step between two cells on one level is checked against its own fromY/toY "
+                f"({[str(x) for x in problems]})")
+
+        undeclared = workspace / "undeclared"
+        docs = with_steps()
+        docs["stairs"]["flights"][-1].pop("fromY")
+        docs["stairs"]["flights"][-1].pop("toY")
+        write_fixture(undeclared, docs)
+        _, problems = validate(undeclared, wanted=[8])
+        require(any("declares no fromY/toY" in x.message for x in problems),
+                f"and one that declares neither is reported, not passed as a 0.00 m climb "
+                f"({[str(x) for x in problems]})")
+
+        wrong = workspace / "wrong-step"
+        write_fixture(wrong, with_steps(rise=0.220))
+        _, problems = validate(wrong, wanted=[8])
+        require(any("out by 70.0 mm" in x.message for x in problems),
+                f"and a step that does not reach the deck it claims is caught "
+                f"({[str(x) for x in problems]})")
+
+        # `rise` is a magnitude, so a flight authored downward is the same flight.
+        downward = copy.deepcopy(base)
+        flight = row(downward, "stairs", "STAIR_L0_L1")
+        flight["fromCell"], flight["toCell"] = flight["toCell"], flight["fromCell"]
+        upside_down = workspace / "downward"
+        write_fixture(upside_down, downward)
+        _, problems = validate(upside_down, wanted=[8])
+        require(not problems,
+                f"§12.4 writes the basement flight top-down; authored either way it is the same "
+                f"flight, because rise is a magnitude ({[str(x) for x in problems]})")
+
+        # A flight between two cells no portal joins is a staircase into a wall, and nothing else
+        # says so: rule 5 walks portals and never looks at a flight.
+        orphan = copy.deepcopy(base)
+        row(orphan, "stairs", "STAIR_L0_L1")["toCell"] = "L1_WC4"
+        nowhere = workspace / "stair-nowhere"
+        write_fixture(nowhere, orphan)
+        _, problems = validate(nowhere, wanted=[8])
+        require(any("staircase into a wall" in x.message for x in problems),
+                f"a flight whose two cells no portal joins is caught "
+                f"({[str(x) for x in problems]})")
+
+        # Rule 10's one-sided exterior exemption: outdoor steps may be shallower and deeper than
+        # §70.5's band, never steeper.
+        generous = with_steps(rise=0.190, going=0.300, risers=3, fromY=0.00, toY=0.57,
+                              fromCell="L0_TERRACE", toCell="L0_FOYER")
+        porch = workspace / "porch-steps"
+        write_fixture(porch, generous)
+        _, problems = validate(porch, wanted=[10])
+        require(not problems,
+                f"the porch's 680 mm step is permitted because it is outdoors and GENEROUS "
+                f"({[str(x) for x in problems]})")
+
+        steep = with_steps(rise=0.190, going=0.200, risers=3, fromY=0.00, toY=0.57,
+                           fromCell="L0_TERRACE", toCell="L0_FOYER")
+        sheer = workspace / "steep-steps"
+        write_fixture(sheer, steep)
+        _, problems = validate(sheer, wanted=[10])
+        require(any("outside §70.5" in x.message for x in problems),
+                f"and a 580 mm one is not: a steep step is a steep step in the rain as much as on "
+                f"the landing ({[str(x) for x in problems]})")
+
+        # ...and the exemption is for OUTDOOR steps, not for generous ones. An interior flight
+        # over the band is still an interior flight over the band.
+        indoors = copy.deepcopy(base)
+        row(indoors, "stairs", "STAIR_L0_L1")["going"] = 0.400
+        inside = workspace / "generous-indoors"
+        write_fixture(inside, indoors)
+        _, problems = validate(inside, wanted=[10])
+        require(any("outside §70.5" in x.message for x in problems),
+                f"a 760 mm tread INDOORS is still caught; the exemption is the outdoors, not the "
+                f"generosity ({[str(x) for x in problems]})")
 
         @mutation(9, "a stack dropping to a cell that does not exist")
         def _(docs):

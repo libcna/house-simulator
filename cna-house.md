@@ -983,16 +983,28 @@ Every flight satisfies `2·rise + going ∈ [600, 650] mm` and a consistent rise
 
 | Stair | From → To | Total rise | Risers × rise | Going | Width | Shape | Footprint |
 |---|---|---|---|---|---|---|---|
-| `STAIR_MAIN_L0_L1` | L0 +0.60 → L1 +3.65 | 3.050 m | 17 × 179.4 mm | 280 mm | 1.10 m | U, half-landing at +2.212 | X +2.20…+4.90, Z −20.20…−14.30 |
-| `STAIR_MAIN_L1_L2` | L1 +3.65 → L2 +6.55 | 2.900 m | 16 × 181.3 mm | 280 mm | 1.10 m | U, landing at +2.16 rel. | same footprint |
+| `STAIR_MAIN_L0_L1` | L0 +0.60 → L1 +3.65 | 3.050 m | 17 × 179.4 mm | 280 mm | 1.10 m | U, half-landing at riser 9, **+2.2147** | X +2.20…+4.90, Z −20.20…−14.30 |
+| `STAIR_MAIN_L1_L2` | L1 +3.65 → L2 +6.55 | 2.900 m | 16 × 181.3 mm | 280 mm | 1.10 m | U, landing at riser 12, **+2.175 rel.** | same footprint |
 | `STAIR_ATTIC_L2_L3` | L2 +6.55 → L3 +9.30 | 2.750 m | 15 × 183.3 mm | 265 mm | 0.90 m | straight, north-running | X +5.40…+8.20, Z −18.30…−14.30 |
 | `STAIR_BASEMENT_L0_B1` | L0 +0.60 → B1 −2.30 | 2.900 m | 16 × 181.3 mm | 275 mm | 1.00 m | straight, north-running, **directly beneath the main stair** | X +2.20…+4.90, Z −20.20…−14.30 |
 | `STEPS_PORCH` | grade 0.00 → porch +0.57 | 0.570 m | 3 × 190 mm | 300 mm | 3.00 m | straight | Z −11.60…−10.70 |
+| `STEPS_TERRACE_LAWN` | lawn 0.00 → terrace +0.45 | 0.450 m | 3 × 150 mm | 350 mm | 3.00 m | straight | Z −36.00, the terrace's south edge |
 | `STEPS_TERRACE` | terrace +0.45 → sunroom +0.60 | 0.150 m | 1 × 150 mm | 350 mm | 3.60 m | single step | Z −32.40 |
-| `STEPS_GARAGE` | garage +0.15 → mudroom +0.60 | 0.450 m | 3 × 150 mm | 280 mm | 1.10 m | straight | inside the garage at the house wall |
+| `STEPS_GARAGE` | garage +0.15 → mudroom +0.60 | 0.450 m | 3 × 150 mm | **300 mm** | 1.10 m | straight | inside the garage at the house wall |
 
 `2·179.4 + 280 = 638.8` ✔ · `2·181.3 + 280 = 642.6` ✔ · `2·183.3 + 265 = 631.6` ✔ ·
-`2·181.3 + 275 = 637.6` ✔ · `2·190 + 300 = 680` (exterior, permitted) ✔
+`2·181.3 + 275 = 637.6` ✔ · `2·150 + 350 = 650` ✔ (both terrace flights) ·
+`2·150 + 300 = 600` ✔ (garage) · `2·190 + 300 = 680` (exterior, permitted) ✔
+
+> Corrected 2026-09-07 by `HOUSE-00379`, which authored these as data and checked the arithmetic.
+> **Eight flights, not seven:** the terrace deck is +0.45 and the lawn is grade, so there are three
+> steps between them that nothing scheduled — without them the terrace is a place you can see and
+> not reach. **The garage steps' going was 280 mm**, making `2·150 + 280 = 580`, below §70.5's
+> band; 300 mm makes it exactly 600 and the flight has the room. **The two landing heights** were
+> 2.7 mm and 15 mm off a riser boundary: a landing is where a riser ends, so it is 9 × 179.4 mm
+> above L0's floor and 12 × 181.3 mm above L1's, which is +2.2147 and +2.175 rel. The rises
+> themselves are exact — 3.05/17, 2.90/16, 2.75/15 — and this table's tenths of a millimetre are
+> those numbers rounded.
 
 Headroom under every flight and at every landing nosing is ≥ 2.00 m, verified by
 `HOUSE-00360`'s automated check against the level heights.
@@ -1528,8 +1540,10 @@ surprise. This keeps the data declarative without inventing a VM.
    leaves it null claims to be a hole. Every kind with something that opens is covered,
    `garage_door` and `hatch` included (widened 2026-09-07 by `HOUSE-00378`, which found 63 doors
    with a null `aperture` and two kinds the rule had never looked at);
-8. stair flights connect the declared cells and their total rise equals the level difference to
-   within 1 mm;
+8. stair flights connect the declared cells — a portal has to join them, or the flight is a
+   staircase into a wall — and their total rise equals the level difference to within 1 mm, or,
+   for a flight between two cells on **one** level, the `fromY`/`toY` it declares, since one level
+   has no level difference to check against (widened 2026-09-07 by `HOUSE-00379`);
 9. plumbing: every fixture's cell appears in a declared stack;
 10. realism checks (§66 of the brief; §70.5 here): door heights, ceiling heights, counter heights,
     stair `2R + G`, human/pet/car scale, capsule clearance through every portal;

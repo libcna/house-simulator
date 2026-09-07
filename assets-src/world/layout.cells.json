@@ -409,7 +409,9 @@
       // Outdoors, but roofed: the front balcony at +3.65 is its ceiling, which is why it is not
       // open to the sky and why rain stops at its edge (`build_coverage.py`). Two rockers, a
       // doormat and a wall lantern each side of the door.
-      "yOverride": [0.60, 3.35],
+      // +0.57, not L0's +0.60: §12.4 puts the porch deck three 190 mm steps above grade and
+      // the front door one 30 mm threshold above the deck (`HOUSE-00379`).
+      "yOverride": [0.57, 3.35],
       "footstepSurface": "hardwood",
       "acoustic": { "absorption": 0.55, "reverbHint": "outdoor_sheltered" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -1036,7 +1038,10 @@
       // outer edge -- which is why `build_coverage.py` has anything to measure here.
       // To Z -32.10, the sunroom's interior face: the slider needs a plane both cells reach.
       "boxes": [{ "x": [-6.7, 6.7], "z": [-36.0, -32.1] }],
-      "yOverride": [0.0, 20.0],
+      // The deck is +0.45, not grade: §12.4's `STEPS_TERRACE` is a single 150 mm step from it
+      // up into the sunroom at +0.60, so the terrace itself stands 0.45 m above the lawn and
+      // `STEPS_TERRACE_LAWN` is how you get onto it (`HOUSE-00379`).
+      "yOverride": [0.45, 20.0],
       "footstepSurface": "bluestone",
       "acoustic": { "absorption": 0.86, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },

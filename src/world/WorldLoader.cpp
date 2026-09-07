@@ -2070,6 +2070,32 @@ namespace cnahouse::world
                 flight.surface = surface.Value();
             }
 
+            // `fromY`/`toY` are how a flight between two cells on ONE level says what it climbs;
+            // §15.7 rule 8 has nothing else to check it against there. Absent is a real state and
+            // not zero -- a flight between storeys declares neither, and reading a missing field
+            // as 0.00 would make the porch steps climb from the basement.
+            for (const auto& [field, target] :
+                 std::initializer_list<std::pair<std::string_view, std::optional<float>*>>{
+                     {"fromY", &flight.fromY}, {"toY", &flight.toY}})
+            {
+                if (row.Has(field) && !row.IsNull(field))
+                {
+                    const Result<float> value = row.RequireFloat(field);
+                    if (!value)
+                    {
+                        return value.Error().WithContext("layout.stairs.json");
+                    }
+                    *target = value.Value();
+                }
+            }
+            if (flight.fromY.has_value() != flight.toY.has_value())
+            {
+                return Err(ErrorCode::InvalidData,
+                           "a flight declares both fromY and toY or neither; this one declares "
+                           "only one, and one end of a climb is not a climb",
+                           "layout.stairs.json/" + row.Path());
+            }
+
             contents.stairs.push_back(std::move(flight));
         }
 

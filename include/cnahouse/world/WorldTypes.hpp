@@ -502,6 +502,11 @@ namespace cnahouse::world
         std::vector<Landing> landings;
         bool collisionRamp = false;
         std::string surface;
+        //! The heights a flight starts and ends at, for a flight between two cells on ONE level --
+        //! the porch, terrace and garage steps. Empty on a flight between storeys, where the
+        //! levels' FFLs say what it climbs (`HOUSE-00379`).
+        std::optional<float> fromY;
+        std::optional<float> toY;
 
         /// @brief `risers × rise`: how far the flight actually climbs.
         [[nodiscard]] constexpr float Climb() const noexcept

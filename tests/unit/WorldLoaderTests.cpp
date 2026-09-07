@@ -3061,6 +3061,59 @@ namespace
         IdRegistry::ResetForTesting();
     }
 
+    TEST(AuthoredWorldTest, TheAuthoredFlightsClimbWhatTheyClaim)
+    {
+        IdRegistry::ResetForTesting();
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/layout.stairs.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
+        }
+
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory, contents));
+        const auto flights = world::WorldLoader::LoadStairs(directory, contents);
+        ASSERT_TRUE(flights) << flights.Error().ToString();
+
+        // §12.4's eight flights, and §15.7 rule 8 asserted by the other implementation: four climb
+        // between storeys and the levels' FFLs say what that is; four join two cells on one level
+        // and declare it themselves, because one level has no level difference to check against.
+        ASSERT_EQ(contents.stairs.size(), 8U);
+        std::map<cnahouse::util::Id, float> fflOf;
+        for (const world::Level& level : contents.levels)
+        {
+            fflOf.emplace(level.id, level.ffl);
+        }
+        const auto levelOf = [&contents](cnahouse::util::Id cellId)
+        {
+            const auto found = std::find_if(contents.cells.begin(),
+                                            contents.cells.end(),
+                                            [cellId](const world::Cell& cell) { return cell.id == cellId; });
+            return found == contents.cells.end() ? cnahouse::util::Id{} : found->level;
+        };
+
+        int declared = 0;
+        for (const world::StairFlight& flight : contents.stairs)
+        {
+            const cnahouse::util::Id from = levelOf(flight.fromCell);
+            const cnahouse::util::Id to = levelOf(flight.toCell);
+            ASSERT_TRUE(from.IsValid() && to.IsValid()) << "a flight names two cells that exist";
+            if (flight.fromY.has_value())
+            {
+                ++declared;
+                EXPECT_NEAR(flight.Climb(), *flight.toY - *flight.fromY, 1e-3F)
+                    << "flight " << flight.risers << " x " << flight.rise;
+                continue;
+            }
+            EXPECT_NE(from, to) << "a flight between two cells on one level declares fromY/toY";
+            EXPECT_NEAR(flight.Climb(), std::abs(fflOf.at(to) - fflOf.at(from)), 1e-3F);
+        }
+        EXPECT_EQ(declared, 4) << "the porch, both terrace flights and the garage steps";
+
+        IdRegistry::ResetForTesting();
+    }
+
     TEST(AuthoredWorldTest, TheAuthoredWorldIsPlainJsonAndTheSourceIsNot)
     {
         // The two halves of the format, both asserted, because until `HOUSE-00421` only one of

@@ -5709,8 +5709,45 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             (`HOUSE-00373`), the garage loft hatch (`HOUSE-00377`), the stair-head door and the
             under-stair crawl door. The extra windows are §12.6's three additions from
             `HOUSE-00376` less `W_SLIDER`, which is a door here and not a window.
-- [ ] HOUSE-00379 — Author `layout.stairs.json`: the 7 flights of §12.4 with risers, goings, landings and surfaces
+- [x] HOUSE-00379 — Author `layout.stairs.json`: the 8 flights of §12.4 with risers, goings, landings and surfaces
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
+      finding: **the terrace could be seen and not reached.** §12.4 scheduled seven flights and the
+            terrace deck is +0.45 with the lawn at grade, so three steps between them were missing
+            entirely. `STEPS_TERRACE_LAWN` is the eighth flight, and §12.4 has the row now.
+      finding: **the garage steps were below §70.5's band.** `2 × 150 + 280 = 580` mm, and the
+            band starts at 600. The rise is fixed by the elevations — +0.15 to +0.60 in three — so
+            the going moves: 300 mm makes it exactly 600 and the flight has the room for it.
+      finding: **both U-stair landings were off a riser boundary**, by 2.7 mm and 15 mm. A landing
+            is where a riser ends, so the main stair's half-landing is 9 × 179.4 mm above L0's
+            floor (+2.2147, not +2.212) and the L1→L2 landing 12 × 181.3 mm above L1's (+2.175
+            rel., not +2.16). The rises themselves are exact — 3.05/17, 2.90/16, 2.75/15 — and
+            §12.4's tenths of a millimetre are those numbers rounded, which the file says.
+      finding: **two cells stood at the wrong height.** `L0_PORCH`'s floor was L0's +0.60 and the
+            porch deck is +0.57, three 190 mm steps above grade with a 30 mm threshold at the door.
+            `EXT_TERRACE`'s was grade, and its deck is +0.45 — so the cell contained 0.45 m of
+            solid stone. Both corrected, and `P_EXT_BACKYARD__EXT_TERRACE`'s rect with them: the
+            opening is at the top of the new steps, not at the bottom.
+      finding: **rule 8 could say nothing about half the stairs.** It compared `risers × rise` to
+            the two levels' FFL difference, which is zero for the four flights that join two cells
+            on one level — the porch, both terrace flights and the garage steps all passed a test
+            that was checking 0.57 m against 0.00 m and would have caught nothing. Those flights
+            now declare `fromY`/`toY` (new in the schema and in `StairFlight`), the rule checks
+            against them, and a same-level flight that declares neither is reported rather than
+            waved through.
+      note: rule 8 gained two more things while it was open. `rise` is a magnitude, so a flight
+            authored downward is the same flight and §12.4's "L0 +0.60 → B1 −2.30" needs no
+            re-ordering; and the two cells must be joined by a portal, or the flight is a staircase
+            into a wall — which nothing else would have said, because rule 5 walks portals and
+            never looks at a flight.
+      note: rule 10's exterior exemption is **one-sided**. The porch's `2 × 190 + 300 = 680` mm is
+            outside §70.5's band deliberately: shallower and deeper is the right step outdoors, and
+            §12.4 already marked it permitted. Steeper is not, indoors or out, so an outdoor flight
+            under 600 mm is still refused — and so is a generous one indoors, which is the claim
+            that stops the exemption becoming "big treads are fine".
+      note: the C++ loader reads `fromY`/`toY` as `std::optional<float>`: absent is a real state,
+            and reading a missing field as 0.00 would make the porch steps climb from the basement.
+            It refuses a flight that declares one and not the other. `AuthoredWorldTest` asserts
+            rule 8 over the deployed world from the other implementation, as it now does rule 7.
 - [ ] HOUSE-00380 — Author the window schedule per façade per level (§12.6), and cross-check counts against the portals file
       dep: HOUSE-00376 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00381 — Author `layout.lights.json` for `B1` and `L0`: fixtures, groups, colour temperatures, ranges, defaults

@@ -268,6 +268,13 @@ interactable.
       "landings": [ { "at": 9, "depth": 1.20 } ],
       "collisionRamp": true,
       "surface": "wood"
+    },
+    {
+      "id": "STEPS_PORCH",
+      "fromCell": "EXT_WALK", "toCell": "L0_PORCH",
+      "risers": 3, "rise": 0.190, "going": 0.300, "width": 3.00,
+      "fromY": 0.00, "toY": 0.57,        // required: one level has no level difference
+      "landings": [], "collisionRamp": true, "surface": "bluestone"
     }
   ]
 }
@@ -275,7 +282,14 @@ interactable.
 
 The validator checks `risers × rise` equals the level difference to within 1 mm, and that
 `2·rise + going` lands in the comfortable range — the realism rule that catches a stair nobody
-could climb.
+could climb. Exterior steps may exceed the upper bound and the porch does, at 680 mm: shallower
+and deeper is the right thing outdoors. They may not go under it — a steep step is a steep step in
+the rain as much as on the landing.
+
+`rise` is a magnitude and direction lives in `fromCell`/`toCell`, so §12.4's "L0 +0.60 → B1 −2.30"
+is the same flight whichever end it is authored from. `fromY` and `toY` are for the flights that
+join two cells on one level; a flight like that with neither is reported, because the alternative
+is a rule that quietly says nothing about half the stairs in the house.
 
 ## `layout.lights.json`
 
@@ -621,7 +635,10 @@ build**:
    that has something that opens is covered, `garage_door` and `hatch` included: a sectional door
    is five hinged segments and a chest lid lifts (widened by `HOUSE-00378`);
 8. stair flights connect the declared cells and their total rise equals the level difference to
-   within 1 mm;
+   within 1 mm. Two extras `HOUSE-00379` added: a portal must join the two cells, or the flight is
+   a staircase into a wall; and a flight between two cells on **one** level is checked against the
+   `fromY`/`toY` it declares, because one level has no level difference to check against. `rise`
+   is a magnitude, so a flight authored downward is the same flight;
 9. every plumbing fixture's cell appears in a declared stack;
 10. realism: door heights, ceiling heights, counter heights, stair `2R + G`, human/pet/car scale,
     and capsule clearance through every portal;

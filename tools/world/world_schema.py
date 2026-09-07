@@ -245,6 +245,11 @@ def build() -> dict[str, dict]:
          "rise": {"type": "number", "exclusiveMinimum": 0},
          "going": {"type": "number", "exclusiveMinimum": 0},
          "width": {"type": "number", "exclusiveMinimum": 0},
+         # The heights a flight starts and ends at, for the flights that connect two cells on ONE
+         # level -- the porch, terrace and garage steps. §15.7 rule 8 checks the climb against the
+         # two levels' FFLs, and between two cells on the same level that difference is zero: the
+         # flight is the only thing that knows what it climbs. Added by `HOUSE-00379`.
+         "fromY": NUM, "toY": NUM,
          "landings": {"type": "array", "items": obj(
              ["at", "depth"], {"at": {"type": "integer", "minimum": 0}, "depth": NUM})},
          "collisionRamp": BOOL,

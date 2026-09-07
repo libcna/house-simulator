@@ -1,0 +1,94 @@
+{
+  // §12.4's flights, as data. `HOUSE-00379`.
+  //
+  // `rise` is a magnitude and `risers × rise` is the height the flight climbs; direction is
+  // `fromCell` → `toCell`. §15.7 rule 8 checks that climb against the two levels' FFLs, and for a
+  // flight between two cells on the SAME level -- the porch steps, the terrace steps, the garage
+  // steps -- against the `fromY`/`toY` this file declares, because two cells on one level have no
+  // level difference to check against and the flight is the only thing that knows.
+  //
+  // §70.5's `2·rise + going ∈ [600, 650] mm` holds for every flight here. Exterior steps may
+  // exceed the upper bound and do: the porch is 680 mm, which is a shallower, deeper step than the
+  // rule asks for and is the right thing outdoors. They may not go under it -- a steep step is a
+  // steep step in the rain as much as on the landing.
+  "schema": "cna-house/stairs/1",
+  "flights": [
+    {
+      // §12.4's 17 × 179.4 mm is 3.05 m / 17 exactly; the table rounds to a tenth of a
+      // millimetre and this is the number it rounds. The half-landing is riser 9, which puts it
+      // at +2.2147 -- §12.4 said +2.212, corrected there with this arithmetic.
+      "id": "STAIR_MAIN_L0_L1",
+      "fromCell": "L0_STAIR_MAIN", "toCell": "L1_STAIR_MAIN",
+      "risers": 17, "rise": 0.1794118, "going": 0.280, "width": 1.10,
+      "landings": [{ "at": 9, "depth": 1.10 }],
+      "collisionRamp": true, "surface": "stair_wood"
+    },
+    {
+      // 2.90 m / 16. The landing is riser 12, +2.175 above L1's FFL; §12.4 said +2.16.
+      "id": "STAIR_MAIN_L1_L2",
+      "fromCell": "L1_STAIR_MAIN", "toCell": "L2_STAIR_MAIN",
+      "risers": 16, "rise": 0.1812500, "going": 0.280, "width": 1.10,
+      "landings": [{ "at": 12, "depth": 1.10 }],
+      "collisionRamp": true, "surface": "stair_wood"
+    },
+    {
+      // 2.75 m / 15, straight, north-running, and narrower because it serves the attic.
+      "id": "STAIR_ATTIC_L2_L3",
+      "fromCell": "L2_STAIR_ATTIC", "toCell": "L3_STAIR_HEAD",
+      "risers": 15, "rise": 0.1833333, "going": 0.265, "width": 0.90,
+      "landings": [],
+      "collisionRamp": true, "surface": "stair_wood_open"
+    },
+    {
+      // Straight, north-running, directly beneath the main stair, and authored upward: `rise` is
+      // a magnitude, so the flight that §12.4 writes "L0 +0.60 → B1 −2.30" is the same flight.
+      "id": "STAIR_BASEMENT_L0_B1",
+      "fromCell": "B1_STAIR", "toCell": "L0_STAIR_MAIN",
+      "risers": 16, "rise": 0.1812500, "going": 0.275, "width": 1.00,
+      "landings": [],
+      "collisionRamp": true, "surface": "concrete"
+    },
+    {
+      // The three porch steps. 2·190 + 300 = 680 mm: outside §70.5's band, deliberately, and
+      // §12.4 marks it "(exterior, permitted)".
+      "id": "STEPS_PORCH",
+      "fromCell": "EXT_WALK", "toCell": "L0_PORCH",
+      "risers": 3, "rise": 0.190, "going": 0.300, "width": 3.00,
+      "fromY": 0.00, "toY": 0.57,
+      "landings": [],
+      "collisionRamp": true, "surface": "bluestone"
+    },
+    {
+      // The single step up from the terrace into the sunroom -- §16.1's "one step down" beside
+      // the slider, from this side.
+      "id": "STEPS_TERRACE",
+      "fromCell": "EXT_TERRACE", "toCell": "L0_SUNROOM",
+      "risers": 1, "rise": 0.150, "going": 0.350, "width": 3.60,
+      "fromY": 0.45, "toY": 0.60,
+      "landings": [],
+      "collisionRamp": false, "surface": "bluestone"
+    },
+    {
+      // `HOUSE-00379`. Not in §12.4, and the terrace cannot be reached without it: the deck is
+      // +0.45 and the lawn is grade, so there are three steps between them and §12.4 scheduled
+      // none. Added there with this row.
+      "id": "STEPS_TERRACE_LAWN",
+      "fromCell": "EXT_BACKYARD", "toCell": "EXT_TERRACE",
+      "risers": 3, "rise": 0.150, "going": 0.350, "width": 3.00,
+      "fromY": 0.00, "toY": 0.45,
+      "landings": [],
+      "collisionRamp": true, "surface": "bluestone"
+    },
+    {
+      // Garage slab +0.15 to mudroom +0.60, inside the garage at the house wall. §12.4 gave the
+      // going as 280 mm, which makes 2·150 + 280 = 580 -- below §70.5's band. 300 mm makes it
+      // exactly 600, and the flight has the room; corrected in §12.4.
+      "id": "STEPS_GARAGE",
+      "fromCell": "L0_GARAGE", "toCell": "L0_MUDROOM",
+      "risers": 3, "rise": 0.150, "going": 0.300, "width": 1.10,
+      "fromY": 0.15, "toY": 0.60,
+      "landings": [],
+      "collisionRamp": true, "surface": "concrete"
+    }
+  ]
+}

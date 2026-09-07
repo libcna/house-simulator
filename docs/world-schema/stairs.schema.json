@@ -90,6 +90,9 @@
           "fromCell": {
             "$ref": "#/$defs/id"
           },
+          "fromY": {
+            "type": "number"
+          },
           "going": {
             "exclusiveMinimum": 0,
             "type": "number"
@@ -137,6 +140,9 @@
           },
           "toCell": {
             "$ref": "#/$defs/id"
+          },
+          "toY": {
+            "type": "number"
           },
           "width": {
             "exclusiveMinimum": 0,
