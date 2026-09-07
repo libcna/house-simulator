@@ -1669,6 +1669,7 @@ cna-house/
 │   ├── chunk-format.md              ← the project-owned `chunks.bin` static batches (§17.4)
 │   ├── skyexposure-format.md        ← the project-owned `skyexposure.bin` (§64.6)
 │   ├── snowshell-format.md          ← the project-owned `snowshell.bin` (§38)
+│   ├── shading-format.md            ← the project-owned `shading.bin` sun shading (§22)
 │   ├── content-authoring.md
 │   ├── world-format.md
 │   ├── performance-log.md

@@ -277,6 +277,17 @@ jobs:
           CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
             python3 tools/blender/lightmap_bake.py --selftest
 
+      - name: Sun shading must measure the eave and the neighbour, not each other
+        working-directory: cna-house
+        # `HOUSE-00207`. §22 names both effects, so the fixture is both: an eave over a south
+        # window and a neighbour's gable to the south-west. The gable is proved responsible by
+        # DELETING it and re-baking, because the eave shades the south-west too and an altitude
+        # comparison cannot say which of the two did it. The first fixture put the neighbour due
+        # west, where no ray from a south-facing window can ever reach it.
+        run: |
+          CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
+            python3 tools/blender/shading_factor.py --selftest
+
       - name: The impostor atlas must be eight different views, none of them cropped
         working-directory: cna-house
         # `HOUSE-00204`. EEVEE renders headless here. The two claims that earn their place: no

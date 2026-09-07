@@ -3311,8 +3311,50 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       finding: the shell hash covers geometry, lightmap UVs **and the lights**. A hash over
             geometry alone calls a relit room fresh, and moving a lamp changes the bake as
             completely as moving a wall.
-- [ ] HOUSE-00207 — `tools/blender/shading_factor.py`: precompute per-window sun shading on a 12×24 (altitude, azimuth) grid by ray casting
+- [x] HOUSE-00207 — `tools/blender/shading_factor.py`: precompute per-window sun shading on a 12×24 (altitude, azimuth) grid by ray casting
       dep: HOUSE-00206 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/blender/shading_factor.py` and `docs/shading-format.md`, the
+            normative `CSHF` version 1 spec. 22 selftest claims; `--selftest` runs in the CI
+            Blender job. 15 injected bugs, all caught. One window's grid is 288 bytes, so §22's
+            81 windows are 23 KB — its own figure, confirmed rather than assumed.
+      finding: **the fixture's first neighbour was somewhere no ray could reach it.** §22 names
+            "the west neighbour's gable", so the gable went due west — and a south-facing window's
+            rays only ever travel towards +Z, so nothing at the same Z to its west can ever be
+            occluded. The claim passed and failed on the *eave* instead, in both directions. The
+            comparison is now south-west against south-east, and the gable is proved responsible
+            by **deleting it and re-baking** rather than by comparing altitudes, because the eave
+            shades the south-west too and an altitude comparison cannot say which of the two did
+            it.
+      finding: **the window is sampled, not probed.** §22 *multiplies* by `shadingFactor`, so a
+            window half-covered by an eave must read about a half; a single centre ray reads 1
+            until the shadow crosses the middle and then 0, and the foyer's daylight would step
+            rather than slide once per window per afternoon. Measured on the fixture: the 4×4 grid
+            reports `1.0, 1.0, 1.0, 1.0, 0.75, 0.75, 0.25, 0.0 …` down the southern column where a
+            centre ray reports only ones and zeros. The column is also asserted **monotonic** — an
+            eave that shades at one altitude shades at every higher one.
+      finding: the grid is **nodes, not cell centres**: altitude at 0…90 inclusive over 12 samples
+            and azimuth at 0…345 over 24. The runtime interpolates bilinearly, and node sampling
+            makes that exact at the ends — the horizon and the zenith are measured rather than
+            guessed from the nearest interior sample, and the horizon is where a low sun and a long
+            shadow show most.
+      finding: the grid is **occlusion only**. Whether the sun is up, and whether it is within
+            §22's ±75° of the window normal, stay in the analytic `skyExposure` — so the baked grid
+            is a pure property of the geometry and survives a change to that function. What *is*
+            short-circuited is a sun behind the window's own wall: stored as 0 without casting,
+            which is half the grid and 144 of the fixture's 288 nodes.
+      finding: outward is decided by **the geometry**, not by whether the portal names the interior
+            cell `cellA` or `cellB`. A window authored the other way round would otherwise cast
+            every ray into the room it is trying to light, and the selftest builds the same portal
+            both ways round to prove it does not.
+      finding: the stored byte is `round(fraction × 255)`, **rounded and not truncated** — with 16
+            samples the fractions are sixteenths and 3/16 rounds to 48 but truncates to 47. The
+            claim compares the stored byte against a fraction measured independently in the
+            selftest, because a claim that recomputes the fraction the way the tool does cannot
+            see the tool's own rounding, and one that reads the stored byte back finds an integer
+            by construction and reports that rounding never matters.
+      accept: an eave shades a high sun and not a low one; a neighbour shades one azimuth and not
+            its mirror, and stops when deleted; partial shading is reported as a fraction; two
+            bakes of one scene are identical
 - [ ] HOUSE-00208 — `tools/blender/sun_patch.py`: precompute the sun-patch polygons cast through each window onto floors and walls, same grid
       dep: HOUSE-00207 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00209 — `tools/blender/cubemap_bake.py`: bake the 4 mirror cube maps
