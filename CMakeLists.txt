@@ -299,6 +299,30 @@ if(CNAHOUSE_TIER_E AND CNAHOUSE_EFFECT_SOURCES)
     endif()
 endif()
 
+# --- content (`HOUSE-00216`) ----------------------------------------------------------------------
+#
+# One target that runs the validators, then the generators, then `cna-content` -- in an order
+# derived from a declared graph rather than written by hand. NOT part of `all`: the content build
+# reads and writes `assets-src/` and `content/`, and a code build should not.
+#
+#     cmake --build build --target content
+#     cmake --build build --target content-plan     # print the plan, run nothing
+add_custom_target(content
+    COMMAND python3 "${CMAKE_CURRENT_SOURCE_DIR}/tools/ci/build_content.py"
+            --stamps "${CMAKE_BINARY_DIR}/content-stamps.json"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "content: building the content tree"
+    USES_TERMINAL
+    VERBATIM)
+
+add_custom_target(content-plan
+    COMMAND python3 "${CMAKE_CURRENT_SOURCE_DIR}/tools/ci/build_content.py"
+            --stamps "${CMAKE_BINARY_DIR}/content-stamps.json" --dry-run
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "content-plan: what a content build would do"
+    USES_TERMINAL
+    VERBATIM)
+
 # --- content-verify (`HOUSE-00199`) ---------------------------------------------------------------
 #
 # `cna-house.md` §18.4: rebuild everything and assert the hashes match; drift is a build failure.

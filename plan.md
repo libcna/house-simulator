@@ -3740,12 +3740,73 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             the build does both. A proxy left in a chunk is invisible geometry the GPU still
             transforms, and on a model whose proxy shares the source mesh it doubles the vertex
             count with nothing to show for it.
-- [ ] HOUSE-00216 — Content build orchestration: one `make content` target running validators, generators and `cna-content` in the right order with dependency tracking
+- [x] HOUSE-00216 — Content build orchestration: one `make content` target running validators, generators and `cna-content` in the right order with dependency tracking
       dep: HOUSE-00205…HOUSE-00215 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00217 — Add the content-build documentation: what each tool does, in what order, and how to rebuild one asset
+      note: (2026-09-07) `tools/ci/build_content.py` plus the `content` and `content-plan` CMake
+            targets. 41 selftest claims; 15 injected bugs, all caught. The order is a **topological
+            sort of a declared graph**, not a written list — adding a stage means naming what it
+            needs and nothing else, and reordering the declaration changes nothing.
+      finding: **freshness is content, never mtime**, and `AGENTS.md` is the reason rather than
+            taste. Its opening argument is that every avoidable rebuild is irreversible flash wear
+            on one SSD shared by ten agents, and mtime gets it wrong in both directions: **git does
+            not preserve mtime**, so a clone or a branch switch stamps every file with the time it
+            was written and an mtime build rebuilds a tree that has not changed at all; and an
+            output restored from a backup is newer than an input it does not match. A stage is
+            fresh when the SHA-256 of its inputs, its exact command line and its output list match
+            the stamp. The selftest moves an input's mtime forward by an hour and requires that
+            nothing rebuilds.
+      finding: **"no inputs" is not "no pattern matched", and the difference cost a real run.** The
+            first version skipped a stage only when its whole input set was empty, so
+            `build_collision` was launched on the strength of `assets.manifest.json` existing while
+            `assets-src/world/*.json` — the thing it actually reads — did not, and it failed inside
+            the tool. A pipeline waiting for phase 5 reported as a broken build. Every input
+            pattern must now match at least one file, and the skip names the pattern that did not.
+      finding: **validators gate generators by an explicit edge, not by a sort key.** Ordering the
+            plan by group happens to work for today's graph and stops working the moment a
+            generator has no `needs` and lands in the same topological level as a validator —
+            which is exactly what happened, and what the claim "every validator runs before every
+            generator" caught. `with_validator_gate` adds the edges; the sort then does the work.
+      finding: five outcomes, and keeping **skipped** distinct from **failed** is the point. Six of
+            eleven stages are skipped today because phase 5 has not authored the layout; `make
+            content` has to be runnable now, and a build that quietly succeeded by doing nothing
+            would be the worst of the five. A failed stage **stamps nothing**, so the next run
+            retries it, and blocks its dependents rather than running them on missing inputs.
+      accept: the order is derived from the graph and a cycle is refused by name; touching an input
+            rebuilds nothing and changing a byte rebuilds exactly its readers; a stage that cannot
+            run yet is skipped and named, not failed
+- [x] HOUSE-00217 — Add the content-build documentation: what each tool does, in what order, and how to rebuild one asset
       dep: HOUSE-00216 · sys: — · plat: TOOL · pri: MUST
-- [ ] HOUSE-00218 — Measure and record a full content build time; set the expectation for later sessions
+      note: (2026-09-07) `docs/content-build.md`. The stage table is **generated** from the
+            pipeline graph by `build_content.py --docs` and checked by `--check-docs`, which is now
+            a gate in `tools/ci/run_checks.sh` — the same idiom `budget_report.py` uses, for the
+            same reason.
+      finding: a hand-written build order is **a second description of the dependencies**, and a
+            second description drifts: the one thing this page documents is the one thing most
+            likely to go stale the next time a stage is added. Generating it removes the failure
+            mode instead of asking someone to remember. Every `Stage` therefore carries a
+            one-line `description`, and the selftest refuses a stage without one.
+      finding: the gate was verified to **bite** — the committed table was edited by hand and
+            `--check-docs` failed, naming the command that fixes it. A generated document whose
+            checker cannot fail is a hand-written document with extra steps.
+- [x] HOUSE-00218 — Measure and record a full content build time; set the expectation for later sessions
       dep: HOUSE-00216 · sys: — · plat: TOOL · pri: SHOULD
+      note: (2026-09-07) Four rows in `docs/performance-log.md`.
+      finding: **today's content build is 0.29 s cold and 0.09 s warm**, medians of five — and
+            that number means very little on its own, because six of the eleven stages are skipped
+            for want of a layout. Recorded as the baseline it is, clearly labelled, so a later
+            session comparing against it knows what was and was not in it.
+      finding: **the expectation this task exists to set is the lightmap bake, and it is
+            overnight.** Measured scaling on `lightmap_bake`'s fixture — 32²/16 spp 0.039 s, 128²/16
+            0.200 s, 128²/64 0.617 s — is close to linear in texels × samples above about 64².
+            Extrapolating to §18.3's 2048² at 256 samples gives **≈ 10 minutes per atlas** and
+            **≈ 7–8 hours for its 42 atlases**, and that is a *lower* bound: the fixture is two
+            rooms of sixteen faces and two lamps, where a furnished cell has far more geometry per
+            ray. The scaling was measured rather than assumed precisely so the extrapolation could
+            be defended.
+      finding: that number is what makes `HOUSE-00216`'s content-hash stamps **load-bearing rather
+            than a convenience**. A pipeline whose longest stage is seven hours cannot afford to
+            rebuild because git rewrote an mtime, and `AGENTS.md`'s SSD argument and this one point
+            the same way.
 - [x] HOUSE-00219 — `tools/assets/video_transcode.py`: transcode source footage to the runtime video format and to the frame-strip atlases
       dep: HOUSE-00098 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `tools/assets/video_transcode.py`, producing both of §58.3's backends:

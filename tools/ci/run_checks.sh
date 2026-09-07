@@ -107,6 +107,10 @@ run_gate "licences"   python3 tools/assets/verify_licences.py --check
 # build tree and gives the same answer everywhere. Its compiled column is empty by design; pass
 # --content/--effects by hand for the numbers the pack budgets are written against.
 run_gate "budget"     python3 tools/ci/budget_report.py --check
+# `HOUSE-00217`. The stage table in docs/content-build.md is generated from the pipeline
+# graph, so a stage added without regenerating it is a documented order that is no longer
+# the order. This is the same idiom the budget report uses, for the same reason.
+run_gate "content-doc" python3 tools/ci/build_content.py --check-docs
 # Every glTF in the tree must import cleanly, warnings included (`HOUSE-00186`). Cheap while the
 # tree is small; when it is not, it moves to the content job.
 run_gate "gltf"       python3 tools/assets/gltf_validate.py
