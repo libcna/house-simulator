@@ -51,6 +51,24 @@ Rule: a member listed here that does not exist, or whose hash does not match, is
 error**. A file present in the directory but absent from the manifest is also an error — silent
 extra data is how two sources of truth begin.
 
+The hashes are defined exactly, because two implementations have to agree —
+[`world_manifest.py`](../tools/world/world_manifest.py) writes them and
+[`WorldLoader`](../include/cnahouse/world/WorldLoader.hpp) verifies them:
+
+* a **member** hash is `sha256:` plus the lower-case hex SHA-256 of the file's **bytes**. Not of
+  its parsed JSON: a reformatted file is a different file, the deployed copy is what the loader
+  reads, and "the bytes on disk" is the only definition both sides can implement without first
+  agreeing on a JSON canonicalisation;
+* **`worldHash`** is `sha256:` plus the SHA-256 of `<file>\n<sha256>\n` for each member, in the
+  order the manifest lists them, encoded UTF-8. Over the list rather than over the contents,
+  because it must change whenever any member changes and that costs one hash of a few hundred
+  bytes instead of a rehash of the world.
+
+Members are written in this page's order — never the filesystem's — because the order is part of
+the hash, and a list that reshuffled between two machines would make a save written on one look
+stale on the other. Regenerate with `tools/world/world_manifest.py --emit assets-src/world`;
+`--check` is a CI gate.
+
 ## `layout.levels.json`
 
 The five levels and the construction constants everything else derives from.

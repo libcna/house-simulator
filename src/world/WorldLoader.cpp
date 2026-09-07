@@ -14,6 +14,7 @@
 
 #include "System/IO/Directory.hpp"
 #include "System/IO/File.hpp"
+#include "System/Security/Cryptography/SHA256.hpp"
 
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Log.hpp"
@@ -247,6 +248,95 @@ namespace cnahouse::world
             return z.Error();
         }
         return Footprint{x.Value().first, x.Value().second, z.Value().first, z.Value().second};
+    }
+
+    namespace
+    {
+        /// @brief `sha256:` plus 64 lower-case hex characters.
+        [[nodiscard]] std::string Spell(const std::vector<SharpRuntime::bytecs>& digest)
+        {
+            static constexpr char kHex[] = "0123456789abcdef";
+            std::string text = "sha256:";
+            text.reserve(text.size() + digest.size() * 2U);
+            for (const SharpRuntime::bytecs byte : digest)
+            {
+                const auto value = static_cast<unsigned char>(byte);
+                text.push_back(kHex[value >> 4U]);
+                text.push_back(kHex[value & 0x0FU]);
+            }
+            return text;
+        }
+    } // namespace
+
+    Result<std::string> WorldLoader::HashFile(std::string_view path)
+    {
+        std::vector<SharpRuntime::bytecs> bytes;
+        try
+        {
+            bytes = System::IO::File::ReadAllBytes(std::string(path));
+        }
+        catch (const std::exception& e)
+        {
+            return Err(ErrorCode::IoFailure, e.what(), std::string(path));
+        }
+        System::Security::Cryptography::SHA256 sha;
+        return Spell(sha.ComputeHash(bytes));
+    }
+
+    std::string WorldLoader::ComputeWorldHash(std::span<const WorldManifest::Member> members)
+    {
+        std::string joined;
+        for (const WorldManifest::Member& member : members)
+        {
+            joined += member.file;
+            joined += '\n';
+            joined += member.sha256;
+            joined += '\n';
+        }
+        std::vector<SharpRuntime::bytecs> bytes(joined.size());
+        for (std::size_t index = 0; index < joined.size(); ++index)
+        {
+            bytes[index] = static_cast<SharpRuntime::bytecs>(static_cast<unsigned char>(joined[index]));
+        }
+        System::Security::Cryptography::SHA256 sha;
+        return Spell(sha.ComputeHash(bytes));
+    }
+
+    Result<void> WorldLoader::VerifyManifest(std::string_view directory, const WorldManifest& manifest)
+    {
+        for (std::size_t index = 0; index < manifest.members.size(); ++index)
+        {
+            const WorldManifest::Member& member = manifest.members[index];
+            const Result<std::string> actual = HashFile(Join(directory, member.file));
+            if (!actual)
+            {
+                return actual.Error().WithContext("world.manifest.json");
+            }
+            if (actual.Value() != member.sha256)
+            {
+                // Naming the file and both hashes, because the two ways to reach this are a file
+                // edited without regenerating the manifest and a file that arrived corrupt, and
+                // the author can tell those apart at a glance and this code cannot.
+                return Err(ErrorCode::ChecksumMismatch,
+                           member.file + " does not match the manifest: it lists " + member.sha256 +
+                               " and the file on disk is " + actual.Value() +
+                               ". Run tools/world/world_manifest.py --emit if you meant to "
+                               "change it",
+                           "world.manifest.json/members[" + std::to_string(index) + "]");
+            }
+        }
+
+        const std::string expected = ComputeWorldHash(manifest.members);
+        if (expected != manifest.worldHash)
+        {
+            return Err(ErrorCode::ChecksumMismatch,
+                       "the worldHash does not cover this member list: it says " + manifest.worldHash +
+                           " and the list hashes to " + expected +
+                           ". A save compares this number to decide whether the world moved "
+                           "under it, so a wrong one is a decision made on nothing",
+                       "world.manifest.json/worldHash");
+        }
+        return util::Ok();
     }
 
     Result<WorldManifest> WorldLoader::LoadManifest(std::string_view directory)
@@ -3573,6 +3663,10 @@ namespace cnahouse::world
         if (!manifest)
         {
             return manifest.Error();
+        }
+        if (const Result<void> verified = VerifyManifest(directory, manifest.Value()); !verified)
+        {
+            return verified.Error();
         }
 
         WorldData::Contents contents;

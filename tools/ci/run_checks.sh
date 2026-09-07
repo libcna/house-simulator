@@ -133,6 +133,10 @@ run_gate "content-doc" python3 tools/ci/build_content.py --check-docs
 # editor and `validate_world.py` read, and a stale copy of it is worse than none.
 run_gate "world-schema" python3 tools/world/world_schema.py --check
 run_gate "world-rules" check_world
+# `HOUSE-00364`. The manifest is what `WorldLoader` verifies at load and what a save's `worldHash`
+# is taken from, so a stale one is a load-time failure or, worse, a save that silently disagrees
+# with the world it was written against.
+run_gate "world-manifest" python3 tools/world/world_manifest.py --check assets-src/world
 # `HOUSE-00280`. The surface map is counted from the manifest, so importing or dropping a
 # footstep sample changes it. A stale map is HOUSE-00281 sourcing the wrong list.
 run_gate "footsteps" python3 tools/assets/footstep_map.py --check

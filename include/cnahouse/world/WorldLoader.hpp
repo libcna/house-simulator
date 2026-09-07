@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -64,6 +65,32 @@ namespace cnahouse::world
     public:
         /// @brief The file names of §15.1, in the order they are read.
         [[nodiscard]] static std::span<const std::string_view> FileNames() noexcept;
+
+        /// @brief Hashes @p path's **bytes** as `sha256:<64 lower-case hex>`.
+        ///
+        /// Of the bytes, not of the parsed JSON: a reformatted file is a different file, the
+        /// deployed copy is what this reads, and "the bytes on disk" is the only definition a C++
+        /// reader and `tools/world/world_manifest.py` can both implement without first agreeing on
+        /// a JSON canonicalisation.
+        [[nodiscard]] static util::Result<std::string> HashFile(std::string_view path);
+
+        /// @brief The `worldHash` @p members imply.
+        ///
+        /// `sha256:` over `<file>\n<sha256>\n` for each member, **in the order given**, encoded
+        /// UTF-8. In the order given because the load order is part of what a save was taken
+        /// against; over the list rather than over the contents because it must change when any
+        /// member changes, and that costs one hash of a few hundred bytes instead of a rehash of
+        /// the world.
+        [[nodiscard]] static std::string ComputeWorldHash(std::span<const WorldManifest::Member> members);
+
+        /// @brief Rehashes every member and checks the manifest against them.
+        ///
+        /// `cna-house.md` §15.1: a member whose hash does not match is a **load-time error**. The
+        /// save system reads the same `worldHash` to decide whether the world moved under a save
+        /// (`HOUSE-02317`), so a manifest that lied would make that decision on a number nothing
+        /// had verified.
+        [[nodiscard]] static util::Result<void> VerifyManifest(std::string_view directory,
+                                                               const WorldManifest& manifest);
 
         /// @brief Reads `world.manifest.json` from @p directory.
         ///

@@ -162,9 +162,13 @@ def default_stages() -> list[Stage]:
         # every stage in that group to every generator, which is right for the licence and
         # manifest gates -- they speak for the whole tree -- and wrong for this one: an unauthored
         # layout is no reason to stop compiling the textures.
+        Stage("world-manifest", "world",
+              ["python3", "tools/world/world_manifest.py", "--check", "assets-src/world"],
+              inputs=["assets-src/world/*.json"], outputs=[], needs=["manifest"],
+              description="world.manifest.json indexes the world it sits in"),
         Stage("world-rules", "world",
               ["python3", "tools/world/validate_world.py", "assets-src/world"],
-              inputs=["assets-src/world/*.json"], outputs=[], needs=["manifest"],
+              inputs=["assets-src/world/*.json"], outputs=[], needs=["world-manifest"],
               description="the eleven rules of §15.7 over the authored layout"),
         Stage("collision", "world",
               ["python3", "tools/world/build_collision.py"],

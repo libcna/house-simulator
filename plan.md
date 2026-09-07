@@ -5318,8 +5318,30 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: until `HOUSE-00366` writes the first world file the gate prints why it has nothing to
             check rather than a bare green line, and it is the one gate in `run_checks.sh` that
             needs `jsonschema`, so a checkout without it is told rather than quietly passed.
-- [ ] HOUSE-00364 — Implement `world.manifest.json` hashing and the `worldHash` used by the save system
+- [x] HOUSE-00364 — Implement `world.manifest.json` hashing and the `worldHash` used by the save system
       dep: HOUSE-00343 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) both halves, because a hash the loader verifies has to be written by
+            something: `tools/world/world_manifest.py` (`--emit`, `--check`, `--selftest`, 13
+            claims) writes it, and `WorldLoader::HashFile` / `ComputeWorldHash` /
+            `VerifyManifest` check it at load. `--check` is a gate in `run_checks.sh` and a stage
+            in `build_content.py`, ahead of `world-rules`. Six new C++ tests; fourteen injected
+            bugs across the two, fourteen caught.
+      note: the definition is pinned in `docs/world-format.md` and **cross-checked**: a C++ test
+            asserts `ComputeWorldHash` against a literal the Python writer produced for the same
+            two members, and against the well-known SHA-256 of an empty file. Two implementations
+            that merely happened to agree would drift, and every save written by one would then be
+            stale to the other.
+      finding: a member's hash is of the file's **bytes**, not of its parsed JSON. A reformatted
+            file is a different file, the deployed copy is what the loader reads, and "the bytes on
+            disk" is the only definition both sides can implement without first agreeing on a JSON
+            canonicalisation nobody has written.
+      finding: `worldHash` is over the member **list**, not the contents — it must change whenever
+            any member changes, and that costs one hash of a few hundred bytes instead of a rehash
+            of the world. The order is part of it, so members are written in §15.1's order and
+            never the filesystem's: a list that reshuffled between two machines would make a save
+            written on one look stale on the other.
+      note: the gate says "nothing to index" out loud while the world is unauthored rather than
+            returning a silent zero, so it never reads as "the index is fine".
 - [ ] HOUSE-00365 — Measure world load time; assert < 250 ms
       dep: HOUSE-00357 · sys: world · plat: LNX · pri: MUST
 

@@ -57,22 +57,31 @@ namespace
             out << text;
         }
 
-        /// A manifest listing exactly the files the test has written, with placeholder hashes.
-        /// The hashes are not checked here -- that is `HOUSE-00364` -- but they are required to be
-        /// present and well formed, so the fixture carries real-looking ones.
+        /// A manifest listing exactly the files the test has written, with REAL hashes.
+        ///
+        /// Real, because `Load` verifies them (`HOUSE-00364`). Computed with the code under test,
+        /// which would be circular on its own -- so `TheWorldHashMatchesTheDefinitionByteForByte`
+        /// pins the definition against a literal the Python writer produced, and that is what
+        /// makes the two implementations one definition rather than two that happen to agree.
         void WriteManifest(const std::vector<std::string>& members) const
         {
-            std::string text = R"({"schema": "cna-house/manifest/1",)"
-                               R"("worldHash": "sha256:)" +
-                               std::string(64, '0') + R"(","members": [)";
-            for (std::size_t index = 0; index < members.size(); ++index)
+            std::vector<world::WorldManifest::Member> rows;
+            for (const std::string& file : members)
+            {
+                const auto hash = world::WorldLoader::HashFile(directory_ + "/" + file);
+                rows.push_back({file, hash ? hash.Value() : std::string("sha256:")});
+            }
+
+            std::string text = R"({"schema": "cna-house/manifest/1", "worldHash": ")" +
+                               world::WorldLoader::ComputeWorldHash(rows) + R"(", "members": [)";
+            for (std::size_t index = 0; index < rows.size(); ++index)
             {
                 if (index != 0)
                 {
                     text += ',';
                 }
-                text += R"({"file": ")" + members[index] + R"(", "sha256": "sha256:)" + std::string(63, 'a') +
-                        std::to_string(index % 10) + R"("})";
+                text +=
+                    R"({"file": ")" + rows[index].file + R"(", "sha256": ")" + rows[index].sha256 + R"("})";
             }
             text += "]}";
             Write("world.manifest.json", text);
@@ -662,7 +671,9 @@ namespace
         EXPECT_EQ(manifest.Value().version, 1);
         EXPECT_EQ(manifest.Value().members.size(), 1U);
         EXPECT_EQ(manifest.Value().members[0].file, "layout.levels.json");
-        EXPECT_EQ(manifest.Value().worldHash, "sha256:" + std::string(64, '0'));
+        EXPECT_EQ(manifest.Value().worldHash,
+                  world::WorldLoader::ComputeWorldHash(
+                      std::vector<world::WorldManifest::Member>{manifest.Value().members[0]}));
     }
 
     TEST_F(WorldLoaderTest, AMemberThatIsNotInTheDirectoryIsALoadError)
@@ -704,6 +715,75 @@ namespace
 
         const auto manifest = world::WorldLoader::LoadManifest(directory_);
         EXPECT_TRUE(manifest) << manifest.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, TheWorldHashMatchesTheDefinitionByteForByte)
+    {
+        // The cross-implementation check, and the reason this task has two halves. The literal is
+        // what `tools/world/world_manifest.py` produces for the same two members; if the C++ and
+        // the Python ever drift, every save written by one is stale to the other.
+        const std::vector<world::WorldManifest::Member> members{
+            {"layout.levels.json", "sha256:" + std::string(64, '0')},
+            {"layout.cells.json", "sha256:" + std::string(64, 'a')},
+        };
+        EXPECT_EQ(world::WorldLoader::ComputeWorldHash(members),
+                  "sha256:d8e3c37a0b0e853ce670d6020e6889f2d50c3209b0bd672bb76a7f525145191d");
+
+        // And a file hash is of the BYTES: the well-known SHA-256 of nothing at all.
+        Write("empty.json", "");
+        const auto empty = world::WorldLoader::HashFile(directory_ + "/empty.json");
+        ASSERT_TRUE(empty) << empty.Error().ToString();
+        EXPECT_EQ(empty.Value(), "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+    }
+
+    TEST_F(WorldLoaderTest, AMemberWhoseBytesChangedIsALoadError)
+    {
+        // §15.1: a member whose hash does not match is a load-time error. The two ways to get here
+        // are an edit without regenerating the manifest and a file that arrived corrupt, so the
+        // message carries both hashes and the command that fixes the first.
+        WriteWorldWithMaterials();
+        Write("layout.cells.json", Cells() + "\n");
+
+        const auto loaded = world::WorldLoader::Load(directory_);
+        ASSERT_FALSE(loaded);
+        EXPECT_EQ(loaded.Error().Code(), ErrorCode::ChecksumMismatch);
+        EXPECT_NE(loaded.Error().Message().find("layout.cells.json"), std::string::npos)
+            << loaded.Error().ToString();
+        EXPECT_NE(loaded.Error().Message().find("world_manifest.py"), std::string::npos)
+            << "and say how to fix it: " << loaded.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AWorldHashThatDoesNotCoverItsMemberListIsALoadError)
+    {
+        // A save compares this number to decide whether the world moved under it, so a wrong one
+        // is a decision made on nothing.
+        Write("layout.levels.json", Levels());
+        const auto hash = world::WorldLoader::HashFile(directory_ + "/layout.levels.json");
+        ASSERT_TRUE(hash);
+        Write("world.manifest.json",
+              R"({"schema": "cna-house/manifest/1", "worldHash": "sha256:)" + std::string(64, 'f') +
+                  R"(", "members": [{"file": "layout.levels.json", "sha256": ")" + hash.Value() + R"("}]})");
+
+        const auto manifest = world::WorldLoader::LoadManifest(directory_);
+        ASSERT_TRUE(manifest) << manifest.Error().ToString();
+        const auto verified = world::WorldLoader::VerifyManifest(directory_, manifest.Value());
+        ASSERT_FALSE(verified);
+        EXPECT_EQ(verified.Error().Code(), ErrorCode::ChecksumMismatch);
+        EXPECT_NE(verified.Error().Context().find("worldHash"), std::string::npos)
+            << verified.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, TheWorldHashDependsOnTheOrderOfTheMemberList)
+    {
+        // The load order is part of what a save was taken against, so the same files in another
+        // order are a different world.
+        const std::vector<world::WorldManifest::Member> forward{
+            {"a.json", "sha256:" + std::string(64, '1')},
+            {"b.json", "sha256:" + std::string(64, '2')},
+        };
+        const std::vector<world::WorldManifest::Member> backward{forward[1], forward[0]};
+        EXPECT_NE(world::WorldLoader::ComputeWorldHash(forward),
+                  world::WorldLoader::ComputeWorldHash(backward));
     }
 
     TEST_F(WorldLoaderTest, AMemberListedTwiceIsRefused)

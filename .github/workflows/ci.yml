@@ -126,6 +126,14 @@ jobs:
           python3 -m pip install --break-system-packages --user jsonschema
           python3 tools/world/validate_world.py --selftest
 
+      - name: The manifest and the worldHash must be one definition, not two
+        working-directory: cna-house
+        # `HOUSE-00364`. The hash is written by Python and verified by C++, so the two halves have
+        # to agree byte for byte or every save written by one is stale to the other. The Python
+        # selftest pins the definition; `WorldLoaderTests` pins the C++ against a literal this tool
+        # produced for the same two members.
+        run: python3 tools/world/world_manifest.py --selftest
+
       - name: The world files must have a schema a machine can check
         working-directory: cna-house
         # `HOUSE-00341`. The sixteen schemas are generated from one source, so what this proves is
