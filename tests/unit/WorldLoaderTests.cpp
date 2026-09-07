@@ -313,6 +313,36 @@ namespace
             return world::WorldLoader::LoadPortals(directory_, contents);
         }
 
+        /// Three leaves over `Portals()`: a hinged door, a slider that does not swing, and a
+        /// solid lockable door hinged on the other side.
+        static std::string Openings()
+        {
+            return R"({
+              "schema": "cna-house/openings/1",
+              "openings": [
+                {
+                  "id": "DOOR_L0_WC1", "kind": "door", "portal": "P_HALL__WC1",
+                  "leaf": { "width": 0.86, "height": 2.04, "thickness": 0.040 },
+                  "hinge": "left", "swing": "into_L0_WC1", "maxAngleDeg": 95.0,
+                  "frame": { "asset": "MODEL_DOOR_FRAME_INT_01", "casing": 0.070 },
+                  "asset": "MODEL_DOOR_LEAF_PANEL_01", "material": "MAT_PAINT_TRIM_WHITE",
+                  "solid": false, "lockable": false
+                },
+                {
+                  "id": "WIN_L0_WC1", "kind": "window", "portal": "P_HALL__WC1_GLASS",
+                  "leaf": { "width": 0.50, "height": 0.60, "thickness": 0.006 },
+                  "hinge": null, "swing": null, "maxAngleDeg": 0.0
+                },
+                {
+                  "id": "DOOR_L0_STAIR", "kind": "door", "portal": "P_HALL__STAIR",
+                  "leaf": { "width": 0.90, "height": 2.04, "thickness": 0.045 },
+                  "hinge": "right", "swing": "into_L0_HALL", "maxAngleDeg": 90.0,
+                  "solid": true, "lockable": true
+                }
+              ]
+            })";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -328,8 +358,12 @@ namespace
             Write("layout.materials.json", Materials());
             Write("layout.cells.json", Cells());
             Write("layout.portals.json", Portals());
-            WriteManifest(
-                {"layout.levels.json", "layout.materials.json", "layout.cells.json", "layout.portals.json"});
+            Write("layout.openings.json", Openings());
+            WriteManifest({"layout.levels.json",
+                           "layout.materials.json",
+                           "layout.cells.json",
+                           "layout.portals.json",
+                           "layout.openings.json"});
         }
 
         std::string directory_;
@@ -1127,6 +1161,115 @@ namespace
         EXPECT_EQ(loaded.Value().OtherSide(*door, Intern("L0_WC1")), Intern("L0_HALL"));
     }
 
+    // --- the openings -----------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, AnOpeningIsReadWithEveryFieldItCarries)
+    {
+        Write("layout.openings.json", Openings());
+        world::WorldData::Contents contents;
+        const auto openings = world::WorldLoader::LoadOpenings(directory_, contents);
+        ASSERT_TRUE(openings) << openings.Error().ToString();
+
+        ASSERT_EQ(contents.openings.size(), 3U);
+        const world::Opening& door = contents.openings[0];
+        EXPECT_EQ(door.id, Intern("DOOR_L0_WC1"));
+        EXPECT_EQ(door.kind, world::OpeningKind::Door);
+        EXPECT_EQ(door.portal, Intern("P_HALL__WC1"));
+        EXPECT_FLOAT_EQ(door.leaf.width, 0.86F);
+        EXPECT_FLOAT_EQ(door.leaf.height, 2.04F);
+        EXPECT_FLOAT_EQ(door.leaf.thickness, 0.040F);
+        ASSERT_TRUE(door.hinge.has_value());
+        EXPECT_EQ(*door.hinge, world::HingeSide::Left);
+        EXPECT_EQ(door.swing, "into_L0_WC1");
+        EXPECT_FLOAT_EQ(door.maxAngleDeg, 95.0F);
+        EXPECT_EQ(door.frameAsset, Intern("MODEL_DOOR_FRAME_INT_01"));
+        EXPECT_FLOAT_EQ(door.casing, 0.070F);
+        EXPECT_EQ(door.asset, Intern("MODEL_DOOR_LEAF_PANEL_01"));
+        EXPECT_EQ(door.material, Intern("MAT_PAINT_TRIM_WHITE"));
+        EXPECT_FALSE(door.solid);
+        EXPECT_FALSE(door.lockable);
+    }
+
+    TEST_F(WorldLoaderTest, ANullHingeIsNotHingedAndNotHingedLeft)
+    {
+        // A slider does not swing, and `Left` is the first value of the enum -- so a reader that
+        // ignored the field would look identical on a door and wrong on every slider in the house.
+        Write("layout.openings.json", Openings());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadOpenings(directory_, contents));
+
+        const world::Opening& slider = contents.openings[1];
+        EXPECT_EQ(slider.kind, world::OpeningKind::Window);
+        EXPECT_FALSE(slider.hinge.has_value());
+        EXPECT_EQ(slider.swing, "");
+        // And the door beside it hinges RIGHT, not left, so the value is read and not defaulted.
+        EXPECT_TRUE(contents.openings[2].hinge.has_value());
+        EXPECT_EQ(*contents.openings[2].hinge, world::HingeSide::Right);
+    }
+
+    TEST_F(WorldLoaderTest, ASolidLeafIsReadBecauseTheAudioSolveReadsItAndNotTheAsset)
+    {
+        // §64.3: a hollow-core door is 16 dB closed and a solid one 24. The difference lives here,
+        // in the layout, not in the `.glb`.
+        Write("layout.openings.json", Openings());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadOpenings(directory_, contents));
+
+        EXPECT_FALSE(contents.openings[0].solid);
+        EXPECT_TRUE(contents.openings[2].solid);
+        EXPECT_TRUE(contents.openings[2].lockable);
+    }
+
+    TEST_F(WorldLoaderTest, ALeafWithNoSizeIsRefused)
+    {
+        for (const std::string row :
+             {R"({"id": "D", "kind": "door", "portal": "P", "leaf": {"height": 2.04}})",
+              R"({"id": "D", "kind": "door", "portal": "P", "leaf": {"width": 0.0, "height": 2.04}})",
+              R"({"id": "D", "kind": "door", "portal": "P",
+                  "leaf": {"width": 0.86, "height": -2.04}})"})
+        {
+            Write("layout.openings.json", R"({"schema": "cna-house/openings/1", "openings": [)" + row + "]}");
+            world::WorldData::Contents contents;
+            const auto openings = world::WorldLoader::LoadOpenings(directory_, contents);
+            ASSERT_FALSE(openings) << "accepted " << row;
+            // Absent and zero are refused by different rules -- one required, one positive -- and
+            // both messages must name the dimension, because "a leaf is wrong" sends nobody
+            // anywhere.
+            EXPECT_TRUE(openings.Error().Context().find("width") != std::string::npos ||
+                        openings.Error().Context().find("height") != std::string::npos)
+                << openings.Error().ToString();
+        }
+    }
+
+    TEST_F(WorldLoaderTest, ALeafThatOpensPastAHalfTurnIsRefused)
+    {
+        Write("layout.openings.json",
+              R"({"schema": "cna-house/openings/1",
+                  "openings": [{"id": "D", "kind": "door", "portal": "P",
+                                "leaf": {"width": 0.86, "height": 2.04},
+                                "maxAngleDeg": 270.0}]})");
+        world::WorldData::Contents contents;
+        const auto openings = world::WorldLoader::LoadOpenings(directory_, contents);
+        ASSERT_FALSE(openings);
+        EXPECT_EQ(openings.Error().Code(), ErrorCode::OutOfRange);
+    }
+
+    TEST_F(WorldLoaderTest, TheOpeningToPortalBijectionIsNotTheLoadersToCheck)
+    {
+        // §15.7 rule 7 is a statement about two whole files -- every door has exactly one portal
+        // AND no portal has two leaves -- and the loader has read one of them. `validate_world.py`
+        // and `WorldValidator` own it; a partial check here would report the wrong half.
+        Write("layout.openings.json",
+              R"({"schema": "cna-house/openings/1",
+                  "openings": [{"id": "D", "kind": "door", "portal": "P_DOES_NOT_EXIST",
+                                "leaf": {"width": 0.86, "height": 2.04}}]})");
+        world::WorldData::Contents contents;
+        const auto openings = world::WorldLoader::LoadOpenings(directory_, contents);
+        ASSERT_TRUE(openings) << openings.Error().ToString();
+        ASSERT_EQ(contents.openings.size(), 1U);
+        EXPECT_EQ(contents.openings[0].portal, Intern("P_DOES_NOT_EXIST"));
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -1145,6 +1288,8 @@ namespace
         EXPECT_EQ(world.Value().FindMaterial(Intern("MAT_LEAF"))->effectTierS, world::EffectTier::AlphaTest);
         EXPECT_EQ(world.Value().Cells().size(), 6U);
         EXPECT_NE(world.Value().FindCell(Intern("L0_HALL")), nullptr);
+        EXPECT_EQ(world.Value().Portals().size(), 4U);
+        EXPECT_EQ(world.Value().Openings().size(), 3U);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -1171,8 +1316,12 @@ namespace
         Write("layout.materials.json", Materials());
         Write("layout.cells.json", Cells());
         Write("layout.portals.json", Portals());
-        WriteManifest(
-            {"layout.levels.json", "layout.materials.json", "layout.cells.json", "layout.portals.json"});
+        Write("layout.openings.json", Openings());
+        WriteManifest({"layout.levels.json",
+                       "layout.materials.json",
+                       "layout.cells.json",
+                       "layout.portals.json",
+                       "layout.openings.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

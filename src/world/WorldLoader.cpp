@@ -1475,6 +1475,188 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadOpenings(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.openings.json", "openings", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+
+        const Result<JsonValue> openings = document.Value().Root().RequireArray("openings");
+        if (!openings)
+        {
+            return openings.Error().WithContext("layout.openings.json");
+        }
+        const Result<std::vector<JsonValue>> rows = openings.Value().Elements();
+        if (!rows)
+        {
+            return rows.Error().WithContext("layout.openings.json");
+        }
+
+        for (const JsonValue& row : rows.Value())
+        {
+            Opening opening;
+            const Result<util::Id> id = RequireId(row, "id");
+            if (!id)
+            {
+                return id.Error().WithContext("layout.openings.json");
+            }
+            opening.id = id.Value();
+
+            const Result<std::string> kind = row.RequireString("kind");
+            if (!kind)
+            {
+                return kind.Error().WithContext("layout.openings.json");
+            }
+            const Result<OpeningKind> parsedKind = ParseOpeningKind(kind.Value());
+            if (!parsedKind)
+            {
+                return parsedKind.Error()
+                    .WithContext(row.Path() + "/kind")
+                    .WithContext("layout.openings.json");
+            }
+            opening.kind = parsedKind.Value();
+
+            const Result<util::Id> portal = RequireId(row, "portal");
+            if (!portal)
+            {
+                return portal.Error().WithContext("layout.openings.json");
+            }
+            opening.portal = portal.Value();
+
+            // The leaf is what swings, and all three of its numbers are load-bearing: `width` and
+            // `height` are §70.5's realism check, and `thickness` is what tells a closed door from
+            // a hole with a picture of a door in it.
+            const Result<JsonValue> leaf = row.RequireObject("leaf");
+            if (!leaf)
+            {
+                return leaf.Error().WithContext("layout.openings.json");
+            }
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, float*>>{
+                     {"width", &opening.leaf.width},
+                     {"height", &opening.leaf.height},
+                     {"thickness", &opening.leaf.thickness}})
+            {
+                const Result<float> value = field == std::string_view("thickness")
+                                                ? leaf.Value().OptionalFloat(field, 0.0F)
+                                                : leaf.Value().RequireFloat(field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.openings.json");
+                }
+                if (value.Value() <= 0.0F && field != std::string_view("thickness"))
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a leaf " + std::string(field) + " is positive; this is " +
+                                   std::to_string(value.Value()),
+                               "layout.openings.json/" + row.Path() + "/leaf/" + std::string(field));
+                }
+                *target = value.Value();
+            }
+
+            // `hinge` is `null` on a slider and on a window that does not swing, and "not hinged"
+            // is a real state rather than "hinged left".
+            if (row.Has("hinge") && !row.IsNull("hinge"))
+            {
+                const Result<std::string> hinge = row.RequireString("hinge");
+                if (!hinge)
+                {
+                    return hinge.Error().WithContext("layout.openings.json");
+                }
+                const Result<HingeSide> parsedHinge = ParseHingeSide(hinge.Value());
+                if (!parsedHinge)
+                {
+                    return parsedHinge.Error()
+                        .WithContext(row.Path() + "/hinge")
+                        .WithContext("layout.openings.json");
+                }
+                opening.hinge = parsedHinge.Value();
+            }
+
+            const auto text = [&row](std::string_view field) -> Result<std::string>
+            {
+                if (!row.Has(field) || row.IsNull(field))
+                {
+                    return std::string{};
+                }
+                return row.RequireString(field);
+            };
+            const Result<std::string> swing = text("swing");
+            if (!swing)
+            {
+                return swing.Error().WithContext("layout.openings.json");
+            }
+            opening.swing = swing.Value();
+
+            const Result<float> angle = row.OptionalFloat("maxAngleDeg", 0.0F);
+            if (!angle)
+            {
+                return angle.Error().WithContext("layout.openings.json");
+            }
+            if (angle.Value() < 0.0F || angle.Value() > 180.0F)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "a leaf opens 0..180 degrees; this is " + std::to_string(angle.Value()),
+                           "layout.openings.json/" + row.Path() + "/maxAngleDeg");
+            }
+            opening.maxAngleDeg = angle.Value();
+
+            if (row.Has("frame") && !row.IsNull("frame"))
+            {
+                const Result<JsonValue> frame = row.RequireObject("frame");
+                if (!frame)
+                {
+                    return frame.Error().WithContext("layout.openings.json");
+                }
+                const Result<util::Id> asset = OptionalId(frame.Value(), "asset");
+                if (!asset)
+                {
+                    return asset.Error().WithContext("layout.openings.json");
+                }
+                opening.frameAsset = asset.Value();
+                const Result<float> casing = frame.Value().OptionalFloat("casing", 0.0F);
+                if (!casing)
+                {
+                    return casing.Error().WithContext("layout.openings.json");
+                }
+                opening.casing = casing.Value();
+            }
+
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, util::Id*>>{
+                     {"asset", &opening.asset}, {"material", &opening.material}})
+            {
+                const Result<util::Id> value = OptionalId(row, field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.openings.json");
+                }
+                *target = value.Value();
+            }
+
+            // `solid` is not decoration: §64.3 gives a hollow-core door 16 dB closed and a solid
+            // one 24, and the audio solve reads this field and not the asset.
+            const Result<bool> solid = row.OptionalBool("solid", false);
+            if (!solid)
+            {
+                return solid.Error().WithContext("layout.openings.json");
+            }
+            opening.solid = solid.Value();
+
+            const Result<bool> lockable = row.OptionalBool("lockable", false);
+            if (!lockable)
+            {
+                return lockable.Error().WithContext("layout.openings.json");
+            }
+            opening.lockable = lockable.Value();
+
+            contents.openings.push_back(std::move(opening));
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -1502,6 +1684,10 @@ namespace cnahouse::world
         if (const Result<void> portals = LoadPortals(directory, contents); !portals)
         {
             return portals.Error();
+        }
+        if (const Result<void> openings = LoadOpenings(directory, contents); !openings)
+        {
+            return openings.Error();
         }
 
         util::Log::Info(util::LogCat::World,

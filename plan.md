@@ -4998,8 +4998,24 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             the difference between a glazed door and a bricked-up one. Same for `soundLoss`.
       finding: a portal whose two sides name the same cell is refused. A hole from a room into
             itself is not a portal, and it would give that cell two entries in its own portal list.
-- [ ] HOUSE-00346 — `WorldLoader`: openings (doors, windows) with hinge/swing/travel metadata
+- [x] HOUSE-00346 — `WorldLoader`: openings (doors, windows) with hinge/swing/travel metadata
       dep: HOUSE-00345 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadOpenings`. 6 new unit tests; eight injected bugs,
+            seven caught and one redundantly covered (see below).
+      finding: `hinge: null` is "does not swing", not "hinged left". A slider has no hinge, and
+            `Left` is the first value of the enum — so a reader that ignored the field entirely
+            would look right on every door and wrong on every slider in the house. The fixture
+            carries a left door, a right door and a hingeless slider for exactly that reason.
+      finding: `solid` is read here and not inferred from the asset, because §64.3's 16 dB for a
+            hollow-core door and 24 dB for a solid one is what the audio solve reads, and the
+            `.glb` does not know which it is.
+      note: the leaf's `width` and `height` are checked twice over — required, and positive — so an
+            injected bug that made them optional is still caught by the positivity rule. That is a
+            redundancy rather than a gap, and the test now also requires the message to name the
+            dimension either way.
+      note: §15.7 rule 7's opening↔portal bijection is **not** checked here. It is a statement
+            about two whole files (every door has one portal AND no portal has two leaves) and the
+            loader has read one of them; a partial check would report the wrong half.
 - [ ] HOUSE-00347 — `WorldLoader`: stairs, with the derived collision ramp parameters
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00348 — `WorldLoader`: lights and light groups

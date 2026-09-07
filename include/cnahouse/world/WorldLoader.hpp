@@ -96,6 +96,14 @@ namespace cnahouse::world
         [[nodiscard]] static util::Result<void> LoadPortals(std::string_view directory,
                                                             WorldData::Contents& contents);
 
+        /// @brief Reads `layout.openings.json` into @p contents.
+        ///
+        /// Doors and windows as geometry plus entity. Which portal each one belongs to is checked
+        /// by §15.7 rule 7 (`validate_world.py`, `WorldValidator`), not here: the bijection is a
+        /// statement about two whole files and the loader has only read one of them.
+        [[nodiscard]] static util::Result<void> LoadOpenings(std::string_view directory,
+                                                             WorldData::Contents& contents);
+
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
         /// As each `HOUSE-00344`…`HOUSE-00355` lands, its file joins this sequence. Until then the
