@@ -146,6 +146,9 @@ run_gate "world-rules" check_world
 # metric row states the number the layout actually measures.
 run_gate "graph-report" python3 tools/world/report_graph.py assets-src/world --check
 run_gate "window-schedule" python3 tools/world/window_schedule.py --check
+# `HOUSE-00398`. The plans are drawn from the layout, so a stale SVG is a plan of a house that no
+# longer exists -- which is worse than no plan, because somebody will act on it.
+run_gate "floor-plans" python3 tools/world/floor_plans.py --check
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
 # `HOUSE-00280`. The surface map is counted from the manifest, so importing or dropping a
 # footstep sample changes it. A stale map is HOUSE-00281 sourcing the wrong list.

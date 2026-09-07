@@ -180,6 +180,14 @@ jobs:
         run: |
           python3 tools/world/window_schedule.py --selftest
 
+      - name: The floor plans must be drawn from the layout, with north up
+        working-directory: cna-house
+        # `HOUSE-00398`. The claim that matters is the one nobody would notice being wrong: §14
+        # puts north at -Z, so a cell further north is drawn HIGHER on the page. A plan with north
+        # upside down is a plan every reviewer acts on and nobody questions.
+        run: |
+          python3 tools/world/floor_plans.py --selftest
+
       - name: Rooms must become walls, and the collision file must read back
         working-directory: cna-house
         # `HOUSE-00210`. The fixture is three rooms chosen so that every rule has something to

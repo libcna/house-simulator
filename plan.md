@@ -6223,8 +6223,21 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             finds says nothing about the one somebody removed.
 - [ ] HOUSE-00397 — Run the full validator; fix every violation; record the first clean run
       dep: HOUSE-00396, HOUSE-00360…HOUSE-00362 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00398 — Generate the printable floor plans (SVG per level) from the layout for review and for the docs
+- [x] HOUSE-00398 — Generate the printable floor plans (SVG per level) from the layout for review and for the docs
       dep: HOUSE-00397 · sys: world · plat: TOOL · pri: SHOULD
+      note: six plans in `docs/floor-plans/` — one per level plus a site plan for the yards, the
+            terrace, the garden and the shed. Every line comes from `assets-src/world/`: cell
+            boxes, portal rectangles and the plumbing chases. Nothing is positioned by hand, so a
+            plan cannot drift from the house, and the `floor-plans` gate fails when the committed
+            SVGs stop matching — a stale plan is worse than no plan, because somebody acts on it.
+      note: SVG rather than a raster because it prints, it diffs as text and a reviewer opens it in
+            a browser with no tooling. A PNG would be a binary blob nobody can review in a diff.
+      note: the claim that earns its keep is the one nobody would notice being wrong: §14 puts
+            north at −Z, so a cell further north is drawn **higher** on the page. A plan with north
+            upside down is one every reviewer acts on and nobody questions, so the selftest moves a
+            room north and asserts its label moved up. Four injected bugs, all caught.
+      note: this is the first time the whole session's authoring can be **looked** at: 96 cells and
+            179 portals of JSON become six pages.
       files: tools/world/plan_svg.py, docs/plans/*.svg
 - [ ] HOUSE-00399 — Author the ID golden list (every cell, portal, light group, interactable, material, asset) for the stability test
       dep: HOUSE-00397 · sys: world · plat: CI · pri: MUST

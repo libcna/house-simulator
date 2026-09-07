@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="648" height="459" viewBox="0 0 648 459" font-family="DejaVu Sans, sans-serif">
+  <style>.id{font-size:9px;fill:#333}.name{font-size:8px;fill:#777}.key{font-size:10px;fill:#333}</style>
+  <rect width="648" height="459" fill="#fbfbfa"/>
+  <rect x="46.0" y="178.6" width="78.0" height="96.2" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="85.0" y="226.7" text-anchor="middle">L1_BATH2</text>
+  <text class="name" x="85.0" y="236.7" text-anchor="middle">Family Bathroom</text>
+  <rect x="503.6" y="178.6" width="98.8" height="96.2" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="553.0" y="226.7" text-anchor="middle">L1_BATH3</text>
+  <text class="name" x="553.0" y="236.7" text-anchor="middle">Guest Bathroom</text>
+  <rect x="433.4" y="46.0" width="169.0" height="109.2" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="517.9" y="100.6" text-anchor="middle">L1_BED2</text>
+  <text class="name" x="517.9" y="110.6" text-anchor="middle">Bedroom 2</text>
+  <rect x="46.0" y="274.8" width="117.0" height="104.0" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="104.5" y="326.8" text-anchor="middle">L1_BED3</text>
+  <text class="name" x="104.5" y="336.8" text-anchor="middle">Bedroom 3</text>
+  <rect x="163.0" y="274.8" width="156.0" height="104.0" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="241.0" y="326.8" text-anchor="middle">L1_BED4</text>
+  <text class="name" x="241.0" y="336.8" text-anchor="middle">Bedroom 4</text>
+  <rect x="503.6" y="274.8" width="98.8" height="104.0" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="553.0" y="326.8" text-anchor="middle">L1_BED5</text>
+  <text class="name" x="553.0" y="336.8" text-anchor="middle">Guest Bedroom</text>
+  <rect x="124.0" y="178.6" width="70.2" height="36.4" fill="#efeceb" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="159.1" y="196.8" text-anchor="middle">L1_CLOSET_2</text>
+  <text class="name" x="159.1" y="206.8" text-anchor="middle">Hall Closet 2</text>
+  <rect x="261.8" y="178.6" width="57.2" height="36.4" fill="#efeceb" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="290.4" y="196.8" text-anchor="middle">L1_CLOSET_3</text>
+  <text class="name" x="290.4" y="206.8" text-anchor="middle">Hall Closet 3</text>
+  <rect x="319.0" y="178.6" width="114.4" height="96.2" fill="#f4f1e8" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="376.2" y="226.7" text-anchor="middle">L1_HALL</text>
+  <text class="name" x="376.2" y="236.7" text-anchor="middle">Upper Hall</text>
+  <rect x="124.0" y="215.0" width="195.0" height="59.8" fill="#f4f1e8" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="221.5" y="244.9" text-anchor="middle">L1_HALL_W</text>
+  <text class="name" x="221.5" y="254.9" text-anchor="middle">West Corridor</text>
+  <rect x="319.0" y="274.8" width="114.4" height="104.0" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="376.2" y="326.8" text-anchor="middle">L1_LANDING</text>
+  <text class="name" x="376.2" y="336.8" text-anchor="middle">Stair Landing</text>
+  <rect x="433.4" y="155.2" width="70.2" height="23.4" fill="#efeceb" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="468.5" y="166.9" text-anchor="middle">L1_LINEN</text>
+  <text class="name" x="468.5" y="176.9" text-anchor="middle">Linen Closet</text>
+  <rect x="46.0" y="46.0" width="85.8" height="132.6" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="88.9" y="112.3" text-anchor="middle">L1_MASTER_BATH</text>
+  <text class="name" x="88.9" y="122.3" text-anchor="middle">Master Bathroom</text>
+  <rect x="194.2" y="46.0" width="239.2" height="132.6" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="313.8" y="112.3" text-anchor="middle">L1_MASTER_BED</text>
+  <text class="name" x="313.8" y="122.3" text-anchor="middle">Master Bedroom</text>
+  <rect x="131.8" y="46.0" width="62.4" height="132.6" fill="#efeceb" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="163.0" y="112.3" text-anchor="middle">L1_MASTER_CLOSET</text>
+  <text class="name" x="163.0" y="122.3" text-anchor="middle">Master Walk-in Closet</text>
+  <rect x="433.4" y="225.4" width="70.2" height="153.4" fill="#e8eef6" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="468.5" y="302.1" text-anchor="middle">L1_STAIR_MAIN</text>
+  <text class="name" x="468.5" y="312.1" text-anchor="middle">Staircase L1</text>
+  <rect x="503.6" y="155.2" width="98.8" height="23.4" fill="#efeceb" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="553.0" y="166.9" text-anchor="middle">L1_STOR</text>
+  <text class="name" x="553.0" y="176.9" text-anchor="middle">Upper Store</text>
+  <rect x="194.2" y="178.6" width="67.6" height="36.4" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="228.0" y="196.8" text-anchor="middle">L1_WC3</text>
+  <text class="name" x="228.0" y="206.8" text-anchor="middle">WC 3</text>
+  <rect x="433.4" y="178.6" width="70.2" height="46.8" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="468.5" y="202.0" text-anchor="middle">L1_WC4</text>
+  <text class="name" x="468.5" y="212.0" text-anchor="middle">WC 4</text>
+  <line x1="347.6" y1="274.8" x2="404.8" y2="274.8" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="319.0" y1="224.1" x2="319.0" y2="265.7" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="433.4" y1="306.0" x2="433.4" y2="347.6" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
+  <rect x="438.6" y="238.4" width="59.8" height="127.4" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <rect x="438.6" y="238.4" width="59.8" height="127.4" fill="none" stroke="#8e44ad" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <line x1="364.5" y1="178.6" x2="387.9" y2="178.6" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="194.2" y1="100.6" x2="194.2" y2="124.0" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="131.8" y1="100.6" x2="131.8" y2="124.0" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="433.4" y1="190.3" x2="433.4" y2="213.7" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="456.8" y1="155.2" x2="480.2" y2="155.2" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="541.3" y1="155.2" x2="564.7" y2="155.2" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="541.3" y1="178.6" x2="564.7" y2="178.6" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="131.8" y1="274.8" x2="155.2" y2="274.8" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="229.3" y1="274.8" x2="252.7" y2="274.8" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="124.0" y1="233.2" x2="124.0" y2="256.6" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="216.3" y1="215.0" x2="239.7" y2="215.0" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="147.4" y1="215.0" x2="170.8" y2="215.0" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="278.7" y1="215.0" x2="302.1" y2="215.0" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="503.6" y1="315.1" x2="503.6" y2="338.5" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="541.3" y1="274.8" x2="564.7" y2="274.8" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="286.5" y1="46.0" x2="348.9" y2="46.0" stroke="#1f6f8b" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="363.2" y1="378.8" x2="389.2" y2="378.8" stroke="#7d2018" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="321.6" y1="378.8" x2="352.8" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="399.6" y1="378.8" x2="430.8" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="471.1" y1="378.8" x2="502.3" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="209.8" y1="46.0" x2="241.0" y2="46.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="248.8" y1="46.0" x2="280.0" y2="46.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="386.6" y1="46.0" x2="417.8" y2="46.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="46.0" y1="104.5" x2="46.0" y2="120.1" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="508.8" y1="46.0" x2="540.0" y2="46.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="602.4" y1="85.0" x2="602.4" y2="116.2" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="88.9" y1="378.8" x2="120.1" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="46.0" y1="311.2" x2="46.0" y2="342.4" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="177.3" y1="378.8" x2="208.5" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="237.1" y1="378.8" x2="268.3" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="46.0" y1="218.9" x2="46.0" y2="234.5" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="537.4" y1="378.8" x2="568.6" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <!-- flight STAIR_MAIN_L1_L2: 16 risers -->
+  <g stroke="#2c3e50" stroke-width="1.4" fill="none"><line x1="618" y1="34" x2="618" y2="8"/><path d="M614 14 L618 8 L622 14"/></g>
+  <text class="key" x="618" y="46" text-anchor="middle">N</text>
+  <line x1="46.0" y1="440.8" x2="176.0" y2="440.8" stroke="#2c3e50" stroke-width="2"/>
+  <text class="key" x="46.0" y="434.8">5 m</text>
+  <text class="key" x="190.0" y="444.8">L1 &#183; 19 cells &#183; 37 portals</text>
+</svg>

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="648" height="459" viewBox="0 0 648 459" font-family="DejaVu Sans, sans-serif">
+  <style>.id{font-size:9px;fill:#333}.name{font-size:8px;fill:#777}.key{font-size:10px;fill:#333}</style>
+  <rect width="648" height="459" fill="#fbfbfa"/>
+  <rect x="163.0" y="46.0" width="93.6" height="80.6" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="209.8" y="86.3" text-anchor="middle">B1_CELLAR</text>
+  <text class="name" x="209.8" y="96.3" text-anchor="middle">Wine Cellar</text>
+  <rect x="433.4" y="46.0" width="169.0" height="106.6" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="517.9" y="99.3" text-anchor="middle">B1_CINEMA</text>
+  <text class="name" x="517.9" y="109.3" text-anchor="middle">Home Cinema</text>
+  <rect x="503.6" y="215.0" width="98.8" height="59.8" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="553.0" y="244.9" text-anchor="middle">B1_ELECTRICAL</text>
+  <text class="name" x="553.0" y="254.9" text-anchor="middle">Electrical Service</text>
+  <rect x="163.0" y="274.8" width="156.0" height="104.0" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="241.0" y="326.8" text-anchor="middle">B1_GYM</text>
+  <text class="name" x="241.0" y="336.8" text-anchor="middle">Home Gym</text>
+  <rect x="319.0" y="46.0" width="114.4" height="332.8" fill="#f4f1e8" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="376.2" y="212.4" text-anchor="middle">B1_HALL</text>
+  <text class="name" x="376.2" y="222.4" text-anchor="middle">Basement Hallway</text>
+  <rect x="163.0" y="126.6" width="156.0" height="148.2" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="241.0" y="200.7" text-anchor="middle">B1_HOBBY</text>
+  <text class="name" x="241.0" y="210.7" text-anchor="middle">Hobby Room</text>
+  <rect x="256.6" y="46.0" width="62.4" height="80.6" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="287.8" y="86.3" text-anchor="middle">B1_LAUNDRY2</text>
+  <text class="name" x="287.8" y="96.3" text-anchor="middle">Secondary Laundry</text>
+  <rect x="503.6" y="274.8" width="98.8" height="104.0" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="553.0" y="326.8" text-anchor="middle">B1_MECHANICAL</text>
+  <text class="name" x="553.0" y="336.8" text-anchor="middle">Mechanical</text>
+  <rect x="433.4" y="225.4" width="70.2" height="153.4" fill="#e8eef6" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="468.5" y="302.1" text-anchor="middle">B1_STAIR</text>
+  <text class="name" x="468.5" y="312.1" text-anchor="middle">Basement Stair Foot</text>
+  <rect x="46.0" y="178.6" width="117.0" height="96.2" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="104.5" y="226.7" text-anchor="middle">B1_STOR1</text>
+  <text class="name" x="104.5" y="236.7" text-anchor="middle">Storage 1</text>
+  <rect x="46.0" y="46.0" width="117.0" height="132.6" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="104.5" y="112.3" text-anchor="middle">B1_STOR2</text>
+  <text class="name" x="104.5" y="122.3" text-anchor="middle">Storage 2</text>
+  <rect x="475.0" y="152.6" width="28.6" height="72.8" fill="#efeceb" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="489.3" y="189.0" text-anchor="middle">B1_UNDERSTAIR</text>
+  <text class="name" x="489.3" y="199.0" text-anchor="middle">Under-stair Store</text>
+  <rect x="433.4" y="199.4" width="41.6" height="26.0" fill="#efeceb" stroke="#2c3e50" stroke-width="1.4"/>
+  <rect x="503.6" y="152.6" width="98.8" height="62.4" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="553.0" y="183.8" text-anchor="middle">B1_UTILITY</text>
+  <text class="name" x="553.0" y="193.8" text-anchor="middle">Utility</text>
+  <rect x="433.4" y="152.6" width="41.6" height="46.8" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="454.2" y="176.0" text-anchor="middle">B1_WC7</text>
+  <text class="name" x="454.2" y="186.0" text-anchor="middle">Basement WC</text>
+  <rect x="46.0" y="274.8" width="117.0" height="104.0" fill="#ffffff" stroke="#2c3e50" stroke-width="1.4"/>
+  <text class="id" x="104.5" y="326.8" text-anchor="middle">B1_WORKSHOP</text>
+  <text class="name" x="104.5" y="336.8" text-anchor="middle">Workshop</text>
+  <line x1="433.4" y1="286.5" x2="433.4" y2="317.7" stroke="#7f8c8d" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="433.4" y1="200.7" x2="433.4" y2="224.1" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="503.6" y1="315.1" x2="503.6" y2="338.5" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="503.6" y1="238.4" x2="503.6" y2="261.8" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="541.3" y1="152.6" x2="564.7" y2="152.6" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="433.4" y1="87.6" x2="433.4" y2="111.0" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="433.4" y1="164.3" x2="433.4" y2="187.7" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="319.0" y1="315.1" x2="319.0" y2="338.5" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="319.0" y1="189.0" x2="319.0" y2="212.4" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="319.0" y1="74.6" x2="319.0" y2="98.0" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="163.0" y1="315.1" x2="163.0" y2="338.5" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="163.0" y1="215.0" x2="163.0" y2="238.4" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="163.0" y1="140.9" x2="163.0" y2="164.3" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="198.1" y1="126.6" x2="221.5" y2="126.6" stroke="#b03a2e" stroke-width="3.2" stroke-linecap="round"/>
+  <rect x="438.6" y="238.4" width="59.8" height="85.8" fill="none" stroke="#b03a2e" stroke-width="1.6" stroke-dasharray="5 3"/>
+  <line x1="541.3" y1="378.8" x2="564.7" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="181.2" y1="378.8" x2="204.6" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="241.0" y1="378.8" x2="264.4" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="46.0" y1="315.1" x2="46.0" y2="338.5" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="92.8" y1="378.8" x2="116.2" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="46.0" y1="215.0" x2="46.0" y2="238.4" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="46.0" y1="100.6" x2="46.0" y2="124.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="92.8" y1="46.0" x2="116.2" y2="46.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <!-- flight STAIR_BASEMENT_L0_B1: 16 risers -->
+  <g stroke="#2c3e50" stroke-width="1.4" fill="none"><line x1="618" y1="34" x2="618" y2="8"/><path d="M614 14 L618 8 L622 14"/></g>
+  <text class="key" x="618" y="46" text-anchor="middle">N</text>
+  <line x1="46.0" y1="440.8" x2="176.0" y2="440.8" stroke="#2c3e50" stroke-width="2"/>
+  <text class="key" x="46.0" y="434.8">5 m</text>
+  <text class="key" x="190.0" y="444.8">B1 &#183; 15 cells &#183; 23 portals</text>
+</svg>
