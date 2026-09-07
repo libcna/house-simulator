@@ -3289,6 +3289,284 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadInitialState(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "initialstate.json", "initialstate", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+        const JsonValue& root = document.Value().Root();
+        InitialState& initial = contents.initialState;
+
+        const Result<JsonValue> player = root.RequireObject("player");
+        if (!player)
+        {
+            return player.Error().WithContext("initialstate.json");
+        }
+        const Result<util::Id> playerCell = RequireId(player.Value(), "cell");
+        if (!playerCell)
+        {
+            return playerCell.Error().WithContext("initialstate.json");
+        }
+        initial.player.cell = playerCell.Value();
+        const Result<Microsoft::Xna::Framework::Vector3> spawn = player.Value().RequireVector3("position");
+        if (!spawn)
+        {
+            return spawn.Error().WithContext("initialstate.json");
+        }
+        initial.player.position = spawn.Value();
+        const Result<float> yaw = player.Value().OptionalFloat("yawDeg", 0.0F);
+        if (!yaw)
+        {
+            return yaw.Error().WithContext("initialstate.json");
+        }
+        initial.player.yawDeg = yaw.Value();
+
+        const Result<JsonValue> clock = root.RequireObject("clock");
+        if (!clock)
+        {
+            return clock.Error().WithContext("initialstate.json");
+        }
+        const Result<double> epoch = clock.Value().RequireNumber("epochSeconds");
+        if (!epoch)
+        {
+            return epoch.Error().WithContext("initialstate.json");
+        }
+        initial.clock.epochSeconds = epoch.Value();
+        const Result<float> scale = clock.Value().RequireFloat("timeScale");
+        if (!scale)
+        {
+            return scale.Error().WithContext("initialstate.json");
+        }
+        if (scale.Value() < 0.0F)
+        {
+            return Err(ErrorCode::OutOfRange,
+                       "a time scale is not negative; this is " + std::to_string(scale.Value()) +
+                           ", and a clock that runs backwards is a sunrise in the west",
+                       "initialstate.json/clock/timeScale");
+        }
+        initial.clock.timeScale = scale.Value();
+
+        const Result<float> latitude = clock.Value().OptionalFloat("latitudeDeg", 0.0F);
+        if (!latitude)
+        {
+            return latitude.Error().WithContext("initialstate.json");
+        }
+        if (latitude.Value() < -90.0F || latitude.Value() > 90.0F)
+        {
+            return Err(ErrorCode::OutOfRange,
+                       "a latitude is -90..90; this is " + std::to_string(latitude.Value()),
+                       "initialstate.json/clock/latitudeDeg");
+        }
+        initial.clock.latitudeDeg = latitude.Value();
+
+        const Result<float> longitude = clock.Value().OptionalFloat("longitudeDeg", 0.0F);
+        if (!longitude)
+        {
+            return longitude.Error().WithContext("initialstate.json");
+        }
+        if (longitude.Value() < -180.0F || longitude.Value() > 180.0F)
+        {
+            return Err(ErrorCode::OutOfRange,
+                       "a longitude is -180..180; this is " + std::to_string(longitude.Value()),
+                       "initialstate.json/clock/longitudeDeg");
+        }
+        initial.clock.longitudeDeg = longitude.Value();
+
+        const Result<std::int64_t> offset = clock.Value().OptionalInt("utcOffsetMinutes", 0);
+        if (!offset)
+        {
+            return offset.Error().WithContext("initialstate.json");
+        }
+        initial.clock.utcOffsetMinutes = static_cast<std::int32_t>(offset.Value());
+
+        if (root.Has("weather") && !root.IsNull("weather"))
+        {
+            const Result<JsonValue> weather = root.RequireObject("weather");
+            if (!weather)
+            {
+                return weather.Error().WithContext("initialstate.json");
+            }
+            const Result<util::Id> target = OptionalId(weather.Value(), "target");
+            if (!target)
+            {
+                return target.Error().WithContext("initialstate.json");
+            }
+            initial.weather.target = target.Value();
+            const Result<float> cover = weather.Value().OptionalFloat("cloudCover", 0.0F);
+            if (!cover)
+            {
+                return cover.Error().WithContext("initialstate.json");
+            }
+            if (cover.Value() < 0.0F || cover.Value() > 1.0F)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "cloud cover is 0..1; this is " + std::to_string(cover.Value()),
+                           "initialstate.json/weather/cloudCover");
+            }
+            initial.weather.cloudCover = cover.Value();
+            const Result<float> wind = weather.Value().OptionalFloat("windSpeed", 0.0F);
+            if (!wind)
+            {
+                return wind.Error().WithContext("initialstate.json");
+            }
+            if (wind.Value() < 0.0F)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "a wind speed is not negative; this is " + std::to_string(wind.Value()),
+                           "initialstate.json/weather/windSpeed");
+            }
+            initial.weather.windSpeed = wind.Value();
+        }
+
+        // The interactable block is the canonical state table's opening values. Each override is
+        // checked against the field the interactable DECLARES -- name and type -- because this file
+        // is what every delta save is taken against: a field here that the interactable does not
+        // have is a value the save would carry for ever and nothing would ever read.
+        //
+        // A block naming an interactable that does not exist is NOT reported here: that is §15.7
+        // rule 6, it has one owner, and a second message for it would be a worse one.
+        if (root.Has("interactables") && !root.IsNull("interactables"))
+        {
+            const Result<JsonValue> block = root.RequireObject("interactables");
+            if (!block)
+            {
+                return block.Error().WithContext("initialstate.json");
+            }
+            const Result<std::vector<std::pair<std::string, JsonValue>>> rows = block.Value().Members();
+            if (!rows)
+            {
+                return rows.Error().WithContext("initialstate.json");
+            }
+            for (const auto& [name, values] : rows.Value())
+            {
+                InteractableStart start;
+                start.id = util::Intern(name);
+
+                const Interactable* declared = nullptr;
+                for (const Interactable& candidate : contents.interactables)
+                {
+                    if (candidate.id == start.id)
+                    {
+                        declared = &candidate;
+                        break;
+                    }
+                }
+
+                if (values.GetKind() != util::JsonValue::Kind::Object)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "an interactable's initial state is an object of field values",
+                               "initialstate.json/interactables/" + name);
+                }
+                const Result<std::vector<std::pair<std::string, JsonValue>>> fields = values.Members();
+                if (!fields)
+                {
+                    return fields.Error().WithContext("initialstate.json");
+                }
+                for (const auto& [field, value] : fields.Value())
+                {
+                    StateValue read{false};
+                    switch (value.GetKind())
+                    {
+                        case util::JsonValue::Kind::Boolean:
+                        {
+                            const Result<bool> flag = values.RequireBool(field);
+                            if (!flag)
+                            {
+                                return flag.Error().WithContext("initialstate.json");
+                            }
+                            read = flag.Value();
+                            break;
+                        }
+                        case util::JsonValue::Kind::Number:
+                        {
+                            const Result<double> number = values.RequireNumber(field);
+                            if (!number)
+                            {
+                                return number.Error().WithContext("initialstate.json");
+                            }
+                            read = number.Value();
+                            break;
+                        }
+                        case util::JsonValue::Kind::String:
+                        {
+                            const Result<std::string> text = values.RequireString(field);
+                            if (!text)
+                            {
+                                return text.Error().WithContext("initialstate.json");
+                            }
+                            read = text.Value();
+                            break;
+                        }
+                        default:
+                            return Err(ErrorCode::InvalidData,
+                                       "a state value is a boolean, a number or a string; \"" + field +
+                                           "\" is neither",
+                                       "initialstate.json/interactables/" + name + "/" + field);
+                    }
+
+                    if (declared != nullptr)
+                    {
+                        const StateTable::Field* slot = declared->state.Find(field);
+                        if (slot == nullptr)
+                        {
+                            return Err(ErrorCode::InvalidData,
+                                       "\"" + field + "\" is not a state field of " + name +
+                                           "; it declares " + declared->state.Names(),
+                                       "initialstate.json/interactables/" + name + "/" + field);
+                        }
+                        if (slot->value.index() != read.index())
+                        {
+                            return Err(ErrorCode::InvalidData,
+                                       "\"" + field + "\" starts as a different type from the one " + name +
+                                           " declares for it",
+                                       "initialstate.json/interactables/" + name + "/" + field);
+                        }
+                    }
+                    start.overrides.Declare(field, read);
+                }
+                initial.interactables.push_back(std::move(start));
+            }
+        }
+
+        if (root.Has("pets") && !root.IsNull("pets"))
+        {
+            const Result<JsonValue> block = root.RequireObject("pets");
+            if (!block)
+            {
+                return block.Error().WithContext("initialstate.json");
+            }
+            const Result<std::vector<std::pair<std::string, JsonValue>>> rows = block.Value().Members();
+            if (!rows)
+            {
+                return rows.Error().WithContext("initialstate.json");
+            }
+            for (const auto& [name, values] : rows.Value())
+            {
+                PetStart pet;
+                pet.id = util::Intern(name);
+                const Result<util::Id> cell = OptionalId(values, "cell");
+                if (!cell)
+                {
+                    return cell.Error().WithContext("initialstate.json");
+                }
+                pet.cell = cell.Value();
+                const Result<std::string> state = values.OptionalString("state", "");
+                if (!state)
+                {
+                    return state.Error().WithContext("initialstate.json");
+                }
+                pet.state = state.Value();
+                initial.pets.push_back(std::move(pet));
+            }
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -3348,6 +3626,10 @@ namespace cnahouse::world
         if (const Result<void> interactables = LoadInteractables(directory, contents); !interactables)
         {
             return interactables.Error();
+        }
+        if (const Result<void> initial = LoadInitialState(directory, contents); !initial)
+        {
+            return initial.Error();
         }
 
         util::Log::Info(util::LogCat::World,

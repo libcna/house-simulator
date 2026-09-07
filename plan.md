@@ -5171,8 +5171,26 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: evaluation walks the tree with an explicit stack. The tree comes from data, and a
             2 000-term predicate — far past anything an author would write — must not be able to
             overflow the game's stack. A test builds one.
-- [ ] HOUSE-00355 — `WorldLoader`: `initialstate.json` into the canonical state table
+- [x] HOUSE-00355 — `WorldLoader`: `initialstate.json` into the canonical state table
       dep: HOUSE-00354 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadInitialState`, read **last** so its `interactables`
+            block can be checked against the state each interactable declares. 8 new unit tests;
+            ten injected bugs, ten caught.
+      finding: each opening value is checked by **name and by type** against the interactable's
+            declared field. This file is what every delta save is taken against (§65.6), so a
+            field here that the interactable does not have is a value the save would carry for
+            ever and nothing would ever read — and a `doorOpen` that starts as `0.5` against a
+            boolean is the same bug one type further on.
+      note: an opening state is only the fields it **names**. `interactables.json` already
+            declares every field and its default, so a block that repeated all of them would be a
+            second place to change a default.
+      note: a block naming an interactable that does not exist is **not** reported here — that is
+            §15.7 rule 6, it has one owner, and a second message for it would be a worse one. The
+            field check simply does not run for it. Same arrangement as the portal-plane check.
+      finding: `player.cell` is required. Without it §16.4 step 4 assigns `EXT_WORLD` and the game
+            starts the player outside the house it just loaded, with nothing in the frame saying
+            the spawn row was incomplete. An injected bug that made it optional survived the first
+            version of the test, which only checked that the whole `player` block was required.
 - [ ] HOUSE-00356 — Implement `SpatialIndex`: the 2 m × 2 m × level grid over cells, built at load
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
       verify: unit SpatialIndexTests.* against brute force on 10⁵ random points

@@ -768,6 +768,65 @@ namespace cnahouse::world
         util::Id portal;
     };
 
+    /// @brief `initialstate.json`: where the player starts.
+    struct PlayerStart
+    {
+        util::Id cell;
+        Microsoft::Xna::Framework::Vector3 position;
+        float yawDeg = 0.0F;
+    };
+
+    /// @brief `initialstate.json`: the clock a fresh start begins on.
+    struct ClockStart
+    {
+        /// Seconds into the simulated day. A double, not a float: at 60x a float loses the second
+        /// hand before the first in-game week is out.
+        double epochSeconds = 0.0;
+        float timeScale = 1.0F;
+        float latitudeDeg = 0.0F;
+        float longitudeDeg = 0.0F;
+        std::int32_t utcOffsetMinutes = 0;
+    };
+
+    /// @brief `initialstate.json`: the weather a fresh start begins in.
+    struct WeatherStart
+    {
+        util::Id target;
+        float cloudCover = 0.0F;
+        float windSpeed = 0.0F;
+    };
+
+    /// @brief One interactable's opening state: only the fields the file names.
+    ///
+    /// A partial table on purpose. `interactables.json` already declares every field and its
+    /// default; this says which of them start somewhere else, and a row that repeated all of them
+    /// would be a second place to change a default.
+    struct InteractableStart
+    {
+        util::Id id;
+        StateTable overrides;
+    };
+
+    struct PetStart
+    {
+        util::Id id;
+        util::Id cell;
+        std::string state;
+    };
+
+    /// @brief `initialstate.json`, whole (`cna-house.md` §65.6).
+    ///
+    /// The reference every delta save is taken against and every *Reset House* returns to, which
+    /// is why it is validated as strictly as the layout.
+    struct InitialState
+    {
+        PlayerStart player;
+        ClockStart clock;
+        WeatherStart weather;
+        std::vector<InteractableStart> interactables;
+        std::vector<PetStart> pets;
+    };
+
     /// @brief `layout.exterior.json`, whole.
     struct Exterior
     {

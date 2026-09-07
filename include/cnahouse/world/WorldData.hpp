@@ -80,6 +80,7 @@ namespace cnahouse::world
             std::vector<AudioEmitter> audioEmitters;
             std::vector<AudioTransmission> audioTransmission;
             std::vector<Interactable> interactables;
+            InitialState initialState;
             Exterior exterior;
         };
 
@@ -195,6 +196,11 @@ namespace cnahouse::world
         }
 
         [[nodiscard]] const Interactable* FindInteractable(util::Id id) const noexcept;
+
+        [[nodiscard]] const InitialState& GetInitialState() const noexcept
+        {
+            return m_contents.initialState;
+        }
 
         [[nodiscard]] const Exterior& GetExterior() const noexcept
         {

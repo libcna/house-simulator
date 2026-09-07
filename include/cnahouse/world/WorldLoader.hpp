@@ -156,6 +156,15 @@ namespace cnahouse::world
         [[nodiscard]] static util::Result<void> LoadInteractables(std::string_view directory,
                                                                   WorldData::Contents& contents);
 
+        /// @brief Reads `initialstate.json` into @p contents.
+        ///
+        /// Read **last**, because its `interactables` block is checked against the state each
+        /// interactable declares -- name and type. This file is what every delta save is taken
+        /// against (`cna-house.md` §65.6), so a field here that the interactable does not have is
+        /// a value the save would carry for ever and nothing would ever read.
+        [[nodiscard]] static util::Result<void> LoadInitialState(std::string_view directory,
+                                                                 WorldData::Contents& contents);
+
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
         /// As each `HOUSE-00344`…`HOUSE-00355` lands, its file joins this sequence. Until then the

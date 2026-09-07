@@ -595,6 +595,21 @@ namespace
                    body + "}]}]}";
         }
 
+        /// `world-format.md`'s example, with the fridge starting colder than it declares.
+        static std::string InitialState()
+        {
+            return R"({
+              "schema": "cna-house/initialstate/1",
+              "player":  { "cell": "L0_FOYER", "position": [0.0, 0.60, -18.4], "yawDeg": 90.0 },
+              "clock":   { "epochSeconds": 21600.0, "timeScale": 60.0,
+                           "latitudeDeg": 40.05, "longitudeDeg": -75.30,
+                           "utcOffsetMinutes": -300 },
+              "weather": { "target": "W_PARTLY", "cloudCover": 0.35, "windSpeed": 2.4 },
+              "interactables": { "FRIDGE_L0_KITCHEN": { "temperatureC": 2.5 } },
+              "pets":    { "PET_DOG": { "cell": "L0_FAMILY", "state": "Lie" } }
+            })";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -618,6 +633,7 @@ namespace
             Write("layout.audio.json", Audio());
             Write("layout.exterior.json", Exterior());
             Write("interactables.json", Interactables());
+            Write("initialstate.json", InitialState());
             WriteManifest({"layout.levels.json",
                            "layout.materials.json",
                            "layout.cells.json",
@@ -629,7 +645,8 @@ namespace
                            "layout.nav.json",
                            "layout.audio.json",
                            "layout.exterior.json",
-                           "interactables.json"});
+                           "interactables.json",
+                           "initialstate.json"});
         }
 
         std::string directory_;
@@ -2284,6 +2301,9 @@ namespace
 
         ASSERT_EQ(fridge.state.Fields().size(), 3U);
         EXPECT_EQ(fridge.state.Fields()[0].name, "doorOpen");
+        ASSERT_NE(fridge.state.Find("doorOpen"), nullptr);
+        ASSERT_NE(fridge.state.Find("temperatureC"), nullptr);
+        ASSERT_NE(fridge.state.Find("programme"), nullptr);
         EXPECT_FALSE(std::get<bool>(fridge.state.Find("doorOpen")->value));
         EXPECT_DOUBLE_EQ(std::get<double>(fridge.state.Find("temperatureC")->value), 4.0);
         EXPECT_EQ(std::get<std::string>(fridge.state.Find("programme")->value), "eco");
@@ -2442,6 +2462,165 @@ namespace
         EXPECT_EQ(fields[2].name, "programme");
     }
 
+    // --- the initial state ------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, TheInitialStateIsRead)
+    {
+        Write("interactables.json", Interactables());
+        Write("initialstate.json", InitialState());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadInteractables(directory_, contents));
+        const auto initial = world::WorldLoader::LoadInitialState(directory_, contents);
+        ASSERT_TRUE(initial) << initial.Error().ToString();
+
+        EXPECT_EQ(contents.initialState.player.cell, Intern("L0_FOYER"));
+        EXPECT_FLOAT_EQ(contents.initialState.player.position.Z, -18.4F);
+        EXPECT_FLOAT_EQ(contents.initialState.player.yawDeg, 90.0F);
+
+        EXPECT_DOUBLE_EQ(contents.initialState.clock.epochSeconds, 21600.0);
+        EXPECT_FLOAT_EQ(contents.initialState.clock.timeScale, 60.0F);
+        EXPECT_FLOAT_EQ(contents.initialState.clock.latitudeDeg, 40.05F);
+        EXPECT_EQ(contents.initialState.clock.utcOffsetMinutes, -300);
+
+        EXPECT_EQ(contents.initialState.weather.target, Intern("W_PARTLY"));
+        EXPECT_FLOAT_EQ(contents.initialState.weather.cloudCover, 0.35F);
+
+        ASSERT_EQ(contents.initialState.pets.size(), 1U);
+        EXPECT_EQ(contents.initialState.pets[0].id, Intern("PET_DOG"));
+        EXPECT_EQ(contents.initialState.pets[0].cell, Intern("L0_FAMILY"));
+        EXPECT_EQ(contents.initialState.pets[0].state, "Lie");
+    }
+
+    TEST_F(WorldLoaderTest, AnOpeningStateIsOnlyTheFieldsItNames)
+    {
+        // A partial table on purpose: `interactables.json` already declares every field and its
+        // default, so a row that repeated all of them would be a second place to change one.
+        Write("interactables.json", Interactables());
+        Write("initialstate.json", InitialState());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadInteractables(directory_, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadInitialState(directory_, contents));
+
+        ASSERT_EQ(contents.initialState.interactables.size(), 1U);
+        const world::InteractableStart& fridge = contents.initialState.interactables[0];
+        EXPECT_EQ(fridge.id, Intern("FRIDGE_L0_KITCHEN"));
+        ASSERT_EQ(fridge.overrides.Fields().size(), 1U)
+            << "it names one field of three, and the other two keep their declared defaults";
+        ASSERT_NE(fridge.overrides.Find("temperatureC"), nullptr);
+        EXPECT_DOUBLE_EQ(std::get<double>(fridge.overrides.Find("temperatureC")->value), 2.5);
+    }
+
+    TEST_F(WorldLoaderTest, AnOpeningValueForAFieldTheInteractableDoesNotHaveIsRefused)
+    {
+        // This file is what every delta save is taken against (§65.6), so a field here that the
+        // interactable does not declare is a value the save carries for ever and nothing reads.
+        Write("interactables.json", Interactables());
+        Write("initialstate.json",
+              R"({"schema": "cna-house/initialstate/1",
+                  "player": {"cell": "C", "position": [0, 0, 0]},
+                  "clock": {"epochSeconds": 0, "timeScale": 1},
+                  "interactables": {"FRIDGE_L0_KITCHEN": {"doorAjar": true}}})");
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadInteractables(directory_, contents));
+        const auto initial = world::WorldLoader::LoadInitialState(directory_, contents);
+        ASSERT_FALSE(initial);
+        EXPECT_NE(initial.Error().Message().find("doorAjar"), std::string::npos)
+            << initial.Error().ToString();
+        EXPECT_NE(initial.Error().Message().find("temperatureC"), std::string::npos)
+            << "and list what it does declare: " << initial.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AnOpeningValueOfTheWrongTypeIsRefused)
+    {
+        Write("interactables.json", Interactables());
+        Write("initialstate.json",
+              R"({"schema": "cna-house/initialstate/1",
+                  "player": {"cell": "C", "position": [0, 0, 0]},
+                  "clock": {"epochSeconds": 0, "timeScale": 1},
+                  "interactables": {"FRIDGE_L0_KITCHEN": {"doorOpen": 0.5}}})");
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadInteractables(directory_, contents));
+        const auto initial = world::WorldLoader::LoadInitialState(directory_, contents);
+        ASSERT_FALSE(initial);
+        EXPECT_NE(initial.Error().Message().find("different type"), std::string::npos)
+            << initial.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AnOpeningStateForAnInteractableThatDoesNotExistIsRuleSix)
+    {
+        // The field check needs the interactable, and a dangling id already has one owner in
+        // §15.7 rule 6. A second message for it here would be a worse one.
+        Write("interactables.json", Interactables());
+        Write("initialstate.json",
+              R"({"schema": "cna-house/initialstate/1",
+                  "player": {"cell": "C", "position": [0, 0, 0]},
+                  "clock": {"epochSeconds": 0, "timeScale": 1},
+                  "interactables": {"NO_SUCH_THING": {"anything": true}}})");
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadInteractables(directory_, contents));
+        const auto initial = world::WorldLoader::LoadInitialState(directory_, contents);
+        ASSERT_TRUE(initial) << initial.Error().ToString();
+        ASSERT_EQ(contents.initialState.interactables.size(), 1U);
+        EXPECT_EQ(contents.initialState.interactables[0].id, Intern("NO_SUCH_THING"));
+    }
+
+    TEST_F(WorldLoaderTest, AClockOrWeatherOutsideItsRangeIsRefused)
+    {
+        const std::vector<std::pair<std::string, std::string>> broken{
+            {R"("clock": {"epochSeconds": 0, "timeScale": -1})", "runs backwards"},
+            {R"("clock": {"epochSeconds": 0, "timeScale": 1, "latitudeDeg": 120})", "latitude"},
+            {R"("clock": {"epochSeconds": 0, "timeScale": 1, "longitudeDeg": 400})", "longitude"},
+        };
+        for (const auto& [clock, fragment] : broken)
+        {
+            Write("initialstate.json",
+                  R"({"schema": "cna-house/initialstate/1",
+                      "player": {"cell": "C", "position": [0, 0, 0]}, )" +
+                      clock + "}");
+            world::WorldData::Contents contents;
+            const auto initial = world::WorldLoader::LoadInitialState(directory_, contents);
+            ASSERT_FALSE(initial) << "accepted " << clock;
+            EXPECT_NE(initial.Error().Message().find(fragment), std::string::npos)
+                << initial.Error().ToString();
+        }
+
+        Write("initialstate.json",
+              R"({"schema": "cna-house/initialstate/1",
+                  "player": {"cell": "C", "position": [0, 0, 0]},
+                  "clock": {"epochSeconds": 0, "timeScale": 1},
+                  "weather": {"cloudCover": 1.4}})");
+        world::WorldData::Contents contents;
+        const auto initial = world::WorldLoader::LoadInitialState(directory_, contents);
+        ASSERT_FALSE(initial);
+        EXPECT_EQ(initial.Error().Code(), ErrorCode::OutOfRange);
+    }
+
+    TEST_F(WorldLoaderTest, ThePlayerMustNameTheCellItStartsIn)
+    {
+        // Without it §16.4 step 4 assigns `EXT_WORLD`: the game starts the player outside the
+        // house it just loaded, and nothing in the frame says the spawn row was incomplete.
+        Write("initialstate.json",
+              R"({"schema": "cna-house/initialstate/1",
+                  "player": {"position": [0, 0.6, 0]},
+                  "clock": {"epochSeconds": 0, "timeScale": 1}})");
+        world::WorldData::Contents contents;
+        const auto initial = world::WorldLoader::LoadInitialState(directory_, contents);
+        ASSERT_FALSE(initial);
+        EXPECT_NE(initial.Error().Context().find("cell"), std::string::npos) << initial.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, ThePlayerAndTheClockAreRequired)
+    {
+        for (const std::string body : {R"("clock": {"epochSeconds": 0, "timeScale": 1})",
+                                       R"("player": {"cell": "C", "position": [0, 0, 0]})"})
+        {
+            Write("initialstate.json", R"({"schema": "cna-house/initialstate/1", )" + body + "}");
+            world::WorldData::Contents contents;
+            EXPECT_FALSE(world::WorldLoader::LoadInitialState(directory_, contents))
+                << "accepted a file with only " << body;
+        }
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -2472,6 +2651,7 @@ namespace
         EXPECT_EQ(world.Value().GetExterior().vegetation.size(), 2U);
         EXPECT_EQ(world.Value().Interactables().size(), 2U);
         EXPECT_NE(world.Value().FindInteractable(Intern("SWITCH_L0_HALL")), nullptr);
+        EXPECT_EQ(world.Value().GetInitialState().player.cell, Intern("L0_FOYER"));
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -2506,6 +2686,7 @@ namespace
         Write("layout.audio.json", Audio());
         Write("layout.exterior.json", Exterior());
         Write("interactables.json", Interactables());
+        Write("initialstate.json", InitialState());
         WriteManifest({"layout.levels.json",
                        "layout.materials.json",
                        "layout.cells.json",
@@ -2517,7 +2698,8 @@ namespace
                        "layout.nav.json",
                        "layout.audio.json",
                        "layout.exterior.json",
-                       "interactables.json"});
+                       "interactables.json",
+                       "initialstate.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);
