@@ -224,6 +224,12 @@ def build() -> dict[str, dict]:
     schemas["openings"] = envelope("openings", "layout.openings.json", rows("openings", obj(
         ["id", "kind", "portal", "leaf"],
         {"id": ID, "kind": {"enum": ["door", "window"]}, "portal": ID,
+         # The opening's TYPE, §12.3's and §12.6's schedules: `D_INT_PASSAGE`, `W_DH_STD`. Added
+         # by `HOUSE-00378`, because both documents describe openings by type and 133 rows that
+         # carried only their measurements could not be asked "which of these are bathroom
+         # windows". Id-shaped but not an id: it names a kind, so many rows share one and rule 1
+         # never sees it.
+         "type": {"$ref": "#/$defs/id"},
          "leaf": obj(["width", "height"], {"width": NUM, "height": NUM, "thickness": NUM}),
          "hinge": {"enum": ["left", "right", None]},
          "swing": {"anyOf": [STR, {"type": "null"}]},

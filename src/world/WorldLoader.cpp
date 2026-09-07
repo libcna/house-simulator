@@ -1230,23 +1230,21 @@ namespace cnahouse::world
         /// Returning them all is what accepts a portal that lies in one run of an L-shaped room and
         /// rejects one that lies in the gap between two runs.
         [[nodiscard]] std::vector<std::pair<float, float>>
-        BoundaryRuns(const Cell& cell, PlaneAxis axis, float value)
+        BoundaryRuns(const Cell& cell, PlaneAxis axis, float value, float tolerance = kPlaneTolerance)
         {
             std::vector<std::pair<float, float>> runs;
             for (const Footprint& box : cell.boxes)
             {
                 if (axis == PlaneAxis::X)
                 {
-                    if (std::abs(box.minX - value) <= kPlaneTolerance ||
-                        std::abs(box.maxX - value) <= kPlaneTolerance)
+                    if (std::abs(box.minX - value) <= tolerance || std::abs(box.maxX - value) <= tolerance)
                     {
                         runs.emplace_back(box.minZ, box.maxZ);
                     }
                 }
                 else
                 {
-                    if (std::abs(box.minZ - value) <= kPlaneTolerance ||
-                        std::abs(box.maxZ - value) <= kPlaneTolerance)
+                    if (std::abs(box.minZ - value) <= tolerance || std::abs(box.maxZ - value) <= tolerance)
                     {
                         runs.emplace_back(box.minX, box.maxX);
                     }
@@ -1255,12 +1253,154 @@ namespace cnahouse::world
             return runs;
         }
 
+        /// @brief The thickest wall `layout.levels.json` declares, or 0 when it declares none.
+        ///
+        /// §15.7 rule 4 needs it because a window is **in** a wall and not on either face of it: a
+        /// room stops at the interior face and the yard outside at the exterior one, so the two
+        /// cells are `wallExterior` apart with the opening between them.
+        [[nodiscard]] float ThickestWall(const Construction& construction) noexcept
+        {
+            return std::max({construction.wallExterior,
+                             construction.wallPartition,
+                             construction.wallPlumbing,
+                             construction.wallGarage,
+                             construction.foundationWall});
+        }
+
+        /// @brief The faces of @p cell on @p axis within @p reach of @p value that span `u`.
+        [[nodiscard]] std::vector<float>
+        FacesNear(const Cell& cell, PlaneAxis axis, float value, float reach, float minU, float maxU)
+        {
+            std::vector<float> found;
+            for (const Footprint& box : cell.boxes)
+            {
+                const std::array<float, 2> faces = axis == PlaneAxis::X
+                                                       ? std::array<float, 2>{box.minX, box.maxX}
+                                                       : std::array<float, 2>{box.minZ, box.maxZ};
+                const float spanLow = axis == PlaneAxis::X ? box.minZ : box.minX;
+                const float spanHigh = axis == PlaneAxis::X ? box.maxZ : box.maxX;
+                for (const float face : faces)
+                {
+                    if (std::abs(face - value) > reach + kPlaneTolerance)
+                    {
+                        continue;
+                    }
+                    if (spanLow - kPlaneTolerance <= minU && maxU <= spanHigh + kPlaneTolerance)
+                    {
+                        found.push_back(face);
+                    }
+                }
+            }
+            return found;
+        }
+
+        /// @brief True when the portal plane lies in the **wall** between two cells that do not abut.
+        ///
+        /// Two rooms either side of a partition share a coordinate (§13.1), so "in both cells'
+        /// planes within 1 cm" holds for them. A room and the yard outside it do not. The check
+        /// stays as strong as it was otherwise: the faces must straddle the portal, each must span
+        /// the opening, and they must be no further apart than the thickest declared wall.
+        [[nodiscard]] bool
+        InTheWall(const WorldData::Contents& contents, const Cell& a, const Cell& b, const Portal& portal)
+        {
+            const float wall = ThickestWall(contents.construction);
+            if (wall <= 0.0F)
+            {
+                return false;
+            }
+            const std::vector<float> facesA =
+                FacesNear(a, portal.axis, portal.planeValue, wall, portal.minU, portal.maxU);
+            const std::vector<float> facesB =
+                FacesNear(b, portal.axis, portal.planeValue, wall, portal.minU, portal.maxU);
+            for (const float faceA : facesA)
+            {
+                for (const float faceB : facesB)
+                {
+                    if (std::abs(faceA - faceB) > wall + kPlaneTolerance)
+                    {
+                        continue;
+                    }
+                    const float low = std::min(faceA, faceB);
+                    const float high = std::max(faceA, faceB);
+                    if (low - kPlaneTolerance <= portal.planeValue &&
+                        portal.planeValue <= high + kPlaneTolerance)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// @brief §15.7 rule 4 for a portal between a sub-cell and the cell it nests in.
+        ///
+        /// A portal into a container or a mezzanine is not in a shared wall: the sub-cell is inside
+        /// its parent, so the opening is in the sub-cell's OWN face -- the fridge door, the chest
+        /// lid, the loft hatch -- and the parent has no face there at all.
+        [[nodiscard]] Result<void> CheckNestedPortal(const WorldData::Contents& contents,
+                                                     const Portal& portal,
+                                                     const Cell& child,
+                                                     const Cell& parent,
+                                                     const std::string& where)
+        {
+            if (portal.axis == PlaneAxis::Y)
+            {
+                const std::optional<Extent> extent = ExtentDuringLoad(contents, child);
+                if (extent.has_value() &&
+                    std::min(std::abs(extent->floorY - portal.planeValue),
+                             std::abs(extent->ceilingY - portal.planeValue)) > kPlaneTolerance)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "y = " + std::to_string(portal.planeValue) +
+                                   " is neither the floor nor the lid of cell " + Name(child.id),
+                               where + "/plane");
+                }
+                return util::Ok();
+            }
+
+            const std::vector<std::pair<float, float>> runs =
+                BoundaryRuns(child, portal.axis, portal.planeValue);
+            if (runs.empty())
+            {
+                return Err(ErrorCode::InvalidData,
+                           "cell " + Name(child.id) + " nests in " + Name(parent.id) +
+                               ", so the opening is in ITS face -- and it has none on " +
+                               std::string(ToStringView(portal.axis)) + " = " +
+                               std::to_string(portal.planeValue) + " within 1 cm",
+                           where + "/plane");
+            }
+            const bool spans = std::any_of(runs.begin(),
+                                           runs.end(),
+                                           [&portal](const std::pair<float, float>& run)
+                                           {
+                                               return run.first - kPlaneTolerance <= portal.minU &&
+                                                      portal.maxU <= run.second + kPlaneTolerance;
+                                           });
+            if (!spans)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "the rectangle is not inside any run of cell " + Name(child.id) +
+                               "'s face on that plane",
+                           where + "/rect/u");
+            }
+            const std::optional<Extent> extent = ExtentDuringLoad(contents, child);
+            if (extent.has_value() && (portal.minV < extent->floorY - kPlaneTolerance ||
+                                       portal.maxV > extent->ceilingY + kPlaneTolerance))
+            {
+                return Err(ErrorCode::InvalidData,
+                           "the opening is taller than " + Name(child.id),
+                           where + "/rect/v");
+            }
+            return util::Ok();
+        }
+
         /// @brief §15.7 rule 4 for one side of one portal.
         [[nodiscard]] Result<void> CheckPortalSide(const WorldData::Contents& contents,
                                                    const Portal& portal,
                                                    util::Id cellId,
                                                    std::string_view side,
-                                                   const std::string& where)
+                                                   const std::string& where,
+                                                   float reach)
         {
             const Cell* cell = FindCellDuringLoad(contents, cellId);
             if (cell == nullptr)
@@ -1303,13 +1443,14 @@ namespace cnahouse::world
             }
 
             const std::vector<std::pair<float, float>> runs =
-                BoundaryRuns(*cell, portal.axis, portal.planeValue);
+                BoundaryRuns(*cell, portal.axis, portal.planeValue, reach);
             if (runs.empty())
             {
                 return Err(ErrorCode::InvalidData,
                            "cell " + Name(cellId) + " (" + std::string(side) + ") has no face on " +
                                std::string(ToStringView(portal.axis)) + " = " +
-                               std::to_string(portal.planeValue) + " within 1 cm",
+                               std::to_string(portal.planeValue) +
+                               " within 1 cm, and no face within a wall of it on the far side either",
                            where + "/plane");
             }
             const bool spans = std::any_of(runs.begin(),
@@ -1550,10 +1691,52 @@ namespace cnahouse::world
             portal.crouch = crouch.Value();
 
             const std::string where = row.Path();
+            const Cell* sideA = FindCellDuringLoad(contents, portal.cellA);
+            const Cell* sideB = FindCellDuringLoad(contents, portal.cellB);
+
+            // A portal into a sub-cell is checked against the CHILD, because the parent has no
+            // face where the opening is; and a portal in a wall is checked with the wall's own
+            // tolerance, because the two cells there are a wall apart on purpose. Both are decided
+            // for the pair: they are statements about the two cells together.
+            const Cell* child = nullptr;
+            const Cell* parent = nullptr;
+            if (sideA != nullptr && sideB != nullptr)
+            {
+                if (sideA->parent == sideB->id)
+                {
+                    child = sideA;
+                    parent = sideB;
+                }
+                else if (sideB->parent == sideA->id)
+                {
+                    child = sideB;
+                    parent = sideA;
+                }
+            }
+            if (child != nullptr)
+            {
+                if (const Result<void> checked = CheckNestedPortal(contents, portal, *child, *parent, where);
+                    !checked)
+                {
+                    return checked.Error().WithContext("layout.portals.json");
+                }
+                contents.portals.push_back(std::move(portal));
+                continue;
+            }
+
+            // A wall PLUS the same 1 cm of slack. The slack is not cosmetic: `-14.0 - -14.3` is
+            // 0.30000001 in floating point, so a bare `<= 0.30` rejects every window in a 0.30 m
+            // wall.
+            const bool walled =
+                sideA != nullptr && sideB != nullptr && InTheWall(contents, *sideA, *sideB, portal);
+            const float reach =
+                walled ? ThickestWall(contents.construction) + kPlaneTolerance : kPlaneTolerance;
+
             for (const auto& [cellId, side] : std::initializer_list<std::pair<util::Id, std::string_view>>{
                      {portal.cellA, "cellA"}, {portal.cellB, "cellB"}})
             {
-                if (const Result<void> checked = CheckPortalSide(contents, portal, cellId, side, where);
+                if (const Result<void> checked =
+                        CheckPortalSide(contents, portal, cellId, side, where, reach);
                     !checked)
                 {
                     return checked.Error().WithContext("layout.portals.json");
@@ -1617,6 +1800,13 @@ namespace cnahouse::world
             }
             opening.portal = portal.Value();
 
+            const Result<util::Id> type = OptionalId(row, "type");
+            if (!type)
+            {
+                return type.Error().WithContext("layout.openings.json");
+            }
+            opening.type = type.Value();
+
             // The leaf is what swings, and all three of its numbers are load-bearing: `width` and
             // `height` are §70.5's realism check, and `thickness` is what tells a closed door from
             // a hole with a picture of a door in it.
@@ -1666,15 +1856,10 @@ namespace cnahouse::world
                 opening.hinge = parsedHinge.Value();
             }
 
-            const auto text = [&row](std::string_view field) -> Result<std::string>
-            {
-                if (!row.Has(field) || row.IsNull(field))
-                {
-                    return std::string{};
-                }
-                return row.RequireString(field);
-            };
-            const Result<std::string> swing = text("swing");
+            // `swing` names a cell, so it is read as one. Null is a leaf that does not swing at
+            // all -- a slider, a sectional door, a fixed light -- and is not the same as a leaf
+            // that swings somewhere unstated.
+            const Result<util::Id> swing = OptionalId(row, "swing");
             if (!swing)
             {
                 return swing.Error().WithContext("layout.openings.json");

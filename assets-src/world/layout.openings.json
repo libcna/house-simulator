@@ -1,0 +1,1278 @@
+{
+  // Every leaf in the house: what actually swings, slides, tilts or lifts in each portal.
+  // `HOUSE-00378`. `layout.portals.json` says where the hole is; this says what fills it, and
+  // §15.7 rule 7 is the bijection between the two -- every door and window has exactly one
+  // portal, every leaf-bearing portal names its opening in `aperture`, and no portal carries two.
+  //
+  // Sizes are §12.3's and §12.6's schedules and are DERIVED from the portal rather than repeated
+  // beside it: a leaf is the rough opening less its reveal, 0.04 m across and 0.05 m up for a
+  // door, 0.02 m all round for a window sash. Nothing here can disagree with the hole it hangs
+  // in, and moving a portal's rect without touching this file is caught by arithmetic and not by
+  // eye. The two rows that are stated rather than derived say so in their type comment.
+  //
+  // `swing` names the cell the leaf opens INTO: the smaller of the two, because a door swings
+  // into the room it serves and not into the corridor; never the outdoors, whatever the areas
+  // say, because a leaf opening over a porch step would foul it; and never down a stair, because
+  // a door at the head of a flight must not swing over the top step. `hinge` is the side with
+  // more wall beside it, so the leaf folds flat against something instead of standing in the
+  // middle of the room. Both are derived and both are stated: they are design decisions, and a
+  // hundred and thirty chosen by hand would be a hundred and thirty chances to be arbitrary in a
+  // different way.
+  //
+  // `asset` and `frame.asset` are null throughout. They are model references and the models are
+  // phase 6 work; a made-up id here would point at nothing and rule 6 could not tell. `material`
+  // is NOT null: those ten ids are an obligation on `HOUSE-00381`, which authors
+  // `layout.materials.json`, and rule 6 holds it to them the moment that file exists.
+  "schema": "cna-house/openings/1",
+  "openings": [
+    // ---- D_INT_PASSAGE x28 -- §12.3's 0.86 x 2.05 interior leaf, latch only.
+    {
+      "id": "DOOR_B1_STAIR__B1_MECHANICAL", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_STAIR__B1_MECHANICAL",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_MECHANICAL", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_STAIR__B1_ELECTRICAL", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_STAIR__B1_ELECTRICAL",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_ELECTRICAL", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_CINEMA__B1_UTILITY", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_CINEMA__B1_UTILITY",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_UTILITY", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_HALL__B1_CINEMA", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_HALL__B1_CINEMA",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_CINEMA", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_HALL__B1_GYM", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_HALL__B1_GYM",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_GYM", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_HALL__B1_HOBBY", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_HALL__B1_HOBBY",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_HOBBY", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_HALL__B1_LAUNDRY2", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_HALL__B1_LAUNDRY2",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_LAUNDRY2", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_GYM__B1_WORKSHOP", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_GYM__B1_WORKSHOP",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_WORKSHOP", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_HOBBY__B1_STOR1", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_HOBBY__B1_STOR1",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_STOR1", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_HOBBY__B1_STOR2", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_HOBBY__B1_STOR2",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_STOR2", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_B1_HOBBY__B1_CELLAR", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_B1_HOBBY__B1_CELLAR",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "right", "swing": "B1_CELLAR", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_HALL__L0_FAMILY", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L0_HALL__L0_FAMILY",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "right", "swing": "L0_HALL", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_MUDROOM__L0_LAUNDRY", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L0_MUDROOM__L0_LAUNDRY",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_LAUNDRY", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_FAMILY__L0_LAUNDRY", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L0_FAMILY__L0_LAUNDRY",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_LAUNDRY", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_DINING__L0_STOR", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L0_DINING__L0_STOR",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_STOR", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_KITCHEN__L0_PANTRY", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L0_KITCHEN__L0_PANTRY",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_PANTRY", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_BUTLERS__L0_PANTRY", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L0_BUTLERS__L0_PANTRY",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "right", "swing": "L0_PANTRY", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_STOR__L0_BUTLERS", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L0_STOR__L0_BUTLERS",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "right", "swing": "L0_BUTLERS", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L1_HALL_W__L1_CLOSET_2", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L1_HALL_W__L1_CLOSET_2",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "right", "swing": "L1_CLOSET_2", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L1_HALL_W__L1_CLOSET_3", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L1_HALL_W__L1_CLOSET_3",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_CLOSET_3", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L2_STAIR__L2_STAIR_ATTIC", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L2_STAIR__L2_STAIR_ATTIC",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_STAIR_ATTIC", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L2_LANDING__L2_LIBRARY", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L2_LANDING__L2_LIBRARY",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_LANDING", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L2_HALL_W__L2_CLOSET_4", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L2_HALL_W__L2_CLOSET_4",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "right", "swing": "L2_CLOSET_4", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L2_HALL_W__L2_LINEN2", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L2_HALL_W__L2_LINEN2",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_LINEN2", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L2_HALL__L2_GAMES", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L2_HALL__L2_GAMES",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_HALL", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L2_GAMES__L2_STOR2", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L2_GAMES__L2_STOR2",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_STOR2", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L2_STOR2__L2_SITTING", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L2_STOR2__L2_SITTING",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_STOR2", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_MUDROOM__L0_GARAGE", "kind": "door", "type": "D_INT_PASSAGE",
+      "portal": "P_L0_MUDROOM__L0_GARAGE",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_MUDROOM", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+
+    // ---- D_INT_PRIVACY x23 -- the same leaf with a thumb-turn: bathrooms, WCs, bedrooms, the
+    // office.
+    {
+      "id": "DOOR_B1_HALL__B1_WC7", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_B1_HALL__B1_WC7",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "B1_WC7", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L0_HALL__L0_WC1", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L0_HALL__L0_WC1",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_WC1", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L0_LIVING__L0_WC2", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L0_LIVING__L0_WC2",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_WC2", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L0_OFFICE__L0_CLOSET_W", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L0_OFFICE__L0_CLOSET_W",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_CLOSET_W", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_HALL__L1_MASTER_BED", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_HALL__L1_MASTER_BED",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_HALL", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_MASTER_BED__L1_MASTER_CLOSET", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_MASTER_BED__L1_MASTER_CLOSET",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_MASTER_CLOSET", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_MASTER_CLOSET__L1_MASTER_BATH", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_MASTER_CLOSET__L1_MASTER_BATH",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_MASTER_CLOSET", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_HALL__L1_WC4", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_HALL__L1_WC4",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_WC4", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_LINEN__L1_BED2", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_LINEN__L1_BED2",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "right", "swing": "L1_LINEN", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_STOR__L1_BED2", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_STOR__L1_BED2",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_STOR", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_BATH3__L1_STOR", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_BATH3__L1_STOR",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_STOR", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_HALL_W__L1_BED3", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_HALL_W__L1_BED3",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "right", "swing": "L1_HALL_W", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_HALL_W__L1_BED4", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_HALL_W__L1_BED4",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_HALL_W", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_HALL_W__L1_BATH2", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_HALL_W__L1_BATH2",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_BATH2", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_HALL_W__L1_WC3", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_HALL_W__L1_WC3",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_WC3", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_STAIR__L1_BED5", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_STAIR__L1_BED5",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_BED5", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_BED5__L1_BATH3", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L1_BED5__L1_BATH3",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L1_BATH3", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L2_LIBRARY__L2_BED6", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L2_LIBRARY__L2_BED6",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_BED6", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L2_HALL_W__L2_BATH4", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L2_HALL_W__L2_BATH4",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_BATH4", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L2_HALL_W__L2_WC5", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L2_HALL_W__L2_WC5",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_WC5", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L2_BATH4__L2_BED7", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L2_BATH4__L2_BED7",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "right", "swing": "L2_BATH4", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L2_HALL__L2_WC6", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L2_HALL__L2_WC6",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_WC6", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L2_STOR2__L2_BATH5", "kind": "door", "type": "D_INT_PRIVACY",
+      "portal": "P_L2_STOR2__L2_BATH5",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_STOR2", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": true
+    },
+
+    // ---- D_INT_LOW x1 -- the under-stair store: a 1.55 m leaf you duck through, and the portal
+    // says `crouch`. Exempt from §70.5's leaf band by its declared type, not by being short.
+    {
+      "id": "DOOR_B1_HALL__B1_UNDERSTAIR", "kind": "door", "type": "D_INT_LOW",
+      "portal": "P_B1_HALL__B1_UNDERSTAIR",
+      "leaf": { "width": 0.860, "height": 1.550, "thickness": 0.035 },
+      "hinge": "left", "swing": "B1_UNDERSTAIR", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+
+    // ---- D_STAIRHEAD x1 -- the basement stair. Its PORTAL is the 2.30 x 3.30 hole in the L0 floor,
+    // so the leaf is stated: the door stands at the head of the flight and is a normal 0.86 x 2.05,
+    // not the size of the opening it closes. `hinge` is null for the same reason -- a horizontal
+    // portal has no side to hang it on. `HOUSE-00379` places the flight and can then say which.
+    {
+      "id": "DOOR_L0_STAIR__B1_STAIR", "kind": "door", "type": "D_STAIRHEAD",
+      "portal": "P_L0_STAIR__B1_STAIR",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
+      "hinge": null, "swing": "L0_STAIR_MAIN", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_DOOR_PAINTED",
+      "solid": false, "lockable": false
+    },
+
+    // ---- D_DOUBLE x4 -- one leaf of a pair; the portal carries both.
+    {
+      "id": "DOOR_L0_FOYER__L0_LIVING", "kind": "door", "type": "D_DOUBLE",
+      "portal": "P_L0_FOYER__L0_LIVING",
+      "leaf": { "width": 0.860, "height": 2.100, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_FOYER", "maxAngleDeg": 100.0,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "solid": true, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_HALL__L0_DINING", "kind": "door", "type": "D_DOUBLE",
+      "portal": "P_L0_HALL__L0_DINING",
+      "leaf": { "width": 0.860, "height": 2.100, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_DINING", "maxAngleDeg": 100.0,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "solid": true, "lockable": false
+    },
+    {
+      "id": "DOOR_L0_LIVING__L0_OFFICE", "kind": "door", "type": "D_DOUBLE",
+      "portal": "P_L0_LIVING__L0_OFFICE",
+      "leaf": { "width": 0.860, "height": 2.100, "thickness": 0.040 },
+      "hinge": "left", "swing": "L0_OFFICE", "maxAngleDeg": 100.0,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "solid": true, "lockable": false
+    },
+    {
+      "id": "DOOR_L2_LANDING__L2_BALCONY_JULIET", "kind": "door", "type": "D_DOUBLE",
+      "portal": "P_L2_LANDING__L2_BALCONY_JULIET",
+      "leaf": { "width": 0.760, "height": 2.100, "thickness": 0.040 },
+      "hinge": "left", "swing": "L2_LANDING", "maxAngleDeg": 100.0,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "solid": true, "lockable": false
+    },
+
+    // ---- D_ENTRY x2 -- §12.3's 1.00 x 2.15 front door, mortice lock and deadbolt.
+    {
+      "id": "DOOR_L0_PORCH__L0_FOYER", "kind": "door", "type": "D_ENTRY",
+      "portal": "P_L0_PORCH__L0_FOYER",
+      "leaf": { "width": 0.960, "height": 2.100, "thickness": 0.055 },
+      "hinge": "left", "swing": "L0_FOYER", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "solid": true, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_LANDING__L1_BALCONY_FRONT", "kind": "door", "type": "D_ENTRY",
+      "portal": "P_L1_LANDING__L1_BALCONY_FRONT",
+      "leaf": { "width": 0.960, "height": 2.100, "thickness": 0.055 },
+      "hinge": "left", "swing": "L1_LANDING", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "solid": true, "lockable": true
+    },
+
+    // ---- D_EXT_SIDE x2 -- weather-sealed steel: the garage side door, the shed, the front balcony.
+    {
+      "id": "DOOR_EXT_GARDEN__EXT_SHED", "kind": "door", "type": "D_EXT_SIDE",
+      "portal": "P_EXT_GARDEN__EXT_SHED",
+      "leaf": { "width": 0.860, "height": 2.000, "thickness": 0.050 },
+      "hinge": "left", "swing": "EXT_SHED", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_DOOR_STEEL",
+      "solid": true, "lockable": true
+    },
+    {
+      "id": "DOOR_L0_GARAGE__EXT_SIDEYARD_E", "kind": "door", "type": "D_EXT_SIDE",
+      "portal": "P_L0_GARAGE__EXT_SIDEYARD_E",
+      "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.050 },
+      "hinge": "left", "swing": "L0_GARAGE", "maxAngleDeg": 95.0,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_DOOR_STEEL",
+      "solid": true, "lockable": true
+    },
+
+    // ---- D_SLIDER x2 -- a two-panel unit, one panel moving; no hinge and no swing.
+    {
+      "id": "DOOR_L0_SUNROOM__EXT_TERRACE", "kind": "door", "type": "D_SLIDER",
+      "portal": "P_L0_SUNROOM__EXT_TERRACE",
+      "leaf": { "width": 2.360, "height": 2.100, "thickness": 0.045 },
+      "hinge": null, "swing": null,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_FRAME_ALUMINIUM",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "DOOR_L1_MASTER_BED__L1_BALCONY_REAR", "kind": "door", "type": "D_SLIDER",
+      "portal": "P_L1_MASTER_BED__L1_BALCONY_REAR",
+      "leaf": { "width": 2.360, "height": 2.100, "thickness": 0.045 },
+      "hinge": null, "swing": null,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_FRAME_ALUMINIUM",
+      "solid": false, "lockable": true
+    },
+
+    // ---- D_GARAGE x1 -- §12.3's 4.90 x 2.40 sectional -- five hinged segments (§54's spline).
+    {
+      "id": "DOOR_GARAGE_SECTIONAL", "kind": "door", "type": "D_GARAGE",
+      "portal": "P_L0_GARAGE__EXT_DRIVEWAY",
+      "leaf": { "width": 4.860, "height": 2.350, "thickness": 0.050 },
+      "hinge": null, "swing": null,
+      "frame": { "asset": null, "casing": 0.090 },
+      "asset": null, "material": "MAT_DOOR_STEEL",
+      "solid": true, "lockable": true
+    },
+
+    // ---- D_APPLIANCE x1 -- the refrigerator door, hung on the appliance and not on a frame.
+    {
+      "id": "FRIDGE_L0_KITCHEN", "kind": "door", "type": "D_APPLIANCE",
+      "portal": "P_FRIDGE_INTERIOR",
+      "leaf": { "width": 1.560, "height": 1.700, "thickness": 0.070 },
+      "hinge": "left", "swing": "CELL_FRIDGE_INTERIOR", "maxAngleDeg": 120.0,
+      "frame": { "asset": null, "casing": 0.020 },
+      "asset": null, "material": "MAT_APPLIANCE_STEEL",
+      "solid": true, "lockable": false
+    },
+
+    // ---- H_LID x1 -- the chest freezer's lid, lifting on a horizontal plane.
+    {
+      "id": "FREEZER_L0_PANTRY", "kind": "door", "type": "H_LID",
+      "portal": "P_FREEZER_INTERIOR",
+      "leaf": { "width": 1.380, "height": 0.680, "thickness": 0.060 },
+      "hinge": null, "swing": "CELL_FREEZER_INTERIOR", "maxAngleDeg": 100.0,
+      "frame": { "asset": null, "casing": 0.020 },
+      "asset": null, "material": "MAT_APPLIANCE_STEEL",
+      "solid": true, "lockable": false
+    },
+
+    // ---- H_LOFT x1 -- the garage loft hatch, lifting on a horizontal plane.
+    {
+      "id": "HATCH_GARAGE_LOFT", "kind": "door", "type": "H_LOFT",
+      "portal": "P_L0_GARAGE__L0_GARAGE_LOFT",
+      "leaf": { "width": 0.880, "height": 0.880, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_GARAGE_LOFT", "maxAngleDeg": 100.0,
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_HATCH_PLY",
+      "solid": false, "lockable": false
+    },
+
+    // ---- W_DH_STD x33 -- §12.6's standard double-hung.
+    {
+      "id": "WIN_L0_STAIR_MAIN_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L0_STAIR_MAIN__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L0_STAIR_MAIN",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L0_MUDROOM_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L0_MUDROOM__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L0_MUDROOM",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L0_BUTLERS_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L0_BUTLERS__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L0_BUTLERS",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L0_PANTRY_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L0_PANTRY__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L0_PANTRY",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L0_KITCHEN_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L0_KITCHEN__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L0_KITCHEN",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L0_GARAGE_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L0_GARAGE__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L0_GARAGE",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_LANDING_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_LANDING__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L1_LANDING",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_LANDING_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_LANDING__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_LANDING",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_STAIR_MAIN_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_STAIR_MAIN__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_STAIR_MAIN",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_MASTER_BED_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_MASTER_BED__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L1_MASTER_BED",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_MASTER_BED_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_MASTER_BED__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L1_MASTER_BED",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_MASTER_BED_3", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_MASTER_BED__W3",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_MASTER_BED",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_BED2_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_BED2__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_BED2",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_BED2_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_BED2__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_BED2",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_BED3_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_BED3__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L1_BED3",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_BED3_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_BED3__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_BED3",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_BED4_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_BED4__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L1_BED4",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_BED4_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_BED4__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_BED4",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_BED5_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L1_BED5__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_BED5",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_LANDING_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_LANDING__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L2_LANDING",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_LANDING_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_LANDING__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_LANDING",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_STAIR_MAIN_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_STAIR_MAIN__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_STAIR_MAIN",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_LIBRARY_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_LIBRARY__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L2_LIBRARY",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_LIBRARY_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_LIBRARY__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_LIBRARY",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_BED6_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_BED6__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L2_BED6",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_BED6_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_BED6__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_BED6",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_BED7_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_BED7__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_BED7",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_BED7_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_BED7__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_BED7",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_GAMES_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_GAMES__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "L2_GAMES",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_GAMES_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_GAMES__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_GAMES",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_SITTING_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_SITTING__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_SITTING",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_SITTING_2", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_L2_SITTING__W2",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_SITTING",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_EXT_SHED_1", "kind": "window", "type": "W_DH_STD",
+      "portal": "P_EXT_SHED__W1",
+      "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
+      "hinge": "right", "swing": "EXT_SHED",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+
+    // ---- W_DH_TALL x3 -- the L0 formal rooms.
+    {
+      "id": "WIN_L0_LIVING_2", "kind": "window", "type": "W_DH_TALL",
+      "portal": "P_L0_LIVING__W2",
+      "leaf": { "width": 1.180, "height": 1.780, "thickness": 0.030 },
+      "hinge": "left", "swing": "L0_LIVING",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L0_OFFICE_1", "kind": "window", "type": "W_DH_TALL",
+      "portal": "P_L0_OFFICE__W1",
+      "leaf": { "width": 1.180, "height": 1.780, "thickness": 0.030 },
+      "hinge": "left", "swing": "L0_OFFICE",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L0_OFFICE_2", "kind": "window", "type": "W_DH_TALL",
+      "portal": "P_L0_OFFICE__W2",
+      "leaf": { "width": 1.180, "height": 1.780, "thickness": 0.030 },
+      "hinge": "left", "swing": "L0_OFFICE",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+
+    // ---- W_BAY x1 -- `L0_LIVING`'s three-facet bay.
+    {
+      "id": "WIN_L0_LIVING_1", "kind": "window", "type": "W_BAY",
+      "portal": "P_L0_LIVING__W1",
+      "leaf": { "width": 2.780, "height": 1.680, "thickness": 0.030 },
+      "hinge": "right", "swing": "L0_LIVING",
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+
+    // ---- W_PICTURE x2 -- fixed: no opening light.
+    {
+      "id": "WIN_L0_FAMILY_1", "kind": "window", "type": "W_PICTURE",
+      "portal": "P_L0_FAMILY__W1",
+      "leaf": { "width": 2.380, "height": 1.580, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_FAMILY",
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "WIN_L0_FAMILY_2", "kind": "window", "type": "W_PICTURE",
+      "portal": "P_L0_FAMILY__W2",
+      "leaf": { "width": 2.380, "height": 1.580, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_FAMILY",
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+
+    // ---- W_BATH x3 -- obscured glass, so the portal is `translucent` and not `glass`.
+    {
+      "id": "WIN_L1_MASTER_BATH_1", "kind": "window", "type": "W_BATH",
+      "portal": "P_L1_MASTER_BATH__W1",
+      "leaf": { "width": 0.580, "height": 0.880, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_MASTER_BATH",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_OBSCURED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L1_BATH2_1", "kind": "window", "type": "W_BATH",
+      "portal": "P_L1_BATH2__W1",
+      "leaf": { "width": 0.580, "height": 0.880, "thickness": 0.030 },
+      "hinge": "left", "swing": "L1_BATH2",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_OBSCURED",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L2_BATH4_1", "kind": "window", "type": "W_BATH",
+      "portal": "P_L2_BATH4__W1",
+      "leaf": { "width": 0.580, "height": 0.880, "thickness": 0.030 },
+      "hinge": "left", "swing": "L2_BATH4",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_OBSCURED",
+      "solid": false, "lockable": true
+    },
+
+    // ---- W_BASEMENT x8 -- hoppers, in the 0.9 m window wells the four yards declare.
+    {
+      "id": "WIN_B1_MECHANICAL_1", "kind": "window", "type": "W_BASEMENT",
+      "portal": "P_B1_MECHANICAL__W1",
+      "leaf": { "width": 0.880, "height": 0.580, "thickness": 0.030 },
+      "hinge": "left", "swing": "B1_MECHANICAL",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_B1_GYM_1", "kind": "window", "type": "W_BASEMENT",
+      "portal": "P_B1_GYM__W1",
+      "leaf": { "width": 0.880, "height": 0.580, "thickness": 0.030 },
+      "hinge": "right", "swing": "B1_GYM",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_B1_GYM_2", "kind": "window", "type": "W_BASEMENT",
+      "portal": "P_B1_GYM__W2",
+      "leaf": { "width": 0.880, "height": 0.580, "thickness": 0.030 },
+      "hinge": "left", "swing": "B1_GYM",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_B1_WORKSHOP_1", "kind": "window", "type": "W_BASEMENT",
+      "portal": "P_B1_WORKSHOP__W1",
+      "leaf": { "width": 0.880, "height": 0.580, "thickness": 0.030 },
+      "hinge": "left", "swing": "B1_WORKSHOP",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_B1_WORKSHOP_2", "kind": "window", "type": "W_BASEMENT",
+      "portal": "P_B1_WORKSHOP__W2",
+      "leaf": { "width": 0.880, "height": 0.580, "thickness": 0.030 },
+      "hinge": "right", "swing": "B1_WORKSHOP",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_B1_STOR1_1", "kind": "window", "type": "W_BASEMENT",
+      "portal": "P_B1_STOR1__W1",
+      "leaf": { "width": 0.880, "height": 0.580, "thickness": 0.030 },
+      "hinge": "left", "swing": "B1_STOR1",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_B1_STOR2_1", "kind": "window", "type": "W_BASEMENT",
+      "portal": "P_B1_STOR2__W1",
+      "leaf": { "width": 0.880, "height": 0.580, "thickness": 0.030 },
+      "hinge": "left", "swing": "B1_STOR2",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_B1_STOR2_2", "kind": "window", "type": "W_BASEMENT",
+      "portal": "P_B1_STOR2__W2",
+      "leaf": { "width": 0.880, "height": 0.580, "thickness": 0.030 },
+      "hinge": "right", "swing": "B1_STOR2",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+
+    // ---- W_DORMER x5 -- the five attic dormers.
+    {
+      "id": "WIN_L3_ROOM_1", "kind": "window", "type": "W_DORMER",
+      "portal": "P_L3_ROOM__W1",
+      "leaf": { "width": 0.980, "height": 1.080, "thickness": 0.030 },
+      "hinge": "right", "swing": "L3_ROOM",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L3_ROOM_2", "kind": "window", "type": "W_DORMER",
+      "portal": "P_L3_ROOM__W2",
+      "leaf": { "width": 0.980, "height": 1.080, "thickness": 0.030 },
+      "hinge": "right", "swing": "L3_ROOM",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L3_ROOM_3", "kind": "window", "type": "W_DORMER",
+      "portal": "P_L3_ROOM__W3",
+      "leaf": { "width": 0.980, "height": 1.080, "thickness": 0.030 },
+      "hinge": "left", "swing": "L3_ROOM",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L3_STORE_N_1", "kind": "window", "type": "W_DORMER",
+      "portal": "P_L3_STORE_N__W1",
+      "leaf": { "width": 0.980, "height": 1.080, "thickness": 0.030 },
+      "hinge": "left", "swing": "L3_STORE_N",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+    {
+      "id": "WIN_L3_STORE_N_2", "kind": "window", "type": "W_DORMER",
+      "portal": "P_L3_STORE_N__W2",
+      "leaf": { "width": 0.980, "height": 1.080, "thickness": 0.030 },
+      "hinge": "left", "swing": "L3_STORE_N",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": true
+    },
+
+    // ---- W_GABLE x2 -- louvres: permanently open to the air, so neither lockable nor solid.
+    {
+      "id": "WIN_L3_STORE_W_1", "kind": "window", "type": "W_GABLE",
+      "portal": "P_L3_STORE_W__W1",
+      "leaf": { "width": 0.780, "height": 0.780, "thickness": 0.025 },
+      "hinge": null, "swing": "L3_STORE_W",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_LOUVRE_TIMBER",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "WIN_L3_STORE_E_1", "kind": "window", "type": "W_GABLE",
+      "portal": "P_L3_STORE_E__W1",
+      "leaf": { "width": 0.780, "height": 0.780, "thickness": 0.025 },
+      "hinge": null, "swing": "L3_STORE_E",
+      "frame": { "asset": null, "casing": 0.050 },
+      "asset": null, "material": "MAT_LOUVRE_TIMBER",
+      "solid": false, "lockable": false
+    },
+
+    // ---- W_TRANSOM x1 -- over the front door.
+    {
+      "id": "WIN_L0_FOYER_3", "kind": "window", "type": "W_TRANSOM",
+      "portal": "P_L0_FOYER__W3",
+      "leaf": { "width": 0.980, "height": 0.380, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_FOYER",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+
+    // ---- W_SIDELIGHT x2 -- either side of it.
+    {
+      "id": "WIN_L0_FOYER_1", "kind": "window", "type": "W_SIDELIGHT",
+      "portal": "P_L0_FOYER__W1",
+      "leaf": { "width": 0.280, "height": 2.030, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_FOYER",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "WIN_L0_FOYER_2", "kind": "window", "type": "W_SIDELIGHT",
+      "portal": "P_L0_FOYER__W2",
+      "leaf": { "width": 0.280, "height": 2.030, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_FOYER",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+
+    // ---- W_PANEL x5 -- the sunroom's fixed glazed flanks.
+    {
+      "id": "WIN_L0_SUNROOM_1", "kind": "window", "type": "W_PANEL",
+      "portal": "P_L0_SUNROOM__W1",
+      "leaf": { "width": 1.780, "height": 2.080, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_SUNROOM",
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "WIN_L0_SUNROOM_2", "kind": "window", "type": "W_PANEL",
+      "portal": "P_L0_SUNROOM__W2",
+      "leaf": { "width": 1.780, "height": 2.080, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_SUNROOM",
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "WIN_L0_SUNROOM_3", "kind": "window", "type": "W_PANEL",
+      "portal": "P_L0_SUNROOM__W3",
+      "leaf": { "width": 1.780, "height": 2.080, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_SUNROOM",
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "WIN_L0_SUNROOM_4", "kind": "window", "type": "W_PANEL",
+      "portal": "P_L0_SUNROOM__W4",
+      "leaf": { "width": 1.780, "height": 2.080, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_SUNROOM",
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+    {
+      "id": "WIN_L0_SUNROOM_5", "kind": "window", "type": "W_PANEL",
+      "portal": "P_L0_SUNROOM__W5",
+      "leaf": { "width": 1.780, "height": 2.080, "thickness": 0.030 },
+      "hinge": null, "swing": "L0_SUNROOM",
+      "frame": { "asset": null, "casing": 0.070 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    },
+
+    // ---- W_INTERNAL x1 -- borrowed light, kitchen to sunroom.
+    {
+      "id": "WIN_L0_KITCHEN_2", "kind": "window", "type": "W_INTERNAL",
+      "portal": "P_L0_KITCHEN__W2",
+      "leaf": { "width": 1.180, "height": 1.080, "thickness": 0.030 },
+      "hinge": "right", "swing": "L0_KITCHEN",
+      "frame": { "asset": null, "casing": 0.060 },
+      "asset": null, "material": "MAT_GLASS_CLEAR",
+      "solid": false, "lockable": false
+    }
+  ]
+}

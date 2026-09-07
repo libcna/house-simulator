@@ -5659,8 +5659,56 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             case.
       note: §16.3's whole table is now measured rather than designed: 96 cells, 179 portals, 46
             always-open, 63 doors, 3 nested, 66 windows, 1 garage door. The design said 95 and 186.
-- [ ] HOUSE-00378 — Author `layout.openings.json`: the 7 door types and 10 window types with leaf sizes, frames and hardware references
+- [x] HOUSE-00378 — Author `layout.openings.json`: 12 door types and 12 window types with leaf sizes, frames and material references
       dep: HOUSE-00375, HOUSE-00376 · sys: world · plat: TOOL · pri: MUST
+      finding: **63 door portals said they were always fully open.** `aperture: null` is this
+            format's way of saying "no leaf, never closes" (`docs/world-format.md`), and
+            `HOUSE-00375` left it null on every door it authored. Nothing could see it, because
+            rule 7 only ever looked from the openings file towards the portals. It now checks both
+            ends: a leaf names its portal, the portal names the leaf back, and a shut-able portal
+            with a null `aperture` is reported as a door claiming to be a hole.
+      finding: **rule 7 had never looked at a garage door or a hatch.** Both have leaves — a
+            sectional door is five hinged segments (§54's spline) and a chest lid lifts — and both
+            were outside the kind list, so either could have been authored with no leaf at all and
+            passed. `LEAF_BEARING_KINDS` is now one list with a reason beside it.
+      finding: **the C++ loader and the Python validator disagreed about the house, and a new test
+            caught it the first time it read the real portals.** `WorldLoader::LoadPortals` carries
+            its own §15.7 rule 4 check, written before container sub-cells (`HOUSE-00373`) and
+            before the wall case (`HOUSE-00376`), so it refused the refrigerator door and would
+            have refused all 66 windows. Both cases are now implemented in C++ as well, with their
+            own unit tests, and `AuthoredWorldTest` asserts rule 7's bijection over the deployed
+            world from the other implementation: the day the two disagree about the house, one of
+            them says so.
+      finding: **§70.5's leaf band was applied to four things that are not interior doors** — the
+            two sliders, the refrigerator door and the under-stair store's 1.55 m leaf. The
+            exemption is the opening's declared `type`, never its measurement: a rule that let a
+            leaf out of the band because it happened to be short would let every mistake out with
+            it, which the selftest now proves with a 1.60 m door that is still caught.
+      note: **`type` is new in the openings schema.** §12.3 and §12.6 describe openings by type and
+            133 rows carrying only their measurements could not be asked which were bathroom
+            windows. Id-shaped but not an id — many rows share one, so rule 1 never sees it.
+      note: **`swing` is a cell id now, not prose.** The format wrote `"into_L0_WC1"`, which says
+            what the field name already says in a form nothing can resolve. It is a reference, rule
+            6 checks it, and `Opening::swing` is a `util::Id` rather than a `std::string`.
+      note: leaf sizes are **derived** from the portal rather than repeated beside it — the rough
+            opening less its reveal, 0.04 m across and 0.05 m up for a door, 0.02 m all round for a
+            window sash — so nothing here can disagree with the hole it hangs in. Two rows are
+            stated instead and say why: the basement stair-head door, whose portal is the 2.30 ×
+            3.30 hole in the floor rather than the leaf, and the pair of double doors.
+      note: `hinge` and `swing` are derived too, from stated rules: a leaf hangs on the side with
+            more wall beside it so it folds flat, and opens into the smaller cell — never outdoors,
+            because a leaf over a porch step would foul it, and never down a stair, because a door
+            at the head of a flight must not swing over the top step. A hundred and thirty chosen by
+            hand would be a hundred and thirty chances to be arbitrary in a different way.
+      note: `asset` and `frame.asset` are null throughout and say so in the file: they are model
+            references and the models are phase 6. `material` is not null — those ten `MAT_*` ids
+            are an obligation on `HOUSE-00381`, and rule 6 holds it to them the moment
+            `layout.materials.json` exists.
+      note: 12 door types and 12 window types, not the 7 and 10 in this task's title. The extra
+            doors are the ones later tasks created: the appliance door and the freezer lid
+            (`HOUSE-00373`), the garage loft hatch (`HOUSE-00377`), the stair-head door and the
+            under-stair crawl door. The extra windows are §12.6's three additions from
+            `HOUSE-00376` less `W_SLIDER`, which is a door here and not a window.
 - [ ] HOUSE-00379 — Author `layout.stairs.json`: the 7 flights of §12.4 with risers, goings, landings and surfaces
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00380 — Author the window schedule per façade per level (§12.6), and cross-check counts against the portals file

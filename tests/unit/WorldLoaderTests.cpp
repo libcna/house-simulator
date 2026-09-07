@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <map>
 #include <string>
 #include <utility>
 #include <variant>
@@ -332,9 +333,10 @@ namespace
               "schema": "cna-house/openings/1",
               "openings": [
                 {
-                  "id": "DOOR_L0_WC1", "kind": "door", "portal": "P_HALL__WC1",
+                  "id": "DOOR_L0_WC1", "kind": "door", "type": "D_INT_PRIVACY",
+                  "portal": "P_HALL__WC1",
                   "leaf": { "width": 0.86, "height": 2.04, "thickness": 0.040 },
-                  "hinge": "left", "swing": "into_L0_WC1", "maxAngleDeg": 95.0,
+                  "hinge": "left", "swing": "L0_WC1", "maxAngleDeg": 95.0,
                   "frame": { "asset": "MODEL_DOOR_FRAME_INT_01", "casing": 0.070 },
                   "asset": "MODEL_DOOR_LEAF_PANEL_01", "material": "MAT_PAINT_TRIM_WHITE",
                   "solid": false, "lockable": false
@@ -347,7 +349,7 @@ namespace
                 {
                   "id": "DOOR_L0_STAIR", "kind": "door", "portal": "P_HALL__STAIR",
                   "leaf": { "width": 0.90, "height": 2.04, "thickness": 0.045 },
-                  "hinge": "right", "swing": "into_L0_HALL", "maxAngleDeg": 90.0,
+                  "hinge": "right", "swing": "L0_HALL", "maxAngleDeg": 90.0,
                   "solid": true, "lockable": true
                 }
               ]
@@ -1430,6 +1432,118 @@ namespace
         }
     }
 
+    TEST_F(WorldLoaderTest, AWindowInTheWallIsAcceptedAndAGapIsNot)
+    {
+        // §15.7 rule 4's wall case (`HOUSE-00376`). Two rooms either side of a partition share a
+        // coordinate, but a room and the yard outside it do not: the room stops at the interior
+        // face, the yard at the exterior one, and the window is in the 0.30 m between them. The
+        // check must widen exactly that far and no further.
+        const std::string cells = R"({
+          "schema": "cna-house/cells/1",
+          "cells": [
+            { "id": "L0_HALL", "level": "L0", "kind": "corridor",
+              "boxes": [{ "x": [-2.0, 2.0], "z": [-27.10, -14.30] }] },
+            { "id": "EXT_YARD", "level": "L0", "kind": "exterior",
+              "boxes": [{ "x": [-2.0, 2.0], "z": [-14.00, -4.00] }],
+              "yOverride": [0.0, 20.0] }
+          ]
+        })";
+        const auto portal = [](const std::string& plane)
+        {
+            return R"({
+              "schema": "cna-house/portals/1",
+              "portals": [
+                { "id": "P_HALL__YARD", "cellA": "L0_HALL", "cellB": "EXT_YARD",
+                  "plane": )" +
+                   plane + R"(,
+                  "rect": { "u": [-0.6, 0.6], "v": [1.50, 3.00] },
+                  "kind": "window", "opacity": "glass", "aperture": "WIN_HALL_1" }
+              ]
+            })";
+        };
+
+        // On the room's own face, a full wall from the yard's. This is where every window in the
+        // house sits, and it is the case binary floating point breaks: -14.0 - -14.3 is
+        // 0.30000001, so a `<= 0.30` written without slack rejects all 66 of them.
+        const std::vector<std::string> planes{R"({ "axis": "z", "value": -14.30 })",
+                                              R"({ "axis": "z", "value": -14.15 })",
+                                              R"({ "axis": "z", "value": -14.00 })"};
+        for (const std::string& plane : planes)
+        {
+            world::WorldData::Contents contents;
+            Write("layout.levels.json", Levels());
+            Write("layout.cells.json", cells);
+            Write("layout.portals.json", portal(plane));
+            ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+            ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+            const auto loaded = world::WorldLoader::LoadPortals(directory_, contents);
+            EXPECT_TRUE(loaded) << plane << ": " << (loaded ? "" : loaded.Error().ToString());
+        }
+
+        // ...and not one centimetre further. A plane past the room's own face is in open air, not
+        // in the wall.
+        world::WorldData::Contents contents;
+        Write("layout.levels.json", Levels());
+        Write("layout.cells.json", cells);
+        Write("layout.portals.json", portal(R"({ "axis": "z", "value": -14.60 })"));
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+        const auto refused = world::WorldLoader::LoadPortals(directory_, contents);
+        ASSERT_FALSE(refused);
+        EXPECT_NE(refused.Error().Message().find("no face"), std::string::npos) << refused.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, APortalIntoASubCellIsCheckedAgainstTheSubCellsOwnFace)
+    {
+        // A container or a mezzanine is inside its parent, so the opening is in the CHILD's face
+        // -- the fridge door, the chest lid, the garage loft hatch -- and the parent has no face
+        // there at all (`HOUSE-00373`, `HOUSE-00377`). Checking the parent would refuse every one.
+        const std::string cells = R"({
+          "schema": "cna-house/cells/1",
+          "cells": [
+            { "id": "L0_HALL", "level": "L0", "kind": "corridor",
+              "boxes": [{ "x": [-2.0, 2.0], "z": [4.0, 10.0] }] },
+            { "id": "CELL_FRIDGE", "level": "L0", "kind": "closet", "parent": "L0_HALL",
+              "boxes": [{ "x": [0.0, 1.0], "z": [5.0, 6.0] }],
+              "yOverride": [0.70, 2.45] }
+          ]
+        })";
+        const auto portal = [](const std::string& plane, const std::string& rect)
+        {
+            return R"({
+              "schema": "cna-house/portals/1",
+              "portals": [
+                { "id": "P_HALL__FRIDGE", "cellA": "L0_HALL", "cellB": "CELL_FRIDGE",
+                  "plane": )" +
+                   plane + R"(, "rect": )" + rect + R"(,
+                  "kind": "door", "opacity": "opaque_when_closed", "aperture": "FRIDGE_L0_HALL" }
+              ]
+            })";
+        };
+
+        world::WorldData::Contents contents;
+        Write("layout.levels.json", Levels());
+        Write("layout.cells.json", cells);
+        Write("layout.portals.json",
+              portal(R"({ "axis": "z", "value": 6.0 })", R"({ "u": [0.0, 1.0], "v": [0.70, 2.45] })"));
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+        const auto accepted = world::WorldLoader::LoadPortals(directory_, contents);
+        EXPECT_TRUE(accepted) << (accepted ? "" : accepted.Error().ToString());
+
+        // ...and a plane in NEITHER face is still refused, so the nested path is a different
+        // question and not an exemption.
+        world::WorldData::Contents astray;
+        Write("layout.portals.json",
+              portal(R"({ "axis": "z", "value": 5.5 })", R"({ "u": [0.0, 1.0], "v": [0.70, 2.45] })"));
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, astray));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, astray));
+        const auto refused = world::WorldLoader::LoadPortals(directory_, astray);
+        ASSERT_FALSE(refused);
+        EXPECT_NE(refused.Error().Message().find("has none on"), std::string::npos)
+            << refused.Error().ToString();
+    }
+
     TEST_F(WorldLoaderTest, APortalInOneCellsWallAndNotTheOthersIsRefused)
     {
         // Both sides, not the first. The wall is shared, so a rectangle in one cell's face and not
@@ -1544,7 +1658,10 @@ namespace
         EXPECT_FLOAT_EQ(door.leaf.thickness, 0.040F);
         ASSERT_TRUE(door.hinge.has_value());
         EXPECT_EQ(*door.hinge, world::HingeSide::Left);
-        EXPECT_EQ(door.swing, "into_L0_WC1");
+        EXPECT_EQ(door.type, Intern("D_INT_PRIVACY"));
+        // A cell id, not prose: the format said `"into_L0_WC1"` until `HOUSE-00378` made it a
+        // reference that rule 6 resolves.
+        EXPECT_EQ(door.swing, Intern("L0_WC1"));
         EXPECT_FLOAT_EQ(door.maxAngleDeg, 95.0F);
         EXPECT_EQ(door.frameAsset, Intern("MODEL_DOOR_FRAME_INT_01"));
         EXPECT_FLOAT_EQ(door.casing, 0.070F);
@@ -1565,7 +1682,9 @@ namespace
         const world::Opening& slider = contents.openings[1];
         EXPECT_EQ(slider.kind, world::OpeningKind::Window);
         EXPECT_FALSE(slider.hinge.has_value());
-        EXPECT_EQ(slider.swing, "");
+        EXPECT_FALSE(slider.swing.IsValid());
+        // ...and a row with no `type` leaves it unset rather than inventing one.
+        EXPECT_FALSE(slider.type.IsValid());
         // And the door beside it hinges RIGHT, not left, so the value is read and not defaulted.
         EXPECT_TRUE(contents.openings[2].hinge.has_value());
         EXPECT_EQ(*contents.openings[2].hinge, world::HingeSide::Right);
@@ -2875,6 +2994,69 @@ namespace
         // §12.1's 7:12, as a slope. Read as radians it would be 0.528 and the roof would be a
         // different roof; a test is the cheapest place to say which reading this is.
         EXPECT_NEAR(contents.construction.roofPitch, 7.0F / 12.0F, 1e-4F);
+
+        IdRegistry::ResetForTesting();
+    }
+
+    TEST(AuthoredWorldTest, TheAuthoredCellsPortalsAndLeavesLoadWithTheRealLoader)
+    {
+        IdRegistry::ResetForTesting();
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/layout.openings.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
+        }
+
+        world::WorldData::Contents contents;
+        for (const auto& [name, load] : std::initializer_list<
+                 std::pair<const char*,
+                           cnahouse::util::Result<void> (*)(std::string_view, world::WorldData::Contents&)>>{
+                 {"levels", &world::WorldLoader::LoadLevels},
+                 {"cells", &world::WorldLoader::LoadCells},
+                 {"portals", &world::WorldLoader::LoadPortals},
+                 {"openings", &world::WorldLoader::LoadOpenings}})
+        {
+            const cnahouse::util::Result<void> loaded = load(directory, contents);
+            ASSERT_TRUE(loaded) << name << ": " << loaded.Error().ToString();
+        }
+
+        // §16.3, measured: 75 rooms, 3 nested sub-cells and 18 exterior cells.
+        EXPECT_EQ(contents.cells.size(), 96U);
+        EXPECT_EQ(std::count_if(contents.cells.begin(),
+                                contents.cells.end(),
+                                [](const world::Cell& cell) { return cell.parent.IsValid(); }),
+                  3);
+
+        EXPECT_EQ(contents.portals.size(), 179U);
+        EXPECT_EQ(std::count_if(contents.portals.begin(),
+                                contents.portals.end(),
+                                [](const world::Portal& portal)
+                                { return portal.kind == world::PortalKind::Window; }),
+                  66);
+
+        // §15.7 rule 7's bijection, asserted by the OTHER implementation. `validate_world.py`
+        // makes the same statement in Python over the authored files; this makes it in C++ over
+        // the deployed ones, and the day the two disagree one of them is wrong about the house.
+        EXPECT_EQ(contents.openings.size(), 133U);
+        std::map<cnahouse::util::Id, cnahouse::util::Id> leafOf;
+        for (const world::Opening& opening : contents.openings)
+        {
+            EXPECT_TRUE(opening.portal.IsValid()) << "every leaf names a portal";
+            EXPECT_TRUE(leafOf.emplace(opening.portal, opening.id).second)
+                << "a portal carries exactly one leaf";
+        }
+        for (const world::Portal& portal : contents.portals)
+        {
+            if (portal.kind == world::PortalKind::CasedOpening || portal.kind == world::PortalKind::StairWell)
+            {
+                continue;
+            }
+            const auto found = leafOf.find(portal.id);
+            ASSERT_NE(found, leafOf.end()) << "a shut-able portal has a leaf";
+            // ...and names it back. `aperture` unset means "always fully open", so a door that
+            // leaves it unset claims to be a hole (`HOUSE-00378`).
+            EXPECT_EQ(portal.aperture, found->second);
+        }
 
         IdRegistry::ResetForTesting();
     }

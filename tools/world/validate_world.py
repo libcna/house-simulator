@@ -71,6 +71,13 @@ REPO = Path(__file__).resolve().parents[2]
 # Every one of these is §15.7's or §70.5's number, named here so a message can quote it.
 
 PLANE_TOLERANCE = 0.01          # §15.7 rule 4: "within 1 cm"
+
+#: Portal kinds that have something in them that opens, and therefore a row in
+#: `layout.openings.json`. `cased_opening` and `stair_well` are the two that never do.
+#: `garage_door` and `hatch` were missing until `HOUSE-00378`: a sectional door is five hinged
+#: segments (§54) and a chest lid lifts, so both have a leaf and both animate.
+LEAF_BEARING_KINDS = ("door", "double_door", "window", "exterior_door", "slider",
+                      "garage_door", "hatch")
 OVERLAP_AREA_TOLERANCE = 1e-4   # §15.7 rule 3: "more than 1 cm²"
 RISE_TOLERANCE = 0.001          # §15.7 rule 8: "within 1 mm"
 DOOR_HEIGHT = (1.98, 2.10)      # §70.5, interior door leaf
@@ -846,6 +853,10 @@ def rule_6_references(world: World) -> list[Problem]:
 
     for index, opening in enumerate(world.openings):
         check("openings", index, "portal", opening.get("portal"), portals, "portal", have_portals)
+        # `swing` names the cell the leaf opens into, so it is a reference and is checked like one.
+        # `docs/world-format.md` wrote it `"into_L0_WC1"`, which says the same thing in a form
+        # nothing can resolve and repeats what the field name already means (`HOUSE-00378`).
+        check("openings", index, "swing", opening.get("swing"), cells, "cell", have_cells)
         check("openings", index, "material", opening.get("material"), materials, "material",
               have_materials)
         check("openings", index, "asset", opening.get("asset"), assets, "asset", have_assets)
@@ -920,7 +931,7 @@ def rule_7_openings(world: World) -> list[Problem]:
 
     for index, portal in enumerate(world.portals):
         kind = portal.get("kind")
-        if kind not in ("door", "double_door", "window", "exterior_door", "slider"):
+        if kind not in LEAF_BEARING_KINDS:
             continue
         portal_id = portal.get("id")
         if portal_id not in claimed:
@@ -928,6 +939,23 @@ def rule_7_openings(world: World) -> list[Problem]:
                 7, FILE_OF["portals"], f"portals/{index}",
                 f"portal {portal_id} is a {kind} and no row in "
                 f"{FILE_OF['openings']} declares its leaf"))
+            continue
+        # ...and the portal has to name it back. `aperture: null` means "always fully open"
+        # (`docs/world-format.md`), so a shut-able portal that leaves it null is not merely
+        # missing a cross-reference: it is a door that says it is a hole. `HOUSE-00375` left 63
+        # of them null and nothing could see it until this half of the bijection existed.
+        aperture = portal.get("aperture")
+        if aperture is None:
+            problems.append(Problem(
+                7, FILE_OF["portals"], f"portals/{index}/aperture",
+                f"portal {portal_id} is a {kind} with a leaf ({claimed[portal_id][0]}) and "
+                f"`aperture: null`, which is this format's way of saying it is always fully "
+                f"open"))
+        elif aperture != claimed[portal_id][0]:
+            problems.append(Problem(
+                7, FILE_OF["portals"], f"portals/{index}/aperture",
+                f"portal {portal_id} names aperture {aperture} and is claimed by opening "
+                f"{claimed[portal_id][0]}; the two files have to agree on which leaf this is"))
     return problems
 
 
@@ -1054,8 +1082,16 @@ def rule_10_realism(world: World) -> list[Problem]:
         if opening.get("kind") != "door":
             continue
         portal = world.portal_by_id.get(opening.get("portal"))
-        if portal is not None and portal.get("kind") in ("exterior_door", "garage_door", "hatch"):
+        if portal is not None and portal.get("kind") in ("exterior_door", "garage_door", "hatch",
+                                                         "slider", "double_door"):
             continue  # §70.5's leaf range is the interior door's
+        # ...and so are these two, which are `kind: door` and are not interior doors: a
+        # refrigerator door is hung on an appliance, and the under-stair store's leaf is 1.55 m
+        # because you duck into it. `HOUSE-00378` found both by authoring them. The test is the
+        # opening's declared `type` and not its measurements -- a rule that let a leaf out of
+        # §70.5's band because it happened to be short would let every mistake out with it.
+        if opening.get("type") in ("D_APPLIANCE", "D_INT_LOW"):
+            continue
         leaf = opening.get("leaf") or {}
         for field, (low, high) in (("height", DOOR_HEIGHT), ("width", DOOR_WIDTH)):
             value = leaf.get(field)
@@ -1411,11 +1447,11 @@ def fixture() -> dict[str, dict]:
         portal("P_FOYER__HALL", "L0_FOYER", "L0_HALL", "z", 4.0,
                (-0.5, 0.5), (0.60, 2.65), "cased_opening"),
         portal("P_HALL__WC1", "L0_HALL", "L0_WC1", "x", 2.0,
-               (4.6, 5.5), (0.60, 2.62), "door"),
+               (4.6, 5.5), (0.60, 2.62), "door", aperture="DOOR_WC1"),
         portal("P_HALL__STAIR", "L0_HALL", "L0_STAIR", "x", -2.0,
                (5.0, 6.0), (0.60, 2.65), "cased_opening"),
         portal("P_FOYER__TERRACE", "L0_FOYER", "L0_TERRACE", "z", 0.0,
-               (-0.5, 0.5), (0.60, 2.65), "exterior_door"),
+               (-0.5, 0.5), (0.60, 2.65), "exterior_door", aperture="DOOR_TERRACE"),
         # The horizontal one. L0_STAIR's yOverride reaches 3.65, which is L1_LANDING's floor.
         portal("P_STAIR__LANDING", "L0_STAIR", "L1_LANDING", "y", 3.65,
                (-5.5, -2.5), (4.5, 7.5), "stair_well"),
@@ -1424,12 +1460,15 @@ def fixture() -> dict[str, dict]:
         portal("P_L1HALL__LANDING", "L1_HALL", "L1_LANDING", "x", -2.0,
                (5.0, 6.0), (3.65, 5.70), "cased_opening"),
         portal("P_L1HALL__WC4", "L1_HALL", "L1_WC4", "x", 2.0,
-               (4.6, 5.5), (3.65, 5.67), "door"),
+               (4.6, 5.5), (3.65, 5.67), "door", aperture="DOOR_WC4"),
     ]}
 
     openings = {"schema": "cna-house/openings/1", "openings": [
         {"id": "DOOR_WC1", "kind": "door", "portal": "P_HALL__WC1",
          "leaf": {"width": 0.86, "height": 2.02, "thickness": 0.040},
+         # `swing` names the cell the leaf opens into -- a reference, checked by rule 6, and not
+         # `docs/world-format.md`'s original `"into_L0_WC1"`, which nothing could resolve.
+         "swing": "L0_WC1", "hinge": "left",
          "asset": "MODEL_DOOR_LEAF", "material": "MAT_PAINT"},
         {"id": "DOOR_WC4", "kind": "door", "portal": "P_L1HALL__WC4",
          "leaf": {"width": 0.86, "height": 2.02, "thickness": 0.040},
@@ -1593,6 +1632,17 @@ def selftest() -> int:
         def _(docs):
             row(docs, "props", "PROP_WC1_PAN")["asset"] = "MODEL_MISSING"
 
+        # ...and a swing that names no cell is a reference to nothing, exactly like a missing
+        # asset. It is a reference because `HOUSE-00378` made it one.
+        astray = copy.deepcopy(base)
+        row(astray, "openings", "DOOR_WC1")["swing"] = "L0_NOWHERE"
+        swung = workspace / "swing-astray"
+        write_fixture(swung, astray)
+        _, problems = validate(swung, wanted=[6])
+        require(any("is not a known cell" in x.message for x in problems),
+                f"a leaf that swings into a cell that does not exist is caught "
+                f"({[str(x) for x in problems]})")
+
         @mutation(7, "a door leaf deleted, leaving the portal unclaimed")
         def _(docs):
             docs["openings"]["openings"].remove(row(docs, "openings", "DOOR_WC1"))
@@ -1608,6 +1658,18 @@ def selftest() -> int:
         @mutation(10, "a 2.40 m interior door")
         def _(docs):
             row(docs, "openings", "DOOR_WC1")["leaf"]["height"] = 2.40
+
+        # A leaf that is too SHORT, and of no exempt type. §70.5's band has two ends, and an
+        # exemption written as "short leaves are fine" instead of "these declared types are"
+        # would swallow this one silently (`HOUSE-00378`).
+        stunted = copy.deepcopy(base)
+        row(stunted, "openings", "DOOR_WC1")["leaf"]["height"] = 1.60
+        short = workspace / "short-leaf"
+        write_fixture(short, stunted)
+        _, problems = validate(short, wanted=[10])
+        require(any("1.98" in x.message for x in problems),
+                f"a 1.60 m interior door is caught too -- the exemption is the declared `type`, "
+                f"never the measurement ({[str(x) for x in problems]})")
 
         @mutation(11, "a light switch outside the room it is in")
         def _(docs):
@@ -2141,6 +2203,43 @@ def selftest() -> int:
         require(len(problems) == 1 and "EXT_SHED" in problems[0].message,
                 f"an EXTERIOR cell with no portal is unreachable too, and rule 5 no longer stops "
                 f"at the word \"interior\" ({[str(x) for x in problems]})")
+
+        # `aperture: null` means "always fully open" (`docs/world-format.md`), so a shut-able
+        # portal that leaves it null is a door that says it is a hole. `HOUSE-00375` left 63 of
+        # them null and nothing could see it until rule 7 checked the back-reference.
+        silent = copy.deepcopy(base)
+        row(silent, "portals", "P_HALL__WC1").pop("aperture")
+        no_aperture = workspace / "no-aperture"
+        write_fixture(no_aperture, silent)
+        _, problems = validate(no_aperture, wanted=[7])
+        require(any("always fully open" in x.message for x in problems),
+                f"a door with a leaf and no `aperture` is caught, and told why it matters "
+                f"({[str(x) for x in problems]})")
+
+        crossed = copy.deepcopy(base)
+        row(crossed, "portals", "P_HALL__WC1")["aperture"] = "DOOR_WC4"
+        mismatch = workspace / "mismatch"
+        write_fixture(mismatch, crossed)
+        _, problems = validate(mismatch, wanted=[7])
+        require(any("have to agree" in x.message for x in problems),
+                f"and so is a portal that names one leaf while another claims it "
+                f"({[str(x) for x in problems]})")
+
+        # A garage door and a hatch have leaves too -- five hinged segments and a lifting lid --
+        # and rule 7 skipped both until `HOUSE-00378` authored them.
+        for kind in ("garage_door", "hatch"):
+            leafless = copy.deepcopy(base)
+            portal_row = row(leafless, "portals", "P_HALL__CLOSET")
+            portal_row["kind"] = kind
+            if kind == "hatch":
+                portal_row["plane"] = {"axis": "y", "value": 3.30}
+                portal_row["rect"] = {"u": [2.05, 2.45], "v": [6.4, 7.4]}
+            missing = workspace / f"leafless-{kind}"
+            write_fixture(missing, leafless)
+            _, problems = validate(missing, wanted=[7])
+            require(any("declares its leaf" in x.message for x in problems),
+                    f"a {kind} with no opening row is caught; both were exempt until they were "
+                    f"authored ({[str(x) for x in problems]})")
 
         # Rule 7 needs both files, and a layout under construction has only one: portals are
         # authored before leaves. It stands down until `layout.openings.json` exists, and bites as

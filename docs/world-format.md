@@ -616,7 +616,10 @@ build**:
    (`HOUSE-00374`). Nothing is exempt, `EXT_WORLD` included — it is where the road runs off the
    map, so it has a portal like everything else;
 6. every referenced material, asset, light group, sound, nav region and animation exists;
-7. every door has exactly one portal, and every window has exactly one portal;
+7. every door has exactly one portal, and every window has exactly one portal — in both
+   directions: the leaf names the portal and the portal names the leaf in `aperture`. Every kind
+   that has something that opens is covered, `garage_door` and `hatch` included: a sectional door
+   is five hinged segments and a chest lid lifts (widened by `HOUSE-00378`);
 8. stair flights connect the declared cells and their total rise equals the level difference to
    within 1 mm;
 9. every plumbing fixture's cell appears in a declared stack;

@@ -1523,7 +1523,11 @@ surprise. This keeps the data declarative without inventing a VM.
    is roofed and `visibilityHint: opaque` is a building, and a building you cannot enter is the
    same defect as a room you cannot enter;
 6. every referenced material, asset, light group, sound, nav region and animation exists;
-7. every door has exactly one portal and every window has exactly one portal;
+7. every door has exactly one portal and every window has exactly one portal, **and the portal
+   names the leaf back** in `aperture` — `aperture: null` means "always fully open", so a door that
+   leaves it null claims to be a hole. Every kind with something that opens is covered,
+   `garage_door` and `hatch` included (widened 2026-09-07 by `HOUSE-00378`, which found 63 doors
+   with a null `aperture` and two kinds the rule had never looked at);
 8. stair flights connect the declared cells and their total rise equals the level difference to
    within 1 mm;
 9. plumbing: every fixture's cell appears in a declared stack;

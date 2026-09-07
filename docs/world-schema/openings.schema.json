@@ -159,6 +159,9 @@
                 "type": "null"
               }
             ]
+          },
+          "type": {
+            "$ref": "#/$defs/id"
           }
         },
         "required": [

@@ -464,10 +464,16 @@ namespace cnahouse::world
     {
         util::Id id;
         OpeningKind kind = OpeningKind::Door;
+        //! §12.3's and §12.6's schedule entry -- `D_INT_PASSAGE`, `W_DH_STD`. Id-shaped and not an
+        //! id: many openings share one. Rules ask what an opening *is* where a measurement would be
+        //! the wrong question, §70.5's leaf band being the case that forced it.
+        util::Id type;
         util::Id portal;
         Leaf leaf;
         std::optional<HingeSide> hinge;
-        std::string swing;
+        //! The cell the leaf opens into, by id. A reference, not prose: the format wrote it
+        //! `"into_L0_WC1"` until `HOUSE-00378`, which nothing could resolve.
+        util::Id swing;
         float maxAngleDeg = 0.0F;
         util::Id frameAsset;
         float casing = 0.0F;
