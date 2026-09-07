@@ -2832,8 +2832,43 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             rediscovered.
 - [ ] HOUSE-00264 — Verify the **Khronos glTF-Sample-Assets** per-asset licences and record which are usable
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00265 — Verify **Quaternius**, **Kenney**, **Poly Pizza** licences
+- [x] HOUSE-00265 — Verify **Quaternius**, **Kenney**, **Poly Pizza** licences
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `docs/licence-evidence/quaternius-kenney-polypizza.md`. Three sources,
+            three different verdicts.
+      finding: **Quaternius is REJECTED, because the publisher's own site contradicts itself.** The
+            licence page (dated "Last updated: 8/28/2026") is now the *Quaternius Asset License
+            v1.0*, whose §3(a) forbids redistributing the assets "as a standalone asset, asset pack,
+            stock file, template, or similar product … regardless of how much the Assets have been
+            modified". The FAQ page, live on the same site on the same day, says twice that "All
+            models are under the CC0 License". Both cannot be true: CC0 permits exactly what §3(a)
+            forbids. ADR-0012's rule for unclear terms is that the source is unusable until
+            resolved, and resolving it means asking the publisher — an owner action, not a gate.
+            **No plan task depends on Quaternius alone**, so nothing is blocked.
+      finding: **even ignoring the contradiction, the QAL fits this project badly, and the reason is
+            structural: `assets-src/` is PUBLISHED.** §2 clearly permits shipping a build that
+            incorporates the assets; §3(a) forbids redistributing the asset files. A public git
+            repository carrying the raw `.glb` sits exactly on that line. A licence can permit the
+            compiled game and still forbid this repository, and that distinction now has to be
+            checked for every source — it is what the manifest's separate `redistributeSource` and
+            `redistributeDerived` booleans are for.
+      finding: **Kenney is APPROVED** — CC0, but declared **per asset page**, not site-wide. The
+            site ToS is an ordinary website agreement that mentions no CC0 at all and in fact
+            asserts copyright "unless marked otherwise"; the per-asset "License: Creative Commons
+            CC0" line is that marking. A reader who stopped at the ToS would get the wrong answer.
+            When a pack is acquired, its `SOURCE.md` must record both the asset page and the
+            `License.txt` bundled in the download.
+      finding: **Poly Pizza is CONDITIONAL** — an aggregator with no site-wide licence. Its terms
+            say "We do not claim ownership over any User Content" and push the licence to the
+            uploader: "you agree to adhere to the terms of the Creative Commons license that applies
+            at the time of download." **The default is CC-BY, not CC0** — both sampled models showed
+            "Creative Commons Attribution". Usable per asset with archived per-asset evidence, and
+            CC-BY is fine because attribution is generated from the manifest; but never for a hero
+            asset, where an uploader's self-assertion is not provenance enough.
+      finding: the general lesson, now recorded: **a licence is a property of a file at a moment,
+            not of a website.** Quaternius was a legitimately CC0 source and is not one today. That
+            is why every `SOURCE.md` records the URL read and the retrieval date, and why the
+            per-asset check carries the claim rather than the source's reputation.
 - [ ] HOUSE-00266 — Verify **BlenderKit free tier** licensing model and whether per-asset licences are machine-readable
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
 - [ ] HOUSE-00267 — Verify **Sketchfab CC0** filter semantics: does the filter guarantee CC0, and what evidence do we archive per asset?
