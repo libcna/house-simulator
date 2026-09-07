@@ -3292,9 +3292,19 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             collision from the layout, which is what §49.2's "built offline from the layout" says;
             read `HOUSE-00472` as supplying proxies for what the layout cannot express — the
             rafter envelope, curved surfaces — and not as re-deriving the rectilinear shell.
+      finding: (corrected 2026-09-07, while writing `HOUSE-00213`) the first version gave **every**
+            cell a ceiling slab and four walls, including a cell of kind `exterior` — so a terrace
+            was roofed over and walled in. `world-format.md` states the rule outright
+            (`visibilityHint: open` is "no walls, e.g. exterior") and this tool ignored it. An open
+            cell now gets a floor, no ceiling, and no wall on a side with no neighbour; it keeps
+            the wall it shares with the house. The defect was invisible to this task's own claims
+            and to `HOUSE-00212`'s, and surfaced only when `HOUSE-00213` cast rays from a patio and
+            got none out. Recorded here rather than silently, because the shipped behaviour changed
+            after the task was ticked.
       accept: every wall implied by two abutting cells exists once, at the thickness its neighbours
-            imply, with a hole at every portal and no wall inside a single cell; the file reads
-            back byte-for-byte through its own reader; two builds of one layout are identical
+            imply, with a hole at every portal and no wall inside a single cell; an open cell has
+            no lid; the file reads back byte-for-byte through its own reader; two builds of one
+            layout are identical
 - [x] HOUSE-00211 — `tools/world/build_nav.py`: layout → the pet waypoint graph with perches
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `tools/world/build_nav.py` and `docs/nav-format.md`, the normative `CNAV`
@@ -3350,7 +3360,7 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
 - [x] HOUSE-00212 — `tools/world/build_coverage.py`: the rain/roof coverage height field on a 0.5 m grid
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `tools/world/build_coverage.py` and `docs/coverage-format.md`, the
-            normative `CCOV` version 1 spec. 28 selftest claims; `--selftest` runs in CI. 13
+            normative `CCOV` version 1 spec. 29 selftest claims; `--selftest` runs in CI. 13
             injected bugs, all caught — four missed first time, three of them because the claim
             was written against the constant it was supposed to be checking (`cell == CELL_SIZE`
             moves with the mistake; `cell == 0.5` does not).
@@ -3381,10 +3391,59 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             abuts the lounge — sheltered at 2.50 m on both sides, so the assertion passed whatever
             the tool did. It now tests the open edge facing the garden. A boundary claim has to be
             written against a boundary that is actually one.
+      finding: (corrected 2026-09-07, while writing `HOUSE-00213`) the porch claim had been
+            **passing by coincidence**. `HOUSE-00210` was giving the porch — an `exterior` cell —
+            a ceiling slab of its own, whose underside sat at 2.50 m, exactly where the bedroom
+            floor above it also sits. The assertion could not tell the two apart, so it would have
+            passed with the cover coming from the wrong surface entirely. `HOUSE-00210` no longer
+            builds that lid, and the claim now removes the bedroom and requires the porch to become
+            open sky.
       accept: rain is sheltered exactly where a slab is overhead and nowhere else; a basement never
             shelters the garden; open sky is +INF; two builds are byte-identical
-- [ ] HOUSE-00213 — `tools/world/build_skyexposure.py`: per-cell sky exposure and per-orientation facade exposure by ray casting
+- [x] HOUSE-00213 — `tools/world/build_skyexposure.py`: per-cell sky exposure and per-orientation facade exposure by ray casting
       dep: HOUSE-00212 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/world/build_skyexposure.py` and `docs/skyexposure-format.md`, the
+            normative `CSKY` version 1 spec. 44 selftest claims; `--selftest` runs in CI. 15
+            injected bugs, all caught.
+      finding: **this task found a defect in `HOUSE-00210` that two finished tasks had already
+            shipped past.** `build_collision` gave *every* cell a ceiling slab, including a cell
+            of kind `exterior` — so a terrace was roofed over, and every ray from it was stopped
+            by a lid that is not there. `world-format.md` states the rule outright
+            (`visibilityHint: open` is "no walls, e.g. exterior") and the tool ignored it. Fixed
+            in `build_collision`: an open cell gets a floor, no ceiling, and no wall on a side
+            with no neighbour — it keeps the wall it shares with the house, because that wall is
+            real. `HOUSE-00212`'s porch claim had been **passing by coincidence**: the porch's
+            spurious own ceiling sat at 2.50 m, the same height as the bedroom floor above it, so
+            the assertion could not tell the two apart. It now removes the bedroom and requires
+            the porch to become open sky.
+      finding: the openings need no special case. `HOUSE-00210` punched every portal out of its
+            wall, so a ray leaving through a doorway meets no geometry and escapes on its own —
+            and that is also §64.6's correct semantics, because the baked figure is the
+            **geometric** opening and the runtime multiplies in the aperture live as windows open.
+      finding: directions are a **Fibonacci hemisphere**, uniform in solid angle, and the obvious
+            alternative is actively wrong: a latitude/longitude grid puts as many samples in the
+            last degree below the zenith as in the first above the horizon, so a skylight would be
+            weighted like a wall of glass. Checked against `1 − cos 45° = 0.293`.
+      finding: the Monte Carlo estimator is checked against **three geometries whose answer is
+            known exactly** — open sky 1, an unbounded lid 0, a half-plane 0.5 — rather than
+            against itself. The first version of the lid fixture was 50 m across and measured
+            0.070, which is not an error: a ray at 5° of elevation travels 50 m horizontally
+            before it rises 4.4 m, so it genuinely escapes past the edge. The fixture is now
+            effectively unbounded and the 50 m case is kept as its own claim, asserted against
+            `sin(atan(4.4/50))`.
+      finding: the broad phase is asserted to **agree with brute force on every ray**. A 2 m grid
+            marched by a 3-D DDA is what makes 78 cells × 512 rays × ~4 300 shapes finish in pure
+            Python at all, and a broad phase that also changes answers is not an optimisation.
+      finding: §64.6's "the cell's centre" needs two guards, and both were live: an L-shaped
+            room's centroid can fall **outside the room**, and a sofa can be **standing on it** —
+            a listener inside a solid box hears nothing, so the cell would report zero exposure
+            and the rain would go silent in a room with a window. The centroid is tested and a
+            free point found when it fails; every fallback is named, and a cell with no free point
+            at ear height is a warning rather than a silent zero. The point used is written into
+            the file so a figure can be traced back to where it was measured.
+      accept: a sealed cell measures exactly 0 and an open one strictly more; the eight facades
+            average to the sky exposure; the broad phase changes no answer; two builds are
+            byte-identical
 - [ ] HOUSE-00214 — `tools/world/build_snowshell.py`: generate the snow-shell meshes from up-facing exterior surfaces, respecting per-material slope limits
       dep: HOUSE-00212 · sys: content · plat: TOOL · pri: MUST
 - [x] HOUSE-00215 — `tools/world/build_chunks.py`: batch per-cell static props into ≤ 6 chunks by (effect, material, light groups, alpha mode), pre-transformed to world space, with per-sub-range bounds

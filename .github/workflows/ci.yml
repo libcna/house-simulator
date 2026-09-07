@@ -150,6 +150,16 @@ jobs:
         # fit and together do not, rather than by one that never fitted.
         run: python3 tools/world/build_chunks.py --selftest
 
+      - name: Sky exposure must measure geometry, not sampling noise
+        working-directory: cna-house
+        # `HOUSE-00213`. The Monte Carlo estimator is checked against three geometries whose answer
+        # is known exactly -- open sky (1), an unbounded lid (0), a half-plane (0.5) -- and the
+        # direction set against `1 - cos 45 = 0.293`, which is what separates a uniform solid-angle
+        # distribution from a latitude/longitude grid that would weight a skylight like a wall of
+        # glass. The grid broad phase is asserted to agree with brute force on every ray: one that
+        # also changed answers would not be an optimisation.
+        run: python3 tools/world/build_skyexposure.py --selftest
+
       - name: The stride measurement must survive both animation conventions
         working-directory: cna-house
         # `HOUSE-00194`. The fixture is an analytically exact walk -- 1.4 m of stride over 1.0 s --

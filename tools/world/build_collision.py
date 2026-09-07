@@ -381,16 +381,24 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
         floor_surface = cell.get("footstepSurface")
         indices: list[int] = []
 
+        # An OPEN cell -- a terrace, a porch, a garden region -- has a floor and no lid, and no
+        # wall on the sides that face outdoors. `world-format.md` says so in as many words
+        # (`visibilityHint: open` is "no walls, e.g. exterior"), and building one anyway roofs the
+        # terrace over: the rain stops above it (`HOUSE-00212`) and no ray from it reaches the sky
+        # (`HOUSE-00213`). It still gets the wall it shares with the house, because that wall is
+        # real and the room on the other side needs it too.
+        is_open = cell.get("kind") == "exterior" or cell.get("visibilityHint") == "open"
         for box in boxes_by_cell[cell["id"]]:
             x0, x1, z0, z1 = box
             indices.append(shapes.obb(
                 ((x0 + x1) / 2, y0 - depth / 2, (z0 + z1) / 2),
                 ((x1 - x0) / 2, depth / 2, (z1 - z0) / 2),
                 0.0, floor_surface, KIND_FLOOR))
-            indices.append(shapes.obb(
-                ((x0 + x1) / 2, y1 + depth / 2, (z0 + z1) / 2),
-                ((x1 - x0) / 2, depth / 2, (z1 - z0) / 2),
-                0.0, cell.get("ceilingMaterial"), KIND_CEILING))
+            if not is_open:
+                indices.append(shapes.obb(
+                    ((x0 + x1) / 2, y1 + depth / 2, (z0 + z1) / 2),
+                    ((x1 - x0) / 2, depth / 2, (z1 - z0) / 2),
+                    0.0, cell.get("ceilingMaterial"), KIND_CEILING))
 
             for side in _side_planes(box):
                 axis, value, su0, su1, outward = side
@@ -398,6 +406,8 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
                 on_plane = portals_by_plane.get((axis, snap(value)), [])
                 for u0, u1, neighbour in _neighbour_segments(
                         cell, box, side, cells_by_level.get(cell["level"], []), boxes_by_cell):
+                    if is_open and neighbour is None:
+                        continue
                     thickness = _wall_thickness(construction, cell, neighbour, level)
                     holes = openings + _portal_holes(on_plane, u0, u1, y0, y1)
                     for ru0, rv0, ru1, rv1 in subtract_rects((u0, y0, u1, y1), holes):
@@ -1185,6 +1195,33 @@ def selftest() -> int:
                 f"pooling avoids {world['stats']['pooledAway']} copies "
                 f"({world['stats']['references']} references over "
                 f"{world['stats']['shapes']} shapes)")
+
+        # 6b. An OPEN cell has a floor, no lid, and no wall facing outdoors. Building one anyway
+        #     roofs the terrace over, and `HOUSE-00212` and `HOUSE-00213` both then report a
+        #     sheltered, sky-less patio -- which is how this rule was found, three tools later.
+        terrace = json.loads((world_dir / "layout.cells.json").read_text())
+        terrace["cells"].append({
+            "id": "L0_TERRACE", "level": "L0", "kind": "exterior",
+            "boxes": [{"x": [-3.0, 0.0], "z": [0.0, 3.0]}],
+            "footstepSurface": "concrete", "wallMaterial": "MAT_PAINT",
+            "ceilingMaterial": "MAT_CEIL"})
+        (world_dir / "layout.cells.json").write_text(
+            json.dumps(terrace, indent=2) + "\n", encoding="utf-8")
+        outdoor = build(world_dir)
+        outdoor_shapes: Shapes = outdoor["shapes"]
+        patio = next(c for c in outdoor["cells"] if c["id"] == "L0_TERRACE")
+        kinds = [outdoor_shapes.obbs[i][4] for i in patio["shapes"]
+                 if i < len(outdoor_shapes.obbs)]
+        require(KIND_CEILING not in kinds,
+                f"an exterior cell gets no ceiling slab -- it is open to the sky "
+                f"({[KIND_NAMES[k] for k in kinds]})")
+        require(KIND_FLOOR in kinds, "...but it does get a floor; a terrace is a real surface")
+        walls = [outdoor_shapes.obbs[i] for i in patio["shapes"]
+                 if i < len(outdoor_shapes.obbs) and outdoor_shapes.obbs[i][4] == KIND_WALL]
+        require(len(walls) == 1 and abs(walls[0][0][0] - 0.0) < 1e-6,
+                f"...and exactly one wall, the one it shares with the lounge at x = 0, not four "
+                f"({len(walls)} walls at "
+                f"{[round(w[0][0], 2) for w in walls]})")
 
         # 7. The stair is a CLOSED prism, not a walking surface. An open surface is a floor the
         #    player falls through from below.

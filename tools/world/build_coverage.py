@@ -334,6 +334,23 @@ def selftest() -> int:
                 f"just outside its open edge is open sky "
                 f"(got {sample(coverage, -1.5, -0.75)})")
 
+        # 3b. The porch's cover comes from the BEDROOM ABOVE it, not from a ceiling of its own.
+        #     An exterior cell has no lid (`HOUSE-00210`), and before that rule existed the porch
+        #     got its own ceiling slab at exactly 2.50 m -- the same number the bedroom floor
+        #     gives -- so this claim passed for entirely the wrong reason. Removing the bedroom
+        #     must now leave the porch open to the sky.
+        cells_doc = json.loads((world_dir / "layout.cells.json").read_text())
+        kept = [c for c in cells_doc["cells"] if c["id"] != "L1_BEDROOM"]
+        (world_dir / "layout.cells.json").write_text(
+            json.dumps(dict(cells_doc, cells=kept), indent=2) + "\n", encoding="utf-8")
+        roofless = build(world_dir)
+        require(sample(roofless, -1.5, 1.5) == UNCOVERED,
+                f"with nothing above it, the porch is open to the sky "
+                f"(got {sample(roofless, -1.5, 1.5)}) -- so its 2.50 m above really was the "
+                f"bedroom floor and not a lid of its own")
+        (world_dir / "layout.cells.json").write_text(
+            json.dumps(cells_doc, indent=2) + "\n", encoding="utf-8")
+
         # 4. Indoors the cover is the room's own ceiling, not the roof over the whole house.
         require(abs(sample(coverage, 2.0, 1.5) - 2.50) < 1e-5,
                 f"inside the lounge the cover is its ceiling slab's underside at 2.50 m "
