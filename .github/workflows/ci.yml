@@ -288,6 +288,18 @@ jobs:
           CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
             python3 tools/blender/shading_factor.py --selftest
 
+      - name: Sun patches must land in the room and sweep it, not jump
+        working-directory: cna-house
+        # `HOUSE-00208`. §29.1 interpolates two grid entries, so every node carries the SAME
+        # lattice of points in the same row-major order -- a ray that hits nothing still emits a
+        # point rather than shortening the node. The claims are that the patch lands behind the
+        # window plane (the light travels opposite the sun; backwards it lands on the lawn), that
+        # one patch spans the floor/wall junction, and that it moves monotonically as the sun
+        # rises.
+        run: |
+          CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
+            python3 tools/blender/sun_patch.py --selftest
+
       - name: The impostor atlas must be eight different views, none of them cropped
         working-directory: cna-house
         # `HOUSE-00204`. EEVEE renders headless here. The two claims that earn their place: no

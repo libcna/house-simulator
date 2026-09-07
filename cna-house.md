@@ -1670,6 +1670,7 @@ cna-house/
 │   ├── skyexposure-format.md        ← the project-owned `skyexposure.bin` (§64.6)
 │   ├── snowshell-format.md          ← the project-owned `snowshell.bin` (§38)
 │   ├── shading-format.md            ← the project-owned `shading.bin` sun shading (§22)
+│   ├── sunpatch-format.md           ← the project-owned `sunpatch.bin` decals (§29.1)
 │   ├── content-authoring.md
 │   ├── world-format.md
 │   ├── performance-log.md

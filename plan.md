@@ -3355,8 +3355,42 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: an eave shades a high sun and not a low one; a neighbour shades one azimuth and not
             its mirror, and stops when deleted; partial shading is reported as a fraction; two
             bakes of one scene are identical
-- [ ] HOUSE-00208 — `tools/blender/sun_patch.py`: precompute the sun-patch polygons cast through each window onto floors and walls, same grid
+- [x] HOUSE-00208 — `tools/blender/sun_patch.py`: precompute the sun-patch polygons cast through each window onto floors and walls, same grid
       dep: HOUSE-00207 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/blender/sun_patch.py` and `docs/sunpatch-format.md`, the normative
+            `CSUN` version 1 spec. 15 selftest claims; `--selftest` runs in the CI Blender job.
+            12 injected bugs, all caught.
+      finding: **§29.1's "the two nearest grid entries are interpolated" decides the entire
+            format.** Two polygons of different shapes cannot be blended vertex by vertex, so a
+            patch is not the outline of wherever the light lands — it is a fixed `(n+1)²` lattice,
+            one point per corner of an `n×n` subdivision of the window, in the same order at every
+            one of the 288 nodes. Two things follow and neither is optional: a ray that hits
+            nothing **still emits a point**, clamped inside the room, because dropping it would
+            change the node's vertex count and break the node it is interpolated with; and the
+            lattice is **row-major** along the window's width, because §29.1 draws a quad-*strip*
+            and a strip's indices assume consecutive points run along a row.
+      finding: **subdividing is what lets the patch bend**, which is why §29.1 says quad-strip and
+            not quad. Projecting only the window's four corners gives a flat quad that cuts
+            through the wall the moment the sun is low; a lattice lets each little quad land on
+            whatever surface its own corners hit, and the patch folds along the floor/wall
+            junction by construction. Measured: at least one altitude puts part of the fixture's
+            patch on the floor and part 0.3 m up the back wall.
+      finding: **"a low sun throws a longer patch" is false in a real room**, and it was the first
+            claim written here. Four metres from the window the back wall truncates the patch, so a
+            low sun's extent (2.33 m) is no larger than a high sun's (2.07 m). What is true in any
+            room, and is what §29.1 asks to see, is that the patch **moves** — monotonically,
+            sweeping 4 m of floor as the sun climbs, with no reversal for the eye to catch.
+      finding: the light travels **opposite** the sun. `sun_direction` points from a surface
+            towards the sun, so inside the room the ray runs along its negation; backwards, every
+            patch lands on the lawn, where nothing sees it and nothing complains.
+      finding: **the size, measured, because §72 has no line for it.** At `n=3` a present node is
+            96 bytes, half the grid is empty (the sun behind the window's own wall, one byte), so a
+            window is 13.8 KB and §22's 81 windows about **1.1 MB** — two orders above
+            `shading.bin`'s 23 KB, which is the price of storing geometry instead of a scalar.
+            `--subdivisions` is the dial if it has to come down.
+      accept: every patch lands inside the room behind the window plane; every node has the same
+            point count in the same order; the patch sweeps monotonically with altitude; two bakes
+            are byte-identical
 - [ ] HOUSE-00209 — `tools/blender/cubemap_bake.py`: bake the 4 mirror cube maps
       dep: HOUSE-00206 · sys: content · plat: TOOL · pri: SHOULD
 - [x] HOUSE-00210 — `tools/world/build_collision.py`: layout + `_COL` proxies → `content/world/collision.bin`
