@@ -5227,8 +5227,35 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             that the neighbour walk ran — an injected bug that deleted it passed every test. `Find`
             now reports which step answered, which makes the claim testable and is what §70.6's
             performance scenarios and the debug overlay want to read anyway.
-- [ ] HOUSE-00357 — Implement `WorldValidator` in C++ mirroring `validate_world.py`'s 11 rules, run at load in debug builds
+- [x] HOUSE-00357 — Implement `WorldValidator` in C++ mirroring `validate_world.py`'s 11 rules, run at load in debug builds
       dep: HOUSE-00355 · sys: world · plat: ALL · pri: MUST
+      note: **four of the eleven are already enforced before a `WorldData` exists**, and repeating
+            them would check the same thing twice in every debug run: rule 1 by
+            `WorldData::Create`, and rules 2, 4 and 8 by `WorldLoader`, which refuses the row.
+            `WorldValidator` runs the seven that are properties of the **whole** world — 3, 5, 6,
+            7, 9, 10 and 11 — and the header says which is enforced where, so the split is a
+            statement rather than an omission.
+      note: it reports, it does not refuse. A world that breaks a whole-world rule is still one
+            the loader read, and a designer running the game to look at a room they have half-moved
+            should get the list, not a black screen. `Load` logs each problem at `Warn` in a debug
+            build; `Fast` and not `Full`, because rule 11 samples a floor per interactable and
+            belongs in the test that mirrors the Python gate rather than in every launch.
+      note: **it passed the authored house on the first run**, which is the result the session's
+            three loader/Python disagreements make worth stating: `HOUSE-00378` found the loader
+            refusing a portal the Python accepted, `HOUSE-00388` found it dropping seven of §64.3's
+            ten transmission classes, and `HOUSE-00387` found a whole file the loader never opened.
+            A rule stated once is a rule nobody checks.
+      note: a validator that has only ever passed is not a validator. Ten injected breakages, one
+            per rule and two each for the rules with two halves, each asserting that the rule which
+            owns the thing is the one that fires — the C++ half of the Python gate's discipline.
+            Two of the ten needed the fixture sharpened first: emptying the openings list looks
+            exactly like "the leaves are not authored yet", for which rule 7 correctly stands down;
+            and a crawl space next door to a room you can stand in is reachable **from** that room,
+            which is what rule 11's neighbour search is for.
+      note: the C++ model does not yet carry the exterior file's gates, kerbs, paths and
+            structures, the sky and weather tables, or a pet's start perch and bed. Those stay with
+            the Python gate alone until the loader reads them, and the header lists them rather than
+            leaving a reader to wonder.
 - [x] HOUSE-00358 — Implement `tools/world/validate_world.py` with all 11 rules and clear diagnostics
       dep: HOUSE-00341 · sys: world · plat: TOOL · pri: MUST
       note: (2026-09-07) all eleven rules, each reporting **every** failure with file, JSON path,

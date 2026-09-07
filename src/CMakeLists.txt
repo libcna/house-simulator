@@ -37,6 +37,7 @@ add_library(cnahouse_core STATIC
     world/WorldTypes.cpp
     world/WorldData.cpp
     world/WorldLoader.cpp
+    world/WorldValidator.cpp
     world/InteractableExpr.cpp
     world/SpatialIndex.cpp
 

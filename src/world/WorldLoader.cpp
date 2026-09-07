@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/world/WorldLoader.hpp"
 
+#include "cnahouse/util/Log.hpp"
+#include "cnahouse/world/WorldValidator.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -4059,7 +4062,29 @@ namespace cnahouse::world
                         contents.materials.size(),
                         contents.cells.size(),
                         directory);
-        return WorldData::Create(std::move(contents));
+        Result<WorldData> world = WorldData::Create(std::move(contents));
+        if (!world)
+        {
+            return world;
+        }
+
+        // §15.7's whole-world rules, in a debug build, at load (`HOUSE-00357`). The gate on every
+        // commit is `tools/world/validate_world.py`; this is the same statement made by the code
+        // that reads the house, and it runs here so that a world edited by hand between commits --
+        // or one shipped in a build somebody else made -- is still checked before anything trusts
+        // it. `Fast` and not `Full`: rule 11 samples a floor per interactable and belongs in the
+        // test that mirrors the Python gate, not in every debug launch.
+        //
+        // It reports rather than refuses. A world that breaks a whole-world rule is still a world
+        // the loader read successfully, and a designer running the game to look at a room they
+        // have half-moved should see the list, not a black screen.
+#if !defined(NDEBUG)
+        for (const ValidationProblem& problem : WorldValidator::Validate(world.Value()))
+        {
+            util::Log::Warn(util::LogCat::World, "§15.7 rule {}: {}", problem.rule, problem.ToString());
+        }
+#endif
+        return world;
     }
 
 } // namespace cnahouse::world
