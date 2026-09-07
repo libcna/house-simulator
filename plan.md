@@ -6246,8 +6246,27 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
 
 ### 5.3 Interactable data authoring (placement only; behaviour comes in phase 14)
 
-- [ ] HOUSE-00401 — Author `interactables.json` rows for the 62 doors
+- [x] HOUSE-00401 — Author `interactables.json` rows for the 64 doors
       dep: HOUSE-00375 · sys: world · plat: TOOL · pri: MUST
+      note: 64, not 62: every leaf that swings, slides or lifts on a frame — the 53 interior doors,
+            4 double doors, 2 entry, 2 exterior side, 2 sliders, the garage sectional and the
+            basement stair-head door — which is `layout.openings.json`'s doors less the
+            refrigerator's and the two hatches, and those belong to the container and hatch tasks.
+      note: **the opening is the geometry and this is the thing you use.**
+            `docs/world-format.md` says an opening "pairs with exactly one portal and with one
+            interactable"; these are those interactables, each naming its portal, so visibility,
+            audio and the pet graph all reach the same door through the row they already hold.
+      note: three are named as §65.6 names them — `DOOR_L1_MASTER`, `DOOR_L0_PANTRY`,
+            `DOOR_L2_ATTIC` — because a save delta that references a door by a name the design has
+            already published should not have to be translated. Three of `initialstate.json`'s four
+            dangling references now resolve; `WIN_L1_MASTER_N2` waits for `HOUSE-00402`.
+      note: `openFraction` is continuous, not a boolean: §54 swings a door 100° over 0.6 s and
+            §65.6 starts one of these at 0.35. A door that is either open or shut cannot be ajar.
+      note: **rule 11 proved all 64**, on top of the 80 switch plates: the focus is the handle,
+            away from the hinge, 1.05 m up and 0.06 m inside the room the leaf opens into, and
+            every one is reachable from somewhere a player can stand.
+      note: seeding the name counter with §65.6's three was not optional — the butler's-pantry door
+            derives `DOOR_L0_PANTRY` from its own swing cell, and rule 1 caught the collision.
 - [ ] HOUSE-00402 — Author rows for the 62 openable windows
       dep: HOUSE-00376 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00403 — Author rows for the 84 light groups and their switch plates

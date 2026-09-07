@@ -1225,6 +1225,1111 @@
       "state": { "LG_L3_STORE_W_MAIN": false },
       "persist": ["LG_L3_STORE_W_MAIN"],
       "portal": "P_L3_STORE_W__L3_STORE_N"
+    },
+
+    // ================================================================== the doors
+    // `HOUSE-00401`. 64 rows: every leaf in the house that swings, slides or lifts on a frame,
+    // which is `layout.openings.json`'s doors less the refrigerator's and the two hatches -- those
+    // belong to the container and hatch tasks.
+    //
+    // The opening is the geometry and this is the thing you use: `docs/world-format.md` says an
+    // opening "pairs with exactly one portal and with one interactable", and these are those
+    // interactables. Each names its portal, so the visibility, audio and pet systems all reach the
+    // same door through the row they already hold.
+    //
+    // `openFraction` is continuous, not a boolean: §54 swings a door 100 degrees over 0.6 s and
+    // §65.6 starts one of these at 0.35. A door that is either open or shut cannot be ajar.
+    //
+    // The focus is the handle: away from the hinge, 1.05 m up, 0.06 m inside the room the leaf
+    // opens into -- so §15.7 rule 11 proves all 64 reachable from somewhere a player can stand,
+    // the way it proved the 80 switch plates.
+    //
+    // Three are named as §65.6 names them -- `DOOR_L1_MASTER`, `DOOR_L0_PANTRY`, `DOOR_L2_ATTIC`
+    // -- because a save delta that references a door by a name the design already published should
+    // not have to be translated. The rest are `DOOR_` plus the room the leaf opens into.
+    {
+      "id": "DOOR_B1_MECHANICAL", "kind": "door", "cell": "B1_MECHANICAL",
+      "prop": null,
+      "focus": { "point": [4.96, -1.25, -15.94], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [4.87, -2.30, -16.75], "max": [4.93, -0.20, -15.85] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_STAIR__B1_MECHANICAL"
+    },
+    {
+      "id": "DOOR_B1_ELECTRICAL", "kind": "door", "cell": "B1_ELECTRICAL",
+      "prop": null,
+      "focus": { "point": [4.96, -1.25, -18.89], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [4.87, -2.30, -19.70], "max": [4.93, -0.20, -18.80] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_STAIR__B1_ELECTRICAL"
+    },
+    {
+      "id": "DOOR_B1_UTILITY", "kind": "door", "cell": "B1_UTILITY",
+      "prop": null,
+      "focus": { "point": [7.16, -1.25, -22.94], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [6.35, -2.30, -23.03], "max": [7.25, -0.20, -22.97] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_CINEMA__B1_UTILITY"
+    },
+    {
+      "id": "DOOR_B1_GYM", "kind": "door", "cell": "B1_GYM",
+      "prop": null,
+      "focus": { "point": [-2.26, -1.25, -15.94], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-2.23, -2.30, -16.75], "max": [-2.17, -0.20, -15.85] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_HALL__B1_GYM"
+    },
+    {
+      "id": "DOOR_B1_HOBBY", "kind": "door", "cell": "B1_HOBBY",
+      "prop": null,
+      "focus": { "point": [-2.26, -1.25, -20.79], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-2.23, -2.30, -21.60], "max": [-2.17, -0.20, -20.70] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_HALL__B1_HOBBY"
+    },
+    {
+      "id": "DOOR_B1_LAUNDRY2", "kind": "door", "cell": "B1_LAUNDRY2",
+      "prop": null,
+      "focus": { "point": [-2.26, -1.25, -25.19], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-2.23, -2.30, -26.00], "max": [-2.17, -0.20, -25.10] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_HALL__B1_LAUNDRY2"
+    },
+    {
+      "id": "DOOR_B1_WORKSHOP", "kind": "door", "cell": "B1_WORKSHOP",
+      "prop": null,
+      "focus": { "point": [-8.26, -1.25, -15.94], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-8.23, -2.30, -16.75], "max": [-8.17, -0.20, -15.85] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_GYM__B1_WORKSHOP"
+    },
+    {
+      "id": "DOOR_B1_STOR1", "kind": "door", "cell": "B1_STOR1",
+      "prop": null,
+      "focus": { "point": [-8.26, -1.25, -19.79], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-8.23, -2.30, -20.60], "max": [-8.17, -0.20, -19.70] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_HOBBY__B1_STOR1"
+    },
+    {
+      "id": "DOOR_B1_STOR2", "kind": "door", "cell": "B1_STOR2",
+      "prop": null,
+      "focus": { "point": [-8.26, -1.25, -22.64], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-8.23, -2.30, -23.45], "max": [-8.17, -0.20, -22.55] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_HOBBY__B1_STOR2"
+    },
+    {
+      "id": "DOOR_B1_CELLAR", "kind": "door", "cell": "B1_CELLAR",
+      "prop": null,
+      "focus": { "point": [-6.76, -1.25, -24.06], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-6.85, -2.30, -24.03], "max": [-5.95, -0.20, -23.97] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_HOBBY__B1_CELLAR"
+    },
+    {
+      "id": "DOOR_L0_HALL", "kind": "door", "cell": "L0_HALL",
+      "prop": null,
+      "focus": { "point": [2.14, 1.65, -22.86], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [2.17, 0.60, -22.95], "max": [2.23, 2.70, -22.05] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_HALL__L0_FAMILY"
+    },
+    {
+      "id": "DOOR_L0_LAUNDRY", "kind": "door", "cell": "L0_LAUNDRY",
+      "prop": null,
+      "focus": { "point": [7.16, 1.65, -18.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [6.35, 0.60, -18.33], "max": [7.25, 2.70, -18.27] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_MUDROOM__L0_LAUNDRY"
+    },
+    {
+      "id": "DOOR_L0_LAUNDRY_2", "kind": "door", "cell": "L0_LAUNDRY",
+      "prop": null,
+      "focus": { "point": [7.16, 1.65, -21.94], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [6.35, 0.60, -22.03], "max": [7.25, 2.70, -21.97] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_FAMILY__L0_LAUNDRY"
+    },
+    {
+      "id": "DOOR_L0_STOR", "kind": "door", "cell": "L0_STOR",
+      "prop": null,
+      "focus": { "point": [-8.26, 1.65, -21.04], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-8.23, 0.60, -21.85], "max": [-8.17, 2.70, -20.95] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_DINING__L0_STOR"
+    },
+    {
+      "id": "DOOR_L0_PANTRY", "kind": "door", "cell": "L0_PANTRY",
+      "prop": null,
+      "focus": { "point": [-8.26, 1.65, -25.69], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-8.23, 0.60, -26.50], "max": [-8.17, 2.70, -25.60] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_KITCHEN__L0_PANTRY"
+    },
+    {
+      "id": "DOOR_L0_PANTRY_2", "kind": "door", "cell": "L0_PANTRY",
+      "prop": null,
+      "focus": { "point": [-10.81, 1.65, -25.06], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-10.90, 0.60, -25.03], "max": [-10.00, 2.70, -24.97] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_BUTLERS__L0_PANTRY"
+    },
+    {
+      "id": "DOOR_L0_BUTLERS", "kind": "door", "cell": "L0_BUTLERS",
+      "prop": null,
+      "focus": { "point": [-10.81, 1.65, -22.66], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-10.90, 0.60, -22.63], "max": [-10.00, 2.70, -22.57] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_STOR__L0_BUTLERS"
+    },
+    {
+      "id": "DOOR_L1_CLOSET_2", "kind": "door", "cell": "L1_CLOSET_2",
+      "prop": null,
+      "focus": { "point": [-8.71, 4.70, -20.66], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-8.80, 3.65, -20.63], "max": [-7.90, 5.75, -20.57] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L1_HALL_W__L1_CLOSET_2"
+    },
+    {
+      "id": "DOOR_L1_CLOSET_3", "kind": "door", "cell": "L1_CLOSET_3",
+      "prop": null,
+      "focus": { "point": [-2.94, 4.70, -20.66], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-3.75, 3.65, -20.63], "max": [-2.85, 5.75, -20.57] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L1_HALL_W__L1_CLOSET_3"
+    },
+    {
+      "id": "DOOR_L2_ATTIC", "kind": "door", "cell": "L2_STAIR_ATTIC",
+      "prop": null,
+      "focus": { "point": [4.96, 7.60, -15.94], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [4.87, 6.55, -16.75], "max": [4.93, 8.65, -15.85] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L2_STAIR__L2_STAIR_ATTIC"
+    },
+    {
+      "id": "DOOR_L2_LANDING", "kind": "door", "cell": "L2_LANDING",
+      "prop": null,
+      "focus": { "point": [-2.14, 7.60, -15.94], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-2.23, 6.55, -16.75], "max": [-2.17, 8.65, -15.85] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L2_LANDING__L2_LIBRARY"
+    },
+    {
+      "id": "DOOR_L2_CLOSET_4", "kind": "door", "cell": "L2_CLOSET_4",
+      "prop": null,
+      "focus": { "point": [-8.71, 7.60, -20.66], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-8.80, 6.55, -20.63], "max": [-7.90, 8.65, -20.57] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L2_HALL_W__L2_CLOSET_4"
+    },
+    {
+      "id": "DOOR_L2_LINEN2", "kind": "door", "cell": "L2_LINEN2",
+      "prop": null,
+      "focus": { "point": [-2.94, 7.60, -20.66], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-3.75, 6.55, -20.63], "max": [-2.85, 8.65, -20.57] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L2_HALL_W__L2_LINEN2"
+    },
+    {
+      "id": "DOOR_L2_HALL", "kind": "door", "cell": "L2_HALL",
+      "prop": null,
+      "focus": { "point": [0.36, 7.60, -21.94], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [-0.45, 6.55, -22.03], "max": [0.45, 8.65, -21.97] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L2_HALL__L2_GAMES"
+    },
+    {
+      "id": "DOOR_L2_STOR2", "kind": "door", "cell": "L2_STOR2",
+      "prop": null,
+      "focus": { "point": [2.26, 7.60, -22.09], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [2.17, 6.55, -22.90], "max": [2.23, 8.65, -22.00] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L2_GAMES__L2_STOR2"
+    },
+    {
+      "id": "DOOR_L2_STOR2_2", "kind": "door", "cell": "L2_STOR2",
+      "prop": null,
+      "focus": { "point": [5.81, 7.60, -22.84], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [5.00, 6.55, -22.93], "max": [5.90, 8.65, -22.87] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L2_STOR2__L2_SITTING"
+    },
+    {
+      "id": "DOOR_L0_MUDROOM", "kind": "door", "cell": "L0_MUDROOM",
+      "prop": null,
+      "focus": { "point": [8.64, 1.65, -15.94], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [8.67, 0.60, -16.75], "max": [8.73, 2.70, -15.85] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_MUDROOM__L0_GARAGE"
+    },
+    {
+      "id": "DOOR_B1_WC7", "kind": "door", "cell": "B1_WC7",
+      "prop": null,
+      "focus": { "point": [2.26, -1.25, -21.74], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [2.17, -2.30, -22.55], "max": [2.23, -0.20, -21.65] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_B1_HALL__B1_WC7"
+    },
+    {
+      "id": "DOOR_L0_WC1", "kind": "door", "cell": "L0_WC1",
+      "prop": null,
+      "focus": { "point": [2.26, 1.65, -20.74], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [2.17, 0.60, -21.55], "max": [2.23, 2.70, -20.65] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L0_HALL__L0_WC1"
+    },
+    {
+      "id": "DOOR_L0_WC2", "kind": "door", "cell": "L0_WC2",
+      "prop": null,
+      "focus": { "point": [-8.26, 1.65, -18.89], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-8.23, 0.60, -19.70], "max": [-8.17, 2.70, -18.80] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L0_LIVING__L0_WC2"
+    },
+    {
+      "id": "DOOR_L0_CLOSET_W", "kind": "door", "cell": "L0_CLOSET_W",
+      "prop": null,
+      "focus": { "point": [-11.19, 1.65, -18.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-12.00, 0.60, -18.33], "max": [-11.10, 2.70, -18.27] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L0_OFFICE__L0_CLOSET_W"
+    },
+    {
+      "id": "DOOR_L1_MASTER_CLOSET", "kind": "door", "cell": "L1_MASTER_CLOSET",
+      "prop": null,
+      "focus": { "point": [-7.06, 4.70, -24.19], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-7.03, 3.65, -25.00], "max": [-6.97, 5.75, -24.10] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_MASTER_BED__L1_MASTER_CLOSET"
+    },
+    {
+      "id": "DOOR_L1_MASTER_CLOSET_2", "kind": "door", "cell": "L1_MASTER_CLOSET",
+      "prop": null,
+      "focus": { "point": [-9.34, 4.70, -24.19], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-9.43, 3.65, -25.00], "max": [-9.37, 5.75, -24.10] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_MASTER_CLOSET__L1_MASTER_BATH"
+    },
+    {
+      "id": "DOOR_L1_WC4", "kind": "door", "cell": "L1_WC4",
+      "prop": null,
+      "focus": { "point": [2.26, 4.70, -20.74], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [2.17, 3.65, -21.55], "max": [2.23, 5.75, -20.65] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_HALL__L1_WC4"
+    },
+    {
+      "id": "DOOR_L1_LINEN", "kind": "door", "cell": "L1_LINEN",
+      "prop": null,
+      "focus": { "point": [3.19, 4.70, -22.84], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [3.10, 3.65, -22.93], "max": [4.00, 5.75, -22.87] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_LINEN__L1_BED2"
+    },
+    {
+      "id": "DOOR_L1_STOR", "kind": "door", "cell": "L1_STOR",
+      "prop": null,
+      "focus": { "point": [7.16, 4.70, -22.84], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [6.35, 3.65, -22.93], "max": [7.25, 5.75, -22.87] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_STOR__L1_BED2"
+    },
+    {
+      "id": "DOOR_L1_STOR_2", "kind": "door", "cell": "L1_STOR",
+      "prop": null,
+      "focus": { "point": [7.16, 4.70, -22.06], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [6.35, 3.65, -22.03], "max": [7.25, 5.75, -21.97] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_BATH3__L1_STOR"
+    },
+    {
+      "id": "DOOR_L1_HALL_W", "kind": "door", "cell": "L1_HALL_W",
+      "prop": null,
+      "focus": { "point": [-9.31, 4.70, -18.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-9.40, 3.65, -18.33], "max": [-8.50, 5.75, -18.27] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_HALL_W__L1_BED3"
+    },
+    {
+      "id": "DOOR_L1_HALL_W_2", "kind": "door", "cell": "L1_HALL_W",
+      "prop": null,
+      "focus": { "point": [-4.84, 4.70, -18.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-5.65, 3.65, -18.33], "max": [-4.75, 5.75, -18.27] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_HALL_W__L1_BED4"
+    },
+    {
+      "id": "DOOR_L1_BATH2", "kind": "door", "cell": "L1_BATH2",
+      "prop": null,
+      "focus": { "point": [-9.76, 4.70, -19.09], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-9.73, 3.65, -19.90], "max": [-9.67, 5.75, -19.00] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_HALL_W__L1_BATH2"
+    },
+    {
+      "id": "DOOR_L1_WC3", "kind": "door", "cell": "L1_WC3",
+      "prop": null,
+      "focus": { "point": [-5.34, 4.70, -20.66], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-6.15, 3.65, -20.63], "max": [-5.25, 5.75, -20.57] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_HALL_W__L1_WC3"
+    },
+    {
+      "id": "DOOR_L1_BED5", "kind": "door", "cell": "L1_BED5",
+      "prop": null,
+      "focus": { "point": [4.96, 4.70, -15.94], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [4.87, 3.65, -16.75], "max": [4.93, 5.75, -15.85] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_STAIR__L1_BED5"
+    },
+    {
+      "id": "DOOR_L1_BATH3", "kind": "door", "cell": "L1_BATH3",
+      "prop": null,
+      "focus": { "point": [7.16, 4.70, -18.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [6.35, 3.65, -18.33], "max": [7.25, 5.75, -18.27] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_BED5__L1_BATH3"
+    },
+    {
+      "id": "DOOR_L2_BED6", "kind": "door", "cell": "L2_BED6",
+      "prop": null,
+      "focus": { "point": [-8.26, 7.60, -15.94], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-8.23, 6.55, -16.75], "max": [-8.17, 8.65, -15.85] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L2_LIBRARY__L2_BED6"
+    },
+    {
+      "id": "DOOR_L2_BATH4", "kind": "door", "cell": "L2_BATH4",
+      "prop": null,
+      "focus": { "point": [-9.76, 7.60, -19.09], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-9.73, 6.55, -19.90], "max": [-9.67, 8.65, -19.00] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L2_HALL_W__L2_BATH4"
+    },
+    {
+      "id": "DOOR_L2_WC5", "kind": "door", "cell": "L2_WC5",
+      "prop": null,
+      "focus": { "point": [-5.34, 7.60, -20.66], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-6.15, 6.55, -20.63], "max": [-5.25, 8.65, -20.57] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L2_HALL_W__L2_WC5"
+    },
+    {
+      "id": "DOOR_L2_BATH4_2", "kind": "door", "cell": "L2_BATH4",
+      "prop": null,
+      "focus": { "point": [-11.56, 7.60, -21.94], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [-11.65, 6.55, -22.03], "max": [-10.75, 8.65, -21.97] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L2_BATH4__L2_BED7"
+    },
+    {
+      "id": "DOOR_L2_WC6", "kind": "door", "cell": "L2_WC6",
+      "prop": null,
+      "focus": { "point": [2.26, 7.60, -20.74], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [2.17, 6.55, -21.55], "max": [2.23, 8.65, -20.65] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L2_HALL__L2_WC6"
+    },
+    {
+      "id": "DOOR_L2_STOR2_3", "kind": "door", "cell": "L2_STOR2",
+      "prop": null,
+      "focus": { "point": [7.16, 7.60, -22.06], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [6.35, 6.55, -22.03], "max": [7.25, 8.65, -21.97] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L2_STOR2__L2_BATH5"
+    },
+    {
+      "id": "DOOR_B1_UNDERSTAIR", "kind": "door", "cell": "B1_UNDERSTAIR",
+      "prop": null,
+      "focus": { "point": [2.26, -1.25, -20.34], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [2.17, -2.30, -21.15], "max": [2.23, -0.70, -20.25] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_B1_HALL__B1_UNDERSTAIR"
+    },
+    {
+      "id": "DOOR_B1_CINEMA", "kind": "door", "cell": "B1_CINEMA",
+      "prop": null,
+      "focus": { "point": [2.26, -1.25, -24.69], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [2.17, -2.30, -25.50], "max": [2.23, -0.20, -24.60] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_B1_HALL__B1_CINEMA"
+    },
+    {
+      "id": "DOOR_L1_MASTER", "kind": "door", "cell": "L1_HALL",
+      "prop": null,
+      "focus": { "point": [0.36, 4.70, -21.94], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [-0.45, 3.65, -22.03], "max": [0.45, 5.75, -21.97] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_HALL__L1_MASTER_BED"
+    },
+    {
+      "id": "DOOR_L0_STAIR_MAIN", "kind": "door", "cell": "L0_STAIR_MAIN",
+      "prop": null,
+      "focus": { "point": [3.55, 1.65, -19.30], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [2.40, 0.60, -19.70], "max": [4.70, 2.65, -19.64] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_STAIR__B1_STAIR"
+    },
+    {
+      "id": "DOOR_L0_FOYER", "kind": "door", "cell": "L0_FOYER",
+      "prop": null,
+      "focus": { "point": [-2.14, 1.65, -15.49], "normal": [1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-2.23, 0.60, -17.20], "max": [-2.17, 2.75, -15.40] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_FOYER__L0_LIVING"
+    },
+    {
+      "id": "DOOR_L0_DINING", "kind": "door", "cell": "L0_DINING",
+      "prop": null,
+      "focus": { "point": [-2.26, 1.65, -20.79], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-2.23, 0.60, -22.50], "max": [-2.17, 2.75, -20.70] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_HALL__L0_DINING"
+    },
+    {
+      "id": "DOOR_L0_OFFICE", "kind": "door", "cell": "L0_OFFICE",
+      "prop": null,
+      "focus": { "point": [-8.26, 1.65, -15.49], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-8.23, 0.60, -17.20], "max": [-8.17, 2.75, -15.40] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L0_LIVING__L0_OFFICE"
+    },
+    {
+      "id": "DOOR_L2_LANDING_2", "kind": "door", "cell": "L2_LANDING",
+      "prop": null,
+      "focus": { "point": [0.71, 7.60, -14.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-0.80, 6.55, -14.33], "max": [0.80, 8.70, -14.27] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": "P_L2_LANDING__L2_BALCONY_JULIET"
+    },
+    {
+      "id": "DOOR_L0_FOYER_2", "kind": "door", "cell": "L0_FOYER",
+      "prop": null,
+      "focus": { "point": [0.41, 1.65, -14.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-0.50, 0.60, -14.33], "max": [0.50, 2.75, -14.27] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L0_PORCH__L0_FOYER"
+    },
+    {
+      "id": "DOOR_L1_LANDING", "kind": "door", "cell": "L1_LANDING",
+      "prop": null,
+      "focus": { "point": [0.41, 4.70, -14.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-0.50, 3.65, -14.33], "max": [0.50, 5.80, -14.27] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_LANDING__L1_BALCONY_FRONT"
+    },
+    {
+      "id": "DOOR_EXT_SHED", "kind": "door", "cell": "EXT_SHED",
+      "prop": null,
+      "focus": { "point": [-16.66, 1.05, -41.84], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [-16.63, 0.00, -42.65], "max": [-16.57, 2.05, -41.75] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_EXT_GARDEN__EXT_SHED"
+    },
+    {
+      "id": "DOOR_L0_GARAGE", "kind": "door", "cell": "L0_GARAGE",
+      "prop": null,
+      "focus": { "point": [17.04, 1.20, -17.14], "normal": [-1.0, 0.0, 0.0], "radius": 0.35 },
+      "bounds": { "min": [17.07, 0.15, -17.95], "max": [17.13, 2.25, -17.05] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L0_GARAGE__EXT_SIDEYARD_E"
+    },
+    {
+      "id": "DOOR_L0_SUNROOM", "kind": "door", "cell": "L0_SUNROOM",
+      "prop": null,
+      "focus": { "point": [-0.89, 1.65, -32.04], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [-3.20, 0.60, -32.13], "max": [-0.80, 2.75, -32.07] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L0_SUNROOM__EXT_TERRACE"
+    },
+    {
+      "id": "DOOR_L1_MASTER_BED", "kind": "door", "cell": "L1_MASTER_BED",
+      "prop": null,
+      "focus": { "point": [-1.14, 4.70, -27.04], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [-3.45, 3.65, -27.13], "max": [-1.05, 5.80, -27.07] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L1_MASTER_BED__L1_BALCONY_REAR"
+    },
+    {
+      "id": "DOOR_L0_GARAGE_2", "kind": "door", "cell": "L0_GARAGE",
+      "prop": null,
+      "focus": { "point": [15.56, 1.20, -13.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [10.75, 0.15, -13.33], "max": [15.65, 2.55, -13.27] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+        { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
+        { "verb": "Unlock", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_DOOR_UNLOCK", "duration": 0.4 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction", "locked"],
+      "portal": "P_L0_GARAGE__EXT_DRIVEWAY"
     }
   ]
 }
