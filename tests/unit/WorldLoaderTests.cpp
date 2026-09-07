@@ -12,6 +12,8 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
@@ -170,9 +172,145 @@ namespace
                 {
                   "id": "L0_TERRACE", "level": "L0", "kind": "exterior",
                   "boxes": [{ "x": [-2.0, 2.0], "z": [-4.0, 0.0] }]
+                },
+                {
+                  "id": "L0_WC1", "level": "L0", "kind": "room",
+                  "boxes": [{ "x": [2.0, 4.0], "z": [4.0, 6.0] }]
+                },
+                {
+                  "id": "L1_LANDING", "level": "L1", "kind": "room",
+                  "boxes": [{ "x": [-6.0, -2.0], "z": [4.0, 8.0] }]
                 }
               ]
             })";
+        }
+
+        /// Four portals over `Cells()`: an opening, a door, the horizontal stair well, and a
+        /// window with a traversal cap.
+        ///
+        /// The hall's face on `x = 2` runs `z 4..10`; the WC's runs `z 4..6`. The difference is
+        /// what the "in one cell's wall and not the other's" test turns on, and it is the reason
+        /// the plane check looks at both sides rather than the first.
+        static std::string Portals()
+        {
+            return R"({
+              "schema": "cna-house/portals/1",
+              "portals": [
+                { "id": "P_HALL__STAIR", "cellA": "L0_HALL", "cellB": "L0_STAIR",
+                  "plane": { "axis": "x", "value": -2.0 },
+                  "rect": { "u": [5.0, 6.0], "v": [0.60, 2.65] },
+                  "kind": "cased_opening", "aperture": null, "opacity": "open",
+                  "maxDepth": null },
+                { "id": "P_HALL__WC1", "cellA": "L0_HALL", "cellB": "L0_WC1",
+                  "plane": { "axis": "x", "value": 2.0 },
+                  "rect": { "u": [4.6, 5.5], "v": [0.60, 2.62] },
+                  "kind": "door", "aperture": "DOOR_L0_WC1",
+                  "opacity": "opaque_when_closed", "maxDepth": null,
+                  "soundLoss": { "open": 0.05, "closed": 0.55 } },
+                { "id": "P_STAIR__LANDING", "cellA": "L0_STAIR", "cellB": "L1_LANDING",
+                  "plane": { "axis": "y", "value": 3.65 },
+                  "rect": { "u": [-5.5, -2.5], "v": [4.5, 7.5] },
+                  "kind": "stair_well", "opacity": "open" },
+                { "id": "P_HALL__WC1_GLASS", "cellA": "L0_HALL", "cellB": "L0_WC1",
+                  "plane": { "axis": "x", "value": 2.0 },
+                  "rect": { "u": [4.0, 4.5], "v": [1.00, 1.60] },
+                  "kind": "window", "opacity": "glass", "maxDepth": 2 }
+              ]
+            })";
+        }
+
+        /// One portal file holding the WC door with one field replaced.
+        ///
+        /// @p patch is a whole `"key": value` pair; the key it names replaces the default, or is
+        /// added if the default does not have it. Writing the tests as a patch rather than as
+        /// eleven near-identical JSON blobs is what keeps the ONE thing each case changes visible.
+        static std::string OnePortal(const std::string& patch)
+        {
+            std::vector<std::pair<std::string, std::string>> fields{
+                {"\"id\"", "\"P_HALL__WC1\""},
+                {"\"cellA\"", "\"L0_HALL\""},
+                {"\"cellB\"", "\"L0_WC1\""},
+                {"\"plane\"", R"({ "axis": "x", "value": 2.0 })"},
+                {"\"rect\"", R"({ "u": [4.6, 5.5], "v": [0.60, 2.62] })"},
+                {"\"kind\"", "\"door\""},
+            };
+
+            const std::size_t colon = patch.find(':');
+            std::string key = patch.substr(0, colon);
+            while (!key.empty() && (key.front() == ' ' || key.front() == '\n'))
+            {
+                key.erase(key.begin());
+            }
+            while (!key.empty() && (key.back() == ' ' || key.back() == '\n'))
+            {
+                key.pop_back();
+            }
+            const std::string value = patch.substr(colon + 1);
+
+            bool replaced = false;
+            for (auto& field : fields)
+            {
+                if (field.first == key)
+                {
+                    field.second = value;
+                    replaced = true;
+                }
+            }
+            if (!replaced)
+            {
+                fields.emplace_back(key, value);
+            }
+
+            std::string text = R"({"schema": "cna-house/portals/1", "portals": [{)";
+            for (std::size_t index = 0; index < fields.size(); ++index)
+            {
+                if (index != 0)
+                {
+                    text += ',';
+                }
+                text += fields[index].first + ':' + fields[index].second;
+            }
+            return text + "}]}";
+        }
+
+        /// The stair well with one field replaced, for the horizontal-plane cases.
+        static std::string OneStairWell(const std::string& patch)
+        {
+            std::string row = R"({ "id": "P_STAIR__LANDING", "cellA": "L0_STAIR",
+                                   "cellB": "L1_LANDING",
+                                   "plane": { "axis": "y", "value": 3.65 },
+                                   "rect": { "u": [-5.5, -2.5], "v": [4.5, 7.5] },
+                                   "kind": "stair_well" })";
+            const std::size_t colon = patch.find(':');
+            const std::string key = patch.substr(0, colon);
+            const std::size_t at = row.find(key);
+            // Every patch this helper is given names a field the row already has; a typo in the
+            // key would otherwise leave the row unchanged and the test would pass for no reason.
+            if (at == std::string::npos)
+            {
+                ADD_FAILURE() << "the stair-well row has no field " << key;
+                return "{}";
+            }
+            const std::size_t end = row.find('\n', at);
+            row.replace(at, (end == std::string::npos ? row.size() : end) - at, patch + ",");
+            return R"({"schema": "cna-house/portals/1", "portals": [)" + row + "]}";
+        }
+
+        /// Levels, cells and portals, loaded in the order the loader reads them.
+        [[nodiscard]] cnahouse::util::Result<void> LoadUpToPortals(world::WorldData::Contents& contents) const
+        {
+            Write("layout.levels.json", Levels());
+            Write("layout.cells.json", Cells());
+            Write("layout.portals.json", Portals());
+            if (const auto levels = world::WorldLoader::LoadLevels(directory_, contents); !levels)
+            {
+                return levels.Error();
+            }
+            if (const auto cells = world::WorldLoader::LoadCells(directory_, contents); !cells)
+            {
+                return cells.Error();
+            }
+            return world::WorldLoader::LoadPortals(directory_, contents);
         }
 
         /// The smallest world the loader can finish on: a manifest and the files it lists.
@@ -189,7 +327,9 @@ namespace
             Write("layout.levels.json", Levels());
             Write("layout.materials.json", Materials());
             Write("layout.cells.json", Cells());
-            WriteManifest({"layout.levels.json", "layout.materials.json", "layout.cells.json"});
+            Write("layout.portals.json", Portals());
+            WriteManifest(
+                {"layout.levels.json", "layout.materials.json", "layout.cells.json", "layout.portals.json"});
         }
 
         std::string directory_;
@@ -634,7 +774,7 @@ namespace
         const auto cells = world::WorldLoader::LoadCells(directory_, contents);
         ASSERT_TRUE(cells) << cells.Error().ToString();
 
-        ASSERT_EQ(contents.cells.size(), 4U);
+        ASSERT_EQ(contents.cells.size(), 6U);
         const world::Cell& kitchen = contents.cells[0];
         EXPECT_EQ(kitchen.id, Intern("L0_KITCHEN"));
         EXPECT_EQ(kitchen.level, Intern("L0"));
@@ -795,6 +935,198 @@ namespace
         EXPECT_EQ(contents.cells[0].floorMaterial, Intern("MAT_DOES_NOT_EXIST"));
     }
 
+    // --- the portals ------------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, APortalIsReadWithEveryFieldItCarries)
+    {
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(LoadUpToPortals(contents));
+
+        ASSERT_EQ(contents.portals.size(), 4U);
+        const world::Portal& door = contents.portals[1];
+        EXPECT_EQ(door.id, Intern("P_HALL__WC1"));
+        EXPECT_EQ(door.cellA, Intern("L0_HALL"));
+        EXPECT_EQ(door.cellB, Intern("L0_WC1"));
+        EXPECT_EQ(door.axis, world::PlaneAxis::X);
+        EXPECT_FLOAT_EQ(door.planeValue, 2.0F);
+        EXPECT_NEAR(door.Width(), 0.90F, 1e-5F);
+        EXPECT_NEAR(door.Height(), 2.02F, 1e-5F);
+        EXPECT_EQ(door.kind, world::PortalKind::Door);
+        EXPECT_EQ(door.aperture, Intern("DOOR_L0_WC1"));
+        EXPECT_EQ(door.opacity, world::PortalOpacity::OpaqueWhenClosed);
+        EXPECT_FLOAT_EQ(door.soundLossOpen, 0.05F);
+        EXPECT_FLOAT_EQ(door.soundLossClosed, 0.55F);
+        EXPECT_FALSE(door.crouch);
+    }
+
+    TEST_F(WorldLoaderTest, ANullMaxDepthIsNoCapAndNotACapOfZero)
+    {
+        // The difference between a glazed door you can see through and a bricked-up one. Read as 0
+        // the traversal would stop AT the portal.
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(LoadUpToPortals(contents));
+        EXPECT_FALSE(contents.portals[1].maxDepth.has_value());
+        ASSERT_TRUE(contents.portals[3].maxDepth.has_value());
+        EXPECT_EQ(*contents.portals[3].maxDepth, 2);
+    }
+
+    TEST_F(WorldLoaderTest, AHorizontalPortalIsReadAndChecked)
+    {
+        // A `stair_well` is in the vocabulary and is not a hole in a wall. On a `y` plane `u` is
+        // world X and `v` is world Z, and the plane must be the boundary the two cells share.
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(LoadUpToPortals(contents));
+
+        const world::Portal& well = contents.portals[2];
+        EXPECT_EQ(well.kind, world::PortalKind::StairWell);
+        EXPECT_EQ(well.axis, world::PlaneAxis::Y);
+        EXPECT_FLOAT_EQ(well.planeValue, 3.65F);
+    }
+
+    TEST_F(WorldLoaderTest, AHorizontalPortalAtTheWrongHeightOrOutsideTheFootprintIsRefused)
+    {
+        // The `y` case is checked as hard as the wall case. A stair well at the wrong height joins
+        // two floors that do not meet there, and the visibility solver would see through a slab.
+        for (const auto& [patch, expected] : std::vector<std::pair<std::string, std::string>>{
+                 {R"("plane": { "axis": "y", "value": 4.20 })", "neither the floor nor the ceiling"},
+                 {R"("rect": { "u": [-9.0, -8.0], "v": [4.5, 7.5] })", "footprint"}})
+        {
+            world::WorldData::Contents contents;
+            Write("layout.levels.json", Levels());
+            Write("layout.cells.json", Cells());
+            Write("layout.portals.json", OneStairWell(patch));
+            ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+            ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+
+            const auto portals = world::WorldLoader::LoadPortals(directory_, contents);
+            ASSERT_FALSE(portals) << "accepted " << patch;
+            EXPECT_NE(portals.Error().Message().find(expected), std::string::npos)
+                << portals.Error().ToString();
+        }
+    }
+
+    TEST_F(WorldLoaderTest, APortalNotInItsWallIsRefusedAndBothSidesAreChecked)
+    {
+        // §15.7 rule 4, checked here because the rectangle is what the visibility clip uses every
+        // frame: one that is not in the wall it claims does not fail, it produces a frustum that is
+        // silently wrong and a room that flickers.
+        for (const auto& [patch, expected] : std::vector<std::pair<std::string, std::string>>{
+                 // cellA has no face at x = 2.5, and neither does cellB.
+                 {R"("plane": { "axis": "x", "value": 2.5 })", "no face"},
+                 // In the wall, but the opening runs past the end of the WC's side of it.
+                 {R"("rect": { "u": [3.0, 7.0], "v": [0.60, 2.62] })", "not inside any run"},
+                 // In the wall and in the run, but taller than the room.
+                 {R"("rect": { "u": [4.6, 5.5], "v": [0.60, 9.00] })", "vertical extent"}})
+        {
+            world::WorldData::Contents contents;
+            Write("layout.levels.json", Levels());
+            Write("layout.cells.json", Cells());
+            Write("layout.portals.json", OnePortal(patch));
+            ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+            ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+
+            const auto portals = world::WorldLoader::LoadPortals(directory_, contents);
+            ASSERT_FALSE(portals) << "accepted " << patch;
+            EXPECT_NE(portals.Error().Message().find(expected), std::string::npos)
+                << portals.Error().ToString();
+        }
+    }
+
+    TEST_F(WorldLoaderTest, APortalInOneCellsWallAndNotTheOthersIsRefused)
+    {
+        // Both sides, not the first. The wall is shared, so a rectangle in one cell's face and not
+        // the other's is a hole into the middle of a wall.
+        world::WorldData::Contents contents;
+        Write("layout.levels.json", Levels());
+        Write("layout.cells.json", Cells());
+        // The WC's face on x = 2 runs z 4..6; the hall's runs z 4..10. u = [6.5, 7.0] is inside the
+        // hall's run and outside the WC's.
+        Write("layout.portals.json", OnePortal(R"("rect": { "u": [6.5, 7.0], "v": [0.60, 2.62] })"));
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+
+        const auto portals = world::WorldLoader::LoadPortals(directory_, contents);
+        ASSERT_FALSE(portals);
+        EXPECT_NE(portals.Error().Message().find("L0_WC1"), std::string::npos)
+            << "the message must name the side that fails: " << portals.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, APortalIntoItsOwnCellIsRefused)
+    {
+        world::WorldData::Contents contents;
+        Write("layout.levels.json", Levels());
+        Write("layout.cells.json", Cells());
+        Write("layout.portals.json", OnePortal(R"("cellB": "L0_HALL")"));
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+
+        const auto portals = world::WorldLoader::LoadPortals(directory_, contents);
+        ASSERT_FALSE(portals);
+        EXPECT_NE(portals.Error().Message().find("itself"), std::string::npos) << portals.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, APortalNamingACellThatDoesNotExistIsRuleSixAndNotThisCheck)
+    {
+        // The plane check has nothing to compare against and must not invent a second, worse
+        // message for a dangling reference that `WorldValidator` reports precisely.
+        world::WorldData::Contents contents;
+        Write("layout.levels.json", Levels());
+        Write("layout.cells.json", Cells());
+        Write("layout.portals.json", OnePortal(R"("cellB": "L0_NOWHERE")"));
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+
+        const auto portals = world::WorldLoader::LoadPortals(directory_, contents);
+        ASSERT_TRUE(portals) << portals.Error().ToString();
+        ASSERT_EQ(contents.portals.size(), 1U);
+        EXPECT_EQ(contents.portals[0].cellB, Intern("L0_NOWHERE"));
+    }
+
+    TEST_F(WorldLoaderTest, AnInvertedOrNegativeRangeIsRefused)
+    {
+        for (const std::string patch : {R"("rect": { "u": [5.5, 4.6], "v": [0.60, 2.62] })",
+                                        R"("rect": { "u": [4.6, 5.5], "v": [2.62, 2.62] })",
+                                        R"("maxDepth": -1)"})
+        {
+            world::WorldData::Contents contents;
+            Write("layout.levels.json", Levels());
+            Write("layout.cells.json", Cells());
+            Write("layout.portals.json", OnePortal(patch));
+            ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+            ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+            EXPECT_FALSE(world::WorldLoader::LoadPortals(directory_, contents)) << "accepted " << patch;
+        }
+    }
+
+    TEST_F(WorldLoaderTest, APortalKindOrOpacityOutsideItsVocabularyIsRefused)
+    {
+        for (const std::string patch : {R"("kind": "portcullis")", R"("opacity": "frosted")"})
+        {
+            world::WorldData::Contents contents;
+            Write("layout.levels.json", Levels());
+            Write("layout.cells.json", Cells());
+            Write("layout.portals.json", OnePortal(patch));
+            ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+            ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+            EXPECT_FALSE(world::WorldLoader::LoadPortals(directory_, contents)) << "accepted " << patch;
+        }
+    }
+
+    TEST_F(WorldLoaderTest, PortalsAreGroupedUnderBothCellsOnceTheModelIsBuilt)
+    {
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(LoadUpToPortals(contents));
+        const auto loaded = world::WorldData::Create(std::move(contents));
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+
+        EXPECT_EQ(loaded.Value().PortalsOf(Intern("L0_HALL")).size(), 3U);
+        EXPECT_EQ(loaded.Value().PortalsOf(Intern("L0_WC1")).size(), 2U)
+            << "the door and the glazed panel beside it";
+        const world::Portal* door = loaded.Value().FindPortal(Intern("P_HALL__WC1"));
+        ASSERT_NE(door, nullptr);
+        EXPECT_EQ(loaded.Value().OtherSide(*door, Intern("L0_WC1")), Intern("L0_HALL"));
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -811,7 +1143,7 @@ namespace
         EXPECT_EQ(world.Value().Materials().size(), 5U);
         ASSERT_NE(world.Value().FindMaterial(Intern("MAT_LEAF")), nullptr);
         EXPECT_EQ(world.Value().FindMaterial(Intern("MAT_LEAF"))->effectTierS, world::EffectTier::AlphaTest);
-        EXPECT_EQ(world.Value().Cells().size(), 4U);
+        EXPECT_EQ(world.Value().Cells().size(), 6U);
         EXPECT_NE(world.Value().FindCell(Intern("L0_HALL")), nullptr);
     }
 
@@ -838,7 +1170,9 @@ namespace
                   "construction": {}})");
         Write("layout.materials.json", Materials());
         Write("layout.cells.json", Cells());
-        WriteManifest({"layout.levels.json", "layout.materials.json", "layout.cells.json"});
+        Write("layout.portals.json", Portals());
+        WriteManifest(
+            {"layout.levels.json", "layout.materials.json", "layout.cells.json", "layout.portals.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

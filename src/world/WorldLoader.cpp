@@ -3,7 +3,9 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -46,6 +48,17 @@ namespace cnahouse::world
             "interactables.json",
             "initialstate.json",
         };
+
+        /// @brief The name an id was interned from, or its numeric value if it never was.
+        ///
+        /// A message that says `id 2582577921 has no face on x = 2.5` is a message nobody can act
+        /// on. Everything the loader interns goes through `Intern`, so in practice the name is
+        /// always there; the fallback exists so a diagnostic can never be worse than useless.
+        [[nodiscard]] std::string Name(util::Id id)
+        {
+            const std::string_view name = util::IdRegistry::NameOf(id);
+            return name.empty() ? "id " + std::to_string(id.Value()) : std::string(name);
+        }
 
         /// @brief The last path component of @p path, whatever separator produced it.
         [[nodiscard]] std::string_view BaseName(std::string_view path) noexcept
@@ -1076,6 +1089,392 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    namespace
+    {
+        /// §15.7 rule 4's tolerance: "within 1 cm".
+        constexpr float kPlaneTolerance = 0.01F;
+
+        /// @brief A cell's floor and ceiling from rows that are not a `WorldData` yet.
+        ///
+        /// The same rule as `WorldData::ExtentOf` -- `yOverride` wins, else the level's
+        /// `ffl`..`ceiling`, and a rafter-bounded level with no override has no answer. It cannot
+        /// call it: `Create` has not run, because the portal check happens while the contents are
+        /// still being filled.
+        [[nodiscard]] std::optional<Extent> ExtentDuringLoad(const WorldData::Contents& contents,
+                                                             const Cell& cell)
+        {
+            if (cell.yOverride.has_value())
+            {
+                return cell.yOverride;
+            }
+            for (const Level& level : contents.levels)
+            {
+                if (level.id == cell.level)
+                {
+                    if (!level.ceiling.has_value())
+                    {
+                        return std::nullopt;
+                    }
+                    return Extent{level.ffl, *level.ceiling};
+                }
+            }
+            return std::nullopt;
+        }
+
+        [[nodiscard]] const Cell* FindCellDuringLoad(const WorldData::Contents& contents, util::Id id)
+        {
+            for (const Cell& cell : contents.cells)
+            {
+                if (cell.id == id)
+                {
+                    return &cell;
+                }
+            }
+            return nullptr;
+        }
+
+        /// @brief The spans of the other horizontal axis where @p cell has a face on `axis=value`.
+        ///
+        /// A cell is a union of boxes, so a wall on one plane can be several disjoint runs.
+        /// Returning them all is what accepts a portal that lies in one run of an L-shaped room and
+        /// rejects one that lies in the gap between two runs.
+        [[nodiscard]] std::vector<std::pair<float, float>>
+        BoundaryRuns(const Cell& cell, PlaneAxis axis, float value)
+        {
+            std::vector<std::pair<float, float>> runs;
+            for (const Footprint& box : cell.boxes)
+            {
+                if (axis == PlaneAxis::X)
+                {
+                    if (std::abs(box.minX - value) <= kPlaneTolerance ||
+                        std::abs(box.maxX - value) <= kPlaneTolerance)
+                    {
+                        runs.emplace_back(box.minZ, box.maxZ);
+                    }
+                }
+                else
+                {
+                    if (std::abs(box.minZ - value) <= kPlaneTolerance ||
+                        std::abs(box.maxZ - value) <= kPlaneTolerance)
+                    {
+                        runs.emplace_back(box.minX, box.maxX);
+                    }
+                }
+            }
+            return runs;
+        }
+
+        /// @brief §15.7 rule 4 for one side of one portal.
+        [[nodiscard]] Result<void> CheckPortalSide(const WorldData::Contents& contents,
+                                                   const Portal& portal,
+                                                   util::Id cellId,
+                                                   std::string_view side,
+                                                   const std::string& where)
+        {
+            const Cell* cell = FindCellDuringLoad(contents, cellId);
+            if (cell == nullptr)
+            {
+                // Not this check's business: a dangling cell reference is rule 6, and reporting it
+                // twice with two different messages is worse than reporting it once.
+                return util::Ok();
+            }
+            const std::optional<Extent> extent = ExtentDuringLoad(contents, *cell);
+
+            if (portal.axis == PlaneAxis::Y)
+            {
+                // A horizontal portal -- a stair well or a hatch. `u` is world X and `v` is world Z,
+                // the rectangle must lie inside the footprint, and the plane must be a boundary the
+                // two cells actually share: one's ceiling is the other's floor.
+                const bool inside =
+                    std::any_of(cell->boxes.begin(),
+                                cell->boxes.end(),
+                                [&portal](const Footprint& box)
+                                {
+                                    return box.Contains(portal.minU, portal.minV, kPlaneTolerance) &&
+                                           box.Contains(portal.maxU, portal.maxV, kPlaneTolerance);
+                                });
+                if (!inside)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "the opening is not inside cell " + Name(cellId) + "'s footprint",
+                               where + "/rect");
+                }
+                if (extent.has_value() &&
+                    std::min(std::abs(extent->floorY - portal.planeValue),
+                             std::abs(extent->ceilingY - portal.planeValue)) > kPlaneTolerance)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "y = " + std::to_string(portal.planeValue) +
+                                   " is neither the floor nor the ceiling of cell " + Name(cellId),
+                               where + "/plane");
+                }
+                return util::Ok();
+            }
+
+            const std::vector<std::pair<float, float>> runs =
+                BoundaryRuns(*cell, portal.axis, portal.planeValue);
+            if (runs.empty())
+            {
+                return Err(ErrorCode::InvalidData,
+                           "cell " + Name(cellId) + " (" + std::string(side) + ") has no face on " +
+                               std::string(ToStringView(portal.axis)) + " = " +
+                               std::to_string(portal.planeValue) + " within 1 cm",
+                           where + "/plane");
+            }
+            const bool spans = std::any_of(runs.begin(),
+                                           runs.end(),
+                                           [&portal](const std::pair<float, float>& run)
+                                           {
+                                               return run.first - kPlaneTolerance <= portal.minU &&
+                                                      portal.maxU <= run.second + kPlaneTolerance;
+                                           });
+            if (!spans)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "the rectangle is not inside any run of cell " + Name(cellId) +
+                               "'s face on that plane",
+                           where + "/rect/u");
+            }
+            if (extent.has_value() && (portal.minV < extent->floorY - kPlaneTolerance ||
+                                       portal.maxV > extent->ceilingY + kPlaneTolerance))
+            {
+                return Err(ErrorCode::InvalidData,
+                           "the rectangle's height is outside cell " + Name(cellId) + "'s vertical extent",
+                           where + "/rect/v");
+            }
+            return util::Ok();
+        }
+    } // namespace
+
+    Result<void> WorldLoader::LoadPortals(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.portals.json", "portals", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+
+        const Result<JsonValue> portals = document.Value().Root().RequireArray("portals");
+        if (!portals)
+        {
+            return portals.Error().WithContext("layout.portals.json");
+        }
+        const Result<std::vector<JsonValue>> rows = portals.Value().Elements();
+        if (!rows)
+        {
+            return rows.Error().WithContext("layout.portals.json");
+        }
+
+        for (const JsonValue& row : rows.Value())
+        {
+            Portal portal;
+            const Result<util::Id> id = RequireId(row, "id");
+            if (!id)
+            {
+                return id.Error().WithContext("layout.portals.json");
+            }
+            portal.id = id.Value();
+
+            const Result<util::Id> cellA = RequireId(row, "cellA");
+            if (!cellA)
+            {
+                return cellA.Error().WithContext("layout.portals.json");
+            }
+            portal.cellA = cellA.Value();
+            const Result<util::Id> cellB = RequireId(row, "cellB");
+            if (!cellB)
+            {
+                return cellB.Error().WithContext("layout.portals.json");
+            }
+            portal.cellB = cellB.Value();
+            if (portal.cellA == portal.cellB)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "a portal joins two cells and both sides name " + Name(portal.cellA) +
+                               "; a hole from a room into itself is not a portal",
+                           "layout.portals.json/" + row.Path() + "/cellB");
+            }
+
+            const Result<JsonValue> plane = row.RequireObject("plane");
+            if (!plane)
+            {
+                return plane.Error().WithContext("layout.portals.json");
+            }
+            const Result<std::string> axis = plane.Value().RequireString("axis");
+            if (!axis)
+            {
+                return axis.Error().WithContext("layout.portals.json");
+            }
+            const Result<PlaneAxis> parsedAxis = ParsePlaneAxis(axis.Value());
+            if (!parsedAxis)
+            {
+                return parsedAxis.Error()
+                    .WithContext(row.Path() + "/plane/axis")
+                    .WithContext("layout.portals.json");
+            }
+            portal.axis = parsedAxis.Value();
+            const Result<float> value = plane.Value().RequireFloat("value");
+            if (!value)
+            {
+                return value.Error().WithContext("layout.portals.json");
+            }
+            portal.planeValue = value.Value();
+
+            const Result<JsonValue> rect = row.RequireObject("rect");
+            if (!rect)
+            {
+                return rect.Error().WithContext("layout.portals.json");
+            }
+            const auto range = [&rect, &row](std::string_view field, float& low, float& high) -> Result<void>
+            {
+                const Result<JsonValue> array = rect.Value().RequireArray(field);
+                if (!array)
+                {
+                    return array.Error();
+                }
+                const Result<std::vector<JsonValue>> parts = array.Value().Elements();
+                if (!parts)
+                {
+                    return parts.Error();
+                }
+                if (parts.Value().size() != 2U)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a portal range is [min, max]; this has " +
+                                   std::to_string(parts.Value().size()) + " element(s)",
+                               row.Path() + "/rect/" + std::string(field));
+                }
+                const Result<float> first = parts.Value()[0].AsFloat();
+                if (!first)
+                {
+                    return first.Error();
+                }
+                const Result<float> second = parts.Value()[1].AsFloat();
+                if (!second)
+                {
+                    return second.Error();
+                }
+                if (!(first.Value() < second.Value()))
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a portal range is [min, max] with min < max; this is [" +
+                                   std::to_string(first.Value()) + ", " + std::to_string(second.Value()) +
+                                   "]",
+                               row.Path() + "/rect/" + std::string(field));
+                }
+                low = first.Value();
+                high = second.Value();
+                return util::Ok();
+            };
+            if (const Result<void> u = range("u", portal.minU, portal.maxU); !u)
+            {
+                return u.Error().WithContext("layout.portals.json");
+            }
+            if (const Result<void> v = range("v", portal.minV, portal.maxV); !v)
+            {
+                return v.Error().WithContext("layout.portals.json");
+            }
+
+            const Result<std::string> kind = row.RequireString("kind");
+            if (!kind)
+            {
+                return kind.Error().WithContext("layout.portals.json");
+            }
+            const Result<PortalKind> parsedKind = ParsePortalKind(kind.Value());
+            if (!parsedKind)
+            {
+                return parsedKind.Error()
+                    .WithContext(row.Path() + "/kind")
+                    .WithContext("layout.portals.json");
+            }
+            portal.kind = parsedKind.Value();
+
+            const Result<util::Id> aperture = OptionalId(row, "aperture");
+            if (!aperture)
+            {
+                return aperture.Error().WithContext("layout.portals.json");
+            }
+            portal.aperture = aperture.Value();
+
+            const Result<std::string> opacity = row.OptionalString("opacity", "open");
+            if (!opacity)
+            {
+                return opacity.Error().WithContext("layout.portals.json");
+            }
+            const Result<PortalOpacity> parsedOpacity = ParsePortalOpacity(opacity.Value());
+            if (!parsedOpacity)
+            {
+                return parsedOpacity.Error()
+                    .WithContext(row.Path() + "/opacity")
+                    .WithContext("layout.portals.json");
+            }
+            portal.opacity = parsedOpacity.Value();
+
+            // `maxDepth` is a per-portal traversal cap and `null` means "no cap". Read as 0 it
+            // would mean the opposite -- see through nothing at all -- which is the difference
+            // between a glazed door and a bricked-up one.
+            if (row.Has("maxDepth") && !row.IsNull("maxDepth"))
+            {
+                const Result<std::int64_t> depth = row.RequireInt("maxDepth");
+                if (!depth)
+                {
+                    return depth.Error().WithContext("layout.portals.json");
+                }
+                if (depth.Value() < 0)
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "a traversal cap is not negative; this is " + std::to_string(depth.Value()),
+                               "layout.portals.json/" + row.Path() + "/maxDepth");
+                }
+                portal.maxDepth = static_cast<std::int32_t>(depth.Value());
+            }
+
+            if (row.Has("soundLoss") && !row.IsNull("soundLoss"))
+            {
+                const Result<JsonValue> loss = row.RequireObject("soundLoss");
+                if (!loss)
+                {
+                    return loss.Error().WithContext("layout.portals.json");
+                }
+                const Result<float> open = loss.Value().OptionalFloat("open", 0.0F);
+                if (!open)
+                {
+                    return open.Error().WithContext("layout.portals.json");
+                }
+                const Result<float> closed = loss.Value().OptionalFloat("closed", 0.0F);
+                if (!closed)
+                {
+                    return closed.Error().WithContext("layout.portals.json");
+                }
+                portal.soundLossOpen = open.Value();
+                portal.soundLossClosed = closed.Value();
+            }
+
+            const Result<bool> crouch = row.OptionalBool("crouch", false);
+            if (!crouch)
+            {
+                return crouch.Error().WithContext("layout.portals.json");
+            }
+            portal.crouch = crouch.Value();
+
+            const std::string where = row.Path();
+            for (const auto& [cellId, side] : std::initializer_list<std::pair<util::Id, std::string_view>>{
+                     {portal.cellA, "cellA"}, {portal.cellB, "cellB"}})
+            {
+                if (const Result<void> checked = CheckPortalSide(contents, portal, cellId, side, where);
+                    !checked)
+                {
+                    return checked.Error().WithContext("layout.portals.json");
+                }
+            }
+
+            contents.portals.push_back(std::move(portal));
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -1098,6 +1497,11 @@ namespace cnahouse::world
         if (const Result<void> cells = LoadCells(directory, contents); !cells)
         {
             return cells.Error();
+        }
+
+        if (const Result<void> portals = LoadPortals(directory, contents); !portals)
+        {
+            return portals.Error();
         }
 
         util::Log::Info(util::LogCat::World,

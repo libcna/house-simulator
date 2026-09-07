@@ -4977,8 +4977,27 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       finding: the daylight fixture uses `NE` and not `world-format.md`'s `N`. `N` is the first
             value of the enum, so a reader that ignored the field entirely would have passed — the
             injected-bug run found exactly that and the fixture was changed.
-- [ ] HOUSE-00345 — `WorldLoader`: portals, including plane/rect validation against both cells
+- [x] HOUSE-00345 — `WorldLoader`: portals, including plane/rect validation against both cells
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadPortals`, with §15.7 rule 4 checked as it goes — the
+            rectangle lies in **both** cells' boundary planes within 1 cm and its `v` range lies
+            inside both vertical extents. 11 new unit tests; eleven injected bugs, eleven caught.
+      note: this is the loader's **one** exception to "resolution is rule 6's, not mine", and the
+            reason does not generalise: the rectangle is what the visibility clip uses directly,
+            every frame, so a rectangle that is not in the wall it claims does not fail — it
+            produces a frustum that is silently wrong and a room that flickers. The check also
+            needs nothing outside the two files just read. The `WorldLoader` docstring says so.
+      finding: "both cells" is the half that is easy to lose. The hall's face on `x = 2` runs
+            `z 4..10` and the WC's runs `z 4..6`; a rectangle at `z 6.5..7.0` is in the hall's wall
+            and in no wall of the WC — a hole into the middle of a partition. The fixture is built
+            around exactly that asymmetry and an injected bug that checked only `cellA` fails it.
+      finding: the horizontal (`y`) case is checked as hard as the wall case, because it had to be
+            added to the vocabulary at all (`HOUSE-00358`): a stair well at the wrong height joins
+            two floors that do not meet there and the solver sees through a slab.
+      finding: `maxDepth: null` is "no cap" and must not read as 0, which would mean the opposite —
+            the difference between a glazed door and a bricked-up one. Same for `soundLoss`.
+      finding: a portal whose two sides name the same cell is refused. A hole from a room into
+            itself is not a portal, and it would give that cell two entries in its own portal list.
 - [ ] HOUSE-00346 — `WorldLoader`: openings (doors, windows) with hinge/swing/travel metadata
       dep: HOUSE-00345 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00347 — `WorldLoader`: stairs, with the derived collision ramp parameters

@@ -43,6 +43,12 @@ namespace cnahouse::world
     /// one owner in `validate_world.py` and one mirror in `WorldValidator`, and a third reading
     /// here could disagree with both.
     ///
+    /// The one exception is a portal's **plane** (`HOUSE-00345`, §15.7 rule 4), and it is an
+    /// exception for a reason that does not generalise: the rectangle is what the visibility clip
+    /// uses directly, every frame, so a rectangle that is not in the wall it claims does not fail —
+    /// it produces a frustum that is silently wrong and a room that flickers. The check also needs
+    /// nothing outside the two files the loader has just finished reading.
+    ///
     /// **Every failure names the file and the JSON path.** `util::JsonValue` carries the path, this
     /// class adds the file, and the message that reaches a log or a test reads
     /// `layout.levels.json/levels[2]/ffl: expected a number, found a string`. That is
@@ -81,6 +87,14 @@ namespace cnahouse::world
         /// @brief Reads `layout.cells.json` into @p contents.
         [[nodiscard]] static util::Result<void> LoadCells(std::string_view directory,
                                                           WorldData::Contents& contents);
+
+        /// @brief Reads `layout.portals.json` into @p contents.
+        ///
+        /// Checks §15.7 rule 4 as it goes: the rectangle lies in both cells' boundary planes within
+        /// 1 cm, and its `v` range lies inside both cells' vertical extent. @p contents must
+        /// already hold the levels and the cells.
+        [[nodiscard]] static util::Result<void> LoadPortals(std::string_view directory,
+                                                            WorldData::Contents& contents);
 
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
