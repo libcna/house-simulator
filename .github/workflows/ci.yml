@@ -131,6 +131,16 @@ jobs:
         # this step also re-exercises `build_collision` end to end.
         run: python3 tools/world/build_nav.py --selftest
 
+      - name: Rain must stop at the porch edge and nowhere else
+        working-directory: cna-house
+        # `HOUSE-00212`. The fixture gains a porch with a bedroom directly above it and a cellar
+        # under the lounge, because both are rules an ordinary room cannot test: the porch soffit
+        # is the bedroom's floor, and the cellar's slabs are below ground and must NOT shelter the
+        # lawn. The strongest claim is an equivalence over every cell of the grid -- sheltered
+        # exactly where the cell's CENTRE is under a slab -- which is what refutes a conservative
+        # field that would stop the rain 0.25 m out in the open.
+        run: python3 tools/world/build_coverage.py --selftest
+
       - name: The stride measurement must survive both animation conventions
         working-directory: cna-house
         # `HOUSE-00194`. The fixture is an analytically exact walk -- 1.4 m of stride over 1.0 s --

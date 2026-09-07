@@ -1665,6 +1665,7 @@ cna-house/
 │   ├── anim-format.md               ← the project-owned `.chanim` format (§47.0)
 │   ├── collision-format.md          ← the project-owned `collision.bin` format (§49.2)
 │   ├── nav-format.md                ← the project-owned `nav.bin` pet graph (§60.3)
+│   ├── coverage-format.md           ← the project-owned `coverage.bin` roof mask (§37.2)
 │   ├── content-authoring.md
 │   ├── world-format.md
 │   ├── performance-log.md

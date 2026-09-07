@@ -3347,8 +3347,42 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: no edge offers a route the animal's own capsule does not fit; a window never becomes
             a doorway node; every cell reachable through open portals is in one component per
             species; the file reads back through its own reader; two builds are byte-identical
-- [ ] HOUSE-00212 — `tools/world/build_coverage.py`: the rain/roof coverage height field on a 0.5 m grid
+- [x] HOUSE-00212 — `tools/world/build_coverage.py`: the rain/roof coverage height field on a 0.5 m grid
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/world/build_coverage.py` and `docs/coverage-format.md`, the
+            normative `CCOV` version 1 spec. 28 selftest claims; `--selftest` runs in CI. 13
+            injected bugs, all caught — four missed first time, three of them because the claim
+            was written against the constant it was supposed to be checking (`cell == CELL_SIZE`
+            moves with the mistake; `cell == 0.5` does not).
+      finding: **the soffits are already built, and building them twice would be the bug.** §37.2
+            attributes the mask to `terrain_gen.py`, but none of the geometry it needs is terrain:
+            a porch soffit is the underside of the balcony floor above it, and the roof underside
+            is the top cell's ceiling. `HOUSE-00210` already derives every one of those slabs, so
+            this asks `build_collision` for them. The whole rule is then one line — **the lowest
+            underside of any floor or ceiling slab above the ground** — and it covers §37.2's
+            entire list (house, garage, porch, balcony, sunroom, shed) because each is a cell, and
+            a cell has a ceiling and the thing above it has a floor. That is also why the task
+            depends on `HOUSE-00210` rather than on the terrain.
+      finding: **below-ground slabs are not shelter, and this is not a detail.** A basement floor
+            is 2.6 m under the lawn; without the ground test every square metre over the basement
+            reports itself sheltered and the rain stops in mid-air over the garden, from a slab
+            nobody can see. The fixture grew a cellar for exactly this claim: 4 of its 8 covering
+            slabs are below ground and rejected.
+      finding: **the field is deliberately NOT conservative.** Marking a cell covered when any part
+            of it lies under a roof biases every soffit outward by up to half a grid step, so the
+            rain stops 0.25 m short of the porch edge, in open air — which reads as a bug, not as
+            shelter, and §37.2's acceptance is precisely "rain visibly stops at the porch edge".
+            Centre sampling puts the error either side of the true edge. The claim is stated as an
+            equivalence over all 2 397 cells of the fixture grid, not as a spot check.
+      finding: uncovered is an **actual IEEE +∞**, not a large finite sentinel. `particle.y >
+            coverage` is then false for every particle with no magic constant the writer and the
+            runtime must agree on, and `f32` carries infinity exactly through the round trip.
+      finding: the first version of the porch-edge claim tested the porch's **x = 0 side**, which
+            abuts the lounge — sheltered at 2.50 m on both sides, so the assertion passed whatever
+            the tool did. It now tests the open edge facing the garden. A boundary claim has to be
+            written against a boundary that is actually one.
+      accept: rain is sheltered exactly where a slab is overhead and nowhere else; a basement never
+            shelters the garden; open sky is +INF; two builds are byte-identical
 - [ ] HOUSE-00213 — `tools/world/build_skyexposure.py`: per-cell sky exposure and per-orientation facade exposure by ray casting
       dep: HOUSE-00212 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00214 — `tools/world/build_snowshell.py`: generate the snow-shell meshes from up-facing exterior surfaces, respecting per-material slope limits
