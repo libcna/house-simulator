@@ -5125,8 +5125,19 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: an emitter must name its cell. ADR-0010's portal-path solve starts from cells and not
             from positions, so a point alone would have to be located first — on every voice,
             every frame.
-- [ ] HOUSE-00353 — `WorldLoader`: exterior (terrain reference, road, fences, neighbourhood, vegetation instances)
+- [x] HOUSE-00353 — `WorldLoader`: exterior (terrain reference, road, fences, neighbourhood, vegetation instances)
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadExterior`. 6 new unit tests; nine injected bugs, nine
+            caught.
+      note: vegetation stays **grouped by asset** as the file writes it. §17.4 draws it instanced
+            where that measures faster, and that needs the grouping in the data rather than
+            rebuilt at load from one row per plant.
+      finding: a path of one point is refused. It draws nothing, and worse, a fence built from it
+            occupies no ground at all — a garden with a gap nobody authored and nothing in the
+            data that looks wrong.
+      finding: `impostorFrom: 0` is kept as a real choice (always an impostor, which is right for
+            the far row of houses) while a **negative** distance is refused: that is a sign error
+            that swaps the two branches and draws a full mesh at the horizon.
 - [ ] HOUSE-00354 — `WorldLoader`: interactables, with the closed-vocabulary predicate/effect parser
       dep: HOUSE-00350 · sys: world · plat: ALL · pri: MUST
       accept: an unknown token is a load-time error naming the file, the id and the token

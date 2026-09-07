@@ -476,6 +476,44 @@ namespace
             })";
         }
 
+        /// Terrain, a three-point road, one fence with a gate, two neighbour buildings (one of
+        /// them always an impostor) and two vegetation groups.
+        static std::string Exterior()
+        {
+            return R"({
+              "schema": "cna-house/exterior/1",
+              "terrain": {
+                "heightfield": "Textures/Terrain/plot-height",
+                "size": [96.0, 128.0], "origin": [-48.0, 0.0, -64.0], "yScale": 12.5,
+                "material": "MAT_GRASS_LAWN"
+              },
+              "road": {
+                "centreline": [[-40.0, 0.0, 30.0], [0.0, 0.0, 30.0], [40.0, 0.0, 31.0]],
+                "width": 6.5, "material": "MAT_ASPHALT"
+              },
+              "fences": [
+                { "id": "FENCE_REAR", "asset": "MODEL_FENCE_PANEL_01",
+                  "path": [[-20.0, 0.0, -40.0], [20.0, 0.0, -40.0], [20.0, 0.0, -10.0]],
+                  "height": 1.80, "gate": "GATE_REAR" }
+              ],
+              "neighbourhood": [
+                { "id": "NB_EAST", "asset": "MODEL_HOUSE_NEIGHBOUR_01",
+                  "position": [30.0, 0.0, -10.0], "yawDeg": 90.0,
+                  "lodGroup": "LODG_NEIGHBOUR", "impostorFrom": 45.0 },
+                { "id": "NB_FAR", "asset": "MODEL_HOUSE_NEIGHBOUR_02",
+                  "position": [80.0, 0.0, 60.0], "impostorFrom": 0.0 }
+              ],
+              "vegetation": [
+                { "id": "VEG_BIRCH", "asset": "MODEL_TREE_BIRCH_01", "instances": [
+                    { "position": [-12.0, 0.0, 10.0], "yawDeg": 15.0, "scale": 0.90 },
+                    { "position": [-9.0, 0.0, 14.0], "yawDeg": 200.0, "scale": 1.15 },
+                    { "position": [-14.0, 0.0, 18.0] } ] },
+                { "id": "VEG_HEDGE", "asset": "MODEL_HEDGE_01", "instances": [
+                    { "position": [0.0, 0.0, 26.0], "scale": 1.05 } ] }
+              ]
+            })";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -497,6 +535,7 @@ namespace
             Write("layout.props.json", Props());
             Write("layout.nav.json", Nav());
             Write("layout.audio.json", Audio());
+            Write("layout.exterior.json", Exterior());
             WriteManifest({"layout.levels.json",
                            "layout.materials.json",
                            "layout.cells.json",
@@ -506,7 +545,8 @@ namespace
                            "layout.lights.json",
                            "layout.props.json",
                            "layout.nav.json",
-                           "layout.audio.json"});
+                           "layout.audio.json",
+                           "layout.exterior.json"});
         }
 
         std::string directory_;
@@ -2034,6 +2074,108 @@ namespace
         EXPECT_EQ(loaded.Value().FindTransmission("portcullis"), nullptr);
     }
 
+    // --- the exterior -----------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, TheExteriorIsReadWithEveryPieceItCarries)
+    {
+        Write("layout.exterior.json", Exterior());
+        world::WorldData::Contents contents;
+        const auto exterior = world::WorldLoader::LoadExterior(directory_, contents);
+        ASSERT_TRUE(exterior) << exterior.Error().ToString();
+
+        EXPECT_EQ(contents.exterior.terrain.heightfield, "Textures/Terrain/plot-height");
+        EXPECT_FLOAT_EQ(contents.exterior.terrain.sizeX, 96.0F);
+        EXPECT_FLOAT_EQ(contents.exterior.terrain.sizeZ, 128.0F);
+        EXPECT_FLOAT_EQ(contents.exterior.terrain.yScale, 12.5F);
+        EXPECT_EQ(contents.exterior.terrain.material, Intern("MAT_GRASS_LAWN"));
+
+        ASSERT_EQ(contents.exterior.road.centreline.size(), 3U);
+        EXPECT_FLOAT_EQ(contents.exterior.road.width, 6.5F);
+
+        ASSERT_EQ(contents.exterior.fences.size(), 1U);
+        EXPECT_EQ(contents.exterior.fences[0].id, Intern("FENCE_REAR"));
+        ASSERT_EQ(contents.exterior.fences[0].path.size(), 3U);
+        EXPECT_FLOAT_EQ(contents.exterior.fences[0].height, 1.80F);
+        EXPECT_EQ(contents.exterior.fences[0].gate, Intern("GATE_REAR"));
+
+        ASSERT_EQ(contents.exterior.neighbourhood.size(), 2U);
+        EXPECT_FLOAT_EQ(contents.exterior.neighbourhood[0].yawDeg, 90.0F);
+        EXPECT_FLOAT_EQ(contents.exterior.neighbourhood[0].impostorFrom, 45.0F);
+        EXPECT_FLOAT_EQ(contents.exterior.neighbourhood[1].impostorFrom, 0.0F)
+            << "always an impostor is a real choice for the far row";
+    }
+
+    TEST_F(WorldLoaderTest, VegetationStaysGroupedByAssetAsTheFileWritesIt)
+    {
+        // §17.4 draws it instanced where that measures faster, and that needs the grouping in the
+        // data rather than rebuilt at load from one row per plant.
+        Write("layout.exterior.json", Exterior());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadExterior(directory_, contents));
+
+        ASSERT_EQ(contents.exterior.vegetation.size(), 2U);
+        EXPECT_EQ(contents.exterior.vegetation[0].asset, Intern("MODEL_TREE_BIRCH_01"));
+        ASSERT_EQ(contents.exterior.vegetation[0].instances.size(), 3U);
+        EXPECT_EQ(contents.exterior.vegetation[1].instances.size(), 1U);
+        EXPECT_FLOAT_EQ(contents.exterior.vegetation[0].instances[1].scale, 1.15F);
+        EXPECT_FLOAT_EQ(contents.exterior.vegetation[0].instances[2].scale, 1.0F)
+            << "an instance that states no scale is unscaled";
+    }
+
+    TEST_F(WorldLoaderTest, APathOfOnePointIsRefused)
+    {
+        // It would draw nothing and, worse, a fence built from it would occupy no ground at all --
+        // a garden with a gap nobody authored.
+        Write("layout.exterior.json",
+              R"({"schema": "cna-house/exterior/1",
+                  "terrain": {"heightfield": "h", "size": [10, 10], "origin": [0,0,0]},
+                  "fences": [{"id": "F", "asset": "A", "path": [[0,0,0]]}]})");
+        world::WorldData::Contents contents;
+        const auto exterior = world::WorldLoader::LoadExterior(directory_, contents);
+        ASSERT_FALSE(exterior);
+        EXPECT_NE(exterior.Error().Message().find("at least 2"), std::string::npos)
+            << exterior.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, ATerrainWithNoExtentIsRefused)
+    {
+        Write("layout.exterior.json",
+              R"({"schema": "cna-house/exterior/1",
+                  "terrain": {"heightfield": "h", "size": [0, 128], "origin": [0,0,0]}})");
+        world::WorldData::Contents contents;
+        const auto exterior = world::WorldLoader::LoadExterior(directory_, contents);
+        ASSERT_FALSE(exterior);
+        EXPECT_NE(exterior.Error().Context().find("size"), std::string::npos) << exterior.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, ANegativeImpostorDistanceIsRefused)
+    {
+        // Zero means "always an impostor", a real choice for the far row of houses. Negative is a
+        // sign error that would swap the two branches and draw a full mesh at the horizon.
+        Write("layout.exterior.json",
+              R"({"schema": "cna-house/exterior/1",
+                  "terrain": {"heightfield": "h", "size": [10, 10], "origin": [0,0,0]},
+                  "neighbourhood": [{"id": "N", "asset": "A", "position": [0,0,0],
+                                     "impostorFrom": -20.0}]})");
+        world::WorldData::Contents contents;
+        const auto exterior = world::WorldLoader::LoadExterior(directory_, contents);
+        ASSERT_FALSE(exterior);
+        EXPECT_EQ(exterior.Error().Code(), ErrorCode::OutOfRange);
+    }
+
+    TEST_F(WorldLoaderTest, APointOfTheWrongLengthIsRefused)
+    {
+        Write("layout.exterior.json",
+              R"({"schema": "cna-house/exterior/1",
+                  "terrain": {"heightfield": "h", "size": [10, 10], "origin": [0,0,0]},
+                  "road": {"centreline": [[0,0], [10,0,0]], "width": 6.0}})");
+        world::WorldData::Contents contents;
+        const auto exterior = world::WorldLoader::LoadExterior(directory_, contents);
+        ASSERT_FALSE(exterior);
+        EXPECT_NE(exterior.Error().Message().find("[x, y, z]"), std::string::npos)
+            << exterior.Error().ToString();
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -2061,6 +2203,7 @@ namespace
         EXPECT_EQ(world.Value().NavMarkers().size(), 3U);
         EXPECT_EQ(world.Value().AudioZones().size(), 2U);
         EXPECT_NE(world.Value().FindTransmission("door_solid"), nullptr);
+        EXPECT_EQ(world.Value().GetExterior().vegetation.size(), 2U);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -2093,6 +2236,7 @@ namespace
         Write("layout.props.json", Props());
         Write("layout.nav.json", Nav());
         Write("layout.audio.json", Audio());
+        Write("layout.exterior.json", Exterior());
         WriteManifest({"layout.levels.json",
                        "layout.materials.json",
                        "layout.cells.json",
@@ -2102,7 +2246,8 @@ namespace
                        "layout.lights.json",
                        "layout.props.json",
                        "layout.nav.json",
-                       "layout.audio.json"});
+                       "layout.audio.json",
+                       "layout.exterior.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

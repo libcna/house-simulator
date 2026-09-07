@@ -2585,6 +2585,347 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    namespace
+    {
+        /// @brief An array of `[x, y, z]` triples: a road centreline or a fence path.
+        [[nodiscard]] Result<std::vector<Microsoft::Xna::Framework::Vector3>>
+        ReadPolyline(const JsonValue& parent, std::string_view field, std::size_t least)
+        {
+            std::vector<Microsoft::Xna::Framework::Vector3> points;
+            const Result<JsonValue> array = parent.RequireArray(field);
+            if (!array)
+            {
+                return array.Error();
+            }
+            const Result<std::vector<JsonValue>> rows = array.Value().Elements();
+            if (!rows)
+            {
+                return rows.Error();
+            }
+            for (const JsonValue& row : rows.Value())
+            {
+                const Result<std::vector<JsonValue>> parts = row.Elements();
+                if (!parts)
+                {
+                    return parts.Error();
+                }
+                if (parts.Value().size() != 3U)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a point is [x, y, z]; this has " + std::to_string(parts.Value().size()) +
+                                   " element(s)",
+                               row.Path());
+                }
+                float xyz[3] = {0.0F, 0.0F, 0.0F};
+                for (std::size_t axis = 0; axis < 3U; ++axis)
+                {
+                    const Result<float> value = parts.Value()[axis].AsFloat();
+                    if (!value)
+                    {
+                        return value.Error();
+                    }
+                    xyz[axis] = value.Value();
+                }
+                points.emplace_back(xyz[0], xyz[1], xyz[2]);
+            }
+            // A path of one point is not a path. It would draw nothing and, worse, a fence built
+            // from it would silently occupy no ground at all -- a garden with a gap nobody
+            // authored.
+            if (points.size() < least)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "a path needs at least " + std::to_string(least) + " points; this has " +
+                               std::to_string(points.size()),
+                           parent.Path() + "/" + std::string(field));
+            }
+            return points;
+        }
+    } // namespace
+
+    Result<void> WorldLoader::LoadExterior(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.exterior.json", "exterior", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+        const JsonValue& root = document.Value().Root();
+        Exterior& exterior = contents.exterior;
+
+        const Result<JsonValue> terrain = root.RequireObject("terrain");
+        if (!terrain)
+        {
+            return terrain.Error().WithContext("layout.exterior.json");
+        }
+        const Result<std::string> heightfield = terrain.Value().RequireString("heightfield");
+        if (!heightfield)
+        {
+            return heightfield.Error().WithContext("layout.exterior.json");
+        }
+        exterior.terrain.heightfield = heightfield.Value();
+
+        const Result<Microsoft::Xna::Framework::Vector2> size = terrain.Value().RequireVector2("size");
+        if (!size)
+        {
+            return size.Error().WithContext("layout.exterior.json");
+        }
+        if (size.Value().X <= 0.0F || size.Value().Y <= 0.0F)
+        {
+            return Err(ErrorCode::InvalidData,
+                       "the terrain has extent in both axes; this is " + std::to_string(size.Value().X) +
+                           " x " + std::to_string(size.Value().Y),
+                       "layout.exterior.json/terrain/size");
+        }
+        exterior.terrain.sizeX = size.Value().X;
+        exterior.terrain.sizeZ = size.Value().Y;
+
+        const Result<Microsoft::Xna::Framework::Vector3> origin = terrain.Value().RequireVector3("origin");
+        if (!origin)
+        {
+            return origin.Error().WithContext("layout.exterior.json");
+        }
+        exterior.terrain.origin = origin.Value();
+
+        const Result<float> yScale = terrain.Value().OptionalFloat("yScale", 1.0F);
+        if (!yScale)
+        {
+            return yScale.Error().WithContext("layout.exterior.json");
+        }
+        exterior.terrain.yScale = yScale.Value();
+
+        const Result<util::Id> terrainMaterial = OptionalId(terrain.Value(), "material");
+        if (!terrainMaterial)
+        {
+            return terrainMaterial.Error().WithContext("layout.exterior.json");
+        }
+        exterior.terrain.material = terrainMaterial.Value();
+
+        if (root.Has("road") && !root.IsNull("road"))
+        {
+            const Result<JsonValue> road = root.RequireObject("road");
+            if (!road)
+            {
+                return road.Error().WithContext("layout.exterior.json");
+            }
+            const Result<std::vector<Microsoft::Xna::Framework::Vector3>> centreline =
+                ReadPolyline(road.Value(), "centreline", 2U);
+            if (!centreline)
+            {
+                return centreline.Error().WithContext("layout.exterior.json");
+            }
+            exterior.road.centreline = centreline.Value();
+            const Result<float> width = road.Value().OptionalFloat("width", 0.0F);
+            if (!width)
+            {
+                return width.Error().WithContext("layout.exterior.json");
+            }
+            exterior.road.width = width.Value();
+            const Result<util::Id> material = OptionalId(road.Value(), "material");
+            if (!material)
+            {
+                return material.Error().WithContext("layout.exterior.json");
+            }
+            exterior.road.material = material.Value();
+        }
+
+        if (root.Has("fences") && !root.IsNull("fences"))
+        {
+            const Result<JsonValue> fences = root.RequireArray("fences");
+            if (!fences)
+            {
+                return fences.Error().WithContext("layout.exterior.json");
+            }
+            const Result<std::vector<JsonValue>> rows = fences.Value().Elements();
+            if (!rows)
+            {
+                return rows.Error().WithContext("layout.exterior.json");
+            }
+            for (const JsonValue& row : rows.Value())
+            {
+                Fence fence;
+                const Result<util::Id> id = RequireId(row, "id");
+                if (!id)
+                {
+                    return id.Error().WithContext("layout.exterior.json");
+                }
+                fence.id = id.Value();
+                const Result<util::Id> asset = RequireId(row, "asset");
+                if (!asset)
+                {
+                    return asset.Error().WithContext("layout.exterior.json");
+                }
+                fence.asset = asset.Value();
+                const Result<std::vector<Microsoft::Xna::Framework::Vector3>> path =
+                    ReadPolyline(row, "path", 2U);
+                if (!path)
+                {
+                    return path.Error().WithContext("layout.exterior.json");
+                }
+                fence.path = path.Value();
+                const Result<float> height = row.OptionalFloat("height", 0.0F);
+                if (!height)
+                {
+                    return height.Error().WithContext("layout.exterior.json");
+                }
+                fence.height = height.Value();
+                const Result<util::Id> gate = OptionalId(row, "gate");
+                if (!gate)
+                {
+                    return gate.Error().WithContext("layout.exterior.json");
+                }
+                fence.gate = gate.Value();
+                exterior.fences.push_back(std::move(fence));
+            }
+        }
+
+        if (root.Has("neighbourhood") && !root.IsNull("neighbourhood"))
+        {
+            const Result<JsonValue> neighbourhood = root.RequireArray("neighbourhood");
+            if (!neighbourhood)
+            {
+                return neighbourhood.Error().WithContext("layout.exterior.json");
+            }
+            const Result<std::vector<JsonValue>> rows = neighbourhood.Value().Elements();
+            if (!rows)
+            {
+                return rows.Error().WithContext("layout.exterior.json");
+            }
+            for (const JsonValue& row : rows.Value())
+            {
+                NeighbourBuilding building;
+                const Result<util::Id> id = RequireId(row, "id");
+                if (!id)
+                {
+                    return id.Error().WithContext("layout.exterior.json");
+                }
+                building.id = id.Value();
+                const Result<util::Id> asset = RequireId(row, "asset");
+                if (!asset)
+                {
+                    return asset.Error().WithContext("layout.exterior.json");
+                }
+                building.asset = asset.Value();
+                const Result<Microsoft::Xna::Framework::Vector3> position = row.RequireVector3("position");
+                if (!position)
+                {
+                    return position.Error().WithContext("layout.exterior.json");
+                }
+                building.position = position.Value();
+                const Result<float> yaw = row.OptionalFloat("yawDeg", 0.0F);
+                if (!yaw)
+                {
+                    return yaw.Error().WithContext("layout.exterior.json");
+                }
+                building.yawDeg = yaw.Value();
+                const Result<util::Id> lodGroup = OptionalId(row, "lodGroup");
+                if (!lodGroup)
+                {
+                    return lodGroup.Error().WithContext("layout.exterior.json");
+                }
+                building.lodGroup = lodGroup.Value();
+
+                // The distance at which the building becomes an impostor. Zero means "always an
+                // impostor", which is a real choice for the far row of houses, so it is not
+                // refused -- but a NEGATIVE distance is a sign error that would swap the two
+                // branches and draw a full mesh at the horizon.
+                const Result<float> impostor = row.OptionalFloat("impostorFrom", 0.0F);
+                if (!impostor)
+                {
+                    return impostor.Error().WithContext("layout.exterior.json");
+                }
+                if (impostor.Value() < 0.0F)
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "an impostor distance is not negative; this is " +
+                                   std::to_string(impostor.Value()),
+                               "layout.exterior.json/" + row.Path() + "/impostorFrom");
+                }
+                building.impostorFrom = impostor.Value();
+
+                exterior.neighbourhood.push_back(std::move(building));
+            }
+        }
+
+        if (root.Has("vegetation") && !root.IsNull("vegetation"))
+        {
+            const Result<JsonValue> vegetation = root.RequireArray("vegetation");
+            if (!vegetation)
+            {
+                return vegetation.Error().WithContext("layout.exterior.json");
+            }
+            const Result<std::vector<JsonValue>> rows = vegetation.Value().Elements();
+            if (!rows)
+            {
+                return rows.Error().WithContext("layout.exterior.json");
+            }
+            for (const JsonValue& row : rows.Value())
+            {
+                VegetationGroup group;
+                const Result<util::Id> id = RequireId(row, "id");
+                if (!id)
+                {
+                    return id.Error().WithContext("layout.exterior.json");
+                }
+                group.id = id.Value();
+                const Result<util::Id> asset = RequireId(row, "asset");
+                if (!asset)
+                {
+                    return asset.Error().WithContext("layout.exterior.json");
+                }
+                group.asset = asset.Value();
+
+                // Instances are an ARRAY under one asset, not one row per plant: §17.4 draws them
+                // instanced where that measures faster, and that needs them grouped by asset in
+                // the data rather than sorted into groups at load.
+                const Result<JsonValue> instances = row.RequireArray("instances");
+                if (!instances)
+                {
+                    return instances.Error().WithContext("layout.exterior.json");
+                }
+                const Result<std::vector<JsonValue>> instanceRows = instances.Value().Elements();
+                if (!instanceRows)
+                {
+                    return instanceRows.Error().WithContext("layout.exterior.json");
+                }
+                for (const JsonValue& instanceRow : instanceRows.Value())
+                {
+                    VegetationInstance instance;
+                    const Result<Microsoft::Xna::Framework::Vector3> position =
+                        instanceRow.RequireVector3("position");
+                    if (!position)
+                    {
+                        return position.Error().WithContext("layout.exterior.json");
+                    }
+                    instance.position = position.Value();
+                    const Result<float> yaw = instanceRow.OptionalFloat("yawDeg", 0.0F);
+                    if (!yaw)
+                    {
+                        return yaw.Error().WithContext("layout.exterior.json");
+                    }
+                    instance.yawDeg = yaw.Value();
+                    const Result<float> scale = instanceRow.OptionalFloat("scale", 1.0F);
+                    if (!scale)
+                    {
+                        return scale.Error().WithContext("layout.exterior.json");
+                    }
+                    if (scale.Value() <= 0.0F)
+                    {
+                        return Err(ErrorCode::InvalidData,
+                                   "a scale is positive; this is " + std::to_string(scale.Value()),
+                                   "layout.exterior.json/" + instanceRow.Path() + "/scale");
+                    }
+                    instance.scale = scale.Value();
+                    group.instances.push_back(instance);
+                }
+
+                exterior.vegetation.push_back(std::move(group));
+            }
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -2636,6 +2977,10 @@ namespace cnahouse::world
         if (const Result<void> audio = LoadAudio(directory, contents); !audio)
         {
             return audio.Error();
+        }
+        if (const Result<void> exterior = LoadExterior(directory, contents); !exterior)
+        {
+            return exterior.Error();
         }
 
         util::Log::Info(util::LogCat::World,

@@ -140,6 +140,14 @@ namespace cnahouse::world
         [[nodiscard]] static util::Result<void> LoadAudio(std::string_view directory,
                                                           WorldData::Contents& contents);
 
+        /// @brief Reads `layout.exterior.json` into @p contents.
+        ///
+        /// Terrain, road, fences, neighbourhood buildings and vegetation. Vegetation stays grouped
+        /// by asset as the file writes it, because §17.4 draws it instanced where that measures
+        /// faster and that needs the grouping in the data rather than rebuilt at load.
+        [[nodiscard]] static util::Result<void> LoadExterior(std::string_view directory,
+                                                             WorldData::Contents& contents);
+
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
         /// As each `HOUSE-00344`…`HOUSE-00355` lands, its file joins this sequence. Until then the
