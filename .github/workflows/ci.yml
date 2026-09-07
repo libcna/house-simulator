@@ -69,6 +69,14 @@ jobs:
           python3 tools/assets/origin_check.py --selftest
           python3 tools/assets/pbr_to_stock.py --selftest
 
+      - name: The stride measurement must survive both animation conventions
+        working-directory: cna-house
+        # `HOUSE-00194`. The fixture is an analytically exact walk -- 1.4 m of stride over 1.0 s --
+        # authored in BOTH conventions (root-translating mocap and in-place retarget), plus double
+        # support, a dragging foot, an inch-scaled skeleton, two cycles in one clip, a turn in
+        # place and four malformed sources. Pure stdlib: no numpy, no Pillow.
+        run: python3 tools/assets/measure_stride.py --selftest
+
       - name: The atlas packer must move the UVs it claims to move
         working-directory: cna-house
         # `HOUSE-00192`. The selftest authors its own prop set -- including a 30x18 source, a

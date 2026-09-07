@@ -2764,8 +2764,65 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             `cna-content` (`CNA.WavImporter -> CNA.SoundEffectProcessor ->
             CNA.SoundEffectContentWriter`) and the full filter chain is byte-identical across two
             runs on a real file.
-- [ ] HOUSE-00194 — `tools/assets/measure_stride.py`: measure a locomotion clip's stride length and duration for rate matching
+- [x] HOUSE-00194 — `tools/assets/measure_stride.py`: measure a locomotion clip's stride length and duration for rate matching
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/assets/measure_stride.py`, with `--selftest` and `--make-fixture`.
+            36 selftest claims over eleven fixtures the tool authors itself; nothing is committed.
+            Pure standard library — no numpy, no Pillow — and `--selftest` runs in the CI lint job.
+            The byte-level glTF reading is now `tools/assets/gltf_io.py`, shared with
+            `atlas_pack.py` rather than copied into a second tool.
+      finding: **the two source conventions need one formula, not two code paths.** A CMU trial
+            translates its root; the same clip after retargeting stands still and cycles its feet.
+            The identity that covers both: while a foot is planted it does not move, so the body's
+            velocity over the ground is `-d/dt(footWorld - rootWorld)` during stance. On a
+            root-motion clip this reproduces the root's own travel, which makes the two an
+            independent cross-check of each other — and **their disagreement is the foot sliding**,
+            reported rather than averaged away. The fixture's 30 %-sliding walk is caught at 29.4 %;
+            the clean one reads 0.8 %.
+      finding: **plant detection by SPEED is wrong, and the fixture proves it rather than the
+            documentation asserting it.** In an ideal in-place cycle a swinging foot moves at
+            *exactly* the same speed as a planted one — only the direction differs. The first
+            implementation compared speed magnitudes, folded every swing frame into the stance, and
+            measured 0.62 m for an authored 1.40 m while reporting two cycles instead of one. The
+            median is taken as a **vector**; a sample is stance when it is low, in the forward
+            hemisphere of that vector, and within the speed band. All three tests are load-bearing
+            and each has a fixture that fails without it — the speed band's is a foot that *drags*
+            backwards at four times the gait rate for 12 % of its swing, which height and direction
+            both accept and which inflates the stride to 1.75 m if the band is opened up.
+      finding: **double support must be averaged, not summed.** With a realistic 60 % stance both
+            feet are down for 20 % of the cycle. Summing each foot's stance displacement — the
+            obvious implementation — counts the overlap twice and reports 1.2× the stride. The
+            fixture carries this case precisely so the mistake cannot be made silently later.
+      finding: **the units are checked, because CMU's raw skeletons are in inches.** An unscaled
+            stride of 55.6 reaching `Clip::strideLength` would make every character sprint, and it
+            looks like a number rather than like a bug. `unitsHint` compares the skeleton's own hip
+            height against a human and says `metres`, `centimetres` or `inches`; the three bands are
+            factors of 2.54 and 100 apart, so no plausible human lands between them. It is measured
+            on the **first animated frame**, not the rest pose — an exporter may leave the rest pose
+            at the identity and carry the whole skeleton in the tracks, and the fixture does.
+      finding: what the tool refuses to do is as specified as what it does. A turn in place measures
+            below the 0.05 m/s floor and gets `isLocomotion: false, strideLength: 0`, which is what
+            §47.4 wants for a non-locomotion clip. A skeleton whose feet cannot be named reports
+            `method: "none"` and `0` with a warning rather than a plausible guess — and
+            `--foot-left/--foot-right` then recovers the full measurement.
+      finding: **stride is per CYCLE, and the clip is not the cycle.** A two-cycle clip reports
+            `cycles: 2`, `clipTravel: 2.81 m` and `strideLength: 1.41 m`. Cycles are counted from
+            the plant intervals, with a plant that crosses a looping clip's start counted once
+            rather than as two.
+      finding: bone-name matching covers CMU (`LeftFoot`), Mixamo (`mixamorig:LeftToeBase`), Rigify
+            (`foot.L`) and the underscore conventions, prefers the **ankle to the toe** when a
+            skeleton has both, and requires a single-letter `l`/`r` to be **delimited** — otherwise
+            `Ball`, `Roll` and `Collar` become sides.
+      finding: **shown to fail before it was trusted.** 17 injected bugs, 16 detected. The one that
+            was not is recorded rather than papered over: the two-frame minimum contact length is a
+            noise filter for real captures, and the synthetic fixtures are clean enough never to
+            produce a spurious short run. Two of the injections that *were* caught had to be
+            re-run after the first attempt missed — one sed matched the wrong indentation, one
+            disabled a test the fixture did not yet exercise, and the fixture gained the dragging
+            foot as a result.
+      accept: deterministic output; duration, stride, cycles, foot-plant times and the in-place /
+            root-motion distinction all measured, with `docs/anim-format.md` §3.3's `Clip` fields
+            present and in range so `HOUSE-00223` consumes this rather than measuring again
 - [x] HOUSE-00195 — `tools/assets/manifest.py`: add/update a manifest row, compute hashes, validate the schema
       dep: HOUSE-00181 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `tools/assets/manifest.py` with `validate`, `rehash`, `add` and `list`, and

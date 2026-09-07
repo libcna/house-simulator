@@ -3842,6 +3842,22 @@ one. `clipStrideLength` is measured offline per clip by `tools/assets/measure_st
 stored in the `.chanim` sidecar's `Clip::strideLength` (§47.0). This single number is what removes foot sliding, and it costs
 nothing at runtime.
 
+**How it is measured, since the source clips arrive in two incompatible shapes** (`HOUSE-00194`).
+A CMU trial translates its root across the capture volume; the same clip after retargeting stands
+still and cycles its feet underneath. One identity covers both: while a foot is planted it does not
+move, so the body's velocity over the ground is the negative of that foot's velocity *relative to
+the root*. Integrating that over the clip and dividing by the cycle count gives the stride, and for
+a root-motion clip it reproduces the root's own travel — so the two measurements cross-check each
+other, and **their disagreement is the foot sliding itself** (`footSlideRms`, and a warning above
+10 %). Measured on an exact synthetic walk: the root-motion path returns the authored figure
+exactly, the foot-contact path lands 0.8 % high from the finite sampling of the stance boundaries.
+
+Three things the tool refuses to assume, each because assuming it would put a plausible wrong number
+into `Clip::strideLength`: the **units** (a CMU skeleton is in inches, and an unscaled stride of 56
+would make every character sprint), whether the clip is **locomotion at all** (a turn in place gets
+0, which is what this section wants), and whether the **feet can be found** (an unrecognisable
+skeleton reports 0 and a reason, never a guess).
+
 ### 47.5 Foot placement (IK-lite)
 
 Per foot, per frame, when `onGround`:
