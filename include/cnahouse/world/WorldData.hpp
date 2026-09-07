@@ -207,6 +207,14 @@ namespace cnahouse::world
         [[nodiscard]] std::span<const std::uint32_t> LightsOf(util::Id cell) const noexcept;
         [[nodiscard]] std::span<const std::uint32_t> PropsOf(util::Id cell) const noexcept;
 
+        /// @brief The lights in one switch group.
+        ///
+        /// Grouped as well as celled, because the two questions are asked by different systems for
+        /// different reasons: the renderer asks "what lights this cell", a switch asks "what does
+        /// this group toggle", and a group crosses cells -- the stair-hall group lights three
+        /// floors from one plate.
+        [[nodiscard]] std::span<const std::uint32_t> LightsInGroup(util::Id group) const noexcept;
+
         /// @brief The cell on the other side of @p portal from @p cell, or an invalid id.
         [[nodiscard]] util::Id OtherSide(const Portal& portal, util::Id cell) const noexcept;
 
@@ -256,9 +264,11 @@ namespace cnahouse::world
         std::unordered_map<util::Id, detail::CellRange> m_portalsOfCell;
         std::unordered_map<util::Id, detail::CellRange> m_lightsOfCell;
         std::unordered_map<util::Id, detail::CellRange> m_propsOfCell;
+        std::unordered_map<util::Id, detail::CellRange> m_lightsOfGroup;
         std::vector<std::uint32_t> m_portalsByCell;
         std::vector<std::uint32_t> m_lightsByCell;
         std::vector<std::uint32_t> m_propsByCell;
+        std::vector<std::uint32_t> m_lightsByGroup;
     };
 
 } // namespace cnahouse::world

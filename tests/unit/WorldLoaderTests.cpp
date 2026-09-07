@@ -364,6 +364,35 @@ namespace
             })";
         }
 
+        /// Four lights: a point, a spot with a cone and a fixture, and two in one switch group
+        /// that spans two cells -- because a group crossing cells is what the group index is for.
+        static std::string Lights()
+        {
+            return R"({
+              "schema": "cna-house/lights/1",
+              "lights": [
+                { "id": "LIGHT_L0_KITCHEN_MAIN", "cell": "L0_KITCHEN",
+                  "group": "LG_L0_KITCHEN_MAIN", "type": "point",
+                  "position": [-3.0, 3.10, -25.0], "colorK": 2700, "intensityLm": 1600.0,
+                  "range": 6.0, "defaultOn": true },
+                { "id": "LIGHT_L0_KITCHEN_SINK", "cell": "L0_KITCHEN",
+                  "group": "LG_L0_KITCHEN_SINK", "type": "spot",
+                  "position": [-4.0, 3.10, -26.0], "direction": [0.20, -0.90, 0.40],
+                  "colorK": 3000, "intensityLm": 420.0, "range": 4.0,
+                  "coneInnerDeg": 22.0, "coneOuterDeg": 38.0,
+                  "fixtureProp": "PROP_L0_KITCHEN_DOWNLIGHT",
+                  "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true },
+                { "id": "LIGHT_L0_STAIR_LOW", "cell": "L0_STAIR", "group": "LG_L0_STAIR",
+                  "type": "point", "position": [-4.0, 3.00, 6.0], "colorK": 2700,
+                  "intensityLm": 800.0, "bakedIntoLightmap": true, "castsBlobShadow": false,
+                  "defaultOn": true },
+                { "id": "LIGHT_L1_STAIR_HIGH", "cell": "L1_LANDING", "group": "LG_L0_STAIR",
+                  "type": "point", "position": [-4.0, 6.00, 6.0], "colorK": 2700,
+                  "intensityLm": 800.0, "defaultOn": false }
+              ]
+            })";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -381,12 +410,14 @@ namespace
             Write("layout.portals.json", Portals());
             Write("layout.openings.json", Openings());
             Write("layout.stairs.json", Stairs());
+            Write("layout.lights.json", Lights());
             WriteManifest({"layout.levels.json",
                            "layout.materials.json",
                            "layout.cells.json",
                            "layout.portals.json",
                            "layout.openings.json",
-                           "layout.stairs.json"});
+                           "layout.stairs.json",
+                           "layout.lights.json"});
         }
 
         std::string directory_;
@@ -1437,6 +1468,141 @@ namespace
         EXPECT_EQ(stairs.Error().Code(), ErrorCode::OutOfRange);
     }
 
+    // --- the lights -------------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, ALightIsReadWithEveryFieldItCarries)
+    {
+        Write("layout.lights.json", Lights());
+        world::WorldData::Contents contents;
+        const auto lights = world::WorldLoader::LoadLights(directory_, contents);
+        ASSERT_TRUE(lights) << lights.Error().ToString();
+
+        ASSERT_EQ(contents.lights.size(), 4U);
+        const world::Light& spot = contents.lights[1];
+        EXPECT_EQ(spot.id, Intern("LIGHT_L0_KITCHEN_SINK"));
+        EXPECT_EQ(spot.cell, Intern("L0_KITCHEN"));
+        EXPECT_EQ(spot.group, Intern("LG_L0_KITCHEN_SINK"));
+        EXPECT_EQ(spot.type, world::LightType::Spot);
+        EXPECT_FLOAT_EQ(spot.position.Y, 3.10F);
+        // All three components, and none of them the straight-down [0, -1, 0] a reader that
+        // ignored the field might plausibly default to.
+        EXPECT_FLOAT_EQ(spot.direction.X, 0.20F);
+        EXPECT_FLOAT_EQ(spot.direction.Y, -0.90F);
+        EXPECT_FLOAT_EQ(spot.direction.Z, 0.40F);
+        EXPECT_FLOAT_EQ(spot.colorK, 3000.0F);
+        EXPECT_FLOAT_EQ(spot.intensityLm, 420.0F);
+        EXPECT_FLOAT_EQ(spot.range, 4.0F);
+        EXPECT_FLOAT_EQ(spot.coneInnerDeg, 22.0F);
+        EXPECT_FLOAT_EQ(spot.coneOuterDeg, 38.0F);
+        EXPECT_EQ(spot.fixtureProp, Intern("PROP_L0_KITCHEN_DOWNLIGHT"));
+        EXPECT_TRUE(spot.castsBlobShadow);
+        EXPECT_TRUE(spot.bakedIntoLightmap);
+        EXPECT_TRUE(spot.defaultOn);
+    }
+
+    TEST_F(WorldLoaderTest, BakedAndBlobShadowAreIndependent)
+    {
+        // The file says so in as many words: a baked light still needs a blob shadow for the
+        // dynamic objects the bake never saw. Reading one from the other would lose every moving
+        // shadow in a room that was lit offline.
+        Write("layout.lights.json", Lights());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadLights(directory_, contents));
+
+        EXPECT_TRUE(contents.lights[1].bakedIntoLightmap);
+        EXPECT_TRUE(contents.lights[1].castsBlobShadow);
+        EXPECT_TRUE(contents.lights[2].bakedIntoLightmap);
+        EXPECT_FALSE(contents.lights[2].castsBlobShadow);
+        EXPECT_FALSE(contents.lights[3].defaultOn) << "and a light may start off";
+    }
+
+    TEST_F(WorldLoaderTest, ASpotWithNoDirectionIsRefused)
+    {
+        // `Vector3::Zero` normalises to a NaN: a black room at run time, and there is nothing in
+        // the frame to look at that says why.
+        Write("layout.lights.json",
+              R"({"schema": "cna-house/lights/1",
+                  "lights": [{"id": "L", "cell": "C", "group": "G", "type": "spot",
+                              "position": [0, 3, 0]}]})");
+        world::WorldData::Contents contents;
+        const auto lights = world::WorldLoader::LoadLights(directory_, contents);
+        ASSERT_FALSE(lights);
+        EXPECT_NE(lights.Error().Context().find("direction"), std::string::npos) << lights.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, APointLightNeedsNoDirection)
+    {
+        Write("layout.lights.json", Lights());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadLights(directory_, contents));
+        EXPECT_EQ(contents.lights[0].type, world::LightType::Point);
+    }
+
+    TEST_F(WorldLoaderTest, AColourTemperatureOutsideThePhysicalRangeIsRefused)
+    {
+        // A missing zero on 2 700 puts a kitchen under a match. 1 000 K is a candle and 12 000 K
+        // is a clear north sky; outside that is a typo, not a choice.
+        for (const std::string colour : {"270", "27000"})
+        {
+            Write("layout.lights.json",
+                  R"({"schema": "cna-house/lights/1",
+                      "lights": [{"id": "L", "cell": "C", "group": "G", "type": "point",
+                                  "position": [0, 3, 0], "colorK": )" +
+                      colour + "}]}");
+            world::WorldData::Contents contents;
+            const auto lights = world::WorldLoader::LoadLights(directory_, contents);
+            ASSERT_FALSE(lights) << "accepted " << colour;
+            EXPECT_EQ(lights.Error().Code(), ErrorCode::OutOfRange);
+        }
+    }
+
+    TEST_F(WorldLoaderTest, AnInnerConeOutsideItsOuterOneIsRefused)
+    {
+        // The falloff runs backwards and the spot gets a dark centre, which reads as a shader bug.
+        Write("layout.lights.json",
+              R"({"schema": "cna-house/lights/1",
+                  "lights": [{"id": "L", "cell": "C", "group": "G", "type": "spot",
+                              "position": [0, 3, 0], "direction": [0, -1, 0],
+                              "coneInnerDeg": 50.0, "coneOuterDeg": 30.0}]})");
+        world::WorldData::Contents contents;
+        const auto lights = world::WorldLoader::LoadLights(directory_, contents);
+        ASSERT_FALSE(lights);
+        EXPECT_NE(lights.Error().Message().find("inside"), std::string::npos) << lights.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, ANegativeIntensityOrRangeIsRefused)
+    {
+        for (const std::string field : {"intensityLm", "range"})
+        {
+            Write("layout.lights.json",
+                  R"({"schema": "cna-house/lights/1",
+                      "lights": [{"id": "L", "cell": "C", "group": "G", "type": "point",
+                                  "position": [0, 3, 0], ")" +
+                      field + R"(": -1.0}]})");
+            world::WorldData::Contents contents;
+            EXPECT_FALSE(world::WorldLoader::LoadLights(directory_, contents))
+                << "accepted a negative " << field;
+        }
+    }
+
+    TEST_F(WorldLoaderTest, LightsAreIndexedByGroupAsWellAsByCell)
+    {
+        // A switch asks "what does this group toggle" and the renderer asks "what lights this
+        // cell", and a group crosses cells: the stair-hall group lights two rooms from one plate.
+        Write("layout.lights.json", Lights());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadLights(directory_, contents));
+        const auto loaded = world::WorldData::Create(std::move(contents));
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+
+        EXPECT_EQ(loaded.Value().LightsOf(Intern("L0_KITCHEN")).size(), 2U);
+        EXPECT_EQ(loaded.Value().LightsInGroup(Intern("LG_L0_STAIR")).size(), 2U) << "one group, two cells";
+        const auto group = loaded.Value().LightsInGroup(Intern("LG_L0_STAIR"));
+        ASSERT_EQ(group.size(), 2U);
+        EXPECT_NE(loaded.Value().Lights()[group[0]].cell, loaded.Value().Lights()[group[1]].cell);
+        EXPECT_TRUE(loaded.Value().LightsInGroup(Intern("LG_NOWHERE")).empty());
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -1458,6 +1624,7 @@ namespace
         EXPECT_EQ(world.Value().Portals().size(), 4U);
         EXPECT_EQ(world.Value().Openings().size(), 3U);
         EXPECT_EQ(world.Value().Stairs().size(), 2U);
+        EXPECT_EQ(world.Value().Lights().size(), 4U);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -1486,12 +1653,14 @@ namespace
         Write("layout.portals.json", Portals());
         Write("layout.openings.json", Openings());
         Write("layout.stairs.json", Stairs());
+        Write("layout.lights.json", Lights());
         WriteManifest({"layout.levels.json",
                        "layout.materials.json",
                        "layout.cells.json",
                        "layout.portals.json",
                        "layout.openings.json",
-                       "layout.stairs.json"});
+                       "layout.stairs.json",
+                       "layout.lights.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

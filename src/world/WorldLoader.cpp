@@ -1800,6 +1800,183 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadLights(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.lights.json", "lights", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+
+        const Result<JsonValue> lights = document.Value().Root().RequireArray("lights");
+        if (!lights)
+        {
+            return lights.Error().WithContext("layout.lights.json");
+        }
+        const Result<std::vector<JsonValue>> rows = lights.Value().Elements();
+        if (!rows)
+        {
+            return rows.Error().WithContext("layout.lights.json");
+        }
+
+        for (const JsonValue& row : rows.Value())
+        {
+            Light light;
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, util::Id*>>{
+                     {"id", &light.id}, {"cell", &light.cell}, {"group", &light.group}})
+            {
+                const Result<util::Id> value = RequireId(row, field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.lights.json");
+                }
+                *target = value.Value();
+            }
+
+            const Result<std::string> type = row.RequireString("type");
+            if (!type)
+            {
+                return type.Error().WithContext("layout.lights.json");
+            }
+            const Result<LightType> parsedType = ParseLightType(type.Value());
+            if (!parsedType)
+            {
+                return parsedType.Error().WithContext(row.Path() + "/type").WithContext("layout.lights.json");
+            }
+            light.type = parsedType.Value();
+
+            const Result<Microsoft::Xna::Framework::Vector3> position = row.RequireVector3("position");
+            if (!position)
+            {
+                return position.Error().WithContext("layout.lights.json");
+            }
+            light.position = position.Value();
+
+            if (row.Has("direction") && !row.IsNull("direction"))
+            {
+                const Result<Microsoft::Xna::Framework::Vector3> direction = row.RequireVector3("direction");
+                if (!direction)
+                {
+                    return direction.Error().WithContext("layout.lights.json");
+                }
+                light.direction = direction.Value();
+            }
+            // A spot or a directional light with no direction points nowhere, and `Vector3::Zero`
+            // normalises to a NaN. That is a black room at run time and a load error here.
+            if (light.type == LightType::Spot || light.type == LightType::Directional)
+            {
+                const float lengthSquared = light.direction.X * light.direction.X +
+                                            light.direction.Y * light.direction.Y +
+                                            light.direction.Z * light.direction.Z;
+                if (lengthSquared <= 0.0F)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a " + std::string(ToStringView(light.type)) +
+                                   " light needs a direction; this one has none",
+                               "layout.lights.json/" + row.Path() + "/direction");
+                }
+            }
+
+            // §70.5 does not give a colour-temperature range, but the physical one is not open:
+            // 1 000 K is a candle and 12 000 K is a clear north sky, and a value outside that is a
+            // typo -- a missing zero on 2 700 puts a kitchen under a match.
+            const Result<float> colorK = row.OptionalFloat("colorK", 2700.0F);
+            if (!colorK)
+            {
+                return colorK.Error().WithContext("layout.lights.json");
+            }
+            if (colorK.Value() < 1000.0F || colorK.Value() > 12000.0F)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "a colour temperature is 1000..12000 K; this is " + std::to_string(colorK.Value()),
+                           "layout.lights.json/" + row.Path() + "/colorK");
+            }
+            light.colorK = colorK.Value();
+
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, float*>>{
+                     {"intensityLm", &light.intensityLm}, {"range", &light.range}})
+            {
+                const Result<float> value = row.OptionalFloat(field, 0.0F);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.lights.json");
+                }
+                if (value.Value() < 0.0F)
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "a light " + std::string(field) + " is not negative; this is " +
+                                   std::to_string(value.Value()),
+                               "layout.lights.json/" + row.Path() + "/" + std::string(field));
+                }
+                *target = value.Value();
+            }
+
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, float*>>{
+                     {"coneInnerDeg", &light.coneInnerDeg}, {"coneOuterDeg", &light.coneOuterDeg}})
+            {
+                const Result<float> value = row.OptionalFloat(field, 0.0F);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.lights.json");
+                }
+                if (value.Value() < 0.0F || value.Value() > 180.0F)
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "a cone angle is 0..180 degrees; this is " + std::to_string(value.Value()),
+                               "layout.lights.json/" + row.Path() + "/" + std::string(field));
+                }
+                *target = value.Value();
+            }
+            // Inner inside outer. The other way round the falloff runs backwards and the spot has
+            // a dark centre, which reads as a shader bug and is a data bug.
+            if (light.coneInnerDeg > light.coneOuterDeg)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "the inner cone is inside the outer one; this is " +
+                               std::to_string(light.coneInnerDeg) + " inside " +
+                               std::to_string(light.coneOuterDeg),
+                           "layout.lights.json/" + row.Path() + "/coneInnerDeg");
+            }
+
+            const Result<util::Id> fixture = OptionalId(row, "fixtureProp");
+            if (!fixture)
+            {
+                return fixture.Error().WithContext("layout.lights.json");
+            }
+            light.fixtureProp = fixture.Value();
+
+            if (row.Has("emissiveMaterialSlot") && !row.IsNull("emissiveMaterialSlot"))
+            {
+                const Result<std::string> slot = row.RequireString("emissiveMaterialSlot");
+                if (!slot)
+                {
+                    return slot.Error().WithContext("layout.lights.json");
+                }
+                light.emissiveMaterialSlot = slot.Value();
+            }
+
+            // `bakedIntoLightmap` and `castsBlobShadow` are independent, and the file says so: a
+            // baked light still needs a blob shadow for the dynamic objects the bake never saw.
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, bool*>>{
+                     {"castsBlobShadow", &light.castsBlobShadow},
+                     {"bakedIntoLightmap", &light.bakedIntoLightmap},
+                     {"defaultOn", &light.defaultOn}})
+            {
+                const Result<bool> value = row.OptionalBool(field, false);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.lights.json");
+                }
+                *target = value.Value();
+            }
+
+            contents.lights.push_back(std::move(light));
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -1835,6 +2012,10 @@ namespace cnahouse::world
         if (const Result<void> stairs = LoadStairs(directory, contents); !stairs)
         {
             return stairs.Error();
+        }
+        if (const Result<void> lights = LoadLights(directory, contents); !lights)
+        {
+            return lights.Error();
         }
 
         util::Log::Info(util::LogCat::World,

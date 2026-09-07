@@ -167,6 +167,15 @@ namespace cnahouse::world
             [](const Prop& row) { return row.cell; },
             world.m_propsByCell,
             world.m_propsOfCell);
+        // Lights are grouped twice, by cell and by switch group, because the two questions are
+        // asked by different systems for different reasons: the renderer asks "what lights this
+        // cell", a switch asks "what does this group toggle", and a group crosses cells -- the
+        // stair-hall group lights three floors from one plate.
+        GroupByCell(
+            world.m_contents.lights,
+            [](const Light& row) { return row.group; },
+            world.m_lightsByGroup,
+            world.m_lightsOfGroup);
 
         // A portal belongs to BOTH its cells, so it is grouped twice. Every caller of `PortalsOf`
         // -- the visibility solver, the nav walk, the audio transmission solve -- asks "what leads
@@ -299,6 +308,11 @@ namespace cnahouse::world
     std::span<const std::uint32_t> WorldData::PropsOf(util::Id cell) const noexcept
     {
         return Slice(m_propsOfCell, m_propsByCell, cell);
+    }
+
+    std::span<const std::uint32_t> WorldData::LightsInGroup(util::Id group) const noexcept
+    {
+        return Slice(m_lightsOfGroup, m_lightsByGroup, group);
     }
 
     util::Id WorldData::OtherSide(const Portal& portal, util::Id cell) const noexcept

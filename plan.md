@@ -5041,8 +5041,26 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: `collisionRamp` defaults to **true**, which is `build_collision.py`'s default.
             Defaulting the other way would silently give every flight in the house a box per step
             where it asked for two wedges.
-- [ ] HOUSE-00348 — `WorldLoader`: lights and light groups
+- [x] HOUSE-00348 — `WorldLoader`: lights and light groups
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadLights`, plus `WorldData::LightsInGroup`. 8 new unit
+            tests; eight injected bugs, eight caught.
+      note: lights are indexed **twice**, by cell and by switch group, because the two questions
+            are asked by different systems for different reasons: the renderer asks "what lights
+            this cell", a switch asks "what does this group toggle", and a group crosses cells —
+            the stair-hall group lights two floors from one plate. The fixture is built so that it
+            does.
+      finding: `bakedIntoLightmap` and `castsBlobShadow` are independent and the file says so. A
+            baked light still needs a blob shadow for the dynamic objects the bake never saw, so
+            reading one from the other loses every moving shadow in a room that was lit offline.
+      finding: a `spot` or `directional` light with no direction is refused. `Vector3::Zero`
+            normalises to a NaN — a black room at run time with nothing in the frame that says
+            why — and the fixture's direction is `[0.20, -0.90, 0.40]` rather than straight down,
+            because an injected bug that dropped the field and defaulted to `[0, -1, 0]` survived
+            the first version of the test.
+      finding: `colorK` is bounded 1000..12000 K. §70.5 gives no range, but the physical one is
+            not open: a missing zero on 2 700 puts a kitchen under a match, and that is a typo
+            rather than a choice.
 - [x] HOUSE-00349 — `WorldLoader`: materials
       dep: HOUSE-00343 · sys: world · plat: ALL · pri: MUST
       note: (2026-09-07) `WorldLoader::LoadMaterials`, read **before** the cells because a cell

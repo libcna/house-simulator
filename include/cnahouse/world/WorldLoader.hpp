@@ -113,6 +113,14 @@ namespace cnahouse::world
         [[nodiscard]] static util::Result<void> LoadStairs(std::string_view directory,
                                                            WorldData::Contents& contents);
 
+        /// @brief Reads `layout.lights.json` into @p contents.
+        ///
+        /// A light belongs to exactly one **group**, and the group is what a switch toggles and
+        /// what a lightmap is baked per. `WorldData::LightsInGroup` is the index that makes a
+        /// switch O(1).
+        [[nodiscard]] static util::Result<void> LoadLights(std::string_view directory,
+                                                           WorldData::Contents& contents);
+
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
         /// As each `HOUSE-00344`…`HOUSE-00355` lands, its file joins this sequence. Until then the
