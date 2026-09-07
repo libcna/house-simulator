@@ -145,6 +145,7 @@ namespace cnahouse::app
                "                              built without it has no compiled effects to load.\n"
                "  --headless                  Run with no window (requires a HEADLESS build)\n"
                "  --scene=<name>              Start in a named test scene instead of the house\n"
+               "  --screenshot-frame=<n>      Capture the nth drawn frame (default 1)\n"
                "  --seed=<n>                  Session seed; the same seed reproduces a session exactly\n"
                "  --time=<hours>              Time of day to start at, 0..24\n"
                "  --weather=<name>            Weather archetype to start in\n"
@@ -281,6 +282,25 @@ namespace cnahouse::app
                     return value.Error();
                 }
                 options.screenshot = std::string(*value);
+            }
+            else if (argument.name == "--screenshot-frame")
+            {
+                auto value = requireValue("--screenshot-frame");
+                if (!value)
+                {
+                    return value.Error();
+                }
+                std::uint64_t frame = 0;
+                const auto* first = value->data();
+                const auto* last = first + value->size();
+                const auto parsed = std::from_chars(first, last, frame);
+                if (parsed.ec != std::errc{} || parsed.ptr != last || frame == 0)
+                {
+                    return Error(ErrorCode::InvalidArgument,
+                                 "--screenshot-frame takes a frame number of 1 or more",
+                                 std::string(*value));
+                }
+                options.screenshotFrame = frame;
             }
             else if (argument.name == "--log")
             {

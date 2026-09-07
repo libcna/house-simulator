@@ -56,6 +56,13 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "avatar": [("y", 1.55, 1.90, "human avatar height")],
     "dog": [("y", 0.50, 0.70, "dog withers height")],
     "cat": [("y", 0.20, 0.32, "cat shoulder height")],
+    # A pipeline fixture is not a real-world object, but it is still geometry with a size, and the
+    # bug this table exists to catch -- a model authored in centimetres -- is exactly as possible
+    # here as anywhere. The band is wide because the size is chosen to be legible in a screenshot;
+    # it is a band rather than nothing because 80 would be as wrong as 0.008.
+    "fixture": [("x", 0.05, 3.0, "content-pipeline fixture, legible at a few metres"),
+                ("y", 0.05, 3.0, "content-pipeline fixture, legible at a few metres"),
+                ("z", 0.05, 3.0, "content-pipeline fixture, legible at a few metres")],
 }
 
 #: Categories that exist in the manifest but carry no size expectation. Listed explicitly so that a

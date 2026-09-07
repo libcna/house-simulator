@@ -38,8 +38,12 @@ function(cnahouse_test_target kind)
     # build tree rather than beside the sources they are compared against -- a `git status` that
     # lists a captured frame every time the suite runs teaches people to ignore `git status`.
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/test-output")
+    # The EFFECT root is separate for the same reason the game keeps it separate (`HOUSE-00064`):
+    # a stale `.xnb` in the `.cnb` tree shadows what the build just produced. A test that wants
+    # Tier E has to be told where the `.xnb` tree is (`HOUSE-00201`).
     target_compile_definitions(${_target} PRIVATE
         CNAHOUSE_TEST_CONTENT_ROOT="${CMAKE_BINARY_DIR}/content"
+        CNAHOUSE_TEST_EFFECT_ROOT="${CMAKE_BINARY_DIR}/content-fx"
         CNAHOUSE_TEST_OUTPUT_DIR="${CMAKE_BINARY_DIR}/test-output")
     set_target_properties(${_target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
     # The working directory is the REPOSITORY ROOT, not the build directory, so a test's fixture

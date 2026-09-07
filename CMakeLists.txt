@@ -159,11 +159,28 @@ set_target_properties(cna-house PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BIN
 # force, made visible.
 include(ToolContentPipeline OPTIONAL)
 
-set(CNAHOUSE_CNB_ASSET_DIRS Models Textures Audio Fonts Video world)
+set(CNAHOUSE_CNB_ASSET_DIRS Models Textures Audio Fonts world)
+
+# `Media/` is built differently, and the reason is MEASURED (`HOUSE-00201`). A `Video` (and a
+# `Song`) compiles to a small metadata `.cnb` plus a byte-identical copy of the media file, and the
+# runtime resolves that copy through `ContentManager::BuildAssetPath` -- that is, **relative to the
+# CONTENT ROOT**, not to the `.cnb` beside it. Every other asset type is resolved relative to the
+# output directory it was built into, which is why building one subdirectory at a time works for
+# them and cannot work for media: with `OUTPUT_DIR = content/Video`, a stream reference of
+# `smoke_clip.ogv` deploys to `content/Video/smoke_clip.ogv` and is looked for at
+# `content/smoke_clip.ogv`, and a reference of `Video/smoke_clip.ogv` deploys to
+# `content/Video/Video/smoke_clip.ogv` and is looked for at `content/Video/smoke_clip.ogv`. The two
+# never meet.
+#
+# So the media tree is built with the content root AS its output directory, and carries the
+# `Video/` component in its own source layout instead. `assets-src/Media/Video/clip.ogv` then
+# produces `content/Video/clip.cnb` and `content/Video/clip.ogv`, the content name is
+# `Video/clip` exactly as §21.6 has it, and nothing is copied twice.
+set(CNAHOUSE_CNB_MEDIA_DIR Media)
 
 if(COMMAND cna_add_content)
     set(_content_targets "")
-    foreach(_dir IN LISTS CNAHOUSE_CNB_ASSET_DIRS)
+    foreach(_dir IN LISTS CNAHOUSE_CNB_ASSET_DIRS CNAHOUSE_CNB_MEDIA_DIR)
         if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets-src/${_dir}")
             continue()
         endif()
@@ -172,10 +189,14 @@ if(COMMAND cna_add_content)
         if(NOT _sources)
             continue()   # an empty subdirectory is not an error; most of them start empty
         endif()
+        set(_out "${CMAKE_BINARY_DIR}/content/${_dir}")
+        if(_dir STREQUAL "${CNAHOUSE_CNB_MEDIA_DIR}")
+            set(_out "${CMAKE_BINARY_DIR}/content")
+        endif()
         cna_add_content(
             TARGET cnahouse_content_${_dir}
             SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets-src/${_dir}"
-            OUTPUT_DIR "${CMAKE_BINARY_DIR}/content/${_dir}")
+            OUTPUT_DIR "${_out}")
         list(APPEND _content_targets cnahouse_content_${_dir})
     endforeach()
 

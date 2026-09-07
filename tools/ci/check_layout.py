@@ -43,7 +43,7 @@ REQUIRED_DIRS = (
     + ["include/cnahouse/interaction/behaviours"]
     + ["tools/world", "tools/assets", "tools/blender", "tools/effects", "tools/ci"]
     + ["assets-src/Models", "assets-src/Textures", "assets-src/Audio", "assets-src/Fonts",
-       "assets-src/Video", "assets-src/Effects", "assets-src/world"]
+       "assets-src/Media", "assets-src/Effects", "assets-src/world"]
     + ["tests/unit", "tests/integration", "tests/render", "tests/perf"]
 )
 

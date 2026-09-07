@@ -65,6 +65,15 @@ namespace cnahouse::ui
             return font_ != nullptr;
         }
 
+        /// @brief The face currently pointed at, so a caller that swaps one in can put it back.
+        ///
+        /// Added for `HOUSE-00201`: the smoke scene draws with its OWN face to prove that face
+        /// loaded, and leaving the HUD pointed at a font the scene owns would dangle at teardown.
+        [[nodiscard]] const Microsoft::Xna::Framework::Graphics::SpriteFont* Font() const noexcept
+        {
+            return font_;
+        }
+
         /// @brief Tells the renderer the real back-buffer size, so virtual units can be scaled.
         void SetViewport(int width, int height) noexcept;
 

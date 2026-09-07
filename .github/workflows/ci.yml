@@ -77,6 +77,17 @@ jobs:
         # place and four malformed sources. Pure stdlib: no numpy, no Pillow.
         run: python3 tools/assets/measure_stride.py --selftest
 
+      - name: The smoke-scene assets must be what they claim to be
+        working-directory: cna-house
+        # `HOUSE-00201`. The PNG, WAV and GLB are written byte for byte by the script and are
+        # asserted reproducible; the `.ogv` is not, because Theora's bitstream depends on the
+        # encoder build, and the selftest says so instead of pretending. It also re-probes the clip
+        # to check that all twenty authored frames survived the encode -- `libtheora` here drops a
+        # frame identical to the one before it, which silently cost sixteen of them once.
+        run: |
+          python3 -m pip install --break-system-packages --user pillow
+          python3 tools/assets/make_smoke_assets.py --selftest
+
       - name: The atlas packer must move the UVs it claims to move
         working-directory: cna-house
         # `HOUSE-00192`. The selftest authors its own prop set -- including a 30x18 source, a

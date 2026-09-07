@@ -15,6 +15,7 @@
 #include "cnahouse/app/Platform.hpp"
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/audio/AudioSystem.hpp"
+#include "cnahouse/content/SmokeScene.hpp"
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
@@ -116,6 +117,16 @@ namespace cnahouse::app
             return menus_;
         }
 
+        /// @brief What `--scene=content-smoke` established, or `nullptr` in any other session.
+        ///
+        /// Readable after `Run()` for the same reason `Tier()` is: the six loads happen inside
+        /// `LoadContent` and the video's advance inside `Update`, so nothing outside a frame can
+        /// observe either otherwise (`HOUSE-00201`).
+        [[nodiscard]] const content::SmokeReport* SmokeReport() const noexcept
+        {
+            return smoke_ == nullptr ? nullptr : &smoke_->Report();
+        }
+
         /// @brief The frame-time line: milliseconds and the frames-per-second it implies.
         ///
         /// Both, deliberately. Milliseconds is the number a budget is written in and the one that
@@ -148,6 +159,12 @@ namespace cnahouse::app
         /// @brief The `Pass::Hud` implementation, defined in the .cpp because it is an adapter onto
         ///        `DrawHud` and nothing else needs its name.
         class HudPass;
+
+        /// @brief The `Pass::OpaqueDynamic` adapter onto the content smoke scene (`HOUSE-00201`).
+        class SmokePass;
+
+        /// @brief Loads `Fonts/ui-16` into the HUD, or logs why it could not. Called once.
+        void LoadHudFont();
 
         /// @brief Loads the Tier-E effect set, or falls back to Tier S. Called once, from
         ///        `LoadContent`.
@@ -231,6 +248,12 @@ namespace cnahouse::app
 
         class Hud;
         std::unique_ptr<Hud> hud_;
+
+        /// The content smoke scene of `HOUSE-00201`, or null. Constructed in `LoadContent` when
+        /// `--scene=content-smoke` asked for it, and installed as the `OpaqueDynamic` pass -- the
+        /// pass a prop belongs in, so the scene exercises the frame's real shape rather than a
+        /// bypass of it.
+        std::unique_ptr<content::SmokeScene> smoke_;
 
         std::uint64_t framesDrawn_ = 0;
         std::uint64_t frameLimit_ = 0;

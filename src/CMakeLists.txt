@@ -30,6 +30,7 @@ add_library(cnahouse_core STATIC
     # content
     content/ContentRegistry.cpp
     content/Caches.cpp
+    content/SmokeScene.cpp
 
     # persistence
     persistence/DesktopSaveStore.cpp

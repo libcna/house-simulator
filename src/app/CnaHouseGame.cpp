@@ -108,6 +108,37 @@ namespace cnahouse::app
     /// `Renderer` invalidates the tracker after it, and it declares itself inactive when there is no
     /// font, so an empty HUD is a *skipped* pass in the counters rather than a pass that silently
     /// did nothing.
+    /// `HOUSE-00201`. The smoke scene draws in `OpaqueDynamic` -- the pass a prop belongs in --
+    /// rather than in a pass of its own, so what it exercises is the frame's real shape.
+    class CnaHouseGame::SmokePass final : public rendering::IRenderPass
+    {
+    public:
+        explicit SmokePass(CnaHouseGame& game) noexcept
+            : game_(&game)
+        {
+        }
+
+        void Draw(rendering::PassContext& context) override
+        {
+            game_->smoke_->Draw(context.device);
+        }
+
+        [[nodiscard]] bool IsActive() const override
+        {
+            return game_->contentLoaded_ && game_->smoke_ != nullptr;
+        }
+
+        [[nodiscard]] bool DisturbsDeviceState() const override
+        {
+            // The pass binds its own vertex and index buffers and applies an effect pass, none of
+            // which `StateTracker` predicts.
+            return true;
+        }
+
+    private:
+        CnaHouseGame* game_;
+    };
+
     class CnaHouseGame::HudPass final : public rendering::IRenderPass
     {
     public:
@@ -227,6 +258,26 @@ namespace cnahouse::app
         // resolved against the pre-narrowing tier would offer post-processing that cannot run.
         ResolveQuality();
 
+        if (options_.scene.has_value() && *options_.scene == content::SmokeScene::kSceneName)
+        {
+            // No loading screen in the smoke scene. The title screen covers the frame, and a smoke
+            // test whose picture is the title screen proves nothing about the six assets under it.
+            smoke_ = std::make_unique<content::SmokeScene>(
+                getContentProperty(), effectContent_.get(), audio_, tier_.IsTierE());
+            smoke_->Load();
+            renderer_.Install(rendering::Pass::OpaqueDynamic, std::make_unique<SmokePass>(*this));
+            // The audio gate is opened directly rather than by a keypress: `--scene` is a
+            // non-interactive entry point, and a sound that never plays because nobody pressed a
+            // key would look exactly like a sound that failed to load (`HOUSE-00155`).
+            if (audio_.NoteUserGesture())
+            {
+                Log::Info(LogCat::Audio, "{}", audio_.Summary());
+            }
+            LoadHudFont();
+            contentLoaded_ = true;
+            return;
+        }
+
         // The loading screen IS the title screen IS the audio gate (`HOUSE-00155`,
         // `HOUSE-00156`). Pushed before anything else so the player has something to press during
         // load rather than after it.
@@ -242,6 +293,12 @@ namespace cnahouse::app
         loading_ = loading.get();
         menus_.Replace(std::move(loading));
 
+        LoadHudFont();
+        contentLoaded_ = true;
+    }
+
+    void CnaHouseGame::LoadHudFont()
+    {
         // The font is the first content this project loads, and it is allowed to be absent: a build
         // whose content tree has not been generated yet must still start and still say so, or the
         // first thing a new contributor sees is a crash. `docs/conventions.md` §5.2 puts the catch
@@ -259,7 +316,6 @@ namespace cnahouse::app
                       "drawn: {}",
                       e.what());
         }
-        contentLoaded_ = true;
     }
 
     void CnaHouseGame::ActivateTierE()
@@ -367,6 +423,9 @@ namespace cnahouse::app
         // Cleared BEFORE the font it points at is destroyed. A renderer holding a dangling font is
         // a use-after-free at shutdown, which is the hardest kind to reproduce.
         text_.SetFont(nullptr);
+        // BEFORE `hud_`, and before the content manager unloads: the scene holds a `VideoPlayer`
+        // whose decoder must stop while its `Video` is still alive.
+        smoke_.reset();
         hud_.reset();
         effectContent_.reset();
         contentLoaded_ = false;
@@ -398,6 +457,14 @@ namespace cnahouse::app
             {
                 const debug::Timing::Scope scope(timing_, UpdateStage::Input);
                 input_.Update(frame.deltaSeconds);
+            }
+
+            if (smoke_ != nullptr)
+            {
+                // `HOUSE-00201`. Driven from `Update` and not from the draw, because starting a
+                // sound or advancing a decoder inside a draw would make the frame's cost depend on
+                // whether it was a capture frame.
+                smoke_->Update(frame.deltaSeconds);
             }
 
             // Content is loaded by the time the first frame updates, so the title screen is free to
@@ -482,7 +549,10 @@ namespace cnahouse::app
             // wasteful thinking: XNA offers no way to read the back buffer, and drawing into a target
             // also makes the image independent of the compositor -- no title bar, no cursor, nothing on
             // top -- which is the only form usable as a regression fixture (`HOUSE-00164`).
-            if (!pendingScreenshot_.empty())
+            // `--screenshot-frame` waits, rather than capturing whatever frame 1 happens to hold.
+            // A video's first decoded frame arrives when the decoder produces it, and `HOUSE-00201`
+            // needs that frame to be on screen for the capture to mean anything.
+            if (!pendingScreenshot_.empty() && framesDrawn_ + 1 >= options_.screenshotFrame)
             {
                 if (capture_ == nullptr)
                 {
@@ -605,6 +675,10 @@ namespace cnahouse::app
         // second batch would cost more than everything in it) and BEFORE the corner lines, so the
         // version and frame time stay readable over a title screen.
         menus_.Draw(hud_->batch, text_);
+        if (smoke_ != nullptr)
+        {
+            smoke_->DrawOverlay(hud_->batch, text_);
+        }
 
         text_.DrawShadowed(hud_->batch,
                            SessionLine(),

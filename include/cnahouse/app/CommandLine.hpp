@@ -64,6 +64,14 @@ namespace cnahouse::app
         std::optional<std::string> weather;
         /// @brief Take a screenshot to this path and exit.
         std::optional<std::string> screenshot;
+        /// @brief Which drawn frame `--screenshot` captures. 1 is the first, and the default.
+        ///
+        /// `HOUSE-00201`. Some content is not on screen in frame 1 and never will be: a video's
+        /// first decoded frame arrives when the decoder produces it, not when `Play` is called, so
+        /// a capture of frame 1 shows an empty panel however healthy the pipeline is. Waiting a
+        /// fixed number of frames is honest about what is being waited for, and the alternative --
+        /// widening a tolerance until the empty panel passes -- would hide a real failure too.
+        std::uint64_t screenshotFrame = 1;
         /// @brief `--log=world,content`; empty means every category.
         std::optional<std::string> logCategories;
 

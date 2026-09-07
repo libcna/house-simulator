@@ -2984,9 +2984,79 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             the atlas is what a particular FreeType rasterised. This build used FreeType 2.13.3.
             Recorded so a future byte-difference in `Fonts/*.cnb` is diagnosed as a toolchain change
             rather than misread as asset drift.
-- [ ] HOUSE-00201 — Content smoke scene: load one model, one texture, one font, one sound, one effect, one video and display/play them
+- [x] HOUSE-00201 — Content smoke scene: load one model, one texture, one font, one sound, one effect, one video and display/play them
       dep: HOUSE-00182…HOUSE-00200 · sys: content · plat: LNX · pri: MUST
       verify: render test `content-smoke-01`
+      note: (2026-09-07) `--scene=content-smoke`. `cnahouse::content::SmokeScene` loads the six,
+            draws the model through the compiled effect in `Pass::OpaqueDynamic`, draws the video
+            frame and the source texture as panels, and writes six report lines with its own face.
+            Four assets are authored by `tools/assets/make_smoke_assets.py` (40 kB total); the font
+            and the effect are the ones `HOUSE-00200` and `HOUSE-00185` already vendored.
+            **Eight integration tests and four render tests**, plus the `content-smoke-01`
+            reference. Both selftests run in the CI lint job.
+      finding: **each of the six is checked at the thing that CONSUMES it, not at the `Load<T>`
+            call**, because those are different failures. The model reaches a draw call, the
+            texture reaches a sampler, the font reaches a glyph, the sound reaches the mixer, the
+            effect reaches a shader, and the video's play position moves. Seven injected bugs; six
+            were caught immediately and the seventh is the interesting one.
+      finding: **`soundStarted` was a lie, and an injection proved it.** It was set beside the
+            `Play()` call, so removing `Play()` altogether left every test green — the flag recorded
+            that the code path had run. It now reads `SoundEffectInstance::getStateProperty()` back
+            and stores what the mixer said; the same injection then fails with *"the mixer reports
+            it as 'stopped' rather than playing"*. `Play()` returns `void`, so the read-back is the
+            only evidence available.
+      finding: **the tint is what proves the effect reached the shader, and a colour-distance check
+            could not see it.** Red tinted and red untinted are 16 units apart — any slack wide
+            enough for a rasteriser swallows the difference. The render test therefore counts BOTH
+            forms of all four quadrant colours and requires the untinted count to be **zero** on the
+            model; blue carries the claim, at 143 against 230 in the blue channel. Measured: the
+            shader point-samples, so the rendered texel is the authored one exactly.
+      finding: **CNA resolves a streamed media XREF from the CONTENT ROOT, not from the `.cnb`
+            beside it**, and every other asset type resolves relative to the directory it was built
+            into. §18.1 builds one subdirectory at a time, so for `Video` the two never meet:
+            `streamReference: smoke_clip.ogv` deploys to `content/Video/smoke_clip.ogv` and is
+            looked for at `content/smoke_clip.ogv`; `Video/smoke_clip.ogv` deploys to
+            `content/Video/Video/smoke_clip.ogv` and is looked for at `content/Video/smoke_clip.ogv`.
+            Both were tried and both fail. The fix is `assets-src/Media/`, built into `content/`
+            **itself** with the `Video/` component in the source layout — the content name stays
+            `Video/smoke_clip`, nothing is copied twice, and an integration test asserts the layout
+            so tidying it back is a red test rather than a silent load failure.
+      finding: **`VideoProcessor` requires `width`, `height` and `framesPerSecond` as authored
+            parameters** — CNA does not decode the source at build time, it deploys the stream and
+            trusts the metadata. So the metadata can disagree with the file and nothing at build
+            time notices; `make_smoke_assets.py --selftest` re-probes the clip instead.
+      finding: **`libtheora` here drops a frame identical to the one before it.** A two-second
+            flat-colour clip at 10 fps encoded to **four** frames rather than twenty, silently, and
+            `drawbox` in this ffmpeg has no per-frame `eval` with which to move anything. The clip's
+            frames are therefore PNGs the script authors — a background that changes every half
+            second and a marker that steps three pixels right every frame, so a decoded texture says
+            both which half-second and which frame it is.
+      finding: **`--screenshot-frame` was added rather than widening a tolerance.** A `VideoPlayer`
+            produces a texture when the decoder produces one, not when `Play` returns, so a capture
+            of frame 1 shows an empty panel however healthy the pipeline is. Measured: frame 1 is
+            empty, frame 60 is not. The video panel is then excluded from the reference comparison
+            **by name** (`ImageCompare.hpp`'s rule) because which frame it holds depends on the
+            clock — and it is still asserted non-empty, while the ADVANCE is asserted by the
+            integration test, which can watch 240 frames.
+      finding: **`check_xna_strict.py` caught a real overload trap in this commit's own code.**
+            `soundInstance_->setVolumeProperty(audio_.EffectiveVolume(...))` passes a prvalue and
+            therefore selects the `CNAEXT`-marked `float&&` overload — a forbidden call in which no
+            forbidden identifier appears, invisible to `check_xna_only.py`. Binding the value to a
+            named `float` first fixes it. The gate found it; review had not.
+      finding: `ModelMeshCollection::begin`/`end` are `CNAEXT`-marked, so a **range-for loop over a
+            model's meshes is a forbidden call reached through iteration**. Every walk here is
+            indexed through `getCountProperty()` and `operator[]`.
+      finding: **`title-01.png` had been stale for two commits and nothing said so.** It was
+            captured by `HOUSE-00164` when the HUD font was `Fonts/Hud.spritefont`, naming an
+            *installed* DejaVu Sans; `HOUSE-00200` vendored Noto and made `Fonts/ui-16` the HUD face
+            without regenerating the reference. The fixture disagreed with reality by **1.17 % of
+            the frame — 16 491 pixels, max channel delta 248** — and the render suite is nightly, so
+            no nightly ran in between. Regenerated here, and the rule is written into
+            `docs/screenshot-scenes.md`: a change to a font, a shader or a clear colour IS a
+            reference change, and the commit that makes it runs the render suite.
+      accept: all six load and are visibly used; `content-smoke-01` matches its reference outside
+            the named video rectangle and is bit-identical across two runs; no `.xnb` shadows the
+            `.cnb` tree; Tier S is a complete session with five of six
 - [ ] HOUSE-00202 — Define the pack partition in `assets.manifest.json` and enforce that every asset belongs to exactly one pack
       dep: HOUSE-00195 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00203 — `tools/ci/budget_report.py`: per-pack size, texture memory, triangle totals, audio duration; writes a Markdown table

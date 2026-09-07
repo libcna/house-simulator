@@ -29,6 +29,7 @@ rather than letting a later scene inherit it.
 | `char` | Avatar customisations and poses; dog and cat states | `char-avatar-f3-walk-02`, `char-dog-lie-01` |
 | `ext` | Exterior: road, drive, garden, terrace, neighbourhood at 3 LOD distances | `ext-drive-lod1-05` |
 | `ui` | Prompt, held item, sun clock, menus | `ui-prompt-door-01` |
+| `content` | The content pipeline itself: one of each asset type, loaded and shown | `content-smoke-01` |
 
 A qualifier is only added where it distinguishes scenes within a family, and it always reads
 left-to-right from coarse to fine: family, place, state, ordinal.
@@ -64,8 +65,28 @@ A failing comparison writes three artefacts, named so they sort together:
    assertion about correct output; accepting a wrong one poisons every later comparison.
 4. Commit the scene and its reference together, in the commit that needed them.
 
+## When a scene legitimately cannot be fully compared
+
+`content-smoke-01` carries a **video panel**, and which decoded frame the player has reached depends
+on wall-clock time. That rectangle is excluded from the comparison **by name**, which is
+`ImageCompare.hpp`'s rule: a region that is genuinely not reproducible is named, never absorbed by
+widening the per-channel tolerance until it passes — because a tolerance wide enough to cover a
+changing video is wide enough to cover a missing object. What the excluded rectangle is still
+checked for is that it is *not empty*, and that the video **advances** is asserted by
+`ContentSmokeTests`, which watches two hundred frames instead of one.
+
 ## Updating a reference
 
 A reference changes only when the change in output is **intended**. The commit that updates it says
 why, and updates every scene the change affects in the same commit — never one at a time as tests
 are noticed failing.
+
+**That rule was broken once, and the cost is worth writing down** (`HOUSE-00201`, 2026-09-07).
+`title-01.png` was captured by `HOUSE-00164` when the HUD font was `Fonts/Hud.spritefont`, which
+named an *installed* DejaVu Sans. `HOUSE-00200` replaced it with the vendored Noto `Fonts/ui-16` —
+an intended change, correctly made — and did not regenerate the reference. The fixture then
+disagreed with reality by **1.17 % of the frame (16 491 pixels, max channel delta 248)** for two
+commits, and nothing said so, because the render suite is nightly and no nightly ran in between.
+The lesson is not "be careful": it is that **a change to a font, a shader or a clear colour is a
+reference change**, and the commit that makes it has to run the render suite rather than assume the
+nightly will.

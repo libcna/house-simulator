@@ -6,8 +6,9 @@ by `cna-content`. Nothing under `content*/` is edited or committed; it is all de
 ## The two trees, and why they are two
 
 ```
-assets-src/Models Textures Audio Fonts Video world   ──→  content/      (.cnb)
-assets-src/Effects                                    ──→  content-fx/   (.xnb)
+assets-src/Models Textures Audio Fonts world   ──→  content/<dir>/   (.cnb)
+assets-src/Media                                ──→  content/         (.cnb + streamed media)
+assets-src/Effects                              ──→  content-fx/      (.xnb)
 ```
 
 `cna_add_content` has **no format option** — it always produces `.cnb` — so effects, which must be
@@ -22,6 +23,41 @@ single-root build was tried (`HOUSE-00181`): it discovers `Effects/P1Probe.fx`, 
 into the `.cnb` tree, and **fails the whole build** when no `fxc` is configured. Building
 `Models/`, `Textures/`, `Audio/`, `Fonts/`, `Video/` and `world/` as separate roots is what the
 format actually supports.
+
+## `Media/` is built into the content ROOT, and that is measured (`HOUSE-00201`)
+
+Every other tree is built one subdirectory at a time into `content/<dir>/`. `Media/` is not: it is
+built with `content/` **itself** as its output directory, and carries the `Video/` component in its
+own source layout instead — `assets-src/Media/Video/clip.ogv` produces `content/Video/clip.cnb`.
+
+The reason is a real asymmetry in how CNA resolves a streamed asset. A `Video` (and a `Song`)
+compiles to a small metadata `.cnb` **plus a byte-identical copy of the media file**, and the
+runtime finds that copy through `ContentManager::BuildAssetPath` — that is, relative to the
+**content root**, not to the `.cnb` sitting beside it. Everything else is resolved relative to the
+directory it was built into. With `OUTPUT_DIR = content/Video` the two never meet:
+
+| `streamReference` | Deployed to | Looked for at |
+|---|---|---|
+| `smoke_clip.ogv` | `content/Video/smoke_clip.ogv` | `content/smoke_clip.ogv` |
+| `Video/smoke_clip.ogv` | `content/Video/Video/smoke_clip.ogv` | `content/Video/smoke_clip.ogv` |
+
+Both were tried, and both fail with *"'Video/smoke_clip' streams '…', which was not found beside
+it."* Building the media tree at the content root makes the deployed path and the resolved path the
+same one, keeps the content name `Video/smoke_clip` that `cna-house.md` §58 uses, and copies
+nothing twice. `ContentSmokeTests.TheStreamedVideoSitsWhereTheRuntimeResolvesIt` asserts the layout
+so that "tidying" it back is a red test rather than a silent load failure.
+
+### `assets-src/Media/.cna-content.json`
+
+| Asset | Parameter | Value | Why |
+|---|---|---|---|
+| `Video/smoke_clip.ogv` | `width`, `height` | `64`, `64` | **`VideoProcessor` requires them**, because CNA does not decode the file at build time — it deploys the stream and trusts the metadata. That means the metadata *can* disagree with the file, silently, so `make_smoke_assets.py --selftest` re-probes the clip and asserts they agree. |
+| | `framesPerSecond` | `10.0` | As above. |
+| | `durationMs` | `2000` | Optional, and given: `Video::getDurationProperty` is what the TV backends of §58.2 will schedule against. |
+| | `streamReference` | `Video/smoke_clip.ogv` | Content-root-relative, for the reason in the table above. |
+
+Numeric values are written as **strings** (`"value": "64"`), which the configuration format
+requires: *"numeric values must be strings so their exact persisted value is stable."*
 
 ## Where the `.cna-content.json` files live, and why not at the top
 

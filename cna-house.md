@@ -1719,8 +1719,10 @@ assets-src/                                        content/
   Models/**.glb        ─┐                     ┌─→  Models/**.cnb        → Model
   Textures/**.png      ─┤                     ├─→  Textures/**.cnb      → Texture2D
   Audio/**.wav (16-bit)─┼→ cna-content build ─┼─→  Audio/**.cnb         → SoundEffect
-  Fonts/*.spritefont   ─┤   (--format cnb)    └─→  Fonts/*.cnb          → SpriteFont
-  Video/*.ogv          ─┘                          Video/*.cnb + stream → Video
+  Fonts/*.spritefont   ─┘   (--format cnb)    └─→  Fonts/*.cnb          → SpriteFont
+
+  Media/Video/*.ogv    ──→ cna-content build ───→  Video/*.cnb + stream → Video
+                           (into content/ ITSELF, not content/Media -- see below)
 
   Effects/*.fx         ──→ cna-content build ───→  Effects/*.xnb        → Effect
                            --format xnb
@@ -1756,6 +1758,19 @@ cna_add_content(TARGET cnahouse_effects   # only when CNAHOUSE_TIER_E
 
 `.cna-content.json` sets per-asset processor parameters: `generateChildAssets` for multi-group
 glTF, `profile: hidef` for effects, texture format and mip options.
+
+**`Media/` is the one tree built into the content ROOT, and the reason is measured**
+(`HOUSE-00201`, 2026-09-07). A `Video` or a `Song` compiles to a metadata `.cnb` *plus a
+byte-identical copy of the media file*, and the runtime resolves that copy through
+`ContentManager::BuildAssetPath` — relative to the **content root**, not to the `.cnb` beside it.
+Everything else resolves relative to the directory it was built into. Building the media tree into
+`content/Video` therefore deploys the stream where the runtime does not look, whichever
+`streamReference` is configured; building it into `content/` and putting the `Video/` component in
+the *source* layout makes the two the same path, keeps the content name `Video/<name>` that §58
+uses, and copies nothing twice. `assets-src/README.md` has the two-row table of what each
+alternative does. `VideoProcessor` also **requires** `width`, `height` and `framesPerSecond` as
+parameters: CNA does not decode the source at build time, so the metadata can disagree with the
+file and only an offline check can catch it.
 
 ### 18.2 Authoring conventions
 
