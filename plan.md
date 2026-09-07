@@ -3221,8 +3221,55 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             binary/versioning validation and deterministic bytes — all verified through the real
             C++ reader rather than against the writer's own idea of the format
       accept: (1) deterministic output, hash recorded in the manifest; (2) keyframes decimated only within a stated tolerance; (3) stride length (`measure_stride.py`) and foot-plant markers written into the same file
-- [ ] HOUSE-00224 — `tools/assets/skin_split.py`: split a multi-skin source `.glb` into one file per skin, record each part's attachment bone in the manifest, and extend `gltf_validate.py` to **reject** any `.glb` entering the build that declares more than one skin
+- [x] HOUSE-00224 — `tools/assets/skin_split.py`: split a multi-skin source `.glb` into one file per skin, record each part's attachment bone in the manifest, and extend `gltf_validate.py` to **reject** any `.glb` entering the build that declares more than one skin
       dep: HOUSE-00076, HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/assets/skin_split.py` with `--verify`, `--manifest`, `--selftest`
+            and `--make-fixture`; `manifest.py` validates an optional `attachment` object. The
+            `gltf_validate.py` half was already in place (`HOUSE-00186`) and is confirmed live here:
+            the two-skin fixture is refused by BOTH the project rule *and* `CNA.ModelProcessor`
+            itself, and the two split parts then pass the whole gate including the real importer.
+      finding: **"equivalent" is proved arithmetically rather than by "the file loads".** For every
+            vertex of every kept mesh, `p' = Σ w_j · (jointWorld_j · inverseBind_j) · p` is computed
+            from the source and from the part and must agree to 10 microns — at the bind pose and
+            in motion. A reversed joint list, a corrupted inverse bind matrix and a moved vertex are
+            each shown to fail it. `HOUSE-00076`'s criterion (1) could not be measured at all
+            because there is no loadable unsplit source; this is the form of that comparison that
+            can be.
+      finding: **both sides are posed by the SOURCE's shared skeleton, and that is the whole
+            architecture, not a testing convenience.** §47.0 draws a multi-part character as several
+            `Model`s over one skeleton and one palette. An earlier version of this check posed each
+            part from its own copy of the animation and was wrong twice over: it made the comparison
+            depend on data the runtime never uses, and it failed the moment the channel pruning
+            below became necessary. An injected part whose joint node had MOVED correctly produced
+            no complaint — under a shared pose a part's own node translations are overridden and
+            genuinely do not matter — so the injection was replaced with ones that do.
+      finding: **a part must NOT carry animation channels that miss its own joints**, and this is
+            measured. `CNA.GltfImporter` warns *"Clip 'sway' has 1 channel(s) whose target node is
+            not a joint of this skin — they drive nothing in this palette, and are skipped"*, and
+            `gltf_validate.py` treats an importer warning as an error, so such a part cannot enter
+            the build at all. Nothing is lost by pruning them: CNA discards them anyway, and this
+            project's animation transport is the `.chanim` sidecar rather than `Model::Tag`, which
+            BL-01 makes null regardless. Every dropped channel is NAMED in the attachment record —
+            the fixture's tail part records `sway:Root.rotation` — so "the tail stopped following
+            the body" can never be an unexplained observation.
+      finding: the production tool **prunes the buffer, the materials, the textures and the
+            images**; `p1-split-skins.py` deliberately did not and recorded that it did not, because
+            its job was to establish the shape of the split. The fixture's parts come out at 52 %
+            and 65 % of the source, a figure held down only by a four-vertex fixture being mostly
+            JSON header.
+      finding: what a part **keeps** is the whole node graph, every joint of every skin. Pruning the
+            other part's joints would give each part its own bone numbering and make one shared
+            `.chanim` impossible, which is the arrangement §47.0 depends on.
+      finding: the fixture lists the tail's joints **out of node order** (`TailB` before `TailA`) on
+            purpose. A splitter that rebuilt the joint list from the node graph — the obvious
+            implementation — silently reverses the binding, and every blend index then means a
+            different bone. `verify()` catches exactly that.
+      finding: `--manifest` **updates** rows, never creates them. A row carries a licence, an origin
+            and four permission booleans a splitter cannot know; provenance comes first and the
+            attachment second, and a part with no row yet is reported rather than invented.
+      accept: every part is single-skin and passes the full glTF gate; the attachment record
+            round-trips; skinned-vertex equivalence against the source is demonstrated, and the
+            check is demonstrated to fail
       accept: (1) the split parts render identically to the source; (2) a two-skin file fails validation with a message naming both skins and pointing at the splitter; (3) the rule is documented in `docs/content-authoring.md`
 - [ ] HOUSE-00225 — `tools/ci/check_anim_assets.py`: for every character, assert the `.chanim` joint list matches the compiled `.cnb` `Model::Bones` name-for-name and in order, and that no source `.glb` declares more than one skin
       dep: HOUSE-00223, HOUSE-00224 · sys: ci · plat: CI · pri: MUST

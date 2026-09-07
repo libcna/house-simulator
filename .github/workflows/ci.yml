@@ -94,6 +94,13 @@ jobs:
         # a writer emitting transposed matrices or w-first quaternions passes every other test here.
         run: python3 tools/assets/anim_extract.py --selftest
 
+      - name: The skin splitter must produce parts that skin identically
+        working-directory: cna-house
+        # `HOUSE-00224`. "Equivalent" is proved arithmetically, not by "the file loads": every
+        # vertex's skinned world position is computed from the source and from the part under the
+        # SHARED skeleton's pose, at rest and in motion, and the two must agree to 10 microns.
+        run: python3 tools/assets/skin_split.py --selftest
+
       - name: The smoke-scene assets must be what they claim to be
         working-directory: cna-house
         # `HOUSE-00201`. The PNG, WAV and GLB are written byte for byte by the script and are

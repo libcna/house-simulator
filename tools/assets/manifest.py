@@ -77,6 +77,15 @@ ASSET_KINDS = ("model", "texture", "sound", "font", "effect", "video")
 
 #: The three fields that make a row a RUNTIME asset. All three or none.
 PACKAGED_FIELDS = ("contentName", "kind", "residencyPack")
+
+#: What a row records when its asset is one PART of a character that was split per skin
+#: (`HOUSE-00224`). Optional, and validated whenever it is present.
+#:
+#: `joints` is the part's skin's joint names **in blend-index order**. `HOUSE-00074` measured that
+#: vertex blend indices are skin-local, so that list IS the binding between this part's vertices
+#: and the shared skeleton -- it is the same list the `.chanim` sidecar carries, and the reason the
+#: runtime never calls `getSkinsEXTProperty()`.
+REQUIRED_ATTACHMENT_FIELDS = ("source", "skeletonRoot", "attachmentBone", "joints")
 REQUIRED_ORIGIN_FIELDS = (
     "kind",
     "name",
@@ -250,6 +259,24 @@ def validate(document: dict, *, check_hashes: bool = True) -> list[str]:
                     f"    on disk  {actual}\n"
                     f"    recorded {row.get('sourceSha256')}"
                 )
+
+        attachment = row.get("attachment")
+        if attachment is not None:
+            if not isinstance(attachment, dict):
+                problems.append(f"{where}: 'attachment' is not an object")
+            else:
+                for field in REQUIRED_ATTACHMENT_FIELDS:
+                    if not attachment.get(field):
+                        problems.append(f"{where}: attachment is missing '{field}'")
+                joints = attachment.get("joints")
+                if joints is not None and (not isinstance(joints, list)
+                                           or not all(isinstance(j, str) for j in joints)):
+                    problems.append(f"{where}: attachment.joints must be a list of joint NAMES in "
+                                    f"blend-index order")
+                elif isinstance(joints, list) and len(set(joints)) != len(joints):
+                    # The list is the binding; a duplicate makes two blend indices the same joint.
+                    problems.append(f"{where}: attachment.joints repeats a name, so two blend "
+                                    f"indices would mean one joint")
 
         origin = row.get("origin")
         if not isinstance(origin, dict):
