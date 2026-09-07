@@ -3043,8 +3043,29 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             not of a website.** Quaternius was a legitimately CC0 source and is not one today. That
             is why every `SOURCE.md` records the URL read and the retrieval date, and why the
             per-asset check carries the claim rather than the source's reputation.
-- [ ] HOUSE-00266 — Verify **BlenderKit free tier** licensing model and whether per-asset licences are machine-readable
+- [x] HOUSE-00266 — Verify **BlenderKit free tier** licensing model and whether per-asset licences are machine-readable
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
+      note: (2026-09-07) `docs/licence-evidence/blenderkit.md`. Both questions answered, the second
+            by measurement.
+      finding: **exactly two licences, and only one of them works here.** "Everything you download
+            is available for commercial use. Both allow you to sell higher-level-derivative works,
+            but **royalty free license doesn't allow to re-sell 3D models even if modified**". For a
+            *closed-source* game both would be fine. Here they are not: `assets-src/` is
+            **published**, so a Royalty-Free model committed to it is a 3D model offered as a 3D
+            model to anyone who clones the repository. Arguable when the repository is free —
+            and ADR-0012 does not let this project rely on the arguable reading. Same shape as
+            Quaternius and CMU, except that with CMU the derivative is what we need and *can* be
+            committed, whereas here the model itself is the deliverable.
+      finding: **per-asset licences ARE machine-readable, verified.** The public API
+            `blenderkit.com/api/v1/search/?query=<q>&asset_type=model` returns `results[].license`
+            (`royalty_free` | `cc_zero`) and `results[].isFree` — better than most sources: no
+            scraping, and the filter applies before anything is downloaded.
+      finding: **and the measurement decides it.** Sampling `chair`, `sofa`, `lamp`, `fridge`,
+            `table`: 75 results, **73 `royalty_free` and 2 `cc_zero`** — about 3 % usable here.
+            "Free" and "CC0" are independent: 36 of the free assets are Royalty Free, which is
+            exactly the "free download ≠ redistributable" confusion this project must avoid. **Not a
+            general furniture source**; Poly Haven and ambientCG cover the same ground CC0
+            throughout with first-party provenance. A specific `cc_zero` asset remains usable.
 - [x] HOUSE-00267 — Verify **Sketchfab CC0** filter semantics: does the filter guarantee CC0, and what evidence do we archive per asset?
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `docs/licence-evidence/sketchfab.md`. Both questions answered; one thing
