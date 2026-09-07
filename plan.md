@@ -3049,9 +3049,29 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00268 — Verify **Blend Swap CC0** the same way
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
-- [ ] HOUSE-00269 — **Verify the MakeHuman / MPFB2 asset licence** (Q-03): may generated meshes be redistributed, and under what terms?
+- [x] HOUSE-00269 — **Verify the MakeHuman / MPFB2 asset licence** (Q-03): may generated meshes be redistributed, and under what terms?
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
       accept: a written answer with the licence text archived; if negative, R-04's fallback is triggered here, not later
+      note: (2026-09-07) `docs/licence-evidence/makehuman-mpfb2.md`.
+      finding: **Q-03 answered YES.** The current licence page states a **split licence**: "All core
+            assets are shared under Creative Commons, CC0 … you are free to do as you see fit with
+            the asset or **derivates of the assets**", while GPL/AGPL covers only the *source code*.
+            We ship meshes, not their code, so a body — retopologised, rigged, decimated, compiled —
+            is CC0 throughout. **R-04's fallback is NOT triggered**; `HOUSE-00294` may proceed and
+            judge the meshes on topology and silhouette rather than on licence.
+      finding: **the older page says something narrower and is superseded, which is worth recording
+            because it is still reachable.** `makehumancommunity.org/content/license.html`
+            (copyright line "2001-2015") puts assets under **AGPL** with a CC0 exception conditional
+            on the export coming from "an OFFICIAL and UNMODIFIED version of MakeHuman" — under
+            which an **MPFB2** export, MPFB2 being a Blender add-on, is not obviously covered at all.
+            Unlike the Quaternius contradiction this is not unresolved: the divergence is a
+            liberalisation rather than a restriction, the newer page is the current site and is the
+            only one that covers MPFB, and **CC0 is irrevocable**, so a grant standing when an asset
+            was obtained keeps applying to it.
+      finding: **"core" is load-bearing.** The CC0 statement covers the core base meshes, morphs and
+            rigs. The community asset repository — clothes, hair, skins, poses — carries per-asset
+            licences, so a *dressed* character is not automatically CC0. `HOUSE-00294` must record
+            per asset whether it is core or community, and a community asset's own terms.
 - [ ] HOUSE-00270 — **Verify the CMU Motion Capture Database terms** (Q-04): may retargeted, baked derivatives be redistributed?
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00271 — Verify **Mixamo** terms and record the verdict; expected outcome is "not used for shipped files"
