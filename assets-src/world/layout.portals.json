@@ -791,6 +791,29 @@
       "soundLoss": { "open": 0.10, "closed": 0.72 }
     },
 
+    {
+      // `HOUSE-00377`. §12.3's 4.90 x 2.40 sectional door, centred on the driveway rather than on
+      // the garage: the garage runs X +8.70…+17.10 because it takes the party wall with the
+      // mudroom, and the driveway X +9.30…+17.10, so the opening is centred on +13.20. The sill
+      // is the garage slab at +0.15, not L0's floor.
+      "id": "P_L0_GARAGE__EXT_DRIVEWAY", "cellA": "L0_GARAGE", "cellB": "EXT_DRIVEWAY",
+      "plane": { "axis": "z", "value": -13.30 },
+      "rect": { "u": [10.75, 15.65], "v": [0.15, 2.55] },
+      "kind": "garage_door", "aperture": "DOOR_GARAGE_SECTIONAL",
+      "opacity": "opaque_when_closed", "maxDepth": 4,
+      "soundLoss": { "open": 0.08, "closed": 0.62 }
+    },
+    {
+      // The loft hatch: a horizontal portal in the loft's own floor, which is the third use for
+      // `plane.axis: "y"` after the stair well and the chest freezer. `u` is world X and `v` is
+      // world Z. Crouch, because you come up a ladder through a 0.90 m square hole.
+      "id": "P_L0_GARAGE__L0_GARAGE_LOFT", "cellA": "L0_GARAGE", "cellB": "L0_GARAGE_LOFT",
+      "plane": { "axis": "y", "value": 2.90 },
+      "rect": { "u": [12.40, 13.30], "v": [-18.60, -17.70] },
+      "kind": "hatch", "aperture": "HATCH_GARAGE_LOFT",
+      "opacity": "opaque_when_closed", "crouch": true,
+      "soundLoss": { "open": 0.10, "closed": 0.58 }
+    },
     // ================================================================================ windows
     // `HOUSE-00376`. 66 window portals. A window is a portal like any other: `kind: "window"`,
     // never passable, `opacity: "glass"` where you can see through it and `"translucent"` where

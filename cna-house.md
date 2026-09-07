@@ -970,7 +970,7 @@ data or UI.
 | Interior door leaf | 0.86 × 2.05 m; rough opening 0.90 × 2.10 m |
 | Front entry door | 1.00 × 2.15 m + two 0.30 m sidelights |
 | Rear/patio slider | 2.40 × 2.15 m |
-| Garage door | 4.90 × 2.40 m sectional |
+| Garage door | 4.90 × 2.40 m sectional, sill at the slab +0.15, centred on the driveway at X +13.20 |
 | Cased opening (typical) | 1.60 × 2.20 m |
 | Stair balustrade height | 0.95 m; balcony/terrace railing 1.10 m |
 | Handrail | 0.90 m above the pitch line |
@@ -1140,11 +1140,14 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 | `L0_PANTRY` | Walk-in pantry | −12.70 … −8.20 | −27.10 … −25.00 | 9.5 | 1 | 1 | 1 | Shelved dry goods, **chest freezer**, step stool |
 | `L0_KITCHEN` | Kitchen | −8.20 … +2.20 | −27.10 … −23.00 | 42.6 | 4 | 2 | 0 | Island, **large refrigerator**, range, ovens, dishwasher, sink |
 | `L0_SUNROOM` | Sunroom / breakfast room (rear extension) | −6.70 … +2.70 | −32.10 … −27.10 | 47.0 | 2 | 5 panels + slider | 1 slider | Breakfast table, wicker chairs, plants, wet bar; roof = rear balcony |
-| `L0_GARAGE` | Garage | +9.30 … +17.10 | −21.70 … −13.30 | 65.5 | 2 | 1 + door glazing | 3 (sectional, side, house) | **One car**, workbench, shelving, bins, bikes, loft over the rear half |
+| `L0_GARAGE` | Garage | +8.70 … +17.10 | −21.70 … −13.30 | 65.5 | 2 | 1 | 3 (sectional, side, house) | **One car**, workbench, shelving, bins, bikes |
+| `L0_GARAGE_LOFT` | Garage storage loft | +9.20 … +16.60 | −21.20 … −17.50 | 27.4 | 1 | — | 1 (loft hatch) | Nested in `L0_GARAGE` at +2.90; reached by a ladder through a 0.90 m hatch (`HOUSE-00377`) |
 | `L0_PORCH` | Front porch (exterior cell) | −3.60 … +3.60 | −14.00 … −11.60 | 17.3 | 1 | — | — | Two rockers, a doormat, a wall lantern each side of the door |
 
 **19 cells. 404.6 m² incl. garage and porch; 291.9 m² of heated interior in the main block plus
-47.0 m² sunroom.**
+47.0 m² sunroom.** The garage loft is a twentieth row in `layout.cells.json` and is deliberately
+not in either figure: a mezzanine 2.90 m up is not floor area of `L0`, and its footprint is the
+garage's, already counted (`HOUSE-00377`).
 
 ### 13.4 `L1` — Upper floor 1 · FFL +3.65, ceiling +6.20, clear 2.55 m
 
@@ -1256,8 +1259,9 @@ place crouching exists, and it exists because the roof geometry demands it.
 | `EXT_WORLD` | Everything beyond the fences | the rest | One huge cell holding terrain, road, neighbourhood, sky; internally culled by frustum + distance + LOD |
 
 **18 exterior cells** (counting the 4 attached ones), **75 interior cells**, **93 total** —
-plus the 2 container sub-cells `HOUSE-00373` authored, which are cells in the data but not
-rooms in this schedule, so `layout.cells.json` holds **95**.
+plus the 3 nested sub-cells the data needs and this schedule does not list as rooms: the two
+container interiors of `HOUSE-00373` and the garage storage loft of `HOUSE-00377`. So
+`layout.cells.json` holds **96**.
 
 > Corrected 2026-09-07 by `HOUSE-00372`, which authored these and counted the tables. It read
 > "17 exterior cells (counting the 4 attached ones), 78 interior cells, 95 total". Counted from
@@ -1590,24 +1594,24 @@ asks for, and it falls out of the data, not out of special cases.
 ### 16.3 Graph shape
 
 The design figures below were written before the layout existed. `HOUSE-00374` and `HOUSE-00375`
-authored 112 of the portals and `HOUSE-00376` the 66 windows, so the rows marked **measured** are
-`tools/world/report_graph.py assets-src/world`'s output rather than an estimate; the rest are still
-design figures and `HOUSE-00376`/`HOUSE-00377` will confirm or correct them the same way.
+authored 112 of the portals, `HOUSE-00376` the 66 windows and `HOUSE-00377` the last two, so every
+row below is now `tools/world/report_graph.py assets-src/world`'s output rather than an estimate.
+Where a design figure differed it is kept beside the measurement, because the difference is the
+interesting part.
 
 | Metric | Value |
 |---|---|
-| Cells | 95 — 75 interior rooms + 2 container sub-cells (§54) + 18 exterior — **measured** |
-| Portals total | 179 when complete; **177 authored** — 46 + 63 + 2 + 66 |
+| Cells | 96 — 75 interior rooms + 3 nested sub-cells (§54) + 18 exterior; the design said 95 |
+| Portals total | **179** — 46 + 63 + 3 + 66 + 1; the design said 186 |
 | — always-open (cased/stair) | **46** — 26 interior cased openings, 17 exterior, 3 stair wells |
 | — hinged/double/slider/exterior doors | **63** |
-| — container portals (fridge door, freezer lid) | **2** |
-| — windows | **66** — measured, see §12.6; the design said 81 and §12.6 accounts for the 15 |
-| — garage door | 1 — `HOUSE-00377` |
-| — attic hatch | 1 — `HOUSE-00377` |
-| Mean interior cell degree | **2.26** — through doors and openings only, because a window is not a way through; the visibility graph, which windows do join, is a different number |
+| — nested portals (fridge door, freezer lid, garage loft hatch) | **3** |
+| — windows | **66** — see §12.6; the design said 81 and §12.6 accounts for the 15 |
+| — garage door | **1** |
+| Mean interior cell degree | **2.27** — through doors and openings only, because a window is not a way through; the visibility graph, which windows do join, is a different number |
 | Max interior cell degree | `B1_HALL` = **7** — **measured**; the design said `L0_KITCHEN` = 8 |
 | Graph diameter (through open doors) | **13 hops** (`EXT_SHED` → `L2_BATH5`) — **measured**; the design said 11 (`EXT_ROAD` → `L3_STORE_N`), which is what the graph measured before the garden shed had a door |
-| Diameter with all doors closed | ∞ — **58 components**, which is the whole point; the design said 34 |
+| Diameter with all doors closed | ∞ — **59 components**, which is the whole point; the design said 34 |
 | Largest component with all doors closed | **18 cells** — the exterior ring, which is all cased openings |
 
 ### 16.4 Cell-membership lookup

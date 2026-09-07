@@ -5636,8 +5636,29 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             yard cells existed, and a window that skipped the yard would leave someone standing in
             the garden with no portal to look through. Every window here opens into the cell it
             actually faces.
-- [ ] HOUSE-00377 — Author the garage-door portal and the 1 hatch portal
+- [x] HOUSE-00377 — Author the garage-door portal and the 1 hatch portal
       dep: HOUSE-00374 · sys: world · plat: TOOL · pri: MUST
+      finding: **the hatch had nothing to open into.** §16.3 counts one hatch and §12.2 describes
+            "a storage loft over the rear half at +2.90", but no table lists it as a cell, so the
+            portal had no second end. `L0_GARAGE_LOFT` is now a cell — and it has to be a **nested**
+            one, because a mezzanine is two volumes at different heights over one footprint, which
+            rule 3 reads as two rooms overlapping. That is `HOUSE-00373`'s `parent` mechanism used
+            for what it literally says rather than for a container: the loft is inside the garage
+            in all three axes, its floor at +2.90 is a face the garage does not have, and rule 4's
+            nested case is what checks the hatch. `parent` was introduced for the 214 containers;
+            this is the first cell to use it that is a place you can stand up in.
+      note: rule 5 earned its widening within the hour. The loft was authored before its hatch and
+            the run reported "cell L0_GARAGE_LOFT is not reachable from L0_FOYER; it has 0 passable
+            portal(s)" — the same sentence that `EXT_SHED` could not produce two commits ago.
+      note: the sectional door is §12.3's 4.90 × 2.40 with its sill on the **garage slab** at
+            +0.15, not on L0's floor at +0.60, and centred on the driveway at X +13.20 rather than
+            on the garage: the garage runs from X +8.70 because it takes the party wall with the
+            mudroom, and centring on it would put a quarter of the door in front of that wall.
+      note: `plane.axis: "y"` now has its third user — the stair well, the chest freezer's lid and
+            this. It was added on `HOUSE-00358` as a gap in the vocabulary; it is no longer an edge
+            case.
+      note: §16.3's whole table is now measured rather than designed: 96 cells, 179 portals, 46
+            always-open, 63 doors, 3 nested, 66 windows, 1 garage door. The design said 95 and 186.
 - [ ] HOUSE-00378 — Author `layout.openings.json`: the 7 door types and 10 window types with leaf sizes, frames and hardware references
       dep: HOUSE-00375, HOUSE-00376 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00379 — Author `layout.stairs.json`: the 7 flights of §12.4 with risers, goings, landings and surfaces

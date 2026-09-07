@@ -384,6 +384,22 @@
       "residencyPack": "house-l0", "visibilityHint": "opaque"
     },
     {
+      "id": "L0_GARAGE_LOFT", "level": "L0", "name": "Garage Storage Loft",
+      "kind": "closet", "parent": "L0_GARAGE",
+      // §12.2's "storage loft over the rear half at +2.90". A mezzanine is two volumes at
+      // different heights over one footprint, which rule 3 reads as two rooms overlapping unless
+      // one of them says it nests in the other -- the same mechanism `HOUSE-00373` added for
+      // containers, used here for what it literally describes: a cell inside a cell. Its floor is
+      // the hatch's plane, and the garage has no face at +2.90, which is why rule 4's nested case
+      // has to be the one that checks it.
+      "boxes": [{ "x": [9.20, 16.60], "z": [-21.20, -17.50] }],
+      "yOverride": [2.90, 4.30],
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.16, "reverbHint": "small_hard" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "residencyPack": "house-l0", "visibilityHint": "opaque"
+    },
+    {
       "id": "L0_PORCH", "level": "L0", "name": "Front Porch", "kind": "exterior",
       // To Z -14.30, the foyer's interior face, and not §13.3's -14.00: the 0.30 m exterior wall
       // between them is drawn by the building and belongs to no cell, so an outdoor cell that
