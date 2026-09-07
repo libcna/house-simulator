@@ -3127,8 +3127,52 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: per-pack source bytes, compiled bytes, texture memory, triangles and audio duration,
             with every unmeasurable cell named rather than zeroed; deterministic Markdown; the
             over-budget path demonstrated to fire
-- [ ] HOUSE-00204 — `tools/blender/impostor_render.py`: render 8-yaw impostor atlases with EEVEE, pack, and emit the metadata
+- [x] HOUSE-00204 — `tools/blender/impostor_render.py`: render 8-yaw impostor atlases with EEVEE, pack, and emit the metadata
       dep: HOUSE-00189 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/blender/impostor_render.py`. Eight yaws at 10° elevation into a
+            2048² RGBA atlas, 4 × 2 cells of 512 × 1024, with a metadata sidecar. 17 selftest
+            claims against an **asymmetric** fixture; `--selftest` runs in the CI Blender job.
+            EEVEE Next renders headless here (12.9 s for the first frame, shader compilation);
+            Cycles does not — *"Failed to denoise, build has no OpenImageDenoise support"*.
+      finding: **the lighting is deliberately baked and deliberately DIRECTIONLESS**, which is what
+            §26.3's "pre-lit for an overcast sky" has to mean. There is no sun: the world is a
+            uniform white dome, so the atlas carries albedo × ambient occlusion and the runtime's
+            sky tint multiplies cleanly. A baked sun would fight that tint and light the tree from
+            the wrong side for most of the day. Asserted by rendering the same white subject from
+            opposite yaws and requiring the same luminance — 0.997 against 1.000.
+      finding: `view_transform` is forced to **Standard**. Blender's default AgX is a film response
+            curve for look development, and baking it into an image the runtime multiplies by a sky
+            colour compounds the curve twice: a white leaf arrives at about 0.8 instead of 1.0. The
+            selftest measures 0.997, which is the check.
+      finding: **`ortho_scale` is the view size along the LARGER image dimension.** Setting it to
+            the required WIDTH made a 512 × 1024 frame 4.37 m tall for a 5.40 m subject — the tree
+            was decapitated, every slice still carried a plausible silhouette, the coverage still
+            differed between yaws, the lighting was still flat, and nothing complained. Only *"does
+            any silhouette touch its cell border"* saw it, and that claim is in the selftest for
+            exactly that reason.
+      finding: **the tool must work in Blender's Z-UP, not the source's Y-up**, and the first
+            version did not — including its own fixture. `Vector.to_track_quat` keeps an object
+            upright against world **+Z**, so a Y-up camera solve rolled the camera 90° at every yaw
+            that is not on an axis: yaws 0 and 180 framed correctly and the other six came out
+            lying on their side, stretched across the full cell width and squashed to half its
+            height. The silhouette AREA barely moved, so a coverage check saw nothing; the border
+            check did. The glTF importer converts a Y-up source to Z-up on the way in, so Z-up is
+            the right convention throughout.
+      finding: **coverage cannot tell a view from its mirror.** Yaw 90 and yaw 270 of any subject
+            have the same silhouette area and different silhouettes, and the first "the eight
+            differ" check compared areas and passed on a broken render. It now compares the slices
+            **pixel by pixel**, and the fixture is asymmetric in two axes so no two views are
+            mirrors of each other either.
+      finding: the camera is **orthographic**, and that is not a style choice: a perspective camera
+            at a fixed distance projects a near branch and a far one at different scales, so the
+            eight slices would disagree about the subject's width and the runtime quad would appear
+            to breathe as the camera circled it. The frame is sized from the plan bounding CIRCLE,
+            not the box, or the corners clip at 45°; and the elevation's depth-into-height term is
+            included, or a deep subject loses its top.
+      finding: 512 × 1024 cells rather than 724², because the subjects are trees and gable ends —
+            taller than they are wide, and a square cell spends half its texels on empty sky.
+      accept: eight yaws, one consistent camera, alpha silhouette, correct bounds, packed atlas,
+            metadata that states the baked lighting explicitly, and byte-identical repeatability
 - [x] HOUSE-00205 — `tools/blender/lightmap_unwrap.py`: second-UV atlas packing at a configurable texel density with a 4-texel gutter
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `tools/blender/lightmap_unwrap.py`. 16 selftest claims against a **room

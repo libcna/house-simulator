@@ -207,6 +207,17 @@ jobs:
           CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
             python3 tools/blender/lightmap_unwrap.py --selftest
 
+      - name: The impostor atlas must be eight different views, none of them cropped
+        working-directory: cna-house
+        # `HOUSE-00204`. EEVEE renders headless here. The two claims that earn their place: no
+        # slice's silhouette touches its cell border (Blender's ortho_scale applies to the LARGER
+        # image dimension, so a 512x1024 frame set from the required width decapitates the
+        # subject), and no two slices are pixel-identical (a view and its MIRROR have the same
+        # silhouette area, so coverage cannot tell them apart).
+        run: |
+          CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
+            python3 tools/blender/impostor_render.py --selftest
+
   # --- HOUSE-00134 -------------------------------------------------------------------------------
   build-and-unit:
     name: build ${{ matrix.preset }} + unit
