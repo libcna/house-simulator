@@ -393,6 +393,33 @@ namespace
             })";
         }
 
+        /// Three placements: a dynamic appliance, a static worktop that states almost nothing,
+        /// and a WC pan that drains to a §12.5 stack.
+        static std::string Props()
+        {
+            return R"({
+              "schema": "cna-house/props/1",
+              "props": [
+                {
+                  "id": "PROP_L0_KITCHEN_FRIDGE", "asset": "MODEL_PROP_KITCHEN_FRIDGE_01",
+                  "cell": "L0_KITCHEN",
+                  "position": [1.20, 0.60, -26.70], "yawDeg": 180.0, "scale": 1.0,
+                  "static": false, "lodGroup": "LODG_APPLIANCE", "collision": "proxy",
+                  "material": null, "interactable": "FRIDGE_L0_KITCHEN"
+                },
+                {
+                  "id": "PROP_L0_KITCHEN_WORKTOP", "asset": "MODEL_PROP_WORKTOP_01",
+                  "cell": "L0_KITCHEN", "position": [-2.00, 0.60, -26.90]
+                },
+                {
+                  "id": "PROP_L0_WC1_PAN", "asset": "MODEL_PROP_WC_PAN_01", "cell": "L0_WC1",
+                  "position": [3.00, 0.60, 5.00], "yawDeg": 90.0, "scale": 0.98,
+                  "collision": "box", "plumbing": "STACK_A"
+                }
+              ]
+            })";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -411,13 +438,15 @@ namespace
             Write("layout.openings.json", Openings());
             Write("layout.stairs.json", Stairs());
             Write("layout.lights.json", Lights());
+            Write("layout.props.json", Props());
             WriteManifest({"layout.levels.json",
                            "layout.materials.json",
                            "layout.cells.json",
                            "layout.portals.json",
                            "layout.openings.json",
                            "layout.stairs.json",
-                           "layout.lights.json"});
+                           "layout.lights.json",
+                           "layout.props.json"});
         }
 
         std::string directory_;
@@ -1603,6 +1632,105 @@ namespace
         EXPECT_TRUE(loaded.Value().LightsInGroup(Intern("LG_NOWHERE")).empty());
     }
 
+    // --- the props --------------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, APropIsReadWithEveryFieldItCarries)
+    {
+        Write("layout.props.json", Props());
+        world::WorldData::Contents contents;
+        const auto props = world::WorldLoader::LoadProps(directory_, contents);
+        ASSERT_TRUE(props) << props.Error().ToString();
+
+        ASSERT_EQ(contents.props.size(), 3U);
+        const world::Prop& fridge = contents.props[0];
+        EXPECT_EQ(fridge.id, Intern("PROP_L0_KITCHEN_FRIDGE"));
+        EXPECT_EQ(fridge.asset, Intern("MODEL_PROP_KITCHEN_FRIDGE_01"));
+        EXPECT_EQ(fridge.cell, Intern("L0_KITCHEN"));
+        EXPECT_FLOAT_EQ(fridge.position.X, 1.20F);
+        EXPECT_FLOAT_EQ(fridge.yawDeg, 180.0F);
+        EXPECT_FLOAT_EQ(fridge.scale, 1.0F);
+        EXPECT_FALSE(fridge.isStatic);
+        EXPECT_EQ(fridge.lodGroup, Intern("LODG_APPLIANCE"));
+        EXPECT_EQ(fridge.collision, world::PropCollision::Proxy);
+        EXPECT_FALSE(fridge.material.IsValid()) << "null means the asset's own materials";
+        EXPECT_EQ(fridge.interactable, Intern("FRIDGE_L0_KITCHEN"));
+    }
+
+    TEST_F(WorldLoaderTest, StaticDefaultsToTrueBecauseBatchingAssumesIt)
+    {
+        // §17.4: a prop that never moves is batched offline, and a row has to SAY false to become
+        // a DynamicInstance. The two failure modes are not symmetric -- defaulting the other way
+        // would silently un-batch the whole house, a draw-call regression nobody would trace back
+        // to a default.
+        Write("layout.props.json", Props());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadProps(directory_, contents));
+
+        EXPECT_FALSE(contents.props[0].isStatic) << "the fridge says false";
+        EXPECT_TRUE(contents.props[1].isStatic) << "the worktop says nothing";
+        EXPECT_EQ(contents.props[1].collision, world::PropCollision::Proxy)
+            << "and collision defaults to proxy";
+        EXPECT_FLOAT_EQ(contents.props[1].scale, 1.0F);
+    }
+
+    TEST_F(WorldLoaderTest, APlumbingFixtureNamesTheStackItDrainsTo)
+    {
+        // The field that makes §15.7 rule 9 checkable at all: without it "every fixture's cell
+        // appears in a declared stack" has no way to say which props are fixtures.
+        Write("layout.props.json", Props());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadProps(directory_, contents));
+
+        EXPECT_EQ(contents.props[2].plumbing, Intern("STACK_A"));
+        // 0.98 and not 1.0, because 1.0 is the default: a reader that ignored the field would
+        // have passed against a fixture that agreed with it by accident.
+        EXPECT_FLOAT_EQ(contents.props[2].scale, 0.98F);
+        EXPECT_FALSE(contents.props[0].plumbing.IsValid()) << "a fridge is not on a drain";
+    }
+
+    TEST_F(WorldLoaderTest, AScaleOfZeroOrLessIsRefused)
+    {
+        // Zero collapses the prop to a point and a negative scale turns it inside out. Both read
+        // as a broken model rather than as a broken row.
+        for (const std::string scale : {"0.0", "-1.0"})
+        {
+            Write("layout.props.json",
+                  R"({"schema": "cna-house/props/1",
+                      "props": [{"id": "P", "asset": "A", "cell": "C",
+                                 "position": [0, 0, 0], "scale": )" +
+                      scale + "}]}");
+            world::WorldData::Contents contents;
+            const auto props = world::WorldLoader::LoadProps(directory_, contents);
+            ASSERT_FALSE(props) << "accepted a scale of " << scale;
+            EXPECT_NE(props.Error().Context().find("scale"), std::string::npos) << props.Error().ToString();
+        }
+    }
+
+    TEST_F(WorldLoaderTest, ACollisionModeOutsideItsVocabularyIsRefused)
+    {
+        Write("layout.props.json",
+              R"({"schema": "cna-house/props/1",
+                  "props": [{"id": "P", "asset": "A", "cell": "C", "position": [0, 0, 0],
+                             "collision": "convex_hull"}]})");
+        world::WorldData::Contents contents;
+        const auto props = world::WorldLoader::LoadProps(directory_, contents);
+        ASSERT_FALSE(props);
+        EXPECT_NE(props.Error().Message().find("proxy"), std::string::npos) << props.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, PropsAreGroupedByTheirCell)
+    {
+        Write("layout.props.json", Props());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadProps(directory_, contents));
+        const auto loaded = world::WorldData::Create(std::move(contents));
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+
+        EXPECT_EQ(loaded.Value().PropsOf(Intern("L0_KITCHEN")).size(), 2U);
+        EXPECT_EQ(loaded.Value().PropsOf(Intern("L0_WC1")).size(), 1U);
+        EXPECT_TRUE(loaded.Value().PropsOf(Intern("L0_TERRACE")).empty());
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -1625,6 +1753,7 @@ namespace
         EXPECT_EQ(world.Value().Openings().size(), 3U);
         EXPECT_EQ(world.Value().Stairs().size(), 2U);
         EXPECT_EQ(world.Value().Lights().size(), 4U);
+        EXPECT_EQ(world.Value().Props().size(), 3U);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -1654,13 +1783,15 @@ namespace
         Write("layout.openings.json", Openings());
         Write("layout.stairs.json", Stairs());
         Write("layout.lights.json", Lights());
+        Write("layout.props.json", Props());
         WriteManifest({"layout.levels.json",
                        "layout.materials.json",
                        "layout.cells.json",
                        "layout.portals.json",
                        "layout.openings.json",
                        "layout.stairs.json",
-                       "layout.lights.json"});
+                       "layout.lights.json",
+                       "layout.props.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

@@ -1977,6 +1977,115 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadProps(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.props.json", "props", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+
+        const Result<JsonValue> props = document.Value().Root().RequireArray("props");
+        if (!props)
+        {
+            return props.Error().WithContext("layout.props.json");
+        }
+        const Result<std::vector<JsonValue>> rows = props.Value().Elements();
+        if (!rows)
+        {
+            return rows.Error().WithContext("layout.props.json");
+        }
+
+        for (const JsonValue& row : rows.Value())
+        {
+            Prop prop;
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, util::Id*>>{
+                     {"id", &prop.id}, {"asset", &prop.asset}, {"cell", &prop.cell}})
+            {
+                const Result<util::Id> value = RequireId(row, field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.props.json");
+                }
+                *target = value.Value();
+            }
+
+            const Result<Microsoft::Xna::Framework::Vector3> position = row.RequireVector3("position");
+            if (!position)
+            {
+                return position.Error().WithContext("layout.props.json");
+            }
+            prop.position = position.Value();
+
+            const Result<float> yaw = row.OptionalFloat("yawDeg", 0.0F);
+            if (!yaw)
+            {
+                return yaw.Error().WithContext("layout.props.json");
+            }
+            prop.yawDeg = yaw.Value();
+
+            const Result<float> scale = row.OptionalFloat("scale", 1.0F);
+            if (!scale)
+            {
+                return scale.Error().WithContext("layout.props.json");
+            }
+            if (scale.Value() <= 0.0F)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "a scale is positive; this is " + std::to_string(scale.Value()) +
+                               ". Zero collapses the prop to a point and a negative scale turns "
+                               "it inside out, which reads as a broken model",
+                           "layout.props.json/" + row.Path() + "/scale");
+            }
+            prop.scale = scale.Value();
+
+            // `static` defaults to TRUE, which is what §17.4's batching assumes and what the file's
+            // prose says: a prop that never moves is batched offline, and a row has to SAY `false`
+            // to become a `DynamicInstance`. The two failure modes are not symmetric -- defaulting
+            // to dynamic would silently un-batch the whole house, a regression the budget report
+            // would show as a draw-call number and nobody would trace to a default.
+            const Result<bool> isStatic = row.OptionalBool("static", true);
+            if (!isStatic)
+            {
+                return isStatic.Error().WithContext("layout.props.json");
+            }
+            prop.isStatic = isStatic.Value();
+
+            const Result<std::string> collision = row.OptionalString("collision", "proxy");
+            if (!collision)
+            {
+                return collision.Error().WithContext("layout.props.json");
+            }
+            const Result<PropCollision> parsedCollision = ParsePropCollision(collision.Value());
+            if (!parsedCollision)
+            {
+                return parsedCollision.Error()
+                    .WithContext(row.Path() + "/collision")
+                    .WithContext("layout.props.json");
+            }
+            prop.collision = parsedCollision.Value();
+
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, util::Id*>>{
+                     {"lodGroup", &prop.lodGroup},
+                     {"material", &prop.material},
+                     {"interactable", &prop.interactable},
+                     {"plumbing", &prop.plumbing}})
+            {
+                const Result<util::Id> value = OptionalId(row, field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.props.json");
+                }
+                *target = value.Value();
+            }
+
+            contents.props.push_back(std::move(prop));
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -2016,6 +2125,10 @@ namespace cnahouse::world
         if (const Result<void> lights = LoadLights(directory, contents); !lights)
         {
             return lights.Error();
+        }
+        if (const Result<void> props = LoadProps(directory, contents); !props)
+        {
+            return props.Error();
         }
 
         util::Log::Info(util::LogCat::World,

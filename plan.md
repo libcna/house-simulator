@@ -5080,8 +5080,18 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       finding: a `mask` material with no `alphaCutoff` is refused. There is no threshold to test
             against, and the stock `AlphaTestEffect` would quietly use its own default instead of
             the author's — a foliage card with the wrong fringe, everywhere, and nothing to look at.
-- [ ] HOUSE-00350 — `WorldLoader`: prop placements with LOD group, collision reference and interactable reference
+- [x] HOUSE-00350 — `WorldLoader`: prop placements with LOD group, collision reference and interactable reference
       dep: HOUSE-00349 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadProps`. 6 new unit tests; seven injected bugs, seven
+            caught.
+      finding: `static` defaults to **true**, and the two failure modes are not symmetric. §17.4
+            batches a prop that never moves and the file's prose says a row has to *say* `false`
+            to become a `DynamicInstance`; defaulting the other way would silently un-batch the
+            whole house — a draw-call regression the budget report would show as a number nobody
+            traces back to a default.
+      note: every fixture value is chosen to differ from the field's default (the WC pan is scaled
+            0.98, not 1.0). An injected bug that ignored `scale` survived the first version of the
+            test, because the fixture agreed with the default by accident.
 - [ ] HOUSE-00351 — `WorldLoader`: nav graph, perches, beds, forbidden zones
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00352 — `WorldLoader`: audio zones, ambience beds, emitter placements, portal transmission losses
