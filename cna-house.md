@@ -1544,7 +1544,9 @@ surprise. This keeps the data declarative without inventing a VM.
    is a switch that toggles nothing (`HOUSE-00384`); every portal's `soundLoss` is §64.3's figure
    for its transmission class, because two copies of one fact drift (`HOUSE-00388`); and a cell's
    `thermal.ductBranch` and that branch's `cells` list agree, because a branch that has lost a room
-   is a room the furnace is silent in (`HOUSE-00387`);
+   is a room the furnace is silent in (`HOUSE-00387`); and a nav edge that names a portal joins
+   **that** portal's two cells, because a route through a door goes through that door
+   (`HOUSE-00389`);
 7. every door has exactly one portal and every window has exactly one portal, **and the portal
    names the leaf back** in `aperture` — `aperture: null` means "always fully open", so a door that
    leaves it null claims to be a hole. Every kind with something that opens is covered,

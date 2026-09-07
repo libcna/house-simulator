@@ -451,6 +451,11 @@ The pet navigation graph: a waypoint graph, not a navmesh ([ADR-0011](decisions/
 An edge crossing a portal names it, so a closed door closes the route for the pets exactly as it
 does for vision and sound. One authored graph, four consumers.
 
+Rule 6 checks that an edge's `a` and `b` are nodes, that its `portal` exists, and that the portal
+it names joins **the two cells the edge joins** — a route through a door goes through that door.
+Rule 5 checks that the whole graph is one component. Windows, hatches and the sectional door carry
+no edge at all: a person can climb through a hatch and a pet cannot.
+
 ## `layout.audio.json`
 
 ```jsonc

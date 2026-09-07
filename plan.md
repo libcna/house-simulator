@@ -5983,8 +5983,32 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             the refrigerator and freezer, three clocks, the garage motor, the doorbell, six pipe
             runs on §12.5's own chases, and the 14 creak points spread over the storeys. The duct
             registers wait for `HOUSE-00387`, which authors the ducts.
-- [ ] HOUSE-00389 — Author `layout.nav.json`: ~300 nodes, edges, 22 perches, 2 beds, 2 bowls, forbidden zones
+- [x] HOUSE-00389 — Author `layout.nav.json`: 333 nodes, 677 edges, 22 perches, 2 beds, 2 bowls, forbidden zones
       dep: HOUSE-00367…HOUSE-00372 · sys: world · plat: TOOL · pri: MUST
+      finding: **nothing checked the nav file beyond a node's cell.** Rule 6 read `nodes/N/cell`
+            and stopped: an edge could name a node that does not exist, or name a portal joining
+            two entirely different rooms, and a perch could be in a cell nobody authored. All four
+            are checked now, and the portal one is the interesting one — a route through a door
+            has to go through **that** door, or the pet walks through a wall while the data claims
+            it used the doorway.
+      finding: **rule 5 asked its connectivity question of one graph and there are two.** The pet
+            waypoint graph has its own edges, and a room reachable through a door is not reachable
+            by a dog unless somebody put a waypoint in it. Rule 5 now walks both; the authored
+            graph is one component of 333 nodes, and the claim that proves the check works names
+            the room the stranded node is in.
+      note: nodes are a grid over each cell's boxes — 2.5 m indoors, 10 m out, inset 0.55 m from
+            the walls so a node is somewhere a dog can actually stand — and an edge joins nodes
+            within a spacing and a half, which on a grid is the four neighbours and no more.
+            Windows, hatches and the sectional door carry no edge: a person can climb through a
+            hatch and a pet cannot.
+      note: the 22 perches are §61's, including the eleven it names — the landing window seat, the
+            top of the kitchen cabinets, the back of the living-room sofa, the office desk, the
+            master bed, the warm spot on the mechanical-room duct, three windowsills, the newel
+            post and the airing-cupboard shelf. All cat-only: §61 says a cat that is *on* things
+            rather than beside them is most of what makes it read as a cat.
+      note: forbidden zones are the plant room (both), the garage (the cat), the four attic stores
+            (the dog: the attic stair is 0.90 m and steep) and the road — which also has no nodes
+            at all, and that is the real fence.
 - [ ] HOUSE-00390 — Author `layout.exterior.json`: terrain reference, road segments, sidewalks, kerbs, driveway, paths, fences, gates, shed
       dep: HOUSE-00372 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00391 — Author the neighbourhood instance list: N1–N60 with positions, LOD class and material palette

@@ -787,6 +787,38 @@ def rule_5_connected(world: World) -> list[Problem]:
                 reached.add(neighbour)
                 frontier.append(neighbour)
 
+    # ...and the pet graph, for the same reason one hop down. A pet that cannot reach its bowl is
+    # a bug nobody sees until the dog starves politely in a corner (`HOUSE-00389`). The graph is
+    # its own connectivity question: it has its own edges, and a room reachable through a door is
+    # not reachable by a dog unless somebody put a waypoint in it.
+    nav = world.layout.get("nav") or {}
+    if world.nav_nodes:
+        neighbours: dict[str, set[str]] = {}
+        for edge in nav.get("edges", []):
+            first, second = edge.get("a"), edge.get("b")
+            if first is None or second is None:
+                continue
+            neighbours.setdefault(first, set()).add(second)
+            neighbours.setdefault(second, set()).add(first)
+        start = str(world.nav_nodes[0].get("id"))
+        walked = {start}
+        pending = [start]
+        while pending:
+            current = pending.pop()
+            for neighbour in neighbours.get(current, ()):
+                if neighbour not in walked:
+                    walked.add(neighbour)
+                    pending.append(neighbour)
+        stranded = sorted(str(node.get("id")) for node in world.nav_nodes
+                          if node.get("id") not in walked)
+        if stranded:
+            rooms = sorted({str(node.get("cell")) for node in world.nav_nodes
+                            if node.get("id") in set(stranded)})
+            problems.append(Problem(
+                5, FILE_OF["nav"], "nodes",
+                f"the pet graph is in more than one piece: {len(stranded)} node(s) in "
+                f"{', '.join(rooms)} cannot be walked to from {start}"))
+
     for index, cell in enumerate(world.cells):
         cell_id = cell.get("id")
         if cell_id in walkable and cell_id not in reached:
@@ -931,6 +963,46 @@ def rule_6_references(world: World) -> list[Problem]:
 
     for index, node in enumerate(world.nav_nodes):
         check("nav", index, "cell", node.get("cell"), cells, "cell", have_cells)
+
+    # The rest of the nav file: edges name nodes and portals, and everything that names a cell
+    # names one that exists (`HOUSE-00389`). An edge across a portal has to join the portal's own
+    # two cells, or the route goes through a wall while claiming to go through the door.
+    nav = world.layout.get("nav") or {}
+    node_cell = {row.get("id"): row.get("cell") for row in world.nav_nodes}
+    for index, edge in enumerate(nav.get("edges", [])):
+        for field in ("a", "b"):
+            value = edge.get(field)
+            if value is not None and value not in node_cell:
+                problems.append(Problem(
+                    6, FILE_OF["nav"], f"edges/{index}/{field}",
+                    f"{field} {value!r} is not a known nav node"))
+        portal_id = edge.get("portal")
+        if portal_id is None:
+            continue
+        if have_portals and portal_id not in world.portal_by_id:
+            problems.append(Problem(
+                6, FILE_OF["nav"], f"edges/{index}/portal",
+                f"portal {portal_id!r} is not a known portal"))
+            continue
+        portal = world.portal_by_id.get(portal_id)
+        if portal is None:
+            continue
+        ends = {portal.get("cellA"), portal.get("cellB")}
+        joined = {node_cell.get(edge.get("a")), node_cell.get(edge.get("b"))}
+        if None not in joined and joined != ends:
+            problems.append(Problem(
+                6, FILE_OF["nav"], f"edges/{index}/portal",
+                f"the edge joins {sorted(x for x in joined if x)} and names portal {portal_id}, "
+                f"which joins {sorted(x for x in ends if x)}; a route through a door goes "
+                f"through that door"))
+
+    for group in ("perches", "beds", "bowls", "forbidden"):
+        for index, row in enumerate(nav.get(group, [])):
+            value = row.get("cell")
+            if value is not None and have_cells and value not in cells:
+                problems.append(Problem(
+                    6, FILE_OF["nav"], f"{group}/{index}/cell",
+                    f"cell {value!r} is not a known cell"))
 
     for index, zone in enumerate(world.audio_zones):
         check("audio", index, "cell", zone.get("cell"), cells, "cell", have_cells)
@@ -1751,6 +1823,27 @@ def fixture() -> dict[str, dict]:
         if row["id"] in ("L0_HALL", "L0_WC1"):
             row.setdefault("thermal", {})["ductBranch"] = "DUCT_L0"
 
+    nav = {"schema": "cna-house/nav/1",
+           "nodes": [
+               {"id": "NAV_FOYER", "cell": "L0_FOYER", "position": [0.0, 0.60, 2.0],
+                "kind": "floor"},
+               {"id": "NAV_HALL", "cell": "L0_HALL", "position": [0.0, 0.60, 7.0],
+                "kind": "floor"},
+               {"id": "NAV_WC1", "cell": "L0_WC1", "position": [3.0, 0.60, 5.0],
+                "kind": "floor"}],
+           "edges": [
+               {"a": "NAV_FOYER", "b": "NAV_HALL", "portal": "P_FOYER__HALL", "cost": 5.0,
+                "species": ["dog", "cat"]},
+               {"a": "NAV_HALL", "b": "NAV_WC1", "portal": "P_HALL__WC1", "cost": 3.2,
+                "species": ["cat"]}],
+           "perches": [{"id": "PERCH_HALL", "cell": "L0_HALL", "position": [1.8, 1.40, 6.0],
+                        "species": ["cat"]}],
+           "beds": [{"id": "BED_DOG", "cell": "L0_FOYER", "prop": None,
+                     "position": [-1.5, 0.66, 1.0], "species": ["dog"]}],
+           "bowls": [{"id": "BOWL_WATER", "cell": "L0_HALL", "prop": None,
+                      "position": [1.5, 0.64, 9.0], "species": ["dog", "cat"]}],
+           "forbidden": [{"cell": "L0_STAIR", "species": ["dog"]}]}
+
     audio = {"schema": "cna-house/audio/1",
              "zones": [{"id": "AZ_HALL", "cell": "L0_HALL", "bed": "AMB_ROOM_QUIET", "gain": 0.3}],
              "emitters": [{"id": "EM_CLOCK", "cell": "L0_HALL", "position": [0.0, 2.4, 7.0],
@@ -1769,7 +1862,8 @@ def fixture() -> dict[str, dict]:
 
     return {"levels": levels, "cells": cells, "portals": portals, "openings": openings,
             "stairs": stairs, "lights": lights, "materials": materials, "props": props,
-            "interactables": interactables, "assets": assets, "audio": audio}
+            "interactables": interactables, "assets": assets, "audio": audio,
+            "nav": nav}
 
 
 def write_fixture(directory: Path, documents: dict[str, dict]) -> None:
@@ -2072,6 +2166,46 @@ def selftest() -> int:
         def validate_world_problems(documents, directory, rule):
             write_fixture(directory, documents)
             return validate(directory, wanted=[rule])[1]
+
+        # The pet graph (`HOUSE-00389`). A pet that cannot reach its bowl is a bug nobody sees
+        # until the dog starves politely in a corner, so rule 5 asks the same connectivity
+        # question of it that it asks of the portal graph.
+        cut = copy.deepcopy(base)
+        cut["nav"]["edges"] = [e for e in cut["nav"]["edges"] if e["b"] != "NAV_WC1"]
+        stranded = workspace / "nav-cut"
+        write_fixture(stranded, cut)
+        _, problems = validate(stranded, wanted=[5])
+        require(any("more than one piece" in x.message for x in problems)
+                and any("L0_WC1" in x.message for x in problems),
+                f"a nav node nothing reaches is caught, and the room is named "
+                f"({[str(x) for x in problems]})")
+
+        # An edge across a portal has to join THAT portal's two cells, or the route goes through a
+        # wall while claiming to go through the door.
+        wrong_door = copy.deepcopy(base)
+        wrong_door["nav"]["edges"][0]["portal"] = "P_HALL__WC1"
+        misrouted = workspace / "nav-wrong-door"
+        write_fixture(misrouted, wrong_door)
+        _, problems = validate(misrouted, wanted=[6])
+        require(any("goes through that door" in x.message for x in problems),
+                f"an edge naming a portal that joins two other cells is caught "
+                f"({[str(x) for x in problems]})")
+
+        ghost = copy.deepcopy(base)
+        ghost["nav"]["edges"][0]["b"] = "NAV_NOWHERE"
+        missing_node = workspace / "nav-ghost"
+        write_fixture(missing_node, ghost)
+        _, problems = validate(missing_node, wanted=[6])
+        require(any("is not a known nav node" in x.message for x in problems),
+                f"and an edge to a node that does not exist ({[str(x) for x in problems]})")
+
+        astray_perch = copy.deepcopy(base)
+        astray_perch["nav"]["perches"][0]["cell"] = "L0_NOWHERE"
+        lost_perch = workspace / "nav-perch"
+        write_fixture(lost_perch, astray_perch)
+        _, problems = validate(lost_perch, wanted=[6])
+        require(any("perches/0/cell" in str(x) for x in problems),
+                f"and a perch in a cell that does not exist ({[str(x) for x in problems]})")
 
         # A cell names its duct branch and the branch lists its cells. §62.6 puts the duct
         # rumble at the registers, so a branch that has lost a room is a room the furnace is
