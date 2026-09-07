@@ -95,6 +95,8 @@ jobs:
           /usr/bin/python3 -m pip install --break-system-packages --user numpy || true
           CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
             python3 tools/blender/lod_gen.py --selftest
+          CNAHOUSE_BLENDER_PYTHONPATH="$HOME/.local/lib/python3/dist-packages" \
+            python3 tools/blender/collision_proxy.py --selftest
 
   # --- HOUSE-00134 -------------------------------------------------------------------------------
   build-and-unit:

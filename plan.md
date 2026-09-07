@@ -2589,8 +2589,47 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             deletes, angle-based smooth shading and a real `smart_project` unwrap. 5 568 triangles.
             **Nothing is committed**: `--make-fixture` authors it deterministically, so downstream
             Blender tasks share the fixture without a binary entering the repository.
-- [ ] HOUSE-00190 — `tools/blender/collision_proxy.py`: generate `<name>_COL` as a box or convex decomposition, ≤ 64 triangles
+- [x] HOUSE-00190 — `tools/blender/collision_proxy.py`: generate `<name>_COL` as a box or convex decomposition, ≤ 64 triangles
       dep: HOUSE-00189 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) Three shapes, chosen by measurement, all under §18's 64-triangle ceiling:
+            `box` (12), `hull` (a **14-DOP**, ≤ 64), `boxes` (up to 5 × 12). 17 selftest checks over
+            three fixtures that each select a different shape. Output byte-identical across runs.
+      finding: **the selection rule is OCCUPANCY, not a volume ratio, and the volume ratio was
+            actively wrong.** `BMesh.calc_volume` sums by the divergence theorem, so the L-shaped
+            sofa — two cubes joined into one mesh, intersecting at the corner — double-counts the
+            overlap and reported `fill = 1.2454` for a proxy that provably enclosed every vertex.
+            An impossible number that a threshold would have silently believed. Replaced by sampling
+            a 24³ grid and asking "inside the source?" / "inside the proxy?", which is robust to
+            intersecting shells and to a proxy made of several boxes. Measured: wardrobe 1.00 as a
+            box; vase 0.51 as a box, 0.74 as a 14-DOP; L-sofa **0.30 as one box against 0.89 as
+            five** — that gap is the whole reason the mode exists.
+      finding: **a decimated convex hull cannot meet a triangle ceiling, and a 14-DOP can.** Three
+            approaches were measured before one worked. Decimate-then-re-hull does not converge: the
+            hull of N points has up to 2N−4 faces, so re-hulling restores what the decimation
+            removed, and a 32×16 UV sphere stayed at 961 triangles after eight rounds. Hulling a
+            reduced point set converges but no longer contains every vertex, and expanding it about
+            its centroid until it does over-inflates — 0.431 occupancy, worse than the 5-box split it
+            was meant to beat. A **k-DOP is enclosing by construction**: the plane at
+            `max(dot(v, d))` supports the source, so containment is a property of the build rather
+            than something to test afterwards, and the face count is known before any geometry
+            exists. 14 directions (6 axes + 8 body diagonals) is the largest standard set that fits;
+            the 26-DOP is tighter and lands near 104 triangles.
+      finding: **`bmesh.ops.convex_hull` does not guarantee consistent winding**, and every
+            containment test here is a signed distance to a face plane. Inward-facing normals made
+            interior points read as **0.677 outside** a 0.25-radius sphere. `recalc_face_normals`
+            after every hull, bisect and box.
+      finding: two smaller traps worth recording. `bmesh.ops.delete` raises "found the same
+            (BMVert/BMEdge/BMFace) used multiple times" when the three `convex_hull` result lists
+            overlap — they must be deduplicated **by identity**, since BMesh elements are not
+            hashable by value. And repeated `bisect_plane` shatters each DOP plane into a fan: 170
+            triangles before `dissolve_limit` merges each plane's fragments back into one polygon,
+            44 after, with the geometry unchanged.
+      finding: the box decomposition's slabs are **extended to meet exactly**, not left at their
+            contents' bounds. Two boxes with a gap between them let a capsule sweep find the seam
+            and slip through, which is a bug that only appears when a player walks into it.
+      note: the enclosure test is asserted rather than assumed — every source vertex against the
+            proxy — and was itself shown to fail, rejecting a box shrunk to 80 % with the worst
+            vertex 0.1000 outside.
 - [x] HOUSE-00191 — `tools/assets/pbr_to_stock.py`: metallic-roughness → `DiffuseColor`/`SpecularColor`/`SpecularPower` with a fixed documented mapping
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) The mapping had to be **chosen**: `cna-house.md` §82.3 requires it be
