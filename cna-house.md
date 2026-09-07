@@ -2794,8 +2794,12 @@ LightingSystem, once per frame:
 ### 28.2 Light definitions
 
 Every light is a row in `layout.lights.json` (§15.5) with a stable ID, cell, type, transform,
-colour temperature, intensity, range, cone, fixture prop, switch group and default state. **169
-fixtures in 84 switch groups.** Colour temperature is converted to RGB through a Planckian
+colour temperature, intensity, range, cone, fixture prop, switch group and default state. **220
+fixtures in 128 switch groups inside the house**, measured after `HOUSE-00381` and `HOUSE-00382`
+authored them, plus the exterior lights `HOUSE-00383` adds. This paragraph and §53 both said "169
+fixtures in 84 switch groups"; §13's per-room `Lights` column, which §13.1 says counts groups,
+totals 128 on its own and 84 was never reachable from it. The per-room column wins, because it
+names the room the switch is in. Colour temperature is converted to RGB through a Planckian
 lookup table, so a 2700 K bedroom lamp and a 4000 K garage fluorescent genuinely differ.
 
 ### 28.3 Baked lighting (static)
@@ -2922,7 +2926,7 @@ One map, one extra pass, ≤ 500 casters. Measured in `HOUSE-02712`.
 
 ### 29.3 What is explicitly not attempted
 
-Cascaded shadow maps, shadow-mapped point lights (six faces × 169 fixtures is absurd), soft-shadow
+Cascaded shadow maps, shadow-mapped point lights (six faces × 220 fixtures is absurd), soft-shadow
 penumbra estimation, contact-hardening, screen-space shadows, and any technique requiring a stencil
 buffer (BL-02) or MRT (BL-03).
 
@@ -4253,8 +4257,10 @@ decal. That is the right scope.
 
 ## 53. Lights and switches
 
-* **84 switch groups** control **169 fixtures**. A group is what a real wall switch controls — the
-  four kitchen down-lights, the two porch lanterns, the single closet bulb.
+* **128 switch groups** control **220 fixtures** inside the house, plus the exterior lights below.
+  A group is what a real wall switch controls — the four kitchen down-lights, the two porch
+  lanterns, the single closet bulb. Corrected 2026-09-08 from "84 groups, 169 fixtures", which
+  §13's own per-room column never added up to (`HOUSE-00382`).
 * Switch plates are interactables placed at 1.20 m on the correct side of each doorway
   (data-driven, validated for reachability by §15.7 rule 11). Multi-gang plates offer one action
   per gang: `[E] Kitchen lights   ·   [F] Under-cabinet`.
@@ -4271,6 +4277,9 @@ decal. That is the right scope.
 * Persistence: one bit per group plus a dimmer byte for the 6 dimmable groups.
 * Exterior lights: 2 porch lanterns, 1 garage flood, 2 rear terrace lights, 4 path lights,
   1 shed light, plus the 9 street lights and the neighbours' porch lights (not player-controlled).
+  The **balconies** are missing from that list and §13.4 gives them three groups — two wall
+  lanterns and a festoon on the rear balcony, one lantern on the front. They are `L1` rows, so
+  `HOUSE-00382` authored them with the rest of `L1`.
 
 ---
 
@@ -4819,7 +4828,7 @@ Uniform technical format across the whole collection, spot-checked with `ffprobe
 | Human breath/effort | Good | — |
 | Fire | Good | — |
 | **Doors** | **1 sample** | **Major gap**: 62 doors need open/close/latch/creak/slam across 4 door classes |
-| **Light switches** | none | Major gap: 84 switch groups |
+| **Light switches** | none | Major gap: 128 switch groups |
 | **Cabinets and drawers** | none | Major gap: 214 containers |
 | **Water: taps, shower, drain, flush, cistern** | none (the stream loops are outdoor water) | Major gap |
 | **Toilet flush** | none | Major gap |

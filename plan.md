@@ -5802,8 +5802,27 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             visible lit part, because §53 lights that slot when the group comes on.
       note: `AuthoredWorldTest` asserts the 97 fixtures, the 55 groups and rule 6's index through
             the C++ loader.
-- [ ] HOUSE-00382 — Author `layout.lights.json` for `L1`, `L2`, `L3`
+- [x] HOUSE-00382 — Author `layout.lights.json` for `L1`, `L2`, `L3`
       dep: HOUSE-00381 · sys: world · plat: TOOL · pri: MUST
+      finding: **§28.2 and §53's "169 fixtures in 84 switch groups" was never reachable.** With
+            all five floors authored the house holds **220 fixtures in 128 groups**, and 128 is
+            exactly §13's per-room `Lights` column summed — the column §13.1 says counts groups.
+            84 is not a rounding of anything in §13. The per-room column wins because it names the
+            room the switch is in; §28.2, §53 and §62's audio-gap table are corrected, and so is
+            §28.6's aside about "six faces × 169 fixtures".
+      finding: **§53's exterior list forgets the balconies.** It enumerates porch, garage flood,
+            terrace, paths, shed and street, and §13.4 gives `L1_BALCONY_REAR` two groups and
+            `L1_BALCONY_FRONT` one. They are `L1` rows, so they are authored here with the rest of
+            `L1` — two wall lanterns and a festoon over the table, one lantern on the front — and
+            §53's list now says so, which is also what keeps `HOUSE-00383` from authoring them a
+            second time under different ids.
+      note: 44 more cells gained their `lightGroups` index. Rule 6 checks it both ways, so an
+            upper-floor cell whose lights were authored and whose index was not would have failed
+            the gate rather than sat wrong for a phase.
+      note: the fixture-per-group counts follow the room: three pendants over the pool table, four
+            strips washing the library's floor-to-ceiling shelves, a bare bulb on a pull cord at
+            the attic stair because §13.5 says so, two bedside lamps in the master because a king
+            bed has two sides.
 - [ ] HOUSE-00383 — Author the exterior lights: porch, garage flood, terrace, path, shed, plus the street and neighbour lights
       dep: HOUSE-00381 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00384 — Author the switch plates: position, gang count, group mapping, including the two three-way pairs
