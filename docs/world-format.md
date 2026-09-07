@@ -603,8 +603,13 @@ build**:
 1. every id is unique and matches `^[A-Z][A-Z0-9_]*$`;
 2. every cell box is non-degenerate and inside its level's envelope;
 3. no two cells on a level overlap by more than 1 cm²;
-4. every portal rectangle lies in both cells' boundary planes within 1 cm, and its `v` range lies
-   inside both cells' vertical extent;
+4. every portal rectangle lies in both cells' boundary planes within 1 cm — or in the **wall**
+   between them when they do not abut: two rooms either side of a partition share a coordinate
+   (§13.1), but a room and the yard outside it do not, because there are `wallExterior` metres of
+   wall in between and the window is in them. The two facing planes must straddle the portal, each
+   must span the opening, and they must be no further apart than the thickest wall `construction`
+   declares — a portal in the middle of a room, on the wrong wall, or between two cells that do not
+   face each other still fails. The `v` range lies inside both cells' vertical extent;
 5. the portal graph is connected — every cell that is not `void` is reachable from `L0_FOYER`
    through always-open or door portals. Not "every interior cell": `EXT_SHED` is an `exterior`
    cell that is indoors, and under the narrower wording it was authored with no door

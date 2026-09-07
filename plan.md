@@ -5582,8 +5582,60 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: measured after authoring, by `tools/world/report_graph.py`: one component through open
             doors, diameter 13 hops (`EXT_SHED` → `L2_BATH5`), 58 components with every door shut
             and the largest of them the 18-cell exterior ring.
-- [ ] HOUSE-00376 — Author the 81 window portals (62 openable + 19 fixed) with `opacity: glass` and `maxDepth`
+- [x] HOUSE-00376 — Author the 66 window portals with `opacity: glass`/`translucent` and `maxDepth`
       dep: HOUSE-00374 · sys: world · plat: TOOL · pri: MUST
+      finding: **rule 4 was right for partitions and wrong for the shell, and all 66 windows hit
+            it at once.** Two rooms either side of a partition share a coordinate (§13.1), so "the
+            portal lies in both cells' planes within 1 cm" holds. A room and the yard outside it do
+            not: the room stops at the interior face, the yard at the exterior one, and the window
+            is in the 0.30 m of wall between them, in neither cell's plane. Rule 4 now also accepts
+            a portal **in the wall** — the two facing planes must straddle it, each must span the
+            opening, and they must be no further apart than the thickest wall `construction`
+            declares. Nothing else is loosened: a portal in the middle of a room, on the wrong
+            wall, or between cells that do not face each other still fails, and between two cells
+            that DO abut the old 1 cm still governs. Seven claims, four of them injected-bug tests.
+      finding: **the first fix passed the selftest and failed every window in the house.** The
+            fixture put its wall at the origin, where `0.30 − 0.00` is exactly 0.3; the house puts
+            its front wall at Z −14.30 against a yard at Z −14.00, where the same subtraction is
+            0.30000000000000071 and a `<= 0.30` written without slack rejects it. The tolerance is
+            now a wall **plus** the same 1 cm, and the selftest has a fixture at those coordinates.
+      finding: **eight rooms are scheduled a window and have no exterior wall.** `L0_LAUNDRY`,
+            `L0_WC1`, `L0_WC2`, `L0_DINING`, `L1_BATH3`, `L1_WC4`, `L2_BATH5`, `L2_WC6` are all in
+            the middle of the plan, enclosed on four sides by other rooms. §13's rows are corrected
+            to `—` with the reason in the Notes column; nothing else can be done without moving
+            walls, and a dining room the plan puts in the core is a design decision, not a bug.
+      finding: **`L3_ROOM`'s 3 dormers had nowhere to be.** Its footprint stopped 2.70 m short of
+            the front wall with the `L3_STORE_S` roof void in between. A dormer belongs to the room
+            it lights, so `L3_ROOM` now reaches the eaves in two bays and the void is what is left
+            between them. The bays are at the **ends** of the elevation because the porch roof and
+            the front balcony fill X −3.60…+3.60 to +9.00 and above them there is no exterior cell
+            at all — the same reason `L3_STORE_N`'s two dormers are squeezed into X +2.70…+4.90.
+            `P_L3_STORE_W__L3_STORE_S` is gone with them: the west bay is exactly the corner where
+            the two voids met. The store is still reachable, one hop longer, through `L3_ROOM`.
+      finding: **basement hoppers sit below their yard's floor.** §12.6 puts them in 0.9 m window
+            wells at an absolute sill of −0.45, and the yards' floor was 0.00, so the sill was
+            outside the cell the window opens into. The four yards that carry a basement window now
+            declare a floor of −0.90; the east side yard does not, because the garage is there and
+            it has no basement.
+      finding: **§12.6 and §13 never agreed about how many windows this house has** — §13's
+            per-room column totals 71 openings, §12.6's per-elevation table about 86, and only the
+            attic matched. §13 wins, because it names the room the window is in and a portal has to
+            be in a room. §12.6's count table is replaced by the measured one: **66** = 73 openings
+            §13 schedules (71 rows plus the foyer's transom and the living room's tall window,
+            which its "2 sidelights + transom" and "1 bay + 1 tall" cells each undercount by one)
+            − 8 in landlocked rooms + the garden shed's, which §13.7 describes only in prose.
+      note: three window types the data needed are added to §12.6 — `W_SIDELIGHT`, `W_PANEL` (the
+            sunroom's fixed flanks) and `W_INTERNAL` (borrowed light, kitchen → sunroom). Sizes and
+            sills of the ten that were already there are unchanged.
+      note: the openable/fixed split (§12.6's 62 + 19) is **not** a property of this file:
+            `opacity` says what you can see through, not what opens. `HOUSE-00378` authors the
+            leaves and that is where the split becomes measurable.
+      note: `maxDepth` is authored per §16's `maxDepthFor` table — 3 through clear glass, 1 through
+            obscured glass and gable louvres, 2 through an internal window, a transom or a hopper.
+            The doc's §15.4 example connects a window to `EXT_WORLD`; it was written before §13.7's
+            yard cells existed, and a window that skipped the yard would leave someone standing in
+            the garden with no portal to look through. Every window here opens into the cell it
+            actually faces.
 - [ ] HOUSE-00377 — Author the garage-door portal and the 1 hatch portal
       dep: HOUSE-00374 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00378 — Author `layout.openings.json`: the 7 door types and 10 window types with leaf sizes, frames and hardware references

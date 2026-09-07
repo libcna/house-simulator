@@ -157,12 +157,10 @@
       "rect": { "u": [-26.15, -24.95], "v": [9.3, 10.9] },
       "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
     },
-    {
-      "id": "P_L3_STORE_W__L3_STORE_S", "cellA": "L3_STORE_W", "cellB": "L3_STORE_S",
-      "plane": { "axis": "x", "value": -6.0 },
-      "rect": { "u": [-16.25, -15.05], "v": [9.3, 10.9] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open", "crouch": true
-    },
+    // `P_L3_STORE_W__L3_STORE_S` was here and is gone (`HOUSE-00376`). The west dormer bay now
+    // runs X -6.00…-3.60 through to the eaves, which is exactly the corner where the two roof
+    // voids used to meet, so they no longer share a plane and the crawl-through cannot exist.
+    // `L3_STORE_S` is still reachable, one hop longer, through `L3_ROOM`.
     {
       "id": "P_L3_STORE_E__L3_STORE_N", "cellA": "L3_STORE_E", "cellB": "L3_STORE_N",
       "plane": { "axis": "x", "value": 4.9 },
@@ -791,6 +789,624 @@
       "rect": { "u": [-12.4, -11.0], "v": [-26.9, -26.2] },
       "kind": "hatch", "aperture": "FREEZER_L0_PANTRY", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.10, "closed": 0.72 }
+    },
+
+    // ================================================================================ windows
+    // `HOUSE-00376`. 66 window portals. A window is a portal like any other: `kind: "window"`,
+    // never passable, `opacity: "glass"` where you can see through it and `"translucent"` where
+    // the glass is obscured, and a `maxDepth` that caps how far the visibility walk carries on
+    // behind it (§16.3's table: 3 through clear glass, 1 through obscured glass and louvres,
+    // 2 through an internal window, a transom or a basement hopper).
+    //
+    // Sizes and sill heights are §12.6's window types, unchanged. Placement is this file's: every
+    // opening is on a face its room actually has, which is why the front dormers are at the ends
+    // of the elevation rather than the middle -- the porch roof and the front balcony fill the
+    // strip between them, and above +9.00 there is no exterior cell over that strip at all.
+
+    // ---- B1 ------------------------------------------------------------------------------------
+    {
+      // W_BASEMENT.
+      "id": "P_B1_MECHANICAL__W1", "cellA": "B1_MECHANICAL", "cellB": "EXT_FRONTYARD_E",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [6.35, 7.25], "v": [-0.45, 0.15] },
+      "kind": "window", "aperture": "WIN_B1_MECHANICAL_1",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.06, "closed": 0.55 }
+    },
+    {
+      // W_BASEMENT.
+      "id": "P_B1_GYM__W1", "cellA": "B1_GYM", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-7.50, -6.60], "v": [-0.45, 0.15] },
+      "kind": "window", "aperture": "WIN_B1_GYM_1",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.06, "closed": 0.55 }
+    },
+    {
+      // W_BASEMENT.
+      "id": "P_B1_GYM__W2", "cellA": "B1_GYM", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-5.20, -4.30], "v": [-0.45, 0.15] },
+      "kind": "window", "aperture": "WIN_B1_GYM_2",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.06, "closed": 0.55 }
+    },
+    {
+      // W_BASEMENT.
+      "id": "P_B1_WORKSHOP__W1", "cellA": "B1_WORKSHOP", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-16.75, -15.85], "v": [-0.45, 0.15] },
+      "kind": "window", "aperture": "WIN_B1_WORKSHOP_1",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.06, "closed": 0.55 }
+    },
+    {
+      // W_BASEMENT.
+      "id": "P_B1_WORKSHOP__W2", "cellA": "B1_WORKSHOP", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-10.90, -10.00], "v": [-0.45, 0.15] },
+      "kind": "window", "aperture": "WIN_B1_WORKSHOP_2",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.06, "closed": 0.55 }
+    },
+    {
+      // W_BASEMENT.
+      "id": "P_B1_STOR1__W1", "cellA": "B1_STOR1", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-20.60, -19.70], "v": [-0.45, 0.15] },
+      "kind": "window", "aperture": "WIN_B1_STOR1_1",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.06, "closed": 0.55 }
+    },
+    {
+      // W_BASEMENT.
+      "id": "P_B1_STOR2__W1", "cellA": "B1_STOR2", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-25.00, -24.10], "v": [-0.45, 0.15] },
+      "kind": "window", "aperture": "WIN_B1_STOR2_1",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.06, "closed": 0.55 }
+    },
+    {
+      // W_BASEMENT.
+      "id": "P_B1_STOR2__W2", "cellA": "B1_STOR2", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [-10.90, -10.00], "v": [-0.45, 0.15] },
+      "kind": "window", "aperture": "WIN_B1_STOR2_2",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.06, "closed": 0.55 }
+    },
+
+    // ---- L0 ------------------------------------------------------------------------------------
+    {
+      // W_SIDELIGHT, sidelights.
+      "id": "P_L0_FOYER__W1", "cellA": "L0_FOYER", "cellB": "L0_PORCH",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-0.85, -0.55], "v": [0.70, 2.75] },
+      "kind": "window", "aperture": "WIN_L0_FOYER_1",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.05, "closed": 0.50 }
+    },
+    {
+      // W_SIDELIGHT, sidelights.
+      "id": "P_L0_FOYER__W2", "cellA": "L0_FOYER", "cellB": "L0_PORCH",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [0.55, 0.85], "v": [0.70, 2.75] },
+      "kind": "window", "aperture": "WIN_L0_FOYER_2",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.05, "closed": 0.50 }
+    },
+    {
+      // W_TRANSOM, over the front door.
+      "id": "P_L0_FOYER__W3", "cellA": "L0_FOYER", "cellB": "L0_PORCH",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-0.50, 0.50], "v": [2.80, 3.20] },
+      "kind": "window", "aperture": "WIN_L0_FOYER_3",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.05, "closed": 0.50 }
+    },
+    {
+      // W_DH_STD, half-landing.
+      "id": "P_L0_STAIR_MAIN__W1", "cellA": "L0_STAIR_MAIN", "cellB": "EXT_FRONTYARD_E",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [3.65, 4.85], "v": [1.50, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_STAIR_MAIN_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L0_MUDROOM__W1", "cellA": "L0_MUDROOM", "cellB": "EXT_FRONTYARD_E",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [6.20, 7.40], "v": [1.50, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_MUDROOM_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_PICTURE.
+      "id": "P_L0_FAMILY__W1", "cellA": "L0_FAMILY", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [4.50, 6.90], "v": [1.45, 3.05] },
+      "kind": "window", "aperture": "WIN_L0_FAMILY_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.03, "closed": 0.40 }
+    },
+    {
+      // W_PICTURE, east elevation.
+      "id": "P_L0_FAMILY__W2", "cellA": "L0_FAMILY", "cellB": "EXT_SIDEYARD_E",
+      "plane": { "axis": "x", "value": 8.70 },
+      "rect": { "u": [-25.75, -23.35], "v": [1.45, 3.05] },
+      "kind": "window", "aperture": "WIN_L0_FAMILY_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.03, "closed": 0.40 }
+    },
+    {
+      // W_BAY, bay.
+      "id": "P_L0_LIVING__W1", "cellA": "L0_LIVING", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-8.00, -5.20], "v": [1.15, 2.85] },
+      "kind": "window", "aperture": "WIN_L0_LIVING_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.03, "closed": 0.40 }
+    },
+    {
+      // W_DH_TALL, tall.
+      "id": "P_L0_LIVING__W2", "cellA": "L0_LIVING", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-4.90, -3.70], "v": [1.20, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_LIVING_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.46 }
+    },
+    {
+      // W_DH_TALL.
+      "id": "P_L0_OFFICE__W1", "cellA": "L0_OFFICE", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-9.80, -8.60], "v": [1.20, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_OFFICE_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.46 }
+    },
+    {
+      // W_DH_TALL.
+      "id": "P_L0_OFFICE__W2", "cellA": "L0_OFFICE", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-16.90, -15.70], "v": [1.20, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_OFFICE_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.46 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L0_BUTLERS__W1", "cellA": "L0_BUTLERS", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-24.40, -23.20], "v": [1.50, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_BUTLERS_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L0_PANTRY__W1", "cellA": "L0_PANTRY", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-26.65, -25.45], "v": [1.50, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_PANTRY_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L0_KITCHEN__W1", "cellA": "L0_KITCHEN", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [-8.05, -6.85], "v": [1.50, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_KITCHEN_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_INTERNAL, borrowed light.
+      "id": "P_L0_KITCHEN__W2", "cellA": "L0_KITCHEN", "cellB": "L0_SUNROOM",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [-4.60, -3.40], "v": [1.55, 2.65] },
+      "kind": "window", "aperture": "WIN_L0_KITCHEN_2",
+      "opacity": "glass", "maxDepth": 2,
+      "soundLoss": { "open": 0.06, "closed": 0.52 }
+    },
+    {
+      // W_PANEL.
+      "id": "P_L0_SUNROOM__W1", "cellA": "L0_SUNROOM", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "x", "value": -6.70 },
+      "rect": { "u": [-29.90, -28.10], "v": [0.90, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_SUNROOM_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.03, "closed": 0.38 }
+    },
+    {
+      // W_PANEL.
+      "id": "P_L0_SUNROOM__W2", "cellA": "L0_SUNROOM", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "x", "value": -6.70 },
+      "rect": { "u": [-31.90, -30.10], "v": [0.90, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_SUNROOM_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.03, "closed": 0.38 }
+    },
+    {
+      // W_PANEL.
+      "id": "P_L0_SUNROOM__W3", "cellA": "L0_SUNROOM", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "x", "value": 2.70 },
+      "rect": { "u": [-29.90, -28.10], "v": [0.90, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_SUNROOM_3",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.03, "closed": 0.38 }
+    },
+    {
+      // W_PANEL.
+      "id": "P_L0_SUNROOM__W4", "cellA": "L0_SUNROOM", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "x", "value": 2.70 },
+      "rect": { "u": [-31.90, -30.10], "v": [0.90, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_SUNROOM_4",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.03, "closed": 0.38 }
+    },
+    {
+      // W_PANEL, beside the slider.
+      "id": "P_L0_SUNROOM__W5", "cellA": "L0_SUNROOM", "cellB": "EXT_TERRACE",
+      "plane": { "axis": "z", "value": -32.10 },
+      "rect": { "u": [0.40, 2.20], "v": [0.90, 3.00] },
+      "kind": "window", "aperture": "WIN_L0_SUNROOM_5",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.03, "closed": 0.38 }
+    },
+    {
+      // W_DH_STD, garage wing.
+      "id": "P_L0_GARAGE__W1", "cellA": "L0_GARAGE", "cellB": "EXT_SIDEYARD_E",
+      "plane": { "axis": "x", "value": 17.10 },
+      "rect": { "u": [-20.20, -19.00], "v": [1.05, 2.55] },
+      "kind": "window", "aperture": "WIN_L0_GARAGE_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+
+    // ---- L1 ------------------------------------------------------------------------------------
+    {
+      // W_DH_STD.
+      "id": "P_L1_LANDING__W1", "cellA": "L1_LANDING", "cellB": "L1_BALCONY_FRONT",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-2.10, -0.90], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_LANDING_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_LANDING__W2", "cellA": "L1_LANDING", "cellB": "L1_BALCONY_FRONT",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [0.90, 2.10], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_LANDING_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_STAIR_MAIN__W1", "cellA": "L1_STAIR_MAIN", "cellB": "EXT_FRONTYARD_E",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [3.65, 4.85], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_STAIR_MAIN_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_MASTER_BED__W1", "cellA": "L1_MASTER_BED", "cellB": "L1_BALCONY_REAR",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [-6.40, -5.20], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_MASTER_BED_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_MASTER_BED__W2", "cellA": "L1_MASTER_BED", "cellB": "L1_BALCONY_REAR",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [-4.90, -3.70], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_MASTER_BED_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_MASTER_BED__W3", "cellA": "L1_MASTER_BED", "cellB": "L1_BALCONY_REAR",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [0.40, 1.60], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_MASTER_BED_3",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_BATH, obscured.
+      "id": "P_L1_MASTER_BATH__W1", "cellA": "L1_MASTER_BATH", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-24.85, -24.25], "v": [5.05, 5.95] },
+      "kind": "window", "aperture": "WIN_L1_MASTER_BATH_1",
+      "opacity": "translucent", "maxDepth": 1,
+      "soundLoss": { "open": 0.05, "closed": 0.52 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_BED2__W1", "cellA": "L1_BED2", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [5.10, 6.30], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_BED2_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD, east elevation.
+      "id": "P_L1_BED2__W2", "cellA": "L1_BED2", "cellB": "EXT_SIDEYARD_E",
+      "plane": { "axis": "x", "value": 8.70 },
+      "rect": { "u": [-25.60, -24.40], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_BED2_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_BED3__W1", "cellA": "L1_BED3", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-11.05, -9.85], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_BED3_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_BED3__W2", "cellA": "L1_BED3", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-16.90, -15.70], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_BED3_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_BED4__W1", "cellA": "L1_BED4", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-7.65, -6.45], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_BED4_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_BED4__W2", "cellA": "L1_BED4", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-5.35, -4.15], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_BED4_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_BATH, obscured.
+      "id": "P_L1_BATH2__W1", "cellA": "L1_BATH2", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-20.45, -19.85], "v": [5.05, 5.95] },
+      "kind": "window", "aperture": "WIN_L1_BATH2_1",
+      "opacity": "translucent", "maxDepth": 1,
+      "soundLoss": { "open": 0.05, "closed": 0.52 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L1_BED5__W1", "cellA": "L1_BED5", "cellB": "EXT_FRONTYARD_E",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [6.20, 7.40], "v": [4.55, 6.05] },
+      "kind": "window", "aperture": "WIN_L1_BED5_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+
+    // ---- L2 ------------------------------------------------------------------------------------
+    {
+      // W_DH_STD.
+      "id": "P_L2_LANDING__W1", "cellA": "L2_LANDING", "cellB": "L1_BALCONY_FRONT",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-2.10, -0.90], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_LANDING_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_LANDING__W2", "cellA": "L2_LANDING", "cellB": "L1_BALCONY_FRONT",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [0.90, 2.10], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_LANDING_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_STAIR_MAIN__W1", "cellA": "L2_STAIR_MAIN", "cellB": "EXT_FRONTYARD_E",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [3.65, 4.85], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_STAIR_MAIN_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_LIBRARY__W1", "cellA": "L2_LIBRARY", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-7.65, -6.45], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_LIBRARY_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_LIBRARY__W2", "cellA": "L2_LIBRARY", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-5.35, -4.15], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_LIBRARY_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_BED6__W1", "cellA": "L2_BED6", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-11.05, -9.85], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_BED6_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_BED6__W2", "cellA": "L2_BED6", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-16.90, -15.70], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_BED6_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_BATH, obscured.
+      "id": "P_L2_BATH4__W1", "cellA": "L2_BATH4", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-20.45, -19.85], "v": [7.95, 8.85] },
+      "kind": "window", "aperture": "WIN_L2_BATH4_1",
+      "opacity": "translucent", "maxDepth": 1,
+      "soundLoss": { "open": 0.05, "closed": 0.52 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_BED7__W1", "cellA": "L2_BED7", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-25.15, -23.95], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_BED7_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_BED7__W2", "cellA": "L2_BED7", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [-10.45, -9.25], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_BED7_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_GAMES__W1", "cellA": "L2_GAMES", "cellB": "L1_BALCONY_REAR",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [-5.40, -4.20], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_GAMES_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_GAMES__W2", "cellA": "L2_GAMES", "cellB": "L1_BALCONY_REAR",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [-0.80, 0.40], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_GAMES_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD.
+      "id": "P_L2_SITTING__W1", "cellA": "L2_SITTING", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [5.10, 6.30], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_SITTING_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+    {
+      // W_DH_STD, east elevation.
+      "id": "P_L2_SITTING__W2", "cellA": "L2_SITTING", "cellB": "EXT_SIDEYARD_E",
+      "plane": { "axis": "x", "value": 8.70 },
+      "rect": { "u": [-25.60, -24.40], "v": [7.45, 8.95] },
+      "kind": "window", "aperture": "WIN_L2_SITTING_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
+    },
+
+    // ---- L3 ------------------------------------------------------------------------------------
+    {
+      // W_DORMER, dormer bay.
+      "id": "P_L3_ROOM__W1", "cellA": "L3_ROOM", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-5.90, -4.90], "v": [10.05, 11.15] },
+      "kind": "window", "aperture": "WIN_L3_ROOM_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.05, "closed": 0.50 }
+    },
+    {
+      // W_DORMER, dormer bay.
+      "id": "P_L3_ROOM__W2", "cellA": "L3_ROOM", "cellB": "EXT_FRONTYARD_W",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [-4.70, -3.70], "v": [10.05, 11.15] },
+      "kind": "window", "aperture": "WIN_L3_ROOM_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.05, "closed": 0.50 }
+    },
+    {
+      // W_DORMER, dormer bay.
+      "id": "P_L3_ROOM__W3", "cellA": "L3_ROOM", "cellB": "EXT_FRONTYARD_E",
+      "plane": { "axis": "z", "value": -14.30 },
+      "rect": { "u": [3.75, 4.75], "v": [10.05, 11.15] },
+      "kind": "window", "aperture": "WIN_L3_ROOM_3",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.05, "closed": 0.50 }
+    },
+    {
+      // W_DORMER.
+      "id": "P_L3_STORE_N__W1", "cellA": "L3_STORE_N", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [2.80, 3.80], "v": [10.05, 11.15] },
+      "kind": "window", "aperture": "WIN_L3_STORE_N_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.05, "closed": 0.50 }
+    },
+    {
+      // W_DORMER.
+      "id": "P_L3_STORE_N__W2", "cellA": "L3_STORE_N", "cellB": "EXT_BACKYARD",
+      "plane": { "axis": "z", "value": -27.10 },
+      "rect": { "u": [3.80, 4.80], "v": [10.05, 11.15] },
+      "kind": "window", "aperture": "WIN_L3_STORE_N_2",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.05, "closed": 0.50 }
+    },
+    {
+      // W_GABLE, gable louvre.
+      "id": "P_L3_STORE_W__W1", "cellA": "L3_STORE_W", "cellB": "EXT_SIDEYARD_W",
+      "plane": { "axis": "x", "value": -12.70 },
+      "rect": { "u": [-21.10, -20.30], "v": [11.30, 12.10] },
+      "kind": "window", "aperture": "WIN_L3_STORE_W_1",
+      "opacity": "translucent", "maxDepth": 1,
+      "soundLoss": { "open": 0.18, "closed": 0.18 }
+    },
+    {
+      // W_GABLE, gable louvre.
+      "id": "P_L3_STORE_E__W1", "cellA": "L3_STORE_E", "cellB": "EXT_SIDEYARD_E",
+      "plane": { "axis": "x", "value": 8.70 },
+      "rect": { "u": [-24.80, -24.00], "v": [11.30, 12.10] },
+      "kind": "window", "aperture": "WIN_L3_STORE_E_1",
+      "opacity": "translucent", "maxDepth": 1,
+      "soundLoss": { "open": 0.18, "closed": 0.18 }
+    },
+
+    // ---- L0 ------------------------------------------------------------------------------------
+    {
+      // W_DH_STD, shed.
+      "id": "P_EXT_SHED__W1", "cellA": "EXT_SHED", "cellB": "EXT_GARDEN",
+      "plane": { "axis": "x", "value": -16.60 },
+      "rect": { "u": [-43.60, -42.40], "v": [0.75, 2.25] },
+      "kind": "window", "aperture": "WIN_EXT_SHED_1",
+      "opacity": "glass", "maxDepth": 3,
+      "soundLoss": { "open": 0.04, "closed": 0.48 }
     }
   ]
 }

@@ -216,6 +216,20 @@ class World:
         self.cell_by_id = {row.get("id"): row for row in self.cells}
         self.portal_by_id = {row.get("id"): row for row in self.portals}
 
+    @property
+    def thickest_wall(self) -> float:
+        """The thickest wall `layout.levels.json` declares, or 0 when it declares none.
+
+        Rule 4 needs it because a window is **in** a wall, not on either face of it: the room and
+        the yard are 0.30 m apart because there are 0.30 m of wall between them. Read from the data
+        rather than written here, so a house with thinner walls gets a tighter check for free.
+        """
+        construction = (self.layout.get("levels") or {}).get("construction") or {}
+        thicknesses = [float(value) for key, value in construction.items()
+                       if key.startswith(("wall", "foundation"))
+                       and isinstance(value, (int, float))]
+        return max(thicknesses, default=0.0)
+
     def extent(self, cell: dict) -> tuple[float, float] | None:
         """The cell's floor and ceiling Y, or None when the layout cannot say."""
         level = self.level_by_id.get(cell.get("level"))
@@ -481,7 +495,7 @@ def rule_3_overlap(world: World) -> list[Problem]:
 
 
 def _boundary_span(cell: dict, axis: str, value: float,
-                   ) -> list[tuple[float, float]]:
+                   tolerance: float = PLANE_TOLERANCE) -> list[tuple[float, float]]:
     """The spans of the *other* horizontal axis where `cell` has a face on the plane `axis=value`.
 
     A cell is a union of boxes, so a wall on one plane can be several disjoint runs. Returning them
@@ -491,12 +505,60 @@ def _boundary_span(cell: dict, axis: str, value: float,
     spans = []
     for x0, x1, z0, z1 in boxes_of(cell):
         if axis == "x":
-            if abs(x0 - value) <= PLANE_TOLERANCE or abs(x1 - value) <= PLANE_TOLERANCE:
+            if abs(x0 - value) <= tolerance or abs(x1 - value) <= tolerance:
                 spans.append((z0, z1))
         else:
-            if abs(z0 - value) <= PLANE_TOLERANCE or abs(z1 - value) <= PLANE_TOLERANCE:
+            if abs(z0 - value) <= tolerance or abs(z1 - value) <= tolerance:
                 spans.append((x0, x1))
     return spans
+
+
+def _faces_near(cell: dict, axis: str, value: float, reach: float,
+                u0: float, u1: float) -> list[float]:
+    """The cell's faces on @p axis within @p reach of @p value whose run covers `u0..u1`.
+
+    Rule 4's wall case needs the face itself, not just "there is one": the two faces have to be
+    shown to be on opposite sides of the portal and within a wall of each other, and a face that
+    does not span the opening is not the face the opening is in.
+    """
+    found = []
+    for x0, x1, z0, z1 in boxes_of(cell):
+        near, span = ((x0, x1), (z0, z1)) if axis == "x" else ((z0, z1), (x0, x1))
+        for face in near:
+            if abs(face - value) > reach + PLANE_TOLERANCE:
+                continue
+            if span[0] - PLANE_TOLERANCE <= u0 and u1 <= span[1] + PLANE_TOLERANCE:
+                found.append(face)
+    return sorted(set(found))
+
+
+def _in_the_wall(world: World, cell_a: dict, cell_b: dict, axis: str, value: float,
+                 u0: float, u1: float) -> bool:
+    """True when the portal plane lies in the **wall** between two cells that do not abut.
+
+    §15.7 rule 4 reads "in both cells' boundary planes within 1 cm", which is exactly right for two
+    rooms either side of a partition: they share a coordinate and the geometry builder insets both
+    (§13.1). It is not right for the building's shell. A room's box stops at the interior face and
+    the yard outside stops at the exterior one, so the two are `wallExterior` apart with the wall
+    in between -- and the window is in that wall, in neither cell's plane. `HOUSE-00376` found this
+    on all 73 windows at once.
+
+    The check stays as strong as it was for everything else: the two faces must **straddle** the
+    portal, each must span the opening, and they must be no further apart than the thickest wall
+    the data declares. A portal in the middle of a room, on the wrong wall, or between two cells
+    that do not face each other still fails, because no such pair of faces exists.
+    """
+    wall = world.thickest_wall
+    if wall <= 0.0:
+        return False
+    for face_a in _faces_near(cell_a, axis, value, wall, u0, u1):
+        for face_b in _faces_near(cell_b, axis, value, wall, u0, u1):
+            if abs(face_a - face_b) > wall + PLANE_TOLERANCE:
+                continue
+            low, high = min(face_a, face_b), max(face_a, face_b)
+            if low - PLANE_TOLERANCE <= value <= high + PLANE_TOLERANCE:
+                return True
+    return False
 
 
 def _horizontal_problems(world: World, portal: dict, index: int,
@@ -578,16 +640,27 @@ def rule_4_portal_planes(world: World) -> list[Problem]:
             problems.extend(_horizontal_problems(world, portal, index, float(value),
                                                  (u0, u1, v0, v1)))
             continue
+        # A portal in a wall is in neither cell's plane: the room stops at the interior face, the
+        # yard at the exterior one, and the window is in the 0.30 m between them. Decided once,
+        # for the pair, because it is a statement about the two cells together.
+        walled = (cell_a is not None and cell_b is not None
+                  and _in_the_wall(world, cell_a, cell_b, str(axis), float(value), u0, u1))
+        # A wall PLUS the same 1 cm slack, and the slack is not cosmetic: `-14.0 - -14.3` is
+        # 0.30000000000000071 in binary floating point, so a bare `<= 0.30` rejects every window
+        # in a 0.30 m wall.
+        reach = world.thickest_wall + PLANE_TOLERANCE if walled else PLANE_TOLERANCE
+
         for side in ("cellA", "cellB"):
             cell = world.cell_by_id.get(portal.get(side))
             if cell is None:
                 continue  # rule 6
-            spans = _boundary_span(cell, str(axis), float(value))
+            spans = _boundary_span(cell, str(axis), float(value), reach)
             if not spans:
                 problems.append(Problem(
                     4, FILE_OF["portals"], f"{where}/plane",
                     f"portal {portal_id}: cell {cell.get('id')} ({side}) has no face on "
-                    f"{axis} = {float(value):.3f} within {PLANE_TOLERANCE * 100:.0f} cm"))
+                    f"{axis} = {float(value):.3f} within {PLANE_TOLERANCE * 100:.0f} cm, and no "
+                    f"face within a wall of it on the far side either"))
                 continue
             if not any(span[0] - PLANE_TOLERANCE <= u0 and u1 <= span[1] + PLANE_TOLERANCE
                        for span in spans):
@@ -1718,6 +1791,121 @@ def selftest() -> int:
         require(any("taller than" in p.message for p in problems),
                 f"and so is one taller than the container it opens into "
                 f"({[str(p) for p in problems]})")
+
+        # A portal in a WALL. The room stops at the interior face and the yard outside stops at
+        # the exterior one, so the two are `wallExterior` apart with the wall in between and the
+        # opening is in neither cell's plane. `HOUSE-00376` hit this on all 73 windows at once.
+        def terrace_moved(gap, plane=None):
+            docs = copy.deepcopy(base)
+            for cell in docs["cells"]["cells"]:
+                if cell["id"] == "L0_TERRACE":
+                    cell["boxes"] = [{"x": [-2.0, 2.0], "z": [-4.0 - gap, 0.0 - gap]}]
+            for portal in docs["portals"]["portals"]:
+                if portal["id"] == "P_FOYER__TERRACE":
+                    portal["plane"] = {"axis": "z",
+                                       "value": -gap / 2 if plane is None else plane}
+            return docs
+
+        walled = workspace / "walled"
+        write_fixture(walled, terrace_moved(0.30))
+        _, problems = validate(walled, wanted=[4])
+        require(not problems,
+                f"a portal in the 0.30 m WALL between a room and the yard outside is accepted -- "
+                f"the two cells are a wall apart because there is a wall there "
+                f"({[str(x) for x in problems]})")
+
+        # ...and on the face itself, which is where every real window is: the authored house puts
+        # the plane on the room's own coordinate, a full wall from the yard's. That is the case
+        # binary floating point breaks -- `-14.0 - -14.3` is 0.30000000000000071 -- so a fixture
+        # that only ever tested a plane in the MIDDLE of the wall passed while all 66 windows
+        # failed (`HOUSE-00376`).
+        on_face = workspace / "on-face"
+        write_fixture(on_face, terrace_moved(0.30, plane=0.0))
+        _, problems = validate(on_face, wanted=[4])
+        require(not problems,
+                f"a portal on the room's OWN face, a full wall away from the yard's, is accepted "
+                f"({[str(x) for x in problems]})")
+
+        far_face = workspace / "far-face"
+        write_fixture(far_face, terrace_moved(0.30, plane=-0.30))
+        _, problems = validate(far_face, wanted=[4])
+        require(not problems,
+                f"and so is one on the yard's own face, at the other end of the same wall "
+                f"({[str(x) for x in problems]})")
+
+        # ...at the coordinates the real house uses. The two claims above cannot see the bug that
+        # actually shipped, because 0.30 subtracted at z = 0 is exactly 0.3 in binary floating
+        # point while the same 0.30 at z = -14 is 0.30000000000000071. The authored front wall is
+        # at Z -14.30 and the front yard at Z -14.00, so every window on it failed a `<= 0.30`
+        # written without slack. This fixture is those numbers.
+        drift_free = copy.deepcopy(base)
+        drift_free["cells"]["cells"] += [
+            {"id": "L0_REAR", "level": "L0", "kind": "room",
+             "boxes": [{"x": [-2.0, 2.0], "z": [10.0, 14.0]}]},
+            {"id": "L0_LAWN", "level": "L0", "kind": "exterior",
+             "boxes": [{"x": [-2.0, 2.0], "z": [14.3, 18.3]}], "yOverride": [0.0, 20.0]}]
+        drift_free["portals"]["portals"].append(
+            {"id": "P_REAR__LAWN", "cellA": "L0_REAR", "cellB": "L0_LAWN",
+             "plane": {"axis": "z", "value": 14.0},
+             "rect": {"u": [-0.6, 0.6], "v": [1.5, 3.0]},
+             "kind": "window", "opacity": "glass", "maxDepth": 3})
+        far_out = workspace / "far-out"
+        write_fixture(far_out, drift_free)
+        _, problems = validate(far_out, wanted=[4])
+        require(not problems,
+                f"a window in a 0.30 m wall 14 m from the origin is accepted, where the same wall "
+                f"at the origin subtracts exactly and this one does not "
+                f"({[str(x) for x in problems]})")
+
+        # ...and only within a wall. 0.60 m is not a wall this house declares, it is a gap.
+        chasm = workspace / "chasm"
+        write_fixture(chasm, terrace_moved(0.60))
+        _, problems = validate(chasm, wanted=[4])
+        require(any("no face" in x.message for x in problems),
+                f"0.60 m apart is a modelling gap, not a wall, and is still refused "
+                f"({[str(x) for x in problems]})")
+
+        # ...and only BETWEEN the two faces. Outside them the portal is in open air.
+        outside = workspace / "outside"
+        write_fixture(outside, terrace_moved(0.30, plane=0.12))
+        _, problems = validate(outside, wanted=[4])
+        require(any("no face" in x.message for x in problems),
+                f"a plane past the room's own face is outside the wall, not in it "
+                f"({[str(x) for x in problems]})")
+
+        # A face that does not span the opening is not the face the opening is in, so it cannot be
+        # the one that justifies the looser tolerance. The portal is refused either way here --
+        # the `u`-run check downstream catches it too -- so this claim is about WHICH error the
+        # author is shown: "there is no wall here" sends them to the geometry, "your opening is
+        # off the end of this wall" sends them to the rectangle, and only one of those is true.
+        offset = copy.deepcopy(base)
+        for cell in offset["cells"]["cells"]:
+            if cell["id"] == "L0_TERRACE":
+                cell["boxes"] = [{"x": [-2.0, -1.0], "z": [-4.3, -0.3]}]
+        for portal in offset["portals"]["portals"]:
+            if portal["id"] == "P_FOYER__TERRACE":
+                portal["plane"] = {"axis": "z", "value": -0.15}
+                portal["rect"] = {"u": [0.0, 1.0], "v": [0.6, 2.65]}
+        off_end = workspace / "off-end"
+        write_fixture(off_end, offset)
+        _, problems = validate(off_end, wanted=[4])
+        require(any("no face" in x.message for x in problems)
+                and not any("not inside any run" in x.message for x in problems),
+                f"an opening past the end of the wall is reported as having no wall, not as "
+                f"having a wall it does not fit in ({[str(x) for x in problems]})")
+
+        # ...and the wall case must not become a licence to be 0.30 m out anywhere. The two rooms
+        # here abut, so there is no wall to hide in and the old 1 cm still governs.
+        drifted = copy.deepcopy(base)
+        for portal in drifted["portals"]["portals"]:
+            if portal["id"] == "P_FOYER__HALL":
+                portal["plane"] = {"axis": "z", "value": 4.2}
+        drift = workspace / "drift"
+        write_fixture(drift, drifted)
+        _, problems = validate(drift, wanted=[4])
+        require(any("no face" in x.message for x in problems),
+                f"between two rooms that DO abut, 20 cm off the shared plane is still an error "
+                f"({[str(x) for x in problems]})")
 
         # ...and the same question the other way up. The stair cell's `yOverride` starts at 0.60,
         # which is L0's floor; a wing whose slab is BELOW its level's floor structure is only wrong

@@ -819,7 +819,14 @@
     },
     {
       "id": "L3_ROOM", "level": "L3", "name": "Attic Room", "kind": "room",
-      "boxes": [{ "x": [-6.00, 4.90], "z": [-24.00, -17.00] }],
+      // Three boxes, not one: the front dormer bays reach through what was `L3_STORE_S` to the
+      // eaves at Z -14.30, because a dormer belongs to the room it lights and this room's own
+      // footprint stopped 2.70 m short of the front wall (`HOUSE-00376`). The bays are where the
+      // front yard actually is -- X -6.00…-3.60 and +3.60…+4.90 -- because the porch roof and the
+      // front balcony fill the strip between them to +9.00 and nothing at all is outside above.
+      "boxes": [{ "x": [-6.00, 4.90], "z": [-24.00, -17.00] },
+                { "x": [-6.00, -3.60], "z": [-17.00, -14.30] },
+                { "x": [3.60, 4.90], "z": [-17.00, -14.30] }],
       // The finished part: boarded floor, plastered collar ceiling at +12.60, an old sofa, a desk,
       // boxes, a rocking horse, a train set. 2.4 → 5.0 m of head-room, so its clear height is
       // 3.30 m -- outside §70.5's 2.35-3.10 for a habitable room, and not a violation, because
@@ -870,7 +877,9 @@
     },
     {
       "id": "L3_STORE_S", "level": "L3", "name": "South Attic Store", "kind": "closet",
-      "boxes": [{ "x": [-6.00, 4.90], "z": [-17.00, -14.30] }],
+      // X -3.60…+3.60, not -6.00…+4.90: the dormer bays `HOUSE-00376` gave `L3_ROOM` are cut out
+      // of this void, which is what a dormer is. The two areas still sum to §13.6's 105.7 m².
+      "boxes": [{ "x": [-3.60, 3.60], "z": [-17.00, -14.30] }],
       // The roof-space void behind the front knee wall: 1.2 → 3.0 m and no window at all.
       "yOverride": [9.30, 12.30],
       "footstepSurface": "hardwood",
@@ -929,7 +938,12 @@
       // straight through.
       "boxes": [{ "x": [-13.0, -1.0], "z": [-11.6, 0.0] },
                 { "x": [-13.0, -3.6], "z": [-14.0, -11.6] }],
-      "yOverride": [0.0, 20.0],
+      // Floor at -0.90, not 0.00: §12.6 puts the basement hoppers in 0.9 m window wells,
+      // and a well is a hole in this yard. Without it the wall the window is in has air on
+      // one side and nothing on the other, and its sill at -0.45 is outside the cell it
+      // opens into (`HOUSE-00376`). The four yards that carry a basement window say so; the
+      // east side yard does not, because the garage is there and it has no basement.
+      "yOverride": [-0.90, 20.0],
       "footstepSurface": "grass",
       "acoustic": { "absorption": 0.92, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -941,7 +955,12 @@
       // Squared to the garage's new west face at X +8.70 (see `L0_GARAGE`).
       "boxes": [{ "x": [1.0, 9.3], "z": [-11.6, 0.0] },
                 { "x": [3.6, 8.7], "z": [-14.0, -11.6] }],
-      "yOverride": [0.0, 20.0],
+      // Floor at -0.90, not 0.00: §12.6 puts the basement hoppers in 0.9 m window wells,
+      // and a well is a hole in this yard. Without it the wall the window is in has air on
+      // one side and nothing on the other, and its sill at -0.45 is outside the cell it
+      // opens into (`HOUSE-00376`). The four yards that carry a basement window say so; the
+      // east side yard does not, because the garage is there and it has no basement.
+      "yOverride": [-0.90, 20.0],
       "footstepSurface": "grass",
       "acoustic": { "absorption": 0.92, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -967,7 +986,12 @@
       "boxes": [{ "x": [-22.5, -13.0], "z": [-36.5, 0.0] },
                 { "x": [-22.5, -20.0], "z": [-44.0, -36.5] },
                 { "x": [-22.5, -13.0], "z": [-48.0, -44.0] }],
-      "yOverride": [0.0, 20.0],
+      // Floor at -0.90, not 0.00: §12.6 puts the basement hoppers in 0.9 m window wells,
+      // and a well is a hole in this yard. Without it the wall the window is in has air on
+      // one side and nothing on the other, and its sill at -0.45 is outside the cell it
+      // opens into (`HOUSE-00376`). The four yards that carry a basement window say so; the
+      // east side yard does not, because the garage is there and it has no basement.
+      "yOverride": [-0.90, 20.0],
       "footstepSurface": "grass",
       "acoustic": { "absorption": 0.92, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -1018,7 +1042,12 @@
                 { "x": [-13.0, 17.1], "z": [-38.0, -36.0] },
                 { "x": [-13.0, 12.0], "z": [-46.0, -38.0] },
                 { "x": [-13.0, 17.1], "z": [-48.0, -46.0] }],
-      "yOverride": [0.0, 20.0],
+      // Floor at -0.90, not 0.00: §12.6 puts the basement hoppers in 0.9 m window wells,
+      // and a well is a hole in this yard. Without it the wall the window is in has air on
+      // one side and nothing on the other, and its sill at -0.45 is outside the cell it
+      // opens into (`HOUSE-00376`). The four yards that carry a basement window say so; the
+      // east side yard does not, because the garage is there and it has no basement.
+      "yOverride": [-0.90, 20.0],
       "footstepSurface": "grass",
       "acoustic": { "absorption": 0.93, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
