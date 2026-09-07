@@ -4909,6 +4909,11 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: (2026-09-07) `HOUSE-00358` corrected three shapes here and regenerated:
             `portals.plane.axis` accepts `y`, `levels` gained `plumbing.stacks`, and `props`
             gained `plumbing`. Each is recorded with its reason on `HOUSE-00358`.
+      finding: (2026-09-07, found by `HOUSE-00368`) rule 2's slab bounds asked the wrong question
+            in both directions. "Is this cell inside its level's slabs" is only meaningful where
+            the level above or below actually reaches over it; the garage is a single-storey wing
+            with its own slab at +0.15 and its own roof at +4.30. Both bounds now check the
+            footprints of the neighbouring levels.
       finding: (2026-09-07, found by `HOUSE-00367`) **rule 5 could not survive staged authoring.**
             Cells are authored a level at a time and portals come after them, so a layout with
             cells and no `layout.portals.json` failed rule 5 on every commit — it has claimed no
@@ -5402,8 +5407,25 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             already 113); `concrete` is the nearest of the twenty and the mat is a prop.
       note: `B1_UNDERSTAIR` carries a `yOverride` because §13.2 calls it "low, sloped ceiling" —
             it is under the flight, so its ceiling is not the level's.
-- [ ] HOUSE-00368 — Author `layout.cells.json` for `L0`: 19 cells per §13.3
+- [x] HOUSE-00368 — Author `layout.cells.json` for `L0`: 19 cells per §13.3
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) §13.3 needed **no** correction: measured, every one of the nineteen areas
+            matches its rectangle, nothing overlaps, and the fourteen main-block cells cover the
+            273.9 m² envelope with no gap. `L0_FOYER` now exists, which is where §15.7 rule 5 will
+            start its walk once the portals are authored.
+      finding: the garage broke rule 2 **twice, in both directions**, and the rule was wrong both
+            times. §12.2 puts the garage slab at +0.15 and its ceiling at +4.30 — a 4.15 m bay in
+            a single-storey wing — while L0's floor structure starts at +0.25 and L1's slab
+            underside is at +3.30. The rule asked "is this cell inside its level's slabs"; the
+            question it wants is "is there a storey above or below it to poke into". It now checks
+            the footprints of the levels either side, so a projecting wing may have its own slab
+            and its own roof, and a cell with a room over it is refused exactly as before. Four
+            claims pin both directions.
+      finding: rule 5's stand-down (`HOUSE-00367`) was still wrong: it skipped only when there was
+            neither a portals file *nor* an `L0_FOYER`, so authoring L0 turned the rule back on
+            with no portals to walk and failed all 32 interior cells. It now stands down on the
+            **presence of the file**, and an *empty* portals file is a claim — that nothing in the
+            house connects — which the rule still reports.
 - [ ] HOUSE-00369 — Author `layout.cells.json` for `L1`: 21 cells per §13.4
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00370 — Author `layout.cells.json` for `L2`: 18 cells per §13.5

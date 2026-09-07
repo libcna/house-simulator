@@ -226,6 +226,50 @@ class World:
         except layout_io.LayoutError:
             return None
 
+    def next_level_above(self, level_id: str) -> dict | None:
+        """The level immediately above @p level_id by `ffl`, or None at the top."""
+        ordered = sorted((row for row in self.levels if isinstance(row.get("ffl"), (int, float))),
+                         key=lambda row: float(row["ffl"]))
+        for index, row in enumerate(ordered):
+            if row.get("id") == level_id and index + 1 < len(ordered):
+                return ordered[index + 1]
+        return None
+
+    def next_level_below(self, level_id: str) -> dict | None:
+        """The level immediately below @p level_id by `ffl`, or None at the bottom."""
+        ordered = sorted((row for row in self.levels if isinstance(row.get("ffl"), (int, float))),
+                         key=lambda row: float(row["ffl"]))
+        for index, row in enumerate(ordered):
+            if row.get("id") == level_id and index > 0:
+                return ordered[index - 1]
+        return None
+
+    def _overlaps_level(self, cell: dict, level: dict | None) -> bool:
+        if level is None:
+            return False
+        boxes = boxes_of(cell)
+        for other in self.cells:
+            if other.get("level") != level.get("id"):
+                continue
+            for ax0, ax1, az0, az1 in boxes_of(other):
+                for bx0, bx1, bz0, bz1 in boxes:
+                    if overlap((ax0, ax1), (bx0, bx1)) * overlap((az0, az1), (bz0, bz1)) > 0.0:
+                        return True
+        return False
+
+    def covered_from_below(self, cell: dict, level_id: str) -> bool:
+        """Does any cell on the level below overlap @p cell's footprint?"""
+        return self._overlaps_level(cell, self.next_level_below(level_id))
+
+    def covered_from_above(self, cell: dict, level_id: str) -> bool:
+        """Does any cell on the level above overlap @p cell's footprint?
+
+        The question rule 2 actually wants to ask. "Is this cell's ceiling below the next storey's
+        slab" only means something where that storey exists over it; a projecting single-storey
+        wing has nothing above it and is entitled to its own roof height.
+        """
+        return self._overlaps_level(cell, self.next_level_above(level_id))
+
     def level_ceiling_limit(self, level_id: str) -> float | None:
         """The Y above which a cell on this level would be poking into the floor above.
 
@@ -319,16 +363,27 @@ def rule_2_boxes(world: World) -> list[Problem]:
         low, high = extent
         ffl = float(level.get("ffl", 0.0))
         floor_underside = ffl - float(level.get("structureDepth", 0.0))
-        if low < floor_underside - 1e-9:
+        # The same question as the ceiling bound, the other way up: a cell may sit below its
+        # level's floor structure where there is no storey underneath to sink into. The garage is
+        # a slab-on-grade wing at +0.15 with nothing but ground beneath it, and a bound taken from
+        # a basement that stops short of it is a bound about a different building.
+        if (low < floor_underside - 1e-9
+                and world.covered_from_below(cell, str(level.get("id")))):
             problems.append(Problem(2, FILE_OF["cells"], f"{where}/yOverride",
                                     f"cell {cell_id} starts at y {low:.3f}, below level "
-                                    f"{level.get('id')}'s slab underside {floor_underside:.3f}"))
+                                    f"{level.get('id')}'s slab underside {floor_underside:.3f}, "
+                                    f"and there is a storey under it"))
         if cell.get("kind") in ("exterior", "stair", "void"):
             # A terrace's ceiling is the sky; a stair cell pierces the slab it climbs through, and
             # a void is the hole it climbs through. All three legitimately reach past the level
             # above's slab underside, and forbidding it would leave no way to author a stair.
             continue
         limit = world.level_ceiling_limit(str(level.get("id")))
+        # ...and neither is there anything to poke into where the storey above does not reach. The
+        # garage is a single-storey wing with a 4.15 m bay under a roof of its own, and a bound
+        # taken from a level that stops short of it is a bound about a different building.
+        if limit is not None and not world.covered_from_above(cell, str(level.get("id"))):
+            limit = None
         if limit is not None and high > limit + 1e-9:
             problems.append(Problem(2, FILE_OF["cells"], f"{where}/yOverride",
                                     f"cell {cell_id} reaches y {high:.3f}, through the slab "
@@ -491,7 +546,8 @@ def rule_5_connected(world: World) -> list[Problem]:
     The rule needs a graph to walk, and a layout under construction does not have one yet: the
     cells are authored a level at a time (`HOUSE-00367`…`HOUSE-00372`) and the portals come after
     them (`HOUSE-00374`…). Until `layout.portals.json` exists the data has made no connectivity
-    claim, so there is nothing here to be right or wrong about and the rule stands down.
+    claim, so there is nothing here to be right or wrong about and the rule stands down. That is
+    the file's presence, not its contents: an **empty** portals file is a claim, and a wrong one.
 
     It does **not** stand down once portals exist. A portals file with no `L0_FOYER` is somebody
     who authored a graph and no front door, and that is exactly the mistake this rule is for.
@@ -501,7 +557,7 @@ def rule_5_connected(world: World) -> list[Problem]:
                 if cell.get("kind") not in ("exterior", "void")}
     if not interior:
         return problems
-    if "portals" not in world.layout and ROOT_CELL not in world.cell_by_id:
+    if "portals" not in world.layout:
         return problems
     if ROOT_CELL not in world.cell_by_id:
         return [Problem(5, FILE_OF["cells"], "cells",
@@ -1300,6 +1356,8 @@ def selftest() -> int:
 
         @mutation(2, "a hall that reaches through the slab above")
         def _(docs):
+            # The hall HAS a room above it -- `L1_HALL` shares its footprint -- which is what makes
+            # this a violation and the garage below not one.
             row(docs, "cells", "L0_HALL")["yOverride"] = [0.60, 3.50]
 
         @mutation(3, "a second cell over the hall's footprint")
@@ -1468,6 +1526,58 @@ def selftest() -> int:
                 f"two runs over one directory report the same {len(first)} problem(s) in the "
                 f"same order")
 
+        # ...and the same question the other way up. The stair cell's `yOverride` starts at 0.60,
+        # which is L0's floor; a wing whose slab is BELOW its level's floor structure is only wrong
+        # where there is a storey underneath to sink into.
+        docs = copy.deepcopy(base)
+        row(docs, "cells", "L0_CLOSET")["yOverride"] = [0.15, 3.30]
+        slab = workspace / "slab"
+        write_fixture(slab, docs)
+        _, problems = validate(slab, wanted=[2])
+        require(not problems,
+                f"a cell with no storey below it may sit on its own slab "
+                f"({[str(p) for p in problems]})")
+
+        docs = copy.deepcopy(base)
+        # Put a basement under it. `L1` is the only other level in the fixture, so borrow it: the
+        # rule reads levels by `ffl` order, and a level below L0 is a level below L0.
+        docs["levels"]["levels"].append(
+            {"id": "B1", "name": "Basement", "ffl": -2.30, "ceiling": 0.25,
+             "structureDepth": 0.35})
+        docs["cells"]["cells"].append(
+            {"id": "B1_UNDER", "level": "B1", "kind": "room",
+             "boxes": [{"x": [2.0, 2.5], "z": [6.0, 8.0]}]})
+        row(docs, "cells", "L0_CLOSET")["yOverride"] = [0.15, 3.30]
+        dug = workspace / "dug"
+        write_fixture(dug, docs)
+        _, problems = validate(dug, wanted=[2])
+        require(len(problems) == 1 and "L0_CLOSET" in problems[0].message,
+                f"and the same cell is refused once a basement is put under it "
+                f"({[str(p) for p in problems]})")
+
+        # A single-storey wing with nothing above it may have a roof of its own. The fixture's
+        # closet is on L0 and no L1 cell overlaps it, so it can reach past L1's slab underside;
+        # the hall, which L1_HALL sits directly on top of, cannot. Rule 2's bound is about what is
+        # actually above a cell, not about which level it is on.
+        docs = copy.deepcopy(base)
+        row(docs, "cells", "L0_CLOSET")["yOverride"] = [0.60, 4.30]
+        wing = workspace / "wing"
+        write_fixture(wing, docs)
+        _, problems = validate(wing, wanted=[2])
+        require(not problems,
+                f"a cell with no storey above it may have its own roof height "
+                f"({[str(p) for p in problems]})")
+
+        docs = copy.deepcopy(base)
+        row(docs, "cells", "L1_HALL")["boxes"] = [{"x": [2.0, 2.5], "z": [6.0, 8.0]}]
+        row(docs, "cells", "L0_CLOSET")["yOverride"] = [0.60, 4.30]
+        roofed = workspace / "roofed"
+        write_fixture(roofed, docs)
+        _, problems = validate(roofed, wanted=[2])
+        require(len(problems) == 1 and "L0_CLOSET" in problems[0].message,
+                f"and the same cell is refused once a room is put over it "
+                f"({[str(p) for p in problems]})")
+
         # 13. The tolerances and the guards, each pinned by a case that turns on it alone. Every
         #     one of these was added because a mutation of the rule it belongs to survived the
         #     claims above: a rule that fires on a 24 m² overlap says nothing about 1 cm².
@@ -1530,6 +1640,17 @@ def selftest() -> int:
                 f"a layout with cells and no portals file has claimed no connectivity, so rule 5 "
                 f"stands down rather than failing every commit of a house being authored "
                 f"({[str(p) for p in problems]})")
+
+        # The file's PRESENCE, not its contents. An empty portals file is a claim, and a wrong
+        # one: it says nothing in this house connects to anything.
+        cells_only["portals"] = {"schema": "cna-house/portals/1", "portals": []}
+        cells_only["cells"]["cells"] = copy.deepcopy(base["cells"]["cells"])
+        empty = workspace / "empty-portals"
+        write_fixture(empty, cells_only)
+        _, problems = validate(empty, wanted=[5])
+        require(len(problems) >= 7,
+                f"an EMPTY portals file is a claim that nothing connects, and rule 5 says so "
+                f"({len(problems)})")
 
         docs = copy.deepcopy(base)
         cells = docs["cells"]["cells"]
