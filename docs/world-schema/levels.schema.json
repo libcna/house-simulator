@@ -165,6 +165,45 @@
     "north": {
       "const": "-Z"
     },
+    "plumbing": {
+      "additionalProperties": false,
+      "properties": {
+        "stacks": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "cells": {
+                "items": {
+                  "$ref": "#/$defs/id"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              "chase": {
+                "$ref": "#/$defs/box"
+              },
+              "dropTo": {
+                "$ref": "#/$defs/idOrNull"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              }
+            },
+            "required": [
+              "id",
+              "cells",
+              "chase"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "stacks"
+      ],
+      "type": "object"
+    },
     "schema": {
       "pattern": "^cna-house/levels/\\d+$",
       "type": "string"

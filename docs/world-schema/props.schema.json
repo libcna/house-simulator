@@ -109,6 +109,9 @@
           "material": {
             "$ref": "#/$defs/idOrNull"
           },
+          "plumbing": {
+            "$ref": "#/$defs/idOrNull"
+          },
           "position": {
             "$ref": "#/$defs/vector3"
           },

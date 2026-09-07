@@ -111,6 +111,21 @@ jobs:
           python3 tools/assets/origin_check.py --selftest
           python3 tools/assets/pbr_to_stock.py --selftest
 
+      - name: The eleven world rules must catch what they claim, and only that
+        working-directory: cna-house
+        # `HOUSE-00358`. The fixture is a two-storey house small enough to hold in the head and
+        # real enough to be worth passing: 9 cells, 8 portals (one of them horizontal, because a
+        # `stair_well` is not a hole in a wall), a WC stacked over a WC on a drain, and a 0.5 m
+        # closet whose shelf is reached from the corridor because nobody can stand in the closet.
+        #
+        # The claim that matters is not "the mutation is caught" but "**only** its own rule
+        # catches it": a rule that reports its neighbour's problem looks like a working rule right
+        # up to the day the neighbour is switched off. There is one mutation per rule and each is
+        # required to fire exactly one.
+        run: |
+          python3 -m pip install --break-system-packages --user jsonschema
+          python3 tools/world/validate_world.py --selftest
+
       - name: The world files must have a schema a machine can check
         working-directory: cna-house
         # `HOUSE-00341`. The sixteen schemas are generated from one source, so what this proves is

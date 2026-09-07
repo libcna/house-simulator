@@ -4900,6 +4900,9 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             seventeenth is the *asset* manifest, whose schema is `cna-house.md` §20.3 and whose
             gate is `check_manifest.py`. A selftest claim pins this so the next reader does not
             have to rediscover it.
+      note: (2026-09-07) `HOUSE-00358` corrected three shapes here and regenerated:
+            `portals.plane.axis` accepts `y`, `levels` gained `plumbing.stacks`, and `props`
+            gained `plumbing`. Each is recorded with its reason on `HOUSE-00358`.
       finding: the schemas check **shape only**, and this is a decision rather than a limitation.
             Of §15.7's eleven rules, 4, 5, 6, 7, 9 and 11 span two files or the whole layout,
             which JSON Schema cannot see across, and 2, 3, 8 and 10 compare two numbers to each
@@ -4942,16 +4945,74 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       verify: unit SpatialIndexTests.* against brute force on 10⁵ random points
 - [ ] HOUSE-00357 — Implement `WorldValidator` in C++ mirroring `validate_world.py`'s 11 rules, run at load in debug builds
       dep: HOUSE-00355 · sys: world · plat: ALL · pri: MUST
-- [ ] HOUSE-00358 — Implement `tools/world/validate_world.py` with all 11 rules and clear diagnostics
+- [x] HOUSE-00358 — Implement `tools/world/validate_world.py` with all 11 rules and clear diagnostics
       dep: HOUSE-00341 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) all eleven rules, each reporting **every** failure with file, JSON path,
+            expected and found. `--rules N,M` runs a subset. `--selftest` builds a two-storey
+            house — 9 cells, 8 portals, 3 openings, a stacked WC pair, a 0.5 m closet — that
+            passes all eleven, then mutates it once per rule and requires the mutation to be
+            caught by **its own rule and by no other**: a rule that reports its neighbour's
+            problem looks like a working rule right up to the day the neighbour is switched off.
+            66 claims, 24/24 injected bugs caught.
+      note: a shape failure stops the semantic rules and the output says so. Otherwise one typed
+            field would produce a cascade of eleven rules reporting the consequences of it.
+      finding: **`stair_well` and `hatch` are in the portal vocabulary and the plane vocabulary
+            could not express either of them.** `plane.axis` was `x | z` — both vertical — while
+            §15.7 rule 5 requires the graph to be connected *through* portals, so a stair could
+            not join the floors it climbs. Smallest correction: `axis` also accepts `y`, where `u`
+            is world X and `v` is world Z, the rectangle must lie in both cells' footprints and
+            the plane must be the boundary they share. Recorded in `docs/world-format.md` and in
+            the schema; `HOUSE-00366`…`HOUSE-00381` author against it.
+      finding: rule 2 exempts `stair` and `void` cells from the slab-underside bound for the same
+            reason — a stair cell pierces the slab it climbs through by definition — and
+            `exterior` cells because a terrace's ceiling is the sky. That last one is the defect
+            `build_collision.py` shipped and `build_skyexposure.py` found.
+      finding: **§15.7 rule 9 had no data to read.** `HOUSE-00386` is written as "author the
+            plumbing stack description … *so the validator can check* fixture placement", so the
+            format had to exist first. Smallest correction: `layout.levels.json` gains
+            `plumbing.stacks` (§12.5's STACK-A…F: member cells, the chase rect, the cell it drops
+            to) and a prop gains `plumbing`, the stack it drains to. Without the second field
+            "every fixture's cell appears in a declared stack" cannot say which props are
+            fixtures. Rule 9 checks the stack too, not only the fixture: a stack whose WCs are not
+            actually above one another is a drawing, not a drain.
+      finding: **rule 11 cannot search only the interactable's own cell.** §15.7 says "the room's
+            floor", and a shallow closet, a cabinet, a meter cupboard and a serving hatch are all
+            reached from the room next door — the fixture's 0.5 m closet has floor in it and
+            nobody who can stand on that floor. The eye search therefore covers the cell and its
+            portal-neighbours, the eye position must be somewhere the **player capsule can
+            stand**, and a segment leaving the cell must cross the shared plane *inside the portal
+            rectangle*. Dropping any one of the three lets something absurd through, and the
+            selftest has a case that turns on each.
+      finding: §70.5's "rise consistency within a flight ≤ 2 mm" is **not checkable and not
+            missing**: `layout.stairs.json` carries one `rise` per flight, so every riser is equal
+            by construction and the check would assert a tautology. Likewise the counter, table,
+            seat, sill and switch heights and the human/pet/car scales are properties of an
+            *asset*, not of the layout; §70.5 assigns those to `scale_check.py`, and
+            `HOUSE-00360` joins the two.
 - [ ] HOUSE-00359 — Implement `tools/world/report_graph.py`: adjacency tables, degree stats, diameter, component count with all doors closed
       dep: HOUSE-00358 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00360 — Implement the realism checks of `cna-house.md` §70.5 inside `validate_world.py`
       dep: HOUSE-00358 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) `HOUSE-00358` implemented the four §70.5 rows the **layout** decides —
+            interior door leaf, habitable clear height, stair `2R + G`, capsule clearance. The
+            rest of the table (counter, cabinet, table, desk, seat, mattress, WC, basin, bath,
+            switch, socket, handle, sill; human, dog, cat and car) is a property of an *asset*,
+            so this task is the join between `scale_check.py`'s measurements and the prop
+            placements — not a second reading of the layout. "Rise consistency ≤ 2 mm" is struck
+            as untestable: one `rise` per flight makes it a tautology.
 - [ ] HOUSE-00361 — Implement the reachability proof (rule 11): every interactable's focus point reachable by a 2.5 m ray from a standing eye on its room's floor
       dep: HOUSE-00360 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) the mechanism is already in `validate_world.py` rule 11 from
+            `HOUSE-00358`, with the standing, portal-crossing and neighbour-cell conditions and
+            five selftest claims. What is left for this task is running it over the **authored**
+            layout and answering for the interactables it rejects — which needs
+            `HOUSE-00389`…`HOUSE-00395`.
 - [ ] HOUSE-00362 — Implement the capsule-clearance proof: the player capsule fits through all 186 portals, or the portal is marked `crouch`
       dep: HOUSE-00360 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) `validate_world.py` rule 10 checks it (0.62 m × 1.95 m, `crouch` and
+            `hatch` exempt, and a horizontal portal measured across its narrowest dimension since
+            both of its dimensions are horizontal). The acceptance names **all 186 portals**, so
+            this task closes when `HOUSE-00374`…`HOUSE-00379` have authored them.
 - [ ] HOUSE-00363 — Wire `validate_world.py` into the content build and CI
       dep: HOUSE-00358 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00364 — Implement `world.manifest.json` hashing and the `worldHash` used by the save system
@@ -5003,6 +5064,10 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       dep: HOUSE-00296 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00386 — Author the plumbing stack description (STACK-A…F) as data, so the validator can check fixture placement
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) the **format** now exists: `layout.levels.json` `plumbing.stacks`
+            (`id`, `cells`, `chase`, `dropTo`) and a prop's `plumbing` field, added under
+            `HOUSE-00358` because rule 9 could not be written without them. This task authors
+            §12.5's six rows into it.
 - [ ] HOUSE-00387 — Author the HVAC duct/register description as data, for audio placement
       dep: HOUSE-00386 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00388 — Author `layout.audio.json`: per-cell room tone, absorption, reverb hint; per-portal transmission losses (§64.3)

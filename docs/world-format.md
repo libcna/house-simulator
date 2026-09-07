@@ -75,6 +75,24 @@ The five levels and the construction constants everything else derives from.
 }
 ```
 
+The optional `plumbing` block carries §12.5's stacks, because they are house-wide structural
+constants like `construction` and because validator rule 9 needs them:
+
+```jsonc
+"plumbing": {
+  "stacks": [
+    { "id": "STACK_A", "cells": ["L0_WC1", "L1_WC4", "L2_WC6"],
+      "chase": { "x": [2.20, 4.90], "z": [-22.00, -20.20] },
+      "dropTo": "B1_UTILITY" }
+  ]
+}
+```
+
+A prop that is a plumbing fixture names the stack it drains to in its own `plumbing` field; every
+other prop leaves it `null`. Rule 9 checks both directions — that each fixture is in a cell its
+stack lists, and that each stack's cells are on distinct levels, overlap the chase and land on a
+cell.
+
 `ffl` is finished floor level; `ceiling` is the underside of the ceiling above it. `L3`'s
 `ceiling` is `null` because the attic is bounded by rafters, named by `roof`, not by a plane.
 
@@ -142,6 +160,14 @@ wall.
   ]
 }
 ```
+
+`plane.axis` is `x` or `z` for a wall, and `y` for a **horizontal** opening. A `stair_well` and a
+`hatch` are both in the vocabulary above and neither is a hole in a wall, so the third case is
+needed: on a `y` plane `u` is world X and `v` is world Z, the rectangle must lie inside *both*
+cells' footprints, and the plane must be the boundary the two cells share — one's ceiling is the
+other's floor. A cell a stair climbs through therefore carries a `yOverride` that reaches the
+landing above, which is why `stair` and `void` cells are exempt from the slab-underside bound of
+validator rule 2.
 
 `opacity` semantics:
 
@@ -511,3 +537,21 @@ build**:
 Error messages name the file, the JSON path and what was expected, and the validator reports
 **every** failing row rather than the first: fixing 40 authoring mistakes one build at a time is
 intolerable ([`conventions.md`](conventions.md) §5.1).
+
+Three of the rules read further than their one-line summary suggests, and it is worth knowing
+which way:
+
+* **Rule 3** compares two cells only when they also share vertical space. Two cells on one level
+  legitimately share a footprint when one carries a `yOverride` — a stair void open to the floor
+  below sits over the room it looks into — and without the guard the rule would forbid the one
+  arrangement the format has a field for.
+* **Rule 10** checks the four §70.5 rows the layout decides: interior door leaf size, habitable
+  clear height, stair `2·rise + going`, and player capsule clearance. Counter, seat, sill, switch
+  and socket heights, and human, pet and car scale, are properties of an *asset* and belong to
+  `scale_check.py`; §70.5's "rise consistency within a flight" is not checkable at all, because
+  one `rise` per flight makes every riser equal by construction.
+* **Rule 11** searches the interactable's cell **and its portal-neighbours**, requires the eye
+  position to be somewhere the player capsule can stand, and requires a segment that leaves the
+  cell to cross the shared plane inside the portal rectangle. A shallow closet, a cabinet and a
+  meter cupboard are all reached from the room next door, and a switch in a 0.4 m slot has floor
+  beneath it and nobody who can reach it.

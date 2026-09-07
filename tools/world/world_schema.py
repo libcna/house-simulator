@@ -166,7 +166,15 @@ def build() -> dict[str, dict]:
                 "wallExterior": NUM, "wallPartition": NUM, "wallPlumbing": NUM,
                 "wallGarage": NUM, "foundationWall": NUM, "kneeWallHeight": NUM,
                 "ridgeY": NUM, "roofPitch": NUM, "skirting": NUM, "cornice": NUM,
-                "balustrade": NUM, "railing": NUM}, closed=False)}})
+                "balustrade": NUM, "railing": NUM}, closed=False),
+            # §12.5's STACK-A..F. They live here rather than in a file of their own because they
+            # are house-wide structural constants, which is what this file already holds, and
+            # because `validate_world.py` rule 9 needs them to exist before `HOUSE-00386`
+            # authors the rows.
+            "plumbing": obj(["stacks"], {"stacks": {"type": "array", "items": obj(
+                ["id", "cells", "chase"],
+                {"id": ID, "cells": {"type": "array", "items": ID, "minItems": 1},
+                 "chase": BOX, "dropTo": ID_OR_NULL})}})}})
 
     schemas["cells"] = envelope("cells", "layout.cells.json", rows("cells", obj(
         ["id", "level", "kind", "boxes"],
@@ -192,12 +200,18 @@ def build() -> dict[str, dict]:
     schemas["portals"] = envelope("portals", "layout.portals.json", rows("portals", obj(
         ["id", "cellA", "cellB", "plane", "rect", "kind"],
         {"id": ID, "cellA": ID, "cellB": ID,
-         "plane": obj(["axis", "value"], {"axis": {"enum": ["x", "z"]}, "value": NUM}),
+         # `x` and `z` are the walls; `y` is a horizontal plane, which `stair_well` and `hatch`
+         # need and which the vocabulary listed without providing. On `y`, `u` is world X and `v`
+         # is world Z. See docs/world-format.md, layout.portals.json.
+         "plane": obj(["axis", "value"], {"axis": {"enum": ["x", "y", "z"]}, "value": NUM}),
          "rect": obj(["u", "v"], {"u": INTERVAL, "v": INTERVAL}),
          "kind": {"enum": ["cased_opening", "door", "double_door", "slider", "window",
                            "garage_door", "stair_well", "exterior_door", "hatch"]},
          "aperture": ID_OR_NULL,
          "opacity": {"enum": ["open", "opaque_when_closed", "translucent", "glass"]},
+         # §70.5 exempts a deliberately low portal from the 1.95 m capsule clearance. Two-state,
+         # so a boolean is right here where a continuous quantity would not be.
+         "crouch": BOOL,
          "maxDepth": nullable({"type": "integer", "minimum": 0}),
          "soundLoss": obj([], {"open": UNIT, "closed": UNIT})})))
 
@@ -243,7 +257,11 @@ def build() -> dict[str, dict]:
          "yawDeg": NUM, "scale": {"type": "number", "exclusiveMinimum": 0},
          "static": BOOL, "lodGroup": ID_OR_NULL,
          "collision": {"enum": ["proxy", "none", "box"]},
-         "material": ID_OR_NULL, "interactable": ID_OR_NULL})))
+         "material": ID_OR_NULL, "interactable": ID_OR_NULL,
+         # A plumbing fixture names the §12.5 stack it drains to; everything else is null. This
+         # is what makes rule 9 checkable: without it "every fixture's cell appears in a declared
+         # stack" has no way to say which props are fixtures.
+         "plumbing": ID_OR_NULL})))
 
     schemas["materials"] = envelope("materials", "layout.materials.json", rows(
         "materials", obj(
