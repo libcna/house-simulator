@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/world/WorldTypes.hpp"
 
+#include <algorithm>
 #include <array>
 #include <string>
 #include <utility>
@@ -155,6 +156,25 @@ namespace cnahouse::world
             {MarkerKind::Bed, "bed"},
             {MarkerKind::Bowl, "bowl"},
         }};
+
+        [[nodiscard]] bool LandingAt(const StairFlight& flight, std::int32_t riser)
+        {
+            return std::any_of(flight.landings.begin(),
+                               flight.landings.end(),
+                               [riser](const Landing& landing) { return landing.at == riser; });
+        }
+
+        [[nodiscard]] float LandingDepth(const StairFlight& flight, std::int32_t riser)
+        {
+            for (const Landing& landing : flight.landings)
+            {
+                if (landing.at == riser)
+                {
+                    return landing.depth;
+                }
+            }
+            return 0.0F;
+        }
 
         constexpr std::array<std::pair<MaterialClass, std::string_view>, 20> kMaterialClasses{{
             {MaterialClass::Paint, "paint"},     {MaterialClass::Wood, "wood"},
@@ -363,6 +383,59 @@ namespace cnahouse::world
         }
         text += ToStringView(spec.base);
         return text;
+    }
+
+    std::vector<StairSegment> SegmentFlight(const StairFlight& flight)
+    {
+        std::vector<StairSegment> segments;
+        if (flight.risers <= 0)
+        {
+            return segments;
+        }
+
+        std::int32_t step = 0;
+        while (step < flight.risers)
+        {
+            std::int32_t run = 0;
+            // `run == 0` is the guard that matters: the riser a run STARTS on is the riser the
+            // landing below it ended on, so without it every run after a landing would be exactly
+            // one riser long and the flight would come out in three pieces instead of two.
+            while (step + run < flight.risers && (run == 0 || !LandingAt(flight, step + run)))
+            {
+                ++run;
+            }
+            // And at least one riser per run, so a landing declared at riser 0 cannot produce a
+            // zero-length wedge and loop for ever on the same step.
+            run = std::max(run, 1);
+
+            StairSegment segment;
+            segment.fromRiser = step;
+            segment.risers = run;
+            segment.length = static_cast<float>(run) * flight.going;
+            segment.height = static_cast<float>(run) * flight.rise;
+            segments.push_back(segment);
+
+            step += run;
+            if (const float depth = LandingDepth(flight, step); depth > 0.0F)
+            {
+                StairSegment landing;
+                landing.isLanding = true;
+                landing.fromRiser = step;
+                landing.length = depth;
+                segments.push_back(landing);
+            }
+        }
+        return segments;
+    }
+
+    float TotalRun(const StairFlight& flight)
+    {
+        float total = static_cast<float>(flight.risers) * flight.going;
+        for (const Landing& landing : flight.landings)
+        {
+            total += landing.depth;
+        }
+        return total;
     }
 
     EffectTier DefaultEffectTier(MaterialClass value) noexcept

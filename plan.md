@@ -3506,6 +3506,12 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             imply, with a hole at every portal and no wall inside a single cell; an open cell has
             no lid; the file reads back byte-for-byte through its own reader; two builds of one
             layout are identical
+      finding: (2026-09-07, found by `HOUSE-00347`) a flight with a half-landing produced
+            **three** wedges instead of two: the riser a run starts on is the riser the landing
+            below it ended on, so every run after a landing was one riser long. Continuous
+            geometry, one extra shape per landing, and invisible to the existing claims because
+            they were about closure and edges rather than about the count. Fixed with a `run == 0`
+            guard; the selftest now asserts a half-landing makes two wedges of five risers each.
 - [x] HOUSE-00211 — `tools/world/build_nav.py`: layout → the pet waypoint graph with perches
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `tools/world/build_nav.py` and `docs/nav-format.md`, the normative `CNAV`
@@ -5016,8 +5022,25 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: §15.7 rule 7's opening↔portal bijection is **not** checked here. It is a statement
             about two whole files (every door has one portal AND no portal has two leaves) and the
             loader has read one of them; a partial check would report the wrong half.
-- [ ] HOUSE-00347 — `WorldLoader`: stairs, with the derived collision ramp parameters
+- [x] HOUSE-00347 — `WorldLoader`: stairs, with the derived collision ramp parameters
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadStairs`, plus `SegmentFlight` and `TotalRun` in
+            `WorldTypes`. The ramp parameters are **derived**, not stored: `SegmentFlight` does
+            the same walk `build_collision.py` does — consume risers until the next landing, emit
+            the run, emit the landing — from the same authored row. Storing them would be a second
+            copy that can disagree with the wedges the content build actually baked. 7 new unit
+            tests; eight injected bugs, eight caught.
+      finding: **`build_collision.py` emitted three wedges for a flight with one half-landing,
+            not two** (`HOUSE-00210`, recorded there too). The riser a run starts on is the riser
+            the landing below it ended on, so without a `run == 0` guard every run after a landing
+            was exactly one riser long. The geometry stayed continuous — the risers still added up
+            and the wedges still met — which is why nothing caught it: the existing claims were
+            about closure and about edges, and none about the COUNT. Both sides now carry the
+            guard, and `build_collision.py` gains a claim that a half-landing makes two wedges of
+            five risers each.
+      note: `collisionRamp` defaults to **true**, which is `build_collision.py`'s default.
+            Defaulting the other way would silently give every flight in the house a box per step
+            where it asked for two wedges.
 - [ ] HOUSE-00348 — `WorldLoader`: lights and light groups
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
 - [x] HOUSE-00349 — `WorldLoader`: materials

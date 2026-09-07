@@ -463,7 +463,13 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
             step, u, y = 0, 0.0, base
             while step < risers:
                 run = 0
-                while step + run < risers and (step + run) not in landings:
+                # `run == 0` is the guard that matters: the riser a run STARTS on is the riser
+                # the landing below it ended on, so without it every run after a landing is
+                # exactly one riser long, and a flight with a half-landing comes out as three
+                # wedges instead of two. Found by `HOUSE-00347`, whose C++ segmentation has to
+                # agree with this walk. The geometry was continuous either way, which is why
+                # nothing here caught it until a claim was made about the COUNT.
+                while step + run < risers and (run == 0 or (step + run) not in landings):
                     run += 1
                 run = max(run, 1)
                 length, height = run * going, run * rise
@@ -1233,6 +1239,29 @@ def selftest() -> int:
                 edges[(min(x, y), max(x, y))] = edges.get((min(x, y), max(x, y)), 0) + 1
         require(all(count == 2 for count in edges.values()),
                 "...and every edge is shared by exactly two triangles, so the wedge is closed")
+
+        # 7b. A flight with a half-landing is TWO wedges and one landing box, not three wedges.
+        #     `HOUSE-00347` found the third: the riser a run starts on is the riser the landing
+        #     below it ended on, so without the `run == 0` guard every run after a landing was
+        #     exactly one riser long. The geometry was still continuous, which is why nothing here
+        #     caught it -- so the claim is about the COUNT and about the risers adding up.
+        source = layout_io.load_layout(world_dir, ["levels", "cells", "stairs"])
+        flight = dict(source["stairs"]["flights"][0], id="STAIR_LANDED", risers=10,
+                      landings=[{"at": 5, "depth": 1.0}])
+        with_landing = dict(source)
+        with_landing["stairs"] = {"schema": "cna-house/stairs/1", "flights": [flight]}
+        shapes_landed, per_cell_landed = Shapes(), {}
+        stats_landed = {"stairMeshes": 0, "stairSteps": 0}
+        build_stairs(with_landing, shapes_landed, per_cell_landed, stats_landed)
+        require(stats_landed["stairMeshes"] == 2,
+                f"a flight with one half-landing makes TWO wedges "
+                f"({stats_landed['stairMeshes']})")
+        rise = float(flight["rise"])
+        heights = sorted(round(max(v[1] for v in m["vertices"])
+                               - min(v[1] for v in m["vertices"]), 6)
+                         for m in shapes_landed.meshes if m["kind"] == KIND_STAIR)
+        require(heights == [round(5 * rise, 6), round(5 * rise, 6)],
+                f"...five risers each, so the ten add up ({heights} vs {round(5 * rise, 6)})")
 
         # 8. Proxies: a box becomes an OBB, five boxes become five OBBs, and only what is not a
         #    box becomes a mesh.

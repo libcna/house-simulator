@@ -501,6 +501,35 @@ namespace cnahouse::world
         }
     };
 
+    /// @brief One piece of a flight's collision ramp: a sloped run, or a flat landing.
+    ///
+    /// `build_collision.py` builds exactly this segmentation offline -- a closed wedge per run and
+    /// a box per landing -- and the runtime needs the same numbers to place a step sound, to know
+    /// how far along a flight the player is, and to answer §70.5's headroom question. Deriving them
+    /// in one place, from the authored row, is what stops the two drifting.
+    struct StairSegment
+    {
+        bool isLanding = false;
+        /// The riser this segment starts at, counting from the bottom.
+        std::int32_t fromRiser = 0;
+        /// Risers climbed by this segment; 0 for a landing.
+        std::int32_t risers = 0;
+        /// Horizontal length along the run, in metres.
+        float length = 0.0F;
+        /// Vertical gain, in metres; 0 for a landing.
+        float height = 0.0F;
+    };
+
+    /// @brief Splits a flight into its runs and landings, bottom first.
+    ///
+    /// The same walk `build_collision.py` does: consume risers until the next landing, emit the
+    /// run, emit the landing, repeat. A landing at riser 0 or at the top riser is not a landing in
+    /// the middle of a flight and produces no zero-length run.
+    [[nodiscard]] std::vector<StairSegment> SegmentFlight(const StairFlight& flight);
+
+    /// @brief The flight's total horizontal run: `risers × going` plus every landing's depth.
+    [[nodiscard]] float TotalRun(const StairFlight& flight);
+
     /// @brief `layout.lights.json`: one light.
     struct Light
     {

@@ -343,6 +343,27 @@ namespace
             })";
         }
 
+        /// Two flights: the main stair with a half-landing, and a short one that states no
+        /// `collisionRamp` so the default can be seen.
+        static std::string Stairs()
+        {
+            return R"({
+              "schema": "cna-house/stairs/1",
+              "flights": [
+                {
+                  "id": "STAIR_L0_L1_MAIN", "fromCell": "L0_STAIR", "toCell": "L1_LANDING",
+                  "risers": 17, "rise": 0.17941176, "going": 0.280, "width": 1.20,
+                  "landings": [{ "at": 9, "depth": 1.20 }],
+                  "collisionRamp": true, "surface": "wood"
+                },
+                {
+                  "id": "STAIR_L0_TERRACE", "fromCell": "L0_HALL", "toCell": "L0_TERRACE",
+                  "risers": 3, "rise": 0.15, "going": 0.30, "width": 1.00
+                }
+              ]
+            })";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -359,11 +380,13 @@ namespace
             Write("layout.cells.json", Cells());
             Write("layout.portals.json", Portals());
             Write("layout.openings.json", Openings());
+            Write("layout.stairs.json", Stairs());
             WriteManifest({"layout.levels.json",
                            "layout.materials.json",
                            "layout.cells.json",
                            "layout.portals.json",
-                           "layout.openings.json"});
+                           "layout.openings.json",
+                           "layout.stairs.json"});
         }
 
         std::string directory_;
@@ -1270,6 +1293,150 @@ namespace
         EXPECT_EQ(contents.openings[0].portal, Intern("P_DOES_NOT_EXIST"));
     }
 
+    // --- the stairs -------------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, AFlightIsReadWithItsLandings)
+    {
+        Write("layout.stairs.json", Stairs());
+        world::WorldData::Contents contents;
+        const auto stairs = world::WorldLoader::LoadStairs(directory_, contents);
+        ASSERT_TRUE(stairs) << stairs.Error().ToString();
+
+        ASSERT_EQ(contents.stairs.size(), 2U);
+        const world::StairFlight& main = contents.stairs[0];
+        EXPECT_EQ(main.id, Intern("STAIR_L0_L1_MAIN"));
+        EXPECT_EQ(main.fromCell, Intern("L0_STAIR"));
+        EXPECT_EQ(main.toCell, Intern("L1_LANDING"));
+        EXPECT_EQ(main.risers, 17);
+        EXPECT_FLOAT_EQ(main.going, 0.280F);
+        EXPECT_FLOAT_EQ(main.width, 1.20F);
+        ASSERT_EQ(main.landings.size(), 1U);
+        EXPECT_EQ(main.landings[0].at, 9);
+        EXPECT_FLOAT_EQ(main.landings[0].depth, 1.20F);
+        EXPECT_TRUE(main.collisionRamp);
+        EXPECT_EQ(main.surface, "wood");
+    }
+
+    TEST_F(WorldLoaderTest, CollisionRampDefaultsToTrue)
+    {
+        // The default `build_collision.py` uses. Defaulting the other way would silently give
+        // every flight in the house a box per step where it asked for two wedges.
+        Write("layout.stairs.json", Stairs());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadStairs(directory_, contents));
+        EXPECT_TRUE(contents.stairs[1].collisionRamp) << "the second flight states nothing";
+    }
+
+    TEST_F(WorldLoaderTest, AFlightSegmentsIntoTheRunsAndLandingsTheContentBuildBakes)
+    {
+        // The same walk `build_collision.py` does: consume risers until the next landing, emit the
+        // run, emit the landing, repeat. Deriving it in one place from the authored row is what
+        // stops the runtime and the baked wedges disagreeing about where a flight turns.
+        world::StairFlight flight;
+        flight.risers = 17;
+        flight.rise = 3.05F / 17.0F;
+        flight.going = 0.280F;
+        flight.landings.push_back(world::Landing{9, 1.20F});
+
+        const auto segments = world::SegmentFlight(flight);
+        ASSERT_EQ(segments.size(), 3U);
+
+        EXPECT_FALSE(segments[0].isLanding);
+        EXPECT_EQ(segments[0].fromRiser, 0);
+        EXPECT_EQ(segments[0].risers, 9);
+        EXPECT_NEAR(segments[0].length, 9 * 0.280F, 1e-5F);
+
+        EXPECT_TRUE(segments[1].isLanding);
+        EXPECT_EQ(segments[1].fromRiser, 9);
+        EXPECT_FLOAT_EQ(segments[1].length, 1.20F);
+        EXPECT_FLOAT_EQ(segments[1].height, 0.0F) << "a landing is flat";
+
+        EXPECT_FALSE(segments[2].isLanding);
+        EXPECT_EQ(segments[2].risers, 8);
+
+        // Every riser is accounted for exactly once, which is the property that matters: a
+        // segmentation that lost one would put the top of the flight below the floor it reaches.
+        std::int32_t climbed = 0;
+        float height = 0.0F;
+        for (const auto& segment : segments)
+        {
+            climbed += segment.risers;
+            height += segment.height;
+        }
+        EXPECT_EQ(climbed, flight.risers);
+        EXPECT_NEAR(height, flight.Climb(), 1e-4F);
+        EXPECT_NEAR(world::TotalRun(flight), 17 * 0.280F + 1.20F, 1e-5F);
+    }
+
+    TEST_F(WorldLoaderTest, AFlightWithNoLandingIsOneRun)
+    {
+        // `build_collision.py`'s own selftest fixture: 8 risers, 0.18 rise, 0.28 going, no
+        // landings. One wedge, and this must agree with it.
+        world::StairFlight flight;
+        flight.risers = 8;
+        flight.rise = 0.18F;
+        flight.going = 0.28F;
+
+        const auto segments = world::SegmentFlight(flight);
+        ASSERT_EQ(segments.size(), 1U);
+        EXPECT_EQ(segments[0].risers, 8);
+        EXPECT_NEAR(segments[0].length, 8 * 0.28F, 1e-5F);
+        EXPECT_NEAR(segments[0].height, 8 * 0.18F, 1e-5F);
+    }
+
+    TEST_F(WorldLoaderTest, ALandingOnTheRiserARunStartsOnDoesNotProduceAZeroLengthWedge)
+    {
+        // Without the clamp this loops for ever on the same step, or emits a wedge with no
+        // length. A landing at riser 0 is the bottom of the flight, not a turn in the middle.
+        world::StairFlight flight;
+        flight.risers = 4;
+        flight.rise = 0.18F;
+        flight.going = 0.28F;
+        flight.landings.push_back(world::Landing{0, 1.0F});
+
+        const auto segments = world::SegmentFlight(flight);
+        ASSERT_FALSE(segments.empty());
+        for (const auto& segment : segments)
+        {
+            EXPECT_GT(segment.length, 0.0F);
+        }
+        std::int32_t climbed = 0;
+        for (const auto& segment : segments)
+        {
+            climbed += segment.risers;
+        }
+        EXPECT_EQ(climbed, 4);
+    }
+
+    TEST_F(WorldLoaderTest, AFlightWithNoRisersOrNegativeDimensionsIsRefused)
+    {
+        for (const std::string row :
+             {R"({"id": "S", "fromCell": "A", "toCell": "B", "risers": 0, "rise": 0.18,
+                  "going": 0.28, "width": 1.0})",
+              R"({"id": "S", "fromCell": "A", "toCell": "B", "risers": 8, "rise": -0.18,
+                  "going": 0.28, "width": 1.0})",
+              R"({"id": "S", "fromCell": "A", "toCell": "B", "risers": 8, "rise": 0.18,
+                  "going": 0.0, "width": 1.0})"})
+        {
+            Write("layout.stairs.json", R"({"schema": "cna-house/stairs/1", "flights": [)" + row + "]}");
+            world::WorldData::Contents contents;
+            EXPECT_FALSE(world::WorldLoader::LoadStairs(directory_, contents)) << "accepted " << row;
+        }
+    }
+
+    TEST_F(WorldLoaderTest, ALandingBeyondTheTopOfItsFlightIsRefused)
+    {
+        Write("layout.stairs.json",
+              R"({"schema": "cna-house/stairs/1",
+                  "flights": [{"id": "S", "fromCell": "A", "toCell": "B", "risers": 8,
+                               "rise": 0.18, "going": 0.28, "width": 1.0,
+                               "landings": [{"at": 20, "depth": 1.2}]}]})");
+        world::WorldData::Contents contents;
+        const auto stairs = world::WorldLoader::LoadStairs(directory_, contents);
+        ASSERT_FALSE(stairs);
+        EXPECT_EQ(stairs.Error().Code(), ErrorCode::OutOfRange);
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -1290,6 +1457,7 @@ namespace
         EXPECT_NE(world.Value().FindCell(Intern("L0_HALL")), nullptr);
         EXPECT_EQ(world.Value().Portals().size(), 4U);
         EXPECT_EQ(world.Value().Openings().size(), 3U);
+        EXPECT_EQ(world.Value().Stairs().size(), 2U);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -1317,11 +1485,13 @@ namespace
         Write("layout.cells.json", Cells());
         Write("layout.portals.json", Portals());
         Write("layout.openings.json", Openings());
+        Write("layout.stairs.json", Stairs());
         WriteManifest({"layout.levels.json",
                        "layout.materials.json",
                        "layout.cells.json",
                        "layout.portals.json",
-                       "layout.openings.json"});
+                       "layout.openings.json",
+                       "layout.stairs.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

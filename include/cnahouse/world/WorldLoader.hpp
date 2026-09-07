@@ -104,6 +104,15 @@ namespace cnahouse::world
         [[nodiscard]] static util::Result<void> LoadOpenings(std::string_view directory,
                                                              WorldData::Contents& contents);
 
+        /// @brief Reads `layout.stairs.json` into @p contents.
+        ///
+        /// The collision-ramp parameters are **derived**, not stored: `SegmentFlight` splits a
+        /// flight into the same runs and landings `build_collision.py` builds offline, from the
+        /// same authored row. Storing them would be a second copy that can disagree with the
+        /// wedges the content build actually baked.
+        [[nodiscard]] static util::Result<void> LoadStairs(std::string_view directory,
+                                                           WorldData::Contents& contents);
+
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
         /// As each `HOUSE-00344`…`HOUSE-00355` lands, its file joins this sequence. Until then the

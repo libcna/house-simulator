@@ -1657,6 +1657,149 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadStairs(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.stairs.json", "stairs", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+
+        const Result<JsonValue> flights = document.Value().Root().RequireArray("flights");
+        if (!flights)
+        {
+            return flights.Error().WithContext("layout.stairs.json");
+        }
+        const Result<std::vector<JsonValue>> rows = flights.Value().Elements();
+        if (!rows)
+        {
+            return rows.Error().WithContext("layout.stairs.json");
+        }
+
+        for (const JsonValue& row : rows.Value())
+        {
+            StairFlight flight;
+            const Result<util::Id> id = RequireId(row, "id");
+            if (!id)
+            {
+                return id.Error().WithContext("layout.stairs.json");
+            }
+            flight.id = id.Value();
+
+            const Result<util::Id> fromCell = RequireId(row, "fromCell");
+            if (!fromCell)
+            {
+                return fromCell.Error().WithContext("layout.stairs.json");
+            }
+            flight.fromCell = fromCell.Value();
+            const Result<util::Id> toCell = RequireId(row, "toCell");
+            if (!toCell)
+            {
+                return toCell.Error().WithContext("layout.stairs.json");
+            }
+            flight.toCell = toCell.Value();
+
+            const Result<std::int64_t> risers = row.RequireInt("risers");
+            if (!risers)
+            {
+                return risers.Error().WithContext("layout.stairs.json");
+            }
+            if (risers.Value() < 1)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "a flight has at least one riser; this has " + std::to_string(risers.Value()),
+                           "layout.stairs.json/" + row.Path() + "/risers");
+            }
+            flight.risers = static_cast<std::int32_t>(risers.Value());
+
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, float*>>{
+                     {"rise", &flight.rise}, {"going", &flight.going}, {"width", &flight.width}})
+            {
+                const Result<float> value = row.RequireFloat(field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.stairs.json");
+                }
+                if (value.Value() <= 0.0F)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a stair " + std::string(field) + " is positive; this is " +
+                                   std::to_string(value.Value()),
+                               "layout.stairs.json/" + row.Path() + "/" + std::string(field));
+                }
+                *target = value.Value();
+            }
+
+            if (row.Has("landings") && !row.IsNull("landings"))
+            {
+                const Result<JsonValue> landings = row.RequireArray("landings");
+                if (!landings)
+                {
+                    return landings.Error().WithContext("layout.stairs.json");
+                }
+                const Result<std::vector<JsonValue>> landingRows = landings.Value().Elements();
+                if (!landingRows)
+                {
+                    return landingRows.Error().WithContext("layout.stairs.json");
+                }
+                for (const JsonValue& landingRow : landingRows.Value())
+                {
+                    const Result<std::int64_t> at = landingRow.RequireInt("at");
+                    if (!at)
+                    {
+                        return at.Error().WithContext("layout.stairs.json");
+                    }
+                    if (at.Value() < 0 || at.Value() > flight.risers)
+                    {
+                        return Err(ErrorCode::OutOfRange,
+                                   "a landing sits at a riser of this flight, 0.." +
+                                       std::to_string(flight.risers) + "; this is at " +
+                                       std::to_string(at.Value()),
+                                   "layout.stairs.json/" + landingRow.Path() + "/at");
+                    }
+                    const Result<float> depth = landingRow.RequireFloat("depth");
+                    if (!depth)
+                    {
+                        return depth.Error().WithContext("layout.stairs.json");
+                    }
+                    if (depth.Value() <= 0.0F)
+                    {
+                        return Err(ErrorCode::InvalidData,
+                                   "a landing has depth; this is " + std::to_string(depth.Value()),
+                                   "layout.stairs.json/" + landingRow.Path() + "/depth");
+                    }
+                    flight.landings.push_back(Landing{static_cast<std::int32_t>(at.Value()), depth.Value()});
+                }
+            }
+
+            // `collisionRamp` defaults to TRUE, and the default is the one `build_collision.py`
+            // uses. Both branches are real: a ramp is a closed wedge per run, and the alternative
+            // is one box per step. Defaulting the other way would silently give every flight in
+            // the house a hundred boxes where it asked for two.
+            const Result<bool> ramp = row.OptionalBool("collisionRamp", true);
+            if (!ramp)
+            {
+                return ramp.Error().WithContext("layout.stairs.json");
+            }
+            flight.collisionRamp = ramp.Value();
+
+            if (row.Has("surface") && !row.IsNull("surface"))
+            {
+                const Result<std::string> surface = row.RequireString("surface");
+                if (!surface)
+                {
+                    return surface.Error().WithContext("layout.stairs.json");
+                }
+                flight.surface = surface.Value();
+            }
+
+            contents.stairs.push_back(std::move(flight));
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -1688,6 +1831,10 @@ namespace cnahouse::world
         if (const Result<void> openings = LoadOpenings(directory, contents); !openings)
         {
             return openings.Error();
+        }
+        if (const Result<void> stairs = LoadStairs(directory, contents); !stairs)
+        {
+            return stairs.Error();
         }
 
         util::Log::Info(util::LogCat::World,
