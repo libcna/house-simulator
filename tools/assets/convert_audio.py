@@ -135,6 +135,41 @@ def build_filters(args: argparse.Namespace) -> list[str]:
     return filters
 
 
+def loop_filter_complex(seconds: float, crossfade: float) -> str:
+    """Shorten a LOOP to `seconds` and keep it seamless, as one `-filter_complex` graph.
+
+    **A loop cut with `-t` clicks.** `cna-house.md` §72's budget only closes if every ambience loop
+    is trimmed to 10 s (`HOUSE-00277` measured 72 loops carrying 136 MB of the 156), and the
+    obvious way to do that leaves the last sample and the first unrelated -- so the file plays a
+    step discontinuity once every ten seconds, for as long as the room is on screen. A rain bed
+    that ticks is worse than a rain bed that is thirty seconds long.
+
+    **The blend goes at the HEAD, not the tail**, and getting that backwards was the first attempt
+    here. What has to be true is `result[N-] == result[0]`, so the head is where the material has
+    to be replaced:
+
+        result[t] = source[t]                                    for t in [F, N)
+        result[t] = source[t]·w(t) + source[t + N]·(1 - w(t))     for t in [0, F), w: 0 -> 1
+
+    At `t -> N-` the output is `source[N-]`; at `t = 0` it is `source[N]`; and those two are the
+    same sample. Fading the *tail* into the *head* instead makes `result[N-]` approach `source[F]`,
+    which is a different point in the recording and no more continuous than the naive cut.
+
+    Built from two `afade`s and an `amix` with `normalize=0` rather than from `acrossfade`, which
+    produced a 0.6-second output from a 3-second request here whatever it was fed.
+    """
+    if crossfade <= 0 or crossfade >= seconds:
+        raise ConversionError(
+            f"a loop crossfade of {crossfade} s does not fit inside {seconds} s")
+    return (
+        f"[0:a]atrim=0:{seconds},asetpts=PTS-STARTPTS,"
+        f"afade=t=in:st=0:d={crossfade}:curve=tri[main];"
+        f"[1:a]atrim={seconds}:{seconds + crossfade},asetpts=PTS-STARTPTS,"
+        f"afade=t=out:st=0:d={crossfade}:curve=tri[head];"
+        f"[main][head]amix=inputs=2:duration=first:normalize=0[out]"
+    )
+
+
 def measure_peak(path: Path) -> float:
     """Peak level in dBFS, via `volumedetect`."""
     result = subprocess.run(
@@ -170,7 +205,31 @@ def convert(source: Path, destination: Path, args: argparse.Namespace) -> dict:
         args = argparse.Namespace(**{**vars(args), "normalise": applied_gain})
 
     filters = build_filters(args)
-    if filters:
+    max_seconds = getattr(args, "max_seconds", None)
+    loop_crossfade = getattr(args, "loop_crossfade", 0.0) or 0.0
+    shortened = None
+    if max_seconds and info["duration"] > max_seconds:
+        shortened = round(max_seconds, 4)
+        if loop_crossfade > 0:
+            if info["duration"] < max_seconds + loop_crossfade:
+                raise ConversionError(
+                    f"{source}: {info['duration']:.2f} s is too short to shorten to "
+                    f"{max_seconds} s with a {loop_crossfade} s crossfade -- the blend needs "
+                    f"{max_seconds + loop_crossfade:.2f} s of material to draw the head from")
+            command += ["-i", str(source)]
+            # A filter_complex and an -af chain cannot both feed the same output, so the ordinary
+            # filters run first into an intermediate and the loop cut is a second pass. Two passes
+            # rather than one graph because the trim and the normalise gain are measured from the
+            # WHOLE clip, and measuring them from a shortened one would change what they mean.
+            command += ["-filter_complex", loop_filter_complex(max_seconds, loop_crossfade),
+                        "-map", "[out]"]
+        else:
+            command += ["-t", str(max_seconds)]
+        if filters:
+            raise ConversionError(
+                "--max-seconds cannot be combined with a filter chain in one pass; run the "
+                "filters first and shorten the result")
+    elif filters:
         command += ["-af", ",".join(filters)]
 
     command += ["-c:a", RUNTIME_CODEC]
@@ -193,6 +252,8 @@ def convert(source: Path, destination: Path, args: argparse.Namespace) -> dict:
         "outputSha256": sha256_of(destination),
         "outputFormat": after,
         "appliedGainDb": applied_gain,
+        "shortenedToSeconds": shortened,
+        "loopCrossfadeSeconds": loop_crossfade if shortened else None,
         "command": " ".join(command),
     }
 
@@ -216,6 +277,14 @@ def make_probe_wav(path: Path, *, rate: int, bits: int, channels: int, seconds: 
             str(path),
         ]
     )
+
+
+def _raises(call) -> bool:
+    try:
+        call()
+    except ConversionError:
+        return True
+    return False
 
 
 def selftest() -> int:
@@ -340,6 +409,66 @@ def selftest() -> int:
         )
 
     print()
+    # --- --max-seconds, and whether the shortened loop still wraps -------------------------------
+    # §72's audio budget only closes if every ambience loop is cut to 10 s (`HOUSE-00277`: 72 loops
+    # carry 136 MB of the 156). Cut with `-t`, the file plays a step discontinuity once per loop,
+    # for as long as the room is on screen. The claim is that the crossfade removes it, measured as
+    # the distance between the last sample and the first -- which is what the speaker hears at the
+    # wrap.
+    with tempfile.TemporaryDirectory(prefix="convert_audio_loop_") as tmp:
+        work = Path(tmp)
+        source = work / "sweep.wav"
+        # A SWEEP, so the head and the tail are genuinely different: a steady tone wraps seamlessly
+        # however it is cut and would prove nothing. The phase offset matters too -- a sweep
+        # starting at phase 0 has a first sample of exactly 0, so "the step at the wrap" would be
+        # measured against silence and come out small whatever the tail did. The AMPLITUDE RAMP
+        # matters as much: a pure sweep of this length happens to complete a whole number of cycles
+        # by t = 3, so source[3] equalled source[0] to four decimals and neither construction could
+        # be told from the other.
+        _run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi",
+              "-i", "aevalsrc=0.4*(1-t/8)*sin(2*PI*(200+120*t)*t+1.1):s=48000:d=6",
+              "-c:a", "pcm_s16le", str(source)])
+
+        def edges(path: Path):
+            import struct as _struct
+            import wave
+
+            with wave.open(str(path), "rb") as handle:
+                channels = handle.getnchannels()
+                count = handle.getnframes()
+                rate = handle.getframerate()
+                frames = handle.readframes(count)
+            values = _struct.unpack(f"<{len(frames) // 2}h", frames)
+            return values[0] / 32768.0, values[-channels] / 32768.0, count / rate
+
+        base = argparse.Namespace(
+            require_rate=None, normalise=None, trim=False, trim_threshold=-60.0,
+            highpass=None, lowpass=None, mono=False, sample_rate=None,
+            max_seconds=None, loop_crossfade=0.0)
+
+        naive = work / "naive.wav"
+        convert(source, naive, argparse.Namespace(**{**vars(base), "max_seconds": 3.0}))
+        faded = work / "faded.wav"
+        convert(source, faded,
+                argparse.Namespace(**{**vars(base), "max_seconds": 3.0, "loop_crossfade": 0.25}))
+
+        naive_first, naive_last, naive_seconds = edges(naive)
+        faded_first, faded_last, faded_seconds = edges(faded)
+        check("--max-seconds shortens the file",
+              abs(naive_seconds - 3.0) < 0.02 and abs(faded_seconds - 3.0) < 0.02,
+              f"naive {naive_seconds:.3f} s, crossfaded {faded_seconds:.3f} s, from 6.000 s")
+        naive_step = abs(naive_last - naive_first)
+        faded_step = abs(faded_last - faded_first)
+        check("a naive cut leaves a step at the wrap", naive_step > 0.05,
+              f"last {naive_last:+.4f} against first {naive_first:+.4f} -- a jump of "
+              f"{naive_step:.4f}, which is the click")
+        check("the crossfade removes it", faded_step < naive_step / 4,
+              f"last {faded_last:+.4f} against first {faded_first:+.4f} -- {faded_step:.4f}, "
+              f"{naive_step / max(faded_step, 1e-9):.0f}x smaller")
+        check("a crossfade that does not fit is refused",
+              _raises(lambda: loop_filter_complex(3.0, 3.0)),
+              "a crossfade as long as the clip has nothing to blend with")
+
     if failures:
         print(f"convert_audio selftest: {len(failures)} FAILED: {', '.join(failures)}",
               file=sys.stderr)
@@ -369,6 +498,11 @@ def main() -> int:
     parser.add_argument("--normalise", type=float, metavar="DBFS", help="peak-normalise to DBFS")
     parser.add_argument("--highpass", type=float, metavar="HZ", help="remove subsonic rumble")
     parser.add_argument("--lowpass", type=float, metavar="HZ", help='the "dull" variant filter')
+    parser.add_argument("--max-seconds", type=float, metavar="S",
+                        help="shorten a longer file to S seconds (§72's loop budget)")
+    parser.add_argument("--loop-crossfade", type=float, default=0.0, metavar="S",
+                        help="with --max-seconds, blend the tail into the head over S seconds so "
+                             "the shortened loop still wraps without a click")
     parser.add_argument("--json", action="store_true", help="print the manifest fields as JSON")
     args = parser.parse_args()
 

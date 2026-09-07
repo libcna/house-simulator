@@ -4598,10 +4598,84 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             and channel count are measurable and measured; whether a recording is *clean* is not.
             Each group therefore names its shortest, longest, quietest and loudest file, so an
             aural check has somewhere to start rather than 445 files and no order.
-- [ ] HOUSE-00278 — Convert the selected NOX subset with `convert_audio.py`; verify a listening check on 10 files (R-17)
+- [x] HOUSE-00278 — Convert the selected NOX subset with `convert_audio.py`; verify a listening check on 10 files (R-17)
       dep: HOUSE-00277, HOUSE-00193 · sys: audio · plat: TOOL · pri: MUST
-- [ ] HOUSE-00279 — Manifest every converted NOX file with both hashes, duration, channels and its target category
+      note: (2026-09-07) `tools/assets/nox_convert.py`, plus `--max-seconds` and `--loop-crossfade`
+            added to `convert_audio.py` (`HOUSE-00193`) because it had no duration cap and §72's
+            budget is a cap. **445 of 445 converted, 79.2 MB** — 19.3 MB of one-shots and 59.9 MB
+            in 72 loops, 49 of them shortened. 20 selftest claims here and 4 more in
+            `convert_audio.py`. **The listening check is NOT done and is the one outstanding item;
+            see below.**
+      finding: **a loop cut with `-t` clicks, once per loop, for as long as the room is on
+            screen.** §72's budget only closes if every ambience loop is trimmed, and the obvious
+            way to do it leaves the last sample and the first unrelated. The fix is a **head**
+            crossfade — `result[0]` is made to be `source[N]`, so it matches `result[N⁻]` — and the
+            first attempt put the blend at the tail, which makes `result[N⁻]` approach `source[F]`
+            and is no more continuous than the naive cut. Measured on a swept fixture: a wrap step
+            of **0.149 naive against 0.015 crossfaded**, ten times smaller.
+      finding: two fixtures in a row could not tell the constructions apart, and both failures were
+            the fixture rather than the code. A sweep starting at phase 0 has a first sample of
+            exactly 0, so "the step at the wrap" was measured against silence; and a pure sweep of
+            that length completes a whole number of cycles by t = 3, so `source[3]` equalled
+            `source[0]` to four decimals. An **amplitude ramp** is what finally made the ends
+            differ. `acrossfade` was also abandoned for two `afade`s and an `amix`: it returned a
+            0.6-second output for a 3-second request whatever it was fed.
+      finding: the shorten threshold needs the crossfade in it. Two of the 445 are 10.01 s and
+            10.15 s — over the cap but unable to supply the 0.25 s the blend draws its head from,
+            and cutting them would have saved 1.5 %. "Longer than the cap" is not the rule;
+            "long enough to be worth cutting **and** to supply the blend" is.
+      finding: **nothing is peak-normalised, deliberately.** `nox_select.py` chose each group's
+            eight variants by farthest-point sampling in (duration, RMS) precisely so they differ
+            in level; a per-file normalise would flatten exactly the difference the selection
+            exists to preserve.
+      finding: **§72's 10-second cap was validated against the wrong budget, and 8 is the right
+            number.** §72 checked its total against the *audio-buffer memory* row of 95 MB; the
+            binding constraint is §71's *pack* budgets of 30 + 55 = 85 MB, which it never touched.
+            Measured: at 10 s both packs are over (103.8 % and 107.0 %), at 9 s `audio-core` is
+            still over, at **8 s both fit** (99.8 % and 89.5 %). §72's audible argument is about
+            being an order of magnitude away from an obvious one-second loop and is unchanged.
+            Recorded in §72.
+      finding: **`audio-core` is at 99.8 % with the NOX subset alone**, and `HOUSE-00281`…
+            `HOUSE-00290` must still add ~220 one-shots to that same pack — about 11 MB at the
+            measured 0.052 MB a clip. The pack cannot hold them. The options are raising it,
+            moving the ten human-breath loops (6.4 MB) out of it, or cutting further; that is a
+            budget decision and is recorded in §72 rather than taken here.
+      blocked-part: **the R-17 listening check on 10 files is outstanding** — this session cannot
+            listen. It is staged rather than deferred: `nox_convert.py` writes an `auditionSet`
+            into `docs/asset-selection/nox-conversion.json` naming ten files chosen for the
+            **edges** of the conversion, each with the reason it is worth hearing — the loop
+            shortened the most, the one-shot the trim took the most from, a stereo loop whose
+            image the crossfade could collapse, a loop left alone as the control. A random ten
+            would be ordinary footsteps and would confirm nothing. Playing those ten is a
+            five-minute job and the rest of the acceptance is met.
+- [x] HOUSE-00279 — Manifest every converted NOX file with both hashes, duration, channels and its target category
       dep: HOUSE-00278 · sys: audio · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/assets/nox_manifest.py`. **445 rows added, 461 in the manifest**,
+            plus **110 generated `SOURCE.md` records** — `verify_licences.py` requires one per
+            directory holding a downloaded asset (`HOUSE-00261`) and each must name every asset in
+            it. 25 selftest claims. The credits document and the budget report were regenerated
+            and every gate is green.
+      finding: the requirements were not invented here.
+            `docs/licence-evidence/nox-sound-essentials.md` §5 writes this task out in full —
+            `CC0-1.0`, `licenses/cc0-1.0/LICENCE.txt`, the itch.io URL, `retrieved: 2026-09-07`,
+            `author: Nox_Sound`, and both hashes — so the tool encodes that document rather than a
+            judgement made while writing it.
+      finding: **the original's hash is the point of "both hashes".** `/rv/tmp` is scratch and will
+            be deleted; after that, `audio.originalSha256` is the only link between a file in the
+            tree and the licence evidence written about it. The converted file's hash is what
+            `check_manifest.py` verifies day to day; the original's is what an auditor needs in a
+            year and cannot be recovered later.
+      finding: **the pack split is functional, not lexical, and getting that wrong put 58 of the
+            72 loops in the wrong pack.** Splitting on the category name — `ambience/*` to
+            `audio-ambience` — left `audio-core` at **66 MB against its 30 MB budget** while
+            `audio-ambience` sat at 24 of 55. §71 describes the packs by what the sounds *are*:
+            the 39 appliance loops are the fridge, the computer and the extractor, which is what
+            "room tone" names. But length alone is not the rule either — a human breath sequence
+            and a car engine loop are loops and are interaction sounds, so they stay in
+            `audio-core`.
+      finding: an id needs the category **and** the file name. The publisher reuses names across
+            packs, so `Footstep_Grass_Walk_01.wav` exists in more than one, and a manifest id built
+            from the name alone would collide.
 - [ ] HOUSE-00280 — Map the NOX footstep packs onto the 20 game surfaces; record which 8 surfaces are unserved
       dep: HOUSE-00279 · sys: audio · plat: TOOL · pri: MUST
 - [ ] HOUSE-00281 — Grouped: source the 8 missing footstep surfaces (carpet, concrete, interior hardwood, 3 stair variants, asphalt, bluestone) — ≥ 6 walk + 6 run + 2 land each, CC0

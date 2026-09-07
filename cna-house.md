@@ -5497,6 +5497,30 @@ cost what. Exceeding a **hard fail** number fails CI.
 | — licences, docs | 10 MB | |
 | **Source repository** | ≤ 3.5 GB | `assets-src/` dominates; large binaries are hash-pinned and fetched, not committed, except the small committed baseline |
 
+**Corrected again by `HOUSE-00278`, which performed the conversion: the loop cap is 8 s, not 10,
+and 10 was checked against the wrong budget.** §72's arithmetic below validated 10 s against this
+table's own **audio-buffer memory row of 95 MB** and found 91 MB — but the binding constraint is
+§71's **pack** budgets, `audio-core` 30 MB and `audio-ambience` 55 MB, which total 85 MB and which
+that arithmetic never touched. Measured on the real 445-file selection:
+
+| Loop cap | `audio-core` | `audio-ambience` |
+|---|---:|---:|
+| 10 s | 31.14 MB — **103.8 %** | 58.87 MB — **107.0 %** |
+| 9 s | 30.57 MB — **101.9 %** | 54.32 MB — 98.8 % |
+| **8 s** | **29.93 MB — 99.8 %** | **49.24 MB — 89.5 %** |
+
+Eight seconds is the largest cap that fits both. The audible argument below is unchanged by it —
+it is about being an order of magnitude away from an obvious one-second loop, and eight seconds is
+as far from that as ten. The achieved total is **79.2 MB**.
+
+**Two things a later phase must know.** First, `audio-core` is at **99.8 %** with the NOX subset
+alone, and `HOUSE-00281`…`HOUSE-00290` still have to add roughly 220 one-shots to that same pack —
+about 11 MB at the measured average of 0.052 MB a clip. **The pack cannot hold them**, and the
+choice between raising it, moving the ten human-breath loops (6.4 MB) out of it, and cutting
+further is a budget decision this task deliberately did not make alone. Second, a shortened loop is
+cut with a **head crossfade**, not with `-t`: cut plainly it steps once per loop for as long as the
+room is on screen, measured at a 0.149 discontinuity against 0.015 with the blend.
+
 **The audio row's "≈ 95 MB" priced one-shots and not loops**, measured by `HOUSE-00277` against the
 real NOX selection. 445 clips — the row's own count — come to **156 MB** at 16 bit, and the split
 says why: **373 one-shots are 21 MB** while **72 loops carry 1 106 seconds and 136 MB**. 95 MB over
