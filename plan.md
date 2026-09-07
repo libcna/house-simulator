@@ -3256,8 +3256,35 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             OFL — FAQ 3.7 is explicit that the licence grants no trademark rights. It does not bite:
             the files ship unmodified so the notice stays where it is, and the name is not used as
             this product's branding.
-- [ ] HOUSE-00274 — Verify the **lunar albedo map** and **star catalogue** provenance (public domain expected)
+- [x] HOUSE-00274 — Verify the **lunar albedo map** and **star catalogue** provenance (public domain expected)
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `docs/licence-evidence/astronomical.md`. **The expectation holds for the
+            Moon and does NOT hold for the stars** — which is the finding.
+      finding: **Moon: APPROVED.** NASA SVS "CGI Moon Kit" (`svs.gsfc.nasa.gov/4720`), built from
+            Lunar Reconnaissance Orbiter camera and altimeter data. NASA's Media Usage Guidelines
+            address this case almost word for word: "NASA content – images, audio, video, and
+            **media files used in the rendition of 3-dimensional models, such as texture maps and
+            polygon data in any format** – generally are **not subject to copyright in the United
+            States** … including … **computer graphical simulations**." Three constraints, none
+            biting: no implied NASA endorsement (relevant to store art, not to a moon in the sky);
+            the **insignia and logotype are NOT public domain** and are untouched; third-party
+            material on NASA sites is marked as such, so the per-asset page must still be read.
+            Credit — "NASA's Scientific Visualization Studio", visualizer Ernie Wright (USRA) — is
+            carried in `attribution` though it is not a licence condition.
+      finding: **Stars: the expectation is WRONG.** The obvious source, the **HYG database** v4.4,
+            is **CC BY-SA 4.0**, verified from both its `README.md` and its `LICENSE`. Share-alike
+            matters: phase 24 bakes a positions-and-magnitudes table, which is a derivative of a
+            database and would have to be offered under BY-SA. Workable — a star table can be
+            published BY-SA without touching the rest of the game — but it is an obligation to
+            record, not to discover at packaging time.
+      finding: HYG has **moved to Codeberg**; the GitHub repository most links point at is stale and
+            its licence metadata reads `NOASSERTION`, so a reader who stopped there would have no
+            licence at all. The non-share-alike alternative is the upstream scientific catalogues
+            HYG compiles — Yale Bright Star, Hipparcos/Tycho, via CDS/VizieR, and 9 110 naked-eye
+            stars is exactly what phase 24 wants. **Their terms are NOT verified here** and must be
+            before use; the option is recorded, not approved.
+      finding: the general lesson: **"astronomical data is public domain" is a reasonable prior and
+            it is false for the most convenient source.**
 - [ ] HOUSE-00275 — Verify the **video footage** sources for the television channels
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
 - [x] HOUSE-00276 — **Q-02: re-verify the NOX_SOUND Essentials Series CC0 declaration** against the publisher's live page; archive the evidence
