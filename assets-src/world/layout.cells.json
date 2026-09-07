@@ -2,8 +2,7 @@
   // The cells of the house. `cna-house.md` §13 is the authority: one row per room, corridor,
   // stair, closet, garage bay and exterior region, with the footprints §13.2-§13.7 tabulate.
   //
-  // Every level (`HOUSE-00367`…`HOUSE-00371`); `HOUSE-00372` adds the exterior regions to this
-  // same file.
+  // Complete: every level and every exterior region (`HOUSE-00367`…`HOUSE-00372`).
   //
   // Four fields are deliberately left unset on every row and each is a forward reference, not an
   // omission. Filling them here would make this file the source of truth for a table another task
@@ -865,6 +864,215 @@
       "acoustic": { "absorption": 0.62, "reverbHint": "attic_soft" },
       "thermal": { "heated": false, "ductBranch": null },
       "residencyPack": "house-l3", "visibilityHint": "opaque"
+    },
+
+    // ------------------------------------------------------------------------- exterior, §13.7 --
+    // The thirteen outdoor regions of the plot, plus `EXT_WORLD` for everything beyond the fences.
+    // They sit on `L0` because grade is where they are; rule 2 exempts an `exterior` cell from the
+    // ceiling bound (its ceiling is the sky) and the floor bound does not bite because the
+    // basement is under the main block only, and none of these are.
+    //
+    // §13.7 marks its extents "Approximate", and they are: eleven pairs of them overlap, by up to
+    // 133 m², and two overlap the porch. This task resolved them into an exact tiling and that
+    // resolution is a decision, not a transcription. The rules used:
+    //
+    //   * a region named as being inside another is CARVED OUT of it, not laid over it -- the
+    //     shed out of the garden, the garden out of the west side yard, the terrace and the
+    //     orchard out of the back lawn;
+    //   * the side yards are the strips outboard of everything else and run the full depth of the
+    //     plot, so the boundary between "side yard" and "back lawn" is the building line;
+    //   * every region stops at a building face rather than running under one.
+    //
+    // Measured after the resolution: **no overlap anywhere, and the thirteen regions plus the four
+    // building footprints tile the whole plot X -22.5…+22.5, Z -52…+13.4 with nothing left over.**
+    // That is a stronger statement than §13.7 makes and it is what §16.4 step 4 needs: a point on
+    // the plot is in exactly one cell, so "no cell" really does mean beyond the fences.
+    {
+      "id": "EXT_ROAD", "level": "L0", "name": "Road", "kind": "exterior",
+      // Clipped to the plot frontage; the rest of the carriageway is EXT_WORLD's, which is what
+      // "one huge cell holding terrain, road, neighbourhood, sky" means. §65.6 spawns the player
+      // here, and §16.3 measures the house's diameter from here to L3_STORE_N.
+      "boxes": [{ "x": [-22.5, 22.5], "z": [0.0, 13.4] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "asphalt",
+      "acoustic": { "absorption": 0.90, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "S", "exposure": 1.00 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_WALK", "level": "L0", "name": "Front Walk", "kind": "exterior",
+      "boxes": [{ "x": [-1.0, 1.0], "z": [-11.6, 0.0] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "bluestone",
+      "acoustic": { "absorption": 0.90, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "S", "exposure": 1.00 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_FRONTYARD_W", "level": "L0", "name": "Front Lawn West", "kind": "exterior",
+      // Two boxes: it wraps the west side of the porch, which §13.7's single rectangle ran
+      // straight through.
+      "boxes": [{ "x": [-13.0, -1.0], "z": [-11.6, 0.0] },
+                { "x": [-13.0, -3.6], "z": [-14.0, -11.6] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "grass",
+      "acoustic": { "absorption": 0.92, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "S", "exposure": 1.00 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_FRONTYARD_E", "level": "L0", "name": "Front Lawn East", "kind": "exterior",
+      "boxes": [{ "x": [1.0, 9.3], "z": [-11.6, 0.0] },
+                { "x": [3.6, 9.3], "z": [-14.0, -11.6] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "grass",
+      "acoustic": { "absorption": 0.92, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "S", "exposure": 1.00 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_DRIVEWAY", "level": "L0", "name": "Driveway", "kind": "exterior",
+      // Squared to the garage bay it serves, X +9.3…+17.1, rather than §13.7's +9.6…+16.8: a
+      // driveway narrower than its garage door leaves two strips of nothing at the apron.
+      "boxes": [{ "x": [9.3, 17.1], "z": [-13.3, 0.0] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "asphalt",
+      "acoustic": { "absorption": 0.88, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "SE", "exposure": 1.00 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_SIDEYARD_W", "level": "L0", "name": "West Side Yard", "kind": "exterior",
+      // Three boxes: the strip runs the depth of the plot and the vegetable garden is carved out
+      // of it, which is where §13.7 put the garden's X range.
+      "boxes": [{ "x": [-22.5, -13.0], "z": [-36.5, 0.0] },
+                { "x": [-22.5, -20.0], "z": [-44.0, -36.5] },
+                { "x": [-22.5, -13.0], "z": [-48.0, -44.0] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "grass",
+      "acoustic": { "absorption": 0.92, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "W", "exposure": 0.92 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_SIDEYARD_E", "level": "L0", "name": "East Side Yard", "kind": "exterior",
+      // Four boxes: it also holds the 0.30 m slot between the house and the garage, which belongs
+      // to nothing else and which a player can walk into.
+      "boxes": [{ "x": [17.1, 22.5], "z": [-48.0, 0.0] },
+                { "x": [9.0, 9.3], "z": [-21.7, -14.0] },
+                { "x": [9.0, 22.5], "z": [-27.4, -21.7] },
+                { "x": [17.1, 22.5], "z": [-21.7, -14.0] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "grass",
+      "acoustic": { "absorption": 0.92, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "E", "exposure": 0.92 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_TERRACE", "level": "L0", "name": "Rear Terrace", "kind": "exterior",
+      // Flagged, one step down from the sunroom's slider (§16.1), and under the rear balcony's
+      // outer edge -- which is why `build_coverage.py` has anything to measure here.
+      "boxes": [{ "x": [-6.7, 6.7], "z": [-36.0, -32.4] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "bluestone",
+      "acoustic": { "absorption": 0.86, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "N", "exposure": 0.96 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_BACKYARD", "level": "L0", "name": "Rear Lawn", "kind": "exterior",
+      // Eight boxes: the lawn between the side yards, with the sunroom, the terrace and the
+      // orchard carved out of it.
+      "boxes": [{ "x": [-13.0, -6.7], "z": [-32.1, -27.4] },
+                { "x": [2.7, 17.1], "z": [-32.1, -27.4] },
+                { "x": [-13.0, 17.1], "z": [-32.4, -32.1] },
+                { "x": [-13.0, -6.7], "z": [-36.0, -32.4] },
+                { "x": [6.7, 17.1], "z": [-36.0, -32.4] },
+                { "x": [-13.0, 17.1], "z": [-38.0, -36.0] },
+                { "x": [-13.0, 12.0], "z": [-46.0, -38.0] },
+                { "x": [-13.0, 17.1], "z": [-48.0, -46.0] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "grass",
+      "acoustic": { "absorption": 0.93, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "N", "exposure": 1.00 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_GARDEN", "level": "L0", "name": "Vegetable Garden", "kind": "exterior",
+      // Four boxes: the shed stands in it, so the garden is the ring around the shed.
+      "boxes": [{ "x": [-20.0, -19.8], "z": [-44.0, -36.5] },
+                { "x": [-19.8, -13.0], "z": [-40.6, -36.5] },
+                { "x": [-16.6, -13.0], "z": [-43.8, -40.6] },
+                { "x": [-19.8, -13.0], "z": [-44.0, -43.8] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "soil",
+      "acoustic": { "absorption": 0.94, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "N", "exposure": 1.00 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_SHED", "level": "L0", "name": "Garden Shed", "kind": "exterior",
+      // Enterable, one window and one door: an `exterior` cell that is indoors, which is exactly
+      // the case `kind` and `visibilityHint` describe separately. It is roofed, so it takes an
+      // extent rather than the sky.
+      "boxes": [{ "x": [-19.8, -16.6], "z": [-43.8, -40.6] }],
+      "yOverride": [0.0, 2.35],
+      "footstepSurface": "hardwood",
+      "acoustic": { "absorption": 0.30, "reverbHint": "tiny_hard" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "E", "exposure": 0.18 },
+      "residencyPack": "exterior", "visibilityHint": "opaque"
+    },
+    {
+      "id": "EXT_ORCHARD", "level": "L0", "name": "Orchard Corner", "kind": "exterior",
+      // Clipped to X +12…+17.1 so it stops at the east side yard's building line rather than
+      // running through it, which §13.7's +12…+21 did by 28.8 m².
+      "boxes": [{ "x": [12.0, 17.1], "z": [-46.0, -38.0] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "grass",
+      "acoustic": { "absorption": 0.95, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "N", "exposure": 0.94 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_NORTHSTRIP", "level": "L0", "name": "Behind the Rear Fence", "kind": "exterior",
+      // Visual only, out of bounds: the player controller stops at the fence and this is what is
+      // drawn beyond it.
+      "boxes": [{ "x": [-22.5, 22.5], "z": [-52.0, -48.0] }],
+      "yOverride": [0.0, 20.0],
+      "footstepSurface": "grass",
+      "acoustic": { "absorption": 0.95, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "N", "exposure": 1.00 },
+      "residencyPack": "exterior", "visibilityHint": "open"
+    },
+    {
+      "id": "EXT_WORLD", "level": "L0", "name": "Beyond the Fences", "kind": "exterior",
+      // Four boxes forming a ring around the plot, and deliberately NOT a rectangle over it: the
+      // plot is tiled by the cells above, so a point on it is never in two cells and §16.4 step
+      // 4's "no cell" answer keeps its meaning. This is what holds the terrain, the rest of the
+      // road, the neighbourhood and the sky, culled internally by frustum, distance and LOD.
+      "boxes": [{ "x": [-200.0, 200.0], "z": [13.4, 200.0] },
+                { "x": [-200.0, 200.0], "z": [-200.0, -52.0] },
+                { "x": [-200.0, -22.5], "z": [-52.0, 13.4] },
+                { "x": [22.5, 200.0], "z": [-52.0, 13.4] }],
+      "yOverride": [-5.0, 60.0],
+      "footstepSurface": "grass",
+      "acoustic": { "absorption": 0.96, "reverbHint": "outdoor_open" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "S", "exposure": 1.00 },
+      "residencyPack": "neighbourhood", "visibilityHint": "open"
     }
   ]
 }

@@ -1224,7 +1224,14 @@ place crouching exists, and it exists because the roof geometry demands it.
 | `L0_PORCH`, `L1_BALCONY_REAR`, `L1_BALCONY_FRONT`, `L2_BALCONY_JULIET` | see above | | Exterior cells attached to the house |
 | `EXT_WORLD` | Everything beyond the fences | the rest | One huge cell holding terrain, road, neighbourhood, sky; internally culled by frustum + distance + LOD |
 
-**17 exterior cells** (counting the 4 attached ones), **78 interior cells**, **95 total**.
+**18 exterior cells** (counting the 4 attached ones), **75 interior cells**, **93 total**.
+
+> Corrected 2026-09-07 by `HOUSE-00372`, which authored these and counted the tables. It read
+> "17 exterior cells (counting the 4 attached ones), 78 interior cells, 95 total". Counted from
+> §13.2–§13.7 themselves: B1 15 + L0 19 + L1 21 + L2 18 + L3 6 = 79 rows, of which 4 are the
+> attached exterior cells, so 75 interior; §13.7 lists 14 `EXT_*` ids including `EXT_WORLD`, so
+> 18 exterior. The summary counted three interior cells that are not tabulated anywhere and left
+> `EXT_WORLD` out of the exterior count.
 
 ### 13.8 Fixture count check against the brief
 
@@ -1543,7 +1550,7 @@ asks for, and it falls out of the data, not out of special cases.
 
 | Metric | Value |
 |---|---|
-| Cells | 95 (78 interior + 17 exterior) |
+| Cells | 93 (75 interior + 18 exterior) — corrected 2026-09-07, see §13.7 |
 | Portals total | 186 |
 | — always-open (cased/stair) | 41 |
 | — hinged/double/slider doors | 62 |
