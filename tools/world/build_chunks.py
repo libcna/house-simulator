@@ -89,16 +89,32 @@ LAYOUTS = {
     LAYOUT_ALPHATEST: ("alphatest", ("position", "uv0"), 20),
 }
 
-#: `layout.materials.json`'s `class` -> the effect its geometry is drawn with. Unknown classes are
-#: an error naming the class, never a silent fallback to `Basic`: a material quietly drawn with the
-#: wrong effect is a rendering bug that looks like an art bug.
-CLASS_TO_LAYOUT = {
-    "lightmapped_opaque": LAYOUT_DUAL,
-    "lightmapped_mask": LAYOUT_ALPHATEST,
-    "lit_opaque": LAYOUT_BASIC,
-    "lit_mask": LAYOUT_ALPHATEST,
-    "unlit_opaque": LAYOUT_DUAL,
+#: `effectTierS` -> layout. §22.1's material record states the effect outright, which is what this
+#: reads first: an inferred effect is a second opinion about something the data already says. Both
+#: spellings are accepted because §22.1 writes `"DualTexture"` and §22.2's table writes
+#: `DualTextureEffect`.
+EFFECT_TO_LAYOUT = {
+    "basic": LAYOUT_BASIC, "basiceffect": LAYOUT_BASIC,
+    "dualtexture": LAYOUT_DUAL, "dualtextureeffect": LAYOUT_DUAL,
+    "alphatest": LAYOUT_ALPHATEST, "alphatesteffect": LAYOUT_ALPHATEST,
 }
+
+#: §22.2's class table, the documented fallback when a material omits `effectTierS`. The Tier-S
+#: column, static case: `wood` is `DualTextureEffect` static and `BasicEffect` dynamic, and only
+#: static props are batched (§17.4), so the static reading is the right one here.
+CLASS_TO_LAYOUT = {
+    "paint": LAYOUT_DUAL, "wood": LAYOUT_DUAL, "carpet": LAYOUT_DUAL, "tile": LAYOUT_DUAL,
+    "stone": LAYOUT_DUAL, "concrete": LAYOUT_DUAL, "asphalt": LAYOUT_DUAL,
+    "gravel": LAYOUT_DUAL, "grass": LAYOUT_DUAL, "soil": LAYOUT_DUAL,
+    "metal": LAYOUT_BASIC, "plastic": LAYOUT_BASIC, "glass": LAYOUT_BASIC,
+    "fabric": LAYOUT_BASIC, "water": LAYOUT_BASIC, "emissive": LAYOUT_BASIC,
+    "foliage": LAYOUT_ALPHATEST, "hair": LAYOUT_ALPHATEST,
+}
+
+#: §22.2's classes that are drawn with `SkinnedEffect`. A static prop cannot use one: a skinned
+#: prop is an animated prop, and §17.4 excludes animated props from batching entirely. Silently
+#: batching one would freeze a character in its bind pose inside a wall.
+SKINNED_CLASSES = {"skin", "fur"}
 
 EPS = 1e-6
 
@@ -209,18 +225,41 @@ def bounds_of(positions) -> tuple:
 # ======================================================================================== grouping
 
 
-def effect_layout(material: dict) -> int:
-    """The vertex layout a material's class implies, or an error naming the class.
+def base_class(name: str | None) -> str | None:
+    """§22.2's `wet_<class>` and `snow_<class>` are the same class with a modifier."""
+    if not isinstance(name, str):
+        return None
+    for prefix in ("wet_", "snow_"):
+        if name.startswith(prefix):
+            return name[len(prefix):]
+    return name
 
-    Never a silent fallback to `Basic`: a material quietly drawn with the wrong effect is a
-    rendering bug that presents as an art bug, and is looked for in the wrong place for a day.
+
+def effect_layout(material: dict) -> int:
+    """The vertex layout this material is drawn with: `effectTierS` first, then §22.2's class.
+
+    `effectTierS` is a field of §22.1's material record, so the effect is **stated**; inferring it
+    from the class when the data already says it is a second opinion about the same thing, and two
+    opinions disagree eventually. The class table is the documented fallback for a material that
+    omits it, and neither resolving is an error naming both -- never a silent fall back to
+    `BasicEffect`, because a material quietly drawn with the wrong effect is a rendering bug that
+    presents as an art bug and gets looked for in the wrong place for a day.
     """
-    effect_class = material.get("class")
-    if effect_class not in CLASS_TO_LAYOUT:
+    stated = material.get("effectTierS")
+    if isinstance(stated, str) and stated.lower() in EFFECT_TO_LAYOUT:
+        return EFFECT_TO_LAYOUT[stated.lower()]
+    kind = base_class(material.get("class"))
+    if kind in SKINNED_CLASSES or (isinstance(stated, str) and stated.lower().startswith("skinned")):
         raise LayoutError(
-            f"material {material['id']!r} has class {effect_class!r}, which no stock effect "
-            f"covers; the known classes are {', '.join(sorted(CLASS_TO_LAYOUT))}")
-    return CLASS_TO_LAYOUT[effect_class]
+            f"material {material['id']!r} is drawn with SkinnedEffect (class {kind!r}); a skinned "
+            f"prop is an animated prop, and §17.4 excludes animated props from batching")
+    if kind in CLASS_TO_LAYOUT:
+        return CLASS_TO_LAYOUT[kind]
+    raise LayoutError(
+        f"material {material['id']!r} resolves to no stock effect: effectTierS is {stated!r} and "
+        f"class is {material.get('class')!r}. Known effects are "
+        f"{', '.join(sorted({'Basic', 'DualTexture', 'AlphaTest'}))}; known classes are "
+        f"{', '.join(sorted(CLASS_TO_LAYOUT))} (§22.2)")
 
 
 def group_key(prop: dict, cell: dict, material: dict) -> tuple:
@@ -230,9 +269,9 @@ def group_key(prop: dict, cell: dict, material: dict) -> tuple:
     groups needs no change here. `--report` says how many chunks the three non-material parts
     actually separated, which today is none -- and saying so is better than a comment claiming it.
     """
-    effect_layout(material)
+    layout_id = effect_layout(material)
     light_groups = tuple(sorted(cell.get("lightGroups") or ()))
-    return (material["class"], material["id"], light_groups,
+    return (LAYOUTS[layout_id][0], material["id"], light_groups,
             material.get("alphaMode", "opaque"))
 
 
@@ -277,7 +316,7 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
         if layout_id == LAYOUT_DUAL and not mesh["hasUv1"]:
             raise LayoutError(
                 f"prop {prop['id']!r} is drawn with DualTextureEffect (material "
-                f"{material_id!r}, class {material['class']!r}) but {path.name} has no "
+                f"{material_id!r}, class {material.get('class')!r}) but {path.name} has no "
                 f"TEXCOORD_1; run tools/blender/lightmap_unwrap.py over it (HOUSE-00205)")
 
         placed = place(mesh, [float(c) for c in prop["position"]],
@@ -621,14 +660,21 @@ def selftest() -> int:
         _fixture_model(assets / "medium.glb", uv1=True, boxes=3800)  # 30 400, under it alone
         _fixture_model(assets / "withcol.glb", uv1=True, col_proxy=True)
 
-        (world_dir / "layout.materials.json").write_text(json.dumps({
+        # §22.2's vocabulary, and §22.1's stated `effectTierS`. `MAT_WOOD` deliberately omits
+        # `effectTierS` so the class fallback is exercised as well as the stated path.
+        materials_doc = {
             "schema": "cna-house/materials/1",
             "materials": [
-                {"id": "MAT_SHELL", "class": "lightmapped_opaque", "alphaMode": "opaque"},
-                {"id": "MAT_WOOD", "class": "lightmapped_opaque", "alphaMode": "opaque"},
-                {"id": "MAT_LEAF", "class": "lit_mask", "alphaMode": "mask"},
-                {"id": "MAT_LAMP", "class": "lit_opaque", "alphaMode": "opaque"},
-            ]}, indent=2) + "\n", encoding="utf-8")
+                {"id": "MAT_SHELL", "class": "tile", "alphaMode": "opaque",
+                 "effectTierS": "DualTexture"},
+                {"id": "MAT_WOOD", "class": "wood", "alphaMode": "opaque"},
+                {"id": "MAT_LEAF", "class": "foliage", "alphaMode": "mask",
+                 "effectTierS": "AlphaTest"},
+                {"id": "MAT_LAMP", "class": "emissive", "alphaMode": "opaque",
+                 "effectTierS": "Basic"},
+            ]}
+        (world_dir / "layout.materials.json").write_text(
+            json.dumps(materials_doc, indent=2) + "\n", encoding="utf-8")
 
         def write_props(rows):
             (world_dir / "layout.props.json").write_text(json.dumps({
@@ -678,7 +724,7 @@ def selftest() -> int:
         # 3. The vertex layout is the effect's. `DualTextureEffect` is unlit, so a normal in its
         #    buffer is 12 bytes uploaded and never sampled.
         dual = [c for c in built["chunks"] if c["layout"] == LAYOUT_DUAL]
-        require(len(dual) == 2, "a lightmapped_opaque material is drawn with DualTextureEffect")
+        require(len(dual) == 2, "a tile and a wood material are both drawn with DualTextureEffect")
         require(LAYOUTS[LAYOUT_DUAL][1] == ("position", "uv0", "uv1"),
                 "...whose vertex carries position and two UV sets, and NO normal")
         require(LAYOUTS[LAYOUT_DUAL][2] == 28 and LAYOUTS[LAYOUT_BASIC][2] == 32,
@@ -728,8 +774,31 @@ def selftest() -> int:
         require("TEXCOORD_1" in raised and "lightmap_unwrap" in raised,
                 "a lightmapped prop with no TEXCOORD_1 is refused, naming HOUSE-00205's tool")
 
-        # 6. An unknown material class is an error, never a silent fall back to BasicEffect: a
-        #    material quietly drawn with the wrong effect is a rendering bug that looks like art.
+        # 6. The effect is STATED, not inferred. §22.1's record carries `effectTierS`, and
+        #    inferring it from the class when the data already says it is a second opinion about
+        #    the same thing. `world-format.md` had an abbreviated `class` vocabulary of its own
+        #    ("lightmapped_opaque") that §22 does not use, and this tool was first written against
+        #    it -- §15.1 defines this file as "material definitions (§22)", so §22 wins.
+        require(effect_layout({"id": "M", "class": "metal", "effectTierS": "DualTexture"})
+                == LAYOUT_DUAL,
+                "a stated effectTierS wins over what the class would have implied")
+        require(effect_layout({"id": "M", "class": "wood"}) == LAYOUT_DUAL
+                and effect_layout({"id": "M", "class": "metal"}) == LAYOUT_BASIC
+                and effect_layout({"id": "M", "class": "foliage"}) == LAYOUT_ALPHATEST,
+                "§22.2's class table is the documented fallback when effectTierS is absent")
+        require(effect_layout({"id": "M", "class": "snow_tile"}) == LAYOUT_DUAL
+                and effect_layout({"id": "M", "class": "wet_wood"}) == LAYOUT_DUAL,
+                "§22.2's `wet_<class>` and `snow_<class>` are the same class with a modifier")
+        for bad, why in (({"id": "MAT_SKIN", "class": "skin"}, "§17.4 excludes"),
+                         ({"id": "MAT_FUR", "class": "fur"}, "§17.4 excludes")):
+            try:
+                effect_layout(bad)
+                raised = ""
+            except LayoutError as exc:
+                raised = str(exc)
+            require(why in raised,
+                    f"{bad['id']} is refused: a skinned prop is an animated one, and batching it "
+                    f"would freeze a character in its bind pose")
         (world_dir / "layout.materials.json").write_text(json.dumps({
             "schema": "cna-house/materials/1",
             "materials": [{"id": "MAT_ODD", "class": "shiny", "alphaMode": "opaque"}]},
@@ -740,17 +809,11 @@ def selftest() -> int:
             raised = ""
         except LayoutError as exc:
             raised = str(exc)
-        require("shiny" in raised and "stock effect" in raised,
-                "an unknown material class is refused, naming the class")
+        require("shiny" in raised and "no stock effect" in raised,
+                "an unknown class with no stated effect is refused, naming both")
 
-        (world_dir / "layout.materials.json").write_text(json.dumps({
-            "schema": "cna-house/materials/1",
-            "materials": [
-                {"id": "MAT_SHELL", "class": "lightmapped_opaque", "alphaMode": "opaque"},
-                {"id": "MAT_WOOD", "class": "lightmapped_opaque", "alphaMode": "opaque"},
-                {"id": "MAT_LEAF", "class": "lit_mask", "alphaMode": "mask"},
-                {"id": "MAT_LAMP", "class": "lit_opaque", "alphaMode": "opaque"},
-            ]}, indent=2) + "\n", encoding="utf-8")
+        (world_dir / "layout.materials.json").write_text(
+            json.dumps(materials_doc, indent=2) + "\n", encoding="utf-8")
 
         # 7. Dynamic props are excluded -- §17.4: "props that must move are excluded from batching
         #    and become dynamic instances".

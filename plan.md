@@ -3450,7 +3450,7 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
       accept: ≤ 6 chunks per cell; ≤ 65 535 vertices per chunk where 16-bit indices are used
       note: (2026-09-07) `tools/world/build_chunks.py` and `docs/chunk-format.md`, the normative
-            `CCHK` version 1 spec. 48 selftest claims; `--selftest` runs in CI. 17 injected bugs,
+            `CCHK` version 1 spec. 53 selftest claims; `--selftest` runs in CI. 20 injected bugs,
             all caught — six missed first time, and **two of those six were missed because the
             fixture was a cube**: a 1 m cube with up-facing normals is invariant under the yaw
             this tool bakes in, so "yaw dropped" and "normals not rotated" both passed. The
@@ -3485,9 +3485,21 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             and yaw are in the geometry or they are nowhere. Normals are rotated but not scaled; a
             non-uniform scale would need the inverse transpose and is refused rather than producing
             normals wrong by a factor no wireframe shows.
-      finding: an unrecognised material `class` is an **error naming the class**, never a fallback
-            to `BasicEffect`. A material quietly drawn with the wrong effect is a rendering bug
-            that presents as an art bug and gets looked for in the wrong place.
+      finding: (corrected 2026-09-07, while writing `HOUSE-00214`) the first version keyed the
+            vertex layout on a class vocabulary that **does not exist**. `docs/world-format.md`'s
+            abbreviated material example invents `lightmapped_opaque` / `lit_opaque`; §15.1 defines
+            `layout.materials.json` as "material definitions (**§22**)", and §22.1's record states
+            the effect outright in `effectTierS` while §22.2 gives the real class vocabulary
+            (`paint`, `wood`, `tile`, `metal`, `foliage`, …). The tool now reads `effectTierS`
+            first — an effect that is stated should not be inferred — falls back to §22.2's class
+            table, resolves `wet_<class>` / `snow_<class>` to their base, and refuses a `skin` or
+            `fur` material outright, because a skinned prop is an animated prop and §17.4 excludes
+            those from batching. `docs/world-format.md`'s example was corrected to §22's
+            vocabulary and now says which document wins.
+      finding: a material that resolves to no stock effect is an **error naming both** the stated
+            effect and the class, never a fallback to `BasicEffect`. A material quietly drawn with
+            the wrong effect is a rendering bug that presents as an art bug and gets looked for in
+            the wrong place.
       finding: `_COL` proxies are stripped here as well as extracted by `HOUSE-00210` — §18 says
             the build does both. A proxy left in a chunk is invisible geometry the GPU still
             transforms, and on a model whose proxy shares the source mesh it doubles the vertex

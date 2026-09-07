@@ -253,8 +253,10 @@ and has no runtime object; one that moves becomes a `DynamicInstance`.
 
 ## `layout.materials.json`
 
-The application-owned material (`cna-house.md` §22). It names an effect *class*, not an effect
-instance, and carries the non-visual properties the audio and physics systems read.
+The application-owned material. **`cna-house.md` §22.1 is the authority for this record and §22.2
+for the class vocabulary**; §15.1 defines this file as "material definitions (§22)", so where this
+page and §22 differ, §22 wins. It carries the non-visual properties the audio, physics and weather
+systems read as well as the visual ones.
 
 ```jsonc
 {
@@ -262,20 +264,39 @@ instance, and carries the non-visual properties the audio and physics systems re
   "materials": [
     {
       "id": "MAT_TILE_PORCELAIN_GREY",
-      "class": "lightmapped_opaque",     // decides the Tier-S effect and the Tier-E technique
+      "class": "tile",                   // §22.2's vocabulary: paint · wood · carpet · tile ·
+                                         // stone · concrete · metal · plastic · glass · fabric ·
+                                         // skin · hair · fur · foliage · asphalt · gravel ·
+                                         // grass · soil · water · emissive, and the derived
+                                         // `wet_<class>` / `snow_<class>` forms
       "albedo": "Textures/Architecture/tile-porcelain-grey",
-      "normal": null,
+      "normal": null,                    // Tier E only
+      "lightmapChannel": 1,
+      "tint": [1.00, 1.00, 1.00],
       "specularPower": 48.0, "specularColor": [0.30, 0.30, 0.30],
       "alphaMode": "opaque",             // opaque | mask | blend
       "alphaCutoff": null,
       "twoSided": false,
       "uvScale": [4.0, 4.0],
+      "wetResponse":  { "albedoDarken": 0.22, "specularBoost": 2.1, "powerBoost": 2.5 },
+      "snowResponse": { "coverable": true, "slopeLimitDeg": 40 },
       "footstepSurface": "tile",
-      "audioAbsorption": 0.06
+      "audioAbsorption": 0.06,
+      "effectTierS": "DualTexture",      // Basic | DualTexture | AlphaTest | Skinned
+      "effectTierE": "RoomLit"
     }
   ]
 }
 ```
+
+`effectTierS` is what the content build reads to choose a chunk's vertex layout
+([`chunk-format.md`](chunk-format.md) §3), because it is stated rather than inferred. §22.2's
+class table is the documented fallback when a material omits it — `wood` is `DualTextureEffect`
+static and `BasicEffect` dynamic, and only static props are batched, so the static column is the
+one the batcher uses.
+
+`snowResponse.slopeLimitDeg` is read by [`snowshell-format.md`](snowshell-format.md): a face
+steeper than this never joins the snow shell, which is what stops snow clinging to walls (§38).
 
 ## `layout.nav.json`
 

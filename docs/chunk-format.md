@@ -46,9 +46,19 @@ reads and nothing more. Chunks are grouped by effect class, so a chunk always ha
 `SkinnedEffect` has no layout here: a skinned prop is an animated one, and animated props are not
 batched (§17.4).
 
-`layout.materials.json`'s `class` chooses the layout. An unrecognised class is an **error naming
-the class**, never a silent fallback to `BasicEffect`: a material quietly drawn with the wrong
-effect is a rendering bug that presents as an art bug and gets looked for in the wrong place.
+The layout comes from the material's **`effectTierS`**, which `cna-house.md` §22.1 puts in the
+material record precisely so the effect is stated rather than inferred — inferring it when the data
+already says it is a second opinion about the same thing, and two opinions disagree eventually.
+When a material omits it, §22.2's class table is the documented fallback (`wood` is
+`DualTextureEffect` static and `BasicEffect` dynamic, and only static props are batched, so the
+static column is the one that applies). `wet_<class>` and `snow_<class>` resolve to their base
+class.
+
+A material that resolves to neither is an **error naming both**, never a silent fallback to
+`BasicEffect`: a material quietly drawn with the wrong effect is a rendering bug that presents as
+an art bug and gets looked for in the wrong place. A material whose class is `skin` or `fur`, or
+whose stated effect is `SkinnedEffect`, is refused outright — a skinned prop is an animated prop,
+and §17.4 excludes animated props from batching.
 
 ## 4. Layout
 
