@@ -454,6 +454,28 @@ namespace
             })";
         }
 
+        /// Two zones (one with no ambience bed), one emitter, and §64.3's two door rows.
+        static std::string Audio()
+        {
+            return R"({
+              "schema": "cna-house/audio/1",
+              "zones": [
+                { "id": "AZ_L0_KITCHEN", "cell": "L0_KITCHEN", "bed": "AMB_KITCHEN",
+                  "gain": 0.55 },
+                { "id": "AZ_L0_STAIR", "cell": "L0_STAIR", "bed": null, "gain": 0.30 }
+              ],
+              "emitters": [
+                { "id": "EM_FRIDGE_HUM", "cell": "L0_KITCHEN", "position": [1.20, 0.90, -26.70],
+                  "loop": "AMB_FRIDGE_HUM", "gain": 0.35, "radius": 4.0,
+                  "interactable": "FRIDGE_L0_KITCHEN" }
+              ],
+              "transmission": {
+                "door_hollow": { "open": 0.05, "closed": 0.55 },
+                "door_solid":  { "open": 0.05, "closed": 0.78 }
+              }
+            })";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -474,6 +496,7 @@ namespace
             Write("layout.lights.json", Lights());
             Write("layout.props.json", Props());
             Write("layout.nav.json", Nav());
+            Write("layout.audio.json", Audio());
             WriteManifest({"layout.levels.json",
                            "layout.materials.json",
                            "layout.cells.json",
@@ -482,7 +505,8 @@ namespace
                            "layout.stairs.json",
                            "layout.lights.json",
                            "layout.props.json",
-                           "layout.nav.json"});
+                           "layout.nav.json",
+                           "layout.audio.json"});
         }
 
         std::string directory_;
@@ -1897,6 +1921,119 @@ namespace
         EXPECT_NE(nav.Error().Message().find("ferret"), std::string::npos) << nav.Error().ToString();
     }
 
+    // --- the audio --------------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, TheAudioZonesEmittersAndTransmissionTableAreRead)
+    {
+        Write("layout.audio.json", Audio());
+        world::WorldData::Contents contents;
+        const auto audio = world::WorldLoader::LoadAudio(directory_, contents);
+        ASSERT_TRUE(audio) << audio.Error().ToString();
+
+        ASSERT_EQ(contents.audioZones.size(), 2U);
+        EXPECT_EQ(contents.audioZones[0].id, Intern("AZ_L0_KITCHEN"));
+        EXPECT_EQ(contents.audioZones[0].cell, Intern("L0_KITCHEN"));
+        EXPECT_EQ(contents.audioZones[0].bed, Intern("AMB_KITCHEN"));
+        EXPECT_FLOAT_EQ(contents.audioZones[0].gain, 0.55F);
+        EXPECT_FALSE(contents.audioZones[1].bed.IsValid()) << "a zone may have no bed";
+
+        ASSERT_EQ(contents.audioEmitters.size(), 1U);
+        const world::AudioEmitter& fridge = contents.audioEmitters[0];
+        EXPECT_EQ(fridge.id, Intern("EM_FRIDGE_HUM"));
+        EXPECT_EQ(fridge.cell, Intern("L0_KITCHEN"));
+        EXPECT_FLOAT_EQ(fridge.position.Y, 0.90F);
+        EXPECT_EQ(fridge.loop, Intern("AMB_FRIDGE_HUM"));
+        EXPECT_FLOAT_EQ(fridge.gain, 0.35F);
+        EXPECT_FLOAT_EQ(fridge.radius, 4.0F);
+        EXPECT_EQ(fridge.interactable, Intern("FRIDGE_L0_KITCHEN"));
+
+        ASSERT_EQ(contents.audioTransmission.size(), 2U);
+        EXPECT_EQ(contents.audioTransmission[0].kind, "door_hollow");
+        EXPECT_FLOAT_EQ(contents.audioTransmission[0].closed, 0.55F);
+        EXPECT_FLOAT_EQ(contents.audioTransmission[1].closed, 0.78F);
+    }
+
+    TEST_F(WorldLoaderTest, AnEmitterCarriesItsCellBecauseTheSolverStartsFromCells)
+    {
+        // ADR-0010: the portal-path solve starts from cells, not from positions. A point alone
+        // would have to be located first, on every voice, every frame.
+        Write("layout.audio.json",
+              R"({"schema": "cna-house/audio/1", "zones": [],
+                  "emitters": [{"id": "E", "position": [0, 1, 0]}]})");
+        world::WorldData::Contents contents;
+        const auto audio = world::WorldLoader::LoadAudio(directory_, contents);
+        ASSERT_FALSE(audio);
+        EXPECT_NE(audio.Error().Context().find("cell"), std::string::npos) << audio.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AGainOutsideZeroToOneIsRefused)
+    {
+        // A gain is a linear multiplier and above 1 it clips -- a distortion in an ambience bed
+        // follows the player from room to room.
+        for (const std::string value : {"-0.1", "1.5"})
+        {
+            Write("layout.audio.json",
+                  R"({"schema": "cna-house/audio/1",
+                      "zones": [{"id": "Z", "cell": "C", "gain": )" +
+                      value + "}]}");
+            world::WorldData::Contents contents;
+            const auto audio = world::WorldLoader::LoadAudio(directory_, contents);
+            ASSERT_FALSE(audio) << "accepted a gain of " << value;
+            EXPECT_EQ(audio.Error().Code(), ErrorCode::OutOfRange);
+        }
+    }
+
+    TEST_F(WorldLoaderTest, ANegativeEmitterRadiusIsRefused)
+    {
+        Write("layout.audio.json",
+              R"({"schema": "cna-house/audio/1", "zones": [],
+                  "emitters": [{"id": "E", "cell": "C", "position": [0, 1, 0],
+                                "radius": -2.0}]})");
+        world::WorldData::Contents contents;
+        const auto audio = world::WorldLoader::LoadAudio(directory_, contents);
+        ASSERT_FALSE(audio);
+        EXPECT_EQ(audio.Error().Code(), ErrorCode::OutOfRange);
+    }
+
+    TEST_F(WorldLoaderTest, ATransmissionLossThatFallsWhenTheDoorClosesIsRefused)
+    {
+        // Closing a door cannot make it quieter to shut than to leave open. A sign-flipped pair
+        // sounds exactly like a broken audio system and nothing points at the data.
+        Write("layout.audio.json",
+              R"({"schema": "cna-house/audio/1", "zones": [],
+                  "transmission": {"door_solid": {"open": 0.60, "closed": 0.20}}})");
+        world::WorldData::Contents contents;
+        const auto audio = world::WorldLoader::LoadAudio(directory_, contents);
+        ASSERT_FALSE(audio);
+        EXPECT_NE(audio.Error().Message().find("at least as much"), std::string::npos)
+            << audio.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, ATransmissionLossOutsideZeroToOneIsRefused)
+    {
+        Write("layout.audio.json",
+              R"({"schema": "cna-house/audio/1", "zones": [],
+                  "transmission": {"door_solid": {"open": 0.05, "closed": 1.40}}})");
+        world::WorldData::Contents contents;
+        const auto audio = world::WorldLoader::LoadAudio(directory_, contents);
+        ASSERT_FALSE(audio);
+        EXPECT_EQ(audio.Error().Code(), ErrorCode::OutOfRange);
+    }
+
+    TEST_F(WorldLoaderTest, TheTransmissionTableIsLookedUpByName)
+    {
+        Write("layout.audio.json", Audio());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadAudio(directory_, contents));
+        const auto loaded = world::WorldData::Create(std::move(contents));
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+
+        const world::AudioTransmission* solid = loaded.Value().FindTransmission("door_solid");
+        ASSERT_NE(solid, nullptr);
+        EXPECT_FLOAT_EQ(solid->closed, 0.78F);
+        EXPECT_EQ(loaded.Value().FindTransmission("portcullis"), nullptr);
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -1922,6 +2059,8 @@ namespace
         EXPECT_EQ(world.Value().Props().size(), 3U);
         EXPECT_EQ(world.Value().NavNodes().size(), 3U);
         EXPECT_EQ(world.Value().NavMarkers().size(), 3U);
+        EXPECT_EQ(world.Value().AudioZones().size(), 2U);
+        EXPECT_NE(world.Value().FindTransmission("door_solid"), nullptr);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -1953,6 +2092,7 @@ namespace
         Write("layout.lights.json", Lights());
         Write("layout.props.json", Props());
         Write("layout.nav.json", Nav());
+        Write("layout.audio.json", Audio());
         WriteManifest({"layout.levels.json",
                        "layout.materials.json",
                        "layout.cells.json",
@@ -1961,7 +2101,8 @@ namespace
                        "layout.stairs.json",
                        "layout.lights.json",
                        "layout.props.json",
-                       "layout.nav.json"});
+                       "layout.nav.json",
+                       "layout.audio.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

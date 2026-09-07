@@ -5109,8 +5109,22 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: an edge that crosses a portal names it, which is the whole reason there is one
             authored graph and not two: a closed door closes the route for the pets exactly as it
             does for vision and sound.
-- [ ] HOUSE-00352 — `WorldLoader`: audio zones, ambience beds, emitter placements, portal transmission losses
+- [x] HOUSE-00352 — `WorldLoader`: audio zones, ambience beds, emitter placements, portal transmission losses
       dep: HOUSE-00345 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadAudio`, plus `AudioTransmission` and
+            `WorldData::FindTransmission`. 7 new unit tests; eight injected bugs, eight caught.
+      note: the transmission table is a **named** loss pair — `door_hollow`, `door_solid` — rather
+            than a per-portal number, because §64.3's figures are properties of a kind of
+            construction and the house has 62 doors of half a dozen kinds. A portal's own
+            `soundLoss` overrides it where a door is unusual; this is what the other sixty read.
+            Held as a vector, not a map: a handful of rows, read once per portal solve, and a
+            stable order keeps a diagnostic that lists them stable too.
+      finding: `closed` may not be **less** than `open`. Closing a door cannot make it quieter to
+            shut than to leave open, and a sign-flipped pair sounds exactly like a broken audio
+            system with nothing in the frame pointing at the data.
+      note: an emitter must name its cell. ADR-0010's portal-path solve starts from cells and not
+            from positions, so a point alone would have to be located first — on every voice,
+            every frame.
 - [ ] HOUSE-00353 — `WorldLoader`: exterior (terrain reference, road, fences, neighbourhood, vegetation instances)
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00354 — `WorldLoader`: interactables, with the closed-vocabulary predicate/effect parser

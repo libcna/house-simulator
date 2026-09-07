@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <span>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -77,6 +78,7 @@ namespace cnahouse::world
             std::vector<NavForbidden> navForbidden;
             std::vector<AudioZone> audioZones;
             std::vector<AudioEmitter> audioEmitters;
+            std::vector<AudioTransmission> audioTransmission;
             Exterior exterior;
         };
 
@@ -177,6 +179,14 @@ namespace cnahouse::world
         {
             return m_contents.audioEmitters;
         }
+
+        [[nodiscard]] std::span<const AudioTransmission> AudioTransmissions() const noexcept
+        {
+            return m_contents.audioTransmission;
+        }
+
+        /// @brief The named loss pair, or null when the table does not have that kind.
+        [[nodiscard]] const AudioTransmission* FindTransmission(std::string_view kind) const noexcept;
 
         [[nodiscard]] const Exterior& GetExterior() const noexcept
         {

@@ -134,6 +134,12 @@ namespace cnahouse::world
         [[nodiscard]] static util::Result<void> LoadNav(std::string_view directory,
                                                         WorldData::Contents& contents);
 
+        /// @brief Reads `layout.audio.json` into @p contents.
+        ///
+        /// Zones, emitters and §64.3's named transmission table.
+        [[nodiscard]] static util::Result<void> LoadAudio(std::string_view directory,
+                                                          WorldData::Contents& contents);
+
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
         /// As each `HOUSE-00344`…`HOUSE-00355` lands, its file joins this sequence. Until then the

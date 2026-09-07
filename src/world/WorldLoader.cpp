@@ -2378,6 +2378,213 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadAudio(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.audio.json", "audio", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+        const JsonValue& root = document.Value().Root();
+
+        // A gain is a linear multiplier and 0..1 is the whole of it. Above 1 it clips, and a clip
+        // in an ambience bed is a distortion that follows the player from room to room.
+        const auto gain = [](const JsonValue& row, const std::string& where) -> Result<float>
+        {
+            const Result<float> value = row.OptionalFloat("gain", 1.0F);
+            if (!value)
+            {
+                return value.Error();
+            }
+            if (value.Value() < 0.0F || value.Value() > 1.0F)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "a gain is 0..1; this is " + std::to_string(value.Value()),
+                           where + "/gain");
+            }
+            return value.Value();
+        };
+
+        const Result<JsonValue> zones = root.RequireArray("zones");
+        if (!zones)
+        {
+            return zones.Error().WithContext("layout.audio.json");
+        }
+        const Result<std::vector<JsonValue>> zoneRows = zones.Value().Elements();
+        if (!zoneRows)
+        {
+            return zoneRows.Error().WithContext("layout.audio.json");
+        }
+        for (const JsonValue& row : zoneRows.Value())
+        {
+            AudioZone zone;
+            const Result<util::Id> id = RequireId(row, "id");
+            if (!id)
+            {
+                return id.Error().WithContext("layout.audio.json");
+            }
+            zone.id = id.Value();
+            const Result<util::Id> cell = RequireId(row, "cell");
+            if (!cell)
+            {
+                return cell.Error().WithContext("layout.audio.json");
+            }
+            zone.cell = cell.Value();
+            const Result<util::Id> bed = OptionalId(row, "bed");
+            if (!bed)
+            {
+                return bed.Error().WithContext("layout.audio.json");
+            }
+            zone.bed = bed.Value();
+            const Result<float> zoneGain = gain(row, row.Path());
+            if (!zoneGain)
+            {
+                return zoneGain.Error().WithContext("layout.audio.json");
+            }
+            zone.gain = zoneGain.Value();
+            contents.audioZones.push_back(std::move(zone));
+        }
+
+        if (root.Has("emitters") && !root.IsNull("emitters"))
+        {
+            const Result<JsonValue> emitters = root.RequireArray("emitters");
+            if (!emitters)
+            {
+                return emitters.Error().WithContext("layout.audio.json");
+            }
+            const Result<std::vector<JsonValue>> rows = emitters.Value().Elements();
+            if (!rows)
+            {
+                return rows.Error().WithContext("layout.audio.json");
+            }
+            for (const JsonValue& row : rows.Value())
+            {
+                AudioEmitter emitter;
+                const Result<util::Id> id = RequireId(row, "id");
+                if (!id)
+                {
+                    return id.Error().WithContext("layout.audio.json");
+                }
+                emitter.id = id.Value();
+
+                // Every emitter carries a cell id, because the portal-path solver (ADR-0010)
+                // starts from cells and not from positions: a point alone would have to be
+                // located first, on every voice, every frame.
+                const Result<util::Id> cell = RequireId(row, "cell");
+                if (!cell)
+                {
+                    return cell.Error().WithContext("layout.audio.json");
+                }
+                emitter.cell = cell.Value();
+
+                const Result<Microsoft::Xna::Framework::Vector3> position = row.RequireVector3("position");
+                if (!position)
+                {
+                    return position.Error().WithContext("layout.audio.json");
+                }
+                emitter.position = position.Value();
+
+                for (const auto& [field, target] :
+                     std::initializer_list<std::pair<std::string_view, util::Id*>>{
+                         {"loop", &emitter.loop}, {"interactable", &emitter.interactable}})
+                {
+                    const Result<util::Id> value = OptionalId(row, field);
+                    if (!value)
+                    {
+                        return value.Error().WithContext("layout.audio.json");
+                    }
+                    *target = value.Value();
+                }
+
+                const Result<float> emitterGain = gain(row, row.Path());
+                if (!emitterGain)
+                {
+                    return emitterGain.Error().WithContext("layout.audio.json");
+                }
+                emitter.gain = emitterGain.Value();
+
+                const Result<float> radius = row.OptionalFloat("radius", 0.0F);
+                if (!radius)
+                {
+                    return radius.Error().WithContext("layout.audio.json");
+                }
+                if (radius.Value() < 0.0F)
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "a radius is not negative; this is " + std::to_string(radius.Value()),
+                               "layout.audio.json/" + row.Path() + "/radius");
+                }
+                emitter.radius = radius.Value();
+
+                contents.audioEmitters.push_back(std::move(emitter));
+            }
+        }
+
+        if (root.Has("transmission") && !root.IsNull("transmission"))
+        {
+            const Result<JsonValue> transmission = root.RequireObject("transmission");
+            if (!transmission)
+            {
+                return transmission.Error().WithContext("layout.audio.json");
+            }
+            // The table is an object keyed by construction kind, and `JsonValue` reads named
+            // fields rather than enumerating them, so the kinds are the ones §64.3 names. A kind
+            // the file has and this list does not is not silently dropped: the count is compared
+            // below and a mismatch is reported.
+            static constexpr std::array<std::string_view, 6> kKinds{
+                "door_hollow", "door_solid", "door_glazed", "window", "opening", "hatch"};
+            for (const std::string_view kind : kKinds)
+            {
+                if (!transmission.Value().Has(kind))
+                {
+                    continue;
+                }
+                const Result<JsonValue> pair = transmission.Value().RequireObject(kind);
+                if (!pair)
+                {
+                    return pair.Error().WithContext("layout.audio.json");
+                }
+                AudioTransmission row;
+                row.kind = std::string(kind);
+                for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, float*>>{
+                         {"open", &row.open}, {"closed", &row.closed}})
+                {
+                    const Result<float> value = pair.Value().RequireFloat(field);
+                    if (!value)
+                    {
+                        return value.Error().WithContext("layout.audio.json");
+                    }
+                    if (value.Value() < 0.0F || value.Value() > 1.0F)
+                    {
+                        return Err(ErrorCode::OutOfRange,
+                                   "a transmission loss is 0 (transparent) to 1 (inaudible); this "
+                                   "is " +
+                                       std::to_string(value.Value()),
+                                   "layout.audio.json/transmission/" + std::string(kind) + "/" +
+                                       std::string(field));
+                    }
+                    *target = value.Value();
+                }
+                // Closing a door does not make it quieter to shut than to leave open. The other
+                // way round is a sign-flipped pair, which sounds like the audio system is broken.
+                if (row.closed < row.open)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "closing a " + std::string(kind) +
+                                   " loses at least as much as "
+                                   "leaving it open; this is " +
+                                   std::to_string(row.closed) + " closed against " +
+                                   std::to_string(row.open) + " open",
+                               "layout.audio.json/transmission/" + std::string(kind));
+                }
+                contents.audioTransmission.push_back(std::move(row));
+            }
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -2425,6 +2632,10 @@ namespace cnahouse::world
         if (const Result<void> nav = LoadNav(directory, contents); !nav)
         {
             return nav.Error();
+        }
+        if (const Result<void> audio = LoadAudio(directory, contents); !audio)
+        {
+            return audio.Error();
         }
 
         util::Log::Info(util::LogCat::World,

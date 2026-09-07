@@ -660,6 +660,22 @@ namespace cnahouse::world
         util::Id interactable;
     };
 
+    /// @brief One row of `layout.audio.json`'s `transmission` table.
+    ///
+    /// A **named** loss pair -- `door_hollow`, `door_solid` -- rather than a per-portal number,
+    /// because §64.3's figures are properties of a kind of construction and the house has 62
+    /// doors of half a dozen kinds. A portal's own `soundLoss` overrides it where a door is
+    /// unusual; this is what the other sixty read.
+    ///
+    /// A vector rather than a map: it is read once per portal solve, it has a handful of rows, and
+    /// a stable order keeps a diagnostic that lists it stable too.
+    struct AudioTransmission
+    {
+        std::string kind;
+        float open = 0.0F;
+        float closed = 0.0F;
+    };
+
     struct Terrain
     {
         std::string heightfield;

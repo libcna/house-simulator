@@ -315,6 +315,18 @@ namespace cnahouse::world
         return Slice(m_lightsOfGroup, m_lightsByGroup, group);
     }
 
+    const AudioTransmission* WorldData::FindTransmission(std::string_view kind) const noexcept
+    {
+        for (const AudioTransmission& row : m_contents.audioTransmission)
+        {
+            if (row.kind == kind)
+            {
+                return &row;
+            }
+        }
+        return nullptr;
+    }
+
     util::Id WorldData::OtherSide(const Portal& portal, util::Id cell) const noexcept
     {
         if (portal.cellA == cell)
