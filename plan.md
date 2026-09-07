@@ -2882,8 +2882,37 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00271 — Verify **Mixamo** terms and record the verdict; expected outcome is "not used for shipped files"
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
-- [ ] HOUSE-00272 — Verify **Freesound CC0** filter semantics and the per-sound evidence we must archive
+- [x] HOUSE-00272 — Verify **Freesound CC0** filter semantics and the per-sound evidence we must archive
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `docs/licence-evidence/freesound.md`. Unblocks `HOUSE-00281`…`HOUSE-00290`,
+            roughly 150 samples.
+      finding: **the CC0 filter does not GUARANTEE CC0, and cannot.** It reflects a field the
+            uploader chose. What stands behind it is the ToS: the uploader *warrants* they hold the
+            rights (§87b) and *indemnifies UPF, its licensees and its users* against a breach (§87c),
+            and the licence is granted **directly to downstream users** (§87a) — so our right does
+            not depend on Freesound continuing to exist. But nobody at Freesound checks. That places
+            Freesound **below** Poly Haven and ambientCG, which warrant their own chain of title
+            first-hand, and **above** a bare aggregator. Acceptable for short effects; not for a
+            hero asset.
+      finding: **CC-BY-NC and the retired Sampling+ are excluded outright.** NC conflicts with a
+            possible paid release and is already rejected by ADR-0012; Sampling+ was retired by
+            Creative Commons as too hard to interpret and Freesound's own reading forbids commercial
+            advertising use — an ambiguous licence is an unusable one. Both still appear on old
+            uploads, so the filter must be set, not assumed.
+      finding: **ToS §65 is a trap for a later reader.** "you may not use the Freesound website
+            portal for commercial purposes" restricts commercial use of the *portal*, not of a CC0
+            sound in a commercial product — that is governed by the sound's own licence, granted to
+            users by §87(a). Recorded because the sentence read alone looks like it forbids exactly
+            what this project intends.
+      finding: per-sound evidence is fixed as: sound page URL in the stable `freesound.org/s/<id>/`
+            form, numeric id, uploader username, **the licence as displayed on that page that day**,
+            retrieval date, and both hashes (original and converted, per `HOUSE-00279`). The search
+            filter is not the evidence. Freesound's own per-account attribution list is a useful
+            cross-check but lives behind a login and cannot be read by a gate or a future developer.
+      finding: CC-BY is usable — attribution is generated from the manifest, so the obligation is
+            met by construction — but `licenses/cc-by-4.0/` must be archived before the first such
+            sound is committed, and CC0 should be preferred simply because 150 CC-BY sounds means
+            150 credit lines for fractions of a second of audio.
 - [x] HOUSE-00273 — Verify the **font** licences (OFL) and archive them
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) Largely discharged by `HOUSE-00200`, which had to verify the licence
