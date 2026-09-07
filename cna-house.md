@@ -1571,7 +1571,9 @@ Validation runs in CI and as a pre-build step. A failure fails the build.
 
 | From → To | Portal | Kind | Notes |
 |---|---|---|---|
-| `EXT_WORLD` → `L0_PORCH` | `P_EXT__L0_PORCH` | ○ | Open-sided porch |
+| `EXT_FRONTYARD_W` → `L0_PORCH` | `P_EXT_FRONT_W__L0_PORCH` | ○ | Open-sided porch, west |
+| `EXT_FRONTYARD_E` → `L0_PORCH` | `P_EXT_FRONT_E__L0_PORCH` | ○ | Open-sided porch, east |
+| `EXT_WALK` → `L0_PORCH` | `P_EXT_WALK__L0_PORCH` | ○ | Up the steps from the front walk |
 | `L0_PORCH` → `L0_FOYER` | `P_L0_PORCH__L0_FOYER` | ▣ | **Front door**, 1.00 × 2.15, opens inward, hinge west |
 | `L0_FOYER` → `L0_HALL` | `P_L0_FOYER__L0_HALL` | ○ | 3.00 m wide |
 | `L0_FOYER` → `L0_LIVING` | `P_L0_FOYER__L0_LIVING` | ◫ | Double doors, hinge both jambs |

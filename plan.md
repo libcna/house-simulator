@@ -5952,8 +5952,22 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
 - [ ] HOUSE-00395 — Author `initialstate.json` exactly as `cna-house.md` §65.6 specifies
       dep: HOUSE-00355 · sys: world · plat: TOOL · pri: MUST
       accept: every field in §65.6 is present; the three named open doors and the one open window are explicit
-- [ ] HOUSE-00396 — Run `report_graph.py` and reconcile its output with `cna-house.md` §16.3; fix whichever is wrong
+- [x] HOUSE-00396 — Run `report_graph.py` and reconcile its output with `cna-house.md` §16.3; fix whichever is wrong
       dep: HOUSE-00374…HOUSE-00377 · sys: world · plat: TOOL · pri: MUST
+      finding: **§16.1 named a portal that does not exist.** `P_EXT__L0_PORCH`, an opening from
+            `EXT_WORLD` straight onto the porch, was written before §13.7's yard cells: the porch
+            is actually reached by three cased openings, from the two front yards and up the steps
+            from the walk. §16.1 now lists those three.
+      note: §16.3's metrics already agreed, because `HOUSE-00374`…`HOUSE-00377` corrected them as
+            they authored. The deliverable that makes it **stay** true is the gate:
+            `report_graph.py --check` compares both directions — every `P_*` §16.1 and §16.2 name
+            must exist in the data, and every §16.3 metric row must state the number the layout
+            measures — and it is wired as `graph-report` beside `window-schedule`.
+      note: the metric comparison is "the measured number appears in the row" rather than a full
+            parse. Those rows carry the design figure beside the measurement on purpose, and a
+            parser strict enough to read them would break whenever somebody explains something.
+            A deleted row is caught separately, because a check that only compares the rows it
+            finds says nothing about the one somebody removed.
 - [ ] HOUSE-00397 — Run the full validator; fix every violation; record the first clean run
       dep: HOUSE-00396, HOUSE-00360…HOUSE-00362 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00398 — Generate the printable floor plans (SVG per level) from the layout for review and for the docs

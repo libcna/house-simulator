@@ -141,6 +141,10 @@ run_gate "world-rules" check_world
 # `HOUSE-00380`. §12.6's counts table is maintained by hand and has already been found fifteen
 # windows out (`HOUSE-00376`). This compares it, cell by cell, with the layout, and regenerates
 # docs/window-schedule.md -- the per-window schedule §12.6 said lived in a file that never existed.
+# `HOUSE-00396`. §16.1-§16.3 are written by hand and were designed before the layout existed.
+# This checks both directions: every portal §16's adjacency tables name exists, and every §16.3
+# metric row states the number the layout actually measures.
+run_gate "graph-report" python3 tools/world/report_graph.py assets-src/world --check
 run_gate "window-schedule" python3 tools/world/window_schedule.py --check
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
 # `HOUSE-00280`. The surface map is counted from the manifest, so importing or dropping a

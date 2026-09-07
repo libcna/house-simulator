@@ -160,7 +160,9 @@ jobs:
       - name: The graph report must measure the graph, not restate the design
         working-directory: cna-house
         # `HOUSE-00359`. §16.3's numbers were designed before the layout existed, so this computes
-        # them instead. The claims that matter are the two graphs and the difference between them:
+        # them instead, and `HOUSE-00396` added the cross-check the other way: §16 naming a portal
+        # nobody authored, and a §16.3 metric row that has drifted or been deleted, both fail.
+        # The claims that matter are the two graphs and the difference between them:
         # through open doors the fixture is one connected house; with every door shut it falls
         # into four pieces, which is §16.3's "whole point" at fixture scale. A disconnected graph
         # reports its diameter as ∞ and not as the largest finite distance it happened to find.

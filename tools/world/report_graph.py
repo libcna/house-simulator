@@ -41,6 +41,7 @@ from __future__ import annotations
 import argparse
 import collections
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -344,6 +345,46 @@ def selftest() -> int:
                 f"1-cell WC ({len(groups[0])} vs "
                 f"{renamed_report['shutGraph']['largestComponent']})")
 
+        # `HOUSE-00396`: §16 and the layout are cross-checked, both ways round.
+        agreeing = ("### 16.1 Adjacency table\n"
+                    "| `L0_FOYER` → `L0_HALL` | `P_FOYER__HALL` | ○ | |\n"
+                    "### 16.3 Graph shape\n"
+                    "| Cells | 9 |\n"
+                    "| Portals total | 8 |\n"
+                    "| — windows | 0 |\n"
+                    f"| Mean interior cell degree | {report['degree']['mean']} |\n"
+                    f"| Max interior cell degree | `{report['degree']['maxCell']}` = "
+                    f"{report['degree']['max']} |\n"
+                    f"| Graph diameter (through open doors) | "
+                    f"{report['openGraph']['diameter']} hops |\n"
+                    "| Diameter with all doors closed | ∞ — 4 components |\n"
+                    "| Largest component with all doors closed | 6 cells |\n"
+                    "### 16.4 Cell-membership lookup\n")
+        require(disagreements(report, agreeing) == [],
+                f"§16 agreeing with the layout is silent ({disagreements(report, agreeing)})")
+
+        drifted = agreeing.replace("| Portals total | 8 |", "| Portals total | 12 |")
+        problems = disagreements(report, drifted)
+        require(any("does not mention '8'" in problem for problem in problems),
+                f"a metric that drifted is named, with the measured value ({problems})")
+
+        invented = agreeing.replace("`P_FOYER__HALL`", "`P_FOYER__NOWHERE`")
+        problems = disagreements(report, invented)
+        require(any("which no portal file declares" in problem for problem in problems),
+                f"and an adjacency row naming a portal nobody authored is caught ({problems})")
+
+        require(disagreements(report, "# nothing here\n") != [],
+                "a cna-house.md with no §16 fails rather than passing")
+
+        # ...and a §16.3 that has quietly LOST a row fails too. A cross-check that only compares
+        # the rows it finds says nothing about the row somebody deleted, which is the easiest way
+        # for a measurement to stop being checked.
+        deleted = "\n".join(line for line in agreeing.splitlines()
+                            if not line.startswith("| Portals total |")) + "\n"
+        problems = disagreements(report, deleted)
+        require(any("has no row" in problem for problem in problems),
+                f"a §16.3 with a metric row deleted is caught ({problems})")
+
         # 2. A window is not a way through, in either graph. `validate_world.py` rule 5 makes the
         #    same distinction; if these two ever disagree, one of them is letting a player walk
         #    through glass.
@@ -430,12 +471,67 @@ def selftest() -> int:
     return 0
 
 
+ARCHITECTURE = REPO / "cna-house.md"
+
+
+def disagreements(report: dict, text: str) -> list[str]:
+    """Every way §16 and the layout disagree. `HOUSE-00396`.
+
+    Two checks, and the cheap one catches more: every `P_*` id §16.1 and §16.2 name must exist in
+    the data -- a table naming a portal nobody authored is the failure mode a room-by-room table
+    has -- and §16.3's metric rows must each contain the measured value. The second is deliberately
+    "the number appears in the row" rather than a full parse: those rows carry the design figure
+    beside the measurement on purpose, and a parser strict enough to read them would be a parser
+    that breaks whenever somebody explains something.
+    """
+    problems = []
+    start = text.find("### 16.1 Adjacency table")
+    stop = text.find("### 16.3 Graph shape")
+    if start < 0 or stop < 0:
+        return ["cna-house.md: §16.1-§16.3 were not found; the cross-check cannot run"]
+
+    named = sorted(set(re.findall(r"`(P_[A-Z0-9_]+)`", text[start:stop])))
+    authored = {row["portal"] for row in report["rows"]}
+    for portal in named:
+        if portal not in authored:
+            problems.append(f"cna-house.md §16.1/§16.2 names {portal}, which no portal file "
+                            f"declares")
+
+    cells, portals, degree = report["cells"], report["portals"], report["degree"]
+    open_graph, shut_graph = report["openGraph"], report["shutGraph"]
+    wanted = [
+        ("| Cells |", str(cells["total"])),
+        ("| Portals total |", str(portals["total"])),
+        ("| — windows |", str(portals["byKind"].get("window", 0))),
+        ("| Mean interior cell degree |", f"{degree['mean']}"),
+        ("| Max interior cell degree |", f"{degree['maxCell']}"),
+        ("| Max interior cell degree |", str(degree["max"])),
+        ("| Diameter with all doors closed |", str(shut_graph["components"])),
+        ("| Largest component with all doors closed |", str(shut_graph["largestComponent"])),
+    ]
+    if open_graph["diameter"] is not None:
+        wanted.append(("| Graph diameter (through open doors) |",
+                       f"{open_graph['diameter']} hops"))
+    table = text[stop:text.find("### 16.4", stop)] if text.find("### 16.4", stop) > 0 \
+        else text[stop:]
+    for label, value in wanted:
+        row = next((line for line in table.splitlines() if line.startswith(label)), None)
+        if row is None:
+            problems.append(f"cna-house.md §16.3 has no row {label.strip('| ')!r}")
+        elif value not in row:
+            problems.append(f"cna-house.md §16.3: {label.strip('| ')!r} does not mention "
+                            f"{value!r}, which is what the layout measures")
+    return problems
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("directory", nargs="?", type=Path,
                         default=REPO / "assets-src" / "world")
     parser.add_argument("--json", action="store_true", help="emit the numbers, not the tables")
     parser.add_argument("-o", "--output", type=Path, help="write the markdown to a file")
+    parser.add_argument("--check", action="store_true",
+                        help="fail if §16 disagrees with the layout")
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
 
@@ -446,6 +542,17 @@ def main() -> int:
         return 2
 
     report = measure(args.directory)
+
+    if args.check:
+        problems = disagreements(report, ARCHITECTURE.read_text(encoding="utf-8"))
+        for problem in problems:
+            print(f"report_graph: {problem}", file=sys.stderr)
+        if problems:
+            return 1
+        print(f"report_graph: §16 matches {args.directory} -- "
+              f"{report['cells']['total']} cells, {report['portals']['total']} portals.")
+        return 0
+
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
         return 0
