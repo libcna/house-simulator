@@ -996,6 +996,23 @@ def rule_6_references(world: World) -> list[Problem]:
                 f"which joins {sorted(x for x in ends if x)}; a route through a door goes "
                 f"through that door"))
 
+    # The exterior file's own references (`HOUSE-00390`): a gate hangs in a fence, and a
+    # structure that is enterable names the cell you are in when you are inside it.
+    exterior = world.layout.get("exterior") or {}
+    fences = {row.get("id") for row in exterior.get("fences", [])}
+    for index, gate in enumerate(exterior.get("gates", [])):
+        value = gate.get("fence")
+        if value is not None and fences and value not in fences:
+            problems.append(Problem(
+                6, FILE_OF["exterior"], f"gates/{index}/fence",
+                f"gate {gate.get('id')} hangs in fence {value!r}, which is not declared"))
+    for index, structure in enumerate(exterior.get("structures", [])):
+        value = structure.get("cell")
+        if value is not None and have_cells and value not in cells:
+            problems.append(Problem(
+                6, FILE_OF["exterior"], f"structures/{index}/cell",
+                f"structure {structure.get('id')} is cell {value!r}, which does not exist"))
+
     for group in ("perches", "beds", "bowls", "forbidden"):
         for index, row in enumerate(nav.get(group, [])):
             value = row.get("cell")
@@ -1430,6 +1447,30 @@ def rule_10_realism(world: World) -> list[Problem]:
                 10, FILE_OF["portals"], f"portals/{index}/rect/v",
                 f"portal {portal.get('id')}: {height:.3f} m high, under the player capsule's "
                 f"{CAPSULE_HEIGHT:.2f} m, and it is not marked crouch"))
+    # An enterable structure has to CONTAIN the cell you stand in when you are inside it. The
+    # shed's shell is 3.6 m and its cell 3.2 m, which is the 0.2 m of wall; a shell that did not
+    # contain its own interior would be a building drawn beside its inside (`HOUSE-00390`).
+    exterior = world.layout.get("exterior") or {}
+    for index, structure in enumerate(exterior.get("structures", [])):
+        cell = world.cell_by_id.get(structure.get("cell"))
+        shell = structure.get("footprint") or {}
+        if cell is None or "x" not in shell or "z" not in shell:
+            continue
+        try:
+            sx = (float(shell["x"][0]), float(shell["x"][1]))
+            sz = (float(shell["z"][0]), float(shell["z"][1]))
+        except (IndexError, TypeError, ValueError):
+            continue
+        outside = [box for box in boxes_of(cell)
+                   if box[0] < sx[0] - PLANE_TOLERANCE or box[1] > sx[1] + PLANE_TOLERANCE
+                   or box[2] < sz[0] - PLANE_TOLERANCE or box[3] > sz[1] + PLANE_TOLERANCE]
+        if outside:
+            problems.append(Problem(
+                10, FILE_OF["exterior"], f"structures/{index}/footprint",
+                f"structure {structure.get('id')} does not contain cell "
+                f"{cell.get('id')}'s footprint; a shell that does not hold its own interior is a "
+                f"building drawn beside its inside"))
+
     # A light is inside the cell it names. Nothing else says so: rule 6 checks that the cell
     # exists, and a fixture 30 m from it resolves perfectly while lighting nothing and baking a
     # lightmap for a room it is not in. `HOUSE-00383` is where it would have bitten -- nine street
@@ -1844,6 +1885,20 @@ def fixture() -> dict[str, dict]:
                       "position": [1.5, 0.64, 9.0], "species": ["dog", "cat"]}],
            "forbidden": [{"cell": "L0_STAIR", "species": ["dog"]}]}
 
+    exterior = {"schema": "cna-house/exterior/1",
+                "terrain": {"heightfield": "world/terrain.r16", "size": [40.0, 40.0],
+                            "origin": [-20.0, -3.0, -20.0], "yScale": 6.0,
+                            "material": "MAT_GROUND_LAWN"},
+                "fences": [{"id": "FENCE_FRONT", "asset": "MODEL_FENCE_01",
+                            "path": [[-10.0, 0.0, -6.0], [10.0, 0.0, -6.0]], "height": 1.35,
+                            "gate": None}],
+                "gates": [{"id": "GATE_PED", "fence": "FENCE_FRONT", "kind": "hinged",
+                           "opening": {"x": [-0.6, 0.6], "z": [-6.05, -5.95]}, "height": 1.35,
+                           "asset": None, "interactable": None}],
+                "structures": [{"id": "STRUCT_SHED", "cell": "L0_TERRACE",
+                                "footprint": {"x": [-2.2, 2.2], "z": [-4.5, 0.2]},
+                                "asset": None, "eavesY": 2.35, "ridgeY": 2.85}]}
+
     audio = {"schema": "cna-house/audio/1",
              "zones": [{"id": "AZ_HALL", "cell": "L0_HALL", "bed": "AMB_ROOM_QUIET", "gain": 0.3}],
              "emitters": [{"id": "EM_CLOCK", "cell": "L0_HALL", "position": [0.0, 2.4, 7.0],
@@ -1863,7 +1918,7 @@ def fixture() -> dict[str, dict]:
     return {"levels": levels, "cells": cells, "portals": portals, "openings": openings,
             "stairs": stairs, "lights": lights, "materials": materials, "props": props,
             "interactables": interactables, "assets": assets, "audio": audio,
-            "nav": nav}
+            "nav": nav, "exterior": exterior}
 
 
 def write_fixture(directory: Path, documents: dict[str, dict]) -> None:
@@ -2166,6 +2221,36 @@ def selftest() -> int:
         def validate_world_problems(documents, directory, rule):
             write_fixture(directory, documents)
             return validate(directory, wanted=[rule])[1]
+
+        # The exterior file (`HOUSE-00390`): a gate hangs in a fence, and an enterable structure
+        # contains the cell you stand in inside it.
+        hanging = copy.deepcopy(base)
+        hanging["exterior"]["gates"][0]["fence"] = "FENCE_NOWHERE"
+        gateless = workspace / "gate-fence"
+        write_fixture(gateless, hanging)
+        _, problems = validate(gateless, wanted=[6])
+        require(any("is not declared" in x.message for x in problems),
+                f"a gate hanging in a fence nobody declared is caught "
+                f"({[str(x) for x in problems]})")
+
+        beside = copy.deepcopy(base)
+        beside["exterior"]["structures"][0]["footprint"] = {"x": [8.0, 12.0], "z": [-4.5, 0.2]}
+        misplaced = workspace / "shed-beside"
+        write_fixture(misplaced, beside)
+        _, problems = validate(misplaced, wanted=[10])
+        require(any("beside its inside" in x.message for x in problems),
+                f"and a shell that does not hold its own interior ({[str(x) for x in problems]})")
+
+        # ...and the shell test looks at BOTH axes. A shed the right width and the wrong depth is
+        # exactly as wrong as one in the next county, and half a test would miss it.
+        shallow = copy.deepcopy(base)
+        shallow["exterior"]["structures"][0]["footprint"] = {"x": [-2.2, 2.2], "z": [-1.0, 0.2]}
+        squashed = workspace / "shed-shallow"
+        write_fixture(squashed, shallow)
+        _, problems = validate(squashed, wanted=[10])
+        require(any("beside its inside" in x.message for x in problems),
+                f"a shell the right width and the wrong depth is caught too "
+                f"({[str(x) for x in problems]})")
 
         # The pet graph (`HOUSE-00389`). A pet that cannot reach its bowl is a bug nobody sees
         # until the dog starves politely in a corner, so rule 5 asks the same connectivity

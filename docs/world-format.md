@@ -502,6 +502,17 @@ is placed as instance arrays so it can be drawn instanced where that measures fa
 }
 ```
 
+`HOUSE-00390` added four arrays the file needed and did not have: `gates` (§11.2's three),
+`kerbs` (§11.4's two), `paths` (the walk, the driveway and its apron, the two sidewalks, the verge
+and the garden path) and `structures` (the shed). Rule 6 checks that a gate hangs in a declared
+fence and that a structure's `cell` exists; rule 10 checks that an enterable structure's footprint
+**contains** that cell's, because a shell that does not hold its own interior is a building drawn
+beside its inside.
+
+`terrain.heightfield` is a path, not an asset id: the file is authored later, and the convention it
+will be read with is stated in the data — sample 0 is `origin.y`, sample 65535 is
+`origin.y + yScale`.
+
 ## `layout.weather.json`
 
 The 14 archetypes, the transition matrix and the seasonal tables. Every quantity is continuous;

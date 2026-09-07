@@ -6009,8 +6009,29 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: forbidden zones are the plant room (both), the garage (the cat), the four attic stores
             (the dog: the attic stair is 0.90 m and steep) and the road — which also has no nodes
             at all, and that is the real fence.
-- [ ] HOUSE-00390 — Author `layout.exterior.json`: terrain reference, road segments, sidewalks, kerbs, driveway, paths, fences, gates, shed
+- [x] HOUSE-00390 — Author `layout.exterior.json`: terrain reference, road segments, sidewalks, kerbs, driveway, paths, fences, gates, shed
       dep: HOUSE-00372 · sys: world · plat: TOOL · pri: MUST
+      finding: **the format had terrain, a road and fences, and the task asks for seven more
+            things.** Four arrays added: `gates` (§11.2's pedestrian, sliding vehicle and bolted
+            rear), `kerbs` (§11.4's two at Z +3.2 and +10.2), `paths` (the walk, the driveway and
+            its apron, both sidewalks, the verge and the garden path) and `structures` (the shed).
+            Without them §11.2's gates and §11.6's shed existed only in prose.
+      note: the front fence is **three** runs, not one, because the two gates are holes in it. A
+            fence drawn through its own gate is the kind of thing nobody notices until they walk
+            at it.
+      note: rule 6 checks that a gate hangs in a declared fence and that a structure's cell exists;
+            rule 10 checks that an enterable structure's footprint **contains** its cell's. The
+            shed's shell is 3.6 m and its cell 3.2 m, which is the 0.2 m of wall — and a shell that
+            does not hold its own interior is a building drawn beside its inside. Three injected
+            bugs, one of which needed a sharper fixture: a shed the right width and the wrong depth
+            is exactly as wrong as one in the next county, and half a test missed it.
+      note: `terrain.heightfield` is a path and not an asset id, because §11.5's height field is
+            authored later. The convention it will be read with is stated in the data instead —
+            sample 0 is `origin.y`, sample 65535 is `origin.y + yScale` — so the lot's +0.15 to
+            −0.35 uses a hundredth of the range and nothing has to be re-encoded when a swale is
+            added.
+      note: the road runs the full ±220 m and not §10.4's accessible ±35: the geometry continues
+            past where the player can walk, which is what makes the barrier believable.
 - [ ] HOUSE-00391 — Author the neighbourhood instance list: N1–N60 with positions, LOD class and material palette
       dep: HOUSE-00390 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00392 — Author the vegetation instance list: 34 street trees, property trees, shrubs, hedges, flower beds

@@ -1,0 +1,110 @@
+{
+  // The property outside the house: the ground it stands on, the road, the fences and gates that
+  // bound it, the paved surfaces you walk on and the one building that is not the house.
+  // `HOUSE-00390`. `HOUSE-00391` adds the neighbourhood instances and `HOUSE-00392` the planting.
+  //
+  // Every coordinate here is §10.2's origin: the centre of the pedestrian gate opening in the
+  // front fence, at finished grade. The gate, the front walk and the front door share X = 0.
+  "schema": "cna-house/exterior/1",
+
+  // §11.5's height field: a 1.0 m grid over §10.3's playable volume, 81 x 65 samples. The file is
+  // authored later; this is the reference and the convention it will be read with -- sample 0 is
+  // `origin.y` and sample 65535 is `origin.y + yScale`, so the lot's +0.15 at the front line
+  // falling to -0.35 at the rear fence uses a hundredth of the range and the terrain never has to
+  // be re-encoded when a bank or a swale is added.
+  "terrain": {
+    "heightfield": "world/terrain.r16",
+    "size": [80.0, 64.0],
+    "origin": [-40.0, -3.0, -52.0],
+    "yScale": 6.0,
+    "material": "MAT_GROUND_LAWN"
+  },
+
+  // §11.4's carriageway: 7.0 m of asphalt between kerbs at Z +3.2 and +10.2, so the centreline is
+  // Z +6.7. It runs the full visual length and not just §10.4's accessible +/-35: the geometry
+  // continues past where the player can walk, which is what makes the barrier believable.
+  "road": {
+    "centreline": [[-220.0, 0.0, 6.7], [220.0, 0.0, 6.7]],
+    "width": 7.0,
+    "material": "MAT_ASPHALT_01"
+  },
+
+  // §11.4's two kerbs, ours and the mirrored far side, 0.15 m.
+  "kerbs": [
+    { "id": "KERB_NEAR", "path": [[-220.0, 0.0, 3.2], [220.0, 0.0, 3.2]],
+      "height": 0.15, "material": "MAT_CONCRETE_KERB" },
+    { "id": "KERB_FAR", "path": [[-220.0, 0.0, 10.2], [220.0, 0.0, 10.2]],
+      "height": 0.15, "material": "MAT_CONCRETE_KERB" }
+  ],
+
+  // §11.2. The front is ornamental and 1.35 m; the three boundaries are 1.85 m board. The front
+  // fence is three runs because the two gates are holes in it, and a fence drawn through its own
+  // gate is the kind of thing nobody notices until they walk at it.
+  "fences": [
+    { "id": "EXT_FENCE_FRONT_W", "asset": "MODEL_FENCE_ORNAMENTAL_01",
+      "path": [[-22.5, 0.0, 0.0], [-0.6, 0.0, 0.0]], "height": 1.35, "gate": null },
+    { "id": "EXT_FENCE_FRONT_C", "asset": "MODEL_FENCE_ORNAMENTAL_01",
+      "path": [[0.6, 0.0, 0.0], [10.2, 0.0, 0.0]], "height": 1.35, "gate": null },
+    { "id": "EXT_FENCE_FRONT_E", "asset": "MODEL_FENCE_ORNAMENTAL_01",
+      "path": [[16.2, 0.0, 0.0], [22.5, 0.0, 0.0]], "height": 1.35, "gate": null },
+    { "id": "EXT_FENCE_W", "asset": "MODEL_FENCE_BOARD_01",
+      "path": [[-22.5, 0.0, 0.0], [-22.5, 0.0, -48.0]], "height": 1.85, "gate": null },
+    { "id": "EXT_FENCE_E", "asset": "MODEL_FENCE_BOARD_01",
+      "path": [[22.5, 0.0, 0.0], [22.5, 0.0, -48.0]], "height": 1.85, "gate": null },
+    { "id": "EXT_FENCE_N_W", "asset": "MODEL_FENCE_BOARD_01",
+      "path": [[-22.5, 0.0, -48.0], [18.55, 0.0, -48.0]], "height": 1.85, "gate": null },
+    { "id": "EXT_FENCE_N_E", "asset": "MODEL_FENCE_BOARD_01",
+      "path": [[19.45, 0.0, -48.0], [22.5, 0.0, -48.0]], "height": 1.85, "gate": null }
+  ],
+
+  // §11.2's three gates. `interactable` is null on all three: §11.2 marks every one of them
+  // interactable and `interactables.json` holds light switches so far (`HOUSE-00384`), so these
+  // are an obligation on the task that authors the rest of it rather than a reference to nothing.
+  "gates": [
+    { "id": "EXT_GATE_PED", "fence": "EXT_FENCE_FRONT_W", "kind": "hinged",
+      "opening": { "x": [-0.60, 0.60], "z": [-0.05, 0.05] }, "height": 1.35,
+      "asset": "MODEL_GATE_PED_01", "interactable": null },
+    { "id": "EXT_GATE_DRIVE", "fence": "EXT_FENCE_FRONT_C", "kind": "sliding",
+      "opening": { "x": [10.20, 16.20], "z": [-0.05, 0.05] }, "height": 1.35,
+      "asset": "MODEL_GATE_DRIVE_01", "interactable": null },
+    { "id": "EXT_GATE_REAR", "fence": "EXT_FENCE_N_W", "kind": "bolted",
+      "opening": { "x": [18.55, 19.45], "z": [-48.05, -47.95] }, "height": 1.85,
+      "asset": "MODEL_GATE_REAR_01", "interactable": null }
+  ],
+
+  // The paved surfaces of §11.4 and §11.6. The driveway is two boxes because §11.6 has it 7.2 m
+  // wide at the gate and narrowing to the garage apron, and a taper is two rectangles until the
+  // geometry builder makes it one.
+  "paths": [
+    { "id": "PATH_WALK", "kind": "walk", "boxes": [{ "x": [-1.0, 1.0], "z": [-11.6, 0.0] }],
+      "y": 0.0, "material": "MAT_BLUESTONE_PAVER" },
+    { "id": "PATH_DRIVEWAY", "kind": "driveway",
+      "boxes": [{ "x": [9.6, 16.8], "z": [-6.0, 0.0] },
+                { "x": [9.3, 17.1], "z": [-13.3, -6.0] }],
+      "y": 0.0, "material": "MAT_CONCRETE_BROOM" },
+    { "id": "PATH_APRON", "kind": "apron", "boxes": [{ "x": [9.3, 17.1], "z": [-13.3, -13.0] }],
+      "y": 0.0, "material": "MAT_CONCRETE_BROOM" },
+    { "id": "PATH_SIDEWALK_NEAR", "kind": "sidewalk",
+      "boxes": [{ "x": [-220.0, 220.0], "z": [1.6, 3.2] }],
+      "y": 0.02, "material": "MAT_CONCRETE_SLAB" },
+    { "id": "PATH_SIDEWALK_FAR", "kind": "sidewalk",
+      "boxes": [{ "x": [-220.0, 220.0], "z": [10.2, 11.8] }],
+      "y": 0.02, "material": "MAT_CONCRETE_SLAB" },
+    { "id": "PATH_VERGE_NEAR", "kind": "verge",
+      "boxes": [{ "x": [-220.0, 220.0], "z": [0.0, 1.6] }],
+      "y": 0.0, "material": "MAT_GROUND_LAWN" },
+    { "id": "PATH_GARDEN", "kind": "garden",
+      "boxes": [{ "x": [-19.0, -13.0], "z": [-38.6, -37.8] },
+                { "x": [-19.0, -18.2], "z": [-43.8, -38.6] }],
+      "y": 0.0, "material": "MAT_GRAVEL_PATH" }
+  ],
+
+  // §11.6's garden shed: 3.6 x 3.6 m with its ridge at +2.85. It is the one building on the plot
+  // that is not the house, and it is enterable, so it has a cell -- `EXT_SHED`, whose door and
+  // window are portals like any other (`HOUSE-00374`, `HOUSE-00376`).
+  "structures": [
+    { "id": "STRUCT_SHED", "cell": "EXT_SHED",
+      "footprint": { "x": [-20.0, -16.4], "z": [-44.0, -40.4] },
+      "asset": "MODEL_SHED_01", "eavesY": 2.35, "ridgeY": 2.85 }
+  ]
+}

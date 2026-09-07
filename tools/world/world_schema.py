@@ -360,6 +360,28 @@ def build() -> dict[str, dict]:
                 {"id": ID, "asset": ID,
                  "path": {"type": "array", "items": VEC3, "minItems": 2},
                  "height": NUM, "gate": ID_OR_NULL})},
+            # §11.2's gates, §11.4's kerbs and the paved zones of §11.4 and §11.6. Added by
+            # `HOUSE-00390`: the file had terrain, a road and fences, and the property has a
+            # driveway, a front walk, two sidewalks, a garden path, three gates and a shed.
+            "gates": {"type": "array", "items": obj(
+                ["id", "fence", "kind", "opening"],
+                {"id": ID, "fence": ID, "kind": {"enum": ["hinged", "sliding", "bolted"]},
+                 "opening": BOX, "height": NUM, "asset": ID_OR_NULL,
+                 "interactable": ID_OR_NULL})},
+            "kerbs": {"type": "array", "items": obj(
+                ["id", "path"],
+                {"id": ID, "path": {"type": "array", "items": VEC3, "minItems": 2},
+                 "height": NUM, "material": ID_OR_NULL})},
+            "paths": {"type": "array", "items": obj(
+                ["id", "kind", "boxes"],
+                {"id": ID,
+                 "kind": {"enum": ["walk", "driveway", "sidewalk", "garden", "apron", "verge"]},
+                 "boxes": {"type": "array", "items": BOX, "minItems": 1},
+                 "y": NUM, "material": ID_OR_NULL})},
+            "structures": {"type": "array", "items": obj(
+                ["id", "footprint"],
+                {"id": ID, "cell": ID_OR_NULL, "footprint": BOX, "asset": ID_OR_NULL,
+                 "eavesY": NUM, "ridgeY": NUM})},
             "neighbourhood": {"type": "array", "items": obj(
                 ["id", "asset", "position"],
                 {"id": ID, "asset": ID, "position": VEC3, "yawDeg": NUM,

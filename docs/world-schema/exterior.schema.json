@@ -113,6 +113,75 @@
       },
       "type": "array"
     },
+    "gates": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "asset": {
+            "$ref": "#/$defs/idOrNull"
+          },
+          "fence": {
+            "$ref": "#/$defs/id"
+          },
+          "height": {
+            "type": "number"
+          },
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "interactable": {
+            "$ref": "#/$defs/idOrNull"
+          },
+          "kind": {
+            "enum": [
+              "hinged",
+              "sliding",
+              "bolted"
+            ]
+          },
+          "opening": {
+            "$ref": "#/$defs/box"
+          }
+        },
+        "required": [
+          "id",
+          "fence",
+          "kind",
+          "opening"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "kerbs": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "height": {
+            "type": "number"
+          },
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "material": {
+            "$ref": "#/$defs/idOrNull"
+          },
+          "path": {
+            "items": {
+              "$ref": "#/$defs/vector3"
+            },
+            "minItems": 2,
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "path"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
     "neighbourhood": {
       "items": {
         "additionalProperties": false,
@@ -145,6 +214,46 @@
       },
       "type": "array"
     },
+    "paths": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "boxes": {
+            "items": {
+              "$ref": "#/$defs/box"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "kind": {
+            "enum": [
+              "walk",
+              "driveway",
+              "sidewalk",
+              "garden",
+              "apron",
+              "verge"
+            ]
+          },
+          "material": {
+            "$ref": "#/$defs/idOrNull"
+          },
+          "y": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "boxes"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
     "road": {
       "additionalProperties": false,
       "properties": {
@@ -168,6 +277,37 @@
     "schema": {
       "pattern": "^cna-house/exterior/\\d+$",
       "type": "string"
+    },
+    "structures": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "asset": {
+            "$ref": "#/$defs/idOrNull"
+          },
+          "cell": {
+            "$ref": "#/$defs/idOrNull"
+          },
+          "eavesY": {
+            "type": "number"
+          },
+          "footprint": {
+            "$ref": "#/$defs/box"
+          },
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "ridgeY": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "footprint"
+        ],
+        "type": "object"
+      },
+      "type": "array"
     },
     "terrain": {
       "additionalProperties": false,
