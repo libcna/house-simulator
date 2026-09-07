@@ -6288,8 +6288,21 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             reader. Recorded against the phase-5 exit criterion with the per-file numbers, because
             "the world got slower" is not something anybody can act on and "the parser does
             3.3 KiB/ms and the world is 885 KiB" is.
-- [ ] HOUSE-00403 — Author rows for the 84 light groups and their switch plates
+- [x] HOUSE-00403 — Author rows for the 135 light groups and their switch plates
       dep: HOUSE-00384 · sys: world · plat: TOOL · pri: MUST
+      note: **delivered by `HOUSE-00384`**, which is the same work under a §5.2 heading: 80 plates
+            carrying 121 gangs, in `interactables.json`. Recorded here rather than struck, because
+            the id is permanent and a reader looking for the switch rows should be told where they
+            are.
+      note: 135 groups and not 84 — §28.2's and §53's figure, corrected by `HOUSE-00382` against
+            §13's own per-room column and §53's exterior list. 15 of the 135 have no plate at all,
+            exactly as §53 describes: the table and floor lamps are switched at the lamp, the
+            refrigerator's interior light by its door, and the porch lanterns, the street lights
+            and the neighbours' by a dusk sensor.
+      note: there is no row **per group**. A group is not a thing you touch; a plate is, and a gang
+            on a plate is the group. §53's "one bit per group" is that gang's state field, which is
+            what makes the two three-way pairs expressible as two plates naming one group — and
+            rule 6 checks every gang against the declared groups.
 - [ ] HOUSE-00404 — Author rows for the 62 kitchen containers
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00405 — Author rows for the 18 butler's/pantry containers
