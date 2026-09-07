@@ -1077,6 +1077,14 @@ def rule_6_references(world: World) -> list[Problem]:
             problems.append(Problem(
                 6, FILE_OF["exterior"], f"gates/{index}/fence",
                 f"gate {gate.get('id')} hangs in fence {value!r}, which is not declared"))
+        # §11.2 marks all three interactable, and `HOUSE-00416` authored the rows. A gate pointing
+        # at nothing is a gate the player walks into (`HOUSE-00416`).
+        operated = gate.get("interactable")
+        if operated is not None and have_interactables and operated not in interactables:
+            problems.append(Problem(
+                6, FILE_OF["exterior"], f"gates/{index}/interactable",
+                f"gate {gate.get('id')} is operated by {operated!r}, which "
+                f"{FILE_OF['interactables']} does not declare"))
     for index, structure in enumerate(exterior.get("structures", [])):
         value = structure.get("cell")
         if value is not None and have_cells and value not in cells:
@@ -2559,6 +2567,15 @@ def selftest() -> int:
         _, problems = validate(gateless, wanted=[6])
         require(any("is not declared" in x.message for x in problems),
                 f"a gate hanging in a fence nobody declared is caught "
+                f"({[str(x) for x in problems]})")
+
+        unmanned = copy.deepcopy(base)
+        unmanned["exterior"]["gates"][0]["interactable"] = "GATE_NOWHERE"
+        no_operator = workspace / "gate-operator"
+        write_fixture(no_operator, unmanned)
+        _, problems = validate(no_operator, wanted=[6])
+        require(any("does not declare" in x.message for x in problems),
+                f"a gate operated by a row nobody authored is caught "
                 f"({[str(x) for x in problems]})")
 
         beside = copy.deepcopy(base)

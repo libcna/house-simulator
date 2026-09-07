@@ -2312,16 +2312,23 @@
       "persist": ["openFraction", "locked"],
       "portal": "P_L1_MASTER_BED__L1_BALCONY_REAR"
     },
+    // §12.3's 4.90 x 2.40 sectional. Not a swinging leaf and not a 0.6 s one: §54 gives it five
+    // panel segments on a spline and §11.2 gives the drive gate beside it a 6 s travel, so this
+    // row carries a motor's timing and a motor's sounds. `HOUSE-00401` gave it a hinged door's
+    // actions because it authored 64 leaves with one shape; `HOUSE-00416` is where the four
+    // powered openings get their own.
     {
-      "id": "DOOR_L0_GARAGE_2", "kind": "door", "cell": "L0_GARAGE",
+      "id": "DOOR_L0_GARAGE_SECTIONAL", "kind": "garage_door", "cell": "L0_GARAGE",
       "prop": null,
-      "focus": { "point": [15.56, 1.20, -13.36], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "focus": { "point": [16.20, 1.35, -13.36], "normal": [0.0, 0.0, 1.0], "radius": 0.40 },
       "bounds": { "min": [10.75, 0.15, -13.33], "max": [15.65, 2.55, -13.27] },
       "actions": [
         { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
-          "do": "state.openFraction = 1.0", "sound": "SFX_DOOR_OPEN", "anim": "leaf", "duration": 0.6 },
+          "do": "state.openFraction = 1.0", "sound": "SFX_GARAGE_MOTOR_UP", "anim": "segments",
+          "duration": 6.0 },
         { "verb": "Close", "when": "state.openFraction > 0.05",
-          "do": "state.openFraction = 0.0", "sound": "SFX_DOOR_CLOSE", "anim": "leaf", "duration": 0.5 },
+          "do": "state.openFraction = 0.0", "sound": "SFX_GARAGE_MOTOR_DOWN", "anim": "segments",
+          "duration": 6.0 },
         { "verb": "Lock", "when": "state.openFraction < 0.05 && state.locked == false",
           "do": "state.locked = true", "sound": "SFX_DOOR_LOCK", "duration": 0.4 },
         { "verb": "Unlock", "when": "state.locked == true",
@@ -3379,6 +3386,72 @@
       "state": { "openFraction": 0.0, "latched": true, "locked": false },
       "persist": ["openFraction", "locked"],
       "portal": "P_L0_KITCHEN__W2"
+    },
+    // ================================================================== the gates
+    // §11.2's three, which `HOUSE-00390` authored in `layout.exterior.json` with `interactable`
+    // null because there was nothing yet to point at. There is now, and rule 6 checks it.
+    //
+    // The pedestrian gate is deliberately the first thing you touch: §65.6 starts the player on
+    // the road with it closed and unlocked, so the interaction system teaches itself with no
+    // instruction. That is why it swings in 0.8 s and latches audibly.
+    {
+      "id": "GATE_PED", "kind": "gate", "cell": "EXT_WALK",
+      "prop": null,
+      "focus": { "point": [0.45, 1.05, -0.10], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [-0.60, 0.00, -0.06], "max": [0.60, 1.35, 0.06] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_GATE_OPEN", "anim": "leaf",
+          "duration": 0.8 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_GATE_LATCH", "anim": "leaf",
+          "duration": 0.7 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": null
+    },
+    // §11.2: a 6.0 m sliding leaf on a motor and a rail, 6 s of travel. Its control is at the
+    // side, where a keypad post stands, not in the middle of the opening.
+    {
+      "id": "GATE_DRIVE", "kind": "gate", "cell": "EXT_DRIVEWAY",
+      "prop": null,
+      "focus": { "point": [16.40, 1.10, -0.40], "normal": [0.0, 0.0, -1.0], "radius": 0.35 },
+      "bounds": { "min": [10.20, 0.00, -0.06], "max": [16.20, 1.35, 0.06] },
+      "actions": [
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_GATE_MOTOR_OPEN", "anim": "slide",
+          "duration": 6.0 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_GATE_MOTOR_CLOSE", "anim": "slide",
+          "duration": 6.0 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": false },
+      "persist": ["openFraction"],
+      "portal": null
+    },
+    // §11.2: "bolted; opening it reveals only a hedge". It is interactable so that the bolt is a
+    // thing you can try, which is more honest than a gate that ignores you.
+    {
+      "id": "GATE_REAR", "kind": "gate", "cell": "EXT_SIDEYARD_E",
+      "prop": null,
+      "focus": { "point": [19.20, 1.05, -47.80], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "bounds": { "min": [18.55, 0.00, -48.06], "max": [19.45, 1.85, -47.94] },
+      "actions": [
+        { "verb": "Unbolt", "when": "state.locked == true",
+          "do": "state.locked = false", "sound": "SFX_GATE_BOLT", "duration": 0.6 },
+        { "verb": "Open", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.openFraction = 1.0", "sound": "SFX_GATE_OPEN", "anim": "leaf",
+          "duration": 0.9 },
+        { "verb": "Close", "when": "state.openFraction > 0.05",
+          "do": "state.openFraction = 0.0", "sound": "SFX_GATE_LATCH", "anim": "leaf",
+          "duration": 0.8 },
+        { "verb": "Bolt", "when": "state.openFraction < 0.05 && state.locked == false",
+          "do": "state.locked = true", "sound": "SFX_GATE_BOLT", "duration": 0.6 }
+      ],
+      "state": { "openFraction": 0.0, "latched": true, "locked": true },
+      "persist": ["openFraction", "locked"],
+      "portal": null
     }
   ]
 }

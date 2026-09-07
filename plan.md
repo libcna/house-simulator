@@ -6327,8 +6327,23 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00415 — Author rows for the 11 appliances
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00416 — Author rows for the garage door, the 3 gates and their motors
+- [x] HOUSE-00416 — Author rows for the garage door, the 3 gates and their motors
       dep: HOUSE-00377 · sys: world · plat: TOOL · pri: MUST
+      finding: **the sectional door had a swinging door's actions.** `HOUSE-00401` authored 64
+            leaves with one shape, and the garage door came out of it opening in 0.6 s on a hinge.
+            §54 gives it five panel segments on a spline and §11.2 gives the gate beside it 6 s of
+            travel, so it is `kind: garage_door` now, with a motor's timing and a motor's sounds —
+            and a name that says which door it is rather than `DOOR_L0_GARAGE_2`.
+      note: §11.2's three gates, which `HOUSE-00390` authored with `interactable: null` because
+            there was nothing to point at. There is now, and rule 6 checks it: a gate pointing at
+            nothing is a gate the player walks into.
+      note: the pedestrian gate is deliberately the first thing you touch — §65.6 starts the player
+            on the road with it closed and unlocked — so it swings in 0.8 s and latches audibly.
+            The rear gate is bolted and stays bolted; it is interactable so that the bolt is a
+            thing you can **try**, which is more honest than a gate that ignores you.
+      note: the drive gate's motor is an audio emitter on the gate post, beside §62.6's garage-door
+            motor. §11.2 asks for "motor + rail sound, 6 s travel" and the travel is in the action's
+            duration, so the two agree by construction rather than by somebody remembering.
 - [ ] HOUSE-00417 — Author rows for the 148 pickup items, including the 32 fridge/freezer items, with their home surfaces
       dep: HOUSE-00404 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00418 — Author rows for the 22 seats

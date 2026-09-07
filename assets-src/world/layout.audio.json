@@ -131,6 +131,9 @@
     { "id": "EM_GARAGE_MOTOR", "cell": "L0_GARAGE", "position": [13.20, 3.00, -14.00],
       "loop": "AMB_GARAGE_MOTOR", "gain": 0.55, "radius": 10.0, "interactable": null },
     // never rings on its own: a debug command and one scripted event
+    // §11.2's sliding vehicle gate: a motor and a rail over 6 s of travel, at the gate post.
+    { "id": "EM_GATE_MOTOR", "cell": "EXT_DRIVEWAY", "position": [16.40, 1.10, -0.30],
+      "loop": "AMB_GATE_MOTOR", "gain": 0.45, "radius": 12.0, "interactable": "GATE_DRIVE" },
     { "id": "EM_DOORBELL", "cell": "L0_PORCH", "position": [0.90, 2.60, -14.20],
       "loop": "SFX_DOORBELL", "gain": 0.80, "radius": 12.0, "interactable": null },
     // hiss while an outlet flows and the hammer when a tap shuts, on the stack
