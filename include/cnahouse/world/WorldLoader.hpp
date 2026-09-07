@@ -127,6 +127,13 @@ namespace cnahouse::world
         [[nodiscard]] static util::Result<void> LoadProps(std::string_view directory,
                                                           WorldData::Contents& contents);
 
+        /// @brief Reads `layout.nav.json` into @p contents.
+        ///
+        /// Nodes, edges, and the three marker arrays -- perches, beds and bowls -- which differ
+        /// only in their name and are read into one list with a `MarkerKind`.
+        [[nodiscard]] static util::Result<void> LoadNav(std::string_view directory,
+                                                        WorldData::Contents& contents);
+
         /// @brief Reads every file §15.1 lists and builds the model.
         ///
         /// As each `HOUSE-00344`…`HOUSE-00355` lands, its file joins this sequence. Until then the

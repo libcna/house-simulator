@@ -420,6 +420,40 @@ namespace
             })";
         }
 
+        /// Three nodes, two edges -- one through a door and one inside a room -- and one of each
+        /// marker kind, with the perch reserved for the cat.
+        static std::string Nav()
+        {
+            return R"({
+              "schema": "cna-house/nav/1",
+              "nodes": [
+                { "id": "NAV_L0_KITCHEN_C", "cell": "L0_KITCHEN",
+                  "position": [-3.0, 0.60, -25.0], "kind": "floor" },
+                { "id": "NAV_L0_HALL_S", "cell": "L0_HALL", "position": [0.0, 0.60, 5.0],
+                  "kind": "floor" },
+                { "id": "NAV_L0_HALL_N", "cell": "L0_HALL", "position": [0.0, 0.60, 9.0],
+                  "kind": "floor" }
+              ],
+              "edges": [
+                { "a": "NAV_L0_KITCHEN_C", "b": "NAV_L0_HALL_S", "portal": "P_HALL__WC1",
+                  "cost": 4.2, "species": ["dog", "cat"] },
+                { "a": "NAV_L0_HALL_S", "b": "NAV_L0_HALL_N", "cost": 4.0 }
+              ],
+              "perches": [
+                { "id": "PERCH_L1_WINDOWSEAT", "cell": "L1_LANDING",
+                  "position": [0.4, 4.10, -15.1], "species": ["cat"] }
+              ],
+              "beds": [
+                { "id": "BED_DOG_FAMILY", "cell": "L0_HALL", "prop": "PROP_DOG_BED",
+                  "species": ["dog"] }
+              ],
+              "bowls": [
+                { "id": "BOWL_WATER", "cell": "L0_KITCHEN", "position": [0.0, 0.60, -24.0] }
+              ],
+              "forbidden": [ { "cell": "L0_GARAGE", "species": ["cat"] } ]
+            })";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -439,6 +473,7 @@ namespace
             Write("layout.stairs.json", Stairs());
             Write("layout.lights.json", Lights());
             Write("layout.props.json", Props());
+            Write("layout.nav.json", Nav());
             WriteManifest({"layout.levels.json",
                            "layout.materials.json",
                            "layout.cells.json",
@@ -446,7 +481,8 @@ namespace
                            "layout.openings.json",
                            "layout.stairs.json",
                            "layout.lights.json",
-                           "layout.props.json"});
+                           "layout.props.json",
+                           "layout.nav.json"});
         }
 
         std::string directory_;
@@ -1731,6 +1767,136 @@ namespace
         EXPECT_TRUE(loaded.Value().PropsOf(Intern("L0_TERRACE")).empty());
     }
 
+    // --- the nav graph ----------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, TheNavGraphIsReadWithItsNodesEdgesAndMarkers)
+    {
+        Write("layout.nav.json", Nav());
+        world::WorldData::Contents contents;
+        const auto nav = world::WorldLoader::LoadNav(directory_, contents);
+        ASSERT_TRUE(nav) << nav.Error().ToString();
+
+        ASSERT_EQ(contents.navNodes.size(), 3U);
+        EXPECT_EQ(contents.navNodes[0].id, Intern("NAV_L0_KITCHEN_C"));
+        EXPECT_EQ(contents.navNodes[0].cell, Intern("L0_KITCHEN"));
+        EXPECT_FLOAT_EQ(contents.navNodes[0].position.Y, 0.60F);
+        EXPECT_EQ(contents.navNodes[0].kind, "floor");
+
+        ASSERT_EQ(contents.navEdges.size(), 2U);
+        EXPECT_EQ(contents.navEdges[0].a, Intern("NAV_L0_KITCHEN_C"));
+        EXPECT_EQ(contents.navEdges[0].b, Intern("NAV_L0_HALL_S"));
+        EXPECT_FLOAT_EQ(contents.navEdges[0].cost, 4.2F);
+
+        ASSERT_EQ(contents.navMarkers.size(), 3U);
+        ASSERT_EQ(contents.navForbidden.size(), 1U);
+        EXPECT_EQ(contents.navForbidden[0].cell, Intern("L0_GARAGE"));
+    }
+
+    TEST_F(WorldLoaderTest, AnEdgeCrossingAPortalNamesIt)
+    {
+        // The reason there is one authored graph and not two: a closed door closes the route for
+        // the pets exactly as it does for vision and sound, and it does so because the edge says
+        // which door.
+        Write("layout.nav.json", Nav());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadNav(directory_, contents));
+
+        EXPECT_EQ(contents.navEdges[0].portal, Intern("P_HALL__WC1"));
+        EXPECT_FALSE(contents.navEdges[1].portal.IsValid()) << "an edge inside one room crosses no door";
+    }
+
+    TEST_F(WorldLoaderTest, AnAbsentSpeciesListMeansBothAndAnEmptyOneIsRefused)
+    {
+        // §61's answer for most of the graph is "both", so absent means both. An EMPTY list is not
+        // the same thing: it is a row that does nothing, and far more likely a mistake.
+        Write("layout.nav.json", Nav());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadNav(directory_, contents));
+
+        EXPECT_EQ(contents.navEdges[1].species, world::Species::Both) << "states nothing";
+        EXPECT_EQ(contents.navEdges[0].species, world::Species::Both) << "states both";
+        EXPECT_EQ(contents.navMarkers[0].species, world::Species::Cat) << "a perch is the cat's";
+        EXPECT_FALSE(Includes(contents.navMarkers[0].species, world::Species::Dog));
+
+        Write("layout.nav.json",
+              R"({"schema": "cna-house/nav/1", "nodes": [], "edges": [],
+                  "perches": [{"id": "P", "cell": "C", "position": [0,0,0], "species": []}]})");
+        world::WorldData::Contents empty;
+        const auto nav = world::WorldLoader::LoadNav(directory_, empty);
+        ASSERT_FALSE(nav);
+        EXPECT_NE(nav.Error().Message().find("at least one"), std::string::npos) << nav.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AForbiddenZoneMustSayWhomItForbids)
+    {
+        // The one place an absent species list would read as a rule and do nothing.
+        Write("layout.nav.json",
+              R"({"schema": "cna-house/nav/1", "nodes": [], "edges": [],
+                  "forbidden": [{"cell": "L0_GARAGE"}]})");
+        world::WorldData::Contents contents;
+        const auto nav = world::WorldLoader::LoadNav(directory_, contents);
+        ASSERT_FALSE(nav);
+        EXPECT_NE(nav.Error().Message().find("forbids nobody"), std::string::npos) << nav.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AMarkerIsPlacedByPositionOrByPropAndNeitherIsRefused)
+    {
+        // §61 uses both: a windowsill perch is a point, a dog bed is wherever the bed prop ended
+        // up. A marker with neither is a marker nowhere.
+        Write("layout.nav.json", Nav());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadNav(directory_, contents));
+
+        EXPECT_FALSE(contents.navMarkers[0].prop.IsValid()) << "the perch is a point";
+        EXPECT_FLOAT_EQ(contents.navMarkers[0].position.Y, 4.10F);
+        EXPECT_EQ(contents.navMarkers[1].prop, Intern("PROP_DOG_BED")) << "the bed is a prop";
+
+        Write("layout.nav.json",
+              R"({"schema": "cna-house/nav/1", "nodes": [], "edges": [],
+                  "beds": [{"id": "BED_NOWHERE", "species": ["dog"]}]})");
+        world::WorldData::Contents nowhere;
+        const auto nav = world::WorldLoader::LoadNav(directory_, nowhere);
+        ASSERT_FALSE(nav);
+        EXPECT_NE(nav.Error().Message().find("neither"), std::string::npos) << nav.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, TheThreeMarkerArraysKeepTheirKind)
+    {
+        // Perches, beds and bowls differ only in their name in the file and are read into one
+        // list. Losing the kind would put the cat's water in the dog's bed.
+        Write("layout.nav.json", Nav());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadNav(directory_, contents));
+
+        ASSERT_EQ(contents.navMarkers.size(), 3U);
+        EXPECT_EQ(contents.navMarkers[0].kind, world::MarkerKind::Perch);
+        EXPECT_EQ(contents.navMarkers[1].kind, world::MarkerKind::Bed);
+        EXPECT_EQ(contents.navMarkers[2].kind, world::MarkerKind::Bowl);
+    }
+
+    TEST_F(WorldLoaderTest, ANegativeEdgeCostOrASelfEdgeIsRefused)
+    {
+        for (const std::string edge :
+             {R"({"a": "N1", "b": "N2", "cost": -1.0})", R"({"a": "N1", "b": "N1"})"})
+        {
+            Write("layout.nav.json",
+                  R"({"schema": "cna-house/nav/1", "nodes": [], "edges": [)" + edge + "]}");
+            world::WorldData::Contents contents;
+            EXPECT_FALSE(world::WorldLoader::LoadNav(directory_, contents)) << "accepted " << edge;
+        }
+    }
+
+    TEST_F(WorldLoaderTest, AnUnknownSpeciesIsRefused)
+    {
+        Write("layout.nav.json",
+              R"({"schema": "cna-house/nav/1", "nodes": [], "edges": [],
+                  "forbidden": [{"cell": "C", "species": ["ferret"]}]})");
+        world::WorldData::Contents contents;
+        const auto nav = world::WorldLoader::LoadNav(directory_, contents);
+        ASSERT_FALSE(nav);
+        EXPECT_NE(nav.Error().Message().find("ferret"), std::string::npos) << nav.Error().ToString();
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -1754,6 +1920,8 @@ namespace
         EXPECT_EQ(world.Value().Stairs().size(), 2U);
         EXPECT_EQ(world.Value().Lights().size(), 4U);
         EXPECT_EQ(world.Value().Props().size(), 3U);
+        EXPECT_EQ(world.Value().NavNodes().size(), 3U);
+        EXPECT_EQ(world.Value().NavMarkers().size(), 3U);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -1784,6 +1952,7 @@ namespace
         Write("layout.stairs.json", Stairs());
         Write("layout.lights.json", Lights());
         Write("layout.props.json", Props());
+        Write("layout.nav.json", Nav());
         WriteManifest({"layout.levels.json",
                        "layout.materials.json",
                        "layout.cells.json",
@@ -1791,7 +1960,8 @@ namespace
                        "layout.openings.json",
                        "layout.stairs.json",
                        "layout.lights.json",
-                       "layout.props.json"});
+                       "layout.props.json",
+                       "layout.nav.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

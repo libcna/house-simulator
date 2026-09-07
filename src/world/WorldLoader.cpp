@@ -2086,6 +2086,298 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    namespace
+    {
+        /// @brief `["dog", "cat"]` as a `Species` mask.
+        ///
+        /// An absent list means **both**, which is §61's answer for most of the graph: a corridor
+        /// edge no animal is excluded from is an edge both animals may walk. An empty list is not
+        /// the same thing and is refused -- a row that says "for nobody" is a row that does
+        /// nothing, and it is far more likely to be a mistake than an intention.
+        [[nodiscard]] Result<Species> ReadSpecies(const JsonValue& row, std::string_view field)
+        {
+            if (!row.Has(field) || row.IsNull(field))
+            {
+                return Species::Both;
+            }
+            const Result<JsonValue> array = row.RequireArray(field);
+            if (!array)
+            {
+                return array.Error();
+            }
+            const Result<std::vector<JsonValue>> entries = array.Value().Elements();
+            if (!entries)
+            {
+                return entries.Error();
+            }
+            if (entries.Value().empty())
+            {
+                return Err(ErrorCode::InvalidData,
+                           "a species list names at least one animal; an empty list is a row that "
+                           "does nothing",
+                           row.Path() + "/" + std::string(field));
+            }
+            Species species = Species::None;
+            for (const JsonValue& entry : entries.Value())
+            {
+                const Result<std::string> name = entry.AsString();
+                if (!name)
+                {
+                    return name.Error();
+                }
+                const Result<Species> parsed = ParseSpecies(name.Value());
+                if (!parsed)
+                {
+                    return parsed.Error().WithContext(row.Path() + "/" + std::string(field));
+                }
+                species = species | parsed.Value();
+            }
+            return species;
+        }
+
+        /// @brief The three marker arrays of `layout.nav.json`, which differ only in their name.
+        [[nodiscard]] Result<void> ReadMarkers(const JsonValue& root,
+                                               std::string_view field,
+                                               MarkerKind kind,
+                                               std::vector<NavMarker>& target)
+        {
+            if (!root.Has(field) || root.IsNull(field))
+            {
+                return util::Ok();
+            }
+            const Result<JsonValue> array = root.RequireArray(field);
+            if (!array)
+            {
+                return array.Error();
+            }
+            const Result<std::vector<JsonValue>> rows = array.Value().Elements();
+            if (!rows)
+            {
+                return rows.Error();
+            }
+            for (const JsonValue& row : rows.Value())
+            {
+                NavMarker marker;
+                marker.kind = kind;
+                const Result<util::Id> id = WorldLoader::RequireId(row, "id");
+                if (!id)
+                {
+                    return id.Error();
+                }
+                marker.id = id.Value();
+
+                for (const auto& [name, slot] : std::initializer_list<std::pair<std::string_view, util::Id*>>{
+                         {"cell", &marker.cell}, {"prop", &marker.prop}})
+                {
+                    const Result<util::Id> value = WorldLoader::OptionalId(row, name);
+                    if (!value)
+                    {
+                        return value.Error();
+                    }
+                    *slot = value.Value();
+                }
+
+                // A marker is either placed by position or attached to a prop, and §61 uses both:
+                // a windowsill perch is a point, a dog bed is wherever the bed prop ended up. One
+                // of the two is required, because a marker with neither is a marker nowhere.
+                if (row.Has("position") && !row.IsNull("position"))
+                {
+                    const Result<Microsoft::Xna::Framework::Vector3> position =
+                        row.RequireVector3("position");
+                    if (!position)
+                    {
+                        return position.Error();
+                    }
+                    marker.position = position.Value();
+                }
+                else if (!marker.prop.IsValid())
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a nav marker needs a position or a prop to sit on; this has "
+                               "neither",
+                               row.Path());
+                }
+
+                const Result<Species> species = ReadSpecies(row, "species");
+                if (!species)
+                {
+                    return species.Error();
+                }
+                marker.species = species.Value();
+
+                target.push_back(std::move(marker));
+            }
+            return util::Ok();
+        }
+    } // namespace
+
+    Result<void> WorldLoader::LoadNav(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.nav.json", "nav", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+        const JsonValue& root = document.Value().Root();
+
+        const Result<JsonValue> nodes = root.RequireArray("nodes");
+        if (!nodes)
+        {
+            return nodes.Error().WithContext("layout.nav.json");
+        }
+        const Result<std::vector<JsonValue>> nodeRows = nodes.Value().Elements();
+        if (!nodeRows)
+        {
+            return nodeRows.Error().WithContext("layout.nav.json");
+        }
+        for (const JsonValue& row : nodeRows.Value())
+        {
+            NavNode node;
+            const Result<util::Id> id = RequireId(row, "id");
+            if (!id)
+            {
+                return id.Error().WithContext("layout.nav.json");
+            }
+            node.id = id.Value();
+            const Result<util::Id> cell = RequireId(row, "cell");
+            if (!cell)
+            {
+                return cell.Error().WithContext("layout.nav.json");
+            }
+            node.cell = cell.Value();
+            const Result<Microsoft::Xna::Framework::Vector3> position = row.RequireVector3("position");
+            if (!position)
+            {
+                return position.Error().WithContext("layout.nav.json");
+            }
+            node.position = position.Value();
+            const Result<std::string> kind = row.OptionalString("kind", "");
+            if (!kind)
+            {
+                return kind.Error().WithContext("layout.nav.json");
+            }
+            node.kind = kind.Value();
+            contents.navNodes.push_back(std::move(node));
+        }
+
+        const Result<JsonValue> edges = root.RequireArray("edges");
+        if (!edges)
+        {
+            return edges.Error().WithContext("layout.nav.json");
+        }
+        const Result<std::vector<JsonValue>> edgeRows = edges.Value().Elements();
+        if (!edgeRows)
+        {
+            return edgeRows.Error().WithContext("layout.nav.json");
+        }
+        for (const JsonValue& row : edgeRows.Value())
+        {
+            NavEdge edge;
+            const Result<util::Id> a = RequireId(row, "a");
+            if (!a)
+            {
+                return a.Error().WithContext("layout.nav.json");
+            }
+            edge.a = a.Value();
+            const Result<util::Id> b = RequireId(row, "b");
+            if (!b)
+            {
+                return b.Error().WithContext("layout.nav.json");
+            }
+            edge.b = b.Value();
+            if (edge.a == edge.b)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "an edge joins two nodes and both ends name " + Name(edge.a),
+                           "layout.nav.json/" + row.Path() + "/b");
+            }
+
+            // An edge crossing a portal NAMES it, so a closed door closes the route for the pets
+            // exactly as it does for vision and sound. One authored graph, four consumers.
+            const Result<util::Id> portal = OptionalId(row, "portal");
+            if (!portal)
+            {
+                return portal.Error().WithContext("layout.nav.json");
+            }
+            edge.portal = portal.Value();
+
+            const Result<float> cost = row.OptionalFloat("cost", 0.0F);
+            if (!cost)
+            {
+                return cost.Error().WithContext("layout.nav.json");
+            }
+            if (cost.Value() < 0.0F)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "an edge cost is not negative; this is " + std::to_string(cost.Value()) +
+                               ", and a negative edge makes the shortest path meaningless",
+                           "layout.nav.json/" + row.Path() + "/cost");
+            }
+            edge.cost = cost.Value();
+
+            const Result<Species> species = ReadSpecies(row, "species");
+            if (!species)
+            {
+                return species.Error().WithContext("layout.nav.json");
+            }
+            edge.species = species.Value();
+
+            contents.navEdges.push_back(std::move(edge));
+        }
+
+        for (const auto& [field, kind] : std::initializer_list<std::pair<std::string_view, MarkerKind>>{
+                 {"perches", MarkerKind::Perch}, {"beds", MarkerKind::Bed}, {"bowls", MarkerKind::Bowl}})
+        {
+            if (const Result<void> markers = ReadMarkers(root, field, kind, contents.navMarkers); !markers)
+            {
+                return markers.Error().WithContext("layout.nav.json");
+            }
+        }
+
+        if (root.Has("forbidden") && !root.IsNull("forbidden"))
+        {
+            const Result<JsonValue> forbidden = root.RequireArray("forbidden");
+            if (!forbidden)
+            {
+                return forbidden.Error().WithContext("layout.nav.json");
+            }
+            const Result<std::vector<JsonValue>> rows = forbidden.Value().Elements();
+            if (!rows)
+            {
+                return rows.Error().WithContext("layout.nav.json");
+            }
+            for (const JsonValue& row : rows.Value())
+            {
+                NavForbidden zone;
+                const Result<util::Id> cell = RequireId(row, "cell");
+                if (!cell)
+                {
+                    return cell.Error().WithContext("layout.nav.json");
+                }
+                zone.cell = cell.Value();
+                // Here, and nowhere else, an absent species list would mean "forbidden to nobody"
+                // -- a row that reads as a rule and does nothing. So it is required.
+                if (!row.Has("species") || row.IsNull("species"))
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a forbidden zone says which animals it forbids; without that it "
+                               "is a rule that forbids nobody",
+                               "layout.nav.json/" + row.Path() + "/species");
+                }
+                const Result<Species> species = ReadSpecies(row, "species");
+                if (!species)
+                {
+                    return species.Error().WithContext("layout.nav.json");
+                }
+                zone.species = species.Value();
+                contents.navForbidden.push_back(zone);
+            }
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -2129,6 +2421,10 @@ namespace cnahouse::world
         if (const Result<void> props = LoadProps(directory, contents); !props)
         {
             return props.Error();
+        }
+        if (const Result<void> nav = LoadNav(directory, contents); !nav)
+        {
+            return nav.Error();
         }
 
         util::Log::Info(util::LogCat::World,

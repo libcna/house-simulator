@@ -5092,8 +5092,23 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: every fixture value is chosen to differ from the field's default (the WC pan is scaled
             0.98, not 1.0). An injected bug that ignored `scale` survived the first version of the
             test, because the fixture agreed with the default by accident.
-- [ ] HOUSE-00351 — `WorldLoader`: nav graph, perches, beds, forbidden zones
+- [x] HOUSE-00351 — `WorldLoader`: nav graph, perches, beds, forbidden zones
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadNav`. Perches, beds and bowls differ only in their name
+            in the file, so they are read into one list with a `MarkerKind` — losing the kind puts
+            the cat's water in the dog's bed, and a test says so. 8 new unit tests; nine injected
+            bugs, nine caught.
+      finding: **absent** and **empty** species lists are not the same thing. §61's answer for
+            most of the graph is "both", so an absent list means both; an empty one is a row that
+            does nothing and is far more likely a mistake, so it is refused. The one exception is
+            a forbidden zone, where an absent list would read as a rule that forbids nobody — so
+            there the list is required.
+      finding: a marker is placed by position **or** by a prop, and §61 uses both — a windowsill
+            perch is a point, a dog bed is wherever the bed prop ended up. Neither is refused: a
+            marker with no position and no prop is a marker nowhere.
+      note: an edge that crosses a portal names it, which is the whole reason there is one
+            authored graph and not two: a closed door closes the route for the pets exactly as it
+            does for vision and sound.
 - [ ] HOUSE-00352 — `WorldLoader`: audio zones, ambience beds, emitter placements, portal transmission losses
       dep: HOUSE-00345 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00353 — `WorldLoader`: exterior (terrain reference, road, fences, neighbourhood, vegetation instances)
