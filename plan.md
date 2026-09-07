@@ -4709,24 +4709,142 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
 - [ ] HOUSE-00281 — Grouped: source the 8 missing footstep surfaces (carpet, concrete, interior hardwood, 3 stair variants, asphalt, bluestone) — ≥ 6 walk + 6 run + 2 land each, CC0
       dep: HOUSE-00272, HOUSE-00280 · sys: audio · plat: TOOL · pri: MUST
       accept: 8 surfaces × ≥ 14 samples, manifested, converted, auditioned
+      note: (2026-09-07) `HOUSE-00280` measured the shortfall and it is **113 samples, not
+            112**: `water` needs one more run variant as well. It has a pack, 6 walk and
+            6 land, and NOX ships only 5 run samples in the entire collection, so no
+            selection could have reached §62.4's six. `docs/asset-selection/footstep-surfaces.md`
+            is the generated shopping list and is kept current by a gate.
+      note: `audio-core` is at **99.8 % of its 30 MB budget** with the NOX subset alone
+            (`HOUSE-00278`), and these samples land in that pack — about 6 MB at the
+            measured 0.052 MB a clip. The budget question is recorded in §72.
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00282 — Grouped: source door sounds — 4 door classes × {open, close, latch, creak ×3, slam}, CC0
       dep: HOUSE-00272 · sys: audio · plat: TOOL · pri: MUST
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00283 — Grouped: source switch, cabinet and drawer sounds — ≥ 24 samples
       dep: HOUSE-00272 · sys: audio · plat: TOOL · pri: MUST
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00284 — Grouped: source water sounds — tap ×3 flow rates, shower, drain gurgle, water hammer, pipe hiss, bath fill, toilet flush ×2, cistern refill — ≥ 16 samples
       dep: HOUSE-00272 · sys: audio · plat: TOOL · pri: MUST
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00285 — Grouped: source appliance sounds — fridge compressor start/run/stop, freezer, washer ×3 stages, dryer, dishwasher ×3 stages, oven fan, extractor ×3, microwave, kettle, toaster — ≥ 22 samples
       dep: HOUSE-00272 · sys: audio · plat: TOOL · pri: MUST
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00286 — Grouped: source weather sounds NOX lacks — thunder ×3 distances (≥ 9 samples), hail on roof/window/car, rain on roof/window, gutter trickle — ≥ 18 samples
       dep: HOUSE-00272 · sys: audio · plat: TOOL · pri: MUST
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00287 — Grouped: source dog sounds — bark ×4, whine, growl, pant loop, sigh, eat, drink, collar jingle, nail clicks — ≥ 14 samples
       dep: HOUSE-00272 · sys: audio · plat: TOOL · pri: MUST
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00288 — Grouped: source cat sounds — meow ×5, chirrup, purr loop, hiss, paw falls, scratch — ≥ 12 samples
       dep: HOUSE-00272 · sys: audio · plat: TOOL · pri: MUST
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00289 — Grouped: source house sounds — HVAC burner/blower/duct tick, clock tick, clock chime, doorbell, garage motor, gate motor, creaks ×8 — ≥ 18 samples
       dep: HOUSE-00272 · sys: audio · plat: TOOL · pri: MUST
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00290 — Grouped: source outdoor ambience NOX lacks — distant road, suburban day, suburban night, lawnmower, aircraft, neighbourhood dog — ≥ 10 samples
       dep: HOUSE-00272 · sys: audio · plat: TOOL · pri: MUST
+      blocked: (2026-09-07) **Freesound originals require an account, and creating one means
+            accepting their ToS — which is the project owner's to accept, not a tool's.** Measured
+            rather than assumed: `https://freesound.org/apiv2/search/text/?query=…` answers
+            **401 "Authentication credentials were not provided"**, and a sound's `/download/` URL
+            **302s to `https://freesound.org/home/login/`**. The search pages and the CC0 filter
+            read fine anonymously, so the *selection* work could be done; only the bytes cannot be
+            fetched. The lossy CDN previews are readable without a login and are **not** a
+            substitute — this project converts 24-bit originals and manifests their hashes.
+            `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
+            warranty and indemnity bind **the account holder**, which is the same reason the
+            account cannot be created on the owner's behalf.
 - [ ] HOUSE-00291 — **Hero asset research: the dog.** Three sourcing attempts with recorded results; if none passes the bar, schedule the build-it-ourselves fallback (R-01)
       dep: HOUSE-00267, HOUSE-00268 · sys: content · plat: TOOL · pri: MUST
       accept: a decision with evidence: chosen asset + licence, or "build it" with a task list
