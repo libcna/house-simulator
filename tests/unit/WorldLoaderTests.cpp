@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <string>
 #include <utility>
 #include <variant>
@@ -2806,6 +2807,100 @@ namespace
         EXPECT_LT(position("layout.cells.json"), position("layout.portals.json"));
         EXPECT_LT(position("layout.portals.json"), position("layout.openings.json"));
         EXPECT_LT(position("layout.cells.json"), position("layout.props.json"));
+    }
+
+    // --- the authored world ------------------------------------------------------------------
+
+    /// The real world, deployed, not a fixture.
+    ///
+    /// Every test above builds its own JSON, which proves the reader and proves nothing about the
+    /// house. This one opens what `HOUSE-00366` onwards actually authored, with the loader the
+    /// game uses, and grows a claim per file as each is written. The gates already run
+    /// `world_schema.py` and `validate_world.py` over the same directory; what they cannot do is
+    /// say that the **C++** reader agrees with them.
+    ///
+    /// It reads `content/world/` and not `assets-src/world/`, which is the point of
+    /// `HOUSE-00421`: the authored files are JSONC and `System::Text::Json` is not. Tests run from
+    /// the repository root (`tests/CMakeLists.txt`), so both paths are stable.
+    TEST(AuthoredWorldTest, TheAuthoredLevelsLoadWithTheRealLoader)
+    {
+        IdRegistry::ResetForTesting();
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/layout.levels.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
+        }
+
+        const auto manifest = world::WorldLoader::LoadManifest(directory);
+        ASSERT_TRUE(manifest) << manifest.Error().ToString();
+        ASSERT_TRUE(world::WorldLoader::VerifyManifest(directory, manifest.Value()))
+            << "the committed manifest must cover the committed files";
+
+        world::WorldData::Contents contents;
+        const auto levels = world::WorldLoader::LoadLevels(directory, contents);
+        ASSERT_TRUE(levels) << levels.Error().ToString();
+
+        // §12.2's five levels, in order, with the elevations the architecture states.
+        ASSERT_EQ(contents.levels.size(), 5U);
+        const std::vector<std::pair<const char*, float>> expected{
+            {"B1", -2.30F}, {"L0", 0.60F}, {"L1", 3.65F}, {"L2", 6.55F}, {"L3", 9.30F}};
+        for (std::size_t index = 0; index < expected.size(); ++index)
+        {
+            EXPECT_EQ(contents.levels[index].id, Intern(expected[index].first));
+            EXPECT_FLOAT_EQ(contents.levels[index].ffl, expected[index].second) << expected[index].first;
+        }
+
+        // The one level whose ceiling is null, because rafters bound it and not a plane.
+        for (std::size_t index = 0; index < 4U; ++index)
+        {
+            EXPECT_TRUE(contents.levels[index].ceiling.has_value())
+                << contents.levels[index].name << " has a ceiling plane";
+        }
+        EXPECT_FALSE(contents.levels[4].ceiling.has_value()) << "the attic does not";
+        EXPECT_EQ(contents.levels[4].roof, Intern("ROOF_MAIN"));
+
+        // The structural depth is not decoration: every storey's ceiling plus it is the next
+        // storey's floor, which is what makes the elevations a section rather than five numbers.
+        for (std::size_t index = 0; index + 1 < 4U; ++index)
+        {
+            const world::Level& below = contents.levels[index];
+            ASSERT_TRUE(below.ceiling.has_value());
+            EXPECT_NEAR(*below.ceiling + below.structureDepth, contents.levels[index + 1].ffl, 1e-4F)
+                << below.name << " to " << contents.levels[index + 1].name;
+        }
+
+        EXPECT_FLOAT_EQ(contents.construction.wallExterior, 0.30F);
+        EXPECT_FLOAT_EQ(contents.construction.wallPartition, 0.15F);
+        EXPECT_FLOAT_EQ(contents.construction.ridgeY, 14.30F);
+        // §12.1's 7:12, as a slope. Read as radians it would be 0.528 and the roof would be a
+        // different roof; a test is the cheapest place to say which reading this is.
+        EXPECT_NEAR(contents.construction.roofPitch, 7.0F / 12.0F, 1e-4F);
+
+        IdRegistry::ResetForTesting();
+    }
+
+    TEST(AuthoredWorldTest, TheAuthoredWorldIsPlainJsonAndTheSourceIsNot)
+    {
+        // The two halves of the format, both asserted, because until `HOUSE-00421` only one of
+        // them was built. The authored file carries comments and the deployed one must not: a
+        // deploy that copied bytes would pass every other test here and fail in the game.
+        if (!std::filesystem::exists("assets-src/world/layout.levels.json"))
+        {
+            GTEST_SKIP() << "no authored world yet";
+        }
+        const auto read = [](const std::string& path)
+        {
+            std::ifstream in(path, std::ios::binary);
+            return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+        };
+
+        EXPECT_NE(read("assets-src/world/layout.levels.json").find("//"), std::string::npos)
+            << "the authored file is JSONC and this one uses comments";
+
+        ASSERT_TRUE(std::filesystem::exists("content/world/layout.levels.json"))
+            << "run tools/world/deploy_world.py";
+        EXPECT_EQ(read("content/world/layout.levels.json").find("//"), std::string::npos)
+            << "and the deployed file must have none, because System::Text::Json refuses them";
     }
 
     TEST_F(WorldLoaderTest, JoinProducesOneSeparatorWhateverItIsGiven)

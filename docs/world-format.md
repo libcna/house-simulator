@@ -11,7 +11,11 @@ decide.
 
 The authored files are JSONC (comments permitted); the build strips comments and deploys plain
 JSON beside the compiled content, where the runtime reads them with `System::IO::File` +
-`System::Text::Json`. They are data the *game* owns, not framework content, so no
+`System::Text::Json`. That stripping step is
+[`tools/world/deploy_world.py`](../tools/world/deploy_world.py): `assets-src/world/*.json` →
+`content/world/*.json`, a `build_content.py` stage and a CI gate (`HOUSE-00421`). The runtime never
+reads `assets-src/`, and `System::Text::Json` refuses the first comment, so a change that is not
+deployed is a change the game does not have. They are data the *game* owns, not framework content, so no
 `ContentTypeReader` is registered and no CNA pipeline extension is needed.
 
 ---
@@ -66,7 +70,13 @@ The hashes are defined exactly, because two implementations have to agree —
 
 Members are written in this page's order — never the filesystem's — because the order is part of
 the hash, and a list that reshuffled between two machines would make a save written on one look
-stale on the other. Regenerate with `tools/world/world_manifest.py --emit assets-src/world`;
+stale on the other.
+
+The manifest is **generated, not authored**, and it describes the **deployed** copy in
+`content/world/` rather than the authored JSONC in `assets-src/world/`. `WorldLoader` rehashes the
+files it is about to read, and those are the deployed ones; a manifest over the authored bytes
+would fail at load on every file that had a comment in it, which is every file.
+[`deploy_world.py`](../tools/world/deploy_world.py) writes it as its last step (`HOUSE-00421`), and
 `--check` is a CI gate.
 
 ## `layout.levels.json`

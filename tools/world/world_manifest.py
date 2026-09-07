@@ -5,8 +5,11 @@
 `worldHash` over the list. `WorldLoader` verifies it at load; this writes it, and `--check` is the
 gate that stops it going stale.
 
-    tools/world/world_manifest.py --emit assets-src/world
-    tools/world/world_manifest.py --check assets-src/world
+    tools/world/world_manifest.py --emit content/world
+    tools/world/world_manifest.py --check content/world
+
+`deploy_world.py` calls `emit` for you as its last step, which is where this normally runs: the
+manifest hashes the **deployed** bytes, because those are the ones `WorldLoader` reads back.
     tools/world/world_manifest.py --selftest
 
 ## The definition, exactly, because two implementations have to agree
@@ -241,8 +244,11 @@ def selftest() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    # The DEPLOYED world, not the authored one: `WorldLoader::VerifyManifest` rehashes the files
+    # it is about to read, and those are the copies `deploy_world.py` wrote (`HOUSE-00421`). A
+    # manifest over the authored bytes would fail at load on every file that had a comment in it.
     parser.add_argument("directory", nargs="?", type=Path,
-                        default=REPO / "assets-src" / "world")
+                        default=REPO / "content" / "world")
     parser.add_argument("--emit", action="store_true", help="write world.manifest.json")
     parser.add_argument("--check", action="store_true", help="fail if it is stale")
     parser.add_argument("--selftest", action="store_true")

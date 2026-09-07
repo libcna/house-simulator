@@ -162,14 +162,18 @@ def default_stages() -> list[Stage]:
         # every stage in that group to every generator, which is right for the licence and
         # manifest gates -- they speak for the whole tree -- and wrong for this one: an unauthored
         # layout is no reason to stop compiling the textures.
-        Stage("world-manifest", "world",
-              ["python3", "tools/world/world_manifest.py", "--check", "assets-src/world"],
-              inputs=["assets-src/world/*.json"], outputs=[], needs=["manifest"],
-              description="world.manifest.json indexes the world it sits in"),
         Stage("world-rules", "world",
               ["python3", "tools/world/validate_world.py", "assets-src/world"],
-              inputs=["assets-src/world/*.json"], outputs=[], needs=["world-manifest"],
+              inputs=["assets-src/world/*.json"], outputs=[], needs=["manifest"],
               description="the eleven rules of §15.7 over the authored layout"),
+        # `HOUSE-00421`. The authored files are JSONC and the runtime's `System::Text::Json` is
+        # not: this is the stripping step `world-format.md` describes. After the rules, because
+        # deploying a layout that fails §15.7 would put a broken house where the game reads.
+        Stage("world-deploy", "world",
+              ["python3", "tools/world/deploy_world.py"],
+              inputs=["assets-src/world/*.json"], outputs=["content/world/*.json"],
+              needs=["world-rules"],
+              description="strip the comments, deploy as plain JSON, and hash what was written"),
         Stage("collision", "world",
               ["python3", "tools/world/build_collision.py"],
               inputs=["assets-src/world/*.json", "assets-src/assets.manifest.json"],

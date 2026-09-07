@@ -126,6 +126,14 @@ jobs:
           python3 -m pip install --break-system-packages --user jsonschema
           python3 tools/world/validate_world.py --selftest
 
+      - name: The authored JSONC must become JSON the runtime can actually parse
+        working-directory: cna-house
+        # `HOUSE-00421`. `world-format.md` specifies both halves of the format and only one was
+        # built: `System::Text::Json` refuses the first comment, so `WorldLoader` could not read a
+        # file anybody had authored. The claim that matters is that the deployed copy is STRICT
+        # JSON with the same parsed content -- not the source with the comment characters blanked.
+        run: python3 tools/world/deploy_world.py --selftest
+
       - name: The manifest and the worldHash must be one definition, not two
         working-directory: cna-house
         # `HOUSE-00364`. The hash is written by Python and verified by C++, so the two halves have

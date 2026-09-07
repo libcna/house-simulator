@@ -70,9 +70,9 @@ the generators would be reporting on assets the pipeline had already consumed.
 | 8 | **`cnb-media`** | compile | compile assets-src/Media to content with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Media/**/*` | — (a gate) |
 | 9 | **`cnb-models`** | compile | compile assets-src/Models to content/Models with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Models/**/*` | — (a gate) |
 | 10 | **`cnb-textures`** | compile | compile assets-src/Textures to content/Textures with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Textures/**/*` | — (a gate) |
-| 11 | **`world-manifest`** | world | world.manifest.json indexes the world it sits in | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | — (a gate) |
-| 12 | **`world-rules`** | world | the eleven rules of §15.7 over the authored layout | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-manifest` | `assets-src/world/*.json` | — (a gate) |
-| 13 | **`collision`** | world | rooms become walls; the layout and the _COL proxies | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json`<br>`assets-src/assets.manifest.json` | `content/world/collision.bin` |
+| 11 | **`world-rules`** | world | the eleven rules of §15.7 over the authored layout | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | — (a gate) |
+| 12 | **`collision`** | world | rooms become walls; the layout and the _COL proxies | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json`<br>`assets-src/assets.manifest.json` | `content/world/collision.bin` |
+| 13 | **`world-deploy`** | world | strip the comments, deploy as plain JSON, and hash what was written | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json` | `content/world/*.json` |
 | 14 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/chunks.bin` |
 | 15 | **`cnb-world`** | compile | compile assets-src/world to content/world with cna-content | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/**/*` | — (a gate) |
 | 16 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/coverage.bin` |
@@ -93,9 +93,9 @@ cnb-fonts      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_B
 cnb-media      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Media -o content --quiet
 cnb-models     /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Models -o content/Models --quiet
 cnb-textures   /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Textures -o content/Textures --quiet
-world-manifest python3 tools/world/world_manifest.py --check assets-src/world
 world-rules    python3 tools/world/validate_world.py assets-src/world
 collision      python3 tools/world/build_collision.py
+world-deploy   python3 tools/world/deploy_world.py
 chunks         python3 tools/world/build_chunks.py
 cnb-world      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/world -o content/world --quiet
 coverage       python3 tools/world/build_coverage.py
