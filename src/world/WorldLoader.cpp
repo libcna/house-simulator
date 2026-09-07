@@ -767,6 +767,315 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadCells(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.cells.json", "cells", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+
+        const Result<JsonValue> cells = document.Value().Root().RequireArray("cells");
+        if (!cells)
+        {
+            return cells.Error().WithContext("layout.cells.json");
+        }
+        const Result<std::vector<JsonValue>> rows = cells.Value().Elements();
+        if (!rows)
+        {
+            return rows.Error().WithContext("layout.cells.json");
+        }
+
+        for (const JsonValue& row : rows.Value())
+        {
+            Cell cell;
+            const Result<util::Id> id = RequireId(row, "id");
+            if (!id)
+            {
+                return id.Error().WithContext("layout.cells.json");
+            }
+            cell.id = id.Value();
+
+            const Result<util::Id> level = RequireId(row, "level");
+            if (!level)
+            {
+                return level.Error().WithContext("layout.cells.json");
+            }
+            cell.level = level.Value();
+
+            const Result<std::string> name = row.OptionalString("name", "");
+            if (!name)
+            {
+                return name.Error().WithContext("layout.cells.json");
+            }
+            cell.name = name.Value();
+
+            const Result<std::string> kind = row.RequireString("kind");
+            if (!kind)
+            {
+                return kind.Error().WithContext("layout.cells.json");
+            }
+            const Result<CellKind> parsedKind = ParseCellKind(kind.Value());
+            if (!parsedKind)
+            {
+                return parsedKind.Error().WithContext(row.Path() + "/kind").WithContext("layout.cells.json");
+            }
+            cell.kind = parsedKind.Value();
+
+            // A cell is a UNION of axis-aligned boxes, not one box. That is what an L-shaped room
+            // is, and it is why `WorldData::CellContains` walks a list: the bounding box of an L
+            // includes the notch, which belongs to the room next door.
+            const Result<JsonValue> boxes = row.RequireArray("boxes");
+            if (!boxes)
+            {
+                return boxes.Error().WithContext("layout.cells.json");
+            }
+            const Result<std::vector<JsonValue>> boxRows = boxes.Value().Elements();
+            if (!boxRows)
+            {
+                return boxRows.Error().WithContext("layout.cells.json");
+            }
+            if (boxRows.Value().empty())
+            {
+                return Err(ErrorCode::InvalidData,
+                           "a cell has at least one box; with none it has no floor to stand on and "
+                           "no wall to draw",
+                           "layout.cells.json/" + row.Path() + "/boxes");
+            }
+            for (const JsonValue& box : boxRows.Value())
+            {
+                const Result<Footprint> footprint = ReadFootprint(box);
+                if (!footprint)
+                {
+                    return footprint.Error().WithContext("layout.cells.json");
+                }
+                cell.boxes.push_back(footprint.Value());
+            }
+
+            // `yOverride` is `[min, max]`, and `null` means "use the level's ffl..ceiling". The
+            // difference matters most on a rafter-bounded level, where there is no level ceiling to
+            // fall back to and `WorldData::ExtentOf` refuses rather than inventing one.
+            if (row.Has("yOverride") && !row.IsNull("yOverride"))
+            {
+                const Result<JsonValue> range = row.RequireArray("yOverride");
+                if (!range)
+                {
+                    return range.Error().WithContext("layout.cells.json");
+                }
+                const Result<std::vector<JsonValue>> parts = range.Value().Elements();
+                if (!parts)
+                {
+                    return parts.Error().WithContext("layout.cells.json");
+                }
+                if (parts.Value().size() != 2U)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "yOverride is [floor, ceiling]; this has " +
+                                   std::to_string(parts.Value().size()) + " element(s)",
+                               "layout.cells.json/" + row.Path() + "/yOverride");
+                }
+                const Result<float> low = parts.Value()[0].AsFloat();
+                if (!low)
+                {
+                    return low.Error().WithContext("layout.cells.json");
+                }
+                const Result<float> high = parts.Value()[1].AsFloat();
+                if (!high)
+                {
+                    return high.Error().WithContext("layout.cells.json");
+                }
+                if (!(low.Value() < high.Value()))
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "yOverride is [floor, ceiling] with floor < ceiling; this is [" +
+                                   std::to_string(low.Value()) + ", " + std::to_string(high.Value()) + "]",
+                               "layout.cells.json/" + row.Path() + "/yOverride");
+                }
+                cell.yOverride = Extent{low.Value(), high.Value()};
+            }
+
+            for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, util::Id*>>{
+                     {"floorMaterial", &cell.floorMaterial},
+                     {"wallMaterial", &cell.wallMaterial},
+                     {"ceilingMaterial", &cell.ceilingMaterial},
+                     {"navMeshRegion", &cell.navMeshRegion}})
+            {
+                const Result<util::Id> value = OptionalId(row, field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.cells.json");
+                }
+                *target = value.Value();
+            }
+
+            const auto text = [&row](std::string_view field) -> Result<std::string>
+            {
+                if (!row.Has(field) || row.IsNull(field))
+                {
+                    return std::string{};
+                }
+                return row.RequireString(field);
+            };
+            for (const auto& [field, target] :
+                 std::initializer_list<std::pair<std::string_view, std::string*>>{
+                     {"footstepSurface", &cell.footstepSurface}, {"residencyPack", &cell.residencyPack}})
+            {
+                const Result<std::string> value = text(field);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.cells.json");
+                }
+                *target = value.Value();
+            }
+
+            if (row.Has("acoustic") && !row.IsNull("acoustic"))
+            {
+                const Result<JsonValue> acoustic = row.RequireObject("acoustic");
+                if (!acoustic)
+                {
+                    return acoustic.Error().WithContext("layout.cells.json");
+                }
+                const Result<util::Id> tone = OptionalId(acoustic.Value(), "roomTone");
+                if (!tone)
+                {
+                    return tone.Error().WithContext("layout.cells.json");
+                }
+                cell.acoustic.roomTone = tone.Value();
+                const Result<float> absorption = acoustic.Value().OptionalFloat("absorption", 0.0F);
+                if (!absorption)
+                {
+                    return absorption.Error().WithContext("layout.cells.json");
+                }
+                cell.acoustic.absorption = absorption.Value();
+                const Result<std::string> hint = acoustic.Value().OptionalString("reverbHint", "");
+                if (!hint)
+                {
+                    return hint.Error().WithContext("layout.cells.json");
+                }
+                cell.acoustic.reverbHint = hint.Value();
+            }
+
+            if (row.Has("thermal") && !row.IsNull("thermal"))
+            {
+                const Result<JsonValue> thermal = row.RequireObject("thermal");
+                if (!thermal)
+                {
+                    return thermal.Error().WithContext("layout.cells.json");
+                }
+                const Result<bool> heated = thermal.Value().OptionalBool("heated", false);
+                if (!heated)
+                {
+                    return heated.Error().WithContext("layout.cells.json");
+                }
+                cell.thermal.heated = heated.Value();
+                const Result<util::Id> duct = OptionalId(thermal.Value(), "ductBranch");
+                if (!duct)
+                {
+                    return duct.Error().WithContext("layout.cells.json");
+                }
+                cell.thermal.ductBranch = duct.Value();
+            }
+
+            const auto idList = [](const JsonValue& parent,
+                                   std::string_view field,
+                                   std::vector<util::Id>& target) -> Result<void>
+            {
+                if (!parent.Has(field) || parent.IsNull(field))
+                {
+                    return util::Ok();
+                }
+                const Result<JsonValue> array = parent.RequireArray(field);
+                if (!array)
+                {
+                    return array.Error();
+                }
+                const Result<std::vector<JsonValue>> entries = array.Value().Elements();
+                if (!entries)
+                {
+                    return entries.Error();
+                }
+                for (const JsonValue& entry : entries.Value())
+                {
+                    const Result<std::string> spelling = entry.AsString();
+                    if (!spelling)
+                    {
+                        return spelling.Error();
+                    }
+                    target.push_back(util::Intern(spelling.Value()));
+                }
+                return util::Ok();
+            };
+
+            if (const Result<void> groups = idList(row, "lightGroups", cell.lightGroups); !groups)
+            {
+                return groups.Error().WithContext("layout.cells.json");
+            }
+
+            if (row.Has("daylight") && !row.IsNull("daylight"))
+            {
+                const Result<JsonValue> daylight = row.RequireObject("daylight");
+                if (!daylight)
+                {
+                    return daylight.Error().WithContext("layout.cells.json");
+                }
+                if (const Result<void> windows =
+                        idList(daylight.Value(), "windowIds", cell.daylight.windowIds);
+                    !windows)
+                {
+                    return windows.Error().WithContext("layout.cells.json");
+                }
+                if (daylight.Value().Has("orientation") && !daylight.Value().IsNull("orientation"))
+                {
+                    const Result<std::string> compass = daylight.Value().RequireString("orientation");
+                    if (!compass)
+                    {
+                        return compass.Error().WithContext("layout.cells.json");
+                    }
+                    const Result<Orientation> parsed = ParseOrientation(compass.Value());
+                    if (!parsed)
+                    {
+                        return parsed.Error()
+                            .WithContext(row.Path() + "/daylight/orientation")
+                            .WithContext("layout.cells.json");
+                    }
+                    cell.daylight.orientation = parsed.Value();
+                }
+                const Result<float> exposure = daylight.Value().OptionalFloat("exposure", 0.0F);
+                if (!exposure)
+                {
+                    return exposure.Error().WithContext("layout.cells.json");
+                }
+                cell.daylight.exposure = exposure.Value();
+            }
+
+            const Result<std::int64_t> bias = row.OptionalInt("lodBias", 0);
+            if (!bias)
+            {
+                return bias.Error().WithContext("layout.cells.json");
+            }
+            cell.lodBias = static_cast<std::int32_t>(bias.Value());
+
+            const Result<std::string> hint = row.OptionalString("visibilityHint", "opaque");
+            if (!hint)
+            {
+                return hint.Error().WithContext("layout.cells.json");
+            }
+            const Result<VisibilityHint> parsedHint = ParseVisibilityHint(hint.Value());
+            if (!parsedHint)
+            {
+                return parsedHint.Error()
+                    .WithContext(row.Path() + "/visibilityHint")
+                    .WithContext("layout.cells.json");
+            }
+            cell.visibilityHint = parsedHint.Value();
+
+            contents.cells.push_back(std::move(cell));
+        }
+
+        return util::Ok();
+    }
+
     Result<WorldData> WorldLoader::Load(std::string_view directory)
     {
         const Result<WorldManifest> manifest = LoadManifest(directory);
@@ -786,10 +1095,16 @@ namespace cnahouse::world
             return materials.Error();
         }
 
+        if (const Result<void> cells = LoadCells(directory, contents); !cells)
+        {
+            return cells.Error();
+        }
+
         util::Log::Info(util::LogCat::World,
-                        "loaded {} level(s) and {} material(s) from {}",
+                        "loaded {} level(s), {} material(s) and {} cell(s) from {}",
                         contents.levels.size(),
                         contents.materials.size(),
+                        contents.cells.size(),
                         directory);
         return WorldData::Create(std::move(contents));
     }

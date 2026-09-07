@@ -34,10 +34,14 @@ namespace cnahouse::world
     /// @brief Reads a world directory into a `WorldData`.
     ///
     /// **One file at a time, and the order is the dependency order.** `layout.cells.json` names
-    /// levels, `layout.portals.json` names cells, `layout.props.json` names materials. The loader
-    /// reads them in the order `cna-house.md` §15.1 lists them so that a reference is always into
-    /// something already read, and a dangling one can be reported against the row that carries it
-    /// rather than at the end of the load.
+    /// levels and materials, `layout.portals.json` names cells, `layout.props.json` names both.
+    /// The loader reads them so that a reference is always into something already read -- which is
+    /// what lets `WorldValidator` (`HOUSE-00357`) report a dangling one against the row that
+    /// carries it rather than after the whole load.
+    ///
+    /// The loader itself does **not** resolve those references. Resolution is §15.7 rule 6, it has
+    /// one owner in `validate_world.py` and one mirror in `WorldValidator`, and a third reading
+    /// here could disagree with both.
     ///
     /// **Every failure names the file and the JSON path.** `util::JsonValue` carries the path, this
     /// class adds the file, and the message that reaches a log or a test reads
@@ -73,6 +77,10 @@ namespace cnahouse::world
         /// Read before the cells, because a cell names three of them.
         [[nodiscard]] static util::Result<void> LoadMaterials(std::string_view directory,
                                                               WorldData::Contents& contents);
+
+        /// @brief Reads `layout.cells.json` into @p contents.
+        [[nodiscard]] static util::Result<void> LoadCells(std::string_view directory,
+                                                          WorldData::Contents& contents);
 
         /// @brief Reads every file §15.1 lists and builds the model.
         ///

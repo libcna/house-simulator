@@ -134,6 +134,47 @@ namespace
             })";
         }
 
+        static std::string Cells()
+        {
+            return R"({
+              "schema": "cna-house/cells/1",
+              "cells": [
+                {
+                  "id": "L0_KITCHEN", "level": "L0", "name": "Kitchen", "kind": "room",
+                  "boxes": [{ "x": [-8.20, 2.20], "z": [-27.10, -23.00] }],
+                  "yOverride": null,
+                  "floorMaterial": "MAT_TILE_PORCELAIN_GREY",
+                  "wallMaterial": "MAT_PAINT_WARM_WHITE",
+                  "ceilingMaterial": "MAT_PAINT_FLAT_WHITE",
+                  "footstepSurface": "tile",
+                  "acoustic": { "roomTone": "AMB_KITCHEN", "absorption": 0.28,
+                                "reverbHint": "small_hard" },
+                  "thermal": { "heated": true, "ductBranch": "DUCT_L0_W" },
+                  "lightGroups": ["LG_L0_KITCHEN_MAIN", "LG_L0_KITCHEN_UNDERCAB"],
+                  "daylight": { "windowIds": ["W_L0_KITCHEN_N1", "W_L0_KITCHEN_N2"],
+                                "orientation": "NE", "exposure": 0.55 },
+                  "residencyPack": "house-l0", "lodBias": 0,
+                  "visibilityHint": "opaque", "navMeshRegion": "NAV_L0_KITCHEN"
+                },
+                {
+                  "id": "L0_HALL", "level": "L0", "kind": "corridor",
+                  "boxes": [{ "x": [-2.0, 2.0], "z": [4.0, 10.0] },
+                            { "x": [2.0, 6.0], "z": [8.0, 10.0] }]
+                },
+                {
+                  "id": "L0_STAIR", "level": "L0", "kind": "stair",
+                  "boxes": [{ "x": [-6.0, -2.0], "z": [4.0, 8.0] }],
+                  "yOverride": [0.60, 3.65],
+                  "visibilityHint": "open"
+                },
+                {
+                  "id": "L0_TERRACE", "level": "L0", "kind": "exterior",
+                  "boxes": [{ "x": [-2.0, 2.0], "z": [-4.0, 0.0] }]
+                }
+              ]
+            })";
+        }
+
         /// The smallest world the loader can finish on: a manifest and the files it lists.
         void WriteMinimalWorld() const
         {
@@ -141,12 +182,14 @@ namespace
             WriteManifest({"layout.levels.json"});
         }
 
-        /// The same, plus the materials, for the tests that go all the way through `Load`.
+        /// The same, plus everything the loader can read so far, for the tests that go all the
+        /// way through `Load`.
         void WriteWorldWithMaterials() const
         {
             Write("layout.levels.json", Levels());
             Write("layout.materials.json", Materials());
-            WriteManifest({"layout.levels.json", "layout.materials.json"});
+            Write("layout.cells.json", Cells());
+            WriteManifest({"layout.levels.json", "layout.materials.json", "layout.cells.json"});
         }
 
         std::string directory_;
@@ -582,6 +625,176 @@ namespace
         EXPECT_EQ(materials.Error().Code(), ErrorCode::NotFound);
     }
 
+    // --- the cells --------------------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, ACellIsReadWithEveryFieldItCarries)
+    {
+        Write("layout.cells.json", Cells());
+        world::WorldData::Contents contents;
+        const auto cells = world::WorldLoader::LoadCells(directory_, contents);
+        ASSERT_TRUE(cells) << cells.Error().ToString();
+
+        ASSERT_EQ(contents.cells.size(), 4U);
+        const world::Cell& kitchen = contents.cells[0];
+        EXPECT_EQ(kitchen.id, Intern("L0_KITCHEN"));
+        EXPECT_EQ(kitchen.level, Intern("L0"));
+        EXPECT_EQ(kitchen.name, "Kitchen");
+        EXPECT_EQ(kitchen.kind, world::CellKind::Room);
+        EXPECT_EQ(kitchen.floorMaterial, Intern("MAT_TILE_PORCELAIN_GREY"));
+        EXPECT_EQ(kitchen.footstepSurface, "tile");
+        EXPECT_EQ(kitchen.acoustic.roomTone, Intern("AMB_KITCHEN"));
+        EXPECT_FLOAT_EQ(kitchen.acoustic.absorption, 0.28F);
+        EXPECT_EQ(kitchen.acoustic.reverbHint, "small_hard");
+        EXPECT_TRUE(kitchen.thermal.heated);
+        EXPECT_EQ(kitchen.thermal.ductBranch, Intern("DUCT_L0_W"));
+        ASSERT_EQ(kitchen.lightGroups.size(), 2U);
+        EXPECT_EQ(kitchen.lightGroups[1], Intern("LG_L0_KITCHEN_UNDERCAB"));
+        ASSERT_EQ(kitchen.daylight.windowIds.size(), 2U);
+        ASSERT_TRUE(kitchen.daylight.orientation.has_value());
+        // `NE` and not the `N` of world-format.md's example, deliberately: `N` is the first value
+        // of the enum, so a reader that ignored the field entirely would still pass.
+        EXPECT_EQ(*kitchen.daylight.orientation, world::Orientation::NE);
+        EXPECT_FLOAT_EQ(kitchen.daylight.exposure, 0.55F);
+        EXPECT_EQ(kitchen.residencyPack, "house-l0");
+        EXPECT_EQ(kitchen.lodBias, 0);
+        EXPECT_EQ(kitchen.visibilityHint, world::VisibilityHint::Opaque);
+        EXPECT_EQ(kitchen.navMeshRegion, Intern("NAV_L0_KITCHEN"));
+    }
+
+    TEST_F(WorldLoaderTest, AMultiBoxCellIsAUnionAndNotABoundingBox)
+    {
+        // The L-shaped hall. Its two boxes meet along one edge and the notch beside them belongs to
+        // the room next door -- which is why a cell carries a LIST and why `CellContains` walks it.
+        Write("layout.cells.json", Cells());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+
+        const world::Cell& hall = contents.cells[1];
+        ASSERT_EQ(hall.boxes.size(), 2U);
+        EXPECT_FLOAT_EQ(hall.boxes[0].minX, -2.0F);
+        EXPECT_FLOAT_EQ(hall.boxes[1].maxZ, 10.0F);
+        EXPECT_FLOAT_EQ(world::WorldData::FootprintArea(hall), 32.0F);
+    }
+
+    TEST_F(WorldLoaderTest, ACellWithNoBoxesIsRefused)
+    {
+        Write("layout.cells.json",
+              R"({"schema": "cna-house/cells/1",
+                  "cells": [{"id": "L0_GHOST", "level": "L0", "kind": "room", "boxes": []}]})");
+        world::WorldData::Contents contents;
+        const auto cells = world::WorldLoader::LoadCells(directory_, contents);
+        ASSERT_FALSE(cells);
+        EXPECT_EQ(cells.Error().Code(), ErrorCode::InvalidData);
+        EXPECT_NE(cells.Error().Context().find("boxes"), std::string::npos) << cells.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AnExplicitYOverrideWinsAndANullOneDefersToTheLevel)
+    {
+        Write("layout.cells.json", Cells());
+        Write("layout.levels.json", Levels());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadLevels(directory_, contents));
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+
+        const auto loaded = world::WorldData::Create(std::move(contents));
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+
+        // The stair pierces the slab it climbs through, so it says so.
+        const world::Cell* stair = loaded.Value().FindCell(Intern("L0_STAIR"));
+        ASSERT_NE(stair, nullptr);
+        ASSERT_TRUE(stair->yOverride.has_value());
+        const auto stairExtent = loaded.Value().ExtentOf(*stair);
+        ASSERT_TRUE(stairExtent);
+        EXPECT_FLOAT_EQ(stairExtent.Value().ceilingY, 3.65F);
+
+        // The kitchen does not, so it takes L0's ffl..ceiling.
+        const world::Cell* kitchen = loaded.Value().FindCell(Intern("L0_KITCHEN"));
+        ASSERT_NE(kitchen, nullptr);
+        EXPECT_FALSE(kitchen->yOverride.has_value());
+        const auto kitchenExtent = loaded.Value().ExtentOf(*kitchen);
+        ASSERT_TRUE(kitchenExtent);
+        EXPECT_FLOAT_EQ(kitchenExtent.Value().floorY, 0.60F);
+        EXPECT_FLOAT_EQ(kitchenExtent.Value().ceilingY, 3.30F);
+    }
+
+    TEST_F(WorldLoaderTest, AnInvertedYOverrideIsRefused)
+    {
+        // Read as authored it would be a room whose ceiling is below its floor, and every
+        // `CellContains` in it would answer false -- a room the player falls through, not a
+        // rectangle nobody notices.
+        Write("layout.cells.json",
+              R"({"schema": "cna-house/cells/1",
+                  "cells": [{"id": "L0_A", "level": "L0", "kind": "room",
+                             "boxes": [{"x": [0, 1], "z": [0, 1]}],
+                             "yOverride": [3.65, 0.60]}]})");
+        world::WorldData::Contents contents;
+        const auto cells = world::WorldLoader::LoadCells(directory_, contents);
+        ASSERT_FALSE(cells);
+        EXPECT_NE(cells.Error().Message().find("floor < ceiling"), std::string::npos)
+            << cells.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, ACellKindOutsideTheVocabularyIsRefused)
+    {
+        Write("layout.cells.json",
+              R"({"schema": "cna-house/cells/1",
+                  "cells": [{"id": "L0_A", "level": "L0", "kind": "conservatory",
+                             "boxes": [{"x": [0, 1], "z": [0, 1]}]}]})");
+        world::WorldData::Contents contents;
+        const auto cells = world::WorldLoader::LoadCells(directory_, contents);
+        ASSERT_FALSE(cells);
+        EXPECT_NE(cells.Error().Context().find("kind"), std::string::npos) << cells.Error().ToString();
+        EXPECT_NE(cells.Error().Message().find("corridor"), std::string::npos)
+            << "the message must list the vocabulary: " << cells.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, AnOmittedOptionalBlockLeavesItsDefaultsAndNotGarbage)
+    {
+        // The terrace states nothing but the four required fields. Every optional block must come
+        // out as its documented default, and every unspecified reference as an INVALID id -- two
+        // cells with no room tone must not end up sharing one.
+        Write("layout.cells.json", Cells());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+
+        const world::Cell& terrace = contents.cells[3];
+        EXPECT_EQ(terrace.kind, world::CellKind::Exterior);
+        EXPECT_FALSE(terrace.floorMaterial.IsValid());
+        EXPECT_FALSE(terrace.acoustic.roomTone.IsValid());
+        EXPECT_FALSE(terrace.thermal.heated);
+        EXPECT_TRUE(terrace.lightGroups.empty());
+        EXPECT_FALSE(terrace.daylight.orientation.has_value()) << "an unstated orientation is not North";
+        EXPECT_EQ(terrace.visibilityHint, world::VisibilityHint::Opaque);
+        EXPECT_EQ(terrace.residencyPack, "");
+        EXPECT_NE(terrace.acoustic.roomTone, contents.cells[0].acoustic.roomTone)
+            << "a cell with no room tone must not share the kitchen's";
+    }
+
+    TEST_F(WorldLoaderTest, AnOpenVisibilityHintIsRead)
+    {
+        Write("layout.cells.json", Cells());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
+        EXPECT_EQ(contents.cells[2].visibilityHint, world::VisibilityHint::Open);
+    }
+
+    TEST_F(WorldLoaderTest, TheLoaderDoesNotResolveCrossFileReferences)
+    {
+        // Deliberate. Resolution is §15.7 rule 6, owned by `validate_world.py` and mirrored by
+        // `WorldValidator` (`HOUSE-00357`); a third reading here could disagree with both. What the
+        // loader guarantees is that the id is INTERNED, so the validator can name it.
+        Write("layout.cells.json",
+              R"({"schema": "cna-house/cells/1",
+                  "cells": [{"id": "L0_A", "level": "L9_NOWHERE", "kind": "room",
+                             "boxes": [{"x": [0, 1], "z": [0, 1]}],
+                             "floorMaterial": "MAT_DOES_NOT_EXIST"}]})");
+        world::WorldData::Contents contents;
+        const auto cells = world::WorldLoader::LoadCells(directory_, contents);
+        ASSERT_TRUE(cells) << cells.Error().ToString();
+        EXPECT_EQ(contents.cells[0].level, Intern("L9_NOWHERE"));
+        EXPECT_EQ(contents.cells[0].floorMaterial, Intern("MAT_DOES_NOT_EXIST"));
+    }
+
     // --- the whole load -----------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, LoadProducesAWorldDataWithItsIndicesBuilt)
@@ -598,6 +811,8 @@ namespace
         EXPECT_EQ(world.Value().Materials().size(), 5U);
         ASSERT_NE(world.Value().FindMaterial(Intern("MAT_LEAF")), nullptr);
         EXPECT_EQ(world.Value().FindMaterial(Intern("MAT_LEAF"))->effectTierS, world::EffectTier::AlphaTest);
+        EXPECT_EQ(world.Value().Cells().size(), 4U);
+        EXPECT_NE(world.Value().FindCell(Intern("L0_HALL")), nullptr);
     }
 
     TEST_F(WorldLoaderTest, LoadStopsAtTheManifestWhenTheManifestIsWrong)
@@ -622,7 +837,8 @@ namespace
                              {"id": "L0", "ffl": 3.6, "ceiling": 6.2}],
                   "construction": {}})");
         Write("layout.materials.json", Materials());
-        WriteManifest({"layout.levels.json", "layout.materials.json"});
+        Write("layout.cells.json", Cells());
+        WriteManifest({"layout.levels.json", "layout.materials.json", "layout.cells.json"});
 
         const auto world = world::WorldLoader::Load(directory_);
         ASSERT_FALSE(world);

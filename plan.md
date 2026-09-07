@@ -4958,8 +4958,25 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             looks like a geometry bug and is a read bug. `world-format.md` is explicit that `null`
             is never a synonym for zero, so `JsonValue::IsNull(field)` was added (`HOUSE-00028`'s
             file, smallest correction) and every later loader task needs it too.
-- [ ] HOUSE-00344 — `WorldLoader`: cells, including multi-box cells and the `yOverride` case
+- [x] HOUSE-00344 — `WorldLoader`: cells, including multi-box cells and the `yOverride` case
       dep: HOUSE-00343 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-07) `WorldLoader::LoadCells`, every field of §15.3 including the four
+            optional blocks. 9 new unit tests; nine injected bugs, nine caught.
+      note: the two cases the task names are the two that are easy to get wrong. A cell is a
+            **union** of boxes, not one box: an L-shaped room's bounding box includes a notch that
+            belongs to the room next door, which is why `CellContains` walks a list. And a
+            `yOverride` of `null` defers to the level while `[0.60, 3.65]` wins — the stair cell
+            pierces the slab it climbs through and says so.
+      finding: an inverted `yOverride` is refused **at the read**, not left to rule 2. Read as
+            authored it is a room whose ceiling is below its floor, and every `CellContains` in it
+            answers false: a room the player falls through, not a rectangle nobody notices.
+      finding: the loader deliberately does **not** resolve cross-file references. Resolution is
+            §15.7 rule 6, owned by `validate_world.py` and mirrored by `HOUSE-00357`; a third
+            reading here could disagree with both. What the loader guarantees is that the id is
+            interned, so the validator can name it. A test pins the non-behaviour.
+      finding: the daylight fixture uses `NE` and not `world-format.md`'s `N`. `N` is the first
+            value of the enum, so a reader that ignored the field entirely would have passed — the
+            injected-bug run found exactly that and the fixture was changed.
 - [ ] HOUSE-00345 — `WorldLoader`: portals, including plane/rect validation against both cells
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00346 — `WorldLoader`: openings (doors, windows) with hinge/swing/travel metadata
