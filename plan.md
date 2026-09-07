@@ -2599,6 +2599,21 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             deletes, angle-based smooth shading and a real `smart_project` unwrap. 5 568 triangles.
             **Nothing is committed**: `--make-fixture` authors it deterministically, so downstream
             Blender tasks share the fixture without a binary entering the repository.
+      finding: (corrected 2026-09-07, on the project owner's report) **`--background` does not keep
+            Blender off the screen.** Cycles on the CPU never touches a window, but EEVEE needs a GL
+            context and takes one from the running X/Wayland server, so every run of
+            `impostor_render.py` — a content build, a CI selftest, a batch of them — put a window on
+            the owner's actual screen in the middle of their work. `environment()` now removes
+            `DISPLAY` and `WAYLAND_DISPLAY` from the child; Blender 4.3 falls back to headless GL
+            and EEVEE renders normally, which was **measured** rather than assumed.
+            `CNAHOUSE_BLENDER_KEEP_DISPLAY=1` opts out.
+      finding: **`xvfb-run` was the first fix and was the wrong one.** It works, but its server
+            outlives the command on this machine — a run leaves an `Xvfb` process and a
+            `/tmp/xvfb-run.XXXX` directory behind, which is exactly the leak `AGENTS.md` rule 3
+            names, once per Blender invocation across ten agents. Denying Blender a display needs
+            no second process, leaks nothing, and cannot be defeated by a wrapper that fails to
+            reap. The lesson generalises: the fix that adds a process to clean up after is worse
+            than the fix that removes the thing being cleaned up after.
 - [x] HOUSE-00190 — `tools/blender/collision_proxy.py`: generate `<name>_COL` as a box or convex decomposition, ≤ 64 triangles
       dep: HOUSE-00189 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) Three shapes, chosen by measurement, all under §18's 64-triangle ceiling:

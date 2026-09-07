@@ -70,11 +70,34 @@ def build_command(script: Path, args: list[str]) -> list[str] | None:
 
 
 def environment() -> dict:
+    """The child's environment: the shared numpy on `PYTHONPATH`, and **no display**.
+
+    **`--background` is not enough to keep Blender off the screen.** Cycles on the CPU never
+    touches a window, but EEVEE needs a GL context, and on a desktop session Blender takes one
+    from the running X/Wayland server -- which puts a window on the user's actual screen, in the
+    middle of whatever they were doing, every time a content tool or a CI selftest runs.
+    `impostor_render.py` does exactly that, and a batch of selftests does it repeatedly.
+
+    So `DISPLAY` and `WAYLAND_DISPLAY` are removed from the child's environment. Blender 4.3 falls
+    back to headless GL and EEVEE renders normally -- measured, not assumed -- so nothing is lost
+    and there is no window for anything to appear in.
+
+    **`xvfb-run` was the first fix and was worse.** It works, but its server outlives the command
+    on this machine: a run leaves an `Xvfb` process and a `/tmp/xvfb-run.XXXX` directory behind,
+    which is precisely the leak `AGENTS.md` rule 3 names. Denying Blender a display needs no
+    second process, leaks nothing, and cannot be defeated by a wrapper that fails to reap.
+
+    `CNAHOUSE_BLENDER_KEEP_DISPLAY=1` opts out, for a session that genuinely wants to watch
+    Blender work.
+    """
     env = dict(os.environ)
     deps = DEFAULT_PYTHON_DEPS
     if deps.is_dir():
         existing = env.get("PYTHONPATH", "")
         env["PYTHONPATH"] = f"{deps}{os.pathsep}{existing}" if existing else str(deps)
+    if not env.get("CNAHOUSE_BLENDER_KEEP_DISPLAY"):
+        env.pop("DISPLAY", None)
+        env.pop("WAYLAND_DISPLAY", None)
     return env
 
 
