@@ -1,0 +1,66 @@
+NOX Sound "Essentials Series" — measured audio format census
+============================================================
+
+HOUSE-00276. Produced with ffprobe over every .wav in the collection at
+/rv/tmp/Essentials_Series_NOX_SOUND/ on 2026-09-07.
+
+Regenerate with:
+    find <dir> -type f -iname '*.wav' \
+      | while IFS= read -r f; do ffprobe -v error -select_streams a:0 \
+          -show_entries stream=codec_name,sample_rate,channels,bits_per_raw_sample \
+          -of csv=p=0 "$f"; done | sort | uniq -c | sort -rn
+
+This is a SUMMARY plus every outlier, not 1 644 lines: the per-file listing is
+regenerable in a minute and would be a large committed file nobody reads. What
+is not regenerable once the /rv/tmp/ copy is gone is the fact that it WAS
+measured, and what was found.
+
+WHY IT MATTERS. The publisher's page states "48kHz / 24-bit" throughout (with
+Sao Miguel at 96 kHz). That is true of the bulk and FALSE for 23 files. So
+convert_audio.py (HOUSE-00193) must probe each input; it cannot assume the
+stated format. Phase 1 already established that 48 kHz must not be blindly
+resampled to 44.1 kHz -- this census is the evidence for how much of the
+collection that decision governs: 1 624 of 1 644 files.
+
+CENSUS  (codec, sample_rate, channels, bits_per_raw_sample)
+----------------------------------------------------------
+     1553 pcm_s24le,48000,1,24
+       68 pcm_s24le,48000,2,24
+       19 pcm_s24le,96000,2,24
+        3 pcm_s32le,48000,1,32
+        1 pcm_s24le,96000,1,24
+
+  TOTAL 1 644 files, which matches the publisher's stated count exactly.
+
+SAMPLE RATE
+-----------
+     1624 48000
+       20 96000
+
+OUTLIER 1 — three files are 32-bit, not 24-bit (UNDOCUMENTED upstream)
+----------------------------------------------------------------------
+    Vehicle_Essentials_NOX_SOUND/Vehicle_Essential_Car/Vehicle_Car_Engine_2000_RPM_Front_Exterior_Loop_Mono.wav
+    Vehicle_Essentials_NOX_SOUND/Vehicle_Essential_Car/Vehicle_Car_Engine_1000_RPM_Front_Exterior_Loop_Mono.wav
+    Vehicle_Essentials_NOX_SOUND/Vehicle_Essential_Car/Vehicle_Car_Engine_1000_RPM_Rear_Exterior_Loop_Mono.wav
+
+OUTLIER 2 — twenty files are 96 kHz, not 48 kHz
+-----------------------------------------------
+  The publisher documents Sao Miguel - Flows as 96 kHz. These 14 are that pack,
+  and HOUSE-00277 excludes the Azores flows anyway. The other 6 are NOT
+  documented as 96 kHz upstream:
+
+    Electromagnetic_NOX_SOUND/Electromagnetic_Keyboard_Light_Led_Loop_Mono_Elektrousi.wav
+    Sample_A_Sound_Effect/Backpack_Medium_Polyester_Drop_Stereo.wav
+    Sample_A_Sound_Effect/Backpack_Small_Polyester_PickUp_Stereo.wav
+    Sample_A_Sound_Effect/Cloth_Winter_Coat_Throw_Moderate_Stereo.wav
+    Sample_A_Sound_Effect/Cloth_Coat_PickUp_Stereo.wav
+    Iceland_Packs_NOX_SOUND/Iceland_Flows_NOX_SOUND/Ambiance_Waterfall_Big_Skógafoss_Loop_Stereo.wav
+
+  (the remaining 14 are all in the Sao Miguel - Flows pack)
+
+NOTE ON FILE NAMES
+------------------
+  Several directory and file names contain non-ASCII characters that arrived
+  mojibaked in the zip (e.g. "S<..>o_Miguel", "CaldeirΣes"). HOUSE-00277 must
+  normalise names on import; docs/conventions.md requires lower-case-with-
+  hyphens content names in any case, so nothing mojibaked reaches assets-src/.

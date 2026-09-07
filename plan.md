@@ -2942,9 +2942,54 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00275 — Verify the **video footage** sources for the television channels
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00276 — **Q-02: re-verify the NOX_SOUND Essentials Series CC0 declaration** against the publisher's live page; archive the evidence
+- [x] HOUSE-00276 — **Q-02: re-verify the NOX_SOUND Essentials Series CC0 declaration** against the publisher's live page; archive the evidence
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
       accept: either confirmed (mark `CC0-1.0`, verified, with the archived page) or not (mark `PROVENANCE DECLARED — UNVERIFIED` and do not ship until resolved)
+      note: (2026-09-07) **CONFIRMED — `CC0-1.0`, verified**, for 1 634 of the 1 644 files.
+            `docs/licence-evidence/nox-sound-essentials.md` and
+            `docs/licence-evidence/nox-sound-format-census.txt`.
+      finding: the authoritative page is the publisher's **itch.io** listing,
+            `nox-sound-design.itch.io/essentials-series-sfx-nox-sound`, which states: "You can use
+            these sounds for personal and commercial projects. All sounds are released under CC0,
+            allowing you to use them freely without attribution or restrictions."
+      finding: **"NOX Sound is CC0" is FALSE as a general statement, and the bundled README's four
+            links all lead somewhere that would have said so.** A Sound Effect sells NOX libraries
+            as paid products ($10–$20) under its own licence agreement; Unity distributes under
+            Unity's store terms; the Freesound account is CC0 but is only a **sampler** — its
+            "Pack - Electromagnetic" holds 5 sounds against the local 72, and its "Pack - Footsteps"
+            holds 12 consolidated files against the local 479. Stopping at Freesound, the obvious
+            first-party CC0 evidence, would have verified ~60 sounds and silently implied it for
+            1 644. The CC0 grant attaches to **the Essentials Series release**, not to the
+            publisher.
+      finding: **identity established by counting, not by folder names.** The publisher states
+            1 644 sounds; the local tree holds **exactly 1 644 `.wav` files**. Footsteps 479 = 479,
+            Vehicle 161 = 161, Nature 18 = 18, São Miguel 14 = 14, Iceland 233 = 210 + 23 — five
+            exact per-pack matches plus the exact headline total, and the download is named
+            `Essentials_Series_NOX_SOUND.zip`, which is the local directory's name. Voices (657 vs a
+            stated 526) and Electromagnetic (72 vs 71) are both *larger* locally, consistent with
+            the page's per-pack prose being stale against its own headline — the listing carries an
+            "Update #1" devlog and says "Updated 19 days ago".
+      finding: **10 files are EXCLUDED.** `Sample_A_Sound_Effect/` holds promotional teasers for
+            NOX's **paid** A Sound Effect libraries (Household Essentials, Clothes Movement,
+            Backpack, Ambiance–Nature, Ambiance–Atmosphere), with a `.url` shortcut to that store.
+            A rights holder may licence their own work twice, so this is not a contradiction — but
+            it is not clear either, and ADR-0012 says unclear means unusable. Ten files out of
+            1 644, in categories `HOUSE-00282`/`HOUSE-00290` source separately. **`HOUSE-00277` must
+            exclude that directory explicitly**, alongside the exclusions it already names.
+      finding: **the publisher's stated "48 kHz / 24-bit" is wrong for 23 files**, measured with
+            `ffprobe` over all 1 644: **20 files are 96 kHz** (14 are the documented São Miguel
+            pack; 6 are not documented as such) and **3 are 32-bit `pcm_s32le`** (car engine loops,
+            not documented at all). So `convert_audio.py` (`HOUSE-00193`) **must probe each input**
+            and cannot assume the stated format. 1 624 of 1 644 are 48 kHz, which is the measure of
+            how much of the collection the "do not resample to 44.1 kHz" correction governs.
+      finding: several names arrived **mojibaked** in the zip (`S<..>o_Miguel`, `CaldeirΣes`).
+            `HOUSE-00277` must normalise on import; `docs/conventions.md` requires
+            lower-case-with-hyphens content names anyway, so nothing mojibaked can reach
+            `assets-src/`.
+      risk: the collection lives in `/rv/tmp/`, which is not version-controlled and is scratch space
+            under this machine's build rules. Only the converted subset enters `assets-src/`; the
+            originals' hashes in the manifest are what keep the conversion auditable after the
+            source directory is gone.
 - [ ] HOUSE-00277 — Select the NOX subset to ship: ~430 files, listed explicitly with the category each serves
       dep: HOUSE-00276 · sys: audio · plat: TOOL · pri: MUST
       accept: the exclusion of the Azores flows, the combat voices and the truck pack is explicit
