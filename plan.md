@@ -2580,9 +2580,48 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: the mapping is written down in `docs/content-authoring.md` and is reversible enough to review
 - [ ] HOUSE-00192 — `tools/assets/atlas_pack.py`: pack small-prop textures into shared atlases and rewrite the models' UVs
       dep: HOUSE-00191 · sys: content · plat: TOOL · pri: SHOULD
-- [ ] HOUSE-00193 — `tools/assets/convert_audio.py`: 24→16-bit, 48→44.1 kHz, trim, normalise, loop points, and the dull-variant filter
+- [x] HOUSE-00193 — `tools/assets/convert_audio.py`: 24→16-bit, ~~48→44.1 kHz~~ **sample rate preserved**, trim, normalise, loop points, and the dull-variant filter
       dep: HOUSE-00069 · sys: content · plat: TOOL · pri: MUST
       accept: deterministic output; both hashes recorded in the manifest
+      note: (2026-09-07) The title's "48→44.1 kHz" is **struck, not deleted** — the task id and its
+            history stay. `HOUSE-00069` had already measured that clause wrong and corrected
+            `BL-06`; this is the same correction reaching the tool and `cna-house.md` §63.5, which
+            still carried the old command. `--selftest` proves ten claims; run it before trusting
+            the tool.
+      finding: **the sample rate is preserved and that is a measured decision.** `HOUSE-00069`:
+            24→16 bit alone costs 0.0017 dB RMS; adding `-ar 44100` costs **0.889 dB RMS and
+            0.26 dB peak**, because the resample lowpasses content these sources carry. §63.5's
+            justification — "resampling once offline beats resampling every frame" — is a CPU
+            argument that ignores the signal it spends. `--sample-rate` exists, is never the
+            default, and names what it is doing.
+      finding: **`dynaudnorm`, which §63.5 sketched, is rejected.** It rides gain over time, which
+            would flatten the difference between a soft and a hard footstep — and those variants
+            exist precisely to be different. Peak normalisation applies one fixed gain per file, and
+            the tool reports the gain it applied so a later reader can check it.
+      finding: **ffmpeg's default output is NOT reproducible across toolchains**, and invisibly so.
+            It copies the source's `LIST/INFO` metadata and adds an `ISFT` encoder tag naming the
+            libavformat version (`Lavf61.7.103` here), so the same input on a machine with a
+            different ffmpeg yields different bytes. `-map_metadata -1` plus `-fflags +bitexact`
+            **as an output option** removes both; the same flag before `-i` binds to the demuxer and
+            does not. The selftest asserts the clean output has no tags *and* that the naive command
+            does, so the flags cannot rot into decoration.
+      finding: **loop points are DISCARDED by the content pipeline, measured rather than assumed,
+            and the result is not the obvious one.** `SoundEffect` carries `loopStart`/`loopLength`,
+            `.cnb` and `.xnb` both have the fields, `SoundEffect::FromStream` parses a WAV `smpl`
+            chunk, and the region is applied at `Play()` — the capability exists end to end *except*
+            at the step this project uses. `CNA.WavImporter` never reads `smpl`: the same one-second
+            tone compiled with and without a `smpl` chunk declaring a loop over samples 100–40 000
+            produced **byte-identical payloads** (only the asset name and the build fingerprint
+            differ). A CNA limitation, not worked around here. It costs little — `IsLooped` loops
+            the whole buffer, which is what every looping sound in this house wants — so a `Loop`
+            file is left **untrimmed** and seamlessness stays a property of the recording.
+      finding: verified against the real collection, including both classes of outlier
+            `HOUSE-00276` found: a 32-bit `pcm_s32le` car-engine loop and a 96 kHz keyboard loop both
+            convert correctly, the 96 kHz file keeps its rate, and `--require-rate 48000` **refuses**
+            it (exit 1) rather than resampling a surprise. A converted footstep compiles through
+            `cna-content` (`CNA.WavImporter -> CNA.SoundEffectProcessor ->
+            CNA.SoundEffectContentWriter`) and the full filter chain is byte-identical across two
+            runs on a real file.
 - [ ] HOUSE-00194 — `tools/assets/measure_stride.py`: measure a locomotion clip's stride length and duration for rate matching
       dep: HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
 - [x] HOUSE-00195 — `tools/assets/manifest.py`: add/update a manifest row, compute hashes, validate the schema

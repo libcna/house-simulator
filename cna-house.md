@@ -4670,20 +4670,52 @@ contains one sourcing task per gap category with an explicit target count.
 
 ### 63.5 Processing pipeline for the collection
 
+This section sketched a command; `tools/assets/convert_audio.py` (`HOUSE-00193`) is the real one,
+and three parts of the sketch were corrected against measurement:
+
 ```
-for each selected file:
-  ffmpeg -i <src> -c:a pcm_s16le -ar 44100 -af "highpass=f=28, dynaudnorm=p=0.92" <dst>
-  trim silence, set loop points where the name says Loop, normalise to −18 LUFS short-term
-  record: source path, source sha256, dest sha256, duration, channels, licence = CC0-1.0,
-          provenance = "NOX_SOUND Essentials Series README (declared CC0)"
+tools/assets/convert_audio.py <src> <dst> [--mono] [--trim] [--normalise -3] [--highpass 28]
 ```
+
+**The sample rate is preserved; `-ar 44100` is gone.** The sketch justified it as "the SDL3 mixer's
+device rate is 44.1 kHz by default and resampling once offline beats resampling every frame". That
+is a CPU argument, and `HOUSE-00069` measured the quality it costs: 24→16 bit alone costs 0.0017 dB
+RMS, while adding `-ar 44100` costs **0.889 dB RMS and 0.26 dB peak**, because the resample
+lowpasses content these sources carry. CNA loaded and played a 48 kHz asset correctly and the mixer
+resamples at playback anyway, so the offline resample bought nothing. Bit depth and sample rate are
+independent decisions.
+
+**`dynaudnorm` is gone too.** It rides the gain over time, which would flatten the difference
+between a soft and a hard footstep — and those variants exist precisely to be different. A single
+fixed peak-normalisation gain per file preserves the dynamics within a file and between files.
+
+**Nothing is assumed about the input.** `HOUSE-00276` measured all 1 644 files: the publisher
+documents "48 kHz / 24-bit" and 23 files are neither — 20 at 96 kHz, 3 at 32-bit `pcm_s32le`. The
+tool probes every input, and `--require-rate` fails loudly rather than resampling a surprise.
+
+**Loop points are not written, because the content pipeline discards them.** This was measured, not
+assumed, and the result is not the obvious one. `SoundEffect` carries `loopStart`/`loopLength`, the
+`.cnb` and `.xnb` formats both have fields for them, `SoundEffect::FromStream` parses a WAV `smpl`
+chunk, and the loop region is applied at `Play()` — so the capability exists end to end *except* at
+the step this project uses. `CNA.WavImporter` never looks at `smpl`: compiling the same one-second
+tone twice, once with a `smpl` chunk declaring a loop over samples 100–40 000 and once without,
+produced compiled payloads that are **byte-identical** (the only differences are the asset name and
+the build fingerprint in the header). Loop metadata put into a source WAV would be silently dropped.
+
+That is a CNA limitation, not something to work around here — `cna-house` does not modify CNA. It
+costs little: `SoundEffectInstance::IsLooped` loops the whole buffer, which is what every looping
+sound in this house actually wants. A file whose name says `Loop` is therefore left **untrimmed** —
+trimming is what would break the loop — and seamlessness is a property of the source recording
+rather than something this step can add.
+
+Per file, the tool reports what a manifest row needs: source path, **source sha256, output
+sha256**, duration, channels and the applied gain (`HOUSE-00279`).
 
 Mono is preferred for anything played through `Apply3D` (a stereo source cannot be panned
-meaningfully); stereo is kept for 2-D ambience beds. 48 kHz → 44.1 kHz because the SDL3 mixer's
-device rate is 44.1 kHz by default and resampling once offline beats resampling every frame.
+meaningfully); stereo is kept for 2-D ambience beds.
 
-Selected subset estimate: ~430 files of the 1 644, ≈ 95 MB after conversion to 16-bit 44.1 kHz —
-comfortably inside the audio budget (§72).
+Selected subset estimate: ~430 files of the 1 634 shippable (`HOUSE-00276` excludes ten), ≈ 100 MB
+after conversion to 16-bit at the source rate — comfortably inside the audio budget (§72).
 
 ---
 
