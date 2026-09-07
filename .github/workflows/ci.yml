@@ -141,6 +141,17 @@ jobs:
           python3 -m pip install --break-system-packages --user jsonschema
           python3 tools/world/world_schema.py --selftest
 
+      - name: The graph report must measure the graph, not restate the design
+        working-directory: cna-house
+        # `HOUSE-00359`. §16.3's numbers were designed before the layout existed, so this computes
+        # them instead. The claims that matter are the two graphs and the difference between them:
+        # through open doors the fixture is one connected house; with every door shut it falls
+        # into four pieces, which is §16.3's "whole point" at fixture scale. A disconnected graph
+        # reports its diameter as ∞ and not as the largest finite distance it happened to find.
+        run: |
+          python3 -m pip install --break-system-packages --user jsonschema
+          python3 tools/world/report_graph.py --selftest
+
       - name: Rooms must become walls, and the collision file must read back
         working-directory: cna-house
         # `HOUSE-00210`. The fixture is three rooms chosen so that every rule has something to

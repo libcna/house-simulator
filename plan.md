@@ -4989,8 +4989,25 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             seat, sill and switch heights and the human/pet/car scales are properties of an
             *asset*, not of the layout; §70.5 assigns those to `scale_check.py`, and
             `HOUSE-00360` joins the two.
-- [ ] HOUSE-00359 — Implement `tools/world/report_graph.py`: adjacency tables, degree stats, diameter, component count with all doors closed
+- [x] HOUSE-00359 — Implement `tools/world/report_graph.py`: adjacency tables, degree stats, diameter, component count with all doors closed
       dep: HOUSE-00358 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) §16.1's adjacency tables per level plus §16.2's vertical table, and every
+            metric of §16.3, computed from `assets-src/world/` rather than restated. Markdown by
+            default, `--json` for the numbers, `-o` to a file. 19 claims, 12/12 injected bugs
+            caught.
+      note: deliberately a report and **not** a gate. The numbers move for good reasons — a task
+            adds a room, a door becomes an opening — so a gate over them would fail on every
+            legitimate change and be turned off within a week. What is worth gating is
+            connectivity, and `validate_world.py` rule 5 does that.
+      note: it shares `validate_world.py`'s fixture on purpose. Two tools that disagree about what
+            a house looks like will disagree silently, and one selftest claim asserts that
+            `report_graph`'s "isolated cell" and rule 5's "unreachable cell" name the same room in
+            the same file.
+      finding: "deterministic" had to mean *against a reordered file*, not against a second run.
+            Within one process Python's ordering is stable, so a claim that two runs agree passed
+            while the table was being emitted in whatever order it was read — the injected bug
+            survived it. The claim now reverses the cell and portal lists and requires the same
+            document byte for byte.
 - [ ] HOUSE-00360 — Implement the realism checks of `cna-house.md` §70.5 inside `validate_world.py`
       dep: HOUSE-00358 · sys: world · plat: TOOL · pri: MUST
       note: (2026-09-07) `HOUSE-00358` implemented the four §70.5 rows the **layout** decides —
