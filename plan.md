@@ -5479,8 +5479,32 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: `L3_STAIR_HEAD` takes the same full-bay correction as `L2_STAIR_ATTIC`
             (`HOUSE-00370`), and the six cells then cover 273.9 m² — the envelope, and the same
             total as every other level.
-- [ ] HOUSE-00372 — Author the 17 exterior cells per §13.7, including `EXT_WORLD` and the 4 attached cells
+- [x] HOUSE-00372 — Author the ~~17~~ **14** exterior cells per §13.7, including `EXT_WORLD` (the 4 attached ones came with their levels)
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) **`layout.cells.json` is complete: 93 cells, 114 boxes, five levels and
+            the plot.** All eleven rules pass, the file deploys, and the C++ loader reads it.
+      finding: §13.7 marks its extents "Approximate" and they are — **eleven pairs overlap, by up
+            to 133 m², and two run through the porch.** Resolving them was a decision rather than a
+            transcription, and the three rules used are written into the file beside the rows: a
+            region named as being inside another is carved out of it (the shed out of the garden,
+            the garden out of the west side yard, the terrace and orchard out of the back lawn);
+            the side yards are the strips outboard of everything else, so the side-yard/back-lawn
+            boundary is the building line; and every region stops at a building face rather than
+            running under one.
+      finding: measured after the resolution, **the thirteen outdoor regions plus the four building
+            footprints tile the entire plot with no overlap and nothing left over** — a stronger
+            statement than §13.7 makes, and the one §16.4 step 4 needs: a point on the plot is in
+            exactly one cell, so "no cell" really does mean beyond the fences. `EXT_WORLD` is
+            therefore a **ring** of four boxes around the plot rather than a rectangle over it.
+      finding: the driveway is squared to the garage bay (X +9.3…+17.1) rather than §13.7's
+            +9.6…+16.8. A driveway narrower than the door it serves leaves two strips of nothing
+            at the apron, which is the same class of gap `HOUSE-00370` found at the attic stair.
+      finding: §13.8 and §16.3 both say "95 cells (78 interior + 17 exterior)" and the tables give
+            **93 (75 + 18)**. Counted: B1 15 + L0 19 + L1 21 + L2 18 + L3 6 = 79 rows, 4 of them
+            attached exterior cells, so 75 interior; §13.7 lists 14 `EXT_*` ids **including**
+            `EXT_WORLD`, so 18 exterior. The summary counted three interior cells that are
+            tabulated nowhere and left `EXT_WORLD` out of the exterior count. Both places
+            corrected, and this task's own title inherited the 17.
 - [ ] HOUSE-00373 — Author the 2 container sub-cells for the refrigerator and freezer interiors, and the pattern for future ones
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00374 — Author `layout.portals.json` — the 41 always-open portals (cased openings, stair wells)
