@@ -1,11 +1,94 @@
 {
   "schema": "cna-house/assets/1",
+  "packs": [
+    {
+      "id": "core",
+      "budgetBytes": 55000000,
+      "shipped": true,
+      "contents": "fonts, HUD, shared materials, player avatar, sky, weather, effects"
+    },
+    {
+      "id": "exterior",
+      "budgetBytes": 90000000,
+      "shipped": true,
+      "contents": "terrain, road, fences, garden, shed, vehicles, vegetation LOD0/1"
+    },
+    {
+      "id": "neighbourhood",
+      "budgetBytes": 45000000,
+      "shipped": true,
+      "contents": "LOD1/LOD2 houses, impostors, distant vegetation"
+    },
+    {
+      "id": "house-l0",
+      "budgetBytes": 110000000,
+      "shipped": true,
+      "contents": "L0 shell, lightmaps, props, sunroom, garage, porch"
+    },
+    {
+      "id": "house-l1",
+      "budgetBytes": 75000000,
+      "shipped": true,
+      "contents": "L1 shell, lightmaps, props, balconies"
+    },
+    {
+      "id": "house-l2",
+      "budgetBytes": 70000000,
+      "shipped": true,
+      "contents": "L2 shell, lightmaps, props"
+    },
+    {
+      "id": "house-b1",
+      "budgetBytes": 55000000,
+      "shipped": true,
+      "contents": "B1 shell, lightmaps, props"
+    },
+    {
+      "id": "house-l3",
+      "budgetBytes": 40000000,
+      "shipped": true,
+      "contents": "L3 shell, lightmaps, props"
+    },
+    {
+      "id": "pets",
+      "budgetBytes": 22000000,
+      "shipped": true,
+      "contents": "dog, cat, their clips and sounds"
+    },
+    {
+      "id": "audio-core",
+      "budgetBytes": 30000000,
+      "shipped": true,
+      "contents": "footsteps, interaction sounds, UI"
+    },
+    {
+      "id": "audio-ambience",
+      "budgetBytes": 55000000,
+      "shipped": true,
+      "contents": "room tones, weather, exterior ambience"
+    },
+    {
+      "id": "video",
+      "budgetBytes": 25000000,
+      "shipped": true,
+      "contents": "television media"
+    },
+    {
+      "id": "dev",
+      "budgetBytes": 5000000,
+      "shipped": false,
+      "contents": "content-pipeline fixtures loaded by --scene=content-smoke; never shipped"
+    }
+  ],
   "assets": [
     {
       "id": "EFFECT_P1PROBE",
       "category": "effect",
       "sourceFile": "assets-src/Effects/P1Probe.fx",
       "sourceSha256": "798801c84110b1562c747441474b463eed34b57a77b008132068b609d86368b4",
+      "contentName": "Effects/P1Probe",
+      "kind": "effect",
+      "residencyPack": "core",
       "origin": {
         "kind": "authored",
         "name": "Phase-1 technique and parameter probe effect",
@@ -24,6 +107,9 @@
       "category": "font",
       "sourceFile": "assets-src/Fonts/mono-13.spritefont",
       "sourceSha256": "cd06ac44c94f3f9d579d1cd993b02a29cebe81c91f34e562eb248a0bcc99ddc0",
+      "contentName": "Fonts/mono-13",
+      "kind": "font",
+      "residencyPack": "core",
       "origin": {
         "kind": "authored",
         "name": "monospace debug face at 13 px",
@@ -42,6 +128,9 @@
       "category": "font",
       "sourceFile": "assets-src/Fonts/mono-16.spritefont",
       "sourceSha256": "93e05fc06c9f69b757bbfddf099906d707d5494e1beeba3888affcf27c9b4359",
+      "contentName": "Fonts/mono-16",
+      "kind": "font",
+      "residencyPack": "core",
       "origin": {
         "kind": "authored",
         "name": "monospace debug face at 16 px",
@@ -60,6 +149,7 @@
       "category": "font",
       "sourceFile": "assets-src/Fonts/NotoSansMono-Regular.ttf",
       "sourceSha256": "65b5e2b2c4a1fba9ae8be1f026cb35b03dcb8886d9b2a4147054fde12f7e767d",
+      "notPackaged": "a typeface, not an asset. See FONT_NOTO_SANS_REGULAR.",
       "origin": {
         "kind": "downloaded",
         "name": "Noto Sans Mono Regular 2.014",
@@ -81,6 +171,7 @@
       "category": "font",
       "sourceFile": "assets-src/Fonts/NotoSans-Regular.ttf",
       "sourceSha256": "478c558ea716033cd60c03438f628dfa75694dcf6b5f6d505a2f05fd2b4f3823",
+      "notPackaged": "a typeface, not an asset. The .spritefont descriptors rasterise it at build time and the compiled SpriteFont is what ships; the .ttf is a build input that is committed so the glyphs come from this repository rather than from whatever the build machine has installed (HOUSE-00200).",
       "origin": {
         "kind": "downloaded",
         "name": "Noto Sans Regular 2.015",
@@ -102,6 +193,9 @@
       "category": "font",
       "sourceFile": "assets-src/Fonts/ui-16.spritefont",
       "sourceSha256": "7b83a6c0adbe890dd30b150457ef3ddbbb6728f291ab82d61b6f3d14eacc2d91",
+      "contentName": "Fonts/ui-16",
+      "kind": "font",
+      "residencyPack": "core",
       "origin": {
         "kind": "authored",
         "name": "UI face at 16 px",
@@ -120,6 +214,9 @@
       "category": "font",
       "sourceFile": "assets-src/Fonts/ui-22.spritefont",
       "sourceSha256": "64ab2365b1ef053741a1b4d47b564747aa2193fa5c637b471cfc98e6af860dfe",
+      "contentName": "Fonts/ui-22",
+      "kind": "font",
+      "residencyPack": "core",
       "origin": {
         "kind": "authored",
         "name": "UI face at 22 px",
@@ -138,6 +235,9 @@
       "category": "font",
       "sourceFile": "assets-src/Fonts/ui-30.spritefont",
       "sourceSha256": "9fd6b4a8989237360b246a77f20158fb42770228566d38cd534abc76858b8344",
+      "contentName": "Fonts/ui-30",
+      "kind": "font",
+      "residencyPack": "core",
       "origin": {
         "kind": "authored",
         "name": "UI face at 30 px",
@@ -156,6 +256,9 @@
       "category": "fallback",
       "sourceFile": "assets-src/Models/Fallback/box.glb",
       "sourceSha256": "405b251c4f78dca34eeea88c3d1bf526cb4b9a8ce210448705c5c4cc2a7f9090",
+      "contentName": "Models/Fallback/box",
+      "kind": "model",
+      "residencyPack": "core",
       "origin": {
         "kind": "generated",
         "name": "Fallback box",
@@ -174,6 +277,9 @@
       "category": "fixture",
       "sourceFile": "assets-src/Models/Smoke/marker.glb",
       "sourceSha256": "d47b501713237c1aa5d4c1bd5ba65e36970ec6f8af6d2efb372a847285f4022d",
+      "contentName": "Models/Smoke/marker",
+      "kind": "model",
+      "residencyPack": "dev",
       "origin": {
         "kind": "generated",
         "name": "content smoke-scene marker cube",
@@ -192,6 +298,9 @@
       "category": "fallback",
       "sourceFile": "assets-src/Audio/Fallback/silent.wav",
       "sourceSha256": "c0ef0f9f67f2ebed85190169cebe1071babbd5df7c476693a93bc1409906648e",
+      "contentName": "Audio/Fallback/silent",
+      "kind": "sound",
+      "residencyPack": "core",
       "origin": {
         "kind": "generated",
         "name": "Fallback silence",
@@ -210,6 +319,9 @@
       "category": "fixture",
       "sourceFile": "assets-src/Audio/Smoke/chime.wav",
       "sourceSha256": "450f82e28c85e1d3ba1eff5f1b902198ee3c69200a145c0bb2a6ea43139fb357",
+      "contentName": "Audio/Smoke/chime",
+      "kind": "sound",
+      "residencyPack": "dev",
       "origin": {
         "kind": "generated",
         "name": "content smoke-scene chime",
@@ -228,6 +340,9 @@
       "category": "fallback",
       "sourceFile": "assets-src/Textures/Fallback/grey.png",
       "sourceSha256": "497325ca10dc09147044e36ec12ef96455b55f14acc1061d8b8ad809a2deb245",
+      "contentName": "Textures/Fallback/grey",
+      "kind": "texture",
+      "residencyPack": "core",
       "origin": {
         "kind": "generated",
         "name": "Fallback neutral grey",
@@ -246,6 +361,9 @@
       "category": "fallback",
       "sourceFile": "assets-src/Textures/Fallback/missing.png",
       "sourceSha256": "fd1b8885c1d9b2cbaaf877cda9208439a228cd5d00fc4bf2ad977b64dc5a06bd",
+      "contentName": "Textures/Fallback/missing",
+      "kind": "texture",
+      "residencyPack": "core",
       "origin": {
         "kind": "generated",
         "name": "Missing-texture magenta checker",
@@ -264,6 +382,9 @@
       "category": "fixture",
       "sourceFile": "assets-src/Textures/Smoke/quadrants.png",
       "sourceSha256": "8440da056299a9c382c1b5c8e2e06db8bffa95c14ee0f039817700f364d4c0a5",
+      "contentName": "Textures/Smoke/quadrants",
+      "kind": "texture",
+      "residencyPack": "dev",
       "origin": {
         "kind": "generated",
         "name": "content smoke-scene quadrant texture",
@@ -282,6 +403,9 @@
       "category": "fixture",
       "sourceFile": "assets-src/Media/Video/smoke_clip.ogv",
       "sourceSha256": "d1641ed8d45ff8270e2045c9dee1b0aa3cfdb4e428149f4c0fac328a19bd9b57",
+      "contentName": "Video/smoke_clip",
+      "kind": "video",
+      "residencyPack": "dev",
       "origin": {
         "kind": "generated",
         "name": "content smoke-scene clip",

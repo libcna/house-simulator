@@ -3057,10 +3057,76 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: all six load and are visibly used; `content-smoke-01` matches its reference outside
             the named video rectangle and is bit-identical across two runs; no `.xnb` shadows the
             `.cnb` tree; Tier S is a complete session with five of six
-- [ ] HOUSE-00202 — Define the pack partition in `assets.manifest.json` and enforce that every asset belongs to exactly one pack
+- [x] HOUSE-00202 — Define the pack partition in `assets.manifest.json` and enforce that every asset belongs to exactly one pack
       dep: HOUSE-00195 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00203 — `tools/ci/budget_report.py`: per-pack size, texture memory, triangle totals, audio duration; writes a Markdown table
+      note: (2026-09-07) A `packs` block at the top of `assets-src/assets.manifest.json` declaring
+            §27.2's twelve packs plus `dev`, and three new fields on every row — `contentName`,
+            `kind`, `residencyPack`. `manifest.py validate` refuses a row that has neither those
+            three nor a written `notPackaged` reason, and `manifest.py packs` prints the partition
+            with its counts. Gated by `check_manifest.py`; `manifest.py packs` runs in CI.
+      finding: **the runtime was reading a schema nothing produced, and every unit test passed.**
+            `ContentRegistry` requires `id`, `contentName`, `kind` and `residencyPack`;
+            `assets.manifest.json` carried `id`, `category`, `sourceFile`, `sourceSha256` and
+            `origin` and none of the other three. Nine `ContentRegistryTests` were green throughout,
+            because every one of them parsed a **hand-written fixture** — which is exactly how the
+            gap survived four phases. `ContentRegistryTest.TheREALManifestLoads` now parses the
+            committed file, and it is the only test in that suite that could have caught this.
+      finding: **`residencyPack` no longer defaults to `core`, and the old default was the worst
+            possible one.** A row that named no pack silently became an always-resident one: pinned
+            in memory for the whole session and appearing in no download budget. It is now required
+            at both ends — the tool refuses to write such a row and the runtime refuses to load one
+            — so the two agree instead of the runtime quietly absorbing what the gate missed.
+      finding: a row is a runtime asset or it is **not**, and there is no third state. The two
+            vendored `.ttf` files are committed assets with licences and hashes that nothing loads
+            at run time; they carry `notPackaged` with the reason written out, and
+            `ContentRegistry` skips them. "No pack" as a silent default is precisely how an asset
+            ends up in no download and nobody's budget.
+      finding: **a thirteenth pack, `dev`, is a correction to §27.2 rather than a convenience.**
+            §27.2 lists the *shipping* packs; the four content-smoke fixtures (`HOUSE-00201`) really
+            are runtime assets — compiled, loaded and drawn — so calling them "not packaged" would
+            be false. `dev` carries `shipped: false`, which is the true statement, and gives
+            `budget_report.py` a shipped-versus-total split that means something.
+      accept: every asset row names exactly one declared pack or says why it names none; the
+            runtime loads the real manifest; both are enforced by a gate
+- [x] HOUSE-00203 — `tools/ci/budget_report.py`: per-pack size, texture memory, triangle totals, audio duration; writes a Markdown table
       dep: HOUSE-00202 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-07) `tools/ci/budget_report.py` with `--emit`, `--check`, `--enforce` and
+            `--selftest`; `docs/budget-report.md` is committed and gated for staleness in
+            `run_checks.sh`, the same arrangement `licenses/THIRD-PARTY-ASSETS.md` uses. 19
+            selftest claims over a fixture manifest and content tree it authors itself.
+      finding: **the rule the whole file is built around is that nothing is estimated.** A value
+            that cannot be measured prints `--`, never 0. That matters most NOW, when twelve of
+            thirteen packs are empty: a report that zeroed an unmeasured row would say the project
+            is comfortably inside every budget, which is true and useless. Measured from real
+            sources rather than guessed — a PNG's own `IHDR`, a glTF's index accessor counts, a
+            WAV's `fmt `/`data` chunks, `ffprobe` for a video, and the file sizes themselves.
+      finding: **"not applicable" and "could not be measured" are different, and conflating them
+            buries the second.** A font has no triangle count; that is not an unknown. The first
+            version printed both as `--` and produced a fourteen-row reasons table of which twelve
+            were "a font has no triangles". `·` now means the question does not apply and `--`
+            means a measurement was attempted and failed, and only the latter is listed.
+      finding: a `SpriteFont` **is** a texture atlas and does occupy the §72 texture budget, so its
+            texture memory is a genuine `--` with the reason "the atlas dimensions are inside the
+            compiled `.cnb`, which this report does not parse" — not a `·`. Calling it inapplicable
+            would quietly leave real GPU memory out of the budget it belongs in.
+      finding: **a pack with an unbuilt row is not compared against its budget at all.** Comparing
+            it against the rows that happen to be built reports a pack at 12 % of budget because
+            half of it was not built, which is the kind of reassurance that gets a project into
+            trouble. The selftest's `partial` pack exists solely to make that guard load-bearing:
+            5 000 built bytes against a 1 000-byte budget plus one unbuilt row, so deleting the
+            guard turns a silent pass into a false 500 %.
+      finding: **a video counts its streamed media as well as its metadata `.cnb`.** CNA deploys
+            the media beside the metadata rather than embedding it (`HOUSE-00201`), so counting the
+            `.cnb` alone would report the 25 MB television pack as a few kilobytes.
+      finding: **the committed report is generated from the manifest ALONE, with no build tree**,
+            so `--check` gives the same answer on a machine that has never run a build and can be
+            an ordinary gate. Its compiled column is `--` by design and the report says so;
+            `--content`/`--effects` produce the numbers the pack budgets are written against.
+      finding: shown to fail before it was trusted — 8 injected bugs, all 8 detected, two of them
+            only after the fixture gained the case that discriminates them.
+      accept: per-pack source bytes, compiled bytes, texture memory, triangles and audio duration,
+            with every unmeasurable cell named rather than zeroed; deterministic Markdown; the
+            over-budget path demonstrated to fire
 - [ ] HOUSE-00204 — `tools/blender/impostor_render.py`: render 8-yaw impostor atlases with EEVEE, pack, and emit the metadata
       dep: HOUSE-00189 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00205 — `tools/blender/lightmap_unwrap.py`: second-UV atlas packing at a configurable texel density with a 4-texel gutter

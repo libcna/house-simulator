@@ -110,6 +110,17 @@ namespace cnahouse::content
         {
             AssetEntry entry;
 
+            // A row that says it is NOT a runtime asset is skipped, not rejected. The manifest is
+            // one file covering provenance and packaging both (`cna-house.md` §20.3), so it also
+            // carries build inputs -- the two `.ttf` files the `.spritefont` descriptors rasterise
+            // are committed assets with licences and hashes, and nothing loads them at run time.
+            // `manifest.py` requires the reason to be written out, so this skip can never be a
+            // silently missing asset (`HOUSE-00202`).
+            if (row.Has("notPackaged"))
+            {
+                continue;
+            }
+
             auto id = row.RequireString("id");
             if (!id)
             {
@@ -150,7 +161,13 @@ namespace cnahouse::content
                 continue;
             }
 
-            auto pack = row.OptionalString("residencyPack", "core");
+            // REQUIRED, not defaulted to `core` (changed by `HOUSE-00202`). Defaulting made the
+            // quiet path "this asset is in the always-resident pack", which is the most expensive
+            // pack to be wrong about: an asset nobody assigned would be pinned in memory for the
+            // whole session and appear in no download budget. `manifest.py` refuses a row without
+            // one, so requiring it here costs an author nothing and closes the gap between what
+            // the gate enforces and what the runtime accepts.
+            auto pack = row.RequireString("residencyPack");
             if (!pack)
             {
                 problems.push_back(pack.Error().ToString());

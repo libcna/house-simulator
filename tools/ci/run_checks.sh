@@ -103,6 +103,10 @@ run_gate "effects-baseline" tools/effects/build_effects.sh --check
 run_gate "manifest"   python3 tools/ci/check_manifest.py
 # And the credits document cannot drift from the manifest it is generated from (`HOUSE-00198`).
 run_gate "licences"   python3 tools/assets/verify_licences.py --check
+# `HOUSE-00203`. The committed report is generated from the manifest ALONE, so this gate needs no
+# build tree and gives the same answer everywhere. Its compiled column is empty by design; pass
+# --content/--effects by hand for the numbers the pack budgets are written against.
+run_gate "budget"     python3 tools/ci/budget_report.py --check
 # Every glTF in the tree must import cleanly, warnings included (`HOUSE-00186`). Cheap while the
 # tree is small; when it is not, it moves to the content job.
 run_gate "gltf"       python3 tools/assets/gltf_validate.py

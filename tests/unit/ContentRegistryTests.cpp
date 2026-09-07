@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 //
 // `HOUSE-00142`.
+#include <fstream>
+#include <sstream>
+
 #include <gtest/gtest.h>
 
 #include "cnahouse/content/ContentRegistry.hpp"
@@ -21,7 +24,10 @@ namespace
       "contentName": "Textures/Materials/appliance_steel", "residencyPack": "house-l0" },
     { "id": "SND_FRIDGE_HUM", "kind": "sound",
       "contentName": "Audio/Appliances/fridge_hum", "residencyPack": "audio-ambience" },
-    { "id": "FONT_HUD", "kind": "font", "contentName": "Fonts/Hud" }
+    { "id": "FONT_UI_16", "kind": "font", "contentName": "Fonts/ui-16",
+      "residencyPack": "core" },
+    { "id": "FONT_NOTO_SANS_REGULAR",
+      "notPackaged": "a typeface the .spritefont descriptors rasterise; not a runtime asset" }
   ]
 })";
 
@@ -44,7 +50,9 @@ namespace
         ContentRegistry registry;
         auto loaded = registry.LoadFromJson(kManifest, "assets.manifest.json");
         ASSERT_TRUE(loaded) << loaded.Error().ToString();
+        // FIVE rows in, FOUR assets out: the fifth declares `notPackaged` and is a build input.
         EXPECT_EQ(registry.Count(), 4u);
+        EXPECT_EQ(registry.Find("FONT_NOTO_SANS_REGULAR"), nullptr);
     }
 
     TEST_F(ContentRegistryTest, LooksUpByNameAndById)
@@ -63,14 +71,28 @@ namespace
         EXPECT_EQ(byId, byName);
     }
 
-    TEST_F(ContentRegistryTest, ResidencyPackDefaultsToCore)
+    TEST_F(ContentRegistryTest, AResidencyPackIsRequiredRatherThanDefaultedToCore)
     {
-        // An asset with no pack is one the game always needs -- the HUD font is the obvious case --
-        // and defaulting it to `core` is what makes that the quiet path rather than an authoring
-        // obligation on every row.
+        // CHANGED by `HOUSE-00202`, and the old behaviour is worth recording. `residencyPack` used
+        // to default to `core`, so a row that named no pack became an always-resident one: the
+        // single most expensive pack to be wrong about, since the asset would be pinned for the
+        // whole session and appear in no download budget. `manifest.py` now refuses such a row, so
+        // requiring it here costs an author nothing and closes the gap between what the gate
+        // enforces and what the runtime accepts.
+        constexpr std::string_view kNoPack = R"({
+  "schema": "cna-house/assets/1",
+  "assets": [
+    { "id": "FONT_UI_16", "kind": "font", "contentName": "Fonts/ui-16" }
+  ]
+})";
         ContentRegistry registry;
-        ASSERT_TRUE(registry.LoadFromJson(kManifest, "assets.manifest.json"));
-        const auto* font = registry.Find("FONT_HUD");
+        auto loaded = registry.LoadFromJson(kNoPack, "assets.manifest.json");
+        EXPECT_FALSE(loaded) << "a row with no residencyPack must be rejected, not defaulted";
+        EXPECT_EQ(registry.Count(), 0u);
+
+        ContentRegistry good;
+        ASSERT_TRUE(good.LoadFromJson(kManifest, "assets.manifest.json"));
+        const auto* font = good.Find("FONT_UI_16");
         ASSERT_NE(font, nullptr);
         EXPECT_EQ(font->pack, "core");
     }
@@ -88,6 +110,37 @@ namespace
         const auto packs = registry.Packs();
         EXPECT_EQ(packs.size(), 3u);
         EXPECT_EQ(packs.front(), "house-l0") << "first-seen order, so the list is stable across runs";
+    }
+
+    TEST_F(ContentRegistryTest, TheREALManifestLoads)
+    {
+        // `HOUSE-00202`. Until this test existed, the runtime registry read a schema that nothing
+        // produced: `assets.manifest.json` carried provenance -- id, category, sourceFile, hashes,
+        // origin -- and none of `contentName`, `kind` or `residencyPack`. Every unit test above
+        // passes against a hand-written fixture, which is exactly how that gap survived.
+        //
+        // The test working directory is the repository root (`tests/CMakeLists.txt`), so this path
+        // is stable wherever the build tree lives.
+        std::ifstream file("assets-src/assets.manifest.json");
+        ASSERT_TRUE(file.is_open()) << "assets-src/assets.manifest.json is not readable from the "
+                                       "repository root";
+        std::ostringstream text;
+        text << file.rdbuf();
+
+        ContentRegistry registry;
+        auto loaded = registry.LoadFromJson(text.str(), "assets-src/assets.manifest.json");
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+        EXPECT_GT(registry.Count(), 0u);
+
+        // Every packaged asset names a pack, and every pack it names is one the residency system
+        // knows about. `manifest.py validate` checks the same thing offline; this checks that the
+        // RUNTIME agrees, which is the half that was missing.
+        for (const auto& entry : registry.All())
+        {
+            EXPECT_FALSE(entry.pack.empty()) << entry.name << " has no residency pack";
+            EXPECT_FALSE(entry.contentName.empty()) << entry.name << " has no content name";
+            EXPECT_NE(entry.kind, cnahouse::content::AssetKind::Unknown) << entry.name;
+        }
     }
 
     TEST_F(ContentRegistryTest, AWrongSchemaVersionIsItsOwnError)
@@ -128,8 +181,8 @@ namespace
         constexpr std::string_view kDuplicate = R"({
       "schema": "cna-house/assets/1",
       "assets": [
-        { "id": "SAME", "kind": "model", "contentName": "a" },
-        { "id": "SAME", "kind": "model", "contentName": "b" }
+        { "id": "SAME", "kind": "model", "contentName": "a", "residencyPack": "core" },
+        { "id": "SAME", "kind": "model", "contentName": "b", "residencyPack": "core" }
       ]
     })";
         ContentRegistry registry;
