@@ -285,6 +285,15 @@ acceptance criterion; it is not marked complete on the strength of the code havi
             (`weather-boolean`, `std-filesystem`, `shader-source`, `fx-placement`).
 - [x] HOUSE-00022 — Write `tools/ci/check_layout.py` — the directory-set and file-placement gate
       dep: HOUSE-00001 · sys: ci · plat: CI · pri: MUST
+      finding: (corrected 2026-09-07, while writing `HOUSE-00216`) the `stale-gitkeep` rule judged
+            emptiness **on disk**, so the first content build that actually populated `content/`
+            made the gate fail on `content/.gitkeep` — a placeholder whose whole purpose is to keep
+            a git-ignored directory present in the repository. The layout gate is also the first
+            stage of the content build, so it failed on the output of the previous run. Emptiness
+            is now judged as git judges it, via `git check-ignore`: an ignored file does not make a
+            `.gitkeep` stale, a tracked one does, and a tree that is not a git repository behaves
+            exactly as before. The planted-fault fixture could not have caught this — its temporary
+            tree is not a repository — so the selftest now builds one.
 - [x] HOUSE-00023 — Establish the naming conventions document: ids, files, namespaces, content names, JSON keys
       dep: HOUSE-00001 · sys: — · plat: ALL · pri: MUST
       files: docs/conventions.md
@@ -3771,9 +3780,25 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             content` has to be runnable now, and a build that quietly succeeded by doing nothing
             would be the worst of the five. A failed stage **stamps nothing**, so the next run
             retries it, and blocks its dependents rather than running them on missing inputs.
+      finding: the first version left **`cna-content` out of the graph**, though the task title
+            names it. Added as one stage per content root — `CMakeLists.txt`'s
+            `CNAHOUSE_CNB_ASSET_DIRS` plus `Media/` — rather than one call over `assets-src/`, so a
+            texture change does not recompile the audio. A stage can now also declare a **tool** it
+            needs: `cna-content` is built by CNA, and a checkout that has not configured a build
+            can still run every validator, so a missing tool is its own skip reason rather than a
+            failure. With it in place `make content` really does build `assets-src/` into
+            `content/` — 25 files — which is Phase 3's first exit criterion.
+      finding: **building into `content/` broke the layout gate**, and the gate is the first stage
+            of the next build. `check_layout.py` called `content/.gitkeep` stale "because the
+            directory is no longer empty" — but everything in it is git-ignored, and that
+            `.gitkeep` is the only reason the directory exists in the repository at all. Nobody had
+            hit it because nobody had run a content build into `content/` before. Fixed in
+            `HOUSE-00022`'s tool: emptiness is now judged **as git judges it**, by asking
+            `git check-ignore`, so an ignored file does not make a placeholder stale and a tracked
+            one still does.
       accept: the order is derived from the graph and a cycle is refused by name; touching an input
             rebuilds nothing and changing a byte rebuilds exactly its readers; a stage that cannot
-            run yet is skipped and named, not failed
+            run yet is skipped and named, not failed; `assets-src/` is compiled into `content/`
 - [x] HOUSE-00217 — Add the content-build documentation: what each tool does, in what order, and how to rebuild one asset
       dep: HOUSE-00216 · sys: — · plat: TOOL · pri: MUST
       note: (2026-09-07) `docs/content-build.md`. The stage table is **generated** from the

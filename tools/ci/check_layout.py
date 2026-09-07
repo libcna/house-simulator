@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import re
 import shutil
 import sys
@@ -188,7 +189,17 @@ def check_placement(root: Path, out: list[Problem]) -> None:
 
 
 def check_gitkeep(root: Path, out: list[Problem]) -> None:
-    """A .gitkeep is how an empty directory is tracked; it must not survive the first real file."""
+    """A .gitkeep is how an empty directory is tracked; it must not survive the first real file.
+
+    "Empty" means **empty as far as git is concerned**, not empty on disk. `content/` is generated
+    and git-ignored, and its `.gitkeep` is what keeps the directory in the repository at all -- so
+    the moment a content build runs, an on-disk test calls that `.gitkeep` stale and the layout
+    gate fails. Which it did: `HOUSE-00216` made `make content` actually populate `content/`, and
+    the first stage of the *next* build was this check, failing on the output of the previous one.
+
+    An ignored file therefore does not make a `.gitkeep` stale. The one that does is a file git
+    would track, because that is exactly when the directory no longer needs a placeholder.
+    """
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = sorted(d for d in dirnames if d not in SKIP_DIRS_ANYWHERE)
         here = Path(dirpath)
@@ -197,11 +208,31 @@ def check_gitkeep(root: Path, out: list[Problem]) -> None:
                            if d not in ALLOWED_BUILD_DIRS and not BUILD_LIKE_RE.match(d)]
         if ".gitkeep" not in filenames:
             continue
-        siblings = [f for f in filenames if f != ".gitkeep"]
-        if siblings or dirnames:
+        siblings = [here / f for f in filenames if f != ".gitkeep"]
+        siblings += [here / d for d in dirnames]
+        visible = [p for p in siblings if not _git_ignores(root, p)]
+        if visible:
             rel = (here / ".gitkeep").relative_to(root).as_posix()
+            names = ", ".join(sorted(p.name for p in visible)[:3])
             out.append(Problem("stale-gitkeep", rel,
-                               "the directory is no longer empty; delete the .gitkeep"))
+                               f"the directory now holds tracked content ({names}); delete the "
+                               f".gitkeep"))
+
+
+def _git_ignores(root: Path, path: Path) -> bool:
+    """Would git ignore this path? Answered by git, because `.gitignore` is git's to interpret.
+
+    A repository without git, or a path outside one, answers "no": the check then behaves exactly
+    as it did before, which is the safe direction -- it can report a problem that is not one, and
+    never miss one that is.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "check-ignore", "--quiet", str(path)],
+            capture_output=True, check=False)
+    except (OSError, ValueError):
+        return False
+    return result.returncode == 0
 
 
 def scan(root: Path) -> tuple[list[Problem], list[str]]:
@@ -286,6 +317,40 @@ def selftest() -> int:
                 failures.append(f"planted [{kind}] was NOT detected; reported "
                                 f"{sorted({p.kind for p in problems}) or 'nothing'}")
 
+    # A `.gitkeep` beside a GIT-IGNORED file is not stale, and the planted faults above cannot
+    # show that: the temporary tree is not a git repository, so `_git_ignores` answers "no" for
+    # everything and the check behaves as it did before this rule existed. `content/` is the real
+    # case -- generated, ignored, and kept in the repository only by that `.gitkeep` -- and
+    # `HOUSE-00216` made a content build populate it, so the previous rule failed the layout gate
+    # on the output of the previous build.
+    with tempfile.TemporaryDirectory(prefix="cnahouse-layout-git-") as tmp:
+        root = Path(tmp)
+        _build_clean_tree(root)
+        created = subprocess.run(["git", "-C", str(root), "init", "-q"],
+                                 capture_output=True, check=False).returncode == 0
+        if not created:
+            failures.append("could not create a git repository for the gitkeep/ignore claim")
+        else:
+            (root / ".gitignore").write_text("/generated/\n", encoding="utf-8")
+            generated = root / "generated"
+            generated.mkdir()
+            (generated / ".gitkeep").touch()
+            (generated / "output.bin").write_bytes(b"built\n")
+            if not _git_ignores(root, generated / "output.bin"):
+                failures.append("git did not report the ignored file as ignored")
+            problems, _ = scan(root)
+            if any(p.kind == "stale-gitkeep" for p in problems):
+                failures.append(
+                    "a .gitkeep beside a git-IGNORED file was called stale; that is the rule "
+                    "that failed the layout gate on content/ after HOUSE-00216 built into it")
+            (generated / "tracked.txt").write_text("x\n", encoding="utf-8")
+            (root / ".gitignore").write_text("/generated/output.bin\n", encoding="utf-8")
+            problems, _ = scan(root)
+            if not any(p.kind == "stale-gitkeep" for p in problems):
+                failures.append(
+                    "a .gitkeep beside a TRACKED file was not called stale; the rule still has "
+                    "to fire when the directory really has content git keeps")
+
     if failures:
         print("check_layout self-test FAILED", file=sys.stderr)
         for failure in failures:
@@ -293,6 +358,7 @@ def selftest() -> int:
         return 3
 
     print(f"check_layout self-test passed: {len(PLANTED)} planted layout faults detected, "
+          f"a .gitkeep beside ignored output accepted and beside tracked content rejected, "
           f"clean tree accepted.")
     return 0
 

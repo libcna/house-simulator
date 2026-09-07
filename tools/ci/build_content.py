@@ -60,6 +60,14 @@ REPO = Path(__file__).resolve().parents[2]
 #: covers `/build*/`; never under `assets-src/`, which is source.
 DEFAULT_STAMPS = REPO / "build" / "content-stamps.json"
 
+#: `CMakeLists.txt`'s `CNAHOUSE_CNB_ASSET_DIRS` plus `CNAHOUSE_CNB_MEDIA_DIR`. `Media/` builds to
+#: `content/` itself rather than to `content/Media/`, because a `Video` compiles to a metadata
+#: `.cnb` beside a byte-identical copy the runtime resolves through `BuildAssetPath`
+#: (`HOUSE-00201`); the rest build to `content/<dir>/`.
+CONTENT_ROOTS = [("Models", "content/Models"), ("Textures", "content/Textures"),
+                 ("Audio", "content/Audio"), ("Fonts", "content/Fonts"),
+                 ("world", "content/world"), ("Media", "content")]
+
 STAMP_VERSION = 1
 
 
@@ -73,7 +81,7 @@ class Stage:
 
     def __init__(self, name: str, group: str, command: list[str], inputs: list[str],
                  outputs: list[str], needs: list[str] | None = None,
-                 description: str = "") -> None:
+                 description: str = "", tool: Path | None = None) -> None:
         self.name = name
         self.group = group
         self.command = command
@@ -81,6 +89,24 @@ class Stage:
         self.outputs = outputs
         self.needs = list(needs or [])
         self.description = description
+        #: An executable the stage cannot run without. Absent means SKIP, not fail: `cna-content`
+        #: is built by CNA, and a checkout that has not configured a build yet can still run every
+        #: validator. Distinct from a missing input, and reported as its own reason.
+        self.tool = tool
+
+
+def find_cna_content() -> Path | None:
+    """CNA's content compiler, wherever a configured build left it.
+
+    The same three places `content_verify.py` looks, and for the same reason: it is built by CNA,
+    not by this repository, so its path depends on how the sibling was configured.
+    """
+    for candidate in (REPO / "build" / "CNA_BUILD" / "cna-content",
+                      REPO / "build-consumer" / "CNA_BUILD" / "cna-content",
+                      REPO.parent / "cnanext" / "build" / "cna-content"):
+        if candidate.is_file() and candidate.stat().st_mode & 0o111:
+            return candidate
+    return None
 
 
 def with_validator_gate(stages: list[Stage]) -> list[Stage]:
@@ -151,6 +177,21 @@ def default_stages() -> list[Stage]:
               outputs=["content/world/snowshell.bin"], needs=["coverage"],
               description="the snow shells over up-facing exterior surfaces"),
     ]
+
+    # --- cna-content (`HOUSE-00182`) -------------------------------------------------------------
+    # Last, and per root rather than as one call: a texture change should not recompile the audio.
+    # `world/` is listed here because `CMakeLists.txt` lists it, and it comes after the generators
+    # that write into it.
+    tool = find_cna_content()
+    for directory, output in CONTENT_ROOTS:
+        needs = ["collision"] if directory == "world" else []
+        stages.append(Stage(
+            f"cnb-{directory.lower()}", "compile",
+            [str(tool or "cna-content"), "build", f"assets-src/{directory}", "-o", output,
+             "--quiet"],
+            inputs=[f"assets-src/{directory}/**/*"], outputs=[], needs=needs, tool=tool,
+            description=f"compile assets-src/{directory} to {output} with cna-content"))
+
     return with_validator_gate(stages)
 
 
@@ -257,6 +298,8 @@ def save_stamps(path: Path, stamps: dict) -> None:
 def status_of(stage: Stage, root: Path, stamps: dict, force: bool) -> tuple[str, str]:
     """One of `skip`, `run`, `fresh`, with the reason."""
     digest, _inputs, missing = fingerprint(stage, root)
+    if stage.tool is None and stage.group == "compile":
+        return "skip", "cna-content is not built; configure a build first"
     if missing:
         return "skip", f"no input matches {', '.join(missing)} yet"
     if force:
