@@ -3047,8 +3047,34 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
 - [ ] HOUSE-00267 — Verify **Sketchfab CC0** filter semantics: does the filter guarantee CC0, and what evidence do we archive per asset?
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00268 — Verify **Blend Swap CC0** the same way
+- [x] HOUSE-00268 — Verify **Blend Swap CC0** the same way
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
+      note: (2026-09-07) `docs/licence-evidence/blendswap.md`.
+      finding: **CONDITIONAL and weak — the baseline here is SHARE-ALIKE, not permissive.** The
+            Terms name a site-wide default of "Creative Commons **BY-SA 3.0 USA** (or under the
+            license the content is marked with)", and the FAQ lists CC0, CC BY, CC BY-SA "as well as
+            our General Asset License". The opposite shape from Poly Haven or ambientCG.
+      finding: **non-commercial assets are present and are rejected outright.** Terms §7: "Users may
+            upload content under the Creative Commons Attribution-NonCommercial-ShareAlike License
+            … as long as they do not resell it or **use it for any kind of monetary profit, even
+            through derivatives of the work**." ADR-0012 rejects NC, and unlike a source that simply
+            has none, this one mixes NC into the same library behind the same download button. The
+            per-asset check is not optional here.
+      finding: **the site explicitly disclaims chain of title** — "Neither we or our Affiliates
+            warrant or represent that your use of materials … will not infringe the rights of third
+            parties" — which is precisely the assurance a hero asset needs. Blend Swap therefore
+            ranks at the bottom of this project's provenance order, with Sketchfab, and is **never**
+            a hero-asset source.
+      finding: **CC BY-SA needs a deliberate decision rather than a default yes.** Share-alike
+            attaches to derivatives, and this project derives from everything it ships — LOD1/LOD2,
+            the collision proxy, the compiled `.cnb` — so those would have to be offered under
+            BY-SA. It does not reach the rest of the game, but it is a real obligation; prefer CC0.
+      finding: **the "General Asset License" text could not be found** on `/faq`, `/terms`,
+            `/license`, `/general-asset-license` or `/legal`. An asset under a licence nobody has
+            read is unusable (ADR-0012). Recorded as a named gap rather than assumed benign.
+      finding: the site is opening a **paid marketplace** alongside the free CC library, so
+            "downloadable from Blend Swap" will increasingly not imply Creative Commons — one more
+            reason the per-asset licence read on the day is the only evidence that counts.
 - [x] HOUSE-00269 — **Verify the MakeHuman / MPFB2 asset licence** (Q-03): may generated meshes be redistributed, and under what terms?
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
       accept: a written answer with the licence text archived; if negative, R-04's fallback is triggered here, not later
