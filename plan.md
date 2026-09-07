@@ -5301,19 +5301,36 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             so this task is the join between `scale_check.py`'s measurements and the prop
             placements — not a second reading of the layout. "Rise consistency ≤ 2 mm" is struck
             as untestable: one `rise` per flight makes it a tautology.
-- [ ] HOUSE-00361 — Implement the reachability proof (rule 11): every interactable's focus point reachable by a 2.5 m ray from a standing eye on its room's floor
-      dep: HOUSE-00360 · sys: world · plat: TOOL · pri: MUST
+- [x] HOUSE-00361 — Implement the reachability proof (rule 11): every interactable's focus point reachable by a 2.5 m ray from a standing eye on its room's floor
+      dep: HOUSE-00358, HOUSE-00384 · sys: world · plat: TOOL · pri: MUST
       note: (2026-09-07) the mechanism is already in `validate_world.py` rule 11 from
             `HOUSE-00358`, with the standing, portal-crossing and neighbour-cell conditions and
             five selftest claims. What is left for this task is running it over the **authored**
             layout and answering for the interactables it rejects — which needs
             `HOUSE-00389`…`HOUSE-00395`.
-- [ ] HOUSE-00362 — Implement the capsule-clearance proof: the player capsule fits through all 186 portals, or the portal is marked `crouch`
-      dep: HOUSE-00360 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-08) **run, and it rejected two.** `HOUSE-00384`'s 80 switch plates are the
+            first interactables the house has, and rule 11 refused a plate in the garage loft and
+            one in the under-stair cupboard: both rooms are under 1.95 m, so neither has a standing
+            eye position to reach a switch from. The answer is not to loosen the rule — it is that
+            those two lights are switched from the next room, which is what a house does anyway.
+            All 80 pass. The proof is a proof because it changed the data.
+      note: the `dep` line said `HOUSE-00360`, and this rule needed nothing from it: rule 11 is
+            about interactables and §70.5's asset join is about props. The real dependency is
+            `HOUSE-00384`, which authored the first interactables to check, and it now says so.
+- [x] HOUSE-00362 — Implement the capsule-clearance proof: the player capsule fits through every authored portal, or the portal is marked `crouch`
+      dep: HOUSE-00358, HOUSE-00374…HOUSE-00377 · sys: world · plat: TOOL · pri: MUST
       note: (2026-09-07) `validate_world.py` rule 10 checks it (0.62 m × 1.95 m, `crouch` and
             `hatch` exempt, and a horizontal portal measured across its narrowest dimension since
             both of its dimensions are horizontal). The acceptance names **all 186 portals**, so
             this task closes when `HOUSE-00374`…`HOUSE-00379` have authored them.
+      note: (2026-09-08) **run over all 179.** Not 186: the design's figure was an estimate and
+            §16.3 now carries the measured breakdown (`HOUSE-00376`). Nine portals are marked
+            `crouch` — seven between the attic stores under the 1.20 m knee wall, one into
+            `B1_UNDERSTAIR` and the refrigerator door — and every other passable portal takes the
+            capsule standing. The title says "every authored portal" rather than a number that was
+            never right.
+      note: the `dep` line said `HOUSE-00360`, which this needed nothing from, and not the portal
+            tasks it obviously waits on. Corrected to what it actually depended on.
 - [x] HOUSE-00363 — Wire `validate_world.py` into the content build and CI
       dep: HOUSE-00358 · sys: ci · plat: CI · pri: MUST
       note: (2026-09-07) a `world-rules` stage at the head of the world chain in
