@@ -5191,9 +5191,31 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             starts the player outside the house it just loaded, with nothing in the frame saying
             the spawn row was incomplete. An injected bug that made it optional survived the first
             version of the test, which only checked that the whole `player` block was required.
-- [ ] HOUSE-00356 — Implement `SpatialIndex`: the 2 m × 2 m × level grid over cells, built at load
+- [x] HOUSE-00356 — Implement `SpatialIndex`: the 2 m × 2 m × level grid over cells, built at load
       dep: HOUSE-00344 · sys: world · plat: ALL · pri: MUST
       verify: unit SpatialIndexTests.* against brute force on 10⁵ random points
+      note: (2026-09-07) all three of §16.4's steps — incremental with the 5 cm hysteresis, the
+            neighbour walk through the current cell's portals, and the 2 m grid. The verification
+            line is met literally: 100 000 seeded random points, every one compared with the loop
+            the index replaces, and the sample asserted to land both inside and outside cells often
+            enough for the agreement to mean something. 12 unit tests; eleven injected bugs, eleven
+            caught.
+      finding: the grid is keyed on `(x, z)` and **not** on `(level, x, z)`, and §16.4's "× level"
+            is done by the Y test instead. A cell's vertical extent can be overridden per cell — a
+            stair spans two storeys — so a level cannot be derived from a Y coordinate, and a third
+            key would need one. The bound §16.4 states still holds and for its own reason: cells on
+            one level do not overlap, so a 2 m square sees one cell per level plus the exterior,
+            which is the "≤ 6 cells" the section expects. A test asserts it.
+      finding: the hysteresis is on **step 1 only**. Staying put is sticky; arriving is not. A
+            margin on the grid step would let two cells claim one point with no rule for choosing,
+            and an injected bug that added one is caught.
+      finding: §16.4's step 4 assigns `EXT_WORLD`, which is a room name — the one thing
+            `CLAUDE.md` §3 says C++ must never contain. `Find` returns an invalid id and the
+            controller, which already owns the "clamp to the last good cell" diagnostic, decides.
+      finding: steps 2 and 3 give the **same answer**, so nothing about the returned id can show
+            that the neighbour walk ran — an injected bug that deleted it passed every test. `Find`
+            now reports which step answered, which makes the claim testable and is what §70.6's
+            performance scenarios and the debug overlay want to read anyway.
 - [ ] HOUSE-00357 — Implement `WorldValidator` in C++ mirroring `validate_world.py`'s 11 rules, run at load in debug builds
       dep: HOUSE-00355 · sys: world · plat: ALL · pri: MUST
 - [x] HOUSE-00358 — Implement `tools/world/validate_world.py` with all 11 rules and clear diagnostics

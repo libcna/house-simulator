@@ -38,6 +38,7 @@ add_library(cnahouse_core STATIC
     world/WorldData.cpp
     world/WorldLoader.cpp
     world/InteractableExpr.cpp
+    world/SpatialIndex.cpp
 
     # persistence
     persistence/DesktopSaveStore.cpp
