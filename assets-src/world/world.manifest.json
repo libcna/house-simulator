@@ -1,0 +1,10 @@
+{
+  "schema": "cna-house/manifest/1",
+  "worldHash": "sha256:3cef8f9fe26289bb72639983a07487dbe84e20d3bd70b751c471100eefb4219d",
+  "members": [
+    {
+      "file": "layout.levels.json",
+      "sha256": "sha256:ff71317ab7c91b28bc13a8465208c69870fca3fef635f22fcccf9a5c2ed27802"
+    }
+  ]
+}

@@ -5347,8 +5347,31 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
 
 ### 5.2 Authoring the layout
 
-- [ ] HOUSE-00366 — Author `layout.levels.json`: 5 levels, elevations and the construction constants of `cna-house.md` §12.2/§12.3
+- [x] HOUSE-00366 — Author `layout.levels.json`: 5 levels, elevations and the construction constants of `cna-house.md` §12.2/§12.3
       dep: HOUSE-00343 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) **the first world file exists.** `assets-src/world/layout.levels.json`
+            plus the `world.manifest.json` that indexes it, and the two gates that were saying
+            "nothing to check" now check something: `world_schema.py --validate` and
+            `validate_world.py` both pass, 11/11 rules.
+      finding: §12.1 says "7:12 pitch" and §15.2's example writes `roofPitch: 0.594`; the two do
+            not agree and neither is a radian measure (7:12 in radians is 0.528). Authored as
+            **0.583333 = 7/12, a slope**, which is what "7:12" means and what §12.2's attic section
+            confirms: 1.20 m of headroom at the knee wall rising to 5.00 m at the ridge is 3.80 m
+            of rise, and at 7/12 that puts the knee wall 6.51 m from the ridge — 0.19 m inboard of
+            the 6.70 m half-span, which is where a knee wall goes. §15.2's 0.594 is illustrative.
+      finding: **the C++ loader cannot read the authored file, and nothing deploys a copy it can.**
+            `world-format.md` says the authored files are JSONC and "the build strips comments and
+            deploys plain JSON beside the compiled content", but no task or stage does the
+            stripping — `System::Text::Json` refuses the first comment. Raised as `HOUSE-00421`,
+            the next free id in phase 5's reserved 00341–00450 range.
+      finding: `check_manifest.py` demanded an `assets.manifest.json` row for every world file, and
+            its own note anticipated this ("a blanket `*.json` exemption would silently exempt a
+            future `world/*.json`, which very much is an asset"). It is exempt now, by an exact
+            rule and with the argument written beside it: a world file is authored in this
+            repository, so a row carries no provenance ADR-0012 wants, and the hash such a row
+            would carry already exists in `world.manifest.json` — gated at build **and verified by
+            `WorldLoader` at load**, which a row is not. Two hashes for one file is the shape of
+            rule people work around.
 - [ ] HOUSE-00367 — Author `layout.cells.json` for `B1`: 14 cells per §13.2, with materials, footstep surfaces, acoustics, light groups and residency
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00368 — Author `layout.cells.json` for `L0`: 19 cells per §13.3
@@ -5387,6 +5410,18 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       dep: HOUSE-00382 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00385 — Author `layout.materials.json`: the material class table of §22.2 with all fields
       dep: HOUSE-00296 · sys: world · plat: TOOL · pri: MUST
+- [ ] HOUSE-00421 — Deploy `assets-src/world/*.json` to `content/world/` with the comments stripped
+      dep: HOUSE-00366 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-07) **New task, next free id in phase 5's reserved 00341–00450 range.** Found
+            by `HOUSE-00366`: `docs/world-format.md` says the authored files are JSONC and "the
+            build strips comments and deploys plain JSON beside the compiled content", and nothing
+            does the stripping. `System::Text::Json` refuses the first comment, so the runtime
+            cannot read what was just authored — the two halves of the format were specified and
+            neither was built.
+      accept: every world file in `assets-src/world/` appears in `content/world/` as plain JSON
+            with identical parsed content; the deploy is a `build_content.py` stage; `WorldLoader`
+            loads the deployed copy
+      verify: unit `AuthoredWorldTest.*` loads the deployed world with the real loader
 - [ ] HOUSE-00386 — Author the plumbing stack description (STACK-A…F) as data, so the validator can check fixture placement
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
       note: (2026-09-07) the **format** now exists: `layout.levels.json` `plumbing.stacks`

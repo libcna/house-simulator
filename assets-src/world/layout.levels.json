@@ -1,0 +1,51 @@
+{
+  // The five levels and the construction constants everything else derives from.
+  // `cna-house.md` §12.2 (elevations) and §12.3 (dimensions) are the authority; this file is the
+  // data. Metres, right-handed, Y up, -Z north (§14).
+  "schema": "cna-house/levels/1",
+  "units": "metres",
+  "north": "-Z",
+
+  // `ffl` is finished floor level; `ceiling` is the underside of the ceiling above it. The gap
+  // between one ceiling and the next `ffl` is `structureDepth`: 0.35 m of engineered joists,
+  // subfloor and finish. Every one of these is checkable -- 0.25 + 0.35 = 0.60, 3.30 + 0.35 =
+  // 3.65, 6.20 + 0.35 = 6.55, 9.00 + 0.30 = 9.30 -- and the attic is the one that is not, because
+  // its floor sits on a shallower deck over the collar ties.
+  "levels": [
+    { "id": "B1", "name": "Basement",      "ffl": -2.30, "ceiling":  0.25, "structureDepth": 0.35 },
+    { "id": "L0", "name": "Main Floor",    "ffl":  0.60, "ceiling":  3.30, "structureDepth": 0.35 },
+    { "id": "L1", "name": "Upper Floor 1", "ffl":  3.65, "ceiling":  6.20, "structureDepth": 0.35 },
+    { "id": "L2", "name": "Upper Floor 2", "ffl":  6.55, "ceiling":  9.00, "structureDepth": 0.35 },
+
+    // The attic's `ceiling` is null because it is bounded by rafters, not by a plane: 1.20 m at
+    // the knee wall rising to 5.00 m at the ridge. `null` here is "there is no ceiling plane",
+    // never "the ceiling is at zero", and every cell on this level therefore declares its own
+    // `yOverride` -- `WorldData::ExtentOf` refuses rather than inventing one.
+    { "id": "L3", "name": "Attic",         "ffl":  9.30, "ceiling": null,  "structureDepth": 0.30,
+      "roof": "ROOF_MAIN" }
+  ],
+
+  "construction": {
+    // §12.3, in metres.
+    "wallExterior":   0.30,
+    "wallPartition":  0.15,
+    "wallPlumbing":   0.20,
+    "wallGarage":     0.25,
+    "foundationWall": 0.30,
+
+    "kneeWallHeight": 1.20,
+    "ridgeY":        14.30,
+
+    // Rise over run, not radians: §12.1's "7:12 pitch" is 7/12 = 0.583333. It is consistent with
+    // §12.2's attic section -- 1.20 m of headroom at the knee wall rising to 5.00 m at the ridge
+    // is 3.80 m of rise, which at 7:12 puts the knee wall 6.51 m from the ridge, 0.19 m inboard of
+    // the 6.70 m half-span. §15.2's example writes 0.594; that is an illustrative figure and this
+    // is the design's own number (recorded on `HOUSE-00366`).
+    "roofPitch":      0.583333,
+
+    "skirting":       0.14,
+    "cornice":        0.11,
+    "balustrade":     0.95,
+    "railing":        1.10
+  }
+}

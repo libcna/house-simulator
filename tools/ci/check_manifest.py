@@ -43,6 +43,33 @@ EXEMPT_NAMES = {
 }
 
 
+def is_world_data(path: Path) -> bool:
+    """A world file under `assets-src/world/`.
+
+    Exempt, and this is the argument rather than the convenience. A world file is authored **in
+    this repository**: its provenance is the repository's own licence, so an `assets.manifest.json`
+    row would carry no information ADR-0012 wants. What such a row would carry is a hash -- and
+    every one of these files already has one, in `world.manifest.json`, written and gated by
+    `tools/world/world_manifest.py --check` and **verified by `WorldLoader` at load**
+    (`HOUSE-00364`). That is strictly stronger than a row here, which nothing checks after the
+    build.
+
+    Two hashes for one file is also the shape of rule people work around: every edit to a room
+    would mean updating two indexes, and the one that fails loudest wins.
+
+    This is an exact rule and not a wildcard, which is what `EXEMPT_NAMES`'s note asks for: it is
+    `.json` **under `assets-src/world/`** and nowhere else. A `.png` dropped in that directory
+    still needs a row, and so does a `.json` anywhere else under `assets-src/`.
+    """
+    if path.suffix != ".json":
+        return False
+    try:
+        relative = path.relative_to(ASSETS_SRC)
+    except ValueError:
+        return False
+    return relative.parts[:1] == ("world",)
+
+
 def is_generated_effect_baseline(path: Path) -> bool:
     """`assets-src/Effects/<name>.xnb` beside `<name>.fx`.
 
@@ -59,6 +86,9 @@ def exemption_for(path: Path) -> str | None:
         return EXEMPT_NAMES[path.name]
     if is_generated_effect_baseline(path):
         return "generated from the .fx beside it, which has a row (HOUSE-00185)"
+    if is_world_data(path):
+        return ("world data authored in this repository; hashed by world.manifest.json and "
+                "verified at load (HOUSE-00364), which no manifest row is")
     return None
 
 
