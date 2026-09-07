@@ -3173,8 +3173,33 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             phrased as a request tied to publishing results rather than a licence condition. Carried
             anyway, in the manifest's `attribution` field, so it reaches the generated credits
             automatically. As with Poly Haven, the page also asks that the database not be crawled.
-- [ ] HOUSE-00271 — Verify **Mixamo** terms and record the verdict; expected outcome is "not used for shipped files"
+- [x] HOUSE-00271 — Verify **Mixamo** terms and record the verdict; expected outcome is "not used for shipped files"
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: SHOULD
+      note: (2026-09-07) `docs/licence-evidence/mixamo.md`. **The plan's expectation is confirmed**,
+            though not for the reason one might guess — the use grant is generous.
+      finding: the FAQ grants a genuinely broad **use** licence: "You can use both characters and
+            animations **royalty free for personal, commercial, and non-profit projects** including
+            … **Create video games**." If `cna-house` shipped only a binary, Mixamo would be usable.
+      finding: **it is rejected because the grant is about USE and says nothing about
+            REDISTRIBUTION.** Every item in the permitted list is an end product; none is "publish
+            the animation file". `assets-src/` is published, so committing a Mixamo `.fbx` there
+            distributes the animation as data, which the FAQ neither permits nor discusses — and
+            ADR-0012 says an ungranted permission is not assumed. **The fourth source this phase
+            with that exact shape** (Quaternius, CMU, BlenderKit Royalty Free), and always for the
+            same reason: this project publishes its asset sources, so "may I use it?" and "may I
+            republish it?" are different questions.
+      finding: Mixamo differs from CMU in a way that matters. With CMU the asset is a raw capture
+            and our deliverable is a retargeted `.chanim` — a genuine derivative, expressly
+            shippable. With Mixamo the animation **is** the finished product, so a `.chanim` of a
+            Mixamo clip is substantially the same data in another container: much closer to
+            "redistributing in converted form" than to deriving something new.
+      finding: access needs an **Adobe account** under Adobe's General Terms of Use rather than an
+            asset licence — not text this project can archive as a stable licence the way it
+            archives OFL or CC0 — and the service is unavailable in some territories.
+      note: **nothing depends on it.** `HOUSE-00295` sources locomotion from CMU, whose terms
+            expressly permit inclusion in commercially-sold products. Mixamo remains usable as a
+            private reference while evaluating rigs; nothing from it enters `assets-src/`, the
+            manifest, or a build.
 - [x] HOUSE-00272 — Verify **Freesound CC0** filter semantics and the per-sound evidence we must archive
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `docs/licence-evidence/freesound.md`. Unblocks `HOUSE-00281`…`HOUSE-00290`,
