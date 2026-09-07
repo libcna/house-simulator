@@ -2986,8 +2986,26 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             ToS §4.1 reserves its own. The two sources are otherwise interchangeable and this
             difference is invisible from the licence label, so it is recorded rather than left to be
             rediscovered.
-- [ ] HOUSE-00264 — Verify the **Khronos glTF-Sample-Assets** per-asset licences and record which are usable
+- [x] HOUSE-00264 — Verify the **Khronos glTF-Sample-Assets** per-asset licences and record which are usable
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `docs/licence-evidence/khronos-gltf-sample-assets.md`.
+      finding: **there is no repository-wide licence, and the README says so** — each model carries
+            its own, contributed by a different party. Counted from the licence links in
+            `Models/Models.md`: **148 models, 163 licence links — 93 CC0 and 70 CC BY 4.0, and
+            nothing else.** No NC and no ND anywhere, so neither of ADR-0012's standing restrictions
+            bites and LOD generation is permitted throughout. Both licences are usable here, CC BY
+            because attribution is generated from the manifest.
+      finding: **seven models are on the repository's own `#issues` list — "issues with respect to
+            ownership, license, or markings" — and must not ship**: `AntiqueCamera`, `BoxTextured`,
+            `BoxTexturedNonPowerOfTwo`, `CesiumMan`, `CesiumMilkTruck`,
+            `PrimitiveModeNormalsTest`, `RecursiveSkeletons`. Not a formality: `CesiumMan` and
+            `RecursiveSkeletons` are exactly the skinned, animated models a character pipeline
+            reaches for first, and `BoxTextured` is the obvious texture smoke test. They stay usable
+            as **local fixtures** — validating a file redistributes nothing — but none may enter
+            `assets-src/`, which is published.
+      finding: these are *sample* assets, authored to exercise glTF features rather than to furnish
+            a house. The quality bar applies: most are unsuitable as furniture and none as a hero
+            asset.
 - [x] HOUSE-00265 — Verify **Quaternius**, **Kenney**, **Poly Pizza** licences
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-07) `docs/licence-evidence/quaternius-kenney-polypizza.md`. Three sources,
