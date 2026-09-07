@@ -5426,8 +5426,19 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             with no portals to walk and failed all 32 interior cells. It now stands down on the
             **presence of the file**, and an *empty* portals file is a claim — that nothing in the
             house connects — which the rule still reports.
-- [ ] HOUSE-00369 — Author `layout.cells.json` for `L1`: 21 cells per §13.4
+- [x] HOUSE-00369 — Author `layout.cells.json` for `L1`: 21 cells per §13.4
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-07) §13.4 needed no correction: measured, every area matches its rectangle,
+            nothing overlaps, and the nineteen interior cells cover the 273.9 m² envelope exactly
+            against the document's 274.0.
+      note: the two balconies are `exterior` cells with an explicit `yOverride` reaching to +9.00.
+            They sit on the roofs below them and are open to the sky, so they take no ceiling from
+            their level — which is what lets rain reach them (`build_coverage.py`) and what the
+            `exterior` exemption in rule 2 is for. The front balcony IS the porch's ceiling, which
+            is why `L0_PORCH` stops at +3.35.
+      note: `L1_STAIR_MAIN` overrides up to +6.55 because the flight continues to L2: it pierces
+            this level's ceiling as well as its floor, and `stair` is exempt from both bounds for
+            exactly that reason.
 - [ ] HOUSE-00370 — Author `layout.cells.json` for `L2`: 18 cells per §13.5
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00371 — Author `layout.cells.json` for `L3`: 6 cells per §13.6, with the rafter-envelope description
