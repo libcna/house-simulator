@@ -4909,6 +4909,12 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       note: (2026-09-07) `HOUSE-00358` corrected three shapes here and regenerated:
             `portals.plane.axis` accepts `y`, `levels` gained `plumbing.stacks`, and `props`
             gained `plumbing`. Each is recorded with its reason on `HOUSE-00358`.
+      finding: (2026-09-07, found by `HOUSE-00367`) **rule 5 could not survive staged authoring.**
+            Cells are authored a level at a time and portals come after them, so a layout with
+            cells and no `layout.portals.json` failed rule 5 on every commit — it has claimed no
+            connectivity at all. The rule now stands down when there is no portals file *and* no
+            `L0_FOYER`, and bites as hard as before once either exists: a portal graph with no
+            front door is exactly the mistake it is for. Two claims pin both halves.
       finding: the schemas check **shape only**, and this is a decision rather than a limitation.
             Of §15.7's eleven rules, 4, 5, 6, 7, 9 and 11 span two files or the whole layout,
             which JSON Schema cannot see across, and 2, 3, 8 and 10 compare two numbers to each
@@ -5375,8 +5381,27 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             would carry already exists in `world.manifest.json` — gated at build **and verified by
             `WorldLoader` at load**, which a row is not. Two hashes for one file is the shape of
             rule people work around.
-- [ ] HOUSE-00367 — Author `layout.cells.json` for `B1`: 14 cells per §13.2, with materials, footstep surfaces, acoustics, light groups and residency
+- [x] HOUSE-00367 — Author `layout.cells.json` for `B1`: 14 cells per §13.2, with materials, footstep surfaces, acoustics, light groups and residency
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
+      finding: **§13.2's `B1_WC7` sits inside `B1_UNDERSTAIR`.** The table gives the store the
+            whole block X +2.20…+4.90, Z −23.00…−20.20 (7.6 m²) and gives the WC a rectangle
+            *inside* it, so the two overlap by 2.88 m² and rule 3 fails. Authored with the WC
+            carved out and the store as the L-shaped remainder, 4.68 m².
+            **The document's own arithmetic confirms the reading**: measured, the fourteen cells
+            then cover 273.92 m² with no overlap and no gap, against §13.2's "≈ the 273.9 m²
+            internal envelope". The tabulated 276.9 m² total double-counts the WC.
+      finding: four fields are left unset on every row and each is a forward reference, not an
+            omission — the three material slots (`HOUSE-00385` authors §22.2's table),
+            `lightGroups` (`HOUSE-00381`…`HOUSE-00384`), `daylight.windowIds`
+            (`HOUSE-00374`…`HOUSE-00379`) and `acoustic.roomTone` (`HOUSE-00397`). Filling them
+            here would make this file the source of truth for a table another task owns, and rule
+            6 cannot check any of them until that table exists. The task title says "with
+            materials"; the material table does not exist yet and cannot until `HOUSE-00296`.
+      finding: §62.4 has no `rubber` surface for the gym's floor. Adding a twenty-first surface
+            for one room would mean sourcing a set of samples for it (`HOUSE-00281`'s shortfall is
+            already 113); `concrete` is the nearest of the twenty and the mat is a prop.
+      note: `B1_UNDERSTAIR` carries a `yOverride` because §13.2 calls it "low, sloped ceiling" —
+            it is under the flight, so its ceiling is not the level's.
 - [ ] HOUSE-00368 — Author `layout.cells.json` for `L0`: 19 cells per §13.3
       dep: HOUSE-00366 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00369 — Author `layout.cells.json` for `L1`: 21 cells per §13.4

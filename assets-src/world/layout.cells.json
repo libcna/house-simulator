@@ -1,0 +1,186 @@
+{
+  // The cells of the house. `cna-house.md` §13 is the authority: one row per room, corridor,
+  // stair, closet, garage bay and exterior region, with the footprints §13.2-§13.7 tabulate.
+  //
+  // `B1` only so far (`HOUSE-00367`); `HOUSE-00368`…`HOUSE-00372` add L0, L1, L2, L3 and the
+  // exterior regions to this same file.
+  //
+  // Four fields are deliberately left unset on every row and each is a forward reference, not an
+  // omission. Filling them here would make this file the source of truth for a table another task
+  // owns, and `validate_world.py` rule 6 cannot check any of them until that table exists:
+  //
+  //   floorMaterial / wallMaterial / ceilingMaterial   HOUSE-00385 authors §22.2's material table
+  //   lightGroups                                      HOUSE-00381..HOUSE-00384 author the lights
+  //   daylight.windowIds                               HOUSE-00374..HOUSE-00379 author the portals
+  //   acoustic.roomTone                                HOUSE-00397 authors the ambience beds
+  //
+  // `footstepSurface`, `acoustic.absorption`, `thermal` and `residencyPack` ARE authored: they are
+  // properties of the room as experienced (§22.3) and nothing else declares them.
+  "schema": "cna-house/cells/1",
+
+  "cells": [
+    // ---------------------------------------------------------------------------- B1, §13.2 ----
+    // Basement. FFL -2.30, ceiling +0.25, clear 2.55 m. Footprint: the main block only, interior
+    // X -12.70 … +8.70, Z -27.10 … -14.30 = 273.9 m², which these fourteen cells cover exactly and
+    // without overlap.
+    //
+    // Every cell here is `heated: true` except the wine cellar, which §13.2 says has no heating
+    // duct, and the mechanical room, which is where the heat comes from.
+    {
+      "id": "B1_STAIR", "level": "B1", "name": "Basement Stair Foot", "kind": "stair",
+      "boxes": [{ "x": [2.20, 4.90], "z": [-20.20, -14.30] }],
+      "footstepSurface": "stair_wood",
+      "acoustic": { "absorption": 0.14, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": null },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_HALL", "level": "B1", "name": "Basement Hallway", "kind": "corridor",
+      "boxes": [{ "x": [-2.20, 2.20], "z": [-27.10, -14.30] }],
+      // Exposed joists and the duct trunk overhead: hard, bright, and the longest run in the
+      // house at 12.8 m.
+      "footstepSurface": "concrete",
+      "acoustic": { "absorption": 0.12, "reverbHint": "corridor_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_SPINE" },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_MECHANICAL", "level": "B1", "name": "Mechanical", "kind": "room",
+      "boxes": [{ "x": [4.90, 8.70], "z": [-18.30, -14.30] }],
+      // Furnace, air handler, water heater, water main, expansion tank. Where the heat is made,
+      // so it is not on a duct branch of its own.
+      "footstepSurface": "concrete",
+      "acoustic": { "absorption": 0.09, "reverbHint": "small_hard" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "daylight": { "orientation": "E", "exposure": 0.10 },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_ELECTRICAL", "level": "B1", "name": "Electrical Service", "kind": "room",
+      "boxes": [{ "x": [4.90, 8.70], "z": [-20.60, -18.30] }],
+      "footstepSurface": "concrete",
+      "acoustic": { "absorption": 0.09, "reverbHint": "small_hard" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_UTILITY", "level": "B1", "name": "Utility", "kind": "room",
+      "boxes": [{ "x": [4.90, 8.70], "z": [-23.00, -20.60] }],
+      // Sump, ejector pit, main drain, softener. STACK-A and STACK-D land here (§12.5).
+      "footstepSurface": "concrete",
+      "acoustic": { "absorption": 0.10, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_EAST" },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_CINEMA", "level": "B1", "name": "Home Cinema", "kind": "room",
+      "boxes": [{ "x": [2.20, 8.70], "z": [-27.10, -23.00] }],
+      // Acoustic panels and no windows: the most absorbent room in the house, and the one place
+      // where a reverb tail would be wrong.
+      "footstepSurface": "carpet",
+      "acoustic": { "absorption": 0.62, "reverbHint": "dead" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_EAST" },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_WC7", "level": "B1", "name": "Basement WC", "kind": "room",
+      "boxes": [{ "x": [2.20, 3.80], "z": [-23.00, -21.20] }],
+      // Off B1_HALL, on STACK-F. Carved out of the under-stair block below, which is why that
+      // cell is an L.
+      "footstepSurface": "tile",
+      "acoustic": { "absorption": 0.08, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_EAST" },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_GYM", "level": "B1", "name": "Home Gym", "kind": "room",
+      "boxes": [{ "x": [-8.20, -2.20], "z": [-18.30, -14.30] }],
+      // Rubber floor over the slab. §62.4 has no `rubber` surface and adding one for a single
+      // room would be a twenty-first surface with one sample; `concrete` is the nearest of the
+      // twenty and the mat is a prop.
+      "footstepSurface": "concrete",
+      "acoustic": { "absorption": 0.30, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
+      "daylight": { "orientation": "N", "exposure": 0.18 },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_WORKSHOP", "level": "B1", "name": "Workshop", "kind": "room",
+      "boxes": [{ "x": [-12.70, -8.20], "z": [-18.30, -14.30] }],
+      "footstepSurface": "concrete",
+      "acoustic": { "absorption": 0.16, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
+      "daylight": { "orientation": "NW", "exposure": 0.18 },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_STOR1", "level": "B1", "name": "Storage 1", "kind": "room",
+      "boxes": [{ "x": [-12.70, -8.20], "z": [-22.00, -18.30] }],
+      // Steel shelving; STACK-B's chase runs through it (§12.5).
+      "footstepSurface": "concrete",
+      "acoustic": { "absorption": 0.22, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
+      "daylight": { "orientation": "W", "exposure": 0.12 },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_STOR2", "level": "B1", "name": "Storage 2", "kind": "room",
+      "boxes": [{ "x": [-12.70, -8.20], "z": [-27.10, -22.00] }],
+      // Seasonal goods, paint, luggage; STACK-C and STACK-E drop here.
+      "footstepSurface": "concrete",
+      "acoustic": { "absorption": 0.24, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
+      "daylight": { "orientation": "W", "exposure": 0.12 },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_HOBBY", "level": "B1", "name": "Hobby Room", "kind": "room",
+      "boxes": [{ "x": [-8.20, -2.20], "z": [-24.00, -18.30] }],
+      "footstepSurface": "carpet",
+      "acoustic": { "absorption": 0.34, "reverbHint": "small_soft" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_CELLAR", "level": "B1", "name": "Wine Cellar", "kind": "room",
+      "boxes": [{ "x": [-8.20, -4.60], "z": [-27.10, -24.00] }],
+      // Stone floor, cool, and §13.2's one room with no heating duct -- which is the point of a
+      // cellar and the reason the thermal model has to be able to say so.
+      "footstepSurface": "rock",
+      "acoustic": { "absorption": 0.11, "reverbHint": "small_hard" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_LAUNDRY2", "level": "B1", "name": "Secondary Laundry", "kind": "room",
+      "boxes": [{ "x": [-4.60, -2.20], "z": [-27.10, -24.00] }],
+      // Deep sink and drying rack; on STACK-F with the WC.
+      "footstepSurface": "tile",
+      "acoustic": { "absorption": 0.13, "reverbHint": "small_hard" },
+      "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    },
+    {
+      "id": "B1_UNDERSTAIR", "level": "B1", "name": "Under-stair Store", "kind": "closet",
+      // TWO boxes, and this is the correction §13.2 needs. The table gives this cell the whole
+      // block X +2.20…+4.90, Z -23.00…-20.20 (7.6 m²) and gives `B1_WC7` a rectangle INSIDE it, so
+      // the two overlap by 2.88 m² and rule 3 would fail. The WC is carved out and the store is
+      // the L-shaped remainder, 4.68 m².
+      //
+      // The document's own arithmetic confirms the reading: 276.9 m² minus the double-counted
+      // 2.88 m² is 274.0, and §13.2 says the fourteen cells are "≈ the 273.9 m² internal
+      // envelope". Measured here, the corrected total is 273.92 m² and the union covers the
+      // envelope with no gap at all.
+      "boxes": [
+        { "x": [3.80, 4.90], "z": [-23.00, -20.20] },
+        { "x": [2.20, 3.80], "z": [-21.20, -20.20] }
+      ],
+      // "Low, sloped ceiling": it is under the flight, so its ceiling is not the level's.
+      "yOverride": [-2.30, -0.55],
+      "footstepSurface": "concrete",
+      "acoustic": { "absorption": 0.20, "reverbHint": "tiny_hard" },
+      "thermal": { "heated": false, "ductBranch": null },
+      "residencyPack": "house-b1", "visibilityHint": "opaque"
+    }
+  ]
+}

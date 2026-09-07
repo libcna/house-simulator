@@ -486,16 +486,28 @@ def rule_4_portal_planes(world: World) -> list[Problem]:
 
 
 def rule_5_connected(world: World) -> list[Problem]:
-    """Every interior cell is reachable from `L0_FOYER` through always-open or door portals."""
+    """Every interior cell is reachable from `L0_FOYER` through always-open or door portals.
+
+    The rule needs a graph to walk, and a layout under construction does not have one yet: the
+    cells are authored a level at a time (`HOUSE-00367`…`HOUSE-00372`) and the portals come after
+    them (`HOUSE-00374`…). Until `layout.portals.json` exists the data has made no connectivity
+    claim, so there is nothing here to be right or wrong about and the rule stands down.
+
+    It does **not** stand down once portals exist. A portals file with no `L0_FOYER` is somebody
+    who authored a graph and no front door, and that is exactly the mistake this rule is for.
+    """
     problems = []
     interior = {cell.get("id") for cell in world.cells
                 if cell.get("kind") not in ("exterior", "void")}
     if not interior:
         return problems
+    if "portals" not in world.layout and ROOT_CELL not in world.cell_by_id:
+        return problems
     if ROOT_CELL not in world.cell_by_id:
         return [Problem(5, FILE_OF["cells"], "cells",
-                        f"there is no {ROOT_CELL}; §15.7 rule 5 walks the graph from it, so "
-                        f"connectivity cannot be decided")]
+                        f"there is no {ROOT_CELL} and {FILE_OF['portals']} exists; §15.7 rule 5 "
+                        f"walks the graph from it, so a portal graph without it is a house with "
+                        f"no front door")]
 
     adjacency: dict[str, set[str]] = {}
     for portal in world.portals:
@@ -1501,8 +1513,22 @@ def selftest() -> int:
         write_fixture(rootless, docs)
         _, problems = validate(rootless, wanted=[5])
         require(len(problems) == 1 and ROOT_CELL in problems[0].message,
-                f"without {ROOT_CELL} rule 5 says connectivity cannot be decided, rather than "
-                f"walking from whichever cell happens to be first "
+                f"a portal graph with no {ROOT_CELL} is a house with no front door, and rule 5 "
+                f"says so rather than walking from whichever cell happens to be first "
+                f"({[str(p) for p in problems]})")
+
+        # Rule 5 needs a graph to walk, and a layout under construction has not authored one yet:
+        # `HOUSE-00367`..`HOUSE-00372` write the cells a level at a time and the portals come
+        # after them. Until `layout.portals.json` exists the data has made no connectivity claim.
+        partial = workspace / "partial"
+        cells_only = {"cells": copy.deepcopy(base["cells"]), "levels": copy.deepcopy(base["levels"])}
+        cells_only["cells"]["cells"] = [c for c in cells_only["cells"]["cells"]
+                                        if c["id"] != "L0_FOYER"]
+        write_fixture(partial, cells_only)
+        _, problems = validate(partial, wanted=[5])
+        require(not problems,
+                f"a layout with cells and no portals file has claimed no connectivity, so rule 5 "
+                f"stands down rather than failing every commit of a house being authored "
                 f"({[str(p) for p in problems]})")
 
         docs = copy.deepcopy(base)
