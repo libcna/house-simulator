@@ -4676,8 +4676,36 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
       finding: an id needs the category **and** the file name. The publisher reuses names across
             packs, so `Footstep_Grass_Walk_01.wav` exists in more than one, and a manifest id built
             from the name alone would collide.
-- [ ] HOUSE-00280 — Map the NOX footstep packs onto the 20 game surfaces; record which 8 surfaces are unserved
+- [x] HOUSE-00280 — Map the NOX footstep packs onto the 20 game surfaces; record which 8 surfaces are unserved
       dep: HOUSE-00279 · sys: audio · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/assets/footstep_map.py` and the generated
+            `docs/asset-selection/footstep-surfaces.md`; `--check` is now a gate in
+            `run_checks.sh`, because the map is counted from the manifest and a stale one is
+            `HOUSE-00281` sourcing the wrong list. 20 selftest claims.
+      finding: **the task title says 8 unserved surfaces and the measurement says 9.** §63.4's
+            "12 of the 20 surfaces" is a count of *packs*; §62.4 requires **≥ 6 walk, ≥ 6 run,
+            ≥ 2 land per surface**, and counted that way it is **11 of 20**. The difference is
+            `water`: it has a pack, 6 walk and 6 land, and **5 run**. This is not a selection
+            artefact — `nox_select.py` took 5 of 5 against a cap of 6, so **NOX ships five water
+            run samples in the whole collection** and no choice among them could have reached six.
+            `HOUSE-00281`'s row is therefore **113 samples, not 112**: its eight surfaces plus one
+            water run variant.
+      finding: `jump`, `land` and `jump-land` are **the same sound under three names** — the files
+            under all three are `..._Jump_Land_NN.wav`, and the packs simply disagree about what to
+            call the directory. Counting them as three actions would have shown every surface
+            comfortably meeting a land minimum it had never been tested against. `jump-start` is
+            the take-off, which §62.4 does not ask for, and `foley` is cloth movement and is not a
+            footstep; neither counts towards a minimum, and the take-offs are reported as a bonus.
+      finding: **the `Wood` pack maps to nothing, deliberately.** §63.4 records it as
+            exterior-flavoured, so it is not interior `hardwood`, and §62.4 has no exterior timber
+            surface. It is reported as an unmapped pack rather than quietly assigned — a
+            deck-flavoured creak under a living-room floor is the sort of thing nobody notices in a
+            spreadsheet and everybody notices in the room.
+      finding: one pack can serve two surfaces and six packs can serve one. `DirtyGround` covers
+            both `dirt` and `soil`; the `footstep-exterior/*` packs are **weather variants of
+            surfaces that already exist** — wet and frozen gravel are gravel, and §38 is explicit
+            that the three snow packs all feed the one `snow` set — so they add variants to their
+            base surface rather than becoming surfaces of their own.
 - [ ] HOUSE-00281 — Grouped: source the 8 missing footstep surfaces (carpet, concrete, interior hardwood, 3 stair variants, asphalt, bluestone) — ≥ 6 walk + 6 run + 2 land each, CC0
       dep: HOUSE-00272, HOUSE-00280 · sys: audio · plat: TOOL · pri: MUST
       accept: 8 surfaces × ≥ 14 samples, manifested, converted, auditioned

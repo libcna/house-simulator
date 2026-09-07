@@ -111,6 +111,9 @@ run_gate "budget"     python3 tools/ci/budget_report.py --check
 # graph, so a stage added without regenerating it is a documented order that is no longer
 # the order. This is the same idiom the budget report uses, for the same reason.
 run_gate "content-doc" python3 tools/ci/build_content.py --check-docs
+# `HOUSE-00280`. The surface map is counted from the manifest, so importing or dropping a
+# footstep sample changes it. A stale map is HOUSE-00281 sourcing the wrong list.
+run_gate "footsteps" python3 tools/assets/footstep_map.py --check
 # Every glTF in the tree must import cleanly, warnings included (`HOUSE-00186`). Cheap while the
 # tree is small; when it is not, it moves to the content job.
 run_gate "gltf"       python3 tools/assets/gltf_validate.py
