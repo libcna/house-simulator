@@ -1551,7 +1551,9 @@ surprise. This keeps the data declarative without inventing a VM.
    has no level difference to check against (widened 2026-09-07 by `HOUSE-00379`);
 9. plumbing: every fixture's cell appears in a declared stack;
 10. realism checks (§66 of the brief; §70.5 here): door heights, ceiling heights, counter heights,
-    stair `2R + G`, human/pet/car scale, capsule clearance through every portal;
+    stair `2R + G`, human/pet/car scale, capsule clearance through every portal, and every light
+    inside the cell it names — a fixture 30 m from its room resolves perfectly and lights nothing
+    (added 2026-09-08 by `HOUSE-00383`);
 11. every interactable's `focus.point` is inside its cell and reachable by a 2.5 m ray from a
     standing eye position on the room's floor — a **reachability proof**, not an assumption.
 
@@ -5134,7 +5136,7 @@ Deterministic, so every test and screenshot starts identically.
 | Garage door | Closed. Garage side door closed. Garage↔mudroom door closed. |
 | Interior doors | All closed, **except three**, listed explicitly so the initial state is reproducible: `DOOR_L1_MASTER` at 0.35, `DOOR_L0_PANTRY` at 1.00, `DOOR_L2_ATTIC` at 0.00 (closed — the attic is a discovery) |
 | Windows | All closed **except** `WIN_L1_MASTER_N2` at 0.50 — so weather audio through an open window is testable from the first minute |
-| Lights | **All 84 groups off.** The porch lantern and the street lights are on their dusk sensor and are therefore off at 09:20. |
+| Lights | **All 134 groups off.** The porch lanterns and the street lights are on their dusk sensor and are therefore off at 09:20. (84 → 134 corrected 2026-09-08; see §28.2.) |
 | Refrigerator | Closed, full (24 + 8 items), compressor idle, next cycle in 7 sim minutes |
 | Taps, showers | All off; all plugs out; baths empty |
 | Toilets | All clean, lids **down**, seats down, paper full |

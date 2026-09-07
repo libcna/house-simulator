@@ -453,6 +453,7 @@
       "acoustic": { "absorption": 0.55, "reverbHint": "outdoor_sheltered" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 0.70 },
+      "lightGroups": ["LG_L0_PORCH_LANTERN"],
       "residencyPack": "house-l0", "visibilityHint": "open"
     },
 
@@ -1022,6 +1023,7 @@
       "acoustic": { "absorption": 0.90, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
+      "lightGroups": ["LG_EXT_STREET"],
       "residencyPack": "exterior", "visibilityHint": "open"
     },
     {
@@ -1032,6 +1034,7 @@
       "acoustic": { "absorption": 0.90, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
+      "lightGroups": ["LG_EXT_WALK_PATH"],
       "residencyPack": "exterior", "visibilityHint": "open"
     },
     {
@@ -1079,6 +1082,7 @@
       "acoustic": { "absorption": 0.88, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "SE", "exposure": 1.00 },
+      "lightGroups": ["LG_EXT_DRIVEWAY_FLOOD"],
       "residencyPack": "exterior", "visibilityHint": "open"
     },
     {
@@ -1130,6 +1134,7 @@
       "acoustic": { "absorption": 0.86, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 0.96 },
+      "lightGroups": ["LG_EXT_TERRACE_MAIN"],
       "residencyPack": "exterior", "visibilityHint": "open"
     },
     {
@@ -1184,6 +1189,7 @@
       "acoustic": { "absorption": 0.30, "reverbHint": "tiny_hard" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "E", "exposure": 0.18 },
+      "lightGroups": ["LG_EXT_SHED_MAIN"],
       "residencyPack": "exterior", "visibilityHint": "opaque"
     },
     {
@@ -1225,6 +1231,7 @@
       "acoustic": { "absorption": 0.96, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
+      "lightGroups": ["LG_EXT_STREET"],
       "residencyPack": "neighbourhood", "visibilityHint": "open"
     },
 

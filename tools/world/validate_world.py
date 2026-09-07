@@ -1243,6 +1243,35 @@ def rule_10_realism(world: World) -> list[Problem]:
                 10, FILE_OF["portals"], f"portals/{index}/rect/v",
                 f"portal {portal.get('id')}: {height:.3f} m high, under the player capsule's "
                 f"{CAPSULE_HEIGHT:.2f} m, and it is not marked crouch"))
+    # A light is inside the cell it names. Nothing else says so: rule 6 checks that the cell
+    # exists, and a fixture 30 m from it resolves perfectly while lighting nothing and baking a
+    # lightmap for a room it is not in. `HOUSE-00383` is where it would have bitten -- nine street
+    # lights spread over 200 m of road, only one of which is over the plot.
+    for index, light in enumerate(world.lights):
+        cell = world.cell_by_id.get(light.get("cell"))
+        position = light.get("position")
+        if cell is None or not isinstance(position, list) or len(position) != 3:
+            continue
+        try:
+            x, y, z = (float(value) for value in position)
+        except (TypeError, ValueError):
+            continue
+        inside = any(x0 - PLANE_TOLERANCE <= x <= x1 + PLANE_TOLERANCE
+                     and z0 - PLANE_TOLERANCE <= z <= z1 + PLANE_TOLERANCE
+                     for x0, x1, z0, z1 in boxes_of(cell))
+        if not inside:
+            problems.append(Problem(
+                10, FILE_OF["lights"], f"lights/{index}/position",
+                f"light {light.get('id')} is at x {x:.2f} z {z:.2f}, which is not inside cell "
+                f"{cell.get('id')}'s footprint"))
+            continue
+        extent = world.extent(cell)
+        if extent is not None and not (extent[0] - PLANE_TOLERANCE <= y
+                                       <= extent[1] + PLANE_TOLERANCE):
+            problems.append(Problem(
+                10, FILE_OF["lights"], f"lights/{index}/position",
+                f"light {light.get('id')} is at y {y:.2f}, outside cell {cell.get('id')}'s "
+                f"vertical extent {extent[0]:.2f}..{extent[1]:.2f}"))
     return problems
 
 
@@ -1291,8 +1320,6 @@ def _crosses_portal(eye: tuple[float, float, float], focus: tuple[float, float, 
     v = eye[1] + (focus[1] - eye[1]) * t
     return (u0 - PLANE_TOLERANCE <= u <= u1 + PLANE_TOLERANCE
             and v0 - PLANE_TOLERANCE <= v <= v1 + PLANE_TOLERANCE)
-
-
 def rule_11_reachable(world: World) -> list[Problem]:
     """Every interactable's `focus.point` is in its cell and reachable from a standing eye.
 
@@ -1891,6 +1918,27 @@ def selftest() -> int:
         require(any("1.98" in x.message for x in problems),
                 f"a 1.60 m interior door is caught too -- the exemption is the declared `type`, "
                 f"never the measurement ({[str(x) for x in problems]})")
+
+        # A light is inside the cell it names. Rule 6 checks that the cell exists, and a fixture
+        # 30 m away resolves perfectly while lighting nothing and baking a lightmap for a room it
+        # is not in. `HOUSE-00383`'s nine street lights are spread over 200 m of road and only one
+        # of them is over the plot, so the two had to be told apart.
+        adrift = copy.deepcopy(base)
+        row(adrift, "lights", "LIGHT_HALL")["position"] = [30.0, 3.10, 7.0]
+        stranded = workspace / "light-adrift"
+        write_fixture(stranded, adrift)
+        _, problems = validate(stranded, wanted=[10])
+        require(any("not inside cell" in x.message for x in problems),
+                f"a light outside its cell's footprint is caught ({[str(x) for x in problems]})")
+
+        floating = copy.deepcopy(base)
+        row(floating, "lights", "LIGHT_HALL")["position"] = [0.0, 40.0, 7.0]
+        aloft = workspace / "light-aloft"
+        write_fixture(aloft, floating)
+        _, problems = validate(aloft, wanted=[10])
+        require(any("vertical extent" in x.message for x in problems),
+                f"and one above its ceiling too -- the footprint is right and the height is not "
+                f"({[str(x) for x in problems]})")
 
         @mutation(11, "a light switch outside the room it is in")
         def _(docs):

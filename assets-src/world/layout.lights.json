@@ -2042,6 +2042,191 @@
       "colorK": 2700, "intensityLm": 800.0, "range": 5.36,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+    },
+    // ================================================================== the exterior lights
+    // `HOUSE-00383`. §53's list, in full: 2 porch lanterns, 1 garage flood, 2 rear terrace
+    // lights, 4 path lights, 1 shed light and the 9 street lights. 19 fixtures in 6 groups.
+    //
+    // These are the only lights in the file whose height is measured from the ground rather than
+    // down from a ceiling: an exterior cell's `yOverride` top is the sky at +20, and a lantern
+    // 0.02 m below the sky is not a lantern. Each position below states its height above the
+    // cell's own floor.
+    //
+    // The porch lanterns and the street lights are on §53's dusk sensor with a per-fixture random
+    // offset, so `defaultOn` is false for them the way it is for everything else: at §65.6's
+    // 09:20 start they are off because it is daylight, not because somebody switched them off.
+    //
+    // The neighbours' porch lights are NOT here. §53 lists them, and their positions are the
+    // positions of N1-N60, which `HOUSE-00391` authors; placing them first would be inventing
+    // sixty houses to hang them on.
+
+    // ---- LG_L0_PORCH_LANTERN x2 -- either side of the front door, on the dusk sensor
+    {
+      "id": "LIGHT_L0_PORCH_LANTERN_1", "cell": "L0_PORCH", "group": "LG_L0_PORCH_LANTERN",
+      "type": "point", "position": [-0.90, 2.62, -14.25],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_L0_PORCH_LANTERN_2", "cell": "L0_PORCH", "group": "LG_L0_PORCH_LANTERN",
+      "type": "point", "position": [0.90, 2.62, -14.25],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+    },
+
+    // ---- LG_EXT_DRIVEWAY_FLOOD x1 -- over the garage door, aimed down the drive and not at the
+    // ---- street: +Z is south, so the direction leans away from the house as well as down
+    {
+      "id": "LIGHT_EXT_DRIVEWAY_FLOOD_1", "cell": "EXT_DRIVEWAY", "group": "LG_EXT_DRIVEWAY_FLOOD",
+      "type": "spot", "position": [13.20, 3.10, -13.25],
+      "direction": [0.0, -0.71, 0.71], "coneInnerDeg": 40.0, "coneOuterDeg": 70.0,
+      "colorK": 4000, "intensityLm": 3000.0, "range": 14.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": true, "bakedIntoLightmap": false, "defaultOn": false
+    },
+
+    // ---- LG_EXT_TERRACE_MAIN x2 -- on the sunroom's north wall, over the terrace
+    {
+      "id": "LIGHT_EXT_TERRACE_MAIN_1", "cell": "EXT_TERRACE", "group": "LG_EXT_TERRACE_MAIN",
+      "type": "point", "position": [-2.50, 2.75, -32.15],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 350.0, "range": 7.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_TERRACE_MAIN_2", "cell": "EXT_TERRACE", "group": "LG_EXT_TERRACE_MAIN",
+      "type": "point", "position": [2.50, 2.75, -32.15],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 350.0, "range": 7.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+    },
+
+    // ---- LG_EXT_WALK_PATH x4 -- §11.4's "4 low path lights" along the bluestone walk, 0.50 m
+    // ---- bollards alternating either side of it
+    {
+      "id": "LIGHT_EXT_WALK_PATH_1", "cell": "EXT_WALK", "group": "LG_EXT_WALK_PATH",
+      "type": "point", "position": [-0.75, 0.50, -9.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2700, "intensityLm": 120.0, "range": 4.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_WALK_PATH_2", "cell": "EXT_WALK", "group": "LG_EXT_WALK_PATH",
+      "type": "point", "position": [0.75, 0.50, -6.60],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2700, "intensityLm": 120.0, "range": 4.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_WALK_PATH_3", "cell": "EXT_WALK", "group": "LG_EXT_WALK_PATH",
+      "type": "point", "position": [-0.75, 0.50, -3.70],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2700, "intensityLm": 120.0, "range": 4.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_WALK_PATH_4", "cell": "EXT_WALK", "group": "LG_EXT_WALK_PATH",
+      "type": "point", "position": [0.75, 0.50, -0.80],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2700, "intensityLm": 120.0, "range": 4.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+    },
+
+    // ---- LG_EXT_SHED_MAIN x1 -- one bulb under the shed's 2.35 m roof
+    {
+      "id": "LIGHT_EXT_SHED_MAIN_1", "cell": "EXT_SHED", "group": "LG_EXT_SHED_MAIN",
+      "type": "point", "position": [-18.20, 2.25, -42.20],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 600.0, "range": 3.30,
+      "fixtureProp": null, "emissiveMaterialSlot": "bulb",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+    },
+
+    // ---- LG_EXT_STREET x9 -- §11.4's street lights on the dusk sensor, 25 m apart along the
+    // ---- kerb at Z +1.50 and 8.00 m up. One of them stands in front of the house, in `EXT_ROAD`;
+    // ---- the other eight are past the plot boundary and belong to `EXT_WORLD`, which is where
+    // ---- the road actually continues.
+    {
+      "id": "LIGHT_EXT_STREET_1", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
+      "type": "point", "position": [-100.00, 8.00, 1.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_STREET_2", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
+      "type": "point", "position": [-75.00, 8.00, 1.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_STREET_3", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
+      "type": "point", "position": [-50.00, 8.00, 1.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_STREET_4", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
+      "type": "point", "position": [-25.00, 8.00, 1.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_STREET_5", "cell": "EXT_ROAD", "group": "LG_EXT_STREET",
+      "type": "point", "position": [0.00, 8.00, 1.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_STREET_6", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
+      "type": "point", "position": [25.00, 8.00, 1.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_STREET_7", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
+      "type": "point", "position": [50.00, 8.00, 1.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_STREET_8", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
+      "type": "point", "position": [75.00, 8.00, 1.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+    },
+    {
+      "id": "LIGHT_EXT_STREET_9", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
+      "type": "point", "position": [100.00, 8.00, 1.50],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
     }
   ]
 }

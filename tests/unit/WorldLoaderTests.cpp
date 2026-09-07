@@ -3092,10 +3092,10 @@ namespace
         const auto lights = world::WorldLoader::LoadLights(directory, contents);
         ASSERT_TRUE(lights) << lights.Error().ToString();
 
-        // `HOUSE-00381` authored `B1` and `L0`, `HOUSE-00382` the three upper floors;
-        // `HOUSE-00383` adds the exterior. §28.2 said 169 fixtures in 84 groups and §13's own
+        // `HOUSE-00381` authored `B1` and `L0`, `HOUSE-00382` the three upper floors and
+        // `HOUSE-00383` §53's exterior. §28.2 said 169 fixtures in 84 groups, and §13's own
         // per-room column never added up to that.
-        EXPECT_EQ(contents.lights.size(), 220U);
+        EXPECT_EQ(contents.lights.size(), 239U);
         std::map<cnahouse::util::Id, std::set<cnahouse::util::Id>> groupsIn;
         for (const world::Light& light : contents.lights)
         {
@@ -3109,7 +3109,7 @@ namespace
             (void)cell;
             distinct.insert(groups.begin(), groups.end());
         }
-        EXPECT_EQ(distinct.size(), 128U) << "§13's Lights column, less the porch";
+        EXPECT_EQ(distinct.size(), 134U) << "§13's Lights column plus §53's six exterior groups";
 
         // §15.7 rule 6's index, asserted by the other implementation: a cell's `lightGroups` is
         // exactly the groups its own lights belong to, and §28.1 walks it once per frame.

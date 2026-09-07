@@ -5823,8 +5823,31 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             strips washing the library's floor-to-ceiling shelves, a bare bulb on a pull cord at
             the attic stair because §13.5 says so, two bedside lamps in the master because a king
             bed has two sides.
-- [ ] HOUSE-00383 — Author the exterior lights: porch, garage flood, terrace, path, shed, plus the street and neighbour lights
+- [x] HOUSE-00383 — Author the exterior lights: porch, garage flood, terrace, path, shed, plus the street lights
       dep: HOUSE-00381 · sys: world · plat: TOOL · pri: MUST
+      finding: **a light could name any cell in the house and sit anywhere.** Rule 6 checked that
+            the cell exists; a fixture 30 m away resolved perfectly while lighting nothing and
+            baking a lightmap for a room it is not in. Rule 10 now checks a light's position
+            against its cell's footprint **and** its vertical extent. This task is where it would
+            have bitten: the nine street lights are spread over 200 m of road, one of them over
+            the plot in `EXT_ROAD` and eight past the boundary in `EXT_WORLD`, and getting that
+            wrong is invisible until a lightmap bakes.
+      finding: **§65.6's initial state says "all 84 groups off"** — the same count §28.2 and §53
+            carried. 134 with the exterior authored. Corrected there too, so `HOUSE-00395` starts
+            from a number that exists.
+      note: 19 fixtures in 6 groups, exactly §53's list: 2 porch lanterns, 1 garage flood aimed
+            down the drive rather than at the street, 2 terrace lights on the sunroom's north
+            wall, §11.4's 4 bluestone path bollards, 1 shed bulb and the 9 street lights.
+      note: these are the only fixtures in the file whose height is measured **up from the
+            ground**. An exterior cell's `yOverride` top is the sky at +20, and a lantern 0.02 m
+            below the sky is not a lantern; every exterior position states its height above the
+            cell's own floor instead.
+      note: **the neighbours' porch lights are deliberately not here**, and this task's title is
+            corrected to say so. §53 lists them, and their positions are the positions of N1-N60,
+            which `HOUSE-00391` authors. Placing them first would mean inventing sixty houses to
+            hang them on; `HOUSE-00391` adds them when the houses exist.
+      note: the whole house now holds **239 fixtures in 134 groups**, asserted through the C++
+            loader by `AuthoredWorldTest` alongside rule 6's per-cell index.
 - [ ] HOUSE-00384 — Author the switch plates: position, gang count, group mapping, including the two three-way pairs
       dep: HOUSE-00382 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00385 — Author `layout.materials.json`: the material class table of §22.2 with all fields

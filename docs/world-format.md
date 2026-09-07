@@ -655,7 +655,8 @@ build**:
    is a magnitude, so a flight authored downward is the same flight;
 9. every plumbing fixture's cell appears in a declared stack;
 10. realism: door heights, ceiling heights, counter heights, stair `2R + G`, human/pet/car scale,
-    and capsule clearance through every portal;
+    capsule clearance through every portal, and every light's position inside the footprint and
+    vertical extent of the cell it names (`HOUSE-00383`);
 11. every interactable's `focus.point` is inside its cell and reachable by a 2.5 m ray from a
     standing eye position on the room's floor — a reachability **proof**, not an assumption.
 
