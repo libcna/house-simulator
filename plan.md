@@ -3295,8 +3295,58 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       accept: every wall implied by two abutting cells exists once, at the thickness its neighbours
             imply, with a hole at every portal and no wall inside a single cell; the file reads
             back byte-for-byte through its own reader; two builds of one layout are identical
-- [ ] HOUSE-00211 — `tools/world/build_nav.py`: layout → the pet waypoint graph with perches
+- [x] HOUSE-00211 — `tools/world/build_nav.py`: layout → the pet waypoint graph with perches
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `tools/world/build_nav.py` and `docs/nav-format.md`, the normative `CNAV`
+            version 1 spec. 54 selftest claims; `--selftest` runs in CI. 19 injected bugs, all
+            caught — again only after the claims were rewritten: **six of the nineteen were missed
+            first time**, and five of those six were missed for the same reason, that the
+            verifying claim called the very function it was meant to be checking. A selftest that
+            asserts "no edge crosses a wall" with the tool's own `segment_clearance` agrees with
+            the tool however broken that function is.
+      finding: **the clearance test is what this tool is, and it is not a ray.** §60.3 says the dog
+            "is a capsule (r 0.22, h 0.60) and is genuinely collided". A ray between two nodes goes
+            through the 10 cm gap between the sofa and the wall; the graph then holds an edge the
+            steering can never take, so the dog jams against the sofa while the planner insists the
+            route is fine. Measured on the fixture: a 0.30 m gap gives 0.15 m of clearance —
+            refused for the dog, allowed for the cat. Two species, two radii, two graphs over one
+            node set.
+      finding: **the query is a capsule AXIS, from r to h−r, never a point and never 0…h.** A point
+            probe has no right height: at the feet it misses a wall shelf, at the chest it sails
+            over the 0.25 m bench a dog obviously cannot cross. Testing 0…h and then comparing to r
+            inflates the animal by its own radius at each end, refusing it a doorway it walks under.
+            Both were live bugs here, and only the second-round injections found them: the first
+            selftest measured clearance with the same broken helper it was checking. Against an OBB
+            the answer is exact rather than sampled — `build_collision`'s OBBs are yawed about Y
+            only, so undoing the yaw leaves the query vertical and the distance separates into a
+            2-D clamp in x/z and a 1-D interval gap in y.
+      finding: **not every portal is a route, and getting it wrong breaks the graph rather than
+            thinning it.** A doorway node at floor level under a 0.9 m window sill is *inside* the
+            sill, which is a wall piece from `HOUSE-00210`, so it fails its own clearance test and
+            takes the two cells' subgraphs apart — a disconnected house whose cause is a node
+            nobody asked for. The rule is **geometry, not `kind`**: bottom edge at the floor,
+            taller than the animal, wider than 2r. The same three numbers settle a cased opening,
+            a door, a slider and a garage door, where a list of kinds is a list someone must
+            remember to extend. Rejected portals are reported by name.
+      finding: floors and ceilings are **excluded** from the blocking set. A floor is not an
+            obstacle to something standing on it; counting it gives every node in the house zero
+            clearance and no graph at all.
+      finding: the cross-portal edge must be clearance-tested like any other. Joining the doorway
+            to the *nearest* node in the far cell is wrong — a node just around the corner is close
+            in metres and behind a wall — so candidates are tried in distance order and the first
+            the animal actually fits wins.
+      finding: the room-centre node is the clearance-tested candidate **nearest** the cell's
+            centroid, not the centroid. An L-shaped room's centroid can be outside the room
+            entirely, and a centroid inside the sofa is not somewhere an animal can stand. The
+            fixture's sofa sits on the lounge centroid precisely so this is measured rather than
+            asserted.
+      finding: the cat has **no capsule anywhere in the architecture** — §61 gives it clips,
+            states, parameters and a size (0.25 m at the shoulder, 0.46 m body) but never a radius.
+            r 0.11, h 0.25 is derived from that size here, once, in the open, and travels in the
+            file, rather than being guessed separately by navigation, steering and collision.
+      accept: no edge offers a route the animal's own capsule does not fit; a window never becomes
+            a doorway node; every cell reachable through open portals is in one component per
+            species; the file reads back through its own reader; two builds are byte-identical
 - [ ] HOUSE-00212 — `tools/world/build_coverage.py`: the rain/roof coverage height field on a 0.5 m grid
       dep: HOUSE-00210 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00213 — `tools/world/build_skyexposure.py`: per-cell sky exposure and per-orientation facade exposure by ray casting

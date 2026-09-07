@@ -1664,6 +1664,7 @@ cna-house/
 │   ├── xna-deviations.md            ← the Tier-P project-owned register (§4.3)
 │   ├── anim-format.md               ← the project-owned `.chanim` format (§47.0)
 │   ├── collision-format.md          ← the project-owned `collision.bin` format (§49.2)
+│   ├── nav-format.md                ← the project-owned `nav.bin` pet graph (§60.3)
 │   ├── content-authoring.md
 │   ├── world-format.md
 │   ├── performance-log.md

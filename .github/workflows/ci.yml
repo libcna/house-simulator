@@ -122,6 +122,15 @@ jobs:
           python3 tools/world/layout_io.py --selftest
           python3 tools/world/build_collision.py --selftest
 
+      - name: The pet graph must not offer a route the animal does not fit
+        working-directory: cna-house
+        # `HOUSE-00211`. The fixture adds furniture on the lounge centroid and a window beside the
+        # door, because both are rules that an empty room cannot test: "chosen to avoid furniture"
+        # is vacuous with nothing to avoid, and a window is the portal that must NOT become a
+        # doorway node. Edge tests are the animal's capsule axis against the collision world, so
+        # this step also re-exercises `build_collision` end to end.
+        run: python3 tools/world/build_nav.py --selftest
+
       - name: The stride measurement must survive both animation conventions
         working-directory: cna-house
         # `HOUSE-00194`. The fixture is an analytically exact walk -- 1.4 m of stride over 1.0 s --
