@@ -3165,9 +3165,61 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       dep: HOUSE-00193 · sys: content · plat: TOOL · pri: SHOULD
 - [ ] HOUSE-00221 — `tools/assets/dull_variants.py`: produce the low-passed "dull" variants for the 22 muffle-critical sounds
       dep: HOUSE-00193 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00223 — `tools/assets/anim_extract.py`: read a source `.glb` and write its `.chanim` sidecar — skeleton in skin-joint order, bind and inverse-bind poses, every clip as per-bone TRS keyframe tracks
+- [x] HOUSE-00223 — `tools/assets/anim_extract.py`: read a source `.glb` and write its `.chanim` sidecar — skeleton in skin-joint order, bind and inverse-bind poses, every clip as per-bone TRS keyframe tracks
       dep: HOUSE-00166, HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
-      files: tools/assets/anim_extract.py
+      files: tools/assets/anim_extract.py, tests/unit/ChanimRoundTripTests.cpp
+      note: (2026-09-07) `tools/assets/anim_extract.py` with `--selftest` and `--make-fixture`,
+            plus `ChanimRoundTripTests` — **seven C++ tests that read what the Python tool wrote,
+            with the real `ChanimReader`.** The fixture is generated at build time by CMake rather
+            than committed, for the same reason no compiled content is: a checked-in binary produced
+            by a tool in the same repository goes stale against that tool unnoticed. The Python
+            selftest runs in CI.
+      finding: **the round-trip test is the only one that could exist, and it did not.**
+            `ChanimReaderTests` (`HOUSE-00167`) builds every byte by hand, deliberately, because
+            when it was written the writer did not exist — which makes it an excellent test of the
+            reader and **no test at all of the two agreeing**. Nine injected writer bugs prove the
+            point: transposed matrices, inverse binds off by one joint, `w`-first quaternions, a
+            `boneFirstKey` off by one, alphabetically sorted joints, a dropped stride, bind and
+            inverse-bind swapped — every one of them passes `ChanimReaderTests` and fails in the
+            game. All nine now fail the round trip.
+      finding: **glTF's column-major array and XNA's row-major array are the SAME sixteen floats.**
+            XNA's `Matrix` is the transpose of glTF's (row-vector against column-vector), and
+            transposing a column-major array yields a row-major array of the transpose — so
+            `inverseBindMatrices` is copied straight through and translation lands at `M41..M43`,
+            which is elements 12–14 either way. "Just copy it" is either right for a reason or
+            wrong forever, so the C++ test asserts the fourth ROW carries the translation and the
+            fourth COLUMN is (0, 0, 0, 1).
+      finding: **an identity quaternion cannot show a `w`-first write**, and the first fixture used
+            one. An injected writer that emitted `w` first passed every test in this repository.
+            The hips now end `walk_fwd` at 40° about the normalised axis (1, 2, 3) — four distinct
+            components — and both sides assert the order.
+      finding: **a bone animated to exactly its bind pose is written with NO KEYS AT ALL.** §3.3
+            makes an empty range legal and says such a bone holds its bind pose, and on a real rig
+            most bones in most clips do exactly that. The fixture animates `RightUpLeg` to its own
+            bind pose so the case is exercised by a bone that HAS channels — a bone with none has
+            nothing to drop and proves nothing.
+      finding: decimation is greedy and its correctness is asserted by **reconstruction, not by a
+            key count**: what survives must reproduce every original sample to within the tolerance
+            it was given. Measured on a curved fixture: 31 keys to 14, worst error 0.0199 m against
+            a 0.02 m tolerance. Rotation is compared as an **angle between quaternions** because
+            `q` and `-q` are the same rotation and a component distance calls them 180° apart.
+      finding: keys are sampled at the **union of that bone's own channel times**, not on a
+            resampling grid. The source's times are where the author put information; a uniform
+            grid adds keys where there is nothing to say and loses the exact instant of a contact.
+            The fixture samples the hips' translation at 20 Hz and its rotation at 5 Hz so the
+            union is exercised rather than a single shared grid.
+      finding: `strideLength` and `footPlants` are **consumed from `measure_stride.py`**
+            (`HOUSE-00194`), never measured a second time — which is what stops two implementations
+            of §47.4's one number drifting apart. A measurement that fails leaves the stride at 0,
+            which §47.4 already defines as "not locomotion", and says so in a warning.
+      finding: `check()` re-asserts every condition `docs/anim-format.md` §4 makes a reader reject,
+            **before** writing. A writer that can emit a file its own reader refuses is a writer
+            that will, and the failure then surfaces at load time in the game rather than in the
+            build that produced it. Eight of those conditions are shown to fire.
+      accept: exact skeleton order, bind and inverse-bind data, clips, per-bone TRS tracks,
+            decimation tolerance, stride metadata from `HOUSE-00194`, foot-plant markers,
+            binary/versioning validation and deterministic bytes — all verified through the real
+            C++ reader rather than against the writer's own idea of the format
       accept: (1) deterministic output, hash recorded in the manifest; (2) keyframes decimated only within a stated tolerance; (3) stride length (`measure_stride.py`) and foot-plant markers written into the same file
 - [ ] HOUSE-00224 — `tools/assets/skin_split.py`: split a multi-skin source `.glb` into one file per skin, record each part's attachment bone in the manifest, and extend `gltf_validate.py` to **reject** any `.glb` entering the build that declares more than one skin
       dep: HOUSE-00076, HOUSE-00186 · sys: content · plat: TOOL · pri: MUST

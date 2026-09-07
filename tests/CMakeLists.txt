@@ -22,6 +22,35 @@ if(NOT TARGET gtest_main)
     return()
 endif()
 
+# `HOUSE-00223`. The `.chanim` round-trip fixture, generated at BUILD time rather than committed:
+# a checked-in binary produced by a tool in the same repository goes stale against that tool without
+# anyone noticing, which is the whole reason no compiled content is committed either.
+#
+# `anim_extract.py` writes it and `ChanimRoundTripTests` reads it with the real C++ reader. Neither
+# side can make that check alone: `ChanimReaderTests` builds its bytes by hand, so a writer that
+# emitted transposed matrices or a `boneFirstKey` off by one would pass every other test here.
+set(CNAHOUSE_ANIM_FIXTURE "${CMAKE_BINARY_DIR}/test-fixtures/anim/character.chanim")
+find_program(CNAHOUSE_PYTHON3 NAMES python3 python)
+if(CNAHOUSE_PYTHON3)
+    set(_anim_source "${CMAKE_BINARY_DIR}/test-fixtures/anim/character.glb")
+    add_custom_command(
+        OUTPUT "${CNAHOUSE_ANIM_FIXTURE}"
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_BINARY_DIR}/test-fixtures/anim"
+        COMMAND "${CNAHOUSE_PYTHON3}" "${CMAKE_SOURCE_DIR}/tools/assets/anim_extract.py"
+                --make-fixture "${CMAKE_BINARY_DIR}/test-fixtures/anim"
+        COMMAND "${CNAHOUSE_PYTHON3}" "${CMAKE_SOURCE_DIR}/tools/assets/anim_extract.py"
+                "${_anim_source}" -o "${CNAHOUSE_ANIM_FIXTURE}"
+        DEPENDS "${CMAKE_SOURCE_DIR}/tools/assets/anim_extract.py"
+                "${CMAKE_SOURCE_DIR}/tools/assets/measure_stride.py"
+                "${CMAKE_SOURCE_DIR}/tools/assets/gltf_io.py"
+        COMMENT "Generating the .chanim round-trip fixture with anim_extract.py"
+        VERBATIM)
+    add_custom_target(cnahouse_anim_fixture DEPENDS "${CNAHOUSE_ANIM_FIXTURE}")
+else()
+    message(WARNING "cna-house: no python3, so the .chanim round-trip fixture is not generated "
+                    "and ChanimRoundTripTests will not build.")
+endif()
+
 function(cnahouse_test_target kind)
     set(_target "cnahouse_${kind}_tests")
     file(GLOB_RECURSE _sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${kind}/*.cpp")
@@ -44,7 +73,11 @@ function(cnahouse_test_target kind)
     target_compile_definitions(${_target} PRIVATE
         CNAHOUSE_TEST_CONTENT_ROOT="${CMAKE_BINARY_DIR}/content"
         CNAHOUSE_TEST_EFFECT_ROOT="${CMAKE_BINARY_DIR}/content-fx"
-        CNAHOUSE_TEST_OUTPUT_DIR="${CMAKE_BINARY_DIR}/test-output")
+        CNAHOUSE_TEST_OUTPUT_DIR="${CMAKE_BINARY_DIR}/test-output"
+        CNAHOUSE_TEST_ANIM_FIXTURE="${CNAHOUSE_ANIM_FIXTURE}")
+    if(TARGET cnahouse_anim_fixture)
+        add_dependencies(${_target} cnahouse_anim_fixture)
+    endif()
     set_target_properties(${_target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
     # The working directory is the REPOSITORY ROOT, not the build directory, so a test's fixture
     # paths are stable wherever the build tree lives. This is not a detail: running CNA's own suites

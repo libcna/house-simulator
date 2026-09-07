@@ -86,6 +86,14 @@ jobs:
         # place and four malformed sources. Pure stdlib: no numpy, no Pillow.
         run: python3 tools/assets/measure_stride.py --selftest
 
+      - name: The .chanim writer must write what the reader accepts
+        working-directory: cna-house
+        # `HOUSE-00223`. The Python selftest checks the format's own rules; the C++ side of the
+        # round trip is `ChanimRoundTripTests`, which reads a fixture this tool generates at build
+        # time. Neither can make the claim alone: `ChanimReaderTests` builds its bytes by hand, so
+        # a writer emitting transposed matrices or w-first quaternions passes every other test here.
+        run: python3 tools/assets/anim_extract.py --selftest
+
       - name: The smoke-scene assets must be what they claim to be
         working-directory: cna-house
         # `HOUSE-00201`. The PNG, WAV and GLB are written byte for byte by the script and are
