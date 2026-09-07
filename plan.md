@@ -2815,8 +2815,21 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
       finding: **preview renders are NOT CC0** — ToS §4.1 reserves everything that is not the asset
             itself, naming example renders and page text. Unlike ambientCG, which grants its preview
             renders explicitly. Do not use a Poly Haven preview as a texture or as document art.
-- [ ] HOUSE-00263 — Verify the **ambientCG** licence, same treatment
+- [x] HOUSE-00263 — Verify the **ambientCG** licence, same treatment
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-07) `docs/licence-evidence/ambientcg.md`. `ambientcg.com/license` redirects to
+            `docs.ambientcg.com/license/`, which is the page of record.
+      finding: **APPROVED, no caveats** — the cleanest terms of any source examined so far. CC0 1.0
+            for every asset, and the page answers this project's actual question in its own words:
+            "You can include the raw files in your project, for example a video game."
+      finding: that sentence matters more here than it would for a closed-source game, because
+            `assets-src/` **is published**. This repository distributes raw asset files, not only a
+            compiled build, so a licence permitting the second but not the first is unusable for
+            this project's structure — which is exactly what `HOUSE-00265` found for Quaternius.
+      finding: **ambientCG's preview renders are CC0 too**, stated explicitly, where Poly Haven's
+            ToS §4.1 reserves its own. The two sources are otherwise interchangeable and this
+            difference is invisible from the licence label, so it is recorded rather than left to be
+            rediscovered.
 - [ ] HOUSE-00264 — Verify the **Khronos glTF-Sample-Assets** per-asset licences and record which are usable
       dep: HOUSE-00261 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00265 — Verify **Quaternius**, **Kenney**, **Poly Pizza** licences
