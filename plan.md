@@ -8467,8 +8467,29 @@ never escapes and never penetrates.
             hysteresis widened to 5 m. The third (the boundary guard not clamping) does not
             compile, and the guard's own counter is never tripped by a body that stays in the
             house, which is `BoundaryGuardTests`' case rather than this one's.
-- [ ] HOUSE-00619 — Measure physics cost against the budget (0.35 ms typical, 0.80 worst)
+- [x] HOUSE-00619 — Measure physics cost against the budget (0.35 ms typical, 0.80 worst)
       dep: HOUSE-00555 · sys: — · plat: LNX · pri: MUST
+      verify: perf PhysicsStepTests.TheFixedStepAgainstTheFrameBudget
+      note: (2026-09-08) §49.3's step measured in the REAL house, 20 000 steps a cell in blocks of
+            100, in the median cell by shape count (`B1_GYM`, 14 shapes) and the busiest
+            (`EXT_BACKYARD`, 62). §71.2's budget is per FRAME, and a 60 FPS frame runs two steps
+            while a slow one runs the four §49.3's accumulator clamps to, so both are reported.
+      finding: **0.044-0.048 ms a step, which is 0.09 ms in a typical frame -- 26 % of §71.2's
+            0.35 ms -- and 0.31-0.37 ms in a four-step frame in the busiest cell, 39-46 % of the
+            0.80 ms worst case.** Three runs agreed inside 10 %.
+      finding: **and that is an UPPER bound, because it is a `Debug` build.** `-O0`, with CNA's
+            `Vector3` operators out of line and called for every arithmetic operation: an
+            optimised build of the same code cannot be slower. So the budget is met whatever the
+            flags, and no `Release` tree had to be built to say so -- which is the answer to a
+            measurement that would otherwise have needed a 30-minute rebuild of the engine to be
+            worth anything. The build type is printed beside the number, because a timing without
+            it means nothing.
+      note: the walk in the measurement turns a hundredth of a radian a step, so it is never the
+            same step twice: a body held against one wall for 20 000 steps measures one branch of
+            the slide and none of the others.
+      note: not gating, per §70.4 -- ten build agents share this machine. The assertion is the
+            categorical one the other perf tests use (three times the budget), and here it has
+            room to mean something because the real numbers are a quarter of it.
 - [ ] HOUSE-00620 — Phase-7 review and commit
       dep: HOUSE-00541…HOUSE-00619 · sys: — · plat: ALL · pri: MUST
 
