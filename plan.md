@@ -8412,8 +8412,35 @@ never escapes and never penetrates.
             `WorldValidator`'s constants: a guarantee that took the checker's own numbers would
             agree with it about a typo. Four injected bugs, all caught after that was fixed.
       verify: unit PortalClearanceTests.* — 518/518 with it.
-- [ ] HOUSE-00617 — Guarantee test: the player never ends a frame inside static geometry (checked every step of a scripted tour)
+- [x] HOUSE-00617 — Guarantee test: the player never ends a frame inside static geometry (checked every step of a scripted tour)
       dep: HOUSE-00547 · sys: physics · plat: CI · pri: MUST
+      verify: unit InsideGeometryTests.NoStepOfTheTourEndsInsideAnything
+      note: (2026-09-08) the tour is the DOORWAYS: from each cell's middle to each of its portals
+            in turn, 336 legs over all 96 cells, 41 496 fixed steps, with the overlap asked after
+            every one. A doorway is where a 0.62 m capsule meets a 0.90 m opening with a jamb
+            either side, and if there is anywhere in this house a body can be wedged it is there.
+      finding: **the deepest contact in 41 496 steps is 0.000024 m** -- a fortieth of §49.3's
+            contact tolerance, and 2 500 times shallower than the 0.06 m a single step of the walk
+            covers. The body never gets INSIDE anything at all: the slide keeps it out and step 5
+            never has to run. Which leaves step 5 untested by the tour, so the test has a second
+            half that puts a body deliberately 0.1 to 0.4 m inside a wall in every cell -- 259 of
+            them -- and gives it twenty steps of standing still to get out. 253 come out, the
+            worst in 9 steps against the 4 the arithmetic says (0.02 m x 4 a step).
+      note: six places have no room to push a body OUT to, and they are named and diffed both
+            ways: four sides of the chest freezer, whose interior is 1.4 x 0.7 m and so smaller
+            than the capsule, plus the wedge between a stair well's wall and the flight's ramp and
+            a corner of two exterior shapes at the bottom of the garden. A body teleported into
+            those two settles 0.24 m in and stays: six times as long changes nothing, so it is a
+            fixed point and not a slow escape. None of the six is reachable by walking.
+      note: `kContactTolerance` is written out in the test rather than read from the header. A
+            guarantee that took the physics' own constant would agree with it about a change to
+            it, and "inside" would quietly come to mean whatever the constant was widened to --
+            which is one of the four injected bugs, and is caught.
+      note: four injected bugs, three caught -- the depenetration pushing inward, one iteration
+            instead of four, and the tolerance widened to a metre. The fourth (the slide's 0.999
+            backoff turned into 1.5) is NOT caught and should not be: it drives the body 6 mm into
+            the wall mid-step and step 5 has it out before the frame ends, which is exactly the
+            guarantee this test makes.
 - [ ] HOUSE-00618 — Guarantee test: a 20-minute seeded random walk never trips the boundary counter and never leaves the named cells
       dep: HOUSE-00564 · sys: physics · plat: CI · pri: MUST
 - [ ] HOUSE-00619 — Measure physics cost against the budget (0.35 ms typical, 0.80 worst)
