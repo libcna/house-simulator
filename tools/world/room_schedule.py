@@ -233,6 +233,69 @@ def plumbing(directory: Path, lines: list[str]) -> list[str]:
     return out
 
 
+STAIR_ROW = re.compile(r"^\| `(STAIR_[A-Z0-9_]+|STEPS_[A-Z0-9_]+)` \|")
+
+
+def stairs(directory: Path, lines: list[str]) -> list[str]:
+    """§12.4's stair table against `layout.stairs.json`.
+
+    Six hand-written numbers a flight -- total rise, risers, rise, going, width and footprint --
+    over data that `HOUSE-00379` has already found eight ways wrong once. The footprint column is
+    prose for three of the eight rows ("same footprint", "inside the garage at the house wall"),
+    so it is compared where it states coordinates and left alone where it does not.
+    """
+    layout = layout_io.load_layout(directory, kinds=["stairs"])
+    flights = {row.get("id"): row for row in layout_io.rows(layout, "stairs")}
+    out = []
+    seen = set()
+    for line in lines:
+        found = STAIR_ROW.match(line)
+        if not found:
+            continue
+        identifier = found.group(1)
+        flight = flights.get(identifier)
+        if flight is None:
+            out.append(f"§12.4 names {identifier} and layout.stairs.json does not declare it")
+            continue
+        columns = [value.strip() for value in line.strip("|").split("|")]
+        if len(columns) < 8:
+            # §12.4's row has eight columns. A flight id also appears in §16.2's vertical
+            # adjacency table, and that is not this table.
+            continue
+        seen.add(identifier)
+        risers = re.match(r"^(\d+) ×\s*([\d.]+) mm", columns[3].replace("\u00a0", " "))
+        if risers:
+            if int(risers.group(1)) != int(flight["risers"]):
+                out.append(f"§12.4: {identifier} has {risers.group(1)} risers and the layout has "
+                           f"{flight['risers']}")
+            # §12.4 states the rise to a tenth of a millimetre and says in as many words that
+            # its tenths are the exact quotient rounded, so half a tenth is the tolerance.
+            if abs(float(risers.group(2)) - float(flight["rise"]) * 1000.0) > 0.0500001:
+                out.append(f"§12.4: {identifier}'s rise is {risers.group(2)} mm and the layout's "
+                           f"is {float(flight['rise']) * 1000.0:.1f} mm")
+        going = re.search(r"([\d.]+) mm", columns[4])
+        if going and abs(float(going.group(1)) - float(flight["going"]) * 1000.0) > 0.05:
+            out.append(f"§12.4: {identifier}'s going is {going.group(1)} mm and the layout's is "
+                       f"{float(flight['going']) * 1000.0:.1f} mm")
+        width = re.search(r"([\d.]+) m", columns[5])
+        if width and abs(float(width.group(1)) - float(flight["width"])) > 0.005:
+            out.append(f"§12.4: {identifier} is {width.group(1)} m wide and the layout says "
+                       f"{flight['width']}")
+        footprint = flight.get("footprint") or {}
+        for axis in ("X", "Z"):
+            said = re.search(axis + r"\s*([−+\-\d.]+)\s*…\s*([−+\-\d.]+)", columns[7])
+            if not said or axis.lower() not in footprint:
+                continue
+            want = [float(value.replace("−", "-").replace("+", "")) for value in said.groups()]
+            got = [float(value) for value in footprint[axis.lower()]]
+            if any(abs(a - b) > 0.005 for a, b in zip(want, got)):
+                out.append(f"§12.4: {identifier}'s {axis} footprint is {want} and the layout's is "
+                           f"{got}")
+    for identifier in sorted(set(flights) - seen):
+        out.append(f"{identifier} is in layout.stairs.json and §12.4's table does not list it")
+    return out
+
+
 def extents(directory: Path, lines: list[str]) -> list[str]:
     """Rows whose `X`/`Z` disagree with the cell's bounding box. Reported, never rewritten."""
     layout = layout_io.load_layout(directory)
@@ -313,6 +376,26 @@ def selftest() -> int:
         drift = extents(SOURCE, lines)
         require(not drift, f"...as well as every extent ({drift[:3]})")
 
+        steps = stairs(SOURCE, lines)
+        require(not steps, f"§12.4's eight flights match the layout ({steps[:3]})")
+        wrong = [line.replace("17 × 179.4 mm", "18 × 179.4 mm") for line in lines]
+        require(any("risers" in problem for problem in stairs(SOURCE, wrong)),
+                "and a riser added to the table and not to the data is caught")
+        moved = [line.replace("X +2.20…+4.90, Z −20.20…−14.30", "X +2.20…+4.90, Z −21.20…−14.30")
+                 for line in lines]
+        require(any("footprint" in problem for problem in stairs(SOURCE, moved)),
+                "as is a footprint that has drifted a metre")
+        shallow = [line.replace("| 280 mm |", "| 300 mm |") for line in lines]
+        require(any("going" in problem for problem in stairs(SOURCE, shallow)),
+                "as is a going")
+        narrow = [line.replace("| 1.10 m |", "| 1.20 m |") for line in lines]
+        require(any("wide" in problem for problem in stairs(SOURCE, narrow)),
+                "as is a width")
+        dropped = [line for line in lines if "`STAIR_ATTIC_L2_L3` |" not in line]
+        require(any("does not list it" in problem for problem in stairs(SOURCE, dropped)),
+                "and a flight deleted from the table is reported, which a check that only "
+                "compared the rows it found could not see")
+
         pipes = plumbing(SOURCE, lines)
         require(not pipes, f"§12.5's seven stacks match the layout ({pipes[:3]})")
         moved = [line.replace("`B1_UTILITY` |", "`B1_CINEMA` |") for line in lines]
@@ -346,7 +429,8 @@ def main() -> int:
 
     lines = args.document.read_text(encoding="utf-8").splitlines()
     found, rewrites = problems(args.directory, lines)
-    drift = extents(args.directory, lines) + plumbing(args.directory, lines)
+    drift = (extents(args.directory, lines) + plumbing(args.directory, lines)
+             + stairs(args.directory, lines))
 
     if args.emit and rewrites:
         for index, line in rewrites.items():

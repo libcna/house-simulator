@@ -6750,8 +6750,39 @@ the chunk builder produces ≤ 6 chunks per cell.
             floor, a skirting measured from the ceiling, and no mitre at all — and that mesh claim
             is what catches all four.
       note: the shell is 39 766 triangles over 96 cells, still well under §17.2's ~180 000.
-- [ ] HOUSE-00459 — Generate stair carriages, treads, risers, nosings and landings for the 7 flights
+- [x] HOUSE-00459 — Generate stair carriages, treads, risers, nosings and landings for the 7 flights
       dep: HOUSE-00379 · sys: content · plat: TOOL · pri: MUST
+      finding: **the layout could not say where a flight is.** §12.4 has given every flight a
+            footprint, a shape and a direction since it was written — in prose — and
+            `layout.stairs.json` carried `fromCell`, `toCell`, `risers`, `rise`, `going` and
+            `width` and nothing about position. `HOUSE-00360` had already recorded that §70.5's
+            headroom row was uncheckable for exactly this reason. So the schema gained
+            `footprint`, `run` (the direction you travel while going **up**) and `shape`, and all
+            eight flights were authored from §12.4 — a generator that read the prose table would
+            be reading a document the runtime cannot.
+      note: **eight flights, not the seven in this task's title.** `HOUSE-00379` found the missing
+            terrace-to-lawn steps when it authored the data; the title is left as it was written,
+            which is what "task ids and titles are permanent" means.
+      note: two new gates come with the data. `validate_world.py` rule 10 checks that a flight fits
+            the footprint it declares — a U-stair needs half its treads plus its landing along, and
+            two widths across — because a footprint in the data is a number that can be wrong, and
+            a flight longer than its footprint is a staircase coming through the wall at the top.
+            And `room_schedule.py` now compares §12.4's own table with the layout: risers, rise,
+            going, width and the footprint where the table states coordinates rather than "same
+            footprint" or "inside the garage at the house wall". Both directions, so a flight
+            deleted from the table is reported too.
+      note: solid steps rather than treads on a carriage: a blockout wants the shape you walk on
+            and the volume you cannot walk through, and a closed string is both. The nosing is a
+            separate board because it overhangs, which is the one part of a step's profile you see
+            from below — and it is the reason the bottom step is 25 mm outside the declared
+            footprint, which the claim states rather than fudging.
+      note: a flight is carried by its `fromCell`, so it is built once and it is in the chunk of
+            the room you are standing in when you start to climb. Nine injected bugs; three
+            survived the first round, all of them at the **call site** rather than in the geometry
+            — no flight built at all, every cell building every flight, and a flight that started
+            at the world origin. The last needed a claim about the FIRST tread: a stair well
+            already reaches the floor above whether or not there is a stair in it.
+      note: 41 566 triangles over 96 cells.
 - [ ] HOUSE-00460 — Generate balustrades, newels, handrails and the stairwell openings in the floors above
       dep: HOUSE-00459 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00461 — Generate the roof: hipped-and-gabled planes at 7:12, ridge, hips, valleys, eaves, soffits, fascias

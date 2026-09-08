@@ -1812,10 +1812,48 @@ def rule_10_realism(world: World) -> list[Problem]:
                 10, FILE_OF["cells"], f"cells/{index}",
                 f"cell {cell.get('id')} ({cell.get('name')}) is {area:.2f} m², under §70.5's "
                 f"{minimum:.2f} m² for what its name says it is"))
+    # ---- a flight fits in the footprint it declares (`HOUSE-00459`) ---------------------------
+    #
+    # §12.4 has always given every flight a footprint, in prose. `HOUSE-00459` put it in the data
+    # because the geometry generator needs it, and a footprint in the data is a number that can be
+    # wrong: a flight whose run is longer than the space it says it occupies is a staircase coming
+    # through the wall at the top.
+    for index, flight in enumerate(world.flights):
+        footprint = flight.get("footprint")
+        if not isinstance(footprint, dict):
+            continue
+        try:
+            x0, x1 = (float(value) for value in footprint["x"])
+            z0, z1 = (float(value) for value in footprint["z"])
+            risers = int(flight["risers"])
+            going = float(flight["going"])
+            width = float(flight["width"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        run = flight.get("run")
+        along = (x1 - x0) if run in ("-X", "+X") else (z1 - z0)
+        across = (z1 - z0) if run in ("-X", "+X") else (x1 - x0)
+        # A U-stair doubles back, so its two runs share the depth and each is about half the
+        # risers; a straight flight needs the lot. The landing's depth is part of the run.
+        landings = sum(float(row.get("depth") or 0.0) for row in flight.get("landings") or [])
+        treads = (risers - 1) if flight.get("shape") == "u" else risers
+        needed = (treads / 2.0 if flight.get("shape") == "u" else float(treads)) * going + landings
+        if along + 1e-6 < needed:
+            problems.append(Problem(
+                10, FILE_OF["stairs"], f"flights/{index}/footprint",
+                f"flight {flight.get('id')} runs {needed:.2f} m along {run} and its footprint is "
+                f"{along:.2f} m deep: the top of it would be through the wall"))
+        if across + 1e-6 < width:
+            problems.append(Problem(
+                10, FILE_OF["stairs"], f"flights/{index}/footprint",
+                f"flight {flight.get('id')} is {width:.2f} m wide and its footprint is "
+                f"{across:.2f} m across"))
+        if flight.get("shape") == "u" and across + 1e-6 < 2.0 * width:
+            problems.append(Problem(
+                10, FILE_OF["stairs"], f"flights/{index}/footprint",
+                f"flight {flight.get('id')} doubles back, so it needs two widths "
+                f"({2.0 * width:.2f} m) across and its footprint is {across:.2f} m"))
     return problems
-
-
-
 def _passable_neighbours(world: World, cell_id: str) -> list[tuple[str, dict]]:
     """`(neighbour cell id, portal)` for every portal a person can pass through."""
     out = []
@@ -2140,8 +2178,11 @@ def fixture() -> dict[str, dict]:
     ]}
 
     stairs = {"schema": "cna-house/stairs/1", "flights": [
+        # The footprint is `L0_STAIR`'s, and it holds the flight: 17 treads at 0.280 is 4.76 m
+        # in a cell 4.00 m deep, so the stair is a `u` and doubles back (`HOUSE-00459`).
         {"id": "STAIR_L0_L1", "fromCell": "L0_STAIR", "toCell": "L1_LANDING",
          "risers": risers, "rise": rise, "going": 0.280, "width": 1.20,
+         "footprint": {"x": [-6.0, -2.0], "z": [4.0, 8.0]}, "run": "-Z", "shape": "u",
          "collisionRamp": True, "surface": "wood"},
     ]}
 
@@ -2448,6 +2489,14 @@ def selftest() -> int:
         @mutation(7, "a door leaf deleted, leaving the portal unclaimed")
         def _(docs):
             docs["openings"]["openings"].remove(row(docs, "openings", "DOOR_WC1"))
+
+        @mutation(10, "a flight longer than the footprint it declares")
+        def _(docs):
+            row(docs, "stairs", "STAIR_L0_L1")["footprint"] = {"x": [-6.0, -2.0], "z": [4.0, 5.0]}
+
+        @mutation(10, "a flight wider than the space it stands in")
+        def _(docs):
+            row(docs, "stairs", "STAIR_L0_L1")["width"] = 4.50
 
         @mutation(8, "one riser fewer than the storey needs")
         def _(docs):
@@ -2970,7 +3019,7 @@ def selftest() -> int:
         def _(docs):
             row(docs, "interactables", "SWITCH_HALL")["focus"]["point"] = [5.0, 1.80, 5.0]
 
-        require(sorted(rule for rule, _, _ in mutations) == list(range(1, 12)),
+        require(sorted({rule for rule, _, _ in mutations}) == list(range(1, 12)),
                 "there is a mutation for each of the eleven rules")
 
         for rule, description, mutate in mutations:

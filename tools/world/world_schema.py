@@ -262,6 +262,13 @@ def build() -> dict[str, dict]:
          # two levels' FFLs, and between two cells on the same level that difference is zero: the
          # flight is the only thing that knows what it climbs. Added by `HOUSE-00379`.
          "fromY": NUM, "toY": NUM,
+         # Where the flight IS, and which way you go while climbing it (`HOUSE-00459`). §12.4 has
+         # given every flight a footprint and a shape since it was written, in prose; the geometry
+         # generator needs them as data, and a generator that read the prose would be reading a
+         # table the runtime cannot. `run` is the direction of travel while going UP.
+         "footprint": BOX,
+         "run": {"enum": ["-X", "+X", "-Z", "+Z"]},
+         "shape": {"enum": ["straight", "u"]},
          "landings": {"type": "array", "items": obj(
              ["at", "depth"], {"at": {"type": "integer", "minimum": 0}, "depth": NUM})},
          "collisionRamp": BOOL,

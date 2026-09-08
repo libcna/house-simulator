@@ -87,6 +87,9 @@
           "collisionRamp": {
             "type": "boolean"
           },
+          "footprint": {
+            "$ref": "#/$defs/box"
+          },
           "fromCell": {
             "$ref": "#/$defs/id"
           },
@@ -127,6 +130,20 @@
           "risers": {
             "minimum": 1,
             "type": "integer"
+          },
+          "run": {
+            "enum": [
+              "-X",
+              "+X",
+              "-Z",
+              "+Z"
+            ]
+          },
+          "shape": {
+            "enum": [
+              "straight",
+              "u"
+            ]
           },
           "surface": {
             "anyOf": [

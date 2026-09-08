@@ -425,6 +425,43 @@ def mitred(lo: float, hi: float, corner_lo: float, corner_hi: float, proud: floa
             hi - (proud if abs(hi - corner_hi) < 1e-9 else 0.0))
 
 
+#: A tread's nosing: how far it overhangs the riser below it, and how thick the board is. §12.4
+#: gives every flight a rise, a going, a width and a footprint and says nothing about the section,
+#: so these two are this generator's, like the window's.
+NOSING_PROJECT = 0.025
+NOSING_THICK = 0.045
+
+
+def flight_steps(flight: dict, bottom: float):
+    """Every step of a flight as `(along_lo, along_hi, top_y, across_index)`, in run order.
+
+    `along` runs in the direction of travel from 0, so the caller maps it onto the footprint and
+    the sign of `run`; `across_index` is 0 for the first run of a `u` and 1 for the one that
+    doubles back. The landing is not a step and is placed by the caller: it is where a riser ends
+    (§12.4), which is why `HOUSE-00379` had to move both of this house's landings onto a riser
+    boundary.
+    """
+    risers = int(flight["risers"])
+    rise = float(flight["rise"])
+    going = float(flight["going"])
+    turn = int((flight.get("landings") or [{}])[0].get("at") or 0) if flight.get("shape") == "u" \
+        else 0
+    depth = float((flight.get("landings") or [{}])[0].get("depth") or 0.0) if turn else 0.0
+    steps = []
+    for index in range(1, risers + 1):
+        if turn and index <= turn:
+            along = (index - 1) * going
+            steps.append((along, along + going, bottom + index * rise, 0))
+        elif turn:
+            # Back down the other side, measured from the landing's far edge.
+            back = (risers - index) * going
+            steps.append((back, back + going, bottom + index * rise, 1))
+        else:
+            along = (index - 1) * going
+            steps.append((along, along + going, bottom + index * rise, 0))
+    return steps, turn, depth
+
+
 #: §12's trim, in metres. `casing` and `skirting` are `layout.levels.json`'s; the two below are
 #: not in the data because §12 never gives them a number, and a board that stands proud of the
 #: wall by nothing z-fights with it.
@@ -435,8 +472,59 @@ TRIM_PROUD = 0.018
 THRESHOLD_THICK = 0.015
 
 
+def build_flight(flight: dict, solid, bottom: float) -> None:
+    """A flight's steps, nosings and landing, as boxes, through @p solid.
+
+    Solid steps rather than treads on a carriage: a blockout wants the shape you walk on and the
+    volume you cannot walk through, and a closed string is both. The nosing is a separate board
+    because it overhangs, which is the one part of a step's profile you see from below.
+    """
+    footprint = flight.get("footprint") or {}
+    if not footprint or flight.get("run") not in ("-X", "+X", "-Z", "+Z"):
+        return
+    x0, x1 = (float(value) for value in footprint["x"])
+    z0, z1 = (float(value) for value in footprint["z"])
+    run = flight["run"]
+    width = float(flight["width"])
+
+    along_axis_x = run in ("-X", "+X")
+    start = (x1 if run == "-X" else x0) if along_axis_x else (z1 if run == "-Z" else z0)
+    sign = -1.0 if run in ("-X", "-Z") else 1.0
+    across_lo, across_hi = (z0, z1) if along_axis_x else (x0, x1)
+
+    steps, turn, landing_depth = flight_steps(flight, bottom)
+
+    def place(a0, a1, low, high, lane):
+        """One box, from run coordinates to world ones."""
+        if lane == 0:
+            c0, c1 = across_lo, across_lo + width
+        else:
+            c0, c1 = across_hi - width, across_hi
+        p0, p1 = sorted((start + sign * a0, start + sign * a1))
+        if along_axis_x:
+            solid(p0, p1, low, high, c0, c1)
+        else:
+            solid(c0, c1, low, high, p0, p1)
+
+    for a0, a1, top, lane in steps:
+        offset = (turn * float(flight["going"]) + landing_depth) if lane else 0.0
+        place(a0 + offset, a1 + offset, bottom, top, lane)
+        # The nosing overhangs the riser below it by its own projection.
+        place(a0 + offset - NOSING_PROJECT, a0 + offset, top - NOSING_THICK, top, lane)
+
+    if turn and landing_depth > 0.0:
+        low = bottom + turn * float(flight["rise"])
+        a0 = turn * float(flight["going"])
+        p0, p1 = sorted((start + sign * a0, start + sign * (a0 + landing_depth)))
+        if along_axis_x:
+            solid(p0, p1, bottom, low, across_lo, across_hi)
+        else:
+            solid(across_lo, across_hi, bottom, low, p0, p1)
+
+
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
-               level=None, levels=None, portals=(), openings=None, cells_by_id=None):
+               level=None, levels=None, portals=(), openings=None, cells_by_id=None,
+               flights=()):
     """One mesh object named for the cell: its floor, its ceiling and its walls' inner faces."""
     construction = construction or {}
     neighbours = list(neighbours)
@@ -650,6 +738,18 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         add(floor, (0.0, 1.0, 0.0))
         add([(x, y1, z) for x, _y, z in floor], (0.0, -1.0, 0.0))
 
+    # `HOUSE-00459`: the flights that stand in this cell. A flight is carried by its `fromCell`,
+    # the one it starts in, so it is built once and it is in the chunk of the room you are
+    # standing in when you begin to climb.
+    for flight in flights or ():
+        if flight.get("fromCell") != cell["id"]:
+            continue
+        # The foot of the flight: what it declares if it declares one -- the porch, terrace and
+        # garage steps join two cells on ONE level and are the only things that know what they
+        # climb -- and otherwise the floor of the cell it stands in.
+        foot = flight.get("fromY")
+        build_flight(flight, solid, float(foot) if foot is not None else extent[0])
+
     mesh = bpy.data.meshes.new(f"{cell['id']}_mesh")
     mesh.from_pydata(vertices, [], faces)
     mesh.validate()
@@ -670,11 +770,12 @@ def export(obj, path: Path) -> None:
 
 def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> dict:
     """Every cell the layout declares, as one `.glb` each. Returns a report."""
-    layout = layout_io.load_layout(directory, kinds=["levels", "cells", "portals", "openings"])
+    layout = layout_io.load_layout(directory, kinds=["levels", "cells", "portals", "openings", "stairs"])
     levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
     portals = layout_io.rows(layout, "portals")
     openings = {row["portal"]: row for row in layout_io.rows(layout, "openings")
                 if row.get("portal")}
+    stair_rows = layout_io.rows(layout, "stairs")
     construction = (layout.get("levels") or {}).get("construction") or {}
     report = {"written": [], "skipped": [], "problems": []}
 
@@ -694,7 +795,8 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         reset_scene()
         obj = build_cell(cell, extent, neighbours=neighbours, construction=construction,
                          level=level, levels=levels, portals=portals, openings=openings,
-                         cells_by_id={row["id"]: row for row in layout_io.rows(layout, "cells")})
+                         cells_by_id={row["id"]: row for row in layout_io.rows(layout, "cells")},
+                         flights=stair_rows)
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
@@ -1160,6 +1262,79 @@ def selftest(output: Path) -> int:
     require(widened_points != same_points,
             "and doubling a door's declared casing moves the mesh, so the builder is reading the "
             "opening rather than a constant that happens to match every door in this house")
+
+    # ---- `HOUSE-00459`: the stairs ------------------------------------------------------------
+    flight_rows = {row["id"]: row for row in layout_io.rows(
+        layout_io.load_layout(SOURCE, kinds=["stairs"]), "stairs")}
+    main = flight_rows["STAIR_MAIN_L0_L1"]
+    steps, turn, landing_depth = flight_steps(main, 0.60)
+    require(len(steps) == int(main["risers"]),
+            f"a flight has one step per riser ({len(steps)} of {main['risers']})")
+    require(abs(steps[-1][2] - float(levels["L1"]["ffl"])) < 1e-6,
+            f"and its last tread IS the floor above, {steps[-1][2]:.4f} against "
+            f"{levels['L1']['ffl']}")
+    require(abs(steps[0][2] - (0.60 + float(main["rise"]))) < 1e-9,
+            "and its first is one rise off the floor below")
+    require(turn == 9 and abs(landing_depth - 1.1) < 1e-9,
+            f"the main stair turns at riser 9 on a 1.10 m landing ({turn}, {landing_depth})")
+    lanes = {lane for _a0, _a1, _top, lane in steps}
+    require(lanes == {0, 1},
+            f"and a U-stair has two runs, one each side of its own landing ({sorted(lanes)})")
+    require({lane for _a0, _a1, _top, lane in flight_steps(
+        flight_rows["STAIR_ATTIC_L2_L3"], 6.55)[0]} == {0},
+        "while a straight flight has one")
+
+    # The steps are inside the footprint the flight declares, which rule 10 checks the SIZE of and
+    # nothing checked the placement of until here.
+    boxes = []
+    build_flight(main, lambda *args: boxes.append(args), 0.60)
+    footprint = main["footprint"]
+    # The bottom step's nosing overhangs the foot of the flight, into the room, by its own
+    # projection -- which is what a nosing is. Everything else is inside the declared footprint.
+    slack = NOSING_PROJECT + 1e-6
+    inside = all(float(footprint["x"][0]) - 1e-6 <= bx0 and bx1 <= float(footprint["x"][1]) + 1e-6
+                 and float(footprint["z"][0]) - slack <= bz0
+                 and bz1 <= float(footprint["z"][1]) + slack
+                 for bx0, bx1, _by0, _by1, bz0, bz1 in boxes)
+    require(boxes and inside,
+            f"every one of the {len(boxes)} boxes of the main stair is inside its footprint, but "
+            f"for the bottom nosing's {NOSING_PROJECT * 1000:.0f} mm overhang")
+    require(len(boxes) == 2 * int(main["risers"]) + 1,
+            f"a step, a nosing over each, and the landing ({len(boxes)})")
+    require(min(by0 for _a, _b, by0, _c, _d, _e in boxes) >= 0.60 - 1e-6
+            and abs(max(by1 for _a, _b, _c, by1, _d, _e in boxes)
+                    - float(levels["L1"]["ffl"])) < 1e-6,
+            "and none of it is below the floor it starts on or above the floor it reaches")
+
+    # ...and the cell that carries the flight actually gets it. The claims above call
+    # `build_flight` directly, which a builder that never called it would satisfy perfectly.
+    stair_cell = cells[main["fromCell"]]
+    stair_extent = extent_of(stair_cell, levels[stair_cell["level"]])[0]
+    reset_scene()
+    without = build_cell(stair_cell, stair_extent, neighbours=neighbours,
+                         construction=construction, level=levels[stair_cell["level"]],
+                         levels=levels, portals=list(portal_rows.values()),
+                         openings=openings_by_portal, cells_by_id=cells)
+    without_faces = len(without.data.polygons)
+    reset_scene()
+    with_stair = build_cell(stair_cell, stair_extent, neighbours=neighbours,
+                            construction=construction, level=levels[stair_cell["level"]],
+                            levels=levels, portals=list(portal_rows.values()),
+                            openings=openings_by_portal, cells_by_id=cells,
+                            flights=list(flight_rows.values()))
+    require(len(with_stair.data.polygons) == without_faces + 6 * len(boxes),
+            f"{main['fromCell']} gains the flight's {len(boxes)} boxes "
+            f"({without_faces} -> {len(with_stair.data.polygons)})")
+    top = max(vertex.co.z for vertex in with_stair.data.vertices)
+    require(abs(top - float(levels["L1"]["ffl"])) < 1e-4,
+            f"and the highest thing in it is the top tread, at the floor above ({top:.3f})")
+    # The FOOT of the flight, which the cell's own walls do not give away: the stair well already
+    # reaches `L1`'s floor whether or not a stair is in it, so the claim above cannot tell a
+    # flight that starts on this floor from one that starts at the world origin.
+    heights = {round(vertex.co.z, 6) for vertex in with_stair.data.vertices}
+    require(round(stair_extent[0] + float(main["rise"]), 6) in heights,
+            f"and its first tread is one rise above THIS floor, at "
+            f"{stair_extent[0] + float(main['rise']):.4f} m")
 
     # A cell with no ceiling to be had. §13.6's attic level declares `ceiling: null` and every
     # attic cell overrides it, so this branch is unreachable from the authored house -- which is
