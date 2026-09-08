@@ -4392,6 +4392,81 @@
       "state": { "flow": 0.0, "hotFraction": 0.5 },
       "persist": ["flow", "hotFraction"],
       "portal": null
+    },
+
+    // ============================================================= the televisions
+    // `HOUSE-00414`. §58.1's three: the family room's wall-mounted set, the smaller one on the
+    // master's dresser, and the cinema's projector and screen.
+    //
+    // `channel` and `playhead` are §65.2's own fields: a save records which channel is on and how
+    // far into it, so a television left running is still running the same thing when you come
+    // back. `volume` is continuous.
+    //
+    // All three start off, as §65.6 says -- like everything else in the house, and unlike the save
+    // example in §65.2, which is a different moment on purpose.
+    // the main 55-inch set, wall-mounted on the family room's south wall.
+    {
+      "id": "TV_L0_FAMILY", "kind": "television", "cell": "L0_FAMILY",
+      "prop": null,
+      "focus": { "point": [7.72, 1.95, -26.79], "normal": [0.0, 0.0, 1.0], "radius": 0.60 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.on == false", "do": "state.on = true",
+          "sound": "SFX_TV_ON", "duration": 1.4 },
+        { "verb": "Turn off", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_TV_OFF", "duration": 0.6 },
+        { "verb": "Next channel", "when": "state.on == true",
+          "do": "state.channel += 1; state.playhead = 0.0", "sound": "SFX_TV_CLICK", "duration": 0.4 },
+        { "verb": "Louder", "when": "state.on == true && state.volume < 1.0",
+          "do": "state.volume += 0.1", "sound": "SFX_TV_CLICK", "duration": 0.2 },
+        { "verb": "Quieter", "when": "state.on == true && state.volume > 0.0",
+          "do": "state.volume -= 0.1", "sound": "SFX_TV_CLICK", "duration": 0.2 }
+      ],
+      "state": { "on": false, "channel": 0.0, "volume": 0.4, "playhead": 0.0 },
+      "persist": ["on", "channel", "volume", "playhead"],
+      "portal": null
+    },
+    // the smaller set on the master's dresser.
+    {
+      "id": "TV_L1_MASTER_BED", "kind": "television", "cell": "L1_MASTER_BED",
+      "prop": null,
+      "focus": { "point": [-5.16, 4.80, -25.57], "normal": [0.0, 0.0, 1.0], "radius": 0.60 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.on == false", "do": "state.on = true",
+          "sound": "SFX_TV_ON", "duration": 1.4 },
+        { "verb": "Turn off", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_TV_OFF", "duration": 0.6 },
+        { "verb": "Next channel", "when": "state.on == true",
+          "do": "state.channel += 1; state.playhead = 0.0", "sound": "SFX_TV_CLICK", "duration": 0.4 },
+        { "verb": "Louder", "when": "state.on == true && state.volume < 1.0",
+          "do": "state.volume += 0.1", "sound": "SFX_TV_CLICK", "duration": 0.2 },
+        { "verb": "Quieter", "when": "state.on == true && state.volume > 0.0",
+          "do": "state.volume -= 0.1", "sound": "SFX_TV_CLICK", "duration": 0.2 }
+      ],
+      "state": { "on": false, "channel": 0.0, "volume": 0.4, "playhead": 0.0 },
+      "persist": ["on", "channel", "volume", "playhead"],
+      "portal": null
+    },
+    // the projector's 2.4 m screen. §58.1 says all three share one behaviour, so the projector is
+    // a television with a bigger bounds and not a fourth kind.
+    {
+      "id": "TV_B1_CINEMA", "kind": "television", "cell": "B1_CINEMA",
+      "prop": null,
+      "focus": { "point": [5.45, -0.70, -26.90], "normal": [0.0, 0.0, 1.0], "radius": 0.60 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.on == false", "do": "state.on = true",
+          "sound": "SFX_TV_ON", "duration": 1.4 },
+        { "verb": "Turn off", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_TV_OFF", "duration": 0.6 },
+        { "verb": "Next channel", "when": "state.on == true",
+          "do": "state.channel += 1; state.playhead = 0.0", "sound": "SFX_TV_CLICK", "duration": 0.4 },
+        { "verb": "Louder", "when": "state.on == true && state.volume < 1.0",
+          "do": "state.volume += 0.1", "sound": "SFX_TV_CLICK", "duration": 0.2 },
+        { "verb": "Quieter", "when": "state.on == true && state.volume > 0.0",
+          "do": "state.volume -= 0.1", "sound": "SFX_TV_CLICK", "duration": 0.2 }
+      ],
+      "state": { "on": false, "channel": 0.0, "volume": 0.4, "playhead": 0.0 },
+      "persist": ["on", "channel", "volume", "playhead"],
+      "portal": null
     }
   ]
 }

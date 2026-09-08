@@ -6354,8 +6354,17 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             `paperLeft` — and §57.2's verbs with the preconditions it gives: the lid before the
             seat, the seat before the second of the two long actions. Matter-of-fact and
             proportionate, as §57 asks.
-- [ ] HOUSE-00414 — Author rows for the 3 televisions
+- [x] HOUSE-00414 — Author rows for the 3 televisions
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
+      note: §58.1's three, where §58.1 and §13 put them: the family room's wall-mounted set, the
+            smaller one on the master's dresser, and the cinema's projector and 2.4 m screen.
+            §58.1 says all three share one behaviour, so the projector is a television with a
+            bigger bounds and not a fourth kind — which is the whole reason §58.1 says it.
+      note: `channel` and `playhead` are §65.2's own fields. A save records which channel is on and
+            how far into it, so a television left running is still running the same thing when you
+            come back; that is what makes it worth persisting rather than resetting.
+      note: all three start off, as §65.6 says — unlike §65.2's save example, which is a different
+            moment on purpose and should not be mistaken for the initial state.
 - [ ] HOUSE-00415 — Author rows for the 11 appliances
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
 - [x] HOUSE-00416 — Author rows for the garage door, the 3 gates and their motors
