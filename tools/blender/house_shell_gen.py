@@ -291,8 +291,64 @@ def outer_span(cell: dict, extent: tuple[float, float], level: dict, levels: dic
     return (extent[0], min(above) if above else extent[1])
 
 
+def holes_in(side: str, box: tuple, cell: dict, portals: list) -> list[tuple[float, float, float, float]]:
+    """The portal rectangles that pierce @p side, as `(u0, u1, v0, v1)` in that side's own axes.
+
+    A portal **is** the hole. Every one of them, not only the ones with a leaf: a cased opening has
+    no door and is still a doorway you walk through, and §13.1's "cased openings are not doors" is
+    about counting doors, not about whether there is a hole. Horizontal portals -- the stairwells --
+    pierce floors rather than walls and are `HOUSE-00460`'s.
+    """
+    plane, lo, hi = side_span(side, box)
+    axis = "x" if side in ("-X", "+X") else "z"
+    out = []
+    for portal in portals:
+        if (portal.get("plane") or {}).get("axis") != axis:
+            continue
+        if abs(float(portal["plane"]["value"]) - plane) > 1e-6:
+            continue
+        if cell["id"] not in (portal.get("cellA"), portal.get("cellB")):
+            continue
+        rect = portal.get("rect") or {}
+        u0, u1 = (float(value) for value in rect["u"])
+        v0, v1 = (float(value) for value in rect["v"])
+        if min(u1, hi) - max(u0, lo) <= 1e-6:
+            continue
+        out.append((max(u0, lo), min(u1, hi), v0, v1))
+    return sorted(out)
+
+
+def panel(lo: float, hi: float, v0: float, v1: float,
+          holes: list[tuple[float, float, float, float]]):
+    """`(lo, hi, v0, v1)` rectangles covering the panel except where a hole is.
+
+    A grid rather than a boolean: the cuts are the holes' own edges, and a cell of the grid is
+    emitted unless its centre is inside a hole. With at most a handful of openings in a wall this
+    is exact, deterministic and needs no library -- and a rectangle it emits is always a rectangle,
+    which the lightmap unwrap downstream would rather have than a triangulated polygon with a slot
+    in it.
+    """
+    if not holes:
+        return [(lo, hi, v0, v1)]
+    us = sorted({lo, hi} | {value for hole in holes for value in hole[:2]
+                            if lo - 1e-9 < value < hi + 1e-9})
+    vs = sorted({v0, v1} | {value for hole in holes for value in hole[2:]
+                            if v0 - 1e-9 < value < v1 + 1e-9})
+    out = []
+    for ulo, uhi in zip(us, us[1:]):
+        for vlo, vhi in zip(vs, vs[1:]):
+            if uhi - ulo <= 1e-9 or vhi - vlo <= 1e-9:
+                continue
+            umid, vmid = (ulo + uhi) / 2.0, (vlo + vhi) / 2.0
+            if any(hu0 - 1e-9 <= umid <= hu1 + 1e-9 and hv0 - 1e-9 <= vmid <= hv1 + 1e-9
+                   for hu0, hu1, hv0, hv1 in holes):
+                continue
+            out.append((ulo, uhi, vlo, vhi))
+    return out
+
+
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
-               level=None, levels=None):
+               level=None, levels=None, portals=()):
     """One mesh object named for the cell: its floor, its ceiling and its walls' inner faces."""
     construction = construction or {}
     neighbours = list(neighbours)
@@ -317,6 +373,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         # two inner faces stop at each other, and a face that ran on to the centre line would
         # continue 75 mm into the wall it meets.
         for side, inward in INWARD.items():
+            side_holes = holes_in(side, box, cell, list(portals))
             for lo, hi, wall in side_intervals(side, box, cell, neighbours):
                 half = float(construction.get(wall, 0.0)) / 2.0
                 plane = {"-X": x0 + half, "+X": x1 - half,
@@ -325,11 +382,16 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                 lo, hi = max(lo, clamp[0]), min(hi, clamp[1])
                 if hi - lo <= 1e-6:
                     continue
-                if side in ("-X", "+X"):
-                    corners = [(plane, y0, lo), (plane, y1, lo), (plane, y1, hi), (plane, y0, hi)]
-                else:
-                    corners = [(lo, y0, plane), (lo, y1, plane), (hi, y1, plane), (hi, y0, plane)]
-                add(corners, inward)
+                holes = [hole for hole in side_holes
+                         if min(hole[1], hi) - max(hole[0], lo) > 1e-6]
+                for pu0, pu1, pv0, pv1 in panel(lo, hi, y0, y1, holes):
+                    if side in ("-X", "+X"):
+                        corners = [(plane, pv0, pu0), (plane, pv1, pu0),
+                                   (plane, pv1, pu1), (plane, pv0, pu1)]
+                    else:
+                        corners = [(pu0, pv0, plane), (pu0, pv1, plane),
+                                   (pu1, pv1, plane), (pu1, pv0, plane)]
+                    add(corners, inward)
 
                 # `HOUSE-00454`: the OUTER face of the same wall, where there is an outside. A
                 # partition has two rooms and each has its inner face; an exterior wall has one
@@ -341,13 +403,41 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                 outer_plane = {"-X": x0 - outer_half, "+X": x1 + outer_half,
                                "-Z": z0 - outer_half, "+Z": z1 + outer_half}[side]
                 oy0, oy1 = outer_span(cell, (y0, y1), level, levels or {})
-                if side in ("-X", "+X"):
-                    outer = [(outer_plane, oy0, lo), (outer_plane, oy1, lo),
-                             (outer_plane, oy1, hi), (outer_plane, oy0, hi)]
-                else:
-                    outer = [(lo, oy0, outer_plane), (lo, oy1, outer_plane),
-                             (hi, oy1, outer_plane), (hi, oy0, outer_plane)]
-                add(outer, tuple(-value for value in inward))
+                for pu0, pu1, pv0, pv1 in panel(lo, hi, oy0, oy1, holes):
+                    if side in ("-X", "+X"):
+                        outer = [(outer_plane, pv0, pu0), (outer_plane, pv1, pu0),
+                                 (outer_plane, pv1, pu1), (outer_plane, pv0, pu1)]
+                    else:
+                        outer = [(pu0, pv0, outer_plane), (pu0, pv1, outer_plane),
+                                 (pu1, pv1, outer_plane), (pu1, pv0, outer_plane)]
+                    add(outer, tuple(-value for value in inward))
+
+                # The reveal: the four surfaces of the hole through the wall, of which the bottom
+                # one is the sill. From this room's inner face to the outer face of an exterior
+                # wall, or to the CENTRE LINE of a partition -- the room on the other side carries
+                # its own half, for the same reason it carries its own inner face.
+                far = outer_plane if wall != "wallPartition" else \
+                    {"-X": x0, "+X": x1, "-Z": z0, "+Z": z1}[side]
+                for hu0, hu1, hv0, hv1 in holes:
+                    for corner_lo, corner_hi, along, look in (
+                            (hv0, hv0, "v", (0.0, 1.0, 0.0)),      # the sill, looking up
+                            (hv1, hv1, "v", (0.0, -1.0, 0.0)),     # the head, looking down
+                            (hu0, hu0, "u", None), (hu1, hu1, "u", None)):
+                        if along == "v":
+                            edges = [(hu0, corner_lo), (hu1, corner_lo)]
+                        else:
+                            edges = [(corner_lo, hv0), (corner_lo, hv1)]
+                        (au, av), (bu, bv) = edges
+                        if side in ("-X", "+X"):
+                            quad = [(plane, av, au), (plane, bv, bu), (far, bv, bu), (far, av, au)]
+                        else:
+                            quad = [(au, av, plane), (bu, bv, plane), (bu, bv, far), (au, av, far)]
+                        if look is None:
+                            # A jamb looks across the opening, towards the other jamb.
+                            towards = (hu0 + hu1) / 2.0 - corner_lo
+                            look = ((towards, 0.0, 0.0) if side in ("-Z", "+Z")
+                                    else (0.0, 0.0, towards))
+                        add(quad, look)
 
         # `HOUSE-00452`: the floor and the ceiling, inset to the same inner faces.
         floor = [(ix0, y0, iz0), (ix1, y0, iz0), (ix1, y0, iz1), (ix0, y0, iz1)]
@@ -374,8 +464,9 @@ def export(obj, path: Path) -> None:
 
 def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> dict:
     """Every cell the layout declares, as one `.glb` each. Returns a report."""
-    layout = layout_io.load_layout(directory, kinds=["levels", "cells"])
+    layout = layout_io.load_layout(directory, kinds=["levels", "cells", "portals"])
     levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
+    portals = layout_io.rows(layout, "portals")
     construction = (layout.get("levels") or {}).get("construction") or {}
     report = {"written": [], "skipped": [], "problems": []}
 
@@ -394,7 +485,7 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
             continue
         reset_scene()
         obj = build_cell(cell, extent, neighbours=neighbours, construction=construction,
-                         level=level, levels=levels)
+                         level=level, levels=levels, portals=portals)
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
@@ -604,6 +695,88 @@ def selftest(output: Path) -> int:
     top_extent = extent_of(top, levels["L3"])[0]
     require(outer_span(top, top_extent, levels["L3"], levels)[1] == top_extent[1],
             "and the topmost storey's stops at its own ceiling, because there is no next one")
+
+    # ---- `HOUSE-00455`: the openings ----------------------------------------------------------
+    #
+    # `panel` is a rectangle with rectangular bites out of it. The two things that can go wrong are
+    # that it covers a hole and that it loses area somewhere else, so both are measured rather than
+    # one of them assumed.
+    pieces = panel(0.0, 10.0, 0.0, 3.0, [(2.0, 3.0, 0.0, 2.1), (6.0, 7.2, 0.9, 2.4)])
+    covered = sum((u1 - u0) * (v1 - v0) for u0, u1, v0, v1 in pieces)
+    bites = 1.0 * 2.1 + 1.2 * 1.5
+    require(abs(covered + bites - 30.0) < 1e-9,
+            f"a panel plus its holes is the whole wall: {covered:.3f} + {bites:.3f} of 30")
+    overlap = any(min(a[1], b[1]) - max(a[0], b[0]) > 1e-9 and min(a[3], b[3]) - max(a[2], b[2])
+                  > 1e-9 for index, a in enumerate(pieces) for b in pieces[index + 1:])
+    require(not overlap, "and no two of its pieces overlap, so nothing is drawn twice")
+    require(not panel(0.0, 2.0, 0.0, 2.0, [(0.0, 2.0, 0.0, 2.0)]),
+            "a hole the size of the wall leaves no wall")
+
+    # The acceptance criterion, over the whole house: every opening is a hole in the right wall.
+    portal_rows = {row["id"]: row for row in layout_io.rows(
+        layout_io.load_layout(SOURCE, kinds=["portals"]), "portals")}
+    missing = []
+    for opening in layout_io.rows(layout_io.load_layout(SOURCE, kinds=["openings"]), "openings"):
+        portal = portal_rows.get(opening.get("portal"))
+        if portal is None or (portal.get("plane") or {}).get("axis") == "y":
+            continue
+        for side_of, across in ((portal["cellA"], portal["cellB"]),
+                                (portal["cellB"], portal["cellA"])):
+            cell = cells.get(side_of)
+            if cell is None or cell.get("kind") == "exterior":
+                continue  # a yard has no wall to cut; the room on the other side has it
+            if (cells.get(across) or {}).get("parent") == side_of:
+                continue  # a container's door is a hole in the CONTAINER, not in the room's wall
+            cut = False
+            for box in cell_boxes(cell, extent_of(cell, levels[cell["level"]])[0]):
+                for side in ("-X", "+X", "-Z", "+Z"):
+                    for hole in holes_in(side, box, cell, [portal]):
+                        want = (float(portal["rect"]["v"][0]), float(portal["rect"]["v"][1]))
+                        if abs(hole[2] - want[0]) < 1e-6 and abs(hole[3] - want[1]) < 1e-6:
+                            cut = True
+            if not cut:
+                missing.append(f"{opening['id']} in {side_of}")
+    require(not missing,
+            f"every opening in layout.openings.json is a hole of its own height in the wall of "
+            f"both cells it joins ({len(missing)} are not: {missing[:3]})")
+
+    # A cased opening has no leaf and is still a doorway. Counting doors is §13.1's business;
+    # a hole in a wall is this tool's, and a generator that cut only apertured portals would wall
+    # up every archway in the house.
+    cased = [row for row in portal_rows.values()
+             if not row.get("aperture") and (row.get("plane") or {}).get("axis") != "y"]
+    require(cased, "the house has cased openings to check")
+    uncut = []
+    for row in cased:
+        for side_of in (row["cellA"], row["cellB"]):
+            cell = cells.get(side_of)
+            if cell is None or cell.get("kind") == "exterior":
+                continue
+            if not any(holes_in(side, box, cell, [row])
+                       for box in cell_boxes(cell, extent_of(cell, levels[cell["level"]])[0])
+                       for side in ("-X", "+X", "-Z", "+Z")):
+                uncut.append(f"{row['id']} in {side_of}")
+    require(not uncut,
+            f"and all {len(cased)} of them are cut too, in both rooms ({uncut[:3]})")
+
+    # ...and a portal in one wall is not a hole in another. The plane's VALUE has to match, not
+    # only its axis, or every room with a door would have the same door in its opposite wall.
+    on_plus_z = [row for row in portal_rows.values()
+                 if subject["id"] in (row.get("cellA"), row.get("cellB"))
+                 and (row.get("plane") or {}).get("axis") == "z"
+                 and abs(float(row["plane"]["value"]) - kitchen_box[5]) < 1e-6]
+    require(on_plus_z, "the kitchen has a portal in its south wall")
+    require(not holes_in("-Z", kitchen_box, subject, on_plus_z),
+            "which is not a hole in its north wall")
+
+    # And the mesh really gains the bites: the kitchen's walls are cut by its portals.
+    reset_scene()
+    with_holes = build_cell(subject, extent, neighbours=neighbours, construction=construction,
+                            level=levels[subject["level"]], levels=levels,
+                            portals=list(portal_rows.values()))
+    require(len(with_holes.data.polygons) > len(polygons),
+            f"cutting the kitchen's openings adds faces to it, {len(polygons)} -> "
+            f"{len(with_holes.data.polygons)}")
 
     # A cell with no ceiling to be had. §13.6's attic level declares `ceiling: null` and every
     # attic cell overrides it, so this branch is unreachable from the authored house -- which is

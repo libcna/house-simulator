@@ -6657,9 +6657,36 @@ the chunk builder produces ≤ 6 chunks per cell.
       note: five injected bugs, all caught, including the outer face put on the inner plane —
             which a claim about the mesh's bounds catches and a claim about wall thickness alone
             would not.
-- [ ] HOUSE-00455 — Cut door and window openings from walls, with reveals and sills
+- [x] HOUSE-00455 — Cut door and window openings from walls, with reveals and sills
       dep: HOUSE-00454, HOUSE-00378 · sys: content · plat: TOOL · pri: MUST
       accept: every opening in `layout.openings.json` produces a hole of the right size in the right wall
+      note: (2026-09-08) the acceptance criterion is a **claim**, run over the whole house: for all
+            133 openings, the portal it names is a hole of its own height in the wall of both cells
+            it joins. Two exemptions, each with its reason: a yard has no wall to cut, so an
+            exterior cell is skipped and the room on the other side carries the hole; and a
+            container's door is a hole in the container, not in the room's wall, so a portal into
+            a nested sub-cell is skipped for the parent.
+      finding: **a portal is the hole, not an opening.** 43 of the house's vertical portals are
+            cased openings with no leaf, and a generator that cut only the ones with an `aperture`
+            would wall up every archway in the house. §13.1's "cased openings are not doors" is
+            about counting doors; it says nothing about whether there is a hole. Both are cut, and
+            both are claimed.
+      note: the hole is subtracted with a **grid**, not a boolean: the cuts are the holes' own
+            edges and a cell is emitted unless its centre is inside a hole. Exact for the handful
+            of openings a wall has, deterministic, no library — and every piece it emits is a
+            rectangle, which the lightmap unwrap downstream would much rather have than a polygon
+            with a slot in it. The claim is area: a panel plus its holes is the whole wall, and no
+            two pieces overlap.
+      note: the reveal is the four surfaces of the hole through the wall, of which the bottom one
+            **is** the sill. It runs from this room's inner face to the outer face of an exterior
+            wall, or to the centre line of a partition — the room on the other side carries its
+            half, the same rule as the wall faces themselves.
+      note: the shell is now 2.6 MB over 96 cells. Seven injected bugs; the two that survived the
+            first round were "cut only apertured portals" and "ignore the plane's value, match only
+            its axis" — the second would have put every room's door in its opposite wall as well,
+            and needed a claim that a portal in one wall is **not** a hole in another.
+      note: horizontal portals — the stairwells — pierce floors rather than walls and are left to
+            `HOUSE-00460`, which the task names.
 - [ ] HOUSE-00456 — Generate door frames, architraves and thresholds
       dep: HOUSE-00455 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00457 — Generate window frames, sashes, sills, glazing bars and the glass quad
