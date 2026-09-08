@@ -5420,6 +5420,14 @@ analytic answers; `ClipPlayer` blending and stride matching; the two-bone IK; th
 audio solver; the LOD selector's hysteresis; ID stability (a golden list of every id in the world
 data — adding is fine, renaming fails).
 
+The golden list is [`tests/unit/reference/world-ids.golden.txt`](tests/unit/reference/world-ids.golden.txt),
+2 152 ids over 27 kinds, maintained by `tools/world/id_golden.py` and gated as `world-ids`
+(`HOUSE-00399`). It is **append-only**: `--emit` records ids the world has gained and never deletes
+one, so a rename shows up as an id that left the world and keeps failing until a person removes the
+line and says why. Nothing in §15.7's eleven rules can see a rename — the layout is internally
+consistent under either name — and a save file is a list of ids (§68), so this is the only gate
+that stands between a tidy-up and every save ever written.
+
 ### 70.3 Integration tests (HEADLESS renderer, full `Game` loop)
 
 Roughly 220 cases. Each constructs the real `CnaHouseGame` against

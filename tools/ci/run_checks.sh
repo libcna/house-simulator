@@ -150,6 +150,11 @@ run_gate "window-schedule" python3 tools/world/window_schedule.py --check
 # longer exists -- which is worse than no plan, because somebody will act on it.
 run_gate "floor-plans" python3 tools/world/floor_plans.py --check
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
+# `HOUSE-00399`. An id is the only durable name anything has, and a save file is a list of them
+# (§68). Renaming a room leaves the layout internally consistent and every save broken, so none of
+# §15.7's eleven rules can see it. This gate can: the golden list is append-only, and an id that
+# leaves it fails until a person deletes the line and says why.
+run_gate "world-ids" python3 tools/world/id_golden.py --check
 # `HOUSE-00280`. The surface map is counted from the manifest, so importing or dropping a
 # footstep sample changes it. A stale map is HOUSE-00281 sourcing the wrong list.
 run_gate "footsteps" python3 tools/assets/footstep_map.py --check
