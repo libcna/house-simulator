@@ -6783,8 +6783,33 @@ the chunk builder produces ≤ 6 chunks per cell.
             at the world origin. The last needed a claim about the FIRST tread: a stair well
             already reaches the floor above whether or not there is a stair in it.
       note: 41 566 triangles over 96 cells.
-- [ ] HOUSE-00460 — Generate balustrades, newels, handrails and the stairwell openings in the floors above
+- [x] HOUSE-00460 — Generate balustrades, newels, handrails and the stairwell openings in the floors above
       dep: HOUSE-00459 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) a stairwell is a portal with a `y` plane, and until it was cut the landing
+            above every flight had a floor across it and the stair arrived in a ceiling. The same
+            `panel` that cuts a doorway out of a wall cuts the well out of a slab — 11.27 m² of
+            `L1_STAIR_MAIN`'s 14.47 m² floor is the hole you would fall through — and the claim is
+            the same one: the pieces plus the hole are the whole floor.
+      note: **the handrail is raked.** A level box over each tread is the easy way to avoid sloping
+            quads and is not a handrail; you can see the difference from the hall. It runs from one
+            balustrade height over the first tread to the same over the last, with a newel at each
+            end, and the injected "level, not raked" bug is caught by the claim that the highest
+            thing in the stair well is the rail over the TOP tread.
+      note: a rail goes up every side of a run that is **not against a wall**, decided by the run's
+            across edge lying on the cell's own boundary — both are centre-line numbers, which is
+            what makes them comparable. A `u`'s two inner edges face the well and never do, so the
+            main stair gets one rail up each run and its outer sides get none.
+      note: the railing round a well has a **gap where the stair arrives**, cut with the same
+            `minus` the skirting uses. A railing across the top of a flight is a railing you have
+            to climb, and it is the one thing about this task that a face count alone would not
+            have noticed: telling the builder about the flights turns the single rail along that
+            edge into two.
+      note: §70.5's balustrade row is still checked by neither gate — §12 declares 0.95 up a flight
+            and 1.10 at a drop and this generator now uses both, but there is no *row* in the
+            layout for a rail, so there is nothing for a validator to measure. That is the same
+            "missing input, not missing check" recorded under §70.5 by `HOUSE-00360`, and it is now
+            one step smaller: the heights are in the construction block and used.
+      note: six injected bugs, all caught. 42 518 triangles over 96 cells.
 - [ ] HOUSE-00461 — Generate the roof: hipped-and-gabled planes at 7:12, ridge, hips, valleys, eaves, soffits, fascias
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00462 — Generate the 5 dormers with their own roofs, cheeks and windows

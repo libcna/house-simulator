@@ -318,6 +318,30 @@ def holes_in(side: str, box: tuple, cell: dict, portals: list) -> list:
     return sorted(out)
 
 
+def slab_holes(portals: list, cell: dict, at_y: float, box: tuple) -> list:
+    """The horizontal portals that pierce a slab of @p cell at @p at_y, as `(x0, x1, z0, z1, id)`.
+
+    A stairwell is a portal with a `y` plane: the hole in the floor you walk round. Cutting it is
+    `HOUSE-00460`'s, and until it was cut the landing above every flight had a floor across it and
+    the stair arrived in a ceiling.
+    """
+    x0, x1, _y0, _y1, z0, z1 = box
+    out = []
+    for portal in portals:
+        plane = portal.get("plane") or {}
+        if plane.get("axis") != "y" or abs(float(plane["value"]) - at_y) > 1e-6:
+            continue
+        if cell["id"] not in (portal.get("cellA"), portal.get("cellB")):
+            continue
+        rect = portal.get("rect") or {}
+        hx0, hx1 = (float(value) for value in rect["u"])
+        hz0, hz1 = (float(value) for value in rect["v"])
+        if min(hx1, x1) - max(hx0, x0) <= 1e-6 or min(hz1, z1) - max(hz0, z0) <= 1e-6:
+            continue
+        out.append((max(hx0, x0), min(hx1, x1), max(hz0, z0), min(hz1, z1), portal["id"]))
+    return sorted(out)
+
+
 def panel(lo: float, hi: float, v0: float, v1: float,
           holes: list[tuple[float, float, float, float]]):
     """`(lo, hi, v0, v1)` rectangles covering the panel except where a hole is.
@@ -431,6 +455,11 @@ def mitred(lo: float, hi: float, corner_lo: float, corner_hi: float, proud: floa
 NOSING_PROJECT = 0.025
 NOSING_THICK = 0.045
 
+#: A handrail's section and a newel's, in metres. §12's `balustrade` and `railing` give the two
+#: HEIGHTS -- 0.95 up a flight, 1.10 at a drop -- and no section, so these are this generator's.
+RAIL_SECTION = 0.055
+NEWEL_SECTION = 0.090
+
 
 def flight_steps(flight: dict, bottom: float):
     """Every step of a flight as `(along_lo, along_hi, top_y, across_index)`, in run order.
@@ -472,7 +501,8 @@ TRIM_PROUD = 0.018
 THRESHOLD_THICK = 0.015
 
 
-def build_flight(flight: dict, solid, bottom: float) -> None:
+def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=None,
+                 inner=None) -> None:
     """A flight's steps, nosings and landing, as boxes, through @p solid.
 
     Solid steps rather than treads on a carriage: a blockout wants the shape you walk on and the
@@ -512,6 +542,40 @@ def build_flight(flight: dict, solid, bottom: float) -> None:
         # The nosing overhangs the riser below it by its own projection.
         place(a0 + offset - NOSING_PROJECT, a0 + offset, top - NOSING_THICK, top, lane)
 
+    # `HOUSE-00460`: a handrail up every side of a run that is not against a wall, and a newel at
+    # each end of it. "Against a wall" is the run's across edge lying on the CELL's own boundary --
+    # both are centre-line numbers, which is why they can be compared at all. A `u`'s two inner
+    # edges face the well and never do, so a U-stair gets one rail up each run and the outer sides
+    # get none.
+    if add is not None and construction:
+        height = float(construction.get("balustrade", 0.0))
+        wall_edges = set()
+        if inner is not None:
+            for value in ((inner[4], inner[5]) if along_axis_x else (inner[0], inner[1])):
+                wall_edges.add(round(value, 4))
+        lanes = sorted({lane for _a0, _a1, _top, lane in steps})
+        for lane in lanes:
+            run_steps = [step for step in steps if step[3] == lane]
+            offset = (turn * float(flight["going"]) + landing_depth) if lane else 0.0
+            lane_lo = across_lo if lane == 0 else across_hi - width
+            lane_hi = lane_lo + width
+            first, last = run_steps[0], run_steps[-1]
+            a_start = start + sign * (first[0] + offset)
+            a_end = start + sign * (last[1] + offset)
+            for edge in (lane_lo, lane_hi):
+                if round(edge, 4) in wall_edges:
+                    continue
+                rail_along(add, along_axis_x, a_start, a_end,
+                           first[2] + height, last[2] + height, edge, RAIL_SECTION)
+                for a_at, y_at in ((a_start, first[2]), (a_end, last[2])):
+                    post_lo, post_hi = sorted((a_at, a_at + sign * NEWEL_SECTION))
+                    if along_axis_x:
+                        solid(post_lo, post_hi, y_at - float(flight["rise"]), y_at + height,
+                              edge - NEWEL_SECTION / 2.0, edge + NEWEL_SECTION / 2.0)
+                    else:
+                        solid(edge - NEWEL_SECTION / 2.0, edge + NEWEL_SECTION / 2.0,
+                              y_at - float(flight["rise"]), y_at + height, post_lo, post_hi)
+
     if turn and landing_depth > 0.0:
         low = bottom + turn * float(flight["rise"])
         a0 = turn * float(flight["going"])
@@ -520,6 +584,61 @@ def build_flight(flight: dict, solid, bottom: float) -> None:
             solid(p0, p1, bottom, low, across_lo, across_hi)
         else:
             solid(across_lo, across_hi, bottom, low, p0, p1)
+
+
+def rail_along(add, axis_x: bool, a0: float, a1: float, y0: float, y1: float,
+               across: float, section: float) -> None:
+    """A rail from `(a0, y0)` to `(a1, y1)` along one axis, centred on @p across.
+
+    Six quads rather than an axis-aligned box, because a handrail up a flight is **raked**: its two
+    ends are a storey apart in height. A stepped rail -- a level box over each tread -- is the easy
+    way to avoid sloping quads and is not a handrail; you can see the difference from the hall.
+    """
+    half = section / 2.0
+    corners = []
+    for a, y in ((a0, y0), (a1, y1)):
+        for dy in (-half, half):
+            for dc in (-half, half):
+                corners.append((a, y + dy, across + dc))
+    def point(index):
+        a, y, c = corners[index]
+        return (a, y, c) if axis_x else (c, y, a)
+    for face, outward in (((0, 1, 3, 2), (-1.0, 0.0, 0.0)), ((4, 5, 7, 6), (1.0, 0.0, 0.0)),
+                          ((0, 2, 6, 4), (0.0, -1.0, 0.0)), ((1, 3, 7, 5), (0.0, 1.0, 0.0)),
+                          ((0, 1, 5, 4), (0.0, 0.0, -1.0)), ((2, 3, 7, 6), (0.0, 0.0, 1.0))):
+        world_outward = outward if axis_x else (outward[2], outward[1], outward[0])
+        add([point(index) for index in face], world_outward)
+
+
+def flight_going(flights, cell) -> float:
+    """The deepest going among the flights arriving in @p cell, as the tolerance for "at the edge".
+
+    A top tread sits one going short of the floor's edge or level with it depending on how the
+    flight was authored; anything within a tread's depth of the hole's edge is the way in.
+    """
+    return max([float(row.get("going") or 0.0) for row in flights or ()
+                if row.get("toCell") == cell["id"]] or [0.0])
+
+
+def top_tread_box(flight: dict, bottom: float):
+    """The world box of a flight's top step, or None. Where you step off it onto the floor above."""
+    footprint = flight.get("footprint") or {}
+    if not footprint or flight.get("run") not in ("-X", "+X", "-Z", "+Z"):
+        return None
+    x0, x1 = (float(value) for value in footprint["x"])
+    z0, z1 = (float(value) for value in footprint["z"])
+    run = flight["run"]
+    width = float(flight["width"])
+    along_axis_x = run in ("-X", "+X")
+    start = (x1 if run == "-X" else x0) if along_axis_x else (z1 if run == "-Z" else z0)
+    sign = -1.0 if run in ("-X", "-Z") else 1.0
+    across_lo, across_hi = (z0, z1) if along_axis_x else (x0, x1)
+    steps, turn, landing_depth = flight_steps(flight, bottom)
+    a0, a1, top, lane = steps[-1]
+    offset = (turn * float(flight["going"]) + landing_depth) if lane else 0.0
+    c0, c1 = (across_lo, across_lo + width) if lane == 0 else (across_hi - width, across_hi)
+    p0, p1 = sorted((start + sign * (a0 + offset), start + sign * (a1 + offset)))
+    return (p0, p1, c0, c1, top) if along_axis_x else (c0, c1, p0, p1, top)
 
 
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
@@ -734,9 +853,36 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         add(quad, look)
 
         # `HOUSE-00452`: the floor and the ceiling, inset to the same inner faces.
-        floor = [(ix0, y0, iz0), (ix1, y0, iz0), (ix1, y0, iz1), (ix0, y0, iz1)]
-        add(floor, (0.0, 1.0, 0.0))
-        add([(x, y1, z) for x, _y, z in floor], (0.0, -1.0, 0.0))
+        for level_y, look in ((y0, (0.0, 1.0, 0.0)), (y1, (0.0, -1.0, 0.0))):
+            wells = slab_holes(list(portals), cell, level_y, box)
+            for px0, px1, pz0, pz1 in panel(ix0, ix1, iz0, iz1, wells):
+                add([(px0, level_y, pz0), (px1, level_y, pz0),
+                     (px1, level_y, pz1), (px0, level_y, pz1)], look)
+            # `HOUSE-00460`: a railing round the hole in the FLOOR -- §70.5 asks for 1.05 m at a
+            # drop over a metre and §12 declares 1.10 -- with a gap where the stair arrives. A
+            # railing across the top of the flight would be a railing you have to climb.
+            if level_y != y0 or not construction:
+                continue
+            arrivals = [top_tread_box(row, float(row.get("fromY") or 0.0))
+                        for row in flights or () if row.get("toCell") == cell["id"]]
+            for hx0, hx1, hz0, hz1, _identifier in wells:
+                for axis_x, fixed, span in ((True, hz0, (hx0, hx1)), (True, hz1, (hx0, hx1)),
+                                            (False, hx0, (hz0, hz1)), (False, hx1, (hz0, hz1))):
+                    cuts = []
+                    for tread in arrivals:
+                        if tread is None:
+                            continue
+                        tx0, tx1, tz0, tz1, _top = tread
+                        near = (min(abs(tz0 - fixed), abs(tz1 - fixed)) if axis_x
+                                else min(abs(tx0 - fixed), abs(tx1 - fixed)))
+                        if near > float(flight_going(flights, cell)) + 1e-6:
+                            continue
+                        cuts.append((tx0, tx1) if axis_x else (tz0, tz1))
+                    for lo_at, hi_at in minus(span[0], span[1], cuts):
+                        rail_along(add, axis_x, lo_at, hi_at,
+                                   level_y + float(construction.get("railing", 0.0)),
+                                   level_y + float(construction.get("railing", 0.0)),
+                                   fixed, RAIL_SECTION)
 
     # `HOUSE-00459`: the flights that stand in this cell. A flight is carried by its `fromCell`,
     # the one it starts in, so it is built once and it is in the chunk of the room you are
@@ -748,7 +894,9 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         # garage steps join two cells on ONE level and are the only things that know what they
         # climb -- and otherwise the floor of the cell it stands in.
         foot = flight.get("fromY")
-        build_flight(flight, solid, float(foot) if foot is not None else extent[0])
+        build_flight(flight, solid, float(foot) if foot is not None else extent[0],
+                     add=add, construction=construction,
+                     inner=list(cell_boxes(cell, extent))[0])
 
     mesh = bpy.data.meshes.new(f"{cell['id']}_mesh")
     mesh.from_pydata(vertices, [], faces)
@@ -1306,6 +1454,34 @@ def selftest(output: Path) -> int:
                     - float(levels["L1"]["ffl"])) < 1e-6,
             "and none of it is below the floor it starts on or above the floor it reaches")
 
+    # ---- `HOUSE-00460`: the stairwell openings ------------------------------------------------
+    #
+    # A stairwell is a portal with a `y` plane. Until it was cut, the landing above every flight
+    # had a floor across it and the stair arrived in a ceiling.
+    upper = cells["L1_STAIR_MAIN"]
+    upper_extent = extent_of(upper, levels[upper["level"]])[0]
+    upper_box = list(cell_boxes(upper, upper_extent))[0]
+    wells = slab_holes(list(portal_rows.values()), upper, upper_extent[0], upper_box)
+    require(len(wells) == 1 and wells[0][4] == "P_STAIR_L0_L1",
+            f"the cell over the main stair has one hole in its floor ({wells})")
+    inner_upper = inset_box(upper_box, upper, neighbours, construction)
+    pieces = panel(inner_upper[0], inner_upper[1], inner_upper[4], inner_upper[5], wells)
+    covered = sum((a1 - a0) * (b1 - b0) for a0, a1, b0, b1 in pieces)
+    hole = (min(wells[0][1], inner_upper[1]) - max(wells[0][0], inner_upper[0])) * \
+           (min(wells[0][3], inner_upper[5]) - max(wells[0][2], inner_upper[4]))
+    whole = (inner_upper[1] - inner_upper[0]) * (inner_upper[5] - inner_upper[4])
+    require(abs(covered + hole - whole) < 1e-6 and hole > 1.0,
+            f"and its floor is that room's floor less the {hole:.2f} m² you would fall through "
+            f"({covered:.2f} + {hole:.2f} of {whole:.2f})")
+    lower = cells["L0_STAIR_MAIN"]
+    lower_extent = extent_of(lower, levels[lower["level"]])[0]
+    lower_box = list(cell_boxes(lower, lower_extent))[0]
+    require(len(slab_holes(list(portal_rows.values()), lower, lower_extent[1], lower_box)) == 1,
+            "and the same hole is missing from the ceiling below it, which is the same hole")
+    require(not slab_holes(list(portal_rows.values()), subject, extent[0],
+                           list(cell_boxes(subject, extent))[0]),
+            "while a room with no stair under it keeps its whole floor")
+
     # ...and the cell that carries the flight actually gets it. The claims above call
     # `build_flight` directly, which a builder that never called it would satisfy perfectly.
     stair_cell = cells[main["fromCell"]]
@@ -1322,12 +1498,21 @@ def selftest(output: Path) -> int:
                             levels=levels, portals=list(portal_rows.values()),
                             openings=openings_by_portal, cells_by_id=cells,
                             flights=list(flight_rows.values()))
-    require(len(with_stair.data.polygons) == without_faces + 6 * len(boxes),
-            f"{main['fromCell']} gains the flight's {len(boxes)} boxes "
+    # 35 boxes of stair, a handrail up the open side of each of the U's two runs with a newel at
+    # each end (2 + 4), and one more railing piece round the hole in this cell's OWN floor: the
+    # basement stair arrives through it, and telling the builder about the flights turns the one
+    # rail along that edge into two with a gap between them. A railing across the top of a flight
+    # is a railing you have to climb.
+    require(len(with_stair.data.polygons) == without_faces + 6 * (len(boxes) + 2 + 4 + 1),
+            f"{main['fromCell']} gains the flight's {len(boxes)} boxes, two handrails, four "
+            f"newels, and a gap in the railing where the basement stair comes up "
             f"({without_faces} -> {len(with_stair.data.polygons)})")
     top = max(vertex.co.z for vertex in with_stair.data.vertices)
-    require(abs(top - float(levels["L1"]["ffl"])) < 1e-4,
-            f"and the highest thing in it is the top tread, at the floor above ({top:.3f})")
+    handrail = float(levels["L1"]["ffl"]) + float(construction["balustrade"]) \
+        + RAIL_SECTION / 2.0
+    require(abs(top - handrail) < 1e-4,
+            f"and the highest thing in it is the handrail over the top tread, {handrail:.3f} m -- "
+            f"§12's balustrade height above the floor it arrives at ({top:.3f})")
     # The FOOT of the flight, which the cell's own walls do not give away: the stair well already
     # reaches `L1`'s floor whether or not a stair is in it, so the claim above cannot tell a
     # flight that starts on this floor from one that starts at the world origin.
