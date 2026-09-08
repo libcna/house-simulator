@@ -398,10 +398,40 @@ def window_owner(sides, cells_by_id: dict, fallback: str) -> str:
     return interior[0] if interior else fallback
 
 
+def minus(lo: float, hi: float, cuts) -> list[tuple[float, float]]:
+    """`[lo, hi]` with @p cuts taken out of it, as the runs that are left."""
+    out = []
+    cursor = lo
+    for cut_lo, cut_hi in sorted(cuts):
+        if cut_hi <= cursor + 1e-9 or cut_lo >= hi - 1e-9:
+            continue
+        if cut_lo > cursor + 1e-9:
+            out.append((cursor, min(cut_lo, hi)))
+        cursor = max(cursor, cut_hi)
+    if hi > cursor + 1e-9:
+        out.append((cursor, hi))
+    return out
+
+
+def mitred(lo: float, hi: float, corner_lo: float, corner_hi: float, proud: float):
+    """@p lo…@p hi shortened by @p proud at whichever end is a corner of the room.
+
+    Two boards that both ran to the corner would overlap there in a square of their own projection,
+    which is what a mitre is for. An end that is not a corner -- where one run of wall meets the
+    next along the same side -- is left alone, or the boards would part company in the middle of
+    a wall.
+    """
+    return (lo + (proud if abs(lo - corner_lo) < 1e-9 else 0.0),
+            hi - (proud if abs(hi - corner_hi) < 1e-9 else 0.0))
+
+
 #: §12's trim, in metres. `casing` and `skirting` are `layout.levels.json`'s; the two below are
 #: not in the data because §12 never gives them a number, and a board that stands proud of the
 #: wall by nothing z-fights with it.
 ARCHITRAVE_PROUD = 0.018
+#: A skirting and a cornice stand as proud of the wall as an architrave does, and mitre against
+#: each other at a corner by exactly that much.
+TRIM_PROUD = 0.018
 THRESHOLD_THICK = 0.015
 
 
@@ -518,6 +548,33 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         solid(sill_lo, sill_hi, hv0, hv0 + THRESHOLD_THICK, hu0, hu1)
                     else:
                         solid(hu0, hu1, hv0, hv0 + THRESHOLD_THICK, sill_lo, sill_hi)
+
+                # `HOUSE-00458`: the skirting and the cornice, along the foot and the head of
+                # this run of wall. Interrupted wherever an opening crosses the band -- a doorway
+                # has no skirting across it, and neither does a sidelight whose 0.10 m sill is
+                # below the board's 0.14 m top. Mitred at the room's corners: each board is
+                # shortened by its own projection at an end that IS a corner, so the two boards
+                # meet in the corner instead of overlapping in it.
+                for height, base, name in ((float(construction.get("skirting", 0.0)), y0,
+                                            "skirting"),
+                                           (float(construction.get("cornice", 0.0)), None,
+                                            "cornice")):
+                    if height <= 0.0:
+                        continue
+                    band_lo = base if base is not None else y1 - height
+                    band_hi = band_lo + height
+                    crossing = [(hole[0], hole[1]) for hole in holes
+                                if hole[3] > band_lo + 1e-9 and hole[2] < band_hi - 1e-9]
+                    corner_lo, corner_hi = (iz0, iz1) if side in ("-X", "+X") else (ix0, ix1)
+                    start, end = mitred(lo, hi, corner_lo, corner_hi, TRIM_PROUD)
+                    proud_at = plane + TRIM_PROUD * (1.0 if side in ("-X", "-Z") else -1.0)
+                    for bu0, bu1 in minus(start, end, crossing):
+                        if side in ("-X", "+X"):
+                            solid(min(plane, proud_at), max(plane, proud_at),
+                                  band_lo, band_hi, bu0, bu1)
+                        else:
+                            solid(bu0, bu1, band_lo, band_hi,
+                                  min(plane, proud_at), max(plane, proud_at))
 
                 # `HOUSE-00457`: the window. Frame, sash, glass and -- for a double-hung -- the
                 # meeting rail are generated ONCE, by the first of the portal's interior cells in
@@ -672,6 +729,10 @@ def selftest(output: Path) -> int:
     # One cell with a known box, exported and then READ BACK. The claim that matters is not that
     # the code computed a coordinate but that the coordinate arrived in the file.
     layout = layout_io.load_layout(SOURCE, kinds=["levels", "cells"])
+    portal_rows = {row["id"]: row for row in layout_io.rows(
+        layout_io.load_layout(SOURCE, kinds=["portals"]), "portals")}
+    openings_by_portal = {row["portal"]: row for row in layout_io.rows(
+        layout_io.load_layout(SOURCE, kinds=["openings"]), "openings") if row.get("portal")}
     levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
     cells = {row["id"]: row for row in layout_io.rows(layout, "cells")}
     subject = cells["L0_KITCHEN"]
@@ -803,8 +864,11 @@ def selftest(output: Path) -> int:
 
     # Six faces a box: four sides on the centre line and two inset slabs. And they face the right
     # way -- a floor whose normal points down is invisible from the room and lit from underneath.
+    # The walls alone, with the trim switched off the way the DATA switches it off: a construction
+    # block that declares no skirting and no cornice gets none. No test-only knob.
+    plain = dict(construction, skirting=0.0, cornice=0.0)
     reset_scene()
-    obj = build_cell(subject, extent, neighbours=neighbours, construction=construction,
+    obj = build_cell(subject, extent, neighbours=neighbours, construction=plain,
                      level=levels[subject["level"]], levels=levels, cells_by_id=cells)
     polygons = list(obj.data.polygons)
     all_runs = [(side, run) for side in ("-X", "+X", "-Z", "+Z")
@@ -816,7 +880,8 @@ def selftest(output: Path) -> int:
             f"{len(outside_runs)} are outside walls)")
     require(sum(1 for face in polygons if face.normal.z > 0.99) == 1
             and sum(1 for face in polygons if face.normal.z < -0.99) == 1,
-            "exactly one face looks up and one looks down: the floor and the ceiling")
+            "with the trim off, exactly one face looks up and one looks down: the floor and the "
+            "ceiling")
 
     # Every face looks INTO the room. These are the inner faces of the walls, seen from the only
     # place anyone stands; the outside of the house is `HOUSE-00454`'s. A face that points the
@@ -851,6 +916,64 @@ def selftest(output: Path) -> int:
     require(outer_span(top, top_extent, levels["L3"], levels)[1] == top_extent[1],
             "and the topmost storey's stops at its own ceiling, because there is no next one")
 
+    # ---- `HOUSE-00458`: the skirting and the cornice ------------------------------------------
+    reset_scene()
+    trimmed = build_cell(subject, extent, neighbours=neighbours, construction=construction,
+                         level=levels[subject["level"]], levels=levels, cells_by_id=cells)
+    require(len(trimmed.data.polygons) == len(polygons) + 12 * len(all_runs),
+            f"every run of wall gains a skirting and a cornice, six faces each "
+            f"({len(polygons)} -> {len(trimmed.data.polygons)} over {len(all_runs)} runs)")
+    require(abs(float(construction["skirting"]) - 0.14) < 1e-9
+            and abs(float(construction["cornice"]) - 0.11) < 1e-9,
+            f"and their heights are §12's, from the construction block "
+            f"({construction['skirting']}, {construction['cornice']})")
+    require(minus(0.0, 10.0, [(2.0, 3.0), (6.0, 7.0)]) == [(0.0, 2.0), (3.0, 6.0), (7.0, 10.0)],
+            "a board is interrupted by what crosses it and continues after it")
+    require(minus(0.0, 10.0, [(-1.0, 11.0)]) == [],
+            "and a doorway the width of the wall leaves no board at all")
+    require(minus(0.0, 10.0, [(2.0, 5.0), (3.0, 4.0)]) == [(0.0, 2.0), (5.0, 10.0)],
+            "an interruption inside another one does not reopen the board between them")
+    require(mitred(0.0, 4.0, 0.0, 4.0, 0.018) == (0.018, 3.982),
+            "a board that runs corner to corner is shortened at both ends, so the two boards "
+            "meeting there mitre instead of overlapping")
+    require(mitred(1.0, 4.0, 0.0, 4.0, 0.018) == (1.0, 3.982),
+            "...and an end that is not a corner is left alone, or the boards would part company "
+            "in the middle of a wall")
+
+
+    # The mesh follows `minus`: with the doorways cut, the boards are the pieces it returns.
+    reset_scene()
+    pierced_plain = build_cell(subject, extent, neighbours=neighbours, construction=plain,
+                               level=levels[subject["level"]], levels=levels,
+                               portals=list(portal_rows.values()), cells_by_id=cells)
+    plain_faces = len(pierced_plain.data.polygons)
+    reset_scene()
+    pierced = build_cell(subject, extent, neighbours=neighbours, construction=construction,
+                         level=levels[subject["level"]], levels=levels,
+                         portals=list(portal_rows.values()), cells_by_id=cells)
+    boards = 0
+    for side in ("-X", "+X", "-Z", "+Z"):
+        side_holes_all = holes_in(side, kitchen_box, subject, list(portal_rows.values()))
+        inner = inset_box(kitchen_box, subject, neighbours, construction)
+        corner = (inner[4], inner[5]) if side in ("-X", "+X") else (inner[0], inner[1])
+        for lo, hi, _wall in side_intervals(side, kitchen_box, subject, neighbours):
+            here = [hole for hole in side_holes_all if min(hole[1], hi) - max(hole[0], lo) > 1e-6]
+            for height, base in ((float(construction["skirting"]), kitchen_box[2]),
+                                 (float(construction["cornice"]),
+                                  kitchen_box[3] - float(construction["cornice"]))):
+                crossed = [(hole[0], hole[1]) for hole in here
+                           if hole[3] > base + 1e-9 and hole[2] < base + height - 1e-9]
+                start, end = mitred(lo, hi, corner[0], corner[1], TRIM_PROUD)
+                boards += len(minus(start, end, crossed))
+    require(len(pierced.data.polygons) == plain_faces + 6 * boards,
+            f"the kitchen's skirting and cornice come to {boards} boards once the doorways have "
+            f"broken them ({plain_faces} -> {len(pierced.data.polygons)})")
+
+    tops = {round(vertex.co.z, 6) for vertex in pierced.data.vertices}
+    require(round(kitchen_box[3] - float(construction["cornice"]), 6) in tops,
+            f"and the cornice hangs under the ceiling, not down at the floor "
+            f"({kitchen_box[3] - float(construction['cornice']):.3f} m)")
+
     # ---- `HOUSE-00455`: the openings ----------------------------------------------------------
     #
     # `panel` is a rectangle with rectangular bites out of it. The two things that can go wrong are
@@ -868,8 +991,6 @@ def selftest(output: Path) -> int:
             "a hole the size of the wall leaves no wall")
 
     # The acceptance criterion, over the whole house: every opening is a hole in the right wall.
-    portal_rows = {row["id"]: row for row in layout_io.rows(
-        layout_io.load_layout(SOURCE, kinds=["portals"]), "portals")}
     missing = []
     for opening in layout_io.rows(layout_io.load_layout(SOURCE, kinds=["openings"]), "openings"):
         portal = portal_rows.get(opening.get("portal"))
@@ -934,10 +1055,28 @@ def selftest(output: Path) -> int:
             f"cutting the kitchen's openings adds faces to it, {len(polygons)} -> {holes_faces}")
 
     # ---- `HOUSE-00456`: the door trim ---------------------------------------------------------
-    openings_by_portal = {row["portal"]: row for row in layout_io.rows(
-        layout_io.load_layout(SOURCE, kinds=["openings"]), "openings") if row.get("portal")}
     portal_cell_sides = {row["id"]: (row.get("cellA"), row.get("cellB"))
                          for row in portal_rows.values()}
+    # ...and over the real house: the kitchen's doorway to the pantry breaks the skirting on the
+    # wall it is in, and the window above it does not.
+    door_side = next(side for side in ("-X", "+X", "-Z", "+Z")
+                     for hole in holes_in(side, kitchen_box, subject, list(portal_rows.values()))
+                     if (openings_by_portal.get(hole[4]) or {}).get("kind") == "door")
+    side_holes_here = holes_in(door_side, kitchen_box, subject, list(portal_rows.values()))
+    skirting_top = kitchen_box[2] + float(construction["skirting"])
+    crossing = [(hole[0], hole[1]) for hole in side_holes_here
+                if hole[3] > kitchen_box[2] + 1e-9 and hole[2] < skirting_top - 1e-9]
+    require(crossing, f"something crosses the skirting on the kitchen's {door_side} wall")
+    span = side_span(door_side, kitchen_box)
+    require(len(minus(span[1], span[2], crossing)) == len(crossing) + 1,
+            f"so the board runs up to each doorway and starts again after it "
+            f"({len(minus(span[1], span[2], crossing))} pieces for {len(crossing)} openings)")
+    above = [hole for hole in side_holes_here
+             if (openings_by_portal.get(hole[4]) or {}).get("kind") == "window"
+             and hole[2] >= skirting_top]
+    require(all((hole[0], hole[1]) not in crossing for hole in above),
+            "and a window whose sill is above the board does not interrupt it")
+
     kitchen_holes = [hole for side in ("-X", "+X", "-Z", "+Z")
                      for hole in holes_in(side, kitchen_box, subject,
                                           list(portal_rows.values()))]

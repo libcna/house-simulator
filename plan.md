@@ -6731,8 +6731,25 @@ the chunk builder produces ≤ 6 chunks per cell.
             claim is written as **parts** — four frame boards, four sash boards, a rail, a pane, a
             sill — so a bug that drops one is a claim about the part that went missing rather than
             an unexplained number.
-- [ ] HOUSE-00458 — Generate skirtings and cornices per cell, mitred at corners and interrupted at openings
+- [x] HOUSE-00458 — Generate skirtings and cornices per cell, mitred at corners and interrupted at openings
       dep: HOUSE-00456 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) §12's own `skirting` 0.14 and `cornice` 0.11, along the foot and the head
+            of every run of wall, standing as proud of it as an architrave does.
+      note: **interrupted by what crosses the band, not by "doors".** A doorway breaks the
+            skirting; so does the front door's sidelight, whose 0.10 m sill is below the board's
+            0.14 m top; a window at 0.90 m does not. Asking whether the opening's own vertical
+            range overlaps the board's is the same rule for all three, and it is the rule that
+            gets `W_SIDELIGHT` right without anybody having to notice `W_SIDELIGHT`.
+      note: **mitred** means each board is shortened by its own projection at an end that is a
+            corner of the room — and only there. An end where one run of wall meets the next along
+            the same side is left alone, or the boards would part company in the middle of a wall.
+      note: the mesh is claimed to follow `minus`: the kitchen's 22 boards are counted from the
+            layout, through the same interruption and mitre rules, and compared with the faces the
+            builder actually emitted. Four of the first six injected bugs survived the claims that
+            only tested the helper functions — a board that ignored `minus`, a cornice at the
+            floor, a skirting measured from the ceiling, and no mitre at all — and that mesh claim
+            is what catches all four.
+      note: the shell is 39 766 triangles over 96 cells, still well under §17.2's ~180 000.
 - [ ] HOUSE-00459 — Generate stair carriages, treads, risers, nosings and landings for the 7 flights
       dep: HOUSE-00379 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00460 — Generate balustrades, newels, handrails and the stairwell openings in the floors above
