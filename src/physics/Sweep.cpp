@@ -83,43 +83,20 @@ namespace cnahouse::physics
             obb.halfExtents.X, obb.halfExtents.Y + capsule.halfHeight, obb.halfExtents.Z);
         const float radius = capsule.radius;
 
-        // Already touching? The nearest point of `inner` to the origin decides it, exactly.
-        const Xna::Vector3 nearest = Clamped(origin, inner);
-        const Xna::Vector3 away(origin.X - nearest.X, origin.Y - nearest.Y, origin.Z - nearest.Z);
-        const float awaySquared = LengthSquared(away);
-        if (awaySquared <= radius * radius)
+        // Already touching? Asked of the same code the overlap test uses -- and answered with its
+        // normal, which is already the way OUT and already back in world axes -- so a sweep and a
+        // depenetration cannot disagree about whether a body is inside a wall.
+        const Overlap overlap = OverlapCapsuleObb(capsule, obb);
+        if (overlap.overlapped)
         {
             result.hit = true;
             result.time = 0.0f;
             result.startedInside = true;
-            // The way OUT, which is what a caller depenetrates along. Deep inside the box every
-            // direction is as good as another and the deepest axis is the shortest way out; on the
-            // surface the offset itself is the normal.
-            if (awaySquared > kEpsilon * kEpsilon)
-            {
-                const float length = std::sqrt(awaySquared);
-                result.normal = Xna::Vector3(away.X / length, away.Y / length, away.Z / length);
-            }
-            else
-            {
-                const float toX = inner.X - std::fabs(origin.X);
-                const float toY = inner.Y - std::fabs(origin.Y);
-                const float toZ = inner.Z - std::fabs(origin.Z);
-                if (toX <= toY && toX <= toZ)
-                {
-                    result.normal = Xna::Vector3(origin.X < 0.0f ? -1.0f : 1.0f, 0.0f, 0.0f);
-                }
-                else if (toY <= toZ)
-                {
-                    result.normal = Xna::Vector3(0.0f, origin.Y < 0.0f ? -1.0f : 1.0f, 0.0f);
-                }
-                else
-                {
-                    result.normal = Xna::Vector3(0.0f, 0.0f, origin.Z < 0.0f ? -1.0f : 1.0f);
-                }
-            }
+            result.normal = overlap.normal;
+            return result;
         }
-        else if (LengthSquared(direction) >= kEpsilon * kEpsilon)
+
+        if (LengthSquared(direction) >= kEpsilon * kEpsilon)
         {
             // The slab test against the box grown by the radius on every axis. That box CONTAINS
             // the rounded one, so a miss here is a miss -- and a hit is a candidate whose feature
@@ -469,6 +446,129 @@ namespace cnahouse::physics
             best.Offer(std::max(0.0f, t), normal);
         }
 
+        /// The triangle extruded along Y by the capsule's half-height: six vertices, nine edges and
+        /// five faces. Rounding it by the radius is the Minkowski sum of the triangle and the
+        /// capsule -- which is what the sweep and the overlap are BOTH asking about, so it is built
+        /// once, here, rather than twice with a chance of the two drifting apart.
+        struct Prism
+        {
+            Xna::Vector3 points[6];
+            Xna::Vector3 corners[5][4];
+            Xna::Vector3 normals[5];
+            int counts[5] = {0, 0, 0, 0, 0};
+            Xna::Vector3 centroid;
+        };
+
+        /// False when the triangle is degenerate -- two vertices in the same place, or three in a
+        /// line. There is no surface there and no normal that is not noise.
+        bool BuildPrism(float halfHeight,
+                        const Xna::Vector3& a,
+                        const Xna::Vector3& b,
+                        const Xna::Vector3& c,
+                        Prism& prism)
+        {
+            Xna::Vector3 face = Cross(Subtract(b, a), Subtract(c, a));
+            if (!Normalise(face))
+            {
+                return false;
+            }
+
+            const float h = halfHeight;
+            const Xna::Vector3 points[6] = {
+                Xna::Vector3(a.X, a.Y + h, a.Z),
+                Xna::Vector3(b.X, b.Y + h, b.Z),
+                Xna::Vector3(c.X, c.Y + h, c.Z),
+                Xna::Vector3(a.X, a.Y - h, a.Z),
+                Xna::Vector3(b.X, b.Y - h, b.Z),
+                Xna::Vector3(c.X, c.Y - h, c.Z),
+            };
+            for (int i = 0; i < 6; ++i)
+            {
+                prism.points[i] = points[i];
+                prism.centroid = Xna::Vector3(prism.centroid.X + points[i].X / 6.0f,
+                                              prism.centroid.Y + points[i].Y / 6.0f,
+                                              prism.centroid.Z + points[i].Z / 6.0f);
+            }
+
+            // The five faces: the two triangle copies and the three quads the edges sweep, with
+            // their OUTWARD normals. Outward is decided by the prism itself rather than by a
+            // winding this function was not given -- a triangle mesh's winding is for drawing
+            // (§14) and a body is stopped from either side.
+            const int faceIndices[5][4] = {
+                {0, 1, 2, -1},
+                {3, 5, 4, -1},
+                {0, 3, 4, 1},
+                {1, 4, 5, 2},
+                {2, 5, 3, 0},
+            };
+            for (int f = 0; f < 5; ++f)
+            {
+                int count = 0;
+                for (const int index : faceIndices[f])
+                {
+                    if (index >= 0)
+                    {
+                        prism.corners[f][count++] = points[index];
+                    }
+                }
+                Xna::Vector3 normal = Cross(Subtract(prism.corners[f][1], prism.corners[f][0]),
+                                            Subtract(prism.corners[f][2], prism.corners[f][0]));
+                if (!Normalise(normal))
+                {
+                    // A quad of zero area: the triangle's edge is parallel to Y, so the face is a
+                    // line. The edge tests cover it.
+                    continue;
+                }
+                if (Dot(Subtract(prism.centroid, prism.corners[f][0]), normal) > 0.0f)
+                {
+                    normal = Xna::Vector3(-normal.X, -normal.Y, -normal.Z);
+                }
+                prism.normals[f] = normal;
+                prism.counts[f] = count;
+            }
+            return true;
+        }
+
+        /// The SQUARED distance from @p point to the prism's surface; @p nearest is the point on
+        /// that surface and @p insideSolid says which side of it @p point is on. The prism is
+        /// convex, so its five faces are the whole of its surface and the nearest of them is the
+        /// nearest point.
+        float ClosestOnPrism(const Prism& prism,
+                             const Xna::Vector3& point,
+                             Xna::Vector3& nearest,
+                             bool& insideSolid)
+        {
+            nearest = prism.centroid;
+            float best = -1.0f;
+            insideSolid = true;
+            for (int f = 0; f < 5; ++f)
+            {
+                if (prism.counts[f] == 0)
+                {
+                    continue;
+                }
+                if (Dot(Subtract(point, prism.corners[f][0]), prism.normals[f]) > 0.0f)
+                {
+                    insideSolid = false;
+                }
+                const Xna::Vector3 candidate =
+                    ClosestOnFace(point, prism.corners[f], prism.counts[f], prism.normals[f]);
+                const float distance = LengthSquared(Subtract(point, candidate));
+                if (best < 0.0f || distance < best)
+                {
+                    best = distance;
+                    nearest = candidate;
+                }
+            }
+            if (best < 0.0f)
+            {
+                // Every face was degenerate, which `BuildPrism` has already refused to produce.
+                insideSolid = false;
+                return 0.0f;
+            }
+            return best;
+        }
+
     } // namespace
 
     SweepHit SweepCapsuleTriangle(const Capsule& capsule,
@@ -479,8 +579,8 @@ namespace cnahouse::physics
     {
         SweepHit result;
 
-        Xna::Vector3 face = Cross(Subtract(b, a), Subtract(c, a));
-        if (!Normalise(face))
+        Prism prism;
+        if (!BuildPrism(capsule.halfHeight, a, b, c, prism))
         {
             // Two vertices in the same place, or three in a line. There is no surface to hit, and
             // a normal made of noise is worse than a miss: a body would be pushed in a direction
@@ -488,94 +588,15 @@ namespace cnahouse::physics
             return result;
         }
 
-        // The prism: the triangle extruded along Y by the capsule's half-height. Its faces are the
-        // two triangle copies and the three quads the edges sweep; rounding it by the radius makes
-        // it the Minkowski sum of the triangle and the capsule, and the sweep a ray against that.
-        const float h = capsule.halfHeight;
-        const Xna::Vector3 p[6] = {
-            Xna::Vector3(a.X, a.Y + h, a.Z),
-            Xna::Vector3(b.X, b.Y + h, b.Z),
-            Xna::Vector3(c.X, c.Y + h, c.Z),
-            Xna::Vector3(a.X, a.Y - h, a.Z),
-            Xna::Vector3(b.X, b.Y - h, b.Z),
-            Xna::Vector3(c.X, c.Y - h, c.Z),
-        };
-        Xna::Vector3 centroid;
-        for (const Xna::Vector3& point : p)
-        {
-            centroid = Xna::Vector3(
-                centroid.X + point.X / 6.0f, centroid.Y + point.Y / 6.0f, centroid.Z + point.Z / 6.0f);
-        }
-
         const Xna::Vector3 origin = capsule.centre;
         const float radius = capsule.radius;
 
-        // The prism's five faces, gathered once: their corners and their OUTWARD normals. Outward
-        // is decided by the prism itself rather than by a winding this function was not given -- a
-        // triangle mesh's winding is for drawing (§14) and a sweep is stopped from either side.
-        Xna::Vector3 faceCorners[5][4];
-        Xna::Vector3 faceNormals[5];
-        int faceCounts[5] = {0, 0, 0, 0, 0};
-        const int faceIndices[5][4] = {
-            {0, 1, 2, -1},
-            {3, 5, 4, -1},
-            {0, 3, 4, 1},
-            {1, 4, 5, 2},
-            {2, 5, 3, 0},
-        };
-        for (int f = 0; f < 5; ++f)
-        {
-            int count = 0;
-            for (const int index : faceIndices[f])
-            {
-                if (index >= 0)
-                {
-                    faceCorners[f][count++] = p[index];
-                }
-            }
-            Xna::Vector3 normal = Cross(Subtract(faceCorners[f][1], faceCorners[f][0]),
-                                        Subtract(faceCorners[f][2], faceCorners[f][0]));
-            if (!Normalise(normal))
-            {
-                // A quad of zero area: the triangle's edge is parallel to Y, so the face is a
-                // line. The edge tests cover it.
-                continue;
-            }
-            if (Dot(Subtract(centroid, faceCorners[f][0]), normal) > 0.0f)
-            {
-                normal = Xna::Vector3(-normal.X, -normal.Y, -normal.Z);
-            }
-            faceNormals[f] = normal;
-            faceCounts[f] = count;
-        }
-
-        // Already touching? The capsule is the segment grown by the radius and the prism is the
-        // triangle grown by the segment, so the two overlap exactly when the capsule's CENTRE is
-        // within the radius of the prism -- which is a distance to a convex solid, and its five
-        // faces are the whole of its surface.
-        Xna::Vector3 nearest = centroid;
-        float nearestDistance = -1.0f;
-        bool insideSolid = true;
-        for (int f = 0; f < 5; ++f)
-        {
-            if (faceCounts[f] == 0)
-            {
-                continue;
-            }
-            if (Dot(Subtract(origin, faceCorners[f][0]), faceNormals[f]) > 0.0f)
-            {
-                insideSolid = false;
-            }
-            const Xna::Vector3 candidate =
-                ClosestOnFace(origin, faceCorners[f], faceCounts[f], faceNormals[f]);
-            const float distance = LengthSquared(Subtract(origin, candidate));
-            if (nearestDistance < 0.0f || distance < nearestDistance)
-            {
-                nearestDistance = distance;
-                nearest = candidate;
-            }
-        }
-        if (nearestDistance >= 0.0f && (insideSolid || nearestDistance <= radius * radius))
+        // Already touching? Asked of the same nearest-point code the overlap test uses, so a sweep
+        // and a depenetration cannot disagree about whether a body is inside a wall.
+        Xna::Vector3 nearest;
+        bool insideSolid = false;
+        const float nearestDistance = ClosestOnPrism(prism, origin, nearest, insideSolid);
+        if (insideSolid || nearestDistance <= radius * radius)
         {
             result.hit = true;
             result.time = 0.0f;
@@ -587,7 +608,7 @@ namespace cnahouse::physics
             }
             if (!Normalise(out))
             {
-                out = faceNormals[0];
+                out = prism.normals[0];
             }
             result.normal = out;
             return result;
@@ -596,11 +617,11 @@ namespace cnahouse::physics
         Best best;
         for (int f = 0; f < 5; ++f)
         {
-            if (faceCounts[f] == 0)
+            if (prism.counts[f] == 0)
             {
                 continue;
             }
-            FaceFeature(origin, motion, faceCorners[f], faceCounts[f], faceNormals[f], radius, best);
+            FaceFeature(origin, motion, prism.corners[f], prism.counts[f], prism.normals[f], radius, best);
         }
         const int edges[9][2] = {
             {0, 1},
@@ -615,9 +636,9 @@ namespace cnahouse::physics
         };
         for (const auto& edge : edges)
         {
-            EdgeFeature(origin, motion, p[edge[0]], p[edge[1]], radius, best);
+            EdgeFeature(origin, motion, prism.points[edge[0]], prism.points[edge[1]], radius, best);
         }
-        for (const Xna::Vector3& vertex : p)
+        for (const Xna::Vector3& vertex : prism.points)
         {
             SphereFeature(origin, motion, vertex, radius, best);
         }
@@ -629,6 +650,186 @@ namespace cnahouse::physics
         result.hit = true;
         result.time = best.time;
         result.normal = best.normal;
+        return result;
+    }
+
+    Overlap OverlapCapsuleObb(const Capsule& capsule, const CollisionObb& obb)
+    {
+        Overlap result;
+        // The same frame and the same rounded box the sweep uses. Written once here and called by
+        // `SweepCapsuleObb` for its own already-touching branch, so the two cannot disagree about
+        // whether a body is inside a wall.
+        const float cosYaw = std::cos(-obb.yaw);
+        const float sinYaw = std::sin(-obb.yaw);
+        const Xna::Vector3 offset(capsule.centre.X - obb.centre.X,
+                                  capsule.centre.Y - obb.centre.Y,
+                                  capsule.centre.Z - obb.centre.Z);
+        const Xna::Vector3 origin(
+            offset.X * cosYaw + offset.Z * sinYaw, offset.Y, -offset.X * sinYaw + offset.Z * cosYaw);
+        const Xna::Vector3 inner(
+            obb.halfExtents.X, obb.halfExtents.Y + capsule.halfHeight, obb.halfExtents.Z);
+        const Xna::Vector3 nearest = Clamped(origin, inner);
+        const Xna::Vector3 away(origin.X - nearest.X, origin.Y - nearest.Y, origin.Z - nearest.Z);
+        const float awaySquared = LengthSquared(away);
+        if (awaySquared > capsule.radius * capsule.radius)
+        {
+            return result;
+        }
+        result.overlapped = true;
+        Xna::Vector3 normal;
+        if (awaySquared > kEpsilon * kEpsilon)
+        {
+            const float length = std::sqrt(awaySquared);
+            result.depth = capsule.radius - length;
+            normal = Xna::Vector3(away.X / length, away.Y / length, away.Z / length);
+        }
+        else
+        {
+            // Inside the box itself: the way out is the nearest face, and the depth is how far
+            // that face is plus the radius the surface stands off by.
+            const float toX = inner.X - std::fabs(origin.X);
+            const float toY = inner.Y - std::fabs(origin.Y);
+            const float toZ = inner.Z - std::fabs(origin.Z);
+            if (toX <= toY && toX <= toZ)
+            {
+                result.depth = toX + capsule.radius;
+                normal = Xna::Vector3(origin.X < 0.0f ? -1.0f : 1.0f, 0.0f, 0.0f);
+            }
+            else if (toY <= toZ)
+            {
+                result.depth = toY + capsule.radius;
+                normal = Xna::Vector3(0.0f, origin.Y < 0.0f ? -1.0f : 1.0f, 0.0f);
+            }
+            else
+            {
+                result.depth = toZ + capsule.radius;
+                normal = Xna::Vector3(0.0f, 0.0f, origin.Z < 0.0f ? -1.0f : 1.0f);
+            }
+        }
+        const float cosBack = std::cos(obb.yaw);
+        const float sinBack = std::sin(obb.yaw);
+        result.normal = Xna::Vector3(
+            normal.X * cosBack + normal.Z * sinBack, normal.Y, -normal.X * sinBack + normal.Z * cosBack);
+        return result;
+    }
+
+    Overlap OverlapCapsuleTriangle(const Capsule& capsule,
+                                   const Xna::Vector3& a,
+                                   const Xna::Vector3& b,
+                                   const Xna::Vector3& c)
+    {
+        Overlap result;
+        Prism prism;
+        if (!BuildPrism(capsule.halfHeight, a, b, c, prism))
+        {
+            return result;
+        }
+        Xna::Vector3 nearest;
+        bool insideSolid = false;
+        const float distanceSquared = ClosestOnPrism(prism, capsule.centre, nearest, insideSolid);
+        if (!insideSolid && distanceSquared > capsule.radius * capsule.radius)
+        {
+            return result;
+        }
+        result.overlapped = true;
+        const float distance = std::sqrt(distanceSquared);
+        result.depth = insideSolid ? capsule.radius + distance : capsule.radius - distance;
+        Xna::Vector3 out = Subtract(capsule.centre, nearest);
+        if (insideSolid)
+        {
+            out = Xna::Vector3(-out.X, -out.Y, -out.Z);
+        }
+        if (!Normalise(out))
+        {
+            out = prism.normals[0];
+        }
+        result.normal = out;
+        return result;
+    }
+
+    CellOverlap OverlapCell(const CollisionWorld& world,
+                            const CollisionCell& cell,
+                            BroadPhase& broad,
+                            const Capsule& capsule)
+    {
+        CellOverlap result;
+        const float half = capsule.halfHeight + capsule.radius;
+        const Xna::BoundingBox box(Xna::Vector3(capsule.centre.X - capsule.radius,
+                                                capsule.centre.Y - half,
+                                                capsule.centre.Z - capsule.radius),
+                                   Xna::Vector3(capsule.centre.X + capsule.radius,
+                                                capsule.centre.Y + half,
+                                                capsule.centre.Z + capsule.radius));
+        const std::size_t obbCount = world.obbs.size();
+        for (const std::uint32_t index : broad.Query(cell, box))
+        {
+            ++result.tested;
+            Overlap one;
+            if (index < obbCount)
+            {
+                one = OverlapCapsuleObb(capsule, world.obbs[index]);
+            }
+            else
+            {
+                const CollisionMesh& mesh = world.meshes[index - obbCount];
+                for (std::size_t t = 0; t + 2 < mesh.indices.size(); t += 3)
+                {
+                    const Overlap each = OverlapCapsuleTriangle(capsule,
+                                                                mesh.vertices[mesh.indices[t]],
+                                                                mesh.vertices[mesh.indices[t + 1]],
+                                                                mesh.vertices[mesh.indices[t + 2]]);
+                    if (each.overlapped && (!one.overlapped || each.depth > one.depth))
+                    {
+                        one = each;
+                    }
+                }
+            }
+            // The DEEPEST, which is what §49.3 says to push along. Pushing out of the shallowest
+            // first would leave the body inside the other and spend an iteration doing it.
+            if (one.overlapped && (!result.overlapped || one.depth > result.depth))
+            {
+                const std::uint32_t tested = result.tested;
+                static_cast<Overlap&>(result) = one;
+                result.shape = index;
+                result.tested = tested;
+            }
+        }
+        return result;
+    }
+
+    Depenetration Depenetrate(const CollisionWorld& world,
+                              const CollisionCell& cell,
+                              BroadPhase& broad,
+                              const Capsule& capsule)
+    {
+        Depenetration result;
+        Capsule moving = capsule;
+        for (int i = 0; i < kDepenetrationIterations; ++i)
+        {
+            const CellOverlap overlap = OverlapCell(world, cell, broad, moving);
+            if (i == 0)
+            {
+                result.deepest = overlap.overlapped ? overlap.depth : 0.0f;
+            }
+            if (!overlap.overlapped)
+            {
+                result.resolved = true;
+                return result;
+            }
+            result.resolved = false;
+            ++result.iterations;
+            // A fixed step, not the measured depth: pushing out by the depth resolves in one go
+            // and teleports a body that has ended up deeply buried into whatever is beyond.
+            result.offset = Xna::Vector3(result.offset.X + overlap.normal.X * kDepenetrationStep,
+                                         result.offset.Y + overlap.normal.Y * kDepenetrationStep,
+                                         result.offset.Z + overlap.normal.Z * kDepenetrationStep);
+            moving.centre = Xna::Vector3(moving.centre.X + overlap.normal.X * kDepenetrationStep,
+                                         moving.centre.Y + overlap.normal.Y * kDepenetrationStep,
+                                         moving.centre.Z + overlap.normal.Z * kDepenetrationStep);
+        }
+        // Four pushes used and still inside: `resolved` stays false and the caller decides. §49.5's
+        // guarantee suite is what notices a body that gets here regularly.
+        result.resolved = !OverlapCell(world, cell, broad, moving).overlapped;
         return result;
     }
 

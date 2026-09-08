@@ -93,6 +93,28 @@ namespace cnahouse::physics
                                                 const Microsoft::Xna::Framework::Vector3& b,
                                                 const Microsoft::Xna::Framework::Vector3& c);
 
+    /// @brief How far, and which way, a capsule is inside something.
+    ///
+    /// `normal` points the way OUT and `depth` is how far along it the surface is. Both are what
+    /// §49.3's step 5 pushes along; `depth` is not used to size the push -- that is a fixed 0.02 m
+    /// -- but it is what decides which of several overlaps is the deepest and therefore which
+    /// normal wins.
+    struct Overlap
+    {
+        bool overlapped = false;
+        float depth = 0.0f;
+        Microsoft::Xna::Framework::Vector3 normal;
+    };
+
+    /// @brief Is @p capsule inside @p obb, and by how much (`HOUSE-00547`)?
+    [[nodiscard]] Overlap OverlapCapsuleObb(const Capsule& capsule, const CollisionObb& obb);
+
+    /// @brief Is @p capsule inside the triangle @p a @p b @p c, and by how much?
+    [[nodiscard]] Overlap OverlapCapsuleTriangle(const Capsule& capsule,
+                                                 const Microsoft::Xna::Framework::Vector3& a,
+                                                 const Microsoft::Xna::Framework::Vector3& b,
+                                                 const Microsoft::Xna::Framework::Vector3& c);
+
     /// @brief A sphere is a capsule with no segment, and §45's camera arm is the caller.
     ///
     /// Named because §45 names it -- *"sweep a sphere of radius 0.22 from the pivot to the desired
@@ -129,5 +151,49 @@ namespace cnahouse::physics
                                          class BroadPhase& broad,
                                          const Capsule& capsule,
                                          const Microsoft::Xna::Framework::Vector3& motion);
+
+    /// @brief The DEEPEST overlap of @p capsule with anything in @p cell, and which shape it is.
+    struct CellOverlap : Overlap
+    {
+        std::uint32_t shape = CellSweepHit::kNothing;
+        std::uint32_t tested = 0u;
+    };
+
+    [[nodiscard]] CellOverlap OverlapCell(const CollisionWorld& world,
+                                          const CollisionCell& cell,
+                                          class BroadPhase& broad,
+                                          const Capsule& capsule);
+
+    /// @brief §49.3 step 5: **4 iterations of 0.02 m push-out along the deepest overlap normal.**
+    struct Depenetration
+    {
+        /// @brief Where the capsule ended up, relative to where it started.
+        Microsoft::Xna::Framework::Vector3 offset;
+        /// @brief Iterations actually run, 0 when it was clear to begin with.
+        int iterations = 0;
+        /// @brief Whether it ended clear of everything. **False is not a failure to report and
+        ///        forget**: a body still overlapping after four pushes is somewhere it should
+        ///        never have reached, and §49.5's guarantee suite is what notices.
+        bool resolved = true;
+        /// @brief The deepest overlap found on the FIRST iteration, for the overlay to show.
+        float deepest = 0.0f;
+    };
+
+    /// @brief The fixed step's last act: nudge @p capsule out of whatever it is inside.
+    ///
+    /// **A fixed 0.02 m per iteration, not the measured depth.** Pushing out by the depth resolves
+    /// in one step and teleports a body that has ended up deeply buried -- through a wall, into
+    /// the room beyond -- which is worse than the overlap. Four small pushes move at most 0.08 m
+    /// and a body that needs more than that has gone somewhere the rest of the step should have
+    /// stopped it reaching.
+    [[nodiscard]] Depenetration Depenetrate(const CollisionWorld& world,
+                                            const CollisionCell& cell,
+                                            class BroadPhase& broad,
+                                            const Capsule& capsule);
+
+    /// @brief §49.3's push-out per iteration, in metres.
+    inline constexpr float kDepenetrationStep = 0.02f;
+    /// @brief §49.3's iteration count.
+    inline constexpr int kDepenetrationIterations = 4;
 
 } // namespace cnahouse::physics

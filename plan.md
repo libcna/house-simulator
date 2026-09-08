@@ -7604,10 +7604,44 @@ never escapes and never penetrates.
             step limit. A broad phase asked about the capsule's START position finds the column it
             is standing in and nothing else, so a body moving 3 m in one step is handed only the
             wall behind it -- which is what the first version of that case accidentally proved by
-            starting 0.08 m inside the west wall and reporting a correct t = 0 against it.- [ ] HOUSE-00546 — Implement `RayCast` against OBBs, triangles and the terrain height field
+            starting 0.08 m inside the west wall and reporting a correct t = 0 against it.
+- [ ] HOUSE-00546 — Implement `RayCast` against OBBs, triangles and the terrain height field
       dep: HOUSE-00544 · sys: physics · plat: ALL · pri: MUST
-- [ ] HOUSE-00547 — Implement `Overlap` and depenetration (4 iterations, 0.02 m push-out)
+- [x] HOUSE-00547 — Implement `Overlap` and depenetration (4 iterations, 0.02 m push-out)
       dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) §49.3 step 5 -- *"4 iterations of 0.02 m push-out along the deepest
+            overlap normal"*. `OverlapCapsuleObb` and `OverlapCapsuleTriangle` measure a depth and
+            a way out, `OverlapCell` takes the DEEPEST of a cell over the same broad phase
+            `SweepCell` uses, and `Depenetrate` pushes a fixed 0.02 m four times and reports
+            honestly when that was not enough. The fixed step is the point: pushing out by the
+            MEASURED depth resolves every case in one go and teleports a deeply buried body
+            through the wall it is buried in, which is worse than the overlap.
+      note: the prism a triangle sweeps -- six vertices, nine edges, five faces -- was factored out
+            of `SweepCapsuleTriangle` into `BuildPrism`/`ClosestOnPrism`, and both sweeps now
+            answer *"already touching?"* by CALLING the overlap. A sweep that reports
+            `startedInside` where the overlap reports nothing would be a body that is stuck and
+            cannot be pushed out of anything; the two can no longer disagree because there is only
+            one of them.
+      accept: 21 cases. The depth of a partly buried capsule and of one whose centre is inside the
+            box; the way out is the NEAREST face, not the deepest axis; the boundary located to a
+            millimetre either side; the normal returned in world axes for a yawed box; the WHOLE
+            capsule catching a kerb its centre clears by 0.45 m, contact on the kerb's top edge at
+            0.0879 m and the push west AND up; a floor pushing up from above and down from below,
+            winding regardless; a mesh's deepest TRIANGLE and a cell's deepest SHAPE, each against
+            a case where the first in index order is the shallower; 0.03 m resolved in two pushes
+            and 0.12 m explicitly NOT resolved in four, with the offset capped at 0.08 m; and in
+            the real house a body dropped onto the middle of 77 cells lands clear and 216
+            deliberate 0.03 m burials all come back out (2 cells are stairs, where a 50 mm probe
+            lands on a tread and a 0.60 m body clips the two above it -- §49.3's StepUp, not this)
+      finding: (2026-09-08, found by `HOUSE-00547`) **a cell's `bounds.Min.Y` is not the floor a
+            body stands on** -- it is the bottom of the floor SLAB, 0.35 m lower in the basement.
+            The first version of the real-house case stood the capsule at `Min.Y + 0.92` and found
+            93 of 96 cells "already inside something"; it was measuring the depenetration of a body
+            buried in its own floor and would have called it a pass. The height is found by
+            dropping a 50 mm probe now.
+      note: the body these cases use is §43.1's -- a capsule of radius 0.30 m standing 1.80 m
+            tall. §70.5's 0.62 m is the CLEARANCE a portal has to give that body, not the body's
+            own width, and reading it as the width made every number here 10 mm out.
 - [ ] HOUSE-00548 — Implement `GroundProbe`: downward sweep returning height, normal, surface kind, cell id
       dep: HOUSE-00546 · sys: physics · plat: ALL · pri: MUST
 - [x] HOUSE-00549 — Implement the fixed-step accumulator at 1/120 s with a 4-step clamp
