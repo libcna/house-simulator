@@ -4873,8 +4873,21 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
       dep: HOUSE-00296, HOUSE-00297 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00300 — Generate and review `licenses/THIRD-PARTY-ASSETS.md`
       dep: HOUSE-00299 · sys: — · plat: TOOL · pri: MUST
-- [ ] HOUSE-00301 — Establish the asset-acquisition runbook so later sessions add assets consistently
+- [x] HOUSE-00301 — Establish the asset-acquisition runbook so later sessions add assets consistently
       dep: HOUSE-00300 · sys: — · plat: TOOL · pri: MUST
+      note: `docs/asset-acquisition-runbook.md`: the seven steps every asset in this repository
+            already went through, written down. Evidence before download; `SOURCE.md` beside the
+            files; a manifest row with the hash and the four redistribution booleans; verify and
+            generate in one tool; the per-kind gates; the working recorded, not just the result.
+      note: the `dep` on `HOUSE-00300` is about having reviewed the credits document, and that
+            document exists and passes `verify_licences.py --check` today. The runbook is a
+            **process**, and writing it before the next acquisition is the only time it can save
+            anybody anything — after would be a description of what somebody had already had to
+            work out.
+      note: it ends with the two failures this project has actually had, because a runbook that
+            lists only the happy path is a runbook nobody reads twice: a licence that says one
+            thing on the store page and another in the download, and a pack that fits until it does
+            not — `audio-core` at 99.8 % of 30 MB before the ambience beds were finished.
 - [ ] HOUSE-00302 — Phase-4 review and commit; update `cna-house.md` §19/§20 with what was actually found
       dep: HOUSE-00261…HOUSE-00301 · sys: — · plat: ALL · pri: MUST
 
