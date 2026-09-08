@@ -6708,8 +6708,29 @@ the chunk builder produces ≤ 6 chunks per cell.
       note: the shell is now 15 178 triangles over 96 cells, against §17.2's ~180 000 for the
             finished thing — the trims, stairs, roof and dormers still to come. Six injected bugs,
             all caught after the two findings above were fixed.
-- [ ] HOUSE-00457 — Generate window frames, sashes, sills, glazing bars and the glass quad
+- [x] HOUSE-00457 — Generate window frames, sashes, sills, glazing bars and the glass quad
       dep: HOUSE-00455 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) a four-board frame filling the reveal's depth, a four-board sash inside
+            it, 6 mm of glass in the middle, and a sill board projecting 30 mm into the room. §12.6
+            gives every window type a leaf size and a sill height and **no section at all**, so the
+            four sections are this generator's and are named at the top of the file rather than
+            buried in the arithmetic — when §12 gains a section, one place changes.
+      note: the glazing bar is a **meeting rail**, and only §12.6's `W_DH_*` types get one: a
+            double-hung window has two sashes that pass, and the picture, panel, slider, hopper,
+            louvre, bay, dormer and borrowed-light types are all single lights. Read from the type
+            prefix, which is §12.6's own schedule name. Two types have a rail and ten do not, and
+            the claim names both lists.
+      finding: **`EXT_BACKYARD` owned the kitchen's window.** A window is one object, so it is
+            built once, by the first of its portal's *interior* cells in id order — and with the
+            cell table missing the exterior test silently passed, `EXT_BACKYARD` sorted first, and
+            the kitchen was left with a hole, a sill board and no glass in it. The rule is a named
+            function now, its fallback is "the cell that is asking" rather than "whichever id sorts
+            first", and both directions are claimed: a window onto the lawn is built by the room,
+            and a borrowed-light window between two rooms is built by exactly one of them.
+      note: the shell is 23 902 triangles over 96 cells. Five injected bugs, all caught; the count
+            claim is written as **parts** — four frame boards, four sash boards, a rail, a pane, a
+            sill — so a bug that drops one is a claim about the part that went missing rather than
+            an unexplained number.
 - [ ] HOUSE-00458 — Generate skirtings and cornices per cell, mitred at corners and interrupted at openings
       dep: HOUSE-00456 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00459 — Generate stair carriages, treads, risers, nosings and landings for the 7 flights

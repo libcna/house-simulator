@@ -361,6 +361,43 @@ def architrave_boards(hu0: float, hu1: float, hv0: float, hv1: float, casing: fl
             (hu0 - casing, hu1 + casing, hv1, hv1 + casing)]
 
 
+#: A window's section, in metres. §12.6 gives every type a leaf size and a sill height and no
+#: section at all, so these four are this generator's and are named here rather than buried:
+#: a frame 55 mm wide, a sash 42 mm inside it, 6 mm of glass, and a sill board projecting 30 mm
+#: into the room. They are the sizes a joiner would use; nothing in the layout contradicts them,
+#: and when §12 gains a section this is the one place that changes.
+FRAME_SECTION = 0.055
+SASH_SECTION = 0.042
+GLASS_THICK = 0.006
+SILL_PROJECT = 0.030
+
+#: §12.6's type table names the double-hung windows `W_DH_*`, and a double-hung window has a
+#: meeting rail across the middle where the two sashes pass. Every other type in that table --
+#: picture, panel, slider, hopper, louvre, bay, dormer -- is a single light and has no bar. Read
+#: from the type prefix, which `docs/conventions.md` makes an id and §12.6 makes a schedule entry.
+MEETING_RAIL = 0.050
+
+
+def has_meeting_rail(opening_type: str) -> bool:
+    return str(opening_type or "").startswith("W_DH_")
+
+
+def window_owner(sides, cells_by_id: dict, fallback: str) -> str:
+    """Which cell builds a window: the first of its INTERIOR cells in id order.
+
+    A window is one object. A borrowed-light window between the kitchen and the sunroom must not
+    be built by both of them, and a window onto the back lawn must not be built by the lawn, which
+    has no walls. Falls back to @p fallback when the cell table is not to hand, so a caller that
+    forgets it gets a window built once by the cell asking rather than a window built by whichever
+    id happens to sort first -- which is how `EXT_BACKYARD` came to own the kitchen's window and
+    the kitchen came to have a hole with a sill and no glass in it.
+    """
+    interior = sorted(identifier for identifier in sides or ()
+                      if identifier and (cells_by_id.get(identifier) or {}).get("kind")
+                      not in (None, "exterior"))
+    return interior[0] if interior else fallback
+
+
 #: §12's trim, in metres. `casing` and `skirting` are `layout.levels.json`'s; the two below are
 #: not in the data because §12 never gives them a number, and a board that stands proud of the
 #: wall by nothing z-fights with it.
@@ -369,7 +406,7 @@ THRESHOLD_THICK = 0.015
 
 
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
-               level=None, levels=None, portals=(), openings=None):
+               level=None, levels=None, portals=(), openings=None, cells_by_id=None):
     """One mesh object named for the cell: its floor, its ceiling and its walls' inner faces."""
     construction = construction or {}
     neighbours = list(neighbours)
@@ -377,6 +414,8 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
     faces: list[tuple[int, ...]] = []
 
     openings = openings or {}
+    cells_by_id = cells_by_id or {}
+    portal_cells = {row["id"]: (row.get("cellA"), row.get("cellB")) for row in portals}
 
     def add(points, outward) -> None:
         base = len(vertices)
@@ -480,6 +519,54 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     else:
                         solid(hu0, hu1, hv0, hv0 + THRESHOLD_THICK, sill_lo, sill_hi)
 
+                # `HOUSE-00457`: the window. Frame, sash, glass and -- for a double-hung -- the
+                # meeting rail are generated ONCE, by the first of the portal's interior cells in
+                # id order, because a window is one object and two rooms must not each build it.
+                # The sill board is per-room, like the architrave: both rooms have one.
+                for hole in holes:
+                    opening = openings.get(hole[4])
+                    if opening is None or opening.get("kind") != "window":
+                        continue
+                    hu0, hu1, hv0, hv1 = hole[0], hole[1], hole[2], hole[3]
+                    near, far_side = plane, far
+                    lo_face, hi_face = min(near, far_side), max(near, far_side)
+
+                    def band(u0, u1, v0, v1, d0=lo_face, d1=hi_face, at=side):
+                        if at in ("-X", "+X"):
+                            solid(d0, d1, v0, v1, u0, u1)
+                        else:
+                            solid(u0, u1, v0, v1, d0, d1)
+
+                    owner = window_owner(portal_cells.get(hole[4]), cells_by_id, cell["id"])
+                    if owner == cell["id"]:
+                        # The frame: a ring round the hole, filling the reveal's depth.
+                        f = FRAME_SECTION
+                        band(hu0, hu1, hv0, hv0 + f)
+                        band(hu0, hu1, hv1 - f, hv1)
+                        band(hu0, hu0 + f, hv0 + f, hv1 - f)
+                        band(hu1 - f, hu1, hv0 + f, hv1 - f)
+                        # The sash, inside the frame, and the glass inside the sash.
+                        su0, su1, sv0, sv1 = hu0 + f, hu1 - f, hv0 + f, hv1 - f
+                        g = SASH_SECTION
+                        depth = (lo_face + hi_face) / 2.0
+                        sash_lo, sash_hi = depth - g / 2.0, depth + g / 2.0
+                        band(su0, su1, sv0, sv0 + g, sash_lo, sash_hi)
+                        band(su0, su1, sv1 - g, sv1, sash_lo, sash_hi)
+                        band(su0, su0 + g, sv0 + g, sv1 - g, sash_lo, sash_hi)
+                        band(su1 - g, su1, sv0 + g, sv1 - g, sash_lo, sash_hi)
+                        if has_meeting_rail(opening.get("type")):
+                            middle = (sv0 + sv1) / 2.0
+                            band(su0, su1, middle - MEETING_RAIL / 2.0,
+                                 middle + MEETING_RAIL / 2.0, sash_lo, sash_hi)
+                        band(su0 + g, su1 - g, sv0 + g, sv1 - g,
+                             depth - GLASS_THICK / 2.0, depth + GLASS_THICK / 2.0)
+
+                    # The sill board, projecting into THIS room under the opening.
+                    casing = float((opening.get("frame") or {}).get("casing") or 0.0)
+                    proud = plane + SILL_PROJECT * (1.0 if side in ("-X", "-Z") else -1.0)
+                    band(hu0 - casing, hu1 + casing, hv0 - SILL_PROJECT, hv0,
+                         min(plane, proud), max(plane, proud))
+
                 for hu0, hu1, hv0, hv1, _portal_id in holes:
                     for corner_lo, corner_hi, along, look in (
                             (hv0, hv0, "v", (0.0, 1.0, 0.0)),      # the sill, looking up
@@ -549,7 +636,8 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
             continue
         reset_scene()
         obj = build_cell(cell, extent, neighbours=neighbours, construction=construction,
-                         level=level, levels=levels, portals=portals, openings=openings)
+                         level=level, levels=levels, portals=portals, openings=openings,
+                         cells_by_id={row["id"]: row for row in layout_io.rows(layout, "cells")})
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
@@ -717,7 +805,7 @@ def selftest(output: Path) -> int:
     # way -- a floor whose normal points down is invisible from the room and lit from underneath.
     reset_scene()
     obj = build_cell(subject, extent, neighbours=neighbours, construction=construction,
-                     level=levels[subject["level"]], levels=levels)
+                     level=levels[subject["level"]], levels=levels, cells_by_id=cells)
     polygons = list(obj.data.polygons)
     all_runs = [(side, run) for side in ("-X", "+X", "-Z", "+Z")
                 for run in side_intervals(side, kitchen_box, subject, neighbours)]
@@ -840,7 +928,7 @@ def selftest(output: Path) -> int:
     reset_scene()
     with_holes = build_cell(subject, extent, neighbours=neighbours, construction=construction,
                             level=levels[subject["level"]], levels=levels,
-                            portals=list(portal_rows.values()))
+                            portals=list(portal_rows.values()), cells_by_id=cells)
     holes_faces = len(with_holes.data.polygons)   # read now: `reset_scene` invalidates the object
     require(holes_faces > len(polygons),
             f"cutting the kitchen's openings adds faces to it, {len(polygons)} -> {holes_faces}")
@@ -848,6 +936,8 @@ def selftest(output: Path) -> int:
     # ---- `HOUSE-00456`: the door trim ---------------------------------------------------------
     openings_by_portal = {row["portal"]: row for row in layout_io.rows(
         layout_io.load_layout(SOURCE, kinds=["openings"]), "openings") if row.get("portal")}
+    portal_cell_sides = {row["id"]: (row.get("cellA"), row.get("cellB"))
+                         for row in portal_rows.values()}
     kitchen_holes = [hole for side in ("-X", "+X", "-Z", "+Z")
                      for hole in holes_in(side, kitchen_box, subject,
                                           list(portal_rows.values()))]
@@ -859,13 +949,38 @@ def selftest(output: Path) -> int:
     reset_scene()
     with_trim = build_cell(subject, extent, neighbours=neighbours, construction=construction,
                            level=levels[subject["level"]], levels=levels,
-                           portals=list(portal_rows.values()), openings=openings_by_portal)
+                           portals=list(portal_rows.values()), openings=openings_by_portal,
+                           cells_by_id=cells)
     # Three boards and a threshold, six faces each, per door -- and nothing for a window, whose
     # frame is `HOUSE-00457`'s and has a different section.
-    require(len(with_trim.data.polygons) == holes_faces + 24 * doors_here,
-            f"each of the {doors_here} doorway(s) gains two jambs, a head and a threshold, and "
-            f"the {kinds.count('window')} window(s) gain nothing "
-            f"({holes_faces} -> {len(with_trim.data.polygons)})")
+    # A door gains four boxes -- two jambs, a head, a threshold. A window gains a four-board
+    # frame, a four-board sash, a pane of glass and a sill board, plus a meeting rail if it is
+    # double-hung. Six faces to a box. Counted as parts rather than as a magic number, so an
+    # injected bug that drops one part is a claim about the part that went missing.
+    window_holes = [hole for hole in kitchen_holes
+                    if (openings_by_portal.get(hole[4]) or {}).get("kind") == "window"]
+    boxes_expected = 4 * doors_here
+    for hole in window_holes:
+        row = openings_by_portal[hole[4]]
+        boxes_expected += 1                                   # the sill board, in every room
+        if window_owner(portal_cell_sides.get(hole[4]), cells, subject["id"]) == subject["id"]:
+            boxes_expected += 4 + 4 + 1 + (1 if has_meeting_rail(row.get("type")) else 0)
+    require(len(with_trim.data.polygons) == holes_faces + 6 * boxes_expected,
+            f"the {doors_here} doorway(s) and {len(window_holes)} window(s) add "
+            f"{boxes_expected} boxes between them ({holes_faces} -> "
+            f"{len(with_trim.data.polygons)}, expected {holes_faces + 6 * boxes_expected})")
+
+    rails = {row["type"] for row in openings_by_portal.values()
+             if row.get("kind") == "window" and has_meeting_rail(row.get("type"))}
+    plain = {row["type"] for row in openings_by_portal.values()
+             if row.get("kind") == "window" and not has_meeting_rail(row.get("type"))}
+    require(rails and plain and all(name.startswith("W_DH_") for name in rails),
+            f"only §12.6's double-hung types get a meeting rail ({sorted(rails)}), and the "
+            f"single lights do not ({sorted(plain)})")
+    require(window_owner(("L0_KITCHEN", "EXT_BACKYARD"), cells, "EXT_BACKYARD") == "L0_KITCHEN",
+            "a window onto the back lawn is built by the room, not by the lawn")
+    require(window_owner(("L0_SUNROOM", "L0_KITCHEN"), cells, "L0_SUNROOM") == "L0_KITCHEN",
+            "and a borrowed-light window between two rooms is built once, by the first of them")
 
     casings = {float((row.get("frame") or {}).get("casing") or 0.0)
                for row in openings_by_portal.values() if row.get("kind") == "door"}
@@ -892,13 +1007,15 @@ def selftest(output: Path) -> int:
     reset_scene()
     widened = build_cell(subject, extent, neighbours=neighbours, construction=construction,
                          level=levels[subject["level"]], levels=levels,
-                         portals=list(portal_rows.values()), openings=doubled)
+                         portals=list(portal_rows.values()), openings=doubled,
+                         cells_by_id=cells)
     widened_points = sorted(tuple(round(value, 6) for value in vertex.co)
                             for vertex in widened.data.vertices)
     reset_scene()
     again = build_cell(subject, extent, neighbours=neighbours, construction=construction,
                        level=levels[subject["level"]], levels=levels,
-                       portals=list(portal_rows.values()), openings=openings_by_portal)
+                       portals=list(portal_rows.values()), openings=openings_by_portal,
+                       cells_by_id=cells)
     same_points = sorted(tuple(round(value, 6) for value in vertex.co)
                          for vertex in again.data.vertices)
     require(widened_points != same_points,
