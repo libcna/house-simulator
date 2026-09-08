@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/physics/Sweep.hpp"
 
+#include "cnahouse/physics/BroadPhase.hpp"
+
 #include <algorithm>
 #include <cmath>
 
@@ -627,6 +629,65 @@ namespace cnahouse::physics
         result.hit = true;
         result.time = best.time;
         result.normal = best.normal;
+        return result;
+    }
+
+    CellSweepHit SweepCell(const CollisionWorld& world,
+                           const CollisionCell& cell,
+                           BroadPhase& broad,
+                           const Capsule& capsule,
+                           const Xna::Vector3& motion)
+    {
+        CellSweepHit result;
+
+        // The box the capsule occupies over the WHOLE motion: its shape at the start united with
+        // its shape at the end. Narrowing to the start alone is how a fast body tunnels.
+        const float r = capsule.radius;
+        const float half = capsule.halfHeight + r;
+        const Xna::Vector3 from = capsule.centre;
+        const Xna::Vector3 to(from.X + motion.X, from.Y + motion.Y, from.Z + motion.Z);
+        const Xna::BoundingBox swept(
+            Xna::Vector3(
+                std::min(from.X, to.X) - r, std::min(from.Y, to.Y) - half, std::min(from.Z, to.Z) - r),
+            Xna::Vector3(
+                std::max(from.X, to.X) + r, std::max(from.Y, to.Y) + half, std::max(from.Z, to.Z) + r));
+
+        const std::size_t obbCount = world.obbs.size();
+        for (const std::uint32_t index : broad.Query(cell, swept))
+        {
+            ++result.tested;
+            SweepHit hit;
+            if (index < obbCount)
+            {
+                hit = SweepCapsuleObb(capsule, motion, world.obbs[index]);
+            }
+            else
+            {
+                const CollisionMesh& mesh = world.meshes[index - obbCount];
+                for (std::size_t t = 0; t + 2 < mesh.indices.size(); t += 3)
+                {
+                    const SweepHit one = SweepCapsuleTriangle(capsule,
+                                                              motion,
+                                                              mesh.vertices[mesh.indices[t]],
+                                                              mesh.vertices[mesh.indices[t + 1]],
+                                                              mesh.vertices[mesh.indices[t + 2]]);
+                    if (one.hit && (!hit.hit || one.time < hit.time))
+                    {
+                        hit = one;
+                    }
+                }
+            }
+            // Earliest, not first found: a body walking into a corner meets two walls, and
+            // stopping at whichever the shape list happened to hold first would let it through
+            // the other.
+            if (hit.hit && (!result.hit || hit.time < result.time))
+            {
+                const std::uint32_t tested = result.tested;
+                static_cast<SweepHit&>(result) = hit;
+                result.shape = index;
+                result.tested = tested;
+            }
+        }
         return result;
     }
 

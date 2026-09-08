@@ -3,6 +3,8 @@
 
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 
+#include <cstdint>
+
 #include "cnahouse/physics/CollisionData.hpp"
 
 namespace cnahouse::physics
@@ -90,5 +92,42 @@ namespace cnahouse::physics
                                                 const Microsoft::Xna::Framework::Vector3& a,
                                                 const Microsoft::Xna::Framework::Vector3& b,
                                                 const Microsoft::Xna::Framework::Vector3& c);
+
+    /// @brief A sphere is a capsule with no segment, and §45's camera arm is the caller.
+    ///
+    /// Named because §45 names it -- *"sweep a sphere of radius 0.22 from the pivot to the desired
+    /// camera position"* -- and not because it is a different calculation: `Capsule{centre, 0, radius}` IS
+    /// a sphere, and `SweepCapsuleObb` and `SweepCapsuleTriangle` are already exact for one. A
+    /// second implementation would be a second thing to keep right.
+    [[nodiscard]] inline Capsule Sphere(const Microsoft::Xna::Framework::Vector3& centre, float radius)
+    {
+        return Capsule{centre, 0.0f, radius};
+    }
+
+    /// @brief What a sweep against a whole cell found, and which shape it was.
+    struct CellSweepHit : SweepHit
+    {
+        /// @brief The GLOBAL shape index that was hit, or `kNothing`.
+        std::uint32_t shape = kNothing;
+        /// @brief Sentinel for "nothing was hit", which is not shape 0.
+        static constexpr std::uint32_t kNothing = 0xFFFFFFFFu;
+        /// @brief Shapes the narrow phase actually tested. What the broad phase saved.
+        std::uint32_t tested = 0u;
+    };
+
+    /// @brief The earliest contact of @p capsule swept along @p motion against everything in
+    ///        @p cell (`HOUSE-00545`).
+    ///
+    /// The broad phase narrows the cell to the shapes the swept box overlaps and the narrow phase
+    /// takes the earliest of those; @p broad is passed in rather than made here so that a caller
+    /// sweeping several times a frame reuses one.
+    ///
+    /// **Earliest, not first found.** A body walking into a corner meets two walls, and stopping at
+    /// whichever the shape list happened to hold first would let it through the other.
+    [[nodiscard]] CellSweepHit SweepCell(const CollisionWorld& world,
+                                         const CollisionCell& cell,
+                                         class BroadPhase& broad,
+                                         const Capsule& capsule,
+                                         const Microsoft::Xna::Framework::Vector3& motion);
 
 } // namespace cnahouse::physics

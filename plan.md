@@ -7586,9 +7586,25 @@ never escapes and never penetrates.
             every feature test wants `t >= 0` and the contact is behind the origin. The overlap is
             asked directly now -- the centre within the radius of the prism, which is a distance to
             a convex solid and its five faces are the whole of its surface.
-- [ ] HOUSE-00545 — Implement sphere sweep (for the third-person camera)
+- [x] HOUSE-00545 — Implement sphere sweep (for the third-person camera)
       dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
-- [ ] HOUSE-00546 — Implement `RayCast` against OBBs, triangles and the terrain height field
+      note: (2026-09-08) §45 asks for *"a sphere of radius 0.22 swept from the pivot to the desired
+            camera position"*, and what that needed was not another primitive -- a sphere is a
+            capsule with no segment and `SweepCapsuleObb` is already exact for one, which is a
+            claim -- but a sweep against a whole CELL. `SweepCell` runs the broad phase over the
+            box the capsule occupies across the WHOLE motion and takes the earliest of what comes
+            back, over OBBs and over every triangle of a mesh. `physics::Sphere` names §45's case.
+      accept: the arm stops at the nearer wall at its analytic distance; the EARLIEST hit wins and
+            not the first in the list; an arm down a corridor hits nothing; a fast sphere does not
+            tunnel, because the query box is the whole motion and not the start; the named helper
+            and a hand-built zero-half-height capsule agree exactly; and in the real house 8 arms
+            from the middle of every cell give unit normals, times in [0,1] and shapes that cell
+            holds, with at most 32 shapes reaching the narrow phase for one arm
+      finding: (2026-09-08, found by `HOUSE-00545`) the tunnelling guard is the query box, not a
+            step limit. A broad phase asked about the capsule's START position finds the column it
+            is standing in and nothing else, so a body moving 3 m in one step is handed only the
+            wall behind it -- which is what the first version of that case accidentally proved by
+            starting 0.08 m inside the west wall and reporting a correct t = 0 against it.- [ ] HOUSE-00546 — Implement `RayCast` against OBBs, triangles and the terrain height field
       dep: HOUSE-00544 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00547 — Implement `Overlap` and depenetration (4 iterations, 0.02 m push-out)
       dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
