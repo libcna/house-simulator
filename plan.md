@@ -7146,8 +7146,25 @@ never escapes and never penetrates.
       dep: HOUSE-00552 · sys: physics · plat: CI · pri: MUST
 - [ ] HOUSE-00615 — Guarantee test: every flight is traversable in both directions, and every landing is reachable
       dep: HOUSE-00560 · sys: physics · plat: CI · pri: MUST
-- [ ] HOUSE-00616 — Guarantee test: the player capsule fits through every open portal
+- [x] HOUSE-00616 — Guarantee test: the player capsule fits through every open portal
       dep: HOUSE-00362 · sys: physics · plat: CI · pri: MUST
+      note: (2026-09-09) `PortalClearanceTests.TheCapsuleFitsEveryPortalItIsMeantTo`, over the
+            **deployed** world: 103 walked-through portals, the tightest 0.900 m wide
+            (`P_B1_STAIR__B1_MECHANICAL`) and 2.000 m high against §70.5's 0.62 × 1.95 m capsule.
+            The margins are printed whether or not the test passes — "no violations" says nothing
+            about how close the house is to having one.
+      finding: **what a validation rule cannot say is which portals are exempt on purpose.** Rule
+            10 in both validators takes `crouch` and `hatch` at face value, so marking a doorway
+            `crouch` silences the check for ever and nothing notices. The guarantee names this
+            house's ten exemptions — the six attic stores under the rafters, the under-stair
+            cupboard's 1.55 m leaf, the two container interiors and the garage loft hatch — so an
+            eleventh has to be written down in a commit with a reason. That is the difference
+            between a rule and a guarantee, and the injected "add a `crouch` quietly" is what it
+            catches.
+      note: the capsule's two numbers are pinned against §70.5 rather than read from
+            `WorldValidator`'s constants: a guarantee that took the checker's own numbers would
+            agree with it about a typo. Four injected bugs, all caught after that was fixed.
+      verify: unit PortalClearanceTests.* — 518/518 with it.
 - [ ] HOUSE-00617 — Guarantee test: the player never ends a frame inside static geometry (checked every step of a scripted tour)
       dep: HOUSE-00547 · sys: physics · plat: CI · pri: MUST
 - [ ] HOUSE-00618 — Guarantee test: a 20-minute seeded random walk never trips the boundary counter and never leaves the named cells
