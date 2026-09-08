@@ -8945,8 +8945,43 @@ it must be tuned, not just implemented.
             being stable when nothing moves, the pull-back, boxes contained/straddling/behind/
             beyond, and the pitch that reaches the pose by a different road from the rest of it.
             Seven injected bugs, seven caught (one after the cache was populated first).
-- [ ] HOUSE-00631 — Implement the `F2` world overlay (cell, position, yaw/pitch, surface, target)
+- [x] HOUSE-00631 — Implement the `F2` world overlay (cell, position, yaw/pitch, surface, target)
       dep: HOUSE-00621, HOUSE-00559 · sys: debug · plat: ALL · pri: MUST
+      note: (2026-09-09) `debug::WorldOverlay` over a `WorldSnapshot`, a PRESENTER like §71's `F1`
+            and `F9`: it owns no measurement and runs no query of its own, so everything it says
+            is asserted in a unit test rather than looked at. Seven lines, one per thing §69's
+            `F2` row names.
+      note: **degrees and a compass point, not radians.** §14 makes yaw 0 north and positive east,
+            which is a bearing already -- and an overlay that prints 2.3562 makes its reader do
+            trigonometry before they can tell which way they are facing, which is the entire
+            question the overlay is opened to answer. The point is the NEAREST of eight, so `N`
+            means "within 22.5° of north"; an injected truncation is caught by 20° still being
+            north and 25° already being north-east.
+      note: the position is in MILLIMETRES with the sign always shown, because most of what a
+            position on a debug overlay is for is being typed back into §69's `teleport`.
+      note: **which of §16.4's four steps found the cell is on the line** (`HOUSE-00559`). "grid"
+            on every frame means the incremental test is failing and the 5 cm hysteresis is doing
+            nothing -- invisible in a cell id that happens to be right -- and `NOT FOUND` is
+            shouted rather than mentioned, because §16.4 calls it a world-data bug.
+      finding: **a body in the air must not be told it is standing on a floor.** `floor '-' gap
+            0 mm` is an ANSWER, in the same shape as a real one, and a debug overlay that answers
+            a question it has no answer to is worse than one that is missing a line.
+      note: §54's held item and §50's target interactable arrive in phase 14 (`HOUSE-01137` and
+            the interactable framework). Their lines are here NOW, showing `-`, because an overlay
+            that grows lines as features land is one whose layout moves under a reader who has
+            learnt where to look -- and a test asserts the line count does not change when the
+            values arrive.
+      note: the `F2` KEY and the snapshot that fills it belong to `HOUSE-00632`, which is where
+            the first-person frame is assembled: the game currently draws §70's blockout with the
+            free-fly camera and has no player, no cell tracker and no ground probe in it, and a
+            key that toggles an overlay with nothing behind it is the placeholder this project
+            does not allow. `HOUSE-00562`'s `F9` waits in the same place for the same reason.
+      verified: 8 `WorldOverlayTests` -- all seven lines present and the two future ones showing
+            `-`, §14's bearing at eight points and wrapped both ways more than once round, the
+            nearest-point rounding, the millimetre position, the airborne body, §43.2's mode and
+            crouch, which step found the cell including `NOT FOUND`, the held item and target when
+            there is one, and the toggle. Nine injected bugs, nine caught (one after the ground
+            line's gap was actually asserted rather than only its surface name).
 - [ ] HOUSE-00632 — Tune pass: walk every room and every flight and adjust bob, spring, FOV and step assist until it feels right; record the final numbers
       dep: HOUSE-00627 · sys: player · plat: LNX · pri: MUST
 - [ ] HOUSE-00633 — Render tests: 12 first-person poses across the house

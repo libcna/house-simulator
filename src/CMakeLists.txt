@@ -95,6 +95,7 @@ add_library(cnahouse_core STATIC
     debug/Timing.cpp
     debug/DebugDraw.cpp
     debug/Overlay.cpp
+    debug/WorldOverlay.cpp
     debug/PhysicsOverlay.cpp
     debug/Screenshot.cpp
 )
