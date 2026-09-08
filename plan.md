@@ -8573,8 +8573,47 @@ never escapes and never penetrates.
       note: not gating, per §70.4 -- ten build agents share this machine. The assertion is the
             categorical one the other perf tests use (three times the budget), and here it has
             room to mean something because the real numbers are a quarter of it.
-- [ ] HOUSE-00620 — Phase-7 review and commit
+- [x] HOUSE-00620 — Phase-7 review and commit
       dep: HOUSE-00541…HOUSE-00619 · sys: — · plat: ALL · pri: MUST
+      note: (2026-09-08) **the exit criteria, with the numbers.** *"The collision guarantee suite
+            (`HOUSE-00612`…`HOUSE-00618`) is green"* — it is, all seven, and `HOUSE-00619`'s
+            measurement with them. *"A 20-minute random-walk bot never escapes and never
+            penetrates"* — 144 000 fixed steps, 1 484 m walked, 286 cell changes over 16 rooms,
+            **zero boundary escapes, never a step outside the named cells, and a deepest contact of
+            0.000091 m**, which is a tenth of §49.3's contact tolerance and 660 times shallower
+            than the 0.06 m a single step covers. The phase's own goal — *"walk the whole
+            blockout: every room, every flight, in and out of the house, without falling through,
+            sticking, or passing through anything"* — is met, and every one of those four verbs is
+            a test that would fail if it were not.
+      finding: **the guarantees found six defects that nothing else had, and five of them were in
+            code the phase had already ticked.** `HOUSE-00552`'s fall never swept §11.5's terrain,
+            so every landing outdoors was silent; `HOUSE-00547`'s overlap gave a vertical
+            triangle's flat prism an inside, so a body walking past a stair wedge was reported
+            metres inside it; the same file froze a body that was merely TOUCHING a surface, so it
+            could not walk along one; `HOUSE-00210`'s collision floors had no stair wells cut out
+            of them at all, and then had too much cut out; and the house had a 1.30 m hole in its
+            front elevation at every storey of the main stair. Not one of them was reachable by
+            the unit tests those tasks shipped with: the sweep tests build the geometry they test
+            against, and none of them is a staircase in a house.
+      finding: **the order they were found in is the argument for guarantee tests.** Doors first
+            (nothing), 2 000 pushes (nothing), 2 000 drops (the silent landing), the flights (three
+            defects at once, and the house unwalkable between storeys until they were fixed), the
+            tour (nothing), and then twenty minutes of wandering, which found the front wall. Each
+            one is cheap; the phase would have shipped without any of them and the player would
+            have found all six.
+      note: `cna-house.md` §49.2 corrected: the census is now 1 132 shapes (1 110 OBBs, 22 meshes)
+            against the 1 068 `HOUSE-00472` measured, and the paragraph that said the stair-well
+            landings are *"not guarded yet … Phase 7 owns it"* now describes the 24 rail pieces
+            that guard them.
+      note: **what is left for a later phase, recorded rather than quietly dropped.** (1)
+            `house_shell_gen.py` has the same `open_cell` line as the collision did, so the DRAWN
+            front elevation still has the hole the collision no longer has; the shell is Blender's
+            and regenerating it is a content task, not a physics one. (2) The twelve nudgeable
+            props of `HOUSE-00565` have no `layout.props.json` to bind to. (3) `HOUSE-00562`'s
+            `F9` overlay is not wired to a key: `DebugDraw::Begin` needs a view and a projection
+            and the loop has neither a camera nor a loaded `CollisionWorld` until phase 8.
+      verified: 837 non-render tests and 27 render tests green; `tools/ci/run_checks.sh` all
+            gates green.
 
 ---
 

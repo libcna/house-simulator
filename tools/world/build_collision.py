@@ -1531,6 +1531,9 @@ def report(world: dict) -> str:
         f"{stats['meanBucketOccupancy']} shapes, worst {stats['maxBucketOccupancy']}",
         f"  guards: {stats['guards']} at drops over {GUARD_DROP:.1f} m, which §70.5 asks for "
         f"and the layout has no way to state",
+        f"  stair rails: {stats['stairGuards']} round the wells, §12.3's 0.95 m balustrade, open "
+        f"where a flight climbs from that floor ({stats['outerShared']} outer wall pieces shared "
+        f"with the yard on the other side of them)",
         f"  rafters: {stats['rafterMeshes']} clipped roof planes over "
         f"{stats['rafterArea']:.1f} m² of plan, {stats['rafterAboveCeiling']} dropped as "
         f"unreachable above a flat ceiling",

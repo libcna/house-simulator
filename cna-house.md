@@ -4227,9 +4227,12 @@ Built offline from the layout and the per-asset `_COL` proxies into `content/wor
 Total: ~4 300 OBBs, 18 triangle meshes (~9 000 triangles), the height field. Under 3 MB.
 
 Measured over the authored layout when `HOUSE-00472` built it, with no prop carrying a proxy yet:
-**1 068 shapes — 1 046 OBBs and 22 triangle meshes.** By kind: 831 wall pieces, 119 floors, 89
-ceilings, 12 stair shapes. Three of those groups exist because the layout **cannot** state them,
-which is what "built offline from the layout" leaves to this stage:
+**1 068 shapes — 1 046 OBBs and 22 triangle meshes.** Phase 7 then cut the stair wells out of the
+floors, put a rail round them and gave the house back the front wall it was missing, and the
+census reads **1 132 shapes — 1 110 OBBs and 22 triangle meshes**: 886 wall pieces, 140 floors, 94
+ceilings, 12 stair shapes (`HOUSE-00210`'s defect, `HOUSE-00567`). Three of those groups exist
+because the layout **cannot** state them, which is what "built offline from the layout" leaves to
+this stage:
 
 * **The rafter envelope.** 13 roof planes, each clipped in plan to the cell under it, covering the
   attic's whole 273.9 m². A cell is an axis-aligned volume, so `L3_STORE_W` declares
@@ -4242,9 +4245,18 @@ which is what "built offline from the layout" leaves to this stage:
   §70.5's metre with nothing in the way: the two balconies, the juliet, and the garage's storage
   loft. The shell *draws* a parapet and a rail at each; nothing stopped you walking through it,
   because an open side of an exterior cell has no wall by construction. The porch at +0.57 and the
-  terrace at +0.45 get none, which is the same metre deciding it. The landings open to the
-  stairwell are a drop too and are **not** guarded yet — their rail is drawn round the hole in the
-  floor rather than round the cell, and Phase 7 owns it.
+  terrace at +0.45 get none, which is the same metre deciding it.
+* **Stair rails.** 24 pieces, §12.3's 0.95 m balustrade round every well, open where a flight
+  climbs from that floor and closed where one passes *under* it — a rail with a gap over a flight
+  is a gap you fall through. `HOUSE-00567` built them, `HOUSE-00618`'s twenty-minute bot is what
+  asked for them, and the same task found two things behind them: a `y` portal's rect is the
+  *visibility* opening and over-runs the flight, so cutting it whole out of the slab left 0.88 m of
+  nothing between the main stair's last tread and the floor; and `visibilityHint: open` was read as
+  "no walls", which took the house's front wall away at every storey of the main stair. An outer
+  wall is now also in the list of whichever yard faces it (52 pieces), because a body walking the
+  lawn is swept against the lawn's shapes and met nothing until the cell tracker changed its mind.
+  **`house_shell_gen.py` still has the same `open_cell` line and the same hole in the drawn
+  elevation**: what you walk into is fixed, what you see is not.
 * **The stair ramps.** 9 closed wedges, 2 landing boxes and 1 stepped flight, placed from
   `layout.stairs.json`'s authored `footprint`/`run`/`shape` through the same `stair_geometry`
   module `house_shell_gen.py` builds the treads from.
