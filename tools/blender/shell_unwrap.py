@@ -60,6 +60,7 @@ if not INSIDE_BLENDER:
 
 import argparse  # noqa: E402
 import json  # noqa: E402
+import time  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -84,6 +85,18 @@ SMALL_ROOM_AREA = 6.0
 
 #: The levels §18.3 calls "the attic and the basement".
 DIM_LEVELS = ("B1", "L3")
+
+#: The largest atlas one cell may use, in texels a side.
+#:
+#: §72 budgets **21 art atlases and 21 daylight atlases of 2048²** for the whole house — about a
+#: fifth of a 2048² atlas per cell. 512² is a sixteenth of one, so 96 cells come to roughly six
+#: 2048² atlases' worth of texels and sit inside that budget with room for the daylight set.
+#:
+#: It is also what makes a whole-shell run finish: `lightmap_unwrap` verifies its work by
+#: rasterising the atlas and measuring the gutter between islands, which is `size²` work, and
+#: 2048² is sixteen times 512². A cell that cannot reach §18.3's density inside 512² is reported
+#: with its shortfall rather than given a bigger atlas quietly.
+MAX_ATLAS = 512
 
 
 def wants_lightmap(cell: dict | None) -> bool:
@@ -181,7 +194,7 @@ def summarise(rows: list[dict], skipped: list[str], problems: list[str]) -> dict
         return {"cells": 0, "receiverFaces": 0, "receiverArea": 0.0, "detailFaces": 0,
                 "detailArea": 0.0, "atlases": 0, "worstOccupancy": 0.0,
                 "worstOccupancyCell": "", "worstDensity": 0.0, "smallestIslandGutter": None,
-                "singleIslandCells": [],
+                "cellsWithRoomToSpare": [], "islands": 0, "texels": 0,
                 "skipped": skipped, "problems": problems, "perCell": []}
     worst_row = min(rows, key=lambda row: row["utilisation"])
     return {
@@ -196,16 +209,22 @@ def summarise(rows: list[dict], skipped: list[str], problems: list[str]) -> dict
         "worstOccupancyCell": worst_row["cell"],
         "worstDensity": round(min(row["minDensity"] for row in rows), 3),
         # The tightest gap between two islands anybody has to bake across, in empty texels. `None`
-        # where a cell packed to a single island -- there is no second island to be near, and
-        # reporting that as "0 texels" would read as a gutter violation that is not there.
+        # when no two islands in any cell came within the measured reach of each other at all --
+        # which is the good answer, and reporting it as "0 texels" would read as a gutter violation
+        # that is not there.
         "smallestIslandGutter": (min(gaps) if (gaps := [row["minIslandGutter"] for row in rows
                                                        if row["minIslandGutter"] is not None])
                                  else None),
-        "singleIslandCells": sorted(row["cell"] for row in rows
-                                    if row["minIslandGutter"] is None),
-        "needsAttention": sorted(row["cell"] for row in rows
-                                 if row["utilisation"] < 0.02 or row["minDensity"]
-                                 < row["density"]),
+        "cellsWithRoomToSpare": sorted(row["cell"] for row in rows
+                                       if row["minIslandGutter"] is None),
+        "islands": sum(row["islands"] for row in rows),
+        "texels": sum(row["atlasSize"] ** 2 for row in rows),
+        # A cell worth a second look: almost nothing packed into its atlas, or a density short of
+        # §18.3's target by more than the unwrapper's own tolerance.
+        "needsAttention": sorted(
+            row["cell"] for row in rows
+            if row["utilisation"] < 0.02
+            or row["minDensity"] < row["density"] * (1.0 - lightmap_unwrap.DENSITY_TOLERANCE)),
         "skipped": skipped,
         "problems": problems,
         "perCell": [{"cell": row["cell"], "density": row["density"],
@@ -216,10 +235,24 @@ def summarise(rows: list[dict], skipped: list[str], problems: list[str]) -> dict
     }
 
 
-def unwrap_one(source: Path, destination: Path, density: float) -> dict:
-    """Unwrap one cell's receivers and write both halves back out."""
+def unwrap_one(source: Path, destination: Path, density: float,
+               max_atlas: int = MAX_ATLAS) -> dict:
+    """Unwrap one cell's receivers and write both halves back out.
+
+    `CNAHOUSE_UNWRAP_TIMING=1` prints where the seconds went. A whole-shell run is minutes a cell
+    and the phases are not equally to blame; guessing which one is how an afternoon goes.
+    """
+    timing = bool(os.environ.get("CNAHOUSE_UNWRAP_TIMING"))
+    marks: list[tuple[str, float]] = []
+
+    def mark(name: str) -> None:
+        if timing:
+            marks.append((name, time.perf_counter()))
+
+    mark("start")
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=str(source))
+    mark("import")
     originals = [obj for obj in list(bpy.context.scene.objects) if obj.type == "MESH"]
     receivers, details = [], []
     for obj in originals:
@@ -229,14 +262,15 @@ def unwrap_one(source: Path, destination: Path, density: float) -> dict:
         if detail_mesh is not None:
             details.append(detail_mesh)
 
+    mark("split")
     detail_faces = sum(len(mesh.polygons) for mesh in details)
     detail_area = sum(sum(face.area for face in mesh.polygons) for mesh in details)
     if not receivers:
         return {"skipped": "no receiver surface", "detailFaces": detail_faces,
                 "detailArea": round(detail_area, 3), "faces": 0, "problems": []}
 
-    result = lightmap_unwrap.unwrap(density, lightmap_unwrap.DEFAULT_GUTTER,
-                                    lightmap_unwrap.DEFAULT_MAX_ATLAS)
+    result = lightmap_unwrap.unwrap(density, lightmap_unwrap.DEFAULT_GUTTER, max_atlas)
+    mark("unwrap")
     for index, mesh in enumerate(details):
         obj = bpy.data.objects.new(mesh.name, mesh)
         bpy.context.scene.collection.objects.link(obj)
@@ -248,6 +282,11 @@ def unwrap_one(source: Path, destination: Path, density: float) -> dict:
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.export_scene.gltf(filepath=str(destination), export_format="GLB",
                               export_apply=False, export_yup=True, export_extras=True)
+    mark("export")
+    if timing and len(marks) > 1:
+        print("shell_unwrap: " + source.stem + " " + ", ".join(
+            f"{name} {marks[index][1] - marks[index - 1][1]:.1f}s"
+            for index, (name, _at) in enumerate(marks) if index > 0))
     return result
 
 
@@ -313,11 +352,18 @@ def selftest() -> int:
         require(receivers and details,
                 f"the cell comes out in two halves, receiver and detail "
                 f"({len(receivers)}, {len(details)})")
-        receiver_classes = {str(material.get("surfaceClass"))
-                            for obj in receivers for material in obj.data.materials
-                            if material is not None}
-        require(receiver_classes <= set(house_shell_gen.LIGHTMAP_RECEIVERS),
-                f"every material left on the receiver half is a receiver class "
+        # The materials the polygons USE, not the slots the mesh carries: copying a mesh copies
+        # its whole material list, so the receiver half still has a slot for the trim it no
+        # longer has a face of.
+        receiver_classes = set()
+        for obj in receivers:
+            for index in {polygon.material_index for polygon in obj.data.polygons}:
+                material = obj.data.materials[index]
+                if material is not None:
+                    receiver_classes.add(str(material.get("surfaceClass")))
+        require(receiver_classes and receiver_classes
+                <= set(house_shell_gen.LIGHTMAP_RECEIVERS),
+                f"every class actually used on the receiver half is a receiver class "
                 f"({sorted(receiver_classes)})")
         detail_classes = set()
         for obj in details:
@@ -348,7 +394,9 @@ def selftest() -> int:
                 f"({result['detailFaces']} faces, {result['detailArea']} m²)")
         summary = summarise([{"cell": "L0_HALL", "density": DENSITY_ROOM, **result}], [], [])
         for key in ("receiverFaces", "receiverArea", "detailFaces", "detailArea", "atlases",
-                    "worstOccupancy", "worstDensity", "smallestIslandTexels", "perCell"):
+                    "atlasSizes", "islands", "texels", "worstOccupancy", "worstOccupancyCell",
+                    "worstDensity", "smallestIslandGutter", "needsAttention", "skipped",
+                    "perCell"):
             require(key in summary, f"the report carries `{key}`")
 
         # (9): a rerun writes the same bytes.
@@ -416,12 +464,14 @@ def main() -> int:
           f"{report['receiverFaces']} receiver face(s) over {report['receiverArea']:.0f} m², "
           f"{report['detailFaces']} detail face(s) over {report['detailArea']:.0f} m² left to the "
           f"dynamic term")
+    gutter = report["smallestIslandGutter"]
     print(f"shell_unwrap: {report['atlases']} atlas(es), worst occupancy "
           f"{report['worstOccupancy'] * 100:.1f} % in {report['worstOccupancyCell']}, "
-          f"worst density {report['worstDensity']:.2f} texels/m, tightest island gutter "
-          f"{report['smallestIslandGutter'] if report['smallestIslandGutter'] is not None else 'n/a'}"
-          f" texel(s) over {report['cells'] - len(report['singleIslandCells'])} multi-island "
-          f"cell(s)")
+          f"worst density {report['worstDensity']:.2f} texels/m over {report['islands']} "
+          f"island(s) and {report['texels'] / 1e6:.2f} M texel(s); tightest island gutter "
+          f"{gutter if gutter is not None else 'none within reach'}")
+    if report["needsAttention"]:
+        print(f"shell_unwrap: worth a look: {', '.join(report['needsAttention'])}")
     return 1 if problems else 0
 
 

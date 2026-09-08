@@ -1968,7 +1968,10 @@ file and only an offline check can catch it.
    generator's own decision out of the file.
 
    > **Decided 2026-09-09 (`HOUSE-00471`), replacing "every shell face".** That wording was not
-   > achievable at 4 texels/metre and the measurement is in §72.
+   > achievable at 4 texels/metre and the measurement is in §72. Measured after the change: 78
+   > cells, 5 306 receiver faces over 6 935 m², 29 608 detail faces over 1 877 m² left to the
+   > dynamic term, 967 islands in 78 atlases of 128² — **1.28 M texels, under a third of one** of
+   > §72's 21. `tools/blender/shell_preview.py` renders the distinction into `docs/blockout/`.
 3. `tools/blender/lightmap_bake.py` bakes, per cell, one lightmap per light group plus one
    "daylight" lightmap lit only by a uniform sky dome through that cell's window openings.
    Bakes are diffuse-only, indirect included, Cycles, 256 samples, denoised.

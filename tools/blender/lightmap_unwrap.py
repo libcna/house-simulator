@@ -598,8 +598,13 @@ def _pack(objects, gutter: int, size: int) -> None:
     # `FRACTION` makes the margin a fraction of the final atlas, so a gutter in TEXELS is exactly
     # `gutter / size` -- which `SCALED`, the default, is not: it scales the margin by island size
     # and gives a different gap around every island.
+    # `AABB`, not `CONCAVE`. Concave packing runs an optimiser over each island's outline, and on
+    # an architectural shell it is where a whole-house run goes: minutes a cell, measured, for
+    # islands that are **rectangles** -- a planar-projected wall, floor or ceiling has no concavity
+    # to exploit. AABB packs the same rectangles in a fraction of the time, and the density, gutter
+    # and overlap checks below are unchanged, so the result is verified either way (`HOUSE-00471`).
     _require(bpy.ops.uv.pack_islands(rotate=True, scale=True, margin_method="FRACTION",
-                                     margin=gutter / size, shape_method="CONCAVE"),
+                                     margin=gutter / size, shape_method="AABB"),
              "uv.pack_islands")
     bpy.ops.object.mode_set(mode="OBJECT")
 

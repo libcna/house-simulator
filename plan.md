@@ -6994,37 +6994,68 @@ the chunk builder produces ≤ 6 chunks per cell.
             passes for years.
       note: four injected bugs, all caught. 99 objects.
 
-- [ ] HOUSE-00471 — Generate second-UV lightmap coordinates for the whole shell (`lightmap_unwrap.py`)
+- [x] HOUSE-00471 — Generate second-UV lightmap coordinates for the whole shell (`lightmap_unwrap.py`)
+      dep: HOUSE-00470 · sys: content · plat: TOOL · pri: MUST
       finding: **the shell had no FIRST UV channel.** `lightmap_unwrap.py` refused every file:
             "L0_KITCHEN has no UV layer at all; the shell's albedo channel must exist before a
             second one is added". §21.3's `DualTextureEffect` samples the albedo channel first, so
-            a shell without UV0 cannot take a material at all. Fixed in `house_shell_gen.py`:
-            a world-space planar UV0, one unit per metre, projected on each face's dominant axis,
-            so a 1 m tile is 1 m everywhere and no seam moves when a room is resized.
-      blocked: **61 % of the shell's faces are smaller than one lightmap texel**, and §18.3's step
-            2 says "every shell face" gets a second UV channel. Measured over the generated shell:
-            **26 704 of 43 528 faces are under one texel at §18.3's 4 texels/metre** — a 55 mm
-            handrail face is a fifth of a texel across, a rafter's edge less. `lightmap_unwrap.py`
-            refuses the pack rather than lying about it: `L0_HALL` fails with "224 face(s) pack to
-            no UV area even at 2048²", and it is not the gutter — the same 224 collapse at a gutter
-            of 1. Nothing in the packer can fix a face smaller than a sample.
-      note: the two answers, neither of which is this task's to pick:
-            **(a) lightmap only the room-scale surfaces** — floors, ceilings, walls and the outer
-            skin — and light the trim, the glass, the rails, the sashes and the rafters with the
-            room's existing dynamic term. §18.3's "every shell face" becomes "every face at least
-            one texel across", §22 bakes fewer islands, and §72's 21 atlases of 2048² stand.
-            **(b) raise the density for trim**, which needs about 20 texels/m for a 55 mm board —
-            25× the area of (a) for the surfaces that carry the least light information, and §72's
-            84 MB of atlas becomes something nobody can budget.
-            (a) is the answer this session would pick; it changes §18.3, §22 and the wording of
-            §72, which is more than a task note.
-      note: `tools/blender/shell_unwrap.py` is written and claimed regardless: it picks §18.3's
-            density per cell (4 for a room, 8 under 6 m², 2 in the attic and the basement, and the
-            level wins over the size), skips the outdoors with the reason recorded — §18.3 bakes
-            "per cell … through that cell's window openings", which describes an interior, and
-            `EXT_WORLD` is 160 000 m² — and reports a cell that will not pack instead of dying on
-            it. Eight claims, all passing.
-      dep: HOUSE-00470, HOUSE-00205 · sys: content · plat: TOOL · pri: MUST
+            a shell without UV0 could not have taken a material at all. `house_shell_gen.py` now
+            gives every face a world-space planar UV0, one unit per metre on its dominant axis, so
+            a 1 m tile is 1 m everywhere and no seam moves when a room is resized.
+      finding: **61 % of the shell's faces are smaller than one lightmap texel** — 26 704 of
+            43 528 at §18.3's 4 texels/metre, a 55 mm handrail face being a fifth of a texel
+            across. §18.3 said "every shell face" and it was not achievable: `L0_HALL` failed with
+            "224 face(s) pack to no UV area even at 2048²", the same 224 at a gutter of 1.
+      note: **the decision (2026-09-09) is selective semantic receivers**, and §18.3, §22.2 and §72
+            are rewritten to match. Floors, ceilings, walls and the outer skin are lightmapped;
+            skirtings, cornices, architraves, thresholds, frames, sashes, glass, nosings,
+            handrails, balusters, rafters, gutters and downspouts are lit by the room's dynamic
+            term. §72's budget is unchanged and now says it is for receivers.
+      note: **the rule is the surface's class, never a triangle's size.** A wall must not stop
+            receiving baked light because the generator split it differently. The classification is
+            `house_shell_gen.py`'s `LIGHTMAP_RECEIVERS`, and it travels as generated data: every
+            material carries `surfaceClass` and `lightmapReceiver`, and the exporter writes both
+            into the `.glb`'s material `extras`, so the unwrap reads the generator's decision out
+            of the file rather than parsing a name.
+      finding: **a wall was as many islands as it had faces.** Every face was built with its own
+            corners, so a wall broken into strips round a doorway shared no vertex with itself and
+            `smart_project` gave each strip an island — sub-texel islands on a receiver, for
+            reasons that had nothing to do with the wall. The generator now welds its **receiver**
+            vertices (receivers only, so the trim's face count is untouched), and `L0_HALL`'s 54
+            receiver faces pack into 8 islands. Handing `remove_doubles` a `set` of BMVerts made
+            the output non-deterministic — a set of objects iterates by address — and §18.4's
+            byte-identical claim caught it; the weld is by sorted index now.
+      finding: **`shape_method="CONCAVE"` was making the tool 300× slower for nothing.** A
+            whole-shell run was heading for four hours at ~2.5 minutes a cell, and the concave
+            packer was all of it: it optimises over each island's outline, and an architectural
+            island is a **rectangle** with no concavity to exploit. On `AABB` the same run takes
+            **8.7 seconds** and the unwrapper's own selftest 2.4 s instead of 13 minutes, with all
+            25 of its claims unchanged. Two smaller ones went with it: the atlas search now starts
+            at the size the area provably needs — `sqrt(A)·d` is a lower bound, so it skips only
+            rounds that were always going to fail — and the rasteriser and gutter scan are
+            vectorised, each checked against the loop it replaced at three atlas sizes.
+      note: measured over the whole shell: **78 cells unwrapped**, 5306 receiver faces over
+            6935 m² against **29608 detail faces over 1877 m²** left to the dynamic
+            term; 967 islands in 78 atlases of 128², **1.28 M texels in total** — under
+            a third of ONE of §72's 21 atlases. Worst occupancy 17.8 % (L1_STAIR_MAIN), worst
+            density 3.96 texels/m against §18.3's 4/8/2, no island within reach of another
+            (so no gutter to violate), nothing needing attention. 21 objects are not receivers at
+            all: the yards, the decks, the two roofs and the chimney. `build/shell-lm/report.json`
+            carries it per cell.
+      note: **visual validation**, because UV statistics do not say it looks right:
+            `tools/blender/shell_preview.py` renders the shell headlessly in two modes — the
+            §11-class placeholders, and receivers against detail — into `docs/blockout/`. Of
+            `L0_HALL` in receiver mode, **73 % of the frame is receiver and 9 % is detail**: the
+            trim reads as trim against the walls behind it, and from outside the house the skin is
+            a receiver and no trim shows at all, which is what it should be.
+      finding: **the first two renders were 100 % black and the same size**, because
+            `diffuse_color` is the *viewport* colour and EEVEE renders the node tree; the third was
+            42 % sky, because a hand-built Euler pointed the camera past the house. Both are now
+            claims — the image is not one flat colour, it is not mostly background, and both
+            classes are in the frame — which is the difference between rendering a file and
+            validating a picture.
+      verify: tools/blender/shell_unwrap.py --selftest, tools/blender/shell_preview.py --selftest,
+            tools/blender/lightmap_unwrap.py --selftest
 - [ ] HOUSE-00472 — Generate `_COL` collision proxies for the shell: wall/floor/ceiling OBBs and the stair ramps
       dep: HOUSE-00470, HOUSE-00190 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00473 — Run `build_chunks.py` over the shell; verify ≤ 6 chunks per cell and the vertex limits
