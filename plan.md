@@ -8216,8 +8216,45 @@ never escapes and never penetrates.
             same replay run twice agreeing, which is what says nothing in the step reads a clock or
             an address; and 7 200 steps in a REAL cell of the house, with dozens of shapes and a
             broad phase handing them over in bucket order, agreeing too.
-- [ ] HOUSE-00612 — Guarantee test: the player cannot pass any closed door (all 62, both sides)
+- [x] HOUSE-00612 — Guarantee test: the player cannot pass any closed door (all 62, both sides)
       dep: HOUSE-00554 · sys: physics · plat: CI · pri: MUST
+      verify: unit ClosedDoorTests.NoClosedDoorInTheHouseCanBeWalkedThrough
+      note: (2026-09-08) 62 doors -- 54 interior, 4 double, 4 exterior -- 144 shut walks and 124
+            open controls, driven with the REAL `PlayerStep`: slide, step assist, gravity and
+            depenetration included, at §43.2's fast walk, from 0.75 m out, for 1.25 s of leaning
+            on the leaf. Worst approach **0.220 m short of the doorway plane**; nothing got past
+            one.
+      finding: **a closed door stops the player by TWO facts, not one.** The leaf covers the
+            middle of the opening, and whatever is left over beside it is narrower than the
+            0.62 m capsule -- the doorways are not all the width of their leaves. The widest
+            uncovered slot in the house is **0.340 m** at `P_B1_STAIR__B1_HALL`, a 1.20 m doorway
+            with a standard 0.86 m leaf, which leaves 0.28 m of margin. Widen a doorway by
+            300 mm without widening its leaf and the guarantee goes, which is exactly the change
+            no validation rule would report.
+      note: the leaf is hung against either jamb, because `HOUSE-01182` has not chosen a hinge
+            convention yet and the guarantee should hold whichever it picks. Each approach is
+            walked against the placement that leaves the whole slot in FRONT of the body. Where
+            the slack is under 50 mm -- 57 of the 62 -- only the middle is walked: there is no
+            slot to aim a 0.60 m body at.
+      note: it is also checked through §49.4's dynamic list, which is where the runtime will find
+            a door (`HOUSE-00554`): the shut leaf stops `SweepDynamic` and NAMES itself, because
+            §50 reports "blocked" against a particular door.
+      finding: **0.75 m is not a round number.** At 0.55 m from the plane, 27 of the 124
+            approaches could not get through an OPEN door: the body starts against the frame and
+            spends the walk being pushed out of it. The open control is what found that -- a test
+            that only ever proves a body cannot get through has no way of telling a leaf from a
+            mistake in its own fixture.
+      note: six approaches cannot be made at all and are named, with reasons, the way
+            `HOUSE-00616`'s exemptions are: three stair doors whose standing spot is inside the
+            flight, the Juliet balcony (a doorway with a railing and no floor beyond it), and the
+            refrigerator from both sides. Every other door has at least one side a body can be
+            driven from. The list is diffed BOTH ways, so an exemption that stops being needed is
+            reported too.
+      note: five injected bugs, five caught -- a half-width leaf, no leaf at all, a sweep that
+            skips shapes thinner than 50 mm, a 2.2 m step-up and a 0.9 m depenetration step. A
+            sixth (the slide's 0.999 contact backoff turned into 1.5) is NOT caught and should
+            not be: the depenetration cleans it up before the next step and the door still holds.
+            `CollideAndSlideTests` owns that constant.
 - [ ] HOUSE-00613 — Guarantee test: the player cannot pass any wall, floor or ceiling (2 000 randomised pushes)
       dep: HOUSE-00550 · sys: physics · plat: CI · pri: MUST
 - [ ] HOUSE-00614 — Guarantee test: the player cannot fall through any floor (2 000 randomised drops from 3 m)
