@@ -68,4 +68,27 @@ namespace cnahouse::physics
                                            const Microsoft::Xna::Framework::Vector3& motion,
                                            const CollisionObb& obb);
 
+    /// @brief Sweeps @p capsule along @p motion against the triangle @p a @p b @p c
+    ///        (`HOUSE-00544`).
+    ///
+    /// The stair ramps and the rafter envelope are triangle meshes (§49.2), and the terrain will be
+    /// one. The reduction is the same as the box's and the shape is harder: an upright capsule
+    /// against a triangle is a point against the triangle extruded along Y by `halfHeight` and then
+    /// rounded by `radius` -- a rounded prism of six vertices, nine edges and five faces.
+    ///
+    /// Exact, and by enumeration rather than iteration: the ray is tested against each face's
+    /// offset plane where the contact lands inside that face, each edge as a cylinder, and each
+    /// vertex as a sphere, and the earliest valid contact wins. **A rounded convex body has no
+    /// closed form that skips the edges**, and skipping them is what makes a body catch on the
+    /// seam between two triangles of the same flat floor.
+    ///
+    /// A degenerate triangle -- two vertices in the same place, or three in a line -- has no
+    /// surface to hit and returns a miss rather than a normal made of noise. The winding does not
+    /// matter: a sweep is stopped by a surface from either side, and §14's winding is for drawing.
+    [[nodiscard]] SweepHit SweepCapsuleTriangle(const Capsule& capsule,
+                                                const Microsoft::Xna::Framework::Vector3& motion,
+                                                const Microsoft::Xna::Framework::Vector3& a,
+                                                const Microsoft::Xna::Framework::Vector3& b,
+                                                const Microsoft::Xna::Framework::Vector3& c);
+
 } // namespace cnahouse::physics

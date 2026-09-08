@@ -250,4 +250,384 @@ namespace cnahouse::physics
         return result;
     }
 
+    namespace
+    {
+        Xna::Vector3 Subtract(const Xna::Vector3& a, const Xna::Vector3& b)
+        {
+            return Xna::Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+        }
+
+        Xna::Vector3 Cross(const Xna::Vector3& a, const Xna::Vector3& b)
+        {
+            return Xna::Vector3(a.Y * b.Z - a.Z * b.Y, a.Z * b.X - a.X * b.Z, a.X * b.Y - a.Y * b.X);
+        }
+
+        float Dot(const Xna::Vector3& a, const Xna::Vector3& b)
+        {
+            return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+        }
+
+        /// @p v scaled to unit length, or `false` when it has none to scale.
+        bool Normalise(Xna::Vector3& v)
+        {
+            const float length = std::sqrt(LengthSquared(v));
+            if (length < kEpsilon)
+            {
+                return false;
+            }
+            v = Xna::Vector3(v.X / length, v.Y / length, v.Z / length);
+            return true;
+        }
+
+        /// One candidate contact, kept only while it is the earliest.
+        struct Best
+        {
+            float time = 2.0f;
+            Xna::Vector3 normal;
+            bool found = false;
+
+            void Offer(float t, const Xna::Vector3& n)
+            {
+                if (t >= -kEpsilon && t <= 1.0f && t < time)
+                {
+                    time = std::max(0.0f, t);
+                    normal = n;
+                    found = true;
+                }
+            }
+        };
+
+        /// Ray against the sphere of @p radius at @p centre.
+        void SphereFeature(const Xna::Vector3& origin,
+                           const Xna::Vector3& direction,
+                           const Xna::Vector3& centre,
+                           float radius,
+                           Best& best)
+        {
+            const Xna::Vector3 delta = Subtract(origin, centre);
+            const float t = SmallestRoot(LengthSquared(direction),
+                                         2.0f * Dot(delta, direction),
+                                         LengthSquared(delta) - radius * radius,
+                                         1.0f);
+            if (t < 0.0f)
+            {
+                return;
+            }
+            Xna::Vector3 normal = Subtract(Xna::Vector3(origin.X + direction.X * t,
+                                                        origin.Y + direction.Y * t,
+                                                        origin.Z + direction.Z * t),
+                                           centre);
+            if (Normalise(normal))
+            {
+                best.Offer(t, normal);
+            }
+        }
+
+        /// Ray against the cylinder of @p radius about the segment @p p0 - @p p1, ends open: the
+        /// spheres at the ends are the vertices' business, and testing them twice is only waste.
+        void EdgeFeature(const Xna::Vector3& origin,
+                         const Xna::Vector3& direction,
+                         const Xna::Vector3& p0,
+                         const Xna::Vector3& p1,
+                         float radius,
+                         Best& best)
+        {
+            const Xna::Vector3 axis = Subtract(p1, p0);
+            const float axisLengthSquared = LengthSquared(axis);
+            if (axisLengthSquared < kEpsilon * kEpsilon)
+            {
+                return;
+            }
+            // The ray and the axis, each with the component along the axis removed: what is left
+            // is a 2-D circle problem in the plane perpendicular to the edge.
+            const Xna::Vector3 delta = Subtract(origin, p0);
+            const float dirAlong = Dot(direction, axis) / axisLengthSquared;
+            const float deltaAlong = Dot(delta, axis) / axisLengthSquared;
+            const Xna::Vector3 dirPerp(direction.X - axis.X * dirAlong,
+                                       direction.Y - axis.Y * dirAlong,
+                                       direction.Z - axis.Z * dirAlong);
+            const Xna::Vector3 deltaPerp(
+                delta.X - axis.X * deltaAlong, delta.Y - axis.Y * deltaAlong, delta.Z - axis.Z * deltaAlong);
+            const float t = SmallestRoot(LengthSquared(dirPerp),
+                                         2.0f * Dot(deltaPerp, dirPerp),
+                                         LengthSquared(deltaPerp) - radius * radius,
+                                         1.0f);
+            if (t < 0.0f)
+            {
+                return;
+            }
+            const Xna::Vector3 point(
+                origin.X + direction.X * t, origin.Y + direction.Y * t, origin.Z + direction.Z * t);
+            const float along = Dot(Subtract(point, p0), axis) / axisLengthSquared;
+            if (along < 0.0f || along > 1.0f)
+            {
+                return;
+            }
+            const Xna::Vector3 onAxis(p0.X + axis.X * along, p0.Y + axis.Y * along, p0.Z + axis.Z * along);
+            Xna::Vector3 normal = Subtract(point, onAxis);
+            if (Normalise(normal))
+            {
+                best.Offer(t, normal);
+            }
+        }
+
+        /// Is @p point, which lies in the face's plane, inside the convex polygon?
+        ///
+        /// By the SIGN AGREEING across every edge rather than by a fixed direction: the corners of
+        /// these faces come from an index table and their winding relative to the outward normal
+        /// is whatever the table happens to give. A test that assumed one of the two orders
+        /// rejected every contact on half the faces -- which reads as a body falling through a
+        /// floor from above and standing on it from below.
+        bool InsideFace(const Xna::Vector3& point,
+                        const Xna::Vector3* points,
+                        int count,
+                        const Xna::Vector3& normal)
+        {
+            bool positive = false;
+            bool negative = false;
+            for (int i = 0; i < count; ++i)
+            {
+                const Xna::Vector3& from = points[i];
+                const Xna::Vector3& to = points[(i + 1) % count];
+                const float side = Dot(Subtract(point, from), Cross(normal, Subtract(to, from)));
+                positive = positive || side > kEpsilon;
+                negative = negative || side < -kEpsilon;
+            }
+            return !(positive && negative);
+        }
+
+        /// The closest point to @p point on the convex polygon, whether or not it projects inside.
+        Xna::Vector3 ClosestOnFace(const Xna::Vector3& point,
+                                   const Xna::Vector3* points,
+                                   int count,
+                                   const Xna::Vector3& normal)
+        {
+            const float above = Dot(Subtract(point, points[0]), normal);
+            const Xna::Vector3 projected(
+                point.X - normal.X * above, point.Y - normal.Y * above, point.Z - normal.Z * above);
+            if (InsideFace(projected, points, count, normal))
+            {
+                return projected;
+            }
+            Xna::Vector3 best = points[0];
+            float bestDistance = LengthSquared(Subtract(point, best));
+            for (int i = 0; i < count; ++i)
+            {
+                const Xna::Vector3& from = points[i];
+                const Xna::Vector3 edge = Subtract(points[(i + 1) % count], from);
+                const float lengthSquared = LengthSquared(edge);
+                float along = 0.0f;
+                if (lengthSquared > kEpsilon * kEpsilon)
+                {
+                    along = std::clamp(Dot(Subtract(point, from), edge) / lengthSquared, 0.0f, 1.0f);
+                }
+                const Xna::Vector3 candidate(
+                    from.X + edge.X * along, from.Y + edge.Y * along, from.Z + edge.Z * along);
+                const float distance = LengthSquared(Subtract(point, candidate));
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    best = candidate;
+                }
+            }
+            return best;
+        }
+
+        /// Ray against @p normal's plane through @p points[0], offset outward by @p radius, kept
+        /// only where the contact projects inside the convex face.
+        void FaceFeature(const Xna::Vector3& origin,
+                         const Xna::Vector3& direction,
+                         const Xna::Vector3* points,
+                         int count,
+                         const Xna::Vector3& normal,
+                         float radius,
+                         Best& best)
+        {
+            const float speed = Dot(direction, normal);
+            if (speed >= -kEpsilon)
+            {
+                // Moving along the face or away from it: whatever it meets, it is not this side.
+                return;
+            }
+            const float distance = Dot(Subtract(origin, points[0]), normal) - radius;
+            const float t = distance / -speed;
+            if (t < -kEpsilon || t > 1.0f)
+            {
+                return;
+            }
+            const Xna::Vector3 point(origin.X + direction.X * t - normal.X * radius,
+                                     origin.Y + direction.Y * t - normal.Y * radius,
+                                     origin.Z + direction.Z * t - normal.Z * radius);
+            if (!InsideFace(point, points, count, normal))
+            {
+                // Outside this face: the contact is an edge's or a vertex's, and both are tested
+                // separately.
+                return;
+            }
+            best.Offer(std::max(0.0f, t), normal);
+        }
+
+    } // namespace
+
+    SweepHit SweepCapsuleTriangle(const Capsule& capsule,
+                                  const Xna::Vector3& motion,
+                                  const Xna::Vector3& a,
+                                  const Xna::Vector3& b,
+                                  const Xna::Vector3& c)
+    {
+        SweepHit result;
+
+        Xna::Vector3 face = Cross(Subtract(b, a), Subtract(c, a));
+        if (!Normalise(face))
+        {
+            // Two vertices in the same place, or three in a line. There is no surface to hit, and
+            // a normal made of noise is worse than a miss: a body would be pushed in a direction
+            // nothing chose.
+            return result;
+        }
+
+        // The prism: the triangle extruded along Y by the capsule's half-height. Its faces are the
+        // two triangle copies and the three quads the edges sweep; rounding it by the radius makes
+        // it the Minkowski sum of the triangle and the capsule, and the sweep a ray against that.
+        const float h = capsule.halfHeight;
+        const Xna::Vector3 p[6] = {
+            Xna::Vector3(a.X, a.Y + h, a.Z),
+            Xna::Vector3(b.X, b.Y + h, b.Z),
+            Xna::Vector3(c.X, c.Y + h, c.Z),
+            Xna::Vector3(a.X, a.Y - h, a.Z),
+            Xna::Vector3(b.X, b.Y - h, b.Z),
+            Xna::Vector3(c.X, c.Y - h, c.Z),
+        };
+        Xna::Vector3 centroid;
+        for (const Xna::Vector3& point : p)
+        {
+            centroid = Xna::Vector3(
+                centroid.X + point.X / 6.0f, centroid.Y + point.Y / 6.0f, centroid.Z + point.Z / 6.0f);
+        }
+
+        const Xna::Vector3 origin = capsule.centre;
+        const float radius = capsule.radius;
+
+        // The prism's five faces, gathered once: their corners and their OUTWARD normals. Outward
+        // is decided by the prism itself rather than by a winding this function was not given -- a
+        // triangle mesh's winding is for drawing (§14) and a sweep is stopped from either side.
+        Xna::Vector3 faceCorners[5][4];
+        Xna::Vector3 faceNormals[5];
+        int faceCounts[5] = {0, 0, 0, 0, 0};
+        const int faceIndices[5][4] = {
+            {0, 1, 2, -1},
+            {3, 5, 4, -1},
+            {0, 3, 4, 1},
+            {1, 4, 5, 2},
+            {2, 5, 3, 0},
+        };
+        for (int f = 0; f < 5; ++f)
+        {
+            int count = 0;
+            for (const int index : faceIndices[f])
+            {
+                if (index >= 0)
+                {
+                    faceCorners[f][count++] = p[index];
+                }
+            }
+            Xna::Vector3 normal = Cross(Subtract(faceCorners[f][1], faceCorners[f][0]),
+                                        Subtract(faceCorners[f][2], faceCorners[f][0]));
+            if (!Normalise(normal))
+            {
+                // A quad of zero area: the triangle's edge is parallel to Y, so the face is a
+                // line. The edge tests cover it.
+                continue;
+            }
+            if (Dot(Subtract(centroid, faceCorners[f][0]), normal) > 0.0f)
+            {
+                normal = Xna::Vector3(-normal.X, -normal.Y, -normal.Z);
+            }
+            faceNormals[f] = normal;
+            faceCounts[f] = count;
+        }
+
+        // Already touching? The capsule is the segment grown by the radius and the prism is the
+        // triangle grown by the segment, so the two overlap exactly when the capsule's CENTRE is
+        // within the radius of the prism -- which is a distance to a convex solid, and its five
+        // faces are the whole of its surface.
+        Xna::Vector3 nearest = centroid;
+        float nearestDistance = -1.0f;
+        bool insideSolid = true;
+        for (int f = 0; f < 5; ++f)
+        {
+            if (faceCounts[f] == 0)
+            {
+                continue;
+            }
+            if (Dot(Subtract(origin, faceCorners[f][0]), faceNormals[f]) > 0.0f)
+            {
+                insideSolid = false;
+            }
+            const Xna::Vector3 candidate =
+                ClosestOnFace(origin, faceCorners[f], faceCounts[f], faceNormals[f]);
+            const float distance = LengthSquared(Subtract(origin, candidate));
+            if (nearestDistance < 0.0f || distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearest = candidate;
+            }
+        }
+        if (nearestDistance >= 0.0f && (insideSolid || nearestDistance <= radius * radius))
+        {
+            result.hit = true;
+            result.time = 0.0f;
+            result.startedInside = true;
+            Xna::Vector3 out = Subtract(origin, nearest);
+            if (insideSolid)
+            {
+                out = Xna::Vector3(-out.X, -out.Y, -out.Z);
+            }
+            if (!Normalise(out))
+            {
+                out = faceNormals[0];
+            }
+            result.normal = out;
+            return result;
+        }
+
+        Best best;
+        for (int f = 0; f < 5; ++f)
+        {
+            if (faceCounts[f] == 0)
+            {
+                continue;
+            }
+            FaceFeature(origin, motion, faceCorners[f], faceCounts[f], faceNormals[f], radius, best);
+        }
+        const int edges[9][2] = {
+            {0, 1},
+            {1, 2},
+            {2, 0},
+            {3, 4},
+            {4, 5},
+            {5, 3},
+            {0, 3},
+            {1, 4},
+            {2, 5},
+        };
+        for (const auto& edge : edges)
+        {
+            EdgeFeature(origin, motion, p[edge[0]], p[edge[1]], radius, best);
+        }
+        for (const Xna::Vector3& vertex : p)
+        {
+            SphereFeature(origin, motion, vertex, radius, best);
+        }
+
+        if (!best.found)
+        {
+            return result;
+        }
+        result.hit = true;
+        result.time = best.time;
+        result.normal = best.normal;
+        return result;
+    }
+
 } // namespace cnahouse::physics

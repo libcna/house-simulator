@@ -7560,8 +7560,32 @@ never escapes and never penetrates.
             is the approach direction and not the face normal I had assumed. And a 1.4 m/s walk
             covers 11.67 mm in §49.3's 1/120 s step, so it cannot cross the 20 mm gap I gave it.
             Both are recorded in the file where they failed.
-- [ ] HOUSE-00544 — Implement capsule-vs-triangle sweep (for the stair ramps and terrain)
-      dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
+- [x] HOUSE-00544 — Implement capsule-vs-triangle sweep (for the stair ramps and terrain)
+      dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST      note: (2026-09-08) `SweepCapsuleTriangle`, and 14 analytic cases. Same reduction as the box
+            and a harder shape: an upright capsule against a triangle is a point against the
+            triangle EXTRUDED along Y by the half-height and then rounded by the radius -- a prism
+            of six vertices, nine edges and five faces. Exact by enumeration rather than iteration:
+            the ray against each face's offset plane where the contact lands inside it, each edge
+            as a cylinder, each vertex as a sphere, earliest wins. A rounded convex body has no
+            closed form that skips the edges, and skipping them is what makes a body catch on the
+            seam between two triangles of one flat floor -- which is a case.
+      accept: landing on a face, on a rounded edge and on a rounded vertex, each at its analytic
+            distance; a miss beside; the winding not mattering; the segment lengthening the shape
+            in y and nowhere else; a stair ramp met at its own slope with the slope's normal; a
+            VERTICAL triangle, whose prism has no volume at all, still a surface; a degenerate
+            triangle a miss rather than a normal made of noise; starting on the surface reported
+            as inside; two triangles of one floor giving the same height across their seam; twelve
+            approaches each giving a unit normal that opposes the motion
+      finding: (2026-09-08, found by `HOUSE-00544`) the first implementation had two defects and
+            both were found by cases, not by reading. The inside-a-face test used
+            `cross(normal, edge)` and assumed one winding, so it rejected every contact on the
+            faces whose corners the index table happened to list the other way round -- a body
+            falling through a floor from above and standing on it from below. It compares the SIGN
+            across every edge now, which needs no winding. And there was no already-touching
+            branch at all: a capsule starting inside the surface reported a clean miss, because
+            every feature test wants `t >= 0` and the contact is behind the origin. The overlap is
+            asked directly now -- the centre within the radius of the prism, which is a distance to
+            a convex solid and its five faces are the whole of its surface.
 - [ ] HOUSE-00545 — Implement sphere sweep (for the third-person camera)
       dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00546 — Implement `RayCast` against OBBs, triangles and the terrain height field
