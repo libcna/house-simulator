@@ -7983,8 +7983,29 @@ never escapes and never penetrates.
             body resting against a wall is TOUCHING it -- so the player crouched at every wall
             they leaned on. The same `kContactTolerance` distinction the depenetration needed in
             `HOUSE-00555`, in a second place. Both fit tests use it now.
-- [ ] HOUSE-00559 — Implement cell tracking with 5 cm hysteresis and the `CellEntered` event
+- [x] HOUSE-00559 — Implement cell tracking with 5 cm hysteresis and the `CellEntered` event
       dep: HOUSE-00555, HOUSE-00356 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-08) §16.4's lookup already existed (`HOUSE-00356`) and already applies the
+            5 cm, on the incremental test alone. What this adds is the STATE that lookup needs --
+            the cell the player was in last -- and §43.4's event. `player::CellTracker` is a class
+            rather than a function for exactly that reason, and there is one of it: two systems
+            each keeping their own `currentCell` would each get their own idea of when the player
+            crossed a doorway, which is the thing the hysteresis exists to prevent.
+      note: `world::CellEntered` carries the cell entered AND the one left. §43.4 gives it five
+            consumers -- the visibility root, the audio listener, the residency set, the ambience
+            cross-fade and the overlay -- and a cross-fade needs to know what it is fading FROM.
+            A spawn leaves an invalid `previous`, because entering a cell without leaving one is a
+            different thing and a listener has to be able to tell.
+      note: **a lookup that finds no cell keeps the last good answer.** §16.4's step 4 calls that a
+            world-data bug and says to clamp; five systems cross-fading to an invalid id is a
+            worse failure than a stale one.
+      accept: 6 cases. A first update entering a cell with no previous one, answered by the GRID;
+            120 ticks of standing still publishing nothing and answered by the INCREMENTAL step
+            every time; a doorway crossed once over 400 samples, naming both cells; §43.4's own
+            thrash case -- 200 ticks of ±2 mm astride the boundary staying in one cell, and 5 cm
+            past it arriving; `Forget` sending the next lookup to the grid, which is what a spawn,
+            a teleport and a save load need; and a point in no cell keeping the last good cell.
+            Five injected bugs, five caught.
 - [ ] HOUSE-00560 — Implement the stair ramp surface handling: slope detection, `SurfaceKind::Stairs`, speed reduction
       dep: HOUSE-00553, HOUSE-00379 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00561 — Implement the eye-height critically-damped spring, stiffened on stairs

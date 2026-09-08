@@ -25,6 +25,7 @@ add_library(cnahouse_core STATIC
     audio/AudioSystem.cpp
 
     # player -- input first, because nothing else may read the devices
+    player/CellTracker.cpp
     player/KeyboardMouseSource.cpp
     player/PlayerController.cpp
 
