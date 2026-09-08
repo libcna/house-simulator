@@ -34,6 +34,7 @@
 #include "cnahouse/player/PlayerController.hpp"
 #include "cnahouse/world/WorldData.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
+#include "unit/StairPath.hpp"
 
 namespace
 {
@@ -52,6 +53,11 @@ namespace
     using cnahouse::player::PlayerState;
     using cnahouse::player::PlayerStep;
     using cnahouse::player::PlayerStepReport;
+    using cnahouse::tests::Flat;
+    using cnahouse::tests::FootStart;
+    using cnahouse::tests::PathUp;
+    using cnahouse::tests::SegmentsOf;
+    using cnahouse::tests::StairSegment;
     using cnahouse::util::IdRegistry;
     using Microsoft::Xna::Framework::Vector3;
 
@@ -66,132 +72,13 @@ namespace
     /// 0.60 m from its centre is standing on it; the flights are 1.1 m wide, so this is half a
     /// width. Tighter than this and a body stopped by the balustrade a hand's breadth short of a
     /// waypoint's exact centre reads as one that could not get there.
-    constexpr float kArrived = 0.60F;
+    constexpr float kArrived = cnahouse::tests::kStairArrived;
     /// No progress for this many steps and the body is stuck, whatever it is doing.
     constexpr int kStuck = 240;
 
     std::string_view Name(cnahouse::util::Id id)
     {
         return IdRegistry::NameOf(id);
-    }
-
-    float Flat(const Vector3& a, const Vector3& b)
-    {
-        const float dx = a.X - b.X;
-        const float dz = a.Z - b.Z;
-        return std::sqrt(dx * dx + dz * dz);
-    }
-
-    /// One piece of a flight, as the collision holds it: a wedge or a landing box.
-    struct Segment
-    {
-        float lowY = 0.0F;
-        float highY = 0.0F;
-        Vector3 low;  ///< the middle of its bottom edge
-        Vector3 high; ///< and of its top one; the same point for a landing
-        bool landing = false;
-    };
-
-    /// The centroid of every vertex within a centimetre of @p wanted, optionally only those
-    /// further than @p beyond from @p away.
-    Vector3
-    EdgeCentre(const CollisionMesh& mesh, float wanted, const Vector3* away = nullptr, float beyond = 0.0F)
-    {
-        Vector3 sum;
-        int count = 0;
-        for (const Vector3& vertex : mesh.vertices)
-        {
-            if (std::fabs(vertex.Y - wanted) >= 0.01F)
-            {
-                continue;
-            }
-            if (away != nullptr && Flat(vertex, *away) < beyond)
-            {
-                continue;
-            }
-            sum = Vector3(sum.X + vertex.X, sum.Y + vertex.Y, sum.Z + vertex.Z);
-            ++count;
-        }
-        if (count == 0)
-        {
-            return sum;
-        }
-        const auto n = static_cast<float>(count);
-        return Vector3(sum.X / n, sum.Y / n, sum.Z / n);
-    }
-
-    /// The foot of a ramp's WALKING surface -- which is not the middle of its underside.
-    ///
-    /// `build_collision.py` builds a flight as a solid wedge: a triangular prism whose bottom face
-    /// is flat at the base height and whose top face is the slope. Four of its six vertices are at
-    /// the bottom, two at each end, so the centroid of "everything at the minimum height" is the
-    /// middle of the run's footprint and not the bottom of the slope -- which is a waypoint half a
-    /// flight away from where a body walking up would be, and how this test spent its first run
-    /// walking backwards into the stairwell.
-    Vector3 FootOfTheSlope(const CollisionMesh& mesh, const Vector3& top)
-    {
-        float furthest = 0.0F;
-        for (const Vector3& vertex : mesh.vertices)
-        {
-            if (std::fabs(vertex.Y - mesh.bounds.Min.Y) < 0.01F)
-            {
-                furthest = std::max(furthest, Flat(vertex, top));
-            }
-        }
-        return EdgeCentre(mesh, mesh.bounds.Min.Y, &top, furthest - 0.10F);
-    }
-
-    /// Every stair segment of @p cell whose height is inside [@p from, @p to], in climbing order.
-    std::vector<Segment>
-    SegmentsOf(const CollisionWorld& world, const CollisionCell& cell, float from, float to)
-    {
-        std::vector<Segment> segments;
-        for (const std::uint32_t shape : cell.shapes)
-        {
-            if (shape < world.obbs.size())
-            {
-                const CollisionObb& obb = world.obbs[shape];
-                if (obb.kind != CollisionKind::Stair)
-                {
-                    continue;
-                }
-                const float top = obb.centre.Y + obb.halfExtents.Y;
-                if (top < from - 0.25F || top > to + 0.25F)
-                {
-                    continue;
-                }
-                Segment segment;
-                segment.landing = true;
-                segment.lowY = top;
-                segment.highY = top;
-                segment.low = Vector3(obb.centre.X, top, obb.centre.Z);
-                segment.high = segment.low;
-                segments.push_back(segment);
-                continue;
-            }
-            const std::size_t index = shape - world.obbs.size();
-            if (index >= world.meshes.size() || world.meshes[index].kind != CollisionKind::Stair)
-            {
-                continue;
-            }
-            const CollisionMesh& mesh = world.meshes[index];
-            if (mesh.bounds.Min.Y < from - 0.25F || mesh.bounds.Max.Y > to + 0.25F)
-            {
-                continue;
-            }
-            Segment segment;
-            segment.lowY = mesh.bounds.Min.Y;
-            segment.highY = mesh.bounds.Max.Y;
-            // The wedge's bottom and top EDGES, from the vertices themselves: a bounding box
-            // cannot say which end of a ramp is the low one, and the whole path depends on it.
-            segment.high = EdgeCentre(mesh, mesh.bounds.Max.Y);
-            segment.low = FootOfTheSlope(mesh, segment.high);
-            segments.push_back(segment);
-        }
-        std::sort(segments.begin(),
-                  segments.end(),
-                  [](const Segment& a, const Segment& b) { return a.lowY < b.lowY; });
-        return segments;
     }
 
     /// Walks @p state through @p waypoints, steering at each in turn. Returns how many it reached.
@@ -314,69 +201,23 @@ TEST(StairTraversalTests, EveryFlightIsWalkableUpAndDownAndEveryLandingIsStoodOn
         const world::Level* fromLevel = data.FindLevel(fromCell->level);
         ASSERT_NE(fromLevel, nullptr);
         const float footY = flight.fromY.value_or(fromLevel->ffl);
-        const std::vector<Segment> segments = SegmentsOf(statics, *collision, footY, footY + flight.Climb());
+        const std::vector<StairSegment> segments =
+            SegmentsOf(statics, *collision, footY, footY + flight.Climb());
         ASSERT_FALSE(segments.empty()) << Name(flight.id) << ": no ramp in the collision to walk on";
         ++flights;
 
-        // Up: every segment's ends in climbing order, and finally a step past the top so the
-        // body arrives ON the upper floor rather than on the nosing.
-        std::vector<Vector3> up;
-        for (std::size_t i = 0; i < segments.size(); ++i)
-        {
-            const Segment& segment = segments[i];
-            if (segment.landing)
-            {
-                ++landings;
-                up.push_back(segment.low);
-                continue;
-            }
-            if (i > 0)
-            {
-                // The foot of every run but the first: the body starts on that one.
-                //
-                // A U-shaped flight turns on its landing, and the next run's wedge SITS on that
-                // landing -- at `STAIR_MAIN_L0_L1` the whole eastern half of the landing is under
-                // run 2, 0.71 m thick at its deep end. The only way onto it is at its toe, so the
-                // path along the landing is an L: to the run's own end of the landing first, and
-                // across to its lane second. Walked as one diagonal, a body meets the wedge's
-                // cheek two metres before the toe and stands there for ever.
-                if (i > 0 && segments[i - 1].landing)
-                {
-                    const Segment& landing = segments[i - 1];
-                    up.push_back(Vector3(landing.low.X, landing.low.Y, segment.low.Z));
-                }
-                up.push_back(segment.low);
-            }
-            // Waypoints ALONG the run, not just at its ends. A body aimed two metres up a flight
-            // walks the straight line to that point, which on a U-shaped stair cuts across the
-            // well and into the next run's cheek; aimed a third of a metre ahead it follows the
-            // lane it is standing in. Four steps up each run is enough for the 2.5 m ones here.
-            for (int part = 1; part <= 4; ++part)
-            {
-                const float t = static_cast<float>(part) / 4.0F;
-                up.push_back(Vector3(segment.low.X + (segment.high.X - segment.low.X) * t,
-                                     segment.low.Y + (segment.high.Y - segment.low.Y) * t,
-                                     segment.low.Z + (segment.high.Z - segment.low.Z) * t));
-            }
-        }
-        // One stride past the top, and a stride is 0.40 m -- not a fraction of the run. A quarter
-        // of the basement flight is 1.1 m, which walks the body past the head of the stairs and
-        // into the corner of the well beyond it, where it spends the descent facing a wall.
-        const Segment& last = segments.back();
-        const float runX = last.high.X - last.low.X;
-        const float runZ = last.high.Z - last.low.Z;
-        const float runLength = std::max(1e-3F, std::sqrt(runX * runX + runZ * runZ));
-        up.push_back(Vector3(
-            last.high.X + runX / runLength * 0.40F, last.high.Y, last.high.Z + runZ / runLength * 0.40F));
-
-        // The body starts ON the first run, a twentieth of the way up it, and not on the floor in
-        // front of it: the foot of a flight is where the NEXT flight down comes up, and a body
-        // backed off from the main stair's bottom tread is standing over the basement stairwell.
-        // Walking into a flight from the room is `HOUSE-00617`'s tour; this is about the flight.
-        const Segment& first = segments.front();
-        const Vector3 foot(first.low.X + (first.high.X - first.low.X) * 0.15F,
-                           first.low.Y + (first.high.Y - first.low.Y) * 0.15F,
-                           first.low.Z + (first.high.Z - first.low.Z) * 0.15F);
+        // Up: `PathUp` builds the waypoints from the ramp itself -- the ends of every run, an L
+        // across each landing, four steps along each run and a stride past the top. Every one of
+        // those details was learnt by walking into something, and `HOUSE-00632`'s tune pass walks
+        // the same path, so there is one of it (`unit/StairPath.hpp`).
+        const std::vector<Vector3> up = PathUp(segments);
+        // Counted from the SEGMENTS rather than from the path, which is the same number said
+        // once: `PathUp` puts one waypoint on each landing, and this is what makes "every landing
+        // is reachable" a thing the test can claim to have checked.
+        landings += static_cast<int>(std::count_if(
+            segments.begin(), segments.end(), [](const StairSegment& one) { return one.landing; }));
+        const StairSegment& first = segments.front();
+        const Vector3 foot = FootStart(segments);
 
         // 0.30 m of air under the soles, not 2 mm. A capsule resting on a 32.6° flight touches it
         // UPHILL of its centre by `radius · tan(slope)` -- 0.19 m (`HOUSE-00553` measured the same

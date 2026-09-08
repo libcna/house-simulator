@@ -3844,7 +3844,15 @@ doorway does not thrash.
 ## 44. First-person camera
 
 * Eye at `playerPosition + (0, eyeHeight, 0)`, with `eyeHeight` smoothed by a critically-damped
-  spring (ω = 18 rad/s) so step-ups and stair climbing do not jolt the view.
+  spring (ω = 18 rad/s) so step-ups and stair climbing do not jolt the view. The spring tracks the
+  eye's **world height** and not its height above the feet — above the feet it is the constant
+  1.68 m, and a spring chasing a constant does nothing. A step up moves the *feet*; the eye is left
+  behind in world space and catches up.
+* The eye's height is three terms in a fixed order (`player::FirstPersonView`): the spring, then
+  §44's bob, then §43.1's landing dip, and §44's near-surface pull-back last of all because it
+  needs the view direction the others produce. The bob and the dip are added **after** the spring —
+  through it they would be a 1.8 Hz wobble and a 62 ms impulse fed into a filter built to remove
+  exactly those.
 * **Mouse look**, strict XNA 4.0: each frame read `Mouse::GetState()`, compute the delta from the
   window centre, apply sensitivity, then `Mouse::SetPosition(centreX, centreY)`. The cursor is
   hidden (`Game::setIsMouseVisibleProperty(false)`). This is the canonical XNA first-person idiom

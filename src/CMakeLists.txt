@@ -30,6 +30,7 @@ add_library(cnahouse_core STATIC
     player/EyeProbe.cpp
     player/EyeSpring.cpp
     player/FirstPersonCamera.cpp
+    player/FirstPersonView.cpp
     player/HeadBob.cpp
     player/LandingDip.cpp
     player/MouseCapture.cpp

@@ -8982,8 +8982,83 @@ it must be tuned, not just implemented.
             crouch, which step found the cell including `NOT FOUND`, the held item and target when
             there is one, and the toggle. Nine injected bugs, nine caught (one after the ground
             line's gap was actually asserted rather than only its surface name).
-- [ ] HOUSE-00632 — Tune pass: walk every room and every flight and adjust bob, spring, FOV and step assist until it feels right; record the final numbers
+- [x] HOUSE-00632 — Tune pass: walk every room and every flight and adjust bob, spring, FOV and step assist until it feels right; record the final numbers
       dep: HOUSE-00627 · sys: player · plat: LNX · pri: MUST
+      note: (2026-09-09) **what "feels right" was replaced with, and why.** Feel is not something
+            this session has: nobody walked the house with their hands on the keys. What a tune
+            pass CAN do without a tester is measure the numbers underneath the feel, each against
+            the failure it exists to prevent, over the whole house -- and that is what
+            `CameraTuneTests` does, in five measurements that print their numbers on every run.
+            The subjective half is not claimed and is left for the owner; nothing here says the
+            camera feels good, only that it does what §44 and §48.2 say it should, everywhere.
+      note: **`player::FirstPersonView` is the assembly, and it exists because the ORDER is a
+            decision.** The spring, then §44's bob, then §43.1's dip, then §44's pull-back last
+            because it needs the view direction the rest produce. Every caller that wanted a
+            first-person view -- this tune pass, `HOUSE-00633`'s render poses, the game -- would
+            otherwise write that order out again, and the second one to write it would get it
+            slightly different. §44 now records it, and the six `FirstPersonViewTests` assert it.
+      finding: **the eye spring has to track the eye's WORLD height, not its height above the
+            feet.** Above the feet it is §43.1's constant 1.68 m, and a spring chasing a constant
+            does nothing at all -- the smoothing §44 asks for would have been a no-op that every
+            test of `EyeSpring` in isolation still passed. A step up moves the FEET; the eye is
+            left behind in world space and catches up. Injected back in, it is caught by the whole
+            view's downward motion on a flight jumping from 6 mm to the feet's own 29 mm.
+      note: measured over **8 flights (7 639 frames, 17.8 m of climb), a tour of all 96 cells
+            (336 legs, 96 553 frames, 900 m) and three minutes of §HOUSE-00618's random walk
+            (21 600 frames, 230 m, 23 cell changes)**, plus all 64 door leaves.
+      note: **the final numbers, and nothing needed changing.**
+            · eye lag behind the body: **0.096 m** on the flights, **0.068 m** walking the rooms,
+              **0.149 m** worst anywhere (the terrace bank, at the fast walk) -- against §43.1's
+              0.22 m step-up and a 1.68 m eye, so the view is never a whole kerb behind the body.
+            · §48.2's sawtooth, measured as the spring moving AWAY from its target: **0.4 mm** on
+              the flights, **2.0 mm** over the tour of every room -- against feet that skip
+              **29 mm** between contacts on a ramp and spend 4.7 % of a climb off the ground. That
+              ratio, 29 mm in to 0.4 mm out, is what the spring is worth.
+            · §44's head bob: **0.0120 m** at the walk, **0.0206 m** at the fastest step measured,
+              never over §44's `0.012 · speed/1.35` at the speed the body was going.
+            · §43.1's step assist: largest single-frame lift **0.2218 m** (its own 0.22 m limit,
+              on the tour), largest drop **0.4500 m** (its own step-down limit). The assist is
+              doing the lifting, and the spring is hiding it.
+            · §43.1's landing dip: **19.3 mm** deepest over three minutes of walking.
+            · §44's field of view: 70° vertical is **102.4°** horizontal at 16:9, and it frames
+              the jambs and head of all 64 door leaves from inside the room they open into, with
+              **1.70 m** to spare at the tightest (`P_L1_HALL_W__L1_WC3`).
+      finding: **§48.2's stiffened stair spring buys 6 %, not the transformation its sentence
+            implies.** The main stair climbed twice, everything else identical: 0.1007 m of lag at
+            ω = 24 against 0.1072 m at ω = 18, and neither saws. §48.2's stated benefit -- *"the
+            view rises steadily rather than bobbing per step"* -- is delivered by both, because
+            what removes the per-riser sawtooth is critical damping and not stiffness. The 24 is
+            kept: it is the design's, and it is measurably better on the one number that differs.
+      finding: **§44's near-surface pull-back never fired.** Not once in 96 553 frames of touring
+            every room, nor in three minutes of walking into things. The reason is geometric: the
+            eye sits on the capsule's axis, so §43.1's 0.30 m radius keeps it 0.30 m from any wall
+            face, and it is 1.68 m above the floor -- the 0.10 m probe cannot reach anything a
+            standing body can walk into. It is insurance for phase 13's props and for a crouched
+            body under low geometry, both of which `EyeProbeTests` builds directly. Worth knowing
+            before somebody optimises away a raycast that appears to do nothing.
+      finding: **seven of the 64 door openings cannot be seen WHOLE from either room they join.**
+            Seeing the threshold as well as the head costs another 1.68 m of standback -- the eye
+            is that far above it -- and a WC 2.30 m across cannot give it. That is a fact about
+            §12's rooms rather than about §44's lens, and the part that does not fit is a line on
+            the floor under the player's own feet, so the criterion asserted is the jambs and the
+            head. The seven are counted, so a change to either the house or the lens is noticed.
+      note: `unit/StairPath.hpp` is `HOUSE-00615`'s path up a flight, extracted so that the tune
+            pass walks the same eight flights the guarantee walks. Two copies of "where the
+            waypoints up a staircase are" would be two chances for a tune pass to be measuring a
+            path the guarantee is not. The guarantee's own numbers are unchanged by the extraction
+            -- 8 flights, 3 landings, 4 946 steps, the same before and after.
+      finding: a measurement bug worth recording because the code it was measuring has the same
+            trap: `state.position` is the body's CENTRE, and §43.1's crouch moves the centre by
+            0.275 m while the FEET stay still. Differencing the centre says the body leapt a
+            quarter of a metre every time it stood up. The fixture also set `state.crouched`
+            directly at first, which really does teleport the feet -- the crouch has to be asked
+            for through `InputState`, and the controller moves the body.
+      verified: 5 `CameraTuneTests` (the flights, the ω 24-vs-18 control, the three-minute walk,
+            all 96 cells, all 64 doors) and 6 `FirstPersonViewTests` (the world-height spring, the
+            bob and dip added after it, §48.2's flag reaching it, the snap that is a teleport, the
+            view that snaps itself, and the crouch). Twelve injected bugs, twelve caught: the four
+            terms fed into the wrong end of the spring, the stairs flag, the travel, the snap, and
+            four deliberate mis-tunings (ω 18→4, ω 24→18, the bob ×4, the field of view at 40°).
 - [ ] HOUSE-00633 — Render tests: 12 first-person poses across the house
       dep: HOUSE-00632 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00634 — Phase-8 review and commit
