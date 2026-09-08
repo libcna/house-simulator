@@ -42,6 +42,7 @@ add_library(cnahouse_core STATIC
     world/WorldData.cpp
     physics/BroadPhase.cpp
     physics/CollisionLoader.cpp
+    physics/DynamicObstacles.cpp
     physics/Fall.cpp
     physics/Ground.cpp
     physics/Move.cpp

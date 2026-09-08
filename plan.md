@@ -7865,8 +7865,32 @@ never escapes and never penetrates.
             `radius / normal.Y` above the ground, not `radius`: 13 mm on a 17° square and 0.36 m
             on a 60° one. Two of this task's own cases were written with the flat-ground shortcut
             and failed against correct code. `HOUSE-00548`'s ground probe needs the real formula.
-- [ ] HOUSE-00554 — Implement the dynamic-obstacle list per cell (doors, garage door, pets) and its per-frame refresh
+- [x] HOUSE-00554 — Implement the dynamic-obstacle list per cell (doors, garage door, pets) and its per-frame refresh
       dep: HOUSE-00542 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) §49.4's list: door leaves, the garage door's five segments, pets and the
+            twelve nudgeable props, each an OBB in world space with the id of whatever is driving
+            it -- because §50 reports "blocked" against a PARTICULAR door, and a hit that only said
+            "something" could not.
+      note: **rebuilt every frame, not updated in place.** A door that swings from one cell into
+            another, a pet that walks through a doorway and a prop that is kicked across a room all
+            change WHICH cell they belong to, and an incremental list has to be told about every one
+            of those -- a door left in the cell it swung out of stops a player with something that
+            is not there. Clearing costs one pass over a few dozen boxes, cannot go stale, and the
+            storage is kept between frames so the refill allocates nothing after the first.
+      note: it is deliberately NOT part of `CollisionWorld`, which is the static world read from
+            `collision.bin` and shared immutably for the life of the level. Mixing them would put a
+            per-frame write into the structure every sweep reads. `SweepDynamic` is likewise a
+            separate call from `SweepCell`: the static world wants a grid and a few dozen boxes want
+            a loop, and a caller that only needs the walls should pay for neither.
+      accept: 9 cases. An empty cell and an empty world; per-cell lists with a total; a frame
+            starting empty so last frame's door cannot survive into this one; a leaf stopping a
+            body at 0.68 of its metre and naming the door; the EARLIEST of a cat and a door
+            stopping it rather than the first listed; a swung leaf overlapping and giving §49.4's
+            push-out its direction, with a leaf 50 mm clear giving nothing; the DEEPEST of two
+            overlaps winning, which is where §49.3 pushes; the garage door as five segments that a
+            standing body meets at its own height and a crawling one gets under when three are
+            raised; and the hall's door not stopping a body in the kitchen. Six injected bugs, six
+            caught.
 - [x] HOUSE-00555 — Implement `PlayerController`: input → desired velocity → sweep → position, with the acceleration model
       dep: HOUSE-00551, HOUSE-00140 · sys: player · plat: ALL · pri: MUST
       note: (2026-09-08) §49.3's fixed step, composed. Every piece of it had its own tests already;
