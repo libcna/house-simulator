@@ -8032,8 +8032,27 @@ never escapes and never penetrates.
             garden bank that is not one -- whose slope is still measured; and a body that has
             stopped reporting no slope, because there is no direction to measure along. Seven
             injected bugs, seven caught.
-- [ ] HOUSE-00561 — Implement the eye-height critically-damped spring, stiffened on stairs
+- [x] HOUSE-00561 — Implement the eye-height critically-damped spring, stiffened on stairs
       dep: HOUSE-00560 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-08) §44's ω = 18 and §48.2's ω = 24. **"Critically damped" is the whole
+            specification and it is a testable one**: the damping is exactly `2ω`, never a tuned
+            fraction of it, because that is the unique amount which reaches the target in the
+            shortest time WITHOUT going past it. So the spring has one parameter, and overshoot --
+            the failure mode of a spring tuned by feel -- is a thing a test can simply forbid.
+      note: **the integrator is solved, not stepped.** The explicit pair (advance the velocity,
+            then the position) is one line shorter and diverges once `ω·dt` passes 2, which at
+            §48.2's ω = 24 is an 83 ms frame -- a loading hitch, not a hypothetical, and a
+            diverging eye height is a view that leaves the building. Solving for the new velocity
+            first puts `dt` only in a denominator, so a long frame settles the eye instead of
+            launching it.
+      accept: 7 cases. Both stiffnesses pinned; no overshoot on a 0.22 m step-up, a 0.45 m
+            step-down or a stair-stiffened lift; the stiff spring settling faster than the soft one
+            in the 24/18 ratio a `1/ω` time scale implies; a 0.22 m step within a millimetre in
+            0.45 s, stated against the analytic `7.55/ω` with the semi-implicit integrator's few
+            per cent of extra damping named rather than hidden in the tolerance; a snap that does
+            not travel and keeps no velocity; frames of 0.05 to 1.0 s that settle rather than
+            diverge; and a stair-shaped RAMP target followed with the constant `2v/ω` lag a
+            critically damped spring has, never passing it. Six injected bugs, six caught.
 - [ ] HOUSE-00562 — Implement the debug physics overlay (`F9`): shapes, capsule, probes, sweeps
       dep: HOUSE-00147, HOUSE-00550 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-00563 — Implement `teleport <cellId>` and `noclip` console commands

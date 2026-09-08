@@ -26,6 +26,7 @@ add_library(cnahouse_core STATIC
 
     # player -- input first, because nothing else may read the devices
     player/CellTracker.cpp
+    player/EyeSpring.cpp
     player/KeyboardMouseSource.cpp
     player/PlayerController.cpp
 
