@@ -6636,8 +6636,27 @@ the chunk builder produces ≤ 6 chunks per cell.
             and reverses every plan winding, and a mesh turned inside out has exactly the right
             bounds and passes every claim about coordinates.
       note: five injected bugs, all caught.
-- [ ] HOUSE-00454 — Generate exterior walls with the correct thickness, and the foundation walls
+- [x] HOUSE-00454 — Generate exterior walls with the correct thickness, and the foundation walls
       dep: HOUSE-00453 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) a partition has two rooms and each carries its own inner face; an
+            exterior run has one room and the weather, so it carries a second face on the far side
+            of the centre line. The two are `wallExterior` apart — 0.30 m, straddling the line the
+            layout stores — which is the claim, measured on the exported mesh rather than on the
+            arithmetic that placed it.
+      finding: **an outer skin built from cell extents alone leaves a slot round the whole house
+            at every storey.** `L0`'s ceiling is 3.30 and `L1`'s floor is 3.65: the 0.35 m of floor
+            structure between them belongs to no cell's extent, and the wall outside it belonged to
+            nobody. The lower cell now carries that band — its outer runs reach the **next** level's
+            `ffl`, and the topmost storey's stop at its own ceiling because there is no next one —
+            so every band is carried exactly once.
+      note: below grade the same run is a `foundationWall`, decided by the level's own `ffl` being
+            under §10.2's grade rather than by the level being called `B1`. A house with a second
+            basement gets the right answer without this tool learning its name. The two thicknesses
+            are both 0.30 m today, so the geometry is identical and the **name** is the point:
+            §12's foundation takes a different material.
+      note: five injected bugs, all caught, including the outer face put on the inner plane —
+            which a claim about the mesh's bounds catches and a claim about wall thickness alone
+            would not.
 - [ ] HOUSE-00455 — Cut door and window openings from walls, with reveals and sills
       dep: HOUSE-00454, HOUSE-00378 · sys: content · plat: TOOL · pri: MUST
       accept: every opening in `layout.openings.json` produces a hole of the right size in the right wall

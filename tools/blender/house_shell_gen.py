@@ -267,7 +267,32 @@ def facing(points: list[tuple[float, float, float]], wanted: tuple[float, float,
     return points if sum(n * o for n, o in zip(normal, wanted)) > 0 else list(reversed(points))
 
 
-def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None):
+def outer_wall_name(level: dict, wall: str) -> str:
+    """`foundationWall` for an exterior run below grade, otherwise @p wall.
+
+    §10.2 puts grade at about 0, and only `B1` sits under it. Read from the level's `ffl` rather
+    than from its id, so a house with a second basement gets the same answer.
+    """
+    if wall == "wallExterior" and float(level.get("ffl", 0.0)) < 0.0:
+        return "foundationWall"
+    return wall
+
+
+def outer_span(cell: dict, extent: tuple[float, float], level: dict, levels: dict):
+    """The Y range an exterior run's OUTER face covers: this cell's floor to the next level's.
+
+    A cell's own extent stops at its ceiling -- 3.30 on `L0` -- and the next storey's floor is at
+    3.65. Between them is 0.35 m of floor structure, and an outer skin built from cell extents
+    alone leaves a slot round the whole house at every storey, level with the joists. The lower
+    cell carries that band, so every band is carried once.
+    """
+    above = [float(row["ffl"]) for row in levels.values()
+             if isinstance(row.get("ffl"), (int, float)) and float(row["ffl"]) > extent[1] - 1e-6]
+    return (extent[0], min(above) if above else extent[1])
+
+
+def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
+               level=None, levels=None):
     """One mesh object named for the cell: its floor, its ceiling and its walls' inner faces."""
     construction = construction or {}
     neighbours = list(neighbours)
@@ -305,6 +330,24 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                 else:
                     corners = [(lo, y0, plane), (lo, y1, plane), (hi, y1, plane), (hi, y0, plane)]
                 add(corners, inward)
+
+                # `HOUSE-00454`: the OUTER face of the same wall, where there is an outside. A
+                # partition has two rooms and each has its inner face; an exterior wall has one
+                # room and the weather, and the weather's side is here.
+                if wall == "wallPartition" or level is None:
+                    continue
+                outer_name = outer_wall_name(level, wall)
+                outer_half = float(construction.get(outer_name, 0.0)) / 2.0
+                outer_plane = {"-X": x0 - outer_half, "+X": x1 + outer_half,
+                               "-Z": z0 - outer_half, "+Z": z1 + outer_half}[side]
+                oy0, oy1 = outer_span(cell, (y0, y1), level, levels or {})
+                if side in ("-X", "+X"):
+                    outer = [(outer_plane, oy0, lo), (outer_plane, oy1, lo),
+                             (outer_plane, oy1, hi), (outer_plane, oy0, hi)]
+                else:
+                    outer = [(lo, oy0, outer_plane), (lo, oy1, outer_plane),
+                             (hi, oy1, outer_plane), (hi, oy0, outer_plane)]
+                add(outer, tuple(-value for value in inward))
 
         # `HOUSE-00452`: the floor and the ceiling, inset to the same inner faces.
         floor = [(ix0, y0, iz0), (ix1, y0, iz0), (ix1, y0, iz1), (ix0, y0, iz1)]
@@ -350,7 +393,8 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
             report["skipped"].append(f"{cell['id']}: {reason}")
             continue
         reset_scene()
-        obj = build_cell(cell, extent, neighbours=neighbours, construction=construction)
+        obj = build_cell(cell, extent, neighbours=neighbours, construction=construction,
+                         level=level, levels=levels)
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
@@ -409,21 +453,32 @@ def selftest(output: Path) -> int:
             walls = neighbour_boxes(layout, levels)
             construction_now = (layout.get("levels") or {}).get("construction") or {}
             inner = inset_box(box, subject, walls, construction_now)
-            want_min = [inner[0], inner[2], inner[4]]
-            want_max = [inner[1], inner[3], inner[5]]
+            # Three sides are partitions, so the mesh stops at their inner faces; the north side
+            # has an exterior run, so it reaches the OUTER face of a 0.30 m wall, half a thickness
+            # the other side of the centre line. And it rises past this storey's 3.30 ceiling to
+            # `L1`'s 3.65 floor, because the outer skin carries the band at the joists.
+            outer_z = box[4] - float(construction_now["wallExterior"]) / 2.0
+            want_min = [inner[0], inner[2], outer_z]
+            want_max = [inner[1], float(levels["L1"]["ffl"]), inner[5]]
             close = all(abs(a - b) < 1e-4 for a, b in zip(bounds[0], want_min)) and \
                 all(abs(a - b) < 1e-4 for a, b in zip(bounds[1], want_max))
             require(close,
-                    f"and the exported room is the layout's box with its walls taken off, in world "
-                    f"coordinates: {[round(v, 3) for v in bounds[0]]}.."
-                    f"{[round(v, 3) for v in bounds[1]]} against "
-                    f"{[round(v, 3) for v in want_min]}..{[round(v, 3) for v in want_max]}")
-            require(bounds[0][0] > box[0] and bounds[1][0] < box[1]
-                    and bounds[0][2] > box[4] and bounds[1][2] < box[5],
-                    "which is strictly inside the centre-line box on all four sides")
-            require(abs(bounds[1][1] - bounds[0][1] - (extent[1] - extent[0])) < 1e-4,
-                    f"and it stands from the floor to the ceiling, "
-                    f"{extent[1] - extent[0]:.2f} m of it")
+                    f"and the exported cell spans its inner faces and its outer skin: "
+                    f"{[round(v, 3) for v in bounds[0]]}..{[round(v, 3) for v in bounds[1]]} "
+                    f"against {[round(v, 3) for v in want_min]}.."
+                    f"{[round(v, 3) for v in want_max]}")
+            exterior_inner = box[4] + float(construction_now["wallExterior"]) / 2.0
+            require(abs((exterior_inner - outer_z) - float(construction_now["wallExterior"]))
+                    < 1e-6,
+                    f"so the north wall's two faces are {construction_now['wallExterior']} m "
+                    f"apart, straddling the centre line the layout stores — which is what §12's "
+                    f"construction block says it is")
+            require(bounds[1][1] > box[3] + 1e-6,
+                    f"and the skin passes this storey's ceiling ({box[3]}) to reach the next "
+                    f"storey's floor ({bounds[1][1]}), so there is no slot round the house at the "
+                    f"joists")
+            require(abs(bounds[0][1] - extent[0]) < 1e-4,
+                    f"and it stands on the floor the layout gives it ({extent[0]})")
 
     require(len(document.get("meshes", [])) == 1,
             f"one mesh per cell ({len(document.get('meshes', []))})")
@@ -503,13 +558,16 @@ def selftest(output: Path) -> int:
     # Six faces a box: four sides on the centre line and two inset slabs. And they face the right
     # way -- a floor whose normal points down is invisible from the room and lit from underneath.
     reset_scene()
-    obj = build_cell(subject, extent, neighbours=neighbours, construction=construction)
+    obj = build_cell(subject, extent, neighbours=neighbours, construction=construction,
+                     level=levels[subject["level"]], levels=levels)
     polygons = list(obj.data.polygons)
-    runs = sum(len(side_intervals(side, kitchen_box, subject, neighbours))
-               for side in ("-X", "+X", "-Z", "+Z"))
-    require(len(polygons) == runs + 2,
-            f"one face per run of each side, plus a floor and a ceiling ({len(polygons)} for "
-            f"{runs} runs)")
+    all_runs = [(side, run) for side in ("-X", "+X", "-Z", "+Z")
+                for run in side_intervals(side, kitchen_box, subject, neighbours)]
+    outside_runs = [run for _side, run in all_runs if run[2] != "wallPartition"]
+    require(len(polygons) == len(all_runs) + len(outside_runs) + 2,
+            f"one face per run, a second for each run that has weather on the other side, plus a "
+            f"floor and a ceiling ({len(polygons)} for {len(all_runs)} runs of which "
+            f"{len(outside_runs)} are outside walls)")
     require(sum(1 for face in polygons if face.normal.z > 0.99) == 1
             and sum(1 for face in polygons if face.normal.z < -0.99) == 1,
             "exactly one face looks up and one looks down: the floor and the ceiling")
@@ -523,9 +581,29 @@ def selftest(output: Path) -> int:
     blender_centre = to_blender(*centre)
     inward = [face for face in polygons
               if sum(n * (c - p) for n, c, p in zip(face.normal, blender_centre, face.center)) > 0]
-    require(len(inward) == len(polygons),
-            f"every one of the {len(polygons)} faces looks into the room "
-            f"({len(polygons) - len(inward)} do not)")
+    require(len(inward) == len(all_runs) + 2,
+            f"every inner face and both slabs look into the room ({len(inward)} of "
+            f"{len(all_runs) + 2})")
+    require(len(polygons) - len(inward) == len(outside_runs),
+            f"and every outer face looks away from it, at the weather "
+            f"({len(polygons) - len(inward)} of {len(outside_runs)})")
+
+    # Below grade the same run is a foundation wall. Read from the level's `ffl`, so a house with
+    # a second basement gets the same answer without this tool learning its name.
+    require(outer_wall_name(levels["B1"], "wallExterior") == "foundationWall"
+            and outer_wall_name(levels["L0"], "wallExterior") == "wallExterior",
+            "an exterior run below grade is a foundation wall and one above it is not")
+    require(outer_wall_name(levels["B1"], "wallGarage") == "wallGarage",
+            "...and a garage wall stays a garage wall wherever it is")
+
+    # The band at the joists, from the level's own numbers rather than from a constant.
+    span = outer_span(subject, extent, levels["L0"], levels)
+    require(span == (extent[0], float(levels["L1"]["ffl"])),
+            f"an outer run runs from its own floor to the NEXT storey's, {span}")
+    top = cells["L3_STORE_W"]
+    top_extent = extent_of(top, levels["L3"])[0]
+    require(outer_span(top, top_extent, levels["L3"], levels)[1] == top_extent[1],
+            "and the topmost storey's stops at its own ceiling, because there is no next one")
 
     # A cell with no ceiling to be had. §13.6's attic level declares `ceiling: null` and every
     # attic cell overrides it, so this branch is unreachable from the authored house -- which is
