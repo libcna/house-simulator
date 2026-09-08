@@ -6259,8 +6259,34 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             parser strict enough to read them would break whenever somebody explains something.
             A deleted row is caught separately, because a check that only compares the rows it
             finds says nothing about the one somebody removed.
-- [ ] HOUSE-00397 — Run the full validator; fix every violation; record the first clean run
+- [x] HOUSE-00397 — Run the full validator; fix every violation; record the first clean run
       dep: HOUSE-00396, HOUSE-00360…HOUSE-00362 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-08) **the first clean run, recorded.** All eleven rules of §15.7, no rule
+            restricted, over the authored world and over the deployed one:
+
+                $ python3 tools/world/validate_world.py assets-src/world
+                validate_world: assets-src/world passes all 11 rule(s).   0 shape, 0 rule, 594 ms
+                $ python3 tools/world/validate_world.py content/world
+                validate_world: content/world passes all 11 rule(s).      0 shape, 0 rule, 646 ms
+
+            What it validated: 5 levels, 96 cells, 179 portals, 133 openings, 8 stair flights,
+            243 light fixtures, 333 nav nodes and 677 edges, 92 audio zones and 30 emitters,
+            7 plumbing stacks, 14 duct branches, 253 interactables. The C++ half agrees:
+            `WorldValidatorTest.TheAuthoredWorldPassesEveryRuleItCanSee` runs rules 3, 5, 6, 7, 9,
+            10 and 11 at `ValidationDepth::Full` over the **deployed** copy in 288 ms and reports
+            nothing, and the whole suite is 515/515.
+      note: **no violations were left to fix, and that is the finding rather than an anticlimax.**
+            Every violation this task was written to catch was found and fixed by the authoring
+            task that caused it — the dormer bays that cost `P_L3_STORE_W__L3_STORE_S` its shared
+            plane, the fridge door rule 4 refused before it understood sub-cells, the two plumbing
+            stacks and the eighth stair flight that placing fixtures discovered. A rule that runs
+            on every commit does not accumulate a backlog to work through, which is the whole
+            argument for `HOUSE-00363` having wired it into CI before the data was authored.
+      note: the deployed copy is validated here but is deliberately **not** a second gate.
+            `deploy_world.py --check` compares *parsed documents*, not text, so a deployed file
+            that parses to the same document as its source cannot fail a rule its source passes.
+            A second `world-rules` run over `content/world` would cost 646 ms on every commit to
+            re-prove that equality.
 - [x] HOUSE-00398 — Generate the printable floor plans (SVG per level) from the layout for review and for the docs
       dep: HOUSE-00397 · sys: world · plat: TOOL · pri: SHOULD
       note: six plans in `docs/floor-plans/` — one per level plus a site plan for the yards, the
