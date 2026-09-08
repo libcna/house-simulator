@@ -85,6 +85,9 @@ namespace
     const std::vector<std::string>& RelabelledWithoutAPortal()
     {
         static const std::vector<std::string> kPairs{
+            // The L2 landing's slab reaches past the stair cell's box and the front balcony's
+            // volume reaches up to L2's ceiling, so a body that walks onto that overhang is
+            // labelled with the balcony. Nothing solid is crossed.
             "L2_STAIR_MAIN -> L1_BALCONY_FRONT",
         };
         return kPairs;
@@ -293,7 +296,7 @@ TEST(SolidSurfaceTests, TwoThousandPushesNeverGetThroughAWallAFloorOrACeiling)
             // world being what it is, not a floor failing. Indoors a room is bounded by its walls
             // and a dropped body has nowhere to go but down.
             startedInTheAir =
-                falling && cell.kind != world::CellKind::Exterior &&
+                falling && cell.kind != world::CellKind::Exterior && cell.kind != world::CellKind::Stair &&
                 cnahouse::physics::GroundProbe(statics, *collision, broad, state.Body(), lift + 0.30F)
                     .onGround;
             if (startedInTheAir)

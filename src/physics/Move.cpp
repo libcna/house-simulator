@@ -78,6 +78,10 @@ namespace cnahouse::physics
             // touching" is not "hit immediately after moving" -- and 0.999 of no distance is no
             // distance, so it spends nothing here.
             //
+            // A body that is merely TOUCHING is a different case and does have one, below: it has
+            // an ordinary contact normal, it is going nowhere on its own, and it has to be able to
+            // walk along what it is resting on.
+            //
             // **It is not let through, either.** The obvious kindness -- ignore a start overlap the
             // motion is moving out of, so a body does not freeze against something it is already
             // in -- was tried and walked a body 0.97 m into the attic stair ramp: a triangle's
@@ -96,6 +100,18 @@ namespace cnahouse::physics
             remaining = Xna::Vector3(remaining.X - hit.normal.X * Dot(remaining, hit.normal),
                                      remaining.Y - hit.normal.Y * Dot(remaining, hit.normal),
                                      remaining.Z - hit.normal.Z * Dot(remaining, hit.normal));
+
+            if (hit.startedInside && !hit.touching)
+            {
+                // Inside something. The way out of a VOLUME is not a surface normal, so there is
+                // nothing to slide along and the projection above means nothing: an earlier
+                // version that trusted it walked a body 0.97 m into the attic stair ramp, whose
+                // prism is 1.2 m thick for §43.1's body. The step is spent standing still and
+                // §49.3's step 5 puts the body back, which is the step that exists for it. What
+                // is LEFT of the step is kept rather than zeroed, so the result still says the
+                // body was blocked -- it asked to move and did not.
+                break;
+            }
 
             if (!result.lastWalkable)
             {

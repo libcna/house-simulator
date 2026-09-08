@@ -7659,6 +7659,28 @@ never escapes and never penetrates.
             eleven caught.
 - [x] HOUSE-00547 — Implement `Overlap` and depenetration (4 iterations, 0.02 m push-out)
       dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
+      defect: (2026-09-08, found by `HOUSE-00615`) **a VERTICAL triangle claimed a half-space.**
+            The overlap is a point against the triangle extruded along Y, and a triangle whose
+            plane contains Y extrudes to a flat SHEET: all five of its faces lie in one plane, the
+            centroid that decides which way is out lies in it too, and with every outward normal
+            then pointing the same way by accident of winding, every point on that side of the
+            plane came back "inside". A body 0.45 m from the cheek of a stair wedge was reported
+            3.25 m inside it and §49.3's step 5 hurled it down through the floor. Every wedge
+            cheek and every gable in the house had one of these behind it. Fixed by refusing an
+            interior to a prism with no volume: a sheet has a surface and nothing inside it.
+      defect: (2026-09-08, found by `HOUSE-00615`) **a body TOUCHING a surface could not move at
+            all.** `startedInside` came back for any overlap, including a contact of zero depth,
+            and it means "time 0 whichever way you asked" -- so `CollideAndSlide` travelled
+            nothing, projected the same motion three times and reported blocked, and §49.3's step
+            5 would never move the body either, because there is nothing to push out of
+            (`HOUSE-00555` settled that). A depenetration ends AT contact, so bodies really do
+            come to rest exactly on things: one resting against a stair landing's ramp cheek could
+            not walk the metre along it to the flight's toe. Fixed by asking the depth and the
+            DIRECTION: an overlap inside `kContactTolerance` whose motion is not into the surface
+            is answered by the analytic sweep instead, from a start nudged two tolerances clear so
+            the boundary does not hit itself at t = 0. Deeper than that, nothing changes -- the
+            way out of a volume is not a surface normal, and a sweep that let such a body travel
+            walked one 0.97 m into the attic ramp.
       note: (2026-09-08) §49.3 step 5 -- *"4 iterations of 0.02 m push-out along the deepest
             overlap normal"*. `OverlapCapsuleObb` and `OverlapCapsuleTriangle` measure a depth and
             a way out, `OverlapCell` takes the DEEPEST of a cell over the same broad phase

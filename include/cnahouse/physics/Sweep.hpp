@@ -50,6 +50,16 @@ namespace cnahouse::physics
         Microsoft::Xna::Framework::Vector3 normal;
         /// @brief Whether the capsule was already overlapping the box before it moved.
         bool startedInside = false;
+        /// @brief A start overlap no deeper than `kContactTolerance`: the two are TOUCHING rather
+        ///        than one being inside the other.
+        ///
+        /// The difference is what a slide does about it. A body inside something has no surface to
+        /// slide along -- the way out of a volume is not a normal -- and must stand still and be
+        /// pushed out by §49.3's step 5. A body merely resting ON a surface has an ordinary
+        /// contact normal and must be able to walk ALONG it, and step 5 will never move it,
+        /// because there is nothing to push out of (`HOUSE-00555`). Told apart here so
+        /// `CollideAndSlide` can do the right thing with each (`HOUSE-00615`).
+        bool touching = false;
     };
 
     /// @brief Sweeps @p capsule along @p motion against @p obb (`HOUSE-00543`).

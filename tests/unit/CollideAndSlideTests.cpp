@@ -330,7 +330,10 @@ TEST(CollideAndSlideTests, ABodyThatStartsInsideStandsStillAndIsPutBackByStepFiv
     const SlideResult step = CollideAndSlide(world, world.cells[0], broad, start, Vector3(1.0F, 0.0F, 1.0F));
     EXPECT_NEAR(step.position.X, start.centre.X, 1e-6F) << "an overlap must not be deepened";
     EXPECT_NEAR(step.position.Z, start.centre.Z, 1e-6F);
-    EXPECT_EQ(step.iterations, kSlideIterations);
+    // One iteration, not three: a body inside something learns that on the first sweep and the
+    // other two would ask the same question and get the same answer (`HOUSE-00615`). What matters
+    // is unchanged -- it did not move, and it says it was blocked.
+    EXPECT_EQ(step.iterations, 1);
     EXPECT_TRUE(step.blocked);
 
     // And the 0.05 m it started with is still 0.05 m, which four pushes of 0.02 m undo. Standing

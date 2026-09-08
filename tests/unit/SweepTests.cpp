@@ -195,12 +195,50 @@ TEST(SweepTests, StartingInsideIsReportedAndNotConfusedWithHittingImmediately)
 
 TEST(SweepTests, TouchingExactlyCountsAsInside)
 {
-    // Centre 1.25 out with radius 0.25 against a face at 1: touching to the last bit.
+    // Centre 1.25 out with radius 0.25 against a face at 1: touching to the last bit, and moving
+    // INTO the face.
     const SweepHit hit =
         SweepCapsuleObb(Sphere(1.25f, 0.0f, 0.0f, 0.25f), Vector3(-1.0f, 0.0f, 0.0f), UnitBox());
     ASSERT_TRUE(hit.hit);
     EXPECT_TRUE(hit.startedInside);
+    EXPECT_TRUE(hit.touching) << "a contact of zero depth was reported as penetration";
     ExpectNormal(hit, 1.0f, 0.0f, 0.0f, "touching the +x face");
+}
+
+TEST(SweepTests, ABodyRestingOnAFaceCanStillTravelAlongIt)
+{
+    // The same body, moving ALONG the face rather than into it. `HOUSE-00615`: answering "already
+    // touching, time 0" here freezes a body that has come to rest exactly on something -- and a
+    // depenetration ends AT contact, so bodies do come to rest exactly on things. The slide then
+    // travels nothing, projects the same motion three times and calls itself blocked, and no
+    // step-five push will ever move the body, because it is not inside anything.
+    const SweepHit along =
+        SweepCapsuleObb(Sphere(1.25f, 0.0f, 0.0f, 0.25f), Vector3(0.0f, 0.0f, 2.0f), UnitBox());
+    EXPECT_FALSE(along.startedInside) << "a body resting on a wall could not walk along it";
+    EXPECT_FALSE(along.hit) << "sliding along the face of a box is not a collision with it";
+
+    // ...and away from it, which is the easy case and would be absurd to stop.
+    const SweepHit away =
+        SweepCapsuleObb(Sphere(1.25f, 0.0f, 0.0f, 0.25f), Vector3(1.0f, 0.0f, 0.0f), UnitBox());
+    EXPECT_FALSE(away.hit);
+}
+
+TEST(SweepTests, ABodyINSIDEOneStandsStillWhicheverWayItIsPushed)
+{
+    // The other half of the same rule, and the reason it is a tolerance and not a sign test: the
+    // way out of a VOLUME is not a surface normal. A body 0.5 m inside the box is reported as
+    // started-inside for every direction, including one that would leave along a face, because
+    // §49.3's step 5 is what gets it out -- and a sweep that let it travel walked a body 0.97 m
+    // into the attic stair ramp (`HOUSE-00550`).
+    for (const Vector3& motion :
+         {Vector3(0.0f, 0.0f, 2.0f), Vector3(1.0f, 0.0f, 0.0f), Vector3(-1.0f, 0.0f, 0.0f)})
+    {
+        const SweepHit hit = SweepCapsuleObb(Sphere(0.9f, 0.0f, 0.0f, 0.25f), motion, UnitBox());
+        EXPECT_TRUE(hit.hit);
+        EXPECT_TRUE(hit.startedInside);
+        EXPECT_FALSE(hit.touching) << "0.35 m of penetration was called a touch";
+        EXPECT_FLOAT_EQ(hit.time, 0.0f);
+    }
 }
 
 TEST(SweepTests, AZeroMotionAsksWhetherTheyOverlapNow)

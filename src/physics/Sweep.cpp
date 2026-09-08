@@ -72,7 +72,7 @@ namespace cnahouse::physics
         const Xna::Vector3 offset(capsule.centre.X - obb.centre.X,
                                   capsule.centre.Y - obb.centre.Y,
                                   capsule.centre.Z - obb.centre.Z);
-        const Xna::Vector3 origin(
+        Xna::Vector3 origin(
             offset.X * cosYaw + offset.Z * sinYaw, offset.Y, -offset.X * sinYaw + offset.Z * cosYaw);
         const Xna::Vector3 direction(
             motion.X * cosYaw + motion.Z * sinYaw, motion.Y, -motion.X * sinYaw + motion.Z * cosYaw);
@@ -87,13 +87,52 @@ namespace cnahouse::physics
         // normal, which is already the way OUT and already back in world axes -- so a sweep and a
         // depenetration cannot disagree about whether a body is inside a wall.
         const Overlap overlap = OverlapCapsuleObb(capsule, obb);
-        if (overlap.overlapped)
+        // TOUCHING is not PENETRATING, and a body that is merely resting on a surface has to be
+        // able to walk ALONG it. A start overlap inside `kContactTolerance` whose motion does not
+        // go INTO the surface is therefore not an answer at all: the analytic sweep below is asked
+        // the real question, and returns a miss for a body leaving and a real time for one
+        // travelling along. Into the surface, the early answer still stands -- there is nothing to
+        // compute and no distance to travel.
+        //
+        // `HOUSE-00615` found the gap: a body come to rest exactly on a stair landing's ramp cheek
+        // (a depenetration ends AT contact, `HOUSE-00555`) got `time` 0 for EVERY direction, so
+        // the slide travelled nothing, projected the same motion three times and reported blocked.
+        // It could not walk the metre along the cheek to the flight's toe, and no step-five push
+        // was ever going to move it, because it was not inside anything.
+        const float intoContact =
+            motion.X * overlap.normal.X + motion.Y * overlap.normal.Y + motion.Z * overlap.normal.Z;
+        const bool leavingContact =
+            overlap.overlapped && overlap.depth <= kContactTolerance && intoContact >= 0.0f;
+        if (overlap.overlapped && !leavingContact)
         {
             result.hit = true;
             result.time = 0.0f;
             result.startedInside = true;
+            // TOUCHING is not PENETRATING, and the difference decides whether a body can walk
+            // along a wall it is leaning on. `startedInside` stops a slide dead -- it travels
+            // nothing and, having no depth to push out of, returns the same answer every
+            // iteration -- so a body that has come to rest exactly on a surface (a depenetration
+            // ends AT contact, `HOUSE-00555`) is frozen there for ever. `HOUSE-00615` found it on
+            // a stair landing: a body resting against the cheek of the next flight's ramp could
+            // not walk the metre along it to the flight's toe. §49.3's step 5 will not help,
+            // because there is nothing to push out of.
+            result.touching = overlap.depth <= kContactTolerance;
             result.normal = overlap.normal;
             return result;
+        }
+        if (leavingContact)
+        {
+            // Step off the surface by two tolerances first, in the box's own frame. A ray that
+            // STARTS on a boundary hits it at t = 0 -- true, and useless: the slide would project
+            // the motion onto the very surface the body is leaving and hold it there. A fifth of a
+            // millimetre of clearance removes that self-hit and moves nothing else.
+            const Xna::Vector3 localNormal(overlap.normal.X * cosYaw + overlap.normal.Z * sinYaw,
+                                           overlap.normal.Y,
+                                           -overlap.normal.X * sinYaw + overlap.normal.Z * cosYaw);
+            const float clear = 2.0f * kContactTolerance;
+            origin = Xna::Vector3(origin.X + localNormal.X * clear,
+                                  origin.Y + localNormal.Y * clear,
+                                  origin.Z + localNormal.Z * clear);
         }
 
         if (LengthSquared(direction) >= kEpsilon * kEpsilon)
@@ -464,6 +503,20 @@ namespace cnahouse::physics
             Xna::Vector3 normals[5];
             int counts[5] = {0, 0, 0, 0, 0};
             Xna::Vector3 centroid;
+            /// @brief False when the extrusion has no VOLUME: a triangle whose plane contains Y
+            ///        sweeps along its own plane and the "prism" is a flat sheet.
+            ///
+            /// Such a sheet has a surface and no interior, so nothing can be inside it -- and the
+            /// half-space test below cannot say so, because every face of a flat prism lies in
+            /// ONE plane and the centroid that decides which way is out lies in it too. With all
+            /// five outward normals then pointing the same way by accident of winding, every
+            /// point on that side of the plane is "inside", however far away it is.
+            ///
+            /// `HOUSE-00615` found it: a body 0.45 m from the SIDE of a stair wedge was reported
+            /// 3.25 m inside it, and §49.3's step 5 hurled it down through the floor. Every
+            /// vertical triangle in the house -- every wedge's cheek, every gable -- had a
+            /// half-space of false contact behind it.
+            bool solid = true;
         };
 
         /// False when the triangle is degenerate -- two vertices in the same place, or three in a
@@ -479,6 +532,10 @@ namespace cnahouse::physics
             {
                 return false;
             }
+            // The extrusion is along Y, so the prism is a solid only when the triangle leans out
+            // of that direction. `kEpsilon` and not zero: a triangle a thousandth off vertical
+            // encloses a volume a thousandth of a millimetre thick, which is not one either.
+            prism.solid = std::fabs(face.Y) > kEpsilon;
 
             const float h = halfHeight;
             const Xna::Vector3 points[6] = {
@@ -547,7 +604,7 @@ namespace cnahouse::physics
         {
             nearest = prism.centroid;
             float best = -1.0f;
-            insideSolid = true;
+            insideSolid = prism.solid;
             for (int f = 0; f < 5; ++f)
             {
                 if (prism.counts[f] == 0)
@@ -603,11 +660,14 @@ namespace cnahouse::physics
         Xna::Vector3 nearest;
         bool insideSolid = false;
         const float nearestDistance = ClosestOnPrism(prism, origin, nearest, insideSolid);
+        // The same rule the box uses, for the same reason (`HOUSE-00615`): how deep the start
+        // overlap is, and whether the motion goes INTO it or away along it. A body resting on a
+        // ramp's cheek has to be able to walk along it, and `time` 0 for every direction is what
+        // froze one on a stair landing.
+        const float startDepth =
+            insideSolid ? radius + std::sqrt(nearestDistance) : radius - std::sqrt(nearestDistance);
         if (insideSolid || nearestDistance <= radius * radius)
         {
-            result.hit = true;
-            result.time = 0.0f;
-            result.startedInside = true;
             Xna::Vector3 out = Subtract(origin, nearest);
             if (insideSolid)
             {
@@ -617,8 +677,16 @@ namespace cnahouse::physics
             {
                 out = prism.normals[0];
             }
-            result.normal = out;
-            return result;
+            const bool restingAndLeaving = startDepth <= kContactTolerance && Dot(motion, out) >= 0.0f;
+            if (!restingAndLeaving)
+            {
+                result.hit = true;
+                result.time = 0.0f;
+                result.startedInside = true;
+                result.touching = startDepth <= kContactTolerance;
+                result.normal = out;
+                return result;
+            }
         }
 
         Best best;
