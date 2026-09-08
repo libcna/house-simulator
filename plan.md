@@ -7274,8 +7274,22 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       note: five injected bugs, all caught, including one that dropped the sign and one that read
             the wrong axis for a horizontal portal.
       verify: unit PortalFacingTests.*
-- [ ] HOUSE-00667 — Implement `maxDepthFor(portal)` with the interior/exterior asymmetry table
+- [x] HOUSE-00667 — Implement `maxDepthFor(portal)` with the interior/exterior asymmetry table
       dep: HOUSE-00665 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) §25.2's four rows, transcribed and claimed: a door, a cased opening or a
+            stair well is 6 from inside and 2 from outside; a garage door 4 and 2; glass onto the
+            outdoors 3 from inside and **1** from outside. The asymmetry is the point, and it is
+            its own claim: standing in the garden you see one room through a window, not that room
+            plus everything behind its open door.
+      finding: **"a window onto outside" cannot be decided by the portal's kind.** The sunroom's
+            slider is glass onto the terrace and its `kind` says `slider`; a borrowed-light window
+            between the kitchen and the sunroom is a `window` and is not onto outside at all. The
+            rule reads the CELLS — one of them exterior — and the opacity, so both cases come out
+            right, and both are claimed.
+      note: eight injected bugs. Three of the first five did not compile, because
+            `-Werror=unused-parameter` catches an injection that stops using `camera`; re-injected
+            in forms that build, all eight are caught.
+      verify: unit PortalDepthTests.*
 - [ ] HOUSE-00668 — Implement `PortalTraversal`: the BFS with per-cell frustum lists, the `kMaxFrustaPerCell` cap and the containment skip
       dep: HOUSE-00663…HOUSE-00667 · sys: visibility · plat: ALL · pri: MUST
       files: src/visibility/PortalTraversal.cpp|hpp
