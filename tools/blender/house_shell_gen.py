@@ -803,6 +803,27 @@ def covered_by(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> bo
     return False
 
 
+#: A deck is an exterior cell raised this far over grade. Below it, an exterior cell IS the ground
+#: and its surface is the terrain (`HOUSE-00761`), not a slab.
+DECK_OVER_GRADE = 0.30
+
+
+def slab_here(cell: dict, extent: tuple, is_floor: bool) -> bool:
+    """Does @p cell get this slab? (`HOUSE-00466`.)
+
+    **Outside has no ceiling**, and until this was asked every exterior cell had one: a lid over
+    the front lawn at +20 m, one over each balcony at +9, and one over `EXT_WORLD` at +60 -- a
+    single polygon 160 000 m² across, roofing the world.
+
+    Outside has no floor either, unless it is a **deck**. The yards' ground is the terrain; the
+    porch, the terrace and the three balconies are platforms above it, and their floor is a real
+    slab. The test is the cell's own floor height, because that is the difference.
+    """
+    if cell.get("kind") != "exterior":
+        return True
+    return is_floor and extent[0] > DECK_OVER_GRADE
+
+
 def open_sides_of(cell: dict, box: tuple, neighbours: list) -> list:
     """The sides of @p box with no interior cell across them -- the sides you can fall off."""
     return [side for side in ("-X", "+X", "-Z", "+Z")
@@ -1053,6 +1074,8 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
 
         # `HOUSE-00452`: the floor and the ceiling, inset to the same inner faces.
         for level_y, look in ((y0, (0.0, 1.0, 0.0)), (y1, (0.0, -1.0, 0.0))):
+            if not slab_here(cell, extent, level_y == y0):
+                continue
             wells = slab_holes(list(portals), cell, level_y, box)
             for px0, px1, pz0, pz1 in panel(ix0, ix1, iz0, iz1, wells):
                 add([(px0, level_y, pz0), (px1, level_y, pz0),
@@ -2136,6 +2159,31 @@ def selftest(output: Path) -> int:
     require(not build_balcony_edge(porch, porch_extent, neighbours, construction,
                                    lambda *args: None, lambda *args: None),
             "and the porch, 0.57 m up, gets none of it -- its balustrade is a different thing")
+
+    # ---- `HOUSE-00466`: the balconies, and what outside does not have ---------------------------
+    require(not slab_here(cells["EXT_WORLD"], (-5.0, 60.0), False)
+            and not slab_here(cells["EXT_WORLD"], (-5.0, 60.0), True),
+            "`EXT_WORLD` gets neither slab: it is the world, and it had a lid at +60 m over "
+            "160 000 m² of it until this was asked")
+    require(not slab_here(cells["EXT_FRONTYARD_W"], (-0.9, 20.0), True),
+            "a lawn's ground is the terrain, not a slab")
+    require(slab_here(porch, porch_extent, True) and not slab_here(porch, porch_extent, False),
+            "the porch is a deck, so it has a floor and still no ceiling")
+    for deck in ("L1_BALCONY_FRONT", "L2_BALCONY_JULIET", "EXT_TERRACE"):
+        row = cells[deck]
+        deck_extent = extent_of(row, levels[row["level"]])[0]
+        require(slab_here(row, deck_extent, True) and not slab_here(row, deck_extent, False),
+                f"and so is {deck}, at +{deck_extent[0]}")
+    require(slab_here(subject, extent, False),
+            "while a room keeps its ceiling, which is the thing you are standing under")
+
+    juliet = cells["L2_BALCONY_JULIET"]
+    juliet_extent = extent_of(juliet, levels["L2"])[0]
+    juliet_edges = build_balcony_edge(juliet, juliet_extent, neighbours, construction,
+                                      lambda *args: None, lambda *args: None)
+    require(juliet_edges == 2 * 3,
+            f"the juliet balcony gets its parapet and rail from the same rule as the rear one "
+            f"({juliet_edges})")
 
     require(PORCH_COLUMNS == 4,
             f"§12.1 says the porch stands on FOUR square columns ({PORCH_COLUMNS})")

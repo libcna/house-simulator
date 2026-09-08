@@ -6917,8 +6917,24 @@ the chunk builder produces ≤ 6 chunks per cell.
             give them.
       note: five injected bugs, all caught once the parapet's height had a claim that did not use
             the constant it was checking.
-- [ ] HOUSE-00466 — Generate the front balcony over the porch and the juliet balcony
+- [x] HOUSE-00466 — Generate the front balcony over the porch and the juliet balcony
       dep: HOUSE-00464 · sys: content · plat: TOOL · pri: MUST
+      finding: **the world had a lid on it.** Looking for what these two balconies still needed
+            found that every exterior cell was getting a ceiling slab: one over the front lawn at
+            +20 m, one over each balcony at +9, and one over `EXT_WORLD` at +60 — a single polygon
+            160 000 m² across, roofing the sky. It came in with `HOUSE-00452`, which laid a floor
+            and a ceiling for every cell, and nothing caught it because every claim about slabs was
+            about the kitchen. Outside has no ceiling, and `slab_here` now says so.
+      finding: **and outside has no floor either, unless it is a deck.** The yards' ground is
+            `terrain.png` (`HOUSE-00761`); the porch, the terrace and the three balconies are
+            platforms above it and have real slabs. The test is the cell's own floor height over
+            grade, which is the difference between a deck and a lawn, and all six answers are
+            claimed.
+      note: what the two balconies themselves needed turned out to be **nothing of their own**:
+            `L1_BALCONY_FRONT`'s deck is its floor slab over the porch's head, its parapet and
+            railing come from `HOUSE-00465`'s general rule, and `L2_BALCONY_JULIET` gets the same
+            from the same rule — which is claimed rather than assumed.
+      note: four injected bugs, all caught. 42 986 triangles over 98 objects.
 - [ ] HOUSE-00467 — Generate the garage wing shell, its slab, its loft platform and the sectional-door opening
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00468 — Generate the chimney, the gutters, the downspouts and the roof vents
