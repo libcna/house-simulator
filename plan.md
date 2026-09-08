@@ -8057,8 +8057,33 @@ never escapes and never penetrates.
       dep: HOUSE-00147, HOUSE-00550 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-00563 — Implement `teleport <cellId>` and `noclip` console commands
       dep: HOUSE-00555 · sys: debug · plat: ALL · pri: MUST
-- [ ] HOUSE-00564 — Implement the invisible playable-volume boundary and its escape counter
+- [x] HOUSE-00564 — Implement the invisible playable-volume boundary and its escape counter
       dep: HOUSE-00555 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) §10's fifth and last containment layer, at §10.3's playable volume:
+            -40…+40, -3.5…+20, -52…+12. **The counter is the point, not the wall.** The fence, the
+            neighbours' hedges, the road's termination and the planted terrain are what actually
+            keep the player in; this box is where a gap in THEM becomes visible, which is what
+            `HOUSE-00618` will assert against.
+      note: it CLAMPS as well as counting. §10 calls it a safety net, and a net that only takes
+            attendance is not one -- a player who has found a gap keeps going, and the further
+            they get the less recoverable the state is.
+      note: the counter is an EDGE, like `CellEntered`'s. A body held against the boundary for a
+            second is one gap in the barriers, not 120 of them, and "the counter stays at 0" only
+            means something if one escape counts as one.
+      accept: 5 cases. §10.3's six numbers pinned, with the 6 m of clearance over the fenced
+            property checked rather than described; inside, on every face and at both far corners
+            counting nothing -- a boundary that fired on its own faces would make "still zero"
+            impossible to satisfy; each of the six directions and a triple corner counted and
+            clamped, with the axes that were already inside left alone; 120 ticks pressed against
+            it counting once, and leaving again counting twice; and the box checked against the
+            ground the house actually has. Five injected bugs, five caught.
+      finding: (2026-09-08, found by `HOUSE-00564`) three cells have geometry OUTSIDE the playable
+            volume, and all three are correct: `EXT_WORLD` spans ±200 m, which is §10.3's
+            visual-only neighbourhood shell; `EXT_ROAD` reaches z = +13.475 against the boundary's
+            +12 and `EXT_NORTHSTRIP` reaches z = -52.075 against -52, which is §10's *"the road
+            geometry continues visually far beyond"*. The first draft of the test asserted every
+            cell was inside and was simply wrong about what the boundary is for. It now pins the
+            SET of three, so a fourth would be noticed.
 - [ ] HOUSE-00565 — Implement the nudgeable-prop mini-physics (gravity, support plane, damping, push impulse) for the 12 named props
       dep: HOUSE-00554 · sys: physics · plat: ALL · pri: SHOULD
 - [x] HOUSE-00566 — Determinism: fixed-step replay test at 30/60/144 FPS producing an identical final position
