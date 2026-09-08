@@ -17,6 +17,7 @@
 #include "System/IO/FileMode.hpp"
 #include "System/IO/FileStream.hpp"
 
+#include "cnahouse/app/Settings.hpp"
 #include "cnahouse/physics/BroadPhase.hpp"
 #include "cnahouse/physics/CollisionLoader.hpp"
 #include "cnahouse/player/PlayerController.hpp"
@@ -129,6 +130,13 @@ TEST(PlayerControllerTests, TheTwoNumbersInTheSpeedTableAreOneDecision)
     // ...and stopping is quicker than starting, which is what keeps it from feeling floaty.
     EXPECT_GT(kDeceleration, kAcceleration);
     EXPECT_NEAR(kWalkSpeed / kDeceleration, 0.1038F, 1e-3F);
+
+    // §43.2's fast walk is 2.05 and the sentence next to it says why: *"a brisk walk, not a run.
+    // Above ~2.2 m/s a human transitions to a jog, and the brief is explicit that this is still
+    // walking."* That upper bound is the reason for the number, so it is asserted beside it.
+    EXPECT_FLOAT_EQ(cnahouse::player::kFastWalkSpeed, 2.05F);
+    EXPECT_LT(cnahouse::player::kFastWalkSpeed, 2.2F) << "that is a jog, and the brief says walk";
+    EXPECT_GT(cnahouse::player::kFastWalkSpeed, kWalkSpeed);
 }
 
 TEST(PlayerControllerTests, AWalkReachesFullSpeedInTheTimeTheTableSays)
@@ -292,6 +300,90 @@ TEST(PlayerControllerTests, TheProbeKeepsTheBodyTellingTheTruthAboutTheGround)
     ASSERT_GT(state.position.X, 2.0F);
     EXPECT_EQ(state.groundKind, CollisionKind::Stair) << "§60 would not know it is on a stair";
     EXPECT_EQ(world.SurfaceName(state.surface), "wood");
+}
+
+TEST(PlayerControllerTests, BothWalkSpeedsAreMeasuredOverTwentyMetres)
+{
+    // The acceptance criterion `HOUSE-00556` was written with: 1.35 and 2.05 m/s over a 20 m run,
+    // within 1 %. Measured over the RUN and not read off the velocity, because a controller that
+    // reported the right speed while moving a different distance would pass the easier check.
+    const CollisionWorld world = OneCell({Slab(0.0F, -40.0F, 40.0F)});
+    BroadPhase broad;
+
+    for (const bool fast : {false, true})
+    {
+        PlayerState state = Standing(-15.0F, 0.0F);
+        state.yaw = 1.5707963F; // east
+        state.fastWalk = fast;
+        const float want = fast ? cnahouse::player::kFastWalkSpeed : kWalkSpeed;
+
+        // Up to speed first, so the 0.15 s ramp is not part of what is being measured.
+        for (int i = 0; i < 60; ++i)
+        {
+            PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+        }
+        const float from = state.position.X;
+        int ticks = 0;
+        while (state.position.X - from < 20.0F && ticks < 4000)
+        {
+            PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+            ++ticks;
+        }
+        ASSERT_LT(ticks, 4000) << "it never covered the 20 m";
+        const float measured = (state.position.X - from) / (static_cast<float>(ticks) * kDt);
+        EXPECT_NEAR(measured, want, want * 0.01F) << (fast ? "fast" : "normal");
+    }
+}
+
+TEST(PlayerControllerTests, ShiftTOGGLESTheWalkModeAndDoesNotHoldIt)
+{
+    // §43.2: *"Shift toggles between normal and fast walk. It is not hold-to-sprint."* Which
+    // means the EDGE decides, and the level does not: holding the key down for a second must
+    // change the mode once, not 120 times.
+    const CollisionWorld world = OneCell({Slab(0.0F, -40.0F, 40.0F)});
+    BroadPhase broad;
+    PlayerState state = Standing(0.0F, 0.0F);
+    EXPECT_FALSE(state.fastWalk) << "the walk is the default, not the run";
+
+    InputState press = Forward();
+    press.run = true;
+    press.runPressed = true;
+    const PlayerStepReport first = PlayerStep(world, world.cells[0], broad, state, press, kDt);
+    EXPECT_TRUE(state.fastWalk);
+    EXPECT_TRUE(first.walkModeChanged);
+
+    // Held down: the level stays true, the edge does not repeat, and neither does the toggle.
+    InputState held = Forward();
+    held.run = true;
+    for (int i = 0; i < 120; ++i)
+    {
+        const PlayerStepReport step = PlayerStep(world, world.cells[0], broad, state, held, kDt);
+        EXPECT_FALSE(step.walkModeChanged) << "tick " << i;
+    }
+    EXPECT_TRUE(state.fastWalk) << "holding the key toggled the mode back";
+
+    // Pressed again: back to the walk.
+    PlayerStep(world, world.cells[0], broad, state, press, kDt);
+    EXPECT_FALSE(state.fastWalk);
+}
+
+TEST(PlayerControllerTests, TheWalkModeSurvivesASettingsRoundTrip)
+{
+    // D-09: it is a preference, so it lives in `Settings` -- which is what makes it survive a
+    // save/load and a *Reset House*. A file written before the mode existed says nothing about
+    // it, and the migration gives such a player the walk rather than the run.
+    cnahouse::app::Settings settings = cnahouse::app::Settings::Defaults();
+    EXPECT_FALSE(settings.fastWalk);
+    settings.fastWalk = true;
+    const auto again = cnahouse::app::Settings::FromJson(settings.ToJson(), "settings.json");
+    ASSERT_TRUE(again) << again.Error().Message();
+    EXPECT_TRUE(again->fastWalk);
+    EXPECT_EQ(again->version, cnahouse::app::Settings::kCurrentVersion);
+
+    const auto old = cnahouse::app::Settings::FromJson(R"({"version": 2})", "settings.json");
+    ASSERT_TRUE(old) << old.Error().Message();
+    EXPECT_FALSE(old->fastWalk) << "a file from before the mode existed chose the run";
+    EXPECT_EQ(old->version, cnahouse::app::Settings::kCurrentVersion);
 }
 
 TEST(PlayerControllerTests, TheEyeIsWhereFortyThreePointOnePutsIt)

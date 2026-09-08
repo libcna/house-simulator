@@ -122,6 +122,13 @@ namespace cnahouse::app
         }
         settings.invertY = *invert;
 
+        auto fast = root.OptionalBool("fastWalk", settings.fastWalk);
+        if (!fast)
+        {
+            return fast.Error();
+        }
+        settings.fastWalk = *fast;
+
         auto fov = root.OptionalFloat("fieldOfView", settings.fieldOfView);
         if (!fov)
         {
@@ -142,6 +149,14 @@ namespace cnahouse::app
         if (settings.version < 2)
         {
             settings.version = 2;
+        }
+        if (settings.version < 3)
+        {
+            // Version 3 added §43.2's walk mode (D-09). A file written before it has no opinion,
+            // and the default -- the normal walk -- is the right one to give it: a player who has
+            // never pressed `Shift` has not chosen the fast walk.
+            settings.fastWalk = false;
+            settings.version = 3;
         }
         settings.version = kCurrentVersion;
     }
@@ -208,7 +223,8 @@ namespace cnahouse::app
                            "  \"ambienceVolume\": {},\n"
                            "  \"mouseSensitivity\": {},\n"
                            "  \"invertY\": {},\n"
-                           "  \"fieldOfView\": {}\n"
+                           "  \"fieldOfView\": {},\n"
+                           "  \"fastWalk\": {}\n"
                            "}}\n",
                            version,
                            backBufferWidth,
@@ -221,7 +237,8 @@ namespace cnahouse::app
                            ambienceVolume,
                            mouseSensitivity,
                            invertY ? "true" : "false",
-                           fieldOfView);
+                           fieldOfView,
+                           fastWalk ? "true" : "false");
     }
 
 } // namespace cnahouse::app

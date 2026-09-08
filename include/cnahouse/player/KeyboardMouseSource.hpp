@@ -97,6 +97,7 @@ namespace cnahouse::player
         enum class Edge : std::size_t
         {
             Interact = 0,
+            WalkMode,
             Cancel,
             Menu,
             ToggleOverlay,

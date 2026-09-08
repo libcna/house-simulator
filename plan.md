@@ -7912,10 +7912,31 @@ never escapes and never penetrates.
             spent leaning on a wall. A start-overlap with a non-walkable normal says nothing about
             what is underfoot, and is now ignored -- the ground probe runs next and is the
             authority.
-- [ ] HOUSE-00556 — Implement the two walk speeds and the `Shift` toggle, with the settings persistence of D-09
+- [x] HOUSE-00556 — Implement the two walk speeds and the `Shift` toggle, with the settings persistence of D-09
       dep: HOUSE-00555, HOUSE-00131 · sys: player · plat: ALL · pri: MUST
       accept: 1.35 / 2.05 m/s measured over a 20 m run within 1 %
-      verify: unit WalkSpeedTests.*
+      note: (2026-09-08) §43.2's two speeds, and D-09's answer to where the mode lives. 2.05 is a
+            brisk walk and not a run: *"above ~2.2 m/s a human transitions to a jog, and the brief
+            is explicit that this is still walking"* -- so the 2.2 is asserted beside the 2.05,
+            because it is the reason for it.
+      note: **`Shift` toggles, so the source grows an EDGE beside its level.** `InputState` had
+            `run` as a held state; a toggle driven off a level flips 120 times a second and reads
+            as neither mode. `runPressed` is computed in `KeyboardMouseSource` with the other
+            edges, which is this file's own standing rule -- a consumer that remembered last
+            frame's key would be a second place to get the frame boundary wrong.
+      note: D-09 makes the mode a PREFERENCE and not world state, so it is `Settings::fastWalk`
+            (version 3, with a migration): it survives a save/load AND a *Reset House*. A file
+            written before the field existed has no opinion, and the migration gives that player
+            the walk rather than the run -- somebody who has never pressed `Shift` has not chosen
+            the fast one.
+      accept: 6 cases. Both speeds measured over a 20 m RUN and not read off the velocity -- a
+            controller reporting the right number while covering the wrong distance would pass the
+            easier check -- to within 1 %; 2.05 pinned as a literal with §43.2's 2.2 m/s jog
+            boundary beside it; the toggle firing once on the edge and NOT again over 120 ticks of
+            holding the key; a second press turning it off; the mode through a settings round trip;
+            a version-2 file migrating to the walk. And in the input source, the same key reported
+            as both a level and an edge, with the edge not repeating while held. Six injected bugs,
+            six caught.
 - [ ] HOUSE-00557 — Implement directional speed modifiers (backwards, strafe, stairs, crouch, snow, carrying)
       dep: HOUSE-00556 · sys: player · plat: ALL · pri: MUST
 - [ ] HOUSE-00558 — Implement the automatic attic crouch: headroom probe, capsule swap, eye height, speed

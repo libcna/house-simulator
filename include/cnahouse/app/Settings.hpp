@@ -20,7 +20,7 @@ namespace cnahouse::app
     struct Settings
     {
         /// @brief Bumped whenever a field changes meaning. `Migrate` handles every older value.
-        static constexpr std::int32_t kCurrentVersion = 2;
+        static constexpr std::int32_t kCurrentVersion = 3;
 
         std::int32_t version = kCurrentVersion;
 
@@ -40,6 +40,15 @@ namespace cnahouse::app
 
         /// @brief Field of view in degrees, vertical.
         float fieldOfView = 70.0f;
+
+        /// @brief §43.2's walk mode: false is the 1.35 m/s walk, true the 2.05 m/s one.
+        ///
+        /// **A preference, not world state** (D-09, §77). `Shift` toggles it rather than holding
+        /// it, so it has to be remembered somewhere, and remembering it here means it survives a
+        /// save/load AND a *Reset House*. The save's player block records it too, so a save is a
+        /// self-consistent snapshot -- and settings wins on conflict, which is what makes this
+        /// the one place that decides.
+        bool fastWalk = false;
 
         [[nodiscard]] static Settings Defaults()
         {

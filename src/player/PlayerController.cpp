@@ -56,8 +56,17 @@ namespace cnahouse::player
         // 1. The desired velocity, approached at §43.2's rates rather than snapped to.
         //    Accelerating and decelerating at DIFFERENT rates is what makes the body feel like it
         //    has weight without feeling floaty: it takes 0.15 s to reach a walk and 0.10 s to stop.
+        // §43.2's toggle, taken from the EDGE. A level would flip the mode on every tick the key
+        // is held, which is 120 flips a second and reads as neither mode.
+        if (input.runPressed)
+        {
+            state.fastWalk = !state.fastWalk;
+            report.walkModeChanged = true;
+        }
+        const float speed = state.fastWalk ? kFastWalkSpeed : kWalkSpeed;
+
         const Xna::Vector3 wish = Wish(input, state.yaw);
-        const Xna::Vector3 desired(wish.X * kWalkSpeed, 0.0F, wish.Z * kWalkSpeed);
+        const Xna::Vector3 desired(wish.X * speed, 0.0F, wish.Z * speed);
         const Xna::Vector3 gap(desired.X - state.velocity.X, 0.0F, desired.Z - state.velocity.Z);
         const float gapLength = std::sqrt(gap.X * gap.X + gap.Z * gap.Z);
         const bool wanted = wish.X != 0.0F || wish.Z != 0.0F;

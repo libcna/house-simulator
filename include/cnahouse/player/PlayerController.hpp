@@ -19,8 +19,13 @@ namespace cnahouse::player
     /// @brief §43.1's eye, measured from the feet.
     inline constexpr float kPlayerEyeHeight = 1.68F;
 
-    /// @brief §43.2's normal walk, in m/s. The fast walk and its toggle are `HOUSE-00556`.
+    /// @brief §43.2's normal walk, in m/s: *"the measured average human walking speed"*.
     inline constexpr float kWalkSpeed = 1.35F;
+    /// @brief §43.2's fast walk, in m/s.
+    ///
+    /// *"A brisk walk, not a run. Above ~2.2 m/s a human transitions to a jog, and the brief is
+    /// explicit that this is still walking."* -- which is why it is 2.05 and not 2.5.
+    inline constexpr float kFastWalkSpeed = 2.05F;
     /// @brief §43.2's acceleration and deceleration, in m/s².
     ///
     /// *"Reaches full speed in ~0.15 s -- responsive, not floaty"*, and 1.35 / 9.0 IS 0.15 s: the
@@ -38,6 +43,13 @@ namespace cnahouse::player
         Microsoft::Xna::Framework::Vector3 velocity;
         /// @brief Radians. §14: 0 looks north (-Z) and positive turns EAST.
         float yaw = 0.0F;
+
+        /// @brief §43.2's walk mode. `Shift` TOGGLES it; it is not hold-to-sprint.
+        ///
+        /// D-09 makes it a PREFERENCE rather than world state, so the app mirrors it into
+        /// `Settings` and restores it from there -- it survives a save/load and a *Reset House*.
+        /// The controller owns the toggle and nothing else about it.
+        bool fastWalk = false;
         physics::FallState fall;
 
         /// @brief What `GroundProbe` last said. §60 reads `groundKind`, §31 reads `surface`, and
@@ -78,6 +90,9 @@ namespace cnahouse::player
         bool depenetrated = true;
         /// @brief The body was over nothing this step.
         bool airborne = false;
+        /// @brief `Shift` was pressed and the walk mode changed. §43.2 plays a UI tick and shows
+        ///        a HUD glyph on this, and the app writes the new mode to `Settings`.
+        bool walkModeChanged = false;
     };
 
     /// @brief §49.3's fixed step, composed (`HOUSE-00555`).

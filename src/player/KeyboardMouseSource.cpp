@@ -95,6 +95,9 @@ namespace cnahouse::player
             return pressed;
         };
         state_.interactPressed = edge(Edge::Interact, Keys::E);
+        // §43.2's toggle. `LeftShift` is the one that toggles; the right one is the level's
+        // second binding and repeating it here would make the two shifts fight over the edge.
+        state_.runPressed = edge(Edge::WalkMode, Keys::LeftShift);
         state_.cancelPressed = edge(Edge::Cancel, Keys::Escape);
         state_.menuPressed = edge(Edge::Menu, Keys::Tab);
         state_.toggleOverlayPressed = edge(Edge::ToggleOverlay, Keys::F1);
