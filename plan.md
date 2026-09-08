@@ -7349,8 +7349,20 @@ the chunk builder produces ≤ 6 chunks per cell.
             it compares against the placement boundary now, which is the thing that actually
             bounds it. Caught by the face-count claim `HOUSE-00460` left behind — 328 faces where
             the arithmetic wanted 292.
-- [ ] HOUSE-00481 — Determinism check: two runs of the generator produce byte-identical `.glb`
+- [x] HOUSE-00481 — Determinism check: two runs of the generator produce byte-identical `.glb`
       dep: HOUSE-00480 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) `house_shell_gen.py --check <tree>` regenerates and compares every file
+            on its own, naming the ones that differ rather than saying the tree changed: a
+            generator that is non-deterministic is usually so in ONE place -- a set iterated by
+            address, a float summed in a different order -- and knowing which cell moved is most of
+            finding it. **99 of 99 `.glb` byte-identical across two independent Blender
+            processes.** `tools/blender/shell_unwrap.py --output <tree>` was checked the same way
+            and is also byte-identical, 78 of 78, which is the one worth having: it runs a PACKING
+            OPTIMISER over each cell, and that is the likeliest thing in the chain to have an
+            iteration order in it. Run against `HOUSE-00480`'s tree, which is the shell as it
+            stands. Both scratch trees deleted afterwards.
+      accept: every file compared on its own; a missing, a new and a differing file are each
+            reported and each fail; the check writes nothing to the tree it compares against
 - [ ] HOUSE-00482 — Generate and commit the shell asset manifest rows (`origin.kind = generated`, generator version, seed)
       dep: HOUSE-00481, HOUSE-00195 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00483 — Render test suite for the blockout: 8 exterior and 12 interior poses

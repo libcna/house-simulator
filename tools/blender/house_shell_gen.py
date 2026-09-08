@@ -2715,16 +2715,55 @@ def selftest(output: Path) -> int:
     return 0
 
 
+def determinism(source: Path, reference: Path, scratch: Path) -> int:
+    """`HOUSE-00481`: generate again and compare every byte with the tree at @p reference.
+
+    Not a hash of a hash: every `.glb` is compared on its own, and the report names the files that
+    differ rather than saying "the tree changed". A generator that is non-deterministic is usually
+    non-deterministic in ONE place -- a set iterated by address, a dict ordered by insertion, a
+    float summed in a different order -- and knowing which cell moved is most of finding it.
+
+    §18.4 wants byte-identical output because the content build is incremental and the asset
+    manifest hashes what it produced: a generator that writes different bytes for the same input
+    invalidates every downstream step on every run, and no cache can help it.
+    """
+    if not reference.is_dir():
+        print(f"house_shell_gen: nothing to compare with at {reference}", file=sys.stderr)
+        return 1
+    report = generate(source, scratch, None)
+    if report["problems"]:
+        for problem in report["problems"]:
+            print(f"house_shell_gen: {problem}", file=sys.stderr)
+        return 1
+
+    before = {path.name: digest(path) for path in sorted(reference.glob("*.glb"))}
+    after = {path.name: digest(path) for path in sorted(scratch.glob("*.glb"))}
+    missing = sorted(set(before) - set(after))
+    added = sorted(set(after) - set(before))
+    differing = sorted(name for name in set(before) & set(after)
+                       if before[name] != after[name])
+    print(f"house_shell_gen: {len(after)} file(s) regenerated, {len(differing)} differ, "
+          f"{len(missing)} missing, {len(added)} new")
+    for name in missing + added + differing:
+        print(f"house_shell_gen: {name} is not byte-identical", file=sys.stderr)
+    return 1 if (missing or added or differing) else 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--source", type=Path, default=SOURCE)
     parser.add_argument("--output", type=Path, default=OUTPUT)
     parser.add_argument("--cells", default="", help="comma-separated cell ids; default is all")
+    parser.add_argument("--check", type=Path, default=None,
+                        help="regenerate and compare every file with the tree at this path "
+                             "(HOUSE-00481); writes nothing to it")
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args(blender_env_argv())
 
     if args.selftest:
         return selftest(args.output / "selftest")
+    if args.check is not None:
+        return determinism(args.source, args.check, args.output)
     if not (args.source / "layout.cells.json").is_file():
         print(f"house_shell_gen: no world in {args.source} yet -- nothing to generate.")
         return 0
