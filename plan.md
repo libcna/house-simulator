@@ -8303,8 +8303,37 @@ never escapes and never penetrates.
             its whole step regardless of contact) is NOT caught here: it leaves the body inside
             the wall rather than through it, which is `HOUSE-00617`'s guarantee and
             `CollideAndSlideTests`' unit case.
-- [ ] HOUSE-00614 — Guarantee test: the player cannot fall through any floor (2 000 randomised drops from 3 m)
+- [x] HOUSE-00614 — Guarantee test: the player cannot fall through any floor (2 000 randomised drops from 3 m)
       dep: HOUSE-00552 · sys: physics · plat: CI · pri: MUST
+      verify: unit FloorDropTests.TwoThousandDropsAllLandOnTheFloorTheyWereDroppedOnto
+      note: (2026-09-08) 2 000 seeded drops, 1 252 of them made, over all 96 cells, 57 556 fixed
+            steps. 349 arrive from the full 3 m at 7.60 m/s -- **the fastest anything in this
+            house moves**, 64 mm in a fixed step, which is most of the way through a 0.15 m slab.
+            Tunnelling is a function of speed and this is where to look for it. 349 hard landings
+            and 903 soft, and the worst arrival missed the height it was dropped from by 0.134 m.
+      finding: **"drop the player 3 m" is not a thing this house can do indoors.** §70.5 gives
+            rooms 2.45-3.05 m of clear height and §43.1's body is 1.80 m tall, so the air over an
+            interior floor is 0.60-1.20 m. Three metres exists outdoors, in the stair wells and in
+            the garage, and every drop is as high as its own cell allows -- which the test says,
+            rather than quietly dropping everything a metre and calling it 3.
+      finding: **it found a real defect in `HOUSE-00552` on its first run: every landing outdoors
+            was silent.** `Fall` swept the cell's shapes and not §11.5's height field, so the
+            ground probe ended the fall instead -- setting `onGround` with no landing reported at
+            all, and leaving a body that arrived at 12 m/s a few centimetres INSIDE the lawn.
+            Fixed in the same session; silent landings went from 118 to 8 and hard landings from
+            239 to 349.
+      note: what is under a drop is read straight out of the collision data -- the highest floor
+            or exterior OBB top under the point, or §11.5's field -- and NOT swept for. A witness
+            that used the same `SweepCell` the fall uses would agree with it about a bug in it.
+      note: 748 draws are skipped and each says why: 336 rooms with under 0.10 m of air over the
+            floor, 401 spots where the body starts inside a beam or the ceiling, 11 with a canopy
+            or a parapet between the body and the floor -- that last one is a drop onto THAT and
+            not onto the floor, and a body dropped into one at terminal speed sinks through it at
+            15 mm a step, which is `HOUSE-00617`'s question and not this one.
+      note: four injected bugs, three caught -- floors invisible to a sweep, §43.1's 2.4 m
+            threshold disabled, and the landing overshooting the floor it lands on. The fourth
+            (terminal speed ignored) is invisible here and should be: 3 m of falling reaches
+            7.60 m/s and never approaches 12, which is `FallTests`' case.
 - [ ] HOUSE-00615 — Guarantee test: every flight is traversable in both directions, and every landing is reachable
       dep: HOUSE-00560 · sys: physics · plat: CI · pri: MUST
 - [x] HOUSE-00616 — Guarantee test: the player capsule fits through every open portal
