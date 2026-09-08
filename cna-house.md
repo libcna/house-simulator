@@ -1785,6 +1785,25 @@ Result: drawing a fully visible kitchen with 140 props costs 5 draw calls, not 1
 Props that must move (a drawer, a door, a chair the player can nudge) are excluded from batching
 and become dynamic instances.
 
+**The shell is chunked the same way, and it is not props.** The paragraph above was written about
+furniture; a cell's own floor, ceiling, walls and trim are drawn too, and `HOUSE-00473` measured
+them. The blockout, with no prop placed yet: **488 chunks over 96 cells — 3 to 7 per cell, mean
+5.08 — 81 750 vertices and 43 472 triangles, 2.9 MB.** 292 of the chunks are `DualTextureEffect`
+(the lightmap receivers of §18.3) and 196 `BasicEffect` (the detail, and the receiver classes
+outdoors, which §22 lights directly). The largest single chunk is 1 792 vertices, 2.7 % of the
+16-bit index cap, so the second criterion has an enormous margin and the first has none:
+
+* **Six cells are already at 7** — `L0_GARAGE`, `L0_STAIR_MAIN`, `L1_STAIR_MAIN`, `L3_STORE_E`,
+  `L3_STORE_N`, `L3_STORE_W`. Each carries the four receiver classes (floor, ceiling, wall,
+  exterior), plus glass, plus trim, plus a stair or a structure class. None of those is an
+  artefact of the blockout's one-material-per-class placeholders: a real room's floor, ceiling and
+  walls are genuinely different materials, and glass must be its own chunk because it is blended
+  and drawn after the opaque pass.
+* So **≤ 6 chunks per cell is a target the shell alone does not meet in 6 % of cells, before a
+  single prop.** It is recorded here rather than adjusted, because what the number is protecting
+  is draw calls per frame and that is §71's budget to settle with a measurement, not this
+  section's to weaken by assertion.
+
 ### 17.5 Directory layout
 
 ```

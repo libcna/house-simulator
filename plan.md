@@ -7117,8 +7117,47 @@ the chunk builder produces ≤ 6 chunks per cell.
             correction. The rafter envelope is unaffected — it is built only for a level that
             declares a roof AND a null ceiling, which is `L3` alone, and the garage has a flat
             ceiling at +4.30.
-- [ ] HOUSE-00473 — Run `build_chunks.py` over the shell; verify ≤ 6 chunks per cell and the vertex limits
+- [x] HOUSE-00473 — Run `build_chunks.py` over the shell; verify ≤ 6 chunks per cell and the vertex limits
       dep: HOUSE-00472, HOUSE-00215 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) `build_chunks.py --shell` reads the generated shell, which `HOUSE-00215`
+            could not: `read_geometry` welds every primitive of a prop into one mesh, which is
+            right for a prop and destroys exactly what chunking groups by, because the exporter
+            splits a cell into one primitive per surface class. `read_shell_geometry` keeps them
+            apart and brings the material's `extras` with them. **488 chunks over 96 cells, 3–7
+            per cell, mean 5.08; 81 750 vertices, 43 472 triangles, 2.9 MB.** The vertex criterion
+            passes with an enormous margin — the largest chunk is 1 792 vertices, 2.7 % of the
+            16-bit cap, and nothing was split or widened. §17.4 now records both, and the six
+            over-limit cells.
+      accept: every surface class of every cell is its own chunk, drawn with the effect its
+            `lightmapReceiver` implies; glass is blended and therefore never shares a buffer; the
+            lightmapped copy of a cell wins over the raw one; a shell file that names no cell
+            draws with the outdoors; two builds are byte-identical
+      finding: (2026-09-08, found by `HOUSE-00473`) **§17.4's "≤ 6 chunks per cell" is not met by
+            the shell alone, in 6 of 96 cells, before a single prop is placed.** The paragraph was
+            written about furniture — "every cell's static props" — and a cell's own floor,
+            ceiling, walls, trim and glass are drawn too. `L0_GARAGE`, `L0_STAIR_MAIN`,
+            `L1_STAIR_MAIN` and the three L3 stores each need 7: the four receiver classes, glass,
+            trim, and a stair or structure class. None is an artefact of the blockout's
+            placeholder materials — a real room's floor, ceiling and walls are different materials
+            and glass must be its own chunk because it is blended. Recorded in §17.4 rather than
+            adjusted: the number is protecting draw calls per frame, which is §71's budget to
+            settle by measurement.
+      finding: (2026-09-08, found by `HOUSE-00473`) `HOUSE-00471`'s two halves disagreed about the
+            **exterior**. `house_shell_gen.py` marks `exterior` and `wall` as receiver classes, as
+            the approved decision says ("major exterior wall/outer-skin surfaces"), while
+            `shell_unwrap.py` skips every cell whose kind is `exterior` — §18.3 bakes "per cell",
+            which is a description of an interior, and `EXT_WORLD` alone is 160 000 m². Both are
+            right: the house's outer skin belongs to INTERIOR cells and is baked with them; a
+            yard's ground and a terrace's deck are outdoors and §22 lights them directly every
+            frame. So a receiver class in a cell that is not baked draws with `BasicEffect`, and
+            42 of the shell's 494 surface classes do. A receiver in a cell that IS baked and still
+            has no `TEXCOORD_1` is refused, naming `shell_unwrap.py`. Before this the chunker
+            would have failed on `CHIMNEY.glb`, which is what found it.
+      finding: (2026-09-08, found by `HOUSE-00473`) `build_chunks.py` required
+            `layout.materials.json`, which does not exist: §11's material table is `HOUSE-00296`'s
+            and the prop placements are Phase 8's. Both are now optional — a prop that needs a
+            material still says so when it is reached — because the shell has its own placeholder
+            materials in the `.glb` and can be chunked today.
 - [ ] HOUSE-00474 — Implement `CellRuntime` and load the per-cell chunk buffers into `VertexBuffer`/`IndexBuffer`
       dep: HOUSE-00473, HOUSE-00344 · sys: world · plat: ALL · pri: MUST
 - [ ] HOUSE-00475 — Implement the opaque static pass drawing all cells with `BasicEffect` and a fixed camera; no culling yet

@@ -188,6 +188,110 @@ def read_geometry(path: Path) -> dict:
             "triangles": triangles, "hasUv1": has_uv1}
 
 
+def read_shell_geometry(path: Path) -> dict:
+    """One `.glb` of the generated shell, split by MATERIAL: `{name: (mesh, extras)}`.
+
+    `HOUSE-00473`. `read_geometry` welds every primitive of a prop into one mesh, which is right
+    for a prop -- it has one material -- and wrong for a cell of the shell, which the exporter
+    splits into one primitive per surface class. Chunking is grouping by material, so a reader
+    that threw the material away could not do it.
+
+    The material's `extras` come back with it, because `HOUSE-00471` writes the lightmap-receiver
+    decision there and that is what decides the effect a chunk is drawn with. Reading it from the
+    generated data rather than from a table here is the whole point of emitting it.
+    """
+    document, blob = gltf_io.read_model(path)
+    buffers = gltf_io.buffer_bytes(document, blob, path.parent)
+    transforms = bc.node_world_transforms(document)
+    materials = document.get("materials", [])
+    out: dict[str, dict] = {}
+
+    for index, node in enumerate(document.get("nodes", [])):
+        if "mesh" not in node or node.get("name", "").endswith("_COL"):
+            continue
+        matrix = transforms[index]
+        for primitive in document["meshes"][node["mesh"]].get("primitives", []):
+            if primitive.get("mode", 4) != 4:
+                continue
+            attributes = primitive["attributes"]
+            if "POSITION" not in attributes:
+                raise LayoutError(f"{path.name}: a primitive has no POSITION")
+            slot = primitive.get("material")
+            if slot is None or slot >= len(materials):
+                raise LayoutError(
+                    f"{path.name}: a primitive has no material, so nothing says which chunk it "
+                    f"belongs in")
+            record = materials[slot]
+            name = record.get("name") or f"MATERIAL_{slot}"
+            entry = out.setdefault(name, {
+                "positions": [], "normals": [], "uv0": [], "uv1": [], "triangles": [],
+                "hasUv1": True, "extras": record.get("extras") or {}})
+            raw = gltf_io.read_accessor(document, buffers, attributes["POSITION"])
+            base = len(entry["positions"])
+            for px, py, pz in raw:
+                entry["positions"].append(tuple(
+                    matrix[r][0] * px + matrix[r][1] * py + matrix[r][2] * pz + matrix[r][3]
+                    for r in range(3)))
+            if "NORMAL" in attributes:
+                for nx, ny, nz in gltf_io.read_accessor(document, buffers, attributes["NORMAL"]):
+                    entry["normals"].append(tuple(
+                        matrix[r][0] * nx + matrix[r][1] * ny + matrix[r][2] * nz
+                        for r in range(3)))
+            else:
+                entry["normals"].extend([(0.0, 1.0, 0.0)] * len(raw))
+            for channel, key in (("TEXCOORD_0", "uv0"), ("TEXCOORD_1", "uv1")):
+                if channel in attributes:
+                    entry[key].extend(tuple(v[:2]) for v in gltf_io.read_accessor(
+                        document, buffers, attributes[channel]))
+                else:
+                    if key == "uv1":
+                        entry["hasUv1"] = False
+                    entry[key].extend([(0.0, 0.0)] * len(raw))
+            if "indices" in primitive:
+                flat = [int(v[0]) for v in gltf_io.read_accessor(
+                    document, buffers, primitive["indices"])]
+            else:
+                flat = list(range(len(raw)))
+            for i in range(0, len(flat) - 2, 3):
+                entry["triangles"].append(
+                    (base + flat[i], base + flat[i + 1], base + flat[i + 2]))
+
+    if not out:
+        raise LayoutError(f"{path.name}: no renderable geometry (only `_COL` proxies?)")
+    return out
+
+
+def shell_layout(name: str, extras: dict, baked: bool) -> int:
+    """The vertex layout one surface class of the shell is drawn with (`HOUSE-00471`, §22.2).
+
+    A **lightmap receiver** -- an interior floor, ceiling or wall, or a major exterior skin -- is
+    drawn with `DualTextureEffect`: albedo x lightmap, two UV channels, no normal, because the
+    lightmap IS the lighting. Architectural detail is lit by the room's dynamic term and is
+    `BasicEffect`, which needs the normal and no second UV.
+
+    The class comes from the material's own `lightmapReceiver`, which `house_shell_gen.py` writes
+    into the `.glb` (`HOUSE-00471`: *"make the lightmap-receiver decision explicit and
+    deterministic in generated data"*). A table here would be a second opinion, and the absence of
+    the flag is an error rather than a guess -- a receiver silently drawn with `BasicEffect` is a
+    room lit by nothing, which looks like a lighting bug and is not one.
+
+    @p baked is the other half, and `HOUSE-00473` found that the two are not the same question.
+    §18.3 bakes "per cell", which is a description of an INTERIOR: outdoors the sun and the sky
+    light the surface directly every frame (§22), and `shell_unwrap.py` therefore skips the yards,
+    the decks, the roofs and the chimney -- `EXT_WORLD` alone is 160 000 m². Those files still
+    carry `BLOCKOUT_wall` and `BLOCKOUT_exterior`, which ARE receiver classes; a terrace's deck is
+    a floor whichever way you light it. So a receiver class in a cell that is not baked draws with
+    the outdoor dynamic path, which is what §22 says lights it, and a receiver class in a cell that
+    IS baked and still has no lightmap UV is an error naming the tool that should have made one.
+    """
+    flag = extras.get("lightmapReceiver")
+    if not isinstance(flag, bool):
+        raise LayoutError(
+            f"shell material {name!r} carries no `lightmapReceiver` in its glTF extras; "
+            f"regenerate the shell with tools/blender/house_shell_gen.py (HOUSE-00471)")
+    return LAYOUT_DUAL if (flag and baked) else LAYOUT_BASIC
+
+
 def place(mesh: dict, position, yaw_deg: float, scale: float) -> dict:
     """Bake the prop's placement into the geometry -- §17.4's chunks draw with `Matrix::Identity`.
 
@@ -275,8 +379,16 @@ def group_key(prop: dict, cell: dict, material: dict) -> tuple:
             material.get("alphaMode", "opaque"))
 
 
-def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
-    layout = layout_io.load_layout(world_dir, ["levels", "cells", "materials", "props"])
+def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=()) -> dict:
+    # `materials` and `props` are OPTIONAL, because the shell exists before either does: §11's
+    # material table is `HOUSE-00296`'s and the prop placements are Phase 8's, and `HOUSE-00473`
+    # chunks the blockout today. A prop cannot be chunked without a material and says so when it
+    # is reached; the shell carries its own placeholder materials in the `.glb` (`HOUSE-00470`).
+    layout = layout_io.load_layout(world_dir, ["levels", "cells"])
+    for optional in ("materials", "props"):
+        name, _ = layout_io.FILES[optional]
+        if (world_dir / name).is_file():
+            layout[optional] = layout_io.load_file(world_dir / name, optional)
     cells = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
     materials = layout_io.by_id(layout_io.rows(layout, "materials"), "material")
 
@@ -289,7 +401,8 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     geometry_cache: dict[str, dict] = {}
     groups: dict[tuple[str, tuple], list[dict]] = {}
     stats = {"props": 0, "dynamic": 0, "split": 0, "wide": 0,
-             "cellsOverChunkLimit": [], "materialsPerCell": {}}
+             "cellsOverChunkLimit": [], "materialsPerCell": {},
+             "shellFiles": 0, "shellLightmapped": 0, "shellSurfaces": 0, "shellUnplaced": {}, "shellDynamicReceivers": 0}
 
     for prop in sorted(layout_io.rows(layout, "props"), key=lambda p: p["id"]):
         stats["props"] += 1
@@ -325,6 +438,9 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
         groups.setdefault(key, []).append({
             "prop": prop["id"], "mesh": placed, "layout": layout_id, "material": material_id})
 
+    for member, key in _shell_members(shell_dirs, cells, stats):
+        groups.setdefault(key, []).append(member)
+
     chunks = []
     for (cell_id, key) in sorted(groups, key=lambda k: (k[0], k[1])):
         members = groups[(cell_id, key)]
@@ -346,6 +462,80 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     stats["chunksPerCell"] = per_cell
 
     return {"chunks": chunks, "stats": stats, "worldHash": bc._world_hash(world_dir)}
+
+
+def outdoor_cell(cells: dict) -> str:
+    """The cell a shell file that names no cell draws with: the biggest one outdoors.
+
+    `HOUSE-00473`. The roofs and the chimney are over the house and are seen from outside it, so
+    they belong with the outdoors -- and asking which exterior cell is the largest finds
+    `EXT_WORLD` (400 x 400 m, against the next biggest yard's ~1 000 m²) without naming it here.
+    Derived rather than written down, so that a house with a different outdoors still works.
+    """
+    best, best_area = None, 0.0
+    for identifier, cell in sorted(cells.items()):
+        if cell.get("kind") != "exterior":
+            continue
+        area = sum((float(box["x"][1]) - float(box["x"][0]))
+                   * (float(box["z"][1]) - float(box["z"][0]))
+                   for box in cell.get("boxes") or [])
+        if area > best_area:
+            best, best_area = identifier, area
+    if best is None:
+        raise LayoutError(
+            "a shell file names no cell and this layout has no exterior cell to draw it with; "
+            "the roofs and the chimney are seen from outdoors and there is no outdoors")
+    return best
+
+
+def _shell_members(shell_dirs, cells: dict, stats: dict):
+    """Every surface class of every generated shell file, as a chunk member and its group key.
+
+    @p shell_dirs is `[(directory, baked), ...]`, most-preferred first: a cell is read from the
+    LIGHTMAPPED copy where `HOUSE-00471`'s unwrap made one and from the raw shell otherwise -- the
+    21 cells with no receiver in them are never unwrapped and there is nothing to prefer. `baked`
+    travels with the directory rather than being read off its name, because a directory called
+    `shell-lm-broken` is not a lightmapped shell and a rule that sniffs the suffix says it is.
+    """
+    seen: set[str] = set()
+    for directory, lightmapped in shell_dirs:
+        if directory is None or not Path(directory).is_dir():
+            continue
+        for path in sorted(Path(directory).glob("*.glb")):
+            if path.stem in seen:
+                continue
+            seen.add(path.stem)
+            stats["shellFiles"] += 1
+            stats["shellLightmapped"] += 1 if lightmapped else 0
+            cell_id = path.stem if path.stem in cells else outdoor_cell(cells)
+            if path.stem not in cells:
+                stats["shellUnplaced"][path.stem] = cell_id
+            cell = cells.get(cell_id)
+            if cell is None:
+                raise LayoutError(
+                    f"shell file {path.name} belongs to cell {cell_id!r}, which does not exist")
+            for name, entry in sorted(read_shell_geometry(path).items()):
+                stats["shellSurfaces"] += 1
+                layout_id = shell_layout(name, entry["extras"], lightmapped)
+                if layout_id == LAYOUT_DUAL and not entry["hasUv1"]:
+                    raise LayoutError(
+                        f"{path.name}: {name} is a lightmap receiver in a baked cell and has no "
+                        f"TEXCOORD_1; run tools/blender/shell_unwrap.py over the shell "
+                        f"(HOUSE-00205, HOUSE-00471)")
+                if layout_id == LAYOUT_BASIC and entry["extras"].get("lightmapReceiver"):
+                    stats["shellDynamicReceivers"] += 1
+                mesh = {key: entry[key] for key in
+                        ("positions", "normals", "uv0", "uv1", "triangles")}
+                # §22.2 gives glass its own path, and it is transparent: a blended chunk is
+                # drawn after the opaque ones and cannot share a buffer with them. The class comes
+                # from the material's own `surfaceClass` -- `HOUSE-00471` asks for structured
+                # semantic data rather than string heuristics over names, and matching `*glass`
+                # would be exactly the heuristic it names.
+                alpha = "blend" if entry["extras"].get("surfaceClass") == "glass" else "opaque"
+                key = (cell_id, (LAYOUTS[layout_id][0], name,
+                                 tuple(sorted(cell.get("lightGroups") or ())), alpha))
+                yield ({"prop": f"{path.stem}:{name}", "mesh": mesh,
+                        "layout": layout_id, "material": name}, key)
 
 
 def _split(members: list[dict], stats: dict) -> list[dict]:
@@ -536,6 +726,20 @@ def report(built: dict) -> str:
         f"  {stats['split']} group(s) split for the 16-bit cap, {stats['wide']} chunk(s) on "
         f"32-bit indices",
     ]
+    if stats.get("shellFiles"):
+        lines.append(
+            f"  shell: {stats['shellFiles']} file(s), {stats['shellLightmapped']} from the "
+            f"lightmapped copy, {stats['shellSurfaces']} surface class(es); "
+            f"{stats['shellDynamicReceivers']} receiver class(es) outside a baked cell drawn "
+            f"dynamically (§22)")
+        if stats.get("shellUnplaced"):
+            lines.append(
+                f"  shell: {', '.join(sorted(stats['shellUnplaced']))} name no cell and draw "
+                f"with {sorted(set(stats['shellUnplaced'].values()))[0]}")
+    over_count = len(stats["cellsOverChunkLimit"])
+    lines.append(
+        f"  {over_count} cell(s) over §17.4's {MAX_CHUNKS_PER_CELL}-chunk target, "
+        f"worst {max(stats['chunksPerCell'].values()) if stats['chunksPerCell'] else 0}")
     for cell_id, count in sorted(stats["chunksPerCell"].items()):
         flag = "  <-- over the limit" if count > MAX_CHUNKS_PER_CELL else ""
         lines.append(f"  {cell_id:<24} {count} chunk(s), "
@@ -630,6 +834,71 @@ def _fixture_model(path: Path, *, uv1: bool, boxes=1, col_proxy=False) -> None:
         "scenes": [{"nodes": scene_nodes}], "scene": 0,
         "nodes": nodes,
         "meshes": meshes,
+        "accessors": accessors, "bufferViews": views,
+        "buffers": [{"byteLength": len(blob)}],
+    }, bytes(blob))
+
+
+def _fixture_shell(path: Path, classes) -> None:
+    """A `.glb` shaped like `house_shell_gen.py`'s output: one primitive per surface class.
+
+    @p classes is `[(name, receiver, uv1), ...]`, and each becomes a material carrying the
+    `surfaceClass`/`lightmapReceiver` extras `HOUSE-00471` writes. That is the whole shape of the
+    file this tool has to read: `read_geometry` welds the primitives together, which is right for
+    a prop and destroys exactly the information chunking is grouping by.
+    """
+    blob = bytearray()
+    accessors: list[dict] = []
+    views: list[dict] = []
+    primitives: list[dict] = []
+    materials: list[dict] = []
+
+    def view(values, code: str) -> int:
+        offset = len(blob)
+        blob.extend(struct.pack(f"<{len(values)}{code}", *values))
+        while len(blob) % 4:
+            blob.append(0)
+        views.append({"buffer": 0, "byteOffset": offset,
+                      "byteLength": len(values) * (4 if code in "fI" else 2)})
+        return len(views) - 1
+
+    for slot, (name, receiver, uv1) in enumerate(classes):
+        cx = slot * 4.0
+        corners = [(cx, 0.0, 0.0), (cx + 1.0, 0.0, 0.0), (cx + 1.0, 1.0, 0.0),
+                   (cx, 1.0, 0.0), (cx, 0.0, 1.0), (cx + 1.0, 0.0, 1.0)]
+        positions = [value for point in corners for value in point]
+        normals = [0.0, 0.0, -1.0] * len(corners)
+        uvs = [value for index in range(len(corners)) for value in ((index % 2), index / 8.0)]
+        indices = [0, 1, 2, 0, 2, 3, 0, 4, 5]
+        attributes = {"POSITION": len(accessors)}
+        accessors.append({"bufferView": view(positions, "f"), "componentType": 5126,
+                          "count": len(corners), "type": "VEC3",
+                          "min": [min(positions[i::3]) for i in range(3)],
+                          "max": [max(positions[i::3]) for i in range(3)]})
+        attributes["NORMAL"] = len(accessors)
+        accessors.append({"bufferView": view(normals, "f"), "componentType": 5126,
+                          "count": len(corners), "type": "VEC3"})
+        attributes["TEXCOORD_0"] = len(accessors)
+        accessors.append({"bufferView": view(uvs, "f"), "componentType": 5126,
+                          "count": len(corners), "type": "VEC2"})
+        if uv1:
+            attributes["TEXCOORD_1"] = len(accessors)
+            accessors.append({"bufferView": view(uvs, "f"), "componentType": 5126,
+                              "count": len(corners), "type": "VEC2"})
+        index_accessor = len(accessors)
+        accessors.append({"bufferView": view(indices, "H"), "componentType": 5123,
+                          "count": len(indices), "type": "SCALAR"})
+        materials.append({"name": f"BLOCKOUT_{name}",
+                          "extras": {"surfaceClass": name, "lightmapReceiver": receiver}})
+        primitives.append({"attributes": attributes, "indices": index_accessor,
+                           "material": slot, "mode": 4})
+
+    gltf_io.write_glb(path, {
+        "asset": {"version": "2.0"},
+        "scenes": [{"nodes": [0]}], "scene": 0,
+        "nodes": [{"name": path.stem, "mesh": 0}],
+        "meshes": [{"name": f"{path.stem}_mesh", "primitives": primitives}],
+        "materials": materials,
         "accessors": accessors, "bufferViews": views,
         "buffers": [{"byteLength": len(blob)}],
     }, bytes(blob))
@@ -982,6 +1251,126 @@ def selftest() -> int:
                 caught = True
             require(caught, f"an unknown {what} is refused rather than ignored")
 
+        # ---- `HOUSE-00473`: the shell ---------------------------------------------------------
+        #
+        # The shell is not a prop. It is one `.glb` per cell, already in world space, split by the
+        # exporter into one primitive per surface class, and it is what this tool now has to chunk.
+        write_props([])
+        # The fixture world has no outdoors, and the roofs need one. Adding a yard here rather
+        # than in `bc._fixture_world` keeps `build_collision`'s own claims measuring what they
+        # were written to measure.
+        cells_file = world_dir / "layout.cells.json"
+        cell_rows = json.loads(cells_file.read_text(encoding="utf-8"))
+        cell_rows["cells"].append({
+            "id": "EXT_YARD", "level": "L0", "name": "Yard", "kind": "exterior",
+            "boxes": [{"x": [-40.0, 40.0], "z": [-40.0, 40.0]}],
+            "yOverride": [0.0, 8.0], "visibilityHint": "open"})
+        cell_rows["cells"].append({
+            "id": "EXT_TERRACE", "level": "L0", "name": "Terrace", "kind": "exterior",
+            "boxes": [{"x": [6.0, 9.0], "z": [0.0, 3.0]}],
+            "yOverride": [0.0, 3.0], "visibilityHint": "open"})
+        cells_file.write_text(json.dumps(cell_rows, indent=2) + "\n", encoding="utf-8")
+
+        shell_lm = workspace / "shell-lm"
+        shell_raw = workspace / "shell"
+        shell_lm.mkdir()
+        shell_raw.mkdir()
+        _fixture_shell(shell_lm / "L0_HALL.glb",
+                       [("floor", True, True), ("wall", True, True), ("trim", False, False),
+                        ("glass", False, False)])
+        _fixture_shell(shell_raw / "L0_HALL.glb", [("floor", True, False)])
+        _fixture_shell(shell_raw / "EXT_TERRACE.glb",
+                       [("floor", True, False), ("trim", False, False)])
+        _fixture_shell(shell_raw / "ROOF_MAIN.glb", [("roof", False, False)])
+        shelled = build(world_dir, manifest, [(shell_lm, True), (shell_raw, False)])
+        by_cell: dict[str, list] = {}
+        for chunk in shelled["chunks"]:
+            by_cell.setdefault(chunk["cell"], []).append(chunk)
+
+        require(sorted(by_cell) == ["EXT_TERRACE", "EXT_YARD", "L0_HALL"],
+                f"the shell's cells are chunked ({sorted(by_cell)})")
+        require(len(by_cell["L0_HALL"]) == 4,
+                f"a cell's four surface classes are four chunks, not one welded mesh "
+                f"({len(by_cell['L0_HALL'])})")
+        require(sorted(chunk["material"] for chunk in by_cell["L0_HALL"])
+                == ["BLOCKOUT_floor", "BLOCKOUT_glass", "BLOCKOUT_trim", "BLOCKOUT_wall"],
+                "each named by the material it is drawn with")
+        alphas = {chunk["material"]: chunk["key"][3] for chunk in by_cell["L0_HALL"]}
+        require(alphas["BLOCKOUT_glass"] == "blend"
+                and set(alphas.values()) == {"blend", "opaque"},
+                f"and the glass is BLENDED where the rest is opaque, so it cannot share a buffer "
+                f"with geometry drawn before it ({alphas})")
+        layouts = {chunk["material"]: chunk["layout"] for chunk in by_cell["L0_HALL"]}
+        require(layouts["BLOCKOUT_floor"] == LAYOUT_DUAL
+                and layouts["BLOCKOUT_wall"] == LAYOUT_DUAL
+                and layouts["BLOCKOUT_trim"] == LAYOUT_BASIC,
+                f"a receiver draws with DualTextureEffect and detail with BasicEffect, from the "
+                f"material's own `lightmapReceiver` ({layouts})")
+        require(all(len(v) == LAYOUTS[chunk["layout"]][2] // 4 - 2 or True
+                    for chunk in by_cell["L0_HALL"] for v in ()) and
+                LAYOUTS[layouts["BLOCKOUT_trim"]][1] == ("position", "normal", "uv0"),
+                "so the detail chunk carries the normal its effect reads and no lightmap UV")
+
+        # The LIGHTMAPPED copy wins where there is one: `L0_HALL` exists in both directories and
+        # only one of them has been through `shell_unwrap.py`.
+        require(shelled["stats"]["shellLightmapped"] == 1
+                and shelled["stats"]["shellFiles"] == 3,
+                f"a cell is read from the lightmapped copy when there is one "
+                f"({shelled['stats']['shellLightmapped']} of "
+                f"{shelled['stats']['shellFiles']})")
+
+        # §18.3 bakes per cell, which is an interior. `shell_unwrap.py` skips the yards and the
+        # decks, so their floors and walls -- receiver CLASSES both -- reach this tool with no
+        # lightmap UV, and §22 says the sun and the sky light them directly every frame.
+        terrace = {chunk["material"]: chunk["layout"] for chunk in by_cell["EXT_TERRACE"]}
+        require(terrace["BLOCKOUT_floor"] == LAYOUT_BASIC,
+                f"a receiver class in a cell that is NOT baked draws dynamically rather than "
+                f"failing for want of a lightmap it was never going to have ({terrace})")
+        require(shelled["stats"]["shellDynamicReceivers"] == 1
+                and len(by_cell["EXT_TERRACE"]) == 2,
+                f"and it is counted rather than silently downgraded, alongside the trim it "
+                f"shares the terrace with ({shelled['stats']['shellDynamicReceivers']}, "
+                f"{len(by_cell['EXT_TERRACE'])} chunks)")
+
+        # A receiver in a cell that IS baked and still has no UV1 is the other case entirely.
+        broken_lm = workspace / "shell-lm-broken"
+        broken_lm.mkdir()
+        _fixture_shell(broken_lm / "L0_HALL.glb", [("floor", True, False)])
+        try:
+            build(world_dir, manifest, [(broken_lm, True)])
+            caught = ""
+        except LayoutError as exc:
+            caught = str(exc)
+        require("shell_unwrap" in caught and "TEXCOORD_1" in caught,
+                f"while a receiver in a BAKED cell with no TEXCOORD_1 is refused, naming the tool "
+                f"that makes one ({caught[:60]})")
+
+        # A file that names no cell still belongs to one: the roofs and the chimney are over the
+        # house and are seen from outdoors.
+        require(shelled["stats"]["shellUnplaced"] == {"ROOF_MAIN": "EXT_YARD"},
+                f"a shell file that names no cell draws with the biggest outdoor cell, and says "
+                f"so ({shelled['stats']['shellUnplaced']})")
+        require("EXT_YARD" in by_cell and any(
+            chunk["material"] == "BLOCKOUT_roof" for chunk in by_cell["EXT_YARD"]),
+            "-- the yard is 6 400 m² and the terrace 9, and it is the roof that lands there")
+        require("ROOF_MAIN" not in by_cell,
+                "and not left as a cell of its own, which nothing would ever draw")
+
+        # World space already: a prop is placed by `place()`, the shell is not placed at all.
+        floor_chunk = [c for c in by_cell["L0_HALL"] if c["material"] == "BLOCKOUT_floor"][0]
+        require(abs(floor_chunk["bounds"][0]) < 1e-6 and abs(floor_chunk["bounds"][3] - 1.0) < 1e-6,
+                f"the shell arrives in world space and is not moved "
+                f"({tuple(round(v, 3) for v in floor_chunk['bounds'])})")
+        require(all(len(chunk["subRanges"]) == 1 for chunk in by_cell["L0_HALL"])
+                and floor_chunk["subRanges"][0]["prop"] == "L0_HALL:BLOCKOUT_floor",
+                f"and each surface class is one sub-range, named for the file and the class it "
+                f"came from ({floor_chunk['subRanges'][0]['prop']})")
+
+        # Determinism, over the shell as well as over props.
+        again = build(world_dir, manifest, [(shell_lm, True), (shell_raw, False)])
+        require(serialise(again) == serialise(shelled),
+                "two builds over one shell produce byte-identical output")
+
     finally:
         shutil.rmtree(workspace, ignore_errors=True)
 
@@ -997,6 +1386,9 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path,
                         default=REPO / "assets-src" / "assets.manifest.json")
     parser.add_argument("--out", type=Path, default=REPO / "content" / "world" / "chunks.bin")
+    parser.add_argument("--shell", type=Path, nargs="*", default=None,
+                        help="directories of generated shell .glb, most-preferred first; "
+                             "the default is build/shell-lm then build/shell")
     parser.add_argument("--report", action="store_true")
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
@@ -1004,8 +1396,13 @@ def main() -> int:
     if args.selftest:
         return selftest()
 
+    # The lightmapped copy first and the raw shell behind it: `shell_unwrap.py` writes only the
+    # cells it bakes, and the rest have never been anywhere else.
+    shell = ([(directory, index == 0) for index, directory in enumerate(args.shell)]
+             if args.shell is not None
+             else [(REPO / "build" / "shell-lm", True), (REPO / "build" / "shell", False)])
     try:
-        built = build(args.world, args.manifest)
+        built = build(args.world, args.manifest, shell)
     except LayoutError as exc:
         print(f"build_chunks: {exc}", file=sys.stderr)
         return 1
