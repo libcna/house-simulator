@@ -77,19 +77,24 @@ namespace cnahouse::player
         return HorizontalFovDegrees(EffectiveFieldOfViewDegrees(), aspect_);
     }
 
-    void FirstPersonCamera::Update(const PlayerState& state, float eyeHeight, float pitch) noexcept
+    void FirstPersonCamera::Update(const PlayerState& state,
+                                   float eyeHeight,
+                                   float pitch,
+                                   const HeadBobOffset& bob) noexcept
     {
-        pose_.yaw = state.yaw;
+        // The CAMERA's yaw, which the sway moves and the body's does not: `PlayerState::yaw` is
+        // still where the player is facing, and §71's overlays read it from there.
+        pose_.yaw = state.yaw + bob.yaw;
         pose_.pitch = pitch;
         // §44: the eye is the body's feet plus the smoothed height, and NOT the capsule's centre.
         // A crouch drops the centre by exactly what the half-height loses (`PlayerState::Feet`),
         // so measuring from the feet is what makes 1.68 m standing and 1.15 m crouched one rule.
         const Xna::Vector3 feet = state.Feet();
-        pose_.eye = Xna::Vector3(feet.X, feet.Y + eyeHeight, feet.Z);
+        pose_.eye = Xna::Vector3(feet.X, feet.Y + eyeHeight + bob.vertical, feet.Z);
 
         // §14: yaw 0 looks north (-Z) and positive turns east.
-        const float cosYaw = std::cos(state.yaw);
-        const float sinYaw = std::sin(state.yaw);
+        const float cosYaw = std::cos(pose_.yaw);
+        const float sinYaw = std::sin(pose_.yaw);
         const float cosPitch = std::cos(pitch);
         const float sinPitch = std::sin(pitch);
         pose_.forward = Xna::Vector3(sinYaw * cosPitch, sinPitch, -cosYaw * cosPitch);

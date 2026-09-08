@@ -8781,9 +8781,65 @@ it must be tuned, not just implemented.
             as each other's inverse -- plus 2 `SettingsTests` for the band and for the default
             being the camera's own. Eight injected bugs, eight caught (one after the viewport test
             was moved off 16:9).
-- [ ] HOUSE-00627 — Implement head bob (vertical + lateral) tied to the footstep cadence, with the three settings levels
+- [x] HOUSE-00627 — Implement head bob (vertical + lateral) tied to the footstep cadence, with the three settings levels
       dep: HOUSE-00621, HOUSE-00556 · sys: player · plat: ALL · pri: MUST
       accept: at "Subtle" the amplitude is ≤ 0.012 m and no tester reports nausea
+      note: (2026-09-09) `player::HeadBob`: §44's *"0.012 m · (speed/1.35) at the footstep
+            cadence, plus a 0.35° lateral sway"*, §68's Off/Subtle/Normal, and §62.4's stride.
+      note: **`HeadBob` owns the step accumulator, and it owns it for the FOOTSTEPS too.** §62.4's
+            director (phase 12) needs exactly the count this class already keeps -- one step every
+            0.75 m, 0.95 m at the fast walk -- and two accumulators would let the sound and the
+            view disagree about when a foot lands, which is the one thing a bob has to get right.
+            `TakeSteps()` is that count, and it keeps counting at level `Off`: a CAMERA setting
+            must not change when the house makes a footstep sound. An injected "stop the
+            accumulator when the bob is off" is caught by exactly that test.
+      finding: **§44's amplitude describes `Subtle`, not the maximum.** §68's table defaults the
+            level to `Subtle` and §44 calls the default *"on but low"*, so the 0.012 m IS the
+            default level and `Normal` is what a player picks when they want to feel their
+            footsteps -- twice, which is the smallest multiple that reads as a decision rather
+            than as rounding, and a number `HOUSE-00632` is expected to re-tune.
+      finding: **the sway is about the VERTICAL axis, because §44 rules out the usual reading.**
+            "Lateral sway" in a head bob is normally a small roll, and §44 says two lines earlier
+            that *"roll is always zero during ordinary walking"* -- so the only axis left that
+            does not tilt the horizon is the yaw: the aim drifts a third of a degree left and
+            right as the weight passes from foot to foot. A test asserts the camera's `right`
+            vector stays horizontal with the bob applied.
+      finding: **the rise belongs ABOVE §43.1's eye height, not around it.** A sinusoid centred on
+            the standing height puts the eye 12 mm BELOW it twice a step, and then every stop,
+            every landing and every teleport is a step-sized jump from wherever the phase happened
+            to be. `amplitude · (1 − cos)/2` is zero at every foot plant instead, which makes the
+            standing height the bottom of the walking cycle -- which is also what a walking cycle
+            actually is, the head rising over the leg that carries it -- and makes the waveform
+            continuous through all three of those events without a single special case.
+      finding: **`phase + (ceil(phase) − phase)` is 0.99999994 as often as it is 1.** A body in the
+            air finishes the step it was in and then holds still, and the first version clamped
+            this frame's ADVANCE to the distance remaining: the phase then stopped a
+            hundred-millionth short of the plant for ever, never reported the step, and left the
+            eye a hundred-millionth off the floor. Taking the whole number itself as the target
+            fixes it; the test that found it asserts the step is reported and the phase is 1.
+      note: only the HORIZONTAL part of a frame's travel is a stride, so a lift or a ladder takes
+            no steps at all. §62.4 counts a stair in RISERS rather than in metres, and that half
+            belongs to the footstep director with the riser crossings it needs; §48.2's stiffened
+            eye spring is what keeps a flight from feeling bobbed until then.
+      note: the bob is applied AFTER `HOUSE-00561`'s eye spring, not before. Through the spring it
+            would be a 1.8 Hz wobble fed into a filter built to remove one, and what came out
+            would be neither the bob nor the smoothing.
+      note: the level is `Settings::headBob`, spelled as a NAME in the file (settings version 4,
+            with the v3 migration giving an older file §68's `Subtle` -- §44 says the motion is on
+            by default and a player who has never seen the setting has not turned it off).
+      verified: 12 `HeadBobTests` -- the stated numbers, a step every stride with the eye at rest
+            on every plant and the rise peaking halfway between, the amplitude at three speeds and
+            three levels with the acceptance criterion asserted directly, the sway alternating and
+            closing after two steps, the same walk at 30 and 240 fps giving the same feet, the
+            fast stride told apart by the COUNT over 2.4 m, the steps still counted with the bob
+            off, standing still and a zero-length frame, the airborne step that finishes, `Reset`,
+            a stair climbed rather than walked, and the camera lifting and turning without roll --
+            plus 2 `SettingsTests` for the named level and the v4 migration. Eleven injected bugs,
+            eleven caught (one after the fast-stride test was moved off a distance that gives the
+            same count either way).
+      note: the second half of the acceptance criterion -- *"no tester reports nausea"* -- is
+            `HOUSE-00632`'s, which walks every room and every flight and records the final
+            numbers. It is not claimed here.
 - [ ] HOUSE-00628 — Implement the near-surface eye pull-back to prevent near-plane clipping
       dep: HOUSE-00621, HOUSE-00546 · sys: player · plat: ALL · pri: MUST
 - [ ] HOUSE-00629 — Implement the landing camera dip and its recovery

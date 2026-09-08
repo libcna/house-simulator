@@ -4,6 +4,7 @@
 #include "Microsoft/Xna/Framework/Matrix.hpp"
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 
+#include "cnahouse/player/HeadBob.hpp"
 #include "cnahouse/player/PlayerController.hpp"
 
 namespace cnahouse::player
@@ -141,7 +142,13 @@ namespace cnahouse::player
         ///
         /// @param eyeHeight metres above the FEET, which is what §43.1's 1.68 m standing and
         ///        1.15 m crouched are, and what `EyeSpring` smooths.
-        void Update(const PlayerState& state, float eyeHeight, float pitch) noexcept;
+        /// @param bob §44's head motion (`HOUSE-00627`), applied AFTER the spring. Through the
+        ///        spring it would be a 1.8 Hz wobble fed into a filter that is there to remove
+        ///        one, and what came out would be neither the bob nor the smoothing.
+        void Update(const PlayerState& state,
+                    float eyeHeight,
+                    float pitch,
+                    const HeadBobOffset& bob = {}) noexcept;
 
         [[nodiscard]] const CameraPose& Pose() const noexcept
         {

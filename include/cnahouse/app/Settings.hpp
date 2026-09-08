@@ -5,6 +5,7 @@
 #include <string>
 
 #include "cnahouse/app/CommandLine.hpp"
+#include "cnahouse/player/HeadBob.hpp"
 #include "cnahouse/util/Result.hpp"
 
 namespace cnahouse::app
@@ -20,7 +21,7 @@ namespace cnahouse::app
     struct Settings
     {
         /// @brief Bumped whenever a field changes meaning. `Migrate` handles every older value.
-        static constexpr std::int32_t kCurrentVersion = 3;
+        static constexpr std::int32_t kCurrentVersion = 4;
 
         std::int32_t version = kCurrentVersion;
 
@@ -57,6 +58,13 @@ namespace cnahouse::app
         /// this default is that one. The number is repeated here rather than included because
         /// this header is small and widely included and the camera's is neither.
         float fieldOfView = 70.0f;
+
+        /// @brief §68's head-bob level, defaulting to §44's *"on but low"*.
+        ///
+        /// Three levels and not a slider, because the two numbers §44 gives move together: a
+        /// player choosing between "a little" and "a bit more" is not choosing an amplitude in
+        /// millimetres, and a slider would offer them one that makes them ill.
+        player::HeadBobLevel headBob = player::HeadBobLevel::Subtle;
 
         /// @brief §43.2's walk mode: false is the 1.35 m/s walk, true the 2.05 m/s one.
         ///

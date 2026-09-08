@@ -5,11 +5,13 @@
 
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/player/FirstPersonCamera.hpp"
+#include "cnahouse/player/HeadBob.hpp"
 
 namespace
 {
     using cnahouse::app::QualityPreset;
     using cnahouse::app::Settings;
+    using cnahouse::player::HeadBobLevelName;
 
     TEST(SettingsTests, DefaultsAreTheDocumentedOnes)
     {
@@ -32,6 +34,7 @@ namespace
         written.mouseSensitivity = 1.5f;
         written.invertY = true;
         written.fieldOfView = 90.0f;
+        written.headBob = cnahouse::player::HeadBobLevel::Off;
 
         auto read = Settings::FromJson(written.ToJson(), "settings.json");
         ASSERT_TRUE(read) << read.Error().ToString();
@@ -43,6 +46,35 @@ namespace
         EXPECT_FLOAT_EQ(read->mouseSensitivity, 1.5f);
         EXPECT_TRUE(read->invertY);
         EXPECT_FLOAT_EQ(read->fieldOfView, 90.0f);
+        EXPECT_EQ(read->headBob, cnahouse::player::HeadBobLevel::Off)
+            << "§68's level did not survive the file";
+    }
+
+    TEST(SettingsTests, TheHeadBobLevelIsAName)
+    {
+        // §68 gives three levels and the file spells them, because a settings file is text a
+        // person edits: `"headBob": 2` would make them count, and counting from a number they
+        // cannot see is how a file ends up meaning something nobody intended.
+        for (const auto level : {cnahouse::player::HeadBobLevel::Off,
+                                 cnahouse::player::HeadBobLevel::Subtle,
+                                 cnahouse::player::HeadBobLevel::Normal})
+        {
+            Settings written = Settings::Defaults();
+            written.headBob = level;
+            const std::string json = written.ToJson();
+            EXPECT_NE(json.find(std::string("\"headBob\": \"") + std::string(HeadBobLevelName(level)) + "\""),
+                      std::string::npos)
+                << json;
+            auto read = Settings::FromJson(json, "settings.json");
+            ASSERT_TRUE(read) << read.Error().ToString();
+            EXPECT_EQ(read->headBob, level);
+        }
+
+        // An unknown level falls back to the default rather than failing, the rule the quality
+        // preset already follows: a file from a build with a fourth level must still load here.
+        auto odd = Settings::FromJson(R"({"version": 4, "headBob": "violent"})", "settings.json");
+        ASSERT_TRUE(odd) << odd.Error().ToString();
+        EXPECT_EQ(odd->headBob, cnahouse::player::HeadBobLevel::Subtle);
     }
 
     TEST(SettingsTests, AVersionOneFileMigratesRatherThanBeingDiscarded)
@@ -76,6 +108,9 @@ namespace
         EXPECT_TRUE(settings->invertY);
         EXPECT_FLOAT_EQ(settings->ambienceVolume, 1.0f)
             << "the field v1 did not have takes its default rather than zero";
+        // v3 -> v4 added §68's head bob, and §44 says the motion is on by default: a player who
+        // has never seen the setting has not turned it off.
+        EXPECT_EQ(settings->headBob, cnahouse::player::HeadBobLevel::Subtle);
     }
 
     TEST(SettingsTests, AFileFromANewerBuildStillLoads)

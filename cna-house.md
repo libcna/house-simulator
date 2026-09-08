@@ -3859,7 +3859,14 @@ doorway does not thrash.
   see 43° of the room), capped at 120° so the projection stays a projection.
 * **Head motion**: a very small vertical bob, amplitude `0.012 m · (speed/1.35)`, at the footstep
   cadence, plus a 0.35° lateral sway. Default **on** but low; a settings toggle turns it off. The
-  rule adopted here: any bob large enough to *notice* is too large.
+  rule adopted here: any bob large enough to *notice* is too large. Those numbers are §68's
+  `Subtle`, which is the default; `Normal` doubles them and `Off` is still. The cadence is §62.4's
+  own accumulator — one step per 0.75 m walking, 0.95 m at the fast walk — and it is the *same*
+  accumulator the footsteps come from, so the sound and the view cannot disagree about when a foot
+  lands. The rise is measured **above** §43.1's eye height, which is the bottom of a walking cycle
+  rather than its middle, so every foot plant is at the standing height and stopping, landing and
+  teleporting all leave the eye where it was. The sway turns about the **vertical** axis: the view
+  drifts left and right and the horizon stays level, because roll is zero.
 * **Camera collision**: the eye is inside the player capsule, so walls are already handled. The
   only special case is a near-plane clip against a surface the capsule is touching — solved by
   pulling the near plane to 0.05 m and pushing the eye 0.06 m back along the view direction when

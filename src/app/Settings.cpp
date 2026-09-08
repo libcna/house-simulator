@@ -137,6 +137,16 @@ namespace cnahouse::app
         }
         settings.fastWalk = *fast;
 
+        auto headBob =
+            root.OptionalString("headBob", std::string(player::HeadBobLevelName(settings.headBob)));
+        if (!headBob)
+        {
+            return headBob.Error();
+        }
+        // An unknown level falls back rather than failing, the same rule the quality preset
+        // follows: a settings file from a build with a fourth level must still load in this one.
+        settings.headBob = player::HeadBobLevelFromName(*headBob, settings.headBob);
+
         auto fov = root.OptionalFloat("fieldOfView", settings.fieldOfView);
         if (!fov)
         {
@@ -165,6 +175,14 @@ namespace cnahouse::app
             // never pressed `Shift` has not chosen the fast walk.
             settings.fastWalk = false;
             settings.version = 3;
+        }
+        if (settings.version < 4)
+        {
+            // Version 4 added §68's head-bob level. A file written before it has no opinion, and
+            // §68's own default -- `Subtle` -- is the right one to give it: §44 says the motion is
+            // on by default, and a player who has never seen the setting has not turned it off.
+            settings.headBob = player::HeadBobLevel::Subtle;
+            settings.version = 4;
         }
         settings.version = kCurrentVersion;
     }
@@ -239,6 +257,7 @@ namespace cnahouse::app
                            "  \"mouseSensitivity\": {},\n"
                            "  \"invertY\": {},\n"
                            "  \"lookSmoothing\": {},\n"
+                           "  \"headBob\": \"{}\",\n"
                            "  \"fieldOfView\": {},\n"
                            "  \"fastWalk\": {}\n"
                            "}}\n",
@@ -254,6 +273,7 @@ namespace cnahouse::app
                            mouseSensitivity,
                            invertY ? "true" : "false",
                            lookSmoothing ? "true" : "false",
+                           HeadBobLevelName(headBob),
                            fieldOfView,
                            fastWalk ? "true" : "false");
     }
