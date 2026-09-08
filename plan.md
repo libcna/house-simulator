@@ -8255,8 +8255,44 @@ never escapes and never penetrates.
             sixth (the slide's 0.999 contact backoff turned into 1.5) is NOT caught and should
             not be: the depenetration cleans it up before the next step and the door still holds.
             `CollideAndSlideTests` owns that constant.
-- [ ] HOUSE-00613 — Guarantee test: the player cannot pass any wall, floor or ceiling (2 000 randomised pushes)
+- [x] HOUSE-00613 — Guarantee test: the player cannot pass any wall, floor or ceiling (2 000 randomised pushes)
       dep: HOUSE-00550 · sys: physics · plat: CI · pri: MUST
+      verify: unit SolidSurfaceTests.TwoThousandPushesNeverGetThroughAWallAFloorOrACeiling
+      note: (2026-09-08) 2 000 seeded pushes, 1 883 of them made (117 draws landed inside a stair
+            flight or a chimney breast and were re-drawn out of eight tries), over all 96 cells,
+            75 294 fixed steps. Each push starts 0.40 m inside a cell boundary facing OUT and
+            **already at §43.2's fast walk**, so it arrives at the surface at full speed and then
+            leans on it for 0.33 s -- a body accelerating from rest in the middle of a room tests
+            nothing. 500 of them arrive FALLING as well as walking, from 0.15 to 0.40 m up.
+      finding: **the witness is §16's portal graph, and it has to be the portal RECTANGLE and not
+            the graph.** Two rooms with a doorway between them are joined, so a body that walks
+            through their shared WALL lands in a cell the graph says is reachable and a rule that
+            only asked "are these two joined" sees nothing: measured, with the sweep taught to
+            ignore every 0.15 m wall, 59 extra crossings appear and every one of them passes.
+            Requiring the crossing to happen INSIDE the portal's own rectangle, ±0.10 m, is what
+            gives the test teeth -- §70.5's 0.62 m capsule through a 0.90 m doorway has 0.14 m to
+            spare, so the margin can be that tight.
+      finding: **a body cannot walk into a wall even with the sweep blind to it.** §49.3's step 5
+            pushes out 0.02 m four times a step, 0.08 m, against a walk of 0.017 m a step -- so
+            with `SweepCapsuleObb` returning a miss for every 0.15 m wall the guarantee still
+            holds, and only blinding the OVERLAP as well gets a body through. The five steps back
+            each other up, which is worth knowing before anyone "optimises" one of them away.
+      note: the floor half is asserted by the drop: a body dropped 0.15-0.40 m indoors must
+            record §47.2's LANDING inside the push. Not "is it on the ground at the end" -- a body
+            that lands and then walks off the slab it landed on is still a body a floor stopped,
+            and at a cell's boundary that happens often. Drops are asserted indoors only: an
+            exterior cell is open at its edges by definition, and a body dropped near a terrace
+            edge walks off it while it falls.
+      finding: one pair of cells really can be walked between with no portal --
+            `L2_STAIR_MAIN -> L1_BALCONY_FRONT`. §15's cells are VOLUMES: the front balcony's
+            reaches up to L2's ceiling and the L2 landing's slab reaches past the stair cell's
+            box, so a body on that overhang is relabelled without going through anything. Recorded
+            and diffed both ways, so a second one has to be added in a commit with a reason.
+      note: three injected bugs, three caught -- walls not solid to the overlap either, floors not
+            solid to a sweep, and §47.2's soft landing never reported. A fourth (the slide keeping
+            its whole step regardless of contact) is NOT caught here: it leaves the body inside
+            the wall rather than through it, which is `HOUSE-00617`'s guarantee and
+            `CollideAndSlideTests`' unit case.
 - [ ] HOUSE-00614 — Guarantee test: the player cannot fall through any floor (2 000 randomised drops from 3 m)
       dep: HOUSE-00552 · sys: physics · plat: CI · pri: MUST
 - [ ] HOUSE-00615 — Guarantee test: every flight is traversable in both directions, and every landing is reachable
