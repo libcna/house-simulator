@@ -381,3 +381,89 @@ TEST(FallTests, NoBodyFallsThroughAnyFloorInTheRealHouse)
     // than where the fall started.
     EXPECT_EQ(hard, 0u) << hard << " of " << dropped << " drops of at most 1.50 m landed hard";
 }
+
+TEST(FallTests, ALandingOnTheLAWNIsALandingTooAndNotASilentStop)
+{
+    // `HOUSE-00552` defect, found by `HOUSE-00614`. The fall swept the cell's SHAPES and not
+    // §11.5's height field, so outdoors nothing stopped it: the body sank past the ground and the
+    // step's ground probe -- which does read the field -- quietly set `onGround` on the way past.
+    // The body then stood a few centimetres INSIDE the lawn, where the depenetration (shapes
+    // again) could not push it out, and §47.2's landing was never reported at all. No sound, no
+    // camera dip, no hard landing, anywhere outdoors.
+    CollisionWorld world = OneCell({});
+    world.surfaces = {"grass"};
+    world.terrain.present = true;
+    world.terrain.samplesX = 8u;
+    world.terrain.samplesZ = 8u;
+    world.terrain.originX = -4.0F;
+    world.terrain.originZ = -4.0F;
+    world.terrain.step = 1.0F;
+    world.terrain.heights.assign(64u, 0.40F);
+    world.terrain.materials = {0u};
+    world.terrain.materialIndex.assign(64u, 0u);
+
+    BroadPhase broad;
+    Capsule body{Vector3(0.0F, 0.40F + kStand + 3.0F, 0.0F), kBodyHalfHeight, kBodyRadius};
+    FallState state;
+    state.onGround = false;
+    state.fellFrom = body.centre.Y;
+
+    Landing landing = Landing::None;
+    float drop = 0.0F;
+    int steps = 0;
+    for (; steps < 200 && landing == Landing::None; ++steps)
+    {
+        const FallStep fell = Fall(world, world.cells[0], broad, body, state, kDt);
+        body.centre = fell.position;
+        state = fell.state;
+        landing = fell.landing;
+        drop = fell.drop;
+    }
+
+    ASSERT_NE(landing, Landing::None) << "the body fell through the lawn";
+    // 3 m is over §43.1's 2.4, so it is a hard landing wherever it happens.
+    EXPECT_EQ(landing, Landing::Hard);
+    EXPECT_NEAR(drop, 3.0F, 0.05F);
+    EXPECT_TRUE(state.onGround);
+    EXPECT_FLOAT_EQ(state.speed, 0.0F);
+    // ON the ground, not in it: the body's soles are at the field's height, give or take the
+    // thousandth of a step the landing backs off by.
+    EXPECT_NEAR(body.Bottom(), 0.40F, 0.01F);
+    EXPECT_GE(body.Bottom(), 0.40F - 1e-3F) << "it settled inside the lawn";
+    EXPECT_NEAR(static_cast<float>(steps) * kDt, 0.78F, 0.05F) << "3 m is 0.78 s of falling";
+}
+
+TEST(FallTests, TheNEARERofTheSlabAndTheLawnIsWhatItLandsOn)
+{
+    // A terrace: the slab is what a body lands on and the lawn is under it. The same rule
+    // `GroundProbe` uses, and the two have to agree or a body lands on one and stands on the
+    // other.
+    CollisionWorld world =
+        OneCell({Box(Vector3(0.0F, 0.85F, 0.0F), Vector3(2.0F, 0.15F, 2.0F), CollisionKind::Floor)});
+    world.terrain.present = true;
+    world.terrain.samplesX = 8u;
+    world.terrain.samplesZ = 8u;
+    world.terrain.originX = -4.0F;
+    world.terrain.originZ = -4.0F;
+    world.terrain.step = 1.0F;
+    world.terrain.heights.assign(64u, 0.40F);
+    world.terrain.materials = {0u};
+    world.terrain.materialIndex.assign(64u, 0u);
+
+    BroadPhase broad;
+    Capsule body{Vector3(0.0F, 1.0F + kStand + 1.0F, 0.0F), kBodyHalfHeight, kBodyRadius};
+    FallState state;
+    state.onGround = false;
+    state.fellFrom = body.centre.Y;
+
+    Landing landing = Landing::None;
+    for (int i = 0; i < 200 && landing == Landing::None; ++i)
+    {
+        const FallStep fell = Fall(world, world.cells[0], broad, body, state, kDt);
+        body.centre = fell.position;
+        state = fell.state;
+        landing = fell.landing;
+    }
+    ASSERT_NE(landing, Landing::None);
+    EXPECT_NEAR(body.Bottom(), 1.0F, 0.01F) << "it landed on the lawn under the terrace";
+}

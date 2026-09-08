@@ -7801,6 +7801,16 @@ never escapes and never penetrates.
             every tick a body spends in open floor, and says so.
 - [x] HOUSE-00552 — Implement gravity and landing detection with soft/hard thresholds
       dep: HOUSE-00550 · sys: physics · plat: ALL · pri: MUST
+      defect: (2026-09-08, found by `HOUSE-00614`) **the fall swept the cell's SHAPES and not
+            §11.5's height field, so nothing outdoors stopped it.** The body sank past the ground
+            and the step's `GroundProbe` -- which does read the field -- quietly set `onGround` on
+            the way past, so §47.2's landing was never reported anywhere outdoors: no sound, no
+            camera dip, no hard landing. A body arriving at 12 m/s covers 0.1 m in a step and
+            settled a few centimetres INSIDE the lawn, where the depenetration (shapes again)
+            could not push it out. Fixed by sweeping the terrain too and taking whichever contact
+            is nearer -- the same rule `GroundProbe` already used, so the two now agree about what
+            a body landed on. Measured over `HOUSE-00614`'s 2 000 drops: silent landings fell from
+            118 to 8 and hard landings rose from 239 to 349.
       note: (2026-09-08) `physics::Fall`, over §43.1's three numbers: 9.81 m/s², a 12 m/s terminal
             speed, and *"a fall > 2.4 m plays a heavy landing sound; there is no damage"* --
             §47.2's `land_soft` / `land_hard`. There is no jump in this game and nothing to fall

@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "cnahouse/physics/BroadPhase.hpp"
+#include "cnahouse/physics/Terrain.hpp"
 
 namespace cnahouse::physics
 {
@@ -36,7 +37,28 @@ namespace cnahouse::physics
         result.state.speed = std::min(state.speed + kGravity * dt, kTerminalFallSpeed);
         const float distance = result.state.speed * dt;
 
-        const CellSweepHit hit = SweepCell(world, cell, broad, capsule, Xna::Vector3(0.0F, -distance, 0.0F));
+        const Xna::Vector3 down(0.0F, -distance, 0.0F);
+        const CellSweepHit shapes = SweepCell(world, cell, broad, capsule, down);
+        // §11.5's ground is the other thing a body can land on, and outdoors it is the ONLY one.
+        // Left out of this sweep until `HOUSE-00614` dropped 2 000 bodies and found that every
+        // landing on the lawn was silent: the fall passed through the height field and was ended
+        // by `GroundProbe` instead, which sets `onGround` and reports NO landing -- so §47.2's
+        // sound, §45's camera dip and §43.1's hard landing all went missing outdoors, and a body
+        // arriving at 12 m/s settled a few centimetres INSIDE the ground, where the depenetration
+        // (which reads shapes and not the field) could not push it out.
+        const SweepHit ground = SweepCapsuleTerrain(world.terrain, capsule, down);
+
+        // Whichever is nearer, the same rule `GroundProbe` uses: a body over a terrace has the
+        // slab under it and the lawn under that, and the one it lands on is the slab.
+        SweepHit hit;
+        if (shapes.hit)
+        {
+            hit = static_cast<const SweepHit&>(shapes);
+        }
+        if (ground.hit && (!hit.hit || ground.time < hit.time))
+        {
+            hit = ground;
+        }
         if (!hit.hit)
         {
             result.position = Xna::Vector3(capsule.centre.X, capsule.centre.Y - distance, capsule.centre.Z);
