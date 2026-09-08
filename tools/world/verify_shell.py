@@ -613,6 +613,10 @@ def selftest() -> int:
 
     measured = [row for row in result["headroom"] if row["headroom"] is not None]
     require(measured, "at least one flight has something over it to measure against")
+    require(all(row["headroom"] >= HEADROOM_MIN - 1e-6 for row in measured),
+            f"and every one of the {len(measured)} keeps §70.5's {HEADROOM_MIN} m of head-room, "
+            f"worst {min(row['headroom'] for row in measured):.3f} m "
+            f"({min(measured, key=lambda r: r['headroom'])['flight']})")
 
     # `HOUSE-00478`: winding and black facets.
     winding = result["winding"]
@@ -772,18 +776,15 @@ def selftest() -> int:
             f"the main stair's 17 treads come back in climbing order ({len(tops)})")
 
     known = {
-        # `HOUSE-00480` fixed the two that were the GENERATOR's: a flight is now placed inside the
-        # stairwell it comes up rather than against its footprint's edge, and `STAIR_MAIN_L0_L1`
-        # and `STAIR_MAIN_L1_L2` cleared. These two are the LAYOUT's, and a generator cannot fix
-        # them: the hole is shorter than the flight. `P_STAIR_L2_L3` is 3.00 m of opening for a
-        # flight 15 x 0.265 = 3.98 m long, and `P_L0_STAIR__B1_STAIR` is 3.30 m for one 4.40 m
-        # long, so the last stretch of each passes under the floor above at the height the floor
-        # is. Recorded for `HOUSE-00484`, which is the task that may change the house.
-        "STAIR_ATTIC_L2_L3: head-room 0.183 m at step 14, under L2_STAIR_ATTIC's ceiling",
-        "STAIR_BASEMENT_L0_B1: head-room 1.450 m at step 8, under B1_STAIR's ceiling",
-        # A nested container's own opening is not cut: `CELL_FRIDGE_INTERIOR` is a cell inside
-        # `L0_KITCHEN`, and the generator cuts openings between cells that share a boundary PLANE,
-        # which a nested cell does not.
+        # ALL FOUR head-room failures are gone. `HOUSE-00480` fixed the two that were the
+        # generator's -- a flight is placed inside the stairwell it comes up rather than against
+        # its footprint's edge -- and `HOUSE-00484` fixed the two that were the layout's, by
+        # lengthening the two openings that were shorter than the flights beneath them. The worst
+        # head-room in the house is 2.175 m now, over §70.5's 2.00.
+        #
+        # A nested container's own opening is still not cut: `CELL_FRIDGE_INTERIOR` is a cell
+        # inside `L0_KITCHEN`, and the generator cuts openings between cells that share a boundary
+        # PLANE, which a cell wholly inside another does not.
         "FRIDGE_L0_KITCHEN: not cut in CELL_FRIDGE_INTERIOR.wall",
     }
     unknown = sorted(problem for problem in result["problems"] if problem not in known)

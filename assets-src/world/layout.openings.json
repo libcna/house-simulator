@@ -504,15 +504,18 @@
       "solid": true, "lockable": true
     },
 
-    // ---- D_STAIRHEAD x1 -- the basement stair. Its PORTAL is the 2.30 x 3.30 hole in the L0 floor,
-    // so the leaf is stated: the door stands at the head of the flight and is a normal 0.86 x 2.05,
-    // not the size of the opening it closes. `hinge` is null for the same reason -- a horizontal
-    // portal has no side to hang it on. `HOUSE-00379` places the flight and can then say which.
+    // ---- D_STAIRHEAD x1 -- the basement door, at the BOTTOM landing (`HOUSE-00484`).
+    //
+    // It used to hang in `P_L0_STAIR__B1_STAIR`, which is the 2.30 x 3.30 hole in L0's floor, and
+    // the note here said so: *"`hinge` is null -- a horizontal portal has no side to hang it on"*.
+    // That was the tell. A floor opening over a flight is a stairwell, not a door; the door is in
+    // the wall at the foot of the flight, where it has a side, a hinge and a room to swing into.
+    // Same leaf, same type, same material -- moved, not invented.
     {
-      "id": "DOOR_L0_STAIR__B1_STAIR", "kind": "door", "type": "D_STAIRHEAD",
-      "portal": "P_L0_STAIR__B1_STAIR",
+      "id": "DOOR_B1_STAIR__B1_HALL", "kind": "door", "type": "D_STAIRHEAD",
+      "portal": "P_B1_STAIR__B1_HALL",
       "leaf": { "width": 0.860, "height": 2.050, "thickness": 0.040 },
-      "hinge": null, "swing": "L0_STAIR_MAIN", "maxAngleDeg": 95.0,
+      "hinge": "left", "swing": "B1_STAIR", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.070 },
       "asset": null, "material": "MAT_DOOR_PAINTED",
       "solid": false, "lockable": false

@@ -7,7 +7,7 @@
 # To retire an id, delete its line by hand and say why in the commit message.
 #
 # Format: <kind><TAB><id>, sorted by id. The kind is where the id was found and is informational:
-# moving a row between files is not a rename, so a changed kind is updated in place.
+# moving a row between files is not a rename, so a changed kind is corrected by --emit.
 
 interactables/interactables	APPL_L0_BUTLERS_WINEFRIDGE
 interactables/interactables	APPL_L0_KITCHEN_COFFEE
@@ -157,6 +157,7 @@ openings/openings	DOOR_B1_HOBBY__B1_STOR2
 interactables/interactables	DOOR_B1_LAUNDRY2
 interactables/interactables	DOOR_B1_MECHANICAL
 openings/openings	DOOR_B1_STAIR__B1_ELECTRICAL
+openings/openings	DOOR_B1_STAIR__B1_HALL
 openings/openings	DOOR_B1_STAIR__B1_MECHANICAL
 interactables/interactables	DOOR_B1_STOR1
 interactables/interactables	DOOR_B1_STOR2
@@ -197,7 +198,6 @@ interactables/interactables	DOOR_L0_PANTRY
 interactables/interactables	DOOR_L0_PANTRY_2
 openings/openings	DOOR_L0_PORCH__L0_FOYER
 interactables/interactables	DOOR_L0_STAIR_MAIN
-openings/openings	DOOR_L0_STAIR__B1_STAIR
 interactables/interactables	DOOR_L0_STOR
 openings/openings	DOOR_L0_STOR__L0_BUTLERS
 interactables/interactables	DOOR_L0_SUNROOM

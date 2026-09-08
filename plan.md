@@ -7316,9 +7316,13 @@ the chunk builder produces ≤ 6 chunks per cell.
       finding: (2026-09-08, found by `HOUSE-00479`) §20.2's row for `house_shell_gen.py` estimated
             **~180 000 triangles**, five times what it makes. The estimate was written before the
             generator existed. Corrected in place, with the measurement beside it.
-- [ ] HOUSE-00480 — Fix the inevitable geometry issues found by HOUSE-00477/78/79; iterate the generator, not the output
+- [x] HOUSE-00480 — Fix the inevitable geometry issues found by HOUSE-00477/78/79; iterate the generator, not the output
       dep: HOUSE-00477…HOUSE-00479 · sys: content · plat: TOOL · pri: MUST
-      note: (2026-09-08) **Partly done, and deliberately not ticked.** The one issue that was the
+      note: (2026-09-08, closed) The two layout issues this task could not fix were decided by the
+            owner and fixed under `HOUSE-00484`; the head-room row of §70.5 is met everywhere now,
+            worst 2.175 m. What remains of the list below is the fridge, which is a nested-cell
+            limitation and not a geometry defect: recorded, pinned by `verify_shell`, and left.
+      note: (2026-09-08) The generator half. The one issue that was the
             GENERATOR's is fixed: a flight is placed inside the stairwell it comes up
             (`stair_geometry.well_cross`) rather than against its own footprint's edge, which is a
             wall centre line. `STAIR_MAIN_L0_L1` and `STAIR_MAIN_L1_L2` cleared §70.5's head-room;
@@ -7400,10 +7404,43 @@ the chunk builder produces ≤ 6 chunks per cell.
             and the sky over it. An open landing IS mostly not walls, so the floor is per pose with
             the reason beside it rather than one number that would have to be loose enough for the
             landing and would then pass a bedroom missing a wall.
-- [ ] HOUSE-00484 — Phase-6 review: does it look like the house in `cna-house.md` §12? Correct whichever is wrong.
+- [x] HOUSE-00484 — Phase-6 review: does it look like the house in `cna-house.md` §12? Correct whichever is wrong.
       dep: HOUSE-00483 · sys: — · plat: ALL · pri: MUST
-      note: (2026-09-08) **Reviewed, one thing corrected, and TWO OWNER DECISIONS left open**,
-            which is why the box is not ticked.
+      decided: (2026-09-08, by the owner) **Both stairs: fix the LAYOUT, do not accept the
+            exception and do not steepen a comfortable stair.** Carried out, and the amount of
+            house it cost was **none** -- which is the part worth reading.
+            *The attic.* The approved option was to extend `L3_STAIR_HEAD` into its neighbour by
+            the exact amount required. Measured, the amount required is zero: the treads needing
+            head-room span z -18.010 to -15.360 and `P_STAIR_L2_L3` reached only -17.80, so the
+            shortfall was 0.21 m **in the opening, not in the room**. The partition to
+            `L3_STORE_E` has its inner face at -18.225 (measured off the shell), so the well now
+            reaches -18.15: clear of the last tread by 0.14 m and of the wall by 0.075. No cell
+            moved, no area was taken from the attic, and the stair keeps its 15 x 183.3 mm rise
+            and 265 mm going exactly. (The instruction named `L3_ROOM`; the cell beyond the stair
+            head in the direction the flight runs is `L3_STORE_E`. Moot, since neither was
+            touched, and recorded so the next reader is not looking for a change that is not
+            there.)
+            *The basement.* Two corrections in one portal. `P_L0_STAIR__B1_STAIR` is a 2.30 x 3.30
+            hole in L0's FLOOR and was `kind: "door"` with a 0.86 x 2.05 leaf hung in it -- the
+            openings file said the quiet part out loud, *"`hinge` is null … a horizontal portal has
+            no side to hang it on"*. It is a `stair_well` now, like the three above it, opacity
+            `open` and no sound loss. And its `v` reached -16.40 for a flight running to -18.70,
+            so it now reaches -15.30: the treads needing head-room span -18.425 to -15.400, giving
+            0.10 m of margin inside a cell that runs to -14.30 with nothing in the way.
+            The basement's closable door moved to where a door can exist -- the bottom landing.
+            `P_B1_STAIR__B1_HALL` was a 1.20 x 2.20 cased opening and is a `door` carrying the
+            same 0.86 x 2.05 `D_STAIRHEAD` leaf, hinged left, swinging into `B1_STAIR`.
+      finding: (2026-09-08) retiring `DOOR_L0_STAIR__B1_STAIR` is the first id this project has
+            ever removed. `id_golden.py` refused it exactly as designed -- *"delete its line by
+            hand and say why"* -- so the line was deleted by hand and this is the why: the door did
+            not move, it stopped being a property of a hole in a floor and became a property of a
+            doorway in a wall, and `DOOR_B1_STAIR__B1_HALL` is the same leaf under a name that
+            says where it is. No save file exists yet to be broken by it.
+      finding: (2026-09-08) §16.3's "largest component with all doors closed" went **18 → 19
+            cells**, and the reason is the point of the change: a stairwell does not close, so
+            `B1_STAIR` now stays joined to the house when every door is shut, and shutting the
+            basement's door severs `B1_HALL` instead. `report_graph.py` caught the stale number.
+      note: (2026-09-08) **Reviewed, corrections made, decisions carried out.**
             *Does it look like §12's house?* From the twenty poses of `HOUSE-00483`: yes. A
             three-storey main block on a basement, a projecting garage wing under its own hipped
             roof, a hipped roof with five dormers and a chimney over the main block, a covered

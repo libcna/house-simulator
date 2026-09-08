@@ -25,12 +25,16 @@
     // are what makes the outdoors one connected place: without them the garden, the orchard and
     // the terrace are each an island, and a pet that walked out of the back door could not reach
     // any of them.
+    // `HOUSE-00484`: this is where the basement's door is, because it is where a door can BE. It
+    // was a cased opening and the stair's own floor hole carried the leaf; a 1.20 x 2.20 doorway
+    // in a wall at the bottom landing takes a normal 0.86 x 2.05 leaf, and shutting it does what
+    // shutting the basement door is supposed to do.
     {
       "id": "P_B1_STAIR__B1_HALL", "cellA": "B1_STAIR", "cellB": "B1_HALL",
       "plane": { "axis": "x", "value": 2.2 },
       "rect": { "u": [-17.85, -16.65], "v": [-2.3, -0.1] },
-      "kind": "cased_opening", "aperture": null, "opacity": "open",
-      "soundLoss": { "open": 0.000, "closed": 0.000 }
+      "kind": "door", "aperture": "DOOR_B1_STAIR__B1_HALL", "opacity": "opaque_when_closed",
+      "soundLoss": { "open": 0.109, "closed": 0.842 }
     },
     {
       "id": "P_L0_FOYER__L0_HALL", "cellA": "L0_FOYER", "cellB": "L0_HALL",
@@ -358,10 +362,16 @@
       "kind": "stair_well", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
+    // `HOUSE-00484`: `v` reached -17.80 and the flight reaches -18.28, so the top two treads of
+    // `STAIR_ATTIC_L2_L3` passed under L3's floor with 0.18 m over them where §70.5 wants 2.00.
+    // The treads that need the hole span z -18.010 to -15.360 (measured, `verify_shell.py`), and
+    // the partition to `L3_STORE_E` has its inner face at -18.225, so -18.15 clears the last tread
+    // by 0.14 m and the wall by 0.075. `L3_STAIR_HEAD` did not have to grow: the room was long
+    // enough all along and the OPENING was short.
     {
       "id": "P_STAIR_L2_L3", "cellA": "L2_STAIR_ATTIC", "cellB": "L3_STAIR_HEAD",
       "plane": { "axis": "y", "value": 9.3 },
-      "rect": { "u": [5.2, 8.4], "v": [-17.8, -14.8] },
+      "rect": { "u": [5.2, 8.4], "v": [-18.15, -14.8] },
       "kind": "stair_well", "aperture": null, "opacity": "open",
       "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
@@ -806,12 +816,24 @@
       "kind": "exterior_door", "aperture": "DOOR_L0_GARAGE__EXT_SIDEYARD_E", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.109, "closed": 0.968 }
     },
+    // `HOUSE-00484`, two corrections in one place.
+    //
+    // It was `kind: "door"` with a 0.86 x 2.05 leaf hung in it, and it is a 2.30 x 3.30 hole in a
+    // FLOOR: a multi-metre horizontal opening over a flight of stairs is a stairwell, and the
+    // openings file admitted as much -- *"a horizontal portal has no side to hang it on"*. It is a
+    // `stair_well` now, like the three above it, and the basement's closable door moved to the
+    // bottom landing where a door can exist: `P_B1_STAIR__B1_HALL`.
+    //
+    // And `v` reached only -16.40 for a flight that runs to -18.70, so `STAIR_BASEMENT_L0_B1` had
+    // 1.45 m over its eighth tread. The treads needing the hole span z -18.425 to -15.400
+    // (measured, `verify_shell.py`); -15.30 clears the last of them by 0.10 m, and
+    // `L0_STAIR_MAIN` runs to -14.30 with nothing in the way.
     {
       "id": "P_L0_STAIR__B1_STAIR", "cellA": "B1_STAIR", "cellB": "L0_STAIR_MAIN",
       "plane": { "axis": "y", "value": 0.6 },
-      "rect": { "u": [2.4, 4.7], "v": [-19.7, -16.4] },
-      "kind": "door", "aperture": "DOOR_L0_STAIR__B1_STAIR", "opacity": "opaque_when_closed",
-      "soundLoss": { "open": 0.109, "closed": 0.842 }
+      "rect": { "u": [2.4, 4.7], "v": [-19.7, -15.3] },
+      "kind": "stair_well", "aperture": null, "opacity": "open",
+      "soundLoss": { "open": 0.000, "closed": 0.000 }
     },
     // ----------------------------------------------------------------------------
     // container sub-cells (`HOUSE-00373`): 2 portals

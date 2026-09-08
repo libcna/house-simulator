@@ -1126,7 +1126,7 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 | ID | Name | X | Z | Area | Lights | Win | Doors | Notes |
 |---|---|---|---|---|---|---|---|---|
 | `B1_STAIR` | Basement stair foot | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | — | 3 | Straight flight, under `STAIR_MAIN`; its only door is at the head, on L0 |
-| `B1_HALL` | Basement hallway | −2.20 … +2.20 | −27.10 … −14.30 | 56.3 | 3 | — | 6 | Spine; exposed joists, duct trunk overhead |
+| `B1_HALL` | Basement hallway | −2.20 … +2.20 | −27.10 … −14.30 | 56.3 | 3 | — | 7 | Spine; exposed joists, duct trunk overhead |
 | `B1_MECHANICAL` | Mechanical / HVAC | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | 1 | 1 | Furnace, air handler, water heater, water main, expansion tank |
 | `B1_ELECTRICAL` | Electrical / service | +4.90 … +8.70 | −20.60 … −18.30 | 8.7 | 1 | — | 1 | Panel board, meter tails, structured-wiring cabinet |
 | `B1_UTILITY` | Utility / drainage | +4.90 … +8.70 | −23.00 … −20.60 | 9.1 | 1 | — | 1 | Sump, ejector pit, main drain, softener, STACK-A/D landing |
@@ -1156,7 +1156,7 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 |---|---|---|---|---|---|---|---|---|
 | `L0_FOYER` | Entrance foyer | −2.20 … +2.20 | −18.30 … −14.30 | 17.6 | 2 | 3 | 2 | Console table, mirror, umbrella stand, coat hooks; the front door with two sidelights and a transom over |
 | `L0_HALL` | Central hall | −2.20 … +2.20 | −23.00 … −18.30 | 20.7 | 2 | — | 3 | **Family photo gallery wall** (§59.4) |
-| `L0_STAIR_MAIN` | Main staircase | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 2 | 1 | 1 | Open to the foyer; the window is at the half-landing and the door is the basement flight's |
+| `L0_STAIR_MAIN` | Main staircase | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 2 | 1 | — | Open to the foyer; the window is at the half-landing and the door is the basement flight's |
 | `L0_MUDROOM` | Mudroom | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | 1 | 2 | Bench, cubbies, boots, leashes, dog towel; doors to the garage and the laundry |
 | `L0_LAUNDRY` | Laundry room | +4.90 … +8.70 | −22.00 … −18.30 | 14.1 | 1 | — | 2 | Washer, dryer, folding counter, sink, STACK-D; no exterior wall (`HOUSE-00376`) |
 | `L0_WC1` | Powder room | +2.20 … +4.90 | −22.00 … −20.20 | 4.9 | 1 | — | 1 | WC + basin, STACK-A; no exterior wall (`HOUSE-00376`) |
@@ -1678,7 +1678,7 @@ interesting part.
 | Max interior cell degree | `B1_HALL` = **7** — **measured**; the design said `L0_KITCHEN` = 8 |
 | Graph diameter (through open doors) | **13 hops** (`EXT_SHED` → `L2_BATH5`) — **measured**; the design said 11 (`EXT_ROAD` → `L3_STORE_N`), which is what the graph measured before the garden shed had a door |
 | Diameter with all doors closed | ∞ — **59 components**, which is the whole point; the design said 34 |
-| Largest component with all doors closed | **18 cells** — the exterior ring, which is all cased openings |
+| Largest component with all doors closed | **19 cells** — the exterior ring and what cased openings join to it, and since `HOUSE-00484` also `B1_STAIR`: the basement's floor opening is the stairwell it always was rather than a door, so it no longer closes. The basement's door moved to the bottom landing, where shutting it severs `B1_HALL` instead |
 
 ### 16.4 Cell-membership lookup
 
