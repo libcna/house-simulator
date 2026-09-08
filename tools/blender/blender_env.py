@@ -87,8 +87,19 @@ def environment() -> dict:
     which is precisely the leak `AGENTS.md` rule 3 names. Denying Blender a display needs no
     second process, leaks nothing, and cannot be defeated by a wrapper that fails to reap.
 
-    `CNAHOUSE_BLENDER_KEEP_DISPLAY=1` opts out, for a session that genuinely wants to watch
-    Blender work.
+    **A VIRTUAL display is the third option, and the best one when there is a server to point at.**
+    `CNAHOUSE_BLENDER_DISPLAY=:99` sends Blender to that display instead of taking its display
+    away: it gets a real GL context, nothing appears on the user's screen, and the objection to
+    `xvfb-run` does not apply because the session starts ONE `Xvfb` and every run shares it --
+    nothing is spawned, and so nothing is leaked, per invocation. Start one with:
+
+        Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp &
+
+    The variable is honoured only if something is actually answering on that display, so a stale
+    export cannot silently send a batch of renders into a socket that is not there.
+
+    `CNAHOUSE_BLENDER_KEEP_DISPLAY=1` opts out of all of it and keeps the session's own display,
+    for somebody who genuinely wants to watch Blender work.
     """
     env = dict(os.environ)
     deps = DEFAULT_PYTHON_DEPS
@@ -96,9 +107,30 @@ def environment() -> dict:
         existing = env.get("PYTHONPATH", "")
         env["PYTHONPATH"] = f"{deps}{os.pathsep}{existing}" if existing else str(deps)
     if not env.get("CNAHOUSE_BLENDER_KEEP_DISPLAY"):
-        env.pop("DISPLAY", None)
+        virtual = env.get("CNAHOUSE_BLENDER_DISPLAY", "").strip()
+        if virtual and _display_answers(virtual):
+            env["DISPLAY"] = virtual
+        else:
+            env.pop("DISPLAY", None)
         env.pop("WAYLAND_DISPLAY", None)
     return env
+
+
+def _display_answers(display: str) -> bool:
+    """Is an X server actually listening on @p display?
+
+    Checked rather than trusted: an exported `CNAHOUSE_BLENDER_DISPLAY` that names a server which
+    has since died would send every render at a socket that is not there, and Blender's failure
+    then looks like a GL problem rather than a missing server. The socket is enough to ask -- it
+    needs no `xdpyinfo` on the machine and costs nothing.
+    """
+    name = display.split(".", 1)[0]
+    if not name.startswith(":"):
+        return False
+    number = name[1:]
+    if not number.isdigit():
+        return False
+    return Path(f"/tmp/.X11-unix/X{number}").exists()
 
 
 def relaunch(script: Path, args: list[str], *, tool: str) -> int:
