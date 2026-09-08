@@ -7193,9 +7193,39 @@ the chunk builder produces ≤ 6 chunks per cell.
             looking in both places; an empty hash stays legal, because a fixture world has no
             manifest, and it is the one string in the format that may be, so `--report` says out
             loud when a file cannot be told from a stale one.
-- [ ] HOUSE-00475 — Implement the opaque static pass drawing all cells with `BasicEffect` and a fixed camera; no culling yet
+- [x] HOUSE-00475 — Implement the opaque static pass drawing all cells with `BasicEffect` and a fixed camera; no culling yet
       dep: HOUSE-00474, HOUSE-00159 · sys: rendering · plat: ALL · pri: MUST
       verify: render test `blockout-01` — the house from the road
+      note: (2026-09-08) `rendering::StaticGeometryPass` is installed as `Pass::OpaqueStatic` by
+            `--scene=blockout`, which loads `chunks.bin`, makes every cell resident and draws every
+            chunk in file order with one `BasicEffect`: no culling, lighting off, and a stable
+            colour per material derived from the material's own name by FNV-1a. Not a table,
+            because a table here would be a second copy of `house_shell_gen.py`'s placeholder
+            palette; not lighting, because 60 % of the chunks are `dual` and carry no normal at
+            all. `rendering::Camera` is the small type `HOUSE-00476` will move. **418 chunks over
+            86 cells, 2.13 MB uploaded, drawn at 1600×900.** `tests/render/reference/blockout-01.png`
+            is the committed frame; three claims stand behind it — the pixels, two runs being
+            bit-identical, and what the frame CONTAINS. Suite: 568 green.
+      finding: (2026-09-08, found by `HOUSE-00475`) **every exterior cell was building walls**, at
+            its own `yOverride` height: 20 m round each yard, 65 m round `EXT_WORLD`, which is
+            400 m square. So the first frame this scene ever drew was the inside of that box, one
+            flat colour, with the house lost somewhere in it — a picture that a tolerance-based
+            reference comparison would have accepted forever. `build_collision.py` has always
+            known better (`is_open and neighbour is None`); the shell did not, and nothing had
+            drawn the shell. A cell open to the sky now builds no wall faces at all: the wall a
+            yard abuts belongs to the house on the other side, which draws its own outer skin.
+            Eleven of the 99 shell files now draw nothing, which is what a lawn is. The shell fell
+            from 43 528 to 35 964 faces and the chunks from 488 to 418 over 86 cells.
+      finding: (2026-09-08, found by `HOUSE-00475`) the deployed world binaries were **never
+            reaching the build tree**. `deploy_world.py` and the five generators after it write
+            into the repository's `content/world/`, and `TitleContainer` resolves against the build
+            tree's `content/`; no runtime code had opened one of those files before, so the two
+            roots had never had to meet. A `cnahouse_world_content` target copies what exists.
+      finding: (2026-09-08, found by `HOUSE-00475`) §70.2's 0.10 m near plane cannot be used with a
+            far plane past the 400 m world box: the 4000:1 depth ratio stipples every coplanar
+            surface in the house with z-fighting, which the first frames of this scene showed
+            plainly. The blockout camera uses 0.5 m and 300 m; a player camera that must stand
+            against a wall will need §70.2's near plane and a far plane to match it.
 - [ ] HOUSE-00476 — Implement a free-fly debug camera to inspect the blockout
       dep: HOUSE-00475 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-00477 — Verify the shell against the realism checks: door heights, ceiling heights, stair geometry, headroom

@@ -256,8 +256,9 @@ def read_shell_geometry(path: Path) -> dict:
                 entry["triangles"].append(
                     (base + flat[i], base + flat[i + 1], base + flat[i + 2]))
 
-    if not out:
-        raise LayoutError(f"{path.name}: no renderable geometry (only `_COL` proxies?)")
+    # An EMPTY answer is legal here, unlike for a prop. `HOUSE-00475` stopped the generator giving
+    # an open cell walls, and a yard is then ground and sky and nothing else: `EXT_DRIVEWAY.glb`
+    # has no geometry at all, and a cell that draws nothing is a real cell that draws nothing.
     return out
 
 
@@ -402,7 +403,8 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=()) -> 
     groups: dict[tuple[str, tuple], list[dict]] = {}
     stats = {"props": 0, "dynamic": 0, "split": 0, "wide": 0,
              "cellsOverChunkLimit": [], "materialsPerCell": {},
-             "shellFiles": 0, "shellLightmapped": 0, "shellSurfaces": 0, "shellUnplaced": {}, "shellDynamicReceivers": 0}
+             "shellFiles": 0, "shellLightmapped": 0, "shellSurfaces": 0, "shellUnplaced": {}, "shellDynamicReceivers": 0,
+             "shellEmpty": 0}
 
     for prop in sorted(layout_io.rows(layout, "props"), key=lambda p: p["id"]):
         stats["props"] += 1
@@ -514,7 +516,11 @@ def _shell_members(shell_dirs, cells: dict, stats: dict):
             if cell is None:
                 raise LayoutError(
                     f"shell file {path.name} belongs to cell {cell_id!r}, which does not exist")
-            for name, entry in sorted(read_shell_geometry(path).items()):
+            surfaces = read_shell_geometry(path)
+            if not surfaces:
+                stats["shellEmpty"] += 1
+                continue
+            for name, entry in sorted(surfaces.items()):
                 stats["shellSurfaces"] += 1
                 layout_id = shell_layout(name, entry["extras"], lightmapped)
                 if layout_id == LAYOUT_DUAL and not entry["hasUv1"]:
@@ -735,7 +741,7 @@ def report(built: dict) -> str:
             f"  shell: {stats['shellFiles']} file(s), {stats['shellLightmapped']} from the "
             f"lightmapped copy, {stats['shellSurfaces']} surface class(es); "
             f"{stats['shellDynamicReceivers']} receiver class(es) outside a baked cell drawn "
-            f"dynamically (§22)")
+            f"dynamically (§22); {stats['shellEmpty']} file(s) draw nothing at all")
         if stats.get("shellUnplaced"):
             lines.append(
                 f"  shell: {', '.join(sorted(stats['shellUnplaced']))} name no cell and draw "

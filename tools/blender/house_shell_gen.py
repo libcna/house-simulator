@@ -652,7 +652,9 @@ SURFACE_ORDER = list(SURFACE_COLOURS)
 #: Everything else is architectural DETAIL -- skirtings, cornices, architraves, thresholds, window
 #: frames and sashes, glass, stair nosings, handrails, balusters, rafters, gutters, downspouts --
 #: and is lit by the room's dynamic term instead. §18.3 records the measurement that settled it:
-#: 26 704 of the shell's 43 528 faces are under one texel at 4 texels/metre, and a 55 mm handrail
+#: 26 704 of the shell's 43 528 faces were under one texel at 4 texels/metre when it was taken
+#: (`HOUSE-00475` removed the yard walls; the shell is 33 486 triangles now), and a 55 mm
+#: handrail
 #: face is a fifth of a texel across, so no atlas anyone can budget would light them from a bake.
 LIGHTMAP_RECEIVERS = ("floor", "ceiling", "wall", "exterior")
 
@@ -1018,9 +1020,18 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         # A run is CLAMPED to the room's inset extent on the perpendicular axis: at a corner the
         # two inner faces stop at each other, and a face that ran on to the centre line would
         # continue 75 mm into the wall it meets.
+        # `HOUSE-00475`: an OPEN cell has no walls. A yard is ground and sky, and the wall it
+        # abuts belongs to the house on the other side of it, which draws its own outer face
+        # (`exterior`, below). Building them here gave every exterior cell a full set of faces at
+        # its own `yOverride` height -- 20 m for the yards, 65 m for `EXT_WORLD` -- so the first
+        # frame the blockout ever drew was the inside of a 400 m box with the house somewhere in
+        # it. `build_collision.py` has always known this (`is_open and neighbour is None`); the
+        # shell did not, and nothing had drawn the shell.
+        open_cell = cell.get("kind") == "exterior" or cell.get("visibilityHint") == "open"
         for side, inward in INWARD.items():
             side_holes = holes_in(side, box, cell, list(portals))
-            for lo, hi, wall in side_intervals(side, box, cell, neighbours):
+            for lo, hi, wall in ([] if open_cell
+                                 else side_intervals(side, box, cell, neighbours)):
                 half = float(construction.get(wall, 0.0)) / 2.0
                 plane = {"-X": x0 + half, "+X": x1 - half,
                          "-Z": z0 + half, "+Z": z1 - half}[side]
@@ -2575,6 +2586,41 @@ def selftest(output: Path) -> int:
             "160 000 m² of it until this was asked")
     require(not slab_here(cells["EXT_FRONTYARD_W"], (-0.9, 20.0), True),
             "a lawn's ground is the terrain, not a slab")
+
+    # `HOUSE-00475`: and it gets no WALLS either. Every exterior cell was building a full set of
+    # faces at its own `yOverride` height -- 20 m round each yard, 65 m round `EXT_WORLD`, which
+    # is 400 m square -- so the first frame the blockout drew was the inside of that box. The wall
+    # a yard abuts belongs to the house, which draws its own outer face.
+    for identifier in ("EXT_FRONTYARD_W", "EXT_BACKYARD", "EXT_WORLD", "EXT_ROAD"):
+        yard = cells[identifier]
+        yard_extent = extent_of(yard, levels[yard["level"]])[0]
+        reset_scene()
+        built = build_cell(yard, yard_extent, neighbours=neighbours, construction=construction,
+                           level=levels[yard["level"]], levels=levels,
+                           portals=list(portal_rows.values()), openings=openings_by_portal,
+                           cells_by_id=cells)
+        used = {built.data.materials[polygon.material_index].name
+                for polygon in built.data.polygons} if built.data.polygons else set()
+        require("BLOCKOUT_wall" not in used,
+                f"{identifier} is open to the sky and has no walls ({sorted(used)})")
+        if identifier == "EXT_WORLD":
+            require(not used,
+                    f"and the world cell is nothing at all -- no ground, no lid, no sides "
+                    f"({sorted(used)})")
+
+    # The house on the other side of that boundary still has its outer skin, or removing the
+    # yard's walls would have removed the wall you can see from the yard.
+    outer_cell = cells["L0_LOUNGE"]
+    outer_extent = extent_of(outer_cell, levels[outer_cell["level"]])[0]
+    reset_scene()
+    outer_built = build_cell(outer_cell, outer_extent, neighbours=neighbours,
+                             construction=construction, level=levels[outer_cell["level"]],
+                             levels=levels, portals=list(portal_rows.values()),
+                             openings=openings_by_portal, cells_by_id=cells)
+    outer_used = {outer_built.data.materials[polygon.material_index].name
+                  for polygon in outer_built.data.polygons}
+    require("BLOCKOUT_exterior" in outer_used and "BLOCKOUT_wall" in outer_used,
+            f"while the lounge keeps both its inner wall and its outer skin ({sorted(outer_used)})")
     require(slab_here(porch, porch_extent, True) and not slab_here(porch, porch_extent, False),
             "the porch is a deck, so it has a floor and still no ceiling")
     for deck in ("L1_BALCONY_FRONT", "L2_BALCONY_JULIET", "EXT_TERRACE"):

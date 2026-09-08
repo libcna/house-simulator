@@ -1787,22 +1787,23 @@ and become dynamic instances.
 
 **The shell is chunked the same way, and it is not props.** The paragraph above was written about
 furniture; a cell's own floor, ceiling, walls and trim are drawn too, and `HOUSE-00473` measured
-them. The blockout, with no prop placed yet: **488 chunks over 96 cells — 3 to 7 per cell, mean
-5.08 — 81 750 vertices and 43 472 triangles, 2.9 MB.** 292 of the chunks are `DualTextureEffect`
-(the lightmap receivers of §18.3) and 196 `BasicEffect` (the detail, and the receiver classes
-outdoors, which §22 lights directly). The largest single chunk is 1 792 vertices, 2.7 % of the
-16-bit index cap, so the second criterion has an enormous margin and the first has none:
+them. The blockout, with no prop placed yet: **418 chunks over 86 cells — 3 to 7 per cell — 63 623
+vertices, 2.25 MB.** The largest single chunk is under 2 000 vertices, ~3 % of the 16-bit index
+cap, so the second criterion has an enormous margin and the first has none:
 
-* **Six cells are already at 7** — `L0_GARAGE`, `L0_STAIR_MAIN`, `L1_STAIR_MAIN`, `L3_STORE_E`,
-  `L3_STORE_N`, `L3_STORE_W`. Each carries the four receiver classes (floor, ceiling, wall,
-  exterior), plus glass, plus trim, plus a stair or a structure class. None of those is an
-  artefact of the blockout's one-material-per-class placeholders: a real room's floor, ceiling and
-  walls are genuinely different materials, and glass must be its own chunk because it is blended
-  and drawn after the opaque pass.
-* So **≤ 6 chunks per cell is a target the shell alone does not meet in 6 % of cells, before a
+* **Four cells are at 7** — `L0_GARAGE`, `L3_STORE_E`, `L3_STORE_N`, `L3_STORE_W`. Each carries the
+  four receiver classes (floor, ceiling, wall, exterior), plus glass, plus trim, plus a stair or a
+  structure class. None of those is an artefact of the blockout's one-material-per-class
+  placeholders: a real room's floor, ceiling and walls are genuinely different materials, and glass
+  must be its own chunk because it is blended and drawn after the opaque pass.
+* So **≤ 6 chunks per cell is a target the shell alone does not meet in 5 % of cells, before a
   single prop.** It is recorded here rather than adjusted, because what the number is protecting
   is draw calls per frame and that is §71's budget to settle with a measurement, not this
   section's to weaken by assertion.
+* Ten cells and one non-cell draw **nothing**: a yard is ground and sky. `HOUSE-00475` found every
+  exterior cell building walls at its own `yOverride` height — 20 m round each yard, 65 m round
+  `EXT_WORLD`'s 400 m square — so the first frame the blockout drew was the inside of that box.
+  The wall a yard abuts belongs to the house, which draws its own outer skin.
 
 ### 17.5 Directory layout
 
@@ -1991,6 +1992,11 @@ file and only an offline check can catch it.
    > cells, 5 306 receiver faces over 6 935 m², 29 608 detail faces over 1 877 m² left to the
    > dynamic term, 967 islands in 78 atlases of 128² — **1.28 M texels, under a third of one** of
    > §72's 21. `tools/blender/shell_preview.py` renders the distinction into `docs/blockout/`.
+   >
+   > Re-measured after `HOUSE-00475` stopped the generator giving open cells walls: **4 940
+   > receiver faces over 6 742 m², 27 480 detail faces over 1 755 m², 936 islands, the same 78
+   > atlases and the same 1.28 M texels.** The conclusion is unchanged; the numbers moved because
+   > the 78 baked cells lost 2 494 faces of yard wall that were never part of any room.
 3. `tools/blender/lightmap_bake.py` bakes, per cell, one lightmap per light group plus one
    "daylight" lightmap lit only by a uniform sky dome through that cell's window openings.
    Bakes are diffuse-only, indirect included, Cycles, 256 samples, denoised.
@@ -5781,8 +5787,11 @@ cost what. Exceeding a **hard fail** number fails CI.
 | **Source repository** | ≤ 3.5 GB | `assets-src/` dominates; large binaries are hash-pinned and fetched, not committed, except the small committed baseline |
 
 **Why the lightmap budget is for receivers only** (measured 2026-09-08, decided 2026-09-09,
-`HOUSE-00471`). Over the generated architectural shell: **43 528 faces**, of which **26 704 are
-below one texel** at §18.3's nominal 4 texels/metre. A representative 55 mm handrail face is about
+`HOUSE-00471`). Over the generated architectural shell as it then stood: **43 528 faces**, of which
+**26 704 are below one texel** at §18.3's nominal 4 texels/metre. (`HOUSE-00475` later removed the
+yard walls the generator should never have built; the shell is 33 486 triangles now and the 78
+baked cells lost 2 494 faces. The ratio and the conclusion are unchanged, and the measurement above
+is kept as it was taken.) A representative 55 mm handrail face is about
 **0.2 texel** across at that density. Lighting thin detail from a bake would need roughly
 **20 texels/metre** for a 55 mm board — a 25× increase in *texel area for the surfaces so treated*,
 spent on the surfaces carrying the least lighting information. (25× is the density-area scaling for

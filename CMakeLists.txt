@@ -211,6 +211,28 @@ else()
         "configuration. The application starts without it and logs what it could not load.")
 endif()
 
+# --- the generated world binaries ----------------------------------------------------------------
+#
+# `HOUSE-00475`. `deploy_world.py` and the five generators after it write into the REPOSITORY's
+# `content/world/` -- the deployed layout, `collision.bin`, `nav.bin`, `chunks.bin` and the rest --
+# and `TitleContainer` resolves against the BUILD tree's `content/`. Nothing had read one of those
+# files at runtime before, so nobody had noticed that the two roots never met.
+#
+# Copied rather than generated here: producing `chunks.bin` needs the Blender shell, which is 99
+# `.glb` and minutes of work, and a CMake build is not the place for it.
+# `tools/ci/build_content.py --only world` produces them; this puts what exists where the game
+# looks. Absent files are not an error -- a checkout that has never run the content build still
+# builds and runs, and says what it could not load.
+if(EXISTS "${CMAKE_SOURCE_DIR}/content/world")
+    add_custom_target(cnahouse_world_content ALL
+        COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_BINARY_DIR}/content/world"
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory_if_different
+                "${CMAKE_SOURCE_DIR}/content/world" "${CMAKE_BINARY_DIR}/content/world"
+        COMMENT "Copying the deployed world data into the build tree's content root"
+        VERBATIM)
+    add_dependencies(cna-house cnahouse_world_content)
+endif()
+
 # --- Tier E's effect tree ------------------------------------------------------------------------
 #
 # Gated on `CNAHOUSE_TIER_E` **and** on an `fxc` actually being found, because the two are different

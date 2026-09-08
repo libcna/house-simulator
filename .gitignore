@@ -64,3 +64,7 @@ __pycache__/
 *.pyc
 .cache/
 compile_commands.json
+
+# Generated world binaries (`HOUSE-00475`): `tools/ci/build_content.py --only world`
+# writes them into the deployed content tree, and no compiled content is committed.
+content/world/*.bin

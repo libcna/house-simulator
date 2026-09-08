@@ -54,9 +54,11 @@ add_library(cnahouse_core STATIC
     # rendering
     rendering/RenderTier.cpp
     rendering/Renderer.cpp
+    rendering/Camera.cpp
     rendering/MaterialBinder.cpp
     rendering/Quality.cpp
     rendering/RenderStates.cpp
+    rendering/StaticGeometryPass.cpp
     rendering/StateTracker.cpp
 
     # ui

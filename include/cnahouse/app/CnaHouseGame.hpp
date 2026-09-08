@@ -20,6 +20,7 @@
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
 #include "cnahouse/player/KeyboardMouseSource.hpp"
+#include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/Quality.hpp"
 #include "cnahouse/rendering/RenderTier.hpp"
 #include "cnahouse/rendering/Renderer.hpp"
@@ -27,6 +28,8 @@
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
+#include "cnahouse/world/CellRuntime.hpp"
+#include "cnahouse/world/ChunkData.hpp"
 
 namespace cnahouse::app
 {
@@ -246,6 +249,16 @@ namespace cnahouse::app
         bool crashed_ = false;
         std::string crashMessage_;
 
+        /// @brief `--scene=blockout`: the static shell, drawn and nothing else (`HOUSE-00475`).
+        static constexpr const char* kBlockoutScene = "blockout";
+
+        /// @brief Reads `chunks.bin`, makes every cell resident, installs `Pass::OpaqueStatic`.
+        ///
+        /// Failure is logged and the scene is empty rather than fatal: a blockout that could not
+        /// load should say so and still draw a frame, because the frame is how anyone would see
+        /// that it had not.
+        void LoadBlockout();
+
         class Hud;
         std::unique_ptr<Hud> hud_;
 
@@ -254,6 +267,18 @@ namespace cnahouse::app
         /// pass a prop belongs in, so the scene exercises the frame's real shape rather than a
         /// bypass of it.
         std::unique_ptr<content::SmokeScene> smoke_;
+
+        /// The blockout of `HOUSE-00475`, or empty. `--scene=blockout` loads `chunks.bin`, makes
+        /// every cell resident and installs `Pass::OpaqueStatic`; anything else leaves all three
+        /// alone, because the house is 2.9 MB of geometry and the title screen does not need it.
+        ///
+        /// Declared in this order and not another: `blockoutCells_` holds buffers that name
+        /// `blockoutChunks_`'s data and the device, so it must be destroyed before either. Members
+        /// are destroyed in reverse declaration order, which makes this ordering the guarantee
+        /// rather than a comment about one.
+        std::unique_ptr<world::ChunkLibrary> blockoutChunks_;
+        std::unique_ptr<world::CellRuntime> blockoutCells_;
+        rendering::Camera blockoutCamera_;
 
         std::uint64_t framesDrawn_ = 0;
         std::uint64_t frameLimit_ = 0;

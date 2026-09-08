@@ -18,8 +18,10 @@
 
 #include "cnahouse/debug/Screenshot.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
+#include "cnahouse/rendering/StaticGeometryPass.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/util/Log.hpp"
+#include "cnahouse/world/ChunkReader.hpp"
 
 namespace cnahouse::app
 {
@@ -258,6 +260,14 @@ namespace cnahouse::app
         // resolved against the pre-narrowing tier would offer post-processing that cannot run.
         ResolveQuality();
 
+        if (options_.scene.has_value() && *options_.scene == kBlockoutScene)
+        {
+            LoadBlockout();
+            LoadHudFont();
+            contentLoaded_ = true;
+            return;
+        }
+
         if (options_.scene.has_value() && *options_.scene == content::SmokeScene::kSceneName)
         {
             // No loading screen in the smoke scene. The title screen covers the frame, and a smoke
@@ -295,6 +305,57 @@ namespace cnahouse::app
 
         LoadHudFont();
         contentLoaded_ = true;
+    }
+
+    void CnaHouseGame::LoadBlockout()
+    {
+        auto library = world::ChunkReader::ReadFromTitle("content/world/chunks.bin");
+        if (!library)
+        {
+            Log::Error(LogCat::Content,
+                       "the blockout could not be loaded: {} ({})",
+                       library.Error().Message(),
+                       library.Error().Context());
+            return;
+        }
+        blockoutChunks_ = std::make_unique<world::ChunkLibrary>(std::move(*library));
+        blockoutCells_ = std::make_unique<world::CellRuntime>(getGraphicsDeviceProperty(), *blockoutChunks_);
+
+        std::size_t failed = 0;
+        for (const std::string& cell : blockoutChunks_->cells)
+        {
+            if (!blockoutCells_->Load(cell))
+            {
+                ++failed;
+            }
+        }
+
+        // §12.1's house from the road: the plot's front boundary is z = 0 and the front wall is at
+        // z = -11.6, so an eye on the near verge looking north sees the whole elevation. Slightly
+        // east of the centre line and above head height, so the garage wing reads as a wing rather
+        // than as part of the front wall -- a dead-on elevation is the one view that cannot show
+        // whether the house has any depth.
+        blockoutCamera_.eye = Microsoft::Xna::Framework::Vector3(17.0f, 14.0f, 17.0f);
+        blockoutCamera_.target = Microsoft::Xna::Framework::Vector3(-1.0f, 5.0f, -19.0f);
+        blockoutCamera_.fieldOfViewDegrees = 55.0f;
+        // NOT §70.2's 0.10 m. That near plane is for a player camera that can stand against a
+        // wall, and paired with a far plane past the 400 m world box it gives a depth ratio of
+        // 4000:1 -- which stipples every coplanar surface in the house with z-fighting, measured
+        // by looking at the first frame this scene ever drew. The blockout is looked at from
+        // outside, so it can afford a near plane that leaves the depth buffer some precision.
+        blockoutCamera_.nearPlane = 0.5f;
+        blockoutCamera_.farPlane = 300.0f;
+        renderer_.Install(rendering::Pass::OpaqueStatic,
+                          std::make_unique<rendering::StaticGeometryPass>(
+                              *blockoutChunks_, *blockoutCells_, blockoutCamera_));
+
+        Log::Info(LogCat::Content,
+                  "blockout: {} chunk(s) over {} cell(s), {} resident, {} MB uploaded{}",
+                  blockoutChunks_->chunks.size(),
+                  blockoutChunks_->cells.size(),
+                  blockoutCells_->ResidentChunks(),
+                  static_cast<double>(blockoutCells_->ResidentBytes()) / (1024.0 * 1024.0),
+                  failed == 0 ? "" : " -- SOME CELLS FAILED");
     }
 
     void CnaHouseGame::LoadHudFont()
