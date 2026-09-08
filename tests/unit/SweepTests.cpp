@@ -271,6 +271,39 @@ TEST(SweepTests, AGrazeThatCatchesTheRoundedEdgeIsAHit)
     ExpectNormal(hit, dx / length, 0.0f, 0.10f / length, "the grazing normal");
 }
 
+TEST(SweepTests, AStartInTheCornerRegionIsNotAMiss)
+{
+    // The gap between the rounded box and its axis-aligned bounding box is real space, up to
+    // `radius(√3 − 1)` deep at a corner, and a body standing diagonally off a wall corner is in
+    // it. The slab test finds no entry there -- the centre is already inside every slab, so it
+    // crosses no plane on the way in -- and reading that as "no entry, therefore no hit" walked a
+    // body through the corner. `HOUSE-00551` found it, by asking a body standing on a floor
+    // whether there was a floor under it.
+    //
+    // A 0.25 sphere at (1.20, 1.20, 0) against the unit box: 0.283 from the box's corner edge, so
+    // outside the rounding by 0.033 -- and inside the outer box, whose faces are at 1.25.
+    const float start = 1.20f;
+    const float diagonal = std::sqrt(2.0f) * 0.20f;
+    ASSERT_GT(diagonal, 0.25f) << "the sphere must start CLEAR of the rounded edge";
+    ASSERT_LT(start, 1.0f + 0.25f) << "...and INSIDE the outer box, which is the whole point";
+
+    const SweepHit hit =
+        SweepCapsuleObb(Sphere(start, start, 0.0f, 0.25f), Vector3(-0.4f, -0.4f, 0.0f), UnitBox());
+    ASSERT_TRUE(hit.hit) << "a body diagonally off a corner walked straight through it";
+    // It meets the vertical edge line x = 1, y = 1 when its centre is 0.25 away, so it travels
+    // 0.283 - 0.25 = 0.033 of the 0.566 diagonal it asked for.
+    EXPECT_NEAR(hit.time, (diagonal - 0.25f) / (std::sqrt(2.0f) * 0.4f), 1e-3f);
+    ExpectNormal(hit, 0.70711f, 0.70711f, 0.0f, "the corner-region normal");
+}
+
+TEST(SweepTests, AStartInTheCornerRegionMovingAwayIsStillAMiss)
+{
+    // The same place, going the other way. The fix must not turn "already past it" into a hit.
+    const SweepHit hit =
+        SweepCapsuleObb(Sphere(1.20f, 1.20f, 0.0f, 0.25f), Vector3(0.4f, 0.4f, 0.0f), UnitBox());
+    EXPECT_FALSE(hit.hit);
+}
+
 // ---- yaw ----------------------------------------------------------------------------------------
 
 TEST(SweepTests, AYawedBoxIsMetOnItsOwnFace)

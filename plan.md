@@ -7560,6 +7560,17 @@ never escapes and never penetrates.
             is the approach direction and not the face normal I had assumed. And a 1.4 m/s walk
             covers 11.67 mm in §49.3's 1/120 s step, so it cannot cross the 20 mm gap I gave it.
             Both are recorded in the file where they failed.
+      finding: (2026-09-08, found by `HOUSE-00551`) **a sweep that STARTED in the rounded box's
+            corner region reported a miss.** The slab test looks for the plane the ray crosses on
+            the way in, and a centre already inside every slab crosses none -- `entryAxis` stays
+            -1 and the whole sweep gave up. But the space between the rounded box and its
+            axis-aligned bounding box is real, up to `radius(√3 − 1)` deep at a corner, and it is
+            exactly where a body standing diagonally off a wall corner is: reported as a miss, it
+            walks through the corner. Found by asking a body standing on a floor whether there was
+            a floor under it -- the answer was no, because "exactly touching" lands a hair outside
+            the already-touching test and squarely inside the outer box. The entry point in that
+            case is where the capsule already is, and the edge/corner solve takes it from there.
+            `AStartInTheCornerRegionIsNotAMiss` and its going-the-other-way twin pin both halves.
 - [x] HOUSE-00544 — Implement capsule-vs-triangle sweep (for the stair ramps and terrain)
       dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST      note: (2026-09-08) `SweepCapsuleTriangle`, and 14 analytic cases. Same reduction as the box
             and a harder shape: an upright capsule against a triangle is a point against the

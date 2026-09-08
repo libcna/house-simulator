@@ -136,14 +136,21 @@ namespace cnahouse::physics
                 missed = enter > exit;
             }
 
-            if (!missed && entryAxis >= 0)
+            if (!missed)
             {
-                // Which axes the entry point lies OUTSIDE the inner box on says which feature of
-                // the rounded box it really met: one is a face and exact already, two an edge, and
-                // three a corner.
-                const Xna::Vector3 at(origin.X + direction.X * enter,
-                                      origin.Y + direction.Y * enter,
-                                      origin.Z + direction.Z * enter);
+                // `entryAxis < 0` means the slab test never found an entry: the capsule's centre
+                // is ALREADY inside the outer box, so it crossed no slab plane on the way in.
+                //
+                // That is not a miss and treating it as one was a defect (`HOUSE-00551` found it).
+                // The region between the rounded box and its axis-aligned bounding box is real
+                // space -- it is exactly the corners and edges, up to `radius(√3 − 1)` deep -- and
+                // a body standing diagonally off a wall corner sits in it. Reported as a miss, it
+                // walks through the corner. The entry point there is where the capsule already is.
+                const bool startedInsideOuter = entryAxis < 0;
+                const Xna::Vector3 at = startedInsideOuter ? origin
+                                                           : Xna::Vector3(origin.X + direction.X * enter,
+                                                                          origin.Y + direction.Y * enter,
+                                                                          origin.Z + direction.Z * enter);
                 const float p[3] = {at.X, at.Y, at.Z};
                 const float in[3] = {inner.X, inner.Y, inner.Z};
                 int outside[3] = {0, 0, 0};
@@ -159,7 +166,7 @@ namespace cnahouse::physics
 
                 float time = -1.0f;
                 Xna::Vector3 normal;
-                if (outsideCount <= 1)
+                if (outsideCount <= 1 && !startedInsideOuter)
                 {
                     // A face. The slab entry IS the answer and the normal is the slab's own axis.
                     time = enter;
