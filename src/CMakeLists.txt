@@ -39,6 +39,7 @@ add_library(cnahouse_core STATIC
     physics/BroadPhase.cpp
     physics/CollisionLoader.cpp
     physics/Fall.cpp
+    physics/Ground.cpp
     physics/Move.cpp
     physics/RayCast.cpp
     physics/Sweep.cpp

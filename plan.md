@@ -7682,8 +7682,32 @@ never escapes and never penetrates.
       note: the body these cases use is §43.1's -- a capsule of radius 0.30 m standing 1.80 m
             tall. §70.5's 0.62 m is the CLEARANCE a portal has to give that body, not the body's
             own width, and reading it as the width made every number here 10 mm out.
-- [ ] HOUSE-00548 — Implement `GroundProbe`: downward sweep returning height, normal, surface kind, cell id
+- [x] HOUSE-00548 — Implement `GroundProbe`: downward sweep returning height, normal, surface kind, cell id
       dep: HOUSE-00546 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) §49.3 step 3, in `physics/Ground.hpp`. It is the step that decides whether
+            the body is walking or falling, which footstep to play and which cell it is in, so it
+            answers all four and one more: `steep`. Something underfoot that §43.1 says cannot be
+            stood on is a DIFFERENT answer from nothing underfoot -- the body slides down the bank
+            rather than falling through it -- and collapsing the two loses that.
+      note: **a downward SWEEP and not a height lookup.** A capsule resting on a slope touches it
+            UPHILL of its centre, so its lowest point is not over the ground under its middle: 19 mm
+            on a 20° ramp, 0.36 m on a 60° one (`HOUSE-00553` found this the hard way). Sweeping the
+            body's own shape gets it right without anyone having to remember the formula, and the
+            case that proves it also shows the shortcut putting the body INSIDE the ramp.
+      note: the reach, 0.05 m, sits between two numbers and is chosen by them. Above the largest
+            gap the rest of the fixed step can leave under a body that IS standing -- a slide backs
+            off by a thousandth of its step, a depenetration pushes 0.02 m. Below §43.1's 0.45 m
+            step-down, which is the mechanism for a bigger gap and must not be pre-empted. And
+            under a third of the 0.22 m step-up, so standing beside a kerb is not standing on it.
+      accept: 10 cases. The reach asserted against both of the numbers that bound it; a body on a
+            floor reporting distance, height, normal, surface NAME and kind; over a hole reporting
+            neither ground nor steep; 0.04 m up standing and 0.06 m up falling; a 60° bank
+            reported as steep rather than as thin air; a stair reported as a stair, which is what
+            §60 reads; the lawn as ground with a grass footstep; a terrace 30 mm over that lawn
+            winning, with a DECOY slab listed first so the surface cannot come from shape 0; and a
+            body resting on a 20° ramp found by its own shape. In the real house every cell a body
+            settles into reports ground under it, in that cell, with a unit normal and a surface
+            that is in the table. Ten injected bugs, ten caught.
 - [x] HOUSE-00549 — Implement the fixed-step accumulator at 1/120 s with a 4-step clamp
       dep: HOUSE-00139 · sys: physics · plat: ALL · pri: MUST
       finding: **the accumulator existed and ran at the wrong rate.** `HOUSE-00139` built
