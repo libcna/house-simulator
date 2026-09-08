@@ -1,11 +1,20 @@
 # `collision.bin` — the static collision world
 
 *`HOUSE-00210`. Normative. The writer is `tools/world/build_collision.py`; there is no other. The
-runtime reader is `HOUSE-00541`'s `CollisionLoader` and does not exist yet — when it does, it reads
-exactly what is written here, and the writer's own `read_back` in `build_collision.py` is the round
-trip that keeps the format honest in the meantime. `HOUSE-00225` is the standing lesson: a reader
-and a writer that were each tested against their own hand-written fixtures both passed while
-producing and expecting different bytes.*
+runtime reader is `src/physics/CollisionLoader.cpp` (`HOUSE-00541`). Three checks keep the two
+honest, because `HOUSE-00225` is the standing lesson — a reader and a writer each tested against
+their own hand-written fixtures both passed while producing and expecting different bytes: the
+writer's own `read_back`, `CollisionLoaderTests` over bytes built by hand, and
+`CollisionRoundTripTests` over a fixture `build_collision.py --fixture` writes at build time.*
+
+**The reader checks what this document PROMISES, not only what it can parse.** A bucket entry
+outside its cell's own shape list, a triangle outside its mesh's vertices, a shape index outside
+the world's shapes, a surface index outside the table, a kind this build does not know, a negative
+half-extent, an inverted bounding box, a duplicate cell id: each is a read past the end of an array
+in the sweep or a shape silently behaving as something it is not, and each is one comparison at
+load. A cell grid above 1 048 576 buckets is refused too — a cell's grid is sized from the union of
+its own shapes, so one shape that escaped its cell sizes it, and the writer refuses to produce such
+a file for the same reason.
 
 ---
 

@@ -36,6 +36,7 @@ add_library(cnahouse_core STATIC
     # system below reads it and none of them writes it.
     world/WorldTypes.cpp
     world/WorldData.cpp
+    physics/CollisionLoader.cpp
     world/CellRuntime.cpp
     world/ChunkReader.cpp
     world/WorldLoader.cpp

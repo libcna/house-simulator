@@ -1264,6 +1264,42 @@ def report(world: dict) -> str:
 # ======================================================================================= selftest
 
 
+def fixture_world() -> dict:
+    """A tiny collision world whose every number is stated here and asserted in C++.
+
+    `HOUSE-00541`. `CollisionLoaderTests` builds its bytes by hand, which makes it an excellent
+    test of the reader and no test at all of the reader and the WRITER agreeing: a writer that
+    emitted `halfExtents` before `centre`, or a bucket's entries as GLOBAL indices, would pass
+    every test in this repository and stop the player in the wrong place. `HOUSE-00225` is the
+    standing lesson -- a reader and a writer each tested against their own hand-written fixtures,
+    both passing, producing and expecting different bytes.
+
+    Deliberately asymmetric: a yaw that is not zero, half-extents that differ on all three axes,
+    two surfaces, an OBB and a mesh with DIFFERENT kinds, a 2 x 3 grid so `nx` and `nz` cannot be
+    swapped unnoticed, and buckets holding two shapes, one shape and none.
+    """
+    shapes = Shapes()
+    tile = shapes.surface("tile")
+    wood = shapes.surface("wood")
+    shapes.obbs.append(((1.0, 0.5, 2.0), (0.25, 0.5, 1.5), 0.7853982, tile, KIND_FLOOR))
+    shapes.obbs.append(((-1.0, 1.25, 0.5), (0.1, 1.25, 2.0), 0.0, wood, KIND_WALL))
+    shapes.mesh([(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 0.75, 0.0), (0.0, 0.75, 2.5)],
+                [(0, 1, 2), (0, 2, 3)], "wood", KIND_STAIR)
+
+    cell = {
+        "id": "L0_FIXTURE",
+        "bounds": (-1.1, 0.0, -1.5, 1.25, 2.5, 2.5),
+        "shapes": [0, 1, 2],
+        "nx": 2, "nz": 3,
+        "origin": (-1.1, -1.5),
+        "buckets": [[0, 1], [], [], [2], [], []],
+    }
+    return {"shapes": shapes, "cells": [cell],
+            "worldHash": "0123456789abcdef0123456789abcdef",
+            "stats": {"obbs": len(shapes.obbs), "meshes": len(shapes.meshes),
+                      "shapes": len(shapes.obbs) + len(shapes.meshes)}}
+
+
 def _fixture_world(directory: Path) -> None:
     """A layout small enough to reason about and large enough to exercise every rule.
 
@@ -1993,12 +2029,21 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path,
                         default=REPO / "assets-src" / "assets.manifest.json")
     parser.add_argument("--out", type=Path, default=REPO / "content" / "world" / "collision.bin")
+    parser.add_argument("--fixture", type=Path, default=None,
+                        help="write the C++ round-trip fixture (HOUSE-00541) and exit")
     parser.add_argument("--report", action="store_true", help="print the shape census and stop")
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
 
     if args.selftest:
         return selftest()
+
+    if args.fixture is not None:
+        args.fixture.parent.mkdir(parents=True, exist_ok=True)
+        data = serialise(fixture_world())
+        args.fixture.write_bytes(data)
+        print(f"build_collision: wrote the round-trip fixture {args.fixture} ({len(data)} bytes)")
+        return 0
 
     try:
         world = build(args.world, args.manifest)

@@ -71,6 +71,24 @@ else()
                     "and ChunkRoundTripTests will not build.")
 endif()
 
+# `HOUSE-00541`. The same idiom again for `collision.bin`, and `HOUSE-00225` is why there are three
+# of them: a reader and a writer each tested against their own hand-written fixtures both passed
+# while producing and expecting different bytes.
+set(CNAHOUSE_COLLISION_FIXTURE "${CMAKE_BINARY_DIR}/test-fixtures/collision/fixture.bin")
+if(CNAHOUSE_PYTHON3)
+    add_custom_command(
+        OUTPUT "${CNAHOUSE_COLLISION_FIXTURE}"
+        COMMAND "${CNAHOUSE_PYTHON3}" "${CMAKE_SOURCE_DIR}/tools/world/build_collision.py"
+                --fixture "${CNAHOUSE_COLLISION_FIXTURE}"
+        DEPENDS "${CMAKE_SOURCE_DIR}/tools/world/build_collision.py"
+        COMMENT "Generating the collision.bin round-trip fixture with build_collision.py"
+        VERBATIM)
+    add_custom_target(cnahouse_collision_fixture DEPENDS "${CNAHOUSE_COLLISION_FIXTURE}")
+else()
+    message(WARNING "cna-house: no python3, so the collision.bin round-trip fixture is not "
+                    "generated and CollisionRoundTripTests will not build.")
+endif()
+
 function(cnahouse_test_target kind)
     set(_target "cnahouse_${kind}_tests")
     file(GLOB_RECURSE _sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${kind}/*.cpp")
@@ -95,12 +113,16 @@ function(cnahouse_test_target kind)
         CNAHOUSE_TEST_EFFECT_ROOT="${CMAKE_BINARY_DIR}/content-fx"
         CNAHOUSE_TEST_OUTPUT_DIR="${CMAKE_BINARY_DIR}/test-output"
         CNAHOUSE_TEST_ANIM_FIXTURE="${CNAHOUSE_ANIM_FIXTURE}"
-        CNAHOUSE_TEST_CHUNK_FIXTURE="${CNAHOUSE_CHUNK_FIXTURE}")
+        CNAHOUSE_TEST_CHUNK_FIXTURE="${CNAHOUSE_CHUNK_FIXTURE}"
+        CNAHOUSE_TEST_COLLISION_FIXTURE="${CNAHOUSE_COLLISION_FIXTURE}")
     if(TARGET cnahouse_anim_fixture)
         add_dependencies(${_target} cnahouse_anim_fixture)
     endif()
     if(TARGET cnahouse_chunk_fixture)
         add_dependencies(${_target} cnahouse_chunk_fixture)
+    endif()
+    if(TARGET cnahouse_collision_fixture)
+        add_dependencies(${_target} cnahouse_collision_fixture)
     endif()
     set_target_properties(${_target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
     # The working directory is the REPOSITORY ROOT, not the build directory, so a test's fixture

@@ -7487,8 +7487,27 @@ falling through, sticking, or passing through anything.
 **Exit.** The collision guarantee suite (HOUSE-00612…00618) is green; a 20-minute random-walk bot
 never escapes and never penetrates.
 
-- [ ] HOUSE-00541 — Implement the collision data format and `CollisionLoader` for `collision.bin`
+- [x] HOUSE-00541 — Implement the collision data format and `CollisionLoader` for `collision.bin`
       dep: HOUSE-00472, HOUSE-00210 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) `physics::CollisionLoader` and `physics::CollisionData`, the first code in
+            `src/physics/`. `TitleContainer` and `System::IO::BinaryReader` only, so the static
+            collision world parses with no device at all and its 18 rejection claims are unit
+            tests. `build_collision.py --fixture` writes the round-trip fixture at build time and
+            `CollisionRoundTripTests` asserts the numbers the tool states — the third instance of
+            `HOUSE-00223`'s idiom, and `HOUSE-00225` is why there are three.
+            **The whole house reads back: 1 064 shapes over 96 cells, 718 KB**, and every bucket
+            entry of every cell is a valid local index into that cell's own list.
+      accept: the loader refuses a wrong magic, an unknown version, a reserved flag, a zero grid
+            cell, a surface/shape/triangle/bucket index outside what it addresses, an unknown
+            kind, a negative half-extent, an inverted box, an empty mesh, a duplicate cell id, an
+            empty or escaped-shape grid, and every truncation — each naming the file; an empty
+            `worldHash` is the one name allowed and a surface name is not
+      finding: (2026-09-08, found by `HOUSE-00541`) the format's own promises are the ones worth
+            checking, and they are not the ones a parser checks by accident. **Bucket entries are
+            LOCAL indices** (§3.4) and a global one that happens to be in range would be silently
+            wrong — a sweep testing a shape belonging to another cell. Same for a triangle index
+            outside its own mesh: in range for the file, out of range for the array the sweep
+            walks. Each is one comparison at load and a crash or a phantom wall without it.
 - [ ] HOUSE-00542 — Implement the per-cell loose 1 m collision grid
       dep: HOUSE-00541 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00543 — Implement `Capsule` and the capsule-vs-OBB sweep
