@@ -7081,8 +7081,25 @@ never escapes and never penetrates.
       dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00548 — Implement `GroundProbe`: downward sweep returning height, normal, surface kind, cell id
       dep: HOUSE-00546 · sys: physics · plat: ALL · pri: MUST
-- [ ] HOUSE-00549 — Implement the fixed-step accumulator at 1/120 s with a 4-step clamp
+- [x] HOUSE-00549 — Implement the fixed-step accumulator at 1/120 s with a 4-step clamp
       dep: HOUSE-00139 · sys: physics · plat: ALL · pri: MUST
+      finding: **the accumulator existed and ran at the wrong rate.** `HOUSE-00139` built
+            `FrameTimer` with the clamp, the discarded residue and the dropped-step counter — all
+            of it right — and `kFixedStepSeconds = 1/60`. §49.3 says "fixed step dt = 1/120 s,
+            accumulated from GameTime, max 4 steps per frame" and §7's pipeline says the physics
+            stage runs "at 1/120 s". Corrected to 1/120.
+      note: the rate is not a taste. §49.3's sweep does three collide-and-slide iterations a step,
+            and a player at 6 m/s covers 100 mm in a 60 Hz step against a 0.62 m capsule — enough
+            to catch a doorway jamb on a diagonal. At 120 Hz it is 50 mm.
+      note: four steps of 1/120 is exactly one 30 FPS frame, so below 30 FPS the simulation runs
+            **slow rather than long** — the same trade `HOUSE-00139` recorded, now with a number
+            against it. A steady 60 FPS is two steps a frame, 240 FPS is one every other frame, and
+            both are claimed; so is the constant itself, against §49.3, which is the claim that
+            would have caught the original.
+      note: the accumulator lives in `app::FrameTimer` rather than in `physics`, because it is the
+            frame's property and every fixed-step system reads the same one — `ISystem`'s contract
+            already says the physics stage runs `frame.fixedSteps` of them.
+      verify: unit FrameTimingTests.* — 517/517 with the change.
 - [ ] HOUSE-00550 — Implement collide-and-slide (3 iterations) with the slope limit
       dep: HOUSE-00547, HOUSE-00549 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00551 — Implement step-up (≤ 0.22 m) and step-down (≤ 0.45 m) assist

@@ -43,9 +43,16 @@ namespace cnahouse::app
     public:
         /// @brief The longest delta that will ever be integrated. 100 ms = 10 fps.
         static constexpr float kMaxDeltaSeconds = 0.100f;
-        /// @brief The fixed step: 60 Hz, the rate the collision and animation systems are tuned for.
-        static constexpr float kFixedStepSeconds = 1.0f / 60.0f;
-        /// @brief The most fixed steps one frame may run. 4 steps = 66 ms of simulation.
+        /// @brief The fixed step: **120 Hz**, which is what `cna-house.md` §49.3 and §7's pipeline
+        /// both name — "fixed step dt = 1/120 s, accumulated from GameTime, max 4 steps per frame".
+        ///
+        /// `HOUSE-00139` implemented 60 and `HOUSE-00549` corrected it. The rate is not a taste:
+        /// §49.3's sweep does three collide-and-slide iterations per step, and a player at 6 m/s
+        /// covers 100 mm in a 60 Hz step against a 0.62 m capsule — enough to tunnel a doorway
+        /// jamb on a diagonal. At 120 Hz it is 50 mm.
+        static constexpr float kFixedStepSeconds = 1.0f / 120.0f;
+        /// @brief The most fixed steps one frame may run. §49.3's own number: 4 steps = 33 ms of
+        /// simulation, so a frame slower than 30 FPS runs the simulation slow rather than long.
         static constexpr int kMaxFixedSteps = 4;
 
         /// @brief Produces the context for a frame that took @p realDeltaSeconds of wall clock.

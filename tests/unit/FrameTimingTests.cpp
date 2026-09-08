@@ -11,19 +11,46 @@ namespace
     using cnahouse::app::FrameContext;
     using cnahouse::app::FrameTimer;
 
-    TEST(FrameTimingTests, ASteadySixtyHertzRunsOneFixedStepPerFrame)
+    TEST(FrameTimingTests, ASteadySixtyHertzRunsTwoFixedStepsPerFrame)
     {
         FrameTimer timer;
-        // The accumulator drifts by a fraction of a step each frame at exactly 1/60, so an occasional
-        // 0- or 2-step frame is correct behaviour; what must hold is that the AVERAGE is one.
+        // The step is 1/120 (§49.3), so a 60 FPS frame is exactly two of them. The accumulator
+        // drifts by a fraction of a step each frame, so an occasional 1- or 3-step frame is correct
+        // behaviour; what must hold is that the AVERAGE is two.
         int steps = 0;
         constexpr int kFrames = 600;
         for (int i = 0; i < kFrames; ++i)
         {
             steps += timer.Advance(1.0f / 60.0f).fixedSteps;
         }
-        EXPECT_NEAR(static_cast<double>(steps) / kFrames, 1.0, 0.02);
+        EXPECT_NEAR(static_cast<double>(steps) / kFrames, 2.0, 0.02);
         EXPECT_EQ(timer.DroppedFixedSteps(), 0u) << "a steady frame rate must drop nothing";
+    }
+
+    TEST(FrameTimingTests, TheFixedStepIsTheOneTheArchitectureNames)
+    {
+        // §49.3: "fixed step dt = 1/120 s, accumulated from GameTime, max 4 steps per frame", and
+        // §7's pipeline says the physics stage runs "at 1/120 s". `HOUSE-00139` shipped 1/60 and
+        // `HOUSE-00549` corrected it; this is the claim that would have caught it.
+        EXPECT_FLOAT_EQ(FrameTimer::kFixedStepSeconds, 1.0f / 120.0f);
+        EXPECT_EQ(FrameTimer::kMaxFixedSteps, 4);
+        EXPECT_NEAR(FrameTimer::kFixedStepSeconds * FrameTimer::kMaxFixedSteps, 1.0f / 30.0f, 1e-6f)
+            << "four steps is one 30 FPS frame: below that the simulation runs slow, by design";
+    }
+
+    TEST(FrameTimingTests, ATwoHundredHertzFrameStillGetsAStepEventually)
+    {
+        // Faster than the fixed step: most frames run none, and the accumulator must still deliver
+        // one every other frame rather than starving or drifting away.
+        FrameTimer timer;
+        int steps = 0;
+        constexpr int kFrames = 400;
+        for (int i = 0; i < kFrames; ++i)
+        {
+            steps += timer.Advance(1.0f / 240.0f).fixedSteps;
+        }
+        EXPECT_NEAR(static_cast<double>(steps) / kFrames, 0.5, 0.02);
+        EXPECT_EQ(timer.DroppedFixedSteps(), 0u);
     }
 
     TEST(FrameTimingTests, AHitchClampsToFourSubstepsAndDoesNotSpiral)
@@ -34,7 +61,7 @@ namespace
             (void)timer.Advance(1.0f / 60.0f);
         }
 
-        // The hitch. 250 ms of real time would be 15 fixed steps if the accumulator were honoured.
+        // The hitch. 250 ms of real time would be 30 fixed steps if the accumulator were honoured.
         const FrameContext hitch = timer.Advance(0.250f);
         EXPECT_EQ(hitch.fixedSteps, FrameTimer::kMaxFixedSteps);
         EXPECT_FLOAT_EQ(hitch.realDeltaSeconds, 0.250f) << "the real delta is still reported";
@@ -44,11 +71,17 @@ namespace
         // And then it recovers immediately. This is the half that matters: a timer that carried the
         // residue would ask for more steps on the NEXT frame, which would take longer, which would ask
         // for more still -- the spiral of death.
+        int recovered = 0;
         for (int i = 0; i < 30; ++i)
         {
             const FrameContext after = timer.Advance(1.0f / 60.0f);
-            ASSERT_LE(after.fixedSteps, 2) << "frame " << i << " after the hitch is still catching up";
+            // A 60 FPS frame legitimately asks for two steps at 120 Hz, and drift makes an
+            // occasional third. Three is recovery; four would be the timer still catching up.
+            ASSERT_LE(after.fixedSteps, 3) << "frame " << i << " after the hitch is still catching up";
+            recovered += after.fixedSteps;
         }
+        EXPECT_NEAR(recovered / 30.0, 2.0, 0.1)
+            << "and it is back to the two steps a 60 FPS frame needs, not working off a backlog";
     }
 
     TEST(FrameTimingTests, RepeatedHitchesStillDoNotSpiral)
