@@ -150,6 +150,11 @@ run_gate "window-schedule" python3 tools/world/window_schedule.py --check
 # longer exists -- which is worse than no plan, because somebody will act on it.
 run_gate "floor-plans" python3 tools/world/floor_plans.py --check
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
+# `HOUSE-00477`. §70.5 over the GENERATED SHELL, not over the layout: `validate_world.py` rule 10
+# checks the numbers an author typed and this checks the geometry the generator made of them. It
+# pins the exact set of problems the house has, so a new one fails the day it appears. Skipped,
+# loudly, on a checkout that has not run `house_shell_gen.py` -- the shell is not committed.
+run_gate "shell-realism" python3 tools/world/verify_shell.py --selftest
 # `HOUSE-00399`. An id is the only durable name anything has, and a save file is a list of them
 # (§68). Renaming a room leaves the layout internally consistent and every save broken, so none of
 # §15.7's eleven rules can see it. This gate can: the golden list is append-only, and an id that

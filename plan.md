@@ -7245,8 +7245,34 @@ the chunk builder produces ≤ 6 chunks per cell.
             of one sine is the whole of it: every other angle in the class stays self-consistent
             either way round, and a camera that turned the wrong way would have been discovered by
             someone flying it and doubting themselves. The claim names the section.
-- [ ] HOUSE-00477 — Verify the shell against the realism checks: door heights, ceiling heights, stair geometry, headroom
+- [x] HOUSE-00477 — Verify the shell against the realism checks: door heights, ceiling heights, stair geometry, headroom
       dep: HOUSE-00475, HOUSE-00360 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-08) `tools/world/verify_shell.py`, a new gate. `validate_world.py` rule 10
+            checks the numbers an author typed; this checks the geometry the generator made of
+            them, measured from the triangles: clear height per cell from the slabs, rise and going
+            from the treads' own walking surfaces, head-room from what is actually over each tread,
+            and whether every authored opening is a hole. **88 cells with geometry, 56 habitable
+            cells measured (2.450–3.050 m, all inside §70.5), 8 flights and 74 treads, worst rise
+            spread 0.01 mm, 129 of 130 openings cut.** The selftest exercises every rule on a
+            constructed row as well as on the house, because a threshold the house passes is a
+            threshold that has never been asked a question -- seven of ten injected bugs walked
+            through the first version for exactly that reason. 15 injections, 14 caught; the
+            fifteenth is an equivalence the selftest now asserts outright.
+      accept: every rule reports a row outside it and stays silent on one inside it; the exterior
+            2R+G exemption is one-sided; a rafter-bounded or non-habitable cell is skipped; the
+            set of problems the shell has is pinned exactly, so a new one AND a fixed one are both
+            noticed
+      finding: (2026-09-08, found by `HOUSE-00477`, for `HOUSE-00480`) **every flight is placed
+            against its footprint's edge, which is the wall centre line**, so 0.20 m of it lies
+            inside the wall and outside the stairwell the layout cuts: the well is authored
+            X 2.40–4.70 and the footprint is 2.20–4.90. The head-room over the top tread of that
+            0.20 m strip is one riser — 0.179 m on `STAIR_MAIN_L0_L1`, and the same on the other
+            three interior flights. Older than `HOUSE-00472`: `house_shell_gen.py` placed the
+            lanes the same way before the placement moved into `stair_geometry`. The fix is for a
+            flight to sit inside the INNER extent, which is what the well already is.
+      finding: (2026-09-08, found by `HOUSE-00477`, for `HOUSE-00480`) `FRIDGE_L0_KITCHEN` is not
+            cut: `CELL_FRIDGE_INTERIOR` is a cell NESTED in `L0_KITCHEN`, and the generator cuts
+            openings between cells that share a boundary plane, which a nested cell does not.
 - [ ] HOUSE-00478 — Verify winding and normals across the whole shell (no black facets, no inside-out rooms)
       dep: HOUSE-00475 · sys: rendering · plat: LNX · pri: MUST
       verify: a render test that draws the shell with a normal-visualisation material
