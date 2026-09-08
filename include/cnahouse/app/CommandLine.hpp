@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <optional>
 #include <string>
@@ -58,6 +59,12 @@ namespace cnahouse::app
         bool rendererInfo = false;
         bool help = false;
         std::optional<std::string> scene;
+        /// @brief `--camera=ex,ey,ez,tx,ty,tz`: where a fixed-camera scene looks from and at.
+        ///
+        /// Six metres in world space, which is what §69's screenshot harness drives a pose list
+        /// of. Here rather than in a scene's own code so that a bug report can carry the view it
+        /// was taken from, and so that `HOUSE-00483`'s twenty poses need no twenty scenes.
+        std::optional<std::array<float, 6>> camera;
         std::optional<std::uint64_t> seed;
         /// @brief Time of day to start at, in hours since midnight.
         std::optional<float> timeOfDay;

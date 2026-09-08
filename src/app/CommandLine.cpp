@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: MIT
+#include <array>
+
 #include "cnahouse/app/CommandLine.hpp"
 
 #include <charconv>
@@ -145,6 +147,7 @@ namespace cnahouse::app
                "                              built without it has no compiled effects to load.\n"
                "  --headless                  Run with no window (requires a HEADLESS build)\n"
                "  --scene=<name>              Start in a named test scene instead of the house\n"
+               "  --camera=<ex,ey,ez,tx,ty,tz>  Where a fixed-camera scene looks from and at\n"
                "  --screenshot-frame=<n>      Capture the nth drawn frame (default 1)\n"
                "  --seed=<n>                  Session seed; the same seed reproduces a session exactly\n"
                "  --time=<hours>              Time of day to start at, 0..24\n"
@@ -230,6 +233,58 @@ namespace cnahouse::app
                     return value.Error();
                 }
                 options.scene = std::string(*value);
+            }
+            else if (argument.name == "--camera")
+            {
+                auto value = requireValue("--camera");
+                if (!value)
+                {
+                    return value.Error();
+                }
+                std::array<float, 6> pose{};
+                std::size_t index = 0;
+                std::size_t start = 0;
+                const std::string text(*value);
+                while (index < pose.size())
+                {
+                    const std::size_t comma = text.find(',', start);
+                    const std::string field =
+                        text.substr(start, comma == std::string::npos ? comma : comma - start);
+                    try
+                    {
+                        std::size_t used = 0;
+                        pose[index] = std::stof(field, &used);
+                        if (used != field.size() || field.empty())
+                        {
+                            throw std::invalid_argument("trailing");
+                        }
+                    }
+                    catch (const std::exception&)
+                    {
+                        // Named and refused rather than defaulted: a camera silently at the origin
+                        // is a screenshot of the inside of a floor, and it looks like a bug in the
+                        // renderer.
+                        return Err(
+                            ErrorCode::InvalidArgument,
+                            std::format("--camera field {} is '{}', which is not a number", index + 1, field),
+                            "--camera");
+                    }
+                    ++index;
+                    if (comma == std::string::npos)
+                    {
+                        break;
+                    }
+                    start = comma + 1;
+                }
+                if (index != pose.size())
+                {
+                    return Err(ErrorCode::InvalidArgument,
+                               std::format("--camera needs six comma-separated metres "
+                                           "(eye x,y,z then target x,y,z); got {}",
+                                           index),
+                               "--camera");
+                }
+                options.camera = pose;
             }
             else if (argument.name == "--seed")
             {

@@ -338,6 +338,14 @@ namespace cnahouse::app
         // whether the house has any depth.
         blockoutCamera_.eye = Microsoft::Xna::Framework::Vector3(17.0f, 14.0f, 17.0f);
         blockoutCamera_.target = Microsoft::Xna::Framework::Vector3(-1.0f, 5.0f, -19.0f);
+        if (options_.camera.has_value())
+        {
+            // `--camera` wins, which is what `HOUSE-00483`'s twenty poses drive and what a bug
+            // report carries so that a view can be looked at again.
+            const auto& pose = *options_.camera;
+            blockoutCamera_.eye = Microsoft::Xna::Framework::Vector3(pose[0], pose[1], pose[2]);
+            blockoutCamera_.target = Microsoft::Xna::Framework::Vector3(pose[3], pose[4], pose[5]);
+        }
         blockoutCamera_.fieldOfViewDegrees = 55.0f;
         // NOT §70.2's 0.10 m. That near plane is for a player camera that can stand against a
         // wall, and paired with a far plane past the 400 m world box it gives a depth ratio of

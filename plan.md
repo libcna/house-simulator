@@ -7379,8 +7379,27 @@ the chunk builder produces ≤ 6 chunks per cell.
             hash; each file carries a full SHA-256; `--check-manifest` names what changed —
             the generator, the layout, or which file — rather than saying the tree differs; a
             checkout with no shell is told, not passed
-- [ ] HOUSE-00483 — Render test suite for the blockout: 8 exterior and 12 interior poses
+- [x] HOUSE-00483 — Render test suite for the blockout: 8 exterior and 12 interior poses
       dep: HOUSE-00475 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-08) `tests/render/BlockoutPoseRenderTests.cpp`, twenty poses through a new
+            `--camera=ex,ey,ez,tx,ty,tz` — §69's screenshot-harness pose list, driven from the
+            command line so that a bug report can carry the view it was taken from and so twenty
+            poses need no twenty scenes. **640×360 on purpose**: twenty references at 1600×900
+            would be 12 MB of PNG, and what these catch is a room that changed shape, not a pixel
+            that moved. All twenty references are 884 KB together. The eight exterior poses ring
+            the plot; the twelve interior ones stand at eye height in the middle of a room on every
+            level and look down its longer axis, with the numbers derived from the layout's own
+            boxes. `DISABLED_RegenerateReferences` rewrites all twenty in one run, documented in
+            the file, because a suite this size is regenerated every time the shell moves.
+      accept: each pose is compared with its reference under a software rasteriser and its coverage
+            asserted on any rasteriser; an interior pose fills its frame and an exterior one does
+            not fill it and does not vanish; the suite is 8 + 12 with distinct names and no pose
+            looks at its own eye
+      finding: (2026-09-08, found by `HOUSE-00483`) `l2-landing` covers **75 %** of its frame, not
+            the 90 % every other interior pose does, and the missing quarter is the main stairwell
+            and the sky over it. An open landing IS mostly not walls, so the floor is per pose with
+            the reason beside it rather than one number that would have to be loose enough for the
+            landing and would then pass a bedroom missing a wall.
 - [ ] HOUSE-00484 — Phase-6 review: does it look like the house in `cna-house.md` §12? Correct whichever is wrong.
       dep: HOUSE-00483 · sys: — · plat: ALL · pri: MUST
 
