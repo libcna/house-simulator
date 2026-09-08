@@ -8741,8 +8741,46 @@ it must be tuned, not just implemented.
             two-frame average over three frames of motion, the history dropped across a capture
             change, the pause that clears it, and §68's `Alt` level -- plus `SettingsTests`' band.
             Six injected bugs, six caught, two of them only after the redundant reset was removed.
-- [ ] HOUSE-00626 — Implement the FOV setting and its aspect handling
+- [x] HOUSE-00626 — Implement the FOV setting and its aspect handling
       dep: HOUSE-00621 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-09) the SETTING half was one line of plumbing -- `Settings::fieldOfView` was
+            already parsed, written and clamped (`HOUSE-00131`) and `HOUSE-00621`'s camera already
+            took an angle. What this task decides is the other half: what a window that is not
+            16:9 does to it, which §44 does not say and a projection cannot avoid answering.
+      finding: **the settings file accepted 50° and 110° and §44's band is 55-95.** The same shape
+            of hole as `HOUSE-00625`'s sensitivity, with a twist that made it worse: the CAMERA
+            clamps too, so a file asking for 110° was accepted here, written back as 110°, and
+            then quietly rendered at 95° -- the player was overruled in the one place they could
+            not see it. `Settings::ClampToSupportedRanges` now uses `player::kMinFovDegrees` and
+            `kMaxFovDegrees` themselves rather than a copy of the numbers, and reports.
+      note: **the setting is the VERTICAL angle on every window 4:3 or wider.** That is ordinary
+            "Hor+" and it is the right default: the vertical angle is what sets the apparent size
+            of everything on screen, so holding it makes a doorway the same doorway on a 4:3
+            monitor and on a 21:9 one, and the wider display simply sees more of the room. §44's
+            two numbers are one lens read twice, and 16:9 is only where they were written down.
+      note: below 4:3 the rule inverts and the lens OPENS -- the vertical grows so the horizontal
+            never falls under what 4:3 gives -- because holding the vertical there costs the
+            horizontal field faster than the shape is worth: a portrait window at 70° vertical
+            sees **43°** of the room, which is a letterbox on its side and no way to walk down one
+            of §12's corridors. The floor is deliberately the narrowest shape a DISPLAY comes in
+            rather than the design aspect, so between 4:3 and 16:9 a player sees less of the room
+            than §44's screenshot and nothing is distorted to hide it. Capped at 120°, because the
+            opening rule has no natural limit: as the window narrows it asks for 180°, where the
+            projection matrix is degenerate. §44 now records all three sentences.
+      finding: **a viewport of -1600 by -900 divides out to a perfectly respectable 16:9.**
+            `SetAspect` refuses a zero, a negative and a NaN, and a float division hands it none
+            of those from a window that reports negative pixels -- so `SetViewport(int, int)`
+            tests the two integers rather than the quotient. The first injected bug of the eight
+            was MISSED for exactly this reason: the test started at 16:9, so the wrong answer and
+            the right one were the same number.
+      verified: 6 new `FirstPersonCameraTests` (14 in the suite) -- the setting held across 4:3,
+            16:10, 16:9 and 21:9 with §44's 102.4° and 86.1° at the ends, the lens opening on a
+            square and a portrait window with the horizontal held and the change-over continuous
+            across 4:3, the 120° cap and its still-finite matrix, the PROJECTION built from the
+            effective angle rather than the setting, the viewport in pixels, and the two helpers
+            as each other's inverse -- plus 2 `SettingsTests` for the band and for the default
+            being the camera's own. Eight injected bugs, eight caught (one after the viewport test
+            was moved off 16:9).
 - [ ] HOUSE-00627 — Implement head bob (vertical + lateral) tied to the footstep cadence, with the three settings levels
       dep: HOUSE-00621, HOUSE-00556 · sys: player · plat: ALL · pri: MUST
       accept: at "Subtle" the amplitude is ≤ 0.012 m and no tester reports nausea

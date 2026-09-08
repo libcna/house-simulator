@@ -19,6 +19,48 @@ namespace cnahouse::player
     inline constexpr float kMinFovDegrees = 55.0F;
     inline constexpr float kMaxFovDegrees = 95.0F;
 
+    /// @brief The aspect §44's two field-of-view numbers are stated at.
+    ///
+    /// *"70° vertical by default (102.4° horizontal at 16:9)"* is one lens described twice, and
+    /// 16:9 is where the two descriptions meet. Nothing is held AT this aspect -- it is the
+    /// reference the other two constants below are read against.
+    inline constexpr float kDesignAspect = 16.0F / 9.0F;
+
+    /// @brief The narrowest window shape the horizontal field of view is allowed to shrink to.
+    ///
+    /// §44 gives a VERTICAL angle, so a wider window shows more of the room and a narrower one
+    /// shows less -- the ordinary "Hor+" behaviour, and the right one: the vertical angle is what
+    /// sets the apparent size of everything on screen, so holding it is what makes a doorway the
+    /// same doorway on every display. 4:3 is where that stops being harmless. Below it the
+    /// horizontal field falls away fast (a portrait window at 70° vertical sees 43° of the room,
+    /// which is a letterbox turned on its side and no way to walk down a corridor), so from here
+    /// down the lens OPENS instead: the vertical grows to hold the horizontal angle 4:3 has.
+    ///
+    /// The floor is deliberately the narrowest shape a DISPLAY comes in rather than the design
+    /// aspect. Between 4:3 and 16:9 a player sees less of the room than the screenshot in §44 --
+    /// that is what a narrower monitor is -- and nothing is distorted to hide it.
+    inline constexpr float kNarrowestSupportedAspect = 4.0F / 3.0F;
+
+    /// @brief The hard stop on what the narrow-window rule may open the lens to.
+    ///
+    /// The rule above has no natural limit: as the window approaches zero width the vertical
+    /// angle it asks for approaches 180°, where the projection matrix is degenerate and the
+    /// frame is a fish-eye with the room squeezed into a few pixels in the middle. A window that
+    /// tall is not a shape this game is played in; the cap keeps the matrix sane instead of
+    /// pretending to serve it.
+    inline constexpr float kMaxEffectiveFovDegrees = 120.0F;
+
+    /// @brief §44's second number from its first: `tan(h/2) = aspect · tan(v/2)`.
+    ///
+    /// A free function because the relation is the design's, not the camera's: `HOUSE-00621`'s
+    /// test reads §44's 102.4° out of its 70°, and the debug overlays quote both.
+    /// @pre @p aspect is positive and finite -- `FirstPersonCamera::SetAspect` is the gate.
+    [[nodiscard]] float HorizontalFovDegrees(float verticalDegrees, float aspect) noexcept;
+
+    /// @brief The same relation the other way: the vertical angle that gives @p horizontalDegrees.
+    /// @pre @p aspect is positive and finite.
+    [[nodiscard]] float VerticalFovDegrees(float horizontalDegrees, float aspect) noexcept;
+
     /// @brief §10.3's clip planes: 0.10 m and 420 m.
     ///
     /// *"Depth precision at 24-bit with a 0.10 m near plane is adequate for interiors"* -- and the
@@ -70,10 +112,30 @@ namespace cnahouse::player
         ///        renderer multiplies by it.
         void SetAspect(float aspect) noexcept;
 
+        /// @brief The same, from a viewport's pixels.
+        ///
+        /// The division belongs HERE rather than at every call site, because a back buffer is two
+        /// integers and `width / height` written on integers is a zero-divide before `SetAspect`
+        /// ever sees it. It is also the only place that can tell a nonsense viewport from a
+        /// plausible one: a width and a height that are both negative divide out to a perfectly
+        /// respectable 16:9, which is exactly the shape of answer a float division launders.
+        void SetViewport(int width, int height) noexcept;
+
         [[nodiscard]] float Aspect() const noexcept
         {
             return aspect_;
         }
+
+        /// @brief The vertical angle the projection actually uses.
+        ///
+        /// Equal to the SETTING at 4:3 and every wider window, which is every window a display
+        /// makes; wider than the setting below that, by `kNarrowestSupportedAspect`'s rule, and
+        /// never past `kMaxEffectiveFovDegrees`.
+        [[nodiscard]] float EffectiveFieldOfViewDegrees() const noexcept;
+
+        /// @brief What the player can see left to right, for the settings screen and §71's
+        ///        overlays -- derived here rather than stored, so there is one lens.
+        [[nodiscard]] float HorizontalFieldOfViewDegrees() const noexcept;
 
         /// @brief Places the camera from the body and its smoothed eye height.
         ///

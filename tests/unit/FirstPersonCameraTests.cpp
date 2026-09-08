@@ -23,8 +23,10 @@ namespace
     using cnahouse::player::FirstPersonCamera;
     using cnahouse::player::kDefaultFovDegrees;
     using cnahouse::player::kFarPlane;
+    using cnahouse::player::kMaxEffectiveFovDegrees;
     using cnahouse::player::kMaxFovDegrees;
     using cnahouse::player::kMinFovDegrees;
+    using cnahouse::player::kNarrowestSupportedAspect;
     using cnahouse::player::kNearPlane;
     using cnahouse::player::kPlayerCrouchEyeHeight;
     using cnahouse::player::kPlayerEyeHeight;
@@ -215,4 +217,149 @@ TEST(FirstPersonCameraTests, ANonsenseAspectIsIgnoredRatherThanMultipliedOut)
     EXPECT_FLOAT_EQ(camera.Aspect(), sane);
     camera.SetAspect(4.0F / 3.0F);
     EXPECT_FLOAT_EQ(camera.Aspect(), 4.0F / 3.0F);
+}
+
+// `HOUSE-00626`. The field-of-view SETTING and what a window shape does to it.
+//
+// §44 gives one angle and one aspect -- 70° vertical, 102.4° horizontal at 16:9 -- and a window is
+// not obliged to be 16:9. The rule those tests are about: the setting is the vertical angle on
+// every shape a display comes in, and only a window narrower than 4:3 makes the camera do
+// something the player did not ask for.
+
+TEST(FirstPersonCameraTests, TheSettingIsTheVerticalAngleOnEveryDisplayShape)
+{
+    // 4:3, 16:10, 16:9, 21:9. On all of them the vertical angle is the one in the settings file:
+    // a wider monitor shows MORE of the room, it does not show the same room larger. That is what
+    // makes a doorway the same doorway on every machine, which matters here because §12's rooms
+    // are authored to be walked through and §44's numbers were chosen by walking them.
+    FirstPersonCamera camera;
+    float previousHorizontal = 0.0F;
+    for (const float aspect : {4.0F / 3.0F, 16.0F / 10.0F, 16.0F / 9.0F, 21.0F / 9.0F})
+    {
+        camera.SetAspect(aspect);
+        EXPECT_FLOAT_EQ(camera.EffectiveFieldOfViewDegrees(), kDefaultFovDegrees)
+            << "the vertical angle moved on a " << aspect << " window";
+        EXPECT_GT(camera.HorizontalFieldOfViewDegrees(), previousHorizontal)
+            << "a wider window did not show more of the room";
+        previousHorizontal = camera.HorizontalFieldOfViewDegrees();
+    }
+
+    // The two ends as numbers, because those are the ones that get quoted: §44's own 102.4° at
+    // 16:9, and 86.1° on the narrowest display shape there is.
+    camera.SetAspect(16.0F / 9.0F);
+    EXPECT_NEAR(camera.HorizontalFieldOfViewDegrees(), 102.4F, 0.1F);
+    camera.SetAspect(4.0F / 3.0F);
+    EXPECT_NEAR(camera.HorizontalFieldOfViewDegrees(), 86.1F, 0.1F);
+
+    // ...and the setting itself never moves. What the player set is what they read back, whatever
+    // window the camera is currently pointed through.
+    EXPECT_FLOAT_EQ(camera.FieldOfViewDegrees(), kDefaultFovDegrees);
+}
+
+TEST(FirstPersonCameraTests, ATallWindowOpensTheLensRatherThanNarrowingTheView)
+{
+    // Below 4:3 the vertical angle stops being held, because holding it costs the horizontal
+    // field faster than the shape is worth: a portrait window at 70° vertical sees 43° of the
+    // room, and a corridor seen through 43° cannot be walked down.
+    FirstPersonCamera camera;
+    camera.SetAspect(kNarrowestSupportedAspect);
+    const float floorHorizontal = camera.HorizontalFieldOfViewDegrees();
+
+    for (const float aspect : {1.0F, 3.0F / 4.0F, 9.0F / 16.0F})
+    {
+        camera.SetAspect(aspect);
+        EXPECT_NEAR(camera.HorizontalFieldOfViewDegrees(), floorHorizontal, 0.05F)
+            << "the horizontal field fell through the floor at " << aspect;
+        EXPECT_GT(camera.EffectiveFieldOfViewDegrees(), kDefaultFovDegrees)
+            << "the lens did not open to pay for it";
+    }
+
+    // And the rule is continuous where it changes over: a hair either side of 4:3 is the same
+    // lens, so dragging a window across the boundary is not a jump in the view.
+    camera.SetAspect(kNarrowestSupportedAspect - 0.001F);
+    const float justBelow = camera.EffectiveFieldOfViewDegrees();
+    camera.SetAspect(kNarrowestSupportedAspect + 0.001F);
+    EXPECT_NEAR(justBelow, camera.EffectiveFieldOfViewDegrees(), 0.05F);
+}
+
+TEST(FirstPersonCameraTests, TheLensNeverOpensPastTheCap)
+{
+    // The opening rule has no natural limit -- as the window narrows the vertical angle it asks
+    // for approaches 180°, where the projection is degenerate. A window 0.3 wide for every 1 tall
+    // wants 144°; it gets 120° and the frame it draws is still a frame.
+    FirstPersonCamera camera;
+    camera.SetAspect(0.3F);
+    EXPECT_FLOAT_EQ(camera.EffectiveFieldOfViewDegrees(), kMaxEffectiveFovDegrees);
+
+    const Matrix projection = camera.Projection();
+    EXPECT_TRUE(std::isfinite(projection.M11));
+    EXPECT_TRUE(std::isfinite(projection.M22));
+    EXPECT_GT(projection.M11, 0.0F);
+    EXPECT_GT(projection.M22, 0.0F);
+}
+
+TEST(FirstPersonCameraTests, TheProjectionIsBuiltFromTheEffectiveAngleAndNotTheSetting)
+{
+    // The one that matters: a rule the projection does not use is a rule that only exists in a
+    // getter. On a square window the top of the screen is at the OPENED angle, not at 35°.
+    FirstPersonCamera camera;
+    camera.SetAspect(1.0F);
+    camera.Update(Standing(0.0F, 0.90F, 0.0F), kPlayerEyeHeight, 0.0F);
+    const Matrix projection = camera.Projection();
+
+    const float half = camera.EffectiveFieldOfViewDegrees() * 0.5F * kPi / 180.0F;
+    EXPECT_GT(half, kDefaultFovDegrees * 0.5F * kPi / 180.0F) << "the fixture is not testing anything";
+    const Vector4 top = Through(projection, Vector3(0.0F, 10.0F * std::tan(half), -10.0F));
+    EXPECT_NEAR(top.Y / top.W, 1.0F, 1e-4F);
+
+    // ...and a point at the SETTING's angle is comfortably inside the frame, which is the same
+    // statement made the way a player would notice it: there is more room above their head.
+    const float settingHalf = kDefaultFovDegrees * 0.5F * kPi / 180.0F;
+    const Vector4 wouldHaveBeenTheEdge =
+        Through(projection, Vector3(0.0F, 10.0F * std::tan(settingHalf), -10.0F));
+    EXPECT_LT(wouldHaveBeenTheEdge.Y / wouldHaveBeenTheEdge.W, 0.95F);
+}
+
+TEST(FirstPersonCameraTests, AViewportInPixelsBecomesTheAspectAndAZeroHeightIsRefused)
+{
+    // A back buffer is two integers, and `width / height` on integers with a height of 0 is not
+    // an infinity `SetAspect` can refuse -- it is undefined behaviour before it gets there.
+    FirstPersonCamera camera;
+    camera.SetViewport(1600, 900);
+    EXPECT_FLOAT_EQ(camera.Aspect(), 16.0F / 9.0F);
+
+    // Deliberately NOT 16:9 from here on: a viewport of -1600 by -900 divides out to 16:9, so a
+    // camera that was already at 16:9 cannot tell whether it refused the nonsense or accepted it.
+    camera.SetViewport(1024, 768);
+    const float sane = camera.Aspect();
+    EXPECT_FLOAT_EQ(sane, 4.0F / 3.0F);
+    camera.SetViewport(1600, 0);
+    EXPECT_FLOAT_EQ(camera.Aspect(), sane) << "a minimised window resized the lens";
+    camera.SetViewport(0, 900);
+    EXPECT_FLOAT_EQ(camera.Aspect(), sane);
+    camera.SetViewport(-1600, -900);
+    EXPECT_FLOAT_EQ(camera.Aspect(), sane) << "two negatives made a window shape";
+    camera.SetViewport(-1600, 900);
+    EXPECT_FLOAT_EQ(camera.Aspect(), sane);
+}
+
+TEST(FirstPersonCameraTests, TheTwoFieldOfViewHelpersAreEachOthersInverse)
+{
+    // §44's pair of numbers is one relation read both ways, so the two helpers have to agree or
+    // the narrow-window rule -- which goes out through one and back through the other -- drifts.
+    for (const float aspect : {0.5625F, 1.0F, 4.0F / 3.0F, 16.0F / 9.0F, 21.0F / 9.0F})
+    {
+        for (const float vertical : {kMinFovDegrees, kDefaultFovDegrees, kMaxFovDegrees})
+        {
+            const float horizontal = cnahouse::player::HorizontalFovDegrees(vertical, aspect);
+            EXPECT_NEAR(cnahouse::player::VerticalFovDegrees(horizontal, aspect), vertical, 1e-3F)
+                << "at " << aspect << " with " << vertical;
+            EXPECT_GT(horizontal, 0.0F);
+        }
+    }
+
+    // A wider window is a wider horizontal angle for the same vertical one, which is the whole of
+    // why the rule above has anything to decide.
+    EXPECT_GT(cnahouse::player::HorizontalFovDegrees(kDefaultFovDegrees, 21.0F / 9.0F),
+              cnahouse::player::HorizontalFovDegrees(kDefaultFovDegrees, 4.0F / 3.0F));
 }

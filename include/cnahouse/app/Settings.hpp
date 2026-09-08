@@ -50,7 +50,12 @@ namespace cnahouse::app
         /// jitter off a cheap mouse without becoming a mouse that arrives late.
         bool lookSmoothing = false;
 
-        /// @brief Field of view in degrees, vertical.
+        /// @brief §44's field of view in degrees, VERTICAL, 55-95.
+        ///
+        /// The band and the default are `player::kMinFovDegrees`, `kMaxFovDegrees` and
+        /// `kDefaultFovDegrees`; `ClampToSupportedRanges` uses those constants and a test asserts
+        /// this default is that one. The number is repeated here rather than included because
+        /// this header is small and widely included and the camera's is neither.
         float fieldOfView = 70.0f;
 
         /// @brief §43.2's walk mode: false is the 1.35 m/s walk, true the 2.05 m/s one.

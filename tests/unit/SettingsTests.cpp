@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "cnahouse/app/Settings.hpp"
+#include "cnahouse/player/FirstPersonCamera.hpp"
 
 namespace
 {
@@ -128,7 +129,37 @@ namespace
         // is a mouse that cannot turn round and 10x is one that spins on a twitch, and a settings
         // file that accepted both had told the player those were supported.
         EXPECT_FLOAT_EQ(settings.mouseSensitivity, 0.2f);
-        EXPECT_FLOAT_EQ(settings.fieldOfView, 110.0f);
+        // §44's field-of-view band, tightened from the 50-110 this file accepted until
+        // `HOUSE-00626`, and taken from the camera's own constants rather than copied: a file
+        // outside the band was accepted here and then silently corrected by
+        // `FirstPersonCamera::SetFieldOfView`, so the player was overruled in the one place they
+        // could not see it.
+        EXPECT_FLOAT_EQ(settings.fieldOfView, cnahouse::player::kMaxFovDegrees);
+
+        settings.fieldOfView = 10.0f;
+        EXPECT_FALSE(settings.ClampToSupportedRanges().empty());
+        EXPECT_FLOAT_EQ(settings.fieldOfView, cnahouse::player::kMinFovDegrees);
+    }
+
+    TEST(SettingsTests, TheDefaultsAreTheAnglesTheCameraWasBuiltAround)
+    {
+        // The default lives in `Settings.hpp` as a literal because that header is small and
+        // widely included and the camera's is neither. This is what stops the two drifting.
+        EXPECT_FLOAT_EQ(Settings::Defaults().fieldOfView, cnahouse::player::kDefaultFovDegrees);
+        EXPECT_GE(Settings::Defaults().fieldOfView, cnahouse::player::kMinFovDegrees);
+        EXPECT_LE(Settings::Defaults().fieldOfView, cnahouse::player::kMaxFovDegrees);
+
+        // A settings file at either end of the band survives a round trip through the camera
+        // unchanged, which is the property the shared constants exist for.
+        for (const float degrees : {cnahouse::player::kMinFovDegrees, cnahouse::player::kMaxFovDegrees})
+        {
+            Settings settings = Settings::Defaults();
+            settings.fieldOfView = degrees;
+            EXPECT_TRUE(settings.ClampToSupportedRanges().empty()) << degrees << " is inside the band";
+            cnahouse::player::FirstPersonCamera camera;
+            camera.SetFieldOfView(settings.fieldOfView);
+            EXPECT_FLOAT_EQ(camera.FieldOfViewDegrees(), degrees);
+        }
     }
 
     TEST(SettingsTests, ClampingReportsNothingWhenNothingChanged)

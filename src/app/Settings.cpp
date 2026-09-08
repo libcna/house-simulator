@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <format>
 
+#include "cnahouse/player/FirstPersonCamera.hpp"
 #include "cnahouse/util/Json.hpp"
 
 namespace cnahouse::app
@@ -209,9 +210,13 @@ namespace cnahouse::app
             mouseSensitivity = std::clamp(mouseSensitivity, 0.2f, 4.0f);
             note("mouseSensitivity");
         }
-        if (fieldOfView < 50.0f || fieldOfView > 110.0f)
+        // §44's band again, and this one is the CAMERA's own constants rather than a copy of
+        // them: `player::FirstPersonCamera` clamps whatever it is handed to 55-95 too, so a file
+        // outside the band used to be corrected silently by the camera after being accepted here.
+        // The file is what the player edits, so the file is where they have to be told.
+        if (fieldOfView < player::kMinFovDegrees || fieldOfView > player::kMaxFovDegrees)
         {
-            fieldOfView = std::clamp(fieldOfView, 50.0f, 110.0f);
+            fieldOfView = std::clamp(fieldOfView, player::kMinFovDegrees, player::kMaxFovDegrees);
             note("fieldOfView");
         }
         return changed;

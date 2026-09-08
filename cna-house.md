@@ -3852,7 +3852,11 @@ doorway does not thrash.
 * Sensitivity: 0.0022 rad/pixel by default, settings-controlled 0.2× – 4×; optional raw-ish
   smoothing over 2 frames, default off; invert-Y option.
 * Pitch clamped to ±85°. **Roll is always zero** during ordinary walking.
-* FOV: 70° vertical by default (102.4° horizontal at 16:9), settings-controlled 55°–95°.
+* FOV: 70° vertical by default (102.4° horizontal at 16:9), settings-controlled 55°–95°. The
+  setting is the **vertical** angle on every window 4:3 or wider — a wider display shows more
+  of the room rather than the same room larger. Below 4:3 the vertical instead opens so the
+  horizontal angle never falls under what 4:3 gives (a portrait window at 70° vertical would
+  see 43° of the room), capped at 120° so the projection stays a projection.
 * **Head motion**: a very small vertical bob, amplitude `0.012 m · (speed/1.35)`, at the footstep
   cadence, plus a 0.35° lateral sway. Default **on** but low; a settings toggle turns it off. The
   rule adopted here: any bob large enough to *notice* is too large.
