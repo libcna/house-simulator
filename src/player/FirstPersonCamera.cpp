@@ -50,6 +50,7 @@ namespace cnahouse::player
     void FirstPersonCamera::SetFieldOfView(float degrees) noexcept
     {
         fovDegrees_ = std::clamp(degrees, kMinFovDegrees, kMaxFovDegrees);
+        frustum_.reset();
     }
 
     void FirstPersonCamera::SetAspect(float aspect) noexcept
@@ -57,6 +58,7 @@ namespace cnahouse::player
         if (aspect > 0.0F && std::isfinite(aspect))
         {
             aspect_ = aspect;
+            frustum_.reset();
         }
     }
 
@@ -120,6 +122,7 @@ namespace cnahouse::player
         // last frame gets §10.3's near plane back without anything having to notice they did.
         unclearedEye_ = pose_.eye;
         nearPlane_ = kNearPlane;
+        frustum_.reset();
     }
 
     void FirstPersonCamera::ApplyClearance(const EyeClearance& clearance) noexcept
@@ -130,6 +133,7 @@ namespace cnahouse::player
         pose_.eye = Xna::Vector3(unclearedEye_.X - pose_.forward.X * clearance.pullBack,
                                  unclearedEye_.Y - pose_.forward.Y * clearance.pullBack,
                                  unclearedEye_.Z - pose_.forward.Z * clearance.pullBack);
+        frustum_.reset();
     }
 
     Xna::Matrix FirstPersonCamera::View() const
@@ -143,6 +147,18 @@ namespace cnahouse::player
     {
         return Xna::Matrix::CreatePerspectiveFieldOfView(
             EffectiveFieldOfViewDegrees() * kDegreesToRadians, aspect_, nearPlane_, kFarPlane);
+    }
+
+    const Xna::BoundingFrustum& FirstPersonCamera::Frustum() const
+    {
+        if (!frustum_)
+        {
+            // XNA's own construction: the six planes of `view * projection`, which is the one
+            // matrix that takes a world point to clip space. Doing it any other way would be a
+            // second definition of what the camera can see.
+            frustum_.emplace(View() * Projection());
+        }
+        return *frustum_;
     }
 
 } // namespace cnahouse::player

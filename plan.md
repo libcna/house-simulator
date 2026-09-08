@@ -8915,8 +8915,36 @@ it must be tuned, not just implemented.
             reached at, the monotone recovery that never lifts, the same curve at four frame
             rates, the deeper-of-two rule both ways round, the sixteen-riser bounce, and the
             no-landing/paused-frame/teleport cases. Eight injected bugs, eight caught.
-- [ ] HOUSE-00630 — Implement the `BoundingFrustum` construction from the camera each frame
+- [x] HOUSE-00630 — Implement the `BoundingFrustum` construction from the camera each frame
       dep: HOUSE-00621, HOUSE-00104 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) `FirstPersonCamera::Frustum()`, from `View() * Projection()` -- XNA's own
+            construction, because any other would be a second definition of what the camera can
+            see. `HOUSE-00104` already probed `BoundingFrustum` itself against 24 analytic answers;
+            what is asserted here is that the frustum this camera hands out is the one its own
+            view and projection describe.
+      note: **built once and kept until something moves the camera.** §25.4's traversal asks a cell
+            list, a chunk list and a per-category instance list against these six planes, hundreds
+            of questions a frame, and XNA builds them by multiplying two matrices and solving
+            three-plane intersections for eight corners. Four things invalidate the cache --
+            `Update`, `ApplyClearance`, `SetFieldOfView`, `SetAspect` -- and there is a test for
+            each, which turned out to matter: the first field-of-view injection was MISSED because
+            the fixture never asked for the frustum BEFORE changing the setting, and a camera
+            nobody has asked yet answers correctly however badly the invalidation is written.
+      note: it is taken AFTER §44's pull-back rather than before it. `HOUSE-00628` moves the eye
+            back and the near plane in, and a frustum built before that would cull the sliver of
+            wall the pull-back has just made visible -- 0.07 m ahead, which the test asserts is
+            outside the frustum at §10.3's near plane and inside it at the pulled one.
+      finding: the far plane is only good to about 50 mm. A plane extracted from a matrix that
+            spans 420 m carries a relative error of about a part in 10^6, which is 0.4 mm out
+            there -- and single precision has nothing finer to offer. The near plane is exact to a
+            millimetre at 0.10 m. Worth writing down before §25's traversal starts trusting a
+            far-plane test: it is the price of §10.3's range and not an error in the frustum.
+      verified: 7 `CameraFrustumTests` -- in front and behind, both clip planes from either side,
+            the side planes as §44's field of view seen as geometry with the lens and the window
+            shape changing under a populated cache, the frustum following a turn and a walk and
+            being stable when nothing moves, the pull-back, boxes contained/straddling/behind/
+            beyond, and the pitch that reaches the pose by a different road from the rest of it.
+            Seven injected bugs, seven caught (one after the cache was populated first).
 - [ ] HOUSE-00631 — Implement the `F2` world overlay (cell, position, yaw/pitch, surface, target)
       dep: HOUSE-00621, HOUSE-00559 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-00632 — Tune pass: walk every room and every flight and adjust bob, spring, FOV and step assist until it feels right; record the final numbers

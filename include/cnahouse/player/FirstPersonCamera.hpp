@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <optional>
+
+#include "Microsoft/Xna/Framework/BoundingFrustum.hpp"
 #include "Microsoft/Xna/Framework/Matrix.hpp"
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 
@@ -201,6 +204,20 @@ namespace cnahouse::player
         [[nodiscard]] Microsoft::Xna::Framework::Matrix View() const;
         [[nodiscard]] Microsoft::Xna::Framework::Matrix Projection() const;
 
+        /// @brief §25's frustum, from `View() * Projection()` (`HOUSE-00630`).
+        ///
+        /// **Built once and kept until something moves the camera.** §25.4's traversal asks a cell
+        /// list, a chunk list and a per-category instance list against this, hundreds of questions
+        /// a frame, and every one of them wants the same six planes; XNA builds them by
+        /// multiplying two matrices and solving three-plane intersections for eight corners, which
+        /// is not something to redo per question. `Update`, `ApplyClearance`, `SetFieldOfView` and
+        /// `SetAspect` are the four things that can invalidate it, and they all do.
+        ///
+        /// It is deliberately taken AFTER `ApplyClearance`: §44's pull-back moves the eye back and
+        /// the near plane in, and a frustum built before it would cull the sliver of wall the
+        /// pull-back just made visible.
+        [[nodiscard]] const Microsoft::Xna::Framework::BoundingFrustum& Frustum() const;
+
     private:
         CameraPose pose_;
         /// @brief Where the eye was before §44's pull-back, so applying it is idempotent.
@@ -208,6 +225,8 @@ namespace cnahouse::player
         float fovDegrees_ = kDefaultFovDegrees;
         float aspect_ = 16.0F / 9.0F;
         float nearPlane_ = kNearPlane;
+        /// @brief `Frustum()`'s cache. Empty means "the camera moved since it was last asked".
+        mutable std::optional<Microsoft::Xna::Framework::BoundingFrustum> frustum_;
     };
 
 } // namespace cnahouse::player
