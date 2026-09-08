@@ -174,16 +174,40 @@ namespace cnahouse::physics
                 // surface it settles onto has to be one §43.1 says can be stood on.
                 Capsule ahead = lifted;
                 ahead.centre = raised.position;
+                // Far enough to find the ground under the raised body WHEREVER it is. The lift is
+                // 0.22 m, but the body it was applied to was already standing a little clear of
+                // the floor, so a settle bounded by the lift alone lands a hair short and the
+                // whole step is thrown away -- which left a body walking into a 0.15 m kerb pushed
+                // back by the depenetration and walking at it again, six ticks a cycle, for ever
+                // (`HOUSE-00555` found it).
+                const float span = kStepUpHeight + kStepDownHeight;
                 const CellSweepHit down =
-                    SweepCell(world, cell, broad, ahead, Xna::Vector3(0.0F, -kStepUpHeight, 0.0F));
-                if (down.hit && IsWalkable(down.normal))
+                    SweepCell(world, cell, broad, ahead, Xna::Vector3(0.0F, -span, 0.0F));
+                const float settled = raised.position.Y - span * down.time * kContactBackoff;
+                // Three things, and NOT "is what it landed on walkable".
+                //
+                // A step UP does not end below where it started: sweeping far enough to find the
+                // floor also means being able to fall off the far side of whatever was stepped
+                // over, and that is a step DOWN -- a different mechanism, with its own limit, a
+                // few lines below. And it does not end inside anything, which is what stops a body
+                // being accepted into the ledge it was nosing at.
+                //
+                // Walkability is deliberately left to §49.3's step 3. A body climbing a 0.15 m
+                // kerb comes down on the kerb's rounded top EDGE, whose contact normal is 58° from
+                // vertical -- an artefact of the capsule's own shape, not a fact about the kerb,
+                // whose top is flat. Refusing that refused every kerb in the house: the body was
+                // stopped by the edge, pushed back 0.02 m by the depenetration, and walked at it
+                // again, six ticks a cycle, for ever (`HOUSE-00555` found it). `GroundProbe` runs
+                // next and is the thing that decides whether the body is standing.
+                Capsule landed = ahead;
+                landed.centre = Xna::Vector3(raised.position.X, settled, raised.position.Z);
+                if (down.hit && settled >= capsule.centre.Y - kMotionEpsilon &&
+                    !OverlapCell(world, cell, broad, landed).overlapped)
                 {
-                    const float fell = kStepUpHeight * down.time * kContactBackoff;
                     result.slide = raised;
                     result.steppedUp = true;
-                    result.rise = kStepUpHeight - fell;
-                    result.position =
-                        Xna::Vector3(raised.position.X, raised.position.Y - fell, raised.position.Z);
+                    result.rise = settled - capsule.centre.Y;
+                    result.position = landed.centre;
                 }
             }
         }
@@ -203,6 +227,16 @@ namespace cnahouse::physics
         // `time` 0, so the drop below is zero and nothing happens.
         if (!IsWalkable(ground.normal))
         {
+            if (ground.startedInside)
+            {
+                // Not a fall: a body standing on a floor with its shoulder against a WALL has that
+                // wall as the nearest thing a downward sweep meets, at zero distance, with a
+                // horizontal normal, and it says nothing about what is underfoot. Reported as
+                // airborne it started a fall on every tick spent leaning on a wall, and the
+                // depenetration then pushed the body back out -- a limit cycle (`HOUSE-00555`).
+                // §49.3's step 3 runs next and is the authority on standing.
+                return result;
+            }
             // Something is down there, but §43.1 says it is not a floor -- the side of a bank, the
             // face of a wall below an overhang. There is nothing to settle ONTO, so this is a fall
             // like any other and the body is left where the step put it.

@@ -42,6 +42,7 @@ namespace
     using cnahouse::physics::CollisionWorld;
     using cnahouse::physics::Depenetrate;
     using cnahouse::physics::Depenetration;
+    using cnahouse::physics::kContactTolerance;
     using cnahouse::physics::kDepenetrationIterations;
     using cnahouse::physics::kDepenetrationStep;
     using cnahouse::physics::Overlap;
@@ -477,22 +478,26 @@ TEST(DepenetrationTests, ACornerIsLeftWithNeitherWallStillOverlapping)
     Capsule moved = body;
     moved.centre =
         Vector3(body.centre.X + out.offset.X, body.centre.Y + out.offset.Y, body.centre.Z + out.offset.Z);
-    EXPECT_FALSE(OverlapCapsuleObb(moved, world.obbs[0]).overlapped);
-    EXPECT_FALSE(OverlapCapsuleObb(moved, world.obbs[1]).overlapped);
+    // Clear of both, where "clear" means NOT PENETRATING. Resting against a wall is touching it,
+    // and a push-out that insisted on daylight would shove a body off every wall it leaned on
+    // (`kContactTolerance`, found by `HOUSE-00555`).
+    EXPECT_LE(OverlapCapsuleObb(moved, world.obbs[0]).depth, kContactTolerance);
+    EXPECT_LE(OverlapCapsuleObb(moved, world.obbs[1]).depth, kContactTolerance);
 }
 
 TEST(DepenetrationTests, AFloorPushesTheBodyUpOntoIt)
 {
     const CollisionWorld world = OneCell({}, {Floor(0.0f)});
     BroadPhase broad;
-    // Standing 0.02 m too low: the feet are 0.29 m below the centre's 0.90 m minus... in metres,
-    // the lower cap's centre is at 0.29 and needs to be at 0.31.
+    // Standing 0.02 m too low: the lower cap's centre is at 0.28 and needs to be at 0.30.
+    // ONE push of 0.02 m is exactly that, and the second is not taken -- what is left after it is
+    // contact, not penetration.
     const Capsule body{Vector3(0.0f, 0.88f, 0.0f), kBodyHalfHeight, kBodyRadius};
     const Depenetration out = Depenetrate(world, world.cells[0], broad, body);
     EXPECT_TRUE(out.resolved);
-    EXPECT_EQ(out.iterations, 2);
+    EXPECT_EQ(out.iterations, 1);
     EXPECT_NEAR(out.deepest, 0.02f, 1e-5f);
-    EXPECT_NEAR(out.offset.Y, 2.0f * kDepenetrationStep, 1e-5f);
+    EXPECT_NEAR(out.offset.Y, kDepenetrationStep, 1e-5f);
     EXPECT_NEAR(out.offset.X, 0.0f, 1e-6f);
     EXPECT_NEAR(out.offset.Z, 0.0f, 1e-6f);
 }

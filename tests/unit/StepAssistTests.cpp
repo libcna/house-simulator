@@ -21,6 +21,7 @@
 
 #include "cnahouse/physics/BroadPhase.hpp"
 #include "cnahouse/physics/CollisionLoader.hpp"
+#include "cnahouse/physics/Ground.hpp"
 #include "cnahouse/physics/Move.hpp"
 
 namespace
@@ -36,6 +37,8 @@ namespace
     using cnahouse::physics::CollisionWorld;
     using cnahouse::physics::Depenetrate;
     using cnahouse::physics::Depenetration;
+    using cnahouse::physics::GroundProbe;
+    using cnahouse::physics::GroundProbeResult;
     using cnahouse::physics::kStepDownHeight;
     using cnahouse::physics::kStepUpHeight;
     using cnahouse::physics::MoveWithStepAssist;
@@ -231,17 +234,17 @@ TEST(StepAssistTests, AnUnobstructedStepIsNotDisturbed)
     EXPECT_NEAR(step.position.Y, kStand, 1e-3F);
 }
 
-TEST(StepAssistTests, AStepThatWouldLandOnTheSIDEOfAKerbIsRefused)
+TEST(StepAssistTests, AStepOntoAKerbsCORNERIsPlacedAndNotJudged)
 {
     // A 0.15 m kerb only 0.30 m wide, and a step long enough to overshoot its far edge by 0.25 m.
-    // The lift clears the kerb and the raised retry crosses it, so "did it get further?" says yes.
-    // The settle then comes down 0.21 m and meets the kerb's top-east rounding at 56° from
-    // vertical -- past §43.1's 46°, so it is the SIDE of the kerb and not the top of it. There is
-    // nothing there to stand on, and the whole raised attempt is thrown away.
+    // The body comes down on the kerb's rounded top edge rather than on its top face, and the
+    // contact normal there is 56° from vertical.
     //
-    // Overshoot it by only 0.20 m instead and the same descent meets the same rounding at 42°,
-    // inside the limit, and the body IS left resting against the kerb's corner -- which is what a
-    // capsule balanced on an edge really does, and is a place it can stand.
+    // The assist ACCEPTS that, and deliberately. The 56° is an artefact of the capsule's own
+    // rounding, not a fact about the kerb, whose top is flat; refusing it refused every kerb in
+    // the house, because a body climbing one always meets the edge first (`HOUSE-00555`). What
+    // the assist promises is narrower and checkable: the body ends higher than it started, and
+    // inside nothing. Whether it is STANDING is §49.3's step 3, and `GroundProbe` says no.
     const CollisionWorld world = OneCell({
         Box(Vector3(-2.75F, -0.25F, 0.0F), Vector3(3.25F, 0.25F, 6.0F), CollisionKind::Floor),
         Box(Vector3(0.65F, 0.075F, 0.0F), Vector3(0.15F, 0.075F, 6.0F), CollisionKind::Floor),
@@ -249,14 +252,19 @@ TEST(StepAssistTests, AStepThatWouldLandOnTheSIDEOfAKerbIsRefused)
     BroadPhase broad;
     const StepAssist over =
         MoveWithStepAssist(world, world.cells[0], broad, Body(0.0F, 0.0F), Vector3(1.05F, 0.0F, 0.0F));
-    EXPECT_FALSE(over.steppedUp);
-    EXPECT_LE(over.position.Y, kStand + kRest + 1e-4F) << "it was left hanging beside the kerb";
+    EXPECT_TRUE(over.steppedUp);
+    EXPECT_GT(over.position.Y, kStand + kRest) << "it did not end up higher than it started";
+    EXPECT_LT(over.position.Y, kStand + 0.15F) << "resting on the corner, not on top of the kerb";
 
-    const StepAssist onto =
-        MoveWithStepAssist(world, world.cells[0], broad, Body(0.0F, 0.0F), Vector3(1.00F, 0.0F, 0.0F));
-    EXPECT_TRUE(onto.steppedUp);
-    EXPECT_GT(onto.position.Y, kStand);
-    EXPECT_LT(onto.position.Y, kStand + 0.15F) << "resting on the corner, not standing on the top";
+    Capsule perched = Body(0.0F, 0.0F);
+    perched.centre = over.position;
+    EXPECT_FALSE(OverlapCell(world, world.cells[0], broad, perched).overlapped)
+        << "the assist put the body inside the kerb";
+
+    // ...and the step-3 probe is what reports that a corner is not a floor.
+    const GroundProbeResult ground = GroundProbe(world, world.cells[0], broad, perched);
+    EXPECT_FALSE(ground.onGround);
+    EXPECT_TRUE(ground.steep) << "the probe should see something under it, just not a floor";
 }
 
 // ---------------------------------------------------------------------------------------------

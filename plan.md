@@ -7867,8 +7867,51 @@ never escapes and never penetrates.
             and failed against correct code. `HOUSE-00548`'s ground probe needs the real formula.
 - [ ] HOUSE-00554 — Implement the dynamic-obstacle list per cell (doors, garage door, pets) and its per-frame refresh
       dep: HOUSE-00542 · sys: physics · plat: ALL · pri: MUST
-- [ ] HOUSE-00555 — Implement `PlayerController`: input → desired velocity → sweep → position, with the acceleration model
+- [x] HOUSE-00555 — Implement `PlayerController`: input → desired velocity → sweep → position, with the acceleration model
       dep: HOUSE-00551, HOUSE-00140 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-08) §49.3's fixed step, composed. Every piece of it had its own tests already;
+            what this adds is the order they run in and the state they hand each other.
+            §43.2's two numbers are one decision written twice -- *"reaches full speed in ~0.15 s"*
+            IS 1.35 / 9.0 -- and a case asserts they agree rather than restating the 0.15.
+      note: **gravity is not folded into the slide's motion**, though §49.3 step 1 lists it with
+            the input. One 3-D sweep cannot tell "walked into a wall" from "landed on a floor", and
+            the two want opposite answers: one slides, the other ends a fall and fires §47.2's
+            landing one-shot. The horizontal move and the fall are separate sweeps, and step 3's
+            ground probe is what decides which the next step gets.
+      accept: 10 cases. The speed table's two numbers agreeing; full speed in exactly 18 ticks and
+            half of it in 9; stopping in 13; forward being north and positive yaw east, with a
+            strafe agreeing with a turn to within a millimetre; a wall held for two seconds that is
+            not passed and behind which no speed accumulates; a 0.15 m kerb walked over and a
+            1.20 m drop fallen down and landed soft in one walk; the ground report changing from
+            tile/Floor to wood/Stair as the body crosses; §43.1's eye at 1.68 m; and the same input
+            replayed twice giving the same position to the bit. In the real house, 8 directions x
+            120 ticks from the middle of 77 cells -- 73 920 fixed steps -- with no step ending
+            inside geometry and no speed above the walk. Ten injected bugs, ten caught.
+      finding: (2026-09-08, found by `HOUSE-00555`) **three defects, all of them limit cycles, and
+            all of them invisible to a test that took one step.** Composing the pieces and walking
+            for two seconds is what found them.
+            (1) `Depenetrate` pushed a body that was merely TOUCHING. A body resting against a
+            wall is touching it -- that is what resting is, and the slide leaves it there
+            deliberately -- so every tick spent leaning on a wall bounced the body 0.02 m off it,
+            and it walked back at it over the next seven. `kContactTolerance`: an overlap shallower
+            than a tenth of a millimetre is contact, not penetration.
+            (2) `MoveWithStepAssist`'s settle swept down by the LIFT, 0.22 m. The body it lifted
+            was already standing a little clear of the floor, so the settle landed a hair short,
+            the step was thrown away, and a 0.15 m kerb was unclimbable. It sweeps the lift plus
+            the step-down now, and refuses a landing BELOW where it started -- which is the step
+            DOWN's job, with its own limit.
+            (3) That settle also refused to accept a landing whose contact normal was not walkable.
+            A body climbing a kerb comes down on the kerb's rounded top EDGE at 58° from vertical,
+            which is an artefact of the capsule's own shape and not a fact about the kerb, whose
+            top is flat. The assist now promises only what it can check -- higher than it started,
+            inside nothing -- and §49.3's step 3 decides whether the body is standing, which is
+            where that decision belongs.
+      finding: (2026-09-08, found by `HOUSE-00555`) the step assist reported `airborne` for a body
+            standing on a floor with its shoulder against a WALL: its downward sweep met the wall
+            first, at zero distance, with a horizontal normal. That started a fall on every tick
+            spent leaning on a wall. A start-overlap with a non-walkable normal says nothing about
+            what is underfoot, and is now ignored -- the ground probe runs next and is the
+            authority.
 - [ ] HOUSE-00556 — Implement the two walk speeds and the `Shift` toggle, with the settings persistence of D-09
       dep: HOUSE-00555, HOUSE-00131 · sys: player · plat: ALL · pri: MUST
       accept: 1.35 / 2.05 m/s measured over a 20 m run within 1 %

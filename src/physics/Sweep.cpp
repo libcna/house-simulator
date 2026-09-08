@@ -818,8 +818,9 @@ namespace cnahouse::physics
             {
                 result.deepest = overlap.overlapped ? overlap.depth : 0.0f;
             }
-            if (!overlap.overlapped)
+            if (!overlap.overlapped || overlap.depth <= kContactTolerance)
             {
+                // Touching is not penetrating. See `kContactTolerance`.
                 result.resolved = true;
                 return result;
             }
@@ -836,7 +837,8 @@ namespace cnahouse::physics
         }
         // Four pushes used and still inside: `resolved` stays false and the caller decides. §49.5's
         // guarantee suite is what notices a body that gets here regularly.
-        result.resolved = !OverlapCell(world, cell, broad, moving).overlapped;
+        const CellOverlap left = OverlapCell(world, cell, broad, moving);
+        result.resolved = !left.overlapped || left.depth <= kContactTolerance;
         return result;
     }
 

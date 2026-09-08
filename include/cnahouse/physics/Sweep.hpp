@@ -191,6 +191,15 @@ namespace cnahouse::physics
                                             class BroadPhase& broad,
                                             const Capsule& capsule);
 
+    /// @brief An overlap shallower than this is CONTACT, not penetration: a tenth of a millimetre.
+    ///
+    /// A body resting against a wall is touching it -- that is what resting means -- and the slide
+    /// leaves it there deliberately, a thousandth of its step clear. Pushing such a body out by
+    /// §49.3's fixed 0.02 m made it bounce off every wall it leaned on and walk back at it, seven
+    /// ticks a cycle, for ever (`HOUSE-00555` found it). There is nothing to push out of when the
+    /// depth is zero.
+    inline constexpr float kContactTolerance = 1.0e-4f;
+
     /// @brief §49.3's push-out per iteration, in metres.
     inline constexpr float kDepenetrationStep = 0.02f;
     /// @brief §49.3's iteration count.
