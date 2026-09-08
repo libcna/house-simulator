@@ -49,6 +49,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import layout_io  # noqa: E402
+from layout_io import LayoutError  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 SOURCE = REPO / "assets-src" / "world"
@@ -115,10 +116,20 @@ def surfaces(directory: Path):
         out.append(([row["footprint"]], None, "gravel"))
     # An outdoor cell with a floor of its own is a deck or a terrace, and the ground under it is
     # flat at that height. `EXT_TERRACE` at +0.45 is the case §11.6 names.
-    levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
+    #
+    # **Only on the ground storey.** An exterior cell on L1 or L2 is a BALCONY: it is attached to
+    # the house, the ground under it is the lawn, and writing its floor into the height field
+    # raises the lawn to first-floor level. The ground storey is found rather than named -- the
+    # lowest level whose `ffl` is at or above §10.2's grade -- so a level inserted below L0 does
+    # not silently move which one counts as the ground.
+    levels = {row["id"]: float(row.get("ffl", 0.0)) for row in layout_io.rows(layout, "levels")}
+    above_grade = [ffl for ffl in levels.values() if ffl >= 0.0]
+    ground_ffl = min(above_grade) if above_grade else 0.0
     for cell in layout_io.rows(layout, "cells"):
         if cell.get("kind") != "exterior" or cell["id"] == "EXT_WORLD":
             continue
+        if levels.get(cell.get("level"), 0.0) != ground_ffl:
+            continue          # a balcony, not a pad; the ground under it is whatever the lot is
         override = cell.get("yOverride")
         if not override or abs(float(override[0])) < 1e-6:
             continue
@@ -165,11 +176,103 @@ def png(width: int, height: int, depth: int, rows: list[bytes]) -> bytes:
             + chunk(b"IDAT", zlib.compress(raw, 9)) + chunk(b"IEND", b""))
 
 
+def read_png(blob: bytes) -> tuple[int, int, int, list[int]]:
+    """`(width, height, depth, samples)` from a greyscale PNG this module wrote.
+
+    The decoder lives beside the encoder on purpose: they are one decision about how the ground is
+    stored, and a second file that knew how to read these images would be a second place for that
+    decision to drift. It is deliberately narrow -- greyscale, non-interlaced, filter 0 on every
+    row, which is exactly what `png()` above emits -- and says so rather than half-supporting a
+    PNG it was never given.
+    """
+    if blob[:8] != b"\x89PNG\r\n\x1a\n":
+        raise LayoutError("not a PNG")
+    at = 8
+    header = None
+    data = bytearray()
+    while at + 8 <= len(blob):
+        (length,) = struct.unpack(">I", blob[at:at + 4])
+        tag = blob[at + 4:at + 8]
+        payload = blob[at + 8:at + 8 + length]
+        at += 12 + length
+        if tag == b"IHDR":
+            header = struct.unpack(">IIBBBBB", payload)
+        elif tag == b"IDAT":
+            data += payload
+        elif tag == b"IEND":
+            break
+    if header is None:
+        raise LayoutError("PNG has no IHDR")
+    width, height, depth, colour, compression, filtering, interlace = header
+    if colour != 0 or compression != 0 or filtering != 0 or interlace != 0:
+        raise LayoutError(f"PNG is not the greyscale non-interlaced kind this reads "
+                          f"(colour {colour}, interlace {interlace})")
+    if depth not in (8, 16):
+        raise LayoutError(f"PNG bit depth {depth} is neither 8 nor 16")
+
+    raw = zlib.decompress(bytes(data))
+    stride = width * (depth // 8)
+    samples: list[int] = []
+    for row in range(height):
+        start = row * (stride + 1)
+        if raw[start] != 0:
+            raise LayoutError(f"PNG row {row} uses filter {raw[start]}; this reads filter 0 only")
+        line = raw[start + 1:start + 1 + stride]
+        if depth == 8:
+            samples.extend(line)
+        else:
+            samples.extend(value for (value,) in struct.iter_unpack(">H", line))
+    if len(samples) != width * height:
+        raise LayoutError(f"PNG holds {len(samples)} samples, not {width * height}")
+    return width, height, depth, samples
+
+
+def decode(directory: Path) -> tuple[int, int, list[float], list[int]]:
+    """`(width, height, heights_in_metres, material_indices)` read back from the PNGs on disk.
+
+    This is what a build stage that needs the ground reads -- `build_collision.py` puts it in
+    `collision.bin` so the runtime never opens a PNG -- and it goes through the images rather than
+    calling `fields()` again so that what the game collides with is what the committed ground
+    actually says, quantisation included.
+    """
+    width, height, depth, samples = read_png((directory / "terrain.png").read_bytes())
+    if (width, height, depth) != (WIDTH, HEIGHT, 16):
+        raise LayoutError(f"terrain.png is {width}x{height}@{depth}, not {WIDTH}x{HEIGHT}@16")
+    heights = [ORIGIN_Y + (value / 65535.0) * Y_SCALE for value in samples]
+
+    mw, mh, mdepth, material = read_png((directory / "terrain_materials.png").read_bytes())
+    if (mw, mh, mdepth) != (WIDTH, HEIGHT, 8):
+        raise LayoutError(f"terrain_materials.png is {mw}x{mh}@{mdepth}, not {WIDTH}x{HEIGHT}@8")
+    for value in material:
+        if value >= len(MATERIALS):
+            raise LayoutError(f"terrain_materials.png holds index {value}; there are "
+                              f"{len(MATERIALS)} materials")
+    return WIDTH, HEIGHT, heights, material
+
+
+def _encode(heights: list[float]) -> list[int]:
+    """§11.5's 16-bit quantisation, REFUSING anything the range cannot hold.
+
+    Clamping is the obvious thing to write and it writes a plateau where the ground was meant to
+    be: three balconies spent a release as a 3.00 m mesa in the back garden, and every check
+    passed, because the check compared the file against an encoder that clamped the same way
+    (`HOUSE-00553` found it).
+    """
+    span = max(1e-9, Y_SCALE)
+    for index, value in enumerate(heights):
+        if value < ORIGIN_Y or value > ORIGIN_Y + Y_SCALE:
+            x = ORIGIN_X + (index % WIDTH) * STEP
+            z = ORIGIN_Z + (index // WIDTH) * STEP
+            raise LayoutError(
+                f"the ground at x={x:.1f} z={z:.1f} is {value:.2f} m, outside the height field's "
+                f"{ORIGIN_Y:.1f} to {ORIGIN_Y + Y_SCALE:.1f}; widen `yScale`, or find out what "
+                f"put a first-floor surface into the terrain")
+    return [round((value - ORIGIN_Y) / span * 65535.0) for value in heights]
+
+
 def rendered(directory: Path) -> dict[str, bytes | str]:
     heights, materials = fields(directory)
-    span = max(1e-9, Y_SCALE)
-    samples = [min(65535, max(0, round((value - ORIGIN_Y) / span * 65535.0)))
-               for value in heights]
+    samples = _encode(heights)
     height_rows = [b"".join(struct.pack(">H", samples[row * WIDTH + column])
                             for column in range(WIDTH)) for row in range(HEIGHT)]
     material_rows = [bytes(materials[row * WIDTH:(row + 1) * WIDTH]) for row in range(HEIGHT)]
@@ -265,6 +368,29 @@ def selftest() -> int:
         #    reason this is generated rather than painted.
         require(at(0.0, -34.0) == (0.45, "bluestone"),
                 f"the terrace is flat at +0.45 and paved ({at(0.0, -34.0)})")
+        # ...and a BALCONY is not a pad. `L1_BALCONY_REAR` is an exterior cell with a floor, at
+        # +3.65, and it is attached to the house rather than standing on the lot -- so the ground
+        # under it is the lawn on §10.2's slope. Writing its floor into the height field raised
+        # 66 samples of the back garden to first-floor level, where the encoder then CLAMPED them
+        # to +3.00 and said nothing (`HOUSE-00553`).
+        require(at(-2.0, -30.0)[0] < 1.0,
+                f"a first-floor balcony is not the ground under it ({at(-2.0, -30.0)})")
+        require(abs(at(-2.0, -30.0)[0] - ground_at(-2.0, -30.0)) < 1e-9,
+                f"...it is the lot's own slope there ({at(-2.0, -30.0)[0]:.3f} vs "
+                f"{ground_at(-2.0, -30.0):.3f})")
+        # The porch IS a pad: it is on the ground storey, and this is what says the rule above cut
+        # balconies rather than everything with a floor.
+        require(at(0.0, -13.0) == (0.57, "bluestone"),
+                f"the porch at +0.57 is still a pad, paved by the walk over it "
+                f"({at(0.0, -13.0)})")
+        # And a height the encoding cannot hold is REFUSED rather than flattened.
+        over = [10.0] + [0.0] * (WIDTH * HEIGHT - 1)
+        caught = False
+        try:
+            _encode(over)
+        except LayoutError as error:
+            caught = "10.00" in str(error)
+        require(caught, "a height outside the 6 m range is refused, not clamped to the top of it")
         require(at(13.0, -6.0)[1] == "concrete",
                 f"the driveway is concrete ({at(13.0, -6.0)})")
         require(at(0.0, 7.0)[1] == "asphalt", f"the carriageway is asphalt ({at(0.0, 7.0)})")

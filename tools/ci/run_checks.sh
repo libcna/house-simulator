@@ -149,6 +149,11 @@ run_gate "window-schedule" python3 tools/world/window_schedule.py --check
 # `HOUSE-00398`. The plans are drawn from the layout, so a stale SVG is a plan of a house that no
 # longer exists -- which is worse than no plan, because somebody will act on it.
 run_gate "floor-plans" python3 tools/world/floor_plans.py --check
+# `HOUSE-00761`. §11.5's ground is GENERATED from the layout's slope and pads, so a committed
+# `terrain.png` that no longer matches the layout is a lawn under a terrace that has moved. This
+# gate was missing until `HOUSE-00553` needed the ground to collide with and found three balconies
+# in it -- the artefact had a `--check` and nothing ran it.
+run_gate "terrain-gen" python3 tools/world/terrain_gen.py --check
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
 # `HOUSE-00477`. §70.5 over the GENERATED SHELL, not over the layout: `validate_world.py` rule 10
 # checks the numbers an author typed and this checks the geometry the generator made of them. It

@@ -8055,6 +8055,19 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             geometry from the one file nothing checks. `samples`, `step`, `materialIndex` and
             `materials` moved into `layout.exterior.json`'s `terrain` block, and
             `terrain_gen.py --check` now fails if that block and the generator disagree.
+      finding: (2026-09-08, found by `HOUSE-00553`) **three balconies were in the ground, and the
+            encoder clamped them flat so that nothing noticed.** Any exterior cell with a positive
+            `yOverride` was treated as a flat pad, which is right for the porch at +0.57 and the
+            terrace at +0.45 and wrong for `L1_BALCONY_FRONT`, `L1_BALCONY_REAR` (+3.65) and
+            `L2_BALCONY_JULIET` (+6.55) -- those are attached to the house and the ground under
+            them is the lawn. 66 samples of the back garden and the front walk were written at
+            first-floor level, and `rendered()` then CLAMPED them to the top of the 6 m range, so
+            the committed `terrain.png` held a 3.00 m mesa in the garden, 3.55 m out. Every check
+            passed because the check compared the file against an encoder that clamped the same
+            way. Three corrections: a pad must be on the ground storey (found from the levels, not
+            named), the encoder REFUSES a height it cannot hold, and `terrain-gen` is now one of
+            `run_checks.sh`'s gates -- the artefact had a `--check` and nothing ran it, which is
+            how this survived. Two new selftest claims pin both halves.
       note: the two PNGs are deployed **with the world**, not compiled into content:
             `deploy_world.py` copies them verbatim and `world_manifest.py` lists them after the
             JSON, so `WorldLoader::VerifyManifest` covers the ground the player stands on. Four
