@@ -4205,6 +4205,12 @@ Built offline from the layout and the per-asset `_COL` proxies into `content/wor
   **triangle meshes** (stairs ramps, the terrain patch, the roof underside in the attic, curved
   props).
 * A per-cell **loose grid** (1 m) indexes them, so a capsule sweep tests ~6 shapes, not 900.
+  **Measured by `HOUSE-00542`, and the "not 900" needs splitting in two.** A step-sized query — a
+  0.62 m capsule swept 0.5 m, at the middle of every cell that has geometry — hands the narrow
+  phase **4.84 shapes on average, worst 14**. What it beats is not 900 but **15.2**, which is what
+  one cell holds; the other factor of seventy is the per-cell partition, not the grid. So the two
+  earn their keep at different scales and both are needed: the cell turns 1 064 shapes into 15, and
+  the grid turns 15 into 5.
 * Exterior collision uses the terrain height field plus OBBs for fences, walls, kerbs, the shed,
   vehicles and tree trunks.
 

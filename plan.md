@@ -7508,8 +7508,27 @@ never escapes and never penetrates.
             wrong — a sweep testing a shape belonging to another cell. Same for a triangle index
             outside its own mesh: in range for the file, out of range for the array the sweep
             walks. Each is one comparison at load and a crash or a phantom wall without it.
-- [ ] HOUSE-00542 — Implement the per-cell loose 1 m collision grid
+- [x] HOUSE-00542 — Implement the per-cell loose 1 m collision grid
       dep: HOUSE-00541 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) `physics::BroadPhase`. `CollisionLoader` reads the grid; this is the query
+            over it, and it is the only thing between a sweep and every shape in the room. Reused
+            rather than constructed per query — a sweep runs several times a frame per body and a
+            broad phase that allocated each time would cost more than the narrow phase it feeds —
+            with de-duplication by a serial STAMP rather than a clear, so a query costs nothing for
+            the shapes it does not touch. A shape spans several buckets by design (§3.4) and comes
+            back once.
+      accept: a whole-cell query returns every shape exactly once; a one-bucket query visits one
+            bucket; a query outside the grid returns nothing rather than the nearest bucket; one
+            partly outside is clamped and not wrapped; an inverted or NaN query returns nothing; an
+            empty cell answers nothing; successive queries on one object are independent; and on
+            the real house every returned index is a shape that cell actually holds
+      finding: (2026-09-08, found by `HOUSE-00542`) §49.2's *"~6 shapes, not 900"* is right about
+            the six and wrong about the nine hundred, and the difference is worth having in the
+            document. Measured: a step-sized query hands the narrow phase **4.84 shapes on average,
+            worst 14 (`B1_UNDERSTAIR`)** — against **15.2**, which is what one cell holds, not
+            1 064, which is what the world holds. The grid turns 15 into 5; the per-cell partition
+            turns 1 064 into 15. Both are needed and they work at different scales. §49.2 says so
+            now, and the test prints the measurement on every run rather than only when it fails.
 - [ ] HOUSE-00543 — Implement `Capsule` and the capsule-vs-OBB sweep
       dep: HOUSE-00541 · sys: physics · plat: ALL · pri: MUST
       verify: unit SweepTests.CapsuleObb against 40 analytic cases
