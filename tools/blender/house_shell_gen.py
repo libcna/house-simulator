@@ -698,6 +698,37 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
     ]
 
 
+#: `HOUSE-00470`: one placeholder material per surface class, so the blockout is readable before
+#: `HOUSE-00296` acquires a single real texture. Flat base colours, deliberately unlike each other
+#: rather than pretty: the point is to be able to tell a wall from a ceiling in a screenshot.
+#: The names are the classes §11's material table will use, so the swap is a rename and not a
+#: re-authoring.
+SURFACE_COLOURS = {
+    "floor":     (0.62, 0.51, 0.38, 1.0),
+    "ceiling":   (0.92, 0.92, 0.90, 1.0),
+    "wall":      (0.80, 0.78, 0.74, 1.0),
+    "exterior":  (0.72, 0.70, 0.64, 1.0),
+    "trim":      (0.96, 0.96, 0.94, 1.0),
+    "glass":     (0.55, 0.72, 0.80, 0.35),
+    "stair":     (0.55, 0.42, 0.30, 1.0),
+    "roof":      (0.32, 0.30, 0.30, 1.0),
+    "structure": (0.68, 0.58, 0.44, 1.0),
+    "metal":     (0.45, 0.46, 0.48, 1.0),
+}
+SURFACE_ORDER = list(SURFACE_COLOURS)
+
+
+def material_slots(mesh) -> None:
+    """Give @p mesh one material per surface class, in `SURFACE_ORDER`, and colour them."""
+    for name in SURFACE_ORDER:
+        material = bpy.data.materials.get(f"BLOCKOUT_{name}")
+        if material is None:
+            material = bpy.data.materials.new(f"BLOCKOUT_{name}")
+            material.use_nodes = False
+            material.diffuse_color = SURFACE_COLOURS[name]
+        mesh.materials.append(material)
+
+
 #: A basement window well (`HOUSE-00469`). §12.6 says `W_BASEMENT` is a hopper "in 0.9 m window
 #: wells" and gives its sill as −0.45 absolute, so the WIDTH of the well is §12.6's; how far it
 #: stands out from the wall, how thick its retaining wall is and how far its floor sits below the
@@ -954,24 +985,28 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
     cells_by_id = cells_by_id or {}
     portal_cells = {row["id"]: (row.get("cellA"), row.get("cellB")) for row in portals}
 
-    def add(points, outward) -> None:
+    classes: list[str] = []
+    surface = {"class": "wall"}   # what the current pass is building; see `SURFACE_COLOURS`
+
+    def add(points, outward, klass=None) -> None:
         base = len(vertices)
         vertices.extend(to_blender(*point) for point in facing(points, outward))
         faces.append(tuple(range(base, base + len(points))))
+        classes.append(klass or surface["class"])
 
-    def solid(bx0, bx1, by0, by1, bz0, bz1) -> None:
+    def solid(bx0, bx1, by0, by1, bz0, bz1, klass=None) -> None:
         """A closed box, every face wound outward. Trim is looked at from every side."""
         if bx1 - bx0 <= 1e-9 or by1 - by0 <= 1e-9 or bz1 - bz0 <= 1e-9:
             return
         for value, outward in ((bx0, (-1.0, 0.0, 0.0)), (bx1, (1.0, 0.0, 0.0))):
             add([(value, by0, bz0), (value, by1, bz0), (value, by1, bz1), (value, by0, bz1)],
-                outward)
+                outward, klass)
         for value, outward in ((by0, (0.0, -1.0, 0.0)), (by1, (0.0, 1.0, 0.0))):
             add([(bx0, value, bz0), (bx1, value, bz0), (bx1, value, bz1), (bx0, value, bz1)],
-                outward)
+                outward, klass)
         for value, outward in ((bz0, (0.0, 0.0, -1.0)), (bz1, (0.0, 0.0, 1.0))):
             add([(bx0, by0, value), (bx1, by0, value), (bx1, by1, value), (bx0, by1, value)],
-                outward)
+                outward, klass)
 
     for box in cell_boxes(cell, extent):
         x0, x1, y0, y1, z0, z1 = box
@@ -1024,7 +1059,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         else:
                             outer = [(pu0, pv0, outer_plane), (pu0, pv1, outer_plane),
                                      (pu1, pv1, outer_plane), (pu1, pv0, outer_plane)]
-                        add(outer, tuple(-value for value in inward))
+                        add(outer, tuple(-value for value in inward), "exterior")
 
                 # The reveal runs from this room's inner face to the outer face of an exterior
                 # wall, or to the CENTRE LINE of a partition -- the room on the other side carries
@@ -1046,15 +1081,15 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     lo_face, hi_face = min(near, deep), max(near, deep)
                     for bu0, bu1, bv0, bv1 in architrave_boards(hu0, hu1, hv0, hv1, casing):
                         if side in ("-X", "+X"):
-                            solid(lo_face, hi_face, bv0, bv1, bu0, bu1)
+                            solid(lo_face, hi_face, bv0, bv1, bu0, bu1, "trim")
                         else:
-                            solid(bu0, bu1, bv0, bv1, lo_face, hi_face)
+                            solid(bu0, bu1, bv0, bv1, lo_face, hi_face, "trim")
                     # The threshold: a board across the opening, this room's half of the wall.
                     sill_lo, sill_hi = min(plane, far), max(plane, far)
                     if side in ("-X", "+X"):
-                        solid(sill_lo, sill_hi, hv0, hv0 + THRESHOLD_THICK, hu0, hu1)
+                        solid(sill_lo, sill_hi, hv0, hv0 + THRESHOLD_THICK, hu0, hu1, "trim")
                     else:
-                        solid(hu0, hu1, hv0, hv0 + THRESHOLD_THICK, sill_lo, sill_hi)
+                        solid(hu0, hu1, hv0, hv0 + THRESHOLD_THICK, sill_lo, sill_hi, "trim")
 
                 # `HOUSE-00458`: the skirting and the cornice, along the foot and the head of
                 # this run of wall. Interrupted wherever an opening crosses the band -- a doorway
@@ -1078,10 +1113,10 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     for bu0, bu1 in minus(start, end, crossing):
                         if side in ("-X", "+X"):
                             solid(min(plane, proud_at), max(plane, proud_at),
-                                  band_lo, band_hi, bu0, bu1)
+                                  band_lo, band_hi, bu0, bu1, "trim")
                         else:
                             solid(bu0, bu1, band_lo, band_hi,
-                                  min(plane, proud_at), max(plane, proud_at))
+                                  min(plane, proud_at), max(plane, proud_at), "trim")
 
                 # `HOUSE-00457`: the window. Frame, sash, glass and -- for a double-hung -- the
                 # meeting rail are generated ONCE, by the first of the portal's interior cells in
@@ -1095,11 +1130,11 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     near, far_side = plane, far
                     lo_face, hi_face = min(near, far_side), max(near, far_side)
 
-                    def band(u0, u1, v0, v1, d0=lo_face, d1=hi_face, at=side):
+                    def band(u0, u1, v0, v1, d0=lo_face, d1=hi_face, at=side, klass="trim"):
                         if at in ("-X", "+X"):
-                            solid(d0, d1, v0, v1, u0, u1)
+                            solid(d0, d1, v0, v1, u0, u1, klass)
                         else:
-                            solid(u0, u1, v0, v1, d0, d1)
+                            solid(u0, u1, v0, v1, d0, d1, klass)
 
                     owner = window_owner(portal_cells.get(hole[4]), cells_by_id, cell["id"])
                     if owner == cell["id"]:
@@ -1123,14 +1158,15 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                             band(su0, su1, middle - MEETING_RAIL / 2.0,
                                  middle + MEETING_RAIL / 2.0, sash_lo, sash_hi)
                         band(su0 + g, su1 - g, sv0 + g, sv1 - g,
-                             depth - GLASS_THICK / 2.0, depth + GLASS_THICK / 2.0)
+                             depth - GLASS_THICK / 2.0, depth + GLASS_THICK / 2.0,
+                             klass="glass")
 
                     # `HOUSE-00469`: a basement hopper sits in a well, outside the wall, open to
                     # the sky. §12.6 says so and gives the sill at −0.45 absolute; the well holds
                     # the earth back from it.
                     if str(opening.get("type")) == "W_BASEMENT" and outside:
                         for well_box in window_well(side, outer_plane, hu0, hu1, hv0):
-                            solid(*well_box)
+                            solid(*well_box, "exterior")
 
                     # The sill board, projecting into THIS room under the opening.
                     casing = float((opening.get("frame") or {}).get("casing") or 0.0)
@@ -1157,7 +1193,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                             towards = (hu0 + hu1) / 2.0 - corner_lo
                             look = ((towards, 0.0, 0.0) if side in ("-Z", "+Z")
                                     else (0.0, 0.0, towards))
-                        add(quad, look)
+                        add(quad, look, "trim")
 
         # `HOUSE-00452`: the floor and the ceiling, inset to the same inner faces.
         for level_y, look in ((y0, (0.0, 1.0, 0.0)), (y1, (0.0, -1.0, 0.0))):
@@ -1166,7 +1202,8 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
             wells = slab_holes(list(portals), cell, level_y, box)
             for px0, px1, pz0, pz1 in panel(ix0, ix1, iz0, iz1, wells):
                 add([(px0, level_y, pz0), (px1, level_y, pz0),
-                     (px1, level_y, pz1), (px0, level_y, pz1)], look)
+                     (px1, level_y, pz1), (px0, level_y, pz1)],
+                    look, "floor" if level_y == y0 else "ceiling")
             # `HOUSE-00460`: a railing round the hole in the FLOOR -- §70.5 asks for 1.05 m at a
             # drop over a metre and §12 declares 1.10 -- with a gap where the stair arrives. A
             # railing across the top of the flight would be a railing you have to climb.
@@ -1193,8 +1230,10 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                    level_y + float(construction.get("railing", 0.0)),
                                    fixed, RAIL_SECTION)
 
+    surface["class"] = "metal"
     build_balcony_edge(cell, extent, list(neighbours), construction, solid, add)
     build_mezzanine_guard(cell, extent, cells_by_id, levels or {}, construction, add)
+    surface["class"] = "wall"
 
     # `HOUSE-00464`: a covered deck stands on columns and has a balustrade round its open sides.
     # The porch is the one cell in this house that is covered -- `L1_BALCONY_FRONT` sits on it --
@@ -1218,15 +1257,17 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                 for index in range(PORCH_COLUMNS):
                     at = lo + half + (hi - lo - COLUMN_SECTION) * index / (PORCH_COLUMNS - 1)
                     if longest in ("-X", "+X"):
-                        solid(plane - half, plane + half, by0, beam_lo, at - half, at + half)
+                        solid(plane - half, plane + half, by0, beam_lo, at - half, at + half,
+                              "trim")
                     else:
-                        solid(at - half, at + half, by0, beam_lo, plane - half, plane + half)
+                        solid(at - half, at + half, by0, beam_lo, plane - half, plane + half,
+                              "trim")
             for side in open_sides:
                 plane, lo, hi = side_span(side, box)
                 if side in ("-X", "+X"):
-                    solid(plane - half, plane + half, beam_lo, by1, lo, hi)
+                    solid(plane - half, plane + half, beam_lo, by1, lo, hi, "trim")
                 else:
-                    solid(lo, hi, beam_lo, by1, plane - half, plane + half)
+                    solid(lo, hi, beam_lo, by1, plane - half, plane + half, "trim")
                 # The balustrade between the columns, broken where the steps come up.
                 drop = by0 - 0.0
                 height = float(construction.get("railing" if drop > 1.0 else "balustrade", 0.0))
@@ -1239,7 +1280,8 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                 if side in ("-Z", "+Z")
                                 else (float(step_print["z"][0]), float(step_print["z"][1])))
                 for rail_lo, rail_hi in minus(lo, hi, cuts):
-                    rail_along(add, side in ("-X", "+X"), rail_lo, rail_hi,
+                    rail_along(lambda points, out: add(points, out, "metal"),
+                               side in ("-X", "+X"), rail_lo, rail_hi,
                                by0 + height, by0 + height, plane, RAIL_SECTION)
 
     # `HOUSE-00463`: the walkway boards in an unfinished attic store. A rafter-bounded level's
@@ -1253,11 +1295,11 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
             if (bx1 - bx0) >= (bz1 - bz0):
                 middle = (bz0 + bz1) / 2.0
                 solid(bx0, bx1, by0, by0 + WALKWAY_THICK,
-                      middle - WALKWAY_WIDTH / 2.0, middle + WALKWAY_WIDTH / 2.0)
+                      middle - WALKWAY_WIDTH / 2.0, middle + WALKWAY_WIDTH / 2.0, "structure")
             else:
                 middle = (bx0 + bx1) / 2.0
                 solid(middle - WALKWAY_WIDTH / 2.0, middle + WALKWAY_WIDTH / 2.0,
-                      by0, by0 + WALKWAY_THICK, bz0, bz1)
+                      by0, by0 + WALKWAY_THICK, bz0, bz1, "structure")
 
     # `HOUSE-00459`: the flights that stand in this cell. A flight is carried by its `fromCell`,
     # the one it starts in, so it is built once and it is in the chunk of the room you are
@@ -1268,15 +1310,20 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         # The foot of the flight: what it declares if it declares one -- the porch, terrace and
         # garage steps join two cells on ONE level and are the only things that know what they
         # climb -- and otherwise the floor of the cell it stands in.
+        surface["class"] = "stair"
         foot = flight.get("fromY")
         build_flight(flight, solid, float(foot) if foot is not None else extent[0],
                      add=add, construction=construction,
                      inner=list(cell_boxes(cell, extent))[0])
+        surface["class"] = "wall"
 
     mesh = bpy.data.meshes.new(f"{cell['id']}_mesh")
     mesh.from_pydata(vertices, [], faces)
     mesh.validate()
     mesh.update()
+    material_slots(mesh)
+    for polygon, klass in zip(mesh.polygons, classes):
+        polygon.material_index = SURFACE_ORDER.index(klass)
     obj = bpy.data.objects.new(cell["id"], mesh)
     bpy.context.scene.collection.objects.link(obj)
     return obj
@@ -1352,6 +1399,9 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         mesh.from_pydata(reset_vertices, [], reset_faces)
         mesh.validate()
         mesh.update()
+        material_slots(mesh)
+        for polygon in mesh.polygons:
+            polygon.material_index = SURFACE_ORDER.index("exterior")
         stack = bpy.data.objects.new("CHIMNEY", mesh)
         bpy.context.scene.collection.objects.link(stack)
         export(stack, output / "CHIMNEY.glb")
@@ -1379,20 +1429,23 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, ...]] = []
 
-    def add(points, outward) -> None:
+    classes: list[str] = []
+
+    def add(points, outward, klass="roof") -> None:
         base = len(vertices)
         vertices.extend(to_blender(*point) for point in facing(points, outward))
         faces.append(tuple(range(base, base + len(points))))
+        classes.append(klass)
 
     for corners, outward in roof_planes(outer, eaves_y, pitch):
-        add(corners, outward)
+        add(corners, outward, "roof")
 
     # `HOUSE-00462`: the dormers, which belong to the roof they come through.
     for rect_u, rect_v, plane_z in dormers or ():
         outward = 1.0 if abs(plane_z - box[3]) < abs(plane_z - box[2]) else -1.0
         for corners, face_outward in dormer_shell(rect_u, rect_v, plane_z, outward, outer,
                                                   eaves_y, pitch):
-            add(corners, face_outward)
+            add(corners, face_outward, "roof")
 
     # The fascia: a board round the eaves edge, hanging below it, and the soffit closing the
     # underside back to the wall. Without them you see the roof planes end in mid-air.
@@ -1417,7 +1470,7 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
              (x0 + reach, soffit_y, z1 - reach), (x0, soffit_y, z1 - reach)],
             [(x1 - reach, soffit_y, z0 + reach), (x1, soffit_y, z0 + reach),
              (x1, soffit_y, z1 - reach), (x1 - reach, soffit_y, z1 - reach)]):
-        add(corners, (0.0, -1.0, 0.0))
+        add(corners, (0.0, -1.0, 0.0), "trim")
 
     # `HOUSE-00463`: the rafters and the purlins, under the two long planes. The hip ends carry
     # jack rafters in a real roof and none here: they are a different length each and the attic's
@@ -1445,7 +1498,7 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
                               (near, eaves_y - RAFTER_DEPTH, at + RAFTER_WIDTH / 2.0),
                               (mid, top - RAFTER_DEPTH, at + RAFTER_WIDTH / 2.0),
                               (mid, top - RAFTER_DEPTH, at - RAFTER_WIDTH / 2.0)]
-                add(rafter, (0.0, -1.0, 0.0))
+                add(rafter, (0.0, -1.0, 0.0), "structure")
         # A purlin under each slope, halfway up it.
         for side in (-1.0, 1.0):
             near = (z0 if side < 0 else z1) if dx >= dz else (x0 if side < 0 else x1)
@@ -1456,12 +1509,14 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
                 add([(along0, level - PURLIN_SECTION, at - PURLIN_SECTION / 2.0),
                      (along1, level - PURLIN_SECTION, at - PURLIN_SECTION / 2.0),
                      (along1, level, at - PURLIN_SECTION / 2.0),
-                     (along0, level, at - PURLIN_SECTION / 2.0)], (0.0, 0.0, -1.0))
+                     (along0, level, at - PURLIN_SECTION / 2.0)], (0.0, 0.0, -1.0),
+                    "structure")
             else:
                 add([(at - PURLIN_SECTION / 2.0, level - PURLIN_SECTION, along0),
                      (at - PURLIN_SECTION / 2.0, level - PURLIN_SECTION, along1),
                      (at - PURLIN_SECTION / 2.0, level, along1),
-                     (at - PURLIN_SECTION / 2.0, level, along0)], (-1.0, 0.0, 0.0))
+                     (at - PURLIN_SECTION / 2.0, level, along0)], (-1.0, 0.0, 0.0),
+                    "structure")
 
     # `HOUSE-00468`: a gutter along each eaves edge, a downspout at each corner, and a vent along
     # the ridge. The gutter hangs on the fascia, so its height comes from the fascia's.
@@ -1476,10 +1531,12 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
                           at - GUTTER_SECTION / 2.0, at + GUTTER_SECTION / 2.0)
             for value, outward in ((box_of[0], (-1.0, 0.0, 0.0)), (box_of[1], (1.0, 0.0, 0.0))):
                 add([(value, box_of[2], box_of[4]), (value, box_of[3], box_of[4]),
-                     (value, box_of[3], box_of[5]), (value, box_of[2], box_of[5])], outward)
+                     (value, box_of[3], box_of[5]), (value, box_of[2], box_of[5])], outward,
+                    "metal")
             for value, outward in ((box_of[2], (0.0, -1.0, 0.0)), (box_of[3], (0.0, 1.0, 0.0))):
                 add([(box_of[0], value, box_of[4]), (box_of[1], value, box_of[4]),
-                     (box_of[1], value, box_of[5]), (box_of[0], value, box_of[5])], outward)
+                     (box_of[1], value, box_of[5]), (box_of[0], value, box_of[5])], outward,
+                    "metal")
     half_spout = DOWNSPOUT_SECTION / 2.0
     for corner_x in (x0, x1):
         for corner_z in (z0, z1):
@@ -1487,7 +1544,7 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
                                    (corner_x + half_spout, (1.0, 0.0, 0.0))):
                 add([(value, 0.0, corner_z - half_spout), (value, gutter_y, corner_z - half_spout),
                      (value, gutter_y, corner_z + half_spout), (value, 0.0, corner_z + half_spout)],
-                    outward)
+                    outward, "metal")
     ridge_top = eaves_y + (min(x1 - x0, z1 - z0) / 2.0) * pitch
     if dx >= dz:
         vent = (x0 + (z1 - z0) / 2.0, x1 - (z1 - z0) / 2.0)
@@ -1495,12 +1552,15 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
              (vent[1], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 - RIDGE_VENT_WIDTH / 2.0),
              (vent[1], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 + RIDGE_VENT_WIDTH / 2.0),
              (vent[0], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 + RIDGE_VENT_WIDTH / 2.0)],
-            (0.0, 1.0, 0.0))
+            (0.0, 1.0, 0.0), "metal")
 
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(vertices, [], faces)
     mesh.validate()
     mesh.update()
+    material_slots(mesh)
+    for polygon, klass in zip(mesh.polygons, classes):
+        polygon.material_index = SURFACE_ORDER.index(klass)
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
     return obj
@@ -1617,11 +1677,19 @@ def selftest(output: Path) -> int:
     require(document is not None, f"and the file is a glTF the project's own reader accepts "
                                   f"({error})")
     if document is not None:
+        # The UNION of every position accessor. Since `HOUSE-00470` the exporter splits a cell
+        # into one primitive per material, so the first accessor is the first surface class and
+        # not the cell -- a claim that read it alone would be a claim about the floor.
         bounds = None
         for accessor in document.get("accessors", []):
-            if accessor.get("type") == "VEC3" and "min" in accessor and "max" in accessor:
-                bounds = (accessor["min"], accessor["max"])
-                break
+            if accessor.get("type") != "VEC3" or "min" not in accessor:
+                continue
+            if bounds is None:
+                bounds = ([float(v) for v in accessor["min"]],
+                          [float(v) for v in accessor["max"]])
+                continue
+            bounds = ([min(a, float(b)) for a, b in zip(bounds[0], accessor["min"])],
+                      [max(a, float(b)) for a, b in zip(bounds[1], accessor["max"])])
         require(bounds is not None, "with a POSITION accessor carrying its bounds")
         if bounds is not None:
             box = list(cell_boxes(subject, extent))[0]
@@ -2164,6 +2232,25 @@ def selftest(output: Path) -> int:
             f"every one of the {len(cells)} cells generates, plus {len(roofs)} roof(s) and the "
             f"chimney ({len(everything['written'])} written, {len(everything['skipped'])} "
             f"skipped, {everything['problems'][:1]})")
+
+    # ---- `HOUSE-00470`: the placeholder materials -----------------------------------------------
+    reset_scene()
+    painted = build_cell(subject, extent, neighbours=neighbours, construction=construction,
+                         level=levels[subject["level"]], levels=levels, portals=all_portals,
+                         openings=openings_by_portal, cells_by_id=cells)
+    used = {SURFACE_ORDER[polygon.material_index] for polygon in painted.data.polygons}
+    require(len(painted.data.materials) == len(SURFACE_ORDER),
+            f"a cell carries one material per surface class ({len(painted.data.materials)})")
+    require({"floor", "ceiling", "wall", "exterior", "trim", "glass"} <= used,
+            f"and the kitchen uses the six a room has -- you can tell its floor from its ceiling "
+            f"from its walls in a screenshot ({sorted(used)})")
+    require(len({SURFACE_COLOURS[name] for name in SURFACE_ORDER}) == len(SURFACE_ORDER),
+            "no two classes share a colour, which is the whole point of a placeholder")
+    require(SURFACE_COLOURS["glass"][3] < 1.0,
+            f"and the glass is the one that is not opaque ({SURFACE_COLOURS['glass'][3]})")
+    document, _error = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
+    require(len(document.get("materials", [])) >= 6,
+            f"the exported file carries them ({len(document.get('materials', []))})")
 
     # ---- `HOUSE-00469`: the basement window wells -----------------------------------------------
     wells_wanted = [row for row in openings_by_portal.values()

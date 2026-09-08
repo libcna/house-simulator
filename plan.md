@@ -6977,8 +6977,23 @@ the chunk builder produces ≤ 6 chunks per cell.
             0.30 m short of grade — needed a claim about **all three** walls rather than the
             highest of them.
       note: 99 objects now: 96 cells, two roofs and the chimney.
-- [ ] HOUSE-00470 — Assign placeholder materials per surface class so the blockout is readable
-      dep: HOUSE-00452…HOUSE-00469 · sys: content · plat: TOOL · pri: MUST
+- [x] HOUSE-00470 — Assign placeholder materials per surface class so the blockout is readable
+      dep: HOUSE-00452…HOUSE-00469 · sys: content · plat: TOOL · pri: MUST      note: (2026-09-08) ten classes — floor, ceiling, wall, exterior, trim, glass, stair, roof,
+            structure, metal — each a flat base colour deliberately unlike the others. The point is
+            not prettiness: it is being able to tell a floor from a ceiling from a wall in a
+            screenshot, which is phase 6's exit criterion and was impossible while every face was
+            the same grey.
+      note: the class is **threaded through**, not guessed from the face's normal. A generator that
+            decided "up-facing at floor level is a floor" would be right until the first tread and
+            the first walkway board. Every pass names what it is building, and the names are the
+            ones §11's material table will use, so `HOUSE-00296`'s real materials are a rename.
+      finding: **the exporter splits a cell into one primitive per material**, which broke a claim
+            that had been reading the first `POSITION` accessor as the cell's bounds. It now reads
+            the union of them, and the fix is the claim's rather than the geometry's — but a claim
+            that quietly measured the floor slab and called it the house is exactly the kind that
+            passes for years.
+      note: four injected bugs, all caught. 99 objects.
+
 - [ ] HOUSE-00471 — Generate second-UV lightmap coordinates for the whole shell (`lightmap_unwrap.py`)
       dep: HOUSE-00470, HOUSE-00205 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00472 — Generate `_COL` collision proxies for the shell: wall/floor/ceiling OBBs and the stair ramps
