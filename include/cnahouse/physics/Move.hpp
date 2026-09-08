@@ -92,4 +92,72 @@ namespace cnahouse::physics
                                               const Capsule& capsule,
                                               const Microsoft::Xna::Framework::Vector3& motion);
 
+    /// @brief §43.1: a body climbs a step up to this high without being told to (`HOUSE-00551`).
+    ///
+    /// A stair riser in this house is about 175 mm (§70.5's `2R + G` between 600 and 650 mm over a
+    /// 250-280 mm going), a kerb is 100-150 mm and a threshold is 20 mm, so 0.22 m clears every
+    /// step the house actually has with room to spare, and stops well short of the 0.45 m a body
+    /// would have to be climbing a wall to need.
+    inline constexpr float kStepUpHeight = 0.22F;
+
+    /// @brief §43.1: a body settles onto ground up to this far below without falling.
+    ///
+    /// Twice the step-up on purpose: walking DOWN a stair is where the numbers differ. A body that
+    /// leaves a tread horizontally is over nothing for one tick and would otherwise start a fall
+    /// on every single step, which reads as a stumble and fires §43.1's landing sound down a whole
+    /// flight.
+    inline constexpr float kStepDownHeight = 0.45F;
+
+    /// @brief What the step assist did on top of the slide (`HOUSE-00551`).
+    struct StepAssist
+    {
+        /// @brief Where the body ended up.
+        Microsoft::Xna::Framework::Vector3 position;
+        /// @brief The slide that was accepted: the raised one if the step was taken, else the
+        ///        plain one.
+        SlideResult slide;
+        /// @brief Whether the raised retry was accepted.
+        bool steppedUp = false;
+        /// @brief How far the body was lifted and then settled back, net of the drop. Zero unless
+        ///        `steppedUp`.
+        float rise = 0.0F;
+        /// @brief Whether the body settled onto ground below where the step left it.
+        bool steppedDown = false;
+        /// @brief How far it settled, downwards positive. Zero unless `steppedDown`.
+        float drop = 0.0F;
+        /// @brief The body was over nothing within `kStepDownHeight` and was left where it was.
+        ///        §43.1's gravity is what happens next, and `HOUSE-00552` owns it.
+        bool airborne = false;
+    };
+
+    /// @brief §49.3 step 4 plus §43.1's step-down: one horizontal move, with the assists.
+    ///
+    /// ```
+    /// 4. StepUp: if blocked horizontally and a 0.22 m raised sweep is clear, lift and retry once
+    /// ```
+    ///
+    /// **"Clear" means clear.** The raised retry is accepted only if it meets nothing at all over
+    /// the whole step. The weaker test -- "it got further than the unraised one did" -- accepts a
+    /// body that has merely nosed closer to a ledge it cannot climb and is now balanced against
+    /// its top corner. It also costs something real and worth knowing: a body sliding along a wall
+    /// while stepping over a threshold meets the wall in the raised retry too, so that tick is not
+    /// assisted. At §49.3's tick a step is eleven millimetres, so the body is assisted on the next
+    /// one; at half a metre it would not be, which is why the real-house case walks a tick.
+    ///
+    /// **"Retry once" is not the whole of it.** A body that is lifted 0.22 m and moved forward is
+    /// standing in mid-air over the step it just cleared; the lift has to be given back by
+    /// settling onto whatever is under the new position, or every kerb in the house makes the
+    /// player 0.22 m taller. The settle is also what says NO: land on nothing, or on a face too
+    /// steep for §43.1's slope limit, and the raised attempt is thrown away and the plain slide
+    /// kept. That is why a 0.20 m kerb is climbed and a 0.30 m ledge is not -- the ledge's top is
+    /// out of reach of the lift, so the retry gets no further and there is nothing to accept.
+    ///
+    /// @p motion must be horizontal. Vertical movement is gravity's (`HOUSE-00552`), and a step
+    /// assist applied to a fall would let a body climb by falling into a wall.
+    [[nodiscard]] StepAssist MoveWithStepAssist(const CollisionWorld& world,
+                                                const CollisionCell& cell,
+                                                class BroadPhase& broad,
+                                                const Capsule& capsule,
+                                                const Microsoft::Xna::Framework::Vector3& motion);
+
 } // namespace cnahouse::physics

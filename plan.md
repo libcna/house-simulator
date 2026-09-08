@@ -7707,8 +7707,45 @@ never escapes and never penetrates.
             a surface, and the way out of a volume is a nearest-face direction, not a surface
             normal a motion can be tested against. Reverted: a body that starts inside spends the
             step standing still, and §49.3's step 5 is the step that exists for that.
-- [ ] HOUSE-00551 — Implement step-up (≤ 0.22 m) and step-down (≤ 0.45 m) assist
+- [x] HOUSE-00551 — Implement step-up (≤ 0.22 m) and step-down (≤ 0.45 m) assist
       dep: HOUSE-00550 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) `MoveWithStepAssist`: §49.3 step 4 -- *"if blocked horizontally and a
+            0.22 m raised sweep is clear, lift and retry once"* -- and §43.1's step-down, which is
+            the same idea pointing the other way and twice as far. The two numbers are not
+            symmetric by accident: going UP, 0.22 m clears every step this house has (a 175 mm
+            riser, a 150 mm kerb, a 20 mm threshold); coming DOWN, a body that leaves a tread
+            horizontally is over nothing for a tick and would start a fall on every single stair.
+      note: **"retry once" is not the whole of it, and "clear" means clear.** A body lifted 0.22 m
+            and moved forward is standing in mid-air over the step it just cleared, so the lift has
+            to be given back by settling onto whatever is under the new position -- and the settle
+            is also what says no, by finding nothing there or finding something too steep to stand
+            on. And the raised retry must meet NOTHING: the weaker "did it get further than the
+            unraised one?" accepts a body that has merely nosed 0.2 m closer to a 0.24 m ledge and
+            is balanced against its top corner 15 mm short of standing on it. Clear also puts the
+            threshold exactly where §43.1 does -- the raised feet are at `feet + 0.22`, so what
+            they clear is a step of 0.22 and not a millimetre more -- and it answers the head-room
+            question for free, because a body that cannot be lifted is lifted into the ceiling and
+            a body inside a ceiling is not clear of anything.
+      accept: 11 cases. A 0.20 m kerb climbed and 0.05/0.15/0.21 with it, each measured to the
+            millimetre; 0.24/0.35/0.80 refused; a kerb under 1.85 m of ceiling refused, by the same
+            rule and not a special one; an unobstructed step left exactly alone; a 0.30 m platform
+            walked off and settled onto; a 0.60 m drop left as a fall; a landing on the SIDE of a
+            kerb (overshoot its far edge by 0.25 m and the settle meets its rounding at 56°)
+            refused, while 0.20 m of overshoot meets the same rounding at 42° and is a place a
+            capsule can rest; nothing to settle onto over a 60° bank. In the real house, a full
+            SECOND of walking -- 120 ticks of §43.2's 1.35 m/s -- in eight directions from the
+            middle of 78 cells, 74 880 ticks in all, each fed the position the last produced: the
+            assist fired 27 times, never lifted more than 0.22 m or dropped more than 0.45 m, and
+            never left a body inside anything four pushes could not fix. Eleven injected bugs,
+            eleven caught.
+      finding: (2026-09-08, found by `HOUSE-00551`) two guards written into the first draft turned
+            out to be things the design already says. The explicit head-room sweep is subsumed by
+            "clear" (see above), and the `startedInside` case in the step-down settle is a no-op
+            because `startedInside` comes with `time` 0 and therefore a zero drop. Both were
+            removed rather than left as code no test could distinguish. What SURVIVED that pass is
+            the "blocked horizontally" early-out, which is not a rule either -- a step that went
+            its whole length cannot be improved on by a lift -- but is worth two sweeps a tick on
+            every tick a body spends in open floor, and says so.
 - [ ] HOUSE-00552 — Implement gravity and landing detection with soft/hard thresholds
       dep: HOUSE-00550 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00553 — Implement the terrain height-field collider with bilinear sampling and a triangle test above 20°

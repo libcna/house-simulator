@@ -116,4 +116,107 @@ namespace cnahouse::physics
         return result;
     }
 
+    namespace
+    {
+        /// How far a move got in the x/z plane. The step assist is a question about horizontal
+        /// progress only: a body that slid 0.4 m sideways along a wall got somewhere, and one that
+        /// rose 0.4 m up a ramp got somewhere else, and only the first is what a step is for.
+        float HorizontalProgress(const Xna::Vector3& from, const Xna::Vector3& to)
+        {
+            const float dx = to.X - from.X;
+            const float dz = to.Z - from.Z;
+            return std::sqrt(dx * dx + dz * dz);
+        }
+
+    } // namespace
+
+    StepAssist MoveWithStepAssist(const CollisionWorld& world,
+                                  const CollisionCell& cell,
+                                  BroadPhase& broad,
+                                  const Capsule& capsule,
+                                  const Xna::Vector3& motion)
+    {
+        StepAssist result;
+        const SlideResult plain = CollideAndSlide(world, cell, broad, capsule, motion);
+        result.slide = plain;
+        result.position = plain.position;
+
+        const float asked = HorizontalProgress(Xna::Vector3(), motion);
+        const float got = HorizontalProgress(capsule.centre, plain.position);
+
+        // "Blocked horizontally" (§49.3 step 4). This is an early-out and not a rule: a step that
+        // went its whole length cannot be improved on by a lift, because both attempts are capped
+        // by the distance asked for. Skipping it saves two sweeps on every tick a body spends in
+        // open floor, which is most of them.
+        if (asked - got > kMotionEpsilon)
+        {
+            Capsule lifted = capsule;
+            lifted.centre =
+                Xna::Vector3(capsule.centre.X, capsule.centre.Y + kStepUpHeight, capsule.centre.Z);
+
+            const SlideResult raised = CollideAndSlide(world, cell, broad, lifted, motion);
+
+            // §49.3 says *"if ... a 0.22 m raised sweep is CLEAR"*, and it means clear: the
+            // raised body must meet nothing at all over the whole step. "Got further than the
+            // unraised one did" is the tempting weaker test and it accepts a body that has
+            // merely nosed 0.2 m closer to a 0.24 m ledge and is now balanced against its top
+            // corner, 15 mm short of standing on it. Clear also puts the threshold exactly
+            // where §43.1 does: the raised feet are at `feet + 0.22`, so what they clear is a
+            // step of 0.22 and not a millimetre more.
+            //
+            // It is also the whole of the head-room question. A body that cannot be lifted --
+            // a kerb under a 1.85 m ceiling, when the body is 1.80 m tall -- is lifted INTO
+            // the ceiling, and a body inside a ceiling is not clear of anything.
+            if (raised.contacts == 0 &&
+                HorizontalProgress(lifted.centre, raised.position) > got + kMotionEpsilon)
+            {
+                // Give the lift back. A body left 0.22 m up is standing on nothing, and the
+                // surface it settles onto has to be one §43.1 says can be stood on.
+                Capsule ahead = lifted;
+                ahead.centre = raised.position;
+                const CellSweepHit down =
+                    SweepCell(world, cell, broad, ahead, Xna::Vector3(0.0F, -kStepUpHeight, 0.0F));
+                if (down.hit && IsWalkable(down.normal))
+                {
+                    const float fell = kStepUpHeight * down.time * kContactBackoff;
+                    result.slide = raised;
+                    result.steppedUp = true;
+                    result.rise = kStepUpHeight - fell;
+                    result.position =
+                        Xna::Vector3(raised.position.X, raised.position.Y - fell, raised.position.Z);
+                }
+            }
+        }
+
+        // §43.1's step-down, from wherever the body ended up. Walking off the edge of a tread is
+        // not a fall, and treating it as one makes a staircase a sequence of stumbles.
+        Capsule settled = capsule;
+        settled.centre = result.position;
+        const CellSweepHit ground =
+            SweepCell(world, cell, broad, settled, Xna::Vector3(0.0F, -kStepDownHeight, 0.0F));
+        if (!ground.hit)
+        {
+            result.airborne = true;
+            return result;
+        }
+        // A body already resting on it needs no case of its own: `startedInside` comes with
+        // `time` 0, so the drop below is zero and nothing happens.
+        if (!IsWalkable(ground.normal))
+        {
+            // Something is down there, but §43.1 says it is not a floor -- the side of a bank, the
+            // face of a wall below an overhang. There is nothing to settle ONTO, so this is a fall
+            // like any other and the body is left where the step put it.
+            result.airborne = true;
+            return result;
+        }
+        const float drop = kStepDownHeight * ground.time * kContactBackoff;
+        if (drop > kMotionEpsilon)
+        {
+            result.steppedDown = true;
+            result.drop = drop;
+            result.position = Xna::Vector3(result.position.X, result.position.Y - drop, result.position.Z);
+        }
+        return result;
+    }
+
 } // namespace cnahouse::physics
