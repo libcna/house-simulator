@@ -155,6 +155,10 @@ run_gate "world-deploy" python3 tools/world/deploy_world.py --check
 # §15.7's eleven rules can see it. This gate can: the golden list is append-only, and an id that
 # leaves it fails until a person deletes the line and says why.
 run_gate "world-ids" python3 tools/world/id_golden.py --check
+# `HOUSE-00400`. §13's room schedule is 94 rows of hand-maintained numbers over data that changes
+# every time a room does. Walking it against the layout found 52 disagreements, including a garage
+# 5 m² too small and a central hall with three doorways written as `0`.
+run_gate "room-schedule" python3 tools/world/room_schedule.py --check
 # `HOUSE-00280`. The surface map is counted from the manifest, so importing or dropping a
 # footstep sample changes it. A stale map is HOUSE-00281 sourcing the wrong list.
 run_gate "footsteps" python3 tools/assets/footstep_map.py --check

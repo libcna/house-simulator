@@ -6328,8 +6328,50 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             materials (`layout.materials.json` is `HOUSE-00385`, behind `HOUSE-00296`) and no props
             (`HOUSE-00450` onward). Nothing needs doing when they arrive — the walk is generic, so
             `--emit` will pick them up.
-- [ ] HOUSE-00400 — Phase-5 review: walk the plan on paper against the room schedule and the plumbing diagram; correct `cna-house.md` if the data disagrees
+- [x] HOUSE-00400 — Phase-5 review: walk the plan on paper against the room schedule and the plumbing diagram; correct `cna-house.md` if the data disagrees
       dep: HOUSE-00397 · sys: — · plat: ALL · pri: MUST
+      finding: **§13 disagreed with the layout in 52 places.** Walked all 94 rows of §13.2–§13.7
+            against `assets-src/world/`: 6 wrong areas, 2 wrong extents, 44 wrong window and door
+            counts, and 9 unions of boxes that §13.1's own `∪` convention says must be marked and
+            none of which was. The `Lights` column was right everywhere, which is what a column
+            that means one thing looks like.
+      finding: **the garage is 70.6 m², not 65.5.** Its own X and Z columns say 8.4 × 8.4; the area
+            beside them was the designed figure and nobody multiplied. Likewise `B1_UNDERSTAIR`,
+            still carrying 7.6 m² a year after a correction note **in the same section** had worked
+            out 4.68: it is an L-shaped remainder, and §13.1 never said whether Area meant the
+            union or the rectangle around it. It says so now, and the row is marked `∪`.
+      finding: **the porch and the front balcony began at Z −14.00 and the house's front face is
+            at −14.30.** The layout is right — every other L0 cell's front boundary is −14.30 and
+            rule 3 confirms no overlap — so both extents were corrected, which also moves both
+            areas from 17.3 to 19.4 m² and §13.4's balcony total from 64.3 to 66.4.
+      finding: **§13.3's summary added part of the floor twice.** "404.6 m² incl. garage and porch;
+            291.9 m² of heated interior" → with the garage and porch corrected the floor measures
+            438.30 m², less the loft's 27.38 = **410.9**, and the heated main block is the
+            21.4 × 12.8 plate, **273.9** — the old figure counted part of what it then added again
+            as the sunroom.
+      finding: **§13.7's cell arithmetic was one row out.** It read 75 interior, 93 total, 3 nested
+            sub-cells. §13.3 has 20 rows and its summary says "19 cells" because it deliberately
+            excludes the garage loft; the recount took that 19 for the row count. So the loft *is*
+            tabulated, there are 2 unlisted sub-cells and not 3, and 15 + 20 + 21 + 18 + 6 = 80
+            rows − 4 attached exterior = **76** interior, + 18 exterior = **94**, + 2 = 96.
+      note: **`Win` and `Doors` had no single meaning.** The columns held counts, attributions and
+            prose together — a central hall with three doorways written as `0`, a garage door count
+            that omitted the loft hatch, `2 sidelights + transom` where the schedule asked for a
+            number — and no rule reproduced them: counting by the leaf's `swing` cell matched 45
+            rows, counting the cell's boundary matched 29. §13.1 now defines them as the openings
+            on the **boundary** — every sash and leaf you can see from inside the room, so a door
+            counts for both cells — because that is the only definition a reader can check by
+            standing in the room. The eighteen descriptions moved into `Notes`.
+      note: **§12.5's plumbing diagram was already right**, all seven stacks, their fixtures and
+            their drops. It is right because `HOUSE-00386` and `HOUSE-00413` corrected it as they
+            authored — `STACK-G` exists in both places because placing the toilets found two
+            draining nowhere. It is now checked as well as correct.
+      note: the review is a **gate**, not a walk: `tools/world/room_schedule.py --check`, wired as
+            `room-schedule`. It measures the four numeric columns and the `∪` marks and rewrites
+            them with `--emit`; it compares the `X`/`Z` extents and never rewrites one, because
+            which of the two is right is a question about the house and a tool cannot answer it.
+            Five injected bugs caught, and a sixth injection found a line of dead code — an em dash
+            special case that no outcome depended on — which was deleted rather than defended.
 
 ### 5.3 Interactable data authoring (placement only; behaviour comes in phase 14)
 

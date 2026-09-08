@@ -1102,11 +1102,22 @@ through, not what opens. It becomes measurable when `HOUSE-00378` authors the le
   inset by half the bounding partition thickness (0.075 m interior, 0.15 m exterior). The data
   file stores the centre-line box; the geometry builder applies the insets.
 * A cell may be a **union of boxes** (marked `∪`). Portal traversal uses the union's AABB as the
-  conservative bound and the individual boxes for the point-in-cell test.
-* Area is the centre-line box area, rounded.
+  conservative bound and the individual boxes for the point-in-cell test. The `X` and `Z` columns
+  of a marked row are that AABB, which is why the mark matters: the area beside it is smaller.
+* Area is the **sum of the cell's boxes**, rounded to 0.1 m² — the L, not the rectangle around it.
 * `Lights` counts controllable fixture *groups*, not bulbs.
-* `Win` counts window openings; `Doors` counts hinged/sliding leaves (cased openings are not
-  doors).
+* `Win` and `Doors` count the openings on the cell's **boundary**: every sash and every leaf you
+  can see from inside the room, so a door between the hall and the WC counts for both of them.
+  Cased openings are not doors. An em dash is none.
+
+> The four numeric columns and the `∪` marks are measured from `assets-src/world/` by
+> `tools/world/room_schedule.py` and gated as `room-schedule` (`HOUSE-00400`); the `X`/`Z` extents
+> are compared and never rewritten, because which of the two is right is a question about the
+> house. Before that gate existed the columns held a mixture of counts, attributions and prose —
+> a central hall with three doorways written as `0`, a garage door count that omitted the loft
+> hatch, and `2 sidelights + transom` where the schedule asked for a number — and no single rule
+> reproduced them: counting by the leaf's `swing` cell matched 45 rows and counting the boundary
+> matched 29. The descriptions moved into `Notes`, where prose belongs.
 
 ### 13.2 `B1` — Basement · FFL −2.30, ceiling +0.25, clear 2.55 m
 
@@ -1114,21 +1125,21 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 
 | ID | Name | X | Z | Area | Lights | Win | Doors | Notes |
 |---|---|---|---|---|---|---|---|---|
-| `B1_STAIR` | Basement stair foot | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | — | 1 (at the head, on L0) | Straight flight, under `STAIR_MAIN` |
-| `B1_HALL` | Basement hallway | −2.20 … +2.20 | −27.10 … −14.30 | 56.3 | 3 | — | — | Spine; exposed joists, duct trunk overhead |
+| `B1_STAIR` | Basement stair foot | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | — | 3 | Straight flight, under `STAIR_MAIN`; its only door is at the head, on L0 |
+| `B1_HALL` | Basement hallway | −2.20 … +2.20 | −27.10 … −14.30 | 56.3 | 3 | — | 6 | Spine; exposed joists, duct trunk overhead |
 | `B1_MECHANICAL` | Mechanical / HVAC | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | 1 | 1 | Furnace, air handler, water heater, water main, expansion tank |
 | `B1_ELECTRICAL` | Electrical / service | +4.90 … +8.70 | −20.60 … −18.30 | 8.7 | 1 | — | 1 | Panel board, meter tails, structured-wiring cabinet |
 | `B1_UTILITY` | Utility / drainage | +4.90 … +8.70 | −23.00 … −20.60 | 9.1 | 1 | — | 1 | Sump, ejector pit, main drain, softener, STACK-A/D landing |
-| `B1_CINEMA` | Home cinema | +2.20 … +8.70 | −27.10 … −23.00 | 26.7 | 2 | — | 1 | Projector, screen, 6 seats, acoustic panels, no windows |
+| `B1_CINEMA` | Home cinema | +2.20 … +8.70 | −27.10 … −23.00 | 26.7 | 2 | — | 2 | Projector, screen, 6 seats, acoustic panels, no windows |
 | `B1_WC7` | Basement WC | +2.20 … +3.80 | −23.00 … −21.20 | 2.9 | 1 | — | 1 | Off `B1_HALL`, on STACK-F |
-| `B1_GYM` | Home gym | −8.20 … −2.20 | −18.30 … −14.30 | 24.0 | 2 | 2 | 1 | Rubber floor, mirror wall, treadmill, rack, bench |
+| `B1_GYM` | Home gym | −8.20 … −2.20 | −18.30 … −14.30 | 24.0 | 2 | 2 | 2 | Rubber floor, mirror wall, treadmill, rack, bench |
 | `B1_WORKSHOP` | Workshop | −12.70 … −8.20 | −18.30 … −14.30 | 18.0 | 2 | 2 | 1 | Bench, vice, pegboard, tool chest, dust extractor |
-| `B1_STOR1` | Storage 1 | −12.70 … −8.20 | −22.00 … −18.30 | 16.7 | 1 | 1 | 1 | Steel shelving, labelled crates, STACK-B chase |
+| `B1_STOR1` | Storage 1 | −12.70 … −8.20 | −22.00 … −18.30 | 16.6 | 1 | 1 | 1 | Steel shelving, labelled crates, STACK-B chase |
 | `B1_STOR2` | Storage 2 | −12.70 … −8.20 | −27.10 … −22.00 | 23.0 | 1 | 2 | 1 | Seasonal goods, paint, luggage, STACK-C/E chase |
-| `B1_HOBBY` | Hobby room | −8.20 … −2.20 | −24.00 … −18.30 | 34.2 | 2 | — | 1 | Model railway board, craft table, shelving |
+| `B1_HOBBY` | Hobby room | −8.20 … −2.20 | −24.00 … −18.30 | 34.2 | 2 | — | 4 | Model railway board, craft table, shelving |
 | `B1_CELLAR` | Wine / root cellar | −8.20 … −4.60 | −27.10 … −24.00 | 11.2 | 1 | — | 1 | Racks, stone floor, cool, no heating duct |
 | `B1_LAUNDRY2` | Secondary laundry / drying | −4.60 … −2.20 | −27.10 … −24.00 | 7.4 | 1 | — | 1 | Deep sink, drying rack, STACK-F |
-| `B1_UNDERSTAIR` | Under-stair store | +2.20 … +4.90 | −23.00 … −20.20 | 7.6 | 1 | — | 1 | Low, sloped ceiling; the classic junk cupboard |
+| `B1_UNDERSTAIR` ∪ | Under-stair store | +2.20 … +4.90 | −23.00 … −20.20 | 4.7 | 1 | — | 1 | Low, sloped ceiling; the classic junk cupboard |
 
 **15 cells. 273.9 m²**, which is the internal envelope exactly.
 
@@ -1143,82 +1154,90 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 
 | ID | Name | X | Z | Area | Lights | Win | Doors | Notes |
 |---|---|---|---|---|---|---|---|---|
-| `L0_FOYER` | Entrance foyer | −2.20 … +2.20 | −18.30 … −14.30 | 17.6 | 2 | 2 sidelights + transom | 1 (front) | Console table, mirror, umbrella stand, coat hooks |
-| `L0_HALL` | Central hall | −2.20 … +2.20 | −23.00 … −18.30 | 20.7 | 2 | — | 0 | **Family photo gallery wall** (§59.4) |
-| `L0_STAIR_MAIN` | Main staircase | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 2 | 1 (half-landing) | 1 (basement door) | Open to the foyer; the basement flight is beneath |
-| `L0_MUDROOM` | Mudroom | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | 1 | 2 (garage, laundry) | Bench, cubbies, boots, leashes, dog towel |
-| `L0_LAUNDRY` | Laundry room | +4.90 … +8.70 | −22.00 … −18.30 | 14.1 | 1 | — | 1 | Washer, dryer, folding counter, sink, STACK-D; no exterior wall (`HOUSE-00376`) |
+| `L0_FOYER` | Entrance foyer | −2.20 … +2.20 | −18.30 … −14.30 | 17.6 | 2 | 3 | 2 | Console table, mirror, umbrella stand, coat hooks; the front door with two sidelights and a transom over |
+| `L0_HALL` | Central hall | −2.20 … +2.20 | −23.00 … −18.30 | 20.7 | 2 | — | 3 | **Family photo gallery wall** (§59.4) |
+| `L0_STAIR_MAIN` | Main staircase | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 2 | 1 | 1 | Open to the foyer; the window is at the half-landing and the door is the basement flight's |
+| `L0_MUDROOM` | Mudroom | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | 1 | 2 | Bench, cubbies, boots, leashes, dog towel; doors to the garage and the laundry |
+| `L0_LAUNDRY` | Laundry room | +4.90 … +8.70 | −22.00 … −18.30 | 14.1 | 1 | — | 2 | Washer, dryer, folding counter, sink, STACK-D; no exterior wall (`HOUSE-00376`) |
 | `L0_WC1` | Powder room | +2.20 … +4.90 | −22.00 … −20.20 | 4.9 | 1 | — | 1 | WC + basin, STACK-A; no exterior wall (`HOUSE-00376`) |
-| `L0_FAMILY` | Family room | +2.20 … +8.70 | −27.10 … −22.00 | 33.2 | 3 | 2 picture | 1 | **Television**, sectional sofa, dog bed, bookshelves, media unit |
-| `L0_LIVING` | Formal living room | −8.20 … −2.20 | −20.20 … −14.30 | 35.4 | 3 | 1 bay + 1 tall | 1 | Fireplace on the west wall, piano, two armchairs |
-| `L0_OFFICE` | Study / office | −12.70 … −8.20 | −18.30 … −14.30 | 18.0 | 2 | 2 tall | 1 | Desk, office chair, bookcases, filing cabinet, globe |
+| `L0_FAMILY` | Family room | +2.20 … +8.70 | −27.10 … −22.00 | 33.2 | 3 | 2 | 2 | **Television**, sectional sofa, dog bed, bookshelves, media unit; two picture windows |
+| `L0_LIVING` | Formal living room | −8.20 … −2.20 | −20.20 … −14.30 | 35.4 | 3 | 2 | 3 | Fireplace on the west wall, piano, two armchairs; a bay window and a tall one |
+| `L0_OFFICE` | Study / office | −12.70 … −8.20 | −18.30 … −14.30 | 18.0 | 2 | 2 | 2 | Desk, office chair, bookcases, filing cabinet, globe; two tall windows |
 | `L0_WC2` | Guest powder room | −10.40 … −8.20 | −20.20 … −18.30 | 4.2 | 1 | — | 1 | STACK-B; no exterior wall (`HOUSE-00376`) |
 | `L0_CLOSET_W` | Study closet | −12.70 … −10.40 | −20.20 … −18.30 | 4.4 | 1 | — | 1 | Archive boxes, stationery |
-| `L0_DINING` | Formal dining room | −8.20 … −2.20 | −23.00 … −20.20 | 16.8 | 2 | — | 0 | Table for 8, sideboard, chandelier, china cabinet; no exterior wall (`HOUSE-00376`) |
-| `L0_STOR` | Hall storage | −12.70 … −8.20 | −22.60 … −20.20 | 10.8 | 1 | — | 1 | Cleaning cupboard, vacuum, ironing board |
-| `L0_BUTLERS` | Butler's pantry | −12.70 … −8.20 | −25.00 … −22.60 | 10.8 | 1 | 1 | 1 | Glass-front cabinets, counter, second sink, wine fridge |
-| `L0_PANTRY` | Walk-in pantry | −12.70 … −8.20 | −27.10 … −25.00 | 9.5 | 1 | 1 | 1 | Shelved dry goods, **chest freezer**, step stool |
-| `L0_KITCHEN` | Kitchen | −8.20 … +2.20 | −27.10 … −23.00 | 42.6 | 4 | 2 | 0 | Island, **large refrigerator**, range, ovens, dishwasher, sink |
-| `L0_SUNROOM` | Sunroom / breakfast room (rear extension) | −6.70 … +2.70 | −32.10 … −27.10 | 47.0 | 2 | 5 panels + slider | 1 slider | Breakfast table, wicker chairs, plants, wet bar; roof = rear balcony |
-| `L0_GARAGE` | Garage | +8.70 … +17.10 | −21.70 … −13.30 | 65.5 | 2 | 1 | 3 (sectional, side, house) | **One car**, workbench, shelving, bins, bikes |
-| `L0_GARAGE_LOFT` | Garage storage loft | +9.20 … +16.60 | −21.20 … −17.50 | 27.4 | 1 | — | 1 (loft hatch) | Nested in `L0_GARAGE` at +2.90; reached by a ladder through a 0.90 m hatch (`HOUSE-00377`) |
-| `L0_PORCH` | Front porch (exterior cell) | −3.60 … +3.60 | −14.00 … −11.60 | 17.3 | 1 | — | — | Two rockers, a doormat, a wall lantern each side of the door |
+| `L0_DINING` | Formal dining room | −8.20 … −2.20 | −23.00 … −20.20 | 16.8 | 2 | — | 2 | Table for 8, sideboard, chandelier, china cabinet; no exterior wall (`HOUSE-00376`) |
+| `L0_STOR` | Hall storage | −12.70 … −8.20 | −22.60 … −20.20 | 10.8 | 1 | — | 2 | Cleaning cupboard, vacuum, ironing board |
+| `L0_BUTLERS` | Butler's pantry | −12.70 … −8.20 | −25.00 … −22.60 | 10.8 | 1 | 1 | 2 | Glass-front cabinets, counter, second sink, wine fridge |
+| `L0_PANTRY` | Walk-in pantry | −12.70 … −8.20 | −27.10 … −25.00 | 9.5 | 1 | 1 | 3 | Shelved dry goods, **chest freezer**, step stool |
+| `L0_KITCHEN` | Kitchen | −8.20 … +2.20 | −27.10 … −23.00 | 42.6 | 4 | 2 | 2 | Island, **large refrigerator**, range, ovens, dishwasher, sink |
+| `L0_SUNROOM` | Sunroom / breakfast room (rear extension) | −6.70 … +2.70 | −32.10 … −27.10 | 47.0 | 2 | 6 | 1 | Breakfast table, wicker chairs, plants, wet bar; five fixed panels and a slider to the terrace; roof = rear balcony |
+| `L0_GARAGE` | Garage | +8.70 … +17.10 | −21.70 … −13.30 | 70.6 | 2 | 1 | 4 | **One car**, workbench, shelving, bins, bikes; sectional, side and house doors, plus the loft hatch |
+| `L0_GARAGE_LOFT` | Garage storage loft | +9.20 … +16.60 | −21.20 … −17.50 | 27.4 | 1 | — | 1 | Nested in `L0_GARAGE` at +2.90; reached by a ladder through a 0.90 m hatch (`HOUSE-00377`) |
+| `L0_PORCH` | Front porch (exterior cell) | −3.60 … +3.60 | −14.30 … −11.60 | 19.4 | 1 | 3 | 1 | Two rockers, a doormat, a wall lantern each side of the door |
 
-**19 cells. 404.6 m² incl. garage and porch; 291.9 m² of heated interior in the main block plus
+**19 cells. 410.9 m² incl. garage and porch; 273.9 m² of heated interior in the main block plus
 47.0 m² sunroom.** The garage loft is a twentieth row in `layout.cells.json` and is deliberately
 not in either figure: a mezzanine 2.90 m up is not floor area of `L0`, and its footprint is the
 garage's, already counted (`HOUSE-00377`).
+
+> Corrected 2026-09-08 by `HOUSE-00400`, walking §13 against `assets-src/world/`. It read
+> "404.6 m² … 291.9 m² of heated interior". The garage is 8.4 × 8.4 = 70.56 m² and the table said
+> 65.5, and the porch reaches the house's own front face at Z −14.30 rather than the wall's outer
+> −14.00, so it is 7.2 × 2.7 = 19.44 m² and not 17.3. With those two corrected the floor measures
+> 438.30 m², less the loft's 27.38 → **410.92**; and the heated main block is the 21.4 × 12.8
+> plate, **273.92 m²**, not 291.9 — the old figure counted part of what it then added again as
+> the sunroom.
 
 ### 13.4 `L1` — Upper floor 1 · FFL +3.65, ceiling +6.20, clear 2.55 m
 
 | ID | Name | X | Z | Area | Lights | Win | Doors | Notes |
 |---|---|---|---|---|---|---|---|---|
-| `L1_LANDING` | Stair landing | −2.20 … +2.20 | −18.30 … −14.30 | 17.6 | 2 | 2 | 1 (to front balcony) | Window seat; the **cat's favourite perch** |
-| `L1_STAIR_MAIN` | Staircase L1 | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | 1 | 0 | Continues to L2 |
-| `L1_HALL` | Upper hall | −2.20 … +2.20 | −22.00 … −18.30 | 16.3 | 2 | — | 0 | Artwork, a console, a laundry hamper |
-| `L1_HALL_W` | West corridor | −9.70 … −2.20 | −20.60 … −18.30 | 17.3 | 2 | — | 0 | Serves BED3, BED4, BATH2, WC3 |
-| `L1_MASTER_BED` | Master bedroom | −7.00 … +2.20 | −27.10 … −22.00 | 46.9 | 4 | 3 + slider | 2 (hall, balcony) | King bed, seating, dresser, TV (off), slider to the rear balcony |
-| `L1_MASTER_BATH` | Master bathroom | −12.70 … −9.40 | −27.10 … −22.00 | 16.8 | 3 | 1 obscured | 1 | Double vanity, **freestanding bath**, **shower**, WC, STACK-C |
-| `L1_MASTER_CLOSET` | Walk-in closet | −9.40 … −7.00 | −27.10 … −22.00 | 12.2 | 2 | — | 1 | Hanging rails, island drawers, shoe racks, mirror |
-| `L1_BED2` | Bedroom 2 | +2.20 … +8.70 | −27.10 … −22.90 | 27.3 | 2 | 2 | 1 | Double bed, desk, wardrobe, bookshelf |
+| `L1_LANDING` | Stair landing | −2.20 … +2.20 | −18.30 … −14.30 | 17.6 | 2 | 2 | 1 | Window seat; the **cat's favourite perch**; a door to the front balcony |
+| `L1_STAIR_MAIN` | Staircase L1 | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | 1 | 1 | Continues to L2 |
+| `L1_HALL` | Upper hall | −2.20 … +2.20 | −22.00 … −18.30 | 16.3 | 2 | — | 2 | Artwork, a console, a laundry hamper |
+| `L1_HALL_W` | West corridor | −9.70 … −2.20 | −20.60 … −18.30 | 17.3 | 2 | — | 6 | Serves BED3, BED4, BATH2, WC3 |
+| `L1_MASTER_BED` | Master bedroom | −7.00 … +2.20 | −27.10 … −22.00 | 46.9 | 4 | 3 | 3 | King bed, seating, dresser, TV (off), three windows and a slider to the rear balcony |
+| `L1_MASTER_BATH` | Master bathroom | −12.70 … −9.40 | −27.10 … −22.00 | 16.8 | 3 | 1 | 1 | Double vanity, **freestanding bath**, **shower**, WC, one obscured window, STACK-C |
+| `L1_MASTER_CLOSET` | Walk-in closet | −9.40 … −7.00 | −27.10 … −22.00 | 12.2 | 2 | — | 2 | Hanging rails, island drawers, shoe racks, mirror |
+| `L1_BED2` | Bedroom 2 | +2.20 … +8.70 | −27.10 … −22.90 | 27.3 | 2 | 2 | 2 | Double bed, desk, wardrobe, bookshelf |
 | `L1_LINEN` | Linen closet | +2.20 … +4.90 | −22.90 … −22.00 | 2.4 | 1 | — | 1 | Folded towels and bedding |
-| `L1_STOR` | Upper store | +4.90 … +8.70 | −22.90 … −22.00 | 3.4 | 1 | — | 1 | Suitcases, spare bedding |
+| `L1_STOR` | Upper store | +4.90 … +8.70 | −22.90 … −22.00 | 3.4 | 1 | — | 2 | Suitcases, spare bedding |
 | `L1_BED3` | Bedroom 3 | −12.70 … −8.20 | −18.30 … −14.30 | 18.0 | 2 | 2 | 1 | Child's room: single bed, toy chest, wall posters |
 | `L1_BED4` | Bedroom 4 | −8.20 … −2.20 | −18.30 … −14.30 | 24.0 | 2 | 2 | 1 | Teen's room: bed, desk, guitar, beanbag |
-| `L1_BATH2` | Family bathroom | −12.70 … −9.70 | −22.00 … −18.30 | 11.1 | 2 | 1 obscured | 1 | Bath + shower over, vanity, WC, STACK-B |
+| `L1_BATH2` | Family bathroom | −12.70 … −9.70 | −22.00 … −18.30 | 11.1 | 2 | 1 | 1 | Bath + shower over, vanity, WC, one obscured window, STACK-B |
 | `L1_WC3` | WC | −7.00 … −4.40 | −22.00 … −20.60 | 3.6 | 1 | — | 1 | WC + basin |
 | `L1_CLOSET_2` | Hall closet | −9.70 … −7.00 | −22.00 … −20.60 | 3.8 | 1 | — | 1 | Coats, vacuum |
 | `L1_CLOSET_3` | Hall closet | −4.40 … −2.20 | −22.00 … −20.60 | 3.1 | 1 | — | 1 | Cleaning supplies |
-| `L1_BED5` | Guest bedroom | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 2 | 1 | 1 | Double bed, chair, wardrobe, made up, unused |
-| `L1_BATH3` | Guest bathroom | +4.90 … +8.70 | −22.00 … −18.30 | 14.1 | 2 | — | 1 | Shower, vanity, WC, STACK-D; no exterior wall (`HOUSE-00376`) |
+| `L1_BED5` | Guest bedroom | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 2 | 1 | 2 | Double bed, chair, wardrobe, made up, unused |
+| `L1_BATH3` | Guest bathroom | +4.90 … +8.70 | −22.00 … −18.30 | 14.1 | 2 | — | 2 | Shower, vanity, WC, STACK-D; no exterior wall (`HOUSE-00376`) |
 | `L1_WC4` | WC | +2.20 … +4.90 | −22.00 … −20.20 | 4.9 | 1 | — | 1 | STACK-A; no exterior wall (`HOUSE-00376`) |
-| `L1_BALCONY_REAR` | Rear balcony (exterior) | −6.70 … +2.70 | −32.10 … −27.10 | 47.0 | 2 | — | — | Over the sunroom; table, two loungers, planters, 1.10 m railing |
-| `L1_BALCONY_FRONT` | Front balcony (exterior) | −3.60 … +3.60 | −14.00 … −11.60 | 17.3 | 1 | — | — | Over the porch; two chairs, a small table |
+| `L1_BALCONY_REAR` | Rear balcony (exterior) | −6.70 … +2.70 | −32.10 … −27.10 | 47.0 | 2 | 5 | 1 | Over the sunroom; table, two loungers, planters, 1.10 m railing |
+| `L1_BALCONY_FRONT` | Front balcony (exterior) | −3.60 … +3.60 | −14.30 … −11.60 | 19.4 | 1 | 4 | 1 | Over the porch; two chairs, a small table |
 
-**21 cells. 274.0 m² interior + 64.3 m² of balcony.**
+**21 cells. 273.9 m² interior + 66.4 m² of balcony.**
 
 ### 13.5 `L2` — Upper floor 2 · FFL +6.55, ceiling +9.00, clear 2.45 m
 
 | ID | Name | X | Z | Area | Lights | Win | Doors | Notes |
 |---|---|---|---|---|---|---|---|---|
-| `L2_LANDING` | Stair landing | −2.20 … +2.20 | −18.30 … −14.30 | 17.6 | 2 | 2 | 1 (juliet) | Juliet balcony over the front |
-| `L2_STAIR_MAIN` | Staircase L2 head | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | 1 | 0 | |
+| `L2_LANDING` | Stair landing | −2.20 … +2.20 | −18.30 … −14.30 | 17.6 | 2 | 2 | 2 | Juliet balcony over the front |
+| `L2_STAIR_MAIN` | Staircase L2 head | +2.20 … +4.90 | −20.20 … −14.30 | 15.9 | 1 | 1 | 1 |  |
 | `L2_STAIR_ATTIC` | Attic stair | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | — | 1 | Straight, narrow, painted timber, a bare bulb on a pull cord |
-| `L2_HALL` | Upper hall | −2.20 … +2.20 | −22.00 … −18.30 | 16.3 | 2 | — | 0 | |
-| `L2_HALL_W` | West corridor | −9.70 … −2.20 | −20.60 … −18.30 | 17.3 | 2 | — | 0 | |
-| `L2_LIBRARY` | Library | −8.20 … −2.20 | −18.30 … −14.30 | 24.0 | 3 | 2 | 1 | Floor-to-ceiling shelves, reading chairs, a globe, a ladder |
+| `L2_HALL` | Upper hall | −2.20 … +2.20 | −22.00 … −18.30 | 16.3 | 2 | — | 2 |  |
+| `L2_HALL_W` | West corridor | −9.70 … −2.20 | −20.60 … −18.30 | 17.3 | 2 | — | 4 |  |
+| `L2_LIBRARY` | Library | −8.20 … −2.20 | −18.30 … −14.30 | 24.0 | 3 | 2 | 2 | Floor-to-ceiling shelves, reading chairs, a globe, a ladder |
 | `L2_BED6` | Bedroom 6 | −12.70 … −8.20 | −18.30 … −14.30 | 18.0 | 2 | 2 | 1 | Guest / sewing room: bed, sewing table, dress form |
-| `L2_BATH4` | Bathroom 4 | −12.70 … −9.70 | −22.00 … −18.30 | 11.1 | 2 | 1 obscured | 1 | Shower, vanity, WC, STACK-B |
+| `L2_BATH4` | Bathroom 4 | −12.70 … −9.70 | −22.00 … −18.30 | 11.1 | 2 | 1 | 2 | Shower, vanity, WC, one obscured window, STACK-B |
 | `L2_CLOSET_4` | Hall closet | −9.70 … −7.00 | −22.00 … −20.60 | 3.8 | 1 | — | 1 | |
 | `L2_WC5` | WC | −7.00 … −4.40 | −22.00 … −20.60 | 3.6 | 1 | — | 1 | |
 | `L2_LINEN2` | Linen closet | −4.40 … −2.20 | −22.00 … −20.60 | 3.1 | 1 | — | 1 | |
 | `L2_BED7` | Bedroom 7 | −12.70 … −7.00 | −27.10 … −22.00 | 29.1 | 2 | 2 | 1 | Big north bedroom, currently a store-room-in-waiting |
-| `L2_GAMES` | Games / hobby room | −7.00 … +2.20 | −27.10 … −22.00 | 46.9 | 3 | 2 | 1 | Pool table, dartboard, sofa, arcade cabinet, model shelves |
+| `L2_GAMES` | Games / hobby room | −7.00 … +2.20 | −27.10 … −22.00 | 46.9 | 3 | 2 | 2 | Pool table, dartboard, sofa, arcade cabinet, model shelves |
 | `L2_SITTING` | Secondary sitting room | +2.20 … +8.70 | −27.10 … −22.90 | 27.3 | 2 | 2 | 1 | Sofa, coffee table, record player, plants |
-| `L2_STOR2` | Store | +2.20 … +8.70 | −22.90 … −22.00 | 5.9 | 1 | — | 1 | Shallow but long walk-in |
+| `L2_STOR2` | Store | +2.20 … +8.70 | −22.90 … −22.00 | 5.8 | 1 | — | 3 | Shallow but long walk-in |
 | `L2_BATH5` | Bathroom 5 | +4.90 … +8.70 | −22.00 … −18.30 | 14.1 | 2 | — | 1 | Bath, vanity, WC, STACK-D; no exterior wall (`HOUSE-00376`) |
 | `L2_WC6` | WC | +2.20 … +4.90 | −22.00 … −20.20 | 4.9 | 1 | — | 1 | STACK-A; no exterior wall (`HOUSE-00376`) |
-| `L2_BALCONY_JULIET` | Juliet balcony (exterior) | −1.00 … +1.00 | −14.30 … −13.85 | 0.9 | — | — | — | Doors open onto a railing; standing room only |
+| `L2_BALCONY_JULIET` | Juliet balcony (exterior) | −1.00 … +1.00 | −14.30 … −13.85 | 0.9 | — | — | 1 | Doors open onto a railing; standing room only |
 
 **18 cells. 273.9 m² interior + 0.9 m² juliet balcony.**
 
@@ -1237,10 +1256,10 @@ insulation batts between the joists in the unfinished bays, and rough boarding o
 | ID | Name | X | Z | Area | Head-room | Lights | Win | Notes |
 |---|---|---|---|---|---|---|---|---|
 | `L3_STAIR_HEAD` | Attic stair head | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 2.2 → 3.4 m | 1 | — | Dormer above the head gives standing room |
-| `L3_ROOM` | Finished attic room | −6.00 … +4.90 | −24.00 … −17.00, plus two dormer bays to −14.30 | 86.3 | 2.4 → 5.0 m | 2 | 3 dormers | Boarded floor, plastered collar ceiling, an old sofa, a desk, boxes, a rocking horse, a train set |
-| `L3_STORE_W` | West attic store | −12.70 … −6.00 | −27.10 … −14.30 | 85.8 | 1.2 → 4.6 m | 1 | 1 gable louvre | Unfinished: rafters, insulation, walkway boards, 40 boxes, a wardrobe, suitcases |
-| `L3_STORE_E` | East attic / services | +4.90 … +8.70 | −27.10 … −18.30 | 33.4 | 1.2 → 4.2 m | 1 | 1 gable louvre | Header tank, HVAC branch ducts, an aerial mast, cable runs |
-| `L3_STORE_N` | North attic store | −6.00 … +4.90 | −27.10 … −24.00 | 33.8 | 1.2 → 3.2 m | 1 | 2 dormers | Christmas decorations, a cot, framed pictures |
+| `L3_ROOM` ∪ | Finished attic room | −6.00 … +4.90 | −24.00 … −17.00, plus two dormer bays to −14.30 | 86.3 | 2.4 → 5.0 m | 2 | 3 | Boarded floor, plastered collar ceiling, lit by three dormers; an old sofa, a desk, boxes, a rocking horse, a train set |
+| `L3_STORE_W` | West attic store | −12.70 … −6.00 | −27.10 … −14.30 | 85.8 | 1.2 → 4.6 m | 1 | 1 | Unfinished: rafters, insulation, walkway boards, one gable louvre, 40 boxes, a wardrobe, suitcases |
+| `L3_STORE_E` | East attic / services | +4.90 … +8.70 | −27.10 … −18.30 | 33.4 | 1.2 → 4.2 m | 1 | 1 | Header tank, HVAC branch ducts, an aerial mast, cable runs, one gable louvre |
+| `L3_STORE_N` | North attic store | −6.00 … +4.90 | −27.10 … −24.00 | 33.8 | 1.2 → 3.2 m | 1 | 2 | Christmas decorations, a cot, framed pictures; two dormers |
 | `L3_STORE_S` | South attic store | −3.60 … +3.60 | −17.00 … −14.30 | 19.4 | 1.2 → 3.0 m | 1 | — | Roof-space void behind the front knee wall |
 
 > Corrected 2026-09-07 by `HOUSE-00376`. `L3_ROOM` was scheduled 3 dormers and its footprint
@@ -1263,25 +1282,33 @@ place crouching exists, and it exists because the roof geometry demands it.
 | ID | Name | Approximate extent | Notes |
 |---|---|---|---|
 | `EXT_ROAD` | Carriageway + sidewalks | X −35…+35, Z 0…+13.4 | Player spawn |
-| `EXT_FRONTYARD_W` | Front lawn, west | X −22.5…−1, Z −14…0 | |
-| `EXT_FRONTYARD_E` | Front lawn, east | X +1…+9.5, Z −13…0 | |
+| `EXT_FRONTYARD_W` ∪ | Front lawn, west | X −22.5…−1, Z −14…0 |  |
+| `EXT_FRONTYARD_E` ∪ | Front lawn, east | X +1…+9.5, Z −13…0 |  |
 | `EXT_WALK` | Front walk | X −1…+1, Z −11.6…0 | |
 | `EXT_DRIVEWAY` | Driveway + apron | X +9.6…+16.8, Z −13…0 | |
-| `EXT_SIDEYARD_W` | West side yard | X −22.5…−13, Z −48…0 | |
-| `EXT_SIDEYARD_E` | East side yard | X +17.4…+22.5, Z −48…0 | |
+| `EXT_SIDEYARD_W` ∪ | West side yard | X −22.5…−13, Z −48…0 |  |
+| `EXT_SIDEYARD_E` ∪ | East side yard | X +17.4…+22.5, Z −48…0 |  |
 | `EXT_TERRACE` | Rear terrace | X −6.7…+6.7, Z −36…−32.4 | |
-| `EXT_BACKYARD` | Rear lawn | X −22.5…+22.5, Z −44…−32.4 | |
-| `EXT_GARDEN` | Vegetable garden | X −20…−13, Z −44…−36.5 | |
+| `EXT_BACKYARD` ∪ | Rear lawn | X −22.5…+22.5, Z −44…−32.4 |  |
+| `EXT_GARDEN` ∪ | Vegetable garden | X −20…−13, Z −44…−36.5 |  |
 | `EXT_ORCHARD` | Orchard corner | X +12…+21, Z −46…−38 | |
 | `EXT_SHED` | Garden shed interior | X −19.8…−16.6, Z −43.8…−40.6 | Enterable, one window, one door |
 | `EXT_NORTHSTRIP` | Behind the rear fence | X −22.5…+22.5, Z −52…−48 | Visual only, out of bounds |
 | `L0_PORCH`, `L1_BALCONY_REAR`, `L1_BALCONY_FRONT`, `L2_BALCONY_JULIET` | see above | | Exterior cells attached to the house |
-| `EXT_WORLD` | Everything beyond the fences | the rest | One huge cell holding terrain, road, neighbourhood, sky; internally culled by frustum + distance + LOD |
+| `EXT_WORLD` ∪ | Everything beyond the fences | the rest | One huge cell holding terrain, road, neighbourhood, sky; internally culled by frustum + distance + LOD |
 
-**18 exterior cells** (counting the 4 attached ones), **75 interior cells**, **93 total** —
-plus the 3 nested sub-cells the data needs and this schedule does not list as rooms: the two
-container interiors of `HOUSE-00373` and the garage storage loft of `HOUSE-00377`. So
-`layout.cells.json` holds **96**.
+**18 exterior cells** (counting the 4 attached ones), **76 interior cells**, **94 total** —
+plus the 2 nested sub-cells the data needs and this schedule does not list as rooms, the container
+interiors of `HOUSE-00373`. So `layout.cells.json` holds **96**.
+
+> Corrected 2026-09-08 by `HOUSE-00400`, counting the rows again. It read "75 interior cells, 93
+> total — plus the 3 nested sub-cells … the two container interiors and the garage storage loft".
+> §13.3 has **20** rows, not the 19 its summary states: the summary deliberately excludes the
+> garage loft, and the recount below took that figure for the row count. The loft therefore *is*
+> tabulated as a room, so there are two nested sub-cells this schedule omits and not three:
+> 15 + 20 + 21 + 18 + 6 = **80** rows in §13.2–§13.6, of which 4 are the attached exterior cells,
+> leaving **76** interior; §13.7 lists 14 `EXT_*` ids, so **18** exterior and **94** tabulated;
+> 94 + 2 = 96.
 
 > Corrected 2026-09-07 by `HOUSE-00372`, which authored these and counted the tables. It read
 > "17 exterior cells (counting the 4 attached ones), 78 interior cells, 95 total". Counted from
