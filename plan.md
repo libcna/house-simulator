@@ -6607,8 +6607,35 @@ the chunk builder produces ≤ 6 chunks per cell.
             walls is the thick one. A builder that guessed would be inventing the house for the
             sake of two centimetres.
       note: six injected bugs, all caught after the two above were fixed.
-- [ ] HOUSE-00453 — Generate interior partitions between adjacent cells, deduplicated so a shared wall is generated once
+- [x] HOUSE-00453 — Generate interior partitions between adjacent cells, deduplicated so a shared wall is generated once
       dep: HOUSE-00452 · sys: content · plat: TOOL · pri: MUST
+      finding: **a side is rarely all one thing.** Seven of the house's 324 sides are partly
+            partition and partly exterior — `L0_KITCHEN`'s north side is 8.9 m against the sunroom
+            and 1.5 m of outside wall beside it — so `HOUSE-00452`'s one-wall-per-side rule was
+            wrong on them. A side is now split into **runs**, one face each, at the inner face of
+            the wall that bounds that run.
+      finding: **the floor must take the THINNEST wall on a mixed side, not the thickest.** The
+            first version took the thickest, reasoning that floor should never end up inside a
+            wall. It leaves a 75 mm slot between the floor and the skirting, 8.9 m long, that you
+            can see the void through. Floor under a wall is never seen; floor short of one is. The
+            claim that caught it is that the exported mesh's bounds equal the inset box — the two
+            had drifted apart on exactly that side.
+      note: **"deduplicated" means the shared plane is described once and each cell carries the
+            face that looks at it.** Not one wall volume owned by one of the two cells: rendering
+            is per visible cell, per chunk (§17.4), so a wall living only in `L0_HALL`'s chunk
+            would be missing while you stand in the kitchen looking at it. One pass over the shared
+            plane, two inner faces, no surface in two chunks.
+      note: runs are clamped to the room's inset extent on the perpendicular axis, so at a corner
+            the two inner faces stop at each other instead of running 75 mm into the wall they
+            meet. That is what makes the exported bounds equal the inset box exactly.
+      finding: **every face pointed the wrong way, twice, for opposite reasons.** `HOUSE-00451`'s
+            massing was a solid block seen from outside; these are the inner faces of walls, seen
+            from inside the room, like the floor from above. The winding is now **computed** — the
+            polygon normal is measured against the direction the face should look and reversed if
+            it disagrees — rather than written down and hoped for, because `to_blender` negates z
+            and reverses every plan winding, and a mesh turned inside out has exactly the right
+            bounds and passes every claim about coordinates.
+      note: five injected bugs, all caught.
 - [ ] HOUSE-00454 — Generate exterior walls with the correct thickness, and the foundation walls
       dep: HOUSE-00453 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00455 — Cut door and window openings from walls, with reveals and sills
