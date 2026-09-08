@@ -83,6 +83,9 @@ namespace cnahouse::player
         state_.run = keyboard.IsKeyDown(Keys::LeftShift) || keyboard.IsKeyDown(Keys::RightShift);
         state_.crouch = keyboard.IsKeyDown(Keys::LeftControl) || keyboard.IsKeyDown(Keys::RightControl);
         state_.jump = keyboard.IsKeyDown(Keys::Space);
+        // §68's cursor release. Both alts, because a keyboard has two and a player uses whichever
+        // hand is free.
+        state_.freeCursorHeld = keyboard.IsKeyDown(Keys::LeftAlt) || keyboard.IsKeyDown(Keys::RightAlt);
 
         // An edge: down now and up before. Computed here so no consumer keeps its own history --
         // two systems each tracking "was it down last frame" is two chances to disagree about the frame.

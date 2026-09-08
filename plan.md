@@ -8690,8 +8690,31 @@ it must be tuned, not just implemented.
       note: ±85° and not ±90°: at the pole the view has no horizon to level against and the
             smallest yaw becomes a spin. Three injected bugs, three caught -- the clamp moved to
             the pole, removed, and made one-sided.
-- [ ] HOUSE-00624 — Implement cursor hiding, mouse capture, and the `Alt` release plus automatic release on focus loss and menus
+- [x] HOUSE-00624 — Implement cursor hiding, mouse capture, and the `Alt` release plus automatic release on focus loss and menus
       dep: HOUSE-00622 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-08) `player::MouseCapturePolicy`, wired into `CnaHouseGame`'s update: it
+            takes `Game::IsActive`, whether a menu is open and §68's `Alt`, and the game calls
+            `SetMouseCaptured` and `setIsMouseVisibleProperty` only when the answer CHANGES --
+            `Mouse::SetPosition` every frame while a menu is open would fight the pointer the
+            player is trying to use.
+      note: **a policy and not a flag, because three things ask for the cursor and one of them is
+            a key being held.** Written as three `SetMouseCaptured` call sites, whichever ran last
+            in a frame would have the final say, and the one that runs last is whichever the frame
+            happened to reach: that is how a cursor ends up invisible over an open menu. The whole
+            eight-row truth table is a test, and the property it pins is that this is an OR of
+            RELEASES and not an AND -- an AND would need all three reasons at once to give the
+            pointer up.
+      note: §68's `Alt` is a LEVEL and not a toggle: hold it to reach a second monitor, let go to
+            carry on. A toggle would leave a player who alt-tabbed away with a cursor they never
+            asked for when they came back. Both alts, because a keyboard has two.
+      finding: **`Game::IsActive` is consulted and not relied on.** `HOUSE-00100` measured it true
+            on all 9 999 frames of a probe on this platform, including while another window had
+            focus, so what actually frees the cursor here is a menu or the key. The field stays
+            because the policy has to be right on a platform whose `IsActive` works, and because
+            the alternative -- inferring focus from the mouse snapshot not advancing -- cannot
+            tell an unfocused window from a still hand (`HOUSE-00100` again).
+      verified: 3 `MouseCaptureTests` -- the truth table, the change edge and the start state, and
+            the hold-to-release. Five injected bugs, five caught.
 - [ ] HOUSE-00625 — Implement sensitivity, invert-Y and optional 2-frame smoothing as settings
       dep: HOUSE-00622, HOUSE-00131 · sys: player · plat: ALL · pri: MUST
 - [ ] HOUSE-00626 — Implement the FOV setting and its aspect handling

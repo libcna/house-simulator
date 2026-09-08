@@ -52,6 +52,13 @@ namespace cnahouse::player
         /// would be a gate the player can fail to find.
         bool anyPressed = false;
 
+        /// @brief §68's `Alt`, HELD: give the cursor back without opening a menu.
+        ///
+        /// A level and not an edge, because it is a "while you hold this" control and the policy
+        /// that reads it (`HOUSE-00624`) has to know the state on every frame, not the moment it
+        /// changed.
+        bool freeCursorHeld = false;
+
         /// @brief Debug toggles, compiled out of a build without debug tools.
         bool toggleOverlayPressed = false;
         bool screenshotPressed = false;

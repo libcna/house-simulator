@@ -589,6 +589,20 @@ namespace cnahouse::app
                 frameTimes_.push_back(frame.deltaSeconds * 1000.0f);
             }
 
+            // §44's cursor: hidden and held during play, back the moment a menu, the `Alt` key
+            // or the window manager wants it (`HOUSE-00624`). One policy rather than three call
+            // sites, because whichever ran last would otherwise have the final say.
+            player::CaptureRequest capture;
+            capture.windowActive = getIsActiveProperty();
+            capture.menuOpen = !menus_.Empty();
+            capture.freeCursorHeld = input_.Current().freeCursorHeld;
+            if (mouseCapture_.Update(capture))
+            {
+                input_.SetMouseCaptured(mouseCapture_.Captured());
+                setIsMouseVisibleProperty(mouseCapture_.CursorVisible());
+                Log::Info(LogCat::App, "mouse {}", mouseCapture_.Captured() ? "captured" : "released");
+            }
+
 #if CNAHOUSE_DEBUG_TOOLS
             if (input_.Current().screenshotPressed && pendingScreenshot_.empty())
             {

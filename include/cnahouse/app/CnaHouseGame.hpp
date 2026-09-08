@@ -21,6 +21,7 @@
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
 #include "cnahouse/player/KeyboardMouseSource.hpp"
+#include "cnahouse/player/MouseCapture.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/Quality.hpp"
 #include "cnahouse/rendering/RenderTier.hpp"
@@ -211,6 +212,7 @@ namespace cnahouse::app
         /// everywhere rather than only in the build that needs it.
         audio::AudioSystem audio_;
         player::KeyboardMouseSource input_;
+        player::MouseCapturePolicy mouseCapture_;
         ui::TextRenderer text_;
         /// The screen stack of §67.3. The loading/title screen is pushed onto it at `LoadContent`
         /// and pops itself once the player has pressed something AND content is ready.
