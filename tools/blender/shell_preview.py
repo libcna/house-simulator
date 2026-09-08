@@ -320,9 +320,17 @@ def main() -> int:
     else:
         print(f"shell_preview: {paint_blockout()} placeholder material(s)")
     frame_everything()
-    destination = args.out or (OUTPUT / f"{args.mode}-{names[0] if len(names) == 1 else 'house'}.png")
+    leaf = f"{args.mode}-{names[0] if len(names) == 1 else 'house'}.png"
+    # `--out` names a file, or a DIRECTORY to put the usual name in. Passing the directory is the
+    # obvious thing to try and used to render into a path that was already one, silently.
+    destination = OUTPUT / leaf if args.out is None else (
+        args.out / leaf if args.out.is_dir() else args.out)
     render(destination)
-    print(f"shell_preview: {destination.relative_to(REPO)}")
+    try:
+        shown = destination.resolve().relative_to(REPO)
+    except ValueError:
+        shown = destination
+    print(f"shell_preview: {shown}")
     return 0
 
 

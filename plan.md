@@ -7056,8 +7056,67 @@ the chunk builder produces ≤ 6 chunks per cell.
             validating a picture.
       verify: tools/blender/shell_unwrap.py --selftest, tools/blender/shell_preview.py --selftest,
             tools/blender/lightmap_unwrap.py --selftest
-- [ ] HOUSE-00472 — Generate `_COL` collision proxies for the shell: wall/floor/ceiling OBBs and the stair ramps
+- [x] HOUSE-00472 — Generate `_COL` collision proxies for the shell: wall/floor/ceiling OBBs and the stair ramps
       dep: HOUSE-00470, HOUSE-00190 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) The shell's own collision is **1 068 shapes: 1 046 OBBs and 22 triangle
+            meshes** — 831 wall pieces, 119 floors, 89 ceilings, 12 stair shapes — with no prop
+            carrying a proxy yet. `HOUSE-00210`'s note scopes this task to what the layout cannot
+            express, and that turned out to be three things, each now derived rather than named:
+            the attic's **rafter envelope** (13 roof planes clipped in plan to the cell under
+            them, covering the attic's whole 273.9 m²), **13 drop guards** at the four places
+            §70.5's metre applies, and the **stair placement**, which was being guessed. Two new
+            shared modules, `tools/world/stair_geometry.py` (85 claims) and
+            `tools/world/roof_geometry.py` (22 claims), are now the single source of truth for
+            both this file and `tools/blender/house_shell_gen.py`; the duplicated copies in the
+            generator are gone. 19 injected bugs, 16 caught first time — the three missed were two
+            no-ops on this layout and one winding change with no claim about winding; all three
+            are now claimed against constructed data. `cna-house.md` §49.2 records the numbers.
+      finding: (2026-09-08, found by `HOUSE-00472`) **the main stair's collision was in a
+            different place from the main stair, and both were wrong.** `build_collision.py`
+            predates `HOUSE-00459`'s authored placement and said so in a comment — *"without an
+            authored footprint the only defensible placement is the shared edge of the two cells'
+            boxes"* — so it ran every flight along +Z from a cell corner in one lane.
+            `house_shell_gen.py` read the footprint and turned the wrong way: it laid the second
+            run of a `u` BEYOND the landing, climbing back towards it, which puts the flight's TOP
+            tread against the half-landing. You would have stepped off `STAIR_MAIN_L0_L1`'s
+            half-landing at +2.2147 and arrived on L1 at +3.65 in one stride. §12's table calls it
+            `U, half-landing at riser 9`: you turn through 180° and climb back beside the way you
+            came, which is what the 2.70 m footprint is for a flight 1.10 m wide. Fixed by moving
+            the placement into `stair_geometry.py`, which both tools import.
+      finding: (2026-09-08, found by `HOUSE-00472`) **every triangle mesh in `collision.bin` was
+            referenced by the wrong shape index the moment any OBB was built after it.** A mesh's
+            index is `len(obbs) + mesh`, and both `build_stairs` and `build_props` computed it on
+            the spot. `build_props` has run after `build_stairs` since `HOUSE-00210`, so the bug
+            has always been there; this house has no prop with a proxy, which is the only reason
+            nothing had seen it. Adding the guards made it fire immediately — every stair wedge
+            and every rafter pointed four shapes wrong. The references are now `-(mesh + 1)` and
+            resolved once the shape list is complete, and the selftest claims the only mesh any
+            cell references is its stair even though 8 prop OBBs are numbered after it.
+      finding: (2026-09-08, found by `HOUSE-00472`) the stair wedge had been wound **inwards**
+            since `HOUSE-00210`: all eight faces of the prism pointed into the solid, against
+            §14's counter-clockwise-from-outside convention. Invisible because a collision mesh is
+            never drawn — and a sweep reads a face normal to decide which side of a surface a body
+            is on, so `HOUSE-00543` onwards would have inherited it. The selftest now checks all
+            four travel directions, which also proves the new orientation-preserving frame table
+            does not mirror the prism: a mirrored prism is inside out too.
+      finding: (2026-09-08, found by `HOUSE-00472`) `build_grid` could allocate without bound. A
+            cell's grid is sized from the union of its own shapes' AABBs, so one shape that
+            escapes its cell sizes it: a clipping bug during this task put a rafter far from the
+            house and the tool sat allocating buckets until it was killed. Now capped at 1 000 000
+            buckets — `EXT_WORLD`'s legitimate 400 × 400 is 160 000 — and refused with the cell's
+            measured extent. The same debugging found the grid's index arithmetic disagreeing with
+            the interval-overlap test the selftest checks it against, for a shape whose AABB lands
+            exactly on a bucket edge: `(5.85 - 3.85) / 1.0` is `1.9999999999999996`.
+      finding: (2026-09-08, found by `HOUSE-00472`, for `HOUSE-00480`) **`ROOF_GARAGE` floats
+            7 m above the garage.** `eaves_height` derives the eaves from the house-wide
+            `ridgeY` of +14.30, so the garage's 9.0 m square wing gets eaves at +11.675 and a
+            ridge at +14.30 over a garage whose head is +4.30; the generated `ROOF_GARAGE.glb`
+            measures Y 11.30 → 14.30. Its `BLOCKOUT_roof` also spans X −6.00 → 17.40, so
+            `dormers_on` is giving it the main roof's dormers. Not fixed here: §12 authors no
+            ridge or eaves for the wing, so choosing one is a design decision rather than a
+            correction. The rafter envelope is unaffected — it is built only for a level that
+            declares a roof AND a null ceiling, which is `L3` alone, and the garage has a flat
+            ceiling at +4.30.
 - [ ] HOUSE-00473 — Run `build_chunks.py` over the shell; verify ≤ 6 chunks per cell and the vertex limits
       dep: HOUSE-00472, HOUSE-00215 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00474 — Implement `CellRuntime` and load the per-cell chunk buffers into `VertexBuffer`/`IndexBuffer`

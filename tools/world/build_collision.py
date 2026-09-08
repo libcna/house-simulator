@@ -79,6 +79,8 @@ sys.path.insert(0, str(TOOLS / "assets"))
 
 import gltf_io  # noqa: E402
 import layout_io  # noqa: E402
+import roof_geometry  # noqa: E402
+import stair_geometry  # noqa: E402
 from layout_io import LayoutError  # noqa: E402
 
 MAGIC = b"CCOL"
@@ -407,6 +409,24 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
                 for u0, u1, neighbour in _neighbour_segments(
                         cell, box, side, cells_by_level.get(cell["level"], []), boxes_by_cell):
                     if is_open and neighbour is None:
+                        # An open side a storey up is a drop, and §70.5 asks for a guard at more
+                        # than a metre of it. The shell DRAWS one -- a 0.20 m parapet with a rail
+                        # on top (`HOUSE-00465`) -- and nothing stopped you walking through it:
+                        # this cell has no wall here by construction, so until `HOUSE-00472` you
+                        # could step off the rear balcony at +3.65 and off the juliet at +6.55.
+                        # The porch at +0.57 and the terrace at +0.45 get nothing, which is the
+                        # same metre deciding it. `kind == "exterior"` because that is
+                        # `build_balcony_edge`'s own first line: an INTERIOR cell marked
+                        # `visibilityHint: open` -- a landing open to the stairwell -- has a drop
+                        # too, and its guard is the rail round the well `HOUSE-00460` draws from
+                        # the floor's hole rather than round the cell's boundary. That one is not
+                        # built here and is recorded as a gap against Phase 7.
+                        if cell.get("kind") == "exterior" and y0 > GUARD_DROP:
+                            indices.append(_guard_obb(
+                                shapes, axis, value, u0, u1, outward, y0,
+                                float(construction.get("railing", 0.0)),
+                                cell.get("wallMaterial")))
+                            stats["guards"] += 1
                         continue
                     thickness = _wall_thickness(construction, cell, neighbour, level)
                     holes = openings + _portal_holes(on_plane, u0, u1, y0, y1)
@@ -426,6 +446,148 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
     return out
 
 
+#: §70.5's own metre: a drop of more than this needs a guard, and the same number decides whether
+#: the front porch (+0.57) and the terrace (+0.45) are decks or drops. `house_shell_gen.py` asks it
+#: of the same two places for the geometry it draws.
+GUARD_DROP = 1.0
+#: A parapet's thickness, `house_shell_gen.py`'s `PARAPET_THICK`. The drawn guard is a parapet with
+#: a rail above it; what stops you is one solid box from the deck to the rail's height, because a
+#: capsule does not fit between a 0.55 m parapet and a 1.10 m rail.
+GUARD_THICK = 0.20
+
+
+def _guard_obb(shapes: Shapes, axis: str, value: float, u0: float, u1: float, outward: int,
+               floor: float, height: float, surface) -> int:
+    """One guard box along an open edge, standing INSIDE it the way the drawn parapet does."""
+    inward = -outward * GUARD_THICK / 2.0
+    centre_u, half_u = (u0 + u1) / 2, (u1 - u0) / 2
+    if axis == "x":
+        centre = (value + inward, floor + height / 2, centre_u)
+        half = (GUARD_THICK / 2, height / 2, half_u)
+    else:
+        centre = (centre_u, floor + height / 2, value + inward)
+        half = (half_u, height / 2, GUARD_THICK / 2)
+    return shapes.obb(centre, half, 0.0, surface, KIND_WALL)
+
+
+def build_mezzanine_guards(layout, shapes: Shapes, per_cell: dict[str, list[int]],
+                           stats: dict) -> None:
+    """A guard round a platform nested in another cell, a storey above ITS floor.
+
+    The garage's storage loft is the case (`HOUSE-00467`): 27 m² at +2.90 over a slab at +0.15,
+    reached by a ladder, with nothing at its edge. §70.5 asks for a guard at a drop over a metre
+    and does not say the drop has to be outdoors. A container's interior is nested too and is
+    0.10 m over its room's floor, so the same metre leaves it alone.
+
+    Its four sides all face into the parent cell, so `build_shell` gives it no walls: `is_open` is
+    false for it, but `_neighbour_segments` finds the parent across every side and a cell inside
+    another cell shares no boundary plane with it. Nothing else in this file would ever put a
+    shape here.
+    """
+    levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
+    construction = layout["levels"].get("construction") or {}
+    cells = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
+    height = float(construction.get("railing", 0.0))
+    if height <= 0.0:
+        return
+    for identifier, cell in sorted(cells.items()):
+        parent = cells.get(cell.get("parent"))
+        level, parent_level = levels.get(cell.get("level")), None
+        if parent is None or level is None:
+            continue
+        parent_level = levels.get(parent.get("level"))
+        if parent_level is None:
+            continue
+        floor = layout_io.cell_extent(cell, level)[0]
+        if floor - layout_io.cell_extent(parent, parent_level)[0] <= GUARD_DROP:
+            continue
+        for box in layout_io.cell_boxes(cell):
+            for axis, value, u0, u1, outward in _side_planes(box):
+                _add(per_cell, identifier,
+                     _guard_obb(shapes, axis, value, u0, u1, outward, floor, height,
+                                cell.get("wallMaterial")))
+                stats["guards"] += 1
+
+
+# ======================================================================================== rafters
+
+
+def build_rafters(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: dict) -> None:
+    """The attic's roof slope, as one clipped triangle mesh per cell per plane (`HOUSE-00472`).
+
+    §49.2 builds shell collision from the layout, and the layout cannot say this. A cell is an
+    axis-aligned bounding volume, so `L3_STORE_W` declares `yOverride: [9.30, 13.90]` -- §13.6's
+    MAXIMUM head-room, "1.2 -> 4.6 m, so most of it is crouch-only". Read as a box that is a flat
+    lid at +13.90 over the whole west store, and you may stand upright anywhere in a room whose
+    roof is 1.20 m tall at the knee wall. The rafter slope inside the volume is geometry, which
+    `layout.cells.json` says in as many words, and geometry is this file's job.
+
+    Each plane is clipped in plan to each cell's own box, so a cell carries the piece of roof over
+    itself and not the whole 22 x 13.4 m envelope.
+
+    WHICH cells get rafters is derived, not named: a level that declares a `roof` and a null
+    `ceiling` is a level whose upper bound IS the roof, which is the whole meaning of that null
+    (`layout.levels.json`: *"the attic's `ceiling` is null because it is bounded by rafters, not by
+    a plane"*). `L3` is the only such level. The garage has a flat ceiling at +4.30 and therefore a
+    lid already, so its roof -- whose height is wrong, `HOUSE-00480` -- contributes nothing here,
+    and a level given rafters later needs no change to this function.
+    """
+    construction = layout["levels"].get("construction") or {}
+    if not construction.get("ridgeY") or not construction.get("roofPitch"):
+        return
+    levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
+    pitch = float(construction["roofPitch"])
+    roofs = roof_geometry.roof_boxes(layout)
+    for level_id, level in sorted(levels.items()):
+        name = level.get("roof")
+        if not name or level.get("ceiling") is not None or name not in roofs:
+            continue
+        outer = roof_geometry.outer_box(roofs[name], construction)
+        eaves = roof_geometry.eaves_height(construction, outer)
+        planes = roof_geometry.roof_planes(outer, eaves, pitch)
+        for cell in sorted((row for row in layout_io.rows(layout, "cells")
+                            if row.get("level") == level_id), key=lambda c: c["id"]):
+            if cell.get("kind") == "exterior":
+                continue
+            head = layout_io.cell_extent(cell, level)[1]
+            for index, (corners, _outward) in enumerate(planes):
+                for box in layout_io.cell_boxes(cell):
+                    piece = roof_geometry.clip_to_rect(corners, box)
+                    if roof_geometry.plan_area(piece) < MIN_RAFTER_AREA:
+                        continue
+                    # `L3_ROOM` has a plastered collar ceiling at +12.60 and its own flat slab
+                    # stops you there; the roof over it carries on to the ridge at +14.30 and is
+                    # on the far side of that ceiling. A shape you cannot reach is a shape the
+                    # broad phase pays for and nothing ever hits.
+                    if min(point[1] for point in piece) >= head - 1e-6:
+                        stats["rafterAboveCeiling"] += 1
+                        continue
+                    vertices, triangles = _fan(roof_geometry.face_up(piece))
+                    shape = shapes.mesh(vertices, triangles, cell.get("footstepSurface"),
+                                        KIND_CEILING)
+                    _add_mesh(per_cell, cell["id"], shape)
+                    stats["rafterMeshes"] += 1
+                    stats["rafterArea"] += roof_geometry.plan_area(piece)
+                    stats.setdefault("rafterRoofs", set()).add(f"{name}.{index}")
+
+
+#: The smallest piece of roof worth a collision shape, in plan m². A cell that clips a plane at a
+#: corner produces a sliver a millimetre across, and a sliver is a shape the broad phase pays for
+#: and the narrow phase can never usefully hit.
+MIN_RAFTER_AREA = 0.01
+
+
+def _fan(polygon):
+    """@p polygon as a triangle fan from its first vertex: `(vertices, triangles)`.
+
+    A clipped convex face, so a fan is a valid triangulation of it. The winding is the polygon's
+    own, so the caller hands it a polygon already faced the right way -- `roof_geometry.face_up`
+    for a roof, whose outside is the sky.
+    """
+    vertices = [tuple(point) for point in polygon]
+    return vertices, [(0, index, index + 1) for index in range(1, len(polygon) - 1)]
+
+
 # ========================================================================================= stairs
 
 
@@ -436,6 +598,14 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
     prism -- top, underside, two sides and two ends -- not just the walking surface: a sweep that
     only ever meets the top face passes straight through the flight from underneath, which is
     exactly what the stairwell below is.
+
+    WHERE the flight is comes from `stair_geometry`, the module `house_shell_gen.py` draws the
+    visible steps from, so the thing you collide with is the thing you can see (`HOUSE-00472`).
+    This function used to guess: it ran every flight along +Z from the low cell's box edge, in one
+    lane, because it was written three phases before `HOUSE-00459` authored a `footprint`, a `run`
+    and a `shape`. A flight that still has no placement falls back to that guess and is counted in
+    `stats["stairsGuessed"]`, so `--report` says so out loud rather than quietly inventing a
+    staircase.
     """
     levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
     cells = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
@@ -446,76 +616,123 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
             raise LayoutError(
                 f"stair {flight['id']!r} connects {flight['fromCell']!r} -> {flight['toCell']!r}; "
                 f"one of those cells does not exist")
-        risers = int(flight["risers"])
-        rise, going = float(flight["rise"]), float(flight["going"])
         width = float(flight["width"])
-        base = layout_io.cell_extent(from_cell, levels[from_cell["level"]])[0]
-        # The flight runs along +u from the low cell's box corner. Without an authored footprint
-        # the only defensible placement is the shared edge of the two cells' boxes, so the origin
-        # is the low cell's box centre in the cross axis and its far edge along the run.
-        fx0, fx1, fz0, fz1 = layout_io.cell_boxes(from_cell)[0]
-        origin_x, origin_z = (fx0 + fx1) / 2 - width / 2, fz1
+        base = stair_geometry.foot_of(flight, cells, levels)
         surface = flight.get("surface")
+        walk = stair_geometry.flight_runs(flight, base)
+        if walk is None:
+            stats["stairsGuessed"] += 1
+            walk = _guessed_walk(flight, from_cell, base, width)
 
-        landings = {int(landing["at"]): float(landing["depth"])
-                    for landing in flight.get("landings", [])}
         if flight.get("collisionRamp", True):
-            step, u, y = 0, 0.0, base
-            while step < risers:
-                run = 0
-                # `run == 0` is the guard that matters: the riser a run STARTS on is the riser
-                # the landing below it ended on, so without it every run after a landing is
-                # exactly one riser long, and a flight with a half-landing comes out as three
-                # wedges instead of two. Found by `HOUSE-00347`, whose C++ segmentation has to
-                # agree with this walk. The geometry was continuous either way, which is why
-                # nothing here caught it until a claim was made about the COUNT.
-                while step + run < risers and (run == 0 or (step + run) not in landings):
-                    run += 1
-                run = max(run, 1)
-                length, height = run * going, run * rise
-                vertices, triangles = _wedge(origin_x, y, origin_z + u, width, length, height)
-                index = shapes.mesh(vertices, triangles, surface, KIND_STAIR)
-                _add(per_cell, from_cell["id"], len(shapes.obbs) + index)
-                _add(per_cell, to_cell["id"], len(shapes.obbs) + index)
-                stats["stairMeshes"] += 1
-                u += length
-                y += height
-                step += run
-                if step in landings:
-                    depth = landings[step]
+            for entry in walk:
+                if entry["kind"] == "run":
+                    vertices, triangles = _wedge(entry["box"], entry["y0"],
+                                                 entry["y1"] - entry["y0"],
+                                                 entry["axis"], entry["up"])
+                    index = shapes.mesh(vertices, triangles, surface, KIND_STAIR)
+                    _add_mesh(per_cell, from_cell["id"], index)
+                    _add_mesh(per_cell, to_cell["id"], index)
+                    stats["stairMeshes"] += 1
+                else:
+                    x0, x1, z0, z1 = entry["box"]
+                    thickness = float(flight["rise"])
                     _add(per_cell, from_cell["id"], shapes.obb(
-                        (origin_x + width / 2, y - rise / 2, origin_z + u + depth / 2),
-                        (width / 2, rise / 2, depth / 2), 0.0, surface, KIND_STAIR))
-                    u += depth
+                        ((x0 + x1) / 2, entry["y0"] - thickness / 2, (z0 + z1) / 2),
+                        ((x1 - x0) / 2, thickness / 2, (z1 - z0) / 2), 0.0, surface, KIND_STAIR))
+                    stats["stairLandings"] += 1
         else:
-            for step in range(risers):
+            treads = stair_geometry.flight_steps(flight, base)
+            if treads is None:
+                treads = _guessed_treads(flight, walk, base)
+            rise = float(flight["rise"])
+            for tread in treads:
+                x0, x1, z0, z1 = tread["box"]
                 _add(per_cell, from_cell["id"], shapes.obb(
-                    (origin_x + width / 2,
-                     base + (step + 0.5) * rise,
-                     origin_z + (step + 0.5) * going),
-                    (width / 2, rise / 2, going / 2), 0.0, surface, KIND_STAIR))
+                    ((x0 + x1) / 2, tread["y1"] - rise / 2, (z0 + z1) / 2),
+                    ((x1 - x0) / 2, rise / 2, (z1 - z0) / 2), 0.0, surface, KIND_STAIR))
                 stats["stairSteps"] += 1
 
 
-def _wedge(x, y, z, width, length, height):
-    """A closed right-triangular prism: the sloped walking surface, the underside and three sides.
+def _guessed_walk(flight: dict, from_cell: dict, base: float, width: float):
+    """The pre-`HOUSE-00472` placement, for a flight that authors no footprint.
 
-    Six vertices -- the bottom rectangle plus the two raised back corners -- and eight triangles.
-    `selftest` counts the edges rather than trusting this comment: in a closed surface every edge
-    belongs to exactly two triangles, and the first version of this function had the left face
-    twice and the walking surface not at all while still looking like a staircase.
+    It runs along +Z from the low cell's box, centred across. Nothing in this house needs it --
+    every flight has an authored footprint -- and it exists so that a layout mid-edit still builds
+    instead of throwing, which is what the fixture world exercises.
     """
+    x0, x1, _z0, z1 = layout_io.cell_boxes(from_cell)[0]
+    origin_x = (x0 + x1) / 2 - width / 2
+    walk = stair_geometry.segments(flight, base)
+    for entry in walk:
+        low, high = sorted((entry["along0"], entry["along1"]))
+        entry["box"] = (origin_x, origin_x + width, z1 + low, z1 + high)
+        entry["axis"], entry["up"] = "z", 1
+    return walk
+
+
+def _guessed_treads(flight: dict, walk, base: float):
+    """One box per riser over `_guessed_walk`'s runs, for the same unauthored case."""
+    going, rise = float(flight["going"]), float(flight["rise"])
+    treads = []
+    for entry in walk:
+        if entry["kind"] != "run":
+            continue
+        x0, x1, z0, _z1 = entry["box"]
+        for index in range(entry["risers"]):
+            treads.append({"box": (x0, x1, z0 + index * going, z0 + (index + 1) * going),
+                           "y1": entry["y0"] + (index + 1) * rise})
+    return treads
+
+
+#: How a run's local frame -- `lx` across, `lz` up the slope -- maps onto the world, per travel
+#: axis and rise direction: `(along edge of the box, its sign, cross edge, its sign)`, indices into
+#: `(x0, x1, z0, z1)`. Every one has a POSITIVE determinant, and that is the reason the cross axis
+#: flips too: mirror a prism and its faces turn inside out, and a collision mesh whose normals
+#: point into itself is a solid you fall through.
+_FRAMES = {
+    ("z", 1): (2, +1.0, 0, +1.0),
+    ("z", -1): (3, -1.0, 1, -1.0),
+    ("x", 1): (0, +1.0, 3, -1.0),
+    ("x", -1): (1, -1.0, 2, +1.0),
+}
+
+
+def _wedge(box, y, height, axis, up):
+    """A closed right-triangular prism over @p box, rising towards @p up along @p axis.
+
+    Six vertices -- the bottom rectangle plus the two raised corners at the high end -- and eight
+    triangles. `selftest` counts the edges rather than trusting this comment: in a closed surface
+    every edge belongs to exactly two triangles, and the first version of this function had the
+    left face twice and the walking surface not at all while still looking like a staircase.
+    """
+    x0, x1, z0, z1 = box
+    length = (x1 - x0) if axis == "x" else (z1 - z0)
+    width = (z1 - z0) if axis == "x" else (x1 - x0)
+    along_edge, along_sign, cross_edge, cross_sign = _FRAMES[(axis, int(up))]
+
+    def world(lx, lz):
+        along = box[along_edge] + along_sign * lz
+        cross = box[cross_edge] + cross_sign * lx
+        return (along, cross) if axis == "x" else (cross, along)
+
+    corners = [world(0.0, 0.0), world(width, 0.0), world(0.0, length), world(width, length)]
     vertices = [
-        (x, y, z), (x + width, y, z),                                    # 0, 1 bottom front
-        (x, y, z + length), (x + width, y, z + length),                  # 2, 3 bottom back
-        (x, y + height, z + length), (x + width, y + height, z + length),  # 4, 5 top back
+        (corners[0][0], y, corners[0][1]), (corners[1][0], y, corners[1][1]),
+        (corners[2][0], y, corners[2][1]), (corners[3][0], y, corners[3][1]),
+        (corners[2][0], y + height, corners[2][1]), (corners[3][0], y + height, corners[3][1]),
     ]
+    # Counter-clockwise seen from OUTSIDE, which is §14's convention for everything this
+    # repository generates. `HOUSE-00210` wound this prism the other way and nothing noticed,
+    # because a collision mesh is never drawn -- but the sweep that `HOUSE-00473` onwards will
+    # write reads a face normal to decide which side of a surface a body is on, and every one of
+    # these eight pointed into the solid.
     triangles = [
-        (0, 3, 1), (0, 2, 3),      # underside
-        (0, 1, 5), (0, 5, 4),      # the sloped walking surface
-        (2, 5, 3), (2, 4, 5),      # the vertical face at the top of the run
-        (0, 4, 2),                 # left
-        (1, 3, 5),                 # right
+        (0, 1, 3), (0, 3, 2),      # underside
+        (0, 5, 1), (0, 4, 5),      # the sloped walking surface
+        (2, 3, 5), (2, 5, 4),      # the vertical face at the top of the run
+        (0, 2, 4),                 # left
+        (1, 5, 3),                 # right
     ]
     return vertices, triangles
 
@@ -524,6 +741,28 @@ def _add(per_cell: dict[str, list[int]], cell_id: str, index: int) -> None:
     per_cell.setdefault(cell_id, [])
     if index not in per_cell[cell_id]:
         per_cell[cell_id].append(index)
+
+
+def _add_mesh(per_cell: dict[str, list[int]], cell_id: str, mesh: int) -> None:
+    """Reference a triangle MESH, which is numbered after every OBB -- once they all exist.
+
+    A mesh's shape index is `len(obbs) + mesh`, and callers used to compute that on the spot. It
+    is only right if no OBB is ever made afterwards, and `HOUSE-00472` made two builders that do:
+    every stair wedge and every rafter in the house pointed four shapes wrong the moment the
+    garage loft got a guard. Props would have done the same to the stairs since `HOUSE-00210`, and
+    this house has no props with proxies yet, which is the only reason nothing had noticed.
+
+    So a mesh is referenced as `-(mesh + 1)` and `_resolve_meshes` turns it into a shape index when
+    the shape list is complete. A negative index is not a number anything can use by accident.
+    """
+    _add(per_cell, cell_id, -(mesh + 1))
+
+
+def _resolve_meshes(per_cell: dict[str, list[int]], obb_count: int) -> None:
+    """Turn every `-(mesh + 1)` reference into its final shape index, in place."""
+    for cell_id, indices in per_cell.items():
+        per_cell[cell_id] = [obb_count + (-index - 1) if index < 0 else index
+                             for index in indices]
 
 
 # ========================================================================================== props
@@ -722,7 +961,7 @@ def build_props(layout, shapes: Shapes, per_cell, asset_paths, stats) -> None:
             else:
                 placed = [_place(v, px, py, pz, yaw, scale) for v in vertices]
                 index = shapes.mesh(placed, triangles, surface, KIND_PROP)
-                _add(per_cell, cell_id, len(shapes.obbs) + index)
+                _add_mesh(per_cell, cell_id, index)
                 stats["propMeshes"] += 1
 
 
@@ -736,6 +975,11 @@ def _place(point, px, py, pz, yaw, scale):
 # ============================================================================== the loose grid
 
 
+#: The most 1 m buckets one cell's grid may have. `EXT_WORLD` is 400 x 400 = 160 000 of
+#: them, so this is about six times the biggest thing this house contains.
+MAX_GRID_BUCKETS = 1_000_000
+
+
 def build_grid(bounds, shape_aabbs):
     """A 1 m grid in x/z over the cell, listing every shape whose AABB overlaps each bucket.
 
@@ -747,12 +991,24 @@ def build_grid(bounds, shape_aabbs):
     x0, _y0, z0, x1, _y1, z1 = bounds
     nx = max(1, math.ceil((x1 - x0 - EPS) / GRID_CELL))
     nz = max(1, math.ceil((z1 - z0 - EPS) / GRID_CELL))
+    # A cell's bounds are the union of its own shapes' AABBs, so one shape that escapes its cell
+    # sizes the grid. `HOUSE-00472` found this the way you would expect: a clipping bug put a
+    # rafter a long way from the house and this function sat allocating buckets until the process
+    # was killed. The largest legitimate grid in this house is `EXT_WORLD`'s 400 x 400.
+    if nx * nz > MAX_GRID_BUCKETS:
+        raise LayoutError(
+            f"a cell's collision grid would be {nx} x {nz} = {nx * nz} buckets over "
+            f"{x1 - x0:.1f} x {z1 - z0:.1f} m; a shape has escaped its cell")
     buckets: list[list[int]] = [[] for _ in range(nx * nz)]
     for index, (ax0, _ay0, az0, ax1, _ay1, az1) in enumerate(shape_aabbs):
-        i0 = max(0, min(nx - 1, int((ax0 - x0) / GRID_CELL)))
-        i1 = max(0, min(nx - 1, int(math.ceil((ax1 - x0) / GRID_CELL)) - 1))
-        j0 = max(0, min(nz - 1, int((az0 - z0) / GRID_CELL)))
-        j1 = max(0, min(nz - 1, int(math.ceil((az1 - z0) / GRID_CELL)) - 1))
+        # The EPS matches the interval-overlap test the selftest checks this against: a shape
+        # whose AABB stops exactly ON a bucket's edge does not overlap that bucket, and it must
+        # not land there through a floating-point crumb either. `(5.85 - 3.85) / 1.0` is
+        # 1.9999999999999996 in binary, which put a rafter in the bucket next door.
+        i0 = max(0, min(nx - 1, int(math.floor((ax0 - x0) / GRID_CELL + EPS))))
+        i1 = max(0, min(nx - 1, int(math.ceil((ax1 - x0) / GRID_CELL - EPS)) - 1))
+        j0 = max(0, min(nz - 1, int(math.floor((az0 - z0) / GRID_CELL + EPS))))
+        j1 = max(0, min(nz - 1, int(math.ceil((az1 - z0) / GRID_CELL - EPS)) - 1))
         for j in range(j0, max(j0, j1) + 1):
             for i in range(i0, max(i0, i1) + 1):
                 buckets[j * nx + i].append(index)
@@ -777,14 +1033,18 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
             if source:
                 asset_paths[row["id"]] = (REPO / source)
 
-    stats = {"wallPieces": 0, "stairMeshes": 0, "stairSteps": 0,
+    stats = {"wallPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
+             "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0, "guards": 0,
              "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
     shapes = Shapes()
     per_cell = build_shell(layout, shapes, stats)
     build_stairs(layout, shapes, per_cell, stats)
+    build_rafters(layout, shapes, per_cell, stats)
+    build_mezzanine_guards(layout, shapes, per_cell, stats)
     build_props(layout, shapes, per_cell, asset_paths, stats)
 
     obb_count = len(shapes.obbs)
+    _resolve_meshes(per_cell, obb_count)
     aabbs = [obb_aabb(o) for o in shapes.obbs] + [mesh_aabb(m) for m in shapes.meshes]
 
     cells = []
@@ -975,6 +1235,14 @@ def report(world: dict) -> str:
         f"  {stats['duplicateObbs']} identical OBBs collapsed while building",
         f"  {len(world['cells'])} cells, mean bucket occupancy "
         f"{stats['meanBucketOccupancy']} shapes, worst {stats['maxBucketOccupancy']}",
+        f"  guards: {stats['guards']} at drops over {GUARD_DROP:.1f} m, which §70.5 asks for "
+        f"and the layout has no way to state",
+        f"  rafters: {stats['rafterMeshes']} clipped roof planes over "
+        f"{stats['rafterArea']:.1f} m² of plan, {stats['rafterAboveCeiling']} dropped as "
+        f"unreachable above a flat ceiling",
+        f"  stairs: {stats['stairMeshes']} ramp wedges, {stats['stairLandings']} landings, "
+        f"{stats['stairSteps']} stepped OBBs; {stats['stairsGuessed']} flight(s) placed by guess "
+        f"for want of an authored footprint",
         f"  props: {stats['propObbs']} OBBs, {stats['propMeshes']} meshes, "
         f"{stats['propsSkipped']} without collision",
     ]
@@ -1251,7 +1519,8 @@ def selftest() -> int:
         with_landing = dict(source)
         with_landing["stairs"] = {"schema": "cna-house/stairs/1", "flights": [flight]}
         shapes_landed, per_cell_landed = Shapes(), {}
-        stats_landed = {"stairMeshes": 0, "stairSteps": 0}
+        stats_landed = {"stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
+                        "stairsGuessed": 0}
         build_stairs(with_landing, shapes_landed, per_cell_landed, stats_landed)
         require(stats_landed["stairMeshes"] == 2,
                 f"a flight with one half-landing makes TWO wedges "
@@ -1262,6 +1531,213 @@ def selftest() -> int:
                          for m in shapes_landed.meshes if m["kind"] == KIND_STAIR)
         require(heights == [round(5 * rise, 6), round(5 * rise, 6)],
                 f"...five risers each, so the ten add up ({heights} vs {round(5 * rise, 6)})")
+        require(stats_landed["stairsGuessed"] == 1,
+                "and the fixture flight authors no footprint, so it is COUNTED as guessed rather "
+                "than silently invented")
+
+        # 7c. `HOUSE-00472`: the authored house. Where a flight is comes from `stair_geometry`, so
+        #     the thing you collide with is the thing `house_shell_gen.py` draws. The fixture
+        #     cannot show this -- it has no footprint -- so this is claimed against the real
+        #     `layout.stairs.json`, which is data this repository owns.
+        authored = Path(__file__).resolve().parents[2] / "assets-src" / "world"
+        if (authored / "layout.stairs.json").is_file():
+            real = layout_io.load_layout(authored, ["levels", "cells", "stairs"])
+            main = [f for f in layout_io.rows(real, "stairs") if f["id"] == "STAIR_MAIN_L0_L1"][0]
+            real["stairs"] = {"schema": "cna-house/stairs/1", "flights": [main]}
+            shapes_u, per_cell_u = Shapes(), {}
+            stats_u = {"stairMeshes": 0, "stairSteps": 0, "stairLandings": 0, "stairsGuessed": 0}
+            build_stairs(real, shapes_u, per_cell_u, stats_u)
+            require(stats_u["stairsGuessed"] == 0,
+                    "the main stair is placed from its authored footprint, not guessed")
+            require(stats_u["stairMeshes"] == 2 and stats_u["stairLandings"] == 1,
+                    f"a `u` is two wedges and one landing box "
+                    f"({stats_u['stairMeshes']}, {stats_u['stairLandings']})")
+            wedges = [m for m in shapes_u.meshes if m["kind"] == KIND_STAIR]
+            spans = sorted((min(v[0] for v in m["vertices"]), max(v[0] for v in m["vertices"]))
+                           for m in wedges)
+            require(spans[0][1] <= spans[1][0] + 1e-6,
+                    f"...whose two runs are side by side across the well, not through each other "
+                    f"({spans})")
+            # The defect this task fixed: the second run laid beyond the landing and climbing back
+            # towards it put the flight's TOP tread against the half-landing, so you arrived a
+            # whole storey early. The two runs must rise towards each other, not the same way.
+            def rises_towards(mesh):
+                low = min(v[1] for v in mesh["vertices"])
+                at_low = [v[2] for v in mesh["vertices"] if abs(v[1] - low) < 1e-6]
+                at_high = [v[2] for v in mesh["vertices"] if abs(v[1] - low) > 1e-6]
+                return 1 if sum(at_high) / len(at_high) > sum(at_low) / len(at_low) else -1
+            require(rises_towards(wedges[0]) == -rises_towards(wedges[1]),
+                    "...and they climb in OPPOSITE directions, because a `u` turns through 180 "
+                    "degrees on its landing")
+            landing = [o for o in shapes_u.obbs if o[4] == KIND_STAIR][0]
+            half = float(main["rise"]) * 9 + 0.60
+            require(abs(landing[0][1] + float(main["rise"]) / 2 - half) < 1e-6,
+                    f"the landing's walking surface is the top of the ninth riser, +{half:.4f} m "
+                    f"({landing[0][1] + float(main['rise']) / 2:.4f})")
+            treads = stair_geometry.flight_steps(main, 0.60)
+            top = treads[-1]["box"]
+            reached = [m for m in wedges
+                       if min(v[0] for v in m["vertices"]) <= (top[0] + top[1]) / 2
+                       <= max(v[0] for v in m["vertices"])]
+            require(len(reached) == 1
+                    and abs(max(v[1] for v in reached[0]["vertices"]) - treads[-1]["y1"]) < 1e-6,
+                    "the wedge under the shell's top tread ends at exactly that tread's height, "
+                    "so what you see and what you stand on are the same staircase")
+
+        # 7d. `_wedge` must not mirror. All four travel directions exist in this house -- the
+        #     garage steps run along X -- and a mirrored prism has its faces inside out, which is a
+        #     solid the sweep reports as empty space.
+        for axis, up in (("z", 1), ("z", -1), ("x", 1), ("x", -1)):
+            vertices, triangles = _wedge((1.0, 2.0, 3.0, 4.5), 0.0, 0.5, axis, up)
+            normals = []
+            for a, b, c in triangles:
+                pa, pb, pc = vertices[a], vertices[b], vertices[c]
+                u = [pb[i] - pa[i] for i in range(3)]
+                v = [pc[i] - pa[i] for i in range(3)]
+                normals.append((u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2],
+                                u[0] * v[1] - u[1] * v[0]))
+            centre = [sum(v[i] for v in vertices) / len(vertices) for i in range(3)]
+            outward = 0
+            for (a, _b, _c), normal in zip(triangles, normals):
+                away = [vertices[a][i] - centre[i] for i in range(3)]
+                outward += 1 if sum(normal[i] * away[i] for i in range(3)) > 0 else 0
+            require(outward == len(triangles),
+                    f"a wedge running {axis}{'+' if up > 0 else '-'} has all {len(triangles)} "
+                    f"faces pointing OUT of itself ({outward})")
+            require(abs(max(v[1] for v in vertices) - 0.5) < 1e-9
+                    and len({(round(v[0], 6), round(v[1], 6), round(v[2], 6))
+                             for v in vertices}) == 6,
+                    f"...and is 0.5 m tall over six distinct corners ({axis}{up})")
+        high = {}
+        for axis, up in (("z", 1), ("z", -1), ("x", 1), ("x", -1)):
+            vertices, _t = _wedge((1.0, 2.0, 3.0, 4.5), 0.0, 0.5, axis, up)
+            index = 2 if axis == "z" else 0
+            raised = [v[index] for v in vertices if v[1] > 0.25]
+            high[(axis, up)] = round(sum(raised) / len(raised), 6)
+        require(high[("z", 1)] > high[("z", -1)] and high[("x", 1)] > high[("x", -1)],
+                f"and it rises the way it is told to: +1 puts the high end at the larger "
+                f"coordinate ({high})")
+
+        # 7e. `HOUSE-00472`: the rafter envelope and the guards, both of which exist because the
+        #     layout CANNOT state them. Claimed against the authored house -- the fixture has no
+        #     attic and no balcony, and inventing one here would be claiming about the fixture.
+        authored = Path(__file__).resolve().parents[2] / "assets-src" / "world"
+        if (authored / "layout.cells.json").is_file():
+            house = build(authored)
+            house_shapes: Shapes = house["shapes"]
+            offset = len(house_shapes.obbs)
+            references = {row["id"]: row["shapes"] for row in house["cells"]}
+            rows = layout_io.load_layout(authored, ["levels", "cells"])
+            house_levels = {row["id"]: row for row in layout_io.rows(rows, "levels")}
+            house_cells = {row["id"]: row for row in layout_io.rows(rows, "cells")}
+            build_rules = rows["levels"].get("construction") or {}
+
+            require(house["stats"]["rafterMeshes"] > 0,
+                    f"the attic gets a rafter envelope ({house['stats']['rafterMeshes']} pieces)")
+            store = house_cells["L3_STORE_W"]
+            head = layout_io.cell_extent(store, house_levels["L3"])[1]
+            over_store = [house_shapes.meshes[index - offset]
+                          for index in references["L3_STORE_W"] if index >= offset]
+            lowest = min(vertex[1] for mesh in over_store for vertex in mesh["vertices"])
+            require(over_store and lowest < head - 3.0,
+                    f"and it bites: the lowest rafter over the west store is +{lowest:.2f}, "
+                    f"{head - lowest:.2f} m below the flat +{head:.2f} lid its box alone would "
+                    f"have given it")
+            # Every square metre of the attic has roof over it. Anything less is a hole you walk
+            # up through; anything more is a plane clipped to the wrong box.
+            outer = roof_geometry.outer_box(roof_geometry.roof_boxes(rows)["ROOF_MAIN"],
+                                            build_rules)
+            eaves = roof_geometry.eaves_height(build_rules, outer)
+            planes = roof_geometry.roof_planes(outer, eaves, float(build_rules["roofPitch"]))
+            attic_area = covered = 0.0
+            for cell in (row for row in house_cells.values() if row.get("level") == "L3"):
+                for box in layout_io.cell_boxes(cell):
+                    attic_area += (box[1] - box[0]) * (box[3] - box[2])
+                    for corners, _out in planes:
+                        covered += roof_geometry.plan_area(
+                            roof_geometry.clip_to_rect(corners, box))
+            require(abs(covered - attic_area) < 0.01 and attic_area > 250.0,
+                    f"the four planes cover the attic's whole {attic_area:.1f} m² exactly once "
+                    f"({covered:.1f} m²)")
+            everywhere = {KIND_NAMES[house_shapes.meshes[index - offset]["kind"]]
+                          for identifier, indices in references.items()
+                          for index in indices
+                          if index >= offset and house_cells[identifier].get("level") != "L3"}
+            require("ceiling" not in everywhere,
+                    f"and no cell outside the attic gets one -- the garage has a flat ceiling at "
+                    f"+4.30 and therefore a lid already ({sorted(everywhere)})")
+            equations = [roof_geometry.plane_equation(corners) for corners, _out in planes]
+            on_plane = all(any(abs(a * v[0] + b * v[2] + c - v[1]) < 1e-6
+                               for a, b, c in equations)
+                           for mesh in over_store for v in mesh["vertices"])
+            require(on_plane,
+                    "and every rafter vertex lies ON one of the roof's own planes, so the pieces "
+                    "are the roof rather than something shaped like it")
+
+            # A roof plane faces the sky. Winding a clipped piece backwards makes a rafter you
+            # fall through from above and stand on from below, and nothing else here would say so.
+            skyward = 0
+            for mesh in over_store:
+                for a, b, c in mesh["triangles"]:
+                    pa, pb, pc = mesh["vertices"][a], mesh["vertices"][b], mesh["vertices"][c]
+                    u = [pb[i] - pa[i] for i in range(3)]
+                    v = [pc[i] - pa[i] for i in range(3)]
+                    skyward += 1 if u[2] * v[0] - u[0] * v[2] > 0 else -1
+            require(skyward == sum(len(mesh["triangles"]) for mesh in over_store),
+                    f"every rafter triangle faces the sky, which is the way a roof points "
+                    f"({skyward} of {sum(len(m['triangles']) for m in over_store)})")
+
+            # A level bounded by a CEILING has its lid already; only a level whose ceiling is null
+            # is bounded by rafters. Nothing in this house is the first case, so it is constructed.
+            lidded = dict(rows)
+            lidded["levels"] = dict(rows["levels"], levels=[
+                dict(row, ceiling=12.0) if row["id"] == "L3" else row
+                for row in layout_io.rows(rows, "levels")])
+            probe_shapes, probe_cells = Shapes(), {}
+            probe_stats = {"rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0}
+            build_rafters(lidded, probe_shapes, probe_cells, probe_stats)
+            require(probe_stats["rafterMeshes"] == 0,
+                    f"a level that declares a roof AND a ceiling plane gets no rafters: the slab "
+                    f"is its lid ({probe_stats['rafterMeshes']})")
+
+            # The guards. The shell DRAWS a parapet and a rail here; nothing stopped you.
+            railing = float(build_rules["railing"])
+            guarded = {}
+            for identifier, indices in references.items():
+                floor = layout_io.cell_extent(house_cells[identifier],
+                                              house_levels[house_cells[identifier]["level"]])[0]
+                found = [house_shapes.obbs[index] for index in indices if index < offset
+                         and house_shapes.obbs[index][4] == KIND_WALL
+                         and abs(house_shapes.obbs[index][0][1] - (floor + railing / 2)) < 1e-6
+                         and min(house_shapes.obbs[index][1][0],
+                                 house_shapes.obbs[index][1][2]) * 2 <= GUARD_THICK + 1e-9]
+                if found:
+                    guarded[identifier] = found
+            require(sorted(guarded) == ["L0_GARAGE_LOFT", "L1_BALCONY_FRONT", "L1_BALCONY_REAR",
+                                        "L2_BALCONY_JULIET"],
+                    f"exactly the four places you could fall more than a metre off are guarded "
+                    f"({sorted(guarded)})")
+            require(len(guarded["L1_BALCONY_REAR"]) == 3
+                    and len(guarded["L0_GARAGE_LOFT"]) == 4,
+                    f"three open sides on the rear balcony -- the fourth is the house -- and four "
+                    f"round the loft, which is nested in the garage "
+                    f"({len(guarded['L1_BALCONY_REAR'])}, {len(guarded['L0_GARAGE_LOFT'])})")
+            require(all(identifier not in guarded
+                        for identifier in ("EXT_PORCH", "EXT_TERRACE")),
+                    "and neither the porch at +0.57 nor the terrace at +0.45 is, which is §70.5's "
+                    "own metre deciding it")
+            balcony = house_cells["L1_BALCONY_REAR"]
+            deck = layout_io.cell_extent(balcony, house_levels[balcony["level"]])[0]
+            tops = {round(record[0][1] + record[1][1], 4) for record in guarded["L1_BALCONY_REAR"]}
+            require(tops == {round(deck + railing, 4)},
+                    f"a guard's top is §12's railing height over the deck, +{deck + railing:.2f} "
+                    f"({sorted(tops)})")
+            box = layout_io.cell_boxes(balcony)[0]
+            require(all(box[0] - 1e-6 <= record[0][0] <= box[1] + 1e-6
+                        and box[2] - 1e-6 <= record[0][2] <= box[3] + 1e-6
+                        for record in guarded["L1_BALCONY_REAR"]),
+                    "and it stands INSIDE the deck's edge, like the parapet the shell draws, "
+                    "rather than hanging in the air outside it")
 
         # 8. Proxies: a box becomes an OBB, five boxes become five OBBs, and only what is not a
         #    box becomes a mesh.
@@ -1349,6 +1825,38 @@ def selftest() -> int:
                 f"every one of the cell's {len(cell['shapes'])} shapes appears in at least one "
                 f"bucket ({len(covered)} did) -- a shape the grid forgot is a shape the sweep "
                 f"never tests")
+        # A cell's bounds are the union of its own shapes, so one escaped shape sizes the grid.
+        # `HOUSE-00472` watched this allocate until the process was killed.
+        try:
+            build_grid((0.0, 0.0, 0.0, 4_000.0, 3.0, 4_000.0), [])
+            refused = ""
+        except LayoutError as error:
+            refused = str(error)
+        require("escaped its cell" in refused,
+                f"a grid of 16 million buckets is refused rather than allocated ({refused[:60]})")
+        require(build_grid((0.0, 0.0, 0.0, 400.0, 3.0, 400.0), [])[0] == 400,
+                "while `EXT_WORLD`'s own 400 x 400 is built without complaint")
+
+        # `HOUSE-00472`: a mesh's shape index is `len(obbs) + mesh`, and it is only right once no
+        # more OBBs will be made. The fixture builds prop OBBs AFTER the stair wedge, so a cell
+        # that referenced its stair by the count at the time points at a prop instead. Nothing
+        # said so: the reference was in range, the round trip agreed with itself, and the grid
+        # was consistently wrong.
+        obb_total = len(world["shapes"].obbs)
+        stair_refs = {}
+        for check in world["cells"]:
+            for index in check["shapes"]:
+                if index >= obb_total:
+                    kind = KIND_NAMES[world["shapes"].meshes[index - obb_total]["kind"]]
+                    stair_refs.setdefault(kind, set()).add(check["id"])
+        require(world["stats"]["propObbs"] > 0 and sorted(stair_refs) == ["stair"],
+                f"the only mesh any cell references is its stair, even though "
+                f"{world['stats']['propObbs']} prop OBBs were numbered after it "
+                f"({sorted(stair_refs)})")
+        require(all(index < obb_total + len(world["shapes"].meshes)
+                    for check in world["cells"] for index in check["shapes"]),
+                "and no cell references a shape that does not exist")
+
         # A shape must be in every bucket it OVERLAPS, not just the one its minimum corner falls
         # in: a floor slab indexed by its corner leaves the player standing on nothing everywhere
         # but one square metre. Checked against an independent formulation -- interval overlap per

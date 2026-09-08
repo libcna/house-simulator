@@ -4176,6 +4176,29 @@ Built offline from the layout and the per-asset `_COL` proxies into `content/wor
 
 Total: ~4 300 OBBs, 18 triangle meshes (~9 000 triangles), the height field. Under 3 MB.
 
+Measured over the authored layout when `HOUSE-00472` built it, with no prop carrying a proxy yet:
+**1 068 shapes — 1 046 OBBs and 22 triangle meshes.** By kind: 831 wall pieces, 119 floors, 89
+ceilings, 12 stair shapes. Three of those groups exist because the layout **cannot** state them,
+which is what "built offline from the layout" leaves to this stage:
+
+* **The rafter envelope.** 13 roof planes, each clipped in plan to the cell under it, covering the
+  attic's whole 273.9 m². A cell is an axis-aligned volume, so `L3_STORE_W` declares
+  `yOverride: [9.30, 13.90]` — §13.6's *maximum* head-room, "1.2 → 4.6 m, so most of it is
+  crouch-only". Read as a box it is a flat lid at +13.90 over the whole store. The rafters put the
+  ceiling back where the roof is: over the west store the lowest of them is +10.57, 3.33 m under
+  that lid. They come from the same `roof_geometry` module the shell is drawn from, so the roof you
+  hit is the roof you see.
+* **Drop guards.** 13 of them, at the only four places in the house you could fall more than
+  §70.5's metre with nothing in the way: the two balconies, the juliet, and the garage's storage
+  loft. The shell *draws* a parapet and a rail at each; nothing stopped you walking through it,
+  because an open side of an exterior cell has no wall by construction. The porch at +0.57 and the
+  terrace at +0.45 get none, which is the same metre deciding it. The landings open to the
+  stairwell are a drop too and are **not** guarded yet — their rail is drawn round the hole in the
+  floor rather than round the cell, and Phase 7 owns it.
+* **The stair ramps.** 9 closed wedges, 2 landing boxes and 1 stepped flight, placed from
+  `layout.stairs.json`'s authored `footprint`/`run`/`shape` through the same `stair_geometry`
+  module `house_shell_gen.py` builds the treads from.
+
 ### 49.3 The player sweep
 
 ```

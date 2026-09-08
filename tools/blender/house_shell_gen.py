@@ -97,6 +97,8 @@ sys.path.insert(0, str(REPO / "tools" / "world"))
 sys.path.insert(0, str(REPO / "tools" / "assets"))
 import gltf_validate  # noqa: E402
 import layout_io  # noqa: E402
+import roof_geometry  # noqa: E402
+import stair_geometry  # noqa: E402
 
 SOURCE = REPO / "assets-src" / "world"
 #: Generated, and `content/` is gitignored entirely (§18.4). `build/` is one of the six directory
@@ -462,33 +464,20 @@ NEWEL_SECTION = 0.090
 
 
 def flight_steps(flight: dict, bottom: float):
-    """Every step of a flight as `(along_lo, along_hi, top_y, across_index)`, in run order.
+    """Every tread of a flight, from `stair_geometry` -- the module the COLLISION is built from.
 
-    `along` runs in the direction of travel from 0, so the caller maps it onto the footprint and
-    the sign of `run`; `across_index` is 0 for the first run of a `u` and 1 for the one that
-    doubles back. The landing is not a step and is placed by the caller: it is where a riser ends
-    (§12.4), which is why `HOUSE-00379` had to move both of this house's landings onto a riser
-    boundary.
+    `HOUSE-00472`. This used to work the placement out here, and got a `u` wrong: it laid the
+    second run beyond the landing and climbed back towards it, which puts the flight's TOP tread
+    against the half-landing. You would have stepped off `STAIR_MAIN_L0_L1`'s half-landing at
+    +2.2147 and arrived on L1 at +3.65 in one stride. §12 calls the flight `U, half-landing at
+    riser 9`: you turn through 180 degrees and climb back beside the way you came, which is why
+    its footprint is 2.70 m across for a flight 1.10 m wide.
+
+    Each tread is a dict with a world `box`, the `y1` you stand on, its `lane`, its `run`, the
+    `axis` it travels along and the `up` it rises towards. Returns None for a flight that authors
+    no `footprint`/`run`, which is a flight this generator cannot draw.
     """
-    risers = int(flight["risers"])
-    rise = float(flight["rise"])
-    going = float(flight["going"])
-    turn = int((flight.get("landings") or [{}])[0].get("at") or 0) if flight.get("shape") == "u" \
-        else 0
-    depth = float((flight.get("landings") or [{}])[0].get("depth") or 0.0) if turn else 0.0
-    steps = []
-    for index in range(1, risers + 1):
-        if turn and index <= turn:
-            along = (index - 1) * going
-            steps.append((along, along + going, bottom + index * rise, 0))
-        elif turn:
-            # Back down the other side, measured from the landing's far edge.
-            back = (risers - index) * going
-            steps.append((back, back + going, bottom + index * rise, 1))
-        else:
-            along = (index - 1) * going
-            steps.append((along, along + going, bottom + index * rise, 0))
-    return steps, turn, depth
+    return stair_geometry.flight_steps(flight, bottom)
 
 
 #: §12's trim, in metres. `casing` and `skirting` are `layout.levels.json`'s; the two below are
@@ -503,44 +492,42 @@ THRESHOLD_THICK = 0.015
 
 def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=None,
                  inner=None) -> None:
-    """A flight's steps, nosings and landing, as boxes, through @p solid.
+    """A flight's steps, nosings, landing, handrails and newels, as boxes, through @p solid.
 
     Solid steps rather than treads on a carriage: a blockout wants the shape you walk on and the
     volume you cannot walk through, and a closed string is both. The nosing is a separate board
     because it overhangs, which is the one part of a step's profile you see from below.
+
+    Where every one of those boxes goes comes from `stair_geometry` (`HOUSE-00472`), so the shell
+    and `build_collision.py` cannot disagree about it again.
     """
-    footprint = flight.get("footprint") or {}
-    if not footprint or flight.get("run") not in ("-X", "+X", "-Z", "+Z"):
+    placed = stair_geometry.flight_runs(flight, bottom)
+    treads = stair_geometry.flight_steps(flight, bottom)
+    if placed is None or treads is None:
         return
-    x0, x1 = (float(value) for value in footprint["x"])
-    z0, z1 = (float(value) for value in footprint["z"])
-    run = flight["run"]
-    width = float(flight["width"])
+    axis = placed[0]["axis"]
+    along_axis_x = axis == "x"
+    rise = float(flight["rise"])
 
-    along_axis_x = run in ("-X", "+X")
-    start = (x1 if run == "-X" else x0) if along_axis_x else (z1 if run == "-Z" else z0)
-    sign = -1.0 if run in ("-X", "-Z") else 1.0
-    across_lo, across_hi = (z0, z1) if along_axis_x else (x0, x1)
+    def emit(box, low, high):
+        solid(box[0], box[1], low, high, box[2], box[3])
 
-    steps, turn, landing_depth = flight_steps(flight, bottom)
+    def along_of(box):
+        """`(low, high)` on the axis the flight travels, whichever that is."""
+        return (box[0], box[1]) if along_axis_x else (box[2], box[3])
 
-    def place(a0, a1, low, high, lane):
-        """One box, from run coordinates to world ones."""
-        if lane == 0:
-            c0, c1 = across_lo, across_lo + width
-        else:
-            c0, c1 = across_hi - width, across_hi
-        p0, p1 = sorted((start + sign * a0, start + sign * a1))
-        if along_axis_x:
-            solid(p0, p1, low, high, c0, c1)
-        else:
-            solid(c0, c1, low, high, p0, p1)
+    def with_along(box, low, high):
+        return (low, high, box[2], box[3]) if along_axis_x else (box[0], box[1], low, high)
 
-    for a0, a1, top, lane in steps:
-        offset = (turn * float(flight["going"]) + landing_depth) if lane else 0.0
-        place(a0 + offset, a1 + offset, bottom, top, lane)
-        # The nosing overhangs the riser below it by its own projection.
-        place(a0 + offset - NOSING_PROJECT, a0 + offset, top - NOSING_THICK, top, lane)
+    for tread in treads:
+        emit(tread["box"], bottom, tread["y1"])
+        # The nosing overhangs the riser below it: it projects from the tread's FRONT edge, which
+        # is the end nearer the foot of the run, and a `u`'s second run faces the other way.
+        low, high = along_of(tread["box"])
+        front = low if tread["up"] > 0 else high
+        edge = sorted((front - tread["up"] * NOSING_PROJECT, front))
+        emit(with_along(tread["box"], edge[0], edge[1]),
+             tread["y1"] - NOSING_THICK, tread["y1"])
 
     # `HOUSE-00460`: a handrail up every side of a run that is not against a wall, and a newel at
     # each end of it. "Against a wall" is the run's across edge lying on the CELL's own boundary --
@@ -553,37 +540,31 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
         if inner is not None:
             for value in ((inner[4], inner[5]) if along_axis_x else (inner[0], inner[1])):
                 wall_edges.add(round(value, 4))
-        lanes = sorted({lane for _a0, _a1, _top, lane in steps})
-        for lane in lanes:
-            run_steps = [step for step in steps if step[3] == lane]
-            offset = (turn * float(flight["going"]) + landing_depth) if lane else 0.0
-            lane_lo = across_lo if lane == 0 else across_hi - width
-            lane_hi = lane_lo + width
-            first, last = run_steps[0], run_steps[-1]
-            a_start = start + sign * (first[0] + offset)
-            a_end = start + sign * (last[1] + offset)
+        for number in sorted({tread["run"] for tread in treads}):
+            run_treads = [tread for tread in treads if tread["run"] == number]
+            first, last = run_treads[0], run_treads[-1]
+            up = first["up"]
+            a_start = along_of(first["box"])[0 if up > 0 else 1]
+            a_end = along_of(last["box"])[1 if up > 0 else 0]
+            lane_lo, lane_hi = ((first["box"][2], first["box"][3]) if along_axis_x
+                                else (first["box"][0], first["box"][1]))
             for edge in (lane_lo, lane_hi):
                 if round(edge, 4) in wall_edges:
                     continue
                 rail_along(add, along_axis_x, a_start, a_end,
-                           first[2] + height, last[2] + height, edge, RAIL_SECTION)
-                for a_at, y_at in ((a_start, first[2]), (a_end, last[2])):
-                    post_lo, post_hi = sorted((a_at, a_at + sign * NEWEL_SECTION))
+                           first["y1"] + height, last["y1"] + height, edge, RAIL_SECTION)
+                for a_at, y_at in ((a_start, first["y1"]), (a_end, last["y1"])):
+                    post_lo, post_hi = sorted((a_at, a_at + up * NEWEL_SECTION))
                     if along_axis_x:
-                        solid(post_lo, post_hi, y_at - float(flight["rise"]), y_at + height,
+                        solid(post_lo, post_hi, y_at - rise, y_at + height,
                               edge - NEWEL_SECTION / 2.0, edge + NEWEL_SECTION / 2.0)
                     else:
                         solid(edge - NEWEL_SECTION / 2.0, edge + NEWEL_SECTION / 2.0,
-                              y_at - float(flight["rise"]), y_at + height, post_lo, post_hi)
+                              y_at - rise, y_at + height, post_lo, post_hi)
 
-    if turn and landing_depth > 0.0:
-        low = bottom + turn * float(flight["rise"])
-        a0 = turn * float(flight["going"])
-        p0, p1 = sorted((start + sign * a0, start + sign * (a0 + landing_depth)))
-        if along_axis_x:
-            solid(p0, p1, bottom, low, across_lo, across_hi)
-        else:
-            solid(across_lo, across_hi, bottom, low, p0, p1)
+    for entry in placed:
+        if entry["kind"] == "landing":
+            emit(entry["box"], bottom, entry["y0"])
 
 
 def rail_along(add, axis_x: bool, a0: float, a1: float, y0: float, y1: float,
@@ -622,80 +603,23 @@ def flight_going(flights, cell) -> float:
 
 def top_tread_box(flight: dict, bottom: float):
     """The world box of a flight's top step, or None. Where you step off it onto the floor above."""
-    footprint = flight.get("footprint") or {}
-    if not footprint or flight.get("run") not in ("-X", "+X", "-Z", "+Z"):
+    treads = stair_geometry.flight_steps(flight, bottom)
+    if not treads:
         return None
-    x0, x1 = (float(value) for value in footprint["x"])
-    z0, z1 = (float(value) for value in footprint["z"])
-    run = flight["run"]
-    width = float(flight["width"])
-    along_axis_x = run in ("-X", "+X")
-    start = (x1 if run == "-X" else x0) if along_axis_x else (z1 if run == "-Z" else z0)
-    sign = -1.0 if run in ("-X", "-Z") else 1.0
-    across_lo, across_hi = (z0, z1) if along_axis_x else (x0, x1)
-    steps, turn, landing_depth = flight_steps(flight, bottom)
-    a0, a1, top, lane = steps[-1]
-    offset = (turn * float(flight["going"]) + landing_depth) if lane else 0.0
-    c0, c1 = (across_lo, across_lo + width) if lane == 0 else (across_hi - width, across_hi)
-    p0, p1 = sorted((start + sign * (a0 + offset), start + sign * (a1 + offset)))
-    return (p0, p1, c0, c1, top) if along_axis_x else (c0, c1, p0, p1, top)
+    box, top = treads[-1]["box"], treads[-1]["y1"]
+    return (box[0], box[1], box[2], box[3], top)
 
 
-#: How far the roof oversails the outer face of the wall, in metres. §12.1 says the attic is "under
-#: a 7:12 roof over a 13.4 m span", and the main block is 12.80 m between wall centre lines, 13.10
-#: between their outer faces: the missing 0.30 is 0.15 of overhang on each side. So the number is
-#: §12.1's, arrived at by subtraction, and it is the one place it appears.
-EAVES_OVERHANG = 0.15
+#: The roof's overhang, its eaves height and its four planes are `tools/world/roof_geometry.py`'s,
+#: so that `build_collision.py` can build the attic's rafter envelope from the numbers this
+#: generator draws it with (`HOUSE-00472`). §12 over-determines the roof and `HOUSE-00461` settled
+#: it once; nothing here may settle it a second time. The fascia's own section is this generator's,
+#: because §12 gives the board no dimension at all.
+EAVES_OVERHANG = roof_geometry.EAVES_OVERHANG
+eaves_height = roof_geometry.eaves_height
+roof_planes = roof_geometry.roof_planes
 FASCIA_DEPTH = 0.20
 FASCIA_THICK = 0.035
-
-
-def roof_planes(box: tuple, eaves_y: float, pitch: float):
-    """A hip roof over a rectangle: `(corners, outward)` per plane, in world coordinates.
-
-    Two trapezoids along the long sides and two triangles at the ends -- or four triangles when the
-    rectangle is square, which the garage's 8.4 × 8.4 wing is, and a pyramid is what a hip roof
-    over a square is.
-
-    §12.1's roof is "hipped-and-gabled". The hips are here; the gables are the five dormers
-    (`HOUSE-00462`) and the projecting garage wing, which is what makes the phrase true without
-    this generator having to invent a gablet §12 never describes.
-    """
-    x0, x1, z0, z1 = box
-    dx, dz = x1 - x0, z1 - z0
-    half = min(dx, dz) / 2.0
-    top = eaves_y + half * pitch
-
-    def plane(points, outward):
-        """One face, with a degenerate ridge collapsed: over a square the two trapezoids meet at
-        a point, which makes them triangles, which is what a pyramid is."""
-        kept = [point for index, point in enumerate(points)
-                if index == 0 or max(abs(a - b) for a, b in zip(point, points[index - 1])) > 1e-9]
-        return (kept, outward)
-
-    if dx >= dz:
-        zm = (z0 + z1) / 2.0
-        ridge0, ridge1 = (x0 + half, zm), (x1 - half, zm)
-        return [
-            plane([(x0, eaves_y, z0), (x1, eaves_y, z0), (ridge1[0], top, zm),
-                   (ridge0[0], top, zm)], (0.0, pitch, -1.0)),
-            plane([(x1, eaves_y, z1), (x0, eaves_y, z1), (ridge0[0], top, zm),
-                   (ridge1[0], top, zm)], (0.0, pitch, 1.0)),
-            plane([(x0, eaves_y, z1), (x0, eaves_y, z0), (ridge0[0], top, zm)],
-                  (-1.0, pitch, 0.0)),
-            plane([(x1, eaves_y, z0), (x1, eaves_y, z1), (ridge1[0], top, zm)],
-                  (1.0, pitch, 0.0)),
-        ]
-    xm = (x0 + x1) / 2.0
-    ridge0, ridge1 = (xm, z0 + half), (xm, z1 - half)
-    return [
-        plane([(x0, eaves_y, z1), (x0, eaves_y, z0), (xm, top, ridge0[1]),
-               (xm, top, ridge1[1])], (-1.0, pitch, 0.0)),
-        plane([(x1, eaves_y, z0), (x1, eaves_y, z1), (xm, top, ridge1[1]),
-               (xm, top, ridge0[1])], (1.0, pitch, 0.0)),
-        plane([(x0, eaves_y, z0), (x1, eaves_y, z0), (xm, top, ridge0[1])], (0.0, pitch, -1.0)),
-        plane([(x1, eaves_y, z1), (x0, eaves_y, z1), (xm, top, ridge1[1])], (0.0, pitch, 1.0)),
-    ]
 
 
 #: `HOUSE-00470`: one placeholder material per surface class, so the blockout is readable before
@@ -899,20 +823,6 @@ def dormer_shell(rect_u: tuple, rect_v: tuple, plane_z: float, outward: float,
                        (mid, ridge_y, back), (edge, roof_at(back), back)],
                       (side, pitch, 0.0)))
     return faces
-
-
-def eaves_height(construction: dict, box: tuple) -> float:
-    """Where the roof's eaves EDGE is, derived from the ridge and the pitch (`HOUSE-00461`).
-
-    §12 over-determines the roof: it states a ridge at +14.30, a 7:12 pitch, a 1.20 m knee wall and
-    a 13.4 m span, and the four do not quite agree. The ridge and the pitch win -- 14.30 is the
-    house's height above grade and 7:12 is what you see -- and the knee wall comes out at 1.179 m
-    against §12's 1.20, a 21 mm difference that is §12 rounding rather than a disagreement about
-    the house.
-    """
-    x0, x1, z0, z1 = box
-    return float(construction["ridgeY"]) - (min(x1 - x0, z1 - z0) / 2.0) * \
-        float(construction["roofPitch"])
 
 
 def covered_by(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> bool:
@@ -1701,30 +1611,9 @@ def dormers_on(box: tuple, portals, openings) -> list:
 
 
 def roof_boxes(layout: dict, levels: dict) -> dict:
-    """`{name: centre-line rectangle}` for every roof this generator builds.
-
-    `ROOF_MAIN` covers the attic, which is what `layout.levels.json` says: `L3` declares
-    `"roof": "ROOF_MAIN"` and its cells ARE the main block. `ROOF_GARAGE` covers the garage, the
-    projecting wing §12.1 describes; the sunroom's roof is flat and is the rear balcony's floor,
-    so it is a cell's ceiling and not a roof.
-    """
-    out = {}
-    attic = [row for row in layout_io.rows(layout, "cells") if row.get("level") == "L3"]
-    if attic:
-        boxes = [box for row in attic for box in (row.get("boxes") or [])]
-        out["ROOF_MAIN"] = (min(float(b["x"][0]) for b in boxes),
-                            max(float(b["x"][1]) for b in boxes),
-                            min(float(b["z"][0]) for b in boxes),
-                            max(float(b["z"][1]) for b in boxes))
-    garage = next((row for row in layout_io.rows(layout, "cells")
-                   if row.get("kind") == "garage"), None)
-    if garage:
-        boxes = garage.get("boxes") or []
-        out["ROOF_GARAGE"] = (min(float(b["x"][0]) for b in boxes),
-                              max(float(b["x"][1]) for b in boxes),
-                              min(float(b["z"][0]) for b in boxes),
-                              max(float(b["z"][1]) for b in boxes))
-    return out
+    """`{name: centre-line rectangle}` for every roof, from `roof_geometry` (`HOUSE-00472`)."""
+    del levels
+    return roof_geometry.roof_boxes(layout)
 
 
 def digest(path: Path) -> str:
@@ -2200,22 +2089,36 @@ def selftest(output: Path) -> int:
     flight_rows = {row["id"]: row for row in layout_io.rows(
         layout_io.load_layout(SOURCE, kinds=["stairs"]), "stairs")}
     main = flight_rows["STAIR_MAIN_L0_L1"]
-    steps, turn, landing_depth = flight_steps(main, 0.60)
+    steps = flight_steps(main, 0.60)
     require(len(steps) == int(main["risers"]),
             f"a flight has one step per riser ({len(steps)} of {main['risers']})")
-    require(abs(steps[-1][2] - float(levels["L1"]["ffl"])) < 1e-6,
-            f"and its last tread IS the floor above, {steps[-1][2]:.4f} against "
+    require(abs(steps[-1]["y1"] - float(levels["L1"]["ffl"])) < 1e-6,
+            f"and its last tread IS the floor above, {steps[-1]['y1']:.4f} against "
             f"{levels['L1']['ffl']}")
-    require(abs(steps[0][2] - (0.60 + float(main["rise"]))) < 1e-9,
+    require(abs(steps[0]["y1"] - (0.60 + float(main["rise"]))) < 1e-9,
             "and its first is one rise off the floor below")
-    require(turn == 9 and abs(landing_depth - 1.1) < 1e-9,
-            f"the main stair turns at riser 9 on a 1.10 m landing ({turn}, {landing_depth})")
-    lanes = {lane for _a0, _a1, _top, lane in steps}
+    lanes = {tread["lane"] for tread in steps}
     require(lanes == {0, 1},
             f"and a U-stair has two runs, one each side of its own landing ({sorted(lanes)})")
-    require({lane for _a0, _a1, _top, lane in flight_steps(
-        flight_rows["STAIR_ATTIC_L2_L3"], 6.55)[0]} == {0},
+    require({tread["lane"] for tread in flight_steps(
+        flight_rows["STAIR_ATTIC_L2_L3"], 6.55)} == {0},
         "while a straight flight has one")
+
+    # `HOUSE-00472`: the two runs of a `u` climb TOWARDS each other. This generator used to lay the
+    # second one beyond the landing and climb back to it, so the top tread finished against the
+    # half-landing and you reached L1 in one stride from +2.2147.
+    first_run = [tread for tread in steps if tread["run"] == 0]
+    second_run = [tread for tread in steps if tread["run"] == 1]
+    require(first_run[0]["up"] == -second_run[0]["up"],
+            f"the two runs of a `u` climb in opposite directions "
+            f"({first_run[0]['up']}, {second_run[0]['up']})")
+    landing_y = 0.60 + 9 * float(main["rise"])
+    foot = second_run[0]["box"][2 if second_run[0]["up"] > 0 else 3]
+    require(abs(second_run[0]["y1"] - landing_y - float(main["rise"])) < 1e-9,
+            f"the second run's FIRST tread is one riser above the half-landing at "
+            f"+{landing_y:.4f} ({second_run[0]['y1']:.4f})")
+    require(abs(foot - -17.92) < 1e-6,
+            f"and it starts at the landing's far edge, z = -17.92 ({foot:.3f})")
 
     # The steps are inside the footprint the flight declares, which rule 10 checks the SIZE of and
     # nothing checked the placement of until here.
@@ -2238,6 +2141,20 @@ def selftest(output: Path) -> int:
             and abs(max(by1 for _a, _b, _c, by1, _d, _e in boxes)
                     - float(levels["L1"]["ffl"])) < 1e-6,
             "and none of it is below the floor it starts on or above the floor it reaches")
+    # A nosing overhangs the tread BELOW it, so it must sit outside its own tread on the side the
+    # run descends. Winding this the wrong way round for the second run of a `u` puts the nosing
+    # inside the step, where it is invisible and does nothing.
+    treads_only = {(round(t["box"][0], 6), round(t["box"][1], 6),
+                    round(t["box"][2], 6), round(t["box"][3], 6)) for t in steps}
+    nosings = [box for box in boxes if abs((box[3] - box[2]) - NOSING_THICK) < 1e-9]
+    require(len(nosings) == int(main["risers"]),
+            f"there is a nosing over every riser ({len(nosings)})")
+    overhangs = sum(1 for bx0, bx1, _by0, _by1, bz0, bz1 in nosings
+                    if (round(bx0, 6), round(bx1, 6), round(bz0, 6), round(bz1, 6))
+                    not in treads_only)
+    require(overhangs == int(main["risers"]),
+            f"and every one of them stands proud of its own tread rather than inside it "
+            f"({overhangs})")
 
     # ---- `HOUSE-00460`: the stairwell openings ------------------------------------------------
     #
