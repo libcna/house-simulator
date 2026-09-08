@@ -7616,8 +7616,37 @@ never escapes and never penetrates.
             is standing in and nothing else, so a body moving 3 m in one step is handed only the
             wall behind it -- which is what the first version of that case accidentally proved by
             starting 0.08 m inside the west wall and reporting a correct t = 0 against it.
-- [ ] HOUSE-00546 — Implement `RayCast` against OBBs, triangles and the terrain height field
+- [x] HOUSE-00546 — Implement `RayCast` against OBBs, triangles and the terrain height field
       dep: HOUSE-00544 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) `physics/RayCast.hpp`: a slab test in the box's own frame, Möller-Trumbore
+            for a triangle, and an Amanatides & Woo walk for §11.5's ground -- plus `RayCastCell`,
+            which is what §50.1 actually calls: *"if occluded by static geometry between eye and
+            hit: continue -- one short raycast"*.
+      note: **the normal is the RAY's answer, not the geometry's.** A wall is opaque from both
+            sides and a triangle's winding is for drawing (§14), so every normal returned is
+            turned to face back along the ray and `dot(normal, direction)` is never positive. The
+            box test does the same for the face it entered by.
+      note: **a ray that starts inside a box hits it at zero.** §50.1 asks whether anything is
+            BETWEEN the eye and a thing, and an eye inside a wall is behind that wall. Reporting a
+            miss would let a player work a light switch through the wall they are standing in.
+      note: the ground is walked square by square rather than tested over its bounding box: a ray
+            across the lot crosses 80 squares of its length and 5 120 of its box. The first square
+            that answers gives the nearest answer, and needs no comparison against later ones,
+            because a square's triangles lie inside that square's own footprint.
+      accept: 19 cases. Six faces met square on at their own distances and normals; a ray stopping
+            short; one passing 0.5 m over the top; one pointing away; a ray starting inside
+            reported at zero with the nearest face's normal; a 90° box whose normal comes back in
+            WORLD axes and a 45° one met on its diagonal face at `3 - √2`; a triangle hit from
+            both sides at the same distance with opposite normals; past its sloping edge; edge-on
+            in its own plane not stopping the ray; a triangle with no area; ground met by a
+            vertical ray, by a diagonal one that has to step in BOTH axes, by one entering the lot
+            from 5 m outside, and a grazing ray that clears the near bank of a valley and lands on
+            the far one; three ways of never reaching the lot; the NEAREST of two walls with the
+            far one listed first; §50.1's occlusion test with and without the partition; the
+            ground winning over a slab buried under it. In the real house, 2.6 m rays from eye
+            height in six directions from every cell: every hit within reach, its point on the ray
+            at the distance reported, its normal unit and facing back. Eleven injected bugs,
+            eleven caught.
 - [x] HOUSE-00547 — Implement `Overlap` and depenetration (4 iterations, 0.02 m push-out)
       dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
       note: (2026-09-08) §49.3 step 5 -- *"4 iterations of 0.02 m push-out along the deepest

@@ -40,6 +40,7 @@ add_library(cnahouse_core STATIC
     physics/CollisionLoader.cpp
     physics/Fall.cpp
     physics/Move.cpp
+    physics/RayCast.cpp
     physics/Sweep.cpp
     physics/Terrain.cpp
     world/CellRuntime.cpp
