@@ -1078,11 +1078,20 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
 
 
 def _world_hash(world_dir: Path) -> str:
-    """`world.manifest.json`'s `worldHash`, so the runtime can reject a stale collision file."""
-    path = world_dir / "world.manifest.json"
-    if not path.is_file():
-        return ""
-    return str(layout_io.load_file(path, "manifest").get("worldHash", ""))
+    """`world.manifest.json`'s `worldHash`, so the runtime can reject a stale binary.
+
+    The manifest is written by `deploy_world.py` into `content/world/` (`HOUSE-00364`), NOT beside
+    the authored source, so looking only in @p world_dir found nothing and stamped every file
+    built from `assets-src/world` with an empty hash. Nothing read the field until `HOUSE-00474`
+    put a C++ reader behind it, which is exactly how a write-only field goes wrong.
+
+    An empty string is still a legal answer -- a fixture world has no manifest and does not need
+    one -- and it means the staleness check cannot run, which the report says out loud.
+    """
+    for path in (world_dir / "world.manifest.json", REPO / "content" / "world" / "world.manifest.json"):
+        if path.is_file():
+            return str(layout_io.load_file(path, "manifest").get("worldHash", ""))
+    return ""
 
 
 # ========================================================================================= writer

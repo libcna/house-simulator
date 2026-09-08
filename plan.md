@@ -7158,8 +7158,41 @@ the chunk builder produces ≤ 6 chunks per cell.
             and the prop placements are Phase 8's. Both are now optional — a prop that needs a
             material still says so when it is reached — because the shell has its own placeholder
             materials in the `.glb` and can be chunked today.
-- [ ] HOUSE-00474 — Implement `CellRuntime` and load the per-cell chunk buffers into `VertexBuffer`/`IndexBuffer`
+- [x] HOUSE-00474 — Implement `CellRuntime` and load the per-cell chunk buffers into `VertexBuffer`/`IndexBuffer`
       dep: HOUSE-00473, HOUSE-00344 · sys: world · plat: ALL · pri: MUST
+      note: (2026-09-08) Two pieces, split where the graphics starts. `ChunkReader` parses
+            `chunks.bin` with `TitleContainer` and `System::IO::BinaryReader` and no device at all,
+            so it is unit-tested (16 claims) and round-tripped against a fixture
+            `build_chunks.py --fixture` writes at build time (9 claims, the `.chanim` idiom of
+            `HOUSE-00223`). `CellRuntime` owns per-cell residency and the buffers; it needs a
+            device, so its 7 claims live in the render suite. Suite: 565 green.
+      accept: a well-formed file reads back; every truncation, an unknown version, a reserved
+            flag, a repeated table name, an inverted box, 16-bit indices that cannot address the
+            vertices, an index count that is not whole triangles and sub-ranges that do not tile
+            the buffer are each refused naming the file; loading is idempotent, unloading releases,
+            a cell the file does not have is `NotFound`; the whole 488-chunk house reads back
+      finding: (2026-09-08, found by `HOUSE-00474`) **CNA has no generic
+            `VertexBuffer::SetData<T>`.** XNA 4.0's is generic over any struct, which is how real
+            XNA uploads a `VertexPositionDualTexture : IVertexType`; CNA offers four concrete
+            overloads plus a `CNAEXT SetDataRaw` this project may not call, and **not one of the
+            four carries two texture coordinates** — which is exactly what `DualTextureEffect`
+            reads. Not a blocker, because CNA supports the way round it deliberately:
+            `VertexBuffer::ValidateSetDataRange` says *"this buffer may carry any declaration the
+            caller chose, so every declared element still has to fit in the bytes actually
+            uploaded"*. A `dual` chunk is therefore uploaded through `VertexPositionNormalTexture`
+            — stream `x y z nx ny nz u v` — under a declaration reading `nx ny` as TEXCOORD0 and
+            `nz u` as TEXCOORD1. **The cost is four bytes a vertex, 32 uploaded where the file
+            stores 28**, and `ResidentBytes()` counts the uploaded figure so it is measured rather
+            than assumed. `TheCarriersStreamIsSixFloatsThenTwo` measures the stream order the whole
+            thing rests on. A generic `SetData<T>` upstream would remove the four bytes.
+      finding: (2026-09-08, found by `HOUSE-00474`) `worldHash` has been **empty in every binary
+            this repository writes**, since `HOUSE-00210`. `_world_hash` looked for
+            `world.manifest.json` beside the authored world, and `deploy_world.py` writes it into
+            `content/world/` (`HOUSE-00364`). Nothing noticed because nothing read the field until
+            a C++ reader was put behind it — which is how a write-only field goes wrong. Fixed by
+            looking in both places; an empty hash stays legal, because a fixture world has no
+            manifest, and it is the one string in the format that may be, so `--report` says out
+            loud when a file cannot be told from a stale one.
 - [ ] HOUSE-00475 — Implement the opaque static pass drawing all cells with `BasicEffect` and a fixed camera; no culling yet
       dep: HOUSE-00474, HOUSE-00159 · sys: rendering · plat: ALL · pri: MUST
       verify: render test `blockout-01` — the house from the road

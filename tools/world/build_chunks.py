@@ -726,6 +726,10 @@ def report(built: dict) -> str:
         f"  {stats['split']} group(s) split for the 16-bit cap, {stats['wide']} chunk(s) on "
         f"32-bit indices",
     ]
+    if not built.get("worldHash"):
+        lines.append(
+            "  the world hash is EMPTY: deploy_world.py has not written content/world/"
+            "world.manifest.json, so nothing can tell this file from a stale one")
     if stats.get("shellFiles"):
         lines.append(
             f"  shell: {stats['shellFiles']} file(s), {stats['shellLightmapped']} from the "
@@ -837,6 +841,62 @@ def _fixture_model(path: Path, *, uv1: bool, boxes=1, col_proxy=False) -> None:
         "accessors": accessors, "bufferViews": views,
         "buffers": [{"byteLength": len(blob)}],
     }, bytes(blob))
+
+
+def fixture_library() -> dict:
+    """A tiny chunk file whose every number is stated here and asserted in C++.
+
+    `HOUSE-00474`. `ChunkReaderTests` builds its bytes by hand, which makes it an excellent test of
+    the reader and no test at all of the reader and the WRITER agreeing: a writer that emitted the
+    bounding box max before min, or the sub-range count before the indices, would pass every test
+    in this repository and fail in the game. `tests/CMakeLists.txt` generates this file with this
+    tool, and `ChunkRoundTripTests` reads it with the real C++ reader.
+
+    Everything here is deliberately asymmetric: distinct values in every field, all three layouts,
+    a chunk with two sub-ranges, and a `dual` chunk whose two UV sets differ -- a fixture whose
+    `TEXCOORD_0` equalled its `TEXCOORD_1` could not show them being swapped.
+    """
+    def vertex(position, normal, uv0, uv1):
+        return (position, normal, uv0, uv1)
+
+    dual = {
+        "cell": "L0_HALL", "material": "MAT_PLASTER", "layout": LAYOUT_DUAL, "indexBits": 16,
+        "vertices": [vertex((0.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.125, 0.25), (0.5, 0.75)),
+                     vertex((4.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.375, 0.5), (0.625, 0.875)),
+                     vertex((4.0, 2.5, 0.0), (0.0, 1.0, 0.0), (0.625, 0.75), (0.75, 0.9375)),
+                     vertex((0.0, 2.5, -3.0), (0.0, 1.0, 0.0), (0.875, 0.9375), (0.875, 0.96875))],
+        "indices": [0, 1, 2, 0, 2, 3],
+        "bounds": (0.0, 0.0, -3.0, 4.0, 2.5, 0.0),
+        "subRanges": [{"prop": "L0_HALL:BLOCKOUT_wall", "indexStart": 0, "indexCount": 3,
+                       "bounds": (0.0, 0.0, 0.0, 4.0, 2.5, 0.0)},
+                      {"prop": "L0_HALL:BLOCKOUT_floor", "indexStart": 3, "indexCount": 3,
+                       "bounds": (0.0, 0.0, -3.0, 4.0, 2.5, 0.0)}],
+    }
+    basic = {
+        "cell": "L0_HALL", "material": "MAT_TRIM", "layout": LAYOUT_BASIC, "indexBits": 16,
+        "vertices": [vertex((1.0, 0.0, 0.5), (1.0, 0.0, 0.0), (0.0, 0.0), (0.0, 0.0)),
+                     vertex((1.0, 0.1, 0.5), (0.0, 0.0, -1.0), (1.0, 0.0), (0.0, 0.0)),
+                     vertex((1.0, 0.1, 2.5), (0.0, -1.0, 0.0), (1.0, 1.0), (0.0, 0.0))],
+        "indices": [0, 1, 2],
+        "bounds": (1.0, 0.0, 0.5, 1.0, 0.1, 2.5),
+        "subRanges": [{"prop": "L0_HALL:BLOCKOUT_trim", "indexStart": 0, "indexCount": 3,
+                       "bounds": (1.0, 0.0, 0.5, 1.0, 0.1, 2.5)}],
+    }
+    alpha = {
+        "cell": "L0_LOUNGE", "material": "MAT_GLASS", "layout": LAYOUT_ALPHATEST, "indexBits": 16,
+        "vertices": [vertex((-2.0, 0.9, 6.0), (0.0, 0.0, 0.0), (0.25, 0.5), (0.0, 0.0)),
+                     vertex((-0.5, 0.9, 6.0), (0.0, 0.0, 0.0), (0.75, 0.5), (0.0, 0.0)),
+                     vertex((-0.5, 2.1, 6.0), (0.0, 0.0, 0.0), (0.75, 1.0), (0.0, 0.0))],
+        "indices": [0, 1, 2],
+        "bounds": (-2.0, 0.9, 6.0, -0.5, 2.1, 6.0),
+        "subRanges": [{"prop": "PROP_WINDOW_01", "indexStart": 0, "indexCount": 3,
+                       "bounds": (-2.0, 0.9, 6.0, -0.5, 2.1, 6.0)}],
+    }
+    return {"chunks": [dual, basic, alpha],
+            "stats": {"props": 0, "dynamic": 0, "split": 0, "wide": 0,
+                      "cellsOverChunkLimit": [], "materialsPerCell": {}, "chunksPerCell": {},
+                      "keysBeyondMaterial": 0},
+            "worldHash": "0123456789abcdef0123456789abcdef"}
 
 
 def _fixture_shell(path: Path, classes) -> None:
@@ -1389,12 +1449,21 @@ def main() -> int:
     parser.add_argument("--shell", type=Path, nargs="*", default=None,
                         help="directories of generated shell .glb, most-preferred first; "
                              "the default is build/shell-lm then build/shell")
+    parser.add_argument("--fixture", type=Path, default=None,
+                        help="write the C++ round-trip fixture (HOUSE-00474) and exit")
     parser.add_argument("--report", action="store_true")
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args()
 
     if args.selftest:
         return selftest()
+
+    if args.fixture is not None:
+        args.fixture.parent.mkdir(parents=True, exist_ok=True)
+        data = serialise(fixture_library())
+        args.fixture.write_bytes(data)
+        print(f"build_chunks: wrote the round-trip fixture {args.fixture} ({len(data)} bytes)")
+        return 0
 
     # The lightmapped copy first and the raw shell behind it: `shell_unwrap.py` writes only the
     # cells it bakes, and the rest have never been anywhere else.

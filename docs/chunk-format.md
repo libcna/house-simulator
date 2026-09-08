@@ -1,8 +1,10 @@
 # `chunks.bin` — the pre-batched static geometry
 
 *`HOUSE-00215`. Normative. The writer is `tools/world/build_chunks.py`; there is no other. The
-runtime reader is `HOUSE-00474`'s `CellRuntime` and does not exist yet — the writer's own
-`read_back` is the round trip that keeps the format honest until it does.*
+runtime reader is `src/world/ChunkReader.cpp` and `CellRuntime` uploads what it returns
+(`HOUSE-00474`). Three checks keep the two honest: the writer's own `read_back`, `ChunkReaderTests`
+over bytes built by hand, and `ChunkRoundTripTests` over a fixture this tool writes at build time —
+the last is the only one that can see the writer and the reader disagreeing about field order.*
 
 ---
 
@@ -67,7 +69,7 @@ and §17.4 excludes animated props from batching.
 | `magic` | 4 bytes | ASCII `CCHK` |
 | `version` | `u32` | **1** |
 | `flags` | `u32` | 0. A reader must **reject** any unknown bit |
-| `worldHash` | string | `world.manifest.json`'s `worldHash` |
+| `worldHash` | string | `world.manifest.json`'s `worldHash`, or **empty** before `deploy_world.py` has written one. The only string in this format that may be empty: it means the staleness check cannot run, which is different from the file being corrupt |
 | `cellCount` | `u32` | |
 | `cells` | `cellCount` × string | sorted cell ids |
 | `materialCount` | `u32` | |
@@ -96,6 +98,57 @@ own prop's. A sub-range carrying the group's box culls nothing and costs 24 byte
 
 Textures are not named here. A chunk names its material, and `layout.materials.json` names the
 material's albedo; duplicating the path would be a second place for it to be wrong.
+
+## 4a. The shell is chunked too
+
+`HOUSE-00473`. §17.4 was written about "every cell's static props", and a cell's own floor,
+ceiling, walls, trim and glass are drawn as well. `build_chunks.py --shell <dir>...` reads the
+`.glb` per cell that `tools/blender/house_shell_gen.py` writes and chunks it the same way, with
+three differences worth stating:
+
+* **One primitive per surface class, not one mesh.** The exporter splits a cell by material, which
+  is exactly what chunking groups by, so the shell is read by a separate function that keeps the
+  primitives apart. `read_geometry`, which welds them, stays as it is because that is right for a
+  prop.
+* **The material is the placeholder in the `.glb`** (`BLOCKOUT_wall`, `BLOCKOUT_glass`, …), and
+  what it is drawn with comes from the `lightmapReceiver` `HOUSE-00471` writes into the material's
+  glTF `extras`: a receiver is `DualTextureEffect`, everything else `BasicEffect`. A table here
+  would be a second opinion about a decision the data already carries.
+* **Baked and not baked are different questions.** §18.3 bakes per cell, which is a description of
+  an interior; `shell_unwrap.py` skips the yards, decks, roofs and chimney, so their floors and
+  walls — receiver classes both — arrive with no `TEXCOORD_1` and §22 lights them directly every
+  frame. A receiver class outside a baked cell is therefore `BasicEffect`; a receiver **inside**
+  one with no second UV is an error naming `shell_unwrap.py`.
+
+A sub-range's `prop` is the `layout.props.json` id for a prop and `<file>:<material>` for a surface
+class of the shell. A shell file whose name is not a cell — `ROOF_MAIN`, `ROOF_GARAGE`, `CHIMNEY` —
+draws with the largest exterior cell, which is `EXT_WORLD` in this house and is derived rather than
+named.
+
+## 4b. Uploading: the declaration is the meaning, the built-in type is a carrier
+
+`HOUSE-00474`. XNA 4.0's `VertexBuffer.SetData<T>` is generic over any struct, so real XNA declares
+a `VertexPositionDualTexture : IVertexType` and uploads it. **CNA has no generic**: four concrete
+overloads — `VertexPositionColor`, `VertexPositionColorTexture`, `VertexPositionNormalTexture`,
+`VertexPositionTexture` — plus a `CNAEXT SetDataRaw` this project may not call (ADR-0001). None of
+the four carries two texture coordinates, which is exactly what `DualTextureEffect` reads.
+
+This is not a blocker, because CNA supports the way round it deliberately.
+`VertexBuffer::ValidateSetDataRange` says: *"a built-in type's own declaration already describes
+exactly that stream, but this buffer may carry any declaration the caller chose, so every declared
+element still has to fit in the bytes actually uploaded."* So:
+
+| Layout | Uploaded through | GPU stride | Declaration reads |
+|---|---|---|---|
+| `basic` | `VertexPositionNormalTexture` | 32 | `Position@0` `Normal@12` `TexCoord0@24` |
+| `dual` | `VertexPositionNormalTexture` | 32 | `Position@0` `TexCoord0@12` `TexCoord1@20` |
+| `alphatest` | `VertexPositionTexture` | 20 | `Position@0` `TexCoord0@12` |
+
+The carrier's stream is `x y z nx ny nz u v`; for `dual` the declaration reads `nx ny` as TEXCOORD0
+and `nz u` as TEXCOORD1, and `v` goes unread. The struct's field names are not what reaches the
+GPU. **The cost is four bytes a vertex** — 32 uploaded where this file stores 28 —
+and `CellRuntime::ResidentBytes()` counts what was uploaded so the difference is measured rather
+than assumed. A generic `SetData<T>` in CNA would remove it.
 
 ## 5. Grouping: the four-part key has one free part
 
