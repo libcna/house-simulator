@@ -8366,8 +8366,33 @@ never escapes and never penetrates.
             threshold disabled, and the landing overshooting the floor it lands on. The fourth
             (terminal speed ignored) is invisible here and should be: 3 m of falling reaches
             7.60 m/s and never approaches 12, which is `FallTests`' case.
-- [ ] HOUSE-00615 — Guarantee test: every flight is traversable in both directions, and every landing is reachable
+- [x] HOUSE-00615 — Guarantee test: every flight is traversable in both directions, and every landing is reachable
       dep: HOUSE-00560 · sys: physics · plat: CI · pri: MUST
+      verify: unit StairTraversalTests.EveryFlightIsWalkableUpAndDownAndEveryLandingIsStoodOn
+      note: (2026-09-08) all eight flights walked UP and back DOWN with the real `PlayerStep`, 3
+            landings stood on, 4 946 fixed steps. The path comes out of the collision RAMP itself
+            -- the lowest and highest vertices of each wedge and the centre of each landing box --
+            because that is the surface the body will be standing on, and the body is steered from
+            waypoint to waypoint the way a player is: yaw at the next one, walk forward, no
+            vertical help of any kind.
+      finding: **this task found three defects, and none of them was in the flights.** The
+            collision floors had no stair wells cut out of them, so every interior flight arrived
+            at a ceiling and the basement was unreachable on foot (`HOUSE-00210`). A vertical
+            triangle's extruded prism is a flat sheet whose "inside" test claimed a half-space, so
+            a body walking past a wedge's cheek was reported metres inside it and thrown through
+            the floor (`HOUSE-00547`). And a body TOUCHING a surface could not move at all, in any
+            direction, which froze one against the cheek of the next flight (`HOUSE-00547`). All
+            three were invisible to every test that came before, because nothing had tried to walk
+            a staircase.
+      note: the awkward parts of the test are the house's, not the physics'. A U-shaped flight
+            turns on a landing that the next run SITS on -- 0.71 m thick at its deep end -- so the
+            way across is an L and not a diagonal; the waypoints go along each run rather than
+            from end to end, or a body aimed two metres ahead cuts the corner into the well; and
+            the stride PAST the top is 0.40 m rather than a fraction of the run, because a quarter
+            of the basement flight is 1.1 m and lands the body in the corner of the well.
+      note: arrival is BEING THERE -- within 0.60 m of the last waypoint, horizontally and
+            vertically -- and not a waypoint count. The steepest flight is 35°, so 0.60 m along it
+            is 0.42 m of height, and both tolerances are that same number for that reason.
 - [x] HOUSE-00616 — Guarantee test: the player capsule fits through every open portal
       dep: HOUSE-00362 · sys: physics · plat: CI · pri: MUST
       note: (2026-09-09) `PortalClearanceTests.TheCapsuleFitsEveryPortalItIsMeantTo`, over the
