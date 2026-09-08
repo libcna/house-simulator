@@ -679,6 +679,163 @@ TEST(PlayerControllerTests, ALowHEADERIsDuckedUnderRatherThanWalkedInto)
     EXPECT_FALSE(state.crouched) << "it stayed crouched after clearing the opening";
 }
 
+namespace
+{
+    /// A ramp tilted @p degrees about the z axis, rising along +x, wide enough that a body on it
+    /// is nowhere near an edge.
+    CollisionMesh Ramp(float degrees)
+    {
+        const float rise = 24.0F * std::tan(degrees * 3.14159265F / 180.0F);
+        CollisionMesh ramp;
+        ramp.vertices = {Vector3(-24.0F, -rise, -12.0F),
+                         Vector3(-24.0F, -rise, 12.0F),
+                         Vector3(24.0F, rise, 12.0F),
+                         Vector3(24.0F, rise, -12.0F)};
+        ramp.indices = {0u, 1u, 2u, 0u, 2u, 3u};
+        ramp.surface = 0u;
+        ramp.kind = CollisionKind::Stair;
+        return ramp;
+    }
+} // namespace
+
+TEST(PlayerControllerTests, TheSlopeIsMeasuredALONGTheTravelAndNotDownTheSteepestLine)
+{
+    // §48.2 asks whether the body is CLIMBING, which is a question about the direction it is
+    // going. A body crossing a ramp along its contour is on a 30° surface and climbing nothing --
+    // and giving it `stair_up` would be the wrong clip.
+    using namespace cnahouse::player;
+    const CollisionWorld world = OneCell({}, {Ramp(30.0F)});
+    BroadPhase broad;
+
+    struct Case
+    {
+        float yaw;
+        float want;
+        const char* what;
+    };
+
+    const Case cases[] = {
+        {1.5707963F, 30.0F, "east, straight up it"},
+        {-1.5707963F, -30.0F, "west, straight down it"},
+        {0.0F, 0.0F, "north, along the contour"},
+        {3.1415927F, 0.0F, "south, along the contour the other way"},
+    };
+    for (const Case& one : cases)
+    {
+        PlayerState state;
+        state.position = Vector3(0.0F, kStand + 0.002F, 0.0F);
+        state.yaw = one.yaw;
+        for (int i = 0; i < 40; ++i)
+        {
+            PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+        }
+        EXPECT_NEAR(state.groundSlopeDeg, one.want, 1.5F) << one.what;
+    }
+}
+
+TEST(PlayerControllerTests, TheAlongSlopeSpeedIsTheHypotenuseAndNotTheShadow)
+{
+    // §48.2: *"the clip rate is matched to the along-slope speed, not the horizontal component, so
+    // the feet keep up with the actual travel."* On a 30° ramp the body covers 1/cos(30) = 1.155
+    // metres of stair for every metre of map.
+    using namespace cnahouse::player;
+    const CollisionWorld world = OneCell({}, {Ramp(30.0F)});
+    BroadPhase broad;
+    PlayerState state;
+    state.position = Vector3(0.0F, kStand + 0.002F, 0.0F);
+    state.yaw = 1.5707963F;
+    for (int i = 0; i < 120; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+    }
+    const float horizontal = Speed(state);
+    ASSERT_GT(horizontal, 0.5F);
+    EXPECT_NEAR(state.alongSlopeSpeed / horizontal, 1.0F / std::cos(30.0F * 3.14159265F / 180.0F), 0.02F);
+    EXPECT_GT(state.alongSlopeSpeed, horizontal) << "the feet would be skating";
+
+    // On the flat the two are the same number, so nothing pays for the hypotenuse where there is
+    // no slope.
+    const CollisionWorld flat = OneCell({Slab(0.0F, -40.0F, 40.0F)});
+    PlayerState level = Standing(0.0F, 0.0F);
+    level.yaw = 1.5707963F;
+    for (int i = 0; i < 120; ++i)
+    {
+        PlayerStep(flat, flat.cells[0], broad, level, Forward(), kDt);
+    }
+    EXPECT_NEAR(level.alongSlopeSpeed, Speed(level), 1e-4F);
+}
+
+TEST(PlayerControllerTests, StairUpAndStairDownAreChosenByTheFifteenDegreeBand)
+{
+    // §48.2's threshold, and the two things it separates. A 32° flight is a climb; a half-landing
+    // is a `Stairs` surface that is FLAT, and a body crossing it must not be given a climbing
+    // animation -- which is why the band exists at all and why it is not §43.1's 46°.
+    using namespace cnahouse::player;
+    EXPECT_FLOAT_EQ(kStairAnimationSlopeDegrees, 15.0F);
+    EXPECT_LT(kStairAnimationSlopeDegrees, cnahouse::physics::kSlopeLimitDegrees)
+        << "the animation band is not the walkability limit";
+
+    BroadPhase broad;
+    const auto walk = [&](const CollisionWorld& world, float yaw)
+    {
+        PlayerState state;
+        state.position = Vector3(0.0F, kStand + 0.002F, 0.0F);
+        state.yaw = yaw;
+        PlayerStepReport step;
+        for (int i = 0; i < 60; ++i)
+        {
+            step = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+        }
+        return std::pair{step.stairs, state};
+    };
+
+    const CollisionWorld steep = OneCell({}, {Ramp(32.0F)});
+    auto [up, upState] = walk(steep, 1.5707963F);
+    EXPECT_EQ(up, PlayerStepReport::Stairs::Up);
+    EXPECT_TRUE(upState.OnStairs());
+    EXPECT_EQ(walk(steep, -1.5707963F).first, PlayerStepReport::Stairs::Down);
+
+    // A landing: `Stairs` underfoot and flat, so no climbing clip.
+    const CollisionWorld landing = OneCell({Slab(0.0F, -40.0F, 40.0F, CollisionKind::Stair)});
+    auto [flatOnStairs, flatState] = walk(landing, 1.5707963F);
+    EXPECT_EQ(flatOnStairs, PlayerStepReport::Stairs::None);
+    EXPECT_TRUE(flatState.OnStairs()) << "it is still a stair surface, for §48.3's footsteps";
+
+    // And a 30° ramp that is NOT a stair -- a garden bank -- gets no stair clip either.
+    CollisionMesh bank = Ramp(30.0F);
+    bank.kind = CollisionKind::Exterior;
+    const CollisionWorld garden = OneCell({}, {bank});
+    auto [notStairs, bankState] = walk(garden, 1.5707963F);
+    EXPECT_EQ(notStairs, PlayerStepReport::Stairs::None);
+    EXPECT_FALSE(bankState.OnStairs());
+    EXPECT_NEAR(bankState.groundSlopeDeg, 30.0F, 1.5F) << "the slope is still measured";
+}
+
+TEST(PlayerControllerTests, StandingStillHasNoSlopeToSpeakOf)
+{
+    // The slope is along the TRAVEL, and a body that is not travelling has no direction to measure
+    // along. Reporting the last one would leave a body that stopped on a landing mid-climb.
+    using namespace cnahouse::player;
+    const CollisionWorld world = OneCell({}, {Ramp(30.0F)});
+    BroadPhase broad;
+    PlayerState state;
+    state.position = Vector3(0.0F, kStand + 0.002F, 0.0F);
+    state.yaw = 1.5707963F;
+    for (int i = 0; i < 60; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+    }
+    ASSERT_NEAR(state.groundSlopeDeg, 30.0F, 1.5F);
+
+    for (int i = 0; i < 60; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, state, InputState{}, kDt);
+    }
+    EXPECT_NEAR(Speed(state), 0.0F, 1e-3F);
+    EXPECT_NEAR(state.groundSlopeDeg, 0.0F, 1e-3F);
+    EXPECT_NEAR(state.alongSlopeSpeed, 0.0F, 1e-3F);
+}
+
 TEST(PlayerControllerTests, TheEyeIsWhereFortyThreePointOnePutsIt)
 {
     PlayerState state = Standing(1.0F, 2.0F);

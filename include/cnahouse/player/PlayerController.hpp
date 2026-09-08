@@ -48,6 +48,15 @@ namespace cnahouse::player
     /// @brief §43.2's `snowDepth > 0.12`, in metres.
     inline constexpr float kDeepSnowDepth = 0.12F;
 
+    /// @brief §48.2: on a `Stairs` surface steeper than this, §47.2 blends to `stair_up` or
+    ///        `stair_down`. In degrees.
+    ///
+    /// **Not the same question as §43.1's 46° slope limit**, which asks whether a surface can be
+    /// stood on at all. This one asks whether the body is CLIMBING, and a half-landing is a
+    /// `Stairs` surface that is flat -- so a body crossing one must not be given a climbing
+    /// animation, and §48.2 gives it the in-place turn clips instead.
+    inline constexpr float kStairAnimationSlopeDegrees = 15.0F;
+
     /// @brief §43.2's acceleration and deceleration, in m/s².
     ///
     /// *"Reaches full speed in ~0.15 s -- responsive, not floaty"*, and 1.35 / 9.0 IS 0.15 s: the
@@ -90,6 +99,31 @@ namespace cnahouse::player
         std::uint16_t surface = 0u;
         physics::CollisionKind groundKind = physics::CollisionKind::Floor;
         std::string_view cellId;
+
+        /// @brief The ground's slope ALONG the direction of travel, in degrees. Positive is up.
+        ///
+        /// Along the travel and not down the surface's steepest line: a body crossing a stair's
+        /// half-landing, or walking along a ramp's contour, is not climbing anything, and §48.2's
+        /// `stair_up` would be the wrong clip for it.
+        float groundSlopeDeg = 0.0F;
+
+        /// @brief Metres a second ALONG the ground rather than across the map.
+        ///
+        /// §48.2: *"the clip rate is matched to the along-slope speed, not the horizontal
+        /// component, so the feet keep up with the actual travel."* On a 32° flight that is 18 %
+        /// more than the horizontal speed, which is the difference between feet that walk and
+        /// feet that skate.
+        float alongSlopeSpeed = 0.0F;
+
+        /// @brief §48.1's `SurfaceKind::Stairs`: the body is on a stair ramp.
+        ///
+        /// Offered as a name because that is how §48.2 and §48.3 refer to it, and NOT as a second
+        /// enum -- which would be a second place for the collider and the player to disagree about
+        /// what a stair is.
+        [[nodiscard]] bool OnStairs() const noexcept
+        {
+            return groundKind == physics::CollisionKind::Stair;
+        }
 
         /// @brief Half the body's segment: §43.1's standing 0.60 or crouched 0.325.
         [[nodiscard]] float HalfHeight() const
@@ -148,6 +182,16 @@ namespace cnahouse::player
         float speedFactor = 1.0F;
         /// @brief The body crouched or stood up this step. §47.2 blends to `crouch_*` on it.
         bool crouchChanged = false;
+
+        /// @brief §48.2's answer for §47.2's state machine.
+        enum class Stairs
+        {
+            /// @brief Not on a stair ramp, or on one flat enough to walk normally.
+            None,
+            Up,
+            Down,
+        };
+        Stairs stairs = Stairs::None;
     };
 
     /// @brief §49.3's fixed step, composed (`HOUSE-00555`).

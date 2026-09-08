@@ -258,6 +258,36 @@ namespace cnahouse::player
             state.fall.speed = 0.0F;
         }
 
+        // §48.2's slope, measured ALONG the direction of travel. The gradient of a plane with
+        // normal `n` in the horizontal direction `d` is `-(n.x·d.x + n.z·d.z) / n.y`; its arctangent
+        // is the angle, positive uphill.
+        //
+        // Along the TRAVEL and not down the surface's steepest line, because a body crossing a
+        // half-landing or walking along a ramp's contour is not climbing anything, and §48.2 gives
+        // that case the in-place turn clips rather than `stair_up`.
+        {
+            const float horizontal =
+                std::sqrt(state.velocity.X * state.velocity.X + state.velocity.Z * state.velocity.Z);
+            state.groundSlopeDeg = 0.0F;
+            state.alongSlopeSpeed = horizontal;
+            if (horizontal > 1.0e-4F && state.groundNormal.Y > 1.0e-4F)
+            {
+                const float dx = state.velocity.X / horizontal;
+                const float dz = state.velocity.Z / horizontal;
+                const float gradient =
+                    -(state.groundNormal.X * dx + state.groundNormal.Z * dz) / state.groundNormal.Y;
+                state.groundSlopeDeg = std::atan(gradient) * 180.0F / 3.14159265F;
+                // The hypotenuse: a body covering `horizontal` metres across the map covers
+                // `horizontal · √(1 + g²)` along the ground it is walking on.
+                state.alongSlopeSpeed = horizontal * std::sqrt(1.0F + gradient * gradient);
+            }
+            if (state.OnStairs() && std::fabs(state.groundSlopeDeg) > kStairAnimationSlopeDegrees)
+            {
+                report.stairs = state.groundSlopeDeg > 0.0F ? PlayerStepReport::Stairs::Up
+                                                            : PlayerStepReport::Stairs::Down;
+            }
+        }
+
         // 5. Depenetrate, last, so that whatever the four steps above left is put right before
         //    anything reads the position.
         const Depenetration out = Depenetrate(world, cell, broad, body);

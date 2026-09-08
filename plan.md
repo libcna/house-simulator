@@ -8006,8 +8006,32 @@ never escapes and never penetrates.
             past it arriving; `Forget` sending the next lookup to the grid, which is what a spawn,
             a teleport and a save load need; and a point in no cell keeping the last good cell.
             Five injected bugs, five caught.
-- [ ] HOUSE-00560 — Implement the stair ramp surface handling: slope detection, `SurfaceKind::Stairs`, speed reduction
+- [x] HOUSE-00560 — Implement the stair ramp surface handling: slope detection, `SurfaceKind::Stairs`, speed reduction
       dep: HOUSE-00553, HOUSE-00379 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) Two of the three were already in place and the third is the interesting
+            one. §48.1's ramps carry `CollisionKind::Stair` from `build_collision.py`, and §43.2's
+            ×0.72 arrived with `HOUSE-00557`. What was missing is the SLOPE, and §48.2 asks for it
+            in a particular way.
+      note: **the slope is measured ALONG the direction of travel, not down the surface's steepest
+            line.** §48.2's question is whether the body is CLIMBING, and a body crossing a
+            half-landing or walking along a ramp's contour is on a sloped surface and climbing
+            nothing -- §48.2 gives that case the in-place turn clips, not `stair_up`. The gradient
+            of a plane with normal `n` along a horizontal `d` is `-(n.x·d.x + n.z·d.z) / n.y`.
+      note: `alongSlopeSpeed` is the hypotenuse and not the shadow: §48.2 wants *"the clip rate
+            matched to the along-slope speed, not the horizontal component, so the feet keep up
+            with the actual travel"*. On a 32° flight that is 18 % more than the horizontal speed,
+            which is the difference between feet that walk and feet that skate.
+      note: **`SurfaceKind::Stairs` is `groundKind == CollisionKind::Stair`, named and not
+            duplicated.** A second enum would be a second place for the collider and the player to
+            disagree about what a stair is, and §48.3's stair footstep set has to agree with the
+            thing the body is standing on.
+      accept: 5 cases. The slope measured up, down and BOTH ways along the contour of a 30° ramp;
+            the along-slope speed as `1/cos(30)` of the horizontal on a slope and equal to it on
+            the flat; §48.2's 15° band choosing `stair_up` and `stair_down` on a 32° flight,
+            NOTHING on a flat landing that is still a stair surface for §48.3, and nothing on a 30°
+            garden bank that is not one -- whose slope is still measured; and a body that has
+            stopped reporting no slope, because there is no direction to measure along. Seven
+            injected bugs, seven caught.
 - [ ] HOUSE-00561 — Implement the eye-height critically-damped spring, stiffened on stairs
       dep: HOUSE-00560 · sys: player · plat: ALL · pri: MUST
 - [ ] HOUSE-00562 — Implement the debug physics overlay (`F9`): shapes, capsule, probes, sweeps
