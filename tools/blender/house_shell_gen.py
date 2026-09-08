@@ -1437,18 +1437,23 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
             continue
         reset_scene()
         obj = build_roof(name, box, construction,
-                         dormers=dormers_on(box, portals, openings.values()))
+                         dormers=dormers_on(box, portals, openings.values()),
+                         eaves=roof_geometry.roof_eaves(layout, name, box, construction))
         export(obj, output / f"{name}.glb")
         report["written"].append(name)
     return report
 
 
-def build_roof(name: str, box: tuple, construction: dict, dormers=()):
-    """One roof object over @p box, with its fascia. @p box is the WALL CENTRE-LINE rectangle."""
+def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None):
+    """One roof object over @p box, with its fascia. @p box is the WALL CENTRE-LINE rectangle.
+
+    @p eaves is `roof_geometry.roof_eaves`'s answer, which is §12's ridge for the roof a level
+    declares and the head of the covered cells for one it does not (`HOUSE-00484`).
+    """
     half_wall = float(construction.get("wallExterior", 0.0)) / 2.0
     reach = half_wall + EAVES_OVERHANG
     outer = (box[0] - reach, box[1] + reach, box[2] - reach, box[3] + reach)
-    eaves_y = eaves_height(construction, outer)
+    eaves_y = eaves_height(construction, outer) if eaves is None else float(eaves)
     pitch = float(construction["roofPitch"])
 
     vertices: list[tuple[float, float, float]] = []
@@ -1626,6 +1631,12 @@ def dormers_on(box: tuple, portals, openings) -> list:
         if not (box[2] - 1e-6 <= value <= box[3] + 1e-6):
             continue
         rect = portal["rect"]
+        # ...and ACROSS it as well. Filtering on the dormer's plane alone gave `ROOF_GARAGE` every
+        # dormer of the main block, whose walls run through the same z range 15 m to the west
+        # (`HOUSE-00484`): the garage's `BLOCKOUT_roof` spanned X -6.00 to 17.40 for a wing 8.4 m
+        # wide.
+        if float(rect["u"][0]) < box[0] - 1e-6 or float(rect["u"][1]) > box[1] + 1e-6:
+            continue
         out.append(((float(rect["u"][0]), float(rect["u"][1])),
                     (float(rect["v"][0]), float(rect["v"][1])), value))
     return sorted(out)

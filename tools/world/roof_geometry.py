@@ -79,6 +79,43 @@ def eaves_height(construction: dict, box: tuple) -> float:
         float(construction["roofPitch"])
 
 
+def roof_eaves(layout: dict, name: str, box: tuple, construction: dict) -> float:
+    """Where a named roof's eaves are (`HOUSE-00484`).
+
+    Two cases, and the difference is whether the layout says so:
+
+    * a roof a LEVEL declares (`L3` declares `ROOF_MAIN`) is bounded by §12's own `ridgeY`, and
+      `eaves_height` derives the eaves from it and the span. That is `HOUSE-00461`'s resolution and
+      it stands;
+    * a roof no level declares -- the garage wing -- has no authored ridge, and using the house's
+      put `ROOF_GARAGE`'s eaves at **+11.675 over a garage whose head is +4.30**: a roof floating
+      seven metres above the building it covers, which is what the blockout drew until this. Its
+      eaves are the head of the cells it covers, which is where a wall stops and a roof starts.
+
+    Derived rather than authored, because §12 gives the wing no ridge and no eaves and a number
+    invented in `layout.levels.json` would be a number nobody could check.
+    """
+    outer = outer_box(box, construction)
+    for level in layout_io.rows(layout, "levels"):
+        if level.get("roof") == name:
+            return eaves_height(construction, outer)
+
+    levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
+    heads = []
+    for cell in layout_io.rows(layout, "cells"):
+        level = levels.get(cell.get("level"))
+        if level is None:
+            continue
+        for cx0, cx1, cz0, cz1 in layout_io.cell_boxes(cell):
+            if (min(cx1, box[1]) - max(cx0, box[0]) > 1e-6
+                    and min(cz1, box[3]) - max(cz0, box[2]) > 1e-6):
+                heads.append(layout_io.cell_extent(cell, level)[1])
+                break
+    if not heads:
+        return eaves_height(construction, outer)
+    return max(heads)
+
+
 def roof_planes(box: tuple, eaves_y: float, pitch: float):
     """A hip roof over a rectangle: `(corners, outward)` per plane, in world coordinates.
 
@@ -278,6 +315,25 @@ def selftest() -> int:
     bottoms = {round(min(point[1] for point in corners), 6) for corners, _out in planes}
     require(tops == {round(float(construction["ridgeY"]), 6)} and bottoms == {round(eaves, 6)},
             f"every plane runs from the eaves to the ridge ({sorted(bottoms)} -> {sorted(tops)})")
+
+    # `HOUSE-00484`: where each roof's eaves are, and why the two answers differ.
+    garage_box = boxes["ROOF_GARAGE"]
+    main_eaves = roof_eaves(layout, "ROOF_MAIN", boxes["ROOF_MAIN"], construction)
+    garage_eaves = roof_eaves(layout, "ROOF_GARAGE", garage_box, construction)
+    require(abs(main_eaves - eaves) < 1e-9,
+            f"a roof a LEVEL declares keeps §12's ridge: `L3` declares `ROOF_MAIN` and its eaves "
+            f"are still +{main_eaves:.4f}")
+    require(abs(garage_eaves - 4.30) < 1e-9,
+            f"a roof no level declares springs from the head of the cells it covers: the garage's "
+            f"is +4.30 and so are its eaves ({garage_eaves})")
+    garage_outer = outer_box(garage_box, construction)
+    garage_ridge = garage_eaves + (min(garage_outer[1] - garage_outer[0],
+                                       garage_outer[3] - garage_outer[2]) / 2.0) \
+        * float(construction["roofPitch"])
+    require(garage_ridge < float(construction["ridgeY"]),
+            f"so the wing's ridge is +{garage_ridge:.3f}, BELOW the house's +"
+            f"{float(construction['ridgeY']):.2f} -- it was +14.30 with its eaves at +11.675, "
+            f"seven metres over the garage it covers")
 
     square = roof_planes((0.0, 8.4, 0.0, 8.4), 0.0, 0.5)
     require(all(len(corners) == 3 for corners, _out in square),

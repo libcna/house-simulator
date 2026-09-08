@@ -7402,6 +7402,43 @@ the chunk builder produces ≤ 6 chunks per cell.
             landing and would then pass a bedroom missing a wall.
 - [ ] HOUSE-00484 — Phase-6 review: does it look like the house in `cna-house.md` §12? Correct whichever is wrong.
       dep: HOUSE-00483 · sys: — · plat: ALL · pri: MUST
+      note: (2026-09-08) **Reviewed, one thing corrected, and TWO OWNER DECISIONS left open**,
+            which is why the box is not ticked.
+            *Does it look like §12's house?* From the twenty poses of `HOUSE-00483`: yes. A
+            three-storey main block on a basement, a projecting garage wing under its own hipped
+            roof, a hipped roof with five dormers and a chimney over the main block, a covered
+            porch with four columns under a front balcony, a rear balcony and a juliet, windows in
+            the openings §12.6 schedules, and rooms that read as rooms from the inside — floor,
+            skirting, wall, cornice, ceiling, and a doorway you can see through.
+      finding: (2026-09-08, found by `HOUSE-00484`) **`ROOF_GARAGE` was seven metres above the
+            garage, and is now on it.** `eaves_height` derives the eaves from the house-wide
+            `ridgeY` of +14.30, which is right for the roof `L3` declares and meaningless for a
+            wing no level declares: the garage's 9.0 m square gave eaves at +11.675 over a garage
+            whose head is +4.30. `roof_geometry.roof_eaves` now answers the two cases separately —
+            §12's ridge for a roof a level declares, the head of the covered cells for one it does
+            not — so the wing's eaves are +4.30 and its ridge +6.925, below the house's +14.30.
+            `dormers_on` was also giving it every dormer of the main block, whose walls run through
+            the same z range 15 m west: it filters across the roof as well as along it now, and
+            `ROOF_GARAGE.glb` spans X 8.40–17.40 for a wing 8.4 m wide instead of −6.00 to 17.40.
+      decision: (2026-09-08, raised by `HOUSE-00484`) **§12 and §70.5 disagree about the attic
+            stair, and the owner has to settle it.** `L3_STAIR_HEAD` is 4.00 m long and
+            `STAIR_ATTIC_L2_L3` is 15 × 265 mm = 3.98 m of going. §70.5 wants 2.00 m of head-room
+            over every tread; the top two treads have 0.18 m, because the flight arrives 0.02 m
+            from the end of the cell and there is no room for a stairwell opening over them.
+            No generator can fix that. The choices are: steepen the flight (2R+G is 632 mm and has
+            room to 650), lengthen `L3_STAIR_HEAD` into `L3_ROOM`, or write the low head-room into
+            §12.4 as what an attic stair is. **Not chosen here.**
+      decision: (2026-09-08, raised by `HOUSE-00484`) the same question for the basement:
+            `P_L0_STAIR__B1_STAIR` is a 3.30 m opening in L0's floor for a flight 4.40 m long, so
+            `STAIR_BASEMENT_L0_B1` has 1.45 m of head-room at its eighth tread. There IS room —
+            `L0_STAIR_MAIN` is 5.90 m long — but the portal is authored `kind: "door"` with an
+            aperture, so enlarging it makes a 4.10 m cellar hatch, which is an architectural
+            decision and not a correction. **Not chosen here.**
+      finding: (2026-09-08, found by `HOUSE-00484`) `FRIDGE_L0_KITCHEN` is still not cut.
+            `CELL_FRIDGE_INTERIOR` is nested inside `L0_KITCHEN` and the generator cuts openings
+            between cells that share a boundary PLANE, which a cell wholly inside another does
+            not. One opening of 130, on a fridge; left for whoever gives a container an interior
+            that has to be looked into.
 
 ---
 
