@@ -8077,8 +8077,49 @@ never escapes and never penetrates.
             not travel and keeps no velocity; frames of 0.05 to 1.0 s that settle rather than
             diverge; and a stair-shaped RAMP target followed with the constant `2v/ω` lag a
             critically damped spring has, never passing it. Six injected bugs, six caught.
-- [ ] HOUSE-00562 — Implement the debug physics overlay (`F9`): shapes, capsule, probes, sweeps
+- [x] HOUSE-00562 — Implement the debug physics overlay (`F9`): shapes, capsule, probes, sweeps
       dep: HOUSE-00147, HOUSE-00550 · sys: debug · plat: ALL · pri: MUST
+      note: (2026-09-08) `debug::PhysicsOverlay`, the first consumer `HOUSE-00147`'s `DebugDraw`
+            has had. A PRESENTER, the same as §71's `F1`: it builds a list of SEGMENTS and
+            `DebugDraw` decides how to draw them. That is what lets a unit test assert that a
+            shape outside the visible cells is not drawn, that a blocked sweep is red and a clear
+            one is not, and that the numbers on the screen are the ones the physics produced --
+            none of which is answerable by looking at a screen, and all of which quietly stops
+            being true.
+      note: everything is a line. `DebugDraw::Box` takes a `BoundingBox`, which cannot hold the
+            yaw §49.2 allows a prop's proxy; and a solid box reads as a wall at a glance and hides
+            what is behind it, which is the one thing a debug overlay must not do.
+      finding: **the sweep it shows is one it runs ITSELF**, from the body's current velocity,
+            rather than a recording plumbed out of `PlayerStep`. A hook on §49.3's hot path that
+            exists only when `CNAHOUSE_DEBUG_TOOLS` is on makes the debug build a different
+            program from the one the perf tests measure -- `HOUSE-00147` settled that for the
+            counters and it settles this. One extra `SweepCell` a frame against the body's own
+            cell is a few µs of the frame it is annotating.
+      finding: **it caps itself at 10 000 segments and says how many it dropped.** `DebugDraw`
+            holds 65 536 line vertices and drops the rest SILENTLY; a debugging tool that quietly
+            stops showing part of the world is worse than one that admits it ran out. A third of
+            the buffer leaves room for `F4`'s cell wireframes and portal quads in the same frame,
+            and the real house's worst cell -- `EXT_BACKYARD` -- draws 832.
+      note: the colour key, which §71 does not give and which is therefore asserted rather than
+            described: floor lime, wall white, stair cyan, ceiling sky, prop violet, exterior
+            grey; the capsule yellow, and RED only when it is inside something deeper than the
+            contact tolerance -- a body resting against a wall is touching it, and an overlay red
+            in every corridor says nothing. The ground probe is green standing, orange on
+            something too steep to stand on (§43.1's 46°), grey over nothing.
+      verified: 11 `PhysicsOverlayTests` -- a shared wall drawn once and only the visible cells'
+            shapes, a yawed prop drawn yawed, red only when actually buried, the probe naming the
+            surface and the 2 mm of daylight with its cross at the GROUND's height rather than
+            the feet's, a 60° face that is orange and not green, the sweep agreeing with
+            `SweepCell` on time, shape and stopping point, the cap and its dropped count, the
+            no-cell case, and the whole real house: 96 cells drawn with no NaN, identical on a
+            rebuild. Twelve injected bugs, twelve caught -- three after the tests that missed them
+            were sharpened.
+      note: NOT wired to a key yet, and deliberately: `DebugDraw::Begin` needs a view and a
+            projection, and the game loop has neither a camera nor a loaded `CollisionWorld`
+            until phase 8 (`HOUSE-00621`…`HOUSE-00633`). Binding `F9` to a toggle nothing can
+            draw would be the placeholder this project's rules forbid. `HOUSE-02507` completes
+            the overlay with the pets; the key and the wiring belong with whichever of those
+            arrives first.
 - [x] HOUSE-00563 — Implement `teleport <cellId>` and `noclip` console commands
       dep: HOUSE-00555 · sys: debug · plat: ALL · pri: MUST
       note: (2026-09-08) §71 lists eighteen commands and this is the first task that needs one,
