@@ -6880,8 +6880,23 @@ the chunk builder produces ≤ 6 chunks per cell.
             catches a walkway laid in the finished room is the one that builds `L3_ROOM` twice,
             once on each kind of level, and requires the two to be identical.
       note: six injected bugs, all caught. 42 780 triangles.
-- [ ] HOUSE-00464 — Generate the front porch: deck, columns, beam, roof, steps, balustrade
+- [x] HOUSE-00464 — Generate the front porch: deck, columns, beam, roof, steps, balustrade
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) three of the six items were already built and are named here so nobody
+            builds them twice: the **deck** and the **roof** are `L0_PORCH`'s own floor and ceiling
+            slabs at +0.57 and +3.35 (`HOUSE-00452`), and the **steps** are `STEPS_PORCH`
+            (`HOUSE-00459`). What this adds is the columns, the beam and the balustrade.
+      note: **a porch is a covered deck, and the data says which cells are covered.** `L0_PORCH`
+            has `L1_BALCONY_FRONT` on exactly its footprint with its floor 0.30 m over the porch's
+            head; the rear balcony and the terrace have nothing over them. So no cell is named in
+            the generator — `covered_by` asks the question and the three answers are claimed.
+      note: four square columns, because §12.1 says four, and the claim is against §12.1 rather
+            than against the constant: an injected "three columns" passes a claim that counts what
+            the constant says and fails one that quotes the document.
+      note: the balustrade is broken where the steps arrive, with the same `minus` the skirting and
+            the stairwell railing use, and its height follows §70.5's two tiers — `railing` 1.10 at
+            a drop over a metre, `balustrade` 0.95 below it, and the porch deck is 0.57 above grade.
+      note: six injected bugs, all caught once the column count had a claim of its own.
 - [ ] HOUSE-00465 — Generate the rear extension (sunroom) shell and its flat roof / balcony deck with parapet and railing
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00466 — Generate the front balcony over the porch and the juliet balcony

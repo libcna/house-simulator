@@ -698,6 +698,13 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
     ]
 
 
+#: The porch (`HOUSE-00464`). §12.1 says "a full-width front porch on four square columns" and
+#: gives no section, so the column is 0.20 square and the beam over it 0.25 deep, and the four are
+#: spread evenly along the open edge.
+PORCH_COLUMNS = 4
+COLUMN_SECTION = 0.20
+PORCH_BEAM = 0.25
+
 #: The attic's structure (`HOUSE-00463`). §12 gives the pitch, the ridge and the collar tie and
 #: says nothing about members, so the spacing and the sections are this generator's: rafters at
 #: 400 mm centres, 50 × 200, a purlin under each slope at mid-span, and a 600 mm walkway board.
@@ -759,6 +766,35 @@ def eaves_height(construction: dict, box: tuple) -> float:
     x0, x1, z0, z1 = box
     return float(construction["ridgeY"]) - (min(x1 - x0, z1 - z0) / 2.0) * \
         float(construction["roofPitch"])
+
+
+def covered_by(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> bool:
+    """Is another cell stacked over the whole of @p cell's footprint, just above it?
+
+    That is what makes the porch a porch: `L1_BALCONY_FRONT` has the same box and its floor is
+    0.30 m over the porch's head, so the porch has a roof and the rear balcony does not. Reading
+    it this way means no cell has to be named here.
+    """
+    boxes = cell.get("boxes") or []
+    if not boxes:
+        return False
+    for other in cells_by_id.values():
+        if other.get("id") == cell.get("id"):
+            continue
+        above = other.get("yOverride")
+        if not above or not (extent[1] - 0.6 <= float(above[0]) <= extent[1] + 0.6):
+            continue
+        for box in boxes:
+            covered = any(float(other_box["x"][0]) <= float(box["x"][0]) + 1e-6
+                          and float(other_box["x"][1]) >= float(box["x"][1]) - 1e-6
+                          and float(other_box["z"][0]) <= float(box["z"][0]) + 1e-6
+                          and float(other_box["z"][1]) >= float(box["z"][1]) - 1e-6
+                          for other_box in other.get("boxes") or [])
+            if not covered:
+                break
+        else:
+            return True
+    return False
 
 
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
@@ -1003,6 +1039,52 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                    level_y + float(construction.get("railing", 0.0)),
                                    level_y + float(construction.get("railing", 0.0)),
                                    fixed, RAIL_SECTION)
+
+    # `HOUSE-00464`: a covered deck stands on columns and has a balustrade round its open sides.
+    # The porch is the one cell in this house that is covered -- `L1_BALCONY_FRONT` sits on it --
+    # and the open sides are the ones with no interior cell across them, which is the same test
+    # the walls use.
+    if (cell.get("kind") == "exterior" and construction
+            and covered_by(cell, extent, cells_by_id)):
+        for box in cell_boxes(cell, extent):
+            bx0, bx1, by0, by1, bz0, bz1 = box
+            open_sides = [side for side in ("-X", "+X", "-Z", "+Z")
+                          if all(wall != "wallPartition"
+                                 for _lo, _hi, wall in side_intervals(side, box, cell,
+                                                                      list(neighbours)))]
+            beam_lo = by1 - PORCH_BEAM
+            half = COLUMN_SECTION / 2.0
+            # The columns go along the longest open side, evenly spread including its two ends.
+            longest = max(open_sides, key=lambda side: side_span(side, box)[2]
+                          - side_span(side, box)[1], default=None)
+            if longest is not None:
+                plane, lo, hi = side_span(longest, box)
+                for index in range(PORCH_COLUMNS):
+                    at = lo + half + (hi - lo - COLUMN_SECTION) * index / (PORCH_COLUMNS - 1)
+                    if longest in ("-X", "+X"):
+                        solid(plane - half, plane + half, by0, beam_lo, at - half, at + half)
+                    else:
+                        solid(at - half, at + half, by0, beam_lo, plane - half, plane + half)
+            for side in open_sides:
+                plane, lo, hi = side_span(side, box)
+                if side in ("-X", "+X"):
+                    solid(plane - half, plane + half, beam_lo, by1, lo, hi)
+                else:
+                    solid(lo, hi, beam_lo, by1, plane - half, plane + half)
+                # The balustrade between the columns, broken where the steps come up.
+                drop = by0 - 0.0
+                height = float(construction.get("railing" if drop > 1.0 else "balustrade", 0.0))
+                cuts = []
+                for row in flights or ():
+                    step_print = row.get("footprint") or {}
+                    if not step_print or row.get("toCell") != cell["id"]:
+                        continue
+                    cuts.append((float(step_print["x"][0]), float(step_print["x"][1]))
+                                if side in ("-Z", "+Z")
+                                else (float(step_print["z"][0]), float(step_print["z"][1])))
+                for rail_lo, rail_hi in minus(lo, hi, cuts):
+                    rail_along(add, side in ("-X", "+X"), rail_lo, rail_hi,
+                               by0 + height, by0 + height, plane, RAIL_SECTION)
 
     # `HOUSE-00463`: the walkway boards in an unfinished attic store. A rafter-bounded level's
     # `closet` cells are the stores -- §13.6's "unfinished: rafters, insulation, walkway boards" --
@@ -1940,10 +2022,10 @@ def selftest(output: Path) -> int:
                   if abs(face.center.z - board_height) < 0.05])
     boarded_faces = len(boarded.data.polygons)
     reset_scene()
-    plain_store = build_cell(store, extent_of(store, levels["L3"])[0], neighbours=neighbours,
-                             construction=construction,
-                             level=dict(levels["L3"], ceiling=13.9), levels=levels,
-                             cells_by_id=cells)
+    plain_store_faces = len(build_cell(store, extent_of(store, levels["L3"])[0],
+                                       neighbours=neighbours, construction=construction,
+                                       level=dict(levels["L3"], ceiling=13.9), levels=levels,
+                                       cells_by_id=cells).data.polygons)
     finished = cells["L3_ROOM"]
     reset_scene()
     room_rafters = build_cell(finished, extent_of(finished, levels["L3"])[0],
@@ -1951,15 +2033,54 @@ def selftest(output: Path) -> int:
                               level=levels["L3"], levels=levels, cells_by_id=cells)
     room_faces = len(room_rafters.data.polygons)
     reset_scene()
-    room_flat = build_cell(finished, extent_of(finished, levels["L3"])[0], neighbours=neighbours,
-                           construction=construction, level=dict(levels["L3"], ceiling=12.6),
-                           levels=levels, cells_by_id=cells)
-    require(room_faces == len(room_flat.data.polygons),
+    room_flat_faces = len(build_cell(finished, extent_of(finished, levels["L3"])[0],
+                                     neighbours=neighbours, construction=construction,
+                                     level=dict(levels["L3"], ceiling=12.6), levels=levels,
+                                     cells_by_id=cells).data.polygons)
+    require(room_faces == room_flat_faces,
             f"the FINISHED attic room gets no walkway, being a room and not a store "
-            f"({room_faces} against {len(room_flat.data.polygons)})")
-    require(boards >= 4 and boarded_faces == len(plain_store.data.polygons) + 6,
+            f"({room_faces} against {room_flat_faces})")
+    require(boards >= 4 and boarded_faces == plain_store_faces + 6,
             f"the store gets a walkway board along it, six faces of it ({boards} faces near the "
-            f"floor, {len(plain_store.data.polygons)} -> {boarded_faces})")
+            f"floor, {plain_store_faces} -> {boarded_faces})")
+
+    # ---- `HOUSE-00464`: the porch ---------------------------------------------------------------
+    porch = cells["L0_PORCH"]
+    porch_extent = extent_of(porch, levels[porch["level"]])[0]
+    require(covered_by(porch, porch_extent, cells),
+            "the porch is covered -- `L1_BALCONY_FRONT` sits on it -- which is what makes it a "
+            "porch and not a terrace")
+    require(not covered_by(cells["L1_BALCONY_REAR"],
+                           extent_of(cells["L1_BALCONY_REAR"], levels["L1"])[0], cells),
+            "and the rear balcony is not, so it gets no columns")
+    require(not covered_by(cells["EXT_TERRACE"],
+                           extent_of(cells["EXT_TERRACE"], levels["L0"])[0], cells),
+            "nor is the terrace")
+
+    require(PORCH_COLUMNS == 4,
+            f"§12.1 says the porch stands on FOUR square columns ({PORCH_COLUMNS})")
+
+    flight_list = list(flight_rows.values())
+    reset_scene()
+    porch_faces = len(build_cell(porch, porch_extent, neighbours=neighbours,
+                                 construction=construction, level=levels[porch["level"]],
+                                 levels=levels, portals=all_portals,
+                                 openings=openings_by_portal, cells_by_id=cells,
+                                 flights=flight_list).data.polygons)
+    # The same porch with the thing that covers it taken away -- and nothing else changed, so the
+    # difference is the columns, the beams and the balustrade and not a side effect.
+    uncovered = {key: value for key, value in cells.items() if key != "L1_BALCONY_FRONT"}
+    reset_scene()
+    bare_porch = len(build_cell(porch, porch_extent, neighbours=neighbours,
+                                construction=construction, level=levels[porch["level"]],
+                                levels=levels, portals=all_portals,
+                                openings=openings_by_portal, cells_by_id=uncovered,
+                                flights=flight_list).data.polygons)
+    require(porch_faces == bare_porch + 6 * (PORCH_COLUMNS + 3) + 6 * 4,
+            f"and it gains {PORCH_COLUMNS} columns, a beam over each of its three open sides and "
+            f"a balustrade broken by the steps ({bare_porch} -> {porch_faces})")
+    steps_here = [row for row in flight_list if row.get("toCell") == "L0_PORCH"]
+    require(steps_here, "the porch steps arrive in it, so its balustrade has a gap for them")
 
     tops = {round(point[1], 6) for corners, _ in planes for point in corners}
     require(tops == {round(eaves_y, 6), round(float(construction["ridgeY"]), 6)},
