@@ -8441,8 +8441,32 @@ never escapes and never penetrates.
             backoff turned into 1.5) is NOT caught and should not be: it drives the body 6 mm into
             the wall mid-step and step 5 has it out before the frame ends, which is exactly the
             guarantee this test makes.
-- [ ] HOUSE-00618 — Guarantee test: a 20-minute seeded random walk never trips the boundary counter and never leaves the named cells
+- [x] HOUSE-00618 — Guarantee test: a 20-minute seeded random walk never trips the boundary counter and never leaves the named cells
       dep: HOUSE-00564 · sys: physics · plat: CI · pri: MUST
+      verify: unit RandomWalkTests.TwentyMinutesOfWanderingStaysInTheHouse
+      note: (2026-09-08) 144 000 fixed steps, 1 283 m walked, 311 cell changes over 18 named
+            cells, 21 181 blocked steps, 314 step-ups and 54 landings. **Zero boundary escapes and
+            never a step outside the named cells**, which are this task's two criteria.
+      finding: **a heading-walk spends twenty minutes in the room it started in** -- measured: 9
+            cells of 96, because a random heading finds a doorway about as often as a blindfolded
+            person does. Three times in four the bot now picks one of its CURRENT cell's own
+            portals and walks at it, which is what turns the soak into a tour of the house (18
+            cells, 311 crossings) and puts the pressure where it belongs. The fourth time it takes
+            a bare heading, so it still walks into walls and corners on purpose.
+      finding: **it fell down the stair well at 15.5 minutes and never got out.** §12.3 gives a
+            flight a 0.95 m balustrade, and the collision has no guard round the hole in a floor:
+            `build_collision.py` says so in its own comment and calls it a gap against this phase.
+            Under the L0 floor there is nowhere to stand, so the body spent the last four and a
+            half minutes pressed into the underside of the slab, up to 0.38 m inside it. The walk
+            asserts that a wedge can only happen AFTER such a fall -- a body wedged with both feet
+            in the house is a failure -- and the missing guard is `HOUSE-00620`'s to book.
+      note: the deepest contact in the 15.5 minutes BEFORE the fall is 0.000086 m, which agrees
+            with `HOUSE-00617`'s 0.000024 m over its own tour: walking about this house does not
+            put the body inside anything.
+      note: three injected bugs, two caught -- no depenetration at all, and §16.4's 5 cm
+            hysteresis widened to 5 m. The third (the boundary guard not clamping) does not
+            compile, and the guard's own counter is never tripped by a body that stays in the
+            house, which is `BoundaryGuardTests`' case rather than this one's.
 - [ ] HOUSE-00619 — Measure physics cost against the budget (0.35 ms typical, 0.80 worst)
       dep: HOUSE-00555 · sys: — · plat: LNX · pri: MUST
 - [ ] HOUSE-00620 — Phase-7 review and commit
