@@ -698,6 +698,16 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
     ]
 
 
+#: A basement window well (`HOUSE-00469`). §12.6 says `W_BASEMENT` is a hopper "in 0.9 m window
+#: wells" and gives its sill as −0.45 absolute, so the WIDTH of the well is §12.6's; how far it
+#: stands out from the wall, how thick its retaining wall is and how far its floor sits below the
+#: sill are this generator's.
+WELL_WIDTH = 0.90
+WELL_PROJECT = 0.60
+WELL_WALL = 0.10
+WELL_BELOW_SILL = 0.15
+GRADE_Y = 0.0
+
 #: The rainwater goods and the chimney (`HOUSE-00468`). §12 names none of them, so every section
 #: here is this generator's; what is NOT invented is where the chimney stands, which is the
 #: fireplace's own position, and how high it goes, which is §12's ridge plus the 0.60 m a stack
@@ -871,6 +881,37 @@ def build_balcony_edge(cell: dict, extent: tuple, neighbours: list, construction
                        plane + (PARAPET_THICK / 2.0) * inward, RAIL_SECTION)
             built += 2
     return built
+
+
+def window_well(side: str, outer_plane: float, u0: float, u1: float, sill: float) -> list:
+    """The four boxes of a basement window well: two sides, an end and a floor.
+
+    Outside the wall's OUTER face, which is the only place a well can be -- a well inside the wall
+    is a hole in the basement. §12.6 puts the hopper's sill at −0.45 absolute and the well holds
+    the earth back from it up to grade.
+    """
+    well_lo, well_hi = u0 - WELL_WALL, u1 + WELL_WALL
+    floor_y = sill - WELL_BELOW_SILL
+    out_dir = -1.0 if side in ("-X", "-Z") else 1.0
+    far_out = outer_plane + WELL_PROJECT * out_dir
+    lo_face, hi_face = min(outer_plane, far_out), max(outer_plane, far_out)
+    end = far_out - WELL_WALL / 2.0 * out_dir
+    end_lo, end_hi = min(end, far_out), max(end, far_out)
+    boxes = []
+    for edge in (well_lo, well_hi):
+        if side in ("-X", "+X"):
+            boxes.append((lo_face, hi_face, floor_y, GRADE_Y,
+                          edge - WELL_WALL / 2.0, edge + WELL_WALL / 2.0))
+        else:
+            boxes.append((edge - WELL_WALL / 2.0, edge + WELL_WALL / 2.0,
+                          floor_y, GRADE_Y, lo_face, hi_face))
+    if side in ("-X", "+X"):
+        boxes.append((end_lo, end_hi, floor_y, GRADE_Y, well_lo, well_hi))
+        boxes.append((lo_face, hi_face, floor_y - WELL_WALL, floor_y, well_lo, well_hi))
+    else:
+        boxes.append((well_lo, well_hi, floor_y, GRADE_Y, end_lo, end_hi))
+        boxes.append((well_lo, well_hi, floor_y - WELL_WALL, floor_y, lo_face, hi_face))
+    return boxes
 
 
 def build_mezzanine_guard(cell: dict, extent: tuple, cells_by_id: dict, levels: dict,
@@ -1083,6 +1124,13 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                  middle + MEETING_RAIL / 2.0, sash_lo, sash_hi)
                         band(su0 + g, su1 - g, sv0 + g, sv1 - g,
                              depth - GLASS_THICK / 2.0, depth + GLASS_THICK / 2.0)
+
+                    # `HOUSE-00469`: a basement hopper sits in a well, outside the wall, open to
+                    # the sky. §12.6 says so and gives the sill at −0.45 absolute; the well holds
+                    # the earth back from it.
+                    if str(opening.get("type")) == "W_BASEMENT" and outside:
+                        for well_box in window_well(side, outer_plane, hu0, hu1, hv0):
+                            solid(*well_box)
 
                     # The sill board, projecting into THIS room under the opening.
                     casing = float((opening.get("frame") or {}).get("casing") or 0.0)
@@ -1553,6 +1601,7 @@ def selftest(output: Path) -> int:
     layout = layout_io.load_layout(SOURCE, kinds=["levels", "cells"])
     portal_rows = {row["id"]: row for row in layout_io.rows(
         layout_io.load_layout(SOURCE, kinds=["portals"]), "portals")}
+    all_portals = list(portal_rows.values())
     openings_by_portal = {row["portal"]: row for row in layout_io.rows(
         layout_io.load_layout(SOURCE, kinds=["openings"]), "openings") if row.get("portal")}
     levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
@@ -2116,6 +2165,62 @@ def selftest(output: Path) -> int:
             f"chimney ({len(everything['written'])} written, {len(everything['skipped'])} "
             f"skipped, {everything['problems'][:1]})")
 
+    # ---- `HOUSE-00469`: the basement window wells -----------------------------------------------
+    wells_wanted = [row for row in openings_by_portal.values()
+                    if str(row.get("type")) == "W_BASEMENT"]
+    require(len(wells_wanted) == 8,
+            f"§12.6's `W_BASEMENT` hoppers are the windows that need wells ({len(wells_wanted)})")
+    well_portal = portal_rows[wells_wanted[0]["portal"]]
+    well_cell = cells[well_portal["cellA"] if cells.get(well_portal["cellA"], {}).get("kind")
+                      != "exterior" else well_portal["cellB"]]
+    well_extent = extent_of(well_cell, levels[well_cell["level"]])[0]
+    reset_scene()
+    with_well = len(build_cell(well_cell, well_extent, neighbours=neighbours,
+                               construction=construction, level=levels[well_cell["level"]],
+                               levels=levels, portals=all_portals, openings=openings_by_portal,
+                               cells_by_id=cells).data.polygons)
+    # `W_PICTURE` rather than `W_DH_STD`: a double-hung would also gain a meeting rail, and the
+    # difference has to be the well and nothing else.
+    hoppers = {row["id"]: dict(row, type="W_PICTURE") for row in openings_by_portal.values()}
+    reset_scene()
+    without_well = len(build_cell(well_cell, well_extent, neighbours=neighbours,
+                                  construction=construction, level=levels[well_cell["level"]],
+                                  levels=levels, portals=all_portals,
+                                  openings={key: hoppers[row["id"]] for key, row
+                                            in openings_by_portal.items()},
+                                  cells_by_id=cells).data.polygons)
+    here = [row for row in wells_wanted
+            if well_cell["id"] in (portal_rows[row["portal"]]["cellA"],
+                                   portal_rows[row["portal"]]["cellB"])]
+    require(with_well == without_well + 6 * 4 * len(here),
+            f"{well_cell['id']}'s {len(here)} hopper(s) each stand in a well of four boxes — two "
+            f"sides, an end and a floor ({without_well} -> {with_well})")
+    # All four orientations, because a well on the north wall and one on the east wall go through
+    # different halves of the same function -- and the first version of this claim only ever
+    # exercised one of them, so an injected bug in the other went unnoticed.
+    for well_side in ("-X", "+X", "-Z", "+Z"):
+        shape = window_well(well_side, 10.0, 0.0, 0.9, -0.45)
+        require(len(shape) == 4, f"a {well_side} well is four boxes ({len(shape)})")
+        axis = 0 if well_side in ("-X", "+X") else 4
+        outward = -1.0 if well_side in ("-X", "-Z") else 1.0
+        beyond = (all(box[axis + 1] <= 10.0 + 1e-9 for box in shape) if outward < 0
+                  else all(box[axis] >= 10.0 - 1e-9 for box in shape))
+        require(beyond,
+                f"and every one of them is OUTSIDE the {well_side} wall's outer face — a well "
+                f"inside the wall is a hole in the basement "
+                f"({[round(box[axis], 3) for box in shape]})")
+        require(min(box[2] for box in shape) < -0.45 - WELL_BELOW_SILL + 1e-9,
+                f"its floor is under the sill, so water has somewhere to go "
+                f"({min(box[2] for box in shape)})")
+        floor_top = -0.45 - WELL_BELOW_SILL
+        upright = [box for box in shape if box[3] > floor_top + 1e-9]
+        require(len(upright) == 3 and all(box[3] == GRADE_Y for box in upright),
+                f"and all three of its walls come up to grade, not just one of them "
+                f"({[round(box[3], 3) for box in upright]})")
+    require(float(well_portal["rect"]["v"][0]) < GRADE_Y,
+            f"a basement hopper's sill is below grade, which is why it needs one "
+            f"({well_portal['rect']['v'][0]})")
+
     # ---- `HOUSE-00468`: the chimney ------------------------------------------------------------
     hearth = next(row for row in layout_io.rows(
         layout_io.load_layout(SOURCE, kinds=["interactables"]), "interactables")
@@ -2162,7 +2267,6 @@ def selftest(output: Path) -> int:
     require(all(len(corners) == 3 for corners, _ in square),
             "and over a square it is four triangles, which is what a pyramid is")
     # ---- `HOUSE-00462`: the dormers -----------------------------------------------------------
-    all_portals = list(portal_rows.values())
     dormer_list = dormers_on(main_box, all_portals, openings_by_portal.values())
     require(len(dormer_list) == 5,
             f"§12.1's five dormers are the five `W_DORMER` windows ({len(dormer_list)})")

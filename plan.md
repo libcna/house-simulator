@@ -6964,8 +6964,19 @@ the chunk builder produces ≤ 6 chunks per cell.
       note: the chimney is its own object, `CHIMNEY.glb`: it runs from the hearth at +0.60 to
             +14.90 through four storeys and a roof, and belongs to no cell.
       note: six injected bugs, all caught.
-- [ ] HOUSE-00469 — Generate the basement window wells
+- [x] HOUSE-00469 — Generate the basement window wells
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) §12.6 says `W_BASEMENT` is a hopper "in 0.9 m window wells" with its sill
+            at −0.45 absolute, so the eight of them get a well each: two side walls, an end and a
+            floor, outside the wall's **outer** face — a well inside the wall is a hole in the
+            basement — running from below the sill up to grade.
+      finding: **a claim that only ever exercises one branch is a claim about one branch.** The
+            first version tested a well on one wall, and the house's basement hoppers happen to be
+            in `z` planes, so an injected bug that deleted the floor of an `x`-plane well passed.
+            The claim now runs all four orientations, and a second injection — a wall stopping
+            0.30 m short of grade — needed a claim about **all three** walls rather than the
+            highest of them.
+      note: 99 objects now: 96 cells, two roofs and the chimney.
 - [ ] HOUSE-00470 — Assign placeholder materials per surface class so the blockout is readable
       dep: HOUSE-00452…HOUSE-00469 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00471 — Generate second-UV lightmap coordinates for the whole shell (`lightmap_unwrap.py`)
