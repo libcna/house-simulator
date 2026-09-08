@@ -318,8 +318,33 @@
         "material": {
           "$ref": "#/$defs/idOrNull"
         },
+        "materialIndex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "materials": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "origin": {
           "$ref": "#/$defs/vector3"
+        },
+        "samples": {
+          "items": {
+            "minimum": 2,
+            "type": "integer"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
         },
         "size": {
           "items": {
@@ -328,6 +353,9 @@
           "maxItems": 2,
           "minItems": 2,
           "type": "array"
+        },
+        "step": {
+          "type": "number"
         },
         "yScale": {
           "type": "number"

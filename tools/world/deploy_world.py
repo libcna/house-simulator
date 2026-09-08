@@ -105,6 +105,23 @@ def deploy(source: Path, target: Path, *, dry_run: bool = False) -> tuple[list[s
             out.parent.mkdir(parents=True, exist_ok=True)
             out.write_text(text, encoding="utf-8")
 
+    # The two binary companions, copied verbatim. There is nothing to strip from a PNG, and
+    # `layout.exterior.json` names them as paths into this directory exactly as it names nothing
+    # else -- so a deploy that left them behind would ship an exterior pointing at a height field
+    # that is not there (`HOUSE-00761`).
+    for name in world_manifest.COMPANION_FILES:
+        path = source / name
+        if not path.is_file():
+            continue
+        data = path.read_bytes()
+        out = target / name
+        if out.is_file() and out.read_bytes() == data:
+            continue
+        written.append(name)
+        if not dry_run:
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(data)
+
     # The manifest, over what was just written. Last, because it hashes the deployed bytes; and
     # here rather than in a separate stage, because a manifest that described a different set of
     # bytes than the one beside it is the exact failure this whole step exists to avoid.
@@ -124,7 +141,10 @@ def deploy(source: Path, target: Path, *, dry_run: bool = False) -> tuple[list[s
         # The manifest is written by this step and has no source, so it is expected without one.
         manifest_name = layout_io.FILES["manifest"][0]
         expected = {layout_io.FILES[k][0] for k in DEPLOYED_KINDS}
-        for stale in sorted(target.glob("*.json")):
+        expected.update(world_manifest.COMPANION_FILES)
+        stale_candidates = sorted(target.glob("*.json")) + [
+            target / name for name in world_manifest.COMPANION_FILES if (target / name).is_file()]
+        for stale in stale_candidates:
             if stale.name == manifest_name:
                 continue
             if stale.name in expected and (source / stale.name).is_file():
@@ -243,6 +263,31 @@ def selftest() -> int:
         require(listed["layout.levels.json"]
                 != world_manifest.file_hash(source / "layout.levels.json"),
                 "not the authored ones -- they differ by exactly the comments that were stripped")
+
+        # 7. The binary companions. `layout.exterior.json` points the runtime at `terrain.png` in
+        #    this directory, so a deploy that only copied JSON would ship an exterior naming a
+        #    height field that is not there (`HOUSE-00761`).
+        blob = b"\x89PNG\r\n\x1a\n" + bytes(range(64))
+        (source / "terrain.png").write_bytes(blob)
+        written, _ = deploy(source, target)
+        landed = target / "terrain.png"
+        require("terrain.png" in written and landed.is_file() and landed.read_bytes() == blob,
+                f"a companion PNG is deployed byte for byte ({written})")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        names = [row["file"] for row in manifest["members"]]
+        require(names == ["layout.levels.json", "terrain.png"],
+                f"the manifest covers it, after the JSON ({names})")
+        require([row for row in manifest["members"] if row["file"] == "terrain.png"][0]["sha256"]
+                == world_manifest.file_hash(target / "terrain.png"),
+                "with the hash of the deployed bytes, so a swapped ground fails at load")
+        require(not deploy(source, target)[0],
+                "and an unchanged companion is not rewritten every deploy")
+
+        # ...and the stale rule applies to it too, which the `*.json` glob alone would miss.
+        (source / "terrain.png").unlink()
+        _, problems = deploy(source, target)
+        require(any("terrain.png" in problem for problem in problems),
+                f"a deployed companion with no source is reported ({problems})")
     finally:
         shutil.rmtree(workspace, ignore_errors=True)
 

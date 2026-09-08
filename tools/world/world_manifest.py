@@ -61,6 +61,14 @@ REPO = Path(__file__).resolve().parents[2]
 #: manifest (`cna-house.md` §20.3) and belongs to `check_manifest.py`.
 MEMBER_KINDS = [k for k in layout_io.FILES if k not in ("manifest", "assets")]
 
+#: The world's non-JSON members, deployed verbatim beside the JSON and listed after it.
+#:
+#: `layout.exterior.json` names these two as paths into the deployed world directory, and the
+#: runtime reads the height field for ground collision (§11.5). A member the loader reads and the
+#: manifest does not cover is a file that can be swapped under a save without the `worldHash`
+#: moving -- which is the one thing this manifest exists to prevent.
+COMPANION_FILES = ["terrain.png", "terrain_materials.png"]
+
 SCHEMA = "cna-house/manifest/1"
 
 
@@ -89,6 +97,10 @@ def build(directory: Path) -> dict:
         if not path.is_file():
             continue
         members.append({"file": name, "sha256": file_hash(path)})
+    for name in COMPANION_FILES:
+        path = directory / name
+        if path.is_file():
+            members.append({"file": name, "sha256": file_hash(path)})
     return {"schema": SCHEMA, "worldHash": world_hash(members), "members": members}
 
 

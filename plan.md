@@ -6739,8 +6739,35 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
 
 ## Phase 10 — Exterior and property
 
-- [ ] HOUSE-00761 — Author the terrain height field (81 × 65 samples) with the slope described in §10.2, plus its material index map
+- [x] HOUSE-00761 — Author the terrain height field (81 × 65 samples) with the slope described in §10.2, plus its material index map
       dep: HOUSE-00390 · sys: content · plat: TOOL · pri: MUST
+      finding: **the file reference was `world/terrain.r16` and §11.5 asks for a 16-bit PNG.** The
+            format doc's example named a raw blob; the section that specifies the encoding names a
+            PNG. Repointed to `world/terrain.png` and `docs/world-format.md` corrected, because a
+            renderer written against the example would have opened a file that never existed.
+      note: the ground is **generated, not painted** — `tools/world/terrain_gen.py` reads §10.2's
+            one-sentence slope and takes every flat pad from `layout.exterior.json`'s `paths` and
+            `structures` and from the outdoor cells' floors. Painting it would re-derive numbers
+            the layout already holds, and the first time a terrace moved the ground under it would
+            not. The material index is the same argument: each of §11.5's eight classes is already
+            a path's material or a cell's `footstepSurface`, so the ground and the footsteps agree
+            without anybody maintaining two lists.
+      note: the selftest's slope claim had to be moved **off the halfway point**. Halfway is the
+            one point on the slope where running it backwards gives the same answer, and a claim
+            that cannot tell uphill from downhill is not a claim about a slope. A quarter-point
+            claim (+0.025 at Z −12) catches the reversal; five injected bugs, all caught.
+      note: **no `terrain.json` sidecar.** The first draft wrote one, and it would have been a
+            second statement of the grid that `deploy_world.py` does not copy (it is not one of the
+            sixteen) and `world.manifest.json` does not hash — so the runtime would read its
+            geometry from the one file nothing checks. `samples`, `step`, `materialIndex` and
+            `materials` moved into `layout.exterior.json`'s `terrain` block, and
+            `terrain_gen.py --check` now fails if that block and the generator disagree.
+      note: the two PNGs are deployed **with the world**, not compiled into content:
+            `deploy_world.py` copies them verbatim and `world_manifest.py` lists them after the
+            JSON, so `WorldLoader::VerifyManifest` covers the ground the player stands on. Four
+            injected bugs — not copied, not hashed, rewritten every deploy, and a stale copy the
+            `*.json` glob would have missed — all caught. Their `assets.manifest.json` rows are
+            `notPackaged` for the same reason: they belong to no residency pack.
 - [ ] HOUSE-00762 — `terrain_gen.py`: generate the 25 terrain tiles with skirts, per-tile bounds and lightmap UVs
       dep: HOUSE-00761 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00763 — Generate the road, kerbs, sidewalks, drain grates and the road markings

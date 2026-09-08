@@ -352,7 +352,14 @@ def build() -> dict[str, dict]:
             "terrain": obj(["heightfield", "size", "origin"], {
                 "heightfield": STR,
                 "size": {"type": "array", "items": NUM, "minItems": 2, "maxItems": 2},
-                "origin": VEC3, "yScale": NUM, "material": ID_OR_NULL}),
+                "origin": VEC3, "yScale": NUM, "material": ID_OR_NULL,
+                # How to read the height field, in the file that is deployed and hashed rather
+                # than in a sidecar beside it that neither happens to (`HOUSE-00761`).
+                "samples": {"type": "array", "items": {"type": "integer", "minimum": 2},
+                            "minItems": 2, "maxItems": 2},
+                "step": NUM,
+                "materialIndex": {"anyOf": [STR, {"type": "null"}]},
+                "materials": {"type": "array", "items": STR}}),
             "road": obj([], {"centreline": {"type": "array", "items": VEC3, "minItems": 2},
                              "width": NUM, "material": ID_OR_NULL}),
             "fences": {"type": "array", "items": obj(
