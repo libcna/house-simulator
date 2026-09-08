@@ -6555,8 +6555,33 @@ scaled, correctly wound, chunked per cell, rendered with placeholder materials.
 **Exit.** You can look at the house from the road and recognise it; every room's shell exists;
 the chunk builder produces ≤ 6 chunks per cell.
 
-- [ ] HOUSE-00451 — `house_shell_gen.py` skeleton: read the layout, open Blender headless, emit `.glb` per cell
+- [x] HOUSE-00451 — `house_shell_gen.py` skeleton: read the layout, open Blender headless, emit `.glb` per cell
       dep: HOUSE-00397, HOUSE-00186 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) all **96 cells** generate, 784 KiB of `.glb` in `build/shell/`, in 5 s.
+            The pass emits the **massing**: one closed box per footprint box, floor to ceiling.
+            That is real geometry — the rooms are in their right places at their right heights —
+            and each of the next four tasks *supersedes* part of it rather than adding beside it:
+            `HOUSE-00452` the top and bottom faces, `HOUSE-00453` the shared sides, `HOUSE-00454`
+            the outer ones, `HOUSE-00455` the openings. When the last lands no massing face is
+            left, which is what stops this being scaffolding nobody removes.
+      note: **the axis convention is the one thing here that is silently wrong or silently right.**
+            The world is Y-up, −Z north and so is glTF, so the export must be the identity; Blender
+            is Z-up and `export_yup=True` writes `gltf(x, y, z) = blender(X, Z, −Y)`, so a world
+            point is built at `(x, −z, y)`. The claim is not that the code computes that — it is
+            that the kitchen's exported `POSITION` accessor reads
+            `[−8.2, 0.6, −27.1]…[2.2, 3.3, −23.0]`, which is `layout.cells.json`'s box, read back
+            out of the file with the project's own glTF reader. Both sign injections were caught by
+            it and by nothing else.
+      note: a level with a `null` ceiling gives a cell no height unless it overrides one. Every
+            attic cell does, so that branch is unreachable from the authored house — which is why
+            it is claimed against a made-up cell rather than left to be exercised by a house that
+            never has one. Five injected bugs, all caught, including a non-deterministic vertex
+            that §18.4's byte-identical claim caught and nothing else would have.
+      note: no `run_checks.sh` gate, following the seven Blender tools already here: a gate that
+            needs Blender is not a fast gate, and none of them is wired as one. Nor a
+            `build_content.py` stage yet — nothing consumes the shell until it is chunked, and
+            where the generated shell lives on the way to `content/` is `HOUSE-00452`…`HOUSE-00465`'s
+            question rather than a skeleton's to answer.
 - [ ] HOUSE-00452 — Generate floors and ceilings per cell, with the partition-centre-line inset
       dep: HOUSE-00451 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00453 — Generate interior partitions between adjacent cells, deduplicated so a shared wall is generated once
