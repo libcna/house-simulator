@@ -698,6 +698,18 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
     ]
 
 
+#: The rainwater goods and the chimney (`HOUSE-00468`). §12 names none of them, so every section
+#: here is this generator's; what is NOT invented is where the chimney stands, which is the
+#: fireplace's own position, and how high it goes, which is §12's ridge plus the 0.60 m a stack
+#: has to clear it by.
+GUTTER_SECTION = 0.12
+DOWNSPOUT_SECTION = 0.10
+RIDGE_VENT_WIDTH = 0.30
+RIDGE_VENT_HEIGHT = 0.08
+CHIMNEY_ALONG = 1.10
+CHIMNEY_ACROSS = 0.60
+CHIMNEY_OVER_RIDGE = 0.60
+
 #: A balcony's edge (`HOUSE-00465`): a solid parapet with a railing capping it to §12's `railing`
 #: height. §12.2 says the rear-extension roof is "open" and used as the master balcony and gives no
 #: section, so the parapet's thickness and height are this generator's.
@@ -1233,7 +1245,7 @@ def export(obj, path: Path) -> None:
 
 def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> dict:
     """Every cell the layout declares, as one `.glb` each. Returns a report."""
-    layout = layout_io.load_layout(directory, kinds=["levels", "cells", "portals", "openings", "stairs"])
+    layout = layout_io.load_layout(directory, kinds=["levels", "cells", "portals", "openings", "stairs", "interactables"])
     levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
     portals = layout_io.rows(layout, "portals")
     openings = {row["portal"]: row for row in layout_io.rows(layout, "openings")
@@ -1263,6 +1275,39 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
+
+    fireplace = next((row for row in layout_io.rows(layout, "interactables")
+                      if "FIREPLACE" in str(row.get("id"))), None)
+    chimney = chimney_at(fireplace, construction,
+                         float(levels[fireplace["cell"][:2] if False else "L0"]["ffl"])
+                         if fireplace else 0.0)
+    if chimney is not None and (wanted is None or "CHIMNEY" in wanted):
+        reset_scene()
+        reset_vertices: list = []
+        reset_faces: list = []
+
+        def chimney_add(points, outward) -> None:
+            base = len(reset_vertices)
+            reset_vertices.extend(to_blender(*point) for point in facing(points, outward))
+            reset_faces.append(tuple(range(base, base + len(points))))
+
+        cx0, cx1, cy0, cy1, cz0, cz1 = chimney
+        for value, outward in ((cx0, (-1.0, 0.0, 0.0)), (cx1, (1.0, 0.0, 0.0))):
+            chimney_add([(value, cy0, cz0), (value, cy1, cz0), (value, cy1, cz1),
+                         (value, cy0, cz1)], outward)
+        for value, outward in ((cz0, (0.0, 0.0, -1.0)), (cz1, (0.0, 0.0, 1.0))):
+            chimney_add([(cx0, cy0, value), (cx1, cy0, value), (cx1, cy1, value),
+                         (cx0, cy1, value)], outward)
+        chimney_add([(cx0, cy1, cz0), (cx1, cy1, cz0), (cx1, cy1, cz1), (cx0, cy1, cz1)],
+                    (0.0, 1.0, 0.0))
+        mesh = bpy.data.meshes.new("CHIMNEY_mesh")
+        mesh.from_pydata(reset_vertices, [], reset_faces)
+        mesh.validate()
+        mesh.update()
+        stack = bpy.data.objects.new("CHIMNEY", mesh)
+        bpy.context.scene.collection.objects.link(stack)
+        export(stack, output / "CHIMNEY.glb")
+        report["written"].append("CHIMNEY")
 
     for name, box in sorted(roof_boxes(layout, levels).items()):
         if wanted is not None and name not in wanted:
@@ -1370,6 +1415,40 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
                      (at - PURLIN_SECTION / 2.0, level, along1),
                      (at - PURLIN_SECTION / 2.0, level, along0)], (-1.0, 0.0, 0.0))
 
+    # `HOUSE-00468`: a gutter along each eaves edge, a downspout at each corner, and a vent along
+    # the ridge. The gutter hangs on the fascia, so its height comes from the fascia's.
+    gutter_y = eaves_y - FASCIA_DEPTH
+    for side_x in (False, True):
+        for at in ((x0, x1) if side_x else (z0, z1)):
+            if side_x:
+                box_of = (at - GUTTER_SECTION / 2.0, at + GUTTER_SECTION / 2.0,
+                          gutter_y, gutter_y + GUTTER_SECTION, z0, z1)
+            else:
+                box_of = (x0, x1, gutter_y, gutter_y + GUTTER_SECTION,
+                          at - GUTTER_SECTION / 2.0, at + GUTTER_SECTION / 2.0)
+            for value, outward in ((box_of[0], (-1.0, 0.0, 0.0)), (box_of[1], (1.0, 0.0, 0.0))):
+                add([(value, box_of[2], box_of[4]), (value, box_of[3], box_of[4]),
+                     (value, box_of[3], box_of[5]), (value, box_of[2], box_of[5])], outward)
+            for value, outward in ((box_of[2], (0.0, -1.0, 0.0)), (box_of[3], (0.0, 1.0, 0.0))):
+                add([(box_of[0], value, box_of[4]), (box_of[1], value, box_of[4]),
+                     (box_of[1], value, box_of[5]), (box_of[0], value, box_of[5])], outward)
+    half_spout = DOWNSPOUT_SECTION / 2.0
+    for corner_x in (x0, x1):
+        for corner_z in (z0, z1):
+            for value, outward in ((corner_x - half_spout, (-1.0, 0.0, 0.0)),
+                                   (corner_x + half_spout, (1.0, 0.0, 0.0))):
+                add([(value, 0.0, corner_z - half_spout), (value, gutter_y, corner_z - half_spout),
+                     (value, gutter_y, corner_z + half_spout), (value, 0.0, corner_z + half_spout)],
+                    outward)
+    ridge_top = eaves_y + (min(x1 - x0, z1 - z0) / 2.0) * pitch
+    if dx >= dz:
+        vent = (x0 + (z1 - z0) / 2.0, x1 - (z1 - z0) / 2.0)
+        add([(vent[0], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 - RIDGE_VENT_WIDTH / 2.0),
+             (vent[1], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 - RIDGE_VENT_WIDTH / 2.0),
+             (vent[1], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 + RIDGE_VENT_WIDTH / 2.0),
+             (vent[0], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 + RIDGE_VENT_WIDTH / 2.0)],
+            (0.0, 1.0, 0.0))
+
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(vertices, [], faces)
     mesh.validate()
@@ -1377,6 +1456,24 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
     return obj
+
+
+def chimney_at(fireplace, construction: dict, floor: float):
+    """The chimney's box, from the hearth to `CHIMNEY_OVER_RIDGE` above §12's ridge.
+
+    Where it stands is the fireplace's own position -- `APPL_L0_LIVING_FIREPLACE`, on
+    `L0_LIVING`'s west wall -- so moving the fireplace moves the chimney. How high it goes is §12's
+    `ridgeY` plus the height a stack has to clear a ridge by. Only its section is invented.
+    """
+    if fireplace is None:
+        return None
+    point = (fireplace.get("focus") or {}).get("point")
+    if not isinstance(point, list) or len(point) != 3:
+        return None
+    x, _y, z = (float(value) for value in point)
+    return (x - CHIMNEY_ACROSS / 2.0, x + CHIMNEY_ACROSS / 2.0,
+            floor, float(construction["ridgeY"]) + CHIMNEY_OVER_RIDGE,
+            z - CHIMNEY_ALONG / 2.0, z + CHIMNEY_ALONG / 2.0)
 
 
 def dormers_on(box: tuple, portals, openings) -> list:
@@ -2013,11 +2110,30 @@ def selftest(output: Path) -> int:
     # The whole house, which is the deliverable and not a sample.
     everything = generate(SOURCE, output)
     roofs = sorted(roof_boxes(layout_io.load_layout(SOURCE, kinds=["levels", "cells"]), levels))
-    require(len(everything["written"]) == len(cells) + len(roofs)
+    require(len(everything["written"]) == len(cells) + len(roofs) + 1
             and not everything["problems"] and not everything["skipped"],
-            f"every one of the {len(cells)} cells generates, plus {len(roofs)} roof(s) "
-            f"({len(everything['written'])} written, {len(everything['skipped'])} skipped, "
-            f"{everything['problems'][:1]})")
+            f"every one of the {len(cells)} cells generates, plus {len(roofs)} roof(s) and the "
+            f"chimney ({len(everything['written'])} written, {len(everything['skipped'])} "
+            f"skipped, {everything['problems'][:1]})")
+
+    # ---- `HOUSE-00468`: the chimney ------------------------------------------------------------
+    hearth = next(row for row in layout_io.rows(
+        layout_io.load_layout(SOURCE, kinds=["interactables"]), "interactables")
+        if "FIREPLACE" in str(row.get("id")))
+    stack_box = chimney_at(hearth, construction, float(levels["L0"]["ffl"]))
+    point = hearth["focus"]["point"]
+    require(abs((stack_box[0] + stack_box[1]) / 2.0 - float(point[0])) < 1e-9
+            and abs((stack_box[4] + stack_box[5]) / 2.0 - float(point[2])) < 1e-9,
+            "the chimney stands over the fireplace, wherever the fireplace is — its plan position "
+            "is `APPL_L0_LIVING_FIREPLACE`'s own and not a number written here")
+    require(stack_box[3] > float(construction["ridgeY"]) + 0.5,
+            f"and it clears §12's ridge by more than half a metre, which is what a stack has to "
+            f"do ({stack_box[3]} against {construction['ridgeY']})")
+    require(abs(stack_box[2] - float(levels["L0"]["ffl"])) < 1e-9,
+            "and it starts at the hearth's own floor")
+    require(chimney_at(None, construction, 0.6) is None
+            and chimney_at({"focus": {}}, construction, 0.6) is None,
+            "a house with no fireplace gets no chimney rather than one at the origin")
 
     # ---- `HOUSE-00461`: the roof ---------------------------------------------------------------
     main_box = roof_boxes(layout_io.load_layout(SOURCE, kinds=["levels", "cells"]),
@@ -2096,7 +2212,8 @@ def selftest(output: Path) -> int:
     expected_rafters = 2 * (int(ridge_run / RAFTER_SPACING) + 1)
     require(len(dormered.data.polygons) == plain_roof_faces + 5 * len(dormer_list),
             "the roof's face count is the planes, the eaves boards and the structure")
-    bare = plain_roof_faces - (4 + 4 + 4)      # planes, fascia, soffit
+    # planes, fascia, soffit, four gutters of four faces, four downspouts of two, one ridge vent
+    bare = plain_roof_faces - (4 + 4 + 4 + 4 * 4 + 4 * 2 + 1)
     require(bare == expected_rafters + 2,
             f"a rafter every {RAFTER_SPACING * 1000:.0f} mm over the ridge's {ridge_run:.2f} m, "
             f"both slopes, and a purlin under each ({bare} against {expected_rafters + 2})")

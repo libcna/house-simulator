@@ -6950,8 +6950,20 @@ the chunk builder produces ≤ 6 chunks per cell.
             is nested too and is 0.10 m up, so §70.5's own metre is what separates the two — which
             is the claim, and the injected "guard every nested cell" is what it catches.
       note: three injected bugs, all caught.
-- [ ] HOUSE-00468 — Generate the chimney, the gutters, the downspouts and the roof vents
+- [x] HOUSE-00468 — Generate the chimney, the gutters, the downspouts and the roof vents
       dep: HOUSE-00461 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) a gutter along each eaves edge hanging on the fascia, a downspout at each
+            of the four corners running to grade, and a vent along the ridge. §12 names none of
+            them, so every section is this generator's and they are declared together at the top
+            of the file rather than buried.
+      note: **the chimney's position is the fireplace's.** `APPL_L0_LIVING_FIREPLACE` is an
+            interactable with a focus point on `L0_LIVING`'s west wall, so the stack is centred on
+            it and moves if it moves; its height is §12's `ridgeY` plus the 0.60 m a stack has to
+            clear a ridge by; only its 1.10 × 0.60 section is invented. A house with no fireplace
+            gets no chimney rather than one at the origin, which is its own claim.
+      note: the chimney is its own object, `CHIMNEY.glb`: it runs from the hearth at +0.60 to
+            +14.90 through four storeys and a roof, and belongs to no cell.
+      note: six injected bugs, all caught.
 - [ ] HOUSE-00469 — Generate the basement window wells
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00470 — Assign placeholder materials per surface class so the blockout is readable
