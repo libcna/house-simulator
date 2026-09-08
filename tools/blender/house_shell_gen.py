@@ -463,7 +463,7 @@ RAIL_SECTION = 0.055
 NEWEL_SECTION = 0.090
 
 
-def flight_steps(flight: dict, bottom: float):
+def flight_steps(flight: dict, bottom: float, portals=()):
     """Every tread of a flight, from `stair_geometry` -- the module the COLLISION is built from.
 
     `HOUSE-00472`. This used to work the placement out here, and got a `u` wrong: it laid the
@@ -477,7 +477,7 @@ def flight_steps(flight: dict, bottom: float):
     `axis` it travels along and the `up` it rises towards. Returns None for a flight that authors
     no `footprint`/`run`, which is a flight this generator cannot draw.
     """
-    return stair_geometry.flight_steps(flight, bottom)
+    return stair_geometry.flight_steps(flight, bottom, portals)
 
 
 #: §12's trim, in metres. `casing` and `skirting` are `layout.levels.json`'s; the two below are
@@ -491,7 +491,7 @@ THRESHOLD_THICK = 0.015
 
 
 def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=None,
-                 inner=None) -> None:
+                 inner=None, portals=()) -> None:
     """A flight's steps, nosings, landing, handrails and newels, as boxes, through @p solid.
 
     Solid steps rather than treads on a carriage: a blockout wants the shape you walk on and the
@@ -501,8 +501,8 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
     Where every one of those boxes goes comes from `stair_geometry` (`HOUSE-00472`), so the shell
     and `build_collision.py` cannot disagree about it again.
     """
-    placed = stair_geometry.flight_runs(flight, bottom)
-    treads = stair_geometry.flight_steps(flight, bottom)
+    placed = stair_geometry.flight_runs(flight, bottom, portals)
+    treads = stair_geometry.flight_steps(flight, bottom, portals)
     if placed is None or treads is None:
         return
     axis = placed[0]["axis"]
@@ -536,7 +536,16 @@ def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=N
     # get none.
     if add is not None and construction:
         height = float(construction.get("balustrade", 0.0))
+        # "Against a wall" is the run's across edge lying on whatever BOUNDS the flight. Since
+        # `HOUSE-00480` that is the stairwell the flight comes up -- `frame`'s cross range -- and
+        # not the cell's box, whose edges are wall centre lines and which the flight no longer
+        # touches. Comparing against the box gave the main stair a handrail on both sides of both
+        # runs the moment it moved 0.20 m off it, which is a rail up the wall.
         wall_edges = set()
+        fields = stair_geometry.frame(flight, portals)
+        if fields is not None:
+            wall_edges.add(round(fields[3], 4))
+            wall_edges.add(round(fields[4], 4))
         if inner is not None:
             for value in ((inner[4], inner[5]) if along_axis_x else (inner[0], inner[1])):
                 wall_edges.add(round(value, 4))
@@ -601,9 +610,9 @@ def flight_going(flights, cell) -> float:
                 if row.get("toCell") == cell["id"]] or [0.0])
 
 
-def top_tread_box(flight: dict, bottom: float):
+def top_tread_box(flight: dict, bottom: float, portals=()):
     """The world box of a flight's top step, or None. Where you step off it onto the floor above."""
-    treads = stair_geometry.flight_steps(flight, bottom)
+    treads = stair_geometry.flight_steps(flight, bottom, portals)
     if not treads:
         return None
     box, top = treads[-1]["box"], treads[-1]["y1"]
@@ -1218,7 +1227,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
             # railing across the top of the flight would be a railing you have to climb.
             if level_y != y0 or not construction:
                 continue
-            arrivals = [top_tread_box(row, float(row.get("fromY") or 0.0))
+            arrivals = [top_tread_box(row, float(row.get("fromY") or 0.0), list(portals))
                         for row in flights or () if row.get("toCell") == cell["id"]]
             for hx0, hx1, hz0, hz1, _identifier in wells:
                 for axis_x, fixed, span in ((True, hz0, (hx0, hx1)), (True, hz1, (hx0, hx1)),
@@ -1323,7 +1332,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         foot = flight.get("fromY")
         build_flight(flight, solid, float(foot) if foot is not None else extent[0],
                      add=add, construction=construction,
-                     inner=list(cell_boxes(cell, extent))[0])
+                     inner=list(cell_boxes(cell, extent))[0], portals=list(portals))
         surface["class"] = "wall"
 
     mesh = bpy.data.meshes.new(f"{cell['id']}_mesh")
@@ -2610,7 +2619,7 @@ def selftest(output: Path) -> int:
 
     # The house on the other side of that boundary still has its outer skin, or removing the
     # yard's walls would have removed the wall you can see from the yard.
-    outer_cell = cells["L0_LOUNGE"]
+    outer_cell = cells["L0_LIVING"]
     outer_extent = extent_of(outer_cell, levels[outer_cell["level"]])[0]
     reset_scene()
     outer_built = build_cell(outer_cell, outer_extent, neighbours=neighbours,
@@ -2620,7 +2629,7 @@ def selftest(output: Path) -> int:
     outer_used = {outer_built.data.materials[polygon.material_index].name
                   for polygon in outer_built.data.polygons}
     require("BLOCKOUT_exterior" in outer_used and "BLOCKOUT_wall" in outer_used,
-            f"while the lounge keeps both its inner wall and its outer skin ({sorted(outer_used)})")
+            f"while the living room keeps both its inner wall and its outer skin ({sorted(outer_used)})")
     require(slab_here(porch, porch_extent, True) and not slab_here(porch, porch_extent, False),
             "the porch is a deck, so it has a floor and still no ceiling")
     for deck in ("L1_BALCONY_FRONT", "L2_BALCONY_JULIET", "EXT_TERRACE"):

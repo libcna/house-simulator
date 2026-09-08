@@ -609,6 +609,9 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
     """
     levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
     cells = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
+    # `HOUSE-00480`: a flight is placed inside the stairwell it comes up, not against its own
+    # footprint's edge, which is a wall centre line.
+    portals = list(layout_io.rows(layout, "portals"))
     for flight in sorted(layout_io.rows(layout, "stairs"), key=lambda f: f["id"]):
         from_cell = cells.get(flight["fromCell"])
         to_cell = cells.get(flight["toCell"])
@@ -619,7 +622,7 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
         width = float(flight["width"])
         base = stair_geometry.foot_of(flight, cells, levels)
         surface = flight.get("surface")
-        walk = stair_geometry.flight_runs(flight, base)
+        walk = stair_geometry.flight_runs(flight, base, portals)
         if walk is None:
             stats["stairsGuessed"] += 1
             walk = _guessed_walk(flight, from_cell, base, width)
@@ -642,7 +645,7 @@ def build_stairs(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: 
                         ((x1 - x0) / 2, thickness / 2, (z1 - z0) / 2), 0.0, surface, KIND_STAIR))
                     stats["stairLandings"] += 1
         else:
-            treads = stair_geometry.flight_steps(flight, base)
+            treads = stair_geometry.flight_steps(flight, base, portals)
             if treads is None:
                 treads = _guessed_treads(flight, walk, base)
             rise = float(flight["rise"])

@@ -7318,6 +7318,37 @@ the chunk builder produces ≤ 6 chunks per cell.
             generator existed. Corrected in place, with the measurement beside it.
 - [ ] HOUSE-00480 — Fix the inevitable geometry issues found by HOUSE-00477/78/79; iterate the generator, not the output
       dep: HOUSE-00477…HOUSE-00479 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) **Partly done, and deliberately not ticked.** The one issue that was the
+            GENERATOR's is fixed: a flight is placed inside the stairwell it comes up
+            (`stair_geometry.well_cross`) rather than against its own footprint's edge, which is a
+            wall centre line. `STAIR_MAIN_L0_L1` and `STAIR_MAIN_L1_L2` cleared §70.5's head-room;
+            `verify_shell`'s pinned list is down from 5 problems to 3. The flight is authored data
+            all the way now — the footprint says where, the stairwell portal says how wide — with
+            no wall thickness guessed at from `construction`.
+            Three remain, and **none of them is a generator bug**, which is why this task stays
+            open rather than being ticked over them:
+            (1) `P_STAIR_L2_L3` is 3.00 m of opening for a flight 3.98 m long and
+            `P_L0_STAIR__B1_STAIR` is 3.30 m for one 4.40 m long, so each flight's last stretch
+            passes under the floor above. That is the LAYOUT, and changing the house is
+            `HOUSE-00484`'s;
+            (2) `FRIDGE_L0_KITCHEN` is not cut, because a nested container shares no boundary
+            plane with the room it stands in;
+            (3) `ROOF_GARAGE` floats 7 m over the garage, because §12 authors the wing no ridge
+            and no eaves and choosing one is a design decision (`HOUSE-00472`'s finding).
+      finding: (2026-09-08, found by `HOUSE-00480`) `house_shell_gen.py`'s **selftest had been
+            exiting 1 since `HOUSE-00475`** — a claim I added there named `L0_LOUNGE`, which is a
+            cell of `build_collision.py`'s FIXTURE and not of this house, so the run died on a
+            `KeyError` after the claim before it. I had grepped the output for `FAIL` and found
+            none, and never looked at the exit status. The lesson is the shape of the check, not
+            the typo: a selftest that CRASHES prints no `FAIL`, and a run that greps for one is
+            reading the wrong thing. `tools/ci/run_checks.sh` cannot help here — this selftest
+            needs Blender and is not a gate.
+      finding: (2026-09-08, found by `HOUSE-00480`) moving the flight off the wall gave it a
+            handrail on BOTH sides of both runs. `build_flight` decided "against a wall" by
+            comparing the lane's edge with the CELL BOX's, and the flight no longer touches that;
+            it compares against the placement boundary now, which is the thing that actually
+            bounds it. Caught by the face-count claim `HOUSE-00460` left behind — 328 faces where
+            the arithmetic wanted 292.
 - [ ] HOUSE-00481 — Determinism check: two runs of the generator produce byte-identical `.glb`
       dep: HOUSE-00480 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00482 — Generate and commit the shell asset manifest rows (`origin.kind = generated`, generator version, seed)

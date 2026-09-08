@@ -772,15 +772,15 @@ def selftest() -> int:
             f"the main stair's 17 treads come back in climbing order ({len(tops)})")
 
     known = {
-        # Every flight is placed against its footprint's edge, which is the wall centre line, so
-        # 0.20 m of it is inside the wall and outside the stairwell the layout cuts (`u` 2.40-4.70
-        # against a footprint of 2.20-4.90). The head-room over the top tread of that 0.20 m strip
-        # is one riser. Older than `HOUSE-00472`: `house_shell_gen.py` placed the lanes the same
-        # way. The fix needs the flight to sit inside the INNER extent, which is what the well is.
+        # `HOUSE-00480` fixed the two that were the GENERATOR's: a flight is now placed inside the
+        # stairwell it comes up rather than against its footprint's edge, and `STAIR_MAIN_L0_L1`
+        # and `STAIR_MAIN_L1_L2` cleared. These two are the LAYOUT's, and a generator cannot fix
+        # them: the hole is shorter than the flight. `P_STAIR_L2_L3` is 3.00 m of opening for a
+        # flight 15 x 0.265 = 3.98 m long, and `P_L0_STAIR__B1_STAIR` is 3.30 m for one 4.40 m
+        # long, so the last stretch of each passes under the floor above at the height the floor
+        # is. Recorded for `HOUSE-00484`, which is the task that may change the house.
         "STAIR_ATTIC_L2_L3: head-room 0.183 m at step 14, under L2_STAIR_ATTIC's ceiling",
-        "STAIR_BASEMENT_L0_B1: head-room 0.181 m at step 15, under B1_STAIR's ceiling",
-        "STAIR_MAIN_L0_L1: head-room 0.179 m at step 16, under L0_STAIR_MAIN's ceiling",
-        "STAIR_MAIN_L1_L2: head-room 0.181 m at step 15, under L1_STAIR_MAIN's ceiling",
+        "STAIR_BASEMENT_L0_B1: head-room 1.450 m at step 8, under B1_STAIR's ceiling",
         # A nested container's own opening is not cut: `CELL_FRIDGE_INTERIOR` is a cell inside
         # `L0_KITCHEN`, and the generator cuts openings between cells that share a boundary PLANE,
         # which a nested cell does not.

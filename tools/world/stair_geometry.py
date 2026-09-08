@@ -85,14 +85,51 @@ def segments(flight: dict, bottom: float):
     return walk
 
 
-def frame(flight: dict):
-    """`(axis, sign, start, cross_lo, cross_hi, width)`, or None when nothing is authored.
+def well_cross(flight: dict, portals=()):
+    """The cross-axis range a flight must fit through, or None when nothing narrows it.
 
-    `axis` is the world axis the flight travels along, `sign` the direction of travel, `start` the
-    edge of the footprint the foot of the flight stands on. Lane 0 is the `cross_lo` side of the
-    footprint and lane 1 the `cross_hi` side, always -- a fixed convention, so that the shell and
-    the collision put the same run on the same side of the well.
+    `HOUSE-00480`. A flight's `footprint` is its cell's box, whose edges are WALL CENTRE LINES:
+    placing a lane hard against one puts 0.20 m of the flight inside the wall and outside the hole
+    the floor above has in it. The stairwell portal IS that hole -- `P_STAIR_L0_L1` is authored
+    X 2.40-4.70 against the main stair's footprint of 2.20-4.90 -- and a flight has to fit through
+    the hole it comes up. So the lanes are placed in the intersection of the two, which is authored
+    data rather than a wall thickness guessed at from `construction`.
+
+    A flight the layout narrows nothing for -- the porch and terrace steps, which are outdoors and
+    pass through no floor -- keeps its whole footprint.
     """
+    fields = _fields_of(flight)
+    if fields is None:
+        return None
+    axis, _sign, _start, cross_lo, cross_hi = fields
+    lo, hi = cross_lo, cross_hi
+    footprint = flight["footprint"]
+    fx0, fx1 = (float(value) for value in footprint["x"])
+    fz0, fz1 = (float(value) for value in footprint["z"])
+    for portal in portals:
+        plane = portal.get("plane") or {}
+        rect = portal.get("rect") or {}
+        if plane.get("axis") != "y" or not rect:
+            continue
+        # `u` is x and `v` is z for a horizontal plane, which is what `world-format.md` says and
+        # what `slab_holes` reads.
+        u0, u1 = (float(value) for value in rect["u"])
+        v0, v1 = (float(value) for value in rect["v"])
+        if min(u1, fx1) - max(u0, fx0) <= 1e-6 or min(v1, fz1) - max(v0, fz0) <= 1e-6:
+            continue
+        if axis == "x":
+            lo, hi = max(lo, v0), min(hi, v1)
+        else:
+            lo, hi = max(lo, u0), min(hi, u1)
+    if hi - lo < float(flight["width"]) - 1e-6:
+        # The hole is narrower than the flight. Narrowing further would put the flight through a
+        # wall to no purpose, so the footprint stands and `verify_shell` says what it costs.
+        return None
+    return (lo, hi)
+
+
+def _fields_of(flight: dict):
+    """`(axis, sign, start, cross_lo, cross_hi)` straight from the footprint, before any narrowing."""
     footprint = flight.get("footprint") or {}
     if not footprint or flight.get("run") not in RUNS:
         return None
@@ -102,17 +139,36 @@ def frame(flight: dict):
     axis = "x" if run in ("-X", "+X") else "z"
     sign = -1.0 if run in ("-X", "-Z") else 1.0
     if axis == "x":
-        return ("x", sign, x1 if sign < 0 else x0, z0, z1, float(flight["width"]))
-    return ("z", sign, z1 if sign < 0 else z0, x0, x1, float(flight["width"]))
+        return ("x", sign, x1 if sign < 0 else x0, z0, z1)
+    return ("z", sign, z1 if sign < 0 else z0, x0, x1)
 
 
-def place(flight: dict, along0: float, along1: float, lane: int):
+def frame(flight: dict, portals=()):
+    """`(axis, sign, start, cross_lo, cross_hi, width)`, or None when nothing is authored.
+
+    `axis` is the world axis the flight travels along, `sign` the direction of travel, `start` the
+    edge of the footprint the foot of the flight stands on. Lane 0 is the `cross_lo` side and lane
+    1 the `cross_hi` side, always -- a fixed convention, so that the shell and the collision put
+    the same run on the same side of the well. The cross range is `well_cross`'s where a stairwell
+    narrows it and the footprint's otherwise.
+    """
+    fields = _fields_of(flight)
+    if fields is None:
+        return None
+    axis, sign, start, cross_lo, cross_hi = fields
+    narrowed = well_cross(flight, portals)
+    if narrowed is not None:
+        cross_lo, cross_hi = narrowed
+    return (axis, sign, start, cross_lo, cross_hi, float(flight["width"]))
+
+
+def place(flight: dict, along0: float, along1: float, lane: int, portals=()):
     """One segment's `(x0, x1, z0, z1)`, or None when the flight has no authored placement.
 
     `lane < 0` spans the full width of the footprint across, which is what a landing is: you turn
     round on it, so it is as wide as both runs and the well between them.
     """
-    fields = frame(flight)
+    fields = frame(flight, portals)
     if fields is None:
         return None
     axis, sign, start, cross_lo, cross_hi, width = fields
@@ -126,33 +182,33 @@ def place(flight: dict, along0: float, along1: float, lane: int):
     return (low, high, cross[0], cross[1]) if axis == "x" else (cross[0], cross[1], low, high)
 
 
-def flight_runs(flight: dict, bottom: float):
+def flight_runs(flight: dict, bottom: float, portals=()):
     """Every run and landing of @p flight as a placed box, or None if it has no placement.
 
     Each entry adds `box` -- `(x0, x1, z0, z1)` -- `axis`, and `up`: the direction along `axis` the
     run RISES in, `+1` towards the larger coordinate. A `u`'s two runs have opposite `up`, and a
     consumer that ignores it builds a staircase you descend to reach the floor above.
     """
-    fields = frame(flight)
+    fields = frame(flight, portals)
     if fields is None:
         return None
     axis, sign, *_rest = fields
     walk = segments(flight, bottom)
     for entry in walk:
-        entry["box"] = place(flight, entry["along0"], entry["along1"], entry["lane"])
+        entry["box"] = place(flight, entry["along0"], entry["along1"], entry["lane"], portals)
         entry["axis"] = axis
         travel = 1.0 if entry["along1"] >= entry["along0"] else -1.0
         entry["up"] = int(travel * sign)
     return walk
 
 
-def flight_steps(flight: dict, bottom: float):
+def flight_steps(flight: dict, bottom: float, portals=()):
     """Every tread of @p flight, in climbing order: `box`, `y0`, `y1`, `lane`, `axis`, `up`.
 
     `y1` is the top of the tread -- the surface you stand on -- so the n-th step of a flight is at
     `bottom + n * rise`, which is what §12.4 means by a landing being where a riser ends.
     """
-    placed = flight_runs(flight, bottom)
+    placed = flight_runs(flight, bottom, portals)
     if placed is None:
         return None
     going, rise = float(flight["going"]), float(flight["rise"])
@@ -166,7 +222,7 @@ def flight_steps(flight: dict, bottom: float):
         for index in range(entry["risers"]):
             a0 = entry["along0"] + direction * index * going
             treads.append({
-                "box": place(flight, a0, a0 + direction * going, entry["lane"]),
+                "box": place(flight, a0, a0 + direction * going, entry["lane"], portals),
                 "y0": bottom, "y1": entry["y0"] + (index + 1) * rise,
                 "lane": entry["lane"], "axis": entry["axis"], "up": entry["up"],
                 "run": number - 1, "along0": a0, "along1": a0 + direction * going})
