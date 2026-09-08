@@ -6403,6 +6403,14 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       dep: HOUSE-00404 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00418 — Author rows for the 22 seats
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
+      note: (2026-09-08) **the `dep` line understates it.** A seat's position is a piece of
+            furniture's position, and `layout.props.json` is `HOUSE-00450` onwards. Every other
+            interactable authored this session had an anchor in the layout — a doorway, a wall, a
+            §12.5 chase — and a sofa has none. Authoring seats first would mean inventing furniture
+            positions that the props task then has to match, which is the dependency backwards.
+            The same applies to `HOUSE-00404`…`HOUSE-00411`'s containers: §54 makes a container a
+            sub-cell with its own portal, and 62 kitchen drawers are 62 sub-cells inside the
+            units' geometry.
 - [ ] HOUSE-00419 — Author the `placeable` surface list (tables, counters, shelves, floors) used when putting an item down
       dep: HOUSE-00417 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00420 — Validate the complete interactable set: 640 ± 20 rows, all reachable, all with sounds and persistence fields
