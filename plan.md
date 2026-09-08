@@ -8061,9 +8061,36 @@ never escapes and never penetrates.
       dep: HOUSE-00555 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00565 — Implement the nudgeable-prop mini-physics (gravity, support plane, damping, push impulse) for the 12 named props
       dep: HOUSE-00554 · sys: physics · plat: ALL · pri: SHOULD
-- [ ] HOUSE-00566 — Determinism: fixed-step replay test at 30/60/144 FPS producing an identical final position
+- [x] HOUSE-00566 — Determinism: fixed-step replay test at 30/60/144 FPS producing an identical final position
       dep: HOUSE-00555 · sys: physics · plat: CI · pri: MUST
       verify: unit PhysicsDeterminismTests.*
+      note: (2026-09-08) §49.3's determinism clause, driven through the REAL accumulator
+            (`FrameTimer`) rather than by calling the step 7 200 times: what is being tested is
+            that the grouping of steps into frames does not matter, and skipping the thing that
+            does the grouping would test nothing.
+      note: **bit-for-bit, not "within a millimetre".** The whole reason for a fixed step is that
+            the answer does not depend on the frame rate AT ALL, and a tolerance would hide exactly
+            the drift a save file cannot survive. The position, the velocity, the walk mode, the
+            crouch and the ground kind are all compared, because a position that agrees while the
+            velocity does not is a replay that diverges on the next frame.
+      finding: (2026-09-08, found by `HOUSE-00566`) **"60 seconds" has to mean 7 200 STEPS and not
+            60 seconds of wall clock**, and the first version of this test got it wrong and failed.
+            `1/144` as a float is not exactly a 144th of a second, so 8 640 of them do not add up
+            to 60: measured, 60 s of wall clock is 7 200 fixed steps at 30 and 60 FPS and **7 199**
+            at 144. That is 8.3 ms of simulation and has nothing to do with determinism -- but it
+            made three runs disagree, and the tempting reading was that the accumulator was
+            drifting. It is not: replaying the same sums in `double` gives the same 7 200 / 7 200 /
+            7 199, so the difference is the REPRESENTATION of the frame delta and not the
+            accumulation of it. A `float`-to-`double` change to `FrameTimer` was written, measured,
+            found to change none of the three, and reverted -- another task's code does not get
+            edited without a failing test that names the defect.
+      accept: 5 cases. 1 200 steps arriving in 300 frames at 30 FPS and 1 440 at 144, so the
+            grouping really does differ; 7 200 recorded steps ending at a bit-identical position,
+            velocity and state at all three rates, having actually gone somewhere; 37 FPS -- 3.243
+            steps a frame, a different remainder carried into every one -- agreeing with 60; the
+            same replay run twice agreeing, which is what says nothing in the step reads a clock or
+            an address; and 7 200 steps in a REAL cell of the house, with dozens of shapes and a
+            broad phase handing them over in bucket order, agreeing too.
 - [ ] HOUSE-00612 — Guarantee test: the player cannot pass any closed door (all 62, both sides)
       dep: HOUSE-00554 · sys: physics · plat: CI · pri: MUST
 - [ ] HOUSE-00613 — Guarantee test: the player cannot pass any wall, floor or ceiling (2 000 randomised pushes)
