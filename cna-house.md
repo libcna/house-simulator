@@ -5500,6 +5500,15 @@ Console commands (development builds only): `time set <hh:mm>`, `time scale <x>`
 `save`, `load`, `screenshot [path]`, `cull off|on`, `tier s|e`, `budget report`,
 `nav draw`, `pet <dog|cat> state <state>`, `validate world`.
 
+The **free-fly camera** (`cnahouse::debug::FreeFlyCamera`, `HOUSE-00476`) is what F5 flies out
+with, and it is what `--scene=blockout` is steered by. It ignores collision, gravity, head height
+and the portal graph on purpose: what it is for is standing inside a wall to see which side of it is
+inside out. 4 m/s, ×6 while running; movement follows the view, strafe stays level, up and down are
+world up and down, and the pitch stops 1° short of the pole where a yaw-then-pitch camera loses its
+horizon. It reads `player::InputState` rather than keys, so it needs no window to be tested and is
+remapped wherever every other control is (§68). Taking it over adopts the pose of whatever camera
+was there, so the view does not jump.
+
 A **screenshot harness** drives a named camera pose list from JSON, sets a fixed time and weather,
 renders and writes PNGs — used by the render regression tests and for producing documentation
 images.

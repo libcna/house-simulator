@@ -7226,8 +7226,25 @@ the chunk builder produces ≤ 6 chunks per cell.
             surface in the house with z-fighting, which the first frames of this scene showed
             plainly. The blockout camera uses 0.5 m and 300 m; a player camera that must stand
             against a wall will need §70.2's near plane and a far plane to match it.
-- [ ] HOUSE-00476 — Implement a free-fly debug camera to inspect the blockout
+- [x] HOUSE-00476 — Implement a free-fly debug camera to inspect the blockout
       dep: HOUSE-00475 · sys: debug · plat: ALL · pri: MUST
+      note: (2026-09-08) `cnahouse::debug::FreeFlyCamera`, steering `--scene=blockout` and
+            documented in §69 next to the F5 freeze it is what flies out with. It reads
+            `player::InputState` -- intent, not keys (`HOUSE-00140`) -- so all 12 claims are unit
+            tests with no window, no device and no person. It ignores collision, gravity and head
+            height deliberately: standing inside a wall to see which side is inside out is the
+            whole job, and `HOUSE-00478` is about to need exactly that.
+      accept: yaw 0 faces north and positive yaw turns east (§14); pitch clamps short of the pole;
+            yaw wraps; look is ignored when the window cannot provide it (`HOUSE-00100`); forward
+            follows the view while strafe stays level; up and down are world up and down; run
+            multiplies the speed and nothing else; two half-seconds travel as far as one second;
+            adopting a fixed camera does not jump the view, and one looking at its own eye is
+            left alone
+      finding: (2026-09-08, found by `HOUSE-00476`) the first version had positive yaw turning
+            **west**. §14 says "positive yaw turns east (clockwise seen from above)", and the sign
+            of one sine is the whole of it: every other angle in the class stays self-consistent
+            either way round, and a camera that turned the wrong way would have been discovered by
+            someone flying it and doubting themselves. The claim names the section.
 - [ ] HOUSE-00477 — Verify the shell against the realism checks: door heights, ceiling heights, stair geometry, headroom
       dep: HOUSE-00475, HOUSE-00360 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00478 — Verify winding and normals across the whole shell (no black facets, no inside-out rooms)

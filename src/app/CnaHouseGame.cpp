@@ -345,6 +345,10 @@ namespace cnahouse::app
         // outside, so it can afford a near plane that leaves the depth buffer some precision.
         blockoutCamera_.nearPlane = 0.5f;
         blockoutCamera_.farPlane = 300.0f;
+        // The free-fly camera takes over from wherever the fixed one was pointing, so pressing a
+        // key does not jump the view (`HOUSE-00476`). With no input at all it changes nothing,
+        // which is what makes `blockout-01` a fixed frame.
+        freeFly_.Adopt(blockoutCamera_);
         renderer_.Install(rendering::Pass::OpaqueStatic,
                           std::make_unique<rendering::StaticGeometryPass>(
                               *blockoutChunks_, *blockoutCells_, blockoutCamera_));
@@ -518,6 +522,16 @@ namespace cnahouse::app
             {
                 const debug::Timing::Scope scope(timing_, UpdateStage::Input);
                 input_.Update(frame.deltaSeconds);
+            }
+
+            if (blockoutCells_ != nullptr)
+            {
+                // `HOUSE-00476`. The debug camera flies; nothing else in this scene moves. Driven
+                // from `Update` so its speed is in metres per SECOND and does not change with the
+                // frame rate -- which matters because this camera is what a person is holding when
+                // they read the frame timings it changes.
+                freeFly_.Update(input_.Current(), input_.LookAvailable(), frame.deltaSeconds);
+                freeFly_.ApplyTo(blockoutCamera_);
             }
 
             if (smoke_ != nullptr)

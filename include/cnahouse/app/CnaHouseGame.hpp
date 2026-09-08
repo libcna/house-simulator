@@ -17,6 +17,7 @@
 #include "cnahouse/audio/AudioSystem.hpp"
 #include "cnahouse/content/SmokeScene.hpp"
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/debug/FreeFlyCamera.hpp"
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
 #include "cnahouse/player/KeyboardMouseSource.hpp"
@@ -279,6 +280,7 @@ namespace cnahouse::app
         std::unique_ptr<world::ChunkLibrary> blockoutChunks_;
         std::unique_ptr<world::CellRuntime> blockoutCells_;
         rendering::Camera blockoutCamera_;
+        debug::FreeFlyCamera freeFly_;
 
         std::uint64_t framesDrawn_ = 0;
         std::uint64_t frameLimit_ = 0;
