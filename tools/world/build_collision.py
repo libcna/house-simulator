@@ -366,8 +366,44 @@ def box_rect(box) -> tuple[float, float, float, float]:
     return (x0, z0, x1, z1)
 
 
-def _slab_holes(portals_by_plane, cell_id: str, plane_y: float):
-    """The `y` portals of @p cell_id lying on the horizontal plane @p plane_y, as hole rects."""
+def _step_off_rects(layout, cells, levels, portals, cell_id: str, plane_y: float):
+    """Where a flight arriving at @p plane_y lets you step OFF it. Floor, not well.
+
+    A stair well is authored as a `y` portal, and the rect is the VISIBILITY opening: generous, and
+    on the main stair 0.88 m longer than the flight. Cut whole out of the floor it leaves a gap
+    between the last tread and the floor -- the player climbs seventeen steps and finds nothing to
+    stand on (`HOUSE-00620` measured it: run 2 tops out at z -15.68 and the floor resumed at
+    -14.80). What a builder does is run the trimmer to the last tread, so the strip beyond it, in
+    the direction of travel and across the run's own width, is floor.
+    """
+    out = []
+    for flight in layout_io.rows(layout, "stairs"):
+        if flight.get("toCell") != cell_id:
+            continue
+        base = stair_geometry.foot_of(flight, cells, levels)
+        top = base + int(flight["risers"]) * float(flight["rise"])
+        if abs(top - plane_y) > 0.05:
+            continue
+        treads = stair_geometry.flight_steps(flight, base, portals)
+        if not treads:
+            continue
+        last = treads[-1]
+        x0, x1, z0, z1 = last["box"]
+        # Forward is the way the flight rises, along its own axis.
+        reach = 3.0  # further than any well in this house is long; the hole clips it
+        if last["axis"] == "z":
+            out.append((x0, z1, x1, z1 + reach) if last["up"] > 0 else (x0, z0 - reach, x1, z0))
+        else:
+            out.append((x1, z0, x1 + reach, z1) if last["up"] > 0 else (x0 - reach, z0, x0, z1))
+    return out
+
+
+def _slab_holes(portals_by_plane, cell_id: str, plane_y: float, step_off=()):
+    """The `y` portals of @p cell_id on the horizontal plane @p plane_y, as hole rects.
+
+    Minus @p step_off: the floor at the head of each arriving flight, which is the difference
+    between a stair well and a hole a player falls into.
+    """
     holes = []
     for portal in portals_by_plane.get(("y", snap(plane_y)), []):
         if cell_id not in (portal.get("cellA"), portal.get("cellB")):
@@ -376,8 +412,36 @@ def _slab_holes(portals_by_plane, cell_id: str, plane_y: float):
         u, v = rect.get("u"), rect.get("v")
         if not u or not v:
             continue
-        holes.append((float(u[0]), float(v[0]), float(u[1]), float(v[1])))
+        whole = (float(u[0]), float(v[0]), float(u[1]), float(v[1]))
+        holes.extend(subtract_rects(whole, list(step_off)) if step_off else [whole])
     return holes
+
+
+def cells_on_level_outside(cell, cells_on_level, boxes_by_cell, axis, value, outward, span):
+    """Exterior cells whose box faces @p value from the far side, within a wall's thickness.
+
+    A house's outer wall separates a room from the garden, and §15 leaves the wall's own footprint
+    between their boxes -- so `_neighbour_segments` sees no neighbour and the wall goes into the
+    room's list alone. This is the other half of it: whichever yard, terrace or lawn is on the
+    outside gets the same shape, so a body walking there meets the house.
+    """
+    out = []
+    for other in cells_on_level:
+        if other["id"] == cell["id"] or other.get("kind") != "exterior":
+            continue
+        for ox0, ox1, oz0, oz1 in boxes_by_cell[other["id"]]:
+            if axis == "x":
+                near = ox0 if outward > 0 else ox1
+                overlap = overlap_1d(span[0], span[1], oz0, oz1)
+            else:
+                near = oz0 if outward > 0 else oz1
+                overlap = overlap_1d(span[0], span[1], ox0, ox1)
+            # Within half a metre: the widest wall in §12.3 is 0.30, and a yard authored a
+            # hand's breadth further out is still the yard on the other side of this wall.
+            if abs(near - value) <= 0.5 and overlap:
+                out.append(other["id"])
+                break
+    return out
 
 
 def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
@@ -392,6 +456,7 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
         cells_by_level.setdefault(cell["level"], []).append(cell)
 
     portals = layout_io.rows(layout, "portals")
+    cells_by_id = layout_io.by_id(cells, "cell")
     portals_by_plane: dict[tuple[str, float], list[dict]] = {}
     for portal in portals:
         plane = portal.get("plane") or {}
@@ -415,14 +480,23 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
         # (`HOUSE-00213`). It still gets the wall it shares with the house, because that wall is
         # real and the room on the other side needs it too.
         is_open = cell.get("kind") == "exterior" or cell.get("visibilityHint") == "open"
+        # ...but only an EXTERIOR cell loses its walls. `visibilityHint: open` on an interior cell
+        # means open to the STAIRWELL -- §16's three stair cells and two landings carry it -- and
+        # treating that as "no walls" left the house with a 1.30 m hole in its front elevation at
+        # every storey of the main stair, where the only thing on the other side is the garden.
+        # `HOUSE-00618`'s bot found it: at 16.7 minutes it walked in off the front lawn, under the
+        # ground floor, and spent the rest of the run wedged against the slab's edge.
+        outdoors = cell.get("kind") == "exterior"
         # A HOLE in a slab is a `y` portal on that slab's plane: §16.2's four stair wells and two
         # hatches, and nothing else. Until `HOUSE-00615` walked the flights this was not cut, so
         # `L0_STAIR_MAIN`'s floor lay across the top of the basement flight and `L1_STAIR_MAIN`'s
         # across the top of the main one -- every interior flight in the house arrived at a
         # ceiling, and the basement was unreachable on foot. The world already says where the
         # openings are; the collision simply was not reading it.
-        floor_holes = _slab_holes(portals_by_plane, cell["id"], y0)
-        ceiling_holes = _slab_holes(portals_by_plane, cell["id"], y1)
+        floor_holes = _slab_holes(portals_by_plane, cell["id"], y0,
+                                  _step_off_rects(layout, cells_by_id, levels, portals, cell["id"], y0))
+        ceiling_holes = _slab_holes(portals_by_plane, cell["id"], y1,
+                                    _step_off_rects(layout, cells_by_id, levels, portals, cell["id"], y1))
         for box in boxes_by_cell[cell["id"]]:
             x0, x1, z0, z1 = box
             for rx0, rz0, rx1, rz1 in subtract_rects(box_rect(box), floor_holes):
@@ -445,7 +519,7 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
                 on_plane = portals_by_plane.get((axis, snap(value)), [])
                 for u0, u1, neighbour in _neighbour_segments(
                         cell, box, side, cells_by_level.get(cell["level"], []), boxes_by_cell):
-                    if is_open and neighbour is None:
+                    if outdoors and neighbour is None:
                         # An open side a storey up is a drop, and §70.5 asks for a guard at more
                         # than a metre of it. The shell DRAWS one -- a 0.20 m parapet with a rail
                         # on top (`HOUSE-00465`) -- and nothing stopped you walking through it:
@@ -476,9 +550,24 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
                         else:
                             centre = (centre_u, centre_v, value)
                             half = (half_u, half_v, thickness / 2)
-                        indices.append(shapes.obb(
-                            centre, half, 0.0, cell.get("wallMaterial"), KIND_WALL))
+                        piece = shapes.obb(centre, half, 0.0, cell.get("wallMaterial"), KIND_WALL)
+                        indices.append(piece)
                         stats["wallPieces"] += 1
+                        if neighbour is None:
+                            # The house's OUTER face, and the garden on the other side of it needs
+                            # it too. §15's exterior cells stop 0.30 m short of the house -- the
+                            # wall's own footprint is the gap -- so neither cell calls the other a
+                            # neighbour and the wall lands in the house's list alone. A body
+                            # walking the yard is swept against the YARD's shapes, so nothing
+                            # stopped it until the cell tracker changed its mind, by which time it
+                            # was inside the wall. `HOUSE-00618`'s bot walked in off the front lawn
+                            # that way. A wall belongs to both sides of itself, and one of them is
+                            # the outdoors.
+                            for other in cells_on_level_outside(
+                                    cell, cells_by_level.get(cell["level"], []), boxes_by_cell,
+                                    axis, value, outward, (ru0, ru1)):
+                                _add(out, other, piece)
+                                stats["outerShared"] += 1
         out[cell["id"]] = indices
     return out
 
@@ -492,19 +581,116 @@ GUARD_DROP = 1.0
 #: capsule does not fit between a 0.55 m parapet and a 1.10 m rail.
 GUARD_THICK = 0.20
 
+#: A stair balustrade is a RAIL and not a parapet: 60 mm, against the balcony guard's masonry.
+#: §12.3 gives the height (0.95 m) and not the thickness, and the difference matters only in that a
+#: fat one leaves a slot behind it that nothing can stand in.
+BALUSTRADE_THICK = 0.06
+
 
 def _guard_obb(shapes: Shapes, axis: str, value: float, u0: float, u1: float, outward: int,
-               floor: float, height: float, surface) -> int:
+               floor: float, height: float, surface, thickness: float = None) -> int:
     """One guard box along an open edge, standing INSIDE it the way the drawn parapet does."""
-    inward = -outward * GUARD_THICK / 2.0
+    thick = GUARD_THICK if thickness is None else thickness
+    inward = -outward * thick / 2.0
     centre_u, half_u = (u0 + u1) / 2, (u1 - u0) / 2
     if axis == "x":
         centre = (value + inward, floor + height / 2, centre_u)
-        half = (GUARD_THICK / 2, height / 2, half_u)
+        half = (thick / 2, height / 2, half_u)
     else:
         centre = (centre_u, floor + height / 2, value + inward)
-        half = (half_u, height / 2, GUARD_THICK / 2)
+        half = (half_u, height / 2, thick / 2)
     return shapes.obb(centre, half, 0.0, surface, KIND_WALL)
+
+
+def build_stairwell_guards(layout, shapes: Shapes, per_cell: dict[str, list[int]],
+                           stats: dict) -> None:
+    """A rail round the hole in a floor, with a gap where the flight comes up (`HOUSE-00567`).
+
+    §49.2 recorded this as the one drop in the house with nothing at its edge: *"The landings open
+    to the stairwell are a drop too and are not guarded yet -- their rail is drawn round the hole
+    in the floor rather than round the cell, and Phase 7 owns it."* `HOUSE-00618`'s twenty-minute
+    bot then walked off one at 15.5 minutes, fell to the basement and spent the rest of the run
+    wedged under the floor, which is what an unguarded well does to whoever finds it.
+
+    §12.3 gives a stair balustrade 0.95 m, and the gap is the step-off strip: the way ON to the
+    flight has to stay open or the rail is a wall round a staircase.
+    """
+    levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
+    cells = layout_io.rows(layout, "cells")
+    cells_by_id = layout_io.by_id(cells, "cell")
+    portals = layout_io.rows(layout, "portals")
+    construction = layout["levels"].get("construction") or {}
+    height = float(construction.get("balustrade", 0.0))
+    if height <= 0.0:
+        return
+
+    portals_by_plane: dict[tuple[str, float], list[dict]] = {}
+    for portal in portals:
+        plane = portal.get("plane") or {}
+        portals_by_plane.setdefault((plane.get("axis"), snap(float(plane.get("value", 0.0)))), []).append(
+            portal)
+
+    for cell in sorted(cells, key=lambda row: row["id"]):
+        level = levels.get(cell["level"])
+        if level is None:
+            continue
+        floor = layout_io.cell_extent(cell, level)[0]
+        step_off = _step_off_rects(layout, cells_by_id, levels, portals, cell["id"], floor)
+        holes = _slab_holes(portals_by_plane, cell["id"], floor, step_off)
+        # A rail goes BESIDE a flight, never across one. The main stair leaves the L0 floor at
+        # z -14.30 and crosses the basement well's north edge 1.24 m up, so a rail drawn round
+        # that well without this opening is a fence across the bottom of the staircase.
+        through = list(step_off)
+        for flight in layout_io.rows(layout, "stairs"):
+            if cell["id"] not in (flight.get("fromCell"), flight.get("toCell")):
+                continue
+            placed = stair_geometry.flight_runs(
+                flight, stair_geometry.foot_of(flight, cells_by_id, levels), portals)
+            for entry in placed or ():
+                if entry["y1"] <= floor + 0.05:
+                    # A flight that tops out AT this floor or below it passes UNDER the rail, and
+                    # a rail with a gap over it is a gap you fall through. The way off such a
+                    # flight is its step-off strip, which is already in the list. Only a flight
+                    # that climbs ABOVE this floor is one you walk onto here.
+                    continue
+                x0, x1, z0, z1 = entry["box"]
+                through.append((x0, z0, x1, z1))
+        for hx0, hz0, hx1, hz1 in holes:
+            # The four edges of the well, each as (axis, plane value, span, which way the FLOOR is).
+            edges = (
+                ("x", hx0, (hz0, hz1), -1),
+                ("x", hx1, (hz0, hz1), +1),
+                ("z", hz0, (hx0, hx1), -1),
+                ("z", hz1, (hx0, hx1), +1),
+            )
+            for axis, value, (u0, u1), outward in edges:
+                # Where a flight steps off across this edge there is no rail, or the rail is a wall
+                # round a staircase. `_step_off_rects` is the same strip the floor was given back.
+                openings = []
+                for sx0, sz0, sx1, sz1 in through:
+                    if axis == "x":
+                        touches = sx0 - 1e-6 <= value <= sx1 + 1e-6
+                        span = (max(sz0, u0), min(sz1, u1))
+                    else:
+                        touches = sz0 - 1e-6 <= value <= sz1 + 1e-6
+                        span = (max(sx0, u0), min(sx1, u1))
+                    if touches and span[1] - span[0] > 1e-6:
+                        openings.append((span[0], 0.0, span[1], 1.0))
+                for a0, _v0, a1, _v1 in subtract_rects((u0, 0.0, u1, 1.0), openings):
+                    # Is the other side of this edge FLOOR, or more well? Taking the step-off strip
+                    # out of the portal rect leaves the well as two rectangles, and the seam
+                    # between them is not an edge of anything: a rail there is a rail across the
+                    # middle of the hole. Asked of a point a centimetre outside the edge.
+                    probe_u = 0.5 * (a0 + a1)
+                    probe_v = value + outward * 0.01
+                    probe = (probe_v, probe_u) if axis == "x" else (probe_u, probe_v)
+                    if any(hx0 - 1e-9 <= probe[0] <= hx1 + 1e-9 and hz0 - 1e-9 <= probe[1] <= hz1 + 1e-9
+                           for hx0, hz0, hx1, hz1 in holes):
+                        continue
+                    _add(per_cell, cell["id"],
+                         _guard_obb(shapes, axis, value, a0, a1, -outward, floor, height,
+                                    cell.get("wallMaterial"), BALUSTRADE_THICK))
+                    stats["stairGuards"] += 1
 
 
 def build_mezzanine_guards(layout, shapes: Shapes, per_cell: dict[str, list[int]],
@@ -1074,11 +1260,12 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
                 asset_paths[row["id"]] = (REPO / source)
 
     stats = {"wallPieces": 0, "floorPieces": 0, "ceilingPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
-             "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0, "guards": 0,
+             "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0, "guards": 0, "stairGuards": 0, "outerShared": 0,
              "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
     shapes = Shapes()
     per_cell = build_shell(layout, shapes, stats)
     build_stairs(layout, shapes, per_cell, stats)
+    build_stairwell_guards(layout, shapes, per_cell, stats)
     build_rafters(layout, shapes, per_cell, stats)
     build_mezzanine_guards(layout, shapes, per_cell, stats)
     build_props(layout, shapes, per_cell, asset_paths, stats)

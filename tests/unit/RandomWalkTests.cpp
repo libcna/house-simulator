@@ -76,6 +76,14 @@ namespace
         return IdRegistry::NameOf(id);
     }
 
+    /// Is the cell an interior room? Outdoors the ground is §11.5's height field and has nothing
+    /// to do with the level's FFL.
+    bool indoors(const world::WorldData& data, cnahouse::util::Id id)
+    {
+        const world::Cell* cell = data.FindCell(id);
+        return cell != nullptr && cell->kind != world::CellKind::Exterior;
+    }
+
     /// The finished floor level of whatever cell @p id names, or a number nothing is below.
     float levelFloor(const world::WorldData& data, cnahouse::util::Id id)
     {
@@ -257,10 +265,20 @@ TEST(RandomWalkTests, TwentyMinutesOfWanderingStaysInTheHouse)
         // `build_collision.py` says so in as many words and calls it a gap against this phase. So
         // a body that walks over the edge of the well goes down it, which is what the house says
         // and not what a house does.
-        if (!fell && state.position.Y - state.Rise() < levelFloor(data, tracker.Current()) - 0.60F)
+        // Below the floor of an INDOOR room by more than a step: it has gone down a hole. Not
+        // outdoors, where §11.5's ground is the terrain and the front walk is 0.60 m below L0's
+        // FFL by construction -- an earlier version of this line counted that as a fall and let
+        // every wedge after it through, which is a test that passes for the wrong reason.
+        if (!fell && indoors(data, tracker.Current()) &&
+            state.position.Y - state.Rise() < levelFloor(data, tracker.Current()) - 0.60F)
         {
             fell = true;
             fellAt = step;
+            std::printf("  fell at (%.2f, %.2f, %.2f) out of %s\n",
+                        static_cast<double>(state.position.X),
+                        static_cast<double>(state.position.Y),
+                        static_cast<double>(state.position.Z),
+                        std::string(Name(tracker.Current())).c_str());
         }
 
         if (step % 8 == 0)
@@ -314,21 +332,19 @@ TEST(RandomWalkTests, TwentyMinutesOfWanderingStaysInTheHouse)
     EXPECT_EQ(guard.Escapes(), 0u) << "§10.3's boundary was crossed";
     EXPECT_TRUE(lostCells.empty()) << lostCells.size() << " time(s) outside the named cells; first: "
                                    << (lostCells.empty() ? std::string() : lostCells.front());
-    // The body may end up inside geometry ONLY after it has fallen down the stair well, which it
-    // can do because the collision has no balustrade round the hole in a floor (§12.3 gives a
-    // flight a 0.95 m one; `build_collision.py` records its absence as a gap against this phase).
-    // Under the L0 floor there is nowhere to stand and nothing to walk back up, and the body ends
-    // its twenty minutes pressed into the underside of the slab. What must not happen is a body
-    // wedged while it is walking about the house NORMALLY, and that is what this asks.
+    // Never inside anything, and never below the floor of a room. Both were false when this test
+    // was written -- the bot walked in off the front lawn through a 1.30 m hole in the house's
+    // front wall at the main stair, and spent its last four minutes wedged under the ground floor
+    // -- and `HOUSE-00567` is what closed them.
     if (fell)
     {
-        std::printf("  fell down the stair well on step %d (%.1f minutes in); first wedge on step "
-                    "%d\n",
+        std::printf("  went below an indoor floor on step %d (%.1f minutes in); first wedge on "
+                    "step %d\n",
                     fellAt,
                     static_cast<double>(fellAt) * static_cast<double>(kDt) / 60.0,
                     firstWedge);
     }
-    EXPECT_TRUE(wedged.empty() || (fell && firstWedge > fellAt))
-        << wedged.size() << " sample(s) found the body inside geometry with both feet in the house; "
-        << "first: " << (wedged.empty() ? std::string() : wedged.front());
+    EXPECT_FALSE(fell) << "the bot ended up below the floor of a room it was in";
+    EXPECT_TRUE(wedged.empty()) << wedged.size() << " sample(s) found the body inside geometry; first: "
+                                << (wedged.empty() ? std::string() : wedged.front());
 }

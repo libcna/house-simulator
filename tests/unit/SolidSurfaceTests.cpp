@@ -84,12 +84,7 @@ namespace
     /// otherwise the list becomes the place a real wall passage hides.
     const std::vector<std::string>& RelabelledWithoutAPortal()
     {
-        static const std::vector<std::string> kPairs{
-            // The L2 landing's slab reaches past the stair cell's box and the front balcony's
-            // volume reaches up to L2's ceiling, so a body that walks onto that overhang is
-            // labelled with the balcony. Nothing solid is crossed.
-            "L2_STAIR_MAIN -> L1_BALCONY_FRONT",
-        };
+        static const std::vector<std::string> kPairs{};
         return kPairs;
     }
 

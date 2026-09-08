@@ -76,9 +76,10 @@ namespace
             //
             // The spot 0.75 m from the door, at the doorway's own sill height, is INSIDE the
             // flight: the body starts among the treads and the depenetration walks it out
-            // sideways rather than through the door. `P_L1_STAIR__L1_BED5` was here too until
-            // `HOUSE-00615` taught a body resting against a surface to walk along it, after which
-            // it can shuffle out of the flight and reach the door.
+            // sideways rather than through the door. `P_L1_STAIR__L1_BED5` came and went twice
+            // while the stairs were being fixed: `HOUSE-00615` taught a body resting on a surface
+            // to walk along one, which let it shuffle out of the flight and reach the door, and
+            // `HOUSE-00567`'s balustrade then stood between the two.
             "P_B1_STAIR__B1_HALL from B1_STAIR",
             // An appliance. §70.5's capsule does not fit through a refrigerator door, and
             // `PortalClearanceTests` exempts the same portal for the same reason.
@@ -86,6 +87,7 @@ namespace
             "P_FRIDGE_INTERIOR from L0_KITCHEN",
             // A Juliet balcony is a doorway with a railing and NO floor beyond it. There is
             // nowhere to stand outside one, which is what makes it a Juliet balcony.
+            "P_L1_STAIR__L1_BED5 from L1_STAIR_MAIN",
             "P_L2_LANDING__L2_BALCONY_JULIET from L2_BALCONY_JULIET",
             "P_L2_STAIR__L2_STAIR_ATTIC from L2_STAIR_ATTIC",
         };

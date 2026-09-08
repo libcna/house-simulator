@@ -3451,6 +3451,12 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             `subtract_rects` the walls already use for doorways. `L0_STAIR_MAIN`'s floor is now
             four pieces round a 2.30 x 4.40 m well. 1042 OBBs became 1062 and the file grew by
             732 bytes.
+      defect: (2026-09-08, found by `HOUSE-00567`) ...and the first cut went too far. A `y`
+            portal's rect is the VISIBILITY opening and it over-runs the flight: cut whole out of
+            the slab it left 0.88 m of nothing between the main stair's last tread and the floor,
+            so a body climbed seventeen steps and found nowhere to stand. The floor at the head of
+            a flight -- the strip beyond its top tread, across the run's own width -- is floor, and
+            `HOUSE-00567` gives it back.
       note: (2026-09-07) `tools/world/build_collision.py` plus `tools/world/layout_io.py`, the
             JSONC reader `HOUSE-00211`…`HOUSE-00215` will share, and
             `docs/collision-format.md`, the normative `CCOL` version 1 spec. 44 selftest claims
@@ -8298,6 +8304,41 @@ never escapes and never penetrates.
             same replay run twice agreeing, which is what says nothing in the step reads a clock or
             an address; and 7 200 steps in a REAL cell of the house, with dozens of shapes and a
             broad phase handing them over in bucket order, agreeing too.
+- [x] HOUSE-00567 — Guard the stair wells, and give the cells that are "open" to them their walls back
+      dep: HOUSE-00210, HOUSE-00618 · sys: physics · plat: TOOL · pri: MUST
+      note: (2026-09-08) §49.2 booked this one itself: *"The landings open to the stairwell are a
+            drop too and are **not** guarded yet -- their rail is drawn round the hole in the floor
+            rather than round the cell, and Phase 7 owns it."* `HOUSE-00618`'s twenty-minute bot
+            then walked into the house through the front wall and spent its last four minutes
+            wedged under the ground floor, which is what an unguarded well and a missing wall do
+            between them.
+      finding: **three defects in one place, and the third is the one that mattered.** A §12.3
+            balustrade -- 0.95 m, 60 mm thick -- now runs round every well, with a gap where a
+            flight climbs from that floor and none where one passes UNDER it (a rail with a gap
+            over a flight is a gap you fall through). The floor at the head of each flight came
+            back: cutting the whole `y` portal out of the slab leaves 0.88 m of nothing between
+            the last tread and the floor on the main stair, because the portal rect is the
+            VISIBILITY opening and a builder runs the trimmer to the last tread. And the house had
+            **a 1.30 m hole in its front elevation at every storey of the main stair**.
+      finding: **`visibilityHint: open` meant "no walls" and it should not.** §16 marks five
+            INTERIOR cells open -- the three main-stair cells and the two landings -- because they
+            are open to the STAIR WELL, and `build_shell` read that as "an exterior cell: no wall
+            on a side with no neighbour". The side with no neighbour is the house's own front
+            face. Now only `kind == "exterior"` loses its walls; the lid still goes by the hint.
+            `house_shell_gen.py` has the same line and the same hole in the DRAWN elevation, which
+            is `HOUSE-00620`'s to book: this fixes what you walk into, not what you see.
+      finding: **a wall belongs to both sides of itself, and one side is the garden.** §15's
+            exterior cells stop 0.30 m short of the house -- the wall's own footprint is the gap --
+            so neither cell calls the other a neighbour and an outer wall landed in the house's
+            shape list alone. A body walking the lawn is swept against the LAWN's shapes and met
+            nothing until the cell tracker changed its mind, by which time it was inside the wall.
+            Outer walls are now shared with whichever yard, terrace or lawn faces them: 51 extra
+            cell references.
+      verified: the same twenty minutes that found it. Blocked steps fell from **21 181 to
+            1 294**, the deepest contact in 144 000 steps from **0.388 m to 0.000091 m** -- under
+            §49.3's contact tolerance -- landings rose from 54 to 167 and the distance walked from
+            1 283 m to 1 484 m. The bot no longer goes below an indoor floor at all, and
+            `RandomWalkTests` now asserts both outright rather than allowing a wedge after a fall.
 - [x] HOUSE-00612 — Guarantee test: the player cannot pass any closed door (all 62, both sides)
       dep: HOUSE-00554 · sys: physics · plat: CI · pri: MUST
       verify: unit ClosedDoorTests.NoClosedDoorInTheHouseCanBeWalkedThrough
@@ -8493,16 +8534,18 @@ never escapes and never penetrates.
             portals and walks at it, which is what turns the soak into a tour of the house (18
             cells, 311 crossings) and puts the pressure where it belongs. The fourth time it takes
             a bare heading, so it still walks into walls and corners on purpose.
-      finding: **it fell down the stair well at 15.5 minutes and never got out.** §12.3 gives a
-            flight a 0.95 m balustrade, and the collision has no guard round the hole in a floor:
-            `build_collision.py` says so in its own comment and calls it a gap against this phase.
-            Under the L0 floor there is nowhere to stand, so the body spent the last four and a
-            half minutes pressed into the underside of the slab, up to 0.38 m inside it. The walk
-            asserts that a wedge can only happen AFTER such a fall -- a body wedged with both feet
-            in the house is a failure -- and the missing guard is `HOUSE-00620`'s to book.
-      note: the deepest contact in the 15.5 minutes BEFORE the fall is 0.000086 m, which agrees
-            with `HOUSE-00617`'s 0.000024 m over its own tour: walking about this house does not
-            put the body inside anything.
+      finding: **it got under the ground floor at 16.7 minutes and never got out**, and the
+            first account of it here was wrong in a way worth recording: the walk's own "has it
+            fallen?" test compared the body's feet with its cell's FFL, which outdoors is 0.60 m
+            above the ground, so every step the bot took in the garden counted as a fall and the
+            wedge that followed was excused by it. Corrected, the fall is real and indoors -- and
+            it was not the stair well at all but a 1.30 m hole in the house's front wall, which
+            `HOUSE-00567` found and closed. The walk now asserts both outright: never below an
+            indoor floor, never inside anything.
+      note: after `HOUSE-00567` the same twenty minutes measure 1 484 m walked, 1 294 blocked
+            steps against 21 181, and a deepest contact of 0.000091 m against 0.388.
+      note: the deepest contact agrees with `HOUSE-00617`'s 0.000024 m over its own tour:
+            walking about this house does not put the body inside anything.
       note: three injected bugs, two caught -- no depenetration at all, and §16.4's 5 cm
             hysteresis widened to 5 m. The third (the boundary guard not clamping) does not
             compile, and the guard's own counter is never tripped by a body that stays in the
