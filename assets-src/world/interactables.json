@@ -4467,6 +4467,224 @@
       "state": { "on": false, "channel": 0.0, "volume": 0.4, "playhead": 0.0 },
       "persist": ["on", "channel", "volume", "playhead"],
       "portal": null
+    },
+
+    // ============================================================== the appliances
+    // `HOUSE-00415`. §50.4's eleven, over the nine kinds it names: two ovens in the tall housing
+    // (§13.3 says "ovens", plural), the hob, the dishwasher, the microwave, the kettle, the coffee
+    // machine, the washer, the dryer, the fireplace and the butler's wine fridge. Nine kinds and
+    // eleven machines is what the count and the list together say, and this is the reading that
+    // satisfies both.
+    //
+    // `on`, `programme`, `progress` and `doorOpen` are §50.4's own fields. `progress` runs 0..1 so
+    // a wash is a thing that finishes rather than a thing that toggles, and a fire burns down on
+    // the same field.
+    //
+    // Placed along the kitchen's north run -- the wall §12.5's STACK-E puts the water on -- and in
+    // the laundry, so an appliance is where its services are rather than where it looked good.
+    // §13.3's ovens, plural: two in the tall housing beside the range.
+    {
+      "id": "APPL_L0_KITCHEN_OVEN_1", "kind": "appliance", "cell": "L0_KITCHEN",
+      "prop": null,
+      "focus": { "point": [-6.33, 1.55, -26.69], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 },
+        { "verb": "Next programme", "when": "state.on == false",
+          "do": "state.programme += 1", "sound": "SFX_APPLIANCE_DIAL", "duration": 0.4 },
+        { "verb": "Open", "when": "state.doorOpen == false && state.on == false",
+          "do": "state.doorOpen = true", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.7 },
+        { "verb": "Close", "when": "state.doorOpen == true",
+          "do": "state.doorOpen = false", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.6 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0, "doorOpen": false },
+      "persist": ["on", "programme", "progress", "doorOpen"],
+      "portal": null
+    },
+    {
+      "id": "APPL_L0_KITCHEN_OVEN_2", "kind": "appliance", "cell": "L0_KITCHEN",
+      "prop": null,
+      "focus": { "point": [-6.33, 2.05, -26.69], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 },
+        { "verb": "Next programme", "when": "state.on == false",
+          "do": "state.programme += 1", "sound": "SFX_APPLIANCE_DIAL", "duration": 0.4 },
+        { "verb": "Open", "when": "state.doorOpen == false && state.on == false",
+          "do": "state.doorOpen = true", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.7 },
+        { "verb": "Close", "when": "state.doorOpen == true",
+          "do": "state.doorOpen = false", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.6 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0, "doorOpen": false },
+      "persist": ["on", "programme", "progress", "doorOpen"],
+      "portal": null
+    },
+    // the range's hob: four zones on one `programme`.
+    {
+      "id": "APPL_L0_KITCHEN_HOB", "kind": "appliance", "cell": "L0_KITCHEN",
+      "prop": null,
+      "focus": { "point": [-4.87, 1.52, -26.69], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0 },
+      "persist": ["on", "programme", "progress"],
+      "portal": null
+    },
+    {
+      "id": "APPL_L0_KITCHEN_DISHWASHER", "kind": "appliance", "cell": "L0_KITCHEN",
+      "prop": null,
+      "focus": { "point": [-1.75, 1.05, -26.69], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 },
+        { "verb": "Next programme", "when": "state.on == false",
+          "do": "state.programme += 1", "sound": "SFX_APPLIANCE_DIAL", "duration": 0.4 },
+        { "verb": "Open", "when": "state.doorOpen == false && state.on == false",
+          "do": "state.doorOpen = true", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.7 },
+        { "verb": "Close", "when": "state.doorOpen == true",
+          "do": "state.doorOpen = false", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.6 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0, "doorOpen": false },
+      "persist": ["on", "programme", "progress", "doorOpen"],
+      "portal": null
+    },
+    {
+      "id": "APPL_L0_KITCHEN_MICROWAVE", "kind": "appliance", "cell": "L0_KITCHEN",
+      "prop": null,
+      "focus": { "point": [-3.62, 2.15, -26.69], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 },
+        { "verb": "Next programme", "when": "state.on == false",
+          "do": "state.programme += 1", "sound": "SFX_APPLIANCE_DIAL", "duration": 0.4 },
+        { "verb": "Open", "when": "state.doorOpen == false && state.on == false",
+          "do": "state.doorOpen = true", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.7 },
+        { "verb": "Close", "when": "state.doorOpen == true",
+          "do": "state.doorOpen = false", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.6 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0, "doorOpen": false },
+      "persist": ["on", "programme", "progress", "doorOpen"],
+      "portal": null
+    },
+    // on the counter, not built in, which is why it is the one appliance you can pick up later.
+    {
+      "id": "APPL_L0_KITCHEN_KETTLE", "kind": "appliance", "cell": "L0_KITCHEN",
+      "prop": null,
+      "focus": { "point": [-0.71, 1.65, -26.53], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0 },
+      "persist": ["on", "programme", "progress"],
+      "portal": null
+    },
+    {
+      "id": "APPL_L0_KITCHEN_COFFEE", "kind": "appliance", "cell": "L0_KITCHEN",
+      "prop": null,
+      "focus": { "point": [0.12, 1.65, -26.53], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 },
+        { "verb": "Next programme", "when": "state.on == false",
+          "do": "state.programme += 1", "sound": "SFX_APPLIANCE_DIAL", "duration": 0.4 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0 },
+      "persist": ["on", "programme", "progress"],
+      "portal": null
+    },
+    // §13.3's wine fridge. §50.4 counts eleven appliances over nine named kinds, and with two
+    // ovens this is the eleventh.
+    {
+      "id": "APPL_L0_BUTLERS_WINEFRIDGE", "kind": "appliance", "cell": "L0_BUTLERS",
+      "prop": null,
+      "focus": { "point": [-9.55, 1.20, -24.52], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 },
+        { "verb": "Open", "when": "state.doorOpen == false && state.on == false",
+          "do": "state.doorOpen = true", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.7 },
+        { "verb": "Close", "when": "state.doorOpen == true",
+          "do": "state.doorOpen = false", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.6 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0, "doorOpen": false },
+      "persist": ["on", "programme", "progress", "doorOpen"],
+      "portal": null
+    },
+    // §65.6 leaves clothes in it, unstarted.
+    {
+      "id": "APPL_L0_LAUNDRY_WASHER", "kind": "appliance", "cell": "L0_LAUNDRY",
+      "prop": null,
+      "focus": { "point": [5.85, 1.10, -21.45], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 },
+        { "verb": "Next programme", "when": "state.on == false",
+          "do": "state.programme += 1", "sound": "SFX_APPLIANCE_DIAL", "duration": 0.4 },
+        { "verb": "Open", "when": "state.doorOpen == false && state.on == false",
+          "do": "state.doorOpen = true", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.7 },
+        { "verb": "Close", "when": "state.doorOpen == true",
+          "do": "state.doorOpen = false", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.6 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0, "doorOpen": false },
+      "persist": ["on", "programme", "progress", "doorOpen"],
+      "portal": null
+    },
+    {
+      "id": "APPL_L0_LAUNDRY_DRYER", "kind": "appliance", "cell": "L0_LAUNDRY",
+      "prop": null,
+      "focus": { "point": [6.99, 1.10, -21.45], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 },
+        { "verb": "Next programme", "when": "state.on == false",
+          "do": "state.programme += 1", "sound": "SFX_APPLIANCE_DIAL", "duration": 0.4 },
+        { "verb": "Open", "when": "state.doorOpen == false && state.on == false",
+          "do": "state.doorOpen = true", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.7 },
+        { "verb": "Close", "when": "state.doorOpen == true",
+          "do": "state.doorOpen = false", "sound": "SFX_APPLIANCE_DOOR", "anim": "door", "duration": 0.6 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0, "doorOpen": false },
+      "persist": ["on", "programme", "progress", "doorOpen"],
+      "portal": null
+    },
+    // §13.3 puts it on the west wall. It has `on` and `progress` like the rest -- a fire burns
+    // down -- and no door and no programme.
+    {
+      "id": "APPL_L0_LIVING_FIREPLACE", "kind": "appliance", "cell": "L0_LIVING",
+      "prop": null,
+      "focus": { "point": [-7.96, 1.15, -17.55], "normal": [0.0, 0.0, 1.0], "radius": 0.35 },
+      "actions": [
+        { "verb": "Start", "when": "state.on == false", "do": "state.on = true; state.progress = 0.0",
+          "sound": "SFX_APPLIANCE_START", "duration": 0.8 },
+        { "verb": "Stop", "when": "state.on == true", "do": "state.on = false",
+          "sound": "SFX_APPLIANCE_STOP", "duration": 0.5 }
+      ],
+      "state": { "on": false, "programme": 0.0, "progress": 0.0 },
+      "persist": ["on", "programme", "progress"],
+      "portal": null
     }
   ]
 }

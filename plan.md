@@ -6365,8 +6365,23 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             come back; that is what makes it worth persisting rather than resetting.
       note: all three start off, as §65.6 says — unlike §65.2's save example, which is a different
             moment on purpose and should not be mistaken for the initial state.
-- [ ] HOUSE-00415 — Author rows for the 11 appliances
+- [x] HOUSE-00415 — Author rows for the 11 appliances
       dep: HOUSE-00368 · sys: world · plat: TOOL · pri: MUST
+      note: §50.4 gives a count of **11** over **nine** named kinds — oven, hob, washer, dryer,
+            dishwasher, microwave, kettle, coffee machine, fireplace. The reading that satisfies
+            both: two ovens, because §13.3 says "range, **ovens**", and the butler's pantry's wine
+            fridge, which §13.3 lists and §50.4's kind list does not. Recorded rather than resolved
+            by silently authoring nine or thirteen.
+      note: `on`, `programme`, `progress` and `doorOpen` are §50.4's own fields. `progress` runs
+            0..1, so a wash is a thing that **finishes** rather than a thing that toggles — and a
+            fire burns down on the same field, which is why the fireplace needs no special case.
+      note: placed along the kitchen's north run, the wall §12.5's STACK-E puts the water on, and
+            in the laundry: an appliance is where its services are rather than where it looked
+            good. §65.6's "the washing machine has clothes in it, unstarted" is the state this row
+            starts in.
+      note: the house now holds **253 interactables** — 80 switch plates, 63 doors, the sectional,
+            54 windows, 3 gates, 12 toilets, 26 taps, 3 televisions, 11 appliances — against §53's
+            640, with the containers and the pickups still to come.
 - [x] HOUSE-00416 — Author rows for the garage door, the 3 gates and their motors
       dep: HOUSE-00377 · sys: world · plat: TOOL · pri: MUST
       finding: **the sectional door had a swinging door's actions.** `HOUSE-00401` authored 64
