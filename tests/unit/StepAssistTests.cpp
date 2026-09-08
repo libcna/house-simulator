@@ -452,7 +452,20 @@ TEST(StepAssistTests, WalkingTheRealHouseTickByTick)
                 EXPECT_GE(step.drop, 0.0F) << cell.id;
                 EXPECT_LE(step.position.Y, body.centre.Y + kStepUpHeight + 1e-4F) << cell.id;
                 EXPECT_GE(step.position.Y, body.centre.Y - kStepDownHeight - 1e-4F) << cell.id;
-                EXPECT_FALSE(step.steppedUp && step.airborne) << cell.id << ": climbed onto nothing";
+                if (step.steppedUp && step.airborne)
+                {
+                    // A step up that ends airborne is not automatically wrong: the body can settle
+                    // onto the rounded top EDGE of something -- the cut edge of a stair well's
+                    // floor is a vertical face -- and walking off that IS a fall. What must never
+                    // happen is climbing onto NOTHING, so that is what is asked, of the geometry
+                    // rather than of the flag. (`HOUSE-00615` made this case reachable by cutting
+                    // the stair wells out of the collision floors, where they belong.)
+                    Capsule after = body;
+                    after.centre = step.position;
+                    const cnahouse::physics::CellSweepHit under = cnahouse::physics::SweepCell(
+                        *world, cell, broad, after, Vector3(0.0F, -kStepDownHeight, 0.0F));
+                    EXPECT_TRUE(under.hit) << cell.id << ": climbed onto nothing";
+                }
 
                 body.centre = step.position;
                 const CellOverlap overlap = OverlapCell(*world, cell, broad, body);

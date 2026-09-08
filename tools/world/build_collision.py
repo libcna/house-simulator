@@ -356,6 +356,30 @@ def _portal_holes(portals_on_plane, u0, u1, y0, y1):
     return holes
 
 
+def box_rect(box) -> tuple[float, float, float, float]:
+    """A cell box `(x0, x1, z0, z1)` as `subtract_rects`' `(u0, v0, u1, v1)` with u = x, v = z.
+
+    The same convention §15.4 gives a `y` portal -- *"on `Y`, `u` is world X and `v` is world Z"* --
+    so a hole and the slab it is cut from are in one coordinate system and neither needs swapping.
+    """
+    x0, x1, z0, z1 = box
+    return (x0, z0, x1, z1)
+
+
+def _slab_holes(portals_by_plane, cell_id: str, plane_y: float):
+    """The `y` portals of @p cell_id lying on the horizontal plane @p plane_y, as hole rects."""
+    holes = []
+    for portal in portals_by_plane.get(("y", snap(plane_y)), []):
+        if cell_id not in (portal.get("cellA"), portal.get("cellB")):
+            continue
+        rect = portal.get("rect") or {}
+        u, v = rect.get("u"), rect.get("v")
+        if not u or not v:
+            continue
+        holes.append((float(u[0]), float(v[0]), float(u[1]), float(v[1])))
+    return holes
+
+
 def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
     """Floors, ceilings and walls for every cell. Returns cell id -> shape indices."""
     levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
@@ -391,17 +415,29 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
         # (`HOUSE-00213`). It still gets the wall it shares with the house, because that wall is
         # real and the room on the other side needs it too.
         is_open = cell.get("kind") == "exterior" or cell.get("visibilityHint") == "open"
+        # A HOLE in a slab is a `y` portal on that slab's plane: §16.2's four stair wells and two
+        # hatches, and nothing else. Until `HOUSE-00615` walked the flights this was not cut, so
+        # `L0_STAIR_MAIN`'s floor lay across the top of the basement flight and `L1_STAIR_MAIN`'s
+        # across the top of the main one -- every interior flight in the house arrived at a
+        # ceiling, and the basement was unreachable on foot. The world already says where the
+        # openings are; the collision simply was not reading it.
+        floor_holes = _slab_holes(portals_by_plane, cell["id"], y0)
+        ceiling_holes = _slab_holes(portals_by_plane, cell["id"], y1)
         for box in boxes_by_cell[cell["id"]]:
             x0, x1, z0, z1 = box
-            indices.append(shapes.obb(
-                ((x0 + x1) / 2, y0 - depth / 2, (z0 + z1) / 2),
-                ((x1 - x0) / 2, depth / 2, (z1 - z0) / 2),
-                0.0, floor_surface, KIND_FLOOR))
-            if not is_open:
+            for rx0, rz0, rx1, rz1 in subtract_rects(box_rect(box), floor_holes):
                 indices.append(shapes.obb(
-                    ((x0 + x1) / 2, y1 + depth / 2, (z0 + z1) / 2),
-                    ((x1 - x0) / 2, depth / 2, (z1 - z0) / 2),
-                    0.0, cell.get("ceilingMaterial"), KIND_CEILING))
+                    ((rx0 + rx1) / 2, y0 - depth / 2, (rz0 + rz1) / 2),
+                    ((rx1 - rx0) / 2, depth / 2, (rz1 - rz0) / 2),
+                    0.0, floor_surface, KIND_FLOOR))
+                stats["floorPieces"] += 1
+            if not is_open:
+                for rx0, rz0, rx1, rz1 in subtract_rects(box_rect(box), ceiling_holes):
+                    indices.append(shapes.obb(
+                        ((rx0 + rx1) / 2, y1 + depth / 2, (rz0 + rz1) / 2),
+                        ((rx1 - rx0) / 2, depth / 2, (rz1 - rz0) / 2),
+                        0.0, cell.get("ceilingMaterial"), KIND_CEILING))
+                    stats["ceilingPieces"] += 1
 
             for side in _side_planes(box):
                 axis, value, su0, su1, outward = side
@@ -1037,7 +1073,7 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
             if source:
                 asset_paths[row["id"]] = (REPO / source)
 
-    stats = {"wallPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
+    stats = {"wallPieces": 0, "floorPieces": 0, "ceilingPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
              "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0, "guards": 0,
              "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
     shapes = Shapes()

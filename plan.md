@@ -3441,6 +3441,16 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             next one's; two bakes are byte-identical
 - [x] HOUSE-00210 — `tools/world/build_collision.py`: layout + `_COL` proxies → `content/world/collision.bin`
       dep: HOUSE-00190 · sys: content · plat: TOOL · pri: MUST
+      defect: (2026-09-08, found by `HOUSE-00615`) **the collision floors had no stair wells cut
+            out of them.** `build_shell` gave every cell box a full slab, so `L0_STAIR_MAIN`'s
+            floor lay across the top of the basement flight and `L1_STAIR_MAIN`'s across the top
+            of the main one: every interior flight in the house arrived at a ceiling and the
+            basement was unreachable on foot. The openings were in the world all along -- §16.2's
+            four `stair_well` portals and two hatches are `y`-plane portals, and a `y` portal on a
+            slab's plane IS a hole in it -- so the fix is to subtract them, with the same
+            `subtract_rects` the walls already use for doorways. `L0_STAIR_MAIN`'s floor is now
+            four pieces round a 2.30 x 4.40 m well. 1042 OBBs became 1062 and the file grew by
+            732 bytes.
       note: (2026-09-07) `tools/world/build_collision.py` plus `tools/world/layout_io.py`, the
             JSONC reader `HOUSE-00211`…`HOUSE-00215` will share, and
             `docs/collision-format.md`, the normative `CCOL` version 1 spec. 44 selftest claims
