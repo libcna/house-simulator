@@ -7300,8 +7300,22 @@ the chunk builder produces ≤ 6 chunks per cell.
             outside with the culling reversed shows the inside of its far walls, which is correct.
             What the two frames share is a SILHOUETTE — 92 % of their union — and the 8 % residue
             is where the blockout is genuinely open: the porch, the garage opening, roof soffits.
-- [ ] HOUSE-00479 — Measure the shell's triangle count per cell and per level against the budget
+- [x] HOUSE-00479 — Measure the shell's triangle count per cell and per level against the budget
       dep: HOUSE-00475 · sys: — · plat: LNX · pri: MUST
+      note: (2026-09-08) `verify_shell --report` counts them, and the gate claims the budget.
+            **33 486 triangles over 88 cells; the worst cell, `L0_SUNROOM`, is 1 080 — 30 % of
+            §72's 3 500.** By level: B1 6 338, L0 10 468, L1 7 332, L2 6 370, L3 2 654, and 324 in
+            the roofs and chimney, which belong to no cell. Counted from the drawn triangles rather
+            than from `chunks.bin`, so the number says something about the GENERATOR and not about
+            what survived batching. §72 records all of it.
+      finding: (2026-09-08, found by `HOUSE-00479`) **74 % of the shell is `trim`** — 24 832
+            triangles of skirtings, cornices, architraves, nosings and handrails, against 3 044 of
+            wall and 458 of floor and ceiling. That is precisely the geometry `HOUSE-00471` decided
+            not to lightmap, on the grounds that it carries almost no lighting information; it is
+            worth knowing that the same class carries three quarters of the triangles.
+      finding: (2026-09-08, found by `HOUSE-00479`) §20.2's row for `house_shell_gen.py` estimated
+            **~180 000 triangles**, five times what it makes. The estimate was written before the
+            generator existed. Corrected in place, with the measurement beside it.
 - [ ] HOUSE-00480 — Fix the inevitable geometry issues found by HOUSE-00477/78/79; iterate the generator, not the output
       dep: HOUSE-00477…HOUSE-00479 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00481 — Determinism check: two runs of the generator produce byte-identical `.glb`

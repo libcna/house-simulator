@@ -70,6 +70,27 @@ def face_extent(mesh: dict, axis: int) -> tuple[float, float]:
     return (min(values), max(values)) if values else (0.0, 0.0)
 
 
+#: §72's per-cell budget for the architectural shell, in LOD0 triangles.
+SHELL_TRIANGLES_PER_CELL = 3500
+
+
+def triangle_rows(shell: dict, cells: dict) -> list[dict]:
+    """Triangles per cell and per class, against §72's `Architectural shell, per cell` (`HOUSE-00479`).
+
+    Counted from the drawn triangles and not from the chunk file, so that this says something about
+    the GENERATOR rather than about what happened to survive batching. A cell that draws nothing is
+    a row of zero rather than an absent row: a yard is a real cell that costs nothing.
+    """
+    rows = []
+    for cell_id, surfaces in sorted(shell.items()):
+        by_class = {name: len(mesh["triangles"]) for name, mesh in sorted(surfaces.items())}
+        rows.append({"cell": cell_id,
+                     "level": (cells.get(cell_id) or {}).get("level"),
+                     "triangles": sum(by_class.values()),
+                     "byClass": by_class})
+    return rows
+
+
 def face_normals(mesh: dict):
     """`(normal, centre, area)` per triangle, with the normal UNNORMALISED and its length twice
     the area -- so a degenerate facet has a zero-length normal and needs no separate test."""
@@ -390,6 +411,7 @@ def verify(shell_dir: Path, world_dir: Path) -> dict:
                      if row.get("ceiling") is None}
     heights = clear_heights(shell, cells, rafter_levels)
     winding = winding_rows(shell, cells)
+    triangles = triangle_rows(shell, cells)
     stairs = stair_rows(shell, layout)
     headroom = headroom_rows(shell, layout)
     openings = opening_rows(shell, layout)
@@ -402,9 +424,13 @@ def verify(shell_dir: Path, world_dir: Path) -> dict:
         if row["wrong"]:
             found.append(f"{row['cell']}.{row['class']}: {row['wrong']} face(s) point the wrong "
                          f"way")
+    for row in triangles:
+        if row["triangles"] > SHELL_TRIANGLES_PER_CELL:
+            found.append(f"{row['cell']}: {row['triangles']} triangles, over §72's "
+                         f"{SHELL_TRIANGLES_PER_CELL} for one cell of the shell")
     return {"cells": len(shell), "clearHeights": heights, "stairs": stairs,
             "headroom": headroom, "openings": openings, "winding": winding,
-            "problems": found}
+            "triangles": triangles, "problems": found}
 
 
 def problems(heights, stairs, headroom, openings) -> list[str]:
@@ -484,6 +510,24 @@ def report(result: dict) -> str:
                      f"(§70.5 wants {HEADROOM_MIN})")
     cut = [row for row in result["openings"] if not row["blocked"]]
     lines.append(f"  {len(cut)} of {len(result['openings'])} authored opening(s) are cut")
+    triangles = result.get("triangles") or []
+    if triangles:
+        by_level: dict[str, int] = {}
+        for row in triangles:
+            by_level[row["level"] or "-"] = by_level.get(row["level"] or "-", 0) + row["triangles"]
+        worst = max(triangles, key=lambda row: row["triangles"])
+        classes: dict[str, int] = {}
+        for row in triangles:
+            for name, count in row["byClass"].items():
+                classes[name] = classes.get(name, 0) + count
+        lines.append(f"  {sum(row['triangles'] for row in triangles)} triangles over "
+                     f"{len(triangles)} cell(s); worst {worst['triangles']} in {worst['cell']} "
+                     f"(§72 allows {SHELL_TRIANGLES_PER_CELL} a cell)")
+        lines.append("    by level: " + ", ".join(
+            f"{level} {count}" for level, count in sorted(by_level.items())))
+        lines.append("    by class: " + ", ".join(
+            f"{name} {count}" for name, count in sorted(classes.items(),
+                                                        key=lambda pair: -pair[1])))
     winding = result.get("winding") or []
     if winding:
         slabs = [row for row in winding if row["class"] in ("floor", "ceiling")]
@@ -606,6 +650,28 @@ def selftest() -> int:
             f"box's side, which is what a parapet, a mezzanine guard and a window well are -- "
             f"free-standing boxes with faces both ways, and why those two classes are counted "
             f"here and judged by `BlockoutRenderTests.NothingIsInsideOut` instead")
+
+    # `HOUSE-00479`: §72's per-cell triangle budget.
+    triangles = result["triangles"]
+    total = sum(row["triangles"] for row in triangles)
+    worst = max(triangles, key=lambda row: row["triangles"])
+    require(total > 20000, f"the shell is {total} triangles over {len(triangles)} cells")
+    require(worst["triangles"] <= SHELL_TRIANGLES_PER_CELL,
+            f"and its worst cell, {worst['cell']}, is {worst['triangles']} -- "
+            f"{worst['triangles'] * 100 // SHELL_TRIANGLES_PER_CELL} % of §72's "
+            f"{SHELL_TRIANGLES_PER_CELL} for one cell of the shell")
+    classes: dict[str, int] = {}
+    for row in triangles:
+        for name, count in row["byClass"].items():
+            classes[name] = classes.get(name, 0) + count
+    biggest = max(classes.items(), key=lambda pair: pair[1])
+    require(biggest[0] == "trim" and biggest[1] * 2 > total,
+            f"and MORE THAN HALF of it is `{biggest[0]}` -- {biggest[1]} of {total} triangles, "
+            f"the skirtings, cornices, architraves, nosings and handrails §18.3 decided not to "
+            f"lightmap ({sorted(classes.items(), key=lambda pair: -pair[1])[:3]})")
+    require(all(row["triangles"] >= 0 for row in triangles)
+            and any(row["triangles"] == 0 for row in triangles) is False,
+            "every cell with a `.glb` that has geometry counts at least one triangle")
 
     require(result["openings"], "there are openings to check")
     cut = [row for row in result["openings"] if not row["blocked"]]
