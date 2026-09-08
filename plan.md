@@ -6582,8 +6582,31 @@ the chunk builder produces ≤ 6 chunks per cell.
             `build_content.py` stage yet — nothing consumes the shell until it is chunked, and
             where the generated shell lives on the way to `content/` is `HOUSE-00452`…`HOUSE-00465`'s
             question rather than a skeleton's to answer.
-- [ ] HOUSE-00452 — Generate floors and ceilings per cell, with the partition-centre-line inset
+- [x] HOUSE-00452 — Generate floors and ceilings per cell, with the partition-centre-line inset
       dep: HOUSE-00451 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) the inset is computed **per side** from `layout.levels.json`'s own
+            `construction` block, not from §13.1's transcribed 0.075/0.15: another interior cell
+            across a side means `wallPartition` and 0.075, an exterior cell or nothing means
+            `wallExterior` and 0.15, and the garage means `wallGarage` and 0.125 from either side.
+            The kitchen's floor comes out 40.49 m² of §13's 42.64 m² centre-line area.
+      finding: **an exterior cell is a cell, and the wall to it is still an exterior wall.**
+            `L0_PORCH` abuts `L0_FOYER`'s front face, so a neighbour test that only asked "is
+            there a cell across this?" made the front of the house a 0.15 m partition. Exterior
+            cells are excluded from the neighbour list, and the porch is the claim that says so —
+            the first version had no case where an exterior cell actually abutted an interior one,
+            so the injected bug that removed the rule went unnoticed twice: once because the
+            selftest built its own neighbour list instead of calling the generator's, and once
+            because the cell it tested had nothing across it either way.
+      finding: **`HOUSE-00451`'s four side faces all pointed into the room.** `to_blender` negates
+            z, which reverses a plan winding, and the massing was wound the obvious way. Nothing
+            noticed: the export-bounds claim reads an accessor's min/max, which a mesh turned
+            inside out satisfies exactly. Measuring the polygon normals caught it, and the same
+            claim caught the floor slab I had just wound the same wrong way.
+      note: `wallPlumbing` (0.20) is **not** applied and the reason is recorded in the tool: §12.5
+            gives each stack a chase as a volume in a room and never says which of that room's four
+            walls is the thick one. A builder that guessed would be inventing the house for the
+            sake of two centimetres.
+      note: six injected bugs, all caught after the two above were fixed.
 - [ ] HOUSE-00453 — Generate interior partitions between adjacent cells, deduplicated so a shared wall is generated once
       dep: HOUSE-00452 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00454 — Generate exterior walls with the correct thickness, and the foundation walls
