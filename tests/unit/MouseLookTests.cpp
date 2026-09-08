@@ -8,12 +8,15 @@
 
 #include <gtest/gtest.h>
 
+#include "cnahouse/player/FirstPersonCamera.hpp"
 #include "cnahouse/player/MouseLook.hpp"
 
 namespace
 {
     using cnahouse::player::ApplyLook;
+    using cnahouse::player::ClampedPitch;
     using cnahouse::player::InputState;
+    using cnahouse::player::kMaxPitchDegrees;
     using cnahouse::player::LookAngles;
 
     constexpr float kPi = std::numbers::pi_v<float>;
@@ -91,16 +94,42 @@ TEST(MouseLookTests, TheYawWrapsAndStaysWhereItCanBeCompared)
     EXPECT_FLOAT_EQ(west.yaw, east.yaw) << "north-by-west and north-by-east are different numbers";
 }
 
-TEST(MouseLookTests, ThePitchIsNotWrapped)
+TEST(MouseLookTests, ThePitchStopsFiveDegreesShortOfThePoleAndNeverWraps)
 {
-    // Wrapping the pitch would put a player who looked all the way up back at the floor, which is
-    // what §44's ±85° clamp (`HOUSE-00623`) exists to prevent -- and a wrap here would hide the
-    // absence of that clamp rather than leaving it visible.
+    // `HOUSE-00623`, §44: *"Pitch clamped to ±85°"*. Short of the pole and not at it -- at exactly
+    // ±90° the view has no horizon to level against and the smallest yaw becomes a spin. And
+    // CLAMPED, never wrapped: wrapping would put a player who looked all the way up back at the
+    // floor, which is a different game.
+    const float limit = kMaxPitchDegrees * kPi / 180.0F;
     LookAngles angles;
-    ApplyLook(angles, Look(0.0F, -kPi), true);
-    EXPECT_NEAR(angles.pitch, kPi, 1e-5F);
-    // ...and past the pole, where a wrap would put the view back at the horizon facing the other
-    // way instead of leaving it absurdly far up, which is what the clamp is there to notice.
-    ApplyLook(angles, Look(0.0F, -kPi), true);
-    EXPECT_NEAR(angles.pitch, 2.0F * kPi, 1e-4F);
+    for (int push = 0; push < 20; ++push)
+    {
+        ApplyLook(angles, Look(0.0F, -kPi * 0.25F), true);
+        EXPECT_LE(angles.pitch, limit + 1e-6F);
+    }
+    EXPECT_NEAR(angles.pitch, limit, 1e-6F) << "it did not reach the limit at all";
+    EXPECT_LT(angles.pitch, kPi * 0.5F) << "it reached the pole";
+
+    for (int push = 0; push < 40; ++push)
+    {
+        ApplyLook(angles, Look(0.0F, kPi * 0.25F), true);
+        EXPECT_GE(angles.pitch, -limit - 1e-6F);
+    }
+    EXPECT_NEAR(angles.pitch, -limit, 1e-6F);
+
+    // The view comes back the INSTANT the mouse comes back: a clamp applied where the pitch is
+    // read instead of where it changes lets the stored angle run past the pole while the mouse is
+    // pushed, and the player then takes the same distance back before anything moves.
+    ApplyLook(angles, Look(0.0F, -0.02F), true);
+    EXPECT_NEAR(angles.pitch, -limit + 0.02F, 1e-6F);
+}
+
+TEST(MouseLookTests, TheClampIsTheOneNumberTheDesignStates)
+{
+    EXPECT_FLOAT_EQ(kMaxPitchDegrees, 85.0F);
+    const float limit = kMaxPitchDegrees * kPi / 180.0F;
+    EXPECT_FLOAT_EQ(ClampedPitch(0.0F), 0.0F);
+    EXPECT_FLOAT_EQ(ClampedPitch(limit * 0.5F), limit * 0.5F);
+    EXPECT_FLOAT_EQ(ClampedPitch(kPi), limit);
+    EXPECT_FLOAT_EQ(ClampedPitch(-kPi), -limit);
 }

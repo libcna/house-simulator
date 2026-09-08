@@ -8674,8 +8674,22 @@ it must be tuned, not just implemented.
             window), fifty turns of yaw that end where they started, and the pitch that does not
             wrap. Five injected bugs, five caught.
       accept: no drift over 10 000 frames; consistent at every frame rate
-- [ ] HOUSE-00623 — Implement pitch clamping (±85°) and zero roll
+- [x] HOUSE-00623 — Implement pitch clamping (±85°) and zero roll
       dep: HOUSE-00622 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-08) `ClampedPitch`, applied where the pitch CHANGES rather than where it is
+            read. A clamp at the reading end lets the stored angle run past the pole while the
+            mouse is pushed, and the player then has to take the same distance back before the
+            view moves at all -- which feels like the mouse has stopped working. A test pushes it
+            twenty times against the limit and then asks for 0.02 rad back, and gets exactly that.
+      note: **the roll half needed no code, and that is the finding.** §44 says *"Roll is always
+            zero"*, and `HOUSE-00621` builds the camera's basis from a right vector that comes
+            from the YAW alone, so there is nowhere for a roll to enter: it is zero by
+            construction at every pitch including both poles, which `FirstPersonCameraTests`
+            asserts at seven of them. A `roll` field to hold zero, or a clamp to keep it there,
+            would be two ways to say what the geometry already says once.
+      note: ±85° and not ±90°: at the pole the view has no horizon to level against and the
+            smallest yaw becomes a spin. Three injected bugs, three caught -- the clamp moved to
+            the pole, removed, and made one-sided.
 - [ ] HOUSE-00624 — Implement cursor hiding, mouse capture, and the `Alt` release plus automatic release on focus loss and menus
       dep: HOUSE-00622 · sys: player · plat: ALL · pri: MUST
 - [ ] HOUSE-00625 — Implement sensitivity, invert-Y and optional 2-frame smoothing as settings

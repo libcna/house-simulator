@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/player/MouseLook.hpp"
 
+#include "cnahouse/player/FirstPersonCamera.hpp"
+
+#include <algorithm>
 #include <cmath>
 #include <numbers>
 
@@ -42,7 +45,16 @@ namespace cnahouse::player
         // ...and the mouse forward looks UP. Screen Y grows downward, so the source's `look.Y` is
         // positive when the hand moves back; pitch is positive up, so it is subtracted. The
         // invert-Y setting has already been applied by the source and must not be applied twice.
-        angles.pitch -= input.look.Y;
+        // §44's ±85°, applied where the pitch CHANGES rather than where it is read: a clamp at
+        // the reading end leaves the stored angle drifting past the pole while the mouse is
+        // pushed, and the view then takes the same distance back before it moves at all.
+        angles.pitch = ClampedPitch(angles.pitch - input.look.Y);
+    }
+
+    float ClampedPitch(float pitch) noexcept
+    {
+        constexpr float kLimit = kMaxPitchDegrees * std::numbers::pi_v<float> / 180.0F;
+        return std::clamp(pitch, -kLimit, kLimit);
     }
 
 } // namespace cnahouse::player
