@@ -6897,8 +6897,26 @@ the chunk builder produces ≤ 6 chunks per cell.
             the stairwell railing use, and its height follows §70.5's two tiers — `railing` 1.10 at
             a drop over a metre, `balustrade` 0.95 below it, and the porch deck is 0.57 above grade.
       note: six injected bugs, all caught once the column count had a claim of its own.
-- [ ] HOUSE-00465 — Generate the rear extension (sunroom) shell and its flat roof / balcony deck with parapet and railing
+- [x] HOUSE-00465 — Generate the rear extension (sunroom) shell and its flat roof / balcony deck with parapet and railing
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
+      finding: **the sunroom's shell and its flat roof were already built, and the data is why.**
+            `L0_SUNROOM` is an ordinary cell, so `HOUSE-00452`…`HOUSE-00455` gave it its floor,
+            ceiling, walls and openings; the flat roof is `L1_BALCONY_REAR`'s deck at +3.65, which
+            is that cell's own floor; and the 0.35 m of structure between the sunroom's 3.30
+            ceiling and it is carried by the outer skin, which `HOUSE-00454` already runs to the
+            next storey's `ffl` for exactly this reason. What was missing was the edge.
+      note: so this task is the **parapet and the railing**, and the rule is §70.5's own: a deck
+            whose floor is more than a metre above what is under it gets them, round every side
+            with nothing across it. The porch at +0.57 and the terrace at +0.45 get none — the
+            porch's balustrade is `HOUSE-00464`'s and is a different thing at a different height.
+      note: the parapet is a solid 0.20 × 0.55 and the railing caps it at §12's `railing` 1.10, so
+            the rail sits **on** the parapet rather than inside it — which is its own claim,
+            because a parapet the height of the rail passes every claim about the rail.
+      note: the rule is general, so `L1_BALCONY_FRONT` and `L2_BALCONY_JULIET` get their edges from
+            it too; what remains of `HOUSE-00466` is whatever those two need that this does not
+            give them.
+      note: five injected bugs, all caught once the parapet's height had a claim that did not use
+            the constant it was checking.
 - [ ] HOUSE-00466 — Generate the front balcony over the porch and the juliet balcony
       dep: HOUSE-00464 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00467 — Generate the garage wing shell, its slab, its loft platform and the sectional-door opening

@@ -698,6 +698,12 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
     ]
 
 
+#: A balcony's edge (`HOUSE-00465`): a solid parapet with a railing capping it to §12's `railing`
+#: height. §12.2 says the rear-extension roof is "open" and used as the master balcony and gives no
+#: section, so the parapet's thickness and height are this generator's.
+PARAPET_THICK = 0.20
+PARAPET_HEIGHT = 0.55
+
 #: The porch (`HOUSE-00464`). §12.1 says "a full-width front porch on four square columns" and
 #: gives no section, so the column is 0.20 square and the beam over it 0.25 deep, and the four are
 #: spread evenly along the open edge.
@@ -795,6 +801,43 @@ def covered_by(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> bo
         else:
             return True
     return False
+
+
+def open_sides_of(cell: dict, box: tuple, neighbours: list) -> list:
+    """The sides of @p box with no interior cell across them -- the sides you can fall off."""
+    return [side for side in ("-X", "+X", "-Z", "+Z")
+            if not any(wall == "wallPartition"
+                       for _lo, _hi, wall in side_intervals(side, box, cell, neighbours))]
+
+
+def build_balcony_edge(cell: dict, extent: tuple, neighbours: list, construction, solid, add
+                       ) -> int:
+    """A parapet with a railing on it round a deck you could fall a storey off. Returns the count.
+
+    §70.5's threshold is a drop over a metre, and the same number decides the rail's height, so it
+    is asked once. A ground-level deck -- the porch at +0.57, the terrace at +0.45 -- gets nothing
+    here; the porch's own balustrade is `HOUSE-00464`'s and is a different thing.
+    """
+    if cell.get("kind") != "exterior" or not construction or extent[0] <= 1.0:
+        return 0
+    built = 0
+    for box in cell_boxes(cell, extent):
+        for side in open_sides_of(cell, box, neighbours):
+            plane, lo, hi = side_span(side, box)
+            inward = 1.0 if side in ("-X", "-Z") else -1.0
+            near, far_edge = plane, plane + PARAPET_THICK * inward
+            if side in ("-X", "+X"):
+                solid(min(near, far_edge), max(near, far_edge),
+                      extent[0], extent[0] + PARAPET_HEIGHT, lo, hi)
+            else:
+                solid(lo, hi, extent[0], extent[0] + PARAPET_HEIGHT,
+                      min(near, far_edge), max(near, far_edge))
+            rail_along(add, side in ("-X", "+X"), lo, hi,
+                       extent[0] + float(construction.get("railing", 0.0)),
+                       extent[0] + float(construction.get("railing", 0.0)),
+                       plane + (PARAPET_THICK / 2.0) * inward, RAIL_SECTION)
+            built += 2
+    return built
 
 
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
@@ -1039,6 +1082,8 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                    level_y + float(construction.get("railing", 0.0)),
                                    level_y + float(construction.get("railing", 0.0)),
                                    fixed, RAIL_SECTION)
+
+    build_balcony_edge(cell, extent, list(neighbours), construction, solid, add)
 
     # `HOUSE-00464`: a covered deck stands on columns and has a balustrade round its open sides.
     # The porch is the one cell in this house that is covered -- `L1_BALCONY_FRONT` sits on it --
@@ -2056,6 +2101,41 @@ def selftest(output: Path) -> int:
     require(not covered_by(cells["EXT_TERRACE"],
                            extent_of(cells["EXT_TERRACE"], levels["L0"])[0], cells),
             "nor is the terrace")
+
+    # ---- `HOUSE-00465`: the balcony edges -------------------------------------------------------
+    balcony = cells["L1_BALCONY_REAR"]
+    balcony_extent = extent_of(balcony, levels["L1"])[0]
+    require(balcony_extent[0] > 1.0 and porch_extent[0] < 1.0,
+            f"the rear balcony is a storey up ({balcony_extent[0]}) and the porch deck is not "
+            f"({porch_extent[0]}), which is §70.5's own threshold for a drop")
+    open_sides = [side for side in ("-X", "+X", "-Z", "+Z")
+                  if not any(wall == "wallPartition" for _lo, _hi, wall in side_intervals(
+                      side, list(cell_boxes(balcony, balcony_extent))[0], balcony,
+                      neighbours))]
+    parapets, rail_faces = [], []
+    built = build_balcony_edge(balcony, balcony_extent, neighbours, construction,
+                               lambda *args: parapets.append(args),
+                               lambda *args: rail_faces.append(args))
+    require(built == 2 * len(open_sides) and len(parapets) == len(open_sides)
+            and len(rail_faces) == 6 * len(open_sides),
+            f"it gains a parapet and a railing on each of its {len(open_sides)} open sides "
+            f"({len(parapets)} parapets, {len(rail_faces)} rail faces)")
+    tops_of = {round(box[3], 4) for box in parapets}
+    require(tops_of == {round(balcony_extent[0] + PARAPET_HEIGHT, 4)},
+            f"the parapet stands {PARAPET_HEIGHT} m off the deck ({sorted(tops_of)})")
+    rail_tops = {round(point[1], 4) for corners in rail_faces for point in corners[0]}
+    require(max(tops_of) < balcony_extent[0] + float(construction["railing"]) - RAIL_SECTION,
+            f"which is below the rail, so the rail sits ON the parapet rather than inside it "
+            f"({max(tops_of)} against "
+            f"{balcony_extent[0] + float(construction['railing']) - RAIL_SECTION:.3f})")
+    require(max(rail_tops) > balcony_extent[0] + float(construction["railing"]),
+            f"and the rail's top is over §12's railing height above it "
+            f"({max(rail_tops)} against {balcony_extent[0] + float(construction['railing'])})")
+    require(len(open_sides) == 3,
+            f"three of them: the fourth is the house ({open_sides})")
+    require(not build_balcony_edge(porch, porch_extent, neighbours, construction,
+                                   lambda *args: None, lambda *args: None),
+            "and the porch, 0.57 m up, gets none of it -- its balustrade is a different thing")
 
     require(PORCH_COLUMNS == 4,
             f"§12.1 says the porch stands on FOUR square columns ({PORCH_COLUMNS})")
