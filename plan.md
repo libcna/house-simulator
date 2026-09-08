@@ -6995,6 +6995,35 @@ the chunk builder produces ≤ 6 chunks per cell.
       note: four injected bugs, all caught. 99 objects.
 
 - [ ] HOUSE-00471 — Generate second-UV lightmap coordinates for the whole shell (`lightmap_unwrap.py`)
+      finding: **the shell had no FIRST UV channel.** `lightmap_unwrap.py` refused every file:
+            "L0_KITCHEN has no UV layer at all; the shell's albedo channel must exist before a
+            second one is added". §21.3's `DualTextureEffect` samples the albedo channel first, so
+            a shell without UV0 cannot take a material at all. Fixed in `house_shell_gen.py`:
+            a world-space planar UV0, one unit per metre, projected on each face's dominant axis,
+            so a 1 m tile is 1 m everywhere and no seam moves when a room is resized.
+      blocked: **61 % of the shell's faces are smaller than one lightmap texel**, and §18.3's step
+            2 says "every shell face" gets a second UV channel. Measured over the generated shell:
+            **26 704 of 43 528 faces are under one texel at §18.3's 4 texels/metre** — a 55 mm
+            handrail face is a fifth of a texel across, a rafter's edge less. `lightmap_unwrap.py`
+            refuses the pack rather than lying about it: `L0_HALL` fails with "224 face(s) pack to
+            no UV area even at 2048²", and it is not the gutter — the same 224 collapse at a gutter
+            of 1. Nothing in the packer can fix a face smaller than a sample.
+      note: the two answers, neither of which is this task's to pick:
+            **(a) lightmap only the room-scale surfaces** — floors, ceilings, walls and the outer
+            skin — and light the trim, the glass, the rails, the sashes and the rafters with the
+            room's existing dynamic term. §18.3's "every shell face" becomes "every face at least
+            one texel across", §22 bakes fewer islands, and §72's 21 atlases of 2048² stand.
+            **(b) raise the density for trim**, which needs about 20 texels/m for a 55 mm board —
+            25× the area of (a) for the surfaces that carry the least light information, and §72's
+            84 MB of atlas becomes something nobody can budget.
+            (a) is the answer this session would pick; it changes §18.3, §22 and the wording of
+            §72, which is more than a task note.
+      note: `tools/blender/shell_unwrap.py` is written and claimed regardless: it picks §18.3's
+            density per cell (4 for a room, 8 under 6 m², 2 in the attic and the basement, and the
+            level wins over the size), skips the outdoors with the reason recorded — §18.3 bakes
+            "per cell … through that cell's window openings", which describes an interior, and
+            `EXT_WORLD` is 160 000 m² — and reports a cell that will not pack instead of dying on
+            it. Eight claims, all passing.
       dep: HOUSE-00470, HOUSE-00205 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00472 — Generate `_COL` collision proxies for the shell: wall/floor/ceiling OBBs and the stair ramps
       dep: HOUSE-00470, HOUSE-00190 · sys: content · plat: TOOL · pri: MUST

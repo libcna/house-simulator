@@ -1940,6 +1940,14 @@ file and only an offline check can catch it.
 2. `tools/blender/lightmap_unwrap.py` gives every shell face a second UV channel packed per cell
    into a texel-density-uniform atlas (**4 texels/metre** for rooms, 8 for small rooms, 2 for the
    attic and basement).
+
+   > **Open, 2026-09-08, `HOUSE-00471`.** "Every shell face" is not achievable at 4 texels/metre.
+   > Measured over the generated shell: **26 704 of 43 528 faces are smaller than one texel** — a
+   > 55 mm handrail face is a fifth of a texel across — and `lightmap_unwrap.py` refuses the pack
+   > rather than lying about it (`L0_HALL`: "224 face(s) pack to no UV area even at 2048²", the
+   > same 224 at a gutter of 1). Either this step covers only the faces at least a texel across and
+   > the trim is lit dynamically, or the density rises to ~20 texels/m for trim and §72's atlas
+   > budget stops being affordable. `plan.md`'s `HOUSE-00471` entry carries both.
 3. `tools/blender/lightmap_bake.py` bakes, per cell, one lightmap per light group plus one
    "daylight" lightmap lit only by a uniform sky dome through that cell's window openings.
    Bakes are diffuse-only, indirect included, Cycles, 256 samples, denoised.

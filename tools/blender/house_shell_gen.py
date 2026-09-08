@@ -718,6 +718,33 @@ SURFACE_COLOURS = {
 SURFACE_ORDER = list(SURFACE_COLOURS)
 
 
+def planar_uvs(mesh) -> None:
+    """A world-space planar UV0, one unit per metre, projected on each face's dominant axis.
+
+    The shell had **no UV layer at all** until `HOUSE-00471` went to add the second one and found
+    there was no first: §21.3's `DualTextureEffect` samples the albedo channel first, and a shell
+    with no UV0 cannot take a material at all, placeholder or real.
+
+    Planar and world-space rather than unwrapped, because that is what an architectural surface
+    wants: a 1 m tile is 1 m everywhere, so the boards on a floor are the same size in the kitchen
+    as in the attic, and no seam moves when a room is resized. The second channel -- the packed,
+    density-uniform one the lightmaps bake into -- is `lightmap_unwrap.py`'s and is a different
+    thing for a different reason.
+    """
+    layer = mesh.uv_layers.new(name="UVMap")
+    for polygon in mesh.polygons:
+        normal = polygon.normal
+        axis = max(range(3), key=lambda index: abs(normal[index]))
+        for loop_index in polygon.loop_indices:
+            point = mesh.vertices[mesh.loops[loop_index].vertex_index].co
+            if axis == 0:
+                layer.data[loop_index].uv = (point.y, point.z)
+            elif axis == 1:
+                layer.data[loop_index].uv = (point.x, point.z)
+            else:
+                layer.data[loop_index].uv = (point.x, point.y)
+
+
 def material_slots(mesh) -> None:
     """Give @p mesh one material per surface class, in `SURFACE_ORDER`, and colour them."""
     for name in SURFACE_ORDER:
@@ -1324,6 +1351,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
     material_slots(mesh)
     for polygon, klass in zip(mesh.polygons, classes):
         polygon.material_index = SURFACE_ORDER.index(klass)
+    planar_uvs(mesh)
     obj = bpy.data.objects.new(cell["id"], mesh)
     bpy.context.scene.collection.objects.link(obj)
     return obj
@@ -1402,6 +1430,7 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         material_slots(mesh)
         for polygon in mesh.polygons:
             polygon.material_index = SURFACE_ORDER.index("exterior")
+        planar_uvs(mesh)
         stack = bpy.data.objects.new("CHIMNEY", mesh)
         bpy.context.scene.collection.objects.link(stack)
         export(stack, output / "CHIMNEY.glb")
@@ -1561,6 +1590,7 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
     material_slots(mesh)
     for polygon, klass in zip(mesh.polygons, classes):
         polygon.material_index = SURFACE_ORDER.index(klass)
+    planar_uvs(mesh)
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
     return obj
@@ -2251,6 +2281,28 @@ def selftest(output: Path) -> int:
     document, _error = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
     require(len(document.get("materials", [])) >= 6,
             f"the exported file carries them ({len(document.get('materials', []))})")
+
+    # ---- `HOUSE-00471`: the albedo UVs ----------------------------------------------------------
+    uv_layers = list(painted.data.uv_layers)
+    require(len(uv_layers) == 1 and uv_layers[0].name == "UVMap",
+            f"a cell has exactly one UV channel, and the second is the lightmap unwrapper's "
+            f"({[layer.name for layer in uv_layers]})")
+    # The BIGGEST up-facing face, which is the floor slab: a skirting board's top also looks up.
+    floor_face = max((face for face in painted.data.polygons if face.normal.z > 0.99),
+                     key=lambda face: face.area)
+    corners = [tuple(round(value, 4) for value in
+                     painted.data.uv_layers[0].data[loop].uv)
+               for loop in floor_face.loop_indices]
+    world = [tuple(round(value, 4) for value in
+                   painted.data.vertices[painted.data.loops[loop].vertex_index].co[:2])
+             for loop in floor_face.loop_indices]
+    require(corners == world,
+            f"and a floor's UVs ARE its world x and y, so a 1 m tile is 1 m everywhere "
+            f"({corners[:2]} against {world[:2]})")
+    spans = [max(value[axis] for value in corners) - min(value[axis] for value in corners)
+             for axis in (0, 1)]
+    require(min(spans) > 3.0,
+            f"the kitchen's floor spans metres of UV, not a normalised 0..1 ({spans})")
 
     # ---- `HOUSE-00469`: the basement window wells -----------------------------------------------
     wells_wanted = [row for row in openings_by_portal.values()
