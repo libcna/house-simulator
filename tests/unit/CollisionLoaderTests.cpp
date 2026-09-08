@@ -147,6 +147,7 @@ namespace
         OneMesh(bytes);
         bytes.U32(1u);
         OneCell(bytes);
+        bytes.U8(0u); // §3.5: no terrain. A world with no exterior is a legal one.
         return bytes;
     }
 
@@ -189,7 +190,7 @@ TEST(CollisionLoaderTests, TheWrongFileEntirelyIsSaidPlainly)
 TEST(CollisionLoaderTests, AVersionOrAFlagThisBuildDoesNotKnowIsRefused)
 {
     Bytes version = WellFormed();
-    version.Poke(4, 2u);
+    version.Poke(4, 3u);
     auto world = ReadOf(version);
     ASSERT_FALSE(world);
     EXPECT_EQ(world.Error().Code(), ErrorCode::VersionMismatch);
@@ -406,7 +407,7 @@ TEST(CollisionLoaderTests, AnEmptyWorldHashIsTheOneNameThatIsAllowed)
     // none, and that is a staleness check that cannot run rather than a corrupt file.
     Bytes bytes;
     bytes.U32(CollisionLoader::kMagic).U32(CollisionLoader::kVersion).U32(0u);
-    bytes.Str("").F32(1.0f).U32(0u).U32(0u).U32(0u).U32(0u);
+    bytes.Str("").F32(1.0f).U32(0u).U32(0u).U32(0u).U32(0u).U8(0u);
     auto world = ReadOf(bytes);
     ASSERT_TRUE(world) << world.Error().Message();
     EXPECT_TRUE(world->worldHash.empty());

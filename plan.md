@@ -7773,8 +7773,45 @@ never escapes and never penetrates.
             floor of 77 cells and dropped: every one lands, at rest, not inside the floor, never
             below its own cell, and none of the 77 lands hard -- which they could not, at 1.50 m.
             Nine injected bugs, nine caught.
-- [ ] HOUSE-00553 — Implement the terrain height-field collider with bilinear sampling and a triangle test above 20°
+- [x] HOUSE-00553 — Implement the terrain height-field collider with bilinear sampling and a triangle test above 20°
       dep: HOUSE-00544 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) §11.5's ground, end to end. `collision.bin` grows a §3.5 terrain section
+            (format version 2): 81 x 65 heights in METRES, the origin, the step, and a material
+            per sample resolving through §3.2's existing surface table. 26 KB in a 745 KB file.
+      note: **the ground goes in `collision.bin` rather than being decoded at runtime.**
+            `terrain.png` is a 16-bit PNG and the XNA-only runtime has no way to read one:
+            `Texture2D::FromStream` needs a `GraphicsDevice`, so it could not run in a headless
+            physics test, and hands back 8-bit colour anyway. A PNG decoder in `cnahouse::` would
+            be a second implementation of an encoding `terrain_gen.py` already owns. The samples
+            are read back from the COMMITTED image, so the collider gets the ground the repository
+            holds, quantisation included -- `terrain_gen.py` grew a reader beside its writer for it.
+      accept: 16 cases. A flat lawn flat everywhere with an upward normal; off the lot clamped to
+            the edge and SAYING so; the surface passing through its own samples with no step at a
+            square boundary; a body dropped onto a lawn stopping on it; one walking over a lawn
+            meeting nothing; one sunk 50 mm overlapping by 50 mm; a sweep 35 m off the lot hitting
+            nothing; the two triangles of a steep square giving 1.0 and 1.5 either side of their
+            diagonal, and a sweep landing on the SECOND of them; a valley where a body 50 mm from
+            the foot of a bank rests 74 mm above the floor its middle is over, because its side
+            reaches the bank. On the real lot: §10.2's slope at three points including the quarter
+            that says which way it falls, §11.6's terrace flat at +0.45 and paved, 4 941 sampled
+            normals all unit and all facing up, the lowest ground -0.35 and the highest +0.57 (the
+            porch), and a body dropped every 2 m over the whole lot landing every time, never
+            sinking below the ground under its own centre. Twelve injected bugs, twelve caught.
+      finding: (2026-09-08, found by `HOUSE-00553`) **§11.5 asked for a bilinear sample and the
+            collider cannot use one.** Over the same four samples a bilinear patch and the two
+            triangles the square is DRAWN as differ by a quarter of the square's twist, and on this
+            lot that reaches **74 mm on a square the 20° rule calls gentle** -- the rule tests each
+            triangle's own slope, which says nothing about how far the smooth patch strays between
+            them. A body told the ground is at the bilinear height, and placed a millimetre over
+            it, stands 73 mm inside the ground it is drawn on, and §49.3's depenetration shoves it
+            back out every tick. So there is ONE surface, the triangulated field, swept by the same
+            `SweepCapsuleTriangle` every other triangle in the world uses; §11.5 was corrected to
+            say so, and its 20° is kept for what it is genuinely for -- telling a caller the ground
+            here is a slope rather than a lawn (§60). 55 of the lot's 5 120 squares are over it.
+      finding: (2026-09-08, found by `HOUSE-00553`) a capsule resting on a slope sits
+            `radius / normal.Y` above the ground, not `radius`: 13 mm on a 17° square and 0.36 m
+            on a 60° one. Two of this task's own cases were written with the flat-ground shortcut
+            and failed against correct code. `HOUSE-00548`'s ground probe needs the real formula.
 - [ ] HOUSE-00554 — Implement the dynamic-obstacle list per cell (doors, garage door, pets) and its per-frame refresh
       dep: HOUSE-00542 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00555 — Implement `PlayerController`: input → desired velocity → sweep → position, with the acceleration model

@@ -54,9 +54,12 @@ TEST(CollisionRoundTripTests, TheWriterAndTheReaderAgreeOnTheHeader)
     const CollisionWorld world = Load();
     EXPECT_EQ(world.worldHash, kWorldHash);
     EXPECT_FLOAT_EQ(world.gridCell, 1.0f);
-    ASSERT_EQ(world.surfaces.size(), 2u);
+    // Four: the two the shapes name, plus the two §3.5's ground names through the same table.
+    ASSERT_EQ(world.surfaces.size(), 4u);
     EXPECT_EQ(world.surfaces[0], "tile");
     EXPECT_EQ(world.surfaces[1], "wood");
+    EXPECT_EQ(world.surfaces[2], "grass");
+    EXPECT_EQ(world.surfaces[3], "gravel");
     ASSERT_EQ(world.obbs.size(), 2u);
     ASSERT_EQ(world.meshes.size(), 1u);
     ASSERT_EQ(world.cells.size(), 1u);
@@ -193,4 +196,50 @@ TEST(CollisionRoundTripTests, TheWholeHouseReadsBackWhenItHasBeenBuilt)
     }
     EXPECT_EQ(withGeometry, world->cells.size());
     EXPECT_GT(world->TriangleCount(), 0u);
+
+    // §11.5's ground came along with it: 81 x 65 samples a metre apart over §10.3's playable area.
+    ASSERT_TRUE(world->terrain.present);
+    EXPECT_EQ(world->terrain.samplesX, 81u);
+    EXPECT_EQ(world->terrain.samplesZ, 65u);
+    EXPECT_FLOAT_EQ(world->terrain.step, 1.0f);
+    EXPECT_FLOAT_EQ(world->terrain.originX, -40.0f);
+    EXPECT_FLOAT_EQ(world->terrain.originZ, -52.0f);
+    EXPECT_EQ(world->terrain.heights.size(), 81u * 65u);
+    EXPECT_EQ(world->terrain.materialIndex.size(), 81u * 65u);
+    EXPECT_EQ(world->terrain.materials.size(), 8u);
+}
+
+TEST(CollisionRoundTripTests, TheGroundIsWhatTheWriterWrote)
+{
+    // §3.5 (`HOUSE-00553`). Three samples by two, so `samplesX` and `samplesZ` cannot be swapped
+    // unnoticed, a step that is NOT the world grid's 1.0, heights that are not a plane, and two
+    // materials of which the second is not the first entry of the surface table.
+    const CollisionWorld world = Load();
+    const auto& terrain = world.terrain;
+    ASSERT_TRUE(terrain.present);
+    EXPECT_EQ(terrain.samplesX, 3u);
+    EXPECT_EQ(terrain.samplesZ, 2u);
+    EXPECT_FLOAT_EQ(terrain.originX, -1.0f);
+    EXPECT_FLOAT_EQ(terrain.originZ, -2.0f);
+    EXPECT_FLOAT_EQ(terrain.step, 2.0f);
+    EXPECT_FLOAT_EQ(terrain.MaxX(), 3.0f);
+    EXPECT_FLOAT_EQ(terrain.MaxZ(), 0.0f);
+
+    // Row-major with z OUTER: the second row is the far one, and a reader that transposed would
+    // read 0.5 here.
+    ASSERT_EQ(terrain.heights.size(), 6u);
+    EXPECT_FLOAT_EQ(terrain.Height(0u, 0u), 0.0f);
+    EXPECT_FLOAT_EQ(terrain.Height(2u, 0u), 0.5f);
+    EXPECT_FLOAT_EQ(terrain.Height(0u, 1u), 1.0f);
+    EXPECT_FLOAT_EQ(terrain.Height(2u, 1u), 2.0f);
+
+    // Out of range clamps to the edge rather than reading past the end.
+    EXPECT_FLOAT_EQ(terrain.Height(9u, 9u), 2.0f);
+
+    // Materials resolve through the SHARED surface table, so a footstep on the lawn and a
+    // footstep on a tiled floor ask one question of one table.
+    ASSERT_EQ(terrain.materials.size(), 2u);
+    EXPECT_EQ(world.SurfaceName(terrain.Material(0u, 0u)), "grass");
+    EXPECT_EQ(world.SurfaceName(terrain.Material(2u, 0u)), "gravel");
+    EXPECT_EQ(world.SurfaceName(terrain.Material(1u, 1u)), "grass");
 }

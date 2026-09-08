@@ -78,13 +78,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(TOOLS / "assets"))
 
 import gltf_io  # noqa: E402
+import terrain_gen  # noqa: E402
 import layout_io  # noqa: E402
 import roof_geometry  # noqa: E402
 import stair_geometry  # noqa: E402
 from layout_io import LayoutError  # noqa: E402
 
 MAGIC = b"CCOL"
-VERSION = 1
+VERSION = 2
 
 #: §49.2's loose grid is 1 m. Written into the file so the reader does not carry a second copy of
 #: the constant that could disagree with this one.
@@ -1076,8 +1077,40 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
         "meanBucketOccupancy": round(sum(occupied) / len(occupied), 2) if occupied else 0.0,
         "maxBucketOccupancy": max(occupied) if occupied else 0,
     })
-    return {"shapes": shapes, "cells": cells, "stats": stats,
+    terrain = _terrain(world_dir, shapes, stats)
+    return {"shapes": shapes, "cells": cells, "stats": stats, "terrain": terrain,
             "worldHash": _world_hash(world_dir)}
+
+
+def _terrain(world_dir: Path, shapes: Shapes, stats: dict) -> dict | None:
+    """§11.5's height field, read back from the committed PNGs, or `None` when there is none.
+
+    **The ground goes in this file rather than being decoded at runtime.** `terrain.png` is a
+    16-bit PNG, which the XNA-only runtime has no way to read: `Texture2D::FromStream` needs a
+    `GraphicsDevice` (so it could not run in a headless physics test) and would hand back 8-bit
+    colour anyway. Putting the samples here costs 26 KB in a 700 KB file and means the collider
+    reads what everything else reads.
+
+    They are read from the PNG rather than recomputed with `terrain_gen.fields()`, so that what the
+    game collides with is the ground that is COMMITTED, 16-bit quantisation and all.
+    """
+    if not (world_dir / "terrain.png").is_file():
+        return None
+    width, height, heights, materials = terrain_gen.decode(world_dir)
+    table = [shapes.surface(name) for name in terrain_gen.MATERIALS]
+    stats["terrainSamples"] = width * height
+    stats["terrainMin"] = round(min(heights), 3)
+    stats["terrainMax"] = round(max(heights), 3)
+    return {
+        "samplesX": width,
+        "samplesZ": height,
+        "originX": terrain_gen.ORIGIN_X,
+        "originZ": terrain_gen.ORIGIN_Z,
+        "step": terrain_gen.STEP,
+        "heights": heights,
+        "materials": table,
+        "materialIndex": materials,
+    }
 
 
 def _world_hash(world_dir: Path) -> str:
@@ -1150,6 +1183,18 @@ def serialise(world: dict) -> bytes:
             out += struct.pack("<H", len(bucket))
             for entry in bucket:
                 out += struct.pack("<H", local[cell["shapes"][entry]])
+
+    terrain = world.get("terrain")
+    out += struct.pack("<B", 1 if terrain else 0)
+    if terrain:
+        out += struct.pack("<II", terrain["samplesX"], terrain["samplesZ"])
+        out += struct.pack("<3f", terrain["originX"], terrain["originZ"], terrain["step"])
+        for value in terrain["heights"]:
+            out += struct.pack("<f", value)
+        out += struct.pack("<I", len(terrain["materials"]))
+        for index in terrain["materials"]:
+            out += struct.pack("<H", index)
+        out += bytes(terrain["materialIndex"])
     return bytes(out)
 
 
@@ -1221,10 +1266,24 @@ def read_back(data: bytes) -> dict:
         cells.append({"id": cell_id, "bounds": bounds, "shapes": indices,
                       "nx": nx, "nz": nz, "origin": origin, "buckets": buckets})
 
+    (has_terrain,) = unpack("<B")
+    terrain = None
+    if has_terrain:
+        samples_x, samples_z = unpack("<II")
+        origin_x, origin_z, step = unpack("<3f")
+        count = samples_x * samples_z
+        heights = list(struct.unpack(f"<{count}f", take(4 * count)))
+        (material_count,) = unpack("<I")
+        materials = [surfaces[unpack("<H")[0]] for _ in range(material_count)]
+        index = list(bytes(take(count)))
+        terrain = {"samplesX": samples_x, "samplesZ": samples_z, "originX": origin_x,
+                   "originZ": origin_z, "step": step, "heights": heights,
+                   "materials": materials, "materialIndex": index}
+
     if at != len(data):
-        raise LayoutError(f"{len(data) - at} bytes left over after the last cell")
+        raise LayoutError(f"{len(data) - at} bytes left over after the terrain")
     return {"worldHash": world_hash, "gridCell": grid_cell, "surfaces": surfaces,
-            "obbs": obbs, "meshes": meshes, "cells": cells}
+            "obbs": obbs, "meshes": meshes, "cells": cells, "terrain": terrain}
 
 
 # ========================================================================================= report
@@ -1258,6 +1317,14 @@ def report(world: dict) -> str:
         f"  props: {stats['propObbs']} OBBs, {stats['propMeshes']} meshes, "
         f"{stats['propsSkipped']} without collision",
     ]
+    terrain = world.get("terrain")
+    if terrain:
+        lines.append(
+            f"  terrain: {terrain['samplesX']} x {terrain['samplesZ']} samples "
+            f"{terrain['step']:.1f} m apart, {stats['terrainMin']:.2f} to "
+            f"{stats['terrainMax']:.2f} m, {len(terrain['materials'])} materials")
+    else:
+        lines.append("  terrain: none in this layout")
     return "\n".join(lines)
 
 
@@ -1294,7 +1361,20 @@ def fixture_world() -> dict:
         "origin": (-1.1, -1.5),
         "buckets": [[0, 1], [], [], [2], [], []],
     }
-    return {"shapes": shapes, "cells": [cell],
+    # A 3 x 2 height field, deliberately asymmetric so `samplesX` and `samplesZ` cannot be
+    # swapped unnoticed, with a step that is not the world grid's 1.0 and heights that are not a
+    # plane. Two materials, the second of which is NOT the first surface in the table, so a reader
+    # that ignored the material table would produce `tile` for the lot.
+    grass = shapes.surface("grass")
+    gravel = shapes.surface("gravel")
+    terrain = {
+        "samplesX": 3, "samplesZ": 2,
+        "originX": -1.0, "originZ": -2.0, "step": 2.0,
+        "heights": [0.0, 0.25, 0.5, 1.0, 1.25, 2.0],
+        "materials": [grass, gravel],
+        "materialIndex": [0, 0, 1, 1, 0, 1],
+    }
+    return {"shapes": shapes, "cells": [cell], "terrain": terrain,
             "worldHash": "0123456789abcdef0123456789abcdef",
             "stats": {"obbs": len(shapes.obbs), "meshes": len(shapes.meshes),
                       "shapes": len(shapes.obbs) + len(shapes.meshes)}}
@@ -1957,6 +2037,30 @@ def selftest() -> int:
         require(len({record["surface"] for record in back["obbs"]}) >= 3,
                 f"...and the fixture exercises more than one entry of that table "
                 f"({len({r['surface'] for r in back['obbs']})} distinct surfaces read back)")
+
+        # 11b. §11.5's ground (`HOUSE-00553`). It is 26 KB of the file and the only part of it a
+        #      reader could plausibly skip, so the fixture carries a 3 x 2 field whose every
+        #      number is stated in `fixture_world` and asserted in C++ as well as here.
+        fixture = fixture_world()
+        pair = read_back(serialise(fixture))["terrain"]
+        want = fixture["terrain"]
+        require(pair is not None and (pair["samplesX"], pair["samplesZ"]) == (3, 2),
+                f"the height field round trips 3 x 2 and not 2 x 3 "
+                f"({pair and (pair['samplesX'], pair['samplesZ'])})")
+        require(pair["heights"] == want["heights"],
+                f"every sample survives as float32 ({pair['heights']})")
+        require((pair["originX"], pair["originZ"], pair["step"]) == (-1.0, -2.0, 2.0),
+                f"so do the origin and the step, which is NOT the world grid's 1.0 "
+                f"({pair['originX']}, {pair['originZ']}, {pair['step']})")
+        require(pair["materials"] == ["grass", "gravel"] and pair["materialIndex"] == want["materialIndex"],
+                f"and the per-sample material resolves through the shared surface table "
+                f"({pair['materials']}, {pair['materialIndex']})")
+        require(len(set(pair["materialIndex"])) > 1,
+                "...over more than one material, so a reader that returned a constant fails")
+        world_no_terrain = dict(fixture)
+        world_no_terrain["terrain"] = None
+        require(read_back(serialise(world_no_terrain))["terrain"] is None,
+                "a world with no ground writes the flag and stops, and reads back as none")
 
         # 12. Truncation and a wrong version are refused, not misread.
         for cut in (3, 12, len(data) - 1):

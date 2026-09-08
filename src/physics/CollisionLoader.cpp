@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/physics/CollisionLoader.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <format>
 #include <memory>
 #include <unordered_set>
@@ -142,6 +144,31 @@ namespace cnahouse::physics
     std::string_view CollisionWorld::SurfaceName(std::uint16_t index) const
     {
         return index < surfaces.size() ? std::string_view(surfaces[index]) : std::string_view();
+    }
+
+    float CollisionTerrain::Height(std::uint32_t ix, std::uint32_t iz) const
+    {
+        if (heights.empty())
+        {
+            return 0.0f;
+        }
+        // Clamped, not wrapped and not refused. A body that walks off the far end of the lot
+        // stands on the edge of it; §64's playable-volume boundary is what stops it going there,
+        // and this is not the place to argue with it.
+        const std::uint32_t x = std::min(ix, samplesX - 1u);
+        const std::uint32_t z = std::min(iz, samplesZ - 1u);
+        return heights[static_cast<std::size_t>(z) * samplesX + x];
+    }
+
+    std::uint16_t CollisionTerrain::Material(std::uint32_t ix, std::uint32_t iz) const
+    {
+        if (materialIndex.empty() || materials.empty())
+        {
+            return 0u;
+        }
+        const std::uint32_t x = std::min(ix, samplesX - 1u);
+        const std::uint32_t z = std::min(iz, samplesZ - 1u);
+        return materials[materialIndex[static_cast<std::size_t>(z) * samplesX + x]];
     }
 
     std::size_t CollisionWorld::TriangleCount() const
@@ -461,6 +488,111 @@ namespace cnahouse::physics
                     }
                 }
                 world.cells.push_back(std::move(cell));
+            }
+
+            // §3.5, the ground (`HOUSE-00553`). A `0` here is a world with no exterior -- the
+            // round-trip fixture is one -- and must read as "no ground" rather than as an error.
+            const std::uint8_t hasTerrain = reader.ReadByte();
+            if (hasTerrain > 1u)
+            {
+                return Bad(ErrorCode::InvalidData,
+                           std::format("hasTerrain is {}, which is neither 0 nor 1", hasTerrain),
+                           name);
+            }
+            if (hasTerrain == 1u)
+            {
+                CollisionTerrain& terrain = world.terrain;
+                terrain.present = true;
+                terrain.samplesX = reader.ReadUInt32();
+                terrain.samplesZ = reader.ReadUInt32();
+                if (terrain.samplesX < 2u || terrain.samplesZ < 2u)
+                {
+                    // One sample in an axis is not a surface: bilinear needs a square to
+                    // interpolate over, and a field a body can stand on needs at least one.
+                    return Bad(ErrorCode::InvalidData,
+                               std::format("the terrain is {} x {} samples; two are needed on each "
+                                           "axis to make one square",
+                                           terrain.samplesX,
+                                           terrain.samplesZ),
+                               name);
+                }
+                const std::uint64_t samples = static_cast<std::uint64_t>(terrain.samplesX) * terrain.samplesZ;
+                if (samples > kMaxTerrainSamples)
+                {
+                    return Bad(ErrorCode::InvalidData,
+                               std::format("the terrain holds {} samples, above the {} limit",
+                                           samples,
+                                           kMaxTerrainSamples),
+                               name);
+                }
+                terrain.originX = reader.ReadSingle();
+                terrain.originZ = reader.ReadSingle();
+                terrain.step = reader.ReadSingle();
+                if (!(terrain.step > 0.0f) || !std::isfinite(terrain.step) ||
+                    !std::isfinite(terrain.originX) || !std::isfinite(terrain.originZ))
+                {
+                    // A step of zero divides by nothing on every sample lookup, and a NaN origin
+                    // puts the whole field nowhere.
+                    return Bad(ErrorCode::InvalidData,
+                               std::format("the terrain's step is {} and its origin ({}, {})",
+                                           terrain.step,
+                                           terrain.originX,
+                                           terrain.originZ),
+                               name);
+                }
+
+                terrain.heights.resize(static_cast<std::size_t>(samples));
+                for (float& height : terrain.heights)
+                {
+                    height = reader.ReadSingle();
+                    if (!std::isfinite(height))
+                    {
+                        return Bad(ErrorCode::InvalidData, "a terrain height is not finite", name);
+                    }
+                }
+
+                const std::uint32_t materialCount = reader.ReadUInt32();
+                if (materialCount == 0u || materialCount > kMaxSurfaces)
+                {
+                    return Bad(ErrorCode::InvalidData,
+                               std::format("the terrain names {} materials, outside 1..{}",
+                                           materialCount,
+                                           kMaxSurfaces),
+                               name);
+                }
+                terrain.materials.reserve(materialCount);
+                for (std::uint32_t m = 0; m < materialCount; ++m)
+                {
+                    const std::uint16_t surface = reader.ReadUInt16();
+                    if (surface >= world.surfaces.size())
+                    {
+                        // A footstep would read a name that is not there. §3.5 resolves through
+                        // §3.2's table precisely so that there is only one table to be wrong.
+                        return Bad(ErrorCode::InvalidData,
+                                   std::format("terrain material {} names surface {}, and there "
+                                               "are {}",
+                                               m,
+                                               surface,
+                                               world.surfaces.size()),
+                                   name);
+                    }
+                    terrain.materials.push_back(surface);
+                }
+
+                terrain.materialIndex.resize(static_cast<std::size_t>(samples));
+                for (std::uint8_t& index : terrain.materialIndex)
+                {
+                    index = reader.ReadByte();
+                    if (index >= terrain.materials.size())
+                    {
+                        return Bad(ErrorCode::InvalidData,
+                                   std::format("a terrain sample names material {}, and there are "
+                                               "{}",
+                                               index,
+                                               terrain.materials.size()),
+                                   name);
+                    }
+                }
             }
 
             return world;

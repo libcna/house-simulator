@@ -82,6 +82,48 @@ namespace cnahouse::physics
     };
 
     /// @brief Everything `content/world/collision.bin` holds.
+    /// @brief §11.5's ground: heights on a regular x/z grid, with a material per sample.
+    ///
+    /// **A height field, not a mesh.** 81 × 65 samples a metre apart describe the whole lot in
+    /// 26 KB, where the same ground as triangles would be 10 240 of them in every cell list it
+    /// touched. What a collider does with it is `physics/Terrain.hpp`.
+    struct CollisionTerrain
+    {
+        /// @brief False when the world has no exterior. Everything below is then empty.
+        bool present = false;
+        std::uint32_t samplesX = 0;
+        std::uint32_t samplesZ = 0;
+        /// @brief The sample grid's minimum corner.
+        float originX = 0.0f;
+        float originZ = 0.0f;
+        /// @brief Metres between samples.
+        float step = 1.0f;
+        /// @brief `samplesX × samplesZ` heights in METRES, row-major: z outer, x inner.
+        std::vector<float> heights;
+        /// @brief Indices into `CollisionWorld::surfaces`.
+        std::vector<std::uint16_t> materials;
+        /// @brief One index into `materials` per sample.
+        std::vector<std::uint8_t> materialIndex;
+
+        /// @brief The height at sample (@p ix, @p iz). Out of range clamps to the edge, which is
+        ///        what a body walking off the far end of the lot should stand on.
+        [[nodiscard]] float Height(std::uint32_t ix, std::uint32_t iz) const;
+
+        /// @brief The surface-table index at sample (@p ix, @p iz), clamped the same way.
+        [[nodiscard]] std::uint16_t Material(std::uint32_t ix, std::uint32_t iz) const;
+
+        /// @brief The east/north edge of the field, in world metres.
+        [[nodiscard]] float MaxX() const
+        {
+            return originX + static_cast<float>(samplesX - 1) * step;
+        }
+
+        [[nodiscard]] float MaxZ() const
+        {
+            return originZ + static_cast<float>(samplesZ - 1) * step;
+        }
+    };
+
     struct CollisionWorld
     {
         std::string worldHash;
@@ -91,6 +133,7 @@ namespace cnahouse::physics
         std::vector<CollisionObb> obbs;
         std::vector<CollisionMesh> meshes;
         std::vector<CollisionCell> cells;
+        CollisionTerrain terrain;
 
         [[nodiscard]] const CollisionCell* Cell(std::string_view id) const;
         /// @brief The surface name a shape's index refers to, or empty when it has none.

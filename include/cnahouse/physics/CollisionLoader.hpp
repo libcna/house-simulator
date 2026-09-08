@@ -35,7 +35,7 @@ namespace cnahouse::physics
         /// @brief The 4-byte magic, `CCOL`.
         static constexpr std::uint32_t kMagic = 0x4C4F4343u; // 'C','C','O','L' little-endian
         /// @brief The only version this reader accepts.
-        static constexpr std::uint32_t kVersion = 1u;
+        static constexpr std::uint32_t kVersion = 2u;
         /// @brief A name longer than this is a corrupt length field, not a name.
         static constexpr std::uint32_t kMaxNameBytes = 1024u;
         /// @brief `u16` surface indices cannot address more.
@@ -54,6 +54,9 @@ namespace cnahouse::physics
         static constexpr std::uint32_t kMaxShapesPerCell = 65535u;
         /// @brief `EXT_WORLD` is 400 x 400 = 160 000 buckets, the largest this house has.
         static constexpr std::uint32_t kMaxBucketsPerCell = 1048576u;
+        /// @brief §11.5's field is 81 × 65. Four million samples is 16 MB of heights, which is a
+        ///        file that is wrong rather than a lot bigger than this one.
+        static constexpr std::uint32_t kMaxTerrainSamples = 4194304u;
 
         /// @brief Reads from @p stream. @p name is used only in error messages.
         [[nodiscard]] static util::Result<CollisionWorld> Read(System::IO::Stream& stream,

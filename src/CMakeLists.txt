@@ -41,6 +41,7 @@ add_library(cnahouse_core STATIC
     physics/Fall.cpp
     physics/Move.cpp
     physics/Sweep.cpp
+    physics/Terrain.cpp
     world/CellRuntime.cpp
     world/ChunkReader.cpp
     world/WorldLoader.cpp

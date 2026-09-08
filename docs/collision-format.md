@@ -56,7 +56,7 @@ is a second description of the layout that can disagree with the first.
 | Field | Type | Value |
 |---|---|---|
 | `magic` | 4 bytes | `0x43 0x43 0x4F 0x4C` — ASCII `CCOL` |
-| `version` | `u32` | **1** |
+| `version` | `u32` | **2** — version 1 had no §3.5 |
 | `flags` | `u32` | 0. Reserved; a reader must **reject** a file with any unknown bit set rather than ignore it |
 | `worldHash` | string | `world.manifest.json`'s `worldHash`, or empty when the layout has no manifest |
 | `gridCell` | `f32` | The loose grid's cell size in metres, **1.0** |
@@ -145,6 +145,40 @@ dividing shapes — the floor slab alone spans every bucket of every vertical la
 vertical reject is one comparison against the shape's own AABB, which the sweep does anyway.
 
 A shape is listed in **every bucket its AABB overlaps**, not the one its minimum corner falls in.
+
+### 3.5 The terrain height field
+
+*Version 2 (`HOUSE-00553`). §11.5's ground, and §49.2's "exterior collision uses the terrain height
+field plus OBBs".*
+
+| Field | Type | |
+|---|---|---|
+| `hasTerrain` | `u8` | 0 or 1. **0 ends the file** — nothing below is written |
+| `samplesX`, `samplesZ` | `u32`, `u32` | 81 × 65 for this house |
+| `originX`, `originZ` | `f32`, `f32` | the sample grid's minimum corner |
+| `step` | `f32` | metres between samples, 1.0 |
+| `heights` | `samplesX × samplesZ` × `f32` | **metres**, row-major, *z* outer and *x* inner |
+| `materialCount` | `u32` | |
+| `materials` | `materialCount` × `u16` | indices into §3.2's surface table |
+| `materialIndex` | `samplesX × samplesZ` × `u8` | index into `materials` |
+
+**Why the ground is in this file at all.** It is authored as `terrain.png`, a 16-bit greyscale
+image, and the runtime has no way to read one: `Texture2D::FromStream` is XNA 4.0 but needs a
+`GraphicsDevice` — so it could not run in a headless physics test — and hands back 8-bit colour
+regardless. A PNG decoder in `cnahouse::` would be a second implementation of an encoding
+`terrain_gen.py` already owns. 5 265 samples cost 26 KB in a 700 KB file, which is the cheapest
+of the three answers.
+
+**Heights are metres, not the PNG's `u16`.** The quantisation is the authoring format's business.
+`build_collision.py` reads the committed image and decodes it, so the collider and the renderer
+agree sample for sample, and the reader needs no copy of `originY` or `yScale` to make sense of a
+number.
+
+**Materials resolve through §3.2's surface table**, not a table of their own. A footstep on grass
+and a footstep on a tiled floor are the same question, and two tables would be two answers.
+
+`hasTerrain` is 0 for a world with no exterior — the round-trip fixture is one — and a reader must
+treat that as "no ground", not as an error.
 
 ## 4. How rooms become walls
 

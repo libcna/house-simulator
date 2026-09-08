@@ -913,8 +913,18 @@ The terrain is a **height field** on a 1.0 m grid over the whole playable area (
 5 265 vertices), authored as a 16-bit PNG plus a JSON metadata sidecar, with a per-cell material
 index (grass / lawn-worn / flower-bed soil / gravel / concrete / asphalt / bluestone / mulch).
 Rendered as one static chunk per 16 × 16 m tile (25 tiles), each with its own `BoundingBox`, so
-distance culling works. Collision uses the same height field (bilinear sample + a triangle test
-for slopes > 20°).
+distance culling works. Collision uses the same height field, as the **two triangles each square
+is drawn as** — one surface for the collider and for anything that asks how high the ground is.
+
+> **Corrected by `HOUSE-00553`.** This said *"bilinear sample + a triangle test for slopes > 20°"*,
+> and a bilinear sample cannot be the collision surface. Over the same four samples the bilinear
+> patch and the two triangles differ by a quarter of the square's twist, and on this lot that
+> reaches **74 mm on a square that is not steep by the 20° rule** — the rule tests each triangle's
+> own slope, which says nothing about how far the smooth patch strays between them. A body told
+> the ground is at the bilinear height, and placed a millimetre over it, stands 73 mm inside the
+> ground it is drawn on, and §49.3's depenetration shoves it out again every tick. The 20° figure
+> is kept for what it is genuinely for: `TerrainSample::steep` tells a caller the ground here is a
+> slope rather than a lawn, which is what §60 asks.
 
 ---
 
