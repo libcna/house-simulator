@@ -5502,6 +5502,34 @@ Run by `validate_world.py` over the layout and by `scale_check.py` over every as
 | Every interactable reachable from a standing eye position | a 2.5 m ray must reach `focus.point` |
 | Room area vs. its function | a bedroom ≥ 9 m², a bathroom ≥ 3.5 m², a WC ≥ 1.8 m², a corridor ≥ 0.9 m wide |
 
+**Who checks what** (recorded 2026-09-08 by `HOUSE-00360`, which implemented the layout half).
+`validate_world.py` rule 10 and `WorldValidator::CheckRealism` — the two say the same thing, and
+both run — own every row the layout decides: interior door leaf height and width, habitable clear
+height, `2·rise + going`, capsule clearance, window sill over the room's own floor, light switch
+and door handle centres, room area against what the room's `name` says it is for, and the corridor
+width. `scale_check.py` owns every row that is a property of an *asset*: counter, upper cabinet,
+dining table, desk, chair and sofa seat, mattress, WC seat, basin and bath rim, handrail, human,
+dog, cat — and **car**, which this table listed and that tool did not transcribe until now.
+
+Four rows are checked by neither, and each is a missing **input**, not a missing check:
+
+* *rise consistency within a flight* cannot fail. `layout.stairs.json` carries one `rise` per
+  flight, so every riser is equal by construction and the check would assert a tautology.
+* *headroom over every flight and landing* needs the flight's position in plan, and a flight row
+  has `fromCell`, `toCell`, `risers`, `rise`, `going` and `width` — no origin, no direction. It
+  becomes checkable when `HOUSE-00459` generates the carriages.
+* *balustrade / railing height* has no row anywhere: railings are not in the layout and no asset
+  is categorised as one. `handrail` is, and is checked.
+* *socket centre* has no socket interactables to measure. A band over an empty set is a check that
+  passes for the wrong reason, so it is absent rather than green.
+
+The window sill row is decided by the window's declared **type**, never by its measurement: §12.6
+gives a sill per type, and eleven of the house's 66 windows sit outside 0.50–1.10 m on purpose —
+the sidelights beside the front door, the sunroom's full-height panels, the bathrooms' obscured
+privacy glazing at 1.40 m, the basement hoppers at 1.85 m and the front door's transom at 2.20 m.
+An exemption written as "high sills are fine" would have exempted every mis-authored window along
+with them.
+
 ### 70.6 Performance tests
 
 Run nightly on the dev machine against the budgets of §71, on a fixed set of worst-case scenarios:

@@ -4,10 +4,13 @@
 #include "cnahouse/world/InteractableExpr.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
+#include <cstddef>
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace cnahouse::world
@@ -26,6 +29,67 @@ namespace cnahouse::world
         constexpr float kStairSumHigh = 0.650F;
         constexpr float kCapsuleWidth = 0.62F;
         constexpr float kCapsuleHeight = 1.95F;
+        constexpr float kSillLow = 0.50F; // §70.5, window sill over the room's own floor
+        constexpr float kSillHigh = 1.10F;
+        constexpr float kSwitchLow = 1.10F; // §70.5, light switch centre
+        constexpr float kSwitchHigh = 1.30F;
+        constexpr float kHandleLow = 0.95F; // §70.5, door handle centre
+        constexpr float kHandleHigh = 1.10F;
+        constexpr float kCorridorWidth = 0.90F; // §70.5, "a corridor ≥ 0.9 m wide"
+
+        /// @brief Window types §70.5's habitable sill band does not govern (`HOUSE-00360`).
+        ///
+        /// The test is the declared `type`, never the measured sill: an exemption written as
+        /// "high sills are fine" would exempt every window authored at the wrong height along
+        /// with the ones that belong there. Anything not listed is checked, so a type added to
+        /// §12.6 arrives inside the band and has to argue its way out.
+        bool SillExempt(std::string_view type) noexcept
+        {
+            return type == "W_SIDELIGHT"   // glazing beside the front door; runs to the floor
+                   || type == "W_PANEL"    // the sunroom's fixed full-height flanks
+                   || type == "W_SLIDER"   // a door with glass in it
+                   || type == "W_TRANSOM"  // sits above a door head
+                   || type == "W_BATH"     // obscured privacy glazing, above eye level by design
+                   || type == "W_BASEMENT" // a hopper in a window well
+                   || type == "W_GABLE";   // a non-opening louvre in a gable end
+        }
+
+        /// @brief §70.5's minimum floor area for a room whose name says what it is for, or 0.
+        ///
+        /// The layout has no `function` field -- a WC and a study are both `CellKind::Room` -- and
+        /// the `name` is the only place the data says which. Whole words, so "Bedroom 2" and
+        /// "Master Bedroom" match and "Bedroomish" does not.
+        float MinimumAreaFor(const std::string& name) noexcept
+        {
+            float minimum = 0.0F;
+            std::string lowered;
+            lowered.reserve(name.size());
+            for (const char letter : name)
+            {
+                lowered.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(letter))));
+            }
+            std::size_t start = 0;
+            while (start <= lowered.size())
+            {
+                const std::size_t end = std::min(lowered.find(' ', start), lowered.size());
+                const std::string_view word(lowered.data() + start, end - start);
+                if (word == "bedroom")
+                {
+                    minimum = std::max(minimum, 9.0F);
+                }
+                else if (word == "bathroom")
+                {
+                    minimum = std::max(minimum, 3.5F);
+                }
+                else if (word == "wc")
+                {
+                    minimum = std::max(minimum, 1.8F);
+                }
+                start = end + 1;
+            }
+            return minimum;
+        }
+
         constexpr float kReach = 2.50F; // §15.7 rule 11
         constexpr float kEyeHeight = 1.60F;
         constexpr float kSampleStep = 0.25F;
@@ -631,6 +695,11 @@ namespace cnahouse::world
         }
 
         /// @brief Rule 10. §70.5's dimensional checks the layout alone decides.
+        ///
+        /// The same set `validate_world.py` runs, and deliberately so: the two exist to find each
+        /// other wrong. What neither checks, and why, is in that tool's docstring -- rise
+        /// consistency is a tautology, headroom needs a flight position the layout does not carry,
+        /// and railings and sockets have no rows yet.
         void CheckRealism(const WorldData& world, Sink& sink)
         {
             for (const Opening& opening : world.Openings())
@@ -732,6 +801,134 @@ namespace cnahouse::world
                              "portals/" + Name(portal.id) + "/rect/v",
                              "portal " + Name(portal.id) + ": " + Number(portal.Height(), 3) +
                                  " m high, under the player capsule's 1.95 m, and not crouch");
+                }
+            }
+
+            // §70.5's window sill, over the room's OWN floor (`HOUSE-00360`). Both sides, because
+            // a borrowed-light window has a sill in each room and the floors need not be level.
+            for (const Opening& opening : world.Openings())
+            {
+                if (opening.kind != OpeningKind::Window || SillExempt(Name(opening.type)))
+                {
+                    continue;
+                }
+                const Portal* portal = world.FindPortal(opening.portal);
+                if (portal == nullptr || portal->axis == PlaneAxis::Y)
+                {
+                    continue; // a horizontal portal has no sill
+                }
+                for (const Id side : {portal->cellA, portal->cellB})
+                {
+                    const Cell* cell = world.FindCell(side);
+                    if (cell == nullptr || cell->kind != CellKind::Room)
+                    {
+                        continue;
+                    }
+                    const util::Result<Extent> extent = world.ExtentOf(*cell);
+                    if (!extent)
+                    {
+                        continue;
+                    }
+                    const float sill = portal->minV - extent.Value().floorY;
+                    if (sill < kSillLow - 1e-6F || sill > kSillHigh + 1e-6F)
+                    {
+                        sink.Add(10,
+                                 "layout.openings.json",
+                                 "openings/" + Name(opening.id),
+                                 "window " + Name(opening.id) + " (" + Name(opening.type) +
+                                     "): its sill is " + Number(sill) + " m above " + Name(cell->id) +
+                                     "'s floor, outside §70.5's 0.50-1.10 m");
+                    }
+                }
+            }
+
+            // §70.5's switch and handle centres. An interactable's focus point IS the thing you
+            // reach for -- `interactables.json` says so of the door, "the focus is the handle".
+            // The socket row is absent because there are no socket interactables to measure, and
+            // a band over an empty set passes for the wrong reason.
+            for (const Interactable& thing : world.Interactables())
+            {
+                float low = 0.0F;
+                float high = 0.0F;
+                const char* what = nullptr;
+                if (thing.kind == "light_switch")
+                {
+                    low = kSwitchLow;
+                    high = kSwitchHigh;
+                    what = "switch centre";
+                }
+                else if (thing.kind == "door")
+                {
+                    low = kHandleLow;
+                    high = kHandleHigh;
+                    what = "handle centre";
+                }
+                if (what == nullptr)
+                {
+                    continue;
+                }
+                const Cell* cell = world.FindCell(thing.cell);
+                if (cell == nullptr)
+                {
+                    continue; // rule 6
+                }
+                const util::Result<Extent> extent = world.ExtentOf(*cell);
+                if (!extent)
+                {
+                    continue;
+                }
+                const float height = thing.focusPoint.Y - extent.Value().floorY;
+                if (height < low - 1e-6F || height > high + 1e-6F)
+                {
+                    sink.Add(10,
+                             "interactables.json",
+                             "interactables/" + Name(thing.id) + "/focus/point",
+                             Name(thing.id) + ": its " + what + " is " + Number(height) + " m above " +
+                                 Name(cell->id) + "'s floor, outside §70.5's " + Number(low) + "-" +
+                                 Number(high) + " m");
+                }
+            }
+
+            // §70.5's floor area against what the room is for, and a corridor's width. One-sided:
+            // a bedroom cannot be too large and §70.5 does not pretend otherwise.
+            for (const Cell& cell : world.Cells())
+            {
+                if (cell.kind == CellKind::Corridor)
+                {
+                    // Width, not area, and on BOTH plan axes: an L-shaped corridor is a wide box
+                    // and a narrow one, and the narrow one is the one you walk down sideways.
+                    for (const Footprint& box : cell.boxes)
+                    {
+                        const float narrowest = std::min(box.maxX - box.minX, box.maxZ - box.minZ);
+                        if (narrowest < kCorridorWidth - 1e-6F)
+                        {
+                            sink.Add(10,
+                                     "layout.cells.json",
+                                     "cells/" + Name(cell.id) + "/boxes",
+                                     "corridor " + Name(cell.id) + ": a box is " + Number(narrowest) +
+                                         " m across, under §70.5's 0.90 m");
+                        }
+                    }
+                    continue;
+                }
+                if (cell.kind != CellKind::Room)
+                {
+                    continue;
+                }
+                const float minimum = MinimumAreaFor(cell.name);
+                if (minimum <= 0.0F)
+                {
+                    continue;
+                }
+                const float area = WorldData::FootprintArea(cell);
+                if (area < minimum - 1e-6F)
+                {
+                    sink.Add(10,
+                             "layout.cells.json",
+                             "cells/" + Name(cell.id),
+                             "cell " + Name(cell.id) + " (" + cell.name + ") is " + Number(area) +
+                                 " m², under §70.5's " + Number(minimum) +
+                                 " m² for what its name says it is");
                 }
             }
 

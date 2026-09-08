@@ -28,18 +28,29 @@ the semantic rules are skipped, and the output says so.
 
 ## What this tool does NOT decide, and why
 
-Two parts of rule 10 are not here and are not missing:
+Rule 10 is §70.5's realism table, split by what decides each row. Here: interior door leaf height
+and width, habitable clear height, stair `2R + G`, player capsule clearance, window sill above the
+room's own floor, light switch and door handle centres, and floor area against what the room's name
+says it is for (`HOUSE-00358`, `HOUSE-00360`).
 
-* **counter, table, seat, sill and switch heights** (§70.5's long table) need the *asset's*
-  geometry, not the layout's -- a prop row is a position and an asset id, and the height that
-  matters is inside the `.glb`. `scale_check.py` measures assets; `HOUSE-00360` joins the two.
-* **human, pet and car scale** are likewise a property of the asset, and §70.5 assigns them to
-  `scale_check.py` in as many words.
+In `scale_check.py`, because they are properties of an *asset* and §70.5 says so: counter, upper
+cabinet, dining table, desk, chair and sofa seat, mattress, WC seat, basin and bath rim, handrail,
+and human, dog, cat and car scale. A prop row is a position and an asset id; how tall the thing is
+lives in the `.glb`.
 
-What *is* here is everything the layout alone determines: door leaf sizes, room clear heights,
-stair `2R + G`, and player capsule clearance through every portal. §70.5's "rise consistency within
-a flight" is not among them and cannot be: `layout.stairs.json` carries **one** `rise` per flight,
-so every riser in a flight is equal by construction and the check would assert a tautology.
+Four rows are checked by neither, and each is a missing *input* rather than a missing check:
+
+* **rise consistency within a flight** (≤ 2 mm) cannot fail: `layout.stairs.json` carries **one**
+  `rise` per flight, so every riser is equal by construction and the check would be a tautology.
+* **headroom over every flight and landing** (≥ 2.00 m) needs the flight's position in plan, and a
+  flight row has `fromCell`, `toCell`, `risers`, `rise`, `going` and `width` -- no origin and no
+  direction. It becomes checkable when `HOUSE-00459` generates the carriages.
+* **balustrade / railing height** has no row anywhere: railings are not in the layout and no asset
+  is categorised as one yet. `handrail` is, and is checked.
+* **socket centre** has no socket interactables to measure. A band over an empty set is a check
+  that passes for the wrong reason, so it is absent rather than green.
+
+`HOUSE-02596` is where the whole table is signed off over the layout *and* every asset at once.
 
 ## Rule 11 is a proof, and it is a proof about the room, not about the props
 
@@ -89,6 +100,41 @@ CAPSULE_HEIGHT = 1.95
 REACH_RANGE = 2.50              # §15.7 rule 11
 EYE_HEIGHT = 1.60               # a standing eye above the floor
 CAPSULE_RADIUS = CAPSULE_WIDTH / 2.0   # somewhere a player can actually stand
+SILL_HABITABLE = (0.50, 1.10)   # §70.5, window sill above the room's own floor
+SWITCH_CENTRE = (1.10, 1.30)    # §70.5, light switch centre
+HANDLE_CENTRE = (0.95, 1.10)    # §70.5, door handle centre
+CORRIDOR_WIDTH = 0.90           # §70.5, "a corridor ≥ 0.9 m wide"
+
+#: §70.5's minimum floor area by what the room is FOR, keyed by the word in the cell's `name`.
+#:
+#: The layout has no `function` field: a cell carries a `kind` (`room`, `corridor`, `closet`,
+#: `stair`, `garage`, `exterior`) and a human-readable `name`, and §70.5's row is about the
+#: function -- a bedroom and a study are both `kind: room` and only one of them has a minimum.
+#: The name is the only place the data says which, so the name is what this reads. Matching is on
+#: whole words, so "Bedroom 2" and "Master Bedroom" are bedrooms and "Bedroom Closet" would be
+#: too -- which is why `closet` cells are skipped before this runs.
+ROOM_MINIMUM_AREA = {
+    "bedroom": 9.0,
+    "bathroom": 3.5,
+    "wc": 1.8,
+}
+
+#: Window types §70.5's habitable sill band does NOT govern, and why each one is out.
+#:
+#: The test is the window's declared `type`, never its measured sill -- the same rule the interior
+#: door leaf follows. A check that exempted a window because it happened to sit at 1.85 m would
+#: exempt every window authored at the wrong height along with it, and the whole point of the band
+#: is to catch exactly that. Anything NOT listed here is checked, so a new type added to §12.6
+#: arrives inside the band by default and has to argue its way out.
+SILL_EXEMPT_TYPES = {
+    "W_SIDELIGHT": "glazing beside the front door; it runs to the floor by design",
+    "W_PANEL": "the sunroom's fixed full-height flanks; a wall of glass, not a window in a wall",
+    "W_SLIDER": "a door with glass in it (§12.6 lists it under windows for its size)",
+    "W_TRANSOM": "sits above a door head, which is where §12.6 puts it",
+    "W_BATH": "obscured privacy glazing, deliberately above standing eye level",
+    "W_BASEMENT": "a hopper in a 0.9 m window well; its sill is high inside and low outside",
+    "W_GABLE": "a non-opening louvre in a gable end, not a window onto a room",
+}
 
 #: §15.7 rule 5 walks "always-open or door" portals. A window is not a way through, whatever its
 #: opacity; everything else is, including a hatch, which is a way through for someone willing to
@@ -1670,7 +1716,104 @@ def rule_10_realism(world: World) -> list[Problem]:
                 10, FILE_OF["lights"], f"lights/{index}/position",
                 f"light {light.get('id')} is at y {y:.2f}, outside cell {cell.get('id')}'s "
                 f"vertical extent {extent[0]:.2f}..{extent[1]:.2f}"))
+
+    # ---- §70.5's window sill, measured from the room's own floor ------------------------------
+    #
+    # `HOUSE-00360`. A sill is a portal rectangle's lower edge and a floor is the cell's, so this
+    # is a layout question and not an asset one: no `.glb` is involved in deciding that a bedroom
+    # window starts at 0.90 m. Both sides of the portal are measured, because a borrowed-light
+    # window between two rooms has a sill in each of them and the floors need not be level.
+    for index, opening in enumerate(world.openings):
+        if opening.get("kind") != "window":
+            continue
+        if opening.get("type") in SILL_EXEMPT_TYPES:
+            continue
+        portal = world.portal_by_id.get(opening.get("portal"))
+        if portal is None:
+            continue
+        rect = portal.get("rect") or {}
+        vertical = rect.get("v")
+        if (portal.get("plane") or {}).get("axis") == "y" or not isinstance(vertical, list):
+            continue  # a horizontal portal has no sill; rule 4 has already said if `v` is wrong
+        for side in ("cellA", "cellB"):
+            cell = world.cell_by_id.get(portal.get(side))
+            if cell is None or cell.get("kind") != "room":
+                continue
+            extent = world.extent(cell)
+            if extent is None:
+                continue
+            sill = float(vertical[0]) - extent[0]
+            low, high = SILL_HABITABLE
+            if not low - 1e-9 <= sill <= high + 1e-9:
+                problems.append(Problem(
+                    10, FILE_OF["openings"], f"openings/{index}",
+                    f"window {opening.get('id')} ({opening.get('type')}): its sill is "
+                    f"{sill:.2f} m above {cell.get('id')}'s floor, outside §70.5's "
+                    f"{low:.2f}–{high:.2f} m. If the type is meant to sit there, exempt the TYPE "
+                    f"in SILL_EXEMPT_TYPES with the reason"))
+
+    # ---- §70.5's switch and handle centres ----------------------------------------------------
+    #
+    # An interactable's focus point IS the thing you reach for -- `interactables.json` says so of
+    # the door in as many words, "the focus is the handle: away from the hinge, 1.05 m up" -- so
+    # these two rows of §70.5 are decided by the layout and not by any model. The socket row is
+    # NOT here: there are no socket interactables to measure, and a check over an empty set is a
+    # check that passes for the wrong reason.
+    for index, thing in enumerate(world.interactables):
+        band = {"light_switch": SWITCH_CENTRE, "door": HANDLE_CENTRE}.get(thing.get("kind"))
+        if band is None:
+            continue
+        cell = world.cell_by_id.get(thing.get("cell"))
+        point = (thing.get("focus") or {}).get("point")
+        if cell is None or not isinstance(point, list) or len(point) != 3:
+            continue
+        extent = world.extent(cell)
+        if extent is None:
+            continue
+        try:
+            height = float(point[1]) - extent[0]
+        except (TypeError, ValueError):
+            continue
+        low, high = band
+        if not low - 1e-9 <= height <= high + 1e-9:
+            what = "switch centre" if thing.get("kind") == "light_switch" else "handle centre"
+            problems.append(Problem(
+                10, FILE_OF["interactables"], f"interactables/{index}/focus/point",
+                f"{thing.get('id')}: its {what} is {height:.2f} m above {cell.get('id')}'s "
+                f"floor, outside §70.5's {low:.2f}–{high:.2f} m"))
+
+    # ---- §70.5's room area against what the room is for ---------------------------------------
+    #
+    # "a bedroom >= 9 m², a bathroom >= 3.5 m², a WC >= 1.8 m², a corridor >= 0.9 m wide". A
+    # one-sided bound: a bedroom cannot be too large, and §70.5 does not pretend otherwise.
+    for index, cell in enumerate(world.cells):
+        kind = cell.get("kind")
+        if kind == "corridor":
+            # Width, not area: a corridor is judged by whether two people pass in it. Every box is
+            # measured on BOTH plan axes, because an L-shaped corridor is a wide box and a narrow
+            # one, and the narrow one is the one you walk down sideways.
+            for box_index, (x0, x1, z0, z1) in enumerate(boxes_of(cell)):
+                narrowest = min(x1 - x0, z1 - z0)
+                if narrowest < CORRIDOR_WIDTH - 1e-9:
+                    problems.append(Problem(
+                        10, FILE_OF["cells"], f"cells/{index}/boxes/{box_index}",
+                        f"corridor {cell.get('id')}: this box is {narrowest:.2f} m across, under "
+                        f"§70.5's {CORRIDOR_WIDTH:.2f} m"))
+            continue
+        if kind != "room":
+            continue
+        words = str(cell.get("name") or "").lower().replace(",", " ").split()
+        minimum = next((area for word, area in ROOM_MINIMUM_AREA.items() if word in words), None)
+        if minimum is None:
+            continue
+        area = sum((x1 - x0) * (z1 - z0) for x0, x1, z0, z1 in boxes_of(cell))
+        if area < minimum - 1e-9:
+            problems.append(Problem(
+                10, FILE_OF["cells"], f"cells/{index}",
+                f"cell {cell.get('id')} ({cell.get('name')}) is {area:.2f} m², under §70.5's "
+                f"{minimum:.2f} m² for what its name says it is"))
     return problems
+
 
 
 def _passable_neighbours(world: World, cell_id: str) -> list[tuple[str, dict]]:
@@ -1918,10 +2061,13 @@ def fixture() -> dict[str, dict]:
 
     cells = {"schema": "cna-house/cells/1", "cells": [
         cell("L0_FOYER", "L0", "room", [((-2.0, 2.0), (0.0, 4.0))],
-             floorMaterial="MAT_TILE"),
+             name="Entrance Foyer", floorMaterial="MAT_TILE"),
         cell("L0_HALL", "L0", "corridor", [((-2.0, 2.0), (4.0, 10.0))],
-             floorMaterial="MAT_TILE", lightGroups=["LG_HALL"]),
-        cell("L0_WC1", "L0", "room", [((2.0, 4.0), (4.0, 6.0))], floorMaterial="MAT_TILE"),
+             name="Central Hall", floorMaterial="MAT_TILE", lightGroups=["LG_HALL"]),
+        # Named, because §70.5's area row is about what a room is FOR and the `name` is the only
+        # field that says: a WC and a study are both `kind: room`. 2 x 2 m is 4 m², over the 1.8.
+        cell("L0_WC1", "L0", "room", [((2.0, 4.0), (4.0, 6.0))],
+             name="WC 1", floorMaterial="MAT_TILE"),
         cell("L0_STAIR", "L0", "stair", [((-6.0, -2.0), (4.0, 8.0))],
              yOverride=[0.60, 3.65]),
         cell("L0_TERRACE", "L0", "exterior", [((-2.0, 2.0), (-4.0, 0.0))]),
@@ -1930,7 +2076,7 @@ def fixture() -> dict[str, dict]:
         # cabinet, meter cupboard and serving hatch in the house.
         cell("L0_CLOSET", "L0", "closet", [((2.0, 2.5), (6.0, 8.0))]),
         cell("L1_HALL", "L1", "corridor", [((-2.0, 2.0), (4.0, 10.0))]),
-        cell("L1_WC4", "L1", "room", [((2.0, 4.0), (4.0, 6.0))]),
+        cell("L1_WC4", "L1", "room", [((2.0, 4.0), (4.0, 6.0))], name="WC 4"),
         cell("L1_LANDING", "L1", "room", [((-6.0, -2.0), (4.0, 8.0))]),
     ]}
 
@@ -1953,6 +2099,11 @@ def fixture() -> dict[str, dict]:
         # The horizontal one. L0_STAIR's yOverride reaches 3.65, which is L1_LANDING's floor.
         portal("P_STAIR__LANDING", "L0_STAIR", "L1_LANDING", "y", 3.65,
                (-5.5, -2.5), (4.5, 7.5), "stair_well"),
+        # A window in the same wall as the terrace door. §70.5's sill row needs one, and a window
+        # is the portal kind rule 5 must not walk and rule 10's capsule must not measure.
+        portal("P_FOYER__TERRACE__W1", "L0_FOYER", "L0_TERRACE", "z", 0.0,
+               (-1.6, -0.7), (1.50, 3.00), "window", aperture="WIN_FOYER_1",
+               soundLoss={"open": 0.109, "closed": 0.921}),
         portal("P_HALL__CLOSET", "L0_HALL", "L0_CLOSET", "x", 2.0,
                (6.4, 7.4), (0.60, 2.65), "cased_opening"),
         portal("P_L1HALL__LANDING", "L1_HALL", "L1_LANDING", "x", -2.0,
@@ -1973,6 +2124,13 @@ def fixture() -> dict[str, dict]:
          "portal": "P_L1HALL__WC4",
          "leaf": {"width": 0.86, "height": 2.02, "thickness": 0.040},
          "asset": "MODEL_DOOR_LEAF", "material": "MAT_PAINT"},
+        # 1.50 m up, over a 0.60 m floor, is a 0.90 m sill -- §12.6's own number for a `W_DH_STD`
+        # and the middle of §70.5's 0.50-1.10 band.
+        {"id": "WIN_FOYER_1", "kind": "window", "type": "W_DH_STD",
+         "portal": "P_FOYER__TERRACE__W1",
+         "leaf": {"width": 0.90, "height": 1.50, "thickness": 0.030},
+         "swing": "L0_FOYER", "hinge": "left",
+         "asset": None, "material": "MAT_TILE", "solid": False, "lockable": True},
         # An exterior door: §70.5's interior leaf range does not apply, and this row proves the
         # exemption is real by being 2.15 m tall.
         {"id": "DOOR_TERRACE", "kind": "door", "type": "D_ENTRY",
@@ -2008,6 +2166,12 @@ def fixture() -> dict[str, dict]:
         {"id": "SWITCH_HALL", "kind": "light_switch", "cell": "L0_HALL",
          "focus": {"point": [1.90, 1.80, 5.00], "normal": [-1.0, 0.0, 0.0], "radius": 0.05},
          "actions": [{"verb": "Toggle", "do": "toggle(LG_HALL)"}]},
+        # The WC door's handle, on the hall side. §70.5's handle row is measured from an
+        # interactable's focus point, so a fixture without a door interactable would let that check
+        # pass over an empty set -- which is the way a check passes for the wrong reason.
+        {"id": "DOOR_WC1_HANDLE", "kind": "door", "cell": "L0_HALL", "portal": "P_HALL__WC1",
+         "focus": {"point": [1.94, 1.65, 5.20], "normal": [-1.0, 0.0, 0.0], "radius": 0.05},
+         "actions": [{"verb": "Open", "do": "open(DOOR_WC1_HANDLE)"}]},
         # A container's state fields are its own business and are NOT light groups. It is here so
         # that the gang check can be shown to look at `kind` and not at every row with a `state`.
         {"id": "SHELF_CLOSET", "kind": "container", "cell": "L0_CLOSET",
@@ -2190,8 +2354,8 @@ def selftest() -> int:
         # 2. Every rule is actually exercised by the fixture -- a rule with nothing to look at
         #    passes for the wrong reason. Counted as: the rule reads at least one row.
         world = World(layout_io.load_layout(world_dir))
-        require(len(world.cells) == 9 and len(world.portals) == 8 and len(world.openings) == 3,
-                f"the fixture has 9 cells, 8 portals, 3 openings "
+        require(len(world.cells) == 9 and len(world.portals) == 9 and len(world.openings) == 4,
+                f"the fixture has 9 cells, 9 portals, 4 openings "
                 f"({len(world.cells)}, {len(world.portals)}, {len(world.openings)})")
         require(any(p["plane"]["axis"] == "y" for p in world.portals),
                 "including a HORIZONTAL portal -- a stair_well is in the vocabulary and is not a "
@@ -2435,6 +2599,75 @@ def selftest() -> int:
         require(any("1.98" in x.message for x in problems),
                 f"a 1.60 m interior door is caught too -- the exemption is the declared `type`, "
                 f"never the measurement ({[str(x) for x in problems]})")
+
+        # ---- §70.5's remaining layout rows (`HOUSE-00360`) ------------------------------------
+        #
+        # Each is checked twice: that the fixture's honest value passes, and that a plausible wrong
+        # one is caught. A band claim that only ever sees a failure cannot tell a band from a
+        # rejection of everything.
+        def rule_10_over(documents, name):
+            directory = workspace / name
+            write_fixture(directory, documents)
+            return validate(directory, wanted=[10])[1]
+
+        high_sill = copy.deepcopy(base)
+        row(high_sill, "portals", "P_FOYER__TERRACE__W1")["rect"]["v"] = [2.10, 3.00]
+        problems = rule_10_over(high_sill, "high-sill")
+        require(any("sill is 1.50 m" in x.message for x in problems),
+                f"a window sill at 1.50 m over the floor is caught ({[str(x) for x in problems]})")
+
+        # ...and the exemption is the declared TYPE. The same window at the same wrong height is
+        # fine once it is a `W_BATH`, because that is what obscured privacy glazing does -- and a
+        # rule that exempted it for being high would have exempted the row above too.
+        privacy = copy.deepcopy(high_sill)
+        row(privacy, "openings", "WIN_FOYER_1")["type"] = "W_BATH"
+        require(not rule_10_over(privacy, "privacy-sill"),
+                "...unless its declared type is one §70.5's habitable band does not govern")
+
+        switched = copy.deepcopy(base)
+        row(switched, "interactables", "SWITCH_HALL")["focus"]["point"] = [1.90, 2.20, 5.00]
+        problems = rule_10_over(switched, "high-switch")
+        require(any("switch centre is 1.60 m" in x.message for x in problems),
+                f"a light switch 1.60 m up is caught ({[str(x) for x in problems]})")
+
+        handled = copy.deepcopy(base)
+        row(handled, "interactables", "DOOR_WC1_HANDLE")["focus"]["point"] = [1.94, 1.85, 5.20]
+        problems = rule_10_over(handled, "high-handle")
+        require(any("handle centre is 1.25 m" in x.message for x in problems),
+                f"and a door handle 1.25 m up ({[str(x) for x in problems]})")
+
+        # The two bands are different numbers -- 1.10-1.30 for a switch, 0.95-1.10 for a handle --
+        # so a switch at handle height and a handle at switch height are both errors. A check that
+        # used one band for both would pass this pair and mean nothing.
+        swapped = copy.deepcopy(base)
+        row(swapped, "interactables", "SWITCH_HALL")["focus"]["point"] = [1.90, 1.65, 5.00]
+        row(swapped, "interactables", "DOOR_WC1_HANDLE")["focus"]["point"] = [1.94, 1.80, 5.20]
+        problems = rule_10_over(swapped, "swapped-heights")
+        require(len(problems) == 2
+                and any("switch centre is 1.05 m" in x.message for x in problems)
+                and any("handle centre is 1.20 m" in x.message for x in problems),
+                f"a switch at handle height and a handle at switch height are two errors, not "
+                f"zero ({[str(x) for x in problems]})")
+
+        cramped = copy.deepcopy(base)
+        row(cramped, "cells", "L0_WC1")["boxes"] = [{"x": [2.0, 2.8], "z": [4.0, 6.0]}]
+        problems = rule_10_over(cramped, "cramped-wc")
+        require(any("1.60 m²" in x.message and "1.80 m²" in x.message for x in problems),
+                f"a 1.60 m² WC is under §70.5's 1.8 ({[str(x) for x in problems]})")
+
+        # ...and the minimum is read from the NAME, because the layout has no other field that
+        # says what a room is for. Rename it and it is an ordinary room with no minimum at all.
+        anonymous = copy.deepcopy(cramped)
+        row(anonymous, "cells", "L0_WC1")["name"] = "Meter Cupboard"
+        require(not rule_10_over(anonymous, "anonymous-room"),
+                "...and the same 1.60 m² room passes once its name stops claiming to be a WC")
+
+        pinched = copy.deepcopy(base)
+        row(pinched, "cells", "L0_HALL")["boxes"] = [{"x": [-2.0, 2.0], "z": [4.0, 4.8]}]
+        problems = rule_10_over(pinched, "pinched-corridor")
+        require(any("0.80 m across" in x.message for x in problems),
+                f"and a corridor 0.80 m across is caught on the narrow axis, not excused by the "
+                f"long one ({[str(x) for x in problems]})")
 
         def validate_world_problems(documents, directory, rule):
             write_fixture(directory, documents)

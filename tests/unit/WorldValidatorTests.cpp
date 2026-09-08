@@ -161,6 +161,53 @@ namespace
                            [rule](const world::ValidationProblem& problem) { return problem.rule == rule; });
     }
 
+    /// A rule-10 problem whose message contains @p needle. The §70.5 rows all live in rule 10, so
+    /// "rule 10 fired" is not enough to say WHICH of them did.
+    [[nodiscard]] bool Said(const std::vector<world::ValidationProblem>& problems, const char* needle)
+    {
+        return std::any_of(problems.begin(),
+                           problems.end(),
+                           [needle](const world::ValidationProblem& problem)
+                           { return problem.ToString().find(needle) != std::string::npos; });
+    }
+
+    /// Adds a window to @p contents, sill @p sillY above the world origin, of @p type.
+    void AddWindow(world::WorldData::Contents& contents, const char* type, float sillY)
+    {
+        world::Portal glazing;
+        glazing.id = Intern("P_FOYER__EXT__W1");
+        glazing.cellA = Intern("L0_FOYER");
+        glazing.cellB = Intern("L0_HALL");
+        glazing.axis = world::PlaneAxis::Z;
+        glazing.planeValue = 4.0F;
+        glazing.minU = -1.6F;
+        glazing.maxU = -0.7F;
+        glazing.minV = sillY;
+        glazing.maxV = sillY + 1.50F;
+        glazing.kind = world::PortalKind::Window;
+        glazing.aperture = Intern("WIN_FOYER_1");
+        glazing.soundLossOpen = 0.109F;
+        glazing.soundLossClosed = 0.921F;
+        contents.portals.push_back(glazing);
+
+        world::Opening sash;
+        sash.id = Intern("WIN_FOYER_1");
+        sash.kind = world::OpeningKind::Window;
+        sash.type = Intern(type);
+        sash.portal = Intern("P_FOYER__EXT__W1");
+        sash.leaf.width = 0.90F;
+        sash.leaf.height = 1.50F;
+        sash.leaf.thickness = 0.03F;
+        sash.swing = Intern("L0_FOYER");
+        contents.openings.push_back(sash);
+
+        world::AudioTransmission single;
+        single.kind = "window_single";
+        single.open = 0.109F;
+        single.closed = 0.921F;
+        contents.audioTransmission.push_back(single);
+    }
+
     TEST(WorldValidatorTest, TheFixtureItselfIsClean)
     {
         IdRegistry::ResetForTesting();
@@ -251,6 +298,85 @@ namespace
             auto contents = Fixture();
             contents.lights[0].position = {40.0F, 3.10F, 7.0F};
             EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 10)) << "a light in another county";
+        }
+
+        // ---- §70.5's remaining layout rows (`HOUSE-00360`) ----------------------------------
+
+        // A sill 1.50 m over the floor. The foyer's floor is L0's 0.60 ffl, so 2.10 is 1.50 up.
+        {
+            auto contents = Fixture();
+            AddWindow(contents, "W_DH_STD", 2.10F);
+            const auto problems = ProblemsFor(std::move(contents));
+            EXPECT_TRUE(Said(problems, "sill is 1.50")) << "a window at head height";
+        }
+
+        // ...and 0.90 up is §12.6's own number for a `W_DH_STD`, so it passes. A band that only
+        // ever rejects is not a band.
+        {
+            auto contents = Fixture();
+            AddWindow(contents, "W_DH_STD", 1.50F);
+            EXPECT_FALSE(Said(ProblemsFor(std::move(contents)), "sill is")) << "a 0.90 m sill";
+        }
+
+        // The exemption is the declared TYPE, never the measurement: obscured privacy glazing sits
+        // above eye level because that is what it is for.
+        {
+            auto contents = Fixture();
+            AddWindow(contents, "W_BATH", 2.10F);
+            EXPECT_FALSE(Said(ProblemsFor(std::move(contents)), "sill is")) << "a bathroom window";
+        }
+
+        // A light switch 1.60 m up, and a door handle 1.25 m up. Two DIFFERENT bands: a check that
+        // used one for both would pass a switch at handle height in either direction.
+        {
+            auto contents = Fixture();
+            world::Interactable plate;
+            plate.id = Intern("SWITCH_HALL");
+            plate.kind = "light_switch";
+            plate.cell = Intern("L0_HALL");
+            plate.focusPoint = {1.90F, 2.20F, 5.00F};
+            plate.state.Declare("LG_HALL", world::StateValue{false});
+            contents.interactables.push_back(plate);
+
+            world::Interactable handle;
+            handle.id = Intern("DOOR_FOYER_HANDLE");
+            handle.kind = "door";
+            handle.cell = Intern("L0_HALL");
+            handle.focusPoint = {1.94F, 1.85F, 4.20F};
+            contents.interactables.push_back(handle);
+
+            const auto problems = ProblemsFor(std::move(contents));
+            EXPECT_TRUE(Said(problems, "switch centre is 1.60")) << "a switch out of reach";
+            EXPECT_TRUE(Said(problems, "handle centre is 1.25")) << "a handle at switch height";
+        }
+
+        // A room whose NAME says it is a WC, at 1.60 m². The layout has no `function` field, so
+        // the name is the only place the data says what a room is for.
+        {
+            auto contents = Fixture();
+            contents.cells[1].name = "WC 1";
+            contents.cells[1].boxes[0] = world::Footprint{-2.0F, -1.2F, 4.0F, 6.0F};
+            EXPECT_TRUE(Said(ProblemsFor(std::move(contents)), "under §70.5's 1.80 m²"))
+                << "a WC you cannot turn round in";
+        }
+
+        // ...and the same room with a name that claims nothing has no minimum at all.
+        {
+            auto contents = Fixture();
+            contents.cells[1].name = "Meter Cupboard";
+            contents.cells[1].boxes[0] = world::Footprint{-2.0F, -1.2F, 4.0F, 6.0F};
+            EXPECT_FALSE(Said(ProblemsFor(std::move(contents)), "for what its name says it is"))
+                << "an unnamed function has no minimum";
+        }
+
+        // A corridor 0.80 m across, measured on its NARROW axis. It is 2 m long, and a check that
+        // took the larger dimension would call it 2 m wide and pass it.
+        {
+            auto contents = Fixture();
+            contents.cells[1].kind = world::CellKind::Corridor;
+            contents.cells[1].boxes[0] = world::Footprint{-2.0F, -1.2F, 4.0F, 6.0F};
+            EXPECT_TRUE(Said(ProblemsFor(std::move(contents)), "0.80 m across"))
+                << "a corridor you walk down sideways";
         }
 
         // Rule 11: an interactable nobody can reach, in a room nobody can stand up in.

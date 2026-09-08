@@ -56,6 +56,13 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "avatar": [("y", 1.55, 1.90, "human avatar height")],
     "dog": [("y", 0.50, 0.70, "dog withers height")],
     "cat": [("y", 0.20, 0.32, "cat shoulder height")],
+    # The one row of §70.5 this table did not transcribe (`HOUSE-00360`). A car is the only entry
+    # in the section with THREE bounds, and it needs all three: a hatchback and an estate differ
+    # by half a metre of length and by nothing else, so a height-only check would pass a model
+    # scaled to a van. Length is -Z (glTF forward), which is why the depth bound is the long one.
+    "car": [("z", 4.2, 5.2, "car length"),
+            ("x", 1.7, 2.0, "car width"),
+            ("y", 1.4, 1.9, "car height")],
     # A pipeline fixture is not a real-world object, but it is still geometry with a size, and the
     # bug this table exists to catch -- a model authored in centimetres -- is exactly as possible
     # here as anywhere. The band is wide because the size is chosen to be legible in a screenshot;
@@ -210,6 +217,29 @@ def selftest() -> int:
             failures += 1
         else:
             print("  a 1.90 m door is rejected, so the tolerance is a tolerance")
+
+        # A car is checked on all three axes, and the axis is what makes the check mean anything:
+        # a model 1.8 m long and 4.6 m wide is a car turned sideways, which a "largest dimension"
+        # check would wave through (`HOUSE-00360`).
+        car = Path(work) / "car_ok.glb"
+        car.write_bytes(make(1.85, 1.55, 4.60))
+        if check(car, "car"):
+            print(f"  SELFTEST FAILED: a 4.60 x 1.85 x 1.55 m car was rejected: "
+                  f"{check(car, 'car')}", file=sys.stderr)
+            failures += 1
+        else:
+            print("  a 4.60 x 1.85 x 1.55 m car passes")
+
+        sideways = Path(work) / "car_sideways.glb"
+        sideways.write_bytes(make(4.60, 1.55, 1.85))
+        problems = check(sideways, "car")
+        if not any("car length" in p for p in problems) or not any("car width" in p
+                                                                   for p in problems):
+            print(f"  SELFTEST FAILED: a car lying across its own axes passed: {problems}",
+                  file=sys.stderr)
+            failures += 1
+        else:
+            print("  and the same car rotated 90 degrees fails on length AND width")
 
         # An unknown category must be an ERROR, never a silent skip.
         if not check(good, "spaceship"):

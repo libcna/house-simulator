@@ -5332,15 +5332,40 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             while the table was being emitted in whatever order it was read — the injected bug
             survived it. The claim now reverses the cell and portal lists and requires the same
             document byte for byte.
-- [ ] HOUSE-00360 — Implement the realism checks of `cna-house.md` §70.5 inside `validate_world.py`
+- [x] HOUSE-00360 — Implement the realism checks of `cna-house.md` §70.5 inside `validate_world.py`
       dep: HOUSE-00358 · sys: world · plat: TOOL · pri: MUST
-      note: (2026-09-07) `HOUSE-00358` implemented the four §70.5 rows the **layout** decides —
-            interior door leaf, habitable clear height, stair `2R + G`, capsule clearance. The
-            rest of the table (counter, cabinet, table, desk, seat, mattress, WC, basin, bath,
-            switch, socket, handle, sill; human, dog, cat and car) is a property of an *asset*,
-            so this task is the join between `scale_check.py`'s measurements and the prop
-            placements — not a second reading of the layout. "Rise consistency ≤ 2 mm" is struck
-            as untestable: one `rise` per flight makes it a tautology.
+      finding: **yesterday's note was wrong about what this task is**, and the correction is the
+            first thing done under it. It said §70.5's remaining rows were all asset properties and
+            that this task was therefore the join with `scale_check.py`. Four of them are not:
+            a **window sill** is a portal rectangle's lower edge over a cell's floor, a **light
+            switch centre** and a **door handle centre** are an interactable's focus point over the
+            same floor (`interactables.json` says so in as many words — "the focus is the handle:
+            away from the hinge, 1.05 m up"), and **room area against function** is a footprint.
+            No `.glb` decides any of them. The join the old note described is `HOUSE-02596`, which
+            already exists and already says so.
+      note: (2026-09-08) so the four are implemented, in **both** validators — rule 10 in
+            `validate_world.py` and `WorldValidator::CheckRealism` — because the reason for having
+            two is that they find each other wrong. Eight new selftest claims and six injected
+            bugs, all caught; six new C++ cases. The authored house passes both.
+      note: the sill row is decided by the window's declared **type**, never by its measurement.
+            Eleven of the 66 windows sit outside §70.5's 0.50–1.10 m on purpose: the front door's
+            sidelights at 0.10, the sunroom's full-height panels at 0.30, the bathrooms' obscured
+            glazing at 1.40, the basement hoppers at 1.85 and the transom at 2.20. An exemption
+            written as "high sills are fine" would have exempted every mis-authored window with
+            them — the same argument `HOUSE-00378` settled for the door leaf.
+      note: the layout has **no `function` field**. A WC and a study are both `kind: room`, and
+            §70.5's area row is about the function, so the check reads the cell's `name` — the only
+            place the data says which. Rename a 1.6 m² "WC 1" to "Meter Cupboard" and it has no
+            minimum, which is the honest consequence and is claimed as one.
+      finding: **§70.5's car row was in the table and not in `scale_check.py`.** Added, with all
+            three bounds and the axes that make them mean something: a model 1.8 m long and 4.6 m
+            wide is a car turned sideways, and a largest-dimension check would wave it through.
+      note: four rows are checked by **neither** gate, and each is a missing input rather than a
+            missing check — recorded under §70.5 and in the tool's own docstring. Rise consistency
+            is a tautology (one `rise` per flight); headroom over a flight needs a plan position
+            `layout.stairs.json` does not carry, so it waits for `HOUSE-00459`; balustrades have no
+            row anywhere; and there are no socket interactables, so a socket band would pass over
+            an empty set.
 - [x] HOUSE-00361 — Implement the reachability proof (rule 11): every interactable's focus point reachable by a 2.5 m ray from a standing eye on its room's floor
       dep: HOUSE-00358, HOUSE-00384 · sys: world · plat: TOOL · pri: MUST
       note: (2026-09-07) the mechanism is already in `validate_world.py` rule 11 from
