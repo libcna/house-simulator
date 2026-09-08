@@ -155,6 +155,10 @@ run_gate "world-deploy" python3 tools/world/deploy_world.py --check
 # pins the exact set of problems the house has, so a new one fails the day it appears. Skipped,
 # loudly, on a checkout that has not run `house_shell_gen.py` -- the shell is not committed.
 run_gate "shell-realism" python3 tools/world/verify_shell.py --selftest
+# `HOUSE-00482`. The shell is a build product and has no `assets-src/` row, so §20.1's provenance
+# question is answered here instead: which generator, at which version, over which layout,
+# producing which bytes. Needs Blender, and says so loudly on a checkout without a shell.
+run_gate "shell-manifest" python3 tools/blender/house_shell_gen.py --check-manifest
 # `HOUSE-00399`. An id is the only durable name anything has, and a save file is a list of them
 # (§68). Renaming a room leaves the layout internally consistent and every save broken, so none of
 # §15.7's eleven rules can see it. This gate can: the golden list is append-only, and an id that

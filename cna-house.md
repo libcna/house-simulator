@@ -2130,6 +2130,15 @@ compared against a reference photograph, recorded in `docs/asset-review/`.
 * Anything without provable provenance is marked `PROVENANCE UNKNOWN — DO NOT SHIP` and the
   packaging target refuses to include it. It may still sit in `assets-src/` as a placeholder
   during development, and a build with any such asset stamps a visible watermark on every frame.
+* **A generated asset has no `assets-src/` row and is not exempt from the question.** The house
+  shell is 99 `.glb` regenerated from the layout into `build/shell/`, so the row's two purposes —
+  provenance and a licence — are served by `docs/shell-manifest.json` instead (`HOUSE-00482`),
+  which records the form the question actually takes for something a tool makes: **which generator,
+  at which version, over which layout, producing which bytes.** The version is a SHA-256 over the
+  sources that decide the geometry rather than a number somebody has to remember to raise; the
+  layout is `world.manifest.json`'s hash; the bytes are a full SHA-256 each.
+  `house_shell_gen.py --check-manifest` is a gate, and it says so loudly on a checkout with no
+  shell rather than passing green over nothing.
 
 ### 20.2 Network availability
 

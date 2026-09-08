@@ -7363,8 +7363,22 @@ the chunk builder produces ≤ 6 chunks per cell.
             stands. Both scratch trees deleted afterwards.
       accept: every file compared on its own; a missing, a new and a differing file are each
             reported and each fail; the check writes nothing to the tree it compares against
-- [ ] HOUSE-00482 — Generate and commit the shell asset manifest rows (`origin.kind = generated`, generator version, seed)
+- [x] HOUSE-00482 — Generate and commit the shell asset manifest rows (`origin.kind = generated`, generator version, seed)
       dep: HOUSE-00481, HOUSE-00195 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) `docs/shell-manifest.json`, written by `house_shell_gen.py --manifest` and
+            gated by `--check-manifest`. **Not rows in `assets.manifest.json`**, and the reason is
+            in §20.1: that file's rule is "every file under `assets-src/` has a manifest row", and
+            the shell is not under `assets-src/` — it is 99 `.glb` regenerated from the layout into
+            `build/shell/`. A row there would need a `sourceSha256` of a file the repository does
+            not contain. What the row buys — provenance and a licence — is what this records, in
+            the form the question takes for something a tool makes: **which generator, at which
+            version, over which layout, producing which bytes.** `origin.kind` is `generated` for
+            all 99 and the licence is the project's, so neither is repeated 99 times.
+      accept: the generator's version is a SHA-256 over the four sources that decide the geometry,
+            not a number somebody must remember to raise; the layout is `world.manifest.json`'s
+            hash; each file carries a full SHA-256; `--check-manifest` names what changed —
+            the generator, the layout, or which file — rather than saying the tree differs; a
+            checkout with no shell is told, not passed
 - [ ] HOUSE-00483 — Render test suite for the blockout: 8 exterior and 12 interior poses
       dep: HOUSE-00475 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00484 — Phase-6 review: does it look like the house in `cna-house.md` §12? Correct whichever is wrong.

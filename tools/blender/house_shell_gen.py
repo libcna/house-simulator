@@ -90,6 +90,7 @@ if not INSIDE_BLENDER:
 
 import argparse  # noqa: E402
 import hashlib  # noqa: E402
+import json  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
@@ -2715,6 +2716,93 @@ def selftest(output: Path) -> int:
     return 0
 
 
+#: The provenance record this generator writes beside its output (`HOUSE-00482`).
+SHELL_MANIFEST = REPO / "docs" / "shell-manifest.json"
+#: What the generator's own version IS: the bytes of every module that decides the geometry. Not a
+#: number somebody has to remember to raise -- a number that cannot be wrong.
+GENERATOR_SOURCES = ("tools/blender/house_shell_gen.py",
+                     "tools/world/stair_geometry.py",
+                     "tools/world/roof_geometry.py",
+                     "tools/world/layout_io.py")
+
+
+def generator_version() -> str:
+    """A SHA-256 over the sources that decide the shell's geometry, in a fixed order."""
+    accumulator = hashlib.sha256()
+    for name in GENERATOR_SOURCES:
+        accumulator.update(name.encode("utf-8"))
+        accumulator.update(b"\0")
+        accumulator.update((REPO / name).read_bytes())
+    return f"sha256:{accumulator.hexdigest()}"
+
+
+def world_hash(source: Path) -> str:
+    """`world.manifest.json`'s hash of the layout this shell was generated from, or empty."""
+    for path in (source / "world.manifest.json", REPO / "content" / "world" / "world.manifest.json"):
+        if path.is_file():
+            return str(layout_io.load_file(path, "manifest").get("worldHash", ""))
+    return ""
+
+
+def shell_manifest(source: Path, output: Path) -> dict:
+    """The provenance of every file in @p output: what made it, from what, and what came out.
+
+    §20.1's rule is "every file under `assets-src/` has a manifest row", and the shell is not under
+    `assets-src/`: it is a build product, regenerated from the layout by a tool in this repository.
+    What a row would have bought it -- provenance and a licence -- it gets here instead, in the
+    form the question actually takes for a generated asset: WHICH generator, at WHICH version, over
+    WHICH layout, producing WHICH bytes. `origin.kind` is `generated` for all of it and the licence
+    is the project's, which is why neither is repeated 99 times.
+    """
+    return {
+        "schema": "cna-house/shell-manifest/1",
+        "generator": GENERATOR_SOURCES[0],
+        "generatorVersion": generator_version(),
+        "origin": {"kind": "generated", "licence": "MIT", "attribution": ""},
+        "worldHash": world_hash(source),
+        # The FULL digest, not `digest()`'s 64-bit prefix: that one exists to compare two runs of
+        # this tool in the same minute, and this one is a provenance record that has to be worth
+        # trusting later.
+        "files": {path.name: "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+                  for path in sorted(output.glob("*.glb"))},
+    }
+
+
+def write_shell_manifest(source: Path, output: Path, destination: Path, check: bool) -> int:
+    """Writes @p destination, or compares it and reports. Returns a process exit status."""
+    manifest = shell_manifest(source, output)
+    if not manifest["files"]:
+        print(f"house_shell_gen: no shell in {output} -- NOTHING WAS RECORDED.")
+        return 0
+    text = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    if not check:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(text, encoding="utf-8")
+        print(f"house_shell_gen: {len(manifest['files'])} file(s) recorded in "
+              f"{destination.relative_to(REPO) if destination.is_relative_to(REPO) else destination}")
+        return 0
+    if not destination.is_file():
+        print(f"house_shell_gen: {destination} does not exist; run --manifest", file=sys.stderr)
+        return 1
+    if destination.read_text(encoding="utf-8") == text:
+        print(f"house_shell_gen: {destination.name} matches the shell in {output}")
+        return 0
+    previous = json.loads(destination.read_text(encoding="utf-8"))
+    if previous.get("generatorVersion") != manifest["generatorVersion"]:
+        print("house_shell_gen: the generator has changed since the manifest was written",
+              file=sys.stderr)
+    if previous.get("worldHash") != manifest["worldHash"]:
+        print("house_shell_gen: the layout has changed since the manifest was written",
+              file=sys.stderr)
+    for name in sorted(set(previous.get("files") or {}) | set(manifest["files"])):
+        before = (previous.get("files") or {}).get(name)
+        after = manifest["files"].get(name)
+        if before != after:
+            print(f"house_shell_gen: {name} {'is new' if before is None else ('has gone' if after is None else 'changed')}",
+                  file=sys.stderr)
+    return 1
+
+
 def determinism(source: Path, reference: Path, scratch: Path) -> int:
     """`HOUSE-00481`: generate again and compare every byte with the tree at @p reference.
 
@@ -2757,8 +2845,16 @@ def main() -> int:
     parser.add_argument("--check", type=Path, default=None,
                         help="regenerate and compare every file with the tree at this path "
                              "(HOUSE-00481); writes nothing to it")
+    parser.add_argument("--manifest", action="store_true",
+                        help="write docs/shell-manifest.json from the shell in --output")
+    parser.add_argument("--check-manifest", action="store_true",
+                        help="compare docs/shell-manifest.json with the shell in --output")
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args(blender_env_argv())
+
+    if args.manifest or args.check_manifest:
+        return write_shell_manifest(args.source, args.output, SHELL_MANIFEST,
+                                    args.check_manifest)
 
     if args.selftest:
         return selftest(args.output / "selftest")
