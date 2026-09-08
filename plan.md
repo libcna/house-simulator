@@ -8649,8 +8649,30 @@ it must be tuned, not just implemented.
             including both poles, the view matrix's origin/-Z/handedness, the clip planes and the
             field of view read back off the projection, and the nonsense aspect. Six injected
             bugs, six caught.
-- [ ] HOUSE-00622 — Implement mouse look: `Mouse::GetState` delta from the window centre, sensitivity, `Mouse::SetPosition` recentre
+- [x] HOUSE-00622 — Implement mouse look: `Mouse::GetState` delta from the window centre, sensitivity, `Mouse::SetPosition` recentre
       dep: HOUSE-00621, HOUSE-00100 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-08) **half of this was already built and the note says which half.**
+            `HOUSE-00140`'s `KeyboardMouseSource` owns the pixels, §44's 0.0022 rad/px, the
+            sensitivity multiplier, the invert-Y and `Mouse::SetPosition`'s recentring, because a
+            system that polled the mouse itself could not be replayed, remapped or tested without
+            a window. What this task adds is the other end: `player::LookAngles` and `ApplyLook`,
+            which turn the radians the source hands over into §14's yaw and §44's pitch.
+      note: the sensitivity is deliberately NOT applied here. `InputState::look` is already in
+            radians, and a multiplier at this end would be the same setting twice with the second
+            one impossible to find. A test asserts one pixel of motion arrives as 0.0022 rad and
+            nothing else.
+      finding: **wrapping the yaw cost precision it did not have to.** `fmod(x + π, 2π) - π` is
+            arithmetic about π, and a yaw of 0.0022 rad -- one pixel -- came back as 0.0021998882:
+            right to six figures and wrong in the last bit, every frame. An angle already inside
+            (-π, π] is now returned untouched, which is also what makes the two ways round the
+            compass compare equal.
+      note: the pitch is NOT wrapped. Wrapping it would put a player who looked all the way up
+            back at the floor and would hide the absence of §44's ±85° clamp, which is
+            `HOUSE-00623`'s and is meant to be visible until it is there.
+      verified: 5 `MouseLookTests` -- right turns east and forward looks up, the radians pass
+            through unscaled, an unavailable look moves nothing (`HOUSE-00100`'s unfocused
+            window), fifty turns of yaw that end where they started, and the pitch that does not
+            wrap. Five injected bugs, five caught.
       accept: no drift over 10 000 frames; consistent at every frame rate
 - [ ] HOUSE-00623 — Implement pitch clamping (±85°) and zero roll
       dep: HOUSE-00622 · sys: player · plat: ALL · pri: MUST

@@ -29,6 +29,7 @@ add_library(cnahouse_core STATIC
     player/CellTracker.cpp
     player/EyeSpring.cpp
     player/FirstPersonCamera.cpp
+    player/MouseLook.cpp
     player/KeyboardMouseSource.cpp
     player/PlayerController.cpp
 
