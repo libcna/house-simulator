@@ -3818,6 +3818,580 @@
                  "flushPhase": 0.0, "paperLeft": 1.0 },
       "persist": ["urine", "solids", "lidOpen", "seatUp", "paperLeft"],
       "portal": null
+    },
+
+    // ================================================================== the taps
+    // `HOUSE-00412`. 26 water outlets, not §56.1's 17. Its own list undercounts the basins: it
+    // says "5 bathroom/WC basin taps" and §13 gives a basin to each of the seven WCs and each of
+    // the five bathrooms, with a **double** vanity in the master — thirteen basin taps before a
+    // bath, a shower or a sink. The rest of §56.1's list is right and is here in full.
+    //
+    // Each one is placed at its room's §12.5 chase, like the toilets: a tap is on the wall the
+    // water arrives in, and a stack that moves takes its taps with it. The four rooms with no
+    // stack — the kitchen, the butler's pantry, the laundries — fall back to the room centre, and
+    // §12.5's STACK-E already puts the kitchen's water on the north wall.
+    //
+    // §56.2's state: `flow` and `hotFraction` are continuous, and a plug and a fill level belong
+    // to the fixture that has one. There is no `isRunning` boolean, for the same reason §36.1 has
+    // no `isRaining`.
+    {
+      "id": "TAP_B1_WC7_BASIN", "kind": "faucet", "cell": "B1_WC7",
+      "prop": null,
+      "focus": { "point": [2.55, -1.40, -22.65], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L0_WC1_BASIN", "kind": "faucet", "cell": "L0_WC1",
+      "prop": null,
+      "focus": { "point": [3.55, 1.50, -20.55], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L0_WC2_BASIN", "kind": "faucet", "cell": "L0_WC2",
+      "prop": null,
+      "focus": { "point": [-10.05, 1.50, -18.70], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L1_WC3_BASIN", "kind": "faucet", "cell": "L1_WC3",
+      "prop": null,
+      "focus": { "point": [-6.65, 4.55, -21.10], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L1_WC4_BASIN", "kind": "faucet", "cell": "L1_WC4",
+      "prop": null,
+      "focus": { "point": [3.55, 4.55, -20.55], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L2_WC5_BASIN", "kind": "faucet", "cell": "L2_WC5",
+      "prop": null,
+      "focus": { "point": [-6.65, 7.45, -21.10], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L2_WC6_BASIN", "kind": "faucet", "cell": "L2_WC6",
+      "prop": null,
+      "focus": { "point": [3.55, 7.45, -20.55], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    // §13.4's double vanity: two taps, not one.
+    {
+      "id": "TAP_L1_MASTER_BATH_BASIN_1", "kind": "faucet", "cell": "L1_MASTER_BATH",
+      "prop": null,
+      "focus": { "point": [-12.35, 4.55, -23.25], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L1_MASTER_BATH_BASIN_2", "kind": "faucet", "cell": "L1_MASTER_BATH",
+      "prop": null,
+      "focus": { "point": [-12.15, 4.55, -23.25], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    // the freestanding bath.
+    {
+      "id": "TAP_L1_MASTER_BATH_BATH", "kind": "faucet", "cell": "L1_MASTER_BATH",
+      "prop": null,
+      "focus": { "point": [-12.35, 4.27, -23.25], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L1_MASTER_BATH_SHOWER", "kind": "faucet", "cell": "L1_MASTER_BATH",
+      "prop": null,
+      "focus": { "point": [-12.35, 5.70, -23.25], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5 },
+      "persist": ["flow", "hotFraction"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L1_BATH2_BASIN", "kind": "faucet", "cell": "L1_BATH2",
+      "prop": null,
+      "focus": { "point": [-10.05, 4.55, -18.70], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    // §13.4: a bath with the shower over it.
+    {
+      "id": "TAP_L1_BATH2_BATH", "kind": "faucet", "cell": "L1_BATH2",
+      "prop": null,
+      "focus": { "point": [-10.05, 4.27, -18.70], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L1_BATH2_SHOWER", "kind": "faucet", "cell": "L1_BATH2",
+      "prop": null,
+      "focus": { "point": [-10.05, 5.70, -18.70], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5 },
+      "persist": ["flow", "hotFraction"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L1_BATH3_BASIN", "kind": "faucet", "cell": "L1_BATH3",
+      "prop": null,
+      "focus": { "point": [6.80, 4.55, -19.60], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L1_BATH3_SHOWER", "kind": "faucet", "cell": "L1_BATH3",
+      "prop": null,
+      "focus": { "point": [6.80, 5.70, -19.60], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5 },
+      "persist": ["flow", "hotFraction"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L2_BATH4_BASIN", "kind": "faucet", "cell": "L2_BATH4",
+      "prop": null,
+      "focus": { "point": [-10.05, 7.45, -18.70], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L2_BATH4_SHOWER", "kind": "faucet", "cell": "L2_BATH4",
+      "prop": null,
+      "focus": { "point": [-10.05, 8.60, -18.70], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5 },
+      "persist": ["flow", "hotFraction"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L2_BATH5_BASIN", "kind": "faucet", "cell": "L2_BATH5",
+      "prop": null,
+      "focus": { "point": [6.80, 7.45, -19.60], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L2_BATH5_BATH", "kind": "faucet", "cell": "L2_BATH5",
+      "prop": null,
+      "focus": { "point": [6.80, 7.17, -19.60], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    // §56.1's mixer and the filter tap beside it.
+    {
+      "id": "TAP_L0_KITCHEN_SINK_1", "kind": "faucet", "cell": "L0_KITCHEN",
+      "prop": null,
+      "focus": { "point": [-4.35, 1.65, -26.55], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L0_KITCHEN_SINK_2", "kind": "faucet", "cell": "L0_KITCHEN",
+      "prop": null,
+      "focus": { "point": [-3.65, 1.65, -26.55], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    // §13.3's second sink.
+    {
+      "id": "TAP_L0_BUTLERS_SINK", "kind": "faucet", "cell": "L0_BUTLERS",
+      "prop": null,
+      "focus": { "point": [-10.45, 1.65, -23.25], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    {
+      "id": "TAP_L0_LAUNDRY_SINK", "kind": "faucet", "cell": "L0_LAUNDRY",
+      "prop": null,
+      "focus": { "point": [6.80, 1.65, -19.60], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    // §13.2's deep sink.
+    {
+      "id": "TAP_B1_LAUNDRY2_SINK", "kind": "faucet", "cell": "B1_LAUNDRY2",
+      "prop": null,
+      "focus": { "point": [-2.55, -1.35, -24.35], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Plug", "when": "state.plug == false", "do": "state.plug = true",
+          "sound": "SFX_PLUG", "duration": 0.4 },
+        { "verb": "Unplug", "when": "state.plug == true", "do": "state.plug = false",
+          "sound": "SFX_DRAIN", "duration": 0.4 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5, "plug": false, "fillLevel": 0.0 },
+      "persist": ["flow", "hotFraction", "plug", "fillLevel"],
+      "portal": null
+    },
+    // §11.6 puts the hose reel on the east service path.
+    {
+      "id": "TAP_EXT_SIDEYARD_E_OUTDOOR", "kind": "faucet", "cell": "EXT_SIDEYARD_E",
+      "prop": null,
+      "focus": { "point": [19.80, 0.60, -23.45], "normal": [0.0, 1.0, 0.0], "radius": 0.30 },
+      "actions": [
+        { "verb": "Turn on", "when": "state.flow < 0.01", "do": "state.flow = 0.65",
+          "sound": "SFX_TAP_ON", "anim": "handle", "duration": 0.5 },
+        { "verb": "Turn off", "when": "state.flow > 0.01", "do": "state.flow = 0.0",
+          "sound": "SFX_TAP_OFF", "anim": "handle", "duration": 0.5 },
+        { "verb": "Hotter", "when": "state.hotFraction < 1.0", "do": "state.hotFraction += 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 },
+        { "verb": "Colder", "when": "state.hotFraction > 0.0", "do": "state.hotFraction -= 0.25",
+          "sound": "SFX_TAP_TURN", "duration": 0.3 }
+      ],
+      "state": { "flow": 0.0, "hotFraction": 0.5 },
+      "persist": ["flow", "hotFraction"],
+      "portal": null
     }
   ]
 }

@@ -1297,7 +1297,7 @@ container interiors of `HOUSE-00373` and the garage storage loft of `HOUSE-00377
 | ≥ 3 toilets / WCs | **7 WC-only rooms**: `B1_WC7`, `L0_WC1`, `L0_WC2`, `L1_WC3`, `L1_WC4`, `L2_WC5`, `L2_WC6`, plus a WC in each bathroom (said "8" over a list of seven until 2026-09-08, `HOUSE-00413`; the ids run `WC1`…`WC7` with no gap) |
 | ≥ 3 bathrooms | **5 bathrooms**: `L1_MASTER_BATH`, `L1_BATH2`, `L1_BATH3`, `L2_BATH4`, `L2_BATH5` |
 | Toilet fixtures total | **12** (7 WCs + 5 bathrooms) |
-| Showers / baths | 3 showers, 3 baths (master has both) |
+| Showers / baths | **4 showers** (master, `L1_BATH2` over the bath, `L1_BATH3`, `L2_BATH4`), 3 baths (master has both) — "3 showers" corrected 2026-09-08, `HOUSE-00412` |
 | Bedrooms | 7 (`L1_MASTER_BED`, `L1_BED2..5`, `L2_BED6`, `L2_BED7`) |
 | Basement spaces | 14 |
 | Attic spaces | 6 |
@@ -4375,9 +4375,15 @@ is the whole model, and it is deliberate.
 
 ### 56.1 Fixtures
 
-17 water outlets: kitchen mixer + filter tap, butler's-pantry tap, 5 bathroom/WC basin taps
-(each hot+cold or a mixer), 3 bath taps, 3 showers, the laundry sink, the basement laundry tub,
-the outdoor tap on the east elevation (with a hose reel).
+**26** water outlets: kitchen mixer + filter tap, butler's-pantry tap, **13 bathroom/WC basin
+taps** (each hot+cold or a mixer), 3 bath taps, **4 showers**, the laundry sink, the basement
+laundry tub, the outdoor tap on the east elevation (with a hose reel).
+
+> Corrected 2026-09-08 by `HOUSE-00412`, which authored them. This said "17 … 5 basin taps … 3
+> showers", and §13 gives a basin to each of the seven WCs and each of the five bathrooms with a
+> **double** vanity in the master — thirteen basin taps before a bath, a shower or a sink — and a
+> shower to the master, `L1_BATH2` (over the bath), `L1_BATH3` and `L2_BATH4`, which is four. The
+> three baths are right: the master's freestanding one, `L1_BATH2`'s and `L2_BATH5`'s.
 
 ### 56.2 Behaviour
 

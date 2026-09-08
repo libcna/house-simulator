@@ -6319,8 +6319,22 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
       dep: HOUSE-00404 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00411 — Author rows for the 14 basement/attic containers
       dep: HOUSE-00404 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00412 — Author rows for the 17 water outlets, with their basins, plugs and stacks
+- [x] HOUSE-00412 — Author rows for the 26 water outlets, with their basins, plugs and stacks
       dep: HOUSE-00386 · sys: world · plat: TOOL · pri: MUST
+      finding: **26, not 17.** §56.1's own list undercounts the basins: it says "5 bathroom/WC
+            basin taps" and §13 gives a basin to each of the seven WCs and each of the five
+            bathrooms, with a **double** vanity in the master — thirteen basin taps before a bath,
+            a shower or a sink. Everything else in §56.1's list is right and is here in full.
+      finding: **four showers, not three.** The master, `L1_BATH2` (over the bath), `L1_BATH3` and
+            `L2_BATH4` all have one in §13's own notes; §56.1 and §13.8 both said three. The three
+            baths are right — the master's freestanding one, `L1_BATH2`'s and `L2_BATH5`'s.
+      note: each outlet is placed at its room's §12.5 chase, like the toilets: a tap is on the wall
+            the water arrives in, and a stack that moves takes its taps with it. The four rooms
+            with no stack fall back to the room centre, and STACK-E already puts the kitchen's
+            water on the north wall.
+      note: `flow` and `hotFraction` are continuous and a plug and a fill level belong to the
+            fixtures that have one. There is no `isRunning` boolean, for the same reason §36.1 has
+            no `isRaining`.
 - [x] HOUSE-00413 — Author rows for the 12 toilets
       dep: HOUSE-00386 · sys: world · plat: TOOL · pri: MUST
       finding: **twelve, not thirteen.** §13.8 says "8 WC-only rooms" over a list of **seven** —
