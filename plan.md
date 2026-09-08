@@ -6857,8 +6857,29 @@ the chunk builder produces ≤ 6 chunks per cell.
       note: seven injected bugs. The two that survived the first round both needed sharper claims:
             a ridge level with the dormer's own head still cleared the window, and a louvre in the
             wrong plane never reached the code that would have mishandled it.
-- [ ] HOUSE-00463 — Generate the attic knee walls, collar-tie ceiling, rafters, purlins and the walkway boarding
+- [x] HOUSE-00463 — Generate the attic knee walls, collar-tie ceiling, rafters, purlins and the walkway boarding
       dep: HOUSE-00461 · sys: content · plat: TOOL · pri: MUST
+      finding: **there is no knee wall to build.** §12.2 gives the attic "1.20 m at the knee wall",
+            and `HOUSE-00461` measured the rafter line over the exterior wall's centre at 1.267 m —
+            so the height §12 names is reached *outside* the wall, and the knee wall is the
+            exterior wall's own inner face, which `HOUSE-00454` built. A separate stud wall inboard
+            of it would be a wall standing in the room for no reason.
+      finding: **the collar-tie ceiling is already there.** §12.2 puts it at +12.60 "over the
+            finished part", and `L3_ROOM`'s `yOverride` top is exactly 12.60: it is that cell's
+            ceiling, laid by `HOUSE-00452`. Building it again here would have put two slabs in the
+            same plane.
+      note: so what this task adds is the structure: a rafter every 400 mm over the ridge's run on
+            both slopes, a purlin under each slope at mid-span, and a walkway board down each
+            unfinished store. The spacings and sections are this generator's — §12 gives the pitch,
+            the ridge and the collar tie and names no member.
+      note: the hip ends carry no jack rafters. They are a different length each, and the only
+            place you see structure is the unfinished stores, which are under the long slopes.
+      note: an attic store is a `closet` on a rafter-bounded level and the finished room is a
+            `room` — the only thing in the data that tells them apart, and §13.6's own notes say
+            which is which ("unfinished: rafters, insulation, walkway boards"). The claim that
+            catches a walkway laid in the finished room is the one that builds `L3_ROOM` twice,
+            once on each kind of level, and requires the two to be identical.
+      note: six injected bugs, all caught. 42 780 triangles.
 - [ ] HOUSE-00464 — Generate the front porch: deck, columns, beam, roof, steps, balustrade
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00465 — Generate the rear extension (sunroom) shell and its flat roof / balcony deck with parapet and railing

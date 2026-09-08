@@ -698,6 +698,16 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
     ]
 
 
+#: The attic's structure (`HOUSE-00463`). §12 gives the pitch, the ridge and the collar tie and
+#: says nothing about members, so the spacing and the sections are this generator's: rafters at
+#: 400 mm centres, 50 × 200, a purlin under each slope at mid-span, and a 600 mm walkway board.
+RAFTER_SPACING = 0.40
+RAFTER_WIDTH = 0.05
+RAFTER_DEPTH = 0.20
+PURLIN_SECTION = 0.15
+WALKWAY_WIDTH = 0.60
+WALKWAY_THICK = 0.030
+
 #: A dormer's cheek thickness, and how far its front wall rises above the window head.
 DORMER_CHEEK = 0.10
 DORMER_HEAD = 0.15
@@ -994,6 +1004,23 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                    level_y + float(construction.get("railing", 0.0)),
                                    fixed, RAIL_SECTION)
 
+    # `HOUSE-00463`: the walkway boards in an unfinished attic store. A rafter-bounded level's
+    # `closet` cells are the stores -- §13.6's "unfinished: rafters, insulation, walkway boards" --
+    # and the finished attic room is `kind: room`, which is the only thing in the data that tells
+    # them apart. The finished room's collar-tie ceiling is not built here: it is its own cell's
+    # ceiling at §12.2's +12.60, which `HOUSE-00452` already laid.
+    if (level or {}).get("ceiling") is None and cell.get("kind") == "closet":
+        for box in cell_boxes(cell, extent):
+            bx0, bx1, by0, _by1, bz0, bz1 = box
+            if (bx1 - bx0) >= (bz1 - bz0):
+                middle = (bz0 + bz1) / 2.0
+                solid(bx0, bx1, by0, by0 + WALKWAY_THICK,
+                      middle - WALKWAY_WIDTH / 2.0, middle + WALKWAY_WIDTH / 2.0)
+            else:
+                middle = (bx0 + bx1) / 2.0
+                solid(middle - WALKWAY_WIDTH / 2.0, middle + WALKWAY_WIDTH / 2.0,
+                      by0, by0 + WALKWAY_THICK, bz0, bz1)
+
     # `HOUSE-00459`: the flights that stand in this cell. A flight is carried by its `fromCell`,
     # the one it starts in, so it is built once and it is in the chunk of the room you are
     # standing in when you begin to climb.
@@ -1120,6 +1147,50 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
             [(x1 - reach, soffit_y, z0 + reach), (x1, soffit_y, z0 + reach),
              (x1, soffit_y, z1 - reach), (x1 - reach, soffit_y, z1 - reach)]):
         add(corners, (0.0, -1.0, 0.0))
+
+    # `HOUSE-00463`: the rafters and the purlins, under the two long planes. The hip ends carry
+    # jack rafters in a real roof and none here: they are a different length each and the attic's
+    # unfinished stores -- the only place you see structure -- are under the long slopes.
+    dx, dz = x1 - x0, z1 - z0
+    if min(dx, dz) > 0.0:
+        half = min(dx, dz) / 2.0
+        top = eaves_y + half * pitch
+        along0, along1 = (x0 + half, x1 - half) if dx >= dz else (z0 + half, z1 - half)
+        count = int((along1 - along0) / RAFTER_SPACING)
+        for index in range(count + 1):
+            at = along0 + index * RAFTER_SPACING
+            if at > along1 + 1e-9:
+                break
+            for side in (-1.0, 1.0):
+                near = (z0 if side < 0 else z1) if dx >= dz else (x0 if side < 0 else x1)
+                mid = ((z0 + z1) / 2.0) if dx >= dz else ((x0 + x1) / 2.0)
+                if dx >= dz:
+                    rafter = [(at - RAFTER_WIDTH / 2.0, eaves_y - RAFTER_DEPTH, near),
+                              (at + RAFTER_WIDTH / 2.0, eaves_y - RAFTER_DEPTH, near),
+                              (at + RAFTER_WIDTH / 2.0, top - RAFTER_DEPTH, mid),
+                              (at - RAFTER_WIDTH / 2.0, top - RAFTER_DEPTH, mid)]
+                else:
+                    rafter = [(near, eaves_y - RAFTER_DEPTH, at - RAFTER_WIDTH / 2.0),
+                              (near, eaves_y - RAFTER_DEPTH, at + RAFTER_WIDTH / 2.0),
+                              (mid, top - RAFTER_DEPTH, at + RAFTER_WIDTH / 2.0),
+                              (mid, top - RAFTER_DEPTH, at - RAFTER_WIDTH / 2.0)]
+                add(rafter, (0.0, -1.0, 0.0))
+        # A purlin under each slope, halfway up it.
+        for side in (-1.0, 1.0):
+            near = (z0 if side < 0 else z1) if dx >= dz else (x0 if side < 0 else x1)
+            mid = ((z0 + z1) / 2.0) if dx >= dz else ((x0 + x1) / 2.0)
+            at = (near + mid) / 2.0
+            level = (eaves_y + top) / 2.0 - RAFTER_DEPTH
+            if dx >= dz:
+                add([(along0, level - PURLIN_SECTION, at - PURLIN_SECTION / 2.0),
+                     (along1, level - PURLIN_SECTION, at - PURLIN_SECTION / 2.0),
+                     (along1, level, at - PURLIN_SECTION / 2.0),
+                     (along0, level, at - PURLIN_SECTION / 2.0)], (0.0, 0.0, -1.0))
+            else:
+                add([(at - PURLIN_SECTION / 2.0, level - PURLIN_SECTION, along0),
+                     (at - PURLIN_SECTION / 2.0, level - PURLIN_SECTION, along1),
+                     (at - PURLIN_SECTION / 2.0, level, along1),
+                     (at - PURLIN_SECTION / 2.0, level, along0)], (-1.0, 0.0, 0.0))
 
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(vertices, [], faces)
@@ -1841,6 +1912,54 @@ def selftest(output: Path) -> int:
     require(len(dormered.data.polygons) == plain_roof_faces + 5 * len(dormer_list),
             f"and the roof gains five faces for each of the five ({plain_roof_faces} -> "
             f"{len(dormered.data.polygons)})")
+
+    # ---- `HOUSE-00463`: the attic structure -----------------------------------------------------
+    ridge_run = (outer[1] - outer[0]) - (outer[3] - outer[2])
+    expected_rafters = 2 * (int(ridge_run / RAFTER_SPACING) + 1)
+    require(len(dormered.data.polygons) == plain_roof_faces + 5 * len(dormer_list),
+            "the roof's face count is the planes, the eaves boards and the structure")
+    bare = plain_roof_faces - (4 + 4 + 4)      # planes, fascia, soffit
+    require(bare == expected_rafters + 2,
+            f"a rafter every {RAFTER_SPACING * 1000:.0f} mm over the ridge's {ridge_run:.2f} m, "
+            f"both slopes, and a purlin under each ({bare} against {expected_rafters + 2})")
+
+    store = cells["L3_STORE_W"]
+    require(store.get("kind") == "closet" and levels["L3"].get("ceiling") is None,
+            "an attic store is a `closet` on a rafter-bounded level, which is the only thing in "
+            "the data that tells it from the finished room")
+    require(cells["L3_ROOM"].get("kind") == "room"
+            and abs(float(cells["L3_ROOM"]["yOverride"][1]) - 12.60) < 1e-9,
+            "and the finished room's ceiling IS §12.2's collar tie at +12.60, already laid by "
+            "`HOUSE-00452` rather than built again here")
+    reset_scene()
+    boarded = build_cell(store, extent_of(store, levels["L3"])[0], neighbours=neighbours,
+                         construction=construction, level=levels["L3"], levels=levels,
+                         cells_by_id=cells)
+    board_height = float(store["yOverride"][0]) + WALKWAY_THICK / 2.0
+    boards = len([face for face in boarded.data.polygons
+                  if abs(face.center.z - board_height) < 0.05])
+    boarded_faces = len(boarded.data.polygons)
+    reset_scene()
+    plain_store = build_cell(store, extent_of(store, levels["L3"])[0], neighbours=neighbours,
+                             construction=construction,
+                             level=dict(levels["L3"], ceiling=13.9), levels=levels,
+                             cells_by_id=cells)
+    finished = cells["L3_ROOM"]
+    reset_scene()
+    room_rafters = build_cell(finished, extent_of(finished, levels["L3"])[0],
+                              neighbours=neighbours, construction=construction,
+                              level=levels["L3"], levels=levels, cells_by_id=cells)
+    room_faces = len(room_rafters.data.polygons)
+    reset_scene()
+    room_flat = build_cell(finished, extent_of(finished, levels["L3"])[0], neighbours=neighbours,
+                           construction=construction, level=dict(levels["L3"], ceiling=12.6),
+                           levels=levels, cells_by_id=cells)
+    require(room_faces == len(room_flat.data.polygons),
+            f"the FINISHED attic room gets no walkway, being a room and not a store "
+            f"({room_faces} against {len(room_flat.data.polygons)})")
+    require(boards >= 4 and boarded_faces == len(plain_store.data.polygons) + 6,
+            f"the store gets a walkway board along it, six faces of it ({boards} faces near the "
+            f"floor, {len(plain_store.data.polygons)} -> {boarded_faces})")
 
     tops = {round(point[1], 6) for corners, _ in planes for point in corners}
     require(tops == {round(eaves_y, 6), round(float(construction["ridgeY"]), 6)},
