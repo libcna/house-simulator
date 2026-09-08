@@ -38,6 +38,7 @@ add_library(cnahouse_core STATIC
     world/WorldData.cpp
     physics/BroadPhase.cpp
     physics/CollisionLoader.cpp
+    physics/Sweep.cpp
     world/CellRuntime.cpp
     world/ChunkReader.cpp
     world/WorldLoader.cpp

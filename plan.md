@@ -7529,9 +7529,37 @@ never escapes and never penetrates.
             1 064, which is what the world holds. The grid turns 15 into 5; the per-cell partition
             turns 1 064 into 15. Both are needed and they work at different scales. §49.2 says so
             now, and the test prints the measurement on every run rather than only when it fails.
-- [ ] HOUSE-00543 — Implement `Capsule` and the capsule-vs-OBB sweep
+- [x] HOUSE-00543 — Implement `Capsule` and the capsule-vs-OBB sweep
       dep: HOUSE-00541 · sys: physics · plat: ALL · pri: MUST
       verify: unit SweepTests.CapsuleObb against 40 analytic cases
+      note: (2026-09-08) `physics::Capsule` and `SweepCapsuleObb`, and **46 analytic cases** across
+            23 tests — the numbers worked out on paper from each case, not read off a run, because
+            a table of what the code currently does is a change detector and passes just as
+            happily when the sweep is wrong.
+            The whole thing rests on one fact: a `Capsule` has no orientation and a `CollisionObb`
+            has only yaw, so in the box's own frame the capsule is still upright. That makes the
+            Minkowski sum of the two a BOX of half-extents `(ex, ey + halfHeight, ez)` ROUNDED by
+            the radius, and the sweep an exact ray against it — no iteration, no margin, and a
+            `Capsule` with nowhere to say the axis is anything but +Y.
+      accept: six faces square on; a miss short, a miss beside, a miss moving away; a hit exactly
+            at t = 1; the segment lengthening the shape in y and in nothing else; starting inside
+            reported as itself with a depenetration direction; a zero motion answering overlap; a
+            rounded edge and a rounded corner at their analytic distances; a graze that catches and
+            one that misses by 50 mm; three yaw cases including a normal with two non-zero
+            components; the time being a fraction and not a distance; sixteen directions each
+            giving a unit normal that opposes the motion; a zero-thickness box; a zero radius
+      finding: (2026-09-08, found by `HOUSE-00543`) **square corners are the bug the rounded box
+            avoids, and it is worth 0.183 m.** Expanding the box by the radius on all three axes
+            is one line shorter and wrong by `radius(√3 − 1)` at a corner: the body stops short of
+            the geometry, on nothing at all, and the feel of it is catching on doorframes.
+            `AGrazeThatMissesTheRoundedEdgeIsAMiss` is the case that tells the two apart -- a body
+            passing 50 mm clear of the rounding, which a square corner catches.
+      finding: (2026-09-08, found by `HOUSE-00543`) two of the first draft's cases were wrong and
+            the code was right, which is what analytic cases are for. A cube turned 45° presents an
+            EDGE to +x and not a face -- its silhouette is a diamond reaching √2 -- so the normal
+            is the approach direction and not the face normal I had assumed. And a 1.4 m/s walk
+            covers 11.67 mm in §49.3's 1/120 s step, so it cannot cross the 20 mm gap I gave it.
+            Both are recorded in the file where they failed.
 - [ ] HOUSE-00544 — Implement capsule-vs-triangle sweep (for the stair ramps and terrain)
       dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00545 — Implement sphere sweep (for the third-person camera)
