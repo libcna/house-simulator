@@ -6935,8 +6935,21 @@ the chunk builder produces ≤ 6 chunks per cell.
             railing come from `HOUSE-00465`'s general rule, and `L2_BALCONY_JULIET` gets the same
             from the same rule — which is claimed rather than assumed.
       note: four injected bugs, all caught. 42 986 triangles over 98 objects.
-- [ ] HOUSE-00467 — Generate the garage wing shell, its slab, its loft platform and the sectional-door opening
+- [x] HOUSE-00467 — Generate the garage wing shell, its slab, its loft platform and the sectional-door opening
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) three of the four were already built, and each is claimed here so that
+            "already built" is a measurement rather than an assumption: the **shell** is
+            `L0_GARAGE`'s walls, every one of them a `wallGarage` from either side
+            (`HOUSE-00452`); the **slab** and the head are its own cell's +0.15 and +4.30, which
+            are §12.2's; and the **sectional door** is an `opening` of kind `door`, so
+            `HOUSE-00455` cut it and `HOUSE-00456` lined it like any other — a 4.9 m one.
+      finding: **the loft platform had nothing at its edge.** It is 27 m² at +2.90 over a slab at
+            +0.15, and §70.5 asks for a guard at a drop over a metre without saying the drop has to
+            be outdoors. So the balcony rule got an indoor sibling: a cell nested inside another,
+            more than a metre above its floor, gets a railing round it. A refrigerator's interior
+            is nested too and is 0.10 m up, so §70.5's own metre is what separates the two — which
+            is the claim, and the injected "guard every nested cell" is what it catches.
+      note: three injected bugs, all caught.
 - [ ] HOUSE-00468 — Generate the chimney, the gutters, the downspouts and the roof vents
       dep: HOUSE-00461 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00469 — Generate the basement window wells

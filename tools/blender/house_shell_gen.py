@@ -861,6 +861,33 @@ def build_balcony_edge(cell: dict, extent: tuple, neighbours: list, construction
     return built
 
 
+def build_mezzanine_guard(cell: dict, extent: tuple, cells_by_id: dict, levels: dict,
+                          construction, add) -> int:
+    """A railing round a platform nested inside another cell, a storey above its floor.
+
+    The garage's storage loft is the case (`HOUSE-00467`): a 27 m² platform at +2.90 over a slab at
+    +0.15, with nothing at its edge. §70.5 asks for a guard at a drop over a metre, and it does not
+    say the drop has to be outdoors. A container's interior is nested too and is 0.10 m over its
+    room's floor, so the same test leaves it alone.
+    """
+    parent = cells_by_id.get(cell.get("parent"))
+    if parent is None or not construction:
+        return 0
+    parent_level = levels.get(parent.get("level")) if levels else None
+    parent_extent, _ = extent_of(parent, parent_level) if parent_level else (None, "")
+    if parent_extent is None or extent[0] - parent_extent[0] <= 1.0:
+        return 0
+    height = float(construction.get("railing", 0.0))
+    built = 0
+    for box in cell_boxes(cell, extent):
+        for side in ("-X", "+X", "-Z", "+Z"):
+            plane, lo, hi = side_span(side, box)
+            rail_along(add, side in ("-X", "+X"), lo, hi,
+                       extent[0] + height, extent[0] + height, plane, RAIL_SECTION)
+            built += 1
+    return built
+
+
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
                level=None, levels=None, portals=(), openings=None, cells_by_id=None,
                flights=()):
@@ -1107,6 +1134,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                    fixed, RAIL_SECTION)
 
     build_balcony_edge(cell, extent, list(neighbours), construction, solid, add)
+    build_mezzanine_guard(cell, extent, cells_by_id, levels or {}, construction, add)
 
     # `HOUSE-00464`: a covered deck stands on columns and has a balustrade round its open sides.
     # The porch is the one cell in this house that is covered -- `L1_BALCONY_FRONT` sits on it --
@@ -2184,6 +2212,34 @@ def selftest(output: Path) -> int:
     require(juliet_edges == 2 * 3,
             f"the juliet balcony gets its parapet and rail from the same rule as the rear one "
             f"({juliet_edges})")
+
+    # ---- `HOUSE-00467`: the garage wing ---------------------------------------------------------
+    loft = cells["L0_GARAGE_LOFT"]
+    loft_extent = extent_of(loft, levels[loft["level"]])[0]
+    guards = build_mezzanine_guard(loft, loft_extent, cells, levels, construction,
+                                   lambda *args: None)
+    require(guards == 4,
+            f"the garage loft is a platform 2.75 m over the slab, so it gets a guard on all four "
+            f"sides ({guards})")
+    fridge = cells["CELL_FRIDGE_INTERIOR"]
+    require(not build_mezzanine_guard(fridge, extent_of(fridge, levels["L0"])[0], cells, levels,
+                                      construction, lambda *args: None),
+            "and a refrigerator's interior, nested and 0.10 m up, does not — the same test, and "
+            "§70.5's own metre is what separates them")
+    require(not build_mezzanine_guard(subject, extent, cells, levels, construction,
+                                      lambda *args: None),
+            "nor does a room that is nested in nothing")
+
+    garage = cells["L0_GARAGE"]
+    garage_extent = extent_of(garage, levels[garage["level"]])[0]
+    require(abs(garage_extent[0] - 0.15) < 1e-9 and abs(garage_extent[1] - 4.30) < 1e-9,
+            f"the garage's slab is §12.2's +0.15 and its head +4.30, which are its own cell's "
+            f"({garage_extent})")
+    sectional = next(row for row in openings_by_portal.values()
+                     if row["id"] == "DOOR_GARAGE_SECTIONAL")
+    require(sectional.get("kind") == "door",
+            "the sectional door is an `opening` of kind `door`, so `HOUSE-00455` cut it and "
+            "`HOUSE-00456` lined it like any other")
 
     require(PORCH_COLUMNS == 4,
             f"§12.1 says the porch stands on FOUR square columns ({PORCH_COLUMNS})")
