@@ -7746,8 +7746,33 @@ never escapes and never penetrates.
             the "blocked horizontally" early-out, which is not a rule either -- a step that went
             its whole length cannot be improved on by a lift -- but is worth two sweeps a tick on
             every tick a body spends in open floor, and says so.
-- [ ] HOUSE-00552 — Implement gravity and landing detection with soft/hard thresholds
+- [x] HOUSE-00552 — Implement gravity and landing detection with soft/hard thresholds
       dep: HOUSE-00550 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) `physics::Fall`, over §43.1's three numbers: 9.81 m/s², a 12 m/s terminal
+            speed, and *"a fall > 2.4 m plays a heavy landing sound; there is no damage"* --
+            §47.2's `land_soft` / `land_hard`. There is no jump in this game and nothing to fall
+            off that is more than a storey high, which is why the whole of falling is one function
+            and not an integrator.
+      note: **semi-implicit Euler, and the order is the decision.** The speed is advanced first and
+            the body moved at the NEW speed, so the fall converges on the analytic answer from
+            above -- a body that falls a shade too fast lands a shade early, and one that falls too
+            slowly hangs. At §49.3's fixed 1/120 s the difference is 0.7 mm over a two-metre fall
+            and it is the SAME 0.7 mm every time, which is what §49.3's determinism clause asks.
+      note: the terminal speed earns its place for a reason other than realism -- it is reached
+            after 1.22 s, which is 7.3 m, further than anything in this house. What it does is
+            bound what ONE fixed step can move a body to 0.10 m, and a step that cannot move a
+            body 0.10 m cannot put it through a 0.15 m floor slab however the sweep behaves.
+      accept: 10 cases. A body on the ground accumulating no speed over 240 steps -- gravity
+            integrated into a resting body hands the first step off a kerb a fall it never had; the
+            first step being g·dt of speed and g·dt² of distance (0.68 mm) and not the zero a
+            move-then-accelerate would give; 12 m/s reached and never passed, with the worst single
+            step 0.100006 m; 0.50 m landing soft in the 39 steps `√(2h/g)` says; §12's 3.05 m
+            storey landing hard; either side of 2.4 m by 50 mm; the drop measured over the FALL and
+            not over the last of its 120 steps; a 60° bank stopping a body without ending its fall,
+            because §43.1 says that is not a place to land. In the real house, a body held over the
+            floor of 77 cells and dropped: every one lands, at rest, not inside the floor, never
+            below its own cell, and none of the 77 lands hard -- which they could not, at 1.50 m.
+            Nine injected bugs, nine caught.
 - [ ] HOUSE-00553 — Implement the terrain height-field collider with bilinear sampling and a triangle test above 20°
       dep: HOUSE-00544 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00554 — Implement the dynamic-obstacle list per cell (doors, garage door, pets) and its per-frame refresh
