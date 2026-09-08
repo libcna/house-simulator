@@ -19,6 +19,11 @@ namespace cnahouse::player
     /// @brief §43.1's eye, measured from the feet.
     inline constexpr float kPlayerEyeHeight = 1.68F;
 
+    /// @brief §43.1's crouched body: 1.25 m tall, so a half-height of 1.25/2 - 0.30.
+    inline constexpr float kPlayerCrouchHalfHeight = 0.325F;
+    /// @brief §43.1's crouched eye, measured from the feet.
+    inline constexpr float kPlayerCrouchEyeHeight = 1.15F;
+
     /// @brief §43.2's normal walk, in m/s: *"the measured average human walking speed"*.
     inline constexpr float kWalkSpeed = 1.35F;
     /// @brief §43.2's fast walk, in m/s.
@@ -61,7 +66,8 @@ namespace cnahouse::player
         /// @brief Radians. §14: 0 looks north (-Z) and positive turns EAST.
         float yaw = 0.0F;
 
-        /// @brief Crouched, which in this house means the attic (§43.1). `HOUSE-00558` sets it.
+        /// @brief Crouched, which in this house means the attic (§43.1). **Automatic**: the
+        ///        controller sets it from the head-room and the player never asks for it.
         bool crouched = false;
         /// @brief Carrying an item (§50.5). The interaction system sets it.
         bool carrying = false;
@@ -85,17 +91,36 @@ namespace cnahouse::player
         physics::CollisionKind groundKind = physics::CollisionKind::Floor;
         std::string_view cellId;
 
+        /// @brief Half the body's segment: §43.1's standing 0.60 or crouched 0.325.
+        [[nodiscard]] float HalfHeight() const
+        {
+            return crouched ? kPlayerCrouchHalfHeight : kPlayerHalfHeight;
+        }
+
+        /// @brief Feet to centre, which is what a crouch changes and a position does not.
+        [[nodiscard]] float Rise() const
+        {
+            return HalfHeight() + kPlayerRadius;
+        }
+
+        /// @brief The soles. **The invariant a crouch preserves**: the body shrinks towards the
+        ///        floor, so its centre drops by exactly what its half-height loses.
+        [[nodiscard]] Microsoft::Xna::Framework::Vector3 Feet() const
+        {
+            return Microsoft::Xna::Framework::Vector3(position.X, position.Y - Rise(), position.Z);
+        }
+
         /// @brief The eye, which is what §45's camera and §50.1's targeting ray start from.
         [[nodiscard]] Microsoft::Xna::Framework::Vector3 Eye() const
         {
-            return Microsoft::Xna::Framework::Vector3(
-                position.X, position.Y - kPlayerHalfHeight - kPlayerRadius + kPlayerEyeHeight, position.Z);
+            const float height = crouched ? kPlayerCrouchEyeHeight : kPlayerEyeHeight;
+            return Microsoft::Xna::Framework::Vector3(position.X, position.Y - Rise() + height, position.Z);
         }
 
-        /// @brief The body, at wherever it currently is.
+        /// @brief The body, at wherever it currently is and whichever shape it currently has.
         [[nodiscard]] physics::Capsule Body() const
         {
-            return physics::Capsule{position, kPlayerHalfHeight, kPlayerRadius};
+            return physics::Capsule{position, HalfHeight(), kPlayerRadius};
         }
     };
 
@@ -121,6 +146,8 @@ namespace cnahouse::player
         /// @brief Everything §43.2's modifier table did to the walk this step, as one number.
         ///        1.0 is an unmodified forward walk. §47's locomotion blend reads it.
         float speedFactor = 1.0F;
+        /// @brief The body crouched or stood up this step. §47.2 blends to `crouch_*` on it.
+        bool crouchChanged = false;
     };
 
     /// @brief §49.3's fixed step, composed (`HOUSE-00555`).

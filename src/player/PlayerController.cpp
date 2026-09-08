@@ -125,10 +125,80 @@ namespace cnahouse::player
                                           state.velocity.Z + gap.Z / gapLength * rate);
         }
 
+        // §43.1's attic crouch, decided before the move and never asked for by the player.
+        //
+        // Two questions, in this order. Does the STANDING body still fit where it is? If not,
+        // crouch -- an attic's rafters come down over a body that walked in upright, and a body
+        // that only checked on the way in would end up inside them. And if it is crouched, does
+        // the standing body fit again? If so, stand -- but only then, or the swap puts the head
+        // through the roof.
+        //
+        // The feet stay put through both: the body shrinks towards the floor, so the centre drops
+        // by exactly what the half-height loses.
+        {
+            const Xna::Vector3 feet = state.Feet();
+            const bool wasCrouched = state.crouched;
+            const Capsule standing{Xna::Vector3(feet.X, feet.Y + kPlayerHalfHeight + kPlayerRadius, feet.Z),
+                                   kPlayerHalfHeight,
+                                   kPlayerRadius};
+            // TOUCHING is not a reason to crouch. A body resting against a wall is touching it --
+            // that is what resting is -- and a fit test that counted contact as "does not fit"
+            // crouched the player at every wall they leaned on (`kContactTolerance`, the same
+            // distinction the depenetration needed).
+            const bool standingFits =
+                OverlapCell(world, cell, broad, standing).depth <= physics::kContactTolerance;
+            state.crouched = !standingFits;
+            if (state.crouched != wasCrouched)
+            {
+                report.crouchChanged = true;
+                state.position = Xna::Vector3(feet.X, feet.Y + state.Rise(), feet.Z);
+            }
+        }
+
         // 2 and 4. Slide, and lift over a kerb if the slide was blocked.
         Capsule body = state.Body();
-        const StepAssist moved = MoveWithStepAssist(
+        StepAssist moved = MoveWithStepAssist(
             world, cell, broad, body, Xna::Vector3(state.velocity.X * dt, 0.0F, state.velocity.Z * dt));
+        // Blocked by something the body would fit under? A low HEADER over a doorway is the case:
+        // the room it is standing in is 2.4 m and the opening is 1.4 m, so the standing test a few
+        // lines up sees nothing wrong -- the body does fit where it IS -- and what stops it is a
+        // vertical face entirely above its waist, whose normal is horizontal like any wall's.
+        //
+        // So the question is not what the contact's normal was. It is whether crouching gets the
+        // body further, asked by trying it, once -- exactly as the kerb assist lifts and retries.
+        // (A sloping rafter needs none of this: it comes down over the body's own feet first, and
+        // the standing test catches it there.)
+        if (moved.slide.contacts > 0 && !state.crouched)
+        {
+            const Xna::Vector3 feet = state.Feet();
+            PlayerState lowered = state;
+            lowered.crouched = true;
+            lowered.position = Xna::Vector3(feet.X, feet.Y + lowered.Rise(), feet.Z);
+            const Capsule small = lowered.Body();
+            if (OverlapCell(world, cell, broad, small).depth <= physics::kContactTolerance)
+            {
+                const StepAssist under =
+                    MoveWithStepAssist(world,
+                                       cell,
+                                       broad,
+                                       small,
+                                       Xna::Vector3(state.velocity.X * dt, 0.0F, state.velocity.Z * dt));
+                const float was =
+                    std::sqrt((moved.position.X - body.centre.X) * (moved.position.X - body.centre.X) +
+                              (moved.position.Z - body.centre.Z) * (moved.position.Z - body.centre.Z));
+                const float now =
+                    std::sqrt((under.position.X - small.centre.X) * (under.position.X - small.centre.X) +
+                              (under.position.Z - small.centre.Z) * (under.position.Z - small.centre.Z));
+                if (now > was + kMotionEpsilon)
+                {
+                    state.crouched = true;
+                    report.crouchChanged = true;
+                    body = small;
+                    moved = under;
+                }
+            }
+        }
+
         body.centre = moved.position;
         report.blocked = moved.slide.blocked;
         report.steppedUp = moved.steppedUp;

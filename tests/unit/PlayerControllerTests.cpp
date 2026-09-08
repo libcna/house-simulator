@@ -242,6 +242,10 @@ TEST(PlayerControllerTests, AWallStopsTheBodyAndDoesNotStoreUpSpeedBehindIt)
     // The wall's south face is at z = -1.9 and the body's radius is 0.30.
     EXPECT_GT(state.position.Z, -1.61F) << "it went through the wall";
     EXPECT_NEAR(Speed(state), 0.0F, 1e-3F) << "it kept accelerating into the wall";
+    // And it does NOT duck. Crouching does not get a body past a full-height wall, so the retry
+    // that ducks under a header must not fire here -- a player who crouches at every wall they
+    // walk into is a player who is permanently crouched.
+    EXPECT_FALSE(state.crouched) << "it crouched at a wall that goes up to the ceiling";
 
     // Resting against the wall, not inside it: a body leaning on a wall IS touching it, and the
     // depenetration deliberately leaves it there rather than bouncing it off (`kContactTolerance`).
@@ -452,17 +456,26 @@ TEST(PlayerControllerTests, TheStateModifiersMultiplyBecauseTheyAreIndependent)
     // one doing all four is slowed by all four -- unlike the directional three, which are one
     // fact asked in different directions.
     using namespace cnahouse::player;
-    const CollisionWorld world = OneCell({Slab(0.0F, -40.0F, 40.0F, CollisionKind::Stair)});
+    // A stair under a ceiling low enough to crouch under: the crouch is AUTOMATIC (§43.1), so a
+    // test that set the flag by hand would be overwritten by the head-room the moment it ran.
+    const CollisionWorld stairs = OneCell({Slab(0.0F, -40.0F, 40.0F, CollisionKind::Stair)});
+    const CollisionWorld world = OneCell({
+        Slab(0.0F, -40.0F, 40.0F, CollisionKind::Stair),
+        Box(Vector3(0.0F, 1.60F, 0.0F), Vector3(40.0F, 0.10F, 12.0F), CollisionKind::Ceiling),
+    });
     BroadPhase broad;
 
-    PlayerState state = Standing(0.0F, 0.0F);
-    PlayerStep(world, world.cells[0], broad, state, InputState{}, kDt); // let the probe see the stair
-    ASSERT_EQ(state.groundKind, CollisionKind::Stair);
-
-    PlayerStepReport step = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+    PlayerState upright = Standing(0.0F, 0.0F);
+    PlayerStep(stairs, stairs.cells[0], broad, upright, InputState{}, kDt);
+    ASSERT_EQ(upright.groundKind, CollisionKind::Stair);
+    ASSERT_FALSE(upright.crouched);
+    PlayerStepReport step = PlayerStep(stairs, stairs.cells[0], broad, upright, Forward(), kDt);
     EXPECT_NEAR(step.speedFactor, kStairsFactor, 1e-4F);
 
-    state.crouched = true;
+    PlayerState state = Standing(0.0F, 0.0F);
+    PlayerStep(world, world.cells[0], broad, state, InputState{}, kDt);
+    ASSERT_EQ(state.groundKind, CollisionKind::Stair);
+    ASSERT_TRUE(state.crouched) << "the low ceiling should have crouched it";
     step = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
     EXPECT_NEAR(step.speedFactor, kStairsFactor * kCrouchFactor, 1e-4F);
 
@@ -511,6 +524,159 @@ TEST(PlayerControllerTests, WalkingBackwardsReallyIsSlowerOverTheGround)
     EXPECT_NEAR(static_cast<float>(backwards) / static_cast<float>(forwards),
                 1.0F / cnahouse::player::kBackwardsFactor,
                 0.02F);
+}
+
+TEST(PlayerControllerTests, TheCrouchedBodyIsTheOneFortyThreePointOneDescribes)
+{
+    using namespace cnahouse::player;
+    // 1.25 m tall with the same 0.30 m radius, and an eye at 1.15 m.
+    EXPECT_FLOAT_EQ(kPlayerCrouchHalfHeight, 0.325F);
+    EXPECT_FLOAT_EQ((kPlayerCrouchHalfHeight + kPlayerRadius) * 2.0F, 1.25F);
+    EXPECT_FLOAT_EQ(kPlayerCrouchEyeHeight, 1.15F);
+
+    // The FEET are what a crouch preserves: the body shrinks towards the floor.
+    PlayerState state = Standing(0.0F, 0.0F);
+    const float feet = state.Feet().Y;
+    state.crouched = true;
+    state.position = Vector3(state.position.X, feet + state.Rise(), state.position.Z);
+    EXPECT_NEAR(state.Feet().Y, feet, 1e-6F);
+    EXPECT_NEAR(state.Eye().Y - feet, kPlayerCrouchEyeHeight, 1e-6F);
+    EXPECT_LT(state.Eye().Y, feet + kPlayerEyeHeight) << "crouching did not lower the eye";
+}
+
+TEST(PlayerControllerTests, ALowCeilingCrouchesTheBodyAndALowerOneDoesNotStandItUp)
+{
+    // §43.1's crouch is AUTOMATIC and attic-only: the player never asks for it. A ceiling at
+    // 1.50 m has no room for a 1.80 m body and plenty for a 1.25 m one.
+    using namespace cnahouse::player;
+    const CollisionWorld world = OneCell({
+        Slab(0.0F, -20.0F, 20.0F),
+        Box(Vector3(0.0F, 1.60F, 0.0F), Vector3(20.0F, 0.10F, 12.0F), CollisionKind::Ceiling),
+    });
+    BroadPhase broad;
+    PlayerState state = Standing(0.0F, 0.0F);
+    ASSERT_FALSE(state.crouched);
+    const float feet = state.Feet().Y;
+
+    const PlayerStepReport step = PlayerStep(world, world.cells[0], broad, state, InputState{}, kDt);
+    EXPECT_TRUE(state.crouched) << "it stayed standing under a 1.50 m ceiling";
+    EXPECT_TRUE(step.crouchChanged);
+    EXPECT_NEAR(state.Feet().Y, feet, 2e-3F) << "the crouch moved the feet";
+
+    // It stays crouched for as long as the ceiling is there, and reports the change only once.
+    for (int i = 0; i < 60; ++i)
+    {
+        const PlayerStepReport again = PlayerStep(world, world.cells[0], broad, state, InputState{}, kDt);
+        EXPECT_FALSE(again.crouchChanged) << "tick " << i;
+        EXPECT_TRUE(state.crouched);
+    }
+
+    // ...and the modifier table slows it while it is (§43.2).
+    const PlayerStepReport walking = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+    EXPECT_NEAR(walking.speedFactor, kCrouchFactor, 1e-4F);
+}
+
+TEST(PlayerControllerTests, ItStandsUpAgainOnlyWhenThereIsRoom)
+{
+    // The other half, and the one that hurts if it is wrong: standing up under a rafter puts the
+    // head through it. The ceiling here covers only the western half of the room.
+    using namespace cnahouse::player;
+    const CollisionWorld world = OneCell({
+        Slab(0.0F, -20.0F, 20.0F),
+        Box(Vector3(-10.0F, 1.60F, 0.0F), Vector3(10.0F, 0.10F, 12.0F), CollisionKind::Ceiling),
+    });
+    BroadPhase broad;
+    PlayerState state = Standing(-5.0F, 0.0F);
+    state.yaw = 1.5707963F; // east, out from under the ceiling
+
+    PlayerStep(world, world.cells[0], broad, state, InputState{}, kDt);
+    ASSERT_TRUE(state.crouched);
+
+    bool stoodUp = false;
+    for (int i = 0; i < 1200 && !stoodUp; ++i)
+    {
+        const PlayerStepReport step = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+        if (!state.crouched)
+        {
+            stoodUp = true;
+            EXPECT_TRUE(step.crouchChanged);
+            EXPECT_GT(state.position.X, -0.6F) << "it stood up while still under the ceiling";
+        }
+        // Whatever it does, it is never inside the ceiling it is under.
+        EXPECT_LE(OverlapCell(world, world.cells[0], broad, state.Body()).depth,
+                  cnahouse::physics::kContactTolerance)
+            << "tick " << i;
+    }
+    EXPECT_TRUE(stoodUp) << "it never stood up after leaving the low ceiling";
+}
+
+TEST(PlayerControllerTests, ASlopingRafterIsWalkedUnderRatherThanWalkedInto)
+{
+    // The attic case §43.1 is written for. A rafter sloping down towards the eaves does not stop
+    // a standing body in FRONT of it -- it stops it from ABOVE -- so the "does the standing body
+    // still fit here?" question cannot see it: the body does still fit where it is. The move is
+    // retried crouched, once, exactly as the kerb assist lifts and retries.
+    const float slope = 0.5F; // 1 m down over 2 m east
+    CollisionMesh rafter;
+    rafter.vertices = {Vector3(-2.0F, 2.60F, -6.0F),
+                       Vector3(-2.0F, 2.60F, 6.0F),
+                       Vector3(14.0F, 2.60F - 16.0F * slope, 6.0F),
+                       Vector3(14.0F, 2.60F - 16.0F * slope, -6.0F)};
+    rafter.indices = {0u, 1u, 2u, 0u, 2u, 3u};
+    rafter.surface = 0u;
+    rafter.kind = CollisionKind::Ceiling;
+    const CollisionWorld world = OneCell({Slab(0.0F, -20.0F, 20.0F)}, {rafter});
+    BroadPhase broad;
+
+    PlayerState state = Standing(-1.5F, 0.0F);
+    state.yaw = 1.5707963F;
+    ASSERT_FALSE(state.crouched);
+
+    for (int i = 0; i < 900; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+        EXPECT_LE(OverlapCell(world, world.cells[0], broad, state.Body()).depth,
+                  cnahouse::physics::kContactTolerance)
+            << "tick " << i << " at x = " << state.position.X;
+    }
+    EXPECT_TRUE(state.crouched) << "it never ducked under the rafter";
+    // The rafter's clear height is `2.60 - 0.5(x + 2)`. A 1.80 m body runs out of room at
+    // x = -0.40 and a 1.25 m one at x = +0.70, so ducking is worth 1.10 m of attic -- and the
+    // body has to end up past the first of those and not past the second.
+    EXPECT_GT(state.position.X, 0.40F) << "it stopped where a STANDING body would have";
+    EXPECT_LT(state.position.X, 0.80F) << "it went further than a 1.25 m body fits";
+}
+
+TEST(PlayerControllerTests, ALowHEADERIsDuckedUnderRatherThanWalkedInto)
+{
+    // The case the ceiling RETRY exists for, and a different one from the sloping rafter above.
+    // Under a rafter, the ceiling over the body's own feet comes down first, so the "does the
+    // standing body still fit HERE?" question sees it coming. A header does not slope: the room
+    // is 2.4 m and the opening is 1.4 m, so the body fits perfectly well where it stands and is
+    // stopped by something in front of it that is entirely above its waist.
+    const CollisionWorld world = OneCell({
+        Slab(0.0F, -20.0F, 20.0F),
+        Box(Vector3(0.0F, 2.50F, 0.0F), Vector3(20.0F, 0.10F, 12.0F), CollisionKind::Ceiling),
+        // The header: a beam from 1.40 m up to the ceiling, across the body's path at x = 2.
+        Box(Vector3(2.0F, 1.95F, 0.0F), Vector3(0.15F, 0.55F, 12.0F), CollisionKind::Wall),
+    });
+    BroadPhase broad;
+    PlayerState state = Standing(0.0F, 0.0F);
+    state.yaw = 1.5707963F; // east, at the opening
+
+    PlayerStep(world, world.cells[0], broad, state, InputState{}, kDt);
+    ASSERT_FALSE(state.crouched) << "2.4 m of room is not a reason to crouch";
+
+    for (int i = 0; i < 900; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+        EXPECT_LE(OverlapCell(world, world.cells[0], broad, state.Body()).depth,
+                  cnahouse::physics::kContactTolerance)
+            << "tick " << i;
+    }
+    EXPECT_GT(state.position.X, 4.0F) << "it stopped at the header instead of ducking under it";
+    // ...and once through, with 2.4 m over its head again, it stands back up.
+    EXPECT_FALSE(state.crouched) << "it stayed crouched after clearing the opening";
 }
 
 TEST(PlayerControllerTests, TheEyeIsWhereFortyThreePointOnePutsIt)

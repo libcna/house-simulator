@@ -7958,9 +7958,31 @@ never escapes and never penetrates.
             that strafing east and turning east covered the same ground. It was written before the
             modifiers existed and was wrong the moment they did: a strafe is §43.2's 0.85. The
             case now asserts that ratio, which is the modifier arriving at the body.
-- [ ] HOUSE-00558 — Implement the automatic attic crouch: headroom probe, capsule swap, eye height, speed
+- [x] HOUSE-00558 — Implement the automatic attic crouch: headroom probe, capsule swap, eye height, speed
       dep: HOUSE-00557 · sys: player · plat: ALL · pri: MUST
-      accept: entering `L3_STORE_W` under the knee wall crouches; standing up is automatic and never clips
+      note: (2026-09-08) §43.1's 1.25 m body with its eye at 1.15 m, swapped in and out
+            AUTOMATICALLY -- the player never asks for it, and there is no crouch key. The FEET
+            are what the swap preserves: the body shrinks towards the floor, so the centre drops by
+            exactly what the half-height loses.
+      note: **two questions, because an attic asks them in two different ways.** A sloping rafter
+            comes down over the body's own feet before it blocks the body's path, so "does the
+            standing body still fit HERE?" catches it. A doorway HEADER does not slope: the room is
+            2.4 m, the opening is 1.4 m, the body fits perfectly well where it stands, and what
+            stops it is a vertical face entirely above its waist -- whose normal is horizontal,
+            like any wall's. So the second question is not about the contact's normal at all: it is
+            whether crouching gets the body further, asked by trying it once, exactly as the kerb
+            assist lifts and retries. A wall that goes to the ceiling gains nothing and is refused.
+      accept: 6 cases. The crouched body's three numbers, and the feet unmoved by the swap with the
+            eye dropping to 1.15; a 1.50 m ceiling crouching the body, reporting the change ONCE
+            over the next 60 ticks, and §43.2's ×0.55 arriving with it; standing up only after
+            leaving the low ceiling, never inside it; a sloping rafter ducked under, reaching
+            x = 0.63 where a standing body stops at -0.40 and a 1.25 m one runs out at +0.70; a
+            low header ducked under and stood up again on the far side; and a full-height wall
+            NOT crouching the body. Eight injected bugs, eight caught.
+      finding: (2026-09-08, found by `HOUSE-00558`) the head-room test asked `overlapped`, and a
+            body resting against a wall is TOUCHING it -- so the player crouched at every wall
+            they leaned on. The same `kContactTolerance` distinction the depenetration needed in
+            `HOUSE-00555`, in a second place. Both fit tests use it now.
 - [ ] HOUSE-00559 — Implement cell tracking with 5 cm hysteresis and the `CellEntered` event
       dep: HOUSE-00555, HOUSE-00356 · sys: player · plat: ALL · pri: MUST
 - [ ] HOUSE-00560 — Implement the stair ramp surface handling: slope detection, `SurfaceKind::Stairs`, speed reduction
