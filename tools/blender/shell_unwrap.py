@@ -180,7 +180,8 @@ def summarise(rows: list[dict], skipped: list[str], problems: list[str]) -> dict
     if not rows:
         return {"cells": 0, "receiverFaces": 0, "receiverArea": 0.0, "detailFaces": 0,
                 "detailArea": 0.0, "atlases": 0, "worstOccupancy": 0.0,
-                "worstOccupancyCell": "", "worstDensity": 0.0, "smallestIslandTexels": 0,
+                "worstOccupancyCell": "", "worstDensity": 0.0, "smallestIslandGutter": None,
+                "singleIslandCells": [],
                 "skipped": skipped, "problems": problems, "perCell": []}
     worst_row = min(rows, key=lambda row: row["utilisation"])
     return {
@@ -194,9 +195,14 @@ def summarise(rows: list[dict], skipped: list[str], problems: list[str]) -> dict
         "worstOccupancy": round(worst_row["utilisation"], 4),
         "worstOccupancyCell": worst_row["cell"],
         "worstDensity": round(min(row["minDensity"] for row in rows), 3),
-        # The smallest island anybody has to bake into, in texels. A receiver island under a few
-        # texels is the one that would need special handling, so it is reported by name.
-        "smallestIslandTexels": min(row["minIslandGutter"] or 0 for row in rows),
+        # The tightest gap between two islands anybody has to bake across, in empty texels. `None`
+        # where a cell packed to a single island -- there is no second island to be near, and
+        # reporting that as "0 texels" would read as a gutter violation that is not there.
+        "smallestIslandGutter": (min(gaps) if (gaps := [row["minIslandGutter"] for row in rows
+                                                       if row["minIslandGutter"] is not None])
+                                 else None),
+        "singleIslandCells": sorted(row["cell"] for row in rows
+                                    if row["minIslandGutter"] is None),
         "needsAttention": sorted(row["cell"] for row in rows
                                  if row["utilisation"] < 0.02 or row["minDensity"]
                                  < row["density"]),
@@ -412,8 +418,10 @@ def main() -> int:
           f"dynamic term")
     print(f"shell_unwrap: {report['atlases']} atlas(es), worst occupancy "
           f"{report['worstOccupancy'] * 100:.1f} % in {report['worstOccupancyCell']}, "
-          f"worst density {report['worstDensity']:.2f} texels/m, smallest receiver island "
-          f"{report['smallestIslandTexels']} texel(s)")
+          f"worst density {report['worstDensity']:.2f} texels/m, tightest island gutter "
+          f"{report['smallestIslandGutter'] if report['smallestIslandGutter'] is not None else 'n/a'}"
+          f" texel(s) over {report['cells'] - len(report['singleIslandCells'])} multi-island "
+          f"cell(s)")
     return 1 if problems else 0
 
 

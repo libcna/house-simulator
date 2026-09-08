@@ -505,6 +505,25 @@ def unwrap(density: float, gutter: int, max_atlas: int) -> dict:
     while size < max_atlas and gutter / size > 1.0 / GUTTER_HEADROOM:
         size *= 2
 
+    # ...and start no smaller than the atlas the geometry provably needs. At 100 % packing an area
+    # of `A` m² at `d` texels/m needs `A·d²` texels, so `sqrt(A)·d` is a LOWER BOUND on the side:
+    # no smaller atlas can meet the density, whatever the packer does. Starting there skips the
+    # rounds that were always going to fail, and skips only those -- the loop below still packs,
+    # measures and doubles exactly as it did (`HOUSE-00471`; the search from 32 upward was most of
+    # a whole-shell run).
+    world_area = 0.0
+    for obj in objects:
+        matrix = obj.matrix_world
+        mesh = obj.data
+        for polygon in mesh.polygons:
+            corners = [matrix @ mesh.vertices[mesh.loops[i].vertex_index].co
+                       for i in polygon.loop_indices]
+            world_area += sum((corners[i] - corners[0]).cross(corners[i + 1] - corners[0]).length
+                              * 0.5 for i in range(1, len(corners) - 1))
+    needed = math.sqrt(max(world_area, 0.0)) * density
+    while size < max_atlas and size < needed:
+        size *= 2
+
     records: list[dict] = []
     measured: list[float] = []
     while True:

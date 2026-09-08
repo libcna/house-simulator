@@ -43,6 +43,7 @@ add_library(cnahouse_core STATIC
 
     # visibility -- §25's portal walk. Reads the world, writes nothing in it.
     visibility/PortalRuntime.cpp
+    visibility/PortalFacing.cpp
 
     # persistence
     persistence/DesktopSaveStore.cpp

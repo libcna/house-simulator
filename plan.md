@@ -7256,8 +7256,24 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             rather than on edge, which is its own claim.
       note: five injected bugs, all caught.
       verify: unit PortalRuntimeTests.*
-- [ ] HOUSE-00666 — Implement the portal back-face test (portal plane vs. camera side)
+- [x] HOUSE-00666 — Implement the portal back-face test (portal plane vs. camera side)
       dep: HOUSE-00665 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) §25.2's `if p.plane faces away from the camera: continue`. The walk
+            expands a cell; a portal of that cell leads to the other side of its plane, and if the
+            camera is already on that side it is looking at the doorway from behind. Skipping those
+            is most of what stops the walk turning round and re-entering the room it came from.
+      note: which side the cell is on is **read from the cell's own box**, not passed in — a caller
+            that had to work it out would work it out differently in two places. The mirror case is
+            claimed as well as the direct one, so the test is about sides rather than about which
+            of `cellA`/`cellB` was written first.
+      note: two conservative answers, both claimed. A camera **exactly in the doorway plane** faces
+            towards: at zero distance there is nothing to be behind, and the alternative blinks the
+            next room out as you walk through the opening. And a portal whose cell is missing faces
+            towards too — that is rule 6's finding, and a visibility walk must not quietly lose a
+            room over it.
+      note: five injected bugs, all caught, including one that dropped the sign and one that read
+            the wrong axis for a horizontal portal.
+      verify: unit PortalFacingTests.*
 - [ ] HOUSE-00667 — Implement `maxDepthFor(portal)` with the interior/exterior asymmetry table
       dep: HOUSE-00665 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00668 — Implement `PortalTraversal`: the BFS with per-cell frustum lists, the `kMaxFrustaPerCell` cap and the containment skip
