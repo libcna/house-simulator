@@ -70,6 +70,34 @@ namespace cnahouse::player
     inline constexpr float kNearPlane = 0.10F;
     inline constexpr float kFarPlane = 420.0F;
 
+    /// @brief §44's camera collision, which is one special case and not a spring arm.
+    ///
+    /// *"The eye is inside the player capsule, so walls are already handled. The only special case
+    /// is a near-plane clip against a surface the capsule is touching -- solved by pulling the
+    /// near plane to 0.05 m and pushing the eye 0.06 m back along the view direction when a 0.10 m
+    /// forward probe hits."*
+    inline constexpr float kEyeProbeDistance = 0.10F;
+    inline constexpr float kEyePullBack = 0.06F;
+    inline constexpr float kNearPlaneClose = 0.05F;
+
+    /// @brief What a surface in front of the eye costs: a step back and a closer near plane.
+    struct EyeClearance
+    {
+        float pullBack = 0.0F;
+        float nearPlane = kNearPlane;
+    };
+
+    /// @brief §44's response to a probe that hit @p distance metres ahead.
+    ///
+    /// **Graded by how close the surface is, rather than switched on when the probe hits.** §44
+    /// gives the response at contact; applied as a switch it is 60 mm of eye travel and 50 mm of
+    /// near plane in ONE frame, and the frame a player's nose reaches a door is the frame they are
+    /// looking at it hardest. Fading it in over the probe's own 0.10 m costs nothing -- it is the
+    /// same arithmetic -- reaches §44's numbers where §44 states them, at contact, and comes back
+    /// the same way when the player steps off. It is also stateless, which is what keeps it
+    /// identical at 30 and 240 frames a second.
+    [[nodiscard]] EyeClearance ClearanceForProbe(bool hit, float distance) noexcept;
+
     /// @brief §44's pitch limit. `HOUSE-00623` applies it; the number lives with the camera it
     ///        belongs to, so there is one of it.
     inline constexpr float kMaxPitchDegrees = 85.0F;
@@ -155,13 +183,31 @@ namespace cnahouse::player
             return pose_;
         }
 
+        /// @brief Applies §44's camera collision to the pose the last `Update` built.
+        ///
+        /// Separate from `Update` because the probe needs the view direction that `Update`
+        /// computes, and because the camera must not be the thing that queries the world: the
+        /// clearance comes from `ProbeAhead` (`EyeProbe.hpp`), which is where the collision call
+        /// lives. Applying it twice is the same as applying it once -- the pull-back is measured
+        /// from the eye `Update` left, not from wherever the eye is now.
+        void ApplyClearance(const EyeClearance& clearance) noexcept;
+
+        /// @brief The near plane in force, which §44's camera collision moves.
+        [[nodiscard]] float NearPlane() const noexcept
+        {
+            return nearPlane_;
+        }
+
         [[nodiscard]] Microsoft::Xna::Framework::Matrix View() const;
         [[nodiscard]] Microsoft::Xna::Framework::Matrix Projection() const;
 
     private:
         CameraPose pose_;
+        /// @brief Where the eye was before §44's pull-back, so applying it is idempotent.
+        Microsoft::Xna::Framework::Vector3 unclearedEye_;
         float fovDegrees_ = kDefaultFovDegrees;
         float aspect_ = 16.0F / 9.0F;
+        float nearPlane_ = kNearPlane;
     };
 
 } // namespace cnahouse::player

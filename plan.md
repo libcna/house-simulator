@@ -8840,8 +8840,45 @@ it must be tuned, not just implemented.
       note: the second half of the acceptance criterion -- *"no tester reports nausea"* -- is
             `HOUSE-00632`'s, which walks every room and every flight and records the final
             numbers. It is not claimed here.
-- [ ] HOUSE-00628 — Implement the near-surface eye pull-back to prevent near-plane clipping
+- [x] HOUSE-00628 — Implement the near-surface eye pull-back to prevent near-plane clipping
       dep: HOUSE-00621, HOUSE-00546 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-09) §44's camera collision, which is one special case and not a spring arm:
+            `ClearanceForProbe` turns a probe distance into a pull-back and a near plane,
+            `FirstPersonCamera::ApplyClearance` applies it, and `player::ProbeAhead` is the
+            0.10 m `RayCastCell` (`HOUSE-00546`) between them.
+      finding: **§44 states the response at contact, and applied as a SWITCH it is 60 mm of eye
+            travel and 50 mm of near plane in one frame.** The frame a player's nose reaches a
+            door is the frame they are looking at it hardest, and a 60 mm jump there is the pop
+            the whole feature exists to avoid. Grading it by the probe's own distance -- nothing
+            at 0.10 m, all of it at the surface -- costs the same arithmetic, reaches §44's
+            numbers where §44 states them, comes back the same way, and is stateless, so it is
+            identical at 30 and 240 frames a second. §44 now records the grading.
+      note: **the camera does not query the world.** It is handed an eye height, a pitch, a bob
+            and now a clearance, every one of them somebody else's measurement, and the collision
+            call lives in `EyeProbe.hpp` beside the physics it needs. That is also what makes the
+            two-phase shape necessary -- `Update` builds the view direction the probe needs, so
+            the probe cannot run inside it.
+      note: `ApplyClearance` is IDEMPOTENT: the pull-back is measured from the eye `Update` left,
+            not from wherever the eye is now, so a second call is the same eye and not 0.12 m of
+            it. `Update` also puts §10.3's near plane back, so a player who stepped away from the
+            wall recovers without anything having to notice they did.
+      note: the probe follows the VIEW and not the body -- the pitch and `HOUSE-00627`'s sway
+            included -- because a player looking down at the floor they are standing on is the
+            commonest surface at arm's length, and a player with their BACK to a wall is not
+            clipping through it. An injected "flatten the pitch out of it" is caught by the
+            crouched-to-40 mm floor case.
+      finding: 0.06 m of pull-back against §43.1's 0.30 m capsule radius is what keeps §44's
+            argument -- *"the eye is inside the player capsule, so walls are already handled"* --
+            true after the pull-back as well as before it. The two numbers are written down in
+            different sections and only their RATIO makes the argument work, so a test walks 20
+            yaw/pitch pairs and asserts the eye is still inside the body.
+      verified: 6 `EyeProbeTests` -- the stated numbers, the graded response with its monotone
+            sweep and its two degenerate distances, the eye stepping back along a view that is not
+            down an axis with the projection reading the moved plane back and the next frame
+            clearing it, the eye kept inside the capsule at 20 orientations, a real wall found at
+            0.06 m and not at 0.5 m nor behind, and the floor 40 mm under a crouched eye. Eight
+            injected bugs, eight caught -- two only after the pull-back test was moved off a
+            north-facing fixture, where a sign flip on X multiplies a zero.
 - [ ] HOUSE-00629 — Implement the landing camera dip and its recovery
       dep: HOUSE-00552, HOUSE-00621 · sys: player · plat: ALL · pri: SHOULD
 - [ ] HOUSE-00630 — Implement the `BoundingFrustum` construction from the camera each frame

@@ -32,6 +32,21 @@ namespace cnahouse::player
                kRadiansToDegrees;
     }
 
+    EyeClearance ClearanceForProbe(bool hit, float distance) noexcept
+    {
+        if (!hit || distance >= kEyeProbeDistance)
+        {
+            return EyeClearance{};
+        }
+
+        // 0 at the probe's own reach, 1 at the surface: the response arrives as the player does.
+        const float closeness = std::clamp(1.0F - std::max(distance, 0.0F) / kEyeProbeDistance, 0.0F, 1.0F);
+        EyeClearance clearance;
+        clearance.pullBack = kEyePullBack * closeness;
+        clearance.nearPlane = kNearPlane + (kNearPlaneClose - kNearPlane) * closeness;
+        return clearance;
+    }
+
     void FirstPersonCamera::SetFieldOfView(float degrees) noexcept
     {
         fovDegrees_ = std::clamp(degrees, kMinFovDegrees, kMaxFovDegrees);
@@ -100,6 +115,21 @@ namespace cnahouse::player
         pose_.forward = Xna::Vector3(sinYaw * cosPitch, sinPitch, -cosYaw * cosPitch);
         pose_.right = Xna::Vector3(cosYaw, 0.0F, sinYaw);
         pose_.up = Cross(pose_.right, pose_.forward);
+
+        // A frame starts with no clearance and earns it: a player who walked away from the wall
+        // last frame gets §10.3's near plane back without anything having to notice they did.
+        unclearedEye_ = pose_.eye;
+        nearPlane_ = kNearPlane;
+    }
+
+    void FirstPersonCamera::ApplyClearance(const EyeClearance& clearance) noexcept
+    {
+        nearPlane_ = clearance.nearPlane;
+        // From the eye `Update` left rather than from the current one, so a second call with the
+        // same clearance is the same eye and not 0.12 m of pull-back.
+        pose_.eye = Xna::Vector3(unclearedEye_.X - pose_.forward.X * clearance.pullBack,
+                                 unclearedEye_.Y - pose_.forward.Y * clearance.pullBack,
+                                 unclearedEye_.Z - pose_.forward.Z * clearance.pullBack);
     }
 
     Xna::Matrix FirstPersonCamera::View() const
@@ -112,7 +142,7 @@ namespace cnahouse::player
     Xna::Matrix FirstPersonCamera::Projection() const
     {
         return Xna::Matrix::CreatePerspectiveFieldOfView(
-            EffectiveFieldOfViewDegrees() * kDegreesToRadians, aspect_, kNearPlane, kFarPlane);
+            EffectiveFieldOfViewDegrees() * kDegreesToRadians, aspect_, nearPlane_, kFarPlane);
     }
 
 } // namespace cnahouse::player

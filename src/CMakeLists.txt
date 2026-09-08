@@ -27,6 +27,7 @@ add_library(cnahouse_core STATIC
     # player -- input first, because nothing else may read the devices
     player/BoundaryGuard.cpp
     player/CellTracker.cpp
+    player/EyeProbe.cpp
     player/EyeSpring.cpp
     player/FirstPersonCamera.cpp
     player/HeadBob.cpp

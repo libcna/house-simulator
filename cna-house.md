@@ -3870,7 +3870,12 @@ doorway does not thrash.
 * **Camera collision**: the eye is inside the player capsule, so walls are already handled. The
   only special case is a near-plane clip against a surface the capsule is touching — solved by
   pulling the near plane to 0.05 m and pushing the eye 0.06 m back along the view direction when
-  a 0.10 m forward probe hits.
+  a 0.10 m forward probe hits. Both are **graded by the probe's own distance** rather than
+  switched on at the hit: full at the surface, nothing at 0.10 m, and stateless in between, so the
+  response arrives as the player does and leaves as they step off. The probe follows the VIEW —
+  pitch and the bob's sway included — because a player looking down at the floor they are standing
+  on is the commonest surface at arm's length, and 0.06 m against §43.1's 0.30 m radius is what
+  keeps the pulled-back eye inside the capsule that the walls are already handled by.
 * **Stairs**: the eye height spring plus the step-up logic means climbing is smooth; the camera
   never intersects the flight above because the stair collision is a ramp (§48).
 * **Exposure adaptation** (§25.7) is a first-person feature as much as a lighting one.
