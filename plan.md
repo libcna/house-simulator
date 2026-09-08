@@ -8226,8 +8226,48 @@ never escapes and never penetrates.
             geometry continues visually far beyond"*. The first draft of the test asserted every
             cell was inside and was simply wrong about what the boundary is for. It now pins the
             SET of three, so a fourth would be noticed.
-- [ ] HOUSE-00565 — Implement the nudgeable-prop mini-physics (gravity, support plane, damping, push impulse) for the 12 named props
+- [x] HOUSE-00565 — Implement the nudgeable-prop mini-physics (gravity, support plane, damping, push impulse) for the 12 named props
       dep: HOUSE-00554 · sys: physics · plat: ALL · pri: SHOULD
+      note: (2026-09-08) `physics::NudgeableProp` and `NudgeStep`/`PushProp`: §49.4's four
+            behaviours -- gravity, a support-plane resolve, linear and angular damping, and a push
+            impulse from the player capsule -- and its two promises, which are the interesting
+            half. They never STACK because they are resolved against static geometry only, so two
+            props cannot hold each other up; and they never SLEEP-FAIL because sleep is a state
+            rather than an optimisation, entered when a prop is slow and supported and left only
+            by a push.
+      note: **a capsule, not a box.** §49.4 says "a sphere or box"; the collision layer sweeps
+            capsules against the world and nothing else, and a football is a capsule with no
+            segment while a waste bin is one with a short one. Giving twelve props their own
+            box-versus-world sweep would double the geometry code in this project to make a
+            0.40 m crate's corners squarer, and all four behaviours are the same either way.
+      finding: **the damping has to be `exp(-k·dt)` and the displacement its integral.** The cheap
+            `v -= k·v·dt` with `x += v·dt` is out by `k·dt/2` of the distance -- 2.3 % at 30 FPS,
+            13 mm over a second of rolling -- so a ball stops on a different floorboard depending
+            on the frame rate, which is exactly what §49.3's fixed step promises it will not do.
+            With the exact form, one second of rolling measures 0.80722 m at 30, 120 and 144 FPS:
+            the same six figures.
+      finding: **friction has to be chosen from a PROBE, not from "did this step's move hit the
+            floor".** A prop resting on a floor is left a thousandth of its step clear of it, so it
+            falls a hair and lands again every step, and a friction picked that way alternates
+            between the ground's and the air's: measured as an effective 0.58 per second against
+            the 1.4 intended, which rolled a shoved football 4.24 m across a 6 m room instead of
+            1.75 m. §49.3's step 3 asks the same question the same way for the same reason.
+      finding: and the probe must NOT end the fall. It reaches 0.05 m, so a prop that stopped
+            falling when the floor came within reach hovered a finger's width above it for ever.
+            What ends a fall is the sweep touching the floor.
+      note: the numbers, with §49.4 giving none: 0.9 of the player's closing speed divided by the
+            prop's mass, capped at 2.5 m/s -- so a 1.35 m/s shove sends a 0.43 kg football off at
+            the cap and a 12 kg crate at 0.10 m/s -- ground damping 1.4/s (a shove rolls a ball
+            1.75 m, across a kitchen and not across the house), air 0.35/s, spin 2.0/s, and sleep
+            below 0.05 m/s.
+      note: the twelve props themselves are `layout.props.json`, which this phase does not have:
+            the system is here and tested against constructed props, and binding it to the
+            authored twelve waits for that file the way `HOUSE-00554`'s dynamic list does.
+      verified: 8 `NudgeableTests` -- the drop and its first `g·dt²`, the sleep that stays exactly
+            still for ten seconds, mass dividing the shove, the roll to a stop, the wall it stops
+            against without pressing, two props that fall through each other to the floor, the
+            off-centre spin and its damping, and the same answer at 30, 120 and 144 FPS. Eight
+            injected bugs, eight caught.
 - [x] HOUSE-00566 — Determinism: fixed-step replay test at 30/60/144 FPS producing an identical final position
       dep: HOUSE-00555 · sys: physics · plat: CI · pri: MUST
       verify: unit PhysicsDeterminismTests.*
