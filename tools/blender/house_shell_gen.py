@@ -698,6 +698,45 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
     ]
 
 
+#: A dormer's cheek thickness, and how far its front wall rises above the window head.
+DORMER_CHEEK = 0.10
+DORMER_HEAD = 0.15
+
+
+def dormer_shell(rect_u: tuple, rect_v: tuple, plane_z: float, outward: float,
+                 outer: tuple, eaves_y: float, pitch: float):
+    """One dormer over a window, as `(corners, outward)` faces: front, two cheeks, two roof planes.
+
+    A **wall** dormer: this house's five sit in the front and rear walls (`W_DORMER`'s portals are
+    on the wall's own plane) and rise through the roof, rather than standing back on the slope. Its
+    own roof is a little gable at the main roof's pitch, and it runs back until its ridge meets the
+    main plane -- which is where a dormer roof dies into a roof.
+    """
+    u0, u1 = rect_u[0] - DORMER_CHEEK, rect_u[1] + DORMER_CHEEK
+    head = rect_v[1] + DORMER_HEAD
+    ridge_y = head + ((u1 - u0) / 2.0) * pitch
+    # The main roof's surface at a given z on this side, and where the dormer's ridge meets it.
+    eaves_z = outer[3] if outward > 0 else outer[2]
+    def roof_at(z):
+        return eaves_y + abs(eaves_z - z) * pitch
+    back = eaves_z - outward * ((ridge_y - eaves_y) / pitch)
+    mid = (u0 + u1) / 2.0
+    faces = [
+        # The front gable, from the roof surface at the wall up to the dormer's own ridge.
+        ([(u0, roof_at(plane_z), plane_z), (u1, roof_at(plane_z), plane_z),
+          (u1, head, plane_z), (mid, ridge_y, plane_z), (u0, head, plane_z)],
+         (0.0, 0.0, outward)),
+    ]
+    for edge, side in ((u0, -1.0), (u1, 1.0)):
+        faces.append(([(edge, roof_at(plane_z), plane_z), (edge, head, plane_z),
+                       (edge, roof_at(back), back)], (side, 0.0, 0.0)))
+    for edge, side in ((u0, -1.0), (u1, 1.0)):
+        faces.append(([(edge, head, plane_z), (mid, ridge_y, plane_z),
+                       (mid, ridge_y, back), (edge, roof_at(back), back)],
+                      (side, pitch, 0.0)))
+    return faces
+
+
 def eaves_height(construction: dict, box: tuple) -> float:
     """Where the roof's eaves EDGE is, derived from the ridge and the pitch (`HOUSE-00461`).
 
@@ -1024,13 +1063,14 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         if wanted is not None and name not in wanted:
             continue
         reset_scene()
-        obj = build_roof(name, box, construction)
+        obj = build_roof(name, box, construction,
+                         dormers=dormers_on(box, portals, openings.values()))
         export(obj, output / f"{name}.glb")
         report["written"].append(name)
     return report
 
 
-def build_roof(name: str, box: tuple, construction: dict):
+def build_roof(name: str, box: tuple, construction: dict, dormers=()):
     """One roof object over @p box, with its fascia. @p box is the WALL CENTRE-LINE rectangle."""
     half_wall = float(construction.get("wallExterior", 0.0)) / 2.0
     reach = half_wall + EAVES_OVERHANG
@@ -1048,6 +1088,13 @@ def build_roof(name: str, box: tuple, construction: dict):
 
     for corners, outward in roof_planes(outer, eaves_y, pitch):
         add(corners, outward)
+
+    # `HOUSE-00462`: the dormers, which belong to the roof they come through.
+    for rect_u, rect_v, plane_z in dormers or ():
+        outward = 1.0 if abs(plane_z - box[3]) < abs(plane_z - box[2]) else -1.0
+        for corners, face_outward in dormer_shell(rect_u, rect_v, plane_z, outward, outer,
+                                                  eaves_y, pitch):
+            add(corners, face_outward)
 
     # The fascia: a board round the eaves edge, hanging below it, and the soffit closing the
     # underside back to the wall. Without them you see the roof planes end in mid-air.
@@ -1081,6 +1128,26 @@ def build_roof(name: str, box: tuple, construction: dict):
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
     return obj
+
+
+def dormers_on(box: tuple, portals, openings) -> list:
+    """`(u range, v range, plane)` for every `W_DORMER` window in the walls under @p box."""
+    by_id = {row["id"]: row for row in portals}
+    out = []
+    for opening in openings:
+        if str(opening.get("type") or "") != "W_DORMER":
+            continue
+        portal = by_id.get(opening.get("portal"))
+        plane = (portal or {}).get("plane") or {}
+        if plane.get("axis") != "z":
+            continue
+        value = float(plane["value"])
+        if not (box[2] - 1e-6 <= value <= box[3] + 1e-6):
+            continue
+        rect = portal["rect"]
+        out.append(((float(rect["u"][0]), float(rect["u"][1])),
+                    (float(rect["v"][0]), float(rect["v"][1])), value))
+    return sorted(out)
 
 
 def roof_boxes(layout: dict, levels: dict) -> dict:
@@ -1729,6 +1796,52 @@ def selftest(output: Path) -> int:
     square = roof_planes((0.0, 8.4, 0.0, 8.4), 0.0, 0.5)
     require(all(len(corners) == 3 for corners, _ in square),
             "and over a square it is four triangles, which is what a pyramid is")
+    # ---- `HOUSE-00462`: the dormers -----------------------------------------------------------
+    all_portals = list(portal_rows.values())
+    dormer_list = dormers_on(main_box, all_portals, openings_by_portal.values())
+    require(len(dormer_list) == 5,
+            f"§12.1's five dormers are the five `W_DORMER` windows ({len(dormer_list)})")
+    subject_dormer = dormer_list[0]
+    dormer_out = 1.0 if abs(subject_dormer[2] - main_box[3]) < abs(subject_dormer[2] - main_box[2]) \
+        else -1.0
+    faces = dormer_shell(subject_dormer[0], subject_dormer[1], subject_dormer[2], dormer_out,
+                         outer, eaves_y, float(construction["roofPitch"]))
+    require(len(faces) == 5,
+            f"a dormer is a gable face, two cheeks and two roof planes ({len(faces)})")
+    heads = {round(point[1], 4) for corners, _ in faces for point in corners}
+    window_head = subject_dormer[1][1]
+    front_top = window_head + DORMER_HEAD
+    require(max(heads) > front_top + 1e-6,
+            f"its ridge is over the top of its own front wall, not level with it: {max(heads)} "
+            f"against {front_top} — a dormer whose ridge is its head has no roof")
+
+    # A gable louvre is not a dormer. It sits in a gable end rather than coming through the roof,
+    # and this house's two are in `x` planes; the type test is what would keep a `z`-plane one out.
+    synthetic_portal = {"id": "P_FAKE", "plane": {"axis": "z", "value": main_box[3]},
+                        "rect": {"u": [0.0, 0.8], "v": [11.3, 12.1]}}
+    require(not dormers_on(main_box, [synthetic_portal],
+                           [{"type": "W_GABLE", "portal": "P_FAKE"}]),
+            "a gable louvre in the same wall is not a dormer")
+    require(len(dormers_on(main_box, [synthetic_portal],
+                           [{"type": "W_DORMER", "portal": "P_FAKE"}])) == 1,
+            "...and the same opening as a dormer is")
+    roof_here = eaves_y + abs((outer[3] if dormer_out > 0 else outer[2]) - subject_dormer[2]) \
+        * float(construction["roofPitch"])
+    require(abs(min(heads) - roof_here) < 1e-3,
+            f"and its foot is on the roof it comes through, at {roof_here:.3f} m")
+    widths = {round(point[0], 4) for corners, _ in faces for point in corners}
+    require(min(widths) < subject_dormer[0][0] and max(widths) > subject_dormer[0][1],
+            "and its cheeks stand outside the window, not through it")
+
+    reset_scene()
+    plain_roof = build_roof("ROOF_PLAIN", main_box, construction)
+    plain_roof_faces = len(plain_roof.data.polygons)
+    reset_scene()
+    dormered = build_roof("ROOF_MAIN", main_box, construction, dormers=dormer_list)
+    require(len(dormered.data.polygons) == plain_roof_faces + 5 * len(dormer_list),
+            f"and the roof gains five faces for each of the five ({plain_roof_faces} -> "
+            f"{len(dormered.data.polygons)})")
+
     tops = {round(point[1], 6) for corners, _ in planes for point in corners}
     require(tops == {round(eaves_y, 6), round(float(construction["ridgeY"]), 6)},
             f"every corner of it is either at the eaves or at the ridge ({sorted(tops)})")

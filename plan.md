@@ -6837,8 +6837,26 @@ the chunk builder produces ≤ 6 chunks per cell.
             roof here because §12.1 gives it a flat one that is the rear balcony's floor — a cell's
             ceiling, which `HOUSE-00452` already built.
       note: five injected bugs, all caught. 98 objects, 42 560 triangles.
-- [ ] HOUSE-00462 — Generate the 5 dormers with their own roofs, cheeks and windows
+- [x] HOUSE-00462 — Generate the 5 dormers with their own roofs, cheeks and windows
       dep: HOUSE-00461 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) five dormers, and the five are found rather than counted: they are the
+            five `W_DORMER` openings, three in the front wall of `L3_ROOM` and two in the rear of
+            `L3_STORE_N`. Each gets a gable face, two cheeks and two roof planes at the main
+            roof's pitch, and its window is `HOUSE-00457`'s — already built, in the wall the dormer
+            comes through.
+      note: **wall dormers, not roof dormers.** Their portals are on the wall's own plane, so they
+            rise out of the wall and through the roof rather than standing back on the slope, and
+            `L3_ROOM`'s two bays reaching Z −14.30 are the rooms behind them. The dormer's own
+            ridge runs back until it meets the main plane, which is where a dormer roof dies into
+            a roof — computed from the pitch rather than chosen.
+      note: a **gable louvre is not a dormer**. §12.6 gives `W_GABLE` to the two attic gable ends,
+            and they sit in `x` planes here, so the axis test would have hidden a type mistake
+            forever. The claim uses a made-up `z`-plane louvre to prove the type test is what keeps
+            it out — the injected bug that let `W_GABLE` through changed nothing about this house
+            and would have changed the next one.
+      note: seven injected bugs. The two that survived the first round both needed sharper claims:
+            a ridge level with the dormer's own head still cleared the window, and a louvre in the
+            wrong plane never reached the code that would have mishandled it.
 - [ ] HOUSE-00463 — Generate the attic knee walls, collar-tie ceiling, rafters, purlins and the walkway boarding
       dep: HOUSE-00461 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00464 — Generate the front porch: deck, columns, beam, roof, steps, balustrade
