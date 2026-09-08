@@ -42,6 +42,10 @@ namespace cnahouse::player
         // distance it travelled -- the "camera snaps when you close the menu" bug.
         hasPreviousMouse_ = false;
         lookAvailable_ = false;
+        // The two-frame average's history goes with it -- and does so in `Apply`'s seeding branch
+        // rather than here, because dropping `hasPreviousMouse_` is what sends the next frame
+        // down that branch. Zeroing it in both places is one place too many: a bug in the one
+        // that matters would be hidden by the one that does not.
     }
 
     void KeyboardMouseSource::Update(float deltaSeconds)
@@ -131,6 +135,8 @@ namespace cnahouse::player
             previousMouseY_ = y;
             hasPreviousMouse_ = true;
             lookAvailable_ = false;
+            previousLookX_ = 0.0f;
+            previousLookY_ = 0.0f;
             return;
         }
 
@@ -145,13 +151,30 @@ namespace cnahouse::player
             // the snapshot simply does not advance, and the two are indistinguishable from here -- so
             // neither contributes look, which is the safe reading of both.
             lookAvailable_ = false;
+            previousLookX_ = 0.0f;
+            previousLookY_ = 0.0f;
             return;
         }
 
         lookAvailable_ = true;
         const float scale = InputConfig::kRadiansPerPixel * config_.sensitivity;
-        state_.look.X = static_cast<float>(dx) * scale;
-        state_.look.Y = static_cast<float>(dy) * scale * (config_.invertY ? -1.0f : 1.0f);
+        const float lookX = static_cast<float>(dx) * scale;
+        const float lookY = static_cast<float>(dy) * scale * (config_.invertY ? -1.0f : 1.0f);
+
+        if (config_.smoothing)
+        {
+            // §44's two-frame average, applied AFTER the sensitivity so the setting is still the
+            // multiplier the player set and not a number the smoothing has been through.
+            state_.look.X = 0.5f * (lookX + previousLookX_);
+            state_.look.Y = 0.5f * (lookY + previousLookY_);
+        }
+        else
+        {
+            state_.look.X = lookX;
+            state_.look.Y = lookY;
+        }
+        previousLookX_ = lookX;
+        previousLookY_ = lookY;
     }
 
 } // namespace cnahouse::player

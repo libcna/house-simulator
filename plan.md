@@ -8715,8 +8715,32 @@ it must be tuned, not just implemented.
             tell an unfocused window from a still hand (`HOUSE-00100` again).
       verified: 3 `MouseCaptureTests` -- the truth table, the change edge and the start state, and
             the hold-to-release. Five injected bugs, five caught.
-- [ ] HOUSE-00625 — Implement sensitivity, invert-Y and optional 2-frame smoothing as settings
+- [x] HOUSE-00625 — Implement sensitivity, invert-Y and optional 2-frame smoothing as settings
       dep: HOUSE-00622, HOUSE-00131 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-08) sensitivity and invert-Y were already settings and already wired
+            (`HOUSE-00131`, `HOUSE-00140`); what this adds is §44's *"optional raw-ish smoothing
+            over 2 frames, default off"* -- `Settings::lookSmoothing`, through `InputConfig` into
+            the source -- and §44's BAND on the sensitivity.
+      finding: **the settings file accepted a sensitivity of 0.05x and 10x, and §44 says 0.2x to
+            4x.** 0.05 is a mouse that cannot turn round and 10 spins on a twitch, and a file that
+            accepted both had told the player those were supported. Clamped to the stated band,
+            with the same "you were told" report the other clamps use.
+      note: the smoothing is applied AFTER the sensitivity, so the setting is still the multiplier
+            the player set and not a number the average has been through; and it is off by default
+            because smoothing IS latency -- it trades a millisecond of aim for a millisecond of
+            lag, and a player who wants that knows they do.
+      finding: **the average's history has to be dropped wherever the position history is, and in
+            exactly ONE place.** A capture change already drops `hasPreviousMouse_`, which sends
+            the next frame down `Apply`'s seeding branch, and that branch is where the average is
+            cleared: zeroing it in `SetMouseCaptured` as well was a second place that hid a bug in
+            the first -- the injected "keep the history across a capture change" was CAUGHT only
+            after the redundant copy was removed. A pause clears it too, because `HOUSE-00100`
+            says a still hand and an unfocused window are the same thing from here and a sweep
+            from before an alt-tab must not arrive as half a sweep after it.
+      verified: 4 new `InputTests` (16 in the suite) -- the default that smooths nothing, the
+            two-frame average over three frames of motion, the history dropped across a capture
+            change, the pause that clears it, and §68's `Alt` level -- plus `SettingsTests`' band.
+            Six injected bugs, six caught, two of them only after the redundant reset was removed.
 - [ ] HOUSE-00626 — Implement the FOV setting and its aspect handling
       dep: HOUSE-00621 · sys: player · plat: ALL · pri: MUST
 - [ ] HOUSE-00627 — Implement head bob (vertical + lateral) tied to the footstep cadence, with the three settings levels

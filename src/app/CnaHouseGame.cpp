@@ -220,6 +220,7 @@ namespace cnahouse::app
         player::InputConfig inputConfig;
         inputConfig.sensitivity = settings_.mouseSensitivity;
         inputConfig.invertY = settings_.invertY;
+        inputConfig.smoothing = settings_.lookSmoothing;
         inputConfig.recentreX = settings_.backBufferWidth / 2;
         inputConfig.recentreY = settings_.backBufferHeight / 2;
         input_.SetConfig(inputConfig);

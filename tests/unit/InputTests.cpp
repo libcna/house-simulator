@@ -205,3 +205,91 @@ namespace
     }
 
 } // namespace
+
+TEST(InputTests, TwoFrameSmoothingIsOffByDefaultAndAveragesWhenItIsOn)
+{
+    // `HOUSE-00625`, §44: *"optional raw-ish smoothing over 2 frames, default off"*. Off by
+    // default because smoothing IS latency -- it trades a millisecond of aim for a millisecond of
+    // lag -- and two frames is the shortest average there is.
+    KeyboardMouseSource raw;
+    raw.Apply(KeyboardState({}), At(100, 100), 0.016f); // seeds the position
+    raw.Apply(KeyboardState({}), At(110, 100), 0.016f);
+    const float ten = raw.Current().look.X;
+    EXPECT_GT(ten, 0.0f);
+    raw.Apply(KeyboardState({}), At(110 + 20, 100), 0.016f);
+    EXPECT_NEAR(raw.Current().look.X, 2.0f * ten, 1e-6f) << "the default smoothed something";
+
+    InputConfig config;
+    config.smoothing = true;
+    KeyboardMouseSource smoothed(config);
+    smoothed.Apply(KeyboardState({}), At(100, 100), 0.016f);
+    smoothed.Apply(KeyboardState({}), At(110, 100), 0.016f);
+    // The first smoothed frame averages 10 px with the nothing before it.
+    EXPECT_NEAR(smoothed.Current().look.X, 0.5f * ten, 1e-6f);
+    smoothed.Apply(KeyboardState({}), At(130, 100), 0.016f);
+    // ...and the second averages 20 px with the 10 before it: 15.
+    EXPECT_NEAR(smoothed.Current().look.X, 1.5f * ten, 1e-6f);
+    // A frame of 20 again is the average of two twenties, which is a mouse that has settled.
+    smoothed.Apply(KeyboardState({}), At(150, 100), 0.016f);
+    EXPECT_NEAR(smoothed.Current().look.X, 2.0f * ten, 1e-6f);
+}
+
+TEST(InputTests, TheSmoothingHistoryIsDroppedWithThePositionHistory)
+{
+    // The delta from before a menu is not this frame's aim. `HOUSE-00140` drops the position
+    // history across a capture change for that reason, and the averaged delta has to go with it or
+    // the first frame back carries half of whatever the pointer did while the menu was open.
+    InputConfig config;
+    config.smoothing = true;
+    KeyboardMouseSource source(config);
+    source.Apply(KeyboardState({}), At(100, 100), 0.016f);
+    source.Apply(KeyboardState({}), At(400, 100), 0.016f); // a big sweep
+    ASSERT_GT(source.Current().look.X, 0.0f);
+
+    source.SetMouseCaptured(true);
+    source.SetMouseCaptured(false);
+    source.Apply(KeyboardState({}), At(100, 100), 0.016f); // re-seeds
+    source.Apply(KeyboardState({}), At(110, 100), 0.016f);
+
+    KeyboardMouseSource fresh(config);
+    fresh.Apply(KeyboardState({}), At(100, 100), 0.016f);
+    fresh.Apply(KeyboardState({}), At(110, 100), 0.016f);
+    EXPECT_FLOAT_EQ(source.Current().look.X, fresh.Current().look.X)
+        << "the sweep before the capture change survived into the aim after it";
+}
+
+TEST(InputTests, APauseClearsTheAverageRatherThanCarryingItOver)
+{
+    // A frame with no motion is not a zero the average should include: `HOUSE-00100` says a still
+    // hand and an unfocused window are indistinguishable from here, so a pause of unknown length
+    // may have passed. Carrying the delta across it would let a sweep from before an alt-tab
+    // arrive as half a sweep afterwards.
+    InputConfig config;
+    config.smoothing = true;
+    KeyboardMouseSource source(config);
+    source.Apply(KeyboardState({}), At(100, 100), 0.016f);
+    source.Apply(KeyboardState({}), At(300, 100), 0.016f); // a 200 px sweep
+    source.Apply(KeyboardState({}), At(300, 100), 0.016f); // ...and a still frame
+    ASSERT_FALSE(source.LookAvailable());
+    source.Apply(KeyboardState({}), At(310, 100), 0.016f); // 10 px
+
+    KeyboardMouseSource fresh(config);
+    fresh.Apply(KeyboardState({}), At(300, 100), 0.016f);
+    fresh.Apply(KeyboardState({}), At(310, 100), 0.016f);
+    EXPECT_FLOAT_EQ(source.Current().look.X, fresh.Current().look.X)
+        << "the sweep from before the pause arrived after it";
+}
+
+TEST(InputTests, AltHeldIsWhatTheCursorPolicyReads)
+{
+    // §68's release, and a LEVEL rather than an edge: `HOUSE-00624`'s policy asks every frame.
+    KeyboardMouseSource source;
+    source.Apply(KeyboardState({}), At(0, 0), 0.016f);
+    EXPECT_FALSE(source.Current().freeCursorHeld);
+    source.Apply(KeyboardState{Keys::LeftAlt}, At(0, 0), 0.016f);
+    EXPECT_TRUE(source.Current().freeCursorHeld);
+    source.Apply(KeyboardState{Keys::RightAlt}, At(0, 0), 0.016f);
+    EXPECT_TRUE(source.Current().freeCursorHeld) << "the other alt is not an alt";
+    source.Apply(KeyboardState{Keys::W}, At(0, 0), 0.016f);
+    EXPECT_FALSE(source.Current().freeCursorHeld);
+}

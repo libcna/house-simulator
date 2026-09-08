@@ -27,6 +27,13 @@ namespace cnahouse::player
 
         int recentreX = 0;
         int recentreY = 0;
+
+        /// @brief §44's *"optional raw-ish smoothing over 2 frames, default off"*.
+        ///
+        /// The average of this frame's delta and the last one. Two frames because that is the
+        /// shortest average there is: it takes the jitter off a cheap mouse and costs half a
+        /// frame of latency, and anything longer is a mouse that arrives late.
+        bool smoothing = false;
     };
 
     /// @brief The desktop input source: keyboard for movement, mouse for look.
@@ -114,6 +121,11 @@ namespace cnahouse::player
         int previousMouseX_ = 0;
         int previousMouseY_ = 0;
         bool hasPreviousMouse_ = false;
+        /// The previous frame's look, for §44's two-frame average. Zeroed whenever the history is
+        /// dropped -- a capture change or a frame with no motion -- for the same reason the
+        /// position history is: the delta from before a menu is not this frame's aim.
+        float previousLookX_ = 0.0F;
+        float previousLookY_ = 0.0F;
         bool captured_ = false;
         bool lookAvailable_ = false;
     };

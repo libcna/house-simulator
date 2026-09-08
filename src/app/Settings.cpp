@@ -115,6 +115,13 @@ namespace cnahouse::app
         }
         settings.mouseSensitivity = *sensitivity;
 
+        auto smoothing = root.OptionalBool("lookSmoothing", settings.lookSmoothing);
+        if (!smoothing)
+        {
+            return smoothing.Error();
+        }
+        settings.lookSmoothing = *smoothing;
+
         auto invert = root.OptionalBool("invertY", settings.invertY);
         if (!invert)
         {
@@ -194,9 +201,12 @@ namespace cnahouse::app
                 note("a volume");
             }
         }
-        if (mouseSensitivity < 0.05f || mouseSensitivity > 10.0f)
+        // §44's band, and not a wider one "to be safe": 0.05x is a mouse that cannot turn round
+        // and 10x is one that spins on a twitch, and a settings file that accepts both has told
+        // the player those are supported.
+        if (mouseSensitivity < 0.2f || mouseSensitivity > 4.0f)
         {
-            mouseSensitivity = std::clamp(mouseSensitivity, 0.05f, 10.0f);
+            mouseSensitivity = std::clamp(mouseSensitivity, 0.2f, 4.0f);
             note("mouseSensitivity");
         }
         if (fieldOfView < 50.0f || fieldOfView > 110.0f)
@@ -223,6 +233,7 @@ namespace cnahouse::app
                            "  \"ambienceVolume\": {},\n"
                            "  \"mouseSensitivity\": {},\n"
                            "  \"invertY\": {},\n"
+                           "  \"lookSmoothing\": {},\n"
                            "  \"fieldOfView\": {},\n"
                            "  \"fastWalk\": {}\n"
                            "}}\n",
@@ -237,6 +248,7 @@ namespace cnahouse::app
                            ambienceVolume,
                            mouseSensitivity,
                            invertY ? "true" : "false",
+                           lookSmoothing ? "true" : "false",
                            fieldOfView,
                            fastWalk ? "true" : "false");
     }

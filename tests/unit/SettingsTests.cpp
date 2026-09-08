@@ -124,7 +124,10 @@ namespace
         EXPECT_EQ(settings.backBufferWidth, 640);
         EXPECT_EQ(settings.backBufferHeight, 4320);
         EXPECT_FLOAT_EQ(settings.masterVolume, 1.0f);
-        EXPECT_FLOAT_EQ(settings.mouseSensitivity, 0.05f);
+        // §44's band, tightened from the 0.05-10 this file accepted until `HOUSE-00625`: 0.05x
+        // is a mouse that cannot turn round and 10x is one that spins on a twitch, and a settings
+        // file that accepted both had told the player those were supported.
+        EXPECT_FLOAT_EQ(settings.mouseSensitivity, 0.2f);
         EXPECT_FLOAT_EQ(settings.fieldOfView, 110.0f);
     }
 

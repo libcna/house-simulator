@@ -35,8 +35,20 @@ namespace cnahouse::app
         float effectsVolume = 1.0f;
         float ambienceVolume = 1.0f;
 
+        /// @brief §44's mouse sensitivity multiplier, 0.2x to 4x.
+        ///
+        /// A MULTIPLIER and not an angle: the rad/px is `InputConfig::kRadiansPerPixel`, and
+        /// exposing both would let a player find two ways to mean the same thing.
         float mouseSensitivity = 1.0f;
         bool invertY = false;
+
+        /// @brief §44's *"optional raw-ish smoothing over 2 frames, default off"*.
+        ///
+        /// Off by default because smoothing is latency: it trades a millisecond of aim for a
+        /// millisecond of lag, and a player who wants it knows they do. Two frames and not a
+        /// filter with a time constant -- at 60 Hz that is 8 ms of averaging, which takes the
+        /// jitter off a cheap mouse without becoming a mouse that arrives late.
+        bool lookSmoothing = false;
 
         /// @brief Field of view in degrees, vertical.
         float fieldOfView = 70.0f;
