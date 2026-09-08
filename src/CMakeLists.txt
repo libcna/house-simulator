@@ -28,6 +28,7 @@ add_library(cnahouse_core STATIC
     player/BoundaryGuard.cpp
     player/CellTracker.cpp
     player/EyeSpring.cpp
+    player/FirstPersonCamera.cpp
     player/KeyboardMouseSource.cpp
     player/PlayerController.cpp
 

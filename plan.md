@@ -8622,8 +8622,33 @@ never escapes and never penetrates.
 **Goal.** The camera the player will spend the whole game inside. It must feel right, which means
 it must be tuned, not just implemented.
 
-- [ ] HOUSE-00621 — Implement `FirstPersonCamera`: eye from the controller, view matrix, projection, near/far
+- [x] HOUSE-00621 — Implement `FirstPersonCamera`: eye from the controller, view matrix, projection, near/far
       dep: HOUSE-00561 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-08) `player::FirstPersonCamera`: §44's eye, view and projection, with §10.3's
+            0.10 m and 420 m clip planes and §44's 70° vertical field of view in its 55°-95° band.
+            The eye HEIGHT is given rather than computed -- §44 asks for it smoothed by
+            `HOUSE-00561`'s critically damped spring, which the controller owns because §48.2
+            stiffens it on stairs, and a camera running its own would be a second answer to "how
+            high is the eye".
+      note: **roll is zero by construction, not by assertion.** The right vector comes from the
+            YAW alone (§14's `(cos yaw, 0, sin yaw)`), so it is horizontal whatever the pitch
+            does, and the up vector is what the other two leave. That also makes a pitch of
+            exactly ±90° an ordinary case rather than the one where `CreateLookAt` with a world up
+            has no answer -- worth having before `HOUSE-00623` adds the ±85° clamp, so the clamp
+            is a design limit and not a workaround.
+      finding: **§44 said "≈ 100° horizontal at 16:9" and it is 102.4°.** `tan(h/2) = aspect ·
+            tan(v/2)` over 70° vertical, and the two sentences are one decision: the second is now
+            the first's own arithmetic, and the test asserts them together so a change to either
+            reads across. 2.4° is the sort of gap that gets transcribed into a settings tooltip
+            and then into a bug report.
+      note: a zero or NaN aspect is ignored rather than multiplied out. A window minimised to
+            nothing reports a height of 0, and a projection built from that is a matrix of
+            infinities that every vertex after it inherits.
+      verified: 8 `FirstPersonCameraTests` -- the stated numbers, the horizontal field of view,
+            the eye over the FEET standing and crouched, §14's yaw, roll zero at seven pitches
+            including both poles, the view matrix's origin/-Z/handedness, the clip planes and the
+            field of view read back off the projection, and the nonsense aspect. Six injected
+            bugs, six caught.
 - [ ] HOUSE-00622 — Implement mouse look: `Mouse::GetState` delta from the window centre, sensitivity, `Mouse::SetPosition` recentre
       dep: HOUSE-00621, HOUSE-00100 · sys: player · plat: ALL · pri: MUST
       accept: no drift over 10 000 frames; consistent at every frame rate

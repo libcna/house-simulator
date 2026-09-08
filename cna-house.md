@@ -3852,7 +3852,7 @@ doorway does not thrash.
 * Sensitivity: 0.0022 rad/pixel by default, settings-controlled 0.2× – 4×; optional raw-ish
   smoothing over 2 frames, default off; invert-Y option.
 * Pitch clamped to ±85°. **Roll is always zero** during ordinary walking.
-* FOV: 70° vertical by default (≈ 100° horizontal at 16:9), settings-controlled 55°–95°.
+* FOV: 70° vertical by default (102.4° horizontal at 16:9), settings-controlled 55°–95°.
 * **Head motion**: a very small vertical bob, amplitude `0.012 m · (speed/1.35)`, at the footstep
   cadence, plus a 0.35° lateral sway. Default **on** but low; a settings toggle turns it off. The
   rule adopted here: any bob large enough to *notice* is too large.
