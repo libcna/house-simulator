@@ -7663,8 +7663,39 @@ never escapes and never penetrates.
             frame's property and every fixed-step system reads the same one — `ISystem`'s contract
             already says the physics stage runs `frame.fixedSteps` of them.
       verify: unit FrameTimingTests.* — 517/517 with the change.
-- [ ] HOUSE-00550 — Implement collide-and-slide (3 iterations) with the slope limit
+- [x] HOUSE-00550 — Implement collide-and-slide (3 iterations) with the slope limit
       dep: HOUSE-00547, HOUSE-00549 · sys: physics · plat: ALL · pri: MUST
+      note: (2026-09-08) §49.3 step 2, in `physics/Move.cpp`: sweep, walk to `hit.t · 0.999`, slide
+            what is left of the step into the contact plane, three times. The 0.999 is the part
+            that is easy to drop and expensive to be without -- a body that ends a step exactly ON
+            a wall starts the next one INSIDE it, and then cannot walk along it.
+      note: **§43.1's 46° slope limit is not in that pseudocode and cannot be left out.** A
+            projection has no opinion about which surfaces are floors, so sliding along the face of
+            a 60° bank gives a body MORE climb than a 30° ramp does -- exactly backwards. A contact
+            steeper than the limit has the upward part taken out of the slide afterwards, which
+            leaves the body moving along the foot of the slope. `IsWalkable` is the whole test and
+            it is a comparison, not trigonometry: a surface tilted by t has a normal tilted by t,
+            so `normal.Y >= cos(46°)` is the question, and a ceiling fails it for free.
+      accept: 11 cases. A clear step taken whole; a step the size of a REAL tick (1.35 m/s over
+            1/120 s is 11 mm, a hundredth of what the other cases use); a wall met head-on stopping
+            at 0.6993 of the metre and not at 0.70; a wall met at 45° keeping the whole of its
+            alongward metre; an inside corner needing two of the three slides and ending inside
+            neither wall; a passage narrowing from 0.72 m to 0.50 m using all three and reporting
+            `blocked` with the rest of the step unspent; a body that starts 0.05 m inside standing
+            still and being recovered by step 5; 30° climbed by 0.4334 m and 60° climbed by nothing
+            at all. In the real house, 616 steps of 0.5 m from the middle of 77 cells: 34 met
+            something, none ran out of slides, none grew longer than the step asked for, and the
+            one that ended touching came out in four pushes. Thirteen injected bugs, thirteen
+            caught.
+      finding: (2026-09-08, found by `HOUSE-00550`) **"ignore a start overlap the motion is moving
+            out of" walks a body through a stair.** It looks obviously right -- a body resting on a
+            floor is touching it, and a contact the motion does not push into cannot stop that
+            motion -- and it was implemented, as a `StartOverlaps::Separating` mode on `SweepCell`.
+            It then walked a body 0.97 m into `L2_STAIR_ATTIC`'s ramp. A triangle's prism is 1.2 m
+            thick for §43.1's body (`halfHeight` each way), so "inside" it is a VOLUME rather than
+            a surface, and the way out of a volume is a nearest-face direction, not a surface
+            normal a motion can be tested against. Reverted: a body that starts inside spends the
+            step standing still, and §49.3's step 5 is the step that exists for that.
 - [ ] HOUSE-00551 — Implement step-up (≤ 0.22 m) and step-down (≤ 0.45 m) assist
       dep: HOUSE-00550 · sys: physics · plat: ALL · pri: MUST
 - [ ] HOUSE-00552 — Implement gravity and landing detection with soft/hard thresholds
