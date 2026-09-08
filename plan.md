@@ -6687,8 +6687,27 @@ the chunk builder produces ≤ 6 chunks per cell.
             and needed a claim that a portal in one wall is **not** a hole in another.
       note: horizontal portals — the stairwells — pierce floors rather than walls and are left to
             `HOUSE-00460`, which the task names.
-- [ ] HOUSE-00456 — Generate door frames, architraves and thresholds
+- [x] HOUSE-00456 — Generate door frames, architraves and thresholds
       dep: HOUSE-00455 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-08) two jambs, a head and a threshold per doorway, per room that looks at it.
+            The architrave's width is the **opening's own** `frame.casing`; it stands 18 mm proud
+            of the wall, because a board coplanar with the wall z-fights with it and §12 gives no
+            number for the projection. Windows get nothing here: a window's frame is
+            `HOUSE-00457`'s and has a different section, and lumping the two together would give
+            every window a doorstep.
+      finding: **`HOUSE-00455` gave no reveal to a partition.** The `continue` that skips the outer
+            face of an interior wall skipped the reveal with it, so every doorway between two rooms
+            was a hole through a wall with no sides — you could see out through the wall's thickness
+            at every one of them. The acceptance claim was about holes and could not see it; the
+            trim pass found it because trim and reveal share the same guard. Restructured so only
+            the outer face is conditional.
+      finding: **a claim about a function is not a claim about the code that calls it.** Every door
+            in this house declares the same 0.06 m casing, so a builder that hard-coded 0.06 passed
+            every claim, including one that measured `architrave_boards` at two different widths.
+            What catches it is doubling a door's declared casing and requiring the **mesh** to move.
+      note: the shell is now 15 178 triangles over 96 cells, against §17.2's ~180 000 for the
+            finished thing — the trims, stairs, roof and dormers still to come. Six injected bugs,
+            all caught after the two findings above were fixed.
 - [ ] HOUSE-00457 — Generate window frames, sashes, sills, glazing bars and the glass quad
       dep: HOUSE-00455 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00458 — Generate skirtings and cornices per cell, mitred at corners and interrupted at openings

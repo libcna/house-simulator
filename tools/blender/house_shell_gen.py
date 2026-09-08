@@ -291,8 +291,8 @@ def outer_span(cell: dict, extent: tuple[float, float], level: dict, levels: dic
     return (extent[0], min(above) if above else extent[1])
 
 
-def holes_in(side: str, box: tuple, cell: dict, portals: list) -> list[tuple[float, float, float, float]]:
-    """The portal rectangles that pierce @p side, as `(u0, u1, v0, v1)` in that side's own axes.
+def holes_in(side: str, box: tuple, cell: dict, portals: list) -> list:
+    """The portal rectangles that pierce @p side, as `(u0, u1, v0, v1, portal_id)`.
 
     A portal **is** the hole. Every one of them, not only the ones with a leaf: a cased opening has
     no door and is still a doorway you walk through, and §13.1's "cased openings are not doors" is
@@ -314,7 +314,7 @@ def holes_in(side: str, box: tuple, cell: dict, portals: list) -> list[tuple[flo
         v0, v1 = (float(value) for value in rect["v"])
         if min(u1, hi) - max(u0, lo) <= 1e-6:
             continue
-        out.append((max(u0, lo), min(u1, hi), v0, v1))
+        out.append((max(u0, lo), min(u1, hi), v0, v1, portal["id"]))
     return sorted(out)
 
 
@@ -332,7 +332,7 @@ def panel(lo: float, hi: float, v0: float, v1: float,
         return [(lo, hi, v0, v1)]
     us = sorted({lo, hi} | {value for hole in holes for value in hole[:2]
                             if lo - 1e-9 < value < hi + 1e-9})
-    vs = sorted({v0, v1} | {value for hole in holes for value in hole[2:]
+    vs = sorted({v0, v1} | {value for hole in holes for value in hole[2:4]
                             if v0 - 1e-9 < value < v1 + 1e-9})
     out = []
     for ulo, uhi in zip(us, us[1:]):
@@ -340,25 +340,62 @@ def panel(lo: float, hi: float, v0: float, v1: float,
             if uhi - ulo <= 1e-9 or vhi - vlo <= 1e-9:
                 continue
             umid, vmid = (ulo + uhi) / 2.0, (vlo + vhi) / 2.0
-            if any(hu0 - 1e-9 <= umid <= hu1 + 1e-9 and hv0 - 1e-9 <= vmid <= hv1 + 1e-9
-                   for hu0, hu1, hv0, hv1 in holes):
+            if any(hole[0] - 1e-9 <= umid <= hole[1] + 1e-9
+                   and hole[2] - 1e-9 <= vmid <= hole[3] + 1e-9 for hole in holes):
                 continue
             out.append((ulo, uhi, vlo, vhi))
     return out
 
 
+def architrave_boards(hu0: float, hu1: float, hv0: float, hv1: float, casing: float):
+    """The two jambs and the head of an architrave round an opening, in the wall's own axes.
+
+    A function rather than three lines inside the builder, so the width can be claimed: every door
+    in this house declares the same 0.06 m casing, and a builder that hard-coded 0.06 would be
+    indistinguishable from one that read the opening -- until the day a door had a wider casing.
+    """
+    if casing <= 0.0:
+        return []
+    return [(hu0 - casing, hu0, hv0, hv1 + casing),
+            (hu1, hu1 + casing, hv0, hv1 + casing),
+            (hu0 - casing, hu1 + casing, hv1, hv1 + casing)]
+
+
+#: §12's trim, in metres. `casing` and `skirting` are `layout.levels.json`'s; the two below are
+#: not in the data because §12 never gives them a number, and a board that stands proud of the
+#: wall by nothing z-fights with it.
+ARCHITRAVE_PROUD = 0.018
+THRESHOLD_THICK = 0.015
+
+
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
-               level=None, levels=None, portals=()):
+               level=None, levels=None, portals=(), openings=None):
     """One mesh object named for the cell: its floor, its ceiling and its walls' inner faces."""
     construction = construction or {}
     neighbours = list(neighbours)
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, ...]] = []
 
+    openings = openings or {}
+
     def add(points, outward) -> None:
         base = len(vertices)
         vertices.extend(to_blender(*point) for point in facing(points, outward))
         faces.append(tuple(range(base, base + len(points))))
+
+    def solid(bx0, bx1, by0, by1, bz0, bz1) -> None:
+        """A closed box, every face wound outward. Trim is looked at from every side."""
+        if bx1 - bx0 <= 1e-9 or by1 - by0 <= 1e-9 or bz1 - bz0 <= 1e-9:
+            return
+        for value, outward in ((bx0, (-1.0, 0.0, 0.0)), (bx1, (1.0, 0.0, 0.0))):
+            add([(value, by0, bz0), (value, by1, bz0), (value, by1, bz1), (value, by0, bz1)],
+                outward)
+        for value, outward in ((by0, (0.0, -1.0, 0.0)), (by1, (0.0, 1.0, 0.0))):
+            add([(bx0, value, bz0), (bx1, value, bz0), (bx1, value, bz1), (bx0, value, bz1)],
+                outward)
+        for value, outward in ((bz0, (0.0, 0.0, -1.0)), (bz1, (0.0, 0.0, 1.0))):
+            add([(bx0, by0, value), (bx1, by0, value), (bx1, by1, value), (bx0, by1, value)],
+                outward)
 
     for box in cell_boxes(cell, extent):
         x0, x1, y0, y1, z0, z1 = box
@@ -396,29 +433,54 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                 # `HOUSE-00454`: the OUTER face of the same wall, where there is an outside. A
                 # partition has two rooms and each has its inner face; an exterior wall has one
                 # room and the weather, and the weather's side is here.
-                if wall == "wallPartition" or level is None:
-                    continue
-                outer_name = outer_wall_name(level, wall)
-                outer_half = float(construction.get(outer_name, 0.0)) / 2.0
-                outer_plane = {"-X": x0 - outer_half, "+X": x1 + outer_half,
-                               "-Z": z0 - outer_half, "+Z": z1 + outer_half}[side]
-                oy0, oy1 = outer_span(cell, (y0, y1), level, levels or {})
-                for pu0, pu1, pv0, pv1 in panel(lo, hi, oy0, oy1, holes):
-                    if side in ("-X", "+X"):
-                        outer = [(outer_plane, pv0, pu0), (outer_plane, pv1, pu0),
-                                 (outer_plane, pv1, pu1), (outer_plane, pv0, pu1)]
-                    else:
-                        outer = [(pu0, pv0, outer_plane), (pu0, pv1, outer_plane),
-                                 (pu1, pv1, outer_plane), (pu1, pv0, outer_plane)]
-                    add(outer, tuple(-value for value in inward))
+                outside = wall != "wallPartition" and level is not None
+                outer_plane = plane
+                if outside:
+                    outer_name = outer_wall_name(level, wall)
+                    outer_half = float(construction.get(outer_name, 0.0)) / 2.0
+                    outer_plane = {"-X": x0 - outer_half, "+X": x1 + outer_half,
+                                   "-Z": z0 - outer_half, "+Z": z1 + outer_half}[side]
+                    oy0, oy1 = outer_span(cell, (y0, y1), level, levels or {})
+                    for pu0, pu1, pv0, pv1 in panel(lo, hi, oy0, oy1, holes):
+                        if side in ("-X", "+X"):
+                            outer = [(outer_plane, pv0, pu0), (outer_plane, pv1, pu0),
+                                     (outer_plane, pv1, pu1), (outer_plane, pv0, pu1)]
+                        else:
+                            outer = [(pu0, pv0, outer_plane), (pu0, pv1, outer_plane),
+                                     (pu1, pv1, outer_plane), (pu1, pv0, outer_plane)]
+                        add(outer, tuple(-value for value in inward))
 
-                # The reveal: the four surfaces of the hole through the wall, of which the bottom
-                # one is the sill. From this room's inner face to the outer face of an exterior
+                # The reveal runs from this room's inner face to the outer face of an exterior
                 # wall, or to the CENTRE LINE of a partition -- the room on the other side carries
                 # its own half, for the same reason it carries its own inner face.
-                far = outer_plane if wall != "wallPartition" else \
-                    {"-X": x0, "+X": x1, "-Z": z0, "+Z": z1}[side]
-                for hu0, hu1, hv0, hv1 in holes:
+                far = outer_plane if outside else {"-X": x0, "+X": x1, "-Z": z0, "+Z": z1}[side]
+
+                # `HOUSE-00456`: the door trim on THIS room's face -- two jambs, a head and a
+                # threshold. A window's frame is `HOUSE-00457`'s; the two are different objects
+                # with different sections, and lumping them together would give every window an
+                # architrave and a doorstep.
+                for hole in holes:
+                    opening = openings.get(hole[4])
+                    if opening is None or opening.get("kind") != "door":
+                        continue
+                    casing = float((opening.get("frame") or {}).get("casing") or 0.0)
+                    hu0, hu1, hv0, hv1 = hole[0], hole[1], hole[2], hole[3]
+                    near, deep = plane, plane + ARCHITRAVE_PROUD * (
+                        1.0 if side in ("-X", "-Z") else -1.0)
+                    lo_face, hi_face = min(near, deep), max(near, deep)
+                    for bu0, bu1, bv0, bv1 in architrave_boards(hu0, hu1, hv0, hv1, casing):
+                        if side in ("-X", "+X"):
+                            solid(lo_face, hi_face, bv0, bv1, bu0, bu1)
+                        else:
+                            solid(bu0, bu1, bv0, bv1, lo_face, hi_face)
+                    # The threshold: a board across the opening, this room's half of the wall.
+                    sill_lo, sill_hi = min(plane, far), max(plane, far)
+                    if side in ("-X", "+X"):
+                        solid(sill_lo, sill_hi, hv0, hv0 + THRESHOLD_THICK, hu0, hu1)
+                    else:
+                        solid(hu0, hu1, hv0, hv0 + THRESHOLD_THICK, sill_lo, sill_hi)
+
+                for hu0, hu1, hv0, hv1, _portal_id in holes:
                     for corner_lo, corner_hi, along, look in (
                             (hv0, hv0, "v", (0.0, 1.0, 0.0)),      # the sill, looking up
                             (hv1, hv1, "v", (0.0, -1.0, 0.0)),     # the head, looking down
@@ -464,9 +526,11 @@ def export(obj, path: Path) -> None:
 
 def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> dict:
     """Every cell the layout declares, as one `.glb` each. Returns a report."""
-    layout = layout_io.load_layout(directory, kinds=["levels", "cells", "portals"])
+    layout = layout_io.load_layout(directory, kinds=["levels", "cells", "portals", "openings"])
     levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
     portals = layout_io.rows(layout, "portals")
+    openings = {row["portal"]: row for row in layout_io.rows(layout, "openings")
+                if row.get("portal")}
     construction = (layout.get("levels") or {}).get("construction") or {}
     report = {"written": [], "skipped": [], "problems": []}
 
@@ -485,7 +549,7 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
             continue
         reset_scene()
         obj = build_cell(cell, extent, neighbours=neighbours, construction=construction,
-                         level=level, levels=levels, portals=portals)
+                         level=level, levels=levels, portals=portals, openings=openings)
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
@@ -549,8 +613,11 @@ def selftest(output: Path) -> int:
             # the other side of the centre line. And it rises past this storey's 3.30 ceiling to
             # `L1`'s 3.65 floor, because the outer skin carries the band at the joists.
             outer_z = box[4] - float(construction_now["wallExterior"]) / 2.0
-            want_min = [inner[0], inner[2], outer_z]
-            want_max = [inner[1], float(levels["L1"]["ffl"]), inner[5]]
+            # On the three partitioned sides the mesh reaches the CENTRE LINE, because a
+            # partition's reveal runs to it -- that is what "each room carries its half of the
+            # opening" means, and the room on the other side carries the other half.
+            want_min = [box[0], inner[2], outer_z]
+            want_max = [box[1], float(levels["L1"]["ffl"]), box[5]]
             close = all(abs(a - b) < 1e-4 for a, b in zip(bounds[0], want_min)) and \
                 all(abs(a - b) < 1e-4 for a, b in zip(bounds[1], want_max))
             require(close,
@@ -774,9 +841,69 @@ def selftest(output: Path) -> int:
     with_holes = build_cell(subject, extent, neighbours=neighbours, construction=construction,
                             level=levels[subject["level"]], levels=levels,
                             portals=list(portal_rows.values()))
-    require(len(with_holes.data.polygons) > len(polygons),
-            f"cutting the kitchen's openings adds faces to it, {len(polygons)} -> "
-            f"{len(with_holes.data.polygons)}")
+    holes_faces = len(with_holes.data.polygons)   # read now: `reset_scene` invalidates the object
+    require(holes_faces > len(polygons),
+            f"cutting the kitchen's openings adds faces to it, {len(polygons)} -> {holes_faces}")
+
+    # ---- `HOUSE-00456`: the door trim ---------------------------------------------------------
+    openings_by_portal = {row["portal"]: row for row in layout_io.rows(
+        layout_io.load_layout(SOURCE, kinds=["openings"]), "openings") if row.get("portal")}
+    kitchen_holes = [hole for side in ("-X", "+X", "-Z", "+Z")
+                     for hole in holes_in(side, kitchen_box, subject,
+                                          list(portal_rows.values()))]
+    kinds = [(openings_by_portal.get(hole[4]) or {}).get("kind") for hole in kitchen_holes]
+    doors_here = kinds.count("door")
+    require(doors_here and kinds.count("window"),
+            f"the kitchen has doors AND windows in its walls to tell apart ({kinds})")
+
+    reset_scene()
+    with_trim = build_cell(subject, extent, neighbours=neighbours, construction=construction,
+                           level=levels[subject["level"]], levels=levels,
+                           portals=list(portal_rows.values()), openings=openings_by_portal)
+    # Three boards and a threshold, six faces each, per door -- and nothing for a window, whose
+    # frame is `HOUSE-00457`'s and has a different section.
+    require(len(with_trim.data.polygons) == holes_faces + 24 * doors_here,
+            f"each of the {doors_here} doorway(s) gains two jambs, a head and a threshold, and "
+            f"the {kinds.count('window')} window(s) gain nothing "
+            f"({holes_faces} -> {len(with_trim.data.polygons)})")
+
+    casings = {float((row.get("frame") or {}).get("casing") or 0.0)
+               for row in openings_by_portal.values() if row.get("kind") == "door"}
+    require(casings and 0.0 not in casings,
+            f"every door declares a `frame.casing` ({sorted(casings)})")
+    narrow = architrave_boards(0.0, 0.9, 0.0, 2.02, 0.06)
+    wide = architrave_boards(0.0, 0.9, 0.0, 2.02, 0.12)
+    require(abs((narrow[0][1] - narrow[0][0]) - 0.06) < 1e-9
+            and abs((wide[0][1] - wide[0][0]) - 0.12) < 1e-9,
+            f"and the architrave is as wide as the casing the opening declares, not as wide as "
+            f"the one this house happens to use everywhere "
+            f"({narrow[0][1] - narrow[0][0]:.3f}, {wide[0][1] - wide[0][0]:.3f})")
+    require(not architrave_boards(0.0, 0.9, 0.0, 2.02, 0.0),
+            "and an opening with no casing gets no architrave rather than three boards of nothing")
+
+    # ...and the builder READS it. The claim above is about the boards; this one is about the path
+    # from the opening row to them, which a hard-coded 0.06 satisfies just as well until a door
+    # has a different casing. Doubling one and seeing the mesh move is the difference.
+    import copy as _copy
+    doubled = {portal_id: _copy.deepcopy(row) for portal_id, row in openings_by_portal.items()}
+    for row in doubled.values():
+        if row.get("kind") == "door" and (row.get("frame") or {}).get("casing"):
+            row["frame"]["casing"] = float(row["frame"]["casing"]) * 2.0
+    reset_scene()
+    widened = build_cell(subject, extent, neighbours=neighbours, construction=construction,
+                         level=levels[subject["level"]], levels=levels,
+                         portals=list(portal_rows.values()), openings=doubled)
+    widened_points = sorted(tuple(round(value, 6) for value in vertex.co)
+                            for vertex in widened.data.vertices)
+    reset_scene()
+    again = build_cell(subject, extent, neighbours=neighbours, construction=construction,
+                       level=levels[subject["level"]], levels=levels,
+                       portals=list(portal_rows.values()), openings=openings_by_portal)
+    same_points = sorted(tuple(round(value, 6) for value in vertex.co)
+                         for vertex in again.data.vertices)
+    require(widened_points != same_points,
+            "and doubling a door's declared casing moves the mesh, so the builder is reading the "
+            "opening rather than a constant that happens to match every door in this house")
 
     # A cell with no ceiling to be had. §13.6's attic level declares `ceiling: null` and every
     # attic cell overrides it, so this branch is unreachable from the authored house -- which is
