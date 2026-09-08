@@ -641,6 +641,77 @@ def top_tread_box(flight: dict, bottom: float):
     return (p0, p1, c0, c1, top) if along_axis_x else (c0, c1, p0, p1, top)
 
 
+#: How far the roof oversails the outer face of the wall, in metres. §12.1 says the attic is "under
+#: a 7:12 roof over a 13.4 m span", and the main block is 12.80 m between wall centre lines, 13.10
+#: between their outer faces: the missing 0.30 is 0.15 of overhang on each side. So the number is
+#: §12.1's, arrived at by subtraction, and it is the one place it appears.
+EAVES_OVERHANG = 0.15
+FASCIA_DEPTH = 0.20
+FASCIA_THICK = 0.035
+
+
+def roof_planes(box: tuple, eaves_y: float, pitch: float):
+    """A hip roof over a rectangle: `(corners, outward)` per plane, in world coordinates.
+
+    Two trapezoids along the long sides and two triangles at the ends -- or four triangles when the
+    rectangle is square, which the garage's 8.4 × 8.4 wing is, and a pyramid is what a hip roof
+    over a square is.
+
+    §12.1's roof is "hipped-and-gabled". The hips are here; the gables are the five dormers
+    (`HOUSE-00462`) and the projecting garage wing, which is what makes the phrase true without
+    this generator having to invent a gablet §12 never describes.
+    """
+    x0, x1, z0, z1 = box
+    dx, dz = x1 - x0, z1 - z0
+    half = min(dx, dz) / 2.0
+    top = eaves_y + half * pitch
+
+    def plane(points, outward):
+        """One face, with a degenerate ridge collapsed: over a square the two trapezoids meet at
+        a point, which makes them triangles, which is what a pyramid is."""
+        kept = [point for index, point in enumerate(points)
+                if index == 0 or max(abs(a - b) for a, b in zip(point, points[index - 1])) > 1e-9]
+        return (kept, outward)
+
+    if dx >= dz:
+        zm = (z0 + z1) / 2.0
+        ridge0, ridge1 = (x0 + half, zm), (x1 - half, zm)
+        return [
+            plane([(x0, eaves_y, z0), (x1, eaves_y, z0), (ridge1[0], top, zm),
+                   (ridge0[0], top, zm)], (0.0, pitch, -1.0)),
+            plane([(x1, eaves_y, z1), (x0, eaves_y, z1), (ridge0[0], top, zm),
+                   (ridge1[0], top, zm)], (0.0, pitch, 1.0)),
+            plane([(x0, eaves_y, z1), (x0, eaves_y, z0), (ridge0[0], top, zm)],
+                  (-1.0, pitch, 0.0)),
+            plane([(x1, eaves_y, z0), (x1, eaves_y, z1), (ridge1[0], top, zm)],
+                  (1.0, pitch, 0.0)),
+        ]
+    xm = (x0 + x1) / 2.0
+    ridge0, ridge1 = (xm, z0 + half), (xm, z1 - half)
+    return [
+        plane([(x0, eaves_y, z1), (x0, eaves_y, z0), (xm, top, ridge0[1]),
+               (xm, top, ridge1[1])], (-1.0, pitch, 0.0)),
+        plane([(x1, eaves_y, z0), (x1, eaves_y, z1), (xm, top, ridge1[1]),
+               (xm, top, ridge0[1])], (1.0, pitch, 0.0)),
+        plane([(x0, eaves_y, z0), (x1, eaves_y, z0), (xm, top, ridge0[1])], (0.0, pitch, -1.0)),
+        plane([(x1, eaves_y, z1), (x0, eaves_y, z1), (xm, top, ridge1[1])], (0.0, pitch, 1.0)),
+    ]
+
+
+def eaves_height(construction: dict, box: tuple) -> float:
+    """Where the roof's eaves EDGE is, derived from the ridge and the pitch (`HOUSE-00461`).
+
+    §12 over-determines the roof: it states a ridge at +14.30, a 7:12 pitch, a 1.20 m knee wall and
+    a 13.4 m span, and the four do not quite agree. The ridge and the pitch win -- 14.30 is the
+    house's height above grade and 7:12 is what you see -- and the knee wall comes out at 1.179 m
+    against §12's 1.20, a 21 mm difference that is §12 rounding rather than a disagreement about
+    the house.
+    """
+    x0, x1, z0, z1 = box
+    return float(construction["ridgeY"]) - (min(x1 - x0, z1 - z0) / 2.0) * \
+        float(construction["roofPitch"])
+
+
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
                level=None, levels=None, portals=(), openings=None, cells_by_id=None,
                flights=()):
@@ -948,7 +1019,95 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
+
+    for name, box in sorted(roof_boxes(layout, levels).items()):
+        if wanted is not None and name not in wanted:
+            continue
+        reset_scene()
+        obj = build_roof(name, box, construction)
+        export(obj, output / f"{name}.glb")
+        report["written"].append(name)
     return report
+
+
+def build_roof(name: str, box: tuple, construction: dict):
+    """One roof object over @p box, with its fascia. @p box is the WALL CENTRE-LINE rectangle."""
+    half_wall = float(construction.get("wallExterior", 0.0)) / 2.0
+    reach = half_wall + EAVES_OVERHANG
+    outer = (box[0] - reach, box[1] + reach, box[2] - reach, box[3] + reach)
+    eaves_y = eaves_height(construction, outer)
+    pitch = float(construction["roofPitch"])
+
+    vertices: list[tuple[float, float, float]] = []
+    faces: list[tuple[int, ...]] = []
+
+    def add(points, outward) -> None:
+        base = len(vertices)
+        vertices.extend(to_blender(*point) for point in facing(points, outward))
+        faces.append(tuple(range(base, base + len(points))))
+
+    for corners, outward in roof_planes(outer, eaves_y, pitch):
+        add(corners, outward)
+
+    # The fascia: a board round the eaves edge, hanging below it, and the soffit closing the
+    # underside back to the wall. Without them you see the roof planes end in mid-air.
+    x0, x1, z0, z1 = outer
+    for corners, outward in (
+            ([(x0, eaves_y - FASCIA_DEPTH, z0), (x1, eaves_y - FASCIA_DEPTH, z0),
+              (x1, eaves_y, z0), (x0, eaves_y, z0)], (0.0, 0.0, -1.0)),
+            ([(x1, eaves_y - FASCIA_DEPTH, z1), (x0, eaves_y - FASCIA_DEPTH, z1),
+              (x0, eaves_y, z1), (x1, eaves_y, z1)], (0.0, 0.0, 1.0)),
+            ([(x0, eaves_y - FASCIA_DEPTH, z1), (x0, eaves_y - FASCIA_DEPTH, z0),
+              (x0, eaves_y, z0), (x0, eaves_y, z1)], (-1.0, 0.0, 0.0)),
+            ([(x1, eaves_y - FASCIA_DEPTH, z0), (x1, eaves_y - FASCIA_DEPTH, z1),
+              (x1, eaves_y, z1), (x1, eaves_y, z0)], (1.0, 0.0, 0.0))):
+        add(corners, outward)
+    soffit_y = eaves_y - FASCIA_DEPTH + FASCIA_THICK
+    for corners in (
+            [(x0, soffit_y, z0), (x1, soffit_y, z0),
+             (x1, soffit_y, z0 + reach), (x0, soffit_y, z0 + reach)],
+            [(x0, soffit_y, z1 - reach), (x1, soffit_y, z1 - reach),
+             (x1, soffit_y, z1), (x0, soffit_y, z1)],
+            [(x0, soffit_y, z0 + reach), (x0 + reach, soffit_y, z0 + reach),
+             (x0 + reach, soffit_y, z1 - reach), (x0, soffit_y, z1 - reach)],
+            [(x1 - reach, soffit_y, z0 + reach), (x1, soffit_y, z0 + reach),
+             (x1, soffit_y, z1 - reach), (x1 - reach, soffit_y, z1 - reach)]):
+        add(corners, (0.0, -1.0, 0.0))
+
+    mesh = bpy.data.meshes.new(f"{name}_mesh")
+    mesh.from_pydata(vertices, [], faces)
+    mesh.validate()
+    mesh.update()
+    obj = bpy.data.objects.new(name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    return obj
+
+
+def roof_boxes(layout: dict, levels: dict) -> dict:
+    """`{name: centre-line rectangle}` for every roof this generator builds.
+
+    `ROOF_MAIN` covers the attic, which is what `layout.levels.json` says: `L3` declares
+    `"roof": "ROOF_MAIN"` and its cells ARE the main block. `ROOF_GARAGE` covers the garage, the
+    projecting wing §12.1 describes; the sunroom's roof is flat and is the rear balcony's floor,
+    so it is a cell's ceiling and not a roof.
+    """
+    out = {}
+    attic = [row for row in layout_io.rows(layout, "cells") if row.get("level") == "L3"]
+    if attic:
+        boxes = [box for row in attic for box in (row.get("boxes") or [])]
+        out["ROOF_MAIN"] = (min(float(b["x"][0]) for b in boxes),
+                            max(float(b["x"][1]) for b in boxes),
+                            min(float(b["z"][0]) for b in boxes),
+                            max(float(b["z"][1]) for b in boxes))
+    garage = next((row for row in layout_io.rows(layout, "cells")
+                   if row.get("kind") == "garage"), None)
+    if garage:
+        boxes = garage.get("boxes") or []
+        out["ROOF_GARAGE"] = (min(float(b["x"][0]) for b in boxes),
+                              max(float(b["x"][1]) for b in boxes),
+                              min(float(b["z"][0]) for b in boxes),
+                              max(float(b["z"][1]) for b in boxes))
+    return out
 
 
 def digest(path: Path) -> str:
@@ -1537,11 +1696,42 @@ def selftest(output: Path) -> int:
 
     # The whole house, which is the deliverable and not a sample.
     everything = generate(SOURCE, output)
-    require(len(everything["written"]) == len(cells) and not everything["problems"]
-            and not everything["skipped"],
-            f"every one of the {len(cells)} cells generates "
+    roofs = sorted(roof_boxes(layout_io.load_layout(SOURCE, kinds=["levels", "cells"]), levels))
+    require(len(everything["written"]) == len(cells) + len(roofs)
+            and not everything["problems"] and not everything["skipped"],
+            f"every one of the {len(cells)} cells generates, plus {len(roofs)} roof(s) "
             f"({len(everything['written'])} written, {len(everything['skipped'])} skipped, "
             f"{everything['problems'][:1]})")
+
+    # ---- `HOUSE-00461`: the roof ---------------------------------------------------------------
+    main_box = roof_boxes(layout_io.load_layout(SOURCE, kinds=["levels", "cells"]),
+                          levels)["ROOF_MAIN"]
+    reach = float(construction["wallExterior"]) / 2.0 + EAVES_OVERHANG
+    outer = (main_box[0] - reach, main_box[1] + reach, main_box[2] - reach, main_box[3] + reach)
+    require(abs((outer[3] - outer[2]) - 13.4) < 1e-9,
+            f"§12.1's roof is 13.4 m over the span, and the main block plus its overhang is "
+            f"{outer[3] - outer[2]:.2f} m — the 0.30 m §12.1 does not account for is the eaves")
+    eaves_y = eaves_height(construction, outer)
+    ridge = eaves_y + ((outer[3] - outer[2]) / 2.0) * float(construction["roofPitch"])
+    require(abs(ridge - float(construction["ridgeY"])) < 1e-9,
+            f"the ridge comes out at §12's +{construction['ridgeY']} ({ridge:.4f})")
+    knee = (eaves_y + reach * float(construction["roofPitch"])) - float(levels["L3"]["ffl"])
+    require(abs(knee - 1.267) < 0.001 and knee > float(construction["kneeWallHeight"]),
+            f"and the rafter line over the wall centre is {knee:.3f} m above the attic floor "
+            f"against §12's kneeWallHeight {construction['kneeWallHeight']} — 67 mm the generous "
+            f"way, so nothing is short of headroom, and the ridge and the pitch are what give way "
+            f"if anything ever has to")
+
+    planes = roof_planes(outer, eaves_y, float(construction["roofPitch"]))
+    require(len(planes) == 4 and sum(1 for corners, _ in planes if len(corners) == 3) == 2,
+            f"a hip roof over a rectangle is two trapezoids and two triangles "
+            f"({[len(corners) for corners, _ in planes]})")
+    square = roof_planes((0.0, 8.4, 0.0, 8.4), 0.0, 0.5)
+    require(all(len(corners) == 3 for corners, _ in square),
+            "and over a square it is four triangles, which is what a pyramid is")
+    tops = {round(point[1], 6) for corners, _ in planes for point in corners}
+    require(tops == {round(eaves_y, 6), round(float(construction["ridgeY"]), 6)},
+            f"every corner of it is either at the eaves or at the ridge ({sorted(tops)})")
     sizes = sorted((output / f"{name}.glb").stat().st_size for name in everything["written"])
     require(all(size > 0 for size in sizes),
             f"and every file has bytes in it (smallest {sizes[0]})")

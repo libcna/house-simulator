@@ -6810,8 +6810,33 @@ the chunk builder produces ≤ 6 chunks per cell.
             "missing input, not missing check" recorded under §70.5 by `HOUSE-00360`, and it is now
             one step smaller: the heights are in the construction block and used.
       note: six injected bugs, all caught. 42 518 triangles over 96 cells.
-- [ ] HOUSE-00461 — Generate the roof: hipped-and-gabled planes at 7:12, ridge, hips, valleys, eaves, soffits, fascias
+- [x] HOUSE-00461 — Generate the roof: hipped-and-gabled planes at 7:12, ridge, hips, valleys, eaves, soffits, fascias
       dep: HOUSE-00454 · sys: content · plat: TOOL · pri: MUST
+      finding: **§12.1's "13.4 m span" is the roof, not the house, and that is what reconciles it.**
+            The main block is 12.80 m between wall centre lines and 13.10 between their outer
+            faces; 13.4 is 13.10 plus 0.15 m of eaves overhang on each side. The overhang is
+            therefore not a number this generator chose — it is §12.1's own, arrived at by
+            subtraction, and the claim says so: 12.80 + 2 × 0.15 + 2 × 0.15 = 13.40 exactly.
+      finding: **§12 over-determines the roof and the knee wall is what gives.** With the ridge at
+            +14.30 and a 7:12 pitch over that 13.4 m, the rafter line over the wall centre is
+            **1.267 m** above the attic floor and §12's `kneeWallHeight` says 1.20 — 67 mm, and in
+            the generous direction, so nothing is short of headroom. The ridge and the pitch win
+            because they are the two you can see: +14.30 is the house's height above grade and
+            7:12 is the roof's shape. Recorded rather than silently rounded away.
+      note: **the hips are here and the gables are elsewhere.** §12.1 calls the roof
+            "hipped-and-gabled"; the hips are the four planes over the main block, and the gables
+            are the five dormers (`HOUSE-00462`) and the projecting garage wing. Reading it that
+            way needs no gablet invented that §12 never describes.
+      note: over a square the two trapezoids meet at a point and become triangles, which is what a
+            pyramid is — and the garage wing is 8.4 × 8.4. The collapse is done by dropping a
+            degenerate edge rather than by a special case for squares, so a wing that is nearly
+            square gets a very short ridge rather than a discontinuity.
+      note: a roof is its **own object**, `ROOF_MAIN.glb` and `ROOF_GARAGE.glb`, not a cell's:
+            `layout.levels.json` already says `L3` has `"roof": "ROOF_MAIN"`, one roof spans six
+            attic cells, and you see it from the road with nothing resident. The sunroom has no
+            roof here because §12.1 gives it a flat one that is the rear balcony's floor — a cell's
+            ceiling, which `HOUSE-00452` already built.
+      note: five injected bugs, all caught. 98 objects, 42 560 triangles.
 - [ ] HOUSE-00462 — Generate the 5 dormers with their own roofs, cheeks and windows
       dep: HOUSE-00461 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00463 — Generate the attic knee walls, collar-tie ceiling, rafters, purlins and the walkway boarding
