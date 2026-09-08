@@ -3878,6 +3878,12 @@ doorway does not thrash.
   keeps the pulled-back eye inside the capsule that the walls are already handled by.
 * **Stairs**: the eye height spring plus the step-up logic means climbing is smooth; the camera
   never intersects the flight above because the stair collision is a ramp (§48).
+* **Landing dip**: when a fall ends (§43.1), the eye is given a downward *impulse* — not a
+  displacement, so nothing jumps on the landing frame — and a critically damped ω = 16 spring
+  turns it into a dip and a recovery. The dip's lowest point is `0.035 m · drop`, capped at
+  0.09 m, reached 62 ms after the landing, nine tenths recovered by a third of a second. Past
+  §43.1's 2.4 m the cap means a fall from the roof and one from the first floor land the same:
+  the knees have already done everything they can.
 * **Exposure adaptation** (§25.7) is a first-person feature as much as a lighting one.
 
 ---

@@ -8879,8 +8879,42 @@ it must be tuned, not just implemented.
             0.06 m and not at 0.5 m nor behind, and the floor 40 mm under a crouched eye. Eight
             injected bugs, eight caught -- two only after the pull-back test was moved off a
             north-facing fixture, where a sign flip on X multiplies a zero.
-- [ ] HOUSE-00629 — Implement the landing camera dip and its recovery
+- [x] HOUSE-00629 — Implement the landing camera dip and its recovery
       dep: HOUSE-00552, HOUSE-00621 · sys: player · plat: ALL · pri: SHOULD
+      note: (2026-09-09) `player::LandingDip`, driven by `PlayerStepReport::landing` and
+            `landingDrop` (`HOUSE-00552`). §44 named no numbers for this one, so §44 now records
+            the ones chosen: `0.035 m · drop` capped at 0.09 m, a critically damped ω = 16 spring,
+            the bottom of the dip 62 ms after the landing and nine tenths of the way back by a
+            third of a second. The cap is §43.1's argument rather than a taste: past the 2.4 m
+            hard landing the knees have already done everything they can.
+      finding: **a dip applied as a DISPLACEMENT starts with a pop, which is what it exists to
+            stop.** Moving the eye down and letting it spring back puts it somewhere else on the
+            landing frame than it was on the frame before -- 84 mm, at the moment the player is
+            looking hardest. What lands here is a VELOCITY: the eye is exactly where it was, going
+            down, and the spring makes the rest. The impulse is sized `depth · ω · e`, because a
+            critically damped spring kicked from rest turns round at `t = 1/ω` where it has
+            reached `v/(ω·e)` -- so the depth asked for is the depth arrived at.
+      note: integrated by its CLOSED FORM and not stepped, which `EyeSpring` cannot be: between
+            impulses this spring's target is zero and stays zero, so `x(t) = (x + (v + ωx)t)e^(-ωt)`
+            is available, and the dip is a shape a player watches for half a second rather than a
+            correction they never see. Sampled at 0.1, 0.2 and 0.3 s it is the same to 1e-5 at 30,
+            60, 120 and 240 frames a second.
+      note: landing again while still dipping takes the DEEPER of the two rather than adding them
+            -- two landings inside a quarter of a second is a bounce down a flight, and the sum
+            would put the eye through the tread. A test bounces down sixteen risers and stays
+            inside 2 × the cap; the pathological case is bounded rather than clamped, because the
+            bound is 0.18 m against the 1.68 m the eye has under it.
+      finding: **the "never lifts" clamp was dead code and was removed.** The impulse is only ever
+            downwards and a critically damped spring does not overshoot, so `Offset() <= 0` is a
+            property of the spring -- and the clamp's only real effect would have been to hide the
+            one failure worth hearing about: an injected under-damped spring, which bounces the
+            eye up past where it started. Removed, the injection is still caught, by the test that
+            asserts the property instead.
+      verified: 7 `LandingDipTests` -- the depth curve and its cap with §43.1's 2.4 m either side,
+            the eye that does not move on the landing frame with the depth and the 62 ms it is
+            reached at, the monotone recovery that never lifts, the same curve at four frame
+            rates, the deeper-of-two rule both ways round, the sixteen-riser bounce, and the
+            no-landing/paused-frame/teleport cases. Eight injected bugs, eight caught.
 - [ ] HOUSE-00630 — Implement the `BoundingFrustum` construction from the camera each frame
       dep: HOUSE-00621, HOUSE-00104 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00631 — Implement the `F2` world overlay (cell, position, yaw/pitch, surface, target)
