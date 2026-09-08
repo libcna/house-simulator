@@ -8079,8 +8079,43 @@ never escapes and never penetrates.
             critically damped spring has, never passing it. Six injected bugs, six caught.
 - [ ] HOUSE-00562 — Implement the debug physics overlay (`F9`): shapes, capsule, probes, sweeps
       dep: HOUSE-00147, HOUSE-00550 · sys: debug · plat: ALL · pri: MUST
-- [ ] HOUSE-00563 — Implement `teleport <cellId>` and `noclip` console commands
+- [x] HOUSE-00563 — Implement `teleport <cellId>` and `noclip` console commands
       dep: HOUSE-00555 · sys: debug · plat: ALL · pri: MUST
+      note: (2026-09-08) §71 lists eighteen commands and this is the first task that needs one,
+            so the REGISTRY arrives with it -- `cnahouse::debug::Console`, a name, a usage line
+            and a handler -- and `HOUSE-00684`, `HOUSE-01141`, `HOUSE-01272`, `HOUSE-01536`,
+            `HOUSE-01694` and `HOUSE-02056` plug into it rather than each growing a parser. The
+            console owns splitting a line into words and finding a handler and nothing else:
+            what the words MEAN is the command's business, because a shared argument type would
+            have to know about cells, times, weather archetypes and asset ids at once.
+      note: `teleport` puts the body on the named cell's FLOOR -- its level's FFL plus the
+            capsule's rise plus 2 mm -- not in the middle of the cell's volume. A cell is a
+            volume, so the middle of one is in the AIR, and a debugging aid that drops the
+            player 1.5 m ends in a fall and a landing sound. It also arrives at REST: the run
+            and the fall it was in are dropped, or a teleport out of a 12 m drop lands hard on
+            arrival somewhere else entirely.
+      note: it calls `CellTracker::Forget()` before the next lookup. §16.4's incremental test is
+            sticky by 5 cm, so a destination that lands inside the hysteresis of the cell the
+            player just left would be answered with the OLD cell and never looked at again; a
+            teleport, a spawn and a save load all need the lookup to start at the grid. The
+            tests assert the STEP (`Grid`) as well as the answer, because with two adjacent
+            cells the neighbour walk happens to get the right id for the wrong reason.
+      note: `noclip` is taken FIRST in §49.3's step and returns early, because every stage below
+            it asks the world a question and the whole point is that the world is not answering:
+            no collide-and-slide, no gravity, no ground probe, no attic crouch. Up and down come
+            from the jump and crouch buttons, the only vertical input a first-person body has,
+            and both at once is not a direction. The fall state is cleared on EVERY noclip step,
+            not just on leaving: switching it on mid-fall must not leave a 20 m drop waiting to
+            be landed when it is switched off again.
+      verified: 12 tests (9 `ConsoleCommandTests`, 3 `PlayerControllerTests`) -- the split, an
+            unknown name reported WITH the name, an empty line that is not an error,
+            re-registration replacing a name, teleport's floor placement, its tracker reset
+            across a portal and across the house, its refusal of no argument and of a stray
+            second one, noclip's toggle and its explicit `on`/`off`, the velocity dropped on the
+            way out, a command with no player at all, a walk straight through a 20 cm wall that
+            demonstrably stops a normal body, the vertical, and the fall that does not survive
+            the flight. Fifteen injected bugs, fifteen caught -- four of them only after the
+            tests that missed them were sharpened.
 - [x] HOUSE-00564 — Implement the invisible playable-volume boundary and its escape counter
       dep: HOUSE-00555 · sys: physics · plat: ALL · pri: MUST
       note: (2026-09-08) §10's fifth and last containment layer, at §10.3's playable volume:

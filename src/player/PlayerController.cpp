@@ -125,6 +125,29 @@ namespace cnahouse::player
                                           state.velocity.Z + gap.Z / gapLength * rate);
         }
 
+        // §71's `noclip`: no collision, no gravity, no ground. Taken first and returning early,
+        // because every step below it asks the world a question and the whole point of noclip is
+        // that the world is not answering. Up and down come from the crouch and jump buttons,
+        // which are the only vertical input a first-person body has.
+        if (state.noclip)
+        {
+            const Xna::Vector3 freeWish = Wish(input, state.yaw);
+            const float freeSpeed = state.fastWalk ? kFastWalkSpeed : kWalkSpeed;
+            const float vertical = (input.jump ? 1.0F : 0.0F) - (input.crouch ? 1.0F : 0.0F);
+            state.velocity = Xna::Vector3(freeWish.X * freeSpeed, 0.0F, freeWish.Z * freeSpeed);
+            state.position = Xna::Vector3(state.position.X + state.velocity.X * dt,
+                                          state.position.Y + vertical * freeSpeed * dt,
+                                          state.position.Z + state.velocity.Z * dt);
+            state.fall = FallState{};
+            state.onGround = false;
+            state.groundNormal = Xna::Vector3(0.0F, 1.0F, 0.0F);
+            state.groundSlopeDeg = 0.0F;
+            state.alongSlopeSpeed = 0.0F;
+            report.speedFactor = 1.0F;
+            report.airborne = true;
+            return report;
+        }
+
         // §43.1's attic crouch, decided before the move and never asked for by the player.
         //
         // Two questions, in this order. Does the STANDING body still fit where it is? If not,

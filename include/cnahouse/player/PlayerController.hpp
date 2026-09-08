@@ -84,6 +84,13 @@ namespace cnahouse::player
         ///        `kDeepSnowDepth` slows the body down.
         float snowDepth = 0.0F;
 
+        /// @brief `noclip` (§71): collision, gravity and the ground are all switched off.
+        ///
+        /// A development command and never reachable in a shipped build. It exists because the
+        /// alternative when a room will not load or a body is stuck is to rebuild the level, and
+        /// because §49.5's guarantee tests need a way to PUT a body somewhere no walk can reach.
+        bool noclip = false;
+
         /// @brief §43.2's walk mode. `Shift` TOGGLES it; it is not hold-to-sprint.
         ///
         /// D-09 makes it a PREFERENCE rather than world state, so the app mirrors it into

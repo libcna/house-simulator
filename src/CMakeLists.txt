@@ -81,7 +81,9 @@ add_library(cnahouse_core STATIC
 
     # debug -- compiled always; the OVERLAY is what CNAHOUSE_DEBUG_TOOLS gates, not the counters,
     # because a counter that only exists in a debug build cannot be asserted by a perf test.
+    debug/Console.cpp
     debug/Counters.cpp
+    debug/PlayerCommands.cpp
     debug/FreeFlyCamera.cpp
     debug/Timing.cpp
     debug/DebugDraw.cpp

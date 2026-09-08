@@ -961,3 +961,123 @@ TEST(PlayerControllerTests, ASecondOfWalkingInEveryCellOfTheRealHouseEndsSomewhe
     ASSERT_GT(steps, 40000u);
     EXPECT_EQ(inside, 0u) << inside << " of " << steps << " steps ended inside geometry";
 }
+
+TEST(PlayerControllerTests, NoclipWalksThroughTheWallAndDoesNotFall)
+{
+    // `HOUSE-00563`. §71's `noclip` is the command that gets a developer to the far side of a
+    // wall the house has no door through. What it turns off is every question the step asks the
+    // world: collision, gravity and the ground.
+    const CollisionWorld world =
+        OneCell({Slab(0.0F, -20.0F, 20.0F),
+                 Box(Vector3(1.0F, 1.5F, 0.0F), Vector3(0.2F, 1.5F, 6.0F), CollisionKind::Wall)});
+    BroadPhase broad;
+
+    // Facing east (+X, §14's yaw of a quarter turn), a metre short of a wall 20 cm thick.
+    PlayerState blocked = Standing(0.0F, 0.0F);
+    blocked.yaw = 1.5707963F;
+    for (int i = 0; i < 240; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, blocked, Forward(), kDt);
+    }
+    ASSERT_LT(blocked.position.X, 0.8F) << "the wall did not stop a walking body; test is not testing";
+
+    PlayerState free = Standing(0.0F, 0.0F);
+    free.yaw = 1.5707963F;
+    free.noclip = true;
+    const float startY = free.position.Y;
+    for (int i = 0; i < 240; ++i)
+    {
+        const PlayerStepReport report = PlayerStep(world, world.cells[0], broad, free, Forward(), kDt);
+        EXPECT_FALSE(report.blocked);
+        EXPECT_EQ(report.landing, Landing::None);
+        EXPECT_TRUE(report.airborne);
+    }
+    // Two seconds at the walk speed, with no acceleration ramp: noclip is not a body.
+    EXPECT_NEAR(free.position.X, 2.0F * kWalkSpeed, 1e-3F);
+    EXPECT_GT(free.position.X, 1.5F) << "it stopped at the wall";
+    EXPECT_NEAR(free.position.Y, startY, 1e-5F) << "gravity was still running";
+    EXPECT_FALSE(free.onGround);
+}
+
+TEST(PlayerControllerTests, NoclipRisesOnJumpAndSinksOnCrouch)
+{
+    // Up and down are the crouch and jump buttons, which are the only vertical input a
+    // first-person body has -- and a noclip that cannot leave the storey it is on is no use for
+    // reaching the attic or the crawl space.
+    const CollisionWorld world = OneCell({Slab(0.0F, -20.0F, 20.0F)});
+    BroadPhase broad;
+
+    PlayerState state = Standing(0.0F, 0.0F);
+    state.noclip = true;
+    const float startY = state.position.Y;
+
+    InputState up;
+    up.jump = true;
+    for (int i = 0; i < 120; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, state, up, kDt);
+    }
+    EXPECT_NEAR(state.position.Y - startY, kWalkSpeed, 1e-3F);
+
+    InputState down;
+    down.crouch = true;
+    for (int i = 0; i < 240; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, state, down, kDt);
+    }
+    // A second up and two down, from a floor it goes straight through.
+    EXPECT_NEAR(state.position.Y - startY, -kWalkSpeed, 1e-3F);
+    EXPECT_LT(state.position.Y, 0.0F) << "the floor stopped a body that is not colliding";
+
+    InputState both;
+    both.jump = true;
+    both.crouch = true;
+    const float held = state.position.Y;
+    for (int i = 0; i < 60; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, state, both, kDt);
+    }
+    EXPECT_FLOAT_EQ(state.position.Y, held) << "both buttons at once is not a direction";
+}
+
+TEST(PlayerControllerTests, LeavingNoclipHandsTheBodyBackToTheWorld)
+{
+    // The command zeroes the velocity (`ConsoleCommandTests`); what is checked here is the other
+    // half -- that the step starts colliding and falling again the moment the flag clears, from
+    // wherever the flight ended.
+    const CollisionWorld world = OneCell({Slab(0.0F, -20.0F, 20.0F)});
+    BroadPhase broad;
+
+    // Switched on in mid-air, in the middle of a long fall: the state of that fall must not
+    // survive the flight, or the first step after noclip lands from a height on the other side
+    // of the house and §47.2 calls it a hard landing.
+    PlayerState state = Standing(0.0F, 0.0F);
+    state.noclip = true;
+    state.fall.onGround = false;
+    state.fall.speed = 9.0F;
+    state.fall.fellFrom = 20.0F;
+
+    InputState up;
+    up.jump = true;
+    for (int i = 0; i < 120; ++i)
+    {
+        PlayerStep(world, world.cells[0], broad, state, up, kDt);
+    }
+    ASSERT_GT(state.position.Y, kStand + 1.0F);
+    EXPECT_FLOAT_EQ(state.fall.speed, 0.0F) << "the fall it was in kept accumulating through noclip";
+
+    state.noclip = false;
+    state.velocity = Vector3();
+    Landing landing = Landing::None;
+    bool landed = false;
+    for (int i = 0; i < 240 && !landed; ++i)
+    {
+        landing = PlayerStep(world, world.cells[0], broad, state, InputState{}, kDt).landing;
+        landed = landing != Landing::None;
+    }
+    EXPECT_TRUE(landed) << "the body never fell back to the floor";
+    // 1.35 m is under §43.1's 2.4 m, so this is a step down, not a fall worth a grunt.
+    EXPECT_EQ(landing, Landing::Soft) << "it landed from the drop it was in before noclip";
+    EXPECT_TRUE(state.onGround);
+    EXPECT_NEAR(state.position.Y - kStand, 0.0F, 0.01F);
+}
