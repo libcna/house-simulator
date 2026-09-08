@@ -38,6 +38,48 @@ namespace cnahouse::player
             return wish;
         }
 
+        /// §43.2's modifier table, as one number.
+        float SpeedFactor(const InputState& input, const PlayerState& state)
+        {
+            // The DIRECTIONAL part first, as the ellipse whose axes are the table's own numbers.
+            // Multiplying the two instead would make a backwards strafe 0.61 of a walk -- slower
+            // than either of the things it is a mixture of, which is not what a mixture means.
+            float forward = input.move.Y;
+            float lateral = input.move.X;
+            const float length = std::sqrt(forward * forward + lateral * lateral);
+            float factor = 1.0F;
+            if (length > 1.0e-6F)
+            {
+                forward /= length;
+                lateral /= length;
+                const float alongLimit = forward >= 0.0F ? 1.0F : kBackwardsFactor;
+                const float along = forward / alongLimit;
+                const float across = lateral / kStrafeFactor;
+                factor = 1.0F / std::sqrt(along * along + across * across);
+            }
+
+            // The STATE part multiplies: being on a stair, crouched, carrying something and in
+            // deep snow are four independent facts, and a body doing all four is slowed by all
+            // four.
+            if (state.groundKind == CollisionKind::Stair)
+            {
+                factor *= kStairsFactor;
+            }
+            if (state.crouched)
+            {
+                factor *= kCrouchFactor;
+            }
+            if (state.carrying)
+            {
+                factor *= kCarryingFactor;
+            }
+            if (state.snowDepth > kDeepSnowDepth)
+            {
+                factor *= kDeepSnowFactor;
+            }
+            return factor;
+        }
+
     } // namespace
 
     PlayerStepReport PlayerStep(const CollisionWorld& world,
@@ -63,9 +105,10 @@ namespace cnahouse::player
             state.fastWalk = !state.fastWalk;
             report.walkModeChanged = true;
         }
-        const float speed = state.fastWalk ? kFastWalkSpeed : kWalkSpeed;
+        const float speed = (state.fastWalk ? kFastWalkSpeed : kWalkSpeed) * SpeedFactor(input, state);
 
         const Xna::Vector3 wish = Wish(input, state.yaw);
+        report.speedFactor = speed / (state.fastWalk ? kFastWalkSpeed : kWalkSpeed);
         const Xna::Vector3 desired(wish.X * speed, 0.0F, wish.Z * speed);
         const Xna::Vector3 gap(desired.X - state.velocity.X, 0.0F, desired.Z - state.velocity.Z);
         const float gapLength = std::sqrt(gap.X * gap.X + gap.Z * gap.Z);

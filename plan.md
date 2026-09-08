@@ -7937,8 +7937,27 @@ never escapes and never penetrates.
             a version-2 file migrating to the walk. And in the input source, the same key reported
             as both a level and an edge, with the edge not repeating while held. Six injected bugs,
             six caught.
-- [ ] HOUSE-00557 — Implement directional speed modifiers (backwards, strafe, stairs, crouch, snow, carrying)
+- [x] HOUSE-00557 — Implement directional speed modifiers (backwards, strafe, stairs, crouch, snow, carrying)
       dep: HOUSE-00556 · sys: player · plat: ALL · pri: MUST
+      note: (2026-09-08) §43.2's six modifiers, and they are two KINDS of thing rather than six of
+            one. Backwards, strafe and forward are one fact asked in different directions, so they
+            are the axes of an ellipse the speed is limited by: each pure direction is exactly its
+            own number and a diagonal falls between the two it is a mixture of -- 0.7772 for a
+            backwards strafe. Multiplying them instead gives 0.61, which is SLOWER than either of
+            the things that mixture is made of, and that is not what a mixture means.
+      note: the state modifiers -- stairs, crouch, carrying, deep snow -- DO multiply, because they
+            are four independent facts about the body and one doing all four is slowed by all four.
+            §43.2's snow figure is a threshold and not a ramp, so 0.12 m is not deep and 0.13 is.
+      accept: 5 cases. Every one of the seven numbers pinned as a literal; the three pure
+            directions exact and the diagonal strictly between the two it lies between; the four
+            state modifiers accumulating, with the snow threshold checked either side; and the
+            factor reaching the BODY and not only the report -- ten metres backwards takes
+            1 / 0.72 as long as ten metres forwards, measured over the run. Seven injected bugs,
+            seven caught.
+      finding: (2026-09-08, found by `HOUSE-00557`) `ForwardIsNorthAndPositiveYawTurnsEast` asserted
+            that strafing east and turning east covered the same ground. It was written before the
+            modifiers existed and was wrong the moment they did: a strafe is §43.2's 0.85. The
+            case now asserts that ratio, which is the modifier arriving at the body.
 - [ ] HOUSE-00558 — Implement the automatic attic crouch: headroom probe, capsule swap, eye height, speed
       dep: HOUSE-00557 · sys: player · plat: ALL · pri: MUST
       accept: entering `L3_STORE_W` under the knee wall crouches; standing up is automatic and never clips

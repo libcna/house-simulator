@@ -26,6 +26,23 @@ namespace cnahouse::player
     /// *"A brisk walk, not a run. Above ~2.2 m/s a human transitions to a jog, and the brief is
     /// explicit that this is still walking."* -- which is why it is 2.05 and not 2.5.
     inline constexpr float kFastWalkSpeed = 2.05F;
+    /// @brief §43.2's directional and state modifiers.
+    ///
+    /// The three DIRECTIONAL ones are not multiplied together: a body backing away diagonally is
+    /// not travelling at 0.72 x 0.85 of a walk. They are the axes of an ellipse the speed is
+    /// limited by, so each pure direction is exactly its own number and a diagonal falls between
+    /// the two it is between -- 0.777 for a backwards strafe, which is neither 0.72 nor 0.85 nor
+    /// 0.61.
+    inline constexpr float kBackwardsFactor = 0.72F;
+    inline constexpr float kStrafeFactor = 0.85F;
+    /// @brief The STATE modifiers, which do multiply: they are independent facts about the body.
+    inline constexpr float kStairsFactor = 0.72F;
+    inline constexpr float kCrouchFactor = 0.55F;
+    inline constexpr float kCarryingFactor = 0.94F;
+    inline constexpr float kDeepSnowFactor = 0.80F;
+    /// @brief §43.2's `snowDepth > 0.12`, in metres.
+    inline constexpr float kDeepSnowDepth = 0.12F;
+
     /// @brief §43.2's acceleration and deceleration, in m/s².
     ///
     /// *"Reaches full speed in ~0.15 s -- responsive, not floaty"*, and 1.35 / 9.0 IS 0.15 s: the
@@ -43,6 +60,14 @@ namespace cnahouse::player
         Microsoft::Xna::Framework::Vector3 velocity;
         /// @brief Radians. §14: 0 looks north (-Z) and positive turns EAST.
         float yaw = 0.0F;
+
+        /// @brief Crouched, which in this house means the attic (§43.1). `HOUSE-00558` sets it.
+        bool crouched = false;
+        /// @brief Carrying an item (§50.5). The interaction system sets it.
+        bool carrying = false;
+        /// @brief Snow underfoot, in metres. §36's weather sets it; deeper than
+        ///        `kDeepSnowDepth` slows the body down.
+        float snowDepth = 0.0F;
 
         /// @brief §43.2's walk mode. `Shift` TOGGLES it; it is not hold-to-sprint.
         ///
@@ -93,6 +118,9 @@ namespace cnahouse::player
         /// @brief `Shift` was pressed and the walk mode changed. §43.2 plays a UI tick and shows
         ///        a HUD glyph on this, and the app writes the new mode to `Settings`.
         bool walkModeChanged = false;
+        /// @brief Everything §43.2's modifier table did to the walk this step, as one number.
+        ///        1.0 is an unmodified forward walk. §47's locomotion blend reads it.
+        float speedFactor = 1.0F;
     };
 
     /// @brief §49.3's fixed step, composed (`HOUSE-00555`).

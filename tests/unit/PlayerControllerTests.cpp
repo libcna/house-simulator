@@ -211,7 +211,9 @@ TEST(PlayerControllerTests, ForwardIsNorthAndPositiveYawTurnsEast)
     EXPECT_GT(east.position.X, 0.5F) << "positive yaw did not turn east";
     EXPECT_NEAR(east.position.Z, 0.0F, 1e-4F);
 
-    // Strafing right from yaw 0 goes east too, and the two agree on how far in a second.
+    // Strafing right from yaw 0 goes east too -- and §43.2's strafe modifier means it covers
+    // 0.85 of the ground that turning east and walking does, which is the modifier arriving at the
+    // body rather than only at the report.
     PlayerState strafe = Standing(0.0F, 0.0F);
     InputState right;
     right.move.X = 1.0F;
@@ -219,7 +221,8 @@ TEST(PlayerControllerTests, ForwardIsNorthAndPositiveYawTurnsEast)
     {
         PlayerStep(world, world.cells[0], broad, strafe, right, kDt);
     }
-    EXPECT_NEAR(strafe.position.X, east.position.X, 1e-3F);
+    EXPECT_GT(strafe.position.X, 0.5F) << "strafing right did not go east";
+    EXPECT_NEAR(strafe.position.X / east.position.X, cnahouse::player::kStrafeFactor, 0.02F);
 }
 
 TEST(PlayerControllerTests, AWallStopsTheBodyAndDoesNotStoreUpSpeedBehindIt)
@@ -384,6 +387,130 @@ TEST(PlayerControllerTests, TheWalkModeSurvivesASettingsRoundTrip)
     ASSERT_TRUE(old) << old.Error().Message();
     EXPECT_FALSE(old->fastWalk) << "a file from before the mode existed chose the run";
     EXPECT_EQ(old->version, cnahouse::app::Settings::kCurrentVersion);
+}
+
+TEST(PlayerControllerTests, EveryNumberInTheModifierTableIsTheOneItSays)
+{
+    using namespace cnahouse::player;
+    EXPECT_FLOAT_EQ(kBackwardsFactor, 0.72F);
+    EXPECT_FLOAT_EQ(kStrafeFactor, 0.85F);
+    EXPECT_FLOAT_EQ(kStairsFactor, 0.72F);
+    EXPECT_FLOAT_EQ(kCrouchFactor, 0.55F);
+    EXPECT_FLOAT_EQ(kCarryingFactor, 0.94F);
+    EXPECT_FLOAT_EQ(kDeepSnowFactor, 0.80F);
+    EXPECT_FLOAT_EQ(kDeepSnowDepth, 0.12F);
+}
+
+TEST(PlayerControllerTests, TheThreeDirectionsAreExactAndTheDiagonalIsBetweenThem)
+{
+    // §43.2 gives forward, backwards and strafe as three numbers. They are the axes of an ellipse
+    // the speed is limited by, not factors to multiply: a body backing away diagonally is not
+    // travelling at 0.72 x 0.85 = 0.61 of a walk, which is SLOWER than either of the things that
+    // mixture is made of.
+    const CollisionWorld world = OneCell({Slab(0.0F, -40.0F, 40.0F)});
+    BroadPhase broad;
+
+    struct Case
+    {
+        float x;
+        float y;
+        float want;
+        const char* what;
+    };
+
+    const Case cases[] = {
+        {0.0F, 1.0F, 1.0F, "straight forward"},
+        {0.0F, -1.0F, cnahouse::player::kBackwardsFactor, "straight back"},
+        {1.0F, 0.0F, cnahouse::player::kStrafeFactor, "pure strafe"},
+        {-1.0F, 0.0F, cnahouse::player::kStrafeFactor, "the other strafe"},
+    };
+    for (const Case& one : cases)
+    {
+        PlayerState state = Standing(0.0F, 0.0F);
+        InputState input;
+        input.move.X = one.x;
+        input.move.Y = one.y;
+        const PlayerStepReport step = PlayerStep(world, world.cells[0], broad, state, input, kDt);
+        EXPECT_NEAR(step.speedFactor, one.want, 1e-4F) << one.what;
+    }
+
+    // ...and the diagonal falls BETWEEN the two it is a mixture of.
+    PlayerState diagonal = Standing(0.0F, 0.0F);
+    InputState back;
+    const float inv = 1.0F / std::sqrt(2.0F);
+    back.move.X = inv;
+    back.move.Y = -inv;
+    const PlayerStepReport step = PlayerStep(world, world.cells[0], broad, diagonal, back, kDt);
+    EXPECT_NEAR(step.speedFactor, 0.7772F, 1e-3F);
+    EXPECT_GT(step.speedFactor, cnahouse::player::kBackwardsFactor);
+    EXPECT_LT(step.speedFactor, cnahouse::player::kStrafeFactor);
+}
+
+TEST(PlayerControllerTests, TheStateModifiersMultiplyBecauseTheyAreIndependent)
+{
+    // A stair, a crouch, a carried item and deep snow are four separate facts about the body, and
+    // one doing all four is slowed by all four -- unlike the directional three, which are one
+    // fact asked in different directions.
+    using namespace cnahouse::player;
+    const CollisionWorld world = OneCell({Slab(0.0F, -40.0F, 40.0F, CollisionKind::Stair)});
+    BroadPhase broad;
+
+    PlayerState state = Standing(0.0F, 0.0F);
+    PlayerStep(world, world.cells[0], broad, state, InputState{}, kDt); // let the probe see the stair
+    ASSERT_EQ(state.groundKind, CollisionKind::Stair);
+
+    PlayerStepReport step = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+    EXPECT_NEAR(step.speedFactor, kStairsFactor, 1e-4F);
+
+    state.crouched = true;
+    step = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+    EXPECT_NEAR(step.speedFactor, kStairsFactor * kCrouchFactor, 1e-4F);
+
+    state.carrying = true;
+    step = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+    EXPECT_NEAR(step.speedFactor, kStairsFactor * kCrouchFactor * kCarryingFactor, 1e-4F);
+
+    // §43.2's snow threshold is a threshold, not a ramp: 0.12 m is not deep and 0.13 is.
+    state.snowDepth = 0.12F;
+    step = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+    EXPECT_NEAR(step.speedFactor, kStairsFactor * kCrouchFactor * kCarryingFactor, 1e-4F);
+    state.snowDepth = 0.13F;
+    step = PlayerStep(world, world.cells[0], broad, state, Forward(), kDt);
+    EXPECT_NEAR(step.speedFactor, kStairsFactor * kCrouchFactor * kCarryingFactor * kDeepSnowFactor, 1e-4F);
+}
+
+TEST(PlayerControllerTests, WalkingBackwardsReallyIsSlowerOverTheGround)
+{
+    // The factor has to reach the body and not just the report. Ten metres backwards takes
+    // 1 / 0.72 as long as ten metres forwards, measured over the run.
+    const CollisionWorld world = OneCell({Slab(0.0F, -40.0F, 40.0F)});
+    BroadPhase broad;
+
+    const auto ticksFor = [&](float moveY)
+    {
+        PlayerState state = Standing(0.0F, 0.0F);
+        InputState input;
+        input.move.Y = moveY;
+        for (int i = 0; i < 60; ++i)
+        {
+            PlayerStep(world, world.cells[0], broad, state, input, kDt);
+        }
+        const float from = state.position.Z;
+        int ticks = 0;
+        while (std::fabs(state.position.Z - from) < 10.0F && ticks < 4000)
+        {
+            PlayerStep(world, world.cells[0], broad, state, input, kDt);
+            ++ticks;
+        }
+        return ticks;
+    };
+    const int forwards = ticksFor(1.0F);
+    const int backwards = ticksFor(-1.0F);
+    ASSERT_LT(forwards, 4000);
+    ASSERT_LT(backwards, 4000);
+    EXPECT_NEAR(static_cast<float>(backwards) / static_cast<float>(forwards),
+                1.0F / cnahouse::player::kBackwardsFactor,
+                0.02F);
 }
 
 TEST(PlayerControllerTests, TheEyeIsWhereFortyThreePointOnePutsIt)
