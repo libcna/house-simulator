@@ -717,6 +717,21 @@ SURFACE_COLOURS = {
 }
 SURFACE_ORDER = list(SURFACE_COLOURS)
 
+#: The surface classes that receive a baked lightmap (`HOUSE-00471`, `cna-house.md` §18.3).
+#:
+#: **Semantic, not geometric.** A wall is a lightmap receiver because it is a wall -- a large,
+#: static architectural surface whose illumination is low-frequency and worth baking -- and not
+#: because any particular triangle of it happens to be bigger than a texel. Triangulating a wall
+#: differently must not change whether it is lit by a bake, which is why this is a set of classes
+#: and not a size threshold.
+#:
+#: Everything else is architectural DETAIL -- skirtings, cornices, architraves, thresholds, window
+#: frames and sashes, glass, stair nosings, handrails, balusters, rafters, gutters, downspouts --
+#: and is lit by the room's dynamic term instead. §18.3 records the measurement that settled it:
+#: 26 704 of the shell's 43 528 faces are under one texel at 4 texels/metre, and a 55 mm handrail
+#: face is a fifth of a texel across, so no atlas anyone can budget would light them from a bake.
+LIGHTMAP_RECEIVERS = ("floor", "ceiling", "wall", "exterior")
+
 
 def planar_uvs(mesh) -> None:
     """A world-space planar UV0, one unit per metre, projected on each face's dominant axis.
@@ -746,14 +761,60 @@ def planar_uvs(mesh) -> None:
 
 
 def material_slots(mesh) -> None:
-    """Give @p mesh one material per surface class, in `SURFACE_ORDER`, and colour them."""
+    """Give @p mesh one material per surface class, in `SURFACE_ORDER`, and colour them.
+
+    The material IS the semantic classification, and it is what survives into the `.glb`: glTF
+    splits a mesh into one primitive per material, so "this primitive is a wall" is carried by the
+    file itself rather than by a name a later tool has to parse. Each material also carries a
+    `lightmapReceiver` custom property, which the exporter writes into its `extras` -- so the
+    unwrap and the bake read the generator's own decision instead of re-deriving it.
+    """
     for name in SURFACE_ORDER:
         material = bpy.data.materials.get(f"BLOCKOUT_{name}")
         if material is None:
             material = bpy.data.materials.new(f"BLOCKOUT_{name}")
             material.use_nodes = False
             material.diffuse_color = SURFACE_COLOURS[name]
+            material["surfaceClass"] = name
+            material["lightmapReceiver"] = name in LIGHTMAP_RECEIVERS
         mesh.materials.append(material)
+
+
+def weld(mesh) -> int:
+    """Merge coincident vertices **of the lightmap receivers**. Returns how many were removed.
+
+    Every face is built with its own eight corners, so before this a wall split into three strips
+    round a doorway is three islands that share no vertex -- and `smart_project` would give each
+    strip an island of its own, which is how a receiver surface ends up with sub-texel islands for
+    reasons that have nothing to do with the wall. Welding makes the logical surface **connected**,
+    so the unwrapper sees one wall and packs one island for it (`HOUSE-00471`).
+
+    Only the receivers, because only they are unwrapped: a skirting board is not lightmapped and
+    welding it would change nothing but the face count. The threshold is 10 µm -- coincident means
+    coincident -- so two boards 18 mm apart do not merge and nor do the two faces of a 6 mm pane.
+    """
+    import bmesh  # noqa: PLC0415  (only available inside Blender)
+
+    receivers = {SURFACE_ORDER.index(name) for name in LIGHTMAP_RECEIVERS}
+    working = bmesh.new()
+    working.from_mesh(mesh)
+    working.faces.ensure_lookup_table()
+    working.verts.ensure_lookup_table()
+    # By INDEX, not by a set of vertex objects: `remove_doubles` keeps the first vertex of each
+    # cluster, so the order it is handed decides which one survives and therefore the file's bytes
+    # -- and a `set` of BMVerts iterates by address, which is a different answer every run. §18.4's
+    # byte-identical claim caught it.
+    chosen = sorted({vertex.index for face in working.faces
+                     if face.material_index in receivers for vertex in face.verts})
+    wanted = [working.verts[index] for index in chosen]
+    before = len(working.verts)
+    if wanted:
+        bmesh.ops.remove_doubles(working, verts=wanted, dist=1e-5)
+    removed = before - len(working.verts)
+    working.to_mesh(mesh)
+    working.free()
+    mesh.update()
+    return removed
 
 
 #: A basement window well (`HOUSE-00469`). §12.6 says `W_BASEMENT` is a hopper "in 0.9 m window
@@ -1351,6 +1412,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
     material_slots(mesh)
     for polygon, klass in zip(mesh.polygons, classes):
         polygon.material_index = SURFACE_ORDER.index(klass)
+    weld(mesh)          # before the UVs: welding moves loops, and a face keeps its material
     planar_uvs(mesh)
     obj = bpy.data.objects.new(cell["id"], mesh)
     bpy.context.scene.collection.objects.link(obj)
@@ -1362,8 +1424,10 @@ def export(obj, path: Path) -> None:
     bpy.ops.object.select_all(action="DESELECT")
     obj.select_set(True)
     bpy.context.view_layer.objects.active = obj
+    # `export_extras` carries each material's `surfaceClass` and `lightmapReceiver` into the
+    # `.glb`, so the classification the generator made is in the file rather than in a convention.
     bpy.ops.export_scene.gltf(filepath=str(path), export_format="GLB", use_selection=True,
-                              export_yup=True)
+                              export_yup=True, export_extras=True)
 
 
 def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> dict:
@@ -1430,6 +1494,7 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         material_slots(mesh)
         for polygon in mesh.polygons:
             polygon.material_index = SURFACE_ORDER.index("exterior")
+        weld(mesh)
         planar_uvs(mesh)
         stack = bpy.data.objects.new("CHIMNEY", mesh)
         bpy.context.scene.collection.objects.link(stack)
@@ -1590,6 +1655,7 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=()):
     material_slots(mesh)
     for polygon, klass in zip(mesh.polygons, classes):
         polygon.material_index = SURFACE_ORDER.index(klass)
+    weld(mesh)          # before the UVs: welding moves loops, and a face keeps its material
     planar_uvs(mesh)
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
@@ -2303,6 +2369,43 @@ def selftest(output: Path) -> int:
              for axis in (0, 1)]
     require(min(spans) > 3.0,
             f"the kitchen's floor spans metres of UV, not a normalised 0..1 ({spans})")
+
+    # ---- `HOUSE-00471`: the receivers are welded, so a wall is one surface ----------------------
+    require(set(LIGHTMAP_RECEIVERS) == {"floor", "ceiling", "wall", "exterior"},
+            f"the receivers are the room-scale classes, named once ({LIGHTMAP_RECEIVERS})")
+    require(not (set(LIGHTMAP_RECEIVERS) & {"trim", "glass", "metal", "stair", "structure",
+                                            "roof"}),
+            "and no detail class is one of them")
+    receiver_indices = {SURFACE_ORDER.index(name) for name in LIGHTMAP_RECEIVERS}
+    loose = 0
+    for edge in painted.data.edges:
+        users = [face for face in painted.data.polygons
+                 if edge.key[0] in face.vertices and edge.key[1] in face.vertices
+                 and face.material_index in receiver_indices]
+        if len(users) > 1:
+            loose += 1
+    require(loose > 0,
+            f"receiver faces SHARE edges after the weld, so a wall broken into strips round a "
+            f"doorway is one connected surface and not three islands ({loose} shared edges)")
+    detail_verts = {index for face in painted.data.polygons
+                    if face.material_index not in receiver_indices
+                    for index in face.vertices}
+    require(detail_verts, "and the trim is still there, unwelded, with its own vertices")
+
+    kitchen_material = painted.data.materials[SURFACE_ORDER.index("wall")]
+    require(kitchen_material.get("lightmapReceiver") is True
+            and kitchen_material.get("surfaceClass") == "wall",
+            "a wall's material says so itself, so the unwrap reads the generator's decision "
+            "rather than re-deriving it")
+    require(painted.data.materials[SURFACE_ORDER.index("trim")].get("lightmapReceiver") is False,
+            "and the trim's says it is not a receiver")
+    exported, _err = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
+    tagged = [material for material in exported.get("materials", [])
+              if isinstance(material.get("extras"), dict)
+              and "lightmapReceiver" in material["extras"]]
+    require(len(tagged) == len(exported.get("materials", [])),
+            f"and it survives into the .glb as material `extras`, on every material "
+            f"({len(tagged)} of {len(exported.get('materials', []))})")
 
     # ---- `HOUSE-00469`: the basement window wells -----------------------------------------------
     wells_wanted = [row for row in openings_by_portal.values()

@@ -87,6 +87,10 @@ LIGHTMAP_UV = "Lightmap"
 MIN_ATLAS = 32
 DEFAULT_MAX_ATLAS = 2048
 
+#: Below this many texels in its bounding box, a face is rasterised by the scalar loop rather than
+#: by numpy: setting up an array costs more than testing a handful of points (`HOUSE-00471`).
+SCALAR_TEXELS = 256
+
 #: How far below the target density the chosen atlas may land. A power-of-two atlas cannot hit an
 #: arbitrary density exactly: the next size up costs FOUR times the memory for at most twice the
 #: density, so refusing a 2 % shortfall would quadruple the lightmap budget to buy nothing anyone
@@ -215,34 +219,109 @@ def rasterise(records: list[dict], islands: dict, size: int) -> tuple[list[int],
     Texel CENTRES, because that is what the baker samples. Two faces that merely share an edge do
     not both claim a texel; two faces that genuinely overlap do.
     """
-    grid = [-1] * (size * size)
-    owner: dict[int, tuple[str, int]] = {}
+    import numpy  # noqa: PLC0415  (Blender's interpreter has it; see blender_env.py)
+
+    # Vectorised over each face's own bounding box. The test is the same crossing-number rule
+    # `_point_in_polygon` applies one texel at a time -- and that version is kept, and claimed
+    # against this one, because a rewrite for speed that changes an answer is a rewrite that
+    # ruins bakes silently (`HOUSE-00471`: at 2048² the loop version is minutes a cell).
+    grid = numpy.full(size * size, -1, dtype=numpy.int32)
+    owner = numpy.full(size * size, -1, dtype=numpy.int32)
+    keys: list[tuple[str, int]] = []
     problems: list[str] = []
-    for record in records:
+    for index, record in enumerate(records):
         uvs = record["uv"]
+        keys.append((record["object"], record["polygon"]))
         xs = [u for u, _ in uvs]
         ys = [v for _, v in uvs]
         x0 = max(int(math.floor(min(xs) * size)), 0)
         x1 = min(int(math.ceil(max(xs) * size)), size)
         y0 = max(int(math.floor(min(ys) * size)), 0)
         y1 = min(int(math.ceil(max(ys) * size)), size)
-        key = (record["object"], record["polygon"])
-        island = islands.get(key, -1)
-        for y in range(y0, y1):
-            centre_y = (y + 0.5) / size
-            for x in range(x0, x1):
-                centre_x = (x + 0.5) / size
-                if not _point_in_polygon(centre_x, centre_y, uvs):
+        if x1 <= x0 or y1 <= y0:
+            continue
+        island = islands.get(keys[-1], -1)
+
+        # Small faces stay on the scalar path. A numpy pass costs tens of microseconds to set up
+        # whatever it covers, and most of a shell's faces cover a handful of texels: measured over
+        # the fixture, vectorising everything was SLOWER than the loop it replaced. The threshold
+        # is where the two meet.
+        if (x1 - x0) * (y1 - y0) <= SCALAR_TEXELS:
+            for y in range(y0, y1):
+                centre_y = (y + 0.5) / size
+                for x in range(x0, x1):
+                    if not _point_in_polygon((x + 0.5) / size, centre_y, uvs):
+                        continue
+                    cell = y * size + x
+                    if owner[cell] >= 0 and owner[cell] != index:
+                        other = keys[int(owner[cell])]
+                        problems.append(
+                            f"texel ({x}, {y}) is claimed by both {other[0]}#{other[1]} and "
+                            f"{keys[-1][0]}#{keys[-1][1]}: two surfaces would share one light "
+                            f"sample")
+                        continue
+                    grid[cell] = island
+                    owner[cell] = index
+            continue
+
+        centres_x = (numpy.arange(x0, x1) + 0.5) / size
+        centres_y = (numpy.arange(y0, y1) + 0.5) / size
+        px, py = numpy.meshgrid(centres_x, centres_y)
+        inside = numpy.zeros(px.shape, dtype=bool)
+        count = len(uvs)
+        for corner in range(count):
+            ax, ay = uvs[corner]
+            bx, by = uvs[(corner + 1) % count]
+            crosses = (ay > py) != (by > py)
+            with numpy.errstate(divide="ignore", invalid="ignore"):
+                boundary_x = (bx - ax) * (py - ay) / numpy.where(by - ay == 0, 1.0, by - ay) + ax
+            inside ^= crosses & (px < boundary_x)
+
+        cells = ((numpy.arange(y0, y1)[:, None] * size)
+                 + numpy.arange(x0, x1)[None, :])[inside]
+        if cells.size == 0:
+            continue
+        taken = owner[cells]
+        clash = cells[(taken >= 0) & (taken != index)]
+        if clash.size:
+            first = int(clash[0])
+            other = keys[int(owner[first])]
+            problems.append(
+                f"texel ({first % size}, {first // size}) is claimed by both {other[0]}#{other[1]} "
+                f"and {keys[-1][0]}#{keys[-1][1]}: two surfaces would share one light sample")
+        free = cells[(taken < 0) | (taken == index)]
+        grid[free] = island
+        owner[free] = index
+    return grid.tolist(), problems
+
+
+def measure_gutter_reference(grid: list[int], size: int, gutter: int):
+    """The loop-for-loop version of `measure_gutter`, kept as the thing the fast one is checked
+    against. Slow by construction -- it touches every texel and every neighbour -- and never used
+    outside the selftest (`HOUSE-00471`)."""
+    problems: list[str] = []
+    smallest: int | None = None
+    reach = gutter + 1
+    for y in range(size):
+        for x in range(size):
+            island = grid[y * size + x]
+            if island < 0:
+                continue
+            for dy in range(-reach, reach + 1):
+                ny = y + dy
+                if not 0 <= ny < size:
                     continue
-                cell = y * size + x
-                if grid[cell] != -1 and owner[cell] != key:
-                    problems.append(
-                        f"texel ({x}, {y}) is claimed by both {owner[cell][0]}#{owner[cell][1]} "
-                        f"and {key[0]}#{key[1]}: two surfaces would share one light sample")
-                    continue
-                grid[cell] = island
-                owner[cell] = key
-    return grid, problems
+                for dx in range(-reach, reach + 1):
+                    nx = x + dx
+                    if not 0 <= nx < size or (dx == 0 and dy == 0):
+                        continue
+                    other = grid[ny * size + nx]
+                    if other < 0 or other == island:
+                        continue
+                    between = max(abs(dx), abs(dy)) - 1
+                    if smallest is None or between < smallest:
+                        smallest = between
+    return smallest, problems
 
 
 def measure_gutter(grid: list[int], size: int, gutter: int) -> tuple[int | None, list[str]]:
@@ -263,38 +342,64 @@ def measure_gutter(grid: list[int], size: int, gutter: int) -> tuple[int | None,
     smallest: int | None = None
     reach = gutter + 1
 
-    boundary = []
-    for y in range(size):
-        row = y * size
-        for x in range(size):
-            island = grid[row + x]
-            if island < 0:
-                continue
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                nx, ny = x + dx, y + dy
-                if not (0 <= nx < size and 0 <= ny < size) or grid[ny * size + nx] != island:
-                    boundary.append((x, y, island))
-                    break
+    import numpy  # noqa: PLC0415
 
-    for x, y, island in boundary:
-        for dy in range(-reach, reach + 1):
-            ny = y + dy
-            if not 0 <= ny < size:
+    # The boundary scan is the one place this tool touches every texel, so it is vectorised: at
+    # 2048² the Python loop is four million iterations before any measuring starts. Same rule --
+    # a texel whose four-neighbourhood is entirely its own island is not a boundary texel.
+    field = numpy.asarray(grid, dtype=numpy.int32).reshape(size, size)
+    filled = field >= 0
+    edge = numpy.zeros_like(filled)
+    for axis, shift in ((1, 1), (1, -1), (0, 1), (0, -1)):
+        rolled = numpy.roll(field, shift, axis=axis)
+        differs = rolled != field
+        if axis == 1 and shift == 1:
+            differs[:, 0] = True
+        elif axis == 1:
+            differs[:, -1] = True
+        elif shift == 1:
+            differs[0, :] = True
+        else:
+            differs[-1, :] = True
+        edge |= differs
+    ys, xs = numpy.nonzero(filled & edge)
+    boundary = [(int(x), int(y), int(field[y, x])) for x, y in zip(xs, ys)]
+
+    if not boundary:
+        return None, problems
+
+    # One vectorised pass per offset in the (2·reach+1)² neighbourhood, over EVERY boundary texel
+    # at once, instead of a Python loop per texel per offset. Same neighbourhood, same Chebyshev
+    # rule, same answer -- the tool's own selftest is the contract (`HOUSE-00471`).
+    bx = numpy.array([x for x, _y, _island in boundary], dtype=numpy.int64)
+    by = numpy.array([y for _x, y, _island in boundary], dtype=numpy.int64)
+    mine = numpy.array([island for _x, _y, island in boundary], dtype=numpy.int32)
+    for ring in range(0, reach + 1):
+        between = ring - 1
+        offsets = [(dx, dy) for dy in range(-ring, ring + 1) for dx in range(-ring, ring + 1)
+                   if max(abs(dx), abs(dy)) == ring]
+        for dx, dy in offsets:
+            if dx == 0 and dy == 0:
                 continue
-            for dx in range(-reach, reach + 1):
-                nx = x + dx
-                if not 0 <= nx < size or (dx == 0 and dy == 0):
-                    continue
-                other = grid[ny * size + nx]
-                if other < 0 or other == island:
-                    continue
-                between = max(abs(dx), abs(dy)) - 1
-                if smallest is None or between < smallest:
-                    smallest = between
-                if between < gutter:
-                    problems.append(
-                        f"islands {island} and {other} have {between} empty texel(s) between them "
-                        f"at ({x}, {y}); the gutter is {gutter}")
+            nx, ny = bx + dx, by + dy
+            valid = (nx >= 0) & (nx < size) & (ny >= 0) & (ny < size)
+            if not valid.any():
+                continue
+            other = field[ny[valid], nx[valid]]
+            differs = (other >= 0) & (other != mine[valid])
+            if not differs.any():
+                continue
+            if smallest is None or between < smallest:
+                smallest = between
+            if between < gutter and len(problems) < 5:
+                first = int(numpy.nonzero(differs)[0][0])
+                where = numpy.nonzero(valid)[0][first]
+                problems.append(
+                    f"islands {int(mine[where])} and {int(other[differs][0])} have {between} "
+                    f"empty texel(s) between them at ({int(bx[where])}, {int(by[where])}); the "
+                    f"gutter is {gutter}")
+        if smallest is not None:
+            break        # the rings are searched outward, so the first hit IS the smallest
     return smallest, problems[:5]
 
 
@@ -552,6 +657,42 @@ def selftest() -> int:
         else:
             print(f"  FAIL  {message}")
             failures += 1
+
+    # ---- the fast paths agree with the slow ones (`HOUSE-00471`) -------------------------------
+    #
+    # `rasterise` and `measure_gutter` are the two places this tool touches every texel, and both
+    # were rewritten to run over arrays instead of over Python loops. A rewrite for speed that
+    # changes an answer is a rewrite that ruins bakes silently, so both are checked against the
+    # loop they replaced, on shapes chosen to exercise the awkward parts: a rectangle, a triangle
+    # whose edges cut texels diagonally, and two islands a known distance apart.
+    global SCALAR_TEXELS  # noqa: PLW0603  (the point is to force each path in turn)
+    keep_threshold = SCALAR_TEXELS
+    probe_records = [
+        {"object": "a", "polygon": 0, "uv": [(0.10, 0.10), (0.40, 0.10), (0.40, 0.40),
+                                             (0.10, 0.40)], "uvArea": 0.09, "worldArea": 1.0},
+        {"object": "a", "polygon": 1, "uv": [(0.55, 0.12), (0.92, 0.33), (0.61, 0.78)],
+         "uvArea": 0.08, "worldArea": 1.0},
+        {"object": "a", "polygon": 2, "uv": [(0.05, 0.80), (0.20, 0.80), (0.20, 0.95),
+                                             (0.05, 0.95)], "uvArea": 0.02, "worldArea": 1.0},
+    ]
+    probe_islands = {("a", 0): 0, ("a", 1): 1, ("a", 2): 2}
+    for probe_size in (32, 64, 128):
+        SCALAR_TEXELS = 10 ** 9
+        slow_grid, slow_problems = rasterise(probe_records, probe_islands, probe_size)
+        SCALAR_TEXELS = 0
+        fast_grid, fast_problems = rasterise(probe_records, probe_islands, probe_size)
+        SCALAR_TEXELS = keep_threshold
+        require(slow_grid == fast_grid,
+                f"at {probe_size}² the vectorised rasteriser fills exactly the texels the loop "
+                f"does ({sum(1 for c in slow_grid if c >= 0)} of {probe_size * probe_size}, "
+                f"{sum(1 for a, b in zip(slow_grid, fast_grid) if a != b)} differ)")
+        require(len(slow_problems) == len(fast_problems),
+                f"and finds the same overlaps ({len(slow_problems)}, {len(fast_problems)})")
+        slow_gap, _ = measure_gutter_reference(slow_grid, probe_size, DEFAULT_GUTTER)
+        fast_gap, _ = measure_gutter(slow_grid, probe_size, DEFAULT_GUTTER)
+        require(slow_gap == fast_gap,
+                f"and the vectorised gutter measures the same smallest gap at {probe_size}² "
+                f"({slow_gap}, {fast_gap})")
 
     build_room_fixture()
     result = unwrap(DENSITIES["small_room"], DEFAULT_GUTTER, DEFAULT_MAX_ATLAS)

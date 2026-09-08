@@ -1937,17 +1937,38 @@ file and only an offline check can catch it.
 
 1. `tools/blender/house_shell_gen.py` reads `layout.cells.json` and generates the architectural
    shell — floors, ceilings, walls, openings, stairs, roof — as a Blender scene, deterministically.
-2. `tools/blender/lightmap_unwrap.py` gives every shell face a second UV channel packed per cell
-   into a texel-density-uniform atlas (**4 texels/metre** for rooms, 8 for small rooms, 2 for the
-   attic and basement).
+2. `tools/blender/shell_unwrap.py` gives every shell **lightmap receiver** a second UV channel,
+   packed per cell into a texel-density-uniform atlas (**4 texels/metre** for rooms, 8 for small
+   rooms, 2 for the attic and basement) by `lightmap_unwrap.py`.
 
-   > **Open, 2026-09-08, `HOUSE-00471`.** "Every shell face" is not achievable at 4 texels/metre.
-   > Measured over the generated shell: **26 704 of 43 528 faces are smaller than one texel** — a
-   > 55 mm handrail face is a fifth of a texel across — and `lightmap_unwrap.py` refuses the pack
-   > rather than lying about it (`L0_HALL`: "224 face(s) pack to no UV area even at 2048²", the
-   > same 224 at a gutter of 1). Either this step covers only the faces at least a texel across and
-   > the trim is lit dynamically, or the density rises to ~20 texels/m for trim and §72's atlas
-   > budget stops being affordable. `plan.md`'s `HOUSE-00471` entry carries both.
+   **A lightmap receiver is a surface class, not a triangle size.** The receivers are the major
+   static room-scale surfaces — interior floors, interior ceilings, interior wall surfaces and the
+   major exterior wall/outer-skin surfaces — where baked light carries meaningful low-frequency
+   information. Architectural **detail** is deliberately not lightmapped: skirtings, cornices,
+   architraves, thresholds, window frames and sashes, glass, stair nosings, handrails, balusters,
+   rafters and attic framing, gutters, downspouts, and the thin trim of the roof, porch and
+   balconies. It is lit by the room's or the exterior's dynamic term instead (§22.2), which is a
+   quality and performance choice rather than a missing feature: a 55 mm board carries no
+   low-frequency lighting information worth a texel, and giving it one costs atlas area that a
+   wall would use better.
+
+   Movable and stateful geometry — door and window leaves, cabinet fronts, anything an interactable
+   turns — is never baked either: a bake is a photograph of one state, and it is wrong the moment
+   the thing moves.
+
+   Because the rule is the class and not the size, **triangulating a receiver differently must not
+   change whether it is lit by a bake.** `house_shell_gen.py` welds its receiver faces so a wall
+   broken into strips round a doorway is one connected surface, and the unwrapper packs one island
+   for the wall rather than one per strip. A small triangle that belongs to a large receiver is
+   carried by that receiver's island; it is never dropped on its own account.
+
+   The classification is **generated data, not a naming convention**: every material
+   `house_shell_gen.py` creates carries `surfaceClass` and `lightmapReceiver`, and the glTF
+   exporter writes both into the material's `extras`, so the unwrap and the bake read the
+   generator's own decision out of the file.
+
+   > **Decided 2026-09-09 (`HOUSE-00471`), replacing "every shell face".** That wording was not
+   > achievable at 4 texels/metre and the measurement is in §72.
 3. `tools/blender/lightmap_bake.py` bakes, per cell, one lightmap per light group plus one
    "daylight" lightmap lit only by a uniform sky dome through that cell's window openings.
    Bakes are diffuse-only, indirect included, Cycles, 256 samples, denoised.
@@ -2294,6 +2315,21 @@ can do.
 | `wet_<class>` | a second material with darkened albedo | `SurfaceBlend/Wet` | Tier S swaps the material; Tier E blends continuously |
 | `snow_<class>` | a snow shell mesh drawn over the base | `SurfaceBlend/Snowy` | |
 | `emissive` | `BasicEffect` `LightingEnabled=false` | `RoomLit/Emissive` | Lamp shades, TV, fridge interior, appliance LEDs |
+
+**Static shell surfaces: which of these paths, and when** (`HOUSE-00471`). A material's row above
+says what it is; §18.3 says whether it is lit by a bake:
+
+| Shell surface | Lit by | Tier S | Tier E |
+|---|---|---|---|
+| Floors, ceilings, wall surfaces, outer skin — the **lightmap receivers** | baked lightmap + dynamic room term | `DualTextureEffect`, lightmap in texture 2 | `RoomLit/LitLightmap` |
+| Skirtings, cornices, architraves, thresholds, frames, sashes, nosings, handrails, balusters, rafters, gutters, downspouts — **architectural detail** | the room's or the exterior's dynamic term only | `BasicEffect` (the stock path its class already names above) | `RoomLit`, no lightmap sample |
+| Glass | its own transparent/reflection path | `BasicEffect` + `EnvironmentMapEffect` as §22.2's `glass` row says | `RoomLit/Glass` |
+| Door and window leaves, cabinet fronts, anything an interactable moves | dynamic only | as the class's row | as the class's row |
+
+Detail geometry needs no second UV channel and no artificially high lightmap density; it is small,
+it is close to the receiver behind it, and the room term it shares with that receiver is what keeps
+the two consistent. Tier S is complete on its own here — nothing about this arrangement depends on
+Tier E, which improves the result and is not required for correctness.
 
 ### 22.3 Why `footstepSurface` and `audioAbsorption` live here
 
@@ -5681,7 +5717,7 @@ cost what. Exceeding a **hard fail** number fails CI.
 |---|---|---|
 | **GPU total** | 550 MB | On a 1 GB iGPU sharing system memory |
 | — Textures (albedo, normal) | 300 MB | ~1 400 textures after atlasing, mostly DXT where the content profile packages it (§27.2) |
-| — Lightmaps | 60 MB | 21 art atlases + 21 daylight atlases, 2048² DXT1 |
+| — Lightmaps | 60 MB | 21 art atlases + 21 daylight atlases, 2048² DXT1, budgeted for §18.3's **lightmap receivers** and not for every triangle the shell generator makes |
 | — Vertex/index buffers | 120 MB | ~6.2 M vertices resident across all packs |
 | — Render targets | 40 MB | shadow map 2048² + 2 composite targets at native |
 | — Dynamic buffers | 10 MB | particles, sky, stars, foliage |
@@ -5698,6 +5734,15 @@ cost what. Exceeding a **hard fail** number fails CI.
 | — binaries | 90 MB | |
 | — licences, docs | 10 MB | |
 | **Source repository** | ≤ 3.5 GB | `assets-src/` dominates; large binaries are hash-pinned and fetched, not committed, except the small committed baseline |
+
+**Why the lightmap budget is for receivers only** (measured 2026-09-08, decided 2026-09-09,
+`HOUSE-00471`). Over the generated architectural shell: **43 528 faces**, of which **26 704 are
+below one texel** at §18.3's nominal 4 texels/metre. A representative 55 mm handrail face is about
+**0.2 texel** across at that density. Lighting thin detail from a bake would need roughly
+**20 texels/metre** for a 55 mm board — a 25× increase in *texel area for the surfaces so treated*,
+spent on the surfaces carrying the least lighting information. (25× is the density-area scaling for
+those surfaces, not a measured multiple of the whole atlas requirement.) The budget above therefore
+stands unchanged and covers the receivers; the detail is lit dynamically (§18.3, §22.2).
 
 **Corrected again by `HOUSE-00278`, which performed the conversion: the loop cap is 8 s, not 10,
 and 10 was checked against the wrong budget.** §72's arithmetic below validated 10 s against this

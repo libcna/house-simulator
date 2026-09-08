@@ -41,6 +41,9 @@ add_library(cnahouse_core STATIC
     world/InteractableExpr.cpp
     world/SpatialIndex.cpp
 
+    # visibility -- §25's portal walk. Reads the world, writes nothing in it.
+    visibility/PortalRuntime.cpp
+
     # persistence
     persistence/DesktopSaveStore.cpp
 

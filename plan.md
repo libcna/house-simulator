@@ -7235,8 +7235,27 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verify: unit ReduceFrustumTests.ContainmentProperty
 - [ ] HOUSE-00664 — Implement the NDC-area computation of a clipped polygon and the `kMinPortalNdcArea` cutoff
       dep: HOUSE-00663 · sys: visibility · plat: ALL · pri: MUST
-- [ ] HOUSE-00665 — Implement `PortalRuntime`: per-portal aperture, cached world rect, opacity, and the closed/open hysteresis
+- [x] HOUSE-00665 — Implement `PortalRuntime`: per-portal aperture, cached world rect, opacity, and the closed/open hysteresis
       dep: HOUSE-00345 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) §25.3's two answers, both easy to get wrong invisibly. **The leaf does not
+            shrink the doorway**: the portal is the hole in the wall, a sight line crossing it is
+            never blocked by a leaf that has swung out of the plane, so above the latch the
+            aperture is the *whole* rectangle and the leaf is an ordinary opaque object in the
+            target cell. A door open 10° reveals a slice of the room because the leaf hides the
+            rest, not because the portal got narrow — and that is claimed by comparing the world
+            rectangle at 10 % open, 100 % open and shut.
+      note: **the state is latched**, §25.3's 0.05/0.08 band. A door settling shut sits in that
+            band for a frame or two, and a naive `aperture > 0` would flicker the cell behind it —
+            its chunks, props, lights and further portals — on and off. Both thresholds are claimed
+            against §25.3, and so is the fact that they are a band and not one number.
+      note: vision and movement are different questions: a closed glass door stops bodies and not
+            sight (§25.3), an opaque one stops both, and a cased opening has no leaf and stops
+            neither. The world rectangle is cached because the walk clips it several times a frame
+            and deriving four corners from an axis, a plane and a `(u, v)` rectangle is arithmetic
+            nobody needs to repeat — including the `u`/`v` axis swap that puts a stair well flat
+            rather than on edge, which is its own claim.
+      note: five injected bugs, all caught.
+      verify: unit PortalRuntimeTests.*
 - [ ] HOUSE-00666 — Implement the portal back-face test (portal plane vs. camera side)
       dep: HOUSE-00665 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00667 — Implement `maxDepthFor(portal)` with the interior/exterior asymmetry table

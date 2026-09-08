@@ -1,16 +1,29 @@
 #!/usr/bin/env python3
-"""shell_unwrap.py -- the shell's second UV channel, at §18.3's densities.
+"""shell_unwrap.py -- the lightmap UVs for the shell's RECEIVER surfaces, at §18.3's densities.
 
 `HOUSE-00471`. `lightmap_unwrap.py` (`HOUSE-00205`) packs one object's faces into a
-density-uniform atlas and checks the six things that ruin a bake. This drives it over the whole
-generated shell and picks the density §18.3 asks for, per cell:
-
-> a second UV channel packed per cell into a texel-density-uniform atlas -- **4 texels/metre for
-> rooms, 8 for small rooms, 2 for the attic and basement**
+density-uniform atlas and checks the six things that ruin a bake. This drives it over the
+generated shell, picks the density §18.3 asks for per cell, and -- the part that took a decision --
+gives it only the surfaces that are **lightmap receivers**.
 
     tools/blender/shell_unwrap.py                     # build/shell -> build/shell-lm
     tools/blender/shell_unwrap.py --cells L0_KITCHEN
     tools/blender/shell_unwrap.py --selftest
+
+## Which surfaces, and why it is not a size test
+
+§18.3 used to say "every shell face" gets a second UV channel. It cannot: 26 704 of the shell's
+43 528 faces are under one texel at 4 texels/metre, and a 55 mm handrail face is a fifth of a texel
+across. The decision (2026-09-09) is **selective semantic receivers**: floors, ceilings, walls and
+the outer skin are lightmapped; skirtings, cornices, architraves, thresholds, frames, sashes,
+glass, nosings, handrails, balusters, rafters, gutters and downspouts are lit by the room's
+dynamic term.
+
+**Semantic, not geometric.** The rule is the surface's CLASS, which `house_shell_gen.py` writes
+into each material as `lightmapReceiver`, and never the size of an individual triangle: a wall must
+not stop receiving baked light because the generator split it differently. The same generator welds
+its receiver faces, so a wall broken into strips round a doorway is one connected surface and the
+unwrapper packs one island for it rather than three.
 
 ## What "small room" means, since §18.3 does not say
 
@@ -46,9 +59,11 @@ if not INSIDE_BLENDER:
     sys.exit(blender_env.relaunch(Path(__file__).resolve(), sys.argv[1:], tool="shell_unwrap"))
 
 import argparse  # noqa: E402
+import json  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import house_shell_gen  # noqa: E402
 import lightmap_unwrap  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
@@ -96,14 +111,137 @@ def density_for(cell: dict | None) -> float:
     return DENSITY_SMALL if 0.0 < area < SMALL_ROOM_AREA else DENSITY_ROOM
 
 
+def receiver_material(material) -> bool:
+    """Does @p material say it is a lightmap receiver?
+
+    The generator's own decision, read back: `house_shell_gen.material_slots` sets
+    `lightmapReceiver` on every material it makes and the exporter writes it into the `.glb`'s
+    material `extras`. Falling back to the class NAME rather than to a guess keeps a hand-made
+    fixture working; falling back to "yes" would silently lightmap the trim again.
+    """
+    if material is None:
+        return False
+    flag = material.get("lightmapReceiver")
+    if flag is not None:
+        return bool(flag)
+    name = str(material.get("surfaceClass") or material.name).replace("BLOCKOUT_", "")
+    return name in house_shell_gen.LIGHTMAP_RECEIVERS
+
+
+def split_receivers(obj):
+    """Split @p obj into `(receiver, detail)` objects by material. Either may be None.
+
+    Two meshes rather than a face selection, because `lightmap_unwrap.unwrap` works on every mesh
+    in the scene and must not see the detail at all: one sub-texel island is enough to make the
+    pack fail, and the failure would be about a handrail rather than about the wall it is on.
+    """
+    mesh = obj.data
+    receivers = {index for index, material in enumerate(mesh.materials)
+                 if receiver_material(material)}
+    groups = {"receiver": [], "detail": []}
+    for polygon in mesh.polygons:
+        key = "receiver" if polygon.material_index in receivers else "detail"
+        groups[key].append(polygon.index)
+
+    import bmesh  # noqa: PLC0415
+
+    def carved(keep: list[int], suffix: str):
+        """A copy of the mesh with only @p keep's faces, as a DATABLOCK, not an object."""
+        copy = mesh.copy()
+        copy.name = f"{mesh.name}{suffix}"
+        working = bmesh.new()
+        working.from_mesh(copy)
+        working.faces.ensure_lookup_table()
+        wanted = set(keep)
+        drop = [face for face in working.faces if face.index not in wanted]
+        bmesh.ops.delete(working, geom=drop, context="FACES")
+        working.to_mesh(copy)
+        working.free()
+        copy.update()
+        return copy
+
+    receiver_mesh = carved(groups["receiver"], "") if groups["receiver"] else None
+    detail_mesh = carved(groups["detail"], "_DETAIL") if groups["detail"] else None
+    name = obj.name
+    bpy.data.objects.remove(obj, do_unlink=True)
+
+    receiver = None
+    if receiver_mesh is not None:
+        receiver = bpy.data.objects.new(name, receiver_mesh)
+        bpy.context.scene.collection.objects.link(receiver)
+    # The detail stays a datablock until the unwrap is over: `lightmap_unwrap.unwrap` works on
+    # every mesh in the scene, and one sub-texel handrail island is enough to fail the pack --
+    # with a message about the handrail rather than about the wall it is on.
+    return receiver, detail_mesh
+
+
+def summarise(rows: list[dict], skipped: list[str], problems: list[str]) -> dict:
+    """The report `HOUSE-00471` asks for: what was lightmapped, what was not, and how well."""
+    if not rows:
+        return {"cells": 0, "receiverFaces": 0, "receiverArea": 0.0, "detailFaces": 0,
+                "detailArea": 0.0, "atlases": 0, "worstOccupancy": 0.0,
+                "worstOccupancyCell": "", "worstDensity": 0.0, "smallestIslandTexels": 0,
+                "skipped": skipped, "problems": problems, "perCell": []}
+    worst_row = min(rows, key=lambda row: row["utilisation"])
+    return {
+        "cells": len(rows),
+        "receiverFaces": sum(row["faces"] for row in rows),
+        "receiverArea": round(sum(row["worldArea"] for row in rows), 1),
+        "detailFaces": sum(row["detailFaces"] for row in rows),
+        "detailArea": round(sum(row["detailArea"] for row in rows), 1),
+        "atlases": len(rows),
+        "atlasSizes": sorted({row["atlasSize"] for row in rows}),
+        "worstOccupancy": round(worst_row["utilisation"], 4),
+        "worstOccupancyCell": worst_row["cell"],
+        "worstDensity": round(min(row["minDensity"] for row in rows), 3),
+        # The smallest island anybody has to bake into, in texels. A receiver island under a few
+        # texels is the one that would need special handling, so it is reported by name.
+        "smallestIslandTexels": min(row["minIslandGutter"] or 0 for row in rows),
+        "needsAttention": sorted(row["cell"] for row in rows
+                                 if row["utilisation"] < 0.02 or row["minDensity"]
+                                 < row["density"]),
+        "skipped": skipped,
+        "problems": problems,
+        "perCell": [{"cell": row["cell"], "density": row["density"],
+                     "atlas": row["atlasSize"], "faces": row["faces"],
+                     "islands": row["islands"], "detailFaces": row["detailFaces"],
+                     "occupancy": row["utilisation"], "minDensity": row["minDensity"],
+                     "area": row["worldArea"]} for row in rows],
+    }
+
+
 def unwrap_one(source: Path, destination: Path, density: float) -> dict:
+    """Unwrap one cell's receivers and write both halves back out."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=str(source))
+    originals = [obj for obj in list(bpy.context.scene.objects) if obj.type == "MESH"]
+    receivers, details = [], []
+    for obj in originals:
+        receiver, detail_mesh = split_receivers(obj)
+        if receiver is not None:
+            receivers.append(receiver)
+        if detail_mesh is not None:
+            details.append(detail_mesh)
+
+    detail_faces = sum(len(mesh.polygons) for mesh in details)
+    detail_area = sum(sum(face.area for face in mesh.polygons) for mesh in details)
+    if not receivers:
+        return {"skipped": "no receiver surface", "detailFaces": detail_faces,
+                "detailArea": round(detail_area, 3), "faces": 0, "problems": []}
+
     result = lightmap_unwrap.unwrap(density, lightmap_unwrap.DEFAULT_GUTTER,
                                     lightmap_unwrap.DEFAULT_MAX_ATLAS)
+    for index, mesh in enumerate(details):
+        obj = bpy.data.objects.new(mesh.name, mesh)
+        bpy.context.scene.collection.objects.link(obj)
+        del index
+
+    result["detailFaces"] = detail_faces
+    result["detailArea"] = round(detail_area, 3)
     destination.parent.mkdir(parents=True, exist_ok=True)
+    bpy.ops.object.select_all(action="SELECT")
     bpy.ops.export_scene.gltf(filepath=str(destination), export_format="GLB",
-                              export_apply=False, export_yup=True)
+                              export_apply=False, export_yup=True, export_extras=True)
     return result
 
 
@@ -140,19 +278,78 @@ def selftest() -> int:
             "a room is lightmapped; the world, a deck and a roof are not — outside is lit by the "
             "sky every frame and `EXT_WORLD` is 160 000 m² of it")
 
-    if not (SHELL / "L0_WC1.glb").is_file():
+    require(set(house_shell_gen.LIGHTMAP_RECEIVERS)
+            == {"floor", "ceiling", "wall", "exterior"},
+            f"the receiver classes are the generator's, not a second list here "
+            f"({house_shell_gen.LIGHTMAP_RECEIVERS})")
+
+    if not (SHELL / "L0_HALL.glb").is_file():
         require(False, "the shell is generated; run tools/blender/house_shell_gen.py first")
     else:
-        result = unwrap_one(SHELL / "L0_WC1.glb", OUTPUT / "selftest" / "L0_WC1.glb",
-                            DENSITY_SMALL)
+        # `L0_HALL` is the cell that would not pack at all before this decision: 224 of its faces
+        # collapsed to no UV area at 2048², and the same 224 collapsed at a gutter of 1.
+        out = OUTPUT / "selftest" / "L0_HALL.glb"
+        result = unwrap_one(SHELL / "L0_HALL.glb", out, DENSITY_ROOM)
+
+        # (6) the pack succeeds, and (5)(7)(8) are `lightmap_unwrap`'s own checks: no island with
+        # zero area, no UV outside [0, 1], the gutter measured between islands.
         require(not result["problems"],
-                f"the smallest room unwraps clean ({result['problems'][:2]})")
-        require(result["minDensity"] >= DENSITY_SMALL - 0.01,
-                f"at no less than the density it was asked for "
-                f"({result['minDensity']:.2f} of {DENSITY_SMALL})")
-        require(len(bpy.data.objects[0].data.uv_layers) == 2,
-                f"and the result has TWO channels, the albedo one and the lightmap one "
-                f"({len(bpy.data.objects[0].data.uv_layers)})")
+                f"the hall packs, with no zero-area island, nothing outside the atlas and the "
+                f"gutter kept ({result['problems'][:2]})")
+        require(result["minDensity"] >= DENSITY_ROOM - 0.01,
+                f"at no less than the density §18.3 asks for "
+                f"({result['minDensity']:.2f} of {DENSITY_ROOM})")
+
+        # (1) and (2): the receivers were unwrapped and the detail was not there to be.
+        receivers = [obj for obj in bpy.context.scene.objects
+                     if obj.type == "MESH" and not obj.name.endswith("_DETAIL")]
+        details = [obj for obj in bpy.context.scene.objects if obj.name.endswith("_DETAIL")]
+        require(receivers and details,
+                f"the cell comes out in two halves, receiver and detail "
+                f"({len(receivers)}, {len(details)})")
+        receiver_classes = {str(material.get("surfaceClass"))
+                            for obj in receivers for material in obj.data.materials
+                            if material is not None}
+        require(receiver_classes <= set(house_shell_gen.LIGHTMAP_RECEIVERS),
+                f"every material left on the receiver half is a receiver class "
+                f"({sorted(receiver_classes)})")
+        detail_classes = set()
+        for obj in details:
+            used = {polygon.material_index for polygon in obj.data.polygons}
+            for index in used:
+                material = obj.data.materials[index]
+                if material is not None:
+                    detail_classes.add(str(material.get("surfaceClass")))
+        require(detail_classes and not (detail_classes
+                                        & set(house_shell_gen.LIGHTMAP_RECEIVERS)),
+                f"and every class actually used on the detail half is not "
+                f"({sorted(detail_classes)})")
+        require(all(lightmap_unwrap.LIGHTMAP_UV in obj.data.uv_layers for obj in receivers),
+                "the receivers have the lightmap channel")
+        require(not any(lightmap_unwrap.LIGHTMAP_UV in obj.data.uv_layers for obj in details),
+                "and the detail does not: it is lit by the room's dynamic term (§22.2)")
+
+        # (4): a wall broken into strips round a doorway is ONE island, not one per strip. The
+        # hall has three doorways; if triangulation decided coverage, its islands would outnumber
+        # its faces' logical surfaces several times over.
+        require(result["islands"] < result["faces"] / 2,
+                f"the hall's {result['faces']} receiver faces pack into {result['islands']} "
+                f"islands, so the welded strips are carried by their wall")
+
+        # (10) and (3): the statistics exist, and the exclusions are counted rather than dropped.
+        require(result["detailFaces"] > 0 and result["detailArea"] > 0.0,
+                f"the detail is reported, not silently discarded "
+                f"({result['detailFaces']} faces, {result['detailArea']} m²)")
+        summary = summarise([{"cell": "L0_HALL", "density": DENSITY_ROOM, **result}], [], [])
+        for key in ("receiverFaces", "receiverArea", "detailFaces", "detailArea", "atlases",
+                    "worstOccupancy", "worstDensity", "smallestIslandTexels", "perCell"):
+            require(key in summary, f"the report carries `{key}`")
+
+        # (9): a rerun writes the same bytes.
+        first = out.read_bytes()
+        unwrap_one(SHELL / "L0_HALL.glb", out, DENSITY_ROOM)
+        require(out.read_bytes() == first,
+                "and a second run over an unchanged shell writes the same bytes")
 
     if failures:
         print(f"shell_unwrap: {len(failures)} claim(s) FAILED")
@@ -180,15 +377,14 @@ def main() -> int:
     wanted = {name.strip() for name in args.cells.split(",") if name.strip()} or None
 
     problems: list[str] = []
-    done = 0
-    skipped = 0
-    worst = 1e9
+    rows: list[dict] = []
+    skipped: list[str] = []
     for path in sorted(args.shell.glob("*.glb")):
         if wanted is not None and path.stem not in wanted:
             continue
         cell = cells.get(path.stem)
         if not wants_lightmap(cell):
-            skipped += 1
+            skipped.append(path.stem)
             continue
         try:
             result = unwrap_one(path, args.output / path.name, density_for(cell))
@@ -197,15 +393,27 @@ def main() -> int:
             # state of the other ninety-five.
             problems.append(f"{path.stem}: {error}")
             continue
-        done += 1
-        worst = min(worst, result["minDensity"])
+        if result.get("skipped"):
+            skipped.append(f"{path.stem} ({result['skipped']})")
+            continue
+        rows.append({"cell": path.stem, "density": density_for(cell), **result})
         for problem in result["problems"]:
             problems.append(f"{path.stem}: {problem}")
 
+    report = summarise(rows, skipped, problems)
+    (args.output).mkdir(parents=True, exist_ok=True)
+    (args.output / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
+                                             encoding="utf-8")
     for problem in problems:
         print(f"shell_unwrap: {problem}", file=sys.stderr)
-    print(f"shell_unwrap: {done} object(s) unwrapped, {skipped} skipped as outdoors, "
-          f"worst density {worst:.2f} texels/m")
+    print(f"shell_unwrap: {report['cells']} cell(s) unwrapped, {len(skipped)} not receivers; "
+          f"{report['receiverFaces']} receiver face(s) over {report['receiverArea']:.0f} m², "
+          f"{report['detailFaces']} detail face(s) over {report['detailArea']:.0f} m² left to the "
+          f"dynamic term")
+    print(f"shell_unwrap: {report['atlases']} atlas(es), worst occupancy "
+          f"{report['worstOccupancy'] * 100:.1f} % in {report['worstOccupancyCell']}, "
+          f"worst density {report['worstDensity']:.2f} texels/m, smallest receiver island "
+          f"{report['smallestIslandTexels']} texel(s)")
     return 1 if problems else 0
 
 
