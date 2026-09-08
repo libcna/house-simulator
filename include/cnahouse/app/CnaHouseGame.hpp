@@ -252,6 +252,9 @@ namespace cnahouse::app
 
         /// @brief `--scene=blockout`: the static shell, drawn and nothing else (`HOUSE-00475`).
         static constexpr const char* kBlockoutScene = "blockout";
+        /// @brief `--scene=blockout-normals`: the same house with the culling reversed, so that
+        ///        every pixel drawn is a face that should not have been visible (`HOUSE-00478`).
+        static constexpr const char* kBackFaceScene = "blockout-normals";
 
         /// @brief Reads `chunks.bin`, makes every cell resident, installs `Pass::OpaqueStatic`.
         ///

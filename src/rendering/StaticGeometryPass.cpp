@@ -121,7 +121,8 @@ namespace cnahouse::rendering
 
         // Opaque geometry, seen from inside and outside: `CullClockwise` is §14's convention for
         // everything this project generates, depth writes on, no blending.
-        context.states.SetRasterizer(Gfx::RasterizerState::CullClockwise);
+        context.states.SetRasterizer(showBackFaces_ ? Gfx::RasterizerState::CullCounterClockwise
+                                                    : Gfx::RasterizerState::CullClockwise);
         context.states.SetDepthStencil(Gfx::DepthStencilState::Default);
         context.states.SetBlend(Gfx::BlendState::Opaque);
 

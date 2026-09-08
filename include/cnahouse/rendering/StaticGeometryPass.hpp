@@ -48,6 +48,20 @@ namespace cnahouse::rendering
         ~StaticGeometryPass() override;
 
         void Draw(PassContext& context) override;
+
+        /// @brief Reverses the culling, so that only BACK faces are drawn (`HOUSE-00478`).
+        ///
+        /// §14: front faces are counter-clockwise and the game binds `CullClockwise`. Bind the
+        /// opposite and every face that is drawn is one you should never have been able to see --
+        /// so a frame that is nearly empty is a frame with nothing inside out in it. That is a
+        /// normal-visualisation pass that needs no custom effect, which Tier S could not have
+        /// (ADR-0003), and it says a thing a colour ramp does not: not "which way does this face
+        /// point" but "is this face pointing at me when it should not be".
+        void SetShowBackFaces(bool value) noexcept
+        {
+            showBackFaces_ = value;
+        }
+
         [[nodiscard]] bool IsActive() const override;
 
         /// @brief Chunks and triangles submitted by the last `Draw`.
@@ -74,6 +88,7 @@ namespace cnahouse::rendering
         const world::CellRuntime& cells_;
         const Camera& camera_;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::BasicEffect> effect_;
+        bool showBackFaces_ = false;
         std::uint32_t chunksDrawn_ = 0u;
         std::uint32_t trianglesDrawn_ = 0u;
     };

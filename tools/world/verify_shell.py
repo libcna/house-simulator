@@ -70,6 +70,91 @@ def face_extent(mesh: dict, axis: int) -> tuple[float, float]:
     return (min(values), max(values)) if values else (0.0, 0.0)
 
 
+def face_normals(mesh: dict):
+    """`(normal, centre, area)` per triangle, with the normal UNNORMALISED and its length twice
+    the area -- so a degenerate facet has a zero-length normal and needs no separate test."""
+    for a, b, c in mesh["triangles"]:
+        pa, pb, pc = mesh["positions"][a], mesh["positions"][b], mesh["positions"][c]
+        u = [pb[i] - pa[i] for i in range(3)]
+        v = [pc[i] - pa[i] for i in range(3)]
+        normal = (u[1] * v[2] - u[2] * v[1],
+                  u[2] * v[0] - u[0] * v[2],
+                  u[0] * v[1] - u[1] * v[0])
+        length = (normal[0] ** 2 + normal[1] ** 2 + normal[2] ** 2) ** 0.5
+        centre = tuple((pa[i] + pb[i] + pc[i]) / 3.0 for i in range(3))
+        yield normal, centre, length / 2.0
+
+
+def winding_rows(shell: dict, cells: dict) -> list[dict]:
+    """Which way every face of the shell points (`HOUSE-00478`).
+
+    §14: front faces are counter-clockwise, so `(b - a) x (c - a)` is the side you can see. For a
+    room's own surfaces that side is INTO the room -- a floor faces up, a ceiling faces down, a
+    wall faces the middle -- and for the `exterior` class, which is the outer skin of the house, it
+    is the other way. A face wound the wrong way is culled, and a culled face is a hole in the room
+    you can see the outdoors through; a face with no area at all is the "black facet" §70 asks
+    about, invisible until a normal-visualisation pass draws it as nothing.
+
+    **Floors and ceilings are the classes this can be sure about**, and they are checked: a floor
+    faces up and a ceiling faces down, whatever shape the room is. `wall` and `exterior` are
+    counted and NOT judged, because those classes carry two different kinds of thing -- a room's
+    bounding surface, where "in" is the middle of the box, and free-standing boxes that are not a
+    boundary at all: a balcony parapet, a mezzanine guard, a basement window well. A thin box has
+    faces pointing both ways by construction, and half of them look wrong to any test that assumes
+    the class is a boundary. `oneWay` counts the faces that do point into their box and `other` the
+    rest; the arbiter for those is `BlockoutRenderTests.NothingIsInsideOut`, which draws the house
+    with the culling reversed and looks at what is left.
+
+    A face with no area at all is checked for every class: that is the "black facet" §70 asks
+    about, invisible until something tries to light it.
+    """
+    rows = []
+    for cell_id, surfaces in sorted(shell.items()):
+        cell = cells.get(cell_id)
+        boxes = layout_io.cell_boxes(cell) if cell else []
+        if not boxes:
+            continue
+
+        def inward_at(x: float, z: float, nx: float, nz: float) -> float:
+            """How far @p normal points into the nearest box, along whichever axis it lies on."""
+            best = None
+            for bx0, bx1, bz0, bz1 in boxes:
+                gap = max(bx0 - x, x - bx1, bz0 - z, z - bz1, 0.0)
+                if best is None or gap < best[0]:
+                    best = (gap, (bx0, bx1, bz0, bz1))
+            bx0, bx1, bz0, bz1 = best[1]
+            if abs(nx) >= abs(nz):
+                return nx * (1.0 if abs(x - bx0) <= abs(x - bx1) else -1.0)
+            return nz * (1.0 if abs(z - bz0) <= abs(z - bz1) else -1.0)
+        for name, mesh in sorted(surfaces.items()):
+            wrong = 0
+            other = 0
+            degenerate = 0
+            total = 0
+            for normal, position, area in face_normals(mesh):
+                total += 1
+                if area <= 1e-9:
+                    degenerate += 1
+                    continue
+                if name == "floor":
+                    if normal[1] <= 1e-9:
+                        wrong += 1
+                elif name == "ceiling":
+                    if -normal[1] <= 1e-9:
+                        wrong += 1
+                elif name in ("wall", "exterior"):
+                    # Into the box the face is on the edge of, for a wall; out of it for the skin.
+                    facing = inward_at(position[0], position[2], normal[0], normal[2])
+                    if name == "exterior":
+                        facing = -facing
+                    if facing <= 1e-9:
+                        other += 1
+            if total:
+                rows.append({"cell": cell_id, "class": name, "faces": total,
+                             "wrong": wrong, "other": other, "degenerate": degenerate})
+    return rows
+
+
 def clear_heights(shell: dict, cells: dict, rafter_levels=()) -> list[dict]:
     """The walking surface to the ceiling's underside, per cell that has both.
 
@@ -304,13 +389,22 @@ def verify(shell_dir: Path, world_dir: Path) -> dict:
     rafter_levels = {row["id"] for row in layout_io.rows(layout, "levels")
                      if row.get("ceiling") is None}
     heights = clear_heights(shell, cells, rafter_levels)
+    winding = winding_rows(shell, cells)
     stairs = stair_rows(shell, layout)
     headroom = headroom_rows(shell, layout)
     openings = opening_rows(shell, layout)
 
+    found = problems(heights, stairs, headroom, openings)
+    # `HOUSE-00478`. Two verdicts that need no threshold and no exemption.
+    for row in winding:
+        if row["degenerate"]:
+            found.append(f"{row['cell']}.{row['class']}: {row['degenerate']} face(s) have no area")
+        if row["wrong"]:
+            found.append(f"{row['cell']}.{row['class']}: {row['wrong']} face(s) point the wrong "
+                         f"way")
     return {"cells": len(shell), "clearHeights": heights, "stairs": stairs,
-            "headroom": headroom, "openings": openings,
-            "problems": problems(heights, stairs, headroom, openings)}
+            "headroom": headroom, "openings": openings, "winding": winding,
+            "problems": found}
 
 
 def problems(heights, stairs, headroom, openings) -> list[str]:
@@ -390,6 +484,16 @@ def report(result: dict) -> str:
                      f"(§70.5 wants {HEADROOM_MIN})")
     cut = [row for row in result["openings"] if not row["blocked"]]
     lines.append(f"  {len(cut)} of {len(result['openings'])} authored opening(s) are cut")
+    winding = result.get("winding") or []
+    if winding:
+        slabs = [row for row in winding if row["class"] in ("floor", "ceiling")]
+        free = sum(row["other"] for row in winding)
+        lines.append(f"  winding: {sum(row['faces'] for row in winding)} face(s), "
+                     f"{sum(row['degenerate'] for row in winding)} with no area, "
+                     f"{sum(row['wrong'] for row in winding)} pointing the wrong way over "
+                     f"{sum(row['faces'] for row in slabs)} floor and ceiling faces; {free} "
+                     f"wall/exterior face(s) are not on their box's side (parapets, guards, "
+                     f"window wells)")
     lines.append(f"  {len(result['problems'])} problem(s)")
     return "\n".join(lines)
 
@@ -465,6 +569,43 @@ def selftest() -> int:
 
     measured = [row for row in result["headroom"] if row["headroom"] is not None]
     require(measured, "at least one flight has something over it to measure against")
+
+    # `HOUSE-00478`: winding and black facets.
+    winding = result["winding"]
+    slabs = [row for row in winding if row["class"] in ("floor", "ceiling")]
+    require(sum(row["faces"] for row in winding) > 30000,
+            f"{sum(row['faces'] for row in winding)} faces were examined")
+    require(sum(row["degenerate"] for row in winding) == 0,
+            "not one face in the shell has zero area -- §70's black facet, which is invisible "
+            "until something tries to light it")
+    require(sum(row["faces"] for row in slabs) > 400
+            and sum(row["wrong"] for row in slabs) == 0,
+            f"and every one of the {sum(row['faces'] for row in slabs)} floor and ceiling faces "
+            f"points INTO its room: a floor up, a ceiling down (§14's counter-clockwise front)")
+    # A house with no black facet in it cannot show that the check for one works, so it is asked
+    # about a mesh built to have one: a triangle with two identical corners, which is exactly what
+    # a collapsed quad leaves behind.
+    flat = {"positions": [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0)],
+            "triangles": [(0, 1, 2), (0, 3, 1)]}
+    probe = winding_rows({"PROBE": {"floor": flat}},
+                         {"PROBE": {"id": "PROBE", "boxes": [{"x": [0.0, 1.0], "z": [0.0, 1.0]}]}})
+    require(len(probe) == 1 and probe[0]["degenerate"] == 1 and probe[0]["faces"] == 2,
+            f"a triangle with two identical corners IS counted as having no area ({probe})")
+    require(probe[0]["wrong"] == 0,
+            "...and is not ALSO counted as pointing the wrong way, which it has no way to do")
+    upside = {"positions": [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0)],
+              "triangles": [(0, 1, 2)]}
+    inverted = winding_rows({"PROBE": {"floor": upside}},
+                            {"PROBE": {"id": "PROBE",
+                                       "boxes": [{"x": [0.0, 1.0], "z": [0.0, 1.0]}]}})
+    require(inverted[0]["wrong"] == 1,
+            f"and a floor wound the other way IS counted as pointing down ({inverted})")
+
+    require(sum(row["other"] for row in winding) > 0,
+            f"{sum(row['other'] for row in winding)} wall and exterior faces are not on their "
+            f"box's side, which is what a parapet, a mezzanine guard and a window well are -- "
+            f"free-standing boxes with faces both ways, and why those two classes are counted "
+            f"here and judged by `BlockoutRenderTests.NothingIsInsideOut` instead")
 
     require(result["openings"], "there are openings to check")
     cut = [row for row in result["openings"] if not row["blocked"]]

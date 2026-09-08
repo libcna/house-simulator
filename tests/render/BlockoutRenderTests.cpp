@@ -127,6 +127,86 @@ namespace
             << "two runs of the same build must be bit-identical: " << diff->ToString();
     }
 
+    Options BackFaceOptions()
+    {
+        Options options = FixtureOptions();
+        options.scene = "blockout-normals";
+        return options;
+    }
+
+    /// Which pixels are not the clear colour, and how many.
+    std::vector<bool> Silhouette(const Image& image, std::size_t& drawn)
+    {
+        std::vector<bool> mask(image.pixels.size(), false);
+        drawn = 0;
+        for (std::size_t i = 0; i < image.pixels.size(); ++i)
+        {
+            const auto& pixel = image.pixels[i];
+            const bool isClear =
+                pixel.getRProperty() == 18 && pixel.getGProperty() == 20 && pixel.getBProperty() == 24;
+            mask[i] = !isClear;
+            drawn += isClear ? 0u : 1u;
+        }
+        return mask;
+    }
+
+    TEST(BlockoutRenderTests, NothingIsInsideOut)
+    {
+        // `HOUSE-00478`. §14: front faces are counter-clockwise and the game binds
+        // `CullClockwise`. `--scene=blockout-normals` binds the opposite, so every pixel is a face
+        // whose front is turned away -- the inside of the far wall of every room, seen through the
+        // near one. For a house whose winding is right, the two frames have the SAME SILHOUETTE:
+        // wherever you can see the outside of the house you can also see the inside of the far
+        // side of it, and where you cannot, neither.
+        //
+        // Not a proof of watertightness, and it does not claim to be: a blockout has open porches,
+        // a garage opening and roof soffits with nothing behind them, and those are exactly the
+        // 8 % the two frames disagree over. What it pins is the NUMBER -- a facet that turns
+        // inside out moves it, in the direction of "a back face with no front face in front of
+        // it", and that is the half of the residue this measures separately.
+        if (!ContentIsBuilt())
+        {
+            GTEST_SKIP() << "no content/world/chunks.bin";
+        }
+        const std::string frontPath = OutputPath("blockout-front.png");
+        const std::string backPath = OutputPath("blockout-normals-actual.png");
+        ASSERT_TRUE(RenderHarness::CaptureFrame(FixtureOptions(), kWidth, kHeight, frontPath));
+        ASSERT_TRUE(RenderHarness::CaptureFrame(BackFaceOptions(), kWidth, kHeight, backPath));
+
+        const auto frontImage = RenderHarness::LoadPng(frontPath);
+        const auto backImage = RenderHarness::LoadPng(backPath);
+        ASSERT_TRUE(frontImage.HasValue()) << frontImage.Error().ToString();
+        ASSERT_TRUE(backImage.HasValue()) << backImage.Error().ToString();
+        ASSERT_EQ(frontImage->pixels.size(), backImage->pixels.size());
+
+        std::size_t frontDrawn = 0;
+        std::size_t backDrawn = 0;
+        const std::vector<bool> front = Silhouette(*frontImage, frontDrawn);
+        const std::vector<bool> back = Silhouette(*backImage, backDrawn);
+        ASSERT_GT(frontDrawn, 0u);
+        ASSERT_GT(backDrawn, 0u) << "the reversed pass drew nothing at all, so it is not drawing";
+
+        std::size_t both = 0;
+        std::size_t frontOnly = 0;
+        std::size_t backOnly = 0;
+        for (std::size_t i = 0; i < front.size(); ++i)
+        {
+            both += (front[i] && back[i]) ? 1u : 0u;
+            frontOnly += (front[i] && !back[i]) ? 1u : 0u;
+            backOnly += (!front[i] && back[i]) ? 1u : 0u;
+        }
+        const double union_ = static_cast<double>(both + frontOnly + backOnly);
+        const double disagreement = static_cast<double>(frontOnly + backOnly) / union_;
+        EXPECT_LT(disagreement, 0.12)
+            << "the front-face and back-face silhouettes disagree over " << (disagreement * 100.0)
+            << " % of their union (" << frontOnly << " front-only, " << backOnly
+            << " back-only): a facet has turned inside out, or the house has grown a "
+            << "hole";
+        // The direction that means "you can see into the house from outside".
+        EXPECT_LT(static_cast<double>(backOnly) / static_cast<double>(frontDrawn), 0.05)
+            << backOnly << " pixels show the inside of a surface with no outside in front of it";
+    }
+
     TEST(BlockoutRenderTests, TheFrameContainsAHouseAndNotAnEmptyRoom)
     {
         // Driver-independent, so it runs on hardware too, and it is the assertion that would catch

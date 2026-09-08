@@ -260,7 +260,8 @@ namespace cnahouse::app
         // resolved against the pre-narrowing tier would offer post-processing that cannot run.
         ResolveQuality();
 
-        if (options_.scene.has_value() && *options_.scene == kBlockoutScene)
+        if (options_.scene.has_value() &&
+            (*options_.scene == kBlockoutScene || *options_.scene == kBackFaceScene))
         {
             LoadBlockout();
             LoadHudFont();
@@ -349,9 +350,12 @@ namespace cnahouse::app
         // key does not jump the view (`HOUSE-00476`). With no input at all it changes nothing,
         // which is what makes `blockout-01` a fixed frame.
         freeFly_.Adopt(blockoutCamera_);
-        renderer_.Install(rendering::Pass::OpaqueStatic,
-                          std::make_unique<rendering::StaticGeometryPass>(
-                              *blockoutChunks_, *blockoutCells_, blockoutCamera_));
+        auto pass = std::make_unique<rendering::StaticGeometryPass>(
+            *blockoutChunks_, *blockoutCells_, blockoutCamera_);
+        // `--scene=blockout-normals` is the same house with the culling reversed (`HOUSE-00478`).
+        // A separate scene name rather than a key, because what looks at it is a render test.
+        pass->SetShowBackFaces(options_.scene.has_value() && *options_.scene == kBackFaceScene);
+        renderer_.Install(rendering::Pass::OpaqueStatic, std::move(pass));
 
         Log::Info(LogCat::Content,
                   "blockout: {} chunk(s) over {} cell(s), {} resident, {} MB uploaded{}",

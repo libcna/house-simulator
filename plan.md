@@ -7273,9 +7273,33 @@ the chunk builder produces ≤ 6 chunks per cell.
       finding: (2026-09-08, found by `HOUSE-00477`, for `HOUSE-00480`) `FRIDGE_L0_KITCHEN` is not
             cut: `CELL_FRIDGE_INTERIOR` is a cell NESTED in `L0_KITCHEN`, and the generator cuts
             openings between cells that share a boundary plane, which a nested cell does not.
-- [ ] HOUSE-00478 — Verify winding and normals across the whole shell (no black facets, no inside-out rooms)
+- [x] HOUSE-00478 — Verify winding and normals across the whole shell (no black facets, no inside-out rooms)
       dep: HOUSE-00475 · sys: rendering · plat: LNX · pri: MUST
       verify: a render test that draws the shell with a normal-visualisation material
+      note: (2026-09-08) Two halves, because neither can answer the whole question. `verify_shell`
+            examines **33 162 faces: none has zero area** — §70's black facet, invisible until
+            something tries to light it — **and all 458 floor and ceiling faces point into their
+            room**, a floor up and a ceiling down, which is §14's counter-clockwise front. The
+            render half is `--scene=blockout-normals`: the same house with the culling REVERSED, so
+            every pixel is a face whose front is turned away. Tier S has no custom effect
+            (ADR-0003) and needs none — this says something a colour ramp does not, namely "is this
+            face pointing at me when it should not be".
+      accept: a triangle with two identical corners is counted as having no area and not also as
+            pointing the wrong way; a floor wound the other way IS counted; the front-face and
+            back-face silhouettes agree over 92 % of their union, and the "inside with no outside
+            in front of it" half of the residue is under 5 %
+      finding: (2026-09-08, found by `HOUSE-00478`) **`wall` and `exterior` are two classes that
+            carry two different kinds of thing**, and no static test can judge them together: a
+            room's bounding surface, where "in" is the middle of the box, and free-standing boxes
+            that bound nothing — a balcony parapet, a mezzanine guard, a basement window well. A
+            thin box has faces pointing both ways by construction, and 468 of the shell's 4 492
+            wall and exterior faces are those. The first version of this check called all 468
+            wrong. They are counted and reported now, and the render test is their arbiter.
+      finding: (2026-09-08, found by `HOUSE-00478`) the reversed-culling frame is **not empty**,
+            and expecting it to be would have been the wrong claim: looking at a house from
+            outside with the culling reversed shows the inside of its far walls, which is correct.
+            What the two frames share is a SILHOUETTE — 92 % of their union — and the 8 % residue
+            is where the blockout is genuinely open: the porch, the garage opening, roof soffits.
 - [ ] HOUSE-00479 — Measure the shell's triangle count per cell and per level against the budget
       dep: HOUSE-00475 · sys: — · plat: LNX · pri: MUST
 - [ ] HOUSE-00480 — Fix the inevitable geometry issues found by HOUSE-00477/78/79; iterate the generator, not the output
