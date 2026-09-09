@@ -272,7 +272,14 @@ field is the ground it stands on, and a slab as well would be a second answer to
 ground here" -- one that wins wherever the lot has dropped away from the cell's declared floor.
 `EXT_ORCHARD` says +0.00 and the lawn under it is 0.30 m lower, which is a plinth with a step round
 it that §43.1's 0.22 m step-up cannot climb. A BALCONY keeps its slab: it is an exterior cell whose
-floor is 3.65 m over the lawn, and no height field carries that.
+floor is 3.65 m over the lawn, and no height field carries that; so does every cell in a world that
+has no height field at all, which is every fixture.
+
+It has no **lid** either — but only if it is open. `EXT_SHED` is an `exterior` cell that is a
+BUILDING, and a building has a ceiling: §15.7 rule 5 draws that line and `HOUSE-00777` found the
+shed roofless in §37.2's coverage field, which is to say it rained in it. The five interior cells
+marked `visibilityHint: open` are open to the stair WELL, which is a hole in the slab (§3.4's
+`_slab_holes`), not the absence of one.
 
 What is built instead comes from `layout.exterior.json`:
 

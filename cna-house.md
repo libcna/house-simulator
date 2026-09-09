@@ -4322,9 +4322,10 @@ looked at, and the main stair's first run begins 0.20 m past `L0_FOYER`'s cased 
 side of every hole carries the other side's shapes within **0.40 m** of the plane — the 0.30 m
 capsule plus that hysteresis plus 50 mm — over the hole's width and the body's own height, indexed
 by the part of them within reach so a borrowed slab does not size the borrower's grid.
-`docs/collision-format.md` §4.1 is normative and `OpeningReachTests` is the guarantee. The census: **2 022 cell references over 1 281 shapes** — 1 259 OBBs and 22 meshes, of which 334
+`docs/collision-format.md` §4.1 is normative and `OpeningReachTests` is the guarantee. The census: **2 034 cell references over 1 293 shapes** — 1 271 OBBs and 22 meshes, of which 334
 are what stands outdoors and 106 are floors, down from 140 when the yards stopped having them.
-The wall count fell from 888 to 735 when the yards stopped being walled.
+The wall count fell from 888 to 735 when the yards stopped being walled, and the ceiling count
+rose from 94 to 106 when `HOUSE-00777` gave the shed and the five stair cells their lids back.
 
 ### 49.3 The player sweep
 

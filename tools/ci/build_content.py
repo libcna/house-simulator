@@ -290,6 +290,20 @@ def fingerprint(stage: Stage, root: Path) -> tuple[str, list[Path]]:
     digest = hashlib.sha256()
     digest.update(json.dumps(stage.command, sort_keys=True).encode())
     digest.update(json.dumps(sorted(stage.outputs), sort_keys=True).encode())
+    # ...and the TOOL, which is an input like any other (`HOUSE-00226`). The command line was
+    # hashed as text and the scripts it names were not, so editing a generator left every stage
+    # that runs it "up to date": `HOUSE-00777` changed what `build_collision.py` writes and the
+    # graph rebuilt nothing, including the nav graph built against its output. Every argument that
+    # names a file in the repository is hashed -- the script, and anything else a stage is handed.
+    for token in stage.command:
+        if token in stage.outputs:
+            # A stage that names its own output on the command line would otherwise be stale the
+            # moment it ran: its fingerprint would contain what it had just written.
+            continue
+        candidate = root / token
+        if candidate.is_file():
+            digest.update(token.encode())
+            digest.update(candidate.read_bytes())
     for path in inputs:
         digest.update(str(path.relative_to(root)).encode())
         digest.update(path.read_bytes())
@@ -609,6 +623,28 @@ def selftest() -> int:
         require("first" in ran,
                 f"changing a stage's command line rebuilds it, though no input moved ({ran})")
 
+        # 6b. ...and so is the TOOL the command names (`HOUSE-00226`). A generator is an input:
+        #     editing what `build_collision.py` writes and having the graph report every stage
+        #     up to date is how a content tree ends up built by a program that no longer exists.
+        build(fixture(), root, stamps, runner=fake)
+        tool = root / "tools" / "first.py"
+        tool.parent.mkdir(parents=True, exist_ok=True)
+        tool.write_text("# a generator\n", encoding="utf-8")
+        toolish = fixture()
+        toolish[1].command = ["first", "tools/first.py", "out/first.bin"]
+        build(toolish, root, stamps, runner=fake)
+        ran.clear()
+        build(toolish, root, stamps, runner=fake)
+        require(ran == [], f"a stage with an unchanged tool is fresh ({ran})")
+        tool.write_text("# a generator, changed\n", encoding="utf-8")
+        ran.clear()
+        build(toolish, root, stamps, runner=fake)
+        require(sorted(ran) == ["first", "second", "third"],
+                f"editing the tool a stage runs rebuilds it, and everything downstream "
+                f"({sorted(ran)})")
+        # ...and back to the plain fixture, settled, so what follows starts from a fresh graph.
+        build(fixture(), root, stamps, runner=fake)
+
         # 7. A missing output rebuilds, whatever the stamp says. Trusting the stamp would leave
         #    the build reporting success over a file nobody can load.
         build(fixture(), root, stamps, runner=fake)
@@ -619,7 +655,8 @@ def selftest() -> int:
                 f"deleting an output rebuilds that stage, and `third` with it because it is built "
                 f"against what `second` writes ({ran})")
         require(any("output missing" in r["reason"] for r in outcome["results"]),
-                "and says so, rather than reporting it fresh")
+                f"and says so, rather than reporting it fresh "
+                f"({[(r['stage'], r['reason']) for r in outcome['results']]})")
 
         # 8. A stage with no inputs yet is SKIPPED -- distinct from fresh, and it blocks what
         #    depends on it. Most of the world tools are in this state until phase 5 authors the

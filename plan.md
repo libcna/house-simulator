@@ -102,11 +102,11 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 0 | Repository, conventions, decisions | 00001–00060 | 42 | The repo builds an empty `Game` and CI is green |
 | 1 | CNA capability verification | 00061–00120 | 60 | Every §5 claim re-proved; `BL-09` settled; probes deleted |
 | 2 | Build skeleton and CI | 00121–00180 | 48 | `Game` clears the screen; HEADLESS tests run in CI |
-| 3 | Content pipeline | 00181–00260 | 45 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
+| 3 | Content pipeline | 00181–00260 | 46 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 81 | The full layout authored, validated and loaded |
 | 6 | Blockout house geometry | 00451–00540 | 39 | The generated shell renders |
-| 7 | Collision and player controller | 00541–00620 | 37 | You can walk the whole blockout |
+| 7 | Collision and player controller | 00541–00620 | 38 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 23 | Terrain, fences, gates, drive, garden |
@@ -4108,6 +4108,23 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             pass; and the whole check is demonstrated against a model the real content pipeline
             compiled
       accept: a deliberately renamed joint and a deliberately reintroduced second skin both fail the content build
+- [x] HOUSE-00226 — A stage's own tool is one of its inputs
+      dep: HOUSE-00216 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/ci/build_content.py --selftest`
+      note: (2026-09-09) found by `HOUSE-00777`: **editing a generator left every stage that runs
+            it "up to date".** The fingerprint hashed each stage's input FILES and its command line
+            as text, and the command line names the script -- so changing what `build_collision.py`
+            writes changed the hash of nothing. The graph reported the whole world fresh, and the
+            content tree stayed as the previous version of the tool had left it, nav graph
+            included. Every session that has edited a generator today has been rebuilding by hand
+            without knowing it was the only reason the tree was right.
+      finding: **a stage that names its own OUTPUT on the command line must not hash it**, which
+            is the trap this fix walks into if it hashes every argument that happens to be a file:
+            the stage's fingerprint would then contain what it had just written, and it would be
+            stale the moment it ran, for ever. The declared outputs are skipped by name.
+      verified: two claims -- a stage with an unchanged tool is fresh, and editing the tool
+            rebuilds it and everything downstream -- and 2 injections, both CAUGHT: the tool left
+            out of the fingerprint, and the output left in it.
 - [x] HOUSE-00222 — Phase-3 review and commit; run `budget_report.py` for the first time
       dep: HOUSE-00181…HOUSE-00225 · sys: — · plat: ALL · pri: MUST
       note: (2026-09-07) **Phase 3 closes.** All three exit criteria met and measured, not
@@ -11147,8 +11164,38 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             through.
 - [ ] HOUSE-00776 — Place the four downspouts, the gutters and their splash points (used by the rain audio)
       dep: HOUSE-00468 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00777 — Build the coverage height field (`build_coverage.py`) from the house, garage, porch, balconies, sunroom and shed
+- [x] HOUSE-00777 — Build the coverage height field (`build_coverage.py`) from the house, garage, porch, balconies, sunroom and shed
       dep: HOUSE-00212, HOUSE-00768 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/build_coverage.py --selftest`
+      measured: (2026-09-09) §37.2's field over the whole lot: **160 × 128 cells of 0.5 m from
+            (-40.00, -52.00), 1 635 of 20 480 sheltered (8.0 %)**, 199 covering slabs, soffits
+            from +0.25 to +9.00 m. `HOUSE-00212` wrote the tool against a fixture; this is the
+            property, and every one of §37.2's six -- house, garage, porch, balconies, sunroom and
+            shed -- is now named in a claim, with six open places (terrace, both lawns, drive,
+            walk, road) named beside them so that "8 % is sheltered" cannot stay true while the
+            porch moves to the orchard.
+      finding: **§37.2's own sentence, tested: "the rain visibly stops at the porch edge".**
+            0.30 m inside the porch is sheltered at +3.30 and 0.30 m outside it is open sky -- and
+            what stops it is the front balcony's floor, not a roof of the porch's own, which an
+            open cell does not have.
+      finding: **the shed's cover was its own floor, 0.35 m under the floor it stands on.** The
+            below-ground test was one number for the property -- §11.5's height field origin,
+            -3.00 -- and the lot is not flat: the shed stands on a pad at +0.00 and its floor
+            slab's underside is at -0.35. The test is asked of the ground AT THE POINT now, which
+            is what "below ground is not shelter" meant.
+      finding: **and then the shed had no cover at all, because a building with no lid is a shed
+            it rains in.** `build_shell` gave no ceiling to any cell that was `exterior` OR
+            `visibilityHint: open`; `EXT_SHED` is an exterior cell that is a BUILDING, and §15.7
+            rule 5 and `HOUSE-00567` had already drawn that line for the walls. Only an OPEN
+            exterior cell has no lid now. The five interior cells marked open -- the three stair
+            halls and two landings -- gain their ceilings back with it, with the stair wells still
+            cut out of them by `_slab_holes`: 94 → 106 ceiling slabs.
+      note: an open exterior cell keeps its floor slab in a world with **no height field**, which
+            is every fixture: `HOUSE-00782` took the slab away because §11.5's ground is the real
+            floor outdoors, and a fixture with neither would have a terrace with nothing under it.
+      verified: 3 injections CAUGHT -- one ground level for the whole property (the shed's floor
+            becomes its roof), a building with no lid (the shed is open to the sky), and a porch
+            given a roof of its own (the soffit stops being the balcony's floor).
 - [ ] HOUSE-00778 — Build the snow shells (`build_snowshell.py`) for terrain, roofs, decks, rails, furniture and the car
       dep: HOUSE-00214, HOUSE-00777 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00779 — Build the sky-exposure data (`build_skyexposure.py`) per cell and per facade
@@ -13304,20 +13351,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 320 numbered tasks across 53 phases.**
+**1 322 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
-| Foundations, capability proof, build, pipeline, assets | 0–4 | 237 |
-| World data, blockout, collision, camera, visibility | 5–9 | 210 |
+| Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
+| World data, blockout, collision, camera, visibility | 5–9 | 211 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 132 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 320** |
-
+| **Total** | **0–52** | **1 322** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -13369,6 +13415,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00226` | **New task, next free id in phase 3's reserved 00181–00260 range.** Found by `HOUSE-00777`: `build_content.py` hashed each stage's input files and its command line as TEXT, so editing the generator the command names changed the hash of nothing and the whole world reported itself up to date. | The fix belongs to the content build rather than to the coverage task that tripped over it: every one of the eight world stages has the same hole, and the nav graph -- twenty minutes of it -- is the one that hurts, because it is built against `collision.bin` and would keep a version built by a tool that no longer exists. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00569` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00774`: `SweepCapsuleTriangle` extrudes a triangle by the capsule's half-height, a SPHERE's half-height is zero, and the flat prism that leaves is the shape `prism.solid` exists to refuse -- so everything over a triangle was inside it, decided by whether a mathematically-zero dot product came out a hair positive. | `HOUSE-00615` fixed the same defect for a vertical triangle and the height was the second way to have no volume. It is its own task rather than a line in `HOUSE-00774` because it is not about the exterior at all: §45's camera arm sweeps a sphere, every probe in the test suite is one, and the bug was in the sweep both of them share. No id was renumbered or struck. |
 | 2026-09-09 | `collision.bin` v2 → **v3** | A `u8` per cell: **is §11.5's ground part of this cell's collision?** (`HOUSE-00774`) | The height field is one surface over the whole lot and the house stands on it, so it runs through the basement and 0.1 m under `L0`'s floor. Giving §49.3's step 5 the ground -- which the outdoors needs, because a body that walked off the terrace's edge landed inside the slope and stayed there -- pushed a body on the basement stair out of the lawn above it instead. Nothing else in the file can tell the two apart: `EXT_SHED` is an `exterior` cell that is a building, and §15's yards are cells like any other. `docs/collision-format.md` §3.4 is normative. No id was renumbered or struck. |
 | 2026-09-09 | §15.7 | A **twelfth rule**: *"nothing outdoors stands in something else"* -- no two `structures` footprints overlap, no `paths` box runs into one, no `vegetation` instance is inside one (`HOUSE-00769`) | §15.7's rules 2 and 3 make exactly this statement about the house's cells and nothing made it about the LOT, which has three kinds of rectangle that can be authored on top of each other. Two of them were: the garden path ran three metres through the shed and reached no door, and three of §11.1's six raised beds were vegetation instances inside the shed's walls. Both were invisible to every other rule -- a path and a shed pad are both gravel at the same height, and an instance is a point with no size for anything to overlap. The rule found two more the day it was written. `docs/world-format.md` and `WorldValidator.hpp` say the same twelve; the C++ mirror does not carry the exterior file, so this one is the Python gate's alone, and its header now says so. No id was renumbered or struck. |

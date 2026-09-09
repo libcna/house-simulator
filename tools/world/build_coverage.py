@@ -101,7 +101,14 @@ def property_bounds(layout, built) -> tuple[float, float, float, float]:
 
 
 def slabs(built, ground: float):
-    """Every covering slab as `(x0, z0, x1, z1, underside)`, above the ground only.
+    """Every covering slab as `(x0, z0, x1, z1, underside)`, above the field's floor only.
+
+    The `ground` here is the ONE number below which nothing can be shelter -- §11.5's height field
+    cannot encode a height below its own origin. Whether a slab is over the ground **at a
+    particular point** is a second question, asked per cell in `build`, because the ground is not
+    flat: the shed stands on a pad at +0.00 and its own floor slab's underside is at -0.35, which
+    is under the floor you are standing on and was reported as the shelter over your head until
+    `HOUSE-00777` measured it.
 
     Yawed slabs would need their corners rotated; floors and ceilings from `build_collision` are
     axis-aligned by construction (they come from a cell's footprint box), and a yawed one is
@@ -138,14 +145,30 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     nz = max(1, int(math.ceil((z1 - z0 - 1e-9) / CELL_SIZE)))
     covers = slabs(built, ground)
 
+    # §11.5's ground under each sample, so that "below ground is not shelter" is asked of the
+    # ground that is actually there. The lot falls 0.92 m from the porch to the north fence and
+    # the shed stands on a pad; one number for the whole property makes a floor slab into a roof.
+    terrain = built.get("terrain")
+
+    def ground_at(x: float, z: float) -> float:
+        if not terrain:
+            return ground
+        ix = min(max(int(round((x - terrain["originX"]) / terrain["step"])), 0),
+                 terrain["samplesX"] - 1)
+        iz = min(max(int(round((z - terrain["originZ"]) / terrain["step"])), 0),
+                 terrain["samplesZ"] - 1)
+        return terrain["heights"][iz * terrain["samplesX"] + ix]
+
     field = [UNCOVERED] * (nx * nz)
     for j in range(nz):
         cz = z0 + (j + 0.5) * CELL_SIZE
         for i in range(nx):
             cx = x0 + (i + 0.5) * CELL_SIZE
+            here = ground_at(cx, cz)
             best = UNCOVERED
             for sx0, sz0, sx1, sz1, underside in covers:
-                if sx0 <= cx <= sx1 and sz0 <= cz <= sz1 and underside < best:
+                if sx0 <= cx <= sx1 and sz0 <= cz <= sz1 and underside < best \
+                        and underside > here + 1e-6:
                     best = underside
             field[j * nx + i] = best
 
@@ -283,7 +306,10 @@ def selftest() -> int:
         # below ground and must not shelter the lawn.
         cells = json.loads((world_dir / "layout.cells.json").read_text())
         cells["cells"].append({
-            "id": "L0_PORCH", "level": "L0", "kind": "exterior",
+            # `visibilityHint: open` is what makes it a porch rather than a shed: an exterior
+            # cell that is not open is a BUILDING and gets a lid (`HOUSE-00777`), and the point of
+            # this fixture is a cell whose only cover is the room above it.
+            "id": "L0_PORCH", "level": "L0", "kind": "exterior", "visibilityHint": "open",
             "boxes": [{"x": [-3.0, 0.0], "z": [0.0, 3.0]}],
             "footstepSurface": "concrete", "wallMaterial": "MAT_PAINT",
             "ceilingMaterial": "MAT_CEIL", "yOverride": [0.0, 2.5]})
@@ -476,6 +502,61 @@ def selftest() -> int:
         art = ascii_map(coverage)
         require("." in art and "2" in art,
                 "the plan view distinguishes open sky from a 2.50 m soffit")
+
+        # 14. `HOUSE-00777`: the AUTHORED house, and §37.2's own list of what has to be covered --
+        #     "house, garage, porch, balconies, sunroom and shed". The fixture above proves the
+        #     rule; this proves the property. Each place is named, because "8 % of the lot is
+        #     sheltered" is a number that stays true while the porch moves to the orchard.
+        authored = REPO / "assets-src" / "world"
+        if (authored / "layout.cells.json").is_file():
+            lot = build(authored, REPO / "assets-src" / "assets.manifest.json")
+            sheltered = {
+                "the foyer": (0.0, -16.0),
+                "the garage": (13.0, -17.5),
+                "the sunroom": (0.0, -29.5),
+                "the shed": (-18.0, -42.0),
+                "the porch": (0.0, -13.0),
+                "under the rear balcony": (0.0, -30.0),
+            }
+            open_sky = {
+                "the terrace": (0.0, -34.0),
+                "the back lawn": (-10.0, -40.0),
+                "the driveway": (13.0, -5.0),
+                "the front walk": (0.0, -8.0),
+                "the road": (0.0, 6.0),
+                "the vegetable garden": (-15.0, -39.0),
+            }
+            missing = [name for name, (x, z) in sheltered.items()
+                       if sample(lot, x, z) == UNCOVERED]
+            require(not missing,
+                    f"§37.2's list is covered on the real property: house, garage, porch, "
+                    f"balconies, sunroom and shed ({missing})")
+            roofed = [(name, round(sample(lot, x, z), 2)) for name, (x, z) in open_sky.items()
+                      if sample(lot, x, z) != UNCOVERED]
+            require(not roofed,
+                    f"and the open ground is open: nothing over the terrace, the lawns, the drive "
+                    f"or the road ({roofed})")
+
+            # §37.2's own sentence: *"standing under the porch in a downpour, the rain visibly
+            # stops at the porch edge"*. The porch's south edge is z = -11.60, and the front
+            # balcony's floor is what stops the rain over it.
+            inside = sample(lot, 0.0, -11.9)
+            outside = sample(lot, 0.0, -11.3)
+            require(inside != UNCOVERED and outside == UNCOVERED,
+                    f"the rain stops AT the porch edge: sheltered 0.30 m inside it ({inside:.2f} m "
+                    f"of soffit) and open sky 0.30 m outside")
+            require(abs(inside - 3.30) < 0.01,
+                    f"...and what stops it is the front balcony's floor at +3.30, not the porch's "
+                    f"own roof, which an open cell does not have ({inside:.2f})")
+            require(abs(sample(lot, -18.0, -42.0) - 2.35) < 0.01,
+                    f"the shed's ceiling is its cover, at §11.1's own 2.35 m eaves "
+                    f"({sample(lot, -18.0, -42.0):.2f})")
+
+            covered = lot["stats"]["covered"]
+            require(0.05 <= covered / lot["stats"]["cells"] <= 0.15,
+                    f"and the sheltered fraction of the lot is a house's worth of it: "
+                    f"{100.0 * covered / lot['stats']['cells']:.1f} % of "
+                    f"{lot['stats']['cells']} cells")
 
     finally:
         shutil.rmtree(workspace, ignore_errors=True)

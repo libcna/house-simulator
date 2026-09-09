@@ -444,8 +444,14 @@ def cells_on_level_outside(cell, cells_on_level, boxes_by_cell, axis, value, out
     return out
 
 
-def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
-    """Floors, ceilings and walls for every cell. Returns cell id -> shape indices."""
+def build_shell(layout, shapes: Shapes, stats: dict, has_ground: bool = False) -> dict[str, list[int]]:
+    """Floors, ceilings and walls for every cell. Returns cell id -> shape indices.
+
+    @p has_ground says whether §11.5's height field exists in this world. It decides one thing: an
+    open exterior cell on the ground storey has no floor slab when the field is there to be its
+    floor, and keeps one when it is not -- a fixture world with no terrain would otherwise have a
+    terrace with nothing under it at all (`HOUSE-00782`).
+    """
     levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
     construction = layout["levels"].get("construction", {})
     cells = layout_io.rows(layout, "cells")
@@ -468,7 +474,8 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
 
     def on_the_ground(row: dict) -> bool:
         """An open exterior cell standing on §11.5's ground rather than on a storey of the house."""
-        return open_air(row) and abs(level_ffl.get(row.get("level"), 0.0) - grade) < 1e-6
+        return (has_ground and open_air(row)
+                and abs(level_ffl.get(row.get("level"), 0.0) - grade) < 1e-6)
 
     out: dict[str, list[int]] = {}
     for cell in sorted(cells, key=lambda c: c["id"]):
@@ -486,7 +493,14 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
         # terrace over: the rain stops above it (`HOUSE-00212`) and no ray from it reaches the sky
         # (`HOUSE-00213`). It still gets the wall it shares with the house, because that wall is
         # real and the room on the other side needs it too.
-        is_open = cell.get("kind") == "exterior" or cell.get("visibilityHint") == "open"
+        #
+        # Only an OPEN EXTERIOR one, since `HOUSE-00777`: `EXT_SHED` is an `exterior` cell that is
+        # a BUILDING (§15.7 rule 5 draws the same line, and `HOUSE-00567` drew it for the walls),
+        # and a shed with no lid is a shed it rains in -- §37.2 lists it among the six things the
+        # coverage field has to cover. The five INTERIOR cells marked `visibilityHint: open` are
+        # open to the stair well, and the well is a hole in the slab that `_slab_holes` cuts;
+        # having no slab at all is a different thing, and gave the two landings no ceiling.
+        is_open = open_air(cell)
         # ...but only an EXTERIOR cell loses its walls. `visibilityHint: open` on an interior cell
         # means open to the STAIRWELL -- §16's three stair cells and two landings carry it -- and
         # treating that as "no walls" left the house with a 1.30 m hole in its front elevation at
@@ -1693,7 +1707,7 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
              "structureObbs": 0, "trunks": 0, "vehicles": 0, "hedges": 0,
              "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
     shapes = Shapes()
-    per_cell = build_shell(layout, shapes, stats)
+    per_cell = build_shell(layout, shapes, stats, (world_dir / "terrain.png").is_file())
     build_stairs(layout, shapes, per_cell, stats)
     build_stairwell_guards(layout, shapes, per_cell, stats)
     build_rafters(layout, shapes, per_cell, stats)
@@ -2286,7 +2300,9 @@ def selftest() -> int:
         #     sheltered, sky-less patio -- which is how this rule was found, three tools later.
         terrace = json.loads((world_dir / "layout.cells.json").read_text())
         terrace["cells"].append({
-            "id": "L0_TERRACE", "level": "L0", "kind": "exterior",
+            # `visibilityHint: open` is what makes it a terrace rather than a shed: an exterior
+            # cell that is NOT open is a building, and a building has a lid (`HOUSE-00777`).
+            "id": "L0_TERRACE", "level": "L0", "kind": "exterior", "visibilityHint": "open",
             "boxes": [{"x": [-3.0, 0.0], "z": [0.0, 3.0]}],
             "footstepSurface": "concrete", "wallMaterial": "MAT_PAINT",
             "ceilingMaterial": "MAT_CEIL"})
@@ -2298,7 +2314,7 @@ def selftest() -> int:
         kinds = [outdoor_shapes.obbs[i][4] for i in patio["shapes"]
                  if i < len(outdoor_shapes.obbs)]
         require(KIND_CEILING not in kinds,
-                f"an exterior cell gets no ceiling slab -- it is open to the sky "
+                f"an OPEN exterior cell gets no ceiling slab -- it is open to the sky "
                 f"({[KIND_NAMES[k] for k in kinds]})")
         require(KIND_FLOOR in kinds, "...but it does get a floor; a terrace is a real surface")
         walls = [outdoor_shapes.obbs[i] for i in patio["shapes"]
