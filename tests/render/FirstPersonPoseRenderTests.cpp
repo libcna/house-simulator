@@ -73,7 +73,13 @@ namespace
         // Kept anyway, because a body in a corner is a pose worth having a picture of, and
         // because the near plane's value is asserted where it CAN be seen: `EyeProbeTests` reads
         // it back out of the projection.
-        {"l0-hall-corner", {1.89f, 0.60f, -22.69f, 135.0f, 0.0f}},
+        // §25's culling arrived in `HOUSE-00684` and this pose is 0.31 m from `D_L0_FAMILY`,
+        // which §65.6 starts SHUT. The room behind it is correctly not drawn -- and the shell
+        // draws no door LEAF, so what is left is the hole the opening was cut as. Two thirds of
+        // this frame is the clear colour for the same reason `l0-front-door` above is: a missing
+        // asset, recorded as `HOUSE-00486`, not a missing surface. When the leaf lands, this
+        // reference changes and the commit that changes it says so.
+        {"l0-hall-corner", {1.89f, 0.60f, -22.69f, 135.0f, 0.0f}, 0.35},
         // The main stair from the foyer it is open to (§12.2), which is where a person looks at a
         // staircase from. Standing ON a flight is a frame of the underside of the flight above.
         //

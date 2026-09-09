@@ -14,6 +14,7 @@
 #include "cnahouse/app/CnaHouseGame.hpp"
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
+#include "cnahouse/debug/Console.hpp"
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/debug/VisibilityGeometryOverlay.hpp"
 #include "cnahouse/debug/VisibilityOverlay.hpp"
@@ -187,9 +188,11 @@ namespace
         EXPECT_GT(snapshot.chunksDrawn, 0);
         EXPECT_LT(snapshot.chunksDrawn, 418) << "the chunk cull kept every chunk in the house";
         EXPECT_LE(snapshot.chunksDrawn, snapshot.chunksTested);
-        // And the overlay is honest about the draw list not being built from any of it yet.
-        EXPECT_FALSE(snapshot.cullingApplied);
-        EXPECT_EQ(snapshot.drawCalls, 418) << "the frame still draws every resident chunk";
+        // §25.1 all the way through: the draw list IS the visible set's chunks (`HOUSE-00684`).
+        EXPECT_TRUE(snapshot.cullingApplied);
+        EXPECT_EQ(snapshot.drawCalls, snapshot.chunksDrawn)
+            << "the draw list and the chunk cull disagree about what is being drawn";
+        EXPECT_LT(snapshot.drawCalls, 100) << "the frame is still drawing most of the house";
     }
 
     TEST(HeadlessRunTests, PressingF4DrawsTheDecisionAndNotJustTheHouse)
@@ -285,7 +288,10 @@ namespace
 
         CnaHouseGame game(options, settings);
         game.SetInputSourceForTesting(&input);
-        game.SetFrameLimit(60);
+        // Frames and not steps: §49.3's step does not run while frozen, so a step limit would
+        // never be reached. Enough of them that the camera flies clear of the body at any frame
+        // rate this build reaches.
+        game.SetFrameLimit(400);
         game.Run();
         ASSERT_EQ(game.ExitCode(), 0);
 
@@ -332,7 +338,7 @@ namespace
         // And it STOPPED being recomputed. The body stands still while frozen, so a walk that kept
         // running would keep producing the same answer and look exactly like one that had stopped:
         // the frame it was computed for is the only thing that can tell the two apart.
-        EXPECT_GT(game.FramesDrawn(), 50U);
+        EXPECT_GT(game.FramesDrawn(), 100U);
         EXPECT_LT(snapshot.walkFrame, game.FramesDrawn() - 40U)
             << "the walk is still being recomputed every frame with F5 down";
         // Not `> 0`: the freeze lands in the FIRST frame's update, after that frame's walk, and
@@ -373,6 +379,137 @@ namespace
         EXPECT_NEAR(eye.X, body.X, 0.01f) << "the freeze moved the camera it was meant to hold";
         EXPECT_NEAR(eye.Y, body.Y, 0.01f);
         EXPECT_NEAR(eye.Z, body.Z, 0.01f);
+    }
+
+    /// Types a console line on a chosen frame and records the draw list either side of it.
+    ///
+    /// The only seam a test has for issuing a command MID-SESSION: the console is the game's, and
+    /// `Run` does not return until the session is over. An input source is updated every frame, so
+    /// it is where a scripted player's typing belongs.
+    class ConsoleDriver final : public cnahouse::player::IInputSource
+    {
+    public:
+        ConsoleDriver(CnaHouseGame& game, std::string line, int onFrame)
+            : game_(&game)
+            , line_(std::move(line))
+            , onFrame_(onFrame)
+        {
+        }
+
+        void Update(float) override
+        {
+            state_ = cnahouse::player::InputState{};
+            ++frame_;
+            if (frame_ == onFrame_)
+            {
+                result_ = game_->ConsoleForTesting().Execute(line_);
+            }
+            const int drawCalls = game_->VisibilitySnapshotForTesting().drawCalls;
+            if (frame_ < onFrame_)
+            {
+                before_ = drawCalls;
+            }
+            else if (frame_ > onFrame_ + 1)
+            {
+                after_ = drawCalls;
+            }
+        }
+
+        [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+        {
+            return state_;
+        }
+
+        [[nodiscard]] bool LookAvailable() const noexcept override
+        {
+            return false;
+        }
+
+        [[nodiscard]] int Before() const noexcept
+        {
+            return before_;
+        }
+
+        [[nodiscard]] int After() const noexcept
+        {
+            return after_;
+        }
+
+        [[nodiscard]] const cnahouse::debug::CommandResult& Result() const noexcept
+        {
+            return result_;
+        }
+
+    private:
+        CnaHouseGame* game_;
+        std::string line_;
+        int onFrame_;
+        int frame_ = 0;
+        int before_ = -1;
+        int after_ = -1;
+        cnahouse::player::InputState state_;
+        cnahouse::debug::CommandResult result_;
+    };
+
+    TEST(HeadlessRunTests, CullOffDrawsTheWholeHouseAndCullOnDrawsTheVisibleSet)
+    {
+        // `HOUSE-00684`, end to end and through the console the way a person would type it. The
+        // two numbers either side of the command are what phase 9 was for -- and `cull off` is
+        // what `HOUSE-00688` renders its second frame with.
+        cnahouse::util::Log::ResetForTesting();
+
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        options.player = std::array<float, 5>{-3.00f, 0.60f, -25.05f, 90.0f, 0.0f};
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        // One `Game` at a time, in a scope of its own: CNA's device manager is a process-wide
+        // thing and two live `CnaHouseGame`s crash before either of them draws.
+        int before = 0;
+        int after = 0;
+        bool appliedAtEnd = true;
+        {
+            CnaHouseGame game(options, settings);
+            ConsoleDriver driver(game, "cull off", 10);
+            game.SetInputSourceForTesting(&driver);
+            game.SetFrameLimit(20);
+            game.Run();
+            ASSERT_EQ(game.ExitCode(), 0);
+            ASSERT_TRUE(driver.Result().ok) << driver.Result().message;
+            before = driver.Before();
+            after = driver.After();
+            appliedAtEnd = game.VisibilitySnapshotForTesting().cullingApplied;
+        }
+
+        std::printf("  §12's house from L0_KITCHEN: %d draw call(s) with culling on, %d with "
+                    "`cull off` (418 chunks resident)\n",
+                    before,
+                    after);
+
+        // On by default: §25 exists to be used.
+        EXPECT_GT(before, 0);
+        EXPECT_LT(before, 418 / 4) << "culling on is barely culling anything";
+        // ...and off means everything resident, which is the frame `HOUSE-00688` compares against.
+        EXPECT_EQ(after, 418) << "`cull off` did not restore the whole house";
+        EXPECT_FALSE(appliedAtEnd) << "the overlay still claims the frame was culled";
+
+        // And `cull on` in a session that is already on changes nothing, which is what makes the
+        // command a setting rather than a toggle.
+        {
+            CnaHouseGame again(options, settings);
+            ConsoleDriver back(again, "cull on", 10);
+            again.SetInputSourceForTesting(&back);
+            again.SetFrameLimit(20);
+            again.Run();
+            ASSERT_TRUE(back.Result().ok) << back.Result().message;
+            EXPECT_EQ(back.After(), back.Before()) << "`cull on` changed a frame already culled";
+        }
     }
 
     TEST(HeadlessRunTests, PressingF9BuildsTheWireframeForTheCellTheBodyIsIn)
@@ -511,9 +648,14 @@ namespace
 
         CnaHouseGame game(options, settings);
         game.SetInputSourceForTesting(&input);
-        // Enough to walk several metres at any plausible frame rate, and few enough that the far
-        // wall is out of reach even if every frame were four steps long.
-        game.SetFrameLimit(250);
+        // §49.3's steps and not frames: 240 steps is exactly two simulated seconds on every
+        // machine, where 250 FRAMES was a quarter of a second here and two seconds on a slow
+        // build -- and `HOUSE-00684` made the frames four times cheaper, which moved the number
+        // this test used to depend on. Two seconds is about 2.6 m at §43.2's speed: well past the
+        // metre and a half asserted below, and nowhere near the wall 12 m away. The frame limit
+        // stays as the backstop for a session whose steps never run.
+        game.SetFixedStepLimit(240);
+        game.SetFrameLimit(4000);
         game.Run();
         ASSERT_EQ(game.ExitCode(), 0);
 
@@ -543,7 +685,7 @@ namespace
                     simulated,
                     walked,
                     walked / simulated);
-        ASSERT_GT(simulated, 0.5) << "the game ran no steps to measure";
+        ASSERT_GT(simulated, 1.9) << "the game ran no steps to measure";
         // §43.2's 1.35 m/s, minus the 0.15 s the body spends reaching it (§43.2's 9.0 m/s²).
         EXPECT_LT(walked / simulated, 1.35 * 1.05) << "the body covered more ground than it had time for";
         EXPECT_GT(walked / simulated, 1.35 * 0.80) << "it walked slower than §43.2's speed";
@@ -582,7 +724,11 @@ namespace
 
         CnaHouseGame game(options, settings);
         game.SetInputSourceForTesting(&input);
-        game.SetFrameLimit(400);
+        // Four simulated seconds, which is five metres of walking at §43.2's speed -- enough to
+        // leave the foyer through the doorway from any starting jitter, and the same five metres
+        // whatever the machine.
+        game.SetFixedStepLimit(480);
+        game.SetFrameLimit(6000);
         game.Run();
         ASSERT_EQ(game.ExitCode(), 0);
 

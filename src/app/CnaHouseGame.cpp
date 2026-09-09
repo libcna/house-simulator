@@ -25,7 +25,9 @@
 #include "Microsoft/Xna/Framework/Graphics/SpriteFont.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
+#include "cnahouse/debug/PlayerCommands.hpp"
 #include "cnahouse/debug/Screenshot.hpp"
+#include "cnahouse/debug/VisibilityCommands.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
@@ -417,6 +419,9 @@ namespace cnahouse::app
         {
             chunkCuller_.emplace(*blockoutChunks_);
         }
+        debug::RegisterVisibilityCommands(console_, debug::VisibilityCommandContext{&cullingEnabled_});
+        debug::RegisterPlayerCommands(console_,
+                                      debug::PlayerCommandContext{&player_, &tracker_, &*world_, &*index_});
 
         // §71's `F9` draws through this, and it needs a device -- which is why it is built here
         // and not with the other members.
@@ -978,7 +983,15 @@ namespace cnahouse::app
             RenderFrame();
 
             ++framesDrawn_;
-            if (frameLimit_ != 0 && framesDrawn_ >= frameLimit_)
+            if (fixedStepLimit_ != 0 && fixedSteps_ >= fixedStepLimit_)
+            {
+                Log::Info(LogCat::App,
+                          "fixed-step limit of {} reached after {} frames; exiting",
+                          fixedStepLimit_,
+                          framesDrawn_);
+                Exit();
+            }
+            else if (frameLimit_ != 0 && framesDrawn_ >= frameLimit_)
             {
                 Log::Info(LogCat::App, "frame limit of {} reached; exiting", frameLimit_);
                 Exit();
@@ -1124,11 +1137,19 @@ namespace cnahouse::app
         // §25.1's step 5 is built from residency and not from the walk above (`BuildRenderList`
         // says why), so the overlay says so rather than reporting a culling system that is not
         // culling. `HOUSE-00684` is what turns this to `ON`.
-        snapshot.cullingApplied = false;
+        snapshot.cullingApplied = CullingApplied();
         snapshot.frozen = visibilityFrozen_;
         snapshot.walkFrame = visibility_->Frame();
         snapshot.inspectionEye = blockoutCamera_.eye;
         return snapshot;
+    }
+
+    bool CnaHouseGame::CullingApplied() const noexcept
+    {
+        // Three things have to be true, and they are three different questions: the player has not
+        // typed `cull off`, the scene has a walk to cull with, and that walk has actually run.
+        return cullingEnabled_ && walking_ && chunkCuller_.has_value() && visibility_.has_value() &&
+               !visibility_->Visible().empty();
     }
 
     void CnaHouseGame::BuildRenderList()
@@ -1138,15 +1159,19 @@ namespace cnahouse::app
         {
             return;
         }
-        // **Every resident chunk, and §25's visible set is not consulted yet.** The traversal is
-        // built and tested (`HOUSE-00670`-`HOUSE-00673`), but every portal that has a leaf starts
-        // CLOSED (§25.3, `PortalRuntime`) and nothing opens one until §65's doors exist -- so a
-        // walk driven by the visible set would be a picture of one room with the rest of the house
-        // culled correctly and invisibly. `HOUSE-00684`'s `cull off|on` and `HOUSE-00688`'s
-        // over-culling comparison are where that source is switched over, and nothing here changes
-        // when it is: this function is the only place that decides.
         const Microsoft::Xna::Framework::Vector3 eye =
             walking_ ? view_.Camera().Pose().eye : blockoutCamera_.eye;
+        if (CullingApplied())
+        {
+            // §25.1's steps 1-3, all the way through to the draw list: the walk's answer, then the
+            // chunks of it that are in one of its cones.
+            renderList_.AddChunks(*blockoutChunks_, chunkCuller_->Chunks(), eye);
+            return;
+        }
+        // Everything resident. Two ways to get here and they are different situations: §71's
+        // `cull off`, which `HOUSE-00688` uses to render the same pose twice; and a scene with no
+        // walk at all -- `--scene=blockout` looks at the house from the road, where §16.4 has no
+        // cell for the camera and a portal walk has nowhere to start.
         renderList_.AddChunks(*blockoutChunks_, blockoutCells_->ResidentChunkIndices(), eye);
     }
 

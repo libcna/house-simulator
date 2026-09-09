@@ -105,7 +105,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 3 | Content pipeline | 00181–00260 | 45 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 80 | The full layout authored, validated and loaded |
-| 6 | Blockout house geometry | 00451–00540 | 35 | The generated shell renders |
+| 6 | Blockout house geometry | 00451–00540 | 36 | The generated shell renders |
 | 7 | Collision and player controller | 00541–00620 | 35 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 37 | Culling correct, proved, and within budget |
@@ -7492,6 +7492,24 @@ the chunk builder produces ≤ 6 chunks per cell.
             between cells that share a boundary PLANE, which a cell wholly inside another does
             not. One opening of 130, on a fridge; left for whoever gives a container an interior
             that has to be looked into.
+- [ ] HOUSE-00486 — Draw a blockout door leaf in every opening that has a door
+      dep: HOUSE-00484 · sys: content · plat: TOOL · pri: MUST
+      finding: (2026-09-09, found by `HOUSE-00684`) **the shell fills a window with glass and a
+            doorway with nothing.** `house_shell_gen.py` cuts 130 openings and draws
+            `BLOCKOUT_glass` in the glazed ones (696 triangles), so a closed window is a surface;
+            a closed DOOR is a hole. That was invisible while everything was drawn -- you saw the
+            room behind it -- and §25's culling made it visible in one commit: §65.6 starts every
+            door shut, the walk correctly refuses to see through one, and what is left on screen is
+            the hole. `fp-l0-hall-corner` stands 0.31 m from `D_L0_FAMILY` and is two thirds clear
+            colour; every other interior pose has black rectangles where its doors are.
+      note: the leaf is a slab in the opening's rect, on the plane the portal declares, in its own
+            material class -- the same shape `BLOCKOUT_glass` already is. It is NOT §15's animated
+            door (phase 15): it does not open, and it does not need to for the shell to stop having
+            holes in it.
+      note: **`HOUSE-00688` is blocked on this.** *"Render each of the 24 poses normally and with
+            culling disabled and assert the images match"* cannot pass while a shut door is a hole:
+            culled, you see the clear colour; unculled, you see the room. The difference is real and
+            it is the shell's, so the comparison is meaningless until the leaf exists.
 - [ ] HOUSE-00485 — Fix the shell's coplanar wall/exterior faces where two cells abut
       dep: HOUSE-00484 · sys: content · plat: TOOL · pri: SHOULD
       finding: (2026-09-09, found by `HOUSE-00676`) **`house_shell_gen.py` draws two surfaces in the
@@ -9927,8 +9945,46 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             bugs, all caught -- three only after the suite was strengthened: the frozen walk needing
             its frame index to be visible at all, the missing adopt needing a test that presses
             nothing, and the annotation camera needing an accessor because no fixture draws one.
-- [ ] HOUSE-00684 — Implement the `cull off|on` console command
+- [x] HOUSE-00684 — Implement the `cull off|on` console command
       dep: HOUSE-00670 · sys: debug · plat: ALL · pri: MUST
+      note: (2026-09-09) `debug::RegisterVisibilityCommands` on `HOUSE-00563`'s registry, and the
+            switch it throws: `CnaHouseGame::CullingApplied()` decides whether §25.1's step 5 is
+            built from `ChunkCuller::Chunks()` or from every resident chunk, and `BuildRenderList`
+            is still the one place that asks.
+      note: **on by default.** §25 exists to be used, and this is the commit where the whole phase
+            starts paying: from `L0_KITCHEN` the frame goes from **418 draw calls to 20** and from
+            12 state changes to 5, against §71.2's 620 and 90.
+      note: `cull` with no argument REPORTS rather than toggling. A toggle makes the command's
+            effect depend on a state the person typing it cannot see, and the one thing they are
+            about to do with it is render the same pose twice (`HOUSE-00688`) -- where getting the
+            second one backwards is a comparison of two identical frames that proves nothing.
+      note: **off does not mean "do not walk".** The walk keeps running and `F3` keeps reporting it;
+            what stops is the draw list being built from its answer. That is the only way
+            `HOUSE-00688`'s comparison can work -- two frames from one pose with everything else
+            about them identical.
+      finding: **turning culling on made every timing-based integration test wrong at once.** §49.3's
+            fixed step is fed by REAL frame time, so a frame limit measures the machine: the same
+            250 frames simulated a quarter of a second after this change where they had simulated a
+            second before it, and two tests that assert how far a body walked began failing on a
+            faster game. `SetFixedStepLimit` is the seam that removes the dependency -- 240 steps is
+            two simulated seconds everywhere -- and the frame limit stays as the backstop.
+      finding: **a shut door is a hole in the shell, and culling made it visible.** Recorded as
+            `HOUSE-00486` with the measurement; `fp-l0-hall-corner` drops from 90 % coverage to 38 %
+            because it stands 0.31 m from a shut door, and its minimum follows `l0-front-door`'s
+            precedent of saying so rather than being relaxed quietly. All twelve first-person
+            references were regenerated: they are pictures of the frame the game now draws.
+      note: the empty-visible-set guard in `CullingApplied` is DEFENSIVE and is not covered by a
+            test. It is there because a camera in no cell -- `noclip` past the plot's edge -- gives
+            a walk with no root and an empty answer, and drawing nothing then is worse than drawing
+            everything. Reaching that state in a test costs a two-hundred-metre flight, so it is
+            recorded here instead of asserted.
+      verified: 5 `VisibilityCommandTests` (off and on setting rather than toggling, no argument
+            reporting, a bad argument refused without changing anything, a null context refused
+            rather than dereferenced, and the name registered exactly once) and 1
+            `HeadlessRunTests` case driving the console mid-session through a scripted input source
+            -- 20 draw calls before `cull off` and 418 after, in one session. Eight injected bugs,
+            all caught -- one recorded as NOT a bug: `CullingApplied`'s `walking_` term is implied
+            by `chunkCuller_` existing at all.
 - [ ] HOUSE-00685 — Author the 24 named visibility poses with their expected visible-cell sets
       dep: HOUSE-00681 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00686 — Test: exact visible-set assertion for all 24 poses
@@ -9936,8 +9992,13 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
 - [ ] HOUSE-00687 — Test: the door-state matrix — for each of the 62 doors, open and close it and assert the visible set changes in the expected direction, from both sides
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
-      dep: HOUSE-00684, HOUSE-00164 · sys: ci · plat: CI · pri: MUST
+      dep: HOUSE-00684, HOUSE-00164, HOUSE-00486 · sys: ci · plat: CI · pri: MUST
       accept: this is the single most important test in the project; a failure means something visible was culled
+      blocked: (2026-09-09, by `HOUSE-00684`) **a shut door is a hole in the shell**, so the two
+            images cannot match: culled you see the clear colour through the doorway, unculled you
+            see the room. The difference is real and it is the SHELL's -- `HOUSE-00486` draws the
+            leaf, and this test means something the day it lands. `dep` amended to say so rather
+            than leaving the criterion unsatisfiable for a reason nobody wrote down.
 - [ ] HOUSE-00689 — Test: with all doors closed, the graph fragments as `report_graph.py` predicts and the visible set from `L0_FOYER` is the golden list
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00690 — Test: with all doors open, the visible-cell count from the 12 budget poses stays within budget
@@ -12146,19 +12207,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 299 numbered tasks across 53 phases.**
+**1 300 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 237 |
-| World data, blockout, collision, camera, visibility | 5–9 | 201 |
+| World data, blockout, collision, camera, visibility | 5–9 | 202 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 130 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 146 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 161 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 299** |
+| **Total** | **0–52** | **1 300** |
 
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
@@ -12204,6 +12265,7 @@ evidence that it fails.
 | 2026-09-06 | `HOUSE-00069` | `BL-06`'s workaround command `ffmpeg -i in.wav -c:a pcm_s16le -ar 44100 out.wav` → `ffmpeg -i in.wav -c:a pcm_s16le out.wav`; the offline step is re-scoped from format conversion to provenance capture | Measuring the two halves separately showed the resample, not the bit-depth reduction, is what damages the signal: 24→16 bit costs 0.0017 dB RMS, while adding `-ar 44100` costs 0.889 dB RMS and 0.26 dB peak on a high-frequency NOX source. The collection is uniformly 48 kHz, CNA loaded and played a 48 kHz asset correctly, and the mixer resamples at playback anyway, so the offline resample bought nothing and cost signal. |
 | 2026-09-06 | `HOUSE-00063` | No text change to the task; a finding recorded against `HOUSE-00136` and `HOUSE-00124` | `CNA_CNAEXT=OFF` removes the `CNA::Graphics::` engine layer (6 277 symbols → 0; archive 37.4 MB → 69 kB) but **not** the other forbidden identifiers, which live in `Microsoft::Xna::Framework::Graphics` in CNA's always-compiled core and are present in the linked binary. `check_xna_only.py` is therefore the *only* gate for those, not a redundant one. `HOUSE-00136` must be scoped to what can actually be asserted at the symbol level. |
 | 2026-09-09 | `HOUSE-00485` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00676`: `house_shell_gen.py` draws a cell's exterior skin in the same plane, facing the same way, as the abutting cell's wall -- measured at `L0_GARAGE`'s x = 8.825 west wall against the `exterior` faces of seven other cells. | Two coplanar front-facing surfaces are a z-fight whose winner is decided by submission order and nothing else. It was invisible while the opaque pass submitted cell by cell; sorting the draw list by material (§25.1 step 5) changed which arbitrary answer the garage shows, which is how it was noticed. The generator is where a shared boundary should draw one surface rather than two, and that changes the shell eight render fixtures are pictures of -- so it is its own task rather than a correction folded into a rendering one. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00486`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and a `dep` added to `HOUSE-00688`. Found by `HOUSE-00684`: the shell fills a window with `BLOCKOUT_glass` and a doorway with nothing, so a closed door is a hole. | Invisible while everything was drawn -- you saw the room behind it -- and visible the moment §25's culling was turned on, because §65.6 starts every door shut and the walk correctly refuses to see through one. `HOUSE-00688`'s two images cannot match while the difference between them is a hole in the shell, so its dependency now says so rather than leaving the criterion unsatisfiable for a reason nobody wrote down. No id was renumbered or struck. |
 
 ---
 

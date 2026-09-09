@@ -16,6 +16,7 @@
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/audio/AudioSystem.hpp"
 #include "cnahouse/content/SmokeScene.hpp"
+#include "cnahouse/debug/Console.hpp"
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/debug/DebugDraw.hpp"
 #include "cnahouse/debug/FreeFlyCamera.hpp"
@@ -87,6 +88,22 @@ namespace cnahouse::app
             frameLimit_ = frames;
         }
 
+        /// @brief Stops after this many of §49.3's fixed steps. 0 means no limit.
+        ///
+        /// **The limit a simulation test wants.** A frame limit measures the MACHINE: the fixed
+        /// step is fed by real frame time, so the same 250 frames simulate a quarter of a second
+        /// on a fast build and two seconds on a slow one -- and a test that asserts how far a body
+        /// walked is then asserting how quickly the frames went by. `HOUSE-00684` made the frames
+        /// four times cheaper and moved every such test at once, which is what made this seam
+        /// necessary rather than merely tidy. Counted in steps, a walk is the same walk everywhere.
+        ///
+        /// Both limits apply; whichever is reached first stops the loop, so a frame limit is still
+        /// the backstop for a session whose steps never run at all.
+        void SetFixedStepLimit(std::uint64_t steps) noexcept
+        {
+            fixedStepLimit_ = steps;
+        }
+
         /// @brief Drives the game from a scripted input source instead of the devices.
         ///
         /// The one seam the player wiring needs to be testable without a window: everything after
@@ -122,6 +139,12 @@ namespace cnahouse::app
         [[nodiscard]] const debug::Counters& CountersForTesting() const noexcept
         {
             return counters_;
+        }
+
+        /// @brief §71's console, so a test can type a command the way a person would.
+        [[nodiscard]] debug::Console& ConsoleForTesting() noexcept
+        {
+            return console_;
         }
 
         /// @brief §25.8's `F5`: whether the walk is frozen and the camera detached.
@@ -405,6 +428,13 @@ namespace cnahouse::app
         /// @brief Copies §44's camera into the renderer's, which is what the pass draws through.
         void ApplyPlayerCamera();
 
+        /// @brief Whether this frame's draw list is built from §25's visible set.
+        ///
+        /// Three separate questions: `cull on`, a scene that HAS a walk, and a walk that has run.
+        /// A blockout camera on the road is in no cell, so §25 has nowhere to start and the
+        /// answer is no -- which is not the same as having been turned off.
+        [[nodiscard]] bool CullingApplied() const noexcept;
+
         /// @brief §25.1's step 5 for this frame: fills `renderList_` and lets the passes sort it.
         ///
         /// Called at the top of `RenderFrame`, because it needs the camera the frame will be drawn
@@ -489,6 +519,14 @@ namespace cnahouse::app
         /// was culled can be flown out to and looked at. *"The single most useful debugging tool
         /// for a portal system."*
         bool visibilityFrozen_ = false;
+        /// §71's `cull off|on` (`HOUSE-00684`). On by default -- §25 exists to be used -- and off
+        /// is what `HOUSE-00688` compares against: the walk still runs and `F3` still reports it,
+        /// and what stops is the draw list being built from its answer.
+        bool cullingEnabled_ = true;
+        /// §71's command registry. The console has no prompt yet (§71's own task); the commands
+        /// are registered against it and driven by the tests, which is what `HOUSE-00563`
+        /// established.
+        debug::Console console_;
         /// §71's `F9`, and the line renderer it draws through. Both exist only in the walk scene:
         /// `DebugDraw` needs a device, and the overlay needs a `CollisionWorld` and a camera --
         /// which is exactly what `HOUSE-00620` recorded as the reason `F9` was not wired yet.
@@ -509,6 +547,7 @@ namespace cnahouse::app
 
         std::uint64_t framesDrawn_ = 0;
         std::uint64_t frameLimit_ = 0;
+        std::uint64_t fixedStepLimit_ = 0;
         int exitCode_ = 0;
         bool contentLoaded_ = false;
     };
