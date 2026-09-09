@@ -7813,6 +7813,10 @@ the chunk builder produces ≤ 6 chunks per cell.
             one burst and passed 8 consecutive runs afterwards, with no code change between --
             which is what says it is load and not content: the failing burst ran while a Blender
             shell regeneration and another session's build were both on the machine.
+      note: (2026-09-09, third sighting) `BlockoutPoseRenderTests.TheTwelveInteriorPosesMatchTheirReferences`
+            failed once more during `HOUSE-00781`'s verification, in a full-suite run, and passed
+            alone immediately afterwards and in the next full run. Three sightings now, all in
+            full-suite runs on a loaded machine, none reproducible alone.
       note: neither failure's output was captured, which is the first thing to fix: `ctest`
             needs `--output-on-failure` in the wrapper so a sighting is not lost, and the pose
             comparison should say WHICH pose and by how many pixels. §46's own words apply --
@@ -11540,8 +11544,42 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             pack a roof belongs to is §27.2's to say, and it lists no roof.
       verified: 9 claims and 3 injections, all CAUGHT -- placement by centre instead of coverage,
             the height test dropped, and the world competing with the property.
-- [ ] HOUSE-00781 — Render tests: 8 exterior poses covering the road, drive, front, side yards, terrace, garden and orchard
+- [x] HOUSE-00781 — Render tests: 8 exterior poses covering the road, drive, front, side yards, terrace, garden and orchard
       dep: HOUSE-00780 · sys: ci · plat: CI · pri: MUST
+      verify: render `PropertyPoseRenderTests.*`
+      note: (2026-09-09) `tests/render/PropertyPoseRenderTests.cpp` and eight references at
+            640 × 360, 232 KB in all. **These are not `HOUSE-00483`'s eight.** Those ring the
+            house at a distance and frame the BUILDING; every one was chosen before the lot
+            existed. These stand ON the property at §43.1's eye height and look along it, which is
+            the only way to see what `HOUSE-00761`…`HOUSE-00780` built -- the ground falling
+            0.92 m from the porch to the north fence, both fences, the kerbs, the drive, the shed,
+            the garden structures and the road.
+      finding: **eye height is 1.68 m over the ground AT THAT POINT**, read from §11.5's height
+            field: the orchard is 0.29 m below the front walk and the terrace 0.45 m above it, so
+            a camera at a fixed +1.68 world would be looking out of a person's chest in one place
+            and over their head in another.
+      finding: two poses had to be moved before they said anything, and both for the same reason:
+            **a pose 3 m from a wall is a picture of a wall.** The terrace is 3.9 m deep against a
+            3.3 m sunroom, so the pose looks ALONG it; the shed's 3.2 m wall filled the whole
+            frame from inside the garden, so that one steps back to 7.5 m and takes the beds, the
+            trellis and the boundary fence with it.
+      finding: **"there is sky over it" is not true of three of the eight, and saying so is the
+            claim.** The front walk stands 6 m from a 13.5 m elevation and both side yards 8 m
+            from a three-storey wall: a 70° lens is filled by the house, which is what standing
+            next to a house looks like. Those three assert the opposite instead -- that the top of
+            the frame is NOT sky -- so a house that stopped being drawn fails them, and the other
+            five still fail if the lawn does.
+      note: **four of the eight show a house with no roof, and that is `HOUSE-00494`.** §12.1's
+            roof is drawn in `ROOF_MAIN`, whose chunks are filed under `EXT_WORLD`, and
+            `EXT_WORLD` has exactly ONE portal -- to `EXT_ROAD`. So the roof is visible from the
+            road and the drive and invisible from the back garden, the orchard and the terrace.
+            §25.6 already says the outdoors is culled by a bounding-volume hierarchy over
+            instances rather than by portal traversal, and `HOUSE-00677`/`HOUSE-00678` built that
+            hierarchy; what is missing is the exterior chunks going through it. The references
+            record what the renderer draws today, and the day that is wired the four frames move
+            -- which is what a reference is for.
+      verified: 3 tests -- the eight references, the ground-and-sky claims, and the suite's own
+            shape -- plus 1 014 unit, 92 integration and 34 render tests green.
 - [x] HOUSE-00782 — Test: the property is fully walkable and fully bounded (bot walk, boundary counter 0)
       dep: HOUSE-00774, HOUSE-00775 · sys: ci · plat: CI · pri: MUST
       verify: unit PropertyWalkTests.EveryPartOfTheLotIsReachableAndNoneOfItLeavesTheBox
