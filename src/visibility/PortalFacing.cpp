@@ -2,6 +2,7 @@
 #include "cnahouse/visibility/PortalFacing.hpp"
 
 #include <algorithm>
+#include <cmath>
 
 namespace cnahouse::visibility
 {
@@ -24,15 +25,54 @@ namespace cnahouse::visibility
             }
         }
 
-        /// The centre of a cell's footprint at mid-height. Enough to say which side of a plane the
-        /// cell is on, which is all this file asks of it.
-        [[nodiscard]] bool
-        CentreOf(const world::WorldData& world, const world::Cell& cell, Vector3& out) noexcept
+        /// The centre of the cell's own footprint AT this portal, at mid-height.
+        ///
+        /// **Not the cell's bounding box** (`HOUSE-00687`). §12's cells are one or more boxes and
+        /// several of them wrap round something: `EXT_SIDEYARD_E` runs up the east side of the
+        /// house and along the back of the garage, so the middle of its bounding box is INSIDE the
+        /// garage -- on the far side of the garage's own east door. Asked which side of that door
+        /// the yard is on, a bounding box answers "the garage's", and the walk then refuses to look
+        /// through a door the player is standing in front of. That is over-culling, which is the
+        /// one failure §25 has no tolerance for.
+        ///
+        /// The box that TOUCHES the portal is the room the doorway is in, so that is the one asked.
+        /// A cell with one box -- most of the house -- is unchanged by this.
+        [[nodiscard]] bool CentreOf(const world::WorldData& world,
+                                    const world::Cell& cell,
+                                    const world::Portal& portal,
+                                    Vector3& out) noexcept
         {
             if (cell.boxes.empty())
             {
                 return false;
             }
+            constexpr float kTouching = 1e-3F;
+            const world::Footprint* chosen = nullptr;
+            for (const world::Footprint& box : cell.boxes)
+            {
+                const bool touches = portal.axis == world::PlaneAxis::X
+                                         ? (std::abs(box.minX - portal.planeValue) < kTouching ||
+                                            std::abs(box.maxX - portal.planeValue) < kTouching)
+                                         : (std::abs(box.minZ - portal.planeValue) < kTouching ||
+                                            std::abs(box.maxZ - portal.planeValue) < kTouching);
+                if (!touches)
+                {
+                    continue;
+                }
+                // ...and ACROSS the doorway, not merely on its plane: a long wall can meet the
+                // same plane a room away from the opening in it.
+                const float lo = portal.axis == world::PlaneAxis::X ? box.minZ : box.minX;
+                const float hi = portal.axis == world::PlaneAxis::X ? box.maxZ : box.maxX;
+                if (std::min(hi, portal.maxU) - std::max(lo, portal.minU) <= 0.0F)
+                {
+                    continue;
+                }
+                chosen = &box;
+                break;
+            }
+            // A `Y` portal is a stairwell in a floor and no footprint edge meets it; so is a cell
+            // whose boxes do not reach their own portal. The bounding box is the fallback, which is
+            // what this used to be for everything.
             float minX = cell.boxes.front().minX;
             float maxX = cell.boxes.front().maxX;
             float minZ = cell.boxes.front().minZ;
@@ -43,6 +83,13 @@ namespace cnahouse::visibility
                 maxX = std::max(maxX, box.maxX);
                 minZ = std::min(minZ, box.minZ);
                 maxZ = std::max(maxZ, box.maxZ);
+            }
+            if (chosen != nullptr)
+            {
+                minX = chosen->minX;
+                maxX = chosen->maxX;
+                minZ = chosen->minZ;
+                maxZ = chosen->maxZ;
             }
             const util::Result<world::Extent> extent = world.ExtentOf(cell);
             const float low = extent ? extent.Value().floorY : 0.0F;
@@ -68,7 +115,7 @@ namespace cnahouse::visibility
             return false;
         }
         Vector3 centre{};
-        if (!CentreOf(world, *cell, centre))
+        if (!CentreOf(world, *cell, portal, centre))
         {
             return false;
         }

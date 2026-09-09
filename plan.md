@@ -10088,8 +10088,36 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             the same ORDER -- because `RenderList` sorts what it is given and a render fixture
             compares pixels. Eight injected bugs, six caught; the two that are not are the two
             recorded above as inert by design.
-- [ ] HOUSE-00687 — Test: the door-state matrix — for each of the 62 doors, open and close it and assert the visible set changes in the expected direction, from both sides
+- [x] HOUSE-00687 — Test: the door-state matrix — for each of the 62 doors, open and close it and assert the visible set changes in the expected direction, from both sides
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-09) **the poses are derived, not authored.** A door's own rectangle says where
+            it is and which way it faces, so standing in front of one is arithmetic: a stride and a
+            half back along the inward normal, at eye height, looking at the middle of it. Sixty
+            hand-authored poses would be sixty chances to stand in a wall and sixty things to move
+            when a door does.
+      finding: **`PlaneFacesAway` asked a cell's BOUNDING BOX which side of a portal it was on, and
+            an L-shaped cell answers wrong.** `EXT_SIDEYARD_E` runs up the east side of the house
+            AND along the back of the garage, so the middle of its bounding box is inside the
+            garage -- on the far side of the garage's own east door. The walk therefore refused to
+            look through a door the player was standing a stride and a half in front of, and
+            `L0_GARAGE` was never visible from that yard: **over-culling**, the one failure §25 has
+            no tolerance for. The box that TOUCHES the portal, and crosses its opening, is the room
+            the doorway is in; that is the one asked now. A cell with one box -- most of the house
+            -- is unchanged, which is why the twenty-four poses of `HOUSE-00686` did not move.
+      note: **a door is not the only way light gets between two rooms.** Seven of the 109 door/side
+            pairs are joined a second time by glass -- §12.1's front door has sidelights, the
+            first-floor landing has two windows onto the balcony its door opens onto, and the garage
+            and the shed each have a window onto the yard their door leads to. The "it leaves when
+            the door shuts" half is skipped for those and counted, rather than asserted against a
+            layout the test wished for.
+      measured: **109 door/side pairs checked**, 70 glass doors skipped (§25.3: shut is still
+            see-through), 17 with nowhere to stand a body in front of the door. And 56 doors opened
+            BEHIND the camera, none of which changed the set -- which is the half a
+            door-in-front-of-you test cannot make: a system that rebuilt the set from apertures
+            rather than from the frustum would pass everything else here.
+      verified: 2 `DoorMatrixTests`. Six injected bugs, all caught -- including the two that prove
+            the fix above is load-bearing: putting the bounding box back, and dropping the check
+            that the touching box crosses the doorway rather than merely meeting its plane.
 - [ ] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
       dep: HOUSE-00684, HOUSE-00164, HOUSE-00486 · sys: ci · plat: CI · pri: MUST
       accept: this is the single most important test in the project; a failure means something visible was culled
