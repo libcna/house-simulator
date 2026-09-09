@@ -10165,8 +10165,30 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             colour through the doorway, unculled you saw the room -- and `HOUSE-00486` drew the
             leaf. The `dep` records it, because the criterion was unsatisfiable for a reason that
             is a fact about the shell rather than about the culling.
-- [ ] HOUSE-00689 — Test: with all doors closed, the graph fragments as `report_graph.py` predicts and the visible set from `L0_FOYER` is the golden list
+- [x] HOUSE-00689 — Test: with all doors closed, the graph fragments as `report_graph.py` predicts and the visible set from `L0_FOYER` is the golden list
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-09) **two claims about one house, and they are about different graphs.** With
+            every door shut, WALKING has only the openings that have no leaf as edges and the house
+            falls into pieces; SEEING has glass as well, because §25.3 says a closed glass door
+            never closes its portal for vision. The two numbers must not agree, and the test says so
+            rather than leaving a reader to assume one implies the other.
+      measured: **59 components, the largest 19 cells** -- exactly what `docs/graph-report.md` says,
+            computed here from what the RUNTIME loaded rather than read out of the tool's own
+            output, so the two agreeing is the measurement.
+      finding: **§70.3's golden list is an illustration, not a measurement, and the difference is
+            the heading.** It names `L0_STAIR_MAIN`, `L1_STAIR_MAIN`, `L1_LANDING`, `L0_LIVING`,
+            `L0_PORCH` and `EXT_WORLD`; from the foyer's centre looking north with every door shut
+            the answer is `{L0_FOYER, L0_HALL, L0_KITCHEN, L0_SUNROOM}`. Every cell §70.3 names and
+            this does not is one the pose cannot see: the stair is through a cased opening due EAST
+            (`P_L0_FOYER__L0_STAIR`, plane x = 2.2, centred on the eye's own z) and §44's lens is
+            102.4 degrees wide, so 90 degrees off the axis is outside it; the living room is west
+            behind a shut double door; the porch, the road and the front yards are through the
+            sidelights BEHIND the camera. The list ends in an ellipsis in §70.3 and was written
+            before the geometry existed; the golden list is now the measured one, with each
+            difference accounted for rather than the pose bent to fit.
+      verified: 2 `ClosedHouseTests`. Four injected bugs, all caught -- a shut door counted as a way
+            through, a window counted as one, a shut opaque door passing light, and a component walk
+            that never revisits.
 - [ ] HOUSE-00690 — Test: with all doors open, the visible-cell count from the 12 budget poses stays within budget
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00691 — Test: the partially-open-door rule — a door at 0.02 culls, at 0.10 does not, and the leaf occludes inside the target cell
