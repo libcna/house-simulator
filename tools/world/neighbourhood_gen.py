@@ -189,7 +189,7 @@ def openings_on(house: House) -> list[tuple[float, float, float, float]]:
     return out
 
 
-def house_faces(house: House, detailed: bool) -> list:
+def house_faces(house: House, detailed: bool, plot: bool = True) -> list:
     """Every face of one house, in world metres, with the origin at the middle of its footprint.
 
     Faces are `(corners, normal, material)`, which is what `_document` writes and what
@@ -237,6 +237,61 @@ def house_faces(house: House, detailed: bool) -> list:
                                                       half_d + depth), house.palette.trim)
 
     faces += _roof_faces(house, house.outer, house.eaves, house.roof)
+    if detailed and plot:
+        faces += plot_faces(house)
+    return faces
+
+
+#: A neighbour's drive: §11.4 gives ours 7.8 m of width and theirs is a single car's.
+DRIVE_WIDTH = 3.2
+DRIVE_REACH = 9.0
+DRIVE_THICK = 0.12
+#: The boundary between two plots: a low rail fence, which is what a suburban side boundary is.
+BOUNDARY_HEIGHT = 1.05
+BOUNDARY_POST = 0.09
+BOUNDARY_RAIL = 0.06
+BOUNDARY_BAY = 2.4
+
+
+def plot_faces(house: House) -> list:
+    """§11.4's "driveways, cars, mailboxes, lawns, fences" for one house, as far as geometry goes.
+
+    `HOUSE-00842`. A house at LOD0 is 90 m away at the nearest and still reads as a house on a
+    PLOT rather than as a model on grass: a drive running out to the street from wherever the cars
+    are kept, and a rail fence down one boundary. The cars and the mailboxes are
+    `layout.exterior.json`'s own rows (`NB_CAR_01`…`NB_CAR_03`, twelve `MODEL_MAILBOX`), placed by
+    `HOUSE-00391` and drawn by their own assets; what the house owes its plot is the ground and
+    the boundary.
+
+    Only at LOD0: §26.2's LOD1 is the massing, and a drive 200 m away is a grey line.
+    """
+    faces: list = []
+    half_w, half_d = house.width / 2.0, house.depth / 2.0
+
+    # The drive starts where the cars are: at the garage if there is one, and beside the front
+    # door if there is not.
+    if house.garage == "attached":
+        centre = half_w + 2.8
+    elif house.garage == "detached":
+        centre = half_w + 2.5 + 2.8
+    else:
+        centre = -half_w + DRIVE_WIDTH / 2.0 + 0.6
+    faces += box((centre - DRIVE_WIDTH / 2.0, -DRIVE_THICK, half_d),
+                 (centre + DRIVE_WIDTH / 2.0, 0.0, half_d + DRIVE_REACH), "NB_DRIVE")
+
+    # The boundary, down the side away from the drive so the two do not fight over the same metre.
+    edge = -half_w - 1.6 if centre > 0.0 else half_w + 1.6
+    bays = max(1, int(round((house.depth + DRIVE_REACH) / BOUNDARY_BAY)))
+    start, end = -half_d, half_d + DRIVE_REACH
+    for index in range(bays + 1):
+        at = start + (end - start) * index / bays
+        faces += box((edge - BOUNDARY_POST / 2.0, 0.0, at - BOUNDARY_POST / 2.0),
+                     (edge + BOUNDARY_POST / 2.0, BOUNDARY_HEIGHT, at + BOUNDARY_POST / 2.0),
+                     house.palette.trim)
+    for level in (0.45, BOUNDARY_HEIGHT - BOUNDARY_RAIL - 0.05):
+        faces += box((edge - BOUNDARY_RAIL / 2.0, level, start),
+                     (edge + BOUNDARY_RAIL / 2.0, level + BOUNDARY_RAIL, end),
+                     house.palette.trim)
     return faces
 
 
@@ -432,7 +487,10 @@ def selftest() -> int:
     # 3. Geometry: a house stands on the ground, its roof starts where its walls stop, and its
     #    ridge is over its own footprint.
     for asset, house in sorted(TYPES.items()):
-        faces = house_faces(house, True)
+        # The BUILDING and not its plot: a drive is a slab buried in the ground like every other
+        # slab in this world, and a boundary fence runs out past the house's own corner. Both are
+        # `plot_faces`'s and both are claimed below.
+        faces = house_faces(house, True, plot=False)
         ys = [point[1] for corners, _n, _m in faces for point in corners]
         # Of the WALL and not of the house: a porch slab lies on the ground too, and a house
         # lifted off it with its porch left behind would pass a claim about the lowest point of
@@ -457,12 +515,19 @@ def selftest() -> int:
     # 4. §26.2's LOD1 is the massing without the detail. Measured as a RATIO, because that is what
     #    §26.1's table states, and asserted per type rather than in the aggregate.
     for asset, house in sorted(TYPES.items()):
-        full = sum(1 if len(c) == 3 else 2 for c, _n, _m in house_faces(house, True))
+        full = sum(1 if len(c) == 3 else 2 for c, _n, _m in house_faces(house, True, plot=False))
         low = sum(1 if len(c) == 3 else 2 for c, _n, _m in house_faces(house, False))
         require(low < full,
                 f"{house.name}_LOW is smaller than {house.name} ({low} against {full} triangles)")
         require(0.30 <= low / full <= 0.85,
-                f"...and it is the massing rather than a decimation: {low / full:.2f} of it")
+                f"...and it is the massing rather than a decimation: {low / full:.2f} of the "
+                f"BUILDING")
+        # ...and of the ASSET, which is what §26.2's 0.35 is about: an LOD0 neighbour carries its
+        # drive and its boundary as well, and an LOD1 one carries neither.
+        whole = sum(1 if len(c) == 3 else 2 for c, _n, _m in house_faces(house, True))
+        require(0.20 <= low / whole <= 0.45,
+                f"...and {low / whole:.2f} of the whole asset, which is §26.2's 0.35 with a plot "
+                f"under it")
 
     # 5. The openings are on the STREET elevation and inside the wall they are cut into -- a
     #    window that overhangs its own wall is a window in the air.
@@ -489,6 +554,34 @@ def selftest() -> int:
             "a GABLE is two slopes and two triangular ends, and the ends are wall")
     require(sum(1 for _c, _n, material in gable_faces if material == gable.palette.wall) == 2,
             "-- the ends are the WALL's material, because a gable end is a wall")
+
+    # 6b. `HOUSE-00842`: the plot. A house at LOD0 stands on a drive and a boundary, and one at
+    #     LOD1 stands on neither.
+    for asset, house in sorted(TYPES.items()):
+        plot = plot_faces(house)
+        require(plot, f"{house.name} has a plot: a drive and a boundary fence")
+        drive = [f for f in plot if f[2] == "NB_DRIVE"]
+        require(drive, f"{house.name}'s drive is its own material, so it is its own chunk")
+        zs = [point[2] for corners, _n, _m in drive for point in corners]
+        require(min(zs) >= house.depth / 2.0 - 1e-6,
+                f"{house.name}'s drive starts at the front of the house and runs OUT, rather than "
+                f"under it ({min(zs):.2f} against {house.depth / 2.0:.2f})")
+        require(max(zs) - min(zs) >= 8.0,
+                f"...and reaches the street: {max(zs) - min(zs):.1f} m of it")
+        ys = [point[1] for corners, _n, _m in drive for point in corners]
+        require(max(ys) <= 1e-6,
+                f"...and lies IN the ground rather than on it, like every other slab in this "
+                f"world ({max(ys):.3f})")
+        if house.garage != "none":
+            xs = [point[0] for corners, _n, _m in drive for point in corners]
+            require(min(xs) > house.width / 2.0,
+                    f"{house.name} has a garage, so its drive is on the garage's side "
+                    f"({min(xs):.2f} against {house.width / 2.0:.2f})")
+        posts = [f for f in plot if f[2] == house.palette.trim]
+        require(len(posts) >= 6 * 4,
+                f"{house.name}'s boundary is posts and rails, not one long box ({len(posts)} faces)")
+        low = [f for f in house_faces(house, False) if f[2] == "NB_DRIVE"]
+        require(not low, f"{house.name}_LOW has no drive: §26.2's LOD1 is the massing")
 
     # 7. The impostor is §26.1's two triangles and nothing else.
     card = impostor_faces()

@@ -11737,8 +11737,34 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             chunked exterior goes 61 files to 62 and 466 chunks to 470.
       verified: 2 injections, both CAUGHT -- a builder with no ground style, and the barrier
             exemption widened until it swallowed every clash.
-- [ ] HOUSE-00842 — Generate the 2 adjacent houses (N1, N2) at LOD0 detail, with real windows, doors, drives and fences
+- [x] HOUSE-00842 — Generate the 2 adjacent houses (N1, N2) at LOD0 detail, with real windows, doors, drives and fences
       dep: HOUSE-00841 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/neighbourhood_gen.py --selftest`
+      measured: (2026-09-09) `MODEL_NB_HOUSE_A` -- which is `NB_HOUSE_N1` -- goes 156 to **288
+            triangles** and `_B`, which is `NB_HOUSE_N2`, 126 to 270: the windows and doors were
+            already reveals in the grammar (`HOUSE-00841`), and what LOD0 gains here is the PLOT.
+            92 selftest claims over the two tasks.
+      finding: **a house at LOD0 stands on a plot and not on grass.** N1 is 90 m away at the
+            nearest -- `layout.exterior.json` gives it `impostorFrom: 90` -- and at that range what
+            says "someone lives there" is a drive running out to the street from wherever the cars
+            are kept and a fence down the boundary, not another window. So `plot_faces` draws a
+            3.2 m drive from the garage (or from beside the front door on a house with none) and a
+            1.05 m rail fence on the other side, and both are LOD0 only: §26.2's LOD1 is the
+            massing, and a drive at 200 m is a grey line.
+      finding: **the plot broke three of `HOUSE-00841`'s own claims, and every one of them was
+            right to break.** "Nothing of it is under the ground" -- a drive is a slab buried
+            0.12 m, like every other slab in this world; "nothing reaches past its own garage" --
+            a boundary fence runs out past the house's corner by design; and the LOD ratio, which
+            went from 0.54 to 0.29. The first two now measure the BUILDING (`house_faces(...,
+            plot=False)`) and the plot has claims of its own; the third is asserted twice, because
+            both numbers mean something: 0.5-0.65 of the building, and 0.24-0.29 of the whole
+            asset -- which is §26.2's 0.35 with a plot under it.
+      note: the cars, the mailboxes and the bin clusters on these plots are `HOUSE-00391`'s own
+            rows (`NB_CAR_01`…`NB_CAR_03`, twelve `MODEL_MAILBOX`) and `HOUSE-00846`'s assets.
+            What a house owes its plot is the ground and the boundary; what stands on it is
+            placed, not modelled into the house.
+      verified: 3 injections, all CAUGHT -- the drive running under the house instead of out from
+            it, the drive lying on the ground rather than in it, and the plot drawn at LOD1 too.
 - [ ] HOUSE-00843 — Generate the 6 across-the-street houses (N3–N8) at LOD1
       dep: HOUSE-00841 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00844 — Generate the 16 further houses (N9–N24) at LOD2
