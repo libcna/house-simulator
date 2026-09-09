@@ -607,9 +607,43 @@ def _compost(box: tuple[float, float, float, float], base: float, height: float)
     return faces
 
 
+#: §10.4's low stone wall at the west road end: a coped dry-stone wall, `HOUSE-00775`'s barrier.
+STONE_WALL_ASSET = "MODEL_STONE_WALL_LOW"
+#: The coping oversails the wall by this much on each face, and is this deep. A coping course is
+#: what makes a stone wall read as one rather than as a low grey box.
+COPING_OVERSAIL = 0.06
+COPING_DEPTH = 0.12
+#: How tall a course of stone is. Courses are drawn because the wall is 0.90 m tall and 3.4 m long
+#: at the end of a road a player walks up to: a single box at that size reads as a kerb on end.
+COURSE = 0.22
+
+
+def _stone_wall(box: tuple[float, float, float, float], base: float, height: float) -> list[dict]:
+    """§10.4's low stone wall: courses of stone with a coping over them.
+
+    `HOUSE-00775` put it across the road end as a barrier, and nothing drew it: the wall is a
+    `structures` row like the raised beds, and this tool refuses an asset it has no builder for --
+    which is exactly what it did, loudly, for six weeks' worth of nobody running it (`HOUSE-00785`).
+    """
+    x0, x1, z0, z1 = box
+    faces: list[dict] = []
+    coping_low = base + max(0.0, height - COPING_DEPTH)
+    courses = max(1, int(round(max(0.0, coping_low - base) / COURSE)))
+    for course in range(courses):
+        low = base + (coping_low - base) * course / courses
+        high = base + (coping_low - base) * (course + 1) / courses
+        # Alternate courses are set back a little, which is what gives a dry-stone wall its face.
+        inset = 0.0 if course % 2 == 0 else 0.015
+        faces += _box((x0 + inset, low, z0 + inset), (x1 - inset, high, z1 - inset))
+    faces += _box((x0 - COPING_OVERSAIL, coping_low, z0 - COPING_OVERSAIL),
+                  (x1 + COPING_OVERSAIL, base + height, z1 + COPING_OVERSAIL))
+    return faces
+
+
 #: Which builder draws which §11.1 structure. A structure whose asset is not here is a structure
 #: nothing would draw, and `garden_structures` refuses rather than writing an empty file.
-_GARDEN_BUILDERS = {BED_ASSET: _bed, TRELLIS_ASSET: _trellis, COMPOST_ASSET: _compost}
+_GARDEN_BUILDERS = {BED_ASSET: _bed, TRELLIS_ASSET: _trellis, COMPOST_ASSET: _compost,
+                    STONE_WALL_ASSET: _stone_wall}
 
 
 def garden_structures(directory: Path) -> list[dict]:
@@ -662,7 +696,8 @@ def garden_structures(directory: Path) -> list[dict]:
 
 
 #: The style each garden structure is drawn in, for the material its faces carry.
-_GARDEN_STYLE = {BED_ASSET: "bed", TRELLIS_ASSET: "trellis", COMPOST_ASSET: "compost"}
+_GARDEN_STYLE = {BED_ASSET: "bed", TRELLIS_ASSET: "trellis", COMPOST_ASSET: "compost",
+                 STONE_WALL_ASSET: "stone"}
 
 
 def _triangles(faces: list) -> int:
@@ -790,7 +825,7 @@ def emit(directory: Path, output: Path) -> dict:
         written.append(built["id"])
         triangles += sum(_triangles(faces) for _name, faces in built["parts"])
     for structure in garden_structures(directory):
-        style = _GARDEN_STYLE[structure["asset"]]
+        style = _GARDEN_STYLE[structure["asset"]]  # `_GARDEN_BUILDERS`'s keys, checked below
         document, blob = _document([(structure["id"], structure["faces"], {})],
                                    f"GARDEN_{style}", style)
         gltf_io.write_glb(output / f"{structure['id']}.glb", document, blob)
@@ -1154,11 +1189,29 @@ def selftest() -> int:
             return (min(a[1], b[1]) - max(a[0], b[0]) > 1e-6
                     and min(a[3], b[3]) - max(a[2], b[2]) > 1e-6)
 
+        # §10.4's barrier is the exemption `validate_world.py` rule 12 already makes and for the
+        # same reason: the low stone wall at the road end stands ON the verge and ACROSS the
+        # sidewalk, which is what a barrier does. Everything else in the garden that crosses a
+        # path is a bed in a path (`HOUSE-00769` found three).
         clashes = [one["id"] for one in garden
-                   if overlap(one["footprint"], shed_box)
-                   or any(overlap(one["footprint"], path) for path in paths)]
+                   if one.get("asset") != STONE_WALL_ASSET
+                   and (overlap(one["footprint"], shed_box)
+                        or any(overlap(one["footprint"], path) for path in paths))]
         require(not clashes,
-                f"and none of them stands in the shed or in a path ({clashes})")
+                f"and none of them stands in the shed or in a path, the road-end wall aside "
+                f"({clashes})")
+        barriers = [one["id"] for one in garden if one.get("asset") == STONE_WALL_ASSET]
+        # Every builder must have a ground style, and the pair is what `emit` indexes: a builder
+        # with no style is a `KeyError` at write time, which is how this task's own fix failed the
+        # first time it ran (`HOUSE-00785`).
+        require(sorted(_GARDEN_BUILDERS) == sorted(_GARDEN_STYLE),
+                f"every garden builder has a ground style and every style has a builder "
+                f"({sorted(set(_GARDEN_BUILDERS) ^ set(_GARDEN_STYLE))})")
+
+        require(barriers and any(overlap(one["footprint"], path)
+                                 for one in garden if one["id"] in barriers for path in paths),
+                f"-- and the road-end wall really does cross one, so the exemption is doing "
+                f"something ({barriers})")
         pairs = [(a["id"], b["id"]) for index, a in enumerate(garden) for b in garden[index + 1:]
                  if overlap(a["footprint"], b["footprint"])]
         require(not pairs, f"nor in each other ({pairs})")

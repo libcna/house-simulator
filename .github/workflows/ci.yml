@@ -237,6 +237,17 @@ jobs:
         # also changed answers would not be an optimisation.
         run: python3 tools/world/build_skyexposure.py --selftest
 
+      - name: The boundary and the street must still be buildable
+        working-directory: cna-house
+        # `HOUSE-00785`. `fence_gen.py` refuses a `structures` row whose asset it has no builder
+        # for, which is right and which is exactly what it did from the day `HOUSE-00775` added
+        # §10.4's stone wall -- with nothing running it, so `build/fence` kept the files it had
+        # written before and the chunk build kept reading them. `neighbourhood_gen.py`
+        # (`HOUSE-00841`) is here from its first day for the same reason.
+        run: |
+          python3 tools/world/fence_gen.py --selftest
+          python3 tools/world/neighbourhood_gen.py --selftest
+
       - name: Snow must settle on decks and on nothing else
         working-directory: cna-house
         # `HOUSE-00214`. The slope test is measured from +Y rather than |Y|, so a deck's underside

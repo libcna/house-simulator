@@ -109,7 +109,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 7 | Collision and player controller | 00541–00620 | 38 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
-| 10 | Exterior and property | 00761–00840 | 24 | Terrain, fences, gates, drive, garden |
+| 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 15 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 30 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 64 | Every room furnished to density |
@@ -11669,8 +11669,65 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
 
 ## Phase 11 — Neighbourhood background
 
-- [ ] HOUSE-00841 — `neighbourhood_gen.py`: the parametric house grammar (footprint, storeys, roof type, garage, porch) with 8 material palettes
+- [x] HOUSE-00841 — `neighbourhood_gen.py`: the parametric house grammar (footprint, storeys, roof type, garage, porch) with 8 material palettes
       dep: HOUSE-00391 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/neighbourhood_gen.py --selftest`
+      measured: (2026-09-09) `tools/world/neighbourhood_gen.py`, **66 selftest claims**, seven
+            assets built from the layout's own list: `MODEL_NB_HOUSE_A` 156 triangles,
+            `_B` 126, `_C` 132, their `_LOW` counterparts 84 / 66 / 84, and
+            `MODEL_NB_IMPOSTOR_CARD` at 3. Four materials a house, one a card.
+      finding: **the roof is `roof_geometry.roof_planes`** -- the same function that draws OUR roof
+            and builds its rafters (`HOUSE-00472`, `HOUSE-00496`). A neighbour's hip is the same
+            geometry at a different size, and a gable is those four planes with the two ends
+            removed and the long ones carried out, which is what a gable IS. A second answer to
+            "where is a roof" is the kind of thing that drifts, and this project has three
+            consumers of the first one already.
+      finding: **LOD1 is the massing without the reveals, and that is one decision rather than a
+            decimation pass.** §26.2 asks for 0.35 of the triangles; measured, the three types
+            come to 0.54, 0.52 and 0.64 of theirs, which is the honest number for a body with
+            eight window recesses in it and is asserted as a band rather than as a target.
+      finding: a house is five numbers and a palette -- footprint, storeys, roof, garage, porch --
+            and a value outside the vocabulary is refused rather than quietly built as something
+            else. §11.4's variety is **eight palettes**, each a set of four material IDS and not
+            colours: the blockout draws by material name and §22's real materials arrive later
+            against the same names.
+      verified: 66 claims and 4 injections, all CAUGHT -- LOD1 keeping its reveals, a gable end
+            classed as roof rather than as the wall it is, a house floating 0.2 m over its own
+            ground, and two palettes made identical.
+      note: the claim about the ground had to be tightened before the third injection bit: it
+            asked for the lowest point of ANYTHING, and a porch slab lies on the ground too, so a
+            house lifted off it with its porch left behind passed. It asks about the WALL now.
+- [x] HOUSE-00785 — `fence_gen.py` has not run since the road-end wall was authored
+      dep: HOUSE-00775 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/fence_gen.py --selftest`
+      note: (2026-09-09) **New task, next free id in phase 10's reserved 00761–00840 range.**
+            Found by `HOUSE-00841` while looking for a generator to model the new one on:
+            `fence_gen.py --selftest` did not pass, and neither did `fence_gen.py`.
+      finding: **`HOUSE-00775` added §10.4's low stone wall as a `structures` row and nothing
+            drew it.** The tool refuses an asset it has no builder for -- which is right, and is
+            what it did: *"structure 'STRUCT_WALL_ROADEND_W' has asset 'MODEL_STONE_WALL_LOW',
+            which nothing draws"*. So it produced NOTHING at all, and `build/fence` kept the
+            nineteen files it had written before, which `HOUSE-00780` then chunked as if they
+            were current. Every fence in the world was one task out of date and the road-end
+            barrier was not there.
+      finding: **nothing ran it.** `fence_gen` has no gate in `run_checks.sh` and no step in CI --
+            it is not one of the twelve world tools the workflow selftests -- so a generator that
+            could not produce a single file reported nothing to anybody for as long as that was
+            true. Both it and `neighbourhood_gen` are gated now, locally and in CI.
+      finding: the fix needed TWO tables and only one of them refused: `_GARDEN_BUILDERS` says
+            what draws a structure and `_GARDEN_STYLE` says which ground material it is, and the
+            second is indexed at write time with no check at all -- so the first fix ran the
+            selftest green and then died with a `KeyError` on the real world. A claim now says
+            the two tables have the same keys.
+      finding: §10.4's barrier is the exemption `validate_world.py` rule 12 already makes: a wall
+            across the road end stands ON the verge and ACROSS the sidewalk, which is what a
+            barrier does. `fence_gen`'s own "nothing stands in a path" claim needed the same
+            words, and a second claim asserts the wall really does cross one, so the exemption is
+            doing something.
+      measured: 9 714 triangles over 20 runs and gates, where the stale tree had 19 files; the
+            chunked exterior goes 61 files to 62 and 466 chunks to 470.
+      verified: 2 injections, both CAUGHT -- a builder with no ground style, and the barrier
+            exemption widened until it swallowed every clash.
 - [ ] HOUSE-00842 — Generate the 2 adjacent houses (N1, N2) at LOD0 detail, with real windows, doors, drives and fences
       dep: HOUSE-00841 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00843 — Generate the 6 across-the-street houses (N3–N8) at LOD1
@@ -13761,19 +13818,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 330 numbered tasks across 53 phases.**
+**1 331 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 133 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 134 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 330** |
+| **Total** | **0–52** | **1 331** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -13825,6 +13882,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00785` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00841`: `fence_gen.py` has been unable to produce a single file since `HOUSE-00775` authored §10.4's stone wall, and nothing ran it, so `build/fence` kept the previous tree and `HOUSE-00780` chunked that. | Fixed in the same commit as the task that found it, because the tool it found is the one the new generator is modelled on and both are now gated. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00493`…`HOUSE-00496` | **Four new tasks, the next free ids in phase 6's reserved 00451–00540 range.** Two gates that flaked once each under load (`00493`); the roofs and the chimney loading with the `neighbourhood` pack (`00494`); the render suite's three assertions that were written when the house stood in a void, and the stale content copy they were reading (`00495`, fixed); and the attic's exterior skin drawn to its box with §12.1's roof inside it (`00496`). | `00495` was fixed on the spot because it made every render claim in this session unreliable. The other three are recorded with their measurements: `00496` is a shell-geometry change that eight render references depend on, so it is sequenced before `HOUSE-00781` rather than folded into the task that found it. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00490`, `HOUSE-00491`, `HOUSE-00492` | **Three new tasks, the next free ids in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00779`: the five dormers were not cut out of the roof they come through and their own fronts covered their windows (`00490`, fixed); two `W_GABLE` louvres open into a hip roof that has no gable ends (`00491`); the two rear dormers overlap by 0.20 m (`00492`). | `00490` is a generator defect and was fixed here, in `roof_geometry.py`, where the shell and the collision share one answer. `00491` and `00492` are §12 and `layout.openings.json` -- a design choice and a data nudge with a window schedule, a golden id list and eight render poses behind them -- so they are recorded with their evidence rather than decided by the task that found them. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00784` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00779`: §4's wall rule built the wall an OPEN cell shares with a building over the CELL's extent, which is §10.3's +20.00 ceiling -- 1 053 m² of collision standing in open air over the sunroom, garage and shed roofs. | The fix belongs to `build_collision` rather than to the sky-exposure task that tripped over it: it is `HOUSE-00774`'s own rule -- two open things do not have a wall between them -- in the vertical, and every ray-casting and camera query in the project reads the same shapes. No id was renumbered or struck. |

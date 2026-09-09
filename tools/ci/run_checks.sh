@@ -154,6 +154,13 @@ run_gate "floor-plans" python3 tools/world/floor_plans.py --check
 # gate was missing until `HOUSE-00553` needed the ground to collide with and found three balconies
 # in it -- the artefact had a `--check` and nothing ran it.
 run_gate "terrain-gen" python3 tools/world/terrain_gen.py --check
+# `HOUSE-00785`. `fence_gen.py` refuses an exterior structure it has no builder for -- which is
+# right -- and NOTHING RAN IT: `HOUSE-00775` added §10.4's stone wall to the layout and the
+# generator has been unable to produce a single fence since, silently, while `build/fence` kept
+# the files it wrote before. The neighbourhood grammar joins it here rather than waiting for the
+# same thing to happen twice.
+run_gate "fence-gen" python3 tools/world/fence_gen.py --selftest
+run_gate "neighbourhood" python3 tools/world/neighbourhood_gen.py --selftest
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
 # `HOUSE-00477`. §70.5 over the GENERATED SHELL, not over the layout: `validate_world.py` rule 10
 # checks the numbers an author typed and this checks the geometry the generator made of them. It
