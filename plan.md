@@ -105,7 +105,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 3 | Content pipeline | 00181–00260 | 46 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 81 | The full layout authored, validated and loaded |
-| 6 | Blockout house geometry | 00451–00540 | 42 | The generated shell renders |
+| 6 | Blockout house geometry | 00451–00540 | 43 | The generated shell renders |
 | 7 | Collision and player controller | 00541–00620 | 38 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
@@ -7795,6 +7795,22 @@ the chunk builder produces ≤ 6 chunks per cell.
       verified: 14 claims in `roof_geometry`'s selftest and 3 injections, all CAUGHT -- the
             dormers not cut out of the roof, the front closed over its window, and the cut running
             back from the eaves instead of the wall.
+- [ ] HOUSE-00493 — Two gates failed once each under load and did not reproduce
+      dep: HOUSE-00483 · sys: ci · plat: CI · pri: SHOULD
+      note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
+            Recorded from `HOUSE-00779`'s verification, where two tests failed once each on a
+            machine running about eight agents:
+            `AudioGateTests.NoAudioRunsAFullSessionAndNeverOpensTheDevice` (integration) and
+            `BlockoutPoseRenderTests.TheTwelveInteriorPosesMatchTheirReferences` (render).
+      note: **neither reproduces on demand.** The audio gate passed 10 targeted runs, 3 full
+            integration runs and in isolation. The interior poses then failed **2 of 5** runs in
+            one burst and passed 8 consecutive runs afterwards, with no code change between --
+            which is what says it is load and not content: the failing burst ran while a Blender
+            shell regeneration and another session's build were both on the machine.
+      note: neither failure's output was captured, which is the first thing to fix: `ctest`
+            needs `--output-on-failure` in the wrapper so a sighting is not lost, and the pose
+            comparison should say WHICH pose and by how many pixels. §46's own words apply --
+            *"a flaky render test is worse than none, because it teaches people to ignore it"*.
 - [ ] HOUSE-00491 — Two gable louvres open into the hip roof
       dep: HOUSE-00490 · sys: world · plat: TOOL · pri: SHOULD
       note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
@@ -11272,8 +11288,56 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             given a roof of its own (the soffit stops being the balcony's floor).
 - [ ] HOUSE-00778 — Build the snow shells (`build_snowshell.py`) for terrain, roofs, decks, rails, furniture and the car
       dep: HOUSE-00214, HOUSE-00777 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00779 — Build the sky-exposure data (`build_skyexposure.py`) per cell and per facade
+- [x] HOUSE-00779 — Build the sky-exposure data (`build_skyexposure.py`) per cell and per facade
       dep: HOUSE-00213, HOUSE-00777 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/build_skyexposure.py --selftest`
+      measured: (2026-09-09) §64.6 over the whole house: **96 cells, 997 listening points, 512
+            rays each — 510 464 casts, worst standard error 0.0128**, in 13 s. `EXT_WORLD` 0.970
+            down to nine sealed basement rooms at exactly 0.000, with the three balconies at
+            0.508–0.616, the porch at 0.311, the sunroom at 0.127 and the living room at 0.055.
+            `HOUSE-00213` wrote the tool against fixtures; this is the property, and §64.6's own
+            two testable examples are now claims — `B1_CINEMA` "gets essentially nothing" (0.000,
+            exactly) and the sunroom is the loudest room in the house and still under half the
+            terrace it opens onto, because "almost the outdoor level" is the aperture term the
+            runtime adds when the slider opens and not a number this file can bake.
+      finding: **the house found two defects before it found one of its own**, and both were
+            whole rooms reporting silence: `HOUSE-00784` (1 053 m² of invisible wall standing in
+            open air over the sunroom, garage and shed roofs — `L1_MASTER_BED` measured 0.000)
+            and `HOUSE-00490` (the five dormers not cut out of the roof they come through, with
+            their own fronts boarded over their windows — `L3_ROOM` measured 0.000). Both are
+            fixed and committed; the claim that would have caught either on the day it appeared
+            is now here: **every room with a window in a wall hears the sky through it.**
+      finding: **§64.6's "the cell's centre" does not survive a room that is not convex, and no
+            amount of testing the point could have found it.** `HOUSE-00213` handled a centroid
+            that falls outside the room and a centroid with a sofa on it. `L3_ROOM`'s is neither:
+            it is free, it is inside the room, and every straight line from it to any of the
+            room's three dormers leaves through `L3_STORE_S` on the way, because the room is a T
+            and the dormer bays are the ends of its arms. A room §13.6 calls "lit by three
+            dormers" measured 0.000 with the roof already fixed. One point in a room can only
+            ever be one point in a room.
+      finding: so the figure is the **mean over the cell's floor** — a 1 m grid at ear height,
+            the centre first, points inside geometry dropped rather than counted as silence, and
+            the step grown with the cell so that none exceeds 16 points (`EXT_WORLD` is 200 m
+            across and a metre grid over it is 40 000). `CSKY` goes to **version 2** to carry
+            `samples`, because the error now falls with the square root of `rays × samples` and a
+            consumer is entitled to know which; `origin` stays the centre. `docs/skyexposure-
+            format.md` §5 is normative and says what version 1 measured.
+      finding: two figures that look like defects and are not, so that neither is "fixed" later:
+            the **chest freezer's interior is not sealed** (0.039) because its lid is a `y`
+            portal — a chest freezer opens from the top — while the fridge's door faces the
+            kitchen and its interior is 0.000; and the **porch is the one open exterior cell
+            under half the sky** (0.311), because the front balcony roofs it, which is exactly
+            what §37.2's coverage field says about the same place.
+      finding: `L3_STORE_W` and `L3_STORE_E` still measure exactly 0.000 with a window each.
+            That is `HOUSE-00491` — §12.6's two `W_GABLE` louvres in a roof that has no gable
+            ends — and it is named in the claim rather than excluded silently, so the claim above
+            stays a real claim.
+      note: two gates failed once each during this task's verification and neither reproduced --
+            the audio gate and the twelve interior render poses. Booked as `HOUSE-00493` with the
+            counts, because an intermittent gate is worse than none.
+      verified: 15 claims over the real house and the sampling, and 3 injections, all CAUGHT --
+            one point per cell again, a blocked sample counted as silence, and the sample count
+            left out of the file.
 - [ ] HOUSE-00780 — Implement exterior chunking and residency for the `exterior` pack
       dep: HOUSE-00215, HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00781 — Render tests: 8 exterior poses covering the road, drive, front, side yards, terrace, garden and orchard
@@ -13459,19 +13523,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 326 numbered tasks across 53 phases.**
+**1 327 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
-| World data, blockout, collision, camera, visibility | 5–9 | 214 |
+| World data, blockout, collision, camera, visibility | 5–9 | 215 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 133 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 326** |
+| **Total** | **0–52** | **1 327** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.

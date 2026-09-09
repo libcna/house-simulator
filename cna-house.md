@@ -5264,6 +5264,15 @@ contributions`, which updates live as windows open. `L3_STORE_W` under the roof 
 rain-on-roof layer at full strength; `B1_CINEMA` gets essentially nothing; the sunroom with its
 slider open gets almost the outdoor level.
 
+> Corrected 2026-09-09 by `HOUSE-00779`. **"The cell's centre" is the mean over the cell's floor**,
+> not one point in it. A centre can be free, inside the room, and still see none of the room's own
+> windows: `L3_ROOM` is a T whose three dormers are at the ends of its arms, and every straight
+> line from its centroid to any of them leaves through `L3_STORE_S` — a room §13.6 calls "lit by
+> three dormers" measured 0.000. The figure is now the mean over a 1 m grid at ear height, capped
+> at 16 points a cell, with the centre first and still the point the file carries;
+> `docs/skyexposure-format.md` §5 is normative. Measured over this house: 96 cells, 997 listening
+> points, `EXT_WORLD` 0.970 down to nine sealed basement rooms at exactly 0.000.
+
 ### 64.7 Reverberation
 
 No convolution and no algorithmic reverb (CNA provides neither). Instead, each acoustic profile

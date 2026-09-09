@@ -31,7 +31,7 @@ sunroom with its slider open gets "almost the outdoor level", and `L3_STORE_W` s
 | Field | Type | Value |
 |---|---|---|
 | `magic` | 4 bytes | ASCII `CSKY` |
-| `version` | `u32` | **1** |
+| `version` | `u32` | **2** |
 | `flags` | `u32` | 0. A reader must **reject** any unknown bit |
 | `worldHash` | string | `world.manifest.json`'s `worldHash` |
 | `rays` | `u32` | how many directions each figure was measured with |
@@ -39,13 +39,18 @@ sunroom with its slider open gets "almost the outdoor level", and `L3_STORE_W` s
 | `orientations` | 8 × string | `N NE E SE S SW W NW` |
 | `cellCount` | `u32` | |
 | per cell: `id` | string | |
-| `origin` | 3 × `f32` | where the listener was placed |
+| `origin` | 3 × `f32` | the cell's centre — the first of its listening points |
+| `samples` | `u32` | how many listening points the figures below are the mean of |
 | `sky` | `f32` | 0 … 1, the fraction of the hemisphere that reaches open sky |
 | `facade` | 8 × `f32` | the same fraction restricted to each compass sector |
 
 `rays` travels with the file because these are Monte Carlo estimates and a consumer is entitled to
-know their precision. `origin` travels with it because "the cell's centre" is not always where the
-centre is — see §5.
+know their precision, and `samples` for the same reason: the error falls with the square root of
+`rays × samples`, not of `rays`. `origin` travels with it because "the cell's centre" is not always
+where the centre is — see §5.
+
+**Version 2** added `samples` (`HOUSE-00779`). Version 1 measured each cell from one point and the
+field would have been 1 throughout; the change is described in §5.
 
 §14's axes: **−Z is north**, +Z is the road, +X is east.
 
@@ -79,8 +84,23 @@ that. Two things can go wrong with it, and both are handled rather than assumed 
 
 So the centroid is tested against the geometry, and when it fails the cell's boxes are scanned on a
 coarse grid for the nearest free point. Every fallback is counted and named in the report, and a
-cell with no free point at ear height at all is a warning, never a silent zero. The point used is
-written into the file so the number can be traced back to where it was measured.
+cell with no free point at ear height at all is a warning, never a silent zero.
+
+**A third thing goes wrong, and it is the one that needed the format changed** (`HOUSE-00779`): a
+centroid can be free, inside the room, and still unable to see any of the room's own windows.
+`L3_ROOM` is a T — a body 7 m deep with two dormer bays reaching the front wall — and every
+straight line from its centroid to any of its three dormers leaves the room through `L3_STORE_S` on
+the way. A room §13.6 calls *"lit by three dormers"* measured **0.000**, and no amount of testing
+the point for solidity would have found it, because the point was fine. One point in a room can
+only ever be one point in a room.
+
+So the figure is the **mean over the cell's floor**. The listening points are a grid at
+`SAMPLE_STEP` = 1.0 m over the cell's boxes at ear height, with the centre first; a point standing
+inside geometry is dropped rather than measured as silence, and the step grows with the cell so
+that no cell exceeds `MAX_SAMPLES` = 16 of them — `EXT_WORLD` is 200 m across and a metre grid over
+it would be 40 000 points. This house comes to **997 points over 96 cells**. `origin` is still the
+centre and `samples` says how many points the figure averages, so a number can still be reproduced;
+what it can no longer be is traced to a single place, because it no longer comes from one.
 
 ## 6. What this is not
 

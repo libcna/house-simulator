@@ -55,7 +55,7 @@ from layout_io import LayoutError  # noqa: E402
 REPO = Path(__file__).resolve().parents[2]
 
 MAGIC = b"CSKY"
-VERSION = 1
+VERSION = 2
 
 #: Rays per cell over the upper hemisphere. See the module docstring for why this number.
 DEFAULT_RAYS = 512
@@ -63,6 +63,21 @@ DEFAULT_RAYS = 512
 #: The listener's ears above the cell floor. §64.6 samples "the cell's centre"; the centre of a
 #: room in plan, at the height of the thing doing the listening.
 EAR_HEIGHT = 1.60
+
+#: How far apart the listening points are, in metres, and how many of them a cell may have.
+#:
+#: §64.6 says "the cell's centre" and `HOUSE-00213` took it literally. `HOUSE-00779` measured the
+#: house with it and found the sentence does not survive a room that is not convex: `L3_ROOM` is a
+#: T -- a body 7 m deep with two dormer bays reaching the front wall -- and NO ray from its
+#: centroid reaches any of its three dormer windows, because the straight line to each of them
+#: leaves the room through `L3_STORE_S` on the way. A room §13.6 calls "lit by three dormers"
+#: measured 0.000, and one point in a room can only ever be one point in a room.
+#:
+#: So the figure is the MEAN over the cell's floor, and the centre is the first sample rather than
+#: the only one. The cap is what makes that affordable: `EXT_WORLD` is 200 m across and a metre
+#: grid over it is 150 000 points, so the step grows with the cell until the count fits.
+SAMPLE_STEP = 1.0
+MAX_SAMPLES = 16
 
 #: The compass sectors a facade exposure is reported for. §14: −Z is north, +Z is the road.
 #: `layout.cells.json`'s `daylight.orientation` uses the four cardinals; the four diagonals are
@@ -250,6 +265,38 @@ def sector_of(direction) -> str:
     return ORIENTATIONS[int((azimuth + 22.5) % 360.0 // 45.0)]
 
 
+def listener_points(cell, level, caster: Caster, stats):
+    """Every point the cell is listened from: the centre first, then the rest of its floor.
+
+    `listener_point` below is still the centre and still the point written into the file; this is
+    the set the figure is averaged over (`HOUSE-00779`). The grid is laid over each box at
+    `SAMPLE_STEP`, coarsened until the whole cell fits in `MAX_SAMPLES`, and a point inside
+    geometry is dropped rather than measured -- a listener inside the sofa hears nothing, and one
+    sample that says zero would pull the room's mean down by its share of it.
+    """
+    boxes = layout_io.cell_boxes(cell)
+    floor = layout_io.cell_extent(cell, level)[0]
+    ceiling = layout_io.cell_extent(cell, level)[1]
+    height = min(EAR_HEIGHT, max(0.1, (ceiling - floor) * 0.5))
+    area = sum((x1 - x0) * (z1 - z0) for x0, x1, z0, z1 in boxes)
+    step = max(SAMPLE_STEP, math.sqrt(area / MAX_SAMPLES) if area > 0 else SAMPLE_STEP)
+
+    points = [listener_point(cell, level, caster, stats)]
+    for x0, x1, z0, z1 in boxes:
+        steps_x = max(1, int((x1 - x0) / step))
+        steps_z = max(1, int((z1 - z0) / step))
+        for i in range(steps_x):
+            for j in range(steps_z):
+                point = (x0 + (i + 0.5) * (x1 - x0) / steps_x, floor + height,
+                         z0 + (j + 0.5) * (z1 - z0) / steps_z)
+                if caster.inside(point):
+                    stats["blockedSamples"] += 1
+                    continue
+                if all(math.dist(point, other) > 1e-6 for other in points):
+                    points.append(point)
+    return points
+
+
 def listener_point(cell, level, caster: Caster, stats):
     """Where §64.6's "the cell's centre" actually is, and a fallback when a prop is standing there.
 
@@ -303,35 +350,44 @@ def build(world_dir: Path, manifest_path: Path | None = None, rays: int = DEFAUL
     sectors = [sector_of(d) for d in directions]
     per_sector_total = {name: sectors.count(name) for name in ORIENTATIONS}
 
-    stats = {"rays": rays, "centroidBlocked": [], "noListenerPoint": [], "casts": 0}
+    stats = {"rays": rays, "centroidBlocked": [], "noListenerPoint": [], "casts": 0,
+             "blockedSamples": 0, "samples": 0}
     results = []
     for cell in sorted(layout_io.rows(layout, "cells"), key=lambda c: c["id"]):
         level = levels.get(cell["level"])
         if level is None:
             raise LayoutError(f"cell {cell['id']!r} names level {cell['level']!r}, "
                               f"which does not exist")
-        origin = listener_point(cell, level, caster, stats)
+        points = listener_points(cell, level, caster, stats)
+        stats["samples"] += len(points)
         escaped = 0
         by_sector = {name: 0 for name in ORIENTATIONS}
-        for direction, sector in zip(directions, sectors):
-            stats["casts"] += 1
-            if caster.escapes(origin, direction):
-                escaped += 1
-                by_sector[sector] += 1
+        for origin in points:
+            for direction, sector in zip(directions, sectors):
+                stats["casts"] += 1
+                if caster.escapes(origin, direction):
+                    escaped += 1
+                    by_sector[sector] += 1
+        casts = rays * len(points)
         results.append({
             "id": cell["id"],
-            "origin": origin,
-            "sky": escaped / rays,
-            "facade": {name: (by_sector[name] / per_sector_total[name]
+            # The CENTRE, which is where §64.6 says the figure is measured and is still the first
+            # sample; the figure itself is the mean over `samples` of them (`HOUSE-00779`).
+            "origin": points[0],
+            "samples": len(points),
+            "sky": escaped / casts,
+            "facade": {name: (by_sector[name] / (per_sector_total[name] * len(points))
                               if per_sector_total[name] else 0.0)
                        for name in ORIENTATIONS},
         })
 
     # The Monte Carlo error actually incurred, rather than the argument for it in the docstring.
+    # Averaging over a cell's samples is more casts, so the error falls with the square root of
+    # all of them and not of the ray count alone.
     worst = 0.0
     for entry in results:
         p = entry["sky"]
-        worst = max(worst, math.sqrt(p * (1 - p) / rays))
+        worst = max(worst, math.sqrt(p * (1 - p) / (rays * entry["samples"])))
     stats["worstStandardError"] = worst
     return {"cells": results, "stats": stats, "worldHash": built["worldHash"],
             "collision": built, "caster": caster}
@@ -353,6 +409,7 @@ def serialise(exposure: dict) -> bytes:
     for entry in exposure["cells"]:
         out += bc._string(entry["id"])
         out += struct.pack("<3f", *entry["origin"])
+        out += struct.pack("<I", entry["samples"])
         out += struct.pack("<f", entry["sky"])
         for name in ORIENTATIONS:
             out += struct.pack("<f", entry["facade"][name])
@@ -394,9 +451,11 @@ def read_back(data: bytes) -> dict:
     for _ in range(cell_count):
         identifier = text()
         origin = unpack("<3f")
+        (samples,) = unpack("<I")
         (sky,) = unpack("<f")
         facade = {name: unpack("<f")[0] for name in orientations}
-        cells.append({"id": identifier, "origin": origin, "sky": sky, "facade": facade})
+        cells.append({"id": identifier, "origin": origin, "samples": samples, "sky": sky,
+                      "facade": facade})
     if at != len(data):
         raise LayoutError(f"{len(data) - at} bytes left over after the last cell")
     return {"worldHash": world_hash, "rays": rays, "orientations": orientations, "cells": cells}
@@ -405,9 +464,10 @@ def read_back(data: bytes) -> dict:
 def report(exposure: dict) -> str:
     stats = exposure["stats"]
     lines = [
-        f"{len(exposure['cells'])} cells, {stats['rays']} rays each "
-        f"({stats['casts']} casts); worst standard error "
-        f"{stats['worstStandardError']:.4f}",
+        f"{len(exposure['cells'])} cells, {stats['samples']} listening points, "
+        f"{stats['rays']} rays each ({stats['casts']} casts); worst standard error "
+        f"{stats['worstStandardError']:.4f}; {stats['blockedSamples']} sample point(s) dropped "
+        f"for standing inside something",
     ]
     for entry in sorted(exposure["cells"], key=lambda e: -e["sky"]):
         top = max(entry["facade"], key=lambda k: entry["facade"][k])
@@ -688,6 +748,133 @@ def selftest() -> int:
             except LayoutError:
                 caught = True
             require(caught, f"an unknown {what} is refused rather than ignored")
+
+        # 11. `HOUSE-00779`: the listening POINTS, which are the cell's floor and not just its
+        #     centre. Driven on the fixture, where the answers can be counted.
+        terrace_cell = next(row for row in layout_io.rows(
+            layout_io.load_layout(world_dir, ["levels", "cells"]), "cells")
+            if row["id"] == "L0_TERRACE")
+        terrace_level = {"id": "L0", "ffl": 0.0, "ceiling": 2.5}
+        sample_stats = {"centroidBlocked": [], "noListenerPoint": [], "blockedSamples": 0}
+        spread = listener_points(terrace_cell, terrace_level, Caster(exposure["collision"]),
+                                 sample_stats)
+        require(len(spread) > 1,
+                f"a cell is listened to from its whole floor, not from one point ({len(spread)})")
+        require(spread[0] == listener_point(terrace_cell, terrace_level,
+                                            Caster(exposure["collision"]),
+                                            {"centroidBlocked": [], "noListenerPoint": []}),
+                "and the CENTRE is the first of them, which is the point the file carries")
+        wide = listener_points({"id": "L0_WIDE", "level": "L0",
+                                "boxes": [{"x": [-100.0, 100.0], "z": [-100.0, 100.0]}]},
+                               terrace_level, Caster(exposure["collision"]), sample_stats)
+        require(len(wide) <= MAX_SAMPLES + 1,
+                f"the step grows with the cell so a 200 m one is not 40 000 points "
+                f"({len(wide)} for 40 000 m²)")
+        sofa = bc.Shapes()
+        sofa.obb((2.0, 1.25, 1.5), (1.0, 1.25, 1.0), 0.0, None, bc.KIND_PROP)
+        sofa_caster = Caster({"shapes": sofa, "cells": [], "worldHash": ""})
+        sofa_stats = {"centroidBlocked": [], "noListenerPoint": [], "blockedSamples": 0}
+        around = listener_points({"id": "L0_SOFA", "level": "L0",
+                                  "boxes": [{"x": [0.0, 4.0], "z": [0.0, 3.0]}]},
+                                 terrace_level, sofa_caster, sofa_stats)
+        require(sofa_stats["blockedSamples"] > 0 and all(not sofa_caster.inside(point)
+                                                         for point in around),
+                f"a sample standing inside the sofa is dropped rather than measured as silence "
+                f"({sofa_stats['blockedSamples']} dropped of {len(around)} kept)")
+
+        # 12. `HOUSE-00779`: the AUTHORED house and §64.6's own worked examples. The fixtures above
+        #     prove the estimator; this proves the property, and every case is NAMED, because "8 %
+        #     of the house hears the sky" is a number that stays true while a room loses its
+        #     windows.
+        authored = REPO / "assets-src" / "world"
+        if (authored / "layout.cells.json").is_file():
+            house = build(authored, REPO / "assets-src" / "assets.manifest.json")
+            sky = {entry["id"]: entry["sky"] for entry in house["cells"]}
+            rooms = layout_io.load_layout(authored, ["levels", "cells", "portals", "openings"])
+            cells_by_id = layout_io.by_id(layout_io.rows(rooms, "cells"), "cell")
+
+            # §64.6: "`B1_CINEMA` gets essentially nothing".
+            require(sky["B1_CINEMA"] == 0.0,
+                    f"§64.6's own example: `B1_CINEMA` gets nothing at all, exactly 0 "
+                    f"({sky['B1_CINEMA']})")
+            sealed = sorted(name for name, value in sky.items()
+                            if value == 0.0 and cells_by_id[name]["level"] == "B1")
+            require(len(sealed) >= 8,
+                    f"and so does every other basement room with no opening to the outside "
+                    f"({len(sealed)}: {sealed})")
+
+            # The outdoors is the outdoors: every open exterior cell sees most of the sky.
+            # ...with ONE exception, and it is the one §37.2 already names: the front porch is
+            # outdoors and roofed, by the balcony over it rather than by anything of its own.
+            shut_in = {name: round(sky[name], 3) for name, row in cells_by_id.items()
+                       if row.get("kind") == "exterior" and row.get("visibilityHint") == "open"
+                       and sky[name] < 0.5}
+            require(set(shut_in) == {"L0_PORCH"},
+                    f"every open exterior cell hears more than half the sky except the porch, "
+                    f"which the front balcony roofs over ({shut_in})")
+            require(sky["L0_PORCH"] > 0.2,
+                    f"...and the porch still hears a third of it, because it is open on three "
+                    f"sides ({sky['L0_PORCH']:.3f})")
+            require(sky["EXT_ROAD"] > sky["L0_PORCH"] > sky["L0_LIVING"] > sky["B1_CINEMA"],
+                    f"and the house falls away from it in order: road {sky['EXT_ROAD']:.3f} > "
+                    f"porch {sky['L0_PORCH']:.3f} > living {sky['L0_LIVING']:.3f} > cinema "
+                    f"{sky['B1_CINEMA']:.3f}")
+
+            # A room with a window hears the sky through it. This is the claim `HOUSE-00784` and
+            # `HOUSE-00490` were both found by: an invisible wall standing on the sunroom's roof
+            # and a roof plane drawn across every dormer window each turned a whole room silent.
+            by_portal = {row["id"]: row for row in layout_io.rows(rooms, "portals")}
+            windowed = {}
+            for opening in layout_io.rows(rooms, "openings"):
+                if opening.get("kind") != "window":
+                    continue
+                portal = by_portal.get(opening.get("portal")) or {}
+                for side in ("cellA", "cellB"):
+                    room = portal.get(side)
+                    if room in cells_by_id and cells_by_id[room].get("kind") != "exterior":
+                        windowed.setdefault(room, []).append(str(opening.get("type")))
+            # `HOUSE-00491`: `W_GABLE` is a louvre in a gable end, and this roof is a hip -- both
+            # of them are 0.73 m inside solid roof and neither can see anything. Named here, with
+            # the task that owns the decision, so the claim below stays a real claim.
+            gabled = {name for name, types in windowed.items() if set(types) == {"W_GABLE"}}
+            require(gabled == {"L3_STORE_W", "L3_STORE_E"},
+                    f"the only rooms whose every window is a gable louvre are the two "
+                    f"`HOUSE-00491` is about ({sorted(gabled)})")
+            silent = sorted(name for name in windowed if name not in gabled and sky[name] <= 0.0)
+            require(not silent,
+                    f"every room with a window in a WALL hears the sky through it ({silent})")
+            require(sky["L3_ROOM"] > 0.0 and sky["L3_STORE_N"] > 0.0,
+                    f"...including the three rooms lit by dormers, which measured 0.000 until "
+                    f"`HOUSE-00490` cut the roof out of the way of their windows "
+                    f"({sky['L3_ROOM']:.3f}, {sky['L3_STORE_N']:.3f})")
+            require(all(sky[name] == 0.0 for name in gabled),
+                    f"and the two gable louvres still hear nothing, which is what "
+                    f"`HOUSE-00491` records "
+                    f"({[round(sky[name], 3) for name in sorted(gabled)]})")
+
+            # §64.6: "the sunroom with its slider open gets almost the outdoor level". The slider
+            # is not open in this file and cannot be: the baked figure is the GEOMETRIC opening
+            # and the runtime multiplies the aperture in as a window moves. So the check is that
+            # the sunroom is the loudest room in the house and still well under the terrace it
+            # opens onto -- the gap between them is exactly what the runtime term has to close.
+            indoor = {name: value for name, value in sky.items()
+                      if cells_by_id[name].get("kind") not in ("exterior",)}
+            loudest = max(indoor, key=lambda name: indoor[name])
+            require(loudest == "L0_SUNROOM",
+                    f"the sunroom is the loudest room in the house ({loudest} is)")
+            require(sky["L0_SUNROOM"] < sky["EXT_TERRACE"] / 2.0,
+                    f"...and still well under the terrace it opens onto "
+                    f"({sky['L0_SUNROOM']:.3f} against {sky['EXT_TERRACE']:.3f}) -- §64.6's "
+                    f"'almost the outdoor level' is the aperture term the runtime adds when the "
+                    f"slider opens, not a number this file can bake")
+
+            # The freezer looks like a bug and is not: a chest freezer's lid IS its portal, so its
+            # interior has a hole in the top of it and hears what the pantry hears through the
+            # window. The fridge's door is in a wall plane facing the kitchen and hears nothing.
+            require(sky["CELL_FREEZER_INTERIOR"] > 0.0 and sky["CELL_FRIDGE_INTERIOR"] == 0.0,
+                    f"the chest freezer's lid is a `y` portal and its interior is not sealed "
+                    f"({sky['CELL_FREEZER_INTERIOR']:.3f}); the fridge's door faces the kitchen "
+                    f"and its interior is ({sky['CELL_FRIDGE_INTERIOR']:.3f})")
 
     finally:
         shutil.rmtree(workspace, ignore_errors=True)
