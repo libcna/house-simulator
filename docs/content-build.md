@@ -75,7 +75,7 @@ the pet graph sat over the ground the terrain used to be, and every stage report
 | 8 | **`cnb-media`** | compile | compile assets-src/Media to content with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Media/**/*` | — (a gate) |
 | 9 | **`cnb-models`** | compile | compile assets-src/Models to content/Models with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Models/**/*` | — (a gate) |
 | 10 | **`cnb-textures`** | compile | compile assets-src/Textures to content/Textures with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Textures/**/*` | — (a gate) |
-| 11 | **`world-rules`** | world | the eleven rules of §15.7 over the authored layout | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | — (a gate) |
+| 11 | **`world-rules`** | world | the twelve rules of §15.7 over the authored layout | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | — (a gate) |
 | 12 | **`collision`** | world | rooms become walls; the layout and the _COL proxies | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json`<br>`assets-src/assets.manifest.json` | `content/world/collision.bin` |
 | 13 | **`world-deploy`** | world | strip the comments, deploy as plain JSON, and hash what was written | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json` | `content/world/*.json` |
 | 14 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/chunks.bin` |

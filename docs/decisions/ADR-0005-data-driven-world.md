@@ -43,7 +43,7 @@ placement and asset residency. C++ contains *systems*; the building contains no 
   `L0_KITCHEN`, `P_L0_HALL__L0_KITCHEN`, `LG_L0_KITCHEN_MAIN`, `FRIDGE_L0_KITCHEN`. Ids are the
   contract between the data, the code, the save file and the tools.
 * **Validation is a build step, not a hope.** `tools/world/validate_world.py`, mirrored by a C++
-  validator used by the unit tests, enforces the eleven rules of `cna-house.md` §15.7 — including
+  validator used by the unit tests, enforces the twelve rules of `cna-house.md` §15.7 — including
   that no two cells on a level overlap by more than 1 cm², that every portal rectangle lies in both
   cells' boundary planes within 1 cm, that the graph is connected from `L0_FOYER`, that stair rises
   sum to the level difference within 1 mm, and that every interactable's focus point is provably

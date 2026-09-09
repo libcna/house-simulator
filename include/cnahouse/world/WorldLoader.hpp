@@ -56,7 +56,7 @@ namespace cnahouse::world
     /// `HOUSE-00028`'s whole point and there is no reason to lose it one layer up.
     ///
     /// **It does not validate the house.** A portal whose rectangle is not in its cells' plane, a
-    /// room nobody can reach, a stair that does not climb a storey: those are §15.7's eleven rules,
+    /// room nobody can reach, a stair that does not climb a storey: those are §15.7's twelve rules,
     /// which `validate_world.py` (`HOUSE-00358`) runs before the build and `WorldValidator`
     /// (`HOUSE-00357`) runs at load in debug builds. What the loader refuses is what it cannot
     /// build a `WorldData` from at all: a missing file, a malformed value, a duplicate id.

@@ -302,6 +302,10 @@
           "footprint": {
             "$ref": "#/$defs/box"
           },
+          "height": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
           "id": {
             "$ref": "#/$defs/id"
           },

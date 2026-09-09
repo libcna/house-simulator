@@ -404,10 +404,12 @@ def shed(directory: Path) -> dict | None:
     """
     layout = layout_io.load_layout(directory)
     exterior = layout.get("exterior") or {}
-    structures = exterior.get("structures") or []
-    if not structures:
+    # The structure with a CELL, not the first row: §11.1's raised beds, trellis and compost bin
+    # are structures too, and `garden_structures` draws those. A building is the one you can stand
+    # inside, which is what having a cell means.
+    row = next((one for one in exterior.get("structures") or [] if one.get("cell")), None)
+    if row is None:
         return None
-    row = structures[0]
     cell = next((one for one in layout_io.rows(layout, "cells")
                  if one["id"] == row.get("cell")), None)
     if cell is None:
@@ -484,6 +486,188 @@ def shed(directory: Path) -> dict | None:
         "bounds": (min(p[0] for p in points), min(p[1] for p in points), min(p[2] for p in points),
                    max(p[0] for p in points), max(p[1] for p in points), max(p[2] for p in points)),
     }
+
+
+# ============================================================================ garden structures
+
+#: §11.1's raised beds, in the timber they are actually built from. A board 0.04 m thick and a
+#: 0.07 m corner post is a cedar bed anyone has built; the bed's SIZE is authored, because how many
+#: fit and where the paths between them run is the garden's business and not this file's.
+BED_BOARD = 0.04
+BED_POST = 0.07
+#: Soil sits a hand's breadth below the rim, the way a bed that has been watered and topped up
+#: does. A bed filled flush to the top is a bed that washes onto the path.
+BED_FREEBOARD = 0.06
+
+#: The trellis: two posts, a rail top and bottom, and a lattice between them. The pitch is what
+#: makes it a trellis rather than a fence -- 0.25 m is a gap a runner bean can cross.
+TRELLIS_POST = 0.07
+TRELLIS_RAIL = (0.06, 0.035)
+TRELLIS_SLAT = (0.03, 0.015)
+TRELLIS_PITCH = 0.25
+
+#: The compost bin: four posts and slatted sides, because compost has to breathe. The gap is what
+#: makes it a bin and not a box.
+COMPOST_POST = 0.07
+COMPOST_BOARD = 0.15
+COMPOST_GAP = 0.03
+#: Its front is two boards high and the other three sides are full height: that is how you get a
+#: barrow-load in and a fork-load out.
+COMPOST_FRONT_BOARDS = 2
+
+BED_ASSET = "MODEL_RAISED_BED_01"
+TRELLIS_ASSET = "MODEL_TRELLIS_01"
+COMPOST_ASSET = "MODEL_COMPOST_BIN_01"
+
+
+def _bed(box: tuple[float, float, float, float], base: float, height: float) -> list[dict]:
+    """One raised bed: four boards, four corner posts and the soil inside them."""
+    x0, x1, z0, z1 = box
+    faces: list[dict] = []
+    top = base + height
+    # The boards, mitred the easy way: the two along X run the full length and the two along Z fit
+    # between them, so no two boards occupy the same volume.
+    faces += _box((x0, base, z0), (x1, top, z0 + BED_BOARD))
+    faces += _box((x0, base, z1 - BED_BOARD), (x1, top, z1))
+    faces += _box((x0, base, z0 + BED_BOARD), (x0 + BED_BOARD, top, z1 - BED_BOARD))
+    faces += _box((x1 - BED_BOARD, base, z0 + BED_BOARD), (x1, top, z1 - BED_BOARD))
+    # Corner posts INSIDE the boards, which is what the boards are screwed to. They stop at the
+    # rim rather than standing proud of it: a post that pokes up is a barked shin.
+    for corner_x in (x0 + BED_BOARD, x1 - BED_BOARD - BED_POST):
+        for corner_z in (z0 + BED_BOARD, z1 - BED_BOARD - BED_POST):
+            faces += _box((corner_x, base - 0.05, corner_z),
+                          (corner_x + BED_POST, top, corner_z + BED_POST))
+    # The soil, one box, its top `BED_FREEBOARD` under the rim.
+    faces += _box((x0 + BED_BOARD, base, z0 + BED_BOARD),
+                  (x1 - BED_BOARD, top - BED_FREEBOARD, z1 - BED_BOARD))
+    return faces
+
+
+def _trellis(box: tuple[float, float, float, float], base: float, height: float) -> list[dict]:
+    """§11.1's trellis: a lattice panel between two posts, along whichever axis it is longer in."""
+    x0, x1, z0, z1 = box
+    along_x = (x1 - x0) >= (z1 - z0)
+    lo, hi = (x0, x1) if along_x else (z0, z1)
+    cross_lo, cross_hi = (z0, z1) if along_x else (x0, x1)
+    faces: list[dict] = []
+
+    def slab(a0: float, a1: float, y0: float, y1: float, b0: float, b1: float) -> list[dict]:
+        """A box given along-axis, height and cross-axis ranges, whichever way round they are."""
+        return (_box((a0, y0, b0), (a1, y1, b1)) if along_x
+                else _box((b0, y0, a0), (b1, y1, a1)))
+
+    top = base + height
+    # The posts are set 0.4 m into the ground -- a trellis catches wind like a sail.
+    for post in (lo, hi - TRELLIS_POST):
+        faces += slab(post, post + TRELLIS_POST, base - 0.40, top, cross_lo, cross_hi)
+    for level in (base + 0.10, top - TRELLIS_RAIL[0]):
+        faces += slab(lo + TRELLIS_POST, hi - TRELLIS_POST, level, level + TRELLIS_RAIL[0],
+                      cross_lo, cross_lo + TRELLIS_RAIL[1])
+    # The lattice: verticals at `TRELLIS_PITCH` and horizontals at the same, both inside the frame,
+    # both on the same face of it. A count rather than a spacing, so the last gap is not a sliver.
+    inner_lo, inner_hi = lo + TRELLIS_POST, hi - TRELLIS_POST
+    inner_low, inner_high = base + 0.10 + TRELLIS_RAIL[0], top - TRELLIS_RAIL[0]
+    verticals = max(1, int(round((inner_hi - inner_lo) / TRELLIS_PITCH)) - 1)
+    horizontals = max(1, int(round((inner_high - inner_low) / TRELLIS_PITCH)) - 1)
+    for index in range(verticals):
+        at = inner_lo + (inner_hi - inner_lo) * (index + 1) / (verticals + 1)
+        faces += slab(at - TRELLIS_SLAT[0] / 2.0, at + TRELLIS_SLAT[0] / 2.0, inner_low, inner_high,
+                      cross_lo + TRELLIS_RAIL[1], cross_lo + TRELLIS_RAIL[1] + TRELLIS_SLAT[1])
+    for index in range(horizontals):
+        at = inner_low + (inner_high - inner_low) * (index + 1) / (horizontals + 1)
+        faces += slab(inner_lo, inner_hi, at - TRELLIS_SLAT[0] / 2.0, at + TRELLIS_SLAT[0] / 2.0,
+                      cross_lo + TRELLIS_RAIL[1] + TRELLIS_SLAT[1],
+                      cross_lo + TRELLIS_RAIL[1] + 2 * TRELLIS_SLAT[1])
+    return faces
+
+
+def _compost(box: tuple[float, float, float, float], base: float, height: float) -> list[dict]:
+    """The compost bin: four posts, three slatted sides and a low front you tip a barrow over.
+
+    The front is the +X side, which is the one facing the garden it serves.
+    """
+    x0, x1, z0, z1 = box
+    faces: list[dict] = []
+    top = base + height
+    for corner_x in (x0, x1 - COMPOST_POST):
+        for corner_z in (z0, z1 - COMPOST_POST):
+            faces += _box((corner_x, base - 0.20, corner_z),
+                          (corner_x + COMPOST_POST, top, corner_z + COMPOST_POST))
+    courses = max(1, int((height + COMPOST_GAP) // (COMPOST_BOARD + COMPOST_GAP)))
+    for course in range(courses):
+        low = base + course * (COMPOST_BOARD + COMPOST_GAP)
+        high = low + COMPOST_BOARD
+        # The two sides and the back, full height; the front only as high as `COMPOST_FRONT_BOARDS`.
+        faces += _box((x0 + COMPOST_POST, low, z0), (x1 - COMPOST_POST, high, z0 + BOARD_THICKNESS))
+        faces += _box((x0 + COMPOST_POST, low, z1 - BOARD_THICKNESS), (x1 - COMPOST_POST, high, z1))
+        faces += _box((x0, low, z0 + COMPOST_POST), (x0 + BOARD_THICKNESS, high, z1 - COMPOST_POST))
+        if course < COMPOST_FRONT_BOARDS:
+            faces += _box((x1 - BOARD_THICKNESS, low, z0 + COMPOST_POST),
+                          (x1, high, z1 - COMPOST_POST))
+    return faces
+
+
+#: Which builder draws which §11.1 structure. A structure whose asset is not here is a structure
+#: nothing would draw, and `garden_structures` refuses rather than writing an empty file.
+_GARDEN_BUILDERS = {BED_ASSET: _bed, TRELLIS_ASSET: _trellis, COMPOST_ASSET: _compost}
+
+
+def garden_structures(directory: Path) -> list[dict]:
+    """§11.1's raised beds, trellis and compost bin: every structure that is not a building.
+
+    **A structure with a `cell` is a building and `shed` draws it**, from the cell, because a body
+    stands inside it. These have no cell and no inside: what they need from the world is the GROUND
+    under them, which is §11.5's height field and not a level's floor, so each one sits on the
+    lowest ground its own footprint covers and is buried 50 mm into it. A bed whose boards stop at
+    the mean has daylight under its low corner, and this garden falls 0.29 m across itself.
+    """
+    layout = layout_io.load_layout(directory)
+    exterior = layout.get("exterior") or {}
+    _w, _h, heights, _materials = terrain_gen.decode(directory)
+
+    def ground(x: float, z: float) -> float:
+        ix = min(max(int(round((x - terrain_gen.ORIGIN_X) / terrain_gen.STEP)), 0),
+                 terrain_gen.WIDTH - 1)
+        iz = min(max(int(round((z - terrain_gen.ORIGIN_Z) / terrain_gen.STEP)), 0),
+                 terrain_gen.HEIGHT - 1)
+        return heights[iz * terrain_gen.WIDTH + ix]
+
+    out = []
+    for row in exterior.get("structures") or []:
+        if row.get("cell"):
+            continue
+        builder = _GARDEN_BUILDERS.get(row.get("asset"))
+        if builder is None:
+            raise layout_io.LayoutError(
+                f"structure {row['id']!r} has asset {row.get('asset')!r}, which nothing draws; "
+                f"the ones this tool knows are {sorted(_GARDEN_BUILDERS)}")
+        x0, x1 = float(row["footprint"]["x"][0]), float(row["footprint"]["x"][1])
+        z0, z1 = float(row["footprint"]["z"][0]), float(row["footprint"]["z"][1])
+        height = float(row.get("height") or 0.45)
+        base = min(ground(x, z) for x in (x0, x1, (x0 + x1) / 2.0)
+                   for z in (z0, z1, (z0 + z1) / 2.0)) - 0.05
+        faces = builder((x0, x1, z0, z1), base, height)
+        points = [point for corners, _n in faces for point in corners]
+        out.append({
+            "id": row["id"],
+            "asset": row["asset"],
+            "faces": faces,
+            "base": base,
+            "height": height,
+            "footprint": (x0, x1, z0, z1),
+            "bounds": (min(p[0] for p in points), min(p[1] for p in points), min(p[2] for p in points),
+                       max(p[0] for p in points), max(p[1] for p in points), max(p[2] for p in points)),
+        })
+    return out
+
+
+#: The style each garden structure is drawn in, for the material its faces carry.
+_GARDEN_STYLE = {BED_ASSET: "bed", TRELLIS_ASSET: "trellis", COMPOST_ASSET: "compost"}
+
+
+def _triangles(faces: list) -> int:
+    """How many TRIANGLES a face list is: a quad is two and a gable end is one."""
+    return sum(1 if len(corners) == 3 else 2 for corners, _normal in faces)
 
 
 def _document(parts: list[tuple[str, list, dict]], material: str,
@@ -597,19 +781,26 @@ def emit(directory: Path, output: Path) -> dict:
         document, blob = _fence_document(fence)
         gltf_io.write_glb(output / f"{fence['id']}.glb", document, blob)
         written.append(fence["id"])
-        triangles += len(fence["faces"]) * 2
+        triangles += _triangles(fence["faces"])
     built = shed(directory)
     if built is not None:
         document, blob = _document([(name, faces, {}) for name, faces in built["parts"]],
                                    "SHED_timber", "shed")
         gltf_io.write_glb(output / f"{built['id']}.glb", document, blob)
         written.append(built["id"])
-        triangles += sum(len(faces) * 2 for _name, faces in built["parts"])
+        triangles += sum(_triangles(faces) for _name, faces in built["parts"])
+    for structure in garden_structures(directory):
+        style = _GARDEN_STYLE[structure["asset"]]
+        document, blob = _document([(structure["id"], structure["faces"], {})],
+                                   f"GARDEN_{style}", style)
+        gltf_io.write_glb(output / f"{structure['id']}.glb", document, blob)
+        written.append(structure["id"])
+        triangles += _triangles(structure["faces"])
     for gate in gates(directory):
         document, blob = _gate_document(gate)
         gltf_io.write_glb(output / f"{gate['id']}.glb", document, blob)
         written.append(gate["id"])
-        triangles += (len(gate["leaf"]) + len(gate["fixed"])) * 2
+        triangles += _triangles(gate["leaf"]) + _triangles(gate["fixed"])
     return {"written": written, "triangles": triangles}
 
 
@@ -910,6 +1101,160 @@ def selftest() -> int:
         require(not wrong_shed,
                 f"every face of it is wound the way its own normal says, gable ends included "
                 f"({sorted(set(wrong_shed))})")
+
+        # ------------------------------------------------------------ §11.1's garden structures
+        garden = garden_structures(SOURCE)
+        by_asset: dict[str, list[dict]] = {}
+        for one in garden:
+            by_asset.setdefault(one["asset"], []).append(one)
+        require(len(by_asset.get(BED_ASSET, [])) == 6
+                and len(by_asset.get(TRELLIS_ASSET, [])) == 1
+                and len(by_asset.get(COMPOST_ASSET, [])) == 1,
+                f"§11.1's six raised beds, one trellis and one compost bin are drawn "
+                f"({[(name.split('_', 1)[1], len(rows)) for name, rows in sorted(by_asset.items())]})")
+        require(all(one["id"] != built["id"] for one in garden),
+                "and the SHED is not among them: a structure with a cell is a building, and "
+                "`shed` draws that one from the cell a body stands in")
+
+        # They stand on §11.5's GROUND, which is not a floor and is not flat: the garden falls
+        # 0.29 m across itself, so a structure drawn at y = 0 has daylight under one end of it.
+        _w, _h, terrain_heights, _materials = terrain_gen.decode(SOURCE)
+
+        def ground_at(x: float, z: float) -> float:
+            ix = min(max(int(round((x - terrain_gen.ORIGIN_X) / terrain_gen.STEP)), 0),
+                     terrain_gen.WIDTH - 1)
+            iz = min(max(int(round((z - terrain_gen.ORIGIN_Z) / terrain_gen.STEP)), 0),
+                     terrain_gen.HEIGHT - 1)
+            return terrain_heights[iz * terrain_gen.WIDTH + ix]
+
+        floating = []
+        for one in garden:
+            x0, x1, z0, z1 = one["footprint"]
+            lowest = min(ground_at(x, z) for x in (x0, x1, (x0 + x1) / 2.0)
+                         for z in (z0, z1, (z0 + z1) / 2.0))
+            if one["bounds"][1] > lowest - 1e-6 or one["base"] > lowest - 0.049:
+                floating.append((one["id"], round(one["base"], 3), round(lowest, 3)))
+        require(not floating,
+                f"every one of them is buried in the ground under its own footprint rather than "
+                f"standing at zero ({floating[:3]})")
+        require(all(abs((one["bounds"][4] - one["base"]) - one["height"]) < 1e-6
+                    for one in garden if one["asset"] != TRELLIS_ASSET),
+                f"and each is exactly the height the layout gives it, measured from that base "
+                f"({[(one['id'], round(one['bounds'][4] - one['base'], 3)) for one in garden][:3]})")
+
+        # Nothing stands in the shed or in a path, which is the defect that put this task here:
+        # the six beds were authored as vegetation INSTANCES -- points -- and two of them were
+        # inside the shed's walls, where a point is happy and a 2.2 x 1.1 m box is not.
+        shed_box = (float(structure["footprint"]["x"][0]), float(structure["footprint"]["x"][1]),
+                    float(structure["footprint"]["z"][0]), float(structure["footprint"]["z"][1]))
+        paths = [(float(box["x"][0]), float(box["x"][1]), float(box["z"][0]), float(box["z"][1]))
+                 for row in (layout.get("exterior") or {}).get("paths", []) for box in row["boxes"]]
+
+        def overlap(a, b) -> bool:
+            return (min(a[1], b[1]) - max(a[0], b[0]) > 1e-6
+                    and min(a[3], b[3]) - max(a[2], b[2]) > 1e-6)
+
+        clashes = [one["id"] for one in garden
+                   if overlap(one["footprint"], shed_box)
+                   or any(overlap(one["footprint"], path) for path in paths)]
+        require(not clashes,
+                f"and none of them stands in the shed or in a path ({clashes})")
+        pairs = [(a["id"], b["id"]) for index, a in enumerate(garden) for b in garden[index + 1:]
+                 if overlap(a["footprint"], b["footprint"])]
+        require(not pairs, f"nor in each other ({pairs})")
+
+        # A bed is boards, posts and soil, and the soil is BELOW the rim: a bed filled flush is a
+        # bed that washes onto the path the first time it rains.
+        bed = by_asset[BED_ASSET][0]
+        tops = sorted({round(point[1], 4) for corners, _n in bed["faces"] for point in corners})
+        require(tops[-1] == round(bed["base"] + bed["height"], 4)
+                and round(bed["base"] + bed["height"] - BED_FREEBOARD, 4) in tops,
+                f"a bed's soil is {BED_FREEBOARD:.2f} m under its rim, and its rim is the top of "
+                f"its boards ({tops[-3:]})")
+        sides = {round(min(point[axis] for point in corners), 3)
+                 for corners, _n in bed["faces"] for axis in (0, 2)}
+        require({round(bed['footprint'][0], 3), round(bed['footprint'][2], 3)} <= sides,
+                "and its boards run all the way round it, starting at its own footprint")
+
+        # Every garden structure is BOXES -- `_box` and nothing else -- so its faces come in sixes
+        # and each six is one timber. Chunking them is what lets the claims below count boards and
+        # slats rather than faces, and the chunking is itself the first claim: six faces that are
+        # not a box would make every number after it meaningless.
+        def timbers(one: dict) -> list[tuple]:
+            out = []
+            faces = one["faces"]
+            for start in range(0, len(faces), 6):
+                corners = [point for corners, _n in faces[start:start + 6] for point in corners]
+                out.append((min(p[0] for p in corners), min(p[1] for p in corners),
+                            min(p[2] for p in corners), max(p[0] for p in corners),
+                            max(p[1] for p in corners), max(p[2] for p in corners),
+                            len({tuple(round(v, 5) for v in point) for point in corners}))
+                           )
+            return out
+
+        require(all(len(one["faces"]) % 6 == 0 and all(box[6] == 8 for box in timbers(one))
+                    for one in garden),
+                "every garden structure is boxes: six faces each, eight corners each")
+
+        # The trellis is a LATTICE, which is what makes it a trellis and not a fence panel.
+        trellis = by_asset[TRELLIS_ASSET][0]
+        pieces = timbers(trellis)
+        uprights = sorted(box[0] for box in pieces
+                          if box[3] - box[0] <= TRELLIS_SLAT[0] + 1e-6 and box[4] - box[1] > 0.5)
+        crosspieces = [box for box in pieces
+                       if box[4] - box[1] <= TRELLIS_SLAT[0] + 1e-6 and box[3] - box[0] > 0.5]
+        require(len(uprights) >= 4 and len(crosspieces) >= 3,
+                f"the trellis is a lattice: {len(uprights)} upright(s) and {len(crosspieces)} "
+                f"horizontal(s) between its posts and rails")
+        gaps = sorted(b - a for a, b in zip(uprights, uprights[1:]))
+        require(gaps and gaps[-1] - gaps[0] < 1e-9
+                and 0.15 <= gaps[0] <= TRELLIS_PITCH + 0.10,
+                f"...evenly spaced, at a pitch a bean can cross "
+                f"({[round(gap, 4) for gap in gaps[:3]]})")
+        tx0, tx1, tz0, tz1 = trellis["footprint"]
+        require(all(box[0] >= tx0 - 1e-6 and box[3] <= tx1 + 1e-6
+                    and box[2] >= tz0 - 1e-6 and box[5] <= tz1 + 1e-6 for box in pieces),
+                f"and every timber of it is inside its own {tz1 - tz0:.2f} m footprint -- a panel, "
+                f"not a fence with a lean on it")
+
+        # The compost bin is slatted and open-fronted: it has to breathe, and you have to get a
+        # fork into it.
+        compost = by_asset[COMPOST_ASSET][0]
+        cx0, cx1, cz0, cz1 = compost["footprint"]
+        pieces = timbers(compost)
+        boards = [box for box in pieces if min(box[3] - box[0], box[5] - box[2]) <= BOARD_THICKNESS + 1e-6]
+        front = [box for box in boards if box[0] >= cx1 - BOARD_THICKNESS - 1e-6]
+        back = [box for box in boards if box[3] <= cx0 + BOARD_THICKNESS + 1e-6]
+        require(front and back and max(box[4] for box in front) < max(box[4] for box in back) - 0.2,
+                f"its front is lower than its back, which is how a barrow-load gets in "
+                f"({len(front)} board(s) to {len(back)})")
+        boarded = sum(box[4] - box[1] for box in back)
+        courses = sorted((box[1], box[4]) for box in back)
+        air = [high[0] - low[1] for low, high in zip(courses, courses[1:])]
+        # 20 mm rather than `COMPOST_GAP`: a claim that reads the constant it is checking passes
+        # whatever that constant becomes, including zero. This is the number a gap has to beat to
+        # be one you can see daylight through.
+        require(boarded < compost["height"] * 0.95 and air and min(air) >= 0.02,
+                f"and its sides are SLATTED -- {boarded:.2f} m of board in {len(back)} courses "
+                f"over a {compost['height']:.2f} m side, the tightest gap {min(air, default=0.0):.3f} m "
+                f"-- because compost that cannot breathe is a bin of silage")
+        require(len([box for box in pieces if box[3] - box[0] <= COMPOST_POST + 1e-6
+                     and box[5] - box[2] <= COMPOST_POST + 1e-6 and box[4] - box[1] > 0.5]) == 4,
+                "and it stands on four posts, one at each corner")
+
+        wrong_garden = []
+        for one in garden:
+            for corners, normal in one["faces"]:
+                a, b, c = corners[0], corners[1], corners[2]
+                u = tuple(b[k] - a[k] for k in range(3))
+                v = tuple(c[k] - a[k] for k in range(3))
+                cross = (u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2],
+                         u[0] * v[1] - u[1] * v[0])
+                if sum(cross[k] * normal[k] for k in range(3)) <= 1e-9:
+                    wrong_garden.append(one["id"])
+        require(not wrong_garden,
+                f"and every face of all {len(garden)} of them is wound the way its own normal says "
+                f"({sorted(set(wrong_garden))})")
 
     if failures:
         print(f"\nfence_gen: {len(failures)} claim(s) FAILED")

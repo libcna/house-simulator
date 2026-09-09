@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""validate_world.py -- the eleven rules of `cna-house.md` §15.7, over a whole world directory.
+"""validate_world.py -- the twelve rules of `cna-house.md` §15.7, over a whole world directory.
 
 `HOUSE-00358`. `world_schema.py` (`HOUSE-00341`) checks that each of the sixteen files has the
 right *shape*. This checks that the sixteen agree with each other and with the house: that a
@@ -16,7 +16,7 @@ pre-build step. `cna-house.md` §15.7: a failure fails the build.
 
 ## Every failure, not the first
 
-Each rule collects **all** its failures and the run reports all eleven rules' worth, because
+Each rule collects **all** its failures and the run reports all twelve rules' worth, because
 fixing forty authoring mistakes one build at a time is intolerable (`conventions.md` §5.1). Each
 message names the file, the JSON path and what was expected against what was found -- a message
 that says "portal misaligned" and stops has told the author to go and search.
@@ -82,6 +82,10 @@ REPO = Path(__file__).resolve().parents[2]
 # Every one of these is §15.7's or §70.5's number, named here so a message can quote it.
 
 PLANE_TOLERANCE = 0.01          # §15.7 rule 4: "within 1 cm"
+#: Rule 12's: how far two things outdoors have to be into each other before it is an overlap
+#: rather than a touch. The same centimetre, for the same reason -- a shed with a lean-to against
+#: it and a path that stops at a doorway are both authored edge to edge.
+EPS_OVERLAP = 0.01
 
 #: Portal kinds that have something in them that opens, and therefore a row in
 #: `layout.openings.json`. `cased_opening` and `stair_well` are the two that never do.
@@ -156,6 +160,7 @@ RULE_TITLES = {
     9: "every plumbing fixture is on a declared stack",
     10: "the layout is dimensionally plausible",
     11: "every interactable is reachable from the floor",
+    12: "nothing outdoors stands in something else",
 }
 
 
@@ -247,7 +252,7 @@ def segment_inside(x0: float, z0: float, x1: float, z1: float,
 
 
 class World:
-    """The layout, indexed the way the rules need it. Built once, read by all eleven."""
+    """The layout, indexed the way the rules need it. Built once, read by all twelve."""
 
     def __init__(self, layout: dict[str, dict]) -> None:
         self.layout = layout
@@ -2033,10 +2038,99 @@ def rule_11_reachable(world: World) -> list[Problem]:
     return problems
 
 
+def rule_12_outdoors(world: World) -> list[Problem]:
+    """Nothing outdoors stands in something else: a structure, a path or a plant in a building.
+
+    §15.7's rules 2 and 3 do this for the house -- a cell's boxes are checked against every other
+    cell's -- and nothing did it for the LOT. The exterior file describes the ground with three
+    kinds of rectangle that can be authored on top of each other, and two of them were: the garden
+    path ran three metres through the shed and reached no door, and three of §11.1's six raised
+    beds were points inside the shed's walls or half a metre off them. Both were invisible: a path
+    and a shed pad are both gravel at the same height, and a bed authored as a vegetation INSTANCE
+    is a position with no size for anything to overlap.
+
+    Three conditions, each one of a defect that actually happened:
+
+    * no two `structures` footprints overlap -- a bed inside a bed, or inside the shed;
+    * no `paths` box overlaps a structure -- a path through a building;
+    * no `vegetation` instance stands inside a structure -- a shrub in the shed.
+
+    Structures may TOUCH: a lean-to against a shed wall is a real thing, and so is a path that
+    stops at a doorway. Only overlap by more than a centimetre is a problem, which is the same
+    tolerance rule 3 uses on the cells.
+    """
+    problems: list[Problem] = []
+    exterior = world.layout.get("exterior") or {}
+    structures = exterior.get("structures") or []
+    if not structures:
+        return problems
+
+    def box_of(row: dict) -> tuple[float, float, float, float] | None:
+        footprint = row.get("footprint") or {}
+        try:
+            return (float(footprint["x"][0]), float(footprint["x"][1]),
+                    float(footprint["z"][0]), float(footprint["z"][1]))
+        except (KeyError, IndexError, TypeError, ValueError):
+            return None
+
+    def over(a, b) -> float:
+        """How much two rectangles overlap, as the smaller of the two axes' overlaps."""
+        return min(min(a[1], b[1]) - max(a[0], b[0]), min(a[3], b[3]) - max(a[2], b[2]))
+
+    placed = [(row, box_of(row)) for row in structures]
+    for index, (row, box) in enumerate(placed):
+        if box is None:
+            continue
+        for other, other_box in placed[index + 1:]:
+            if other_box is None:
+                continue
+            depth = over(box, other_box)
+            if depth > EPS_OVERLAP:
+                problems.append(Problem(
+                    12, FILE_OF["exterior"], f"structures/{index}/footprint",
+                    f"structure {row.get('id')} overlaps {other.get('id')} by {depth:.3f} m; two "
+                    f"things cannot stand in the same square metre of garden"))
+
+    for path_index, path in enumerate(exterior.get("paths") or []):
+        for box_index, raw in enumerate(path.get("boxes") or []):
+            try:
+                box = (float(raw["x"][0]), float(raw["x"][1]),
+                       float(raw["z"][0]), float(raw["z"][1]))
+            except (KeyError, IndexError, TypeError, ValueError):
+                continue
+            for row, structure_box in placed:
+                if structure_box is None:
+                    continue
+                depth = over(box, structure_box)
+                if depth > EPS_OVERLAP:
+                    problems.append(Problem(
+                        12, FILE_OF["exterior"], f"paths/{path_index}/boxes/{box_index}",
+                        f"path {path.get('id')} runs {depth:.3f} m into {row.get('id')}; a path "
+                        f"that goes through a building reaches nothing"))
+
+    for veg_index, group in enumerate(exterior.get("vegetation") or []):
+        for instance_index, instance in enumerate(group.get("instances") or []):
+            position = instance.get("position") or []
+            if len(position) < 3:
+                continue
+            x, z = float(position[0]), float(position[2])
+            for row, structure_box in placed:
+                if structure_box is None:
+                    continue
+                if (structure_box[0] + EPS_OVERLAP < x < structure_box[1] - EPS_OVERLAP
+                        and structure_box[2] + EPS_OVERLAP < z < structure_box[3] - EPS_OVERLAP):
+                    problems.append(Problem(
+                        12, FILE_OF["exterior"],
+                        f"vegetation/{veg_index}/instances/{instance_index}/position",
+                        f"{group.get('id')} stands at ({x:.2f}, {z:.2f}), which is inside "
+                        f"{row.get('id')}"))
+    return problems
+
+
 RULES = {
     1: rule_1_ids, 2: rule_2_boxes, 3: rule_3_overlap, 4: rule_4_portal_planes,
     5: rule_5_connected, 6: rule_6_references, 7: rule_7_openings, 8: rule_8_stairs,
-    9: rule_9_plumbing, 10: rule_10_realism, 11: rule_11_reachable,
+    9: rule_9_plumbing, 10: rule_10_realism, 11: rule_11_reachable, 12: rule_12_outdoors,
 }
 
 
@@ -2065,7 +2159,7 @@ def validate(directory: Path, wanted: list[int] | None = None,
 def report(directory: Path, wanted: list[int] | None = None, stream=sys.stdout) -> int:
     shape, problems = validate(directory, wanted)
     if shape:
-        print(f"validate_world: {len(shape)} shape problem(s); the eleven rules did not run, "
+        print(f"validate_world: {len(shape)} shape problem(s); the twelve rules did not run, "
               f"because a rule cannot read a field that is not the type it says it is.",
               file=stream)
         for line in shape:
@@ -2099,7 +2193,7 @@ def report(directory: Path, wanted: list[int] | None = None, stream=sys.stdout) 
 
 
 def fixture() -> dict[str, dict]:
-    """A small house that satisfies all eleven rules, and exercises each of them at least once.
+    """A small house that satisfies all twelve rules, and exercises each of them at least once.
 
     Small enough to hold in the head and real enough to be worth passing: two storeys, a foyer that
     everything is reachable from, a WC stacked over a WC on the drain the plumbing rule wants, a
@@ -2429,7 +2523,7 @@ def selftest() -> int:
         shape, problems = validate(world_dir)
         require(not shape, f"the fixture matches every schema ({shape[:2]})")
         require(not problems,
-                f"and passes all eleven rules ({[str(p) for p in problems[:3]]})")
+                f"and passes all twelve rules ({[str(p) for p in problems[:3]]})")
 
         # 2. Every rule is actually exercised by the fixture -- a rule with nothing to look at
         #    passes for the wrong reason. Counted as: the rule reads at least one row.
@@ -3058,8 +3152,18 @@ def selftest() -> int:
         def _(docs):
             row(docs, "interactables", "SWITCH_HALL")["focus"]["point"] = [5.0, 1.80, 5.0]
 
-        require(sorted({rule for rule, _, _ in mutations}) == list(range(1, 12)),
-                "there is a mutation for each of the eleven rules")
+        @mutation(12, "a garden path drawn through the shed")
+        def _(docs):
+            # The defect this rule was written for, in the fixture's own shed: a path box over a
+            # structure's footprint. Nothing else in the file can see it -- both are ground, both
+            # are at the same height, and the shed is drawn from the layout that the path is in.
+            docs["exterior"]["paths"] = [
+                {"id": "PATH_GARDEN", "kind": "garden",
+                 "boxes": [{"x": [-1.0, 1.0], "z": [-4.0, 4.0]}],
+                 "y": 0.0, "material": "MAT_GROUND_LAWN"}]
+
+        require(sorted({rule for rule, _, _ in mutations}) == list(range(1, 13)),
+                "there is a mutation for each of the twelve rules")
 
         for rule, description, mutate in mutations:
             docs = copy.deepcopy(base)
@@ -3102,7 +3206,7 @@ def selftest() -> int:
         stream = io.StringIO()
         code = report(broken, stream=stream)
         require(code == 1 and "did not run" in stream.getvalue(),
-                "and the report says the rules did not run, instead of printing eleven oks")
+                "and the report says the rules did not run, instead of printing twelve oks")
 
         # 7. --rules runs what it is asked for and nothing else.
         docs = copy.deepcopy(base)

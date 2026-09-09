@@ -10956,8 +10956,56 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             11 rules with rule 7 in its new, stronger form, and the world's 11 files, the
             manifest, the licences, the floor plans and the shell manifest are all regenerated
             and matching.
-- [ ] HOUSE-00769 — Generate the raised vegetable beds, the trellis and the compost bin
+- [x] HOUSE-00769 — Generate the raised vegetable beds, the trellis and the compost bin
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
+      measured: (2026-09-09) §11.1's garden furniture in `fence_gen.py`: **six raised beds** of
+            2.2 x 1.1 m and 0.45 m high (108 triangles each -- four boards, four posts and the
+            soil), a **2.2 x 1.8 m trellis** (192: two posts, two rails and a 7 x 5 lattice at a
+            0.25 m pitch) and the **compost bin** (252: four posts and slatted sides, open-fronted
+            two boards up). 1 090 triangles over eight structures; the tool now writes 19 files and
+            9 654 triangles for the whole boundary.
+      finding: **a raised bed is not a plant, and an instance is not a rectangle.** The six beds
+            were authored as `vegetation` instances of `MODEL_RAISED_BED` -- a position, a yaw and
+            a scale, with no size for anything to compare -- and three of the six were in the
+            shed or against it: the one at (-18.60, -42.20) was **1.8 m inside the shed's walls**
+            and the one at (-18.60, -40.30) 0.10 m off its south wall, which any bed deeper than
+            0.20 m overlaps. They are `structures` now, with footprints, laid out in the three
+            pieces the garden actually has -- two north of the main path, two south of it either
+            side of the shed's leg, and two in the strip east of the shed -- and nothing is nearer
+            than 0.10 m to a path, a boundary or the shed. The flower bed against the porch stays
+            in `vegetation`, because that one IS planting.
+      finding: **and the path really did run through the shed** (`HOUSE-00768` recorded it). The
+            leg ran x -19.0…-18.2 over z -43.8…-38.6, three metres of it inside the building, and
+            reached no door -- the shed's is on its EAST face. It runs down that face now, from
+            the main path to the threshold, starting at x = -16.4: the OUTSIDE of the wall, not the
+            cell's own face, which is 0.20 m of timber further in.
+      finding: **nothing was comparing the lot's rectangles, so §15.7 gains rule 12** -- *"nothing
+            outdoors stands in something else"*: no two `structures` overlap, no `paths` box runs
+            into one, no `vegetation` instance is inside one. Rules 2 and 3 say exactly this about
+            the house's cells; the exterior file has three kinds of rectangle of its own and
+            nothing had ever compared them, which is how both defects above were authored and why
+            neither was visible -- a path and a shed pad are both gravel at the same height.
+      finding: **it found two more the moment it existed, and one of them was mine.** The moved
+            path leg was still 0.20 m into the shed, because I had aimed it at the cell's face
+            rather than the footprint's; and the compost bin, placed by §11.1's *"west side yard"*,
+            landed on top of an authored shrub at (-20.97, -42.80). Both corrected before the
+            first build. That is a rule earning its keep in the hour it was written.
+      note: the structures stand on §11.5's GROUND and not on a floor, which is the difference
+            between them and the shed: each sits on the lowest ground its own footprint covers,
+            buried 50 mm, because the garden falls 0.29 m across itself and a bed drawn at zero has
+            daylight under one end. `layout.exterior.json`'s `structures` row gains an optional
+            `height` for them -- a building takes its heights from its cell and its ridge, and a
+            bed has one number.
+      verified: 17 more `fence_gen --selftest` claims -- the six-one-one census, the shed excluded
+            from it, every structure buried in its own ground and exactly its authored height,
+            nothing in the shed or a path or another structure, a bed's soil under its rim and its
+            boards all the way round, the trellis a lattice at an even pitch inside a 0.10 m
+            footprint, the bin slatted with a 20 mm gap and lower at the front, every structure
+            made of boxes and every face wound the way its normal says -- and **6 injections, all
+            CAUGHT**: beds at zero instead of on the ground, soil flush to the rim, a trellis with
+            no lattice, a bin boarded to the top all round, a bin with no gaps at all, and the shed
+            drawn as garden furniture. Rule 12 has its own fixture mutation, caught by rule 12 and
+            by nothing else.
       finding: (2026-09-09, found by `HOUSE-00768`) **the garden path runs through the shed.**
             `PATH_GARDEN`'s second box is x -19.0…-18.2 over z -43.8…-38.6, and the shed's cell is
             x -19.8…-16.6 over z -43.8…-40.6: three metres of that leg are inside the building, and
@@ -13158,6 +13206,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00568` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00618`: static collision is partitioned per cell and the sweep is given one cell, so a body standing in a doorway -- which §16.4's lookup keeps in the room it came from until it is 0.05 m past the boundary -- met nothing that stood 0.20 m on the other side of it. Measured: 0.151 m inside the main stair's first run, from `L0_FOYER`, before anything stopped it. | A wall is shared by both rooms and that is what makes the per-cell partition safe; a hole is not a wall, and `HOUSE-00567` had already fixed the same defect once for the outer walls the yards could not see. This generalises it to every hole, so it is its own task in the phase that owns collision rather than a correction folded into the exterior one that exposed it. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
+| 2026-09-09 | §15.7 | A **twelfth rule**: *"nothing outdoors stands in something else"* -- no two `structures` footprints overlap, no `paths` box runs into one, no `vegetation` instance is inside one (`HOUSE-00769`) | §15.7's rules 2 and 3 make exactly this statement about the house's cells and nothing made it about the LOT, which has three kinds of rectangle that can be authored on top of each other. Two of them were: the garden path ran three metres through the shed and reached no door, and three of §11.1's six raised beds were vegetation instances inside the shed's walls. Both were invisible to every other rule -- a path and a shed pad are both gravel at the same height, and an instance is a point with no size for anything to overlap. The rule found two more the day it was written. `docs/world-format.md` and `WorldValidator.hpp` say the same twelve; the C++ mirror does not carry the exterior file, so this one is the Python gate's alone, and its header now says so. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00488`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and two more `dep`s on `HOUSE-00688`. Found by `HOUSE-00688`'s first run: a cell does not always draw the surfaces a body standing in it looks at, and §25 removes the cell that does -- 8 450 pixels of four frames become the clear colour with culling on. | The most important test in the project was written, run and left FAILING and DISABLED, with its numbers, rather than weakened to pass. Its 46 881 differing pixels separate into two shell defects and no culling defect: 38 431 are `HOUSE-00485`'s coplanar pairs resolving the other way, and 8 450 are this. No id was renumbered or struck. |
 
 ---

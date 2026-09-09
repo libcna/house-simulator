@@ -39,7 +39,7 @@ namespace cnahouse::world
     /// the Python accepted, and `HOUSE-00388` found it silently dropping seven of §64.3's ten
     /// transmission classes. A rule stated once is a rule nobody checks.
     ///
-    /// **Four of the eleven are already enforced before a `WorldData` exists**, and repeating them
+    /// **Four of the twelve are already enforced before a `WorldData` exists**, and repeating them
     /// here would be checking the same thing twice in every debug run:
     ///
     /// * rule 1, ids unique across every kind — `WorldData::Create` refuses to build otherwise;
@@ -53,7 +53,8 @@ namespace cnahouse::world
     ///
     /// What it does not yet see, because the C++ model does not carry it: the exterior file's
     /// gates, kerbs, paths and structures, the sky and weather tables, and a pet's start perch and
-    /// bed. Those are checked by the Python gate alone until the loader reads them.
+    /// bed. Those are checked by the Python gate alone until the loader reads them -- and rule 12,
+    /// added by `HOUSE-00769`, is entirely about those rectangles, so it lives there too.
     class WorldValidator
     {
     public:

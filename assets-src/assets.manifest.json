@@ -15914,7 +15914,7 @@
       "id": "TERRAIN_HEIGHTFIELD",
       "category": "terrain",
       "sourceFile": "assets-src/world/terrain.png",
-      "sourceSha256": "0e2a97acc9afc236f12a7892841e065e7cd1d2cad8a737cccfaa5d9908255395",
+      "sourceSha256": "815df9a3c922837d9059ac01c232053b2ff87997848614c982809b481eeb9f68",
       "origin": {
         "kind": "generated",
         "name": "Site height field, 81 x 65 samples on a 1 m grid",
@@ -15933,7 +15933,7 @@
       "id": "TERRAIN_MATERIAL_INDEX",
       "category": "terrain",
       "sourceFile": "assets-src/world/terrain_materials.png",
-      "sourceSha256": "bf83293aac9380f0c9e576b2be683bc150efd2904bc29bee5b01c2e122ba186d",
+      "sourceSha256": "0dc56307add4fbe4183171f22e890251c066325e7e2ee6a39015c7922b05a445",
       "origin": {
         "kind": "generated",
         "name": "Site material index, one of §11.5's eight classes per sample",

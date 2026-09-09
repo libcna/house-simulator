@@ -165,7 +165,7 @@ def default_stages() -> list[Stage]:
         Stage("world-rules", "world",
               ["python3", "tools/world/validate_world.py", "assets-src/world"],
               inputs=["assets-src/world/*.json"], outputs=[], needs=["manifest"],
-              description="the eleven rules of §15.7 over the authored layout"),
+              description="the twelve rules of §15.7 over the authored layout"),
         # `HOUSE-00421`. The authored files are JSONC and the runtime's `System::Text::Json` is
         # not: this is the stripping step `world-format.md` describes. After the rules, because
         # deploying a layout that fails §15.7 would put a broken house where the game reads.

@@ -89,7 +89,7 @@ check_format()
     clang-format --dry-run -Werror "${files[@]}"
 }
 
-# `HOUSE-00363`. The eleven rules of §15.7 over the authored layout. Skipped, loudly, until
+# `HOUSE-00363`. The twelve rules of §15.7 over the authored layout. Skipped, loudly, until
 # `HOUSE-00366` writes the first world file -- a gate over nothing must say so rather than print
 # a green line that means "there was nothing to check". Unlike the rest of this script it needs
 # `jsonschema`, so a checkout without it is told, not quietly passed.
@@ -166,7 +166,7 @@ run_gate "shell-realism" python3 tools/world/verify_shell.py --selftest
 run_gate "shell-manifest" python3 tools/blender/house_shell_gen.py --check-manifest
 # `HOUSE-00399`. An id is the only durable name anything has, and a save file is a list of them
 # (§68). Renaming a room leaves the layout internally consistent and every save broken, so none of
-# §15.7's eleven rules can see it. This gate can: the golden list is append-only, and an id that
+# §15.7's twelve rules can see it. This gate can: the golden list is append-only, and an id that
 # leaves it fails until a person deletes the line and says why.
 run_gate "world-ids" python3 tools/world/id_golden.py --check
 # `HOUSE-00400`. §13's room schedule is 94 rows of hand-maintained numbers over data that changes

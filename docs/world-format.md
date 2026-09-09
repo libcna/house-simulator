@@ -712,7 +712,7 @@ the `schema` header rule are one definition rather than sixteen that can quietly
 `world_schema.py --check` is a CI gate; regenerate with `--emit` after changing a shape here.
 
 The schemas check **shape**: presence, type, range, and that an id looks like an id, each problem
-reported against the field that carries it. They deliberately do **not** check the eleven rules
+reported against the field that carries it. They deliberately do **not** check the twelve rules
 below. Rules 4, 5, 6, 7, 9 and 11 span two files or the whole layout, and JSON Schema cannot see
 across a file boundary; rules 2, 3, 8 and 10 compare two numbers to each other, which it also
 cannot do. A schema that attempted them would be a second, weaker validator — so a portal naming a
@@ -721,7 +721,7 @@ the validator.
 
 ## Validation
 
-`tools/world/validate_world.py`, mirrored by a C++ validator the unit tests use, enforces eleven
+`tools/world/validate_world.py`, mirrored by a C++ validator the unit tests use, enforces twelve
 rules (`cna-house.md` §15.7) on top of the schemas above. It runs in CI and as a pre-build step, and a failure **fails the
 build**:
 
@@ -755,7 +755,13 @@ build**:
     capsule clearance through every portal, and every light's position inside the footprint and
     vertical extent of the cell it names (`HOUSE-00383`);
 11. every interactable's `focus.point` is inside its cell and reachable by a 2.5 m ray from a
-    standing eye position on the room's floor — a reachability **proof**, not an assumption.
+    standing eye position on the room's floor — a reachability **proof**, not an assumption;
+12. nothing outdoors stands in something else: no two `structures` footprints overlap, no `paths`
+    box runs into one, and no `vegetation` instance is inside one (`HOUSE-00769`). Rules 2 and 3
+    say this about the house's cells; the lot has three kinds of rectangle of its own and nothing
+    compared them, which is how a garden path came to run three metres through the shed. A
+    centimetre of overlap is the tolerance, so a lean-to against a wall and a path that stops at a
+    threshold are both still legal.
 
 Error messages name the file, the JSON path and what was expected, and the validator reports
 **every** failing row rather than the first: fixing 40 authoring mistakes one build at a time is

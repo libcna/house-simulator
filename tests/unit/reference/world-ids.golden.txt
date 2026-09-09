@@ -1891,7 +1891,15 @@ stairs/flights	STEPS_GARAGE
 stairs/flights	STEPS_PORCH
 stairs/flights	STEPS_TERRACE
 stairs/flights	STEPS_TERRACE_LAWN
+exterior/structures	STRUCT_BED_1
+exterior/structures	STRUCT_BED_2
+exterior/structures	STRUCT_BED_3
+exterior/structures	STRUCT_BED_4
+exterior/structures	STRUCT_BED_5
+exterior/structures	STRUCT_BED_6
+exterior/structures	STRUCT_COMPOST
 exterior/structures	STRUCT_SHED
+exterior/structures	STRUCT_TRELLIS
 weather/seasons	SUMMER
 interactables/interactables	SWITCH_B1_CELLAR
 interactables/interactables	SWITCH_B1_CINEMA

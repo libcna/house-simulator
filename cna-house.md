@@ -1605,7 +1605,15 @@ surprise. This keeps the data declarative without inventing a VM.
     inside the cell it names — a fixture 30 m from its room resolves perfectly and lights nothing
     (added 2026-09-08 by `HOUSE-00383`);
 11. every interactable's `focus.point` is inside its cell and reachable by a 2.5 m ray from a
-    standing eye position on the room's floor — a **reachability proof**, not an assumption.
+    standing eye position on the room's floor — a **reachability proof**, not an assumption;
+12. **nothing outdoors stands in something else**: no two of §11's `structures` overlap, no path
+    box runs into one, and no vegetation instance is inside one (added 2026-09-09 by
+    `HOUSE-00769`). Rules 2 and 3 do this for the house and nothing did it for the lot, which has
+    three kinds of rectangle that can be authored on top of each other — and two of them were: the
+    garden path ran three metres through the shed and reached no door, and three of §11.1's six
+    raised beds were points inside the shed's walls. Both were invisible, because a path and a
+    shed pad are both gravel at the same height and a bed authored as an instance has no size for
+    anything to overlap.
 
 Validation runs in CI and as a pre-build step. A failure fails the build.
 
@@ -5635,7 +5643,7 @@ The golden list is [`tests/unit/reference/world-ids.golden.txt`](tests/unit/refe
 2 152 ids over 27 kinds, maintained by `tools/world/id_golden.py` and gated as `world-ids`
 (`HOUSE-00399`). It is **append-only**: `--emit` records ids the world has gained and never deletes
 one, so a rename shows up as an id that left the world and keeps failing until a person removes the
-line and says why. Nothing in §15.7's eleven rules can see a rename — the layout is internally
+line and says why. Nothing in §15.7's twelve rules can see a rename — the layout is internally
 consistent under either name — and a save file is a list of ids (§68), so this is the only gate
 that stands between a tidy-up and every save ever written.
 

@@ -44,7 +44,7 @@ namespace cnahouse::world
     /// **What `Create` checks and what it does not.** It checks the two things an index cannot be
     /// built without: that no id appears twice, and that a row's id is not zero. Everything else --
     /// that a portal's cells exist, that its rectangle is in their plane, that the graph is
-    /// connected -- is `validate_world.py`'s eleven rules (`HOUSE-00358`) and `WorldValidator`'s
+    /// connected -- is `validate_world.py`'s twelve rules (`HOUSE-00358`) and `WorldValidator`'s
     /// (`HOUSE-00357`). Repeating them here would be a third copy that can disagree with the other
     /// two, and the loader is not the place to discover that a house is unwalkable.
     ///

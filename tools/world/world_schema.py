@@ -398,10 +398,16 @@ def build() -> dict[str, dict]:
                  "kind": {"enum": ["walk", "driveway", "sidewalk", "garden", "apron", "verge"]},
                  "boxes": {"type": "array", "items": BOX, "minItems": 1},
                  "y": NUM, "material": ID_OR_NULL})},
+            # A structure with a `cell` is a BUILDING -- you stand inside it, and its heights
+            # come from the cell and from `eavesY`/`ridgeY`. One without a cell is garden
+            # furniture: §11.1's raised beds, its trellis and the compost bin, which have no
+            # inside and one height each (`HOUSE-00769`). `height` is measured from the GROUND
+            # under them, because that is what they stand on.
             "structures": {"type": "array", "items": obj(
                 ["id", "footprint"],
                 {"id": ID, "cell": ID_OR_NULL, "footprint": BOX, "asset": ID_OR_NULL,
-                 "eavesY": NUM, "ridgeY": NUM})},
+                 "eavesY": NUM, "ridgeY": NUM,
+                 "height": {"type": "number", "exclusiveMinimum": 0}})},
             "neighbourhood": {"type": "array", "items": obj(
                 ["id", "asset", "position"],
                 {"id": ID, "asset": ID, "position": VEC3, "yawDeg": NUM,

@@ -108,9 +108,15 @@
     { "id": "PATH_VERGE_NEAR", "kind": "verge",
       "boxes": [{ "x": [-220.0, 220.0], "z": [0.0, 1.6] }],
       "y": 0.0, "material": "MAT_GROUND_LAWN" },
+    // The leg to the shed door moved east by `HOUSE-00769`. It ran x -19.0…-18.2 over
+    // z -43.8…-38.6, which is three metres INSIDE the shed (x -19.8…-16.6, z -43.8…-40.6) and
+    // reaches no door: the shed's is on its EAST face at x = -16.6. It now runs down that face,
+    // from the main path to the threshold, starting at x = -16.4 -- the OUTSIDE of the shed's
+    // wall, because §11.6's footprint is the cell plus the wall and a path that starts at the
+    // cell's own face is a path through 0.20 m of timber (rule 12).
     { "id": "PATH_GARDEN", "kind": "garden",
       "boxes": [{ "x": [-19.0, -13.0], "z": [-38.6, -37.8] },
-                { "x": [-19.0, -18.2], "z": [-43.8, -38.6] }],
+                { "x": [-16.4, -15.6], "z": [-42.6, -38.6] }],
       "y": 0.0, "material": "MAT_GRAVEL_PATH" }
   ],
 
@@ -563,15 +569,14 @@
       { "position": [59.00, 0.00, 13.70], "yawDeg": 0.0, "scale": 0.96 },
       { "position": [60.00, 0.00, 13.70], "yawDeg": 0.0, "scale": 1.02 }
     ] },
-    // ---- VEG_BED x7 -- §11.6's six raised beds in the vegetable garden, plus the flower bed
-    // against the porch.
+    // ---- VEG_BED x1 -- §11.1's flower bed against the porch, which is planting: soil and what
+    // grows in it. The vegetable garden's SIX raised beds left this list in `HOUSE-00769` and are
+    // `structures` now, because a raised bed is a timber box you build, not a plant -- and because
+    // an instance is a point and a bed is a rectangle. Three of the six stood in the shed or in
+    // the path when they were points: the one at (-18.60, -42.20) was 1.8 m inside the shed's
+    // walls, and the one at (-18.60, -40.30) was 0.10 m off its south wall, which any bed deeper
+    // than 0.20 m overlaps.
     { "id": "VEG_BED", "asset": "MODEL_RAISED_BED", "instances": [
-      { "position": [-18.60, 0.00, -38.40], "yawDeg": 0.0, "scale": 1.00 },
-      { "position": [-15.60, 0.00, -38.40], "yawDeg": 0.0, "scale": 1.00 },
-      { "position": [-18.60, 0.00, -40.30], "yawDeg": 0.0, "scale": 1.00 },
-      { "position": [-15.60, 0.00, -40.30], "yawDeg": 0.0, "scale": 1.00 },
-      { "position": [-18.60, 0.00, -42.20], "yawDeg": 0.0, "scale": 1.00 },
-      { "position": [-15.60, 0.00, -42.20], "yawDeg": 0.0, "scale": 1.00 },
       { "position": [0.00, 0.00, -13.60], "yawDeg": 0.0, "scale": 1.00 }
     ] }
   ],
@@ -579,9 +584,41 @@
   // §11.6's garden shed: 3.6 x 3.6 m with its ridge at +2.85. It is the one building on the plot
   // that is not the house, and it is enterable, so it has a cell -- `EXT_SHED`, whose door and
   // window are portals like any other (`HOUSE-00374`, `HOUSE-00376`).
+  // §11.1's vegetable garden furniture follows it (`HOUSE-00769`): six raised beds, a trellis and
+  // the compost bin in the west side yard. They have no cell -- there is no inside to stand in --
+  // so they take a `height` and sit on §11.5's ground rather than on a floor.
+  //
+  // The beds are 2.2 x 1.1 m, which is a bed you can reach the middle of from either side, laid
+  // out in the three pieces the garden actually has: two north of the main path, two south of it
+  // either side of the shed leg, and two in the strip east of the shed. Nothing is nearer than
+  // 0.10 m to a path, a boundary or the shed.
   "structures": [
     { "id": "STRUCT_SHED", "cell": "EXT_SHED",
       "footprint": { "x": [-20.0, -16.4], "z": [-44.0, -40.4] },
-      "asset": "MODEL_SHED_01", "eavesY": 2.35, "ridgeY": 2.85 }
+      "asset": "MODEL_SHED_01", "eavesY": 2.35, "ridgeY": 2.85 },
+
+    { "id": "STRUCT_BED_1", "footprint": { "x": [-19.4, -17.2], "z": [-37.7, -36.6] },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+    { "id": "STRUCT_BED_2", "footprint": { "x": [-16.4, -14.2], "z": [-37.7, -36.6] },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+    { "id": "STRUCT_BED_3", "footprint": { "x": [-19.4, -17.2], "z": [-40.2, -39.1] },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+    { "id": "STRUCT_BED_4", "footprint": { "x": [-15.4, -13.2], "z": [-40.2, -39.1] },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+    { "id": "STRUCT_BED_5", "footprint": { "x": [-15.4, -13.2], "z": [-43.6, -42.5] },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+    { "id": "STRUCT_BED_6", "footprint": { "x": [-15.4, -13.2], "z": [-42.2, -41.1] },
+      "asset": "MODEL_RAISED_BED_01", "height": 0.45 },
+
+    // On the garden's NORTH edge, against the rear boundary, where a 1.8 m panel shades nothing:
+    // §14's -Z is north, so the sun is always on the other side of it from the beds.
+    { "id": "STRUCT_TRELLIS", "footprint": { "x": [-15.4, -13.2], "z": [-43.95, -43.85] },
+      "asset": "MODEL_TRELLIS_01", "height": 1.8 },
+
+    // §11.1 puts the compost bin in the west side yard, which is where it belongs: near the
+    // garden, out of sight of the terrace, and on the lawn rather than on the beds' gravel. West
+    // of the shrub border rather than on it -- the border runs at x = -21 and rule 12 said so.
+    { "id": "STRUCT_COMPOST", "footprint": { "x": [-22.4, -21.4], "z": [-43.6, -42.6] },
+      "asset": "MODEL_COMPOST_BIN_01", "height": 1.0 }
   ]
 }
