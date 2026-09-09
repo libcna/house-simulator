@@ -393,6 +393,18 @@ namespace cnahouse::physics
                     return Bad(
                         ErrorCode::Duplicate, std::format("cell '{}' appears more than once", cell.id), name);
                 }
+                // §49.2's ground is a property of the CELL, not of the world: the height field
+                // runs under the house as well as over the lawn, and a body on the basement stair
+                // is a tenth of a metre from it (`HOUSE-00774`).
+                const std::uint8_t outdoors = reader.ReadByte();
+                if (outdoors > 1u)
+                {
+                    return Bad(
+                        ErrorCode::InvalidData,
+                        std::format("cell '{}' says outdoors is {}, which is not 0 or 1", cell.id, outdoors),
+                        name);
+                }
+                cell.outdoors = outdoors != 0u;
                 auto bounds = ReadBounds(reader, std::format("cell '{}'", cell.id), name);
                 if (!bounds)
                 {

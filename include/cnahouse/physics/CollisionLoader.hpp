@@ -35,7 +35,10 @@ namespace cnahouse::physics
         /// @brief The 4-byte magic, `CCOL`.
         static constexpr std::uint32_t kMagic = 0x4C4F4343u; // 'C','C','O','L' little-endian
         /// @brief The only version this reader accepts.
-        static constexpr std::uint32_t kVersion = 2u;
+        ///
+        /// 3 since `HOUSE-00774`: a cell says whether it is the open outdoors, because §11.5's
+        /// height field is one surface over the whole lot and the basement is under part of it.
+        static constexpr std::uint32_t kVersion = 3u;
         /// @brief A name longer than this is a corrupt length field, not a name.
         static constexpr std::uint32_t kMaxNameBytes = 1024u;
         /// @brief `u16` surface indices cannot address more.

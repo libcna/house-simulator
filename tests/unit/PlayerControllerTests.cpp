@@ -22,6 +22,8 @@
 #include "cnahouse/physics/CollisionLoader.hpp"
 #include "cnahouse/player/PlayerController.hpp"
 
+#include "CellFloor.hpp"
+
 namespace
 {
     using cnahouse::physics::BroadPhase;
@@ -907,19 +909,12 @@ TEST(PlayerControllerTests, ASecondOfWalkingInEveryCellOfTheRealHouseEndsSomewhe
         {
             continue;
         }
-        const float pebble = 0.05F;
-        const Capsule falling =
-            Sphere(Vector3(midX, (cell.bounds.Min.Y + cell.bounds.Max.Y) * 0.5F, midZ), pebble);
-        if (OverlapCell(*world, cell, broad, falling).overlapped)
+        const cnahouse::tests::StandingSpot spot = cnahouse::tests::StandInTheMiddle(*world, cell, broad);
+        if (!spot.found)
         {
             continue;
         }
-        const auto landed = SweepCell(*world, cell, broad, falling, Vector3(0.0F, -height, 0.0F));
-        if (!landed.hit)
-        {
-            continue;
-        }
-        const float floorY = falling.centre.Y - height * landed.time - pebble;
+        const float floorY = spot.floorY;
         if (floorY + 2.0F * kStand > cell.bounds.Max.Y)
         {
             continue;

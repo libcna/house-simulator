@@ -63,6 +63,14 @@ namespace cnahouse::physics
     struct CollisionCell
     {
         std::string id;
+        /// @brief Is this cell the open outdoors, so that §11.5's ground is part of its collision?
+        ///
+        /// §49.2: *"Exterior collision uses the terrain height field plus OBBs"*. The height field
+        /// is ONE surface over the whole lot and the house stands on it, so the ground passes
+        /// through the basement and a tenth of a metre under `L0`'s floor. A body on the basement
+        /// stair must not be pushed by it and a body on the lawn must; the difference is which
+        /// cell it is in, and this is the file saying so (`HOUSE-00774`).
+        bool outdoors = false;
         Microsoft::Xna::Framework::BoundingBox bounds;
         /// @brief GLOBAL shape indices: `0 … obbs.size()-1` are OBBs, the rest are meshes at
         ///        `index - obbs.size()`.

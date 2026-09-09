@@ -273,3 +273,36 @@ TEST(SweepTriangleTests, EveryApproachGivesAUnitNormalThatOpposesTheMotion)
         EXPECT_LT(dot, 1e-4f) << "direction " << i << ": the normal points the way the body went";
     }
 }
+
+TEST(SweepTriangleTests, ASphereIsNotInsideAFlatTriangleItIsMerelyOver)
+{
+    // `HOUSE-00569`. The capsule/triangle test extrudes the triangle by the capsule's HALF-HEIGHT
+    // and asks whether the centre is inside the prism, which turns a capsule into a sphere. A
+    // sphere's half-height is zero, so its prism is the triangle itself -- a flat sheet, five
+    // faces in one plane -- and `prism.solid` refused exactly that shape for a VERTICAL triangle
+    // and not for a flat one extruded by nothing. Everything over the triangle was "inside" it.
+    //
+    // Found by `HOUSE-00774`: a 50 mm probe dropped down the middle of the back yard, 9.6 m above
+    // the lawn, was reported inside the ground and stopped where it started.
+    Vector3 a, b, c;
+    Flat(a, b, c);
+
+    const SweepHit above =
+        SweepCapsuleTriangle(Sphere(1.3f, 9.6f, 1.3f, 0.05f), Vector3(0.0f, -12.0f, 0.0f), a, b, c);
+    ASSERT_TRUE(above.hit) << "a sphere dropped onto a triangle has to land on it";
+    EXPECT_FALSE(above.startedInside) << "9.6 m above a triangle is not inside it";
+    EXPECT_GT(above.time, 0.5f) << "it landed at the start of its own fall";
+
+    // The other side of the same mistake: a sphere UNDER the triangle, moving down and away, met
+    // a half-space that claimed it -- which is what put a body in the basement on the lawn.
+    const SweepHit below =
+        SweepCapsuleTriangle(Sphere(1.3f, -3.0f, 1.3f, 0.05f), Vector3(0.0f, -2.0f, 0.0f), a, b, c);
+    EXPECT_FALSE(below.hit) << "a sphere below a triangle, going down, meets nothing";
+
+    // A capsule still has an inside, because extruding by ITS half-height leaves a volume: this
+    // is the case the flag has to keep saying yes to.
+    const SweepHit through = SweepCapsuleTriangle(
+        Capsule{Vector3(1.3f, 0.0f, 1.3f), 0.6f, 0.3f}, Vector3(0.0f, -1.0f, 0.0f), a, b, c);
+    ASSERT_TRUE(through.hit);
+    EXPECT_TRUE(through.startedInside) << "a body standing ON a triangle is touching it";
+}

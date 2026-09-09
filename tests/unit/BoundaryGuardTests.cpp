@@ -164,10 +164,13 @@ TEST(BoundaryGuardTests, TheBoxAgreesWithTheGroundTheHouseActuallyHas)
 
     // Geometry OUTSIDE it is expected and is not a defect: §10 says "the road geometry continues
     // visually far beyond", and §10.3 gives the neighbourhood shell as ±220 m. Measured here:
-    // `EXT_WORLD` spans ±200 m, `EXT_ROAD` reaches z = +13.475 against the boundary's +12, and
-    // `EXT_NORTHSTRIP` reaches z = -52.075 against -52. What must hold is the other direction --
-    // that nothing the player can WALK on needs the boundary to stop them, which is what
-    // `HOUSE-00618`'s count of zero will say.
+    // `EXT_WORLD` spans ±200 m and `EXT_ROAD` reaches z = +13.40 against the boundary's +12. What
+    // must hold is the other direction -- that nothing the player can WALK on needs the boundary
+    // to stop them, which is what `HOUSE-00618`'s count of zero will say.
+    //
+    // Three until `HOUSE-00774`, when the cell boundaries between two open yards stopped being
+    // walls: `EXT_NORTHSTRIP` was outside only because of the one it shared with `EXT_WORLD`, at
+    // z = -52.075 against -52.0, and its own floor stops exactly on the boundary.
     std::size_t beyond = 0;
     for (const auto& cell : world->cells)
     {
@@ -181,5 +184,5 @@ TEST(BoundaryGuardTests, TheBoxAgreesWithTheGroundTheHouseActuallyHas)
             ++beyond;
         }
     }
-    EXPECT_EQ(beyond, 3u) << "the set of cells with geometry outside the playable volume changed";
+    EXPECT_EQ(beyond, 2u) << "the set of cells with geometry outside the playable volume changed";
 }

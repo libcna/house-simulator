@@ -130,6 +130,8 @@ namespace
     void OneCell(Bytes& bytes)
     {
         bytes.Str("L0_CELL");
+        // §3.4's `outdoors` (version 3, `HOUSE-00774`): this fixture cell is a room.
+        bytes.U8(0u);
         bytes.Box(0.0f, 0.0f, 0.0f, 2.0f, 2.0f, 2.0f);
         bytes.U32(2u).U32(0u).U32(1u);
         bytes.U32(1u).U32(2u);
@@ -190,7 +192,7 @@ TEST(CollisionLoaderTests, TheWrongFileEntirelyIsSaidPlainly)
 TEST(CollisionLoaderTests, AVersionOrAFlagThisBuildDoesNotKnowIsRefused)
 {
     Bytes version = WellFormed();
-    version.Poke(4, 3u);
+    version.Poke(4, CollisionLoader::kVersion + 1u);
     auto world = ReadOf(version);
     ASSERT_FALSE(world);
     EXPECT_EQ(world.Error().Code(), ErrorCode::VersionMismatch);
@@ -314,7 +316,7 @@ TEST(CollisionLoaderTests, ACellReferencingAShapeThatIsNotThereIsRefused)
     OneObb(bytes);
     bytes.U32(0u);
     bytes.U32(1u);
-    bytes.Str("L0_CELL").Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+    bytes.Str("L0_CELL").U8(0u).Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
     bytes.U32(1u).U32(5u);
     const auto world = ReadOf(bytes);
     ASSERT_FALSE(world);
@@ -332,7 +334,7 @@ TEST(CollisionLoaderTests, ABucketEntryIsALocalIndexAndIsCheckedAsOne)
     OneObb(bytes);
     bytes.U32(0u);
     bytes.U32(1u);
-    bytes.Str("L0_CELL").Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+    bytes.Str("L0_CELL").U8(0u).Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
     bytes.U32(1u).U32(0u);
     bytes.U32(1u).U32(1u);
     bytes.F32(0.0f).F32(0.0f);
@@ -349,7 +351,7 @@ TEST(CollisionLoaderTests, ABucketHoldingMoreEntriesThanTheCellHasShapesIsRefuse
     bytes.U32(1u);
     OneObb(bytes);
     bytes.U32(0u).U32(1u);
-    bytes.Str("L0_CELL").Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+    bytes.Str("L0_CELL").U8(0u).Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
     bytes.U32(1u).U32(0u);
     bytes.U32(1u).U32(1u);
     bytes.F32(0.0f).F32(0.0f);
@@ -393,7 +395,7 @@ TEST(CollisionLoaderTests, ARepeatedCellIdIsRefused)
     bytes.U32(0u).U32(0u).U32(2u);
     for (int i = 0; i < 2; ++i)
     {
-        bytes.Str("L0_CELL").Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
+        bytes.Str("L0_CELL").U8(0u).Box(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f);
         bytes.U32(0u).U32(1u).U32(1u).F32(0.0f).F32(0.0f).U16(0u);
     }
     const auto world = ReadOf(bytes);

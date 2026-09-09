@@ -428,6 +428,61 @@ TEST(TerrainTests, TheRealLotIsTheGroundTheLayoutDescribes)
     EXPECT_LT(steep, samples / 10) << steep << " of " << samples << " squares are over 20 degrees";
 }
 
+TEST(TerrainTests, ASmallProbeDroppedOnTheRealLotFallsToTheGround)
+{
+    // `HOUSE-00569`, found by `HOUSE-00774`. The capsule/triangle test extrudes the triangle by
+    // the capsule's HALF-HEIGHT so that a capsule becomes a sphere; a sphere's half-height is
+    // zero, so its prism is the triangle -- a flat sheet whose five faces are one plane, which is
+    // the shape `prism.solid` exists to refuse. It refused it for a VERTICAL triangle and not for
+    // a flat one extruded by nothing, and the half-space that left behind is decided by whether a
+    // dot product that is mathematically zero comes out a hair positive: on a triangle whose
+    // corners are (1.6, -0.24, -37.4) rather than (0, 0, 0), it does.
+    //
+    // A 50 mm probe 9.6 m over the back lawn was reported INSIDE the ground and stopped where it
+    // started. Half the physics tests place a body by dropping such a probe down the middle of a
+    // cell, so half the physics tests were standing bodies in mid-air outdoors.
+    const std::string path = "content/world/collision.bin";
+    System::IO::FileStream* probe = nullptr;
+    try
+    {
+        probe = new System::IO::FileStream(path, System::IO::FileMode::Open, System::IO::FileAccess::Read);
+    }
+    catch (const std::exception&)
+    {
+        GTEST_SKIP() << "no " << path;
+    }
+    const std::unique_ptr<System::IO::FileStream> stream(probe);
+    const auto world = CollisionLoader::Read(*stream, path);
+    ASSERT_TRUE(world) << world.Error().Message();
+    const CollisionTerrain& terrain = world->terrain;
+    ASSERT_TRUE(terrain.present);
+
+    std::size_t dropped = 0;
+    std::size_t stuck = 0;
+    float worst = 0.0F;
+    for (float z = terrain.originZ + 1.5F; z < terrain.MaxZ(); z += 3.0F)
+    {
+        for (float x = terrain.originX + 1.5F; x < terrain.MaxX(); x += 3.0F)
+        {
+            const float ground = TerrainAt(terrain, x, z).height;
+            const Capsule pebble = Sphere(Vector3(x, ground + 9.6F, z), 0.05F);
+            const SweepHit hit = SweepCapsuleTerrain(terrain, pebble, Vector3(0.0F, -12.0F, 0.0F));
+            ++dropped;
+            ASSERT_TRUE(hit.hit) << x << ", " << z;
+            if (hit.startedInside)
+            {
+                ++stuck;
+            }
+            const float landed = pebble.centre.Y - 12.0F * hit.time - 0.05F;
+            worst = std::max(worst, std::fabs(landed - ground));
+        }
+    }
+    ASSERT_GT(dropped, 400u);
+    EXPECT_EQ(stuck, 0u) << stuck << " of " << dropped << " probes were reported inside the ground "
+                         << "from 9.6 m above it";
+    EXPECT_LT(worst, 0.35F) << "worst landing " << worst << " m from the ground under it";
+}
+
 TEST(TerrainTests, ABodyStandsOnTheRealLotWhereeverItIsPutDown)
 {
     const std::string path = "content/world/collision.bin";
@@ -489,8 +544,12 @@ TEST(TerrainTests, ABodyStandsOnTheRealLotWhereeverItIsPutDown)
     }
     ASSERT_GT(dropped, 1000u);
     // Pad edges are a small minority of the lot; a lot of them would mean the ground is a
-    // staircase rather than a garden.
-    EXPECT_LT(pressed, dropped / 50) << pressed << " of " << dropped << " resting places are against a step";
+    // staircase rather than a garden. One fortieth and not one fiftieth since `HOUSE-00774`: a
+    // pad's level is rounded OUTWARD by half a sample now, so the terrace and the shed each have
+    // one more ring of edge samples than they had, and the count went 23 -> 25 of 1 280. The
+    // alternative was a deck overhanging its own ground by 0.70 m, with a body standing on the
+    // slope under it and inside the slab.
+    EXPECT_LT(pressed, dropped / 40) << pressed << " of " << dropped << " resting places are against a step";
     EXPECT_LT(propped, dropped / 20) << propped << " of " << dropped
                                      << " landings caught something higher than the ground under them";
 }

@@ -78,10 +78,10 @@ namespace
             "CELL_FREEZER_INTERIOR north",
             "CELL_FREEZER_INTERIOR south",
             "CELL_FREEZER_INTERIOR west",
-            // The corner of two exterior shapes at the bottom of the garden. A body TELEPORTED
-            // into it is 0.24 m inside and stays there: six times as long changes nothing, so it
-            // is a fixed point rather than a slow escape, and it is not reachable by walking.
-            "EXT_GARDEN north",
+            // `EXT_GARDEN north` was here until `HOUSE-00774`: the corner of two exterior shapes
+            // at the bottom of the garden, 0.24 m deep and a fixed point. Both shapes were cell
+            // BOUNDARY walls between one open yard and another -- 86 pieces of invisible wall over
+            // the property -- and the garden's north boundary is grass now.
         };
         return kDeadEnds;
     }

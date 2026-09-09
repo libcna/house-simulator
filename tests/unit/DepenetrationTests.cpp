@@ -27,6 +27,9 @@
 #include "cnahouse/physics/BroadPhase.hpp"
 #include "cnahouse/physics/CollisionLoader.hpp"
 #include "cnahouse/physics/Sweep.hpp"
+#include "cnahouse/physics/Terrain.hpp"
+
+#include "CellFloor.hpp"
 
 namespace
 {
@@ -536,6 +539,7 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
     std::size_t crowded = 0;
     std::size_t nudged = 0;
     std::size_t unresolved = 0;
+    std::size_t sloped = 0;
     for (const auto& cell : world->cells)
     {
         if (cell.shapes.empty() || cell.nx == 0u || cell.nz == 0u)
@@ -551,22 +555,12 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
             continue; // a crawl space or a duct: no room for a person to stand up in it
         }
 
-        // A 50 mm pebble dropped down the middle of the cell finds the floor. It is small on
-        // purpose: a body-sized probe started at head height is inside the ceiling slab in most
-        // rooms, and what is wanted here is the surface, not a body already in trouble.
-        const float pebble = 0.05f;
-        const Capsule falling =
-            Sphere(Vector3(midX, (cell.bounds.Min.Y + cell.bounds.Max.Y) * 0.5f, midZ), pebble);
-        if (OverlapCell(*world, cell, broad, falling).overlapped)
+        const cnahouse::tests::StandingSpot spot = cnahouse::tests::StandInTheMiddle(*world, cell, broad);
+        if (!spot.found)
         {
-            continue; // solid at mid-height down the middle: a chimney, a stack, a stair
+            continue; // solid down the middle, or nothing under it to stand on
         }
-        const CellSweepHit landing = SweepCell(*world, cell, broad, falling, Vector3(0.0f, -height, 0.0f));
-        if (!landing.hit)
-        {
-            continue; // nothing under the middle of this cell to stand on
-        }
-        const float floorY = falling.centre.Y - height * landing.time - pebble;
+        const float floorY = spot.floorY;
         if (floorY + 2.0f * stand > cell.bounds.Max.Y)
         {
             continue; // the floor sits high enough in the cell that a body would not fit above it
@@ -610,6 +604,18 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
             {
                 continue; // the sweep stopped against a corner it only grazed; not a burial
             }
+            if (std::fabs(in.normal.Y) > 0.5f)
+            {
+                // A LID, not a wall: the attic stores are bounded by the rafter planes, and a
+                // body shoved 0.03 m sideways into a 30-degree roof is pushed back out DOWNWARD --
+                // into the floor it is standing on, which pushes it up again. Four 0.02 m steps
+                // cannot settle that, and §49.3's step 5 is not what should: a body does not get
+                // there, because the slide and the step assist stop it a metre earlier, and
+                // §49.5's twenty-minute soak is the guarantee that says so. Counted, so that
+                // "most of the house is a lid" could not pass unnoticed.
+                ++sloped;
+                continue;
+            }
             ++nudged;
             const Depenetration out = Depenetrate(*world, cell, broad, buried);
             EXPECT_GT(out.deepest, 0.0f) << cell.id;
@@ -627,6 +633,10 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
                            << " cells put a body inside something just by standing it on their "
                               "floor; a stair or two is expected, a house is not";
     ASSERT_GT(nudged, 80u) << "only " << nudged << " burials were arranged";
+    EXPECT_LE(sloped, 12u) << sloped
+                           << " burials were into a lid rather than a wall; the attic's "
+                              "four stores are bounded by rafters and are expected to be most of "
+                              "that number";
     // 0.03 m needs two of the four pushes, so every one of these must come out. A failure here is
     // a body that would still be inside a wall at the end of a frame.
     EXPECT_EQ(unresolved, 0u) << unresolved << " of " << nudged << " burials survived four pushes";

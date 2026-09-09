@@ -85,7 +85,7 @@ import stair_geometry  # noqa: E402
 from layout_io import LayoutError  # noqa: E402
 
 MAGIC = b"CCOL"
-VERSION = 2
+VERSION = 3
 
 #: §49.2's loose grid is 1 m. Written into the file so the reader does not carry a second copy of
 #: the constant that could disagree with this one.
@@ -539,6 +539,13 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
                                 cell.get("wallMaterial")))
                             stats["guards"] += 1
                         continue
+                    # Two open yards abut on grass, and until `HOUSE-00774` this built a WALL
+                    # between them: 86 pieces, 5 219 m² of it, 29 over five metres tall, none of
+                    # it drawn by anything. §49.2's exterior collision is the height field plus
+                    # what stands on it, and `build_exterior` is what puts the fences there.
+                    if open_air(cell) and neighbour is not None and open_air(neighbour):
+                        stats["openBoundaries"] += 1
+                        continue
                     thickness = _wall_thickness(construction, cell, neighbour, level)
                     holes = openings + _portal_holes(on_plane, u0, u1, y0, y1)
                     for ru0, rv0, ru1, rv1 in subtract_rects((u0, y0, u1, y1), holes):
@@ -991,6 +998,232 @@ def _resolve_meshes(per_cell: dict[str, list[int]], obb_count: int) -> None:
                              for index in indices]
 
 
+# ============================================================================ the property outdoors
+
+#: What a body meets at §11.2's fences: the BOARDS, 0.10 m of them, which is the post section the
+#: drawn fence is set out on. A fence is not a wall and does not get a wall's thickness.
+FENCE_THICKNESS = 0.10
+#: How long one piece of fence is. Not a bay -- `fence_gen` owns where the posts are -- but how
+#: often the collision has to follow §11.5's ground, which falls 0.9 m from the road to the rear
+#: fence. One box per run would be a fence hanging in the air at one end and buried at the other.
+FENCE_PIECE = 2.0
+#: §11.4's kerb: 0.15 m high (the layout says so) and this wide. A body walks OVER one, because
+#: §43.1's step-up is 0.22 m -- which is what a kerb is for.
+KERB_WIDTH = 0.16
+#: §49.2 collides with **tree trunks**, not canopies: `(width, height)` in metres, per species.
+#: A canopy you cannot walk under is a tree that has swallowed the garden it stands in.
+TRUNKS = {
+    "MODEL_TREE_MAPLE_MATURE": (0.45, 3.0),
+    "MODEL_TREE_MAPLE_STREET": (0.35, 3.0),
+    "MODEL_TREE_BIRCH": (0.30, 3.0),
+    "MODEL_TREE_FRUIT": (0.25, 2.2),
+}
+#: §70.5's car, which §49.2 lists: 4.4 m long, 1.80 m across and 1.50 m tall.
+CAR_SIZE = (4.4, 1.5, 1.8)
+#: The asset that is one.
+CAR_ASSET = "MODEL_PARKED_CAR"
+
+
+def open_air(cell: dict) -> bool:
+    """Is this cell the open outdoors -- a yard, a deck, the road -- rather than a building?
+
+    §15.7 rule 5 already draws this line: *"an `exterior` cell that is roofed and
+    `visibilityHint: opaque` is a building"*. `EXT_SHED` is the one, and it keeps its walls; the
+    seventeen open ones are ground, and the boundary between two of them is grass.
+    """
+    return cell.get("kind") == "exterior" and cell.get("visibilityHint") == "open"
+
+
+def _exterior_cells(layout) -> list[tuple[str, list]]:
+    """Every open exterior cell but `EXT_WORLD`, with its footprint boxes.
+
+    `EXT_WORLD` is excluded because it is the backdrop: it reaches 200 m in each direction and
+    §10.3's playable volume is 40, so a kerb piece 180 m down the road is scenery that no body can
+    ever touch. What the property's own cells cover is what a body can walk into.
+    """
+    out = []
+    for cell in layout_io.rows(layout, "cells"):
+        if cell["id"] == "EXT_WORLD" or not open_air(cell):
+            continue
+        out.append((cell["id"], layout_io.cell_boxes(cell)))
+    return out
+
+
+def _outdoor_owners(aabb, cells: list[tuple[str, list]]) -> list[str]:
+    """Which open cells a shape belongs to: every one a body standing in it could reach it from.
+
+    The same `OPENING_REACH` the holes use, and for the same reason. Two yards abut with no wall
+    and no portal between them, so §16.4 hands the body from one to the other in the middle of an
+    open lawn; a fence post on the boundary has to be in both lists or the body meets it in one
+    yard and walks through it in the other.
+    """
+    out = []
+    for cell_id, boxes in cells:
+        for x0, x1, z0, z1 in boxes:
+            if (aabb[0] < x1 + OPENING_REACH and aabb[3] > x0 - OPENING_REACH
+                    and aabb[2] < z1 + OPENING_REACH and aabb[5] > z0 - OPENING_REACH):
+                out.append(cell_id)
+                break
+    return out
+
+
+def build_exterior(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats: dict,
+                   world_dir: Path) -> None:
+    """§49.2's exterior collision: OBBs for what stands on §11.5's ground (`HOUSE-00774`).
+
+    *"Exterior collision uses the terrain height field plus OBBs for fences, walls, kerbs, the
+    shed, vehicles and tree trunks."* The height field is `HOUSE-00553`'s and is read straight into
+    the file; the shed is a cell and gets its walls from `build_shell` like any room. This is
+    everything else, and until it existed the property was divided by the CELL boundaries instead:
+    86 wall pieces between one open yard and another, 5 219 m² of invisible wall, 29 of them over
+    5 m tall. A body could not walk from the front lawn to the side yard.
+
+    Each piece is put in every open cell within reach of it, because two yards abut with no wall
+    and no portal, so nothing else would share it.
+    """
+    cells = _exterior_cells(layout)
+    if not cells:
+        return
+    exterior = layout.get("exterior") or {}
+    heights = None
+    if (world_dir / "terrain.png").is_file():
+        _w, _h, samples, _materials = terrain_gen.decode(world_dir)
+        heights = samples
+
+    def ground(x: float, z: float) -> float:
+        """§11.5's height field at a point, or zero for a world that has none (the fixture)."""
+        if heights is None:
+            return 0.0
+        ix = min(max(int(round((x - terrain_gen.ORIGIN_X) / terrain_gen.STEP)), 0),
+                 terrain_gen.WIDTH - 1)
+        iz = min(max(int(round((z - terrain_gen.ORIGIN_Z) / terrain_gen.STEP)), 0),
+                 terrain_gen.HEIGHT - 1)
+        return heights[iz * terrain_gen.WIDTH + ix]
+
+    def place(centre, half, yaw: float, surface: str, kind: int, counter: str) -> None:
+        """One OBB, in every open cell that can reach it -- and NOT in the pool if none can.
+
+        The kerbs run 440 m down the road and 34 street trees stand along it; the property's own
+        cells cover 45 m of that. A shape nothing references is a shape in the file for no reason,
+        so the reach test comes first and the pool is only asked for what survives it.
+        """
+        owners = _outdoor_owners(obb_aabb((centre, half, yaw, 0, kind)), cells)
+        if not owners:
+            return
+        index = shapes.obb(centre, half, yaw, surface, kind)
+        for cell_id in owners:
+            _add(per_cell, cell_id, index)
+        stats[counter] += 1
+
+    # §11.2's fences, in pieces short enough to follow the ground, with the gate openings left out
+    # of them: a gate is a leaf that opens (§65), so the hole is what the static file carries and
+    # `DynamicObstacles` carries the leaf.
+    openings = [(float(gate["opening"]["x"][0]), float(gate["opening"]["x"][1]),
+                 float(gate["opening"]["z"][0]), float(gate["opening"]["z"][1]))
+                for gate in exterior.get("gates", []) if gate.get("opening")]
+    for row in exterior.get("fences", []):
+        start, end = row["path"][0], row["path"][-1]
+        along_x = abs(end[0] - start[0]) >= abs(end[2] - start[2])
+        low = min(start[0], end[0]) if along_x else min(start[2], end[2])
+        high = max(start[0], end[0]) if along_x else max(start[2], end[2])
+        across = (start[2] + end[2]) / 2.0 if along_x else (start[0] + end[0]) / 2.0
+        height = float(row.get("height") or 1.85)
+        if high - low <= EPS:
+            continue
+        # A gate is a HOLE in the fence, and the hole is cut before the run is cut into pieces.
+        # Dropping whichever PIECE happened to be centred in it would leave §11.2's 1.2 m
+        # pedestrian gate covered by the two pieces either side of it -- the opening is narrower
+        # than a piece -- and would board up a gate that a piece boundary happened to straddle.
+        # §11.2 authors its three runs to stop either side of each gate, so nothing in this house
+        # exercises it; a run drawn THROUGH a gate is what it is here for.
+        spans = [(low, high)]
+        for x0, x1, z0, z1 in openings:
+            if along_x:
+                if not (z0 - FENCE_THICKNESS <= across <= z1 + FENCE_THICKNESS):
+                    continue
+                cut_low, cut_high = x0, x1
+            else:
+                if not (x0 - FENCE_THICKNESS <= across <= x1 + FENCE_THICKNESS):
+                    continue
+                cut_low, cut_high = z0, z1
+            spans = [piece for span in spans
+                     for piece in ((span[0], min(span[1], cut_low)), (max(span[0], cut_high), span[1]))
+                     if piece[1] - piece[0] > EPS]
+        for span_low, span_high in spans:
+            length = span_high - span_low
+            pieces = max(1, int(math.ceil(length / FENCE_PIECE - 1e-9)))
+            step = length / pieces
+            for index in range(pieces):
+                a, b = span_low + index * step, span_low + (index + 1) * step
+                middle = (a + b) / 2.0
+                x, z = (middle, across) if along_x else (across, middle)
+                base = ground(x, z)
+                half = ((b - a) / 2.0, height / 2.0, FENCE_THICKNESS / 2.0) if along_x else \
+                       (FENCE_THICKNESS / 2.0, height / 2.0, (b - a) / 2.0)
+                place((x, base + height / 2.0, z), half, 0.0, "fence", KIND_EXTERIOR, "fencePieces")
+
+    # §11.4's kerbs, which a body steps over rather than into.
+    for row in exterior.get("kerbs", []):
+        start, end = row["path"][0], row["path"][-1]
+        along_x = abs(end[0] - start[0]) >= abs(end[2] - start[2])
+        low = min(start[0], end[0]) if along_x else min(start[2], end[2])
+        high = max(start[0], end[0]) if along_x else max(start[2], end[2])
+        across = (start[2] + end[2]) / 2.0 if along_x else (start[0] + end[0]) / 2.0
+        height = float(row.get("height") or 0.15)
+        pieces = max(1, int(math.ceil((high - low) / FENCE_PIECE - 1e-9)))
+        step = (high - low) / pieces
+        for index in range(pieces):
+            a, b = low + index * step, low + (index + 1) * step
+            middle = (a + b) / 2.0
+            x, z = (middle, across) if along_x else (across, middle)
+            base = ground(x, z)
+            half = ((b - a) / 2.0, height / 2.0, KERB_WIDTH / 2.0) if along_x else \
+                   (KERB_WIDTH / 2.0, height / 2.0, (b - a) / 2.0)
+            place((x, base + height / 2.0, z), half, 0.0, "kerb", KIND_EXTERIOR, "kerbPieces")
+
+    # §11.1's garden furniture: a raised bed is a solid box 0.45 m high, which is twice §43.1's
+    # step-up, so you walk round it. The ones with a CELL are buildings and have walls already.
+    for row in exterior.get("structures", []):
+        if row.get("cell"):
+            continue
+        x0, x1 = float(row["footprint"]["x"][0]), float(row["footprint"]["x"][1])
+        z0, z1 = float(row["footprint"]["z"][0]), float(row["footprint"]["z"][1])
+        height = float(row.get("height") or 0.45)
+        base = min(ground(x, z) for x in (x0, x1, (x0 + x1) / 2.0)
+                   for z in (z0, z1, (z0 + z1) / 2.0))
+        place(((x0 + x1) / 2.0, base + height / 2.0, (z0 + z1) / 2.0),
+              ((x1 - x0) / 2.0, height / 2.0, (z1 - z0) / 2.0), 0.0,
+              "structure", KIND_EXTERIOR, "structureObbs")
+
+    # §49.2's tree TRUNKS. A canopy is not collision: a body walks under a maple.
+    for group in exterior.get("vegetation", []):
+        size = TRUNKS.get(group.get("asset"))
+        if size is None:
+            continue
+        width, height = size
+        for instance in group.get("instances", []):
+            position = instance.get("position") or [0.0, 0.0, 0.0]
+            scale = float(instance.get("scale") or 1.0)
+            x, z = float(position[0]), float(position[2])
+            base = ground(x, z)
+            place((x, base + height * scale / 2.0, z),
+                  (width * scale / 2.0, height * scale / 2.0, width * scale / 2.0),
+                  0.0, "bark", KIND_EXTERIOR, "trunks")
+
+    # §11.4's parked cars, which are §49.2's "vehicles". They carry a yaw, and an OBB is the one
+    # shape in this file that can.
+    for row in exterior.get("neighbourhood", []):
+        if row.get("asset") != CAR_ASSET:
+            continue
+        position = row.get("position") or [0.0, 0.0, 0.0]
+        x, z = float(position[0]), float(position[2])
+        yaw = math.radians(float(row.get("yawDeg") or 0.0))
+        base = ground(x, z)
+        place((x, base + CAR_SIZE[1] / 2.0, z),
+              (CAR_SIZE[0] / 2.0, CAR_SIZE[1] / 2.0, CAR_SIZE[2] / 2.0),
+              yaw, "vehicle", KIND_EXTERIOR, "vehicles")
+
+
 # ================================================================== what reaches through a hole
 
 #: §43.1's capsule radius. Collision is built for the body that walks it, so the body's own size
@@ -1364,7 +1597,10 @@ def build_grid(bounds, shape_aabbs):
 def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     """Read the layout, generate every shape, and return the world ready to be written."""
     layout = layout_io.load_layout(world_dir, ["levels", "cells", "portals"])
-    for optional in ("stairs", "props", "materials"):
+    # `exterior` joins them for `HOUSE-00774`: §11.2's fences, §11.4's kerbs and cars, §11.1's
+    # garden structures and §49.2's tree trunks are all in it, and until this was read the only
+    # thing outdoors that stopped a body was a cell boundary.
+    for optional in ("stairs", "props", "materials", "exterior"):
         name, _ = layout_io.FILES[optional]
         if (world_dir / name).is_file():
             layout[optional] = layout_io.load_file(world_dir / name, optional)
@@ -1378,7 +1614,8 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
 
     stats = {"wallPieces": 0, "floorPieces": 0, "ceilingPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
              "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0, "guards": 0, "stairGuards": 0, "outerShared": 0,
-             "openingShared": 0,
+             "openingShared": 0, "openBoundaries": 0, "fencePieces": 0, "kerbPieces": 0,
+             "structureObbs": 0, "trunks": 0, "vehicles": 0,
              "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
     shapes = Shapes()
     per_cell = build_shell(layout, shapes, stats)
@@ -1387,6 +1624,7 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     build_rafters(layout, shapes, per_cell, stats)
     build_mezzanine_guards(layout, shapes, per_cell, stats)
     build_props(layout, shapes, per_cell, asset_paths, stats)
+    build_exterior(layout, shapes, per_cell, stats, world_dir)
 
     obb_count = len(shapes.obbs)
     _resolve_meshes(per_cell, obb_count)
@@ -1395,6 +1633,14 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     # can reach through a doorway includes the props and the stair wedges the builders above put
     # on the other side of it.
     reachable = share_through_openings(layout, per_cell, aabbs, stats)
+
+    # Which cells §11.5's ground belongs to (`HOUSE-00774`). §49.2 says exterior collision is
+    # *"the terrain height field plus OBBs"*, and the height field is one surface over the whole
+    # lot -- including the ground the house's basement is under. A body on the basement stair is
+    # 0.1 m from that surface and must not be pushed by it, so the file says which cells are the
+    # open outdoors and the runtime asks the ground only there.
+    outdoor_ids = {cell_id for cell_id, _boxes in _exterior_cells(layout)}
+    outdoor_ids.add("EXT_WORLD")
 
     cells = []
     for cell_id in sorted(per_cell):
@@ -1408,8 +1654,9 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
         bounds = (min(a[0] for a in local), min(a[1] for a in local), min(a[2] for a in local),
                   max(a[3] for a in local), max(a[4] for a in local), max(a[5] for a in local))
         nx, nz, origin, buckets = build_grid(bounds, local)
-        cells.append({"id": cell_id, "shapes": indices, "bounds": bounds,
-                      "nx": nx, "nz": nz, "origin": origin, "buckets": buckets})
+        cells.append({"id": cell_id, "shapes": indices, "bounds": bounds, "nx": nx, "nz": nz,
+                      "origin": origin, "buckets": buckets,
+                      "outdoors": cell_id in outdoor_ids})
 
     references = sum(len(c["shapes"]) for c in cells)
     occupied = [len(b) for c in cells for b in c["buckets"] if b]
@@ -1518,6 +1765,7 @@ def serialise(world: dict) -> bytes:
     out += struct.pack("<I", len(world["cells"]))
     for cell in world["cells"]:
         out += _string(cell["id"])
+        out += struct.pack("<B", 1 if cell.get("outdoors") else 0)
         out += struct.pack("<6f", *cell["bounds"])
         out += struct.pack("<I", len(cell["shapes"]))
         for index in cell["shapes"]:
@@ -1600,6 +1848,7 @@ def read_back(data: bytes) -> dict:
     cells = []
     for _ in range(cell_count):
         cell_id = text()
+        (outdoors,) = unpack("<B")
         bounds = unpack("<6f")
         (shape_count,) = unpack("<I")
         indices = [unpack("<I")[0] for _ in range(shape_count)]
@@ -1609,8 +1858,9 @@ def read_back(data: bytes) -> dict:
         for _ in range(nx * nz):
             (count,) = unpack("<H")
             buckets.append([unpack("<H")[0] for _ in range(count)])
-        cells.append({"id": cell_id, "bounds": bounds, "shapes": indices,
-                      "nx": nx, "nz": nz, "origin": origin, "buckets": buckets})
+        cells.append({"id": cell_id, "outdoors": bool(outdoors), "bounds": bounds,
+                      "shapes": indices, "nx": nx, "nz": nz, "origin": origin,
+                      "buckets": buckets})
 
     (has_terrain,) = unpack("<B")
     terrain = None
@@ -1667,6 +1917,10 @@ def report(world: dict) -> str:
         f"{stats['propsSkipped']} without collision",
         f"  openings: {stats['openingShared']} shape(s) shared across a hole, each carried "
         f"{OPENING_REACH:.2f} m past the plane -- a body in a doorway is in both rooms",
+        f"  outdoors: {stats['fencePieces']} fence piece(s), {stats['kerbPieces']} kerb, "
+        f"{stats['structureObbs']} garden structure(s), {stats['trunks']} tree trunk(s) and "
+        f"{stats['vehicles']} vehicle(s); {stats['openBoundaries']} boundary between two open "
+        f"yards left as grass",
     ]
     terrain = world.get("terrain")
     if terrain:
@@ -2298,6 +2552,147 @@ def selftest() -> int:
                         for clips in house["borrowed"].values() for clip in clips),
                     "...and no borrowed box is wider than the reach in BOTH horizontal axes, "
                     "which is what a clip that never fired would look like")
+
+            # 7g. `HOUSE-00774`: §49.2's exterior collision -- the height field plus OBBs for
+            #     what stands on it -- and the cell boundaries that stopped being walls.
+            rows_exterior = layout_io.load_layout(authored, ["cells"])
+            rows_exterior["exterior"] = layout_io.load_file(
+                authored / layout_io.FILES["exterior"][0], "exterior")
+            outdoor = {row["id"] for row in house["cells"] if row["outdoors"]}
+            open_cells = {cell_id for cell_id, _boxes in _exterior_cells(rows_exterior)}
+            require(outdoor == open_cells | {"EXT_WORLD"},
+                    f"exactly the open exterior cells carry §11.5's ground, and every room is "
+                    f"without it ({sorted(outdoor.symmetric_difference(open_cells | {'EXT_WORLD'}))[:3]})")
+            require("EXT_SHED" not in outdoor and "L0_HALL" not in outdoor,
+                    "the shed is a BUILDING and the hall is a room: neither stands on the lawn")
+
+            require(house["stats"]["openBoundaries"] > 50,
+                    f"the boundaries between one open yard and another are grass, not wall "
+                    f"({house['stats']['openBoundaries']} of them)")
+            walled = []
+            for row in house["cells"]:
+                if row["id"] not in open_cells:
+                    continue
+                for index in row["shapes"]:
+                    if index >= offset or house_shapes.obbs[index][4] != KIND_WALL:
+                        continue
+                    # Borrowed shapes are somebody else's (`HOUSE-00568`): the shed's own wall
+                    # reaches into the garden and the side yard through their openings, and that is
+                    # a building's wall being shared, not a boundary being walled.
+                    owners = [other["id"] for other in house["cells"]
+                              if index in other["shapes"]
+                              and (other["id"], index) not in house["borrowed"]]
+                    if len(owners) > 1 and all(one in open_cells for one in owners):
+                        walled.append((row["id"], index))
+            require(not walled,
+                    f"and not one wall piece is shared by two of them ({walled[:3]})")
+
+            fences = [index for index in range(len(house_shapes.obbs))
+                      if house_shapes.obbs[index][4] == KIND_EXTERIOR
+                      and house_shapes.surfaces[house_shapes.obbs[index][3]] == "fence"]
+            require(house["stats"]["fencePieces"] == len(fences) and len(fences) > 60,
+                    f"§11.2's seven runs are collision now ({len(fences)} pieces)")
+            # The property is ENCLOSED: every metre of every boundary either has a fence piece on
+            # it or is one of §11.2's three gate openings.
+            gates = [(float(gate["opening"]["x"][0]), float(gate["opening"]["x"][1]),
+                      float(gate["opening"]["z"][0]), float(gate["opening"]["z"][1]))
+                     for gate in (rows_exterior.get("exterior") or {}).get("gates", [])]
+            missing = []
+            for row in (rows_exterior.get("exterior") or {}).get("fences", []):
+                start, end = row["path"][0], row["path"][-1]
+                along_x = abs(end[0] - start[0]) >= abs(end[2] - start[2])
+                low = min(start[0], end[0]) if along_x else min(start[2], end[2])
+                high = max(start[0], end[0]) if along_x else max(start[2], end[2])
+                across = (start[2] + end[2]) / 2.0 if along_x else (start[0] + end[0]) / 2.0
+                probe = low + 0.25
+                while probe < high - 0.25:
+                    x, z = (probe, across) if along_x else (across, probe)
+                    if any(x0 - 0.3 <= x <= x1 + 0.3 and z0 - 0.3 <= z <= z1 + 0.3
+                           for x0, x1, z0, z1 in gates):
+                        probe += 0.5
+                        continue
+                    if not any(abs(house_shapes.obbs[index][0][0] - x) <=
+                               house_shapes.obbs[index][1][0] + 1e-6
+                               and abs(house_shapes.obbs[index][0][2] - z) <=
+                               house_shapes.obbs[index][1][2] + 1e-6
+                               for index in fences):
+                        missing.append((row["id"], round(x, 2), round(z, 2)))
+                    probe += 0.5
+            require(not missing,
+                    f"and every metre of every run is covered except at the three gates "
+                    f"({len(missing)} gaps: {missing[:3]})")
+            in_a_gate = [index for index in fences
+                         if any(x0 + 1e-6 < house_shapes.obbs[index][0][0] < x1 - 1e-6
+                                and z0 - 0.2 < house_shapes.obbs[index][0][2] < z1 + 0.2
+                                for x0, x1, z0, z1 in gates)]
+            require(not in_a_gate,
+                    f"and NOTHING static stands in a gate's opening: a gate is a leaf that opens, "
+                    f"so the hole is what the file carries ({in_a_gate[:3]})")
+
+            # A gate is a HOLE in the fence, and the house cannot show it: §11.2 authors three
+            # runs that stop either side of each gate, so the rule that leaves an opening out has
+            # nothing to do there. Asked of a synthetic run that spans one instead -- which is the
+            # layout a fence with a gate in the middle of it would be authored as.
+            spanning = {
+                "levels": {"levels": [{"id": "L0", "ffl": 0.0, "ceiling": 3.0}]},
+                "cells": {"cells": [{"id": "EXT_YARD", "level": "L0", "kind": "exterior",
+                                     "visibilityHint": "open", "yOverride": [0.0, 20.0],
+                                     "boxes": [{"x": [-10.0, 10.0], "z": [-10.0, 10.0]}]}]},
+                "exterior": {
+                    "fences": [{"id": "FENCE_ONE", "asset": "MODEL_FENCE_BOARD_01", "height": 1.85,
+                                "path": [[-8.0, 0.0, 0.0], [8.0, 0.0, 0.0]]}],
+                    "gates": [{"id": "GATE_ONE", "fence": "FENCE_ONE", "kind": "hinged",
+                               "opening": {"x": [-0.6, 0.6], "z": [-0.05, 0.05]}, "height": 1.85}],
+                },
+            }
+            probe_shapes, probe_cells = Shapes(), {}
+            probe_stats = {name: 0 for name in ("fencePieces", "kerbPieces", "structureObbs",
+                                                "trunks", "vehicles")}
+            build_exterior(spanning, probe_shapes, probe_cells, probe_stats, workspace / "nowhere")
+            require(probe_stats["fencePieces"] >= 8,
+                    f"a 16 m run with a gate in it becomes at least eight pieces "
+                    f"({probe_stats['fencePieces']})")
+            west = {round(record[0][0] + record[1][0], 4) for record in probe_shapes.obbs}
+            east = {round(record[0][0] - record[1][0], 4) for record in probe_shapes.obbs}
+            require(-0.6 in west and 0.6 in east,
+                    f"and the run stops ON each of the gate's jambs rather than near them "
+                    f"({sorted(w for w in west if w < 1)[-2:]}, {sorted(e for e in east if e > -1)[:2]})")
+            require(not [record for record in probe_shapes.obbs
+                         if abs(record[0][0]) < 0.6 - 1e-6 and abs(record[0][2]) < 0.05],
+                    f"and none of them stands in the gate's own opening "
+                    f"({[record[0] for record in probe_shapes.obbs if abs(record[0][0]) < 0.6][:2]})")
+            require(any(record[0][0] < -0.6 for record in probe_shapes.obbs)
+                    and any(record[0][0] > 0.6 for record in probe_shapes.obbs),
+                    "...while the run either side of it is there")
+
+            trunks = [house_shapes.obbs[index] for index in range(len(house_shapes.obbs))
+                      if house_shapes.obbs[index][4] == KIND_EXTERIOR
+                      and house_shapes.surfaces[house_shapes.obbs[index][3]] == "bark"]
+            require(len(trunks) == house["stats"]["trunks"] and trunks,
+                    f"§49.2 collides with tree TRUNKS ({len(trunks)} of them)")
+            require(all(max(record[1][0], record[1][2]) * 2 <= 0.7 for record in trunks),
+                    f"...trunks and not canopies: the widest is "
+                    f"{max(max(record[1][0], record[1][2]) * 2 for record in trunks):.2f} m across")
+            require(all(record[1][1] > 2.0 * max(record[1][0], record[1][2]) for record in trunks),
+                    f"...and each is a COLUMN, taller than it is wide by more than three times: "
+                    f"the stubbiest is {min(record[1][1] * 2 / max(record[1][0], record[1][2]) / 2 for record in trunks):.1f} "
+                    f"times its own width, which is a trunk and not a canopy dropped on the lawn")
+
+            cars = [house_shapes.obbs[index] for index in range(len(house_shapes.obbs))
+                    if house_shapes.obbs[index][4] == KIND_EXTERIOR
+                    and house_shapes.surfaces[house_shapes.obbs[index][3]] == "vehicle"]
+            require(len(cars) == house["stats"]["vehicles"] and cars
+                    and any(abs(record[2]) > 1e-6 for record in cars),
+                    f"§11.4's parked cars are OBBs with the yaw the layout gives them "
+                    f"({len(cars)} of them, yaws "
+                    f"{sorted(round(math.degrees(record[2])) for record in cars)})")
+
+            kerbs = [house_shapes.obbs[index] for index in range(len(house_shapes.obbs))
+                     if house_shapes.obbs[index][4] == KIND_EXTERIOR
+                     and house_shapes.surfaces[house_shapes.obbs[index][3]] == "kerb"]
+            require(kerbs and all(record[1][1] * 2 <= 0.22 + 1e-6 for record in kerbs),
+                    f"and §11.4's kerb is a kerb: {max(record[1][1] * 2 for record in kerbs):.2f} m "
+                    f"high, which §43.1's 0.22 m step-up walks over rather than round")
 
             # A window is not a way through, and what is behind one is not carried: the sunroom's
             # floor slab reaches to `P_L0_KITCHEN__W2`'s plane, and the kitchen does not have it.

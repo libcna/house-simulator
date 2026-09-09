@@ -82,6 +82,17 @@ namespace
     ///
     /// Diffed both ways below. A second entry has to be added here, in a commit, with a reason --
     /// otherwise the list becomes the place a real wall passage hides.
+    /// Is this cell the open outdoors -- a yard, a deck, the road -- rather than a room?
+    ///
+    /// §15.7 rule 5 draws the same line: an `exterior` cell that is roofed and `opaque` is a
+    /// BUILDING (`EXT_SHED` is the one), and the rest are ground.
+    [[nodiscard]] bool OnGrass(const world::WorldData& data, cnahouse::util::Id id)
+    {
+        const world::Cell* cell = data.FindCell(id);
+        return cell != nullptr && cell->kind == world::CellKind::Exterior &&
+               cell->visibilityHint == world::VisibilityHint::Open;
+    }
+
     const std::vector<std::string>& RelabelledWithoutAPortal()
     {
         static const std::vector<std::string> kPairs{};
@@ -201,6 +212,7 @@ TEST(SolidSurfaceTests, TwoThousandPushesNeverGetThroughAWallAFloorOrACeiling)
     int skippedStart = 0;
     int steps = 0;
     int changes = 0;
+    int outdoors = 0;
     std::vector<std::string> leftTheGraph;
     std::vector<std::string> neverLanded;
     std::vector<std::string> throughSomethingSolid;
@@ -358,6 +370,18 @@ TEST(SolidSurfaceTests, TwoThousandPushesNeverGetThroughAWallAFloorOrACeiling)
             {
                 continue;
             }
+            if (OnGrass(data, before) && OnGrass(data, after))
+            {
+                // Two open exterior cells abut on GRASS (`HOUSE-00774`). §15's cells divide the
+                // lot for visibility, lighting and audio, not because there is anything between
+                // them: until this task the collision builder put a wall on every one of those
+                // boundaries -- 86 pieces, 5 219 m² of invisible wall, 29 of them over five metres
+                // tall -- and the front lawn could not be walked to the side yard. A crossing
+                // between two of them is a body walking across a lawn, and there is no portal to
+                // look for because §25.6 culls the outdoors by distance rather than by holes.
+                ++outdoors;
+                continue;
+            }
 
             // A cell change with no portal between the two, and not one of the three pairs of
             // cells whose VOLUMES touch without one. Whether anything solid was in the way is
@@ -401,12 +425,14 @@ TEST(SolidSurfaceTests, TwoThousandPushesNeverGetThroughAWallAFloorOrACeiling)
         std::printf("  relabelled without a portal (recorded): %s\n", pair.c_str());
     }
     std::printf("  %d push(es) over %zu cell(s), %d of them arriving in a fall, %d step(s); "
-                "%d cell change(s); %d start(s) skipped, %d left the graph\n",
+                "%d cell change(s), %d of them from one open yard to another; %d start(s) "
+                "skipped, %d left the graph\n",
                 pushed,
                 pushable.size(),
                 dropped,
                 steps,
                 changes,
+                outdoors,
                 skippedStart,
                 static_cast<int>(leftTheGraph.size()));
 

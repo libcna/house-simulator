@@ -56,7 +56,7 @@ is a second description of the layout that can disagree with the first.
 | Field | Type | Value |
 |---|---|---|
 | `magic` | 4 bytes | `0x43 0x43 0x4F 0x4C` — ASCII `CCOL` |
-| `version` | `u32` | **2** — version 1 had no §3.5 |
+| `version` | `u32` | **3** — version 1 had no §3.5, version 2 no `outdoors` (§3.4) |
 | `flags` | `u32` | 0. Reserved; a reader must **reject** a file with any unknown bit set rather than ignore it |
 | `worldHash` | string | `world.manifest.json`'s `worldHash`, or empty when the layout has no manifest |
 | `gridCell` | `f32` | The loose grid's cell size in metres, **1.0** |
@@ -130,6 +130,7 @@ doing it per sweep.
 | `cellCount` | `u32` | |
 | then per cell: | | |
 | `id` | string | the `layout.cells.json` id |
+| `outdoors` | `u8` | 0 or 1: **is §3.5's ground part of this cell's collision?** |
 | `bounds` | 6 × `f32` | min *xyz*, max *xyz* over every shape the cell references, **as that cell indexes it** — §4.1's borrowed shapes count only for the part of them within reach |
 | `shapeCount` | `u32` | ≤ 65 535 |
 | `shapes` | `shapeCount` × `u32` | **global** shape indices: `0 … obbCount−1` are OBBs, `obbCount …` are meshes at `index − obbCount` |
@@ -143,6 +144,14 @@ holds more, so local indices halve the largest part of the file.
 The grid is **x/z only**. A cell is one storey tall, so a third axis would multiply buckets without
 dividing shapes — the floor slab alone spans every bucket of every vertical layer — and the
 vertical reject is one comparison against the shape's own AABB, which the sweep does anyway.
+
+`outdoors` is a property of the CELL and not of the world (`HOUSE-00774`). §3.5's height field is
+one surface over the whole lot and the house stands on it, so the ground runs through the basement
+and a tenth of a metre under `L0`'s floor: a body on the basement stair is beside it and must not
+be pushed by it, and a body on the lawn must. The flag is what tells §49.3's step 5 and the ground
+probe which of the two they are looking at. It is 1 for §15's open exterior cells and for
+`EXT_WORLD`, and 0 for every room — including `EXT_SHED`, which is an `exterior` cell that is a
+BUILDING (§15.7 rule 5 draws the same line).
 
 A shape is listed in **every bucket its AABB overlaps**, not the one its minimum corner falls in.
 A shape a cell borrows through a hole (§4.1) is listed by the part of it within reach of that hole
@@ -247,6 +256,37 @@ The house's census: **376 shape references**, over 107 holes a body can stand in
 `OpeningReachTests` is the guarantee — within the hysteresis band either side of every such hole,
 the deepest overlap does not depend on which of the two lists you ask — and it holds to 0.000000 m
 over 5 739 poses.
+
+### 4.2 The property outdoors
+
+*`HOUSE-00774`.* §49.2: *"Exterior collision uses the terrain height field plus OBBs for fences,
+walls, kerbs, the shed, vehicles and tree trunks."* The height field is §3.5's and the shed is a
+cell with walls like any room; this is the rest of that sentence, and until it existed the property
+was divided by its **cell boundaries** instead — 86 wall pieces between one open yard and another,
+5 219 m² of invisible wall, 29 of them over five metres tall, none of it drawn by anything. You
+could not walk from the front lawn to the side yard.
+
+Two open exterior cells abut on grass, so §4's rule 1 does not apply between them and no wall is
+built (107 boundaries in this house). What is built instead comes from `layout.exterior.json`:
+
+| From | What | This house |
+|---|---|---|
+| `fences` | one OBB per 2 m of run, `FENCE_THICKNESS` thick, sitting on the ground under it, with each gate's opening **cut out of the run before it is cut into pieces** | 91 |
+| `kerbs` | the same, 0.15 m high — a body steps over a kerb, because §43.1's step-up is 0.22 m | 48 |
+| `structures` without a cell | one OBB each: §11.1's raised beds, its trellis and the compost bin | 8 |
+| `vegetation` whose asset is a tree | one OBB per instance, sized as a **trunk** — a body walks under a maple, not into it | 17 |
+| `neighbourhood` whose asset is a parked car | one OBB per car, carrying the row's yaw | 2 |
+
+A gate is a hole and not a piece: §65 makes all three interactable, so the leaf is a dynamic
+obstacle (§49.4) exactly as a door is, and what the static file carries is the opening.
+
+Each piece is put in **every** open cell within `OPENING_REACH` of it, for §4.1's reason one step
+further out: two yards abut with no wall AND no portal, so §16.4 hands a body from one to the other
+in the middle of an open lawn and nothing else would share the fence post on the boundary.
+
+Nothing is built where no open cell can reach it. The kerbs run 440 m down the road and 34 street
+trees stand along it; the property's own cells cover 45 m of that, and a kerb 180 m away is scenery
+that §10.3's playable volume puts out of reach for ever.
 
 ## 5. Proxies: most of them are boxes
 

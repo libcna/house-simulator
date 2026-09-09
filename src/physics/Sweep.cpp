@@ -2,6 +2,7 @@
 #include "cnahouse/physics/Sweep.hpp"
 
 #include "cnahouse/physics/BroadPhase.hpp"
+#include "cnahouse/physics/Terrain.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -533,9 +534,17 @@ namespace cnahouse::physics
                 return false;
             }
             // The extrusion is along Y, so the prism is a solid only when the triangle leans out
-            // of that direction. `kEpsilon` and not zero: a triangle a thousandth off vertical
-            // encloses a volume a thousandth of a millimetre thick, which is not one either.
-            prism.solid = std::fabs(face.Y) > kEpsilon;
+            // of that direction AND there is something to extrude. `kEpsilon` and not zero: a
+            // triangle a thousandth off vertical encloses a volume a thousandth of a millimetre
+            // thick, which is not one either.
+            //
+            // **The height is the second way to have no volume, and it went unnoticed until
+            // `HOUSE-00569`.** A SPHERE is a capsule with a half-height of zero (§45's camera arm
+            // is one, and so is any probe), and extruding a triangle by zero leaves the triangle:
+            // a flat sheet whose five faces are all in one plane, which is the very shape this
+            // flag exists to refuse. A 50 mm probe **9.6 m above the lawn** was reported inside
+            // the ground because of it.
+            prism.solid = halfHeight > kEpsilon && std::fabs(face.Y) > kEpsilon;
 
             const float h = halfHeight;
             const Xna::Vector3 points[6] = {
@@ -881,7 +890,24 @@ namespace cnahouse::physics
         Capsule moving = capsule;
         for (int i = 0; i < kDepenetrationIterations; ++i)
         {
-            const CellOverlap overlap = OverlapCell(world, cell, broad, moving);
+            CellOverlap overlap = OverlapCell(world, cell, broad, moving);
+            // ...and §11.5's ground, in the cells the ground belongs to (`HOUSE-00774`). §49.2
+            // says exterior collision is *"the terrain height field plus OBBs"*, and step 5 asked
+            // only the OBBs: a body that walked off the terrace's 0.68 m edge landed inside the
+            // slope under it and stayed there, falling at 12 m/s without moving, because nothing
+            // pushed it out. Indoors the same height field runs under the house -- the basement
+            // stair climbs through it -- which is what `CollisionCell::outdoors` is for.
+            if (cell.outdoors)
+            {
+                const Overlap ground = OverlapCapsuleTerrain(world.terrain, moving);
+                if (ground.overlapped && (!overlap.overlapped || ground.depth > overlap.depth))
+                {
+                    const std::uint32_t tested = overlap.tested;
+                    static_cast<Overlap&>(overlap) = ground;
+                    overlap.shape = CellSweepHit::kNothing;
+                    overlap.tested = tested;
+                }
+            }
             if (i == 0)
             {
                 result.deepest = overlap.overlapped ? overlap.depth : 0.0f;
@@ -906,7 +932,13 @@ namespace cnahouse::physics
         // Four pushes used and still inside: `resolved` stays false and the caller decides. §49.5's
         // guarantee suite is what notices a body that gets here regularly.
         const CellOverlap left = OverlapCell(world, cell, broad, moving);
-        result.resolved = !left.overlapped || left.depth <= kContactTolerance;
+        float depth = left.overlapped ? left.depth : 0.0f;
+        if (cell.outdoors)
+        {
+            const Overlap ground = OverlapCapsuleTerrain(world.terrain, moving);
+            depth = std::max(depth, ground.overlapped ? ground.depth : 0.0f);
+        }
+        result.resolved = depth <= kContactTolerance;
         return result;
     }
 

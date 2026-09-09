@@ -8649,6 +8649,31 @@ never escapes and never penetrates.
             0.000075 m** over 144 000 steps, 1 390 m walked, 0 boundary escapes -- and 33 blocked
             steps rather than 1 197, because a body that meets a staircase where the staircase is
             stops walking into it. 1 010 unit tests pass.
+- [x] HOUSE-00569 — A sphere has no inside: the zero-height prism that swallowed everything over a triangle
+      dep: HOUSE-00543 · sys: physics · plat: ALL · pri: MUST
+      verify: unit SweepTriangleTests.ASphereIsNotInsideAFlatTriangleItIsMerelyOver,
+              TerrainTests.ASmallProbeDroppedOnTheRealLotFallsToTheGround
+      note: (2026-09-09) found by `HOUSE-00774`, which needed a 50 mm probe to find the ground
+            outdoors: **the probe, 9.6 m over the back lawn, was reported INSIDE it** and stopped
+            where it started. Half the physics guarantee tests place a body by dropping such a
+            probe down the middle of a cell, so half of them were standing bodies in mid-air the
+            moment the outdoors became walkable.
+      finding: **`SweepCapsuleTriangle` turns a capsule into a sphere by extruding the triangle by
+            the capsule's HALF-HEIGHT, and a sphere's half-height is zero.** The prism is then the
+            triangle itself: a flat sheet whose five faces lie in one plane, which is exactly the
+            shape `prism.solid` was added to refuse -- for a VERTICAL triangle (`HOUSE-00615`) and
+            not for a flat one extruded by nothing. `prism.solid` is now `halfHeight > eps AND the
+            triangle leans out of Y`, which is the two ways an extrusion can have no volume.
+      finding: **it was a coin flip, which is why nothing had found it.** The outward normals are
+            decided by `Dot(centroid - corner, normal) > 0`, and for a flat prism the centroid is
+            IN the plane, so that dot is mathematically zero. On a triangle at the origin it comes
+            out exactly zero and the two faces keep opposite normals; on one whose corners are
+            (1.6, -0.24, -37.4) it comes out a hair positive, both faces end up pointing the same
+            way, and every point on that side is "inside". A synthetic test at the origin passes
+            with the defect in place -- `TerrainTests` over the real lot is what catches it.
+      verified: 528 probes dropped from 9.6 m over the real lot, none reported inside the ground
+            and none landing more than 0.35 m from it; and the sphere/capsule pair at the unit
+            level. Injection: the old one-sided `prism.solid`, CAUGHT.
 - [x] HOUSE-00612 — Guarantee test: the player cannot pass any closed door (all 62, both sides)
       dep: HOUSE-00554 · sys: physics · plat: CI · pri: MUST
       verify: unit ClosedDoorTests.NoClosedDoorInTheHouseCanBeWalkedThrough
@@ -11024,8 +11049,61 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       dep: HOUSE-00297, HOUSE-00392 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00773 — Implement grass-card rendering with `AlphaTestEffect` and per-instance jitter
       dep: HOUSE-00772, HOUSE-00080 · sys: rendering · plat: ALL · pri: MUST
-- [ ] HOUSE-00774 — Build the exterior collision: terrain, fences, kerbs, walls, shed, tree trunks, vehicles
+- [x] HOUSE-00774 — Build the exterior collision: terrain, fences, kerbs, walls, shed, tree trunks, vehicles
       dep: HOUSE-00553, HOUSE-00766 · sys: physics · plat: ALL · pri: MUST
+      verify: `tools/world/build_collision.py --selftest`; unit RandomWalkTests,
+              SolidSurfaceTests, TerrainTests, DepenetrationTests, StepAssistTests
+      measured: (2026-09-09) §49.2's sentence, finished: the height field was `HOUSE-00553`'s and
+            the shed is a cell with walls, and this is *"OBBs for fences, kerbs, vehicles and tree
+            trunks"* -- **91 fence pieces, 48 of kerb, 8 garden structures, 17 tree trunks and 2
+            parked cars, 166 shapes in all**. The census went 1 134 -> 1 147 shapes and 888 -> 735
+            walls, because of what it took away.
+      finding: **the property was divided by its own cell boundaries: 86 wall pieces between one
+            open yard and another, 5 219 m² of invisible wall, 29 of them over five metres tall.**
+            None of it was drawn by anything -- `house_shell_gen` gives an open cell no walls -- so
+            the front lawn could not be walked to the side yard, the garden's north edge was a
+            recorded dead end in `InsideGeometryTests`, and `EXT_NORTHSTRIP` was outside §10.3's
+            playable volume only because of the one it shared with `EXT_WORLD`. §15.7 rule 5
+            already draws the line this uses: an `exterior` cell that is roofed and `opaque` is a
+            BUILDING (`EXT_SHED` is the one and keeps its walls); the other seventeen are ground.
+      finding: **a gate is a hole, cut before the run is cut into pieces.** §11.2 authors its three
+            runs to stop either side of each gate, so nothing in this house exercises it -- but a
+            run drawn THROUGH a gate would otherwise be boarded up by whichever 2 m piece the
+            opening fell inside, and §11.2's pedestrian gate is 1.2 m wide, narrower than a piece.
+            The leaf itself is §49.4's dynamic obstacle, exactly as a door is.
+      finding: **the ground belongs to the cells that are outdoors, and the file has to say which.**
+            The height field is one surface over the whole lot and the house stands on it, so it
+            runs through the basement and 0.1 m under `L0`'s floor. Giving §49.3's step 5 the
+            ground -- which the outdoors needs, see below -- then pushed a body on the BASEMENT
+            STAIR sideways out of the lawn above it, and `StairTraversalTests` said so at once.
+            `collision.bin` is version 3: one byte per cell, and `EXT_SHED` is a room by it.
+      finding: **step 5 had never asked the ground, and outdoors that is where a body ends up.**
+            A body that walked off the terrace's 0.68 m edge landed inside the slope under it and
+            **stayed there, falling at 12 m/s without moving**, because `Depenetrate` asked the
+            cell's OBBs and nothing else while `GroundProbe` and the fall had consulted the height
+            field since `HOUSE-00553`. Three things read collision; the third one now does too.
+      finding: **and the terrace's own slab overhung its ground by 0.70 m.** §11.6's terrace is
+            x -6.7…6.7 and §11.5's grid is 1 m, so a pad rasterised by point sampling stopped at
+            ±6 and left the deck hanging over the slope, with a body standing on the terrain 0.19 m
+            inside the slab. A pad's LEVEL is rounded outward by half a sample now and its
+            material is not: how high the ground is under a slab and what a footstep sounds like
+            at a point are different questions.
+      finding: **half the physics tests were placing bodies on the wrong floor** -- a yard's floor
+            slab is at its cell's `yOverride`, `EXT_BACKYARD`'s is -0.90, and the lawn over it is
+            at zero. Each dropped its own 50 mm pebble and asked only the cell's shapes; they ask
+            `tests/unit/CellFloor.hpp` now, which asks the ground too, in the cells that have one.
+            That is also what turned up `HOUSE-00569`.
+      note: `SolidSurfaceTests` no longer treats a crossing between two open yards as a body going
+            through something solid -- there is no portal to look for, because §25.6 culls the
+            outdoors by distance and not by holes -- and reports the count instead. 126 of them in
+            2 000 pushes.
+      verified: **10 injections, all CAUGHT**: the yards walled again, no fence collision at all,
+            a fence built across its gates, every cell told it stands on the lawn, a canopy for a
+            trunk, a kerb as tall as a wall, a pad that is not rounded outward, the ground given no
+            say in the push-out, the ground given a say in every cell, and `HOUSE-00569`'s prism.
+            §49.5's twenty minutes then walk the property: **1 516 m, deepest contact 0.000091 m,
+            0 boundary escapes**, 4 904 step-ups where there were 596 -- the bot spends its time
+            outdoors now, because for the first time it can.
 - [ ] HOUSE-00775 — Implement the road-end barriers: hedge, stone wall, parked van, street trees, and the sign
       dep: HOUSE-00763 · sys: world · plat: TOOL · pri: MUST
       accept: the player is stopped by visible objects at x = ±35, never by an invisible wall
@@ -13206,6 +13284,8 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00568` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00618`: static collision is partitioned per cell and the sweep is given one cell, so a body standing in a doorway -- which §16.4's lookup keeps in the room it came from until it is 0.05 m past the boundary -- met nothing that stood 0.20 m on the other side of it. Measured: 0.151 m inside the main stair's first run, from `L0_FOYER`, before anything stopped it. | A wall is shared by both rooms and that is what makes the per-cell partition safe; a hole is not a wall, and `HOUSE-00567` had already fixed the same defect once for the outer walls the yards could not see. This generalises it to every hole, so it is its own task in the phase that owns collision rather than a correction folded into the exterior one that exposed it. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00569` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00774`: `SweepCapsuleTriangle` extrudes a triangle by the capsule's half-height, a SPHERE's half-height is zero, and the flat prism that leaves is the shape `prism.solid` exists to refuse -- so everything over a triangle was inside it, decided by whether a mathematically-zero dot product came out a hair positive. | `HOUSE-00615` fixed the same defect for a vertical triangle and the height was the second way to have no volume. It is its own task rather than a line in `HOUSE-00774` because it is not about the exterior at all: §45's camera arm sweeps a sphere, every probe in the test suite is one, and the bug was in the sweep both of them share. No id was renumbered or struck. |
+| 2026-09-09 | `collision.bin` v2 → **v3** | A `u8` per cell: **is §11.5's ground part of this cell's collision?** (`HOUSE-00774`) | The height field is one surface over the whole lot and the house stands on it, so it runs through the basement and 0.1 m under `L0`'s floor. Giving §49.3's step 5 the ground -- which the outdoors needs, because a body that walked off the terrace's edge landed inside the slope and stayed there -- pushed a body on the basement stair out of the lawn above it instead. Nothing else in the file can tell the two apart: `EXT_SHED` is an `exterior` cell that is a building, and §15's yards are cells like any other. `docs/collision-format.md` §3.4 is normative. No id was renumbered or struck. |
 | 2026-09-09 | §15.7 | A **twelfth rule**: *"nothing outdoors stands in something else"* -- no two `structures` footprints overlap, no `paths` box runs into one, no `vegetation` instance is inside one (`HOUSE-00769`) | §15.7's rules 2 and 3 make exactly this statement about the house's cells and nothing made it about the LOT, which has three kinds of rectangle that can be authored on top of each other. Two of them were: the garden path ran three metres through the shed and reached no door, and three of §11.1's six raised beds were vegetation instances inside the shed's walls. Both were invisible to every other rule -- a path and a shed pad are both gravel at the same height, and an instance is a point with no size for anything to overlap. The rule found two more the day it was written. `docs/world-format.md` and `WorldValidator.hpp` say the same twelve; the C++ mirror does not carry the exterior file, so this one is the Python gate's alone, and its header now says so. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00488`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and two more `dep`s on `HOUSE-00688`. Found by `HOUSE-00688`'s first run: a cell does not always draw the surfaces a body standing in it looks at, and §25 removes the cell that does -- 8 450 pixels of four frames become the clear colour with culling on. | The most important test in the project was written, run and left FAILING and DISABLED, with its numbers, rather than weakened to pass. Its 46 881 differing pixels separate into two shell defects and no culling defect: 38 431 are `HOUSE-00485`'s coplanar pairs resolving the other way, and 8 450 are this. No id was renumbered or struck. |
 

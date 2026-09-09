@@ -205,8 +205,23 @@ def fields(directory: Path):
                 if any(box["x"][0] <= x <= box["x"][1] and box["z"][0] <= z <= box["z"][1]
                        for box in boxes):
                     material = name
-                    if level is not None:
-                        height = float(level)
+                # A pad's LEVEL is rounded OUTWARD, by half a sample, and its material is not.
+                #
+                # The two are different questions. What a footstep sounds like at a point is a
+                # point sample, and half a metre of flagstone noise on the lawn would be inventing
+                # a terrace nobody laid. How high the ground is under a slab is not: §11.6's
+                # terrace is x -6.7…6.7 and this grid is 1 m, so a point test puts the plateau at
+                # -6…6 and leaves the terrace's own floor slab **overhanging its ground by
+                # 0.70 m**. A body that walked up the slope under that overhang stood on the
+                # terrain 0.19 m inside the slab, which `HOUSE-00618`'s bot found the moment
+                # `HOUSE-00774` let it walk round the terrace at all. Growing the pad instead
+                # leaves the ground half a sample WIDER than the deck it carries, which is a
+                # plinth and not a hole.
+                if level is not None and any(
+                        box["x"][0] - STEP / 2.0 <= x <= box["x"][1] + STEP / 2.0
+                        and box["z"][0] - STEP / 2.0 <= z <= box["z"][1] + STEP / 2.0
+                        for box in boxes):
+                    height = float(level)
             heights.append(height)
             materials.append(MATERIALS.index(material))
     return heights, materials
