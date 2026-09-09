@@ -8,6 +8,7 @@
 // world would pass every test here and say nothing about a building with 96 cells, 179 portals,
 // three storeys and a stair well open through all of them.
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <filesystem>
 #include <string>
@@ -567,4 +568,134 @@ TEST(PortalTraversalTests, AWalkFromNowhereIsEmptyRatherThanUndefined)
     input.world = nullptr;
     walk.Run(input);
     EXPECT_TRUE(walk.Visible().empty());
+}
+
+TEST(PortalTraversalTests, TheHardStopKeepsTheBiggestAndCountsWhatItThrewAway)
+{
+    // `HOUSE-00671`, R-08's graceful degradation and §71.2's hard fail at 30 visible cells. §12's
+    // house cannot reach it -- the worst of 40 poses with every door open is 12 -- so the fixture
+    // is a room with forty doorways in one wall, which is what a traversal that has run away looks
+    // like from the inside.
+    IdRegistry::ResetForTesting();
+
+    constexpr int kRooms = 40;
+    world::WorldData::Contents contents;
+    world::Level level;
+    level.id = cnahouse::util::Intern("L0");
+    level.name = "Ground";
+    level.ffl = 0.0F;
+    level.ceiling = 2.6F;
+    contents.levels.push_back(level);
+
+    // A 40 m x 20 m hall, and forty 1 m rooms along its northern wall at z = -20.
+    world::Cell hall;
+    hall.id = cnahouse::util::Intern("HALL");
+    hall.level = level.id;
+    hall.name = "Hall";
+    world::Footprint hallBox;
+    hallBox.minX = -20.0F;
+    hallBox.maxX = 20.0F;
+    hallBox.minZ = -20.0F;
+    hallBox.maxZ = 0.0F;
+    hall.boxes.push_back(hallBox);
+    contents.cells.push_back(hall);
+
+    for (int i = 0; i < kRooms; ++i)
+    {
+        world::Cell room;
+        room.id = cnahouse::util::Intern("ROOM_" + std::to_string(i));
+        room.level = level.id;
+        room.name = "Room " + std::to_string(i);
+        world::Footprint box;
+        box.minX = -20.0F + static_cast<float>(i);
+        box.maxX = box.minX + 1.0F;
+        box.minZ = -24.0F;
+        box.maxZ = -20.0F;
+        room.boxes.push_back(box);
+        contents.cells.push_back(room);
+
+        world::Portal portal;
+        portal.id = cnahouse::util::Intern("P_" + std::to_string(i));
+        portal.cellA = hall.id;
+        portal.cellB = room.id;
+        portal.axis = world::PlaneAxis::Z;
+        portal.planeValue = -20.0F;
+        portal.minU = box.minX + 0.05F;
+        portal.maxU = box.maxX - 0.05F;
+        portal.minV = 0.0F;
+        portal.maxV = 2.04F;
+        portal.kind = world::PortalKind::CasedOpening;
+        portal.opacity = world::PortalOpacity::Open;
+        contents.portals.push_back(portal);
+    }
+
+    auto built = world::WorldData::Create(std::move(contents));
+    ASSERT_TRUE(built) << built.Error().ToString();
+    const world::WorldData& data = built.Value();
+    std::vector<PortalRuntime> open = Runtimes(data);
+    OpenEverything(open);
+
+    // Standing at the south end of the hall looking north: §44's 102.4° horizontal at 16:9 covers
+    // 2 x 20 x tan(51.2°) = 50 m at 20 m, so all forty doorways are in frame.
+    PlayerState state;
+    state.position = Vector3(0.0F, state.Rise(), -0.5F);
+    state.yaw = 0.0F;
+    Standing standing;
+    standing.cell = hall.id;
+    standing.camera.SetAspect(16.0F / 9.0F);
+    standing.camera.Update(state, kPlayerEyeHeight, 0.0F);
+    standing.eye = standing.camera.Pose().eye;
+
+    PortalTraversal walk;
+    walk.Run(InputFor(data, open, standing));
+
+    std::printf("  forty doorways: %zu cells kept of %d reached, %d dropped by §71.2's hard stop\n",
+                walk.Visible().size(),
+                walk.Stats().cellsVisited,
+                walk.Stats().cellsDropped);
+
+    ASSERT_GT(walk.Stats().cellsVisited, static_cast<int>(cnahouse::visibility::kMaxVisibleCells))
+        << "the fixture did not reach the cap, so nothing was degraded";
+    EXPECT_EQ(walk.Visible().size(), cnahouse::visibility::kMaxVisibleCells);
+    EXPECT_EQ(walk.Stats().cellsDropped,
+              walk.Stats().cellsVisited - static_cast<int>(cnahouse::visibility::kMaxVisibleCells));
+
+    // The room the player is STANDING IN is never a candidate: a frame without it has no floor.
+    EXPECT_EQ(walk.Visible()[0].cell, hall.id);
+    EXPECT_TRUE(walk.IsVisible(hall.id));
+
+    // ...and what survived is what covers most of the screen. Measured independently here, from
+    // each doorway's own corners rather than from the walk's stored rectangles: the smallest room
+    // kept has to be at least as big as the biggest one dropped.
+    //
+    // Which doorways those are is NOT the ones nearest the middle. A rectilinear projection
+    // stretches the edges of a 102° frame, so a doorway 19.5 m off the centre line covers more
+    // screen than one at 8.5 m -- the first version of this test asserted the opposite and was
+    // measuring its own assumption rather than the code.
+    const auto& viewProjection = InputFor(data, open, standing).viewProjection;
+    float smallestKept = 1e9F;
+    float biggestDropped = 0.0F;
+    for (int i = 0; i < kRooms; ++i)
+    {
+        const world::Portal& portal = data.Portals()[static_cast<std::size_t>(i)];
+        const std::array<Vector3, 4> corners{Vector3(portal.minU, portal.minV, portal.planeValue),
+                                             Vector3(portal.maxU, portal.minV, portal.planeValue),
+                                             Vector3(portal.maxU, portal.maxV, portal.planeValue),
+                                             Vector3(portal.minU, portal.maxV, portal.planeValue)};
+        const cnahouse::visibility::NdcRect rect = cnahouse::visibility::NdcBounds(corners, viewProjection);
+        const float area = rect.Empty() ? 0.0F : (rect.maxX - rect.minX) * (rect.maxY - rect.minY);
+        if (walk.IsVisible(cnahouse::util::Intern("ROOM_" + std::to_string(i))))
+        {
+            smallestKept = std::min(smallestKept, area);
+        }
+        else
+        {
+            biggestDropped = std::max(biggestDropped, area);
+        }
+    }
+    std::printf("  smallest room kept covers %.5f of the screen; biggest dropped %.5f\n",
+                static_cast<double>(smallestKept),
+                static_cast<double>(biggestDropped));
+    EXPECT_GE(smallestKept, biggestDropped)
+        << "the hard stop dropped a room that covers more of the screen than one it kept";
 }

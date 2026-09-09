@@ -9445,8 +9445,30 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             update, the set being this frame's and computed once, a door opening changing it with
             the camera still, the exterior sweep, and a frame before anyone has said where the
             camera is. Five injected bugs, five caught.
-- [ ] HOUSE-00671 — Implement the `maxVisibleCells` hard stop with graceful degradation (drop the smallest-frustum cells first) and a counter
+- [x] HOUSE-00671 — Implement the `maxVisibleCells` hard stop with graceful degradation (drop the smallest-frustum cells first) and a counter
       dep: HOUSE-00670 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) `kMaxVisibleCells = 30` -- §71.2's *hard fail* row, enforced rather than
+            hoped for -- with R-08's graceful degradation: past it the walk keeps the thirty cells
+            covering the most screen and drops the rest, and `TraversalStats::cellsDropped` counts
+            them. This is the ONE place in §25 where something the player can see is culled, which
+            is why it is counted and why the counter is the loudest in the struct.
+      note: **§12's house cannot reach it** -- the worst of 40 poses with every door open is 12 --
+            so the fixture is a hall with forty doorways in one wall, which is what a traversal
+            that has run away looks like from the inside. 41 cells reached, 30 kept, 11 dropped.
+      finding: **the biggest doorways on screen are NOT the ones nearest the middle of the view.**
+            A rectilinear projection stretches the edges of a 102° frame, so a doorway 19.5 m off
+            the centre line covers more of the screen than one at 8.5 m. The first version of this
+            test asserted the opposite and was measuring its own assumption; the assertion now
+            computes each doorway's screen rectangle independently and requires the smallest KEPT
+            to be at least as big as the biggest DROPPED.
+      note: the camera's own cell is pinned out of the sort. Not observable today -- its rectangle
+            is the whole screen, so it sorts first anyway, and an injection that includes it is
+            correctly reported as changing nothing -- and kept because the failure it prevents is a
+            frame with no floor, which is not a thing to leave to a sort order.
+      verified: 1 more `PortalTraversalTests` over the forty-doorway fixture -- the cap reached,
+            the count, the camera cell kept, and the kept/dropped split ranked against an
+            independently computed screen area. Four injected bugs, four caught (a fifth, moving
+            the camera cell into the sort, changes nothing and is recorded rather than counted).
 - [ ] HOUSE-00672 — Implement per-cell chunk culling against the cell's frusta
       dep: HOUSE-00670, HOUSE-00474 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00673 — Implement per-cell dynamic-instance culling

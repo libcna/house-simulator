@@ -181,10 +181,47 @@ namespace cnahouse::visibility
             }
         }
 
+        Degrade();
+
         for (const VisibleCell& cell : visible_)
         {
             stats_.diffuseCells += Has(cell.flags, ConeFlags::Diffuse) ? 1 : 0;
         }
+    }
+
+    void PortalTraversal::Degrade()
+    {
+        if (visible_.size() <= kMaxVisibleCells)
+        {
+            return;
+        }
+
+        // R-08's graceful degradation: keep the cells with the biggest share of the screen. The
+        // camera's own cell is never a candidate -- it is `visible_[0]`, the room the player is
+        // standing in, and dropping it would be a frame with no floor.
+        //
+        // Sorted only when the cap is exceeded, which measurement says is never in this house: the
+        // ordinary path keeps the walk's breadth-first order, which is what `F3` reads.
+        std::stable_sort(
+            visible_.begin() + 1,
+            visible_.end(),
+            [](const VisibleCell& a, const VisibleCell& b)
+            {
+                const auto area = [](const VisibleCell& cell)
+                {
+                    float biggest = 0.0F;
+                    for (std::size_t i = 0; i < cell.frustumCount; ++i)
+                    {
+                        const NdcRect& rect = cell.rects[i];
+                        biggest = std::max(
+                            biggest, rect.Empty() ? 0.0F : (rect.maxX - rect.minX) * (rect.maxY - rect.minY));
+                    }
+                    return biggest;
+                };
+                return area(a) > area(b);
+            });
+        stats_.cellsDropped = static_cast<int>(visible_.size() - kMaxVisibleCells);
+        visible_.resize(kMaxVisibleCells);
     }
 
 } // namespace cnahouse::visibility

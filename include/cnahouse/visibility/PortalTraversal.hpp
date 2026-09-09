@@ -56,6 +56,19 @@ namespace cnahouse::visibility
         return (static_cast<std::uint8_t>(flags) & static_cast<std::uint8_t>(one)) != 0;
     }
 
+    /// @brief §71.2's hard stop on the visible set, and R-08's answer to a traversal that runs
+    ///        away (`HOUSE-00671`).
+    ///
+    /// §71.2 budgets 9 visible cells typically, 22 in the worst case and calls 30 a **hard fail**.
+    /// This is that number, enforced rather than hoped for: past it the walk keeps the thirty cells
+    /// with the largest share of the screen and drops the rest, which is the one place in §25 where
+    /// something the player CAN see is culled. It is counted for exactly that reason -- a frame
+    /// that had to degrade is a frame worth knowing about, and R-08 asks for graceful degradation
+    /// rather than a frame that misses its budget.
+    ///
+    /// Measured (`HOUSE-00668`): with EVERY door in this house open, the worst of 40 poses is 12.
+    inline constexpr std::size_t kMaxVisibleCells = 30;
+
     /// @brief One cell the walk decided the camera can see, and through which cones.
     struct VisibleCell
     {
@@ -100,6 +113,10 @@ namespace cnahouse::visibility
         int maxDepth = 0;
         /// @brief Cells every cone into which came through §15.4's frosted glass.
         int diffuseCells = 0;
+        /// @brief Cells §71.2's hard stop threw away. **Non-zero means something visible was
+        ///        culled**, which is a frame that missed its budget rather than a frame that was
+        ///        drawn wrong -- but it is still the loudest counter in this struct.
+        int cellsDropped = 0;
     };
 
     /// @brief §25.2's portal walk: breadth-first from the camera's cell, one reduced frustum per
@@ -165,6 +182,9 @@ namespace cnahouse::visibility
         };
 
         VisibleCell& Reach(util::Id cell, int depth, ConeFlags flags);
+
+        /// @brief §71.2's hard stop, applied after the walk: keep the biggest, count the rest.
+        void Degrade();
 
         std::vector<VisibleCell> visible_;
         std::vector<Work> queue_;
