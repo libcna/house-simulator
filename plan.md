@@ -10233,8 +10233,28 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: 3 `AjarDoorTests`, and `DoorStand.hpp` extracted so `HOUSE-00687`'s stand-in-front-
             of-a-door arithmetic has one home rather than two that drift. Four injected bugs, all
             caught.
-- [ ] HOUSE-00692 — Test: window visibility from outside is capped at depth 1
+- [x] HOUSE-00692 — Test: window visibility from outside is capped at depth 1
       dep: HOUSE-00680 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-09) over the WINDOWS and not over poses: §12 has **67 glazed openings between
+            the outdoors and a room**, and 62 of them have a yard to stand a body in front of.
+            `OutdoorDepthTests` makes the claim about whatever four gardens happen to show; this
+            makes it one window at a time.
+      measured: **103 room sightings through glass from outside, every one of them at depth 1** and
+            carrying glazing's allowance of 1. From inside the same windows, 81 sightings are
+            deeper than that -- which is the asymmetry §25.2 exists to state: from a room a window
+            onto the garden is worth three, because the garden is where the neighbourhood, the
+            terrain and the sky are.
+      finding: **the claim has to be made about the CHAIN and not about the pose**, and the house
+            proved it twice. Standing on the porch in front of the foyer's sidelight with every
+            door open, `L0_HALL` is visible at depth 2 -- through the front DOOR beside the window,
+            which §25.2's other exterior row is worth 2. Standing inside the foyer, `EXT_WORLD` is
+            at depth 4 through the same door, worth 6 from inside. Both are the table working. The
+            test therefore runs the outdoor case with every door SHUT -- where glass is the only way
+            in, so every interior cell reached came through it -- and, with them open, asserts only
+            about cells whose `allowance` is glazing's.
+      verified: 3 `WindowDepthTests`. Four injected bugs, all caught -- the two glazed rows of the
+            table, the chain keeping the loosest cap instead of the tightest, and a camera outdoors
+            being read as indoors.
 - [ ] HOUSE-00693 — Test: the stair well makes three floors visible from the foyer, and the basement/attic doors cut their levels off entirely
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00694 — Measure visibility cost in all 10 performance scenarios against the 0.55/1.20 ms budget
