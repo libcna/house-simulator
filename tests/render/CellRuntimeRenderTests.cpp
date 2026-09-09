@@ -162,6 +162,98 @@ TEST(CellRuntimeRenderTests, LoadingIsIdempotentAndUnloadingReleases)
         });
 }
 
+TEST(CellRuntimeRenderTests, TheChunkIndexIsTheDrawListsWayBackToTheBuffers)
+{
+    // `HOUSE-00676`. Residency is per CELL and a draw list is per chunk, and the sort has thrown
+    // the cell grouping away on purpose -- so a `RenderItem` naming chunk 7 has to reach chunk 7's
+    // two buffers without knowing which room it came from.
+    const ChunkLibrary library = LoadFixture();
+    ASSERT_EQ(library.chunks.size(), 3u);
+    WithDevice(
+        [&library](GraphicsDevice& device)
+        {
+            CellRuntime runtime(device, library);
+            EXPECT_TRUE(runtime.ResidentChunkIndices().empty());
+            EXPECT_EQ(runtime.Find(0u), nullptr) << "nothing is resident, so nothing is findable";
+
+            ASSERT_TRUE(runtime.Load("L0_LOUNGE"));
+            ASSERT_TRUE(runtime.Load("L0_HALL"));
+            // ASCENDING, and therefore the file's order rather than the order the cells arrived
+            // in: two sessions that loaded the same rooms the other way round must submit the
+            // same frame.
+            const std::vector<std::uint32_t> indices(runtime.ResidentChunkIndices().begin(),
+                                                     runtime.ResidentChunkIndices().end());
+            EXPECT_EQ(indices, (std::vector<std::uint32_t>{0u, 1u, 2u}));
+
+            for (const std::uint32_t index : indices)
+            {
+                const auto* found = runtime.Find(index);
+                ASSERT_NE(found, nullptr) << "chunk " << index;
+                EXPECT_EQ(found->chunk, index) << "the index found somebody else's chunk";
+                EXPECT_NE(found->vertices.get(), nullptr);
+                EXPECT_EQ(found->primitiveCount, library.chunks[index].indexCount / 3u);
+            }
+            EXPECT_EQ(runtime.Find(static_cast<std::uint32_t>(library.chunks.size())), nullptr)
+                << "an index past the file must not be dereferenced";
+            EXPECT_EQ(runtime.Find(4000000u), nullptr);
+
+            // Unloading takes its chunks out of both answers, rather than leaving a pointer into
+            // a vector that has just been erased.
+            const auto* hall = runtime.Chunks("L0_HALL");
+            ASSERT_NE(hall, nullptr);
+            const std::uint32_t gone = hall->front().chunk;
+            runtime.Unload("L0_HALL");
+            EXPECT_EQ(runtime.Find(gone), nullptr);
+            EXPECT_EQ(runtime.ResidentChunkIndices().size(), runtime.ResidentChunks());
+
+            runtime.UnloadAll();
+            EXPECT_TRUE(runtime.ResidentChunkIndices().empty());
+        });
+}
+
+TEST(CellRuntimeRenderTests, TheResidentIndicesAreTheFilesOrderAndNotTheCellMaps)
+{
+    // The guarantee the fixture cannot check. `chunks.bin` happens to list its chunks grouped by
+    // cell in the same order the cell table sorts them, so walking the resident MAP gives ascending
+    // indices there by coincidence. Nothing in `docs/chunk-format.md` promises that, so this
+    // library is built by hand with the two orders deliberately disagreeing: cell `A` owns chunk 1
+    // and cell `B` owns chunks 0 and 2.
+    ChunkLibrary library;
+    library.cells = {"A_ROOM", "B_ROOM"};
+    library.materials = {"BLOCKOUT_wall"};
+    for (const std::uint16_t cell : {std::uint16_t{1}, std::uint16_t{0}, std::uint16_t{1}})
+    {
+        cnahouse::world::Chunk chunk;
+        chunk.cell = cell;
+        chunk.material = 0u;
+        chunk.layout = ChunkLayout::Basic;
+        chunk.vertexCount = 3u;
+        chunk.vertices.assign(3u * cnahouse::world::ChunkVertexStride(ChunkLayout::Basic), 0u);
+        chunk.indexCount = 3u;
+        chunk.indices.assign(3u * sizeof(std::uint16_t), 0u);
+        library.chunks.push_back(std::move(chunk));
+    }
+
+    WithDevice(
+        [&library](GraphicsDevice& device)
+        {
+            CellRuntime runtime(device, library);
+            // Loaded in the order that makes the mistake visible: the cell holding the LATER
+            // chunks first.
+            ASSERT_TRUE(runtime.Load("B_ROOM"));
+            ASSERT_TRUE(runtime.Load("A_ROOM"));
+            const std::vector<std::uint32_t> indices(runtime.ResidentChunkIndices().begin(),
+                                                     runtime.ResidentChunkIndices().end());
+            EXPECT_EQ(indices, (std::vector<std::uint32_t>{0u, 1u, 2u}))
+                << "the cell map's order reached the draw list instead of the file's";
+            for (const std::uint32_t index : indices)
+            {
+                ASSERT_NE(runtime.Find(index), nullptr) << index;
+                EXPECT_EQ(runtime.Find(index)->chunk, index);
+            }
+        });
+}
+
 TEST(CellRuntimeRenderTests, ACellTheFileDoesNotHaveIsNotFound)
 {
     const ChunkLibrary library = LoadFixture();

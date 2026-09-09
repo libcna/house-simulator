@@ -39,6 +39,7 @@
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
+#include "cnahouse/visibility/RenderList.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkData.hpp"
 #include "cnahouse/world/SpatialIndex.hpp"
@@ -101,6 +102,22 @@ namespace cnahouse::app
         [[nodiscard]] const player::PlayerState& PlayerForTesting() const noexcept
         {
             return player_;
+        }
+
+        /// @brief §25.1's step 5 for the last frame drawn (`HOUSE-00676`).
+        ///
+        /// Readable after `Run()` because what the passes were asked to draw is a fact about the
+        /// FRAME, and the only alternative is to infer it from the picture -- which cannot tell a
+        /// chunk that was culled from one that was drawn behind another.
+        [[nodiscard]] const visibility::RenderList& RenderListForTesting() const noexcept
+        {
+            return renderList_;
+        }
+
+        /// @brief §71's counters, so an integration test can read what a frame actually submitted.
+        [[nodiscard]] const debug::Counters& CountersForTesting() const noexcept
+        {
+            return counters_;
         }
 
         /// @brief §71's `F9`, for the test that presses the key.
@@ -344,6 +361,12 @@ namespace cnahouse::app
         /// @brief Copies §44's camera into the renderer's, which is what the pass draws through.
         void ApplyPlayerCamera();
 
+        /// @brief §25.1's step 5 for this frame: fills `renderList_` and lets the passes sort it.
+        ///
+        /// Called at the top of `RenderFrame`, because it needs the camera the frame will be drawn
+        /// with and the passes read it immediately after.
+        void BuildRenderList();
+
         /// @brief Builds and draws §71's `F9` through `debugDraw_`. Does nothing when hidden.
         void DrawPhysicsOverlay();
 
@@ -371,6 +394,11 @@ namespace cnahouse::app
         std::unique_ptr<world::CellRuntime> blockoutCells_;
         rendering::Camera blockoutCamera_;
         debug::FreeFlyCamera freeFly_;
+        /// §25.1's step 5 (`HOUSE-00675`): the frame's sorted draw list, rebuilt every frame and
+        /// read by the passes. Owned here rather than by a pass because §17.1 gives it to the
+        /// renderer and not to any one pass -- several of them read their own slice of the one
+        /// list, and the sort that makes those slices contiguous has to happen once.
+        visibility::RenderList renderList_;
 
         /// §16's world and §49.2's collision, loaded only by `--scene=walk`. Held as options
         /// because both are large and neither has a meaningful empty state.

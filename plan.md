@@ -105,7 +105,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 3 | Content pipeline | 00181–00260 | 45 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 80 | The full layout authored, validated and loaded |
-| 6 | Blockout house geometry | 00451–00540 | 34 | The generated shell renders |
+| 6 | Blockout house geometry | 00451–00540 | 35 | The generated shell renders |
 | 7 | Collision and player controller | 00541–00620 | 35 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 37 | Culling correct, proved, and within budget |
@@ -7492,6 +7492,27 @@ the chunk builder produces ≤ 6 chunks per cell.
             between cells that share a boundary PLANE, which a cell wholly inside another does
             not. One opening of 130, on a fridge; left for whoever gives a container an interior
             that has to be looked into.
+- [ ] HOUSE-00485 — Fix the shell's coplanar wall/exterior faces where two cells abut
+      dep: HOUSE-00484 · sys: content · plat: TOOL · pri: SHOULD
+      finding: (2026-09-09, found by `HOUSE-00676`) **`house_shell_gen.py` draws two surfaces in the
+            same plane, facing the same way, wherever a cell's exterior skin lands on another
+            cell's wall.** Measured: `L0_GARAGE`'s west wall is the plane x = 8.825 facing east
+            (32 of its 66 wall triangles), and the `exterior` faces of `L0_MUDROOM`,
+            `B1_ELECTRICAL`, `B1_MECHANICAL`, `B1_UTILITY`, `L0_LAUNDRY`, `L1_BATH3` and
+            `L1_BED5` -- 22 triangles over seven cells -- are on that same plane with the same
+            normal. Both are front-facing from inside the garage, so which one a pixel shows is
+            decided by the order the two chunks were submitted in, and nothing else.
+      note: it was INVISIBLE until §25.1's step 5 sorted the draw list. The pass used to submit
+            cell by cell, and the garage's own wall happened to lose; sorted by material, `wall`
+            (index 9) draws after `exterior` (index 1) and wins. The picture is deterministic
+            either way -- what changed is which arbitrary answer it is, and `fp-l0-garage.png` was
+            regenerated to the new one, which is also the more sensible of the two: standing in the
+            garage you now see the garage's own wall rather than the house's outside skin.
+      note: the fix is the generator's, not the sort's: a cell boundary shared with another cell
+            should draw ONE surface, not one per side. Left as its own task because it changes the
+            shell that eight render fixtures are pictures of, and because the two decisions above
+            (the attic stair, the basement hatch) show that shell geometry is where an
+            architectural question hides.
 
 ---
 
@@ -9590,8 +9611,46 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             counting state changes by material alone survived the real house (where every material
             has one effect and every chunk is opaque, so the three components change together), and
             a slice taken from offset zero survived a length-only assertion on `ItemsFor`.
-- [ ] HOUSE-00676 — Wire `RenderList` into the opaque static pass, replacing the draw-everything path
+- [x] HOUSE-00676 — Wire `RenderList` into the opaque static pass, replacing the draw-everything path
       dep: HOUSE-00675, HOUSE-00475 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-09) `StaticGeometryPass` no longer decides what to draw. It walked
+            `library_.cells` and `CellRuntime::Chunks(cell)` itself; it now draws
+            `RenderList::ItemsFor(Pass::OpaqueStatic)` and `CnaHouseGame::BuildRenderList` decides.
+            `CellRuntime` gained the direction a draw list needs -- `ResidentChunkIndices()` and
+            `Find(chunk)` -- because the sort throws the cell grouping away on purpose and an item
+            names a chunk, not a room.
+      measured: **418 chunks, 12 state changes.** The list arrives grouped by material, so the
+            blockout colour is written and `Apply`d once per RUN rather than once per chunk: 418
+            applies before, 12 after, against §71.2's budget of 90. The draw calls are unchanged at
+            418, which is the point -- the sort buys state changes, not draws.
+      note: the pass loop is the OUTER one, which is what makes the hoist legal. Each `EffectPass`'s
+            `Apply` has to precede its own draw, so a technique with two passes must submit the run
+            twice; `BasicEffect` has one, so it turns once. Written the other way round the hoist
+            would silently draw the house under the last pass only.
+      note: the list still holds every RESIDENT chunk and not §25's visible set, and
+            `BuildRenderList` is the one place that says so. Every portal with a leaf starts closed
+            (§25.3, `PortalRuntime`) and nothing opens one until §65's doors, so a walk driven by
+            the traversal today would be a correct picture of one room. `HOUSE-00684`'s
+            `cull off|on` and `HOUSE-00688`'s over-culling comparison are where the source is
+            switched, and no pass changes when it is.
+      finding: **the sort exposed a coplanar pair in the shell that draw order had been hiding.**
+            `fp-l0-garage.png` changed on 73 571 of 230 400 pixels, from `BLOCKOUT_exterior` blue to
+            `BLOCKOUT_wall` green: the garage's west wall and seven other cells' exterior skin are
+            the same plane facing the same way. Recorded as `HOUSE-00485` with the measurement; the
+            reference was regenerated because the new answer is deterministic AND the more sensible
+            one, and it is the only one of the 29 render fixtures that moved.
+      verified: 2 `StaticGeometryPassTests` (the list's items drawn against a real device, a chunk
+            in the list whose cell is not resident skipped rather than dereferenced, two materials
+            costing two binds, an empty list and another pass's items both meaning "nothing to
+            do"), 2 new `CellRuntimeRenderTests` (the chunk index reaching its buffers, unloading
+            taking its chunks out of both answers, and a hand-built library whose file order and
+            cell order disagree, which is what the real file cannot check), 1 new `HeadlessRunTests`
+            case (a real four-frame session: 418 submitted, 12 state changes, the list sorted,
+            cleared between frames, and the pass's count and the list's agreeing to the one bind
+            that is not a change). Sixteen injected bugs, all caught -- two only after the suite was
+            strengthened: the not-resident guard is unreachable from the game (every chunk is
+            resident) and needed the pass tested directly, and the resident indices' ascending order
+            is a coincidence in the real file and needed a library built by hand.
 
 ### 9.2 Exterior visibility
 
@@ -11832,19 +11891,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 298 numbered tasks across 53 phases.**
+**1 299 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 237 |
-| World data, blockout, collision, camera, visibility | 5–9 | 200 |
+| World data, blockout, collision, camera, visibility | 5–9 | 201 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 130 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 146 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 161 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 298** |
+| **Total** | **0–52** | **1 299** |
 
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
@@ -11889,6 +11948,7 @@ evidence that it fails.
 | 2026-09-06 | `HOUSE-00068` | `accept: the failure mode is documented so the pipeline can assert against it` → the actual behaviour is measured and documented, and `BL-06` is corrected. `cna-house.md` §6 `BL-06` rewritten and downgraded from severity `L` to a pipeline note. | **The task's premise was measured false.** `BL-06` predicted 24-bit PCM is rejected. It is not, by either path: `cna-content`'s `SoundEffectProcessor` converts it to 16-bit with a warning and exit code 0, and `SoundEffect::FromStream` accepts a raw 24-bit WAV without throwing. The conversion is byte-identical to `ffmpeg -c:a pcm_s16le` (29 of 96 304 bytes differ, all header; PCM identical from byte 400 to EOF). There is no failure mode to document, so the criterion as written was unsatisfiable. Phase 1 exists to measure, and a measurement is never massaged to fit the architecture. |
 | 2026-09-06 | `HOUSE-00069` | `BL-06`'s workaround command `ffmpeg -i in.wav -c:a pcm_s16le -ar 44100 out.wav` → `ffmpeg -i in.wav -c:a pcm_s16le out.wav`; the offline step is re-scoped from format conversion to provenance capture | Measuring the two halves separately showed the resample, not the bit-depth reduction, is what damages the signal: 24→16 bit costs 0.0017 dB RMS, while adding `-ar 44100` costs 0.889 dB RMS and 0.26 dB peak on a high-frequency NOX source. The collection is uniformly 48 kHz, CNA loaded and played a 48 kHz asset correctly, and the mixer resamples at playback anyway, so the offline resample bought nothing and cost signal. |
 | 2026-09-06 | `HOUSE-00063` | No text change to the task; a finding recorded against `HOUSE-00136` and `HOUSE-00124` | `CNA_CNAEXT=OFF` removes the `CNA::Graphics::` engine layer (6 277 symbols → 0; archive 37.4 MB → 69 kB) but **not** the other forbidden identifiers, which live in `Microsoft::Xna::Framework::Graphics` in CNA's always-compiled core and are present in the linked binary. `check_xna_only.py` is therefore the *only* gate for those, not a redundant one. `HOUSE-00136` must be scoped to what can actually be asserted at the symbol level. |
+| 2026-09-09 | `HOUSE-00485` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00676`: `house_shell_gen.py` draws a cell's exterior skin in the same plane, facing the same way, as the abutting cell's wall -- measured at `L0_GARAGE`'s x = 8.825 west wall against the `exterior` faces of seven other cells. | Two coplanar front-facing surfaces are a z-fight whose winner is decided by submission order and nothing else. It was invisible while the opaque pass submitted cell by cell; sorting the draw list by material (§25.1 step 5) changed which arbitrary answer the garage shows, which is how it was noticed. The generator is where a shared boundary should draw one surface rather than two, and that changes the shell eight render fixtures are pictures of -- so it is its own task rather than a correction folded into a rendering one. No id was renumbered or struck. |
 
 ---
 

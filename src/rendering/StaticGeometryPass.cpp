@@ -82,10 +82,12 @@ namespace cnahouse::rendering
 
     StaticGeometryPass::StaticGeometryPass(const world::ChunkLibrary& library,
                                            const world::CellRuntime& cells,
-                                           const Camera& camera)
+                                           const Camera& camera,
+                                           visibility::RenderList& list)
         : library_(library)
         , cells_(cells)
         , camera_(camera)
+        , list_(list)
     {
     }
 
@@ -93,13 +95,18 @@ namespace cnahouse::rendering
 
     bool StaticGeometryPass::IsActive() const
     {
-        return cells_.ResidentChunks() > 0;
+        // What the LIST holds, not what is resident: residency is what the pass can draw and the
+        // list is what it was asked to. A frame whose list is empty has nothing for this pass even
+        // with the whole house on the GPU, and saying so is what makes "ran" and "had nothing to
+        // do" different numbers in the overlay.
+        return list_.Has(Pass::OpaqueStatic);
     }
 
     void StaticGeometryPass::Draw(PassContext& context)
     {
         chunksDrawn_ = 0u;
         trianglesDrawn_ = 0u;
+        stateChanges_ = 0u;
         Gfx::GraphicsDevice& device = context.device;
 
         if (effect_ == nullptr)
@@ -128,41 +135,63 @@ namespace cnahouse::rendering
 
         Gfx::EffectPassCollection& passes = effect_->getCurrentTechniqueProperty()->getPassesProperty();
 
-        for (const std::string& cell : library_.cells)
+        // §25.1's step 5 sorted this by material, so the blockout colour is written once per RUN of
+        // chunks that share one rather than once per chunk -- which is the whole return on the
+        // sort, and what §71.2 counts as a state change.
+        //
+        // The pass loop is the OUTER one, which is what lets `Apply` be hoisted at all: each pass's
+        // `Apply` has to precede its own draw, so a technique with two of them must submit the run
+        // twice. `BasicEffect` has one, so this loop turns once -- but written the other way round
+        // it would be a hoist that silently drew the house under the last pass only.
+        const int passCount = passes.getCountProperty();
+        for (int p = 0; p < passCount; ++p)
         {
-            const auto* chunks = cells_.Chunks(cell);
-            if (chunks == nullptr)
+            bool bound = false;
+            std::uint16_t boundMaterial = 0u;
+            for (const visibility::RenderItem& item : list_.ItemsFor(Pass::OpaqueStatic))
             {
-                continue;
-            }
-            for (const auto& resident : *chunks)
-            {
-                const world::Chunk& chunk = library_.chunks[resident.chunk];
-                effect_->setDiffuseColorProperty(BlockoutColour(library_.materials[chunk.material]));
-                device.SetVertexBuffer(resident.vertices.get());
-                device.setIndicesProperty(resident.indices.get());
-                for (int p = 0; p < passes.getCountProperty(); ++p)
+                const world::CellRuntime::ResidentChunk* resident = cells_.Find(item.geometry);
+                if (resident == nullptr)
                 {
-                    // The colour changes per chunk, so `Apply` is per chunk too: it is what copies
-                    // the effect's parameters to the device, and hoisting it out of this loop would
-                    // draw the whole house in whatever colour the first chunk happened to be.
-                    passes[p].Apply();
-                    device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList,
-                                                 0,
-                                                 0,
-                                                 static_cast<int>(chunk.vertexCount),
-                                                 0,
-                                                 static_cast<int>(resident.primitiveCount));
+                    // The list named a chunk whose cell is not resident. Skipped and not fatal:
+                    // residency and visibility are two answers arriving from different systems, and
+                    // the frame in between must draw the house it has rather than stop.
+                    continue;
                 }
-                ++chunksDrawn_;
-                trianglesDrawn_ += resident.primitiveCount;
+                const world::Chunk& chunk = library_.chunks[item.geometry];
+                device.SetVertexBuffer(resident->vertices.get());
+                device.setIndicesProperty(resident->indices.get());
+                if (!bound || item.material != boundMaterial)
+                {
+                    effect_->setDiffuseColorProperty(BlockoutColour(library_.materials[item.material]));
+                    // `Apply` is what copies the effect's parameters to the device, so it belongs
+                    // with the parameter that changed and nowhere else. AFTER the buffers, which is
+                    // the order the pass has always bound them in.
+                    passes[p].Apply();
+                    boundMaterial = item.material;
+                    bound = true;
+                    ++stateChanges_;
+                }
+                device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList,
+                                             0,
+                                             0,
+                                             static_cast<int>(chunk.vertexCount),
+                                             0,
+                                             static_cast<int>(resident->primitiveCount));
+                if (p == 0)
+                {
+                    ++chunksDrawn_;
+                    trianglesDrawn_ += resident->primitiveCount;
+                }
             }
         }
 
         static const debug::Counters::Handle kChunks = context.counters.Resolve("static.chunks");
         static const debug::Counters::Handle kTriangles = context.counters.Resolve("static.triangles");
+        static const debug::Counters::Handle kStates = context.counters.Resolve("static.stateChanges");
         context.counters.Set(kChunks, static_cast<std::int64_t>(chunksDrawn_));
         context.counters.Set(kTriangles, static_cast<std::int64_t>(trianglesDrawn_));
+        context.counters.Set(kStates, static_cast<std::int64_t>(stateChanges_));
     }
 
 } // namespace cnahouse::rendering

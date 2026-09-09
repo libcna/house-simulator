@@ -139,6 +139,23 @@ namespace cnahouse::visibility
         /// comes back is that pass's items in the order §7.5 wants them.
         [[nodiscard]] std::span<const RenderItem> ItemsFor(rendering::Pass pass);
 
+        /// @brief Whether @p pass has anything in the list.
+        ///
+        /// Const and order-independent -- a linear scan, not a search -- because a pass is asked
+        /// whether it is active BEFORE the frame is submitted, and sorting the list to answer that
+        /// would make asking a question change what `Items` returns.
+        [[nodiscard]] bool Has(rendering::Pass pass) const noexcept
+        {
+            for (const RenderItem& item : items_)
+            {
+                if (item.pass == pass)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         [[nodiscard]] std::size_t Size() const noexcept
         {
             return items_.size();

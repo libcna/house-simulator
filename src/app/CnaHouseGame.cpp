@@ -582,7 +582,7 @@ namespace cnahouse::app
         // which is what makes `blockout-01` a fixed frame.
         freeFly_.Adopt(blockoutCamera_);
         auto pass = std::make_unique<rendering::StaticGeometryPass>(
-            *blockoutChunks_, *blockoutCells_, blockoutCamera_);
+            *blockoutChunks_, *blockoutCells_, blockoutCamera_, renderList_);
         // `--scene=blockout-normals` is the same house with the culling reversed (`HOUSE-00478`).
         // A separate scene name rather than a key, because what looks at it is a render test.
         pass->SetShowBackFaces(options_.scene.has_value() && *options_.scene == kBackFaceScene);
@@ -997,12 +997,32 @@ namespace cnahouse::app
 
     void CnaHouseGame::RenderFrame()
     {
+        BuildRenderList();
         getGraphicsDeviceProperty().Clear(ClearColour());
         rendering::PassContext context{getGraphicsDeviceProperty(), *states_, counters_, smoothedDelta_};
         renderer_.Draw(context);
         // AFTER the passes and before the HUD: §71's `F9` annotates the world it is drawn over,
         // and a wireframe under the geometry is a wireframe nobody can see.
         DrawPhysicsOverlay();
+    }
+
+    void CnaHouseGame::BuildRenderList()
+    {
+        renderList_.Clear();
+        if (blockoutChunks_ == nullptr || blockoutCells_ == nullptr)
+        {
+            return;
+        }
+        // **Every resident chunk, and §25's visible set is not consulted yet.** The traversal is
+        // built and tested (`HOUSE-00670`-`HOUSE-00673`), but every portal that has a leaf starts
+        // CLOSED (§25.3, `PortalRuntime`) and nothing opens one until §65's doors exist -- so a
+        // walk driven by the visible set would be a picture of one room with the rest of the house
+        // culled correctly and invisibly. `HOUSE-00684`'s `cull off|on` and `HOUSE-00688`'s
+        // over-culling comparison are where that source is switched over, and nothing here changes
+        // when it is: this function is the only place that decides.
+        const Microsoft::Xna::Framework::Vector3 eye =
+            walking_ ? view_.Camera().Pose().eye : blockoutCamera_.eye;
+        renderList_.AddChunks(*blockoutChunks_, blockoutCells_->ResidentChunkIndices(), eye);
     }
 
     void CnaHouseGame::DrawPhysicsOverlay()

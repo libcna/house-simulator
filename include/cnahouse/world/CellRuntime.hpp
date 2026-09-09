@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -89,6 +90,26 @@ namespace cnahouse::world
         /// @brief @p cell's chunks, or `nullptr` when it is not resident.
         [[nodiscard]] const std::vector<ResidentChunk>* Chunks(std::string_view cell) const;
 
+        /// @brief Every resident chunk's index into the library, ascending (`HOUSE-00676`).
+        ///
+        /// What a draw list is built from. Residency is per CELL and a draw list is per chunk, so
+        /// somebody has to flatten one into the other; doing it here means it happens when a cell
+        /// loads rather than once a frame, and that the answer is in a stable order whatever order
+        /// the cells arrived in.
+        [[nodiscard]] std::span<const std::uint32_t> ResidentChunkIndices() const noexcept
+        {
+            return residentIndices_;
+        }
+
+        /// @brief The buffers for library chunk @p chunk, or `nullptr` when its cell is not
+        ///        resident (`HOUSE-00676`).
+        ///
+        /// The reverse of `Chunks`, and the direction a sorted draw list needs: a `RenderItem`
+        /// names a chunk, and the pass that draws it has to get from that number to two GPU buffers
+        /// without knowing which cell it came from -- the sort has just thrown that grouping away
+        /// on purpose.
+        [[nodiscard]] const ResidentChunk* Find(std::uint32_t chunk) const noexcept;
+
         [[nodiscard]] std::size_t ResidentCells() const
         {
             return resident_.size();
@@ -114,8 +135,19 @@ namespace cnahouse::world
         const ChunkLibrary& library_;
         /// Ordered, so that the resident set is reported in a stable order whatever the load order.
         std::map<std::string, std::vector<ResidentChunk>, std::less<>> resident_;
+        /// @brief Library chunk index -> its buffers, or null. One entry per chunk in the file.
+        ///
+        /// Rebuilt whole after every load and unload rather than patched. Loading is rare and a
+        /// house is a few hundred chunks, so the cost is nothing; patching would mean a stale
+        /// pointer into a vector that has just been erased, which is the one failure mode this
+        /// index could have.
+        std::vector<const ResidentChunk*> byChunk_;
+        std::vector<std::uint32_t> residentIndices_;
 
         [[nodiscard]] util::Result<ResidentChunk> Upload(const Chunk& chunk, std::uint32_t index);
+
+        /// @brief Rebuilds `byChunk_` and `residentIndices_` from `resident_`.
+        void RebuildChunkIndex();
     };
 
 } // namespace cnahouse::world

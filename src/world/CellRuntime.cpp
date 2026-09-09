@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/world/CellRuntime.hpp"
 
+#include <algorithm>
 #include <cstring>
 #include <format>
 
@@ -222,6 +223,7 @@ namespace cnahouse::world
             uploaded.push_back(std::move(*chunk));
         }
         resident_.emplace(std::string(cell), std::move(uploaded));
+        RebuildChunkIndex();
         return {};
     }
 
@@ -231,12 +233,39 @@ namespace cnahouse::world
         if (it != resident_.end())
         {
             resident_.erase(it);
+            RebuildChunkIndex();
         }
     }
 
     void CellRuntime::UnloadAll()
     {
         resident_.clear();
+        RebuildChunkIndex();
+    }
+
+    void CellRuntime::RebuildChunkIndex()
+    {
+        byChunk_.assign(library_.chunks.size(), nullptr);
+        residentIndices_.clear();
+        for (const auto& [name, chunks] : resident_)
+        {
+            for (const ResidentChunk& chunk : chunks)
+            {
+                if (chunk.chunk < byChunk_.size())
+                {
+                    byChunk_[chunk.chunk] = &chunk;
+                    residentIndices_.push_back(chunk.chunk);
+                }
+            }
+        }
+        // Ascending, so the draw list's source is the file's order and not the cell map's. Two
+        // sessions that loaded the same cells in a different order must submit the same frame.
+        std::sort(residentIndices_.begin(), residentIndices_.end());
+    }
+
+    const CellRuntime::ResidentChunk* CellRuntime::Find(std::uint32_t chunk) const noexcept
+    {
+        return chunk < byChunk_.size() ? byChunk_[chunk] : nullptr;
     }
 
     bool CellRuntime::IsResident(std::string_view cell) const

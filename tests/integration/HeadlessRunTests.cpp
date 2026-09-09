@@ -13,6 +13,7 @@
 #include "cnahouse/app/CnaHouseGame.hpp"
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
+#include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/player/FirstPersonView.hpp"
 #include "cnahouse/player/IInputSource.hpp"
 #include "cnahouse/util/Ids.hpp"
@@ -43,6 +44,59 @@ namespace
 
         EXPECT_GE(game.FramesDrawn(), 120u) << "the frame limit must actually stop the loop";
         EXPECT_EQ(game.ExitCode(), 0) << "and it must stop cleanly, not by throwing";
+    }
+
+    TEST(HeadlessRunTests, TheOpaquePassDrawsTheSortedListAndNotTheResidencyMap)
+    {
+        // `HOUSE-00676`. The pass walked the residency map itself until §25.1's step 5 existed;
+        // now the frame builds a list, sorts it, and the pass submits its own slice. What that
+        // buys is measurable and is measured here: the blockout colour is written once per RUN of
+        // chunks sharing a material, so §71.2's *state changes* fall from very nearly one per
+        // chunk to one per material.
+        cnahouse::util::Log::ResetForTesting();
+
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.scene = "blockout";
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 640;
+        settings.backBufferHeight = 360;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetFrameLimit(4);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+
+        const auto& list = game.RenderListForTesting();
+        ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
+        EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
+        // §71.2's 620 draw calls, over FOUR frames: a list that was not emptied between them would
+        // be four houses long and would still draw a correct-looking picture.
+        EXPECT_LE(list.DrawCalls(), 620) << "the list was not cleared between frames";
+
+        const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
+        const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
+        ASSERT_NE(chunks, nullptr);
+        ASSERT_NE(states, nullptr);
+        std::printf("  blockout: %lld chunk(s) submitted, %lld state change(s), list of %zu\n",
+                    static_cast<long long>(chunks->Max()),
+                    static_cast<long long>(states->Max()),
+                    list.Size());
+
+        // Every item in the list was drawn: nothing in it named a chunk the runtime could not find.
+        EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), list.Size());
+        // And the material was bound once per run, not once per chunk. §71.2 budgets 90 typically.
+        EXPECT_GT(states->Max(), 0);
+        EXPECT_LE(states->Max(), 90);
+        EXPECT_LT(states->Max(), chunks->Max() / 4)
+            << "the sort bought nothing: the pass is rebinding almost per chunk";
+        // The pass's own count and the list's agree, which is what says the two are counting the
+        // same thing rather than each counting its own.
+        EXPECT_EQ(states->Max(), list.StateChanges() + 1)
+            << "the list counts CHANGES between neighbours and the pass counts BINDS, so the pass "
+               "is always one ahead -- the first bind is not a change";
     }
 
     /// Presses one key on the first frame and holds nothing afterwards, which is what an EDGE is.

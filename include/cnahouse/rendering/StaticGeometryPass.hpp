@@ -8,6 +8,7 @@
 
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/Renderer.hpp"
+#include "cnahouse/visibility/RenderList.hpp"
 
 namespace Microsoft::Xna::Framework::Graphics
 {
@@ -23,13 +24,19 @@ namespace cnahouse::world
 namespace cnahouse::rendering
 {
 
-    /// @brief `Pass::OpaqueStatic`: every resident cell's chunks, with `BasicEffect` (`HOUSE-00475`).
+    /// @brief `Pass::OpaqueStatic`: the draw list's static slice, with `BasicEffect`
+    ///        (`HOUSE-00475`, `HOUSE-00676`).
     ///
-    /// **No culling.** §25's portal traversal is `HOUSE-00485` onwards; this pass draws what
-    /// `CellRuntime` has made resident, in the order the chunk file lists it, and counts what it
-    /// drew. That is the whole point of drawing the blockout before culling exists: a frame that is
-    /// wrong with everything drawn is wrong in the geometry, and a frame that is wrong once culling
-    /// arrives is wrong in the culling.
+    /// **This pass no longer decides what to draw.** It walked the residency map itself until
+    /// `HOUSE-00676`; now it draws `RenderList::ItemsFor(Pass::OpaqueStatic)` and whoever built the
+    /// list decided. That is §25.1's shape -- step 5 produces a sorted list and the passes submit
+    /// it -- and it is what lets the sort do something: the list arrives grouped by material, so
+    /// the blockout colour is written and `Apply`d once per material instead of once per chunk.
+    ///
+    /// **No culling here either.** What the list holds is somebody else's answer; today the
+    /// blockout and walk scenes put every resident chunk in it, and §25's visible set replaces
+    /// that source without this pass changing at all -- which is the point of taking the decision
+    /// out of it.
     ///
     /// **`BasicEffect` with lighting off, one flat colour per material.** §22.2 puts the receivers
     /// on `DualTextureEffect` and the detail on `BasicEffect`, and neither can draw anything yet:
@@ -41,10 +48,15 @@ namespace cnahouse::rendering
     class StaticGeometryPass final : public IRenderPass
     {
     public:
-        /// @brief Borrows all three; each must outlive this pass.
+        /// @brief Borrows all four; each must outlive this pass.
+        ///
+        /// @param list the frame's draw list. Non-const because the first pass to ask for its own
+        ///        slice sorts it (`RenderList::ItemsFor`), which is what makes a caller that
+        ///        forgot to sort impossible rather than merely unlucky.
         StaticGeometryPass(const world::ChunkLibrary& library,
                            const world::CellRuntime& cells,
-                           const Camera& camera);
+                           const Camera& camera,
+                           visibility::RenderList& list);
         ~StaticGeometryPass() override;
 
         void Draw(PassContext& context) override;
@@ -75,6 +87,16 @@ namespace cnahouse::rendering
             return trianglesDrawn_;
         }
 
+        /// @brief Effect-parameter applications by the last `Draw` -- §71.2's *state changes*.
+        ///
+        /// One per run of chunks sharing a material, which over a sorted list is one per material
+        /// and over an unsorted one is very nearly one per chunk. Counted rather than assumed,
+        /// because it is the only number that says whether §25.1's step 5 bought anything.
+        [[nodiscard]] std::uint32_t StateChanges() const noexcept
+        {
+            return stateChanges_;
+        }
+
         /// @brief The blockout colour of @p material: stable, and derived from the name alone.
         ///
         /// A hash rather than a table, because a table here would be a second copy of
@@ -87,10 +109,12 @@ namespace cnahouse::rendering
         const world::ChunkLibrary& library_;
         const world::CellRuntime& cells_;
         const Camera& camera_;
+        visibility::RenderList& list_;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::BasicEffect> effect_;
         bool showBackFaces_ = false;
         std::uint32_t chunksDrawn_ = 0u;
         std::uint32_t trianglesDrawn_ = 0u;
+        std::uint32_t stateChanges_ = 0u;
     };
 
 } // namespace cnahouse::rendering
