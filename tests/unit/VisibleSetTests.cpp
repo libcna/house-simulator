@@ -157,7 +157,7 @@ TEST(VisibleSetTests, EveryOneOfTheTwentyFourPosesSeesExactlyWhatItSays)
         EXPECT_TRUE(extra.empty()) << pose.name << " also reached " << Join(extra) << " (over-drawing)";
     }
     std::printf("  24 poses reached %zu cell(s) between them, deepest chain %d\n", total, deepest);
-    EXPECT_EQ(total, 101U) << "the poses no longer see what `HOUSE-00685` recorded";
+    EXPECT_EQ(total, 99U) << "the poses no longer see what `HOUSE-00685` recorded";
     // §25.2's interior cap is six and NOTHING in §12 reaches it: the deepest chain any of the
     // twenty-four produces is four, and the numbers that actually stop a walk here are the
     // back-face test and the area cutoff. Asserted so that a house whose chains got longer -- a

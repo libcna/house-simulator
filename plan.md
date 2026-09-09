@@ -105,7 +105,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 3 | Content pipeline | 00181–00260 | 45 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 80 | The full layout authored, validated and loaded |
-| 6 | Blockout house geometry | 00451–00540 | 37 | The generated shell renders |
+| 6 | Blockout house geometry | 00451–00540 | 38 | The generated shell renders |
 | 7 | Collision and player controller | 00541–00620 | 35 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 37 | Culling correct, proved, and within budget |
@@ -7538,6 +7538,24 @@ the chunk builder produces ≤ 6 chunks per cell.
             coverage minimum, which `HOUSE-00684` and `HOUSE-00483` had relaxed for exactly this.
       note: thirty render references were regenerated -- twelve first-person, seventeen blockout
             poses and `blockout-01` -- because the shell they are pictures of changed.
+- [ ] HOUSE-00488 — Give every cell the boundary surfaces a body standing in it looks at
+      dep: HOUSE-00486 · sys: content · plat: TOOL · pri: MUST
+      finding: (2026-09-09, found by `HOUSE-00688`) **a cell does not always draw the surfaces it
+            is looking at, and §25 removes the cell that does.** `L1_LANDING` draws a floor and a
+            ceiling and nothing else, so the wall a body standing on it faces belongs to a
+            neighbour; the walk correctly leaves that neighbour out, and the wall goes with it.
+            Measured across §25.8's poses: **8 450 pixels of four frames become the clear colour
+            when culling is turned on** -- `l1-landing` (684), `l2-landing` (939), `l0-stair-main`
+            (3 644) and `ext-backyard` (3 183).
+      note: two ways to fix it and the choice is architectural. Either the SHELL gives every cell
+            its own face on every boundary it has -- which is what `house_shell_gen.py` already does
+            for most of them and what §17.4's per-cell chunking assumes -- or `build_chunks.py`
+            assigns a boundary surface to both cells, which doubles it. The first is the one that
+            matches §17.4's *"a chunk never spans two cells"*; the second is the one that needs no
+            geometry.
+      note: **`HOUSE-00688` is blocked on this and on `HOUSE-00485`.** The other 38 431 differing
+            pixels are `HOUSE-00485`'s coplanar pairs -- a surface swap rather than a hole -- and
+            the two together are why the most important test in the project is committed disabled.
 - [ ] HOUSE-00487 — Bring `L0_GARAGE` and the three attic stores back inside §17.4's six chunks a cell
       dep: HOUSE-00473 · sys: content · plat: TOOL · pri: SHOULD
       finding: (2026-09-09, found by `HOUSE-00486`) **four cells have been over §17.4's chunk target
@@ -10119,8 +10137,29 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             the fix above is load-bearing: putting the bounding box back, and dropping the check
             that the touching box crosses the doorway rather than merely meeting its plane.
 - [ ] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
-      dep: HOUSE-00684, HOUSE-00164, HOUSE-00486 · sys: ci · plat: CI · pri: MUST
+      dep: HOUSE-00684, HOUSE-00164, HOUSE-00486, HOUSE-00485, HOUSE-00488 · sys: ci · plat: CI · pri: MUST
       accept: this is the single most important test in the project; a failure means something visible was culled
+      note: (2026-09-09) **written, running, and FAILING -- so the task stays open.** The test is
+            committed DISABLED with its numbers rather than deleted or weakened to pass: a version
+            of this test that tolerated a hole would be worse than none. `--no-cull` was added for
+            it, because a render harness drives the game through `Options` and cannot type into a
+            console; it is the same switch `cull off` throws.
+      note: **it needs no committed reference.** The two frames are the same pose in the same
+            session shape, so one IS the other's reference -- which also means it cannot be quietly
+            satisfied by regenerating a picture.
+      measured: 18 of the 24 poses are comparable (§65.6's door state is the only one the command
+            line can ask for), and **8 of the 18 differ**. The differences separate cleanly into two
+            causes, neither of them the culling: **38 431 pixels change SURFACE** -- a wall where
+            the unculled frame draws trim or the exterior skin, which is `HOUSE-00485`'s coplanar
+            pairs resolving the other way -- and **8 450 pixels become the CLEAR COLOUR**, which is
+            `HOUSE-00488`: a boundary surface owned by a cell the walk correctly excluded.
+      finding: it also found a bad POSE, on its first run. `HOUSE-00685`'s `l0-stair-main` stood at
+            the stair cell's centre, which is mid-flight -- inside the stairs -- and rendered a
+            picture of the underside of a tread, 98.7 % one colour. Moved to the FOOT of the flight
+            looking up it, where it now sees three storeys through the stair well (`B1_STAIR`,
+            `L0_STAIR_MAIN`, `L1_STAIR_MAIN`, `L1_LANDING`) and is `HOUSE-00693`'s pose as well.
+            The fixture's rule -- *"a pose is somewhere a body can STAND"* -- was right and the pose
+            broke it; a traversal test could not tell, and a render test could.
       note: (2026-09-09) was blocked and is not any more. `HOUSE-00684` found that a shut door was
             a hole in the shell, so the two images could not match -- culled you saw the clear
             colour through the doorway, unculled you saw the room -- and `HOUSE-00486` drew the
@@ -12334,19 +12373,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 301 numbered tasks across 53 phases.**
+**1 302 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 237 |
-| World data, blockout, collision, camera, visibility | 5–9 | 203 |
+| World data, blockout, collision, camera, visibility | 5–9 | 204 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 130 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 146 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 161 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 301** |
+| **Total** | **0–52** | **1 302** |
 
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
@@ -12394,6 +12433,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00485` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00676`: `house_shell_gen.py` draws a cell's exterior skin in the same plane, facing the same way, as the abutting cell's wall -- measured at `L0_GARAGE`'s x = 8.825 west wall against the `exterior` faces of seven other cells. | Two coplanar front-facing surfaces are a z-fight whose winner is decided by submission order and nothing else. It was invisible while the opaque pass submitted cell by cell; sorting the draw list by material (§25.1 step 5) changed which arbitrary answer the garage shows, which is how it was noticed. The generator is where a shared boundary should draw one surface rather than two, and that changes the shell eight render fixtures are pictures of -- so it is its own task rather than a correction folded into a rendering one. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00486`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and a `dep` added to `HOUSE-00688`. Found by `HOUSE-00684`: the shell fills a window with `BLOCKOUT_glass` and a doorway with nothing, so a closed door is a hole. | Invisible while everything was drawn -- you saw the room behind it -- and visible the moment §25's culling was turned on, because §65.6 starts every door shut and the walk correctly refuses to see through one. `HOUSE-00688`'s two images cannot match while the difference between them is a hole in the shell, so its dependency now says so rather than leaving the criterion unsatisfiable for a reason nobody wrote down. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00487` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00486`: `L0_GARAGE`, `L3_STORE_E`, `L3_STORE_N` and `L3_STORE_W` carry seven materials each, over §17.4's six chunks a cell, and the content build's `chunks` stage has been failing on it since before either task. | Noticed while rebuilding the shell, and NOT caused by the door leaves -- they are `trim`, a class those cells already had, and the material count is unchanged at ten. Recorded rather than relaxed: whether to merge two blockout classes or to accept that a garage is not a room is a decision about §17.4's budget. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00488`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and two more `dep`s on `HOUSE-00688`. Found by `HOUSE-00688`'s first run: a cell does not always draw the surfaces a body standing in it looks at, and §25 removes the cell that does -- 8 450 pixels of four frames become the clear colour with culling on. | The most important test in the project was written, run and left FAILING and DISABLED, with its numbers, rather than weakened to pass. Its 46 881 differing pixels separate into two shell defects and no culling defect: 38 431 are `HOUSE-00485`'s coplanar pairs resolving the other way, and 8 450 are this. No id was renumbered or struck. |
 
 ---
 

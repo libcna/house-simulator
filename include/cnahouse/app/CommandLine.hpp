@@ -56,6 +56,15 @@ namespace cnahouse::app
         RenderTier tier = RenderTier::E;
         bool headless = false;
         bool noAudio = false;
+
+        /// @brief `--no-cull`: build the draw list from everything resident, not from §25's
+        ///        visible set.
+        ///
+        /// The same switch §71's `cull off` throws, on the command line because that is the only
+        /// way a render test can reach it: `HOUSE-00688` renders one pose twice and compares the
+        /// two frames, and the harness drives the game through `Options` and not through a
+        /// console. §25's walk still runs and `F3` still reports it either way.
+        bool noCull = false;
         bool rendererInfo = false;
         bool help = false;
         std::optional<std::string> scene;

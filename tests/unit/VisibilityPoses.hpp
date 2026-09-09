@@ -163,23 +163,18 @@ namespace cnahouse::testsupport
           "L0_OFFICE",
           "L0_STAIR_MAIN",
           "L0_SUNROOM"}},
-        // §25.8's own example: the stair well carries the walk up a storey with every door shut
+        // §25.8's own example, and `HOUSE-00693`'s: THREE storeys through the stair well with
+        // every door shut. At the FOOT of the flight looking up it -- the cell's centre is
+        // mid-flight, which is inside the stairs, and `HOUSE-00688` found that out by rendering a
+        // picture of the underside of a tread.
         {"l0-stair-main",
          "L0_STAIR_MAIN",
          3.55f,
          0.60f,
-         -17.25f,
-         180.0f,
+         -14.60f,
+         0.0f,
          false,
-         {"EXT_DRIVEWAY",
-          "EXT_FRONTYARD_E",
-          "EXT_FRONTYARD_W",
-          "EXT_ROAD",
-          "L0_FOYER",
-          "L0_MUDROOM",
-          "L0_PORCH",
-          "L0_STAIR_MAIN",
-          "L1_STAIR_MAIN"}},
+         {"B1_STAIR", "L0_FOYER", "L0_HALL", "L0_MUDROOM", "L0_STAIR_MAIN", "L1_LANDING", "L1_STAIR_MAIN"}},
         // the fire door to the mudroom and the sectional door are both shut
         {"l0-garage", "L0_GARAGE", 12.90f, 0.60f, -17.50f, 270.0f, false, {"L0_GARAGE"}},
         // the balcony through two glazed windows; the cased openings to the hall and the stair are behind the

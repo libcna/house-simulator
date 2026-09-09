@@ -155,6 +155,8 @@ namespace cnahouse::app
                "  --time=<hours>              Time of day to start at, 0..24\n"
                "  --weather=<name>            Weather archetype to start in\n"
                "  --no-audio                  Start with audio disabled\n"
+               "  --no-cull                   Draw everything resident instead of §25's visible\n"
+               "                              set -- the same switch as the `cull off` command\n"
                "  --screenshot=<path>         Write one screenshot and exit\n"
                "  --log=<categories>          Comma-separated log categories, e.g. world,content\n"
                "  --renderer-info             Print this build's renderer and tier facts, then exit\n"
@@ -194,6 +196,10 @@ namespace cnahouse::app
             else if (argument.name == "--no-audio")
             {
                 options.noAudio = true;
+            }
+            else if (argument.name == "--no-cull")
+            {
+                options.noCull = true;
             }
             else if (argument.name == "--renderer-info")
             {

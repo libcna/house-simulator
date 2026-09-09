@@ -419,6 +419,9 @@ namespace cnahouse::app
         {
             chunkCuller_.emplace(*blockoutChunks_);
         }
+        // `--no-cull` is the same switch `cull off` throws, set before the first frame: a render
+        // test drives the game through `Options` and cannot type into a console.
+        cullingEnabled_ = !options_.noCull;
         debug::RegisterVisibilityCommands(console_, debug::VisibilityCommandContext{&cullingEnabled_});
         debug::RegisterPlayerCommands(console_,
                                       debug::PlayerCommandContext{&player_, &tracker_, &*world_, &*index_});
