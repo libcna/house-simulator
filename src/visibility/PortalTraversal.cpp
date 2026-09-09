@@ -22,7 +22,7 @@ namespace cnahouse::visibility
         return found == visible_.end() ? nullptr : &*found;
     }
 
-    VisibleCell& PortalTraversal::Reach(util::Id cell, int depth, ConeFlags flags)
+    VisibleCell& PortalTraversal::Reach(util::Id cell, int depth, int allowance, ConeFlags flags)
     {
         for (VisibleCell& one : visible_)
         {
@@ -32,6 +32,10 @@ namespace cnahouse::visibility
                 // still tie, and taking the minimum says what the code means rather than relying
                 // on the queue's order to say it.
                 one.depth = std::min(one.depth, depth);
+                // The LARGEST, because a cell reached two ways may continue down whichever chain
+                // has the more allowance left: a room seen through a window and through an open
+                // door is the door's chain from there on (`HOUSE-00680`).
+                one.allowance = std::max(one.allowance, allowance);
                 // §26.4's detail sets are dropped for a cell reached through frosted glass, so the
                 // flag survives only while EVERY way in has it: one clear view of a room is enough
                 // to need its dressing props.
@@ -43,6 +47,7 @@ namespace cnahouse::visibility
         visible_.push_back(VisibleCell{});
         visible_.back().cell = cell;
         visible_.back().depth = depth;
+        visible_.back().allowance = allowance;
         // The camera's own cell needs no special case: it is queued with no flags, so this is
         // `None` for it and whatever the cone carried for everything else.
         visible_.back().flags = flags;
@@ -65,14 +70,14 @@ namespace cnahouse::visibility
         // The whole screen: the camera's own frustum covers all of it, so nothing can be
         // "contained" by it and skipped before the walk has started.
         const NdcRect whole{-1.0F, -1.0F, 1.0F, 1.0F};
-        queue_.push_back(Work{input.cameraCell, input.cameraFrustum, whole, 0, ConeFlags::None});
+        queue_.push_back(Work{input.cameraCell, input.cameraFrustum, whole, 0, kNoLimit, ConeFlags::None});
 
         for (std::size_t head = 0; head < queue_.size(); ++head)
         {
             // Copied and not referenced: `queue_` grows inside this loop and a reference into it
             // is a dangling one the moment it does.
             const Work work = queue_[head];
-            VisibleCell& cell = Reach(work.cell, work.depth, work.flags);
+            VisibleCell& cell = Reach(work.cell, work.depth, work.allowance, work.flags);
             stats_.maxDepth = std::max(stats_.maxDepth, work.depth);
 
             // §25.2's containment skip, at the point the frustum is about to be USED: this cone
@@ -131,7 +136,14 @@ namespace cnahouse::visibility
                     ++stats_.skippedFacing;
                     continue;
                 }
-                if (work.depth >= MaxDepthFor(portal, *input.world, input.side))
+                // §25.2's cap belongs to the CHAIN and not to this one portal (`HOUSE-00680`).
+                // *"Standing in the garden you should see one room through a window, not that room
+                // plus everything behind its open door"* -- and a per-portal cap gives exactly
+                // that: the window admits the chain at depth 1, and the room's own door, whose cap
+                // is 2, then carries it on. Taking the minimum of every cap the chain has crossed
+                // is what makes the window's 1 mean what §25.2 says it means.
+                const int allowance = std::min(work.allowance, MaxDepthFor(portal, *input.world, input.side));
+                if (work.depth >= allowance)
                 {
                     ++stats_.skippedDepth;
                     continue;
@@ -177,7 +189,7 @@ namespace cnahouse::visibility
                                             ? work.flags | ConeFlags::Diffuse
                                             : work.flags;
                 ++stats_.portalsCrossed;
-                queue_.push_back(Work{other, next.frustum, rect, work.depth + 1, flags});
+                queue_.push_back(Work{other, next.frustum, rect, work.depth + 1, allowance, flags});
             }
         }
 

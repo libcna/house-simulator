@@ -70,6 +70,9 @@ namespace cnahouse::visibility
     inline constexpr std::size_t kMaxVisibleCells = 30;
 
     /// @brief One cell the walk decided the camera can see, and through which cones.
+    /// @brief The allowance a chain starts with: no portal has constrained it yet.
+    inline constexpr int kNoLimit = 1 << 20;
+
     struct VisibleCell
     {
         util::Id cell;
@@ -80,6 +83,16 @@ namespace cnahouse::visibility
         /// @brief The SHALLOWEST depth this cell was reached at, which is what §25.2's depth caps
         ///        are measured against and what `F3` shows.
         int depth = 0;
+        /// @brief The depth this cell's own chain may still reach (`HOUSE-00680`).
+        ///
+        /// §25.2's caps belong to the CHAIN and not to one portal in it: *"standing in the garden
+        /// you should see one room through a window, not that room plus everything behind its open
+        /// door"*. A window from outside caps at 1, so the room behind it must not then spend the
+        /// door's allowance of 2. The allowance a chain carries is therefore the MINIMUM of the
+        /// caps of every portal it has crossed, and this is what that came to.
+        ///
+        /// `kNoLimit` on the camera's own cell: nothing has been crossed to reach it.
+        int allowance = kNoLimit;
         /// @brief Frusta the cap refused. Non-zero means this room is seen through more than four
         ///        openings at once, which §71's `F3` is the place to notice.
         int frustaDropped = 0;
@@ -178,10 +191,12 @@ namespace cnahouse::visibility
             ClipFrustum frustum;
             NdcRect rect;
             int depth = 0;
+            /// @brief The minimum cap of every portal crossed to get here (`HOUSE-00680`).
+            int allowance = kNoLimit;
             ConeFlags flags = ConeFlags::None;
         };
 
-        VisibleCell& Reach(util::Id cell, int depth, ConeFlags flags);
+        VisibleCell& Reach(util::Id cell, int depth, int allowance, ConeFlags flags);
 
         /// @brief §71.2's hard stop, applied after the walk: keep the biggest, count the rest.
         void Degrade();

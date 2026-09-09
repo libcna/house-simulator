@@ -9775,9 +9775,37 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             drawing no garden and visiting no node, standing outside giving the camera's own answer,
             the cap degrading to a superset, the containment rule firing, and an interior cell never
             contributing a cone. Eight injected bugs, all caught.
-- [ ] HOUSE-00680 — Implement the outdoor→indoor traversal at depth 1 through windows
+- [x] HOUSE-00680 — Implement the outdoor→indoor traversal at depth 1 through windows
       dep: HOUSE-00679 · sys: visibility · plat: ALL · pri: MUST
       accept: standing in the garden, exactly one room is visible through each window, not the whole house
+      finding: (2026-09-09) **§25.2's depth cap belongs to the CHAIN, and reading it per portal
+            defeats the row it exists for.** `MaxDepthFor` was already right and the walk already
+            read it, but a window admitting a chain at depth 1 was followed by the room's own door,
+            whose cap from an exterior camera is 2 -- so `1 >= 2` is false, the chain crossed, and
+            the garden saw *"that room plus everything behind its open door"*, which is the exact
+            sentence §25.2 writes to forbid. The per-portal reading is caught by
+            `ARoomSeenThroughAWindowStopsAtThatRoom` now; it passed everything before this task.
+      note: the fix is one line and a field: a chain carries the MINIMUM of the caps of every
+            portal it has crossed, so a window's 1 is final. `Work::allowance` carries it and
+            `VisibleCell::allowance` records it, which is what makes the rule assertable rather
+            than inferable from cell counts.
+      note: a cell reached two ways keeps the LARGER allowance -- a room entered from the yard by a
+            door and also glimpsed through its window is the door's chain from there on. Refusing to
+            continue down a chain that is allowed to continue would be over-culling, which is the
+            one direction §25 does not tolerate.
+      measured: **32 garden poses with every door in the house open: the deepest chain is 2, the
+            widest visible set 11**, against §71.2's 9 typical, 22 worst and 30 hard fail. Thirty
+            rooms are reached through glazing over 16 of those poses and not one of them carries the
+            chain on. Indoors nothing changed: 16 poses still chain 5 deep with a widest set of 11.
+      note: the depth-2 claim is checked against an INDEPENDENT graph walk in the test -- the cells
+            two non-glazed hops from the camera -- rather than against the traversal's own answer.
+            A cell visible at depth 2 that is only reachable through glazing is the failure, and
+            that is a statement about the house, not about the code under test.
+      verified: 5 `OutdoorDepthTests` -- the chain rule over 32 garden poses, a room seen through a
+            window stopping there (against the independent graph walk), §25.2's four rows read off
+            the house's own 68 glazed openings and 110 other portals, the better-of-two-ways rule,
+            and the interior walk still six doors deep. Seven injected bugs, all caught, including
+            the per-portal reading this task replaced.
 
 ### 9.3 Instrumentation and proof
 
