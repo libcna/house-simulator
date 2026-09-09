@@ -7848,8 +7848,9 @@ the chunk builder produces ≤ 6 chunks per cell.
       measured: 9 references regenerated (the 8 exterior poses' ground and fences, plus
             `blockout-01`; `blockout-b1-cinema` moved too, through its window well). 31 render
             tests green, 1 014 unit and 92 integration.
-- [ ] HOUSE-00496 — The roof is inside the attic's box, so the house has no roof from outside
+- [x] HOUSE-00496 — The roof is inside the attic's box, so the house has no roof from outside
       dep: HOUSE-00495 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/verify_shell.py --selftest`; `tools/blender/house_shell_gen.py --selftest`
       note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
             Found by `HOUSE-00495` while regenerating the exterior references: §12.1 asks for "a
             hipped-and-gabled roof at a 7:12 pitch with five dormers" and from the road this house
@@ -7877,6 +7878,41 @@ the chunk builder produces ≤ 6 chunks per cell.
       note: this is what `HOUSE-00781`'s eight exterior poses will photograph, so it comes first;
             §12.1's silhouette is the single most visible thing about the house and eight
             references of a flat-topped box would commit a picture of the defect.
+      finding: (2026-09-09, fixing it) **the roof surface is the LOWER ENVELOPE of its planes** --
+            checked over 400 random points against the point-in-polygon test with no disagreement
+            -- so "under the roof" is the intersection of four half-spaces, a convex region, and a
+            wall panel clipped against all four stays one polygon. That is what makes this a clip
+            and not a mesh-boolean: `clip_half_planes` is thirty lines of Sutherland-Hodgman, used
+            twice, on the wall in `(u, v)` and on the ceiling slab in plan.
+      finding: **and the attic then had no lid from inside.** Clipping the walls to the slope
+            opened `l3-store-w`'s pose to the sky -- 68 % of the frame where its own rule wants
+            90 % -- because §12.1's roof is drawn in `ROOF_MAIN`, which belongs to the outdoors
+            and is not visible from in a room. Each rafter-bounded cell now draws the roof's
+            UNDERSIDE over its own boxes, which is exactly what `HOUSE-00472` gives it in
+            collision and from the same planes.
+      finding: **the underside is classed `roof` and not `ceiling`, and that is not cosmetic.**
+            `verify_shell` reads a cell's clear height off a ceiling that is ONE horizontal plane,
+            and measures head-room over a flight against it; classed as a ceiling, a slope broke
+            the first and reported the attic stair at 1.267 m of head-room under the second. §13.6
+            measures an attic in a RANGE for the same reason -- "1.2 -> 4.6 m, so most of it is
+            crouch-only".
+      finding: `verify_shell` gains the rule that would have caught this on the day it appeared:
+            **nothing a rafter-bounded cell draws stands over the roof above it**, with `trim`
+            exempt (a cornice is drawn from the room's box and is under the slope by
+            construction) and a dormer's own footprint exempt (a dormer comes THROUGH the roof,
+            and its window is 0.49 m over the slope by design). It found `HOUSE-00491`'s two
+            gable louvres immediately, 1.44 m inside solid roof, and they are recorded as known.
+      measured: the shell goes 41 663 -> 41 527 triangles: `exterior` 1 688 -> 1 605, `wall`
+            3 304 -> 3 269, `ceiling` 216 -> 206, and a new `roof` 125 -> 151 where each attic
+            cell carries its own underside. Ten references move -- the eight exterior poses,
+            `blockout-01`, and the two attic interiors that can now see the slope.
+      verified: 5 claims and 4 injections, 3 CAUGHT by the selftests -- the roof surface read as
+            its ridge everywhere, the dormer exemption widened until it swallowed the roof, and
+            the wall clip disabled in the generator. The fourth -- `generate` forgetting to pass
+            the roof to `build_cell` at all -- cannot be driven by the harness, because it shows
+            up only in a REGENERATED shell; it was injected by hand instead, the shell rebuilt,
+            and `verify_shell` reported 17 problems over 6 cells (`L3_STORE_W.exterior` 3.42 m
+            over the roof) before the generator was restored.
 - [ ] HOUSE-00494 — The roofs and the chimney load with the `neighbourhood` pack
       dep: HOUSE-00780 · sys: content · plat: TOOL · pri: SHOULD
       note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**

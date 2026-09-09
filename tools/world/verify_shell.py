@@ -38,6 +38,7 @@ sys.path.insert(0, str(REPO / "tools" / "world"))
 sys.path.insert(0, str(REPO / "tools" / "assets"))
 import build_chunks as bch  # noqa: E402
 import layout_io  # noqa: E402
+import roof_geometry  # noqa: E402
 import stair_geometry  # noqa: E402
 
 #: §70.5's clear height for a habitable room, in metres.
@@ -456,6 +457,79 @@ def opening_rows(shell: dict, layout: dict) -> list[dict]:
     return rows
 
 
+def under_roof_rows(shell: dict, layout: dict, cells: dict) -> list[dict]:
+    """How far each rafter-bounded cell's drawn geometry stands ABOVE the roof over it.
+
+    `HOUSE-00496`. §13.6's `yOverride` on an attic cell is its MAXIMUM head-room -- `L3_STORE_W`
+    declares +13.90 -- and a skin built to it stands outside a roof whose eaves are +10.57 at that
+    same wall. The house was a flat-topped box from the road with §12.1's roof drawn inside it,
+    and nothing measured it: the clear-height rules skip a rafter-bounded level by design, and the
+    winding rules ask which way a face points rather than where it is.
+
+    `trim` is exempt and named: §12's cornices, skirtings and architraves are drawn from the
+    cell's own box and are inside the room, where the roof is not the bound -- a cornice at the
+    head of an attic wall is under the slope by construction, and clipping the shell's 32 732
+    trim triangles to it is `HOUSE-00480`'s work rather than this rule's.
+    """
+    construction = layout["levels"].get("construction") or {}
+    levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
+    rows: list[dict] = []
+    portals = layout_io.rows(layout, "portals")
+    openings = layout_io.rows(layout, "openings") if "openings" in layout else []
+    for cell_id, surfaces in sorted(shell.items()):
+        cell = cells.get(cell_id)
+        if cell is None:
+            continue
+        level = levels.get(cell.get("level"))
+        planes = _roof_planes_of(level, layout, construction)
+        equations = roof_geometry.plane_equations(planes)
+        if not equations:
+            continue
+        # A DORMER comes through the roof, so the roof is not the bound inside its footprint --
+        # its own front, cheeks and little roof are, and its window is 0.49 m over the slope by
+        # design (`HOUSE-00490`). The footprints are the same ones the roof is cut by.
+        box = roof_geometry.roof_boxes(layout).get(level["roof"])
+        outer = roof_geometry.outer_box(box, construction)
+        eaves = roof_geometry.roof_eaves(layout, level["roof"], box, construction)
+        pitch = float(construction["roofPitch"])
+        # Widened by the wall the dormer's front IS: its window's glass sits in that wall and
+        # half of it is on the far side of the plane the footprint stops at, 15 mm outside a
+        # rectangle that is otherwise exactly right.
+        margin = float(construction.get("wallExterior", 0.30))
+        holes = [(x0 - margin, x1 + margin, z0 - margin, z1 + margin)
+                 for x0, x1, z0, z1 in
+                 (roof_geometry.dormer_footprint(rect_u, rect_v, plane_z, outer, eaves, pitch)
+                  for rect_u, rect_v, plane_z
+                  in roof_geometry.dormers_on(box, portals, openings))]
+        for name, mesh in sorted(surfaces.items()):
+            if name == "trim":
+                continue
+            worst = 0.0
+            for x, y, z in mesh["positions"]:
+                if any(x0 - 1e-6 <= x <= x1 + 1e-6 and z0 - 1e-6 <= z <= z1 + 1e-6
+                       for x0, x1, z0, z1 in holes):
+                    continue
+                height = roof_geometry.roof_height(equations, x, z)
+                if height is not None:
+                    worst = max(worst, y - height)
+            rows.append({"cell": cell_id, "class": name, "over": worst})
+    return rows
+
+
+def _roof_planes_of(level, layout, construction):
+    """The planes of the roof @p level is bounded by, or `()` -- `HOUSE-00472`'s own derivation."""
+    if not level or level.get("ceiling") is not None or not level.get("roof"):
+        return ()
+    if not construction.get("roofPitch"):
+        return ()
+    box = roof_geometry.roof_boxes(layout).get(level["roof"])
+    if box is None:
+        return ()
+    outer = roof_geometry.outer_box(box, construction)
+    eaves = roof_geometry.roof_eaves(layout, level["roof"], box, construction)
+    return roof_geometry.roof_planes(outer, eaves, float(construction["roofPitch"]))
+
+
 def verify(shell_dir: Path, world_dir: Path) -> dict:
     layout = layout_io.load_layout(world_dir, kinds=["levels", "cells", "portals", "openings"])
     for optional in ("stairs",):
@@ -474,7 +548,14 @@ def verify(shell_dir: Path, world_dir: Path) -> dict:
     headroom = headroom_rows(shell, layout)
     openings = opening_rows(shell, layout)
 
+    over_roof = under_roof_rows(shell, layout, cells)
     found = problems(heights, stairs, headroom, openings)
+    # `HOUSE-00496`: a rafter-bounded cell drawn as a box stands through its own roof. A
+    # millimetre of tolerance, because a wall clipped exactly to the plane lands on it.
+    for row in over_roof:
+        if row["over"] > 0.001:
+            found.append(f"{row['cell']}.{row['class']}: stands {row['over']:.2f} m over the roof "
+                         f"above it")
     # `HOUSE-00478`. Two verdicts that need no threshold and no exemption.
     for row in winding:
         if row["degenerate"]:
@@ -488,7 +569,7 @@ def verify(shell_dir: Path, world_dir: Path) -> dict:
                          f"{SHELL_TRIANGLES_PER_CELL} for one cell of the shell")
     return {"cells": len(shell), "clearHeights": heights, "stairs": stairs,
             "headroom": headroom, "openings": openings, "winding": winding,
-            "triangles": triangles, "problems": found}
+            "triangles": triangles, "overRoof": over_roof, "problems": found}
 
 
 def problems(heights, stairs, headroom, openings) -> list[str]:
@@ -885,6 +966,31 @@ def selftest() -> int:
     require(tops == sorted(tops) and len(tops) == 17,
             f"the main stair's 17 treads come back in climbing order ({len(tops)})")
 
+    # `HOUSE-00496`: the rule itself, driven over a shell made for it rather than over the one on
+    # disk. Regenerating the house needs Blender and minutes; what has to be proved here is that a
+    # cell drawn to its own box is REPORTED, and a synthetic cell says that in three lines.
+    attic_layout = layout_io.load_layout(REPO / "assets-src" / "world",
+                                         kinds=["levels", "cells", "portals", "openings"])
+    attic_cells = layout_io.by_id(layout_io.rows(attic_layout, "cells"), "cell")
+    store = attic_cells["L3_STORE_W"]
+    box = layout_io.cell_boxes(store)[0]
+    corner = ((box[0] + box[1]) / 2.0, (box[2] + box[3]) / 2.0)
+    boxed = {"L3_STORE_W": {"exterior": {"positions": [
+        (box[0], 13.90, box[2]), (box[0], 13.90, box[3]), (corner[0], 13.90, corner[1])]}}}
+    rows = under_roof_rows(boxed, attic_layout, attic_cells)
+    require(rows and rows[0]["over"] > 3.0,
+            f"a rafter-bounded cell drawn to its own `yOverride` box stands over the roof, and by "
+            f"how much: {rows[0]['over']:.2f} m at `L3_STORE_W`'s +13.90, where the hip over its "
+            f"west wall is +10.57")
+    under = {"L3_STORE_W": {"exterior": {"positions": [
+        (box[0], 10.00, box[2]), (box[0], 10.00, box[3])]}}}
+    require(under_roof_rows(under, attic_layout, attic_cells)[0]["over"] <= 0.0,
+            "...and one clipped under the roof does not")
+    dormer_glass = {"L3_ROOM": {"glass": {"positions": [(-5.4, 11.05, -14.30)]}}}
+    require(under_roof_rows(dormer_glass, attic_layout, attic_cells)[0]["over"] <= 0.0,
+            "a dormer's window is 0.49 m over the slope and is not a problem: a dormer comes "
+            "THROUGH the roof, and inside its footprint the roof is not the bound")
+
     known = {
         # ALL FOUR head-room failures are gone. `HOUSE-00480` fixed the two that were the
         # generator's -- a flight is placed inside the stairwell it comes up rather than against
@@ -896,6 +1002,13 @@ def selftest() -> int:
         # inside `L0_KITCHEN`, and the generator cuts openings between cells that share a boundary
         # PLANE, which a cell wholly inside another does not.
         "FRIDGE_L0_KITCHEN: not cut in CELL_FRIDGE_INTERIOR.wall",
+        # `HOUSE-00491`, measured by `HOUSE-00496`'s rule the day both were written: §12.6's two
+        # `W_GABLE` louvres are in gable ENDS, and `roof_geometry` builds §12.1's roof as a hip
+        # with no gable to put them in. They are 1.44 m inside solid roof, which is what a window
+        # 0.80 m tall at +11.30 is when the hip at that wall is +10.57. Whether the roof gains a
+        # gablet or the louvres become dormers is §12's to say.
+        "L3_STORE_E.glass: stands 1.44 m over the roof above it",
+        "L3_STORE_W.glass: stands 1.44 m over the roof above it",
     }
     unknown = sorted(problem for problem in result["problems"] if problem not in known)
     require(not unknown,

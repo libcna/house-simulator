@@ -4343,6 +4343,17 @@ capsule plus that hysteresis plus 50 mm — over the hole's width and the body's
 by the part of them within reach so a borrowed slab does not size the borrower's grid.
 `docs/collision-format.md` §4.1 is normative and `OpeningReachTests` is the guarantee.
 
+**A rafter-bounded cell is not a box** (`HOUSE-00496`). §13.6's `yOverride` on an attic cell is
+its MAXIMUM head-room -- `L3_STORE_W` declares +13.90 -- and the drawn shell built its skin to
+that height while §12.1's roof runs +10.39 to +14.30. From the road this house was a flat-topped
+box with its roof inside it: dropping every roof chunk moved a full front elevation by 170 pixels.
+`HOUSE-00472` fixed the same misreading for collision and left the picture alone. The walls and the
+outer skin are clipped to the roof now -- the surface is the lower envelope of its planes, so
+"under it" is an intersection of half-spaces and a panel stays one polygon -- and each attic cell
+draws the roof's UNDERSIDE over its own boxes, because the roof itself belongs to the outdoors and
+a room cannot see it. `verify_shell` measures it: nothing a rafter-bounded cell draws stands over
+the roof above it.
+
 **A dormer is a hole in the roof** (`HOUSE-00490`). §12.1's five come through the slope, and the
 plane was left whole under them: the roof ran across the inside of every dormer window, and the
 dormer's own front gable covered the rest of it. §64.6 measured `L3_ROOM` -- "lit by three dormers"

@@ -373,6 +373,77 @@ def slab_holes(portals: list, cell: dict, at_y: float, box: tuple) -> list:
     return sorted(out)
 
 
+def under_roof(u0: float, u1: float, v0: float, v1: float, cuts):
+    """One wall panel as `(us, vs)`, clipped under the roof -- or nothing, if it is all over it.
+
+    Returns the rectangle unchanged when there is no roof to be under, so a level bounded by a
+    ceiling plane pays nothing for this (`HOUSE-00496`).
+    """
+    rectangle = [(u0, v0), (u0, v1), (u1, v1), (u1, v0)]
+    if not cuts:
+        return [tuple(zip(*rectangle))]
+    clipped = clip_half_planes(rectangle, cuts)
+    if len(clipped) < 3:
+        return []
+    return [tuple(zip(*clipped))]
+
+
+def clip_half_planes(polygon, cuts):
+    """@p polygon in 2-D, clipped to `nu*u + nv*v <= k` for every `(nu, nv, k)` in @p cuts.
+
+    `HOUSE-00496`. The roof surface is the lower envelope of its planes
+    (`roof_geometry.roof_height`), so "under the roof" -- and, in plan, "where the roof is over
+    this height" -- are both intersections of half-planes, and a convex polygon clipped by one
+    stays convex and stays one polygon. Sutherland-Hodgman, one half-plane at a time; an empty
+    list means nothing of the panel is on the keeping side.
+    """
+    out = list(polygon)
+    for nu, nv, k in cuts:
+        if not out:
+            return []
+        clipped = []
+        for index, (u, v) in enumerate(out):
+            pu, pv = out[index - 1]
+            here = nu * u + nv * v - k
+            there = nu * pu + nv * pv - k
+            inside = here <= 1e-9
+            was = there <= 1e-9
+            if inside != was and abs(here - there) > 1e-12:
+                t = there / (there - here)
+                clipped.append((pu + t * (u - pu), pv + t * (v - pv)))
+            if inside:
+                clipped.append((u, v))
+        out = clipped
+    return [point for index, point in enumerate(out)
+            if index == 0 or max(abs(a - b) for a, b in zip(point, out[index - 1])) > 1e-9]
+
+
+def roof_lines(equations, side: str, plane: float):
+    """Each roof plane as a `(nu, nv, k)` half-plane in a WALL's own `(u, v)` coordinates.
+
+    A wall on a `+/-X` side has `u = z` and `v = y`, so `y <= a*x + b*z + c` becomes
+    `-b*u + v <= a*plane + c`; on a `+/-Z` side `u = x` and the roles swap.
+    """
+    cuts = []
+    for a, b, c in equations or ():
+        if side in ("-X", "+X"):
+            cuts.append((-b, 1.0, a * plane + c))
+        else:
+            cuts.append((-a, 1.0, b * plane + c))
+    return cuts
+
+
+def roof_over(equations, height: float):
+    """Each roof plane as a `(nu, nv, k)` half-plane in PLAN, keeping where the roof is above
+    @p height: `a*x + b*z + c >= height`, which is `-a*x - b*z <= c - height`.
+
+    A ceiling slab at §13.6's maximum head-room is only a lid where the roof is over it, and over
+    the rest of the attic the rafters are (`HOUSE-00496`). Left whole, `L3_STORE_W`'s +13.90 slab
+    stands through a roof that is +10.57 at its own wall.
+    """
+    return [(-a, -b, c - height) for a, b, c in equations or ()]
+
+
 def panel(lo: float, hi: float, v0: float, v1: float,
           holes: list[tuple[float, float, float, float]]):
     """`(lo, hi, v0, v1)` rectangles covering the panel except where a hole is.
@@ -977,10 +1048,58 @@ def build_mezzanine_guard(cell: dict, extent: tuple, cells_by_id: dict, levels: 
     return built
 
 
+def roof_faces_for(level, layout, construction):
+    """The `(corners, outward)` faces of the roof this level is bounded by, or `()`.
+
+    `roof_planes_for` returns the same roof as plane EQUATIONS, which is what clipping a wall
+    under it needs; this is the geometry itself, which is what drawing its underside needs.
+    """
+    if not level or level.get("ceiling") is not None or not level.get("roof"):
+        return ()
+    if not construction or not construction.get("roofPitch"):
+        return ()
+    box = roof_geometry.roof_boxes(layout).get(level["roof"])
+    if box is None:
+        return ()
+    outer = roof_geometry.outer_box(box, construction)
+    eaves = roof_geometry.roof_eaves(layout, level["roof"], box, construction)
+    return roof_geometry.roof_planes(outer, eaves, float(construction["roofPitch"]))
+
+
+def roof_planes_for(level, layout, construction):
+    """`roof_geometry.plane_equations` for the roof this LEVEL is bounded by, or `()`.
+
+    The same derivation `build_collision.py`'s rafters use, and for the same reason: a level that
+    declares a `roof` and a `null` ceiling is a level whose upper bound IS the roof
+    (`HOUSE-00472`). A level with a ceiling plane has one and is left alone.
+    """
+    if not level or level.get("ceiling") is not None or not level.get("roof"):
+        return ()
+    if not construction or not construction.get("roofPitch"):
+        return ()
+    boxes = roof_geometry.roof_boxes(layout)
+    box = boxes.get(level["roof"])
+    if box is None:
+        return ()
+    outer = roof_geometry.outer_box(box, construction)
+    eaves = roof_geometry.roof_eaves(layout, level["roof"], box, construction)
+    return roof_geometry.plane_equations(
+        roof_geometry.roof_planes(outer, eaves, float(construction["roofPitch"])))
+
+
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
                level=None, levels=None, portals=(), openings=None, cells_by_id=None,
-               flights=()):
-    """One mesh object named for the cell: its floor, its ceiling and its walls' inner faces."""
+               flights=(), roof=(), roof_planes_here=()):
+    """One mesh object named for the cell: its floor, its ceiling and its walls' inner faces.
+
+    @p roof is `roof_geometry.plane_equations` for the roof this cell's level is bounded by, or
+    empty. It is what stops a rafter-bounded cell being drawn as a BOX (`HOUSE-00496`): §13.6's
+    `yOverride` on an attic cell is its MAXIMUM head-room, so `L3_STORE_W` declares +13.90 and a
+    skin built to that height stands outside a roof whose eaves are +10.57 at that wall. The
+    house was a flat-topped box from the road, with §12.1's roof drawn inside it: dropping every
+    roof chunk moved a full front elevation by 170 pixels. `HOUSE-00472` fixed the same misreading
+    for collision and left the drawn shell alone.
+    """
     construction = construction or {}
     neighbours = list(neighbours)
     vertices: list[tuple[float, float, float]] = []
@@ -1055,14 +1174,14 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     continue
                 holes = [hole for hole in side_holes
                          if min(hole[1], hi) - max(hole[0], lo) > 1e-6]
+                inner_lines = roof_lines(roof, side, plane)
                 for pu0, pu1, pv0, pv1 in panel(lo, hi, y0, y1, holes):
-                    if side in ("-X", "+X"):
-                        corners = [(plane, pv0, pu0), (plane, pv1, pu0),
-                                   (plane, pv1, pu1), (plane, pv0, pu1)]
-                    else:
-                        corners = [(pu0, pv0, plane), (pu0, pv1, plane),
-                                   (pu1, pv1, plane), (pu1, pv0, plane)]
-                    add(corners, inward)
+                    for pu, pv in under_roof(pu0, pu1, pv0, pv1, inner_lines):
+                        if side in ("-X", "+X"):
+                            corners = [(plane, v, u) for u, v in zip(pu, pv)]
+                        else:
+                            corners = [(u, v, plane) for u, v in zip(pu, pv)]
+                        add(corners, inward)
 
                 # `HOUSE-00454`: the OUTER face of the same wall, over the heights where there
                 # IS an outside. A partition has two rooms and each draws its inner face; an
@@ -1102,15 +1221,15 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     # garage: above its roof the band is as much weather as the wall under it.
                     if any(c0 <= y0 + 1e-6 and c1 >= y1 - 1e-6 for c0, c1 in covers):
                         cuts.append((y1, oy1))
+                    outer_lines = roof_lines(roof, side, outer_plane)
                     for vy0, vy1 in minus(oy0, oy1, cuts):
                         for pu0, pu1, pv0, pv1 in panel(lo, hi, vy0, vy1, holes):
-                            if side in ("-X", "+X"):
-                                outer = [(outer_plane, pv0, pu0), (outer_plane, pv1, pu0),
-                                         (outer_plane, pv1, pu1), (outer_plane, pv0, pu1)]
-                            else:
-                                outer = [(pu0, pv0, outer_plane), (pu0, pv1, outer_plane),
-                                         (pu1, pv1, outer_plane), (pu1, pv0, outer_plane)]
-                            add(outer, tuple(-value for value in inward), "exterior")
+                            for pu, pv in under_roof(pu0, pu1, pv0, pv1, outer_lines):
+                                if side in ("-X", "+X"):
+                                    outer = [(outer_plane, v, u) for u, v in zip(pu, pv)]
+                                else:
+                                    outer = [(u, v, outer_plane) for u, v in zip(pu, pv)]
+                                add(outer, tuple(-value for value in inward), "exterior")
 
                 # The reveal runs from this room's inner face to the outer face of an exterior
                 # wall, or to the CENTRE LINE of a partition -- the room on the other side carries
@@ -1304,10 +1423,20 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
             if not slab_here(cell, extent, level_y == y0):
                 continue
             wells = slab_holes(list(portals), cell, level_y, box)
+            # A CEILING under a roof is only a lid where the roof is over it (`HOUSE-00496`):
+            # §13.6's `yOverride` on an attic cell is its maximum head-room, so `L3_STORE_W`'s
+            # +13.90 slab stands out through a roof that is +10.57 at its own wall. Over the rest
+            # of the attic the rafters are the lid, and they are already there.
+            over = roof_over(roof, level_y) if (roof and level_y != y0) else []
             for px0, px1, pz0, pz1 in panel(ix0, ix1, iz0, iz1, wells):
-                add([(px0, level_y, pz0), (px1, level_y, pz0),
-                     (px1, level_y, pz1), (px0, level_y, pz1)],
-                    look, "floor" if level_y == y0 else "ceiling")
+                for corners in ([[(px0, pz0), (px1, pz0), (px1, pz1), (px0, pz1)]] if not over
+                                else [clip_half_planes([(px0, pz0), (px1, pz0),
+                                                        (px1, pz1), (px0, pz1)], over)]):
+                    if len(corners) < 3:
+                        continue
+                    add([(x, level_y, z) for x, z in corners],
+                        look, "floor" if level_y == y0 else "ceiling")
+
             # `HOUSE-00460`: a railing round the hole in the FLOOR -- §70.5 asks for 1.05 m at a
             # drop over a metre and §12 declares 1.10 -- with a gap where the stair arrives. A
             # railing across the top of the flight would be a railing you have to climb.
@@ -1333,6 +1462,24 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                    level_y + float(construction.get("railing", 0.0)),
                                    level_y + float(construction.get("railing", 0.0)),
                                    fixed, RAIL_SECTION)
+
+    # `HOUSE-00496`: and where the roof is the lid, the roof is what this cell draws overhead.
+    # Clipping the walls to the slope without this leaves the attic open to the sky from inside --
+    # `l3-store-w`'s pose went from a room to 68 % of one -- because §12.1's roof is drawn in
+    # `ROOF_MAIN`, which belongs to the outdoors and is not visible from in here.
+    # `build_collision.py` gives each attic cell its own rafter pieces for the same reason and
+    # from the same planes (`HOUSE-00472`); this is that decision, drawn.
+    if roof_planes_here:
+        for plane_corners, _outward in roof_planes_here:
+            for bx0, bx1, bz0, bz1 in layout_io.cell_boxes(cell):
+                piece = roof_geometry.clip_to_rect(plane_corners, (bx0, bx1, bz0, bz1))
+                if roof_geometry.plan_area(piece) < 0.01:
+                    continue
+                # Class `roof` and not `ceiling`: a cell's ceiling is ONE horizontal plane and
+                # `verify_shell` reads clear heights off it, while this is a slope. §13.6 measures
+                # an attic in a range for the same reason -- "1.2 -> 4.6 m, so most of it is
+                # crouch-only".
+                add([tuple(point) for point in piece], (0.0, -1.0, 0.0), "roof")
 
     surface["class"] = "metal"
     build_balcony_edge(cell, extent, list(neighbours), construction, solid, add)
@@ -1474,7 +1621,8 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         obj = build_cell(cell, extent, neighbours=neighbours, construction=construction,
                          level=level, levels=levels, portals=portals, openings=openings,
                          cells_by_id={row["id"]: row for row in layout_io.rows(layout, "cells")},
-                         flights=stair_rows)
+                         flights=stair_rows, roof=roof_planes_for(level, layout, construction),
+                         roof_planes_here=roof_faces_for(level, layout, construction))
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
@@ -2626,6 +2774,48 @@ def selftest(output: Path) -> int:
             and abs(float(cells["L3_ROOM"]["yOverride"][1]) - 12.60) < 1e-9,
             "and the finished room's ceiling IS §12.2's collar tie at +12.60, already laid by "
             "`HOUSE-00452` rather than built again here")
+    reset_scene()
+    # `HOUSE-00496`: the same cell WITH the roof it is bounded by, which is how `generate` builds
+    # it. §13.6's `yOverride` is maximum head-room, and drawn as a box this store stands 3.33 m
+    # over a hip whose eaves are +10.57 at its own west wall -- the house was a flat-topped box
+    # from the road with §12.1's roof inside it.
+    reset_scene()
+    attic_roof = roof_planes_for(levels["L3"], layout, construction)
+    require(len(attic_roof) == 4,
+            f"`L3` is bounded by a roof and its four planes are read from `roof_geometry` "
+            f"({len(attic_roof)})")
+    clipped = build_cell(store, extent_of(store, levels["L3"])[0], neighbours=neighbours,
+                         construction=construction, level=levels["L3"], levels=levels,
+                         cells_by_id=cells, roof=attic_roof)
+    over = 0.0
+    for polygon in clipped.data.polygons:
+        if SURFACE_ORDER[polygon.material_index] == "trim":
+            continue
+        for index in polygon.vertices:
+            point = clipped.data.vertices[index].co
+            # Blender axes: `to_blender` negates z and swaps it with y.
+            height = roof_geometry.roof_height(attic_roof, point.x, -point.y)
+            if height is not None:
+                over = max(over, point.z - height)
+    require(over <= 0.001,
+            f"and nothing it draws stands over that roof: worst {over:.3f} m")
+    boxed = 0.0
+    reset_scene()
+    unclipped = build_cell(store, extent_of(store, levels["L3"])[0], neighbours=neighbours,
+                           construction=construction, level=levels["L3"], levels=levels,
+                           cells_by_id=cells)
+    for polygon in unclipped.data.polygons:
+        if SURFACE_ORDER[polygon.material_index] == "trim":
+            continue
+        for index in polygon.vertices:
+            point = unclipped.data.vertices[index].co
+            height = roof_geometry.roof_height(attic_roof, point.x, -point.y)
+            if height is not None:
+                boxed = max(boxed, point.z - height)
+    require(boxed > 3.0,
+            f"-- and the same cell built without it stands {boxed:.2f} m over, which is the "
+            f"defect and not a tolerance")
+
     reset_scene()
     boarded = build_cell(store, extent_of(store, levels["L3"])[0], neighbours=neighbours,
                          construction=construction, level=levels["L3"], levels=levels,
