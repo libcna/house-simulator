@@ -126,10 +126,11 @@ TEST(ExteriorBvhTests, EveryInstanceIsUnderExactlyOneLeaf)
     ExteriorBvh bvh;
     bvh.Build(plot);
 
-    ASSERT_NE(bvh.Root(), nullptr);
+    const BvhNode* root = bvh.Root();
+    ASSERT_NE(root, nullptr);
     std::vector<int> seen(plot.size(), 0);
     std::size_t total = 0;
-    for (const BvhNode* leaf : LeavesOf(bvh, *bvh.Root()))
+    for (const BvhNode* leaf : LeavesOf(bvh, *root))
     {
         for (std::uint32_t i = leaf->first; i < leaf->first + leaf->count; ++i)
         {
@@ -280,9 +281,10 @@ TEST(ExteriorBvhTests, ThreeLevelsEightWaysAtSection25Point6sScale)
     // 4 100 over 64 leaves is 64 each, and the median split keeps them even to within a couple.
     EXPECT_LE(stats.maxLeafSize, 70);
     EXPECT_GE(stats.maxLeafSize, 60);
-    ASSERT_NE(bvh.Root(), nullptr);
-    EXPECT_EQ(bvh.Root()->count, 4100u);
-    EXPECT_EQ(bvh.Root()->childCount, 8u);
+    const BvhNode* root = bvh.Root();
+    ASSERT_NE(root, nullptr);
+    EXPECT_EQ(root->count, 4100u);
+    EXPECT_EQ(root->childCount, 8u);
 }
 
 TEST(ExteriorBvhTests, TheChildrenPartitionSPACEAndNotMerelyTheList)
@@ -295,9 +297,10 @@ TEST(ExteriorBvhTests, TheChildrenPartitionSPACEAndNotMerelyTheList)
     IdRegistry::ResetForTesting();
     ExteriorBvh bvh;
     bvh.Build(APlotOf(4100));
-    ASSERT_NE(bvh.Root(), nullptr);
+    const BvhNode* rootNode = bvh.Root();
+    ASSERT_NE(rootNode, nullptr);
 
-    const BvhNode& root = *bvh.Root();
+    const BvhNode& root = *rootNode;
     const double rootArea = static_cast<double>(root.bounds.Max.X - root.bounds.Min.X) *
                             static_cast<double>(root.bounds.Max.Z - root.bounds.Min.Z);
     ASSERT_GT(rootArea, 0.0);
@@ -367,8 +370,10 @@ TEST(ExteriorBvhTests, ALongInstanceIsHeldOnceRatherThanSplitOrDuplicated)
 
     // And its own node's box really does hold all 400 m of it, so the traversal that reaches the
     // node reaches the fence.
+    const BvhNode* rootNode = bvh.Root();
+    ASSERT_NE(rootNode, nullptr);
     bool held = false;
-    for (const BvhNode* leaf : LeavesOf(bvh, *bvh.Root()))
+    for (const BvhNode* leaf : LeavesOf(bvh, *rootNode))
     {
         for (std::uint32_t i = leaf->first; i < leaf->first + leaf->count; ++i)
         {
@@ -384,7 +389,7 @@ TEST(ExteriorBvhTests, ALongInstanceIsHeldOnceRatherThanSplitOrDuplicated)
     // Sibling boxes overlapping is the COST of that, and it is real -- recorded rather than
     // asserted away, because a traversal that assumed disjoint siblings would be wrong.
     int overlapping = 0;
-    const BvhNode& root = *bvh.Root();
+    const BvhNode& root = *rootNode;
     for (std::uint8_t a = 0; a < root.childCount; ++a)
     {
         for (std::uint8_t b = static_cast<std::uint8_t>(a + 1); b < root.childCount; ++b)
@@ -434,8 +439,12 @@ TEST(ExteriorBvhTests, TheSameInstancesInAnotherOrderGiveTheSameTree)
 
     // The leaves hold the same instances, which is the claim that matters: within one leaf the
     // order is `nth_element`'s business and the traversal reads the whole leaf anyway.
-    const std::vector<const BvhNode*> leavesOne = LeavesOf(one, *one.Root());
-    const std::vector<const BvhNode*> leavesTwo = LeavesOf(two, *two.Root());
+    const BvhNode* rootOne = one.Root();
+    const BvhNode* rootTwo = two.Root();
+    ASSERT_NE(rootOne, nullptr);
+    ASSERT_NE(rootTwo, nullptr);
+    const std::vector<const BvhNode*> leavesOne = LeavesOf(one, *rootOne);
+    const std::vector<const BvhNode*> leavesTwo = LeavesOf(two, *rootTwo);
     ASSERT_EQ(leavesOne.size(), leavesTwo.size());
     for (std::size_t leaf = 0; leaf < leavesOne.size(); ++leaf)
     {
@@ -492,8 +501,12 @@ TEST(ExteriorBvhTests, InstancesAtTheSamePlaceAreSplitTheSameWayEveryTime)
     // median and partitions around it, and says nothing about the order on either side. The
     // traversal reads a whole leaf, so a leaf is a set -- and the claim is that the SETS are a
     // fact about the posts rather than about which end of the file they were written at.
-    const std::vector<const BvhNode*> leavesOne = LeavesOf(one, *one.Root());
-    const std::vector<const BvhNode*> leavesTwo = LeavesOf(two, *two.Root());
+    const BvhNode* rootOne = one.Root();
+    const BvhNode* rootTwo = two.Root();
+    ASSERT_NE(rootOne, nullptr);
+    ASSERT_NE(rootTwo, nullptr);
+    const std::vector<const BvhNode*> leavesOne = LeavesOf(one, *rootOne);
+    const std::vector<const BvhNode*> leavesTwo = LeavesOf(two, *rootTwo);
     ASSERT_EQ(leavesOne.size(), leavesTwo.size());
     ASSERT_GT(leavesOne.size(), 1U) << "one leaf would make the claim vacuous";
     for (std::size_t leaf = 0; leaf < leavesOne.size(); ++leaf)
@@ -543,19 +556,21 @@ TEST(ExteriorBvhTests, ASmallPlotIsOneLeafAndAnEmptyOneIsNoTree)
                                Vector3(0.4F, 0.5F, 0.4F)));
     }
     bvh.Build(few);
-    ASSERT_NE(bvh.Root(), nullptr);
-    EXPECT_TRUE(bvh.Root()->IsLeaf());
+    const BvhNode* root = bvh.Root();
+    ASSERT_NE(root, nullptr);
+    EXPECT_TRUE(root->IsLeaf());
     EXPECT_EQ(bvh.Statistics().nodes, 1);
     EXPECT_EQ(bvh.Statistics().leaves, 1);
     EXPECT_EQ(bvh.Statistics().levels, 1);
-    EXPECT_EQ(bvh.Root()->count, ExteriorBvh::kMinToSplit);
+    EXPECT_EQ(root->count, ExteriorBvh::kMinToSplit);
 
     // One more and it splits.
     few.push_back(Instance(
         "BIN_EXTRA", PropCategory::SmallProp, Vector3(99.0F, 0.0F, 0.0F), Vector3(0.4F, 0.5F, 0.4F)));
     bvh.Build(few);
-    ASSERT_NE(bvh.Root(), nullptr);
-    EXPECT_FALSE(bvh.Root()->IsLeaf());
+    const BvhNode* split = bvh.Root();
+    ASSERT_NE(split, nullptr);
+    EXPECT_FALSE(split->IsLeaf());
     EXPECT_GT(bvh.Statistics().leaves, 1);
 }
 

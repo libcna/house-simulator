@@ -10289,6 +10289,40 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       dep: HOUSE-00695 · sys: — · plat: ALL · pri: MUST
 - [ ] HOUSE-00697 — Phase-9 review and commit; record the visible-cell and draw-call numbers in the performance log
       dep: HOUSE-00661…HOUSE-00696 · sys: — · plat: ALL · pri: MUST
+- [x] HOUSE-00698 — Fix the optimised build: three `-Werror` failures that appear only at `-O3`
+      dep: — · sys: ci · plat: LNX · pri: MUST
+      finding: **the project did not compile at `-O3` and nothing had noticed**, because every
+            build tree in daily use is `Debug`. `HOUSE-00694` needed an optimised one, and three
+            translation units failed under `-Werror` -- all of them GCC 14 analysing inlined
+            library code, and all fixed by writing what the code already meant rather than by
+            silencing the warning:
+            * `src/world/InteractableExpr.cpp` — `-Wmaybe-uninitialized` on
+            `basic_string::_M_string_length` inside the `StateValue` variant of the node copied
+            into `Add`'s BY-VALUE parameter. Now a const reference, which every caller already
+            wanted: they all pass a named local they keep, so by value was a copy AND a move where
+            a copy does.
+            * `tests/unit/ExteriorBvhTests.cpp` — `-Wnull-dereference` on `*bvh.Root()`.
+            `ASSERT_NE(bvh.Root(), nullptr)` asserts one CALL and the dereference is another one,
+            and at `-O3` GCC will not tie the two together. Now the pointer is bound once, asserted,
+            and used -- which is what the assertion was claiming all along.
+            * `tests/unit/WorldLoaderTests.cpp` — `-Wnull-dereference` inside libstdc++'s own
+            `sbumpc`, from the usual `istreambuf_iterator` pair slurp, whose stream GCC cannot
+            prove has a buffer. Now the length comes from the filesystem and the read is sized.
+      measured: with those three, `build-consumer` (Release, `-O3 -DNDEBUG`) builds the game, all
+            four test binaries and the content, and its unit suite is **996/996 green**. What is
+            NOT proved is the `linux-release` preset itself: it shares `build/` with `linux-debug`,
+            so configuring it would rebuild the whole tree twice and throw the debug one away for
+            nothing. All three files are renderer-independent, so neither is the fix.
+      finding: **six integration tests fail in that tree, and it is the CONFIGURATION and not the
+            optimisation.** Two `ContentSmokeTests` want Tier E, which this tree is configured
+            without. The four `HeadlessRunTests` walk tests end with the camera pitched to §44's
+            85° limit and yawed 30° off, while every assertion about the BODY -- it landed on
+            §12's floor, nothing pushed it sideways -- passes: the simulation is identical and the
+            difference is mouse look under the HEADLESS renderer's input path. Recorded rather than
+            chased: the gating tree is `build/`, where all 92 pass, and this is not phase 9's
+            subject.
+      verified: `build/` untouched and green -- 996 unit, 92 integration, 30 render, 10 perf -- and
+            all gates green.
 
 ---
 

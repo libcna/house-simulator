@@ -3347,10 +3347,17 @@ namespace
         {
             GTEST_SKIP() << "no authored world yet";
         }
+        // A SIZED read rather than the usual `istreambuf_iterator` pair: at `-O3` GCC 14 cannot
+        // prove the stream has a buffer, and reports a potential null dereference inside
+        // libstdc++'s own `sbumpc` -- which under `-Werror` broke every optimised build of this
+        // suite (`HOUSE-00698`). This form asks the filesystem for the length and reads it.
         const auto read = [](const std::string& path)
         {
             std::ifstream in(path, std::ios::binary);
-            return std::string(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>());
+            std::string text(static_cast<std::size_t>(std::filesystem::file_size(path)), '\0');
+            in.read(text.data(), static_cast<std::streamsize>(text.size()));
+            text.resize(static_cast<std::size_t>(in.gcount()));
+            return text;
         };
 
         EXPECT_NE(read("assets-src/world/layout.levels.json").find("//"), std::string::npos)

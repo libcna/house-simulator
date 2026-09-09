@@ -255,9 +255,17 @@ namespace cnahouse::world
             return util::Ok();
         }
 
-        [[nodiscard]] std::int32_t Add(Predicate& predicate, Predicate::Node node)
+        /// @brief Appends @p node and returns its index.
+        ///
+        /// **By const reference and not by value.** Every caller passes a named local it does not
+        /// give up, so a by-value parameter was a copy AND a move where a copy does; and at `-O3`
+        /// GCC 14 could not prove the copied-into parameter's `StateValue` variant was initialised
+        /// through the two inlinings, which made `-Wmaybe-uninitialized` fire on
+        /// `basic_string::_M_string_length` and, under `-Werror`, broke every optimised build of
+        /// the project (`HOUSE-00698`). The reference removes the temporary the warning was about.
+        [[nodiscard]] std::int32_t Add(Predicate& predicate, const Predicate::Node& node)
         {
-            predicate.m_nodes.push_back(std::move(node));
+            predicate.m_nodes.push_back(node);
             return static_cast<std::int32_t>(predicate.m_nodes.size()) - 1;
         }
 
