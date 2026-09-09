@@ -69,6 +69,7 @@ add_library(cnahouse_core STATIC
     visibility/ClipFrustum.cpp
     visibility/DetailSets.cpp
     visibility/ClipRect.cpp
+    visibility/InstanceCulling.cpp
     visibility/PortalArea.cpp
     visibility/PortalTraversal.cpp
     visibility/VisibilitySystem.cpp

@@ -9494,8 +9494,32 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             bound, every drawn chunk belonging to a visible cell AND inside one of its cones, the
             nine chunks behind a second doorway, turning round changing the list, and the reused
             buffer. Five injected bugs, five caught.
-- [ ] HOUSE-00673 — Implement per-cell dynamic-instance culling
+- [x] HOUSE-00673 — Implement per-cell dynamic-instance culling
       dep: HOUSE-00672 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) `visibility::InstanceCuller` over a `DynamicInstance` -- an id, its cell,
+            and a world-space sphere. §17.4 batches a cell's STATIC props into chunks (*"a fully
+            visible kitchen with 140 props costs 5 draw calls, not 140"*) and excludes the ones
+            that move: *"a drawer, a door, a chair the player can nudge"*. Those are submitted one
+            at a time, so each is worth a test of its own, and §71.2 budgets 180 typically.
+      note: **a sphere and not a box**, which is §25.1's own choice: these things rotate -- a door
+            swings, a chair is nudged round -- and a sphere is the bound that does not have to be
+            rebuilt when they do.
+      note: the list is handed over every frame rather than indexed once, which is the difference
+            between this and `HOUSE-00672`'s chunks: chunks do not move, so their cell mapping is
+            built at construction; instances do, so there is nothing to prepare.
+      note: **§25's order is rooms first and things second, and the measurement says why.** A chair
+            in every one of §12's 96 cells, seen from `L0_HALL`: 3 drawn, **88 culled with the room
+            they are in** at one id comparison each, and 5 by the room's own cones. The expensive
+            test runs 8 times out of 96.
+      note: an instance visible only through the SECOND doorway is drawn -- 84 of them over 384
+            poses with five instances a cell -- which is what the injection that tests only the
+            first cone is caught by. The first version of the fixture put one chair in the middle
+            of each room, where every cone that sees the room sees the chair, and caught nothing.
+      verified: 5 `InstanceCullingTests` -- the counts adding up with §71.2's budget as the bound,
+            everything drawn being in a visible cell and one of its cones, the 84 second-cone
+            instances, a chair behind the camera in the camera's OWN room (where the cell test
+            cannot help), and instances in a cell that does not exist. Five injected bugs, five
+            caught.
 - [ ] HOUSE-00674 — Implement distance culling per prop category
       dep: HOUSE-00673 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00675 — Implement `RenderList`: the sorted draw list (pass → effect → material → chunk)
