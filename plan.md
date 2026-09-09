@@ -9850,8 +9850,48 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             input source every other integration test uses, a shared edge slot is invisible unless
             two keys are pressed together, and a row's own depth is invisible unless the row is
             found by something other than that depth.
-- [ ] HOUSE-00682 — Implement the `F4` visibility geometry overlay (cell wireframes, portal quads, reduced frusta)
+- [x] HOUSE-00682 — Implement the `F4` visibility geometry overlay (cell wireframes, portal quads, reduced frusta)
       dep: HOUSE-00681, HOUSE-00147 · sys: debug · plat: ALL · pri: MUST
+      note: (2026-09-09) `debug::VisibilityGeometryOverlay` over `HOUSE-00147`'s `DebugDraw`: the
+            visible cells as wireframe boxes coloured by depth, their openings as filled quads
+            coloured by §25.3's latch, and each cone as a wire pyramid. It builds into segments and
+            quads of its own rather than drawing straight through `DebugDraw`, for §71's `F9`
+            reason: what it would draw is then assertable with no device, and the cap is counted
+            and reported instead of being swallowed silently by the vertex buffer.
+      finding: **§25.8 asks for wire pyramids and the traversal was throwing away the only thing a
+            pyramid can stand on.** `ClipRectToFrustum` produces the world-space aperture polygon
+            and `ReduceFrustum` consumes it; between the two it was discarded, and a `ClipFrustum`
+            is planes with no corners. `VisibleCell::apertures` now keeps it -- in every build and
+            not only a debug one, for §71's reason about counters: a measurement that exists only
+            in a debug build makes that build a different program from the one the tests measure.
+      note: **a wireframe per FOOTPRINT and not per cell.** §12's rooms are one or more boxes, and
+            an L-shaped room drawn as its bounding box claims a corner it does not have. Asserted
+            by counting the ramp-coloured segments -- twelve per box exactly -- because a lower
+            bound would have been met by the portals and cones alone.
+      note: **a shut door is drawn too, in its own colour.** The question this overlay answers is
+            *"why is that room dark"*, and drawing only the openings the walk crossed would hide
+            exactly what the reader is looking for. From `L0_HALL` with §65.6's doors shut: 5 cells,
+            23 openings passing light and 7 shut; with every door open, 8 cells and 53 open.
+      note: `F4` and `F9` share ONE `DebugDraw::Begin`/`Flush` pair, because `Begin` discards what
+            is queued -- two overlays each opening their own would leave only the second on screen,
+            and the two are most useful together: a capsule standing inside the cones that decided
+            what it can see.
+      measured: from `L0_KITCHEN` in a real 30-frame session: 7 cells, 47 openings open and 8 shut,
+            8 cones, 492 segments -- against the overlay's cap of 10 000 and `DebugDraw`'s 32 768.
+      verified: 7 `VisibilityGeometryOverlayTests` (the rooms drawn and no others, twelve edges per
+            footprint counted exactly, every cone's pyramid joined to the eye AND standing on its
+            own aperture outline, the camera's own cone drawing no pyramid, a shut door drawn
+            differently, the depth ramp being monotone and not wrapping, the cap counted and said,
+            and a rebuild replacing rather than appending), 1 extended `InputTests` case (`F4` on
+            its own key and its own edge slot), and 1 `HeadlessRunTests` case pressing `F4` in a
+            real session and checking it agrees with `F3` about how many rooms there are. Ten
+            injected bugs, all caught -- two only after the suite was strengthened: one box per cell
+            survived a lower bound on the segment count, and a pyramid with no base survived a test
+            that only checked its apex edges.
+      note: `Color(int,int,int,int)` and not the byte constructor: `check_xna_strict` caught four
+            `std::uint8_t`s resolving to a `CNAEXT` overload that names no forbidden identifier and
+            is therefore invisible to the identifier lint (ADR-0001). Exactly the case that gate
+            exists for, found by it on its first run over this file.
 - [ ] HOUSE-00683 — Implement `F5` freeze-visibility and the detached inspection camera
       dep: HOUSE-00682 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-00684 — Implement the `cull off|on` console command

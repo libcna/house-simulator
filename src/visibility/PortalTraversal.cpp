@@ -70,7 +70,8 @@ namespace cnahouse::visibility
         // The whole screen: the camera's own frustum covers all of it, so nothing can be
         // "contained" by it and skipped before the walk has started.
         const NdcRect whole{-1.0F, -1.0F, 1.0F, 1.0F};
-        queue_.push_back(Work{input.cameraCell, input.cameraFrustum, whole, 0, kNoLimit, ConeFlags::None});
+        queue_.push_back(Work{
+            input.cameraCell, input.cameraFrustum, whole, ClippedPolygon{}, 0, kNoLimit, ConeFlags::None});
 
         for (std::size_t head = 0; head < queue_.size(); ++head)
         {
@@ -98,6 +99,7 @@ namespace cnahouse::visibility
             {
                 cell.frusta[cell.frustumCount] = work.frustum;
                 cell.rects[cell.frustumCount] = work.rect;
+                cell.apertures[cell.frustumCount] = work.aperture;
                 ++cell.frustumCount;
             }
             else
@@ -189,7 +191,7 @@ namespace cnahouse::visibility
                                             ? work.flags | ConeFlags::Diffuse
                                             : work.flags;
                 ++stats_.portalsCrossed;
-                queue_.push_back(Work{other, next.frustum, rect, work.depth + 1, allowance, flags});
+                queue_.push_back(Work{other, next.frustum, rect, clipped, work.depth + 1, allowance, flags});
             }
         }
 

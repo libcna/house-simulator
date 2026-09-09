@@ -22,6 +22,7 @@
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/PhysicsOverlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
+#include "cnahouse/debug/VisibilityGeometryOverlay.hpp"
 #include "cnahouse/debug/VisibilityOverlay.hpp"
 #include "cnahouse/debug/WorldOverlay.hpp"
 #include "cnahouse/physics/BroadPhase.hpp"
@@ -121,6 +122,12 @@ namespace cnahouse::app
         [[nodiscard]] const debug::Counters& CountersForTesting() const noexcept
         {
             return counters_;
+        }
+
+        /// @brief §25.8's `F4`, for the test that presses the key.
+        [[nodiscard]] const debug::VisibilityGeometryOverlay& VisibilityGeometryForTesting() const noexcept
+        {
+            return visibilityGeometry_;
         }
 
         /// @brief §25.8's `F3`, for the test that presses the key.
@@ -382,7 +389,12 @@ namespace cnahouse::app
         /// with and the passes read it immediately after.
         void BuildRenderList();
 
-        /// @brief Builds and draws §71's `F9` through `debugDraw_`. Does nothing when hidden.
+        /// @brief Builds and draws §71's `F9` and §25.8's `F4` through `debugDraw_`.
+        ///
+        /// ONE `Begin`/`Flush` pair for both: `DebugDraw::Begin` discards what is queued, so two
+        /// overlays each opening their own would leave only the second on screen -- and the two
+        /// are most useful together, a capsule standing inside the cones that decided what it can
+        /// see.
         void DrawPhysicsOverlay();
 
         /// @brief What §69's `F2` shows about this frame.
@@ -440,6 +452,7 @@ namespace cnahouse::app
         /// §25.8's `F3`, and the walk it reports. Both exist only in the walk scene: the blockout
         /// camera is outside the house and in no cell, and §16.4 has no answer for it.
         debug::VisibilityOverlay visibilityOverlay_;
+        debug::VisibilityGeometryOverlay visibilityGeometry_;
         std::optional<visibility::VisibilitySystem> visibility_;
         std::optional<visibility::ChunkCuller> chunkCuller_;
         /// §71's `F9`, and the line renderer it draws through. Both exist only in the walk scene:

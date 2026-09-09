@@ -14,6 +14,7 @@
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/debug/VisibilityGeometryOverlay.hpp"
 #include "cnahouse/debug/VisibilityOverlay.hpp"
 #include "cnahouse/player/FirstPersonView.hpp"
 #include "cnahouse/player/IInputSource.hpp"
@@ -188,6 +189,48 @@ namespace
         // And the overlay is honest about the draw list not being built from any of it yet.
         EXPECT_FALSE(snapshot.cullingApplied);
         EXPECT_EQ(snapshot.drawCalls, 418) << "the frame still draws every resident chunk";
+    }
+
+    TEST(HeadlessRunTests, PressingF4DrawsTheDecisionAndNotJustTheHouse)
+    {
+        // `HOUSE-00682`. §25.8's `F4`, end to end: the key reaches the overlay, the overlay is
+        // built from the same walk `F3` reports, and what it holds is the DECISION -- the rooms
+        // reached, their openings with their latch state, and a pyramid per cone.
+        cnahouse::util::Log::ResetForTesting();
+
+        OneKeyPress input(&cnahouse::player::InputState::toggleVisibilityGeometryPressed);
+
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        options.player = std::array<float, 5>{-3.00f, 0.60f, -25.05f, 90.0f, 0.0f};
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(30);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+
+        const auto& overlay = game.VisibilityGeometryForTesting();
+        EXPECT_TRUE(overlay.Visible()) << "one press of F4 did not show the overlay";
+        std::printf("  %s\n", overlay.Line().c_str());
+        EXPECT_GT(overlay.Segments().size(), 100U)
+            << "the overlay is up and drew nothing: the walk reached rooms with walls";
+        EXPECT_GT(overlay.Quads().size(), 0U) << "no portal quad was built";
+        EXPECT_EQ(overlay.Dropped(), 0U) << "§12's house needed more segments than the cap";
+
+        // It is built from the SAME walk `F3` reports, so the two agree about how many rooms
+        // there are -- which is what makes reading them side by side worth anything.
+        const cnahouse::debug::VisibilitySnapshot snapshot = game.VisibilitySnapshotForTesting();
+        EXPECT_NE(overlay.Line().find(std::to_string(snapshot.visible.size()) + " cell(s)"),
+                  std::string::npos)
+            << overlay.Line() << " against F3's " << snapshot.visible.size() << " cells";
     }
 
     TEST(HeadlessRunTests, PressingF9BuildsTheWireframeForTheCellTheBodyIsIn)

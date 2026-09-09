@@ -872,6 +872,13 @@ namespace cnahouse::app
                           "visibility overlay {}",
                           visibilityOverlay_.Visible() ? "shown" : "hidden");
             }
+            if (Input().Current().toggleVisibilityGeometryPressed)
+            {
+                visibilityGeometry_.Toggle();
+                Log::Info(LogCat::Debug,
+                          "visibility geometry {}",
+                          visibilityGeometry_.Visible() ? "shown" : "hidden");
+            }
             if (Input().Current().togglePhysicsOverlayPressed)
             {
                 physicsOverlay_.Toggle();
@@ -1045,6 +1052,13 @@ namespace cnahouse::app
         {
             chunkCuller_->Cull(visibility_->Visible());
         }
+        if (visibilityGeometry_.Visible())
+        {
+            // Built only while it is up: §25.8's geometry is thousands of segments over a house
+            // with every door open, and a frame that is not showing it should not pay for it.
+            visibilityGeometry_.Build(
+                *world_, visibility_->Visible(), visibility_->Portals(), view_.Camera().Pose().eye);
+        }
     }
 
     debug::VisibilitySnapshot CnaHouseGame::VisibilitySnapshot() const
@@ -1105,8 +1119,21 @@ namespace cnahouse::app
     void CnaHouseGame::DrawPhysicsOverlay()
     {
 #if CNAHOUSE_DEBUG_TOOLS
-        if (!walking_ || !physicsOverlay_.Visible() || debugDraw_ == nullptr || !collision_.has_value())
+        if (!walking_ || debugDraw_ == nullptr)
         {
+            return;
+        }
+        const bool wantsPhysics = physicsOverlay_.Visible() && collision_.has_value();
+        if (!wantsPhysics && !visibilityGeometry_.Visible())
+        {
+            return;
+        }
+        if (!wantsPhysics)
+        {
+            // §25.8's `F4` alone: one `Begin`, the cones, one `Flush`.
+            debugDraw_->Begin(view_.Camera().View(), view_.Camera().Projection());
+            visibilityGeometry_.Draw(*debugDraw_);
+            debugDraw_->Flush();
             return;
         }
         const physics::CollisionCell* cell = collision_->Cell(util::IdRegistry::NameOf(tracker_.Current()));
@@ -1122,6 +1149,7 @@ namespace cnahouse::app
 
         debugDraw_->Begin(view_.Camera().View(), view_.Camera().Projection());
         physicsOverlay_.Draw(*debugDraw_);
+        visibilityGeometry_.Draw(*debugDraw_);
         debugDraw_->Flush();
 #endif
     }

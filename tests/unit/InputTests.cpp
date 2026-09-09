@@ -189,6 +189,9 @@ namespace
             {Keys::F1, &cnahouse::player::InputState::toggleOverlayPressed, "F1 performance"},
             {Keys::F2, &cnahouse::player::InputState::toggleWorldOverlayPressed, "F2 world"},
             {Keys::F3, &cnahouse::player::InputState::toggleVisibilityOverlayPressed, "F3 visibility"},
+            {Keys::F4,
+             &cnahouse::player::InputState::toggleVisibilityGeometryPressed,
+             "F4 visibility geometry"},
             {Keys::F9, &cnahouse::player::InputState::togglePhysicsOverlayPressed, "F9 physics"},
         };
 
@@ -213,14 +216,14 @@ namespace
         // in the same frame shows that the second one has already been consumed.
         KeyboardMouseSource together;
         together.Apply(KeyboardState({}), At(0, 0), 0.016f);
-        together.Apply(KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F9}, At(0, 0), 0.016f);
+        together.Apply(KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F4, Keys::F9}, At(0, 0), 0.016f);
         for (const Binding& binding : bindings)
         {
             EXPECT_TRUE(together.Current().*(binding.field))
                 << binding.what << " did not fire when the other overlays' keys were down too";
         }
         // ...and holding them repeats none of them, which is what makes each an edge of its own.
-        together.Apply(KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F9}, At(0, 0), 0.016f);
+        together.Apply(KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F4, Keys::F9}, At(0, 0), 0.016f);
         for (const Binding& binding : bindings)
         {
             EXPECT_FALSE(together.Current().*(binding.field)) << binding.what << " repeated";

@@ -13,6 +13,7 @@
 
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/visibility/ClipFrustum.hpp"
+#include "cnahouse/visibility/ClipRect.hpp"
 #include "cnahouse/visibility/PortalArea.hpp"
 #include "cnahouse/visibility/PortalDepth.hpp"
 #include "cnahouse/visibility/PortalRuntime.hpp"
@@ -79,6 +80,17 @@ namespace cnahouse::visibility
         std::array<ClipFrustum, kMaxFrustaPerCell> frusta{};
         /// @brief The screen rectangle each frustum arrived with, for §25.2's containment skip.
         std::array<NdcRect, kMaxFrustaPerCell> rects{};
+        /// @brief The world-space polygon each cone was reduced THROUGH (`HOUSE-00682`).
+        ///
+        /// §25.2's `ClipRectToFrustum` produces it and `ReduceFrustum` consumes it, and until
+        /// `F4` it was thrown away in between. §25.8 draws *"the reduced frusta as wire
+        /// pyramids"*, and a pyramid needs an aperture: the planes alone do not have corners.
+        ///
+        /// Kept in every build and not only a debug one, for the reason §71 gives about counters:
+        /// a measurement that exists only in a debug build makes the debug build a different
+        /// program from the one the tests measure. Empty for the camera's own cell, which was
+        /// reduced through nothing.
+        std::array<ClippedPolygon, kMaxFrustaPerCell> apertures{};
         std::size_t frustumCount = 0;
         /// @brief The SHALLOWEST depth this cell was reached at, which is what §25.2's depth caps
         ///        are measured against and what `F3` shows.
@@ -190,6 +202,8 @@ namespace cnahouse::visibility
             util::Id cell;
             ClipFrustum frustum;
             NdcRect rect;
+            /// @brief The world-space polygon this cone came through. Empty at the camera.
+            ClippedPolygon aperture;
             int depth = 0;
             /// @brief The minimum cap of every portal crossed to get here (`HOUSE-00680`).
             int allowance = kNoLimit;

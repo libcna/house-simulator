@@ -110,6 +110,7 @@ namespace cnahouse::player
             ToggleOverlay,
             ToggleWorldOverlay,
             ToggleVisibilityOverlay,
+            ToggleVisibilityGeometry,
             TogglePhysicsOverlay,
             Screenshot,
             Count,
