@@ -9172,9 +9172,32 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
 
 ### 9.1 The traversal
 
-- [ ] HOUSE-00661 — Implement `ClipFrustum`: an N-plane frustum (N ≤ 10) over `Plane`, with `Intersects(BoundingBox)` and `Intersects(BoundingSphere)`
+- [x] HOUSE-00661 — Implement `ClipFrustum`: an N-plane frustum (N ≤ 10) over `Plane`, with `Intersects(BoundingBox)` and `Intersects(BoundingSphere)`
       dep: HOUSE-00630 · sys: visibility · plat: ALL · pri: MUST
       verify: unit ClipFrustumTests.* against `BoundingFrustum` for the 6-plane case
+      note: (2026-09-09) `visibility::ClipFrustum`, on `Plane` and nothing else -- §25.2's Tier-A
+            construction, no CNAEXT. Ten planes because §25.2 bounds the clipped polygon at eight
+            vertices and the near and far planes come along from the camera; four cuts of a
+            four-sided rectangle cannot make more than eight edges, so ten is a bound rather than
+            a guess.
+      note: **the plane convention is XNA's, exactly: normals point OUTWARD and `Front` is
+            outside.** That is what `BoundingFrustum::Contains` means when it maps
+            `PlaneIntersectionType::Front` to `Disjoint`, and matching it is what makes the two
+            types comparable box for box -- which is how this one is tested, and is the only
+            reason to be confident about a sign nobody can see.
+      note: a frustum with NO planes contains everything. It is the identity §25.2's traversal
+            starts from and the fall-back when a reduction cannot be made, and "no planes means no
+            outside" is the answer that keeps a failed reduction over-drawing rather than culling
+            something visible.
+      note: `Add` returns false when full rather than dropping the plane or throwing. A dropped
+            plane makes the frustum too WIDE -- it over-draws, which is invisible -- and the
+            caller is the only thing that can decide to fall back to the unreduced frustum.
+      verified: 6 `ClipFrustumTests` -- 3 993 boxes and spheres against `BoundingFrustum` over a
+            40 m cube at three sizes, with the fixture asserting it produced all three answers;
+            the point test; the empty frustum; four planes cutting a doorway-shaped column with a
+            straddling box still reported as intersecting; the tenth plane fitting and the
+            eleventh refused without changing an answer; and the same six planes added in reverse
+            giving the same answers. Five injected bugs, five caught.
 - [ ] HOUSE-00662 — Implement `ClipRectToFrustum`: 2-D Sutherland–Hodgman of an axis-aligned portal rectangle against a frustum's side planes
       dep: HOUSE-00661 · sys: visibility · plat: ALL · pri: MUST
       verify: unit ClipTests.* incl. fully inside, fully outside, straddling every plane, and degenerate cases
