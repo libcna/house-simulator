@@ -124,6 +124,28 @@ namespace cnahouse::app
             return counters_;
         }
 
+        /// @brief §25.8's `F5`: whether the walk is frozen and the camera detached.
+        [[nodiscard]] bool VisibilityFrozenForTesting() const noexcept
+        {
+            return visibilityFrozen_;
+        }
+
+        /// @brief Where the frame is drawn from, which is the BODY's eye until `F5` detaches it.
+        [[nodiscard]] const rendering::Camera& DrawCameraForTesting() const noexcept
+        {
+            return blockoutCamera_;
+        }
+
+        /// @brief The view matrix §25.8's `F4` and §71's `F9` are drawn through.
+        ///
+        /// Exposed because the alternative is a render fixture with an overlay up: the annotations
+        /// are world-space, so drawing them through the wrong camera puts them somewhere they are
+        /// not, and after `F5` the wrong camera is the one the body is still holding.
+        [[nodiscard]] Microsoft::Xna::Framework::Matrix DebugViewForTesting() const
+        {
+            return DebugView();
+        }
+
         /// @brief §25.8's `F4`, for the test that presses the key.
         [[nodiscard]] const debug::VisibilityGeometryOverlay& VisibilityGeometryForTesting() const noexcept
         {
@@ -389,6 +411,14 @@ namespace cnahouse::app
         /// with and the passes read it immediately after.
         void BuildRenderList();
 
+        /// @brief The view and projection the FRAME is drawn with, for world-space annotations.
+        ///
+        /// The body's eye until §25.8's `F5` detaches the camera. Drawing the cones through the
+        /// body's camera while the picture came from the inspection one would put them somewhere
+        /// they are not, which is the one thing a freeze must not do.
+        [[nodiscard]] Microsoft::Xna::Framework::Matrix DebugView() const;
+        [[nodiscard]] Microsoft::Xna::Framework::Matrix DebugProjection();
+
         /// @brief Builds and draws §71's `F9` and §25.8's `F4` through `debugDraw_`.
         ///
         /// ONE `Begin`/`Flush` pair for both: `DebugDraw::Begin` discards what is queued, so two
@@ -455,6 +485,10 @@ namespace cnahouse::app
         debug::VisibilityGeometryOverlay visibilityGeometry_;
         std::optional<visibility::VisibilitySystem> visibility_;
         std::optional<visibility::ChunkCuller> chunkCuller_;
+        /// §25.8's `F5`: the walk stops being recomputed and the camera leaves the body, so what
+        /// was culled can be flown out to and looked at. *"The single most useful debugging tool
+        /// for a portal system."*
+        bool visibilityFrozen_ = false;
         /// §71's `F9`, and the line renderer it draws through. Both exist only in the walk scene:
         /// `DebugDraw` needs a device, and the overlay needs a `CollisionWorld` and a camera --
         /// which is exactly what `HOUSE-00620` recorded as the reason `F9` was not wired yet.

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -73,6 +74,21 @@ namespace cnahouse::debug
         /// is in before that command exists. An overlay that did not say so would be reporting a
         /// culling system that is not culling.
         bool cullingApplied = false;
+
+        /// @brief §25.8's `F5`: the walk is frozen and the camera has detached from the body.
+        ///
+        /// While this is true every number above describes an OLD frame -- the one the freeze
+        /// caught -- and the eye it was computed from is not where the picture is being drawn
+        /// from. Saying so is the difference between a frozen overlay and a broken one.
+        bool frozen = false;
+        /// @brief The frame index the walk above was computed for.
+        ///
+        /// Stops advancing the moment `F5` freezes, which is the only way to SEE that the walk has
+        /// stopped: the body stands still while frozen, so a walk that kept running would keep
+        /// producing the same answer and look exactly like one that had stopped.
+        std::uint64_t walkFrame = 0;
+        /// @brief Where the detached camera is, while `frozen`. Ignored otherwise.
+        Microsoft::Xna::Framework::Vector3 inspectionEye;
     };
 
     /// @brief §25.8's `F3`: *"cells visible ... traversals ... portals tested ... maxdepth"*, and

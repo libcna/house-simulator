@@ -67,6 +67,8 @@ namespace cnahouse::player
         bool toggleVisibilityOverlayPressed = false;
         /// @brief §25.8's `F4`: the visibility GEOMETRY -- cell boxes, portal quads, the cones.
         bool toggleVisibilityGeometryPressed = false;
+        /// @brief §25.8's `F5`: freeze the visibility walk and detach the camera to inspect it.
+        bool toggleFreezeVisibilityPressed = false;
         /// @brief §69's `F9`: the physics overlay -- collision shapes, the capsule, the probe.
         bool togglePhysicsOverlayPressed = false;
         bool screenshotPressed = false;

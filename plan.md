@@ -9892,8 +9892,41 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             `std::uint8_t`s resolving to a `CNAEXT` overload that names no forbidden identifier and
             is therefore invisible to the identifier lint (ADR-0001). Exactly the case that gate
             exists for, found by it on its first run over this file.
-- [ ] HOUSE-00683 — Implement `F5` freeze-visibility and the detached inspection camera
+- [x] HOUSE-00683 — Implement `F5` freeze-visibility and the detached inspection camera
       dep: HOUSE-00682 · sys: debug · plat: ALL · pri: MUST
+      note: (2026-09-09) §25.8: *"`F5` freezes the visibility computation so the camera can fly out
+            and inspect what was culled -- the single most useful debugging tool for a portal
+            system."* Both halves: `UpdateVisibility` returns at once while frozen, so `F3`'s
+            numbers, `F4`'s geometry and the chunk cull are all the frame the freeze caught; and the
+            body stops stepping while the input that walked it flies `HOUSE-00476`'s free camera
+            instead.
+      note: the detach **adopts** the eye, so the inspection camera starts exactly where the view
+            was. A detach that jumped would throw away the view the reader pressed `F5` to keep,
+            which is the one thing the freeze exists for -- asserted by freezing and pressing
+            nothing else.
+      finding: **a frozen walk is invisible from its own numbers.** The body stands still while
+            frozen, so a walk that kept running would keep producing the same answer and look
+            exactly like one that had stopped: the injection that removed the early return was
+            MISSED. The frame index the walk was computed for is the only thing that can tell the
+            two apart, so `VisibilitySnapshot::walkFrame` carries it and `F3` prints it on the
+            `FROZEN` line.
+      finding: **the world-space annotations were being drawn through the camera the body still
+            holds.** Correct until `F5`, and wrong the moment it fires: `F4`'s frozen cones would be
+            drawn 6 m from where they are, and a freeze that moves what it froze is worse than no
+            freeze. `DebugView`/`DebugProjection` take the camera the FRAME came from. No render
+            fixture has an overlay up, so this is asserted on the matrices themselves -- and on at
+            least one of the three translation components, because a camera that flew straight down
+            its own view direction leaves the right-axis one exactly where it was.
+      measured: sixty frames with `F5` on the first and `W` held for the rest: the body has not
+            moved (0 fixed steps), the inspection camera is **5.96 m** from its eye, and the walk
+            `F3` reports is still `L0_KITCHEN`'s from the frame the freeze caught.
+      verified: 1 new `VisibilityOverlayTests` case (the `FROZEN` line, in capitals and first, with
+            the frame it caught and where the camera went), 1 extended `InputTests` case (`F5` on
+            its own key and its own edge slot, six overlay keys pressed together), and 2
+            `HeadlessRunTests` cases -- freeze-and-fly, and freeze-and-hold-still. Eight injected
+            bugs, all caught -- three only after the suite was strengthened: the frozen walk needing
+            its frame index to be visible at all, the missing adopt needing a test that presses
+            nothing, and the annotation camera needing an accessor because no fixture draws one.
 - [ ] HOUSE-00684 — Implement the `cull off|on` console command
       dep: HOUSE-00670 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-00685 — Author the 24 named visibility poses with their expected visible-cell sets

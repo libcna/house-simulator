@@ -6,6 +6,7 @@
 // throws during `Initialize`, content that cannot be found from the working directory, a `Draw`
 // that leaves the device in a state the next frame rejects. It runs under the `headless` preset,
 // which `HOUSE-00105` measured doing 600 frames with `DISPLAY` unset.
+#include <cmath>
 #include <cstdio>
 
 #include <gtest/gtest.h>
@@ -231,6 +232,147 @@ namespace
         EXPECT_NE(overlay.Line().find(std::to_string(snapshot.visible.size()) + " cell(s)"),
                   std::string::npos)
             << overlay.Line() << " against F3's " << snapshot.visible.size() << " cells";
+    }
+
+    TEST(HeadlessRunTests, PressingF5FreezesTheWalkAndDetachesTheCamera)
+    {
+        // `HOUSE-00683`. §25.8: *"`F5` freezes the visibility computation so the camera can fly
+        // out and inspect what was culled -- the single most useful debugging tool for a portal
+        // system."* Both halves are checked: the walk stops being recomputed, and the camera stops
+        // being the body's.
+        cnahouse::util::Log::ResetForTesting();
+
+        // Freezes on the first frame, then holds `W` for the rest of the run: with the walk frozen
+        // the body must not move and the camera must.
+        class FreezeThenFly final : public cnahouse::player::IInputSource
+        {
+        public:
+            void Update(float) override
+            {
+                state_ = cnahouse::player::InputState{};
+                state_.toggleFreezeVisibilityPressed = !fired_;
+                fired_ = true;
+                state_.move.Y = 1.0f;
+            }
+
+            [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+            {
+                return state_;
+            }
+
+            [[nodiscard]] bool LookAvailable() const noexcept override
+            {
+                return false;
+            }
+
+        private:
+            cnahouse::player::InputState state_;
+            bool fired_ = false;
+        };
+
+        FreezeThenFly input;
+
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        options.player = std::array<float, 5>{-3.00f, 0.60f, -25.05f, 90.0f, 0.0f};
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(60);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+
+        EXPECT_TRUE(game.VisibilityFrozenForTesting()) << "one press of F5 did not freeze the walk";
+
+        // The body stood still: `W` was held for sixty frames and §49.3's step never ran.
+        const cnahouse::player::PlayerState& player = game.PlayerForTesting();
+        EXPECT_NEAR(player.position.X, -3.00f, 0.05f) << "the body walked while the walk was frozen";
+        EXPECT_NEAR(player.position.Z, -25.05f, 0.05f);
+        EXPECT_EQ(game.FixedStepsForTesting(), 0U) << "§49.3's step ran during a freeze";
+
+        // ...and the camera did not: the same `W` flew the inspection camera out of the room.
+        const Microsoft::Xna::Framework::Vector3 eye = game.DrawCameraForTesting().eye;
+        const Microsoft::Xna::Framework::Vector3 body = game.ViewForTesting().Camera().Pose().eye;
+        const float moved =
+            std::sqrt((eye.X - body.X) * (eye.X - body.X) + (eye.Y - body.Y) * (eye.Y - body.Y) +
+                      (eye.Z - body.Z) * (eye.Z - body.Z));
+        std::printf("  the inspection camera flew %.2f m from the body's eye\n", static_cast<double>(moved));
+        EXPECT_GT(moved, 1.0f) << "the camera never detached from the body";
+
+        // The world-space annotations are drawn through the camera the FRAME came from, which is
+        // now the inspection camera. Through the body's, the frozen cones would be drawn 6 m from
+        // where they are -- and a freeze that moved what it froze is worse than no freeze.
+        const Microsoft::Xna::Framework::Matrix debugView = game.DebugViewForTesting();
+        const Microsoft::Xna::Framework::Matrix drawView = game.DrawCameraForTesting().View();
+        EXPECT_FLOAT_EQ(debugView.M41, drawView.M41) << "F4 is drawn through the wrong camera";
+        EXPECT_FLOAT_EQ(debugView.M42, drawView.M42);
+        EXPECT_FLOAT_EQ(debugView.M43, drawView.M43);
+        const Microsoft::Xna::Framework::Matrix bodyView = game.ViewForTesting().Camera().View();
+        // At least one of the three, not M41 in particular: a camera that flew straight down its
+        // own view direction leaves the right-axis translation exactly where it was.
+        EXPECT_TRUE(debugView.M41 != bodyView.M41 || debugView.M42 != bodyView.M42 ||
+                    debugView.M43 != bodyView.M43)
+            << "the body's camera and the frame's are the same, so nothing was proved";
+
+        // The overlay says so, and says where the camera went.
+        const cnahouse::debug::VisibilitySnapshot snapshot = game.VisibilitySnapshotForTesting();
+        EXPECT_TRUE(snapshot.frozen);
+        EXPECT_NEAR(snapshot.inspectionEye.X, eye.X, 1e-3f);
+        // The walk it reports is still the one from the room, not from where the camera is now.
+        EXPECT_EQ(snapshot.cell, "L0_KITCHEN");
+        ASSERT_FALSE(snapshot.visible.empty());
+        EXPECT_EQ(snapshot.visible.front().cell, "L0_KITCHEN");
+        // And it STOPPED being recomputed. The body stands still while frozen, so a walk that kept
+        // running would keep producing the same answer and look exactly like one that had stopped:
+        // the frame it was computed for is the only thing that can tell the two apart.
+        EXPECT_GT(game.FramesDrawn(), 50U);
+        EXPECT_LT(snapshot.walkFrame, game.FramesDrawn() - 40U)
+            << "the walk is still being recomputed every frame with F5 down";
+        // Not `> 0`: the freeze lands in the FIRST frame's update, after that frame's walk, and
+        // frame indices start at zero -- so the walk having run is what the non-empty visible set
+        // above says, not what this number does.
+    }
+
+    TEST(HeadlessRunTests, FreezingDoesNotMoveTheViewItWasPressedToKeep)
+    {
+        // The detach ADOPTS the eye: a camera that started somewhere else would throw away the
+        // view the reader pressed `F5` to keep, which is the one thing the freeze is for.
+        cnahouse::util::Log::ResetForTesting();
+
+        OneKeyPress input(&cnahouse::player::InputState::toggleFreezeVisibilityPressed);
+
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        options.player = std::array<float, 5>{-3.00f, 0.60f, -25.05f, 90.0f, 0.0f};
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(30);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+        ASSERT_TRUE(game.VisibilityFrozenForTesting());
+
+        // Nothing was held after the press, so the inspection camera has not flown anywhere: it is
+        // still exactly where the body's eye is.
+        const Microsoft::Xna::Framework::Vector3 eye = game.DrawCameraForTesting().eye;
+        const Microsoft::Xna::Framework::Vector3 body = game.ViewForTesting().Camera().Pose().eye;
+        EXPECT_NEAR(eye.X, body.X, 0.01f) << "the freeze moved the camera it was meant to hold";
+        EXPECT_NEAR(eye.Y, body.Y, 0.01f);
+        EXPECT_NEAR(eye.Z, body.Z, 0.01f);
     }
 
     TEST(HeadlessRunTests, PressingF9BuildsTheWireframeForTheCellTheBodyIsIn)

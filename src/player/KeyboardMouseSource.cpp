@@ -111,6 +111,7 @@ namespace cnahouse::player
         state_.toggleWorldOverlayPressed = edge(Edge::ToggleWorldOverlay, Keys::F2);
         state_.toggleVisibilityOverlayPressed = edge(Edge::ToggleVisibilityOverlay, Keys::F3);
         state_.toggleVisibilityGeometryPressed = edge(Edge::ToggleVisibilityGeometry, Keys::F4);
+        state_.toggleFreezeVisibilityPressed = edge(Edge::ToggleFreezeVisibility, Keys::F5);
         state_.togglePhysicsOverlayPressed = edge(Edge::TogglePhysicsOverlay, Keys::F9);
         state_.screenshotPressed = edge(Edge::Screenshot, Keys::F12);
 

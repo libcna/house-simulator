@@ -768,13 +768,24 @@ namespace cnahouse::app
                 Input().Update(frame.deltaSeconds);
             }
 
-            if (walking_)
+            if (walking_ && !visibilityFrozen_)
             {
                 // §49.3's fixed steps, then §44's view over them. The free-fly camera is NOT
                 // updated here: two things steering one camera is a fight, and in this scene the
-                // body wins -- flying is what `--scene=blockout` is for.
+                // body wins -- flying is what `--scene=blockout` is for, and what §25.8's `F5`
+                // borrows below.
                 const debug::Timing::Scope scope(timing_, UpdateStage::Physics);
                 UpdateWalk(frame.deltaSeconds);
+            }
+            else if (walking_)
+            {
+                // §25.8's `F5`. The body stands still and the camera flies: the input that walked
+                // it now steers the inspection camera, which is what lets a reader leave the room
+                // and look back at the cones that decided what was in it. The walk itself is not
+                // recomputed -- `UpdateVisibility` returns at once -- so what `F3` reports and
+                // `F4` draws is the frame the freeze caught and not the one on screen.
+                freeFly_.Update(Input().Current(), Input().LookAvailable(), frame.deltaSeconds);
+                freeFly_.ApplyTo(blockoutCamera_);
             }
             if (walking_ && visibility_.has_value())
             {
@@ -878,6 +889,20 @@ namespace cnahouse::app
                 Log::Info(LogCat::Debug,
                           "visibility geometry {}",
                           visibilityGeometry_.Visible() ? "shown" : "hidden");
+            }
+            if (Input().Current().toggleFreezeVisibilityPressed && walking_)
+            {
+                visibilityFrozen_ = !visibilityFrozen_;
+                if (visibilityFrozen_)
+                {
+                    // Adopted, so the inspection camera starts exactly where the eye was: a
+                    // detach that jumped would lose the view a reader pressed `F5` to keep.
+                    freeFly_.Adopt(blockoutCamera_);
+                }
+                Log::Info(LogCat::Debug,
+                          "visibility {}",
+                          visibilityFrozen_ ? "FROZEN; the camera has detached from the body"
+                                            : "running again");
             }
             if (Input().Current().togglePhysicsOverlayPressed)
             {
@@ -1038,6 +1063,12 @@ namespace cnahouse::app
 
     void CnaHouseGame::UpdateVisibility(const FrameContext& frame)
     {
+        if (visibilityFrozen_)
+        {
+            // §25.8's whole point: the answer stays as it was so the camera can go and look at
+            // it. Not even the chunk cull re-runs -- it is part of the same answer.
+            return;
+        }
         visibility::CameraView view;
         view.cell = tracker_.Current();
         const player::FirstPersonCamera& camera = view_.Camera();
@@ -1094,6 +1125,9 @@ namespace cnahouse::app
         // says why), so the overlay says so rather than reporting a culling system that is not
         // culling. `HOUSE-00684` is what turns this to `ON`.
         snapshot.cullingApplied = false;
+        snapshot.frozen = visibilityFrozen_;
+        snapshot.walkFrame = visibility_->Frame();
+        snapshot.inspectionEye = blockoutCamera_.eye;
         return snapshot;
     }
 
@@ -1116,6 +1150,24 @@ namespace cnahouse::app
         renderList_.AddChunks(*blockoutChunks_, blockoutCells_->ResidentChunkIndices(), eye);
     }
 
+    Microsoft::Xna::Framework::Matrix CnaHouseGame::DebugView() const
+    {
+        // The camera the FRAME is drawn with, which is the body's eye until §25.8's `F5` detaches
+        // it. Drawing world-space annotations through the body's camera while the picture came
+        // from the inspection camera would put the cones somewhere they are not.
+        return blockoutCamera_.View();
+    }
+
+    Microsoft::Xna::Framework::Matrix CnaHouseGame::DebugProjection()
+    {
+        const auto& viewport = getGraphicsDeviceProperty().getViewportProperty();
+        const float aspect = viewport.getHeightProperty() > 0
+                                 ? static_cast<float>(viewport.getWidthProperty()) /
+                                       static_cast<float>(viewport.getHeightProperty())
+                                 : 16.0f / 9.0f;
+        return blockoutCamera_.Projection(aspect);
+    }
+
     void CnaHouseGame::DrawPhysicsOverlay()
     {
 #if CNAHOUSE_DEBUG_TOOLS
@@ -1131,7 +1183,7 @@ namespace cnahouse::app
         if (!wantsPhysics)
         {
             // §25.8's `F4` alone: one `Begin`, the cones, one `Flush`.
-            debugDraw_->Begin(view_.Camera().View(), view_.Camera().Projection());
+            debugDraw_->Begin(DebugView(), DebugProjection());
             visibilityGeometry_.Draw(*debugDraw_);
             debugDraw_->Flush();
             return;
@@ -1147,7 +1199,7 @@ namespace cnahouse::app
         const std::array<const physics::CollisionCell*, 1> cells{cell};
         physicsOverlay_.Build(*collision_, std::span(cells.data(), cell == nullptr ? 0U : 1U), broad_, body);
 
-        debugDraw_->Begin(view_.Camera().View(), view_.Camera().Projection());
+        debugDraw_->Begin(DebugView(), DebugProjection());
         physicsOverlay_.Draw(*debugDraw_);
         visibilityGeometry_.Draw(*debugDraw_);
         debugDraw_->Flush();

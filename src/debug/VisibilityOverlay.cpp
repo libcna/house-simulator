@@ -84,6 +84,18 @@ namespace cnahouse::debug
                                     Count(snapshot.stateChanges),
                                     snapshot.cullingApplied ? "ON" : "NOT APPLIED"));
 
+        if (snapshot.frozen)
+        {
+            // First, and in capitals: a frozen overlay describes a frame that is not the one on
+            // screen, and a reader who has forgotten they pressed `F5` will believe every number
+            // above it.
+            lines.push_back(std::format("FROZEN   the walk above is frame {}; the camera is at "
+                                        "{:+.2f} {:+.2f} {:+.2f}",
+                                        snapshot.walkFrame,
+                                        snapshot.inspectionEye.X,
+                                        snapshot.inspectionEye.Y,
+                                        snapshot.inspectionEye.Z));
+        }
         lines.push_back(std::format("camera   {}   pos {:+.2f} {:+.2f} {:+.2f}   yaw {:.0f}deg",
                                     snapshot.cell.empty() ? "-" : snapshot.cell,
                                     snapshot.eye.X,

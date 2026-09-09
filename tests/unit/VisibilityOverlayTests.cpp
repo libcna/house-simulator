@@ -217,6 +217,32 @@ TEST(VisibilityOverlayTests, ItSaysWhetherTheFrameWasActuallyCulled)
     EXPECT_FALSE(Mentions(overlay.Lines(snapshot), "NOT APPLIED"));
 }
 
+TEST(VisibilityOverlayTests, AFrozenWalkSaysSoBeforeAnythingElseItSays)
+{
+    // §25.8's `F5`. While the walk is frozen every number on the overlay describes an OLD frame,
+    // and the eye it was computed from is not where the picture is being drawn from. A reader who
+    // has forgotten they pressed the key will believe all of it, so the overlay says so in
+    // capitals and gives the detached camera's position beside it.
+    VisibilitySnapshot snapshot = AFrame();
+    const VisibilityOverlay overlay;
+    EXPECT_FALSE(Mentions(overlay.Lines(snapshot), "FROZEN"));
+
+    snapshot.frozen = true;
+    snapshot.walkFrame = 417;
+    snapshot.inspectionEye = Vector3(12.50F, 9.00F, -40.25F);
+    const std::vector<std::string> lines = overlay.Lines(snapshot);
+    EXPECT_TRUE(Mentions(lines, "FROZEN"));
+    // WHICH frame it caught, because a frozen overlay that kept the current frame number would be
+    // indistinguishable from one that never froze.
+    EXPECT_TRUE(Mentions(lines, "frame 417"));
+    EXPECT_TRUE(Mentions(lines, "+12.50"));
+    EXPECT_TRUE(Mentions(lines, "-40.25"));
+    // ...and the camera line still says where the WALK was done from, which is the other half of
+    // what a reader needs: the two positions together are what the freeze is for.
+    EXPECT_TRUE(Mentions(lines, "-3.42"));
+    EXPECT_TRUE(Mentions(lines, "L0_KITCHEN"));
+}
+
 TEST(VisibilityOverlayTests, ItIsHiddenUntilItIsToggled)
 {
     VisibilityOverlay overlay;
