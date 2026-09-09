@@ -9263,8 +9263,35 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             eleven-sided overflow, and the property. Six injected bugs, six caught -- one of them
             by hand, because moving the two end planes to the END of the function is a reordering
             the injection harness cannot express as one substitution.
-- [ ] HOUSE-00664 — Implement the NDC-area computation of a clipped polygon and the `kMinPortalNdcArea` cutoff
+- [x] HOUSE-00664 — Implement the NDC-area computation of a clipped polygon and the `kMinPortalNdcArea` cutoff
       dep: HOUSE-00663 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) `visibility::NdcArea` -- the clipped polygon through `View() * Projection()`
+            and a shoelace in normalised device coordinates, where the whole screen is 4 -- and
+            `PortalContributes`, which is §25.2's cutoff as a decision.
+      finding: **§25.2's *"about 2 x 2 pixels at 1280 x 720"* is 2.8 pixels, not 4.** One pixel
+            there is `4/(1280·720)` = 4.34e-6 of the square, so 1.2e-5 is 1.66 x 1.66. The constant
+            is §25.2's and is kept; what is now written down beside it is what it means, so that
+            nobody re-derives the sentence into 1.74e-5 and wonders why the chains got shorter. An
+            injection that does exactly that is caught.
+      finding: **the cutoff never culls a doorway inside this world, and that is the right
+            answer.** Measured: a 0.9 x 2.04 m doorway falls under 1.2e-5 at **419 m**, and §10.3's
+            far plane is **420**. The two numbers were chosen in different sections for different
+            reasons and land within a metre of each other -- a doorway stops being worth traversing
+            exactly where the world stops being drawn. What the cutoff actually stops is slivers: a
+            20 mm gap is 26 px at 2 m and 1.7 px at 8 m, so the chain ends when a reduction has
+            worn a doorway down to a couple of centimetres, which is what §25.2 means by *"keeps a
+            corridor of eight open doors from exploding"*. It also means `maxDepthFor`
+            (`HOUSE-00667`) stops far more chains than this does.
+      finding: **a portal the camera is standing IN must never be culled by area.** A vertex at or
+            behind the eye divides by a non-positive `w` and lands somewhere it is not, and the
+            polygon's area comes out tiny -- a room that vanishes when the player steps into its
+            doorway, which is the worst culling bug there is. Any vertex with `w < 1e-4` returns
+            the WHOLE SCREEN instead. Culling what is behind the camera is `HOUSE-00666`'s job.
+      verified: 8 `PortalAreaTests` -- the cutoff in pixels, a doorway shrinking with distance and
+            its 419 m reach, the slivers the cutoff is for, a portal filling the view, the portal
+            the camera stands in, winding independence, the degenerate polygons, and an off-screen
+            portal still having an area of its own (so a frustum bug cannot hide behind an area
+            one). Five injected bugs, five caught.
 - [x] HOUSE-00665 — Implement `PortalRuntime`: per-portal aperture, cached world rect, opacity, and the closed/open hysteresis
       dep: HOUSE-00345 · sys: visibility · plat: ALL · pri: MUST
       note: (2026-09-09) §25.3's two answers, both easy to get wrong invisibly. **The leaf does not
