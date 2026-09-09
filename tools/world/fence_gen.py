@@ -213,24 +213,155 @@ def fences(directory: Path) -> list[dict]:
     return out
 
 
-def _document(fence: dict) -> tuple[dict, bytes]:
-    """One fence as a glTF document, in `read_shell_geometry`'s shape: one named material."""
-    positions: list[tuple[float, float, float]] = []
-    normals: list[tuple[float, float, float]] = []
-    uvs: list[tuple[float, float]] = []
-    indices: list[int] = []
-    for corners, normal in fence["faces"]:
-        base = len(positions)
-        for point in corners:
-            positions.append(point)
-            normals.append(normal)
-            # World metres, like the ground's: a fence's boards are the same size everywhere.
-            uvs.append((point[0] + point[2], point[1]))
-        indices += [base, base + 1, base + 2, base, base + 2, base + 3]
+#: A gate's own carpentry, in metres (`HOUSE-00767`). §11.2 gives the leaf widths and the heights
+#: and no ironmongery, so the sections are stated here rather than spread through the code.
+STILE_SECTION = (0.07, 0.045)
+GATE_GAP = 0.04
+HINGE = (0.22, 0.05, 0.012)
+LATCH = (0.14, 0.05, 0.012)
+BOLT = (0.30, 0.04, 0.012)
+#: The sliding gate runs on a track at the ground and two rollers under its leaf.
+TRACK_SECTION = (0.06, 0.04)
+ROLLER = (0.09, 0.09)
 
+
+def gates(directory: Path) -> list[dict]:
+    """§11.2's three gates as `{id, kind, leaf, fixed, pivot, travel, bounds}`.
+
+    **The leaf and the fixed ironmongery are separate**, because one of them moves. §65 makes all
+    three interactable -- the pedestrian gate swings, the vehicle gate slides six metres, the rear
+    one is bolted -- and a leaf welded to its own hinge straps is a leaf that cannot open. The
+    pivot and the travel travel WITH the geometry, in the node's `extras`, so the behaviour task
+    reads them off the asset rather than re-deriving them from the layout.
+    """
+    layout = layout_io.load_layout(directory)
+    exterior = layout.get("exterior") or {}
+    _w, _h, heights, _materials = terrain_gen.decode(directory)
+
+    def ground(x: float, z: float) -> float:
+        ix = min(max(int(round((x - terrain_gen.ORIGIN_X) / terrain_gen.STEP)), 0),
+                 terrain_gen.WIDTH - 1)
+        iz = min(max(int(round((z - terrain_gen.ORIGIN_Z) / terrain_gen.STEP)), 0),
+                 terrain_gen.HEIGHT - 1)
+        return heights[iz * terrain_gen.WIDTH + ix]
+
+    styles = {row["id"]: row.get("asset") for row in exterior.get("fences", [])}
+    out = []
+    for row in exterior.get("gates", []):
+        opening = row["opening"]
+        x0, x1 = float(opening["x"][0]), float(opening["x"][1])
+        z0, z1 = float(opening["z"][0]), float(opening["z"][1])
+        width = x1 - x0
+        height = float(row.get("height") or 1.35)
+        board = styles.get(row.get("fence")) == BOARD_ASSET
+        style = "board" if board else "ornamental"
+        base = ground((x0 + x1) / 2.0, (z0 + z1) / 2.0)
+        plane = (z0 + z1) / 2.0
+        thickness = STILE_SECTION[1]
+        leaf_x0, leaf_x1 = x0 + GATE_GAP, x1 - GATE_GAP
+        low = base + GROUND_GAP
+        high = base + height
+
+        leaf: list[dict] = []
+        # Two stiles and two rails: a gate is a frame first, whatever is nailed to it.
+        for stile in (leaf_x0, leaf_x1 - STILE_SECTION[0]):
+            leaf += _box((stile, low, plane - thickness / 2.0),
+                         (stile + STILE_SECTION[0], high, plane + thickness / 2.0))
+        for level in (low, high - STILE_SECTION[0]):
+            leaf += _box((leaf_x0, level, plane - thickness / 2.0),
+                         (leaf_x1, level + STILE_SECTION[0], plane + thickness / 2.0))
+        # And then either boarding or pickets, the same as the fence it hangs in.
+        inner0, inner1 = leaf_x0 + STILE_SECTION[0], leaf_x1 - STILE_SECTION[0]
+        infill = 0
+        if board:
+            leaf += _box((inner0, low, plane - BOARD_THICKNESS / 2.0),
+                         (inner1, high, plane + BOARD_THICKNESS / 2.0))
+            infill = 1
+        else:
+            span = inner1 - inner0
+            count = max(1, int(span / PICKET_PITCH))
+            pitch = span / count
+            for picket in range(count):
+                start = inner0 + picket * pitch + (pitch - PICKET_WIDTH) / 2.0
+                leaf += _box((start, low, plane - PICKET_THICKNESS / 2.0),
+                             (start + PICKET_WIDTH, high, plane + PICKET_THICKNESS / 2.0))
+                infill += 1
+
+        fixed: list[dict] = []
+        hardware: list[tuple[str, str]] = []
+        hinged = row.get("kind") in ("hinged", "bolted")
+        if hinged:
+            # Hung on the LEFT post, which is the one at the low end of the opening: §11.2 says
+            # "single hinge east" for the pedestrian gate and this is that hinge's own side.
+            for level in (low + 0.20, high - 0.30):
+                leaf += _box((leaf_x0, level, plane - HINGE[2] / 2.0 - thickness / 2.0),
+                             (leaf_x0 + HINGE[0], level + HINGE[1],
+                              plane - thickness / 2.0))
+                fixed += _box((x0 - HINGE[1], level, plane - HINGE[2] / 2.0 - thickness / 2.0),
+                              (leaf_x0, level + HINGE[1], plane - thickness / 2.0))
+                hardware += [("hinge", "leaf"), ("hinge", "fixed")]
+            catch = BOLT if row.get("kind") == "bolted" else LATCH
+            leaf += _box((leaf_x1 - catch[0], base + 0.95, plane + thickness / 2.0),
+                         (leaf_x1, base + 0.95 + catch[1], plane + thickness / 2.0 + catch[2]))
+            fixed += _box((leaf_x1, base + 0.95, plane + thickness / 2.0),
+                          (x1, base + 0.95 + catch[1], plane + thickness / 2.0 + catch[2]))
+            name = "bolt" if row.get("kind") == "bolted" else "latch"
+            hardware += [(name, "leaf"), (name, "fixed")]
+            pivot = (leaf_x0, base, plane)
+            travel = None
+        else:
+            # A sliding gate: a track on the ground, two rollers under the leaf, and six metres of
+            # travel along the fence line.
+            fixed += _box((x0 - width, base, plane - TRACK_SECTION[0] / 2.0),
+                          (x1, base + TRACK_SECTION[1], plane + TRACK_SECTION[0] / 2.0))
+            hardware.append(("track", "fixed"))
+            for at in (leaf_x0 + 0.4, leaf_x1 - 0.4):
+                leaf += _box((at - ROLLER[0] / 2.0, base + TRACK_SECTION[1],
+                              plane - ROLLER[1] / 2.0),
+                             (at + ROLLER[0] / 2.0, base + TRACK_SECTION[1] + ROLLER[1],
+                              plane + ROLLER[1] / 2.0))
+                hardware.append(("roller", "leaf"))
+            pivot = ((leaf_x0 + leaf_x1) / 2.0, base, plane)
+            travel = (-width, 0.0, 0.0)
+
+        points = [point for corners, _n in leaf + fixed for point in corners]
+        only_leaf = [point for corners, _n in leaf for point in corners]
+        out.append({
+            "id": row["id"],
+            "kind": row.get("kind"),
+            "leafBounds": (min(p[0] for p in only_leaf), min(p[1] for p in only_leaf),
+                           min(p[2] for p in only_leaf), max(p[0] for p in only_leaf),
+                           max(p[1] for p in only_leaf), max(p[2] for p in only_leaf)),
+            "style": style,
+            "leaf": leaf,
+            "fixed": fixed,
+            "infill": infill,
+            "hardware": hardware,
+            "width": width,
+            "pivot": pivot,
+            "travel": travel,
+            "interactable": row.get("interactable"),
+            "bounds": (min(p[0] for p in points), min(p[1] for p in points),
+                       min(p[2] for p in points), max(p[0] for p in points),
+                       max(p[1] for p in points), max(p[2] for p in points)),
+        })
+    return out
+
+
+def _document(name: str, parts: list[tuple[str, list, dict]], material: str,
+              style: str) -> tuple[dict, bytes]:
+    """@p parts as one glTF document -- a node each, one shared material.
+
+    `read_shell_geometry`'s shape, so `build_chunks.py` reads a fence the way it reads the shell.
+    Several NODES rather than one, because a gate's leaf moves and its hinge straps do not: the
+    part that swings is its own node with its pivot in `extras`, which is what §65's behaviour
+    reads off the asset instead of re-deriving it from the layout.
+    """
     blob = bytearray()
     accessors: list[dict] = []
     views: list[dict] = []
+    meshes: list[dict] = []
+    nodes: list[dict] = []
 
     def store(values: list[tuple], kind: str) -> int:
         count = {"VEC3": 3, "VEC2": 2}[kind]
@@ -244,46 +375,95 @@ def _document(fence: dict) -> tuple[dict, bytes]:
                           "max": [max(v[i] for v in values) for i in range(count)]})
         return len(accessors) - 1
 
-    position = store(positions, "VEC3")
-    normal = store(normals, "VEC3")
-    uv0 = store(uvs, "VEC2")
-    offset = len(blob)
-    for index in indices:
-        blob.extend(struct.pack("<I", index))
-    views.append({"buffer": 0, "byteOffset": offset, "byteLength": len(indices) * 4})
-    accessors.append({"bufferView": len(views) - 1, "componentType": 5125,
-                      "count": len(indices), "type": "SCALAR"})
+    for part, faces, extras in parts:
+        if not faces:
+            continue
+        positions: list[tuple[float, float, float]] = []
+        normals: list[tuple[float, float, float]] = []
+        uvs: list[tuple[float, float]] = []
+        indices: list[int] = []
+        for corners, normal in faces:
+            base = len(positions)
+            for point in corners:
+                positions.append(point)
+                normals.append(normal)
+                # World metres, like the ground's: a fence's boards are the same size everywhere.
+                uvs.append((point[0] + point[2], point[1]))
+            indices += [base, base + 1, base + 2, base, base + 2, base + 3]
+        position = store(positions, "VEC3")
+        normal_at = store(normals, "VEC3")
+        uv0 = store(uvs, "VEC2")
+        offset = len(blob)
+        for index in indices:
+            blob.extend(struct.pack("<I", index))
+        views.append({"buffer": 0, "byteOffset": offset, "byteLength": len(indices) * 4})
+        accessors.append({"bufferView": len(views) - 1, "componentType": 5125,
+                          "count": len(indices), "type": "SCALAR"})
+        meshes.append({"name": part, "primitives": [
+            {"attributes": {"POSITION": position, "NORMAL": normal_at, "TEXCOORD_0": uv0},
+             "indices": len(accessors) - 1, "material": 0, "mode": 4}]})
+        node = {"name": part, "mesh": len(meshes) - 1}
+        if extras:
+            node["extras"] = extras
+        nodes.append(node)
 
     document = {
         "asset": {"version": "2.0", "generator": "cna-house fence_gen.py"},
         "scene": 0,
-        "scenes": [{"nodes": [0]}],
-        "nodes": [{"name": fence["id"], "mesh": 0}],
-        "meshes": [{"name": fence["id"], "primitives": [
-            {"attributes": {"POSITION": position, "NORMAL": normal, "TEXCOORD_0": uv0},
-             "indices": len(accessors) - 1, "material": 0, "mode": 4}]}],
-        "materials": [{"name": f"FENCE_{fence['style']}",
+        "scenes": [{"nodes": list(range(len(nodes)))}],
+        "nodes": nodes,
+        "meshes": meshes,
+        "materials": [{"name": material,
                        "extras": {"surfaceClass": "fence",
                                   # Lit by the sun term like the rest of the boundary: a fence is
                                   # thin, and §18.3 keeps the lightmap for surfaces that carry
                                   # low-frequency light rather than for every board.
                                   "lightmapReceiver": False,
-                                  "groundMaterial": fence["style"]}}],
+                                  "groundMaterial": style}}],
         "accessors": accessors,
         "bufferViews": views,
         "buffers": [{"byteLength": len(blob)}],
     }
+    assert name
     return document, bytes(blob)
+
+
+def _fence_document(fence: dict) -> tuple[dict, bytes]:
+    return _document(fence["id"], [(fence["id"], fence["faces"], {})],
+                     f"FENCE_{fence['style']}", fence["style"])
+
+
+def _gate_document(gate: dict) -> tuple[dict, bytes]:
+    """A gate: the LEAF, with its pivot and travel, and the ironmongery that stays put."""
+    moving = {"pivot": [round(value, 4) for value in gate["pivot"]],
+              "gateKind": gate["kind"],
+              "interactable": gate["interactable"],
+              "width": round(gate["width"], 4)}
+    if gate["travel"] is not None:
+        moving["travel"] = [round(value, 4) for value in gate["travel"]]
+    else:
+        # A hinged leaf swings about +Y through its own pivot; the layout says which way the
+        # pedestrian gate is hung and §11.2's other two are the same arrangement.
+        moving["axis"] = [0.0, 1.0, 0.0]
+    return _document(gate["id"],
+                     [(f"{gate['id']}_LEAF", gate["leaf"], moving),
+                      (f"{gate['id']}_FIXED", gate["fixed"], {"fixed": True})],
+                     f"GATE_{gate['style']}", gate["style"])
 
 
 def emit(directory: Path, output: Path) -> dict:
     output.mkdir(parents=True, exist_ok=True)
     written, triangles = [], 0
     for fence in fences(directory):
-        document, blob = _document(fence)
+        document, blob = _fence_document(fence)
         gltf_io.write_glb(output / f"{fence['id']}.glb", document, blob)
         written.append(fence["id"])
         triangles += len(fence["faces"]) * 2
+    for gate in gates(directory):
+        document, blob = _gate_document(gate)
+        gltf_io.write_glb(output / f"{gate['id']}.glb", document, blob)
+        written.append(gate["id"])
+        triangles += (len(gate["leaf"]) + len(gate["fixed"])) * 2
     return {"written": written, "triangles": triangles}
 
 
@@ -322,9 +502,9 @@ def selftest() -> int:
     require(not stray, f"and every one of them stands between its own two endpoints ({stray})")
 
     # 2. The gate openings are in the DATA and this is what proves the runs respect them.
-    gates = (layout.get("exterior") or {}).get("gates", [])
+    openings = (layout.get("exterior") or {}).get("gates", [])
     inside = []
-    for gate in gates:
+    for gate in openings:
         opening = gate["opening"]
         for run in runs:
             if run["bounds"][0] > opening["x"][1] - 1e-6 or run["bounds"][3] < opening["x"][0] + 1e-6:
@@ -449,8 +629,70 @@ def selftest() -> int:
                 wrong.append(run["id"])
     require(not wrong, f"every face is wound the way its own normal says ({sorted(set(wrong))[:3]})")
 
-    require(_document(runs[0]) == _document(fences(SOURCE)[0]),
+    require(_fence_document(runs[0]) == _fence_document(fences(SOURCE)[0]),
             "a fence renders the same bytes twice")
+
+    # 7. `HOUSE-00767`'s gates.
+    hung = gates(SOURCE)
+    rows = openings
+    listed = ", ".join(f"{gate['id']} ({gate['kind']})" for gate in hung)
+    require(len(hung) == len(rows) == 3 and {gate["kind"] for gate in hung}
+            == {"hinged", "sliding", "bolted"},
+            f"§11.2's three gates: {listed}")
+    fits = []
+    for gate, row in zip(hung, rows):
+        opening = row["opening"]
+        if (gate["leafBounds"][0] < float(opening["x"][0]) - 1e-6
+                or gate["leafBounds"][3] > float(opening["x"][1]) + 1e-6):
+            fits.append((gate["id"], round(gate["leafBounds"][0], 3),
+                         round(gate["leafBounds"][3], 3)))
+    require(not fits,
+            f"and each LEAF fills its own opening and no more, so it cannot foul the fence it "
+            f"hangs in. The bounds of the whole gate are wider on purpose: a hinge strap is "
+            f"screwed to the post outside the opening, and the sliding gate's track has to reach "
+            f"as far as the leaf travels ({fits})")
+    gaps = [round(float(row["opening"]["x"][1]) - float(row["opening"]["x"][0])
+                  - (gate["leafBounds"][3] - gate["leafBounds"][0]), 4)
+            for gate, row in zip(hung, rows)]
+    require(all(gap >= 2 * GATE_GAP - 1e-6 for gap in gaps),
+            f"with a {GATE_GAP * 1000:.0f} mm gap at each side, which is what lets it swing "
+            f"({gaps})")
+
+    swinging = [gate for gate in hung if gate["travel"] is None]
+    sliding = [gate for gate in hung if gate["travel"] is not None]
+    require(len(swinging) == 2 and len(sliding) == 1,
+            "two swing and one slides, which is §11.2's own arrangement")
+    hinged_at = [(gate["id"], abs(gate["pivot"][0] - gate["leafBounds"][0]))
+                 for gate in swinging]
+    require(all(offset < 0.05 for _id, offset in hinged_at),
+            f"a swinging leaf's pivot is at its own hinge stile and not at its middle ({hinged_at})")
+    require(all(abs(abs(gate["travel"][0]) - gate["width"]) < 1e-6 for gate in sliding),
+            f"and the sliding gate travels its own width -- {sliding[0]['width']:.1f} m of "
+            f"opening, {abs(sliding[0]['travel'][0]):.1f} m of travel")
+
+    document, _blob = _gate_document(hung[0])
+    names = [node["name"] for node in document["nodes"]]
+    moving = next(node for node in document["nodes"] if node["name"].endswith("_LEAF"))
+    require(names == [f"{hung[0]['id']}_LEAF", f"{hung[0]['id']}_FIXED"]
+            and moving["extras"]["interactable"] == rows[0]["interactable"],
+            f"the leaf and the ironmongery are SEPARATE nodes, and the leaf carries its pivot, its "
+            f"axis and §65's interactable id ({names})")
+    ironmongery = {gate["id"]: sorted(gate["hardware"]) for gate in hung}
+    wanted = {
+        "hinged": [("hinge", "fixed"), ("hinge", "fixed"), ("hinge", "leaf"), ("hinge", "leaf"),
+                   ("latch", "fixed"), ("latch", "leaf")],
+        "bolted": [("bolt", "fixed"), ("bolt", "leaf"), ("hinge", "fixed"), ("hinge", "fixed"),
+                   ("hinge", "leaf"), ("hinge", "leaf")],
+        "sliding": [("roller", "leaf"), ("roller", "leaf"), ("track", "fixed")],
+    }
+    missing = [(gate["id"], ironmongery[gate["id"]]) for gate in hung
+               if ironmongery[gate["id"]] != wanted[gate["kind"]]]
+    require(not missing,
+            f"and every gate carries the ironmongery its kind needs, half on the leaf and half on "
+            f"the post: two hinges and a latch, two hinges and a bolt, or a track and two rollers "
+            f"({missing[:2]})")
+    require(_gate_document(hung[0]) == _gate_document(gates(SOURCE)[0]),
+            "a gate renders the same bytes twice")
 
     if failures:
         print(f"\nfence_gen: {len(failures)} claim(s) FAILED")
@@ -473,7 +715,8 @@ def main() -> int:
         return 0
     report = emit(args.directory, args.output)
     where = args.output.relative_to(REPO) if args.output.is_relative_to(REPO) else args.output
-    print(f"fence_gen: {len(report['written'])} fence(s), {report['triangles']} triangles -> {where}")
+    print(f"fence_gen: {len(report['written'])} run(s) and gate(s), {report['triangles']} "
+          f"triangles -> {where}")
     return 0
 
 

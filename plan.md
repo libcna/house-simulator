@@ -10741,8 +10741,30 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             height field, against each bay's own two posts, and against the picket pitch, and two
             more -- a missing cap and a missing rail -- were added for the same reason: the cap is
             now claimed as the highest thing in the run, and the rails are counted per bay.
-- [ ] HOUSE-00767 — Generate the pedestrian gate, the sliding vehicle gate and the rear service gate with their hardware
+- [x] HOUSE-00767 — Generate the pedestrian gate, the sliding vehicle gate and the rear service gate with their hardware
       dep: HOUSE-00766 · sys: content · plat: TOOL · pri: MUST
+      measured: (2026-09-09) the three gates §11.2 gives, in `fence_gen.py` with the fences they
+            hang in: the 1.2 m hinged pedestrian gate, the 6.0 m sliding vehicle gate and the
+            0.9 m bolted rear service gate, **900 triangles** over the seven fence runs' 7 536.
+            Each is a frame of two stiles and two rails with the infill of its own fence --
+            pickets on the front, boarding at the back.
+      finding: **the leaf and the ironmongery are separate NODES, because one of them moves.** §65
+            makes all three interactable; a leaf welded to its own hinge straps is a leaf that
+            cannot open. `<ID>_LEAF` carries the pivot, the axis or the travel and §65's
+            interactable id in its `extras`, and `<ID>_FIXED` is what stays on the post: the straps,
+            the keeper, the track. The behaviour task reads the pivot off the asset rather than
+            re-deriving it from the layout.
+      note: the whole gate's bounds are WIDER than its opening on purpose -- a hinge strap is
+            screwed to the post outside it and a sliding gate's track has to reach as far as the
+            leaf travels -- so the claim that a gate fills its opening and no more is made against
+            the LEAF's bounds, which is the part that has to fit.
+      verified: 9 more `fence_gen --selftest` claims and 6 injections, all CAUGHT: a pivot at the
+            leaf's middle instead of its hinge stile, a sliding gate that travels a metre instead
+            of its own width, a leaf with no gap at its sides, the leaf and the ironmongery welded
+            into one node, hinge straps left off the post, and a sliding gate with no rollers. The
+            last two were MISSED first: `all(gate["fixed"])` was true with only a latch keeper, so
+            the claim now names the ironmongery each kind needs -- two hinges and a latch, two
+            hinges and a bolt, or a track and two rollers -- and which side of the gate each is on.
 - [ ] HOUSE-00768 — Generate the garden shed (walls, roof, door, window, floor) as an enterable cell
       dep: HOUSE-00766 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00769 — Generate the raised vegetable beds, the trellis and the compost bin
