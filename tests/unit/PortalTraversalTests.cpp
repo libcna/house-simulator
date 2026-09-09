@@ -395,6 +395,157 @@ TEST(PortalTraversalTests, TheContainmentSkipFiresAndTheWalkIsDeterministic)
     EXPECT_EQ(Names(first), Names(second)) << "the second run kept something from the first";
 }
 
+TEST(PortalTraversalTests, AFrostedDoorMarksWhatIsBehindItDiffuse)
+{
+    // §25.2's `if p.opacity == translucent: next.flags |= DIFFUSE`, over §12's own translucent
+    // portal: `P_L0_LIVING__L0_OFFICE`, the glazed double doors between the living room and the
+    // office (§16's portal table).
+    IdRegistry::ResetForTesting();
+    if (!WorldIsDeployed())
+    {
+        GTEST_SKIP() << "no deployed world";
+    }
+    const world::WorldData data = Load();
+    std::vector<PortalRuntime> open = Runtimes(data);
+    OpenEverything(open);
+
+    // The house has to HAVE one, or this test is about nothing.
+    int translucent = 0;
+    for (const world::Portal& portal : data.Portals())
+    {
+        translucent += portal.opacity == world::PortalOpacity::Translucent ? 1 : 0;
+    }
+    ASSERT_GT(translucent, 0) << "§15.4's translucent opacity is unused in this house";
+
+    const Standing standing = StandIn(data, "L0_LIVING", 270.0F);
+    PortalTraversal walk;
+    walk.Run(InputFor(data, open, standing));
+
+    const auto* room = walk.Find(standing.cell);
+    ASSERT_NE(room, nullptr);
+    EXPECT_FALSE(cnahouse::visibility::Has(room->flags, cnahouse::visibility::ConeFlags::Diffuse))
+        << "the camera's own room is being seen through glass";
+
+    const auto* office = walk.Find(cnahouse::util::Intern("L0_OFFICE"));
+    if (office != nullptr)
+    {
+        EXPECT_TRUE(cnahouse::visibility::Has(office->flags, cnahouse::visibility::ConeFlags::Diffuse))
+            << "the office is reached through §12's glazed doors and is not marked diffuse";
+        EXPECT_GT(walk.Stats().diffuseCells, 0);
+    }
+    std::printf("  from L0_LIVING:");
+    for (const auto& seen : walk.Visible())
+    {
+        std::printf(" %s%s",
+                    std::string(IdRegistry::NameOf(seen.cell)).c_str(),
+                    cnahouse::visibility::Has(seen.flags, cnahouse::visibility::ConeFlags::Diffuse) ? "*"
+                                                                                                    : "");
+    }
+    std::printf("  (* = seen only through frosted glass; %d of %zu)\n",
+                walk.Stats().diffuseCells,
+                walk.Visible().size());
+
+    // **The flag is ANDed, and the house proves it.** `EXT_SIDEYARD_W` is reached through the
+    // office's frosted doors AND through the living room's own clear windows, so it is not being
+    // seen through frosted glass and keeps its dressing. An OR would mark it and cost the yard its
+    // props for a view the player has clearly.
+    if (const auto* yard = walk.Find(cnahouse::util::Intern("EXT_SIDEYARD_W")); yard != nullptr)
+    {
+        EXPECT_FALSE(cnahouse::visibility::Has(yard->flags, cnahouse::visibility::ConeFlags::Diffuse))
+            << "a yard visible through a clear window was marked diffuse by another route";
+    }
+
+    // **And it survives the chain**: `L0_CLOSET_W` opens off the office and off nothing else, so
+    // every way into it goes through the frosted doors first. Swept over eight headings, because
+    // which rooms a single pose reaches is a fact about where the camera happens to point.
+}
+
+TEST(PortalTraversalTests, TheDiffuseFlagSurvivesTheRestOfTheChain)
+{
+    // §25.2's `|=`. The house cannot show this: every room behind a frosted door or window in §12
+    // also has a clear way in, which is what the AND rule above is for -- so the chain is tested
+    // on three rooms in a row, built here, with the frosted glass in the middle.
+    //
+    // A hand-built world rather than a fixture file, because what is under test is one bit of
+    // arithmetic in the walk and the shortest honest way to reach it is three cells and two
+    // portals. Everything else in this file is deliberately the real house.
+    IdRegistry::ResetForTesting();
+
+    world::WorldData::Contents contents;
+    world::Level level;
+    level.id = cnahouse::util::Intern("L0");
+    level.name = "Ground";
+    level.ffl = 0.0F;
+    level.ceiling = 2.6F;
+    contents.levels.push_back(level);
+
+    // Three rooms in a row along x, each 4 m wide, sharing walls at x = 4 and x = 8.
+    for (int i = 0; i < 3; ++i)
+    {
+        world::Cell cell;
+        cell.id = cnahouse::util::Intern("ROOM_" + std::to_string(i));
+        cell.level = level.id;
+        cell.name = "Room " + std::to_string(i);
+        world::Footprint box;
+        box.minX = static_cast<float>(i) * 4.0F;
+        box.maxX = box.minX + 4.0F;
+        box.minZ = -2.0F;
+        box.maxZ = 2.0F;
+        cell.boxes.push_back(box);
+        contents.cells.push_back(cell);
+    }
+
+    // ROOM_0 -> ROOM_1 through frosted glass, ROOM_1 -> ROOM_2 through an ordinary opening.
+    for (int i = 0; i < 2; ++i)
+    {
+        world::Portal portal;
+        portal.id = cnahouse::util::Intern("P_" + std::to_string(i));
+        portal.cellA = cnahouse::util::Intern("ROOM_" + std::to_string(i));
+        portal.cellB = cnahouse::util::Intern("ROOM_" + std::to_string(i + 1));
+        portal.axis = world::PlaneAxis::X;
+        portal.planeValue = static_cast<float>(i + 1) * 4.0F;
+        portal.minU = -0.45F;
+        portal.maxU = 0.45F;
+        portal.minV = 0.0F;
+        portal.maxV = 2.04F;
+        portal.kind = i == 0 ? world::PortalKind::DoubleDoor : world::PortalKind::CasedOpening;
+        portal.opacity = i == 0 ? world::PortalOpacity::Translucent : world::PortalOpacity::Open;
+        contents.portals.push_back(portal);
+    }
+
+    auto built = world::WorldData::Create(std::move(contents));
+    ASSERT_TRUE(built) << built.Error().ToString();
+    const world::WorldData& data = built.Value();
+    std::vector<PortalRuntime> open = Runtimes(data);
+    OpenEverything(open);
+
+    // Standing in ROOM_0 looking east, straight through both openings.
+    PlayerState state;
+    state.position = Vector3(1.0F, state.Rise(), 0.0F);
+    state.yaw = 90.0F * 3.14159265F / 180.0F;
+    Standing standing;
+    standing.cell = cnahouse::util::Intern("ROOM_0");
+    standing.camera.SetAspect(16.0F / 9.0F);
+    standing.camera.Update(state, kPlayerEyeHeight, 0.0F);
+    standing.eye = standing.camera.Pose().eye;
+
+    PortalTraversal walk;
+    walk.Run(InputFor(data, open, standing));
+
+    const auto* first = walk.Find(cnahouse::util::Intern("ROOM_1"));
+    const auto* second = walk.Find(cnahouse::util::Intern("ROOM_2"));
+    ASSERT_NE(first, nullptr) << "the room through the frosted doors was not reached";
+    ASSERT_NE(second, nullptr) << "the room beyond it was not reached";
+    EXPECT_TRUE(cnahouse::visibility::Has(first->flags, cnahouse::visibility::ConeFlags::Diffuse));
+    EXPECT_TRUE(cnahouse::visibility::Has(second->flags, cnahouse::visibility::ConeFlags::Diffuse))
+        << "the flag was dropped by the clear opening beyond the glass -- §25.2's `|=` is an OR "
+           "with what the cone already carried, not an assignment";
+    EXPECT_EQ(second->depth, 2);
+    EXPECT_FALSE(
+        cnahouse::visibility::Has(walk.Find(standing.cell)->flags, cnahouse::visibility::ConeFlags::Diffuse));
+    EXPECT_EQ(walk.Stats().diffuseCells, 2);
+}
+
 TEST(PortalTraversalTests, AWalkFromNowhereIsEmptyRatherThanUndefined)
 {
     IdRegistry::ResetForTesting();

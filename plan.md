@@ -9389,8 +9389,38 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             with the skip and the area cutoff both counted, and a walk from no cell at all. Nine
             injected bugs, nine caught -- the last two only after the invariant was stated as a
             property of the result rather than as a counter.
-- [ ] HOUSE-00669 — Implement the translucent-portal `DIFFUSE` flag and its effect on the target cell's detail set
+- [x] HOUSE-00669 — Implement the translucent-portal `DIFFUSE` flag and its effect on the target cell's detail set
       dep: HOUSE-00668 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) §25.2's `if p.opacity == translucent: next.flags |= DIFFUSE`, and §26.4's
+            table on the other end of it: `visibility::DetailFor` turns a cell's flags, §68's
+            quality and the distance into which of the three detail sets it draws and what its LOD
+            bias is. §15.4's row in one sentence -- *"a room seen through a frosted door renders
+            its shell and furniture but none of its 60 small dressing props"*.
+      note: **the flag is ORed along a cone and ANDed across cones.** `|=` down the chain because
+            frosted glass stays between the camera and everything beyond it however many clear
+            doorways follow; AND across arrivals because a cell is drawn ONCE, so a room reached
+            through both a frosted door and a clear one is not being seen through frosted glass and
+            keeps its props. Both directions are the safe one: the first never draws detail the
+            player cannot resolve, the second never drops detail they can see.
+      finding: **§12's house cannot test the chain, and that is why one test here is synthetic.**
+            Every room behind a frosted door or window in this layout also has a clear way in --
+            the master bathroom's frosted window looks onto the side yard, and the yard is also
+            visible through the bedroom's clear one -- so the AND rule (which the house tests
+            beautifully: `EXT_SIDEYARD_W` is NOT diffuse from the living room while `L0_OFFICE`
+            is) hides the OR rule completely. Three rooms in a row with the glass in the middle,
+            built in the test, is the shortest honest way to reach one bit of arithmetic.
+      finding: §26.4 lists the `dressing` and `micro` rows independently, and taken literally they
+            let a room 20 m away at `ultra` draw individual pens on a desk whose books have gone.
+            `micro` is made a subset of `dressing`, and that is written down because it is the one
+            thing in the function the table does not say.
+      note: the boundary is INSIDE: §26.4 says *"beyond 18 m"*, and 18 is not beyond 18. A boundary
+            the other way pops a prop as the player walks a millimetre.
+      verified: 6 `DetailSetTests` (the stated distances, essential never dropped over 32
+            combinations, the frosted room losing its dressing and gaining LOD+1 on top of §68's
+            bias, the two quality rows, the two distance rows and their boundaries, and micro never
+            outliving dressing) and 2 more `PortalTraversalTests` (§12's own glazed doors marking
+            the office and only the office, and the three-room chain). Nine injected bugs, nine
+            caught.
 - [ ] HOUSE-00670 — Implement `VisibilitySystem`: camera cell → traversal → visible set, published once per frame
       dep: HOUSE-00668, HOUSE-00559 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00671 — Implement the `maxVisibleCells` hard stop with graceful degradation (drop the smallest-frustum cells first) and a counter

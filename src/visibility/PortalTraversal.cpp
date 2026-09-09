@@ -22,7 +22,7 @@ namespace cnahouse::visibility
         return found == visible_.end() ? nullptr : &*found;
     }
 
-    VisibleCell& PortalTraversal::Reach(util::Id cell, int depth)
+    VisibleCell& PortalTraversal::Reach(util::Id cell, int depth, ConeFlags flags)
     {
         for (VisibleCell& one : visible_)
         {
@@ -32,12 +32,20 @@ namespace cnahouse::visibility
                 // still tie, and taking the minimum says what the code means rather than relying
                 // on the queue's order to say it.
                 one.depth = std::min(one.depth, depth);
+                // §26.4's detail sets are dropped for a cell reached through frosted glass, so the
+                // flag survives only while EVERY way in has it: one clear view of a room is enough
+                // to need its dressing props.
+                one.flags = static_cast<ConeFlags>(static_cast<std::uint8_t>(one.flags) &
+                                                   static_cast<std::uint8_t>(flags));
                 return one;
             }
         }
         visible_.push_back(VisibleCell{});
         visible_.back().cell = cell;
         visible_.back().depth = depth;
+        // The camera's own cell needs no special case: it is queued with no flags, so this is
+        // `None` for it and whatever the cone carried for everything else.
+        visible_.back().flags = flags;
         ++stats_.cellsVisited;
         return visible_.back();
     }
@@ -57,14 +65,14 @@ namespace cnahouse::visibility
         // The whole screen: the camera's own frustum covers all of it, so nothing can be
         // "contained" by it and skipped before the walk has started.
         const NdcRect whole{-1.0F, -1.0F, 1.0F, 1.0F};
-        queue_.push_back(Work{input.cameraCell, input.cameraFrustum, whole, 0});
+        queue_.push_back(Work{input.cameraCell, input.cameraFrustum, whole, 0, ConeFlags::None});
 
         for (std::size_t head = 0; head < queue_.size(); ++head)
         {
             // Copied and not referenced: `queue_` grows inside this loop and a reference into it
             // is a dangling one the moment it does.
             const Work work = queue_[head];
-            VisibleCell& cell = Reach(work.cell, work.depth);
+            VisibleCell& cell = Reach(work.cell, work.depth, work.flags);
             stats_.maxDepth = std::max(stats_.maxDepth, work.depth);
 
             // §25.2's containment skip, at the point the frustum is about to be USED: this cone
@@ -161,9 +169,21 @@ namespace cnahouse::visibility
 
                 const ReducedFrustum next =
                     ReduceFrustum(input.eye, clipped.Points(), input.nearPlane, input.farPlane);
+                // §25.2: *"if p.opacity == translucent: next.flags |= DIFFUSE"*. The `|=` is the
+                // point -- a cone that came through frosted glass stays diffuse however many
+                // clear doorways it crosses afterwards, because the glass is still between the
+                // camera and everything down that chain.
+                const ConeFlags flags = portal.opacity == world::PortalOpacity::Translucent
+                                            ? work.flags | ConeFlags::Diffuse
+                                            : work.flags;
                 ++stats_.portalsCrossed;
-                queue_.push_back(Work{other, next.frustum, rect, work.depth + 1});
+                queue_.push_back(Work{other, next.frustum, rect, work.depth + 1, flags});
             }
+        }
+
+        for (const VisibleCell& cell : visible_)
+        {
+            stats_.diffuseCells += Has(cell.flags, ConeFlags::Diffuse) ? 1 : 0;
         }
     }
 

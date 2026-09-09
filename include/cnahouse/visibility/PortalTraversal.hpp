@@ -34,6 +34,28 @@ namespace cnahouse::visibility
     /// are unioned rather than intersected.
     inline constexpr std::size_t kMaxFrustaPerCell = 4;
 
+    /// @brief What a cone picked up on its way in (`HOUSE-00669`).
+    enum class ConeFlags : std::uint8_t
+    {
+        None = 0,
+        /// @brief §15.4's `translucent`: the view reached this cell through frosted glass.
+        ///
+        /// *"Passes, but the reduced frustum is marked diffuse so the target cell renders at
+        /// LOD+1 and no small props."* It is sticky down the chain -- a room seen through a room
+        /// seen through a frosted door is still being seen through frosted glass.
+        Diffuse = 1,
+    };
+
+    [[nodiscard]] constexpr ConeFlags operator|(ConeFlags a, ConeFlags b) noexcept
+    {
+        return static_cast<ConeFlags>(static_cast<std::uint8_t>(a) | static_cast<std::uint8_t>(b));
+    }
+
+    [[nodiscard]] constexpr bool Has(ConeFlags flags, ConeFlags one) noexcept
+    {
+        return (static_cast<std::uint8_t>(flags) & static_cast<std::uint8_t>(one)) != 0;
+    }
+
     /// @brief One cell the walk decided the camera can see, and through which cones.
     struct VisibleCell
     {
@@ -48,6 +70,14 @@ namespace cnahouse::visibility
         /// @brief Frusta the cap refused. Non-zero means this room is seen through more than four
         ///        openings at once, which §71's `F3` is the place to notice.
         int frustaDropped = 0;
+        /// @brief The flags of every cone that reached this cell, ANDed together.
+        ///
+        /// **And, not or.** A cell is drawn once, so a room reached through both a frosted door
+        /// and a clear one is not being seen through frosted glass: one clear view of it is enough
+        /// to need its dressing props. `Diffuse` therefore survives only when EVERY way in was
+        /// diffuse -- which is also the safe direction, because dropping detail from a room the
+        /// player can see clearly is a visible loss and keeping it costs a few props.
+        ConeFlags flags = ConeFlags::None;
     };
 
     /// @brief What the walk did, for §71's `F3` overlay and for the tests.
@@ -68,6 +98,8 @@ namespace cnahouse::visibility
         int skippedContained = 0;
         int frustaDropped = 0;
         int maxDepth = 0;
+        /// @brief Cells every cone into which came through §15.4's frosted glass.
+        int diffuseCells = 0;
     };
 
     /// @brief §25.2's portal walk: breadth-first from the camera's cell, one reduced frustum per
@@ -129,9 +161,10 @@ namespace cnahouse::visibility
             ClipFrustum frustum;
             NdcRect rect;
             int depth = 0;
+            ConeFlags flags = ConeFlags::None;
         };
 
-        VisibleCell& Reach(util::Id cell, int depth);
+        VisibleCell& Reach(util::Id cell, int depth, ConeFlags flags);
 
         std::vector<VisibleCell> visible_;
         std::vector<Work> queue_;
