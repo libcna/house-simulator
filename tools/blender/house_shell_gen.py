@@ -1193,6 +1193,59 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     band(hu0 - casing, hu1 + casing, hv0 - SILL_PROJECT, hv0,
                          min(plane, proud), max(plane, proud))
 
+                # `HOUSE-00486`: the door LEAF, and the lining that closes the gap round it.
+                #
+                # The shell filled a window with glass and a doorway with nothing until §25's
+                # culling was turned on (`HOUSE-00684`) and every shut door became a hole to the
+                # clear colour. §65.6 starts them all shut, so a shut leaf is what the house looks
+                # like; §15's animated door replaces this in phase 15 and this class disappears
+                # with it.
+                #
+                # Built by BOTH rooms, in each one's own half of the reveal -- like the
+                # architrave and the threshold above, and unlike a window's frame. A window is one
+                # object and its owner builds it; a leaf built once is a leaf that belongs to ONE
+                # cell's chunk, and §25 culls the room behind a shut door -- so the room in front
+                # of it would be left looking at the hole again, which is the whole bug this task
+                # is fixing. Two half-wall-deep slabs never meet, so there is nothing to z-fight.
+                for hole in holes:
+                    opening = openings.get(hole[4])
+                    if opening is None or opening.get("kind") != "door":
+                        continue
+                    hu0, hu1, hv0, hv1 = hole[0], hole[1], hole[2], hole[3]
+                    leaf = opening.get("leaf") or {}
+                    thickness = float(leaf.get("thickness") or 0.04)
+                    width = min(float(leaf.get("width") or (hu1 - hu0)), hu1 - hu0)
+                    height = min(float(leaf.get("height") or (hv1 - hv0)), hv1 - hv0)
+                    # Centred across the opening and sitting on the threshold, which is where a
+                    # closed door is. The leftover -- 20 mm each side and 50 mm at the head on
+                    # §12's doors -- is the lining, so the hole is closed and the gap a real door
+                    # has is still the gap it has.
+                    lu0 = (hu0 + hu1) / 2.0 - width / 2.0
+                    lu1 = lu0 + width
+                    lv0, lv1 = hv0, hv0 + height
+                    reveal_lo, reveal_hi = min(plane, far), max(plane, far)
+                    middle = (reveal_lo + reveal_hi) / 2.0
+
+                    def leaf_box(u0, u1, v0, v1, d0, d1, klass):
+                        if side in ("-X", "+X"):
+                            solid(d0, d1, v0, v1, u0, u1, klass)
+                        else:
+                            solid(u0, u1, v0, v1, d0, d1, klass)
+
+                    # `trim`, and NOT a class of its own. A leaf in its own colour would be
+                    # easier to pick out, and it would be an eleventh blockout material -- which
+                    # pushes `L0_GARAGE` and the three attic stores past §17.4's six chunks a cell,
+                    # measured. A door is joinery: it belongs in the class that already holds the
+                    # architrave round it, the sash beside it and the skirting under it, and §18.3
+                    # keeps all four out of the bake for the same reason. §11's material table
+                    # separates them when it arrives.
+                    leaf_box(lu0, lu1, lv0, lv1,
+                             middle - thickness / 2.0, middle + thickness / 2.0, "trim")
+                    # The lining: the reveal's full depth, filling what the leaf does not.
+                    leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                    leaf_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                    leaf_box(lu0, lu1, lv1, hv1, reveal_lo, reveal_hi, "trim")
+
                 for hu0, hu1, hv0, hv1, _portal_id in holes:
                     for corner_lo, corner_hi, along, look in (
                             (hv0, hv0, "v", (0.0, 1.0, 0.0)),      # the sill, looking up
@@ -2055,6 +2108,22 @@ def selftest(output: Path) -> int:
     window_holes = [hole for hole in kitchen_holes
                     if (openings_by_portal.get(hole[4]) or {}).get("kind") == "window"]
     boxes_expected = 4 * doors_here
+    # `HOUSE-00486`: and EVERY door adds its leaf plus the lining that closes the gap round it --
+    # one box per side that has a gap, so a leaf exactly as wide as its hole adds only the leaf.
+    # Both rooms build one, in their own half of the reveal, because a leaf built once belongs to
+    # one cell's chunk and §25 culls the room behind a shut door. Counted from the leaf's own
+    # dimensions rather than assumed to be four, because §12's doors are 0.86 x 2.05 in a
+    # 0.90 x 2.10 hole and a later one might not be.
+    for hole in kitchen_holes:
+        row = openings_by_portal.get(hole[4]) or {}
+        if row.get("kind") != "door":
+            continue
+        leaf = row.get("leaf") or {}
+        width = min(float(leaf.get("width") or (hole[1] - hole[0])), hole[1] - hole[0])
+        height = min(float(leaf.get("height") or (hole[3] - hole[2])), hole[3] - hole[2])
+        boxes_expected += 1
+        boxes_expected += 2 if (hole[1] - hole[0]) - width > 2e-9 else 0
+        boxes_expected += 1 if (hole[3] - hole[2]) - height > 1e-9 else 0
     for hole in window_holes:
         row = openings_by_portal[hole[4]]
         boxes_expected += 1                                   # the sill board, in every room

@@ -57,11 +57,11 @@ namespace
         {"b1-cinema", {5.45f, -2.30f, -25.05f, 90.0f, 0.0f}},
         {"b1-hall", {0.00f, -2.30f, -20.70f, 0.0f, 0.0f}},
         {"l0-hall", {0.00f, 0.60f, -20.65f, 0.0f, 0.0f}},
-        // §12.1's front door, from a stride inside it. The opening is a hole in the shell and
-        // there is nothing behind it yet: the leaf is phase 15's and the drive beyond it is
-        // phase 10's, so a quarter of this frame is the clear colour ON PURPOSE. When either
-        // lands, this reference changes and the commit that changes it says so.
-        {"l0-front-door", {0.00f, 0.60f, -14.90f, 180.0f, 0.0f}, 0.60},
+        // §12.1's front door, from a stride inside it. A quarter of this frame was the clear
+        // colour until `HOUSE-00486` drew the leaf: the opening is a hole in the shell and the
+        // drive beyond it is phase 10's, so what was behind it was nothing. The blockout leaf
+        // closes it; §15's animated door and phase 10's drive replace this picture again.
+        {"l0-front-door", {0.00f, 0.60f, -14.90f, 180.0f, 0.0f}, 0.90},
         {"l0-kitchen", {-3.00f, 0.60f, -25.05f, 90.0f, 0.0f}},
         // As close to a corner as §43.1's 0.30 m capsule lets a body get, looking into it at 45°.
         //
@@ -73,13 +73,11 @@ namespace
         // Kept anyway, because a body in a corner is a pose worth having a picture of, and
         // because the near plane's value is asserted where it CAN be seen: `EyeProbeTests` reads
         // it back out of the projection.
-        // §25's culling arrived in `HOUSE-00684` and this pose is 0.31 m from `D_L0_FAMILY`,
-        // which §65.6 starts SHUT. The room behind it is correctly not drawn -- and the shell
-        // draws no door LEAF, so what is left is the hole the opening was cut as. Two thirds of
-        // this frame is the clear colour for the same reason `l0-front-door` above is: a missing
-        // asset, recorded as `HOUSE-00486`, not a missing surface. When the leaf lands, this
-        // reference changes and the commit that changes it says so.
-        {"l0-hall-corner", {1.89f, 0.60f, -22.69f, 135.0f, 0.0f}, 0.35},
+        // 0.31 m from `D_L0_FAMILY`, which §65.6 starts SHUT -- so this is the pose that showed
+        // `HOUSE-00486`: §25's culling correctly refused to draw the room behind the door, and the
+        // shell drew no LEAF, leaving two thirds of the frame as the hole the opening was cut as.
+        // With the leaf drawn it is a room again, and the shut door is a surface.
+        {"l0-hall-corner", {1.89f, 0.60f, -22.69f, 135.0f, 0.0f}},
         // The main stair from the foyer it is open to (§12.2), which is where a person looks at a
         // staircase from. Standing ON a flight is a frame of the underside of the flight above.
         //

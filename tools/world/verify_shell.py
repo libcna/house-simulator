@@ -392,9 +392,67 @@ def opening_rows(shell: dict, layout: dict) -> list[dict]:
                     if lo_u < mid_u < hi_u and lo_v < mid_v < hi_v:
                         blocked.append((cell_id, name))
                         break
+        # `HOUSE-00486`: and the LEAF, which is the opposite question. `blocked` asks whether the
+        # wall was cut; this asks whether what was cut was then filled with a door. A leaf is
+        # `trim` -- a door is joinery, like the architrave round it -- and it is the only trim
+        # face across the middle of a door opening: the architrave is round the hole, the
+        # threshold is under it, and neither crosses it.
+        leafed = []
+        for cell_id in (portal.get("cellA"), portal.get("cellB")):
+            mesh = (shell.get(cell_id) or {}).get("trim")
+            if mesh is None:
+                continue
+            for a, b, c in mesh["triangles"]:
+                points = [mesh["positions"][a], mesh["positions"][b], mesh["positions"][c]]
+                if min(abs(p[axis] - value) for p in points) > 0.35:
+                    continue
+                lo_u = min(p[cross] for p in points)
+                hi_u = max(p[cross] for p in points)
+                lo_v = min(p[1] for p in points)
+                hi_v = max(p[1] for p in points)
+                mid_u = (u0 + u1) / 2
+                # Two thirds up the opening: clear of the threshold under it and of the head
+                # above, so only a face that crosses the doorway itself can be here.
+                mid_v = v0 + (v1 - v0) * 2.0 / 3.0
+                if lo_u < mid_u < hi_u and lo_v < mid_v < hi_v:
+                    leafed.append(cell_id)
+                    break
+        # Which of the two cells could POSSIBLY build a leaf: one that draws walls. A landing
+        # open on every side has a floor and a ceiling and nothing else, and an opening in a
+        # boundary neither cell walls is an opening nobody can fill.
+        walled = []
+        for cell_id in (portal.get("cellA"), portal.get("cellB")):
+            surfaces = shell.get(cell_id) or {}
+            found = False
+            for name in ("wall", "exterior"):
+                mesh = surfaces.get(name)
+                if mesh is None:
+                    continue
+                for a, b, c in mesh["triangles"]:
+                    points = [mesh["positions"][a], mesh["positions"][b], mesh["positions"][c]]
+                    if min(abs(p[axis] - value) for p in points) > 0.35:
+                        continue
+                    # Beside the opening, not across it -- the wall the opening is cut IN.
+                    if min(p[cross] for p in points) < u1 and max(p[cross] for p in points) > u0:
+                        found = True
+                        break
+                if found:
+                    break
+            if found:
+                walled.append(cell_id)
+        walled = sorted(walled)
         rows.append({"opening": opening["id"], "kind": opening.get("kind"),
                      "width": u1 - u0, "height": v1 - v0,
-                     "blocked": sorted(set(blocked))})
+                     "blocked": sorted(set(blocked)),
+                     "walled": walled,
+                     # Which of the two cells draws JOINERY at all. A stair hall draws its walls,
+                     # its floor and its flights and no trim of any kind -- no skirting, no
+                     # architrave -- so it has no leaf either, and that is a fact about the cell
+                     # rather than about the door.
+                     "joinery": sorted(cell_id for cell_id in (portal.get("cellA"),
+                                                               portal.get("cellB"))
+                                       if (shell.get(cell_id) or {}).get("trim")),
+                     "leafed": sorted(set(leafed))})
     return rows
 
 
@@ -510,6 +568,10 @@ def report(result: dict) -> str:
                      f"(§70.5 wants {HEADROOM_MIN})")
     cut = [row for row in result["openings"] if not row["blocked"]]
     lines.append(f"  {len(cut)} of {len(result['openings'])} authored opening(s) are cut")
+    doors = [row for row in result["openings"] if row["kind"] == "door" and not row["blocked"]]
+    two_sided = [row for row in doors if len(row["leafed"]) >= 2]
+    lines.append(f"  {len([row for row in doors if row['leafed']])} of {len(doors)} cut door "
+                 f"opening(s) have a leaf, {len(two_sided)} of them from both sides")
     triangles = result.get("triangles") or []
     if triangles:
         by_level: dict[str, int] = {}
@@ -681,6 +743,38 @@ def selftest() -> int:
     cut = [row for row in result["openings"] if not row["blocked"]]
     require(len(cut) >= len(result["openings"]) - 1,
             f"{len(cut)} of the {len(result['openings'])} authored openings are holes in the shell")
+
+    # `HOUSE-00486`. A window is filled with glass and a doorway was filled with nothing, which was
+    # invisible until §25's culling stopped drawing the room behind a shut door (`HOUSE-00684`) and
+    # left the hole on screen. Both rooms build a leaf, in their own half of the reveal: one built
+    # once belongs to one cell's chunk, and that cell is exactly the one culling removes.
+    doors = [row for row in result["openings"] if row["kind"] == "door" and not row["blocked"]]
+    require(doors, "there are door openings to check")
+    # A leaf can only go in a wall, so the claim is about the doors whose boundary HAS one.
+    fillable = [row for row in doors if row["walled"]]
+    leafless = [row["opening"] for row in fillable if not row["leafed"]]
+    require(not leafless,
+            f"every one of the {len(fillable)} door openings in a wall has a leaf in it "
+            f"({leafless[:4] if leafless else 'none missing'})")
+    require(len(doors) - len(fillable) == 3,
+            f"and the {len(doors) - len(fillable)} that are in no wall at all are the two balcony "
+            f"doors and the shed's -- their cells draw a floor and a ceiling and nothing else, so "
+            f"there is nothing for a leaf to sit in "
+            f"({[row['opening'] for row in doors if not row['walled']]})")
+    # Both sides, wherever both sides can have one: a leaf built once belongs to one cell's chunk,
+    # and §25 culls the room behind a shut door -- so the room in FRONT of it would be left looking
+    # at the hole, which is the bug this replaced.
+    both = [row for row in fillable
+            if len(row["walled"]) == 2 and len(set(row["walled"]) & set(row["joinery"])) == 2]
+    missing = [row["opening"] for row in both if len(row["leafed"]) != 2]
+    require(both and not missing,
+            f"and every one of the {len(both)} doors between two rooms that draw joinery has a "
+            f"leaf on BOTH sides ({missing[:3] if missing else 'none missing'})")
+    stairs_only = [row["opening"] for row in fillable
+                   if len(row["walled"]) == 2 and len(set(row["walled"]) & set(row["joinery"])) < 2]
+    require(len(stairs_only) == 2,
+            f"and the {len(stairs_only)} that have one side only are the stair hall's, which draws "
+            f"no trim of any kind -- no skirting, no architrave, no leaf ({stairs_only})")
 
     # THE SHELL IS NOT PERFECT, and this is where that is written down. `HOUSE-00480` is the task
     # that fixes what `HOUSE-00477`/`78`/`79` find; until it does, the list below is the exact set

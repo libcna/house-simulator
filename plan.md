@@ -105,7 +105,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 3 | Content pipeline | 00181–00260 | 45 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 80 | The full layout authored, validated and loaded |
-| 6 | Blockout house geometry | 00451–00540 | 36 | The generated shell renders |
+| 6 | Blockout house geometry | 00451–00540 | 37 | The generated shell renders |
 | 7 | Collision and player controller | 00541–00620 | 35 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 37 | Culling correct, proved, and within budget |
@@ -7492,7 +7492,7 @@ the chunk builder produces ≤ 6 chunks per cell.
             between cells that share a boundary PLANE, which a cell wholly inside another does
             not. One opening of 130, on a fridge; left for whoever gives a container an interior
             that has to be looked into.
-- [ ] HOUSE-00486 — Draw a blockout door leaf in every opening that has a door
+- [x] HOUSE-00486 — Draw a blockout door leaf in every opening that has a door
       dep: HOUSE-00484 · sys: content · plat: TOOL · pri: MUST
       finding: (2026-09-09, found by `HOUSE-00684`) **the shell fills a window with glass and a
             doorway with nothing.** `house_shell_gen.py` cuts 130 openings and draws
@@ -7510,6 +7510,48 @@ the chunk builder produces ≤ 6 chunks per cell.
             culling disabled and assert the images match"* cannot pass while a shut door is a hole:
             culled, you see the clear colour; unculled, you see the room. The difference is real and
             it is the shell's, so the comparison is meaningless until the leaf exists.
+      note: (2026-09-09) done. Every door opening now gets a leaf at its authored size --
+            `layout.openings.json` carries `leaf: {width, height, thickness}` -- sitting on the
+            threshold and centred across the hole, with a lining filling what is left. The house
+            went from 33 231 to 38 751 triangles.
+      finding: **both rooms build one, and that is not a duplicate.** The first version followed a
+            window's owner rule -- one object, built by the first interior cell in id order -- and
+            left the corner pose exactly as black as before: a leaf built once belongs to ONE
+            cell's chunk, and §25 culls the room behind a shut door, so the room in FRONT of it was
+            still looking at the hole. Each room now builds a leaf in its own half of the reveal,
+            like the architrave and the threshold beside it; the two slabs are half a wall apart
+            and cannot z-fight.
+      finding: **`trim`, not a class of its own.** A leaf in its own colour would be easier to pick
+            out and would be an eleventh blockout material -- which pushes `L0_GARAGE` and the three
+            attic stores past §17.4's six chunks a cell, measured. A door is joinery: it belongs
+            with the architrave round it, the sash beside it and the skirting under it, and §18.3
+            keeps all four out of the bake for the same reason.
+      measured: **61 of the 64 cut door openings have a leaf, 53 of them from both sides.** The
+            three without are the two balcony doors and the shed's, whose cells draw a floor and a
+            ceiling and no walls at all -- there is nothing for a leaf to sit in. The two with one
+            side only are the stair hall's, which draws no trim of any kind: no skirting, no
+            architrave, no leaf. All four numbers are `verify_shell` claims now, so a leaf that
+            stops being drawn is a failed gate rather than a picture somebody notices.
+      measured: the first-person poses go from as much as 60 % clear colour to **0 %** -- eleven of
+            twelve, the twelfth being `l0-foyer-stair`'s 14 %, which is the front elevation's own
+            hole and not a door. `l0-hall-corner` and `l0-front-door` both go back to §70's 90 %
+            coverage minimum, which `HOUSE-00684` and `HOUSE-00483` had relaxed for exactly this.
+      note: thirty render references were regenerated -- twelve first-person, seventeen blockout
+            poses and `blockout-01` -- because the shell they are pictures of changed.
+- [ ] HOUSE-00487 — Bring `L0_GARAGE` and the three attic stores back inside §17.4's six chunks a cell
+      dep: HOUSE-00473 · sys: content · plat: TOOL · pri: SHOULD
+      finding: (2026-09-09, found by `HOUSE-00486`) **four cells have been over §17.4's chunk target
+            since before this task, and the `chunks` stage of the content build has been failing on
+            it.** `L0_GARAGE` carries seven materials -- ceiling, exterior, floor, glass, metal,
+            stair, trim, wall -- and `L3_STORE_E`, `L3_STORE_N` and `L3_STORE_W` are the same shape
+            of problem. It is not the door leaves: they are `trim`, which every one of those cells
+            already had, and the material count is unchanged at ten.
+      note: §17.4's target is *"≤ 6 chunks per cell"*, which `docs/chunk-format.md` §5 shows means
+            *"≤ 6 distinct materials among a cell's static props"*. The garage has a stair in it, a
+            metal door track, glazing and both an interior and an exterior skin; whether the answer
+            is to merge two blockout classes or to accept that a garage is not a room is a decision
+            for whoever owns §17.4's budget, which is why this is `SHOULD` and recorded rather than
+            silently relaxed.
 - [ ] HOUSE-00485 — Fix the shell's coplanar wall/exterior faces where two cells abut
       dep: HOUSE-00484 · sys: content · plat: TOOL · pri: SHOULD
       finding: (2026-09-09, found by `HOUSE-00676`) **`house_shell_gen.py` draws two surfaces in the
@@ -9994,11 +10036,11 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
 - [ ] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
       dep: HOUSE-00684, HOUSE-00164, HOUSE-00486 · sys: ci · plat: CI · pri: MUST
       accept: this is the single most important test in the project; a failure means something visible was culled
-      blocked: (2026-09-09, by `HOUSE-00684`) **a shut door is a hole in the shell**, so the two
-            images cannot match: culled you see the clear colour through the doorway, unculled you
-            see the room. The difference is real and it is the SHELL's -- `HOUSE-00486` draws the
-            leaf, and this test means something the day it lands. `dep` amended to say so rather
-            than leaving the criterion unsatisfiable for a reason nobody wrote down.
+      note: (2026-09-09) was blocked and is not any more. `HOUSE-00684` found that a shut door was
+            a hole in the shell, so the two images could not match -- culled you saw the clear
+            colour through the doorway, unculled you saw the room -- and `HOUSE-00486` drew the
+            leaf. The `dep` records it, because the criterion was unsatisfiable for a reason that
+            is a fact about the shell rather than about the culling.
 - [ ] HOUSE-00689 — Test: with all doors closed, the graph fragments as `report_graph.py` predicts and the visible set from `L0_FOYER` is the golden list
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00690 — Test: with all doors open, the visible-cell count from the 12 budget poses stays within budget
@@ -12207,19 +12249,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 300 numbered tasks across 53 phases.**
+**1 301 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 237 |
-| World data, blockout, collision, camera, visibility | 5–9 | 202 |
+| World data, blockout, collision, camera, visibility | 5–9 | 203 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 130 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 146 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 161 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 300** |
+| **Total** | **0–52** | **1 301** |
 
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
@@ -12266,6 +12308,7 @@ evidence that it fails.
 | 2026-09-06 | `HOUSE-00063` | No text change to the task; a finding recorded against `HOUSE-00136` and `HOUSE-00124` | `CNA_CNAEXT=OFF` removes the `CNA::Graphics::` engine layer (6 277 symbols → 0; archive 37.4 MB → 69 kB) but **not** the other forbidden identifiers, which live in `Microsoft::Xna::Framework::Graphics` in CNA's always-compiled core and are present in the linked binary. `check_xna_only.py` is therefore the *only* gate for those, not a redundant one. `HOUSE-00136` must be scoped to what can actually be asserted at the symbol level. |
 | 2026-09-09 | `HOUSE-00485` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00676`: `house_shell_gen.py` draws a cell's exterior skin in the same plane, facing the same way, as the abutting cell's wall -- measured at `L0_GARAGE`'s x = 8.825 west wall against the `exterior` faces of seven other cells. | Two coplanar front-facing surfaces are a z-fight whose winner is decided by submission order and nothing else. It was invisible while the opaque pass submitted cell by cell; sorting the draw list by material (§25.1 step 5) changed which arbitrary answer the garage shows, which is how it was noticed. The generator is where a shared boundary should draw one surface rather than two, and that changes the shell eight render fixtures are pictures of -- so it is its own task rather than a correction folded into a rendering one. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00486`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and a `dep` added to `HOUSE-00688`. Found by `HOUSE-00684`: the shell fills a window with `BLOCKOUT_glass` and a doorway with nothing, so a closed door is a hole. | Invisible while everything was drawn -- you saw the room behind it -- and visible the moment §25's culling was turned on, because §65.6 starts every door shut and the walk correctly refuses to see through one. `HOUSE-00688`'s two images cannot match while the difference between them is a hole in the shell, so its dependency now says so rather than leaving the criterion unsatisfiable for a reason nobody wrote down. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00487` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00486`: `L0_GARAGE`, `L3_STORE_E`, `L3_STORE_N` and `L3_STORE_W` carry seven materials each, over §17.4's six chunks a cell, and the content build's `chunks` stage has been failing on it since before either task. | Noticed while rebuilding the shell, and NOT caused by the door leaves -- they are `trim`, a class those cells already had, and the material count is unchanged at ten. Recorded rather than relaxed: whether to merge two blockout classes or to accept that a garage is not a room is a decision about §17.4's budget. No id was renumbered or struck. |
 
 ---
 
