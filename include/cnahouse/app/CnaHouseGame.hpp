@@ -211,6 +211,17 @@ namespace cnahouse::app
             return tracker_.Current();
         }
 
+        /// @brief How many §17.4 chunks are on the GPU: what `cull off` draws, and the ceiling
+        ///        every culled frame is measured against.
+        ///
+        /// Read rather than written down, because it is a CONTENT number: the shell is generated,
+        /// and a test that spelled it out would have to be edited by whoever next changes a wall
+        /// -- which teaches people to edit the number rather than read the failure.
+        [[nodiscard]] std::size_t ResidentChunksForTesting() const noexcept
+        {
+            return blockoutCells_ == nullptr ? 0u : blockoutCells_->ResidentChunkIndices().size();
+        }
+
         /// @brief The version line drawn in the corner and printed at startup.
         [[nodiscard]] static std::string VersionLine();
 

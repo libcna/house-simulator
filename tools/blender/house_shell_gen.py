@@ -183,8 +183,9 @@ def side_span(side: str, box: tuple) -> tuple[float, float, float]:
 
 
 def side_intervals(side: str, box: tuple, cell: dict, neighbours: list,
-                   ) -> list[tuple[float, float, str]]:
-    """@p side split into `(lo, hi, wall)` runs: which wall bounds each stretch of it.
+                   ) -> list[tuple[float, float, str, bool]]:
+    """@p side split into `(lo, hi, wall, bounded)` runs: which wall bounds each stretch of it,
+    and whether there is another CELL across that stretch.
 
     A side is rarely all one thing. `L0_KITCHEN`'s north side is 8.9 m of partition against the
     sunroom and 1.5 m of exterior wall beside it; seven of the house's 324 sides are mixed like
@@ -194,10 +195,23 @@ def side_intervals(side: str, box: tuple, cell: dict, neighbours: list,
     An **interior** cell across the side makes it a partition; an exterior cell counts as nothing,
     because the back wall of the family room faces `EXT_BACKYARD`, which is a cell, and is still
     an exterior wall.
+
+    **`covers` is not `wall == "wallPartition"`, and the difference is the garage**
+    (`HOUSE-00485`). A side between the garage and a room is `wallGarage` from either side, so a
+    caller asking "is there a room across this?" by looking at the wall's NAME is told no -- and
+    then draws an outer skin into a room that is drawing its own inner face on the same plane.
+    278.97 m² of this house was drawn twice that way, all of it on the garage's two long walls.
+
+    **And the answer is a Y RANGE, not a yes.** The garage is one storey and the house beside it is
+    three: over the garage's own 0.15--4.30 the room across the wall is the garage, and above its
+    roof the same wall faces the weather. A run that answered only *bounded* would take the outer
+    skin off the whole storey and leave a hole above the garage roof -- which is what the first
+    attempt at `HOUSE-00485` did, and what `ext-east` caught. So each run carries the extents of
+    the cells across it, and the caller subtracts them from the span it was going to draw.
     """
     plane, lo, hi = side_span(side, box)
     _x0, _x1, y0, y1, _z0, _z1 = box
-    covered: list[tuple[float, float, str]] = []
+    covered: list[tuple[float, float, str, float, float]] = []
     for other, obox in neighbours:
         if other["id"] == cell["id"]:
             continue
@@ -213,19 +227,25 @@ def side_intervals(side: str, box: tuple, cell: dict, neighbours: list,
             continue
         wall = "wallGarage" if "garage" in (cell.get("kind"), other.get("kind")) \
             else "wallPartition"
-        covered.append((start, end, wall))
+        covered.append((start, end, wall, oy0, oy1))
 
+    # A SWEEP over every boundary, rather than the first-covered-wins pass this replaced: two cells
+    # can cover the same stretch of one side at different heights -- the garage over the mudroom
+    # and the basement plant room under it -- and a run has to carry both of their extents or the
+    # caller cannot subtract what it cannot see.
     outside = "wallGarage" if cell.get("kind") == "garage" else "wallExterior"
-    out: list[tuple[float, float, str]] = []
-    cursor = lo
-    for start, end, wall in sorted(covered):
-        if start > cursor + 1e-6:
-            out.append((cursor, start, outside))
-        if end > cursor:
-            out.append((max(cursor, start), end, wall))
-            cursor = end
-    if hi > cursor + 1e-6:
-        out.append((cursor, hi, outside))
+    edges = sorted({lo, hi} | {edge for start, end, *_ in covered for edge in (start, end)
+                               if lo - 1e-9 <= edge <= hi + 1e-9})
+    out: list[tuple[float, float, str, tuple]] = []
+    for a, b in zip(edges, edges[1:]):
+        if b - a <= 1e-6:
+            continue
+        here = [row for row in covered if row[0] <= a + 1e-6 and row[1] >= b - 1e-6]
+        if not here:
+            out.append((a, b, outside, ()))
+            continue
+        wall = "wallGarage" if any(row[2] == "wallGarage" for row in here) else "wallPartition"
+        out.append((a, b, wall, tuple((row[3], row[4]) for row in here)))
     return out
 
 
@@ -242,7 +262,7 @@ def wall_across(side: str, box: tuple, cell: dict, neighbours: list, constructio
     that gap along 8.9 m of the kitchen.
     """
     construction = construction or {}
-    walls = {wall for _lo, _hi, wall in side_intervals(side, box, cell, neighbours)}
+    walls = {wall for _lo, _hi, wall, _covers in side_intervals(side, box, cell, neighbours)}
     return min(walls, key=lambda name: float(construction.get(name, 0.0)), default="wallExterior")
 
 
@@ -279,6 +299,13 @@ def outer_wall_name(level: dict, wall: str) -> str:
     if wall == "wallExterior" and float(level.get("ffl", 0.0)) < 0.0:
         return "foundationWall"
     return wall
+
+
+#: A gap between two cells stacked on the far side of a wall that is FLOOR STRUCTURE rather than
+#: weather, in metres (`HOUSE-00485`). §13's storeys are 2.90-3.05 apart and the deepest floor band
+#: in this house is 0.45; a gap wider than this is a room's worth of air, and the wall beside it --
+#: the storey of house that stands over the garage's roof -- needs its outer skin.
+INTERIOR_GAP = 0.75
 
 
 def outer_span(cell: dict, extent: tuple[float, float], level: dict, levels: dict):
@@ -890,8 +917,8 @@ def slab_here(cell: dict, extent: tuple, is_floor: bool) -> bool:
 def open_sides_of(cell: dict, box: tuple, neighbours: list) -> list:
     """The sides of @p box with no interior cell across them -- the sides you can fall off."""
     return [side for side in ("-X", "+X", "-Z", "+Z")
-            if not any(wall == "wallPartition"
-                       for _lo, _hi, wall in side_intervals(side, box, cell, neighbours))]
+            if not any(covers
+                       for _lo, _hi, _wall, covers in side_intervals(side, box, cell, neighbours))]
 
 
 def build_balcony_edge(cell: dict, extent: tuple, neighbours: list, construction, solid, add
@@ -1040,8 +1067,8 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         open_cell = cell.get("kind") == "exterior" or cell.get("visibilityHint") == "open"
         for side, inward in INWARD.items():
             side_holes = holes_in(side, box, cell, list(portals))
-            for lo, hi, wall in ([] if open_cell
-                                 else side_intervals(side, box, cell, neighbours)):
+            for lo, hi, wall, covers in ([] if open_cell
+                                         else side_intervals(side, box, cell, neighbours)):
                 half = float(construction.get(wall, 0.0)) / 2.0
                 plane = {"-X": x0 + half, "+X": x1 - half,
                          "-Z": z0 + half, "+Z": z1 - half}[side]
@@ -1060,25 +1087,53 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                    (pu1, pv1, plane), (pu1, pv0, plane)]
                     add(corners, inward)
 
-                # `HOUSE-00454`: the OUTER face of the same wall, where there is an outside. A
-                # partition has two rooms and each has its inner face; an exterior wall has one
-                # room and the weather, and the weather's side is here.
-                outside = wall != "wallPartition" and level is not None
+                # `HOUSE-00454`: the OUTER face of the same wall, over the heights where there
+                # IS an outside. A partition has two rooms and each draws its inner face; an
+                # exterior wall has one room and the weather, and the weather's side is here.
+                #
+                # `HOUSE-00485`: "is there an outside" is a question about a Y RANGE and not about
+                # the wall's name. Reading the name put an `exterior` face into the room across a
+                # garage wall -- coplanar with and facing the same way as that room's own inner
+                # face, 278.97 m² of it, and which one a pixel showed decided by nothing but
+                # submission order. Answering it with a plain "is anything across this run" then
+                # took the skin off the whole storey and left a hole above the garage roof, where
+                # the same wall really does face the weather. So the span this would have drawn has
+                # the cells across the run subtracted from it, and what is left is drawn.
+                outside = not covers and level is not None
                 outer_plane = plane
-                if outside:
+                if level is not None:
                     outer_name = outer_wall_name(level, wall)
                     outer_half = float(construction.get(outer_name, 0.0)) / 2.0
                     outer_plane = {"-X": x0 - outer_half, "+X": x1 + outer_half,
                                    "-Z": z0 - outer_half, "+Z": z1 + outer_half}[side]
                     oy0, oy1 = outer_span(cell, (y0, y1), level, levels or {})
-                    for pu0, pu1, pv0, pv1 in panel(lo, hi, oy0, oy1, holes):
-                        if side in ("-X", "+X"):
-                            outer = [(outer_plane, pv0, pu0), (outer_plane, pv1, pu0),
-                                     (outer_plane, pv1, pu1), (outer_plane, pv0, pu1)]
+                    # Two cells stacked on the far side of this wall leave a gap between them
+                    # -- the floor band of the upper one -- and that gap is floor structure, not
+                    # weather. Bridging it keeps the skin out of the sandwich between two rooms;
+                    # anything wider than `INTERIOR_GAP` is a room's worth of air and is left
+                    # alone, which is what the space above the garage's roof is.
+                    cuts: list[tuple[float, float]] = []
+                    for c0, c1 in sorted(covers):
+                        if cuts and c0 - cuts[-1][1] <= INTERIOR_GAP:
+                            cuts[-1] = (cuts[-1][0], max(cuts[-1][1], c1))
                         else:
-                            outer = [(pu0, pv0, outer_plane), (pu0, pv1, outer_plane),
-                                     (pu1, pv1, outer_plane), (pu1, pv0, outer_plane)]
-                        add(outer, tuple(-value for value in inward), "exterior")
+                            cuts.append((c0, c1))
+                    # The floor band above this cell -- `outer_span`'s 0.35 m of joists, which the
+                    # LOWER cell carries -- is interior wherever a cell across this run spans the
+                    # whole of this one: the room next door has a floor band of its own there. It
+                    # is NOT interior where the cell across is shorter than this one, which is the
+                    # garage: above its roof the band is as much weather as the wall under it.
+                    if any(c0 <= y0 + 1e-6 and c1 >= y1 - 1e-6 for c0, c1 in covers):
+                        cuts.append((y1, oy1))
+                    for vy0, vy1 in minus(oy0, oy1, cuts):
+                        for pu0, pu1, pv0, pv1 in panel(lo, hi, vy0, vy1, holes):
+                            if side in ("-X", "+X"):
+                                outer = [(outer_plane, pv0, pu0), (outer_plane, pv1, pu0),
+                                         (outer_plane, pv1, pu1), (outer_plane, pv0, pu1)]
+                            else:
+                                outer = [(pu0, pv0, outer_plane), (pu0, pv1, outer_plane),
+                                         (pu1, pv1, outer_plane), (pu1, pv0, outer_plane)]
+                            add(outer, tuple(-value for value in inward), "exterior")
 
                 # The reveal runs from this room's inner face to the outer face of an exterior
                 # wall, or to the CENTRE LINE of a partition -- the room on the other side carries
@@ -1316,9 +1371,9 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         for box in cell_boxes(cell, extent):
             bx0, bx1, by0, by1, bz0, bz1 = box
             open_sides = [side for side in ("-X", "+X", "-Z", "+Z")
-                          if all(wall != "wallPartition"
-                                 for _lo, _hi, wall in side_intervals(side, box, cell,
-                                                                      list(neighbours)))]
+                          if not any(covers
+                                     for _lo, _hi, _wall, covers in side_intervals(
+                                         side, box, cell, list(neighbours)))]
             beam_lo = by1 - PORCH_BEAM
             half = COLUMN_SECTION / 2.0
             # The columns go along the longest open side, evenly spread including its two ends.
@@ -1816,11 +1871,11 @@ def selftest(output: Path) -> int:
             f"and the fourth for most of its length ({walls})")
     # ...and that fourth side is MIXED, which is the case a single wall per side gets wrong.
     north = side_intervals("-Z", kitchen_box, subject, neighbours)
-    require(len(north) == 2 and {wall for _lo, _hi, wall in north}
+    require(len(north) == 2 and {wall for _lo, _hi, wall, _covers in north}
             == {"wallPartition", "wallExterior"},
             f"its north side is 8.9 m of partition against the sunroom and 1.5 m of exterior "
-            f"wall beside it ({[(round(a, 2), round(b, 2), w) for a, b, w in north]})")
-    require(abs(sum(hi - lo for lo, hi, _w in north)
+            f"wall beside it ({[(round(a, 2), round(b, 2), w) for a, b, w, _c in north]})")
+    require(abs(sum(hi - lo for lo, hi, _w, _c in north)
                 - (kitchen_box[1] - kitchen_box[0])) < 1e-6,
             "and the runs cover the side exactly once, with no gap and no overlap")
     family = cells["L0_FAMILY"]
@@ -1828,11 +1883,11 @@ def selftest(output: Path) -> int:
     require(wall_across("+X", family_box, family, neighbours, construction) == "wallExterior",
             "the family room's east side has nothing across it, so it is an exterior wall")
     family_north = side_intervals("-Z", family_box, family, neighbours)
-    require(any(wall == "wallPartition" for _lo, _hi, wall in family_north)
-            and any(wall == "wallExterior" for _lo, _hi, wall in family_north),
+    require(any(wall == "wallPartition" for _lo, _hi, wall, _c in family_north)
+            and any(wall == "wallExterior" for _lo, _hi, wall, _c in family_north),
             f"and its north side clips the corner of the sunroom for half a metre and is the "
             f"outside wall for the other six "
-            f"({[(round(a, 2), round(b, 2), w) for a, b, w in family_north]})")
+            f"({[(round(a, 2), round(b, 2), w) for a, b, w, _c in family_north]})")
     # The case the exterior rule exists for: `L0_PORCH` is a CELL, it abuts the foyer's front
     # face, and the wall between them is the front of the house.
     foyer = cells["L0_FOYER"]
@@ -1882,7 +1937,9 @@ def selftest(output: Path) -> int:
     polygons = list(obj.data.polygons)
     all_runs = [(side, run) for side in ("-X", "+X", "-Z", "+Z")
                 for run in side_intervals(side, kitchen_box, subject, neighbours)]
-    outside_runs = [run for _side, run in all_runs if run[2] != "wallPartition"]
+    # `HOUSE-00485`: a second face where the WEATHER is on the other side, which is not the same
+    # question as "the wall is not a partition" -- a garage boundary is neither.
+    outside_runs = [run for _side, run in all_runs if not run[3]]
     require(len(polygons) == len(all_runs) + len(outside_runs) + 2,
             f"one face per run, a second for each run that has weather on the other side, plus a "
             f"floor and a ceiling ({len(polygons)} for {len(all_runs)} runs of which "
@@ -1965,7 +2022,7 @@ def selftest(output: Path) -> int:
         side_holes_all = holes_in(side, kitchen_box, subject, list(portal_rows.values()))
         inner = inset_box(kitchen_box, subject, neighbours, construction)
         corner = (inner[4], inner[5]) if side in ("-X", "+X") else (inner[0], inner[1])
-        for lo, hi, _wall in side_intervals(side, kitchen_box, subject, neighbours):
+        for lo, hi, _wall, _covers in side_intervals(side, kitchen_box, subject, neighbours):
             here = [hole for hole in side_holes_all if min(hole[1], hi) - max(hole[0], lo) > 1e-6]
             for height, base in ((float(construction["skirting"]), kitchen_box[2]),
                                  (float(construction["cornice"]),
@@ -2641,7 +2698,7 @@ def selftest(output: Path) -> int:
             f"the rear balcony is a storey up ({balcony_extent[0]}) and the porch deck is not "
             f"({porch_extent[0]}), which is §70.5's own threshold for a drop")
     open_sides = [side for side in ("-X", "+X", "-Z", "+Z")
-                  if not any(wall == "wallPartition" for _lo, _hi, wall in side_intervals(
+                  if not any(covers for _lo, _hi, _wall, covers in side_intervals(
                       side, list(cell_boxes(balcony, balcony_extent))[0], balcony,
                       neighbours))]
     parapets, rail_faces = [], []

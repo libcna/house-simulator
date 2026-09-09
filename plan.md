@@ -7570,7 +7570,7 @@ the chunk builder produces ≤ 6 chunks per cell.
             is to merge two blockout classes or to accept that a garage is not a room is a decision
             for whoever owns §17.4's budget, which is why this is `SHOULD` and recorded rather than
             silently relaxed.
-- [ ] HOUSE-00485 — Fix the shell's coplanar wall/exterior faces where two cells abut
+- [x] HOUSE-00485 — Fix the shell's coplanar wall/exterior faces where two cells abut
       dep: HOUSE-00484 · sys: content · plat: TOOL · pri: SHOULD
       finding: (2026-09-09, found by `HOUSE-00676`) **`house_shell_gen.py` draws two surfaces in the
             same plane, facing the same way, wherever a cell's exterior skin lands on another
@@ -7591,6 +7591,43 @@ the chunk builder produces ≤ 6 chunks per cell.
             shell that eight render fixtures are pictures of, and because the two decisions above
             (the attic stair, the basement hatch) show that shell geometry is where an
             architectural question hides.
+      measured: (2026-09-09) **278.97 m² of this house was drawn twice**, over 29 (plane, cell
+            pair) combinations, every one of them on the garage's two long walls -- more than the
+            22 triangles `HOUSE-00676` could see from where it was standing. Measured by taking
+            every axis-aligned vertical face in the shell, grouping by plane and normal, and
+            intersecting the rectangles of faces owned by different cells.
+      finding: **the generator asked the wrong question.** *"Is there weather on the other side of
+            this run"* was answered by the WALL'S NAME -- `wall != "wallPartition"` -- and a garage
+            boundary is `wallGarage` from either side. So the garage drew its outer skin into the
+            mudroom and the mudroom drew its outer skin into the garage, each coplanar with and
+            facing the same way as the other's inner face, and which one a pixel showed was decided
+            by the order the two chunks were submitted in.
+      finding: **the obvious fix opens a hole, and the render fixtures caught it.** Answering "is
+            anything across this run" instead took the outer skin off the whole storey -- including
+            the part of `L1_BED5`'s and `L1_BATH3`'s east wall that stands ABOVE the garage roof,
+            where the same wall really does face the weather. `ext-east` changed by 2 276 pixels,
+            49 of them to the clear colour. The question is about a Y RANGE and not a yes.
+      note: so a run now carries the EXTENTS of the cells across it, and the outer skin is drawn
+            over `outer_span` minus those extents. Gaps between two stacked cells smaller than
+            `INTERIOR_GAP` (0.75 m) are bridged: a 0.35 m gap between two rooms on the far side of
+            a wall is the upper one's floor band, not weather. §13's storeys are 2.90-3.05 m apart,
+            so nothing a person can stand in is anywhere near that threshold.
+      measured: **0.69 m² left, over 3 combinations**, none of them a wall or a skin: an architrave
+            in the plane of the sunroom's skin, the freezer's shell in the plane of the pantry's
+            trim, and 0.02 m² where the front balcony's rail meets the stair. A different cause,
+            two orders of magnitude smaller, and recorded rather than swept in.
+      measured: and the pictures moved the OTHER way, which is what says the fix is a fix:
+            `ext-road`, `ext-southeast`, `ext-northeast` and `ext-above` now show the house's outer
+            skin over 737, 508, 825 and 1 113 pixels that showed its roof, a ceiling, trim or a
+            wall through it; **24 pixels of clear colour were filled** (15 at `ext-above`, 9 at
+            `ext-east`); and on the second-floor landing 2 649 pixels show the landing's WALL where
+            they showed the outside of the house. The shell went 38 751 -> 38 827 triangles,
+            `exterior` 1 458 -> 1 534: fewer duplicates, more of the skin that was missing.
+      note: two tests stopped writing the house's chunk count down. `CnaHouseGame` now answers
+            `ResidentChunksForTesting()`, because a generated shell's chunk count is a number that
+            changes whenever a wall does -- and a number people have to edit is a number they stop
+            reading.
+      verified: 1 007 unit, 92 integration, 30 render (nine references regenerated) and all gates.
 
 ---
 

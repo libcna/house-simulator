@@ -186,7 +186,8 @@ namespace
         EXPECT_EQ(snapshot.traversal.cellsDropped, 0);
         // §25.1's step 3 ran over the walk's answer, and drew less than the whole house.
         EXPECT_GT(snapshot.chunksDrawn, 0);
-        EXPECT_LT(snapshot.chunksDrawn, 418) << "the chunk cull kept every chunk in the house";
+        EXPECT_LT(snapshot.chunksDrawn, static_cast<int>(game.ResidentChunksForTesting()))
+            << "the chunk cull kept every chunk in the house";
         EXPECT_LE(snapshot.chunksDrawn, snapshot.chunksTested);
         // §25.1 all the way through: the draw list IS the visible set's chunks (`HOUSE-00684`).
         EXPECT_TRUE(snapshot.cullingApplied);
@@ -473,6 +474,7 @@ namespace
         // thing and two live `CnaHouseGame`s crash before either of them draws.
         int before = 0;
         int after = 0;
+        int resident = 0;
         bool appliedAtEnd = true;
         {
             CnaHouseGame game(options, settings);
@@ -484,19 +486,25 @@ namespace
             ASSERT_TRUE(driver.Result().ok) << driver.Result().message;
             before = driver.Before();
             after = driver.After();
+            // The house's own chunk count, ASKED rather than written down (`HOUSE-00485`): the
+            // shell is generated, so a spelled-out number is one the next person to change a wall
+            // has to edit, and a number people edit is a number nobody reads.
+            resident = static_cast<int>(game.ResidentChunksForTesting());
             appliedAtEnd = game.VisibilitySnapshotForTesting().cullingApplied;
         }
 
         std::printf("  §12's house from L0_KITCHEN: %d draw call(s) with culling on, %d with "
-                    "`cull off` (418 chunks resident)\n",
+                    "`cull off` (%d chunks resident)\n",
                     before,
-                    after);
+                    after,
+                    resident);
 
+        ASSERT_GT(resident, 100) << "the house did not load";
         // On by default: §25 exists to be used.
         EXPECT_GT(before, 0);
-        EXPECT_LT(before, 418 / 4) << "culling on is barely culling anything";
+        EXPECT_LT(before, resident / 4) << "culling on is barely culling anything";
         // ...and off means everything resident, which is the frame `HOUSE-00688` compares against.
-        EXPECT_EQ(after, 418) << "`cull off` did not restore the whole house";
+        EXPECT_EQ(after, resident) << "`cull off` did not restore the whole house";
         EXPECT_FALSE(appliedAtEnd) << "the overlay still claims the frame was culled";
 
         // And `cull on` in a session that is already on changes nothing, which is what makes the

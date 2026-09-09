@@ -221,7 +221,11 @@ TEST(VisibilityBudgetTests, AndTheDrawCallsAndStateChangesThatFollowFromThem)
                 worstDraws,
                 worstStates);
     EXPECT_GT(worstDraws, 0) << "no pose drew anything, so nothing was budgeted";
-    // The whole house is 418 chunks. A worst pose that drew most of them would mean the walk is
-    // not earning its keep at the poses a budget is measured at.
-    EXPECT_LT(worstDraws, 418 / 2) << "the busiest budget pose draws half the house";
+    // A worst pose that drew most of the house would mean the walk is not earning its keep at the
+    // poses a budget is measured at. The house's chunk count is ASKED of the file rather than
+    // written down (`HOUSE-00485`): the shell is generated, and a number in a test is a number the
+    // next person to change a wall has to edit.
+    const int whole = static_cast<int>(library->chunks.size());
+    ASSERT_GT(whole, 100) << "the chunk library is not the house";
+    EXPECT_LT(worstDraws, whole / 2) << "the busiest budget pose draws half the house";
 }
