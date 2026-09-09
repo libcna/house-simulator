@@ -116,6 +116,31 @@ namespace
         return static_cast<double>(drawn) / static_cast<double>(image.pixels.size());
     }
 
+    /// How many distinct colours @p image contains, counting no further than @p cap.
+    ///
+    /// The blockout colours a surface by its material, so this is "how many different things are
+    /// in shot". One is a camera inside geometry -- the failure the coverage ceiling used to
+    /// catch, before the property under the house made a full frame an ordinary thing to see.
+    std::size_t DistinctColours(const Image& image, std::size_t cap)
+    {
+        std::vector<std::uint32_t> seen;
+        for (const auto& pixel : image.pixels)
+        {
+            const std::uint32_t key = static_cast<std::uint32_t>(pixel.getRProperty()) << 16 |
+                                      static_cast<std::uint32_t>(pixel.getGProperty()) << 8 |
+                                      static_cast<std::uint32_t>(pixel.getBProperty());
+            if (std::find(seen.begin(), seen.end(), key) == seen.end())
+            {
+                seen.push_back(key);
+                if (seen.size() >= cap)
+                {
+                    break;
+                }
+            }
+        }
+        return seen.size();
+    }
+
     void CompareOnePose(const Pose& pose, bool interior)
     {
         const std::string actual =
@@ -151,9 +176,14 @@ namespace
             // Outside, the house is in front of a background. Both ends are failures: nothing
             // drawn, or the camera inside something.
             EXPECT_GT(coverage, 0.05) << pose.name << " drew almost nothing";
-            EXPECT_LT(coverage, 0.98) << pose.name
-                                      << " fills the frame: the camera is inside "
-                                         "something";
+            // `HOUSE-00495`: the ceiling on this used to be 0.98, and "the camera is inside
+            // something" was what a full frame meant while the house stood in a void -- every
+            // outdoor pose had sky round it because there was nothing else. `HOUSE-00780` put the
+            // lot in the picture, and `ext-front-door` stands 7 m from the front door on the walk:
+            // house above, path below, and not a pixel of sky, legitimately. What the ceiling was
+            // protecting is asked directly instead -- a camera inside geometry sees ONE colour.
+            EXPECT_GT(DistinctColours(*loaded, 8u), 2u)
+                << pose.name << " is one or two flat colours: the camera is inside something";
         }
     }
 

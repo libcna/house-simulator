@@ -129,11 +129,28 @@ function(cnahouse_test_target kind)
     # paths are stable wherever the build tree lives. This is not a detail: running CNA's own suites
     # from the wrong directory made 64 tests "fail" during HOUSE-00118 purely on unresolved fixture
     # paths, and the same trap is one line away here.
+    # `HOUSE-00495`: a test that DRAWS reads the game's own content root -- the copy under the
+    # build tree -- and `cnahouse_world_content` refreshes that copy at BUILD time. A content
+    # rebuild that is not followed by a C++ build therefore leaves every render and integration
+    # test looking at the previous world, and passing against it: the render suite reported thirty
+    # green frames over a `chunks.bin` that predated the outdoors being chunked at all. The fixture
+    # below re-runs the copy before they do.
+    set(_properties LABELS "${kind}")
+    if(kind STREQUAL "render" OR kind STREQUAL "integration")
+        list(APPEND _properties FIXTURES_REQUIRED world_content)
+    endif()
     gtest_discover_tests(${_target}
         WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-        PROPERTIES LABELS "${kind}"
+        PROPERTIES ${_properties}
         DISCOVERY_MODE PRE_TEST)
 endfunction()
+
+if(TARGET cnahouse_world_content)
+    add_test(NAME world-content-current
+             COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}"
+                     --target cnahouse_world_content)
+    set_tests_properties(world-content-current PROPERTIES FIXTURES_SETUP world_content)
+endif()
 
 foreach(_kind unit integration render perf)
     cnahouse_test_target(${_kind})

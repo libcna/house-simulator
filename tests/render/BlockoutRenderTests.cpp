@@ -197,14 +197,26 @@ namespace
         }
         const double union_ = static_cast<double>(both + frontOnly + backOnly);
         const double disagreement = static_cast<double>(frontOnly + backOnly) / union_;
-        EXPECT_LT(disagreement, 0.12)
-            << "the front-face and back-face silhouettes disagree over " << (disagreement * 100.0)
-            << " % of their union (" << frontOnly << " front-only, " << backOnly
-            << " back-only): a facet has turned inside out, or the house has grown a "
-            << "hole";
-        // The direction that means "you can see into the house from outside".
-        EXPECT_LT(static_cast<double>(backOnly) / static_cast<double>(frontDrawn), 0.05)
+        // `HOUSE-00495`: the SYMMETRIC bound above this line is gone, and the reason is worth
+        // keeping. It read "wherever you can see the outside of the house you can also see the
+        // inside of the far side of it", which held while the house stood in nothing: every
+        // surface in the frame belonged to a closed room. `HOUSE-00780` put the outdoors in the
+        // frame, and a terrain tile is a single-sided sheet with no underside at all -- 464 665
+        // front-only pixels of ground against 574 back-only, and a bound over their union
+        // measures how much lawn is in shot. What it was protecting is measured below instead.
+        EXPECT_GT(disagreement, 0.0) << "the two passes drew the same pixels exactly, which means "
+                                        "the reversed pass is not reversing anything";
+
+        // The direction that means "you can see into the house from outside", which is the half a
+        // facet turning inside out moves. It is a hundredth of what the old bound allowed,
+        // because the ground it was diluted by is now excluded by asking the question this way.
+        EXPECT_LT(static_cast<double>(backOnly) / static_cast<double>(frontDrawn), 0.01)
             << backOnly << " pixels show the inside of a surface with no outside in front of it";
+        // ...and the reversed pass still draws a house's worth of the frame. A silhouette that
+        // collapsed would satisfy the ratio above by having no back faces at all.
+        EXPECT_GT(static_cast<double>(backDrawn) / static_cast<double>(frontDrawn), 0.10)
+            << "the reversed pass drew " << backDrawn << " pixels against the front pass's " << frontDrawn
+            << ": the house has no inside";
     }
 
     TEST(BlockoutRenderTests, TheFrameContainsAHouseAndNotAnEmptyRoom)
@@ -273,9 +285,20 @@ namespace
             rowsWithHouse += count > 20 ? 1u : 0u;
         }
         EXPECT_GT(columnsWithHouse, 400u) << "the drawn geometry is too narrow to be the house";
-        EXPECT_LT(columnsWithHouse, static_cast<std::size_t>(kWidth) - 100u)
-            << "the drawn geometry spans the whole frame";
         EXPECT_GT(rowsWithHouse, 250u) << "the drawn geometry is too short to be the house";
+        // `HOUSE-00495`: "and it does not span the whole frame" used to be asked of the COLUMNS,
+        // and every column has ground in it since `HOUSE-00780` put the lot in the picture -- the
+        // house stands on 45 m of frontage now, not in a void. The same thing is asked of the
+        // rows, where it is still true and still worth asking: there is sky over the house, and a
+        // camera that has ended up inside something has none.
+        std::size_t skyRows = 0;
+        for (const std::size_t count : byRow)
+        {
+            skyRows += count == 0 ? 1u : 0u;
+        }
+        EXPECT_GT(skyRows, 50u)
+            << "not one row of the frame is sky: the camera is inside something, or the frame is "
+               "one surface";
 
         // ...and it is made of more than one material. The blockout colours a surface by its
         // material name, so a frame with one colour in it is a frame where that failed.

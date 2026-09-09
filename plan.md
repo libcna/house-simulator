@@ -105,7 +105,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 3 | Content pipeline | 00181–00260 | 46 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 81 | The full layout authored, validated and loaded |
-| 6 | Blockout house geometry | 00451–00540 | 44 | The generated shell renders |
+| 6 | Blockout house geometry | 00451–00540 | 46 | The generated shell renders |
 | 7 | Collision and player controller | 00541–00620 | 38 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
@@ -7817,6 +7817,66 @@ the chunk builder produces ≤ 6 chunks per cell.
             needs `--output-on-failure` in the wrapper so a sighting is not lost, and the pose
             comparison should say WHICH pose and by how many pixels. §46's own words apply --
             *"a flaky render test is worse than none, because it teaches people to ignore it"*.
+- [x] HOUSE-00495 — The render suite meets the outdoors
+      dep: HOUSE-00780 · sys: ci · plat: CI · pri: MUST
+      verify: `~/.claude/bin/render-tests`
+      note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
+            `HOUSE-00780` put the property in the picture and three render assertions had been
+            written when the house stood in a void. Nine references are regenerated, three rules
+            are restated, and the reason each one died is kept beside it.
+      finding: **the render suite was reading a content tree that was hours old, and passing.** A
+            test that DRAWS goes through the game, whose content root is the COPY under the build
+            tree, and `cnahouse_world_content` refreshes that copy at build time. So a content
+            rebuild that is not followed by a C++ build leaves every render and integration test
+            looking at the previous world: this session reported "30 render tests pass" three
+            times over a `chunks.bin` that predated the outdoors being chunked at all. A `ctest`
+            fixture (`world-content-current`) re-runs the copy before them now. Same family as
+            `HOUSE-00226`: a check that cannot see the change reports success.
+      finding: **"the silhouettes agree" was a statement about a house in a void.**
+            `NothingIsInsideOut` compared the front-face and back-face passes and allowed 12 % of
+            disagreement; a terrain tile is a single-sided sheet with no underside, so the ground
+            alone is 464 665 front-only pixels against 574 back-only. The half that means
+            something -- a back face with no front face in front of it, which is what an
+            inside-out facet looks like -- is asked directly and at a hundredth of the old bound.
+      finding: **"and it does not span the whole frame" was another one.** It was asked of the
+            columns, and every column has ground in it now; asked of the ROWS it is still true and
+            still worth asking, because a camera inside geometry has no sky over it.
+      finding: **and so was the 0.98 coverage ceiling on an exterior pose.** `ext-front-door`
+            stands 7 m from the front door: house above, path below, not a pixel of sky, and
+            entirely correct. What the ceiling protected -- a camera inside geometry -- is one
+            flat colour, so that is what is asked.
+      measured: 9 references regenerated (the 8 exterior poses' ground and fences, plus
+            `blockout-01`; `blockout-b1-cinema` moved too, through its window well). 31 render
+            tests green, 1 014 unit and 92 integration.
+- [ ] HOUSE-00496 — The roof is inside the attic's box, so the house has no roof from outside
+      dep: HOUSE-00495 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
+            Found by `HOUSE-00495` while regenerating the exterior references: §12.1 asks for "a
+            hipped-and-gabled roof at a 7:12 pitch with five dormers" and from the road this house
+            is a flat-topped box.
+      finding: **the attic's exterior skin is drawn to its `yOverride`, and the roof is inside
+            it.** Measured from the shell: `L3_STORE_W`'s `exterior` class runs +9.30 to +13.90
+            and `L3_ROOM`'s to +12.60, while `ROOF_MAIN`'s planes run +10.39 (eaves) to +14.30
+            (ridge). The roof is drawn, and it is buried: dropping every `BLOCKOUT_roof` chunk
+            from `chunks.bin` changes an eye-level frame of the whole front elevation by **515
+            bytes over 5.76 MB -- about 170 pixels**, all of them near the ridge.
+      finding: `HOUSE-00472` fixed exactly this misreading for COLLISION and said so in as many
+            words: *"`L3_STORE_W` declares `yOverride: [9.30, 13.90]` -- §13.6's MAXIMUM
+            head-room. Read as a box that is a flat lid at +13.90 over the whole west store, and
+            you may stand upright anywhere in a room whose roof is 1.20 m tall at the knee wall."*
+            The rafters made the collision right; the DRAWN skin still boxes the attic in.
+      finding: it is not the dormers and not `HOUSE-00490`: the same flat top is in every
+            reference committed before that task, and `blockout-normals` shows the roof's
+            underside exactly where the roof should be.
+      note: the fix is the shell's, in `house_shell_gen.py`: a cell on a rafter-bounded level
+            should have its outer skin and its walls clipped to the roof surface -- the same
+            `roof_geometry.roof_planes` the rafters come from -- rather than to the cell's box,
+            and its ceiling slab replaced by the rafters that already exist. A wall becomes a
+            trapezoid under the slope, which the opening cutter's rectangles have to be clipped
+            against afterwards.
+      note: this is what `HOUSE-00781`'s eight exterior poses will photograph, so it comes first;
+            §12.1's silhouette is the single most visible thing about the house and eight
+            references of a flat-topped box would commit a picture of the defect.
 - [ ] HOUSE-00494 — The roofs and the chimney load with the `neighbourhood` pack
       dep: HOUSE-00780 · sys: content · plat: TOOL · pri: SHOULD
       note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
@@ -13626,19 +13686,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 328 numbered tasks across 53 phases.**
+**1 330 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
-| World data, blockout, collision, camera, visibility | 5–9 | 216 |
+| World data, blockout, collision, camera, visibility | 5–9 | 218 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 133 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 328** |
+| **Total** | **0–52** | **1 330** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -13690,6 +13750,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00493`…`HOUSE-00496` | **Four new tasks, the next free ids in phase 6's reserved 00451–00540 range.** Two gates that flaked once each under load (`00493`); the roofs and the chimney loading with the `neighbourhood` pack (`00494`); the render suite's three assertions that were written when the house stood in a void, and the stale content copy they were reading (`00495`, fixed); and the attic's exterior skin drawn to its box with §12.1's roof inside it (`00496`). | `00495` was fixed on the spot because it made every render claim in this session unreliable. The other three are recorded with their measurements: `00496` is a shell-geometry change that eight render references depend on, so it is sequenced before `HOUSE-00781` rather than folded into the task that found it. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00490`, `HOUSE-00491`, `HOUSE-00492` | **Three new tasks, the next free ids in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00779`: the five dormers were not cut out of the roof they come through and their own fronts covered their windows (`00490`, fixed); two `W_GABLE` louvres open into a hip roof that has no gable ends (`00491`); the two rear dormers overlap by 0.20 m (`00492`). | `00490` is a generator defect and was fixed here, in `roof_geometry.py`, where the shell and the collision share one answer. `00491` and `00492` are §12 and `layout.openings.json` -- a design choice and a data nudge with a window schedule, a golden id list and eight render poses behind them -- so they are recorded with their evidence rather than decided by the task that found them. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00784` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00779`: §4's wall rule built the wall an OPEN cell shares with a building over the CELL's extent, which is §10.3's +20.00 ceiling -- 1 053 m² of collision standing in open air over the sunroom, garage and shed roofs. | The fix belongs to `build_collision` rather than to the sky-exposure task that tripped over it: it is `HOUSE-00774`'s own rule -- two open things do not have a wall between them -- in the vertical, and every ray-casting and camera query in the project reads the same shapes. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00226` | **New task, next free id in phase 3's reserved 00181–00260 range.** Found by `HOUSE-00777`: `build_content.py` hashed each stage's input files and its command line as TEXT, so editing the generator the command names changed the hash of nothing and the whole world reported itself up to date. | The fix belongs to the content build rather than to the coverage task that tripped over it: every one of the eight world stages has the same hole, and the nav graph -- twenty minutes of it -- is the one that hurts, because it is built against `collision.bin` and would keep a version built by a tool that no longer exists. No id was renumbered or struck. |
