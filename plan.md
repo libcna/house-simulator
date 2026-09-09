@@ -10368,8 +10368,30 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             MISSED, **and it is not a bug**: a push starts from the same head a pop does, so a ring
             left mid-array behaves identically. The test's claim was corrected to say so rather
             than the code being changed to make a false claim true.
-- [ ] HOUSE-00696 — Write `docs/visibility.md`: the algorithm, its parameters, its guarantees, and how to debug it
+- [x] HOUSE-00696 — Write `docs/visibility.md`: the algorithm, its parameters, its guarantees, and how to debug it
       dep: HOUSE-00695 · sys: — · plat: ALL · pri: MUST
+      note: (2026-09-09) 210 lines in seven sections -- the five-step pipeline and the code that is
+            each step; the walk in detail, including the apertures and the outdoor join; **every
+            constant §25 has** with the header that owns it and why that number; what the system
+            guarantees; what it costs; how to debug it; and where the code is.
+      finding: **it is descriptive and says so in its first line.** `cna-house.md` §25 is the
+            design and this is what was built from it: where they differ §25 wins and the document
+            is the bug. A second normative account of the same system is a second thing to keep
+            true, and the one that gets read is not always the one that gets updated.
+      note: the debugging half is a symptom table -- *a room that should be visible is missing*
+            → which of §25.2's six reasons counted it; *and none of them did* → `CELLS DROPPED` or
+            `QUEUE DROPPED`, the two caps that cull something visible; *geometry missing inside a
+            room that IS visible* → step 3 and not step 2; *the garden flickers as the camera
+            turns* → the cone cap falling back to the camera frustum. A visibility bug is invisible
+            by construction, because its symptom is geometry that is not there, so what a person
+            needs under pressure is which counter to read first.
+      verified: 2 `VisibilityDocTests`, because **a table of numbers copied out of code goes
+            stale** and this project already checks its other copied tables that way
+            (`room_schedule`, `window_schedule`, `budget_report`). Eleven constants are compared
+            against the headers that own them, the row must name its header, and the files and
+            debug keys the document points at must exist. Two injections, both CAUGHT: the ring's
+            capacity changed to 192, and a cull distance to 400 m, each with the document left as
+            it was.
 - [ ] HOUSE-00697 — Phase-9 review and commit; record the visible-cell and draw-call numbers in the performance log
       dep: HOUSE-00661…HOUSE-00696 · sys: — · plat: ALL · pri: MUST
 - [x] HOUSE-00698 — Fix the optimised build: three `-Werror` failures that appear only at `-O3`
