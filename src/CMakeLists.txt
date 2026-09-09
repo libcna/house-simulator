@@ -67,6 +67,7 @@ add_library(cnahouse_core STATIC
     # visibility -- §25's portal walk. Reads the world, writes nothing in it.
     visibility/ChunkCulling.cpp
     visibility/ClipFrustum.cpp
+    visibility/CullDistance.cpp
     visibility/DetailSets.cpp
     visibility/ClipRect.cpp
     visibility/InstanceCulling.cpp

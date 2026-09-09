@@ -9520,8 +9520,31 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             instances, a chair behind the camera in the camera's OWN room (where the cell test
             cannot help), and instances in a cell that does not exist. Five injected bugs, five
             caught.
-- [ ] HOUSE-00674 — Implement distance culling per prop category
+- [x] HOUSE-00674 — Implement distance culling per prop category
       dep: HOUSE-00673 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) §25.6's eight numbers -- small props 45 m, garden furniture 70, fences
+            120, trees 180, neighbourhood LOD0 90, LOD1 160, LOD2 300, impostors 420 -- as
+            `visibility::PropCategory` and `CullDistanceFor`, with §68's view-distance setting
+            folded in and clamped to its own 0.6x-1.4x band.
+      note: **a category and not a number per instance.** `EXT_WORLD` holds about 4 100 instances
+            in ONE cell, where portal traversal cannot help at all (§25.6), so this test is what
+            stands between the frame and all of them. Eight categories are eight decisions to tune;
+            4 100 numbers would be 4 100 to author and get wrong, and the exterior data already
+            says what kind of thing each instance is.
+      note: the two ladders INTERLEAVE -- a tree at 180 m outlives a neighbourhood house at LOD1
+            (160 m) and not one at LOD2 (300 m) -- which is asserted, because it is the property a
+            later tidy-up that sorts the table would break.
+      finding: at §68's widest setting the impostor distance is 588 m and §10.3's far plane is 420.
+            Recorded rather than fixed: the two numbers meet exactly at 1.0x, which is §71.3's High
+            tier, and past the far plane the projection clips what this table would have kept.
+      note: the consumer is `HOUSE-00678`'s BVH traversal, where §25.6's step 1 and step 2 meet.
+            The table and its arithmetic are separable and are separated: the distances are a
+            decision about the design, and the hierarchy is a data structure.
+      verified: 6 `CullDistanceTests` -- the eight transcribed numbers, the interleaving, the
+            boundary (the stated distance is the last one at which a thing is drawn, §26.4's rule),
+            §68's multiplier and its clamp, all four quality tiers printed against §10.3's far
+            plane, and a category with no distance drawing nothing. Five injected bugs, five
+            caught.
 - [ ] HOUSE-00675 — Implement `RenderList`: the sorted draw list (pass → effect → material → chunk)
       dep: HOUSE-00674 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00676 — Wire `RenderList` into the opaque static pass, replacing the draw-everything path
