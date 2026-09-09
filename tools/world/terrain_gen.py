@@ -385,8 +385,8 @@ def tiles(directory: Path) -> list[dict]:
             primitives: dict[str, dict] = {}
 
             def add(name: str, corners: list[tuple]) -> None:
-                entry = primitives.setdefault(name, {"material": name, "vertices": [], "index": {},
-                                                     "indices": []})
+                entry = primitives.setdefault(name, {"material": f"TERRAIN_{name}", "ground": name,
+                                                     "vertices": [], "index": {}, "indices": []})
                 for corner in corners:
                     # Welded on the WHOLE vertex and not on the position: the skirt's top row
                     # stands exactly on the ground's edge and points sideways, so welding on
@@ -446,6 +446,7 @@ def tiles(directory: Path) -> list[dict]:
                 "column": column,
                 "row": row,
                 "primitives": [{"material": primitive["material"],
+                                "ground": primitive["ground"],
                                 "vertices": primitive["vertices"],
                                 "indices": primitive["indices"]} for primitive in ordered],
                 "bounds": (min(p[0] for p in points), min(p[1] for p in points),
@@ -455,7 +456,155 @@ def tiles(directory: Path) -> list[dict]:
     return out
 
 
-def _tile_document(tile: dict) -> tuple[dict, bytes]:
+#: §11.4's street, cut into segments so distance culling has something to cull (`HOUSE-00763`).
+#:
+#: Twenty metres, which is 22 segments over the 440 m the `road` row's centreline declares -- and
+#: chosen so that §10.3's playable edge at x = ±40 falls ON a segment boundary rather than inside
+#: one. The carriageway is drawn only outside the height field, and a rule about whole segments is
+#: easier to hold than one about parts of them.
+ROAD_SEGMENT_METRES = 20.0
+
+#: §11.4: *"drain grates at x = ±14"*, in the near gutter, 0.6 m by 0.4 m.
+GRATE_X = (-14.0, 14.0)
+GRATE_SIZE = (0.6, 0.4)
+
+#: §11.4's *"faded centre line"*: 0.10 m wide, and 3 mm over the asphalt so it cannot z-fight with
+#: the surface it is painted on.
+CENTRE_LINE_WIDTH = 0.10
+PAINT_LIFT = 0.003
+#: A grate is metal in the road surface, lifted by the same hair for the same reason.
+GRATE_LIFT = 0.005
+
+
+def _quad(material: str, corners: list[tuple[float, float, float]],
+          normal: tuple[float, float, float], uv_scale: float = 1.0) -> dict:
+    """One flat rectangle as a primitive-ready dict. @p corners run round it."""
+    vertices = [(corner, normal, (corner[0] * uv_scale, corner[2] * uv_scale), (0.0, 0.0))
+                for corner in corners]
+    return {"material": material, "ground": material.split("_", 1)[1],
+            "vertices": vertices, "indices": [0, 1, 2, 0, 2, 3]}
+
+
+def _strip(material: str, x0: float, x1: float, z0: float, z1: float, y: float) -> dict:
+    """A horizontal rectangle facing up, wound counter-clockwise from above (§14's front face)."""
+    return _quad(material,
+                 [(x0, y, z0), (x0, y, z1), (x1, y, z1), (x1, y, z0)],
+                 (0.0, 1.0, 0.0))
+
+
+def road_pieces(directory: Path) -> list[dict]:
+    """§11.4's road, kerbs, sidewalks, drain grates and centre line, in 40 m segments.
+
+    **The carriageway is drawn only where the height field is not.** Inside §10.3's playable area
+    the ground IS the road: `fields()` flattens the corridor to the `paths` rows' own heights and
+    paints it asphalt and concrete, so `HOUSE-00762`'s tiles already draw it. Drawing it again
+    would be two surfaces in one plane, which is exactly what `HOUSE-00485` spent a day removing.
+    Beyond the field there is no ground at all, and this is where the street comes from.
+    """
+    layout = layout_io.load_layout(directory)
+    exterior = layout.get("exterior") or {}
+    road = exterior.get("road") or {}
+    if not road.get("centreline") or not road.get("width"):
+        return []
+    centre_z = float(road["centreline"][0][2])
+    half = float(road["width"]) / 2.0
+    start = min(point[0] for point in road["centreline"])
+    end = max(point[0] for point in road["centreline"])
+    field_x0, field_x1 = ORIGIN_X, ORIGIN_X + (WIDTH - 1) * STEP
+
+    # The corridor as the LAYOUT declares it, outermost first, so a strip that is not authored is
+    # not invented: §11.4 calls the far side "mirrored" and the layout gives it a sidewalk and no
+    # verge, so neither does this.
+    strips = [(float(row["boxes"][0]["z"][0]), float(row["boxes"][0]["z"][1]),
+               float(row.get("y") or 0.0), BY_MATERIAL.get(row.get("material"), "grass"))
+              for row in exterior.get("paths", [])
+              if row.get("kind") in ("verge", "sidewalk")
+              and float(row["boxes"][0]["x"][0]) <= start + 1e-6]
+    strips.append((centre_z - half, centre_z + half, 0.0,
+                   BY_MATERIAL.get(road.get("material"), "asphalt")))
+    strips.sort()
+
+    out = []
+    segments = int(round((end - start) / ROAD_SEGMENT_METRES))
+    for index in range(segments):
+        x0 = start + index * ROAD_SEGMENT_METRES
+        x1 = x0 + ROAD_SEGMENT_METRES
+        pieces: list[dict] = []
+        # Outside the height field only, and CLIPPED rather than skipped: the boundary is a
+        # segment edge at this length, and a clip keeps that a property of the arithmetic rather
+        # than of the constant.
+        for span in ((x0, min(x1, field_x0)), (max(x0, field_x1), x1)):
+            if span[1] - span[0] <= 1e-6:
+                continue
+            for z0, z1, y, material in strips:
+                pieces.append(_strip(f"TERRAIN_{material}", span[0], span[1], z0, z1, y))
+
+        # The kerbs run the WHOLE length: inside the field the ground is flat asphalt and concrete
+        # with no upstand at all, which is what a kerb is.
+        for kerb in exterior.get("kerbs", []):
+            line = float(kerb["path"][0][2])
+            height = float(kerb.get("height") or 0.15)
+            inward = 1.0 if line < centre_z else -1.0
+            back = line - inward * height
+            # The road-facing face, and the top. The other two are buried in the sidewalk.
+            face = [(x0, 0.0, line), (x0, height, line), (x1, height, line), (x1, 0.0, line)]
+            if inward > 0.0:
+                # Wound so the face looks INTO the road, which for the near kerb is +Z and for the
+                # far one -Z. The claim below caught this the wrong way round on both of them.
+                face = list(reversed(face))
+            pieces.append(_quad("TERRAIN_concrete", face, (0.0, 0.0, inward)))
+            top = [(x0, height, min(line, back)), (x0, height, max(line, back)),
+                   (x1, height, max(line, back)), (x1, height, min(line, back))]
+            pieces.append(_quad("TERRAIN_concrete", top, (0.0, 1.0, 0.0)))
+
+        # §11.4's faded centre line, and its drain grates.
+        pieces.append(_strip("ROAD_paint", x0, x1,
+                             centre_z - CENTRE_LINE_WIDTH / 2.0, centre_z + CENTRE_LINE_WIDTH / 2.0,
+                             PAINT_LIFT))
+        for grate in GRATE_X:
+            if not (x0 - 1e-6 <= grate < x1 - 1e-6):
+                continue
+            gutter = min(float(kerb["path"][0][2]) for kerb in exterior.get("kerbs", [])
+                         if float(kerb["path"][0][2]) < centre_z) if exterior.get("kerbs") \
+                else centre_z - half
+            pieces.append(_strip("ROAD_grate",
+                                 grate - GRATE_SIZE[0] / 2.0, grate + GRATE_SIZE[0] / 2.0,
+                                 gutter, gutter + GRATE_SIZE[1], GRATE_LIFT))
+
+        merged: dict[str, dict] = {}
+        for piece in pieces:
+            entry = merged.setdefault(piece["material"],
+                                      {"material": piece["material"], "ground": piece["ground"],
+                                       "vertices": [], "indices": []})
+            base = len(entry["vertices"])
+            entry["vertices"].extend(piece["vertices"])
+            entry["indices"].extend(base + i for i in piece["indices"])
+        ordered = [merged[name] for name in sorted(merged)]
+        points = [vertex[0] for primitive in ordered for vertex in primitive["vertices"]]
+        out.append({
+            "id": f"ROAD_S{index:02d}",
+            "primitives": ordered,
+            "bounds": (min(p[0] for p in points), min(p[1] for p in points),
+                       min(p[2] for p in points), max(p[0] for p in points),
+                       max(p[1] for p in points), max(p[2] for p in points)),
+        })
+    return out
+
+
+def emit_road(directory: Path, output: Path) -> dict:
+    """Writes one `.glb` per road segment into @p output. Returns a report."""
+    output.mkdir(parents=True, exist_ok=True)
+    written = []
+    triangles = 0
+    for piece in road_pieces(directory):
+        document, blob = _tile_document(piece, receiver=False)
+        gltf_io.write_glb(output / f"{piece['id']}.glb", document, blob)
+        written.append(piece["id"])
+        triangles += sum(len(primitive["indices"]) // 3 for primitive in piece["primitives"])
+    return {"written": written, "triangles": triangles}
+
+
+def _tile_document(tile: dict, receiver: bool = True) -> tuple[dict, bytes]:
     """One tile as a glTF document and its buffer, in `read_shell_geometry`'s own shape.
 
     One primitive per material, each with a NAMED material whose `extras` carry the surface class
@@ -496,13 +645,16 @@ def _tile_document(tile: dict) -> tuple[dict, bytes]:
         accessors.append({"bufferView": len(views) - 1, "componentType": 5123,
                           "count": len(primitive["indices"]), "type": "SCALAR"})
         materials.append({
-            "name": f"TERRAIN_{primitive['material']}",
+            "name": primitive["material"],
             "extras": {
-                "surfaceClass": "terrain",
+                "surfaceClass": "terrain" if receiver else "road",
                 # §11.5's ground is lit by §22's baked sun shading over the same second UV
-                # channel a room's lightmap uses, which is why the tiles carry one at all.
-                "lightmapReceiver": True,
-                "groundMaterial": primitive["material"],
+                # channel a room's lightmap uses, which is why the tiles carry one at all. The
+                # STREET beyond the lot is not a receiver: it would need an atlas of its own for
+                # 440 m of asphalt, and the seam between the two falls on the property line where
+                # §11.2's fence stands (`HOUSE-00763`).
+                "lightmapReceiver": receiver,
+                "groundMaterial": primitive.get("ground", primitive["material"]),
             },
         })
         primitives.append({"attributes": {"POSITION": position, "NORMAL": normal,
@@ -823,8 +975,7 @@ def selftest() -> int:
         # Every square's material comes from the index image, so the ground and the footsteps
         # cannot disagree about what a person is standing on.
         _w, _h, _heights, index = decode(SOURCE)
-        present = {name for tile in rows for primitive in tile["primitives"]
-                   for name in [primitive["material"]]}
+        present = {primitive["ground"] for tile in rows for primitive in tile["primitives"]}
         require(present == {MATERIALS[value] for value in set(index)},
                 f"and the materials the tiles carry are exactly the ones the index image uses "
                 f"({sorted(present)})")
@@ -832,6 +983,104 @@ def selftest() -> int:
         first = _tile_document(rows[0])
         again = _tile_document(tiles(SOURCE)[0])
         require(first == again, "a tile renders the same bytes twice")
+
+        # 8. `HOUSE-00763`'s street.
+        street = road_pieces(SOURCE)
+        exterior = layout_io.load_layout(SOURCE)["exterior"]
+        centre_z = float(exterior["road"]["centreline"][0][2])
+        half = float(exterior["road"]["width"]) / 2.0
+        length = (max(p[0] for p in exterior["road"]["centreline"])
+                  - min(p[0] for p in exterior["road"]["centreline"]))
+        require(len(street) == round(length / ROAD_SEGMENT_METRES) == 22,
+                f"§11.4's street is {len(street)} segments of {ROAD_SEGMENT_METRES:.0f} m over its "
+                f"own {length:.0f} m centreline")
+        spans = sorted((piece["bounds"][0], piece["bounds"][3]) for piece in street)
+        require(all(abs(spans[i][1] - spans[i + 1][0]) < 1e-6 for i in range(len(spans) - 1))
+                and abs(spans[0][0] + 220.0) < 1e-6 and abs(spans[-1][1] - 220.0) < 1e-6,
+                "and they meet end to end from one end of it to the other, with no gap and no "
+                "overlap")
+
+        # The carriageway is the height field's inside §10.3's playable area and the street's
+        # outside it, and never both -- which is what stops `HOUSE-00485`'s two-surfaces-one-plane
+        # from coming back on the road.
+        field_x0, field_x1 = ORIGIN_X, ORIGIN_X + (WIDTH - 1) * STEP
+        asphalt = [(vertex[0][0], piece["id"]) for piece in street
+                   for primitive in piece["primitives"] if primitive["material"] == "TERRAIN_asphalt"
+                   for vertex in primitive["vertices"]]
+        require(asphalt and all(x <= field_x0 + 1e-6 or x >= field_x1 - 1e-6 for x, _ in asphalt),
+                f"the street draws carriageway only OUTSIDE the height field ({len(asphalt)} "
+                f"vertices, none between {field_x0:.0f} and {field_x1:.0f})")
+        _w, _h, _heights, index = decode(SOURCE)
+        require(MATERIALS.index("asphalt") in set(index),
+                "and the field paints the rest of it, which is why the street must not")
+
+        # Both kerbs, over the whole length, at the height the layout gives them.
+        for kerb in exterior["kerbs"]:
+            line = float(kerb["path"][0][2])
+            height = float(kerb["height"])
+            tops = [vertex[0] for piece in street for primitive in piece["primitives"]
+                    for vertex in primitive["vertices"]
+                    if abs(vertex[0][1] - height) < 1e-6
+                    and min(abs(vertex[0][2] - line), abs(vertex[0][2] - (line + height)),
+                            abs(vertex[0][2] - (line - height))) < 1e-6]
+            covered = sorted({round(point[0], 3) for point in tops})
+            require(len(covered) >= 2 and abs(covered[0] + 220.0) < 1e-6
+                    and abs(covered[-1] - 220.0) < 1e-6,
+                    f"{kerb['id']} stands {height:.2f} m over the road along the whole street "
+                    f"({len(tops)} vertices from x={covered[0] if covered else 0:.0f} to "
+                    f"{covered[-1] if covered else 0:.0f})")
+
+        grates = [primitive for piece in street for primitive in piece["primitives"]
+                  if primitive["material"] == "ROAD_grate"]
+        centres = sorted(round(sum(v[0][0] for v in primitive["vertices"]) / len(primitive["vertices"]), 3)
+                         for primitive in grates)
+        require(centres == sorted(GRATE_X),
+                f"§11.4's two drain grates are at x = {centres}, in the near gutter")
+        require(all(v[0][1] > 0.0 for primitive in grates for v in primitive["vertices"]),
+                "and they sit ON the road surface rather than in it")
+
+        paint = [primitive for piece in street for primitive in piece["primitives"]
+                 if primitive["material"] == "ROAD_paint"]
+        widths = {round(max(v[0][2] for v in primitive["vertices"])
+                        - min(v[0][2] for v in primitive["vertices"]), 4) for primitive in paint}
+        require(len(paint) == len(street) and widths == {CENTRE_LINE_WIDTH}
+                and all(abs((max(v[0][2] for v in primitive["vertices"])
+                             + min(v[0][2] for v in primitive["vertices"])) / 2.0 - centre_z) < 1e-6
+                        for primitive in paint),
+                f"and the faded centre line runs the whole street, {CENTRE_LINE_WIDTH * 100:.0f} cm "
+                f"wide on the centreline at z = {centre_z:.1f}")
+        require(all(v[0][1] >= PAINT_LIFT - 1e-9 for primitive in paint for v in primitive["vertices"]),
+                f"lifted {PAINT_LIFT * 1000:.0f} mm over the asphalt, so the paint and the road it "
+                f"is painted on cannot z-fight")
+
+        wrong = []
+        for piece in street:
+            for primitive in piece["primitives"]:
+                for i in range(0, len(primitive["indices"]), 3):
+                    corners = [primitive["vertices"][primitive["indices"][i + k]] for k in range(3)]
+                    a, b, c = (corner[0] for corner in corners)
+                    u = tuple(b[k] - a[k] for k in range(3))
+                    v = tuple(c[k] - a[k] for k in range(3))
+                    normal = (u[1] * v[2] - u[2] * v[1],
+                              u[2] * v[0] - u[0] * v[2],
+                              u[0] * v[1] - u[1] * v[0])
+                    if sum(normal[k] * corners[0][1][k] for k in range(3)) <= 1e-9:
+                        wrong.append((piece["id"], primitive["material"]))
+        require(not wrong,
+                f"every face of the street is wound the way its own normal says ({wrong[:3]})")
+        require(all(all(piece["bounds"][k] - 1e-6 <= v[0][k] <= piece["bounds"][k + 3] + 1e-6
+                        for k in range(3))
+                    for piece in street for primitive in piece["primitives"]
+                    for v in primitive["vertices"]),
+                "and every segment's BoundingBox holds every vertex it has")
+        require(_tile_document(street[0], receiver=False)
+                == _tile_document(road_pieces(SOURCE)[0], receiver=False),
+                "a road segment renders the same bytes twice")
+        require(all(primitive["material"] != "TERRAIN_grass"
+                    or any(abs(v[0][2] - 13.4) < 1e-6 for v in primitive["vertices"]) is False
+                    for piece in street for primitive in piece["primitives"]),
+                "and the far verge §11.4 calls 'mirrored' is NOT invented: the layout gives that "
+                "side a sidewalk and no verge row, so neither does this")
 
     if failures:
         print(f"\nterrain_gen: {len(failures)} claim(s) FAILED")
@@ -848,22 +1097,30 @@ def main() -> int:
     parser.add_argument("--selftest", action="store_true")
     parser.add_argument("--tiles", action="store_true",
                         help="write §11.5's terrain tiles as one .glb each (HOUSE-00762)")
+    parser.add_argument("--road", action="store_true",
+                        help="write §11.4's road, kerbs, sidewalks, grates and markings "
+                             "(HOUSE-00763)")
     parser.add_argument("--output", type=Path, default=TILES,
                         help="where --tiles writes; a build product, never committed")
     args = parser.parse_args()
 
     if args.selftest:
         return selftest()
-    if args.tiles:
+    if args.tiles or args.road:
         if not (args.directory / "terrain.png").is_file():
             print(f"terrain_gen: no height field in {args.directory}; run this without --tiles "
                   f"first.", file=sys.stderr)
             return 1
-        report = emit_tiles(args.directory, args.output)
-        columns, rows = tile_grid()
-        print(f"terrain_gen: {len(report['written'])} tile(s) ({columns} x {rows} of "
-              f"{TILE_METRES:.0f} m), {report['triangles']} triangles -> "
-              f"{args.output.relative_to(REPO) if args.output.is_relative_to(REPO) else args.output}")
+        where = args.output.relative_to(REPO) if args.output.is_relative_to(REPO) else args.output
+        if args.tiles:
+            report = emit_tiles(args.directory, args.output)
+            columns, rows = tile_grid()
+            print(f"terrain_gen: {len(report['written'])} tile(s) ({columns} x {rows} of "
+                  f"{TILE_METRES:.0f} m), {report['triangles']} triangles -> {where}")
+        if args.road:
+            report = emit_road(args.directory, args.output)
+            print(f"terrain_gen: {len(report['written'])} road segment(s) of "
+                  f"{ROAD_SEGMENT_METRES:.0f} m, {report['triangles']} triangles -> {where}")
         return 0
     if not (args.directory / "layout.exterior.json").is_file():
         print(f"terrain_gen: no exterior in {args.directory} yet -- nothing to generate.")

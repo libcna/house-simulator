@@ -10640,8 +10640,37 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             ground triangles facing up, all 2 560 skirt faces facing out, the skirt depth, the
             bounds holding every vertex, the atlas and its gutters, the materials matching the
             index image, and a tile that renders the same bytes twice.
-- [ ] HOUSE-00763 — Generate the road, kerbs, sidewalks, drain grates and the road markings
+- [x] HOUSE-00763 — Generate the road, kerbs, sidewalks, drain grates and the road markings
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
+      measured: (2026-09-09) `terrain_gen.py --road`: §11.4's street as **22 segments of 20 m**
+            over the 440 m its own `road` row declares, **368 triangles** -- the carriageway,
+            both sidewalks, the near verge, both kerbs, two drain grates and the centre line.
+      finding: **the carriageway is drawn only OUTSIDE the height field, because inside it the
+            ground IS the road.** `fields()` flattens the corridor to the `paths` rows' own
+            heights and paints it asphalt and concrete, so `HOUSE-00762`'s tiles already draw it:
+            the field reads y = 0.000 asphalt at z = 6.7 and y = 0.020 concrete on the sidewalk.
+            Drawing it again would be two surfaces in one plane -- exactly what `HOUSE-00485`
+            spent a day removing -- so the street stops at x = ±40 and the segment length is 20 m
+            precisely so that §10.3's edge falls ON a segment boundary.
+      finding: **both kerbs were wound inside out, and the claim caught it.** A kerb's road face
+            looks +Z on the near side and −Z on the far one; the first version reversed exactly the
+            wrong one of the two. The test is that every face is wound the way its OWN normal says,
+            which is checkable without knowing which kerb is which.
+      finding: **§11.4 calls the far side "mirrored" and the layout does not author it.** There is
+            `PATH_SIDEWALK_FAR` and no far verge row, so the generator draws a far sidewalk and no
+            far verge rather than inventing a strip the data does not declare. Recorded here
+            because the strip at z = 11.8…13.4 is real ground in §11.4's table and belongs to
+            whoever authors the neighbours' side (`HOUSE-00841`).
+      note: the street is **not** a lightmap receiver and the tiles are: 440 m of asphalt would
+            need an atlas of its own, and the seam between baked and unbaked falls on the property
+            line where §11.2's fence stands.
+      verified: 13 more `terrain_gen --selftest` claims -- the segment count against the
+            centreline's own length, segments meeting end to end from -220 to +220, no carriageway
+            inside the field (72 vertices, none between -40 and +40) while the field paints the
+            rest, each kerb standing 0.15 m over the road along the whole street, the two grates at
+            x = ±14 sitting ON the surface, the centre line 10 cm wide on the centreline lifted
+            3 mm, every face wound the way its normal says, the bounds, determinism, and the far
+            verge deliberately absent.
 - [ ] HOUSE-00764 — Generate the driveway, the apron and the connecting path
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00765 — Generate the front walk, the terrace paving and the garden paths
