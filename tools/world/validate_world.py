@@ -2052,7 +2052,10 @@ def rule_12_outdoors(world: World) -> list[Problem]:
     Three conditions, each one of a defect that actually happened:
 
     * no two `structures` footprints overlap -- a bed inside a bed, or inside the shed;
-    * no `paths` box overlaps a structure -- a path through a building;
+    * no `paths` box overlaps a **building** -- a structure with a cell -- because a path that
+      goes through one reaches nothing. Not every structure: §10.4's low stone wall at the end of
+      the road stands ON the verge and across the sidewalk, which is what a barrier does, and
+      §11.4's `verge` rows are ground cover rather than anywhere to walk (`HOUSE-00775`);
     * no `vegetation` instance stands inside a structure -- a shrub in the shed.
 
     Structures may TOUCH: a lean-to against a shed wall is a real thing, and so is a path that
@@ -2099,7 +2102,7 @@ def rule_12_outdoors(world: World) -> list[Problem]:
             except (KeyError, IndexError, TypeError, ValueError):
                 continue
             for row, structure_box in placed:
-                if structure_box is None:
+                if structure_box is None or not row.get("cell"):
                     continue
                 depth = over(box, structure_box)
                 if depth > EPS_OVERLAP:

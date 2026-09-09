@@ -11104,9 +11104,47 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             §49.5's twenty minutes then walk the property: **1 516 m, deepest contact 0.000091 m,
             0 boundary escapes**, 4 904 step-ups where there were 596 -- the bot spends its time
             outdoors now, because for the first time it can.
-- [ ] HOUSE-00775 — Implement the road-end barriers: hedge, stone wall, parked van, street trees, and the sign
+- [x] HOUSE-00775 — Implement the road-end barriers: hedge, stone wall, parked van, street trees, and the sign
       dep: HOUSE-00763 · sys: world · plat: TOOL · pri: MUST
       accept: the player is stopped by visible objects at x = ±35, never by an invisible wall
+      verify: unit RoadEndTests.TheRoadEndsInSomethingYouCanSee;
+              `tools/world/build_collision.py --selftest`
+      measured: (2026-09-09) three walks down the road with the real `PlayerStep`, from our own
+            gate: **east stops at +34.70, west at -34.20, across at +11.20, and §10.3's box is
+            never touched** -- 0 escapes in all three. What stops them is a privet hedge across
+            the whole corridor at each end (§10.4's "hedge-lined corner"), the low stone wall in
+            front of the west one, and the far hedge; the delivery van, the sign and the street
+            trees stand in front of them, which is what §10.4 says you see.
+      finding: **§10.4's second layer stood outside the world it was bounding.** The far hedge was
+            authored at z +13.70 -- §11.4's row -- and §11.5's height field stops at +12.0 while
+            §10.3's playable volume stops at +12.0 with it. So the hedge was beyond the ground,
+            beyond the box, and could not stop anybody: a body walking north across the road was
+            clamped by the SAFETY NET at +12.0, which is the one thing §10.4 says must never
+            happen. It is a 0.5 m strip at +11.5…+12.0 now, its near face exactly on §10.3's own
+            "road corridor (accessible) 0.0 … +11.5", and §11.4's row says so.
+      finding: **a model's length runs along its own -Z, and the collision was building cars
+            across the road.** §14 puts forward at -Z and yaws about +Y, which is why the two
+            cars at this east-west kerb are authored at 90 and 270 degrees; `CAR_SIZE` was written
+            `(along, tall, across)` and turned them broadside. The walk east stopped **24 m early
+            against a parked car's flank**, in the middle of the carriageway. Sizes are written
+            `(across, tall, along)` now, and §10.4's van is 5.4 x 2.1 x 2.4.
+      finding: **what stands beyond the named cells belongs to `EXT_WORLD`.** §10.4's barriers are
+            at x = ±35 and the property's own cells stop at ±22.5, so `build_exterior` was
+            dropping every one of them for want of an owner. A shape no named cell reaches now
+            goes to `EXT_WORLD` -- which is what §16.4 answers for a body standing there -- if it
+            is over §11.5's height field, and that field IS §10.3's playable volume, so a kerb
+            180 m down the road is still scenery rather than collision.
+      note: rule 12's path check now applies to a structure with a CELL -- a building. §10.4's
+            stone wall stands on the verge and across the sidewalk, which is what a barrier does,
+            and §11.4's `verge` rows are ground cover rather than anywhere to walk. The rule's
+            other two halves are unchanged and its fixture mutation still fires.
+      verified: 6 injections CAUGHT -- hedges not collision at all, the west end's hedge missing,
+            a hedge only as tall as a kerb, a vehicle parked across the road, nothing outside the
+            named cells collided, and (checked by hand, because it is a hundred authored rows
+            rather than one line) **the far hedge back at +13.70: the walk across the road is
+            clamped by §10.3's box at +12.00, 1 escape**. Plus a claim that walks all three open
+            sides of the corridor at half-metre intervals and finds no gap a 0.62 m body fits
+            through.
 - [ ] HOUSE-00776 — Place the four downspouts, the gutters and their splash points (used by the rain audio)
       dep: HOUSE-00468 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00777 — Build the coverage height field (`build_coverage.py`) from the house, garage, porch, balconies, sunroom and shed
@@ -13284,6 +13322,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00568` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00618`: static collision is partitioned per cell and the sweep is given one cell, so a body standing in a doorway -- which §16.4's lookup keeps in the room it came from until it is 0.05 m past the boundary -- met nothing that stood 0.20 m on the other side of it. Measured: 0.151 m inside the main stair's first run, from `L0_FOYER`, before anything stopped it. | A wall is shared by both rooms and that is what makes the per-cell partition safe; a hole is not a wall, and `HOUSE-00567` had already fixed the same defect once for the outer walls the yards could not see. This generalises it to every hole, so it is its own task in the phase that owns collision rather than a correction folded into the exterior one that exposed it. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
+| 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00569` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00774`: `SweepCapsuleTriangle` extrudes a triangle by the capsule's half-height, a SPHERE's half-height is zero, and the flat prism that leaves is the shape `prism.solid` exists to refuse -- so everything over a triangle was inside it, decided by whether a mathematically-zero dot product came out a hair positive. | `HOUSE-00615` fixed the same defect for a vertical triangle and the height was the second way to have no volume. It is its own task rather than a line in `HOUSE-00774` because it is not about the exterior at all: §45's camera arm sweeps a sphere, every probe in the test suite is one, and the bug was in the sweep both of them share. No id was renumbered or struck. |
 | 2026-09-09 | `collision.bin` v2 → **v3** | A `u8` per cell: **is §11.5's ground part of this cell's collision?** (`HOUSE-00774`) | The height field is one surface over the whole lot and the house stands on it, so it runs through the basement and 0.1 m under `L0`'s floor. Giving §49.3's step 5 the ground -- which the outdoors needs, because a body that walked off the terrace's edge landed inside the slope and stayed there -- pushed a body on the basement stair out of the lawn above it instead. Nothing else in the file can tell the two apart: `EXT_SHED` is an `exterior` cell that is a building, and §15's yards are cells like any other. `docs/collision-format.md` §3.4 is normative. No id was renumbered or struck. |
 | 2026-09-09 | §15.7 | A **twelfth rule**: *"nothing outdoors stands in something else"* -- no two `structures` footprints overlap, no `paths` box runs into one, no `vegetation` instance is inside one (`HOUSE-00769`) | §15.7's rules 2 and 3 make exactly this statement about the house's cells and nothing made it about the LOT, which has three kinds of rectangle that can be authored on top of each other. Two of them were: the garden path ran three metres through the shed and reached no door, and three of §11.1's six raised beds were vegetation instances inside the shed's walls. Both were invisible to every other rule -- a path and a shed pad are both gravel at the same height, and an instance is a point with no size for anything to overlap. The rule found two more the day it was written. `docs/world-format.md` and `WorldValidator.hpp` say the same twelve; the C++ mirror does not carry the exterior file, so this one is the Python gate's alone, and its header now says so. No id was renumbered or struck. |

@@ -821,7 +821,11 @@ The player is contained by real objects, in this priority order:
    the neighbours' front fences and a continuous 2.1 m privet hedge.
 3. **Road termination** — the accessible road ends at `x = ±35` where it bends behind
    dense street trees and a parked delivery van (east) / a hedge-lined corner and a low stone wall
-   with a "PRIVATE ROAD" sign (west). The road *geometry* continues visually far beyond.
+   with a "PRIVATE ROAD" sign (west). The road *geometry* continues visually far beyond. Built by
+   `HOUSE-00775`: the barrier itself is a privet hedge across the whole corridor at each end --
+   the corner the road bends behind -- and the wall, the sign, the van and the trees stand in
+   front of it. A body walking the road is stopped at ±34.7 and at +11.2, all three of them by
+   something drawn.
 4. **Terrain** — the ground beyond the accessible area rises gently and is planted, so there is no
    visible edge.
 5. **A final invisible boundary** at the playable-volume box, 6 m beyond every believable barrier,
@@ -890,7 +894,7 @@ driveway to the front walk at `z = −6.0` so the player never has to cross gras
 | Kerb | +3.2 | 0.15 m |
 | Carriageway | +3.2 … +10.2 | 7.0 m asphalt, two lanes, a faded centre line, drain grates at `x = ±14` |
 | Kerb, sidewalk, verge (far side) | +10.2 … +13.4 | mirrored |
-| Neighbours' fences / hedge (far side) | +13.4 … +14.0 | continuous barrier |
+| Neighbours' fences / hedge (far side) | +11.5 … +12.0 | continuous barrier, at §10.3's own edge of the accessible corridor (corrected 2026-09-09 by `HOUSE-00775`: at +13.4 it stood beyond §11.5's ground and outside §10.3's playable volume, so it could never stop anybody) |
 
 Neighbourhood composition (all non-enterable):
 

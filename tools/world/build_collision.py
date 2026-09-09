@@ -1018,10 +1018,20 @@ TRUNKS = {
     "MODEL_TREE_BIRCH": (0.30, 3.0),
     "MODEL_TREE_FRUIT": (0.25, 2.2),
 }
-#: §70.5's car, which §49.2 lists: 4.4 m long, 1.80 m across and 1.50 m tall.
-CAR_SIZE = (4.4, 1.5, 1.8)
-#: The asset that is one.
-CAR_ASSET = "MODEL_PARKED_CAR"
+#: §10.4's hedges, which bound the road corridor: `(depth, height)`. 2.1 m is §10.4's own figure
+#: and 0.5 m is what an extruded 1 m strip is thick. A hedge is not a tree -- it is a barrier, and
+#: `HOUSE-00775` is where the road's ends became ones.
+HEDGES = {"MODEL_HEDGE_PRIVET_1M": (0.5, 2.1)}
+#: §70.5's car, which §49.2 lists: 4.4 m long, 1.80 m across and 1.50 m tall, and written the way
+#: the MODEL is -- `(across, tall, along)`. §14 puts a model's forward at -Z and yaws it about +Y,
+#: so a car's length runs along its own Z and the two cars parked at this east-west kerb are
+#: authored at 90 and 270 degrees. Writing the length along X instead parked them ACROSS the road,
+#: and `HOUSE-00775`'s walk to the end of it stopped 24 m early against a car's flank.
+CAR_SIZE = (1.8, 1.5, 4.4)
+#: The assets that are ones. §10.4's delivery van at the east end of the road is the second.
+CAR_ASSETS = ("MODEL_PARKED_CAR", "MODEL_DELIVERY_VAN")
+#: §10.4's van, which is bigger than a car: 5.4 m long, 2.10 m across and 2.40 m tall.
+VAN_SIZE = (2.1, 2.4, 5.4)
 
 
 def open_air(cell: dict) -> bool:
@@ -1049,13 +1059,21 @@ def _exterior_cells(layout) -> list[tuple[str, list]]:
     return out
 
 
-def _outdoor_owners(aabb, cells: list[tuple[str, list]]) -> list[str]:
+def _outdoor_owners(aabb, cells: list[tuple[str, list]], on_the_ground: bool = False) -> list[str]:
     """Which open cells a shape belongs to: every one a body standing in it could reach it from.
 
     The same `OPENING_REACH` the holes use, and for the same reason. Two yards abut with no wall
     and no portal between them, so §16.4 hands the body from one to the other in the middle of an
     open lawn; a fence post on the boundary has to be in both lists or the body meets it in one
     yard and walks through it in the other.
+
+    A shape no named cell reaches belongs to `EXT_WORLD` when it stands on the GROUND
+    (`HOUSE-00775`). §10.4's road termination is at x = ±35 and the property's cells stop at
+    ±22.5, so the barriers that end the road are outside every one of them -- and §16.4 answers
+    `EXT_WORLD` for a body standing there, which is the cell whose list they have to be in. The
+    ground is the limit because §11.5's height field IS §10.3's playable volume: 80 x 64 m, x
+    ±40 by z -52…+12. A kerb 180 m down the road is on no ground and behind the boundary that
+    stops the player at 40, so it is scenery and not collision.
     """
     out = []
     for cell_id, boxes in cells:
@@ -1064,6 +1082,8 @@ def _outdoor_owners(aabb, cells: list[tuple[str, list]]) -> list[str]:
                     and aabb[2] < z1 + OPENING_REACH and aabb[5] > z0 - OPENING_REACH):
                 out.append(cell_id)
                 break
+    if not out and on_the_ground:
+        out.append("EXT_WORLD")
     return out
 
 
@@ -1100,6 +1120,13 @@ def build_exterior(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats
                  terrain_gen.HEIGHT - 1)
         return heights[iz * terrain_gen.WIDTH + ix]
 
+    def on_the_lot(aabb) -> bool:
+        """Is any of this shape over §11.5's height field, which is §10.3's playable volume?"""
+        return (aabb[0] < terrain_gen.ORIGIN_X + (terrain_gen.WIDTH - 1) * terrain_gen.STEP
+                and aabb[3] > terrain_gen.ORIGIN_X
+                and aabb[2] < terrain_gen.ORIGIN_Z + (terrain_gen.HEIGHT - 1) * terrain_gen.STEP
+                and aabb[5] > terrain_gen.ORIGIN_Z)
+
     def place(centre, half, yaw: float, surface: str, kind: int, counter: str) -> None:
         """One OBB, in every open cell that can reach it -- and NOT in the pool if none can.
 
@@ -1107,7 +1134,8 @@ def build_exterior(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats
         cells cover 45 m of that. A shape nothing references is a shape in the file for no reason,
         so the reach test comes first and the pool is only asked for what survives it.
         """
-        owners = _outdoor_owners(obb_aabb((centre, half, yaw, 0, kind)), cells)
+        aabb = obb_aabb((centre, half, yaw, 0, kind))
+        owners = _outdoor_owners(aabb, cells, on_the_ground=on_the_lot(aabb))
         if not owners:
             return
         index = shapes.obb(centre, half, yaw, surface, kind)
@@ -1210,17 +1238,35 @@ def build_exterior(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats
                   (width * scale / 2.0, height * scale / 2.0, width * scale / 2.0),
                   0.0, "bark", KIND_EXTERIOR, "trunks")
 
+    # §10.4's hedges: the second of its five containment layers, and the one that ends the road.
+    # A hedge is authored as an extruded strip -- one 1 m section per instance -- so the sections
+    # meet and the barrier is continuous, which is what makes it a barrier and not a row of bushes.
+    for group in exterior.get("vegetation", []):
+        size = HEDGES.get(group.get("asset"))
+        if size is None:
+            continue
+        depth, height = size
+        for instance in group.get("instances", []):
+            position = instance.get("position") or [0.0, 0.0, 0.0]
+            x, z = float(position[0]), float(position[2])
+            yaw = math.radians(float(instance.get("yawDeg") or 0.0))
+            base = ground(x, z)
+            # The strip runs along its own local X, so a section turned 90 degrees runs along Z.
+            place((x, base + height / 2.0, z), (0.5, height / 2.0, depth / 2.0), yaw,
+                  "hedge", KIND_EXTERIOR, "hedges")
+
     # §11.4's parked cars, which are §49.2's "vehicles". They carry a yaw, and an OBB is the one
     # shape in this file that can.
     for row in exterior.get("neighbourhood", []):
-        if row.get("asset") != CAR_ASSET:
+        if row.get("asset") not in CAR_ASSETS:
             continue
+        size = VAN_SIZE if row.get("asset") == "MODEL_DELIVERY_VAN" else CAR_SIZE
         position = row.get("position") or [0.0, 0.0, 0.0]
         x, z = float(position[0]), float(position[2])
         yaw = math.radians(float(row.get("yawDeg") or 0.0))
         base = ground(x, z)
-        place((x, base + CAR_SIZE[1] / 2.0, z),
-              (CAR_SIZE[0] / 2.0, CAR_SIZE[1] / 2.0, CAR_SIZE[2] / 2.0),
+        place((x, base + size[1] / 2.0, z),
+              (size[0] / 2.0, size[1] / 2.0, size[2] / 2.0),
               yaw, "vehicle", KIND_EXTERIOR, "vehicles")
 
 
@@ -1615,7 +1661,7 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     stats = {"wallPieces": 0, "floorPieces": 0, "ceilingPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
              "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0, "guards": 0, "stairGuards": 0, "outerShared": 0,
              "openingShared": 0, "openBoundaries": 0, "fencePieces": 0, "kerbPieces": 0,
-             "structureObbs": 0, "trunks": 0, "vehicles": 0,
+             "structureObbs": 0, "trunks": 0, "vehicles": 0, "hedges": 0,
              "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
     shapes = Shapes()
     per_cell = build_shell(layout, shapes, stats)
@@ -1918,9 +1964,9 @@ def report(world: dict) -> str:
         f"  openings: {stats['openingShared']} shape(s) shared across a hole, each carried "
         f"{OPENING_REACH:.2f} m past the plane -- a body in a doorway is in both rooms",
         f"  outdoors: {stats['fencePieces']} fence piece(s), {stats['kerbPieces']} kerb, "
-        f"{stats['structureObbs']} garden structure(s), {stats['trunks']} tree trunk(s) and "
-        f"{stats['vehicles']} vehicle(s); {stats['openBoundaries']} boundary between two open "
-        f"yards left as grass",
+        f"{stats['structureObbs']} garden structure(s), {stats['trunks']} tree trunk(s), "
+        f"{stats['hedges']} hedge section(s) and {stats['vehicles']} vehicle(s); "
+        f"{stats['openBoundaries']} boundary between two open yards left as grass",
     ]
     terrain = world.get("terrain")
     if terrain:
@@ -2686,6 +2732,41 @@ def selftest() -> int:
                     f"§11.4's parked cars are OBBs with the yaw the layout gives them "
                     f"({len(cars)} of them, yaws "
                     f"{sorted(round(math.degrees(record[2])) for record in cars)})")
+
+            # §10.4's road termination: the accessible corridor's three open sides -- x = ±35 and
+            # the far side -- each have a continuous barrier across them, with no gap a 0.62 m
+            # body could walk through. The near side is the property's own fence, above.
+            solid = [house_shapes.obbs[index] for index in range(len(house_shapes.obbs))
+                     if house_shapes.obbs[index][4] == KIND_EXTERIOR
+                     and house_shapes.surfaces[house_shapes.obbs[index][3]] in
+                     ("hedge", "vehicle", "structure", "bark")]
+
+            def covered(x: float, z: float) -> bool:
+                """Is there something solid within a body's radius of this point?"""
+                for record in solid:
+                    (cx, cy, cz), (hx, hy, hz), yaw, _surface, _kind = record
+                    if cy + hy < 0.5:
+                        continue          # a kerb or a bed: a body walks over it
+                    cos, sin = abs(math.cos(yaw)), abs(math.sin(yaw))
+                    ex, ez = hx * cos + hz * sin, hx * sin + hz * cos
+                    if (abs(cx - x) <= ex + BODY_RADIUS and abs(cz - z) <= ez + BODY_RADIUS):
+                        return True
+                return False
+
+            gaps = []
+            for side, fixed in (("x", -35.0), ("x", 35.0), ("z", 11.75)):
+                span = (0.5, 11.5) if side == "x" else (-34.5, 34.5)
+                probe = span[0]
+                while probe <= span[1]:
+                    x, z = (fixed, probe) if side == "x" else (probe, fixed)
+                    if not covered(x, z):
+                        gaps.append((side, round(fixed, 2), round(probe, 2)))
+                    probe += 0.5
+            require(not gaps,
+                    f"§10.4's road termination is continuous on all three open sides of the "
+                    f"corridor ({len(gaps)} gap(s): {gaps[:3]})")
+            require(house["stats"]["hedges"] > 90,
+                    f"and most of it is §10.4's hedge ({house['stats']['hedges']} sections)")
 
             kerbs = [house_shapes.obbs[index] for index in range(len(house_shapes.obbs))
                      if house_shapes.obbs[index][4] == KIND_EXTERIOR

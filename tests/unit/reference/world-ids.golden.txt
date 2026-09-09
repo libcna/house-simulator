@@ -1219,6 +1219,8 @@ exterior/neighbourhood	NB_SIGN_01
 exterior/neighbourhood	NB_SIGN_02
 exterior/neighbourhood	NB_SIGN_03
 exterior/neighbourhood	NB_SIGN_04
+exterior/neighbourhood	NB_SIGN_PRIVATE_W
+exterior/neighbourhood	NB_VAN_ROADEND_E
 exterior/paths	PATH_APRON
 exterior/paths	PATH_CONNECT
 exterior/paths	PATH_DRIVEWAY
@@ -1900,6 +1902,7 @@ exterior/structures	STRUCT_BED_6
 exterior/structures	STRUCT_COMPOST
 exterior/structures	STRUCT_SHED
 exterior/structures	STRUCT_TRELLIS
+exterior/structures	STRUCT_WALL_ROADEND_W
 weather/seasons	SUMMER
 interactables/interactables	SWITCH_B1_CELLAR
 interactables/interactables	SWITCH_B1_CINEMA
@@ -2018,6 +2021,8 @@ interactables/interactables	TV_L1_MASTER_BED
 exterior/vegetation	VEG_BED
 exterior/vegetation	VEG_BIRCH
 exterior/vegetation	VEG_FRUIT
+exterior/vegetation	VEG_HEDGE_END_E
+exterior/vegetation	VEG_HEDGE_END_W
 exterior/vegetation	VEG_HEDGE_FAR
 exterior/vegetation	VEG_MAPLE
 exterior/vegetation	VEG_SHRUB
