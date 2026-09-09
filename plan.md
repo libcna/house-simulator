@@ -7902,9 +7902,10 @@ the chunk builder produces ≤ 6 chunks per cell.
             construction) and a dormer's own footprint exempt (a dormer comes THROUGH the roof,
             and its window is 0.49 m over the slope by design). It found `HOUSE-00491`'s two
             gable louvres immediately, 1.44 m inside solid roof, and they are recorded as known.
-      measured: the shell goes 41 663 -> 41 527 triangles: `exterior` 1 688 -> 1 605, `wall`
-            3 304 -> 3 269, `ceiling` 216 -> 206, and a new `roof` 125 -> 151 where each attic
-            cell carries its own underside. Ten references move -- the eight exterior poses,
+      measured: the shell goes 41 663 -> **41 553** triangles: `exterior` 1 688 -> 1 605, `wall`
+            3 304 -> 3 269, `ceiling` 216 -> 206, and `roof` 125 -> 151 where each attic cell
+            carries its own underside. (41 527 was the count with the walls clipped and before
+            the underside was put back; the commit message quotes that intermediate number.) Ten references move -- the eight exterior poses,
             `blockout-01`, and the two attic interiors that can now see the slope.
       verified: 5 claims and 4 injections, 3 CAUGHT by the selftests -- the roof surface read as
             its ridge everywhere, the dormer exemption widened until it swallowed the roof, and
