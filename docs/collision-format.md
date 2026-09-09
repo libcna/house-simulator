@@ -281,6 +281,25 @@ shed roofless in §37.2's coverage field, which is to say it rained in it. The f
 marked `visibilityHint: open` are open to the stair WELL, which is a hole in the slab (§3.4's
 `_slab_holes`), not the absence of one.
 
+**And a wall of an open cell stops at the roof of what it is a wall of** (`HOUSE-00784`). An open
+cell is a volume of *outdoors*, so its extent is §10.3's ceiling — `EXT_GARDEN` runs to +20.00 and
+`EXT_WORLD` to +60.00 — and §4's rule 1 built the shared wall over the CELL's extent rather than
+over the neighbour's. That put **1 053 m² of collision into open air in 12 segments**: over the
+sunroom's roof (`EXT_TERRACE` and `EXT_BACKYARD`, +3.30 to +20.00), over the garage's
+(`EXT_SIDEYARD_E` and `EXT_DRIVEWAY`, +4.30 to +20.00) and over the shed's (`EXT_GARDEN` on all
+four sides, +2.35 to +20.00 — a 17.65 m overhang). Nothing drew it and nothing could walk into it,
+because a body is 1.8 m tall and every piece began at 2.35 m or higher; what found it was
+`HOUSE-00779` casting a ray at the sky from the terrace and hitting a wall standing on the
+sunroom's roof.
+
+The top is found across **every level**, not the cell's own: the other side of a balcony's wall at
++6.55 is the storey above, which is a cell on another level, and clipping to the same-level
+neighbour alone would take 21.8 m² of real wall off the rear balcony. An **open** occupant does not
+count either — the rear balcony stands at +3.65 over the sunroom — so only solid cells raise the
+roof line, which is what makes this one rule rather than two. `EXT_SHED` is the case that shows the
+rule is about the OPEN cell and not about exterior cells: its own walls are its own height and are
+untouched; it is the garden's copy of that wall, running to +20.00, that was wrong.
+
 What is built instead comes from `layout.exterior.json`:
 
 | From | What | This house |

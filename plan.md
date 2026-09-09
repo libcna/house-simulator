@@ -109,7 +109,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 7 | Collision and player controller | 00541–00620 | 38 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
-| 10 | Exterior and property | 00761–00840 | 23 | Terrain, fences, gates, drive, garden |
+| 10 | Exterior and property | 00761–00840 | 24 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 15 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 30 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 64 | Every room furnished to density |
@@ -11252,6 +11252,40 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             fill itself is checked the other way too: every one of the eleven cells has to be
             reached, so a barrier that appeared where there should be none fails it just as
             loudly.
+- [x] HOUSE-00784 — A wall of an open cell stops at the roof of what it is a wall of
+      dep: HOUSE-00774 · sys: world · plat: TOOL · pri: MUST
+      verify: `tools/world/build_collision.py --selftest`
+      note: (2026-09-09) **New task, next free id in phase 10's reserved 00761–00840 range.**
+            Found by `HOUSE-00779`: no ray cast from the terrace reached the sky over the
+            sunroom's roof, and `L1_MASTER_BED` -- a bedroom with three windows -- measured a sky
+            exposure of exactly **0.000**, which §64.6 turns into a bedroom it cannot rain on.
+      measured: **1 053 m² of collision standing in open air, in 12 segments**, over three roofs:
+            the sunroom's (`EXT_TERRACE` and `EXT_BACKYARD` walled from +3.30 to +20.00), the
+            garage's (`EXT_SIDEYARD_E` and `EXT_DRIVEWAY`, +4.30 to +20.00) and the shed's
+            (`EXT_GARDEN` on all four sides, +2.35 to +20.00, a 17.65 m overhang). None of it was
+            drawn by anything and none of it could be walked into, so nothing had found it: a
+            body is 1.8 m tall and every piece of it starts at 2.35 m or higher.
+      finding: **an open cell is a volume of outdoors, and its extent is §10.3's ceiling.**
+            `EXT_GARDEN` runs to +20.00 and `EXT_WORLD` to +60.00 because that is how much sky the
+            cell contains -- and §4's wall rule built the shared wall over the CELL's extent
+            rather than over the neighbour's. `HOUSE-00774` took the wall from between two open
+            yards; this is the same rule in the vertical, and the same 5 219 m² mistake one axis
+            over.
+      finding: **the top has to be found across every level, and `_neighbour_segments` cannot see
+            past its own.** The other side of a balcony's wall at +6.55 is the storey above, which
+            is a cell on `L1` while the balcony is on `L0`'s list -- so a rule that clipped to the
+            same-level neighbour alone would have taken 21.8 m² of real wall off the rear balcony
+            and opened the second storey to it. `_face_occupants` looks at every level.
+      finding: **an open occupant is not something to be a wall of either.** The rear balcony
+            stands at +3.65 over the sunroom, so clipping to "the tallest cell against this face"
+            would have kept the wall to +9.00; only the solid ones count, which is what makes this
+            one rule rather than two.
+      finding: the shed is the case that proves the rule is about the OPEN cell and not about
+            exterior cells: `EXT_SHED` is an `exterior` cell that is a BUILDING (§15.7 rule 5), so
+            its own walls are its own height and this rule does not touch them -- it is the
+            garden's copy of that wall, running to +20.00, that was wrong.
+      verified: 5 claims and 3 injections, all CAUGHT -- the clip removed, the occupant scan
+            restricted to the cell's own level, and an open occupant counted as solid.
 - [ ] HOUSE-00783 — Phase-10 review and commit
       dep: HOUSE-00761…HOUSE-00782 · sys: — · plat: ALL · pri: MUST
 
@@ -13351,19 +13385,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 322 numbered tasks across 53 phases.**
+**1 323 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 211 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 132 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 133 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 322** |
+| **Total** | **0–52** | **1 323** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -13415,6 +13449,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00784` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00779`: §4's wall rule built the wall an OPEN cell shares with a building over the CELL's extent, which is §10.3's +20.00 ceiling -- 1 053 m² of collision standing in open air over the sunroom, garage and shed roofs. | The fix belongs to `build_collision` rather than to the sky-exposure task that tripped over it: it is `HOUSE-00774`'s own rule -- two open things do not have a wall between them -- in the vertical, and every ray-casting and camera query in the project reads the same shapes. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00226` | **New task, next free id in phase 3's reserved 00181–00260 range.** Found by `HOUSE-00777`: `build_content.py` hashed each stage's input files and its command line as TEXT, so editing the generator the command names changed the hash of nothing and the whole world reported itself up to date. | The fix belongs to the content build rather than to the coverage task that tripped over it: every one of the eight world stages has the same hole, and the nav graph -- twenty minutes of it -- is the one that hurts, because it is built against `collision.bin` and would keep a version built by a tool that no longer exists. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00569` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00774`: `SweepCapsuleTriangle` extrudes a triangle by the capsule's half-height, a SPHERE's half-height is zero, and the flat prism that leaves is the shape `prism.solid` exists to refuse -- so everything over a triangle was inside it, decided by whether a mathematically-zero dot product came out a hair positive. | `HOUSE-00615` fixed the same defect for a vertical triangle and the height was the second way to have no volume. It is its own task rather than a line in `HOUSE-00774` because it is not about the exterior at all: §45's camera arm sweeps a sphere, every probe in the test suite is one, and the bug was in the sweep both of them share. No id was renumbered or struck. |
 | 2026-09-09 | `collision.bin` v2 → **v3** | A `u8` per cell: **is §11.5's ground part of this cell's collision?** (`HOUSE-00774`) | The height field is one surface over the whole lot and the house stands on it, so it runs through the basement and 0.1 m under `L0`'s floor. Giving §49.3's step 5 the ground -- which the outdoors needs, because a body that walked off the terrace's edge landed inside the slope and stayed there -- pushed a body on the basement stair out of the lawn above it instead. Nothing else in the file can tell the two apart: `EXT_SHED` is an `exterior` cell that is a building, and §15's yards are cells like any other. `docs/collision-format.md` §3.4 is normative. No id was renumbered or struck. |

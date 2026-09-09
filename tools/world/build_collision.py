@@ -325,6 +325,51 @@ def _neighbour_segments(cell, box, side, cells_on_level, boxes_by_cell):
     return out
 
 
+def _face_occupants(cell, side, u0, u1, cells, boxes_by_cell, extents):
+    """Every cell standing against `[u0, u1]` of this face, at ANY level.
+
+    `_neighbour_segments` looks only at the cell's own level, because a partition's other side is
+    the room next door and rooms are per level. What is *stacked* against a face is a different
+    question and needs every level: the second storey is the other side of a balcony's wall, and
+    the sky above the garage roof is only sky because nothing is there.
+    """
+    axis, value, _u0, _u1, outward = side
+    mid = 0.5 * (u0 + u1)
+    found = []
+    for other in cells:
+        if other["id"] == cell["id"] or other["id"] not in extents:
+            continue
+        for ox0, ox1, oz0, oz1 in boxes_by_cell[other["id"]]:
+            near = (ox0 if outward > 0 else ox1) if axis == "x" else (oz0 if outward > 0 else oz1)
+            span = (overlap_1d(u0, u1, oz0, oz1) if axis == "x"
+                    else overlap_1d(u0, u1, ox0, ox1))
+            if abs(near - value) > 0.01 or not span or not span[0] < mid < span[1]:
+                continue
+            found.append(other)
+            break
+    return found
+
+
+def _roof_line(cell, side, u0, u1, cells, boxes_by_cell, extents, floor):
+    """How high a wall of an OPEN cell reaches here: the top of the tallest thing it is a wall of.
+
+    An open cell is a volume of outdoors and §10.3's ceiling is where it stops -- `EXT_GARDEN`
+    runs to +20.00 and `EXT_WORLD` to +60.00 -- so a wall built over the cell's own extent stands
+    17 m into the sky over a 2.35 m shed. `HOUSE-00774` took the wall from between two open yards;
+    this is the same rule in the vertical, and `HOUSE-00779` is what found it: no ray from the
+    terrace reached the sky over the sunroom's roof, because a wall it shares with the sunroom
+    went up past it to +20.00.
+
+    An OPEN occupant is not something to be a wall of either -- the rear balcony is outdoors at
+    +3.65 over the sunroom -- so only the solid ones count, which is what makes this one rule
+    rather than two.
+    """
+    tops = [extents[other["id"]][1]
+            for other in _face_occupants(cell, side, u0, u1, cells, boxes_by_cell, extents)
+            if not open_air(other)]
+    return max(tops, default=floor)
+
+
 def _same_cell_openings(cell_id, box, side, boxes_by_cell, extent):
     """Where another box of the SAME cell abuts this side, there is no wall -- rule 3."""
     axis, value, u0, u1, outward = side
@@ -471,6 +516,10 @@ def build_shell(layout, shapes: Shapes, stats: dict, has_ground: bool = False) -
 
     grade = ground_storey(layout)
     level_ffl = {row["id"]: float(row.get("ffl", 0.0)) for row in layout_io.rows(layout, "levels")}
+    #: Floor and ceiling of every cell, for `_roof_line`. A cell naming a level that does not
+    #: exist is left out and raises its own error below, where the message can name the cell.
+    extents = {row["id"]: layout_io.cell_extent(row, levels[row["level"]])
+               for row in cells if row["level"] in levels}
 
     def on_the_ground(row: dict) -> bool:
         """An open exterior cell standing on §11.5's ground rather than on a storey of the house."""
@@ -578,9 +627,24 @@ def build_shell(layout, shapes: Shapes, stats: dict, has_ground: bool = False) -
                     if open_air(cell) and neighbour is not None and open_air(neighbour):
                         stats["openBoundaries"] += 1
                         continue
+                    # A wall of an OPEN cell reaches the roof of what it is a wall of and no
+                    # further: `EXT_GARDEN` runs to §10.3's +20.00 ceiling and the shed it wraps
+                    # stops at +2.35, so its own extent put 17 m of collision into the sky over
+                    # the shed roof. 1 053 m² of it stood over the sunroom, the garage and the
+                    # shed until `HOUSE-00784`, invisible, drawn by nothing, and enough to stop
+                    # every ray `HOUSE-00779` cast at the sky from the terrace.
+                    top = y1
+                    if open_air(cell):
+                        top = min(y1, _roof_line(cell, side, u0, u1, cells, boxes_by_cell,
+                                                 extents, y0))
+                        if top - y0 <= EPS:
+                            stats["clippedAway"] += 1
+                            continue
+                        if y1 - top > EPS:
+                            stats["clippedToRoof"] += 1
                     thickness = _wall_thickness(construction, cell, neighbour, level)
-                    holes = openings + _portal_holes(on_plane, u0, u1, y0, y1)
-                    for ru0, rv0, ru1, rv1 in subtract_rects((u0, y0, u1, y1), holes):
+                    holes = openings + _portal_holes(on_plane, u0, u1, y0, top)
+                    for ru0, rv0, ru1, rv1 in subtract_rects((u0, y0, u1, top), holes):
                         centre_u, half_u = (ru0 + ru1) / 2, (ru1 - ru0) / 2
                         centre_v, half_v = (rv0 + rv1) / 2, (rv1 - rv0) / 2
                         if axis == "x":
@@ -1703,7 +1767,8 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
 
     stats = {"wallPieces": 0, "floorPieces": 0, "ceilingPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
              "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0, "guards": 0, "stairGuards": 0, "outerShared": 0,
-             "openingShared": 0, "openBoundaries": 0, "fencePieces": 0, "kerbPieces": 0,
+             "openingShared": 0, "openBoundaries": 0, "clippedToRoof": 0, "clippedAway": 0,
+             "fencePieces": 0, "kerbPieces": 0,
              "structureObbs": 0, "trunks": 0, "vehicles": 0, "hedges": 0,
              "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
     shapes = Shapes()
@@ -2010,6 +2075,8 @@ def report(world: dict) -> str:
         f"{stats['structureObbs']} garden structure(s), {stats['trunks']} tree trunk(s), "
         f"{stats['hedges']} hedge section(s) and {stats['vehicles']} vehicle(s); "
         f"{stats['openBoundaries']} boundary between two open yards left as grass",
+        f"  roof line: {stats['clippedToRoof']} wall(s) of an open cell cut back to the top of "
+        f"what they are a wall of, {stats['clippedAway']} dropped entirely",
     ]
     terrain = world.get("terrain")
     if terrain:
@@ -2323,6 +2390,91 @@ def selftest() -> int:
                 f"...and exactly one wall, the one it shares with the lounge at x = 0, not four "
                 f"({len(walls)} walls at "
                 f"{[round(w[0][0], 2) for w in walls]})")
+
+        # 6c. ...and a wall of an open cell stops at the ROOF of what it is a wall of. An open
+        #     cell is a volume of outdoors -- `EXT_GARDEN` runs to §10.3's +20.00 ceiling -- so a
+        #     wall built over the cell's own extent stands 17 m into the sky over a 2.35 m shed.
+        #     A yard wrapping a shed, with a storey stacked on the shed in one variant and a
+        #     balcony in the other, is the smallest thing that can tell the three cases apart.
+        roofline_dir = workspace / "roofline"
+        shutil.copytree(world_dir, roofline_dir)
+
+        def roofline_world(upstairs: dict | None):
+            doc = json.loads((world_dir / "layout.cells.json").read_text())
+            doc["cells"] = [c for c in doc["cells"] if c["id"] == "L0_LOUNGE"]
+            doc["cells"].append({
+                "id": "L0_YARD", "level": "L0", "kind": "exterior", "visibilityHint": "open",
+                "yOverride": [0.0, 20.0], "boxes": [{"x": [4.0, 8.0], "z": [0.0, 6.0]}],
+                "footstepSurface": "grass", "wallMaterial": "MAT_PAINT",
+                "ceilingMaterial": "MAT_CEIL"})
+            doc["cells"].append({
+                # An `exterior` cell that is NOT open is a BUILDING (§15.7 rule 5), so it keeps
+                # its walls and its lid, and the yard round it has something to be a wall of.
+                "id": "L0_SHED", "level": "L0", "kind": "exterior", "visibilityHint": "opaque",
+                "yOverride": [0.0, 2.0], "boxes": [{"x": [8.0, 10.0], "z": [0.0, 6.0]}],
+                "footstepSurface": "concrete", "wallMaterial": "MAT_PAINT",
+                "ceilingMaterial": "MAT_CEIL"})
+            if upstairs is not None:
+                doc["cells"].append(upstairs)
+            (roofline_dir / "layout.cells.json").write_text(
+                json.dumps(doc, indent=2) + "\n", encoding="utf-8")
+            levels_doc = json.loads((world_dir / "layout.levels.json").read_text())
+            levels_doc["levels"].append(
+                {"id": "L1", "name": "Upper", "ffl": 2.0, "ceiling": 6.0,
+                 "structureDepth": 0.30})
+            (roofline_dir / "layout.levels.json").write_text(
+                json.dumps(levels_doc, indent=2) + "\n", encoding="utf-8")
+            (roofline_dir / "layout.portals.json").write_text(
+                json.dumps({"schema": "cna-house/portals/1", "portals": []}, indent=2) + "\n",
+                encoding="utf-8")
+            (roofline_dir / "layout.stairs.json").write_text(
+                json.dumps({"schema": "cna-house/stairs/1", "flights": []}, indent=2) + "\n",
+                encoding="utf-8")
+            built = build(roofline_dir)
+            yard = next(c for c in built["cells"] if c["id"] == "L0_YARD")
+            tops = [built["shapes"].obbs[i][0][1] + built["shapes"].obbs[i][1][1]
+                    for i in yard["shapes"]
+                    if i < len(built["shapes"].obbs)
+                    and built["shapes"].obbs[i][4] == KIND_WALL
+                    and abs(built["shapes"].obbs[i][0][0] - 8.0) < 0.2]
+            return built, tops
+
+        bare, tops = roofline_world(None)
+        require(tops and max(tops) <= 2.0 + 1e-6,
+                f"the yard's wall against a 2.00 m shed stops at its roof, not at the cell's own "
+                f"+20.00 ceiling (highest piece {max(tops) if tops else None})")
+        require(tops and abs(max(tops) - 2.0) < 1e-6,
+                f"...and it does reach the roof: the shed is walled to +2.00, not left open "
+                f"({max(tops) if tops else None})")
+        require(bare["stats"]["clippedToRoof"] > 0,
+                f"...and the cut is counted rather than silent "
+                f"({bare['stats']['clippedToRoof']} wall(s) cut back)")
+        _storey, storey_tops = roofline_world(
+            {"id": "L1_LOFT", "level": "L1", "kind": "room",
+             "boxes": [{"x": [8.0, 10.0], "z": [0.0, 6.0]}],
+             "footstepSurface": "wood", "wallMaterial": "MAT_PAINT",
+             "ceilingMaterial": "MAT_CEIL"})
+        require(storey_tops and abs(max(storey_tops) - 6.0) < 1e-6,
+                f"a storey stacked on the shed puts the wall back up to ITS roof at +6.00 -- the "
+                f"other side of a yard's wall is on another level and `_neighbour_segments` "
+                f"cannot see it (highest piece {max(storey_tops) if storey_tops else None})")
+        _deck, deck_tops = roofline_world(
+            {"id": "L1_DECK", "level": "L1", "kind": "exterior", "visibilityHint": "open",
+             "boxes": [{"x": [8.0, 10.0], "z": [0.0, 6.0]}],
+             "footstepSurface": "wood", "wallMaterial": "MAT_PAINT",
+             "ceilingMaterial": "MAT_CEIL"})
+        require(deck_tops and abs(max(deck_tops) - 2.0) < 1e-6,
+                f"...but a DECK over the shed is not something to be a wall of, so the wall stops "
+                f"at the shed again -- which is `HOUSE-00774`'s rule in the vertical "
+                f"({max(deck_tops) if deck_tops else None})")
+        shed_walls = [_deck["shapes"].obbs[i] for i in
+                      next(c for c in _deck["cells"] if c["id"] == "L0_SHED")["shapes"]
+                      if i < len(_deck["shapes"].obbs)
+                      and _deck["shapes"].obbs[i][4] == KIND_WALL]
+        require(shed_walls and all(o[0][1] + o[1][1] <= 2.0 + 1e-6 for o in shed_walls),
+                f"the shed's OWN walls are its own height and are not cut by this rule at all "
+                f"({len(shed_walls)} pieces, highest "
+                f"{max((o[0][1] + o[1][1]) for o in shed_walls) if shed_walls else None})")
 
         # 7. The stair is a CLOSED prism, not a walking surface. An open surface is a floor the
         #    player falls through from below.
