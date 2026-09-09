@@ -172,6 +172,14 @@ namespace cnahouse::world
             [](const Prop& row) { return row.cell; },
             world.m_propsByCell,
             world.m_propsOfCell);
+        // Cells by their PARENT (`HOUSE-00488`). §54's containers and §12's garage loft are cells
+        // that stand inside another cell's volume, and what §25 needs every frame is the question
+        // the other way round: given a room, what is nested in it.
+        GroupByCell(
+            world.m_contents.cells,
+            [](const Cell& row) { return row.parent; },
+            world.m_childrenByCell,
+            world.m_childrenOfCell);
         // Lights are grouped twice, by cell and by switch group, because the two questions are
         // asked by different systems for different reasons: the renderer asks "what lights this
         // cell", a switch asks "what does this group toggle", and a group crosses cells -- the
@@ -319,6 +327,11 @@ namespace cnahouse::world
     std::span<const std::uint32_t> WorldData::PropsOf(util::Id cell) const noexcept
     {
         return Slice(m_propsOfCell, m_propsByCell, cell);
+    }
+
+    std::span<const std::uint32_t> WorldData::ChildrenOf(util::Id cell) const noexcept
+    {
+        return Slice(m_childrenOfCell, m_childrenByCell, cell);
     }
 
     std::span<const std::uint32_t> WorldData::LightsInGroup(util::Id group) const noexcept

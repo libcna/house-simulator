@@ -739,6 +739,20 @@ def selftest() -> int:
             and any(row["triangles"] == 0 for row in triangles) is False,
             "every cell with a `.glb` that has geometry counts at least one triangle")
 
+    # `HOUSE-00488`. A cell that draws a floor and a ceiling and NOTHING ELSE is a room whose walls
+    # belong to its neighbours -- and §25 removes a neighbour the moment a door shuts, taking the
+    # wall with it. Five cells were in that state until this claim: the two landings and the three
+    # stair halls, every one of them `visibilityHint: open`, which the generator was reading as
+    # "has no walls" rather than as "is open to look through".
+    wallless = sorted(row["cell"] for row in triangles
+                      if row["level"] is not None
+                      and (cells.get(row["cell"]) or {}).get("kind") != "exterior"
+                      and row["triangles"] > 0
+                      and not ({"wall", "exterior"} & set(row["byClass"])))
+    require(not wallless,
+            f"and every interior cell that draws anything draws a WALL or an outer skin -- not a "
+            f"floor and a ceiling with the room next door's walls around it ({wallless})")
+
     require(result["openings"], "there are openings to check")
     cut = [row for row in result["openings"] if not row["blocked"]]
     require(len(cut) >= len(result["openings"]) - 1,
@@ -756,10 +770,11 @@ def selftest() -> int:
     require(not leafless,
             f"every one of the {len(fillable)} door openings in a wall has a leaf in it "
             f"({leafless[:4] if leafless else 'none missing'})")
-    require(len(doors) - len(fillable) == 3,
-            f"and the {len(doors) - len(fillable)} that are in no wall at all are the two balcony "
-            f"doors and the shed's -- their cells draw a floor and a ceiling and nothing else, so "
-            f"there is nothing for a leaf to sit in "
+    require(len(doors) - len(fillable) == 1,
+            f"and the {len(doors) - len(fillable)} that is in no wall at all is the shed's -- an "
+            f"EXTERIOR cell draws no walls (`HOUSE-00475`), so there is nothing for a leaf to sit "
+            f"in. It was three until `HOUSE-00488`: the two balcony doors are in a landing, and a "
+            f"landing that is `visibilityHint: open` used to draw no walls either "
             f"({[row['opening'] for row in doors if not row['walled']]})")
     # Both sides, wherever both sides can have one: a leaf built once belongs to one cell's chunk,
     # and §25 culls the room behind a shut door -- so the room in FRONT of it would be left looking
@@ -772,9 +787,10 @@ def selftest() -> int:
             f"leaf on BOTH sides ({missing[:3] if missing else 'none missing'})")
     stairs_only = [row["opening"] for row in fillable
                    if len(row["walled"]) == 2 and len(set(row["walled"]) & set(row["joinery"])) < 2]
-    require(len(stairs_only) == 2,
-            f"and the {len(stairs_only)} that have one side only are the stair hall's, which draws "
-            f"no trim of any kind -- no skirting, no architrave, no leaf ({stairs_only})")
+    require(not stairs_only,
+            f"and NONE has a leaf on one side only. Two did until `HOUSE-00488` -- the stair hall's,"
+            f" which drew no trim of any kind because an open cell drew no walls to hang it on "
+            f"({stairs_only})")
 
     # THE SHELL IS NOT PERFECT, and this is where that is written down. `HOUSE-00480` is the task
     # that fixes what `HOUSE-00477`/`78`/`79` find; until it does, the list below is the exact set

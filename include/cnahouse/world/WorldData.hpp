@@ -237,6 +237,13 @@ namespace cnahouse::world
         [[nodiscard]] std::span<const std::uint32_t> LightsOf(util::Id cell) const noexcept;
         [[nodiscard]] std::span<const std::uint32_t> PropsOf(util::Id cell) const noexcept;
 
+        /// @brief The cells nested INSIDE @p cell -- indices into `Cells()` (`HOUSE-00488`).
+        ///
+        /// The other side of `Cell::parent`, and asked every frame: §25 draws a nested cell
+        /// whenever the room it stands in is drawn, because its outward faces -- the front of the
+        /// fridge, the underside of the garage loft -- are what a body in that room is looking at.
+        [[nodiscard]] std::span<const std::uint32_t> ChildrenOf(util::Id cell) const noexcept;
+
         /// @brief The lights in one switch group.
         ///
         /// Grouped as well as celled, because the two questions are asked by different systems for
@@ -295,10 +302,12 @@ namespace cnahouse::world
         std::unordered_map<util::Id, detail::CellRange> m_portalsOfCell;
         std::unordered_map<util::Id, detail::CellRange> m_lightsOfCell;
         std::unordered_map<util::Id, detail::CellRange> m_propsOfCell;
+        std::unordered_map<util::Id, detail::CellRange> m_childrenOfCell;
         std::unordered_map<util::Id, detail::CellRange> m_lightsOfGroup;
         std::vector<std::uint32_t> m_portalsByCell;
         std::vector<std::uint32_t> m_lightsByCell;
         std::vector<std::uint32_t> m_propsByCell;
+        std::vector<std::uint32_t> m_childrenByCell;
         std::vector<std::uint32_t> m_lightsByGroup;
     };
 

@@ -417,7 +417,9 @@ namespace cnahouse::app
         visibility_.emplace(*world_);
         if (blockoutChunks_ != nullptr)
         {
-            chunkCuller_.emplace(*blockoutChunks_);
+            // With the world, so §12's nested cells are drawn with the room they stand in
+            // (`HOUSE-00488`): a fridge whose door is shut is still a fridge in the kitchen.
+            chunkCuller_.emplace(*blockoutChunks_, &*world_);
         }
         // `--no-cull` is the same switch `cull off` throws, set before the first frame: a render
         // test drives the game through `Options` and cannot type into a console.

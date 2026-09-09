@@ -12,7 +12,8 @@
 namespace cnahouse::world
 {
     struct ChunkLibrary;
-}
+    class WorldData;
+} // namespace cnahouse::world
 
 namespace cnahouse::visibility
 {
@@ -37,7 +38,13 @@ namespace cnahouse::visibility
         /// The library keys cells by NAME and the visible set carries `util::Id`s; hashing a
         /// string per cell per frame would be a lookup in the middle of the hot loop for a mapping
         /// that never changes.
-        explicit ChunkCuller(const world::ChunkLibrary& library);
+        ///
+        /// @param world optional, and what it buys is §12's nested cells (`HOUSE-00488`): a
+        ///        container's shell and the garage loft's underside are geometry that stands
+        ///        inside another cell's volume and belongs to a chunk of their own. Without the
+        ///        world this culler cannot know that, and the fridge disappears from the kitchen
+        ///        the moment its door is shut.
+        explicit ChunkCuller(const world::ChunkLibrary& library, const world::WorldData* world = nullptr);
 
         struct Stats
         {
@@ -47,6 +54,9 @@ namespace cnahouse::visibility
             /// @brief Chunks inside a VISIBLE cell that no cone of that cell could see. This is
             ///        the number that says whether the step is worth its cost.
             int chunksCulled = 0;
+            /// @brief Chunks drawn because a cell NESTED in a visible one owns them: the front of
+            ///        the refrigerator, the underside of the garage loft (`HOUSE-00488`).
+            int chunksFromNested = 0;
         };
 
         void Cull(std::span<const VisibleCell> visible);
@@ -63,7 +73,11 @@ namespace cnahouse::visibility
         }
 
     private:
+        /// @brief One cell's chunks against one cell's cones. `nested` only for the counter.
+        void CullCell(const VisibleCell& cell, util::Id owner, bool nested);
+
         const world::ChunkLibrary* library_ = nullptr;
+        const world::WorldData* world_ = nullptr;
         /// @brief Cell id -> the chunk indices belonging to it.
         std::unordered_map<std::uint32_t, std::vector<std::uint32_t>> byCell_;
         std::vector<std::uint32_t> drawn_;

@@ -113,6 +113,72 @@ namespace
 
 } // namespace
 
+TEST(ChunkCullingTests, ACellNestedInAVisibleRoomDrawsWithIt)
+{
+    // `HOUSE-00488`. §54's containers are cells with their own portal, and §25 leaves a shut one
+    // out of the visible set -- correctly: nothing can be SEEN through a shut fridge door, and a
+    // fridge that were "visible" would be lit by §24 and would open an audio path through a door
+    // that is closed. But its OUTSIDE is kitchen furniture. §17.4 puts it in the sub-cell's own
+    // chunk, so without this rule the refrigerator disappears from the kitchen the moment culling
+    // is turned on -- 18 606 pixels of it, measured across two poses.
+    IdRegistry::ResetForTesting();
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no deployed world; run tools/ci/build_content.py --only world";
+    }
+    const world::WorldData data = LoadWorld();
+    auto library = world::ChunkReader::ReadFromTitle("content/world/chunks.bin");
+    ASSERT_TRUE(library) << library.Error().ToString();
+
+    const cnahouse::util::Id kitchen = cnahouse::util::Intern("L0_KITCHEN");
+    const cnahouse::util::Id fridge = cnahouse::util::Intern("CELL_FRIDGE_INTERIOR");
+    const world::Cell* nested = data.FindCell(fridge);
+    ASSERT_NE(nested, nullptr);
+    ASSERT_EQ(nested->parent, kitchen) << "the refrigerator is declared inside the kitchen";
+
+    VisibilitySystem system(data);
+    // §65.6's own door state: every door shut, including the fridge's.
+    for (const world::Portal& portal : data.Portals())
+    {
+        system.SetAperture(portal.id, 0.0F);
+    }
+    // The heading that looks AT it: the refrigerator stands at the kitchen's east end and the
+    // pose is the room's centre, so three of the four cardinals have it behind them -- and a
+    // chunk behind the camera is culled by the cone, correctly, whoever owns it.
+    system.SetCamera(Standing(data, "L0_KITCHEN", 90.0F));
+    system.Update(Frame(1));
+    EXPECT_FALSE(system.IsVisible(fridge))
+        << "a shut container is not VISIBLE; only its shell is drawn, which is the whole point";
+
+    // Without the world the culler cannot know what is nested where, which is what makes the
+    // comparison below a measurement of the rule rather than of the house.
+    ChunkCuller blind(*library);
+    blind.Cull(system.Visible());
+    ChunkCuller knowing(*library, &data);
+    knowing.Cull(system.Visible());
+
+    const auto owned = [&library](const ChunkCuller& culler, std::string_view cell)
+    {
+        int count = 0;
+        for (const std::uint32_t index : culler.Chunks())
+        {
+            const world::Chunk& chunk = library->chunks[index];
+            count += chunk.cell < library->cells.size() && library->cells[chunk.cell] == cell ? 1 : 0;
+        }
+        return count;
+    };
+
+    EXPECT_EQ(owned(blind, "CELL_FRIDGE_INTERIOR"), 0) << "the blind culler drew a cell it cannot know about";
+    EXPECT_GT(owned(knowing, "CELL_FRIDGE_INTERIOR"), 0)
+        << "the refrigerator's own chunks are not drawn with the kitchen around them";
+    EXPECT_GT(knowing.Statistics().chunksFromNested, 0);
+    EXPECT_EQ(owned(knowing, "L0_KITCHEN"), owned(blind, "L0_KITCHEN"))
+        << "the rule changed what the KITCHEN draws, which it has no business doing";
+    std::printf("  the kitchen draws %d chunk(s) of its own and %d of the refrigerator nested in it\n",
+                owned(knowing, "L0_KITCHEN"),
+                owned(knowing, "CELL_FRIDGE_INTERIOR"));
+}
+
 TEST(ChunkCullingTests, MostOfAVisibleRoomIsStillThrownAway)
 {
     IdRegistry::ResetForTesting();

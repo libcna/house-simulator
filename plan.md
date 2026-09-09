@@ -7556,6 +7556,50 @@ the chunk builder produces ≤ 6 chunks per cell.
       note: **`HOUSE-00688` is blocked on this and on `HOUSE-00485`.** The other 38 431 differing
             pixels are `HOUSE-00485`'s coplanar pairs -- a surface swap rather than a hole -- and
             the two together are why the most important test in the project is committed disabled.
+      note: (2026-09-09) **two of the four causes are fixed and the task stays open for the other
+            two.** `HOUSE-00688`'s comparison went from 8 of 18 poses failing, worst 4.71 % of a
+            frame, to **3, worst 1.97 %**; `l0-hall`, `l0-kitchen`, `l1-landing`, `l2-landing` and
+            `l0-stair-main` are clean. Each cause was found by projecting the shell into the pose's
+            own camera and reading off WHO OWNS the pixels the culled frame loses -- a question the
+            pixel counts alone cannot answer.
+      finding: **`visibilityHint: "open"` is about looking, and the generator read it as "has no
+            walls".** §16 marks the two landings and the three stair halls open because a landing
+            and the stair well it hangs over are one space to see through; `house_shell_gen.py`
+            took that as the rule `HOUSE-00475` wrote for a YARD and gave all five a floor, a
+            ceiling and nothing else. What a body on `L1_LANDING` faced was the room behind it.
+            Now only an EXTERIOR cell has no walls, and what makes a landing open is the cased
+            openings in its walls -- which are portals, which `holes_in` has always cut. The shell
+            went 38 827 -> 41 597 triangles, and **two more doors got a leaf** (61 -> 63 of 64) and
+            three more got one on both sides (53 -> 56): the balcony doors had no wall to hang one
+            in.
+      finding: **a nested cell's shell is the room's furniture, and `Cell::parent` was already in
+            the data.** The front of the refrigerator and the underside of the garage loft stand
+            inside another cell's volume and live in the sub-cell's own chunk, so they vanished the
+            moment §25 left that sub-cell out -- 18 606 pixels of the fridge over two poses and
+            12 108 of the loft. `WorldData::ChildrenOf` is the index the other way round and
+            `ChunkCuller` now draws a nested cell's chunks against the PARENT's cones.
+      finding: **and it is step 3 that does it, not the walk.** Putting the sub-cell in the visible
+            set was tried first and reverted: §24 would light a shut refrigerator and §64 would
+            open an audio path through its door. §54's *"a container falls out of the visibility
+            system rather than being a special case"* is true of its INSIDE, which its own shut
+            door hides; its outside is not behind that door.
+      finding: **what is left is two causes, both measured.** (1) `ROOF_MAIN`, `ROOF_GARAGE` and
+            `CHIMNEY` name no cell, so `build_chunks.py` draws them with `EXT_WORLD` -- 5 chunks,
+            297 triangles, including the RAFTERS a rafter-bounded attic looks up at. From `L3_ROOM`
+            and from the garage `EXT_WORLD` is not visible and the roof goes: 4 456 and 1 936
+            pixels. Either the hull is split per covered cell (clipping, in the generator) or it is
+            drawn with whatever cell the camera is in, and that is an owner's call about §17.4.
+            (2) `ext-backyard`'s 3 523 pixels are a LAYOUT defect: the only portal between
+            `EXT_TERRACE` and `EXT_BACKYARD` is on the terrace's north edge at z = -36, and the
+            pose stands to the WEST of it, where the two cells abut over 4 m with no portal at all.
+            The walk is right and the world is missing a portal.
+      verified: 1 `ChunkCullingTests` over §12's own refrigerator, with three injections all
+            CAUGHT -- never reaching the children, testing them against their own cones instead of
+            the parent's, and indexing the children by cell instead of by parent -- and a new
+            `verify_shell` claim, **every interior cell that draws anything draws a wall or an
+            outer skin**, which named `L1_LANDING` and `L2_LANDING` when the old rule was injected
+            back. 1 008 unit, 92 integration, 30 render (twelve first-person references
+            regenerated: the refrigerator is in the kitchen again).
 - [ ] HOUSE-00487 — Bring `L0_GARAGE` and the three attic stores back inside §17.4's six chunks a cell
       dep: HOUSE-00473 · sys: content · plat: TOOL · pri: SHOULD
       finding: (2026-09-09, found by `HOUSE-00486`) **four cells have been over §17.4's chunk target
@@ -7564,6 +7608,9 @@ the chunk builder produces ≤ 6 chunks per cell.
             stair, trim, wall -- and `L3_STORE_E`, `L3_STORE_N` and `L3_STORE_W` are the same shape
             of problem. It is not the door leaves: they are `trim`, which every one of those cells
             already had, and the material count is unchanged at ten.
+      note: (2026-09-09) **six cells now, not four.** `HOUSE-00488` gave the five open interior
+            cells their own walls, and `L0_STAIR_MAIN` and `L1_STAIR_MAIN` went to seven materials
+            with them. The same question, two more rooms in it.
       note: §17.4's target is *"≤ 6 chunks per cell"*, which `docs/chunk-format.md` §5 shows means
             *"≤ 6 distinct materials among a cell's static props"*. The garage has a stair in it, a
             metal door track, glazing and both an interior and an exterior skin; whether the answer

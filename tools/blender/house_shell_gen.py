@@ -1057,14 +1057,23 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
         # A run is CLAMPED to the room's inset extent on the perpendicular axis: at a corner the
         # two inner faces stop at each other, and a face that ran on to the centre line would
         # continue 75 mm into the wall it meets.
-        # `HOUSE-00475`: an OPEN cell has no walls. A yard is ground and sky, and the wall it
+        # `HOUSE-00475`: an EXTERIOR cell has no walls. A yard is ground and sky, and the wall it
         # abuts belongs to the house on the other side of it, which draws its own outer face
         # (`exterior`, below). Building them here gave every exterior cell a full set of faces at
         # its own `yOverride` height -- 20 m for the yards, 65 m for `EXT_WORLD` -- so the first
         # frame the blockout ever drew was the inside of a 400 m box with the house somewhere in
         # it. `build_collision.py` has always known this (`is_open and neighbour is None`); the
         # shell did not, and nothing had drawn the shell.
-        open_cell = cell.get("kind") == "exterior" or cell.get("visibilityHint") == "open"
+        #
+        # `HOUSE-00488`: and ONLY an exterior cell. §16's `visibilityHint: "open"` says a cell is
+        # open to its neighbours for VISIBILITY -- a landing and the stair well it hangs over are
+        # one space to look through -- and reading it here as "has no walls" left the five open
+        # interior cells drawing a floor and a ceiling and nothing else. The wall a body on
+        # `L1_LANDING` faces then belonged to the room behind it, §25 correctly left that room out,
+        # and the wall went with it: 5 267 pixels of three frames became the clear colour. A
+        # landing has walls; what makes it open is the cased openings in them, and those are
+        # portals, which `holes_in` has always cut.
+        open_cell = cell.get("kind") == "exterior"
         for side, inward in INWARD.items():
             side_holes = holes_in(side, box, cell, list(portals))
             for lo, hi, wall, covers in ([] if open_cell
