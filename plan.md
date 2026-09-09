@@ -10058,8 +10058,36 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             caught; the seventh -- flipping one pose's door state -- is `HOUSE-00686`'s to catch,
             because a fixture cannot tell a wrong door state from a right one without running the
             walk, which is the next task.
-- [ ] HOUSE-00686 — Test: exact visible-set assertion for all 24 poses
+- [x] HOUSE-00686 — Test: exact visible-set assertion for all 24 poses
       dep: HOUSE-00685 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-09) set EQUALITY, and the two differences reported separately. A test that
+            asserted only that the expected cells are present would pass a system that culls
+            nothing -- the whole house is a superset of every answer -- and one that asserted only
+            that nothing extra is present would pass a system that culls everything. §25's two
+            failure modes are over-culling and over-drawing, and equality is the one assertion that
+            sees both; the message names which it is.
+      measured: **24 poses reach 101 cells between them, deepest chain 4.** Opening every door in
+            the house widens the set at 19 of the 24.
+      finding: **§25.2's interior depth cap of six is inert in §12's house.** The deepest chain any
+            of the twenty-four produces is four, and `OutdoorDepthTests` measured five over sixteen
+            interior poses with every door open -- so an injection that loosened the cap to seven
+            changed nothing anywhere. What actually stops a walk here is the back-face test and the
+            area cutoff (`HOUSE-00668` measured 34 of 76 portals facing away from one pose). The
+            deepest chain is asserted rather than left as a comment, so a house whose chains got
+            longer is noticed instead of quietly running closer to the cap.
+      finding: **the containment skip is unobservable from the visible set, by design.** §25.2 says
+            it is *"not needed for correctness, only for efficiency"*, and an injection replacing it
+            with a much more aggressive skip -- refuse any cone into a cell already reached --
+            changed neither the 24 sets nor `ChunkCullingTests`' drawn chunks. Proving it sound
+            needs the walk run twice with the skip off, which is a knob the traversal does not have;
+            recorded for `HOUSE-00695`, which is the task that touches this code for its own reasons.
+      verified: 4 `VisibleSetTests` -- the exact sets for all 24 poses with over-culling and
+            over-drawing named apart, the camera's own cell always the root at depth zero, shutting
+            every door never ADDING a cell (which catches an aperture wired backwards, where every
+            number still looks reasonable), and the same pose asked twice giving the same answer in
+            the same ORDER -- because `RenderList` sorts what it is given and a render fixture
+            compares pixels. Eight injected bugs, six caught; the two that are not are the two
+            recorded above as inert by design.
 - [ ] HOUSE-00687 — Test: the door-state matrix — for each of the 62 doors, open and close it and assert the visible set changes in the expected direction, from both sides
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
