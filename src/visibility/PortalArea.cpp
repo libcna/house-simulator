@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/visibility/PortalArea.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 
@@ -57,6 +58,37 @@ namespace cnahouse::visibility
             twice += x[i] * y[j] - x[j] * y[i];
         }
         return std::fabs(twice) * 0.5F;
+    }
+
+    NdcRect NdcBounds(std::span<const Xna::Vector3> polygon, const Xna::Matrix& viewProjection)
+    {
+        NdcRect rect;
+        if (polygon.empty() || polygon.size() > kMaxClippedVertices)
+        {
+            return rect;
+        }
+        for (const Xna::Vector3& p : polygon)
+        {
+            const float w = p.X * viewProjection.M14 + p.Y * viewProjection.M24 + p.Z * viewProjection.M34 +
+                            viewProjection.M44;
+            if (w < kMinW)
+            {
+                // The same rule as `NdcArea`: a portal the camera is standing in covers
+                // everything, because the alternative is a room that vanishes in its own doorway.
+                return NdcRect{-1.0F, -1.0F, 1.0F, 1.0F};
+            }
+            const float x = (p.X * viewProjection.M11 + p.Y * viewProjection.M21 + p.Z * viewProjection.M31 +
+                             viewProjection.M41) /
+                            w;
+            const float y = (p.X * viewProjection.M12 + p.Y * viewProjection.M22 + p.Z * viewProjection.M32 +
+                             viewProjection.M42) /
+                            w;
+            rect.minX = std::min(rect.minX, x);
+            rect.minY = std::min(rect.minY, y);
+            rect.maxX = std::max(rect.maxX, x);
+            rect.maxY = std::max(rect.maxY, y);
+        }
+        return rect;
     }
 
     bool PortalContributes(std::span<const Xna::Vector3> polygon, const Xna::Matrix& viewProjection)

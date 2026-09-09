@@ -46,6 +46,48 @@ namespace cnahouse::visibility
     [[nodiscard]] float NdcArea(std::span<const Microsoft::Xna::Framework::Vector3> polygon,
                                 const Microsoft::Xna::Framework::Matrix& viewProjection);
 
+    /// @brief The screen rectangle a clipped portal covers, in normalised device coordinates.
+    ///
+    /// §25.2's containment skip: *"compare the clipped polygon's NDC bounding rectangle; if the
+    /// new one is inside a previously recorded one for that cell, skip"*. A rectangle rather than
+    /// the polygon because the test only has to be conservative -- a false "not contained" costs
+    /// one more traversal and never loses a room.
+    struct NdcRect
+    {
+        float minX = 1.0F;
+        float minY = 1.0F;
+        float maxX = -1.0F;
+        float maxY = -1.0F;
+
+        /// @brief Empty until something is added: `min > max` on both axes.
+        [[nodiscard]] bool Empty() const noexcept
+        {
+            return minX > maxX || minY > maxY;
+        }
+
+        /// @brief Does this rectangle cover all of @p other? An empty @p other is covered by
+        ///        anything, and an empty THIS covers nothing.
+        [[nodiscard]] bool Contains(const NdcRect& other) const noexcept
+        {
+            if (other.Empty())
+            {
+                return true;
+            }
+            if (Empty())
+            {
+                return false;
+            }
+            return minX <= other.minX && minY <= other.minY && maxX >= other.maxX && maxY >= other.maxY;
+        }
+    };
+
+    /// @brief The bounding rectangle of @p polygon on screen.
+    ///
+    /// A vertex at or behind the eye gives the WHOLE screen, for the same reason `NdcArea` does:
+    /// the divide is meaningless and the conservative answer is "everything".
+    [[nodiscard]] NdcRect NdcBounds(std::span<const Microsoft::Xna::Framework::Vector3> polygon,
+                                    const Microsoft::Xna::Framework::Matrix& viewProjection);
+
     /// @brief §25.2's decision: is this portal worth walking through?
     [[nodiscard]] bool PortalContributes(std::span<const Microsoft::Xna::Framework::Vector3> polygon,
                                          const Microsoft::Xna::Framework::Matrix& viewProjection);

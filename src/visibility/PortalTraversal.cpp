@@ -1,0 +1,170 @@
+// SPDX-License-Identifier: MIT
+#include "cnahouse/visibility/PortalTraversal.hpp"
+
+#include <algorithm>
+
+#include "cnahouse/visibility/ClipRect.hpp"
+#include "cnahouse/visibility/PortalFacing.hpp"
+#include "cnahouse/visibility/ReduceFrustum.hpp"
+#include "cnahouse/world/WorldData.hpp"
+
+namespace cnahouse::visibility
+{
+    namespace
+    {
+        namespace Xna = Microsoft::Xna::Framework;
+    }
+
+    const VisibleCell* PortalTraversal::Find(util::Id cell) const noexcept
+    {
+        const auto found = std::find_if(
+            visible_.begin(), visible_.end(), [cell](const VisibleCell& one) { return one.cell == cell; });
+        return found == visible_.end() ? nullptr : &*found;
+    }
+
+    VisibleCell& PortalTraversal::Reach(util::Id cell, int depth)
+    {
+        for (VisibleCell& one : visible_)
+        {
+            if (one.cell == cell)
+            {
+                // Breadth-first, so the first arrival is the shallowest -- but a later one can
+                // still tie, and taking the minimum says what the code means rather than relying
+                // on the queue's order to say it.
+                one.depth = std::min(one.depth, depth);
+                return one;
+            }
+        }
+        visible_.push_back(VisibleCell{});
+        visible_.back().cell = cell;
+        visible_.back().depth = depth;
+        ++stats_.cellsVisited;
+        return visible_.back();
+    }
+
+    void PortalTraversal::Run(const Input& input)
+    {
+        // Cleared rather than reconstructed: `clear()` keeps the capacity, so a steady state
+        // allocates nothing (§71.2 gives visibility 0.55 ms and none of it should be `malloc`).
+        visible_.clear();
+        queue_.clear();
+        stats_ = TraversalStats{};
+        if (input.world == nullptr || !input.cameraCell.IsValid())
+        {
+            return;
+        }
+
+        // The whole screen: the camera's own frustum covers all of it, so nothing can be
+        // "contained" by it and skipped before the walk has started.
+        const NdcRect whole{-1.0F, -1.0F, 1.0F, 1.0F};
+        queue_.push_back(Work{input.cameraCell, input.cameraFrustum, whole, 0});
+
+        for (std::size_t head = 0; head < queue_.size(); ++head)
+        {
+            // Copied and not referenced: `queue_` grows inside this loop and a reference into it
+            // is a dangling one the moment it does.
+            const Work work = queue_[head];
+            VisibleCell& cell = Reach(work.cell, work.depth);
+            stats_.maxDepth = std::max(stats_.maxDepth, work.depth);
+
+            // §25.2's containment skip, at the point the frustum is about to be USED: this cone
+            // is inside one this cell has already been expanded with, so everything it could
+            // reach has been reached.
+            bool covered = false;
+            for (std::size_t i = 0; i < cell.frustumCount; ++i)
+            {
+                covered = covered || cell.rects[i].Contains(work.rect);
+            }
+            if (covered)
+            {
+                ++stats_.skippedContained;
+                continue;
+            }
+
+            if (cell.frustumCount < kMaxFrustaPerCell)
+            {
+                cell.frusta[cell.frustumCount] = work.frustum;
+                cell.rects[cell.frustumCount] = work.rect;
+                ++cell.frustumCount;
+            }
+            else
+            {
+                // The cell stays visible; what is lost is a fifth cone to test its contents
+                // against, and the four kept are wider than the fifth would have narrowed to.
+                ++cell.frustaDropped;
+                ++stats_.frustaDropped;
+                continue;
+            }
+
+            planes_.clear();
+            for (std::size_t i = 0; i < work.frustum.PlaneCount(); ++i)
+            {
+                planes_.push_back(work.frustum[i]);
+            }
+
+            for (const std::uint32_t index : input.world->PortalsOf(work.cell))
+            {
+                if (index >= input.portals.size())
+                {
+                    continue;
+                }
+                const world::Portal& portal = input.world->Portals()[index];
+                const PortalRuntime& runtime = input.portals[index];
+                ++stats_.portalsTested;
+
+                // §25.3: a closed opaque door stops vision; a closed GLASS one does not.
+                if (!runtime.PassesLight())
+                {
+                    ++stats_.skippedClosed;
+                    continue;
+                }
+                if (PlaneFacesAway(portal, *input.world, work.cell, input.eye))
+                {
+                    ++stats_.skippedFacing;
+                    continue;
+                }
+                if (work.depth >= MaxDepthFor(portal, *input.world, input.side))
+                {
+                    ++stats_.skippedDepth;
+                    continue;
+                }
+
+                const ClippedPolygon clipped = ClipRectToFrustum(runtime.WorldRect(), planes_);
+                if (clipped.Empty())
+                {
+                    ++stats_.skippedClipped;
+                    continue;
+                }
+                if (!PortalContributes(clipped.Points(), input.viewProjection))
+                {
+                    ++stats_.skippedArea;
+                    continue;
+                }
+
+                const util::Id other = portal.cellA == work.cell ? portal.cellB : portal.cellA;
+                const NdcRect rect = NdcBounds(clipped.Points(), input.viewProjection);
+                // §25.2's skip again, at the push: a cone inside one the target has already been
+                // expanded with reaches nothing new, and testing it here saves queueing it.
+                if (const VisibleCell* already = Find(other); already != nullptr)
+                {
+                    bool contained = false;
+                    for (std::size_t i = 0; i < already->frustumCount; ++i)
+                    {
+                        contained = contained || already->rects[i].Contains(rect);
+                    }
+                    if (contained)
+                    {
+                        ++stats_.skippedContained;
+                        continue;
+                    }
+                }
+
+                const ReducedFrustum next =
+                    ReduceFrustum(input.eye, clipped.Points(), input.nearPlane, input.farPlane);
+                ++stats_.portalsCrossed;
+                queue_.push_back(Work{other, next.frustum, rect, work.depth + 1});
+            }
+        }
+    }
+
+} // namespace cnahouse::visibility

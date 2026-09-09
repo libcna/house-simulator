@@ -9347,9 +9347,48 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             `-Werror=unused-parameter` catches an injection that stops using `camera`; re-injected
             in forms that build, all eight are caught.
       verify: unit PortalDepthTests.*
-- [ ] HOUSE-00668 — Implement `PortalTraversal`: the BFS with per-cell frustum lists, the `kMaxFrustaPerCell` cap and the containment skip
+- [x] HOUSE-00668 — Implement `PortalTraversal`: the BFS with per-cell frustum lists, the `kMaxFrustaPerCell` cap and the containment skip
       dep: HOUSE-00663…HOUSE-00667 · sys: visibility · plat: ALL · pri: MUST
       files: src/visibility/PortalTraversal.cpp|hpp
+      note: (2026-09-09) §25.2's pseudocode, line for line, over the pieces `HOUSE-00661`…`00667`
+            built -- and tested against §12's ACTUAL house rather than a two-room fixture. A
+            synthetic world would pass every assertion here and say nothing about a building with
+            96 cells, 179 portals and a stair well open through three storeys.
+      note: **breadth-first, and the reason is the depth cap.** A depth-first walk spends its whole
+            allowance down the first corridor it finds and then meets the same rooms again at a
+            shallower depth from another direction, re-expanding them. Breadth-first reaches every
+            room at the shallowest depth it can be reached at -- which is the depth `maxDepthFor`
+            is written against.
+      note: **the numbers, from the house.** Standing in `L0_HALL` looking north with every door in
+            the house open: 8 cells visible (kitchen, dining, family, sunroom, terrace, backyard,
+            the fridge's interior, and the hall itself), 76 portals tested, 9 crossed, 34 skipped
+            as facing away, 4 as too deep, 29 clipped to nothing, max depth 4. With the doors shut
+            -- §65.6's starting state -- 6 cells, through the cased openings and the stair well.
+      note: **§71.2's budget, with every door in the house open**: the worst of 40 poses is
+            **12 visible cells** against a typical of 9, a worst case of 22 and a hard fail at 30.
+            No player will ever arrange the house that way, so 12 is an upper bound on a bound.
+      note: over 288 poses of the whole house, §25.2's containment skip fires **50** times and its
+            area cutoff **4** -- which is what `HOUSE-00664` predicted: the cutoff is permissive and
+            it is `maxDepthFor` and the back-face test that stop most chains (34 of 76 portals from
+            one pose face away).
+      finding: **the containment skip is one-directional, and §25.2 does not say so.** It refuses a
+            cone contained in one the cell already has; it does not go back and drop a cone that a
+            later, WIDER one subsumes -- measured, `EXT_BACKYARD` seen from `L0_PANTRY` through two
+            openings keeps both. The cost is one redundant frustum test against that cell's
+            contents and never a wrong answer, so the invariant asserted is the one the design
+            provides -- no cone is covered by an EARLIER one -- and the other direction is recorded
+            rather than quietly fixed.
+      finding: the traversal's use of the back-face test is invisible in a visible-SET test: taking
+            it out lets the walk turn round and re-enter the room it came from, which adds nothing
+            to a set that already contains that room. What catches it is a fact about the house --
+            looking north from `L0_HALL`, `L0_FOYER` is BEHIND the camera and must not be visible --
+            which is the kind of assertion only a real building can provide.
+      verified: 7 `PortalTraversalTests` -- the camera's own cell with everything shut, opening
+            every door reaching further without ever hiding a room, the depth cap, the four-frusta
+            cap, §71.2's budget over 40 poses, the containment skip's invariant over all 96 cells
+            with the skip and the area cutoff both counted, and a walk from no cell at all. Nine
+            injected bugs, nine caught -- the last two only after the invariant was stated as a
+            property of the result rather than as a counter.
 - [ ] HOUSE-00669 — Implement the translucent-portal `DIFFUSE` flag and its effect on the target cell's detail set
       dep: HOUSE-00668 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00670 — Implement `VisibilitySystem`: camera cell → traversal → visible set, published once per frame
