@@ -912,8 +912,9 @@ Neighbourhood composition (all non-enterable):
 The terrain is a **height field** on a 1.0 m grid over the whole playable area (81 × 65 samples =
 5 265 vertices), authored as a 16-bit PNG plus a JSON metadata sidecar, with a per-cell material
 index (grass / lawn-worn / flower-bed soil / gravel / concrete / asphalt / bluestone / mulch).
-Rendered as one static chunk per 16 × 16 m tile (25 tiles), each with its own `BoundingBox`, so
-distance culling works. Collision uses the same height field, as the **two triangles each square
+Rendered as one static chunk per 16 × 16 m tile (**20 tiles**, 5 × 4 — corrected from 25 by
+`HOUSE-00762`: 81 × 65 samples on a 1 m grid is 80 × 64 m, and 25 would need a 5 × 5 field), each
+with its own `BoundingBox`, so distance culling works. Collision uses the same height field, as the **two triangles each square
 is drawn as** — one surface for the collider and for anything that asks how high the ground is.
 
 > **Corrected by `HOUSE-00553`.** This said *"bilinear sample + a triangle test for slopes > 20°"*,

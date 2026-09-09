@@ -49,10 +49,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import layout_io  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "assets"))
+import gltf_io  # noqa: E402
 from layout_io import LayoutError  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 SOURCE = REPO / "assets-src" / "world"
+#: Where `--tiles` writes. A build product like the shell, and committed for the same reason: none.
+TILES = REPO / "build" / "terrain"
 
 #: §11.5: a 1.0 m grid over §10.3's playable area, X -40..+40 and Z -52..+12.
 WIDTH, HEIGHT = 81, 65
@@ -65,6 +70,33 @@ ORIGIN_Y, Y_SCALE = -3.0, 6.0
 
 #: §11.5's eight classes, in the order the index uses. The index is the position in this list.
 MATERIALS = ["grass", "lawn_worn", "soil", "gravel", "concrete", "asphalt", "bluestone", "mulch"]
+
+#: §11.5's tile: *"one static chunk per 16 x 16 m tile ... each with its own `BoundingBox`, so
+#: distance culling works"* (`HOUSE-00762`).
+#:
+#: **Twenty tiles, not §11.5's twenty-five.** 81 x 65 samples on a 1 m grid is 80 x 64 m, which is
+#: 5 x 4 tiles of 16 m. Twenty-five would need a 5 x 5 field; §10.3's playable area is 80 x 64 and
+#: the height field is sized from it. The parenthesis in §11.5 is arithmetic that does not follow
+#: from the extents beside it, and is corrected there rather than worked around here.
+TILE_METRES = 16.0
+
+#: How far a tile's edge hangs down, in metres.
+#:
+#: A skirt is there for the seam a SIMPLIFIED tile leaves: at LOD0 two tiles share their edge
+#: samples exactly and cannot crack, but §26's decimation moves an edge vertex by up to the
+#: height difference between the samples it dropped. Measured over this lot's own field, the
+#: largest step between two adjacent samples is 0.45 m (the terrace's own edge), so 0.50 m of
+#: skirt covers the worst simplification the ground can suffer and is still invisible from
+#: standing height.
+SKIRT_METRES = 0.50
+
+#: §18.3's lightmap density for a room, in texels a metre, and the gutter between islands. One
+#: atlas holds the whole ground: a 16 m tile is 64 texels, five across and four deep with a
+#: 4-texel gutter round each is 360 x 288, which fits `shell_unwrap`'s 512 limit with room to
+#: spare -- so the terrain costs ONE atlas rather than one per tile.
+LIGHTMAP_DENSITY = 4.0
+LIGHTMAP_GUTTER = 4
+LIGHTMAP_ATLAS = 512
 
 #: A `paths` row's material maps to one of the eight. Anything unlisted stays grass, which is what
 #: the lot is.
@@ -270,6 +302,241 @@ def _encode(heights: list[float]) -> list[int]:
     return [round((value - ORIGIN_Y) / span * 65535.0) for value in heights]
 
 
+def tile_grid() -> tuple[int, int]:
+    """How many tiles across (X) and deep (Z). Five by four over §10.3's 80 x 64 m."""
+    return (round((WIDTH - 1) * STEP / TILE_METRES), round((HEIGHT - 1) * STEP / TILE_METRES))
+
+
+def _vertex(ix: int, iz: int, heights: list[float], normals: list[tuple[float, float, float]],
+            tile: tuple[int, int]) -> tuple:
+    """One ground vertex: position, normal, world-metre UV0 and the atlas UV1 for its tile."""
+    x = ORIGIN_X + ix * STEP
+    z = ORIGIN_Z + iz * STEP
+    per = int(TILE_METRES / STEP)
+    # One atlas for the whole ground: each tile's island is 64 texels square with a 4-texel gutter
+    # round it, so the islands step by 72 and the five-by-four grid comes to 360 x 288 texels.
+    pitch = TILE_METRES * LIGHTMAP_DENSITY + 2 * LIGHTMAP_GUTTER
+    u = tile[0] * pitch + LIGHTMAP_GUTTER + (ix - tile[0] * per) * LIGHTMAP_DENSITY
+    v = tile[1] * pitch + LIGHTMAP_GUTTER + (iz - tile[1] * per) * LIGHTMAP_DENSITY
+    return ((x, heights[iz * WIDTH + ix], z),
+            normals[iz * WIDTH + ix],
+            # UV0 is WORLD METRES, so the material decides its own repeat and two tiles cannot
+            # disagree about where a texture starts. A tile-local 0..1 would tile the lawn five
+            # times across the lot and put a seam down every tile edge.
+            (x, z),
+            (u / LIGHTMAP_ATLAS, v / LIGHTMAP_ATLAS))
+
+
+def _sample_normals(heights: list[float]) -> list[tuple[float, float, float]]:
+    """A normal per sample, area-weighted over the triangles that meet there.
+
+    **The LIGHTING normal, and deliberately not the collider's.** `physics::TerrainAt` answers with
+    the FACE normal of the triangle a point lands in, because a body has to be told about the
+    surface it is standing on; a lawn shaded per face is a lawn made of visible facets. The
+    surface is the same surface -- the same samples, the same diagonal -- and only the normal
+    differs, which is the ordinary split between what is drawn and what is collided with.
+    """
+    accumulated = [[0.0, 0.0, 0.0] for _ in range(len(heights))]
+    for iz in range(HEIGHT - 1):
+        for ix in range(WIDTH - 1):
+            corners = {}
+            for du, dv in ((0, 0), (1, 0), (0, 1), (1, 1)):
+                index = (iz + dv) * WIDTH + (ix + du)
+                corners[(du, dv)] = (ORIGIN_X + (ix + du) * STEP, heights[index],
+                                     ORIGIN_Z + (iz + dv) * STEP)
+            # §11.5's own split, the one `physics::Terrain` collides with: the (0,0)-(1,1)
+            # diagonal. A renderer that split the other way would draw a surface a body does not
+            # stand on -- by a quarter of the square's twist, which `HOUSE-00553` measured at 74 mm.
+            for triangle in (((0, 0), (1, 1), (1, 0)), ((0, 0), (0, 1), (1, 1))):
+                a, b, c = (corners[key] for key in triangle)
+                u = (b[0] - a[0], b[1] - a[1], b[2] - a[2])
+                v = (c[0] - a[0], c[1] - a[1], c[2] - a[2])
+                # Unnormalised, so the sum is area-weighted: a big triangle should count for more.
+                normal = (u[1] * v[2] - u[2] * v[1],
+                          u[2] * v[0] - u[0] * v[2],
+                          u[0] * v[1] - u[1] * v[0])
+                for key in triangle:
+                    index = (iz + key[1]) * WIDTH + (ix + key[0])
+                    for axis in range(3):
+                        accumulated[index][axis] += normal[axis]
+    out = []
+    for total in accumulated:
+        length = (total[0] ** 2 + total[1] ** 2 + total[2] ** 2) ** 0.5
+        out.append((0.0, 1.0, 0.0) if length < 1e-12
+                   else (total[0] / length, total[1] / length, total[2] / length))
+    return out
+
+
+def tiles(directory: Path) -> list[dict]:
+    """§11.5's ground as tiles, ready to write: one primitive per material present in each.
+
+    **A primitive per material and not per tile**, because §17.4 batches by material and a tile
+    that is half lawn and half asphalt is two draws whatever this does. The tile is still the unit
+    with a `BoundingBox`, which is what §11.5 asks distance culling to have.
+    """
+    _width, _height, heights, materials = decode(directory)
+    normals = _sample_normals(heights)
+    columns, rows = tile_grid()
+    per = int(TILE_METRES / STEP)
+
+    out = []
+    for row in range(rows):
+        for column in range(columns):
+            primitives: dict[str, dict] = {}
+
+            def add(name: str, corners: list[tuple]) -> None:
+                entry = primitives.setdefault(name, {"material": name, "vertices": [], "index": {},
+                                                     "indices": []})
+                for corner in corners:
+                    # Welded on the WHOLE vertex and not on the position: the skirt's top row
+                    # stands exactly on the ground's edge and points sideways, so welding on
+                    # position alone would hand the skirt the ground's normal and shade a
+                    # vertical apron as if it were lawn.
+                    position = entry["index"].get(corner)
+                    if position is None:
+                        position = len(entry["vertices"])
+                        entry["index"][corner] = position
+                        entry["vertices"].append(corner)
+                    entry["indices"].append(position)
+
+            for dz in range(per):
+                for dx in range(per):
+                    ix, iz = column * per + dx, row * per + dz
+                    name = MATERIALS[materials[iz * WIDTH + ix]]
+                    corner = {(du, dv): _vertex(ix + du, iz + dv, heights, normals, (column, row))
+                              for du in (0, 1) for dv in (0, 1)}
+                    # Wound to face UP: the collider's two triangles are `(00,10,11)` and
+                    # `(00,11,01)`, whose cross products point down, and §14's front face is
+                    # counter-clockwise. Same split, same surface, opposite winding.
+                    for triangle in (((0, 0), (1, 1), (1, 0)), ((0, 0), (0, 1), (1, 1))):
+                        add(name, [corner[key] for key in triangle])
+
+            # The skirt, round the tile's own edge. Its vertices carry the edge's UVs and a normal
+            # that points OUT of the tile, so a skirt lit as ground would not glow at grazing sun.
+            for dz in range(per):
+                for dx in range(per):
+                    ix, iz = column * per + dx, row * per + dz
+                    if not (dx == 0 or dz == 0 or dx == per - 1 or dz == per - 1):
+                        continue
+                    name = MATERIALS[materials[iz * WIDTH + ix]]
+                    borders = []
+                    if dx == 0:
+                        borders.append((((0, 0), (0, 1)), (-1.0, 0.0, 0.0)))
+                    if dx == per - 1:
+                        borders.append((((1, 1), (1, 0)), (1.0, 0.0, 0.0)))
+                    if dz == 0:
+                        borders.append((((1, 0), (0, 0)), (0.0, 0.0, -1.0)))
+                    if dz == per - 1:
+                        borders.append((((0, 1), (1, 1)), (0.0, 0.0, 1.0)))
+                    for (first, second), outward in borders:
+                        top = [_vertex(ix + first[0], iz + first[1], heights, normals, (column, row)),
+                               _vertex(ix + second[0], iz + second[1], heights, normals, (column, row))]
+                        skirt = []
+                        for point in top:
+                            skirt.append(((point[0][0], point[0][1] - SKIRT_METRES, point[0][2]),
+                                          outward, point[2], point[3]))
+                        top = [(point[0], outward, point[2], point[3]) for point in top]
+                        add(name, [top[0], skirt[0], top[1]])
+                        add(name, [top[1], skirt[0], skirt[1]])
+
+            ordered = [primitives[name] for name in MATERIALS if name in primitives]
+            points = [vertex[0] for primitive in ordered for vertex in primitive["vertices"]]
+            out.append({
+                "id": f"TERRAIN_R{row}C{column}",
+                "column": column,
+                "row": row,
+                "primitives": [{"material": primitive["material"],
+                                "vertices": primitive["vertices"],
+                                "indices": primitive["indices"]} for primitive in ordered],
+                "bounds": (min(p[0] for p in points), min(p[1] for p in points),
+                           min(p[2] for p in points), max(p[0] for p in points),
+                           max(p[1] for p in points), max(p[2] for p in points)),
+            })
+    return out
+
+
+def _tile_document(tile: dict) -> tuple[dict, bytes]:
+    """One tile as a glTF document and its buffer, in `read_shell_geometry`'s own shape.
+
+    One primitive per material, each with a NAMED material whose `extras` carry the surface class
+    and the lightmap decision -- which is how `build_chunks.py` reads the shell, and reading the
+    ground the same way is what keeps one chunker rather than two.
+    """
+    blob = bytearray()
+    accessors: list[dict] = []
+    views: list[dict] = []
+    primitives: list[dict] = []
+    materials: list[dict] = []
+
+    def store(values: list[tuple], kind: str) -> int:
+        nonlocal blob
+        count = {"VEC3": 3, "VEC2": 2}[kind]
+        offset = len(blob)
+        for value in values:
+            blob += struct.pack(f"<{count}f", *value[:count])
+        views.append({"buffer": 0, "byteOffset": offset, "byteLength": len(blob) - offset})
+        accessors.append({"bufferView": len(views) - 1, "componentType": 5126,
+                          "count": len(values), "type": kind,
+                          "min": [min(v[i] for v in values) for i in range(count)],
+                          "max": [max(v[i] for v in values) for i in range(count)]})
+        return len(accessors) - 1
+
+    for primitive in tile["primitives"]:
+        vertices = primitive["vertices"]
+        position = store([v[0] for v in vertices], "VEC3")
+        normal = store([v[1] for v in vertices], "VEC3")
+        uv0 = store([v[2] for v in vertices], "VEC2")
+        uv1 = store([v[3] for v in vertices], "VEC2")
+        offset = len(blob)
+        for index in primitive["indices"]:
+            blob += struct.pack("<H", index)
+        while len(blob) % 4:
+            blob += b"\0"
+        views.append({"buffer": 0, "byteOffset": offset, "byteLength": len(primitive["indices"]) * 2})
+        accessors.append({"bufferView": len(views) - 1, "componentType": 5123,
+                          "count": len(primitive["indices"]), "type": "SCALAR"})
+        materials.append({
+            "name": f"TERRAIN_{primitive['material']}",
+            "extras": {
+                "surfaceClass": "terrain",
+                # §11.5's ground is lit by §22's baked sun shading over the same second UV
+                # channel a room's lightmap uses, which is why the tiles carry one at all.
+                "lightmapReceiver": True,
+                "groundMaterial": primitive["material"],
+            },
+        })
+        primitives.append({"attributes": {"POSITION": position, "NORMAL": normal,
+                                          "TEXCOORD_0": uv0, "TEXCOORD_1": uv1},
+                           "indices": len(accessors) - 1, "material": len(materials) - 1,
+                           "mode": 4})
+
+    document = {
+        "asset": {"version": "2.0", "generator": "cna-house terrain_gen.py"},
+        "scene": 0,
+        "scenes": [{"nodes": [0]}],
+        "nodes": [{"name": tile["id"], "mesh": 0}],
+        "meshes": [{"name": tile["id"], "primitives": primitives}],
+        "materials": materials,
+        "accessors": accessors,
+        "bufferViews": views,
+        "buffers": [{"byteLength": len(blob)}],
+    }
+    return document, bytes(blob)
+
+
+def emit_tiles(directory: Path, output: Path) -> dict:
+    """Writes one `.glb` per tile into @p output. Returns a report."""
+    output.mkdir(parents=True, exist_ok=True)
+    written = []
+    triangles = 0
+    for tile in tiles(directory):
+        document, blob = _tile_document(tile)
+        gltf_io.write_glb(output / f"{tile['id']}.glb", document, blob)
+        written.append(tile["id"])
+        triangles += sum(len(primitive["indices"]) // 3 for primitive in tile["primitives"])
+    return {"written": written, "triangles": triangles}
+
+
 def rendered(directory: Path) -> dict[str, bytes | str]:
     heights, materials = fields(directory)
     samples = _encode(heights)
@@ -426,6 +693,146 @@ def selftest() -> int:
         require(bool([p for p in _contract_problems(stated) if "step" in p]),
                 "and a layout that halved the step would be caught")
 
+        # 7. `HOUSE-00762`'s tiles, over the house's own ground.
+        rows = tiles(SOURCE)
+        columns, deep = tile_grid()
+        require((columns, deep) == (5, 4) and len(rows) == 20,
+                f"§11.5's ground is {columns} x {deep} = {len(rows)} tiles of {TILE_METRES:.0f} m "
+                f"over §10.3's 80 x 64 m -- not the 25 §11.5's parenthesis says, which would need "
+                f"a 5 x 5 field")
+
+        covered = {(tile["column"], tile["row"]) for tile in rows}
+        require(len(covered) == len(rows), "every tile has its own square of the grid")
+        edges = []
+        for tile in rows:
+            x0 = ORIGIN_X + tile["column"] * TILE_METRES
+            z0 = ORIGIN_Z + tile["row"] * TILE_METRES
+            # A skirt vertex carries a horizontal normal and a ground vertex does not, which is
+            # what tells the two apart without carrying a flag through the mesh.
+            ground = [v for primitive in tile["primitives"] for v in primitive["vertices"]
+                      if abs(v[1][1]) > 1e-6]
+            inside = all(x0 - 1e-6 <= v[0][0] <= x0 + TILE_METRES + 1e-6
+                         and z0 - 1e-6 <= v[0][2] <= z0 + TILE_METRES + 1e-6
+                         for primitive in tile["primitives"] for v in primitive["vertices"])
+            edges.append(inside and bool(ground))
+        require(all(edges), "and no tile has a vertex outside its own 16 m square")
+
+        # The seam: two tiles that touch share the samples along their edge EXACTLY. At LOD0 that
+        # is what makes the ground one surface rather than twenty; the skirt is for §26's
+        # decimation, which is allowed to move an edge and is why the skirt exists at all.
+        by_key = {(tile["column"], tile["row"]): tile for tile in rows}
+        seams = 0
+        cracks = []
+        for (column, row), tile in sorted(by_key.items()):
+            right = by_key.get((column + 1, row))
+            if right is None:
+                continue
+            seams += 1
+            plane = ORIGIN_X + (column + 1) * TILE_METRES
+            mine = {v[0] for primitive in tile["primitives"] for v in primitive["vertices"]
+                    if abs(v[0][0] - plane) < 1e-9 and v[1][0] >= 0.0}
+            theirs = {v[0] for primitive in right["primitives"] for v in primitive["vertices"]
+                      if abs(v[0][0] - plane) < 1e-9 and v[1][0] <= 0.0}
+            heights_mine = {(round(p[2], 6), round(p[1], 6)) for p in mine}
+            heights_theirs = {(round(p[2], 6), round(p[1], 6)) for p in theirs}
+            if not heights_theirs <= heights_mine and not heights_mine <= heights_theirs:
+                cracks.append((column, row))
+        require(seams > 0 and not cracks,
+                f"and two tiles that touch agree about every height along the seam ({seams} seam(s) "
+                f"checked, {cracks[:3] if cracks else 'no crack'})")
+
+        # The split and the winding: §11.5's ground is drawn as the two triangles it is COLLIDED
+        # with, and `physics::Terrain` splits along (0,0)-(1,1). A renderer that split the other
+        # way would draw a surface a body does not stand on, by up to the 74 mm `HOUSE-00553`
+        # measured on this lot.
+        upward = 0
+        downward = []
+        outward = 0
+        inward = []
+        for tile in rows:
+            for primitive in tile["primitives"]:
+                for i in range(0, len(primitive["indices"]), 3):
+                    corners = [primitive["vertices"][primitive["indices"][i + k]] for k in range(3)]
+                    a, b, c = (corner[0] for corner in corners)
+                    u = tuple(b[k] - a[k] for k in range(3))
+                    v = tuple(c[k] - a[k] for k in range(3))
+                    normal = (u[1] * v[2] - u[2] * v[1],
+                              u[2] * v[0] - u[0] * v[2],
+                              u[0] * v[1] - u[1] * v[0])
+                    if all(abs(corner[1][1]) < 1e-6 for corner in corners):
+                        # A skirt face: it must point the way its vertices say it does.
+                        wanted = corners[0][1]
+                        dot = sum(normal[k] * wanted[k] for k in range(3))
+                        if dot > 1e-9:
+                            outward += 1
+                        else:
+                            inward.append(tile["id"])
+                    elif normal[1] > 1e-9:
+                        upward += 1
+                    else:
+                        downward.append(tile["id"])
+        require(upward == 20 * 512 and not downward,
+                f"every one of the {upward} ground triangles is wound to face UP "
+                f"({downward[:3] if downward else 'none downward'})")
+        require(outward == 20 * 128 and not inward,
+                f"and every one of the {outward} skirt faces points out of its tile "
+                f"({inward[:3] if inward else 'none inward'})")
+
+        # The skirt, which is the other half of `HOUSE-00762`'s ask.
+        skirted = []
+        for tile in rows:
+            lowest = min(v[0][1] for primitive in tile["primitives"] for v in primitive["vertices"])
+            floor = min(v[0][1] for primitive in tile["primitives"] for v in primitive["vertices"]
+                        if abs(v[1][1]) > 1e-6)
+            skirted.append(abs((floor - lowest) - SKIRT_METRES) < 1e-6)
+        require(all(skirted),
+                f"and every tile hangs a {SKIRT_METRES:.2f} m skirt below its lowest ground vertex")
+
+        # The bounds §11.5 asks distance culling to have.
+        wrong = [tile["id"] for tile in rows
+                 if any(not (tile["bounds"][0] - 1e-6 <= v[0][0] <= tile["bounds"][3] + 1e-6
+                             and tile["bounds"][1] - 1e-6 <= v[0][1] <= tile["bounds"][4] + 1e-6
+                             and tile["bounds"][2] - 1e-6 <= v[0][2] <= tile["bounds"][5] + 1e-6)
+                         for primitive in tile["primitives"] for v in primitive["vertices"])]
+        require(not wrong, f"every tile's own BoundingBox holds every vertex it has ({wrong[:3]})")
+
+        # One atlas for the whole ground, and the islands do not touch.
+        pitch = TILE_METRES * LIGHTMAP_DENSITY + 2 * LIGHTMAP_GUTTER
+        boxes = []
+        for tile in rows:
+            us = [v[3][0] * LIGHTMAP_ATLAS for primitive in tile["primitives"]
+                  for v in primitive["vertices"]]
+            vs = [v[3][1] * LIGHTMAP_ATLAS for primitive in tile["primitives"]
+                  for v in primitive["vertices"]]
+            boxes.append((min(us), min(vs), max(us), max(vs)))
+        inside = all(0.0 <= box[0] and 0.0 <= box[1] and box[2] <= LIGHTMAP_ATLAS
+                     and box[3] <= LIGHTMAP_ATLAS for box in boxes)
+        gutters = []
+        for i, a in enumerate(boxes):
+            for b in boxes[i + 1:]:
+                overlap_u = min(a[2], b[2]) - max(a[0], b[0])
+                overlap_v = min(a[3], b[3]) - max(a[1], b[1])
+                gutters.append(overlap_u < -2 * LIGHTMAP_GUTTER + 1e-6
+                               or overlap_v < -2 * LIGHTMAP_GUTTER + 1e-6
+                               or min(overlap_u, overlap_v) <= 0.0)
+        require(inside and all(gutters),
+                f"the whole ground is ONE {LIGHTMAP_ATLAS}-texel atlas at "
+                f"{LIGHTMAP_DENSITY:.0f} texels/m, with {LIGHTMAP_GUTTER} texels between islands "
+                f"(pitch {pitch:.0f})")
+
+        # Every square's material comes from the index image, so the ground and the footsteps
+        # cannot disagree about what a person is standing on.
+        _w, _h, _heights, index = decode(SOURCE)
+        present = {name for tile in rows for primitive in tile["primitives"]
+                   for name in [primitive["material"]]}
+        require(present == {MATERIALS[value] for value in set(index)},
+                f"and the materials the tiles carry are exactly the ones the index image uses "
+                f"({sorted(present)})")
+
+        first = _tile_document(rows[0])
+        again = _tile_document(tiles(SOURCE)[0])
+        require(first == again, "a tile renders the same bytes twice")
+
     if failures:
         print(f"\nterrain_gen: {len(failures)} claim(s) FAILED")
         return 1
@@ -439,10 +846,25 @@ def main() -> int:
     parser.add_argument("--emit", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--selftest", action="store_true")
+    parser.add_argument("--tiles", action="store_true",
+                        help="write §11.5's terrain tiles as one .glb each (HOUSE-00762)")
+    parser.add_argument("--output", type=Path, default=TILES,
+                        help="where --tiles writes; a build product, never committed")
     args = parser.parse_args()
 
     if args.selftest:
         return selftest()
+    if args.tiles:
+        if not (args.directory / "terrain.png").is_file():
+            print(f"terrain_gen: no height field in {args.directory}; run this without --tiles "
+                  f"first.", file=sys.stderr)
+            return 1
+        report = emit_tiles(args.directory, args.output)
+        columns, rows = tile_grid()
+        print(f"terrain_gen: {len(report['written'])} tile(s) ({columns} x {rows} of "
+              f"{TILE_METRES:.0f} m), {report['triangles']} triangles -> "
+              f"{args.output.relative_to(REPO) if args.output.is_relative_to(REPO) else args.output}")
+        return 0
     if not (args.directory / "layout.exterior.json").is_file():
         print(f"terrain_gen: no exterior in {args.directory} yet -- nothing to generate.")
         return 0

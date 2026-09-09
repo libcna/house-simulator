@@ -10603,8 +10603,43 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             injected bugs — not copied, not hashed, rewritten every deploy, and a stale copy the
             `*.json` glob would have missed — all caught. Their `assets.manifest.json` rows are
             `notPackaged` for the same reason: they belong to no residency pack.
-- [ ] HOUSE-00762 — `terrain_gen.py`: generate the 25 terrain tiles with skirts, per-tile bounds and lightmap UVs
+- [x] HOUSE-00762 — `terrain_gen.py`: generate the 25 terrain tiles with skirts, per-tile bounds and lightmap UVs
       dep: HOUSE-00761 · sys: content · plat: TOOL · pri: MUST
+      measured: (2026-09-09) **twenty tiles, not twenty-five** -- 5 × 4 of 16 m over §10.3's
+            80 × 64 m. §11.5's parenthesis does not follow from the extents in its own sentence, and
+            §11.5 is corrected rather than the generator bent to it (Planning corrections).
+            `tools/world/terrain_gen.py --tiles` writes one `.glb` per tile into `build/terrain`:
+            **12 800 triangles, 7 499 vertices**, of which 10 240 are ground (16 × 16 squares, two
+            triangles each) and 2 560 are skirt.
+      finding: **the tiles are drawn as the ground is COLLIDED with, or a body does not stand on
+            what it sees.** `physics::Terrain` splits every square along its (0,0)-(1,1) diagonal,
+            because §11.5's bilinear patch cannot be the collision surface -- `HOUSE-00553`
+            measured the two 74 mm apart on this lot. The tiles use that split and that diagonal,
+            wound the other way so the face is up: same surface, opposite winding.
+      finding: **welding on the position alone shades the skirt as lawn.** The skirt's top row
+            stands exactly on the ground's edge and points sideways, so a de-duplication keyed on
+            position hands it the ground's up normal -- and the claim that every skirt face points
+            out of its tile caught it, with 2 560 faces classified as ground and wound downwards.
+            Welding is on the whole vertex.
+      note: the skirt is 0.50 m and it is for §26, not for LOD0: two tiles that touch share their
+            edge samples exactly and cannot crack, which the selftest asserts over all 16 seams.
+            What can move an edge is decimation, and the largest step between two adjacent samples
+            on this lot is 0.45 m (the terrace's own edge).
+      note: **one lightmap atlas for the whole ground.** A 16 m tile at §18.3's 4 texels/m is 64
+            texels; five across and four deep with `lightmap_unwrap`'s own 4-texel gutter is
+            360 × 288, inside `shell_unwrap`'s 512 limit. So the terrain costs one atlas rather
+            than twenty, and every tile's island is its own square of it.
+      note: **not wired into `build_chunks.py`, deliberately.** It groups by (cell, material), and
+            twenty tile files that name no cell would merge into one grass chunk with the whole
+            lot's bounding box -- which is the opposite of §11.5's *"each with its own
+            `BoundingBox`, so distance culling works"*. The ground belongs in §25.6's exterior
+            instances (`HOUSE-00852`'s wiring), which is also `HOUSE-00488`'s finding about why a
+            lawn disappears when a yard is culled.
+      verified: 12 `terrain_gen --selftest` claims over the house's own ground -- the tile count and
+            its arithmetic, no vertex outside its own square, 16 seams with no crack, all 10 240
+            ground triangles facing up, all 2 560 skirt faces facing out, the skirt depth, the
+            bounds holding every vertex, the atlas and its gutters, the materials matching the
+            index image, and a tile that renders the same bytes twice.
 - [ ] HOUSE-00763 — Generate the road, kerbs, sidewalks, drain grates and the road markings
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00764 — Generate the driveway, the apron and the connecting path
@@ -12805,6 +12840,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00485` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00676`: `house_shell_gen.py` draws a cell's exterior skin in the same plane, facing the same way, as the abutting cell's wall -- measured at `L0_GARAGE`'s x = 8.825 west wall against the `exterior` faces of seven other cells. | Two coplanar front-facing surfaces are a z-fight whose winner is decided by submission order and nothing else. It was invisible while the opaque pass submitted cell by cell; sorting the draw list by material (§25.1 step 5) changed which arbitrary answer the garage shows, which is how it was noticed. The generator is where a shared boundary should draw one surface rather than two, and that changes the shell eight render fixtures are pictures of -- so it is its own task rather than a correction folded into a rendering one. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00486`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and a `dep` added to `HOUSE-00688`. Found by `HOUSE-00684`: the shell fills a window with `BLOCKOUT_glass` and a doorway with nothing, so a closed door is a hole. | Invisible while everything was drawn -- you saw the room behind it -- and visible the moment §25's culling was turned on, because §65.6 starts every door shut and the walk correctly refuses to see through one. `HOUSE-00688`'s two images cannot match while the difference between them is a hole in the shell, so its dependency now says so rather than leaving the criterion unsatisfiable for a reason nobody wrote down. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00487` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00486`: `L0_GARAGE`, `L3_STORE_E`, `L3_STORE_N` and `L3_STORE_W` carry seven materials each, over §17.4's six chunks a cell, and the content build's `chunks` stage has been failing on it since before either task. | Noticed while rebuilding the shell, and NOT caused by the door leaves -- they are `trim`, a class those cells already had, and the material count is unchanged at ten. Recorded rather than relaxed: whether to merge two blockout classes or to accept that a garage is not a room is a decision about §17.4's budget. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00762` | `cna-house.md` §11.5's *"one static chunk per 16 × 16 m tile (25 tiles)"* → **20 tiles, 5 × 4**, with the arithmetic stated beside it | The parenthesis does not follow from the extents in the same sentence: 81 × 65 samples on a 1 m grid is 80 × 64 m, which is five 16 m tiles across and four deep. Twenty-five would need a 5 × 5 field, and §10.3's playable area is 80 × 64. Nothing else in the design depends on the number; the generator, its selftest and this correction now all say 20. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00488`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and two more `dep`s on `HOUSE-00688`. Found by `HOUSE-00688`'s first run: a cell does not always draw the surfaces a body standing in it looks at, and §25 removes the cell that does -- 8 450 pixels of four frames become the clear colour with culling on. | The most important test in the project was written, run and left FAILING and DISABLED, with its numbers, rather than weakened to pass. Its 46 881 differing pixels separate into two shell defects and no culling defect: 38 431 are `HOUSE-00485`'s coplanar pairs resolving the other way, and 8 450 are this. No id was renumbered or struck. |
 
 ---
