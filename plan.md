@@ -9545,8 +9545,51 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             §68's multiplier and its clamp, all four quality tiers printed against §10.3's far
             plane, and a category with no distance drawing nothing. Five injected bugs, five
             caught.
-- [ ] HOUSE-00675 — Implement `RenderList`: the sorted draw list (pass → effect → material → chunk)
+- [x] HOUSE-00675 — Implement `RenderList`: the sorted draw list (pass → effect → material → chunk)
       dep: HOUSE-00674 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) §25.1's step 5. `RenderItem` carries the four-part key -- §7.5's pass,
+            the stock effect (`world::EffectTier`), the material index and the chunk or instance
+            index -- plus the metres-from-the-eye the transparent pass sorts on. `AddChunks` builds
+            items from `ChunkCuller::Chunks()`, `Add` takes anything the caller classified itself,
+            and `ItemsFor(pass)` hands each pass its own contiguous slice.
+      note: **the pass and the effect are read off the chunk, not guessed.** `docs/chunk-format.md`
+            §3: the layout COMES FROM the material's `effectTierS`, so `EffectForLayout` and
+            `PassForLayout` read back what the content build already wrote down. Deriving either
+            from a material NAME would be a second opinion about a decision the data states.
+      note: **`Transparent` is the one pass that does not use the key.** §7.5 draws glass, water,
+            curtains and particles back to front whatever their material is; sorting that pass by
+            material would be fewer state changes and a visibly wrong picture, which is the one
+            trade a draw list must never make. Every other pass ignores depth, because §25.1 chose
+            the state changes over the overdraw.
+      finding: **`Pass::Transparent` is not reachable from `chunks.bin` as it stands.** What decides
+            it is the material's `alphaMode` (§22.1), and `docs/chunk-format.md` §5 collapses
+            §17.4's four-part key to the material id precisely because `alphaMode` is a field of the
+            material -- so the file does not carry it, and the material table is `HOUSE-00385`,
+            unauthored. `BLOCKOUT_glass` is `basic` today and is drawn opaque. Transparent items
+            therefore arrive through `Add`, `PassForLayout` says so in a comment, and the third
+            answer goes in when `layout.materials.json` exists. `alphatest` IS carried, because it
+            is a different vertex layout and not merely a different blend state.
+      note: `stable_sort`, so the frame is byte-identical on two runs: the visible set is built in
+            a defined order, and two transparent panes at the same distance must not swap between
+            runs a render fixture compares pixel by pixel. Asserted over 40 equal keys and not 4 --
+            libstdc++ insertion-sorts below sixteen and is stable there by accident, so a short
+            list cannot tell a stable sort from an unstable one.
+      measured: the whole house with no culling at all -- 418 chunks -- is 418 draw calls and
+            **11 state changes** against §71.2's 620 and 90. From `L0_HALL` with every aperture
+            open: 30 chunks, **29** state changes in the order the visible set arrives in (cell by
+            cell, and every cell has a floor, walls and a ceiling), **7** after the sort, which is
+            one per distinct key less the first.
+      verified: 13 `RenderListTests` -- the layout table, one item per visible chunk carrying the
+            chunk's own key, the four-part order over the real house plus synthetic items in two
+            more passes, the state-change collapse against the distinct-key minimum, §71.2's
+            budget, back-to-front transparency against a material order that wants the opposite,
+            `ItemsFor` partitioning the list and sorting when it must, `Clear` keeping its buffer,
+            an index past the library skipped rather than dereferenced, the depth arithmetic,
+            stability over 40 equal keys, and two builds of one frame agreeing item by item.
+            Twenty-one injected bugs, all caught -- two only after the suite was strengthened:
+            counting state changes by material alone survived the real house (where every material
+            has one effect and every chunk is opaque, so the three components change together), and
+            a slice taken from offset zero survived a length-only assertion on `ItemsFor`.
 - [ ] HOUSE-00676 — Wire `RenderList` into the opaque static pass, replacing the draw-everything path
       dep: HOUSE-00675, HOUSE-00475 · sys: rendering · plat: ALL · pri: MUST
 

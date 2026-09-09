@@ -75,6 +75,7 @@ add_library(cnahouse_core STATIC
     visibility/PortalTraversal.cpp
     visibility/VisibilitySystem.cpp
     visibility/ReduceFrustum.cpp
+    visibility/RenderList.cpp
     visibility/PortalRuntime.cpp
     visibility/PortalFacing.cpp
     visibility/PortalDepth.cpp
