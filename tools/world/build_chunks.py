@@ -380,7 +380,8 @@ def group_key(prop: dict, cell: dict, material: dict) -> tuple:
             material.get("alphaMode", "opaque"))
 
 
-def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=()) -> dict:
+def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
+          exterior_dirs=()) -> dict:
     # `materials` and `props` are OPTIONAL, because the shell exists before either does: §11's
     # material table is `HOUSE-00296`'s and the prop placements are Phase 8's, and `HOUSE-00473`
     # chunks the blockout today. A prop cannot be chunked without a material and says so when it
@@ -403,7 +404,7 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=()) -> 
     groups: dict[tuple[str, tuple], list[dict]] = {}
     stats = {"props": 0, "dynamic": 0, "split": 0, "wide": 0,
              "cellsOverChunkLimit": [], "materialsPerCell": {},
-             "shellFiles": 0, "shellLightmapped": 0, "shellSurfaces": 0, "shellUnplaced": {}, "shellDynamicReceivers": 0,
+             "shellFiles": 0, "exteriorFiles": 0, "shellLightmapped": 0, "shellSurfaces": 0, "shellUnplaced": {}, "shellDynamicReceivers": 0,
              "shellEmpty": 0}
 
     for prop in sorted(layout_io.rows(layout, "props"), key=lambda p: p["id"]):
@@ -442,6 +443,10 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=()) -> 
 
     for member, key in _shell_members(shell_dirs, cells, stats):
         groups.setdefault(key, []).append(member)
+    for member, key in _shell_members(exterior_dirs, cells, stats, outdoors=True,
+                                      levels=layout_io.by_id(layout_io.rows(layout, "levels"),
+                                                             "level")):
+        groups.setdefault(key, []).append(member)
 
     chunks = []
     for (cell_id, key) in sorted(groups, key=lambda k: (k[0], k[1])):
@@ -462,6 +467,15 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=()) -> 
     stats["keysBeyondMaterial"] = len({k for k in groups}) - len(
         {(k[0], k[1][1]) for k in groups})
     stats["chunksPerCell"] = per_cell
+    # §27.3's residency tiers load PACKS, and a chunk's pack is its cell's: where a terrain tile
+    # is filed decides when it is in memory. Counted here so that a tile filed under
+    # `EXT_WORLD` -- whose pack is `neighbourhood`, not `exterior` -- is visible as a number
+    # rather than as a stutter at the front gate (`HOUSE-00780`).
+    packs: dict[str, int] = {}
+    for chunk in chunks:
+        pack = (cells.get(chunk["cell"]) or {}).get("residencyPack") or "(none)"
+        packs[pack] = packs.get(pack, 0) + 1
+    stats["chunksPerPack"] = packs
 
     return {"chunks": chunks, "stats": stats, "worldHash": bc._world_hash(world_dir)}
 
@@ -490,7 +504,73 @@ def outdoor_cell(cells: dict) -> str:
     return best
 
 
-def _shell_members(shell_dirs, cells: dict, stats: dict):
+def geometry_bounds(surfaces: dict):
+    """`(minx, miny, minz, maxx, maxy, maxz)` over every surface class of one file."""
+    lo = [float("inf")] * 3
+    hi = [float("-inf")] * 3
+    for entry in surfaces.values():
+        for point in entry["positions"]:
+            for axis in range(3):
+                lo[axis] = min(lo[axis], point[axis])
+                hi[axis] = max(hi[axis], point[axis])
+    return (lo[0], lo[1], lo[2], hi[0], hi[1], hi[2])
+
+
+def place_outdoors(cells: dict, bounds, fallback: str, levels: dict | None = None) -> str:
+    """Which exterior cell a file that names no cell stands in: the one it covers most of.
+
+    `HOUSE-00780`. A generated exterior file is named for the thing it is -- `TERRAIN_R2C3`,
+    `EXT_FENCE_N_W`, `ROAD_S07` -- and not for a cell, so `outdoor_cell`'s answer used to be all
+    any of them got: 64 files and 20 chunks in `EXT_WORLD`, whose residency pack is
+    `neighbourhood`. §27.2 puts "terrain, road, fences, garden, shed" in **`exterior`**, and the
+    pack a chunk loads with is its cell's, so where a tile lands decides when it is in memory.
+
+    **Largest overlap, not the cell containing its centre.** A terrain tile is 16 m across and the
+    front porch is 2.7 m: the tile over the front of the house has its centre inside the porch and
+    one 46th of its area there, and filing it under `L0_PORCH` puts the ground the player walks in
+    on with the ground-floor pack. Overlap answers that correctly and needs no special case for
+    size. `EXT_WORLD` is the LAST RESORT rather than a competitor: it is the ring OUTSIDE the
+    property, and the west fence stands on the boundary with half its posts each side of it --
+    whichever way that arithmetic came out, a fence of this property belongs to this
+    property's pack. A road segment 100 m away overlaps nothing of the property and lands in
+    the world, which is where it is.
+
+    The cell also has to be at the right HEIGHT. `L1_BALCONY_REAR` is an exterior cell whose plan
+    box sits over the back lawn, and a ground tile from -0.72 to +0.45 overlaps it perfectly in
+    plan while being 3.65 m below its floor; filed there, the lawn would load with `house-l1` and
+    unload when the player left the first floor.
+
+    This is a RESIDENCY key and not a visibility one, which is what makes it safe: §25.6 culls the
+    outdoors with a bounding-volume hierarchy over instances and their own boxes, because
+    `EXT_WORLD` is one enormous cell and portal traversal cannot help inside it. A terrain tile
+    that straddles two yards is not hidden by the one it is filed under.
+    """
+    best, best_area = None, 0.0
+    for identifier, cell in sorted(cells.items()):
+        if cell.get("kind") != "exterior" or identifier == fallback:
+            continue
+        if levels is not None:
+            level = levels.get(cell.get("level"))
+            if level is not None:
+                try:
+                    low, high = layout_io.cell_extent(cell, level)
+                except LayoutError:
+                    low, high = None, None
+                if low is not None and (bounds[4] < low - 0.5 or bounds[1] > high + 0.5):
+                    continue
+        area = 0.0
+        for box in cell.get("boxes") or []:
+            wide = min(bounds[3], float(box["x"][1])) - max(bounds[0], float(box["x"][0]))
+            deep = min(bounds[5], float(box["z"][1])) - max(bounds[2], float(box["z"][0]))
+            if wide > 0.0 and deep > 0.0:
+                area += wide * deep
+        if area > best_area:
+            best, best_area = identifier, area
+    return best or fallback
+
+
+def _shell_members(shell_dirs, cells: dict, stats: dict, outdoors: bool = False,
+                   levels: dict | None = None):
     """Every surface class of every generated shell file, as a chunk member and its group key.
 
     @p shell_dirs is `[(directory, baked), ...]`, most-preferred first: a cell is read from the
@@ -507,19 +587,25 @@ def _shell_members(shell_dirs, cells: dict, stats: dict):
             if path.stem in seen:
                 continue
             seen.add(path.stem)
-            stats["shellFiles"] += 1
+            stats["exteriorFiles" if outdoors else "shellFiles"] += 1
             stats["shellLightmapped"] += 1 if lightmapped else 0
-            cell_id = path.stem if path.stem in cells else outdoor_cell(cells)
-            if path.stem not in cells:
+            surfaces = read_shell_geometry(path)
+            if not surfaces:
+                stats["shellEmpty"] += 1
+                continue
+            cell_id = path.stem
+            if cell_id not in cells:
+                cell_id = outdoor_cell(cells)
+                if outdoors:
+                    # An exterior file is named for the thing it is, never for a cell, so it is
+                    # placed by where it STANDS (`HOUSE-00780`).
+                    cell_id = place_outdoors(cells, geometry_bounds(surfaces), cell_id,
+                                             levels)
                 stats["shellUnplaced"][path.stem] = cell_id
             cell = cells.get(cell_id)
             if cell is None:
                 raise LayoutError(
                     f"shell file {path.name} belongs to cell {cell_id!r}, which does not exist")
-            surfaces = read_shell_geometry(path)
-            if not surfaces:
-                stats["shellEmpty"] += 1
-                continue
             for name, entry in sorted(surfaces.items()):
                 stats["shellSurfaces"] += 1
                 layout_id = shell_layout(name, entry["extras"], lightmapped)
@@ -743,9 +829,25 @@ def report(built: dict) -> str:
             f"{stats['shellDynamicReceivers']} receiver class(es) outside a baked cell drawn "
             f"dynamically (§22); {stats['shellEmpty']} file(s) draw nothing at all")
         if stats.get("shellUnplaced"):
+            where: dict[str, int] = {}
+            for cell_id in stats["shellUnplaced"].values():
+                where[cell_id] = where.get(cell_id, 0) + 1
             lines.append(
-                f"  shell: {', '.join(sorted(stats['shellUnplaced']))} name no cell and draw "
-                f"with {sorted(set(stats['shellUnplaced'].values()))[0]}")
+                f"  placed by where they stand: {len(stats['shellUnplaced'])} file(s) that name "
+                f"no cell, over {len(where)} cell(s) -- "
+                + ", ".join(f"{cell_id} {count}"
+                            for cell_id, count in sorted(where.items(), key=lambda kv: -kv[1])))
+    if stats.get("exteriorFiles"):
+        lines.append(
+            f"  exterior: {stats['exteriorFiles']} generated file(s) -- terrain tiles, road "
+            f"segments, fences, gates and garden structures (§27.2's `exterior` pack)")
+    if stats.get("chunksPerPack"):
+        lines.append(
+            "  residency: "
+            + ", ".join(f"{pack} {count}"
+                        for pack, count in sorted(stats["chunksPerPack"].items(),
+                                                  key=lambda kv: (-kv[1], kv[0])))
+            + " chunk(s)")
     over_count = len(stats["cellsOverChunkLimit"])
     lines.append(
         f"  {over_count} cell(s) over §17.4's {MAX_CHUNKS_PER_CELL}-chunk target, "
@@ -1432,6 +1534,63 @@ def selftest() -> int:
                 f"and each surface class is one sub-range, named for the file and the class it "
                 f"came from ({floor_chunk['subRanges'][0]['prop']})")
 
+        # `HOUSE-00780`: the EXTERIOR generators' output. Their files are named for the thing they
+        # are -- `TERRAIN_R2C3`, `EXT_FENCE_N_W` -- so each is placed in the cell it stands in,
+        # and the pack that cell names is when it loads (§27.2, §27.3's T3).
+        yard_cells = {
+            "EXT_YARD": {"id": "EXT_YARD", "level": "L0", "kind": "exterior",
+                         "boxes": [{"x": [-40.0, 40.0], "z": [-40.0, 40.0]}]},
+            "EXT_PATIO": {"id": "EXT_PATIO", "level": "L0", "kind": "exterior",
+                          "boxes": [{"x": [-1.0, 1.0], "z": [-1.0, 1.0]}]},
+            "EXT_LAWN": {"id": "EXT_LAWN", "level": "L0", "kind": "exterior",
+                         "boxes": [{"x": [-8.0, 8.0], "z": [-8.0, 8.0]}]},
+            "EXT_DECK": {"id": "EXT_DECK", "level": "L1", "kind": "exterior",
+                         "boxes": [{"x": [-8.0, 8.0], "z": [-8.0, 8.0]}]},
+        }
+        yard_levels = {"L0": {"id": "L0", "ffl": 0.0, "ceiling": 3.0},
+                       "L1": {"id": "L1", "ffl": 4.0, "ceiling": 8.0}}
+        tile = (-6.0, -0.5, -6.0, 6.0, 0.5, 6.0)
+        require(place_outdoors(yard_cells, tile, "EXT_YARD", yard_levels) == "EXT_LAWN",
+                f"a 12 m tile is filed under the cell it COVERS, not the 2 m patio its centre "
+                f"happens to be in ({place_outdoors(yard_cells, tile, 'EXT_YARD', yard_levels)})")
+        require(place_outdoors(yard_cells, tile, "EXT_YARD", None) == "EXT_DECK",
+                f"-- and with no levels to read, the height test cannot run: the deck 4 m over "
+                f"the tile covers exactly as much of it as the lawn does and wins the tie on its "
+                f"id, which is what passing the levels is there to prevent "
+                f"({place_outdoors(yard_cells, tile, 'EXT_YARD', None)})")
+        upstairs = {name: row for name, row in yard_cells.items()
+                    if name not in ("EXT_LAWN", "EXT_PATIO")}
+        require(place_outdoors(upstairs, tile, "EXT_YARD", yard_levels) == "EXT_YARD",
+                f"a ground tile is NOT filed under the deck 4 m over it, even when the deck is "
+                f"the only exterior cell whose box covers it -- it falls through to the world "
+                f"instead ({place_outdoors(upstairs, tile, 'EXT_YARD', yard_levels)})")
+        edge = (-40.0, -0.5, 7.0, -7.0, 0.5, 9.0)
+        require(place_outdoors(yard_cells, edge, "EXT_YARD", yard_levels) == "EXT_LAWN",
+                f"a fence on the boundary belongs to the property, not to the world it also "
+                f"overlaps -- the world is the last resort and never a competitor "
+                f"({place_outdoors(yard_cells, edge, 'EXT_YARD', yard_levels)})")
+        away = (100.0, -0.5, 100.0, 110.0, 0.5, 110.0)
+        require(place_outdoors(yard_cells, away, "EXT_YARD", yard_levels) == "EXT_YARD",
+                "and a road segment 100 m away, overlapping nothing of the property, lands in "
+                "the world, which is where it is")
+
+        outdoor_dir = workspace / "outdoors"
+        outdoor_dir.mkdir()
+        _fixture_shell(outdoor_dir / "TERRAIN_R0C0.glb", [("BLOCKOUT_floor", False, False)])
+        outdoors = build(world_dir, manifest, [(shell_lm, True), (shell_raw, False)],
+                         [(outdoor_dir, False)])
+        require(outdoors["stats"]["exteriorFiles"] == 1,
+                f"an exterior directory is counted apart from the shell "
+                f"({outdoors['stats']['exteriorFiles']} against "
+                f"{outdoors['stats']['shellFiles']} shell files)")
+        require(outdoors["stats"]["shellUnplaced"].get("TERRAIN_R0C0") is not None,
+                f"and a tile named for itself rather than for a cell is placed and SAID to be "
+                f"({outdoors['stats']['shellUnplaced']})")
+        require(sum(outdoors["stats"]["chunksPerPack"].values()) == len(outdoors["chunks"]),
+                f"every chunk is counted in exactly one residency pack -- §27.3 loads packs, and "
+                f"a chunk in none of them is a chunk nothing ever loads "
+                f"({outdoors['stats']['chunksPerPack']})")
+
         # Determinism, over the shell as well as over props.
         again = build(world_dir, manifest, [(shell_lm, True), (shell_raw, False)])
         require(serialise(again) == serialise(shelled),
@@ -1455,6 +1614,11 @@ def main() -> int:
     parser.add_argument("--shell", type=Path, nargs="*", default=None,
                         help="directories of generated shell .glb, most-preferred first; "
                              "the default is build/shell-lm then build/shell")
+    parser.add_argument("--exterior", type=Path, nargs="*", default=None,
+                        help="directories of generated EXTERIOR .glb -- terrain tiles, road "
+                             "segments, fences, gates, garden structures. Their names are things "
+                             "and not cells, so each is placed in the exterior cell it stands in "
+                             "(HOUSE-00780). The default is build/terrain then build/fence")
     parser.add_argument("--fixture", type=Path, default=None,
                         help="write the C++ round-trip fixture (HOUSE-00474) and exit")
     parser.add_argument("--report", action="store_true")
@@ -1476,8 +1640,13 @@ def main() -> int:
     shell = ([(directory, index == 0) for index, directory in enumerate(args.shell)]
              if args.shell is not None
              else [(REPO / "build" / "shell-lm", True), (REPO / "build" / "shell", False)])
+    # The exterior generators write beside the shell and none of it is lightmapped: §18.3 bakes
+    # the ROOMS, and the outdoors is lit by the sun and the sky (§22).
+    exterior = ([(directory, False) for directory in args.exterior]
+                if args.exterior is not None
+                else [(REPO / "build" / "terrain", False), (REPO / "build" / "fence", False)])
     try:
-        built = build(args.world, args.manifest, shell)
+        built = build(args.world, args.manifest, shell, exterior)
     except LayoutError as exc:
         print(f"build_chunks: {exc}", file=sys.stderr)
         return 1

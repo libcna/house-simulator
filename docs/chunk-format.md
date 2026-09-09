@@ -125,6 +125,36 @@ class of the shell. A shell file whose name is not a cell — `ROOF_MAIN`, `ROOF
 draws with the largest exterior cell, which is `EXT_WORLD` in this house and is derived rather than
 named.
 
+## 4c. The outdoors is chunked too, and its cell is a residency key
+
+*`HOUSE-00780`.* The exterior generators write one `.glb` per thing — 25 terrain tiles, 22 road
+segments, 8 fence runs, 3 gates, 9 garden structures — and none of those names is a cell id, so
+until this task every one of them landed in `EXT_WORLD` by `outdoor_cell`'s fallback: 64 files and
+20 chunks in the one cell whose residency pack is `neighbourhood`, when §27.2 puts terrain, road,
+fences, garden and shed in **`exterior`**. A chunk's pack is its cell's, so where a tile is filed
+decides when it is in memory.
+
+Each is now placed in the exterior cell it **covers most of**:
+
+* not the cell containing its centre. A terrain tile is 16 m across and the front porch is 2.7 m;
+  the tile over the front of the house has its centre inside the porch and one 46th of its area
+  there, and filing it there put the ground the player walks in on into the ground-floor pack.
+* not a cell at the wrong **height**. `L1_BALCONY_REAR` is an exterior cell whose plan box sits
+  over the back lawn: a ground tile from −0.72 to +0.45 covers it exactly and is 3.65 m below its
+  floor. Filed there, the lawn would load with `house-l1` and unload when the player left the
+  first floor.
+* and never `EXT_WORLD` while any cell of the property overlaps it. The world is the ring outside
+  the boundary and the west fence stands on the line, half its posts each side; whichever way that
+  arithmetic came out, this property's fence belongs to this property's pack. A road segment 100 m
+  away overlaps nothing of the property and lands in the world, which is where it is.
+
+**The cell is a residency key here and not a visibility one.** §25.6 culls the outdoors with a
+bounding-volume hierarchy over instances and their own boxes, precisely because `EXT_WORLD` is one
+enormous cell that portal traversal cannot help inside — so a terrain tile straddling two yards is
+not hidden by the one it is filed under. This house: **61 exterior files, 30 chunks in `exterior`
+and 9 in `neighbourhood`** — the latter being the 21 road segments and 8 terrain tiles that are
+genuinely beyond the property.
+
 ## 4b. Uploading: the declaration is the meaning, the built-in type is a carrier
 
 `HOUSE-00474`. XNA 4.0's `VertexBuffer.SetData<T>` is generic over any struct, so real XNA declares

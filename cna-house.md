@@ -1829,6 +1829,12 @@ cap, so the second criterion has an enormous margin and the first has none:
   single prop.** It is recorded here rather than adjusted, because what the number is protecting
   is draw calls per frame and that is §71's budget to settle with a measurement, not this
   section's to weaken by assertion.
+* **The outdoors is chunked too, since `HOUSE-00780`.** The terrain tiles, road segments, fences,
+  gates and garden structures are generated one file per thing and named for the thing, so each is
+  filed in the exterior cell it covers most of — the cell being a **residency** key (§27.2's pack)
+  and not a visibility one, because §25.6 culls the outdoors with a BVH over instances. Measured:
+  61 files, 466 chunks over 93 cells, 30 chunks in the `exterior` pack and 9 in `neighbourhood`.
+  `EXT_ROAD` and `EXT_WORLD` join the four cells over the six-chunk target, at 8 and 9.
 * Ten cells and one non-cell draw **nothing**: a yard is ground and sky. `HOUSE-00475` found every
   exterior cell building walls at its own `yOverride` height — 20 m round each yard, 65 m round
   `EXT_WORLD`'s 400 m square — so the first frame the blockout drew was the inside of that box.

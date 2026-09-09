@@ -105,7 +105,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 3 | Content pipeline | 00181–00260 | 46 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 81 | The full layout authored, validated and loaded |
-| 6 | Blockout house geometry | 00451–00540 | 43 | The generated shell renders |
+| 6 | Blockout house geometry | 00451–00540 | 44 | The generated shell renders |
 | 7 | Collision and player controller | 00541–00620 | 38 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
@@ -7684,6 +7684,12 @@ the chunk builder produces ≤ 6 chunks per cell.
             those two.
 - [ ] HOUSE-00487 — Bring `L0_GARAGE` and the three attic stores back inside §17.4's six chunks a cell
       dep: HOUSE-00473 · sys: content · plat: TOOL · pri: SHOULD
+      note: (2026-09-09, extended by `HOUSE-00780`) **two more, and they are the outdoors.** Now
+            that the terrain tiles, road segments, fences and garden structures are chunked,
+            `EXT_ROAD` is at 8 and `EXT_WORLD` at 9 -- the road alone carries asphalt, two kerb
+            materials, three road markings and the verge, one chunk each. Six cells are now eight.
+            The same question decides all of them: §17.4's target protects draw calls per frame,
+            and §71's budget is what settles whether six is the right number.
       finding: (2026-09-09, found by `HOUSE-00486`) **four cells have been over §17.4's chunk target
             since before this task, and the `chunks` stage of the content build has been failing on
             it.** `L0_GARAGE` carries seven materials -- ceiling, exterior, floor, glass, metal,
@@ -7811,6 +7817,22 @@ the chunk builder produces ≤ 6 chunks per cell.
             needs `--output-on-failure` in the wrapper so a sighting is not lost, and the pose
             comparison should say WHICH pose and by how many pixels. §46's own words apply --
             *"a flaky render test is worse than none, because it teaches people to ignore it"*.
+- [ ] HOUSE-00494 — The roofs and the chimney load with the `neighbourhood` pack
+      dep: HOUSE-00780 · sys: content · plat: TOOL · pri: SHOULD
+      note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
+            Found by `HOUSE-00780`. `ROOF_MAIN`, `ROOF_GARAGE` and `CHIMNEY` name no cell, so
+            `HOUSE-00473` files them under `outdoor_cell` -- `EXT_WORLD`, whose `residencyPack` is
+            `neighbourhood`. §27.3's T3 loads `exterior` and then `neighbourhood`, so the house's
+            own roof is resident only once the distant houses are, and is demoted with them.
+      note: `HOUSE-00780`'s coverage rule cannot place them: a roof's bounding box spans the whole
+            house from the ground up -- its downspouts reach the lawn -- so it overlaps every yard
+            and the rear balcony about equally, and the answer it gives is an accident of which
+            yard is longest.
+      note: §27.2's pack table lists no roof at all: `exterior` is "terrain, road, fences, garden,
+            shed, vehicles, vegetation" and `house-l3` is "L3 shell, lightmaps, props". A roof is
+            seen from outdoors whatever level the player is on, so `house-l3` would make it vanish
+            from the street; `exterior` fits what it is for. That is §27's call and is recorded
+            here with the measurement rather than made by the task that found it.
 - [ ] HOUSE-00491 — Two gable louvres open into the hip roof
       dep: HOUSE-00490 · sys: world · plat: TOOL · pri: SHOULD
       note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
@@ -11373,8 +11395,54 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: 15 claims over the real house and the sampling, and 3 injections, all CAUGHT --
             one point per cell again, a blocked sample counted as silence, and the sample count
             left out of the file.
-- [ ] HOUSE-00780 — Implement exterior chunking and residency for the `exterior` pack
+- [x] HOUSE-00780 — Implement exterior chunking and residency for the `exterior` pack
       dep: HOUSE-00215, HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/build_chunks.py --selftest`
+      note: (2026-09-09) `build_chunks` read `build/shell` and nothing else, so §11's outdoors --
+            25 terrain tiles, 22 road segments, 8 fence runs, 3 gates and 9 garden structures, all
+            generated and all on disk -- was in no chunk at all. It reads `build/terrain` and
+            `build/fence` too now, and each file is placed in the exterior cell it stands in.
+      finding: **a chunk's residency pack is its CELL's, so where a tile is filed decides when it
+            is in memory.** An exterior file is named for the thing it is -- `TERRAIN_R2C3`,
+            `EXT_FENCE_N_W`, `ROAD_S07` -- and never for a cell, so `outdoor_cell`'s fallback gave
+            every one of them `EXT_WORLD`, whose pack is `neighbourhood`. §27.2 puts terrain,
+            road, fences, garden and shed in **`exterior`**: the ground the player walks on would
+            have loaded and unloaded with the distant houses.
+      finding: **placement is by COVERAGE and not by centre.** A terrain tile is 16 m across and
+            the front porch is 2.7 m: the tile over the front of the house has its centre inside
+            the porch and one 46th of its area there, and centre-placement filed the ground the
+            player walks in on under `house-l0`.
+      finding: **and the cell has to be at the right height.** `L1_BALCONY_REAR` is an exterior
+            cell whose plan box sits over the back lawn, so a ground tile from -0.72 to +0.45
+            covers it exactly while being 3.65 m below its floor. Filed there, the back lawn
+            loaded with `house-l1` and vanished when the player left the first floor. Both of
+            these were live before the rule was finished, and both are claims now.
+      finding: **`EXT_WORLD` is the last resort and never a competitor.** It is the ring outside
+            the boundary, and `EXT_FENCE_W` stands on the line with half its posts each side: by
+            raw overlap the world won it. A fence of this property belongs to this property's
+            pack; a road segment 100 m away overlaps nothing of the property and lands in the
+            world, which is where it is.
+      finding: the cell is a **residency** key here and not a visibility one, which is what makes
+            all of the above safe: §25.6 culls the outdoors with a bounding-volume hierarchy over
+            instances and their own boxes, because `EXT_WORLD` is one enormous cell that portal
+            traversal cannot help inside. A tile straddling two yards is not hidden by the one it
+            is filed under.
+      measured: 61 exterior files placed over 10 cells; **466 chunks over 93 cells** where the
+            shell alone was 436 over 86; 108 611 vertices, 3.45 MB packed against 5.21 MB in
+            CNA's model vertex. By pack: `house-l0` 117, `house-l1` 102, `house-l2` 90,
+            `house-b1` 80, `house-l3` 38, **`exterior` 30**, `neighbourhood` 9 -- the last being
+            the 21 road segments and 8 terrain tiles genuinely beyond the property.
+      finding: `EXT_ROAD` (8) and `EXT_WORLD` (9) now join `HOUSE-00487`'s four cells over §17.4's
+            six-chunk target, for the same reason those four are over it: one chunk per material,
+            and the road carries asphalt, two kerb materials, three markings and the verge. Added
+            to that task's list rather than resolved here.
+      note: **the roofs and the chimney still load with `neighbourhood`** -- `HOUSE-00494`. They
+            name no cell either and `HOUSE-00473` gave them `EXT_WORLD`; coverage cannot place
+            them, because a roof's bounding box spans the whole house from the ground up (its
+            downspouts reach the lawn) and overlaps every yard and the balcony equally. Which
+            pack a roof belongs to is §27.2's to say, and it lists no roof.
+      verified: 9 claims and 3 injections, all CAUGHT -- placement by centre instead of coverage,
+            the height test dropped, and the world competing with the property.
 - [ ] HOUSE-00781 — Render tests: 8 exterior poses covering the road, drive, front, side yards, terrace, garden and orchard
       dep: HOUSE-00780 · sys: ci · plat: CI · pri: MUST
 - [x] HOUSE-00782 — Test: the property is fully walkable and fully bounded (bot walk, boundary counter 0)
@@ -13558,19 +13626,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 327 numbered tasks across 53 phases.**
+**1 328 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
-| World data, blockout, collision, camera, visibility | 5–9 | 215 |
+| World data, blockout, collision, camera, visibility | 5–9 | 216 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 133 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 327** |
+| **Total** | **0–52** | **1 328** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
