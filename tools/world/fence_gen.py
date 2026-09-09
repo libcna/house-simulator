@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-"""fence_gen.py -- §11.2's fences, generated from the exterior layout.
+"""fence_gen.py -- §11.2's fences and gates and §11.1's shed, from the exterior layout.
 
-`HOUSE-00766`. The boundary a lot has: the 1.85 m board fence on the west, north and east
-boundaries and the 1.35 m ornamental fence along the road frontage, as posts with caps, rails and
-the surface between them.
+`HOUSE-00766`, `HOUSE-00767`, `HOUSE-00768`. The boundary a lot has and the things standing on it:
+the 1.85 m board fence on the west, north and east boundaries and the 1.35 m ornamental fence along
+the road frontage, as posts with caps, rails and the surface between them; the three gates cut into
+them, each with the ironmongery its kind needs; and the garden shed, which is an enterable cell.
 
-    tools/world/fence_gen.py                       # every fence -> build/fence/<ID>.glb
+    tools/world/fence_gen.py                       # -> build/fence/<ID>.glb
     tools/world/fence_gen.py --selftest
+
+§17's generator table gives this tool "fences, gates, trellis, the shed", and they are one tool
+because they are one question: what the exterior layout says stands on the boundary.
 
 ## Why it is generated and not modelled
 
@@ -290,24 +294,39 @@ def gates(directory: Path) -> list[dict]:
         fixed: list[dict] = []
         hardware: list[tuple[str, str]] = []
         hinged = row.get("kind") in ("hinged", "bolted")
+        # §11.2 says the pedestrian gate is "single hinge east", and a hinge side cannot be derived
+        # from anything else in the file, so the layout carries it (`HOUSE-00767`). A gate that
+        # does not say is hung at the LOW end of its own opening, which is a default and is
+        # recorded as one.
+        far_side = row.get("hinge") in ("east", "north")
         if hinged:
-            # Hung on the LEFT post, which is the one at the low end of the opening: §11.2 says
-            # "single hinge east" for the pedestrian gate and this is that hinge's own side.
+            # The hinge stile and the one the catch is on, which is the whole of what the side
+            # decides: everything else about the leaf is symmetric.
+            hinge_x, catch_x = (leaf_x1, leaf_x0) if far_side else (leaf_x0, leaf_x1)
+            post_x = x1 if far_side else x0
+            reach = -HINGE[0] if far_side else HINGE[0]
             for level in (low + 0.20, high - 0.30):
-                leaf += _box((leaf_x0, level, plane - HINGE[2] / 2.0 - thickness / 2.0),
-                             (leaf_x0 + HINGE[0], level + HINGE[1],
+                leaf += _box((min(hinge_x, hinge_x + reach), level,
+                              plane - HINGE[2] / 2.0 - thickness / 2.0),
+                             (max(hinge_x, hinge_x + reach), level + HINGE[1],
                               plane - thickness / 2.0))
-                fixed += _box((x0 - HINGE[1], level, plane - HINGE[2] / 2.0 - thickness / 2.0),
-                              (leaf_x0, level + HINGE[1], plane - thickness / 2.0))
+                fixed += _box((min(hinge_x, post_x + (HINGE[1] if far_side else -HINGE[1])), level,
+                               plane - HINGE[2] / 2.0 - thickness / 2.0),
+                              (max(hinge_x, post_x + (HINGE[1] if far_side else -HINGE[1])),
+                               level + HINGE[1], plane - thickness / 2.0))
                 hardware += [("hinge", "leaf"), ("hinge", "fixed")]
             catch = BOLT if row.get("kind") == "bolted" else LATCH
-            leaf += _box((leaf_x1 - catch[0], base + 0.95, plane + thickness / 2.0),
-                         (leaf_x1, base + 0.95 + catch[1], plane + thickness / 2.0 + catch[2]))
-            fixed += _box((leaf_x1, base + 0.95, plane + thickness / 2.0),
-                          (x1, base + 0.95 + catch[1], plane + thickness / 2.0 + catch[2]))
+            span = catch[0] if far_side else -catch[0]
+            leaf += _box((min(catch_x, catch_x + span), base + 0.95, plane + thickness / 2.0),
+                         (max(catch_x, catch_x + span), base + 0.95 + catch[1],
+                          plane + thickness / 2.0 + catch[2]))
+            keeper = x0 if far_side else x1
+            fixed += _box((min(catch_x, keeper), base + 0.95, plane + thickness / 2.0),
+                          (max(catch_x, keeper), base + 0.95 + catch[1],
+                           plane + thickness / 2.0 + catch[2]))
             name = "bolt" if row.get("kind") == "bolted" else "latch"
             hardware += [(name, "leaf"), (name, "fixed")]
-            pivot = (leaf_x0, base, plane)
+            pivot = (hinge_x, base, plane)
             travel = None
         else:
             # A sliding gate: a track on the ground, two rollers under the leaf, and six metres of
@@ -341,6 +360,7 @@ def gates(directory: Path) -> list[dict]:
             "pivot": pivot,
             "travel": travel,
             "interactable": row.get("interactable"),
+            "hinge": row.get("hinge"),
             "bounds": (min(p[0] for p in points), min(p[1] for p in points),
                        min(p[2] for p in points), max(p[0] for p in points),
                        max(p[1] for p in points), max(p[2] for p in points)),
@@ -348,7 +368,125 @@ def gates(directory: Path) -> list[dict]:
     return out
 
 
-def _document(name: str, parts: list[tuple[str, list, dict]], material: str,
+def _panel(u0: float, u1: float, v0: float, v1: float,
+           holes: list[tuple[float, float, float, float]]) -> list[tuple[float, float, float, float]]:
+    """@p (u0, u1) x (v0, v1) with @p holes taken out of it, as the rectangles that are left.
+
+    Bands first, then runs: split at every hole's u boundary, and inside each band take the holes
+    that span it out of the height. The same shape of answer `house_shell_gen.panel` gives, done
+    again here because that one lives inside Blender and this tool does not.
+    """
+    edges = sorted({u0, u1} | {edge for hole in holes for edge in (hole[0], hole[1])
+                               if u0 - 1e-9 < edge < u1 + 1e-9})
+    out = []
+    for left, right in zip(edges, edges[1:]):
+        if right - left <= 1e-6:
+            continue
+        cuts = [(hole[2], hole[3]) for hole in holes
+                if hole[0] <= left + 1e-6 and hole[1] >= right - 1e-6]
+        cursor = v0
+        for cut_low, cut_high in sorted(cuts):
+            if cut_low > cursor + 1e-6:
+                out.append((left, right, cursor, min(cut_low, v1)))
+            cursor = max(cursor, cut_high)
+        if v1 > cursor + 1e-6:
+            out.append((left, right, cursor, v1))
+    return out
+
+
+def shed(directory: Path) -> dict | None:
+    """§11.1's garden shed: floor, four walls with their openings cut, and a gable roof.
+
+    **An enterable cell, so it is built from the CELL and not from the footprint.** `EXT_SHED` is
+    the volume a body stands in (3.2 m square, head at 2.35) and `STRUCT_SHED`'s footprint is that
+    plus the wall thickness, which is where the walls go. Building it the other way round would put
+    the walls inside the room and the door frame in the wrong plane from §16's portal.
+    """
+    layout = layout_io.load_layout(directory)
+    exterior = layout.get("exterior") or {}
+    structures = exterior.get("structures") or []
+    if not structures:
+        return None
+    row = structures[0]
+    cell = next((one for one in layout_io.rows(layout, "cells")
+                 if one["id"] == row.get("cell")), None)
+    if cell is None:
+        return None
+
+    box = cell["boxes"][0]
+    ix0, ix1 = float(box["x"][0]), float(box["x"][1])
+    iz0, iz1 = float(box["z"][0]), float(box["z"][1])
+    override = cell.get("yOverride") or [0.0, 2.35]
+    floor, head = float(override[0]), float(override[1])
+    ox0, ox1 = float(row["footprint"]["x"][0]), float(row["footprint"]["x"][1])
+    oz0, oz1 = float(row["footprint"]["z"][0]), float(row["footprint"]["z"][1])
+    eaves = float(row.get("eavesY") or head)
+    ridge = float(row.get("ridgeY") or eaves + 0.5)
+
+    # §16's own openings, in the wall each one is in. A shed with a door drawn where the portal is
+    # not is a shed you cannot walk into.
+    holes: dict[tuple[str, float], list[tuple[float, float, float, float]]] = {}
+    for portal in layout_io.rows(layout, "portals"):
+        if cell["id"] not in (portal.get("cellA"), portal.get("cellB")):
+            continue
+        plane, rect = portal.get("plane") or {}, portal.get("rect") or {}
+        if not rect.get("u") or not isinstance(plane.get("value"), (int, float)):
+            continue
+        key = (plane["axis"], round(float(plane["value"]), 4))
+        holes.setdefault(key, []).append((float(rect["u"][0]), float(rect["u"][1]),
+                                          floor + float(rect["v"][0]), floor + float(rect["v"][1])))
+
+    parts: list[tuple[str, list]] = []
+    walls: list[dict] = []
+    # The four walls, each from the room's own face out to the footprint.
+    for axis, plane, outer, other in (("x", ix0, ox0, (iz0, iz1)), ("x", ix1, ox1, (iz0, iz1)),
+                                      ("z", iz0, oz0, (ix0, ix1)), ("z", iz1, oz1, (ix0, ix1))):
+        cut = holes.get((axis, round(plane, 4)), [])
+        for u0, u1, v0, v1 in _panel(other[0], other[1], floor, head, cut):
+            low = (min(plane, outer), v0, u0) if axis == "x" else (u0, v0, min(plane, outer))
+            high = (max(plane, outer), v1, u1) if axis == "x" else (u1, v1, max(plane, outer))
+            walls += _box(low, high)
+    parts.append(("STRUCT_SHED_WALLS", walls))
+
+    slab = _box((ox0, floor - 0.10, oz0), (ox1, floor, oz1))
+    parts.append(("STRUCT_SHED_FLOOR", slab))
+
+    # A gable roof with its ridge along X, so the door is in a gable end -- which is what a shed
+    # this shape is: 3.6 m square, eaves at 2.35 and the ridge half a metre over them.
+    middle = (oz0 + oz1) / 2.0
+    rise, run = ridge - eaves, abs(middle - oz0)
+    length = (rise ** 2 + run ** 2) ** 0.5
+    roof: list[dict] = []
+    for near in (oz0, oz1):
+        # The pitch's own normal, from the rise and the run, rather than a pair of numbers that
+        # look about right: §11.1 gives eaves 2.35 and ridge 2.85 over 1.8 m, which is not 45°.
+        outward = (0.0, run / length, (-rise / length) if near < middle else (rise / length))
+        corners = [(ox0, eaves, near), (ox1, eaves, near), (ox1, ridge, middle), (ox0, ridge, middle)]
+        if near < middle:
+            corners = list(reversed(corners))
+        roof.append((corners, outward))
+    for gable in (ox0, ox1):
+        corners = [(gable, eaves, oz0), (gable, eaves, oz1), (gable, ridge, middle)]
+        if gable == ox1:
+            corners = list(reversed(corners))
+        roof.append((corners, (-1.0 if gable == ox0 else 1.0, 0.0, 0.0)))
+    parts.append(("STRUCT_SHED_ROOF", roof))
+
+    points = [point for _name, faces in parts for corners, _n in faces for point in corners]
+    return {
+        "id": row["id"],
+        "cell": cell["id"],
+        "parts": parts,
+        "openings": sum(len(value) for value in holes.values()),
+        "interior": (ix1 - ix0) * (iz1 - iz0),
+        "eaves": eaves,
+        "ridge": ridge,
+        "bounds": (min(p[0] for p in points), min(p[1] for p in points), min(p[2] for p in points),
+                   max(p[0] for p in points), max(p[1] for p in points), max(p[2] for p in points)),
+    }
+
+
+def _document(parts: list[tuple[str, list, dict]], material: str,
               style: str) -> tuple[dict, bytes]:
     """@p parts as one glTF document -- a node each, one shared material.
 
@@ -389,7 +527,10 @@ def _document(name: str, parts: list[tuple[str, list, dict]], material: str,
                 normals.append(normal)
                 # World metres, like the ground's: a fence's boards are the same size everywhere.
                 uvs.append((point[0] + point[2], point[1]))
-            indices += [base, base + 1, base + 2, base, base + 2, base + 3]
+            # A quad is two triangles and a gable end is one: a face with three corners is a
+            # triangle, not a quad with two of its corners in the same place.
+            indices += ([base, base + 1, base + 2] if len(corners) == 3
+                        else [base, base + 1, base + 2, base, base + 2, base + 3])
         position = store(positions, "VEC3")
         normal_at = store(normals, "VEC3")
         uv0 = store(uvs, "VEC2")
@@ -424,12 +565,11 @@ def _document(name: str, parts: list[tuple[str, list, dict]], material: str,
         "bufferViews": views,
         "buffers": [{"byteLength": len(blob)}],
     }
-    assert name
     return document, bytes(blob)
 
 
 def _fence_document(fence: dict) -> tuple[dict, bytes]:
-    return _document(fence["id"], [(fence["id"], fence["faces"], {})],
+    return _document([(fence["id"], fence["faces"], {})],
                      f"FENCE_{fence['style']}", fence["style"])
 
 
@@ -445,8 +585,7 @@ def _gate_document(gate: dict) -> tuple[dict, bytes]:
         # A hinged leaf swings about +Y through its own pivot; the layout says which way the
         # pedestrian gate is hung and §11.2's other two are the same arrangement.
         moving["axis"] = [0.0, 1.0, 0.0]
-    return _document(gate["id"],
-                     [(f"{gate['id']}_LEAF", gate["leaf"], moving),
+    return _document([(f"{gate['id']}_LEAF", gate["leaf"], moving),
                       (f"{gate['id']}_FIXED", gate["fixed"], {"fixed": True})],
                      f"GATE_{gate['style']}", gate["style"])
 
@@ -459,6 +598,13 @@ def emit(directory: Path, output: Path) -> dict:
         gltf_io.write_glb(output / f"{fence['id']}.glb", document, blob)
         written.append(fence["id"])
         triangles += len(fence["faces"]) * 2
+    built = shed(directory)
+    if built is not None:
+        document, blob = _document([(name, faces, {}) for name, faces in built["parts"]],
+                                   "SHED_timber", "shed")
+        gltf_io.write_glb(output / f"{built['id']}.glb", document, blob)
+        written.append(built["id"])
+        triangles += sum(len(faces) * 2 for _name, faces in built["parts"])
     for gate in gates(directory):
         document, blob = _gate_document(gate)
         gltf_io.write_glb(output / f"{gate['id']}.glb", document, blob)
@@ -662,10 +808,21 @@ def selftest() -> int:
     sliding = [gate for gate in hung if gate["travel"] is not None]
     require(len(swinging) == 2 and len(sliding) == 1,
             "two swing and one slides, which is §11.2's own arrangement")
-    hinged_at = [(gate["id"], abs(gate["pivot"][0] - gate["leafBounds"][0]))
-                 for gate in swinging]
-    require(all(offset < 0.05 for _id, offset in hinged_at),
-            f"a swinging leaf's pivot is at its own hinge stile and not at its middle ({hinged_at})")
+    hinged_at = [(gate["id"], min(abs(gate["pivot"][0] - gate["leafBounds"][0]),
+                                  abs(gate["pivot"][0] - gate["leafBounds"][3])),
+                  gate["hinge"]) for gate in swinging]
+    require(all(offset < 0.05 for _id, offset, _side in hinged_at),
+            f"a swinging leaf's pivot is at ONE of its two stiles and not at its middle "
+            f"({[(one[0], round(one[1], 3)) for one in hinged_at]})")
+    authored = {gate["id"]: gate for gate in swinging if gate["hinge"]}
+    wrong_side = [(gate_id, gate["hinge"], round(gate["pivot"][0], 2))
+                  for gate_id, gate in authored.items()
+                  if (gate["hinge"] in ("east", "north"))
+                  != (abs(gate["pivot"][0] - gate["leafBounds"][3]) < 1e-6)]
+    described = ", ".join(f"{gate_id} on its {gate['hinge']} stile"
+                          for gate_id, gate in authored.items())
+    require(authored and not wrong_side,
+            f"and the one §11.2 says is hung EAST is hung east: {described} ({wrong_side})")
     require(all(abs(abs(gate["travel"][0]) - gate["width"]) < 1e-6 for gate in sliding),
             f"and the sliding gate travels its own width -- {sliding[0]['width']:.1f} m of "
             f"opening, {abs(sliding[0]['travel'][0]):.1f} m of travel")
@@ -693,6 +850,66 @@ def selftest() -> int:
             f"({missing[:2]})")
     require(_gate_document(hung[0]) == _gate_document(gates(SOURCE)[0]),
             "a gate renders the same bytes twice")
+
+    # 8. `HOUSE-00768`'s shed.
+    built = shed(SOURCE)
+    require(built is not None, "§11.1's garden shed is built from the layout's own structure row")
+    if built is not None:
+        structure = ((layout.get("exterior") or {}).get("structures") or [])[0]
+        cell = next(one for one in layout_io.rows(layout, "cells") if one["id"] == built["cell"])
+        box = cell["boxes"][0]
+        interior = (float(box["x"][1]) - float(box["x"][0])) * (float(box["z"][1]) - float(box["z"][0]))
+        require(abs(built["interior"] - interior) < 1e-6 and built["cell"] == structure["cell"],
+                f"and it is built from the CELL a body stands in ({interior:.2f} m² of floor) "
+                f"inside the footprint the structure declares, which is where the walls go")
+        require(abs(built["bounds"][0] - float(structure["footprint"]["x"][0])) < 1e-6
+                and abs(built["bounds"][3] - float(structure["footprint"]["x"][1])) < 1e-6
+                and abs(built["bounds"][2] - float(structure["footprint"]["z"][0])) < 1e-6
+                and abs(built["bounds"][5] - float(structure["footprint"]["z"][1])) < 1e-6,
+                "so its walls stand exactly on that footprint, no wider and no narrower")
+        require(abs(built["bounds"][4] - float(structure["ridgeY"])) < 1e-6
+                and built["ridge"] > built["eaves"],
+                f"its ridge is the layout's own {structure['ridgeY']} m and its roof really does "
+                f"pitch from {built['eaves']:.2f} m of eaves")
+        require(built["openings"] == 2,
+                f"§11.1's one door and one window are cut in it, because §16's portals are where "
+                f"the holes are ({built['openings']})")
+
+        # A shed you can walk into: the door's own hole is empty all the way to the floor.
+        door = next(portal for portal in layout_io.rows(layout, "portals")
+                    if portal.get("id") == "P_EXT_GARDEN__EXT_SHED")
+        plane = float(door["plane"]["value"])
+        blocked = []
+        for name, faces in built["parts"]:
+            if name != "STRUCT_SHED_WALLS":
+                continue
+            for corners, _normal in faces:
+                xs = [point[0] for point in corners]
+                if not (min(xs) <= plane + 1e-6 and max(xs) >= plane - 1e-6):
+                    continue
+                zs = [point[2] for point in corners]
+                ys = [point[1] for point in corners]
+                du = min(max(zs), float(door["rect"]["u"][1])) - max(min(zs), float(door["rect"]["u"][0]))
+                dv = min(max(ys), float(door["rect"]["v"][1])) - max(min(ys), float(door["rect"]["v"][0]))
+                if du > 1e-6 and dv > 1e-6:
+                    blocked.append((round(du, 3), round(dv, 3)))
+        require(not blocked,
+                f"and nothing is drawn across the doorway, which is what makes the cell enterable "
+                f"({blocked[:3]})")
+
+        wrong_shed = []
+        for name, faces in built["parts"]:
+            for corners, normal in faces:
+                a, b, c = corners[0], corners[1], corners[2]
+                u = tuple(b[k] - a[k] for k in range(3))
+                v = tuple(c[k] - a[k] for k in range(3))
+                cross = (u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2],
+                         u[0] * v[1] - u[1] * v[0])
+                if sum(cross[k] * normal[k] for k in range(3)) <= 1e-9:
+                    wrong_shed.append(name)
+        require(not wrong_shed,
+                f"every face of it is wound the way its own normal says, gable ends included "
+                f"({sorted(set(wrong_shed))})")
 
     if failures:
         print(f"\nfence_gen: {len(failures)} claim(s) FAILED")

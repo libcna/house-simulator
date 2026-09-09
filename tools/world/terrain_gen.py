@@ -143,9 +143,25 @@ def surfaces(directory: Path):
         z = float(road["centreline"][0][2])
         out.append(([{"x": [-40.0, 40.0], "z": [z - half, z + half]}], 0.0,
                     BY_MATERIAL.get(road.get("material"), "asphalt")))
-    # A structure's pad is flat under it: §11.6 puts the shed on one.
+    # A structure's pad is flat under it AT ITS OWN FLOOR, which is what a pad is (`HOUSE-00768`).
+    #
+    # §10.2 names it -- *"expressed as a coarse height field so drainage, the terrace step and the
+    # shed pad read correctly"* -- and until this the pad changed the MATERIAL and not the level:
+    # the shed's cell declares its floor at 0.00 and the lawn under it falls to -0.288, so the shed
+    # stood a foot in the air with daylight under the door. The terrace escaped because its floor
+    # is +0.45 and the exterior-cell rule below only fires on a NON-ZERO override; a floor of
+    # exactly zero is still a floor, and this is the rule that says so.
+    #
+    # A structure with no CELL is not a building: §11.1's raised beds, the compost bin and the
+    # trellis stand on the garden, and gravelling and levelling the soil under a vegetable bed
+    # would be the generator inventing a yard nobody asked for. Only something with a floor gets
+    # a pad, and having a floor is what `yOverride` on its cell says.
+    cells_by_id = {row["id"]: row for row in layout_io.rows(layout, "cells")}
     for row in exterior.get("structures", []):
-        out.append(([row["footprint"]], None, "gravel"))
+        override = (cells_by_id.get(row.get("cell")) or {}).get("yOverride")
+        if not override:
+            continue
+        out.append(([row["footprint"]], float(override[0]), "gravel"))
     # An outdoor cell with a floor of its own is a deck or a terrace, and the ground under it is
     # flat at that height. `EXT_TERRACE` at +0.45 is the case §11.6 names.
     #
@@ -1121,6 +1137,31 @@ def selftest() -> int:
         require(not pads,
                 f"and every outdoor cell with a floor of its own stands on a flat pad at that "
                 f"height -- §11.1's terrace at +0.45 is the case it is for ({pads[:3]})")
+
+        # And a STRUCTURE's pad, which is the same rule for the thing standing on it rather than
+        # for the cell inside it (`HOUSE-00768`). A floor of exactly zero is still a floor: the
+        # shed's is 0.00 and the lawn under it falls to -0.29, so without this it stood a foot in
+        # the air with daylight under its door.
+        standing = []
+        for row in (whole.get("exterior") or {}).get("structures", []):
+            cell = next((one for one in layout_io.rows(whole, "cells")
+                         if one["id"] == row.get("cell")), None)
+            override = (cell or {}).get("yOverride")
+            if not override:
+                continue
+            box = row["footprint"]
+            height, material = _sample((float(box["x"][0]) + float(box["x"][1])) / 2.0,
+                                       (float(box["z"][0]) + float(box["z"][1])) / 2.0)
+            beside, _outside = _sample(float(box["x"][1]) + 2.0,
+                                       (float(box["z"][0]) + float(box["z"][1])) / 2.0)
+            standing.append((row["id"], round(height, 3), float(override[0]), round(beside, 3),
+                             material))
+        wrong_pad = [row for row in standing if abs(row[1] - row[2]) > 1e-3]
+        described = ", ".join(f"{row[0]} at {row[1]:+.2f} on {row[4]} with the ground at "
+                              f"{row[3]:+.2f} two metres away" for row in standing)
+        require(standing and not wrong_pad,
+                f"and every structure stands on a pad at ITS OWN floor: {described} "
+                f"({wrong_pad[:2]})")
 
         require(all(primitive["material"] != "TERRAIN_grass"
                     or any(abs(v[0][2] - 13.4) < 1e-6 for v in primitive["vertices"]) is False

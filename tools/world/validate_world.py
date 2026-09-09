@@ -151,7 +151,7 @@ RULE_TITLES = {
     4: "portal rectangles lie in both cells' planes",
     5: "the portal graph is connected",
     6: "every reference resolves",
-    7: "every door and window has exactly one portal",
+    7: "every door and window has exactly one portal, and no two share a hole",
     8: "stair flights reach the floor they claim",
     9: "every plumbing fixture is on a declared stack",
     10: "the layout is dimensionally plausible",
@@ -1249,10 +1249,20 @@ def rule_6_references(world: World) -> list[Problem]:
 
 
 def rule_7_openings(world: World) -> list[Problem]:
-    """Every door has exactly one portal and every window has exactly one portal.
+    """Every door has exactly one portal and every window has exactly one portal, and no two
+    openings in one wall overlap.
 
     Both directions. A door with no portal is a leaf that swings in a solid wall; a portal claimed
     by two doors is two leaves in one hole, and neither of those can be seen by looking at one row.
+
+    **And no two holes in the same wall may overlap** (`HOUSE-00768`). Two portals on one plane
+    between the same two cells are two holes cut in one wall, and if their rectangles intersect the
+    wall has a single hole the shape of their union: a window sitting inside a doorway, with a
+    frame across the opening and a leaf that shuts into glass. It is invisible in every row on its
+    own -- both portals are perfectly well formed -- and it is arithmetic between two of them, so
+    it belongs here. Two were found the day this was written: the shed's window overlapped its door
+    by 250 mm, and the kitchen's borrowed-light window stood 850 mm inside the sunroom's cased
+    opening.
 
     The rule needs both files. Portals are authored before leaves (`HOUSE-00375` then
     `HOUSE-00378`), so it stands down until `layout.openings.json` exists -- the same arrangement
@@ -1306,6 +1316,35 @@ def rule_7_openings(world: World) -> list[Problem]:
                 7, FILE_OF["portals"], f"portals/{index}/aperture",
                 f"portal {portal_id} names aperture {aperture} and is claimed by opening "
                 f"{claimed[portal_id][0]}; the two files have to agree on which leaf this is"))
+
+    # Two holes in one wall may not overlap. Grouped by the wall itself -- the plane AND the pair
+    # of cells -- because two portals on one plane between different rooms are two different walls
+    # that happen to be in line, which is most of a storey's partitions.
+    walls: dict[tuple, list[tuple[int, dict]]] = {}
+    for index, portal in enumerate(world.portals):
+        plane = portal.get("plane") or {}
+        rect = portal.get("rect") or {}
+        if not isinstance(plane.get("value"), (int, float)) or not rect.get("u") or not rect.get("v"):
+            continue
+        key = (plane.get("axis"), round(float(plane["value"]), 4),
+               tuple(sorted((str(portal.get("cellA")), str(portal.get("cellB"))))))
+        walls.setdefault(key, []).append((index, portal))
+    for key, group in sorted(walls.items(), key=lambda item: str(item[0])):
+        for first in range(len(group)):
+            for second in range(first + 1, len(group)):
+                _index_a, a = group[first]
+                index_b, b = group[second]
+                du = (min(float(a["rect"]["u"][1]), float(b["rect"]["u"][1]))
+                      - max(float(a["rect"]["u"][0]), float(b["rect"]["u"][0])))
+                dv = (min(float(a["rect"]["v"][1]), float(b["rect"]["v"][1]))
+                      - max(float(a["rect"]["v"][0]), float(b["rect"]["v"][0])))
+                if du <= 1e-6 or dv <= 1e-6:
+                    continue
+                problems.append(Problem(
+                    7, FILE_OF["portals"], f"portals/{index_b}/rect",
+                    f"portal {b.get('id')} overlaps {a.get('id')} by {du:.3f} x {dv:.3f} m in the "
+                    f"same wall ({key[0]} = {key[1]}, between {key[2][0]} and {key[2][1]}); two "
+                    f"holes cut in one wall make one hole the shape of their union"))
     return problems
 
 

@@ -15914,7 +15914,7 @@
       "id": "TERRAIN_HEIGHTFIELD",
       "category": "terrain",
       "sourceFile": "assets-src/world/terrain.png",
-      "sourceSha256": "6a9dc96487f44f944af9b65fb3209601257cc8cfa31946c87e87438889ee8cc6",
+      "sourceSha256": "0e2a97acc9afc236f12a7892841e065e7cd1d2cad8a737cccfaa5d9908255395",
       "origin": {
         "kind": "generated",
         "name": "Site height field, 81 x 65 samples on a 1 m grid",

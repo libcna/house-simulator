@@ -56,6 +56,11 @@ the stages happen to be written in. Adding a stage means naming its dependencies
 Validators gate the generators by an explicit edge rather than by sorting: a gate that ran after
 the generators would be reporting on assets the pipeline had already consumed.
 
+**`needs` also means stale.** A stage whose upstream ran is rebuilt, whatever its own inputs say,
+and the report names which upstream did it. Until `HOUSE-00768` this was ordering alone, and the
+consequence was a `nav.bin` built against a `collision.bin` that had since been rebuilt under it:
+the pet graph sat over the ground the terrain used to be, and every stage reported success.
+
 <!-- BEGIN GENERATED: build_content.py --docs -->
 
 | # | Stage | Group | What it does | Needs | Reads | Writes |
@@ -111,7 +116,7 @@ snowshell      python3 tools/world/build_snowshell.py
 | Outcome | Means |
 |---|---|
 | **built** | it ran |
-| **fresh** | its inputs, command and outputs are unchanged |
+| **fresh** | its inputs, command and outputs are unchanged — **and nothing it needs rebuilt** |
 | **skipped** | one of its input patterns matches nothing yet |
 | **blocked** | something it needs was skipped or failed |
 | **FAILED** | the tool exited non-zero; the build fails |

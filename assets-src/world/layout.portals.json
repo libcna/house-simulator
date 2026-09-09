@@ -330,7 +330,11 @@
       // it (`HOUSE-00376`).
       "id": "P_EXT_GARDEN__EXT_SHED", "cellA": "EXT_GARDEN", "cellB": "EXT_SHED",
       "plane": { "axis": "x", "value": -16.6 },
-      "rect": { "u": [-42.65, -41.75], "v": [0.0, 2.05] },
+      // Moved 0.45 m along the wall by `HOUSE-00768`: at Z -42.65 the doorway overlapped the
+      // window beside it by 250 mm, which is one hole the shape of both. The window keeps its
+      // §12.6 size and the door moves, because 1.2 m of window will not fit west of a door that
+      // starts at -42.65 in a wall that starts at -43.8. Rule 7 now says so.
+      "rect": { "u": [-42.20, -41.30], "v": [0.0, 2.05] },
       "kind": "exterior_door", "aperture": "DOOR_EXT_GARDEN__EXT_SHED", "opacity": "opaque_when_closed",
       "soundLoss": { "open": 0.109, "closed": 0.968 }
     },
@@ -1099,9 +1103,13 @@
     },
     {
       // W_INTERNAL, borrowed light.
+      // Moved 1.4 m west by `HOUSE-00768`: at X -4.60…-3.40 it stood 850 mm INSIDE the cased
+      // opening next to it (-4.25…-0.25), which is a window frame across a doorway. The wall
+      // between the two rooms runs -6.7…2.2 and the opening takes -4.25…-0.25, so the window now
+      // sits in the middle of the 2.45 m of wall west of it. Rule 7 now says so.
       "id": "P_L0_KITCHEN__W2", "cellA": "L0_KITCHEN", "cellB": "L0_SUNROOM",
       "plane": { "axis": "z", "value": -27.10 },
-      "rect": { "u": [-4.60, -3.40], "v": [1.55, 2.65] },
+      "rect": { "u": [-6.00, -4.80], "v": [1.55, 2.65] },
       "kind": "window", "aperture": "WIN_L0_KITCHEN_2",
       "opacity": "glass", "maxDepth": 2,
       "soundLoss": { "open": 0.109, "closed": 0.921 }

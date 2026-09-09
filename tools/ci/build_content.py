@@ -357,6 +357,12 @@ def build(stages: list[Stage], root: Path, stamps_path: Path, *, force: bool = F
 
     results = []
     blocked: set[str] = set()
+    # A stage whose upstream RAN is stale, whatever its own fingerprint says. `needs` is a fact
+    # about the graph and this is what makes it one: the pet graph is built against the collision
+    # world, and until this a terrain change rebuilt `collision.bin` and left `nav.bin` sitting
+    # over the ground it used to be. Found by `HOUSE-00768`, whose shed pad moved the lawn 0.29 m
+    # and rebuilt collision alone.
+    rebuilt: set[str] = set()
     failed = False
     for stage in order:
         if any(need in blocked for need in stage.needs):
@@ -365,6 +371,9 @@ def build(stages: list[Stage], root: Path, stamps_path: Path, *, force: bool = F
             blocked.add(stage.name)
             continue
         status, reason = status_of(stage, root, stamps, force)
+        upstream = sorted(need for need in stage.needs if need in rebuilt)
+        if status == "fresh" and upstream:
+            status, reason = "run", f"{', '.join(upstream)} rebuilt"
         if status == "skip":
             results.append({"stage": stage.name, "status": "skipped", "seconds": 0.0,
                             "reason": reason})
@@ -394,6 +403,7 @@ def build(stages: list[Stage], root: Path, stamps_path: Path, *, force: bool = F
             "fingerprint": digest, "outputs": list(stage.outputs), "seconds": round(elapsed, 3)}
         results.append({"stage": stage.name, "status": "built", "seconds": elapsed,
                         "reason": reason})
+        rebuilt.add(stage.name)
 
     if not dry_run:
         save_stamps(stamps_path, stamps)
@@ -541,6 +551,25 @@ def selftest() -> int:
         require(all(r["status"] == "fresh" for r in second["results"]),
                 "and reports every stage fresh")
 
+        # 3b. A stage whose UPSTREAM ran is stale, whatever its own inputs say (`HOUSE-00768`).
+        #     `third` reads `src/a.txt` and `second` reads `src/b.txt`, so changing b rebuilds
+        #     second -- and third, which is built against what second wrote. Until this, `nav.bin`
+        #     sat over the ground the terrain used to be, because `collision.bin` was rebuilt
+        #     under it and nav's own inputs had not changed.
+        ran.clear()
+        (root / "src" / "b.txt").write_text("beta again\n", encoding="utf-8")
+        cascade = build(fixture(), root, stamps, runner=fake)
+        statuses = {entry["stage"]: entry["status"] for entry in cascade["results"]}
+        reasons = {entry["stage"]: entry["reason"] for entry in cascade["results"]}
+        require(statuses == {"first": "fresh", "second": "built", "third": "built"}
+                and reasons["third"] == "second rebuilt",
+                f"a stage whose `needs` rebuilt is rebuilt too, and the report says whose "
+                f"({statuses}, third because {reasons['third']!r})")
+        ran.clear()
+        again = build(fixture(), root, stamps, runner=fake)
+        require(ran == [] and all(r["status"] == "fresh" for r in again["results"]),
+                "and it settles: the run after that rebuilds nothing")
+
         # 4. THE CLAIM THIS TOOL EXISTS FOR: mtime is not what freshness means. `git` does not
         #    preserve mtime, so an mtime build rebuilds the whole tree after every clone or branch
         #    switch -- and `AGENTS.md`'s entire argument is that avoidable rebuilds are
@@ -565,9 +594,11 @@ def selftest() -> int:
         (root / "src" / "a.txt").write_text("alpha!\n", encoding="utf-8")
         ran.clear()
         build(fixture(), root, stamps, runner=fake)
-        require(sorted(ran) == ["first", "third"],
-                f"changing a.txt rebuilds exactly the stages that read it ({sorted(ran)}) -- "
-                f"`second` reads b.txt and is left alone")
+        require(sorted(ran) == ["first", "second", "third"],
+                f"changing a.txt rebuilds `first`, which reads it, and everything downstream of "
+                f"`first` ({sorted(ran)}). Until `HOUSE-00768` this stopped at the stages whose "
+                f"own inputs changed, which left every stage built against another's output "
+                f"stale the moment that output moved")
 
         # 6. The COMMAND is part of the fingerprint. A stage run at 4 samples and one run at 64
         #    produce different content from identical inputs.
@@ -584,8 +615,9 @@ def selftest() -> int:
         (root / "out" / "second.bin").unlink()
         ran.clear()
         outcome = build(fixture(), root, stamps, runner=fake)
-        require(ran == ["second"],
-                f"deleting an output rebuilds that stage and only it ({ran})")
+        require(ran == ["second", "third"],
+                f"deleting an output rebuilds that stage, and `third` with it because it is built "
+                f"against what `second` writes ({ran})")
         require(any("output missing" in r["reason"] for r in outcome["results"]),
                 "and says so, rather than reporting it fresh")
 

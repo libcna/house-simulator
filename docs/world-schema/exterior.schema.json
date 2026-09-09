@@ -126,6 +126,14 @@
           "height": {
             "type": "number"
           },
+          "hinge": {
+            "enum": [
+              "north",
+              "south",
+              "east",
+              "west"
+            ]
+          },
           "id": {
             "$ref": "#/$defs/id"
           },

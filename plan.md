@@ -10881,6 +10881,14 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             screwed to the post outside it and a sliding gate's track has to reach as far as the
             leaf travels -- so the claim that a gate fills its opening and no more is made against
             the LEAF's bounds, which is the part that has to fit.
+      finding: (corrected the same day, with `HOUSE-00768`) **§11.2 says the pedestrian gate is
+            "single hinge east" and the layout could not.** The first version hung every leaf at
+            the LOW end of its opening, which is the wrong end for the one gate the design names a
+            side for, and no field in `layout.exterior.json` could say otherwise. `gates` now
+            carries an optional `hinge` -- north, south, east or west -- authored for that gate and
+            absent for the other two, whose side §11.2 does not state; a gate that does not say is
+            hung at the low end, which is a default and is recorded as one rather than passed off
+            as a fact. A seventh injection, ignoring the authored side, is CAUGHT.
       verified: 9 more `fence_gen --selftest` claims and 6 injections, all CAUGHT: a pivot at the
             leaf's middle instead of its hinge stile, a sliding gate that travels a metre instead
             of its own width, a leaf with no gap at its sides, the leaf and the ironmongery welded
@@ -10888,10 +10896,78 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             last two were MISSED first: `all(gate["fixed"])` was true with only a latch keeper, so
             the claim now names the ironmongery each kind needs -- two hinges and a latch, two
             hinges and a bolt, or a track and two rollers -- and which side of the gate each is on.
-- [ ] HOUSE-00768 — Generate the garden shed (walls, roof, door, window, floor) as an enterable cell
+- [x] HOUSE-00768 — Generate the garden shed (walls, roof, door, window, floor) as an enterable cell
       dep: HOUSE-00766 · sys: content · plat: TOOL · pri: MUST
+      measured: (2026-09-09) §11.1's shed in `fence_gen.py`: a floor slab, four walls with §16's
+            own two openings cut in them, and a gable roof from the layout's 2.35 m eaves to its
+            2.85 m ridge, **128 triangles**. The ridge runs along X so the door is in a gable end,
+            which is what a 3.6 m square shed with its door on one face is.
+      note: **built from the CELL and not from the footprint.** `EXT_SHED` is the 10.24 m² a body
+            stands in and `STRUCT_SHED`'s footprint is that plus the wall thickness, so the walls
+            run between the two. Building it the other way round puts the walls inside the room and
+            the door frame in a different plane from §16's portal -- which the injection that does
+            exactly that now catches.
+      finding: **two openings in this house shared a hole, and nothing could see it.** Drawing the
+            shed meant cutting its door and its window, and they overlap: 250 mm of the window is
+            inside the doorway. Looking for others found a second, worse one -- `L0_KITCHEN`'s
+            borrowed-light window stood **850 mm inside the sunroom's cased opening**, a window
+            frame across a doorway. Both portals are perfectly well formed on their own; the defect
+            is arithmetic BETWEEN two rows, which is why `validate_world.py` rule 7 now carries it:
+            *"every door and window has exactly one portal, and no two share a hole"*.
+      note: the shed's DOOR moved 0.45 m along its wall and the kitchen's WINDOW moved 1.4 m west.
+            The door moved because 1.2 m of window will not fit west of a door that starts at
+            z = -42.65 in a wall that starts at -43.8, and moving the window instead would have
+            changed a §12.6 size; the kitchen's window moved into the middle of the 2.45 m of wall
+            west of the opening, which is where a borrowed-light window belongs.
+      finding: **a gable end is a triangle.** The document builder emitted two triangles for every
+            face, so the first version wrote each gable as a quad with two corners in the same
+            place -- a degenerate facet, which is exactly what `verify_shell` refuses in the house's
+            own shell. It now emits one triangle for a three-corner face. The roof's normals are
+            computed from the rise and the run (0.5 m over 1.8 m) rather than from a pair of
+            numbers that look about right, and the winding claim caught all four of them reversed.
+      finding: **the shed stood a foot in the air.** Its cell declares its floor at 0.00 and the
+            lawn under it falls to **-0.288**, so there was daylight under the door. §10.2 names
+            the pad -- *"a coarse height field so drainage, the terrace step and the shed pad read
+            correctly"* -- and `terrain_gen.surfaces()` gave a structure's pad a MATERIAL and no
+            level. The terrace escaped it because its floor is +0.45 and the exterior-cell rule
+            only fires on a non-zero override; a floor of exactly zero is still a floor. A
+            structure now stands on a pad at its own floor, and only a structure with a floor gets
+            one -- §11.1's raised beds and compost bin stand on the garden, and gravelling the soil
+            under a vegetable bed would be the generator inventing a yard nobody asked for.
+      finding: **and that pad found a hole in the content build: `needs` did not mean stale.**
+            Moving the ground rebuilt `collision.bin` and left `nav.bin` -- the pet graph, built
+            against the collision world by `build_nav.py` -- reporting itself fresh, because
+            freshness was each stage's own inputs and `needs` was ordering alone. It is now a
+            cascade: a stage whose upstream ran is rebuilt, and the report says whose. Two of
+            `build_content`'s own claims asserted the old behaviour and were corrected to the new
+            one; the cascade costs the nav graph's 15 minutes whenever collision moves, which is
+            the price of a graph that is not quietly wrong.
+      verified: 7 more `fence_gen --selftest` claims -- built from the cell, standing on the
+            footprint, the ridge and eaves the layout gives, both openings cut, nothing drawn
+            across the doorway, and every face wound the way its own normal says -- and 3
+            injections, all CAUGHT: a walled-over doorway, a shed built from the footprint, and a
+            roof left flat at the eaves. Plus one `terrain_gen` claim that every structure stands
+            on a pad at its own floor with the ground two metres away for comparison, and two
+            `build_content` claims for the cascade and for it settling on the next run.
+      verified: 1 010 unit, 92 integration, 30 render. One reference frame regenerated --
+            `blockout-l0-kitchen`, whose borrowed-light window moved 1.4 m and which differed by
+            6.39 % of the frame until it was; the other nineteen are byte-for-byte what they were,
+            because moving a window in the kitchen moves nothing else. `validate_world` passes all
+            11 rules with rule 7 in its new, stronger form, and the world's 11 files, the
+            manifest, the licences, the floor plans and the shell manifest are all regenerated
+            and matching.
 - [ ] HOUSE-00769 — Generate the raised vegetable beds, the trellis and the compost bin
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
+      finding: (2026-09-09, found by `HOUSE-00768`) **the garden path runs through the shed.**
+            `PATH_GARDEN`'s second box is x -19.0…-18.2 over z -43.8…-38.6, and the shed's cell is
+            x -19.8…-16.6 over z -43.8…-40.6: three metres of that leg are inside the building, and
+            it reaches no door -- the shed's is on its EAST face at x = -16.6, which the leg never
+            comes near. It is invisible in the height field because the pad and the path are both
+            gravel at 0.00 (`HOUSE-00768`), and it is still a path drawn through a shed. The leg
+            wants to be x -16.6…-15.8 over z -42.6…-38.6, which runs from the main path to the door
+            and stays inside `EXT_GARDEN`'s own east box. Left to this task because it is the
+            garden's, and because moving it costs the nav graph's 15 minutes -- worth spending once,
+            with the beds.
 - [ ] HOUSE-00770 — Place the exterior props: mailbox, bins ×3, hose reel, AC condenser, gas meter, water tap, downspout splash blocks
       dep: HOUSE-00764 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00771 — Place the garden furniture: terrace table and chairs, two loungers, swing bench, fire pit, birdbath, planters

@@ -377,10 +377,16 @@ def build() -> dict[str, dict]:
             # §11.2's gates, §11.4's kerbs and the paved zones of §11.4 and §11.6. Added by
             # `HOUSE-00390`: the file had terrain, a road and fences, and the property has a
             # driveway, a front walk, two sidewalks, a garden path, three gates and a shed.
+            # `hinge` is which side of its opening a swinging leaf is hung on (`HOUSE-00767`).
+            # §11.2 says the pedestrian gate is "single hinge east" and says nothing about the
+            # other two, and a hinge side is not derivable from anything else in the file: a gate
+            # without it is hung at the low end of its own opening, which is a default and not a
+            # fact, so the one §11.2 states is authored.
             "gates": {"type": "array", "items": obj(
                 ["id", "fence", "kind", "opening"],
                 {"id": ID, "fence": ID, "kind": {"enum": ["hinged", "sliding", "bolted"]},
                  "opening": BOX, "height": NUM, "asset": ID_OR_NULL,
+                 "hinge": {"enum": ["north", "south", "east", "west"]},
                  "interactable": ID_OR_NULL})},
             "kerbs": {"type": "array", "items": obj(
                 ["id", "path"],
