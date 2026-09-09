@@ -9421,8 +9421,30 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             outliving dressing) and 2 more `PortalTraversalTests` (§12's own glazed doors marking
             the office and only the office, and the three-room chain). Nine injected bugs, nine
             caught.
-- [ ] HOUSE-00670 — Implement `VisibilitySystem`: camera cell → traversal → visible set, published once per frame
+- [x] HOUSE-00670 — Implement `VisibilitySystem`: camera cell → traversal → visible set, published once per frame
       dep: HOUSE-00668, HOUSE-00559 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) `visibility::VisibilitySystem`, an `app::ISystem` at §7.5's `Visibility`
+            stage. It owns one `PortalRuntime` per portal (§25.3's apertures), takes a `CameraView`
+            from whoever owns the camera, and runs `HOUSE-00668`'s walk once.
+      note: **the camera is handed OVER, not reached for.** §7.5: systems *"read and write state
+            held by the objects the service container owns"* and do not call each other, because a
+            call is an ordering constraint `UpdateStage` cannot express. A visibility system that
+            pulled a pose out of a renderer would be exactly that.
+      note: **one walk a frame, and the frame index is published beside the set.** §25.1's pipeline
+            runs chunk culling, instance culling, lighting, audio and residency off the same
+            answer; two walks in one frame would disagree the moment the camera moved between
+            them, and a chunk drawn against a frustum the lighting did not agree with is a bug that
+            takes a week. The index is how a consumer notices it has been ordered before the stage
+            it depends on.
+      note: **the one decision this system makes that the traversal cannot**: which row of §25.2's
+            depth table applies, from the camera cell's own `CellKind::Exterior`. Measured over all
+            144 exterior poses in §12's plot -- every exterior cell, eight headings each -- the
+            deepest walk is **2** and 97 of them are stopped BY the cap; from `L0_HALL` indoors the
+            same house reaches depth 4 and 8 cells. Both directions of that injection are caught.
+      verified: 5 `VisibilitySystemTests` -- the stage and name and an empty set before the first
+            update, the set being this frame's and computed once, a door opening changing it with
+            the camera still, the exterior sweep, and a frame before anyone has said where the
+            camera is. Five injected bugs, five caught.
 - [ ] HOUSE-00671 — Implement the `maxVisibleCells` hard stop with graceful degradation (drop the smallest-frustum cells first) and a counter
       dep: HOUSE-00670 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00672 — Implement per-cell chunk culling against the cell's frusta
