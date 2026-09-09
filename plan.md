@@ -7589,10 +7589,21 @@ the chunk builder produces ≤ 6 chunks per cell.
             and from the garage `EXT_WORLD` is not visible and the roof goes: 4 456 and 1 936
             pixels. Either the hull is split per covered cell (clipping, in the generator) or it is
             drawn with whatever cell the camera is in, and that is an owner's call about §17.4.
-            (2) `ext-backyard`'s 3 523 pixels are a LAYOUT defect: the only portal between
-            `EXT_TERRACE` and `EXT_BACKYARD` is on the terrace's north edge at z = -36, and the
-            pose stands to the WEST of it, where the two cells abut over 4 m with no portal at all.
-            The walk is right and the world is missing a portal.
+            (2) `ext-backyard`'s 3 523 pixels are the OUTDOORS being drawn the wrong way round.
+            The only portal between `EXT_TERRACE` and `EXT_BACKYARD` is the opening at the top of
+            `STEPS_TERRACE_LAWN` on the terrace's north edge, and the pose stands to the WEST of
+            it, where the two abut over 4 m with no portal at all. That is not one missing portal:
+            **thirteen pairs of exterior cells abut over more than half a metre with no portal
+            between them**, up to 48 m of shared face (`EXT_SIDEYARD_E` and `EXT_WORLD`).
+      finding: **and authoring those portals would be the wrong fix.** §25.6 is explicit --
+            *"`EXT_WORLD` is one enormous cell, so portal traversal cannot help inside it"* -- and
+            the outdoors is meant to be culled by the exterior hierarchy against distance and the
+            frustum, not by a portal walk between the yards. What is actually wrong is that the
+            ground is per-CELL CHUNKS today, because §25.6's instance path has no content in it
+            yet: the vegetation is `HOUSE-00772`, the neighbourhood `HOUSE-00852` and the wiring
+            `HOUSE-00852`. Until the terrain and the yards are exterior INSTANCES, a lawn is a
+            chunk of a cell the portal walk did not reach, and the portal walk was never the thing
+            that was supposed to reach it.
       verified: 1 `ChunkCullingTests` over §12's own refrigerator, with three injections all
             CAUGHT -- never reaching the children, testing them against their own cones instead of
             the parent's, and indexing the children by cell instead of by parent -- and a new
