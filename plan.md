@@ -10280,8 +10280,55 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             crossed, a shut door on it passing light, and a walk capped at one storey (caught with
             `VisibleSetTests`, whose 24 exact sets see the cells this test's level-counting does
             not).
-- [ ] HOUSE-00694 — Measure visibility cost in all 10 performance scenarios against the 0.55/1.20 ms budget
+- [x] HOUSE-00694 — Measure visibility cost in all 10 performance scenarios against the 0.55/1.20 ms budget
       dep: HOUSE-00690 · sys: — · plat: LNX · pri: MUST
+      measured: **every one of §70.6's ten scenarios is inside §71.2's visibility row, with room to
+            spare.** An optimised build, §25.1's steps 1-4, the median of 25 blocks; four runs on a
+            machine with nine other agents on it: the **median scenario 0.084-0.097 ms, 15-18 % of
+            the 0.55 ms typical**; the **worst scenario 0.26-0.43 ms, 22-36 % of the 1.20 ms worst
+            case**; the 90-second walk's **worst frame 0.43-0.68 ms, 36-57 %** of the same, its
+            median 0.023-0.037 ms and its p95 0.15-0.25 ms. Step 5, the sort, is 0.0003 ms against
+            a 1.60 ms draw-submission row, which is why it is reported and not added to the total.
+      measured: **the portal walk is not where the time goes.** Across the ten poses it runs
+            0.0029 ms (`L3_STORE_W`, one crossing) to 0.0195 ms (`L0_KITCHEN`, thirteen) -- at
+            most 4 % of the typical budget -- and the per-cell chunk test is a tenth of that again
+            (0.0002-0.0019 ms). §25.6's exterior hierarchy is **88-96 % of every scenario that can
+            see outdoors**: 0.257 of the kitchen's 0.278 ms, 0.282 of the gym's 0.293 ms.
+      finding: **the exterior cost tracks the number of CONES into the outdoors, not the number of
+            instances drawn.** The road at §44's widest lens reaches `EXT_WORLD` through one cone,
+            tests 3 394 instances, draws 2 176 of them and costs 0.081 ms. `L0_KITCHEN` reaches the
+            outdoors through SEVEN, tests 5 639 to draw 513, and costs 0.257 ms -- three times the
+            road for a quarter of the geometry, because §25.6's tree is walked once per cone and
+            nothing is shared between the walks. The gym is the same shape: six cones, 5 382 tests,
+            384 drawn, 0.282 ms. **This is what `HOUSE-00695` should optimise**, and it is not what
+            that task currently names: the portal-plane test, the containment check and the work
+            queue are all inside the 0.0029-0.0195 ms the walk costs, so perfecting all three saves
+            at most 4 % of a budget that is already 82 % unspent.
+      finding: **a `-O0` measurement cannot answer a budget question, only bound it.** In the debug
+            tree the same ten scenarios come out 5-7× slower -- median 0.73 ms, worst 1.82 ms --
+            which is over the row and says nothing, because an optimised build of the same code
+            cannot be slower. Getting an optimised one first took `HOUSE-00698`.
+      finding: **as far as §25 is concerned §70.6's rows are ten camera poses and a door state.**
+            The visibility stage does not know it is raining, that a pet is being skinned or that a
+            cupboard is open, so the thunderstorm and the blizzard are an outdoor pose each and the
+            pets are an indoor one; what the rest of each scenario stresses is another row of §71.2
+            and the test names which. Where §70.6 gives a heading it is used; where it does not,
+            all four cardinals are measured and the worst is the row, because a heading chosen by
+            hand is a heading chosen to pass. The tenth row is a distribution rather than a pose:
+            §25's answer is recomputed from the camera cell every frame, so what a 90-second route
+            costs is what the poses along it cost, and every cell at four headings is a superset of
+            any route through the house.
+      note: **the exterior instances are synthetic and the test says so on every run.** §25.6's
+            ~4 100 real ones are `HOUSE-00772`'s vegetation and `HOUSE-00852`'s neighbourhood,
+            which are Phase 10 content; a hierarchy of nothing measures nothing, so the test builds
+            4 100 in §25.6's eight categories over §10.3's property and neighbourhood extents from
+            a fixed LCG. Right size and shape of problem, wrong instances -- and this is the number
+            to re-take when the real set lands.
+      verified: 2 `VisibilityCostTests`, and two probes that the columns measure what they name:
+            removing §25.6's node-level frustum rejection moved the kitchen's exterior column
+            0.257 -> 0.724 ms and left its walk column at 0.019; stopping the walk from crossing
+            any portal at all collapsed the kitchen to **1 cell** and 0.0014 ms, which is the
+            reading the reported cell, chunk and instance counts exist to make visible.
 - [ ] HOUSE-00695 — Optimise the traversal against the measurement: the portal-plane test, the frusta containment check, and the work-queue allocation
       dep: HOUSE-00694 · sys: visibility · plat: ALL · pri: MUST
       accept: no allocation in the steady state; the work queue is a fixed-capacity ring
