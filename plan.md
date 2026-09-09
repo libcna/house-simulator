@@ -11662,6 +11662,15 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             garden's copy of that wall, running to +20.00, that was wrong.
       verified: 5 claims and 3 injections, all CAUGHT -- the clip removed, the occupant scan
             restricted to the cell's own level, and an open occupant counted as solid.
+      note: (2026-09-09, the deferred proof) this task, `HOUSE-00490` and `HOUSE-00779` each said
+            the nav stage would be rebuilt once at the end of the phase rather than after every
+            commit, and that the graph would be PROVED unchanged rather than assumed. It was:
+            `build_nav` ran the full 2 042 s over the corrected collision, and the new `nav.bin`
+            differs from the one built before any of the three tasks in **58 bytes, all of them
+            inside the `worldHash` string in its header** -- which changed because the world did
+            (`HOUSE-00776` authored the downspouts and their emitters). Every byte after the
+            header, which is the graph itself, is identical. Three 34-minute nav builds were saved
+            and nothing was taken on trust.
 - [ ] HOUSE-00783 — Phase-10 review and commit
       dep: HOUSE-00761…HOUSE-00782 · sys: — · plat: ALL · pri: MUST
 
