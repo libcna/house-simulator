@@ -9739,8 +9739,42 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             distance metric itself). A fifteenth -- removing the empty-cone short-circuit -- is
             recorded as NOT a bug: the loop below it does nothing for an empty span either way, so
             the guard saves an allocation and states an intent rather than changing an answer.
-- [ ] HOUSE-00679 — Implement the indoor→outdoor portal traversal into `EXT_WORLD` with the reduced frustum
+- [x] HOUSE-00679 — Implement the indoor→outdoor portal traversal into `EXT_WORLD` with the reduced frustum
       dep: HOUSE-00678, HOUSE-00668 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) §25.7 is right that *"crossing an exterior door is just another portal
+            traversal, so there is no special case"* -- and there is none. `HOUSE-00668`'s walk
+            already reaches the yards through their glazing and reduces a cone for each, and
+            `HOUSE-00667`'s `MaxDepthFor` already gives §25.2's asymmetric caps. What was missing is
+            the JOIN: `visibility::ExteriorCones` gathers the cones of every visible EXTERIOR cell
+            into the list §25.6's hierarchy is culled against.
+      finding: **§25.6 says `EXT_WORLD` is one enormous cell; §12's layout has eighteen exterior
+            cells and `EXT_WORLD` touches only `EXT_ROAD`.** The outdoors here is the porch, two
+            balconies, the road, the walk, two front yards, the drive, two side yards, the terrace,
+            the back yard, the garden, the shed, the orchard, the north strip and `EXT_WORLD`
+            itself. So the hierarchy is not per cell and the cones are not one: the collection takes
+            every exterior cell the walk reached. §25.6's argument survives unchanged -- the
+            openings between yards are cased and open, so the walk crosses them freely and the
+            cones stay wide, which is exactly the case a hierarchy is for.
+      note: **deduplicated by §25.2's own containment rule**, on the screen rectangles the walk
+            already recorded: a cone inside one already collected can see nothing more, and finding
+            that out by walking the whole tree again is what this avoids. One or two are merged from
+            most poses in the sunroom.
+      note: **the cap degrades to the CAMERA, never to nothing.** Eighteen cells at four cones each
+            is seventy-two walks of the hierarchy, which is not a frame budget; past `kMaxCones = 8`
+            the collected cones are thrown away and the unreduced camera frustum stands in. That is
+            a superset of every cone it replaces -- they were all reduced from it -- so the frame
+            over-draws the garden and never over-culls it, which is the only direction §25 tolerates.
+            Asserted as a superset rather than described.
+      measured: **the reduction is worth between 1.2x and 4.7x.** From `L0_SUNROOM` over eight
+            yaws, the cones through the glazing draw 79-272 of the 2 000 garden instances where the
+            room's own frustum with no walls in it draws 318-394; facing 135 degrees it is 84
+            against 394. From a windowless room -- cinema, cellar, pantry, bathroom -- 14 of 16
+            poses reach no exterior cell at all and the hierarchy is not walked once.
+      verified: 7 `ExteriorTraversalTests` over §12's real house -- what a window draws being a
+            subset of what the camera would, the sunroom's numbers pose by pose, a windowless room
+            drawing no garden and visiting no node, standing outside giving the camera's own answer,
+            the cap degrading to a superset, the containment rule firing, and an interior cell never
+            contributing a cone. Eight injected bugs, all caught.
 - [ ] HOUSE-00680 — Implement the outdoor→indoor traversal at depth 1 through windows
       dep: HOUSE-00679 · sys: visibility · plat: ALL · pri: MUST
       accept: standing in the garden, exactly one room is visible through each window, not the whole house

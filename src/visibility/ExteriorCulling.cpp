@@ -5,7 +5,9 @@
 #include <cmath>
 
 #include "Microsoft/Xna/Framework/BoundingBox.hpp"
+
 #include "Microsoft/Xna/Framework/ContainmentType.hpp"
+#include "cnahouse/world/WorldData.hpp"
 
 namespace cnahouse::visibility
 {
@@ -29,6 +31,59 @@ namespace cnahouse::visibility
         const float y = Outside(point.Y, box.Min.Y, box.Max.Y);
         const float z = Outside(point.Z, box.Min.Z, box.Max.Z);
         return std::sqrt(x * x + y * y + z * z);
+    }
+
+    void ExteriorCones::Collect(const world::WorldData& world,
+                                std::span<const VisibleCell> visible,
+                                const ClipFrustum& camera)
+    {
+        cones_.clear();
+        rects_.clear();
+        cellsOutside_ = 0;
+        conesMerged_ = 0;
+        degraded_ = false;
+
+        for (const VisibleCell& cell : visible)
+        {
+            const world::Cell* row = world.FindCell(cell.cell);
+            if (row == nullptr || row->kind != world::CellKind::Exterior)
+            {
+                continue;
+            }
+            ++cellsOutside_;
+            for (std::size_t i = 0; i < cell.frustumCount; ++i)
+            {
+                // §25.2's containment approximation, reused: a cone whose screen rectangle is
+                // inside one already collected can only see what that one sees, and walking the
+                // hierarchy again for it would cost a whole traversal to find that out.
+                bool covered = false;
+                for (const NdcRect& kept : rects_)
+                {
+                    if (kept.Contains(cell.rects[i]))
+                    {
+                        covered = true;
+                        break;
+                    }
+                }
+                if (covered)
+                {
+                    ++conesMerged_;
+                    continue;
+                }
+                if (cones_.size() >= kMaxCones)
+                {
+                    // The cap. Everything collected so far is discarded rather than kept
+                    // alongside the camera, because the camera's frustum already contains every
+                    // one of them -- it is what they were all reduced from.
+                    degraded_ = true;
+                    cones_.assign(1, camera);
+                    rects_.clear();
+                    return;
+                }
+                cones_.push_back(cell.frusta[i]);
+                rects_.push_back(cell.rects[i]);
+            }
+        }
     }
 
     void ExteriorCuller::Cull(const ExteriorBvh& bvh,

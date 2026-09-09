@@ -9,6 +9,13 @@
 
 #include "cnahouse/visibility/ClipFrustum.hpp"
 #include "cnahouse/visibility/ExteriorBvh.hpp"
+#include "cnahouse/visibility/PortalArea.hpp"
+#include "cnahouse/visibility/PortalTraversal.hpp"
+
+namespace cnahouse::world
+{
+    class WorldData;
+}
 
 namespace cnahouse::visibility
 {
@@ -100,6 +107,67 @@ namespace cnahouse::visibility
                    const Microsoft::Xna::Framework::Vector3& eye,
                    float scale,
                    bool inside);
+    };
+
+    /// @brief §25.7's indoor to outdoor crossing, gathered (`HOUSE-00679`).
+    ///
+    /// *"Crossing an exterior door is just another portal traversal, so there is no special
+    /// case"* -- and there is none here either: §25.2's walk reaches the yards through their
+    /// windows and doors and reduces a cone for each, exactly as it does for a room. What this
+    /// does is the one thing the walk cannot: collect those cones into the list §25.6's hierarchy
+    /// is culled against, because the outdoors is many cells in this layout and one hierarchy.
+    ///
+    /// **Deduplicated by §25.2's own rule.** A cone whose screen rectangle is inside one already
+    /// collected adds nothing but a second walk of the whole tree, and the walk has already used
+    /// that approximation to decide which cells to visit at all.
+    ///
+    /// **The cap degrades to the camera, never to nothing.** Eighteen exterior cells with four
+    /// cones each is seventy-two walks of the hierarchy, which is not a frame budget. Past
+    /// `kMaxCones` the collection throws its cones away and stands the CAMERA's frustum in their
+    /// place: that is a superset of every cone the walk could have produced, so the frame
+    /// over-draws the garden and never over-culls it -- the only direction §25 tolerates.
+    class ExteriorCones
+    {
+    public:
+        /// @brief Eight, which is two rooms' worth of openings onto the garden.
+        static constexpr std::size_t kMaxCones = 8;
+
+        /// @brief Gathers the cones of every visible EXTERIOR cell.
+        ///
+        /// @param camera the unreduced camera frustum, used only when the cap overflows.
+        void Collect(const world::WorldData& world,
+                     std::span<const VisibleCell> visible,
+                     const ClipFrustum& camera);
+
+        [[nodiscard]] std::span<const ClipFrustum> Cones() const noexcept
+        {
+            return cones_;
+        }
+
+        /// @brief Exterior cells the walk reached. Zero means the outdoors is not in view at all.
+        [[nodiscard]] int CellsOutside() const noexcept
+        {
+            return cellsOutside_;
+        }
+
+        /// @brief Cones the containment rule threw away as already covered.
+        [[nodiscard]] int ConesMerged() const noexcept
+        {
+            return conesMerged_;
+        }
+
+        /// @brief Whether the cap overflowed and the camera's own frustum is standing in.
+        [[nodiscard]] bool Degraded() const noexcept
+        {
+            return degraded_;
+        }
+
+    private:
+        std::vector<ClipFrustum> cones_;
+        std::vector<NdcRect> rects_;
+        int cellsOutside_ = 0;
+        int conesMerged_ = 0;
+        bool degraded_ = false;
     };
 
     /// @brief Metres from @p point to the nearest point of @p box; zero when it is inside.
