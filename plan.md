@@ -10713,8 +10713,34 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             would raise the lawn to first-floor level. The claim now applies the same rule, found
             the same way it is found there: the lowest storey whose `ffl` is at or above grade.
       verified: 2 more `terrain_gen --selftest` claims, over the house's own layout.
-- [ ] HOUSE-00766 — `fence_gen.py`: the 1.85 m board fence (W/N/E), the 1.35 m ornamental front fence, posts, caps and rails
+- [x] HOUSE-00766 — `fence_gen.py`: the 1.85 m board fence (W/N/E), the 1.35 m ornamental front fence, posts, caps and rails
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
+      measured: (2026-09-09) `tools/world/fence_gen.py`: §11.2's seven runs -- three ornamental
+            across the frontage and four of board fence round the other three sides -- as **7 536
+            triangles**, 84 posts with caps over 77 bays, two rails a bay, and 246 pickets on the
+            front. One `.glb` per run in `build/fence`.
+      finding: **a fence follows the LOT, and §10.2's lot slopes.** Each post is set on the height
+            field at its own position and each bay's rails and boarding rake between its two posts;
+            the west fence falls 0.35 m from the road to the rear, and the steepest single bay
+            carries 129 mm over 2.19 m. The alternative -- stepping each bay level -- needs a
+            plinth under the low end, and §11.2 does not have one.
+      note: the ground comes from `terrain_gen.decode`, so the fence stands on the same surface
+            `build_collision.py` collides with rather than on a second idea of where the ground is.
+            Posts are set out by CEIL and not by rounding: `POST_SPACING` is the most a fence may
+            span, and rounding a 3.05 m run to one bay puts its posts 3.05 m apart.
+      finding: **the gate openings are already in the data, and the claim is what proves the runs
+            respect them.** `EXT_FENCE_FRONT_W` stops at x = -0.6 and `_C` starts at +0.6 because
+            the pedestrian gate is between them; nothing in the generator knows that, and nothing
+            has to.
+      verified: 12 `fence_gen --selftest` claims and **seven injections, all CAUGHT after the
+            claims were made honest**. The first four found three of them worthless: a post set
+            level instead of on the ground, boarding that does not rake, and an ornamental fence
+            drawn as a panel all PASSED, because the height claim compared a post against its own
+            recorded base, the rake claim counted heights the posts also contribute, and the picket
+            claim counted faces rather than pickets. Each was rewritten to measure against the
+            height field, against each bay's own two posts, and against the picket pitch, and two
+            more -- a missing cap and a missing rail -- were added for the same reason: the cap is
+            now claimed as the highest thing in the run, and the rails are counted per bay.
 - [ ] HOUSE-00767 — Generate the pedestrian gate, the sliding vehicle gate and the rear service gate with their hardware
       dep: HOUSE-00766 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00768 — Generate the garden shed (walls, roof, door, window, floor) as an enterable cell
