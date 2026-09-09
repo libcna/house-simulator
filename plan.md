@@ -10189,8 +10189,28 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: 2 `ClosedHouseTests`. Four injected bugs, all caught -- a shut door counted as a way
             through, a window counted as one, a shut opaque door passing light, and a component walk
             that never revisits.
-- [ ] HOUSE-00690 — Test: with all doors open, the visible-cell count from the 12 budget poses stays within budget
+- [x] HOUSE-00690 — Test: with all doors open, the visible-cell count from the 12 budget poses stays within budget
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-09) §70.4's *"12 budget poses"* now exist as data: `VisibilityPose::budget`
+            marks twelve of `HOUSE-00685`'s twenty-four -- the spine of each storey, the open plan
+            that sees furthest, the stair well that sees three of them, and one outdoors looking
+            back at the house. A sample of the house's WORST corners and not of the house, because
+            a budget met in a cupboard is not met.
+      measured: **with every door in the house open, the worst of the twelve is `l0-sunroom` at 12
+            visible cells** and the mean is 6.8, against §71.2's 9 typical, 22 worst case and 30
+            hard fail. The twelve see 81 cells in all with the doors open and 54 with them shut.
+            The same twelve cost at worst **47 draw calls and 7 state changes** against §71.2's 620
+            and 90 -- and 47 of the house's 418 chunks is the whole point of phase 9 in one number.
+      finding: **"with every door open" is a clause that has to be made load-bearing.** Run with
+            them SHUT every count falls and every budget assertion still passes -- the injection
+            that flipped the apertures was MISSED. The test now measures both and requires the open
+            total to be the larger, so the arrangement it is named after is one it actually made.
+      note: §25's own cap is asserted too: `cellsDropped` must be zero at every budget pose. Non-zero
+            means the hard stop threw a VISIBLE cell away, which is a frame that missed its budget
+            rather than one drawn wrong -- but it is still the loudest counter §25 has.
+      verified: 2 `VisibilityBudgetTests`. Four injected bugs, three caught; the fourth -- a chunk
+            cull that keeps every chunk of a visible cell -- is `ChunkCullingTests`' to catch, and
+            does not move a 47-call frame anywhere near §71.2's 620.
 - [ ] HOUSE-00691 — Test: the partially-open-door rule — a door at 0.02 culls, at 0.10 does not, and the leaf occludes inside the target cell
       dep: HOUSE-00687 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00692 — Test: window visibility from outside is capped at depth 1
