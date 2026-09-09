@@ -4304,8 +4304,10 @@ this stage:
   `layout.stairs.json`'s authored `footprint`/`run`/`shape` through the same `stair_geometry`
   module `house_shell_gen.py` builds the treads from.
 
-**Outdoors, the ground is the collision** (`HOUSE-00774`). The height field plus the OBBs above,
-and *nothing else*: two open exterior cells abut on grass, so the boundary between them is not a
+**Outdoors, the ground is the collision** (`HOUSE-00774`, `HOUSE-00782`). The height field plus the
+OBBs above, and *nothing else* -- an open exterior cell on the ground storey has no floor slab of
+its own either, because a slab and a height field are two answers to how high the ground is and
+they disagree by up to 0.30 m of invisible plinth: two open exterior cells abut on grass, so the boundary between them is not a
 wall. It was one until this task — 86 pieces, 5 219 m² of invisible wall, 29 of them over five
 metres tall — and the front lawn could not be walked to the side yard. §11.2's fences (91 pieces),
 §11.4's kerbs (48) and cars (2), §11.1's garden structures (8) and the tree trunks (17) are what
@@ -4320,10 +4322,9 @@ looked at, and the main stair's first run begins 0.20 m past `L0_FOYER`'s cased 
 side of every hole carries the other side's shapes within **0.40 m** of the plane — the 0.30 m
 capsule plus that hysteresis plus 50 mm — over the hole's width and the body's own height, indexed
 by the part of them within reach so a borrowed slab does not size the borrower's grid.
-`docs/collision-format.md` §4.1 is normative and `OpeningReachTests` is the guarantee. The census: **1 919 cell references over 1 147 shapes** — 1 125 OBBs and 22 meshes, of which 166
-are what stands outdoors, 309 references are borrowed through a hole and 52 are `HOUSE-00567`'s
-outer walls shared with the yards. The wall count fell from 888 to 735 when the yards stopped
-being walled.
+`docs/collision-format.md` §4.1 is normative and `OpeningReachTests` is the guarantee. The census: **2 022 cell references over 1 281 shapes** — 1 259 OBBs and 22 meshes, of which 334
+are what stands outdoors and 106 are floors, down from 140 when the yards stopped having them.
+The wall count fell from 888 to 735 when the yards stopped being walled.
 
 ### 49.3 The player sweep
 

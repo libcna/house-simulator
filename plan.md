@@ -11157,8 +11157,54 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       dep: HOUSE-00215, HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00781 — Render tests: 8 exterior poses covering the road, drive, front, side yards, terrace, garden and orchard
       dep: HOUSE-00780 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-00782 — Test: the property is fully walkable and fully bounded (bot walk, boundary counter 0)
+- [x] HOUSE-00782 — Test: the property is fully walkable and fully bounded (bot walk, boundary counter 0)
       dep: HOUSE-00774, HOUSE-00775 · sys: ci · plat: CI · pri: MUST
+      verify: unit PropertyWalkTests.EveryPartOfTheLotIsReachableAndNoneOfItLeavesTheBox
+      note: (2026-09-09) **a random walk answers neither half of this.** §49.5's twenty-minute bot
+            proves that nothing goes wrong along the way it happens to go; it cannot say the
+            orchard is reachable, because a seeded walk that never turns down the side yard proves
+            nothing about the orchard -- and in twenty minutes it visits 7 cells of 96. So this is
+            a **flood fill**: every place a body can stand on the lot, found by standing one there
+            and asking §49.3's own collision, joined up by sweeping between neighbours the way the
+            controller does, with §43.1's step-up deciding what is a step and what is a wall.
+      measured: 73 482 squares of §10.3's playable volume at a quarter-metre stride, 18 434 of them
+            somewhere a body can stand; **6 665 reached from the front walk with the gates shut,
+            over every one of the eleven open exterior cells inside the fence** -- and the fill
+            stops at the fence: |x| ≤ 22.0 m, z from -47.5 to -0.5. The shed is walked into
+            through its own door (25 squares).
+      finding: **the gates are what "fully bounded" turns on.** §65.6 starts every door shut and
+            §11.1 calls the rear gate *"locked, decorative"*, so the fill shuts all three -- the
+            static file carries the HOLE and the leaf is §49.4's dynamic obstacle. With them open
+            the fill walks out of the rear gate into the alley, round the end of the fence and
+            over the whole neighbourhood to §10.3's own edge; with them shut the property is a
+            closed space, which is what the phase set out to build.
+      finding: **§10.4's second layer stopped at our own fence.** Our front fence covers
+            x -22.5…+22.5 and the corridor runs to ±35, so a body that walked out of the front
+            gate could turn round the end of our fence into the neighbours' front gardens and keep
+            going. `VEG_HEDGE_NEAR_W` and `_E` are their boundary, 12 sections each from the end
+            of our fence to the corner; `RoadEndTests` walks off the verge at both ends and is
+            stopped 0.80 m short of our own fence line.
+      finding: **an open exterior cell had a floor as well as the ground, and they disagreed.**
+            §49.2 says exterior collision is *"the height field plus OBBs"*, and `build_shell` was
+            also giving every yard a slab at its cell's `yOverride`: `EXT_ORCHARD` declares +0.00
+            and the lawn under it falls to -0.30, so the orchard stood on a plinth with a step
+            round it that §43.1's 0.22 m step-up cannot climb, and half the east side yard with
+            it. The slab is gone for an open exterior cell on the ground storey and the height
+            field is the floor. A BALCONY keeps its slab -- its floor is 3.65 m over the lawn and
+            no field carries that -- and taking it away drops a body through it into the garden,
+            which is what the injection that does exactly that shows.
+      note: the file lost 106 of its 140 floor slabs and `EXT_WORLD`'s 400 x 400 bucket grid with
+            them: **756 KB → 116 KB**, because that cell's bounds were its own ±200 m slab.
+      note: `CameraTuneTests`'s view-saw bound gains 2 mm (`kGroundSaw`). It was built when
+            everything outdoors was a level slab; on a slope the feet drop between contacts, so a
+            step down can begin part way through a bob. Measured over the 96-cell tour: 0.0572 m
+            against a 0.0571 m bound, one seventh of a millimetre, in the back yard.
+      verified: 4 injections CAUGHT -- the yards' floor slabs back (the plinth returns), a balcony
+            losing its floor (a body falls through it), the neighbours' hedge gone (the walk off
+            the verge keeps going), and the gates left open (the fill leaves the property). The
+            fill itself is checked the other way too: every one of the eleven cells has to be
+            reached, so a barrier that appeared where there should be none fails it just as
+            loudly.
 - [ ] HOUSE-00783 — Phase-10 review and commit
       dep: HOUSE-00761…HOUSE-00782 · sys: — · plat: ALL · pri: MUST
 

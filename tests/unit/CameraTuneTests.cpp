@@ -116,6 +116,17 @@ namespace
     /// §43.1's eye height and an order of magnitude under §44's own head bob.
     constexpr float kSpringSaw = 0.004F;
 
+    /// What the GROUND adds to that, outdoors, since `HOUSE-00782` gave the yards §11.5's height
+    /// field instead of a flat slab.
+    ///
+    /// The bound below is the bob plus the landing dip plus `kSpringSaw`, and it was built when
+    /// everything a body walked on outdoors was level. On a slope the feet drop between contacts
+    /// -- the same thing the note above describes on a flight -- so a step down can begin part way
+    /// through a bob and the eye's worst single-frame descent is the sum of the two. Measured over
+    /// the 96-cell tour: **0.0572 m against a 0.0571 m bound**, one seventh of a millimetre, in
+    /// the back yard. 2 mm is what that costs, rounded up to a number rather than a measurement.
+    constexpr float kGroundSaw = 0.002F;
+
     /// Everything one walk measured.
     struct Measured
     {
@@ -704,7 +715,7 @@ TEST(CameraTuneTests, ThreeMinutesOfWalkingTheHouseKeepsTheViewInsideEverySectio
     EXPECT_LE(measured.worstSpringSaw, kSpringSaw) << "§48.2's sawtooth reached the eye";
     // Everything that is ALLOWED to move the view down while the feet rise: §44's bob at the
     // speed it was going, §43.1's landing dip, and the spring's own couple of millimetres.
-    EXPECT_LE(measured.worstSaw, measured.maxBob - measured.deepestDip + kSpringSaw)
+    EXPECT_LE(measured.worstSaw, measured.maxBob - measured.deepestDip + kSpringSaw + kGroundSaw)
         << "the view dipped further than §44's bob and §43.1's dip together";
     EXPECT_LE(measured.worstBobExcess, 1e-4F) << "the bob exceeded §44's amplitude for the speed";
     EXPECT_LE(measured.maxPullBack, kEyePullBack) << "§44's pull-back went past its own limit";
@@ -978,7 +989,7 @@ TEST(CameraTuneTests, TheTourOfEveryRoomKeepsTheViewInsideItsNumbers)
     EXPECT_GT(legs, 100) << "the tour barely happened, so it proves little";
     EXPECT_LE(measured.maxLag, kMaxLag) << "the view sank behind the body in " << worstCell;
     EXPECT_LE(measured.worstSpringSaw, kSpringSaw) << "§48.2's sawtooth reached the eye";
-    EXPECT_LE(measured.worstSaw, measured.maxBob - measured.deepestDip + kSpringSaw);
+    EXPECT_LE(measured.worstSaw, measured.maxBob - measured.deepestDip + kSpringSaw + kGroundSaw);
     EXPECT_LE(measured.worstBobExcess, 1e-4F) << "the bob exceeded §44's amplitude for the speed";
     EXPECT_LE(measured.maxPullBack, kEyePullBack);
     EXPECT_GE(measured.minNearPlane, kNearPlaneClose);

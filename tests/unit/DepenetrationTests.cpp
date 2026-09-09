@@ -629,7 +629,12 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
         }
     }
     ASSERT_GT(stood, 40u) << "only " << stood << " cells had room to stand in";
-    EXPECT_LE(crowded, 4u) << crowded
+    // Five since `HOUSE-00782`: `B1_STAIR`, `L1_STAIR_MAIN` and `CELL_FREEZER_INTERIOR` are the
+    // stairs and the appliance this has always counted, `L2_STOR2` is a cupboard, and
+    // `EXT_BACKYARD` joined them when the yards stopped having floor slabs -- its nine boxes make
+    // an L round the house and the middle of their bounding grid is inside the house, which is
+    // what a body stood "in the middle of the cell" then finds.
+    EXPECT_LE(crowded, 5u) << crowded
                            << " cells put a body inside something just by standing it on their "
                               "floor; a stair or two is expected, a house is not";
     ASSERT_GT(nudged, 80u) << "only " << nudged << " burials were arranged";

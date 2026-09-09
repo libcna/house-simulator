@@ -267,7 +267,14 @@ was divided by its **cell boundaries** instead — 86 wall pieces between one op
 could not walk from the front lawn to the side yard.
 
 Two open exterior cells abut on grass, so §4's rule 1 does not apply between them and no wall is
-built (107 boundaries in this house). What is built instead comes from `layout.exterior.json`:
+built (107 boundaries in this house). **Nor does one get a floor** (`HOUSE-00782`): §3.5's height
+field is the ground it stands on, and a slab as well would be a second answer to "how high is the
+ground here" -- one that wins wherever the lot has dropped away from the cell's declared floor.
+`EXT_ORCHARD` says +0.00 and the lawn under it is 0.30 m lower, which is a plinth with a step round
+it that §43.1's 0.22 m step-up cannot climb. A BALCONY keeps its slab: it is an exterior cell whose
+floor is 3.65 m over the lawn, and no height field carries that.
+
+What is built instead comes from `layout.exterior.json`:
 
 | From | What | This house |
 |---|---|---|

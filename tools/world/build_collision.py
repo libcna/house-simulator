@@ -463,6 +463,13 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
         key = (plane.get("axis"), snap(float(plane.get("value", 0.0))))
         portals_by_plane.setdefault(key, []).append(portal)
 
+    grade = ground_storey(layout)
+    level_ffl = {row["id"]: float(row.get("ffl", 0.0)) for row in layout_io.rows(layout, "levels")}
+
+    def on_the_ground(row: dict) -> bool:
+        """An open exterior cell standing on §11.5's ground rather than on a storey of the house."""
+        return open_air(row) and abs(level_ffl.get(row.get("level"), 0.0) - grade) < 1e-6
+
     out: dict[str, list[int]] = {}
     for cell in sorted(cells, key=lambda c: c["id"]):
         level = levels.get(cell["level"])
@@ -497,9 +504,20 @@ def build_shell(layout, shapes: Shapes, stats: dict) -> dict[str, list[int]]:
                                   _step_off_rects(layout, cells_by_id, levels, portals, cell["id"], y0))
         ceiling_holes = _slab_holes(portals_by_plane, cell["id"], y1,
                                     _step_off_rects(layout, cells_by_id, levels, portals, cell["id"], y1))
+        # An open exterior cell ON THE GROUND STOREY has no floor of its own: §11.5's height
+        # field is the ground it stands on, and §49.2 says exterior collision is *"the height
+        # field plus OBBs"* (`HOUSE-00782`). A BALCONY is an exterior cell too and its floor is
+        # 3.65 m over the lawn, which no height field carries -- `terrain_gen` draws the same line
+        # for its pads, and taking a balcony's slab away drops a body through it into the garden. A slab as well as the field is two answers to "how high is the ground
+        # here", and where they differed the slab won: `EXT_ORCHARD` declares `yOverride` 0.00 and
+        # the lawn under it falls to -0.30, so the orchard stood on a 0.30 m plinth with a step
+        # round it that §43.1's 0.22 m step-up could not climb. The orchard was unreachable, and
+        # so was half the east side yard. A deck -- the terrace at +0.45, the porch at +0.57 -- is
+        # in the height field too, as `terrain_gen`'s pad.
         for box in boxes_by_cell[cell["id"]]:
             x0, x1, z0, z1 = box
-            for rx0, rz0, rx1, rz1 in subtract_rects(box_rect(box), floor_holes):
+            for rx0, rz0, rx1, rz1 in ([] if on_the_ground(cell)
+                                       else subtract_rects(box_rect(box), floor_holes)):
                 indices.append(shapes.obb(
                     ((rx0 + rx1) / 2, y0 - depth / 2, (rz0 + rz1) / 2),
                     ((rx1 - rx0) / 2, depth / 2, (rz1 - rz0) / 2),
@@ -1042,6 +1060,17 @@ def open_air(cell: dict) -> bool:
     seventeen open ones are ground, and the boundary between two of them is grass.
     """
     return cell.get("kind") == "exterior" and cell.get("visibilityHint") == "open"
+
+
+def ground_storey(layout) -> float:
+    """The `ffl` of the lowest level at or above §10.2's grade: the storey the lot is at.
+
+    Found rather than named, so a level inserted below `L0` does not silently move which one
+    counts as the ground -- `terrain_gen.surfaces` finds it the same way, for the same reason.
+    """
+    above = [float(row.get("ffl", 0.0)) for row in layout_io.rows(layout, "levels")
+             if float(row.get("ffl", 0.0)) >= 0.0]
+    return min(above) if above else 0.0
 
 
 def _exterior_cells(layout) -> list[tuple[str, list]]:
@@ -2601,6 +2630,7 @@ def selftest() -> int:
 
             # 7g. `HOUSE-00774`: §49.2's exterior collision -- the height field plus OBBs for
             #     what stands on it -- and the cell boundaries that stopped being walls.
+            grade_of_house = ground_storey(rows)
             rows_exterior = layout_io.load_layout(authored, ["cells"])
             rows_exterior["exterior"] = layout_io.load_file(
                 authored / layout_io.FILES["exterior"][0], "exterior")
@@ -2732,6 +2762,30 @@ def selftest() -> int:
                     f"§11.4's parked cars are OBBs with the yaw the layout gives them "
                     f"({len(cars)} of them, yaws "
                     f"{sorted(round(math.degrees(record[2])) for record in cars)})")
+
+            # §11.5's ground is the only floor the outdoors has (`HOUSE-00782`). A slab as well
+            # would be a second answer to "how high is the ground here", and the two disagree
+            # wherever the lot has dropped away from a cell's declared floor: `EXT_ORCHARD` says
+            # 0.00 and the lawn under it is 0.30 m lower, which is a plinth with a step round it
+            # that §43.1's 0.22 m step-up cannot climb.
+            slabbed = []
+            for row in house["cells"]:
+                cell_row = house_cells.get(row["id"])
+                if cell_row is None or not open_air(cell_row):
+                    continue
+                if abs(float(house_levels[cell_row["level"]].get("ffl", 0.0)) - grade_of_house) > 1e-6:
+                    continue          # a balcony: its floor is a storey up and no field carries it
+                for index in row["shapes"]:
+                    if (index < offset and house_shapes.obbs[index][4] == KIND_FLOOR
+                            and (row["id"], index) not in house["borrowed"]):
+                        slabbed.append((row["id"], index))
+            require(not slabbed,
+                    f"no open exterior cell on the ground storey has a floor slab: the height "
+                    f"field is what it stands on ({slabbed[:3]})")
+            require(any(house_shapes.obbs[index][4] == KIND_FLOOR
+                        for index in references["L1_BALCONY_REAR"] if index < offset),
+                    "...and a BALCONY still has one, because its floor is 3.65 m over the lawn "
+                    "and no height field carries that")
 
             # §10.4's road termination: the accessible corridor's three open sides -- x = ±35 and
             # the far side -- each have a continuous barrier across them, with no gap a 0.62 m

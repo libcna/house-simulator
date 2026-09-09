@@ -62,7 +62,7 @@ namespace
 
     struct Walk
     {
-        float reached = 0.0F;
+        float reached = -1.0e9F;
         std::uint64_t escapes = 0u;
         std::string lastCell;
     };
@@ -98,13 +98,14 @@ TEST(RoadEndTests, TheRoadEndsInSomethingYouCanSee)
     const auto ground = [&statics](float x, float z)
     { return cnahouse::physics::TerrainAt(statics.terrain, x, z).height; };
 
-    const auto walkTo = [&](float yaw, const char* what, const auto& along)
+    const auto walkTo =
+        [&](float yaw, const char* what, const auto& along, const Vector3& start = Vector3(0.0F, 0.0F, 2.4F))
     {
         BroadPhase broad;
         CellTracker tracker;
         BoundaryGuard guard;
         PlayerState state;
-        state.position = Vector3(0.0F, ground(0.0F, 2.4F) + kRise + 0.01F, 2.4F);
+        state.position = Vector3(start.X, ground(start.X, start.Z) + kRise + 0.01F, start.Z);
         state.yaw = yaw;
         state.fastWalk = true;
         tracker.Forget();
@@ -146,9 +147,16 @@ TEST(RoadEndTests, TheRoadEndsInSomethingYouCanSee)
     // §14: yaw 0 looks north (-Z), a quarter turn east (+X), three quarters west.
     const auto byX = [](const Vector3& at) { return std::fabs(at.X); };
     const auto byZ = [](const Vector3& at) { return at.Z; };
+    const auto byNorth = [](const Vector3& at) { return -at.Z; };
     const Walk east = walkTo(1.5707963F, "east", byX);
     const Walk west = walkTo(-1.5707963F, "west", byX);
     const Walk across = walkTo(3.1415927F, "across", byZ);
+    // ...and off the verge into the neighbours' front gardens, at both ends, which is §10.4's
+    // second layer on OUR side of the road: our own fence covers x -22.5…+22.5 and the
+    // neighbours' hedge covers the rest out to the corner. Without it the corridor was open round
+    // the end of our own fence and `HOUSE-00782`'s fill walked out into the neighbourhood.
+    const Walk neighbourW = walkTo(0.0F, "n-west", byNorth, Vector3(-28.0F, 0.0F, 1.0F));
+    const Walk neighbourE = walkTo(0.0F, "n-east", byNorth, Vector3(28.0F, 0.0F, 1.0F));
 
     // §10.3's corridor is x -35…+35 and z 0…+11.5. The barriers stand at its edges, so a body
     // leaning on one stops a capsule's radius short of it and never reaches the box at ±40 / +12.
@@ -159,8 +167,17 @@ TEST(RoadEndTests, TheRoadEndsInSomethingYouCanSee)
     EXPECT_LT(across.reached, 12.0F) << "walked through the far hedge";
     EXPECT_GT(across.reached, 9.0F) << "stopped before crossing the road";
 
+    // The neighbours' hedge runs z 0.00…0.50, so a body walking north off the verge stops with
+    // its own radius to spare and never crosses our own fence line.
+    EXPECT_LT(neighbourW.reached, -0.5F) << "walked into the neighbours' garden, west of our fence";
+    EXPECT_LT(neighbourE.reached, -0.5F) << "walked into the neighbours' garden, east of our fence";
+    EXPECT_GT(neighbourW.reached, -1.6F) << "stopped before reaching the hedge at all";
+    EXPECT_GT(neighbourE.reached, -1.6F) << "stopped before reaching the hedge at all";
+
     // The point of the whole thing: §10.4's fifth layer never had to do anything.
     EXPECT_EQ(east.escapes, 0u) << "the east end of the road is an invisible wall";
     EXPECT_EQ(west.escapes, 0u) << "the west end of the road is an invisible wall";
     EXPECT_EQ(across.escapes, 0u) << "the far side of the road is an invisible wall";
+    EXPECT_EQ(neighbourW.escapes + neighbourE.escapes, 0u)
+        << "the neighbours' front gardens are held by an invisible wall";
 }

@@ -613,6 +613,39 @@
       { "position": [35.25, 0.00, 10.50], "yawDeg": 90.0, "scale": 1.00 },
       { "position": [35.25, 0.00, 11.50], "yawDeg": 90.0, "scale": 1.00 }
     ] },
+    // ---- VEG_HEDGE_NEAR_W / _E x12 each -- §10.4's SECOND layer on our own side of the road,
+    // beyond our own fence: the neighbours' front boundary, from the end of our fence at x = ±22.5
+    // to the corner at ±35. Without it the corridor was open at both ends round the end of our
+    // fence, and `HOUSE-00782`'s flood fill walked out into the neighbours' gardens and on to the
+    // playable volume's own edge at x = ±40.
+    { "id": "VEG_HEDGE_NEAR_W", "asset": "MODEL_HEDGE_PRIVET_1M", "instances": [
+      { "position": [-34.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-33.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-32.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-31.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-30.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-29.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-28.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-27.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-26.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-25.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-24.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [-23.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 }
+    ] },
+    { "id": "VEG_HEDGE_NEAR_E", "asset": "MODEL_HEDGE_PRIVET_1M", "instances": [
+      { "position": [23.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [24.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [25.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [26.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [27.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [28.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [29.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [30.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [31.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [32.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [33.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 },
+      { "position": [34.50, 0.00, 0.25], "yawDeg": 0.0, "scale": 1.00 }
+    ] },
     // ---- VEG_BED x1 -- §11.1's flower bed against the porch, which is planting: soil and what
     // grows in it. The vegetable garden's SIX raised beds left this list in `HOUSE-00769` and are
     // `structures` now, because a raised bed is a timber box you build, not a plant -- and because
