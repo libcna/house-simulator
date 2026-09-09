@@ -14,6 +14,7 @@
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/app/Settings.hpp"
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/debug/VisibilityOverlay.hpp"
 #include "cnahouse/player/FirstPersonView.hpp"
 #include "cnahouse/player/IInputSource.hpp"
 #include "cnahouse/util/Ids.hpp"
@@ -132,6 +133,62 @@ namespace
         bool cnahouse::player::InputState::* edge_;
         bool fired_ = false;
     };
+
+    TEST(HeadlessRunTests, PressingF3ShowsTheWalkTheFrameActuallyDid)
+    {
+        // `HOUSE-00681`. §25.8's `F3`, end to end: the key reaches the overlay, and behind it a
+        // real §25.2 walk ran over §12's house with the camera the frame was drawn from. The
+        // numbers are what phase 9 spent itself proving, and this is the first place a person can
+        // see them without a debugger.
+        cnahouse::util::Log::ResetForTesting();
+
+        OneKeyPress input(&cnahouse::player::InputState::toggleVisibilityOverlayPressed);
+
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        // §12's kitchen, facing east: a room with doorways, so the walk has something to cross.
+        options.player = std::array<float, 5>{-3.00f, 0.60f, -25.05f, 90.0f, 0.0f};
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(30);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+
+        EXPECT_TRUE(game.VisibilityOverlayForTesting().Visible())
+            << "one press of F3 did not show the overlay";
+
+        const cnahouse::debug::VisibilitySnapshot snapshot = game.VisibilitySnapshotForTesting();
+        const std::vector<std::string> lines = game.VisibilityOverlayForTesting().Lines(snapshot);
+        for (const std::string& line : lines)
+        {
+            std::printf("  %s\n", line.c_str());
+        }
+
+        // A real walk, not an empty struct: the camera's own cell at least, and portals tested.
+        ASSERT_FALSE(snapshot.visible.empty()) << "the walk reached nothing, not even its own cell";
+        EXPECT_EQ(snapshot.visible.front().depth, 0) << "the camera's own cell is the walk's root";
+        EXPECT_EQ(snapshot.cell, snapshot.visible.front().cell);
+        EXPECT_GT(snapshot.traversal.portalsTested, 0);
+        EXPECT_EQ(snapshot.cellsInWorld, 96) << "§16's house has 96 cells";
+        // §71.2's hard fail is 30 visible cells; §65.6's doors start shut, so this is far under it.
+        EXPECT_LE(snapshot.visible.size(), 30U);
+        EXPECT_EQ(snapshot.traversal.cellsDropped, 0);
+        // §25.1's step 3 ran over the walk's answer, and drew less than the whole house.
+        EXPECT_GT(snapshot.chunksDrawn, 0);
+        EXPECT_LT(snapshot.chunksDrawn, 418) << "the chunk cull kept every chunk in the house";
+        EXPECT_LE(snapshot.chunksDrawn, snapshot.chunksTested);
+        // And the overlay is honest about the draw list not being built from any of it yet.
+        EXPECT_FALSE(snapshot.cullingApplied);
+        EXPECT_EQ(snapshot.drawCalls, 418) << "the frame still draws every resident chunk";
+    }
 
     TEST(HeadlessRunTests, PressingF9BuildsTheWireframeForTheCellTheBodyIsIn)
     {

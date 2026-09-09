@@ -173,6 +173,60 @@ namespace
         EXPECT_FALSE(source.Current().toggleOverlayPressed);
     }
 
+    TEST(InputTests, EachOverlayHasItsOwnFunctionKeyAndNobodyElsesEdge)
+    {
+        // §69's `F2`, §25.8's `F3` and §71's `F9`, each to its own field. A scripted input source
+        // sets these fields directly (`SetInputSourceForTesting`), so nothing downstream can catch
+        // a key wired to the wrong one -- this is the only place the mapping itself is checked.
+        struct Binding
+        {
+            Keys key;
+            bool cnahouse::player::InputState::* field;
+            const char* what;
+        };
+
+        const Binding bindings[] = {
+            {Keys::F1, &cnahouse::player::InputState::toggleOverlayPressed, "F1 performance"},
+            {Keys::F2, &cnahouse::player::InputState::toggleWorldOverlayPressed, "F2 world"},
+            {Keys::F3, &cnahouse::player::InputState::toggleVisibilityOverlayPressed, "F3 visibility"},
+            {Keys::F9, &cnahouse::player::InputState::togglePhysicsOverlayPressed, "F9 physics"},
+        };
+
+        for (const Binding& binding : bindings)
+        {
+            KeyboardMouseSource source;
+            source.Apply(KeyboardState({}), At(0, 0), 0.016f);
+            source.Apply(KeyboardState{binding.key}, At(0, 0), 0.016f);
+            EXPECT_TRUE(source.Current().*(binding.field)) << binding.what << " is not on its key";
+            for (const Binding& other : bindings)
+            {
+                if (other.field != binding.field)
+                {
+                    EXPECT_FALSE(source.Current().*(other.field))
+                        << binding.what << " also fired " << other.what;
+                }
+            }
+        }
+
+        // All four at once, which is what catches two of them SHARING an edge slot: one key
+        // pressed alone still looks right when its slot belongs to another, and only pressing both
+        // in the same frame shows that the second one has already been consumed.
+        KeyboardMouseSource together;
+        together.Apply(KeyboardState({}), At(0, 0), 0.016f);
+        together.Apply(KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F9}, At(0, 0), 0.016f);
+        for (const Binding& binding : bindings)
+        {
+            EXPECT_TRUE(together.Current().*(binding.field))
+                << binding.what << " did not fire when the other overlays' keys were down too";
+        }
+        // ...and holding them repeats none of them, which is what makes each an edge of its own.
+        together.Apply(KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F9}, At(0, 0), 0.016f);
+        for (const Binding& binding : bindings)
+        {
+            EXPECT_FALSE(together.Current().*(binding.field)) << binding.what << " repeated";
+        }
+    }
+
     TEST(InputTests, RunAndCrouchAreLevelsNotEdges)
     {
         // Held states, deliberately: a run that needed re-pressing every frame would be unusable.

@@ -22,6 +22,7 @@
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/PhysicsOverlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
+#include "cnahouse/debug/VisibilityOverlay.hpp"
 #include "cnahouse/debug/WorldOverlay.hpp"
 #include "cnahouse/physics/BroadPhase.hpp"
 #include "cnahouse/physics/CollisionData.hpp"
@@ -39,7 +40,9 @@
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
+#include "cnahouse/visibility/ChunkCulling.hpp"
 #include "cnahouse/visibility/RenderList.hpp"
+#include "cnahouse/visibility/VisibilitySystem.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkData.hpp"
 #include "cnahouse/world/SpatialIndex.hpp"
@@ -118,6 +121,18 @@ namespace cnahouse::app
         [[nodiscard]] const debug::Counters& CountersForTesting() const noexcept
         {
             return counters_;
+        }
+
+        /// @brief §25.8's `F3`, for the test that presses the key.
+        [[nodiscard]] const debug::VisibilityOverlay& VisibilityOverlayForTesting() const noexcept
+        {
+            return visibilityOverlay_;
+        }
+
+        /// @brief What `F3` would show about the last frame.
+        [[nodiscard]] debug::VisibilitySnapshot VisibilitySnapshotForTesting() const
+        {
+            return VisibilitySnapshot();
         }
 
         /// @brief §71's `F9`, for the test that presses the key.
@@ -373,6 +388,17 @@ namespace cnahouse::app
         /// @brief What §69's `F2` shows about this frame.
         [[nodiscard]] debug::WorldSnapshot WalkSnapshot() const;
 
+        /// @brief §25's walk for this frame, and §25.1's step 3 over its answer.
+        ///
+        /// Runs whenever the walk scene has a world: the visible set is computed every frame and
+        /// `F3` reports it, whether or not the draw list is built from it. That is deliberate --
+        /// a culling system nobody can see the answer of is one nobody can debug, and
+        /// `HOUSE-00684`'s `cull off` will need exactly this separation anyway.
+        void UpdateVisibility(const FrameContext& frame);
+
+        /// @brief What §25.8's `F3` shows about this frame.
+        [[nodiscard]] debug::VisibilitySnapshot VisibilitySnapshot() const;
+
         class Hud;
         std::unique_ptr<Hud> hud_;
 
@@ -411,6 +437,11 @@ namespace cnahouse::app
         player::FirstPersonView view_;
         player::CellTracker tracker_;
         debug::WorldOverlay worldOverlay_;
+        /// §25.8's `F3`, and the walk it reports. Both exist only in the walk scene: the blockout
+        /// camera is outside the house and in no cell, and §16.4 has no answer for it.
+        debug::VisibilityOverlay visibilityOverlay_;
+        std::optional<visibility::VisibilitySystem> visibility_;
+        std::optional<visibility::ChunkCuller> chunkCuller_;
         /// §71's `F9`, and the line renderer it draws through. Both exist only in the walk scene:
         /// `DebugDraw` needs a device, and the overlay needs a `CollisionWorld` and a camera --
         /// which is exactly what `HOUSE-00620` recorded as the reason `F9` was not wired yet.

@@ -9809,8 +9809,47 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
 
 ### 9.3 Instrumentation and proof
 
-- [ ] HOUSE-00681 — Implement the `F3` visibility overlay (counts, traversals, portals tested, depth, the visible list)
+- [x] HOUSE-00681 — Implement the `F3` visibility overlay (counts, traversals, portals tested, depth, the visible list)
       dep: HOUSE-00670 · sys: debug · plat: ALL · pri: MUST
+      note: (2026-09-09) `debug::VisibilityOverlay`, a presenter like §69's `F2` and §71's `F1` and
+            `F9`: it measures nothing and queries nothing, so what it says is asserted in a unit
+            test instead of looked at. Five header lines plus the visible list, capped at twelve
+            rows with *"... and N more"* -- §25's own cap is thirty and a screen is not thirty lines
+            tall beside everything else on it.
+      note: **every REASON a portal was not crossed, not a total.** A room that should be visible
+            and is not is one of six numbers -- closed, facing away, too deep, clipped to nothing,
+            too small, already covered -- and a total says a chain stopped without saying which
+            stopped it. That is the whole reason §25.8 calls this family of tools the most useful
+            thing a portal system has.
+      note: **a count that was never measured prints as `-`, not `0`.** Zero is an answer -- nothing
+            was drawn -- and the instance and exterior culls do not run in the game yet, so
+            reporting them as zero would report an empty garden rather than an absent measurement.
+      note: **the overlay says whether the frame was actually culled.** §25's walk now runs every
+            frame in the walk scene and `F3` reports it, but `BuildRenderList` still builds from
+            residency (`HOUSE-00676`), so the line reads `culling NOT APPLIED`. An overlay reporting
+            a visible set that nothing acted on has to say which of the two it is describing;
+            `HOUSE-00684` is what turns it to `ON`.
+      note: the walk itself is now wired: `CnaHouseGame` owns a `VisibilitySystem` and a
+            `ChunkCuller` in the walk scene and runs them at §7.5's stage 11, after the body has
+            moved and before the frame is drawn. `F3` is the first thing in the project that shows
+            phase 9's answer to a person.
+      measured: **from `L0_KITCHEN` facing east with §65.6's doors shut: 7 cells visible of 96,
+            maxdepth 3, 91 portals tested and 8 crossed** (8 closed, 39 facing away, 34 clipped to
+            nothing, 2 already covered), and the chunk cull takes 23 chunks to 20. The visible list
+            is the kitchen, the hall, the family room, the sunroom, and through its glazing the back
+            yard (3 cones), the east side yard and the orchard -- which is `HOUSE-00679`'s
+            indoor-to-outdoor crossing, seen for the first time in a running frame.
+      verified: 7 `VisibilityOverlayTests` (every §25.8 number and every cell named, each row's own
+            depth and cone count, `-` for unmeasured against `0` for measured-as-none, the list cap
+            and its summary, a dropped cone or cell said loudly and only when non-zero, an empty
+            walk saying so, and the culling flag), 1 new `InputTests` case (each overlay on its own
+            function key AND its own edge slot -- all four pressed in one frame, which is what
+            catches two of them sharing one), and 1 `HeadlessRunTests` case pressing `F3` in a real
+            30-frame session and asserting the walk behind it. Thirteen injected bugs, all caught --
+            three only after the suite was strengthened: the key mapping is bypassed by the scripted
+            input source every other integration test uses, a shared edge slot is invisible unless
+            two keys are pressed together, and a row's own depth is invisible unless the row is
+            found by something other than that depth.
 - [ ] HOUSE-00682 — Implement the `F4` visibility geometry overlay (cell wireframes, portal quads, reduced frusta)
       dep: HOUSE-00681, HOUSE-00147 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-00683 — Implement `F5` freeze-visibility and the detached inspection camera

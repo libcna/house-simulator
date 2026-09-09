@@ -409,6 +409,15 @@ namespace cnahouse::app
             return;
         }
 
+        // §25's walk, over the world just loaded. It runs every frame from here on and `F3`
+        // reports it; what the draw list is built from is a separate decision and
+        // `BuildRenderList` is the one place that makes it.
+        visibility_.emplace(*world_);
+        if (blockoutChunks_ != nullptr)
+        {
+            chunkCuller_.emplace(*blockoutChunks_);
+        }
+
         // §71's `F9` draws through this, and it needs a device -- which is why it is built here
         // and not with the other members.
         debugDraw_ = std::make_unique<debug::DebugDraw>(getGraphicsDeviceProperty());
@@ -767,6 +776,13 @@ namespace cnahouse::app
                 const debug::Timing::Scope scope(timing_, UpdateStage::Physics);
                 UpdateWalk(frame.deltaSeconds);
             }
+            if (walking_ && visibility_.has_value())
+            {
+                // §7.5's stage 11, after the body has moved and the camera is where the frame will
+                // be drawn from -- which is why it is not inside `UpdateWalk`'s fixed-step loop.
+                const debug::Timing::Scope scope(timing_, UpdateStage::Visibility);
+                UpdateVisibility(frame);
+            }
             else if (blockoutCells_ != nullptr)
             {
                 // `HOUSE-00476`. The debug camera flies; nothing else in this scene moves. Driven
@@ -848,6 +864,13 @@ namespace cnahouse::app
             {
                 worldOverlay_.Toggle();
                 Log::Info(LogCat::Debug, "world overlay {}", worldOverlay_.Visible() ? "shown" : "hidden");
+            }
+            if (Input().Current().toggleVisibilityOverlayPressed)
+            {
+                visibilityOverlay_.Toggle();
+                Log::Info(LogCat::Debug,
+                          "visibility overlay {}",
+                          visibilityOverlay_.Visible() ? "shown" : "hidden");
             }
             if (Input().Current().togglePhysicsOverlayPressed)
             {
@@ -1006,6 +1029,60 @@ namespace cnahouse::app
         DrawPhysicsOverlay();
     }
 
+    void CnaHouseGame::UpdateVisibility(const FrameContext& frame)
+    {
+        visibility::CameraView view;
+        view.cell = tracker_.Current();
+        const player::FirstPersonCamera& camera = view_.Camera();
+        view.eye = camera.Pose().eye;
+        view.viewProjection = camera.View() * camera.Projection();
+        view.frustum = visibility::ClipFrustum(camera.Frustum());
+        view.nearPlane = camera.Frustum().getNearProperty();
+        view.farPlane = camera.Frustum().getFarProperty();
+        visibility_->SetCamera(view);
+        visibility_->Update(frame);
+        if (chunkCuller_.has_value())
+        {
+            chunkCuller_->Cull(visibility_->Visible());
+        }
+    }
+
+    debug::VisibilitySnapshot CnaHouseGame::VisibilitySnapshot() const
+    {
+        debug::VisibilitySnapshot snapshot;
+        if (!visibility_.has_value() || !world_.has_value())
+        {
+            return snapshot;
+        }
+        snapshot.cell = util::IdRegistry::NameOf(tracker_.Current());
+        snapshot.eye = view_.Camera().Pose().eye;
+        snapshot.yaw = view_.Camera().Pose().yaw;
+        snapshot.cellsInWorld = static_cast<int>(world_->Cells().size());
+        snapshot.traversal = visibility_->Stats();
+        for (const visibility::VisibleCell& cell : visibility_->Visible())
+        {
+            debug::VisibleCellLine row;
+            row.cell = util::IdRegistry::NameOf(cell.cell);
+            row.depth = cell.depth;
+            row.cones = static_cast<int>(cell.frustumCount);
+            row.conesDropped = cell.frustaDropped;
+            row.diffuse = visibility::Has(cell.flags, visibility::ConeFlags::Diffuse);
+            snapshot.visible.push_back(std::move(row));
+        }
+        if (chunkCuller_.has_value())
+        {
+            snapshot.chunksDrawn = chunkCuller_->Statistics().chunksDrawn;
+            snapshot.chunksTested = chunkCuller_->Statistics().chunksTested;
+        }
+        snapshot.drawCalls = renderList_.DrawCalls();
+        snapshot.stateChanges = renderList_.StateChanges();
+        // §25.1's step 5 is built from residency and not from the walk above (`BuildRenderList`
+        // says why), so the overlay says so rather than reporting a culling system that is not
+        // culling. `HOUSE-00684` is what turns this to `ON`.
+        snapshot.cullingApplied = false;
+        return snapshot;
+    }
+
     void CnaHouseGame::BuildRenderList()
     {
         renderList_.Clear();
@@ -1085,6 +1162,7 @@ namespace cnahouse::app
         if (walking_)
         {
             worldOverlay_.Draw(hud_->batch, text_, WalkSnapshot());
+            visibilityOverlay_.Draw(hud_->batch, text_, VisibilitySnapshot());
         }
 #if CNAHOUSE_DEBUG_TOOLS
         if (walking_ && physicsOverlay_.Visible())
