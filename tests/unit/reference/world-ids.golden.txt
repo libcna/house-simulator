@@ -1220,6 +1220,7 @@ exterior/neighbourhood	NB_SIGN_02
 exterior/neighbourhood	NB_SIGN_03
 exterior/neighbourhood	NB_SIGN_04
 exterior/paths	PATH_APRON
+exterior/paths	PATH_CONNECT
 exterior/paths	PATH_DRIVEWAY
 exterior/paths	PATH_GARDEN
 exterior/paths	PATH_SIDEWALK_FAR

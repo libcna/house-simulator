@@ -93,6 +93,12 @@
       "y": 0.0, "material": "MAT_CONCRETE_BROOM" },
     { "id": "PATH_APRON", "kind": "apron", "boxes": [{ "x": [9.3, 17.1], "z": [-13.3, -13.0] }],
       "y": 0.0, "material": "MAT_CONCRETE_BROOM" },
+    // §11.3's connector: "a 1.0 m concrete path links the driveway to the front walk at z = -6.0
+    // so the player never has to cross grass". It was the one paved surface §11 describes and this
+    // file did not have (`HOUSE-00764`). A `walk` rather than a kind of its own: it is a path a
+    // person walks on, which is what that kind means, and the schema's list is closed.
+    { "id": "PATH_CONNECT", "kind": "walk", "boxes": [{ "x": [1.0, 9.6], "z": [-6.5, -5.5] }],
+      "y": 0.0, "material": "MAT_CONCRETE_BROOM" },
     { "id": "PATH_SIDEWALK_NEAR", "kind": "sidewalk",
       "boxes": [{ "x": [-220.0, 220.0], "z": [1.6, 3.2] }],
       "y": 0.02, "material": "MAT_CONCRETE_SLAB" },

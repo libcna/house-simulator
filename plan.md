@@ -10671,8 +10671,30 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             x = ±14 sitting ON the surface, the centre line 10 cm wide on the centreline lifted
             3 mm, every face wound the way its normal says, the bounds, determinism, and the far
             verge deliberately absent.
-- [ ] HOUSE-00764 — Generate the driveway, the apron and the connecting path
+- [x] HOUSE-00764 — Generate the driveway, the apron and the connecting path
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
+      finding: (2026-09-09) **two of the three were already drawn, and the third was not in the
+            layout.** §11's paved surfaces are DATA: `fields()` flattens every `paths` row to its
+            own `y` and paints its material into the height field, and `HOUSE-00762`'s tiles draw
+            the field -- so `PATH_DRIVEWAY` and `PATH_APRON` have been geometry since the tiles
+            existed. What was missing was §11.3's sentence: *"a 1.0 m concrete path links the
+            driveway to the front walk at z = -6.0 so the player never has to cross grass"*, which
+            `layout.exterior.json` had no row for.
+      note: authored as `PATH_CONNECT` -- `x` 1.0…9.6, `z` -6.5…-5.5, `y` 0.0,
+            `MAT_CONCRETE_BROOM` -- a `walk` and not a kind of its own, because that is what the
+            kind means and the schema's list is closed. It meets `PATH_WALK` at x = 1.0 and the
+            driveway at x = 9.6, so §11.3's "never has to cross grass" is true as walked.
+      measured: the field now reads **concrete at y = 0.000 from x = 1.0 to x = 9.6 at z = -6.0**,
+            with grass at +0.067 half a metre off it. `collision.bin` was rebuilt from the new
+            field, so a body walks the path it can see.
+      note: **a paved surface costs 15 minutes of nav.** Changing the height field invalidates
+            `collision.bin`, and `build_nav.py` rebuilds the pet graph against it -- 932 s of the
+            content build, against 0.4 s for collision itself. Worth knowing before authoring a
+            path: it is the clearance test over every node pair, not the terrain.
+      verified: `validate_world`'s 11 rules, `terrain_gen --check`'s contract, `id_golden` (2 153
+            ids, `PATH_CONNECT` appended), 1 008 unit, 92 integration, 30 render, all gates green
+            -- with the terrain's two manifest hashes, the shell manifest and the licence document
+            regenerated, because a generated asset's hash is in three places and a gate for each.
 - [ ] HOUSE-00765 — Generate the front walk, the terrace paving and the garden paths
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00766 — `fence_gen.py`: the 1.85 m board fence (W/N/E), the 1.35 m ornamental front fence, posts, caps and rails
