@@ -97,16 +97,16 @@
     "L3_STORE_N.glb": "sha256:ed168f4cd31b79d2d3341649232efcad6b8bff78f6c3506c73a58533dda3224a",
     "L3_STORE_S.glb": "sha256:8b53363b3327e0983c499ac6aa25d136bd46323450217935867b82c4051f35ce",
     "L3_STORE_W.glb": "sha256:65b0aaee85985274a04a7b7156eccdf1d2a8c3cfe00f139331ffae1f9f0bce49",
-    "ROOF_GARAGE.glb": "sha256:6bf3ac8323e087a1a6427c86192c2a716878aef2305c8181c5d6fffd477d5c13",
-    "ROOF_MAIN.glb": "sha256:58c46ee8463ab0ca6949d9008a4270a4d320de91f8fbf5bd3a381eeb0870f230"
+    "ROOF_GARAGE.glb": "sha256:b6f8e01a7076c086dd820b0d2856528accea4435f698c0ae16d8eae29a448107",
+    "ROOF_MAIN.glb": "sha256:f5c6a0d1b951f01883e6862bf500071b829bfee7b04031f2e4c26d24091895db"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:46b4126cded08b2711a6a760e7f30a3c96f407cea7999591245a163fd26fc581",
+  "generatorVersion": "sha256:3d070152ab2f55143913f1cbdcafe08d733c78a7c718e63d429c9e74a02a1bcf",
   "origin": {
     "attribution": "",
     "kind": "generated",
     "licence": "MIT"
   },
   "schema": "cna-house/shell-manifest/1",
-  "worldHash": "sha256:464bf2d5344b14793a80ecbc6db463e670e20e885a9c71313ec56802a66e2ac7"
+  "worldHash": "sha256:d9f0405dd68134b6f23fb15d87f41842ddede956df96941cae27700d552c7f84"
 }

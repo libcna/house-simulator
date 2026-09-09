@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""validate_world.py -- the twelve rules of `cna-house.md` §15.7, over a whole world directory.
+"""validate_world.py -- the thirteen rules of `cna-house.md` §15.7, over a whole world directory.
 
 `HOUSE-00358`. `world_schema.py` (`HOUSE-00341`) checks that each of the sixteen files has the
 right *shape*. This checks that the sixteen agree with each other and with the house: that a
@@ -16,7 +16,7 @@ pre-build step. `cna-house.md` §15.7: a failure fails the build.
 
 ## Every failure, not the first
 
-Each rule collects **all** its failures and the run reports all twelve rules' worth, because
+Each rule collects **all** its failures and the run reports all thirteen rules' worth, because
 fixing forty authoring mistakes one build at a time is intolerable (`conventions.md` §5.1). Each
 message names the file, the JSON path and what was expected against what was found -- a message
 that says "portal misaligned" and stops has told the author to go and search.
@@ -74,6 +74,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import layout_io  # noqa: E402
+import roof_geometry  # noqa: E402
+import terrain_gen  # noqa: E402
 import world_schema  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
@@ -161,6 +163,7 @@ RULE_TITLES = {
     10: "the layout is dimensionally plausible",
     11: "every interactable is reachable from the floor",
     12: "nothing outdoors stands in something else",
+    13: "every downspout is at a roof corner, on the ground under it",
 }
 
 
@@ -252,10 +255,17 @@ def segment_inside(x0: float, z0: float, x1: float, z1: float,
 
 
 class World:
-    """The layout, indexed the way the rules need it. Built once, read by all twelve."""
+    """The layout, indexed the way the rules need it. Built once, read by all thirteen."""
 
-    def __init__(self, layout: dict[str, dict]) -> None:
+    def __init__(self, layout: dict[str, dict], directory: Path | None = None) -> None:
         self.layout = layout
+        #: Where the layout was read from, for the rules that need a file the layout only NAMES:
+        #: rule 13 reads §11.5's height field to check a downspout's splash point is on the
+        #: ground. `None` means "no directory", and such a rule checks what it can rather than
+        #: passing silently -- the first version of rule 13 read `world.directory` on a class
+        #: that had no such attribute, caught the `AttributeError` meant for a missing PNG, and
+        #: reported ok on a splash point 79 mm underground.
+        self.directory = directory
         self.levels = layout_io.rows(layout, "levels") if "levels" in layout else []
         self.cells = layout_io.rows(layout, "cells") if "cells" in layout else []
         self.portals = layout_io.rows(layout, "portals") if "portals" in layout else []
@@ -2130,10 +2140,89 @@ def rule_12_outdoors(world: World) -> list[Problem]:
     return problems
 
 
+def rule_13_downspouts(world: World) -> list[Problem]:
+    """Every downspout is where the roof puts it, and its splash is on the ground under it.
+
+    §37.3's splash particles and §37.4's trickle emitter both need to know where the water lands,
+    and the pipes have been drawn since `HOUSE-00468` with nothing outside the shell knowing they
+    exist. `HOUSE-00776` writes them down; this is what stops the writing and the drawing drifting
+    apart, because both come from `roof_geometry.house_downspouts`.
+
+    Four conditions:
+
+    * the set of ids is exactly the derived one -- six, not eight: the garage wing projects from
+      the house's east wall, so the two corners where the roofs meet are each under the other,
+      and a pipe at one of them is a pipe in the dining room;
+    * each row's `position` is its roof corner at the gutter, to the millimetre;
+    * each row's `splash` is directly under it -- same x and z -- because water falls straight
+      down;
+    * and the splash sits on §11.5's height field rather than at +0.00, which the lot's own fall
+      makes 0.13 m wrong at the north corners.
+    """
+    problems: list[Problem] = []
+    exterior = world.layout.get("exterior") or {}
+    rows = exterior.get("downspouts") or []
+    try:
+        derived = {row["id"]: row for row in roof_geometry.house_downspouts(world.layout)}
+    except (LayoutError, KeyError, TypeError, ValueError):
+        derived = {}
+    if not rows and not derived:
+        return problems
+    # A world with rows and NO roof is not a world this rule has nothing to say about: every row
+    # in it is a pipe hanging off nothing, and the loop below says so.
+
+    authored = {row.get("id"): row for row in rows}
+    for missing in sorted(set(derived) - set(authored)):
+        problems.append(Problem(
+            13, FILE_OF["exterior"], "downspouts",
+            f"{missing} is a corner of {derived[missing]['roof']} and has no downspout row"))
+    for extra in sorted(set(authored) - set(derived)):
+        problems.append(Problem(
+            13, FILE_OF["exterior"], "downspouts",
+            f"{extra} is not a corner of any roof, or stands under another roof"))
+
+    heights = None
+    if world.directory is not None:
+        try:
+            _w, _h, heights, _materials = terrain_gen.decode(world.directory)
+        except (FileNotFoundError, OSError):
+            heights = None
+
+    for index, row in enumerate(rows):
+        identifier = row.get("id")
+        want = derived.get(identifier)
+        if want is None:
+            continue
+        position = row.get("position") or [0.0, 0.0, 0.0]
+        splash = row.get("splash") or [0.0, 0.0, 0.0]
+        if (abs(float(position[0]) - want["x"]) > 1e-3
+                or abs(float(position[2]) - want["z"]) > 1e-3
+                or abs(float(position[1]) - want["headY"]) > 1e-3):
+            problems.append(Problem(
+                13, FILE_OF["exterior"], f"downspouts/{index}/position",
+                f"{identifier} is at ({position[0]}, {position[1]}, {position[2]}); "
+                f"{want['roof']}'s corner is at ({want['x']:.2f}, {want['headY']:.3f}, "
+                f"{want['z']:.2f})"))
+        if (abs(float(splash[0]) - float(position[0])) > 1e-6
+                or abs(float(splash[2]) - float(position[2])) > 1e-6):
+            problems.append(Problem(
+                13, FILE_OF["exterior"], f"downspouts/{index}/splash",
+                f"{identifier}'s splash is not under its pipe: water falls straight down"))
+        if heights is not None:
+            ground = terrain_gen.height_at(heights, float(splash[0]), float(splash[2]))
+            if abs(float(splash[1]) - ground) > 1e-3:
+                problems.append(Problem(
+                    13, FILE_OF["exterior"], f"downspouts/{index}/splash",
+                    f"{identifier}'s splash is at {float(splash[1]):.3f}; §11.5's ground under "
+                    f"it is {ground:.3f}"))
+    return problems
+
+
 RULES = {
     1: rule_1_ids, 2: rule_2_boxes, 3: rule_3_overlap, 4: rule_4_portal_planes,
     5: rule_5_connected, 6: rule_6_references, 7: rule_7_openings, 8: rule_8_stairs,
     9: rule_9_plumbing, 10: rule_10_realism, 11: rule_11_reachable, 12: rule_12_outdoors,
+    13: rule_13_downspouts,
 }
 
 
@@ -2150,7 +2239,7 @@ def validate(directory: Path, wanted: list[int] | None = None,
         return shape, []
 
     layout = layout_io.load_layout(directory)
-    world = World(layout)
+    world = World(layout, directory)
     out: list[Problem] = []
     for number in sorted(RULES):
         if wanted is not None and number not in wanted:
@@ -2162,7 +2251,7 @@ def validate(directory: Path, wanted: list[int] | None = None,
 def report(directory: Path, wanted: list[int] | None = None, stream=sys.stdout) -> int:
     shape, problems = validate(directory, wanted)
     if shape:
-        print(f"validate_world: {len(shape)} shape problem(s); the twelve rules did not run, "
+        print(f"validate_world: {len(shape)} shape problem(s); the thirteen rules did not run, "
               f"because a rule cannot read a field that is not the type it says it is.",
               file=stream)
         for line in shape:
@@ -2196,7 +2285,7 @@ def report(directory: Path, wanted: list[int] | None = None, stream=sys.stdout) 
 
 
 def fixture() -> dict[str, dict]:
-    """A small house that satisfies all twelve rules, and exercises each of them at least once.
+    """A small house that satisfies all thirteen rules, and exercises each of them at least once.
 
     Small enough to hold in the head and real enough to be worth passing: two storeys, a foyer that
     everything is reachable from, a WC stacked over a WC on the drain the plumbing rule wants, a
@@ -2526,7 +2615,7 @@ def selftest() -> int:
         shape, problems = validate(world_dir)
         require(not shape, f"the fixture matches every schema ({shape[:2]})")
         require(not problems,
-                f"and passes all twelve rules ({[str(p) for p in problems[:3]]})")
+                f"and passes all thirteen rules ({[str(p) for p in problems[:3]]})")
 
         # 2. Every rule is actually exercised by the fixture -- a rule with nothing to look at
         #    passes for the wrong reason. Counted as: the rule reads at least one row.
@@ -3165,8 +3254,52 @@ def selftest() -> int:
                  "boxes": [{"x": [-1.0, 1.0], "z": [-4.0, 4.0]}],
                  "y": 0.0, "material": "MAT_GROUND_LAWN"}]
 
-        require(sorted({rule for rule, _, _ in mutations}) == list(range(1, 13)),
-                "there is a mutation for each of the twelve rules")
+        @mutation(13, "a downspout that is not at any roof corner")
+        def _(docs):
+            # The fixture has no roof, so EVERY downspout row in it is a pipe hanging off
+            # nothing -- which is the same failure as one at the wrong corner of a real roof and
+            # is the one this fixture can state. `HOUSE-00776`.
+            docs["exterior"]["downspouts"] = [
+                {"id": "DS_MAIN_NW", "roof": "ROOF_MAIN", "position": [0.0, 5.0, 0.0],
+                 "splash": [0.0, 0.0, 0.0], "material": None}]
+
+        # ...and rule 13's other three conditions need a world with a ROOF and a height field,
+        # which the fixture has neither of. The property has both, so they are driven against it
+        # directly (`HOUSE-00776`). The first version of this rule read `world.directory` on a
+        # class that had no such attribute, caught the `AttributeError` it had meant for a missing
+        # PNG, and reported ok on a splash point 79 mm underground -- an injection found that, and
+        # these three claims are what would have.
+        authored_world = REPO / "assets-src" / "world"
+        if (authored_world / "layout.exterior.json").is_file():
+            def rule13(edit) -> list[str]:
+                layout = layout_io.load_layout(authored_world)
+                edit((layout.get("exterior") or {}).get("downspouts") or [])
+                return [x.message for x in
+                        rule_13_downspouts(World(layout, authored_world))]
+
+            require(not rule13(lambda rows: None),
+                    f"the property's own downspouts pass rule 13 ({rule13(lambda rows: None)})")
+
+            def sink(rows):
+                rows[0]["splash"] = [rows[0]["splash"][0], 0.0, rows[0]["splash"][2]]
+            require(any("§11.5's ground under it" in message for message in rule13(sink)),
+                    f"a splash point at +0.00 where the lot has fallen 79 mm is caught -- the "
+                    f"ground under a pipe is the height field's, not zero ({rule13(sink)})")
+
+            def adrift(rows):
+                rows[0]["splash"] = [rows[0]["splash"][0] + 2.0, rows[0]["splash"][1],
+                                     rows[0]["splash"][2]]
+            require(any("water falls straight down" in message for message in rule13(adrift)),
+                    f"a splash point two metres from its pipe is caught ({rule13(adrift)})")
+
+            def moved(rows):
+                rows[0]["position"] = [rows[0]["position"][0] + 0.5, rows[0]["position"][1],
+                                       rows[0]["position"][2]]
+            require(any("corner is at" in message for message in rule13(moved)),
+                    f"and a pipe half a metre off its roof's corner is caught ({rule13(moved)})")
+
+        require(sorted({rule for rule, _, _ in mutations}) == list(range(1, 14)),
+                "there is a mutation for each of the thirteen rules")
 
         for rule, description, mutate in mutations:
             docs = copy.deepcopy(base)
@@ -3209,7 +3342,7 @@ def selftest() -> int:
         stream = io.StringIO()
         code = report(broken, stream=stream)
         require(code == 1 and "did not run" in stream.getvalue(),
-                "and the report says the rules did not run, instead of printing twelve oks")
+                "and the report says the rules did not run, instead of printing thirteen oks")
 
         # 7. --rules runs what it is asked for and nothing else.
         docs = copy.deepcopy(base)

@@ -178,7 +178,25 @@
     { "id": "EM_CREAK_13", "cell": "L3_ROOM", "position": [-5.60, 12.45, -23.60],
       "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
     { "id": "EM_CREAK_14", "cell": "L3_STORE_W", "position": [-12.30, 13.75, -26.70],
-      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null }
+      "loop": "SFX_HOUSE_CREAK", "gain": 0.18, "radius": 6.0, "interactable": null },
+
+    // §37.4's gutter/downspout trickle, "positional, at the four downspouts, `Apply3D`" -- six of
+    // them, because that is how many the roofs have (`HOUSE-00776`). Each one stands at its
+    // splash point, on the ground the pipe discharges onto, and `layout.exterior.json`'s
+    // `downspouts` rows are where those points come from. The loop still needs sourcing (§37.4
+    // says so); the placement does not depend on which recording arrives.
+    { "id": "EM_DOWNSPOUT_GARAGE_NE", "cell": "EXT_SIDEYARD_E", "position": [17.40, -0.079, -22.00],
+      "loop": "AMB_DOWNSPOUT_TRICKLE", "gain": 0.35, "radius": 6.0, "interactable": null },
+    { "id": "EM_DOWNSPOUT_GARAGE_SE", "cell": "EXT_SIDEYARD_E", "position": [17.40, 0.000, -13.00],
+      "loop": "AMB_DOWNSPOUT_TRICKLE", "gain": 0.35, "radius": 6.0, "interactable": null },
+    { "id": "EM_DOWNSPOUT_GARAGE_SW", "cell": "EXT_FRONTYARD_E", "position": [8.40, 0.015, -13.00],
+      "loop": "AMB_DOWNSPOUT_TRICKLE", "gain": 0.35, "radius": 6.0, "interactable": null },
+    { "id": "EM_DOWNSPOUT_MAIN_NE", "cell": "EXT_SIDEYARD_E", "position": [9.00, -0.131, -27.40],
+      "loop": "AMB_DOWNSPOUT_TRICKLE", "gain": 0.35, "radius": 6.0, "interactable": null },
+    { "id": "EM_DOWNSPOUT_MAIN_NW", "cell": "EXT_SIDEYARD_W", "position": [-13.00, -0.131, -27.40],
+      "loop": "AMB_DOWNSPOUT_TRICKLE", "gain": 0.35, "radius": 6.0, "interactable": null },
+    { "id": "EM_DOWNSPOUT_MAIN_SW", "cell": "EXT_FRONTYARD_W", "position": [-13.00, 0.004, -14.00],
+      "loop": "AMB_DOWNSPOUT_TRICKLE", "gain": 0.35, "radius": 6.0, "interactable": null }
   ],
 
   // §64.3, in decibels, as the fractions a portal carries.

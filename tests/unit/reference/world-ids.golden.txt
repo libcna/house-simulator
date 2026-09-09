@@ -266,6 +266,12 @@ openings/openings	DOOR_L2_STOR2__L2_BATH5
 openings/openings	DOOR_L2_STOR2__L2_SITTING
 interactables/interactables	DOOR_L2_WC5
 interactables/interactables	DOOR_L2_WC6
+exterior/downspouts	DS_GARAGE_NE
+exterior/downspouts	DS_GARAGE_SE
+exterior/downspouts	DS_GARAGE_SW
+exterior/downspouts	DS_MAIN_NE
+exterior/downspouts	DS_MAIN_NW
+exterior/downspouts	DS_MAIN_SW
 levels/hvac/branches	DUCT_B1_EAST
 levels/hvac/branches	DUCT_B1_SPINE
 levels/hvac/branches	DUCT_B1_WEST
@@ -299,6 +305,12 @@ audio/emitters	EM_CREAK_12
 audio/emitters	EM_CREAK_13
 audio/emitters	EM_CREAK_14
 audio/emitters	EM_DOORBELL
+audio/emitters	EM_DOWNSPOUT_GARAGE_NE
+audio/emitters	EM_DOWNSPOUT_GARAGE_SE
+audio/emitters	EM_DOWNSPOUT_GARAGE_SW
+audio/emitters	EM_DOWNSPOUT_MAIN_NE
+audio/emitters	EM_DOWNSPOUT_MAIN_NW
+audio/emitters	EM_DOWNSPOUT_MAIN_SW
 audio/emitters	EM_FREEZER_HUM
 audio/emitters	EM_FRIDGE_HUM
 audio/emitters	EM_FURNACE

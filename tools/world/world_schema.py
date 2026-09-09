@@ -408,6 +408,15 @@ def build() -> dict[str, dict]:
                 {"id": ID, "cell": ID_OR_NULL, "footprint": BOX, "asset": ID_OR_NULL,
                  "eavesY": NUM, "ridgeY": NUM,
                  "height": {"type": "number", "exclusiveMinimum": 0}})},
+            # `HOUSE-00776`: §37.3's splash points and §37.4's trickle emitters. The pipes have
+            # been drawn since `HOUSE-00468` and nothing outside the shell knew they existed;
+            # neither a particle system nor an `Apply3D` emitter can read a Blender mesh.
+            # `position` is the head, at the gutter; `splash` is where the water lands, on the
+            # GROUND under it rather than at +0.00, which is 0.13 m out at the north corners.
+            "downspouts": {"type": "array", "items": obj(
+                ["id", "roof", "position", "splash"],
+                {"id": ID, "roof": ID, "position": VEC3, "splash": VEC3,
+                 "material": ID_OR_NULL})},
             "neighbourhood": {"type": "array", "items": obj(
                 ["id", "asset", "position"],
                 {"id": ID, "asset": ID, "position": VEC3, "yawDeg": NUM,

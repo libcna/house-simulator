@@ -80,6 +80,36 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "downspouts": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "material": {
+            "$ref": "#/$defs/idOrNull"
+          },
+          "position": {
+            "$ref": "#/$defs/vector3"
+          },
+          "roof": {
+            "$ref": "#/$defs/id"
+          },
+          "splash": {
+            "$ref": "#/$defs/vector3"
+          }
+        },
+        "required": [
+          "id",
+          "roof",
+          "position",
+          "splash"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
     "fences": {
       "items": {
         "additionalProperties": false,

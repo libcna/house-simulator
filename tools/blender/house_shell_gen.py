@@ -100,6 +100,7 @@ import gltf_validate  # noqa: E402
 import layout_io  # noqa: E402
 import roof_geometry  # noqa: E402
 import stair_geometry  # noqa: E402
+import terrain_gen  # noqa: E402
 
 SOURCE = REPO / "assets-src" / "world"
 #: Generated, and `content/` is gitignored entirely (§18.4). `build/` is one of the six directory
@@ -1516,19 +1517,29 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         export(stack, output / "CHIMNEY.glb")
         report["written"].append("CHIMNEY")
 
+    # `HOUSE-00776`: where the water comes off this roof, and the ground it lands on.
+    all_spouts = roof_geometry.house_downspouts(layout)
+    try:
+        _w, _h, terrain_heights, _materials = terrain_gen.decode(directory)
+        for row in all_spouts:
+            row["groundY"] = terrain_gen.height_at(terrain_heights, row["x"], row["z"])
+    except (FileNotFoundError, OSError):
+        pass                                    # a world with no height field: the pipes reach +0
     for name, box in sorted(roof_boxes(layout, levels).items()):
         if wanted is not None and name not in wanted:
             continue
         reset_scene()
         obj = build_roof(name, box, construction,
                          dormers=dormers_on(box, portals, openings.values()),
-                         eaves=roof_geometry.roof_eaves(layout, name, box, construction))
+                         eaves=roof_geometry.roof_eaves(layout, name, box, construction),
+                         spouts=[row for row in all_spouts if row["roof"] == name])
         export(obj, output / f"{name}.glb")
         report["written"].append(name)
     return report
 
 
-def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None):
+def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None,
+               spouts=()):
     """One roof object over @p box, with its fascia. @p box is the WALL CENTRE-LINE rectangle.
 
     @p eaves is `roof_geometry.roof_eaves`'s answer, which is §12's ridge for the roof a level
@@ -1651,14 +1662,19 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
                 add([(box_of[0], value, box_of[4]), (box_of[1], value, box_of[4]),
                      (box_of[1], value, box_of[5]), (box_of[0], value, box_of[5])], outward,
                     "metal")
+    # `HOUSE-00776`: the pipes, from `roof_geometry.house_downspouts` rather than from a loop over
+    # this roof's four corners. Two of the eight corners are UNDER the other roof -- the garage
+    # wing projects from the house's east wall -- so a pipe at each of them is a pipe indoors, and
+    # the water it carries lands in the dining room. Each one also runs to the GROUND under it
+    # rather than to +0.00, which is 0.13 m short at the north corners where the lot has fallen.
     half_spout = DOWNSPOUT_SECTION / 2.0
-    for corner_x in (x0, x1):
-        for corner_z in (z0, z1):
-            for value, outward in ((corner_x - half_spout, (-1.0, 0.0, 0.0)),
-                                   (corner_x + half_spout, (1.0, 0.0, 0.0))):
-                add([(value, 0.0, corner_z - half_spout), (value, gutter_y, corner_z - half_spout),
-                     (value, gutter_y, corner_z + half_spout), (value, 0.0, corner_z + half_spout)],
-                    outward, "metal")
+    for spout in spouts or ():
+        corner_x, corner_z, foot = spout["x"], spout["z"], spout.get("groundY", 0.0)
+        for value, outward in ((corner_x - half_spout, (-1.0, 0.0, 0.0)),
+                               (corner_x + half_spout, (1.0, 0.0, 0.0))):
+            add([(value, foot, corner_z - half_spout), (value, gutter_y, corner_z - half_spout),
+                 (value, gutter_y, corner_z + half_spout), (value, foot, corner_z + half_spout)],
+                outward, "metal")
     ridge_top = eaves_y + (min(x1 - x0, z1 - z0) / 2.0) * pitch
     if dx >= dz:
         vent = (x0 + (z1 - z0) / 2.0, x1 - (z1 - z0) / 2.0)
@@ -2594,8 +2610,10 @@ def selftest(output: Path) -> int:
     require(len(dormered.data.polygons) == expected,
             "the roof's face count is the cut planes, the dormers, the eaves boards and the "
             "structure")
-    # planes, fascia, soffit, four gutters of four faces, four downspouts of two, one ridge vent
-    bare = plain_roof_faces - (4 + 4 + 4 + 4 * 4 + 4 * 2 + 1)
+    # planes, fascia, soffit, four gutters of four faces, one ridge vent -- and NO downspouts,
+    # since `HOUSE-00776`: they are `roof_geometry.house_downspouts`'s to place, because two of the
+    # eight corners are under the other roof, and a roof built without that list has none.
+    bare = plain_roof_faces - (4 + 4 + 4 + 4 * 4 + 1)
     require(bare == expected_rafters + 2,
             f"a rafter every {RAFTER_SPACING * 1000:.0f} mm over the ridge's {ridge_run:.2f} m, "
             f"both slopes, and a purlin under each ({bare} against {expected_rafters + 2})")

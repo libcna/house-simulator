@@ -11252,8 +11252,43 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             clamped by §10.3's box at +12.00, 1 escape**. Plus a claim that walks all three open
             sides of the corridor at half-metre intervals and finds no gap a 0.62 m body fits
             through.
-- [ ] HOUSE-00776 — Place the four downspouts, the gutters and their splash points (used by the rain audio)
+- [x] HOUSE-00776 — Place the four downspouts, the gutters and their splash points (used by the rain audio)
       dep: HOUSE-00468 · sys: world · plat: TOOL · pri: MUST
+      verify: `tools/world/roof_geometry.py --selftest`; `tools/world/validate_world.py --selftest`
+      note: (2026-09-09) the pipes have been DRAWN since `HOUSE-00468` and nothing outside the
+            shell knew they existed. §37.3's splash particles and §37.4's `Apply3D` trickle
+            emitter both need to know where the water lands, and neither can read a Blender mesh
+            -- the same split `HOUSE-00472` moved the roof planes out of and `HOUSE-00490` the
+            dormers. `roof_geometry.house_downspouts` derives them, `layout.exterior.json` carries
+            them, §15.7's new **rule 13** checks the one against the other, and
+            `layout.audio.json` has an emitter at each splash point.
+      finding: **six, not four, and not eight either.** Each roof has a pipe at each of its four
+            corners, less the two corners where the roofs meet: the garage wing projects from the
+            house's east wall, so `ROOF_GARAGE`'s north-west corner (+8.40, -22.00) is 0.60 m
+            inside `ROOF_MAIN`'s footprint and `ROOF_MAIN`'s south-east corner is inside the
+            garage's. The shell drew eight, two of them indoors, discharging into the dining room
+            and the garage. §37.4's "the four downspouts" counted one roof; corrected there with
+            the measurement.
+      finding: **and each one now reaches the ground rather than +0.00.** The lot falls 0.92 m
+            from the porch to the north fence, so a pipe drawn to zero stops 131 mm short at both
+            north corners and 79 mm at the garage's. The splash point is §11.5's height field
+            under the pipe, which is the same ground `build_collision` collides with, and rule 13
+            checks it to the millimetre.
+      finding: **the rule read `world.directory` on a class that had no such attribute** -- and
+            caught it, because the `except` beside it was written for a missing height-field PNG.
+            The result was a rule that reported ok on a splash point 79 mm underground, for the
+            same reason `HOUSE-00226`'s stages reported themselves fresh: an exception path that
+            swallows the difference between "checked and fine" and "could not check". Found by
+            injection, not by review. `World` now carries its directory and says why in a comment
+            longer than the attribute.
+      measured: 6 downspouts, heads at +10.192 (main) and +4.100 (garage) -- the eaves less the
+            fascia's 0.20 m, because the gutter hangs on the fascia -- and splash points from
+            -0.131 to +0.015. The shell loses 4 faces (two pipes) and gains the ground under the
+            other six; §15.7 goes from twelve rules to thirteen; `world-ids.golden.txt` gains 12
+            ids.
+      verified: 13 claims and 4 injections, all CAUGHT -- a pipe at every corner indoors or not,
+            the head at the eaves instead of the gutter, rule 13 not reading the height field, and
+            the splash allowed to drift from the pipe.
 - [x] HOUSE-00777 — Build the coverage height field (`build_coverage.py`) from the house, garage, porch, balconies, sunroom and shed
       dep: HOUSE-00212, HOUSE-00768 · sys: content · plat: TOOL · pri: MUST
       verify: `tools/world/build_coverage.py --selftest`

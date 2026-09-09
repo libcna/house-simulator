@@ -1618,6 +1618,12 @@ surprise. This keeps the data declarative without inventing a VM.
     raised beds were points inside the shed's walls. Both were invisible, because a path and a
     shed pad are both gravel at the same height and a bed authored as an instance has no size for
     anything to overlap.
+13. **every downspout is at a roof corner, on the ground under it**: the ids are exactly the ones
+    `roof_geometry.house_downspouts` derives, each row's head is that corner at the gutter to the
+    millimetre, and its splash point is directly below on §11.5's height field (added 2026-09-09 by
+    `HOUSE-00776`). The pipes have been drawn since `HOUSE-00468` and nothing outside the shell
+    knew they existed; §37.3's splashes and §37.4's trickle emitter both need to know where the
+    water lands, and neither can read a Blender mesh.
 
 Validation runs in CI and as a pre-build step. A failure fails the build.
 
@@ -3638,7 +3644,14 @@ source:
 | Open-air rain | `Ambiance_Rain_Calm/Strong_Loop_Stereo` (NOX) | exposure of the listener's cell to the sky |
 | Rain on the roof | needs sourcing (§63.4) | `1 − distanceToRoofAbove/6`, strongest in `L3_*` |
 | Rain on windows | needs sourcing | Σ over the cell's windows of `area · (1 − soundLoss)` |
-| Gutter / downspout trickle | needs sourcing | positional, at the four downspouts, `Apply3D` |
+| Gutter / downspout trickle | needs sourcing | positional, at the **six** downspouts, `Apply3D` |
+
+> Corrected 2026-09-09 by `HOUSE-00776`. **Six, not four.** Each roof has a downspout at each of
+> its four corners, less the two corners where the roofs meet: the garage wing projects from the
+> house's east wall, so `ROOF_GARAGE`'s north-west corner is 0.60 m inside `ROOF_MAIN`'s footprint
+> and `ROOF_MAIN`'s south-east corner is inside the garage's. A pipe at either is a pipe indoors.
+> `layout.exterior.json`'s `downspouts` rows carry the head and the splash point, §15.7's rule 13
+> checks them against the geometry, and `layout.audio.json` has an emitter at each.
 
 Indoors the open-air layer is heavily attenuated and cross-faded toward its dull variant; opening a
 window raises it audibly and immediately, which is one of the most satisfying interactions in the
@@ -5689,7 +5702,7 @@ The golden list is [`tests/unit/reference/world-ids.golden.txt`](tests/unit/refe
 2 152 ids over 27 kinds, maintained by `tools/world/id_golden.py` and gated as `world-ids`
 (`HOUSE-00399`). It is **append-only**: `--emit` records ids the world has gained and never deletes
 one, so a rename shows up as an id that left the world and keeps failing until a person removes the
-line and says why. Nothing in §15.7's twelve rules can see a rename — the layout is internally
+line and says why. Nothing in §15.7's thirteen rules can see a rename — the layout is internally
 consistent under either name — and a save file is a list of ids (§68), so this is the only gate
 that stands between a tidy-up and every save ever written.
 

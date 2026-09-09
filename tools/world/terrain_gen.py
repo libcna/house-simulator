@@ -127,6 +127,19 @@ def ground_at(x: float, z: float) -> float:
     return 0.15 + (-0.35 - 0.15) * t
 
 
+def height_at(heights: list[float], x: float, z: float) -> float:
+    """The BUILT height field at (@p x, @p z) -- the ground with §11.5's pads in it.
+
+    `ground_at` above is §10.2's ideal slope, which is what the field is generated FROM; this is
+    what the field says afterwards, and the two differ wherever a pad, a deck or the road has
+    flattened it. Anything asking "how high is the ground here" -- a fence post, a downspout's
+    splash point, a body -- wants this one.
+    """
+    ix = min(max(int(round((x - ORIGIN_X) / STEP)), 0), WIDTH - 1)
+    iz = min(max(int(round((z - ORIGIN_Z) / STEP)), 0), HEIGHT - 1)
+    return heights[iz * WIDTH + ix]
+
+
 def surfaces(directory: Path):
     """`(boxes, height, material)` for every flat thing the layout declares, outermost first."""
     layout = layout_io.load_layout(directory)

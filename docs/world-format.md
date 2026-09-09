@@ -512,6 +512,14 @@ fence and that a structure's `cell` exists; rule 10 checks that an enterable str
 **contains** that cell's, because a shell that does not hold its own interior is a building drawn
 beside its inside.
 
+`HOUSE-00776` added a fifth: `downspouts`, one row per pipe with `position` (the head, at the
+gutter) and `splash` (where the water lands, on §11.5's height field under it). §37.3's splash
+particles and §37.4's `Apply3D` trickle emitter both need that point and neither can read a Blender
+mesh, which is where the pipes had lived since `HOUSE-00468`. The rows are authored and rule 13
+checks every one of them against `roof_geometry.house_downspouts` — the same function the shell
+draws from — so the writing and the drawing cannot drift. There are **six**, not eight: the two
+corners where the garage wing meets the house are each inside the other roof's footprint.
+
 `terrain.heightfield` and `terrain.materialIndex` are paths into the **deployed world directory**,
 not asset ids: the two images are copied there verbatim by `deploy_world.py` and hashed into
 `world.manifest.json` beside the JSON, so `WorldLoader::VerifyManifest` covers the ground the
@@ -712,7 +720,7 @@ the `schema` header rule are one definition rather than sixteen that can quietly
 `world_schema.py --check` is a CI gate; regenerate with `--emit` after changing a shape here.
 
 The schemas check **shape**: presence, type, range, and that an id looks like an id, each problem
-reported against the field that carries it. They deliberately do **not** check the twelve rules
+reported against the field that carries it. They deliberately do **not** check the thirteen rules
 below. Rules 4, 5, 6, 7, 9 and 11 span two files or the whole layout, and JSON Schema cannot see
 across a file boundary; rules 2, 3, 8 and 10 compare two numbers to each other, which it also
 cannot do. A schema that attempted them would be a second, weaker validator — so a portal naming a

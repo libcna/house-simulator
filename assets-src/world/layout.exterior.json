@@ -669,6 +669,28 @@
   // out in the three pieces the garden actually has: two north of the main path, two south of it
   // either side of the shed leg, and two in the strip east of the shed. Nothing is nearer than
   // 0.10 m to a path, a boundary or the shed.
+  // `HOUSE-00776`. §37.3's splash points and §37.4's trickle emitters: where the water comes off
+  // each roof and where it lands. Six and not eight, because the garage wing projects from the
+  // house's east wall and the two corners where the roofs meet are each under the other one --
+  // `roof_geometry.house_downspouts` derives the list and rule 13 checks these rows against it.
+  // `position` is the head at the gutter (the eaves less the fascia's 0.20 m); `splash` is the
+  // §11.5 height field under it, which the lot's fall makes 0.13 m lower at the north corners
+  // than the +0.00 the pipes used to stop at.
+  "downspouts": [
+    { "id": "DS_GARAGE_NE", "roof": "ROOF_GARAGE", "position": [17.40, 4.100, -22.00],
+      "splash": [17.40, -0.079, -22.00], "material": "MAT_METAL_GUTTER" },
+    { "id": "DS_GARAGE_SE", "roof": "ROOF_GARAGE", "position": [17.40, 4.100, -13.00],
+      "splash": [17.40, 0.000, -13.00], "material": "MAT_METAL_GUTTER" },
+    { "id": "DS_GARAGE_SW", "roof": "ROOF_GARAGE", "position": [8.40, 4.100, -13.00],
+      "splash": [8.40, 0.015, -13.00], "material": "MAT_METAL_GUTTER" },
+    { "id": "DS_MAIN_NE", "roof": "ROOF_MAIN", "position": [9.00, 10.192, -27.40],
+      "splash": [9.00, -0.131, -27.40], "material": "MAT_METAL_GUTTER" },
+    { "id": "DS_MAIN_NW", "roof": "ROOF_MAIN", "position": [-13.00, 10.192, -27.40],
+      "splash": [-13.00, -0.131, -27.40], "material": "MAT_METAL_GUTTER" },
+    { "id": "DS_MAIN_SW", "roof": "ROOF_MAIN", "position": [-13.00, 10.192, -14.00],
+      "splash": [-13.00, 0.004, -14.00], "material": "MAT_METAL_GUTTER" }
+  ],
+
   "structures": [
     { "id": "STRUCT_SHED", "cell": "EXT_SHED",
       "footprint": { "x": [-20.0, -16.4], "z": [-44.0, -40.4] },

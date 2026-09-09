@@ -337,6 +337,63 @@ def subtract_rect(corners, rect):
     return out
 
 
+#: The gutter's section and the fascia's depth, both `house_shell_gen.py`'s until `HOUSE-00776`
+#: needed to know where the water comes out. The gutter hangs on the fascia, so the head of a
+#: downspout is the eaves less the fascia's depth, and §37.3's splash lands under it.
+FASCIA_DEPTH = 0.20
+GUTTER_SECTION = 0.12
+DOWNSPOUT_SECTION = 0.10
+
+#: §14: -Z is north and +Z is the road, so a corner's name is the sign of its z first.
+_CORNERS = (("NW", 0, 2), ("NE", 1, 2), ("SW", 0, 3), ("SE", 1, 3))
+
+
+def downspouts(name: str, box: tuple, construction: dict, eaves_y: float) -> list[dict]:
+    """One downspout at each corner of @p name's roof: `{id, roof, x, z, headY}`.
+
+    `HOUSE-00468` has drawn these pipes since the shell had a roof, and nothing else knew they
+    existed -- §37.3's splash particles and §37.4's trickle emitter both need to know where the
+    water lands, and neither can read a Blender mesh. The head is the gutter's own height, which
+    is the fascia's, which is why those two numbers moved here with it.
+
+    @p box is the roof's centre-line rectangle; the pipe stands at the corner of the OUTER one,
+    because that is where the gutter it drains is.
+    """
+    outer = outer_box(box, construction)
+    return [{"id": f"DS_{name.removeprefix('ROOF_')}_{corner}",
+             "roof": name,
+             "x": outer[ix],
+             "z": outer[iz],
+             "headY": eaves_y - FASCIA_DEPTH}
+            for corner, ix, iz in _CORNERS]
+
+
+def house_downspouts(layout: dict) -> list[dict]:
+    """Every downspout on the property, in id order.
+
+    Four at each roof MINUS the corners that stand under another roof, which is not a detail: the
+    garage wing projects east from the house's east wall, so `ROOF_GARAGE`'s outer north-west
+    corner (+8.40, -22.00) is 0.60 m inside `ROOF_MAIN`'s footprint. A pipe there is a pipe in the
+    dining room, and the water it carries has nowhere to land. A lower roof that dies into a wall
+    drains the other way along its gutter, which is what a real one does.
+    """
+    construction = layout["levels"].get("construction") or {}
+    boxes = roof_boxes(layout)
+    outers = {name: outer_box(box, construction) for name, box in boxes.items()}
+    out = []
+    for name, box in sorted(boxes.items()):
+        for row in downspouts(name, box, construction,
+                              roof_eaves(layout, name, box, construction)):
+            under = [other for other, rect in outers.items()
+                     if other != name
+                     and rect[0] < row["x"] < rect[1] and rect[2] < row["z"] < rect[3]]
+            if under:
+                row["under"] = sorted(under)[0]
+                continue
+            out.append(row)
+    return sorted(out, key=lambda row: row["id"])
+
+
 def plane_equation(corners):
     """`(a, b, c)` with `y = a*x + b*z + c` over @p corners, or None if they are not a plane.
 
@@ -652,6 +709,37 @@ def selftest() -> int:
             "and a hole nowhere near the face leaves the face alone, uncopied and unclipped")
     require(subtract_rect(square_face, (-1.0, 5.0, -1.0, 5.0)) == [],
             "a hole that swallows the face leaves nothing")
+
+    # ---- `HOUSE-00776`: the downspouts, and the two corners that do not get one.
+    spouts = house_downspouts(layout)
+    require(len(spouts) == 6,
+            f"this house has six downspouts and not eight: four corners on each roof, less the "
+            f"two where the roofs meet ({len(spouts)})")
+    require([row["id"] for row in spouts] == sorted(row["id"] for row in spouts),
+            "and they come back in id order, so a file written from them is stable")
+    garage_outer = outer_box(boxes["ROOF_GARAGE"], construction)
+    main_outer = outer_box(boxes["ROOF_MAIN"], construction)
+    absent = {"DS_GARAGE_NW", "DS_MAIN_SE"} - {row["id"] for row in spouts}
+    require(absent == {"DS_GARAGE_NW", "DS_MAIN_SE"},
+            f"the two missing are the ones INSIDE the other roof: the garage wing projects from "
+            f"the house's east wall, so a pipe at either would stand indoors "
+            f"({sorted({'DS_GARAGE_NW', 'DS_MAIN_SE'} & {row['id'] for row in spouts})} are there)")
+    require(main_outer[0] < 8.4 < main_outer[1] and main_outer[2] < -22.0 < main_outer[3],
+            f"-- and that is a measurement, not an opinion: the garage's north-west corner "
+            f"(8.40, -22.00) is inside `ROOF_MAIN`'s {[round(v, 2) for v in main_outer]}")
+    require(garage_outer[0] < 9.0 < garage_outer[1] and garage_outer[2] < -14.0 < garage_outer[3],
+            f"...and the main roof's south-east corner (9.00, -14.00) is inside `ROOF_GARAGE`'s "
+            f"{[round(v, 2) for v in garage_outer]}")
+    for row in spouts:
+        rect = main_outer if row["roof"] == "ROOF_MAIN" else garage_outer
+        require(row["x"] in (rect[0], rect[1]) and row["z"] in (rect[2], rect[3]),
+                f"{row['id']} stands at a corner of {row['roof']}'s outer rectangle, which is "
+                f"where the gutter it drains ends ({row['x']:.2f}, {row['z']:.2f})")
+    main_eaves_y = roof_eaves(layout, "ROOF_MAIN", boxes["ROOF_MAIN"], construction)
+    heads = {round(row["headY"], 6) for row in spouts if row["roof"] == "ROOF_MAIN"}
+    require(heads == {round(main_eaves_y - FASCIA_DEPTH, 6)},
+            f"and its head is the GUTTER's height -- the eaves less the fascia the gutter hangs "
+            f"on -- rather than the eaves ({sorted(heads)} against {main_eaves_y:.3f})")
 
     if failures:
         print(f"\nroof_geometry: {len(failures)} claim(s) FAILED")
