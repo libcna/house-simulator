@@ -9229,10 +9229,40 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             octagon of eight planes staying inside the twelve-vertex bound, the winding preserved
             (checked by the turn at every corner), and the degenerate areas. Seven injected bugs,
             seven caught.
-- [ ] HOUSE-00663 — Implement `ReduceFrustum`: build side planes from the camera and the clipped polygon's edges
+- [x] HOUSE-00663 — Implement `ReduceFrustum`: build side planes from the camera and the clipped polygon's edges
       dep: HOUSE-00662 · sys: visibility · plat: ALL · pri: MUST
       accept: **the reduced frustum contains every point the portal can see and no point outside the parent** — proved by 10⁵ random samples
       verify: unit ReduceFrustumTests.ContainmentProperty
+      note: (2026-09-09) `visibility::ReduceFrustum`: one side plane per edge of the clipped
+            polygon, each containing the camera, with §25.2's original near and far planes kept.
+            This is the step that makes portal traversal worth doing -- without it the room beyond
+            a door is tested against the whole camera frustum.
+      note: **the plane's sign comes from the polygon's own centroid, not from its winding.** A
+            clipped polygon's order is whatever the clip produced from whatever order the portal's
+            corners were stored in, and the same portal seen from the other side of the wall
+            reverses it. A point known to be INSIDE settles the direction, and neither the winding
+            nor which side the camera is on can get it wrong -- a test walks a door from both
+            sides and asserts each camera sees the room BEYOND it and not the one it is in.
+      note: **the near and far planes go in FIRST.** They are two of `ClipFrustum`'s ten, and a
+            polygon with more edges than there is room for has to lose SIDES: a frustum without
+            its far plane is unbounded, and the traversal behind it tests the whole world. An
+            eleven-sided polygon drops three sides and keeps both ends, asserted.
+      note: an edge the eye is collinear with has no plane -- a body standing exactly IN a doorway
+            has two of them -- and it is dropped and counted rather than guessed. Dropping widens
+            the cone, which over-draws; inventing one could cull the room. `ReducedFrustum` carries
+            `complete` and `dropped` so a traversal doing more work than it should can say so.
+      accept: **met.** 100 000 samples: 50 000 rays aimed through the portal -- a random point
+            inside the clipped polygon, a random distance from 1.02 to 40 -- of which every single
+            one the parent admitted was admitted by the reduction (0 culled); and 50 000 points
+            uniform in a 60 m cube, of which the reduction admitted 459 and **not one** was
+            outside the parent. An injected 1 mm narrowing of the cone is caught by the first half.
+      verified: 10 `ReduceFrustumTests` -- the doorway still inside, what it cannot show culled,
+            the ends kept and the eye on every side plane, winding independence, a door from both
+            sides, a narrower door giving a narrower cone (monotone, which is what makes the
+            traversal's depth converge), the degenerate polygon, the collinear edge, the
+            eleven-sided overflow, and the property. Six injected bugs, six caught -- one of them
+            by hand, because moving the two end planes to the END of the function is a reordering
+            the injection harness cannot express as one substitution.
 - [ ] HOUSE-00664 — Implement the NDC-area computation of a clipped polygon and the `kMinPortalNdcArea` cutoff
       dep: HOUSE-00663 · sys: visibility · plat: ALL · pri: MUST
 - [x] HOUSE-00665 — Implement `PortalRuntime`: per-portal aperture, cached world rect, opacity, and the closed/open hysteresis
