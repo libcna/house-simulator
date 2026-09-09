@@ -9654,8 +9654,49 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
 
 ### 9.2 Exterior visibility
 
-- [ ] HOUSE-00677 — Implement the exterior loose BVH over `EXT_WORLD` instances, built at load
+- [x] HOUSE-00677 — Implement the exterior loose BVH over `EXT_WORLD` instances, built at load
       dep: HOUSE-00674 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) `visibility::ExteriorBvh` over an `ExteriorInstance` -- an id, §25.6's
+            category and a world-space box. Three levels, eight children each, built by three
+            median splits along whatever axis is longest at each cut; 4 100 instances become 73
+            nodes and 64 leaves of about 64.
+      note: **a box and not a sphere**, which is the opposite of `HOUSE-00673`'s choice and for the
+            same reason: a sphere is the bound that survives rotation, and nothing out here rotates.
+            A fence run, a terrain tile and a road segment are all long and thin, and a sphere round
+            one is mostly air.
+      note: **"loose" means an instance belongs to exactly one node.** A grid has to cut a straddling
+            instance or store it in every cell it touches, and a 400 m fence run straddles
+            everything. Here a node's box is the UNION of its subtree, so siblings overlap exactly
+            where their contents do -- measured at 6 of the root's 28 sibling pairs -- and nothing
+            is ever duplicated or split. The traversal must therefore visit both of two overlapping
+            siblings, which is correct and is why this is not a quadtree.
+      note: each node carries a CATEGORY MASK and the largest §25.6 distance under it, which is
+            where step 1 and step 2 meet (`HOUSE-00674` said they would): a subtree of nothing but
+            fences is finished at 120 m, and the test is an `and` of two bytes rather than a loop.
+      finding: **area cannot tell a good split from a bad one, and shape can.** Six cuts all on X
+            give sixty-four slabs of a sixty-fourth of the plot each -- exactly the area a good
+            split gives -- so the first version of the spatial test passed with the axis choice
+            disabled. What separates them is that a 6 m by 400 m slab intersects nearly every
+            frustum: the median leaf is **1.10** times longer than it is wide as built and **35.18**
+            with every cut on one axis, so the assertion is the aspect ratio.
+      note: the instances themselves are phase 10's. `layout.exterior.json` today has 87
+            neighbourhood buildings, 229 vegetation instances and 7 fence runs, and none of them
+            carries a SIZE -- a building's bounds are its asset's, and the exterior geometry is
+            `HOUSE-00762`-`HOUSE-00771`. So this is built over a supplied list and tested at
+            §25.6's stated 4 100 with its stated categories; nothing here invents a bound it has no
+            data for.
+      verified: 12 `ExteriorBvhTests` -- every instance under exactly one leaf and the same
+            instances coming out, a node's box containing its subtree and its children's, a child
+            index naming a child and not a grandchild (the ranges tiling, which is the bug a flat
+            BVH has exactly once), the category mask and cull distance being exact rather than
+            approximate, a one-category subtree carrying one bit, three levels and eight ways at
+            4 100, the leaves being square rather than slabs, a 400 m fence held once with the
+            sibling overlap that costs, the same instances in another order giving the same tree,
+            identical centres split the same way every time (what the id tie-break is for), an
+            empty exterior and a plot below `kMinToSplit`, and a rebuild replacing rather than
+            appending. Sixteen injected bugs, all caught -- two only after the suite was
+            strengthened: one axis for every cut survived an area assertion, and a rebuild from
+            nothing was never asked for.
 - [ ] HOUSE-00678 — Implement BVH frustum traversal with the per-category distance cutoffs
       dep: HOUSE-00677 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00679 — Implement the indoor→outdoor portal traversal into `EXT_WORLD` with the reduced frustum
