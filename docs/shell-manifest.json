@@ -98,10 +98,10 @@
     "L3_STORE_S.glb": "sha256:8b53363b3327e0983c499ac6aa25d136bd46323450217935867b82c4051f35ce",
     "L3_STORE_W.glb": "sha256:65b0aaee85985274a04a7b7156eccdf1d2a8c3cfe00f139331ffae1f9f0bce49",
     "ROOF_GARAGE.glb": "sha256:6bf3ac8323e087a1a6427c86192c2a716878aef2305c8181c5d6fffd477d5c13",
-    "ROOF_MAIN.glb": "sha256:bb2554e352b7d468d8aa8fa495e520f6217f58bbdb50ab6eb891db3650b5cce5"
+    "ROOF_MAIN.glb": "sha256:58c46ee8463ab0ca6949d9008a4270a4d320de91f8fbf5bd3a381eeb0870f230"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:d6a805e9031aac4c8ddc7339c1bff7c34bde931d5809d8995a7ca2a64ba3d6d0",
+  "generatorVersion": "sha256:46b4126cded08b2711a6a760e7f30a3c96f407cea7999591245a163fd26fc581",
   "origin": {
     "attribution": "",
     "kind": "generated",

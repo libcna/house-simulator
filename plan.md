@@ -105,7 +105,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 3 | Content pipeline | 00181–00260 | 46 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 81 | The full layout authored, validated and loaded |
-| 6 | Blockout house geometry | 00451–00540 | 39 | The generated shell renders |
+| 6 | Blockout house geometry | 00451–00540 | 42 | The generated shell renders |
 | 7 | Collision and player controller | 00541–00620 | 38 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
@@ -7757,6 +7757,80 @@ the chunk builder produces ≤ 6 chunks per cell.
             changes whenever a wall does -- and a number people have to edit is a number they stop
             reading.
       verified: 1 007 unit, 92 integration, 30 render (nine references regenerated) and all gates.
+- [x] HOUSE-00490 — A dormer is a hole in the roof, not a lump on it
+      dep: HOUSE-00462, HOUSE-00472 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/roof_geometry.py --selftest`; `tools/blender/house_shell_gen.py --selftest`
+      note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.** Found
+            by `HOUSE-00779`: `L3_ROOM`, a room §13.6 calls *"lit by three dormers"*, measured a
+            sky exposure of **0.000**, and so did `L3_STORE_N` with its two. Standing in the
+            dormer bay itself measured 0.000 as well, which is what said the windows rather than
+            the listener were the problem.
+      finding: **two boards over one window.** §12.1's dormers are WALL dormers -- they sit in the
+            front and rear walls and rise through the slope -- and the main roof plane was left
+            whole underneath them, so it crossed the window at +10.57 where the window runs
+            +10.05 to +11.15. Then the dormer's own front gable, one pentagon across its whole
+            width from the roof surface up to its ridge, covered the rest. The wall below has the
+            opening properly punched out of it; the roof put it back twice.
+      finding: **the shell drew it and the collision collided it, and neither could see the
+            other's half.** `dormer_shell` and `dormers_on` lived in `house_shell_gen.py`, a
+            Blender script `build_collision.py` cannot import -- the same split `HOUSE-00472`
+            moved the roof planes out of for the same reason. Both now live in
+            `roof_geometry.py`, so the dormer you see and the dormer you walk into are one shape,
+            and the collision has the five dormers it never had at all: 40 faces where there were
+            none.
+      finding: **the cut stops at the wall, not at the eaves.** The roof oversails the front wall
+            by `EAVES_OVERHANG`, and that 0.15 m strip is in FRONT of the dormer rather than under
+            it; cutting to the eaves would leave a slot in the roof over the overhang. The
+            footprint runs from the dormer's front wall back to where its own ridge dies into the
+            slope, which is the same number `dormer_shell` builds the cheeks from -- one
+            derivation, in `_dormer_metrics`, because two would be two dormers.
+      finding: the check that says the operation is sound is the roof's **plan area**: the hole
+            and the dormer's own two roof planes are the same 2.2286 m², so the roof covers what
+            it covered before. The front, the jambs, the header and the cheeks stand in one plane
+            each and contribute none of it.
+      measured: the shell's roof goes 71 → 125 triangles and the whole shell 41 609 → 41 663;
+            the collision goes 22 → 73 meshes (24 clipped rafter pieces where 13 covered the
+            attic, plus 40 dormer faces). Sky exposure measured from inside a dormer bay goes
+            0.000 → 0.021. All 30 render references still match.
+      verified: 14 claims in `roof_geometry`'s selftest and 3 injections, all CAUGHT -- the
+            dormers not cut out of the roof, the front closed over its window, and the cut running
+            back from the eaves instead of the wall.
+- [ ] HOUSE-00491 — Two gable louvres open into the hip roof
+      dep: HOUSE-00490 · sys: world · plat: TOOL · pri: SHOULD
+      note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
+            Found by `HOUSE-00779`. §12.6's window table has a `W_GABLE` type -- *"0.80 × 0.80
+            louvre, attic gable ends, non-opening"* -- and the house has two of them,
+            `P_L3_STORE_W__W1` in the west wall at x = -12.70 and `P_L3_STORE_E__W1` in the east
+            at x = 8.70, both at +11.30 to +12.10. **There are no gable ends.** `roof_geometry.py`
+            builds §12.1's roof as a hip, and says why in as many words: *"The hips are here; the
+            gables are the five dormers and the projecting garage wing, which is what makes
+            'hipped-and-gabled' true without this generator having to invent a gablet §12 never
+            describes."* The hip plane at the west wall is +10.57, so both louvres are 0.73 m
+            inside solid roof.
+      note: the consequence is measured: `L3_STORE_W` and `L3_STORE_E` both report a §64.6 sky
+            exposure of exactly 0.000 with a window each, and §37.5's daylight will say the same.
+      note: **this is a §12 decision and not a defect to fix quietly.** Either the roof gains a
+            gablet at each hip end -- which contradicts the sentence above and changes the
+            silhouette in eight render poses -- or the two louvres become dormers, or they are
+            struck from §12.6 and the two stores have no window. Whoever owns §12 picks; the
+            evidence is here so that the choice is made once.
+- [ ] HOUSE-00492 — The two rear dormers overlap by 0.20 m
+      dep: HOUSE-00490 · sys: world · plat: TOOL · pri: SHOULD
+      note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
+            Found by `HOUSE-00490` while cutting the dormer footprints out of the roof: the five
+            footprints cover 11.143 m² but remove only 10.771 m² of plan, and the 0.372 m²
+            difference is `WIN_L3_STORE_N_1` and `WIN_L3_STORE_N_2` sharing it. Their openings are
+            authored at u 2.80–3.80 and 3.80–4.80 -- edge to edge, with no wall between them --
+            and a dormer is `DORMER_CHEEK` = 0.10 m wider than its window on each side, so the
+            two cheeks occupy the same 0.20 m of wall.
+      note: the front three prove the intended spacing: `WIN_L3_ROOM_1` and `_2` are 0.20 m apart
+            (-5.90…-4.90 and -4.70…-3.70), which is exactly two cheeks meeting. The rear pair is
+            0.20 m too close, and the fix is a 0.20 m nudge in `layout.openings.json` plus the
+            window schedule, §12.6 and the id golden that follow it.
+      note: the drawn consequence is two coincident cheek faces, which is z-fighting where the
+            two dormers meet; the collision consequence is a duplicate face in the same plane,
+            which is harmless. Neither is visible in the eight exterior poses at their distance,
+            which is why it took a plan-area check to find it.
 
 ---
 
@@ -13385,19 +13459,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 323 numbered tasks across 53 phases.**
+**1 326 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
-| World data, blockout, collision, camera, visibility | 5–9 | 211 |
+| World data, blockout, collision, camera, visibility | 5–9 | 214 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 133 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 323** |
+| **Total** | **0–52** | **1 326** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -13449,6 +13523,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00490`, `HOUSE-00491`, `HOUSE-00492` | **Three new tasks, the next free ids in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00779`: the five dormers were not cut out of the roof they come through and their own fronts covered their windows (`00490`, fixed); two `W_GABLE` louvres open into a hip roof that has no gable ends (`00491`); the two rear dormers overlap by 0.20 m (`00492`). | `00490` is a generator defect and was fixed here, in `roof_geometry.py`, where the shell and the collision share one answer. `00491` and `00492` are §12 and `layout.openings.json` -- a design choice and a data nudge with a window schedule, a golden id list and eight render poses behind them -- so they are recorded with their evidence rather than decided by the task that found them. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00784` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00779`: §4's wall rule built the wall an OPEN cell shares with a building over the CELL's extent, which is §10.3's +20.00 ceiling -- 1 053 m² of collision standing in open air over the sunroom, garage and shed roofs. | The fix belongs to `build_collision` rather than to the sky-exposure task that tripped over it: it is `HOUSE-00774`'s own rule -- two open things do not have a wall between them -- in the vertical, and every ray-casting and camera query in the project reads the same shapes. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00226` | **New task, next free id in phase 3's reserved 00181–00260 range.** Found by `HOUSE-00777`: `build_content.py` hashed each stage's input files and its command line as TEXT, so editing the generator the command names changed the hash of nothing and the whole world reported itself up to date. | The fix belongs to the content build rather than to the coverage task that tripped over it: every one of the eight world stages has the same hole, and the nav graph -- twenty minutes of it -- is the one that hurts, because it is built against `collision.bin` and would keep a version built by a tool that no longer exists. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00569` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00774`: `SweepCapsuleTriangle` extrudes a triangle by the capsule's half-height, a SPHERE's half-height is zero, and the flat prism that leaves is the shape `prism.solid` exists to refuse -- so everything over a triangle was inside it, decided by whether a mathematically-zero dot product came out a hair positive. | `HOUSE-00615` fixed the same defect for a vertical triangle and the height was the second way to have no volume. It is its own task rather than a line in `HOUSE-00774` because it is not about the exterior at all: §45's camera arm sweeps a sphere, every probe in the test suite is one, and the bug was in the sweep both of them share. No id was renumbered or struck. |

@@ -116,7 +116,7 @@ def roof_eaves(layout: dict, name: str, box: tuple, construction: dict) -> float
     return max(heads)
 
 
-def roof_planes(box: tuple, eaves_y: float, pitch: float):
+def roof_planes(box: tuple, eaves_y: float, pitch: float, dormers=()):
     """A hip roof over a rectangle: `(corners, outward)` per plane, in world coordinates.
 
     Two trapezoids along the long sides and two triangles at the ends -- or four triangles when the
@@ -126,6 +126,13 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
     §12.1's roof is "hipped-and-gabled". The hips are here; the gables are the five dormers
     (`HOUSE-00462`) and the projecting garage wing, which is what makes the phrase true without
     this generator having to invent a gablet §12 never describes.
+
+    @p dormers is `dormers_on`'s answer, and **the roof is not there where one comes through it**
+    (`HOUSE-00490`). A wall dormer's own roof covers exactly its own footprint, so leaving the main
+    plane whole underneath it puts a roof across the inside of every dormer window: from the attic
+    you look at a slope where the window is, and §64.6 measured `L3_ROOM` -- a room §13.6 says is
+    "lit by three dormers" -- at a sky exposure of 0.000. Each footprint is subtracted in plan, so
+    a face becomes up to four, and the pieces are still convex.
     """
     x0, x1, z0, z1 = box
     dx, dz = x1 - x0, z1 - z0
@@ -142,7 +149,7 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
     if dx >= dz:
         zm = (z0 + z1) / 2.0
         ridge0, ridge1 = (x0 + half, zm), (x1 - half, zm)
-        return [
+        faces = [
             plane([(x0, eaves_y, z0), (x1, eaves_y, z0), (ridge1[0], top, zm),
                    (ridge0[0], top, zm)], (0.0, pitch, -1.0)),
             plane([(x1, eaves_y, z1), (x0, eaves_y, z1), (ridge0[0], top, zm),
@@ -152,18 +159,182 @@ def roof_planes(box: tuple, eaves_y: float, pitch: float):
             plane([(x1, eaves_y, z0), (x1, eaves_y, z1), (ridge1[0], top, zm)],
                   (1.0, pitch, 0.0)),
         ]
-    xm = (x0 + x1) / 2.0
-    ridge0, ridge1 = (xm, z0 + half), (xm, z1 - half)
-    return [
-        plane([(x0, eaves_y, z1), (x0, eaves_y, z0), (xm, top, ridge0[1]),
-               (xm, top, ridge1[1])], (-1.0, pitch, 0.0)),
-        plane([(x1, eaves_y, z0), (x1, eaves_y, z1), (xm, top, ridge1[1]),
-               (xm, top, ridge0[1])], (1.0, pitch, 0.0)),
-        plane([(x1, eaves_y, z0), (x0, eaves_y, z0), (xm, top, ridge0[1])],
-              (0.0, pitch, -1.0)),
-        plane([(x0, eaves_y, z1), (x1, eaves_y, z1), (xm, top, ridge1[1])],
-              (0.0, pitch, 1.0)),
-    ]
+    else:
+        xm = (x0 + x1) / 2.0
+        ridge0, ridge1 = (xm, z0 + half), (xm, z1 - half)
+        faces = [
+            plane([(x0, eaves_y, z1), (x0, eaves_y, z0), (xm, top, ridge0[1]),
+                   (xm, top, ridge1[1])], (-1.0, pitch, 0.0)),
+            plane([(x1, eaves_y, z0), (x1, eaves_y, z1), (xm, top, ridge1[1]),
+                   (xm, top, ridge0[1])], (1.0, pitch, 0.0)),
+            plane([(x1, eaves_y, z0), (x0, eaves_y, z0), (xm, top, ridge0[1])],
+                  (0.0, pitch, -1.0)),
+            plane([(x0, eaves_y, z1), (x1, eaves_y, z1), (xm, top, ridge1[1])],
+                  (0.0, pitch, 1.0)),
+        ]
+    if not dormers:
+        return faces
+    holes = [dormer_footprint(rect_u, rect_v, plane_z, box, eaves_y, pitch)
+             for rect_u, rect_v, plane_z in dormers]
+    out = []
+    for corners, outward in faces:
+        pieces = [corners]
+        for hole in holes:
+            pieces = [piece for whole in pieces for piece in subtract_rect(whole, hole)]
+        out.extend((piece, outward) for piece in pieces)
+    return out
+
+
+#: A dormer's cheek thickness, and how far its front wall rises above the window head. Both were
+#: `house_shell_gen.py`'s until `HOUSE-00490` needed the dormer in the collision as well as in the
+#: picture: a shape that is drawn in one tool and collided in another has to be ONE shape.
+DORMER_CHEEK = 0.10
+DORMER_HEAD = 0.15
+
+
+def dormers_on(box: tuple, portals, openings) -> list:
+    """`(u range, v range, plane)` for every `W_DORMER` window in the walls under @p box."""
+    by_id = {row["id"]: row for row in portals}
+    out = []
+    for opening in openings:
+        if str(opening.get("type") or "") != "W_DORMER":
+            continue
+        portal = by_id.get(opening.get("portal"))
+        plane = (portal or {}).get("plane") or {}
+        if plane.get("axis") != "z":
+            continue
+        value = float(plane["value"])
+        if not (box[2] - 1e-6 <= value <= box[3] + 1e-6):
+            continue
+        rect = portal["rect"]
+        # ...and ACROSS it as well. Filtering on the dormer's plane alone gave `ROOF_GARAGE` every
+        # dormer of the main block, whose walls run through the same z range 15 m to the west
+        # (`HOUSE-00484`): the garage's `BLOCKOUT_roof` spanned X -6.00 to 17.40 for a wing 8.4 m
+        # wide.
+        if float(rect["u"][0]) < box[0] - 1e-6 or float(rect["u"][1]) > box[1] + 1e-6:
+            continue
+        out.append(((float(rect["u"][0]), float(rect["u"][1])),
+                    (float(rect["v"][0]), float(rect["v"][1])), value))
+    return sorted(out)
+
+
+def _dormer_metrics(rect_u: tuple, rect_v: tuple, plane_z: float, outer: tuple, eaves_y: float,
+                    pitch: float):
+    """The numbers `dormer_shell` and `dormer_footprint` must agree on, worked out once.
+
+    They are the same dormer seen two ways -- the faces that are drawn and collided, and the
+    rectangle of main roof they replace -- and two derivations of `back` would be two dormers.
+    """
+    u0, u1 = rect_u[0] - DORMER_CHEEK, rect_u[1] + DORMER_CHEEK
+    head = rect_v[1] + DORMER_HEAD
+    ridge_y = head + ((u1 - u0) / 2.0) * pitch
+    # Which side of the roof this dormer is on: the eaves edge it faces is the near one.
+    outward = 1.0 if abs(plane_z - outer[3]) < abs(plane_z - outer[2]) else -1.0
+    eaves_z = outer[3] if outward > 0 else outer[2]
+    # Where the dormer's ridge meets the main plane, which is where a dormer roof dies into a roof.
+    back = eaves_z - outward * ((ridge_y - eaves_y) / pitch)
+    return u0, u1, head, ridge_y, outward, eaves_z, back
+
+
+def dormer_footprint(rect_u: tuple, rect_v: tuple, plane_z: float, outer: tuple, eaves_y: float,
+                     pitch: float) -> tuple:
+    """The plan rectangle of main roof one dormer replaces: `(x0, x1, z0, z1)`.
+
+    From its front wall back to where its ridge dies into the slope, and no further: the eaves
+    OVERSAIL the wall by `EAVES_OVERHANG`, and that strip of roof is in front of the dormer rather
+    than under it. Cutting it too would leave a slot in the roof over the overhang.
+    """
+    u0, u1, _head, _ridge, _outward, _eaves_z, back = _dormer_metrics(
+        rect_u, rect_v, plane_z, outer, eaves_y, pitch)
+    return (u0, u1, min(plane_z, back), max(plane_z, back))
+
+
+def dormer_shell(rect_u: tuple, rect_v: tuple, plane_z: float, outer: tuple, eaves_y: float,
+                 pitch: float):
+    """One dormer over a window, as `(corners, outward)` faces: front, two cheeks, two roof planes.
+
+    A **wall** dormer: this house's five sit in the front and rear walls (`W_DORMER`'s portals are
+    on the wall's own plane) and rise through the roof, rather than standing back on the slope. Its
+    own roof is a little gable at the main roof's pitch, and it runs back until its ridge meets the
+    main plane -- which is where a dormer roof dies into a roof.
+    """
+    u0, u1, head, ridge_y, outward, eaves_z, back = _dormer_metrics(
+        rect_u, rect_v, plane_z, outer, eaves_y, pitch)
+
+    def roof_at(z):
+        """The main roof's surface at a given z on this side."""
+        return eaves_y + abs(eaves_z - z) * pitch
+
+    def facing(points, wanted):
+        """@p points, reversed if their winding does not face @p wanted.
+
+        `house_shell_gen.py` does this to every face it draws; the dormer does it HERE because
+        `build_collision.py` collides these faces and has no `facing` of its own -- and a cheek
+        has no "up" for `face_up` to use, which is how the roof planes are oriented.
+        """
+        (ax, ay, az), (bx, by, bz), (cx, cy, cz) = points[0], points[1], points[2]
+        ux, uy, uz = bx - ax, by - ay, bz - az
+        vx, vy, vz = cx - bx, cy - by, cz - bz
+        normal = (uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx)
+        return points if sum(n * o for n, o in zip(normal, wanted)) > 0 else list(reversed(points))
+
+    mid = (u0 + u1) / 2.0
+    front = (0.0, 0.0, outward)
+    foot = roof_at(plane_z)
+    # The front, from the roof surface at the wall up to the dormer's own ridge -- **with the
+    # window left open** (`HOUSE-00490`). It was one pentagon until then, and a pentagon across
+    # the whole width covers the window from the roof line (+10.57) to the head (+11.15): the
+    # wall below has the opening punched out of it and the dormer put a board back over the top
+    # two thirds of it. §13.6 calls `L3_ROOM` "lit by three dormers" and §64.6 measured its sky
+    # exposure at 0.000.
+    faces = [([(u0, head, plane_z), (u1, head, plane_z), (mid, ridge_y, plane_z)], front)]
+    window_low, window_high = max(rect_v[0], foot), max(rect_v[1], foot)
+    for left, right in ((u0, rect_u[0]), (rect_u[1], u1)):
+        if right - left > 1e-9:
+            faces.append(([(left, foot, plane_z), (right, foot, plane_z),
+                           (right, head, plane_z), (left, head, plane_z)], front))
+    for low, high in ((window_high, head), (foot, window_low)):
+        if high - low > 1e-9:
+            faces.append(([(rect_u[0], low, plane_z), (rect_u[1], low, plane_z),
+                           (rect_u[1], high, plane_z), (rect_u[0], high, plane_z)], front))
+    for edge, side in ((u0, -1.0), (u1, 1.0)):
+        faces.append(([(edge, roof_at(plane_z), plane_z), (edge, head, plane_z),
+                       (edge, roof_at(back), back)], (side, 0.0, 0.0)))
+    for edge, side in ((u0, -1.0), (u1, 1.0)):
+        faces.append(([(edge, head, plane_z), (mid, ridge_y, plane_z),
+                       (mid, ridge_y, back), (edge, roof_at(back), back)],
+                      (side, pitch, 0.0)))
+    return [(facing(corners, outward_vector), outward_vector) for corners, outward_vector in faces]
+
+
+def subtract_rect(corners, rect):
+    """@p corners in plan, minus the axis-aligned @p rect: up to four convex pieces.
+
+    Four `clip_to_rect` calls against the bands left round the hole rather than a general polygon
+    difference, because the input is convex and the hole is a rectangle: the bands are convex, the
+    pieces are `clip_to_rect`'s own answers, and the height of every vertex is still evaluated from
+    the face's own plane rather than interpolated.
+    """
+    if len(corners) < 3:
+        return []
+    xs = [point[0] for point in corners]
+    zs = [point[2] for point in corners]
+    lo_x, hi_x, lo_z, hi_z = min(xs), max(xs), min(zs), max(zs)
+    rx0, rx1, rz0, rz1 = rect
+    if rx1 <= lo_x or rx0 >= hi_x or rz1 <= lo_z or rz0 >= hi_z:
+        return [list(corners)]
+    mid_x0, mid_x1 = max(rx0, lo_x), min(rx1, hi_x)
+    out = []
+    for band in ((lo_x, mid_x0, lo_z, hi_z),
+                 (mid_x1, hi_x, lo_z, hi_z),
+                 (mid_x0, mid_x1, lo_z, min(rz0, hi_z)),
+                 (mid_x0, mid_x1, max(rz1, lo_z), hi_z)):
+        if band[1] - band[0] <= 1e-9 or band[3] - band[2] <= 1e-9:
+            continue
+        piece = clip_to_rect(corners, band)
+        if plan_area(piece) > 1e-9:
+            out.append(piece)
+    return out
 
 
 def plane_equation(corners):
@@ -409,6 +580,78 @@ def selftest() -> int:
     require(clipped and max(point[1] for point in clipped) > eaves + 1.0,
             f"...and it really does slope: {max(p[1] for p in clipped):.3f} against the eaves' "
             f"{eaves:.3f}")
+
+    # ---- `HOUSE-00490`: the dormers, and the hole each one leaves in the plane it comes through.
+    with_openings = layout_io.load_layout(source, kinds=["levels", "cells", "portals", "openings"])
+    dormers = dormers_on(boxes["ROOF_MAIN"], layout_io.rows(with_openings, "portals"),
+                         layout_io.rows(with_openings, "openings"))
+    require(len(dormers) == 5,
+            f"§12.1's five dormers are the five `W_DORMER` windows ({len(dormers)})")
+    louvre = {"id": "P_FAKE", "plane": {"axis": "z", "value": boxes["ROOF_MAIN"][3]},
+              "rect": {"u": [0.0, 0.8], "v": [11.3, 12.1]}}
+    require(not dormers_on(boxes["ROOF_MAIN"], [louvre], [{"type": "W_GABLE", "portal": "P_FAKE"}]),
+            "a gable louvre in the same wall is not a dormer -- it sits in a gable end rather "
+            "than coming through the roof")
+    require(len(dormers_on(boxes["ROOF_MAIN"], [louvre],
+                           [{"type": "W_DORMER", "portal": "P_FAKE"}])) == 1,
+            "...and the same opening as a dormer is")
+
+    pitch = float(construction["roofPitch"])
+    one = dormers[0]
+    hole = dormer_footprint(one[0], one[1], one[2], outer, eaves, pitch)
+    cut = roof_planes(outer, eaves, pitch, [one])
+    plain_area = sum(plan_area(face) for face, _out in planes)
+    cut_area = sum(plan_area(face) for face, _out in cut)
+    hole_area = (hole[1] - hole[0]) * (hole[3] - hole[2])
+    require(abs((plain_area - cut_area) - hole_area) < 1e-9,
+            f"the roof is not there where a dormer comes through it: {plain_area:.4f} - "
+            f"{cut_area:.4f} = {plain_area - cut_area:.4f} m² of plan, the dormer's own footprint "
+            f"({hole_area:.4f})")
+    shell = dormer_shell(one[0], one[1], one[2], outer, eaves, pitch)
+    require(abs(sum(plan_area(face) for face, _out in shell) - hole_area) < 1e-9,
+            f"...and the dormer's own roof covers exactly that hole, so the roof still has the "
+            f"plan area it had ({sum(plan_area(f) for f, _o in shell):.4f} against "
+            f"{hole_area:.4f})")
+    require(max(hole[2], hole[3], key=lambda v: abs(v - one[2])) != one[2]
+            and min(abs(hole[2] - one[2]), abs(hole[3] - one[2])) < 1e-9,
+            f"the cut stops AT the dormer's front wall ({one[2]}) rather than at the eaves: the "
+            f"roof oversails the wall by {EAVES_OVERHANG} m and that strip is in front of the "
+            f"dormer, not under it ({hole[2]}..{hole[3]})")
+
+    # The window is a HOLE in the dormer's front, which is what the front is for. It was one
+    # pentagon across the whole width until this task, and the wall below has the opening cut out
+    # of it: the dormer put a board back over the top two thirds of every dormer window in the
+    # house, and §64.6 measured `L3_ROOM` -- "lit by three dormers" -- at 0.000.
+    window_mid_y = (max(one[1][0], eaves + abs(outer[3] - one[2]) * pitch) + one[1][1]) / 2.0
+    window_mid_x = (one[0][0] + one[0][1]) / 2.0
+    covering = [face for face, _out in shell
+                if all(abs(point[2] - one[2]) < 1e-9 for point in face)
+                and min(p[0] for p in face) - 1e-9 <= window_mid_x <= max(p[0] for p in face) + 1e-9
+                and min(p[1] for p in face) - 1e-9 <= window_mid_y <= max(p[1] for p in face) + 1e-9]
+    require(not covering,
+            f"the window is a hole in the dormer's front: nothing of the front stands at "
+            f"({window_mid_x:.2f}, {window_mid_y:.2f}) ({len(covering)} face(s) do)")
+    jambs = [face for face, _out in shell if all(abs(point[2] - one[2]) < 1e-9 for point in face)]
+    require(len(jambs) == 4,
+            f"...and the front is four pieces round it -- two jambs, a header and the gable above "
+            f"({len(jambs)})")
+    require(all(abs(plan_area(face)) < 1e-12 for face, _out in shell
+                if all(abs(point[2] - one[2]) < 1e-9 for point in face)),
+            "the front stands in one plane, so it has no plan area and takes none of the roof's")
+
+    # Subtraction on its own, against answers that can be counted by hand.
+    square_face = [(0.0, 0.0, 0.0), (4.0, 0.0, 0.0), (4.0, 0.0, 4.0), (0.0, 0.0, 4.0)]
+    require(len(subtract_rect(square_face, (1.0, 2.0, 1.0, 2.0))) == 4,
+            "a hole in the middle of a face leaves four pieces round it")
+    require(abs(sum(plan_area(piece) for piece in subtract_rect(square_face, (1.0, 2.0, 1.0, 2.0)))
+                - (16.0 - 1.0)) < 1e-9,
+            "...whose area is the face's less the hole's, exactly")
+    require(len(subtract_rect(square_face, (0.0, 2.0, 0.0, 2.0))) == 2,
+            "a hole in a corner leaves two")
+    require(subtract_rect(square_face, (9.0, 10.0, 9.0, 10.0)) == [square_face],
+            "and a hole nowhere near the face leaves the face alone, uncopied and unclipped")
+    require(subtract_rect(square_face, (-1.0, 5.0, -1.0, 5.0)) == [],
+            "a hole that swallows the face leaves nothing")
 
     if failures:
         print(f"\nroof_geometry: {len(failures)} claim(s) FAILED")

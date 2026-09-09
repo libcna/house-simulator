@@ -655,6 +655,12 @@ def top_tread_box(flight: dict, bottom: float, portals=()):
 EAVES_OVERHANG = roof_geometry.EAVES_OVERHANG
 eaves_height = roof_geometry.eaves_height
 roof_planes = roof_geometry.roof_planes
+#: ...and so is the dormer, since `HOUSE-00490`: it comes THROUGH the roof, so the shape and the
+#: hole it leaves have to be one answer, and `build_collision.py` needs both.
+DORMER_CHEEK = roof_geometry.DORMER_CHEEK
+DORMER_HEAD = roof_geometry.DORMER_HEAD
+dormer_shell = roof_geometry.dormer_shell
+dormers_on = roof_geometry.dormers_on
 FASCIA_DEPTH = 0.20
 FASCIA_THICK = 0.035
 
@@ -824,45 +830,6 @@ RAFTER_DEPTH = 0.20
 PURLIN_SECTION = 0.15
 WALKWAY_WIDTH = 0.60
 WALKWAY_THICK = 0.030
-
-#: A dormer's cheek thickness, and how far its front wall rises above the window head.
-DORMER_CHEEK = 0.10
-DORMER_HEAD = 0.15
-
-
-def dormer_shell(rect_u: tuple, rect_v: tuple, plane_z: float, outward: float,
-                 outer: tuple, eaves_y: float, pitch: float):
-    """One dormer over a window, as `(corners, outward)` faces: front, two cheeks, two roof planes.
-
-    A **wall** dormer: this house's five sit in the front and rear walls (`W_DORMER`'s portals are
-    on the wall's own plane) and rise through the roof, rather than standing back on the slope. Its
-    own roof is a little gable at the main roof's pitch, and it runs back until its ridge meets the
-    main plane -- which is where a dormer roof dies into a roof.
-    """
-    u0, u1 = rect_u[0] - DORMER_CHEEK, rect_u[1] + DORMER_CHEEK
-    head = rect_v[1] + DORMER_HEAD
-    ridge_y = head + ((u1 - u0) / 2.0) * pitch
-    # The main roof's surface at a given z on this side, and where the dormer's ridge meets it.
-    eaves_z = outer[3] if outward > 0 else outer[2]
-    def roof_at(z):
-        return eaves_y + abs(eaves_z - z) * pitch
-    back = eaves_z - outward * ((ridge_y - eaves_y) / pitch)
-    mid = (u0 + u1) / 2.0
-    faces = [
-        # The front gable, from the roof surface at the wall up to the dormer's own ridge.
-        ([(u0, roof_at(plane_z), plane_z), (u1, roof_at(plane_z), plane_z),
-          (u1, head, plane_z), (mid, ridge_y, plane_z), (u0, head, plane_z)],
-         (0.0, 0.0, outward)),
-    ]
-    for edge, side in ((u0, -1.0), (u1, 1.0)):
-        faces.append(([(edge, roof_at(plane_z), plane_z), (edge, head, plane_z),
-                       (edge, roof_at(back), back)], (side, 0.0, 0.0)))
-    for edge, side in ((u0, -1.0), (u1, 1.0)):
-        faces.append(([(edge, head, plane_z), (mid, ridge_y, plane_z),
-                       (mid, ridge_y, back), (edge, roof_at(back), back)],
-                      (side, pitch, 0.0)))
-    return faces
-
 
 def covered_by(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> bool:
     """Is another cell stacked over the whole of @p cell's footprint, just above it?
@@ -1584,14 +1551,14 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
         faces.append(tuple(range(base, base + len(points))))
         classes.append(klass)
 
-    for corners, outward in roof_planes(outer, eaves_y, pitch):
+    # The planes, with a hole in them where each dormer comes through (`HOUSE-00490`): leaving
+    # them whole put a slope across the inside of every dormer window.
+    for corners, outward in roof_planes(outer, eaves_y, pitch, dormers or ()):
         add(corners, outward, "roof")
 
     # `HOUSE-00462`: the dormers, which belong to the roof they come through.
     for rect_u, rect_v, plane_z in dormers or ():
-        outward = 1.0 if abs(plane_z - box[3]) < abs(plane_z - box[2]) else -1.0
-        for corners, face_outward in dormer_shell(rect_u, rect_v, plane_z, outward, outer,
-                                                  eaves_y, pitch):
+        for corners, face_outward in dormer_shell(rect_u, rect_v, plane_z, outer, eaves_y, pitch):
             add(corners, face_outward, "roof")
 
     # The fascia: a board round the eaves edge, hanging below it, and the soffit closing the
@@ -1731,32 +1698,6 @@ def chimney_at(fireplace, construction: dict, floor: float):
     return (x - CHIMNEY_ACROSS / 2.0, x + CHIMNEY_ACROSS / 2.0,
             floor, float(construction["ridgeY"]) + CHIMNEY_OVER_RIDGE,
             z - CHIMNEY_ALONG / 2.0, z + CHIMNEY_ALONG / 2.0)
-
-
-def dormers_on(box: tuple, portals, openings) -> list:
-    """`(u range, v range, plane)` for every `W_DORMER` window in the walls under @p box."""
-    by_id = {row["id"]: row for row in portals}
-    out = []
-    for opening in openings:
-        if str(opening.get("type") or "") != "W_DORMER":
-            continue
-        portal = by_id.get(opening.get("portal"))
-        plane = (portal or {}).get("plane") or {}
-        if plane.get("axis") != "z":
-            continue
-        value = float(plane["value"])
-        if not (box[2] - 1e-6 <= value <= box[3] + 1e-6):
-            continue
-        rect = portal["rect"]
-        # ...and ACROSS it as well. Filtering on the dormer's plane alone gave `ROOF_GARAGE` every
-        # dormer of the main block, whose walls run through the same z range 15 m to the west
-        # (`HOUSE-00484`): the garage's `BLOCKOUT_roof` spanned X -6.00 to 17.40 for a wing 8.4 m
-        # wide.
-        if float(rect["u"][0]) < box[0] - 1e-6 or float(rect["u"][1]) > box[1] + 1e-6:
-            continue
-        out.append(((float(rect["u"][0]), float(rect["u"][1])),
-                    (float(rect["v"][0]), float(rect["v"][1])), value))
-    return sorted(out)
 
 
 def roof_boxes(layout: dict, levels: dict) -> dict:
@@ -2599,10 +2540,11 @@ def selftest(output: Path) -> int:
     subject_dormer = dormer_list[0]
     dormer_out = 1.0 if abs(subject_dormer[2] - main_box[3]) < abs(subject_dormer[2] - main_box[2]) \
         else -1.0
-    faces = dormer_shell(subject_dormer[0], subject_dormer[1], subject_dormer[2], dormer_out,
+    faces = dormer_shell(subject_dormer[0], subject_dormer[1], subject_dormer[2],
                          outer, eaves_y, float(construction["roofPitch"]))
-    require(len(faces) == 5,
-            f"a dormer is a gable face, two cheeks and two roof planes ({len(faces)})")
+    require(len(faces) == 8,
+            f"a dormer is a gable, two jambs and a header round its window, two cheeks and two "
+            f"roof planes ({len(faces)})")
     heads = {round(point[1], 4) for corners, _ in faces for point in corners}
     window_head = subject_dormer[1][1]
     front_top = window_head + DORMER_HEAD
@@ -2633,15 +2575,25 @@ def selftest(output: Path) -> int:
     plain_roof_faces = len(plain_roof.data.polygons)
     reset_scene()
     dormered = build_roof("ROOF_MAIN", main_box, construction, dormers=dormer_list)
-    require(len(dormered.data.polygons) == plain_roof_faces + 5 * len(dormer_list),
-            f"and the roof gains five faces for each of the five ({plain_roof_faces} -> "
-            f"{len(dormered.data.polygons)})")
+    # `HOUSE-00490`: the planes are CUT where each dormer comes through, so the count is the cut
+    # planes plus the dormers' own faces, not the whole planes plus them. A roof left whole under
+    # a dormer is a roof across the inside of its window.
+    pitch_here = float(construction["roofPitch"])
+    expected = (plain_roof_faces
+                - len(roof_planes(outer, eaves_y, pitch_here))
+                + len(roof_planes(outer, eaves_y, pitch_here, dormer_list))
+                + sum(len(dormer_shell(one[0], one[1], one[2], outer, eaves_y, pitch_here))
+                      for one in dormer_list))
+    require(len(dormered.data.polygons) == expected,
+            f"and the roof is its cut planes plus each dormer's own faces ({plain_roof_faces} -> "
+            f"{len(dormered.data.polygons)}, expected {expected})")
 
     # ---- `HOUSE-00463`: the attic structure -----------------------------------------------------
     ridge_run = (outer[1] - outer[0]) - (outer[3] - outer[2])
     expected_rafters = 2 * (int(ridge_run / RAFTER_SPACING) + 1)
-    require(len(dormered.data.polygons) == plain_roof_faces + 5 * len(dormer_list),
-            "the roof's face count is the planes, the eaves boards and the structure")
+    require(len(dormered.data.polygons) == expected,
+            "the roof's face count is the cut planes, the dormers, the eaves boards and the "
+            "structure")
     # planes, fascia, soffit, four gutters of four faces, four downspouts of two, one ridge vent
     bare = plain_roof_faces - (4 + 4 + 4 + 4 * 4 + 4 * 2 + 1)
     require(bare == expected_rafters + 2,

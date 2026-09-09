@@ -4324,6 +4324,14 @@ capsule plus that hysteresis plus 50 mm — over the hole's width and the body's
 by the part of them within reach so a borrowed slab does not size the borrower's grid.
 `docs/collision-format.md` §4.1 is normative and `OpeningReachTests` is the guarantee.
 
+**A dormer is a hole in the roof** (`HOUSE-00490`). §12.1's five come through the slope, and the
+plane was left whole under them: the roof ran across the inside of every dormer window, and the
+dormer's own front gable covered the rest of it. §64.6 measured `L3_ROOM` -- "lit by three dormers"
+-- at a sky exposure of 0.000. The footprint is cut out of the plane and the dormer's eight faces
+stand in the hole, with the window open between them; `roof_geometry.py` owns both, so what is
+drawn and what is collided are one shape. The roof's plan area is the same afterwards, which is
+what says the dormer covers exactly what it removed.
+
 **A wall of an open cell stops at the roof of what it is a wall of** (`HOUSE-00784`). The same
 rule as the boundary between two yards, one axis over: an open cell's extent is §10.3's +20.00
 ceiling because that is how much sky it holds, and building the shared wall over the CELL's extent
@@ -4334,11 +4342,12 @@ sky from the terrace. The roof line is the tallest SOLID cell against that stret
 any level: the storey above a balcony is on a different level and still holds its wall up, and the
 balcony itself is outdoors and does not.
 
-The census: **2 031 cell references over 1 284 shapes** — 1 262 OBBs and 22 meshes, of which 334
+The census: **2 081 cell references over 1 335 shapes** — 1 262 OBBs and 73 meshes, of which 334
 are what stands outdoors and 106 are floors, down from 140 when the yards stopped having them.
 The wall count fell from 888 to 735 when the yards stopped being walled and to 726 at the roof
-line, and the ceiling count rose from 94 to 106 when `HOUSE-00777` gave the shed and the five
-stair cells their lids back.
+line; the ceiling count rose from 94 to 106 when `HOUSE-00777` gave the shed and the five stair
+cells their lids back, and the mesh count from 22 to 73 when `HOUSE-00490` put the five dormers
+in — 24 clipped rafter pieces where there were 13, and 40 dormer faces.
 
 ### 49.3 The player sweep
 

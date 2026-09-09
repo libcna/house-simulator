@@ -257,6 +257,18 @@ The house's census: **376 shape references**, over 107 holes a body can stand in
 the deepest overlap does not depend on which of the two lists you ask — and it holds to 0.000000 m
 over 5 739 poses.
 
+**And a dormer is a hole in the roof, not a lump on it** (`HOUSE-00490`). §12.1's five dormers sit
+in the front and rear walls and rise through the slope; the main plane was left whole underneath
+them, so from inside the attic the roof ran across the window, and the dormer's own front gable put
+a second board over the top two thirds of it. `L3_ROOM` is a room §13.6 calls *"lit by three
+dormers"* and §64.6 measured its sky exposure at **0.000**. Each dormer's footprint is now cut out
+of the plane in plan — from its front wall back to where its ridge dies into the slope, and no
+further, because the eaves oversail the wall and that strip is in front of the dormer rather than
+under it — and its own eight faces stand in the hole: a gable, two jambs and a header round the
+open window, two cheeks and two roof planes. The roof's plan area is unchanged by the operation,
+which is the check that says the dormer covers exactly what it removed. `roof_geometry.py` owns
+both halves, so the shell you see and the shell you collide with are the same shape.
+
 ### 4.2 The property outdoors
 
 *`HOUSE-00774`.* §49.2: *"Exterior collision uses the terrain height field plus OBBs for fences,

@@ -864,13 +864,27 @@ def build_rafters(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats:
     levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
     pitch = float(construction["roofPitch"])
     roofs = roof_geometry.roof_boxes(layout)
+    portals = layout_io.rows(layout, "portals")
+    openings = layout_io.rows(layout, "openings") if "openings" in layout else []
+    cells_by_id = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
+    #: Which room each `z`-plane opening belongs to, so a dormer goes in the list of the room it
+    #: lights. §13.6 describes `L3_ROOM` as "lit by three dormers"; the dormer is that room's.
+    owner_of = {}
+    for portal in portals:
+        plane = portal.get("plane") or {}
+        rect = portal.get("rect") or {}
+        if plane.get("axis") != "z" or "u" not in rect:
+            continue
+        owner_of[(snap(float(plane["value"])), snap(float(rect["u"][0])),
+                  snap(float(rect["u"][1])))] = portal.get("cellA")
     for level_id, level in sorted(levels.items()):
         name = level.get("roof")
         if not name or level.get("ceiling") is not None or name not in roofs:
             continue
         outer = roof_geometry.outer_box(roofs[name], construction)
         eaves = roof_geometry.eaves_height(construction, outer)
-        planes = roof_geometry.roof_planes(outer, eaves, pitch)
+        dormers = roof_geometry.dormers_on(roofs[name], portals, openings)
+        planes = roof_geometry.roof_planes(outer, eaves, pitch, dormers)
         for cell in sorted((row for row in layout_io.rows(layout, "cells")
                             if row.get("level") == level_id), key=lambda c: c["id"]):
             if cell.get("kind") == "exterior":
@@ -895,6 +909,22 @@ def build_rafters(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats:
                     stats["rafterMeshes"] += 1
                     stats["rafterArea"] += roof_geometry.plan_area(piece)
                     stats.setdefault("rafterRoofs", set()).add(f"{name}.{index}")
+        # ...and the dormers that come through those planes (`HOUSE-00490`). The hole is cut
+        # above; without the box that fills it, a body in the attic would walk out through the
+        # window and a ray would leave through the roof at any angle at all.
+        for rect_u, rect_v, plane_z in dormers:
+            owner = owner_of.get((snap(plane_z), snap(rect_u[0]), snap(rect_u[1])))
+            cell = cells_by_id.get(owner)
+            if cell is None or cell.get("level") != level_id:
+                stats["dormersUnowned"] += 1
+                continue
+            for corners, _outward in roof_geometry.dormer_shell(rect_u, rect_v, plane_z, outer,
+                                                               eaves, pitch):
+                vertices, triangles = _fan(corners)
+                shape = shapes.mesh(vertices, triangles, cell.get("footstepSurface"),
+                                    KIND_CEILING)
+                _add_mesh(per_cell, cell["id"], shape)
+                stats["dormerFaces"] += 1
 
 
 #: The smallest piece of roof worth a collision shape, in plan m². A cell that clips a plane at a
@@ -1753,7 +1783,9 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     # `exterior` joins them for `HOUSE-00774`: §11.2's fences, §11.4's kerbs and cars, §11.1's
     # garden structures and §49.2's tree trunks are all in it, and until this was read the only
     # thing outdoors that stopped a body was a cell boundary.
-    for optional in ("stairs", "props", "materials", "exterior"):
+    # `openings` joins them for `HOUSE-00490`: a dormer is a `W_DORMER` window, and the window
+    # type is the only thing in the world that says a hole in the wall comes through the roof.
+    for optional in ("stairs", "props", "materials", "exterior", "openings"):
         name, _ = layout_io.FILES[optional]
         if (world_dir / name).is_file():
             layout[optional] = layout_io.load_file(world_dir / name, optional)
@@ -1766,7 +1798,8 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
                 asset_paths[row["id"]] = (REPO / source)
 
     stats = {"wallPieces": 0, "floorPieces": 0, "ceilingPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
-             "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0, "guards": 0, "stairGuards": 0, "outerShared": 0,
+             "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0,
+             "dormerFaces": 0, "dormersUnowned": 0, "guards": 0, "stairGuards": 0, "outerShared": 0,
              "openingShared": 0, "openBoundaries": 0, "clippedToRoof": 0, "clippedAway": 0,
              "fencePieces": 0, "kerbPieces": 0,
              "structureObbs": 0, "trunks": 0, "vehicles": 0, "hedges": 0,
@@ -2064,6 +2097,9 @@ def report(world: dict) -> str:
         f"  rafters: {stats['rafterMeshes']} clipped roof planes over "
         f"{stats['rafterArea']:.1f} m² of plan, {stats['rafterAboveCeiling']} dropped as "
         f"unreachable above a flat ceiling",
+        f"  dormers: {stats['dormerFaces']} face(s) -- a gable, two jambs and a header round "
+        f"the window, two cheeks and two roof planes each -- standing in holes cut out of the "
+        f"planes they come through ({stats['dormersUnowned']} whose room could not be found)",
         f"  stairs: {stats['stairMeshes']} ramp wedges, {stats['stairLandings']} landings, "
         f"{stats['stairSteps']} stepped OBBs; {stats['stairsGuessed']} flight(s) placed by guess "
         f"for want of an authored footprint",
