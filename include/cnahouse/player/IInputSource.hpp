@@ -61,6 +61,8 @@ namespace cnahouse::player
 
         /// @brief Debug toggles, compiled out of a build without debug tools.
         bool toggleOverlayPressed = false;
+        /// @brief §69's `F2`: the world overlay -- cell, position, yaw/pitch, surface, target.
+        bool toggleWorldOverlayPressed = false;
         bool screenshotPressed = false;
     };
 

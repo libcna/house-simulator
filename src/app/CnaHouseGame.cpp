@@ -1,6 +1,13 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/app/CnaHouseGame.hpp"
 
+#include "System/IO/FileAccess.hpp"
+#include "System/IO/FileMode.hpp"
+#include "System/IO/FileStream.hpp"
+
+#include "cnahouse/physics/CollisionLoader.hpp"
+#include "cnahouse/world/WorldLoader.hpp"
+
 #include <format>
 #include <optional>
 
@@ -262,9 +269,14 @@ namespace cnahouse::app
         ResolveQuality();
 
         if (options_.scene.has_value() &&
-            (*options_.scene == kBlockoutScene || *options_.scene == kBackFaceScene))
+            (*options_.scene == kBlockoutScene || *options_.scene == kBackFaceScene ||
+             *options_.scene == kWalkScene))
         {
             LoadBlockout();
+            if (*options_.scene == kWalkScene)
+            {
+                LoadWalk();
+            }
             LoadHudFont();
             contentLoaded_ = true;
             return;
@@ -307,6 +319,211 @@ namespace cnahouse::app
 
         LoadHudFont();
         contentLoaded_ = true;
+    }
+
+    void CnaHouseGame::LoadWalk()
+    {
+        // §16's world first: the collision is indexed by cell NAME, and which cell a body is in is
+        // a question only the world data can answer (§16.4).
+        world::WorldData::Contents contents;
+        const auto levels = world::WorldLoader::LoadLevels("content/world", contents);
+        const auto cells = world::WorldLoader::LoadCells("content/world", contents);
+        const auto portals = world::WorldLoader::LoadPortals("content/world", contents);
+        if (!levels || !cells || !portals)
+        {
+            Log::Error(LogCat::Content,
+                       "--scene=walk: the world did not load; drawing from the fixed camera");
+            return;
+        }
+        auto built = world::WorldData::Create(std::move(contents));
+        if (!built)
+        {
+            Log::Error(LogCat::Content, "--scene=walk: {}", built.Error().ToString());
+            return;
+        }
+        world_.emplace(std::move(built.Value()));
+        index_.emplace(world::SpatialIndex::Build(*world_));
+
+        try
+        {
+            System::IO::FileStream stream(
+                "content/world/collision.bin", System::IO::FileMode::Open, System::IO::FileAccess::Read);
+            auto loaded = physics::CollisionLoader::Read(stream, "content/world/collision.bin");
+            if (!loaded)
+            {
+                Log::Error(LogCat::Content, "--scene=walk: {}", loaded.Error().Message());
+                world_.reset();
+                index_.reset();
+                return;
+            }
+            collision_.emplace(std::move(loaded.Value()));
+        }
+        catch (const std::exception& e)
+        {
+            Log::Error(LogCat::Content, "--scene=walk: collision.bin: {}", e.what());
+            world_.reset();
+            index_.reset();
+            return;
+        }
+
+        // §12's front hall, unless `--player` says otherwise. The middle of a named cell rather
+        // than a coordinate somebody measured off a plan: a spawn that is 20 mm inside a wall
+        // spends its first frames being shoved out, and the shove is the first thing a screenshot
+        // would catch.
+        Microsoft::Xna::Framework::Vector3 feet(0.0F, 0.0F, 0.0F);
+        if (options_.player.has_value())
+        {
+            const auto& stand = *options_.player;
+            feet = Microsoft::Xna::Framework::Vector3(stand[0], stand[1], stand[2]);
+            look_.yaw = Microsoft::Xna::Framework::MathHelper::ToRadians(stand[3]);
+            look_.pitch = player::ClampedPitch(Microsoft::Xna::Framework::MathHelper::ToRadians(stand[4]));
+        }
+        else if (const world::Cell* hall = world_->FindCell(util::Intern("L0_HALL")); hall != nullptr)
+        {
+            const world::Level* level = world_->FindLevel(hall->level);
+            const world::Footprint& box = hall->boxes.front();
+            feet = Microsoft::Xna::Framework::Vector3((box.minX + box.maxX) * 0.5F,
+                                                      level == nullptr ? 0.0F : level->ffl,
+                                                      (box.minZ + box.maxZ) * 0.5F);
+        }
+
+        player_ = player::PlayerState{};
+        player_.position =
+            Microsoft::Xna::Framework::Vector3(feet.X, feet.Y + player_.Rise() + 0.02F, feet.Z);
+        player_.yaw = look_.yaw;
+        player_.fastWalk = settings_.fastWalk;
+        tracker_.Forget();
+        tracker_.Update(*world_, *index_, player_.position);
+        if (!tracker_.Current().IsValid())
+        {
+            Log::Error(LogCat::Content,
+                       "--scene=walk: ({:.2f}, {:.2f}, {:.2f}) is not in any cell",
+                       feet.X,
+                       feet.Y,
+                       feet.Z);
+            world_.reset();
+            index_.reset();
+            collision_.reset();
+            return;
+        }
+
+        view_.Camera().SetFieldOfView(settings_.fieldOfView);
+        view_.Camera().SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
+        view_.Bob().SetLevel(settings_.headBob);
+        walking_ = true;
+
+        // Half a second of standing still before anything is drawn: the body was spawned 20 mm
+        // clear of the floor and §49.3's step is what puts it down. A screenshot taken on frame
+        // one would otherwise be taken 20 mm high, and worse, the eye would still be springing.
+        const player::InputState still;
+        for (int step = 0; step < 60; ++step)
+        {
+            const physics::CollisionCell* cell =
+                collision_->Cell(util::IdRegistry::NameOf(tracker_.Current()));
+            if (cell == nullptr)
+            {
+                break;
+            }
+            player_.cellId = cell->id;
+            const player::PlayerStepReport report =
+                player::PlayerStep(*collision_, *cell, broad_, player_, still, player::kFixedStepSeconds);
+            tracker_.Update(*world_, *index_, player_.Feet());
+            view_.Update(player_, report, look_.pitch, player::kFixedStepSeconds);
+        }
+        view_.Snap(player_, look_.pitch);
+        ApplyPlayerCamera();
+
+        Log::Info(LogCat::App,
+                  "walking in {} at ({:.2f}, {:.2f}, {:.2f}), yaw {:.0f} deg",
+                  util::IdRegistry::NameOf(tracker_.Current()),
+                  player_.Feet().X,
+                  player_.Feet().Y,
+                  player_.Feet().Z,
+                  static_cast<double>(look_.yaw * 180.0F / 3.14159265F));
+    }
+
+    void CnaHouseGame::UpdateWalk(float deltaSeconds)
+    {
+        // §44's mouse look, from the source that owns the devices (`HOUSE-00622`).
+        player::ApplyLook(look_, Input().Current(), Input().LookAvailable());
+        player_.yaw = look_.yaw;
+
+        // §49.3: dt = 1/120 s, accumulated from the frame time, at most four steps. The cap is
+        // what stops a loading hitch from being simulated in full and walking the body through a
+        // wall at the far side of it.
+        const int steps = player::FixedSteps(stepAccumulator_, deltaSeconds);
+        fixedSteps_ += static_cast<std::uint64_t>(steps);
+        for (int step = 0; step < steps; ++step)
+        {
+            const physics::CollisionCell* cell =
+                collision_->Cell(util::IdRegistry::NameOf(tracker_.Current()));
+            if (cell == nullptr)
+            {
+                break;
+            }
+            player_.cellId = cell->id;
+            const player::PlayerStepReport report = player::PlayerStep(
+                *collision_, *cell, broad_, player_, Input().Current(), player::kFixedStepSeconds);
+            if (report.walkModeChanged)
+            {
+                // D-09: the walk mode is a SETTING, so the game writes it back rather than the
+                // controller keeping a second copy of it.
+                settings_.fastWalk = player_.fastWalk;
+            }
+            tracker_.Update(*world_, *index_, player_.Feet());
+            view_.Update(player_, report, look_.pitch, player::kFixedStepSeconds);
+            if (const physics::CollisionCell* now =
+                    collision_->Cell(util::IdRegistry::NameOf(tracker_.Current()));
+                now != nullptr)
+            {
+                // §44's near-surface pull-back, in the cell the body ENDED the step in.
+                view_.ProbeSurfaces(*collision_, *now, broad_);
+            }
+        }
+        ApplyPlayerCamera();
+    }
+
+    void CnaHouseGame::ApplyPlayerCamera()
+    {
+        // §44's camera, as the renderer's `rendering::Camera`: an eye, a target and a lens. The
+        // near plane is the VIEW's, because `HOUSE-00628` moves it when the eye is against a wall.
+        const player::CameraPose& pose = view_.Camera().Pose();
+        blockoutCamera_.eye = pose.eye;
+        blockoutCamera_.target = Microsoft::Xna::Framework::Vector3(
+            pose.eye.X + pose.forward.X, pose.eye.Y + pose.forward.Y, pose.eye.Z + pose.forward.Z);
+        blockoutCamera_.fieldOfViewDegrees = view_.Camera().EffectiveFieldOfViewDegrees();
+        blockoutCamera_.nearPlane = view_.Camera().NearPlane();
+        blockoutCamera_.farPlane = player::kFarPlane;
+    }
+
+    debug::WorldSnapshot CnaHouseGame::WalkSnapshot() const
+    {
+        debug::WorldSnapshot snapshot;
+        snapshot.cell = util::IdRegistry::NameOf(tracker_.Current());
+        snapshot.cellFoundBy = tracker_.LastStep();
+        if (world_.has_value())
+        {
+            if (const world::Cell* cell = world_->FindCell(tracker_.Current()); cell != nullptr)
+            {
+                snapshot.level = util::IdRegistry::NameOf(cell->level);
+            }
+        }
+        snapshot.position = player_.Feet();
+        snapshot.yaw = look_.yaw;
+        snapshot.pitch = look_.pitch;
+        snapshot.speed = player_.alongSlopeSpeed;
+        snapshot.onGround = player_.onGround;
+        snapshot.crouched = player_.crouched;
+        snapshot.fastWalk = player_.fastWalk;
+        snapshot.ground = player_.groundKind;
+        // The gap the probe last reported is not kept on the state -- a body that is `onGround`
+        // is ON it, and §49.3's step already used the number to put it there. Zero says "resting".
+        snapshot.groundGap = 0.0F;
+        if (collision_.has_value() && player_.surface < collision_->surfaces.size())
+        {
+            snapshot.surface = collision_->surfaces[player_.surface];
+        }
+        return snapshot;
     }
 
     void CnaHouseGame::LoadBlockout()
@@ -534,16 +751,24 @@ namespace cnahouse::app
             // key.
             {
                 const debug::Timing::Scope scope(timing_, UpdateStage::Input);
-                input_.Update(frame.deltaSeconds);
+                Input().Update(frame.deltaSeconds);
             }
 
-            if (blockoutCells_ != nullptr)
+            if (walking_)
+            {
+                // §49.3's fixed steps, then §44's view over them. The free-fly camera is NOT
+                // updated here: two things steering one camera is a fight, and in this scene the
+                // body wins -- flying is what `--scene=blockout` is for.
+                const debug::Timing::Scope scope(timing_, UpdateStage::Physics);
+                UpdateWalk(frame.deltaSeconds);
+            }
+            else if (blockoutCells_ != nullptr)
             {
                 // `HOUSE-00476`. The debug camera flies; nothing else in this scene moves. Driven
                 // from `Update` so its speed is in metres per SECOND and does not change with the
                 // frame rate -- which matters because this camera is what a person is holding when
                 // they read the frame timings it changes.
-                freeFly_.Update(input_.Current(), input_.LookAvailable(), frame.deltaSeconds);
+                freeFly_.Update(Input().Current(), Input().LookAvailable(), frame.deltaSeconds);
                 freeFly_.ApplyTo(blockoutCamera_);
             }
 
@@ -567,7 +792,7 @@ namespace cnahouse::app
             // user-gesture audio gate (`HOUSE-00155`): the loading screen's own `Update` sees
             // `anyPressed` and calls back into `audio_`, so there is ONE place the gesture is
             // recognised rather than one in the game and one in the screen.
-            if (menus_.Update(input_.Current(), frame.deltaSeconds))
+            if (menus_.Update(Input().Current(), frame.deltaSeconds))
             {
                 Exit();
             }
@@ -596,7 +821,7 @@ namespace cnahouse::app
             player::CaptureRequest capture;
             capture.windowActive = getIsActiveProperty();
             capture.menuOpen = !menus_.Empty();
-            capture.freeCursorHeld = input_.Current().freeCursorHeld;
+            capture.freeCursorHeld = Input().Current().freeCursorHeld;
             if (mouseCapture_.Update(capture))
             {
                 input_.SetMouseCaptured(mouseCapture_.Captured());
@@ -605,18 +830,23 @@ namespace cnahouse::app
             }
 
 #if CNAHOUSE_DEBUG_TOOLS
-            if (input_.Current().screenshotPressed && pendingScreenshot_.empty())
+            if (Input().Current().screenshotPressed && pendingScreenshot_.empty())
             {
                 pendingScreenshot_ = debug::Screenshot::TimestampedName(".");
             }
-            if (input_.Current().toggleOverlayPressed)
+            if (Input().Current().toggleOverlayPressed)
             {
                 overlay_.Toggle();
                 Log::Info(LogCat::Debug, "performance overlay {}", overlay_.Visible() ? "shown" : "hidden");
             }
+            if (Input().Current().toggleWorldOverlayPressed)
+            {
+                worldOverlay_.Toggle();
+                Log::Info(LogCat::Debug, "world overlay {}", worldOverlay_.Visible() ? "shown" : "hidden");
+            }
 #endif
 
-            if (input_.Current().cancelPressed)
+            if (Input().Current().cancelPressed)
             {
                 Log::Info(LogCat::App, "cancel pressed; exiting after {} frames", framesDrawn_);
                 Exit();
@@ -794,6 +1024,10 @@ namespace cnahouse::app
                            Microsoft::Xna::Framework::Color::White);
 #if CNAHOUSE_DEBUG_TOOLS
         overlay_.Draw(hud_->batch, text_, platform_, timing_, counters_);
+        if (walking_)
+        {
+            worldOverlay_.Draw(hud_->batch, text_, WalkSnapshot());
+        }
 #endif
         hud_->batch.End();
     }

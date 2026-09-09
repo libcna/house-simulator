@@ -9059,8 +9059,62 @@ it must be tuned, not just implemented.
             view that snaps itself, and the crouch). Twelve injected bugs, twelve caught: the four
             terms fed into the wrong end of the spring, the stairs flag, the travel, the snap, and
             four deliberate mis-tunings (ω 18→4, ω 24→18, the bob ×4, the field of view at 40°).
-- [ ] HOUSE-00633 — Render tests: 12 first-person poses across the house
+- [x] HOUSE-00633 — Render tests: 12 first-person poses across the house
       dep: HOUSE-00632 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-09) twelve `fp-*` references at 640x360 -- two below ground, six on the
+            ground floor, two above, one in the attic and one nose-in-a-corner -- plus the thing
+            they needed: `--scene=walk`, which puts §49's capsule in §12's house and draws through
+            §44's camera. `docs/screenshot-scenes.md` gains the `fp` family.
+      note: **these are frames of the GAME and `HOUSE-00483`'s twenty are frames of the MODEL.**
+            Those are a camera at six numbers off a plan, a 55° lens and a 0.5 m near plane, free
+            to float inside a wall. `--player=x,y,z,yaw,pitch` puts the FEET somewhere a body can
+            stand, lets §49.3 settle it onto whatever is under it, and looks from 1.68 m over the
+            soles through a 70° lens. A ceiling 20 mm too low is invisible from outside and
+            obvious from under it, and an eye that has to stand on the treads cannot take a
+            picture of a flight with no head-room at all.
+      note: the wiring is real and the game is now WALKABLE: §16's world and §49.2's collision
+            load, §49.3's fixed step runs from the frame time through `player::FixedSteps`, mouse
+            look drives §44's pitch, `F2` shows `HOUSE-00631`'s overlay with a live snapshot, and
+            §68's walk-mode toggle writes back to `Settings` (D-09). `SetInputSourceForTesting` is
+            the one seam that makes it testable without a window -- `HOUSE-00140`'s interface was
+            already the boundary, so a scripted `InputState` walks the body.
+      finding: **`noscreen` deliberately unsets `LIBGL_ALWAYS_SOFTWARE`, so `LIBGL_ALWAYS_SOFTWARE=1
+            noscreen ...` compares nothing.** `RenderHarness::RenderingInSoftware()` then asks the
+            adapter, gets this machine's GPU, and takes the branch that captures a frame and skips
+            the comparison -- so three injected camera bugs came back MISSED from a suite that had
+            never compared a pixel. The references were also GENERATED that way and are therefore
+            GPU frames. Regenerated properly through a wrapper that keeps the variable (which is
+            what `render-tests` does), they came out **pixel-identical** to the GPU ones -- flat
+            blockout geometry rasterises the same either way -- and the injections are caught.
+      finding: **capturing frame 30 makes a reference disagree with itself.** The corner line
+            carries the frame time, and frame 30's is however long this machine took: 22.43 ms on
+            one run and 24.99 on the next. Frame 1's is `FrameTimer`'s clamped default and is the
+            same everywhere, which is why every scene in `docs/screenshot-scenes.md` is captured
+            there. The cost is that these frames are drawn from the pose `LoadWalk` settled rather
+            than one `UpdateWalk` produced, so the frame LOOP is asserted where a loop belongs:
+            `HeadlessRunTests` walks 400 frames and measures §43.2's speed against §49.3's clock.
+      finding: **the corner pose was chosen to make §10.3's near plane matter, and measured not
+            to.** Rendering it with the near plane at 0.5 m changes TWO PIXELS; it takes 5.0 m to
+            change half the frame. The eye rides on the capsule's axis, so the nearest thing a
+            standing body can put in front of it is 0.30 m away and 1.68 m up -- the same geometry
+            that made `HOUSE-00632`'s pull-back never fire in 96 553 frames. The pose is kept and
+            the measurement written down, because the next person to see a near-plane injection
+            come back MISSED should not have to repeat it.
+      note: `fp-l0-front-door` is a quarter clear colour and `fp-l0-foyer-stair` an eighth. The
+            first is §12's front doorway with nothing behind it -- the leaf is phase 15's and the
+            drive beyond it phase 10's -- and the second is `HOUSE-00620`'s recorded 1.30 m hole in
+            the DRAWN front elevation, which `build_collision.py` was fixed for and
+            `house_shell_gen.py` has not been. Both are accepted deliberately and both will change
+            the reference when they are filled, which is the reference doing its job.
+      verified: 12 poses compared under llvmpipe at a 0.2 % tolerance, each also asserted to cover
+            its own share of the frame; 4 `HeadlessRunTests` (the body standing where it was put
+            with §44's eye over it, 400 frames of walking at 1.33 m/s measured against §49.3's
+            clock, the cell tracking following it through two doorways into the kitchen, and a
+            place that is in no cell falling back to the fixed camera); 6 `FixedStepTests` for
+            §49.3's accumulator. Eleven injected bugs, eleven caught -- the eye at the body's
+            centre, the blockout's 55° lens, the yaw, the settle, the fixed step given the frame
+            time, the untracked cell, the dropped remainder, the missing cap, and three of the
+            view assembly's terms -- once each harness was pointed at the right binary.
 - [ ] HOUSE-00634 — Phase-8 review and commit
       dep: HOUSE-00621…HOUSE-00633 · sys: — · plat: ALL · pri: MUST
 

@@ -65,6 +65,15 @@ namespace cnahouse::app
         /// of. Here rather than in a scene's own code so that a bug report can carry the view it
         /// was taken from, and so that `HOUSE-00483`'s twenty poses need no twenty scenes.
         std::optional<std::array<float, 6>> camera;
+
+        /// @brief `--player=x,y,z,yawDeg,pitchDeg`: stand a body with its FEET there and look
+        ///        through its eyes (`HOUSE-00633`).
+        ///
+        /// The feet and not the eye, because that is what a pose in this house IS: §43.1 puts the
+        /// eye 1.68 m over the soles and §49.3 settles the body onto whatever it is standing on,
+        /// so a first-person frame is reproducible from a floor position and a heading rather than
+        /// from six numbers somebody measured off a plan. Degrees, and §14's yaw: 0 looks north.
+        std::optional<std::array<float, 5>> player;
         std::optional<std::uint64_t> seed;
         /// @brief Time of day to start at, in hours since midnight.
         std::optional<float> timeOfDay;

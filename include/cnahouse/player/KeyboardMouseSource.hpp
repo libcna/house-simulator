@@ -108,6 +108,7 @@ namespace cnahouse::player
             Cancel,
             Menu,
             ToggleOverlay,
+            ToggleWorldOverlay,
             Screenshot,
             Count,
         };

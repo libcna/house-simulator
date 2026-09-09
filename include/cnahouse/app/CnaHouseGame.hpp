@@ -20,8 +20,15 @@
 #include "cnahouse/debug/FreeFlyCamera.hpp"
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
+#include "cnahouse/debug/WorldOverlay.hpp"
+#include "cnahouse/physics/BroadPhase.hpp"
+#include "cnahouse/physics/CollisionData.hpp"
+#include "cnahouse/player/CellTracker.hpp"
+#include "cnahouse/player/FirstPersonView.hpp"
+#include "cnahouse/player/FixedStep.hpp"
 #include "cnahouse/player/KeyboardMouseSource.hpp"
 #include "cnahouse/player/MouseCapture.hpp"
+#include "cnahouse/player/MouseLook.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/Quality.hpp"
 #include "cnahouse/rendering/RenderTier.hpp"
@@ -32,6 +39,8 @@
 #include "cnahouse/ui/TextRenderer.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkData.hpp"
+#include "cnahouse/world/SpatialIndex.hpp"
+#include "cnahouse/world/WorldData.hpp"
 
 namespace cnahouse::app
 {
@@ -69,6 +78,45 @@ namespace cnahouse::app
         void SetFrameLimit(std::uint64_t frames) noexcept
         {
             frameLimit_ = frames;
+        }
+
+        /// @brief Drives the game from a scripted input source instead of the devices.
+        ///
+        /// The one seam the player wiring needs to be testable without a window: everything after
+        /// `IInputSource` is expressed in game terms (`HOUSE-00140`), so a test that can supply one
+        /// can walk the body through the house and assert where it ended up. Null restores the
+        /// keyboard and mouse. The pointer is not owned; it must outlive the `Run()` that uses it.
+        void SetInputSourceForTesting(player::IInputSource* source) noexcept
+        {
+            scriptedInput_ = source;
+        }
+
+        /// @brief Where the body is standing, for `HOUSE-00633`'s integration test.
+        ///
+        /// Readable after `Run()` because the alternative is asserting on the log line, and a walk
+        /// that ended somewhere unexpected is a fact about the SIMULATION rather than about what
+        /// it printed.
+        [[nodiscard]] const player::PlayerState& PlayerForTesting() const noexcept
+        {
+            return player_;
+        }
+
+        /// @brief §49.3's fixed steps run so far. The simulated clock, in 1/120 s units.
+        [[nodiscard]] std::uint64_t FixedStepsForTesting() const noexcept
+        {
+            return fixedSteps_;
+        }
+
+        /// @brief §44's camera, after the last frame. Also `HOUSE-00633`'s.
+        [[nodiscard]] const player::FirstPersonView& ViewForTesting() const noexcept
+        {
+            return view_;
+        }
+
+        /// @brief The cell the body was last found in, or an invalid id if it is not walking.
+        [[nodiscard]] util::Id CellForTesting() const noexcept
+        {
+            return tracker_.Current();
         }
 
         /// @brief The version line drawn in the corner and printed at startup.
@@ -257,6 +305,16 @@ namespace cnahouse::app
         /// @brief `--scene=blockout-normals`: the same house with the culling reversed, so that
         ///        every pixel drawn is a face that should not have been visible (`HOUSE-00478`).
         static constexpr const char* kBackFaceScene = "blockout-normals";
+        /// @brief `--scene=walk`: the same shell with a BODY in it, seen through its eyes
+        ///        (`HOUSE-00633`).
+        ///
+        /// The difference from `blockout` is not the geometry, it is who is looking: §49's capsule
+        /// stands on the floor, §44's camera sits 1.68 m over its soles behind a 70° lens, and the
+        /// keys walk it. That is what makes a frame from here a picture of the GAME rather than a
+        /// picture of the model -- an eye at head height cannot float through a wall to get a
+        /// better angle, and a ceiling 20 mm too low is obvious from under it and invisible from
+        /// outside.
+        static constexpr const char* kWalkScene = "walk";
 
         /// @brief Reads `chunks.bin`, makes every cell resident, installs `Pass::OpaqueStatic`.
         ///
@@ -264,6 +322,22 @@ namespace cnahouse::app
         /// load should say so and still draw a frame, because the frame is how anyone would see
         /// that it had not.
         void LoadBlockout();
+
+        /// @brief Loads §16's world and §49.2's collision and stands a body in it.
+        ///
+        /// After `LoadBlockout`, because the walk scene is the blockout with somebody in it. A
+        /// failure here leaves `walking_` false and the scene draws from the fixed camera, which
+        /// is the same rule the blockout follows: say so, and still draw a frame.
+        void LoadWalk();
+
+        /// @brief §49.3's fixed steps for one frame, then §44's view over them.
+        void UpdateWalk(float deltaSeconds);
+
+        /// @brief Copies §44's camera into the renderer's, which is what the pass draws through.
+        void ApplyPlayerCamera();
+
+        /// @brief What §69's `F2` shows about this frame.
+        [[nodiscard]] debug::WorldSnapshot WalkSnapshot() const;
 
         class Hud;
         std::unique_ptr<Hud> hud_;
@@ -286,6 +360,30 @@ namespace cnahouse::app
         std::unique_ptr<world::CellRuntime> blockoutCells_;
         rendering::Camera blockoutCamera_;
         debug::FreeFlyCamera freeFly_;
+
+        /// §16's world and §49.2's collision, loaded only by `--scene=walk`. Held as options
+        /// because both are large and neither has a meaningful empty state.
+        std::optional<world::WorldData> world_;
+        std::optional<world::SpatialIndex> index_;
+        std::optional<physics::CollisionWorld> collision_;
+        physics::BroadPhase broad_;
+        player::PlayerState player_;
+        player::LookAngles look_;
+        player::FirstPersonView view_;
+        player::CellTracker tracker_;
+        debug::WorldOverlay worldOverlay_;
+        /// §49.3's leftover time: the fixed step is 1/120 s and a frame is not.
+        float stepAccumulator_ = 0.0F;
+        bool walking_ = false;
+        std::uint64_t fixedSteps_ = 0;
+        /// @brief Set by `SetInputSourceForTesting`; null means the keyboard and mouse.
+        player::IInputSource* scriptedInput_ = nullptr;
+
+        /// @brief Whichever source is driving this session.
+        [[nodiscard]] player::IInputSource& Input() noexcept
+        {
+            return scriptedInput_ != nullptr ? *scriptedInput_ : static_cast<player::IInputSource&>(input_);
+        }
 
         std::uint64_t framesDrawn_ = 0;
         std::uint64_t frameLimit_ = 0;

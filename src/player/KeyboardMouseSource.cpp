@@ -108,6 +108,7 @@ namespace cnahouse::player
         state_.cancelPressed = edge(Edge::Cancel, Keys::Escape);
         state_.menuPressed = edge(Edge::Menu, Keys::Tab);
         state_.toggleOverlayPressed = edge(Edge::ToggleOverlay, Keys::F1);
+        state_.toggleWorldOverlayPressed = edge(Edge::ToggleWorldOverlay, Keys::F2);
         state_.screenshotPressed = edge(Edge::Screenshot, Keys::F12);
 
         // ANY input, as one edge. `GetPressedKeys()` is plain XNA 4.0 -- the CNAEXT markings on

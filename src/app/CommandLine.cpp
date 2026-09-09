@@ -148,6 +148,8 @@ namespace cnahouse::app
                "  --headless                  Run with no window (requires a HEADLESS build)\n"
                "  --scene=<name>              Start in a named test scene instead of the house\n"
                "  --camera=<ex,ey,ez,tx,ty,tz>  Where a fixed-camera scene looks from and at\n"
+               "  --player=<x,y,z,yaw,pitch>  Stand a body here (feet, metres; degrees) and look\n"
+               "                              through its eyes\n"
                "  --screenshot-frame=<n>      Capture the nth drawn frame (default 1)\n"
                "  --seed=<n>                  Session seed; the same seed reproduces a session exactly\n"
                "  --time=<hours>              Time of day to start at, 0..24\n"
@@ -285,6 +287,58 @@ namespace cnahouse::app
                                "--camera");
                 }
                 options.camera = pose;
+            }
+            else if (argument.name == "--player")
+            {
+                auto value = requireValue("--player");
+                if (!value)
+                {
+                    return value.Error();
+                }
+                std::array<float, 5> stand{};
+                std::size_t index = 0;
+                std::size_t start = 0;
+                const std::string text(*value);
+                while (index < stand.size())
+                {
+                    const std::size_t comma = text.find(',', start);
+                    const std::string field =
+                        text.substr(start, comma == std::string::npos ? comma : comma - start);
+                    try
+                    {
+                        std::size_t used = 0;
+                        stand[index] = std::stof(field, &used);
+                        if (used != field.size() || field.empty())
+                        {
+                            throw std::invalid_argument("trailing");
+                        }
+                    }
+                    catch (const std::exception&)
+                    {
+                        // Named and refused rather than defaulted, for the same reason `--camera`
+                        // refuses: a body silently at the origin is standing in the middle of the
+                        // road, and the frame it draws looks like a bug in the world data.
+                        return Err(
+                            ErrorCode::InvalidArgument,
+                            std::format("--player field {} is '{}', which is not a number", index + 1, field),
+                            "--player");
+                    }
+                    ++index;
+                    if (comma == std::string::npos)
+                    {
+                        break;
+                    }
+                    start = comma + 1;
+                }
+                if (index != stand.size())
+                {
+                    return Err(ErrorCode::InvalidArgument,
+                               std::format("--player needs five comma-separated numbers "
+                                           "(feet x,y,z then yaw and pitch in degrees); got {}",
+                                           index),
+                               "--player");
+                }
+                options.player = stand;
             }
             else if (argument.name == "--seed")
             {

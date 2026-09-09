@@ -30,6 +30,7 @@ rather than letting a later scene inherit it.
 | `ext` | Exterior: road, drive, garden, terrace, neighbourhood at 3 LOD distances | `ext-drive-lod1-05` |
 | `ui` | Prompt, held item, sun clock, menus | `ui-prompt-door-01` |
 | `content` | The content pipeline itself: one of each asset type, loaded and shown | `content-smoke-01` |
+| `fp` | First-person: twelve places a body can stand, seen through §44's camera at head height | `fp-l0-hall`, `fp-l3-room` |
 
 A qualifier is only added where it distinguishes scenes within a family, and it always reads
 left-to-right from coarse to fine: family, place, state, ordinal.
@@ -46,6 +47,25 @@ A failing comparison writes three artefacts, named so they sort together:
 ```
 <id>.reference.png   <id>.actual.png   <id>.diff.png
 ```
+
+## The `fp` family is named for its PLACE, not numbered
+
+`HOUSE-00633`'s twelve first-person frames are `fp-<level>-<room>` rather than `fp-NN`, the same
+way `HOUSE-00483`'s blockout poses are: what makes one of them reproducible is
+`--scene=walk --player=x,y,z,yaw,pitch`, which is written down in the test beside its name, and a
+place reads better in a failure than an ordinal does. The ordinal rule above still governs every
+family whose members are *states* of one place rather than different places.
+
+**These are frames of the game and not of the model.** `--player` puts §49's capsule on the floor
+with its feet at the given point, lets §49.3 settle it onto whatever it is standing on, and looks
+through §44's camera — the eye 1.68 m over the soles, a 70° lens, §10.3's 0.10 m near plane. A
+`--camera` pose can float through a wall to get a better angle; this one cannot, which is the
+point: a ceiling 20 mm too low is invisible from outside and obvious from under it.
+
+They are captured on the **first drawn frame**, like every other scene here, because the corner
+line carries the frame time and only frame 1's is a fixed number on every machine. What the frame
+loop does after that is asserted by `HeadlessRunTests`, which walks 400 frames and checks where the
+body and the eye ended up.
 
 ## Referring to a scene
 
