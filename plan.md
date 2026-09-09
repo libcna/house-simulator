@@ -9115,8 +9115,51 @@ it must be tuned, not just implemented.
             centre, the blockout's 55° lens, the yaw, the settle, the fixed step given the frame
             time, the untracked cell, the dropped remainder, the missing cap, and three of the
             view assembly's terms -- once each harness was pointed at the right binary.
-- [ ] HOUSE-00634 — Phase-8 review and commit
+- [x] HOUSE-00634 — Phase-8 review and commit
       dep: HOUSE-00621…HOUSE-00633 · sys: — · plat: ALL · pri: MUST
+      note: (2026-09-09) **the goal, and how much of it is claimed.** *"The camera the player will
+            spend the whole game inside. It must feel right, which means it must be tuned, not
+            just implemented."* Every one of §44's clauses is implemented and measured -- the eye
+            and its spring, mouse look and its band, the ±85° pitch with roll zero by construction,
+            the 55-95° field of view and what a window shape does to it, the head bob on §62.4's
+            cadence, the near-surface pull-back, the landing dip, §25's frustum, §69's `F2`, and
+            twelve first-person frames of the house. What is NOT claimed is the word "feel": no
+            person has walked this house with their hands on the keys, and `HOUSE-00632` says at
+            length what was measured instead of it. The phase is complete; the tuning is measured
+            rather than felt, and that is written down rather than papered over.
+      note: **the numbers, in one place.** Eye lag behind the body 0.096 m on the eight flights,
+            0.068 m walking the rooms, 0.149 m worst anywhere (a terrace bank at the fast walk) --
+            all inside one 0.22 m step-up. §48.2's sawtooth reaching the eye: 0.4 mm on the
+            flights and 2.0 mm over a tour of all 96 cells, against feet that skip 29 mm between
+            contacts on a ramp. Head bob 0.0120 m at the walk, never over §44's amplitude for the
+            speed. Step assist 0.2218 m up and 0.4500 m down, its own two limits. Landing dip
+            19.3 mm. Field of view 70° vertical, 102.4° horizontal at 16:9, framing all 64 door
+            leaves from inside the rooms they open into with 1.70 m to spare at the tightest.
+      finding: **three of the phase's findings were about the MEASUREMENT and not the code**, and
+            they are the ones worth carrying forward. (1) A spring chasing the eye's height ABOVE
+            THE FEET does nothing at all, and every unit test of `EyeSpring` in isolation still
+            passes -- the assembly is where that shows. (2) `noscreen` unsets
+            `LIBGL_ALWAYS_SOFTWARE` by design, so a render suite invoked through it compares no
+            pixels and reports success; three injected camera bugs came back MISSED from it.
+            (3) A reference captured on frame 30 disagrees with itself between runs, because the
+            corner line carries the frame time.
+      note: **what phase 8 closed that phase 7 had left open.** `HOUSE-00620` recorded §71's `F9`
+            as unwired because *"`DebugDraw::Begin` needs a view and a projection and the loop has
+            neither a camera nor a loaded `CollisionWorld` until phase 8"*. `--scene=walk` has
+            both, so `F9` is now on `F9`: it builds the cell the body is in, draws it through
+            `DebugDraw` after the passes, and puts its four lines in the opposite corner from
+            `F1` and `F2` so two overlays at once are readable. Rendered and looked at, not just
+            asserted -- the white shape wireframe, the yellow capsule and the ground probe are all
+            in the frame.
+      note: **what is left, recorded rather than quietly dropped.** (1) `house_shell_gen.py` still
+            has phase 7's `open_cell` line, so the DRAWN front elevation keeps the 1.30 m hole the
+            collision no longer has -- and `fp-l0-foyer-stair` is now a committed picture of it.
+            (2) The twelve nudgeable props of `HOUSE-00565` still have no `layout.props.json`.
+            (3) §44's *"exposure adaptation"* clause is §25.7's and belongs to the lighting phase.
+            (4) `fp-l0-front-door` looks through a doorway with no leaf (phase 15) at a drive that
+            is not drawn yet (phase 10); both will change that reference when they land.
+      verified: 928 non-render tests and 28 render tests green; `tools/ci/run_checks.sh` all gates
+            green. The phase added 91 tests over 13 files and 11 commits.
 
 ---
 

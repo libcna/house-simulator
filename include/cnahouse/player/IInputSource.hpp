@@ -63,6 +63,8 @@ namespace cnahouse::player
         bool toggleOverlayPressed = false;
         /// @brief §69's `F2`: the world overlay -- cell, position, yaw/pitch, surface, target.
         bool toggleWorldOverlayPressed = false;
+        /// @brief §69's `F9`: the physics overlay -- collision shapes, the capsule, the probe.
+        bool togglePhysicsOverlayPressed = false;
         bool screenshotPressed = false;
     };
 

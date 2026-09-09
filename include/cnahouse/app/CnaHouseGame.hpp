@@ -17,8 +17,10 @@
 #include "cnahouse/audio/AudioSystem.hpp"
 #include "cnahouse/content/SmokeScene.hpp"
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/debug/DebugDraw.hpp"
 #include "cnahouse/debug/FreeFlyCamera.hpp"
 #include "cnahouse/debug/Overlay.hpp"
+#include "cnahouse/debug/PhysicsOverlay.hpp"
 #include "cnahouse/debug/Timing.hpp"
 #include "cnahouse/debug/WorldOverlay.hpp"
 #include "cnahouse/physics/BroadPhase.hpp"
@@ -99,6 +101,12 @@ namespace cnahouse::app
         [[nodiscard]] const player::PlayerState& PlayerForTesting() const noexcept
         {
             return player_;
+        }
+
+        /// @brief §71's `F9`, for the test that presses the key.
+        [[nodiscard]] const debug::PhysicsOverlay& PhysicsOverlayForTesting() const noexcept
+        {
+            return physicsOverlay_;
         }
 
         /// @brief §49.3's fixed steps run so far. The simulated clock, in 1/120 s units.
@@ -336,6 +344,9 @@ namespace cnahouse::app
         /// @brief Copies §44's camera into the renderer's, which is what the pass draws through.
         void ApplyPlayerCamera();
 
+        /// @brief Builds and draws §71's `F9` through `debugDraw_`. Does nothing when hidden.
+        void DrawPhysicsOverlay();
+
         /// @brief What §69's `F2` shows about this frame.
         [[nodiscard]] debug::WorldSnapshot WalkSnapshot() const;
 
@@ -372,6 +383,11 @@ namespace cnahouse::app
         player::FirstPersonView view_;
         player::CellTracker tracker_;
         debug::WorldOverlay worldOverlay_;
+        /// §71's `F9`, and the line renderer it draws through. Both exist only in the walk scene:
+        /// `DebugDraw` needs a device, and the overlay needs a `CollisionWorld` and a camera --
+        /// which is exactly what `HOUSE-00620` recorded as the reason `F9` was not wired yet.
+        debug::PhysicsOverlay physicsOverlay_;
+        std::unique_ptr<debug::DebugDraw> debugDraw_;
         /// §49.3's leftover time: the fixed step is 1/120 s and a frame is not.
         float stepAccumulator_ = 0.0F;
         bool walking_ = false;

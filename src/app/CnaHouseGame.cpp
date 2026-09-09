@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: MIT
+#include <array>
+
 #include "cnahouse/app/CnaHouseGame.hpp"
 
 #include "System/IO/FileAccess.hpp"
@@ -407,6 +409,9 @@ namespace cnahouse::app
             return;
         }
 
+        // §71's `F9` draws through this, and it needs a device -- which is why it is built here
+        // and not with the other members.
+        debugDraw_ = std::make_unique<debug::DebugDraw>(getGraphicsDeviceProperty());
         view_.Camera().SetFieldOfView(settings_.fieldOfView);
         view_.Camera().SetViewport(settings_.backBufferWidth, settings_.backBufferHeight);
         view_.Bob().SetLevel(settings_.headBob);
@@ -844,6 +849,12 @@ namespace cnahouse::app
                 worldOverlay_.Toggle();
                 Log::Info(LogCat::Debug, "world overlay {}", worldOverlay_.Visible() ? "shown" : "hidden");
             }
+            if (Input().Current().togglePhysicsOverlayPressed)
+            {
+                physicsOverlay_.Toggle();
+                Log::Info(
+                    LogCat::Debug, "physics overlay {}", physicsOverlay_.Visible() ? "shown" : "hidden");
+            }
 #endif
 
             if (Input().Current().cancelPressed)
@@ -989,6 +1000,33 @@ namespace cnahouse::app
         getGraphicsDeviceProperty().Clear(ClearColour());
         rendering::PassContext context{getGraphicsDeviceProperty(), *states_, counters_, smoothedDelta_};
         renderer_.Draw(context);
+        // AFTER the passes and before the HUD: §71's `F9` annotates the world it is drawn over,
+        // and a wireframe under the geometry is a wireframe nobody can see.
+        DrawPhysicsOverlay();
+    }
+
+    void CnaHouseGame::DrawPhysicsOverlay()
+    {
+#if CNAHOUSE_DEBUG_TOOLS
+        if (!walking_ || !physicsOverlay_.Visible() || debugDraw_ == nullptr || !collision_.has_value())
+        {
+            return;
+        }
+        const physics::CollisionCell* cell = collision_->Cell(util::IdRegistry::NameOf(tracker_.Current()));
+        debug::PhysicsOverlayBody body;
+        body.capsule = player_.Body();
+        body.velocity = player_.velocity;
+        body.dt = player::kFixedStepSeconds;
+        body.cell = cell;
+        // §71 says *"in the visible cells"*, and phase 9's visible set does not exist yet: the one
+        // the body is in is what there is, and it is also the one §49.3 collides against.
+        const std::array<const physics::CollisionCell*, 1> cells{cell};
+        physicsOverlay_.Build(*collision_, std::span(cells.data(), cell == nullptr ? 0U : 1U), broad_, body);
+
+        debugDraw_->Begin(view_.Camera().View(), view_.Camera().Projection());
+        physicsOverlay_.Draw(*debugDraw_);
+        debugDraw_->Flush();
+#endif
     }
 
     void CnaHouseGame::DrawHud()
@@ -1028,6 +1066,25 @@ namespace cnahouse::app
         {
             worldOverlay_.Draw(hud_->batch, text_, WalkSnapshot());
         }
+#if CNAHOUSE_DEBUG_TOOLS
+        if (walking_ && physicsOverlay_.Visible())
+        {
+            // Bottom-left, because §71's `F1`, `F2` and `F9` all start at the same top corner and
+            // two of them at once would be one unreadable pile. `F9`'s text is four lines about
+            // the body; the rest of it is the wireframe.
+            const std::vector<std::string> lines = physicsOverlay_.Lines();
+            constexpr float kLineHeight = 18.0f;
+            for (std::size_t i = 0; i < lines.size(); ++i)
+            {
+                const float y = 880.0f - static_cast<float>(lines.size() - 1 - i) * kLineHeight;
+                text_.DrawShadowed(hud_->batch,
+                                   lines[i],
+                                   Microsoft::Xna::Framework::Vector2(12.0f, y),
+                                   ui::Anchor::BottomLeft,
+                                   Microsoft::Xna::Framework::Color::White);
+            }
+        }
+#endif
 #endif
         hud_->batch.End();
     }

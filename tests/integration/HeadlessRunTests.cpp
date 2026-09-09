@@ -45,6 +45,76 @@ namespace
         EXPECT_EQ(game.ExitCode(), 0) << "and it must stop cleanly, not by throwing";
     }
 
+    /// Presses one key on the first frame and holds nothing afterwards, which is what an EDGE is.
+    class OneKeyPress final : public cnahouse::player::IInputSource
+    {
+    public:
+        explicit OneKeyPress(bool cnahouse::player::InputState::* edge)
+            : edge_(edge)
+        {
+        }
+
+        void Update(float) override
+        {
+            // True on the FIRST update and never again, which is what an edge is -- and it has to
+            // be set inside `Update` rather than in the constructor, because the game samples the
+            // source at the top of the frame and would clear a press made before it.
+            state_.*edge_ = !fired_;
+            fired_ = true;
+        }
+
+        [[nodiscard]] const cnahouse::player::InputState& Current() const noexcept override
+        {
+            return state_;
+        }
+
+        [[nodiscard]] bool LookAvailable() const noexcept override
+        {
+            return false;
+        }
+
+    private:
+        cnahouse::player::InputState state_;
+        bool cnahouse::player::InputState::* edge_;
+        bool fired_ = false;
+    };
+
+    TEST(HeadlessRunTests, PressingF9BuildsTheWireframeForTheCellTheBodyIsIn)
+    {
+        // `HOUSE-00620` recorded §71's `F9` as unwired because *"`DebugDraw::Begin` needs a view
+        // and a projection and the loop has neither a camera nor a loaded `CollisionWorld` until
+        // phase 8"*. `--scene=walk` has both, so this is the phase-8 review closing it: the key
+        // reaches the overlay and the overlay builds the cell it is standing in.
+        cnahouse::util::Log::ResetForTesting();
+
+        OneKeyPress input(&cnahouse::player::InputState::togglePhysicsOverlayPressed);
+
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        options.player = std::array<float, 5>{-3.00f, 0.60f, -25.05f, 90.0f, 0.0f};
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(30);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+
+        const auto& overlay = game.PhysicsOverlayForTesting();
+        EXPECT_TRUE(overlay.Visible()) << "one press of F9 did not show the overlay";
+        EXPECT_GT(overlay.Segments().size(), 100U)
+            << "the overlay is visible and drew nothing: §12's kitchen has walls";
+        EXPECT_EQ(overlay.Dropped(), 0U) << "the cell needed more segments than the overlay's cap";
+        // §49.3's capsule is in there: the overlay draws the body it annotates.
+        EXPECT_GT(overlay.Lines().size(), 2U);
+    }
+
     TEST(HeadlessRunTests, TheWalkSceneStandsABodyInTheHouseAndLooksThroughItsEyes)
     {
         // `HOUSE-00633`'s wiring, end to end and with no window: §16's world and §49.2's collision
