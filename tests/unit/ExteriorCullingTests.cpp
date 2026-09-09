@@ -269,8 +269,13 @@ TEST(ExteriorCullingTests, SeveralConesAreAUnionAndNothingIsDrawnTwice)
 
     culler.Cull(bvh, north, eye);
     const std::set<std::uint32_t> seenNorth = AsSet(culler.Instances());
+    const int testedNorth = culler.Statistics().instancesTested;
     culler.Cull(bvh, east, eye);
     const std::set<std::uint32_t> seenEast = AsSet(culler.Instances());
+    const int testedEast = culler.Statistics().instancesTested;
+    const std::array<ClipFrustum, 1> middle{ConeAt(eye, 45.0F)};
+    culler.Cull(bvh, middle, eye);
+    const int testedMiddle = culler.Statistics().instancesTested;
     culler.Cull(bvh, all, eye);
     const std::set<std::uint32_t> seenAll = AsSet(culler.Instances());
 
@@ -285,10 +290,23 @@ TEST(ExteriorCullingTests, SeveralConesAreAUnionAndNothingIsDrawnTwice)
     EXPECT_EQ(culler.Instances().size(), seenAll.size()) << "an instance was listed twice";
     EXPECT_TRUE(std::is_sorted(culler.Instances().begin(), culler.Instances().end()));
     EXPECT_EQ(culler.Statistics().instancesDrawn, static_cast<int>(seenAll.size()));
-    // Three cones cost more work than one, which is the honest reading of `instancesTested`.
-    std::printf("  one cone versus three: %zu drawn, %d instance test(s)\n",
+    // And three cones cost far LESS than three walks, which is what `HOUSE-00699` bought: the
+    // hierarchy is walked once carrying all three, so an instance in the overlap -- 0° and 45°
+    // share most of their field -- is reached once and tested until the first cone that can see
+    // it, instead of once per cone. The bound is what makes this a test rather than a printf: it
+    // is not that the union is cheaper on this plot, it is that no instance is visited twice.
+    const int testedAll = culler.Statistics().instancesTested;
+    std::printf("  one cone versus three: %zu drawn, %d instance test(s) against %d + %d + %d for "
+                "the three walks separately\n",
                 seenAll.size(),
-                culler.Statistics().instancesTested);
+                testedAll,
+                testedNorth,
+                testedMiddle,
+                testedEast);
+    EXPECT_LT(testedAll, testedNorth + testedMiddle + testedEast)
+        << "three cones cost three walks, so the hierarchy is still being walked once per cone";
+    EXPECT_GE(testedAll, std::max({testedNorth, testedMiddle, testedEast}))
+        << "the union tested fewer instances than one of its own cones, which means it missed some";
 }
 
 TEST(ExteriorCullingTests, ANodeWhollyInsideAConeStopsTestingItsSubtree)

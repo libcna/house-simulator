@@ -377,10 +377,11 @@ namespace
         /// §25.7's cones into the outdoors, which is what §25.6's hierarchy is walked once per.
         int cones = 0;
         bool conesDegraded = false;
-        /// Instance-versus-cone tests. Larger than the instances drawn by however many cones
-        /// retested what an earlier one had already accepted -- the number that says whether the
-        /// cost is the garden or the number of windows onto it.
+        /// Instances examined, and the plane tests behind them -- the two numbers that say
+        /// whether the exterior cost is the garden or the number of windows onto it.
         int instancesTested = 0;
+        int exteriorNodes = 0;
+        int frustumTests = 0;
         float yawDegrees = 0.0F;
 
         [[nodiscard]] double StagesMs() const noexcept
@@ -479,6 +480,8 @@ namespace
         result.cones = static_cast<int>(cones.Cones().size());
         result.conesDegraded = cones.Degraded();
         result.instancesTested = exterior.Statistics().instancesTested;
+        result.exteriorNodes = exterior.Statistics().nodesVisited;
+        result.frustumTests = exterior.Statistics().frustumTests;
         return result;
     }
 
@@ -574,12 +577,15 @@ TEST(VisibilityCostTests, TheNineFixedScenariosAgainstTheFrameBudget)
                     measured.StagesMs(),
                     100.0 * measured.StagesMs() / kTypicalMs,
                     measured.sortMs);
-        std::printf("[ visibility ]     %d portal crossing(s); %d cone(s) outdoors%s, %d instance test(s) "
-                    "for %d instance(s) drawn; worst block %.4f ms. The rest: %s\n",
+        std::printf("[ visibility ]     %d portal crossing(s); %d cone(s) outdoors%s, %d node(s) and %d "
+                    "instance test(s) under %d plane test(s) for %d instance(s) drawn; worst block "
+                    "%.4f ms. The rest: %s\n",
                     measured.traversals,
                     measured.cones,
                     measured.conesDegraded ? " (capped, standing the camera's own frustum in)" : "",
+                    measured.exteriorNodes,
                     measured.instancesTested,
+                    measured.frustumTests,
                     measured.instances,
                     measured.worstMs,
                     std::string(scenario.rest).c_str());

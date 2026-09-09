@@ -41,15 +41,23 @@ namespace cnahouse::visibility
         struct Stats
         {
             int nodesVisited = 0;
+            /// @brief Nodes NO live cone could see, and whose subtree therefore stopped there.
             int nodesCulledByFrustum = 0;
             int nodesCulledByDistance = 0;
             /// @brief Nodes found wholly inside a cone, whose subtree therefore skipped the
             ///        frustum test. The number that says whether that shortcut is worth its branch.
             int nodesFullyInside = 0;
-            /// @brief Instance tests done. Larger than `instancesDrawn + culled` when `EXT_WORLD`
-            ///        is reached through more than one opening: the second cone retests what the
-            ///        first already accepted, and this counts WORK.
+            /// @brief Instances examined -- once each, whatever how many cones reached them
+            ///        (`HOUSE-00699`).
+            ///
+            /// Until that task the hierarchy was walked once per cone and this counted every
+            /// retest: `L0_KITCHEN`, which reaches the outdoors through seven openings, tested
+            /// 5 639 instances to draw 513. One walk carrying all seven brings it to 1 601, and
+            /// the number now means what it says.
             int instancesTested = 0;
+            /// @brief Instances no live cone could see. An instance the FIRST cone accepts is
+            ///        never tested against the rest: they are alternative views of one garden and
+            ///        the answer cannot change.
             int instancesCulledByFrustum = 0;
             int instancesCulledByDistance = 0;
             /// @brief The unique instances in `Instances()`, whatever how many cones found them.
@@ -77,6 +85,11 @@ namespace cnahouse::visibility
         ///        instance in ANY of them is on screen. An EMPTY span means the exterior cell was
         ///        not reached at all and nothing is drawn: it is not the identity frustum, which is
         ///        what a `ClipFrustum` with no planes would be.
+        ///
+        ///        **They are walked together and not one after another** (`HOUSE-00699`): the
+        ///        hierarchy is descended ONCE carrying the set of cones still live in the subtree,
+        ///        so §25.6's distance test -- which has no cone in it -- is asked once per node
+        ///        and once per instance however many openings there are.
         /// @param viewDistanceScale §68's setting, clamped to its band exactly as
         ///        `CullDistanceFor` clamps it.
         void Cull(const ExteriorBvh& bvh,
@@ -101,12 +114,17 @@ namespace cnahouse::visibility
         std::vector<std::uint8_t> found_;
         Stats stats_;
 
+        /// @brief One node against every cone still live in this subtree (`HOUSE-00699`).
+        ///
+        /// @param live one bit per cone in @p cones that might still see this subtree.
+        /// @param inside one bit per cone that wholly contains it, and so tests nothing below.
         void Visit(const ExteriorBvh& bvh,
                    const BvhNode& node,
-                   const ClipFrustum& cone,
+                   std::span<const ClipFrustum> cones,
+                   std::uint32_t live,
+                   std::uint32_t inside,
                    const Microsoft::Xna::Framework::Vector3& eye,
-                   float scale,
-                   bool inside);
+                   float scale);
     };
 
     /// @brief §25.7's indoor to outdoor crossing, gathered (`HOUSE-00679`).

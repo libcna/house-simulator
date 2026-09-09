@@ -10406,6 +10406,39 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             subject.
       verified: `build/` untouched and green -- 996 unit, 92 integration, 30 render, 10 perf -- and
             all gates green.
+- [x] HOUSE-00699 — Optimise §25.6's exterior hierarchy against the measurement: walk it once for every cone, not once per cone
+      dep: HOUSE-00694 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) `HOUSE-00694` found 88-96 % of §25's cost in this walk and `HOUSE-00695`
+            found nothing to win in the portal one, so this is where the task list needed a line
+            it did not have. `ExteriorCuller::Cull` now descends the hierarchy ONCE carrying a bit
+            per cone -- the set still live in this subtree, and the set that wholly contains it --
+            instead of once per cone from the root.
+      finding: **§25.6's step 2 has no cone in it.** The distance from the eye to a node's box, and
+            from the eye to an instance's, is the same number whichever opening onto the garden the
+            view arrived through; a walk per cone asked it once per cone and got the same answer
+            every time. That is the whole of the saving, plus one more: an instance the first live
+            cone can see is never tested against the rest, because the cones are alternative views
+            of one garden and the answer cannot change.
+      measured: **`L0_KITCHEN`'s seven cones test 1 601 instances instead of 5 639** for the same
+            513 drawn, and the gym's six 1 537 instead of 5 382 -- 72 % less work for an answer the
+            brute-force comparison says is identical. In time, A/B/A against `HEAD` built and run
+            back to back: the kitchen's exterior column 0.132 ms before, **0.104 after**, 0.139
+            before again; the gym 0.124, **0.103**, 0.137; the blizzard 0.071, **0.057**, 0.076.
+            **About a quarter off the dominant column**, and unchanged on the single-cone poses,
+            which is exactly where the redundancy was not.
+      finding: **what is left is the plane tests, and there are not many left to remove.** The
+            kitchen now visits 41 nodes and does 4 255 cone-versus-box tests for 1 601 instances --
+            2.7 cones an instance, the pruning already doing most of the work -- and `Contains` is
+            CNA's own p/n-vertex test, which is the right algorithm. With §25 now at **9 % of
+            §71.2's typical and 9 % of its worst case**, further work here would be optimising a
+            number that is already an order of magnitude inside its budget.
+      verified: 28 `ExteriorCullingTests` and `ExteriorTraversalTests`, whose set-equality against
+            a brute-force scan over all 4 100 instances is what makes an optimisation provable
+            rather than plausible, plus a new bound: three overlapping cones must test FEWER
+            instances than three separate walks and no fewer than the busiest single cone (2 755
+            against 1 793 + 1 602 + 1 730). Three injections, all CAUGHT -- asking only the first
+            live cone about an instance, passing the live set down as the inside set, and
+            descending into a node no cone can see.
 
 ---
 

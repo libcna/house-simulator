@@ -105,9 +105,22 @@ namespace cnahouse::visibility
         // Clamped ONCE, and by the same function `CullDistanceFor` uses: a node rejected at an
         // unclamped scale would cull instances the per-instance test would have kept.
         const float scale = ClampViewDistanceScale(viewDistanceScale);
-        for (const ClipFrustum& cone : cones)
+        // ONE walk carrying every cone, and not one walk per cone (`HOUSE-00699`). §25.6's step 2
+        // -- the distance -- does not depend on the cone at all, so a walk per cone paid for the
+        // same square root once per opening onto the garden; measured, `L0_KITCHEN` reaches the
+        // outdoors through seven and was testing 5 639 instances to draw 513.
+        //
+        // Thirty-two at a time because the live set is a bit per cone. `ExteriorCones` collects at
+        // most `kMaxCones` = 8, so the loop runs once; it is a loop rather than a cap because a
+        // cap would silently cull whatever the thirty-third cone could see, and this walk is not
+        // allowed to be the thing that loses a tree.
+        constexpr std::size_t kConesPerPass = 32;
+        for (std::size_t base = 0; base < cones.size(); base += kConesPerPass)
         {
-            Visit(bvh, *root, cone, eye, scale, false);
+            const std::size_t count = std::min(kConesPerPass, cones.size() - base);
+            const std::uint32_t live =
+                count == kConesPerPass ? ~std::uint32_t{0} : (std::uint32_t{1} << count) - std::uint32_t{1};
+            Visit(bvh, *root, cones.subspan(base, count), live, 0u, eye, scale);
         }
 
         for (std::uint32_t i = 0; i < found_.size(); ++i)
@@ -122,13 +135,14 @@ namespace cnahouse::visibility
 
     void ExteriorCuller::Visit(const ExteriorBvh& bvh,
                                const BvhNode& node,
-                               const ClipFrustum& cone,
+                               std::span<const ClipFrustum> cones,
+                               std::uint32_t live,
+                               std::uint32_t inside,
                                const Xna::Vector3& eye,
-                               float scale,
-                               bool inside)
+                               float scale)
     {
         ++stats_.nodesVisited;
-        if (inside)
+        if (inside != 0u)
         {
             ++stats_.nodesSkippedFrustumTest;
         }
@@ -136,34 +150,57 @@ namespace cnahouse::visibility
         // §25.6's step 2 first, and against the node's OWN summary: the largest distance anything
         // under it is drawn at. Nothing inside can outlive that, so one comparison retires the
         // whole subtree -- which is the entire reason the mask and the distance are on the node.
+        //
+        // It is also the reason the cones share a walk: this test has no cone in it, so a walk per
+        // cone asked it once per cone and got the same answer every time.
         if (DistanceToBox(node.bounds, eye) > node.maxCullDistance * scale)
         {
             ++stats_.nodesCulledByDistance;
             return;
         }
 
-        if (!inside)
+        std::uint32_t stillLive = 0u;
+        std::uint32_t stillInside = 0u;
+        for (std::size_t i = 0; i < cones.size(); ++i)
         {
+            const std::uint32_t bit = std::uint32_t{1} << i;
+            if ((live & bit) == 0u)
+            {
+                continue;
+            }
+            if ((inside & bit) != 0u)
+            {
+                // A parent was wholly inside this cone, so this node is too: nothing to test.
+                stillLive |= bit;
+                stillInside |= bit;
+                continue;
+            }
             ++stats_.frustumTests;
-            const Xna::ContainmentType containment = cone.Contains(node.bounds);
+            const Xna::ContainmentType containment = cones[i].Contains(node.bounds);
             if (containment == Xna::ContainmentType::Disjoint)
             {
-                ++stats_.nodesCulledByFrustum;
-                return;
+                continue;
             }
+            stillLive |= bit;
             if (containment == Xna::ContainmentType::Contains)
             {
                 // Everything below is inside too, so the frustum test is done for this subtree.
-                inside = true;
+                stillInside |= bit;
                 ++stats_.nodesFullyInside;
             }
+        }
+
+        if (stillLive == 0u)
+        {
+            ++stats_.nodesCulledByFrustum;
+            return;
         }
 
         if (!node.IsLeaf())
         {
             for (std::uint8_t child = 0; child < node.childCount; ++child)
             {
-                Visit(bvh, bvh.Nodes()[node.firstChild + child], cone, eye, scale, inside);
+                Visit(bvh, bvh.Nodes()[node.firstChild + child], cones, stillLive, stillInside, eye, scale);
             }
             return;
         }
@@ -177,14 +214,29 @@ namespace cnahouse::visibility
                 ++stats_.instancesCulledByDistance;
                 continue;
             }
-            if (!inside)
+            if (stillInside != 0u)
             {
-                ++stats_.frustumTests;
-                if (cone.Contains(instance.bounds) == Xna::ContainmentType::Disjoint)
+                // Some cone holds this whole leaf, so it holds every instance in it.
+                found_[i] = 1u;
+                continue;
+            }
+            bool seen = false;
+            for (std::size_t cone = 0; cone < cones.size() && !seen; ++cone)
+            {
+                if ((stillLive & (std::uint32_t{1} << cone)) == 0u)
                 {
-                    ++stats_.instancesCulledByFrustum;
                     continue;
                 }
+                ++stats_.frustumTests;
+                // The FIRST cone that can see it is enough: the cones are alternative views of the
+                // same garden and an instance in any of them is on screen. Asking the rest would
+                // be work for an answer that cannot change.
+                seen = cones[cone].Contains(instance.bounds) != Xna::ContainmentType::Disjoint;
+            }
+            if (!seen)
+            {
+                ++stats_.instancesCulledByFrustum;
+                continue;
             }
             found_[i] = 1u;
         }
