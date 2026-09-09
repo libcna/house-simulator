@@ -9697,8 +9697,48 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             appending. Sixteen injected bugs, all caught -- two only after the suite was
             strengthened: one axis for every cut survived an area assertion, and a rebuild from
             nothing was never asked for.
-- [ ] HOUSE-00678 — Implement BVH frustum traversal with the per-category distance cutoffs
+- [x] HOUSE-00678 — Implement BVH frustum traversal with the per-category distance cutoffs
       dep: HOUSE-00677 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) `visibility::ExteriorCuller` walks `HOUSE-00677`'s hierarchy against
+            `EXT_WORLD`'s cones and leaves the visible instances in `Instances()`. §25.6's steps 1
+            and 2 are ONE walk: the node's `maxCullDistance` retires a subtree by distance before
+            its box is ever tested against a plane, which is what the summary on the node was for.
+      note: **the distance is to the instance's BOX and not to its centre.** A fence run is 400 m
+            long; measured from its centre it is 200 m from either end of the plot and culled at
+            §25.6's 120 m, with the player standing next to it. Distance to the box is also zero
+            when the eye is inside it, which is the right answer for a terrain tile.
+      note: a node found wholly inside a cone carries that DOWN: its subtree tests nothing else
+            against the cone, and `nodesSkippedFrustumTest` is what says the flag is being carried
+            rather than merely noticed -- an injection that passed `false` to the children left the
+            answer correct and every other counter unchanged.
+      note: an EMPTY cone span means `EXT_WORLD` was not reached and nothing is drawn. That is not
+            the same as a `ClipFrustum` with no planes, which contains everything and is the
+            identity the traversal starts from; both are asserted, because confusing them is how a
+            culled cell draws the whole garden.
+      measured: **40 poses over 4 100 instances: 62 015 instance tests against brute force's
+            164 000, and every one of the 40 answers identical to it.** That is the no-over-culling
+            claim (`HOUSE-00688`'s, in miniature) made against the structure rather than against
+            pixels: a hierarchy is a promise that a cheap answer equals an expensive one, and here
+            it is 38 % of the work for the same set. 1 200 small props with 500 of them 300 m away:
+            9 branches retired by distance, 507 instance tests.
+      finding: **the brute-force reference shares `DistanceToBox` with the walk, so an error in it
+            moves both answers together.** An injection replacing the Euclidean length with the sum
+            of the axes -- which over-culls everything off-axis -- passed all 40 poses. Caught by
+            testing the function itself diagonally: a unit cube and a point 3 m off one face and
+            4 m off another is 5 m away, not 7. Recorded because it is the general trap in
+            differential testing, and the next reference implementation will have the same one.
+      verified: 9 `ExteriorCullingTests` -- the 40-pose agreement with brute force, agreement again
+            at every §68 view-distance setting including outside its band, each of six categories
+            drawn at exactly its stated distance and not a metre further, several cones as a union
+            with no repeats and an ascending answer, the fully-inside shortcut being carried down,
+            the box-not-centre distance and its arithmetic diagonally, an unreached exterior
+            drawing nothing while a plane-less cone draws everything, an empty exterior, and a
+            subtree retired whole by its own summary at four view-distance settings. Fourteen
+            injected bugs, all caught -- three only after the suite was strengthened (the node
+            distance test dropping §68's scale, the inside flag not being carried down, and the
+            distance metric itself). A fifteenth -- removing the empty-cone short-circuit -- is
+            recorded as NOT a bug: the loop below it does nothing for an empty span either way, so
+            the guard saves an allocation and states an intent rather than changing an answer.
 - [ ] HOUSE-00679 — Implement the indoor→outdoor portal traversal into `EXT_WORLD` with the reduced frustum
       dep: HOUSE-00678, HOUSE-00668 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00680 — Implement the outdoor→indoor traversal at depth 1 through windows

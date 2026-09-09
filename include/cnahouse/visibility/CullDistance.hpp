@@ -46,6 +46,14 @@ namespace cnahouse::visibility
     /// altogether or push it past §10.3's 420 m far plane, where nothing is drawn anyway.
     [[nodiscard]] float CullDistanceFor(PropCategory category, float viewDistanceScale = 1.0F) noexcept;
 
+    /// @brief §68's 0.6x-1.4x band, applied to @p viewDistanceScale.
+    ///
+    /// Exposed because `HOUSE-00678`'s hierarchy rejects a whole subtree against the LARGEST
+    /// distance under it, and that multiplication has to be the same one `CullDistanceFor` does to
+    /// each instance. A node rejected at an unclamped scale would cull instances the per-instance
+    /// test would have kept, which is over-culling -- the one failure §25 has no tolerance for.
+    [[nodiscard]] float ClampViewDistanceScale(float viewDistanceScale) noexcept;
+
     /// @brief Is something of @p category at @p distance metres worth drawing?
     [[nodiscard]] bool
     WithinCullDistance(PropCategory category, float distance, float viewDistanceScale = 1.0F) noexcept;

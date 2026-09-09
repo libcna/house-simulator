@@ -40,6 +40,11 @@ namespace cnahouse::visibility
         return "?";
     }
 
+    float ClampViewDistanceScale(float viewDistanceScale) noexcept
+    {
+        return std::clamp(viewDistanceScale, kMinViewScale, kMaxViewScale);
+    }
+
     float CullDistanceFor(PropCategory category, float viewDistanceScale) noexcept
     {
         const auto index = static_cast<std::size_t>(category);
@@ -47,7 +52,7 @@ namespace cnahouse::visibility
         {
             return 0.0F;
         }
-        return kCullDistances[index] * std::clamp(viewDistanceScale, kMinViewScale, kMaxViewScale);
+        return kCullDistances[index] * ClampViewDistanceScale(viewDistanceScale);
     }
 
     bool WithinCullDistance(PropCategory category, float distance, float viewDistanceScale) noexcept

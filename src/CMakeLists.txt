@@ -70,6 +70,7 @@ add_library(cnahouse_core STATIC
     visibility/CullDistance.cpp
     visibility/DetailSets.cpp
     visibility/ExteriorBvh.cpp
+    visibility/ExteriorCulling.cpp
     visibility/ClipRect.cpp
     visibility/InstanceCulling.cpp
     visibility/PortalArea.cpp
