@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <span>
 
 #include "Microsoft/Xna/Framework/ContainmentType.hpp"
 #include "Microsoft/Xna/Framework/Plane.hpp"
@@ -63,6 +64,16 @@ namespace cnahouse::visibility
         [[nodiscard]] const Microsoft::Xna::Framework::Plane& operator[](std::size_t index) const
         {
             return planes_[index];
+        }
+
+        /// @brief The planes as they are stored, for a caller that needs a span of them.
+        ///
+        /// `ClipRectToFrustum` takes one, and until `HOUSE-00695` §25.2's walk built it by copying
+        /// this array element by element into a `std::vector` once per visible cell -- ten planes
+        /// copied to hand back a view of ten planes that were already contiguous.
+        [[nodiscard]] std::span<const Microsoft::Xna::Framework::Plane> Planes() const noexcept
+        {
+            return std::span(planes_.data(), count_);
         }
 
         /// @brief §25.4's per-cell and per-chunk test.

@@ -189,6 +189,16 @@ TEST(VisibilityOverlayTests, ADroppedConeOrCellIsSaidLoudly)
     // And a cone dropped at one cell is named on that cell's own row, not only in the header.
     snapshot.visible[1].conesDropped = 1;
     EXPECT_TRUE(Mentions(overlay.Lines(snapshot), "(+1 dropped)"));
+
+    // `queueDropped` is a different event with a nearly identical name and it is shown apart from
+    // both (`HOUSE-00695`): the cap above is §25.2's fifth cone into ONE room, which is by design;
+    // this is the work queue running out of room, after which a room may never have been reached
+    // at all. The overlay has to make them tellable apart, because the response differs.
+    snapshot.traversal.queueDropped = 4;
+    const std::vector<std::string> overflowed = overlay.Lines(snapshot);
+    EXPECT_TRUE(Mentions(overflowed, "QUEUE DROPPED 4"));
+    EXPECT_TRUE(Mentions(overflowed, "CELLS DROPPED 3")) << "and the other two are still there";
+    EXPECT_TRUE(Mentions(overflowed, "(2 dropped)"));
 }
 
 TEST(VisibilityOverlayTests, AWalkThatReachedNothingSaysSoRatherThanShowingNothing)

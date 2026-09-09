@@ -14,6 +14,7 @@
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/visibility/ClipFrustum.hpp"
 #include "cnahouse/visibility/ClipRect.hpp"
+#include "cnahouse/visibility/ConeQueue.hpp"
 #include "cnahouse/visibility/PortalArea.hpp"
 #include "cnahouse/visibility/PortalDepth.hpp"
 #include "cnahouse/visibility/PortalRuntime.hpp"
@@ -73,6 +74,21 @@ namespace cnahouse::visibility
     /// @brief One cell the walk decided the camera can see, and through which cones.
     /// @brief The allowance a chain starts with: no portal has constrained it yet.
     inline constexpr int kNoLimit = 1 << 20;
+
+    /// @brief §25.2's work queue, as a fixed-capacity ring (`HOUSE-00695`).
+    ///
+    /// **Cones WAITING, not cones in total.** The walk is breadth-first and a slot is free again
+    /// the moment its cone has been expanded, so this has to cover the widest frontier and not the
+    /// frame's whole traffic. §71.2 calls 110 portal traversals a hard fail and every one of them
+    /// would have to be queued at the same instant to fill this; measured (`HOUSE-00695`) the
+    /// worst frontier in this house is 12, over every cell at four headings with every door open.
+    ///
+    /// **Fixed, because "it does not allocate once it is warm" is not the same claim as "it does
+    /// not allocate".** A `std::vector` that keeps its capacity allocates on the frame that first
+    /// needs more -- which is the frame with the most to do, and therefore the frame least able to
+    /// pay for it. A ring cannot do that: it is one array inside the object, and the only thing it
+    /// can run out of is room, which is counted.
+    inline constexpr std::size_t kMaxQueuedCones = 128;
 
     struct VisibleCell
     {
@@ -142,6 +158,16 @@ namespace cnahouse::visibility
         ///        culled**, which is a frame that missed its budget rather than a frame that was
         ///        drawn wrong -- but it is still the loudest counter in this struct.
         int cellsDropped = 0;
+        /// @brief The most cones waiting at once, which is what `kMaxQueuedCones` has to cover.
+        int queuePeak = 0;
+        /// @brief Cones the work queue had no room for. **The other loud counter**: a cone
+        ///        that was never expanded is a room that may never have been reached, the same
+        ///        class of event as `cellsDropped` and not a tuning number.
+        ///
+        /// Named for the QUEUE rather than the cone, because `VisibleCell::conesDropped` already
+        /// means something else and next to it in an overlay: that one is the fifth cone into one
+        /// room, which §25.2's cap refuses by design.
+        int queueDropped = 0;
     };
 
     /// @brief §25.2's portal walk: breadth-first from the camera's cell, one reduced frustum per
@@ -153,9 +179,12 @@ namespace cnahouse::visibility
     /// reaches every room at the shallowest depth it can be reached at, which is also the depth
     /// `maxDepthFor` is written against.
     ///
-    /// **The object is reused between frames.** The queue and the visible list keep their
-    /// capacity, so a steady state costs no allocation at all -- §71.2 gives visibility 0.55 ms
-    /// typical and `HOUSE-00695` is where the allocation would otherwise be found.
+    /// **The object is reused between frames and the walk allocates nothing** (`HOUSE-00695`).
+    /// The work queue is a fixed-capacity ring inside the object, the clip planes are read from
+    /// the cone that already holds them, and the visible list is reserved once at construction and
+    /// only cleared -- §71.2 gives the whole of visibility 0.55 ms and none of it should be
+    /// `malloc`. `VisibilityAllocationTests` asserts it with a counting `operator new` rather than
+    /// trusting the comment.
     class PortalTraversal
     {
     public:
@@ -176,6 +205,9 @@ namespace cnahouse::visibility
             /// @brief §25.2's depth table asks where the camera is standing.
             CameraSide side = CameraSide::Interior;
         };
+
+        /// @brief Reserves the visible list once, so the walk itself never grows it.
+        PortalTraversal();
 
         void Run(const Input& input);
 
@@ -216,8 +248,7 @@ namespace cnahouse::visibility
         void Degrade();
 
         std::vector<VisibleCell> visible_;
-        std::vector<Work> queue_;
-        std::vector<Microsoft::Xna::Framework::Plane> planes_;
+        ConeQueue<Work, kMaxQueuedCones> queue_;
         TraversalStats stats_;
     };
 

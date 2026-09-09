@@ -10329,9 +10329,45 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             0.257 -> 0.724 ms and left its walk column at 0.019; stopping the walk from crossing
             any portal at all collapsed the kitchen to **1 cell** and 0.0014 ms, which is the
             reading the reported cell, chunk and instance counts exist to make visible.
-- [ ] HOUSE-00695 — Optimise the traversal against the measurement: the portal-plane test, the frusta containment check, and the work-queue allocation
+- [x] HOUSE-00695 — Optimise the traversal against the measurement: the portal-plane test, the frusta containment check, and the work-queue allocation
       dep: HOUSE-00694 · sys: visibility · plat: ALL · pri: MUST
       accept: no allocation in the steady state; the work queue is a fixed-capacity ring
+      note: (2026-09-09) both acceptance criteria are met. The work queue is `ConeQueue<Work, 128>`,
+            a fixed-capacity ring inside the traversal; the clip planes are read from the cone that
+            already holds them (`ClipFrustum::Planes`) instead of being copied into a `std::vector`
+            once per visible cell; and the visible list is reserved once at construction.
+      measured: **neither is measurably faster, which is what `HOUSE-00694` said would happen.**
+            A/B/A against `HEAD`, built and run back to back so the machine is the same machine:
+            the walk column at `L0_KITCHEN` is 0.0125 ms before, 0.0114 after and 0.0137 before
+            again; at `L0_FOYER` 0.0069, 0.0062, 0.0076. The after is inside the spread of the two
+            befores, and the drift between the two befores (+10 %) is as large as the difference.
+            A column that is 1-2 % of §71.2's budget has nothing in it to win, and this is the
+            evidence rather than the excuse.
+      finding: **what the ring buys is not throughput, it is the frame it does not spoil.** A
+            `std::vector` that keeps its capacity allocates nothing once warm -- and then allocates
+            on the first frame that needs more, which is the frame with the most to do and so the
+            least able to pay for a `malloc`. A fixed array cannot do that. `VisibilityAllocationTests`
+            asserts it directly, with a counting global `operator new`: over §25.8's 24 poses, eight
+            further walks each allocate **zero** times.
+      measured: the deepest work queue is **13 cones of 128**, over every cell in the house at four
+            headings with every door open (`EXT_FRONTYARD_W`), and a whole frame pushes about
+            twenty. The capacity is therefore ten times what the house asks for, which is why the
+            ring never wraps here and why the wrap is tested where it can be reached: `ConeQueue`
+            is a template and `ConeQueueTests` drives a `ConeQueue<int, 4>` round it forty times.
+      finding: **the other two names in this task were examined and left alone.** `PlaneFacesAway`
+            is a loop over the cell's own footprint boxes -- one box for most of this house -- and
+            §25.2's containment check is at most four `NdcRect` comparisons per cone. Both are
+            inside the 0.003-0.013 ms the whole walk costs. Rewriting them would be churn with a
+            measurement saying it cannot matter; **the 88-96 % is in §25.6's exterior hierarchy**
+            and is `HOUSE-00699`.
+      verified: 6 `ConeQueueTests`, 3 `VisibilityAllocationTests`, and the 1 005-test unit suite,
+            92 integration, 30 render. Five injections: a push that wraps to the front of the array
+            instead of by the capacity -- CAUGHT; a full ring that overwrites instead of refusing --
+            CAUGHT; a visible list that gives its buffer back every frame -- CAUGHT; a ring of 8,
+            too small for the house -- CAUGHT. The fifth, a `Clear` that forgets the head, was
+            MISSED, **and it is not a bug**: a push starts from the same head a pop does, so a ring
+            left mid-array behaves identically. The test's claim was corrected to say so rather
+            than the code being changed to make a false claim true.
 - [ ] HOUSE-00696 — Write `docs/visibility.md`: the algorithm, its parameters, its guarantees, and how to debug it
       dep: HOUSE-00695 · sys: — · plat: ALL · pri: MUST
 - [ ] HOUSE-00697 — Phase-9 review and commit; record the visible-cell and draw-call numbers in the performance log

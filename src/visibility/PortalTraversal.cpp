@@ -2,6 +2,7 @@
 #include "cnahouse/visibility/PortalTraversal.hpp"
 
 #include <algorithm>
+#include <span>
 
 #include "cnahouse/visibility/ClipRect.hpp"
 #include "cnahouse/visibility/PortalFacing.hpp"
@@ -13,6 +14,13 @@ namespace cnahouse::visibility
     namespace
     {
         namespace Xna = Microsoft::Xna::Framework;
+    }
+
+    PortalTraversal::PortalTraversal()
+    {
+        // Twice §71.2's hard stop, because the walk reaches cells and `Degrade` trims them
+        // afterwards: the list is at its longest before the cap is applied, not after it.
+        visible_.reserve(kMaxVisibleCells * 2);
     }
 
     const VisibleCell* PortalTraversal::Find(util::Id cell) const noexcept
@@ -57,10 +65,11 @@ namespace cnahouse::visibility
 
     void PortalTraversal::Run(const Input& input)
     {
-        // Cleared rather than reconstructed: `clear()` keeps the capacity, so a steady state
-        // allocates nothing (§71.2 gives visibility 0.55 ms and none of it should be `malloc`).
+        // Cleared rather than reconstructed: `clear()` keeps the capacity, and the ring is an
+        // array inside the object, so a steady state allocates nothing at all (§71.2 gives
+        // visibility 0.55 ms and none of it should be `malloc`).
         visible_.clear();
-        queue_.clear();
+        queue_.Clear();
         stats_ = TraversalStats{};
         if (input.world == nullptr || !input.cameraCell.IsValid())
         {
@@ -70,14 +79,12 @@ namespace cnahouse::visibility
         // The whole screen: the camera's own frustum covers all of it, so nothing can be
         // "contained" by it and skipped before the walk has started.
         const NdcRect whole{-1.0F, -1.0F, 1.0F, 1.0F};
-        queue_.push_back(Work{
-            input.cameraCell, input.cameraFrustum, whole, ClippedPolygon{}, 0, kNoLimit, ConeFlags::None});
+        static_cast<void>(queue_.Push(Work{
+            input.cameraCell, input.cameraFrustum, whole, ClippedPolygon{}, 0, kNoLimit, ConeFlags::None}));
 
-        for (std::size_t head = 0; head < queue_.size(); ++head)
+        while (!queue_.Empty())
         {
-            // Copied and not referenced: `queue_` grows inside this loop and a reference into it
-            // is a dangling one the moment it does.
-            const Work work = queue_[head];
+            const Work work = queue_.Pop();
             VisibleCell& cell = Reach(work.cell, work.depth, work.allowance, work.flags);
             stats_.maxDepth = std::max(stats_.maxDepth, work.depth);
 
@@ -111,11 +118,10 @@ namespace cnahouse::visibility
                 continue;
             }
 
-            planes_.clear();
-            for (std::size_t i = 0; i < work.frustum.PlaneCount(); ++i)
-            {
-                planes_.push_back(work.frustum[i]);
-            }
+            // The cone's own planes, read where they already are: `ClipRectToFrustum` wants a
+            // span and `ClipFrustum` holds a contiguous array, so the copy this used to make --
+            // ten planes into a vector, once per visible cell -- was work for nothing.
+            const std::span<const Xna::Plane> planes = work.frustum.Planes();
 
             for (const std::uint32_t index : input.world->PortalsOf(work.cell))
             {
@@ -151,7 +157,7 @@ namespace cnahouse::visibility
                     continue;
                 }
 
-                const ClippedPolygon clipped = ClipRectToFrustum(runtime.WorldRect(), planes_);
+                const ClippedPolygon clipped = ClipRectToFrustum(runtime.WorldRect(), planes);
                 if (clipped.Empty())
                 {
                     ++stats_.skippedClipped;
@@ -190,10 +196,17 @@ namespace cnahouse::visibility
                 const ConeFlags flags = portal.opacity == world::PortalOpacity::Translucent
                                             ? work.flags | ConeFlags::Diffuse
                                             : work.flags;
-                ++stats_.portalsCrossed;
-                queue_.push_back(Work{other, next.frustum, rect, clipped, work.depth + 1, allowance, flags});
+                // Counted on the PUSH and not before it: a cone the ring had no room for was
+                // not crossed, whatever the walk decided, and `queueDropped` is where it went.
+                if (queue_.Push(Work{other, next.frustum, rect, clipped, work.depth + 1, allowance, flags}))
+                {
+                    ++stats_.portalsCrossed;
+                }
             }
         }
+
+        stats_.queuePeak = static_cast<int>(queue_.Peak());
+        stats_.queueDropped = static_cast<int>(queue_.Dropped());
 
         Degrade();
 

@@ -41,7 +41,7 @@ namespace cnahouse::debug
 
         // §25.8's first line, with its own numbers in its own order.
         lines.push_back(
-            std::format("cells    visible {} / {}   maxdepth {}   frusta {}{}{}",
+            std::format("cells    visible {} / {}   maxdepth {}   frusta {}{}{}{}",
                         snapshot.visible.size(),
                         snapshot.cellsInWorld,
                         snapshot.traversal.maxDepth,
@@ -51,12 +51,20 @@ namespace cnahouse::debug
                             : std::format("  ({} dropped)", snapshot.traversal.frustaDropped),
                         snapshot.traversal.cellsDropped == 0
                             ? std::string()
-                            : std::format("  CELLS DROPPED {}", snapshot.traversal.cellsDropped)));
+                            : std::format("  CELLS DROPPED {}", snapshot.traversal.cellsDropped),
+                        // The same class of event as a dropped cell and shown the same way
+                        // (`HOUSE-00695`): a cone the work queue had no room for is a room that
+                        // was never reached, so it is silent until it happens and loud when it does.
+                        // Not the same thing as the per-cell `(+n dropped)` below, which is
+                        // §25.2's fifth cone into one room and is by design.
+                        snapshot.traversal.queueDropped == 0
+                            ? std::string()
+                            : std::format("  QUEUE DROPPED {}", snapshot.traversal.queueDropped)));
 
         // Every REASON a portal was not crossed, and not a total: a room that should be visible
         // and is not is one of these six numbers, and a total cannot say which.
         lines.push_back(std::format("portals  tested {}  crossed {}  |  closed {}  facing {}  "
-                                    "deep {}  clipped {}  small {}  covered {}",
+                                    "deep {}  clipped {}  small {}  covered {}  |  queue {} / {}",
                                     snapshot.traversal.portalsTested,
                                     snapshot.traversal.portalsCrossed,
                                     snapshot.traversal.skippedClosed,
@@ -64,7 +72,9 @@ namespace cnahouse::debug
                                     snapshot.traversal.skippedDepth,
                                     snapshot.traversal.skippedClipped,
                                     snapshot.traversal.skippedArea,
-                                    snapshot.traversal.skippedContained));
+                                    snapshot.traversal.skippedContained,
+                                    snapshot.traversal.queuePeak,
+                                    visibility::kMaxQueuedCones));
 
         lines.push_back(std::format("geometry chunks {} / {}   instances {} / {}   exterior {} / {} "
                                     "({} node)",
