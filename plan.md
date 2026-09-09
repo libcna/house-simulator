@@ -10211,8 +10211,28 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: 2 `VisibilityBudgetTests`. Four injected bugs, three caught; the fourth -- a chunk
             cull that keeps every chunk of a visible cell -- is `ChunkCullingTests`' to catch, and
             does not move a 47-call frame anywhere near §71.2's 620.
-- [ ] HOUSE-00691 — Test: the partially-open-door rule — a door at 0.02 culls, at 0.10 does not, and the leaf occludes inside the target cell
+- [x] HOUSE-00691 — Test: the partially-open-door rule — a door at 0.02 culls, at 0.10 does not, and the leaf occludes inside the target cell
       dep: HOUSE-00687 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-09) §25.3's rule at the level it decides anything -- which rooms a body
+            standing in front of the door can see -- over **102 door/side cases** in §12's house.
+            `PortalRuntimeTests` already asserts the latch on one portal; this asserts what the
+            latch DOES.
+      note: **the third clause is testable as its negative.** *"A door leaf occludes geometry inside
+            the target cell; it does not shrink the portal"* -- there is no leaf occlusion to
+            measure (nothing occludes anything yet, and §25.3 says the leaf is an ordinary object
+            in the room rather than part of the portal). What IS testable, and is the same
+            sentence, is that a door ajar shows **exactly** what a wide-open one shows: 102 doors
+            compared at 0.10 against 1.00, all identical. A system that scaled the doorway by the
+            aperture would pass "0.02 culls, 0.10 does not" and fail this -- and would look
+            plausible on screen, revealing a thin slice of the room for the wrong reason. The
+            injection that scales the rectangle by the aperture is caught by exactly this.
+      note: §25.3's hysteresis is asserted as a SEQUENCE and not as two numbers: 0.06 reached from
+            below is still shut, 0.09 opens it, 0.06 reached from above is still open, 0.04 shuts
+            it. A door settling through the band must not flicker the room behind it -- its chunks,
+            its props, its lights -- on and off for a frame or two.
+      verified: 3 `AjarDoorTests`, and `DoorStand.hpp` extracted so `HOUSE-00687`'s stand-in-front-
+            of-a-door arithmetic has one home rather than two that drift. Four injected bugs, all
+            caught.
 - [ ] HOUSE-00692 — Test: window visibility from outside is capped at depth 1
       dep: HOUSE-00680 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00693 — Test: the stair well makes three floors visible from the foyer, and the basement/attic doors cut their levels off entirely
