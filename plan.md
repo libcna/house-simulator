@@ -10255,8 +10255,31 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: 3 `WindowDepthTests`. Four injected bugs, all caught -- the two glazed rows of the
             table, the chain keeping the loosest cap instead of the tightest, and a camera outdoors
             being read as indoors.
-- [ ] HOUSE-00693 — Test: the stair well makes three floors visible from the foyer, and the basement/attic doors cut their levels off entirely
+- [x] HOUSE-00693 — Test: the stair well makes three floors visible from the foyer, and the basement/attic doors cut their levels off entirely
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
+      measured: **from the foot of the main stair with every door in the house shut: 7 cells on 3
+            storeys -- B1, L0 and L1** -- through two stair wells and a cased opening, and not the
+            attic, which is four storeys up and behind a door. §25 treats a stair well as an
+            ordinary portal, which is exactly why this needs asserting: a system that special-cased
+            floors would either stop at one and lose the view up the stair, or not stop at all.
+      finding: **the level BOUNDARIES have no doors, and §70.3's sentence is about the doors one
+            step in from them.** `P_L0_STAIR__B1_STAIR` and `P_STAIR_L2_L3` are `stair_well`
+            portals with no leaf: always open, so `B1_STAIR` is visible from the ground floor
+            whatever anybody does, and nothing can shut it off. What cuts the BASEMENT off is
+            `P_B1_STAIR__B1_HALL`, and the ATTIC `P_L2_STAIR__L2_STAIR_ATTIC` -- both doors, both
+            one cell in. The test says so rather than asserting a door that §12 does not have.
+      finding: **"opening it gives the level back" has to be asked from where the door can be
+            SEEN.** From the ground floor, opening the basement door changes nothing: the cone
+            reduced down the stair well does not reach the door at the foot of it. That is the
+            reduction working and not the door failing, so the shut half is asked from the stair
+            above (the basement is exactly `B1_STAIR` and no more) and the open half from in front
+            of the door.
+      measured: the attic door shut, **nothing above the second floor is in view at all** -- not the
+            attic stair, not the attic; open, two cells arrive.
+      verified: 3 `StairWellTests`. Three injected bugs, all caught -- a stair well that is never
+            crossed, a shut door on it passing light, and a walk capped at one storey (caught with
+            `VisibleSetTests`, whose 24 exact sets see the cells this test's level-counting does
+            not).
 - [ ] HOUSE-00694 — Measure visibility cost in all 10 performance scenarios against the 0.55/1.20 ms budget
       dep: HOUSE-00690 · sys: — · plat: LNX · pri: MUST
 - [ ] HOUSE-00695 — Optimise the traversal against the measurement: the portal-plane test, the frusta containment check, and the work-queue allocation
