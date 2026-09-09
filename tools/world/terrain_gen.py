@@ -1076,6 +1076,52 @@ def selftest() -> int:
         require(_tile_document(street[0], receiver=False)
                 == _tile_document(road_pieces(SOURCE)[0], receiver=False),
                 "a road segment renders the same bytes twice")
+        # 9. `HOUSE-00765`: every paved surface §11 declares is IN the field, at its own height
+        #    and its own material. The front walk, the terrace paving and the garden paths are
+        #    therefore drawn by `HOUSE-00762`'s tiles, and nothing has to draw them again -- which
+        #    is the same rule that keeps the carriageway off the street's own segments.
+        _w2, _h2, field_heights, field_index = decode(SOURCE)
+
+        def _sample(x: float, z: float) -> tuple[float, str]:
+            ix = int(round((x - ORIGIN_X) / STEP))
+            iz = int(round((z - ORIGIN_Z) / STEP))
+            at = iz * WIDTH + ix
+            return field_heights[at], MATERIALS[field_index[at]]
+
+        wrong_surface = []
+        for row in exterior.get("paths", []):
+            box = row["boxes"][0]
+            if box["x"][0] < ORIGIN_X or box["x"][1] > ORIGIN_X + (WIDTH - 1) * STEP:
+                continue          # the street, which reaches 220 m past the field
+            height, material = _sample((box["x"][0] + box["x"][1]) / 2.0,
+                                       (box["z"][0] + box["z"][1]) / 2.0)
+            wanted = BY_MATERIAL.get(row.get("material"), "grass")
+            if abs(height - float(row.get("y") or 0.0)) > 1e-3 or material != wanted:
+                wrong_surface.append((row["id"], round(height, 3), material, wanted))
+        require(not wrong_surface,
+                f"every paved surface §11 declares is in the height field at its own height and "
+                f"material -- the front walk, the driveway, the apron, the connector and the "
+                f"garden path ({wrong_surface[:3]})")
+
+        pads = []
+        whole = layout_io.load_layout(SOURCE)
+        storeys = {row["id"]: float(row.get("ffl", 0.0)) for row in layout_io.rows(whole, "levels")}
+        grade = min([ffl for ffl in storeys.values() if ffl >= 0.0] or [0.0])
+        for cell in layout_io.rows(whole, "cells"):
+            override = cell.get("yOverride")
+            if cell.get("kind") != "exterior" or not override or float(override[0]) <= 0.0:
+                continue
+            if storeys.get(cell.get("level"), 0.0) != grade:
+                continue          # a BALCONY: the ground under it is the lawn, not its own floor
+            box = cell["boxes"][0]
+            height, material = _sample((float(box["x"][0]) + float(box["x"][1])) / 2.0,
+                                       (float(box["z"][0]) + float(box["z"][1])) / 2.0)
+            if abs(height - float(override[0])) > 1e-3:
+                pads.append((cell["id"], round(height, 3), float(override[0])))
+        require(not pads,
+                f"and every outdoor cell with a floor of its own stands on a flat pad at that "
+                f"height -- §11.1's terrace at +0.45 is the case it is for ({pads[:3]})")
+
         require(all(primitive["material"] != "TERRAIN_grass"
                     or any(abs(v[0][2] - 13.4) < 1e-6 for v in primitive["vertices"]) is False
                     for piece in street for primitive in piece["primitives"]),

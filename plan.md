@@ -10695,8 +10695,24 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             ids, `PATH_CONNECT` appended), 1 008 unit, 92 integration, 30 render, all gates green
             -- with the terrain's two manifest hashes, the shell manifest and the licence document
             regenerated, because a generated asset's hash is in three places and a gate for each.
-- [ ] HOUSE-00765 — Generate the front walk, the terrace paving and the garden paths
+- [x] HOUSE-00765 — Generate the front walk, the terrace paving and the garden paths
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
+      finding: (2026-09-09) **all three were already drawn, and the task is what proves it.** The
+            same rule as `HOUSE-00764`: a paved surface is a `paths` row or an outdoor cell's own
+            floor, `fields()` flattens and paints it into the height field, and `HOUSE-00762`'s
+            tiles draw the field. Measured: the walk is bluestone at y = 0.000, the terrace
+            bluestone at +0.450, the garden path gravel at 0.000.
+      note: so what this task adds is the CLAIM, not the geometry -- two of them, and general
+            rather than a transcription of §11.1's table: *every paved surface §11 declares is in
+            the field at its own height and its own material*, and *every outdoor cell with a floor
+            of its own stands on a flat pad at that height*. Both walk the layout, so a sixth path
+            or a second terrace is covered the day it is authored.
+      finding: **the pad claim caught the balconies on its first run** -- `L1_BALCONY_REAR` at
+            +3.65 over ground at -0.16 -- which is `surfaces()`'s own deliberate exclusion:
+            an exterior cell on L1 or L2 is a balcony, and writing its floor into the height field
+            would raise the lawn to first-floor level. The claim now applies the same rule, found
+            the same way it is found there: the lowest storey whose `ffl` is at or above grade.
+      verified: 2 more `terrain_gen --selftest` claims, over the house's own layout.
 - [ ] HOUSE-00766 — `fence_gen.py`: the 1.85 m board fence (W/N/E), the 1.35 m ornamental front fence, posts, caps and rails
       dep: HOUSE-00762 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00767 — Generate the pedestrian gate, the sliding vehicle gate and the rear service gate with their hardware
