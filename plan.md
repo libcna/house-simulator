@@ -9469,8 +9469,31 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             the count, the camera cell kept, and the kept/dropped split ranked against an
             independently computed screen area. Four injected bugs, four caught (a fifth, moving
             the camera cell into the sort, changes nothing and is recorded rather than counted).
-- [ ] HOUSE-00672 — Implement per-cell chunk culling against the cell's frusta
+- [x] HOUSE-00672 — Implement per-cell chunk culling against the cell's frusta
       dep: HOUSE-00670, HOUSE-00474 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-09) `visibility::ChunkCuller`: every chunk of every visible cell against that
+            cell's own cones, one hit being enough. The library keys cells by NAME and the visible
+            set by `util::Id`, so the mapping is built ONCE at construction -- hashing a string per
+            cell per frame is a lookup in the middle of the hot loop for something that never
+            changes.
+      note: **a chunk visible only through the SECOND doorway must still be drawn.** A room seen
+            through two openings keeps up to four cones and a chunk in any of them is on screen;
+            testing only the first culls the half of that room the other door shows, which is a
+            hole in the world that appears only when two doorways into one room are in frame --
+            most of §12's ground floor. Measured: over 384 poses, 117 cell views keep more than one
+            cone and **9 chunks** are visible only through a later one. The injection that tests
+            only the first cone is caught by exactly those nine.
+      finding: **at blockout fidelity the per-chunk test earns 12 %, and that is the honest
+            number.** From `L0_HALL` with every door open: the portal walk takes the house from 418
+            chunks to 34, and the chunk test takes 34 to 30. §17.4 splits a cell by MATERIAL, so
+            the blockout has about four chunks a room and there is little to reject; the saving is
+            for the furnished house, where a room is dozens of chunks and the doorway shows one
+            wall of it. Recorded now so that phase 13 can measure the same thing again and see the
+            difference rather than assume it.
+      verified: 5 `ChunkCullingTests` -- the counts adding up with §71.2's 620 draw calls as the
+            bound, every drawn chunk belonging to a visible cell AND inside one of its cones, the
+            nine chunks behind a second doorway, turning round changing the list, and the reused
+            buffer. Five injected bugs, five caught.
 - [ ] HOUSE-00673 — Implement per-cell dynamic-instance culling
       dep: HOUSE-00672 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00674 — Implement distance culling per prop category
