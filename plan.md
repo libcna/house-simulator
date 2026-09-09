@@ -10027,8 +10027,37 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             -- 20 draw calls before `cull off` and 418 after, in one session. Eight injected bugs,
             all caught -- one recorded as NOT a bug: `CullingApplied`'s `walking_` term is implied
             by `chunkCuller_` existing at all.
-- [ ] HOUSE-00685 — Author the 24 named visibility poses with their expected visible-cell sets
+- [x] HOUSE-00685 — Author the 24 named visibility poses with their expected visible-cell sets
       dep: HOUSE-00681 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-09) `tests/unit/VisibilityPoses.hpp`: name, cell, FEET, §14's yaw, the door
+            state, and the cells the walk must reach exactly. One list, because `HOUSE-00686`,
+            `HOUSE-00689`, `HOUSE-00690` and `HOUSE-00693` all read it and twenty-four poses
+            authored four times are four lists that drift.
+      note: **feet and not eyes.** A pose is somewhere a body can STAND -- §43.1's capsule on §12's
+            floor -- and the eye is 1.68 m above it. An eye position would let a pose sit inside a
+            wall or in the air and still look plausible, and §16.4 looks a cell up by the feet.
+      note: **both door states, as different poses.** §65.6 starts every door shut and the visible
+            set is a different set with them open; six of the twenty-four are the open arrangement
+            no player will ever make and every budget must survive.
+      note: chosen to cover what a portal system can get wrong rather than to look around the
+            house: a room with one shut door (`b1-cinema`, one cell), the open plan with every door
+            SHUT (`l0-sunroom`, ten cells through cased openings alone), both ends of the stair
+            well, a landing that sees two storeys of balcony through glazing, the garage behind a
+            shut fire door, and four outdoor poses looking back in.
+      finding: the expected sets were read off the implementation and then CHECKED against §12's
+            plan and §25's rules, pose by pose -- which is the only honest way to say it. Two were
+            worth the check: `l1-landing` sees the front balcony with its door shut because the
+            landing has two glazed WINDOWS onto it beside the door (`P_L1_LANDING__W1`/`W2`), and
+            `l0-foyer` sees the road with the front door shut because §12.1's door has sidelights.
+            Both are the design working; neither is obvious from the pose. What makes the fixture
+            worth having is that the sets are now FIXED: a regression changes one and names it.
+      verified: 4 `VisibilityPoseTests` -- twenty-four of them each named once with both door states
+            represented, every pose standing inside the cell it names and on that level's floor,
+            every expected cell being a cell and in id order with the camera's own among them, and
+            the set covering all five of §12's levels and the outdoors. Seven injected bugs, six
+            caught; the seventh -- flipping one pose's door state -- is `HOUSE-00686`'s to catch,
+            because a fixture cannot tell a wrong door state from a right one without running the
+            walk, which is the next task.
 - [ ] HOUSE-00686 — Test: exact visible-set assertion for all 24 poses
       dep: HOUSE-00685 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00687 — Test: the door-state matrix — for each of the 62 doors, open and close it and assert the visible set changes in the expected direction, from both sides
