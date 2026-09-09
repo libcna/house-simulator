@@ -9198,9 +9198,37 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             straddling box still reported as intersecting; the tenth plane fitting and the
             eleventh refused without changing an answer; and the same six planes added in reverse
             giving the same answers. Five injected bugs, five caught.
-- [ ] HOUSE-00662 — Implement `ClipRectToFrustum`: 2-D Sutherland–Hodgman of an axis-aligned portal rectangle against a frustum's side planes
+- [x] HOUSE-00662 — Implement `ClipRectToFrustum`: 2-D Sutherland–Hodgman of an axis-aligned portal rectangle against a frustum's side planes
       dep: HOUSE-00661 · sys: visibility · plat: ALL · pri: MUST
       verify: unit ClipTests.* incl. fully inside, fully outside, straddling every plane, and degenerate cases
+      note: (2026-09-09) `visibility::ClipRectToFrustum` over `PortalRuntime::WorldRect()`'s four
+            corners, plus `PolygonArea` for `HOUSE-00664`'s cutoff to be built on.
+      note: **clipped in WORLD space, not in a 2-D frame.** §25.2 calls it a 2-D clip because a
+            portal is an axis-aligned rectangle on an axis-aligned plane -- and it is, but the
+            planes cutting it are not axis-aligned, and projecting into some 2-D basis first costs
+            a basis, two transforms and a special case for a portal seen edge-on. Sutherland-
+            Hodgman against the half-spaces directly is the same algorithm without any of that.
+      finding: **a doorway lying exactly IN one of the frustum's planes is not a hypothetical, and
+            it must survive.** §10.3's near plane is 0.10 m in front of an eye that can stand
+            0.30 m from a wall, and a body standing in a doorway is looking through a portal in one
+            of its own frustum's planes. A strict `< 0` inside test drops those vertices to
+            rounding, and a portal that loses a vertex culls half the room behind it. The
+            tolerance is 1e-5 m and a point ON the plane counts as inside.
+      note: twelve vertices, and it is a bound rather than a hope: Sutherland-Hodgman adds at most
+            one vertex per plane, so a four-sided doorway against §25.2's eight-sided reduced
+            frustum cannot exceed twelve. On overflow the polygon from BEFORE the offending plane
+            is returned with a flag -- larger than the true clip, which over-draws -- because a
+            truncated convex polygon is not a polygon at all.
+      finding: a clipped vertex is on its plane to within ROUNDING, so `ClipFrustum::Contains`
+            (an exact test, matching XNA) reports it outside about half the time. The property to
+            assert is `DotCoordinate <= 1e-4`, not containment -- worth writing down because the
+            first version of the test asserted the second and looked like a clipping bug.
+      verified: 9 `ClipRectTests` -- untouched when inside, empty when outside, halved by one
+            plane, five vertices from a corner cut, a doorway lying in a plane surviving it, every
+            vertex inside every plane of a real camera frustum at four doorway positions, an
+            octagon of eight planes staying inside the twelve-vertex bound, the winding preserved
+            (checked by the turn at every corner), and the degenerate areas. Seven injected bugs,
+            seven caught.
 - [ ] HOUSE-00663 — Implement `ReduceFrustum`: build side planes from the camera and the clipped polygon's edges
       dep: HOUSE-00662 · sys: visibility · plat: ALL · pri: MUST
       accept: **the reduced frustum contains every point the portal can see and no point outside the parent** — proved by 10⁵ random samples
