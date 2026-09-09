@@ -4292,6 +4292,18 @@ this stage:
   `layout.stairs.json`'s authored `footprint`/`run`/`shape` through the same `stair_geometry`
   module `house_shell_gen.py` builds the treads from.
 
+**A hole belongs to both rooms** (`HOUSE-00568`). Per-cell lists are safe wherever a wall separates
+two rooms, because the wall is in both lists and stops a body before it can reach anything behind
+one. At a hole they are not: §16.4's lookup keeps answering with the cell a body came from until it
+is 0.05 m past the boundary, so a body standing in a doorway is 0.35 m into a room nothing has
+looked at, and the main stair's first run begins 0.20 m past `L0_FOYER`'s cased opening. So each
+side of every hole carries the other side's shapes within **0.40 m** of the plane — the 0.30 m
+capsule plus that hysteresis plus 50 mm — over the hole's width and the body's own height, indexed
+by the part of them within reach so a borrowed slab does not size the borrower's grid.
+`docs/collision-format.md` §4.1 is normative and `OpeningReachTests` is the guarantee. The census:
+**1 958 cell references over 1 134 shapes**, of which 376 are borrowed through a hole and 52 are
+`HOUSE-00567`'s outer walls shared with the yards.
+
 ### 49.3 The player sweep
 
 ```

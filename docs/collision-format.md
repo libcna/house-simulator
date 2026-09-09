@@ -130,7 +130,7 @@ doing it per sweep.
 | `cellCount` | `u32` | |
 | then per cell: | | |
 | `id` | string | the `layout.cells.json` id |
-| `bounds` | 6 × `f32` | min *xyz*, max *xyz* over every shape the cell references |
+| `bounds` | 6 × `f32` | min *xyz*, max *xyz* over every shape the cell references, **as that cell indexes it** — §4.1's borrowed shapes count only for the part of them within reach |
 | `shapeCount` | `u32` | ≤ 65 535 |
 | `shapes` | `shapeCount` × `u32` | **global** shape indices: `0 … obbCount−1` are OBBs, `obbCount …` are meshes at `index − obbCount` |
 | `nx`, `nz` | `u32`, `u32` | grid dimensions |
@@ -145,6 +145,9 @@ dividing shapes — the floor slab alone spans every bucket of every vertical la
 vertical reject is one comparison against the shape's own AABB, which the sweep does anyway.
 
 A shape is listed in **every bucket its AABB overlaps**, not the one its minimum corner falls in.
+A shape a cell borrows through a hole (§4.1) is listed by the part of it within reach of that hole
+rather than by all of it: the shape is whole — the narrow phase gets its real geometry — and the
+clip decides only which buckets have to find it.
 
 ### 3.5 The terrain height field
 
@@ -207,6 +210,43 @@ and each is a decision:
    the floor leaves two jambs and a header — three pieces. A window leaves four, adding a sill.
    Two openings stacked with no gap between them leave three, not four, because the decomposition
    merges vertically; an unmerged seam across a jamb is a seam the lightmap finds.
+
+### 4.1 A hole belongs to both rooms
+
+*`HOUSE-00568`.* The four rules above make a **wall** shared, and that is what makes the per-cell
+partition safe: a body swept against one cell's list cannot reach anything behind a wall, because
+the wall is in that list and stops it first. At a **hole** it is not safe. §16.4's lookup hands the
+body to a cell and hands it over 0.05 m past the boundary at the earliest, so a body standing in a
+doorway is 0.35 m into the room it has not been given yet — and whatever stands there was, until
+this rule, in the other cell's list alone.
+
+`L0_FOYER`'s cased opening is 0.20 m west of the main stair's first run. `HOUSE-00618`'s
+twenty-minute bot walked east through it and was **0.151 m inside the staircase** before anything
+stopped it; the shove back out arrived a frame later, when the cell tracker changed its mind. The
+same is true of every hole with something behind it.
+
+So, through every hole in a boundary, each side's list gains the other side's shapes that a body
+standing in the hole can touch:
+
+* **0.40 m** past the plane — §43.1's 0.30 m capsule radius plus §16.4's 0.05 m hysteresis, and
+  50 mm so the rule does not sit exactly on the number it is derived from;
+* over the hole's own width, plus that same reach at each jamb;
+* over the **body's** vertical band and not the hole's — from the lower of the two floors to
+  1.80 m above the higher — when the hole is one a body can walk through (a sill no more than
+  §43.1's 0.22 m step-up above the floor). The fridge sub-cell is where the difference showed: its
+  ceiling slab starts exactly at the top of its own opening, and a body standing on its +0.70 floor
+  has 50 mm of head inside that slab. A hole with a higher sill is a **window**: a body cannot
+  stand in one, so only what is level with the hole itself is carried.
+
+A `y` portal is not a hole for this purpose. A hole in a slab is a way *down*, the body that goes
+through one is falling, and the cell it lands in answers for it; the flights that reach through a
+stair well are in the lists of both cells they connect already, because `build_stairs` puts them
+there.
+
+The house's census: **376 shape references**, over 107 holes a body can stand in.
+`OpeningReachTests` is the guarantee — within the hysteresis band either side of every such hole,
+the deepest overlap does not depend on which of the two lists you ask — and it holds to 0.000000 m
+over 5 739 poses.
 
 ## 5. Proxies: most of them are boxes
 

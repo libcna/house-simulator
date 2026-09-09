@@ -104,11 +104,11 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 2 | Build skeleton and CI | 00121–00180 | 48 | `Game` clears the screen; HEADLESS tests run in CI |
 | 3 | Content pipeline | 00181–00260 | 45 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
-| 5 | World and floor-plan data | 00341–00450 | 80 | The full layout authored, validated and loaded |
-| 6 | Blockout house geometry | 00451–00540 | 38 | The generated shell renders |
-| 7 | Collision and player controller | 00541–00620 | 35 | You can walk the whole blockout |
+| 5 | World and floor-plan data | 00341–00450 | 81 | The full layout authored, validated and loaded |
+| 6 | Blockout house geometry | 00451–00540 | 39 | The generated shell renders |
+| 7 | Collision and player controller | 00541–00620 | 37 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
-| 9 | Room/portal visibility | 00661–00760 | 37 | Culling correct, proved, and within budget |
+| 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 23 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 15 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 30 | The blockout reads as a building |
@@ -7611,6 +7611,60 @@ the chunk builder produces ≤ 6 chunks per cell.
             outer skin**, which named `L1_LANDING` and `L2_LANDING` when the old rule was injected
             back. 1 008 unit, 92 integration, 30 render (twelve first-person references
             regenerated: the refrigerator is in the kitchen again).
+- [ ] HOUSE-00489 — Three doorways open into the side of a flight, and the main stair cannot be reached
+      dep: HOUSE-00568 · sys: world · plat: TOOL · pri: MUST
+      finding: (2026-09-09, found by `HOUSE-00568`) **the openings into the three main-stair cells
+            are in the middle of a 5.9 m hall, which is where the flights are.** Until
+            `HOUSE-00568` a body swept in one cell met nothing that stood in the next, so a doorway
+            with a staircase 0.20 m behind it walked like a doorway. `ClosedDoorTests` now says
+            what the house says: **three doors cannot be walked at from EITHER side** --
+            `P_B1_STAIR__B1_HALL`, `P_L1_STAIR__L1_BED5` and `P_L2_LANDING__L2_BALCONY_JULIET` --
+            and they are recorded in that test's `NoApproachAtAll()` naming this task, so 59 of the
+            62 doors are still proved shut and the three are not quietly dropped.
+      finding: **what each of the three meets, measured.** `P_B1_STAIR__B1_HALL` (x +2.20,
+            z −17.85…−16.65): `STAIR_BASEMENT_L0_B1`'s closed wedge, x +2.40…+3.40 -- 0.20 m past
+            the plane and solid from the basement floor up. `P_L1_STAIR__L1_BED5` (x +4.90,
+            z −16.75…−15.85): §12.3's balustrade round the L1 well, 0.06 m thick at x +4.700…+4.760
+            -- 0.14 m past the plane -- and behind it 0.20 m of ledge before the well itself. The
+            rail is right; a doorway onto a 0.20 m ledge over a 3 m drop is not.
+            `P_L2_LANDING__L2_BALCONY_JULIET` (z −14.30): the Juliet's own 0.20 m parapet at
+            z −14.05…−13.85, which is what a Juliet balcony IS -- a doorway with a rail across it
+            and no floor beyond. That third exemption is permanent; the first two are this task's.
+      finding: **and the arithmetic of `L0_STAIR_MAIN` is the whole problem, in authored numbers.**
+            The cell is x +2.20…+4.90 by z −20.20…−14.30 -- 2.7 × 5.9 m, 15.9 m². The basement well
+            `P_L0_STAIR__B1_STAIR` is x +2.40…+4.70 by z −19.70…−15.30: **10.1 m² of hole in a
+            15.9 m² room**, 2.3 m wide for a flight that is 1.0 m wide. `STAIR_MAIN_L0_L1` then
+            puts its first run at x +2.40…+3.50 over z −16.82…−14.30, rising north FROM THE SOUTH
+            WALL, its half-landing at +2.215 over z −17.92…−16.82, and its second run at
+            x +3.60…+4.70. What is left to stand on at +0.60 is a 0.20 m strip at x +2.20…+2.40, a
+            1.0 × 1.4 m patch at the foot of the flight (x +3.50…+4.90 by z −15.30…−14.30) and a
+            0.5 m strip at z −20.20…−19.70. **Both openings into the cell miss all three of them**:
+            `P_L0_FOYER__L0_STAIR` (x +2.20, z −17.10…−15.50) is over the well and against the
+            first run's flank, and `P_L0_STAIR__L0_MUDROOM` (x +4.90, z −16.85…−15.75) is over the
+            well with the second run 1.615 m above it. `StairTraversalTests` walks every flight in
+            the house because its waypoints come out of the ramp itself -- it has never had to
+            reach one from a room.
+      finding: **six openings, one per storey, and the same middle of the same hall.** A standing
+            body placed in the MIDDLE of each hole, feet on the higher of the two floors, is inside
+            something at all six of the openings into the three main-stair cells: `P_B1_STAIR__`
+            `B1_HALL` 0.100 m, `P_L0_FOYER__L0_STAIR` 0.100 m, `P_L0_STAIR__L0_MUDROOM` 0.069 m,
+            `P_L1_STAIR__L1_LANDING` 0.100 m, `P_L1_STAIR__L1_BED5` 0.160 m and
+            `P_L2_STAIR__L2_LANDING` 0.160 m. Measured with the narrow phase over the deployed
+            collision, at the same 107 holes `OpeningReachTests` walks; of the fourteen other holes
+            that report anything, five are `crouch` openings in the attic and under the stair where
+            a standing body is meant to meet the rafters, four are the porch's 30 mm nosing, and
+            the rest are the refrigerator, the Juliet and a 0.30 m window the probe stands in.
+      note: three ways to fix it and the choice is §13's and §16's, not this session's. (a) Move
+            the openings to the foot of the flight (z −15.30…−14.30 on both walls) and narrow the
+            basement well to its own 1.0 m lane, which gives back the east lane's floor. (b) Turn
+            the `u` the other way -- lane 0 is `cross_lo` by a fixed convention in
+            `stair_geometry.frame` -- so the west lane is clear where the foyer's opening is.
+            (c) Give the stair hall more room, which moves §13's room schedule. Each of them moves
+            the drawn shell, the nav graph, the floor plans and the render references with it.
+      note: the same shape of defect one storey up (`P_L1_STAIR__L1_BED5`) and one down
+            (`P_B1_STAIR__B1_HALL`) is the same three cells' arrangement repeated -- the stair
+            halls share one footprint through the house -- so whatever is decided for L0 decides
+            those two.
 - [ ] HOUSE-00487 — Bring `L0_GARAGE` and the three attic stores back inside §17.4's six chunks a cell
       dep: HOUSE-00473 · sys: content · plat: TOOL · pri: SHOULD
       finding: (2026-09-09, found by `HOUSE-00486`) **four cells have been over §17.4's chunk target
@@ -8533,6 +8587,68 @@ never escapes and never penetrates.
             §49.3's contact tolerance -- landings rose from 54 to 167 and the distance walked from
             1 283 m to 1 484 m. The bot no longer goes below an indoor floor at all, and
             `RandomWalkTests` now asserts both outright rather than allowing a wedge after a fall.
+- [x] HOUSE-00568 — A hole belongs to both rooms: carry what a body standing in one can reach across it
+      dep: HOUSE-00567, HOUSE-00618 · sys: physics · plat: TOOL · pri: MUST
+      verify: unit OpeningReachTests.BothSidesOfEveryHoleAgreeAboutWhatIsBehindIt,
+              OpeningReachTests.TheFoyerKnowsTheStaircaseBehindItsOwnOpening;
+              `tools/world/build_collision.py --selftest`
+      note: (2026-09-09) `HOUSE-00618`'s twenty-minute bot failed for the first time since it was
+            written, because `HOUSE-00768` moved a portal 1.4 m and a seeded walk that steers at
+            doorways takes a different route when a doorway moves. **3 samples of 18 000 found the
+            body inside geometry**, the first 0.071 m inside the main stair's first run on step
+            118 848. The route was new; the defect was not. Proved so by putting the two portals
+            back where they were and re-running: the same twenty minutes passes with a deepest
+            contact of 0.000091 m and never goes near the place.
+      finding: **collision ended at a cell's boundary, and a body does not.** §49.2 partitions the
+            world per cell and §49.3 sweeps against ONE of them, which is safe everywhere a wall
+            separates two rooms -- a wall is in the lists on both sides of itself, so nothing
+            behind one can be reached. At a HOLE it is not: §16.4's lookup keeps answering with the
+            cell the body came from until it is 0.05 m past the boundary, so a body standing in a
+            doorway is 0.35 m into a room whose shapes nothing has looked at. `L0_FOYER`'s cased
+            opening is 0.20 m west of the main stair's first run, and the trace reads: at
+            x +2.251 the foyer says nothing is there, one step later the tracker says
+            `L0_STAIR_MAIN` and the same body is **0.151 m inside the staircase**, four
+            depenetration iterations short of getting out; two steps later it is back in the foyer
+            being lifted 0.275 m by the step assist, and round again every twelve steps.
+      finding: **this is `HOUSE-00567`'s third finding, one hole further in.** That task shared an
+            outer wall with the yard on the other side of it, for exactly this reason and in
+            exactly these words -- *"a wall belongs to both sides of itself"*. What it did not do
+            was the general case: through every hole in a boundary, each side's list now gains the
+            other side's shapes within 0.40 m of the plane -- §43.1's 0.30 m radius plus §16.4's
+            0.05 m hysteresis plus 50 mm, so the rule does not sit exactly on the number it comes
+            from -- over the hole's width and the body's height. `docs/collision-format.md` §4.1
+            is the normative statement and `cna-house.md` §49.2 gains the paragraph and the new
+            census beside the three groups of shapes the layout cannot state.
+      finding: **the vertical band is the BODY's and not the hole's**, which the refrigerator
+            sub-cell is what found. `CELL_FRIDGE_INTERIOR`'s ceiling slab starts exactly at the top
+            of its own opening, so reading the hole carried nothing -- and a body standing on the
+            fridge's +0.70 floor has 50 mm of head inside that slab. The band is now the lower of
+            the two floors to 1.80 m above the higher, for a hole a body can walk through; a hole
+            whose sill is more than §43.1's 0.22 m step-up above the floor is a WINDOW, and a body
+            cannot stand in one, so there only what is level with the hole is carried. The
+            kitchen does not get the sunroom's floor and a claim says so.
+      finding: **a borrowed shape is indexed by the part of it within reach, not by all of it.**
+            The shape is whole -- the narrow phase gets its real geometry -- but a neighbour's
+            floor slab spans the neighbour's whole room, and indexing one would have grown
+            `L0_HALL`'s grid from 5 × 5 buckets to 17 × 13 and made a cell's bounds a statement
+            about a room its body can never be in. `L0_FOYER` borrows a wedge that runs to x +3.50
+            and its own bounds stop at +2.60, which is its opening's plane plus the reach.
+      finding: **three doors in the house cannot be walked at from either side, and that is the
+            house's fault** (`HOUSE-00489`). The basement door, `L1_BED5`'s and the Juliet's each
+            have a flight or a rail within 0.40 m of the plane; the first two are the stair halls'
+            arrangement and the third is what a Juliet balcony is. `ClosedDoorTests` records all
+            three by name rather than losing the guarantee for the other 59.
+      verified: `OpeningReachTests` over the deployed world -- 107 holes a body can stand in,
+            5 739 poses in §16.4's hysteresis band either side of each, **worst disagreement
+            between the two cells' answers 0.000000 m** (it was 0.151 m at the foyer). Four
+            injections into `build_collision.py`, all CAUGHT: a zero reach, a clip that never
+            fires, the hole's vertical band instead of the body's, and a window treated as a way
+            through. The census: 1 582 → 1 958 cell references over the same 1 134 shapes (376
+            borrowed), mean bucket occupancy 1.05 → 1.06 and the worst bucket 16 → 22. §49.5's
+            twenty minutes then run clean on the route that found the defect: **deepest contact
+            0.000075 m** over 144 000 steps, 1 390 m walked, 0 boundary escapes -- and 33 blocked
+            steps rather than 1 197, because a body that meets a staircase where the staircase is
+            stops walking into it. 1 010 unit tests pass.
 - [x] HOUSE-00612 — Guarantee test: the player cannot pass any closed door (all 62, both sides)
       dep: HOUSE-00554 · sys: physics · plat: CI · pri: MUST
       verify: unit ClosedDoorTests.NoClosedDoorInTheHouseCanBeWalkedThrough
@@ -8675,6 +8791,13 @@ never escapes and never penetrates.
             (`P_B1_STAIR__B1_MECHANICAL`) and 2.000 m high against §70.5's 0.62 × 1.95 m capsule.
             The margins are printed whether or not the test passes — "no violations" says nothing
             about how close the house is to having one.
+      note: (2026-09-09, `HOUSE-00568`) **three more doors joined the recorded exemptions and one
+            of them is the house's fault.** With a cell's collision no longer ending at its own
+            boundary, a body walking at `P_B1_STAIR__B1_HALL`, `P_L1_STAIR__L1_BED5` or
+            `P_L2_LANDING__L2_BALCONY_JULIET` meets a flight or a balcony rail before it meets the
+            leaf, from either side. `NoApproachAtAll()` names all three with the reason and
+            `HOUSE-00489` owns the two that are defects; 59 of the 62 doors are still proved shut
+            by a walk that starts from a spot a body can stand on.
       finding: **what a validation rule cannot say is which portals are exempt on purpose.** Rule
             10 in both validators takes `crouch` and `hatch` at face value, so marking a doorway
             `crouch` silences the check for ever and nothing notices. The guarantee names this
@@ -12895,19 +13018,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 302 numbered tasks across 53 phases.**
+**1 320 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 237 |
-| World data, blockout, collision, camera, visibility | 5–9 | 204 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 130 |
+| World data, blockout, collision, camera, visibility | 5–9 | 210 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 132 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
-| Time, sun, moon, stars, sky, weather | 22–30 | 146 |
-| Audio, room-aware audio, animals, avatar, animation | 31–38 | 161 |
+| Time, sun, moon, stars, sky, weather | 22–30 | 155 |
+| Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 302** |
+| **Total** | **0–52** | **1 320** |
 
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
@@ -12956,6 +13079,9 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00486`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and a `dep` added to `HOUSE-00688`. Found by `HOUSE-00684`: the shell fills a window with `BLOCKOUT_glass` and a doorway with nothing, so a closed door is a hole. | Invisible while everything was drawn -- you saw the room behind it -- and visible the moment §25's culling was turned on, because §65.6 starts every door shut and the walk correctly refuses to see through one. `HOUSE-00688`'s two images cannot match while the difference between them is a hole in the shell, so its dependency now says so rather than leaving the criterion unsatisfiable for a reason nobody wrote down. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00487` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00486`: `L0_GARAGE`, `L3_STORE_E`, `L3_STORE_N` and `L3_STORE_W` carry seven materials each, over §17.4's six chunks a cell, and the content build's `chunks` stage has been failing on it since before either task. | Noticed while rebuilding the shell, and NOT caused by the door leaves -- they are `trim`, a class those cells already had, and the material count is unchanged at ten. Recorded rather than relaxed: whether to merge two blockout classes or to accept that a garage is not a room is a decision about §17.4's budget. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00762` | `cna-house.md` §11.5's *"one static chunk per 16 × 16 m tile (25 tiles)"* → **20 tiles, 5 × 4**, with the arithmetic stated beside it | The parenthesis does not follow from the extents in the same sentence: 81 × 65 samples on a 1 m grid is 80 × 64 m, which is five 16 m tiles across and four deep. Twenty-five would need a 5 × 5 field, and §10.3's playable area is 80 × 64. Nothing else in the design depends on the number; the generator, its selftest and this correction now all say 20. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00568` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00618`: static collision is partitioned per cell and the sweep is given one cell, so a body standing in a doorway -- which §16.4's lookup keeps in the room it came from until it is 0.05 m past the boundary -- met nothing that stood 0.20 m on the other side of it. Measured: 0.151 m inside the main stair's first run, from `L0_FOYER`, before anything stopped it. | A wall is shared by both rooms and that is what makes the per-cell partition safe; a hole is not a wall, and `HOUSE-00567` had already fixed the same defect once for the outer walls the yards could not see. This generalises it to every hole, so it is its own task in the phase that owns collision rather than a correction folded into the exterior one that exposed it. No id was renumbered or struck. |
+| 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
+| 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00488`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and two more `dep`s on `HOUSE-00688`. Found by `HOUSE-00688`'s first run: a cell does not always draw the surfaces a body standing in it looks at, and §25 removes the cell that does -- 8 450 pixels of four frames become the clear colour with culling on. | The most important test in the project was written, run and left FAILING and DISABLED, with its numbers, rather than weakened to pass. Its 46 881 differing pixels separate into two shell defects and no culling defect: 38 431 are `HOUSE-00485`'s coplanar pairs resolving the other way, and 8 450 are this. No id was renumbered or struck. |
 
 ---

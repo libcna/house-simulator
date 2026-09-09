@@ -991,6 +991,123 @@ def _resolve_meshes(per_cell: dict[str, list[int]], obb_count: int) -> None:
                              for index in indices]
 
 
+# ================================================================== what reaches through a hole
+
+#: §43.1's capsule radius. Collision is built for the body that walks it, so the body's own size
+#: is a number this file needs.
+BODY_RADIUS = 0.30
+#: §16.4's hysteresis, `SpatialIndex::kHysteresis`: how far past its own boundary the cell lookup
+#: still answers with the cell the body was already in. A body that far past the plane is still
+#: being swept against the cell it came from, so the cell it came from has to know what is there.
+CELL_HYSTERESIS = 0.05
+#: How far past a hole in its boundary a body simulated in a cell can touch something: the two
+#: above, plus 50 mm so the rule does not sit exactly on the number it is derived from. 0.40 m.
+OPENING_REACH = BODY_RADIUS + CELL_HYSTERESIS + 0.05
+#: §43.1's standing body, floor to crown. What a body in a doorway can reach ABOVE the floor it
+#: stands on, and so how high up the other side of a hole is worth carrying.
+BODY_HEIGHT = 1.80
+#: §43.1's step-up, `physics::kStepUpHeight`. A hole whose sill is no higher than this above the
+#: floor is one a body walks THROUGH; anything higher is a window, and what a body can put through
+#: a window is its shoulder rather than itself.
+STEP_UP = 0.22
+
+
+def _intersect_aabb(a, b):
+    """The overlap of two AABBs, or `None` when they do not touch."""
+    low = tuple(max(a[i], b[i]) for i in range(3))
+    high = tuple(min(a[i + 3], b[i + 3]) for i in range(3))
+    if any(high[i] <= low[i] for i in range(3)):
+        return None
+    return low + high
+
+
+def union_aabb(boxes):
+    """The AABB of a list of AABBs. A shape borrowed through two holes is indexed by both."""
+    return (tuple(min(box[i] for box in boxes) for i in range(3))
+            + tuple(max(box[i + 3] for box in boxes) for i in range(3)))
+
+
+def share_through_openings(layout, per_cell: dict[str, list[int]], aabbs, stats: dict) -> dict:
+    """A body standing in a doorway is in BOTH rooms, so both rooms' lists carry what it can touch.
+
+    §49.2 partitions collision per cell and the sweep is given ONE cell -- whichever §16.4's lookup
+    answers with. That is right for everything a wall separates, because a wall belongs to the
+    lists on both sides of it and nothing behind one can be reached. It is wrong at a **hole**: the
+    main stair's flight starts 0.20 m east of `L0_FOYER`'s cased opening, in `L0_STAIR_MAIN`'s list
+    alone, and a body walking east through that opening met nothing until the cell tracker changed
+    its mind -- by which time it was 0.16 m inside the flight and being shoved back out. That is
+    `HOUSE-00618`'s bot walking into a staircase, and it is the same defect `HOUSE-00567` fixed for
+    the outer walls the yards could not see, one hole further in.
+
+    So: through every hole in a boundary, each side gains the other side's shapes within
+    `OPENING_REACH` of the plane, over the hole's own width and the body's own height. `y` portals
+    are deliberately not holes for this purpose -- a hole in a slab is a way DOWN, and the flights
+    that reach through one are already in the lists of both cells they connect (`build_stairs`).
+
+    A shared shape is INDEXED by the parts of it that are within reach (the returned clips, one per
+    hole it came through), not by all of it: a neighbour's floor slab spans the neighbour's whole
+    room, and letting that size this cell's grid would grow `L0_HALL`'s from 5 x 5 buckets to
+    17 x 13 and make the cell's bounds a statement about a room the body cannot be in. The shape
+    itself is whole -- the narrow phase gets the real geometry -- the clip only decides which
+    buckets have to find it.
+    """
+    levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
+    cells = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
+    listed = {cell_id: set(indices) for cell_id, indices in per_cell.items()}
+    clipped: dict[tuple[str, int], tuple] = {}
+    for portal in sorted(layout_io.rows(layout, "portals"), key=lambda row: row["id"]):
+        plane = portal.get("plane") or {}
+        axis = plane.get("axis")
+        if axis not in ("x", "z"):
+            continue
+        value = float(plane.get("value", 0.0))
+        rect = portal.get("rect") or {}
+        u0, u1 = (float(v) for v in rect["u"])
+        v0, v1 = (float(v) for v in rect["v"])
+        for me, other in ((portal["cellA"], portal["cellB"]), (portal["cellB"], portal["cellA"])):
+            if (me not in per_cell or other not in per_cell
+                    or me not in cells or other not in cells):
+                continue
+            here, _lid = layout_io.cell_extent(cells[me], levels[cells[me]["level"]])
+            over, _other_lid = layout_io.cell_extent(cells[other], levels[cells[other]["level"]])
+            low_floor, high_floor = min(here, over), max(here, over)
+            if v0 <= high_floor + STEP_UP:
+                # A way THROUGH: the body stands in the hole, on the higher of the two floors, and
+                # what it can touch is its own height above that -- which is not the hole's height.
+                # The fridge sub-cell is where the difference showed: its ceiling slab starts
+                # exactly at the top of its own opening, and a body standing on its 0.70 m floor
+                # has 50 mm of head inside that slab while the kitchen, reading the HOLE, did not
+                # carry it.
+                low_y, high_y = low_floor, high_floor + BODY_HEIGHT
+            else:
+                # A window. A body cannot be in it -- the wall under it is what it stands against
+                # -- so only what is level with the hole itself is within reach.
+                low_y, high_y = v0, v1
+            if high_y <= low_y:
+                continue
+            if axis == "x":
+                reach = (value - OPENING_REACH, low_y, u0 - OPENING_REACH,
+                         value + OPENING_REACH, high_y, u1 + OPENING_REACH)
+            else:
+                reach = (u0 - OPENING_REACH, low_y, value - OPENING_REACH,
+                         u1 + OPENING_REACH, high_y, value + OPENING_REACH)
+            for index in per_cell[other]:
+                overlap = _intersect_aabb(aabbs[index], reach)
+                if overlap is None:
+                    continue
+                if index in listed[me]:
+                    # Already this cell's own shape, whole. Only what is borrowed is clipped, and
+                    # a shape borrowed through a second hole is indexed by both parts.
+                    if (me, index) in clipped:
+                        clipped[(me, index)].append(overlap)
+                    continue
+                per_cell[me].append(index)
+                listed[me].add(index)
+                clipped[(me, index)] = [overlap]
+                stats["openingShared"] += 1
+    return clipped
+
+
 # ========================================================================================== props
 
 
@@ -1261,6 +1378,7 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
 
     stats = {"wallPieces": 0, "floorPieces": 0, "ceilingPieces": 0, "stairMeshes": 0, "stairSteps": 0, "stairLandings": 0,
              "stairsGuessed": 0, "rafterMeshes": 0, "rafterArea": 0.0, "rafterAboveCeiling": 0, "guards": 0, "stairGuards": 0, "outerShared": 0,
+             "openingShared": 0,
              "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
     shapes = Shapes()
     per_cell = build_shell(layout, shapes, stats)
@@ -1273,6 +1391,10 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     obb_count = len(shapes.obbs)
     _resolve_meshes(per_cell, obb_count)
     aabbs = [obb_aabb(o) for o in shapes.obbs] + [mesh_aabb(m) for m in shapes.meshes]
+    # Last, because it needs every shape's final index and every cell's finished list: what a body
+    # can reach through a doorway includes the props and the stair wedges the builders above put
+    # on the other side of it.
+    reachable = share_through_openings(layout, per_cell, aabbs, stats)
 
     cells = []
     for cell_id in sorted(per_cell):
@@ -1281,7 +1403,8 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
             raise LayoutError(
                 f"cell {cell_id!r} has {len(indices)} collision shapes; the format's u16 bucket "
                 f"indices address {MAX_PER_CELL}")
-        local = [aabbs[i] for i in indices]
+        local = [union_aabb(reachable[(cell_id, i)]) if (cell_id, i) in reachable else aabbs[i]
+                 for i in indices]
         bounds = (min(a[0] for a in local), min(a[1] for a in local), min(a[2] for a in local),
                   max(a[3] for a in local), max(a[4] for a in local), max(a[5] for a in local))
         nx, nz, origin, buckets = build_grid(bounds, local)
@@ -1302,7 +1425,7 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
     })
     terrain = _terrain(world_dir, shapes, stats)
     return {"shapes": shapes, "cells": cells, "stats": stats, "terrain": terrain,
-            "worldHash": _world_hash(world_dir)}
+            "borrowed": reachable, "worldHash": _world_hash(world_dir)}
 
 
 def _terrain(world_dir: Path, shapes: Shapes, stats: dict) -> dict | None:
@@ -1542,6 +1665,8 @@ def report(world: dict) -> str:
         f"for want of an authored footprint",
         f"  props: {stats['propObbs']} OBBs, {stats['propMeshes']} meshes, "
         f"{stats['propsSkipped']} without collision",
+        f"  openings: {stats['openingShared']} shape(s) shared across a hole, each carried "
+        f"{OPENING_REACH:.2f} m past the plane -- a body in a doorway is in both rooms",
     ]
     terrain = world.get("terrain")
     if terrain:
@@ -1763,8 +1888,11 @@ def selftest() -> int:
         world = build(world_dir)
         lounge = next(c for c in world["cells"] if c["id"] == "L0_LOUNGE")
         shapes: Shapes = world["shapes"]
+        # What the cell OWNS: a shape borrowed through one of its own holes (`HOUSE-00568`) is
+        # the room next door's, and these claims are about what this room generates.
+        owned = [i for i in lounge["shapes"] if ("L0_LOUNGE", i) not in world["borrowed"]]
         divider = [
-            i for i in lounge["shapes"]
+            i for i in owned
             if i < len(shapes.obbs) and shapes.obbs[i][4] == KIND_WALL
             and abs(shapes.obbs[i][0][2] - 3.0) < 0.01
             and shapes.obbs[i][0][0] < 2.0
@@ -1775,11 +1903,11 @@ def selftest() -> int:
         require(any(i < len(shapes.obbs) and shapes.obbs[i][4] == KIND_WALL
                     and abs(shapes.obbs[i][0][2] - 3.0) < 0.01
                     and shapes.obbs[i][0][0] > 2.0
-                    for i in lounge["shapes"]),
+                    for i in owned),
                 "...but the part of that same edge facing outdoors IS a wall")
 
         # 3. The wall carrying a door and a window is punched by both.
-        shared = [i for i in lounge["shapes"]
+        shared = [i for i in owned
                   if i < len(shapes.obbs) and shapes.obbs[i][4] == KIND_WALL
                   and abs(shapes.obbs[i][0][0] - 4.0) < 0.01]
         require(len(shared) == 6,
@@ -2016,7 +2144,8 @@ def selftest() -> int:
             everywhere = {KIND_NAMES[house_shapes.meshes[index - offset]["kind"]]
                           for identifier, indices in references.items()
                           for index in indices
-                          if index >= offset and house_cells[identifier].get("level") != "L3"}
+                          if index >= offset and house_cells[identifier].get("level") != "L3"
+                          and (identifier, index) not in house["borrowed"]}
             require("ceiling" not in everywhere,
                     f"and no cell outside the attic gets one -- the garage has a flat ceiling at "
                     f"+4.30 and therefore a lid already ({sorted(everywhere)})")
@@ -2061,6 +2190,7 @@ def selftest() -> int:
                 floor = layout_io.cell_extent(house_cells[identifier],
                                               house_levels[house_cells[identifier]["level"]])[0]
                 found = [house_shapes.obbs[index] for index in indices if index < offset
+                         and (identifier, index) not in house["borrowed"]
                          and house_shapes.obbs[index][4] == KIND_WALL
                          and abs(house_shapes.obbs[index][0][1] - (floor + railing / 2)) < 1e-6
                          and min(house_shapes.obbs[index][1][0],
@@ -2092,6 +2222,91 @@ def selftest() -> int:
                         for record in guarded["L1_BALCONY_REAR"]),
                     "and it stands INSIDE the deck's edge, like the parapet the shell draws, "
                     "rather than hanging in the air outside it")
+
+            # 7f. `HOUSE-00568`: a body standing in a hole is in BOTH rooms, so what is within
+            #     reach through the hole is in both lists. Claimed on the authored house, because
+            #     the fixture has one room and no doorway with anything behind it.
+            house_aabbs = ([obb_aabb(o) for o in house_shapes.obbs]
+                           + [mesh_aabb(m) for m in house_shapes.meshes])
+            house_portals = layout_io.load_layout(authored, ["portals"])
+            planes = {}
+            for portal in layout_io.rows(house_portals, "portals"):
+                plane = portal.get("plane") or {}
+                if plane.get("axis") in ("x", "z"):
+                    for side in (portal["cellA"], portal["cellB"]):
+                        planes.setdefault(side, []).append(
+                            (plane["axis"], float(plane["value"])))
+
+            require(house["stats"]["openingShared"] > 0,
+                    f"the house has holes with something behind them "
+                    f"({house['stats']['openingShared']} shape(s) shared)")
+
+            # The regression itself, named. `STAIR_MAIN_L0_L1`'s first run is a wedge whose west
+            # face is at x = +2.40, and `P_L0_FOYER__L0_STAIR` is the cased opening at x = +2.20:
+            # 0.20 m, which is less than a 0.30 m body's radius. `HOUSE-00618`'s bot walked east
+            # out of the foyer and was 0.151 m inside the staircase before anything stopped it.
+            first_run = [index for index in range(len(house_shapes.meshes))
+                         if abs(mesh_aabb(house_shapes.meshes[index])[0] - 2.40) < 1e-6
+                         and abs(mesh_aabb(house_shapes.meshes[index])[1] - 0.60) < 1e-6
+                         and house_shapes.meshes[index]["kind"] == KIND_STAIR]
+            require(len(first_run) == 1,
+                    f"the main stair's first run is one wedge starting at x +2.40, y +0.60 "
+                    f"({len(first_run)})")
+            if first_run:
+                run_index = offset + first_run[0]
+                require(run_index in references["L0_STAIR_MAIN"] and run_index in references["L0_FOYER"],
+                        "and it is in L0_FOYER's list as well as L0_STAIR_MAIN's: the opening is "
+                        "0.20 m from it and a body in the opening is standing in the staircase")
+
+            # The fridge, which is where the vertical band had to be the BODY's and not the hole's:
+            # `CELL_FRIDGE_INTERIOR`'s ceiling slab starts exactly at the top of its own opening,
+            # and a body standing on its +0.70 floor has 50 mm of head inside that slab.
+            fridge_lid = [index for index in references["CELL_FRIDGE_INTERIOR"]
+                          if index < offset and house_shapes.obbs[index][4] == KIND_CEILING]
+            require(len(fridge_lid) == 1 and fridge_lid[0] in references["L0_KITCHEN"],
+                    f"the kitchen carries the fridge's own ceiling slab, which is above the top "
+                    f"of the fridge's opening and still inside a body standing in it "
+                    f"({len(fridge_lid)})")
+
+            # Nothing is carried further than a body can reach, and the borrowed part is what
+            # sizes the grid: `L0_FOYER` borrows a wedge that runs to x +3.50 and its own bounds
+            # stop at +2.60, which is the opening's plane plus `OPENING_REACH`.
+            foyer = [row for row in house["cells"] if row["id"] == "L0_FOYER"][0]
+            require(abs(foyer["bounds"][3] - (2.20 + OPENING_REACH)) < 1e-6,
+                    f"L0_FOYER's bounds stop {OPENING_REACH:.2f} m past its own opening, not at "
+                    f"the far end of the staircase it borrowed ({foyer['bounds'][3]:.3f})")
+            require(foyer["nx"] * foyer["nz"] <= 30,
+                    f"...so its grid is still the foyer's ({foyer['nx']} x {foyer['nz']} buckets)")
+
+            # And every borrowed shape is INDEXED by the part of it within reach of a hole in
+            # the cell that borrowed it -- not by all of it. A neighbour's floor slab spans the
+            # neighbour's whole room, and a cell that indexed one would have a grid over a room
+            # its body can never be in.
+            far = []
+            for (cell_id, index), clips in house["borrowed"].items():
+                for clip in clips:
+                    if not any((clip[0] >= value - OPENING_REACH - 1e-6
+                                and clip[3] <= value + OPENING_REACH + 1e-6) if axis == "x" else
+                               (clip[2] >= value - OPENING_REACH - 1e-6
+                                and clip[5] <= value + OPENING_REACH + 1e-6)
+                               for axis, value in planes.get(cell_id, [])):
+                        far.append((cell_id, index, tuple(round(v, 3) for v in clip)))
+            require(not far,
+                    f"every borrowed shape is indexed within {OPENING_REACH:.2f} m of the hole it "
+                    f"came through ({len(far)} not: {far[:2]})")
+            require(all(min(clip[3] - clip[0], clip[5] - clip[2]) <= 2 * OPENING_REACH + 1e-6
+                        for clips in house["borrowed"].values() for clip in clips),
+                    "...and no borrowed box is wider than the reach in BOTH horizontal axes, "
+                    "which is what a clip that never fired would look like")
+
+            # A window is not a way through, and what is behind one is not carried: the sunroom's
+            # floor slab reaches to `P_L0_KITCHEN__W2`'s plane, and the kitchen does not have it.
+            sunroom_floor = [index for index in references["L0_SUNROOM"]
+                             if index < offset and house_shapes.obbs[index][4] == KIND_FLOOR]
+            require(sunroom_floor
+                    and all(index not in references["L0_KITCHEN"] for index in sunroom_floor),
+                    "the kitchen does not carry the sunroom's floor: the only hole between them "
+                    "is a window with a 0.95 m sill, and a body cannot stand in one")
 
         # 8. Proxies: a box becomes an OBB, five boxes become five OBBs, and only what is not a
         #    box becomes a mesh.
@@ -2227,7 +2442,9 @@ def selftest() -> int:
                     bz0, bz1 = oz + j * GRID_CELL, oz + (j + 1) * GRID_CELL
                     expected = set()
                     for n, index in enumerate(check["shapes"]):
-                        ax0, _, az0, ax1, _, az1 = all_aabbs[index]
+                        borrowed_clips = world["borrowed"].get((check["id"], index))
+                        ax0, _, az0, ax1, _, az1 = (union_aabb(borrowed_clips) if borrowed_clips
+                                                    else all_aabbs[index])
                         if (min(ax1, bx1) - max(ax0, bx0) > EPS
                                 and min(az1, bz1) - max(az0, bz0) > EPS):
                             expected.add(n)
