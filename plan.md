@@ -12764,8 +12764,44 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 22 — Time
 
-- [ ] HOUSE-01531 — Implement `SimClock`: epoch seconds, time scale, location, UTC offset, US DST rules
+- [x] HOUSE-01531 — Implement `SimClock`: epoch seconds, time scale, location, UTC offset, US DST rules
       dep: HOUSE-00139 · sys: environment · plat: ALL · pri: MUST
+      verify: `SimClockTests.*`
+      note: (2026-09-10) taken out of phase order because it is one of the two things
+            `HOUSE-00850` waits on -- §35.3 puts the neighbours' porch lights and §11.4's street
+            lights on a dusk sensor, and a dusk sensor with no clock to sense is why that task was
+            left open earlier today. The other half is `HOUSE-01251`'s light groups.
+      finding: **`epochSeconds` is local STANDARD time, and §35.1's word "local" had to be
+            decided.** *"Seconds since 2031-01-01T00:00:00 local"* is ambiguous exactly where it
+            matters: on November's first Sunday the local WALL clock runs 01:00-02:00 twice, so a
+            wall-clock epoch has two seconds with the same reading and, in March, an hour that
+            never happens. Counted in local standard seconds the line is monotone and unbroken,
+            and the wall clock is derived by adding an hour while daylight saving is in force --
+            which is what a wall clock IS. `Standard()` is the number, `Wall()` is the reading, and
+            a claim steps a minute at a time across both transitions to prove the line never
+            repeats or skips.
+      finding: **both DST bounds are expressed in STANDARD time for the same reason.** §35's US
+            rule begins on the second Sunday in March at 02:00 standard and ends on the first
+            Sunday in November at 02:00 DAYLIGHT -- which is 01:00 standard. Written in wall-clock
+            terms the end lands in the hour that happens twice and the comparison has no single
+            answer; written in standard time it is one number on a monotone line.
+      finding: the fixture worth having was already in the design. §31.4's screenshot scene says
+            **"Saturday 14 June 2031, 09:20 local (UTC−4 DST)"** -- a weekday, a date and a DST
+            verdict authored long before this code and not derived from it. All three come out.
+      note: the calendar arithmetic is Howard Hinnant's `days_from_civil`, exact over every year a
+            `std::int64_t` holds, with no table and no locale -- this project targets a Web build
+            where `time_t` is whatever the host says it is, and §35's clock has to give the same
+            answer everywhere. `HOUSE-01532` exposes the conversion API and its 500-case table on
+            top of it; §35.2b's `calendarDaysPerSimDay` stays out until `HOUSE-01542`, because with
+            it in place this clock's own tests could not say what date a given second is.
+      measured: (2026-09-10) 10 tests. `timeScale` 60 gives exactly 1 simulated minute per real
+            second and 86 400 s per 24 real minutes, both asserted; a 250 ms hitch advances the
+            clock by 15 simulated seconds and not by a frame.
+      verified: 7 injections, all CAUGHT -- truncation instead of floor division (the second before
+            the epoch becomes the first of 2031), daylight saving ending at 02:00 standard instead
+            of 01:00, beginning on March's FIRST Sunday, `Advance` accepting a negative dt, the
+            weekday seed off by one, `Wall()` forgetting the hour, and `NthWeekdayOfMonth` off by
+            a week.
 - [ ] HOUSE-01532 — Implement calendar conversion (epoch ↔ Y/M/D h:m:s, day-of-year, weekday) and its tests
       dep: HOUSE-01531 · sys: environment · plat: ALL · pri: MUST
       verify: unit ClockTests.* against 500 known conversions incl. DST boundaries and leap years
