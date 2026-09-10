@@ -13626,6 +13626,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 - [ ] HOUSE-01561 — Implement `SunModel`: the simplified NOAA algorithm producing declination, hour angle, altitude and azimuth
       dep: HOUSE-01532 · sys: environment · plat: ALL · pri: MUST
       verify: unit SunModelTests.* against 200 published sunrise/sunset times, ± 3 minutes
+      note: (2026-09-10) **not started: its `verify` line needs data this machine cannot get, and
+            the alternative is the mistake `HOUSE-01532` was written to correct.** The criterion is
+            *"200 PUBLISHED sunrise/sunset times"*, and published means from an authority. There is
+            no network here (`curl https://pypi.org/simple/` times out) and no astronomy package is
+            installed -- `astral`, `ephem`, `skyfield` and `astropy` are all absent; `pytz` and
+            `zoneinfo` are what there is, and neither computes a sunrise.
+      note: generating the table with a NOAA implementation in Python would be **the same algorithm
+            checking itself**, which is exactly what `HOUSE-01532` spent a task replacing: a
+            conversion tested against its own arithmetic proves consistency and says nothing about
+            correctness. `HOUSE-01532`'s table works because `datetime`/`zoneinfo` is a different
+            implementation by a different hand; there is no such second source for solar position
+            on this machine.
+      note: **what would unblock it**, in preference order: (1) a published table committed as a
+            fixture -- NOAA's own solar calculator output for §33's 40.05 N, 75.30 W over a year is
+            365 rows and would settle it permanently; (2) network access long enough to install
+            `astral` or fetch that table once; (3) a SECOND independent formulation in the
+            generator -- the sunrise equation from a different source rather than NOAA's -- which
+            is weaker than published data but is genuine independence, and would have to say so in
+            the tool and in the test.
 - [ ] HOUSE-01562 — Implement the world-space sun direction with the north = `−Z` convention
       dep: HOUSE-01561 · sys: environment · plat: ALL · pri: MUST
 - [ ] HOUSE-01563 — Implement the sun colour and intensity LUT over altitude, with the cloud modulation
