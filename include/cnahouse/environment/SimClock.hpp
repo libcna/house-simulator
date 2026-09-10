@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "cnahouse/environment/Season.hpp"
+
 namespace cnahouse::environment
 {
 
@@ -147,6 +149,16 @@ namespace cnahouse::environment
 
         /// @brief Whole SIMULATED days since the epoch -- how many times the sun has come up.
         [[nodiscard]] std::int64_t SimDayIndex() const noexcept;
+
+        /// @brief Where the year is, `[0, 1)`, with 0 at the vernal equinox (`HOUSE-01534`).
+        ///
+        /// Continuous, and it completes exactly once per calendar year: the divisor is the length
+        /// of the year the clock is IN, so a leap year's 366 days still come to one turn and the
+        /// phase does not drift by a day every four years.
+        [[nodiscard]] double YearFraction() const noexcept;
+
+        /// @brief §36.3's season phase for `YearFraction()`.
+        [[nodiscard]] SeasonPhase Season() const noexcept;
 
         /// @brief The clock set as close to @p time, read as local STANDARD time, as it can get.
         ///

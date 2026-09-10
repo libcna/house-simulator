@@ -187,6 +187,26 @@ namespace cnahouse::environment
         return FloorDiv(FloorSeconds(epochSeconds), 86400);
     }
 
+    double SimClock::YearFraction() const noexcept
+    {
+        const CivilTime now = Standard();
+        // The year's own start and its own length, both taken from the calendar rather than from
+        // 365: a leap year is 366 days and a phase divided by 365 would arrive 1/365 of a turn
+        // early, every four years, for as long as the save lasts.
+        const std::int64_t yearStart = DaysFromCivil(now.year, 1, 1) - kEpochDay;
+        const double length =
+            static_cast<double>(DaysFromCivil(now.year + 1, 1, 1) - DaysFromCivil(now.year, 1, 1));
+        const double dayOfYear = CalendarDays() - static_cast<double>(yearStart);
+        const double fromEquinox = dayOfYear - static_cast<double>(kVernalEquinoxDayOfYear - 1);
+        const double turns = fromEquinox / length;
+        return turns - std::floor(turns);
+    }
+
+    SeasonPhase SimClock::Season() const noexcept
+    {
+        return SeasonAt(YearFraction());
+    }
+
     void SimClock::SetCalendar(double calendarDays) noexcept
     {
         const double rate = (std::isfinite(calendarDaysPerSimDay) && calendarDaysPerSimDay > 0.0)

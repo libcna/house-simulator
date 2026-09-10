@@ -13230,8 +13230,45 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             a hand-edited line, and an unseeded spread that would make `--check` meaningless.
 - [ ] HOUSE-01533 — Implement the day-length presets and the custom value, wired to settings
       dep: HOUSE-01531, HOUSE-00131 · sys: environment · plat: ALL · pri: MUST
-- [ ] HOUSE-01534 — Implement season derivation and its exposure to the weather system
+- [x] HOUSE-01534 — Implement season derivation and its exposure to the weather system
       dep: HOUSE-01532 · sys: environment · plat: ALL · pri: MUST
+      verify: unit `SeasonPhaseTests.*`
+      note: (2026-09-10) **§36.3's `SeasonPhase`, and the reason it is a phase.** *"Season is a
+            continuous phase, never an enum... a boundary is crossed every 91 real minutes, so a
+            matrix that switched at an instant would be visible as a glitch."* `SeasonAt` returns
+            the four fields §36.3 names and `MixBySeason` is the thing callers are meant to do with
+            them, put next to the phase so that a caller reaching for `primary` alone has to walk
+            past the function that does it properly.
+      finding: **`blend` never exceeds 0.5, and that is the whole of what makes the mix
+            continuous.** §36.3 types the field as `0 .. 1`, and reading that as "ramps to 1.0 at
+            the boundary" makes the seasonal mix DISCONTINUOUS: the last instant of autumn would be
+            100 % winter and the first instant of winter 100 % autumn. At a half it is the same
+            50/50 mix under two labels -- `primary`/`secondary` simply swap -- and the quantity a
+            caller computes does not move at all. Measured over 10 000 steps of a year the largest
+            change in a mixed value is under 0.15 of the distance between two seasons' values, and
+            at the boundaries themselves it is the same.
+      finding: **the divisor is the year's OWN length and that only shows up mid-year.** On
+            20 March the offset from the equinox is zero whatever it is divided by, so a flat 365
+            passes every equinox check; on 31 December of a leap year it places the phase 0.002 of
+            a turn late. The claim that catches it is stated at the end of the year rather than at
+            the start.
+      measured: a year of play from the vernal equinox -- 365 real minutes at §35.2b's compression
+            -- crosses **exactly four boundaries**, the narrowest and widest gaps both 91.25 real
+            minutes to within 1.5, which is §36.3's own number reached by playing rather than by
+            arithmetic. Every season gets exactly a quarter of the phase.
+      note: **the weather system is what this is exposed TO, and it does not exist yet.** §36 is a
+            later phase; `SimClock::Season()` is the exposure, and `MixBySeason` is the contract
+            the transition matrices, the temperature curve (`HOUSE-01535`), vegetation colour and
+            the ambience bed will each read. The vernal equinox is a fixed 20 March rather than a
+            solved instant: the true one moves by up to eighteen hours across the leap cycle, which
+            is 0.2 % of the year and far below anything §36.3 blends over. Solving it belongs to
+            §35.3's sun model, where the answer is wanted to the minute for a different reason.
+      verified: 6 `SeasonPhaseTests`. Eight injected bugs, all caught: the blend ramping to a whole
+            instead of a half, the opening fifth blending towards the season ahead, the year
+            fraction divided by a flat 365, the equinox offset dropped so the year starts in
+            January, the mix ignoring the secondary season, the ramp covering the whole season,
+            the fraction not wrapping so a second year runs off the end, and a season blending
+            with itself.
 - [ ] HOUSE-01535 — Implement the temperature curve (annual + diurnal) for the configured location
       dep: HOUSE-01534 · sys: environment · plat: ALL · pri: MUST
 - [ ] HOUSE-01536 — Implement the console commands `time set`, `time scale`, `time advance`

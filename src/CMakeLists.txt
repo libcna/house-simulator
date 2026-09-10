@@ -25,6 +25,7 @@ add_library(cnahouse_core STATIC
     audio/AudioSystem.cpp
 
     # environment -- §35's clock, which everything time-dependent reads and nothing duplicates
+    environment/Season.cpp
     environment/SimClock.cpp
 
     # player -- input first, because nothing else may read the devices
