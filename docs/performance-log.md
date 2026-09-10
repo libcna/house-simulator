@@ -95,6 +95,35 @@ number came from.
 | 2026-09-07 | HOUSE-00218 | `lightmap_bake.py` — one Cycles bake of the two-room fixture, CPU, denoised | wall clock / Cycles CPU / — / as above | `lightmap_bake` selftest fixture | 32²/16 spp **0.039 s** · 64²/16 **0.055 s** · 128²/16 **0.200 s** · 64²/64 **0.191 s** · 128²/64 **0.617 s** | — | baseline | Above ~64² the cost is close to linear in texels × samples; below it, fixed overhead dominates. Measured to make the extrapolation below defensible rather than guessed. |
 | 2026-09-07 | HOUSE-00218 | **Estimated** full lightmap bake, §18.3's settings (2048², 256 spp, denoised) | wall clock / Cycles CPU / — / as above | — | **≈ 10 min per atlas; ≈ 7–8 h for §18.3's 42 atlases** | — | baseline | Extrapolated from the 128²/64 row by ×256 texels and ×4 samples. A **lower bound**: the fixture is two rooms of 16 faces and two lamps, and a furnished cell has far more geometry per ray. The number to plan against is *overnight*, not *coffee break* — which is why `HOUSE-00216`'s content-hash stamps are load-bearing rather than a convenience. |
 
+### Phase 9 — room/portal visibility (`HOUSE-00697`)
+
+**The first two rows are COUNTS and not times**, which is why they carry a Debug config without the
+usual warning: how many cells a pose sees and how many draws follow from them is a property of the
+house and of §25's arithmetic, and an optimiser cannot change either. The time rows below them are
+`HOUSE-00694`'s, taken in an optimised build; they are recorded here rather than re-measured
+because re-measuring costs two full rebuilds of a tree shared with nine other agents for a number
+whose inputs have not moved.
+
+| date | task | what | config | scene | value | budget | verdict | notes |
+|---|---|---|---|---|---|---|---|---|
+| 2026-09-10 | HOUSE-00697 | Visible cells from §70.4's 12 budget poses, **every door in the house open** | Debug / — / — / a count, not a time | unit `VisibilityBudgetTests` | **worst 13** (`l0-sunroom`), mean 6.8 | 9 typical · 22 worst · 30 hard fail | **within** | The twelve see 82 cells between them with the doors open and 54 with them shut, out of §16's 96. §25's `cellsDropped` is zero at every one of them, so nothing was thrown away to reach the number. |
+| 2026-09-10 | HOUSE-00697 | Draw calls and state changes that follow from the same twelve poses | Debug / — / — / a count, not a time | unit `VisibilityBudgetTests` | **69 draws**, 16 state changes | 620 · 90 | **11 % of budget** | 69 of the house's **469** chunks, which is phase 9 in one number. **16 of the 69 are §25.6's outdoors** (`HOUSE-00700`), which reached 10 of the 12 poses for 120 chunks in all; before that path existed the same twelve measured 53 draws and 7 state changes and were measuring half the frame. |
+| 2026-09-09 | HOUSE-00694 | §25.1's steps 1–4 over §70.6's ten scenarios — the MEDIAN scenario | Release / OPENGLES3 / — / — | perf `VisibilityCostTests` | **0.084–0.097 ms** | 0.55 ms typical | **15–18 % of budget** | Median of 25 blocks, four runs on a machine with nine other agents on it; the range is the four runs. Step 5, the sort, is 0.0003 ms and is reported separately rather than added. |
+| 2026-09-09 | HOUSE-00694 | The same, the **worst** scenario | Release / OPENGLES3 / — / — | perf `VisibilityCostTests` | **0.26–0.43 ms** | 1.20 ms worst case | **22–36 % of budget** | The portal walk is 0.0029 ms (`L3_STORE_W`, one crossing) to 0.0195 ms (`L0_KITCHEN`, thirteen) of it; §25.6's exterior hierarchy is **88–96 %** of every scenario that can see outdoors. The exterior cost tracks the number of CONES into the outdoors, not the geometry: the kitchen reaches it through seven and costs three times the road, which sees a quarter of the house's worth more geometry through one. |
+| 2026-09-09 | HOUSE-00694 | The 90-second walk — worst FRAME | Release / OPENGLES3 / — / — | perf `VisibilityCostTests` | **0.43–0.68 ms** | 1.20 ms worst case | **36–57 % of budget** | Median 0.023–0.037 ms, p95 0.15–0.25 ms. A distribution rather than a pose: §25's answer is recomputed from the camera cell every frame, so a route costs what the poses along it cost. |
+
+**What the time rows do not include.** They predate `HOUSE-00700`, which added §25.6's real
+instances to the frame: a `GatherExteriorCones` pass over the visible set, one walk of a
+49-instance hierarchy, and a `std::set_difference` against the walk's chunks. Measured as counts on
+the twelve budget poses that is at most 120 chunks over twelve frames — three orders of magnitude
+under the 4 100 synthetic instances the rows above are dominated by — so the rows bound the new
+cost rather than describe it, and the next optimised measurement should retake them.
+
+**The exterior instance set in those rows is synthetic** — 4 100 instances in §25.6's categories
+over §10.3's extents — because the real vegetation (`HOUSE-00772`) and neighbourhood
+(`HOUSE-00852`) are Phase 10 content. The 49 real ones are the ground, the road, the fences and
+the garden structures. Retake these numbers when the content lands.
+
 ## Budgets this log is measured against
 
 Recorded here for convenience; `cna-house.md` §71–72 is authoritative.

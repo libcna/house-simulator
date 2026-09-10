@@ -8,8 +8,10 @@
 // upper bound on an upper bound, and a budget that survives it survives anything the game can
 // produce. §71.2 allows 9 typical, 22 worst case and 30 as a hard fail.
 #include <algorithm>
+#include <cstdint>
 #include <cstdio>
 #include <filesystem>
+#include <iterator>
 #include <string>
 #include <vector>
 
@@ -17,6 +19,8 @@
 
 #include "cnahouse/player/FirstPersonCamera.hpp"
 #include "cnahouse/visibility/ChunkCulling.hpp"
+#include "cnahouse/visibility/ExteriorCulling.hpp"
+#include "cnahouse/visibility/ExteriorScene.hpp"
 #include "cnahouse/visibility/RenderList.hpp"
 #include "cnahouse/visibility/VisibilitySystem.hpp"
 #include "cnahouse/world/ChunkReader.hpp"
@@ -28,6 +32,7 @@
 namespace
 {
     namespace world = cnahouse::world;
+    namespace visibility = cnahouse::visibility;
     using cnahouse::app::FrameContext;
     using cnahouse::player::FirstPersonCamera;
     using cnahouse::player::kPlayerEyeHeight;
@@ -186,9 +191,22 @@ TEST(VisibilityBudgetTests, AndTheDrawCallsAndStateChangesThatFollowFromThem)
     }
     ChunkCuller culler(*library);
     RenderList list;
+    // §25.6's half of the frame (`HOUSE-00700`). Until it existed the draw list WAS the walk's
+    // chunks and this test could ask the chunk cull alone; now the outdoors is a second structure
+    // over the same file, and a budget measured without it is a budget measured on part of the
+    // frame. The union subtracts what the walk already found, exactly as `CnaHouseGame` does.
+    const visibility::ExteriorScene scene = visibility::BuildExteriorScene(*library, data);
+    visibility::ExteriorCuller exterior;
+    std::vector<visibility::ClipFrustum> cones;
+    std::vector<std::uint32_t> outdoors;
+    std::vector<std::uint32_t> already;
+    std::vector<std::uint32_t> extra;
 
     int worstDraws = 0;
     int worstStates = 0;
+    int worstIndoors = 0;
+    int posesWithOutdoors = 0;
+    std::size_t outdoorChunks = 0;
     const char* worstName = "-";
     for (const VisibilityPose& pose : kVisibilityPoses)
     {
@@ -204,7 +222,27 @@ TEST(VisibilityBudgetTests, AndTheDrawCallsAndStateChangesThatFollowFromThem)
         culler.Cull(system.Visible());
         list.Clear();
         list.AddChunks(*library, culler.Chunks(), view.eye);
+        visibility::GatherExteriorCones(data, system.Visible(), cones);
+        outdoors.clear();
+        if (!cones.empty() && !scene.Empty())
+        {
+            exterior.Cull(scene.bvh, cones, view.eye);
+            for (const std::uint32_t instance : exterior.Instances())
+            {
+                outdoors.push_back(scene.ChunkOf(instance));
+            }
+            std::sort(outdoors.begin(), outdoors.end());
+        }
+        already.assign(culler.Chunks().begin(), culler.Chunks().end());
+        std::sort(already.begin(), already.end());
+        extra.clear();
+        std::set_difference(
+            outdoors.begin(), outdoors.end(), already.begin(), already.end(), std::back_inserter(extra));
+        const int indoors = list.DrawCalls();
+        list.AddChunks(*library, extra, view.eye);
         list.Sort();
+        posesWithOutdoors += extra.empty() ? 0 : 1;
+        outdoorChunks += extra.size();
 
         EXPECT_LE(list.DrawCalls(), 620) << pose.name << " is over §71.2's 620 draw calls";
         EXPECT_LE(list.StateChanges(), 90) << pose.name << " is over §71.2's 90 state changes";
@@ -212,15 +250,31 @@ TEST(VisibilityBudgetTests, AndTheDrawCallsAndStateChangesThatFollowFromThem)
         {
             worstDraws = list.DrawCalls();
             worstStates = list.StateChanges();
+            worstIndoors = indoors;
             worstName = pose.name.data();
         }
     }
     std::printf("  the worst of the twelve is %s: %d draw call(s) and %d state change(s) "
-                "(§71.2: 620 and 90)\n",
+                "(§71.2: 620 and 90); %d of those are §25.6's outdoors, which reached %d of the "
+                "12 poses for %zu chunk(s) in all\n",
                 worstName,
                 worstDraws,
-                worstStates);
+                worstStates,
+                worstDraws - worstIndoors,
+                posesWithOutdoors,
+                outdoorChunks);
     EXPECT_GT(worstDraws, 0) << "no pose drew anything, so nothing was budgeted";
+    // Both halves of the frame are in that number. A run where the outdoors reached nobody would
+    // be measuring the walk alone and would pass every budget above without saying so.
+    EXPECT_GT(posesWithOutdoors, 0) << "§25.6 contributed to no budget pose, so this measures half "
+                                       "the frame";
+    EXPECT_GT(outdoorChunks, 0U);
+    // ...and it reached the WORST pose, which is the one the budget is read off. Counting what
+    // §25.6 found is not the same as drawing it: this compares the list's own two totals, so a
+    // union that computes the right set and then submits nothing fails here and nowhere else.
+    EXPECT_GT(worstDraws, worstIndoors)
+        << worstName << " draws " << worstDraws << " and the walk alone accounts for all of them, "
+        << "so the outdoors was gathered and not submitted";
     // A worst pose that drew most of the house would mean the walk is not earning its keep at the
     // poses a budget is measured at. The house's chunk count is ASKED of the file rather than
     // written down (`HOUSE-00485`): the shell is generated, and a number in a test is a number the

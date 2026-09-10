@@ -11189,8 +11189,72 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             debug keys the document points at must exist. Two injections, both CAUGHT: the ring's
             capacity changed to 192, and a cull distance to 400 m, each with the document left as
             it was.
-- [ ] HOUSE-00697 — Phase-9 review and commit; record the visible-cell and draw-call numbers in the performance log
+- [x] HOUSE-00697 — Phase-9 review and commit; record the visible-cell and draw-call numbers in the performance log
       dep: HOUSE-00661…HOUSE-00696 · sys: — · plat: ALL · pri: MUST
+      note: (2026-09-10) **the goal, and how much of it is claimed.** *"The core architectural
+            system. Everything about the project's viability rests here."* §25 is implemented end
+            to end and measured: the portal runtime and its latch, the reduced-frustum walk with
+            §25.2's depth asymmetry and its cone queue, the per-cell chunk test, §25.6's exterior
+            hierarchy and its distance categories, §25.7's cone flags, §25.8's four overlays and
+            the freeze, and the draw list that all of it feeds. The phase closes with **no pinned
+            poses anywhere in it**, which is not where it stood a day ago.
+      measured: **the two numbers this task exists to record, both now in
+            `docs/performance-log.md`.** With every door in the house open the twelve budget poses
+            see **13 cells at worst** (`l0-sunroom`) and 6.8 on average, against §71.2's 9 typical,
+            22 worst and 30 hard fail; the twelve see 82 of §16's 96 cells between them with the
+            doors open and 54 with them shut. They cost **69 draw calls and 16 state changes at
+            worst** against 620 and 90 -- 69 of the house's **469** chunks, which is phase 9 in one
+            number. `cellsDropped` is zero at every pose, so nothing was thrown away to reach it.
+      finding: **the draw-call test was measuring half the frame and this review is what found
+            it.** `VisibilityBudgetTests` submitted `ChunkCuller`'s answer and nothing else, which
+            WAS the draw list until `HOUSE-00700` put the outdoors on §25.6's instance path a few
+            hours earlier. Measured on the walk alone the twelve came to 53 draws and 7 state
+            changes; with §25.6's contribution unioned in, as `CnaHouseGame` does, 69 and 16. The
+            test now builds both halves and prints the split -- 16 of the 69, over 10 of the 12
+            poses, 120 chunks in all -- and fails if the outdoors reaches none of them, because a
+            run where it reached nobody would silently be the old measurement again.
+      note: **the time rows are `HOUSE-00694`'s and are recorded rather than retaken, deliberately.**
+            §25.1's steps 1-4 cost 0.084-0.097 ms at the median scenario (15-18 % of §71.2's
+            0.55 ms) and 0.26-0.43 ms at the worst (22-36 % of 1.20 ms), with the 90-second walk's
+            worst frame 0.43-0.68 ms. Retaking them means two full optimised rebuilds of a tree
+            shared with nine other agents -- `linux-release` and `linux-debug` are the same
+            `build/` directory -- for inputs that have not moved: what `HOUSE-00700` added is one
+            walk of a 49-instance hierarchy against 4 100 synthetic ones, three orders of magnitude
+            under what those rows are dominated by. The log says so in place of the number, and
+            says the next optimised measurement should retake them.
+      finding: **what phase 9 closed at the very end of it, and it was not a culling defect.**
+            `HOUSE-00688` -- *"the single most important test in the project"* -- spent the phase
+            unable to close: eight of eighteen poses differed culled against unculled. Six causes
+            were found and every one was real. `HOUSE-00485` was coplanar pairs resolving the other
+            way (38 431 px); `HOUSE-00488` was geometry a cell looks at but does not own (8 450 px,
+            including a rafter-bounded attic that could not see its own rafters); `HOUSE-00700` was
+            the ground never being on §25.6's instance path at all (`ext-backyard` 31.23 % of its
+            frame); and the last, `HOUSE-00786`, was not §25's at all -- §10.2's height field had
+            no hole under the house, so the UNCULLED frame drew half a metre of lawn inside the
+            basement and the CULLED one was right. **All eighteen match now**, worst 0.1546 %.
+      note: **what is left, recorded rather than quietly dropped.** (1) `HOUSE-00489` -- three
+            doorways open into the side of a flight and `L0_STAIR_MAIN` cannot be reached from
+            either of its openings -- is phase 5's arithmetic, not §25's, and its three candidate
+            fixes each move §13's room schedule, the drawn shell, the nav graph and the render
+            references. It is an owner decision and is left as one. (2) `HOUSE-00493`'s two
+            gates that failed once each under load and did not reproduce. (3) §25.6's instances
+            are 49 real ones plus a synthetic 4 100 in the perf test until `HOUSE-00772`'s
+            vegetation and `HOUSE-00852`'s neighbourhood land. (4) The `snowshell` content stage
+            still fails for want of `layout.materials.json` (`HOUSE-00385`); every other stage of
+            the chain built clean in this review's own run, nav included.
+      verified: 1 069 unit and 93 integration tests green, 35 render tests green, and
+            `tools/ci/run_checks.sh` all gates green. The phase is **40 tasks**, and the 40
+            commits before this one that name a phase-9 id left **30 test files** under `tests/`
+            behind them.
+      note: **three injections into the extended budget test, one CAUGHT and two deliberately
+            not.** Gathering the outdoors and then submitting nothing is CAUGHT, by comparing the
+            list's own two totals rather than by counting what was gathered -- which is what the
+            first version of the claim did, and it MISSED. The other two -- the union not
+            subtracting, and the cones taken from the camera instead of from the outdoor cells --
+            stay under 620 draws and 90 state changes and are correctly invisible here: this test's
+            job is the budget. Both are caught where they belong, by `ExteriorSceneTests` and by
+            `HeadlessRunTests.PressingF3…`, and saying which test owns which claim is better than
+            adding a fourth assertion to this one.
 - [x] HOUSE-00698 — Fix the optimised build: three `-Werror` failures that appear only at `-O3`
       dep: — · sys: ci · plat: LNX · pri: MUST
       finding: **the project did not compile at `-O3` and nothing had noticed**, because every
