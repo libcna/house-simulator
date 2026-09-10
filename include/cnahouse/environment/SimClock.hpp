@@ -68,10 +68,17 @@ namespace cnahouse::environment
 
         /// @brief §35.1: *"`Update` accumulates `gameTime.ElapsedGameTime · timeScale`"*.
         ///
-        /// Takes REAL seconds -- `FrameContext`'s clamped `dt` (`HOUSE-00139`) -- and never a
-        /// frame count: a hitch advances the clock by the time that really passed, which is what
-        /// `HOUSE-01540` asks for. A negative or non-finite `dt` advances nothing; time in this
-        /// house does not run backwards because a platform timer glitched.
+        /// Takes `FrameContext::realDeltaSeconds` -- the UNCLAMPED one -- and never a frame
+        /// count. §35 and `HOUSE-01540` are explicit that a hitch advances the clock by *"the real
+        /// elapsed time"*, and `FrameContext` carries two deltas that differ exactly then: a
+        /// 250 ms hitch is 0.250 s real and `FrameTimer::kMaxDeltaSeconds` = 0.100 s clamped, so
+        /// the clock gains 15 simulated seconds where the physics integrates 6. **That divergence
+        /// is the design**: the simulation runs slow for a frame rather than wrong, and the wall
+        /// clock does not stop because the machine stuttered. Feeding this the clamped delta makes
+        /// a hitchy session's clock quietly lose time, which is the failure `HOUSE-01540` names.
+        ///
+        /// A negative or non-finite `dt` advances nothing; time in this house does not run
+        /// backwards because a platform timer glitched.
         void Advance(double realSeconds) noexcept;
 
         /// @brief Local STANDARD time -- the number, with no daylight saving in it.

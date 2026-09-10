@@ -13243,8 +13243,34 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep-note: schema lands in phase 39
 - [ ] HOUSE-01539 — Test: at `timeScale = 60`, 3 real seconds advance the clock by exactly 3 simulated minutes
       dep: HOUSE-01533 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-01540 — Test: a frame hitch of 250 ms advances the clock by the real elapsed time, and the physics accumulator clamps
+- [x] HOUSE-01540 — Test: a frame hitch of 250 ms advances the clock by the real elapsed time, and the physics accumulator clamps
       dep: HOUSE-01531, HOUSE-00549 · sys: ci · plat: CI · pri: MUST
+      verify: unit `ClockHitchTests.*`
+      finding: **`SimClock::Advance`'s own header named the wrong field, and this task is what
+            reads it closely enough to notice.** `HOUSE-01531` wrote *"takes REAL seconds --
+            `FrameContext`'s clamped `dt`"*, which is two different things in one sentence. On the
+            only frame where it matters they differ by more than a factor of two: a 250 ms hitch is
+            0.250 s real against `kMaxDeltaSeconds` = 0.100 s clamped, so the clock gains **15
+            simulated seconds where the physics integrates 6**. Nothing wires the clock into the
+            game yet, so no code was wrong -- but the sentence the next person reads was, and a
+            clock fed the clamped delta loses time on every hitch for the rest of the session
+            without anything failing.
+      note: the divergence is the DESIGN and the test says so from both sides. §49.3 clamps because
+            250 ms integrated whole is a body through a wall; §35 does not, because the afternoon
+            does not stop when a texture upload stalls. On an ordinary 60 Hz frame the two deltas
+            are the same number and both halves agree, which is what makes the hitch a special case
+            rather than a permanent drift -- and that is a claim of its own here.
+      measured: one 250 ms frame: `realDeltaSeconds` 0.250, `deltaSeconds` 0.100, **4 fixed steps**
+            (§49.3's cap) and **8 dropped**, the clamped 0.100 s having asked for twelve at 120 Hz.
+            Sixty consecutive hitch frames -- 15 s of wall clock -- put the clock at exactly **900
+            simulated seconds**, 15 minutes, while `totalSeconds` reaches 6.1 s and the dropped
+            counter reaches 488. The simulation is behind, the clock is not, and the counter says
+            by how much rather than leaving it to be reported as "it feels sluggish".
+      verified: 5 `ClockHitchTests`. Six injected bugs, all caught: the clamp removed so a hitch is
+            integrated whole, the residue banked instead of discarded, the step cap lifted, a
+            negative delta reaching the frame, the clock fed the clamped delta, and -- with
+            `SimClockTests` in the filter, where that claim lives -- the guard against an infinite
+            delta removed.
 - [ ] HOUSE-01542 — Implement the compressed year of `cna-house.md` §35.2b: `SimClock::calendarDaysPerSimDay` (default 24.0), so one simulated day advances the calendar by 24 days and a year takes 365 real minutes
       dep: HOUSE-01532 · sys: environment · plat: ALL · pri: MUST
       files: src/environment/SimClock.cpp|hpp
