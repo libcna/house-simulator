@@ -11796,8 +11796,26 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             default, the `_LOW` suffix read as part of the palette's name, the neighbour radius
             shrunk to zero until nothing clashes, and -- injected into the LAYOUT rather than into
             the tool -- two neighbours painted alike.
-- [ ] HOUSE-00844 — Generate the 16 further houses (N9–N24) at LOD2
+- [x] HOUSE-00844 — Generate the 16 further houses (N9–N24) at LOD2
       dep: HOUSE-00841 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/neighbourhood_gen.py --selftest`
+      finding: **`_LOW` was not an LOD2 -- it was an LOD1 with a porch on it.** §26.2 puts LOD2 at
+            0.12 of the triangles and the variant sat at 0.24-0.32 of its asset, because it still
+            carried the porch: four boxes of trim -- a slab, two posts and a beam -- that at
+            §26.1's 30-90 px is a smudge under the eaves. The porch is LOD0's now, with the
+            reveals and the plot, and the three shapes come to **0.12, 0.07 and 0.14**, which is
+            the band §26.2 asks for.
+      finding: **two variants over three bands, and the LAYOUT decides which band gets which.**
+            `LODG_NB_HOUSE_FULL` (N1, N2) and `LODG_NB_HOUSE_MED` (N3-N8) both name the full
+            variant; only `LODG_NB_HOUSE_LOW` (N9-N24, sixteen of them) names `_LOW`. A house 90 m
+            away and one 160 m away differ in what the culler does with them, not in what the file
+            contains, and asserting that from the layout is what stops a row quietly asking for
+            the wrong one.
+      measured: `A_*_LOW` 36 triangles against `A_*`'s 288; `B_*_LOW` 18 against 270; `C_*_LOW` 36
+            against 264. Sixteen placed houses at LOD2, nine distinct `_LOW` variants between
+            them.
+      verified: 2 injections, both CAUGHT -- the porch kept at LOD2, and an LOD2 row naming the
+            full variant (injected into the layout).
 - [ ] HOUSE-00845 — Generate the 36 distant silhouettes (N25–N60) as impostor cards on the horizon ring
       dep: HOUSE-00204, HOUSE-00844 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00846 — Generate the street furniture: 9 street lights, 5 utility poles with catenary wires, 4 signs, 12 mailboxes, 2 bin clusters, a basketball hoop

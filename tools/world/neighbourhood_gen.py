@@ -264,7 +264,11 @@ def house_faces(house: House, detailed: bool, plot: bool = True) -> list:
         faces += _roof_faces(house, (low[0] - OVERHANG, high[0] + OVERHANG,
                                      low[2] - OVERHANG, high[2] + OVERHANG), height, "hip")
 
-    if house.porch != "none":
+    # The porch is LOD0's, like the reveals and the plot (`HOUSE-00844`). §26.2 puts LOD2 at 0.12
+    # of the triangles and this house's `_LOW` variant sat at 0.24-0.32 with a porch on it: four
+    # boxes of trim -- a slab, two posts and a beam -- that at 30-90 px on screen is a smudge under
+    # the eaves. Without it the three shapes come to 0.13, 0.07 and 0.14, which is the band.
+    if house.porch != "none" and detailed:
         depth = 2.4 if house.porch == "full" else 1.2
         width = house.width if house.porch == "full" else 2.6
         height = 2.6
@@ -580,15 +584,16 @@ def selftest() -> int:
         low = sum(1 if len(c) == 3 else 2 for c, _n, _m in house_faces(house, False))
         require(low < full,
                 f"{house.name}_LOW is smaller than {house.name} ({low} against {full} triangles)")
-        require(0.30 <= low / full <= 0.85,
+        require(0.10 <= low / full <= 0.60,
                 f"...and it is the massing rather than a decimation: {low / full:.2f} of the "
                 f"BUILDING")
-        # ...and of the ASSET, which is what §26.2's 0.35 is about: an LOD0 neighbour carries its
-        # drive and its boundary as well, and an LOD1 one carries neither.
+        # `HOUSE-00844`: and of the whole ASSET, which is where §26.2's ratios live. This street
+        # has TWO variants for three bands -- the layout gives `LODG_NB_HOUSE_MED` the full asset
+        # and `LODG_NB_HOUSE_LOW` the `_LOW` one -- so `_LOW` is LOD2 and its target is 0.12, not
+        # LOD1's 0.35. Measured: 0.12, 0.07 and 0.14 for the three shapes.
         whole = sum(1 if len(c) == 3 else 2 for c, _n, _m in house_faces(house, True))
-        require(0.20 <= low / whole <= 0.45,
-                f"...and {low / whole:.2f} of the whole asset, which is §26.2's 0.35 with a plot "
-                f"under it")
+        require(0.05 <= low / whole <= 0.20,
+                f"...and {low / whole:.2f} of the whole asset, which is §26.2's LOD2 band")
 
     # 5. The openings are on the STREET elevation and inside the wall they are cut into -- a
     #    window that overhangs its own wall is a window in the air.
@@ -691,6 +696,23 @@ def selftest() -> int:
                 f"each other share a palette, so the street is not a copy-pasted estate "
                 f"({clashes})")
         require(len(placed) == 24, f"§11.4's twenty-four placed houses ({len(placed)})")
+
+        # `HOUSE-00844`: which asset each LOD band names. Two variants over three bands, and the
+        # layout is what decides which band gets which -- LOD0 and LOD1 share the full asset
+        # because a house 90 m away and one 160 m away differ in what the CULLER does with them,
+        # not in what the file contains.
+        bands = {}
+        for row in rows:
+            asset = str(row.get("asset", ""))
+            if asset.startswith(HOUSE_PREFIX):
+                bands.setdefault(row.get("lodGroup"), set()).add(asset.endswith("_LOW"))
+        require(bands.get("LODG_NB_HOUSE_FULL") == {False}
+                and bands.get("LODG_NB_HOUSE_MED") == {False},
+                f"LOD0 and LOD1 name the full variant ({bands})")
+        require(bands.get("LODG_NB_HOUSE_LOW") == {True},
+                f"and LOD2 names `_LOW`, all sixteen of them ({bands})")
+        require(sum(1 for row in rows if str(row.get("asset", "")).endswith("_LOW")) == 16,
+                "which is §11.4's N9-N24")
         # ...and the radius that "together" means is the street's own geometry, not a number that
         # can be shrunk until nothing clashes: a plot on this street is 18-28 m wide and the rows
         # are 4-9 m apart in depth.
