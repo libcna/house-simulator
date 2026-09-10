@@ -438,6 +438,11 @@ namespace cnahouse::app
         // and not after opening the menu (`HOUSE-01533`).
         clock_.timeScale =
             environment::TimeScaleForDayLength(static_cast<double>(settings_.dayLengthRealMinutes));
+        // §35.2b's table: *"Starting season: Spring -- a new game begins at the vernal equinox."*
+        // §35.1's epoch is 1 January, so a clock left at zero would start every session in the
+        // middle of winter (`HOUSE-01543`). There is no save to load a time from yet; when there
+        // is (`HOUSE-01538`), this is the value it replaces.
+        clock_.SetCalendar(environment::kNewGameCalendarDays);
         debug::RegisterTimeCommands(console_, debug::TimeCommandContext{&clock_});
         debug::RegisterPlayerCommands(console_,
                                       debug::PlayerCommandContext{&player_, &tracker_, &*world_, &*index_});

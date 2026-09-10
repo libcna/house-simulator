@@ -56,6 +56,30 @@ namespace cnahouse::environment
     /// reason. Counting from 1, so 20 March in a common year.
     inline constexpr int kVernalEquinoxDayOfYear = 79;
 
+    /// @brief The length of one turn of the year phase, in calendar days.
+    ///
+    /// **A constant, and that is `HOUSE-01543`'s correction to `HOUSE-01534`.** The phase was
+    /// divided by the length of the year the clock was IN -- 365 or 366 -- which is exact at the
+    /// equinox and DISCONTINUOUS at every 1 January: the divisor and the offset both change at
+    /// once, and the phase jumped 0.0007 of a turn, three times an hour's worth, in a single hour.
+    /// §36.3 requires continuity in terms, so the divisor cannot depend on which year it is.
+    ///
+    /// 365.2425 is the mean Gregorian year, which is the average of the very lengths the old rule
+    /// switched between -- so the phase completes once per year on average and the equinox stays
+    /// within a fraction of a day of 20 March, which is what the real equinox does anyway.
+    inline constexpr double kMeanYearDays = 365.2425;
+
+    /// @brief Where a NEW GAME starts, in calendar days past §35.1's 2031-01-01 epoch.
+    ///
+    /// §35.2b's table: *"Starting season: **Spring** -- a new game begins at the vernal equinox."*
+    /// The epoch is 1 January and the equinox is 78 calendar days later, so a clock left at zero
+    /// starts a new game in the middle of WINTER -- `yearFraction` 0.786 -- which is neither what
+    /// §35.2b asks for nor what §36.3's `yearFraction` comment ("0 = vernal equinox, a new game
+    /// starts here") describes. `SimClock::SetCalendar` of this number is what puts it right, and
+    /// it is a calendar position rather than a date because that is the quantity the compression
+    /// leaves exact.
+    inline constexpr double kNewGameCalendarDays = static_cast<double>(kVernalEquinoxDayOfYear) - 1.0;
+
     /// @brief §36.3's phase at @p yearFraction, which is wrapped into `[0, 1)` first.
     ///
     /// Wrapped rather than clamped: a year fraction is an angle, and a caller that has just

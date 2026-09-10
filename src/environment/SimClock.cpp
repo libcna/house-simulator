@@ -189,16 +189,13 @@ namespace cnahouse::environment
 
     double SimClock::YearFraction() const noexcept
     {
-        const CivilTime now = Standard();
-        // The year's own start and its own length, both taken from the calendar rather than from
-        // 365: a leap year is 366 days and a phase divided by 365 would arrive 1/365 of a turn
-        // early, every four years, for as long as the save lasts.
-        const std::int64_t yearStart = DaysFromCivil(now.year, 1, 1) - kEpochDay;
-        const double length =
-            static_cast<double>(DaysFromCivil(now.year + 1, 1, 1) - DaysFromCivil(now.year, 1, 1));
-        const double dayOfYear = CalendarDays() - static_cast<double>(yearStart);
-        const double fromEquinox = dayOfYear - static_cast<double>(kVernalEquinoxDayOfYear - 1);
-        const double turns = fromEquinox / length;
+        // Counted CONTINUOUSLY from the epoch's own vernal equinox, over a constant year length.
+        // The obvious alternative -- the day of the year over the length of the year the clock is
+        // in -- is what `HOUSE-01534` did, and it is discontinuous at every 1 January: the offset
+        // resets and the divisor changes between 365 and 366 at the same instant, so the phase
+        // stepped 0.0007 of a turn in one hour. §36.3 forbids exactly that, and the equinox moving
+        // by a fraction of a day between years is what the real one does.
+        const double turns = (CalendarDays() - kNewGameCalendarDays) / kMeanYearDays;
         return turns - std::floor(turns);
     }
 

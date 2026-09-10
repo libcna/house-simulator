@@ -173,23 +173,21 @@ TEST(SeasonPhaseTests, TheClockPutsTheEquinoxOnTheTwentiethOfMarch)
     EXPECT_NEAR(clock.YearFraction(), 0.25, 0.01);
     EXPECT_EQ(clock.Season().primary, static_cast<int>(Season::Summer));
 
-    // **The divisor is the year's OWN length**, which only shows up mid-year: on 20 March the
-    // offset is zero whatever it is divided by. 2032 has 366 days, so its last day is 288 days
-    // past the equinox out of 366 -- dividing by a flat 365 would place it 0.002 of a turn late,
-    // every leap year, which is a fifth of a real minute of play in the wrong season and grows
-    // with any quantity that integrates the phase.
-    for (const auto& [year, length] : {std::pair{2031, 365.0}, std::pair{2032, 366.0}})
+    // **The divisor is a CONSTANT, and that is `HOUSE-01543`'s correction to `HOUSE-01534`.** The
+    // first version divided by the length of the year the clock was in, which is exact at the
+    // equinox -- where the offset is zero whatever it is divided by, so every equinox check above
+    // passes either way -- and DISCONTINUOUS at 1 January, where the offset resets and the divisor
+    // changes between 365 and 366 in the same instant. §36.3 forbids that, and
+    // `TheYearFractionIsMonotonicRightAcrossTheWrap` is what catches it.
+    for (const auto& [year, expected] : {std::pair{2031, 0.783041}, std::pair{2032, 0.785115}})
     {
         CivilTime lastDay;
         lastDay.year = year;
         lastDay.month = 12;
         lastDay.day = 31;
         clock.SetStandard(lastDay);
-        // 31 December is day `length` counting from 1, so `length - 1` days past 1 January and
-        // `length - kVernalEquinoxDayOfYear` past the equinox.
-        EXPECT_NEAR(
-            clock.YearFraction(), (length - static_cast<double>(kVernalEquinoxDayOfYear)) / length, 1e-9)
-            << "31 December " << year << " is not " << length << " days into its own year";
+        EXPECT_NEAR(clock.YearFraction(), expected, 1e-5)
+            << "31 December " << year << " is not where a constant-length year puts it";
     }
 
     // ...and the turn is exactly one per calendar year INCLUDING a leap year, which is what the
@@ -208,6 +206,61 @@ TEST(SeasonPhaseTests, TheClockPutsTheEquinoxOnTheTwentiethOfMarch)
         EXPECT_NEAR(clock.YearFraction(), first, 0.01)
             << "a year later is not the same point in the phase, in " << year;
     }
+}
+
+TEST(SeasonPhaseTests, AFreshGameStartsInSpringAtYearFractionZero)
+{
+    // §35.2b's table: "Starting season: Spring -- a new game begins at the vernal equinox", and
+    // §36.3's own comment on the field: "0 = vernal equinox (a new game starts here)".
+    // `HOUSE-01543`'s first acceptance criterion, in the clock's own terms.
+    SimClock fresh;
+    fresh.SetCalendar(cnahouse::environment::kNewGameCalendarDays);
+    EXPECT_NEAR(fresh.YearFraction(), 0.0, 1e-9);
+    EXPECT_EQ(fresh.Season().primary, static_cast<int>(Season::Spring));
+    EXPECT_EQ(fresh.Standard().month, 3) << "the equinox is in March";
+    EXPECT_EQ(fresh.Standard().day, 20);
+
+    // And the failure it exists to prevent, stated as a measurement: a clock left at §35.1's epoch
+    // starts in the middle of WINTER, four fifths of the way through the year.
+    const SimClock epoch;
+    EXPECT_NEAR(epoch.YearFraction(), 0.786, 0.002);
+    EXPECT_EQ(epoch.Season().primary, static_cast<int>(Season::Winter));
+}
+
+TEST(SeasonPhaseTests, TheYearFractionIsMonotonicRightAcrossTheWrap)
+{
+    // `HOUSE-01543`'s third criterion. The phase is an angle, so it must climb to just under 1.0
+    // and then start again at just over 0.0 -- with no step at the join bigger than the steps
+    // either side of it, and nothing anywhere that goes backwards except that one wrap.
+    SimClock clock;
+    clock.calendarDaysPerSimDay = 1.0;
+    // Started AT the equinox, so 370 days of hours contain exactly one turn of a 365.2425-day
+    // year. Starting before it would contain two, which is correct and would make the count a
+    // statement about the start rather than about the wrap.
+    clock.SetCalendar(cnahouse::environment::kNewGameCalendarDays);
+    double previous = clock.YearFraction();
+    int wraps = 0;
+    double largestRise = 0.0;
+    for (int step = 0; step < 370 * 24; ++step)
+    {
+        clock.epochSeconds += 3600.0; // an hour of calendar at a time
+        const double now = clock.YearFraction();
+        if (now < previous)
+        {
+            ++wraps;
+            EXPECT_GT(previous, 0.99) << "the phase went backwards somewhere that is not the wrap";
+            EXPECT_LT(now, 0.01) << "the wrap did not land at the start of the year";
+        }
+        else
+        {
+            largestRise = std::max(largestRise, now - previous);
+        }
+        previous = now;
+    }
+    EXPECT_EQ(wraps, 1) << "370 days of hours crossed the year boundary " << wraps << " times";
+    // An hour is 1/8760 of a year, so no step may be larger than about that. A phase that jumped
+    // at a month boundary -- which a day-of-MONTH mistake would produce -- fails here.
+    EXPECT_LT(largestRise, 2.0 / 8760.0) << "the phase moved further in an hour than an hour is";
 }
 
 TEST(SeasonPhaseTests, ASessionOfPlayCrossesABoundaryEveryNinetyOneRealMinutes)

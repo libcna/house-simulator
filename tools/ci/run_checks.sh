@@ -189,6 +189,11 @@ run_gate "world-ids" python3 tools/world/id_golden.py --check
 # of that table is entirely in its coming from somewhere else. A hand-edited line is a weakened
 # test that nothing else in the project would notice, so the table is regenerated and compared.
 run_gate "calendar-table" python3 tools/ci/calendar_table.py --check
+# `HOUSE-01543`. §36.3: *"Season is a continuous phase, never an enum... never a switch."* The
+# season code being right is no protection at all against a consumer writing
+# `switch (phase.primary)`, and nothing in a test of the season itself would notice. This is the
+# rule enforced where it can be, at the point of use.
+run_gate "season-usage" python3 tools/ci/check_season_usage.py
 # `HOUSE-00400`. §13's room schedule is 94 rows of hand-maintained numbers over data that changes
 # every time a room does. Walking it against the layout found 52 disagreements, including a garage
 # 5 m² too small and a central hall with three doorways written as `0`.

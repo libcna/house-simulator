@@ -13541,13 +13541,56 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
               24 real minutes while the declination completes one turn per 365 real minutes;
               (3) `calendarDaysPerSimDay = 1.0` restores a realistic calendar for debugging
       verify: unit ClockTests.CompressedYear
-- [ ] HOUSE-01543 — Implement `SeasonPhase` (`yearFraction`, `primary`, `secondary`, `blend`) as a **continuous** value per `cna-house.md` §36.3; a new game starts at the vernal equinox
+- [x] HOUSE-01543 — Implement `SeasonPhase` (`yearFraction`, `primary`, `secondary`, `blend`) as a **continuous** value per `cna-house.md` §36.3; a new game starts at the vernal equinox
       dep: HOUSE-01542, HOUSE-01534 · sys: environment · plat: ALL · pri: MUST
       files: src/environment/SeasonPhase.cpp|hpp
       accept: (1) a fresh save starts in spring at `yearFraction == 0`; (2) `blend` is 0 through the
               middle of a season and ramps over the outer 20 % at each end; (3) `yearFraction` is
               continuous and monotonic across the year wrap; (4) **no consumer reads an integer
               season without a blend weight** — asserted by a lint over `src/`
+      verify: `tools/ci/check_season_usage.py --selftest`, unit `SeasonPhaseTests.*`
+      note: (2026-09-10) **criterion 2 was already `HOUSE-01534`'s; the other three were not, and
+            two of them found real defects.** This entry is what the overlap is for -- the earlier
+            task built the phase, this one is the four things that have to be TRUE of it.
+      correction: **criterion 3 caught `HOUSE-01534`'s year fraction being discontinuous.** It
+            divided the day of the year by the length of the year the clock was IN, which is exact
+            at the equinox -- where the offset is zero whatever it is divided by, so every equinox
+            check passed -- and broken at every 1 January, where the offset resets and the divisor
+            changes between 365 and 366 in the same instant. Measured: the phase stepped **0.0007
+            of a turn in one simulated hour**, three times an hour's worth, in the middle of the
+            night on New Year's Eve. §36.3 forbids exactly that. The divisor is now the constant
+            mean Gregorian year, 365.2425 -- the average of the two lengths the old rule switched
+            between -- so the phase is continuous everywhere and the equinox drifts by a fraction
+            of a day between years, which is what the real one does.
+      finding: **criterion 1 was false and nothing said so.** §35.2b's table says *"Starting season:
+            Spring -- a new game begins at the vernal equinox"* and §36.3's own comment on the
+            field says *"0 = vernal equinox (a new game starts here)"*. §35.1's epoch is 1 January,
+            so a clock left at zero -- which is what `CnaHouseGame` had -- starts every session at
+            `yearFraction` **0.786, in the middle of winter**. `CnaHouseGame` now sets the calendar
+            to `kNewGameCalendarDays` at start-up, and both the unit and the integration test say
+            what the failure looked like as well as what the fix does.
+      finding: **criterion 4's lint threw out all four of its own exemptions on its first run.**
+            `check_season_usage.py` requires that a file reading `phase.primary` or naming a
+            `Season::` constant also mentions `blend` or calls `MixBySeason`. The two files that
+            legitimately read a season -- `Season.cpp`, which computes the phase, and
+            `EnvironmentOverlay.cpp`, which names it for a person -- both pass in their own right,
+            so the exemption list is EMPTY. The machinery stays, and its third rule is
+            `build_chunks.py`'s: an exemption whose file would pass without it fails, because a
+            licence nobody is using is a licence still there on the day that file starts switching.
+      note: the rule is FILE granularity and the tool says so rather than implying it: a file that
+            blends in one function and switches in another passes. A C++ parser would do better and
+            is not worth its weight for a rule whose job is to make the wrong thing conspicuous
+            rather than impossible -- the same bargain `check_xna_only.py` makes with identifiers.
+            Proved against a real consumer: a `switch (phase.primary)` dropped into `src/weather/`
+            fails the gate by name.
+      note: the `files:` line says `SeasonPhase.cpp|hpp` and the code is in `Season.cpp|hpp`, which
+            is a deviation and is recorded rather than churned: the header holds the `Season` enum
+            as well as `SeasonPhase`, and naming a file after one of its two types would be worse
+            than naming it after the subject both belong to.
+      verified: 10 `SeasonPhaseTests`, 9 claims in `check_season_usage --selftest`, and a
+            `season-usage` gate in `run_checks.sh`. Four injected bugs into the lint, all caught:
+            the named-season pattern dropped, the blend requirement dropped, a do-nothing exemption
+            left alone, and every file scanned including a `.txt`.
       verify: unit SeasonPhaseTests.*
 - [ ] HOUSE-01544 — Implement seasonal day-length variation: sunrise and sunset drift with the declination, so the shortest and longest days are visibly different within one 6-hour year
       dep: HOUSE-01542, HOUSE-01561 · sys: environment · plat: ALL · pri: MUST

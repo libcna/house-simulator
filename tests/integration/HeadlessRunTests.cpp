@@ -19,6 +19,7 @@
 #include "cnahouse/debug/VisibilityGeometryOverlay.hpp"
 #include "cnahouse/debug/VisibilityOverlay.hpp"
 #include "cnahouse/environment/DayLength.hpp"
+#include "cnahouse/environment/Season.hpp"
 #include "cnahouse/player/FirstPersonView.hpp"
 #include "cnahouse/player/IInputSource.hpp"
 #include "cnahouse/util/Ids.hpp"
@@ -168,12 +169,21 @@ namespace
             clock.timeScale,
             cnahouse::environment::TimeScaleForDayLength(static_cast<double>(settings.dayLengthRealMinutes)));
         EXPECT_DOUBLE_EQ(clock.timeScale, 60.0) << "§35.2's chosen 60x did not reach the game";
+        // §35.2b's table, end to end: *"Starting season: Spring -- a new game begins at the vernal
+        // equinox."* §35.1's epoch is 1 January, so a clock left at zero starts every session in
+        // the middle of winter, and nothing downstream would ever say so (`HOUSE-01543`).
+        EXPECT_EQ(clock.Season().primary, static_cast<int>(cnahouse::environment::Season::Spring))
+            << "a new game did not start in spring";
+        EXPECT_LT(clock.YearFraction(), 0.01) << "a new game did not start at the vernal equinox";
+        EXPECT_EQ(clock.Standard().month, 3) << "the equinox is in March";
+        EXPECT_EQ(clock.Standard().year, 2031) << "the clock did not start in §35.1's epoch year";
+
         // Thirty frames of a headless run are milliseconds of wall clock, so what is asserted is
-        // that the clock MOVED and did not move absurdly -- not a duration, which would be a
-        // measurement of the machine.
-        EXPECT_GT(clock.epochSeconds, 0.0) << "thirty frames did not advance §35's clock at all";
-        EXPECT_LT(clock.epochSeconds, 3600.0) << "thirty frames advanced the clock by an hour";
-        EXPECT_EQ(clock.Standard().year, 2031) << "the clock did not start at §35.1's epoch";
+        // that the clock MOVED from where the new game put it and did not move absurdly -- not a
+        // duration, which would be a measurement of the machine.
+        const double moved = clock.CalendarDays() - cnahouse::environment::kNewGameCalendarDays;
+        EXPECT_GT(moved, 0.0) << "thirty frames did not advance §35's clock at all";
+        EXPECT_LT(moved, 1.0) << "thirty frames advanced the calendar by a day";
         EXPECT_TRUE(std::isfinite(clock.OutdoorBaseTemperatureC()));
     }
 
