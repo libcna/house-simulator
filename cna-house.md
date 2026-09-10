@@ -930,6 +930,18 @@ Rendered as one static chunk per 16 × 16 m tile (**20 tiles**, 5 × 4 — corre
 with its own `BoundingBox`, so distance culling works. Collision uses the same height field, as the **two triangles each square
 is drawn as** — one surface for the collider and for anything that asks how high the ground is.
 
+**The drawn ground stops at the wall of a room it would otherwise run through** (`HOUSE-00786`).
+The field is one continuous surface over the whole lot, which means it passes straight through the
+basement: over `B1_GYM`'s footprint the ground runs y −0.537…−0.006 and B1's ceiling is at +0.25,
+so half a metre of lawn hangs inside the room. Collision already worked around this by asking the
+ground only in outdoor cells (`HOUSE-00774`), and rendering cannot: a tile is 16 m square, so the
+tile seen through a basement window is the same tile that continues under the house. So
+`terrain_gen.py` cuts the mesh — and only the mesh — to the plan of every non-exterior cell whose
+interior volume the surface enters, which on this house is the basement's fourteen boxes and
+**269.24 m²** of the lot's 5 120. `terrain.png` keeps every sample, because the field is also what
+says how high the ground is against a wall; the collider and every "how high is the ground here"
+query read the same numbers they always did.
+
 > **Corrected by `HOUSE-00553`.** This said *"bilinear sample + a triangle test for slopes > 20°"*,
 > and a bilinear sample cannot be the collision surface. Over the same four samples the bilinear
 > patch and the two triangles differ by a quarter of the square's twist, and on this lot that

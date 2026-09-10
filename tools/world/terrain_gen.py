@@ -42,6 +42,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import struct
 import sys
 import zlib
@@ -411,6 +412,333 @@ def _sample_normals(heights: list[float]) -> list[tuple[float, float, float]]:
     return out
 
 
+#: The precision interpolated ground vertices are rounded to, in metres.
+#:
+#: A point where an excavation's edge crosses a triangle is computed twice -- once from each
+#: triangle sharing that edge -- and the two arrive by different arithmetic. Rounding both to a
+#: micrometre makes them the same float, which is what lets `add()` weld them and what stops a
+#: hairline crack appearing along the wall line. Original grid corners are NOT rounded: they come
+#: from `_vertex` unchanged, so the ground outside a building is byte-identical to what it was.
+EXCAVATION_PRECISION = 6
+
+
+def excavations(directory: Path, heights: list[float]) -> list[dict]:
+    """The plan boxes of every room the GROUND SURFACE runs through (`HOUSE-00786`).
+
+    §10.2's height field is one continuous surface over the whole lot -- *"a coarse height field"*
+    -- and it therefore passes straight through the basement. `HOUSE-00774` already found this on
+    the COLLISION side and worked around it: *"a body on the basement stair is 0.1 m from that
+    surface and must not be pushed by it, so the file says which cells are the open outdoors and
+    the runtime asks the ground only there."* Rendering has no such gate and cannot have one: a
+    terrain tile is 16 m square, so the tile seen through a basement window is the same tile that
+    continues under the house, and drawing it draws half a metre of lawn inside the room.
+
+    So the mesh gets a hole. **Only the mesh**: `terrain.png` keeps every sample, §49.2's collider
+    keeps reading it, and the atlas keeps its layout, because the field is also the thing that says
+    how high the ground is next to a wall.
+
+    Which rooms is not a list anybody maintains -- it is the defect's own definition. A room whose
+    interior volume the surface enters is a room you can see the lawn from; measured on this house
+    that is the fourteen boxes of the basement and nothing else, and if a terrace pad or a regraded
+    yard ever lifts the ground into a ground-floor room, this finds that room too.
+    """
+    layout = layout_io.load_layout(directory)
+    levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
+    out = []
+    for cell in layout_io.rows(layout, "cells"):
+        if cell.get("kind") == "exterior":
+            continue
+        level = levels.get(cell.get("level")) or {}
+        floor = float(level.get("ffl", 0.0))
+        lid = level.get("ceiling")
+        # An attic has no ceiling of its own -- it has a roof -- and a cell with a `yOverride`
+        # states both ends itself.
+        top = float(lid) if lid is not None else floor + 100.0
+        override = cell.get("yOverride")
+        if override:
+            floor, top = float(override[0]), float(override[1])
+        for box in cell["boxes"]:
+            low, high = _surface_range(heights, box)
+            if low is None or high <= floor or low >= top:
+                continue
+            out.append({"cell": cell["id"], "x": tuple(box["x"]), "z": tuple(box["z"])})
+    return out
+
+
+def _surface_range(heights: list[float], box: dict) -> tuple[float | None, float | None]:
+    """The lowest and highest the ground gets over @p box, from the samples that define it."""
+    x0, x1 = box["x"]
+    z0, z1 = box["z"]
+    ix0 = max(0, int(math.floor((x0 - ORIGIN_X) / STEP)))
+    ix1 = min(WIDTH - 1, int(math.ceil((x1 - ORIGIN_X) / STEP)))
+    iz0 = max(0, int(math.floor((z0 - ORIGIN_Z) / STEP)))
+    iz1 = min(HEIGHT - 1, int(math.ceil((z1 - ORIGIN_Z) / STEP)))
+    if ix1 < ix0 or iz1 < iz0:
+        return (None, None)
+    values = [heights[iz * WIDTH + ix] for iz in range(iz0, iz1 + 1) for ix in range(ix0, ix1 + 1)]
+    return (min(values), max(values))
+
+
+def _lerp_vertex(first: tuple, second: tuple, t: float) -> tuple:
+    """A ground vertex t of the way from @p first to @p second, rounded to a micrometre."""
+    def mix(a: float, b: float) -> float:
+        return round(a + (b - a) * t, EXCAVATION_PRECISION)
+
+    x = mix(first[0][0], second[0][0])
+    y = mix(first[0][1], second[0][1])
+    z = mix(first[0][2], second[0][2])
+    normal = [first[1][i] + (second[1][i] - first[1][i]) * t for i in range(3)]
+    length = math.sqrt(sum(component * component for component in normal)) or 1.0
+    normal = tuple(round(component / length, EXCAVATION_PRECISION) for component in normal)
+    # UV0 is world metres by construction, so it is READ OFF the interpolated position rather than
+    # interpolated separately: the two cannot then disagree in the last bit.
+    return ((x, y, z), normal, (x, z),
+            (mix(first[3][0], second[3][0]), mix(first[3][1], second[3][1])))
+
+
+def _halves(polygon: list, axis: int, value: float) -> tuple[list, list]:
+    """@p polygon split by the plane `axis = value` into (the low side, the high side).
+
+    Sutherland-Hodgman, run twice over the same crossing so that both halves get the SAME
+    intersection vertex -- computed once, from the low side's parameter -- and the two pieces
+    therefore share an edge exactly.
+    """
+    if not polygon:
+        return ([], [])
+    low, high = [], []
+    for index, current in enumerate(polygon):
+        following = polygon[(index + 1) % len(polygon)]
+        here = current[0][axis * 2]
+        there = following[0][axis * 2]
+        if here <= value:
+            low.append(current)
+        if here >= value:
+            high.append(current)
+        if (here < value < there) or (there < value < here):
+            crossing = _lerp_vertex(current, following, (value - here) / (there - here))
+            low.append(crossing)
+            high.append(crossing)
+    return (low if _area(low) > AREA_EPSILON else [],
+            high if _area(high) > AREA_EPSILON else [])
+
+
+#: Square metres. A sliver smaller than this is a rounding artefact of the clip, not a triangle.
+AREA_EPSILON = 1e-9
+
+
+def _area(polygon: list) -> float:
+    """The absolute area of @p polygon's PLAN projection."""
+    if len(polygon) < 3:
+        return 0.0
+    total = 0.0
+    for index, current in enumerate(polygon):
+        following = polygon[(index + 1) % len(polygon)]
+        total += current[0][0] * following[0][2] - following[0][0] * current[0][2]
+    return abs(total) * 0.5
+
+
+def _minus_box(polygon: list, box: dict) -> list:
+    """@p polygon minus @p box, as up to four convex pieces.
+
+    The complement of a rectangle is not convex, so the difference is taken as four half-plane
+    cuts: everything west of it, everything east of it, then -- of what is left between those two
+    -- everything north and everything south. What remains after all four is inside the box, and
+    is the part that is not returned.
+    """
+    x0, x1 = box["x"]
+    z0, z1 = box["z"]
+    pieces = []
+    west, rest = _halves(polygon, 0, x0)
+    if west:
+        pieces.append(west)
+    middle, east = _halves(rest, 0, x1)
+    if east:
+        pieces.append(east)
+    north, rest = _halves(middle, 1, z0)
+    if north:
+        pieces.append(north)
+    _inside, south = _halves(rest, 1, z1)
+    if south:
+        pieces.append(south)
+    return pieces
+
+
+def _edge_outside(edge: list, boxes: list[dict]) -> list[list]:
+    """The parts of the tile-edge segment @p edge that no box in @p boxes covers.
+
+    An interval subtraction rather than a polygon one: a tile edge is axis-aligned and a skirt is
+    a vertical quad hanging from it, so the only question is which stretches of it survive.
+    """
+    runs = [(0.0, 1.0)]
+    first, second = edge[0][0], edge[1][0]
+    for box in boxes:
+        if not runs:
+            break
+        # The stretch of the segment inside the box is the INTERSECTION of the two bands it is
+        # inside in x and in z, clamped to the segment itself. An axis the segment does not move
+        # along contributes no interval: it either lies in that band for its whole length or the
+        # box cannot cover any of it.
+        crossings = []
+        outside = False
+        for start, stop, span in ((first[0], second[0], box["x"]),
+                                  (first[2], second[2], box["z"])):
+            if abs(stop - start) < 1e-12:
+                outside = outside or not span[0] <= start <= span[1]
+                continue
+            low = (span[0] - start) / (stop - start)
+            high = (span[1] - start) / (stop - start)
+            crossings.append((min(low, high), max(low, high)))
+        if outside:
+            continue
+        covered = (max([0.0] + [pair[0] for pair in crossings]),
+                   min([1.0] + [pair[1] for pair in crossings]))
+        if covered[1] - covered[0] <= 1e-9:
+            continue
+        kept = []
+        for start, stop in runs:
+            if covered[0] > start:
+                kept.append((start, min(stop, covered[0])))
+            if covered[1] < stop:
+                kept.append((max(start, covered[1]), stop))
+        runs = [(start, stop) for start, stop in kept if stop - start > 1e-9]
+    if len(runs) == 1 and runs[0] == (0.0, 1.0):
+        return [edge]
+    return [[edge[0] if start <= 0.0 else _lerp_vertex(edge[0], edge[1], start),
+             edge[1] if stop >= 1.0 else _lerp_vertex(edge[0], edge[1], stop)]
+            for start, stop in runs]
+
+
+def _outside(triangle: list, boxes: list[dict]) -> list[list]:
+    """@p triangle minus every box in @p boxes, fan-triangulated. `[]` when it is wholly inside."""
+    pieces = [triangle]
+    for box in boxes:
+        if not pieces:
+            break
+        low = (min(v[0][0] for piece in pieces for v in piece),
+               min(v[0][2] for piece in pieces for v in piece))
+        high = (max(v[0][0] for piece in pieces for v in piece),
+                max(v[0][2] for piece in pieces for v in piece))
+        if high[0] <= box["x"][0] or low[0] >= box["x"][1] or high[1] <= box["z"][0] \
+                or low[1] >= box["z"][1]:
+            continue
+        pieces = [part for piece in pieces for part in _minus_box(piece, box)]
+    out = []
+    for piece in pieces:
+        if len(piece) == 3 and piece is triangle:
+            out.append(piece)
+            continue
+        for corner in range(1, len(piece) - 1):
+            fan = [piece[0], piece[corner], piece[corner + 1]]
+            if _area(fan) > AREA_EPSILON:
+                out.append(fan)
+    return out
+
+
+def _triples(indices: list[int]):
+    """`indices` as triangles."""
+    return [tuple(indices[i:i + 3]) for i in range(0, len(indices), 3)]
+
+
+def _centroid(triangle: list) -> tuple[float, float]:
+    """A triangle's plan centre."""
+    return (sum(vertex[0][0] for vertex in triangle) / 3.0,
+            sum(vertex[0][2] for vertex in triangle) / 3.0)
+
+
+def _inside(point: tuple[float, float], box: dict) -> bool:
+    return box["x"][0] <= point[0] <= box["x"][1] and box["z"][0] <= point[1] <= box["z"][1]
+
+
+def _boxes_overlap(first: dict, second: dict) -> bool:
+    return (first["x"][0] < second["x"][1] and second["x"][0] < first["x"][1]
+            and first["z"][0] < second["z"][1] and second["z"][0] < first["z"][1])
+
+
+def _tile_box(tile: dict) -> dict:
+    """A tile's own plan extent, from the grid rather than from its vertices."""
+    return {"x": (ORIGIN_X + tile["column"] * TILE_METRES,
+                  ORIGIN_X + (tile["column"] + 1) * TILE_METRES),
+            "z": (ORIGIN_Z + tile["row"] * TILE_METRES,
+                  ORIGIN_Z + (tile["row"] + 1) * TILE_METRES)}
+
+
+def _union_area(boxes: list[dict], within: dict) -> float:
+    """The area of the union of @p boxes, clipped to @p within.
+
+    A coordinate-compression sweep, because the boxes overlap -- the basement's rooms share their
+    walls -- and summing them would count the shared strips twice. Written out here rather than
+    taken from the generator, so the claim it serves is an independent measurement.
+    """
+    clipped = []
+    for box in boxes:
+        low = (max(box["x"][0], within["x"][0]), max(box["z"][0], within["z"][0]))
+        high = (min(box["x"][1], within["x"][1]), min(box["z"][1], within["z"][1]))
+        if high[0] > low[0] and high[1] > low[1]:
+            clipped.append({"x": (low[0], high[0]), "z": (low[1], high[1])})
+    xs = sorted({edge for box in clipped for edge in box["x"]})
+    zs = sorted({edge for box in clipped for edge in box["z"]})
+    total = 0.0
+    for i in range(len(xs) - 1):
+        for j in range(len(zs) - 1):
+            centre = ((xs[i] + xs[i + 1]) / 2.0, (zs[j] + zs[j + 1]) / 2.0)
+            if any(_inside(centre, box) for box in clipped):
+                total += (xs[i + 1] - xs[i]) * (zs[j + 1] - zs[j])
+    return total
+
+
+def _skirt_length(rows: list[dict]) -> float:
+    """The total length of skirt top edge in @p rows, measured off the skirt faces themselves."""
+    total = 0.0
+    for tile in rows:
+        for primitive in tile["primitives"]:
+            for triple in _triples(primitive["indices"]):
+                corners = [primitive["vertices"][index] for index in triple]
+                if abs(corners[0][1][1]) > 1e-6:
+                    continue
+                # `add` emits `[top0, skirt0, top1]` then `[top1, skirt0, skirt1]`; the first of
+                # the pair is the one whose two TOP corners span the run.
+                tops = [vertex for vertex in corners
+                        if abs(vertex[0][1] - max(c[0][1] for c in corners)) < 1e-9
+                        or vertex[0][1] > min(c[0][1] for c in corners) + SKIRT_METRES / 2.0]
+                if len(tops) != 2:
+                    continue
+                total += math.dist((tops[0][0][0], tops[0][0][2]), (tops[1][0][0], tops[1][0][2]))
+    return total
+
+
+def _edge_with_ground(rows: list[dict]) -> float:
+    """The length of tile boundary that still carries ground, from the ground triangles."""
+    total = 0.0
+    for tile in rows:
+        box = _tile_box(tile)
+        lines = [(0, box["x"][0]), (0, box["x"][1]), (1, box["z"][0]), (1, box["z"][1])]
+        for primitive in tile["primitives"]:
+            for triple in _triples(primitive["indices"]):
+                corners = [primitive["vertices"][index] for index in triple]
+                if abs(corners[0][1][1]) <= 1e-6:
+                    continue
+                for index in range(3):
+                    first = corners[index][0]
+                    second = corners[(index + 1) % 3][0]
+                    for axis, value in lines:
+                        here = first[axis * 2]
+                        there = second[axis * 2]
+                        if abs(here - value) < 1e-9 and abs(there - value) < 1e-9:
+                            total += math.dist((first[0], first[2]), (second[0], second[2]))
+    return total
+
+
+def _tiles_without_excavation(directory: Path) -> list[dict]:
+    """`tiles` as it was before `HOUSE-00786`, for the claim that the rest of the lot did not move."""
+    global excavations
+    real = excavations
+    try:
+        excavations = lambda _directory, _heights: []  # noqa: E731
+        return tiles(directory)
+    finally:
+        excavations = real
+
+
 def tiles(directory: Path) -> list[dict]:
     """§11.5's ground as tiles, ready to write: one primitive per material present in each.
 
@@ -422,6 +750,7 @@ def tiles(directory: Path) -> list[dict]:
     normals = _sample_normals(heights)
     columns, rows = tile_grid()
     per = int(TILE_METRES / STEP)
+    cut = excavations(directory, heights)
 
     out = []
     for row in range(rows):
@@ -453,7 +782,13 @@ def tiles(directory: Path) -> list[dict]:
                     # `(00,11,01)`, whose cross products point down, and §14's front face is
                     # counter-clockwise. Same split, same surface, opposite winding.
                     for triangle in (((0, 0), (1, 1), (1, 0)), ((0, 0), (0, 1), (1, 1))):
-                        add(name, [corner[key] for key in triangle])
+                        corners = [corner[key] for key in triangle]
+                        # `HOUSE-00786`: the ground stops at the wall of a room it would otherwise
+                        # run through. Untouched triangles come back as the same list object and
+                        # are emitted unchanged, so every lawn away from the house is identical to
+                        # what it was.
+                        for part in _outside(corners, cut):
+                            add(name, part)
 
             # The skirt, round the tile's own edge. Its vertices carry the edge's UVs and a normal
             # that points OUT of the tile, so a skirt lit as ground would not glow at grazing sun.
@@ -473,15 +808,18 @@ def tiles(directory: Path) -> list[dict]:
                     if dz == per - 1:
                         borders.append((((0, 1), (1, 1)), (0.0, 0.0, 1.0)))
                     for (first, second), outward in borders:
-                        top = [_vertex(ix + first[0], iz + first[1], heights, normals, (column, row)),
-                               _vertex(ix + second[0], iz + second[1], heights, normals, (column, row))]
-                        skirt = []
-                        for point in top:
-                            skirt.append(((point[0][0], point[0][1] - SKIRT_METRES, point[0][2]),
-                                          outward, point[2], point[3]))
-                        top = [(point[0], outward, point[2], point[3]) for point in top]
-                        add(name, [top[0], skirt[0], top[1]])
-                        add(name, [top[1], skirt[0], skirt[1]])
+                        edge = [_vertex(ix + first[0], iz + first[1], heights, normals, (column, row)),
+                                _vertex(ix + second[0], iz + second[1], heights, normals, (column, row))]
+                        # A skirt hangs from the GROUND, so where the ground has been excavated
+                        # (`HOUSE-00786`) the skirt goes with it -- otherwise a half-metre apron is
+                        # left hanging inside the room the hole was cut for, which is the same
+                        # defect one storey down.
+                        for run in _edge_outside(edge, cut):
+                            top = [(point[0], outward, point[2], point[3]) for point in run]
+                            skirt = [((point[0][0], point[0][1] - SKIRT_METRES, point[0][2]),
+                                      outward, point[2], point[3]) for point in run]
+                            add(name, [top[0], skirt[0], top[1]])
+                            add(name, [top[1], skirt[0], skirt[1]])
 
             ordered = [primitives[name] for name in MATERIALS if name in primitives]
             points = [vertex[0] for primitive in ordered for vertex in primitive["vertices"]]
@@ -967,12 +1305,119 @@ def selftest() -> int:
                         upward += 1
                     else:
                         downward.append(tile["id"])
-        require(upward == 20 * 512 and not downward,
+        require(upward > 0 and not downward,
                 f"every one of the {upward} ground triangles is wound to face UP "
                 f"({downward[:3] if downward else 'none downward'})")
-        require(outward == 20 * 128 and not inward,
+        require(outward > 0 and not inward,
                 f"and every one of the {outward} skirt faces points out of its tile "
                 f"({inward[:3] if inward else 'none inward'})")
+        # The counts used to be 20 x 512 and 20 x 128 exactly, which was this claim's completeness
+        # half. `HOUSE-00786` cut a hole in the ground and both moved, so completeness is stated
+        # where it can be stated exactly -- as AREA and as LENGTH, below -- rather than as a
+        # number a triangulation is free to reach in more than one way.
+        require(upward < 20 * 512 and outward < 20 * 128,
+                f"...and the excavation took something out of both: {upward} ground triangles of "
+                f"{20 * 512} and {outward} skirt faces of {20 * 128}")
+
+        # 7b. `HOUSE-00786`: the ground stops at the wall of a room it would otherwise run through.
+        _w, _h, samples, _materials = decode(SOURCE)
+        cut = excavations(SOURCE, samples)
+        require(len(cut) == 14 and all(box["cell"].startswith("B1_") for box in cut),
+                f"the rooms §10.2's surface runs through are the basement and nothing else: "
+                f"{len(cut)} box(es), {len(set(box['cell'] for box in cut))} cell(s), all of them "
+                f"B1 ({sorted(set(box['cell'] for box in cut))[:3]})")
+
+        lot = {"x": (ORIGIN_X, ORIGIN_X + (WIDTH - 1) * STEP),
+               "z": (ORIGIN_Z, ORIGIN_Z + (HEIGHT - 1) * STEP)}
+        removed = _union_area(cut, lot)
+        drawn = sum(_area([primitive["vertices"][index] for index in triple])
+                    for tile in rows for primitive in tile["primitives"]
+                    for triple in _triples(primitive["indices"])
+                    if abs(primitive["vertices"][triple[0]][1][1]) > 1e-6)
+        whole = (lot["x"][1] - lot["x"][0]) * (lot["z"][1] - lot["z"][0])
+        require(abs(drawn - (whole - removed)) < 1e-3,
+                f"the ground's plan area is the lot minus the holes: {drawn:.3f} m2 drawn, "
+                f"{whole:.0f} - {removed:.3f} = {whole - removed:.3f} expected")
+
+        # ...and it is the RIGHT hole, not merely one of the right size. Nothing of the ground is
+        # inside a room, tested per triangle rather than per tile.
+        intruders = []
+        for tile in rows:
+            for primitive in tile["primitives"]:
+                for triple in _triples(primitive["indices"]):
+                    corners = [primitive["vertices"][index] for index in triple]
+                    if abs(corners[0][1][1]) <= 1e-6:
+                        continue
+                    for box in cut:
+                        outside = sum(_area(piece) for piece in _minus_box(corners, box))
+                        if outside < _area(corners) - 1e-9:
+                            intruders.append((tile["id"], box["cell"]))
+        require(not intruders,
+                f"and no ground triangle has any part inside a room ({intruders[:3]})")
+
+        # The cut edge is WELDED, which is what `EXCAVATION_PRECISION` is for: the point where a
+        # wall line crosses a grid edge is computed once from each of the two triangles that share
+        # that edge, by different arithmetic, and without the rounding the two answers differ in
+        # the last bit and leave two vertices where there should be one. Measured: 28 such pairs
+        # with the rounding taken out, which is 28 hairline cracks along the house.
+        unwelded = []
+        for tile in rows:
+            for primitive in tile["primitives"]:
+                buckets: dict[tuple, list] = {}
+                for vertex in primitive["vertices"]:
+                    if abs(vertex[1][1]) <= 1e-6:
+                        continue
+                    buckets.setdefault((round(vertex[0][0], 3), round(vertex[0][2], 3)),
+                                       []).append(vertex)
+                for group in buckets.values():
+                    for i, first in enumerate(group):
+                        for second in group[i + 1:]:
+                            if first != second and all(abs(first[0][k] - second[0][k]) < 1e-5
+                                                       for k in range(3)):
+                                unwelded.append(tile["id"])
+        require(not unwelded,
+                f"and the cut edge is welded: no two ground vertices stand 10 um apart "
+                f"({unwelded[:3]})")
+
+        # An interpolated normal is a MIX of two unit vectors and is therefore shorter than one,
+        # which would darken a band along every wall the ground was cut at.
+        stretched = [round(abs(math.dist((0.0, 0.0, 0.0), vertex[1]) - 1.0), 6)
+                     for tile in rows for primitive in tile["primitives"]
+                     for vertex in primitive["vertices"] if abs(vertex[1][1]) > 1e-6]
+        require(max(stretched) < 1e-5,
+                f"and every ground normal is still a unit vector, the cut ones included "
+                f"(worst {max(stretched)})")
+
+        # The skirt hangs from the ground, so it stops where the ground does. Stated as the LENGTH
+        # of tile edge that still carries ground, computed from the ground triangles rather than
+        # from the skirt code that is being checked.
+        require(abs(_skirt_length(rows) - _edge_with_ground(rows)) < 1e-3,
+                f"and the skirt covers exactly the tile edge that still has ground on it: "
+                f"{_skirt_length(rows):.3f} m of skirt over {_edge_with_ground(rows):.3f} m of edge")
+
+        # The half that says this did not disturb anything else: away from the house, the ground is
+        # the ground it was. Compared against a run of the SAME generator with no excavation at all.
+        plain = _tiles_without_excavation(SOURCE)
+        touched = {tile["id"] for tile in rows
+                   if any(_boxes_overlap(_tile_box(tile), box) for box in cut)}
+        moved = [tile["id"] for tile, before in zip(rows, plain)
+                 if tile["id"] not in touched and tile["primitives"] != before["primitives"]]
+        require(len(touched) == 6 and not moved,
+                f"and the {len(rows) - len(touched)} tiles the house does not stand on are "
+                f"byte-identical to what they were ({moved[:3]})")
+
+        gym = next(box for box in cut if box["cell"] == "B1_GYM")
+        before = sum(1 for tile in plain for primitive in tile["primitives"]
+                     for triple in _triples(primitive["indices"])
+                     if abs(primitive["vertices"][triple[0]][1][1]) > 1e-6
+                     and _inside(_centroid([primitive["vertices"][i] for i in triple]), gym))
+        after = sum(1 for tile in rows for primitive in tile["primitives"]
+                    for triple in _triples(primitive["indices"])
+                    if abs(primitive["vertices"][triple[0]][1][1]) > 1e-6
+                    and _inside(_centroid([primitive["vertices"][i] for i in triple]), gym))
+        require(before > 0 and after == 0,
+                f"and over `B1_GYM` -- the room this was found from, whose ceiling is at +0.25 with "
+                f"the ground at -0.537..-0.006 -- {before} ground triangles became {after}")
 
         # The skirt, which is the other half of `HOUSE-00762`'s ask.
         skirted = []

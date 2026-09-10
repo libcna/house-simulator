@@ -10828,8 +10828,14 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: 2 `DoorMatrixTests`. Six injected bugs, all caught -- including the two that prove
             the fix above is load-bearing: putting the bounding box back, and dropping the check
             that the touching box crosses the doorway rather than merely meeting its plane.
-- [ ] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
+- [x] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
       dep: HOUSE-00684, HOUSE-00164, HOUSE-00486, HOUSE-00485, HOUSE-00488, HOUSE-00700, HOUSE-00786 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-10, later still) **`HOUSE-00786` took the last pin out and this closes.** All
+            eighteen comparable poses are identical culled and unculled, `kOutdoorsPending` and the
+            machinery that read it are gone, and the worst of the eighteen is `l0-sunroom` at
+            0.1546 % of its frame -- silhouette pixels on a rasteriser's edge, under the 0.2 % a
+            committed reference is allowed. From here a pose that differs at all is a new hole and
+            fails the day it appears.
       note: (2026-09-10, later the same day) **`HOUSE-00700` landed and took two of the three pins
             out: 17 of 18 poses are now identical culled and unculled.** `ext-backyard` recovered
             31.23 % of its frame and `ext-terrace` 2.00 %. The task still stays open, and the
@@ -11989,7 +11995,7 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             (`HOUSE-00776` authored the downspouts and their emitters). Every byte after the
             header, which is the graph itself, is identical. Three 34-minute nav builds were saved
             and nothing was taken on trust.
-- [ ] HOUSE-00786 — §10.2's height field has no hole under the house: excavate the ground the basement stands in
+- [x] HOUSE-00786 — §10.2's height field has no hole under the house: excavate the ground the basement stands in
       dep: HOUSE-00761 · sys: content · plat: TOOL · pri: MUST
       note: (2026-09-10) **New task, next free id in phase 10's reserved 00761–00840 range.** Found
             by `HOUSE-00700`, which fixed two of the three poses `HOUSE-00688` had pinned and could
@@ -12009,6 +12015,53 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             cell that found it; `b1-gym` comes off `kOutdoorsPending` and `HOUSE-00688` closes with
             no pins; the ground outside the house is unchanged, so the excavation may not eat the
             backfill the exterior walls stand in.
+      verify: `tools/world/terrain_gen.py --selftest`
+      note: (2026-09-10) **the hole is in the MESH and not in the field, and that is the decision
+            in this.** `terrain.png` keeps all 5 265 samples: the field is also what says how high
+            the ground is against a wall, and §49.2's collider, `height_at`, the fence posts, the
+            downspout splash points and `HOUSE-00774`'s outdoor gate all read it. What changes is
+            `tiles()`, which now cuts each 1 m quad against the plan of every room the surface
+            enters before it emits a triangle.
+      note: **which rooms is not a list anybody maintains.** It is the defect's own definition -- a
+            room whose interior volume the ground surface enters -- so a regraded yard or a new
+            terrace pad that lifts the ground into a ground-floor room is found by the same rule
+            without anybody remembering to add it. Measured on this house it is the basement's
+            **14 boxes and nothing else**, which is the answer a hand-written list would have had.
+      finding: the cut has to be EXACT and not snapped to the 1 m grid. `B1_GYM` is
+            x −8.2…−2.2, and the nearest grid lines inside that are −8 and −3: snapping inward
+            leaves 0.8 m of lawn along the room's east wall, which is the same defect in a narrower
+            band, and snapping outward opens a trench between the wall and the lawn. So a quad that
+            straddles a wall is clipped -- a triangle differenced against an axis-aligned box as
+            four half-plane cuts, fan-triangulated, with y, the normal and the atlas UV
+            interpolated. Untouched triangles come back as the same list object and are emitted
+            unchanged, so 14 of the 20 tiles are byte-identical to what they were.
+      finding: **the skirt had to go with it.** §26's LOD skirt hangs 0.50 m below every tile edge,
+            and where the excavation reaches a tile boundary the skirt was left hanging inside the
+            room -- the same defect one storey down, and the selftest's existing skirt claim caught
+            it on the first run rather than a person noticing later.
+      measured: **269.24 m² excavated of the lot's 5 120**, checked against an independent
+            coordinate-compression sweep over the union of the boxes rather than against the
+            generator's own sum. 10 240 ground triangles become 9 897 and 2 560 skirt faces 2 384;
+            over `B1_GYM` itself, 48 ground triangles become 0.
+      verified: 8 claims in `terrain_gen --selftest` and 7 injected bugs, all caught -- nothing
+            excavated at all, every room excavated whether the ground enters it or not, the
+            outdoors excavated too, the difference forgetting its southern piece, the skirt left
+            hanging over the hole, a clipped vertex left unrounded, and an interpolated normal left
+            unnormalised.
+      note: **the references it moved, and the proof they were meant to move.** Eleven committed
+            frames changed and every one of the **10 235** differing pixels was `TERRAIN_grass`
+            becoming a house material -- wall, trim, stair or floor -- with no pixel changing the
+            other way and no pixel changing between two house materials. `b1-cinema` is 9 706 of
+            them, a band of lawn straight across a basement room; the other ten are 333 pixels over
+            six exterior poses and 196 over four property poses, all of them slivers of grass that
+            had been poking out at the foot of the house's own walls. Those ten were UNDER the
+            0.2 % tolerance and had never failed, so they were regenerated with the change proved
+            rather than because a test demanded it.
+      note: **two of those seven MISSED first and the claims were strengthened rather than the
+            injections dropped.** Nothing said the cut edge is WELDED, and nothing said a ground
+            normal is a unit vector; both are now claims, and the first is worth its line --
+            measured, taking the rounding out leaves **28 pairs of vertices 1e-16 m apart** where
+            there should be one, which is 28 hairline cracks along the house's own wall line.
 - [ ] HOUSE-00783 — Phase-10 review and commit
       dep: HOUSE-00761…HOUSE-00782 · sys: — · plat: ALL · pri: MUST
 

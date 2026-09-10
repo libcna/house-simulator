@@ -153,6 +153,12 @@ probe which of the two they are looking at. It is 1 for §15's open exterior cel
 `EXT_WORLD`, and 0 for every room — including `EXT_SHED`, which is an `exterior` cell that is a
 BUILDING (§15.7 rule 5 draws the same line).
 
+The flag stays, and so does the field it guards. `HOUSE-00786` cut the ground the basement stands
+in out of the drawn MESH — rendering has no equivalent gate, because a tile is 16 m square and the
+one seen through a basement window is the one that continues under the house — but the collider
+still reads every sample, because the field is also what says how high the ground is against a wall
+and `height_at` has callers that are nowhere near a room.
+
 A shape is listed in **every bucket its AABB overlaps**, not the one its minimum corner falls in.
 A shape a cell borrows through a hole (§4.1) is listed by the part of it within reach of that hole
 rather than by all of it: the shape is whole — the narrow phase gets its real geometry — and the
