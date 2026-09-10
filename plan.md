@@ -13343,8 +13343,30 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 - [ ] HOUSE-01538 — Implement clock persistence in the save model
       dep: HOUSE-01531 · sys: persistence · plat: ALL · pri: MUST
       dep-note: schema lands in phase 39
-- [ ] HOUSE-01539 — Test: at `timeScale = 60`, 3 real seconds advance the clock by exactly 3 simulated minutes
+- [x] HOUSE-01539 — Test: at `timeScale = 60`, 3 real seconds advance the clock by exactly 3 simulated minutes
       dep: HOUSE-01533 · sys: ci · plat: CI · pri: MUST
+      verify: unit `ClockRateTests.*`
+      note: (2026-09-10) **the one-call version of this claim already existed twice** -- in
+            `SimClockTests` and, since `HOUSE-01533`, taken from the SETTING in `DayLengthTests`.
+            Writing a third would have been a restatement, so this asks the question a running game
+            asks: three real seconds arrive as **180 frames of `1/60 s`**, each of them a `float`
+            that is not exactly a sixtieth, and the claim is where the clock lands after all of
+            them. `timeScale` is read from `Settings::Defaults()` rather than from the constant, so
+            the file fails if the default setting and §35.2's chosen 60x ever stop agreeing.
+      measured: **nine microseconds OVER, and the direction matters.** The nearest `float` to 1/60
+            is 8.7e-10 s too LARGE, so 180 of them come to 3.0000000156 real seconds and the clock
+            lands 9.4 µs past three simulated minutes -- 0.27 s of drift over a whole day of play,
+            forwards. Over 86 400 frames -- one simulated day at 60 Hz -- the offset is 4.5 ms,
+            which is **480 times** the three-second case for 480 times the frames: linear, so
+            nothing compounds. An error that grew with the square would put the sunrise four
+            minutes out.
+      finding: the shape of the error is the assertion, not its size. A tolerance alone would pass
+            a clock that compounded slowly; the ratio would not, and it is what the day-long case
+            actually checks.
+      verified: 5 `ClockRateTests`. Four injected bugs, all caught: the clock accumulating through
+            a `float` (30x the drift), the default day-length setting drifting from §35.2's chosen
+            scale, the clock advancing by a frame rather than by its time, and the frozen preset
+            made a rate.
 - [x] HOUSE-01540 — Test: a frame hitch of 250 ms advances the clock by the real elapsed time, and the physics accumulator clamps
       dep: HOUSE-01531, HOUSE-00549 · sys: ci · plat: CI · pri: MUST
       verify: unit `ClockHitchTests.*`
