@@ -420,6 +420,13 @@ namespace cnahouse::app
             // With the world, so §12's nested cells are drawn with the room they stand in
             // (`HOUSE-00488`): a fridge whose door is shut is still a fridge in the kitchen.
             chunkCuller_.emplace(*blockoutChunks_, &*world_);
+            // §25.6's hierarchy over the exterior chunks, built once (`HOUSE-00700`). The
+            // outdoors is not a room and the portal walk was never the thing that was supposed to
+            // reach it.
+            exteriorScene_.emplace(visibility::BuildExteriorScene(*blockoutChunks_, *world_));
+            Log::Info(LogCat::Content,
+                      "§25.6: {} exterior instance(s) in the hierarchy",
+                      exteriorScene_->instances.size());
         }
         // `--no-cull` is the same switch `cull off` throws, set before the first frame: a render
         // test drives the game through `Options` and cannot type into a console.
@@ -1100,6 +1107,7 @@ namespace cnahouse::app
         if (chunkCuller_.has_value())
         {
             chunkCuller_->Cull(visibility_->Visible());
+            CullExterior();
         }
         if (visibilityGeometry_.Visible())
         {
@@ -1137,6 +1145,16 @@ namespace cnahouse::app
             snapshot.chunksDrawn = chunkCuller_->Statistics().chunksDrawn;
             snapshot.chunksTested = chunkCuller_->Statistics().chunksTested;
         }
+        if (exteriorScene_.has_value() && !exteriorScene_->Empty())
+        {
+            // §25.6's three counters, which were -1 until `HOUSE-00700` gave the hierarchy
+            // something real to hold. `exteriorDrawn` is what the walk over it kept and NOT what
+            // the frame added: the two differ by the chunks §25.2 had already found, and F3 says
+            // what each system decided rather than what survived the union.
+            snapshot.exteriorDrawn = exteriorCuller_.Statistics().instancesDrawn;
+            snapshot.exteriorTested = exteriorCuller_.Statistics().instancesTested;
+            snapshot.exteriorNodes = exteriorCuller_.Statistics().nodesVisited;
+        }
         snapshot.drawCalls = renderList_.DrawCalls();
         snapshot.stateChanges = renderList_.StateChanges();
         // §25.1's step 5 is built from residency and not from the walk above (`BuildRenderList`
@@ -1157,9 +1175,59 @@ namespace cnahouse::app
                !visibility_->Visible().empty();
     }
 
+    void CnaHouseGame::AddExteriorChunks(const Microsoft::Xna::Framework::Vector3& eye)
+    {
+        if (exteriorChunks_.empty())
+        {
+            return;
+        }
+        // The walk's own answer, sorted, so the difference is one linear pass rather than a set.
+        std::vector<std::uint32_t> already(chunkCuller_->Chunks().begin(), chunkCuller_->Chunks().end());
+        std::sort(already.begin(), already.end());
+        std::vector<std::uint32_t> extra;
+        extra.reserve(exteriorChunks_.size());
+        std::set_difference(exteriorChunks_.begin(),
+                            exteriorChunks_.end(),
+                            already.begin(),
+                            already.end(),
+                            std::back_inserter(extra));
+        exteriorAdded_ = extra.size();
+        renderList_.AddChunks(*blockoutChunks_, extra, eye);
+    }
+
+    void CnaHouseGame::CullExterior()
+    {
+        // §25.6's steps 1 and 2 (`HOUSE-00700`). The cones are every way the OUTDOORS is being
+        // seen this frame: each visible exterior cell's own. An instance in any of them is on
+        // screen, and an exterior cell the walk never reached contributes nothing -- which is the
+        // point, because its GEOMETRY is still tested against the cones of the ones it did reach.
+        exteriorChunks_.clear();
+        exteriorCones_.clear();
+        if (!exteriorScene_.has_value() || exteriorScene_->Empty() || !world_.has_value())
+        {
+            return;
+        }
+        visibility::GatherExteriorCones(*world_, visibility_->Visible(), exteriorCones_);
+        if (exteriorCones_.empty())
+        {
+            return;
+        }
+        exteriorCuller_.Cull(exteriorScene_->bvh, exteriorCones_, view_.Camera().Pose().eye);
+        for (const std::uint32_t instance : exteriorCuller_.Instances())
+        {
+            exteriorChunks_.push_back(exteriorScene_->ChunkOf(instance));
+        }
+        std::sort(exteriorChunks_.begin(), exteriorChunks_.end());
+    }
+
     void CnaHouseGame::BuildRenderList()
     {
         renderList_.Clear();
+        // A frame that does not take §25.6's path added nothing from it, and saying so here rather
+        // than leaving last frame's number standing is what keeps the count a fact about THIS
+        // frame -- `cull off` and the residency path both come through here without calling
+        // `AddExteriorChunks` at all.
+        exteriorAdded_ = 0u;
         if (blockoutChunks_ == nullptr || blockoutCells_ == nullptr)
         {
             return;
@@ -1169,8 +1237,13 @@ namespace cnahouse::app
         if (CullingApplied())
         {
             // §25.1's steps 1-3, all the way through to the draw list: the walk's answer, then the
-            // chunks of it that are in one of its cones.
+            // chunks of it that are in one of its cones...
             renderList_.AddChunks(*blockoutChunks_, chunkCuller_->Chunks(), eye);
+            // ...and §25.6's, which is a different question about a different structure
+            // (`HOUSE-00700`). Added rather than replacing: the two sets overlap wherever the
+            // walk did reach an exterior cell, and a chunk drawn twice is a chunk drawn twice, so
+            // what goes in is the exterior set MINUS what the walk already found.
+            AddExteriorChunks(eye);
             return;
         }
         // Everything resident. Two ways to get here and they are different situations: §71's

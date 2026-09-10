@@ -43,6 +43,8 @@
 #include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
 #include "cnahouse/visibility/ChunkCulling.hpp"
+#include "cnahouse/visibility/ExteriorCulling.hpp"
+#include "cnahouse/visibility/ExteriorScene.hpp"
 #include "cnahouse/visibility/RenderList.hpp"
 #include "cnahouse/visibility/VisibilitySystem.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
@@ -451,7 +453,22 @@ namespace cnahouse::app
         /// Called at the top of `RenderFrame`, because it needs the camera the frame will be drawn
         /// with and the passes read it immediately after.
         void BuildRenderList();
+        /// @brief §25.6's steps 1 and 2 over `exteriorScene_`, once a frame (`HOUSE-00700`).
+        void CullExterior();
+        /// @brief Adds what §25.6 found and §25.2's walk did not, so nothing is drawn twice.
+        void AddExteriorChunks(const Microsoft::Xna::Framework::Vector3& eye);
 
+    public:
+        /// @brief The chunks §25.6 added to the last frame's draw list over and above §25.2's.
+        ///
+        /// The one number a test cannot get from the F3 snapshot: it reports what each SYSTEM
+        /// decided, and this is what survived the union of the two.
+        [[nodiscard]] std::size_t ExteriorChunksAddedForTesting() const noexcept
+        {
+            return exteriorAdded_;
+        }
+
+    private:
         /// @brief The view and projection the FRAME is drawn with, for world-space annotations.
         ///
         /// The body's eye until §25.8's `F5` detaches the camera. Drawing the cones through the
@@ -526,6 +543,23 @@ namespace cnahouse::app
         debug::VisibilityGeometryOverlay visibilityGeometry_;
         std::optional<visibility::VisibilitySystem> visibility_;
         std::optional<visibility::ChunkCuller> chunkCuller_;
+        /// @brief §25.6's hierarchy over the exterior chunks, and the walk over it
+        ///        (`HOUSE-00700`).
+        ///
+        /// The outdoors is not a room: §25.6 says portal traversal cannot help inside `EXT_WORLD`,
+        /// and a lawn filed under a yard the walk did not reach was a lawn nobody drew. These two
+        /// answer the exterior; `chunkCuller_` answers the rooms.
+        std::optional<visibility::ExteriorScene> exteriorScene_;
+        visibility::ExteriorCuller exteriorCuller_;
+        std::vector<visibility::ClipFrustum> exteriorCones_;
+        std::vector<std::uint32_t> exteriorChunks_;
+        /// @brief How many chunks §25.6 put in this frame's draw list that §25.2's walk had NOT
+        ///        already found.
+        ///
+        /// The draw list is the union of two answers, so neither system's own count describes it
+        /// and `drawCalls == chunksDrawn` stopped being true the moment the outdoors joined. This
+        /// is the difference, and it is what makes the whole statement checkable again.
+        std::size_t exteriorAdded_ = 0u;
         /// §25.8's `F5`: the walk stops being recomputed and the camera leaves the body, so what
         /// was culled can be flown out to and looked at. *"The single most useful debugging tool
         /// for a portal system."*

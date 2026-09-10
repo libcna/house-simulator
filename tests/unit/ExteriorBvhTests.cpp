@@ -15,6 +15,8 @@
 #include <string>
 #include <vector>
 
+#include <bit>
+
 #include <gtest/gtest.h>
 
 #include "cnahouse/visibility/ExteriorBvh.hpp"
@@ -585,4 +587,33 @@ TEST(ExteriorBvhTests, RebuildingReplacesTheTreeRatherThanAddingToIt)
     EXPECT_EQ(bvh.Statistics().instances, 300);
     EXPECT_EQ(bvh.Statistics().nodes, firstNodes);
     EXPECT_EQ(bvh.Instances().size(), 300u);
+}
+
+TEST(ExteriorBvhTests, TheCategoryMaskHoldsEveryCategoryThereIs)
+{
+    // `HOUSE-00700`. There were eight categories and `BvhNode::categories` was a byte, which held
+    // them exactly. The ninth would have shifted its bit out: a node holding nothing but GROUND
+    // would have had no bits set, a `maxCullDistance` of zero, and would have been rejected by
+    // distance at any range -- a silent over-cull of the whole outdoors, one category after the
+    // byte was full. The `static_assert` beside `CategoryBit` is the durable guard; this is the
+    // arithmetic it is guarding.
+    using cnahouse::visibility::CategoryBit;
+    using cnahouse::visibility::PropCategory;
+
+    std::uint16_t all = 0u;
+    for (unsigned index = 0; index < static_cast<unsigned>(PropCategory::Count); ++index)
+    {
+        const std::uint16_t bit = CategoryBit(static_cast<PropCategory>(index));
+        EXPECT_NE(bit, 0u) << "category " << index << " has no bit, so it can never be seen";
+        EXPECT_EQ(all & bit, 0u) << "category " << index << " shares a bit with an earlier one";
+        all = static_cast<std::uint16_t>(all | bit);
+    }
+    EXPECT_EQ(std::popcount(all), static_cast<int>(PropCategory::Count))
+        << "the mask holds " << std::popcount(all) << " of " << static_cast<int>(PropCategory::Count)
+        << " categories";
+
+    // ...and the GROUND is the one that would have fallen off the end.
+    EXPECT_NE(CategoryBit(PropCategory::Ground), 0u);
+    EXPECT_GT(static_cast<unsigned>(CategoryBit(PropCategory::Ground)), 0xFFu)
+        << "the ground's bit fits in a byte, so this test is no longer testing what it says";
 }

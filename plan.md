@@ -10810,7 +10810,15 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             the fix above is load-bearing: putting the bounding box back, and dropping the check
             that the touching box crosses the doorway rather than merely meeting its plane.
 - [ ] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
-      dep: HOUSE-00684, HOUSE-00164, HOUSE-00486, HOUSE-00485, HOUSE-00488, HOUSE-00700 · sys: ci · plat: CI · pri: MUST
+      dep: HOUSE-00684, HOUSE-00164, HOUSE-00486, HOUSE-00485, HOUSE-00488, HOUSE-00700, HOUSE-00786 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-10, later the same day) **`HOUSE-00700` landed and took two of the three pins
+            out: 17 of 18 poses are now identical culled and unculled.** `ext-backyard` recovered
+            31.23 % of its frame and `ext-terrace` 2.00 %. The task still stays open, and the
+            reason has changed: the last pin is not over-culling at all. `b1-gym`'s 1 132 pixels
+            are `TERRAIN_grass` drawn in front of the gym's own ceiling, because §10.2's height
+            field has no hole under the house -- so the UNCULLED frame is the wrong picture to
+            match and the culled one is right. That is `HOUSE-00786`, which the `dep` now records;
+            when the ground is excavated this closes with no pins at all.
       note: (2026-09-10) **the test is ENABLED and green, and the task stays open, which is not a
             contradiction.** `HOUSE-00485` and `HOUSE-00488` closed the two causes it was blocked
             on and 15 of the 18 comparable poses are now identical culled and unculled. The three
@@ -10849,7 +10857,7 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             colour through the doorway, unculled you saw the room -- and `HOUSE-00486` drew the
             leaf. The `dep` records it, because the criterion was unsatisfiable for a reason that
             is a fact about the shell rather than about the culling.
-- [ ] HOUSE-00700 — Put the outdoors on §25.6's instance path: terrain tiles, road segments, fences and garden structures as exterior instances rather than per-cell chunks
+- [x] HOUSE-00700 — Put the outdoors on §25.6's instance path: terrain tiles, road segments, fences and garden structures as exterior instances rather than per-cell chunks
       dep: HOUSE-00678, HOUSE-00780 · sys: visibility · plat: ALL · pri: MUST
       note: (2026-09-10) **New task, next free id in phase 9's reserved 00661–00760 range.** Found
             by `HOUSE-00488`: `HOUSE-00677`/`HOUSE-00678` built the exterior BVH and its traversal
@@ -10868,6 +10876,67 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             basement window well.
       note: the per-cell filing itself is not wasted: a chunk's cell is a RESIDENCY key (§27.2)
             and stays one. What has to change is which structure decides whether it is DRAWN.
+      note: (2026-09-10) **done.** `visibility::BuildExteriorScene` walks the chunk library once at
+            load and turns every chunk of an EXTERIOR cell into an `ExteriorInstance`; the category
+            is read off the material's own prefix, a chunk being one material (§17.4), so there is
+            no second table that can disagree with the content build. `CnaHouseGame::CullExterior`
+            runs §25.6's steps 1 and 2 over the hierarchy each frame and `AddExteriorChunks` unions
+            the answer into the draw list MINUS what §25.2's walk already found, because a chunk
+            drawn twice is a chunk drawn twice.
+      finding: **the cones are the exterior cells' own, not the camera frustum, and that is the
+            decision in it.** §25.6 says portal traversal cannot help INSIDE `EXT_WORLD`; it does
+            not say the outdoors is drawn whenever it is in front of you. What the walk still
+            answers is *how* the outdoors is being seen -- through which windows, from which yard
+            -- so the instances are tested against the cones of the exterior cells the walk did
+            reach. A basement with no view out contributes no cone and the outdoors costs nothing
+            there, which is the case a frustum-only reading would have got wrong in the other
+            direction: 49 instances submitted from a windowless cellar.
+      correction: (2026-09-10) **the `finding:` above says `b1-gym` was seeing `TERRAIN_grass`
+            through a basement window well. It was not, and this task's fix does not close it.**
+            Measured after the instance path landed: `ext-backyard` and `ext-terrace` went clean
+            the same hour -- 31.23 % and 2.00 % of their frames recovered -- and `b1-gym` did not
+            move. Its 1 132 pixels are grass drawn IN FRONT of the gym's own ceiling (897 px), trim
+            (156 px) and wall (29 px), which no window can do. §10.2's height field simply has no
+            hole under the house: over the gym's footprint the ground runs y −0.537…−0.006 and B1's
+            ceiling is at +0.25, so half a metre of lawn hangs inside the room and the UNCULLED
+            frame is the wrong picture. Recorded as `HOUSE-00786`; the pin stays until it lands,
+            with the measurement in the test rather than the guess. `B1_GYM`'s two windows are real
+            (`P_B1_GYM__W1`, `P_B1_GYM__W2` onto `EXT_FRONTYARD_W`) and the pose faces EAST at
+            x −5.20 with both of them at x −7.50…−6.60 behind it, so §25 is right not to reach
+            through them.
+      measured: **49 exterior instances**, from 49 chunks of exterior cells -- the terrain tiles,
+            the road and its markings, the fences, the gates and the garden structures. The
+            culling-sanity suite went from 15 of 18 poses identical culled and unculled to **17 of
+            18**, and the two it fixed are the two largest holes the project had.
+      finding: **the F3 overlay stopped telling the truth the moment the union existed, and an
+            integration test said so before a person could.** `drawCalls == chunksDrawn` had been
+            an equality since `HOUSE-00684`; with the outdoors added it read 43 against 27. The
+            fix is not to weaken it: §25.6's own three counters -- `exteriorDrawn`,
+            `exteriorTested`, `exteriorNodes`, in the snapshot since `HOUSE-00681` and −1 ever
+            since because nothing ran that hierarchy -- are filled in, and the equality becomes
+            `drawCalls == chunksDrawn + the chunks §25.6 added over the walk's`. Measured from the
+            road: 27 chunks, 18 instances found, **16** added, so two were already in the list and
+            the subtraction is doing something.
+      verified: 6 `ExteriorSceneTests` and `HeadlessRunTests.PressingF3…`, with the re-pinned
+            `CullingSanityRenderTests` over 18 poses. Eleven injected bugs, all caught: an
+            unrecognised material taking a 45 m `SmallProp` distance instead of the ground's far
+            plane, the instance id set to the position so a BVH reorder loses the chunk, `ChunkOf`
+            trusting the position instead of the id, the exterior-kind test dropped so rooms join
+            the outdoors, `NB_IMPOSTOR` tested after the plain `NB_` prefix that shadows it, the
+            instance given a default box instead of the chunk's, every visible cell's cones sent to
+            the hierarchy rather than the outdoor ones', the cone list appended to instead of
+            cleared each frame, the union not subtracting so a lawn is drawn twice, the added
+            chunks never counted, and the F3 counters left at the −1 that means nothing ran.
+      note: **two of those needed the test to be made stronger first, and that is recorded rather
+            than quietly fixed.** "The union does not subtract" and "every visible cell's cones go
+            to the hierarchy" both MISSED on their first run: the equality above grows by the same
+            amount it is compared against, so double-drawing is invisible to it, and an interior
+            cell's cone over-draws a garden the depth buffer then hides. The first is now caught by
+            asserting the subtraction removed something (16 < 18); the second by lifting the rule
+            out of the game loop into `GatherExteriorCones`, where a walk carrying a kitchen, two
+            yards and a basement can be handed to it directly -- and where the claim that a
+            windowless basement submits NO cone at all can be made, which is `b1-gym`'s case and
+            the one that costs the whole outdoors when it is wrong.
 - [x] HOUSE-00689 — Test: with all doors closed, the graph fragments as `report_graph.py` predicts and the visible set from `L0_FOYER` is the golden list
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
       note: (2026-09-09) **two claims about one house, and they are about different graphs.** With
@@ -11901,6 +11970,26 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             (`HOUSE-00776` authored the downspouts and their emitters). Every byte after the
             header, which is the graph itself, is identical. Three 34-minute nav builds were saved
             and nothing was taken on trust.
+- [ ] HOUSE-00786 — §10.2's height field has no hole under the house: excavate the ground the basement stands in
+      dep: HOUSE-00761 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-10) **New task, next free id in phase 10's reserved 00761–00840 range.** Found
+            by `HOUSE-00700`, which fixed two of the three poses `HOUSE-00688` had pinned and could
+            not fix the third. `terrain_gen.py` samples §10.3's whole lot on a 1 m grid and has no
+            concept of a building footprint: `surfaces()` knows about paths, the carriageway, a
+            structure's PAD and an exterior cell with a floor of its own, and every one of those
+            sets a height rather than removing one. So the lawn runs straight through the house.
+      finding: measured from the gym: over `B1_GYM`'s footprint (x −8.2…−2.2, z −18.3…−14.3) the
+            height field runs **y −0.537…−0.006** and B1's ceiling is at **+0.25**, so between half
+            a metre and a quarter of a metre of ground hangs INSIDE the room. It is visible from in
+            there, which is how it was found: `b1-gym` renders 1 132 pixels of `TERRAIN_grass` in
+            front of the gym's own ceiling (897 px), trim (156 px) and wall (29 px). Nothing is
+            wrong with the culling in that pose -- the culled frame is the correct picture and the
+            unculled one is not, which is why the pin cannot come out by fixing §25.
+      accept: no terrain triangle is inside a building's interior volume, asserted in
+            `terrain_gen.py --selftest` over every cell of every level rather than over the one
+            cell that found it; `b1-gym` comes off `kOutdoorsPending` and `HOUSE-00688` closes with
+            no pins; the ground outside the house is unchanged, so the excavation may not eat the
+            backfill the exterior walls stand in.
 - [ ] HOUSE-00783 — Phase-10 review and commit
       dep: HOUSE-00761…HOUSE-00782 · sys: — · plat: ALL · pri: MUST
 

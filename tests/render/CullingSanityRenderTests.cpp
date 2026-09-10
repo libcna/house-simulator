@@ -30,13 +30,20 @@ namespace
     using cnahouse::app::QualityPreset;
     using cnahouse::testsupport::kVisibilityPoses;
 
-    /// The three poses that still differ, and every one of them is the OUTDOORS rather than a
-    /// cell's boundary surface. Measured 2026-09-10, after `HOUSE-00488`: `ext-backyard` 31.23 %,
-    /// `ext-terrace` 2.00 %, `b1-gym` 0.50 % -- the last one losing `TERRAIN_grass` through a
-    /// basement window well. The ground is per-cell CHUNKS until `HOUSE-00700` puts the outdoors
-    /// on §25.6's instance path, and thirteen pairs of exterior cells abut with no portal between
-    /// them; §25.6 says portals cannot help there, so authoring them would be the wrong fix.
-    constexpr std::array<const char*, 3> kOutdoorsPending{"b1-gym", "ext-terrace", "ext-backyard"};
+    /// The ONE pose that still differs, and it is not over-culling.
+    ///
+    /// `HOUSE-00700` put the outdoors on §25.6's instance path and two of the three went clean the
+    /// same hour: `ext-backyard` had been losing 31.23 % of its frame and `ext-terrace` 2.00 %.
+    /// `b1-gym` did not, and measuring it rather than assuming showed it was never the same
+    /// defect. The pose stands in the basement gym at eye y −0.70 and the 1 132 differing pixels
+    /// are `TERRAIN_grass` drawn IN FRONT of the gym's own ceiling (897 px), trim (156 px) and
+    /// wall (29 px) -- so the unculled frame is not seeing the lawn through anything, it is
+    /// standing inside it. §10.2's height field has no hole under the house: over the gym's
+    /// footprint the ground runs y −0.537…−0.006 and B1's ceiling is at +0.25, so half a metre of
+    /// lawn hangs inside the room. That is `HOUSE-00786`, and until the excavation lands the
+    /// UNCULLED frame is the wrong picture to match -- which is why this pin cannot come out with
+    /// the other two.
+    constexpr std::array<const char*, 1> kOutdoorsPending{"b1-gym"};
     using cnahouse::testsupport::RenderHarness;
     using cnahouse::testsupport::VisibilityPose;
 
@@ -69,7 +76,7 @@ namespace
 
 } // namespace
 
-/// ENABLED since `HOUSE-00488` (2026-09-10), with the three poses that still differ PINNED.
+/// ENABLED since `HOUSE-00488` (2026-09-10), with the one pose that still differs PINNED.
 ///
 /// It was disabled because it failed on eight of the eighteen poses §65.6's door state lets it
 /// compare, for two reasons that were both real and neither of them the culling: 38 431 pixels
@@ -82,13 +89,12 @@ namespace
 /// in `ROOF_MAIN`, which is a file the outdoors owns and `l3-room` cannot see. That one was 4 456
 /// pixels.
 ///
-/// The three that remain are all the same thing and it is not a cell's boundary surface: the
-/// OUTDOORS. `ext-backyard`, `ext-terrace` and `b1-gym` each lose ground -- `b1-gym` loses
-/// `TERRAIN_grass` through a basement window well -- because the ground is per-cell CHUNKS today
-/// and thirteen pairs of exterior cells abut with no portal between them. §25.6 is explicit that
-/// portals cannot help there and that the outdoors is culled by the exterior hierarchy over
-/// INSTANCES; nothing puts the ground in that path at all, which is `HOUSE-00700`. Authoring the portals
-/// would be the wrong fix, and is recorded as such.
+/// Seventeen of the eighteen are clean since `HOUSE-00700` put the outdoors on §25.6's instance
+/// path: the ground was per-cell CHUNKS, thirteen pairs of exterior cells abut with no portal
+/// between them, and §25.6 is explicit that portals cannot help there -- so authoring those
+/// portals would have been the wrong fix and is recorded as such. `ext-backyard` recovered
+/// 31.23 % of its frame and `ext-terrace` 2.00 %. The eighteenth, `b1-gym`, is a hole in the
+/// GROUND rather than in the culling and is `HOUSE-00786`'s; see `kOutdoorsPending` above.
 ///
 /// So the set is PINNED rather than the test left off. A pose not on this list that differs is a
 /// new hole and fails the day it appears; a pinned pose that stops differing fails too, so the
@@ -145,10 +151,10 @@ TEST(CullingSanityRenderTests, EveryPoseLooksTheSameCulledAndUnculled)
                             std::end(kOutdoorsPending);
         if (pinned)
         {
-            // Still differing, and it has to STAY differing: the day `HOUSE-00700` puts the
-            // outdoors on §25.6's instance path this line is what says the pin can go.
+            // Still differing, and it has to STAY differing: the day `HOUSE-00786` excavates
+            // the ground under the house this line is what says the pin can go.
             EXPECT_GT(diff->DifferingFraction(), 0.002)
-                << name << " no longer differs. `HOUSE-00700` has landed, or something else fixed "
+                << name << " no longer differs. `HOUSE-00786` has landed, or something else fixed "
                 << "the outdoors: take it out of kOutdoorsPending";
             ++stillPending;
             continue;

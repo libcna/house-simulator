@@ -84,7 +84,7 @@ Every number the subsystem has, with the header that owns it. Change one here an
 | `kClosedBelow`, `kOpenAbove` | 0.05, 0.08 | `PortalRuntime.hpp` | §25.3's latch. A door drifting across one threshold must not flicker the room behind it. |
 | `ExteriorCones::kMaxCones` | 8 | `ExteriorCulling.hpp` | Two rooms' worth of openings onto the garden; past it the camera frustum stands in. |
 | BVH `kLevels`, `kBranching`, `kMinToSplit` | 3, 8, 8 | `ExteriorBvh.hpp` | §25.6 asks for three levels; eight ways puts ~4 100 instances in ~64 leaves of ~64. |
-| cull distances | 45 / 70 / 120 / 180 / 90 / 160 / 300 / 420 m | `CullDistance.hpp` | §25.6's eight categories, in its own order. Measured to the instance's **box**, not its centre. |
+| cull distances | 45 / 70 / 120 / 180 / 90 / 160 / 300 / 420 / 420 m | `CullDistance.hpp` | §25.6's nine categories, in its own order. Measured to the instance's **box**, not its centre. The ninth is the GROUND (`HOUSE-00700`) and its 420 m is §10.3's far plane, which is to say no distance test at all: a lawn you cannot see is outside the frustum or behind the far plane, and both are already answered. |
 | view-distance scale | 0.6×–1.4× | `CullDistance.hpp` | §68's setting, clamped so a settings file cannot turn the exterior off or reach past the far plane. |
 | `kDressingDistance`, `kMicroDistance` | 18 m, 8 m | `DetailSets.hpp` | §26.4's detail sets: dressing dropped beyond 18 m, micro beyond 8 m. A cell every cone into which came through frosted glass adds §15.4's +1 to the LOD bias and drops both. |
 
@@ -136,6 +136,19 @@ the outdoors rather than the geometry in it: `L0_KITCHEN` sees the garden throug
 The exterior instance set used for these numbers is **synthetic** — 4 100 instances in §25.6's
 categories over §10.3's extents — because the real vegetation (`HOUSE-00772`) and neighbourhood
 (`HOUSE-00852`) are Phase 10 content. Re-take these numbers when it lands.
+
+The real set is no longer empty, though: `HOUSE-00700` put the **ground** in the hierarchy.
+`visibility::BuildExteriorScene` turns every chunk of an exterior cell into an `ExteriorInstance`
+once at load — 49 of them today, the terrain tiles, the road, the fences and the garden structures
+`HOUSE-00780` had filed as per-cell chunks — and its category is read off the material's own
+prefix, a chunk being one material (§17.4). A chunk's cell stays its **residency** key (§27.2);
+what changed is which structure decides whether it is drawn. The two answers are unioned rather
+than swapped, minus what the walk already found, because a chunk drawn twice is a chunk drawn
+twice.
+
+Nothing outdoors is drawn from a room with no view out: the cones §25.6 is tested against are the
+cones of the exterior cells the walk **did** reach, so a basement with the yard behind it
+contributes none and the outdoors costs nothing there.
 
 ## 6. How to debug it
 

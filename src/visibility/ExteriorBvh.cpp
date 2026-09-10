@@ -82,11 +82,11 @@ namespace cnahouse::visibility
         // The node's own box and category mask, from what is actually under it -- which is what
         // makes the hierarchy loose: siblings overlap exactly where their contents do.
         Xna::BoundingBox bounds = instances_[first].bounds;
-        std::uint8_t categories = 0u;
+        std::uint16_t categories = 0u;
         for (std::uint32_t i = first; i < first + count; ++i)
         {
             bounds = Union(bounds, instances_[i].bounds);
-            categories = static_cast<std::uint8_t>(categories | CategoryBit(instances_[i].category));
+            categories = static_cast<std::uint16_t>(categories | CategoryBit(instances_[i].category));
         }
         float maxDistance = 0.0F;
         for (std::size_t c = 0; c < static_cast<std::size_t>(PropCategory::Count); ++c)

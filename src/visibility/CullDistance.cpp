@@ -32,6 +32,8 @@ namespace cnahouse::visibility
                 return "neighbourhood lod1";
             case PropCategory::NeighbourhoodLod2:
                 return "neighbourhood lod2";
+            case PropCategory::Ground:
+                return "ground";
             case PropCategory::Impostor:
                 return "impostor";
             case PropCategory::Count:

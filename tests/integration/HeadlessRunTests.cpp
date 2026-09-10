@@ -189,10 +189,31 @@ namespace
         EXPECT_LT(snapshot.chunksDrawn, static_cast<int>(game.ResidentChunksForTesting()))
             << "the chunk cull kept every chunk in the house";
         EXPECT_LE(snapshot.chunksDrawn, snapshot.chunksTested);
-        // §25.1 all the way through: the draw list IS the visible set's chunks (`HOUSE-00684`).
+        // §25.1 all the way through: the draw list IS the visible set's chunks (`HOUSE-00684`)
+        // **plus §25.6's outdoors** (`HOUSE-00700`), which is a different structure answering a
+        // different question -- portal traversal cannot help inside `EXT_WORLD`. The two sets
+        // overlap wherever the walk did reach an exterior cell and the union subtracts that, so
+        // the statement stays an equality rather than becoming an inequality nothing checks.
         EXPECT_TRUE(snapshot.cullingApplied);
-        EXPECT_EQ(snapshot.drawCalls, snapshot.chunksDrawn)
-            << "the draw list and the chunk cull disagree about what is being drawn";
+        EXPECT_EQ(snapshot.drawCalls,
+                  snapshot.chunksDrawn + static_cast<int>(game.ExteriorChunksAddedForTesting()))
+            << "the draw list and the two culls disagree about what is being drawn";
+        // ...and §25.6 ran at all, with its own three counters filled in rather than left at the
+        // -1 that means "nothing did this".
+        EXPECT_GT(snapshot.exteriorDrawn, 0) << "§25.6's hierarchy drew nothing from the road";
+        EXPECT_GT(snapshot.exteriorNodes, 0);
+        EXPECT_LE(snapshot.exteriorDrawn, snapshot.exteriorTested);
+        // **The subtraction is doing something, and this is what says so.** The body starts on the
+        // road looking at the house, so §25.2's walk reaches the front yards and already holds
+        // some of their chunks; §25.6 finds those again through the hierarchy. Measured
+        // 2026-09-10: 18 instances found, 16 added, so two were already in the list. A union that
+        // did not subtract would add all 18 and draw two lawns twice -- and the equality above
+        // cannot see that, because the count it compares against would grow by the same two.
+        const int added = static_cast<int>(game.ExteriorChunksAddedForTesting());
+        EXPECT_GT(added, 0) << "the outdoors contributed nothing at all to a frame on the road";
+        EXPECT_LT(added, snapshot.exteriorDrawn)
+            << "§25.6 found " << snapshot.exteriorDrawn << " instances and all " << added
+            << " went into the list, so the walk's own chunks are being drawn a second time";
         EXPECT_LT(snapshot.drawCalls, 100) << "the frame is still drawing most of the house";
     }
 

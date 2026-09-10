@@ -43,8 +43,14 @@ namespace cnahouse::visibility
         /// @brief Which categories are anywhere under this node, one bit per `PropCategory`.
         ///
         /// The reason step 1 and step 2 meet in the hierarchy rather than after it: a subtree of
-        /// nothing but fences is finished at 120 m, and the test is an `and` of two bytes.
-        std::uint8_t categories = 0u;
+        /// nothing but fences is finished at 120 m, and the test is an `and` of two words.
+        ///
+        /// **`u16` and not `u8` since `HOUSE-00700`.** There were eight categories and a byte held
+        /// them exactly; the ninth would have shifted 1 out of the byte, so a node holding nothing
+        /// but GROUND would have had no bits set, a `maxCullDistance` of zero, and would have been
+        /// rejected by distance at any range at all. A silent over-cull of the whole outdoors, one
+        /// category after the byte was full.
+        std::uint16_t categories = 0u;
         /// @brief The largest §25.6 distance any instance under this node is drawn at.
         ///
         /// Derived from `categories` at build time so the traversal's distance rejection is one
@@ -152,9 +158,17 @@ namespace cnahouse::visibility
     };
 
     /// @brief The bit `BvhNode::categories` uses for @p category.
-    [[nodiscard]] constexpr std::uint8_t CategoryBit(PropCategory category) noexcept
+    ///
+    /// `u16`, and `static_assert`ed against the enum: the day a tenth category is added this is
+    /// where it has to be noticed, because the failure is silent otherwise (`HOUSE-00700`).
+    [[nodiscard]] constexpr std::uint16_t CategoryBit(PropCategory category) noexcept
     {
-        return static_cast<std::uint8_t>(1u << static_cast<unsigned>(category));
+        return static_cast<std::uint16_t>(1u << static_cast<unsigned>(category));
     }
+
+    static_assert(static_cast<unsigned>(PropCategory::Count) <= 16u,
+                  "BvhNode::categories is a u16 bitmask: a category past the sixteenth would shift "
+                  "its bit out and give any node holding only that category a maxCullDistance of "
+                  "zero, which culls it at every distance");
 
 } // namespace cnahouse::visibility

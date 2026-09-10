@@ -2799,7 +2799,12 @@ records the measurement and the feature is dropped.
    the ~4 100 exterior instances (terrain tiles, road segments, fences, trees, neighbourhood
    groups, garden props). Static, so the BVH is built once.
 2. **Distance culling** per category: small props 45 m, garden furniture 70 m, fences 120 m,
-   trees 180 m, neighbourhood LOD0 90 m, LOD1 160 m, LOD2 300 m, impostors 420 m.
+   trees 180 m, neighbourhood LOD0 90 m, LOD1 160 m, LOD2 300 m, impostors 420 m — and **the
+   ground 420 m**, which is §10.3's far plane and therefore no distance test at all
+   (`HOUSE-00700`). Step 1 names *"terrain tiles, road segments"* among the instances and this
+   list did not give them a distance; that was not an omission but an unstated answer, and it is
+   stated now. A lawn you cannot see because it is 200 m away is a lawn outside the frustum or
+   behind the far plane, and both of those are already answered.
 3. **LOD** (§26).
 4. **The house shell itself is an occluder** only in the optional experiment of §25.5.
 

@@ -39,7 +39,7 @@ TEST(CullDistanceTests, TheOrderOfTheCategoriesIsTheOrderOfTheirDistancesExceptW
 {
     // The three neighbourhood rows are a LOD ladder and grow; the four prop rows grow; and the two
     // ladders interleave -- a tree at 180 m outlives a neighbourhood house at LOD1 at 160 m. That
-    // interleaving is the reason these are eight independent numbers rather than a sorted list,
+    // interleaving is the reason these are nine independent numbers rather than a sorted list,
     // and it is asserted so that a later "tidy up" that sorts them is noticed.
     EXPECT_LT(CullDistanceFor(PropCategory::SmallProp), CullDistanceFor(PropCategory::GardenFurniture));
     EXPECT_LT(CullDistanceFor(PropCategory::GardenFurniture), CullDistanceFor(PropCategory::Fence));
