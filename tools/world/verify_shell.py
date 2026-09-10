@@ -1002,13 +1002,11 @@ def selftest() -> int:
         # inside `L0_KITCHEN`, and the generator cuts openings between cells that share a boundary
         # PLANE, which a cell wholly inside another does not.
         "FRIDGE_L0_KITCHEN: not cut in CELL_FRIDGE_INTERIOR.wall",
-        # `HOUSE-00491`, measured by `HOUSE-00496`'s rule the day both were written: §12.6's two
-        # `W_GABLE` louvres are in gable ENDS, and `roof_geometry` builds §12.1's roof as a hip
-        # with no gable to put them in. They are 1.44 m inside solid roof, which is what a window
-        # 0.80 m tall at +11.30 is when the hip at that wall is +10.57. Whether the roof gains a
-        # gablet or the louvres become dormers is §12's to say.
-        "L3_STORE_E.glass: stands 1.44 m over the roof above it",
-        "L3_STORE_W.glass: stands 1.44 m over the roof above it",
+        # `HOUSE-00491`'s two `W_GABLE` louvres used to be here -- 1.44 m inside solid roof,
+        # because §12.6 put them in gable ENDS and §12.1's roof is a hip with none. The owner
+        # decided on 2026-09-10 to remove them and ventilate the roof the way a hip roof is:
+        # soffit intake and a ridge vent. There is nothing left over the roof, and the claim below
+        # is what says a THIRD one cannot appear quietly.
     }
     unknown = sorted(problem for problem in result["problems"] if problem not in known)
     require(not unknown,

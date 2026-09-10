@@ -116,6 +116,77 @@ def roof_eaves(layout: dict, name: str, box: tuple, construction: dict) -> float
     return max(heads)
 
 
+#: §12.1's attic ventilation, since `HOUSE-00491` removed the two gable louvres that a hip roof has
+#: no gable end for: a continuous RIDGE VENT, which is what a hip roof is really ventilated with.
+#: The intake half of the pair is the eaves soffit `build_roof` has drawn since `HOUSE-00461`; this
+#: is the exhaust. Low and wide, the way a shingle-over vent is -- it reads on the silhouette as a
+#: thickened ridge line and not as a box on the roof.
+RIDGE_VENT_WIDTH = 0.28
+RIDGE_VENT_HEIGHT = 0.08
+#: How far short of each hip the vent stops. A ridge vent is not run into the hip corners, where
+#: the three planes meet and there is no cavity under it to exhaust.
+RIDGE_VENT_INSET = 0.45
+
+
+def ridge_line(box: tuple, eaves_y: float, pitch: float):
+    """The two ends of a hip roof's ridge, or `None` when it has none.
+
+    A hip over a SQUARE meets at a point -- a pyramid, which is what the 8.4 x 8.4 garage wing is
+    -- and a point is not a ridge to vent. Returned as `((x, y, z), (x, y, z))` along whichever
+    axis is longer, at the same height `roof_planes` puts the apex.
+    """
+    x0, x1, z0, z1 = box
+    dx, dz = x1 - x0, z1 - z0
+    half = min(dx, dz) / 2.0
+    top = eaves_y + half * pitch
+    if abs(dx - dz) < 1e-9:
+        return None
+    if dx >= dz:
+        zm = (z0 + z1) / 2.0
+        return ((x0 + half, top, zm), (x1 - half, top, zm))
+    xm = (x0 + x1) / 2.0
+    return ((xm, top, z0 + half), (xm, top, z1 - half))
+
+
+def ridge_vent(box: tuple, eaves_y: float, pitch: float):
+    """§12.1's ridge vent as six outward quads, or `[]` on a roof with no ridge.
+
+    `(corners, outward)` per face, the same shape `roof_planes` returns, so `build_roof` adds it
+    the same way it adds a plane. It straddles the ridge: the underside is *inside* solid roof,
+    which is what a cap over a cut slot is, and no face of it is coplanar with a slope.
+    """
+    ends = ridge_line(box, eaves_y, pitch)
+    if ends is None:
+        return []
+    (ax, ay, az), (bx, _by, bz) = ends
+    along_x = abs(bx - ax) > abs(bz - az)
+    length = abs(bx - ax) if along_x else abs(bz - az)
+    if length <= 2.0 * RIDGE_VENT_INSET + 1e-9:
+        return []
+    half = RIDGE_VENT_WIDTH / 2.0
+    if along_x:
+        low = (min(ax, bx) + RIDGE_VENT_INSET, ay - RIDGE_VENT_HEIGHT * 0.5, az - half)
+        high = (max(ax, bx) - RIDGE_VENT_INSET, ay + RIDGE_VENT_HEIGHT * 0.5, az + half)
+    else:
+        low = (ax - half, ay - RIDGE_VENT_HEIGHT * 0.5, min(az, bz) + RIDGE_VENT_INSET)
+        high = (ax + half, ay + RIDGE_VENT_HEIGHT * 0.5, max(az, bz) - RIDGE_VENT_INSET)
+    return _outward_box(low, high)
+
+
+def _outward_box(low: tuple, high: tuple):
+    """An axis-aligned box as six `(corners, outward)` faces, wound to face out."""
+    x0, y0, z0 = low
+    x1, y1, z1 = high
+    return [
+        ([(x0, y0, z1), (x1, y0, z1), (x1, y1, z1), (x0, y1, z1)], (0.0, 0.0, 1.0)),
+        ([(x1, y0, z0), (x0, y0, z0), (x0, y1, z0), (x1, y1, z0)], (0.0, 0.0, -1.0)),
+        ([(x1, y0, z1), (x1, y0, z0), (x1, y1, z0), (x1, y1, z1)], (1.0, 0.0, 0.0)),
+        ([(x0, y0, z0), (x0, y0, z1), (x0, y1, z1), (x0, y1, z0)], (-1.0, 0.0, 0.0)),
+        ([(x0, y1, z1), (x1, y1, z1), (x1, y1, z0), (x0, y1, z0)], (0.0, 1.0, 0.0)),
+        ([(x0, y0, z0), (x1, y0, z0), (x1, y0, z1), (x0, y0, z1)], (0.0, -1.0, 0.0)),
+    ]
+
+
 def roof_planes(box: tuple, eaves_y: float, pitch: float, dormers=()):
     """A hip roof over a rectangle: `(corners, outward)` per plane, in world coordinates.
 
@@ -436,6 +507,49 @@ def plane_equation(corners):
     return (a, b, y0 - a * x0 - b * z0)
 
 
+def clip_face(corners, rect):
+    """@p corners clipped in plan to @p rect, with the height INTERPOLATED along each edge.
+
+    `clip_to_rect` re-evaluates the height from the face's own plane, which is exact for a roof
+    slope and impossible for a VERTICAL face: a purlin's plan projection is a line, it has no
+    `y = ax + bz + c`, and `plane_equation` correctly returns `None` for it. `HOUSE-00488` needs
+    both -- a rafter-bounded cell draws the rafters over it AND the purlin under the slope -- so
+    this is the same Sutherland-Hodgman with the y carried along the edge instead. For a planar
+    convex face the two agree; this one also works when the face is on its edge.
+
+    Returns `[]` when nothing of the face is inside, or when what survives is degenerate.
+    """
+    x0, x1, z0, z1 = rect
+    polygon = [tuple(float(value) for value in point) for point in corners]
+
+    def cut(p, q, axis, at):
+        span = q[axis] - p[axis]
+        t = 0.0 if abs(span) < 1e-12 else (at - p[axis]) / span
+        return tuple(p[i] + (q[i] - p[i]) * t for i in range(3))
+
+    for axis, at, keep_low in ((0, x0, False), (0, x1, True), (2, z0, False), (2, z1, True)):
+        if len(polygon) < 3:
+            return []
+        inside = (lambda point: point[axis] <= at) if keep_low else (lambda point: point[axis] >= at)
+        clipped = []
+        for index, current in enumerate(polygon):
+            previous = polygon[index - 1]
+            if inside(current):
+                if not inside(previous):
+                    clipped.append(cut(previous, current, axis, at))
+                clipped.append(current)
+            elif inside(previous):
+                clipped.append(cut(previous, current, axis, at))
+        polygon = clipped
+    if len(polygon) < 3:
+        return []
+    # Sutherland-Hodgman leaves duplicated corners where an edge runs along a cut; drop them, or a
+    # face with two identical vertices reaches the exporter as a triangle with no area.
+    kept = [point for index, point in enumerate(polygon)
+            if max(abs(a - b) for a, b in zip(point, polygon[index - 1])) > 1e-9]
+    return kept if len(kept) >= 3 else []
+
+
 def clip_to_rect(corners, rect):
     """@p corners clipped in plan to the axis-aligned @p rect `(x0, x1, z0, z1)`.
 
@@ -669,6 +783,54 @@ def selftest() -> int:
                          layout_io.rows(with_openings, "openings"))
     require(len(dormers) == 5,
             f"§12.1's five dormers are the five `W_DORMER` windows ({len(dormers)})")
+    require(not [row for row in layout_io.rows(with_openings, "openings")
+                 if row.get("type") == "W_GABLE"],
+            "and there are no `W_GABLE` louvres left: §12.1's roof is a HIP and has no gable end "
+            "to put one in (`HOUSE-00491`)")
+
+    # ---- `HOUSE-00488`: `clip_face`, which is `clip_to_rect` for a face that has no plane.
+    upright = [(0.0, 0.0, 0.0), (10.0, 0.0, 0.0), (10.0, 2.0, 0.0), (0.0, 2.0, 0.0)]
+    require(not clip_to_rect(upright, (2.0, 6.0, -1.0, 1.0)),
+            "a VERTICAL face has no `y = ax + bz + c`, so the plane-equation clip refuses it -- "
+            "which is right, and is why a purlin vanished from `l3-room`")
+    cut_upright = clip_face(upright, (2.0, 6.0, -1.0, 1.0))
+    require(len(cut_upright) == 4
+            and abs(min(point[0] for point in cut_upright) - 2.0) < 1e-9
+            and abs(max(point[0] for point in cut_upright) - 6.0) < 1e-9
+            and abs(max(point[1] for point in cut_upright) - 2.0) < 1e-9,
+            f"...and `clip_face` cuts it to the box in plan while carrying its height "
+            f"({cut_upright})")
+    sloped = [(0.0, 0.0, 0.0), (10.0, 0.0, 0.0), (10.0, 5.0, 10.0), (0.0, 5.0, 10.0)]
+    require([tuple(point) for point in clip_to_rect(sloped, (2.0, 6.0, 0.0, 10.0))]
+            == clip_face(sloped, (2.0, 6.0, 0.0, 10.0)),
+            "and on a face that HAS a plane the two agree exactly, so there is one clip and not "
+            "two answers")
+    require(not clip_face(upright, (20.0, 30.0, -1.0, 1.0)),
+            "a face wholly outside the box clips to nothing rather than to a sliver")
+
+    # ---- `HOUSE-00491`: the ventilation that replaced them.
+    vent = ridge_vent(outer, eaves, float(construction["roofPitch"]))
+    ends = ridge_line(outer, eaves, float(construction["roofPitch"]))
+    require(ends is not None and len(vent) == 6,
+            f"§12.1's hip roof has a ridge to vent, and the vent is one box on it ({len(vent)})")
+    ridge_length = max(abs(ends[1][0] - ends[0][0]), abs(ends[1][2] - ends[0][2]))
+    vent_points = [point for corners, _out in vent for point in corners]
+    vent_length = max(max(p[0] for p in vent_points) - min(p[0] for p in vent_points),
+                      max(p[2] for p in vent_points) - min(p[2] for p in vent_points))
+    require(abs(vent_length - (ridge_length - 2.0 * RIDGE_VENT_INSET)) < 1e-9,
+            f"it stops {RIDGE_VENT_INSET:.2f} m short of each hip, where the three planes meet "
+            f"and there is no cavity under it ({vent_length:.2f} of {ridge_length:.2f} m)")
+    require(max(point[1] for point in vent_points) > ends[0][1]
+            and min(point[1] for point in vent_points) < ends[0][1],
+            "and it STRADDLES the ridge -- a cap over a cut slot, not a box sitting on top of it")
+    require(max(point[1] for point in vent_points) - ends[0][1] < 0.10,
+            f"...by less than 100 mm, so it reads as a thickened ridge line and not as a box on "
+            f"the roof ({max(p[1] for p in vent_points) - ends[0][1]:.3f} m)")
+    # The garage wing is 9.0 x 9.0 outside: a pyramid, whose ridge is a POINT. Venting a point is
+    # the mistake this returns nothing for rather than drawing a 0 m long box.
+    require(ridge_line((0.0, 9.0, 0.0, 9.0), 4.3, 0.5) is None
+            and not ridge_vent((0.0, 9.0, 0.0, 9.0), 4.3, 0.5),
+            "a pyramid has no ridge, so the garage wing gets no ridge vent")
     louvre = {"id": "P_FAKE", "plane": {"axis": "z", "value": boxes["ROOF_MAIN"][3]},
               "rect": {"u": [0.0, 0.8], "v": [11.3, 12.1]}}
     require(not dormers_on(boxes["ROOF_MAIN"], [louvre], [{"type": "W_GABLE", "portal": "P_FAKE"}]),

@@ -1467,11 +1467,9 @@ portals/portals	P_L3_ROOM__W1
 portals/portals	P_L3_ROOM__W2
 portals/portals	P_L3_ROOM__W3
 portals/portals	P_L3_STORE_E__L3_STORE_N
-portals/portals	P_L3_STORE_E__W1
 portals/portals	P_L3_STORE_N__W1
 portals/portals	P_L3_STORE_N__W2
 portals/portals	P_L3_STORE_W__L3_STORE_N
-portals/portals	P_L3_STORE_W__W1
 portals/portals	P_STAIR_L0_L1
 portals/portals	P_STAIR_L1_L2
 portals/portals	P_STAIR_L2_L3
@@ -2202,12 +2200,10 @@ openings/openings	WIN_L3_ROOM_3
 interactables/interactables	WIN_L3_ROOM_S1
 interactables/interactables	WIN_L3_ROOM_S2
 interactables/interactables	WIN_L3_ROOM_S3
-openings/openings	WIN_L3_STORE_E_1
 openings/openings	WIN_L3_STORE_N_1
 openings/openings	WIN_L3_STORE_N_2
 interactables/interactables	WIN_L3_STORE_N_N1
 interactables/interactables	WIN_L3_STORE_N_N2
-openings/openings	WIN_L3_STORE_W_1
 weather/archetypes	W_CLEAR
 weather/archetypes	W_CLOUDY
 weather/archetypes	W_DRIZZLE

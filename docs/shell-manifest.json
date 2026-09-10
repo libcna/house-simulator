@@ -91,22 +91,22 @@
     "L2_STOR2.glb": "sha256:90a0845e9db494ae89164fe486d31c551f6112bce1fda0d20ef47c2a6ec3c1a2",
     "L2_WC5.glb": "sha256:3ac35ab4e8e276e295fb3dd2c156a1ad580cfb230507332cb7b363b50341e749",
     "L2_WC6.glb": "sha256:791d969ff75777822751943f5316fafa1f3ba2cc57569470cd99cd04ce810c69",
-    "L3_ROOM.glb": "sha256:9ff82ea934c9c47e8811e4575ca1469c56d65b38aca6a4a87686ba2be3810a4c",
+    "L3_ROOM.glb": "sha256:7b381a1b8c4fbd00c8028caaa13351865f0dd028f486337d57acda92f91a2a12",
     "L3_STAIR_HEAD.glb": "sha256:0ac0b3343a0d810a7185b705c8ae88238cff88d1a8615c468b832ffc01a753f2",
-    "L3_STORE_E.glb": "sha256:a91e6418ba77f008b358a65c010878e76df63f429be148568ea2b6b08abdfc42",
-    "L3_STORE_N.glb": "sha256:5d3af8771474e53c02370e8630105823dd94b63d5e549b765a68190d94a1c0d7",
-    "L3_STORE_S.glb": "sha256:15288522ca2a99a3706ef2cea66a6f503e7a1643829080e531bae7430bd81b31",
-    "L3_STORE_W.glb": "sha256:017a392cb2fe03734b823ff5cd3e824437d9995eb0cfaa44929edfd497e42713",
-    "ROOF_GARAGE.glb": "sha256:b6f8e01a7076c086dd820b0d2856528accea4435f698c0ae16d8eae29a448107",
-    "ROOF_MAIN.glb": "sha256:c0645acb7d8c3fa3f4ce93030d786f33879e04a5c5e0169bd6bdc7b9a1e2313f"
+    "L3_STORE_E.glb": "sha256:a896c1c8c1fb2faac685414676e16bc80a576a469fc74121e7695f9489e7bb6c",
+    "L3_STORE_N.glb": "sha256:1753d5d17b55b343553c236518cc905d6c94881ef27a0d57284db3066ca9b821",
+    "L3_STORE_S.glb": "sha256:29ffbaea879a558e4877053bb0bda5cfe3b8a2da5f0cbab5db28742a117e5117",
+    "L3_STORE_W.glb": "sha256:017cdeb6755b4273f7bdc6562dc30093e43d8e1ec4c91befc66e62bfaa898fb4",
+    "ROOF_GARAGE.glb": "sha256:a931aab8f453fa225c19b50f6cb049262e10a729d1bab8a49b8bde0ad036bbfc",
+    "ROOF_MAIN.glb": "sha256:01cb6f9c6f24afabc312a01bae66d77a4511f008133d6df822c88bc6fe7a54e2"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:14957fde7c496579c8bbb380fcc890c52f7bd450ea55189dbfca04aac5da7e07",
+  "generatorVersion": "sha256:a8198519d9b69be5d78147262ef19817f6f35f6af70134dea3670cfd86355383",
   "origin": {
     "attribution": "",
     "kind": "generated",
     "licence": "MIT"
   },
   "schema": "cna-house/shell-manifest/1",
-  "worldHash": "sha256:9b9298aa3c90d08191a6fbb3f79fbcc8cff286b9f429cbbba8ef925038b155df"
+  "worldHash": "sha256:9857f2e8fc8bb32099e2fa7a81a9b0eb1b6a9a7f7fe9cc6fa9583257b11d60d4"
 }

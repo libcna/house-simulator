@@ -122,8 +122,19 @@ three differences worth stating:
 
 A sub-range's `prop` is the `layout.props.json` id for a prop and `<file>:<material>` for a surface
 class of the shell. A shell file whose name is not a cell — `ROOF_MAIN`, `ROOF_GARAGE`, `CHIMNEY` —
-draws with the largest exterior cell, which is `EXT_WORLD` in this house and is derived rather than
-named.
+draws with **the property's own outdoors**: the largest exterior cell in §27.2's `exterior` pack,
+derived rather than named (`HOUSE-00494`). It was the largest exterior cell full stop until then,
+which is `EXT_WORLD`, whose pack is `neighbourhood` — so the player's own roof loaded after the
+distant houses and was demoted with them, and the house is visible from the road the player starts
+on.
+
+**A preferred shell directory older than the one it was derived from is refused.** `build/shell-lm`
+is read before `build/shell` and is written by a second Blender tool that nothing runs
+automatically; on 2026-09-10 it held cells unwrapped the previous evening, so three shell
+regenerations in a row were silently ignored for 78 of the 99 cells and the chunk tree was a
+mixture of two days' geometry. The file was there, it parsed, and it had the right name. mtime is
+the right signal for this and only this: `build/` is never in git, so inside a build tree a derived
+file older than its source is exactly what it looks like.
 
 ## 4c. The outdoors is chunked too, and its cell is a residency key
 

@@ -7590,8 +7590,9 @@ the chunk builder produces ≤ 6 chunks per cell.
             coverage minimum, which `HOUSE-00684` and `HOUSE-00483` had relaxed for exactly this.
       note: thirty render references were regenerated -- twelve first-person, seventeen blockout
             poses and `blockout-01` -- because the shell they are pictures of changed.
-- [ ] HOUSE-00488 — Give every cell the boundary surfaces a body standing in it looks at
+- [x] HOUSE-00488 — Give every cell the boundary surfaces a body standing in it looks at
       dep: HOUSE-00486 · sys: content · plat: TOOL · pri: MUST
+      verify: `CullingSanityRenderTests.EveryPoseLooksTheSameCulledAndUnculled`, now ENABLED
       finding: (2026-09-09, found by `HOUSE-00688`) **a cell does not always draw the surfaces it
             is looking at, and §25 removes the cell that does.** `L1_LANDING` draws a floor and a
             ceiling and nothing else, so the wall a body standing on it faces belongs to a
@@ -7635,12 +7636,44 @@ the chunk builder produces ≤ 6 chunks per cell.
             open an audio path through its door. §54's *"a container falls out of the visibility
             system rather than being a special case"* is true of its INSIDE, which its own shut
             door hides; its outside is not behind that door.
-      finding: **what is left is two causes, both measured.** (1) `ROOF_MAIN`, `ROOF_GARAGE` and
+      finding: **what was left was two causes, both measured.** (1) `ROOF_MAIN`, `ROOF_GARAGE` and
             `CHIMNEY` name no cell, so `build_chunks.py` draws them with `EXT_WORLD` -- 5 chunks,
             297 triangles, including the RAFTERS a rafter-bounded attic looks up at. From `L3_ROOM`
             and from the garage `EXT_WORLD` is not visible and the roof goes: 4 456 and 1 936
             pixels. Either the hull is split per covered cell (clipping, in the generator) or it is
             drawn with whatever cell the camera is in, and that is an owner's call about §17.4.
+      finding: **(2026-09-10) cause (1) is fixed, and `HOUSE-00487`'s decision is what unblocked
+            it.** Splitting per covered cell adds a class to a cell that may then pass six chunks,
+            which is now allowed with a stated exception -- so the rafters MOVE out of `ROOF_MAIN`
+            into the cells that look up at them, clipped to each cell's own boxes, exactly as
+            `HOUSE-00496` did for the roof surface and `HOUSE-00472` already does for collision.
+            Moved and not copied: nothing is drawn twice. `L3_ROOM` went 7 → 8 chunks and its
+            §17.4 exception says so. **`l3-room` is clean: 4 456 pixels recovered, 15 of 18 poses
+            now identical culled and unculled.**
+      finding: **the three that remain are all the OUTDOORS, and none of them is a cell's boundary
+            surface** -- which is this task's subject. `ext-backyard` 31.23 %, `ext-terrace`
+            2.00 % and `b1-gym` 0.50 %, and the last was the one worth identifying: it loses
+            `TERRAIN_grass` through a basement window well, so it is the same ground-in-a-yard
+            problem as the other two and not a fourth cause. They are `HOUSE-00852`'s: until the
+            outdoors is on §25.6's instance path a lawn is a chunk of a cell the portal walk did
+            not reach, and §25.6 says explicitly that portals cannot help there.
+      finding: **a purlin is VERTICAL, and the clip the roof planes use cannot cut one.**
+            `clip_to_rect` re-evaluates the height from `y = ax + bz + c`, which a face on its
+            edge does not have, so `plane_equation` correctly returned `None` and the purlin under
+            each slope simply vanished -- 1 722 pixels of `l3-room`, found by the reference
+            comparison one step after the rafters were fixed. `roof_geometry.clip_face` is the
+            same Sutherland-Hodgman carrying the height along the edge instead, and a claim
+            asserts the two agree exactly on a face that does have a plane, so there is one clip
+            and not two answers.
+      measured: (2026-09-10) 15 of 18 poses identical culled and unculled, from 10 of 18.
+            `l3-room` recovered 4 456 pixels of rafter and, from the first-person pose, gained
+            1 522 pixels of structure it had never drawn -- the reference was the old, wrong
+            picture. Twelve render references regenerated across this task and `HOUSE-00491`.
+      finding: **so the test is ENABLED with those three PINNED, rather than left off.** §25.8
+            calls it the single most important test in the project and it had been disabled since
+            `HOUSE-00688`. A pose not on the pinned list that differs is a new hole and fails the
+            day it appears; a pinned pose that STOPS differing fails too, so the list cannot
+            outlive the defect and `HOUSE-00852` will be told to remove it.
             (2) `ext-backyard`'s 3 523 pixels are the OUTDOORS being drawn the wrong way round.
             The only portal between `EXT_TERRACE` and `EXT_BACKYARD` is the opening at the top of
             `STEPS_TERRACE_LAWN` on the terrace's north edge, and the pose stands to the WEST of
@@ -7717,8 +7750,38 @@ the chunk builder produces ≤ 6 chunks per cell.
             (`P_B1_STAIR__B1_HALL`) is the same three cells' arrangement repeated -- the stair
             halls share one footprint through the house -- so whatever is decided for L0 decides
             those two.
-- [ ] HOUSE-00487 — Bring `L0_GARAGE` and the three attic stores back inside §17.4's six chunks a cell
+- [x] HOUSE-00487 — ~~Bring `L0_GARAGE` and the three attic stores back inside §17.4's six chunks a cell~~ **§17.4's six-chunk target gains an explicit per-cell exception model**
       dep: HOUSE-00473 · sys: content · plat: TOOL · pri: SHOULD
+      verify: `tools/world/build_chunks.py --selftest`, `tools/world/build_chunks.py --report`
+      note: (2026-09-10) **OWNER DECISION.** *"The garage remains a normal room/cell. Do NOT
+            redefine a legitimate architectural room merely to satisfy a rendering-budget number.
+            Do NOT merge semantically useful blockout classes solely to make the validator report
+            ≤ 6 chunks. Room/cell semantics and render-chunk partitioning are separate
+            concepts."* The task's own title is struck: it asked for the cells to be brought under
+            the number, and the answer is that the number gains exceptions instead.
+      finding: §17.4 now says: ≤ 6 is the **target**; over it is not automatically an
+            architectural error; a cell may declare an **exception with a reason and a ceiling**;
+            over the target **undeclared** fails the build; over a cell's **own ceiling** fails;
+            and an exception its cell **no longer needs** fails as well, so the list cannot
+            silently become unlimited fragmentation. The report prints every exception in force
+            with its count, its ceiling and its reason.
+      finding: **the third rule earned its keep the same day.** `L3_STORE_E` left the list when
+            `HOUSE-00491` retired its impossible gable louvre and took its `glass` chunk with it,
+            and `L3_ROOM` went 7 → 8 when `HOUSE-00488` moved the rafters into the cell that looks
+            up at them -- the build failed, by name, until the ceiling was raised to 8 with the
+            reason extended. An exception is a ceiling, not a licence.
+      measured: (2026-09-10) seven exceptions, every maximum the measured count and not a round
+            number with room in it: `EXT_ROAD` 13 (not a room at all -- the residency key for the
+            property's outdoors, and `HOUSE-00494` put the house's roofs and chimney in it),
+            `L3_ROOM` 8, and `L0_GARAGE`, `L0_STAIR_MAIN`, `L1_STAIR_MAIN`, `L3_STORE_N`,
+            `L3_STORE_W` at 7.
+      finding: **the `chunks` stage of the content build has succeeded for the first time.** It had
+            failed on every run since before this task was written, which is how `HOUSE-00492`
+            came to find that nothing noticed `build/shell` had been regenerated: a stage that
+            fails every time reruns every time, and masks a staleness bug for free. `snowshell` is
+            the only failing stage now, and it is blocked on `HOUSE-00385`'s materials.
+      verified: 8 selftest claims and 3 injections, all CAUGHT -- an exception treated as a
+            licence, an undeclared cell over the target allowed, and a stale exception tolerated.
       note: (2026-09-09, extended by `HOUSE-00780`) **two more, and they are the outdoors.** Now
             that the terrain tiles, road segments, fences and garden structures are chunked,
             `EXT_ROAD` is at 8 and `EXT_WORLD` at 9 -- the road alone carries asphalt, two kerb
@@ -7959,8 +8022,39 @@ the chunk builder produces ≤ 6 chunks per cell.
             up only in a REGENERATED shell; it was injected by hand instead, the shell rebuilt,
             and `verify_shell` reported 17 problems over 6 cells (`L3_STORE_W.exterior` 3.42 m
             over the roof) before the generator was restored.
-- [ ] HOUSE-00494 — The roofs and the chimney load with the `neighbourhood` pack
+- [x] HOUSE-00494 — The roofs and the chimney load with the `neighbourhood` pack
       dep: HOUSE-00780 · sys: content · plat: TOOL · pri: SHOULD
+      verify: `tools/world/build_chunks.py --selftest`, `tools/world/build_chunks.py --report`
+      note: (2026-09-10) **OWNER DECISION.** *"The player's own house roof and chimney belong to
+            the house exterior/shell content, not the neighbourhood pack. The house is visible
+            from the player's initial position on the road, so its complete exterior silhouette
+            must exist independently of whether distant neighbourhood content has loaded."*
+      finding: **placing them by where they STAND does not answer it, and the measurement is
+            why.** `HOUSE-00780`'s largest-overlap rule is right for a terrain tile and has
+            nothing to say about a roof: `ROOF_MAIN`'s plan box is the whole house and its overlap
+            with the yards is the 0.15 m eaves oversail -- **0.8 m² with `EXT_SIDEYARD_W` against
+            0.8 m² with `EXT_BACKYARD`**, a tie decided by rounding -- and `CHIMNEY` overlaps no
+            yard at all. Tried, measured, and rejected: it put `ROOF_MAIN` in `L1_BALCONY_REAR`,
+            whose pack is `house-l1`, which is worse than what it replaced.
+      finding: so the rule is **categorical**: a shell file that names no cell draws with the
+            property's own outdoors -- the largest exterior cell in §27.2's `exterior` pack.
+            Which of them is residency-neutral, because every exterior cell of this property is in
+            that one pack, and a claim says so. The answer is `EXT_ROAD`, which is where the
+            player stands when the silhouette has to be complete.
+      measured: (2026-09-10) the `neighbourhood` pack goes 6 chunks → 5 and `exterior` 34 → 35;
+            `EXT_WORLD` drops off §17.4's over-target list entirely and `EXT_ROAD` joins it at 13,
+            with an exception that says why. Nothing is drawn twice: there is one `ROOF_MAIN` and
+            it is filed once.
+      finding: **and it found a staleness hole of `HOUSE-00227`'s family, one directory further
+            in.** `build/shell-lm` is PREFERRED over `build/shell` and is written by a second
+            Blender tool that nothing runs automatically. On 2026-09-10 it held cells unwrapped
+            the previous evening, so **three shell regenerations in a row were silently ignored
+            for 78 of the 99 cells** and the chunk tree was a mixture of two days' geometry --
+            which is why `HOUSE-00492`'s dormer nudge did not reach a render reference and its
+            commit could report the suite green. `build_chunks.py` refuses a preferred copy older
+            than the file it was derived from now, naming the tool that makes one.
+      verified: 3 claims and 2 injections, all CAUGHT -- the roof put back in the biggest outdoor
+            cell whatever its pack, and the stale-preference guard removed.
       note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
             Found by `HOUSE-00780`. `ROOF_MAIN`, `ROOF_GARAGE` and `CHIMNEY` name no cell, so
             `HOUSE-00473` files them under `outdoor_cell` -- `EXT_WORLD`, whose `residencyPack` is
@@ -7975,8 +8069,9 @@ the chunk builder produces ≤ 6 chunks per cell.
             seen from outdoors whatever level the player is on, so `house-l3` would make it vanish
             from the street; `exterior` fits what it is for. That is §27's call and is recorded
             here with the measurement rather than made by the task that found it.
-- [ ] HOUSE-00491 — Two gable louvres open into the hip roof
+- [x] HOUSE-00491 — Two gable louvres open into the hip roof
       dep: HOUSE-00490 · sys: world · plat: TOOL · pri: SHOULD
+      verify: `tools/world/roof_geometry.py --selftest`, `tools/world/verify_shell.py`
       note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
             Found by `HOUSE-00779`. §12.6's window table has a `W_GABLE` type -- *"0.80 × 0.80
             louvre, attic gable ends, non-opening"* -- and the house has two of them,
@@ -7994,6 +8089,36 @@ the chunk builder produces ≤ 6 chunks per cell.
             silhouette in eight render poses -- or the two louvres become dormers, or they are
             struck from §12.6 and the two stores have no window. Whoever owns §12 picks; the
             evidence is here so that the choice is made once.
+      note: (2026-09-10) **OWNER DECISION.** *"Remove the two gable louvres. Do not change the hip
+            roof into a gable roof merely to justify them... Replace the impossible ventilation
+            concept with architecturally plausible hip-roof attic ventilation... Do not create
+            fake gable ends."*
+      finding: **the roof stays a hip and the attic is ventilated the way a hip roof is.** Soffit
+            intake at the eaves, which the 0.15 m oversail already provides and `build_roof` has
+            drawn since `HOUSE-00461`, exhausting through a continuous **ridge vent**: a 0.28 m
+            shingle-over cap straddling the 8.60 m ridge, stopping 0.45 m short of each hip where
+            the three planes meet and there is no cavity under it to exhaust. It reads on the
+            silhouette as a thickened ridge line, which is what a ridge vent looks like.
+      finding: **there was already a ridge vent, and it was a second answer to the same
+            question.** `HOUSE-00468` drew *"a vent along the ridge"* -- a flat lid floating 0.08 m
+            above the apex, from constants of its own in `house_shell_gen.py`. A flat lid cannot
+            cap a slot it is supposed to straddle. There is one definition now,
+            `roof_geometry.ridge_vent`, and §12.1 is written against it.
+      finding: the garage wing is 9.0 × 9.0 outside, so its roof is a **pyramid with no ridge at
+            all** and gets no vent. `ridge_line` returns `None` for it and the generator answers
+            that from the geometry rather than being told which roof it is drawing.
+      measured: (2026-09-10) 64 windows, not 66; 177 portals, not 179; the shell's `glass` class
+            756 triangles, not 780. §12.6's `W_GABLE` row is struck, §16.3's counts corrected,
+            §13.6's two attic stores now say `—` windows, and four ids were retired from the
+            golden list by hand. The shell's one remaining §70.5 problem is the fridge's uncut
+            opening; the two louvres 1.44 m inside solid roof are gone.
+      finding: **and a screenshot proves it.** `property-orchard`'s reference had a green blob
+            floating in the sky above the roofline -- the west louvre, sticking out through the
+            roof into the air. Eleven render references were regenerated after the change and
+            that blob is what left them.
+      verified: 5 claims in `roof_geometry`'s selftest -- the ridge vent straddles the ridge by
+            under 100 mm, stops short of each hip, a pyramid gets none, and no `W_GABLE` opening
+            is left in the layout.
 - [x] HOUSE-00492 — The two rear dormers overlap by 0.20 m
       dep: HOUSE-00490 · sys: world · plat: TOOL · pri: SHOULD
       verify: `tools/world/roof_geometry.py --selftest`, `tools/world/verify_shell.py`
@@ -8038,6 +8163,12 @@ the chunk builder produces ≤ 6 chunks per cell.
       verified: 2 injections, both CAUGHT -- the pair put back edge to edge, and the FRONT pair
             (which was right) pushed together to 0.00 m. A third, widening the claim's own
             tolerance, is not counted: a claim cannot catch its own epsilon being loosened.
+      note: (2026-09-10, corrected by `HOUSE-00494`) **this task's commit reported 34 render tests
+            green and that number was not measuring what it claimed.** `build/shell-lm` is
+            preferred over `build/shell` and held cells unwrapped the previous evening, so the
+            regenerated shell reached the chunk tree for 21 of the 99 cells only -- the rear
+            dormers among the 78 it did not. The nudge is visible in the references now, and
+            `build_chunks.py` refuses a preferred copy older than its source.
 
 ---
 
@@ -14363,6 +14494,7 @@ evidence that it fails.
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
 | 2026-09-10 | `HOUSE-00850`, `HOUSE-00851` | **Three more `dep`s added; no id renumbered, no scope changed.** Reached in DAG order after `HOUSE-00849` and found to be waiting on systems two phases away: `HOUSE-00850` switches light groups that `HOUSE-01251` has not built against a clock `HOUSE-01531` has not written, and `HOUSE-00851` billboards trees `HOUSE-00772` has not placed. | Written down rather than worked round. Each could have produced a pure function with tests and no consumer -- `HOUSE-00849`'s `WindowGlow` is exactly that shape and was right because the CARDS it decides for exist -- but a task that says "implement the lights on the sensor" is not done while no light exists to be on it. The neighbourhood's own remaining work is `HOUSE-00847` (blocked on `HOUSE-00293`'s asset research) and everything downstream of `HOUSE-00851`. |
+| 2026-09-10 | `HOUSE-00487`, `HOUSE-00488`, `HOUSE-00491`, `HOUSE-00494` | **Four owner decisions taken and applied.** §17.4's six-chunk target gains an explicit per-cell exception model rather than the garage being redefined or blockout classes merged (`00487`); the player's own roofs and chimney move from the `neighbourhood` pack to `exterior`, because the house is visible from the road the player starts on (`00494`); the two impossible gable louvres are removed and the hip roof gains real ventilation -- soffit intake and a ridge vent (`00491`); and `00488`'s remaining interior cause is fixed with `00487`'s decision, the rafters moving into the cells that look up at them. | The titles of `00487` and `00491` are struck rather than ticked as written: one asked for the cells to be brought under a number and the answer was that the number gains exceptions, the other for a detail to be justified and the answer was to remove it. `00488` closes on its own scope -- every interior pose is clean -- with the three remaining exterior poses PINNED in a now-ENABLED `CullingSanityRenderTests` and named as `HOUSE-00852`'s. No id was renumbered; four ids were retired from the golden list by hand, which is what that list asks for. |
 | 2026-09-10 | `HOUSE-00849`, `HOUSE-00851`, `HOUSE-00852` | **A `dep` on `HOUSE-00856` added to three tasks; no id renumbered, no scope changed.** All three are `plat: ALL` rendering or visibility work over §11.4's neighbourhood, and until `HOUSE-00856` no code could load a single one of its meshes: `neighbourhood_gen.py` wrote them into `build/neighbourhood` and nothing anywhere opened that directory. | Written down rather than left implicit because it is the difference between a task that can be verified and one that cannot: glow cards behind windows nobody draws, an impostor path with no impostors to select from, and a BVH wired to instances with no geometry would each have been "complete" with nothing on screen. |
 | 2026-09-10 | `HOUSE-00856`, `HOUSE-00857` | **Two new tasks, the next free ids in phase 11's reserved 00841–00890 range.** Found by `HOUSE-00846`: nothing anywhere reads `build/neighbourhood`, so thirty generated meshes have no consumer (`00856`); and `build_collision.py` takes only §49.2's vehicles from the `neighbourhood` array, leaving sixteen solid objects inside §10.4's walkable ±35 m -- the utility pole 0.80 m outside the pedestrian gate among them -- with no collision (`00857`). | Both recorded with their evidence rather than folded into the task that found them: `00856` is a pipeline route that does not exist yet and that `HOUSE-00852` assumes, and `00857` changes `collision.bin` and so the ~34-minute nav build, and asks whether §11.4's collection-day bins are solid at all. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00785` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00841`: `fence_gen.py` has been unable to produce a single file since `HOUSE-00775` authored §10.4's stone wall, and nothing ran it, so `build/fence` kept the previous tree and `HOUSE-00780` chunked that. | Fixed in the same commit as the task that found it, because the tool it found is the one the new generator is modelled on and both are now gated. No id was renumbered or struck. |

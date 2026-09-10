@@ -12,12 +12,12 @@ Every window in the house, measured from `assets-src/world/layout.portals.json` 
 |---|---|---|---|---|---|---|
 | South (front) | 4 | 8 | 7 | 6 | 3 | **28** |
 | North (rear) | 1 | 4 | 4 | 4 | 2 | **15** |
-| West | 3 | 3 | 3 | 3 | 1 | **13** |
-| East | — | 1 | 1 | 1 | 1 | **4** |
+| West | 3 | 3 | 3 | 3 | — | **12** |
+| East | — | 1 | 1 | 1 | — | **3** |
 | Sunroom flanks | — | 4 | — | — | — | **4** |
 | Garage wing | — | 1 | — | — | — | **1** |
 | Garden shed | — | 1 | — | — | — | **1** |
-| **Total** | **8** | **22** | **15** | **14** | **7** | **66** |
+| **Total** | **8** | **22** | **15** | **14** | **5** | **64** |
 
 ## Every window
 
@@ -78,11 +78,9 @@ Every window in the house, measured from `assets-src/world/layout.portals.json` 
 | `P_L2_BATH4__W1` | West | L2 | `L2_BATH4` | `EXT_SIDEYARD_W` | `W_BATH` | 0.60 × 0.90 | +7.95 | translucent |
 | `P_L2_BED6__W2` | West | L2 | `L2_BED6` | `EXT_SIDEYARD_W` | `W_DH_STD` | 1.20 × 1.50 | +7.45 | glass |
 | `P_L2_BED7__W1` | West | L2 | `L2_BED7` | `EXT_SIDEYARD_W` | `W_DH_STD` | 1.20 × 1.50 | +7.45 | glass |
-| `P_L3_STORE_W__W1` | West | L3 | `L3_STORE_W` | `EXT_SIDEYARD_W` | `W_GABLE` | 0.80 × 0.80 | +11.30 | translucent |
 | `P_L0_FAMILY__W2` | East | L0 | `L0_FAMILY` | `EXT_SIDEYARD_E` | `W_PICTURE` | 2.40 × 1.60 | +1.45 | glass |
 | `P_L1_BED2__W2` | East | L1 | `L1_BED2` | `EXT_SIDEYARD_E` | `W_DH_STD` | 1.20 × 1.50 | +4.55 | glass |
 | `P_L2_SITTING__W2` | East | L2 | `L2_SITTING` | `EXT_SIDEYARD_E` | `W_DH_STD` | 1.20 × 1.50 | +7.45 | glass |
-| `P_L3_STORE_E__W1` | East | L3 | `L3_STORE_E` | `EXT_SIDEYARD_E` | `W_GABLE` | 0.80 × 0.80 | +11.30 | translucent |
 | `P_L0_SUNROOM__W1` | Sunroom flanks | L0 | `L0_SUNROOM` | `EXT_BACKYARD` | `W_PANEL` | 1.80 × 2.10 | +0.90 | glass |
 | `P_L0_SUNROOM__W2` | Sunroom flanks | L0 | `L0_SUNROOM` | `EXT_BACKYARD` | `W_PANEL` | 1.80 × 2.10 | +0.90 | glass |
 | `P_L0_SUNROOM__W3` | Sunroom flanks | L0 | `L0_SUNROOM` | `EXT_BACKYARD` | `W_PANEL` | 1.80 × 2.10 | +0.90 | glass |

@@ -3072,17 +3072,21 @@ namespace
                                 [](const world::Cell& cell) { return cell.parent.IsValid(); }),
                   3);
 
-        EXPECT_EQ(contents.portals.size(), 179U);
+        // 179 and 66 until `HOUSE-00491` retired §12.6's two `W_GABLE` louvres: they were in
+        // "attic gable ends" and §12.1's roof is a hip with none, so both stood 1.44 m inside
+        // solid roof. The attic is ventilated by the eaves and a ridge vent now, which is roof
+        // geometry rather than an opening between two cells.
+        EXPECT_EQ(contents.portals.size(), 177U);
         EXPECT_EQ(std::count_if(contents.portals.begin(),
                                 contents.portals.end(),
                                 [](const world::Portal& portal)
                                 { return portal.kind == world::PortalKind::Window; }),
-                  66);
+                  64);
 
         // §15.7 rule 7's bijection, asserted by the OTHER implementation. `validate_world.py`
         // makes the same statement in Python over the authored files; this makes it in C++ over
         // the deployed ones, and the day the two disagree one of them is wrong about the house.
-        EXPECT_EQ(contents.openings.size(), 133U);
+        EXPECT_EQ(contents.openings.size(), 131U);
         std::map<cnahouse::util::Id, cnahouse::util::Id> leafOf;
         for (const world::Opening& opening : contents.openings)
         {

@@ -1493,24 +1493,14 @@
       "opacity": "glass", "maxDepth": 3,
       "soundLoss": { "open": 0.109, "closed": 0.921 }
     },
-    {
-      // W_GABLE, gable louvre.
-      "id": "P_L3_STORE_W__W1", "cellA": "L3_STORE_W", "cellB": "EXT_SIDEYARD_W",
-      "plane": { "axis": "x", "value": -12.70 },
-      "rect": { "u": [-21.10, -20.30], "v": [11.30, 12.10] },
-      "kind": "window", "aperture": "WIN_L3_STORE_W_1",
-      "opacity": "translucent", "maxDepth": 1,
-      "soundLoss": { "open": 0.109, "closed": 0.921 }
-    },
-    {
-      // W_GABLE, gable louvre.
-      "id": "P_L3_STORE_E__W1", "cellA": "L3_STORE_E", "cellB": "EXT_SIDEYARD_E",
-      "plane": { "axis": "x", "value": 8.70 },
-      "rect": { "u": [-24.80, -24.00], "v": [11.30, 12.10] },
-      "kind": "window", "aperture": "WIN_L3_STORE_E_1",
-      "opacity": "translucent", "maxDepth": 1,
-      "soundLoss": { "open": 0.109, "closed": 0.921 }
-    },
+    // `HOUSE-00491` removed `P_L3_STORE_W__W1` and `P_L3_STORE_E__W1` here (owner decision,
+    // 2026-09-10): they were §12.6's two `W_GABLE` louvres, and §12.1's main roof is a HIP with no
+    // gable end to put one in -- both stood **1.44 m inside solid roof**, a 0.80 m opening whose
+    // sill is +11.30 in a wall the hip crosses at +10.57. The attic's ventilation is the ROOF's
+    // now -- soffit intake at the eaves and a continuous ridge vent -- and neither is an opening
+    // between two cells, so there is nothing to replace them with in this file. `L3_STORE_E` and
+    // `L3_STORE_W` keep their cased openings to `L3_STORE_N`, so the portal graph is connected
+    // without them.
 
     // ---- L0 ------------------------------------------------------------------------------------
     {

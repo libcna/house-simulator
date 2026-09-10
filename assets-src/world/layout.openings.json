@@ -1172,25 +1172,19 @@
       "solid": false, "lockable": true
     },
 
-    // ---- W_GABLE x2 -- louvres: permanently open to the air, so neither lockable nor solid.
-    {
-      "id": "WIN_L3_STORE_W_1", "kind": "window", "type": "W_GABLE",
-      "portal": "P_L3_STORE_W__W1",
-      "leaf": { "width": 0.780, "height": 0.780, "thickness": 0.025 },
-      "hinge": null, "swing": "L3_STORE_W",
-      "frame": { "asset": null, "casing": 0.050 },
-      "asset": null, "material": "MAT_LOUVRE_TIMBER",
-      "solid": false, "lockable": false
-    },
-    {
-      "id": "WIN_L3_STORE_E_1", "kind": "window", "type": "W_GABLE",
-      "portal": "P_L3_STORE_E__W1",
-      "leaf": { "width": 0.780, "height": 0.780, "thickness": 0.025 },
-      "hinge": null, "swing": "L3_STORE_E",
-      "frame": { "asset": null, "casing": 0.050 },
-      "asset": null, "material": "MAT_LOUVRE_TIMBER",
-      "solid": false, "lockable": false
-    },
+    // ---- W_GABLE x0 -- REMOVED by `HOUSE-00491` (owner decision, 2026-09-10).
+    //
+    // There were two, `WIN_L3_STORE_W_1` and `_E_1`, and §12.6 put them in "attic gable ends".
+    // §12.1's main roof is a HIP: `roof_geometry.roof_planes` builds four planes that meet at a
+    // ridge, and a hip roof has no gable end to put a louvre in. Measured by `HOUSE-00496`'s rule
+    // the day it was written, both stood **1.44 m inside solid roof** -- a 0.80 m opening whose
+    // sill is +11.30 in a wall the hip crosses at +10.57.
+    //
+    // The owner's decision was to remove them rather than grow a gablet to justify them: the roof
+    // stays a hip and the attic is ventilated the way a hip roof really is -- soffit intake at the
+    // eaves, which `build_roof` has drawn since `HOUSE-00461`, and a continuous RIDGE VENT along
+    // the main ridge, which `HOUSE-00491` adds. Neither is an opening between two cells, so
+    // neither is a row in this file: a vent is roof geometry, and the roof is generated.
 
     // ---- W_TRANSOM x1 -- over the front door.
     {

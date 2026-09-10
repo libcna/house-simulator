@@ -79,6 +79,56 @@ VERSION = 1
 MAX_CHUNKS_PER_CELL = 6
 MAX_VERTICES_16BIT = 0xFFFF
 
+#: §17.4's per-cell exceptions to the six-chunk TARGET (`HOUSE-00487`, owner decision 2026-09-10).
+#:
+#: **Six chunks a cell is the target and exceeding it is not automatically an error.** A cell's
+#: chunk count is its count of distinct materials, and a room's floor, ceiling, walls and outer
+#: skin are genuinely four different materials before it has a stair in it or a pane of glass. The
+#: alternative -- merging semantically useful blockout classes, or redefining a garage as something
+#: other than a room -- would change the ARCHITECTURE to satisfy a rendering number, and room
+#: semantics and chunk partitioning are separate concepts.
+#:
+#: So a cell may declare an exception: `{cell: (maximum, reason)}`. The rules the exception model
+#: has to keep are the ones that stop it becoming unlimited fragmentation:
+#:
+#: * a cell over the target with NO entry here fails the build, which is what catches an accident;
+#: * a cell over its OWN declared maximum fails too, so an exception is a ceiling and not a
+#:   licence;
+#: * an entry whose cell has fallen back to the target fails as well, so the list cannot silently
+#:   accumulate permissions nobody needs -- `L3_STORE_E` left it the day `HOUSE-00491` retired its
+#:   impossible louvre and took its `glass` chunk with it;
+#: * the report prints every exception, its ceiling and its reason, so they are visible rather
+#:   than merely tolerated.
+#:
+#: Every maximum below is the measured count on 2026-09-10, not a round number with room in it.
+#: §71's frame budget is what may tighten or restructure them later.
+CHUNK_BUDGET_EXCEPTIONS = {
+    "EXT_ROAD": (13,
+                 "not a room: the residency key for the property's outdoors. The carriageway's "
+                 "own six ground and marking materials, the ornamental fence and gate that stand "
+                 "on it, and -- since `HOUSE-00494` -- the house's two roofs and its chimney, "
+                 "which are five more and have to load with the exterior rather than with the "
+                 "neighbourhood"),
+    "L0_GARAGE": (7,
+                  "a garage is a room and stays one (`HOUSE-00487`). The four receiver classes, "
+                  "plus the stair to the loft, plus the glazing, plus trim"),
+    "L0_STAIR_MAIN": (7,
+                      "a stair hall: the four receiver classes plus a STAIR class, glazing and "
+                      "trim. The stair is the whole purpose of the room"),
+    "L1_STAIR_MAIN": (7, "the same hall a storey up, and the same seven"),
+    "L3_ROOM": (8,
+                "a rafter-bounded attic room draws the ROOF it looks up at as well as its collar "
+                "ceiling (`HOUSE-00496`), and since `HOUSE-00488` the RAFTERS under that roof as "
+                "well -- two classes no room below it has, and both of them things you are "
+                "looking at when you stand in it"),
+    "L3_STORE_N": (7,
+                   "an attic store: roof and structure instead of a ceiling, and the two dormers "
+                   "put glass in it"),
+    "L3_STORE_W": (7,
+                   "the same, and it keeps a collar ceiling over the finished end as well as the "
+                   "roof over the rest"),
+}
+
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
 #: because a skinned prop is an animated one and animated props are not batched (§17.4).
@@ -458,6 +508,13 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
     per_cell: dict[str, int] = {}
     for chunk in chunks:
         per_cell[chunk["cell"]] = per_cell.get(chunk["cell"], 0) + 1
+    # `HOUSE-00487`: over the TARGET is not automatically an error, but every one of them has to
+    # be declared, none may exceed its own ceiling, and an exception nobody needs any more is a
+    # failure too -- otherwise the list quietly becomes unlimited fragmentation.
+    stats["chunkBudgetProblems"] = chunk_budget_problems(per_cell)
+    stats["chunkBudgetExceptions"] = {
+        cell: (per_cell.get(cell, 0), CHUNK_BUDGET_EXCEPTIONS[cell][0])
+        for cell in sorted(CHUNK_BUDGET_EXCEPTIONS)}
     stats["cellsOverChunkLimit"] = sorted(
         c for c, n in per_cell.items() if n > MAX_CHUNKS_PER_CELL)
     stats["materialsPerCell"] = {
@@ -480,17 +537,60 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
     return {"chunks": chunks, "stats": stats, "worldHash": bc._world_hash(world_dir)}
 
 
-def outdoor_cell(cells: dict) -> str:
+#: §27.2's pack for "terrain, road, fences, garden, shed" -- the property's own outdoors, which
+#: `HOUSE-00494` puts the house's roofs and chimney in as well.
+PROPERTY_OUTDOOR_PACK = "exterior"
+
+
+def chunk_budget_problems(per_cell: dict) -> list[str]:
+    """§17.4's budget as `HOUSE-00487` settled it: what is WRONG, not what is merely over.
+
+    Three ways to be wrong and they are different sentences, because they need different fixes:
+    an undeclared cell over the target is an accident to look at; a declared one over its own
+    ceiling has grown since somebody measured it; and an exception whose cell no longer needs it
+    is a permission left lying around.
+    """
+    problems: list[str] = []
+    for cell, count in sorted(per_cell.items()):
+        allowed = CHUNK_BUDGET_EXCEPTIONS.get(cell)
+        if allowed is None:
+            if count > MAX_CHUNKS_PER_CELL:
+                problems.append(
+                    f"{cell} has {count} chunks, over §17.4's {MAX_CHUNKS_PER_CELL}-chunk target, "
+                    f"and declares no exception. Either reduce it or add one to "
+                    f"CHUNK_BUDGET_EXCEPTIONS with the reason and the ceiling")
+        elif count > allowed[0]:
+            problems.append(
+                f"{cell} has {count} chunks, over the {allowed[0]} its own exception allows: "
+                f"{allowed[1]}")
+    for cell, (allowed, reason) in sorted(CHUNK_BUDGET_EXCEPTIONS.items()):
+        # A cell this build does not HAVE is not evidence of anything: every fixture in this file
+        # is a three-room world, and the exceptions are the real house's.
+        if cell not in per_cell:
+            continue
+        count = per_cell[cell]
+        if count <= MAX_CHUNKS_PER_CELL:
+            problems.append(
+                f"{cell} is at {count} chunks, inside §17.4's target, and still declares an "
+                f"exception for {allowed}. Delete it: {reason}")
+    return problems
+
+
+def outdoor_cell(cells: dict, pack: str | None = None) -> str:
     """The cell a shell file that names no cell draws with: the biggest one outdoors.
 
     `HOUSE-00473`. The roofs and the chimney are over the house and are seen from outside it, so
     they belong with the outdoors -- and asking which exterior cell is the largest finds
     `EXT_WORLD` (400 x 400 m, against the next biggest yard's ~1 000 m²) without naming it here.
     Derived rather than written down, so that a house with a different outdoors still works.
+
+    @p pack narrows the question to one residency pack, which is `HOUSE-00494`'s whole point.
     """
     best, best_area = None, 0.0
     for identifier, cell in sorted(cells.items()):
         if cell.get("kind") != "exterior":
+            continue
+        if pack is not None and cell.get("residencyPack") != pack:
             continue
         area = sum((float(box["x"][1]) - float(box["x"][0]))
                    * (float(box["z"][1]) - float(box["z"][0]))
@@ -499,9 +599,41 @@ def outdoor_cell(cells: dict) -> str:
             best, best_area = identifier, area
     if best is None:
         raise LayoutError(
-            "a shell file names no cell and this layout has no exterior cell to draw it with; "
-            "the roofs and the chimney are seen from outdoors and there is no outdoors")
+            f"a shell file names no cell and this layout has no exterior cell"
+            f"{'' if pack is None else ' in the ' + pack + ' pack'} to draw it with; the roofs "
+            f"and the chimney are seen from outdoors and there is no outdoors")
     return best
+
+
+def house_exterior_cell(cells: dict) -> str:
+    """Where the house's own roofs and chimney are filed. `HOUSE-00494`, owner decision 2026-09-10.
+
+    **The player's roof and chimney belong to the house's exterior, not to the neighbourhood.** The
+    house is visible from the road the player starts on, so its complete silhouette has to exist
+    whether or not the distant houses have loaded -- and until this they did not: `ROOF_MAIN`,
+    `ROOF_GARAGE` and `CHIMNEY` name no cell, `outdoor_cell` answered `EXT_WORLD`, and
+    `EXT_WORLD`'s pack is `neighbourhood`. §27.3's T3 loads `exterior` and THEN `neighbourhood`,
+    so the roof arrived last and was demoted first.
+
+    **Placing them by where they STAND does not work, and the measurement is why.** `ROOF_MAIN`'s
+    plan box is the whole house and its overlap with the yards is the 0.15 m eaves oversail:
+    0.8 m² with `EXT_SIDEYARD_W` against 0.8 m² with `EXT_BACKYARD`, a tie decided by rounding.
+    `CHIMNEY` overlaps no yard at all. `HOUSE-00780`'s largest-overlap rule is right for a terrain
+    tile and has nothing to say about a roof.
+
+    So the answer is categorical: the property's own outdoors, which is the largest exterior cell
+    in §27.2's `exterior` pack. WHICH of them is residency-neutral -- every exterior cell of this
+    property is in that one pack, and `_shell_members`' own claim says so -- and the one that comes
+    out is `EXT_ROAD`, which is where the player stands when the silhouette has to be complete.
+
+    A world whose exterior cells declare no pack at all -- every fixture in this file -- has
+    nothing better to offer, so the largest outdoor cell is the answer there. The claim that the
+    REAL layout does better is made against the real layout.
+    """
+    try:
+        return outdoor_cell(cells, PROPERTY_OUTDOOR_PACK)
+    except LayoutError:
+        return outdoor_cell(cells)
 
 
 def geometry_bounds(surfaces: dict):
@@ -569,6 +701,33 @@ def place_outdoors(cells: dict, bounds, fallback: str, levels: dict | None = Non
     return best or fallback
 
 
+def _refuse_stale_preference(shell_dirs) -> None:
+    """Refuse a preferred shell directory whose files predate the ones they were derived from.
+
+    `HOUSE-00494`. @p shell_dirs is most-preferred first, so anything later in the list is a
+    SOURCE for what comes before it: `build/shell-lm` is `shell_unwrap.py`'s output over
+    `build/shell`. A stale preferred copy is invisible in every other way -- right name, valid
+    glTF, plausible geometry -- and it silently pins a cell to whatever the shell looked like the
+    last time somebody remembered to run the second tool.
+    """
+    directories = [Path(directory) for directory, _baked in shell_dirs
+                   if directory is not None and Path(directory).is_dir()]
+    for index, preferred in enumerate(directories):
+        for source in directories[index + 1:]:
+            stale = []
+            for path in sorted(preferred.glob("*.glb")):
+                origin = source / path.name
+                if origin.is_file() and origin.stat().st_mtime > path.stat().st_mtime + 1.0:
+                    stale.append(path.stem)
+            if stale:
+                raise LayoutError(
+                    f"{len(stale)} file(s) in {preferred} are older than the same cell in "
+                    f"{source} -- the preferred copy was derived from a shell that has since been "
+                    f"regenerated, and chunking it would mix two versions of the house "
+                    f"({', '.join(stale[:4])}{'…' if len(stale) > 4 else ''}). Run "
+                    f"tools/blender/shell_unwrap.py")
+
+
 def _shell_members(shell_dirs, cells: dict, stats: dict, outdoors: bool = False,
                    levels: dict | None = None):
     """Every surface class of every generated shell file, as a chunk member and its group key.
@@ -578,7 +737,18 @@ def _shell_members(shell_dirs, cells: dict, stats: dict, outdoors: bool = False,
     21 cells with no receiver in them are never unwrapped and there is nothing to prefer. `baked`
     travels with the directory rather than being read off its name, because a directory called
     `shell-lm-broken` is not a lightmapped shell and a rule that sniffs the suffix says it is.
+
+    **A preferred copy that is OLDER than the one it was derived from is refused**
+    (`HOUSE-00494`). `build/shell-lm` is preferred over `build/shell`, and it is written by a
+    second Blender tool that nothing runs automatically: on 2026-09-10 it held cells unwrapped the
+    previous evening, so three shell regenerations in a row were silently ignored for 78 of the 99
+    cells and the chunk tree was a mixture of two days' geometry. Nothing said so -- the file was
+    there, it parsed, and it had the right name. This is the one comparison that can see it, and
+    mtime is the right signal here for the reason `build_content.py` distrusts it elsewhere:
+    `build/` is never in git, so within a build tree a derived file older than its source is
+    exactly what it looks like.
     """
+    _refuse_stale_preference(shell_dirs)
     seen: set[str] = set()
     for directory, lightmapped in shell_dirs:
         if directory is None or not Path(directory).is_dir():
@@ -595,12 +765,22 @@ def _shell_members(shell_dirs, cells: dict, stats: dict, outdoors: bool = False,
                 continue
             cell_id = path.stem
             if cell_id not in cells:
-                cell_id = outdoor_cell(cells)
+                # A file named for a THING and not for a cell -- `ROOF_MAIN`, `CHIMNEY`,
+                # `TERRAIN_R2C3`, `EXT_FENCE_N_W` -- is placed by where it STANDS
+                # (`HOUSE-00780`), and that is now true of the shell's own three as well
+                # (`HOUSE-00494`). They used to take `outdoor_cell`'s answer straight, which is
+                # `EXT_WORLD`, whose residency pack is `neighbourhood`: §27.3's T3 loads
+                # `exterior` and THEN `neighbourhood`, so the player's own roof and chimney were
+                # resident only once the distant houses were, and were demoted with them. The
+                # house is visible from the road the player starts on, so its silhouette cannot
+                # depend on whether the neighbourhood has loaded.
                 if outdoors:
-                    # An exterior file is named for the thing it is, never for a cell, so it is
-                    # placed by where it STANDS (`HOUSE-00780`).
-                    cell_id = place_outdoors(cells, geometry_bounds(surfaces), cell_id,
-                                             levels)
+                    cell_id = place_outdoors(cells, geometry_bounds(surfaces),
+                                             outdoor_cell(cells), levels)
+                else:
+                    # The SHELL's own three -- `ROOF_MAIN`, `ROOF_GARAGE`, `CHIMNEY`. Categorical
+                    # rather than placed: see `house_exterior_cell`.
+                    cell_id = house_exterior_cell(cells)
                 stats["shellUnplaced"][path.stem] = cell_id
             cell = cells.get(cell_id)
             if cell is None:
@@ -852,10 +1032,28 @@ def report(built: dict) -> str:
     lines.append(
         f"  {over_count} cell(s) over §17.4's {MAX_CHUNKS_PER_CELL}-chunk target, "
         f"worst {max(stats['chunksPerCell'].values()) if stats['chunksPerCell'] else 0}")
+    # `HOUSE-00487`: an exception is VISIBLE or it is unlimited fragmentation with extra steps.
+    declared = {cell: value for cell, value in (stats.get("chunkBudgetExceptions") or {}).items()
+                if value[0] > 0}
+    if declared:
+        lines.append(f"  §17.4 exceptions in force ({len(declared)}):")
+        for cell_id, (count, allowed) in sorted(declared.items()):
+            lines.append(f"    {cell_id:<22} {count} of {allowed} allowed -- "
+                         f"{CHUNK_BUDGET_EXCEPTIONS[cell_id][1]}")
     for cell_id, count in sorted(stats["chunksPerCell"].items()):
-        flag = "  <-- over the limit" if count > MAX_CHUNKS_PER_CELL else ""
+        allowed = CHUNK_BUDGET_EXCEPTIONS.get(cell_id)
+        if count <= MAX_CHUNKS_PER_CELL:
+            flag = ""
+        elif allowed is None:
+            flag = "  <-- over the target and NOT declared"
+        elif count > allowed[0]:
+            flag = f"  <-- over its own exception's {allowed[0]}"
+        else:
+            flag = f"  <-- §17.4 exception, {allowed[0]} allowed"
         lines.append(f"  {cell_id:<24} {count} chunk(s), "
                      f"{stats['materialsPerCell'].get(cell_id, 0)} material(s){flag}")
+    for problem in stats.get("chunkBudgetProblems") or []:
+        lines.append(f"  PROBLEM: {problem}")
     return "\n".join(lines)
 
 
@@ -1513,11 +1711,59 @@ def selftest() -> int:
                 f"while a receiver in a BAKED cell with no TEXCOORD_1 is refused, naming the tool "
                 f"that makes one ({caught[:60]})")
 
+        # `HOUSE-00494`: a PREFERRED copy older than the shell it was derived from. On 2026-09-10
+        # `build/shell-lm` held 78 cells unwrapped the previous evening, so three shell
+        # regenerations in a row were silently ignored for those cells and the chunk tree was a
+        # mixture of two days' geometry. Nothing said so: the file was there, it parsed, and it
+        # had the right name.
+        stale_lm = workspace / "shell-lm-stale"
+        stale_lm.mkdir()
+        _fixture_shell(stale_lm / "L0_HALL.glb", [("floor", True, True)])
+        fresh_raw = workspace / "shell-fresh"
+        fresh_raw.mkdir()
+        _fixture_shell(fresh_raw / "L0_HALL.glb", [("floor", True, False)])
+        import os as _os
+        _os.utime(stale_lm / "L0_HALL.glb", (1.0, 1.0))
+        try:
+            build(world_dir, manifest, [(stale_lm, True), (fresh_raw, False)])
+            caught = ""
+        except LayoutError as exc:
+            caught = str(exc)
+        require("shell_unwrap" in caught and "L0_HALL" in caught,
+                f"a preferred shell copy OLDER than the one it came from is refused by name, "
+                f"rather than pinning the cell to a shell that has since been regenerated "
+                f"({caught[:70]})")
+        _os.utime(stale_lm / "L0_HALL.glb", None)
+        require(build(world_dir, manifest, [(stale_lm, True), (fresh_raw, False)])["chunks"],
+                "...and the same two trees build once the preferred copy is current again")
+
         # A file that names no cell still belongs to one: the roofs and the chimney are over the
         # house and are seen from outdoors.
         require(shelled["stats"]["shellUnplaced"] == {"ROOF_MAIN": "EXT_YARD"},
                 f"a shell file that names no cell draws with the biggest outdoor cell, and says "
                 f"so ({shelled['stats']['shellUnplaced']})")
+
+        # `HOUSE-00494`, owner decision: and when the outdoor cells declare a residency pack, it
+        # is the property's own pack that decides, not the biggest cell. `EXT_WORLD` is 400 m
+        # square and loads with the NEIGHBOURHOOD; the house's roof cannot wait for that.
+        packed = {
+            "EXT_YARD": {"id": "EXT_YARD", "level": "L0", "kind": "exterior",
+                         "residencyPack": PROPERTY_OUTDOOR_PACK,
+                         "boxes": [{"x": [-40.0, 40.0], "z": [-40.0, 40.0]}]},
+            "EXT_RING": {"id": "EXT_RING", "level": "L0", "kind": "exterior",
+                         "residencyPack": "neighbourhood",
+                         "boxes": [{"x": [-200.0, 200.0], "z": [-200.0, 200.0]}]},
+        }
+        require(outdoor_cell(packed) == "EXT_RING",
+                "the biggest outdoor cell is still the biggest one")
+        require(house_exterior_cell(packed) == "EXT_YARD",
+                f"...and the house's roofs and chimney go to the property's pack instead, so "
+                f"loading the neighbourhood cannot make the silhouette appear or disappear "
+                f"({house_exterior_cell(packed)})")
+        require(house_exterior_cell({"EXT_ONLY": dict(packed["EXT_RING"], id="EXT_ONLY")})
+                == "EXT_ONLY",
+                "a world that declares no such pack falls back to the biggest outdoor cell "
+                "rather than refusing to build")
         require("EXT_YARD" in by_cell and any(
             chunk["material"] == "BLOCKOUT_roof" for chunk in by_cell["EXT_YARD"]),
             "-- the yard is 6 400 m² and the terrace 9, and it is the roof that lands there")
@@ -1533,6 +1779,33 @@ def selftest() -> int:
                 and floor_chunk["subRanges"][0]["prop"] == "L0_HALL:BLOCKOUT_floor",
                 f"and each surface class is one sub-range, named for the file and the class it "
                 f"came from ({floor_chunk['subRanges'][0]['prop']})")
+
+        # `HOUSE-00487`, owner decision: §17.4's six-chunk TARGET, and the exception model that
+        # replaced "over it is an error". Claimed on the RULE rather than on the house, so the
+        # three ways to be wrong are each exercised whatever the house currently measures.
+        require(not chunk_budget_problems({"L0_HALL": MAX_CHUNKS_PER_CELL}),
+                f"a cell at exactly {MAX_CHUNKS_PER_CELL} chunks is fine and needs no exception")
+        undeclared = chunk_budget_problems({"L0_HALL": MAX_CHUNKS_PER_CELL + 1})
+        require(len(undeclared) == 1 and "declares no exception" in undeclared[0],
+                f"a cell over it with no exception is an ERROR, and the message says what to do "
+                f"({undeclared})")
+        require(not chunk_budget_problems({"L0_GARAGE": CHUNK_BUDGET_EXCEPTIONS["L0_GARAGE"][0]}),
+                "a declared cell at its own ceiling is fine -- that is what the exception is")
+        grown = chunk_budget_problems({"L0_GARAGE": CHUNK_BUDGET_EXCEPTIONS["L0_GARAGE"][0] + 1})
+        require(len(grown) == 1 and "its own exception allows" in grown[0],
+                f"...and one PAST its ceiling is an error, so an exception is a ceiling and not a "
+                f"licence ({grown})")
+        stale_exception = chunk_budget_problems({"L0_GARAGE": 3})
+        require(len(stale_exception) == 1 and "Delete it" in stale_exception[0],
+                f"an exception whose cell no longer needs one is an error too, so the list cannot "
+                f"quietly become unlimited fragmentation ({stale_exception})")
+        require(all(reason.strip() for _max, reason in CHUNK_BUDGET_EXCEPTIONS.values())
+                and all(allowed > MAX_CHUNKS_PER_CELL
+                        for allowed, _reason in CHUNK_BUDGET_EXCEPTIONS.values()),
+                "every exception states a reason and a ceiling above the target")
+        require("L0_GARAGE" in CHUNK_BUDGET_EXCEPTIONS,
+                "and the garage is on the list rather than being redefined as something other "
+                "than a room, which is the decision `HOUSE-00487` records")
 
         # `HOUSE-00780`: the EXTERIOR generators' output. Their files are named for the thing they
         # are -- `TERRAIN_R2C3`, `EXT_FENCE_N_W` -- so each is placed in the cell it stands in,
@@ -1652,18 +1925,19 @@ def main() -> int:
         return 1
 
     print(report(built))
-    over = built["stats"]["cellsOverChunkLimit"]
-    if over:
-        print(f"build_chunks: {len(over)} cell(s) exceed §17.4's {MAX_CHUNKS_PER_CELL}-chunk "
-              f"target: {', '.join(over)}", file=sys.stderr)
+    # `HOUSE-00487`: being over the TARGET is not the failure -- being over it undeclared, over
+    # your own declared ceiling, or declaring a ceiling you no longer need is.
+    problems = built["stats"]["chunkBudgetProblems"]
+    for problem in problems:
+        print(f"build_chunks: {problem}", file=sys.stderr)
     if args.report:
-        return 1 if over else 0
+        return 1 if problems else 0
 
     data = serialise(built)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_bytes(data)
     print(f"build_chunks: wrote {args.out} ({len(data)} bytes)")
-    return 1 if over else 0
+    return 1 if problems else 0
 
 
 if __name__ == "__main__":

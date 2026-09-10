@@ -874,8 +874,10 @@ GRADE_Y = 0.0
 #: has to clear it by.
 GUTTER_SECTION = 0.12
 DOWNSPOUT_SECTION = 0.10
-RIDGE_VENT_WIDTH = 0.30
-RIDGE_VENT_HEIGHT = 0.08
+#: The ridge vent is `roof_geometry.ridge_vent`'s since `HOUSE-00491` -- one definition, and the
+#: one the ventilation decision is written against. `HOUSE-00468` drew a flat lid floating above
+#: the ridge from constants of its own; that was two answers to the same question and the flat one
+#: could not straddle a slot it was supposed to cap.
 CHIMNEY_ALONG = 1.10
 CHIMNEY_ACROSS = 0.60
 CHIMNEY_OVER_RIDGE = 0.60
@@ -1066,6 +1068,24 @@ def roof_faces_for(level, layout, construction):
     return roof_geometry.roof_planes(outer, eaves, float(construction["roofPitch"]))
 
 
+def rafters_for(level, layout, construction):
+    """`rafter_faces` for the roof this LEVEL is bounded by, or `()`.
+
+    The same three-line derivation `roof_faces_for` makes, for the same reason: a level with a
+    `roof` and a `null` ceiling looks up at that roof's structure (`HOUSE-00488`).
+    """
+    if not level or level.get("ceiling") is not None or not level.get("roof"):
+        return ()
+    if not construction or not construction.get("roofPitch"):
+        return ()
+    box = roof_geometry.roof_boxes(layout).get(level["roof"])
+    if box is None:
+        return ()
+    outer = roof_geometry.outer_box(box, construction)
+    eaves = roof_geometry.roof_eaves(layout, level["roof"], box, construction)
+    return rafter_faces(outer, eaves, float(construction["roofPitch"]))
+
+
 def roof_planes_for(level, layout, construction):
     """`roof_geometry.plane_equations` for the roof this LEVEL is bounded by, or `()`.
 
@@ -1089,7 +1109,7 @@ def roof_planes_for(level, layout, construction):
 
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
                level=None, levels=None, portals=(), openings=None, cells_by_id=None,
-               flights=(), roof=(), roof_planes_here=()):
+               flights=(), roof=(), roof_planes_here=(), rafters_here=()):
     """One mesh object named for the cell: its floor, its ceiling and its walls' inner faces.
 
     @p roof is `roof_geometry.plane_equations` for the roof this cell's level is bounded by, or
@@ -1481,6 +1501,21 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                 # crouch-only".
                 add([tuple(point) for point in piece], (0.0, -1.0, 0.0), "roof")
 
+        # `HOUSE-00488`: and the RAFTERS under that slope, which is what a rafter-bounded attic
+        # actually looks up at. `HOUSE-00496` gave the cell the roof surface and left the rafters
+        # in `ROOF_MAIN`, so `l3-room` lost 4 456 pixels of them the moment §25 culled the cell
+        # that file is drawn with. `build_collision.py` has given each attic cell its own rafter
+        # pieces since `HOUSE-00472`; this is the same decision, drawn.
+        for rafter_corners, rafter_outward in rafters_here or ():
+            for bx0, bx1, bz0, bz1 in layout_io.cell_boxes(cell):
+                # `clip_face` and not `clip_to_rect`: a PURLIN is vertical, its plan projection is
+                # a line, and the plane-equation clip correctly refuses it. Losing it cost 1 722
+                # pixels of `l3-room` and was caught by the reference comparison.
+                piece = roof_geometry.clip_face(rafter_corners, (bx0, bx1, bz0, bz1))
+                if len(piece) < 3:
+                    continue
+                add([tuple(point) for point in piece], rafter_outward, "structure")
+
     surface["class"] = "metal"
     build_balcony_edge(cell, extent, list(neighbours), construction, solid, add)
     build_mezzanine_guard(cell, extent, cells_by_id, levels or {}, construction, add)
@@ -1622,7 +1657,8 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
                          level=level, levels=levels, portals=portals, openings=openings,
                          cells_by_id={row["id"]: row for row in layout_io.rows(layout, "cells")},
                          flights=stair_rows, roof=roof_planes_for(level, layout, construction),
-                         roof_planes_here=roof_faces_for(level, layout, construction))
+                         roof_planes_here=roof_faces_for(level, layout, construction),
+                         rafters_here=rafters_for(level, layout, construction))
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
@@ -1677,17 +1713,77 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         if wanted is not None and name not in wanted:
             continue
         reset_scene()
+        # `HOUSE-00488`: the rafters move to the cells under a roof that BOUNDS a level -- a
+        # level with a `roof` and a `null` ceiling. A roof over a level that has a ceiling
+        # (`ROOF_GARAGE` over `L0`) keeps its own, because nothing below it will draw them.
+        bounded = any(row.get("roof") == name and row.get("ceiling") is None
+                      for row in layout_io.rows(layout, "levels"))
         obj = build_roof(name, box, construction,
                          dormers=dormers_on(box, portals, openings.values()),
                          eaves=roof_geometry.roof_eaves(layout, name, box, construction),
-                         spouts=[row for row in all_spouts if row["roof"] == name])
+                         spouts=[row for row in all_spouts if row["roof"] == name],
+                         structure_by_cells=bounded)
         export(obj, output / f"{name}.glb")
         report["written"].append(name)
     return report
 
 
+def rafter_faces(outer: tuple, eaves_y: float, pitch: float):
+    """`HOUSE-00463`'s rafters and purlins under the two long planes, as `(corners, outward)`.
+
+    Factored out of `build_roof` by `HOUSE-00488` so that a rafter-bounded CELL can draw the ones
+    that stand over it. The hip ends carry jack rafters in a real roof and none here: they are a
+    different length each, and the attic's unfinished stores -- the only place you see structure --
+    are under the long slopes.
+    """
+    x0, x1, z0, z1 = outer
+    dx, dz = x1 - x0, z1 - z0
+    if min(dx, dz) <= 0.0:
+        return []
+    faces = []
+    half = min(dx, dz) / 2.0
+    top = eaves_y + half * pitch
+    along0, along1 = (x0 + half, x1 - half) if dx >= dz else (z0 + half, z1 - half)
+    count = int((along1 - along0) / RAFTER_SPACING)
+    for index in range(count + 1):
+        at = along0 + index * RAFTER_SPACING
+        if at > along1 + 1e-9:
+            break
+        for side in (-1.0, 1.0):
+            near = (z0 if side < 0 else z1) if dx >= dz else (x0 if side < 0 else x1)
+            mid = ((z0 + z1) / 2.0) if dx >= dz else ((x0 + x1) / 2.0)
+            if dx >= dz:
+                rafter = [(at - RAFTER_WIDTH / 2.0, eaves_y - RAFTER_DEPTH, near),
+                          (at + RAFTER_WIDTH / 2.0, eaves_y - RAFTER_DEPTH, near),
+                          (at + RAFTER_WIDTH / 2.0, top - RAFTER_DEPTH, mid),
+                          (at - RAFTER_WIDTH / 2.0, top - RAFTER_DEPTH, mid)]
+            else:
+                rafter = [(near, eaves_y - RAFTER_DEPTH, at - RAFTER_WIDTH / 2.0),
+                          (near, eaves_y - RAFTER_DEPTH, at + RAFTER_WIDTH / 2.0),
+                          (mid, top - RAFTER_DEPTH, at + RAFTER_WIDTH / 2.0),
+                          (mid, top - RAFTER_DEPTH, at - RAFTER_WIDTH / 2.0)]
+            faces.append((rafter, (0.0, -1.0, 0.0)))
+    # A purlin under each slope, halfway up it.
+    for side in (-1.0, 1.0):
+        near = (z0 if side < 0 else z1) if dx >= dz else (x0 if side < 0 else x1)
+        mid = ((z0 + z1) / 2.0) if dx >= dz else ((x0 + x1) / 2.0)
+        at = (near + mid) / 2.0
+        level = (eaves_y + top) / 2.0 - RAFTER_DEPTH
+        if dx >= dz:
+            faces.append(([(along0, level - PURLIN_SECTION, at - PURLIN_SECTION / 2.0),
+                           (along1, level - PURLIN_SECTION, at - PURLIN_SECTION / 2.0),
+                           (along1, level, at - PURLIN_SECTION / 2.0),
+                           (along0, level, at - PURLIN_SECTION / 2.0)], (0.0, 0.0, -1.0)))
+        else:
+            faces.append(([(at - PURLIN_SECTION / 2.0, level - PURLIN_SECTION, along0),
+                           (at - PURLIN_SECTION / 2.0, level - PURLIN_SECTION, along1),
+                           (at - PURLIN_SECTION / 2.0, level, along1),
+                           (at - PURLIN_SECTION / 2.0, level, along0)], (-1.0, 0.0, 0.0)))
+    return faces
+
+
 def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None,
-               spouts=()):
+               spouts=(), structure_by_cells: bool = False):
     """One roof object over @p box, with its fascia. @p box is the WALL CENTRE-LINE rectangle.
 
     @p eaves is `roof_geometry.roof_eaves`'s answer, which is §12's ridge for the roof a level
@@ -1720,6 +1816,7 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
         for corners, face_outward in dormer_shell(rect_u, rect_v, plane_z, outer, eaves_y, pitch):
             add(corners, face_outward, "roof")
 
+
     # The fascia: a board round the eaves edge, hanging below it, and the soffit closing the
     # underside back to the wall. Without them you see the roof planes end in mid-air.
     x0, x1, z0, z1 = outer
@@ -1745,51 +1842,14 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
              (x1, soffit_y, z1 - reach), (x1 - reach, soffit_y, z1 - reach)]):
         add(corners, (0.0, -1.0, 0.0), "trim")
 
-    # `HOUSE-00463`: the rafters and the purlins, under the two long planes. The hip ends carry
-    # jack rafters in a real roof and none here: they are a different length each and the attic's
-    # unfinished stores -- the only place you see structure -- are under the long slopes.
-    dx, dz = x1 - x0, z1 - z0
-    if min(dx, dz) > 0.0:
-        half = min(dx, dz) / 2.0
-        top = eaves_y + half * pitch
-        along0, along1 = (x0 + half, x1 - half) if dx >= dz else (z0 + half, z1 - half)
-        count = int((along1 - along0) / RAFTER_SPACING)
-        for index in range(count + 1):
-            at = along0 + index * RAFTER_SPACING
-            if at > along1 + 1e-9:
-                break
-            for side in (-1.0, 1.0):
-                near = (z0 if side < 0 else z1) if dx >= dz else (x0 if side < 0 else x1)
-                mid = ((z0 + z1) / 2.0) if dx >= dz else ((x0 + x1) / 2.0)
-                if dx >= dz:
-                    rafter = [(at - RAFTER_WIDTH / 2.0, eaves_y - RAFTER_DEPTH, near),
-                              (at + RAFTER_WIDTH / 2.0, eaves_y - RAFTER_DEPTH, near),
-                              (at + RAFTER_WIDTH / 2.0, top - RAFTER_DEPTH, mid),
-                              (at - RAFTER_WIDTH / 2.0, top - RAFTER_DEPTH, mid)]
-                else:
-                    rafter = [(near, eaves_y - RAFTER_DEPTH, at - RAFTER_WIDTH / 2.0),
-                              (near, eaves_y - RAFTER_DEPTH, at + RAFTER_WIDTH / 2.0),
-                              (mid, top - RAFTER_DEPTH, at + RAFTER_WIDTH / 2.0),
-                              (mid, top - RAFTER_DEPTH, at - RAFTER_WIDTH / 2.0)]
-                add(rafter, (0.0, -1.0, 0.0), "structure")
-        # A purlin under each slope, halfway up it.
-        for side in (-1.0, 1.0):
-            near = (z0 if side < 0 else z1) if dx >= dz else (x0 if side < 0 else x1)
-            mid = ((z0 + z1) / 2.0) if dx >= dz else ((x0 + x1) / 2.0)
-            at = (near + mid) / 2.0
-            level = (eaves_y + top) / 2.0 - RAFTER_DEPTH
-            if dx >= dz:
-                add([(along0, level - PURLIN_SECTION, at - PURLIN_SECTION / 2.0),
-                     (along1, level - PURLIN_SECTION, at - PURLIN_SECTION / 2.0),
-                     (along1, level, at - PURLIN_SECTION / 2.0),
-                     (along0, level, at - PURLIN_SECTION / 2.0)], (0.0, 0.0, -1.0),
-                    "structure")
-            else:
-                add([(at - PURLIN_SECTION / 2.0, level - PURLIN_SECTION, along0),
-                     (at - PURLIN_SECTION / 2.0, level - PURLIN_SECTION, along1),
-                     (at - PURLIN_SECTION / 2.0, level, along1),
-                     (at - PURLIN_SECTION / 2.0, level, along0)], (-1.0, 0.0, 0.0),
-                    "structure")
+    # `HOUSE-00463`: the rafters and the purlins, under the two long planes -- unless the cells
+    # under this roof draw them themselves (`HOUSE-00488`). They are only ever seen from INSIDE
+    # the attic, and this file belongs to the outdoors: from `L3_ROOM` the cell it is filed in is
+    # not visible and 4 456 pixels of rafter went with it. Moved rather than copied, so nothing is
+    # drawn twice.
+    if not structure_by_cells:
+        for corners, outward in rafter_faces(outer, eaves_y, pitch):
+            add(corners, outward, "structure")
 
     # `HOUSE-00468`: a gutter along each eaves edge, a downspout at each corner, and a vent along
     # the ridge. The gutter hangs on the fascia, so its height comes from the fascia's.
@@ -1823,14 +1883,13 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
             add([(value, foot, corner_z - half_spout), (value, gutter_y, corner_z - half_spout),
                  (value, gutter_y, corner_z + half_spout), (value, foot, corner_z + half_spout)],
                 outward, "metal")
-    ridge_top = eaves_y + (min(x1 - x0, z1 - z0) / 2.0) * pitch
-    if dx >= dz:
-        vent = (x0 + (z1 - z0) / 2.0, x1 - (z1 - z0) / 2.0)
-        add([(vent[0], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 - RIDGE_VENT_WIDTH / 2.0),
-             (vent[1], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 - RIDGE_VENT_WIDTH / 2.0),
-             (vent[1], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 + RIDGE_VENT_WIDTH / 2.0),
-             (vent[0], ridge_top + RIDGE_VENT_HEIGHT, (z0 + z1) / 2.0 + RIDGE_VENT_WIDTH / 2.0)],
-            (0.0, 1.0, 0.0), "metal")
+    # §12.1's ridge vent (`HOUSE-00468`, rebuilt by `HOUSE-00491`): the exhaust half of the attic
+    # ventilation that replaced the two impossible gable louvres. `metal`, like the gutters and
+    # downspouts it shares a class with, and a BOX straddling the ridge rather than the flat lid
+    # this drew before -- a cap over a cut slot is what a shingle-over ridge vent is, and a lid
+    # floating 0.08 m above the apex was a lid floating above the apex.
+    for corners, outward in roof_geometry.ridge_vent(outer, eaves_y, pitch):
+        add(corners, outward, "metal")
 
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(vertices, [], faces)

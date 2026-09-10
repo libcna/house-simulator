@@ -10,8 +10,11 @@
 // **It needs no committed reference.** The two frames are of the same pose in the same session
 // shape, so one IS the other's reference -- which also means the test cannot be quietly satisfied
 // by regenerating a picture.
+#include <algorithm>
+#include <array>
 #include <cstdio>
 #include <filesystem>
+#include <iterator>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -26,6 +29,14 @@ namespace
     using cnahouse::app::Options;
     using cnahouse::app::QualityPreset;
     using cnahouse::testsupport::kVisibilityPoses;
+
+    /// The three poses that still differ, and every one of them is the OUTDOORS rather than a
+    /// cell's boundary surface. Measured 2026-09-10, after `HOUSE-00488`: `ext-backyard` 31.23 %,
+    /// `ext-terrace` 2.00 %, `b1-gym` 0.50 % -- the last one losing `TERRAIN_grass` through a
+    /// basement window well. The ground is per-cell CHUNKS until `HOUSE-00852` puts the outdoors
+    /// on §25.6's instance path, and thirteen pairs of exterior cells abut with no portal between
+    /// them; §25.6 says portals cannot help there, so authoring them would be the wrong fix.
+    constexpr std::array<const char*, 3> kOutdoorsPending{"b1-gym", "ext-terrace", "ext-backyard"};
     using cnahouse::testsupport::RenderHarness;
     using cnahouse::testsupport::VisibilityPose;
 
@@ -58,27 +69,32 @@ namespace
 
 } // namespace
 
-/// DISABLED, and this is the whole finding (`HOUSE-00688`).
+/// ENABLED since `HOUSE-00488` (2026-09-10), with the three poses that still differ PINNED.
 ///
-/// It runs, it compares, and it FAILS -- on eight of the eighteen poses §65.6's door state lets it
-/// compare. Two different things are wrong and neither is the culling:
+/// It was disabled because it failed on eight of the eighteen poses §65.6's door state lets it
+/// compare, for two reasons that were both real and neither of them the culling: 38 431 pixels
+/// changing SURFACE (`HOUSE-00485`'s coplanar pairs, since fixed) and 8 450 pixels becoming the
+/// CLEAR COLOUR (`HOUSE-00488`, geometry a cell looks at but does not own).
 ///
-/// * **38 431 pixels change SURFACE.** The culled frame draws a wall where the unculled one draws
-///   trim or the exterior skin, at the same depth. That is `HOUSE-00485`'s coplanar pairs: two
-///   faces in one plane, both front-facing, whose winner is decided by submission order. The
-///   picture is complete either way.
-/// * **8 450 pixels become the CLEAR COLOUR.** Something the unculled frame draws is not drawn at
-///   all with culling on. That is over-culling as far as the picture is concerned, and
-///   `HOUSE-00488` is the task that finds out whose geometry it is: `L1_LANDING` draws no walls of
-///   its own, so what a body standing on it looks at belongs to another cell -- and the four poses
-///   that show holes are all looking at a boundary surface owned by a room the walk correctly
-///   excluded.
+/// Fifteen of the eighteen are clean now. `HOUSE-00488` closed the interior half: `L1_LANDING` and
+/// `L2_LANDING` got their own walls, a nested cell's shell is drawn against its parent's cones,
+/// and -- last -- a rafter-bounded attic draws the RAFTERS it looks up at instead of leaving them
+/// in `ROOF_MAIN`, which is a file the outdoors owns and `l3-room` cannot see. That one was 4 456
+/// pixels.
 ///
-/// Enable it the day `HOUSE-00485` and `HOUSE-00488` land. It is left here, disabled and running
-/// on demand, rather than deleted or weakened to pass: §25.8 calls this the single most important
-/// test in the project, and a version of it that passed by tolerating a hole would be worse than
-/// none.
-TEST(CullingSanityRenderTests, DISABLED_EveryPoseLooksTheSameCulledAndUnculled)
+/// The three that remain are all the same thing and it is not a cell's boundary surface: the
+/// OUTDOORS. `ext-backyard`, `ext-terrace` and `b1-gym` each lose ground -- `b1-gym` loses
+/// `TERRAIN_grass` through a basement window well -- because the ground is per-cell CHUNKS today
+/// and thirteen pairs of exterior cells abut with no portal between them. §25.6 is explicit that
+/// portals cannot help there and that the outdoors is culled by the exterior hierarchy over
+/// INSTANCES; that path has no content in it until `HOUSE-00852`. Authoring the portals would be
+/// the wrong fix, and is recorded as such.
+///
+/// So the set is PINNED rather than the test left off. A pose not on this list that differs is a
+/// new hole and fails the day it appears; a pinned pose that stops differing fails too, so the
+/// list cannot outlive the defect. §25.8 calls this the single most important test in the project
+/// and it is running again.
+TEST(CullingSanityRenderTests, EveryPoseLooksTheSameCulledAndUnculled)
 {
     if (!ContentIsBuilt())
     {
@@ -86,6 +102,7 @@ TEST(CullingSanityRenderTests, DISABLED_EveryPoseLooksTheSameCulledAndUnculled)
     }
 
     int compared = 0;
+    int stillPending = 0;
     double worst = 0.0;
     const char* worstPose = "-";
     for (const VisibilityPose& pose : kVisibilityPoses)
@@ -124,9 +141,23 @@ TEST(CullingSanityRenderTests, DISABLED_EveryPoseLooksTheSameCulledAndUnculled)
         // The same tolerance the committed references use, and for the same reason: a silhouette
         // edge may land on either side of a pixel between two runs of a rasteriser. A ROOM that
         // was culled is thousands of pixels, not tens.
+        const bool pinned = std::find(std::begin(kOutdoorsPending), std::end(kOutdoorsPending), name) !=
+                            std::end(kOutdoorsPending);
+        if (pinned)
+        {
+            // Still differing, and it has to STAY differing: the day `HOUSE-00852` puts the
+            // outdoors on §25.6's instance path this line is what says the pin can go.
+            EXPECT_GT(diff->DifferingFraction(), 0.002)
+                << name << " no longer differs. `HOUSE-00852` has landed, or something else fixed "
+                << "the outdoors: take it out of kOutdoorsPending";
+            ++stillPending;
+            continue;
+        }
         EXPECT_LT(diff->DifferingFraction(), 0.002)
             << name << " differs with culling on: " << diff->ToString() << " -- something visible was culled";
     }
+    EXPECT_EQ(stillPending, std::size(kOutdoorsPending))
+        << "a pinned pose was not among the ones compared, so the pin means nothing";
     std::printf("  %d pose(s) compared culled against unculled; worst %s at %.4f %% of the frame\n",
                 compared,
                 worstPose,

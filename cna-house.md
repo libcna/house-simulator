@@ -957,6 +957,25 @@ Three above-grade storeys plus a habitable attic. This is what makes "several fl
 rather than a stack of arbitrary levels: three-storey Colonials of this size were genuinely built,
 and the attic under a 7:12 roof over a 13.4 m span has real usable volume.
 
+**The attic is ventilated the way a hip roof is** (`HOUSE-00491`, owner decision 2026-09-10):
+**soffit intake** at the eaves, which the 0.15 m oversail already provides and `build_roof` has
+drawn since `HOUSE-00461`, exhausting through a **continuous ridge vent** — a 0.28 m shingle-over
+cap straddling the 8.60 m ridge, stopping 0.45 m short of each hip where the three planes meet and
+there is no cavity under it to exhaust. It reads on the silhouette as a thickened ridge line, which
+is what a ridge vent looks like.
+
+`HOUSE-00468` had already drawn *"a vent along the ridge"* — a flat lid floating 0.08 m above the
+apex, from constants of its own. That was two answers to one question, and the flat one could not
+cap a slot it was supposed to straddle. There is one now, `roof_geometry.ridge_vent`, and it is the
+one this section is written against.
+
+This replaces the two `W_GABLE` louvres §12.6 used to list. They were in *"attic gable ends"*, and
+this roof has none: `roof_geometry.roof_planes` builds four planes meeting at a ridge, so both
+louvres stood **1.44 m inside solid roof**. The decision was to remove them rather than grow a
+gablet to justify a detail an earlier plan had got wrong. The projecting garage wing is square —
+9.0 × 9.0 outside — so its roof is a pyramid with no ridge at all, and it gets no ridge vent; the
+generator answers that from the geometry rather than being told which roof it is drawing.
+
 ### 12.2 Level elevations
 
 All values are **finished floor level** (FFL) unless stated. Structural depth between the top of
@@ -1074,7 +1093,7 @@ Window types (leaf size; sill height above the room's FFL):
 | `W_BATH` | 0.60 × 0.90 obscured | 1.40 | bathrooms and WCs |
 | `W_BASEMENT` | 0.90 × 0.60 hopper | −0.45 abs. | basement, in 0.9 m window wells |
 | `W_DORMER` | 1.00 × 1.10 | 0.75 | attic dormers |
-| `W_GABLE` | 0.80 × 0.80 louvre | — | attic gable ends, non-opening |
+| ~~`W_GABLE`~~ | ~~0.80 × 0.80 louvre~~ | — | **removed by `HOUSE-00491`**: it named "attic gable ends", and this roof is a hip |
 | `W_TRANSOM` | 1.00 × 0.40 | above doors | front door, garage side door |
 
 Three more types the data needed and this table did not list, added 2026-09-07 by `HOUSE-00376`:
@@ -1096,14 +1115,22 @@ cell and fails when the two drift (`HOUSE-00380`). The per-window schedule is
 |---|---|---|---|---|---|---|
 | South (front, `z = −14.30`) | 4 | 8 | 7 | 6 | 3 | **28** |
 | North (rear, `z = −27.10`) | 1 | 4 | 4 | 4 | 2 | **15** |
-| West (`x = −12.70`) | 3 | 3 | 3 | 3 | 1 | **13** |
-| East (`x = +8.70`) | — | 1 | 1 | 1 | 1 | **4** |
+| West (`x = −12.70`) | 3 | 3 | 3 | 3 | — | **12** |
+| East (`x = +8.70`) | — | 1 | 1 | 1 | — | **3** |
 | Sunroom flanks (`x = ∓6.70/+2.70`) | — | 4 | — | — | — | **4** |
 | Garage wing (`x = +17.10`) | — | 1 | — | — | — | **1** |
 | Garden shed (`x = −16.60`) | — | 1 | — | — | — | **1** |
-| **Total** | **8** | **22** | **15** | **14** | **7** | **66** |
+| **Total** | **8** | **22** | **15** | **14** | **5** | **64** |
 
-Total windows: **66**, not the 81 designed here. The 15 are accounted for exactly. Eight are
+**66 → 64, and the two that went were impossible** (`HOUSE-00491`, owner decision 2026-09-10). The
+`W_GABLE` row below described *"attic gable ends"*, and §12.1's main roof is a **hip**:
+`roof_geometry.roof_planes` builds four planes meeting at a ridge, and a hip roof has no gable end
+to put a louvre in. Measured, both stood **1.44 m inside solid roof** — a 0.80 m opening at
+sill +11.30 in a wall the hip crosses at +10.57. The roof stays a hip; the attic is ventilated the
+way a hip roof really is, and §12.1 says how.
+
+Total windows: **64**, not the 81 designed here. The 17 are accounted for exactly — the 15 below,
+plus `HOUSE-00491`'s two impossible louvres. Eight are
 windows §13 scheduled for rooms in the middle of the plan that have no exterior wall at all —
 `L0_LAUNDRY`, `L0_WC1`, `L0_WC2`, `L0_DINING`, `L1_BATH3`, `L1_WC4`, `L2_BATH5`, `L2_WC6` — and
 those rows are corrected in §13. The other seven are the difference between this table's designed
@@ -1281,8 +1308,8 @@ insulation batts between the joists in the unfinished bays, and rough boarding o
 |---|---|---|---|---|---|---|---|---|
 | `L3_STAIR_HEAD` | Attic stair head | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 2.2 → 3.4 m | 1 | — | Dormer above the head gives standing room |
 | `L3_ROOM` ∪ | Finished attic room | −6.00 … +4.90 | −24.00 … −17.00, plus two dormer bays to −14.30 | 86.3 | 2.4 → 5.0 m | 2 | 3 | Boarded floor, plastered collar ceiling, lit by three dormers; an old sofa, a desk, boxes, a rocking horse, a train set |
-| `L3_STORE_W` | West attic store | −12.70 … −6.00 | −27.10 … −14.30 | 85.8 | 1.2 → 4.6 m | 1 | 1 | Unfinished: rafters, insulation, walkway boards, one gable louvre, 40 boxes, a wardrobe, suitcases |
-| `L3_STORE_E` | East attic / services | +4.90 … +8.70 | −27.10 … −18.30 | 33.4 | 1.2 → 4.2 m | 1 | 1 | Header tank, HVAC branch ducts, an aerial mast, cable runs, one gable louvre |
+| `L3_STORE_W` | West attic store | −12.70 … −6.00 | −27.10 … −14.30 | 85.8 | 1.2 → 4.6 m | 1 | — | Unfinished: rafters, insulation, walkway boards, 40 boxes, a wardrobe, suitcases. Ventilated by the eaves and the ridge, not by a window (`HOUSE-00491`) |
+| `L3_STORE_E` | East attic / services | +4.90 … +8.70 | −27.10 … −18.30 | 33.4 | 1.2 → 4.2 m | 1 | — | Header tank, HVAC branch ducts, an aerial mast, cable runs. Ventilated by the eaves and the ridge, not by a window (`HOUSE-00491`) |
 | `L3_STORE_N` | North attic store | −6.00 … +4.90 | −27.10 … −24.00 | 33.8 | 1.2 → 3.2 m | 1 | 2 | Christmas decorations, a cot, framed pictures; two dormers |
 | `L3_STORE_S` | South attic store | −3.60 … +3.60 | −17.00 … −14.30 | 19.4 | 1.2 → 3.0 m | 1 | — | Roof-space void behind the front knee wall |
 
@@ -1706,11 +1733,11 @@ interesting part.
 | Metric | Value |
 |---|---|
 | Cells | 96 — 75 interior rooms + 3 nested sub-cells (§54) + 18 exterior; the design said 95 |
-| Portals total | **179** — 46 + 63 + 3 + 66 + 1; the design said 186 |
+| Portals total | **177** — 46 + 63 + 3 + 64 + 1; the design said 186. 179 until `HOUSE-00491` retired the two `W_GABLE` louvres, which were 1.44 m inside solid roof |
 | — always-open (cased/stair) | **46** — 26 interior cased openings, 17 exterior, 3 stair wells |
 | — hinged/double/slider/exterior doors | **63** |
 | — nested portals (fridge door, freezer lid, garage loft hatch) | **3** |
-| — windows | **66** — see §12.6; the design said 81 and §12.6 accounts for the 15 |
+| — windows | **64** — see §12.6; the design said 81 and §12.6 accounts for the 17 |
 | — garage door | **1** |
 | Mean interior cell degree | **2.27** — through doors and openings only, because a window is not a way through; the visibility graph, which windows do join, is a different number |
 | Max interior cell degree | `B1_HALL` = **7** — **measured**; the design said `L0_KITCHEN` = 8 |
@@ -1829,15 +1856,43 @@ them. The blockout, with no prop placed yet: **418 chunks over 86 cells — 3 to
 vertices, 2.25 MB.** The largest single chunk is under 2 000 vertices, ~3 % of the 16-bit index
 cap, so the second criterion has an enormous margin and the first has none:
 
-* **Four cells are at 7** — `L0_GARAGE`, `L3_STORE_E`, `L3_STORE_N`, `L3_STORE_W`. Each carries the
-  four receiver classes (floor, ceiling, wall, exterior), plus glass, plus trim, plus a stair or a
-  structure class. None of those is an artefact of the blockout's one-material-per-class
-  placeholders: a real room's floor, ceiling and walls are genuinely different materials, and glass
-  must be its own chunk because it is blended and drawn after the opaque pass.
-* So **≤ 6 chunks per cell is a target the shell alone does not meet in 5 % of cells, before a
-  single prop.** It is recorded here rather than adjusted, because what the number is protecting
-  is draw calls per frame and that is §71's budget to settle with a measurement, not this
-  section's to weaken by assertion.
+* Several cells are at **7 or more**. Each carries the four receiver classes (floor, ceiling, wall,
+  exterior), plus glass, plus trim, plus a stair, a roof underside or a structure class. None of
+  those is an artefact of the blockout's one-material-per-class placeholders: a real room's floor,
+  ceiling and walls are genuinely different materials, and glass must be its own chunk because it
+  is blended and drawn after the opaque pass.
+
+**≤ 6 chunks per cell is a TARGET, and exceeding it is not automatically an architectural error**
+(`HOUSE-00487`, owner decision 2026-09-10). The two ways to force every cell under it were both
+refused: merging semantically useful blockout classes, and redefining a garage as something other
+than a room. **Room semantics and render-chunk partitioning are separate concepts**, and changing
+the architecture to satisfy a rendering number gets the dependency backwards.
+
+Instead a cell may declare an **explicit exception**, and the model is what keeps that from
+becoming unlimited fragmentation:
+
+| Rule | |
+|---|---|
+| **≤ 6 is still the target** | a cell that can meet it should |
+| **An exception states a reason and a ceiling** | not "this cell is exempt" — *this cell may have 7, because…* |
+| **Over the target and undeclared fails the build** | which is what catches an accident |
+| **Over its own ceiling fails** | an exception is a ceiling, not a licence |
+| **An exception its cell no longer needs fails** | `L3_STORE_E` left the list the day `HOUSE-00491` retired its impossible louvre and took its `glass` chunk with it |
+| **The report prints every exception in force** | with its count, its ceiling and its reason, so they are visible rather than merely tolerated |
+
+The exceptions are declared in `tools/world/build_chunks.py`'s `CHUNK_BUDGET_EXCEPTIONS`, which is
+where the partitioning is done and the only place that can measure them. Measured 2026-09-10:
+
+| Cell | Chunks | Why |
+|---|---|---|
+| `EXT_ROAD` | 13 | not a room: the residency key for the property's outdoors — the carriageway's six ground and marking materials, the fence and gate on it, and `HOUSE-00494`'s two roofs and chimney |
+| `L0_GARAGE` | 7 | four receiver classes, the stair to the loft, glazing, trim |
+| `L0_STAIR_MAIN`, `L1_STAIR_MAIN` | 7 | a stair hall: the four, a `stair` class, glazing, trim |
+| `L3_ROOM` | 8 | a rafter-bounded attic room draws the **roof** it looks up at as well as its collar ceiling (`HOUSE-00496`), and the **rafters** under that roof (`HOUSE-00488`) — two classes no room below it has, and both of them things you are looking at when you stand in it |
+| `L3_STORE_N`, `L3_STORE_W` | 7 | attic stores: roof and structure instead of a ceiling, plus dormer glass |
+
+§71's frame budget is what may tighten or restructure these later; a measurement is what should
+move them, not an assertion in either direction.
 * **The outdoors is chunked too, since `HOUSE-00780`.** The terrain tiles, road segments, fences,
   gates and garden structures are generated one file per thing and named for the thing, so each is
   filed in the exterior cell it covers most of — the cell being a **residency** key (§27.2's pack)
@@ -2866,8 +2921,8 @@ Content is partitioned into packs from day one, because the Web build needs them
 | Pack | Contents | Est. size |
 |---|---|---|
 | `core` | fonts, HUD, shared materials, player avatar, sky, weather, effects | 55 MB |
-| `exterior` | terrain, road, fences, garden, shed, vehicles, vegetation LOD0/1 | 90 MB |
-| `neighbourhood` | LOD1/LOD2 houses, impostors, distant vegetation | 45 MB |
+| `exterior` | terrain, road, fences, garden, shed, vehicles, vegetation LOD0/1, **the house's own roofs and chimney** | 90 MB |
+| `neighbourhood` | LOD1/LOD2 houses, impostors, distant vegetation, **the neighbours' roofs and chimneys, which are part of their house assets** | 45 MB |
 | `house-l0` | L0 shell, lightmaps, props, sunroom, garage, porch | 110 MB |
 | `house-l1` | L1 shell, lightmaps, props, balconies | 75 MB |
 | `house-l2` | L2 shell, lightmaps, props | 70 MB |
@@ -2877,6 +2932,23 @@ Content is partitioned into packs from day one, because the Web build needs them
 | `audio-core` | footsteps, interaction sounds, UI | 30 MB |
 | `audio-ambience` | room tones, weather, exterior ambience | 55 MB |
 | `video` | television media | 25 MB |
+
+**The player's own roof and chimney are `exterior`, not `neighbourhood`** (`HOUSE-00494`, owner
+decision 2026-09-10). `ROOF_MAIN`, `ROOF_GARAGE` and `CHIMNEY` are generated shell files that name
+no cell, and until this decision `build_chunks.py` filed them under the largest outdoor cell —
+`EXT_WORLD`, whose pack is `neighbourhood`. §27.3's T3 loads `exterior` and *then*
+`neighbourhood`, so the house's own roof arrived after the distant houses did and was demoted with
+them. **The house is visible from the road the player starts on, so its complete exterior
+silhouette cannot depend on whether neighbourhood content has loaded.**
+
+Placing them by where they *stand* does not answer it either, and the measurement is why: a roof's
+plan box is the whole house and its overlap with the yards is the 0.15 m eaves oversail — 0.8 m²
+against `EXT_SIDEYARD_W` and 0.8 m² against `EXT_BACKYARD`, a tie decided by rounding — while the
+chimney overlaps no yard at all. So the answer is categorical rather than geometric: the property's
+own outdoors, which is the largest exterior cell in the `exterior` pack. Which of them is
+residency-neutral, because every exterior cell of this property is in that one pack. The
+neighbours' roofs are part of their house assets and stay in `neighbourhood`; nothing is drawn
+twice, because there is exactly one `ROOF_MAIN` and it is filed once.
 
 **Platform content profiles.** A pack is built once per **content profile** — `linux`, `web`,
 `android` — and the profile, not the running renderer, decides which representation of an asset is
