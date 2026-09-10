@@ -13189,9 +13189,45 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             of 01:00, beginning on March's FIRST Sunday, `Advance` accepting a negative dt, the
             weekday seed off by one, `Wall()` forgetting the hour, and `NthWeekdayOfMonth` off by
             a week.
-- [ ] HOUSE-01532 — Implement calendar conversion (epoch ↔ Y/M/D h:m:s, day-of-year, weekday) and its tests
+- [x] HOUSE-01532 — Implement calendar conversion (epoch ↔ Y/M/D h:m:s, day-of-year, weekday) and its tests
       dep: HOUSE-01531 · sys: environment · plat: ALL · pri: MUST
       verify: unit ClockTests.* against 500 known conversions incl. DST boundaries and leap years
+      note: (2026-09-10) **the conversion existed; what this task is really about is the word
+            KNOWN.** `HOUSE-01531` built Hinnant's algorithm and tested it against the epoch, the
+            DST rule, a handful of weekday anchors and §31.4's screenshot scene -- all worth
+            having, and all of it this project's own arithmetic checking this project's own
+            arithmetic. A conversion tested against itself proves consistency and says nothing
+            about correctness.
+      note: so `tools/ci/calendar_table.py` generates the 500 cases from **Python's `datetime` and
+            `zoneinfo`**: a different algorithm, a different language, and for the daylight-saving
+            column the IANA database's own record of what America/New_York did. The API the test
+            needs was moved out of an anonymous namespace while it was there --
+            `CivilFromEpochSeconds`, `EpochSecondsFor` and `DaylightSavingAt` are free functions
+            now, and `SimClock` calls them rather than keeping a second copy of the rule.
+      finding: **§35's rule is the rule of 2007 and the table made that visible rather than
+            letting it be assumed.** The first run failed on 18 rows, every one of them before
+            2007, because the United States used to begin in April and end in October (and 1974-75
+            were emergency arrangements again). §35 states the current rule and this house is set
+            in 2031, so applying it to every year is right; hiding the rows it disagrees with by
+            leaving them out of the table would not be. They stay, their CONVERSION columns are
+            checked like everyone else's, and the table carries an `era` column that says which
+            side of 2007 each row is on. The test then requires that some of them **do** disagree
+            -- an era column that distinguished nothing would mean rows were being exempted for
+            no reason.
+      measured: **500 conversions verified in both directions**, 382 daylight-saving verdicts
+            against the IANA database, 118 rows before the rule era of which 18 disagree as
+            documented. The table covers the epoch and its negative neighbours, both transitions of
+            every year 2007-2040 to the second either side, the leap-year century rules (2032,
+            2036, 2100, 2000, 1900, 2400), every month boundary of 2031, and a seeded spread from
+            -131 to +369 years -- the boring cases, which is where conversion bugs live.
+      verified: 6 `ClockTests`, 8 claims in `calendar_table --selftest`, and a `calendar-table`
+            gate in `run_checks.sh`. Eight injected bugs into the conversion, all CAUGHT: floor
+            division becoming truncation before the epoch, Hinnant's March-zero shift off by one,
+            1970-01-01 taken for a Wednesday, the day of the year counting from zero, the century
+            rule dropped so 2100 becomes a leap year, daylight saving ending at 02:00 standard
+            instead of 01:00, March's transition on the first Sunday instead of the second, and the
+            seconds field dropped on the way back to epoch seconds. Two more into the table itself:
+            a hand-edited line, and an unseeded spread that would make `--check` meaningless.
 - [ ] HOUSE-01533 — Implement the day-length presets and the custom value, wired to settings
       dep: HOUSE-01531, HOUSE-00131 · sys: environment · plat: ALL · pri: MUST
 - [ ] HOUSE-01534 — Implement season derivation and its exposure to the weather system

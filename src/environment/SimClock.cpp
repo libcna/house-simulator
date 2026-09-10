@@ -98,6 +98,24 @@ namespace cnahouse::environment
         return 1 + offset + (nth - 1) * 7;
     }
 
+    CivilTime CivilFromEpochSeconds(double epochSeconds) noexcept
+    {
+        return FromEpochSeconds(epochSeconds);
+    }
+
+    double EpochSecondsFor(const CivilTime& time) noexcept
+    {
+        const std::int64_t day = DaysFromCivil(time.year, time.month, time.day) - kEpochDay;
+        return static_cast<double>(day * 86400 + time.hour * 3600 + time.minute * 60 + time.second);
+    }
+
+    bool DaylightSavingAt(double epochSeconds) noexcept
+    {
+        const std::int64_t now = FloorSeconds(epochSeconds);
+        const int year = FromEpochSeconds(epochSeconds).year;
+        return now >= DstStart(year) && now < DstEnd(year);
+    }
+
     void SimClock::Advance(double realSeconds) noexcept
     {
         // A hitch advances the clock by the time that really passed (`HOUSE-01540`), so this takes
@@ -123,13 +141,7 @@ namespace cnahouse::environment
 
     bool SimClock::IsDaylightSaving() const noexcept
     {
-        if (!dstRulesUS)
-        {
-            return false;
-        }
-        const std::int64_t now = FloorSeconds(epochSeconds);
-        const int year = FromEpochSeconds(epochSeconds).year;
-        return now >= DstStart(year) && now < DstEnd(year);
+        return dstRulesUS && DaylightSavingAt(epochSeconds);
     }
 
     int SimClock::EffectiveUtcOffsetMinutes() const noexcept
@@ -150,8 +162,7 @@ namespace cnahouse::environment
 
     void SimClock::SetStandard(const CivilTime& time) noexcept
     {
-        const std::int64_t day = DaysFromCivil(time.year, time.month, time.day) - kEpochDay;
-        epochSeconds = static_cast<double>(day * 86400 + time.hour * 3600 + time.minute * 60 + time.second);
+        epochSeconds = EpochSecondsFor(time);
     }
 
 } // namespace cnahouse::environment

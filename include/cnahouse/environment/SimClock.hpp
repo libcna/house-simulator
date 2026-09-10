@@ -116,4 +116,27 @@ namespace cnahouse::environment
     /// daylight saving begins. `n` counts from 1.
     [[nodiscard]] int NthWeekdayOfMonth(int year, int month, int weekday, int nth) noexcept;
 
+    /// @brief §35.1's epoch seconds as a civil date and time (`HOUSE-01532`).
+    ///
+    /// The reading is local STANDARD time, `weekday` and `dayOfYear` filled in. Before the 2031
+    /// epoch the arithmetic is a FLOOR and not a truncation: −1 s is the last second of
+    /// 2030-12-31, not the first of 2031-01-01 counted backwards. A fractional second reads as the
+    /// second it is inside, so 0.9 s is second 0.
+    [[nodiscard]] CivilTime CivilFromEpochSeconds(double epochSeconds) noexcept;
+
+    /// @brief The inverse: @p time, read as local STANDARD time, as §35.1's epoch seconds.
+    ///
+    /// `weekday` and `dayOfYear` are OUTPUTS of the conversion and are ignored here, so a caller
+    /// may fill in the five fields it knows and get the right answer.
+    [[nodiscard]] double EpochSecondsFor(const CivilTime& time) noexcept;
+
+    /// @brief Whether §35's US rule has daylight saving in force at @p epochSeconds.
+    ///
+    /// The rule without a clock to hang it on, so a caller with a timestamp can ask directly.
+    /// Second Sunday in March at 02:00 standard to first Sunday in November at 01:00 standard --
+    /// **the rule in force since 2007**, applied to every year. Before that the United States
+    /// began in April and ended in October; this house is set in 2031 and the project does not
+    /// carry a history of legislation.
+    [[nodiscard]] bool DaylightSavingAt(double epochSeconds) noexcept;
+
 } // namespace cnahouse::environment

@@ -185,6 +185,10 @@ run_gate "shell-manifest" python3 tools/blender/house_shell_gen.py --check-manif
 # §15.7's twelve rules can see it. This gate can: the golden list is append-only, and an id that
 # leaves it fails until a person deletes the line and says why.
 run_gate "world-ids" python3 tools/world/id_golden.py --check
+# `HOUSE-01532`. §35.1's calendar is checked against 500 conversions Python computed, and the value
+# of that table is entirely in its coming from somewhere else. A hand-edited line is a weakened
+# test that nothing else in the project would notice, so the table is regenerated and compared.
+run_gate "calendar-table" python3 tools/ci/calendar_table.py --check
 # `HOUSE-00400`. §13's room schedule is 94 rows of hand-maintained numbers over data that changes
 # every time a room does. Walking it against the layout found 52 disagreements, including a garage
 # 5 m² too small and a central hall with three doorways written as `0`.
