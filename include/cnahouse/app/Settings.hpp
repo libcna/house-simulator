@@ -5,6 +5,7 @@
 #include <string>
 
 #include "cnahouse/app/CommandLine.hpp"
+#include "cnahouse/environment/DayLength.hpp"
 #include "cnahouse/player/HeadBob.hpp"
 #include "cnahouse/util/Result.hpp"
 
@@ -21,7 +22,7 @@ namespace cnahouse::app
     struct Settings
     {
         /// @brief Bumped whenever a field changes meaning. `Migrate` handles every older value.
-        static constexpr std::int32_t kCurrentVersion = 4;
+        static constexpr std::int32_t kCurrentVersion = 5;
 
         std::int32_t version = kCurrentVersion;
 
@@ -74,6 +75,16 @@ namespace cnahouse::app
         /// self-consistent snapshot -- and settings wins on conflict, which is what makes this
         /// the one place that decides.
         bool fastWalk = false;
+
+        /// @brief §35.2's day length, in REAL MINUTES per simulated day. 0 is the frozen clock.
+        ///
+        /// A number with named points on it rather than an enum plus a number: §35.2 asks for
+        /// *"the presets above and a free numeric entry"*, and storing both a preset name and a
+        /// value would be two places that can disagree. `environment::kDayLengthPresetsRealMinutes`
+        /// is the list a settings dialogue offers, `TimeScaleForDayLength` turns this into
+        /// `SimClock::timeScale`, and the default 24 is the one §35.2 chose because it makes
+        /// 1 real second exactly 1 simulated minute.
+        float dayLengthRealMinutes = static_cast<float>(environment::kDefaultDayLengthRealMinutes);
 
         [[nodiscard]] static Settings Defaults()
         {

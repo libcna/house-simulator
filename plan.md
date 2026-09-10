@@ -13228,8 +13228,38 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             instead of 01:00, March's transition on the first Sunday instead of the second, and the
             seconds field dropped on the way back to epoch seconds. Two more into the table itself:
             a hand-edited line, and an unseeded spread that would make `--check` meaningless.
-- [ ] HOUSE-01533 — Implement the day-length presets and the custom value, wired to settings
+- [x] HOUSE-01533 — Implement the day-length presets and the custom value, wired to settings
       dep: HOUSE-01531, HOUSE-00131 · sys: environment · plat: ALL · pri: MUST
+      verify: unit `DayLengthTests.*`
+      finding: **the setting is a NUMBER with named points on it, not an enum plus a number.**
+            §35.2 asks for *"the presets above and a free numeric entry"*, and storing a preset
+            name alongside a value gives a file that can say `slow` and `24` at once, which
+            somebody then has to resolve. `Settings::dayLengthRealMinutes` is the whole setting;
+            `DayLengthPresetIndex` says which of §35.2's six rows a value IS, or that it is the
+            free entry. A preset is an index into the number and cannot disagree with it.
+      note: **zero is frozen, and it is a preset rather than a value out of range.** §35.2's table
+            writes that row as ∞ real minutes a day; as a `timeScale` it is 0, which §35.2 calls
+            *"essential for pixel-regression tests"*. So `TimeScaleForDayLength(0)` is 0 rather
+            than infinity, `ClampToSupportedRanges` leaves a zero alone, and everything else
+            outside the 1-1440 band is corrected AND reported -- the file is what the player edits,
+            and being silently overruled is worse than being told.
+      measured: every preset takes the clock round once in its own number of real minutes, checked
+            by advancing the clock rather than by dividing: 20 → 72x, 24 → 60x, 48 → 30x, 96 → 15x,
+            1440 → 1x, and an hour of real time at the frozen preset moves the clock by nothing.
+            §35.2's reason for choosing 24 is checked in the form a player would: three real
+            seconds are 180 simulated seconds exactly, and a real minute is a simulated hour.
+      note: **what "wired to settings" does and does not mean here.** The field, its migration to
+            version 5, its clamp, its round trip through the file and the conversion to
+            `SimClock::timeScale` all exist. Nothing reads it yet, because nothing constructs a
+            `SimClock` in the game loop -- that arrives with `HOUSE-01536`'s `time` commands, which
+            need a clock to command. The migration is the half that would have hurt: a v4 file has
+            no such field, and a default of 0.0 would freeze the clock of every player who
+            upgrades, so that is what its own claim checks.
+      verified: 7 `DayLengthTests`. Seven injected bugs, all caught: frozen becoming an infinite
+            time scale, the scale computed as minutes-per-day instead of its reciprocal, the
+            migration leaving the day length at zero, the clamp correcting frozen away, the setting
+            not written to the file, and a preset matched by rounding so that 24.4 counts as the
+            default.
 - [x] HOUSE-01534 — Implement season derivation and its exposure to the weather system
       dep: HOUSE-01532 · sys: environment · plat: ALL · pri: MUST
       verify: unit `SeasonPhaseTests.*`

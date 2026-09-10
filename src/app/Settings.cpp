@@ -2,6 +2,7 @@
 #include "cnahouse/app/Settings.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <format>
 
 #include "cnahouse/player/FirstPersonCamera.hpp"
@@ -154,6 +155,13 @@ namespace cnahouse::app
         }
         settings.fieldOfView = *fov;
 
+        auto dayLength = root.OptionalFloat("dayLengthRealMinutes", settings.dayLengthRealMinutes);
+        if (!dayLength)
+        {
+            return dayLength.Error();
+        }
+        settings.dayLengthRealMinutes = *dayLength;
+
         Migrate(settings);
         return settings;
     }
@@ -183,6 +191,14 @@ namespace cnahouse::app
             // on by default, and a player who has never seen the setting has not turned it off.
             settings.headBob = player::HeadBobLevel::Subtle;
             settings.version = 4;
+        }
+        if (settings.version < 5)
+        {
+            // Version 5 added §35.2's day length. A file written before it has no opinion, and the
+            // default -- 24 real minutes a simulated day -- is the one §35.2 chose; a player who
+            // has never opened the setting has not asked for a slower sun.
+            settings.dayLengthRealMinutes = static_cast<float>(environment::kDefaultDayLengthRealMinutes);
+            settings.version = 5;
         }
         settings.version = kCurrentVersion;
     }
@@ -237,6 +253,22 @@ namespace cnahouse::app
             fieldOfView = std::clamp(fieldOfView, player::kMinFovDegrees, player::kMaxFovDegrees);
             note("fieldOfView");
         }
+        // §35.2's band, with ZERO left alone because zero is the frozen clock rather than a day
+        // length out of range -- it is a preset in the table and the state §35.2 calls essential
+        // for pixel-regression tests. Anything else outside the band is corrected: a day of
+        // 0.001 real minutes is a sun that strobes, and a negative one is a clock that runs
+        // backwards through `TimeScaleForDayLength`'s divide.
+        const auto lowest = static_cast<float>(environment::kMinDayLengthRealMinutes);
+        const auto highest = static_cast<float>(environment::kMaxDayLengthRealMinutes);
+        if (!std::isfinite(dayLengthRealMinutes) ||
+            (dayLengthRealMinutes != 0.0f &&
+             (dayLengthRealMinutes < lowest || dayLengthRealMinutes > highest)))
+        {
+            dayLengthRealMinutes = std::isfinite(dayLengthRealMinutes)
+                                       ? std::clamp(dayLengthRealMinutes, lowest, highest)
+                                       : static_cast<float>(environment::kDefaultDayLengthRealMinutes);
+            note("dayLengthRealMinutes");
+        }
         return changed;
     }
 
@@ -259,7 +291,8 @@ namespace cnahouse::app
                            "  \"lookSmoothing\": {},\n"
                            "  \"headBob\": \"{}\",\n"
                            "  \"fieldOfView\": {},\n"
-                           "  \"fastWalk\": {}\n"
+                           "  \"fastWalk\": {},\n"
+                           "  \"dayLengthRealMinutes\": {}\n"
                            "}}\n",
                            version,
                            backBufferWidth,
@@ -275,7 +308,8 @@ namespace cnahouse::app
                            lookSmoothing ? "true" : "false",
                            HeadBobLevelName(headBob),
                            fieldOfView,
-                           fastWalk ? "true" : "false");
+                           fastWalk ? "true" : "false",
+                           dayLengthRealMinutes);
     }
 
 } // namespace cnahouse::app
