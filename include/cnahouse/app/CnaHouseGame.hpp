@@ -26,6 +26,7 @@
 #include "cnahouse/debug/VisibilityGeometryOverlay.hpp"
 #include "cnahouse/debug/VisibilityOverlay.hpp"
 #include "cnahouse/debug/WorldOverlay.hpp"
+#include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/physics/BroadPhase.hpp"
 #include "cnahouse/physics/CollisionData.hpp"
 #include "cnahouse/player/CellTracker.hpp"
@@ -222,6 +223,17 @@ namespace cnahouse::app
         [[nodiscard]] std::size_t ResidentChunksForTesting() const noexcept
         {
             return blockoutCells_ == nullptr ? 0u : blockoutCells_->ResidentChunkIndices().size();
+        }
+
+        /// @brief §35's clock, as it stands after the frames this session has run.
+        ///
+        /// The one thing a test cannot get at any other way: the clock is advanced inside
+        /// `Update` and nothing else reads it yet. What this is for is the claim that it is WIRED
+        /// -- that a session which ran frames has a clock that moved, at the rate the settings
+        /// file asked for.
+        [[nodiscard]] const environment::SimClock& ClockForTesting() const noexcept
+        {
+            return clock_;
         }
 
         /// @brief The version line drawn in the corner and printed at startup.
@@ -541,6 +553,13 @@ namespace cnahouse::app
         /// camera is outside the house and in no cell, and §16.4 has no answer for it.
         debug::VisibilityOverlay visibilityOverlay_;
         debug::VisibilityGeometryOverlay visibilityGeometry_;
+        /// @brief §35.1's clock, advanced once a frame from the REAL delta (`HOUSE-01536`).
+        ///
+        /// One clock, here, because §35.1 says *"everything time-dependent reads it; nothing else
+        /// keeps its own"*. It takes `FrameContext::realDeltaSeconds` and not the clamped one: a
+        /// hitch advances the afternoon by the time that really passed (`HOUSE-01540`), while
+        /// §49.3's accumulator runs the simulation slow for that frame.
+        environment::SimClock clock_;
         std::optional<visibility::VisibilitySystem> visibility_;
         std::optional<visibility::ChunkCuller> chunkCuller_;
         /// @brief §25.6's hierarchy over the exterior chunks, and the walk over it

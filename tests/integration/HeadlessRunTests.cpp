@@ -18,6 +18,7 @@
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/debug/VisibilityGeometryOverlay.hpp"
 #include "cnahouse/debug/VisibilityOverlay.hpp"
+#include "cnahouse/environment/DayLength.hpp"
 #include "cnahouse/player/FirstPersonView.hpp"
 #include "cnahouse/player/IInputSource.hpp"
 #include "cnahouse/util/Ids.hpp"
@@ -136,6 +137,45 @@ namespace
         bool cnahouse::player::InputState::* edge_;
         bool fired_ = false;
     };
+
+    TEST(HeadlessRunTests, TheSessionHasSection35sClockAndItRan)
+    {
+        // §35.1: *"everything time-dependent reads it; nothing else keeps its own."* Nothing reads
+        // it yet -- §36's weather, §35.3's sun and the lighting phase are what will -- so the only
+        // thing that can go wrong quietly is the wiring itself: a clock declared, registered with
+        // the console, and never advanced.
+        //
+        // **The clamped-vs-real choice is NOT provable here**, and saying so is better than a
+        // claim that looks like it proves it. `FrameContext`'s two deltas are the same number on
+        // every frame that is not a hitch, and a headless run of 30 frames produces none; the
+        // choice is proved in `ClockHitchTests`, where a 250 ms frame can be handed to the timer
+        // directly.
+        Options options;
+        options.headless = true;
+        options.scene = "walk";
+        Settings settings = Settings::Defaults();
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetFrameLimit(30);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+
+        const cnahouse::environment::SimClock& clock = game.ClockForTesting();
+        // §35.2's default day length is a SETTING, and the rate has to come from it rather than
+        // from the constant -- a player who chose the slow preset gets it from the first frame.
+        EXPECT_DOUBLE_EQ(
+            clock.timeScale,
+            cnahouse::environment::TimeScaleForDayLength(static_cast<double>(settings.dayLengthRealMinutes)));
+        EXPECT_DOUBLE_EQ(clock.timeScale, 60.0) << "§35.2's chosen 60x did not reach the game";
+        // Thirty frames of a headless run are milliseconds of wall clock, so what is asserted is
+        // that the clock MOVED and did not move absurdly -- not a duration, which would be a
+        // measurement of the machine.
+        EXPECT_GT(clock.epochSeconds, 0.0) << "thirty frames did not advance §35's clock at all";
+        EXPECT_LT(clock.epochSeconds, 3600.0) << "thirty frames advanced the clock by an hour";
+        EXPECT_EQ(clock.Standard().year, 2031) << "the clock did not start at §35.1's epoch";
+        EXPECT_TRUE(std::isfinite(clock.OutdoorBaseTemperatureC()));
+    }
 
     TEST(HeadlessRunTests, PressingF3ShowsTheWalkTheFrameActuallyDid)
     {

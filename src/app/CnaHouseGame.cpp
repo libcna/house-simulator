@@ -27,6 +27,7 @@
 
 #include "cnahouse/debug/PlayerCommands.hpp"
 #include "cnahouse/debug/Screenshot.hpp"
+#include "cnahouse/debug/TimeCommands.hpp"
 #include "cnahouse/debug/VisibilityCommands.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
@@ -432,6 +433,12 @@ namespace cnahouse::app
         // test drives the game through `Options` and cannot type into a console.
         cullingEnabled_ = !options_.noCull;
         debug::RegisterVisibilityCommands(console_, debug::VisibilityCommandContext{&cullingEnabled_});
+        // §35.2's day length is a SETTING, so the clock's rate comes from the settings file rather
+        // than from the constant: a player who chose the slow preset gets it from the first frame
+        // and not after opening the menu (`HOUSE-01533`).
+        clock_.timeScale =
+            environment::TimeScaleForDayLength(static_cast<double>(settings_.dayLengthRealMinutes));
+        debug::RegisterTimeCommands(console_, debug::TimeCommandContext{&clock_});
         debug::RegisterPlayerCommands(console_,
                                       debug::PlayerCommandContext{&player_, &tracker_, &*world_, &*index_});
 
@@ -773,6 +780,9 @@ namespace cnahouse::app
                 static_cast<float>(gameTime.getElapsedGameTimeProperty().getTotalSecondsProperty());
             const FrameContext frame = timer_.Advance(elapsed);
             Log::BeginFrame(frame.frameIndex);
+            // §35.1: *"`Update` accumulates `gameTime.ElapsedGameTime · timeScale`"*, from the
+            // UNCLAMPED delta -- see `clock_`'s declaration and `HOUSE-01540`.
+            clock_.Advance(static_cast<double>(frame.realDeltaSeconds));
             counters_.BeginFrame();
             timing_.BeginFrame();
             overlay_.PushFrameTime(frame.deltaSeconds * 1000.0f);

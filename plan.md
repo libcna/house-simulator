@@ -13336,8 +13336,49 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             not a measurement -- so it is caught by comparing the clock's reading against
             `BaseTemperatureC(Standard().dayOfYear, ...)` at five dates spread round the year
             instead, `dayOfYear` being a field 500 conversions from Python already agree with.
-- [ ] HOUSE-01536 — Implement the console commands `time set`, `time scale`, `time advance`
+- [x] HOUSE-01536 — Implement the console commands `time set`, `time scale`, `time advance`
       dep: HOUSE-01531 · sys: debug · plat: ALL · pri: MUST
+      verify: unit `TimeCommandTests.*`, integration `HeadlessRunTests.TheSessionHasSection35sClock…`
+      note: (2026-09-10) **this is the task that puts a clock in the game at all.** §35.1 says
+            *"everything time-dependent reads it; nothing else keeps its own"*, and until a command
+            needed something to command there was nothing to read: `CnaHouseGame` now holds one
+            `SimClock`, takes its rate from `Settings::dayLengthRealMinutes` (`HOUSE-01533`) so a
+            player who chose the slow preset gets it from the first frame, and advances it once a
+            frame from `FrameContext::realDeltaSeconds` -- the UNCLAMPED one, for `HOUSE-01540`'s
+            reason.
+      note: **one command with three verbs**, which is how §71 lists them and what makes `time`
+            with no verb the READING -- the thing somebody about to change the clock wants first.
+            The reading carries the date, the wall clock, the daylight-saving verdict, the rate as
+            both a multiplier and a day length, the year fraction and the temperature, because §36
+            derives precipitation from the last of those and a person setting the clock to debug
+            snow needs to see it.
+      finding: **the interesting half of a console command is what it refuses.** A console takes
+            typing, and a typo that silently becomes a valid clock setting is worse than an error:
+            `12:60` is a typo for `13:00` and `24:00` for `00:00`, so both are refused rather than
+            wrapped -- wrapping would be guessing at what somebody meant while telling them they
+            were right. `from_chars` with a check that the whole argument was consumed is what
+            makes `9:5x` and `1x` errors instead of 9:05 and 1.
+      finding: **`advance` counts CALENDAR days and `set` stays inside the current simulated day**,
+            which is §35.2b's compression showing up in the interface. A person typing
+            `time advance 30` means a month later, not thirty sunrises -- 30 calendar days is a day
+            and a quarter of play -- so it goes through `SetCalendar`, which is exact. `time set`
+            moves the clock face within its simulated day, and because that also moves the DATE by
+            up to 24 days the reply is the whole reading rather than an "ok".
+      verified: 6 `TimeCommandTests` and 1 `HeadlessRunTests`. Seven injected bugs, all caught: an
+            out-of-range clock face wrapped instead of refused, a trailing typo parsed as a prefix,
+            `set` jumping to a whole day instead of staying in this one, `advance` counting
+            sunrises, a negative scale accepted, the game clock never advanced, and its rate taken
+            from the constant rather than from the setting.
+      note: **what the integration test deliberately does NOT claim.** Whether the game feeds the
+            clock the clamped or the real delta cannot be seen from a headless run: the two are the
+            same number on every frame that is not a hitch, and thirty frames produce none. An
+            injection swapping them came back MISSED, and rather than contriving a claim the test
+            says so in a comment and points at `ClockHitchTests`, where a 250 ms frame can be
+            handed to the timer directly.
+      note: the render suite was NOT re-run for this commit and does not need to be: nothing here
+            draws. It was interrupted at 22 of 38 anyway, by a hold on the shared `:99` display
+            that another session asked for mid-run, and the run before it -- `HOUSE-01535`'s -- was
+            green over the same references.
 - [ ] HOUSE-01537 — Implement the `F8` environment overlay's time section
       dep: HOUSE-01531, HOUSE-00147 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-01538 — Implement clock persistence in the save model
