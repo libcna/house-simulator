@@ -70,6 +70,13 @@ not. `build/terrain` held tiles written at 12:49 on the 9th from a height field 
 the same day; `build/fence` held a tree from before `HOUSE-00785` repaired the generator; and
 `chunks.bin`, plus fourteen committed render references of the outdoors, were built from both.
 
+**A glob output is satisfied by any match** (`HOUSE-00856`). The "is the output still there" check
+asked `exists()` of the pattern itself, and `content/world/*.json` is not a file — so `world-deploy`
+and the four stages above reported *output missing* on every run however fresh they were, and
+rebuilt. `fingerprint`'s "never hash your own output" rule matches a command token against the
+pattern as well as comparing it, so a stage declaring `out/*.bin` and naming `out/a.bin` is covered
+by the same fix.
+
 <!-- BEGIN GENERATED: build_content.py --docs -->
 
 | # | Stage | Group | What it does | Needs | Reads | Writes |
@@ -95,8 +102,9 @@ the same day; `build/fence` held a tree from before `HOUSE-00785` repaired the g
 | 19 | **`cnb-world`** | compile | compile assets-src/world to content/world with cna-content | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/**/*` | — (a gate) |
 | 20 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/coverage.bin` |
 | 21 | **`nav`** | world | the pet waypoint graph | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/nav.bin` |
-| 22 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
-| 23 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
+| 22 | **`neighbourhood-bin`** | world | §11.4's meshes, keyed by the asset id a row names | `anim`, `fonts`, `layout`, `licences`, `manifest`, `neighbourhood`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`build/neighbourhood/*.glb` | `content/world/neighbourhood.bin` |
+| 23 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
+| 24 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
 
 The command each stage runs:
 
@@ -122,6 +130,7 @@ chunks         python3 tools/world/build_chunks.py
 cnb-world      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/world -o content/world --quiet
 coverage       python3 tools/world/build_coverage.py
 nav            python3 tools/world/build_nav.py
+neighbourhood-bin python3 tools/world/build_neighbourhood.py
 skyexposure    python3 tools/world/build_skyexposure.py
 snowshell      python3 tools/world/build_snowshell.py
 ```

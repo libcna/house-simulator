@@ -551,6 +551,13 @@ checks every one of them against `roof_geometry.house_downspouts` — the same f
 draws from — so the writing and the drawing cannot drift. There are **six**, not eight: the two
 corners where the garage wing meets the house are each inside the other roof's footprint.
 
+A `neighbourhood` row's `asset` resolves to a mesh in `content/world/neighbourhood.bin`
+(`HOUSE-00856`, [`docs/neighbourhood-format.md`](neighbourhood-format.md)), which holds one mesh
+per asset **in its own space** — the row supplies the transform. It is not `chunks.bin`, and the
+reason is stated there: a chunk bakes its placement, and an instance that has to pick its own LOD
+cannot have one baked in. `NeighbourhoodResolutionTests` checks both directions against the world
+the build produced — every row resolves to a mesh, and every mesh is placed by a row.
+
 `terrain.heightfield` and `terrain.materialIndex` are paths into the **deployed world directory**,
 not asset ids: the two images are copied there verbatim by `deploy_world.py` and hashed into
 `world.manifest.json` beside the JSON, so `WorldLoader::VerifyManifest` covers the ground the

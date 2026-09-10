@@ -166,6 +166,10 @@ run_gate "terrain-gen" python3 tools/world/terrain_gen.py --check
 # same thing to happen twice.
 run_gate "fence-gen" python3 tools/world/fence_gen.py --selftest
 run_gate "neighbourhood" python3 tools/world/neighbourhood_gen.py --selftest
+# `HOUSE-00856`. The generator above wrote `build/neighbourhood/*.glb` for fifteen tasks and NOTHING
+# read that directory. This is the tool that does, and its round-trip claims are what stop the
+# writer and `NeighbourhoodReader` drifting apart.
+run_gate "neighbourhood-bin" python3 tools/world/build_neighbourhood.py --selftest
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
 # `HOUSE-00477`. §70.5 over the GENERATED SHELL, not over the layout: `validate_world.py` rule 10
 # checks the numbers an author typed and this checks the geometry the generator made of them. It

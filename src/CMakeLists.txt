@@ -59,6 +59,7 @@ add_library(cnahouse_core STATIC
     physics/Terrain.cpp
     world/CellRuntime.cpp
     world/ChunkReader.cpp
+    world/NeighbourhoodReader.cpp
     world/WorldLoader.cpp
     world/WorldValidator.cpp
     world/InteractableExpr.cpp

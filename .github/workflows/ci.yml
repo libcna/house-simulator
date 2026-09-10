@@ -247,6 +247,7 @@ jobs:
         run: |
           python3 tools/world/fence_gen.py --selftest
           python3 tools/world/neighbourhood_gen.py --selftest
+          python3 tools/world/build_neighbourhood.py --selftest
 
       - name: The exterior tree must be part of the content build
         working-directory: cna-house

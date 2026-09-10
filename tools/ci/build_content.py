@@ -47,6 +47,7 @@ Offline tooling: not runtime code, not subject to the XNA-only rule.
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import hashlib
 import json
 import subprocess
@@ -211,6 +212,16 @@ def default_stages() -> list[Stage]:
               inputs=["assets-src/world/layout.exterior.json"],
               outputs=["build/neighbourhood/*.glb"], needs=["world-rules"],
               description="§11.4's neighbour houses, impostor cards and street furniture"),
+        # `HOUSE-00856`. The meshes the runtime opens. `neighbourhood` writes the `.glb`; this
+        # turns them into one `content/world/neighbourhood.bin` keyed by asset id, because §11.4's
+        # 122 instances of 34 assets cannot be chunked -- a chunk bakes its placement and an
+        # instance has to keep its own so §26 can swap its LOD.
+        Stage("neighbourhood-bin", "world",
+              ["python3", "tools/world/build_neighbourhood.py"],
+              inputs=["assets-src/world/layout.exterior.json", "build/neighbourhood/*.glb"],
+              outputs=["content/world/neighbourhood.bin"],
+              needs=["neighbourhood", "world-rules"],
+              description="§11.4's meshes, keyed by the asset id a row names"),
         Stage("chunks", "world", ["python3", "tools/world/build_chunks.py"],
               inputs=["assets-src/world/*.json", "assets-src/Models/**/*.glb",
                       "build/terrain/*.glb", "build/fence/*.glb"],
@@ -307,6 +318,13 @@ def expand(patterns: list[str], root: Path) -> tuple[list[Path], list[str]]:
     return sorted(found), empty
 
 
+def _output_present(pattern: str, root: Path) -> bool:
+    """Whether @p pattern names something that exists -- globbing it when it is a glob."""
+    if any(character in pattern for character in "*?["):
+        return any(root.glob(pattern))
+    return (root / pattern).exists()
+
+
 def fingerprint(stage: Stage, root: Path) -> tuple[str, list[Path]]:
     """The SHA-256 of everything the stage's result depends on, and the inputs it found.
 
@@ -324,9 +342,12 @@ def fingerprint(stage: Stage, root: Path) -> tuple[str, list[Path]]:
     # graph rebuilt nothing, including the nav graph built against its output. Every argument that
     # names a file in the repository is hashed -- the script, and anything else a stage is handed.
     for token in stage.command:
-        if token in stage.outputs:
+        if any(token == pattern or fnmatch.fnmatch(token, pattern) for pattern in stage.outputs):
             # A stage that names its own output on the command line would otherwise be stale the
-            # moment it ran: its fingerprint would contain what it had just written.
+            # moment it ran: its fingerprint would contain what it had just written. Matched as a
+            # PATTERN as well as compared, so a stage declaring `out/*.bin` and naming `out/a.bin`
+            # is covered too -- `HOUSE-00226` wrote the equality and `HOUSE-00856` found the glob
+            # form while giving the exterior generators glob outputs.
             continue
         candidate = root / token
         if candidate.is_file():
@@ -371,7 +392,12 @@ def status_of(stage: Stage, root: Path, stamps: dict, force: bool) -> tuple[str,
         return "run", "never built"
     if recorded.get("fingerprint") != digest:
         return "run", "inputs or command changed"
-    missing = [p for p in stage.outputs if not (root / p).exists()]
+    # A GLOB output is satisfied by any match, not by a file literally called `*.glb`. Written as
+    # `(root / p).exists()` this reported "output missing" on every run for `world-deploy` and for
+    # `HOUSE-00227`'s four exterior generators, so five stages rebuilt every time however fresh
+    # they were -- found by `HOUSE-00856`, whose own output is a single named file and was the
+    # only one of the five that ever reported fresh.
+    missing = [p for p in stage.outputs if not _output_present(p, root)]
     if missing:
         # The stamp says fresh and the file is not there. Trusting the stamp would leave the build
         # reporting success over an output nobody can load.
@@ -686,6 +712,30 @@ def selftest() -> int:
                 f"and says so, rather than reporting it fresh "
                 f"({[(r['stage'], r['reason']) for r in outcome['results']]})")
 
+        # 7b. `HOUSE-00856`: a GLOB output is satisfied by any match, not by a file literally
+        #     called `*.bin`. Written the naive way this reported "output missing" for
+        #     `world-deploy` and for `HOUSE-00227`'s four exterior generators on EVERY run, so five
+        #     stages rebuilt however fresh they were, for months, saying so in the report each time.
+        globbed = [Stage("globby", "g", ["globby", "out/globby-1.bin", "out/globby-2.bin"],
+                         ["src/a.txt"], ["out/globby-*.bin"])]
+        build(globbed, root, stamps, runner=fake)
+        ran.clear()
+        outcome = build(globbed, root, stamps, runner=fake)
+        require(not ran,
+                f"a stage whose output is a glob is fresh once it has run ({ran})")
+        require(all(r["status"] == "fresh" for r in outcome["results"]),
+                f"and says fresh rather than 'output missing' "
+                f"({[(r['stage'], r['reason']) for r in outcome['results']]})")
+        for path in sorted((root / "out").glob("globby-*.bin")):
+            path.unlink()
+        ran.clear()
+        outcome = build(globbed, root, stamps, runner=fake)
+        require(ran == ["globby"],
+                f"...and deleting every match still rebuilds it ({ran})")
+        require(any(r["reason"].startswith("output missing") for r in outcome["results"]),
+                f"for THAT reason and not because its own output was in its fingerprint "
+                f"({[(r['stage'], r['reason']) for r in outcome['results']]})")
+
         # 8. A stage with no inputs yet is SKIPPED -- distinct from fresh, and it blocks what
         #    depends on it. Most of the world tools are in this state until phase 5 authors the
         #    layout, and `make content` has to be runnable today.
@@ -796,6 +846,16 @@ def selftest() -> int:
         #      `HOUSE-00785` had already replaced.
         by_name = {stage.name: stage for stage in default_stages()}
         exterior = ("terrain-tiles", "road", "fence", "neighbourhood")
+        # `HOUSE-00856`: and the neighbourhood's `.glb` reach the runtime through their own stage,
+        # which is what closes the gap the four above only halved. A generator whose output no
+        # stage consumes is a generator nobody would notice failing.
+        require("neighbourhood-bin" in by_name
+                and "neighbourhood" in by_name["neighbourhood-bin"].needs,
+                "the neighbourhood's meshes are turned into a file the runtime opens")
+        require(any(pattern.startswith("build/neighbourhood/")
+                    for pattern in by_name.get("neighbourhood-bin", Stage(
+                        "x", "x", [], [], [])).inputs),
+                "...and that stage hashes the `.glb` it reads")
         require(all(name in by_name for name in exterior),
                 f"the four exterior generators are stages "
                 f"({[name for name in exterior if name not in by_name]} missing)")

@@ -11980,31 +11980,77 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             a card turned to face outward, the tower moved behind the skyline, and the tower moved
             in front of a card.
 - [ ] HOUSE-00849 — Implement the neighbourhood window-glow cards for night (emissive quads behind the window openings)
-      dep: HOUSE-00842 · sys: rendering · plat: ALL · pri: MUST
+      dep: HOUSE-00842, HOUSE-00856 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00850 — Implement the neighbour porch lights and street lights on the dusk sensor with per-fixture offsets
       dep: HOUSE-00849 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-00851 — Implement impostor rendering: yaw slice selection, sky tinting, vertical-axis billboarding for trees
-      dep: HOUSE-00845, HOUSE-00204 · sys: rendering · plat: ALL · pri: MUST
+      dep: HOUSE-00845, HOUSE-00204, HOUSE-00856 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00852 — Wire the neighbourhood into the exterior BVH with the correct LOD distances
-      dep: HOUSE-00851, HOUSE-00678 · sys: visibility · plat: ALL · pri: MUST
+      dep: HOUSE-00851, HOUSE-00678, HOUSE-00856 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00853 — Measure the neighbourhood's draw-call and triangle cost from the road pose against budget
       dep: HOUSE-00852 · sys: — · plat: LNX · pri: MUST
 - [ ] HOUSE-00854 — Render tests: 6 poses covering the neighbourhood at 3 LOD distances, day and night
       dep: HOUSE-00852 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00855 — Phase-11 review: does the property look like it belongs to a street? Correct if not.
       dep: HOUSE-00854 · sys: — · plat: ALL · pri: MUST
-- [ ] HOUSE-00856 — Deploy the generated neighbourhood meshes into the content tree and resolve a `neighbourhood` row's `asset` to one
-      dep: HOUSE-00846 · sys: content · plat: TOOL · pri: MUST
+- [x] HOUSE-00856 — Deploy the generated neighbourhood meshes into the content tree and resolve a `neighbourhood` row's `asset` to one
+      dep: HOUSE-00846 · sys: content · plat: ALL · pri: MUST
+      verify: `tools/world/build_neighbourhood.py --selftest`, `NeighbourhoodReaderTests`,
+            `NeighbourhoodRoundTripTests`, `NeighbourhoodResolutionTests`
       note: (2026-09-10) **New task, next free id in phase 11's reserved 00841–00890 range.** Found
-            by `HOUSE-00846`: `neighbourhood_gen.py` writes 30 `.glb` into `build/neighbourhood`
-            and **nothing reads that directory** -- `grep` finds the path twice, both times inside
-            the generator that writes it. Every other generated exterior tree has a consumer:
-            `build/terrain` and `build/fence` are `build_chunks.py`'s `exterior_dirs`, and
-            `build/shell` is its shell dirs. The neighbourhood cannot take that route as it
-            stands, because a chunk bakes a placement and these 97 rows carry `lodGroup` and
-            `impostorFrom` -- §25.4 wants a per-category instance list, not 97 baked meshes -- and
-            the assets are not in `assets.manifest.json` either, which is the props route.
-            `HOUSE-00852` wires the instances into the BVH and would find nothing to draw.
+            by `HOUSE-00846`: `neighbourhood_gen.py` had written `.glb` into `build/neighbourhood`
+            since `HOUSE-00841` and **nothing read that directory** -- `grep` found the path twice,
+            both times inside the generator that writes it. Sixteen tasks of houses, impostor
+            cards, street furniture and a horizon, none of which any code could open.
+      finding: **the neighbourhood cannot be chunked, and the reason is in `chunk-format.md`'s own
+            first section**: *"a chunk has no transform, so a prop's position and yaw are in the
+            geometry or they are nowhere"*. Right for a prop; wrong three times over for a
+            neighbour. §11.4 places **122 instances of 34 assets**, so baking writes twenty-four
+            houses where there are nineteen meshes; §26.1 picks an instance's LOD by its projected
+            height, and a baked instance cannot change what it draws; and §25.4 asks for a
+            per-category instance list, not a per-cell chunk list.
+      finding: so `neighbourhood.bin` (`docs/neighbourhood-format.md`, magic `CNBH`) holds **meshes
+            in their own space, keyed by asset id, and nothing else.** The INSTANCES are
+            deliberately absent: the rows already carry position, yaw, LOD group and impostor
+            distance and `WorldLoader` already reads them, and a second copy would be a second
+            answer to where a house stands. The transform is applied at draw time.
+      finding: the vertex is `docs/chunk-format.md` §3's **layout 0** -- position, normal, UV, 32
+            bytes, `BasicEffect` -- so the runtime declares the vertex once for both files. It is
+            PROVED rather than assumed: §18.3 bakes rooms and a neighbour has no inside, so the
+            writer refuses a material claiming `lightmapReceiver`, in a function the selftest calls
+            directly because no real input exercises it.
+      measured: **34 assets, 224 610 bytes.** The largest is a LOD0 house at 5 primitives and 580
+            vertices, the smallest `MODEL_NB_IMPOSTOR_GABLE` at one primitive and 7. 21 C++ tests
+            over three suites and 27 selftest claims.
+      finding: `NeighbourhoodResolutionTests` is the check that could not exist before this task:
+            every row resolves, every mesh is placed, **both directions**. The first is the gap the
+            task is about; the second is ADR-0013's rule 1 enforced at run time, so a variant no
+            row names cannot ride along in a pack budget. `UnresolvedAssets` excludes nothing --
+            §11.4's two vehicles come back by name and the test asserts they are the ONLY two,
+            because teaching C++ which prefixes belong to `HOUSE-00847` would put
+            `neighbourhood_gen.is_ours` in a second place.
+      finding: **a glob output was never satisfied, so five stages rebuilt on every run.**
+            `build_content.py` asked `(root / pattern).exists()` of each declared output, and
+            `content/world/*.json` is not a file -- so `world-deploy` and `HOUSE-00227`'s four
+            exterior generators reported "output missing" however fresh they were, saying so in
+            the report each time. Found here because `neighbourhood-bin`'s output is a single
+            named file and was the only one of the six that ever reported fresh. A glob is now
+            satisfied by any match, and `fingerprint`'s "do not hash your own output" rule
+            (`HOUSE-00226`) matches a token against the PATTERN as well as comparing it, so a
+            stage declaring `out/*.bin` and naming `out/a.bin` is covered too. The world group
+            goes from 6 stages running every time to 2 -- `chunks` and `snowshell`, both blocked
+            on recorded tasks.
+      verified: 13 injections, all CAUGHT -- 5 in the writer (normal and UV swapped, a box written
+            max before min, the lightmap guard removed, the assets written unsorted, and the
+            vehicles claimed as this grammar's), 5 in the reader (the ascending-order check
+            removed, `Find` returning the nearest asset instead of null, an empty file accepted,
+            a NaN box let through, and `UnresolvedAssets` left unsorted and duplicated), and 3 in
+            the content graph (a glob output never satisfied, always satisfied, and a stage's own
+            output back in its fingerprint).
+      finding: the NaN injection was **MISSED first time and the test was wrong, not the reader**:
+            the hand-built bytes ended just after the box, so a NaN that slipped the check failed
+            at the truncation instead, with the same error code. The fixture is complete now and
+            the claim names "bounding box" in the message.
 - [ ] HOUSE-00857 — Give the street furniture inside §10.4's accessible road a collision proxy
       dep: HOUSE-00846 · sys: collision · plat: TOOL · pri: MUST
       note: (2026-09-10) **New task, next free id in phase 11's reserved 00841–00890 range.** Found
@@ -14144,6 +14190,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
+| 2026-09-10 | `HOUSE-00849`, `HOUSE-00851`, `HOUSE-00852` | **A `dep` on `HOUSE-00856` added to three tasks; no id renumbered, no scope changed.** All three are `plat: ALL` rendering or visibility work over §11.4's neighbourhood, and until `HOUSE-00856` no code could load a single one of its meshes: `neighbourhood_gen.py` wrote them into `build/neighbourhood` and nothing anywhere opened that directory. | Written down rather than left implicit because it is the difference between a task that can be verified and one that cannot: glow cards behind windows nobody draws, an impostor path with no impostors to select from, and a BVH wired to instances with no geometry would each have been "complete" with nothing on screen. |
 | 2026-09-10 | `HOUSE-00856`, `HOUSE-00857` | **Two new tasks, the next free ids in phase 11's reserved 00841–00890 range.** Found by `HOUSE-00846`: nothing anywhere reads `build/neighbourhood`, so thirty generated meshes have no consumer (`00856`); and `build_collision.py` takes only §49.2's vehicles from the `neighbourhood` array, leaving sixteen solid objects inside §10.4's walkable ±35 m -- the utility pole 0.80 m outside the pedestrian gate among them -- with no collision (`00857`). | Both recorded with their evidence rather than folded into the task that found them: `00856` is a pipeline route that does not exist yet and that `HOUSE-00852` assumes, and `00857` changes `collision.bin` and so the ~34-minute nav build, and asks whether §11.4's collection-day bins are solid at all. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00785` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00841`: `fence_gen.py` has been unable to produce a single file since `HOUSE-00775` authored §10.4's stone wall, and nothing ran it, so `build/fence` kept the previous tree and `HOUSE-00780` chunked that. | Fixed in the same commit as the task that found it, because the tool it found is the one the new generator is modelled on and both are now gated. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00493`…`HOUSE-00496` | **Four new tasks, the next free ids in phase 6's reserved 00451–00540 range.** Two gates that flaked once each under load (`00493`); the roofs and the chimney loading with the `neighbourhood` pack (`00494`); the render suite's three assertions that were written when the house stood in a void, and the stale content copy they were reading (`00495`, fixed); and the attic's exterior skin drawn to its box with §12.1's roof inside it (`00496`). | `00495` was fixed on the spot because it made every render claim in this session unreliable. The other three are recorded with their measurements: `00496` is a shell-geometry change that eight render references depend on, so it is sequenced before `HOUSE-00781` rather than folded into the task that found it. No id was renumbered or struck. |

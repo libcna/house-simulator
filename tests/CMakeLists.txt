@@ -71,6 +71,27 @@ else()
                     "and ChunkRoundTripTests will not build.")
 endif()
 
+# `HOUSE-00856`. The same idiom again for `neighbourhood.bin`, whose vertices are in the ASSET's
+# own space rather than the world's -- a writer and a reader that disagreed about that would still
+# both look right on their own hand-written bytes.
+set(CNAHOUSE_NEIGHBOURHOOD_FIXTURE "${CMAKE_BINARY_DIR}/test-fixtures/neighbourhood/fixture.bin")
+if(CNAHOUSE_PYTHON3)
+    add_custom_command(
+        OUTPUT "${CNAHOUSE_NEIGHBOURHOOD_FIXTURE}"
+        COMMAND "${CNAHOUSE_PYTHON3}" "${CMAKE_SOURCE_DIR}/tools/world/build_neighbourhood.py"
+                --fixture "${CNAHOUSE_NEIGHBOURHOOD_FIXTURE}"
+        DEPENDS "${CMAKE_SOURCE_DIR}/tools/world/build_neighbourhood.py"
+                "${CMAKE_SOURCE_DIR}/tools/world/build_chunks.py"
+                "${CMAKE_SOURCE_DIR}/tools/world/build_collision.py"
+                "${CMAKE_SOURCE_DIR}/tools/world/neighbourhood_gen.py"
+        COMMENT "Generating the neighbourhood.bin round-trip fixture with build_neighbourhood.py"
+        VERBATIM)
+    add_custom_target(cnahouse_neighbourhood_fixture DEPENDS "${CNAHOUSE_NEIGHBOURHOOD_FIXTURE}")
+else()
+    message(WARNING "cna-house: no python3, so the neighbourhood.bin round-trip fixture is not "
+                    "generated and NeighbourhoodRoundTripTests will not build.")
+endif()
+
 # `HOUSE-00541`. The same idiom again for `collision.bin`, and `HOUSE-00225` is why there are three
 # of them: a reader and a writer each tested against their own hand-written fixtures both passed
 # while producing and expecting different bytes.
@@ -114,7 +135,8 @@ function(cnahouse_test_target kind)
         CNAHOUSE_TEST_OUTPUT_DIR="${CMAKE_BINARY_DIR}/test-output"
         CNAHOUSE_TEST_ANIM_FIXTURE="${CNAHOUSE_ANIM_FIXTURE}"
         CNAHOUSE_TEST_CHUNK_FIXTURE="${CNAHOUSE_CHUNK_FIXTURE}"
-        CNAHOUSE_TEST_COLLISION_FIXTURE="${CNAHOUSE_COLLISION_FIXTURE}")
+        CNAHOUSE_TEST_COLLISION_FIXTURE="${CNAHOUSE_COLLISION_FIXTURE}"
+        CNAHOUSE_TEST_NEIGHBOURHOOD_FIXTURE="${CNAHOUSE_NEIGHBOURHOOD_FIXTURE}")
     if(TARGET cnahouse_anim_fixture)
         add_dependencies(${_target} cnahouse_anim_fixture)
     endif()
@@ -123,6 +145,9 @@ function(cnahouse_test_target kind)
     endif()
     if(TARGET cnahouse_collision_fixture)
         add_dependencies(${_target} cnahouse_collision_fixture)
+    endif()
+    if(TARGET cnahouse_neighbourhood_fixture)
+        add_dependencies(${_target} cnahouse_neighbourhood_fixture)
     endif()
     set_target_properties(${_target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
     # The working directory is the REPOSITORY ROOT, not the build directory, so a test's fixture
