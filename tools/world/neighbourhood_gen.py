@@ -39,6 +39,7 @@ Offline tooling: not runtime code, not subject to the XNA-only rule.
 from __future__ import annotations
 
 import argparse
+import math
 import struct
 import sys
 from pathlib import Path
@@ -368,20 +369,72 @@ def _roof_faces(house: House, outer: tuple, eaves: float, kind: str) -> list:
     return faces
 
 
-def impostor_faces(width: float = 11.0, height: float = 8.5) -> list:
-    """§26.1's impostor: two triangles, and §11.4's "distant roof/gable silhouettes".
+#: §11.4's horizon ring: "distant roof/gable silhouettes and tree lines". Four cards, because a
+#: ring of thirty-six identical ones is the copy-pasted estate again at 200 m, and because the
+#: only thing that reads at that range is the shape of a top edge (`HOUSE-00845`).
+IMPOSTOR_KINDS = ("GABLE", "HIP", "TERRACE", "TREELINE")
 
-    One quad standing on the ground, with the gable cut into its top: a card is what a house 200 m
-    away is, and the shape of its top edge is the only thing that reads at that range.
+#: What an impostor id looks like: `MODEL_NB_IMPOSTOR_<KIND>`.
+IMPOSTOR_PREFIX = "MODEL_NB_IMPOSTOR_"
+
+
+def impostor_faces(kind: str = "GABLE") -> list:
+    """One horizon card: a quad standing on the ground with its own roofline cut into the top.
+
+    §26.1 calls an impostor two triangles; a silhouette with a roof on it is three or four, and
+    that is the whole content of the thing -- there is no other detail at 120-260 m, which is where
+    `HOUSE-00391` put this ring. Everything is one material and one primitive, so a card is one
+    draw.
     """
-    half = width / 2.0
-    eaves = height * 0.6
-    return [
-        ([(-half, 0.0, 0.0), (half, 0.0, 0.0), (half, eaves, 0.0), (-half, eaves, 0.0)],
-         (0.0, 0.0, 1.0), "NB_IMPOSTOR"),
-        ([(-half, eaves, 0.0), (half, eaves, 0.0), (0.0, height, 0.0)],
-         (0.0, 0.0, 1.0), "NB_IMPOSTOR"),
-    ]
+    if kind not in IMPOSTOR_KINDS:
+        raise layout_io.LayoutError(f"impostor kind {kind!r} is not one of {list(IMPOSTOR_KINDS)}")
+    front = (0.0, 0.0, 1.0)
+    material = "NB_IMPOSTOR"
+
+    def wall(half: float, top: float):
+        return ([(-half, 0.0, 0.0), (half, 0.0, 0.0), (half, top, 0.0), (-half, top, 0.0)],
+                front, material)
+
+    if kind == "GABLE":
+        half, eaves, ridge = 5.5, 5.1, 8.5
+        return [wall(half, eaves),
+                ([(-half, eaves, 0.0), (half, eaves, 0.0), (0.0, ridge, 0.0)], front, material)]
+    if kind == "HIP":
+        # A hip reads as a TRAPEZOID against the sky where a gable reads as a triangle, and that
+        # difference is the whole reason this kind exists.
+        half, eaves, ridge = 6.0, 5.4, 8.0
+        return [wall(half, eaves),
+                ([(-half, eaves, 0.0), (half, eaves, 0.0), (half * 0.35, ridge, 0.0),
+                  (-half * 0.35, ridge, 0.0)], front, material)]
+    if kind == "TERRACE":
+        # Two roofs over one long wall: a row of houses, which is what most of a suburb's horizon
+        # is. Wider and lower than a detached silhouette.
+        half, eaves, ridge = 9.0, 4.8, 7.0
+        return [wall(half, eaves),
+                ([(-half, eaves, 0.0), (0.0, eaves, 0.0), (-half / 2.0, ridge, 0.0)], front,
+                 material),
+                ([(0.0, eaves, 0.0), (half, eaves, 0.0), (half / 2.0, ridge, 0.0)], front,
+                 material)]
+    # TREELINE: §11.4 asks for one, and a tree line is a wide low mass with a bumpy top rather
+    # than a roof -- three crowns over a trunk band.
+    half, band, crown = 15.0, 3.0, 11.5
+    faces = [wall(half, band)]
+    for index in range(3):
+        centre = -half + half * (index + 0.5) * 2.0 / 3.0
+        faces.append(([(centre - half / 3.2, band, 0.0), (centre + half / 3.2, band, 0.0),
+                       (centre, crown - index % 2 * 2.0, 0.0)], front, material))
+    return faces
+
+
+def impostor_of(asset: str) -> str:
+    """The KIND an impostor asset id names, or an error saying which kinds there are."""
+    if not asset.startswith(IMPOSTOR_PREFIX):
+        raise layout_io.LayoutError(f"{asset!r} is not a neighbourhood impostor id")
+    kind = asset[len(IMPOSTOR_PREFIX):]
+    if kind not in IMPOSTOR_KINDS:
+        raise layout_io.LayoutError(
+            f"{asset!r} names impostor kind {kind!r}, which is not one of {list(IMPOSTOR_KINDS)}")
+    return kind
 
 
 def _document(name: str, faces: list) -> tuple[dict, bytes]:
@@ -471,8 +524,8 @@ def build(directory: Path) -> dict:
     """`{asset: faces}` for every neighbourhood asset the layout names."""
     out: dict[str, list] = {}
     for asset in wanted_assets(directory):
-        if asset.startswith("MODEL_NB_IMPOSTOR"):
-            out[asset] = impostor_faces()
+        if asset.startswith(IMPOSTOR_PREFIX):
+            out[asset] = impostor_faces(impostor_of(asset))
             continue
         house, detailed = house_of(asset)
         out[asset] = house_faces(house, detailed)
@@ -647,15 +700,38 @@ def selftest() -> int:
         require(len(posts) >= 6 * 4,
                 f"{house.name}'s boundary is posts and rails, not one long box ({len(posts)} faces)")
         low = [f for f in house_faces(house, False) if f[2] == "NB_DRIVE"]
-        require(not low, f"{house.name}_LOW has no drive: §26.2's LOD1 is the massing")
+        require(not low, f"{house.name}_LOW has no drive: §26.2's LOD2 is the massing alone")
 
-    # 7. The impostor is §26.1's two triangles and nothing else.
-    card = impostor_faces()
-    require(sum(1 if len(c) == 3 else 2 for c, _n, _m in card) == 3,
-            f"an impostor is a quad and a gable -- three triangles, which is what a house 200 m "
-            f"away is ({sum(1 if len(c) == 3 else 2 for c, _n, _m in card)})")
-    require(len({material for _c, _n, material in card}) == 1,
-            "and one material, so it is one draw")
+    # 7. `HOUSE-00845`: the horizon ring's four cards. §26.1 calls an impostor two triangles; a
+    #    silhouette with a roofline is three to six, and that is the whole content of one.
+    for kind in IMPOSTOR_KINDS:
+        card = impostor_faces(kind)
+        count = sum(1 if len(c) == 3 else 2 for c, _n, _m in card)
+        require(2 <= count <= 8,
+                f"the {kind} card is {count} triangles -- a silhouette and its roofline, which is "
+                f"all that reads at 120-260 m")
+        require(len({material for _c, _n, material in card}) == 1,
+                f"...and one material, so the {kind} card is one draw")
+        require(all(abs(point[2]) < 1e-9 for corners, _n, _m in card for point in corners),
+                f"...and it is a CARD: every corner of {kind} is in one plane")
+        ys = [point[1] for corners, _n, _m in card for point in corners]
+        require(abs(min(ys)) < 1e-9 and 6.0 <= max(ys) <= 14.0,
+                f"...standing on the ground and {max(ys):.1f} m tall, which is a house or a tree "
+                f"and not a fence or a tower")
+    tops = {kind: round(max(point[1] for corners, _n, _m in impostor_faces(kind)
+                            for point in corners), 2) for kind in IMPOSTOR_KINDS}
+    widths = {kind: round(max(point[0] for corners, _n, _m in impostor_faces(kind)
+                              for point in corners) * 2.0, 1) for kind in IMPOSTOR_KINDS}
+    require(len(set(tops.values())) == len(IMPOSTOR_KINDS)
+            and len(set(widths.values())) == len(IMPOSTOR_KINDS),
+            f"and no two kinds are the same silhouette: {tops} over {widths}")
+    for bad in ("MODEL_NB_IMPOSTOR_CARD", "MODEL_NB_IMPOSTOR_", "MODEL_NB_HOUSE_A_CREAM"):
+        try:
+            impostor_of(bad)
+            caught = False
+        except layout_io.LayoutError:
+            caught = True
+        require(caught, f"{bad} is refused as an impostor id, not built as some default card")
 
     # 8. Against the layout the street was authored from -- `HOUSE-00843`'s street, with a palette
     #    in every id.
@@ -696,6 +772,25 @@ def selftest() -> int:
                 f"each other share a palette, so the street is not a copy-pasted estate "
                 f"({clashes})")
         require(len(placed) == 24, f"§11.4's twenty-four placed houses ({len(placed)})")
+
+        # `HOUSE-00845`: the ring. Thirty-six cards, four kinds, and no two NEIGHBOURS on the ring
+        # alike -- the same rule as the street's palettes, applied round a circle, where "adjacent"
+        # is the next card by bearing and the last one wraps to the first.
+        ring = sorted(((row["id"], impostor_of(row["asset"]),
+                        math.degrees(math.atan2(row["position"][0], row["position"][2])) % 360.0)
+                       for row in rows
+                       if str(row.get("asset", "")).startswith(IMPOSTOR_PREFIX)),
+                      key=lambda entry: entry[2])
+        require(len(ring) == 36, f"§11.4's thirty-six distant silhouettes ({len(ring)})")
+        repeats = [(ring[index][0], ring[(index + 1) % len(ring)][0], ring[index][1])
+                   for index in range(len(ring))
+                   if ring[index][1] == ring[(index + 1) % len(ring)][1]]
+        require(not repeats,
+                f"and no two next to each other on the ring are the same card, the wrap from the "
+                f"last to the first included ({repeats})")
+        spread = {kind: sum(1 for entry in ring if entry[1] == kind) for kind in IMPOSTOR_KINDS}
+        require(min(spread.values()) >= 6,
+                f"and every kind is on the horizon, not one of them once: {spread}")
 
         # `HOUSE-00844`: which asset each LOD band names. Two variants over three bands, and the
         # layout is what decides which band gets which -- LOD0 and LOD1 share the full asset

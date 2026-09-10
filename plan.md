@@ -11816,8 +11816,32 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             them.
       verified: 2 injections, both CAUGHT -- the porch kept at LOD2, and an LOD2 row naming the
             full variant (injected into the layout).
-- [ ] HOUSE-00845 — Generate the 36 distant silhouettes (N25–N60) as impostor cards on the horizon ring
+- [x] HOUSE-00845 — Generate the 36 distant silhouettes (N25–N60) as impostor cards on the horizon ring
       dep: HOUSE-00204, HOUSE-00844 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/neighbourhood_gen.py --selftest`
+      finding: **thirty-six identical cards is the copy-pasted estate again, at 200 m.** §11.4 asks
+            for "distant roof/gable silhouettes and tree lines", which is two kinds of thing and
+            the ring had one. Four cards now -- `GABLE` (a triangle against the sky), `HIP` (a
+            trapezoid, which is the difference that reads at that range), `TERRACE` (two roofs
+            over one long wall, which is what most of a suburb's horizon is) and `TREELINE`
+            (§11.4's own, three crowns over a trunk band) -- and each is a different height AND a
+            different width, asserted, because two kinds that differ only in name are one kind.
+      finding: the ring gets the street's rule bent round a circle: no two cards NEXT TO EACH
+            OTHER by bearing are the same kind, **the wrap from the last to the first included**,
+            and every kind appears at least six times. Nine of each, as it happens.
+      measured: 3, 4, 4 and 5 triangles. §26.1 calls an impostor two; a silhouette with a roofline
+            on it is three to six, and that is the entire content of one -- there is nothing else
+            at `HOUSE-00391`'s 114-266 m ring.
+      note: `MODEL_NB_IMPOSTOR_CARD` is gone and is refused by name if it comes back: an id that
+            names no kind would otherwise be built as whichever card the code happened to default
+            to, which is ADR-0013's rule applied to the ring.
+      note: `HOUSE-00204`'s impostor BAKE is not what this task needed -- these are silhouettes
+            cut into a card, not rendered atlases -- so the dependency is satisfied by the
+            geometry rather than by the renderer; a baked impostor texture over these cards is
+            `HOUSE-00848`'s horizon work and later.
+      verified: 3 injections, all CAUGHT -- two kinds given the same silhouette, a card whose
+            corners are not in one plane, and (in the LAYOUT) two of the same card side by side on
+            the ring.
 - [ ] HOUSE-00846 — Generate the street furniture: 9 street lights, 5 utility poles with catenary wires, 4 signs, 12 mailboxes, 2 bin clusters, a basketball hoop
       dep: HOUSE-00763 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00847 — Place the 3 parked neighbour cars and the delivery van
