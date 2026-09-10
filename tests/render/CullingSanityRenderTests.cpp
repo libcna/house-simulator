@@ -33,7 +33,7 @@ namespace
     /// The three poses that still differ, and every one of them is the OUTDOORS rather than a
     /// cell's boundary surface. Measured 2026-09-10, after `HOUSE-00488`: `ext-backyard` 31.23 %,
     /// `ext-terrace` 2.00 %, `b1-gym` 0.50 % -- the last one losing `TERRAIN_grass` through a
-    /// basement window well. The ground is per-cell CHUNKS until `HOUSE-00852` puts the outdoors
+    /// basement window well. The ground is per-cell CHUNKS until `HOUSE-00700` puts the outdoors
     /// on §25.6's instance path, and thirteen pairs of exterior cells abut with no portal between
     /// them; §25.6 says portals cannot help there, so authoring them would be the wrong fix.
     constexpr std::array<const char*, 3> kOutdoorsPending{"b1-gym", "ext-terrace", "ext-backyard"};
@@ -87,8 +87,8 @@ namespace
 /// `TERRAIN_grass` through a basement window well -- because the ground is per-cell CHUNKS today
 /// and thirteen pairs of exterior cells abut with no portal between them. §25.6 is explicit that
 /// portals cannot help there and that the outdoors is culled by the exterior hierarchy over
-/// INSTANCES; that path has no content in it until `HOUSE-00852`. Authoring the portals would be
-/// the wrong fix, and is recorded as such.
+/// INSTANCES; nothing puts the ground in that path at all, which is `HOUSE-00700`. Authoring the portals
+/// would be the wrong fix, and is recorded as such.
 ///
 /// So the set is PINNED rather than the test left off. A pose not on this list that differs is a
 /// new hole and fails the day it appears; a pinned pose that stops differing fails too, so the
@@ -145,10 +145,10 @@ TEST(CullingSanityRenderTests, EveryPoseLooksTheSameCulledAndUnculled)
                             std::end(kOutdoorsPending);
         if (pinned)
         {
-            // Still differing, and it has to STAY differing: the day `HOUSE-00852` puts the
+            // Still differing, and it has to STAY differing: the day `HOUSE-00700` puts the
             // outdoors on §25.6's instance path this line is what says the pin can go.
             EXPECT_GT(diff->DifferingFraction(), 0.002)
-                << name << " no longer differs. `HOUSE-00852` has landed, or something else fixed "
+                << name << " no longer differs. `HOUSE-00700` has landed, or something else fixed "
                 << "the outdoors: take it out of kOutdoorsPending";
             ++stillPending;
             continue;

@@ -108,7 +108,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 6 | Blockout house geometry | 00451–00540 | 46 | The generated shell renders |
 | 7 | Collision and player controller | 00541–00620 | 38 | You can walk the whole blockout |
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
-| 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
+| 9 | Room/portal visibility | 00661–00760 | 40 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 30 | The blockout reads as a building |
@@ -7656,7 +7656,8 @@ the chunk builder produces ≤ 6 chunks per cell.
             `TERRAIN_grass` through a basement window well, so it is the same ground-in-a-yard
             problem as the other two and not a fourth cause. They are `HOUSE-00852`'s: until the
             outdoors is on §25.6's instance path a lawn is a chunk of a cell the portal walk did
-            not reach, and §25.6 says explicitly that portals cannot help there.
+            not reach, and §25.6 says explicitly that portals cannot help there. Recorded as
+            `HOUSE-00700`, which is what the pins name.
       finding: **a purlin is VERTICAL, and the clip the roof planes use cannot cut one.**
             `clip_to_rect` re-evaluates the height from `y = ax + bz + c`, which a face on its
             edge does not have, so `plane_equation` correctly returned `None` and the purlin under
@@ -10809,7 +10810,18 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             the fix above is load-bearing: putting the bounding box back, and dropping the check
             that the touching box crosses the doorway rather than merely meeting its plane.
 - [ ] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
-      dep: HOUSE-00684, HOUSE-00164, HOUSE-00486, HOUSE-00485, HOUSE-00488 · sys: ci · plat: CI · pri: MUST
+      dep: HOUSE-00684, HOUSE-00164, HOUSE-00486, HOUSE-00485, HOUSE-00488, HOUSE-00700 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-10) **the test is ENABLED and green, and the task stays open, which is not a
+            contradiction.** `HOUSE-00485` and `HOUSE-00488` closed the two causes it was blocked
+            on and 15 of the 18 comparable poses are now identical culled and unculled. The three
+            that are not -- `ext-backyard` 31.23 %, `ext-terrace` 2.00 %, `b1-gym` 0.50 % -- are
+            PINNED in the test rather than tolerated: a pose not on that list that differs fails
+            the day it appears, and a pinned pose that STOPS differing fails too.
+      note: this task's acceptance is *"a failure means something visible was culled"*, and in
+            those three something visible still is. It closes when the pins come out, which is
+            `HOUSE-00700`: all three lose GROUND -- `b1-gym` loses `TERRAIN_grass` through a
+            basement window well -- because the outdoors is per-cell chunks and §25.6 says
+            explicitly that portals cannot help there.
       accept: this is the single most important test in the project; a failure means something visible was culled
       note: (2026-09-09) **written, running, and FAILING -- so the task stays open.** The test is
             committed DISABLED with its numbers rather than deleted or weakened to pass: a version
@@ -10837,6 +10849,25 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             colour through the doorway, unculled you saw the room -- and `HOUSE-00486` drew the
             leaf. The `dep` records it, because the criterion was unsatisfiable for a reason that
             is a fact about the shell rather than about the culling.
+- [ ] HOUSE-00700 — Put the outdoors on §25.6's instance path: terrain tiles, road segments, fences and garden structures as exterior instances rather than per-cell chunks
+      dep: HOUSE-00678, HOUSE-00780 · sys: visibility · plat: ALL · pri: MUST
+      note: (2026-09-10) **New task, next free id in phase 9's reserved 00661–00760 range.** Found
+            by `HOUSE-00488`: `HOUSE-00677`/`HOUSE-00678` built the exterior BVH and its traversal
+            and **nothing puts the ground in it**. §25.6's ~4 100 instances are named in the plan
+            as `HOUSE-00772`'s vegetation and `HOUSE-00852`'s neighbourhood; the terrain, the
+            road, the fences and the garden structures are named by neither, and `HOUSE-00780`
+            filed them as per-cell CHUNKS as an interim -- which is what `HOUSE-00694`'s note
+            means by "the exterior instances are synthetic".
+      finding: the consequence is measurable and is the last thing standing between
+            `HOUSE-00688` and its acceptance: a lawn is a chunk of an exterior cell, thirteen
+            pairs of exterior cells abut with no portal between them, and §25.6 is explicit that
+            *"`EXT_WORLD` is one enormous cell, so portal traversal cannot help inside it"*.
+            Authoring those portals is the wrong fix and is recorded as such under `HOUSE-00488`.
+            Measured 2026-09-10: `ext-backyard` loses 31.23 % of its frame with culling on,
+            `ext-terrace` 2.00 %, `b1-gym` 0.50 % -- the last one seeing `TERRAIN_grass` through a
+            basement window well.
+      note: the per-cell filing itself is not wasted: a chunk's cell is a RESIDENCY key (§27.2)
+            and stays one. What has to change is which structure decides whether it is DRAWN.
 - [x] HOUSE-00689 — Test: with all doors closed, the graph fragments as `report_graph.py` predicts and the visible set from `L0_FOYER` is the golden list
       dep: HOUSE-00686 · sys: ci · plat: CI · pri: MUST
       note: (2026-09-09) **two claims about one house, and they are about different graphs.** With
@@ -14441,7 +14472,7 @@ Recorded so nobody has to re-derive the decision.
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 334** |
+| **Total** | **0–52** | **1 335** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
