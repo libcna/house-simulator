@@ -183,8 +183,11 @@ TEST(ClockTests, TheDaylightSavingVerdictIsTheOneAmericaNewYorkRecorded)
     {
         const bool ours = DaylightSavingAt(static_cast<double>(row.epoch));
         // The clock reads the free function rather than keeping a second copy of the rule, and
-        // that holds whatever era the row is from.
+        // that holds whatever era the row is from. §35.2b's compression is off, because this table
+        // is a table of CALENDAR instants and the compression makes the date run 24 times faster
+        // than the clock face -- `CompressedYearTests` is where the default is checked.
         SimClock clock;
+        clock.calendarDaysPerSimDay = 1.0;
         clock.epochSeconds = static_cast<double>(row.epoch);
         EXPECT_EQ(clock.IsDaylightSaving(), ours) << Describe(row);
         clock.dstRulesUS = false;
@@ -225,6 +228,7 @@ TEST(ClockTests, TheWallClockIsTheStandardClockPlusTheHourTheRuleIsIn)
     for (const Row& row : rows)
     {
         SimClock clock;
+        clock.calendarDaysPerSimDay = 1.0;
         clock.epochSeconds = static_cast<double>(row.epoch);
         const CivilTime standard = clock.Standard();
         const CivilTime wall = clock.Wall();

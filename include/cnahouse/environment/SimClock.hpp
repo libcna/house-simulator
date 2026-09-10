@@ -43,6 +43,20 @@ namespace cnahouse::environment
 
     inline constexpr double kSecondsPerDay = 86400.0;
 
+    /// @brief §35.2b's compression: how many CALENDAR days one SIMULATED day advances the date by.
+    ///
+    /// *"Decision (project owner, 2026-09-06): the calendar is compressed so that one simulated day
+    /// advances the calendar by 24 calendar days."* The diurnal rate and the annual rate are
+    /// deliberately decoupled -- the first is chosen for how the sun should look, the second for
+    /// how long a player should have to wait to see winter. At 24 the sun still rises once every
+    /// 24 real minutes and **a full year takes 365 real minutes**, so one long session shows the
+    /// house in all four seasons; without it four seasons would need 146 real hours of play and
+    /// nobody would ever witness autumn.
+    ///
+    /// Set it to 1.0 for a realistic-calendar debug run, which is what §35.2b says it is for and
+    /// what every calendar test in the project uses.
+    inline constexpr double kDefaultCalendarDaysPerSimDay = 24.0;
+
     /// @brief §35.1's clock. Everything time-dependent reads it; nothing else keeps its own.
     ///
     /// **`epochSeconds` is local STANDARD time, and that is a decision.** §35.1 says *"seconds
@@ -54,9 +68,12 @@ namespace cnahouse::environment
     /// in force -- which is what a wall clock is. `Wall()` is the reading; `Standard()` is the
     /// number.
     ///
-    /// **The compressed year is not here.** §35.2b's `calendarDaysPerSimDay` is `HOUSE-01542`, and
-    /// putting it in now would mean this clock's own tests could not say what date a given number
-    /// of seconds is.
+    /// **The compressed year IS here** (`HOUSE-01542`). `epochSeconds` is the DIURNAL clock and
+    /// nothing else: the sun's hour angle, the time on a wall clock's face, `SecondsOfDay`. The
+    /// DATE is derived from it through `calendarDaysPerSimDay`, so it runs 24 times faster, and
+    /// `CivilEpochSeconds` is where the two are put back together into one civil instant. With the
+    /// field at 1.0 every one of them collapses to the identity and the clock is the uncompressed
+    /// one `HOUSE-01531` built.
     struct SimClock
     {
         double epochSeconds = 0.0;
@@ -65,6 +82,8 @@ namespace cnahouse::environment
         double longitudeDeg = kDefaultLongitudeDeg;
         int utcOffsetMinutes = kDefaultUtcOffsetMinutes;
         bool dstRulesUS = true;
+        /// @brief §35.2b's compression. 1.0 is a realistic calendar; the default is 24.0.
+        double calendarDaysPerSimDay = kDefaultCalendarDaysPerSimDay;
 
         /// @brief §35.1: *"`Update` accumulates `gameTime.ElapsedGameTime · timeScale`"*.
         ///
@@ -81,7 +100,26 @@ namespace cnahouse::environment
         /// backwards because a platform timer glitched.
         void Advance(double realSeconds) noexcept;
 
+        /// @brief Calendar days since the epoch, fractional and CONTINUOUS (`HOUSE-01542`).
+        ///
+        /// The quantity §36.3's season phase and §35.3's solar declination read. Continuous
+        /// because §36.3 requires it in terms: *"a boundary is crossed every 91 real minutes, so a
+        /// matrix that switched at an instant would be visible as a glitch"*.
+        [[nodiscard]] double CalendarDays() const noexcept;
+
+        /// @brief The civil instant this clock is at, in uncompressed epoch seconds.
+        ///
+        /// The compressed DATE's midnight plus the diurnal time of day, which is the one number
+        /// the calendar, the daylight-saving rule and the wall clock all have to agree about.
+        /// Identical to `epochSeconds` when `calendarDaysPerSimDay` is 1.0.
+        [[nodiscard]] double CivilEpochSeconds() const noexcept;
+
         /// @brief Local STANDARD time -- the number, with no daylight saving in it.
+        ///
+        /// Under §35.2b's compression the date advances 24 times faster than the clock face, so a
+        /// reading a real minute later is an hour later AND a day later. That is the decoupling
+        /// §35.2b asks for and not a defect: *"the diurnal rate is chosen for how the sun should
+        /// look, the annual rate for how long a player should have to wait to see winter."*
         [[nodiscard]] CivilTime Standard() const noexcept;
 
         /// @brief The local WALL clock: `Standard()` plus an hour while daylight saving is on.
@@ -101,11 +139,33 @@ namespace cnahouse::environment
         /// @brief Seconds since local standard midnight, `[0, 86400)`.
         [[nodiscard]] double SecondsOfDay() const noexcept;
 
-        /// @brief Whole local standard days since the 2031-01-01 epoch. Negative before it.
+        /// @brief Whole CALENDAR days since the 2031-01-01 epoch. Negative before it.
+        ///
+        /// The date's day index and not the simulated one: this is what says which day of the year
+        /// it is, so it moves 24 times faster than `SimDayIndex`.
         [[nodiscard]] std::int64_t DayIndex() const noexcept;
 
-        /// @brief The clock set to @p time, read as local STANDARD time.
+        /// @brief Whole SIMULATED days since the epoch -- how many times the sun has come up.
+        [[nodiscard]] std::int64_t SimDayIndex() const noexcept;
+
+        /// @brief The clock set as close to @p time, read as local STANDARD time, as it can get.
+        ///
+        /// **Exact when `calendarDaysPerSimDay` is 1.0, and coarse otherwise, by construction.**
+        /// A civil reading is a DATE and a TIME OF DAY, and under compression those are two
+        /// quantities running at different rates: with the default 24, a given time of day only
+        /// ever falls on one date in 24, so most (date, time) pairs are instants the clock never
+        /// passes through. This lands on the nearest one it does pass through and `Standard()`
+        /// then says where that is, rather than pretending the request was honoured.
         void SetStandard(const CivilTime& time) noexcept;
+
+        /// @brief The clock set to @p calendarDays past the epoch, EXACTLY.
+        ///
+        /// One quantity in and one quantity set, so there is nothing to round: `CalendarDays()`
+        /// reads back the number given. **The time of day falls out of it** and is not a second
+        /// input, because under §35.2b's compression the two are not independent -- a calendar
+        /// position IS a moment in a simulated day. This is what `time set` wants when it is asked
+        /// for a season rather than for a date, and what `SetStandard` cannot promise.
+        void SetCalendar(double calendarDays) noexcept;
     };
 
     /// @brief Days from 1970-01-01 to @p year-@p month-@p day, proleptic Gregorian.

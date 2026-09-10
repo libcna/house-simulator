@@ -27,9 +27,17 @@ namespace
     using cnahouse::environment::NthWeekdayOfMonth;
     using cnahouse::environment::SimClock;
 
+    /// A clock at a given date, with §35.2b's compression OFF.
+    ///
+    /// Every claim in this file is about the CALENDAR -- what date a number of seconds is, when
+    /// daylight saving turns over, whether the line is monotone -- and `HOUSE-01542` made the date
+    /// run 24 times faster than the clock face by default. 1.0 is §35.2b's own
+    /// *"realistic-calendar debug run"*, and setting it here is what keeps these tests about the
+    /// thing they were written about. `CompressedYearTests` is where the default is tested.
     SimClock At(int year, int month, int day, int hour = 0, int minute = 0, int second = 0)
     {
         SimClock clock;
+        clock.calendarDaysPerSimDay = 1.0;
         CivilTime time;
         time.year = year;
         time.month = month;
@@ -45,6 +53,8 @@ namespace
 
 TEST(SimClockTests, TheEpochIsMidnightOnTheFirstOf2031)
 {
+    // At the epoch itself the compression has nothing to compress -- zero times anything is zero
+    // -- so this one reads the same whatever `calendarDaysPerSimDay` is.
     const SimClock clock;
     EXPECT_DOUBLE_EQ(clock.epochSeconds, 0.0);
     const CivilTime start = clock.Standard();
@@ -73,6 +83,9 @@ TEST(SimClockTests, OneRealSecondIsExactlyOneSimulatedMinute)
     SimClock day;
     day.Advance(24.0 * 60.0);
     EXPECT_DOUBLE_EQ(day.epochSeconds, 86400.0);
+    EXPECT_EQ(day.SimDayIndex(), 1) << "the sun did not come up once in 24 real minutes";
+    // ...and with §35.2b's compression off, one simulated day is one calendar day.
+    day.calendarDaysPerSimDay = 1.0;
     EXPECT_EQ(day.Standard().day, 2);
 }
 
@@ -202,6 +215,7 @@ TEST(SimClockTests, SecondsOfDayAndDayIndexAgreeWithTheCalendar)
     // Before the epoch the arithmetic is a FLOOR and not a truncation: -1 s is the last second of
     // 2030-12-31, not the first of 2031-01-01 counted backwards.
     SimClock before;
+    before.calendarDaysPerSimDay = 1.0;
     before.epochSeconds = -1.0;
     EXPECT_EQ(before.DayIndex(), -1);
     EXPECT_DOUBLE_EQ(before.SecondsOfDay(), 86399.0);

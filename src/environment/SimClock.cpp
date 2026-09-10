@@ -2,6 +2,7 @@
 #include "cnahouse/environment/SimClock.hpp"
 
 #include <cmath>
+#include <initializer_list>
 
 namespace cnahouse::environment
 {
@@ -129,19 +130,40 @@ namespace cnahouse::environment
         epochSeconds += realSeconds * timeScale;
     }
 
+    double SimClock::CalendarDays() const noexcept
+    {
+        // Continuous, because §36.3 requires it: a season boundary is crossed every 91 real
+        // minutes and a phase that stepped would read as a glitch. A non-finite or non-positive
+        // rate would take the calendar with it, so the field is treated as 1.0 there -- a clock
+        // that refuses a bad setting is better than one that becomes NaN because of it.
+        const double rate = (std::isfinite(calendarDaysPerSimDay) && calendarDaysPerSimDay > 0.0)
+                                ? calendarDaysPerSimDay
+                                : 1.0;
+        return epochSeconds / kSecondsPerDay * rate;
+    }
+
+    double SimClock::CivilEpochSeconds() const noexcept
+    {
+        // The compressed DATE's midnight plus the diurnal time of day. At a rate of 1.0 the two
+        // terms are `floor(t/86400)*86400` and `t - floor(t/86400)*86400`, which is `t`.
+        return std::floor(CalendarDays()) * kSecondsPerDay + SecondsOfDay();
+    }
+
     CivilTime SimClock::Standard() const noexcept
     {
-        return FromEpochSeconds(epochSeconds);
+        return FromEpochSeconds(CivilEpochSeconds());
     }
 
     CivilTime SimClock::Wall() const noexcept
     {
-        return FromEpochSeconds(epochSeconds + (IsDaylightSaving() ? 3600.0 : 0.0));
+        return FromEpochSeconds(CivilEpochSeconds() + (IsDaylightSaving() ? 3600.0 : 0.0));
     }
 
     bool SimClock::IsDaylightSaving() const noexcept
     {
-        return dstRulesUS && DaylightSavingAt(epochSeconds);
+        // Asked of the CIVIL instant, not of `epochSeconds`: under compression the rule turns over
+        // 24 times as often in real time, and it is the date on the calendar that decides.
+        return dstRulesUS && DaylightSavingAt(CivilEpochSeconds());
     }
 
     int SimClock::EffectiveUtcOffsetMinutes() const noexcept
@@ -157,12 +179,47 @@ namespace cnahouse::environment
 
     std::int64_t SimClock::DayIndex() const noexcept
     {
+        return static_cast<std::int64_t>(std::floor(CalendarDays()));
+    }
+
+    std::int64_t SimClock::SimDayIndex() const noexcept
+    {
         return FloorDiv(FloorSeconds(epochSeconds), 86400);
+    }
+
+    void SimClock::SetCalendar(double calendarDays) noexcept
+    {
+        const double rate = (std::isfinite(calendarDaysPerSimDay) && calendarDaysPerSimDay > 0.0)
+                                ? calendarDaysPerSimDay
+                                : 1.0;
+        epochSeconds = calendarDays / rate * kSecondsPerDay;
     }
 
     void SimClock::SetStandard(const CivilTime& time) noexcept
     {
-        epochSeconds = EpochSecondsFor(time);
+        const double target = EpochSecondsFor(time);
+        const double day = std::floor(target / kSecondsPerDay);
+        const double secondsOfDay = target - day * kSecondsPerDay;
+        const double rate = (std::isfinite(calendarDaysPerSimDay) && calendarDaysPerSimDay > 0.0)
+                                ? calendarDaysPerSimDay
+                                : 1.0;
+        // The time of day is the half that is always honoured, so the clock is placed on a whole
+        // simulated day plus `secondsOfDay`. Which simulated day is the question: the time of day
+        // carries its OWN share of the calendar with it -- at a rate of 24, being at 08:20 is
+        // already 8.3 calendar days into the simulated day -- so the naive `day / rate` is out by
+        // most of a day most of the time.
+        //
+        // Landing on `day` means `floor(n * rate + carried) == day`, so `n` is in
+        // `[(day - carried) / rate, (day + 1 - carried) / rate)`. The smallest integer at or above
+        // the lower bound is the candidate; the one below it is the only other one worth trying,
+        // and at a rate of 1.0 the first is always exact.
+        const double carried = secondsOfDay / kSecondsPerDay * rate;
+        const double lower = (day - carried) / rate;
+        const double above = std::ceil(lower - 1e-9);
+        const double reached = std::floor(above * rate + carried);
+        const double under = std::floor((above - 1.0) * rate + carried);
+        const double simDay = std::abs(under - day) < std::abs(reached - day) ? above - 1.0 : above;
+        epochSeconds = simDay * kSecondsPerDay + secondsOfDay;
     }
 
 } // namespace cnahouse::environment

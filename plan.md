@@ -13271,9 +13271,52 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             negative delta reaching the frame, the clock fed the clamped delta, and -- with
             `SimClockTests` in the filter, where that claim lives -- the guard against an infinite
             delta removed.
-- [ ] HOUSE-01542 — Implement the compressed year of `cna-house.md` §35.2b: `SimClock::calendarDaysPerSimDay` (default 24.0), so one simulated day advances the calendar by 24 days and a year takes 365 real minutes
+- [x] HOUSE-01542 — Implement the compressed year of `cna-house.md` §35.2b: `SimClock::calendarDaysPerSimDay` (default 24.0), so one simulated day advances the calendar by 24 days and a year takes 365 real minutes
       dep: HOUSE-01532 · sys: environment · plat: ALL · pri: MUST
       files: src/environment/SimClock.cpp|hpp
+      verify: unit `CompressedYearTests.*`
+      note: (2026-09-10) **`epochSeconds` is the DIURNAL clock and nothing else**, and that is the
+            decision the field forces. The sun's hour angle, the face of a wall clock and
+            `SecondsOfDay` all read it directly; the DATE is derived through
+            `calendarDaysPerSimDay` and therefore runs 24 times faster. `CivilEpochSeconds` is
+            where the two are put back together into one civil instant, and it is what the
+            daylight-saving rule and `Standard()` are asked of -- the rule turns over 24 times as
+            often in real time and it is the date on the calendar that decides.
+      finding: **a date and a time of day stop being independent, and `SetStandard` cannot pretend
+            otherwise.** A given time of day only falls on one date in 24, so most (date, time)
+            pairs are instants the clock never passes through. `SetCalendar` therefore takes ONE
+            continuous calendar position and is exact -- one quantity in, one quantity set, with
+            the time of day falling out of it -- and is what a season, a solar declination or a
+            `time set` asking for midwinter wants. `SetStandard` keeps taking a civil time, lands
+            on the nearest instant the clock does pass through, and lets `Standard()` say where
+            that is rather than reporting the request back.
+      measured: 365 real minutes of play, advanced a real minute at a time, ends on
+            **1 January 2032** having seen **15 sunrises** -- §35.2b's 15.208333 simulated days a
+            year. Twelve real minutes is noon on the 13th: half a simulated day is half a day on
+            the clock face and twelve days on the calendar, which is the decoupling in one
+            reading. Over 672 `SetStandard` requests the worst landed **12 calendar days** out,
+            which is half of `calendarDaysPerSimDay` and the most the nearer of two candidates a
+            rate apart can ever be.
+      finding: **the calendar advances continuously**, because §36.3 requires it in terms: a season
+            boundary is crossed every 91 real minutes and a phase that stepped at simulated
+            midnight would read as a glitch. Measured over one simulated day of play, the date
+            advances one day at a time through all 24 of them, with no step larger than 0.02 days.
+      note: **the existing calendar tests now say `calendarDaysPerSimDay = 1.0` out loud.**
+            `SimClockTests` and `ClockTests` are about what date a number of seconds is, and the
+            default made the date run 24 times faster than the clock face; 1.0 is §35.2b's own
+            *"realistic-calendar debug run"*, so setting it is what keeps those tests about the
+            thing they were written about rather than a silent weakening of either.
+      verified: 8 `CompressedYearTests` plus the 29 clock tests that came before. Ten injected
+            bugs, all caught: the compression dropped so a year takes 146 real hours, the calendar
+            stepping at midnight instead of running continuously, the civil instant losing its time
+            of day, the daylight-saving rule asked of the diurnal clock, a NaN rate taken at face
+            value, `SetCalendar` multiplying by the rate instead of dividing, `SetStandard`
+            ignoring the time of day's own calendar share, `SetStandard` never considering the
+            simulated day below, `DayIndex` answering with the simulated day, and the default
+            itself moved to 1.0.
+      note: two of those needed the 672-request sweep before they were caught. A single
+            (date, time) request only ever exercises one side of the halfway mark where the two
+            candidates swap places, so it passed a search that never looked at the day below.
       accept: (1) at `timeScale = 60` and the default compression, 365 real minutes advance the
               calendar by exactly one year; (2) the solar hour angle still completes one turn per
               24 real minutes while the declination completes one turn per 365 real minutes;

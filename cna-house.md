@@ -3565,6 +3565,20 @@ constant:
 `SimClock` gains one field, `calendarDaysPerSimDay` (default 24.0), so the compression is
 configurable and can be set to 1.0 for a realistic-calendar debug run.
 
+**A date and a time of day stop being independent** (`HOUSE-01542`). `epochSeconds` is the diurnal
+clock and the date is derived from it, so a given time of day only ever falls on one date in 24:
+most (date, time) pairs are instants the clock never passes through. `SimClock::SetCalendar` takes
+a single continuous calendar position and is therefore exact — it is what a season, a solar
+declination or a `time set` asking for "midwinter" wants — while `SetStandard`, which takes a civil
+date and time, lands on the nearest instant the clock does pass through and lets `Standard()` say
+where that is. Measured over 672 requests at the default rate, the worst landed **12 calendar days**
+from the date asked for, which is half of `calendarDaysPerSimDay` and the most the nearest of two
+candidates a rate apart can ever be. At 1.0 every request is exact.
+
+The calendar advances **continuously** and not in a jump at simulated midnight, because §36.3
+requires it: a season boundary crossed every 91 real minutes would read as a glitch if the phase
+stepped. One simulated day of play therefore passes through all 24 of its calendar days in turn.
+
 ### 35.3 What the cycle drives
 
 Sun and moon position and colour; sky dome colours and cloud tint; star visibility; outdoor
