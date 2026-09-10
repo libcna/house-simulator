@@ -11940,8 +11940,45 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             the tool -- a lamp standing in the carriageway and a span starting 2 m off its pole.
 - [ ] HOUSE-00847 — Place the 3 parked neighbour cars and the delivery van
       dep: HOUSE-00293 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00848 — Generate the distant tree line, the ridge and the water tower on the horizon ring
+- [x] HOUSE-00848 — Generate the distant tree line, the ridge and the water tower on the horizon ring
       dep: HOUSE-00845 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/neighbourhood_gen.py --selftest`
+      finding: **the far background needs a ring of its OWN, not more cards on `HOUSE-00391`'s.**
+            §11.4 asks for the impostors "on a ring at 120-260 m" and the far background "on the
+            horizon ring", which is a different sentence about a different distance:
+            `MODEL_HORIZON_*` stands at **360 m**, beyond the impostors' 266 m and inside §10.3's
+            420 m far plane, so the two rings occlude in the order a landscape does. Asserted both
+            ways against the layout's own numbers rather than written down as constants.
+      finding: **a ring of cards is a scalloped horizon unless two numbers agree.** Twenty-four
+            cards of 15° each span a chord of 93.98 m at 360 m, so a card is **96.00 m** wide and
+            neighbours OVERLAP; and every kind's profile starts and ends at **+6.00**, so one card
+            meets the next without a step. Either alone leaves a visible seam -- a gap of sky, or a
+            notch -- and both are claims.
+      finding: three kinds, because two alternating is a repeat with a longer stride. `RIDGE` is
+            §11.4's own phrase made geometry -- a hill with the **tree line on its skyline**, drawn
+            in a second material so it reads as trees -- `SPUR` is bare pasture at a different
+            height with its crest on the other side, and `WOODS` is trees on flat ground. The
+            claim that keeps them three things rather than one shape drawn three times counts
+            **local maxima**: a wood is bumpy (4) and a hill is one crest (1).
+      finding: the ring is walked by `(i + i/4) mod 3` -- `R S W R W R S W S W R S` twice round --
+            which puts eight of each kind on the horizon with no two of the same land side by
+            side, **the wrap from the last card to the first included**. It repeats after half the
+            ring, which is 180° away and never in the same view at §44's ~100° horizontal.
+      finding: the water tower is a **card too**, and it stands 12 m INSIDE the skyline rather than
+            on it: at 360 m a leg is 0.08° wide, so what reaches the player is the outline, and a
+            tower drawn behind the ridge would be a tank with no legs under it. It is placed at
+            22.5°, between two cards rather than in front of one, and reaches 34.5 m against the
+            tallest land's 22.0 -- 5.4° of skyline, which is a landmark you can point at.
+      measured: (2026-09-10) 4 assets and **439 triangles over 25 placed instances**: a ridge 21
+            (16 of landscape and 5 crowns), a spur 16, a wood 16 and the tower 15. The whole
+            neighbourhood -- 122 rows, 34 assets, houses, impostors, street furniture and now the
+            horizon -- comes to **5 191 triangles**. 165 selftest claims, up from 145.
+      verified: 10 injections, all CAUGHT -- a kind whose profile ends at a different height (the
+            skyline steps), cards narrowed until sky shows between them, two kinds given the same
+            crest, the ridge stripped of its trees, a wood reshaped into a single-crest hill, and
+            -- injected into the LAYOUT -- a card off the ring, two of the same land side by side,
+            a card turned to face outward, the tower moved behind the skyline, and the tower moved
+            in front of a card.
 - [ ] HOUSE-00849 — Implement the neighbourhood window-glow cards for night (emissive quads behind the window openings)
       dep: HOUSE-00842 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00850 — Implement the neighbour porch lights and street lights on the dusk sensor with per-fixture offsets

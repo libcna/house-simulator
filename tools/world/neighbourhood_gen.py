@@ -426,6 +426,130 @@ def impostor_faces(kind: str = "GABLE") -> list:
     return faces
 
 
+# ================================================================================ the horizon
+
+#: §11.4's far background -- "a low tree-line ridge and a distant water tower on the horizon ring"
+#: -- which is a ring of its own, OUTSIDE `HOUSE-00391`'s 114-266 m impostors and inside §10.3's
+#: 420 m far plane. 360 m is far enough that nothing on it has parallax over the 70 m the player
+#: can walk, and near enough that §33's fog still has something to fade (`HOUSE-00848`).
+HORIZON_RADIUS = 360.0
+#: Twenty-four cards round the circle, 15 degrees each. The chord of 15 degrees at 360 m is
+#: 93.96 m and a card is `HORIZON_WIDTH` wide, so neighbours OVERLAP rather than leaving a gap:
+#: a horizon with 24 slots of sky in it is not a horizon.
+HORIZON_SEGMENTS = 24
+HORIZON_WIDTH = 96.0
+#: Every kind starts and ends at this height, so one card meets the next without a step. The
+#: profile between the ends is what makes them different landscapes.
+HORIZON_EDGE = 6.0
+
+HORIZON_PREFIX = "MODEL_HORIZON_"
+#: What the ring is made of. Three, because two kinds alternating IS a repeat, just a slower one.
+HORIZON_KINDS = ("RIDGE", "SPUR", "WOODS")
+#: The profile of each kind, sampled evenly across the card. §11.4 asks for a LOW ridge: 22 m at
+#: 360 m is 3.5 degrees, which is a hill on the skyline rather than a mountain behind the house.
+HORIZON_PROFILES = {
+    "RIDGE": (6.0, 12.0, 18.5, 22.0, 20.5, 17.0, 13.0, 9.0, 6.0),
+    "SPUR": (6.0, 7.5, 9.5, 11.5, 13.5, 14.5, 12.5, 9.0, 6.0),
+    "WOODS": (6.0, 13.5, 9.0, 15.0, 10.5, 14.0, 9.5, 12.5, 6.0),
+}
+#: How tall the trees on the ridge are, and how many. §11.4's phrase is "tree-line ridge", so the
+#: RIDGE carries them; the SPUR is bare pasture and the WOODS are trees on flat ground, which is
+#: the difference between the three things you see on a horizon.
+HORIZON_CROWN = 3.2
+HORIZON_CROWNS = 5
+
+WATER_TOWER_ASSET = "MODEL_WATER_TOWER"
+#: §11.4's water tower, as a silhouette: the tank sits on `TOWER_LEGS` metres of leg and the whole
+#: thing is `TOWER_TOP` tall. At 360 m that is 5.4 degrees -- a landmark you can point at, which is
+#: what a water tower on a horizon is for.
+TOWER_LEGS = 22.0
+TOWER_TANK = 31.0
+TOWER_TOP = 34.5
+TOWER_HALF = 3.6
+
+
+def horizon_of(asset: str) -> str:
+    """The kind in `MODEL_HORIZON_<KIND>`, refused if it is not one of `HORIZON_KINDS`."""
+    if not asset.startswith(HORIZON_PREFIX):
+        raise layout_io.LayoutError(f"{asset!r} is not a horizon card")
+    kind = asset[len(HORIZON_PREFIX):]
+    if kind not in HORIZON_KINDS:
+        raise layout_io.LayoutError(
+            f"horizon kind {kind!r} is not one of {list(HORIZON_KINDS)}")
+    return kind
+
+
+def horizon_faces(kind: str) -> list:
+    """One segment of §11.4's horizon: a strip of landscape standing on the ring.
+
+    A vertical strip rather than a quad with a roof cut into it, because a ridge is a CURVE and the
+    thing that reads at 360 m is its line against the sky. Eight quads carry that; the impostor
+    cards nearer in (`HOUSE-00845`) carry three to five triangles because a roof is straight.
+    """
+    if kind not in HORIZON_KINDS:
+        raise layout_io.LayoutError(
+            f"horizon kind {kind!r} is not one of {list(HORIZON_KINDS)}")
+    profile = HORIZON_PROFILES[kind]
+    front = (0.0, 0.0, 1.0)
+    half = HORIZON_WIDTH / 2.0
+    steps = len(profile) - 1
+    # A wood is trees and a ridge is ground: the material says which, so the blockout reads as two
+    # kinds of landscape rather than one shape drawn twice.
+    ground = "NB_HORIZON_TREES" if kind == "WOODS" else "NB_HORIZON"
+    faces = []
+    for index in range(steps):
+        u0 = -half + HORIZON_WIDTH * index / steps
+        u1 = -half + HORIZON_WIDTH * (index + 1) / steps
+        faces.append(([(u0, 0.0, 0.0), (u1, 0.0, 0.0), (u1, profile[index + 1], 0.0),
+                       (u0, profile[index], 0.0)], front, ground))
+    if kind == "RIDGE":
+        # §11.4's "tree-line ridge": the trees are ON it, standing along the skyline rather than
+        # beside it. Crowns only -- at 360 m a trunk is a tenth of a pixel.
+        for index in range(HORIZON_CROWNS):
+            at = -half + HORIZON_WIDTH * (index + 1.0) / (HORIZON_CROWNS + 1.0)
+            base = _profile_at(profile, at, half)
+            width = HORIZON_WIDTH / (HORIZON_CROWNS * 3.0)
+            faces.append(([(at - width, base - 0.5, 0.0), (at + width, base - 0.5, 0.0),
+                           (at, base + HORIZON_CROWN, 0.0)], front, "NB_HORIZON_TREES"))
+    return faces
+
+
+def _profile_at(profile, at: float, half: float) -> float:
+    """The profile's height @p at metres from the card's centre, linearly between samples."""
+    steps = len(profile) - 1
+    unit = (at + half) / (2.0 * half) * steps
+    low = max(0, min(steps - 1, int(unit)))
+    return profile[low] + (profile[low + 1] - profile[low]) * (unit - low)
+
+
+def water_tower_faces() -> list:
+    """§11.4's water tower, as a card: legs, bracing, tank and a conical top.
+
+    A card and not a solid, for the same reason the ring is cards: at 360 m a leg is 0.08 degrees
+    wide and the whole of the thing that reaches the player is its outline against the sky.
+    """
+    front = (0.0, 0.0, 1.0)
+    material = "NB_HORIZON_TOWER"
+    faces = []
+    for side in (-1.0, 1.0):
+        # The legs splay, which is what stops a water tower reading as a chimney.
+        foot, top = side * (TOWER_HALF + 1.5), side * (TOWER_HALF - 0.6)
+        for offset in (0.0, side * 1.9):
+            faces.append(([(foot + offset, 0.0, 0.0), (foot + offset + side * 0.45, 0.0, 0.0),
+                           (top + offset + side * 0.45, TOWER_LEGS, 0.0),
+                           (top + offset, TOWER_LEGS, 0.0)], front, material))
+    for height in (TOWER_LEGS * 0.38, TOWER_LEGS * 0.72):
+        span = TOWER_HALF + 1.5 - (1.5 + 0.6) * height / TOWER_LEGS
+        faces.append(([(-span, height, 0.0), (span, height, 0.0),
+                       (span, height + 0.35, 0.0), (-span, height + 0.35, 0.0)], front, material))
+    faces.append(([(-TOWER_HALF, TOWER_LEGS, 0.0), (TOWER_HALF, TOWER_LEGS, 0.0),
+                   (TOWER_HALF, TOWER_TANK, 0.0), (-TOWER_HALF, TOWER_TANK, 0.0)], front,
+                  material))
+    faces.append(([(-TOWER_HALF, TOWER_TANK, 0.0), (TOWER_HALF, TOWER_TANK, 0.0),
+                   (0.0, TOWER_TOP, 0.0)], front, material))
+    return faces
+
+
 # ============================================================================= street furniture
 
 #: Where §11.4's nine street lanterns HANG: `layout.lights.json`'s own `LIGHT_EXT_STREET_1`…`_9`,
@@ -701,7 +825,8 @@ def is_ours(asset: str) -> bool:
     the test is used both to pick what to build and to decide what a stale file in the output
     directory is, so a file another tool wrote is never swept away by this one.
     """
-    return asset.startswith((HOUSE_PREFIX, IMPOSTOR_PREFIX)) or asset in FURNITURE_KINDS
+    return (asset.startswith((HOUSE_PREFIX, IMPOSTOR_PREFIX, HORIZON_PREFIX))
+            or asset in FURNITURE_KINDS or asset == WATER_TOWER_ASSET)
 
 
 def wanted_assets(directory: Path) -> list[str]:
@@ -721,6 +846,12 @@ def build(directory: Path) -> dict:
             continue
         if asset in FURNITURE_KINDS:
             out[asset] = furniture_faces(asset)
+            continue
+        if asset.startswith(HORIZON_PREFIX):
+            out[asset] = horizon_faces(horizon_of(asset))
+            continue
+        if asset == WATER_TOWER_ASSET:
+            out[asset] = water_tower_faces()
             continue
         house, detailed = house_of(asset)
         out[asset] = house_faces(house, detailed)
@@ -1124,6 +1255,93 @@ def selftest() -> int:
         except layout_io.LayoutError:
             caught = True
         require(caught, "an asset this grammar does not know is refused, not built as a box")
+
+        # 10. `HOUSE-00848`'s far background: §11.4's "low tree-line ridge and a distant water
+        #     tower on the horizon ring", which is a ring of its own beyond the impostors.
+        for bad in ("MODEL_HORIZON_ALPS", "MODEL_HORIZON_", "MODEL_NB_IMPOSTOR_GABLE"):
+            try:
+                horizon_of(bad)
+                caught = False
+            except layout_io.LayoutError:
+                caught = True
+            require(caught, f"{bad} is refused as a horizon id, not drawn as some default land")
+        edges = {kind: (HORIZON_PROFILES[kind][0], HORIZON_PROFILES[kind][-1])
+                 for kind in HORIZON_KINDS}
+        require(all(low == HORIZON_EDGE and high == HORIZON_EDGE
+                    for low, high in edges.values()),
+                f"every kind starts and ends at {HORIZON_EDGE:.2f} m, so one card meets the next "
+                f"without a step in the skyline ({edges})")
+        chord = 2.0 * HORIZON_RADIUS * math.sin(math.pi / HORIZON_SEGMENTS)
+        require(HORIZON_WIDTH > chord,
+                f"a card ({HORIZON_WIDTH:.2f} m) is wider than the chord it spans ({chord:.2f} m), "
+                f"so neighbours overlap rather than leaving sky between them")
+        crests = {kind: max(HORIZON_PROFILES[kind]) for kind in HORIZON_KINDS}
+        require(len(set(crests.values())) == len(HORIZON_KINDS),
+                f"no two kinds reach the same height ({crests})")
+
+        def humps(profile) -> int:
+            return sum(1 for index in range(1, len(profile) - 1)
+                       if profile[index] > profile[index - 1] and profile[index] > profile[index + 1])
+
+        shape = {kind: humps(HORIZON_PROFILES[kind]) for kind in HORIZON_KINDS}
+        require(shape["WOODS"] > shape["RIDGE"] and shape["WOODS"] > shape["SPUR"],
+                f"a wood is a bumpy line and a hill is one crest, which is what makes them two "
+                f"kinds and not one drawn twice ({shape})")
+        materials = {kind: sorted({material for _c, _n, material in horizon_faces(kind)})
+                     for kind in HORIZON_KINDS}
+        require(materials["RIDGE"] == ["NB_HORIZON", "NB_HORIZON_TREES"],
+                f"§11.4's ridge carries its TREE LINE ({materials['RIDGE']})")
+        require(materials["SPUR"] == ["NB_HORIZON"] and materials["WOODS"] == ["NB_HORIZON_TREES"],
+                f"the spur is bare and the wood is all trees ({materials})")
+
+        # ...and the ring the layout puts them on.
+        ring = [(row["id"], row["position"][0], row["position"][2], str(row["asset"]),
+                 float(row.get("yawDeg", 0.0)))
+                for row in rows if str(row.get("asset", "")).startswith(HORIZON_PREFIX)]
+        require(len(ring) == HORIZON_SEGMENTS,
+                f"§11.4's horizon is {HORIZON_SEGMENTS} cards ({len(ring)})")
+        radii = [math.hypot(x, z) for _id, x, z, _a, _y in ring]
+        require(all(abs(radius - HORIZON_RADIUS) < 0.02 for radius in radii),
+                f"all of them on one ring at {HORIZON_RADIUS:.0f} m "
+                f"({min(radii):.2f}-{max(radii):.2f})")
+        impostor_radius = max(math.hypot(row["position"][0], row["position"][2]) for row in rows
+                              if str(row.get("asset", "")).startswith(IMPOSTOR_PREFIX))
+        require(min(radii) > impostor_radius,
+                f"beyond `HOUSE-00391`'s impostors, which reach {impostor_radius:.0f} m")
+        require(max(radii) < 420.0,
+                f"and inside §10.3's 420 m far plane ({max(radii):.0f} m)")
+        facing = [(name, round((math.degrees(math.atan2(x, z)) + 180.0) % 360.0 - yaw % 360.0, 3))
+                  for name, x, z, _a, yaw in ring]
+        require(all(abs(error) < 0.05 for _n, error in facing),
+                f"every card faces the origin ({[f for f in facing if abs(f[1]) >= 0.05]})")
+        order = [asset for _id, _x, _z, asset, _y in
+                 sorted(ring, key=lambda r: math.degrees(math.atan2(r[1], r[2])) % 360.0)]
+        adjacent = [(a, b) for a, b in zip(order, order[1:] + order[:1]) if a == b]
+        require(not adjacent,
+                f"no two next to each other on the ring are the same land, the wrap included "
+                f"({adjacent})")
+        counts = {kind: order.count(HORIZON_PREFIX + kind) for kind in HORIZON_KINDS}
+        require(set(counts.values()) == {HORIZON_SEGMENTS // len(HORIZON_KINDS)},
+                f"and each kind carries an equal share of the horizon ({counts})")
+
+        towers = [row for row in rows if str(row.get("asset", "")) == WATER_TOWER_ASSET]
+        require(len(towers) == 1, f"§11.4's ONE water tower ({len(towers)})")
+        if towers:
+            tower_radius = math.hypot(towers[0]["position"][0], towers[0]["position"][2])
+            require(tower_radius < min(radii),
+                    f"standing inside the skyline at {tower_radius:.0f} m, so its legs read "
+                    f"against the sky and not against a hillside")
+            top = max(point[1] for corners, _n, _m in water_tower_faces() for point in corners)
+            require(top > max(crests.values()),
+                    f"and over the top of it: {top:.1f} m against the tallest land at "
+                    f"{max(crests.values()):.1f} m -- a landmark you can point at")
+            bearing = math.degrees(math.atan2(towers[0]["position"][0],
+                                              towers[0]["position"][2])) % 360.0
+            gap = min(abs(((bearing - math.degrees(math.atan2(x, z))) + 180.0) % 360.0 - 180.0)
+                      for _id, x, z, _a, _y in ring)
+            require(gap > 360.0 / HORIZON_SEGMENTS / 4.0,
+                    f"and between two cards rather than in front of one ({gap:.1f} degrees off "
+                    f"the nearest card's centre)")
 
         document, blob = _document(houses[0], built[houses[0]])
         require(len(document["meshes"][0]["primitives"]) == len(document["materials"]),

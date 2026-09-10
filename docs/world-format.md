@@ -533,6 +533,16 @@ near it: the lamp columns stand on the pole line at Z +0.80 and reach the lights
 0.70 m outreach arm. A light and its lamp 1.6 m apart is the kind of thing only a screenshot ever
 finds.
 
+`HOUSE-00848` adds §11.4's **far background** to the same array: `MODEL_HORIZON_RIDGE`, `_SPUR` and
+`_WOODS` on a ring of their own at 360 m — outside `HOUSE-00391`'s 114–266 m impostors and inside
+§10.3's 420 m far plane — plus one `MODEL_WATER_TOWER`. Twenty-four cards of 15° each, and two
+numbers make the skyline continuous rather than scalloped: a card is 96.00 m wide against a chord
+of 93.98 m, so neighbours overlap, and every kind's profile starts and ends at +6.00, so one card
+meets the next without a step. The kinds are three landscapes and not one shape drawn three times —
+the ridge carries §11.4's tree line on its skyline, the spur is bare, the wood is trees on flat
+ground — and they are walked round the ring by `(i + i/4) mod 3`, which puts eight of each on it
+with no two of the same land side by side, the wrap from the last card to the first included.
+
 `HOUSE-00776` added a fifth: `downspouts`, one row per pipe with `position` (the head, at the
 gutter) and `splash` (where the water lands, on §11.5's height field under it). §37.3's splash
 particles and §37.4's `Apply3D` trickle emitter both need that point and neither can read a Blender

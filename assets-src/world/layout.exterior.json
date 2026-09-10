@@ -266,6 +266,72 @@
     { "id": "NB_IMPOSTOR_N60", "asset": "MODEL_NB_IMPOSTOR_TREELINE", "position": [-20.84, 0.00, 124.88],
       "yawDeg": 170.0, "lodGroup": "LODG_NB_IMPOSTOR", "impostorFrom": 0.0 },
 
+    // ---- §11.4's far background (`HOUSE-00848`): "a low tree-line ridge and a distant water
+    // tower on the horizon ring". A ring of its OWN, at 360 m -- outside `HOUSE-00391`'s
+    // 114-266 m impostors and inside §10.3's 420 m far plane -- in twenty-four cards of 15
+    // degrees each. The chord of 15 degrees at 360 m is 93.96 m and a card is 96.00 m wide, so
+    // neighbours overlap; every kind starts and ends at +6.00, so one card meets the next
+    // without a step and the skyline is continuous.
+    //
+    // Three kinds, walked by `(i + i/4) mod 3`: no two next to each other are the same land, the
+    // wrap from the last to the first included, and each appears eight times. The sequence
+    // repeats only after half the ring, which is 180 degrees away and never in the same view.
+    // RIDGE carries §11.4's tree line on its skyline; SPUR is bare pasture and WOODS is trees on
+    // flat ground, which is the difference between the three things a horizon is made of.
+    { "id": "HZ_01", "asset": "MODEL_HORIZON_RIDGE", "position": [0.00, 0.00, 360.00],
+      "yawDeg": 180.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_02", "asset": "MODEL_HORIZON_SPUR", "position": [93.17, 0.00, 347.73],
+      "yawDeg": 195.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_03", "asset": "MODEL_HORIZON_WOODS", "position": [180.00, 0.00, 311.77],
+      "yawDeg": 210.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_04", "asset": "MODEL_HORIZON_RIDGE", "position": [254.56, 0.00, 254.56],
+      "yawDeg": 225.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_05", "asset": "MODEL_HORIZON_WOODS", "position": [311.77, 0.00, 180.00],
+      "yawDeg": 240.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_06", "asset": "MODEL_HORIZON_RIDGE", "position": [347.73, 0.00, 93.17],
+      "yawDeg": 255.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_07", "asset": "MODEL_HORIZON_SPUR", "position": [360.00, 0.00, 0.00],
+      "yawDeg": 270.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_08", "asset": "MODEL_HORIZON_WOODS", "position": [347.73, 0.00, -93.17],
+      "yawDeg": 285.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_09", "asset": "MODEL_HORIZON_SPUR", "position": [311.77, 0.00, -180.00],
+      "yawDeg": 300.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_10", "asset": "MODEL_HORIZON_WOODS", "position": [254.56, 0.00, -254.56],
+      "yawDeg": 315.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_11", "asset": "MODEL_HORIZON_RIDGE", "position": [180.00, 0.00, -311.77],
+      "yawDeg": 330.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_12", "asset": "MODEL_HORIZON_SPUR", "position": [93.17, 0.00, -347.73],
+      "yawDeg": 345.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_13", "asset": "MODEL_HORIZON_RIDGE", "position": [0.00, 0.00, -360.00],
+      "yawDeg": 0.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_14", "asset": "MODEL_HORIZON_SPUR", "position": [-93.17, 0.00, -347.73],
+      "yawDeg": 15.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_15", "asset": "MODEL_HORIZON_WOODS", "position": [-180.00, 0.00, -311.77],
+      "yawDeg": 30.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_16", "asset": "MODEL_HORIZON_RIDGE", "position": [-254.56, 0.00, -254.56],
+      "yawDeg": 45.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_17", "asset": "MODEL_HORIZON_WOODS", "position": [-311.77, 0.00, -180.00],
+      "yawDeg": 60.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_18", "asset": "MODEL_HORIZON_RIDGE", "position": [-347.73, 0.00, -93.17],
+      "yawDeg": 75.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_19", "asset": "MODEL_HORIZON_SPUR", "position": [-360.00, 0.00, -0.00],
+      "yawDeg": 90.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_20", "asset": "MODEL_HORIZON_WOODS", "position": [-347.73, 0.00, 93.17],
+      "yawDeg": 105.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_21", "asset": "MODEL_HORIZON_SPUR", "position": [-311.77, 0.00, 180.00],
+      "yawDeg": 120.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_22", "asset": "MODEL_HORIZON_WOODS", "position": [-254.56, 0.00, 254.56],
+      "yawDeg": 135.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_23", "asset": "MODEL_HORIZON_RIDGE", "position": [-180.00, 0.00, 311.77],
+      "yawDeg": 150.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    { "id": "HZ_24", "asset": "MODEL_HORIZON_SPUR", "position": [-93.17, 0.00, 347.73],
+      "yawDeg": 165.0, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+    // The landmark. Twelve metres INSIDE the ring, so it stands in front of the skyline and its
+    // legs read against the sky rather than against a hillside; at 22.5 degrees it is between two
+    // cards rather than in front of one.
+    { "id": "HZ_WATER_TOWER", "asset": "MODEL_WATER_TOWER", "position": [133.17, 0.00, 321.51],
+      "yawDeg": 202.5, "lodGroup": "LODG_HORIZON", "impostorFrom": 0.0 },
+
     // ---- street furniture x33 -- 5 lamp-carrying utility poles, 4 catenary spans, 4 standalone
     // lamp columns, 5 signs, 12 mailboxes, 2 bin clusters and a basketball hoop; §11.4's four
     // vehicles are interleaved below and are `HOUSE-00847`'s. `HOUSE-00846` is the geometry for
