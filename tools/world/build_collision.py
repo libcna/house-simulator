@@ -1158,6 +1158,31 @@ CAR_SIZE = (1.8, 1.5, 4.4)
 CAR_ASSETS = ("MODEL_PARKED_CAR", "MODEL_DELIVERY_VAN")
 #: §10.4's van, which is bigger than a car: 5.4 m long, 2.10 m across and 2.40 m tall.
 VAN_SIZE = (2.1, 2.4, 5.4)
+#: §11.4's street furniture, and what a BODY meets of each: `(across, tall, along)` like the car.
+#: `HOUSE-00857`. `HOUSE-00846` drew all of it and this file took only the vehicles from the
+#: `neighbourhood` array, so sixteen solid objects inside §10.4's walkable +/-35 m had no collision
+#: at all -- `NB_POLE_03` stands 0.80 m outside §11.2's pedestrian gate, which is the first thing a
+#: player walks at on leaving the property, and they walked through it.
+#:
+#: This is the SOLID part and not the asset's bounding box, which is why it is written here rather
+#: than measured: a lamp's box reaches 1.76 m out to the lantern 8 m up, and a body colliding with
+#: that would stop 1.5 m short of a post it can see. The selftest checks each proxy FITS inside
+#: what `neighbourhood_gen.py` draws, so the two cannot drift apart in the direction that matters.
+FURNITURE_SIZE = {
+    "MODEL_STREET_LIGHT": (0.18, 8.18, 0.18),
+    "MODEL_UTILITY_POLE": (0.26, 10.50, 0.26),
+    "MODEL_UTILITY_POLE_LAMP": (0.26, 10.50, 0.26),
+    "MODEL_STREET_SIGN": (0.08, 2.30, 0.08),
+    "MODEL_MAILBOX": (0.20, 1.30, 0.48),
+    "MODEL_BIN_CLUSTER": (1.98, 1.11, 0.64),
+    "MODEL_BASKETBALL_HOOP": (0.16, 3.40, 0.16),
+}
+#: What is deliberately NOT in it. A catenary hangs 8.7 m up and a horizon card is 360 m away:
+#: neither is something a body can walk into, and a proxy for one is a shape in the file that
+#: nothing will ever sweep against. Named rather than left out silently, so a new asset that
+#: belongs in neither list fails the selftest instead of quietly becoming a ghost.
+FURNITURE_INTANGIBLE = ("MODEL_UTILITY_SPAN", "MODEL_HORIZON_RIDGE", "MODEL_HORIZON_SPUR",
+                        "MODEL_HORIZON_WOODS", "MODEL_WATER_TOWER")
 
 
 def open_air(cell: dict) -> bool:
@@ -1405,6 +1430,21 @@ def build_exterior(layout, shapes: Shapes, per_cell: dict[str, list[int]], stats
         place((x, base + size[1] / 2.0, z),
               (size[0] / 2.0, size[1] / 2.0, size[2] / 2.0),
               yaw, "vehicle", KIND_EXTERIOR, "vehicles")
+
+    # ...and §11.4's street furniture, which is the same rule applied to the rest of the array
+    # (`HOUSE-00857`). `place` drops anything no open cell can reach, so the poles 100 m down the
+    # road cost nothing and the one outside the gate is there.
+    for row in exterior.get("neighbourhood", []):
+        size = FURNITURE_SIZE.get(row.get("asset"))
+        if size is None:
+            continue
+        position = row.get("position") or [0.0, 0.0, 0.0]
+        x, z = float(position[0]), float(position[2])
+        yaw = math.radians(float(row.get("yawDeg") or 0.0))
+        base = ground(x, z)
+        place((x, base + size[1] / 2.0, z),
+              (size[0] / 2.0, size[1] / 2.0, size[2] / 2.0),
+              yaw, "furniture", KIND_EXTERIOR, "furniture")
 
 
 # ================================================================== what reaches through a hole
@@ -1802,7 +1842,7 @@ def build(world_dir: Path, manifest_path: Path | None = None) -> dict:
              "dormerFaces": 0, "dormersUnowned": 0, "guards": 0, "stairGuards": 0, "outerShared": 0,
              "openingShared": 0, "openBoundaries": 0, "clippedToRoof": 0, "clippedAway": 0,
              "fencePieces": 0, "kerbPieces": 0,
-             "structureObbs": 0, "trunks": 0, "vehicles": 0, "hedges": 0,
+             "structureObbs": 0, "trunks": 0, "vehicles": 0, "hedges": 0, "furniture": 0,
              "propObbs": 0, "propMeshes": 0, "propsSkipped": 0}
     shapes = Shapes()
     per_cell = build_shell(layout, shapes, stats, (world_dir / "terrain.png").is_file())
@@ -2109,7 +2149,8 @@ def report(world: dict) -> str:
         f"{OPENING_REACH:.2f} m past the plane -- a body in a doorway is in both rooms",
         f"  outdoors: {stats['fencePieces']} fence piece(s), {stats['kerbPieces']} kerb, "
         f"{stats['structureObbs']} garden structure(s), {stats['trunks']} tree trunk(s), "
-        f"{stats['hedges']} hedge section(s) and {stats['vehicles']} vehicle(s); "
+        f"{stats['hedges']} hedge section(s), {stats['vehicles']} vehicle(s) and "
+        f"{stats['furniture']} piece(s) of street furniture; "
         f"{stats['openBoundaries']} boundary between two open yards left as grass",
         f"  roof line: {stats['clippedToRoof']} wall(s) of an open cell cut back to the top of "
         f"what they are a wall of, {stats['clippedAway']} dropped entirely",
@@ -2927,7 +2968,7 @@ def selftest() -> int:
             }
             probe_shapes, probe_cells = Shapes(), {}
             probe_stats = {name: 0 for name in ("fencePieces", "kerbPieces", "structureObbs",
-                                                "trunks", "vehicles")}
+                                                "trunks", "vehicles", "furniture")}
             build_exterior(spanning, probe_shapes, probe_cells, probe_stats, workspace / "nowhere")
             require(probe_stats["fencePieces"] >= 8,
                     f"a 16 m run with a gate in it becomes at least eight pieces "
@@ -2966,6 +3007,57 @@ def selftest() -> int:
                     f"§11.4's parked cars are OBBs with the yaw the layout gives them "
                     f"({len(cars)} of them, yaws "
                     f"{sorted(round(math.degrees(record[2])) for record in cars)})")
+
+            # `HOUSE-00857`: §11.4's street furniture. The claim that matters is not the count --
+            # it is that the thing outside the gate is solid.
+            furniture = [house_shapes.obbs[index] for index in range(len(house_shapes.obbs))
+                         if house_shapes.obbs[index][4] == KIND_EXTERIOR
+                         and house_shapes.surfaces[house_shapes.obbs[index][3]] == "furniture"]
+            require(len(furniture) == house["stats"]["furniture"] and furniture,
+                    f"§11.4's street furniture is solid ({len(furniture)} piece(s))")
+            pole = [record for record in furniture
+                    if abs(record[0][0]) < 0.5 and abs(record[0][2] - 0.80) < 0.5]
+            require(len(pole) == 1,
+                    f"...including `NB_POLE_03`, which stands 0.80 m outside §11.2's pedestrian "
+                    f"gate and is the first thing a player walks at on leaving the property "
+                    f"({len(pole)} shape(s) there)")
+            require(pole and pole[0][1][1] * 2.0 > 3.0,
+                    f"and it is a POLE: {pole[0][1][1] * 2.0:.1f} m of it, not a kerb a body walks "
+                    f"over" if pole else "and it is a pole")
+            # Every proxy fits inside what the generator draws. The size table is the SOLID part
+            # and the asset's box is everything -- a lamp's reaches 1.76 m out to a lantern 8 m up
+            # -- so the test is containment and not equality, which is the direction that matters:
+            # collision may be smaller than the thing, never larger.
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            import neighbourhood_gen                                          # noqa: E402
+            oversized = []
+            for asset, (across, tall, along) in sorted(FURNITURE_SIZE.items()):
+                try:
+                    drawn = neighbourhood_gen.furniture_faces(asset)
+                except Exception:                                # pragma: no cover - a new asset
+                    continue
+                points = [point for corners, _n, _m in drawn for point in corners]
+                width = max(p[0] for p in points) - min(p[0] for p in points)
+                height = max(p[1] for p in points)
+                depth = max(p[2] for p in points) - min(p[2] for p in points)
+                if across > width + 1e-6 or tall > height + 1e-6 or along > depth + 1e-6:
+                    oversized.append((asset, (across, tall, along),
+                                      (round(width, 2), round(height, 2), round(depth, 2))))
+            require(not oversized,
+                    f"and no proxy is bigger than the thing it stands for ({oversized})")
+            # ...and every asset the street places is in one list or the other, so a new one is a
+            # failure here rather than a ghost the player walks through.
+            street = (layout_io.load_layout(authored, ["exterior"]).get("exterior")
+                      or {}).get("neighbourhood", [])
+            placed = {str(row.get("asset", "")) for row in street}
+            ours = {asset for asset in placed
+                    if asset.startswith(("MODEL_HORIZON_", "MODEL_UTILITY_", "MODEL_STREET_",
+                                         "MODEL_MAILBOX", "MODEL_BIN_", "MODEL_BASKETBALL_",
+                                         "MODEL_WATER_"))}
+            unclassified = sorted(ours - set(FURNITURE_SIZE) - set(FURNITURE_INTANGIBLE))
+            require(not unclassified,
+                    f"every piece of §11.4's furniture is either solid or deliberately not "
+                    f"({unclassified})")
 
             # §11.5's ground is the only floor the outdoors has (`HOUSE-00782`). A slab as well
             # would be a second answer to "how high is the ground here", and the two disagree

@@ -12021,9 +12021,24 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             card in the same plane as its frame, the card 0.25 m off the wall, the card overflowing
             its frame, and cards drawn at LOD1 as well).
 - [ ] HOUSE-00850 — Implement the neighbour porch lights and street lights on the dusk sensor with per-fixture offsets
-      dep: HOUSE-00849 · sys: lighting · plat: ALL · pri: MUST
+      dep: HOUSE-00849, HOUSE-01251, HOUSE-01531 · sys: lighting · plat: ALL · pri: MUST
+      note: (2026-09-10) **Two `dep`s added, no scope changed.** Reached in DAG order after
+            `HOUSE-00849` and found to have nothing to switch and nothing to sense: §28's light
+            groups are `HOUSE-01251`'s `LightingSystem` skeleton in phase 16, and §35's clock --
+            which is what a dusk SENSOR senses -- is `HOUSE-01531` in phase 22.
+            `include/cnahouse/lighting/` and `include/cnahouse/environment/` are both empty
+            directories today. The offset rule itself (§35.3's ±8 simulated minutes per fixture) is
+            a pure function and could be written now; a task that says "implement the lights on the
+            sensor" is not done while no light exists to be on it, and `HOUSE-00849`'s own
+            `WindowGlow` already shows the shape it will take.
 - [ ] HOUSE-00851 — Implement impostor rendering: yaw slice selection, sky tinting, vertical-axis billboarding for trees
-      dep: HOUSE-00845, HOUSE-00204, HOUSE-00856 · sys: rendering · plat: ALL · pri: MUST
+      dep: HOUSE-00845, HOUSE-00204, HOUSE-00856, HOUSE-00772 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-10) **One `dep` added, no scope changed.** "Vertical-axis billboarding for
+            trees" needs trees, and §11.6's are `HOUSE-00772`'s, which is itself blocked on
+            `HOUSE-00297`'s vegetation set. Two of this task's three parts are also waiting on
+            data rather than on code: `HOUSE-00204` built the atlas RENDERER and no atlas has been
+            baked for these cards -- `HOUSE-00845` drew them as geometric silhouettes and said so
+            -- so there are no yaw slices to select between yet.
 - [ ] HOUSE-00852 — Wire the neighbourhood into the exterior BVH with the correct LOD distances
       dep: HOUSE-00851, HOUSE-00678, HOUSE-00856 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-00853 — Measure the neighbourhood's draw-call and triangle cost from the road pose against budget
@@ -12090,19 +12105,39 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             the hand-built bytes ended just after the box, so a NaN that slipped the check failed
             at the truncation instead, with the same error code. The fixture is complete now and
             the claim names "bounding box" in the message.
-- [ ] HOUSE-00857 — Give the street furniture inside §10.4's accessible road a collision proxy
+- [x] HOUSE-00857 — Give the street furniture inside §10.4's accessible road a collision proxy
       dep: HOUSE-00846 · sys: collision · plat: TOOL · pri: MUST
+      verify: `tools/world/build_collision.py --selftest`
       note: (2026-09-10) **New task, next free id in phase 11's reserved 00841–00890 range.** Found
             by `HOUSE-00846`: `build_collision.py` takes exactly one thing from the
-            `neighbourhood` array -- §49.2's vehicles, `CAR_ASSETS` -- so **16 solid objects
-            inside §10.4's walkable ±35 m have no collision at all**: 5 signs, 6 mailboxes, 2 lamp
-            columns, the utility pole at x 0.00 and 2 bin clusters. `NB_POLE_03` stands at
-            (0.00, 0.80), which is 0.80 m outside §11.2's pedestrian gate -- the first thing a
-            player walks at on leaving the property, and they walk through it.
-      note: recorded rather than fixed in the task that found it: a proxy for each of the six
-            shapes changes `collision.bin`, and `nav.bin` is built from `collision.bin` and takes
-            ~34 minutes. Whether the bins are solid at all is also a design question -- §11.4 puts
-            them out "only on the in-fiction collection day".
+            `neighbourhood` array -- §49.2's vehicles, `CAR_ASSETS` -- so `HOUSE-00846` drew nine
+            lamps, five poles, five signs, twelve mailboxes, two bin clusters and a hoop that
+            nobody could touch. `NB_POLE_03` stands at (0.00, 0.80), which is 0.80 m outside
+            §11.2's pedestrian gate -- the first thing a player walks at on leaving the property,
+            and they walked through it.
+      finding: **the proxy is the SOLID part, not the asset's box, and the test is containment
+            rather than equality.** A lamp's bounding box reaches 1.76 m out to its lantern 8 m up,
+            and a body colliding with that would stop 1.5 m short of a post it can see. So the
+            sizes are authored -- seven of them -- and the selftest checks each one FITS inside
+            what `neighbourhood_gen.py` draws for that asset, which is the direction that matters:
+            collision may be smaller than the thing and never larger. The bin cluster was 0.02 m
+            too deep on the first run and the claim said so by name.
+      finding: **what is deliberately intangible is named, not omitted.** A catenary 8.7 m up, a
+            horizon card 360 m away and the water tower are not things a body walks into, and a
+            proxy for one is a shape nothing will ever sweep against -- but leaving them out
+            silently makes a NEW asset a ghost. `FURNITURE_INTANGIBLE` lists them, and a claim
+            asserts every furniture asset the street places is in one list or the other.
+      finding: no `±35` rule was needed. `place` already drops a shape no open cell can reach --
+            it is what keeps 440 m of kerb and 34 street trees out of the file -- so every
+            furniture row is offered and **15 survive**, which is the ones a player can walk to.
+      measured: (2026-09-10) `collision.bin` 121 514 → 122 128 bytes for 15 OBBs. The tallest is
+            `NB_POLE_03` at 10.5 m; the widest a bin cluster at 1.98 m.
+      note: §11.4 puts the bins out "only on the in-fiction collection day", so on the other days
+            they are two solid objects standing where nothing is drawn. That is a scheduling
+            question for whatever hides them, not a reason to leave them walk-through today.
+      verified: 5 injections, all CAUGHT -- the furniture loop removed, a pole given a kerb's
+            height, a mailbox proxy wider than the mailbox, a new asset left in neither list, and
+            the catenary made solid.
 
 ---
 
@@ -14229,6 +14264,7 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
+| 2026-09-10 | `HOUSE-00850`, `HOUSE-00851` | **Three more `dep`s added; no id renumbered, no scope changed.** Reached in DAG order after `HOUSE-00849` and found to be waiting on systems two phases away: `HOUSE-00850` switches light groups that `HOUSE-01251` has not built against a clock `HOUSE-01531` has not written, and `HOUSE-00851` billboards trees `HOUSE-00772` has not placed. | Written down rather than worked round. Each could have produced a pure function with tests and no consumer -- `HOUSE-00849`'s `WindowGlow` is exactly that shape and was right because the CARDS it decides for exist -- but a task that says "implement the lights on the sensor" is not done while no light exists to be on it. The neighbourhood's own remaining work is `HOUSE-00847` (blocked on `HOUSE-00293`'s asset research) and everything downstream of `HOUSE-00851`. |
 | 2026-09-10 | `HOUSE-00849`, `HOUSE-00851`, `HOUSE-00852` | **A `dep` on `HOUSE-00856` added to three tasks; no id renumbered, no scope changed.** All three are `plat: ALL` rendering or visibility work over §11.4's neighbourhood, and until `HOUSE-00856` no code could load a single one of its meshes: `neighbourhood_gen.py` wrote them into `build/neighbourhood` and nothing anywhere opened that directory. | Written down rather than left implicit because it is the difference between a task that can be verified and one that cannot: glow cards behind windows nobody draws, an impostor path with no impostors to select from, and a BVH wired to instances with no geometry would each have been "complete" with nothing on screen. |
 | 2026-09-10 | `HOUSE-00856`, `HOUSE-00857` | **Two new tasks, the next free ids in phase 11's reserved 00841–00890 range.** Found by `HOUSE-00846`: nothing anywhere reads `build/neighbourhood`, so thirty generated meshes have no consumer (`00856`); and `build_collision.py` takes only §49.2's vehicles from the `neighbourhood` array, leaving sixteen solid objects inside §10.4's walkable ±35 m -- the utility pole 0.80 m outside the pedestrian gate among them -- with no collision (`00857`). | Both recorded with their evidence rather than folded into the task that found them: `00856` is a pipeline route that does not exist yet and that `HOUSE-00852` assumes, and `00857` changes `collision.bin` and so the ~34-minute nav build, and asks whether §11.4's collection-day bins are solid at all. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00785` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00841`: `fence_gen.py` has been unable to produce a single file since `HOUSE-00775` authored §10.4's stone wall, and nothing ran it, so `build/fence` kept the previous tree and `HOUSE-00780` chunked that. | Fixed in the same commit as the task that found it, because the tool it found is the one the new generator is modelled on and both are now gated. No id was renumbered or struck. |

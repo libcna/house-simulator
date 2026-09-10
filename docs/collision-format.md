@@ -287,6 +287,22 @@ it that §43.1's 0.22 m step-up cannot climb. A BALCONY keeps its slab: it is an
 floor is 3.65 m over the lawn, and no height field carries that; so does every cell in a world that
 has no height field at all, which is every fixture.
 
+**§11.4's street furniture is solid** (`HOUSE-00857`). §49.2's sentence names *vehicles*, and
+this file took exactly those from the `neighbourhood` array while `HOUSE-00846` drew nine lamps,
+five poles, five signs, twelve mailboxes, two bin clusters and a hoop that nobody could touch —
+`NB_POLE_03` stands 0.80 m outside §11.2's pedestrian gate, which is the first thing a player walks
+at on leaving the property, and they walked through it. Each solid piece is now an OBB of its own,
+surface `furniture`, sized to the SOLID part rather than to the asset's box: a lamp's box reaches
+1.76 m out to a lantern 8 m up, and a body colliding with that would stop 1.5 m short of a post it
+can see. The selftest checks each proxy fits inside what `neighbourhood_gen.py` draws — containment
+and not equality, because collision may be smaller than the thing and never larger.
+
+The catenary spans, the horizon cards and the water tower are named as **deliberately intangible**:
+a wire 8.7 m up and a card 360 m away are not things a body walks into, and a proxy for one is a
+shape nothing will ever sweep against. Naming them is what makes a NEW asset that is in neither
+list a selftest failure rather than a ghost. Fifteen pieces survive `place`'s reach test; the rest
+of the street is 100 m down the road, where no open cell can touch them.
+
 It has no **lid** either — but only if it is open. `EXT_SHED` is an `exterior` cell that is a
 BUILDING, and a building has a ceiling: §15.7 rule 5 draws that line and `HOUSE-00777` found the
 shed roofless in §37.2's coverage field, which is to say it rained in it. The five interior cells
