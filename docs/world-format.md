@@ -519,6 +519,20 @@ render at LOD1. `neighbourhood_gen.py` parses that name — an unknown shape or 
 never painted with a default — and builds only the combinations the rows actually name. There is no
 per-instance material override in this file, and adding one is the alternative that record rejects.
 
+The same array carries §11.4's **street furniture**, and `HOUSE-00846` is what finally put geometry
+under all of it. Two of its rows are worth reading twice. `MODEL_UTILITY_POLE_LAMP` is a pole that
+also carries a street lantern: all five of §11.4's poles stand at an X that also wants one of its
+nine street lights, and two posts 0.70 m apart read as one doubled pole, so the pole carries the
+lamp the way a suburban street does. `MODEL_UTILITY_SPAN` is the **catenary between two poles** —
+a run-spanning asset like a fence rather than a per-instance one, anchored at its west pole and
+running 50 m to the next, so four spans reach from x -100 to x +100 with no wire ending in mid-air.
+
+The nine lanterns are the geometry under `layout.lights.json`'s `LIGHT_EXT_STREET_1`…`_9`, and
+`neighbourhood_gen.py --selftest` asserts that every one of them is **at** its light rather than
+near it: the lamp columns stand on the pole line at Z +0.80 and reach the lights' Z +1.50 on a
+0.70 m outreach arm. A light and its lamp 1.6 m apart is the kind of thing only a screenshot ever
+finds.
+
 `HOUSE-00776` added a fifth: `downspouts`, one row per pipe with `position` (the head, at the
 gutter) and `splash` (where the water lands, on §11.5's height field under it). §37.3's splash
 particles and §37.4's `Apply3D` trickle emitter both need that point and neither can read a Blender

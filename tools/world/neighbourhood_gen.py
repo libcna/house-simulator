@@ -426,6 +426,188 @@ def impostor_faces(kind: str = "GABLE") -> list:
     return faces
 
 
+# ============================================================================= street furniture
+
+#: Where §11.4's nine street lanterns HANG: `layout.lights.json`'s own `LIGHT_EXT_STREET_1`…`_9`,
+#: at `[x, 8.00, 1.50]` for x = -100…100 every 25 m. The geometry below is built to put a lantern
+#: at exactly that point, because a light with nothing holding it up is a light shining out of the
+#: air (`HOUSE-00846`).
+LAMP_HEIGHT = 8.0
+#: The posts stand in one line along the verge at Z +0.80 -- the line §11.4's utility poles were
+#: already on -- so the lantern reaches the light's Z +1.50 on a 0.70 m outreach arm.
+POST_LINE_Z = 0.80
+LAMP_REACH = 1.50 - POST_LINE_Z
+#: How far the outreach arm rises above the lantern, and so how tall a lamp column is.
+LAMP_TOP = 0.18
+
+#: A wooden utility pole, tall enough that the wires it carries clear a lamp column standing
+#: mid-span: the wires leave the crossarm at `WIRE_ATTACH` and sag `SPAN_SAG` in the middle, which
+#: has to stay above the 8.00 m lantern with room to see daylight between them.
+POLE_HEIGHT = 10.5
+CROSSARM_HEIGHT = 9.6
+WIRE_ATTACH = 9.9
+#: §11.4 puts the poles 50 m apart. A span with no sag is a wire under a tension no pole survives.
+SPAN_LENGTH = 50.0
+SPAN_SAG = 1.2
+#: Three wires, at the three insulators: one over the pole and one at each end of the crossarm.
+WIRE_OFFSETS = (-0.95, 0.0, 0.95)
+#: A catenary drawn as straight segments, which is what a wire is at 50 m when it is made of boxes.
+#: Eight, measured: the worst a chord strays from the curve is 18.8 mm at eight, 33.3 mm at six and
+#: 75.0 mm at four. The wire is 40 mm thick, so at eight the error is inside the wire.
+SPAN_SEGMENTS = 8
+
+STREET_LIGHT_ASSET = "MODEL_STREET_LIGHT"
+UTILITY_POLE_ASSET = "MODEL_UTILITY_POLE"
+#: The pole that also carries a lantern. All five of §11.4's poles stand at an X where §11.4 also
+#: wants a street light, and two posts 0.70 m apart read as one doubled pole from the garden -- so
+#: the lantern is mounted on the pole, the way a suburban street actually does it. The plain pole
+#: stays in the grammar for a position that has no lamp; `build` only draws what the layout names.
+UTILITY_POLE_LAMP_ASSET = "MODEL_UTILITY_POLE_LAMP"
+UTILITY_SPAN_ASSET = "MODEL_UTILITY_SPAN"
+
+FURNITURE_KINDS = (STREET_LIGHT_ASSET, UTILITY_POLE_ASSET, UTILITY_POLE_LAMP_ASSET,
+                   UTILITY_SPAN_ASSET, "MODEL_STREET_SIGN", "MODEL_MAILBOX", "MODEL_BIN_CLUSTER",
+                   "MODEL_BASKETBALL_HOOP")
+
+
+def _lantern_faces() -> list:
+    """The outreach arm and the lantern, from a post whose base is the origin.
+
+    Shared by the standalone column and the lamp-carrying pole, so there is ONE answer to where a
+    street lantern is and both assets put it in the same place.
+    """
+    faces = box((-0.05, LAMP_HEIGHT + 0.06, 0.0), (0.05, LAMP_HEIGHT + LAMP_TOP, LAMP_REACH),
+                "NB_METAL_GREY")
+    # Centred on `LAMP_HEIGHT`, because that is where the LIGHT is: a lantern whose glass is
+    # 60 mm below its own light source is the same mistake as one 1.6 m away from it, smaller.
+    faces += box((-0.17, LAMP_HEIGHT - 0.09, LAMP_REACH - 0.26),
+                 (0.17, LAMP_HEIGHT + 0.09, LAMP_REACH + 0.26), "NB_LAMP_GLASS")
+    return faces
+
+
+def _pole_faces() -> list:
+    """The pole and its crossarm, without the lantern."""
+    faces = box((-0.13, 0.0, -0.13), (0.13, POLE_HEIGHT, 0.13), "NB_TIMBER_POLE")
+    faces += box((-0.05, CROSSARM_HEIGHT, WIRE_OFFSETS[0] - 0.10),
+                 (0.05, CROSSARM_HEIGHT + 0.12, WIRE_OFFSETS[-1] + 0.10), "NB_TIMBER_POLE")
+    for at in WIRE_OFFSETS:
+        faces += box((-0.05, CROSSARM_HEIGHT + 0.12, at - 0.05),
+                     (0.05, WIRE_ATTACH, at + 0.05), "NB_METAL_GREY")
+    return faces
+
+
+def _wire_faces() -> list:
+    """One 50 m span of §11.4's catenary, from the pole at the origin running +X to the next."""
+    faces: list = []
+    for offset in WIRE_OFFSETS:
+        for index in range(SPAN_SEGMENTS):
+            u0 = SPAN_LENGTH * index / SPAN_SEGMENTS
+            u1 = SPAN_LENGTH * (index + 1) / SPAN_SEGMENTS
+            faces += _wire_segment(u0, wire_height(u0), u1, wire_height(u1), offset)
+    return faces
+
+
+def wire_height(at: float) -> float:
+    """How high the wire is @p at metres along a span -- `WIRE_ATTACH` at each end, sagging between.
+
+    A parabola rather than a true `cosh`: over 50 m with 1.2 m of sag the two curves differ by
+    **0.23 mm** at worst (the catenary parameter is 260.6 m), which is a fortieth of the wire's own
+    thickness -- and the parabola is the one that is exactly `WIRE_ATTACH` at both poles.
+    """
+    unit = 2.0 * at / SPAN_LENGTH - 1.0
+    return WIRE_ATTACH - SPAN_SAG * (1.0 - unit * unit)
+
+
+def _wire_segment(u0: float, y0: float, u1: float, y1: float, offset: float,
+                  thickness: float = 0.04) -> list:
+    """One straight length of wire from `(u0, y0)` to `(u1, y1)`, at Z @p offset."""
+    half = thickness / 2.0
+    z0, z1 = offset - half, offset + half
+    return [
+        ([(u0, y0 - half, z1), (u1, y1 - half, z1), (u1, y1 + half, z1), (u0, y0 + half, z1)],
+         (0.0, 0.0, 1.0), "NB_WIRE"),
+        ([(u1, y1 - half, z0), (u0, y0 - half, z0), (u0, y0 + half, z0), (u1, y1 + half, z0)],
+         (0.0, 0.0, -1.0), "NB_WIRE"),
+        ([(u0, y0 + half, z1), (u1, y1 + half, z1), (u1, y1 + half, z0), (u0, y0 + half, z0)],
+         (0.0, 1.0, 0.0), "NB_WIRE"),
+        ([(u0, y0 - half, z0), (u1, y1 - half, z0), (u1, y1 - half, z1), (u0, y0 - half, z1)],
+         (0.0, -1.0, 0.0), "NB_WIRE"),
+    ]
+
+
+def _rotate(x: float, z: float, yaw_deg: float) -> tuple[float, float]:
+    """`build_chunks.place`'s own yaw, so a point computed here is where the chunk builder puts it."""
+    yaw = math.radians(yaw_deg)
+    cos, sin = math.cos(yaw), math.sin(yaw)
+    return (x * cos + z * sin, -x * sin + z * cos)
+
+
+def carries_lantern(asset: str) -> bool:
+    """Whether @p asset draws one of §11.4's nine street lanterns."""
+    return asset in (STREET_LIGHT_ASSET, UTILITY_POLE_LAMP_ASSET)
+
+
+def lantern_world(position, yaw_deg: float = 0.0) -> tuple[float, float, float]:
+    """Where the lantern of a lamp-carrying asset placed at @p position ends up, in world metres.
+
+    The point `layout.lights.json` has to agree with: a street light is a light AND a lamp, and
+    the two being 1.6 m apart is the sort of thing only a screenshot ever finds.
+    """
+    x, z = _rotate(0.0, LAMP_REACH, yaw_deg)
+    return (position[0] + x, position[1] + LAMP_HEIGHT, position[2] + z)
+
+
+def span_ends(position, yaw_deg: float = 0.0) -> tuple[tuple[float, float], tuple[float, float]]:
+    """The `(x, z)` of the two poles a span placed at @p position hangs between."""
+    near = _rotate(0.0, 0.0, yaw_deg)
+    far = _rotate(SPAN_LENGTH, 0.0, yaw_deg)
+    return ((position[0] + near[0], position[2] + near[1]),
+            (position[0] + far[0], position[2] + far[1]))
+
+
+def furniture_faces(asset: str) -> list:
+    """One piece of §11.4's street furniture, in world metres, its foot at the origin.
+
+    Boxes, like the fences and the garden structures: at 20-60 m these are silhouettes with a
+    scale, and the SCALE is the part that has to be right -- a mailbox the size of a wheelie bin
+    reads as a bin, whatever it is textured with later.
+    """
+    if asset == STREET_LIGHT_ASSET:
+        return (box((-0.09, 0.0, -0.09), (0.09, LAMP_HEIGHT + LAMP_TOP, 0.09), "NB_METAL_GREY")
+                + _lantern_faces())
+    if asset == UTILITY_POLE_ASSET:
+        return _pole_faces()
+    if asset == UTILITY_POLE_LAMP_ASSET:
+        return _pole_faces() + _lantern_faces()
+    if asset == UTILITY_SPAN_ASSET:
+        return _wire_faces()
+    if asset == "MODEL_STREET_SIGN":
+        faces = box((-0.04, 0.0, -0.04), (0.04, 2.30, 0.04), "NB_METAL_GREY")
+        faces += box((-0.02, 1.85, -0.35), (0.02, 2.25, 0.35), "NB_SIGN_PLATE")
+        return faces
+    if asset == "MODEL_MAILBOX":
+        faces = box((-0.05, 0.0, -0.05), (0.05, 1.05, 0.05), "NB_TIMBER_POLE")
+        faces += box((-0.10, 1.05, -0.24), (0.10, 1.30, 0.24), "NB_METAL_GREY")
+        return faces
+    if asset == "MODEL_BIN_CLUSTER":
+        # §11.4's "rubbish-bin clusters (only on the in-fiction collection day)": three wheelie
+        # bins side by side, which is what a kerb looks like on a Thursday.
+        faces: list = []
+        for index in range(3):
+            centre = (index - 1) * 0.70
+            faces += box((centre - 0.29, 0.0, -0.32), (centre + 0.29, 1.05, 0.32), "NB_BIN")
+            faces += box((centre - 0.31, 1.05, -0.34), (centre + 0.31, 1.11, 0.30), "NB_BIN_LID")
+        return faces
+    if asset == "MODEL_BASKETBALL_HOOP":
+        # The ring is at 3.05 m because that is what a basketball ring is, everywhere.
+        faces = box((-0.08, 0.0, -0.08), (0.08, 3.40, 0.08), "NB_METAL_GREY")
+        faces += box((-0.90, 2.95, 0.08), (0.90, 4.05, 0.16), "NB_BACKBOARD")
+        faces += box((-0.23, 3.02, 0.16), (0.23, 3.08, 0.61), "NB_METAL_RING")
+        return faces
+    raise layout_io.LayoutError(
+        f"{asset!r} is not one of §11.4's street furniture: {list(FURNITURE_KINDS)}")
+
+
 def impostor_of(asset: str) -> str:
     """The KIND an impostor asset id names, or an error saying which kinds there are."""
     if not asset.startswith(IMPOSTOR_PREFIX):
@@ -512,12 +694,22 @@ def _document(name: str, faces: list) -> tuple[dict, bytes]:
     return document, bytes(blob)
 
 
+def is_ours(asset: str) -> bool:
+    """Whether @p asset is one THIS tool draws.
+
+    The neighbourhood also names §11.4's vehicles (`HOUSE-00847`), which are not this grammar's;
+    the test is used both to pick what to build and to decide what a stale file in the output
+    directory is, so a file another tool wrote is never swept away by this one.
+    """
+    return asset.startswith((HOUSE_PREFIX, IMPOSTOR_PREFIX)) or asset in FURNITURE_KINDS
+
+
 def wanted_assets(directory: Path) -> list[str]:
     """Every neighbourhood asset the layout asks for, in id order."""
     layout = layout_io.load_layout(directory, kinds=["exterior"])
     exterior = layout.get("exterior") or {}
     return sorted({row["asset"] for row in exterior.get("neighbourhood", [])
-                   if str(row.get("asset", "")).startswith(("MODEL_NB_HOUSE", "MODEL_NB_IMPOSTOR"))})
+                   if is_ours(str(row.get("asset", "")))})
 
 
 def build(directory: Path) -> dict:
@@ -526,6 +718,9 @@ def build(directory: Path) -> dict:
     for asset in wanted_assets(directory):
         if asset.startswith(IMPOSTOR_PREFIX):
             out[asset] = impostor_faces(impostor_of(asset))
+            continue
+        if asset in FURNITURE_KINDS:
+            out[asset] = furniture_faces(asset)
             continue
         house, detailed = house_of(asset)
         out[asset] = house_faces(house, detailed)
@@ -820,6 +1015,116 @@ def selftest() -> int:
                 f"-- and it really does reach neighbours: {len(spans)} pair(s) are inside it, the "
                 f"widest {max(spans) if spans else 0:.0f} m apart")
 
+        # 9. `HOUSE-00846`'s street furniture. The claim that matters is the one nobody could
+        #    have made before this task existed: every one of §11.4's nine street lights now has
+        #    a lamp under it, at the point the LIGHT is at and not near it.
+        furniture = [row for row in rows if is_ours(str(row.get("asset", "")))
+                     and str(row["asset"]) in FURNITURE_KINDS]
+        # §11.4's vehicles share the `neighbourhood` array and are `HOUSE-00847`'s, not this
+        # grammar's. `is_ours` is what keeps this tool's stale sweep from deleting them.
+        theirs = sorted({str(row["asset"]) for row in rows if not is_ours(str(row["asset"]))})
+        require(theirs == ["MODEL_DELIVERY_VAN", "MODEL_PARKED_CAR"],
+                f"the vehicles in the array are somebody else's to draw ({theirs})")
+        lanterns = sorted(lantern_world(row["position"], float(row.get("yawDeg", 0.0)))
+                          for row in furniture if carries_lantern(str(row["asset"])))
+        street_lights = sorted(tuple(float(c) for c in light["position"])
+                               for light in layout_io.rows(
+                                   layout_io.load_layout(SOURCE, kinds=["lights"]), "lights")
+                               if str(light["id"]).startswith("LIGHT_EXT_STREET_"))
+        require(len(street_lights) == 9, f"§11.4's nine street lights ({len(street_lights)})")
+        require(len(lanterns) == len(street_lights),
+                f"and nine lanterns to hang them in ({len(lanterns)})")
+        worst = max((max(abs(a - b) for a, b in zip(lantern, light))
+                     for lantern, light in zip(lanterns, street_lights)), default=None)
+        require(worst is not None and worst < 1e-6,
+                f"every lantern is AT its light, not near it (worst axis {worst} m)")
+
+        # ...and `lantern_world` is telling the truth about the GEOMETRY, not just about its own
+        # constants: the glass a lamp-carrying asset draws is where that function says it is.
+        def glass_centre(asset: str):
+            points = [point for corners, _n, material in built[asset]
+                      if material == "NB_LAMP_GLASS" for point in corners]
+            return (tuple(sum(point[axis] for point in points) / len(points) for axis in range(3))
+                    if points else None)
+
+        drawn = {asset: glass_centre(asset) for asset in built if asset in FURNITURE_KINDS}
+        missing = sorted(asset for asset, centre in drawn.items()
+                         if carries_lantern(asset) and centre is None)
+        require(not missing, f"a lamp-carrying asset draws a lantern ({missing})")
+        stray = sorted(asset for asset, centre in drawn.items()
+                       if not carries_lantern(asset) and centre is not None)
+        require(not stray, f"and one that is not lamp-carrying draws none ({stray})")
+        off = {asset: centre for asset, centre in drawn.items() if centre is not None
+               and max(abs(a - b) for a, b in zip(centre, lantern_world((0.0, 0.0, 0.0)))) > 1e-6}
+        require(not off,
+                f"and the glass really is at {lantern_world((0.0, 0.0, 0.0))}, which is what "
+                f"`lantern_world` promised the light ({off})")
+
+        # ...and the wires reach from pole to pole. A span that ends in mid-air is a wire hanging
+        # off the end of the street.
+        poles = sorted((round(row["position"][0], 3), round(row["position"][2], 3))
+                       for row in furniture
+                       if str(row["asset"]) in (UTILITY_POLE_ASSET, UTILITY_POLE_LAMP_ASSET))
+        require(len(poles) == 5, f"§11.4's five utility poles ({len(poles)})")
+        spans = [span_ends(row["position"], float(row.get("yawDeg", 0.0)))
+                 for row in furniture if str(row["asset"]) == UTILITY_SPAN_ASSET]
+        require(len(spans) == len(poles) - 1,
+                f"and one span between each neighbouring pair of them ({len(spans)})")
+        dangling = [end for span in spans for end in span
+                    if (round(end[0], 3), round(end[1], 3)) not in poles]
+        require(not dangling, f"with both ends of every wire ON a pole ({dangling})")
+
+        # Nothing standing on the verge grows into a wire. The lamp columns are the tall ones and
+        # they stand at the MIDDLE of a span, which is exactly where a catenary is lowest.
+        heights = {asset: max(point[1] for corners, _n, _m in faces for point in corners)
+                   for asset, faces in built.items() if asset in FURNITURE_KINDS}
+        under_wire = []
+        for row in furniture:
+            asset = str(row["asset"])
+            if asset in (UTILITY_SPAN_ASSET, UTILITY_POLE_ASSET, UTILITY_POLE_LAMP_ASSET):
+                continue
+            for (x0, z0), (x1, _z1) in spans:
+                if min(x0, x1) <= row["position"][0] <= max(x0, x1) and abs(row["position"][2] - z0) < 2.0:
+                    clear = wire_height(abs(row["position"][0] - x0)) - heights[asset]
+                    if clear < 0.30:
+                        under_wire.append((row["id"], round(clear, 3)))
+        require(not under_wire,
+                f"nothing on the verge reaches into the catenary above it ({under_wire})")
+        require(abs(wire_height(0.0) - WIRE_ATTACH) < 1e-9
+                and abs(wire_height(SPAN_LENGTH) - WIRE_ATTACH) < 1e-9
+                and abs(wire_height(SPAN_LENGTH / 2.0) - (WIRE_ATTACH - SPAN_SAG)) < 1e-9,
+                f"and the wire really does sag: {WIRE_ATTACH:.2f} m at each pole, "
+                f"{wire_height(SPAN_LENGTH / 2.0):.2f} m in the middle")
+
+        # §11.4's carriageway is 7.0 m between kerbs at Z +3.2 and +10.2. A bin in it is a bin a
+        # car drives through; the vehicles that ARE parked there are `HOUSE-00847`'s and are not
+        # this grammar's.
+        in_road = [row["id"] for row in furniture if 3.2 < row["position"][2] < 10.2]
+        require(not in_road, f"no street furniture stands in the carriageway ({in_road})")
+
+        # Scale, which is the whole job at 20-60 m: these are silhouettes, and a mailbox as tall
+        # as a lamp post is a lamp post.
+        expected = {STREET_LIGHT_ASSET: (8.1, 8.2), UTILITY_POLE_LAMP_ASSET: (10.5, 10.6),
+                    UTILITY_POLE_ASSET: (10.5, 10.6), "MODEL_STREET_SIGN": (2.3, 2.4),
+                    "MODEL_MAILBOX": (1.2, 1.4), "MODEL_BIN_CLUSTER": (1.0, 1.2),
+                    "MODEL_BASKETBALL_HOOP": (4.0, 4.1)}
+        wrong = {asset: round(heights[asset], 3) for asset, (low, high) in expected.items()
+                 if asset in heights and not low <= heights[asset] <= high}
+        require(not wrong, f"every piece of furniture is the height it is in life ({wrong})")
+        # The plain pole is the one exception: every pole on this street carries a lantern, so
+        # `build` never draws it, which is ADR-0013's "only the combinations the layout names".
+        unnamed = sorted(set(expected) - set(heights) - {UTILITY_POLE_ASSET})
+        require(not unnamed, f"and the street names all of them but the plain pole ({unnamed})")
+        require(UTILITY_POLE_ASSET not in built,
+                "-- which is not built, because nothing asks for one")
+
+        try:
+            furniture_faces("MODEL_TARDIS")
+            caught = False
+        except layout_io.LayoutError:
+            caught = True
+        require(caught, "an asset this grammar does not know is refused, not built as a box")
+
         document, blob = _document(houses[0], built[houses[0]])
         require(len(document["meshes"][0]["primitives"]) == len(document["materials"]),
                 "a house is one primitive per material, which is what §17.4 chunks by")
@@ -860,8 +1165,8 @@ def main() -> int:
     # `HOUSE-00785` had every fence in the world one task out of date. Only this tool's own
     # output is removed, and only from its own directory.
     removed = 0
-    for path in sorted(args.output.glob("MODEL_NB_*.glb")):
-        if path.stem not in built:
+    for path in sorted(args.output.glob("MODEL_*.glb")):
+        if is_ours(path.stem) and path.stem not in built:
             path.unlink()
             removed += 1
     print(report(built) if args.report else

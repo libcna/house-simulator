@@ -128,6 +128,11 @@ run_gate "budget"     python3 tools/ci/budget_report.py --check
 # graph, so a stage added without regenerating it is a documented order that is no longer
 # the order. This is the same idiom the budget report uses, for the same reason.
 run_gate "content-doc" python3 tools/ci/build_content.py --check-docs
+# `HOUSE-00227`. The graph's own claims, next to the table generated from it: the four generators
+# that write the exterior `.glb` tree are stages, and `chunks` hashes what they wrote. Until this
+# task none of them was run by anything, and `build/terrain` held tiles three hours older than the
+# height field they are drawn from while every render reference of the outdoors pictured them.
+run_gate "content-graph" python3 tools/ci/build_content.py --selftest
 # `HOUSE-00341`. The sixteen world files' JSON Schemas are generated from one source so that the
 # shared id pattern, vector and range cannot drift between them; docs/world-schema/ is what an
 # editor and `validate_world.py` read, and a stale copy of it is worse than none.

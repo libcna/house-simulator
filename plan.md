@@ -102,7 +102,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 0 | Repository, conventions, decisions | 00001–00060 | 42 | The repo builds an empty `Game` and CI is green |
 | 1 | CNA capability verification | 00061–00120 | 60 | Every §5 claim re-proved; `BL-09` settled; probes deleted |
 | 2 | Build skeleton and CI | 00121–00180 | 48 | `Game` clears the screen; HEADLESS tests run in CI |
-| 3 | Content pipeline | 00181–00260 | 46 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
+| 3 | Content pipeline | 00181–00260 | 47 | glTF, PNG, WAV, SpriteFont and FX all compile and load |
 | 4 | Asset provenance and licensing | 00261–00340 | 42 | Manifest tooling green; NOX imported; every source licence verified |
 | 5 | World and floor-plan data | 00341–00450 | 81 | The full layout authored, validated and loaded |
 | 6 | Blockout house geometry | 00451–00540 | 46 | The generated shell renders |
@@ -110,7 +110,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 8 | First-person camera | 00621–00660 | 14 | It feels right and is tested |
 | 9 | Room/portal visibility | 00661–00760 | 39 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
-| 11 | Neighbourhood background | 00841–00890 | 15 | The house is not floating in nothing |
+| 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 30 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 64 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
@@ -4125,6 +4125,41 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
       verified: two claims -- a stage with an unchanged tool is fresh, and editing the tool
             rebuilds it and everything downstream -- and 2 injections, both CAUGHT: the tool left
             out of the fingerprint, and the output left in it.
+- [x] HOUSE-00227 — The generated exterior tree is a stage of the content build
+      dep: HOUSE-00216, HOUSE-00226 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/ci/build_content.py --selftest`, `tools/ci/build_content.py --check-docs`
+      note: (2026-09-10) **New task, next free id in phase 3's reserved 00181–00260 range.** Found
+            by `HOUSE-00846`. `HOUSE-00226` made a stage's own TOOL one of its inputs; this is the
+            same hole one level out -- **four generators that no stage ran at all**.
+      finding: **`build/terrain` held tiles three hours older than the height field they are drawn
+            from.** `terrain_gen.py --tiles` last wrote them at 12:49 on 2026-09-09;
+            `assets-src/world/terrain.png` was rewritten at 14:56 the same day by `HOUSE-00768`,
+            `HOUSE-00769` and `HOUSE-00774`. Regenerating changed **13 of the 20 tiles** (the 22
+            road segments were byte-identical). `run_checks.sh` gates `terrain_gen.py --check`,
+            which compares the height field against the layout -- a different question from
+            whether the TILES drawn from it are current, and the one nobody was asking.
+      finding: **`chunks.bin` was ten minutes older than the `build/fence` tree it chunked**, at
+            22:29 against 22:39 on the 9th: `HOUSE-00785` repaired the fence generator and ran it,
+            and nothing rebuilt the chunks. So `chunks.bin` was built from a stale terrain tree AND
+            a pre-`HOUSE-00785` fence tree, and it is the only thing the renderer reads.
+      finding: **fifteen committed render references were pictures of that tree** -- eight
+            `blockout-ext-*` poses, six `property-*` poses and `blockout-01` -- and all fifteen
+            passed, because everything downstream was consistently stale. Rebuilt and recaptured
+            here; the interior references are untouched, which is what says the change is the
+            ground and nothing else. The worst pose moved by 1.65 % of its pixels
+            (`property-garden`, where the raised bed stands out of a bank that had changed shape).
+      finding: the fix is four stages -- `terrain-tiles`, `road`, `fence`, `neighbourhood` -- and
+            **`chunks` naming their output among its own inputs**, not merely `needs`-ing them:
+            `needs` alone would rebuild it when they RUN, and the fingerprint has to see the `.glb`
+            so a hand-run generator is noticed too.
+      measured: the world group goes from 8 stages to 12, and the pipeline from 19 to 23.
+            `docs/content-build.md`'s generated table is regenerated from the graph; `run_checks.sh`
+            and CI gain a `content-graph` gate over `--selftest` beside the `content-doc` one that
+            was already there, because a table that matches a graph missing a stage is a correct
+            table of the wrong pipeline.
+      verified: 4 injections, all CAUGHT -- `chunks` stripped of its `build/*.glb` inputs, a
+            generator declaring no outputs, the `fence` stage renamed out of the graph, and a
+            stage description edited without regenerating the table.
 - [x] HOUSE-00222 — Phase-3 review and commit; run `budget_report.py` for the first time
       dep: HOUSE-00181…HOUSE-00225 · sys: — · plat: ALL · pri: MUST
       note: (2026-09-07) **Phase 3 closes.** All three exit criteria met and measured, not
@@ -7817,6 +7852,12 @@ the chunk builder produces ≤ 6 chunks per cell.
             failed once more during `HOUSE-00781`'s verification, in a full-suite run, and passed
             alone immediately afterwards and in the next full run. Three sightings now, all in
             full-suite runs on a loaded machine, none reproducible alone.
+      note: (2026-09-10, fourth sighting) `BlockoutPoseRenderTests.TheEightExteriorPosesMatchTheirReferences`
+            -- the EXTERIOR eight this time, not the interior twelve -- failed once during
+            `HOUSE-00846`'s verification, in a full-suite run started the moment a `-j3` build and
+            a `ctest -j2` had finished, and passed in the targeted run immediately after and in
+            three consecutive full runs. Four sightings, two poses, all under load, none
+            reproducible alone.
       note: neither failure's output was captured, which is the first thing to fix: `ctest`
             needs `--output-on-failure` in the wrapper so a sighting is not lost, and the pose
             comparison should say WHICH pose and by how many pixels. §46's own words apply --
@@ -11842,8 +11883,61 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: 3 injections, all CAUGHT -- two kinds given the same silhouette, a card whose
             corners are not in one plane, and (in the LAYOUT) two of the same card side by side on
             the ring.
-- [ ] HOUSE-00846 — Generate the street furniture: 9 street lights, 5 utility poles with catenary wires, 4 signs, 12 mailboxes, 2 bin clusters, a basketball hoop
+- [x] HOUSE-00846 — Generate the street furniture: 9 street lights, 5 utility poles with catenary wires, 4 signs, 12 mailboxes, 2 bin clusters, a basketball hoop
       dep: HOUSE-00763 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/neighbourhood_gen.py --selftest`
+      finding: **§11.4's nine street lights had no lamp under them.** They were authored as lights
+            and nothing else (`HOUSE-00383`), and `layout.exterior.json` said so in a comment:
+            "§11.4's list less the 9 street lights, which are lights and live in
+            layout.lights.json". A point light at +8.00 m with no post below it is a light shining
+            out of the air, in a street where the player can walk to within a metre of three of
+            them. Nine `MODEL_STREET_LIGHT`/`MODEL_UTILITY_POLE_LAMP` rows now stand under
+            `LIGHT_EXT_STREET_1`…`_9`, and a claim asserts every lantern is **at** its light
+            (worst axis 0.0 m) rather than near it.
+      finding: **all five utility poles stand at an X that also wants a street light**, so the
+            first design -- nine standalone columns -- put two posts 0.70 m apart at five of the
+            nine positions, which from the back garden is one doubled pole. Those five poles carry
+            the lantern themselves (`MODEL_UTILITY_POLE_LAMP`), the way a suburban street does it;
+            the other four are standalone columns. Nine lanterns, five poles, nine lights. The
+            plain `MODEL_UTILITY_POLE` stays in the grammar and is **not built**, because ADR-0013
+            says only the combinations the layout names are generated.
+      finding: **the catenary cannot be a per-instance asset**, because it is the thing BETWEEN
+            two instances. `MODEL_UTILITY_SPAN` is run-spanning like a fence: anchored at its west
+            pole, running 50 m to the next, so four spans reach x -100 to x +100 and a claim
+            checks both ends of every wire land ON a pole. The wire is a parabola rather than a
+            `cosh` -- measured, the two differ by **0.23 mm** over 50 m at 1.2 m of sag, a
+            fortieth of the wire's own thickness -- and the parabola is the one that is exactly
+            `WIRE_ATTACH` at both poles.
+      finding: **the pole had to grow to 10.5 m, and the measurement is why.** A span's lowest
+            point is its middle, and its middle is exactly where the four standalone lamp columns
+            stand (x = ±25, ±75 are the midpoints of the four spans). At the first design's 9.2 m
+            pole the wires hung at 7.66 m through a column that reaches 8.18 m. The claim that
+            found it -- nothing on the verge reaches into the catenary above it, with 0.30 m to
+            spare -- is asserted for every furniture row under every span, not just the ones that
+            happen to clash today.
+      measured: (2026-09-10) 7 furniture assets, **1 920 triangles over 33 placed instances**:
+            a lamp column 36, a lamp-carrying pole 84, a sign 24, a mailbox 24, a bin cluster 72,
+            the hoop 36, and a 50 m span **192** -- 768 of the 1 920, 40 %, is 200 m of overhead
+            cable at 8 straight segments a wire. Measured chord error: **18.8 mm at eight**,
+            33.3 mm at six, 75.0 mm at four -- at eight the error is inside the 40 mm wire, and
+            the number is one constant if that budget ever bites.
+            145 selftest claims, up from 104.
+      note: rebuilding the world content for this task also found `content/world/chunks.bin`
+            **ten minutes older than the `build/fence` tree it was chunked from** (22:29 against
+            22:39 on 2026-09-09). Not caused here -- `build_chunks.py` does not read the
+            `neighbourhood` array at all, only its comments mention it -- and now current: the
+            rebuilt file is 4 324 bytes larger. The `world-content-current` ctest fixture copies
+            `content/world` into the build tree, which is a different guarantee from `content/`
+            matching `assets-src/`, and deliberately so: `nav` alone is ~34 minutes.
+      note: §11.4 asks for "4 stop/street signs" and the street has **five** `MODEL_STREET_SIGN`
+            rows: `HOUSE-00775` added `NB_SIGN_PRIVATE_W` at the west road end, which is §10.4's
+            barrier dressing rather than one of §11.4's four. Both are the same asset.
+      verified: 10 injections, all CAUGHT -- the lantern moved off its light, a span too short to
+            reach the next pole, sag deep enough to swallow a lamp column, a mailbox at lamp-post
+            height, a pole that draws no lantern, a lantern whose glass is 70 mm off the light it
+            is supposed to be at, a sign that draws lamp glass, the stale sweep widened until it
+            would delete another tool's files, and -- injected into the LAYOUT rather than into
+            the tool -- a lamp standing in the carriageway and a span starting 2 m off its pole.
 - [ ] HOUSE-00847 — Place the 3 parked neighbour cars and the delivery van
       dep: HOUSE-00293 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00848 — Generate the distant tree line, the ridge and the water tower on the horizon ring
@@ -11862,6 +11956,31 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       dep: HOUSE-00852 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00855 — Phase-11 review: does the property look like it belongs to a street? Correct if not.
       dep: HOUSE-00854 · sys: — · plat: ALL · pri: MUST
+- [ ] HOUSE-00856 — Deploy the generated neighbourhood meshes into the content tree and resolve a `neighbourhood` row's `asset` to one
+      dep: HOUSE-00846 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-10) **New task, next free id in phase 11's reserved 00841–00890 range.** Found
+            by `HOUSE-00846`: `neighbourhood_gen.py` writes 30 `.glb` into `build/neighbourhood`
+            and **nothing reads that directory** -- `grep` finds the path twice, both times inside
+            the generator that writes it. Every other generated exterior tree has a consumer:
+            `build/terrain` and `build/fence` are `build_chunks.py`'s `exterior_dirs`, and
+            `build/shell` is its shell dirs. The neighbourhood cannot take that route as it
+            stands, because a chunk bakes a placement and these 97 rows carry `lodGroup` and
+            `impostorFrom` -- §25.4 wants a per-category instance list, not 97 baked meshes -- and
+            the assets are not in `assets.manifest.json` either, which is the props route.
+            `HOUSE-00852` wires the instances into the BVH and would find nothing to draw.
+- [ ] HOUSE-00857 — Give the street furniture inside §10.4's accessible road a collision proxy
+      dep: HOUSE-00846 · sys: collision · plat: TOOL · pri: MUST
+      note: (2026-09-10) **New task, next free id in phase 11's reserved 00841–00890 range.** Found
+            by `HOUSE-00846`: `build_collision.py` takes exactly one thing from the
+            `neighbourhood` array -- §49.2's vehicles, `CAR_ASSETS` -- so **16 solid objects
+            inside §10.4's walkable ±35 m have no collision at all**: 5 signs, 6 mailboxes, 2 lamp
+            columns, the utility pole at x 0.00 and 2 bin clusters. `NB_POLE_03` stands at
+            (0.00, 0.80), which is 0.80 m outside §11.2's pedestrian gate -- the first thing a
+            player walks at on leaving the property, and they walk through it.
+      note: recorded rather than fixed in the task that found it: a proxy for each of the six
+            shapes changes `collision.bin`, and `nav.bin` is built from `collision.bin` and takes
+            ~34 minutes. Whether the bins are solid at all is also a design question -- §11.4 puts
+            them out "only on the in-fiction collection day".
 
 ---
 
@@ -13936,7 +14055,7 @@ Recorded so nobody has to re-derive the decision.
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 331** |
+| **Total** | **0–52** | **1 334** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -13988,10 +14107,12 @@ evidence that it fails.
 | 2026-09-09 | `HOUSE-00489` | **New task, next free id in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00568`: with a cell's collision no longer ending at its own boundary, three doors in the house cannot be walked at from either side -- a flight, a stair balustrade and a Juliet's parapet, each within 0.25 m of its doorway -- and `L0_STAIR_MAIN`'s two openings are both over the basement well or against the first run's flank. | The blockout's own arithmetic: a 2.7 × 5.9 m stair hall holding a `u` stair up, a straight flight down and a 2.3 × 4.4 m hole for it leaves three strips of floor that no doorway reaches. Recorded rather than fixed in the session that found it, because each of the three ways out moves §13's room schedule or §16's openings and takes the shell, the nav graph, the floor plans and the render references with it. No id was renumbered or struck. |
 | 2026-09-09 | — | The phase index's task counts recounted from the plan itself: phase 5 80 → **81**, phase 6 38 → **39**, phase 7 35 → **37**, phase 9 37 → **39**, and the totals with them (1 302 → **1 320**) | Four of the fifty-three rows had drifted as tasks were added to their phases' reserved ranges, this session's two included, and the headline had drifted further than the rows it sums. Counted by matching every `- [ ]`/`- [x] HOUSE-nnnnn` line against each row's own id range, so the numbers are now what the plan contains rather than what it last remembered. No task changed, no id was renumbered or struck. |
 | 2026-09-09 | §11.4 | The far-side hedge moves from z **+13.4…+14.0** to **+11.5…+12.0** (`HOUSE-00775`) | §10.4 makes that hedge the barrier that ends the accessible road corridor, §10.3 ends the corridor at z +11.5, and §11.5's height field -- which is §10.3's playable volume -- stops at +12.0. A barrier at +13.4 is beyond all three: a body walking north across the road never reached it and was clamped by §10.3's invisible box instead, which §10.4 calls a safety net and says must never be what stops anyone. Nothing else in the design depends on where the hedge is; the neighbours' houses across the street are at z +22…+30 and stay there. No id was renumbered or struck. |
+| 2026-09-10 | `HOUSE-00856`, `HOUSE-00857` | **Two new tasks, the next free ids in phase 11's reserved 00841–00890 range.** Found by `HOUSE-00846`: nothing anywhere reads `build/neighbourhood`, so thirty generated meshes have no consumer (`00856`); and `build_collision.py` takes only §49.2's vehicles from the `neighbourhood` array, leaving sixteen solid objects inside §10.4's walkable ±35 m -- the utility pole 0.80 m outside the pedestrian gate among them -- with no collision (`00857`). | Both recorded with their evidence rather than folded into the task that found them: `00856` is a pipeline route that does not exist yet and that `HOUSE-00852` assumes, and `00857` changes `collision.bin` and so the ~34-minute nav build, and asks whether §11.4's collection-day bins are solid at all. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00785` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00841`: `fence_gen.py` has been unable to produce a single file since `HOUSE-00775` authored §10.4's stone wall, and nothing ran it, so `build/fence` kept the previous tree and `HOUSE-00780` chunked that. | Fixed in the same commit as the task that found it, because the tool it found is the one the new generator is modelled on and both are now gated. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00493`…`HOUSE-00496` | **Four new tasks, the next free ids in phase 6's reserved 00451–00540 range.** Two gates that flaked once each under load (`00493`); the roofs and the chimney loading with the `neighbourhood` pack (`00494`); the render suite's three assertions that were written when the house stood in a void, and the stale content copy they were reading (`00495`, fixed); and the attic's exterior skin drawn to its box with §12.1's roof inside it (`00496`). | `00495` was fixed on the spot because it made every render claim in this session unreliable. The other three are recorded with their measurements: `00496` is a shell-geometry change that eight render references depend on, so it is sequenced before `HOUSE-00781` rather than folded into the task that found it. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00490`, `HOUSE-00491`, `HOUSE-00492` | **Three new tasks, the next free ids in phase 6's reserved 00451–00540 range.** Found by `HOUSE-00779`: the five dormers were not cut out of the roof they come through and their own fronts covered their windows (`00490`, fixed); two `W_GABLE` louvres open into a hip roof that has no gable ends (`00491`); the two rear dormers overlap by 0.20 m (`00492`). | `00490` is a generator defect and was fixed here, in `roof_geometry.py`, where the shell and the collision share one answer. `00491` and `00492` are §12 and `layout.openings.json` -- a design choice and a data nudge with a window schedule, a golden id list and eight render poses behind them -- so they are recorded with their evidence rather than decided by the task that found them. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00784` | **New task, next free id in phase 10's reserved 00761–00840 range.** Found by `HOUSE-00779`: §4's wall rule built the wall an OPEN cell shares with a building over the CELL's extent, which is §10.3's +20.00 ceiling -- 1 053 m² of collision standing in open air over the sunroom, garage and shed roofs. | The fix belongs to `build_collision` rather than to the sky-exposure task that tripped over it: it is `HOUSE-00774`'s own rule -- two open things do not have a wall between them -- in the vertical, and every ray-casting and camera query in the project reads the same shapes. No id was renumbered or struck. |
+| 2026-09-10 | `HOUSE-00227` | **New task, next free id in phase 3's reserved 00181–00260 range.** Found by `HOUSE-00846`: four generators that write the exterior `.glb` tree -- `terrain_gen.py --tiles`, `--road`, `fence_gen.py`, `neighbourhood_gen.py` -- were run by no stage of the content build, so `build/terrain` held tiles three hours older than the height field they are drawn from, `chunks.bin` was ten minutes older than the fence tree it chunked, and fifteen committed render references were pictures of both. | Fixed here rather than recorded, because every render claim made while the tree is stale is unreliable -- the same reason `HOUSE-00495` was fixed on the spot -- and because it is `HOUSE-00226`'s hole one level out: that task made a stage's tool an input, this one makes the generators stages. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00226` | **New task, next free id in phase 3's reserved 00181–00260 range.** Found by `HOUSE-00777`: `build_content.py` hashed each stage's input files and its command line as TEXT, so editing the generator the command names changed the hash of nothing and the whole world reported itself up to date. | The fix belongs to the content build rather than to the coverage task that tripped over it: every one of the eight world stages has the same hole, and the nav graph -- twenty minutes of it -- is the one that hurts, because it is built against `collision.bin` and would keep a version built by a tool that no longer exists. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00569` | **New task, next free id in phase 7's reserved 00541–00620 range.** Found by `HOUSE-00774`: `SweepCapsuleTriangle` extrudes a triangle by the capsule's half-height, a SPHERE's half-height is zero, and the flat prism that leaves is the shape `prism.solid` exists to refuse -- so everything over a triangle was inside it, decided by whether a mathematically-zero dot product came out a hair positive. | `HOUSE-00615` fixed the same defect for a vertical triangle and the height was the second way to have no volume. It is its own task rather than a line in `HOUSE-00774` because it is not about the exterior at all: §45's camera arm sweeps a sphere, every probe in the test suite is one, and the bug was in the sweep both of them share. No id was renumbered or struck. |
 | 2026-09-09 | `collision.bin` v2 → **v3** | A `u8` per cell: **is §11.5's ground part of this cell's collision?** (`HOUSE-00774`) | The height field is one surface over the whole lot and the house stands on it, so it runs through the basement and 0.1 m under `L0`'s floor. Giving §49.3's step 5 the ground -- which the outdoors needs, because a body that walked off the terrace's edge landed inside the slope and stayed there -- pushed a body on the basement stair out of the lawn above it instead. Nothing else in the file can tell the two apart: `EXT_SHED` is an `exterior` cell that is a building, and §15's yards are cells like any other. `docs/collision-format.md` §3.4 is normative. No id was renumbered or struck. |

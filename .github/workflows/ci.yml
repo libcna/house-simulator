@@ -248,6 +248,17 @@ jobs:
           python3 tools/world/fence_gen.py --selftest
           python3 tools/world/neighbourhood_gen.py --selftest
 
+      - name: The exterior tree must be part of the content build
+        working-directory: cna-house
+        # `HOUSE-00227`. Gating the generators' selftests is a different question from whether
+        # anything RUNS them: it did not, and `build/terrain` came to hold tiles three hours older
+        # than the height field they are drawn from while `chunks.bin` -- and fifteen committed
+        # render references of the outdoors -- were built from them. The graph now names all four
+        # as stages, and these two claims are what stops one being quietly dropped again.
+        run: |
+          python3 tools/ci/build_content.py --selftest
+          python3 tools/ci/build_content.py --check-docs
+
       - name: Snow must settle on decks and on nothing else
         working-directory: cna-house
         # `HOUSE-00214`. The slope test is measured from +Y rather than |Y|, so a deck's underside

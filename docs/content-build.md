@@ -61,6 +61,15 @@ and the report names which upstream did it. Until `HOUSE-00768` this was orderin
 consequence was a `nav.bin` built against a `collision.bin` that had since been rebuilt under it:
 the pet graph sat over the ground the terrain used to be, and every stage reported success.
 
+**The generated exterior tree is part of the pipeline** since `HOUSE-00227`. `terrain-tiles`,
+`road`, `fence` and `neighbourhood` write `.glb` into `build/terrain`, `build/fence` and
+`build/neighbourhood`, and `chunks` reads the first two — so they are its inputs as well as its
+`needs`. Before that no stage ran them at all: `tools/ci/run_checks.sh` gates their **selftests**,
+which is a different question from whether their **output** is current, and on 2026-09-10 it was
+not. `build/terrain` held tiles written at 12:49 on the 9th from a height field rewritten at 14:56
+the same day; `build/fence` held a tree from before `HOUSE-00785` repaired the generator; and
+`chunks.bin`, plus fourteen committed render references of the outdoors, were built from both.
+
 <!-- BEGIN GENERATED: build_content.py --docs -->
 
 | # | Stage | Group | What it does | Needs | Reads | Writes |
@@ -77,13 +86,17 @@ the pet graph sat over the ground the terrain used to be, and every stage report
 | 10 | **`cnb-textures`** | compile | compile assets-src/Textures to content/Textures with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Textures/**/*` | — (a gate) |
 | 11 | **`world-rules`** | world | the twelve rules of §15.7 over the authored layout | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | — (a gate) |
 | 12 | **`collision`** | world | rooms become walls; the layout and the _COL proxies | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json`<br>`assets-src/assets.manifest.json` | `content/world/collision.bin` |
-| 13 | **`world-deploy`** | world | strip the comments, deploy as plain JSON, and hash what was written | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json` | `content/world/*.json` |
-| 14 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/chunks.bin` |
-| 15 | **`cnb-world`** | compile | compile assets-src/world to content/world with cna-content | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/**/*` | — (a gate) |
-| 16 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/coverage.bin` |
-| 17 | **`nav`** | world | the pet waypoint graph | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/nav.bin` |
-| 18 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
-| 19 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
+| 13 | **`fence`** | world | §11.2's fences and gates and §11.1's garden structures | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png` | `build/fence/*.glb` |
+| 14 | **`neighbourhood`** | world | §11.4's neighbour houses, impostor cards and street furniture | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json` | `build/neighbourhood/*.glb` |
+| 15 | **`road`** | world | §11.4's road, kerbs, sidewalks, grates and markings | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png` | `build/terrain/ROAD_*.glb` |
+| 16 | **`terrain-tiles`** | world | §11.5's twenty height-field tiles | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png`<br>`assets-src/world/terrain_materials.png` | `build/terrain/TERRAIN_*.glb` |
+| 17 | **`world-deploy`** | world | strip the comments, deploy as plain JSON, and hash what was written | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json` | `content/world/*.json` |
+| 18 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fence`, `fonts`, `layout`, `licences`, `manifest`, `road`, `terrain-tiles` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb`<br>`build/terrain/*.glb`<br>`build/fence/*.glb` | `content/world/chunks.bin` |
+| 19 | **`cnb-world`** | compile | compile assets-src/world to content/world with cna-content | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/**/*` | — (a gate) |
+| 20 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/coverage.bin` |
+| 21 | **`nav`** | world | the pet waypoint graph | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/nav.bin` |
+| 22 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
+| 23 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
 
 The command each stage runs:
 
@@ -100,6 +113,10 @@ cnb-models     /rv/data/development/github.com/openeggbert/cna-house/build/CNA_B
 cnb-textures   /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Textures -o content/Textures --quiet
 world-rules    python3 tools/world/validate_world.py assets-src/world
 collision      python3 tools/world/build_collision.py
+fence          python3 tools/world/fence_gen.py
+neighbourhood  python3 tools/world/neighbourhood_gen.py
+road           python3 tools/world/terrain_gen.py --road
+terrain-tiles  python3 tools/world/terrain_gen.py --tiles
 world-deploy   python3 tools/world/deploy_world.py
 chunks         python3 tools/world/build_chunks.py
 cnb-world      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/world -o content/world --quiet

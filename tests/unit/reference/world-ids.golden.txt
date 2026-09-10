@@ -1210,6 +1210,10 @@ exterior/neighbourhood	NB_IMPOSTOR_N57
 exterior/neighbourhood	NB_IMPOSTOR_N58
 exterior/neighbourhood	NB_IMPOSTOR_N59
 exterior/neighbourhood	NB_IMPOSTOR_N60
+exterior/neighbourhood	NB_LAMP_01
+exterior/neighbourhood	NB_LAMP_02
+exterior/neighbourhood	NB_LAMP_03
+exterior/neighbourhood	NB_LAMP_04
 exterior/neighbourhood	NB_MAILBOX_01
 exterior/neighbourhood	NB_MAILBOX_02
 exterior/neighbourhood	NB_MAILBOX_03
@@ -1232,6 +1236,10 @@ exterior/neighbourhood	NB_SIGN_02
 exterior/neighbourhood	NB_SIGN_03
 exterior/neighbourhood	NB_SIGN_04
 exterior/neighbourhood	NB_SIGN_PRIVATE_W
+exterior/neighbourhood	NB_SPAN_01
+exterior/neighbourhood	NB_SPAN_02
+exterior/neighbourhood	NB_SPAN_03
+exterior/neighbourhood	NB_SPAN_04
 exterior/neighbourhood	NB_VAN_ROADEND_E
 exterior/paths	PATH_APRON
 exterior/paths	PATH_CONNECT

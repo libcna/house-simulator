@@ -185,9 +185,37 @@ def default_stages() -> list[Stage]:
         Stage("coverage", "world", ["python3", "tools/world/build_coverage.py"],
               inputs=["assets-src/world/*.json"], outputs=["content/world/coverage.bin"],
               needs=["collision"], description="the rain/roof coverage height field"),
+        # --- the generated exterior tree (`HOUSE-00227`) -----------------------------------------
+        # These four write `.glb` that `build_chunks.py` then reads, and until `HOUSE-00227` NO
+        # stage ran them: `run_checks.sh` gates their selftests, which is a different question from
+        # whether their output is current. It was not. On 2026-09-10 `build/terrain` held tiles
+        # written at 12:49 on the 9th from a height field that was rewritten at 14:56 the same day,
+        # `build/fence` held a tree from before `HOUSE-00785` fixed the generator, and
+        # `chunks.bin` -- and every render reference of the outdoors -- was built from both.
+        Stage("terrain-tiles", "world",
+              ["python3", "tools/world/terrain_gen.py", "--tiles"],
+              inputs=["assets-src/world/layout.exterior.json", "assets-src/world/terrain.png",
+                      "assets-src/world/terrain_materials.png"],
+              outputs=["build/terrain/TERRAIN_*.glb"], needs=["world-rules"],
+              description="§11.5's twenty height-field tiles"),
+        Stage("road", "world",
+              ["python3", "tools/world/terrain_gen.py", "--road"],
+              inputs=["assets-src/world/layout.exterior.json", "assets-src/world/terrain.png"],
+              outputs=["build/terrain/ROAD_*.glb"], needs=["world-rules"],
+              description="§11.4's road, kerbs, sidewalks, grates and markings"),
+        Stage("fence", "world", ["python3", "tools/world/fence_gen.py"],
+              inputs=["assets-src/world/layout.exterior.json", "assets-src/world/terrain.png"],
+              outputs=["build/fence/*.glb"], needs=["world-rules"],
+              description="§11.2's fences and gates and §11.1's garden structures"),
+        Stage("neighbourhood", "world", ["python3", "tools/world/neighbourhood_gen.py"],
+              inputs=["assets-src/world/layout.exterior.json"],
+              outputs=["build/neighbourhood/*.glb"], needs=["world-rules"],
+              description="§11.4's neighbour houses, impostor cards and street furniture"),
         Stage("chunks", "world", ["python3", "tools/world/build_chunks.py"],
-              inputs=["assets-src/world/*.json", "assets-src/Models/**/*.glb"],
-              outputs=["content/world/chunks.bin"], needs=["collision"],
+              inputs=["assets-src/world/*.json", "assets-src/Models/**/*.glb",
+                      "build/terrain/*.glb", "build/fence/*.glb"],
+              outputs=["content/world/chunks.bin"],
+              needs=["collision", "terrain-tiles", "road", "fence"],
               description="per-cell static prop batches"),
         Stage("skyexposure", "world", ["python3", "tools/world/build_skyexposure.py"],
               inputs=["assets-src/world/*.json"], outputs=["content/world/skyexposure.bin"],
@@ -760,6 +788,32 @@ def selftest() -> int:
         for stage in default_stages():
             require(bool(stage.description),
                     f"stage {stage.name!r} says what it does, for HOUSE-00217's documentation")
+
+        # 13b. `HOUSE-00227`: the generated exterior tree is IN the pipeline. Four generators wrote
+        #      the `.glb` that `build_chunks.py` reads and no stage ran any of them, which is how
+        #      `build/terrain` came to hold tiles three hours older than the height field they are
+        #      drawn from and `chunks.bin` to be built from both that and a fence tree
+        #      `HOUSE-00785` had already replaced.
+        by_name = {stage.name: stage for stage in default_stages()}
+        exterior = ("terrain-tiles", "road", "fence", "neighbourhood")
+        require(all(name in by_name for name in exterior),
+                f"the four exterior generators are stages "
+                f"({[name for name in exterior if name not in by_name]} missing)")
+        require(all(by_name[name].outputs for name in exterior if name in by_name),
+                "and each of them declares what it writes, so a stale output is a rebuild")
+        chunks = by_name["chunks"]
+        require(all(name in chunks.needs for name in exterior if name != "neighbourhood"),
+                f"`chunks` needs the three whose output it reads ({chunks.needs})")
+        # ...and their output is among its INPUTS, not only its `needs`. `needs` rebuilds it when
+        # they run in this pipeline; the fingerprint is what notices a generator someone ran by
+        # hand, which is every way the tree went stale in the first place.
+        read_by_chunks = {"build/terrain", "build/fence"}
+        written = {pattern.rsplit("/", 1)[0] for name in exterior if name in by_name
+                   for pattern in by_name[name].outputs}
+        seen = {pattern.rsplit("/", 1)[0] for pattern in chunks.inputs}
+        require(read_by_chunks <= written and read_by_chunks <= seen,
+                f"and it hashes what they wrote, so a hand-run generator is noticed too "
+                f"({sorted(read_by_chunks - seen)} unhashed)")
 
         # 14. The documentation is GENERATED from the graph, so it cannot drift from it. A
         #     hand-written order is a second description of the pipeline, and `HOUSE-00217` asks
