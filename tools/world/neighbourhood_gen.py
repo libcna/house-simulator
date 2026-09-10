@@ -231,6 +231,32 @@ def openings_on(house: House) -> list[tuple[float, float, float, float]]:
     return out
 
 
+#: §11.4's "interior-glow cards at night" (`HOUSE-00849`). The trim around an opening is the
+#: FRAME and this is the pane inside it: the blockout wall has no hole in it -- an opening is a
+#: panel of a different material on the wall face -- so "behind the window" is a card inside the
+#: frame rather than a plane in a void behind it. It is drawn `GLOW_PROUD` in front of the frame,
+#: which is the smallest offset that cannot z-fight and is 1/24 of the reveal it sits in.
+GLOW_FRAME = 0.09
+GLOW_PROUD = 0.005
+GLOW_MATERIAL = "NB_WINDOW_GLOW"
+
+
+def glow_card(x0: float, x1: float, y0: float, y1: float, at_z: float) -> list:
+    """One window's glow card: a quad inside the opening's frame, facing the street.
+
+    Two triangles, which is what §26.1 calls an impostor and is the whole of what a lit window is
+    at the 90 m `layout.exterior.json` gives N1 and N2. The card is drawn for every window on a
+    LOD0 house whether or not it is lit tonight -- WHICH of them are lit is `WindowGlow`'s answer
+    at run time and not a decision baked into the mesh, because it changes and the mesh does not.
+    """
+    if x1 - x0 <= 2.0 * GLOW_FRAME or y1 - y0 <= 2.0 * GLOW_FRAME:
+        return []
+    z = at_z + GLOW_PROUD
+    return [([(x0 + GLOW_FRAME, y0 + GLOW_FRAME, z), (x1 - GLOW_FRAME, y0 + GLOW_FRAME, z),
+              (x1 - GLOW_FRAME, y1 - GLOW_FRAME, z), (x0 + GLOW_FRAME, y1 - GLOW_FRAME, z)],
+             (0.0, 0.0, 1.0), GLOW_MATERIAL)]
+
+
 def house_faces(house: House, detailed: bool, plot: bool = True) -> list:
     """Every face of one house, in world metres, with the origin at the middle of its footprint.
 
@@ -246,8 +272,11 @@ def house_faces(house: House, detailed: bool, plot: bool = True) -> list:
     # does not -- 0.35 of the triangles, from one decision rather than from a decimation pass.
     if detailed:
         for x0, x1, y0, y1 in openings_on(house):
-            material = house.palette.door if y0 <= 1e-9 else house.palette.trim
+            door = y0 <= 1e-9
+            material = house.palette.door if door else house.palette.trim
             faces += box((x0, y0, half_d - REVEAL), (x1, y1, half_d), material)
+            if not door:
+                faces += glow_card(x0, x1, y0, y1, half_d)
 
     if house.garage != "none":
         width, depth, height = 5.6, 6.0, 2.7
@@ -985,6 +1014,41 @@ def selftest() -> int:
                     f"{house.name}: ...and under its eaves ({y1:.2f} of {house.eaves:.2f})")
     doors = [row for row in openings_on(TYPES["MODEL_NB_HOUSE_A_CREAM"]) if row[2] <= 1e-9]
     require(len(doors) == 1, f"and exactly one of them reaches the ground: the door ({len(doors)})")
+
+    # 5b. `HOUSE-00849`: §11.4's interior-glow cards. One per WINDOW on a LOD0 house, none on the
+    #     door -- §11.4 asks for lit windows, and a lit front door is a door standing open.
+    for asset, house in sorted(TYPES.items()):
+        cards = [f for f in house_faces(house, True) if f[2] == GLOW_MATERIAL]
+        windows = [row for row in openings_on(house) if row[2] > 1e-9]
+        require(len(cards) == len(windows),
+                f"{house.name}: one glow card per window, and none for the door "
+                f"({len(cards)} of {len(windows)})")
+        require(all(len(corners) == 4 for corners, _n, _m in cards),
+                f"{house.name}: each is a quad -- two triangles, which is what §26.1 calls an "
+                f"impostor and is the whole of a lit window at 90 m")
+        # Inside its own opening, so a card cannot be a lit rectangle floating on the wall...
+        outside = []
+        for corners, _n, _m in cards:
+            low_x = min(point[0] for point in corners)
+            high_x = max(point[0] for point in corners)
+            low_y = min(point[1] for point in corners)
+            high_y = max(point[1] for point in corners)
+            if not any(x0 < low_x and high_x < x1 and y0 < low_y and high_y < y1
+                       for x0, x1, y0, y1 in windows):
+                outside.append((round(low_x, 3), round(low_y, 3)))
+        require(not outside, f"{house.name}: every card is inside its own frame ({outside})")
+        # ...and PROUD of it rather than in the same plane, which would z-fight.
+        # ...and PROUD of it by a NUMBER, not by whatever the constant says: written against
+        # `GLOW_PROUD` this claim would move with it and would pass at zero, which is the
+        # z-fight it exists to prevent.
+        depths = sorted({round(point[2] - house.depth / 2.0, 4)
+                         for corners, _n, _m in cards for point in corners})
+        require(len(depths) == 1 and 0.001 <= depths[0] <= 0.020,
+                f"{house.name}: and 1-20 mm in front of the wall it is set into, so it cannot "
+                f"z-fight with the frame ({depths})")
+        require(not [f for f in house_faces(house, False) if f[2] == GLOW_MATERIAL],
+                f"{house.name}: and LOD1 has none -- §11.4 puts the glow cards on N1 and N2, "
+                f"which are the two LOD0 houses")
 
     # 6. The roof comes from `roof_geometry` and not from a second derivation.
     house = TYPES["MODEL_NB_HOUSE_A_CREAM"]

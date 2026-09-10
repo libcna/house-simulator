@@ -11979,8 +11979,47 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             -- injected into the LAYOUT -- a card off the ring, two of the same land side by side,
             a card turned to face outward, the tower moved behind the skyline, and the tower moved
             in front of a card.
-- [ ] HOUSE-00849 — Implement the neighbourhood window-glow cards for night (emissive quads behind the window openings)
+- [x] HOUSE-00849 — Implement the neighbourhood window-glow cards for night (emissive quads behind the window openings)
       dep: HOUSE-00842, HOUSE-00856 · sys: rendering · plat: ALL · pri: MUST
+      verify: `WindowGlowTests`, `tools/world/neighbourhood_gen.py --selftest`
+      finding: **the blockout wall has no hole in it, so "behind the window opening" has to mean
+            something buildable.** An opening on these houses is a panel of trim on the wall FACE
+            (`HOUSE-00841`), not a void: a card drawn at the back of the reveal would be inside a
+            solid box. So the trim panel is the FRAME and the card is the pane inside it, inset
+            0.09 m and drawn **5 mm proud** of the wall -- the smallest offset that cannot z-fight,
+            and a twenty-fourth of the reveal it sits in. Both numbers are claims, and the
+            proud-ness is asserted as **1-20 mm** rather than against `GLOW_PROUD` itself: written
+            against the constant it would move with it and pass at zero, which is the z-fight it
+            exists to prevent.
+      finding: **which windows are lit is not geometry, and that is the whole design.** The mesh is
+            the same every night; the lit windows are not. `rendering::WindowGlow` answers it from
+            the ROW's id -- `NB_HOUSE_N1`, not its asset -- because §11.4's two LOD0 houses share
+            one mesh where they share a shape, and a pattern keyed on the asset would light them
+            identically. `NB_WINDOW_GLOW` is its own material and therefore its own primitive in
+            `neighbourhood.bin`, so a day frame leaves it out without touching the house.
+      finding: a raw hash lights half of everything, and an evening street has **more dark windows
+            than lit ones**. `RawMask` takes a second, differently-mixed hash into the AND, which
+            measures **0.42 of all windows lit over 200 houses** -- and the counts spread: of 200
+            four-window houses, 21 are fully dark, 62 have one lit, 79 two, 36 three and 2 have
+            every window lit. §11.4's own two come out at 2 of 4 and 3 of 4, and differ.
+      finding: nothing here reads a clock, so nothing here is waiting for one. **When** the cards
+            light is `HOUSE-00850`'s dusk sensor and §35's clock is `HOUSE-01531`; `Level` takes
+            the night level a caller already has, clamps it (a card at 1.4 is a window brighter
+            than the sun it replaced) and scales it by a per-window brightness in 0.45..1, so a
+            street's lit windows are not all the same lamp. The hash is `util::Id`'s own FNV-1a
+            with no seed, so a night reference frame is the same frame on Linux and in a browser.
+      measured: (2026-09-10) 8 cards on the street -- 4 on N1, 4 on N2 -- at 2 triangles each.
+            `MODEL_NB_HOUSE_A_CREAM` goes 288 to **296 triangles** and gains a sixth primitive;
+            `neighbourhood.bin` 224 610 to 228 834 bytes. 8 C++ tests and 15 new selftest claims.
+      note: the emissive PATH is §22's and the material record is `HOUSE-00385`'s, which is blocked
+            on assets. What exists now is the card, its own material, and which of them are lit --
+            everything that is decidable without a material system or a clock.
+      verified: 10 injections, all CAUGHT -- 5 in `WindowGlow` (the sparse hash dropped so half the
+            street lights up, the mask reaching past the windows that exist, `night` left
+            unclamped, every lit window given the same brightness, and the pattern keyed on
+            something other than the row) and 5 in the grammar (the door given a glow card, the
+            card in the same plane as its frame, the card 0.25 m off the wall, the card overflowing
+            its frame, and cards drawn at LOD1 as well).
 - [ ] HOUSE-00850 — Implement the neighbour porch lights and street lights on the dusk sensor with per-fixture offsets
       dep: HOUSE-00849 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-00851 — Implement impostor rendering: yaw slice selection, sky tinting, vertical-axis billboarding for trees

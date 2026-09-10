@@ -558,6 +558,13 @@ reason is stated there: a chunk bakes its placement, and an instance that has to
 cannot have one baked in. `NeighbourhoodResolutionTests` checks both directions against the world
 the build produced — every row resolves to a mesh, and every mesh is placed by a row.
 
+§11.4's *"real windows with interior-glow cards at night"* are geometry on the LOD0 houses
+(`HOUSE-00849`): one `NB_WINDOW_GLOW` quad per window, inset in the trim frame and 5 mm proud of
+the wall, in its own material and therefore its own primitive so a day frame can leave it out.
+**Which** of them are lit is not in the mesh — the mesh is the same every night and the lit windows
+are not — and comes from `rendering::WindowGlow`, keyed on the ROW's id rather than its asset,
+because the two LOD0 houses share a mesh where they share a shape.
+
 `terrain.heightfield` and `terrain.materialIndex` are paths into the **deployed world directory**,
 not asset ids: the two images are copied there verbatim by `deploy_world.py` and hashed into
 `world.manifest.json` beside the JSON, so `WorldLoader::VerifyManifest` covers the ground the

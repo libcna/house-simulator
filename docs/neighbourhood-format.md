@@ -103,10 +103,12 @@ Then per primitive:
 
 ## 7. What the file holds today
 
-(2026-09-10) **34 assets, 224 610 bytes.** Nineteen house variants at LOD0/LOD1/LOD2, four impostor
+(2026-09-10) **34 assets, 228 834 bytes.** Nineteen house variants at LOD0/LOD1/LOD2, four impostor
 cards, seven pieces of street furniture, three horizon cards and the water tower. The largest is a
-LOD0 house at 5 primitives and 580 vertices; the smallest is `MODEL_NB_IMPOSTOR_GABLE` at one
-primitive and 7.
+LOD0 house at 6 primitives and 596 vertices — the sixth is `HOUSE-00849`'s `NB_WINDOW_GLOW`, one
+quad per window, which is its own primitive precisely so that whatever draws the neighbourhood can
+leave it out by day without touching the rest of the house; the smallest is
+`MODEL_NB_IMPOSTOR_GABLE` at one primitive and 7.
 
 ## 8. Staleness
 
