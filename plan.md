@@ -13678,9 +13678,44 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 41 — Culling and LOD optimisation
 
-- [ ] HOUSE-02391 — Implement the LOD selector with the projected-height metric and hysteresis
+- [x] HOUSE-02391 — Implement the LOD selector with the projected-height metric and hysteresis
       dep: HOUSE-00674 · sys: visibility · plat: ALL · pri: MUST
       verify: unit LodTests.* proving no oscillation at a boundary over a 600-frame approach
+      note: (2026-09-10) taken out of order because §26.1 is what `HOUSE-00841`…`HOUSE-00857`'s
+            whole neighbourhood keeps referring to and nothing implemented it: the phase-11 tasks
+            that remain are each blocked on an owner decision, on `HOUSE-00293`'s asset research
+            or on `HOUSE-00772`'s vegetation, and this one's dependency was satisfied.
+      finding: **`Culled` is a LEVEL, not a separate answer.** §26.1's table ends with it -- under
+            8 px nothing is drawn -- so putting it in the enum is what lets one comparison decide
+            between all five and one deadband rule cover the last boundary as well as the others.
+      finding: **the deadband is measured against the level you are AT, not the one you would fall
+            to**, and that is the whole of the hysteresis. At LOD1's 90 px an object holds LOD1
+            down to 76.5 and takes LOD1 again only back at 90. Measured against the level below it
+            would be 0.85 × 30 = 25.5 px, which is not a deadband: the object would fall to LOD2 at
+            89.99 and climb back at 90. An injection makes exactly that mistake and is caught.
+      finding: **and it must not slow a real change down.** A camera cut crosses every band it
+            needs to in one call -- `SelectLod(1 px, Lod0)` is `Culled`, not one step of four --
+            because the deadband exists to absorb dithering, and an object that took four frames
+            to reach its level would draw a LOD0 house at 3 px for three of them.
+      finding: **§26.1's `d > r` clamp is not a nicety.** Unclamped, a camera inside a bounding
+            sphere divides by zero and the NaN reaches the comparison, where it is false against
+            every threshold -- so the object the camera is standing inside would be silently
+            CULLED. Clamped to the sphere's own surface it is `Lod0`, which is what it is.
+      finding: the **bias is applied to the selected level and not inside the selection**.
+            §26.1's global `lodBias` and §15.4's "+1 through frosted glass" are the same operation
+            (`Coarsen`), and hysteresis has to remember the level the METRIC chose: a bias that
+            changed -- a quality setting moved, a door closed -- would otherwise read as an object
+            that had moved. Where the bias comes from is `HOUSE-02393`'s, and
+            `visibility::CellDetail::lodBias` is the interior half of it already.
+      measured: (2026-09-10) the acceptance walk is a 7 m neighbour approached at 2 mm a frame
+            across LOD1's 90 px boundary and walked back: **2 level changes over 600 frames**, one
+            each way. The CONTROL is the same claim's other half and is what makes it worth
+            anything -- a 2 cm hover on that boundary put through the metric alone changes level
+            **more than 50 times in 600 frames**, and through the selector **zero**.
+      verified: 9 tests and 6 injections, all CAUGHT -- the hysteresis removed entirely, the
+            deadband measured against the level below, the threshold made exclusive so 220 px is
+            not LOD0, the distance clamp removed, a factor of two dropped from the metric, and the
+            bias wrapped instead of saturating so +9 is LOD0 again.
 - [ ] HOUSE-02392 — Implement per-category LOD assignment from the manifest
       dep: HOUSE-02391 · sys: visibility · plat: ALL · pri: MUST
 - [ ] HOUSE-02393 — Implement the global `lodBias` from the quality tier and settings

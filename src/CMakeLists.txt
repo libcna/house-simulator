@@ -69,6 +69,7 @@ add_library(cnahouse_core STATIC
     visibility/ChunkCulling.cpp
     visibility/ClipFrustum.cpp
     visibility/CullDistance.cpp
+    visibility/LodSelection.cpp
     visibility/DetailSets.cpp
     visibility/ExteriorBvh.cpp
     visibility/ExteriorCulling.cpp
