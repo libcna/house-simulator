@@ -32,8 +32,8 @@
   <line x1="222.8" y1="378.8" x2="248.8" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="254.0" y1="378.8" x2="280.0" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="473.7" y1="378.8" x2="499.7" y2="378.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
-  <line x1="449.0" y1="46.0" x2="475.0" y2="46.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
-  <line x1="475.0" y1="46.0" x2="501.0" y2="46.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="446.4" y1="46.0" x2="472.4" y2="46.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
+  <line x1="477.6" y1="46.0" x2="503.6" y2="46.0" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="46.0" y1="202.0" x2="46.0" y2="222.8" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
   <line x1="602.4" y1="105.8" x2="602.4" y2="126.6" stroke="#2e86c1" stroke-width="3.2" stroke-linecap="round"/>
   <g stroke="#2c3e50" stroke-width="1.4" fill="none"><line x1="618" y1="34" x2="618" y2="8"/><path d="M614 14 L618 8 L622 14"/></g>

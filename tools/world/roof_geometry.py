@@ -679,6 +679,24 @@ def selftest() -> int:
             "...and the same opening as a dormer is")
 
     pitch = float(construction["roofPitch"])
+
+    # `HOUSE-00492`: the five together, not one at a time. Each dormer's own hole was already
+    # claimed below, and five correct holes can still overlap each other -- `WIN_L3_STORE_N_1` and
+    # `_2` were authored EDGE TO EDGE, and a cheek is `DORMER_CHEEK` wider than its window on each
+    # side, so 0.372 m² of roof was cut twice and two cheek faces stood in the same plane. The sum
+    # is what says they do not, and it is the check that found it.
+    all_holes = 0.0
+    for dormer in dormers:
+        hole_of = dormer_footprint(dormer[0], dormer[1], dormer[2], outer, eaves, pitch)
+        all_holes += (hole_of[1] - hole_of[0]) * (hole_of[3] - hole_of[2])
+    whole_plain = sum(plan_area(face) for face, _out in roof_planes(outer, eaves, pitch))
+    whole_cut = sum(plan_area(face) for face, _out in roof_planes(outer, eaves, pitch, dormers))
+    require(abs((whole_plain - whole_cut) - all_holes) < 1e-6,
+            f"§12.1's five dormers do not overlap each other: they cover {all_holes:.4f} m² of "
+            f"plan and remove {whole_plain - whole_cut:.4f}, a difference of "
+            f"{all_holes - (whole_plain - whole_cut):.4f} m² that would be roof cut twice and two "
+            f"cheeks in one plane")
+
     one = dormers[0]
     hole = dormer_footprint(one[0], one[1], one[2], outer, eaves, pitch)
     cut = roof_planes(outer, eaves, pitch, [one])

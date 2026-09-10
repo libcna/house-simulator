@@ -1466,7 +1466,19 @@
       // W_DORMER.
       "id": "P_L3_STORE_N__W1", "cellA": "L3_STORE_N", "cellB": "EXT_BACKYARD",
       "plane": { "axis": "z", "value": -27.10 },
-      "rect": { "u": [2.80, 3.80], "v": [10.05, 11.15] },
+      // `HOUSE-00492`: this pair was authored EDGE TO EDGE at 2.80-3.80 and 3.80-4.80, and a
+      // dormer is `DORMER_CHEEK` = 0.10 m wider than its window on each side, so the two cheeks
+      // occupied the same 0.20 m of wall -- two coincident faces, which is a z-fight where the
+      // dormers meet. The front three prove the intended spacing: `WIN_L3_ROOM_1` and `_2` are
+      // 0.20 m apart, which is exactly two cheeks meeting.
+      //
+      // BOTH move, and the 2.20 m they now span is the whole of what is available. §15.7 rule 4
+      // wants a portal inside the cell on each side, and `EXT_BACKYARD`'s box behind this wall is
+      // x 2.70-17.10 while `L3_STORE_N` ends at x +4.90: two 1.00 m windows 0.20 m apart fit that
+      // 2.20 m exactly, at 2.70-3.70 and 3.90-4.90, and there is no room to move either one
+      // alone. (Moving `_W1` west to 2.60 was tried first and rule 4 refused it: a window opening
+      // into a yard that is not there.)
+      "rect": { "u": [2.70, 3.70], "v": [10.05, 11.15] },
       "kind": "window", "aperture": "WIN_L3_STORE_N_1",
       "opacity": "glass", "maxDepth": 3,
       "soundLoss": { "open": 0.109, "closed": 0.921 }
@@ -1475,7 +1487,8 @@
       // W_DORMER.
       "id": "P_L3_STORE_N__W2", "cellA": "L3_STORE_N", "cellB": "EXT_BACKYARD",
       "plane": { "axis": "z", "value": -27.10 },
-      "rect": { "u": [3.80, 4.80], "v": [10.05, 11.15] },
+      // 3.80-4.80 -> 3.90-4.90 by `HOUSE-00492`; see `_W1` above for why both had to move.
+      "rect": { "u": [3.90, 4.90], "v": [10.05, 11.15] },
       "kind": "window", "aperture": "WIN_L3_STORE_N_2",
       "opacity": "glass", "maxDepth": 3,
       "soundLoss": { "open": 0.109, "closed": 0.921 }

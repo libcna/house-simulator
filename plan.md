@@ -7994,8 +7994,9 @@ the chunk builder produces ≤ 6 chunks per cell.
             silhouette in eight render poses -- or the two louvres become dormers, or they are
             struck from §12.6 and the two stores have no window. Whoever owns §12 picks; the
             evidence is here so that the choice is made once.
-- [ ] HOUSE-00492 — The two rear dormers overlap by 0.20 m
+- [x] HOUSE-00492 — The two rear dormers overlap by 0.20 m
       dep: HOUSE-00490 · sys: world · plat: TOOL · pri: SHOULD
+      verify: `tools/world/roof_geometry.py --selftest`, `tools/world/verify_shell.py`
       note: (2026-09-09) **New task, next free id in phase 6's reserved 00451–00540 range.**
             Found by `HOUSE-00490` while cutting the dormer footprints out of the roof: the five
             footprints cover 11.143 m² but remove only 10.771 m² of plan, and the 0.372 m²
@@ -8011,6 +8012,32 @@ the chunk builder produces ≤ 6 chunks per cell.
             two dormers meet; the collision consequence is a duplicate face in the same plane,
             which is harmless. Neither is visible in the eight exterior poses at their distance,
             which is why it took a plan-area check to find it.
+      finding: (2026-09-10) **both windows had to move, and the 2.20 m they now span is the whole
+            of what is available.** Nudging `_W1` west to 2.60-3.60 was tried first and §15.7
+            rule 4 refused it by name: `EXT_BACKYARD`'s box behind that wall is x 2.70-17.10, so
+            the window would have opened into a yard that is not there. `L3_STORE_N` ends at
+            x +4.90 at the other end. Two 1.00 m windows 0.20 m apart fit that 2.20 m exactly --
+            2.70-3.70 and 3.90-4.90 -- and neither can move alone.
+      finding: **the claim that finds it is the SUM, and it did not exist.** `roof_geometry`'s
+            selftest checked each dormer's own hole against its own footprint -- true of all five
+            while two of them cut the same roof twice. The five together now cover 11.1428 m² of
+            plan and remove 11.1428, where before they removed 10.7714. One-at-a-time claims
+            cannot see a pair.
+      finding: **and regenerating the shell found a staleness hole `HOUSE-00227` had missed.**
+            `build_chunks.py` has read `build/shell` by default since `HOUSE-00473` and NO stage
+            declared it, so a shell regeneration was invisible to the content build's fingerprint.
+            It is masked today only because `chunks` fails on every run (`HOUSE-00487`) and reruns
+            anyway; the day that is fixed it would have bitten. `build/shell/*.glb` is an input
+            now, with a claim. `build/shell-lm` deliberately is not: it is the PREFERRED tree when
+            it exists and the build works without it, so requiring it would skip the stage on a
+            checkout that has never baked a lightmap.
+      measured: (2026-09-10) the shell's triangle count is **unchanged at 41 553**, and that is
+            the right answer: two coincident cheeks are two faces exactly as two meeting cheeks
+            are. What changed is 0.20 m of wall between them, and the plan area the five dormers
+            remove: 10.7714 → **11.1428 m²**, which is now their own footprints exactly.
+      verified: 2 injections, both CAUGHT -- the pair put back edge to edge, and the FRONT pair
+            (which was right) pushed together to 0.00 m. A third, widening the claim's own
+            tolerance, is not counted: a claim cannot catch its own epsilon being loosened.
 
 ---
 

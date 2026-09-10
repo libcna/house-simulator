@@ -223,8 +223,15 @@ def default_stages() -> list[Stage]:
               needs=["neighbourhood", "world-rules"],
               description="§11.4's meshes, keyed by the asset id a row names"),
         Stage("chunks", "world", ["python3", "tools/world/build_chunks.py"],
+              # ...and `build/shell`, which `build_chunks.py` has read by default since
+              # `HOUSE-00473` and which no stage declared until `HOUSE-00492` regenerated the
+              # shell and looked. It is masked today only because `chunks` fails on every run
+              # (`HOUSE-00487`) and therefore reruns anyway; the day that is fixed, a shell
+              # regeneration would go unchunked. `build/shell-lm` is deliberately NOT here: it is
+              # the PREFERRED tree when it exists and the build works without it, so requiring it
+              # would skip the stage on a checkout that has never baked a lightmap.
               inputs=["assets-src/world/*.json", "assets-src/Models/**/*.glb",
-                      "build/terrain/*.glb", "build/fence/*.glb"],
+                      "build/terrain/*.glb", "build/fence/*.glb", "build/shell/*.glb"],
               outputs=["content/world/chunks.bin"],
               needs=["collision", "terrain-tiles", "road", "fence"],
               description="per-cell static prop batches"),
@@ -868,6 +875,9 @@ def selftest() -> int:
         # they run in this pipeline; the fingerprint is what notices a generator someone ran by
         # hand, which is every way the tree went stale in the first place.
         read_by_chunks = {"build/terrain", "build/fence"}
+        require("build/shell/*.glb" in chunks.inputs,
+                f"...and the SHELL it reads by default, which nothing declared until "
+                f"`HOUSE-00492` regenerated it ({chunks.inputs})")
         written = {pattern.rsplit("/", 1)[0] for name in exterior if name in by_name
                    for pattern in by_name[name].outputs}
         seen = {pattern.rsplit("/", 1)[0] for pattern in chunks.inputs}

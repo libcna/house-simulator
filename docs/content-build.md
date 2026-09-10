@@ -77,6 +77,13 @@ rebuilt. `fingerprint`'s "never hash your own output" rule matches a command tok
 pattern as well as comparing it, so a stage declaring `out/*.bin` and naming `out/a.bin` is covered
 by the same fix.
 
+`chunks` also reads **`build/shell`**, which it has done by default since `HOUSE-00473` and which
+no stage declared until `HOUSE-00492` regenerated the shell and looked. It is an input now. The
+omission was masked because `chunks` fails on every run (`HOUSE-00487`) and therefore reruns
+anyway; the day that is fixed, a shell regeneration would have gone unchunked. `build/shell-lm` is
+deliberately not an input: it is the *preferred* tree when it exists and the build works without
+it, so requiring it would skip the stage on a checkout that has never baked a lightmap.
+
 <!-- BEGIN GENERATED: build_content.py --docs -->
 
 | # | Stage | Group | What it does | Needs | Reads | Writes |
@@ -98,7 +105,7 @@ by the same fix.
 | 15 | **`road`** | world | §11.4's road, kerbs, sidewalks, grates and markings | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png` | `build/terrain/ROAD_*.glb` |
 | 16 | **`terrain-tiles`** | world | §11.5's twenty height-field tiles | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png`<br>`assets-src/world/terrain_materials.png` | `build/terrain/TERRAIN_*.glb` |
 | 17 | **`world-deploy`** | world | strip the comments, deploy as plain JSON, and hash what was written | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json` | `content/world/*.json` |
-| 18 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fence`, `fonts`, `layout`, `licences`, `manifest`, `road`, `terrain-tiles` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb`<br>`build/terrain/*.glb`<br>`build/fence/*.glb` | `content/world/chunks.bin` |
+| 18 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fence`, `fonts`, `layout`, `licences`, `manifest`, `road`, `terrain-tiles` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb`<br>`build/terrain/*.glb`<br>`build/fence/*.glb`<br>`build/shell/*.glb` | `content/world/chunks.bin` |
 | 19 | **`cnb-world`** | compile | compile assets-src/world to content/world with cna-content | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/**/*` | — (a gate) |
 | 20 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/coverage.bin` |
 | 21 | **`nav`** | world | the pet waypoint graph | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/nav.bin` |
