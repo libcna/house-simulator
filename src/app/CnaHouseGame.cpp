@@ -917,6 +917,13 @@ namespace cnahouse::app
                           "visibility geometry {}",
                           visibilityGeometry_.Visible() ? "shown" : "hidden");
             }
+            if (Input().Current().toggleEnvironmentOverlayPressed)
+            {
+                environmentOverlay_.Toggle();
+                Log::Info(LogCat::Debug,
+                          "environment overlay {}",
+                          environmentOverlay_.Visible() ? "shown" : "hidden");
+            }
             if (Input().Current().toggleFreezeVisibilityPressed && walking_)
             {
                 visibilityFrozen_ = !visibilityFrozen_;
@@ -1357,6 +1364,9 @@ namespace cnahouse::app
             worldOverlay_.Draw(hud_->batch, text_, WalkSnapshot());
             visibilityOverlay_.Draw(hud_->batch, text_, VisibilitySnapshot());
         }
+        // NOT gated on `walking_`: §35's clock runs in every scene, and the blockout scene is
+        // where somebody watching the sun move would be standing.
+        environmentOverlay_.Draw(hud_->batch, text_, clock_);
 #if CNAHOUSE_DEBUG_TOOLS
         if (walking_ && physicsOverlay_.Visible())
         {

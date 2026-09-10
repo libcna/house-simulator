@@ -175,7 +175,7 @@ namespace
 
     TEST(InputTests, EachOverlayHasItsOwnFunctionKeyAndNobodyElsesEdge)
     {
-        // §69's `F2`, §25.8's `F3` and §71's `F9`, each to its own field. A scripted input source
+        // §69's `F2`, §25.8's `F3`, §71's `F8` and `F9`, each to its own field. A scripted input source
         // sets these fields directly (`SetInputSourceForTesting`), so nothing downstream can catch
         // a key wired to the wrong one -- this is the only place the mapping itself is checked.
         struct Binding
@@ -193,6 +193,7 @@ namespace
              &cnahouse::player::InputState::toggleVisibilityGeometryPressed,
              "F4 visibility geometry"},
             {Keys::F5, &cnahouse::player::InputState::toggleFreezeVisibilityPressed, "F5 freeze"},
+            {Keys::F8, &cnahouse::player::InputState::toggleEnvironmentOverlayPressed, "F8 environment"},
             {Keys::F9, &cnahouse::player::InputState::togglePhysicsOverlayPressed, "F9 physics"},
         };
 
@@ -212,21 +213,23 @@ namespace
             }
         }
 
-        // All four at once, which is what catches two of them SHARING an edge slot: one key
+        // All of them at once, which is what catches two SHARING an edge slot: one key
         // pressed alone still looks right when its slot belongs to another, and only pressing both
         // in the same frame shows that the second one has already been consumed.
         KeyboardMouseSource together;
         together.Apply(KeyboardState({}), At(0, 0), 0.016f);
-        together.Apply(
-            KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F4, Keys::F5, Keys::F9}, At(0, 0), 0.016f);
+        together.Apply(KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F4, Keys::F5, Keys::F8, Keys::F9},
+                       At(0, 0),
+                       0.016f);
         for (const Binding& binding : bindings)
         {
             EXPECT_TRUE(together.Current().*(binding.field))
                 << binding.what << " did not fire when the other overlays' keys were down too";
         }
         // ...and holding them repeats none of them, which is what makes each an edge of its own.
-        together.Apply(
-            KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F4, Keys::F5, Keys::F9}, At(0, 0), 0.016f);
+        together.Apply(KeyboardState{Keys::F1, Keys::F2, Keys::F3, Keys::F4, Keys::F5, Keys::F8, Keys::F9},
+                       At(0, 0),
+                       0.016f);
         for (const Binding& binding : bindings)
         {
             EXPECT_FALSE(together.Current().*(binding.field)) << binding.what << " repeated";

@@ -19,6 +19,7 @@
 #include "cnahouse/debug/Console.hpp"
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/debug/DebugDraw.hpp"
+#include "cnahouse/debug/EnvironmentOverlay.hpp"
 #include "cnahouse/debug/FreeFlyCamera.hpp"
 #include "cnahouse/debug/Overlay.hpp"
 #include "cnahouse/debug/PhysicsOverlay.hpp"
@@ -223,6 +224,12 @@ namespace cnahouse::app
         [[nodiscard]] std::size_t ResidentChunksForTesting() const noexcept
         {
             return blockoutCells_ == nullptr ? 0u : blockoutCells_->ResidentChunkIndices().size();
+        }
+
+        /// @brief §71's `F8`, for the test that presses the key.
+        [[nodiscard]] const debug::EnvironmentOverlay& EnvironmentOverlayForTesting() const noexcept
+        {
+            return environmentOverlay_;
         }
 
         /// @brief §35's clock, as it stands after the frames this session has run.
@@ -553,6 +560,8 @@ namespace cnahouse::app
         /// camera is outside the house and in no cell, and §16.4 has no answer for it.
         debug::VisibilityOverlay visibilityOverlay_;
         debug::VisibilityGeometryOverlay visibilityGeometry_;
+        /// @brief §71's `F8`, whose time section is `HOUSE-01537`'s.
+        debug::EnvironmentOverlay environmentOverlay_;
         /// @brief §35.1's clock, advanced once a frame from the REAL delta (`HOUSE-01536`).
         ///
         /// One clock, here, because §35.1 says *"everything time-dependent reads it; nothing else

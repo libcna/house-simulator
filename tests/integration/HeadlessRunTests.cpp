@@ -177,6 +177,51 @@ namespace
         EXPECT_TRUE(std::isfinite(clock.OutdoorBaseTemperatureC()));
     }
 
+    TEST(HeadlessRunTests, PressingF8ShowsTheClockTheFrameActuallyRanOn)
+    {
+        // `HOUSE-01537`. §71's `F8`, end to end: the key reaches the overlay, and behind it the
+        // clock this session has actually been advancing -- not a fresh one the panel made for
+        // itself. `EnvironmentOverlayTests` proves what the lines SAY; what is proved here is that
+        // pressing the key shows them, and that they are about this game's clock.
+        cnahouse::util::Log::ResetForTesting();
+
+        OneKeyPress input(&cnahouse::player::InputState::toggleEnvironmentOverlayPressed);
+
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetInputSourceForTesting(&input);
+        game.SetFrameLimit(30);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+
+        EXPECT_TRUE(game.EnvironmentOverlayForTesting().Visible())
+            << "one press of F8 did not show the overlay";
+
+        // The panel reads the SESSION's clock. Thirty frames have advanced it, so the lines must
+        // describe a clock that has moved -- a panel built over a default-constructed `SimClock`
+        // would read exactly midnight on 1 January and pass every other claim in this file.
+        const std::vector<std::string> lines =
+            game.EnvironmentOverlayForTesting().Lines(game.ClockForTesting());
+        ASSERT_GE(lines.size(), 4U);
+        EXPECT_EQ(lines[0], "F8  environment");
+        EXPECT_GT(game.ClockForTesting().epochSeconds, 0.0);
+        EXPECT_EQ(lines[2].find("epoch 0.0 s"), std::string::npos)
+            << "the panel is reading a clock that has not run: " << lines[2];
+        for (const std::string& line : lines)
+        {
+            std::printf("  %s\n", line.c_str());
+        }
+    }
+
     TEST(HeadlessRunTests, PressingF3ShowsTheWalkTheFrameActuallyDid)
     {
         // `HOUSE-00681`. §25.8's `F3`, end to end: the key reaches the overlay, and behind it a

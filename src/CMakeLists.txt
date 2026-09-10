@@ -115,6 +115,7 @@ add_library(cnahouse_core STATIC
     debug/Console.cpp
     debug/Counters.cpp
     debug/PlayerCommands.cpp
+    debug/EnvironmentOverlay.cpp
     debug/TimeCommands.cpp
     debug/VisibilityCommands.cpp
     debug/FreeFlyCamera.cpp

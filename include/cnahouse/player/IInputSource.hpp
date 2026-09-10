@@ -69,6 +69,8 @@ namespace cnahouse::player
         bool toggleVisibilityGeometryPressed = false;
         /// @brief §25.8's `F5`: freeze the visibility walk and detach the camera to inspect it.
         bool toggleFreezeVisibilityPressed = false;
+        /// @brief §71's `F8`: the environment overlay -- §35's clock, the season, the temperature.
+        bool toggleEnvironmentOverlayPressed = false;
         /// @brief §69's `F9`: the physics overlay -- collision shapes, the capsule, the probe.
         bool togglePhysicsOverlayPressed = false;
         bool screenshotPressed = false;

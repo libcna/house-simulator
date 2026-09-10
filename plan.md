@@ -13379,11 +13379,65 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             draws. It was interrupted at 22 of 38 anyway, by a hold on the shared `:99` display
             that another session asked for mid-run, and the run before it -- `HOUSE-01535`'s -- was
             green over the same references.
-- [ ] HOUSE-01537 — Implement the `F8` environment overlay's time section
+- [x] HOUSE-01537 — Implement the `F8` environment overlay's time section
       dep: HOUSE-01531, HOUSE-00147 · sys: debug · plat: ALL · pri: MUST
+      verify: unit `EnvironmentOverlayTests.*`, `InputTests.EachOverlayHasItsOwnFunctionKey…`,
+            integration `HeadlessRunTests.PressingF8…`
+      note: (2026-09-10) a PRESENTER, like §69's `F2` and §71's `F1`: it owns no measurement and
+            takes no queries of its own, so what it says is asserted in a unit test rather than
+            looked at. It reads a `SimClock` and nothing else, because §35.1 says everything
+            time-dependent reads that one clock.
+      finding: **the panel says which of §71's own rows are not built yet, and that is a claim
+            rather than a courtesy.** §71 lists `F8` as *"simulated date/time, sun/moon altitude
+            and azimuth, moon phase and name, the full weather state vector, the current archetype
+            and time to the next transition, RNG state"*, and everything after the first clause is
+            §35.3's sun and §36's weather. A debug overlay silently missing half its rows teaches
+            its reader that the missing rows do not exist, so the last line names both sections and
+            a test fails if it stops doing so.
+      note: **what each line is for.** The WALL clock first, because that is what a person means by
+            "what time is it", with the DST flag beside it or the standard line under it looks an
+            hour wrong. The STANDARD reading second, because `epochSeconds` is standard time and
+            every number below derives from it. The rate BOTH ways -- multiplier and real minutes a
+            day -- because §35.2's table is indexed by the second and nobody should have to divide
+            1440 by anything. BOTH day counts, because §35.2b's whole point is that the calendar
+            runs 24 times faster than the sun and a panel showing one of them would hide the
+            compression in the one place built to explain it. The season as a MIX and not a label,
+            because §36.3 says it is a phase and never an enum. And §36.2's base temperature, which
+            belongs here rather than with the weather: it is what §36 applies its archetype's delta
+            to, and a person debugging "why is it not snowing" needs the base before the archetype.
+      measured: the panel over a 30-frame headless session reads `Wed 2031-01-01 00:00:12 std`,
+            `rate 60x (24 real min / sim day)`, `calendar 0.00 days at 24/sim day (0 sunrise(s))`,
+            `season winter 86% -> autumn (14%) year 0.786`, `temp -4.7 C base`.
+      verified: 8 `EnvironmentOverlayTests`, 1 `HeadlessRunTests` and `F8` added to `InputTests`'
+            binding table. Ten injected bugs, all caught: the overlay starting visible, the
+            standard reading shown as the wall clock, the season printed as a label, the calendar
+            line showing only the sunrises, the panel no longer saying what is missing, an
+            out-of-range season indexing past the table, `F8` not wired to the overlay, the panel
+            built over a fresh clock instead of the session's, `F8` bound to no key, `F8` sharing
+            `F9`'s edge slot, and `F8` bound to `F7`.
+      finding: the key→field mapping needed the binding table extended, not a new test. An
+            injection binding `F8` to `F9`'s key came back MISSED against the integration test,
+            because `OneKeyPress` sets the input FIELD directly and bypasses the keyboard source
+            entirely -- which `InputTests` already says is *"the only place the mapping itself is
+            checked"*. Adding the row is what closed it.
 - [ ] HOUSE-01538 — Implement clock persistence in the save model
       dep: HOUSE-01531 · sys: persistence · plat: ALL · pri: MUST
       dep-note: schema lands in phase 39
+      note: (2026-09-10) **BLOCKED, and the `dep-note` is why -- checked rather than assumed.**
+            `HOUSE-01531`, this task's only stated dependency, is done, so the DAG reports it
+            ready; the save MODEL it would persist into does not exist. `persistence/` holds
+            `ISaveStore` and `DesktopSaveStore` -- ADR-0008's I/O seam, atomic write, backup -- and
+            nothing else: no document, no schema, no version, no migration chain. Writing clock
+            persistence now would mean inventing the save schema ahead of the phase that owns it,
+            and §68's format is the one thing in the project that cannot be quietly redecided
+            later: every save ever written is a list of ids in it.
+      note: what it will need when the schema lands is small and is already true of the clock:
+            `epochSeconds` is a single monotone `double` in local STANDARD time (`HOUSE-01531`),
+            `timeScale` and `calendarDaysPerSimDay` are settings-shaped scalars, and everything
+            else the clock says -- the date, the season, the temperature -- is derived, so the save
+            needs those three numbers and nothing more. `SimClockTests` already proves the epoch
+            line is monotone through both daylight-saving transitions, which is the property a
+            saved timestamp has to have.
 - [x] HOUSE-01539 — Test: at `timeScale = 60`, 3 real seconds advance the clock by exactly 3 simulated minutes
       dep: HOUSE-01533 · sys: ci · plat: CI · pri: MUST
       verify: unit `ClockRateTests.*`
