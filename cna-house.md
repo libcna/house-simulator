@@ -898,6 +898,15 @@ driveway to the front walk at `z = −6.0` so the player never has to cross gras
 
 Neighbourhood composition (all non-enterable):
 
+> Decided 2026-09-10 by `HOUSE-00843` ([ADR-0013](docs/decisions/ADR-0013-neighbourhood-asset-variants.md)).
+> **The eight palettes are in the asset ids.** A `neighbourhood` row names its house as
+> `MODEL_NB_HOUSE_A_CREAM` or `MODEL_NB_HOUSE_C_RENDER_LOW`, and `neighbourhood_gen.py` resolves the
+> shape, the palette and the LOD band from that name offline; there is no per-instance material
+> override in the layout and none at runtime. Only the combinations the street names are generated
+> — **nineteen of a possible forty-eight** — and the assignment is deterministic and neighbourly:
+> houses are walked in street order and each takes the first palette unused within 30 m across and
+> 10 m deep, so no two houses you can see together are painted alike.
+
 * **N1 / N2** — the two immediately adjacent houses at `x ≈ −34` and `x ≈ +36`, same street,
   full-detail facades and roofs, real windows with interior-glow cards at night, driveways, cars,
   mailboxes, lawns, fences. LOD0.

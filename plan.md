@@ -11765,8 +11765,37 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             placed, not modelled into the house.
       verified: 3 injections, all CAUGHT -- the drive running under the house instead of out from
             it, the drive lying on the ground rather than in it, and the plot drawn at LOD1 too.
-- [ ] HOUSE-00843 — Generate the 6 across-the-street houses (N3–N8) at LOD1
+- [x] HOUSE-00843 — Generate the 6 across-the-street houses (N3–N8) at LOD1
       dep: HOUSE-00841 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/world/neighbourhood_gen.py --selftest`
+      note: (2026-09-10) this task needed an architectural decision before it needed geometry, and
+            the owner made it: **§11.4's eight palettes are GENERATED ASSET VARIANTS, resolved
+            offline, not per-instance material overrides.**
+            [ADR-0013](docs/decisions/ADR-0013-neighbourhood-asset-variants.md) records it with
+            the two alternatives it rejects -- a runtime material-remapping path built for one
+            decorative purpose, and opaque `A1…A8` numbering that tells a reader nothing.
+      measured: **nineteen house variants of a possible forty-eight**, plus the impostor card:
+            three shapes × eight palettes × two LOD bands is what a Cartesian product would be,
+            and nineteen is what these twenty-four rows name. N3–N8, this task's six, are
+            `A_BRICK`, `B_SAGE`, `C_BRICK`, `A_OCHRE`, `B_STONE` and `C_RENDER` -- six shapes and
+            six palettes, no two alike.
+      finding: **the assignment is deterministic and neighbourly, and it is DATA.** Houses are
+            walked in street order -- by depth band, then along x -- and each takes the first
+            palette not already used within 30 m across and 10 m deep. All eight palettes land on
+            the street (2 to 4 houses each), no two houses you can see together match, and the
+            answer lives in `layout.exterior.json` where a person looks to see what is on the
+            street. The generator PARSES it; it does not invent it.
+      finding: a stride was tried first and rejected on measurement: walking the same order and
+            taking palette `(k·3) mod 8` left **three neighbour pairs sharing a palette**, one of
+            them (`NB_HOUSE_N4` and `NB_HOUSE_N13`, 29 m apart) sharing shape AND palette -- the
+            copy-pasted estate this rule exists to prevent. The greedy walk leaves none.
+      finding: the generator now **removes a variant the layout no longer names**. `HOUSE-00785`
+            is what that is for: `build/fence` held nineteen files from before the road-end wall
+            existed, and `HOUSE-00780` chunked them. Six stale files went on the first run.
+      verified: 104 claims and 5 injections, all CAUGHT -- an unknown palette painted with a
+            default, the `_LOW` suffix read as part of the palette's name, the neighbour radius
+            shrunk to zero until nothing clashes, and -- injected into the LAYOUT rather than into
+            the tool -- two neighbours painted alike.
 - [ ] HOUSE-00844 — Generate the 16 further houses (N9–N24) at LOD2
       dep: HOUSE-00841 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00845 — Generate the 36 distant silhouettes (N25–N60) as impostor cards on the horizon ring

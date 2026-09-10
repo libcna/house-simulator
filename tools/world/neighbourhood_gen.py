@@ -97,15 +97,26 @@ PALETTES = [
 ]
 
 
+#: How near two houses have to be for the street to notice they match, in metres across and deep.
+#: A plot is 18-28 m wide on this street and the rows are 4-9 m apart in depth, so this reaches a
+#: house's immediate neighbours and the ones behind them, and no further (ADR-0013).
+NEIGHBOUR_X = 30.0
+NEIGHBOUR_Z = 10.0
+
+#: A palette by its §11.4 name, and by the part of an asset id that names it.
+BY_NAME = {palette.name: palette for palette in PALETTES}
+BY_SUFFIX = {palette.name.upper().replace("-", ""): palette for palette in PALETTES}
+
+
 class House:
     """One house's five numbers, and the palette it is painted with.
 
     Everything else -- where the windows go, how the roof meets the walls, how deep a reveal is --
-    is the grammar's, so a new house on this street is five numbers and a palette index.
+    is the grammar's, so a new house on this street is five numbers and a palette.
     """
 
     def __init__(self, name: str, width: float, depth: float, storeys: int, roof: str,
-                 garage: str, porch: str, palette: int) -> None:
+                 garage: str, porch: str, palette) -> None:
         if roof not in ("hip", "gable"):
             raise ValueError(f"{name}: roof {roof!r} is neither hip nor gable")
         if garage not in ("none", "attached", "detached"):
@@ -119,7 +130,14 @@ class House:
         self.roof = roof
         self.garage = garage
         self.porch = porch
-        self.palette = PALETTES[palette % len(PALETTES)]
+        # A palette by NAME, never by index (ADR-0013): the asset id says `..._CREAM`, and an
+        # index would be a second way to say the same thing that could disagree with it.
+        if isinstance(palette, Palette):
+            self.palette = palette
+        elif palette in BY_NAME:
+            self.palette = BY_NAME[palette]
+        else:
+            raise ValueError(f"{name}: palette {palette!r} is not one of {sorted(BY_NAME)}")
 
     @property
     def eaves(self) -> float:
@@ -137,19 +155,42 @@ class House:
 #: asset ids; this is what each of them IS. A is the plain two-storey hip with an attached garage,
 #: B has a gable and a full porch, C is the small single-storey with a detached garage -- three
 #: silhouettes, which is what makes a row of them read as a street.
-TYPES = {
-    "MODEL_NB_HOUSE_A": House("A", 11.0, 8.5, 2, "hip", "attached", "stoop", 0),
-    "MODEL_NB_HOUSE_B": House("B", 9.5, 9.0, 2, "gable", "none", "full", 1),
-    "MODEL_NB_HOUSE_C": House("C", 12.5, 7.0, 1, "hip", "detached", "stoop", 2),
+#: The three SHAPES §11.4's list names, as `(width, depth, storeys, roof, garage, porch)`. The
+#: palette is not here: it comes from the asset id, and a shape painted eight ways is eight
+#: variants of one grammar rather than eight houses (ADR-0013).
+SHAPES = {
+    "A": (11.0, 8.5, 2, "hip", "attached", "stoop"),
+    "B": (9.5, 9.0, 2, "gable", "none", "full"),
+    "C": (12.5, 7.0, 1, "hip", "detached", "stoop"),
 }
+
+#: What an asset id looks like: `MODEL_NB_HOUSE_<SHAPE>_<PALETTE>` and an optional `_LOW`.
+HOUSE_PREFIX = "MODEL_NB_HOUSE_"
 
 
 def house_of(asset: str) -> tuple[House, bool]:
-    """`(house, detailed)` for an asset id: `MODEL_NB_HOUSE_B_LOW` is B without its reveals."""
-    base = asset[:-4] if asset.endswith("_LOW") else asset
-    if base not in TYPES:
-        raise layout_io.LayoutError(f"{asset!r} is not one of {sorted(TYPES)}")
-    return TYPES[base], not asset.endswith("_LOW")
+    """`(house, detailed)` for an asset id.
+
+    `MODEL_NB_HOUSE_B_SAGE_LOW` is shape B in §11.4's sage palette without its reveals or its
+    plot. The id is the only place either is said (ADR-0013), and an id naming a shape or a
+    palette this tool does not know is an error rather than a house painted some default.
+    """
+    if not asset.startswith(HOUSE_PREFIX):
+        raise layout_io.LayoutError(f"{asset!r} is not a neighbourhood house id")
+    body = asset[len(HOUSE_PREFIX):]
+    detailed = not body.endswith("_LOW")
+    if not detailed:
+        body = body[:-len("_LOW")]
+    shape, _, suffix = body.partition("_")
+    if shape not in SHAPES:
+        raise layout_io.LayoutError(
+            f"{asset!r} names shape {shape!r}, which is not one of {sorted(SHAPES)}")
+    if suffix not in BY_SUFFIX:
+        raise layout_io.LayoutError(
+            f"{asset!r} names palette {suffix!r}, which is not one of {sorted(BY_SUFFIX)}")
+    width, depth, storeys, roof, garage, porch = SHAPES[shape]
+    return (House(shape, width, depth, storeys, roof, garage, porch, BY_SUFFIX[suffix]),
+            detailed)
 
 
 def box(low, high, material: str):
@@ -474,15 +515,35 @@ def selftest() -> int:
     require(len({(p.wall, p.trim, p.roof, p.door) for p in PALETTES}) == 8,
             "...and a different set of materials, so two houses in a row do not match")
 
-    # 2. The three types the layout names differ in SHAPE and not only in paint: a street of one
+    # 2. The three SHAPES the layout names differ as shapes and not only in paint: a street of one
     #    silhouette in three colours is a housing estate.
-    require(sorted(TYPES) == ["MODEL_NB_HOUSE_A", "MODEL_NB_HOUSE_B", "MODEL_NB_HOUSE_C"],
-            f"three types, which is what `HOUSE-00391` placed ({sorted(TYPES)})")
+    require(sorted(SHAPES) == ["A", "B", "C"],
+            f"three shapes, which is what `HOUSE-00391` placed ({sorted(SHAPES)})")
+    TYPES = {f"MODEL_NB_HOUSE_{shape}_CREAM": house_of(f"MODEL_NB_HOUSE_{shape}_CREAM")[0]
+             for shape in SHAPES}
     shapes = {(h.width, h.depth, h.storeys, h.roof, h.garage, h.porch) for h in TYPES.values()}
     require(len(shapes) == 3, f"and no two of them are the same house ({len(shapes)} shapes)")
     require(len({h.storeys for h in TYPES.values()}) > 1
             and len({h.roof for h in TYPES.values()}) > 1,
             "-- they differ in storeys AND in roof, which is what reads at 90 m")
+
+    # 2b. `HOUSE-00843`, ADR-0013: the palette is in the ID, and an id is refused rather than
+    #     painted with a default.
+    require(house_of("MODEL_NB_HOUSE_B_SAGE")[0].palette.name == "sage",
+            "an asset id names its palette, and that is where the palette comes from")
+    require(house_of("MODEL_NB_HOUSE_B_SAGE_LOW")[0].palette.name == "sage"
+            and not house_of("MODEL_NB_HOUSE_B_SAGE_LOW")[1],
+            "...and `_LOW` is the LOD band, not part of the palette's name")
+    require(house_of("MODEL_NB_HOUSE_C_SLATEBLUE")[0].palette.name == "slate-blue",
+            "a palette whose §11.4 name has a hyphen is `SLATEBLUE` in an id and `slate-blue` "
+            "everywhere else, and the two are one table")
+    for bad in ("MODEL_NB_HOUSE_D_CREAM", "MODEL_NB_HOUSE_A_TEAL", "MODEL_SOMETHING_ELSE"):
+        try:
+            house_of(bad)
+            caught = False
+        except layout_io.LayoutError:
+            caught = True
+        require(caught, f"{bad} is refused, not built as something else")
 
     # 3. Geometry: a house stands on the ground, its roof starts where its walls stop, and its
     #    ridge is over its own footprint.
@@ -538,17 +599,17 @@ def selftest() -> int:
                     f"{house.width:.1f} m front")
             require(y1 <= house.eaves,
                     f"{house.name}: ...and under its eaves ({y1:.2f} of {house.eaves:.2f})")
-    doors = [row for row in openings_on(TYPES["MODEL_NB_HOUSE_A"]) if row[2] <= 1e-9]
+    doors = [row for row in openings_on(TYPES["MODEL_NB_HOUSE_A_CREAM"]) if row[2] <= 1e-9]
     require(len(doors) == 1, f"and exactly one of them reaches the ground: the door ({len(doors)})")
 
     # 6. The roof comes from `roof_geometry` and not from a second derivation.
-    house = TYPES["MODEL_NB_HOUSE_A"]
+    house = TYPES["MODEL_NB_HOUSE_A_CREAM"]
     planes = roof_geometry.roof_planes(house.outer, house.eaves, HIP_PITCH)
     require(len(planes) == 4, f"a hip roof is `roof_geometry`'s four planes ({len(planes)})")
     roof_faces = [f for f in house_faces(house, True) if f[2] == house.palette.roof]
     require(len(roof_faces) >= 4,
             f"and the house draws them ({len(roof_faces)} roof faces, garage included)")
-    gable = TYPES["MODEL_NB_HOUSE_B"]
+    gable = TYPES["MODEL_NB_HOUSE_B_CREAM"]
     gable_faces = _roof_faces(gable, gable.outer, gable.eaves, "gable")
     require(sum(1 for corners, _n, _m in gable_faces if len(corners) == 3) == 2,
             "a GABLE is two slopes and two triangular ends, and the ends are wall")
@@ -591,18 +652,58 @@ def selftest() -> int:
     require(len({material for _c, _n, material in card}) == 1,
             "and one material, so it is one draw")
 
-    # 8. Against the layout the street was authored from.
+    # 8. Against the layout the street was authored from -- `HOUSE-00843`'s street, with a palette
+    #    in every id.
     if (SOURCE / "layout.exterior.json").is_file():
         assets = wanted_assets(SOURCE)
-        require(len(assets) == 7,
-                f"the layout names seven neighbourhood assets -- three types, three `_LOW` and "
-                f"the impostor card ({assets})")
         built = build(SOURCE)
         require(set(built) == set(assets),
-                f"and every one of them is built ({sorted(set(assets) - set(built))} missing)")
-        require(all(faces for faces in built.values()),
-                "with geometry in each")
-        document, blob = _document("MODEL_NB_HOUSE_A", built["MODEL_NB_HOUSE_A"])
+                f"every asset the layout names is built ({sorted(set(assets) - set(built))} "
+                f"missing)")
+        require(all(faces for faces in built.values()), "with geometry in each")
+
+        # ADR-0013's first rule: only the combinations the street actually names. Three shapes,
+        # eight palettes and two LOD bands is forty-eight; a Cartesian product is what this
+        # decision exists to avoid.
+        houses = [asset for asset in assets if asset.startswith(HOUSE_PREFIX)]
+        require(len(houses) < len(SHAPES) * len(PALETTES) * 2 // 2,
+                f"the street names {len(houses)} house variants, well under the "
+                f"{len(SHAPES) * len(PALETTES) * 2} a Cartesian product would be")
+        require(all(house_of(asset) for asset in houses),
+                "and every one of them parses as a shape this grammar knows in a palette §11.4 "
+                "names")
+        used = {house_of(asset)[0].palette.name for asset in houses}
+        require(used == {palette.name for palette in PALETTES},
+                f"all eight palettes are on the street, which is what §11.4 asks for "
+                f"({sorted({p.name for p in PALETTES} - used)} unused)")
+
+        # ...and its second: no two houses you can see together are painted alike.
+        rows = (layout_io.load_layout(SOURCE, kinds=["exterior"]).get("exterior")
+                or {}).get("neighbourhood", [])
+        placed = [(row["id"], row["position"][0], row["position"][2],
+                   house_of(row["asset"])[0].palette.name)
+                  for row in rows if str(row.get("asset", "")).startswith(HOUSE_PREFIX)]
+        clashes = [(a[0], b[0], a[3]) for index, a in enumerate(placed) for b in placed[index + 1:]
+                   if abs(a[1] - b[1]) <= NEIGHBOUR_X and abs(a[2] - b[2]) <= NEIGHBOUR_Z
+                   and a[3] == b[3]]
+        require(not clashes,
+                f"no two houses within {NEIGHBOUR_X:.0f} m across and {NEIGHBOUR_Z:.0f} m deep of "
+                f"each other share a palette, so the street is not a copy-pasted estate "
+                f"({clashes})")
+        require(len(placed) == 24, f"§11.4's twenty-four placed houses ({len(placed)})")
+        # ...and the radius that "together" means is the street's own geometry, not a number that
+        # can be shrunk until nothing clashes: a plot on this street is 18-28 m wide and the rows
+        # are 4-9 m apart in depth.
+        require(abs(NEIGHBOUR_X - 30.0) < 1e-9 and abs(NEIGHBOUR_Z - 10.0) < 1e-9,
+                f"the neighbourly radius is a plot's width across and a row's depth back "
+                f"({NEIGHBOUR_X} x {NEIGHBOUR_Z})")
+        spans = sorted(abs(a[1] - b[1]) for index, a in enumerate(placed) for b in placed[index + 1:]
+                       if abs(a[2] - b[2]) <= NEIGHBOUR_Z and abs(a[1] - b[1]) <= NEIGHBOUR_X)
+        require(spans and max(spans) <= NEIGHBOUR_X,
+                f"-- and it really does reach neighbours: {len(spans)} pair(s) are inside it, the "
+                f"widest {max(spans) if spans else 0:.0f} m apart")
+
+        document, blob = _document(houses[0], built[houses[0]])
         require(len(document["meshes"][0]["primitives"]) == len(document["materials"]),
                 "a house is one primitive per material, which is what §17.4 chunks by")
         require(all(material["extras"].get("surfaceClass") == "exterior"
@@ -638,9 +739,18 @@ def main() -> int:
     for asset, faces in sorted(built.items()):
         document, blob = _document(asset, faces)
         gltf_io.write_glb(args.output / f"{asset}.glb", document, blob)
+    # A variant the layout no longer names is a file nothing draws, and a stale tree is how
+    # `HOUSE-00785` had every fence in the world one task out of date. Only this tool's own
+    # output is removed, and only from its own directory.
+    removed = 0
+    for path in sorted(args.output.glob("MODEL_NB_*.glb")):
+        if path.stem not in built:
+            path.unlink()
+            removed += 1
     print(report(built) if args.report else
           f"neighbourhood_gen: {len(built)} asset(s) -> "
-          f"{args.output.relative_to(REPO) if args.output.is_relative_to(REPO) else args.output}")
+          f"{args.output.relative_to(REPO) if args.output.is_relative_to(REPO) else args.output}"
+          + (f", {removed} stale variant(s) removed" if removed else ""))
     return 0
 
 

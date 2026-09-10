@@ -21,3 +21,4 @@ it and both are updated to point at each other.
 | [0010](ADR-0010-room-aware-audio.md) | Room-aware audio over the portal graph, not `Apply3D` | Accepted | `HOUSE-00016` |
 | [0011](ADR-0011-no-runtime-dependencies.md) | No third-party runtime dependencies | Accepted | `HOUSE-00017` |
 | [0012](ADR-0012-asset-licensing.md) | Asset licensing policy, and the "no row, no build" rule | Accepted | `HOUSE-00018` |
+| [0013](ADR-0013-neighbourhood-asset-variants.md) | The neighbourhood's variety is generated asset variants, not per-instance material overrides | Accepted | `HOUSE-00843` |

@@ -512,6 +512,13 @@ fence and that a structure's `cell` exists; rule 10 checks that an enterable str
 **contains** that cell's, because a shell that does not hold its own interior is a building drawn
 beside its inside.
 
+A `neighbourhood` row's `asset` carries its **palette** since `HOUSE-00843`
+([ADR-0013](decisions/ADR-0013-neighbourhood-asset-variants.md)): `MODEL_NB_HOUSE_A_CREAM` is
+§11.4 shape A in the cream palette at full detail and `MODEL_NB_HOUSE_C_RENDER_LOW` is shape C in
+render at LOD1. `neighbourhood_gen.py` parses that name — an unknown shape or palette is refused,
+never painted with a default — and builds only the combinations the rows actually name. There is no
+per-instance material override in this file, and adding one is the alternative that record rejects.
+
 `HOUSE-00776` added a fifth: `downspouts`, one row per pipe with `position` (the head, at the
 gutter) and `splash` (where the water lands, on §11.5's height field under it). §37.3's splash
 particles and §37.4's `Apply3D` trickle emitter both need that point and neither can read a Blender
