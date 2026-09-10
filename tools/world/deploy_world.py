@@ -147,6 +147,15 @@ def deploy(source: Path, target: Path, *, dry_run: bool = False) -> tuple[list[s
         for stale in stale_candidates:
             if stale.name == manifest_name:
                 continue
+            # A DOTFILE in the deployed tree belongs to whoever writes it and not to this step
+            # (`HOUSE-00422`). `pathlib.Path.glob` matches hidden names where a shell glob would
+            # not, so `content/world/.cna-content-manifest.json` -- the CNB pipeline's index,
+            # written by the `cnb-world` stage that runs AFTER this one -- was picked up as a world
+            # file that had lost its source and reported for deletion. Deleting it would have
+            # broken the very stage that wrote it, and the two stages would have taken turns
+            # undoing each other on every build.
+            if stale.name.startswith("."):
+                continue
             if stale.name in expected and (source / stale.name).is_file():
                 continue
             problems.append(f"{stale.name}: deployed and no longer authored; delete it")
@@ -229,6 +238,20 @@ def selftest() -> int:
         require(any("no longer authored" in problem for problem in problems),
                 f"a deployed file with no source is reported ({problems})")
         (target / "layout.portals.json").unlink()
+
+        # 4b. ...but a DOTFILE is somebody else's (`HOUSE-00422`). The CNB pipeline writes
+        #     `.cna-content-manifest.json` into the same directory from a stage that runs after
+        #     this one, and `pathlib`'s glob -- unlike a shell's -- matches hidden names, so it was
+        #     reported as a world file that had lost its source. Reporting it was harmless only
+        #     until somebody obeyed: deleting it breaks the stage that wrote it, and the two would
+        #     then undo each other on every build.
+        (target / ".cna-content-manifest.json").write_text('{"entries": []}\n', encoding="utf-8")
+        _, problems = deploy(source, target)
+        require(not any("cna-content-manifest" in problem for problem in problems),
+                f"another tool's dotfile in the deployed tree is not this step's to delete "
+                f"({problems})")
+        require(not problems, f"...and nothing else was reported either ({problems})")
+        (target / ".cna-content-manifest.json").unlink()
 
         # 5. A broken source file is reported and does not stop the rest. One typo hiding the state
         #    of the other fifteen files is the failure mode `validate_world.py` also refuses.

@@ -6046,6 +6046,25 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             group, and that exactly two groups are on two plates each.
 - [ ] HOUSE-00385 — Author `layout.materials.json`: the material class table of §22.2 with all fields
       dep: HOUSE-00296 · sys: world · plat: TOOL · pri: MUST
+- [x] HOUSE-00422 — `deploy_world.py` reports another tool's dotfile in `content/world/` as a world file to delete
+      dep: HOUSE-00421 · sys: ci · plat: CI · pri: MUST
+      verify: `tools/world/deploy_world.py --selftest`
+      note: (2026-09-10) **New task, next free id in phase 5's reserved 00341–00450 range.** Found
+            by `HOUSE-00786`, which ran the whole content chain in a tree where the `cnb-world`
+            stage had never run. It writes `content/world/.cna-content-manifest.json`, and
+            `deploy_world`'s stale scan is `Path.glob("*.json")` -- which, unlike a shell glob,
+            matches hidden names. So the gate said *".cna-content-manifest.json: deployed and no
+            longer authored; delete it"* and `run_checks.sh` went red on a file that is exactly
+            where it belongs.
+      finding: **it was harmless only until somebody obeyed it.** `cnb-world` runs AFTER
+            `world-deploy`, so deleting the file breaks the stage that wrote it and the two would
+            take turns undoing each other on every build -- a build that never settles, which is
+            the failure `HOUSE-00227` spent a day on in a different disguise.
+      note: a dotfile in the deployed tree belongs to whoever writes it. That is the rule now, and
+            it is the narrow one: a `.json` without the dot is still this step's to account for, so
+            a world file that lost its source is still reported.
+      verified: 2 claims and 2 injections, both CAUGHT -- the skip removed, and the skip widened to
+            everything so that a real world file could hide behind a leading dot.
 - [x] HOUSE-00421 — Deploy `assets-src/world/*.json` to `content/world/` with the comments stripped
       dep: HOUSE-00366 · sys: ci · plat: CI · pri: MUST
       note: (2026-09-07) **New task, next free id in phase 5's reserved 00341–00450 range.** Found
