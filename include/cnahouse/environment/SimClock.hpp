@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "cnahouse/environment/Season.hpp"
+#include "cnahouse/environment/Temperature.hpp"
 
 namespace cnahouse::environment
 {
@@ -159,6 +160,14 @@ namespace cnahouse::environment
 
         /// @brief §36.3's season phase for `YearFraction()`.
         [[nodiscard]] SeasonPhase Season() const noexcept;
+
+        /// @brief §36.2's base outdoor temperature for where and when the clock is, °C.
+        ///
+        /// The ANNUAL term reads the compressed calendar and the DIURNAL term reads the clock
+        /// face, which is §35.2b's decoupling arriving where it can be felt: over one simulated
+        /// day of play the sun rises and sets once while the season moves by 24 days, so the
+        /// afternoon warms and the year cools underneath it at the same time.
+        [[nodiscard]] double OutdoorBaseTemperatureC() const noexcept;
 
         /// @brief The clock set as close to @p time, read as local STANDARD time, as it can get.
         ///

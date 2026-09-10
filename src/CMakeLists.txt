@@ -26,6 +26,7 @@ add_library(cnahouse_core STATIC
 
     # environment -- §35's clock, which everything time-dependent reads and nothing duplicates
     environment/Season.cpp
+    environment/Temperature.cpp
     environment/SimClock.cpp
 
     # player -- input first, because nothing else may read the devices

@@ -207,6 +207,17 @@ namespace cnahouse::environment
         return SeasonAt(YearFraction());
     }
 
+    double SimClock::OutdoorBaseTemperatureC() const noexcept
+    {
+        // The day of the year CONTINUOUSLY and 1-based, which is what §36.2's `doy` is: the annual
+        // term has to move within a simulated day, because under §35.2b's compression a simulated
+        // day is 24 of them.
+        const CivilTime now = Standard();
+        const std::int64_t yearStart = DaysFromCivil(now.year, 1, 1) - kEpochDay;
+        const double dayOfYear = CalendarDays() - static_cast<double>(yearStart) + 1.0;
+        return BaseTemperatureC(dayOfYear, SecondsOfDay() / 3600.0);
+    }
+
     void SimClock::SetCalendar(double calendarDays) noexcept
     {
         const double rate = (std::isfinite(calendarDaysPerSimDay) && calendarDaysPerSimDay > 0.0)

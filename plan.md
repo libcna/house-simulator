@@ -13269,8 +13269,43 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             January, the mix ignoring the secondary season, the ramp covering the whole season,
             the fraction not wrapping so a second year runs off the end, and a season blending
             with itself.
-- [ ] HOUSE-01535 — Implement the temperature curve (annual + diurnal) for the configured location
+- [x] HOUSE-01535 — Implement the temperature curve (annual + diurnal) for the configured location
       dep: HOUSE-01534 · sys: environment · plat: ALL · pri: MUST
+      verify: unit `TemperatureCurveTests.*`
+      note: (2026-09-10) §36.2's formula exactly as written --
+            `11 + 12·cos(2π(doy−201)/365) + 6·cos(2π(h−15)/24)` -- with the seasonal lag in both
+            terms rather than approximated out of them: the year peaks on **20 July**, three weeks
+            after the solstice, and the day at **15:00** rather than at noon, because the ground
+            and the air keep warming after the sun has begun to go back.
+      note: **the curve is load-bearing and not decorative**, which is why it has a file to itself.
+            §36.2 DERIVES `precipType` from it -- above 2.5 °C rain, below 0 snow, between them
+            sleet -- and §36.3 says `W_SNOW`'s probability is zero in summer *"by construction
+            rather than by a special case"*. Both are properties of these three constants and of
+            nothing else, and both are checked as such: over the whole of meteorological summer, at
+            every hour, the curve never comes within 2.5 °C of freezing.
+      finding: **mid-January snows for 13 of its 24 hours, not all 24, and that is the curve being
+            honest.** The coldest week peaks at +5 °C at three in the afternoon -- 11 − 12 + 6 --
+            so the BASE alone sleets or rains through the middle of a January day and snows from
+            late afternoon to mid-morning. §36.2's *"it snows in January"* is the archetype's
+            `Δtemp` on top of this; what the base has to guarantee is that January CAN and July
+            CANNOT, and the asymmetry between 13 and 0 is that guarantee. The first draft of the
+            test asserted 24 and was wrong about the design rather than finding a bug in it.
+      finding: **the annual term reads the compressed calendar and the diurnal term reads the clock
+            face**, so §35.2b's decoupling arrives somewhere it can be felt: over one simulated day
+            of play the afternoon warms and cools once while the season moves 24 days underneath
+            it. Measured, that day swings 9-14 °C -- one diurnal cycle's worth and not several --
+            and it is CONTINUOUS: the largest move in a simulated minute is under 0.1 °C, where a
+            curve fed the truncated hour would step by 1.6 °C once an hour.
+      verified: 6 `TemperatureCurveTests`. Nine injected bugs, all caught: the two amplitudes
+            swapped, the annual peak moved to the solstice, the day peaking at noon, a NaN reaching
+            the curve, the diurnal term given the truncated hour, the annual term given the day of
+            the MONTH, the day of the year counting from zero, and the annual period made a leap
+            year's 366.
+      note: two of those needed a claim the first draft did not have. A one-day error in the day of
+            the year is invisible at the annual peak -- the cosine is flat there, and 0.0004 °C is
+            not a measurement -- so it is caught by comparing the clock's reading against
+            `BaseTemperatureC(Standard().dayOfYear, ...)` at five dates spread round the year
+            instead, `dayOfYear` being a field 500 conversions from Python already agree with.
 - [ ] HOUSE-01536 — Implement the console commands `time set`, `time scale`, `time advance`
       dep: HOUSE-01531 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-01537 — Implement the `F8` environment overlay's time section
