@@ -10831,11 +10831,22 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
 - [x] HOUSE-00688 — Test: **no over-culling** — render each of the 24 poses normally and with culling disabled and assert the images match within tolerance
       dep: HOUSE-00684, HOUSE-00164, HOUSE-00486, HOUSE-00485, HOUSE-00488, HOUSE-00700, HOUSE-00786 · sys: ci · plat: CI · pri: MUST
       note: (2026-09-10, later still) **`HOUSE-00786` took the last pin out and this closes.** All
-            eighteen comparable poses are identical culled and unculled, `kOutdoorsPending` and the
-            machinery that read it are gone, and the worst of the eighteen is `l0-sunroom` at
-            0.1546 % of its frame -- silhouette pixels on a rasteriser's edge, under the 0.2 % a
-            committed reference is allowed. From here a pose that differs at all is a new hole and
-            fails the day it appears.
+            eighteen comparable poses PASS, `kOutdoorsPending` and the machinery that read it are
+            gone, and the worst of the eighteen is `l0-sunroom`. From here a pose that crosses the
+            threshold is a new hole and fails the day it appears.
+      measured: (2026-09-11, re-run at `731c5be`, corrected wording) **"pass" is a THRESHOLD and
+            was never pixel equality**; earlier notes here said "identical", which is wrong, and
+            the exact numbers are these. Worst pose `l0-sunroom`: **349 of 225 792 compared pixels
+            differ = 0.1546 %**, max channel delta **104**, mean channel delta **0.072**. The
+            per-channel tolerance is **2** (`kChannelTolerance`) and the acceptance threshold is
+            **0.2 % of compared pixels** (`kDifferingFractionLimit`) -- the same 0.2 % a committed
+            reference is allowed. Compared pixels are 225 792 of the 230 400 in a 640 x 360 frame
+            because `NonDeterministicRegions` excludes the frame-time readout. The residue is
+            silhouette pixels on a rasteriser's edge: the max delta is large because an edge pixel
+            takes one side's colour or the other's, while the mean over the whole frame is 0.072.
+            A ROOM wrongly culled is thousands of pixels and misses the threshold by two orders of
+            magnitude, which is what makes a threshold an adequate instrument here. The test
+            prints all four numbers on every run, so the record is the run and not this note.
       note: (2026-09-10, later the same day) **`HOUSE-00700` landed and took two of the three pins
             out: 17 of 18 poses are now identical culled and unculled.** `ext-backyard` recovered
             31.23 % of its frame and `ext-terrace` 2.00 %. The task still stays open, and the

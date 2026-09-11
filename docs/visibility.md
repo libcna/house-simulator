@@ -192,8 +192,14 @@ contributes none and the outdoors costs nothing there.
   `ExteriorTraversalTests`.
 * No allocation, and the ring — `VisibilityAllocationTests`.
 * The cost — `tests/perf/VisibilityCostTests.cpp`. Never gating; run it on a quiet machine.
-* The same pose drawn culled and unculled must be the same pixels —
-  `tests/render/CullingSanityRenderTests.cpp` (currently disabled; see `HOUSE-00688`).
+* The same pose drawn culled and unculled must match within tolerance —
+  `tests/render/CullingSanityRenderTests.cpp`. **Enabled and green since `HOUSE-00786`**, with no
+  pose pinned: all eighteen poses §65.6's door state lets it compare pass. "Match" is a threshold
+  and not pixel equality — fewer than **0.2 %** of the compared pixels may differ by more than
+  **2** in any channel. Measured 2026-09-11, worst pose `l0-sunroom`: **349 of 225 792 pixels
+  differ (0.1546 %)**, max channel delta 104, mean 0.072 — silhouette pixels on a rasteriser's
+  edge. A room wrongly culled is thousands of pixels, so the threshold separates the two cleanly.
+  The test prints all four numbers on every run.
 
 ## 7. Where the code is
 
