@@ -13068,8 +13068,76 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             maximum** (the other 144 of the 288 face into the window's own wall and are
             short-circuited to 0). The foyer's 12–22 is the balcony over the front door, attributed
             above; the basement's 60–66 is `HOUSE-00469`'s window wells, which are real geometry.
-- [ ] HOUSE-01263 — Implement the daylight model: per-window transmission, open boost, sky exposure, shading factor
+- [x] HOUSE-01263 — Implement the daylight model: per-window transmission, open boost, sky exposure, shading factor
       dep: HOUSE-00779, HOUSE-00207, HOUSE-01279 · sys: lighting · plat: ALL · pri: MUST
+      verify: unit ShadingGridTests.* (9) and DaylightModelTests.*/SkyExposureTests.* (13), over
+              the authored house and the baked `shading.bin`
+      note: `ShadingGrid` is the `CSHF` reader `docs/shading-format.md` said *"does not exist
+            yet"*; `DaylightModel` is §28.4's sum. Both are `System::IO` and arithmetic, no device,
+            so they test without one (ADR-0001). **`HOUSE-01564` wires them into `LightingSystem`**;
+            this task is the model.
+      correction: **§28.4's `shadingFactor` multiplies the DIRECT term only.** The section writes
+            it multiplying the whole of `skyExposure`, and taken literally that makes every
+            north-facing room in the house pitch dark from dawn to dusk. The baked grid is a
+            sun-direction occlusion MASK — `shading_factor.py` stores 0 for every direction behind
+            the window's own wall, half the grid, short-circuited without casting — so a north
+            window's factor is 0 whenever the sun is in the south, which at 40° N is always.
+            Measured: `L0_FAMILY` read **exactly 0.000** at a 45° sun due south.
+            A diffuse sky term is not directional that way: an eave takes a share of the sky DOME,
+            not all of it. `ShadingGrid::SkyViewFactor` is that share, computed once from **the
+            same baked grid** — the irradiance-weighted mean over the hemisphere the window faces,
+            each node weighted by `cos(altitude)` for the grid's over-sampling of the zenith and by
+            the cosine of incidence on the pane. No new data, no new file: the occlusion the bake
+            already measured, integrated instead of sampled. After it, `L0_FAMILY` reads 0.342
+            clear and 0.223 overcast at the same sun.
+      decision: **the ±75° cone is tapered, not switched.** §28.4 says the direct term is
+            *"non-zero only when the sun's azimuth is within ±75° of the window's outward normal"*,
+            which a hard edge satisfies — and a hard edge is a step in a room's brightness once per
+            window per day, the thing §36.3 spends a paragraph forbidding for seasons. The taper
+            `(cos Δ − cos 75°) / (1 − cos 75°)` is 1 head-on, reaches **exactly zero at 75°** and
+            stays there, so the sentence holds as written. Measured worst quarter-degree step:
+            **0.00402**. It introduces no number §28.4 does not already have.
+      decision: **the level needs a reference SUN as well as a reference room, and the first draft
+            forgot that.** §28.4's sum divided by floor area is a glazing RATIO, not a `[0, 1]`
+            level, and `SkyExposureFor` reaches nearly 2 at midsummer noon — so normalising by the
+            glazing ratio alone put every room with a window at a clamped 1.0 and hid the shading,
+            the cloud and the sash behind the clamp. The reference is a 0.20-glazed room with clear
+            glass at an **equinox noon** (49.95° at §33's latitude), head-on, clear sky: the one sun
+            this location has that is neither extreme, and one that travels if the location setting
+            moves.
+      measured: glazing ratios over the 36 cells with windows — **0.026 to 0.402, median 0.118**;
+            habitable rooms cluster at 0.195–0.24 and `L0_SUNROOM` is 0.402. At June noon **36
+            cells are lit**, brightest `L1_LANDING` at 0.988. `L0_FAMILY` over 2031-06-21 peaks at
+            **0.679** and is 0 at midnight. The baked shading costs the **foyer 91.6 %** of its
+            daylight and the **study 20.0 %** — §22's porch-roof claim arriving in the lighting.
+      finding: **`CellKind::Exterior` is not "outdoors".** `EXT_SHED` is an exterior cell because
+            it is outside the house, and it is a shed: walls, a roof, one window,
+            `visibilityHint: opaque`. Excluding it as outdoors left the shed unable to see daylight
+            through the only opening it has. `visibilityHint: open` alone is not it either —
+            `L0_STAIR_MAIN` and `L1_LANDING` are open to the storey above and are indoors. It is
+            **both together**, which picks out exactly the 17 cells a person would call outside. Of
+            the two windows without one exterior side, one (`WIN_L0_KITCHEN_2`, kitchen to sunroom)
+            is genuinely skyless and excluded, and one (`WIN_EXT_SHED_1`) is the shed's and kept.
+      finding: **an interactable and its opening are joined by PORTAL, never by id.**
+            `interactables.json` calls a window `WIN_L1_MASTER_N2` — cell, compass point, ordinal —
+            and `layout.openings.json` calls the same window `WIN_L1_MASTER_BED_2` — cell, ordinal.
+            **All 54 window interactables differ from their opening's id that way**, and both rows
+            carry the portal, which is the thing they are both actually about. Matching on the id
+            finds nothing and fails silently, which is what the first draft did: §65.6's authored
+            half-open `WIN_L1_MASTER_N2` was read as shut and nothing said so. The model now joins
+            through `Interactable::portal`, and a world loaded without `LoadInteractables` cannot
+            honour the initial state at all — which the test documents.
+      finding: **`DaylightModel` keeps a pointer to the grid and a temporary silently dangled.**
+            `DaylightModel model(world, LoadShading());` binds a temporary to the parameter, stores
+            its address and leaves a dangling pointer the moment the full expression ends. Written
+            that way in this task's own first draft of the tests, and the symptom was not a crash:
+            every window read a shading factor of 1.0, so the baked grid appeared to make no
+            difference and the test that checks it appeared to have found a content bug. The rvalue
+            overload is now **deleted**, so the same mistake is a compile error.
+      accept: §28.4's five factors are all present and each is separately observable in a test —
+              area and floor area through the glazing ratio, transmission and the open boost
+              through a single-window cell at a sun low enough not to clamp, sky exposure through
+              the cloud and cone claims, and the shading through the foyer against the study.
       dep-note: uses a fixed noon sun until phase 23 lands the real sun
       dep-note: (2026-09-11) `HOUSE-01279` added to `dep`: the fourth factor is a file that did not
             exist. §32's sun now DOES exist (`HOUSE-01561`…`HOUSE-01563`), so the first dep-note's
