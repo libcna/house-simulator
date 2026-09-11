@@ -22,14 +22,15 @@ Sibling repositories, recorded and **not modified by this session**:
 
 | Repository | HEAD | Note |
 |---|---|---|
-| `cnanext` | `c1c017cd79d3f3ffe06d0abff4dd0b5285b61438` (`next`) | **A vulkan→next merge is staged uncommitted in its working tree.** See §5. |
+| `cnanext` | `93ca4ffdf` (`next`) | The vulkan→next merge, committed and amended at 09:14. cna-house is rebuilt and fully qualified against it — see §5. Not pushed to its own origin at the time of writing. |
 | `sharp-runtimenext` | `0c82d9b888bdf5f7d5663c77942f339bcb2a7445` (`next`) | untouched |
 
 ### Test and gate state
 
 * **1 290** unit + integration tests pass (`ctest --test-dir build -L 'unit|integration' -j3`).
-* **35 / 35** render tests passed earlier in the session, at `731c5be` against the pre-merge
-  `cnanext`. **They have not been re-run since** — see §5, this is the one thing owed.
+* **35 / 35** render tests pass, re-run at the end of the session against the merged
+  `cnanext 93ca4ffdf`. Nothing is owed. See §5 for the figures and for why the binaries had to be
+  rebuilt first.
 * `tools/ci/run_checks.sh` — all gates green, including the two new ones this session added.
 
 **Count tests from the binary, not from `ctest`.** `gtest_discover_tests(... DISCOVERY_MODE
@@ -166,7 +167,26 @@ the index.
 
 ## 5. What is owed, and the constraint that put it there
 
-> **RENDER QUALIFICATION OWED.** The render suite has not been run since `731c5be`.
+> **RENDER QUALIFICATION PAID, 2026-09-11.** Run at cna-house `e0b9b99` against
+> cnanext **`93ca4ffdf`** (the vulkan→next merge, amended) and sharp-runtimenext
+> `0c82d9b`. **35/35 render, 1290/1290 unit+integration, 0 failures.**
+>
+> The number that mattered is **unchanged to the byte** across the merge:
+> `CullingSanityRenderTests`, worst pose `l0-sunroom`, **349 of 225 792 compared
+> pixels differ (0.1546 %)**, max channel delta **104**, mean **0.072** — identical
+> to the pre-merge figure taken at `f84e564` against `c1c017cd7`. The merge moved
+> EasyGL's sprite flush, the `SamplerState` W address path and compiled-effect
+> teardown; none of it reached the 18 `BasicEffect` blockout poses, which is what
+> was predicted and is now measured rather than assumed.
+>
+> **Rebuild before you measure.** The first attempt would have qualified stale
+> binaries: they were linked at 08:11 and `93ca4ffdf` was amended at 09:14, after
+> its author found a regression of their own (an EasyGL depth-format override,
+> since reverted). `find cnanext/modules -name '*.cpp' -newer build/cnahouse_render_tests`
+> is the check.
+>
+> The section below is kept as the original owed-qualification note, because it
+> records the baseline and the reasoning that made the comparison meaningful.
 
 The whole of `cnanext` is mid-merge. A peer session (`cnanextmerge`) is landing **vulkan → next**:
 331 commits, 20 conflicting files, and at the time of writing the merge is **resolved, compiling,
