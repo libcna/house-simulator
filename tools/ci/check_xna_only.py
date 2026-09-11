@@ -26,6 +26,8 @@ Fourteen rejected classes, each with a planted-violation fixture in --selftest:
     cmake-cnaext          CNA_CNAEXT enabled in any CMake input or cache
     weather-boolean       an is(Raining|Snowing|Windy|Stormy) member
     std-filesystem        std::filesystem outside SaveStore
+    posix-file            fopen / opendir / unlink and friends outside SaveStore
+    std-thread            std::thread / std::async: v1 is single-threaded
     shader-source         GLSL / SPIR-V / WGSL / Metal shader source anywhere in the tree
     fx-placement          a .fx / .fxh outside assets-src/Effects/
 
@@ -115,6 +117,11 @@ RULE_HELP = {
                        "(cna-house.md section 36.1).",
     "std-filesystem": "Game code reaches the disk through StorageDevice / ISaveStore so the Web "
                       "port is a swap, not a rewrite (cna-house.md section 8.3).",
+    "posix-file": "The same rule as std-filesystem, by the other door: no POSIX or C file call "
+                  "outside SaveStore's desktop implementation (cna-house.md section 8.3).",
+    "std-thread": "v1 is single-threaded; Emscripten threading changes the module ABI and needs "
+                  "COOP/COEP headers, and HOUSE-02451 measures before anyone pays that "
+                  "(cna-house.md section 8.4).",
     "shader-source": "GLSL/SPIR-V source would mean CNA::Graphics::ShaderEffect, which is Tier C. "
                      "Author .fx under assets-src/Effects/ instead.",
     "fx-placement": "Effect sources live in assets-src/Effects/ so the content build and this "
@@ -150,9 +157,29 @@ CODE_PATTERNS = [
     ("native-graphics", re.compile(r"\bSDL_\w+\b")),
     ("native-graphics", re.compile(r"\b(?:glslang|SPIRV|spvc?)[A-Za-z_]\w*\b")),
     ("std-filesystem", re.compile(r"\bstd\s*::\s*filesystem\b")),
+    # `HOUSE-02841`. §8.3: *"No POSIX filesystem use outside `SaveStore`'s desktop
+    # implementation."* `std::filesystem` was already linted; the C and POSIX doors into the same
+    # room were not, and `std::fopen` is the one a person reaches for without thinking.
+    #
+    # Only names that cannot be anything else. `remove` and `rename` are deliberately absent:
+    # `std::remove` is `<algorithm>`'s and flagging it would train people to write exemptions.
+    ("posix-file", re.compile(r"\b(?:fopen|freopen|fdopen|fileno|popen)\s*\(")),
+    ("posix-file", re.compile(r"\b(?:mkdir|rmdir|unlink|opendir|readdir|closedir|getcwd|chdir|"
+                              r"lstat|realpath|symlink)\s*\(")),
+    # `HOUSE-02841`. §8.4: *"v1 is single-threaded. Everything runs on the game thread."* The
+    # reason is in §8.4 and is not style: Emscripten threading changes the ABI of the whole module
+    # and needs COOP/COEP headers, and `HOUSE-02451` has to MEASURE the load time before anyone
+    # pays that. A thread that appears before that measurement is a Web port nobody can ship.
+    ("std-thread", re.compile(r"\bstd\s*::\s*(?:thread|jthread|async)\b")),
 ]
 
 INCLUDE_RE = re.compile(r"^\s*#\s*include\s*[<\"]([^>\"]+)[>\"]")
+
+#: §8.4's single thread, as headers. `<mutex>` and `<atomic>` are NOT here: a single-threaded
+#: program has no use for them either, but they also appear in a test's allocation counter and in
+#: third-party headers, and a rule that fires on those is a rule people turn off.
+THREAD_INCLUDE_NAMES = frozenset(("thread", "future", "latch", "barrier", "stop_token",
+                                  "semaphore", "condition_variable"))
 
 FORBIDDEN_INCLUDE_PREFIXES = ("CNA/",)
 NATIVE_INCLUDE_PREFIXES = (
@@ -333,9 +360,12 @@ def check_includes(rel: str, raw_lines: list[str], out: list[Violation]) -> None
         elif header == "filesystem":
             out.append(Violation(rel, number, "std-filesystem",
                                  "#include <filesystem>"))
+        elif header in THREAD_INCLUDE_NAMES:
+            out.append(Violation(rel, number, "std-thread", f"#include <{header}>"))
 
 
-def check_code(rel: str, code: str, out: list[Violation], *, allow_filesystem: bool) -> None:
+def check_code(rel: str, code: str, out: list[Violation], *,
+               exempt: frozenset = frozenset()) -> None:
     lines = code.split("\n")
     for number, line in enumerate(lines, start=1):
         for declared in BOOL_DECL_RE.findall(line):
@@ -343,7 +373,7 @@ def check_code(rel: str, code: str, out: list[Violation], *, allow_filesystem: b
             if offence is not None:
                 out.append(Violation(rel, number, "weather-boolean", f"bool {declared}"))
         for rule, pattern in CODE_PATTERNS:
-            if rule == "std-filesystem" and allow_filesystem:
+            if rule in exempt:
                 continue
             match = pattern.search(line)
             if match:
@@ -418,26 +448,60 @@ def scan(root: Path) -> list[Violation]:
         except OSError:
             continue
 
-        is_test = top in TEST_ROOTS
-        is_savestore = path.stem.startswith(SAVESTORE_STEM_PREFIX)
-        allow_filesystem = is_test or is_savestore
-
         raw_lines = raw.split("\n")
-        if not allow_filesystem:
-            check_includes(rel, raw_lines, violations)
-        else:
-            check_includes_without_filesystem(rel, raw_lines, violations)
-        check_code(rel, strip_cxx(raw), violations, allow_filesystem=allow_filesystem)
+        exempt = exempt_rules_for(rel, top, path.stem)
+        check_includes_except(rel, raw_lines, violations, exempt)
+        check_code(rel, strip_cxx(raw), violations, exempt=exempt)
 
     violations.sort(key=lambda v: (v.path, v.line, v.rule))
     return violations
 
 
-def check_includes_without_filesystem(rel: str, raw_lines: list[str],
-                                      out: list[Violation]) -> None:
+#: Path -> the rules it may break, and WHY. One entry, and it is a finding rather than a comfort.
+#:
+#: `HOUSE-02841` added the `posix-file` rule and it found exactly one call in game code on its
+#: first run: `Log::SetFileSink` opens the debug log with `std::fopen`. §8.3 allows POSIX file
+#: access only inside `SaveStore`'s desktop implementation, and a log sink is not that. Removing
+#: it is `HOUSE-02842`, which exists to audit precisely this; the exemption names that task and
+#: has to disappear with it, which is what the stale-exemption check below is for.
+REPO = Path(__file__).resolve().parents[2]
+
+PATH_EXEMPTIONS: dict[str, tuple[frozenset, str]] = {
+    "src/util/Log.cpp": (frozenset({"posix-file"}),
+                         "Log::SetFileSink opens the debug log with std::fopen; HOUSE-02842 "
+                         "audits every filesystem access outside DesktopSaveStore and removes it"),
+}
+
+
+def exempt_rules_for(rel: str, top: str, stem: str) -> frozenset:
+    """Which rules @p rel may break.
+
+    Three sources, and they are different kinds of thing. **Tests** may reach the disk and may
+    start a thread: §8.3 and §8.4 are rules about the GAME, and a test that reads a committed PNG
+    or checks a counter under contention is not the game. **`SaveStore`** is where §8.3 says the
+    disk access belongs. **`PATH_EXEMPTIONS`** is one named file with a reason and a task id.
+    """
+    rules: set = set()
+    if top in TEST_ROOTS:
+        rules.update(("std-filesystem", "posix-file", "std-thread"))
+    if stem.startswith(SAVESTORE_STEM_PREFIX):
+        rules.update(("std-filesystem", "posix-file"))
+    entry = PATH_EXEMPTIONS.get(rel)
+    if entry is not None:
+        rules.update(entry[0])
+    return frozenset(rules)
+
+
+def check_includes_except(rel: str, raw_lines: list[str], out: list[Violation],
+                          exempt: frozenset) -> None:
+    """`check_includes`, with the rules in @p exempt dropped.
+
+    Filtering AFTER the fact rather than threading the exemption through `check_includes`: the
+    include scanner answers one question per line and there is nothing to skip inside it.
+    """
     collected: list[Violation] = []
     check_includes(rel, raw_lines, collected)
-    out.extend(v for v in collected if v.rule != "std-filesystem")
+    out.extend(v for v in collected if v.rule not in exempt)
 
 
 # --------------------------------------------------------------------------------------------
@@ -509,6 +573,12 @@ FIXTURES: dict[str, tuple[str, str]] = {
     "std-filesystem": (
         "src/persistence/PlantedFilesystem.cpp",
         "#include <filesystem>\nvoid f()\n{\n    std::filesystem::path p;\n}\n"),
+    "posix-file": (
+        "src/persistence/PlantedPosix.cpp",
+        "void f()\n{\n    FILE* handle = std::fopen(\"save.bin\", \"w\");\n}\n"),
+    "std-thread": (
+        "src/app/PlantedThread.cpp",
+        "#include <thread>\nvoid f()\n{\n    std::thread worker;\n}\n"),
     "shader-source": (
         "assets-src/Effects/planted.frag",
         "void main() {}\n"),
@@ -601,13 +671,12 @@ def selftest() -> int:
                  "float windSpeed = 0.0F;", "float precipIntensity = 0.0F;",
                  "float thunderIntensity = 0.0F;", "float surfaceWetness = 0.0F;"):
         planted_out: list[Violation] = []
-        check_code("src/weather/WeatherState.hpp", line, planted_out, allow_filesystem=False)
+        check_code("src/weather/WeatherState.hpp", line, planted_out)
         if any(v.rule == "weather-boolean" for v in planted_out):
             failures.append(f"§36.1's own continuous field was rejected: {line!r}")
     # ...and a `bool` one of them is exactly what it is for.
     planted_out = []
-    check_code("src/weather/WeatherState.hpp", "    bool snowDepth = false;", planted_out,
-               allow_filesystem=False)
+    check_code("src/weather/WeatherState.hpp", "    bool snowDepth = false;", planted_out)
     if not any(v.rule == "weather-boolean" for v in planted_out):
         failures.append("`bool snowDepth` -- the float turned into a flag -- was not rejected")
 
@@ -616,8 +685,44 @@ def selftest() -> int:
     if planted != expected:
         failures.append(f"fixture set does not cover every rejected class: "
                         f"missing {sorted(expected - planted)}, extra {sorted(planted - expected)}")
-    if len(FIXTURES) != 14:
-        failures.append(f"expected 14 planted-violation fixtures, found {len(FIXTURES)}")
+    if len(FIXTURES) != 16:
+        failures.append(f"expected 16 planted-violation fixtures, found {len(FIXTURES)}")
+
+    # `HOUSE-02841`. The exemptions, both directions.
+    #
+    # A test may reach the disk and may start a thread; the GAME may not. An exemption that has
+    # stopped being needed has to FAIL, or the list silently becomes a list of things nobody
+    # checks any more -- which is how an allowlist turns into a permission.
+    for rel, (rules, reason) in PATH_EXEMPTIONS.items():
+        if not (REPO / rel).exists():
+            failures.append(f"exemption for {rel} names a file that no longer exists")
+            continue
+        if not reason.strip():
+            failures.append(f"exemption for {rel} has no reason")
+        stripped = strip_cxx((REPO / rel).read_text(encoding="utf-8", errors="replace"))
+        needed: list[Violation] = []
+        check_code(rel, stripped, needed)
+        still = {v.rule for v in needed} & rules
+        if still != set(rules):
+            failures.append(f"exemption for {rel} covers {sorted(rules)} but the file only "
+                            f"breaks {sorted(still) or 'nothing'} now -- delete the stale entry")
+    # ...and a test really is exempt, while the same code in src/ really is not.
+    for root, rel, expect in (("tests", "tests/unit/PlantedIo.cpp", False),
+                              ("src", "src/util/PlantedIo.cpp", True)):
+        probe: list[Violation] = []
+        check_code(rel, "void f() { std::fopen(\"x\", \"r\"); }", probe,
+                   exempt=exempt_rules_for(rel, root, "PlantedIo"))
+        got = any(v.rule == "posix-file" for v in probe)
+        if got != expect:
+            failures.append(f"{rel}: posix-file {'was not' if expect else 'was'} reported "
+                            f"and should {'have been' if expect else 'not have been'}")
+    # ...and `SaveStore`'s desktop implementation is where §8.3 puts the disk access.
+    probe = []
+    check_code("src/persistence/SaveStoreDesktop.cpp", "void f() { std::fopen(\"s\", \"w\"); }",
+               probe, exempt=exempt_rules_for("src/persistence/SaveStoreDesktop.cpp", "src",
+                                              "SaveStoreDesktop"))
+    if any(v.rule == "posix-file" for v in probe):
+        failures.append("SaveStore's own implementation was rejected for reaching the disk")
 
     if failures:
         print("check_xna_only self-test FAILED", file=sys.stderr)
@@ -629,6 +734,7 @@ def selftest() -> int:
           f"detected, clean tree accepted, no allowlist consulted.")
     print(f"  weather-boolean: {len(must_reject)} name(s) rejected, {len(must_accept)} accepted, "
           f"over {len(WEATHER_WORDS)} weather word(s) (`HOUSE-01700`).")
+    print(f"  exemptions: {len(PATH_EXEMPTIONS)} path(s), each still needed (`HOUSE-02841`).")
     return 0
 
 

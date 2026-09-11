@@ -15189,8 +15189,43 @@ their features; this phase closes the gaps and makes the suite a first-class art
 **Nothing here builds for the browser yet.** The goal is to satisfy every readiness criterion of
 `cna-house.md` §80.1 *on Linux*, so the Web port is a build problem rather than a rewrite.
 
-- [ ] HOUSE-02841 — Extend the lint to reject `std::filesystem`, `fopen` and `std::thread` outside their permitted homes
+- [x] HOUSE-02841 — Extend the lint to reject `std::filesystem`, `fopen` and `std::thread` outside their permitted homes
       dep: HOUSE-00021 · sys: ci · plat: CI · pri: MUST
+      verify: `tools/ci/check_xna_only.py --selftest` (16 planted fixtures, from 14); the
+              `xna-only` gate
+      finding: **`posix-file` found a violation in game code on its first run.**
+            `Log::SetFileSink` (`src/util/Log.cpp:240`) opens the debug log with `std::fopen`.
+            §8.3 allows POSIX file access only inside `SaveStore`'s desktop implementation and a
+            log sink is not that; on the Web build it is a call that cannot work. Removing it is
+            **`HOUSE-02842`**, which exists to audit exactly this, so it is recorded as a path
+            exemption naming that task rather than fixed here — and the exemption is checked for
+            staleness, so it fails the day `HOUSE-02842` lands and nobody deletes it.
+      measured: `std::filesystem` was already linted (`HOUSE-00021`); the C and POSIX doors into
+            the same room were not. Across `src/`, `include/`, `tests/` and `tools/`: **5**
+            `fopen`-family calls (four in `tests/render`, one in `src/util/Log.cpp`), **0**
+            `mkdir`/`unlink`/`opendir`-family calls, **0** `std::thread`/`std::async`, and **2**
+            `#include <thread>`, both in tests. §8.4's single thread holds in game code today and
+            now cannot stop holding quietly.
+      decision: **`remove` and `rename` are deliberately NOT in the pattern**, though both are
+            POSIX file calls. `std::remove` is `<algorithm>`'s and fires on ordinary vector code;
+            a rule with false positives teaches people to write exemptions, which costs more than
+            the two names are worth. The pattern is the names that cannot be anything else.
+      decision: **`<mutex>` and `<atomic>` are not linted either.** A single-threaded program has
+            no use for them, but `std::atomic` is how `VisibilityAllocationTests` counts
+            allocations and it appears in third-party headers; the rule fires on `<thread>`,
+            `<future>`, `<latch>`, `<barrier>`, `<stop_token>`, `<semaphore>` and
+            `<condition_variable>`, which nobody includes by accident.
+      finding: the exemption machinery had to be generalised to do this. `allow_filesystem` was a
+            BOOLEAN that skipped one rule, so the two new rules ignored it and the first run
+            rejected four legitimate test files. It is now a set of rules per path, from three
+            sources that are different kinds of thing: **tests** may reach the disk and start a
+            thread, because §8.3 and §8.4 are rules about the GAME; **`SaveStore`** is where §8.3
+            puts the disk access; and **`PATH_EXEMPTIONS`** is a named file with a reason and a
+            task id.
+      verified: two injected bugs, both caught. Pointing the exemption at a file that does not
+            offend fails with *"delete the stale entry"*; removing the tests' exemption fails with
+            the planted test file being rejected. Plus a claim that `SaveStore`'s own
+            implementation is not rejected for reaching the disk, which is the rule's whole point.
 - [ ] HOUSE-02842 — Audit and fix every filesystem access outside `DesktopSaveStore`
       dep: HOUSE-02841 · sys: — · plat: ALL · pri: MUST
 - [ ] HOUSE-02843 — Audit and fix any custom loop or `Game::Run` misuse
