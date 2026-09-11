@@ -13634,10 +13634,55 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 23 — Sun, glare and the sun-clock
 
-- [ ] HOUSE-01561 — Implement `SunModel`: the simplified NOAA algorithm producing declination, hour angle, altitude and azimuth
+- [x] HOUSE-01561 — Implement `SunModel`: the simplified NOAA algorithm producing declination, hour angle, altitude and azimuth
       dep: HOUSE-01532 · sys: environment · plat: ALL · pri: MUST
       verify: unit SunModelTests.* against 200 published sunrise/sunset times, ± 3 minutes
-      note: (2026-09-10) **not started: its `verify` line needs data this machine cannot get, and
+      note: (2026-09-11) **unblocked and CLOSED: the network came back and option (1) below was
+            taken.** The source is the **United States Naval Observatory, Astronomical Applications
+            Department** -- `https://aa.usno.navy.mil/api/rstt/oneday`, API 4.0.1, retrieved
+            2026-09-11 -- which is the institution that publishes the Astronomical Almanac and
+            computes its rise/set times from a full ephemeris. That is genuinely independent of
+            §32.1's ~40-flop approximation in a way no second implementation of NOAA's own formula
+            could be, which was the whole objection.
+      provenance: source USNO AA Dept `rstt/oneday`; retrieved 2026-09-11; coordinates 40.05° N,
+            −75.30° (§33's location, verbatim); 195 dates -- every third day of 2031, the 1st and
+            15th of every month of 2026, 2032 and 2040, and 2031's solstices and equinoxes; time
+            zone **UTC−5 fixed, local STANDARD time on every row** (the API returns `isdst: false`
+            for July as well as January at `tz=-5`, which is what makes the rows directly
+            comparable to `SimClock::Standard()`); values are whole minutes after local standard
+            midnight for rise, set and upper transit. **Licence: a work of the United States
+            Government, not subject to copyright in the United States (17 U.S.C. §105)**, recorded
+            in `NOTICE.md`. Vendored as `tests/unit/reference/suntimes.usno.txt` (8 KB) beside its
+            raw response cache (12 KB) so CI needs no network; `tools/ci/suntimes_table.py --fetch`
+            reproduces it and `--check` is a gate.
+      measured: (2026-09-11) **390 published rise/set times, every one inside the ±3 minute
+            criterion by a factor of five.** Worst sunrise **−0.56 min** (2031-06-30), worst sunset
+            **+0.52 min** (2031-09-22), mean |error| **0.26 min**. Worst upper transit **+0.70 min**
+            (2026-03-01) -- the transit is the equation of time with declination cancelled out, so
+            it fails separately if two errors happened to cancel in rise and set. The table spans
+            2026–2040 on purpose: §32.1's `n` is days since J2000 and an error in the linear terms
+            grows with it, which one year of rows could not see.
+      measured: §32.1's own stated consequences, checked as independent claims rather than quoted:
+            noon altitude over 2031 runs **26.52° to 73.38°** against the section's *"26.4° to
+            73.4°"*; published day length runs **559 to 902 minutes** (9h19m–15h02m) against its
+            *"9h17m to 15h03m"*; the sun transits due south with hour angle 0; the June and
+            December rise azimuths are 58° and 122°.
+      finding: **sunrise is solved from the position model and from nothing else.** The crossing of
+            `kRefractedHorizonDeg` (−0.8333° = the sun's semidiameter plus horizon refraction, the
+            convention every published table including the USNO's uses) is bracketed on a 4-minute
+            scan of the day and bisected on `SunPositionAt`'s own altitude. A closed-form
+            hour-angle solution would have been a SECOND approximation, and a disagreement with the
+            USNO could then not be attributed to either one.
+      finding: the test was written with a wrong premise and the model corrected it, which is the
+            outcome worth recording. The premise was that at 40° N the sun never reaches −18° in
+            June, so astronomical twilight would last all night. It does reach it: the June lower
+            transit is `latitude + 23.44 − 90` = **−26.5°** at 40.05° N, and the latitude where
+            astronomical night first disappears is **48.56° N**. §32.1's *"Reykjavík"* preset
+            (64.13° N, lower transit −2.4°) is where that branch is actually reachable, and it and
+            the *"Equator"* preset the same sentence names are now `ReykjavikObserver()` and
+            `EquatorObserver()` — declared where §32.1 says they exist, *"purely to make the
+            seasonal and diurnal extremes easy to test"*.
+      note: (2026-09-10, SUPERSEDED by the note above) **not started: its `verify` line needs data this machine cannot get, and
             the alternative is the mistake `HOUSE-01532` was written to correct.** The criterion is
             *"200 PUBLISHED sunrise/sunset times"*, and published means from an authority. There is
             no network here (`curl https://pypi.org/simple/` times out) and no astronomy package is

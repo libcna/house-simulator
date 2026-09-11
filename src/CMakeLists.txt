@@ -29,6 +29,7 @@ add_library(cnahouse_core STATIC
     environment/Season.cpp
     environment/Temperature.cpp
     environment/SimClock.cpp
+    environment/SunModel.cpp
 
     # player -- input first, because nothing else may read the devices
     player/BoundaryGuard.cpp

@@ -189,6 +189,12 @@ run_gate "world-ids" python3 tools/world/id_golden.py --check
 # of that table is entirely in its coming from somewhere else. A hand-edited line is a weakened
 # test that nothing else in the project would notice, so the table is regenerated and compared.
 run_gate "calendar-table" python3 tools/ci/calendar_table.py --check
+# `HOUSE-01561`. §32.1's sun is checked against 390 rise and set times published by the US Naval
+# Observatory. Same reasoning as the calendar table and the same failure mode: the whole value of
+# the fixture is that we did not compute it, so the extract is regenerated from the cached
+# responses and compared. `--check` never touches the network; only `--fetch` does.
+run_gate "suntimes-table" python3 tools/ci/suntimes_table.py --check
+run_gate "suntimes-selftest" python3 tools/ci/suntimes_table.py --selftest
 # `HOUSE-01543`. §36.3: *"Season is a continuous phase, never an enum... never a switch."* The
 # season code being right is no protection at all against a consumer writing
 # `switch (phase.primary)`, and nothing in a test of the season itself would notice. This is the
