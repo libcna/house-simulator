@@ -12893,8 +12893,41 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 16 — Lights and switches  ·  **First playable milestone**
 
-- [ ] HOUSE-01251 — Implement `RoomLightState` and `LightingSystem` skeleton: per-cell artificial and daylight levels
+- [x] HOUSE-01251 — Implement `RoomLightState` and `LightingSystem` skeleton: per-cell artificial and daylight levels
       dep: HOUSE-00348 · sys: lighting · plat: ALL · pri: MUST
+      verify: unit LightingSystemTests.* against the authored house, and a `--scene=walk` run
+      measured: **96 cells, 135 switch groups, 243 fixtures.** 86 of the 96 cells have light
+            groups; the other 10 -- closets, shafts, the outdoors -- have none and are 0 rather
+            than a division by zero. §28.2 says *"220 fixtures in 128 switch groups inside the
+            house, plus the exterior lights `HOUSE-00383` adds"*, and 243 − 220 = 23 exterior
+            fixtures in 135 − 128 = 7 exterior groups. The section and the data agree.
+      decision: **a cell's `artificial` is weighted by LUMENS, not by fixture or group count.**
+            §28.1 gives `artificial[g]` per group and does not say how several groups make one
+            room's level, and a mean over groups is wrong in a way the house makes obvious:
+            `B1_CINEMA`'s 2 800 lm group would count the same as its 180 lm one. Measured on that
+            very room, the weighting gives **0.940** and **0.060**. Every group on is exactly 1.0
+            in all 86 lit cells, which is the property that makes the weight safe to rely on.
+      decision: **`RoomLightState::Level` saturates rather than sums.** §28.1 gives no formula.
+            Summing would make a sunlit room with the lights on brighter than the renderer has
+            range for; taking the maximum would make turning the light on in that room do nothing,
+            and §30 has a row about a player watching exactly that. The strongest source sets the
+            level and the rest lift what is left towards 1, so it is monotone in every source,
+            never exceeds 1, and is exactly `kAmbientFloor` when nothing is lit.
+      note: **`daylight` and `borrowed` are left at ZERO and a test asserts they are.**
+            `HOUSE-01263` and `HOUSE-01265` own them. A plausible number nothing computed would
+            make *"the daylight model is not written yet"* indistinguishable from *"the daylight
+            model is broken"*; the test says which, names the task, and is written to be deleted by
+            whichever one lands first.
+      note: it is **wired into the frame**, not left dormant: `CnaHouseGame` loads
+            `layout.lights.json`, builds the system with the world and runs it at
+            `UpdateStage::Lighting` -- ahead of visibility, because §23.3 picks a cell's additive
+            passes from its levels and the levels have to be this frame's before anything decides
+            what to draw. It runs whether or not the body is walking; a room's lights are on or off
+            regardless of who is looking at it. Verified by a `--scene=walk` screenshot run.
+      finding: fixtures in one group could in principle disagree about `defaultOn`. They do not in
+            the authored data, and where they would, ON wins -- a switch that is on lights every
+            fixture it controls, and resolving the disagreement to OFF would hide a data defect
+            instead of showing it.
 - [ ] HOUSE-01252 — Implement `LightBehaviour` and the switch-group model, with the three-way pairs
       dep: HOUSE-01122, HOUSE-00403 · sys: interaction · plat: ALL · pri: MUST
 - [ ] HOUSE-01253 — Implement the switch-plate interactables with per-gang actions

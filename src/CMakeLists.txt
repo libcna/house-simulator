@@ -25,6 +25,10 @@ add_library(cnahouse_core STATIC
     audio/AudioSystem.cpp
 
     # environment -- §35's clock, which everything time-dependent reads and nothing duplicates
+    # lighting -- §28's per-room state, the one answer everything downstream reads
+    lighting/LightingSystem.cpp
+    lighting/RoomLightState.cpp
+
     environment/DayLength.cpp
     environment/Season.cpp
     environment/Temperature.cpp

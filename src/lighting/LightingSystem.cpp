@@ -1,0 +1,175 @@
+// SPDX-License-Identifier: MIT
+#include "cnahouse/lighting/LightingSystem.hpp"
+
+#include <algorithm>
+#include <cmath>
+
+#include "cnahouse/app/FrameTimer.hpp"
+#include "cnahouse/world/WorldData.hpp"
+
+namespace cnahouse::lighting
+{
+
+    LightingSystem::LightingSystem(const world::WorldData& world)
+    {
+        // One state per cell, in the world's order, so a consumer can iterate `Cells()` beside any
+        // other per-cell array the world produced without a lookup.
+        const std::span<const world::Cell> worldCells = world.Cells();
+        cells_.reserve(worldCells.size());
+        cellGroups_.reserve(worldCells.size());
+        cellIndex_.reserve(worldCells.size());
+        for (const world::Cell& cell : worldCells)
+        {
+            cellIndex_.emplace(cell.id.Value(), cells_.size());
+            RoomLightState state;
+            state.cell = cell.id;
+            cells_.push_back(state);
+        }
+
+        // The groups come from the LIGHTS: a group's default state is a property of its fixtures,
+        // and its lumens are their sum. A group named by a cell but owning no fixture would light
+        // nothing, and is left out rather than given a zero-lumen entry that divides badly later.
+        for (const world::Light& light : world.Lights())
+        {
+            if (!light.group.IsValid())
+            {
+                continue;
+            }
+            const auto found = groupIndex_.find(light.group.Value());
+            if (found == groupIndex_.end())
+            {
+                groupIndex_.emplace(light.group.Value(), groups_.size());
+                SwitchGroupState group;
+                group.group = light.group;
+                group.on = light.defaultOn;
+                groups_.push_back(group);
+                groupLumens_.push_back(std::max(light.intensityLm, 0.0F));
+            }
+            else
+            {
+                // §28.2: a group is a set of fixtures on one switch. They agree about `defaultOn`
+                // in the authored data; where they would not, ON wins, because a switch that is on
+                // lights every fixture it controls and a disagreement is a data defect that should
+                // be visible rather than silently resolved to off.
+                groups_[found->second].on = groups_[found->second].on || light.defaultOn;
+                groupLumens_[found->second] += std::max(light.intensityLm, 0.0F);
+            }
+        }
+
+        // The cells' group lists, packed. Only groups that actually own a fixture are kept, and
+        // the lumens are totalled once because the denominator of `artificial` never changes.
+        for (std::size_t index = 0; index < worldCells.size(); ++index)
+        {
+            CellGroups packed;
+            packed.first = cellGroupIds_.size();
+            for (const util::Id& group : worldCells[index].lightGroups)
+            {
+                const auto found = groupIndex_.find(group.Value());
+                if (found == groupIndex_.end())
+                {
+                    continue;
+                }
+                cellGroupIds_.push_back(group);
+                packed.totalLumens += groupLumens_[found->second];
+            }
+            packed.count = cellGroupIds_.size() - packed.first;
+            cellGroups_.push_back(packed);
+        }
+    }
+
+    void LightingSystem::Update(const app::FrameContext& frame)
+    {
+        computedForFrame_ = frame.frameIndex;
+        for (std::size_t index = 0; index < cells_.size(); ++index)
+        {
+            const CellGroups& packed = cellGroups_[index];
+            float lit = 0.0F;
+            for (std::size_t offset = 0; offset < packed.count; ++offset)
+            {
+                const util::Id group = cellGroupIds_[packed.first + offset];
+                const auto found = groupIndex_.find(group.Value());
+                lit += groups_[found->second].Level() * groupLumens_[found->second];
+            }
+            // Lumen-weighted, so a kitchen's four 1 200 lm down-lights and its one 60 lm cabinet
+            // strip contribute what they actually emit. A room with no fixtures is 0 and not a
+            // division by zero.
+            cells_[index].artificial =
+                packed.totalLumens > 0.0F ? std::clamp(lit / packed.totalLumens, 0.0F, 1.0F) : 0.0F;
+        }
+    }
+
+    bool LightingSystem::SetGroupOn(util::Id group, bool on) noexcept
+    {
+        SwitchGroupState* state = FindGroupMutable(group);
+        if (state == nullptr)
+        {
+            return false;
+        }
+        state->on = on;
+        return true;
+    }
+
+    bool LightingSystem::SetGroupDimmer(util::Id group, float dimmer) noexcept
+    {
+        if (!std::isfinite(dimmer))
+        {
+            // A settings file and a console command are both user-editable text. A NaN dimmer would
+            // make one room's level NaN and everything that read it, silently.
+            return false;
+        }
+        SwitchGroupState* state = FindGroupMutable(group);
+        if (state == nullptr)
+        {
+            return false;
+        }
+        state->dimmer = std::clamp(dimmer, 0.0F, 1.0F);
+        return true;
+    }
+
+    const SwitchGroupState* LightingSystem::FindGroup(util::Id group) const noexcept
+    {
+        const auto found = groupIndex_.find(group.Value());
+        return found == groupIndex_.end() ? nullptr : &groups_[found->second];
+    }
+
+    SwitchGroupState* LightingSystem::FindGroupMutable(util::Id group) noexcept
+    {
+        const auto found = groupIndex_.find(group.Value());
+        return found == groupIndex_.end() ? nullptr : &groups_[found->second];
+    }
+
+    const RoomLightState* LightingSystem::FindCell(util::Id cell) const noexcept
+    {
+        const auto found = cellIndex_.find(cell.Value());
+        return found == cellIndex_.end() ? nullptr : &cells_[found->second];
+    }
+
+    std::span<const util::Id> LightingSystem::GroupsForCell(util::Id cell) const noexcept
+    {
+        const auto found = cellIndex_.find(cell.Value());
+        if (found == cellIndex_.end())
+        {
+            return {};
+        }
+        const CellGroups& packed = cellGroups_[found->second];
+        return std::span<const util::Id>(cellGroupIds_.data() + packed.first, packed.count);
+    }
+
+    float LightingSystem::GroupLevelInCell(util::Id cell, util::Id group) const noexcept
+    {
+        const std::span<const util::Id> lighting = GroupsForCell(cell);
+        if (std::find(lighting.begin(), lighting.end(), group) == lighting.end())
+        {
+            return 0.0F;
+        }
+        const SwitchGroupState* state = FindGroup(group);
+        return state == nullptr ? 0.0F : state->Level();
+    }
+
+    float LightingSystem::GroupLumens(util::Id group) const noexcept
+    {
+        const auto found = groupIndex_.find(group.Value());
+        return found == groupIndex_.end() ? 0.0F : groupLumens_[found->second];
+    }
+
+} // namespace cnahouse::lighting

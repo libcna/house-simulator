@@ -334,7 +334,10 @@ namespace cnahouse::app
         const auto levels = world::WorldLoader::LoadLevels("content/world", contents);
         const auto cells = world::WorldLoader::LoadCells("content/world", contents);
         const auto portals = world::WorldLoader::LoadPortals("content/world", contents);
-        if (!levels || !cells || !portals)
+        // §28's fixtures, for `LightingSystem` (`HOUSE-01251`). 243 rows; the loader is the same
+        // one the tests use, so a lights file that would fail CI fails here too.
+        const auto lights = world::WorldLoader::LoadLights("content/world", contents);
+        if (!levels || !cells || !portals || !lights)
         {
             Log::Error(LogCat::Content,
                        "--scene=walk: the world did not load; drawing from the fixed camera");
@@ -416,6 +419,9 @@ namespace cnahouse::app
         // reports it; what the draw list is built from is a separate decision and
         // `BuildRenderList` is the one place that makes it.
         visibility_.emplace(*world_);
+        // §28.1's per-room state, at `UpdateStage::Lighting` (`HOUSE-01251`). Built once over the
+        // world's cells and the fixtures' switch groups; nothing it does allocates after this.
+        lighting_.emplace(*world_);
         if (blockoutChunks_ != nullptr)
         {
             // With the world, so §12's nested cells are drawn with the room they stand in
@@ -818,6 +824,16 @@ namespace cnahouse::app
                 // `F4` draws is the frame the freeze caught and not the one on screen.
                 freeFly_.Update(Input().Current(), Input().LookAvailable(), frame.deltaSeconds);
                 freeFly_.ApplyTo(blockoutCamera_);
+            }
+            if (lighting_.has_value())
+            {
+                // §7.5's stage 6. Ahead of visibility because `UpdateStage` puts it there and for
+                // the reason `UpdateStage` puts it there: §23.3 picks a cell's additive passes
+                // from its levels, so the levels have to be this frame's before anything decides
+                // what to draw. It runs whether or not the body is walking -- a room's lights are
+                // on or off regardless of who is looking at it.
+                const debug::Timing::Scope scope(timing_, UpdateStage::Lighting);
+                lighting_->Update(frame);
             }
             if (walking_ && visibility_.has_value())
             {

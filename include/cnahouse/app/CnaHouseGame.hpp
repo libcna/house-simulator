@@ -28,6 +28,7 @@
 #include "cnahouse/debug/VisibilityOverlay.hpp"
 #include "cnahouse/debug/WorldOverlay.hpp"
 #include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/lighting/LightingSystem.hpp"
 #include "cnahouse/physics/BroadPhase.hpp"
 #include "cnahouse/physics/CollisionData.hpp"
 #include "cnahouse/player/CellTracker.hpp"
@@ -570,6 +571,8 @@ namespace cnahouse::app
         /// §49.3's accumulator runs the simulation slow for that frame.
         environment::SimClock clock_;
         std::optional<visibility::VisibilitySystem> visibility_;
+        /// @brief §28.1's per-room lighting, at `UpdateStage::Lighting` (`HOUSE-01251`).
+        std::optional<lighting::LightingSystem> lighting_;
         std::optional<visibility::ChunkCuller> chunkCuller_;
         /// @brief §25.6's hierarchy over the exterior chunks, and the walk over it
         ///        (`HOUSE-00700`).
