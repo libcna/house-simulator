@@ -3355,6 +3355,29 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             cell `cellA` or `cellB`. A window authored the other way round would otherwise cast
             every ray into the room it is trying to light, and the selftest builds the same portal
             both ways round to prove it does not.
+      correction: (2026-09-11, found by `HOUSE-01279`) **two defects, both found the first time
+            this tool was pointed at the real house, and both invisible to the 22 claims above.**
+            Every one of those claims builds its geometry directly in §14's axes with
+            `bpy.data.meshes.new`; none of them ever imported a `.glb`, and both defects live in
+            the import.
+            (1) **Blender's glTF importer converts Y-up to Z-up** — `(x, y, z)` becomes
+            `(x, −z, y)` — while `sun_direction`, the portal rectangles and the outward normals are
+            all in §14's frame, which is glTF's. Rays and geometry were in DIFFERENT FRAMES, and
+            the failure is silent: rays that should go up go north, so a ground-floor window was
+            reported as shaded by the BASEMENT and the file looked entirely plausible. Measured on
+            `build/shell/ROOF_MAIN.glb`: imported unrotated, its 0–14.3 m of height sits on
+            Blender's Z and its Y holds 13.9–27.5, which is the house's northing. `import_gltf` now
+            composes `R(−90°, X)`, and the corrected whole-shell bounds are Y −2.30 to 14.90 —
+            `B1`'s floor level and the ridge, which is §14 exactly.
+            (2) **`RAY_EPSILON` was 0.002 m, sized against the 0.15 m thinnest wall, and the shell
+            draws the window LEAF in the opening** — `layout.openings.json` gives every window a
+            0.03 m thickness, centred on the portal plane, so every sample started 0.013 m inside
+            the glass. A ray cast from inside a solid hits it whichever way it points, and **all 64
+            windows reported 0 of 288 nodes lit**. The offset is now `leaf/2 + RAY_EPSILON` =
+            0.017 m for the standard sash, still well inside the thinnest wall's half-thickness.
+            Three new claims cover the two, and each was proved by injecting the bug back: with the
+            rotation replaced by the identity the axis claim fails and the tool's own selftest goes
+            red. 50 claims now.
       finding: the stored byte is `round(fraction × 255)`, **rounded and not truncated** — with 16
             samples the fractions are sixteenths and 3/16 rounds to 48 but truncates to 47. The
             claim compares the stored byte against a fraction measured independently in the
@@ -12951,9 +12974,64 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-01262 — Implement the point-light-as-directional approximation with distance attenuation
       dep: HOUSE-01261 · sys: lighting · plat: ALL · pri: MUST
+- [ ] HOUSE-01279 — Bake `shading.bin` for the authored house and wire it into the content build
+      dep: HOUSE-00207, HOUSE-00465 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-11) **New task, next free id in phase 16's reserved 01251–01310 range.** The
+            plan had a tool for this grid (`HOUSE-00207`) and a consumer for it (`HOUSE-01263`) and
+            **nothing that ran the one to feed the other**. `shading.bin` has never existed for the
+            real house; `docs/shading-format.md` says so in its own header. Found while starting
+            `HOUSE-01263`, whose fourth factor it is.
+      finding: **the tool could not be run against the real house at all as it stood.**
+            `shading_factor.py` took one `SHELL.glb`, and the house shell has always been a
+            DIRECTORY of them — `build_shell.py` writes one per cell, 99 of them. It now takes
+            either. §22 also says to cast against *"the house and neighbour geometry"*, and the
+            neighbourhood is not geometry on disk but 122 placements of a model library, so
+            `--neighbourhood` places them: each model imported once and linked at each placement,
+            118 buildings for the cost of loading twelve.
+      finding: **two real defects in `shading_factor.py`, both invisible to its 22 existing
+            claims** — the glTF importer's Y-up→Z-up conversion, and a ray epsilon smaller than the
+            window sash the shell draws. Both are recorded in full under `HOUSE-00207`, both are
+            fixed, and both are now covered by claims proved with an injected bug. The common cause
+            is worth stating on its own: **every claim that tool had built its geometry directly
+            and none of them ever imported a `.glb`**, so the whole of the import path was untested
+            in a tool whose only job is to ray-cast against imported geometry.
+      measured: (2026-09-11) the bake now runs in **3.3 s** — 99 shell files, 118 neighbour
+            placements, 64 windows, 12 × 24 nodes, 4 × 4 rays a node, **21 044 bytes**. Of the 64
+            windows, **63 open onto an exterior cell and read 12–122 lit nodes of a 144 maximum**
+            (the other 144 are behind the window's own wall and are short-circuited to 0), mean 90.
+      finding: the 64th is `WIN_L0_KITCHEN_2`, which opens onto `L0_SUNROOM` — a ROOM — and reads
+            **0**. That is substantively right: an interior window has no sky, and the kitchen's
+            share of the sunroom's daylight is §28.4's 2-hop flood (`HOUSE-01265`) rather than a
+            sky term. `HOUSE-01263` must not treat it as a sky-facing window, and this is where
+            that is written down.
+      blocked: **the box does not move, and the reason is §22's own acceptance claim.** §22 says
+            *"the porch roof genuinely keeps the sun out of the foyer in the afternoon"*, and the
+            baked grid is consistent with it — the foyer's sidelights read **18** lit nodes where
+            `L0_OFFICE`'s south window, same floor, same wall plane, reads **106** — but it could
+            not be ATTRIBUTED. Deleting `L0_PORCH`'s shell and re-baking moved the foyer only from
+            18 to 21, which is the method `HOUSE-00207`'s own selftest uses to prove the gable
+            shades the study, and it says the porch CELL is not what shades the foyer. Whether the
+            porch roof lives in another cell's shell, or the sidelight's own narrow reveal
+            (`W_SIDELIGHT` is 0.28 m wide) is doing the shading, is unresolved. A 21 KB file that
+            says the foyer is dark for a reason nobody has named is worse than no file, so it is
+            not committed and not wired into the content build until it is named.
+      accept: (1) the file is baked from the authored shell and the placed neighbourhood; (2) §22's
+              two named claims — the porch roof over the foyer, the west neighbour's gable over the
+              study — are attributed by deletion and re-bake, not merely observed; (3) it is a
+              content-build stage so `content/world/shading.bin` is current with the world
+      verify: `tools/blender/shading_factor.py --selftest`; the attribution above; the reader in
+              `HOUSE-01263`
 - [ ] HOUSE-01263 — Implement the daylight model: per-window transmission, open boost, sky exposure, shading factor
-      dep: HOUSE-00779, HOUSE-00207 · sys: lighting · plat: ALL · pri: MUST
+      dep: HOUSE-00779, HOUSE-00207, HOUSE-01279 · sys: lighting · plat: ALL · pri: MUST
       dep-note: uses a fixed noon sun until phase 23 lands the real sun
+      dep-note: (2026-09-11) `HOUSE-01279` added to `dep`: the fourth factor is a file that did not
+            exist. §32's sun now DOES exist (`HOUSE-01561`…`HOUSE-01563`), so the first dep-note's
+            *"fixed noon sun"* interim is no longer needed and this should read the real sun.
+      finding: (2026-09-11) §28.4 writes the diffuse sky term as *"proportional to
+            `max(0, sinh(sunAltitude))`"*. That is `sin h` — the sine of the sun's altitude, which
+            is the standard solar-geometry notation and the quantity irradiance on a horizontal
+            surface actually scales with — and not the hyperbolic sine, which is unbounded and
+            reaches 1.65 at the 73.4° this latitude sees. Read as `sin(altitude)` when implemented.
 - [ ] HOUSE-01264 — Implement the `LM_DAY` additive pass driven by `daylightLevel`
       dep: HOUSE-01263, HOUSE-00910 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01265 — Implement the 2-hop light flood through open portals, capped at 0.35 of the source

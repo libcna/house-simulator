@@ -7,9 +7,15 @@ Blender -- so the porch roof genuinely keeps the sun out of the foyer in the aft
 west neighbour's gable shades the study at sunset. 81 windows x 288 samples x 1 byte = 23 KB.
 Cheap, and it is the single detail that makes interior daylight feel real."
 
-    tools/blender/shading_factor.py SHELL.glb --world assets-src/world --out DIR
-    tools/blender/shading_factor.py SHELL.glb --world assets-src/world --out DIR --samples 6
+    tools/blender/shading_factor.py SHELL --world assets-src/world --out DIR
+    tools/blender/shading_factor.py SHELL --world assets-src/world --out DIR --samples 6
     tools/blender/shading_factor.py --selftest
+
+`SHELL` is a `.glb` file **or a directory of them**, because the house shell is a directory of
+them: `build_shell.py` writes one `.glb` per cell and there has never been a single file to hand
+this. `--neighbourhood DIR` additionally places `layout.exterior.json`'s neighbour rows from a
+model library, which is the other half of what §22 says to cast against -- *"the house and
+neighbour geometry"* -- and without it the west neighbour's gable cannot shade anything.
 
 ## Why the window is SAMPLED and not probed once
 
@@ -48,10 +54,14 @@ import sys
 
 try:
     import bpy  # type: ignore
-    from mathutils import Vector  # type: ignore
+    from mathutils import Matrix, Vector  # type: ignore
     from mathutils.bvhtree import BVHTree  # type: ignore
 
     INSIDE_BLENDER = True
+
+    #: Blender's glTF import maps `(x, y, z)` to `(x, -z, y)`. This is the inverse, and every
+    #: import in this tool is composed with it -- see `import_gltf`.
+    GLTF_TO_SECTION14 = Matrix.Rotation(math.radians(-90.0), 4, "X")
 except ImportError:
     INSIDE_BLENDER = False
 
@@ -76,6 +86,17 @@ DEFAULT_SAMPLES = 4
 
 #: A ray starts this far off the glass along the window's outward normal. Starting exactly on the
 #: surface lets a ray hit the very face it left, and the window would shade itself completely.
+#:
+#: **This is the clearance past the SASH, not past the wall**, and the difference was found by
+#: `HOUSE-01279` running this tool against the real house for the first time. The shell draws the
+#: window leaf in the opening -- `layout.openings.json` gives it a `thickness`, 0.03 m for the
+#: standard double-hung -- and the leaf is centred on the portal plane, so 0.002 m from that plane
+#: is 0.013 m INSIDE the glass. A ray cast from inside a solid hits it immediately whichever way it
+#: points, and every window in the house reported 0 of 288 nodes lit. The offset is now
+#: `leaf/2 + RAY_EPSILON`; this constant is what is left when a window has no leaf at all.
+#:
+#: It stays far below the 0.15 m thinnest wall the layout can build, so it still cannot push a
+#: sample through the geometry it is measuring: 0.017 m for the standard sash.
 RAY_EPSILON = 0.002
 
 #: Far enough to leave the property and the neighbours behind.
@@ -116,6 +137,101 @@ def sun_direction(altitude_deg: float, azimuth_deg: float):
 # ================================================================================== the ray tests
 
 
+def import_gltf(path: str) -> list:
+    """Imports one `.glb` and puts it back into §14's axes. Returns the objects it added.
+
+    **Blender's glTF importer rotates the scene and this is not optional.** glTF is Y-up and
+    Blender is Z-up, so `import_scene.gltf` maps `(x, y, z)` to `(x, -z, y)` on the way in. Every
+    other coordinate in this tool -- `sun_direction`, the window rectangles out of
+    `layout.portals.json`, the outward normals -- is in §14's frame, which is glTF's: Y up, -Z
+    north. Leaving the import converted puts the rays and the geometry in DIFFERENT FRAMES, and
+    the failure is silent: rays that should go up go north, so a ground-floor window is reported
+    as shaded by the basement and the file looks entirely plausible.
+
+    Measured 2026-09-11 on `build/shell/ROOF_MAIN.glb`: imported unrotated, the roof's 0..14.3 m
+    of height sits on Blender's Z and its Y holds 13.9..27.5, which is the house's northing.
+    `R(-90 deg, X)` maps `(x, y, z)` to `(x, z, -y)` and is exactly the inverse.
+    """
+    before = set(bpy.context.scene.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    fresh = [o for o in bpy.context.scene.objects if o not in before]
+    for obj in fresh:
+        # Only the roots: a child's world matrix follows its parent's.
+        if obj.parent is None or obj.parent not in fresh:
+            obj.matrix_world = GLTF_TO_SECTION14 @ obj.matrix_world
+    return fresh
+
+
+def import_shell(path: str) -> int:
+    """Imports @p path, which may be one `.glb` or a DIRECTORY of them.
+
+    The house shell is a directory: `build_shell.py` writes one `.glb` per cell -- 99 of them,
+    including the roofs and the chimney, which are exactly the geometry §22 means by "the porch
+    roof genuinely keeps the sun out of the foyer". Sorted, so two runs over the same directory
+    import in the same order and produce the same bytes.
+    """
+    if os.path.isdir(path):
+        files = sorted(f for f in os.listdir(path) if f.endswith(".glb"))
+        if not files:
+            raise SystemExit(f"shading_factor: {path} holds no .glb")
+        for name in files:
+            import_gltf(os.path.join(path, name))
+        return len(files)
+    import_gltf(path)
+    return 1
+
+
+def import_neighbourhood(world_dir: str, library_dir: str) -> int:
+    """Places `layout.exterior.json`'s neighbour rows from @p library_dir.
+
+    §22 casts against *"the house and neighbour geometry"*, and the neighbourhood is not geometry
+    on disk -- it is 122 placements of a dozen models. Each referenced model is imported ONCE and
+    linked into the scene at each placement, so the BVH sees 122 buildings for the cost of loading
+    twelve. A row whose model is missing from the library is reported and skipped rather than
+    failing the bake: an absent neighbour shades nothing, which is a smaller error than no file.
+    """
+    path = os.path.join(world_dir, "layout.exterior.json")
+    if not os.path.isfile(path):
+        raise SystemExit(f"shading_factor: {path} is required by --neighbourhood and not present")
+    with open(path, encoding="utf-8") as handle:
+        rows = json.loads(_strip(handle.read())).get("neighbourhood", [])
+    loaded = {}
+    placed = 0
+    missing = set()
+    for row in rows:
+        asset = row.get("asset")
+        if asset is None:
+            continue
+        if asset not in loaded:
+            path = os.path.join(library_dir, f"{asset}.glb")
+            if not os.path.exists(path):
+                missing.add(asset)
+                loaded[asset] = None
+                continue
+            fresh = [o for o in import_gltf(path) if o.type == "MESH"]
+            for obj in fresh:
+                bpy.context.scene.collection.objects.unlink(obj)
+            loaded[asset] = fresh
+        if not loaded[asset]:
+            continue
+        position = row.get("position", [0.0, 0.0, 0.0])
+        yaw = math.radians(float(row.get("yawDeg", 0.0)))
+        # `position` and `yawDeg` are §14's, and `import_gltf` has already put the model there,
+        # so the placement is a plain yaw about §14's up (+Y) and a translation. Composed onto the
+        # model's own matrix rather than assigned, because the import left one there.
+        placement = (Matrix.Translation((float(position[0]), float(position[1]), float(position[2])))
+                     @ Matrix.Rotation(yaw, 4, "Y"))
+        for source in loaded[asset]:
+            copy = source.copy()
+            copy.data = source.data
+            copy.matrix_world = placement @ source.matrix_world
+            bpy.context.scene.collection.objects.link(copy)
+        placed += 1
+    for asset in sorted(missing):
+        report(f"neighbourhood: no model for {asset}; that neighbour shades nothing")
+    return placed
+
+
 def build_bvh():
     """One BVH over every mesh in the scene, in world space -- the house and its neighbours."""
     vertices = []
@@ -150,12 +266,14 @@ def window_samples(window: dict, samples: int):
     across = Vector(window["across"])
     up = Vector(window["up"])
     normal = Vector(window["normal"]).normalized()
+    # Clear of the sash the shell draws in the opening, not merely clear of the portal plane.
+    offset = float(window.get("leafThickness", 0.0)) / 2.0 + RAY_EPSILON
     points = []
     for i in range(samples):
         for j in range(samples):
             u = (i + 0.5) / samples
             v = (j + 0.5) / samples
-            points.append(origin + across * u + up * v + normal * RAY_EPSILON)
+            points.append(origin + across * u + up * v + normal * offset)
     return points
 
 
@@ -209,7 +327,8 @@ def windows_from_layout(world_dir: str) -> list[dict]:
             raise SystemExit(
                 f"shading_factor: window {opening['id']!r} names portal "
                 f"{opening.get('portal')!r}, which does not exist (validator rule 7)")
-        out.append(window_frame(opening["id"], portal, cells))
+        out.append(window_frame(opening["id"], portal, cells,
+                                float((opening.get("leaf") or {}).get("thickness", 0.0))))
     return out
 
 
@@ -253,7 +372,7 @@ def _strip(text: str) -> str:
     return "".join(out)
 
 
-def window_frame(identifier: str, portal: dict, cells: dict) -> dict:
+def window_frame(identifier: str, portal: dict, cells: dict, leafThickness: float = 0.0) -> dict:
     """A portal rectangle as an origin and two edge vectors, with the outward normal.
 
     Outward is **away from the interior cell**, decided from the cells' own boxes rather than from
@@ -287,7 +406,8 @@ def window_frame(identifier: str, portal: dict, cells: dict) -> dict:
         across = (u1 - u0, 0.0, 0.0)
         normal = (0.0, 0.0, outward)
     return {"id": identifier, "portal": portal["id"], "cell": interior["id"],
-            "origin": origin, "across": across, "up": (0.0, v1 - v0, 0.0), "normal": normal}
+            "origin": origin, "across": across, "up": (0.0, v1 - v0, 0.0), "normal": normal,
+            "leafThickness": float(leafThickness)}
 
 
 # ========================================================================================= writer
@@ -433,6 +553,60 @@ def selftest() -> int:
             "every direction is a unit vector (to single precision -- mathutils is float32, and "
             "a 1e-9 tolerance here is below its noise floor rather than a real check)")
 
+    # 1b. The IMPORT lands in the same axes those directions are in.
+    #
+    #     Found 2026-09-11 by `HOUSE-01279`, the first run of this tool against the real house:
+    #     glTF is Y-up, Blender is Z-up, and `import_scene.gltf` converts on the way in. Every
+    #     other coordinate here is §14's, so an unconverted import puts the rays and the geometry
+    #     in different frames -- rays that should go UP go NORTH, and a ground-floor window is
+    #     reported as shaded by the BASEMENT. The file looks entirely plausible.
+    #
+    #     Every claim above this one builds its geometry directly in §14's axes and so could never
+    #     see it. This one exports a box whose dimensions name their own axis and imports it back
+    #     through `import_gltf`, which is the only way to catch it.
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as temporary:
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        marker = bpy.data.meshes.new("marker")
+        # A tall thin slab, 1 m x 2 m in plan and 8 m tall, standing on the ground. Every extent is
+        # different, so the box says which axis it landed on and no symmetry can hide a swap.
+        #
+        # **Built in BLENDER's axes, because that is what the exporter reads.** `export_scene.gltf`
+        # converts Z-up to Y-up on the way out, so "8 m tall" here is 8 m along Blender's Z; what
+        # comes back through `import_shell` is then in §14's, where tall is Y. The two conversions
+        # are what this claim is about and stating them the wrong way round is how it was first
+        # written -- it failed, and the failure was the test's rather than the tool's.
+        marker.from_pydata([(x, y, z) for x in (-0.5, 0.5) for y in (-1.0, 1.0) for z in (0.0, 8.0)],
+                           [], [(0, 1, 3, 2), (4, 5, 7, 6), (0, 1, 5, 4),
+                                (2, 3, 7, 6), (0, 2, 6, 4), (1, 3, 7, 5)])
+        marker.update()
+        bpy.context.scene.collection.objects.link(bpy.data.objects.new("marker", marker))
+        path = os.path.join(temporary, "marker.glb")
+        bpy.ops.export_scene.gltf(filepath=path, export_format="GLB")
+
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        import_shell(path)
+        low = [1e9, 1e9, 1e9]
+        high = [-1e9, -1e9, -1e9]
+        for obj in bpy.context.scene.objects:
+            if obj.type != "MESH":
+                continue
+            for vertex in obj.data.vertices:
+                world = obj.matrix_world @ vertex.co
+                for axis in range(3):
+                    low[axis] = min(low[axis], world[axis])
+                    high[axis] = max(high[axis], world[axis])
+        extents = [high[axis] - low[axis] for axis in range(3)]
+        require(abs(extents[1] - 8.0) < 1e-3,
+                f"an imported .glb keeps §14's UP on Y ({tuple(round(e, 3) for e in extents)}) -- "
+                f"Blender's importer converts Y-up to Z-up and every ray in this tool is §14's")
+        require(abs(extents[0] - 1.0) < 1e-3 and abs(extents[2] - 2.0) < 1e-3,
+                f"...and X and Z with it, so nothing was merely rotated into place by luck "
+                f"({tuple(round(e, 3) for e in extents)})")
+        require(abs(low[1]) < 1e-3,
+                f"the slab still stands ON the ground rather than under it (y from {low[1]:.3f})")
+
     # 2. The grid is NODES: the horizon and the zenith are measured, and the azimuth wraps.
     require(altitude_of(0) == 0.0 and altitude_of(ALTITUDE_STEPS - 1) == 90.0,
             f"altitude spans 0 to 90 inclusive over {ALTITUDE_STEPS} nodes, so the horizon and "
@@ -532,6 +706,16 @@ def selftest() -> int:
             f"ray can hit the face it started from")
     require(all(-1.0 <= p.x <= 1.0 and 0.9 <= p.y <= 2.1 for p in points),
             "and inside the window's own rectangle, not beyond its jambs")
+    leafed = dict(window)
+    leafed["leafThickness"] = 0.03
+    leafed_points = window_samples(leafed, 2)
+    require(all(abs(p.z - 2.0 - 0.015 - RAY_EPSILON) < 1e-5 for p in leafed_points),
+            f"a window with a 0.03 m leaf starts its rays {0.015 + RAY_EPSILON} m out, CLEAR of "
+            f"the sash -- the shell draws the leaf in the opening, and a sample inside it makes "
+            f"the window shade itself completely (`HOUSE-01279`)")
+    require(0.015 + RAY_EPSILON < 0.15 / 2,
+            "...and that is still inside the thinnest wall's half-thickness, so it cannot push a "
+            "sample out through the far face of the wall it is measuring")
     require(RAY_EPSILON < 0.15 / 10,
             f"the offset is {RAY_EPSILON} m, an order below the thinnest wall the layout can "
             f"build (0.15 m), so it cannot push a sample through the geometry it is measuring")
@@ -656,12 +840,17 @@ def main() -> int:
     positional = [a for a in argv if not a.startswith("--") and a not in options.values()]
 
     if len(positional) != 1 or "world" not in options or "out" not in options:
-        print("shading_factor: usage: SHELL.glb --world DIR --out DIR [--samples N]",
+        print("shading_factor: usage: SHELL --world DIR --out DIR "
+              "[--neighbourhood DIR] [--samples N]",
               file=sys.stderr)
         return 2
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
-    bpy.ops.import_scene.gltf(filepath=positional[0])
+    imported = import_shell(positional[0])
+    report(f"shell: {imported} file(s)")
+    if "neighbourhood" in options:
+        placed = import_neighbourhood(options["world"], options["neighbourhood"])
+        report(f"neighbourhood: {placed} placement(s)")
     windows = windows_from_layout(options["world"])
     if not windows:
         print("shading_factor: layout.openings.json declares no window", file=sys.stderr)
