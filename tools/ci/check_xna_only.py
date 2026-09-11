@@ -168,6 +168,74 @@ IDENTIFIER_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 EMBEDDED_EXT_RE = re.compile(r"[a-z0-9]EXT")
 WEATHER_BOOL_RE = re.compile(r"[Ii]s(?:Raining|Snowing|Windy|Stormy)\b")
 
+#: Kept alongside the declaration rule below, and not replaced by it: this one fires on the
+#: IDENTIFIER wherever it appears, so `auto IsRaining() -> bool` and a call to one are caught even
+#: though neither has `bool` in front of a name. Two cheap rules that overlap beat one that has to
+#: be right about C++ syntax.
+#:
+#: `HOUSE-01700`. The rule above is the one `HOUSE-00021` wrote, and it catches four names.
+#:
+#: Measured 2026-09-11 against eighteen shapes a person would actually write: it caught
+#: `isRaining`, `IsSnowing`, `isWindy` and `isStormy`, and **missed the other fourteen** --
+#: `raining`, `snowing_`, `hasRain`, `rainActive`, `isHailing`, `isThundering`, `isFoggy`,
+#: `isOvercast`, `wasRaining`, `stormActive`, `windGusting`, `snowOnGround`, `precipitating`, and
+#: `isRainingNow`, which differs from a name it does catch by one word. §36.1 says *"there is no
+#: `isRaining` boolean anywhere in the codebase"* and means the kind and not the spelling.
+#:
+#: So the rule below is about a **`bool` DECLARATION whose name names a weather quantity**, which
+#: is what §36.1 forbids, rather than about four spellings of it. Only `bool` is examined: `float
+#: snowDepth` and `float cloudCover` are §36.1's own field names and must never be flagged.
+BOOL_DECL_RE = re.compile(r"\bbool\s+([A-Za-z_][A-Za-z0-9_]*)")
+
+#: An identifier split into lower-case words: `isRainingNow` -> `is`, `raining`, `now`.
+#:
+#: **Tokenising is the whole reason this is not a substring search.** `terrain` contains `rain`
+#: and `window` contains `wind`, and a substring rule flags `bool useTerrain`, `bool terrain` and
+#: `bool windowActive` -- all three of which exist in this repository today and none of which has
+#: anything to do with the weather.
+IDENT_WORDS_RE = re.compile(r"[A-Z]+(?![a-z])|[A-Z][a-z0-9]*|[a-z0-9]+")
+
+
+def _weather_words() -> frozenset:
+    """Every token that makes a `bool` a weather state. Explicit, so it can be read and argued with.
+
+    Two groups, and the split matters. A **state** word names a weather condition on its own, so a
+    `bool` of it is the offence however it is spelt: `bool snowOnGround` is exactly the flag §36.1
+    forbids. A **quantity** word names something §36.1 stores as a float -- a wind speed, a fog
+    density, a cloud cover, a gust factor, a wetness -- and its bare noun is legitimate all over the
+    codebase, so only the adjective or the participle is the offence: `bool windy` yes, `bool
+    windowActive` no, and `bool fogEnabled` no, because §31.5's fog switch is a renderer state and
+    genuinely is a boolean.
+    """
+    states = ("rain", "snow", "sleet", "hail", "storm", "thunder", "lightning", "drizzle",
+              "blizzard", "overcast", "humid", "precip", "precipitation")
+    words = set()
+    for stem in states:
+        for suffix in ("", "s", "y", "ing", "ed"):
+            words.add(stem + suffix)
+        # A stem ending in `e` drops it before a vowel: drizzle -> drizzling, drizzled.
+        if stem.endswith("e"):
+            words.update((stem[:-1] + "ing", stem + "d", stem[:-1] + "y"))
+    # The irregulars, spelt out rather than produced by a doubling rule nobody would trust, and
+    # the participles of the QUALIFIED nouns -- `bool windy` and `bool windGusting` are flags,
+    # `float windSpeed` and `bool windowActive` are not.
+    words.update(("foggy", "windy", "cloudy", "gusty", "gusting", "misty", "wet", "wetting",
+                  "precipitating", "raining", "snowing", "hailing", "thundering", "stormy",
+                  "drizzling", "sleeting", "blizzarding"))
+    return frozenset(words)
+
+
+WEATHER_WORDS = _weather_words()
+
+
+def weather_boolean_offence(name: str) -> str | None:
+    """The token that makes @p name a weather boolean, or `None`."""
+    for token in IDENT_WORDS_RE.findall(name):
+        lowered = token.lower()
+        if lowered in WEATHER_WORDS:
+            return lowered
+    return None
+
 CMAKE_CNAEXT_RE = re.compile(r"CNA_CNAEXT[^\r\n]*")
 TRUTHY_RE = re.compile(r"\b(ON|TRUE|YES|Y|1)\b", re.IGNORECASE)
 FALSY_RE = re.compile(r"\b(OFF|FALSE|NO|N|0)\b", re.IGNORECASE)
@@ -270,6 +338,10 @@ def check_includes(rel: str, raw_lines: list[str], out: list[Violation]) -> None
 def check_code(rel: str, code: str, out: list[Violation], *, allow_filesystem: bool) -> None:
     lines = code.split("\n")
     for number, line in enumerate(lines, start=1):
+        for declared in BOOL_DECL_RE.findall(line):
+            offence = weather_boolean_offence(declared)
+            if offence is not None:
+                out.append(Violation(rel, number, "weather-boolean", f"bool {declared}"))
         for rule, pattern in CODE_PATTERNS:
             if rule == "std-filesystem" and allow_filesystem:
                 continue
@@ -427,9 +499,13 @@ FIXTURES: dict[str, tuple[str, str]] = {
     "cmake-cnaext": (
         "CMakeLists.txt",
         'set(CNA_CNAEXT ON CACHE BOOL "" FORCE)\n'),
+    # `HOUSE-01700`: deliberately NOT `bool isRaining`, which the rule `HOUSE-00021` wrote already
+    # caught. `bool snowOnGround` is one of the fourteen realistic shapes that rule missed, so this
+    # fixture fails against the old rule and passes against the new one -- which is what makes it
+    # evidence rather than decoration. The four original spellings are covered by `must_reject`.
     "weather-boolean": (
         "src/weather/PlantedBoolean.hpp",
-        "struct WeatherState\n{\n    bool isRaining = false;\n};\n"),
+        "struct WeatherState\n{\n    bool snowOnGround = false;\n};\n"),
     "std-filesystem": (
         "src/persistence/PlantedFilesystem.cpp",
         "#include <filesystem>\nvoid f()\n{\n    std::filesystem::path p;\n}\n"),
@@ -491,6 +567,50 @@ def selftest() -> int:
                 failures.append(f"planted [{rule}] in {rel} was NOT detected; "
                                 f"scanner reported: {[ (v.rule, v.path) for v in found ] or 'nothing'}")
 
+    # `HOUSE-01700`. §36.1: *"there is no `isRaining` boolean anywhere in the codebase; a lint
+    # check in CI rejects one."* One planted fixture proves the rule fires; it does not prove the
+    # rule is the RIGHT SHAPE, and the shape is the whole of this claim. These are the names a
+    # person would actually write, with the ones the rule must NOT fire on beside them -- all
+    # three of which exist in this repository today.
+    must_reject = (
+        "isRaining", "IsSnowing", "isWindy", "isStormy",   # `HOUSE-00021`'s four
+        "isRainingNow",                                     # ...and one word past them
+        "raining", "snowing_", "hasRain", "rainActive", "wasRaining", "snowOnGround",
+        "isHailing", "isThundering", "isFoggy", "isOvercast", "stormActive", "windGusting",
+        "precipitating", "isSleeting", "blizzardActive", "drizzling", "lightningNow",
+    )
+    must_accept = (
+        "useTerrain", "terrain", "terrainTile",   # `rain` inside `terrain`
+        "windowActive", "windowSill",             # `wind` inside `window`
+        "fogEnabled",                             # §31.5's fog switch really is a boolean
+        "enabled", "visible", "openFraction", "downspout", "reading", "training", "brainstem",
+    )
+    for name in must_reject:
+        if weather_boolean_offence(name) is None:
+            failures.append(f"`bool {name}` is a weather boolean §36.1 forbids and the lint "
+                            f"does not reject it")
+    for name in must_accept:
+        offence = weather_boolean_offence(name)
+        if offence is not None:
+            failures.append(f"`bool {name}` is not a weather boolean and the lint rejects it "
+                            f"on the token {offence!r} -- a false positive teaches people to "
+                            f"add exemptions")
+    # ...and the rule reads a `bool` DECLARATION, not any mention: §36.1's own field names are
+    # floats and must survive.
+    for line in ("float snowDepth = 0.0F;", "float cloudCover = 0.0F;",
+                 "float windSpeed = 0.0F;", "float precipIntensity = 0.0F;",
+                 "float thunderIntensity = 0.0F;", "float surfaceWetness = 0.0F;"):
+        planted_out: list[Violation] = []
+        check_code("src/weather/WeatherState.hpp", line, planted_out, allow_filesystem=False)
+        if any(v.rule == "weather-boolean" for v in planted_out):
+            failures.append(f"§36.1's own continuous field was rejected: {line!r}")
+    # ...and a `bool` one of them is exactly what it is for.
+    planted_out = []
+    check_code("src/weather/WeatherState.hpp", "    bool snowDepth = false;", planted_out,
+               allow_filesystem=False)
+    if not any(v.rule == "weather-boolean" for v in planted_out):
+        failures.append("`bool snowDepth` -- the float turned into a flag -- was not rejected")
+
     expected = set(RULE_HELP)
     planted = set(FIXTURES)
     if planted != expected:
@@ -507,6 +627,8 @@ def selftest() -> int:
 
     print(f"check_xna_only self-test passed: {len(FIXTURES)} planted-violation fixtures "
           f"detected, clean tree accepted, no allowlist consulted.")
+    print(f"  weather-boolean: {len(must_reject)} name(s) rejected, {len(must_accept)} accepted, "
+          f"over {len(WEATHER_WORDS)} weather word(s) (`HOUSE-01700`).")
     return 0
 
 

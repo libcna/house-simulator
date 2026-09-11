@@ -14107,8 +14107,49 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01697 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-01699 — Test: it snows in January and rains in July at the default location, with no special-casing
       dep: HOUSE-01688 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-01700 — Test: no `bool isRaining`-style field exists anywhere (lint)
+- [x] HOUSE-01700 — Test: no `bool isRaining`-style field exists anywhere (lint)
       dep: HOUSE-00021 · sys: ci · plat: CI · pri: MUST
+      verify: `tools/ci/check_xna_only.py --selftest`; the `xna-only` gate over `src/` and
+              `include/`
+      finding: (2026-09-11) **the lint existed and caught four names.** `HOUSE-00021` wrote
+            `[Ii]s(?:Raining|Snowing|Windy|Stormy)\b`, and a single planted fixture of
+            `bool isRaining` proved it fires. That proves the rule RUNS; it says nothing about
+            whether the rule is the right SHAPE, and the shape is the whole of this task.
+      measured: against eighteen shapes a person would actually write, the old rule caught
+            **4 and missed 14**: `raining`, `snowing_`, `hasRain`, `rainActive`, `isHailing`,
+            `isThundering`, `isFoggy`, `isOvercast`, `wasRaining`, `stormActive`, `windGusting`,
+            `snowOnGround`, `precipitating` — and **`isRainingNow`, which differs from a name it
+            does catch by one word**. §36.1 says *"there is no `isRaining` boolean anywhere in the
+            codebase"* and means the kind, not the spelling.
+      decision: the new rule is about a **`bool` DECLARATION whose name names a weather
+            quantity**, which is what §36.1 forbids, rather than about four spellings of it. Only
+            `bool` is examined, so §36.1's own `float snowDepth`, `float cloudCover`,
+            `float windSpeed`, `float precipIntensity`, `float thunderIntensity` and
+            `float surfaceWetness` are never flagged — and `bool snowDepth`, the float turned into
+            a flag, is, which is a claim of its own.
+      finding: **a substring search is not good enough and the repository proves it.** `terrain`
+            contains `rain` and `window` contains `wind`, and a substring rule flags
+            `bool useTerrain`, `bool terrain` and `bool windowActive` — all three of which exist
+            here today. The identifier is tokenised on camelCase and underscores and whole tokens
+            are matched. `bool fogEnabled` is accepted too, deliberately: §31.5's fog switch is a
+            renderer state and genuinely is a boolean.
+      decision: the word list is two groups and the split is the point. A **state** word names a
+            condition on its own, so a `bool` of it is the offence however spelt — `snowOnGround`.
+            A **quantity** word names something §36.1 stores as a float and whose bare noun is
+            legitimate everywhere — wind, fog, cloud, gust, wetness — so only the adjective or
+            participle offends: `windy` and `windGusting` yes, `windSpeed` and `windowActive` no.
+            77 words in all, generated from the stems and printed by the selftest so the list can
+            be read and argued with rather than guessed at.
+      verified: 22 names rejected, 13 accepted, no false positive anywhere in `src/`, `include/`
+            or `tests/`. The end-to-end fixture was changed from `bool isRaining` to
+            `bool snowOnGround` on purpose — it fails against the old rule and passes against the
+            new one, which is what makes it evidence rather than decoration. Proved by injection:
+            with the declaration rule disabled the fixture goes undetected and the selftest goes
+            red.
+      note: `HOUSE-00021`'s identifier rule is **kept** beside the declaration rule rather than
+            replaced by it. It fires on the identifier wherever it appears, so `auto IsRaining() ->
+            bool` and a call to one are caught although neither has `bool` in front of a name. Two
+            cheap rules that overlap beat one that has to be right about C++ syntax.
 - [ ] HOUSE-01701 — Tune the archetype table and the transition matrices against a subjective "does a week of weather feel right?" review over 7 simulated days
       dep: HOUSE-01698 · sys: weather · plat: LNX · pri: MUST
 - [ ] HOUSE-01703 — Blend the four seasonal transition matrices continuously from `SeasonPhase::blend` instead of selecting one by day-of-year
