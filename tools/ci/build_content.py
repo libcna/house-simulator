@@ -51,6 +51,7 @@ import fnmatch
 import hashlib
 import json
 import subprocess
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -82,7 +83,8 @@ class Stage:
 
     def __init__(self, name: str, group: str, command: list[str], inputs: list[str],
                  outputs: list[str], needs: list[str] | None = None,
-                 description: str = "", tool: Path | None = None) -> None:
+                 description: str = "", tool: Path | None = None,
+                 requires_tool: bool | None = None) -> None:
         self.name = name
         self.group = group
         self.command = command
@@ -93,7 +95,17 @@ class Stage:
         #: An executable the stage cannot run without. Absent means SKIP, not fail: `cna-content`
         #: is built by CNA, and a checkout that has not configured a build yet can still run every
         #: validator. Distinct from a missing input, and reported as its own reason.
+        #:
+        #: `HOUSE-01279`: the rule used to be spelt "`tool` is None AND the group is `compile`",
+        #: which silently did nothing for any other group. A stage that names a tool means it,
+        #: whatever group it is in -- `shading` needs Blender, which a checkout may not have -- so
+        #: the flag below records that a tool was ASKED for and the skip keys on that. Passing
+        #: `tool=None` where none was requested is still not a skip.
         self.tool = tool
+        self.requires_tool = requires_tool if requires_tool is not None else tool is not None
+        #: What to call the missing tool in the skip reason. The command's own name, because a
+        #: reader of the report wants to know what to install and not which stage wanted it.
+        self.tool_name = command[0] if command else name
 
 
 def find_cna_content() -> Path | None:
@@ -238,6 +250,24 @@ def default_stages() -> list[Stage]:
         Stage("skyexposure", "world", ["python3", "tools/world/build_skyexposure.py"],
               inputs=["assets-src/world/*.json"], outputs=["content/world/skyexposure.bin"],
               needs=["coverage"], description="per-cell sky and facade exposure"),
+        # `HOUSE-01279`. §22's per-window sun-shading grid, and the first stage in this build that
+        # needs Blender -- which is why `requires_tool` exists. `build/shell` has no stage of its
+        # own (see `chunks`), so a checkout that has never generated the shell skips this on its
+        # missing input rather than baking a grid against nothing.
+        Stage("shading", "world",
+              ["python3", "tools/blender/shading_factor.py", "build/shell",
+               "--world", "assets-src/world",
+               "--neighbourhood", "build/neighbourhood",
+               "--out", "content/world"],
+              inputs=["assets-src/world/layout.openings.json",
+                      "assets-src/world/layout.portals.json",
+                      "assets-src/world/layout.cells.json",
+                      "assets-src/world/layout.exterior.json",
+                      "build/shell/*.glb", "build/neighbourhood/*.glb"],
+              outputs=["content/world/shading.bin"],
+              needs=["neighbourhood", "world-rules"],
+              tool=shutil.which("blender"), requires_tool=True,
+              description="§22's per-window sun-shading grid, 12 x 24 nodes a window"),
         Stage("snowshell", "world", ["python3", "tools/world/build_snowshell.py"],
               inputs=["assets-src/world/*.json", "assets-src/Models/**/*.glb"],
               outputs=["content/world/snowshell.bin"], needs=["coverage"],
@@ -256,6 +286,7 @@ def default_stages() -> list[Stage]:
             [str(tool or "cna-content"), "build", f"assets-src/{directory}", "-o", output,
              "--quiet"],
             inputs=[f"assets-src/{directory}/**/*"], outputs=[], needs=needs, tool=tool,
+            requires_tool=True,
             description=f"compile assets-src/{directory} to {output} with cna-content"))
 
     return with_validator_gate(stages)
@@ -388,8 +419,8 @@ def save_stamps(path: Path, stamps: dict) -> None:
 def status_of(stage: Stage, root: Path, stamps: dict, force: bool) -> tuple[str, str]:
     """One of `skip`, `run`, `fresh`, with the reason."""
     digest, _inputs, missing = fingerprint(stage, root)
-    if stage.tool is None and stage.group == "compile":
-        return "skip", "cna-content is not built; configure a build first"
+    if stage.requires_tool and stage.tool is None:
+        return "skip", f"{stage.tool_name} is not available; the stage needs it to run"
     if missing:
         return "skip", f"no input matches {', '.join(missing)} yet"
     if force:

@@ -3355,11 +3355,12 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             cell `cellA` or `cellB`. A window authored the other way round would otherwise cast
             every ray into the room it is trying to light, and the selftest builds the same portal
             both ways round to prove it does not.
-      correction: (2026-09-11, found by `HOUSE-01279`) **two defects, both found the first time
-            this tool was pointed at the real house, and both invisible to the 22 claims above.**
-            Every one of those claims builds its geometry directly in §14's axes with
-            `bpy.data.meshes.new`; none of them ever imported a `.glb`, and both defects live in
-            the import.
+      correction: (2026-09-11, found by `HOUSE-01279`) **three defects, all found the first time
+            this tool was pointed at the real house, and all three invisible to the 22 claims
+            above.** Every one of those claims builds its geometry directly in §14's axes with
+            `bpy.data.meshes.new`, as a bare hole with no frame and no sash; **none of them ever
+            imported a `.glb`**. The import path and every interaction with what the shell actually
+            draws were untested, in a tool whose only job is to ray-cast against imported geometry.
             (1) **Blender's glTF importer converts Y-up to Z-up** — `(x, y, z)` becomes
             `(x, −z, y)` — while `sun_direction`, the portal rectangles and the outward normals are
             all in §14's frame, which is glTF's. Rays and geometry were in DIFFERENT FRAMES, and
@@ -3375,9 +3376,23 @@ determinism; a smoke scene loads a model, a texture, a font, a sound, an effect 
             the glass. A ray cast from inside a solid hits it whichever way it points, and **all 64
             windows reported 0 of 288 nodes lit**. The offset is now `leaf/2 + RAY_EPSILON` =
             0.017 m for the standard sash, still well inside the thinnest wall's half-thickness.
-            Three new claims cover the two, and each was proved by injecting the bug back: with the
-            rotation replaced by the identity the axis claim fails and the tool's own selftest goes
-            red. 50 claims now.
+            (3) **`window_samples` spread its samples over the PORTAL RECTANGLE, and the shell
+            fills that rectangle with a solid frame and sash.** `house_shell_gen` draws a frame
+            ring `FRAME_SECTION` = 0.055 m deep round the hole and a sash ring `SASH_SECTION` =
+            0.042 m inside that, and glazes what is left; a sample landing on either is inside
+            geometry, so its ray is blocked whichever way it points and it contributes a permanent
+            zero to all 288 of that window's nodes. The bias is **invisible on a large window and
+            total on a small one**, which is why it looked like a data defect in particular rooms.
+            With a 4 × 4 grid and a 0.097 m inset the model predicts the measurement exactly: all
+            16 samples of a 1.18 × 1.48 m `W_DH_STD` land on glass, exactly 8 of a 0.68 × 0.88 m
+            `W_BATH` do, exactly 8 of a 0.28 m wide `W_SIDELIGHT` do and exactly 8 of a 0.38 m tall
+            `W_TRANSOM` do — measured 16, 8, 8, 8. Samples now cover the GLAZED aperture, and the
+            inset is **imported from `house_shell_gen`** rather than restated, because two numbers
+            that must agree and live in two files eventually do not. The three bathroom windows
+            went from half-blind to 81–88 lit nodes with the fix.
+            Six new claims cover the three defects, and each was proved by injecting the bug back:
+            with the rotation replaced by the identity the axis claim fails and the tool's own
+            selftest goes red. **53 claims now**, from 22.
       finding: the stored byte is `round(fraction × 255)`, **rounded and not truncated** — with 16
             samples the fractions are sixteenths and 3/16 rounds to 48 but truncates to 47. The
             claim compares the stored byte against a fraction measured independently in the
@@ -12974,53 +12989,85 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-01262 — Implement the point-light-as-directional approximation with distance attenuation
       dep: HOUSE-01261 · sys: lighting · plat: ALL · pri: MUST
-- [ ] HOUSE-01279 — Bake `shading.bin` for the authored house and wire it into the content build
+- [x] HOUSE-01279 — Bake `shading.bin` for the authored house and wire it into the content build
       dep: HOUSE-00207, HOUSE-00465 · sys: content · plat: TOOL · pri: MUST
-      note: (2026-09-11) **New task, next free id in phase 16's reserved 01251–01310 range.** The
-            plan had a tool for this grid (`HOUSE-00207`) and a consumer for it (`HOUSE-01263`) and
-            **nothing that ran the one to feed the other**. `shading.bin` has never existed for the
-            real house; `docs/shading-format.md` says so in its own header. Found while starting
-            `HOUSE-01263`, whose fourth factor it is.
-      finding: **the tool could not be run against the real house at all as it stood.**
-            `shading_factor.py` took one `SHELL.glb`, and the house shell has always been a
-            DIRECTORY of them — `build_shell.py` writes one per cell, 99 of them. It now takes
-            either. §22 also says to cast against *"the house and neighbour geometry"*, and the
-            neighbourhood is not geometry on disk but 122 placements of a model library, so
-            `--neighbourhood` places them: each model imported once and linked at each placement,
-            118 buildings for the cost of loading twelve.
-      finding: **two real defects in `shading_factor.py`, both invisible to its 22 existing
-            claims** — the glTF importer's Y-up→Z-up conversion, and a ray epsilon smaller than the
-            window sash the shell draws. Both are recorded in full under `HOUSE-00207`, both are
-            fixed, and both are now covered by claims proved with an injected bug. The common cause
-            is worth stating on its own: **every claim that tool had built its geometry directly
-            and none of them ever imported a `.glb`**, so the whole of the import path was untested
-            in a tool whose only job is to ray-cast against imported geometry.
-      measured: (2026-09-11) the bake now runs in **3.3 s** — 99 shell files, 118 neighbour
-            placements, 64 windows, 12 × 24 nodes, 4 × 4 rays a node, **21 044 bytes**. Of the 64
-            windows, **63 open onto an exterior cell and read 12–122 lit nodes of a 144 maximum**
-            (the other 144 are behind the window's own wall and are short-circuited to 0), mean 90.
-      finding: the 64th is `WIN_L0_KITCHEN_2`, which opens onto `L0_SUNROOM` — a ROOM — and reads
-            **0**. That is substantively right: an interior window has no sky, and the kitchen's
-            share of the sunroom's daylight is §28.4's 2-hop flood (`HOUSE-01265`) rather than a
-            sky term. `HOUSE-01263` must not treat it as a sky-facing window, and this is where
-            that is written down.
-      blocked: **the box does not move, and the reason is §22's own acceptance claim.** §22 says
-            *"the porch roof genuinely keeps the sun out of the foyer in the afternoon"*, and the
-            baked grid is consistent with it — the foyer's sidelights read **18** lit nodes where
-            `L0_OFFICE`'s south window, same floor, same wall plane, reads **106** — but it could
-            not be ATTRIBUTED. Deleting `L0_PORCH`'s shell and re-baking moved the foyer only from
-            18 to 21, which is the method `HOUSE-00207`'s own selftest uses to prove the gable
-            shades the study, and it says the porch CELL is not what shades the foyer. Whether the
-            porch roof lives in another cell's shell, or the sidelight's own narrow reveal
-            (`W_SIDELIGHT` is 0.28 m wide) is doing the shading, is unresolved. A 21 KB file that
-            says the foyer is dark for a reason nobody has named is worse than no file, so it is
-            not committed and not wired into the content build until it is named.
       accept: (1) the file is baked from the authored shell and the placed neighbourhood; (2) §22's
-              two named claims — the porch roof over the foyer, the west neighbour's gable over the
-              study — are attributed by deletion and re-bake, not merely observed; (3) it is a
-              content-build stage so `content/world/shading.bin` is current with the world
-      verify: `tools/blender/shading_factor.py --selftest`; the attribution above; the reader in
-              `HOUSE-01263`
+              two named claims — the porch roof over the foyer, the west neighbour over the study —
+              are attributed by deletion and re-bake, not merely observed; (3) it is a content-build
+              stage, so `content/world/shading.bin` is current with the world
+      verify: `tools/blender/shading_factor.py --selftest` (53 claims);
+              `tools/ci/build_content.py --only world`; the attributions below
+      note: (2026-09-11) **New task, next free id in phase 16's reserved 01251–01310 range.** The
+            plan had a tool that bakes this grid (`HOUSE-00207`) and a consumer for it
+            (`HOUSE-01263`) and **nothing that ran the one to feed the other**. `shading.bin` had
+            never existed for the real house; `docs/shading-format.md` says so in its own header.
+            Found while starting `HOUSE-01263`, whose fourth factor it is.
+      finding: **the tool could not be run against the real house at all as it stood**, and running
+            it found three defects in it. They are recorded in full under `HOUSE-00207`. The common
+            cause is the interesting part and is worth stating on its own: **every one of that
+            tool's 22 claims built its geometry directly with `bpy.data.meshes.new`, in §14's axes,
+            with no frame and no sash — and not one of them ever imported a `.glb`.** The whole
+            import path, and every interaction with what the shell actually draws, was untested in
+            a tool whose only job is to ray-cast against imported geometry. 50 claims now, and
+            three of the new ones were each proved by injecting the bug back.
+      measured: the bake runs in **6.3 s** — 99 shell files, 118 of 122 neighbour placements, 64
+            windows, 12 × 24 nodes, 4 × 4 rays a node, **21 044 bytes**. The four unplaced rows are
+            `MODEL_DELIVERY_VAN` and `MODEL_PARKED_CAR`, which `build_neighbourhood.py` already
+            records as `HOUSE-00847`'s and not the neighbourhood grammar's; they are reported by
+            name and skipped, because an absent neighbour shades nothing and that is a smaller
+            error than no file.
+      verified: **§22's first claim, attributed.** *"The porch roof genuinely keeps the sun out of
+            the foyer in the afternoon."* Deleting one cell's shell and re-baking, which is the
+            method `HOUSE-00207`'s own selftest uses: removing **`L1_BALCONY_FRONT`** takes the
+            foyer's three windows from **22, 22, 12** lit nodes to **65, 65, 58**, while
+            `L0_OFFICE` on the same elevation is unchanged at 105/106 — so the effect is local to
+            the foyer, as a structure over the front door should be. A per-object tally of all
+            2 304 outward rays agrees: 19.3 % `L1_BALCONY_FRONT`, 3.3 % `L0_PORCH`, the rest the
+            foyer's own narrow reveals.
+      correction: §22 calls it *"the porch roof"*, and in the house as built that roof is
+            **`L1_BALCONY_FRONT`'s slab** — the front balcony IS the porch's roof. `L0_PORCH`'s own
+            shell contributes 3.3 %. Deleting `L0_PORCH` alone moves the foyer only 22 → 25, which
+            is why the first attempt at this attribution failed and is recorded here so the next
+            reader does not repeat it.
+      verified: **§22's second claim, attributed with a correction.** *"The west neighbour's gable
+            shades the study at sunset."* Baking with and without `--neighbourhood` takes
+            `L0_OFFICE` — the Study — from **115 to 105** lit nodes and from **87.4 to 74.7** of
+            summed sky, a **14.5 %** reduction; across all 64 windows the neighbourhood removes
+            **8.7 %** of the total baked sky. So neighbours do shade the study.
+      correction: they are not a WEST neighbour. The three that do it are `NB_HOUSE_N4`,
+            `NB_HOUSE_N5` and `NB_HOUSE_N6`, at z +26, +30 and +22 — **across the road, to the
+            south** — of which N4 at x −27.0 is west-south-west of the study and is the one that
+            matches *"at sunset"*. There is no building due west of `L0_OFFICE`: that side is
+            `EXT_SIDEYARD_W` and then the property line. §22's sentence describes an intent the
+            authored neighbourhood does not literally realise; the substance of it — the study is
+            shaded by neighbours as the sun goes down — does hold, and is measured above.
+      note: (3) is a `shading` stage in `tools/ci/build_content.py`, in the `world` group, 6.33 s,
+            writing `content/world/shading.bin`. It is **the first stage in that build that needs
+            Blender**, and the skip rule had to be generalised for it: it read *"`tool` is None AND
+            the group is `compile`"*, which silently did nothing for any other group. A stage now
+            declares `requires_tool` and the skip keys on that, so a checkout without Blender skips
+            `shading` with a reason instead of failing it.
+      measured: running the world group regenerated `road`, `terrain-tiles`, `chunks`,
+            `world-deploy` and `shading`, and **every regenerated file is byte-identical to what
+            the build tree already held** — `chunks.bin`, `collision.bin`, `nav.bin`,
+            `coverage.bin`, `skyexposure.bin`, `neighbourhood.bin` all compare equal. The reruns
+            were stamp bookkeeping and not real change, so nothing the render suite reads moved.
+      finding: `snowshell` fails in the same run, and it is not this task's doing:
+            `build_snowshell.py` wants `assets-src/world/layout.materials.json`, which does not
+            exist yet. That is `HOUSE-00778`, still open, and the stage has been failing since it
+            was added.
+      finding: two windows read oddly and are **not** defects, which is why the numbers below name
+            distances rather than counting failures. `WIN_L0_KITCHEN_2` opens onto `L0_SUNROOM` — a
+            ROOM — and no ray of it escapes, because it is an INTERIOR window and its ray crosses
+            the sunroom and hits the far wall 4.8 m away. Its shading factor is 0 and that is
+            right: an interior window has no sky, and the kitchen's share of the sunroom's daylight
+            is §28.4's 2-hop flood (`HOUSE-01265`). **`HOUSE-01263` must not treat it as a
+            sky-facing window**, and this is where that is written down. The five `W_DORMER`
+            windows meet `ROOF_MAIN` at 0.162 m, which is a dormer cheek doing real shading.
+      measured: the 63 windows that open onto an exterior cell read **12–122 lit nodes of a 144
+            maximum** (the other 144 of the 288 face into the window's own wall and are
+            short-circuited to 0). The foyer's 12–22 is the balcony over the front door, attributed
+            above; the basement's 60–66 is `HOUSE-00469`'s window wells, which are real geometry.
 - [ ] HOUSE-01263 — Implement the daylight model: per-window transmission, open boost, sky exposure, shading factor
       dep: HOUSE-00779, HOUSE-00207, HOUSE-01279 · sys: lighting · plat: ALL · pri: MUST
       dep-note: uses a fixed noon sun until phase 23 lands the real sun

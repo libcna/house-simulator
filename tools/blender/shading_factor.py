@@ -102,6 +102,20 @@ RAY_EPSILON = 0.002
 #: Far enough to leave the property and the neighbours behind.
 RAY_DISTANCE = 200.0
 
+#: How far inside the portal rectangle the GLASS starts, in metres.
+#:
+#: `house_shell_gen` draws a frame ring `FRAME_SECTION` deep round the hole and a sash ring
+#: `SASH_SECTION` inside that, both solid, and glazes what is left. Imported from that module
+#: rather than restated, because two numbers that must agree and live in two files eventually do
+#: not: a frame section changed there and not here would bias every small window's daylight and
+#: nothing would report it.
+try:
+    from house_shell_gen import FRAME_SECTION as _FRAME, SASH_SECTION as _SASH
+
+    GLAZING_INSET = _FRAME + _SASH
+except ImportError:  # pragma: no cover -- only when run outside the tools directory
+    GLAZING_INSET = 0.055 + 0.042
+
 
 def report(message: str) -> None:
     print(f"  {message}")
@@ -256,11 +270,23 @@ def build_bvh():
 
 
 def window_samples(window: dict, samples: int):
-    """`samples x samples` points spread over the window's rectangle, each pushed off the glass.
+    """`samples x samples` points spread over the window's GLAZED aperture, pushed off the glass.
 
-    Spread over the OPENING, not clustered at its centre: an eave shades the top of a window
+    Spread over the opening, not clustered at its centre: an eave shades the top of a window
     before the bottom, and a reveal shades one jamb before the other, and both of those are
     fractions this has to be able to report.
+
+    **Over the GLASS, not over the portal rectangle**, and the difference is not cosmetic.
+    `house_shell_gen` fills the portal rectangle with a frame ring `FRAME_SECTION` deep and a sash
+    ring `SASH_SECTION` inside that, both solid; only what is left is glazed. A sample that lands
+    on the frame is inside geometry and its ray is blocked whichever way it points, so that sample
+    contributes a permanent zero to every one of the window's 288 nodes.
+
+    Found by `HOUSE-01279`. The bias is invisible on a big window and total on a small one, which
+    is why it looked like a data defect in particular rooms: with a 4x4 grid and the shell's
+    0.055 + 0.042 m inset, all 16 samples of a 1.18 x 1.48 m `W_DH_STD` land on glass, exactly 8
+    of a 0.68 x 0.88 m `W_BATH` do, and exactly 8 of a 0.28 m wide `W_SIDELIGHT` do -- which is
+    what was making the foyer read a fifth of the study's daylight.
     """
     origin = Vector(window["origin"])
     across = Vector(window["across"])
@@ -268,11 +294,27 @@ def window_samples(window: dict, samples: int):
     normal = Vector(window["normal"]).normalized()
     # Clear of the sash the shell draws in the opening, not merely clear of the portal plane.
     offset = float(window.get("leafThickness", 0.0)) / 2.0 + RAY_EPSILON
+
+    # The glazed aperture: the portal rectangle less the frame and sash rings, as fractions of each
+    # edge. A window too small to have any glass left would divide by nothing; it falls back to the
+    # whole rectangle and says so, because a zero-area window is a data defect and not this tool's
+    # to silently paper over.
+    width = across.length
+    height = up.length
+    inset = GLAZING_INSET
+    if width <= 2.0 * inset or height <= 2.0 * inset:
+        report(f"{window['id']}: {width:.2f} x {height:.2f} m leaves no glass inside a "
+               f"{inset:.3f} m frame and sash; sampling the whole opening")
+        u_lo, u_hi, v_lo, v_hi = 0.0, 1.0, 0.0, 1.0
+    else:
+        u_lo, u_hi = inset / width, 1.0 - inset / width
+        v_lo, v_hi = inset / height, 1.0 - inset / height
+
     points = []
     for i in range(samples):
         for j in range(samples):
-            u = (i + 0.5) / samples
-            v = (j + 0.5) / samples
+            u = u_lo + (u_hi - u_lo) * (i + 0.5) / samples
+            v = v_lo + (v_hi - v_lo) * (j + 0.5) / samples
             points.append(origin + across * u + up * v + normal * offset)
     return points
 
@@ -713,6 +755,26 @@ def selftest() -> int:
             f"a window with a 0.03 m leaf starts its rays {0.015 + RAY_EPSILON} m out, CLEAR of "
             f"the sash -- the shell draws the leaf in the opening, and a sample inside it makes "
             f"the window shade itself completely (`HOUSE-01279`)")
+    # The glazed aperture. `HOUSE-01279`: samples used to cover the whole portal rectangle, which
+    # the shell fills with a solid frame and sash, so on a small window half of them sat inside
+    # geometry and contributed a permanent zero to all 288 nodes.
+    narrow = dict(window)
+    narrow["across"] = (0.28, 0.0, 0.0)
+    narrow["up"] = (0.0, 2.03, 0.0)
+    narrow_points = window_samples(narrow, 4)
+    narrow_u = [p.x - window["origin"][0] for p in narrow_points]
+    require(all(GLAZING_INSET < u < 0.28 - GLAZING_INSET for u in narrow_u),
+            f"every sample of a 0.28 m `W_SIDELIGHT` lands on GLASS, inside the "
+            f"{GLAZING_INSET:.3f} m frame and sash the shell draws ({min(narrow_u):.3f}..."
+            f"{max(narrow_u):.3f} m across a 0.28 m opening)")
+    wide_points = window_samples(window, 4)
+    wide_u = sorted(p.x - window["origin"][0] for p in wide_points)
+    require(wide_u[0] > GLAZING_INSET and wide_u[-1] < window["across"][0] - GLAZING_INSET,
+            "...and so does every sample of a wide one, which is why this bias was invisible on "
+            "the 36 double-hungs and total on the sidelights")
+    require(GLAZING_INSET > 0.0,
+            f"the inset is {GLAZING_INSET:.3f} m and comes from `house_shell_gen`'s own "
+            f"FRAME_SECTION + SASH_SECTION rather than a second copy of the numbers")
     require(0.015 + RAY_EPSILON < 0.15 / 2,
             "...and that is still inside the thinnest wall's half-thickness, so it cannot push a "
             "sample out through the far face of the wall it is measuring")

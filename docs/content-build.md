@@ -110,8 +110,9 @@ it, so requiring it would skip the stage on a checkout that has never baked a li
 | 20 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/coverage.bin` |
 | 21 | **`nav`** | world | the pet waypoint graph | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/nav.bin` |
 | 22 | **`neighbourhood-bin`** | world | §11.4's meshes, keyed by the asset id a row names | `anim`, `fonts`, `layout`, `licences`, `manifest`, `neighbourhood`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`build/neighbourhood/*.glb` | `content/world/neighbourhood.bin` |
-| 23 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
-| 24 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
+| 23 | **`shading`** | world | §22's per-window sun-shading grid, 12 x 24 nodes a window | `anim`, `fonts`, `layout`, `licences`, `manifest`, `neighbourhood`, `world-rules` | `assets-src/world/layout.openings.json`<br>`assets-src/world/layout.portals.json`<br>`assets-src/world/layout.cells.json`<br>`assets-src/world/layout.exterior.json`<br>`build/shell/*.glb`<br>`build/neighbourhood/*.glb` | `content/world/shading.bin` |
+| 24 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
+| 25 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
 
 The command each stage runs:
 
@@ -138,6 +139,7 @@ cnb-world      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_B
 coverage       python3 tools/world/build_coverage.py
 nav            python3 tools/world/build_nav.py
 neighbourhood-bin python3 tools/world/build_neighbourhood.py
+shading        python3 tools/blender/shading_factor.py build/shell --world assets-src/world --neighbourhood build/neighbourhood --out content/world
 skyexposure    python3 tools/world/build_skyexposure.py
 snowshell      python3 tools/world/build_snowshell.py
 ```
