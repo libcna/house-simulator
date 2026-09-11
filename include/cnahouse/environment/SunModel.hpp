@@ -143,4 +143,33 @@ namespace cnahouse::environment
                                    const SunObserver& observer,
                                    double thresholdDeg = kRefractedHorizonDeg) noexcept;
 
+    /// @brief How long the sun is above the threshold on @p day, in minutes.
+    ///
+    /// The two degenerate cases are answered rather than left to the caller: a day with no crossing
+    /// is **1 440 minutes** when the transit is above the threshold (midnight sun) and **0** when it
+    /// is below (polar night). At §33's 40.05° N neither happens, and a `daylight` term that
+    /// silently returned `set − rise` = 0 for the midnight sun would be wrong in the one place
+    /// nobody would think to look.
+    [[nodiscard]] double DaylightMinutes(const SunDay& day) noexcept;
+
+    /// @brief Daylight minutes at a CONTINUOUS calendar position: §35.2b's compressed year needs it.
+    ///
+    /// @p calendarDaysSinceEpoch is `SimClock::CalendarDays()` — fractional days since
+    /// 2031-01-01. **The fractional part is what this function exists for.** Under the default
+    /// compression the calendar crosses a day every real minute of play, so a day length quantised
+    /// to whole days would step by up to three minutes sixty times an hour, and §35's whole
+    /// argument for a continuous season phase applies here word for word.
+    ///
+    /// Interpolated linearly between the two bracketing days' `SunDayFor` answers, and
+    /// deliberately **not** re-derived from a closed-form hour-angle expression. A closed form
+    /// would be a SECOND approximation living beside `SunPositionAt`, and `HOUSE-01561` kept the
+    /// model to one on purpose; the day length is very nearly linear across one day, so
+    /// interpolating what the model already says costs nothing in accuracy and adds no formula.
+    [[nodiscard]] double DaylightMinutesAt(double calendarDaysSinceEpoch,
+                                           const SunObserver& observer,
+                                           double thresholdDeg = kRefractedHorizonDeg) noexcept;
+
+    /// @brief The daylight length where @p clock currently is, at the clock's own location.
+    [[nodiscard]] double DaylightMinutesFor(const SimClock& clock) noexcept;
+
 } // namespace cnahouse::environment

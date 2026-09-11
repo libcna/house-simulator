@@ -2,6 +2,7 @@
 #include "cnahouse/environment/SunModel.hpp"
 
 #include <cmath>
+#include <cstdint>
 
 namespace cnahouse::environment
 {
@@ -247,6 +248,96 @@ namespace cnahouse::environment
         day.transit = SunEvent{true, transitMinutes};
         day.transitAltitudeDeg = AltitudeAt(dayStartJ2000, transitMinutes, observer);
         return day;
+    }
+
+    double DaylightMinutes(const SunDay& day) noexcept
+    {
+        if (day.rise.occurs && day.set.occurs)
+        {
+            const double length = day.set.minutesOfDay - day.rise.minutesOfDay;
+            // A day whose set precedes its rise is one where the sun was already up at local
+            // midnight. It cannot happen at §33's latitude and is answered rather than trusted.
+            return length >= 0.0 ? length : kMinutesPerDay + length;
+        }
+        if (day.rise.occurs || day.set.occurs)
+        {
+            // One crossing and not the other: the sun was up at one end of the day and not the
+            // other. Above the threshold for whichever part of the day is on that side of it.
+            return day.rise.occurs ? kMinutesPerDay - day.rise.minutesOfDay : day.set.minutesOfDay;
+        }
+        // No crossing at all: the transit says which side of the threshold the whole day was on.
+        return day.transitAltitudeDeg >= 0.0 ? kMinutesPerDay : 0.0;
+    }
+
+    double DaylightMinutesAt(double calendarDaysSinceEpoch,
+                             const SunObserver& observer,
+                             double thresholdDeg) noexcept
+    {
+        if (!std::isfinite(calendarDaysSinceEpoch))
+        {
+            return 0.0;
+        }
+        const double floored = std::floor(calendarDaysSinceEpoch);
+        const double fraction = calendarDaysSinceEpoch - floored;
+        const auto wholeDays = static_cast<std::int64_t>(floored);
+
+        // **A memo, and only a memo.** `SunDayFor` bisects, which measured 0.1446 ms for the two
+        // calls this function needs -- 12 % of §70's frame budget, for a number that moves by
+        // 0.05 minutes a frame. The two whole-day answers it interpolates change once a CALENDAR
+        // day, which under §35.2b's compression is once every sixty frames, so remembering them
+        // turns the per-frame cost into a lerp. The function stays pure: the key is every input,
+        // so a hit is by construction the value a miss would have computed, and the cache can
+        // change what this costs and never what it answers.
+        struct Memo
+        {
+            bool valid = false;
+            std::int64_t day = 0;
+            double latitudeDeg = 0.0;
+            double longitudeDeg = 0.0;
+            int utcOffsetMinutes = 0;
+            double thresholdDeg = 0.0;
+            double lengthToday = 0.0;
+            double lengthTomorrow = 0.0;
+        };
+
+        static thread_local Memo memo;
+
+        const bool hit = memo.valid && memo.day == wholeDays && memo.latitudeDeg == observer.latitudeDeg &&
+                         memo.longitudeDeg == observer.longitudeDeg &&
+                         memo.utcOffsetMinutes == observer.utcOffsetMinutes &&
+                         memo.thresholdDeg == thresholdDeg;
+        if (!hit)
+        {
+            const bool sameObserver = memo.valid && memo.latitudeDeg == observer.latitudeDeg &&
+                                      memo.longitudeDeg == observer.longitudeDeg &&
+                                      memo.utcOffsetMinutes == observer.utcOffsetMinutes &&
+                                      memo.thresholdDeg == thresholdDeg;
+            // Time normally moves FORWARD one day at a time, and the day it moves on to is the one
+            // this memo already computed as "tomorrow". Rolling it over halves the cost of the
+            // miss, which matters because the miss lands on one frame in sixty and a spike is felt
+            // where an average is not.
+            const bool rolledForward = sameObserver && memo.day + 1 == wholeDays;
+            const std::int64_t epochDay = DaysFromCivil(2031, 1, 1);
+            memo.lengthToday =
+                rolledForward
+                    ? memo.lengthTomorrow
+                    : DaylightMinutes(SunDayFor(CivilFromDays(epochDay + wholeDays), observer, thresholdDeg));
+            memo.lengthTomorrow =
+                DaylightMinutes(SunDayFor(CivilFromDays(epochDay + wholeDays + 1), observer, thresholdDeg));
+            memo.day = wholeDays;
+            memo.latitudeDeg = observer.latitudeDeg;
+            memo.longitudeDeg = observer.longitudeDeg;
+            memo.utcOffsetMinutes = observer.utcOffsetMinutes;
+            memo.thresholdDeg = thresholdDeg;
+            memo.valid = true;
+        }
+        return memo.lengthToday + (memo.lengthTomorrow - memo.lengthToday) * fraction;
+    }
+
+    double DaylightMinutesFor(const SimClock& clock) noexcept
+    {
+        const SunObserver observer{clock.latitudeDeg, clock.longitudeDeg, clock.utcOffsetMinutes};
+        return DaylightMinutesAt(clock.CalendarDays(), observer, kRefractedHorizonDeg);
     }
 
 } // namespace cnahouse::environment

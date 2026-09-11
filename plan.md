@@ -13604,10 +13604,54 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             left alone, and every file scanned including a `.txt`.
       verify: unit SeasonPhaseTests.*
 - [ ] HOUSE-01544 — Implement seasonal day-length variation: sunrise and sunset drift with the declination, so the shortest and longest days are visibly different within one 6-hour year
-      dep: HOUSE-01542, HOUSE-01561 · sys: environment · plat: ALL · pri: MUST
+      dep: HOUSE-01542, HOUSE-01561, HOUSE-01564, HOUSE-01566 · sys: environment · plat: ALL · pri: MUST
+      blocked: (2026-09-11) **the code is written and BOTH acceptance criteria are measured as
+            met; the box does not move because the `verify` line's other half cannot be run yet.**
+            *"screenshot scene sun-season-01..04"* needs the sun to be visible and to light
+            something -- §32.3's disc (`HOUSE-01566`) and the wiring into `LightingSystem`
+            (`HOUSE-01564`) -- and neither exists. A screenshot taken today would photograph a sky
+            the sun does not light, and ticking this on the unit half alone would be exactly the
+            quiet skip `docs/workflow.md` forbids. The two tasks are added to `dep`, which is the
+            correction this work revealed: the original `dep` had the astronomy and not the
+            rendering. Everything below is done and stands; this closes the day the scenes can be
+            taken.
       accept: (1) at the configured latitude, midsummer and midwinter daylight lengths differ by the
               analytic amount within 2 simulated minutes; (2) the drift is smooth frame to frame
       verify: unit SunTests.SeasonalDayLength; screenshot scene sun-season-01..04
+      measured: (1) is satisfied against TWO oracles. Midsummer **901.3 min**, midwinter
+            **559.4 min**, swing **341.9 min**; the closed-form sunrise equation says **342.0 min**
+            and the USNO's published solstice times say **343.0 min**. Both inside the criterion's
+            2 minutes. Over the whole of 2031 the model and the analytic oracle never differ by
+            more than **0.19 min** (2031-12-23) -- and they are not expected to agree exactly, since
+            the closed form holds δ fixed across a day and δ actually moves by up to 0.4° between
+            one sunrise and the next sunset.
+      measured: (2) is satisfied at **0.0443 min** worst frame-to-frame step over a whole
+            compressed year, walked at one frame per simulated minute. A per-DATE implementation
+            would step by about 3 minutes instead -- sixty times the bound -- which is what the
+            next line is about.
+      finding: **the task is not satisfied by `SunDayFor` alone, and criterion (2) is why.**
+            `SunDayFor` takes a calendar DATE, and §35.2b's compression crosses a whole calendar
+            day every real minute of play: a day length quantised to dates would step visibly sixty
+            times an hour. `DaylightMinutesAt` takes the FRACTIONAL calendar position and
+            interpolates between the two bracketing days, which is the same argument §36.3 makes
+            for the season phase, arriving in a second place.
+      decision: the continuous day length interpolates `SunDayFor` and is deliberately **not**
+            re-derived from a closed-form hour-angle expression, even though that would be smooth
+            for free. `HOUSE-01561` kept the project to ONE solar approximation on purpose -- a
+            second one living beside it is what makes a disagreement unattributable -- and the
+            closed form is worth more as the test's independent oracle than as production code.
+            The day length is very nearly linear across one day, so interpolating costs 0.19 min at
+            worst and adds no formula.
+      measured: the obvious implementation cost **0.1446 ms a frame**, 12 % of §70's worst-case
+            budget, for a number that moves by 0.05 min a frame. A memo keyed on every input brings
+            the real access pattern to **0.001253 ms** (115×, amortised including its own misses);
+            the worst single call, a calendar day rolling over, is **0.0742 ms** on one frame in
+            sixty, halved by reusing the previous day's *tomorrow* as the new *today*. Rows in
+            `docs/performance-log.md`. The memo cannot change an answer, only a cost: its key is
+            every input, so a hit is by construction what a miss would have computed.
+      note: the unit half of the `verify` line is done and green -- `SunTests.SeasonalDayLength`
+            plus seven more in the same file -- and it is what both acceptance criteria are stated
+            in terms of. Only the scenes are owed.
 - [ ] HOUSE-01545 — Implement the outdoor temperature model: seasonal base curve + diurnal curve + weather `Δtemp`, driven by `SeasonPhase` and blended, never switched
       dep: HOUSE-01543, HOUSE-01535 · sys: environment · plat: ALL · pri: MUST
       accept: (1) the annual minimum and maximum land in winter and summer respectively; (2) the
@@ -13701,10 +13745,43 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             generator -- the sunrise equation from a different source rather than NOAA's -- which
             is weaker than published data but is genuine independence, and would have to say so in
             the tool and in the test.
-- [ ] HOUSE-01562 — Implement the world-space sun direction with the north = `−Z` convention
+- [x] HOUSE-01562 — Implement the world-space sun direction with the north = `−Z` convention
       dep: HOUSE-01561 · sys: environment · plat: ALL · pri: MUST
-- [ ] HOUSE-01563 — Implement the sun colour and intensity LUT over altitude, with the cloud modulation
+      verify: unit SunLightTests.* — the vectors against §10.1's compass, never against each other
+      note: `DirectionToSun` is §32.2's `(cos alt·sin az, sin alt, −cos alt·cos az)` and
+            `SunDirection` is its negation, which is the one an XNA `DirectionalLight` takes. Both
+            are exported because they are *different questions* and the project will ask both: a
+            glare cone wants where the sun IS, a light wants where its light GOES.
+      finding: this is the part of §32 most likely to be wrong in a way that looks almost right --
+            a flipped sign gives shadows of the correct LENGTH pointing the wrong way, and a
+            swapped axis puts the morning sun in the west. Neither would obviously fail a render
+            test. So the tests assert against §10.1's compass directly: azimuth 0 is `−Z`, 90 is
+            `+X`, 180 is `+Z`, 270 is `−X`, and the June noon sun is up AND `+Z`, because at 40° N
+            the noon sun is in the south. Wired to the real model as well as to hand-made angles,
+            so the convention is checked where it is actually consumed.
+      finding: §32.1's azimuth formula is written `cos φ tan δ − sin φ cos H`, which has a pole at
+            δ = ±90°. Implemented as `cos φ sin δ − sin φ cos δ cos H` with `cos δ` multiplied
+            through the whole expression: the same angle out of `atan2`, no pole, and the overhead
+            case is a test (`StraightOverheadIsUpAndNothingElse`) rather than a NaN.
+- [x] HOUSE-01563 — Implement the sun colour and intensity LUT over altitude, with the cloud modulation
       dep: HOUSE-01562 · sys: environment · plat: ALL · pri: MUST
+      verify: unit SunLightTests.* — §32.2's six anchors reproduced, the curve monotone and
+              continuous, and the two cloud factors distinguished
+      note: §32.2's six rows are `kSunLightingAnchors`, verbatim and in the section's order, and
+            the 64 entries are built from them once. The table spans the first anchor to the last
+            (−6° to +60°) because outside those the answer is constant -- at §33's latitude the sun
+            never passes 73.4° anyway.
+      decision: **below −6° the LUT gives the twilight row and not black.** "Clamp to zero below
+            the horizon" is the obvious thing to write and is wrong twice: §32.2 feeds this LUT to
+            the SKY-DIFFUSE term as well as the direct one and a night sky is dim blue rather than
+            black, and clamping would put a 2 % step into every dusk at exactly −6°. `HOUSE-01574`
+            owns what happens to the night ambient below civil twilight.
+      decision: **the cloud factor multiplies the intensity and not the colour.** A renderer uses
+            the two as `colour × intensity`, so scaling both would apply the cloud twice; §32.2's
+            colours are normalised hues rather than radiances.
+      measured: the steepest part of §32.2's table is −0.83° to +2° (intensity 0.10 → 0.35 in
+            2.83°), which is **0.0221 of full intensity per quarter-degree** of altitude. That
+            bounds what a frame can jump by and is the number the continuity test asserts against.
 - [ ] HOUSE-01564 — Wire the sun into `LightingSystem`: it becomes `DirectionalLight0` for outdoor objects and drives `daylight`
       dep: HOUSE-01563, HOUSE-01263 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-01565 — Make the sun-patch decals follow the real sun by interpolating the 12 × 24 grid
