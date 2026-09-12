@@ -14343,8 +14343,23 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             at 0° elevation its near-sun RGB is (0.881, 0.430, 0.184), versus (0.800, 0.380, 0.160)
             opposite the sun; full overcast collapses every sampled altitude and azimuth exactly
             to (0.370, 0.400, 0.440). All channels remain in XNA `Color`'s 0..1 range.
-- [ ] HOUSE-01642 — Generate the sky dome mesh (32 × 18 hemisphere + horizon skirt)
+- [x] HOUSE-01642 — Generate the sky dome mesh (32 × 18 hemisphere + horizon skirt)
       dep: HOUSE-01641 · sys: content · plat: TOOL · pri: MUST
+      verify: `python3 tools/world/build_skydome.py --selftest` (12 claims);
+            `python3 tools/world/build_skydome.py --check content/world/sky_dome.bin`
+      note: (2026-09-12) `sky-dome` is now a content-DAG stage producing the documented `CSKY` v1
+            binary: positions plus a `u16` triangle list, with the dimensions, radius, skirt depth
+            and dome boundary carried in the header. It contains no baked colour because
+            `HOUSE-01644` will update XNA `VertexPositionColor` vertices from the LUT as the sun and
+            weather move. The generated file is 14,656 bytes, 610 vertices and 1,216 triangles;
+            the smallest triangle is 600.759 m², all indices resolve, generation is byte-stable and
+            four damaged-file mutations are rejected.
+      correction: §31.2's old 594-vertex arithmetic was `33 × 18`: a seam-duplicated grid that
+            still omitted the requested skirt, and whose duplicated pole row would make 32
+            zero-area triangles. The non-degenerate 32 × 18-segment topology is one pole plus 18
+            rings (577 dome vertices), a 32-vertex lower skirt ring and one disc centre: 610 total,
+            9.8 KB when expanded to `VertexPositionColor`. Architecture and format docs now record
+            generated reality rather than preserving the stale estimate.
 - [ ] HOUSE-01643 — Implement `SkySystem`: the dome draw with `DepthStencilState::None`, camera-following translation
       dep: HOUSE-01642 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01644 — Implement CPU vertex-colour recomputation from the LUTs, triggered by a material change in the sky state

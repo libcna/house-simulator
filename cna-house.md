@@ -3233,7 +3233,9 @@ reached.
 
 ### 31.2 Tier S colouring
 
-The dome's 594 vertices carry `VertexPositionColor`. Their colours are recomputed on the CPU
+The generated mesh has 610 vertices: 577 on a seam-wrapped, single-pole hemisphere, 32 on the
+bottom skirt ring and one disc centre. They become `VertexPositionColor` at runtime. Their colours
+are recomputed on the CPU
 whenever the sky state changes materially (sun altitude by > 0.25°, cloud cover by > 0.01, i.e.
 a few times per simulated minute) and uploaded with `VertexBuffer::SetData`. The colour of a dome
 vertex is:
@@ -3257,7 +3259,10 @@ analytic atmospheric model to runtime. Sunrise/sunset warmth is concentrated aro
 than tinting every azimuth orange, and the same elevation curve naturally treats dawn and dusk
 identically. The later reference-photo pass (`HOUSE-01652`) art-directs these same anchors.
 
-594 vertices × 16 bytes = 9.5 KB per update. Negligible.
+610 vertices × 16 bytes = 9.8 KB per update. Negligible. The earlier 594-vertex estimate was
+`33 × 18`: it duplicated each seam vertex, omitted the skirt and, if used for the pole, produced
+32 zero-area triangles. `HOUSE-01642` records the generated non-degenerate topology in
+`docs/sky-dome-format.md`.
 
 ### 31.3 Clouds
 

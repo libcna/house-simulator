@@ -204,6 +204,9 @@ run_gate "suntimes-selftest" python3 tools/ci/suntimes_table.py --selftest
 # Both matter: `--check` catches a hand edit and `--selftest` catches a plausible but broken model.
 run_gate "sky-lut" python3 tools/world/sky_lut.py --check
 run_gate "sky-lut-selftest" python3 tools/world/sky_lut.py --selftest
+# `HOUSE-01642`. Geometry that begins with a ring of duplicate poles can look right while carrying
+# zero-area triangles, so the offline mesh proves its topology before `SkySystem` ever uploads it.
+run_gate "sky-dome-selftest" python3 tools/world/build_skydome.py --selftest
 # `HOUSE-01543`. §36.3: *"Season is a continuous phase, never an enum... never a switch."* The
 # season code being right is no protection at all against a consumer writing
 # `switch (phase.primary)`, and nothing in a test of the season itself would notice. This is the

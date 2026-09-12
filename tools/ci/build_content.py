@@ -201,6 +201,11 @@ def default_stages() -> list[Stage]:
         Stage("coverage", "world", ["python3", "tools/world/build_coverage.py"],
               inputs=["assets-src/world/*.json"], outputs=["content/world/coverage.bin"],
               needs=["collision"], description="the rain/roof coverage height field"),
+        Stage("sky-dome", "world",
+              ["python3", "tools/world/build_skydome.py", "--out",
+               "content/world/sky_dome.bin"],
+              inputs=["tools/world/build_skydome.py"], outputs=["content/world/sky_dome.bin"],
+              needs=["sky-lut"], description="§31.1's indexed hemisphere, skirt and ground disc"),
         # --- the generated exterior tree (`HOUSE-00227`) -----------------------------------------
         # These four write `.glb` that `build_chunks.py` then reads, and until `HOUSE-00227` NO
         # stage ran them: `run_checks.sh` gates their selftests, which is a different question from
