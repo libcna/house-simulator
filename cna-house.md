@@ -5652,6 +5652,7 @@ compass. What is on screen:
 | Crosshair — a 3 px dot at 25 % alpha | Always in first person; it grows to a 12 px ring when a target is acquired |
 | Walk-mode glyph | For 1.2 s after `Shift` |
 | Sun/moon clock | §32.4 |
+| Environment readout — wall time · season · year progress · outdoor °C | In play; hideable in Settings |
 | Toast (bottom centre, 2.5 s) | Saved, house reset, locked, blocked |
 | Loading indicator | Only at start-up |
 | Vignette | A very slight permanent one; deepens during a toilet action and while adapting to darkness |
@@ -5726,6 +5727,7 @@ Stored in `settings.json` beside the save, versioned and migrated the same way. 
 | | Camera default | First / Third | First |
 | | Key bindings | full remap | — |
 | **Simulation** | Day length | 20 / 24 / 48 / 96 min, Real time, Frozen, Custom | **24 min** |
+| | Environment readout | On / Off | On |
 | | Weather | On / Fixed / Off | On |
 | | Fixed weather archetype | the 14 archetypes | `W_PARTLY` |
 | | Moon phase speed | 1× – 8× | 1× |

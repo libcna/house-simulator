@@ -22,7 +22,7 @@ namespace cnahouse::app
     struct Settings
     {
         /// @brief Bumped whenever a field changes meaning. `Migrate` handles every older value.
-        static constexpr std::int32_t kCurrentVersion = 5;
+        static constexpr std::int32_t kCurrentVersion = 6;
 
         std::int32_t version = kCurrentVersion;
 
@@ -85,6 +85,9 @@ namespace cnahouse::app
         /// `SimClock::timeScale`, and the default 24 is the one §35.2 chose because it makes
         /// 1 real second exactly 1 simulated minute.
         float dayLengthRealMinutes = static_cast<float>(environment::kDefaultDayLengthRealMinutes);
+
+        /// @brief Whether §67's compact player-facing environment readout is visible in play.
+        bool showEnvironmentReadout = true;
 
         [[nodiscard]] static Settings Defaults()
         {

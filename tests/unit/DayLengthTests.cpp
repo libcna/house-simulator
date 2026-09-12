@@ -139,7 +139,7 @@ TEST(DayLengthTests, TheSettingRoundTripsThroughTheFileAndIsClampedIntoItsBand)
 {
     Settings settings = Settings::Defaults();
     EXPECT_FLOAT_EQ(settings.dayLengthRealMinutes, 24.0F);
-    EXPECT_EQ(Settings::kCurrentVersion, 5) << "the day length is version 5's field";
+    EXPECT_GE(Settings::kCurrentVersion, 5) << "the day length entered the schema in version 5";
 
     settings.dayLengthRealMinutes = 48.0F;
     const auto reread = Settings::FromJson(settings.ToJson(), "round-trip");

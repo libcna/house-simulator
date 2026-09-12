@@ -13976,7 +13976,7 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: removing `weatherDeltaC` from the composition was caught by both focused consumer
             tests: summer stayed at 29 instead of 24/31 °C, and the clock's −4 °C live offset became
             zero. The production addition was restored before the final green run.
-- [ ] HOUSE-01546 — Implement the in-game environment readout: time of day, season, progress through the year, and the outdoor temperature
+- [x] HOUSE-01546 — Implement the in-game environment readout: time of day, season, progress through the year, and the outdoor temperature
       dep: HOUSE-01545, HOUSE-01543 · sys: ui · plat: ALL · pri: MUST
       accept: (1) it is a **player-facing** readout, not the `F8` debug overlay; (2) it shows the
               simulated clock time, the current season, year progress, and the outdoor temperature
@@ -13984,6 +13984,31 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
               requirement is that all four values are legible, not a particular widget;
               (4) it can be hidden from settings
       verify: render test hud-season-01; manual read-through of one full simulated year
+      verify-result: 3 `EnvironmentReadoutTests` automate the full 365-day presentation read-through
+            and pass with the 11 `SettingsTests` and 5 `TextRendererTests`. The production walk
+            scene render test `EnvironmentReadoutRenderTests.HudSeason01IsLegibleAndTheSettingHidesIt`
+            passes under isolated Xvfb/software Mesa 25.0.7 at 640×360; the accepted reference was
+            visually inspected, and enabling the readout changes 3,346 pixels in its dedicated HUD
+            band. The full build and all 1,225 unit tests pass; all gates are green, including 273
+            strict-XNA translation units. No physical display was used.
+      implementation: the compact second HUD row is `HH:MM · season · Year N% · T °C`, centred
+            below the permanent version/frame-time row and drawn only during play. Seasonal outer
+            fifths name both neighbours in calendar order (`Winter/Spring`), so the player-facing
+            label reflects `SeasonPhase::blend` and remains stable across the boundary. Year progress
+            floors `[0,1)` to 0..99 %, never claiming 100 % before wrap. `Settings` schema v6 persists
+            `showEnvironmentReadout` (default on; pre-v6 migration on), and the same field gates the
+            production draw independently of the F8 diagnostic overlay and menu stack.
+      presentation: white Noto Sans 16-point text with the standard 60 % black shadow; centred at
+            virtual y=62. The new `TopCentre` anchor centres against actual viewport glyph width so
+            the full line, including `°C`, remains visible in the 640×360 acceptance frame.
+      mutation: replacing the production settings condition with unconditional drawing made the
+            hidden and visible captures identical; the render test failed with 0 changed pixels
+            versus its >250 requirement. The condition was restored, rebuilt, and the same test
+            returned green.
+      correction: the full suite exposed `DayLengthTests` pinning `kCurrentVersion == 5`, although
+            its own field merely *entered* the schema in v5. Schema v6 legitimately disproved that
+            assertion; it now requires current version >=5 while retaining the v4-to-v5 migration,
+            round-trip and clamping checks. The repaired full suite is green.
 - [ ] HOUSE-01547 — Test: one uninterrupted 365-real-minute run passes through all four seasons exactly once, starting and ending in spring
       dep: HOUSE-01546 · sys: ci · plat: CI · pri: MUST
       accept: run headless with the clock driven at a large `timeScale`; assert the season sequence,

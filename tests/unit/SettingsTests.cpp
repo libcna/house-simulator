@@ -21,6 +21,7 @@ namespace
         EXPECT_EQ(settings.backBufferHeight, 900);
         EXPECT_EQ(settings.quality, QualityPreset::High);
         EXPECT_FLOAT_EQ(settings.masterVolume, 1.0f);
+        EXPECT_TRUE(settings.showEnvironmentReadout);
     }
 
     TEST(SettingsTests, RoundTripsThroughItsOwnJson)
@@ -35,6 +36,7 @@ namespace
         written.invertY = true;
         written.fieldOfView = 90.0f;
         written.headBob = cnahouse::player::HeadBobLevel::Off;
+        written.showEnvironmentReadout = false;
 
         auto read = Settings::FromJson(written.ToJson(), "settings.json");
         ASSERT_TRUE(read) << read.Error().ToString();
@@ -48,6 +50,8 @@ namespace
         EXPECT_FLOAT_EQ(read->fieldOfView, 90.0f);
         EXPECT_EQ(read->headBob, cnahouse::player::HeadBobLevel::Off)
             << "§68's level did not survive the file";
+        EXPECT_FALSE(read->showEnvironmentReadout)
+            << "the player's choice to hide HOUSE-01546's readout did not survive the file";
     }
 
     TEST(SettingsTests, TheHeadBobLevelIsAName)
@@ -111,6 +115,8 @@ namespace
         // v3 -> v4 added §68's head bob, and §44 says the motion is on by default: a player who
         // has never seen the setting has not turned it off.
         EXPECT_EQ(settings->headBob, cnahouse::player::HeadBobLevel::Subtle);
+        EXPECT_TRUE(settings->showEnvironmentReadout)
+            << "a pre-HOUSE-01546 file takes the documented visible default";
     }
 
     TEST(SettingsTests, AFileFromANewerBuildStillLoads)

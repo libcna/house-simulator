@@ -1395,6 +1395,12 @@ namespace cnahouse::app
         {
             smoke_->DrawOverlay(hud_->batch, text_);
         }
+        // Player-facing and therefore absent from the title/menu stack and independent of the F8
+        // debug overlay. The persisted setting is the one switch for it (`HOUSE-01546`).
+        if (settings_.showEnvironmentReadout && menus_.Empty())
+        {
+            environmentReadout_.Draw(hud_->batch, text_, clock_);
+        }
 
         text_.DrawShadowed(hud_->batch,
                            SessionLine(),

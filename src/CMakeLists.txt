@@ -117,6 +117,7 @@ add_library(cnahouse_core STATIC
     rendering/WindowGlow.cpp
 
     # ui
+    ui/EnvironmentReadout.cpp
     ui/LoadingScreen.cpp
     ui/MenuStack.cpp
     ui/TextRenderer.cpp

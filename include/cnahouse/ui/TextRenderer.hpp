@@ -22,6 +22,7 @@ namespace cnahouse::ui
     enum class Anchor
     {
         TopLeft,
+        TopCentre,
         TopRight,
         BottomLeft,
         BottomRight,

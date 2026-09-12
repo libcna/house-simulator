@@ -43,6 +43,7 @@
 #include "cnahouse/rendering/RenderTier.hpp"
 #include "cnahouse/rendering/Renderer.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
+#include "cnahouse/ui/EnvironmentReadout.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/ui/MenuStack.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
@@ -399,6 +400,7 @@ namespace cnahouse::app
         player::KeyboardMouseSource input_;
         player::MouseCapturePolicy mouseCapture_;
         ui::TextRenderer text_;
+        ui::EnvironmentReadout environmentReadout_;
         /// The screen stack of §67.3. The loading/title screen is pushed onto it at `LoadContent`
         /// and pops itself once the player has pressed something AND content is ready.
         ui::MenuStack menus_;

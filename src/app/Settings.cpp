@@ -162,6 +162,14 @@ namespace cnahouse::app
         }
         settings.dayLengthRealMinutes = *dayLength;
 
+        auto environmentReadout =
+            root.OptionalBool("showEnvironmentReadout", settings.showEnvironmentReadout);
+        if (!environmentReadout)
+        {
+            return environmentReadout.Error();
+        }
+        settings.showEnvironmentReadout = *environmentReadout;
+
         Migrate(settings);
         return settings;
     }
@@ -199,6 +207,13 @@ namespace cnahouse::app
             // has never opened the setting has not asked for a slower sun.
             settings.dayLengthRealMinutes = static_cast<float>(environment::kDefaultDayLengthRealMinutes);
             settings.version = 5;
+        }
+        if (settings.version < 6)
+        {
+            // Version 6 added HOUSE-01546's player-facing time/season/temperature line. Existing
+            // players get the documented visible default; they can then hide it in settings.
+            settings.showEnvironmentReadout = true;
+            settings.version = 6;
         }
         settings.version = kCurrentVersion;
     }
@@ -292,7 +307,8 @@ namespace cnahouse::app
                            "  \"headBob\": \"{}\",\n"
                            "  \"fieldOfView\": {},\n"
                            "  \"fastWalk\": {},\n"
-                           "  \"dayLengthRealMinutes\": {}\n"
+                           "  \"dayLengthRealMinutes\": {},\n"
+                           "  \"showEnvironmentReadout\": {}\n"
                            "}}\n",
                            version,
                            backBufferWidth,
@@ -309,7 +325,8 @@ namespace cnahouse::app
                            HeadBobLevelName(headBob),
                            fieldOfView,
                            fastWalk ? "true" : "false",
-                           dayLengthRealMinutes);
+                           dayLengthRealMinutes,
+                           showEnvironmentReadout ? "true" : "false");
     }
 
 } // namespace cnahouse::app

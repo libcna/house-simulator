@@ -29,6 +29,7 @@ rather than letting a later scene inherit it.
 | `char` | Avatar customisations and poses; dog and cat states | `char-avatar-f3-walk-02`, `char-dog-lie-01` |
 | `ext` | Exterior: road, drive, garden, terrace, neighbourhood at 3 LOD distances | `ext-drive-lod1-05` |
 | `ui` | Prompt, held item, sun clock, menus | `ui-prompt-door-01` |
+| `hud-season` | Player environment readout across the seasonal cycle | `hud-season-01` |
 | `content` | The content pipeline itself: one of each asset type, loaded and shown | `content-smoke-01` |
 | `fp` | First-person: twelve places a body can stand, seen through §44's camera at head height | `fp-l0-hall`, `fp-l3-room` |
 | `sun-season` | Longest/shortest-day edges at matched local clock times | `sun-season-01`, `sun-season-04` |
@@ -73,6 +74,16 @@ The same road-and-house composition is intentional. The summer references visibl
 reddened sun disc; the matched winter references do not. Human inspection accepted all four under
 software Mesa 25.0.7. Exact-pixel comparison finds 28 changed pixels in the morning pair and 26 in
 the evening pair — the small disc itself, not a moved camera or changed house.
+
+## `hud-season-01`
+
+The player stands at `(0.00, 0.00, +5.20)` on `EXT_ROAD`, looking north with a level camera, using
+Tier S/Low at 640×360, seed `0x5EEDC0DEC0FFEE01`. The production console freezes the new-game
+clock before capture. The second HUD row therefore reads
+`07:00 · Winter/Spring · Year 0% · 0.7 °C`: the slash is the real half-and-half `SeasonPhase` at
+the vernal-equinox boundary, not an enum
+switch. The test captures the same frame with `showEnvironmentReadout` disabled and requires the
+readout band to change, as well as comparing the visible frame with the accepted reference.
 
 ## The `fp` family is named for its PLACE, not numbered
 

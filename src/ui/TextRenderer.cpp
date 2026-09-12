@@ -60,6 +60,12 @@ namespace cnahouse::ui
         {
             case Anchor::TopLeft:
                 break;
+            case Anchor::TopCentre:
+                // SpriteBatch draws SpriteFont glyphs at their authored pixel size; only the HUD
+                // position is expressed in virtual units. Centre against the real viewport width
+                // so a long line remains centred (and therefore wholly visible) below 1600 px.
+                x = ((static_cast<float>(viewportWidth_) - size.X) * 0.5f) / scale_ + virtualPosition.X;
+                break;
             case Anchor::TopRight:
                 x = kVirtualWidth - virtualPosition.X - size.X;
                 break;
