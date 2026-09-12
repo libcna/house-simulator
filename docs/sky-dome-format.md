@@ -1,8 +1,7 @@
 # `sky_dome.bin` — the dynamic-colour sky geometry
 
-*`HOUSE-01642`. Normative. The only writer is `tools/world/build_skydome.py`. The runtime reader
-arrives with `HOUSE-01643`; until then the writer's independent decode and mutation checks own the
-round trip.*
+*`HOUSE-01642` writer and `HOUSE-01643` runtime reader. Normative. The only writer is
+`tools/world/build_skydome.py`; `rendering::SkyDomeReader` is the only runtime reader.*
 
 ## 1. Geometry
 
@@ -19,9 +18,9 @@ of 594 vertices was `33 × 18`: it duplicated every seam vertex, still omitted t
 naive pole row would add 32 zero-area triangles. Measured generated topology replaces that stale
 arithmetic.
 
-Only positions are stored. `HOUSE-01643` creates XNA `VertexPositionColor` vertices and
-`HOUSE-01644` computes their changing colours; baking a colour into this file would duplicate the
-LUT and be stale as soon as the sun moves.
+Only positions are stored. `SkySystem` creates XNA `VertexPositionColor` vertices, initially in a
+visible bootstrap blue; `HOUSE-01644` computes their changing colours from the LUT. Baking a colour
+into this file would duplicate the LUT and be stale as soon as the sun moves.
 
 ## 2. Encoding
 
@@ -53,3 +52,11 @@ skirt.
 writes `content/world/sky_dome.bin`. `tools/world/build_skydome.py --selftest` asserts the exact
 topology, bounds, sphere radius, index range, absence of duplicate or degenerate vertices and
 triangles, byte determinism, round trip, and rejection of damaged headers and lengths.
+
+At runtime `SkyDomeReader` rejects any other length, magic, version, flags, dimensions, radius,
+skirt depth or counts before allocating the arrays, then rejects non-finite positions and indices
+outside the 610-vertex table. `SkySystem` uploads the resulting 610 vertices and 3,648 `u16`
+indices once, draws 1,216 triangles with opaque blending, `DepthStencilState::None` and
+`RasterizerState::CullNone`, and translates the object by the current camera eye every draw. It is
+also the single `Pass::Sky` owner and draws the existing additive sun disc after the dome; the
+renderer intentionally permits only one implementation per pass.

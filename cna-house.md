@@ -3231,6 +3231,12 @@ horizon is never a hard edge. Drawn first, `DepthStencilState::None` (no test, n
 `RasterizerState::CullNone`, translated to the camera's position each frame so it can never be
 reached.
 
+`HOUSE-01643` makes `SkySystem` the one owner of `Pass::Sky`: it draws the generated dome first and
+then the already-existing celestial overlays (currently the sun disc). This composition matters
+because `Renderer::Install` deliberately has one slot per pass; installing the dome and sun as two
+unrelated passes would replace one with the other. The `CSKY` reader validates the fixed v1 header,
+file length, finite positions and every index before any graphics resource is created.
+
 ### 31.2 Tier S colouring
 
 The generated mesh has 610 vertices: 577 on a seam-wrapped, single-pole hemisphere, 32 on the

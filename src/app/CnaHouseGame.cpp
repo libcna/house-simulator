@@ -34,8 +34,8 @@
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
+#include "cnahouse/rendering/SkySystem.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
-#include "cnahouse/rendering/SunDiscPass.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/util/Log.hpp"
 #include "cnahouse/world/ChunkReader.hpp"
@@ -490,9 +490,19 @@ namespace cnahouse::app
         // §28.1 and §32.2, at `UpdateStage::Lighting` (`HOUSE-01251`, `HOUSE-01564`). Built once
         // over the cells, fixtures and windows; every frame reads the one simulation clock.
         lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
-        auto sunDisc = std::make_unique<rendering::SunDiscPass>(blockoutCamera_);
-        sunDiscPass_ = sunDisc.get();
-        renderer_.Install(rendering::Pass::Sky, std::move(sunDisc));
+        auto skyDome = rendering::SkyDomeReader::ReadFromTitle("content/world/sky_dome.bin");
+        if (skyDome)
+        {
+            auto sky = std::make_unique<rendering::SkySystem>(blockoutCamera_, std::move(*skyDome));
+            skySystem_ = sky.get();
+            renderer_.Install(rendering::Pass::Sky, std::move(sky));
+        }
+        else
+        {
+            // The walk remains usable in a source checkout that has not built generated content,
+            // but the missing layer is never silent or disguised as a plausible sky.
+            Log::Error(LogCat::Content, "--scene=walk: {}", skyDome.Error().ToString());
+        }
         if (blockoutChunks_ != nullptr)
         {
             // With the world, so §12's nested cells are drawn with the room they stand in
@@ -933,9 +943,9 @@ namespace cnahouse::app
                 // Drawing consumes the lighting stage's one solar answer. There is no second
                 // SunModel in rendering, so room light and the disc cannot disagree within a frame
                 // about where the sun is or how clouds attenuate it.
-                if (sunDiscPass_ != nullptr)
+                if (skySystem_ != nullptr)
                 {
-                    sunDiscPass_->SetSun(lighting_->Sun(), lighting_->CloudCover());
+                    skySystem_->SetSun(lighting_->Sun(), lighting_->CloudCover());
                 }
             }
             if (walking_ && visibility_.has_value())

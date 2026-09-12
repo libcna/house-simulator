@@ -14360,8 +14360,22 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             rings (577 dome vertices), a 32-vertex lower skirt ring and one disc centre: 610 total,
             9.8 KB when expanded to `VertexPositionColor`. Architecture and format docs now record
             generated reality rather than preserving the stale estimate.
-- [ ] HOUSE-01643 — Implement `SkySystem`: the dome draw with `DepthStencilState::None`, camera-following translation
+- [x] HOUSE-01643 — Implement `SkySystem`: the dome draw with `DepthStencilState::None`, camera-following translation
       dep: HOUSE-01642 · sys: rendering · plat: ALL · pri: MUST
+      verify: unit `SkySystemTests.*` (4); integration `SkySystemPassTests.*` (1) and
+            `HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight` (1), all graphics
+            invocations with `SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy`
+      note: (2026-09-12) `SkyDomeReader` strictly consumes the generated 14,656-byte `CSKY` v1
+            file before any device allocation: exact header/layout, 610 finite positions and 3,648
+            in-range `u16` indices. `SkySystem` uploads `VertexPositionColor` plus the index buffer
+            once, submits 1,216 triangles under opaque blend, `DepthStencilState::None` and
+            `CullNone`, and uses `CreateTranslation(camera.eye)` every draw. Its current visible
+            bootstrap blue is deliberately temporary; `HOUSE-01644` is the LUT colour update.
+            `SkySystem` composes the existing sun disc after the dome because `Renderer` has one
+            implementation slot per pass; this preserves the already measured sun path instead of
+            replacing it. A Python-generated CMake fixture proves the writer/reader boundary, and
+            malformed length, magic, version, flags, geometry header, NaN position and out-of-range
+            index mutations are rejected.
 - [ ] HOUSE-01644 — Implement CPU vertex-colour recomputation from the LUTs, triggered by a material change in the sky state
       dep: HOUSE-01643 · sys: rendering · plat: ALL · pri: MUST
       accept: recomputed a few times per simulated minute, not per frame; measured cost negligible

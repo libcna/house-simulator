@@ -122,6 +122,7 @@ add_library(cnahouse_core STATIC
     rendering/MaterialBinder.cpp
     rendering/Quality.cpp
     rendering/RenderStates.cpp
+    rendering/SkySystem.cpp
     rendering/StaticGeometryPass.cpp
     rendering/StateTracker.cpp
     rendering/SunDiscPass.cpp

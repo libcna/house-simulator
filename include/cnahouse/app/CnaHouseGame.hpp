@@ -60,7 +60,7 @@
 
 namespace cnahouse::rendering
 {
-    class SunDiscPass;
+    class SkySystem;
 }
 
 namespace cnahouse::app
@@ -602,7 +602,7 @@ namespace cnahouse::app
         ///
         /// The lighting stage copies its one current sun into the pass before drawing. The pass is
         /// installed only for a successfully loaded walk world and remains owned by `renderer_`.
-        rendering::SunDiscPass* sunDiscPass_ = nullptr;
+        rendering::SkySystem* skySystem_ = nullptr;
         std::optional<visibility::ChunkCuller> chunkCuller_;
         /// @brief §25.6's hierarchy over the exterior chunks, and the walk over it
         ///        (`HOUSE-00700`).
