@@ -29,6 +29,7 @@
 #include "cnahouse/debug/WorldOverlay.hpp"
 #include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/lighting/LightingSystem.hpp"
+#include "cnahouse/lighting/ShadingGrid.hpp"
 #include "cnahouse/physics/BroadPhase.hpp"
 #include "cnahouse/physics/CollisionData.hpp"
 #include "cnahouse/player/CellTracker.hpp"
@@ -242,6 +243,12 @@ namespace cnahouse::app
         [[nodiscard]] const environment::SimClock& ClockForTesting() const noexcept
         {
             return clock_;
+        }
+
+        /// @brief §28's per-cell lighting after a walk session, or null outside that scene.
+        [[nodiscard]] const lighting::LightingSystem* LightingForTesting() const noexcept
+        {
+            return lighting_.has_value() ? &*lighting_ : nullptr;
         }
 
         /// @brief The version line drawn in the corner and printed at startup.
@@ -571,6 +578,9 @@ namespace cnahouse::app
         /// §49.3's accumulator runs the simulation slow for that frame.
         environment::SimClock clock_;
         std::optional<visibility::VisibilitySystem> visibility_;
+        /// @brief §22's baked window occlusion. It outlives `lighting_`, whose daylight model
+        ///        keeps a pointer to it.
+        lighting::ShadingGrid shading_ = lighting::ShadingGrid::Unshaded();
         /// @brief §28.1's per-room lighting, at `UpdateStage::Lighting` (`HOUSE-01251`).
         std::optional<lighting::LightingSystem> lighting_;
         std::optional<visibility::ChunkCuller> chunkCuller_;

@@ -20,6 +20,8 @@
 #include "cnahouse/debug/VisibilityOverlay.hpp"
 #include "cnahouse/environment/DayLength.hpp"
 #include "cnahouse/environment/Season.hpp"
+#include "cnahouse/environment/SunModel.hpp"
+#include "cnahouse/lighting/LightingSystem.hpp"
 #include "cnahouse/player/FirstPersonView.hpp"
 #include "cnahouse/player/IInputSource.hpp"
 #include "cnahouse/util/Ids.hpp"
@@ -743,6 +745,49 @@ namespace
     private:
         cnahouse::player::InputState state_;
     };
+
+    TEST(HeadlessRunTests, TheWalkSceneLoadsTheSunBakeAndPublishesDaylight)
+    {
+        // `HOUSE-01564`, end to end: the walk loader reads openings, interactables, initial state
+        // and `shading.bin`, then the lighting stage reads the same clock the game advanced. Unit
+        // tests prove each model; this catches a perfectly good model left unwired in the app.
+        cnahouse::util::Log::ResetForTesting();
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        ConsoleDriver driver(game, "time set 12:00", 2);
+        game.SetInputSourceForTesting(&driver);
+        game.SetFrameLimit(6);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+        ASSERT_TRUE(driver.Result().ok) << driver.Result().message;
+
+        const cnahouse::lighting::LightingSystem* lighting = game.LightingForTesting();
+        ASSERT_NE(lighting, nullptr);
+        EXPECT_GT(lighting->ComputedForFrame(), 0U);
+        EXPECT_EQ(lighting->Cells().size(), 96U);
+        const auto sun = cnahouse::environment::SunPositionFor(game.ClockForTesting());
+        EXPECT_NEAR(lighting->Sun().altitudeDeg, sun.altitudeDeg, 1e-10);
+        EXPECT_NEAR(lighting->Sun().azimuthDeg, sun.azimuthDeg, 1e-10);
+
+        int daylit = 0;
+        for (const cnahouse::lighting::RoomLightState& cell : lighting->Cells())
+        {
+            daylit += cell.daylight > 0.0F ? 1 : 0;
+        }
+        EXPECT_GT(daylit, 25) << "the walk loaded a daylight model but no windows reached it";
+        ASSERT_GT(sun.altitudeDeg, cnahouse::environment::kRefractedHorizonDeg);
+        EXPECT_NE(lighting->SunKeyForCell(cnahouse::util::Id::Of("EXT_WORLD")), nullptr)
+            << "outdoor objects did not receive the sun key";
+    }
 
     TEST(HeadlessRunTests, HoldingForwardWalksTheBodyAcrossTheRoomAtSectionFortyThreesSpeed)
     {

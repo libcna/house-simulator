@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/lighting/LightingSystem.hpp"
 
+#include "Microsoft/Xna/Framework/Vector3.hpp"
+
+#include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/environment/SunLight.hpp"
+#include "cnahouse/environment/SunModel.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -10,12 +15,19 @@
 namespace cnahouse::lighting
 {
 
-    LightingSystem::LightingSystem(const world::WorldData& world)
+    LightingSystem::LightingSystem(const world::WorldData& world,
+                                   const ShadingGrid& shading,
+                                   const environment::SimClock& clock)
+        : daylight_(world, shading)
+        , clock_(&clock)
+        , cloudCover_(world.GetInitialState().weather.cloudCover)
     {
         // One state per cell, in the world's order, so a consumer can iterate `Cells()` beside any
         // other per-cell array the world produced without a lookup.
         const std::span<const world::Cell> worldCells = world.Cells();
         cells_.reserve(worldCells.size());
+        outdoorCells_.reserve(worldCells.size());
+        daylightLevels_.resize(worldCells.size());
         cellGroups_.reserve(worldCells.size());
         cellIndex_.reserve(worldCells.size());
         for (const world::Cell& cell : worldCells)
@@ -24,6 +36,10 @@ namespace cnahouse::lighting
             RoomLightState state;
             state.cell = cell.id;
             cells_.push_back(state);
+            // `CellKind::Exterior` alone includes the enclosed shed; `VisibilityHint::Open` alone
+            // includes indoor stair wells. Together they are the 17 sky-open outdoor cells.
+            outdoorCells_.push_back(cell.kind == world::CellKind::Exterior &&
+                                    cell.visibilityHint == world::VisibilityHint::Open);
         }
 
         // The groups come from the LIGHTS: a group's default state is a property of its fixtures,
@@ -80,8 +96,18 @@ namespace cnahouse::lighting
     void LightingSystem::Update(const app::FrameContext& frame)
     {
         computedForFrame_ = frame.frameIndex;
+        sun_ = environment::SunPositionFor(*clock_);
+        const environment::SunShading shading = environment::SunShadingFor(sun_, cloudCover_);
+        sunKey_.direction = environment::SunDirection(sun_);
+        sunKey_.diffuseColor = Microsoft::Xna::Framework::Vector3(shading.color.X * shading.directIntensity,
+                                                                  shading.color.Y * shading.directIntensity,
+                                                                  shading.color.Z * shading.directIntensity);
+        sunComputed_ = true;
+
+        daylight_.Evaluate(sun_.altitudeDeg, sun_.azimuthDeg, cloudCover_, daylightLevels_);
         for (std::size_t index = 0; index < cells_.size(); ++index)
         {
+            cells_[index].daylight = daylightLevels_[index];
             const CellGroups& packed = cellGroups_[index];
             float lit = 0.0F;
             for (std::size_t offset = 0; offset < packed.count; ++offset)
@@ -170,6 +196,28 @@ namespace cnahouse::lighting
     {
         const auto found = groupIndex_.find(group.Value());
         return found == groupIndex_.end() ? 0.0F : groupLumens_[found->second];
+    }
+
+    bool LightingSystem::SetCloudCover(float cloudCover) noexcept
+    {
+        if (!std::isfinite(cloudCover))
+        {
+            return false;
+        }
+        cloudCover_ = std::clamp(cloudCover, 0.0F, 1.0F);
+        return true;
+    }
+
+    const SunKeyLight* LightingSystem::SunKeyForCell(util::Id cell) const noexcept
+    {
+        const auto found = cellIndex_.find(cell.Value());
+        if (found == cellIndex_.end() || !sunComputed_ ||
+            sun_.altitudeDeg < environment::kRefractedHorizonDeg)
+        {
+            return nullptr;
+        }
+        const std::size_t index = found->second;
+        return outdoorCells_[index] || cells_[index].DaylightIsKey() ? &sunKey_ : nullptr;
     }
 
 } // namespace cnahouse::lighting

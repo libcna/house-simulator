@@ -20,7 +20,11 @@
 #include <gtest/gtest.h>
 
 #include "cnahouse/app/FrameTimer.hpp"
+#include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/environment/SunLight.hpp"
+#include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/lighting/LightingSystem.hpp"
+#include "cnahouse/lighting/ShadingGrid.hpp"
 #include "cnahouse/world/WorldData.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
 
@@ -31,6 +35,8 @@ namespace
     using cnahouse::lighting::kDaylightKeyThreshold;
     using cnahouse::lighting::LightingSystem;
     using cnahouse::lighting::RoomLightState;
+    using cnahouse::lighting::ShadingGrid;
+    using cnahouse::lighting::SunKeyLight;
     using cnahouse::lighting::SwitchGroupState;
     using cnahouse::util::Id;
     namespace world = cnahouse::world;
@@ -46,11 +52,28 @@ namespace
         EXPECT_TRUE(world::WorldLoader::LoadLevels("content/world", contents).HasValue());
         EXPECT_TRUE(world::WorldLoader::LoadCells("content/world", contents).HasValue());
         EXPECT_TRUE(world::WorldLoader::LoadPortals("content/world", contents).HasValue());
+        EXPECT_TRUE(world::WorldLoader::LoadOpenings("content/world", contents).HasValue());
         EXPECT_TRUE(world::WorldLoader::LoadLights("content/world", contents).HasValue());
+        EXPECT_TRUE(world::WorldLoader::LoadInteractables("content/world", contents).HasValue());
+        EXPECT_TRUE(world::WorldLoader::LoadInitialState("content/world", contents).HasValue());
         auto built = world::WorldData::Create(std::move(contents));
         EXPECT_TRUE(built) << built.Error().ToString();
         return std::move(built.Value());
     }
+
+    ShadingGrid LoadShading()
+    {
+        auto grid = ShadingGrid::ReadFromTitle("content/world/shading.bin");
+        return grid ? std::move(grid.Value()) : ShadingGrid::Unshaded();
+    }
+
+    struct HouseLighting
+    {
+        world::WorldData world = LoadWorld();
+        ShadingGrid shading = LoadShading();
+        cnahouse::environment::SimClock clock;
+        LightingSystem lighting{world, shading, clock};
+    };
 
     FrameContext Frame(std::uint64_t index)
     {
@@ -69,8 +92,9 @@ TEST(LightingSystemTests, EveryGroupTheLightsNameGetsAState)
     {
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
-    const world::WorldData world = LoadWorld();
-    const LightingSystem lighting(world);
+    HouseLighting house;
+    const world::WorldData& world = house.world;
+    const LightingSystem& lighting = house.lighting;
 
     // Every light's group has a state, and no state was invented for a group no light belongs to.
     std::vector<std::uint32_t> fromLights;
@@ -103,8 +127,9 @@ TEST(LightingSystemTests, TheHouseStartsWithEveryLightOffBecauseThatIsWhatTheDat
     }
     // `layout.lights.json` says so in terms: *"a house with every light burning is not it"*. This
     // asserts the system READ that rather than defaulting to it, by checking against the data.
-    const world::WorldData world = LoadWorld();
-    LightingSystem lighting(world);
+    HouseLighting house;
+    const world::WorldData& world = house.world;
+    LightingSystem& lighting = house.lighting;
     lighting.Update(Frame(1));
 
     for (const world::Light& light : world.Lights())
@@ -130,8 +155,8 @@ TEST(LightingSystemTests, TurningOnEveryGroupInARoomLightsItExactlyFully)
     {
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
-    const world::WorldData world = LoadWorld();
-    LightingSystem lighting(world);
+    HouseLighting house;
+    LightingSystem& lighting = house.lighting;
     for (const SwitchGroupState& group : lighting.Groups())
     {
         EXPECT_TRUE(lighting.SetGroupOn(group.group, true));
@@ -167,8 +192,9 @@ TEST(LightingSystemTests, ARoomsLevelIsWeightedByLumensAndNotByFixtureCount)
     // The one arithmetic decision in this task. Find a cell with two groups of genuinely different
     // size and assert that the BIGGER one moves the room further -- which a mean over groups would
     // not do, and which is the whole reason a kitchen's cabinet strip is not a fifth of its light.
-    const world::WorldData world = LoadWorld();
-    LightingSystem lighting(world);
+    HouseLighting house;
+    const world::WorldData& world = house.world;
+    LightingSystem& lighting = house.lighting;
 
     bool found = false;
     for (const world::Cell& cell : world.Cells())
@@ -229,8 +255,8 @@ TEST(LightingSystemTests, ADimmerScalesTheGroupAndIsRefusedWhenItIsNotANumber)
     {
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
-    const world::WorldData world = LoadWorld();
-    LightingSystem lighting(world);
+    HouseLighting house;
+    LightingSystem& lighting = house.lighting;
     ASSERT_FALSE(lighting.Groups().empty());
     const Id group = lighting.Groups().front().group;
 
@@ -261,8 +287,8 @@ TEST(LightingSystemTests, AnUnknownGroupOrCellIsReportedRatherThanInvented)
     {
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
-    const world::WorldData world = LoadWorld();
-    LightingSystem lighting(world);
+    HouseLighting house;
+    LightingSystem& lighting = house.lighting;
     const Id nonsense = Id::Of("LG_THERE_IS_NO_SUCH_GROUP");
     EXPECT_FALSE(lighting.SetGroupOn(nonsense, true));
     EXPECT_FALSE(lighting.SetGroupDimmer(nonsense, 0.5F));
@@ -281,8 +307,9 @@ TEST(LightingSystemTests, AGroupOnlyLightsTheCellsThatListIt)
     // §23.3 draws one additive pass per group per cell, so `GroupLevelInCell` is what picks the
     // pass. A group that reported a level in a room it does not light would put a kitchen's light
     // on a bedroom wall.
-    const world::WorldData world = LoadWorld();
-    LightingSystem lighting(world);
+    HouseLighting house;
+    const world::WorldData& world = house.world;
+    LightingSystem& lighting = house.lighting;
     for (const SwitchGroupState& group : lighting.Groups())
     {
         lighting.SetGroupOn(group.group, true);
@@ -319,8 +346,8 @@ TEST(LightingSystemTests, TheFrameIndexIsPublishedSoAConsumerCanTellItIsReadingT
     }
     // The same guard `VisibilitySystem` carries, for the same reason: a stage accidentally ordered
     // before `UpdateStage::Lighting` reads last frame's levels and nothing else would say so.
-    const world::WorldData world = LoadWorld();
-    LightingSystem lighting(world);
+    HouseLighting house;
+    LightingSystem& lighting = house.lighting;
     EXPECT_EQ(lighting.ComputedForFrame(), 0U);
     lighting.Update(Frame(17));
     EXPECT_EQ(lighting.ComputedForFrame(), 17U);
@@ -374,23 +401,120 @@ TEST(LightingSystemTests, DaylightIsKeyOnlyAboveSectionTwentyEightsThreshold)
     EXPECT_TRUE(state.DaylightIsKey());
 }
 
-TEST(LightingSystemTests, TheDaylightAndBorrowedFieldsAreZeroAndThatIsDeliberate)
+TEST(LightingSystemTests, TheFramePublishesTheSunAndTheDaylightModelInWorldCellOrder)
 {
     if (!ContentIsBuilt())
     {
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
-    // **This test exists to be deleted.** `HOUSE-01251` is the skeleton: `daylight` is
-    // `HOUSE-01263`'s and `borrowed` is `HOUSE-01265`'s, and both are left at zero rather than
-    // given a plausible number nothing computed. Asserting the zero is what stops "the daylight
-    // model is not written yet" from being indistinguishable from "the daylight model is broken",
-    // and it will fail the day either one lands -- which is the point.
-    const world::WorldData world = LoadWorld();
-    LightingSystem lighting(world);
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    cnahouse::environment::CivilTime noon;
+    noon.year = 2031;
+    noon.month = 6;
+    noon.day = 21;
+    noon.hour = 12;
+    house.clock.SetStandard(noon);
+
+    LightingSystem& lighting = house.lighting;
     lighting.Update(Frame(6));
-    for (const RoomLightState& cell : lighting.Cells())
+    const auto expectedSun = cnahouse::environment::SunPositionFor(house.clock);
+    EXPECT_NEAR(lighting.Sun().altitudeDeg, expectedSun.altitudeDeg, 1e-10);
+    EXPECT_NEAR(lighting.Sun().azimuthDeg, expectedSun.azimuthDeg, 1e-10);
+
+    const cnahouse::lighting::DaylightModel oracle(house.world, house.shading);
+    std::vector<float> expected(house.world.Cells().size());
+    oracle.Evaluate(expectedSun.altitudeDeg, expectedSun.azimuthDeg, lighting.CloudCover(), expected);
+    int lit = 0;
+    for (std::size_t index = 0; index < lighting.Cells().size(); ++index)
     {
-        EXPECT_FLOAT_EQ(cell.daylight, 0.0F) << "HOUSE-01263 has landed; delete this test";
-        EXPECT_FLOAT_EQ(cell.borrowed, 0.0F) << "HOUSE-01265 has landed; delete this test";
+        const RoomLightState& cell = lighting.Cells()[index];
+        EXPECT_FLOAT_EQ(cell.daylight, expected[index]) << house.world.Cells()[index].name;
+        EXPECT_FLOAT_EQ(cell.borrowed, 0.0F) << "HOUSE-01265 has not landed";
+        lit += cell.daylight > 0.0F ? 1 : 0;
     }
+    EXPECT_GT(lit, 25) << "the wired system left the June-noon house dark";
+}
+
+TEST(LightingSystemTests, TheSunIsDirectionalLightZeroOutdoorsAndAboveTheIndoorThreshold)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    cnahouse::environment::CivilTime noon;
+    noon.year = 2031;
+    noon.month = 6;
+    noon.day = 21;
+    noon.hour = 12;
+    house.clock.SetStandard(noon);
+    house.lighting.Update(Frame(7));
+
+    Id outdoors;
+    Id daylitRoom;
+    Id darkRoom;
+    for (const world::Cell& cell : house.world.Cells())
+    {
+        if (cell.kind == world::CellKind::Exterior && cell.visibilityHint == world::VisibilityHint::Open)
+        {
+            outdoors = cell.id;
+        }
+        const RoomLightState* state = house.lighting.FindCell(cell.id);
+        ASSERT_NE(state, nullptr);
+        if (cell.kind != world::CellKind::Exterior && state->DaylightIsKey())
+        {
+            daylitRoom = cell.id;
+        }
+        if (cell.kind != world::CellKind::Exterior && state->daylight == 0.0F)
+        {
+            darkRoom = cell.id;
+        }
+    }
+    ASSERT_TRUE(outdoors.IsValid());
+    ASSERT_TRUE(daylitRoom.IsValid());
+    ASSERT_TRUE(darkRoom.IsValid());
+
+    const SunKeyLight* outdoorKey = house.lighting.SunKeyForCell(outdoors);
+    const SunKeyLight* indoorKey = house.lighting.SunKeyForCell(daylitRoom);
+    ASSERT_NE(outdoorKey, nullptr);
+    ASSERT_NE(indoorKey, nullptr);
+    EXPECT_EQ(house.lighting.SunKeyForCell(darkRoom), nullptr);
+    EXPECT_EQ(house.lighting.SunKeyForCell(Id::Of("NO_SUCH_CELL")), nullptr);
+
+    const auto direction = cnahouse::environment::SunDirection(house.lighting.Sun());
+    const auto shading =
+        cnahouse::environment::SunShadingFor(house.lighting.Sun(), house.lighting.CloudCover());
+    EXPECT_NEAR(outdoorKey->direction.X, direction.X, 1e-6F);
+    EXPECT_NEAR(outdoorKey->direction.Y, direction.Y, 1e-6F);
+    EXPECT_NEAR(outdoorKey->direction.Z, direction.Z, 1e-6F);
+    EXPECT_NEAR(outdoorKey->diffuseColor.X, shading.color.X * shading.directIntensity, 1e-6F);
+    EXPECT_NEAR(outdoorKey->diffuseColor.Y, shading.color.Y * shading.directIntensity, 1e-6F);
+    EXPECT_NEAR(outdoorKey->diffuseColor.Z, shading.color.Z * shading.directIntensity, 1e-6F);
+
+    cnahouse::environment::CivilTime midnight = noon;
+    midnight.hour = 0;
+    house.clock.SetStandard(midnight);
+    house.lighting.Update(Frame(8));
+    EXPECT_LT(house.lighting.Sun().altitudeDeg, cnahouse::environment::kRefractedHorizonDeg);
+    EXPECT_EQ(house.lighting.SunKeyForCell(outdoors), nullptr) << "the sun is below the horizon";
+}
+
+TEST(LightingSystemTests, CloudCoverIsContinuousClampedAndCannotBecomeNotANumber)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    EXPECT_FLOAT_EQ(house.lighting.CloudCover(), house.world.GetInitialState().weather.cloudCover)
+        << "initialstate.json did not reach the lighting system";
+    EXPECT_TRUE(house.lighting.SetCloudCover(2.0F));
+    EXPECT_FLOAT_EQ(house.lighting.CloudCover(), 1.0F);
+    EXPECT_TRUE(house.lighting.SetCloudCover(-1.0F));
+    EXPECT_FLOAT_EQ(house.lighting.CloudCover(), 0.0F);
+    EXPECT_TRUE(house.lighting.SetCloudCover(0.4F));
+    EXPECT_FALSE(house.lighting.SetCloudCover(std::nanf("")));
+    EXPECT_FLOAT_EQ(house.lighting.CloudCover(), 0.4F) << "the refused NaN was applied";
 }

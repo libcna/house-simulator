@@ -122,11 +122,11 @@ fonts          python3 tools/ci/check_fonts.py
 layout         python3 tools/ci/check_layout.py
 manifest       python3 tools/ci/check_manifest.py
 licences       python3 tools/assets/verify_licences.py --check
-cnb-audio      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Audio -o content/Audio --quiet
-cnb-fonts      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Fonts -o content/Fonts --quiet
-cnb-media      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Media -o content --quiet
-cnb-models     /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Models -o content/Models --quiet
-cnb-textures   /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/Textures -o content/Textures --quiet
+cnb-audio      /rv/data/development/github.com/libcna/house-simulator/build/CNA_BUILD/cna-content build assets-src/Audio -o content/Audio --quiet
+cnb-fonts      /rv/data/development/github.com/libcna/house-simulator/build/CNA_BUILD/cna-content build assets-src/Fonts -o content/Fonts --quiet
+cnb-media      /rv/data/development/github.com/libcna/house-simulator/build/CNA_BUILD/cna-content build assets-src/Media -o content --quiet
+cnb-models     /rv/data/development/github.com/libcna/house-simulator/build/CNA_BUILD/cna-content build assets-src/Models -o content/Models --quiet
+cnb-textures   /rv/data/development/github.com/libcna/house-simulator/build/CNA_BUILD/cna-content build assets-src/Textures -o content/Textures --quiet
 world-rules    python3 tools/world/validate_world.py assets-src/world
 collision      python3 tools/world/build_collision.py
 fence          python3 tools/world/fence_gen.py
@@ -135,7 +135,7 @@ road           python3 tools/world/terrain_gen.py --road
 terrain-tiles  python3 tools/world/terrain_gen.py --tiles
 world-deploy   python3 tools/world/deploy_world.py
 chunks         python3 tools/world/build_chunks.py
-cnb-world      /rv/data/development/github.com/openeggbert/cna-house/build/CNA_BUILD/cna-content build assets-src/world -o content/world --quiet
+cnb-world      /rv/data/development/github.com/libcna/house-simulator/build/CNA_BUILD/cna-content build assets-src/world -o content/world --quiet
 coverage       python3 tools/world/build_coverage.py
 nav            python3 tools/world/build_nav.py
 neighbourhood-bin python3 tools/world/build_neighbourhood.py

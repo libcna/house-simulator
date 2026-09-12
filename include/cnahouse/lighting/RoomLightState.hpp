@@ -39,8 +39,8 @@ namespace cnahouse::lighting
         /// not a fifth of the room each, and a mean over groups would say they were.
         float artificial = 0.0F;
 
-        /// @brief §28.4's daylight, `[0, 1]`. **`HOUSE-01263` computes this**; the skeleton leaves
-        ///        it at zero, which is a house at night rather than a house with a bug.
+        /// @brief §28.4's daylight, `[0, 1]`. `DaylightModel` computes it and `HOUSE-01564` copies
+        ///        the result here in world-cell order on every lighting update.
         float daylight = 0.0F;
 
         /// @brief §28.4's 2-hop flood through open portals. `HOUSE-01265` computes this.

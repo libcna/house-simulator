@@ -334,10 +334,13 @@ namespace cnahouse::app
         const auto levels = world::WorldLoader::LoadLevels("content/world", contents);
         const auto cells = world::WorldLoader::LoadCells("content/world", contents);
         const auto portals = world::WorldLoader::LoadPortals("content/world", contents);
+        const auto openings = world::WorldLoader::LoadOpenings("content/world", contents);
+        const auto interactables = world::WorldLoader::LoadInteractables("content/world", contents);
+        const auto initialState = world::WorldLoader::LoadInitialState("content/world", contents);
         // §28's fixtures, for `LightingSystem` (`HOUSE-01251`). 243 rows; the loader is the same
         // one the tests use, so a lights file that would fail CI fails here too.
         const auto lights = world::WorldLoader::LoadLights("content/world", contents);
-        if (!levels || !cells || !portals || !lights)
+        if (!levels || !cells || !portals || !openings || !interactables || !initialState || !lights)
         {
             Log::Error(LogCat::Content,
                        "--scene=walk: the world did not load; drawing from the fixed camera");
@@ -419,9 +422,23 @@ namespace cnahouse::app
         // reports it; what the draw list is built from is a separate decision and
         // `BuildRenderList` is the one place that makes it.
         visibility_.emplace(*world_);
-        // §28.1's per-room state, at `UpdateStage::Lighting` (`HOUSE-01251`). Built once over the
-        // world's cells and the fixtures' switch groups; nothing it does allocates after this.
-        lighting_.emplace(*world_);
+        auto shading = lighting::ShadingGrid::ReadFromTitle("content/world/shading.bin");
+        if (shading)
+        {
+            shading_ = std::move(shading.Value());
+        }
+        else
+        {
+            // A checkout without Blender can still run in the house. The fallback is deliberately
+            // bright (unoccluded), so a missing bake is visible and never mistaken for night.
+            shading_ = lighting::ShadingGrid::Unshaded();
+            Log::Warn(LogCat::Content,
+                      "--scene=walk: {}; daylight uses unshaded windows",
+                      shading.Error().ToString());
+        }
+        // §28.1 and §32.2, at `UpdateStage::Lighting` (`HOUSE-01251`, `HOUSE-01564`). Built once
+        // over the cells, fixtures and windows; every frame reads the one simulation clock.
+        lighting_.emplace(*world_, shading_, clock_);
         if (blockoutChunks_ != nullptr)
         {
             // With the world, so §12's nested cells are drawn with the room they stand in

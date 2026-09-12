@@ -12951,11 +12951,12 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             and §30 has a row about a player watching exactly that. The strongest source sets the
             level and the rest lift what is left towards 1, so it is monotone in every source,
             never exceeds 1, and is exactly `kAmbientFloor` when nothing is lit.
-      note: **`daylight` and `borrowed` are left at ZERO and a test asserts they are.**
-            `HOUSE-01263` and `HOUSE-01265` own them. A plausible number nothing computed would
-            make *"the daylight model is not written yet"* indistinguishable from *"the daylight
-            model is broken"*; the test says which, names the task, and is written to be deleted by
-            whichever one lands first.
+      note: **At this task's completion, `daylight` and `borrowed` were left at ZERO and a test
+            asserted they were.** `HOUSE-01564` has since replaced that assertion with the wired
+            daylight result; `borrowed` remains zero for `HOUSE-01265`. A plausible number nothing
+            computed would have made *"the daylight model is not written yet"* indistinguishable
+            from *"the daylight model is broken"*; the temporary assertion made the hand-off
+            explicit and failed as intended when the integration landed.
       note: it is **wired into the frame**, not left dormant: `CnaHouseGame` loads
             `layout.lights.json`, builds the system with the world and runs it at
             `UpdateStage::Lighting` -- ahead of visibility, because §23.3 picks a cell's additive
@@ -14008,8 +14009,44 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       measured: the steepest part of §32.2's table is −0.83° to +2° (intensity 0.10 → 0.35 in
             2.83°), which is **0.0221 of full intensity per quarter-degree** of altitude. That
             bounds what a frame can jump by and is the number the continuity test asserts against.
-- [ ] HOUSE-01564 — Wire the sun into `LightingSystem`: it becomes `DirectionalLight0` for outdoor objects and drives `daylight`
+- [x] HOUSE-01564 — Wire the sun into `LightingSystem`: it becomes `DirectionalLight0` for outdoor objects and drives `daylight`
       dep: HOUSE-01563, HOUSE-01263 · sys: lighting · plat: ALL · pri: MUST
+      verify: unit `LightingSystemTests.*` (13); integration
+              `HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight`; full unit and
+              integration suites; `tools/ci/run_checks.sh`
+      note: (2026-09-12) `LightingSystem` now borrows §35's one `SimClock`, owns the
+            `DaylightModel`, reads `initialstate.json`'s cloud cover, and evaluates all 96 cells in
+            world order on every lighting update. The walk scene loads the missing openings,
+            interactables and initial state, reads the 21 044-byte `shading.bin`, and keeps an
+            explicit unshaded fallback for a checkout whose content was built without Blender.
+            The grid is owned beside the system and declared before it: `DaylightModel` retains a
+            pointer to the grid, so the reverse destruction order is part of the implementation.
+      decision: **the value published for XNA is already intensity-folded.** XNA's
+            `DirectionalLight` carries `Direction`, `DiffuseColor` and `SpecularColor` but no
+            separate intensity. `SunKeyLight::diffuseColor` is therefore §32.2's LUT colour times
+            its cloud-attenuated direct intensity, exactly once; its direction is the direction
+            the beam travels. `SunKeyForCell` selects it for the 17 sky-open exterior cells while
+            the sun is above the refracted horizon, and indoors at §28.5's 0.15 daylight threshold.
+      boundary: this task publishes the exact value and source selection for `DirectionalLight0`.
+            `HOUSE-01261` remains the task that walks future dynamic draws and copies key, fill and
+            bounce into each `BasicEffect`/`SkinnedEffect`; no dynamic house-object pass exists yet,
+            and pulling that dependency backward would falsely complete `HOUSE-01261` here.
+      measured: at 2031-06-21 12:00 standard with the authored 0.35 cloud cover, **36 cells** have
+            non-zero direct daylight; the values match a separately evaluated `DaylightModel`
+            entry-for-entry. The running walk test sets noon through the public `time set` command,
+            observes all 96 states after the lighting stage, and sees the sun key for `EXT_WORLD`.
+            The actual fresh-game instant is before sunrise (measured altitude **−1.756°**), so the
+            test does not pretend it is daylight merely to make an assertion pass.
+      qualified: **1 197 / 1 197 unit and 95 / 95 integration tests**, the latter under
+            `SDL_VIDEODRIVER=x11` plus Xvfb so SDL reads the isolated pointer rather than the host's
+            Wayland pointer. `run_checks.sh` is green except that its direct layout invocation sees
+            the agent runtime's read-only `.agents` and `.codex` mount points as two root entries.
+            The same checker over a hard-linked tracked-file mirror with those external mounts
+            absent is clean; neither mount is a repository file or appears in `git status`.
+      verified: three injected disconnects, all CAUGHT -- zeroing the copied daylight, removing
+            the outdoor special case from `SunKeyForCell`, and clearing the openings after the walk
+            loader read them. The last one leaves a valid 96-cell world and exactly zero daylit
+            cells, which is the quiet integration failure the headless test exists to catch.
 - [ ] HOUSE-01565 — Make the sun-patch decals follow the real sun by interpolating the 12 × 24 grid
       dep: HOUSE-01564, HOUSE-01268 · sys: rendering · plat: ALL · pri: MUST
       accept: a patch visibly crosses a bedroom floor over a simulated afternoon

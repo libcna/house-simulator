@@ -7,9 +7,18 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Microsoft/Xna/Framework/Vector3.hpp"
+
 #include "cnahouse/app/ISystem.hpp"
+#include "cnahouse/environment/SunLight.hpp"
+#include "cnahouse/lighting/DaylightModel.hpp"
 #include "cnahouse/lighting/RoomLightState.hpp"
 #include "cnahouse/util/Ids.hpp"
+
+namespace cnahouse::environment
+{
+    struct SimClock;
+}
 
 namespace cnahouse::world
 {
@@ -19,6 +28,18 @@ namespace cnahouse::world
 namespace cnahouse::lighting
 {
 
+    /// @brief The sun values copied into XNA's `DirectionalLight0` for an eligible object.
+    ///
+    /// XNA has no separate intensity parameter: the LUT colour is multiplied by the direct-beam
+    /// intensity here, once, and the consumer writes @c diffuseColor to `DiffuseColor`. Keeping
+    /// this value-shaped also makes `HOUSE-01261`'s later per-object assignment independent of an
+    /// effect instance.
+    struct SunKeyLight
+    {
+        Microsoft::Xna::Framework::Vector3 direction{0.0F, -1.0F, 0.0F};
+        Microsoft::Xna::Framework::Vector3 diffuseColor{0.0F, 0.0F, 0.0F};
+    };
+
     /// @brief §28.1's per-frame loop, at `UpdateStage::Lighting` (`HOUSE-01251`).
     ///
     /// **One state per cell, recomputed from the switch groups, and everything downstream reads
@@ -27,11 +48,10 @@ namespace cnahouse::lighting
     /// behaviour all read a room's level, and if any of them recomputed it they could disagree
     /// within one frame about how bright a room is.
     ///
-    /// This is §28.1's loop with two of its four lines filled in — `artificial` from the switch
-    /// groups, and the combination in `RoomLightState::Level`. `daylight` is `HOUSE-01263`'s,
-    /// `borrowed` is `HOUSE-01265`'s and `ambientColor` needs `HOUSE-01255`'s Planckian
-    /// conversion; each is a **field left at zero and named**, never a plausible number nothing
-    /// computed.
+    /// This is §28.1's loop with `artificial` from the switch groups and `daylight` from
+    /// `DaylightModel`. `borrowed` is `HOUSE-01265`'s and `ambientColor` needs `HOUSE-01255`'s
+    /// Planckian conversion; each remains a **field left at zero and named**, never a plausible
+    /// number nothing computed.
     ///
     /// **Nothing here allocates after `Build`.** The cells and the groups are fixed for the
     /// session — §15's data is const once loaded — so the states, the group table and the index
@@ -39,12 +59,15 @@ namespace cnahouse::lighting
     class LightingSystem final : public app::ISystem
     {
     public:
-        /// @brief Takes the world: one `RoomLightState` per cell, one `SwitchGroupState` per group.
+        /// @brief Takes the world, baked window shading and §35's one simulation clock.
         ///
-        /// The world outlives the system. Groups are discovered from the LIGHTS and not from the
+        /// All three outlive the system. Groups are discovered from the LIGHTS and not from the
         /// cells' `lightGroups` lists, because a group's default state is a property of its
-        /// fixtures; the cell lists say which groups light which room and are read for that.
-        explicit LightingSystem(const world::WorldData& world);
+        /// fixtures; the cell lists say which groups light which room and are read for that. The
+        /// starting cloud cover comes from the world's `initialstate.json`.
+        LightingSystem(const world::WorldData& world,
+                       const ShadingGrid& shading,
+                       const environment::SimClock& clock);
 
         [[nodiscard]] app::UpdateStage Stage() const noexcept override
         {
@@ -98,6 +121,29 @@ namespace cnahouse::lighting
         /// @brief Total luminous flux of a group's fixtures, in lumens. The weight in `artificial`.
         [[nodiscard]] float GroupLumens(util::Id group) const noexcept;
 
+        /// @brief Change the continuous weather input used by both daylight and the direct beam.
+        ///
+        /// Clamped to `[0, 1]`; a non-finite value is refused rather than poisoning every room.
+        bool SetCloudCover(float cloudCover) noexcept;
+
+        [[nodiscard]] float CloudCover() const noexcept
+        {
+            return cloudCover_;
+        }
+
+        /// @brief The current solar position, recomputed from §35's clock by every `Update`.
+        [[nodiscard]] const environment::SunPosition& Sun() const noexcept
+        {
+            return sun_;
+        }
+
+        /// @brief The shared `DirectionalLight0` values, or null when the cell should use a bulb.
+        ///
+        /// Outdoors takes the sun whenever it is above the refracted horizon. Indoors takes it
+        /// only when §28.5's daylight threshold is met. Unknown cells and night return null;
+        /// `HOUSE-01261` supplies the fixture key/fill/bounce alternatives later.
+        [[nodiscard]] const SunKeyLight* SunKeyForCell(util::Id cell) const noexcept;
+
     private:
         struct CellGroups
         {
@@ -117,6 +163,14 @@ namespace cnahouse::lighting
         std::vector<CellGroups> cellGroups_;
         std::unordered_map<std::uint32_t, std::size_t> cellIndex_;
         std::unordered_map<std::uint32_t, std::size_t> groupIndex_;
+        std::vector<bool> outdoorCells_;
+        std::vector<float> daylightLevels_;
+        DaylightModel daylight_;
+        const environment::SimClock* clock_ = nullptr;
+        environment::SunPosition sun_;
+        SunKeyLight sunKey_;
+        float cloudCover_ = 0.0F;
+        bool sunComputed_ = false;
         std::uint64_t computedForFrame_ = 0;
     };
 
