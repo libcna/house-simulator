@@ -14009,11 +14009,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             its own field merely *entered* the schema in v5. Schema v6 legitimately disproved that
             assertion; it now requires current version >=5 while retaining the v4-to-v5 migration,
             round-trip and clamping checks. The repaired full suite is green.
-- [ ] HOUSE-01547 — Test: one uninterrupted 365-real-minute run passes through all four seasons exactly once, starting and ending in spring
+- [x] HOUSE-01547 — Test: one uninterrupted 365-real-minute run passes through all four seasons exactly once, starting and ending in spring
       dep: HOUSE-01546 · sys: ci · plat: CI · pri: MUST
       accept: run headless with the clock driven at a large `timeScale`; assert the season sequence,
               that `blend` never jumps, and that the temperature curve is continuous throughout
       verify: integration SeasonCycleTests.FullYear
+      verify-result: `SeasonCycleTests.FullYear` passes with `DISPLAY` explicitly unset. It drives
+            the production `SimClock` at 60x diurnal time and §35.2b's 24x calendar compression,
+            sampling every virtual real second: 21,915 updates traverse
+            Spring/Summer/Autumn/Winter/Spring exactly once. The largest observed blend step is
+            0.000456 and the largest live outdoor-temperature step is 0.029616 °C.
+      correction: one exact `kMeanYearDays` seasonal turn takes **365.2425 real minutes** at one
+            calendar day per real minute, not the task title's rounded 365. After exactly 365 the
+            clock is correctly still on the Winter/Spring approach; another 14.55 real seconds
+            reaches year fraction zero and primary Spring. The permanent task title stays intact,
+            while the test uses the model's exact duration so its start/end criterion is honest.
+      mutation: forcing the opening side of every seasonal boundary to blend zero made this test
+            fail on a 0.499875 jump (limit 0.001). Adding a 1 °C step at calendar day 200 made it
+            fail on a 1.022704 °C temperature step (limit 0.05). Both production mutations were
+            restored before the final green run.
 - [ ] HOUSE-01541 — Phase-22 review and commit
       dep: HOUSE-01531…HOUSE-01540, HOUSE-01542…HOUSE-01547 · sys: — · plat: ALL · pri: MUST
 
