@@ -687,7 +687,15 @@ namespace
               "clock":   { "epochSeconds": 21600.0, "timeScale": 60.0,
                            "latitudeDeg": 40.05, "longitudeDeg": -75.30,
                            "utcOffsetMinutes": -300 },
-              "weather": { "target": "W_PARTLY", "cloudCover": 0.35, "windSpeed": 2.4 },
+              "weather": { "target": "W_PARTLY", "cloudCover": 0.35,
+                           "cloudCumuliform": 0.9, "precipType": "Rain",
+                           "precipIntensity": 0.2, "windSpeed": 2.4,
+                           "windDirectionDeg": 225.0, "gustFactor": 0.28,
+                           "fogDensity": 0.03, "thunderIntensity": 0.1,
+                           "temperatureC": 21.5, "humidity": 0.55,
+                           "surfaceWetness": 0.4, "snowDepth": 0.12,
+                           "targetExpiryMinutes": 140.0,
+                           "rngState": "0x5EEDC0DEC0FFEE01" },
               "interactables": { "FRIDGE_L0_KITCHEN": { "temperatureC": 2.5 } },
               "pets":    { "PET_DOG": { "cell": "L0_FAMILY", "state": "Lie" } }
             })";
@@ -3030,7 +3038,22 @@ namespace
         EXPECT_EQ(contents.initialState.clock.utcOffsetMinutes, -300);
 
         EXPECT_EQ(contents.initialState.weather.target, Intern("W_PARTLY"));
-        EXPECT_FLOAT_EQ(contents.initialState.weather.cloudCover, 0.35F);
+        const auto& weather = contents.initialState.weather;
+        EXPECT_FLOAT_EQ(weather.state.cloudCover, 0.35F);
+        EXPECT_FLOAT_EQ(weather.state.cloudCumuliform, 0.9F);
+        EXPECT_EQ(weather.state.precipType, cnahouse::weather::PrecipType::Rain);
+        EXPECT_FLOAT_EQ(weather.state.precipIntensity, 0.2F);
+        EXPECT_FLOAT_EQ(weather.state.windSpeed, 2.4F);
+        EXPECT_FLOAT_EQ(weather.state.windDirectionDeg, 225.0F);
+        EXPECT_FLOAT_EQ(weather.state.gustFactor, 0.28F);
+        EXPECT_FLOAT_EQ(weather.state.fogDensity, 0.03F);
+        EXPECT_FLOAT_EQ(weather.state.thunderIntensity, 0.1F);
+        EXPECT_FLOAT_EQ(weather.state.temperatureC, 21.5F);
+        EXPECT_FLOAT_EQ(weather.state.humidity, 0.55F);
+        EXPECT_FLOAT_EQ(weather.state.surfaceWetness, 0.4F);
+        EXPECT_FLOAT_EQ(weather.state.snowDepth, 0.12F);
+        EXPECT_FLOAT_EQ(weather.targetExpiryMinutes, 140.0F);
+        EXPECT_EQ(weather.state.rngState, cnahouse::util::Rng(0x5EEDC0DEC0FFEE01ULL).GetState());
 
         ASSERT_EQ(contents.initialState.pets.size(), 1U);
         EXPECT_EQ(contents.initialState.pets[0].id, Intern("PET_DOG"));
@@ -3140,6 +3163,26 @@ namespace
         const auto initial = world::WorldLoader::LoadInitialState(directory_, contents);
         ASSERT_FALSE(initial);
         EXPECT_EQ(initial.Error().Code(), ErrorCode::OutOfRange);
+    }
+
+    TEST_F(WorldLoaderTest, AFreshWeatherSeedIsExactlyOneLosslessWord)
+    {
+        for (const std::string bad :
+             {"5EEDC0DEC0FFEE01", "0x5EEDC0DE", "0x5EEDC0DEC0FFEE0100", "0x5EEDC0DEC0FFEE0Z"})
+        {
+            std::string json = InitialState();
+            const std::string good = "0x5EEDC0DEC0FFEE01";
+            const auto at = json.find(good);
+            ASSERT_NE(at, std::string::npos);
+            json.replace(at, good.size(), bad);
+            Write("initialstate.json", json);
+
+            world::WorldData::Contents contents;
+            const auto initial = world::WorldLoader::LoadInitialState(directory_, contents);
+            ASSERT_FALSE(initial) << bad;
+            EXPECT_EQ(initial.Error().Context(), "initialstate.json/weather/rngState")
+                << initial.Error().ToString();
+        }
     }
 
     TEST_F(WorldLoaderTest, ThePlayerMustNameTheCellItStartsIn)
@@ -3667,6 +3710,24 @@ namespace
             << "2031-06-14T13:20:00Z, which is 09:20 local at UTC-4";
         EXPECT_EQ(contents.initialState.clock.utcOffsetMinutes, -240) << "June is inside US DST";
         EXPECT_FLOAT_EQ(contents.initialState.clock.timeScale, 60.0F);
+
+        const auto& weather = contents.initialState.weather;
+        EXPECT_EQ(weather.target, Intern("W_PARTLY"));
+        EXPECT_FLOAT_EQ(weather.state.cloudCover, 0.35F);
+        EXPECT_FLOAT_EQ(weather.state.cloudCumuliform, 0.9F);
+        EXPECT_EQ(weather.state.precipType, cnahouse::weather::PrecipType::None);
+        EXPECT_FLOAT_EQ(weather.state.precipIntensity, 0.0F);
+        EXPECT_FLOAT_EQ(weather.state.windSpeed, 3.2F);
+        EXPECT_FLOAT_EQ(weather.state.windDirectionDeg, 225.0F);
+        EXPECT_FLOAT_EQ(weather.state.gustFactor, 0.28F);
+        EXPECT_FLOAT_EQ(weather.state.fogDensity, 0.03F);
+        EXPECT_FLOAT_EQ(weather.state.thunderIntensity, 0.0F);
+        EXPECT_FLOAT_EQ(weather.state.temperatureC, 21.5F);
+        EXPECT_FLOAT_EQ(weather.state.humidity, 0.55F);
+        EXPECT_FLOAT_EQ(weather.state.surfaceWetness, 0.0F);
+        EXPECT_FLOAT_EQ(weather.state.snowDepth, 0.0F);
+        EXPECT_FLOAT_EQ(weather.targetExpiryMinutes, 140.0F);
+        EXPECT_EQ(weather.state.rngState, cnahouse::util::Rng(0x5EEDC0DEC0FFEE01ULL).GetState());
 
         IdRegistry::ResetForTesting();
     }

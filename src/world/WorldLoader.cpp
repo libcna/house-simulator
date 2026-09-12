@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <array>
+#include <charconv>
 #include <cmath>
 #include <cstddef>
 #include <optional>
@@ -4465,30 +4466,90 @@ namespace cnahouse::world
                 return target.Error().WithContext("initialstate.json");
             }
             initial.weather.target = target.Value();
-            const Result<float> cover = weather.Value().OptionalFloat("cloudCover", 0.0F);
-            if (!cover)
+            weather::WeatherState& state = initial.weather.state;
+            const auto readFloat = [&](std::string_view field, float& destination) -> Result<void>
             {
-                return cover.Error().WithContext("initialstate.json");
+                const Result<float> value = weather.Value().OptionalFloat(field, destination);
+                if (!value)
+                {
+                    return value.Error().WithContext("initialstate.json");
+                }
+                destination = value.Value();
+                return util::Ok();
+            };
+            for (const auto& [field, destination] :
+                 std::initializer_list<std::pair<std::string_view, float*>>{
+                     {"cloudCover", &state.cloudCover},
+                     {"cloudCumuliform", &state.cloudCumuliform},
+                     {"precipIntensity", &state.precipIntensity},
+                     {"windSpeed", &state.windSpeed},
+                     {"windDirectionDeg", &state.windDirectionDeg},
+                     {"gustFactor", &state.gustFactor},
+                     {"fogDensity", &state.fogDensity},
+                     {"thunderIntensity", &state.thunderIntensity},
+                     {"temperatureC", &state.temperatureC},
+                     {"humidity", &state.humidity},
+                     {"surfaceWetness", &state.surfaceWetness},
+                     {"snowDepth", &state.snowDepth}})
+            {
+                if (const Result<void> read = readFloat(field, *destination); !read)
+                {
+                    return read.Error();
+                }
             }
-            if (cover.Value() < 0.0F || cover.Value() > 1.0F)
+
+            const Result<std::string> precip = weather.Value().OptionalString(
+                "precipType", std::string(weather::PrecipTypeName(state.precipType)));
+            if (!precip)
+            {
+                return precip.Error().WithContext("initialstate.json");
+            }
+            const Result<weather::PrecipType> precipType =
+                weather::ParsePrecipType(precip.Value(), "initialstate.json/weather/precipType");
+            if (!precipType)
+            {
+                return precipType.Error();
+            }
+            state.precipType = precipType.Value();
+
+            const Result<float> expiry = weather.Value().OptionalFloat("targetExpiryMinutes", 0.0F);
+            if (!expiry)
+            {
+                return expiry.Error().WithContext("initialstate.json");
+            }
+            if (!std::isfinite(expiry.Value()) || expiry.Value() < 0.0F || expiry.Value() > 380.0F)
             {
                 return Err(ErrorCode::OutOfRange,
-                           "cloud cover is 0..1; this is " + std::to_string(cover.Value()),
-                           "initialstate.json/weather/cloudCover");
+                           "target expiry must be 0..380 simulated minutes",
+                           "initialstate.json/weather/targetExpiryMinutes");
             }
-            initial.weather.cloudCover = cover.Value();
-            const Result<float> wind = weather.Value().OptionalFloat("windSpeed", 0.0F);
-            if (!wind)
+            initial.weather.targetExpiryMinutes = expiry.Value();
+
+            const Result<std::string> seedText = weather.Value().OptionalString("rngState", "");
+            if (!seedText)
             {
-                return wind.Error().WithContext("initialstate.json");
+                return seedText.Error().WithContext("initialstate.json");
             }
-            if (wind.Value() < 0.0F)
+            if (!seedText.Value().empty())
             {
-                return Err(ErrorCode::OutOfRange,
-                           "a wind speed is not negative; this is " + std::to_string(wind.Value()),
-                           "initialstate.json/weather/windSpeed");
+                const std::string_view text = seedText.Value();
+                std::uint64_t seed = 0U;
+                const char* first = text.data() + (text.starts_with("0x") ? 2 : 0);
+                const char* last = text.data() + text.size();
+                const auto parsed = std::from_chars(first, last, seed, 16);
+                if (!text.starts_with("0x") || text.size() != 18U || parsed.ec != std::errc{} ||
+                    parsed.ptr != last)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "a fresh weather RNG seed is 0x followed by 16 hexadecimal digits",
+                               "initialstate.json/weather/rngState");
+                }
+                state.rngState = util::Rng(seed).GetState();
             }
-            initial.weather.windSpeed = wind.Value();
+            if (const Result<void> valid = state.Validate(); !valid)
+            {
+                return valid.Error().WithContext("initialstate.json/weather");
+            }
         }
 
         // The interactable block is the canonical state table's opening values. Each override is

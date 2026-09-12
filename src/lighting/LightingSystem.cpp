@@ -23,7 +23,7 @@ namespace cnahouse::lighting
         : daylight_(world, shading)
         , borrowed_(world, portals)
         , clock_(&clock)
-        , cloudCover_(world.GetInitialState().weather.cloudCover)
+        , cloudCover_(world.GetInitialState().weather.state.cloudCover)
     {
         // One state per cell, in the world's order, so a consumer can iterate `Cells()` beside any
         // other per-cell array the world produced without a lookup.

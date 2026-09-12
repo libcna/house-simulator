@@ -146,15 +146,71 @@
       "type": "string"
     },
     "weather": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "cloudCover": {
+          "$ref": "#/$defs/unit"
+        },
+        "cloudCumuliform": {
+          "$ref": "#/$defs/unit"
+        },
+        "fogDensity": {
+          "$ref": "#/$defs/unit"
+        },
+        "gustFactor": {
+          "$ref": "#/$defs/unit"
+        },
+        "humidity": {
+          "$ref": "#/$defs/unit"
+        },
+        "precipIntensity": {
+          "$ref": "#/$defs/unit"
+        },
+        "precipType": {
+          "enum": [
+            "None",
+            "Rain",
+            "Snow",
+            "Sleet",
+            "Hail"
+          ]
+        },
+        "rngState": {
+          "pattern": "^0x[0-9A-Fa-f]{16}$",
+          "type": "string"
+        },
+        "snowDepth": {
+          "maximum": 0.35,
+          "minimum": 0,
+          "type": "number"
+        },
+        "surfaceWetness": {
           "$ref": "#/$defs/unit"
         },
         "target": {
           "$ref": "#/$defs/id"
         },
+        "targetExpiryMinutes": {
+          "maximum": 380,
+          "minimum": 0,
+          "type": "number"
+        },
+        "temperatureC": {
+          "maximum": 38,
+          "minimum": -18,
+          "type": "number"
+        },
+        "thunderIntensity": {
+          "$ref": "#/$defs/unit"
+        },
+        "windDirectionDeg": {
+          "maximum": 360,
+          "minimum": 0,
+          "type": "number"
+        },
         "windSpeed": {
+          "maximum": 30,
+          "minimum": 0,
           "type": "number"
         }
       },

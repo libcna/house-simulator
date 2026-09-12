@@ -763,11 +763,21 @@ validated as strictly as the layout.
   "player":  { "cell": "L0_FOYER", "position": [0.0, 0.60, -18.4], "yawDeg": 0.0 },
   "clock":   { "epochSeconds": 21600.0, "timeScale": 60.0,
                "latitudeDeg": 40.05, "longitudeDeg": -75.30, "utcOffsetMinutes": -300 },
-  "weather": { "target": "W_PARTLY", "cloudCover": 0.35, "windSpeed": 2.4 },
+  "weather": { "target": "W_PARTLY", "cloudCover": 0.35, "cloudCumuliform": 0.9,
+               "precipType": "None", "precipIntensity": 0.0,
+               "windSpeed": 3.2, "windDirectionDeg": 225.0, "gustFactor": 0.28,
+               "fogDensity": 0.03, "thunderIntensity": 0.0,
+               "temperatureC": 21.5, "humidity": 0.55,
+               "surfaceWetness": 0.0, "snowDepth": 0.0,
+               "targetExpiryMinutes": 140.0, "rngState": "0x5EEDC0DEC0FFEE01" },
   "interactables": { "DOOR_L0_FRONT": { "openFraction": 0.0, "latched": true, "locked": true } },
   "pets":    { "PET_DOG": { "cell": "L0_FAMILY", "state": "Lie" } }
 }
 ```
+
+The fresh-world `rngState` is a single 64-bit seed (16 hexadecimal digits), expanded through
+SplitMix64 into xoshiro256++'s four-word state. Saves carry the expanded 64-digit state instead;
+conflating the two would make the first save/load change the future sequence.
 
 ## `assets.manifest.json`
 

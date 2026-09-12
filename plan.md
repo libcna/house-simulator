@@ -14581,11 +14581,11 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             failed `UnknownAndModifierTargetsAreRejectedWithoutChangingState`; production was
             restored.
 - [ ] HOUSE-01695 — Implement the `F8` overlay's weather section (full vector, archetype, time to transition, RNG state)
-      dep: HOUSE-01686, HOUSE-01537 · sys: debug · plat: ALL · pri: MUST
+      dep: HOUSE-01686, HOUSE-01537, HOUSE-01706 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-01696 — Wire the weather into the sky (cloud cover, thunder), lighting (cloud modulation) and fog
-      dep: HOUSE-01686, HOUSE-01648 · sys: weather · plat: ALL · pri: MUST
+      dep: HOUSE-01686, HOUSE-01648, HOUSE-01706 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01697 — Test: determinism — the same seed produces an identical 10 000-simulated-minute history
-      dep: HOUSE-01692 · sys: ci · plat: CI · pri: MUST
+      dep: HOUSE-01692, HOUSE-01706 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-01698 — Test: over 30 simulated days the system visits ≥ 8 archetypes and never produces an impossible combination
       dep: HOUSE-01697 · sys: ci · plat: CI · pri: MUST
 - [x] HOUSE-01699 — Test: it snows in January and rains in July at the default location, with no special-casing
@@ -14684,8 +14684,37 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: bypassing the temperature gate selected one frozen-water archetype during the
             same 3,680 warm decisions and failed the ten-year integration test; production was
             restored.
+- [x] HOUSE-01705 — Load the complete canonical weather vector, transition expiry and fresh-world RNG seed
+      dep: HOUSE-00395, HOUSE-01681 · sys: world · plat: ALL · pri: MUST
+      verify: unit `WorldLoaderTest.TheInitialStateIsRead`,
+              `AuthoredWorldTest.TheAuthoredInitialStateStartsOnTheRoad`,
+              `WorldLoaderTest.AClockOrWeatherOutsideItsRangeIsRefused`,
+              `WorldLoaderTest.AFreshWeatherSeedIsExactlyOneLosslessWord`,
+              `LightingSystemTests.*` (19)
+      note: `WeatherStart` now carries §36.1's complete validated `WeatherState` plus the current
+            target and remaining simulated minutes. `WorldLoader::LoadInitialState` reads every
+            authored channel instead of silently discarding ten of thirteen, expands the
+            canonical 64-bit seed through SplitMix64, and rejects malformed seeds or invalid
+            state ranges. Lighting follows the nested canonical cloud-cover value.
+      finding: the authored file had contained this full state since `HOUSE-00395`, but its C++
+            row type and loader retained only `target`, `cloudCover` and `windSpeed`. That made an
+            executable weather driver impossible to initialise without inventing values and would
+            have changed the deterministic future at the first save.
+      correction: the generated initial-state schema and `docs/world-format.md` now describe the
+            complete vector and distinguish the fresh 16-hex-digit seed from a save's expanded
+            64-hex-digit generator state.
+      mutation: replacing the parsed seed with the default generator seed changed all four
+            expanded words and failed `WorldLoaderTest.TheInitialStateIsRead`; production was
+            restored.
+- [ ] HOUSE-01706 — Implement the phase-26 runtime weather orchestrator over the completed transition components
+      dep: HOUSE-01683…HOUSE-01693, HOUSE-01704, HOUSE-01705 · sys: weather · plat: ALL · pri: MUST
+      accept: the game owns and advances one live state, target, expiry and immutable transition
+              snapshot at `UpdateStage::Weather`; console freeze pauses that same state
+      note: added after `HOUSE-01704` exposed that phase 26 had implemented every transition
+            component but no owner composed or advanced them. `HOUSE-01695`–`HOUSE-01697` cannot
+            honestly observe, wire or test a history until this dependency exists.
 - [ ] HOUSE-01702 — Phase-26 review and commit
-      dep: HOUSE-01681…HOUSE-01701, HOUSE-01703, HOUSE-01704 · sys: — · plat: ALL · pri: MUST
+      dep: HOUSE-01681…HOUSE-01701, HOUSE-01703…HOUSE-01706 · sys: — · plat: ALL · pri: MUST
 
 ---
 

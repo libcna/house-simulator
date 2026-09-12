@@ -660,7 +660,7 @@ TEST(LightingSystemTests, CloudCoverIsContinuousClampedAndCannotBecomeNotANumber
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
     HouseLighting house;
-    EXPECT_FLOAT_EQ(house.lighting.CloudCover(), house.world.GetInitialState().weather.cloudCover)
+    EXPECT_FLOAT_EQ(house.lighting.CloudCover(), house.world.GetInitialState().weather.state.cloudCover)
         << "initialstate.json did not reach the lighting system";
     EXPECT_TRUE(house.lighting.SetCloudCover(2.0F));
     EXPECT_FLOAT_EQ(house.lighting.CloudCover(), 1.0F);

@@ -10,6 +10,7 @@
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Result.hpp"
+#include "cnahouse/weather/WeatherState.hpp"
 #include "cnahouse/world/InteractableExpr.hpp"
 
 /// @file
@@ -835,8 +836,9 @@ namespace cnahouse::world
     struct WeatherStart
     {
         util::Id target;
-        float cloudCover = 0.0F;
-        float windSpeed = 0.0F;
+        weather::WeatherState state;
+        /// @brief Simulated minutes until §42.1 chooses another target.
+        float targetExpiryMinutes = 0.0F;
     };
 
     /// @brief One interactable's opening state: only the fields the file names.
