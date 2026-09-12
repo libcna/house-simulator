@@ -2531,10 +2531,18 @@ def fixture() -> dict[str, dict]:
                     "precipIntensity": [0.0, 0.0], "windSpeed": [12.0, 20.0], "modifier": True,
                     "weight": 0.0}],
                "transitions": {"W_CLEAR": {"W_RAIN": 1.0}, "W_RAIN": {"W_CLEAR": 1.0}},
-               "rates": {"cloudCoverPerMin": 0.06, "precipIntensityPerMin": 0.10,
-                         "windSpeedPerMin": 1.2},
+               "timing": {"W_CLEAR": {"dwellMinutes": [60.0, 120.0],
+                                        "transitionMinutes": [10.0, 20.0]},
+                          "W_RAIN": {"dwellMinutes": [45.0, 90.0],
+                                     "transitionMinutes": [8.0, 16.0]}},
+               "rates": {"cloudCoverPerMin": 0.06, "cloudCumuliformPerMin": 0.08,
+                         "precipIntensityPerMin": 0.10, "windSpeedPerMin": 1.2,
+                         "windDirectionDegPerMin": 5.0, "gustFactorPerMin": 0.15,
+                         "fogDensityPerMin": 0.03, "thunderIntensityPerMin": 0.05,
+                         "temperatureCPerMin": 0.25, "humidityPerMin": 0.08},
                "seasons": [{"id": "SUMMER", "months": [6, 7, 8],
-                            "weights": {"W_CLEAR": 2.0, "W_RAIN": 0.5}}]}
+                            "weights": {"W_CLEAR": 2.0, "W_RAIN": 0.5},
+                            "dwellScale": {"W_CLEAR": 1.0, "W_RAIN": 1.0}}]}
 
     exterior = {"schema": "cna-house/exterior/1",
                 "terrain": {"heightfield": "world/terrain.r16", "size": [40.0, 40.0],

@@ -6552,7 +6552,7 @@ Every numbered requirement area of the brief, mapped to this document and to `pl
 | 13 | Day/night cycle, configurable | 35 | 22 | HOUSE-01531–01541 | MUST |
 | 14 | Sun, glare, sun-clock overlay | 32 | 23 | HOUSE-01561–01578 | MUST |
 | 15 | Night sky, stars, moon phases | 33, 34 | 24 | HOUSE-01601–01619 | MUST |
-| 16 | Structured weather model | 36, 42 | 26 | HOUSE-01681–01702 | MUST |
+| 16 | Structured weather model | 36, 42 | 26 | HOUSE-01681–01707 | MUST |
 | 17 | Weather visuals: rain/snow/hail/storm/wind | 37–41 | 27–30 | HOUSE-01741–01890 | MUST |
 | 18 | Sky/cloud system | 31 | 25 | HOUSE-01641–01655 | MUST |
 | 19 | First-person camera | 44 | 8 | HOUSE-00621–00634 | MUST |

@@ -138,6 +138,10 @@ run_gate "content-graph" python3 tools/ci/build_content.py --selftest
 # editor and `validate_world.py` read, and a stale copy of it is worse than none.
 run_gate "world-schema" python3 tools/world/world_schema.py --check
 run_gate "world-rules" check_world
+# `HOUSE-01707`. The validator's synthetic world is the mutation suite for all thirteen semantic
+# rules. A schema change once made that fixture invalid, silently preventing every mutation from
+# reaching the rules; running it here keeps the test of the gate as current as the gate itself.
+run_gate "world-rules-selftest" python3 tools/world/validate_world.py --selftest
 # `HOUSE-00421`. The deployed copy is what the game reads: `content/world/` is the authored JSONC
 # with its comments stripped, plus the `world.manifest.json` that hashes those bytes
 # (`HOUSE-00364`). A stale deploy is a house that does not match the one in the repository, and

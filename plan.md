@@ -14812,8 +14812,21 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: evaluating the second transition minute from the already rate-limited live state
             changed cloud cover from the immutable-snapshot result 0.4816 to 0.53551364 and failed
             `ExpiryStartsOneSampledTransitionFromAnImmutableSnapshot`; production was restored.
+- [x] HOUSE-01707 — Repair `validate_world.py --selftest` after the weather schema gained timing and rate contracts
+      dep: HOUSE-01684, HOUSE-01685 · sys: ci · plat: TOOL · pri: MUST
+      verify: `python3 tools/world/validate_world.py --selftest` (all claims pass)
+      finding: (2026-09-12) the fixture still had the three-channel rate object from
+            `HOUSE-00393`, no `timing` object and no seasonal `dwellScale`. `HOUSE-01684` and
+            `HOUSE-01685` correctly made the complete forms mandatory, so schema validation stopped
+            the semantic rules from running and 112 mutation claims then failed with empty problem
+            lists. The real authored world and the required `run_checks.sh` path remained green;
+            only the validator's own fixture had drifted.
+      mutation: the pre-fix fixture is the mutation: it reports the missing `timing` and
+            `cloudCumuliformPerMin` fields, then suppresses every semantic result. Supplying the two
+            state timings, all ten positive rates and the seasonal dwell scales restores the same
+            fixture's complete mutation suite without weakening either schema or rule.
 - [ ] HOUSE-01702 — Phase-26 review and commit
-      dep: HOUSE-01681…HOUSE-01701, HOUSE-01703…HOUSE-01706 · sys: — · plat: ALL · pri: MUST
+      dep: HOUSE-01681…HOUSE-01701, HOUSE-01703…HOUSE-01707 · sys: — · plat: ALL · pri: MUST
 
 ---
 
@@ -16132,6 +16145,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-12 | `HOUSE-01707` | **New task, next free id in phase 26's reserved range.** Repair `validate_world.py --selftest`'s weather fixture and add it to the phase review dependency. | `HOUSE-01684` made timing mandatory and `HOUSE-01685` expanded the rate contract from three channels to ten, but neither updated the validator's synthetic world. Its schema failure prevented every semantic mutation from running, yielding 112 secondary failures with empty problem lists. The authored world and normal CI gate remained valid; the fixture now states the complete contract and all self-test claims run again. No schema or semantic rule was weakened. |
 | 2026-09-06 | `HOUSE-00021` | `assets-src/effects/` → `assets-src/Effects/` in `cna-house.md` §70.1, in the §18.1 CMake snippet and in this task's text | Four statements in the two documents disagreed on the case of one path. §18.1's pipeline diagram, §17.5 and the "directories are PascalCase" rule of §8.3 said `Effects/`; §70.1 and the §18.1 CMake snippet said `effects/`. `check_xna_only.py` enforces where a `.fx` may live and needs exactly one spelling. |
 | 2026-09-06 | `HOUSE-00021` | `SOURCE_DIR assets-src/content` → `SOURCE_DIR assets-src` in the §18.1 CMake snippet, with the config file moved to `assets-src/.cna-content.json` | The same snippet placed the ContentManager-bound trees under `assets-src/content/`, while §18.1's own diagram, §17.5 and §15.1 place `Models/`, `Textures/`, `Audio/`, `Fonts/`, `Video/`, `Effects/` and `world/` directly under `assets-src/`. The directory skeleton created by `HOUSE-00001` follows the majority, and `check_layout.py` asserts it. |
 | 2026-09-06 | — | `cna-house.md` header and this file's header now record implementation as in progress rather than forbidden | The project owner approved implementation on 2026-09-06. |
