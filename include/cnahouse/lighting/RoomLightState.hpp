@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "Microsoft/Xna/Framework/Vector3.hpp"
+
 #include "cnahouse/util/Ids.hpp"
 
 namespace cnahouse::lighting
@@ -20,10 +22,10 @@ namespace cnahouse::lighting
 
     /// @brief One cell's lighting, as §28.1's per-frame loop computes it.
     ///
-    /// **Levels, not colours.** §28.3's whole argument is that a room's lighting SHAPE is baked and
-    /// its INTENSITY is not, so what a per-frame system produces is the scalar the baked pass is
-    /// multiplied by. Colour arrives with `HOUSE-01255`'s Planckian conversion and the sky, and
-    /// `ambientColor` is assembled from those and these.
+    /// §28.3's whole argument is that a room's lighting SHAPE is baked and its INTENSITY is not, so
+    /// the levels are the scalars the baked passes use. `artificialColor` is the lumen-weighted
+    /// Planckian hue of the groups that are on; the later renderer combines it with paint and sky
+    /// into §28.1's `ambientColor`.
     ///
     /// Everything here is in `[0, 1]` and everything is a **blend rather than a switch**, for the
     /// reason §36.3 gives about seasons and §28.4 gives about doors: a level that stepped would be
@@ -38,6 +40,12 @@ namespace cnahouse::lighting
         /// behaves: `L0_KITCHEN`'s four 1 200 lm down-lights and its one 60 lm cabinet strip are
         /// not a fifth of the room each, and a mean over groups would say they were.
         float artificial = 0.0F;
+
+        /// @brief Lumen-weighted colour of the artificial sources that currently contribute.
+        ///
+        /// Black when every group is off. This is a hue, not radiance: `artificial` remains the
+        /// one intensity value, so a consumer must not multiply the lumens into the colour again.
+        Microsoft::Xna::Framework::Vector3 artificialColor{0.0F, 0.0F, 0.0F};
 
         /// @brief §28.4's daylight, `[0, 1]`. `DaylightModel` computes it and `HOUSE-01564` copies
         ///        the result here in world-cell order on every lighting update.

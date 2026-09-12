@@ -12973,8 +12973,28 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01252, HOUSE-00384 · sys: interaction · plat: ALL · pri: MUST
 - [ ] HOUSE-01254 — Implement the lamp-as-switch case (table and floor lamps switched by interacting with the lamp)
       dep: HOUSE-01252 · sys: interaction · plat: ALL · pri: MUST
-- [ ] HOUSE-01255 — Implement the Planckian colour-temperature → RGB lookup
+- [x] HOUSE-01255 — Implement the Planckian colour-temperature → RGB lookup
       dep: HOUSE-01251 · sys: lighting · plat: ALL · pri: MUST
+      verify: unit `PlanckianLutTests.*` and the colour claims in `LightingSystemTests.*`
+      decision: a **111-entry table at 100 K intervals** covers exactly the loader's validated
+            1000–12000 K range, with a lerp between neighbours. The compact piecewise
+            logarithmic/power black-body approximation is evaluated once when the table is built;
+            the per-frame path does no logarithm or power. Non-finite input maps to the neutral
+            6500 K entry rather than allowing a NaN into an XNA effect.
+      decision: RGB is a normalised display hue and lumens remain the intensity. A group's colour
+            is the lumen-weighted colour of its fixtures, and a cell's `artificialColor` is the
+            lumen-weighted colour of the groups currently contributing. Weighting by group or
+            fixture count would repeat the arithmetic defect `HOUSE-01251` already ruled out for
+            the scalar level.
+      measured: the authored 243 fixtures use five temperatures: **31 at 2400 K, 143 at 2700 K,
+            27 at 3000 K, 9 at 3500 K and 33 at 4000 K**. The two named §28.2 examples evaluate to
+            2700 K `RGB(1.000, 0.654, 0.343)` and 4000 K `RGB(1.000, 0.807, 0.651)`.
+      verified: all 135 real switch groups agree with a fixture-by-fixture lumen-weighted oracle;
+            a real cell with differently coloured groups proves the active per-room blend and its
+            weighting. Zeroing the LUT's green term is CAUGHT by the independent checkpoints, and
+            replacing the per-room colour with black is CAUGHT by the active-group test. The full
+            **1209/1209** unit suite and the isolated virtual-display walk lighting integration
+            case are green.
 - [ ] HOUSE-01256 — Implement the multi-pass additive static lighting draw (pass 1 opaque + up to 3 additive light-group passes)
       dep: HOUSE-00912, HOUSE-00079 · sys: rendering · plat: ALL · pri: MUST
       accept: depth-equal on the additive passes; no z-fighting; exact addition

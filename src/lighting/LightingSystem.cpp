@@ -6,6 +6,7 @@
 #include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/environment/SunModel.hpp"
+#include "cnahouse/lighting/PlanckianLut.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -59,7 +60,10 @@ namespace cnahouse::lighting
                 group.group = light.group;
                 group.on = light.defaultOn;
                 groups_.push_back(group);
-                groupLumens_.push_back(std::max(light.intensityLm, 0.0F));
+                const float lumens = std::max(light.intensityLm, 0.0F);
+                groupLumens_.push_back(lumens);
+                const auto color = PlanckianRgb(light.colorK);
+                groupColors_.emplace_back(color.X * lumens, color.Y * lumens, color.Z * lumens);
             }
             else
             {
@@ -68,7 +72,23 @@ namespace cnahouse::lighting
                 // lights every fixture it controls and a disagreement is a data defect that should
                 // be visible rather than silently resolved to off.
                 groups_[found->second].on = groups_[found->second].on || light.defaultOn;
-                groupLumens_[found->second] += std::max(light.intensityLm, 0.0F);
+                const float lumens = std::max(light.intensityLm, 0.0F);
+                groupLumens_[found->second] += lumens;
+                const auto color = PlanckianRgb(light.colorK);
+                auto& accumulated = groupColors_[found->second];
+                accumulated.X += color.X * lumens;
+                accumulated.Y += color.Y * lumens;
+                accumulated.Z += color.Z * lumens;
+            }
+        }
+        for (std::size_t index = 0; index < groupColors_.size(); ++index)
+        {
+            const float lumens = groupLumens_[index];
+            if (lumens > 0.0F)
+            {
+                groupColors_[index].X /= lumens;
+                groupColors_[index].Y /= lumens;
+                groupColors_[index].Z /= lumens;
             }
         }
 
@@ -110,17 +130,27 @@ namespace cnahouse::lighting
             cells_[index].daylight = daylightLevels_[index];
             const CellGroups& packed = cellGroups_[index];
             float lit = 0.0F;
+            Microsoft::Xna::Framework::Vector3 colorLumens;
             for (std::size_t offset = 0; offset < packed.count; ++offset)
             {
                 const util::Id group = cellGroupIds_[packed.first + offset];
                 const auto found = groupIndex_.find(group.Value());
-                lit += groups_[found->second].Level() * groupLumens_[found->second];
+                const std::size_t groupIndex = found->second;
+                const float contribution = groups_[groupIndex].Level() * groupLumens_[groupIndex];
+                lit += contribution;
+                colorLumens.X += groupColors_[groupIndex].X * contribution;
+                colorLumens.Y += groupColors_[groupIndex].Y * contribution;
+                colorLumens.Z += groupColors_[groupIndex].Z * contribution;
             }
             // Lumen-weighted, so a kitchen's four 1 200 lm down-lights and its one 60 lm cabinet
             // strip contribute what they actually emit. A room with no fixtures is 0 and not a
             // division by zero.
             cells_[index].artificial =
                 packed.totalLumens > 0.0F ? std::clamp(lit / packed.totalLumens, 0.0F, 1.0F) : 0.0F;
+            cells_[index].artificialColor =
+                lit > 0.0F ? Microsoft::Xna::Framework::Vector3(
+                                 colorLumens.X / lit, colorLumens.Y / lit, colorLumens.Z / lit)
+                           : Microsoft::Xna::Framework::Vector3();
         }
     }
 
@@ -196,6 +226,13 @@ namespace cnahouse::lighting
     {
         const auto found = groupIndex_.find(group.Value());
         return found == groupIndex_.end() ? 0.0F : groupLumens_[found->second];
+    }
+
+    Microsoft::Xna::Framework::Vector3 LightingSystem::GroupColor(util::Id group) const noexcept
+    {
+        const auto found = groupIndex_.find(group.Value());
+        return found == groupIndex_.end() ? Microsoft::Xna::Framework::Vector3()
+                                          : groupColors_[found->second];
     }
 
     bool LightingSystem::SetCloudCover(float cloudCover) noexcept

@@ -3057,7 +3057,13 @@ authored them, plus the exterior lights `HOUSE-00383` adds. This paragraph and �
 fixtures in 84 switch groups"; §13's per-room `Lights` column, which §13.1 says counts groups,
 totals 128 on its own and 84 was never reachable from it. The per-room column wins, because it
 names the room the switch is in. Colour temperature is converted to RGB through a Planckian
-lookup table, so a 2700 K bedroom lamp and a 4000 K garage fluorescent genuinely differ.
+lookup table, so a 2700 K bedroom lamp and a 4000 K garage fluorescent genuinely differ. The
+runtime table covers the validated 1000–12000 K range in 100 K steps and linearly interpolates;
+the result is normalised display RGB, while lumens remain the separate intensity. Mixed fixtures
+within a group, and mixed active groups within a cell, are therefore colour-weighted by lumens
+rather than by fixture count. This is `HOUSE-01255`'s boundary: paint tint, sky colour and exposure
+assemble `ambientColor` later, but they consume this one artificial-light colour rather than
+converting `colorK` again.
 
 ### 28.3 Baked lighting (static)
 

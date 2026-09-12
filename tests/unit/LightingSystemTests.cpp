@@ -24,6 +24,7 @@
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/lighting/LightingSystem.hpp"
+#include "cnahouse/lighting/PlanckianLut.hpp"
 #include "cnahouse/lighting/ShadingGrid.hpp"
 #include "cnahouse/world/WorldData.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
@@ -34,6 +35,7 @@ namespace
     using cnahouse::lighting::kAmbientFloor;
     using cnahouse::lighting::kDaylightKeyThreshold;
     using cnahouse::lighting::LightingSystem;
+    using cnahouse::lighting::PlanckianRgb;
     using cnahouse::lighting::RoomLightState;
     using cnahouse::lighting::ShadingGrid;
     using cnahouse::lighting::SunKeyLight;
@@ -110,7 +112,32 @@ TEST(LightingSystemTests, EveryGroupTheLightsNameGetsAState)
     EXPECT_EQ(lighting.Groups().size(), fromLights.size());
     for (const std::uint32_t group : fromLights)
     {
-        EXPECT_NE(lighting.FindGroup(Id(group)), nullptr);
+        const Id id(group);
+        EXPECT_NE(lighting.FindGroup(id), nullptr);
+
+        Microsoft::Xna::Framework::Vector3 expected;
+        float totalLumens = 0.0F;
+        for (const world::Light& light : world.Lights())
+        {
+            if (light.group != id)
+            {
+                continue;
+            }
+            const float lumens = std::max(light.intensityLm, 0.0F);
+            const auto color = PlanckianRgb(light.colorK);
+            expected.X += color.X * lumens;
+            expected.Y += color.Y * lumens;
+            expected.Z += color.Z * lumens;
+            totalLumens += lumens;
+        }
+        ASSERT_GT(totalLumens, 0.0F);
+        expected.X /= totalLumens;
+        expected.Y /= totalLumens;
+        expected.Z /= totalLumens;
+        const auto actual = lighting.GroupColor(id);
+        EXPECT_NEAR(actual.X, expected.X, 1e-6F);
+        EXPECT_NEAR(actual.Y, expected.Y, 1e-6F);
+        EXPECT_NEAR(actual.Z, expected.Z, 1e-6F);
     }
     EXPECT_EQ(lighting.Cells().size(), world.Cells().size());
     std::printf("  %zu cell(s), %zu switch group(s) over %zu fixture(s)\n",
@@ -144,6 +171,7 @@ TEST(LightingSystemTests, TheHouseStartsWithEveryLightOffBecauseThatIsWhatTheDat
     for (const RoomLightState& cell : lighting.Cells())
     {
         EXPECT_FLOAT_EQ(cell.artificial, 0.0F);
+        EXPECT_EQ(cell.artificialColor, Microsoft::Xna::Framework::Vector3());
         // ...and a dark room is still not black: §30's first row.
         EXPECT_FLOAT_EQ(cell.Level(), kAmbientFloor);
     }
@@ -249,6 +277,77 @@ TEST(LightingSystemTests, ARoomsLevelIsWeightedByLumensAndNotByFixtureCount)
     EXPECT_TRUE(found) << "no cell has two groups of different size, so the weighting is untested";
 }
 
+TEST(LightingSystemTests, ACellsArtificialColourTracksOnlyTheGroupsThatAreOn)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    LightingSystem& lighting = house.lighting;
+
+    bool found = false;
+    for (const world::Cell& cell : house.world.Cells())
+    {
+        const std::span<const Id> groups = lighting.GroupsForCell(cell.id);
+        if (groups.size() < 2)
+        {
+            continue;
+        }
+        Id warmest = groups.front();
+        Id coolest = groups.front();
+        for (const Id& group : groups)
+        {
+            if (lighting.GroupColor(group).Z < lighting.GroupColor(warmest).Z)
+            {
+                warmest = group;
+            }
+            if (lighting.GroupColor(group).Z > lighting.GroupColor(coolest).Z)
+            {
+                coolest = group;
+            }
+        }
+        if (lighting.GroupColor(coolest).Z - lighting.GroupColor(warmest).Z < 0.1F)
+        {
+            continue;
+        }
+
+        for (const SwitchGroupState& group : lighting.Groups())
+        {
+            lighting.SetGroupOn(group.group, false);
+        }
+        lighting.SetGroupOn(warmest, true);
+        lighting.Update(Frame(30));
+        const auto warmOnly = lighting.FindCell(cell.id)->artificialColor;
+        EXPECT_NEAR(warmOnly.X, lighting.GroupColor(warmest).X, 1e-6F);
+        EXPECT_NEAR(warmOnly.Y, lighting.GroupColor(warmest).Y, 1e-6F);
+        EXPECT_NEAR(warmOnly.Z, lighting.GroupColor(warmest).Z, 1e-6F);
+
+        lighting.SetGroupOn(warmest, false);
+        lighting.SetGroupOn(coolest, true);
+        lighting.Update(Frame(31));
+        const auto coolOnly = lighting.FindCell(cell.id)->artificialColor;
+        EXPECT_NEAR(coolOnly.X, lighting.GroupColor(coolest).X, 1e-6F);
+        EXPECT_NEAR(coolOnly.Y, lighting.GroupColor(coolest).Y, 1e-6F);
+        EXPECT_NEAR(coolOnly.Z, lighting.GroupColor(coolest).Z, 1e-6F);
+        EXPECT_GT(coolOnly.Z, warmOnly.Z);
+
+        lighting.SetGroupOn(warmest, true);
+        lighting.Update(Frame(32));
+        const float warmLumens = lighting.GroupLumens(warmest);
+        const float coolLumens = lighting.GroupLumens(coolest);
+        const auto mixed = lighting.FindCell(cell.id)->artificialColor;
+        const auto warmColor = lighting.GroupColor(warmest);
+        const auto coolColor = lighting.GroupColor(coolest);
+        EXPECT_NEAR(
+            mixed.Z, (warmColor.Z * warmLumens + coolColor.Z * coolLumens) / (warmLumens + coolLumens), 1e-6F)
+            << "the active colour was averaged by group count rather than lumens";
+        found = true;
+        break;
+    }
+    EXPECT_TRUE(found) << "no room has two visibly different colour temperatures";
+}
+
 TEST(LightingSystemTests, ADimmerScalesTheGroupAndIsRefusedWhenItIsNotANumber)
 {
     if (!ContentIsBuilt())
@@ -296,6 +395,7 @@ TEST(LightingSystemTests, AnUnknownGroupOrCellIsReportedRatherThanInvented)
     EXPECT_EQ(lighting.FindCell(Id::Of("NO_SUCH_CELL")), nullptr);
     EXPECT_TRUE(lighting.GroupsForCell(Id::Of("NO_SUCH_CELL")).empty());
     EXPECT_FLOAT_EQ(lighting.GroupLevelInCell(Id::Of("NO_SUCH_CELL"), nonsense), 0.0F);
+    EXPECT_EQ(lighting.GroupColor(nonsense), Microsoft::Xna::Framework::Vector3());
 }
 
 TEST(LightingSystemTests, AGroupOnlyLightsTheCellsThatListIt)

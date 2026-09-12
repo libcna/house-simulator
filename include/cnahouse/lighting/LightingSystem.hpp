@@ -49,9 +49,9 @@ namespace cnahouse::lighting
     /// within one frame about how bright a room is.
     ///
     /// This is §28.1's loop with `artificial` from the switch groups and `daylight` from
-    /// `DaylightModel`. `borrowed` is `HOUSE-01265`'s and `ambientColor` needs `HOUSE-01255`'s
-    /// Planckian conversion; each remains a **field left at zero and named**, never a plausible
-    /// number nothing computed.
+    /// `DaylightModel`. `HOUSE-01255` supplies the lumen-weighted Planckian artificial colour.
+    /// `borrowed` is `HOUSE-01265`'s and remains a **field left at zero and named**, never a
+    /// plausible number nothing computed.
     ///
     /// **Nothing here allocates after `Build`.** The cells and the groups are fixed for the
     /// session — §15's data is const once loaded — so the states, the group table and the index
@@ -121,6 +121,9 @@ namespace cnahouse::lighting
         /// @brief Total luminous flux of a group's fixtures, in lumens. The weight in `artificial`.
         [[nodiscard]] float GroupLumens(util::Id group) const noexcept;
 
+        /// @brief Lumen-weighted Planckian hue of a group's fixtures; black for an unknown group.
+        [[nodiscard]] Microsoft::Xna::Framework::Vector3 GroupColor(util::Id group) const noexcept;
+
         /// @brief Change the continuous weather input used by both daylight and the direct beam.
         ///
         /// Clamped to `[0, 1]`; a non-finite value is refused rather than poisoning every room.
@@ -158,6 +161,7 @@ namespace cnahouse::lighting
         std::vector<RoomLightState> cells_;
         std::vector<SwitchGroupState> groups_;
         std::vector<float> groupLumens_;
+        std::vector<Microsoft::Xna::Framework::Vector3> groupColors_;
         /// @brief Every cell's group ids, packed end to end; `CellGroups` indexes into it.
         std::vector<util::Id> cellGroupIds_;
         std::vector<CellGroups> cellGroups_;
