@@ -120,6 +120,23 @@ namespace cnahouse::weather
         return lastPositive;
     }
 
+    util::Result<util::Id> WeatherSampler::SampleNext(util::Id current,
+                                                      const environment::SeasonPhase& season,
+                                                      WeatherState& state) const
+    {
+        if (const util::Result<void> valid = state.Validate(); !valid)
+        {
+            return valid.Error().WithContext("weather/rng/state");
+        }
+        util::Rng rng(state.rngState);
+        util::Result<util::Id> sampled = SampleNext(current, season, rng);
+        if (sampled)
+        {
+            state.rngState = rng.GetState();
+        }
+        return sampled;
+    }
+
     util::Result<WeatherTiming> WeatherSampler::SampleTiming(util::Id current,
                                                              util::Id next,
                                                              const environment::SeasonPhase& season,
@@ -175,6 +192,24 @@ namespace cnahouse::weather
         };
     }
 
+    util::Result<WeatherTiming> WeatherSampler::SampleTiming(util::Id current,
+                                                             util::Id next,
+                                                             const environment::SeasonPhase& season,
+                                                             WeatherState& state) const
+    {
+        if (const util::Result<void> valid = state.Validate(); !valid)
+        {
+            return valid.Error().WithContext("weather/rng/state");
+        }
+        util::Rng rng(state.rngState);
+        util::Result<WeatherTiming> sampled = SampleTiming(current, next, season, rng);
+        if (sampled)
+        {
+            state.rngState = rng.GetState();
+        }
+        return sampled;
+    }
+
     util::Result<WeatherWindTarget>
     WeatherSampler::SampleWind(util::Id archetypeId, float windyModifierAmount, util::Rng& rng) const
     {
@@ -217,6 +252,22 @@ namespace cnahouse::weather
             target.gustFactor += (boostedGust - target.gustFactor) * windyModifierAmount;
         }
         return target;
+    }
+
+    util::Result<WeatherWindTarget>
+    WeatherSampler::SampleWind(util::Id archetype, float windyModifierAmount, WeatherState& state) const
+    {
+        if (const util::Result<void> valid = state.Validate(); !valid)
+        {
+            return valid.Error().WithContext("weather/rng/state");
+        }
+        util::Rng rng(state.rngState);
+        util::Result<WeatherWindTarget> sampled = SampleWind(archetype, windyModifierAmount, rng);
+        if (sampled)
+        {
+            state.rngState = rng.GetState();
+        }
+        return sampled;
     }
 
 } // namespace cnahouse::weather

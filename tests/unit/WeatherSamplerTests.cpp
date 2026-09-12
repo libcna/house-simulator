@@ -18,6 +18,7 @@ namespace
     using cnahouse::util::Rng;
     using cnahouse::weather::WeatherArchetype;
     using cnahouse::weather::WeatherSampler;
+    using cnahouse::weather::WeatherState;
     using cnahouse::weather::WeatherTransition;
     using cnahouse::weather::WeatherTransitionRow;
 
@@ -157,6 +158,68 @@ namespace
         ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), sampled));
         (void)oracle.NextFloat();
         EXPECT_EQ(sampled.GetState(), oracle.GetState());
+    }
+
+    TEST_F(WeatherSeasonTests, SavedWeatherRngReloadsIntoTheExactSameFuture)
+    {
+        const WeatherSampler sampler = Sampler();
+        WeatherState uninterrupted;
+        uninterrupted.rngState = Rng(0x5EEDC0DEU).GetState();
+
+        ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), uninterrupted));
+        ASSERT_TRUE(sampler.SampleTiming(a_, b_, SeasonAt(0.125), uninterrupted));
+        ASSERT_TRUE(sampler.SampleWind(b_, 0.5F, uninterrupted));
+        const auto json = uninterrupted.ToJson();
+        ASSERT_TRUE(json) << json.Error().ToString();
+        auto reloaded = WeatherState::FromJson(json.Value(), "weather-save.json");
+        ASSERT_TRUE(reloaded) << reloaded.Error().ToString();
+
+        for (int decision = 0; decision < 100; ++decision)
+        {
+            const auto nextA = sampler.SampleNext(a_, SeasonAt(0.125), uninterrupted);
+            const auto nextB = sampler.SampleNext(a_, SeasonAt(0.125), reloaded.Value());
+            ASSERT_TRUE(nextA);
+            ASSERT_TRUE(nextB);
+            EXPECT_EQ(nextA.Value(), nextB.Value());
+
+            const auto timingA = sampler.SampleTiming(a_, b_, SeasonAt(0.125), uninterrupted);
+            const auto timingB = sampler.SampleTiming(a_, b_, SeasonAt(0.125), reloaded.Value());
+            ASSERT_TRUE(timingA);
+            ASSERT_TRUE(timingB);
+            EXPECT_EQ(timingA.Value(), timingB.Value());
+
+            const auto windA = sampler.SampleWind(b_, 0.5F, uninterrupted);
+            const auto windB = sampler.SampleWind(b_, 0.5F, reloaded.Value());
+            ASSERT_TRUE(windA);
+            ASSERT_TRUE(windB);
+            EXPECT_EQ(windA.Value(), windB.Value());
+        }
+        EXPECT_EQ(uninterrupted.rngState, reloaded.Value().rngState);
+    }
+
+    TEST_F(WeatherSeasonTests, StoredWeatherRngAdvancesAfterSuccessAndNotAfterFailure)
+    {
+        const WeatherSampler sampler = Sampler();
+        WeatherState state;
+        state.rngState = Rng(42U).GetState();
+        Rng oracle(state.rngState);
+
+        ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), state));
+        (void)oracle.NextFloat();
+        ASSERT_TRUE(sampler.SampleTiming(a_, b_, SeasonAt(0.125), state));
+        (void)oracle.NextFloat();
+        (void)oracle.NextFloat();
+        ASSERT_TRUE(sampler.SampleWind(b_, 1.0F, state));
+        for (int draw = 0; draw < 4; ++draw)
+        {
+            (void)oracle.NextFloat();
+        }
+        EXPECT_EQ(state.rngState, oracle.GetState());
+
+        const auto beforeFailure = state.rngState;
+        EXPECT_FALSE(sampler.SampleNext(Intern("W_UNKNOWN"), SeasonAt(0.125), state));
+        EXPECT_FALSE(sampler.SampleWind(b_, 1.1F, state));
+        EXPECT_EQ(state.rngState, beforeFailure);
     }
 
     TEST_F(WeatherSeasonTests, TimingDrawsStayInsideTheAuthoredGlobalBounds)

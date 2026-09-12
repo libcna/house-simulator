@@ -3726,7 +3726,10 @@ the drive.
 
 A single `xoshiro256++` stream, seeded from the save (or from `initialstate.json` on a fresh
 start), drives every weather decision. The RNG state is part of the save, so reloading reproduces
-the same weather future. Tests set the seed and assert exact sequences.
+the same weather future. The runtime sampling overloads reconstruct the stream from
+`WeatherState::rngState` and write it back after every successful archetype, timing or wind draw;
+a rejected decision consumes nothing. Tests set the seed and assert exact sequences, including
+continuing on both sides of a JSON save/reload boundary.
 
 ---
 

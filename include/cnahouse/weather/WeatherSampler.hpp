@@ -59,6 +59,13 @@ namespace cnahouse::weather
         [[nodiscard]] util::Result<util::Id>
         SampleNext(util::Id current, const environment::SeasonPhase& season, util::Rng& rng) const;
 
+        /// @brief Samples from and immediately persists the RNG owned by @p state.
+        ///
+        /// This is the runtime/save path. The explicit-`Rng` overload remains the low-level path
+        /// for tests and tools. A failed decision leaves the stored stream untouched.
+        [[nodiscard]] util::Result<util::Id>
+        SampleNext(util::Id current, const environment::SeasonPhase& season, WeatherState& state) const;
+
         /// @brief Draws the destination dwell and the source-to-destination transition duration.
         ///
         /// Both are uniform authored distributions. The dwell range is scaled by the continuously
@@ -69,6 +76,12 @@ namespace cnahouse::weather
                                                                const environment::SeasonPhase& season,
                                                                util::Rng& rng) const;
 
+        /// @brief Samples timing from and persists @p state's weather RNG.
+        [[nodiscard]] util::Result<WeatherTiming> SampleTiming(util::Id current,
+                                                               util::Id next,
+                                                               const environment::SeasonPhase& season,
+                                                               WeatherState& state) const;
+
         /// @brief Draws wind separately from the precipitation archetype's other channels.
         ///
         /// The caller owns `W_WINDY`'s independent continuous amount: neither the architecture nor
@@ -77,6 +90,10 @@ namespace cnahouse::weather
         /// consumes exactly two RNG draws at zero and four above zero.
         [[nodiscard]] util::Result<WeatherWindTarget>
         SampleWind(util::Id archetype, float windyModifierAmount, util::Rng& rng) const;
+
+        /// @brief Samples wind from and persists @p state's weather RNG.
+        [[nodiscard]] util::Result<WeatherWindTarget>
+        SampleWind(util::Id archetype, float windyModifierAmount, WeatherState& state) const;
 
     private:
         [[nodiscard]] const WeatherArchetype* FindArchetype(util::Id id) const noexcept;

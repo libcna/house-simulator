@@ -14538,8 +14538,18 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: allowing every non-None precipitation phase to accumulate snow made rain, sleet
             and hail each add 0.054 m in an hour and failed
             `OtherPrecipitationPhasesDoNotCreateSnowCover`; production was restored.
-- [ ] HOUSE-01692 — Implement RNG-state persistence so a reload reproduces the same weather future
+- [x] HOUSE-01692 — Implement RNG-state persistence so a reload reproduces the same weather future
       dep: HOUSE-01683 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `WeatherSeasonTests.SavedWeatherRngReloadsIntoTheExactSameFuture`,
+              `WeatherSeasonTests.StoredWeatherRngAdvancesAfterSuccessAndNotAfterFailure`
+      note: runtime overloads of all three weather sampling operations reconstruct the single
+            xoshiro256++ stream from `WeatherState::rngState` and persist it immediately after a
+            successful archetype, timing or wind sample. Errors leave the stored state untouched.
+            A real `WeatherState` JSON round-trip followed by 100 groups of all three decisions
+            produced byte-identical choices, timings, winds and final RNG state on both branches.
+      mutation: omitting the write-back after a successful four-draw wind sample left the stored
+            stream four draws behind its oracle and failed
+            `StoredWeatherRngAdvancesAfterSuccessAndNotAfterFailure`; production was restored.
 - [ ] HOUSE-01693 — Implement the settings: weather on / fixed / off, and the fixed-archetype selector
       dep: HOUSE-01686, HOUSE-00131 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01694 — Implement the console `weather set <archetype>` and `weather freeze`
