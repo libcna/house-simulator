@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 
@@ -10,6 +11,37 @@
 
 namespace cnahouse::environment
 {
+
+    /// @brief The five daylight/twilight bands named by the standard solar thresholds.
+    enum class TwilightPhase : std::uint8_t
+    {
+        Day,
+        Civil,
+        Nautical,
+        Astronomical,
+        Night,
+    };
+
+    /// @brief Classifies the sun's geometric altitude at the conventional thresholds.
+    ///
+    /// The apparent/refracted horizon separates day from civil twilight; −6°, −12° and −18° are
+    /// the civil, nautical and astronomical ends already declared by `SunModel`.
+    [[nodiscard]] TwilightPhase TwilightPhaseFor(double altitudeDeg) noexcept;
+
+    /// @brief Smooth attenuation of the twilight sky ambient from civil to astronomical night.
+    ///
+    /// One through the civil boundary (−6°), zero at and below astronomical twilight (−18°), and
+    /// a smoothstep between them. The room ambient floor is separate and remains visible at night.
+    [[nodiscard]] double TwilightAmbientFactor(double altitudeDeg) noexcept;
+
+    /// @brief Section 34's star visibility ramp: zero at −4°, full at −14°.
+    ///
+    /// These are artistic visibility endpoints around the conventional twilight bands, not new
+    /// names for the standard −6°/−12°/−18° thresholds. Cloud, moon and magnitude suppression
+    /// belong to `HOUSE-01612`; this publishes the sun-altitude input they will multiply.
+    inline constexpr double kStarsBeginAtSunAltitudeDeg = -4.0;
+    inline constexpr double kStarsFullAtSunAltitudeDeg = -14.0;
+    [[nodiscard]] double StarVisibilityForSunAltitude(double altitudeDeg) noexcept;
 
     /// @brief §32.2's world-space unit vector pointing AT the sun.
     ///

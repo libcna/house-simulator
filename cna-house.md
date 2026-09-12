@@ -3341,7 +3341,8 @@ south-east in December; day length runs from 9h17m to 15h03m; the noon altitude 
 | +60° | (1.00, 1.00, 0.99) | 1.00 |
 
 Multiplied by `(1 − 0.85·cloudCover)` for the direct term and `(1 − 0.35·cloudCover)` for the
-sky-diffuse term.
+sky-diffuse term. Below civil twilight the solar sky-diffuse term smoothsteps from full at −6° to
+zero at astronomical night, −18°; the separate room ambient floor remains.
 
 ### 32.3 The sun disc
 
@@ -3487,9 +3488,10 @@ by the tests.
   sits at the right height. Over a simulated year the visible constellations change with the
   season.
 * **Visibility**: overall alpha = `starVisibility(sunAltitude) · (1 − cloudCover)^1.6 ·
-  (1 − 0.55 · moonBrightness)`. `starVisibility` ramps from 0 at −4° to 1 at −14° (astronomical
-  twilight), so stars appear gradually, brightest first — a Magnitude cutoff that tightens with
-  twilight rather than a global fade, so faint stars vanish first exactly as they should.
+  (1 − 0.55 · moonBrightness)`. `starVisibility` ramps from 0 at −4° to 1 at −14° (two degrees
+  below nautical twilight; standard astronomical twilight is −18°), so stars appear gradually,
+  brightest first — a Magnitude cutoff that tightens with twilight rather than a global fade, so
+  faint stars vanish first exactly as they should.
 * **Twinkle**: per-star `sin(t · f_i + φ_i)` amplitude scaled by `1/sin(altitude)` so stars near
   the horizon twinkle more. Computed in the same CPU pass that fills the vertex buffer, at 20 Hz.
 * **Light pollution**: a faint warm dome glow toward the town, which also hides the faintest stars

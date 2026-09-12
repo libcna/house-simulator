@@ -78,7 +78,58 @@ namespace cnahouse::environment
             return value < 0.0 ? 0.0 : (value > 1.0 ? 1.0 : value);
         }
 
+        [[nodiscard]] double SmoothUnit(double value) noexcept
+        {
+            const double t = ClampUnit(value);
+            return t * t * (3.0 - 2.0 * t);
+        }
+
     } // namespace
+
+    TwilightPhase TwilightPhaseFor(double altitudeDeg) noexcept
+    {
+        if (!std::isfinite(altitudeDeg))
+        {
+            return TwilightPhase::Night;
+        }
+        if (altitudeDeg > kRefractedHorizonDeg)
+        {
+            return TwilightPhase::Day;
+        }
+        if (altitudeDeg > kCivilTwilightDeg)
+        {
+            return TwilightPhase::Civil;
+        }
+        if (altitudeDeg > kNauticalTwilightDeg)
+        {
+            return TwilightPhase::Nautical;
+        }
+        if (altitudeDeg > kAstronomicalTwilightDeg)
+        {
+            return TwilightPhase::Astronomical;
+        }
+        return TwilightPhase::Night;
+    }
+
+    double TwilightAmbientFactor(double altitudeDeg) noexcept
+    {
+        if (!std::isfinite(altitudeDeg))
+        {
+            return 0.0;
+        }
+        const double span = kCivilTwilightDeg - kAstronomicalTwilightDeg;
+        return SmoothUnit((altitudeDeg - kAstronomicalTwilightDeg) / span);
+    }
+
+    double StarVisibilityForSunAltitude(double altitudeDeg) noexcept
+    {
+        if (!std::isfinite(altitudeDeg))
+        {
+            return 0.0;
+        }
+        return SmoothUnit((kStarsBeginAtSunAltitudeDeg - altitudeDeg) /
+                          (kStarsBeginAtSunAltitudeDeg - kStarsFullAtSunAltitudeDeg));
+    }
 
     Vector3 DirectionToSun(const SunPosition& sun) noexcept
     {
@@ -154,7 +205,8 @@ namespace cnahouse::environment
         shading.directIntensity =
             static_cast<float>(static_cast<double>(lighting.intensity) * DirectCloudFactor(cloudCover));
         shading.skyDiffuseIntensity =
-            static_cast<float>(static_cast<double>(lighting.intensity) * SkyDiffuseCloudFactor(cloudCover));
+            static_cast<float>(static_cast<double>(lighting.intensity) * SkyDiffuseCloudFactor(cloudCover) *
+                               TwilightAmbientFactor(sun.altitudeDeg));
         return shading;
     }
 

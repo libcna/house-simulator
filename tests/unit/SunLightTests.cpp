@@ -24,11 +24,14 @@ namespace
     using cnahouse::environment::CivilTime;
     using cnahouse::environment::DirectCloudFactor;
     using cnahouse::environment::DirectionToSun;
+    using cnahouse::environment::kStarsBeginAtSunAltitudeDeg;
+    using cnahouse::environment::kStarsFullAtSunAltitudeDeg;
     using cnahouse::environment::kSunLightingAnchors;
     using cnahouse::environment::kSunLutHighestDeg;
     using cnahouse::environment::kSunLutLowestDeg;
     using cnahouse::environment::kSunLutSize;
     using cnahouse::environment::SkyDiffuseCloudFactor;
+    using cnahouse::environment::StarVisibilityForSunAltitude;
     using cnahouse::environment::SunDirection;
     using cnahouse::environment::SunLighting;
     using cnahouse::environment::SunLightingAt;
@@ -36,6 +39,9 @@ namespace
     using cnahouse::environment::SunObserver;
     using cnahouse::environment::SunPosition;
     using cnahouse::environment::SunShadingFor;
+    using cnahouse::environment::TwilightAmbientFactor;
+    using cnahouse::environment::TwilightPhase;
+    using cnahouse::environment::TwilightPhaseFor;
     using Microsoft::Xna::Framework::Vector3;
 
     /// @brief A position with only the two angles the direction depends on filled in.
@@ -274,4 +280,61 @@ TEST(SunLightTests, ShadingAttenuatesTheIntensityAndLeavesTheColourAlone)
     const auto night = SunShadingFor(At(-20.0, 0.0), 1.0);
     EXPECT_GT(night.directIntensity, 0.0F);
     EXPECT_LT(night.directIntensity, 0.01F);
+    EXPECT_FLOAT_EQ(night.skyDiffuseIntensity, 0.0F)
+        << "HOUSE-01574 fades the solar ambient out by astronomical night";
+}
+
+TEST(SunLightTests, TwilightBandsUseTheThreeStandardThresholds)
+{
+    EXPECT_EQ(TwilightPhaseFor(20.0), TwilightPhase::Day);
+    EXPECT_EQ(TwilightPhaseFor(-1.0), TwilightPhase::Civil);
+    EXPECT_EQ(TwilightPhaseFor(-6.0), TwilightPhase::Nautical);
+    EXPECT_EQ(TwilightPhaseFor(-12.0), TwilightPhase::Astronomical);
+    EXPECT_EQ(TwilightPhaseFor(-18.0), TwilightPhase::Night);
+    EXPECT_EQ(TwilightPhaseFor(std::nan("")), TwilightPhase::Night);
+}
+
+TEST(SunLightTests, TwilightAmbientFadesSmoothlyToAstronomicalNight)
+{
+    EXPECT_DOUBLE_EQ(TwilightAmbientFactor(-6.0), 1.0);
+    EXPECT_DOUBLE_EQ(TwilightAmbientFactor(-12.0), 0.5);
+    EXPECT_DOUBLE_EQ(TwilightAmbientFactor(-18.0), 0.0);
+    EXPECT_DOUBLE_EQ(TwilightAmbientFactor(-30.0), 0.0);
+
+    double previous = 1.0;
+    double worstStep = 0.0;
+    for (double altitude = -6.0; altitude >= -18.0; altitude -= 0.05)
+    {
+        const double current = TwilightAmbientFactor(altitude);
+        EXPECT_LE(current, previous + 1e-12);
+        worstStep = std::max(worstStep, previous - current);
+        previous = current;
+    }
+    EXPECT_LT(worstStep, 0.007) << "the twilight ambient contains a visible step";
+
+    const auto civil = SunShadingFor(At(-6.0, 0.0), 0.0);
+    const auto nautical = SunShadingFor(At(-12.0, 0.0), 0.0);
+    const auto night = SunShadingFor(At(-18.0, 0.0), 0.0);
+    EXPECT_NEAR(civil.skyDiffuseIntensity, 0.02F, 1e-6F);
+    EXPECT_NEAR(nautical.skyDiffuseIntensity, 0.01F, 1e-6F);
+    EXPECT_FLOAT_EQ(night.skyDiffuseIntensity, 0.0F);
+}
+
+TEST(SunLightTests, StarsAppearAcrossTwilightAndAreFullBeforeAstronomicalNight)
+{
+    EXPECT_DOUBLE_EQ(kStarsBeginAtSunAltitudeDeg, -4.0);
+    EXPECT_DOUBLE_EQ(kStarsFullAtSunAltitudeDeg, -14.0);
+    EXPECT_DOUBLE_EQ(StarVisibilityForSunAltitude(-4.0), 0.0);
+    EXPECT_DOUBLE_EQ(StarVisibilityForSunAltitude(-9.0), 0.5);
+    EXPECT_DOUBLE_EQ(StarVisibilityForSunAltitude(-14.0), 1.0);
+    EXPECT_DOUBLE_EQ(StarVisibilityForSunAltitude(-18.0), 1.0);
+    EXPECT_DOUBLE_EQ(StarVisibilityForSunAltitude(std::nan("")), 0.0);
+
+    double previous = 0.0;
+    for (double altitude = -4.0; altitude >= -14.0; altitude -= 0.05)
+    {
+        const double current = StarVisibilityForSunAltitude(altitude);
+        EXPECT_GE(current, previous - 1e-12);
+        previous = current;
+    }
 }

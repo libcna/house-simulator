@@ -14164,8 +14164,30 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 - [ ] HOUSE-01573 — Implement the moon variant of the overlay at a 28° cone
       dep: HOUSE-01572 · sys: ui · plat: ALL · pri: MUST
       dep-note: needs phase 24
-- [ ] HOUSE-01574 — Implement civil/nautical/astronomical twilight thresholds and their effect on ambient and stars
+- [x] HOUSE-01574 — Implement civil/nautical/astronomical twilight thresholds and their effect on ambient and stars
       dep: HOUSE-01563 · sys: environment · plat: ALL · pri: MUST
+      verify: unit SunLightTests.* (16), including all exact band boundaries, monotonic/continuous
+              ambient and star ramps, `SunShadingFor` at civil, nautical and astronomical dusk,
+              and the complete 1,216-test unit binary
+      note: `SunModel` already owned the conventional −6°/−12°/−18° thresholds from
+            `HOUSE-01561`; this task makes them observable as `TwilightPhase` and applies them.
+            The solar sky-diffuse contribution keeps §32.2's value through civil twilight, then
+            smoothsteps to zero at astronomical night. The separate 0.025 room ambient floor is
+            not changed, so night becomes dark rather than mathematically black.
+      correction: §34 called its artistic −14° full-star endpoint *"astronomical twilight"*.
+            Astronomical twilight conventionally ends at −18°, as the existing model and its
+            published-time tests already say. The −4° to −14° star ramp itself remains exactly the
+            accepted look; the architecture now describes −14° accurately as two degrees below
+            nautical twilight instead of renaming a standard threshold.
+      boundary: `StarVisibilityForSunAltitude` publishes only the smooth sun-altitude factor.
+            `HOUSE-01612` still owns the catalogue renderer's magnitude cutoff plus cloud and moon
+            suppression; no absent star renderer is falsely completed here.
+      measured: with clear sky, `skyDiffuseIntensity` is 0.020 at civil dusk, 0.010 at nautical
+            dusk and exactly 0 at astronomical night. The ambient factor's worst 0.05° sample step
+            is below 0.007. Star visibility is 0 at −4°, 0.5 at −9° and 1 at −14° and below.
+      mutation: disconnecting the twilight factor from `SunShadingFor` was caught at both
+            nautical dusk (0.020 instead of 0.010) and astronomical night (0.020 instead of 0);
+            the production expression was restored and all 16 focused tests passed again.
 - [ ] HOUSE-01575 — Validate the OPENGLES3 boolean-grid coverage against the OPENGL33 true count on the same scene
       dep: HOUSE-01569, HOUSE-00091 · sys: ci · plat: LNX · pri: MUST
       accept: the two agree within 0.15 coverage across 20 sampled camera angles
