@@ -14450,8 +14450,21 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: raising scalar movement to 101 % failed the acceptance run on all nine scalar
             channels (for example `cloudCover` reached 0.045450 against 0.045002 tolerance). The
             unmodified limiter was restored before the final green run.
-- [ ] HOUSE-01686 — Implement the smoothstep blend from the snapshot to the target
+- [x] HOUSE-01686 — Implement the smoothstep blend from the snapshot to the target
       dep: HOUSE-01685 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `WeatherBlendTests.*` (6)
+      note: `WeatherBlend` captures immutable start and target vectors, evaluates the clamped cubic
+            `t²(3−2t)` curve for all ten archetype-driven continuous channels, and takes the
+            shortest wrapped arc for wind direction. Discrete precipitation, integrated wet/snow
+            surfaces and RNG state remain at the snapshot for their dedicated tasks. A composition
+            test proves the blend cannot bypass `HOUSE-01685`'s rate limiter.
+      correction: §42.1 used `blendStart` for both a state snapshot and a timestamp, then
+            subtracted it from `now`. The pseudocode now names `blendStartState` and
+            `blendStartTime` separately, matching the executable model instead of leaving an
+            impossible expression as the contract.
+      mutation: replacing the cubic result with its clamped linear input changed quarter progress
+            from 0.15625 to 0.25 and failed all three pinned continuous-channel expectations in
+            `QuarterProgressIsSmoothstepRatherThanLinear`; production was restored.
 - [ ] HOUSE-01687 — Implement the `W_WINDY` modifier as an independent wind draw combinable with any precipitation archetype
       dep: HOUSE-01686 · sys: weather · plat: ALL · pri: MUST
       accept: "windy heavy rain" and "blizzard" arise without a combinatorial state list

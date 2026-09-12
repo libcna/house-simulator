@@ -3901,10 +3901,11 @@ every simulated minute:
         next = sampleArchetype(season, current, rng)
         targetExpiry = now + dwell(next, season, rng)          // 25 .. 380 simulated minutes
         transitionEnd = now + transitionTime(current, next, rng)  // 5 .. 45 simulated minutes
-        blendStart = snapshot(state)
-    t = smoothstep(0, 1, (now − blendStart) / (transitionEnd − blendStart))
+        blendStartTime = now
+        blendStartState = snapshot(state)
+    t = smoothstep(0, 1, (now − blendStartTime) / (transitionEnd − blendStartTime))
     for each channel c:
-        desired = lerp(blendStart[c], target[c], t)
+        desired = lerp(blendStartState[c], target[c], t)
         state[c] = moveTowards(state[c], desired, maxRate[c] · dt)
 ```
 
@@ -3914,6 +3915,10 @@ destination's base range by the continuously blended seasonal dwell scale.
 archetypes' characteristic transition ranges: both sides of the change influence its tempo, but
 the data does not repeat a timing range for all 169 source/destination pairs. Authored and
 seasonally scaled ranges must keep the §42.1 bounds shown above.
+The snapshot is immutable for the life of a transition: the desired curve is evaluated from that
+captured vector, never recursively from the rate-limited live state. Scalar channels use the cubic
+`t²(3−2t)` smoothstep; `windDirectionDeg` follows the shortest wrapped arc. Precipitation phase,
+integrated surface state and RNG state are not interpolation channels.
 
 ### 42.2 Rate limits — the anti-absurdity guarantee
 
