@@ -629,6 +629,10 @@ state you transition into. The file defines its wind and gust bands but no activ
 distribution; the independent continuous modifier amount is therefore a caller input, not a
 hidden runtime constant.
 
+The authored `precipType` is nominal. For rain, snow and sleet targets the live outdoor
+temperature overrides it: below 0 °C is snow, 0 through 2.5 °C inclusive is sleet, and above
+2.5 °C is rain. `None` remains dry and `Hail` remains hail.
+
 §36.3 asks for four seasonal transition matrices; this is one base matrix and four seasonal weight
 vectors, which is the same thing in 13 numbers a season instead of 169 — the matrix says what
 follows what and the season says what the year is fond of. Rule 6 checks that a transition names

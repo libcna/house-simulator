@@ -3667,7 +3667,9 @@ blend between those endpoints.
 with `annualMean = 11 °C`, `annualAmp = 12 °C`, `diurnalAmp = 6 °C` for the default location.
 `precipType` is then **derived**: `temperatureC > 2.5 → Rain`, `< 0.0 → Snow`, between → `Sleet`,
 overriding the archetype's nominal type. So it snows in January and rains in July without any
-special-casing, and a spring storm can produce sleet.
+special-casing, and a spring storm can produce sleet. This override applies to the three water
+phases: a non-precipitating archetype remains `None`, while `W_HAIL` remains `Hail` for the separate
+hail coupling of §40.
 
 ### 36.3 Seasons
 

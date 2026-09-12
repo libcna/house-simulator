@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <format>
 #include <tuple>
 #include <utility>
@@ -84,6 +85,36 @@ namespace cnahouse::weather
         return util::Err(ErrorCode::InvalidData,
                          std::format("'{}' is not None, Rain, Snow, Sleet or Hail", name),
                          std::string(context));
+    }
+
+    util::Result<PrecipType> PrecipTypeAtTemperature(PrecipType nominalType, float temperatureC)
+    {
+        if (!std::isfinite(temperatureC) || temperatureC < -18.0F || temperatureC > 38.0F)
+        {
+            return util::Err(ErrorCode::OutOfRange,
+                             "precipitation temperature must be finite and in [-18, 38] C",
+                             "weather/temperatureC");
+        }
+        switch (nominalType)
+        {
+            case PrecipType::None:
+            case PrecipType::Hail:
+                return nominalType;
+            case PrecipType::Rain:
+            case PrecipType::Snow:
+            case PrecipType::Sleet:
+                if (temperatureC > kSleetRainThresholdC)
+                {
+                    return PrecipType::Rain;
+                }
+                if (temperatureC < kSnowSleetThresholdC)
+                {
+                    return PrecipType::Snow;
+                }
+                return PrecipType::Sleet;
+        }
+        return util::Err(
+            ErrorCode::InvalidData, "the nominal precipitation phase is not defined", "weather/precipType");
     }
 
     util::Result<void> WeatherState::Validate() const

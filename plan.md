@@ -14482,8 +14482,19 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: changing both boost operations from `max` to `min` made windy rain and blizzard
             fall below the modifier's 12 m/s and 0.8 floors and failed both modifier tests;
             production was restored.
-- [ ] HOUSE-01688 — Implement temperature-derived `precipType` (rain / sleet / snow) overriding the archetype's nominal type
+- [x] HOUSE-01688 — Implement temperature-derived `precipType` (rain / sleet / snow) overriding the archetype's nominal type
       dep: HOUSE-01686, HOUSE-01535 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `WeatherPrecipTypeTests.*` (5)
+      note: `PrecipTypeAtTemperature` maps all nominal water phases to snow below 0 °C, sleet
+            from 0 through 2.5 °C inclusive, and rain above 2.5 °C. The same nominal snow target
+            is measured as snow at the coldest January dawn and rain at the warmest July afternoon
+            through `HOUSE-01535`'s one base curve; no season branch exists.
+      clarification: `None` remains no precipitation and `Hail` remains hail. Mapping either through
+            the three water phases would make two documented enum values unreachable and pre-empt
+            `HOUSE-01875`'s separate hail coupling; §36.2 now states that boundary explicitly.
+      mutation: changing the rain comparison from `> 2.5` to `>= 2.5` classified the exact upper
+            boundary as rain and failed `ExactTemperatureBandsAreSnowSleetAndRain`; production was
+            restored.
 - [ ] HOUSE-01689 — Implement the "precip type cannot change while intensity > 0.05" rule with its ramp-down/ramp-up
       dep: HOUSE-01688 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01690 — Implement `surfaceWetness` integration (accumulation and drying)

@@ -46,6 +46,17 @@ namespace cnahouse::weather
     [[nodiscard]] util::Result<PrecipType> ParsePrecipType(std::string_view name,
                                                            std::string_view context = "precipType");
 
+    inline constexpr float kSnowSleetThresholdC = 0.0F;
+    inline constexpr float kSleetRainThresholdC = 2.5F;
+
+    /// @brief §36.2's temperature override for liquid/frozen water precipitation.
+    ///
+    /// Rain above 2.5 °C, snow below 0 °C, and sleet at both endpoints and between them.
+    /// `None` remains no precipitation and `Hail` remains hail; the temperature rule replaces the
+    /// nominal phase only for rain/snow/sleet archetypes.
+    [[nodiscard]] util::Result<PrecipType> PrecipTypeAtTemperature(PrecipType nominalType,
+                                                                   float temperatureC);
+
     /// @brief One inclusive target band from `layout.weather.json`.
     ///
     /// Equal endpoints are valid: clear weather deliberately carries a precipitation band of
