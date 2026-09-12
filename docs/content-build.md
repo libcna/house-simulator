@@ -92,27 +92,28 @@ it, so requiring it would skip the stage on a checkout that has never baked a li
 | 2 | **`fonts`** | validate | every descriptor resolves to a vendored face | — | `assets-src/Fonts/*.spritefont` | — (a gate) |
 | 3 | **`layout`** | validate | the directory-set and file-placement gate | — | `tools/ci/check_layout.py` | — (a gate) |
 | 4 | **`manifest`** | validate | no unlisted file under assets-src/, no hash mismatch | — | `assets-src/assets.manifest.json` | — (a gate) |
-| 5 | **`licences`** | validate | every row has a licence, a licence file and the booleans | `manifest` | `assets-src/assets.manifest.json`<br>`licenses/THIRD-PARTY-ASSETS.md` | — (a gate) |
-| 6 | **`cnb-audio`** | compile | compile assets-src/Audio to content/Audio with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Audio/**/*` | — (a gate) |
-| 7 | **`cnb-fonts`** | compile | compile assets-src/Fonts to content/Fonts with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Fonts/**/*` | — (a gate) |
-| 8 | **`cnb-media`** | compile | compile assets-src/Media to content with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Media/**/*` | — (a gate) |
-| 9 | **`cnb-models`** | compile | compile assets-src/Models to content/Models with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Models/**/*` | — (a gate) |
-| 10 | **`cnb-textures`** | compile | compile assets-src/Textures to content/Textures with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/Textures/**/*` | — (a gate) |
-| 11 | **`world-rules`** | world | the twelve rules of §15.7 over the authored layout | `anim`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | — (a gate) |
-| 12 | **`collision`** | world | rooms become walls; the layout and the _COL proxies | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json`<br>`assets-src/assets.manifest.json` | `content/world/collision.bin` |
-| 13 | **`fence`** | world | §11.2's fences and gates and §11.1's garden structures | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png` | `build/fence/*.glb` |
-| 14 | **`neighbourhood`** | world | §11.4's neighbour houses, impostor cards and street furniture | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json` | `build/neighbourhood/*.glb` |
-| 15 | **`road`** | world | §11.4's road, kerbs, sidewalks, grates and markings | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png` | `build/terrain/ROAD_*.glb` |
-| 16 | **`terrain-tiles`** | world | §11.5's twenty height-field tiles | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png`<br>`assets-src/world/terrain_materials.png` | `build/terrain/TERRAIN_*.glb` |
-| 17 | **`world-deploy`** | world | strip the comments, deploy as plain JSON, and hash what was written | `anim`, `fonts`, `layout`, `licences`, `manifest`, `world-rules` | `assets-src/world/*.json` | `content/world/*.json` |
-| 18 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fence`, `fonts`, `layout`, `licences`, `manifest`, `road`, `terrain-tiles` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb`<br>`build/terrain/*.glb`<br>`build/fence/*.glb`<br>`build/shell/*.glb` | `content/world/chunks.bin` |
-| 19 | **`cnb-world`** | compile | compile assets-src/world to content/world with cna-content | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/**/*` | — (a gate) |
-| 20 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/coverage.bin` |
-| 21 | **`nav`** | world | the pet waypoint graph | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/nav.bin` |
-| 22 | **`neighbourhood-bin`** | world | §11.4's meshes, keyed by the asset id a row names | `anim`, `fonts`, `layout`, `licences`, `manifest`, `neighbourhood`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`build/neighbourhood/*.glb` | `content/world/neighbourhood.bin` |
-| 23 | **`shading`** | world | §22's per-window sun-shading grid, 12 x 24 nodes a window | `anim`, `fonts`, `layout`, `licences`, `manifest`, `neighbourhood`, `world-rules` | `assets-src/world/layout.openings.json`<br>`assets-src/world/layout.portals.json`<br>`assets-src/world/layout.cells.json`<br>`assets-src/world/layout.exterior.json`<br>`build/shell/*.glb`<br>`build/neighbourhood/*.glb` | `content/world/shading.bin` |
-| 24 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
-| 25 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
+| 5 | **`sky-lut`** | validate | §31.2's generated 32 x 8 x 16 compact sky-colour contract | — | `tools/world/sky_lut.py`<br>`assets-src/world/layout.sky.json` | — (a gate) |
+| 6 | **`licences`** | validate | every row has a licence, a licence file and the booleans | `manifest` | `assets-src/assets.manifest.json`<br>`licenses/THIRD-PARTY-ASSETS.md` | — (a gate) |
+| 7 | **`cnb-audio`** | compile | compile assets-src/Audio to content/Audio with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/Audio/**/*` | — (a gate) |
+| 8 | **`cnb-fonts`** | compile | compile assets-src/Fonts to content/Fonts with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/Fonts/**/*` | — (a gate) |
+| 9 | **`cnb-media`** | compile | compile assets-src/Media to content with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/Media/**/*` | — (a gate) |
+| 10 | **`cnb-models`** | compile | compile assets-src/Models to content/Models with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/Models/**/*` | — (a gate) |
+| 11 | **`cnb-textures`** | compile | compile assets-src/Textures to content/Textures with cna-content | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/Textures/**/*` | — (a gate) |
+| 12 | **`world-rules`** | world | the twelve rules of §15.7 over the authored layout | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/world/*.json` | — (a gate) |
+| 13 | **`collision`** | world | rooms become walls; the layout and the _COL proxies | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut`, `world-rules` | `assets-src/world/*.json`<br>`assets-src/assets.manifest.json` | `content/world/collision.bin` |
+| 14 | **`fence`** | world | §11.2's fences and gates and §11.1's garden structures | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png` | `build/fence/*.glb` |
+| 15 | **`neighbourhood`** | world | §11.4's neighbour houses, impostor cards and street furniture | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut`, `world-rules` | `assets-src/world/layout.exterior.json` | `build/neighbourhood/*.glb` |
+| 16 | **`road`** | world | §11.4's road, kerbs, sidewalks, grates and markings | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png` | `build/terrain/ROAD_*.glb` |
+| 17 | **`terrain-tiles`** | world | §11.5's twenty height-field tiles | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`assets-src/world/terrain.png`<br>`assets-src/world/terrain_materials.png` | `build/terrain/TERRAIN_*.glb` |
+| 18 | **`world-deploy`** | world | strip the comments, deploy as plain JSON, and hash what was written | `anim`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut`, `world-rules` | `assets-src/world/*.json` | `content/world/*.json` |
+| 19 | **`chunks`** | world | per-cell static prop batches | `anim`, `collision`, `fence`, `fonts`, `layout`, `licences`, `manifest`, `road`, `sky-lut`, `terrain-tiles` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb`<br>`build/terrain/*.glb`<br>`build/fence/*.glb`<br>`build/shell/*.glb` | `content/world/chunks.bin` |
+| 20 | **`cnb-world`** | compile | compile assets-src/world to content/world with cna-content | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/world/**/*` | — (a gate) |
+| 21 | **`coverage`** | world | the rain/roof coverage height field | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/world/*.json` | `content/world/coverage.bin` |
+| 22 | **`nav`** | world | the pet waypoint graph | `anim`, `collision`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/world/*.json` | `content/world/nav.bin` |
+| 23 | **`neighbourhood-bin`** | world | §11.4's meshes, keyed by the asset id a row names | `anim`, `fonts`, `layout`, `licences`, `manifest`, `neighbourhood`, `sky-lut`, `world-rules` | `assets-src/world/layout.exterior.json`<br>`build/neighbourhood/*.glb` | `content/world/neighbourhood.bin` |
+| 24 | **`shading`** | world | §22's per-window sun-shading grid, 12 x 24 nodes a window | `anim`, `fonts`, `layout`, `licences`, `manifest`, `neighbourhood`, `sky-lut`, `world-rules` | `assets-src/world/layout.openings.json`<br>`assets-src/world/layout.portals.json`<br>`assets-src/world/layout.cells.json`<br>`assets-src/world/layout.exterior.json`<br>`build/shell/*.glb`<br>`build/neighbourhood/*.glb` | `content/world/shading.bin` |
+| 25 | **`skyexposure`** | world | per-cell sky and facade exposure | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/world/*.json` | `content/world/skyexposure.bin` |
+| 26 | **`snowshell`** | world | the snow shells over up-facing exterior surfaces | `anim`, `coverage`, `fonts`, `layout`, `licences`, `manifest`, `sky-lut` | `assets-src/world/*.json`<br>`assets-src/Models/**/*.glb` | `content/world/snowshell.bin` |
 
 The command each stage runs:
 
@@ -121,6 +122,7 @@ anim           python3 tools/ci/check_anim_assets.py
 fonts          python3 tools/ci/check_fonts.py
 layout         python3 tools/ci/check_layout.py
 manifest       python3 tools/ci/check_manifest.py
+sky-lut        python3 tools/world/sky_lut.py --check
 licences       python3 tools/assets/verify_licences.py --check
 cnb-audio      /rv/data/development/github.com/libcna/house-simulator/build/CNA_BUILD/cna-content build assets-src/Audio -o content/Audio --quiet
 cnb-fonts      /rv/data/development/github.com/libcna/house-simulator/build/CNA_BUILD/cna-content build assets-src/Fonts -o content/Fonts --quiet

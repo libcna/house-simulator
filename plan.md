@@ -14323,8 +14323,26 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 25 — Sky and clouds
 
-- [ ] HOUSE-01641 — Generate the sky LUTs offline (zenith and horizon, over sun altitude, cloud cover and azimuth offset) and tune the sunrise/sunset warmth
+- [x] HOUSE-01641 — Generate the sky LUTs offline (zenith and horizon, over sun altitude, cloud cover and azimuth offset) and tune the sunrise/sunset warmth
       dep: HOUSE-00394 · sys: content · plat: TOOL · pri: MUST
+      verify: `python3 tools/world/sky_lut.py --check`; `python3 tools/world/sky_lut.py
+            --selftest` (13 claims; expands 32 × 8 = 256 zenith and 32 × 8 × 16 = 4096 horizon
+            samples)
+      note: (2026-09-12) the 32 committed sun-elevation rows are now reproducibly generated from
+            eleven explicit smoothstep anchors. `colourModel` carries the formerly implicit
+            overcast grey and sun-glow colour/strength/exponent, so the runtime and the offline
+            proof cannot quietly use different cloud-cover or azimuth equations. The validator
+            requires that block, and the content DAG runs the staleness check before generators.
+      correction: `HOUSE-00394` deliberately replaced §31.2's two fully expanded tables with a
+            compact clear-sky curve plus analytic cloud and azimuth terms, but §31.2 still called
+            the committed data a Preetham-generated pair of tables. It is neither: the eleven
+            art-directed anchors and two terms represent the same conceptual 32 × 8 × 16 grid and
+            the selftest materialises all 4096 horizon cells. §31.2 now records measured reality.
+      tuning: the old single horizon curve made every azimuth equally orange at sunrise. The new
+            base horizon is darker away from the sun and a cosine-power lobe restores local warmth:
+            at 0° elevation its near-sun RGB is (0.881, 0.430, 0.184), versus (0.800, 0.380, 0.160)
+            opposite the sun; full overcast collapses every sampled altitude and azimuth exactly
+            to (0.370, 0.400, 0.440). All channels remain in XNA `Color`'s 0..1 range.
 - [ ] HOUSE-01642 — Generate the sky dome mesh (32 × 18 hemisphere + horizon skirt)
       dep: HOUSE-01641 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-01643 — Implement `SkySystem`: the dome draw with `DepthStencilState::None`, camera-following translation

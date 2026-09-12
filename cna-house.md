@@ -3247,9 +3247,15 @@ c += sunGlowTerm(angleToSun) · (1 − cloudCover)²
 c = mix(c, nightColour(moonAltitude, moonPhase), nightWeight(sunAltitude))
 ```
 
-The two LUTs are 32 × 8 (and 32 × 8 × 16) tables of RGB, authored once from a Preetham-style
-model evaluated offline in Python and hand-tuned for sunrise/sunset warmth. Storing LUTs rather
-than evaluating an analytic sky model at runtime is both cheaper and far easier to art-direct.
+The conceptual LUTs are 32 × 8 (and 32 × 8 × 16) tables of RGB. `layout.sky.json` stores their
+compact, exactly reproducible form: 32 clear-sky zenith/horizon rows generated offline from eleven
+art-directed anchors, plus the overcast mix and sun-glow parameters that supply the cloud-cover and
+azimuth axes. `tools/world/sky_lut.py --selftest` expands and checks all 4096 horizon samples. This
+is the deliberate `HOUSE-00394` representation: evaluating the two simple extra axes while the
+vertices are already being recomputed avoids 4064 redundant authored rows without adding an
+analytic atmospheric model to runtime. Sunrise/sunset warmth is concentrated around the sun rather
+than tinting every azimuth orange, and the same elevation curve naturally treats dawn and dusk
+identically. The later reference-photo pass (`HOUSE-01652`) art-directs these same anchors.
 
 594 vertices × 16 bytes = 9.5 KB per update. Negligible.
 

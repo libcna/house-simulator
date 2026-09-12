@@ -165,6 +165,9 @@ def default_stages() -> list[Stage]:
         Stage("anim", "validate", ["python3", "tools/ci/check_anim_assets.py"],
               inputs=["assets-src/Models/**/*.glb"], outputs=[],
               description="single-skin models, and every sidecar binds"),
+        Stage("sky-lut", "validate", ["python3", "tools/world/sky_lut.py", "--check"],
+              inputs=["tools/world/sky_lut.py", "assets-src/world/layout.sky.json"], outputs=[],
+              description="§31.2's generated 32 x 8 x 16 compact sky-colour contract"),
         # --- the world chain (`HOUSE-00210`…`HOUSE-00215`) --------------------------------------
         # `HOUSE-00363`. The layout gate comes first in this chain, because `build_collision.py`
         # and the five tools after it read the layout and believe it; §15.7 says a validation

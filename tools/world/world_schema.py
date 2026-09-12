@@ -480,12 +480,24 @@ def build() -> dict[str, dict]:
                                                          "exclusiveMinimum": 0}}})}}})
 
     schemas["sky"] = envelope("sky", "layout.sky.json", {
-        "required": ["gradient"],
+        "required": ["gradient", "colourModel"],
         "properties": {
             "gradient": {"type": "array", "minItems": 2, "items": obj(
                 ["sunElevationDeg", "zenith", "horizon"],
                 {"sunElevationDeg": {"type": "number", "minimum": -90, "maximum": 90},
                  "zenith": RGB, "horizon": RGB})},
+            # `HOUSE-01641`: the two axes deliberately not expanded into the gradient.  These
+            # parameters are data because `SkySystem` will consume them; leaving them as constants
+            # in the offline generator would let its 4096-cell proof disagree with the frame.
+            "colourModel": obj(
+                ["cloudCoverSamples", "azimuthOffsetSamples", "overcastGrey", "sunGlowColor",
+                 "sunGlowStrength", "sunGlowExponent"],
+                {"cloudCoverSamples": {"const": 8},
+                 "azimuthOffsetSamples": {"const": 16},
+                 "overcastGrey": RGB,
+                 "sunGlowColor": RGB,
+                 "sunGlowStrength": UNIT,
+                 "sunGlowExponent": {"type": "number", "exclusiveMinimum": 0}}),
             "cloudLayers": {"type": "array", "items": obj(
                 ["id", "texture", "altitude"],
                 {"id": ID, "texture": STR, "altitude": NUM,

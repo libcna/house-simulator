@@ -146,6 +146,39 @@
       },
       "type": "array"
     },
+    "colourModel": {
+      "additionalProperties": false,
+      "properties": {
+        "azimuthOffsetSamples": {
+          "const": 16
+        },
+        "cloudCoverSamples": {
+          "const": 8
+        },
+        "overcastGrey": {
+          "$ref": "#/$defs/rgb"
+        },
+        "sunGlowColor": {
+          "$ref": "#/$defs/rgb"
+        },
+        "sunGlowExponent": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "sunGlowStrength": {
+          "$ref": "#/$defs/unit"
+        }
+      },
+      "required": [
+        "cloudCoverSamples",
+        "azimuthOffsetSamples",
+        "overcastGrey",
+        "sunGlowColor",
+        "sunGlowStrength",
+        "sunGlowExponent"
+      ],
+      "type": "object"
+    },
     "gradient": {
       "items": {
         "additionalProperties": false,
@@ -248,7 +281,8 @@
   },
   "required": [
     "schema",
-    "gradient"
+    "gradient",
+    "colourModel"
   ],
   "title": "layout.sky.json",
   "type": "object"

@@ -195,6 +195,11 @@ run_gate "calendar-table" python3 tools/ci/calendar_table.py --check
 # responses and compared. `--check` never touches the network; only `--fetch` does.
 run_gate "suntimes-table" python3 tools/ci/suntimes_table.py --check
 run_gate "suntimes-selftest" python3 tools/ci/suntimes_table.py --selftest
+# `HOUSE-01641`. The 32 committed gradient rows are generated from eleven art-direction anchors;
+# the selftest expands the compact cloud and azimuth terms into the conceptual 32 x 8 x 16 table.
+# Both matter: `--check` catches a hand edit and `--selftest` catches a plausible but broken model.
+run_gate "sky-lut" python3 tools/world/sky_lut.py --check
+run_gate "sky-lut-selftest" python3 tools/world/sky_lut.py --selftest
 # `HOUSE-01543`. §36.3: *"Season is a continuous phase, never an enum... never a switch."* The
 # season code being right is no protection at all against a consumer writing
 # `switch (phase.primary)`, and nothing in a test of the season itself would notice. This is the
