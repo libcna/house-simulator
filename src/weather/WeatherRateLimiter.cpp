@@ -12,7 +12,12 @@ namespace cnahouse::weather
     {
         [[nodiscard]] float MoveTowards(float current, float desired, float maximumDelta) noexcept
         {
-            return current + std::clamp(desired - current, -maximumDelta, maximumDelta);
+            const float delta = desired - current;
+            if (std::abs(delta) <= maximumDelta)
+            {
+                return desired;
+            }
+            return current + std::clamp(delta, -maximumDelta, maximumDelta);
         }
 
         [[nodiscard]] float WrapDegrees(float degrees) noexcept

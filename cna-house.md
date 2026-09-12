@@ -3956,7 +3956,9 @@ with 200 random seeds and checking no channel ever exceeds its rate.
 
 `precipType` cannot change while `precipIntensity > 0.05`. When the temperature crosses a
 threshold mid-event, intensity is first ramped down to 0.05, the type flips, then intensity ramps
-back. So rain turns to sleet turns to snow through a lull, as it does in life.
+back under §42.2's normal precipitation rate. The first observable state carrying the new type is
+therefore exactly at or below 0.05, even when one update spans the whole ramp-down. So rain turns
+to sleet turns to snow through a lull, as it does in life.
 
 ---
 

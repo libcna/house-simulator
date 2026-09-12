@@ -14495,8 +14495,22 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: changing the rain comparison from `> 2.5` to `>= 2.5` classified the exact upper
             boundary as rain and failed `ExactTemperatureBandsAreSnowSleetAndRain`; production was
             restored.
-- [ ] HOUSE-01689 — Implement the "precip type cannot change while intensity > 0.05" rule with its ramp-down/ramp-up
+- [x] HOUSE-01689 — Implement the "precip type cannot change while intensity > 0.05" rule with its ramp-down/ramp-up
       dep: HOUSE-01688 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `PrecipitationTransitionTests.*` (5)
+      note: `PrecipitationTransition` composes the existing rate limiter with a protected intensity
+            target. A phase mismatch above 0.05 targets the boundary under the normal 0.07/minute
+            limit, the first state at the boundary carries the new phase, and later calls ramp back
+            toward the original desired intensity. Even a 100-minute update exposes the switch at
+            0.05 rather than skipping the lull; zero simulated time is an identity.
+      finding: the long-step test exposed scalar `moveTowards` reconstructing a reachable target as
+            `current + (target - current)`, which rounded 0.05 a few ULP upward and prevented the
+            exact boundary transition. It now returns `target` directly whenever the remaining
+            delta fits in the rate budget; the rate-limit acceptance remains unchanged and a
+            regression test pins exact scalar target arrival.
+      mutation: allowing the type assignment immediately, without checking the post-rate-limit
+            intensity, changed rain to snow at intensity 0.73 and failed
+            `TypeChangesOnlyAtTheProtectedIntensity`; production was restored.
 - [ ] HOUSE-01690 — Implement `surfaceWetness` integration (accumulation and drying)
       dep: HOUSE-01686 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01691 — Implement `snowDepth` integration (accumulation and melt)

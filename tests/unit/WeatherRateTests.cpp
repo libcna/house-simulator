@@ -121,6 +121,19 @@ namespace
         EXPECT_NEAR(AngularDistance(next.Value().windDirectionDeg, current.windDirectionDeg), 4.5F, 1e-4F);
     }
 
+    TEST(WeatherRateTests, ScalarTargetsAreReachedExactlyWithoutOvershoot)
+    {
+        const WeatherRateLimiter limiter(Rates());
+        WeatherState current;
+        current.precipIntensity = 1.0F;
+        WeatherState desired = current;
+        desired.precipIntensity = 0.05F;
+
+        const auto next = limiter.Advance(current, desired, 100.0F);
+        ASSERT_TRUE(next);
+        EXPECT_FLOAT_EQ(next.Value().precipIntensity, desired.precipIntensity);
+    }
+
     TEST(WeatherRateTests, NonTargetStateIsPreservedAndZeroMinutesChangesNothing)
     {
         const WeatherRateLimiter limiter(Rates());
