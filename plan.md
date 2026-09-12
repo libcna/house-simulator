@@ -13943,12 +13943,39 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             tests before image comparison: both summer cases report that their visible sun was
             never drawn. `SunTests.SeasonalDayLength` remains green, as do the full unit suite and
             the relevant broader render cases.
-- [ ] HOUSE-01545 — Implement the outdoor temperature model: seasonal base curve + diurnal curve + weather `Δtemp`, driven by `SeasonPhase` and blended, never switched
+- [x] HOUSE-01545 — Implement the outdoor temperature model: seasonal base curve + diurnal curve + weather `Δtemp`, driven by `SeasonPhase` and blended, never switched
       dep: HOUSE-01543, HOUSE-01535 · sys: environment · plat: ALL · pri: MUST
       accept: (1) the annual minimum and maximum land in winter and summer respectively; (2) the
               diurnal minimum is near dawn; (3) the curve is continuous across every season
               boundary; (4) it is the single source `W_SNOW` gating and storm probability read
       verify: unit TemperatureTests.* sampling a full year
+      verify-result: 6 `TemperatureTests`, the 6 `TemperatureCurveTests` regressions, and the full
+            1,222-test unit binary pass. No graphical test is part of this model-only task.
+      implementation: `OutdoorTemperatureC(dayOfYear, hourOfDay, weatherDeltaC)` is the sole
+            composition: `HOUSE-01535`'s exact analytic base plus weather's live offset, exactly
+            once. `SimClock::OutdoorBaseTemperatureC()` delegates to the same path with zero and
+            `SimClock::OutdoorTemperatureC(delta)` supplies the exact continuous calendar day and
+            clock face. The latter is the value `HOUSE-01704`'s snow and storm probability gates
+            consume when the weather system exists.
+      correction: the title's *"driven by `SeasonPhase` and blended"* cannot literally mean mixing
+            four per-season temperature constants. `HOUSE-01535` already accepted §36.2's exact
+            365-day cosine, driven by the 1-based continuous calendar day; `SeasonPhase` uses a
+            365.2425-day mean year to avoid a New-Year discontinuity. Converting that float phase
+            back into a synthetic calendar day creates two slightly different temperatures and
+            replacing the cosine with four anchors discards the accepted curve. §36.3 now says the
+            precise rule: piecewise seasonal tables use `blend`; analytic annual curves read their
+            continuous cycle directly and therefore never switch in the first place.
+      boundary: weather target interpolation remains `HOUSE-01686`; this API consumes that one
+            already-continuous `Δtemp` and does not pre-implement the absent weather state machine.
+            The actual snow/storm probability gates remain `HOUSE-01704`, which depends on this
+            task and now has one live temperature to read rather than a second formula to invent.
+      measured: the full-year 15:00 sweep reaches 29.000 °C on day 201 in summer and 5.000 °C
+            around day 18.5 in winter. The diurnal extrema are exactly 03:00 (pre-dawn) and 15:00,
+            12.0 °C apart; the largest hourly change over the live annual+diurnal curve is
+            1.562 °C. All five season/year boundaries are continuous in the focused sweep.
+      mutation: removing `weatherDeltaC` from the composition was caught by both focused consumer
+            tests: summer stayed at 29 instead of 24/31 °C, and the clock's −4 °C live offset became
+            zero. The production addition was restored before the final green run.
 - [ ] HOUSE-01546 — Implement the in-game environment readout: time of day, season, progress through the year, and the outdoor temperature
       dep: HOUSE-01545, HOUSE-01543 · sys: ui · plat: ALL · pri: MUST
       accept: (1) it is a **player-facing** readout, not the `F8` debug overlay; (2) it shows the

@@ -169,6 +169,13 @@ namespace cnahouse::environment
         /// afternoon warms and the year cools underneath it at the same time.
         [[nodiscard]] double OutdoorBaseTemperatureC() const noexcept;
 
+        /// @brief The live outdoor temperature after the weather archetype's interpolated offset.
+        ///
+        /// This is `HOUSE-01545`'s single source for later snow/storm gates and player-facing
+        /// readouts. The weather system owns interpolation of its target offset; the clock owns the
+        /// seasonal and diurnal position and applies that already-continuous value exactly once.
+        [[nodiscard]] double OutdoorTemperatureC(double weatherDeltaC = 0.0) const noexcept;
+
         /// @brief The clock set as close to @p time, read as local STANDARD time, as it can get.
         ///
         /// **Exact when `calendarDaysPerSimDay` is 1.0, and coarse otherwise, by construction.**

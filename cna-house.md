@@ -3686,9 +3686,12 @@ struct SeasonPhase {
 ```
 
 `blend` is 0 through the middle of a season and ramps over the outer 20 % at each end, so the last
-fifth of autumn is already partly winter. Every seasonal quantity — the transition matrix, the
-temperature curve, vegetation colour, foliage density, snow-cover probability, the ambience bed —
-is the `blend`-weighted mix of the two neighbouring seasons' values, never a switch.
+fifth of autumn is already partly winter. Every **piecewise seasonal table** — the transition
+matrix, vegetation colour, foliage density, snow-cover probability and ambience bed — is the
+`blend`-weighted mix of the two neighbouring seasons' values, never a switch. Analytic annual
+curves, such as §36.2's exact temperature cosine and the sun's declination, read the continuous
+calendar position directly; replacing either with four seasonal constants would approximate an
+already-continuous curve and make two sources for the same cycle.
 
 **Hard seasonal gates are expressed as probability, not as prohibition, with one exception.**
 `W_SNOW` has probability zero in summer: it is gated on the outdoor temperature the §36.2

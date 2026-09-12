@@ -55,4 +55,16 @@ namespace cnahouse::environment
     /// reach `precipType`, `snowDepth` and the furnace's thermostat within a frame.
     [[nodiscard]] double BaseTemperatureC(double dayOfYear, double hourOfDay) noexcept;
 
+    /// @brief The diurnal part of §36.2's curve, in °C relative to the seasonal base.
+    [[nodiscard]] double DiurnalTemperatureDeltaC(double hourOfDay) noexcept;
+
+    /// @brief The one outdoor temperature that weather gating and player-facing UI consume.
+    ///
+    /// @p weatherDeltaC is the weather system's live, continuously interpolated `Δtemp`; this
+    /// function adds it once to the analytic seasonal and diurnal curve. Until the weather system
+    /// exists, pass zero. A non-finite delta is treated as zero so NaN cannot enter snow,
+    /// precipitation, HVAC or audio decisions.
+    [[nodiscard]] double
+    OutdoorTemperatureC(double dayOfYear, double hourOfDay, double weatherDeltaC) noexcept;
+
 } // namespace cnahouse::environment
