@@ -1,254 +1,163 @@
-# Session handoff — 2026-09-11
+# Session handoff — 2026-09-12
 
-*Written for the next agent picking this repository up on a fresh context. It records what this
-session did, what it found, what is owed, and exactly where to start. It is a snapshot and will go
-stale: `plan.md` is the authority, always.*
+This is the authoritative session handoff for the next agent. Read it first, then read only the
+parts of `plan.md`, `cna-house.md`, `AGENTS.md`/`CLAUDE.md`, and source files needed for the next
+dependency-valid task. Do not restart the project or repeat completed audits.
 
----
+## 1. Exact repository state
 
-## 1. Where the repository is
-
-| | |
+| Item | State |
 |---|---|
-| Branch | `develop`, pushed to `origin/develop` |
-| HEAD at session start | `731c5be` |
-| HEAD at session end | `6fb8e86` |
-| Commits this session | 9 |
-| Working tree | clean |
-| Tasks done / open | **472 / 867** (was 464 / 874) |
-| Dependency-valid unfinished MUST tasks | 74 |
+| Repository | `/rv/data/development/github.com/libcna/house-simulator` |
+| Branch | `develop` |
+| Code baseline | `94b160e` — `feat: update sky dome colours from LUT (HOUSE-01644)` |
+| Remote | `origin/develop`; `94b160e` was pushed before this handoff commit |
+| Handoff commit | The commit containing this file; it is a docs-only child of `94b160e` and is also intended to be pushed |
+| Working tree at handoff | Clean after the handoff commit |
+| Ledger count before the handoff commit | 509 completed / 833 open task rows |
 
-Sibling repositories, recorded and **not modified by this session**:
+Verify these claims with `git branch --show-current`, `git rev-parse HEAD`, `git status --short`,
+and `git log --oneline -5` before changing anything.
 
-| Repository | HEAD | Note |
+The previous build-directory migration is complete. The active `build/` cache uses the sibling
+repositories the owner requested:
+
+| Dependency | Branch / HEAD | Build use |
 |---|---|---|
-| `cnanext` | `93ca4ffdf` (`next`) | The vulkan→next merge, committed and amended at 09:14. cna-house is rebuilt and fully qualified against it — see §5. Not pushed to its own origin at the time of writing. |
-| `sharp-runtimenext` | `0c82d9b888bdf5f7d5663c77942f339bcb2a7445` (`next`) | untouched |
+| `../cna` | `next` / `0a3a1460169c9256897626f5b9c7bc308735949d` | `CNA_SOURCE_DIR`; clean |
+| `../sharp-runtime` | `next` / `0c82d9b888bdf5f7d5663c77942f339bcb2a7445` | `CNAHOUSE_SHARP_RUNTIME_ROOT`; clean |
+| SDL3 prebuilt | `../cna/.sdl-prebuilt-Linux-x86_64-wayland` | present and used by the build |
 
-### Test and gate state
+There are no standalone `../cna/build` or `../sharp-runtime/build` directories. This is not a
+problem: house-simulator builds both dependencies as CMake subprojects under `build/CNA_BUILD/`
+and `build/CNA_BUILD/SHARP_RUNTIME/`. The current tree contains the CNA libraries, 14
+sharp-runtime archives, and `build/CNA_BUILD/modules/renderers/easygl/libcna_renderer_easygl.a`.
+The `cna-house`, unit-test, and integration-test binaries all build successfully from this cache.
+Do not reconfigure merely to create standalone sibling build directories.
 
-* **1 290** unit + integration tests pass (`ctest --test-dir build -L 'unit|integration' -j3`).
-* **35 / 35** render tests pass, re-run at the end of the session against the merged
-  `cnanext 93ca4ffdf`. Nothing is owed. See §5 for the figures and for why the binaries had to be
-  rebuilt first.
-* `tools/ci/run_checks.sh` — all gates green, including the two new ones this session added.
+The cache also confirms:
 
-**Count tests from the binary, not from `ctest`.** `gtest_discover_tests(... DISCOVERY_MODE
-PRE_TEST)` makes `ctest -N` report whatever the last build left behind; two calls minutes apart
-legitimately answered 142 and 1141 here. The authoritative count is
-`./build/cnahouse_unit_tests --gtest_list_tests | grep -c '^  '`. This is written into
-`tests/CMakeLists.txt` beside the call.
+```text
+CNA_SOURCE_DIR=/rv/data/development/github.com/libcna/cna
+CNAHOUSE_SHARP_RUNTIME_ROOT=/rv/data/development/github.com/libcna/sharp-runtime
+CNA_CNAEXT=OFF
+CMAKE_C_COMPILER_LAUNCHER=ccache
+CMAKE_CXX_COMPILER_LAUNCHER=ccache
+```
 
----
+Neither sibling repository was modified by this session.
 
-## 2. What this session completed
+## 2. Mandatory display and build rules
 
-Nine commits, oldest first.
+**Never use `DISPLAY=:99` here. It is a real, visible display on this machine.** An earlier test
+invocation incorrectly assumed otherwise and opened test windows on the owner's screen. There
+were no test/game processes left running at handoff.
 
-| Commit | Task(s) | What |
+Every graphical or integration invocation must explicitly use:
+
+```bash
+SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy <command>
+```
+
+Pure static checks do not create windows. Do not run broad graphical suites when a focused test is
+sufficient. A real-screen game launch requires an explicit owner request.
+
+For every build use the established environment and the existing `build/` directory:
+
+```bash
+PATH=/home/robertvokac/.pyenv/versions/3.11.9/bin:/usr/local/bin:/usr/bin:/bin \
+CCACHE_DIR=/rv/cnaccache CCACHE_BASEDIR=/rv \
+cmake --build build --target <targets> -j$(nproc)
+```
+
+Keep that Python first in `PATH` when committing too. The pre-commit hook runs world validation,
+and `/usr/bin/python3` does not have `jsonschema`; the Python 3.11.9 environment does. Do not bypass
+the hook with `--no-verify`.
+
+All normal project constraints remain absolute: strict XNA 4.0-shaped runtime API,
+`CNA_CNAEXT=OFF`, no CNAEXT/model convenience API, no sibling-repository edits, and one completed
+task plus its `plan.md` checkbox per commit.
+
+## 3. Work completed in the sky chain
+
+The dependency chain `HOUSE-01641` through `HOUSE-01644` is complete. Do not redo it.
+
+| Commit | Task | Result |
 |---|---|---|
-| `e34cea8` | — | What *"the culled and unculled frames match"* actually measures |
-| `0826491` | `HOUSE-01561` | §32.1's `SunModel`, against 390 USNO-published rise/set times |
-| `834ebfe` | `HOUSE-01562`, `HOUSE-01563` | §32.2's sun direction, the colour LUT, and a continuous day length |
-| `91ce2ac` | `HOUSE-01251` | §28.1's per-room `LightingSystem` over the house's 243 fixtures |
-| `f84e564` | — | `shading_factor.py` could not be run against the real house, twice over |
-| `ee3c47b` | `HOUSE-01279` | Baked §22's sun-shading grid; a third defect in the tool |
-| `902e572` | `HOUSE-01700` | The `isRaining` lint caught four names and missed fourteen |
-| `5afbcda` | `HOUSE-02841` | `fopen`, the POSIX doors, and the single-thread rule |
-| `6fb8e86` | `HOUSE-01263` | §28.4's daylight model — and the section's `shadingFactor` is wrong |
+| `969f735` | `HOUSE-01641` | Generated the compact 32-row sky colour curve and analytic cloud/azimuth model in `layout.sky.json`. |
+| `5837243` | `HOUSE-01642` | Generated the non-degenerate 610-vertex / 1,216-triangle `CSKY` v1 dome. |
+| `461ac3e` | `HOUSE-01643` | Added the camera-following XNA `SkySystem` dome and composed the existing sun disc in the one `Pass::Sky` slot. |
+| `94b160e` | `HOUSE-01644` | Added strict colour-model loading, material-change CPU recolouring, and live XNA vertex-buffer updates. |
 
-Tasks closed: **`HOUSE-01251`, `01263`, `01279`, `01561`, `01562`, `01563`, `01700`, `02841`**.
-One new task was created (`HOUSE-01279`) and one was created and then **withdrawn** — see §4.
+`HOUSE-01644` specifically added:
 
-### The subsystems that now exist
+* `SkyColourModelReader`, which validates schema `cna-house/sky/1`, exactly 32 strictly ascending
+  elevation rows, the 8 × 16 conceptual sample axes, unit RGB values, and finite bounded scalars;
+* retained `VertexPositionColor` data for all 610 vertices;
+* interpolation between altitude rows, smoothstep from horizon to zenith, and the generated
+  `cloudCover^1.5` overcast mix;
+* updates only after a greater-than 0.25-degree altitude change or greater-than 0.01 cloud-cover
+  change, with no per-update vector allocation;
+* re-upload to the existing XNA vertex buffer and counters `sky.colour.updates` and
+  `sky.colour.micros`;
+* unit coverage for the parser, values, exact thresholds, 600-frame non-per-frame behaviour, full
+  overcast, and timing; and an offscreen device test that performs a second GPU upload.
 
-* **`cnahouse::environment` — the sun.** `SunModel` (position, rise/set/transit by bisecting the
-  model's own altitude), `SunLight` (world direction, §32.2's 64-entry colour LUT, cloud factors),
-  and a continuous seasonal day length on `SimClock`.
-* **`cnahouse::lighting` — the house's light.** `RoomLightState` / `LightingSystem` (per-cell
-  artificial level, running in the frame at `UpdateStage::Lighting`), `ShadingGrid` (the `CSHF`
-  reader plus a sky-view factor), and `DaylightModel` (§28.4's five-factor sum).
-* **`content/world/shading.bin`** is now produced by a `shading` stage in the content build. It is
-  the first stage that needs Blender, and the build's skip rule was generalised for it.
+Measured across 64 forced debug-build updates: mean **0.105 ms**, maximum **0.121 ms**. A
+600-frame half-degree transition caused only two updates including construction. These figures and
+the completed checkbox are recorded in `plan.md`; architecture and format details are in
+`cna-house.md` §31.2 and `docs/sky-dome-format.md`.
 
----
+Important input detail: `assets-src/world/layout.sky.json` is JSONC with comments and is consumed by
+offline tooling. Runtime and C++ tests must read the deployed, comment-free
+`content/world/layout.sky.json`. Do not switch the tests back to the source JSONC file.
 
-## 3. Start here
+## 4. Verification paid at `94b160e`
 
-**`HOUSE-01564` — wire the sun into `LightingSystem`.** Everything it needs now exists and nothing
-else is closer to being a visible, integrated change.
+All commands below completed successfully. Graphical commands used the offscreen/dummy drivers.
 
-* `SunPositionFor(clock)` gives altitude and azimuth; `SunDirection` gives the vector an XNA
-  `DirectionalLight` takes; `SunShadingFor` gives colour and intensity.
-* `DaylightModel::Evaluate(alt, az, cloud, out)` fills a per-cell array in the world's cell order,
-  which is the same order `LightingSystem::Cells()` is in — they were built to line up.
-* `RoomLightState::daylight` is **deliberately left at 0** and
-  `LightingSystemTests.TheDaylightAndBorrowedFieldsAreZeroAndThatIsDeliberate` asserts it is.
-  **That test is written to be deleted by whoever lands this.** It exists so that "the daylight
-  model is not wired yet" cannot be mistaken for "the daylight model is broken".
-* `CnaHouseGame` already loads `layout.lights.json` and constructs `lighting_`. It does **not** yet
-  load openings, interactables or `shading.bin`; wiring the daylight means adding those.
-  `DaylightModel` cannot honour `initialstate.json`'s open window without `LoadInteractables` —
-  see the portal finding in §4.
+```text
+Build: cna-house, cnahouse_unit_tests, cnahouse_integration_tests
+Unit:  SkySystemTests.* — 6 / 6 passed
+Integration: SkySystemPassTests.* plus
+             HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight — 2 / 2 passed
+Static: tools/ci/run_checks.sh — all gates green
+Strict API: check_xna_strict — 297 translation units clean, 27 destructor exemptions
+Diff: git diff --check — clean
+```
 
-Then, in rough order of value:
+The first commit attempt was correctly rejected because the hook inherited `/usr/bin/python3` and
+could not import `jsonschema`. No commit was created by that attempt. Re-running with the PATH in
+§2 made every staged gate green and produced `94b160e` normally.
 
-| Task | Why it is next |
-|---|---|
-| `HOUSE-01566` | The sun disc. With `01564` this makes the sun *visible*, which unblocks `HOUSE-01544`'s owed screenshots. |
-| `HOUSE-01544` | **Code complete, box unticked.** Both acceptance criteria are measured and met; its `verify` line also names screenshot scenes that need `01564` and `01566`. It closes the day those scenes can be taken. |
-| `HOUSE-01255` | The Planckian LUT. `LightingSystem` has no colour yet, and §28.1's `ambientColor` needs it. |
-| `HOUSE-01265` | The 2-hop light flood. `RoomLightState::borrowed` is the other field left at 0. |
-| `HOUSE-01574` | Twilight thresholds. `SunModel` already exposes the three constants and `SunDayFor` solves for any of them. |
-| `HOUSE-01545` | The outdoor temperature model — small, and the season and clock foundation is all there. |
+## 5. Next dependency-valid work
 
----
+Start by reassessing the DAG in `plan.md`. The immediate Phase-25 successor is:
 
-## 4. Findings a future agent must not re-discover
+* **`HOUSE-01645` — implement the night-sky blend and sun-glow term.**
 
-These cost real time to establish. They are all recorded in `plan.md` against their tasks; this is
-the index.
+Useful existing seams:
 
-### About the architecture document
+* `SkyColourModel` already loads and retains `sunGlowColor`, `sunGlowStrength`, and
+  `sunGlowExponent`.
+* `SkySystem::SetSun` receives the full `environment::SunPosition`; its `azimuthDeg` is available,
+  although `HOUSE-01644` intentionally forwards only altitude and cloud cover to `SetSky`.
+* The generated model and its independent expansion oracle are in `tools/world/sky_lut.py`.
+  Preserve that oracle rather than duplicating expected values from the runtime.
+* The full target formula is in `cna-house.md` §31.2. `HOUSE-01644` implemented the altitude,
+  vertex-altitude, and overcast portions only. Directional glow and night blending are intentionally
+  still open.
 
-* **§28.4's `shadingFactor` multiplies the DIRECT term only.** The section writes it multiplying
-  the whole of `skyExposure`, and taken literally *every north-facing room in the house is pitch
-  dark from dawn to dusk*. The baked grid is a sun-direction occlusion mask — 0 for every direction
-  behind the window's own wall — so a north window's factor is 0 whenever the sun is in the south,
-  which at 40° N is always. Measured: `L0_FAMILY` read exactly `0.000` at a 45° sun due south. The
-  diffuse term takes `ShadingGrid::SkyViewFactor` instead, derived from the same baked grid.
-* **§28.4's `max(0, sinh(sunAltitude))` is `sin h`**, the sine of the altitude — standard solar
-  notation, and what irradiance on a horizontal surface scales with. The hyperbolic sine is
-  unbounded and reaches 1.65 at this latitude.
-* **§22's *"the west neighbour's gable shades the study at sunset"* is not literally true.** The
-  neighbours that shade `L0_OFFICE` are across the road to the south; nothing stands due west of it.
-  The substance holds and is measured (−14.5 % of its sky); the compass point does not.
-* **§22's *"porch roof"* over the foyer is `L1_BALCONY_FRONT`'s slab.** Deleting `L0_PORCH` alone
-  moves the foyer 22 → 25 lit nodes; deleting the balcony moves it 22 → 65.
+There is a dependency question to resolve honestly before marking `HOUSE-01645` complete:
+§31.2 writes the final night mix in terms of moon altitude and phase, but `MoonModel` and phase are
+still open as `HOUSE-01601` and `HOUSE-01602`, while `HOUSE-01645` currently depends only on
+`HOUSE-01644`. Do not invent moon data or fake completion. Inspect the architecture and ledger for
+the smallest justified resolution; if the moon inputs genuinely block the whole task, record the
+evidence in `plan.md` and continue independent dependency-valid work.
 
-### About the world data
+The nearest independent task is:
 
-* **`CellKind::Exterior` is not "outdoors".** `EXT_SHED` is an exterior cell *and* a shed — walls,
-  roof, one window, `visibilityHint: opaque`. Outdoors is `Exterior` **and** `visibilityHint::Open`
-  together, which picks out exactly the 17 cells a person would call outside.
-* **An interactable and its opening are joined by PORTAL, never by id.** `interactables.json` calls
-  a window `WIN_L1_MASTER_N2`; `layout.openings.json` calls the same window `WIN_L1_MASTER_BED_2`.
-  **All 54 window interactables differ from their opening's id this way.** Matching on the id finds
-  nothing and fails silently.
-* `MODEL_DELIVERY_VAN` and `MODEL_PARKED_CAR` are referenced by four `layout.exterior.json` rows and
-  do not exist in the neighbourhood model library. This is known and tracked: they are
-  `HOUSE-00847`'s, and `build_neighbourhood.py` asserts it.
-* The `snowshell` content stage **fails on every run** for want of `assets-src/world/layout.materials.json`.
-  That is `HOUSE-00778`, still open, and predates this session.
+* **`HOUSE-01646` — author the three alpha cloud textures** (depends only on completed
+  `HOUSE-01641`). It unblocks `HOUSE-01647` through `HOUSE-01650`.
 
-### About the tooling
-
-* `tools/blender/shading_factor.py` had **three defects**, all invisible to its 22 original claims,
-  and the common cause is worth remembering: *every one of those claims built its geometry directly
-  with `bpy.data.meshes.new` and not one ever imported a `.glb`*, in a tool whose only job is to
-  ray-cast against imported geometry. The defects were the glTF importer's Y-up→Z-up conversion, a
-  ray epsilon smaller than the window sash the shell draws, and sampling the portal rectangle
-  instead of the glazed aperture. It has **53 claims** now and each new one was proved by injecting
-  the bug back.
-* `src/util/Log.cpp` uses `std::fopen` for the debug log sink. §8.3 forbids POSIX file access
-  outside `SaveStore`'s desktop implementation. It is recorded as a **path exemption** in
-  `check_xna_only.py` naming `HOUSE-02842`, and the exemption is checked for staleness — it will
-  fail the day `HOUSE-02842` lands and nobody deletes it.
-
-### About C++ in this codebase
-
-* **`DaylightModel` keeps a pointer to its `ShadingGrid`.** Passing a temporary dangles, and the
-  symptom is not a crash — every window reads a shading factor of 1.0, so the baked grid appears to
-  make no difference and the test that checks it appears to have found a content bug. The rvalue
-  overload is deleted, so the same mistake is now a compile error. Other systems in this repository
-  hold references the same way; the trap generalises.
-
----
-
-## 5. What is owed, and the constraint that put it there
-
-> **RENDER QUALIFICATION PAID, 2026-09-11.** Run at cna-house `e0b9b99` against
-> cnanext **`93ca4ffdf`** (the vulkan→next merge, amended) and sharp-runtimenext
-> `0c82d9b`. **35/35 render, 1290/1290 unit+integration, 0 failures.**
->
-> The number that mattered is **unchanged to the byte** across the merge:
-> `CullingSanityRenderTests`, worst pose `l0-sunroom`, **349 of 225 792 compared
-> pixels differ (0.1546 %)**, max channel delta **104**, mean **0.072** — identical
-> to the pre-merge figure taken at `f84e564` against `c1c017cd7`. The merge moved
-> EasyGL's sprite flush, the `SamplerState` W address path and compiled-effect
-> teardown; none of it reached the 18 `BasicEffect` blockout poses, which is what
-> was predicted and is now measured rather than assumed.
->
-> **Rebuild before you measure.** The first attempt would have qualified stale
-> binaries: they were linked at 08:11 and `93ca4ffdf` was amended at 09:14, after
-> its author found a regression of their own (an EasyGL depth-format override,
-> since reverted). `find cnanext/modules -name '*.cpp' -newer build/cnahouse_render_tests`
-> is the check.
->
-> The section below is kept as the original owed-qualification note, because it
-> records the baseline and the reasoning that made the comparison meaningful.
-
-The whole of `cnanext` is mid-merge. A peer session (`cnanextmerge`) is landing **vulkan → next**:
-331 commits, 20 conflicting files, and at the time of writing the merge is **resolved, compiling,
-and staged uncommitted** in that repository's working tree. That session asked this one to:
-
-1. **not build against `cnanext` until it reported green** — it since has, and this session
-   rebuilt and re-ran 1 290 unit + integration tests against the merged tree, all passing;
-2. **hold the render suite until it releases `:99`** — its own full `ctest` was running there.
-   *This is still outstanding.* Do not take `:99` without checking.
-
-### What to do when `:99` is released
-
-Run `DISPLAY=:99 ctest --test-dir build -L render -j1 --output-on-failure`, and **ask which
-`cnanext` commit it is against before recording the result** — a number measured against an
-uncommitted working tree has no address.
-
-The comparison baseline, measured this session at `f84e564` against pre-merge `c1c017cd7`:
-
-> `CullingSanityRenderTests`, worst pose `l0-sunroom`: **349 of 225 792 compared pixels differ
-> (0.1546 %)**, max channel delta **104**, mean **0.072**. Tolerance 2 per channel, threshold
-> **0.2 %** of compared pixels.
-
-The merge touched EasyGL's sprite sampler path — both branches independently added a `SamplerState`
-W-address hook and the merged renderer now also applies mip state. The peer verified that the
-`-1` "not supplied" sentinel is guarded in both flush paths and that `WrapR` is written
-unconditionally, so there is no frame-order-dependent path. The 18 culling poses are `BasicEffect`
-blockout geometry and *should* be untouched; `TitleScreenRenderTests` and the five
-`FontRenderTests` are the sensitive ones, because they do nothing but draw text.
-
-**If `CullingSanityRenderTests` moves materially, that is a regression and Phase 9 is closed
-around it.** Do not update a baseline to accommodate it.
-
----
-
-## 6. Standing rules this session worked under
-
-Beyond `CLAUDE.md` and `AGENTS.md`, which are authoritative:
-
-* **Independent oracles, always.** `HOUSE-01561` was blocked for a whole previous session rather
-  than close it on a NOAA implementation checking a NOAA implementation. It closed against the US
-  Naval Observatory's published times. The calendar is checked against Python's `datetime`. The
-  seasonal day length is checked against the closed-form sunrise equation *and* the USNO. Keep this.
-* **A number in a document is a claim to be tested, not a fact to be quoted.** Three of this
-  session's most useful findings are places where `cna-house.md` was wrong and the code proved it.
-  Make the smallest justified correction, record why, never deviate silently.
-* **Do not tick a box on half a `verify` line.** `HOUSE-01544` is code-complete with both
-  acceptance criteria measured and stays open because its screenshots cannot be taken yet.
-* **Prove a new test claim by injecting the bug it is meant to catch.** Every claim added to
-  `shading_factor.py` and `check_xna_only.py` this session was proved that way.
-* **Never delete a build directory another session may be using**, and keep to the closed list of
-  build directory names. This machine runs about ten agents.
-
----
-
-## 7. Things that are fine and may look alarming
-
-* `content/` is **gitignored and generated**. `shading.bin` living there is correct.
-* The `world` content group regenerates `road`, `terrain-tiles`, `chunks` and `world-deploy` on a
-  run, reporting *"inputs or command changed"*. Verified this session: **every regenerated file is
-  byte-identical** to what the build tree already held. It is stamp bookkeeping, not change.
-* `HOUSE-00497` appears in commit `f84e564`'s message as a shell defect and **does not exist in
-  `plan.md`**. It was created on a wrong diagnosis and withdrawn in the very next commit when the
-  defect turned out to be in the tool's sampler rather than in the shell. Its id is free.
-* `HOUSE-01538` (clock persistence) is still blocked on there being no save model. That is
-  expected and is not a stop condition.
+Do not proceed past this handoff until the owner starts a new session or gives new instructions.
