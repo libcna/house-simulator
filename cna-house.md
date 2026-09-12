@@ -3815,7 +3815,11 @@ Same particle machinery, different parameters, plus accumulation.
 | Blend | alpha, not additive (snow occludes) |
 
 **Accumulation.** `snowDepth` integrates `dD/dt = 0.0009·intensity − melt(temperature, sunlight)`,
-capped at 0.35 m. Rendering uses a **snow shell**: an offline-generated duplicate of every
+capped at 0.35 m. The accumulation term is present only while `precipType == Snow`; rain, sleet
+and hail do not create ground snow. `sunlight` is §32.2's cloud-attenuated direct intensity in
+0…1, and `melt = 0.00006·max(temperatureC, 0)·(1 + sunlight)` metres per simulated minute. Thus
+snow never melts below freezing, while full direct sunlight doubles above-freezing melt without a
+binary daytime switch. Rendering uses a **snow shell**: an offline-generated duplicate of every
 up-facing exterior surface (terrain tiles, roofs, the porch and balcony decks, fence rails, garden
 furniture tops, the car's roof and bonnet), offset along the surface normal by `snowDepth` and
 drawn with a white snow material at `alpha = smoothstep(0.002, 0.03, snowDepth)`. Faces steeper

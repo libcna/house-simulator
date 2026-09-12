@@ -14526,8 +14526,18 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             fails `RainAccumulatesAtTheDocumentedRate`.
       mutation: changing wetness accumulation from 0.045 to 0.0045 per minute failed
             `RainAccumulatesAtTheDocumentedRate`; production was restored.
-- [ ] HOUSE-01691 — Implement `snowDepth` integration (accumulation and melt)
+- [x] HOUSE-01691 — Implement `snowDepth` integration (accumulation and melt)
       dep: HOUSE-01690 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `SnowAccumulationTests.*` (5)
+      note: `IntegrateSnowDepth` adds §38's 0.0009 metres per simulated minute scaled by
+            intensity only for the Snow phase, subtracts continuous above-freezing melt and clamps
+            persistent depth to 0…0.35 m without changing the rest of the weather vector. The
+            previously unspecified melt function is now pinned in §38: 0.00006 metres per degree
+            above freezing per minute, with §32.2's normalized direct sunlight scaling it from 1×
+            to 2×. Sleet, rain and hail can melt existing cover but cannot create snow cover.
+      mutation: allowing every non-None precipitation phase to accumulate snow made rain, sleet
+            and hail each add 0.054 m in an hour and failed
+            `OtherPrecipitationPhasesDoNotCreateSnowCover`; production was restored.
 - [ ] HOUSE-01692 — Implement RNG-state persistence so a reload reproduces the same weather future
       dep: HOUSE-01683 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01693 — Implement the settings: weather on / fixed / off, and the fixed-archetype selector
