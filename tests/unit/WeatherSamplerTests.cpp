@@ -89,8 +89,8 @@ namespace
     TEST_F(WeatherSeasonTests, SeasonalWeightsTurnOneBaseRowIntoDifferentMatrices)
     {
         const WeatherSampler sampler = Sampler();
-        const auto spring = sampler.Distribution(a_, SeasonAt(0.125));
-        const auto summer = sampler.Distribution(a_, SeasonAt(0.375));
+        const auto spring = sampler.Distribution(a_, SeasonAt(0.125), -5.0F);
+        const auto summer = sampler.Distribution(a_, SeasonAt(0.375), -5.0F);
         ASSERT_TRUE(spring) << spring.Error().ToString();
         ASSERT_TRUE(summer) << summer.Error().ToString();
         ASSERT_EQ(spring.Value().size(), 2U);
@@ -117,7 +117,7 @@ namespace
         phase.primary = 0;
         phase.secondary = 1;
         phase.blend = 0.25F;
-        const auto distribution = sampler.Distribution(a_, phase);
+        const auto distribution = sampler.Distribution(a_, phase, -5.0F);
         ASSERT_TRUE(distribution) << distribution.Error().ToString();
 
         // B: mix(2, .5, .25) = 1.625; C: mix(.5, 2, .25) = .875. Equal base
@@ -129,8 +129,8 @@ namespace
     TEST_F(WeatherSeasonTests, CrossingASeasonBoundaryChangesNoProbabilityDiscontinuously)
     {
         const WeatherSampler sampler = Sampler();
-        const auto before = sampler.Distribution(a_, SeasonAt(0.25 - 1e-7));
-        const auto after = sampler.Distribution(a_, SeasonAt(0.25 + 1e-7));
+        const auto before = sampler.Distribution(a_, SeasonAt(0.25 - 1e-7), -5.0F);
+        const auto after = sampler.Distribution(a_, SeasonAt(0.25 + 1e-7), -5.0F);
         ASSERT_TRUE(before);
         ASSERT_TRUE(after);
         ASSERT_EQ(before.Value().size(), after.Value().size());
@@ -148,7 +148,7 @@ namespace
         std::array<Id, 12> actual{};
         for (Id& value : actual)
         {
-            const auto sampled = sampler.SampleNext(a_, SeasonAt(0.125), rng);
+            const auto sampled = sampler.SampleNext(a_, SeasonAt(0.125), -5.0F, rng);
             ASSERT_TRUE(sampled) << sampled.Error().ToString();
             value = sampled.Value();
         }
@@ -162,7 +162,7 @@ namespace
         const WeatherSampler sampler = Sampler();
         Rng sampled(42);
         Rng oracle(42);
-        ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), sampled));
+        ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), -5.0F, sampled));
         (void)oracle.NextFloat();
         EXPECT_EQ(sampled.GetState(), oracle.GetState());
     }
@@ -173,7 +173,7 @@ namespace
         WeatherState uninterrupted;
         uninterrupted.rngState = Rng(0x5EEDC0DEU).GetState();
 
-        ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), uninterrupted));
+        ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), -5.0F, uninterrupted));
         ASSERT_TRUE(sampler.SampleTiming(a_, b_, SeasonAt(0.125), uninterrupted));
         ASSERT_TRUE(sampler.SampleWind(b_, 0.5F, uninterrupted));
         const auto json = uninterrupted.ToJson();
@@ -183,8 +183,8 @@ namespace
 
         for (int decision = 0; decision < 100; ++decision)
         {
-            const auto nextA = sampler.SampleNext(a_, SeasonAt(0.125), uninterrupted);
-            const auto nextB = sampler.SampleNext(a_, SeasonAt(0.125), reloaded.Value());
+            const auto nextA = sampler.SampleNext(a_, SeasonAt(0.125), -5.0F, uninterrupted);
+            const auto nextB = sampler.SampleNext(a_, SeasonAt(0.125), -5.0F, reloaded.Value());
             ASSERT_TRUE(nextA);
             ASSERT_TRUE(nextB);
             EXPECT_EQ(nextA.Value(), nextB.Value());
@@ -211,7 +211,7 @@ namespace
         state.rngState = Rng(42U).GetState();
         Rng oracle(state.rngState);
 
-        ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), state));
+        ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), -5.0F, state));
         (void)oracle.NextFloat();
         ASSERT_TRUE(sampler.SampleTiming(a_, b_, SeasonAt(0.125), state));
         (void)oracle.NextFloat();
@@ -224,7 +224,7 @@ namespace
         EXPECT_EQ(state.rngState, oracle.GetState());
 
         const auto beforeFailure = state.rngState;
-        EXPECT_FALSE(sampler.SampleNext(Intern("W_UNKNOWN"), SeasonAt(0.125), state));
+        EXPECT_FALSE(sampler.SampleNext(Intern("W_UNKNOWN"), SeasonAt(0.125), -5.0F, state));
         EXPECT_FALSE(sampler.SampleWind(b_, 1.1F, state));
         EXPECT_EQ(state.rngState, beforeFailure);
     }
@@ -365,15 +365,57 @@ namespace
     TEST_F(WeatherSeasonTests, AnUnknownCurrentStateAndAZeroRowAreErrors)
     {
         const WeatherSampler sampler = Sampler();
-        EXPECT_FALSE(sampler.Distribution(Intern("W_UNKNOWN"), SeasonAt(0.0)));
+        EXPECT_FALSE(sampler.Distribution(Intern("W_UNKNOWN"), SeasonAt(0.0), -5.0F));
 
         archetypes_[1].seasonalWeights = {0.0F, 0.0F, 0.0F, 0.0F};
         archetypes_[2].seasonalWeights = {0.0F, 0.0F, 0.0F, 0.0F};
         const WeatherSampler zero(archetypes_, transitions_);
-        const auto distribution = zero.Distribution(a_, SeasonAt(0.0));
+        const auto distribution = zero.Distribution(a_, SeasonAt(0.0), -5.0F);
         ASSERT_FALSE(distribution);
         EXPECT_NE(distribution.Error().Message().find("zero probability"), std::string::npos)
             << distribution.Error().ToString();
+    }
+
+    TEST_F(WeatherSeasonTests, TemperatureEliminatesSnowWithoutInspectingASeason)
+    {
+        archetypes_[2].id = Intern("W_SNOW");
+        transitions_[0].targets[1].target = archetypes_[2].id;
+        const WeatherSampler sampler = Sampler();
+
+        const auto cold = sampler.Distribution(a_, SeasonAt(0.875), -0.01F);
+        const auto freezing = sampler.Distribution(a_, SeasonAt(0.875), 0.0F);
+        const auto summer = sampler.Distribution(a_, SeasonAt(0.375), 29.0F);
+        ASSERT_TRUE(cold) << cold.Error().ToString();
+        ASSERT_TRUE(freezing) << freezing.Error().ToString();
+        ASSERT_TRUE(summer) << summer.Error().ToString();
+        EXPECT_GT(cold->at(1).probability, 0.0F);
+        EXPECT_FLOAT_EQ(freezing->at(1).probability, 0.0F);
+        EXPECT_FLOAT_EQ(summer->at(1).probability, 0.0F);
+    }
+
+    TEST_F(WeatherSeasonTests, ThunderstormProbabilityRisesContinuouslyWithHeat)
+    {
+        archetypes_[1].id = Intern("W_THUNDERSTORM");
+        transitions_[0].targets[0].target = archetypes_[1].id;
+        archetypes_[2].precipType = cnahouse::weather::PrecipType::Rain;
+        const WeatherSampler sampler = Sampler();
+
+        const auto mild = sampler.Distribution(a_, SeasonAt(0.375), 18.0F);
+        const auto hot = sampler.Distribution(a_, SeasonAt(0.375), 24.0F);
+        const auto hottest = sampler.Distribution(a_, SeasonAt(0.375), 30.0F);
+        ASSERT_TRUE(mild) << mild.Error().ToString();
+        ASSERT_TRUE(hot) << hot.Error().ToString();
+        ASSERT_TRUE(hottest) << hottest.Error().ToString();
+        EXPECT_LT(mild->at(0).probability, hot->at(0).probability);
+        EXPECT_LT(hot->at(0).probability, hottest->at(0).probability);
+    }
+
+    TEST_F(WeatherSeasonTests, InvalidTemperatureConsumesNoRng)
+    {
+        WeatherState state;
+        const auto before = state.rngState;
+        EXPECT_FALSE(Sampler().SampleNext(a_, SeasonAt(0.375), 38.01F, state));
+        EXPECT_EQ(state.rngState, before);
     }
 
 } // namespace

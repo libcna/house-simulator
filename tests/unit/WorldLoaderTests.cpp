@@ -3446,8 +3446,10 @@ namespace
 
         const cnahouse::weather::WeatherSampler sampler(contents.weatherArchetypes,
                                                         contents.weatherTransitions);
-        const auto spring = sampler.Distribution(Intern("W_CLEAR"), cnahouse::environment::SeasonAt(0.125));
-        const auto winter = sampler.Distribution(Intern("W_CLEAR"), cnahouse::environment::SeasonAt(0.875));
+        const auto spring =
+            sampler.Distribution(Intern("W_CLEAR"), cnahouse::environment::SeasonAt(0.125), -5.0F);
+        const auto winter =
+            sampler.Distribution(Intern("W_CLEAR"), cnahouse::environment::SeasonAt(0.875), -5.0F);
         ASSERT_TRUE(spring) << spring.Error().ToString();
         ASSERT_TRUE(winter) << winter.Error().ToString();
         ASSERT_EQ(spring.Value().size(), 12U);

@@ -14663,15 +14663,29 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: replacing the blend with the primary spring weight changed the asserted
             `[0.65, 0.35]` row to `[0.8, 0.2]` and failed `WeatherSeasonTests.BlendedMatrices`.
             The production blend was restored before the final green run.
-- [ ] HOUSE-01704 — Gate the archetypes on the measured outdoor temperature: `W_SNOW` impossible in summer, `W_THUNDERSTORM` probability rising with the summer temperature excess
+- [x] HOUSE-01704 — Gate the archetypes on the measured outdoor temperature: `W_SNOW` impossible in summer, `W_THUNDERSTORM` probability rising with the summer temperature excess
       dep: HOUSE-01703, HOUSE-01545 · sys: weather · plat: ALL · pri: MUST
       accept: (1) over a full simulated year, `W_SNOW` is never selected while the outdoor
               temperature is above its threshold — **zero occurrences in summer**; (2) storm
               frequency correlates positively with summer temperature; (3) the gate is expressed
               through the temperature curve, not as a hardcoded month test
-      verify: integration WeatherSeasonTests.NoSummerSnow over a 10-year headless run
+      verify: unit `WeatherSeasonTests.Temperature*`,
+              `WeatherSeasonTests.ThunderstormProbabilityRisesContinuouslyWithHeat`,
+              `WeatherSeasonTests.InvalidTemperatureConsumesNoRng`; integration
+              `WeatherSeasonTests.NoSummerSnowOverTenYearsAtTheDefaultLocation` (4)
+      note: every transition distribution now requires the measured outdoor temperature. Both
+            nominal frozen-water targets have zero effective weight at or above 0 C, independent
+            of the season phase; `W_THUNDERSTORM` keeps its authored seasonal weight and gains a
+            continuous 1x..2x multiplier from 18 C through 30 C. Invalid or out-of-range
+            temperature is rejected before the RNG advances.
+      measured: the deployed 13-state matrix made 3,680 six-hourly summer decisions over ten
+            default-location years and selected zero snow archetypes. In the controlled row the
+            thunderstorm probability rose 0.200 -> 0.273 -> 0.333 at 18, 24 and 30 C.
+      mutation: bypassing the temperature gate selected one frozen-water archetype during the
+            same 3,680 warm decisions and failed the ten-year integration test; production was
+            restored.
 - [ ] HOUSE-01702 — Phase-26 review and commit
-      dep: HOUSE-01681…HOUSE-01701 · sys: — · plat: ALL · pri: MUST
+      dep: HOUSE-01681…HOUSE-01701, HOUSE-01703, HOUSE-01704 · sys: — · plat: ALL · pri: MUST
 
 ---
 

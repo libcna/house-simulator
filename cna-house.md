@@ -3706,6 +3706,13 @@ Conversely `W_THUNDERSTORM`'s probability rises with the summer temperature exce
 part of the year is the stormiest — which is both what the brief asked for and what real
 continental summers do.
 
+The executable gate applies to both frozen-water targets (`W_SNOW` and `W_HEAVY_SNOW`): their
+effective transition weight is zero at `temperatureC >= 0`. A target forced by the developer
+console still derives sleet or rain through §36.2, but the autonomous sampler cannot choose a snow
+event above freezing. Thunderstorm weight keeps its authored and continuously blended seasonal
+weight, multiplied by `1 + clamp((temperatureC − 18) / 12, 0, 1)`; it therefore rises continuously
+from 1× at 18 °C to 2× at 30 °C without inspecting a month or season enum.
+
 ### 36.3.1 What each season looks like
 
 The four looks below are the acceptance target for the seasonal art and material work. Each is

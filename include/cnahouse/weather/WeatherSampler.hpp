@@ -58,19 +58,27 @@ namespace cnahouse::weather
         [[nodiscard]] std::vector<util::Id> StateArchetypes() const;
 
         /// @brief The effective normalised transition row at @p season.
-        [[nodiscard]] util::Result<std::vector<WeatherChoice>>
-        Distribution(util::Id current, const environment::SeasonPhase& season) const;
+        ///
+        /// @p outdoorTemperatureC is the measured `HOUSE-01545` value. Frozen-water targets have zero
+        /// probability at and above freezing, while thunderstorm weight rises continuously with
+        /// heat; neither rule inspects a month or a discrete season.
+        [[nodiscard]] util::Result<std::vector<WeatherChoice>> Distribution(
+            util::Id current, const environment::SeasonPhase& season, float outdoorTemperatureC) const;
 
         /// @brief Draws one destination from `Distribution`, in authored target order.
-        [[nodiscard]] util::Result<util::Id>
-        SampleNext(util::Id current, const environment::SeasonPhase& season, util::Rng& rng) const;
+        [[nodiscard]] util::Result<util::Id> SampleNext(util::Id current,
+                                                        const environment::SeasonPhase& season,
+                                                        float outdoorTemperatureC,
+                                                        util::Rng& rng) const;
 
         /// @brief Samples from and immediately persists the RNG owned by @p state.
         ///
         /// This is the runtime/save path. The explicit-`Rng` overload remains the low-level path
         /// for tests and tools. A failed decision leaves the stored stream untouched.
-        [[nodiscard]] util::Result<util::Id>
-        SampleNext(util::Id current, const environment::SeasonPhase& season, WeatherState& state) const;
+        [[nodiscard]] util::Result<util::Id> SampleNext(util::Id current,
+                                                        const environment::SeasonPhase& season,
+                                                        float outdoorTemperatureC,
+                                                        WeatherState& state) const;
 
         /// @brief Draws the destination dwell and the source-to-destination transition duration.
         ///

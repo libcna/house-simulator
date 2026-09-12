@@ -9,6 +9,9 @@ namespace cnahouse::weather
 {
     namespace
     {
+        constexpr float kStormHeatThresholdC = 18.0F;
+        constexpr float kStormHeatSpanC = 12.0F;
+
         [[nodiscard]] bool ValidWindRange(const WeatherRange& range, float maximum) noexcept
         {
             return std::isfinite(range.minimum) && std::isfinite(range.maximum) && range.minimum >= 0.0F &&
@@ -54,9 +57,16 @@ namespace cnahouse::weather
         return found == transitions_.end() ? nullptr : &*found;
     }
 
-    util::Result<std::vector<WeatherChoice>>
-    WeatherSampler::Distribution(util::Id current, const environment::SeasonPhase& season) const
+    util::Result<std::vector<WeatherChoice>> WeatherSampler::Distribution(
+        util::Id current, const environment::SeasonPhase& season, float outdoorTemperatureC) const
     {
+        if (!std::isfinite(outdoorTemperatureC) || outdoorTemperatureC < -18.0F ||
+            outdoorTemperatureC > 38.0F)
+        {
+            return util::Err(util::ErrorCode::OutOfRange,
+                             "outdoor temperature must be finite and in -18..38 C",
+                             "weather/temperatureC");
+        }
         const WeatherTransitionRow* row = FindRow(current);
         if (row == nullptr)
         {
@@ -82,7 +92,25 @@ namespace cnahouse::weather
                                      target->seasonalWeights[2],
                                      target->seasonalWeights[3]};
             const float seasonalWeight = environment::MixBySeason(season, perSeason);
-            const float effective = transition.probability * target->weight * seasonalWeight;
+            float temperatureWeight = 1.0F;
+            if (target->precipType == PrecipType::Snow && outdoorTemperatureC >= kSnowSleetThresholdC)
+            {
+                // The target is a water phase, and at/above freezing its derived phase would no
+                // longer be snow. Zeroing its probability here makes the seasonal gate a measured
+                // temperature rule instead of a month rule; a forced console target can still
+                // demonstrate the derivation as sleet or rain.
+                temperatureWeight = 0.0F;
+            }
+            else if (target->id == util::Id::Of("W_THUNDERSTORM"))
+            {
+                // Hot-weather storms rise from 1x at 18 C to 2x at 30 C and above. This is a
+                // multiplier on the already blended seasonal table, so all rows keep their
+                // authored relative shape and the result is normalised once below.
+                temperatureWeight +=
+                    std::clamp((outdoorTemperatureC - kStormHeatThresholdC) / kStormHeatSpanC, 0.0F, 1.0F);
+            }
+            const float effective =
+                transition.probability * target->weight * seasonalWeight * temperatureWeight;
             if (!std::isfinite(effective) || !(effective >= 0.0F))
             {
                 return util::Err(util::ErrorCode::InvalidData,
@@ -105,10 +133,13 @@ namespace cnahouse::weather
         return choices;
     }
 
-    util::Result<util::Id>
-    WeatherSampler::SampleNext(util::Id current, const environment::SeasonPhase& season, util::Rng& rng) const
+    util::Result<util::Id> WeatherSampler::SampleNext(util::Id current,
+                                                      const environment::SeasonPhase& season,
+                                                      float outdoorTemperatureC,
+                                                      util::Rng& rng) const
     {
-        const util::Result<std::vector<WeatherChoice>> choices = Distribution(current, season);
+        const util::Result<std::vector<WeatherChoice>> choices =
+            Distribution(current, season, outdoorTemperatureC);
         if (!choices)
         {
             return choices.Error();
@@ -136,6 +167,7 @@ namespace cnahouse::weather
 
     util::Result<util::Id> WeatherSampler::SampleNext(util::Id current,
                                                       const environment::SeasonPhase& season,
+                                                      float outdoorTemperatureC,
                                                       WeatherState& state) const
     {
         if (const util::Result<void> valid = state.Validate(); !valid)
@@ -143,7 +175,7 @@ namespace cnahouse::weather
             return valid.Error().WithContext("weather/rng/state");
         }
         util::Rng rng(state.rngState);
-        util::Result<util::Id> sampled = SampleNext(current, season, rng);
+        util::Result<util::Id> sampled = SampleNext(current, season, outdoorTemperatureC, rng);
         if (sampled)
         {
             state.rngState = rng.GetState();
