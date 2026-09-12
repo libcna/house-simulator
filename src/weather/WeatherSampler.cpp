@@ -7,6 +7,20 @@
 
 namespace cnahouse::weather
 {
+    namespace
+    {
+        [[nodiscard]] bool ValidWindRange(const WeatherRange& range, float maximum) noexcept
+        {
+            return std::isfinite(range.minimum) && std::isfinite(range.maximum) && range.minimum >= 0.0F &&
+                   range.minimum <= range.maximum && range.maximum <= maximum;
+        }
+
+        [[nodiscard]] float SampleRange(const WeatherRange& range, util::Rng& rng) noexcept
+        {
+            return range.minimum + (range.maximum - range.minimum) * rng.NextFloat();
+        }
+    } // namespace
+
     WeatherSampler::WeatherSampler(std::span<const WeatherArchetype> archetypes,
                                    std::span<const WeatherTransitionRow> transitions)
         : archetypes_(archetypes.begin(), archetypes.end())
@@ -159,6 +173,50 @@ namespace cnahouse::weather
             dwellMinimum + (dwellMaximum - dwellMinimum) * dwellDraw,
             transitionMinimum + (transitionMaximum - transitionMinimum) * transitionDraw,
         };
+    }
+
+    util::Result<WeatherWindTarget>
+    WeatherSampler::SampleWind(util::Id archetypeId, float windyModifierAmount, util::Rng& rng) const
+    {
+        const WeatherArchetype* archetype = FindArchetype(archetypeId);
+        if (archetype == nullptr || archetype->modifier)
+        {
+            return util::Err(util::ErrorCode::NotFound,
+                             "wind needs a weather-state archetype",
+                             std::format("weather/{}", archetypeId.Value()));
+        }
+        const WeatherArchetype* modifier = FindArchetype(util::Id::Of("W_WINDY"));
+        if (modifier == nullptr || !modifier->modifier)
+        {
+            return util::Err(util::ErrorCode::NotFound, "the W_WINDY modifier is missing", "weather/W_WINDY");
+        }
+        if (!std::isfinite(windyModifierAmount) || windyModifierAmount < 0.0F || windyModifierAmount > 1.0F)
+        {
+            return util::Err(util::ErrorCode::OutOfRange,
+                             "the W_WINDY modifier amount must be finite and in [0, 1]",
+                             "weather/W_WINDY/amount");
+        }
+        if (!ValidWindRange(archetype->windSpeed, 30.0F) || !ValidWindRange(archetype->gustFactor, 1.0F) ||
+            (windyModifierAmount > 0.0F &&
+             (!ValidWindRange(modifier->windSpeed, 30.0F) || !ValidWindRange(modifier->gustFactor, 1.0F))))
+        {
+            return util::Err(util::ErrorCode::InvalidData,
+                             "wind speed and gust bands must be finite, ordered and in range",
+                             std::format("weather/{}", archetypeId.Value()));
+        }
+
+        WeatherWindTarget target;
+        target.speed = SampleRange(archetype->windSpeed, rng);
+        target.gustFactor = SampleRange(archetype->gustFactor, rng);
+        target.modifierAmount = windyModifierAmount;
+        if (windyModifierAmount > 0.0F)
+        {
+            const float boostedSpeed = std::max(target.speed, SampleRange(modifier->windSpeed, rng));
+            const float boostedGust = std::max(target.gustFactor, SampleRange(modifier->gustFactor, rng));
+            target.speed += (boostedSpeed - target.speed) * windyModifierAmount;
+            target.gustFactor += (boostedGust - target.gustFactor) * windyModifierAmount;
+        }
+        return target;
     }
 
 } // namespace cnahouse::weather

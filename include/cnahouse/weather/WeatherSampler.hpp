@@ -29,6 +29,16 @@ namespace cnahouse::weather
         [[nodiscard]] friend bool operator==(const WeatherTiming&, const WeatherTiming&) = default;
     };
 
+    /// @brief The independently sampled continuous wind part of an archetype target.
+    struct WeatherWindTarget
+    {
+        float speed = 0.0F;
+        float gustFactor = 0.0F;
+        float modifierAmount = 0.0F;
+
+        [[nodiscard]] friend bool operator==(const WeatherWindTarget&, const WeatherWindTarget&) = default;
+    };
+
     /// @brief §36.3's deterministic, continuously season-weighted archetype selector.
     ///
     /// The authored file stores one base transition row per state and four sparse seasonal weight
@@ -58,6 +68,15 @@ namespace cnahouse::weather
                                                                util::Id next,
                                                                const environment::SeasonPhase& season,
                                                                util::Rng& rng) const;
+
+        /// @brief Draws wind separately from the precipitation archetype's other channels.
+        ///
+        /// The caller owns `W_WINDY`'s independent continuous amount: neither the architecture nor
+        /// authored data defines an activation distribution. A non-zero amount uses two further
+        /// draws and blends toward a boost that can never reduce the base speed or gust. Success
+        /// consumes exactly two RNG draws at zero and four above zero.
+        [[nodiscard]] util::Result<WeatherWindTarget>
+        SampleWind(util::Id archetype, float windyModifierAmount, util::Rng& rng) const;
 
     private:
         [[nodiscard]] const WeatherArchetype* FindArchetype(util::Id id) const noexcept;

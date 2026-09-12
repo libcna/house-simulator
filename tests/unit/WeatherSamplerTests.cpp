@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
 #include <vector>
 
@@ -38,6 +39,9 @@ namespace
             WeatherArchetype b;
             b.id = b_;
             b.weight = 1.0F;
+            b.precipType = cnahouse::weather::PrecipType::Rain;
+            b.windSpeed = {5.0F, 7.0F};
+            b.gustFactor = {0.4F, 0.6F};
             b.seasonalWeights = {2.0F, 0.5F, 1.0F, 1.0F};
             b.dwellMinutes = {40.0F, 80.0F};
             b.transitionMinutes = {30.0F, 40.0F};
@@ -45,10 +49,18 @@ namespace
             WeatherArchetype c;
             c.id = c_;
             c.weight = 1.0F;
+            c.precipType = cnahouse::weather::PrecipType::Snow;
+            c.windSpeed = {9.0F, 11.0F};
+            c.gustFactor = {0.6F, 0.7F};
             c.seasonalWeights = {0.5F, 2.0F, 1.0F, 1.0F};
             c.dwellMinutes = {60.0F, 120.0F};
             c.transitionMinutes = {20.0F, 30.0F};
-            archetypes_ = {a, b, c};
+            WeatherArchetype windy;
+            windy.id = Intern("W_WINDY");
+            windy.modifier = true;
+            windy.windSpeed = {12.0F, 20.0F};
+            windy.gustFactor = {0.8F, 1.0F};
+            archetypes_ = {a, b, c, windy};
             transitions_ = {
                 WeatherTransitionRow{a_, {{b_, 0.5F}, {c_, 0.5F}}},
                 WeatherTransitionRow{b_, {{a_, 1.0F}}},
@@ -203,6 +215,80 @@ namespace
         Rng oracle(91);
         const auto timing = sampler.SampleTiming(a_, b_, SeasonAt(0.125), sampled);
         ASSERT_FALSE(timing);
+        EXPECT_EQ(sampled.GetState(), oracle.GetState());
+    }
+
+    TEST_F(WeatherSeasonTests, WindIsAnIndependentTwoDrawTarget)
+    {
+        const WeatherSampler sampler = Sampler();
+        Rng sampled(123U);
+        Rng oracle(123U);
+        const float expectedSpeed = 5.0F + 2.0F * oracle.NextFloat();
+        const float expectedGust = 0.4F + 0.2F * oracle.NextFloat();
+
+        const auto wind = sampler.SampleWind(b_, 0.0F, sampled);
+        ASSERT_TRUE(wind) << wind.Error().ToString();
+        EXPECT_FLOAT_EQ(wind.Value().speed, expectedSpeed);
+        EXPECT_FLOAT_EQ(wind.Value().gustFactor, expectedGust);
+        EXPECT_FLOAT_EQ(wind.Value().modifierAmount, 0.0F);
+        EXPECT_EQ(sampled.GetState(), oracle.GetState());
+    }
+
+    TEST_F(WeatherSeasonTests, WindyRainAndBlizzardNeedNoCombinationArchetypes)
+    {
+        const WeatherSampler sampler = Sampler();
+        Rng rng(456U);
+
+        const auto rainyWind = sampler.SampleWind(b_, 1.0F, rng);
+        const auto snowyWind = sampler.SampleWind(c_, 1.0F, rng);
+        ASSERT_TRUE(rainyWind);
+        ASSERT_TRUE(snowyWind);
+        EXPECT_EQ(archetypes_[1].precipType, cnahouse::weather::PrecipType::Rain);
+        EXPECT_EQ(archetypes_[2].precipType, cnahouse::weather::PrecipType::Snow);
+        EXPECT_GE(rainyWind.Value().speed, 12.0F);
+        EXPECT_GE(rainyWind.Value().gustFactor, 0.8F);
+        EXPECT_GE(snowyWind.Value().speed, 12.0F);
+        EXPECT_GE(snowyWind.Value().gustFactor, 0.8F);
+        EXPECT_FLOAT_EQ(rainyWind.Value().modifierAmount, 1.0F);
+        EXPECT_FLOAT_EQ(snowyWind.Value().modifierAmount, 1.0F);
+    }
+
+    TEST_F(WeatherSeasonTests, WindyBoostConsumesTwoMoreDrawsAndNeverReducesBaseWind)
+    {
+        const WeatherSampler sampler = Sampler();
+        Rng sampled(789U);
+        Rng oracle(789U);
+        const float baseSpeed = 9.0F + 2.0F * oracle.NextFloat();
+        const float baseGust = 0.6F + 0.1F * oracle.NextFloat();
+        const float modifierSpeed = 12.0F + 8.0F * oracle.NextFloat();
+        const float modifierGust = 0.8F + 0.2F * oracle.NextFloat();
+
+        const auto wind = sampler.SampleWind(c_, 1.0F, sampled);
+        ASSERT_TRUE(wind);
+        EXPECT_FLOAT_EQ(wind.Value().speed, std::max(baseSpeed, modifierSpeed));
+        EXPECT_FLOAT_EQ(wind.Value().gustFactor, std::max(baseGust, modifierGust));
+        EXPECT_GE(wind.Value().speed, baseSpeed);
+        EXPECT_GE(wind.Value().gustFactor, baseGust);
+        EXPECT_EQ(sampled.GetState(), oracle.GetState());
+
+        Rng halfStrength(789U);
+        const auto halfWind = sampler.SampleWind(c_, 0.5F, halfStrength);
+        ASSERT_TRUE(halfWind);
+        EXPECT_FLOAT_EQ(halfWind.Value().speed, baseSpeed + (modifierSpeed - baseSpeed) * 0.5F);
+        EXPECT_FLOAT_EQ(halfWind.Value().gustFactor, baseGust + (modifierGust - baseGust) * 0.5F);
+        EXPECT_FLOAT_EQ(halfWind.Value().modifierAmount, 0.5F);
+        EXPECT_EQ(halfStrength.GetState(), oracle.GetState());
+    }
+
+    TEST_F(WeatherSeasonTests, InvalidWindDataIsRefusedBeforeTheRngMoves)
+    {
+        archetypes_[3].windSpeed.maximum = 31.0F;
+        const WeatherSampler sampler = Sampler();
+        Rng sampled(91U);
+        Rng oracle(91U);
+        EXPECT_FALSE(sampler.SampleWind(b_, 1.0F, sampled));
+        EXPECT_EQ(sampled.GetState(), oracle.GetState());
+        EXPECT_FALSE(sampler.SampleWind(b_, 1.01F, sampled));
         EXPECT_EQ(sampled.GetState(), oracle.GetState());
     }
 

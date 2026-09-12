@@ -14465,9 +14465,23 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: replacing the cubic result with its clamped linear input changed quarter progress
             from 0.15625 to 0.25 and failed all three pinned continuous-channel expectations in
             `QuarterProgressIsSmoothstepRatherThanLinear`; production was restored.
-- [ ] HOUSE-01687 — Implement the `W_WINDY` modifier as an independent wind draw combinable with any precipitation archetype
+- [x] HOUSE-01687 — Implement the `W_WINDY` modifier as an independent wind draw combinable with any precipitation archetype
       dep: HOUSE-01686 · sys: weather · plat: ALL · pri: MUST
       accept: "windy heavy rain" and "blizzard" arise without a combinatorial state list
+      verify: unit `WeatherSeasonTests.Wind*` (4)
+      note: `WeatherSampler::SampleWind` samples base speed and gust independently in exactly two
+            RNG draws. Non-zero `W_WINDY` strength consumes two further draws and blends toward the
+            component-wise maximum, so it boosts rather than accidentally calming strong base wind.
+            The same path is exercised with rain and snow archetypes; no combination id exists.
+      finding: neither §36.2 nor `layout.weather.json` defines a modifier activation
+            distribution. The API therefore accepts an independently owned continuous `0..1`
+            strength instead of inventing an invisible frequency constant. Invalid strength or
+            bands are rejected before the RNG moves, preserving deterministic recovery. The first
+            boolean-shaped API was rejected by the project's weather lint and replaced, not
+            allowlisted: weather state remains continuous.
+      mutation: changing both boost operations from `max` to `min` made windy rain and blizzard
+            fall below the modifier's 12 m/s and 0.8 floors and failed both modifier tests;
+            production was restored.
 - [ ] HOUSE-01688 — Implement temperature-derived `precipType` (rain / sleet / snow) overriding the archetype's nominal type
       dep: HOUSE-01686, HOUSE-01535 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01689 — Implement the "precip type cannot change while intensity > 0.05" rule with its ramp-down/ramp-up

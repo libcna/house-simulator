@@ -3656,7 +3656,11 @@ counted it.)
 which is how "windy heavy rain" and "blizzard" arise. Wind is drawn independently of the
 precipitation archetype from a per-archetype distribution, then optionally boosted by the windy
 modifier. That is what gives the required overlapping combinations without a combinatorial state
-list.
+list. The data specifies the modifier's speed and gust bands but no activation distribution, so
+the wind sampler accepts an independent continuous `0..1` amount from its caller rather than
+hiding a frequency constant in code. A full-strength modifier draw takes the maximum of base and
+modifier values: a "boost" can never make an already-strong blizzard calmer; intermediate amounts
+blend between those endpoints.
 
 `Δtemp` is applied to a **seasonal base temperature curve**
 `base(dayOfYear, hourOfDay) = annualMean + annualAmp·cos(2π(doy−201)/365) + diurnalAmp·cos(2π(h−15)/24)`

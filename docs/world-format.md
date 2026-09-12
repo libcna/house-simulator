@@ -625,7 +625,9 @@ Every quantity is a **range**, not a value: §36.2's table gives the archetype's
 target is drawn from the band, which is why two thunderstorms are not identical. `thunderProbability`
 and `modifier` were added by `HOUSE-00393` — §36.2's table has a thunder column with nowhere to go,
 and its `W_WINDY` row is a modifier that combines with any precipitation archetype rather than a
-state you transition into.
+state you transition into. The file defines its wind and gust bands but no activation
+distribution; the independent continuous modifier amount is therefore a caller input, not a
+hidden runtime constant.
 
 §36.3 asks for four seasonal transition matrices; this is one base matrix and four seasonal weight
 vectors, which is the same thing in 13 numbers a season instead of 169 — the matrix says what
