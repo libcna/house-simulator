@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include <string>
+#include <vector>
 
 #include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/environment/SunLight.hpp"
@@ -24,6 +25,7 @@ namespace
     using cnahouse::util::Intern;
     using cnahouse::util::Rng;
     using cnahouse::weather::PrecipType;
+    using cnahouse::weather::PrecipTypeAtTemperature;
     using cnahouse::weather::WeatherSampler;
     using cnahouse::weather::WeatherSystem;
     using cnahouse::world::WorldLoader;
@@ -145,6 +147,70 @@ namespace
         EXPECT_GT(targetChanges, 0U) << "the claimed history never left its authored initial state";
         EXPECT_NE(first.State().rngState, initialRng)
             << "the claimed history never consumed its persisted random stream";
+    }
+
+    TEST(WeatherSeasonTests, ThirtyDaysAreVariedAndNeverContradictTheWeatherRules)
+    {
+        cnahouse::world::WorldData::Contents contents;
+        const std::string directory = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
+        const auto weather = WorldLoader::LoadWeather(directory, contents);
+        ASSERT_TRUE(weather) << weather.Error().ToString();
+        const auto initial = WorldLoader::LoadInitialState(directory, contents);
+        ASSERT_TRUE(initial) << initial.Error().ToString();
+
+        const auto& start = contents.initialState.weather;
+        auto systemResult = WeatherSystem::Create(contents.weatherArchetypes,
+                                                  contents.weatherTransitions,
+                                                  contents.weatherRates,
+                                                  start.state,
+                                                  start.target,
+                                                  start.targetExpiryMinutes);
+        ASSERT_TRUE(systemResult) << systemResult.Error().ToString();
+        WeatherSystem system = std::move(systemResult.Value());
+
+        SimClock clock;
+        clock.SetCalendar(cnahouse::environment::kNewGameCalendarDays);
+        std::vector<Id> visited{system.TargetArchetype()};
+        constexpr std::size_t kThirtyDaysInMinutes = 30U * 24U * 60U;
+        for (std::size_t minute = 1U; minute <= kThirtyDaysInMinutes; ++minute)
+        {
+            SCOPED_TRACE(::testing::Message() << "simulated minute " << minute);
+            clock.Advance(1.0);
+            const float sunlight = DirectSunlight(clock, system.State().cloudCover);
+            ASSERT_TRUE(system.Advance(
+                1.0F, clock.Season(), static_cast<float>(clock.OutdoorBaseTemperatureC()), sunlight));
+            const auto& state = system.State();
+            const auto valid = state.Validate();
+            ASSERT_TRUE(valid) << valid.Error().ToString();
+            if (state.precipType == PrecipType::None)
+            {
+                ASSERT_LE(state.precipIntensity, cnahouse::weather::kPrecipTypeChangeIntensity);
+            }
+            if (state.precipType == PrecipType::Hail)
+            {
+                ASSERT_GT(state.thunderIntensity, 0.3F);
+            }
+            if (state.precipIntensity <= cnahouse::weather::kPrecipTypeChangeIntensity &&
+                (state.precipType == PrecipType::Rain || state.precipType == PrecipType::Snow ||
+                 state.precipType == PrecipType::Sleet))
+            {
+                const auto phase = PrecipTypeAtTemperature(state.precipType, state.temperatureC);
+                ASSERT_TRUE(phase) << phase.Error().ToString();
+                ASSERT_EQ(*phase, state.precipType);
+            }
+
+            if (std::ranges::find(visited, system.TargetArchetype()) == visited.end())
+            {
+                visited.push_back(system.TargetArchetype());
+            }
+            const auto target = std::ranges::find(contents.weatherArchetypes,
+                                                  system.TargetArchetype(),
+                                                  &cnahouse::weather::WeatherArchetype::id);
+            ASSERT_NE(target, contents.weatherArchetypes.end());
+            ASSERT_FALSE(target->modifier) << "the wind modifier became a standalone weather state";
+        }
+
+        EXPECT_GE(visited.size(), 8U);
     }
 
 } // namespace

@@ -14608,8 +14608,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             cannot satisfy the claim.
       mutation: flipping one bit of only the second initial RNG word failed at simulated minute 1;
             the identical canonical seed was restored.
-- [ ] HOUSE-01698 — Test: over 30 simulated days the system visits ≥ 8 archetypes and never produces an impossible combination
+- [x] HOUSE-01698 — Test: over 30 simulated days the system visits ≥ 8 archetypes and never produces an impossible combination
       dep: HOUSE-01697 · sys: ci · plat: CI · pri: MUST
+      verify: integration `WeatherSeasonTests.ThirtyDaysAreVariedAndNeverContradictTheWeatherRules`;
+              unit `PrecipitationTransitionTests.*` (9), all with
+              `SDL_VIDEODRIVER=offscreen`
+      note: the canonical fresh-world stream now runs for all 43,200 minutes of thirty simulated
+            days and requires at least eight distinct real targets, valid ranges, no standalone
+            wind modifier, no dry type above the protected 0.05 intensity, a temperature-compatible
+            water phase after the protected lull, and hail only with thunder above 0.3.
+      finding: the first run found `None` at intensity 0.0500626 in minute 155. Starting rain from
+            zero could overshoot the protected boundary before its type changed, and after a dry
+            switch the blend's residual intensity could raise it again. The second run found rain
+            below freezing at low intensity in minute 1,069 because the phase followed the
+            archetype's eventual temperature rather than the rate-limited live channel.
+      correction: every phase mismatch now targets at most 0.05; a reached dry phase cannot rise
+            above it; rain/sleet/snow are derived after previewing the next live temperature; and
+            hail waits for thunder above 0.3 while departure holds that floor until the type flips.
+      mutation: disabling automatic transitions left the whole 30-day history on one archetype and
+            failed the required minimum of eight; automatic transitions were restored.
 - [x] HOUSE-01699 — Test: it snows in January and rains in July at the default location, with no special-casing
       dep: HOUSE-01688 · sys: ci · plat: CI · pri: MUST
       verify: unit
@@ -14749,6 +14766,9 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       measured: an automatic decision consumes exactly 13 draws (choice + two timing + ten target),
             a reached fresh state consumes none before expiry, and a 30-frame game session on the
             virtual display advanced the authored 140-minute expiry while retaining `W_PARTLY`.
+      correction: `HOUSE-01698` moved water-phase derivation from the archetype's eventual
+            temperature to the next rate-limited live temperature, matching §36.2 without changing
+            the sampled target or RNG history.
       mutation: evaluating the second transition minute from the already rate-limited live state
             changed cloud cover from the immutable-snapshot result 0.4816 to 0.53551364 and failed
             `ExpiryStartsOneSampledTransitionFromAnImmutableSnapshot`; production was restored.

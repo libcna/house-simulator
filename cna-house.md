@@ -3984,6 +3984,13 @@ back under §42.2's normal precipitation rate. The first observable state carryi
 therefore exactly at or below 0.05, even when one update spans the whole ramp-down. So rain turns
 to sleet turns to snow through a lull, as it does in life.
 
+The water phase is derived from the **next rate-limited live `temperatureC`**, not from the
+archetype's eventual target temperature; after the protected lull, the two observable fields
+therefore cannot contradict each other. The same boundary caps residual intensity after the type
+has become `None`. Entering `Hail` additionally waits until `thunderIntensity > 0.3`, and leaving it
+holds thunder just above that boundary until the protected phase switch has completed, preserving
+§40's always-co-occurs rule on every observable state.
+
 ---
 
 ## 43. Player controller

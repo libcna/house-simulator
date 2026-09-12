@@ -140,13 +140,6 @@ namespace cnahouse::weather
             if (targetTracksBaseTemperature_)
             {
                 movingTarget.temperatureC = baseTemperatureC + targetTemperatureOffsetC_;
-                const util::Result<PrecipType> phase =
-                    PrecipTypeAtTemperature(nominalPrecipType_, movingTarget.temperatureC);
-                if (!phase)
-                {
-                    return phase.Error().WithContext("weather/system/target");
-                }
-                movingTarget.precipType = phase.Value();
             }
             const WeatherBlend currentBlend(blend_->Snapshot(), movingTarget, blend_->DurationMinutes());
             const util::Result<WeatherState> blended =
@@ -159,7 +152,10 @@ namespace cnahouse::weather
             desired.precipType = movingTarget.precipType;
         }
 
-        const util::Result<WeatherState> advanced = precipitation_.Advance(state_, desired, simulatedMinutes);
+        const util::Result<WeatherState> advanced =
+            targetTracksBaseTemperature_
+                ? precipitation_.AdvanceDerived(state_, desired, nominalPrecipType_, simulatedMinutes)
+                : precipitation_.Advance(state_, desired, simulatedMinutes);
         if (!advanced)
         {
             return advanced.Error().WithContext("weather/system");

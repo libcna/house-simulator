@@ -76,6 +76,34 @@ namespace
         EXPECT_FLOAT_EQ(rising.Value().precipIntensity, kPrecipTypeChangeIntensity + Rates().precipIntensity);
     }
 
+    TEST(PrecipitationTransitionTests, StartingPrecipitationCannotOutrunItsType)
+    {
+        const PrecipitationTransition transition(Rates());
+        WeatherState current;
+        WeatherState desired = current;
+        desired.precipType = PrecipType::Rain;
+        desired.precipIntensity = 0.8F;
+
+        const auto next = transition.Advance(current, desired, 1.0F);
+        ASSERT_TRUE(next) << next.Error().ToString();
+        EXPECT_EQ(next->precipType, PrecipType::Rain);
+        EXPECT_FLOAT_EQ(next->precipIntensity, kPrecipTypeChangeIntensity);
+    }
+
+    TEST(PrecipitationTransitionTests, AReachedDryTypeCannotRegainTheBlendsOldIntensity)
+    {
+        const PrecipitationTransition transition(Rates());
+        WeatherState current;
+        current.precipIntensity = kPrecipTypeChangeIntensity;
+        WeatherState desired = current;
+        desired.precipIntensity = 0.2F;
+
+        const auto next = transition.Advance(current, desired, 1.0F);
+        ASSERT_TRUE(next) << next.Error().ToString();
+        EXPECT_EQ(next->precipType, PrecipType::None);
+        EXPECT_FLOAT_EQ(next->precipIntensity, kPrecipTypeChangeIntensity);
+    }
+
     TEST(PrecipitationTransitionTests, TemperatureDerivedCrossingUsesTheSameProtection)
     {
         const PrecipitationTransition transition(Rates());
@@ -91,6 +119,56 @@ namespace
         ASSERT_TRUE(next);
         EXPECT_EQ(next.Value().precipType, PrecipType::Rain);
         EXPECT_LT(next.Value().precipIntensity, current.precipIntensity);
+    }
+
+    TEST(PrecipitationTransitionTests, WaterPhaseUsesTheNextRateLimitedLiveTemperature)
+    {
+        const PrecipitationTransition transition(Rates());
+        WeatherState current;
+        current.precipType = PrecipType::Rain;
+        current.precipIntensity = 0.04F;
+        current.temperatureC = 0.1F;
+        WeatherState desired = current;
+        desired.precipIntensity = 0.8F;
+        desired.temperatureC = -10.0F;
+
+        const auto next = transition.AdvanceDerived(current, desired, PrecipType::Rain, 1.0F);
+        ASSERT_TRUE(next) << next.Error().ToString();
+        EXPECT_FLOAT_EQ(next->temperatureC, -0.15F);
+        EXPECT_EQ(next->precipType, PrecipType::Snow);
+        EXPECT_FLOAT_EQ(next->precipIntensity, kPrecipTypeChangeIntensity);
+    }
+
+    TEST(PrecipitationTransitionTests, HailWaitsForThunderAndKeepsItUntilThePhaseChanges)
+    {
+        const PrecipitationTransition transition(Rates());
+        WeatherState current;
+        WeatherState desired = current;
+        desired.precipType = PrecipType::Hail;
+        desired.precipIntensity = 0.7F;
+        desired.thunderIntensity = 0.8F;
+
+        for (int minute = 0; minute < 6; ++minute)
+        {
+            const auto next = transition.Advance(current, desired, 1.0F);
+            ASSERT_TRUE(next) << next.Error().ToString();
+            current = *next;
+            if (current.precipType == PrecipType::Hail)
+            {
+                EXPECT_GT(current.thunderIntensity, cnahouse::weather::kMinimumHailThunderIntensity);
+            }
+        }
+        ASSERT_EQ(current.precipType, PrecipType::Hail);
+
+        current.precipIntensity = 0.1F;
+        current.thunderIntensity = 0.31F;
+        desired.precipType = PrecipType::None;
+        desired.precipIntensity = 0.0F;
+        desired.thunderIntensity = 0.0F;
+        const auto cleared = transition.Advance(current, desired, 1.0F);
+        ASSERT_TRUE(cleared) << cleared.Error().ToString();
+        EXPECT_EQ(cleared->precipType, PrecipType::None);
+        EXPECT_GT(cleared->thunderIntensity, cnahouse::weather::kMinimumHailThunderIntensity);
     }
 
     TEST(PrecipitationTransitionTests, ALongStepStillExposesTheSwitchAtTheBoundary)
