@@ -14429,10 +14429,27 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: replacing the blended dwell scale with spring's fixed scale changed the pinned
             blended draw from 51.313 to 54.733 simulated minutes and failed
             `WeatherSeasonTests.SeasonalDwellScaleIsBlendedContinuously`; production was restored.
-- [ ] HOUSE-01685 — Implement the per-channel rate limiter with the table of §42.2
+- [x] HOUSE-01685 — Implement the per-channel rate limiter with the table of §42.2
       dep: HOUSE-01684 · sys: weather · plat: ALL · pri: MUST
       accept: **no channel can ever exceed its rate**; asserted over 10 000 simulated minutes × 200 seeds
       verify: unit WeatherRateTests.NoChannelEverExceedsItsRate
+      finding: (2026-09-12) the authored rate table contradicted §42.2 on all seven channels the
+            architecture quantified (`0.06/0.10/1.2/0.05/0.20` versus
+            `0.045/0.070/0.9/0.030/0.055`, `0.4` versus `0.25` for temperature, and wind direction
+            absent), and its names described
+            archetype inputs (`temperatureOffset`, `thunderProbability`) rather than the live
+            `WeatherState` outputs. The data now uses §42.2's values and live-channel names;
+            measured architecture wins over the stale authored numbers.
+      note: `WeatherRateLimiter` covers all ten archetype-driven continuous channels. Direction
+            takes the shortest wrapped path and corrects float representation inward when adding a
+            limit near 360 degrees would otherwise expose a result a few ULP above that limit.
+            `precipType`, `surfaceWetness`, `snowDepth` and RNG state remain untouched for their
+            dedicated systems. The schema and C++ loader require exactly the same ten finite,
+            positive data rows. The acceptance run advanced 10 000 simulated minutes for each of
+            200 seeds; every channel reached its limit and none exceeded it.
+      mutation: raising scalar movement to 101 % failed the acceptance run on all nine scalar
+            channels (for example `cloudCover` reached 0.045450 against 0.045002 tolerance). The
+            unmodified limiter was restored before the final green run.
 - [ ] HOUSE-01686 — Implement the smoothstep blend from the snapshot to the target
       dep: HOUSE-01685 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01687 — Implement the `W_WINDY` modifier as an independent wind draw combinable with any precipitation archetype

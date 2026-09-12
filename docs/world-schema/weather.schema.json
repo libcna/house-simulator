@@ -143,10 +143,61 @@
       "type": "array"
     },
     "rates": {
-      "additionalProperties": {
-        "exclusiveMinimum": 0,
-        "type": "number"
+      "additionalProperties": false,
+      "properties": {
+        "cloudCoverPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "cloudCumuliformPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "fogDensityPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "gustFactorPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "humidityPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "precipIntensityPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "temperatureCPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "thunderIntensityPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "windDirectionDegPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "windSpeedPerMin": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        }
       },
+      "required": [
+        "cloudCoverPerMin",
+        "cloudCumuliformPerMin",
+        "precipIntensityPerMin",
+        "windSpeedPerMin",
+        "windDirectionDegPerMin",
+        "gustFactorPerMin",
+        "fogDensityPerMin",
+        "thunderIntensityPerMin",
+        "temperatureCPerMin",
+        "humidityPerMin"
+      ],
       "type": "object"
     },
     "schema": {

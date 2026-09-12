@@ -3746,6 +3746,53 @@ namespace cnahouse::world
                        "layout.weather.json/timing");
         }
 
+        const Result<JsonValue> ratesObject = document.Value().Root().RequireObject("rates");
+        if (!ratesObject)
+        {
+            return ratesObject.Error().WithContext("layout.weather.json");
+        }
+        weather::WeatherRates rates;
+        constexpr std::array<std::pair<std::string_view, float weather::WeatherRates::*>, 10> kRates{
+            std::pair{"cloudCoverPerMin", &weather::WeatherRates::cloudCover},
+            std::pair{"cloudCumuliformPerMin", &weather::WeatherRates::cloudCumuliform},
+            std::pair{"precipIntensityPerMin", &weather::WeatherRates::precipIntensity},
+            std::pair{"windSpeedPerMin", &weather::WeatherRates::windSpeed},
+            std::pair{"windDirectionDegPerMin", &weather::WeatherRates::windDirectionDeg},
+            std::pair{"gustFactorPerMin", &weather::WeatherRates::gustFactor},
+            std::pair{"fogDensityPerMin", &weather::WeatherRates::fogDensity},
+            std::pair{"thunderIntensityPerMin", &weather::WeatherRates::thunderIntensity},
+            std::pair{"temperatureCPerMin", &weather::WeatherRates::temperatureC},
+            std::pair{"humidityPerMin", &weather::WeatherRates::humidity},
+        };
+        const Result<std::vector<std::pair<std::string, JsonValue>>> rateMembers =
+            ratesObject.Value().Members();
+        if (!rateMembers)
+        {
+            return rateMembers.Error().WithContext("layout.weather.json");
+        }
+        if (rateMembers.Value().size() != kRates.size())
+        {
+            return Err(ErrorCode::InvalidData,
+                       "the rate table has exactly ten archetype-driven channels; found " +
+                           std::to_string(rateMembers.Value().size()),
+                       "layout.weather.json/rates");
+        }
+        for (const auto& [name, member] : kRates)
+        {
+            const Result<float> value = ratesObject.Value().RequireFloat(name);
+            if (!value)
+            {
+                return value.Error().WithContext("layout.weather.json");
+            }
+            if (!std::isfinite(value.Value()) || !(value.Value() > 0.0F))
+            {
+                return Err(ErrorCode::OutOfRange,
+                           std::string(name) + " must be finite and positive",
+                           "layout.weather.json/rates/" + std::string(name));
+            }
+            rates.*member = value.Value();
+        }
+
         const Result<JsonValue> seasonArray = document.Value().Root().RequireArray("seasons");
         if (!seasonArray)
         {
@@ -3945,6 +3992,7 @@ namespace cnahouse::world
 
         contents.weatherArchetypes = std::move(parsed);
         contents.weatherTransitions = std::move(transitions);
+        contents.weatherRates = rates;
         return util::Ok();
     }
 

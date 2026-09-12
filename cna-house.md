@@ -3920,14 +3920,21 @@ seasonally scaled ranges must keep the §42.1 bounds shown above.
 | Channel | Max rate (per simulated minute) | Time for a full 0→1 swing |
 |---|---|---|
 | `cloudCover` | 0.045 | ≥ 22 sim min |
+| `cloudCumuliform` | 0.080 | ≥ 12.5 sim min |
 | `precipIntensity` | 0.070 | ≥ 14 sim min |
 | `windSpeed` | 0.9 m/s | ≥ 33 sim min for 0→30 |
 | `windDirectionDeg` | 4.5°, shortest way | ≥ 40 sim min for a reversal |
+| `gustFactor` | 0.150 | ≥ 6.7 sim min |
 | `thunderIntensity` | 0.055 | ≥ 18 sim min |
 | `fogDensity` | 0.030 | ≥ 33 sim min |
-| `temperatureC` | 0.25 °C | |
+| `temperatureC` | 0.25 °C | ≥ 224 sim min for −18→38 °C |
+| `humidity` | 0.080 | ≥ 12.5 sim min |
 | `snowDepth` | integrated, never set directly | |
 | `surfaceWetness` | integrated, never set directly | |
+
+The first ten rows are driven toward archetype targets. `surfaceWetness` and `snowDepth` use their
+accumulation/melt equations instead, and the discrete `precipType` uses §36.2's temperature rule
+plus §42.1's protected phase change.
 
 At the default 60× time scale, 22 simulated minutes is 22 real seconds. So the sky *can* fill in
 noticeably fast — which is right for a summer storm — but "clear → blizzard → clear in seconds" is

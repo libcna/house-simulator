@@ -104,6 +104,23 @@ namespace cnahouse::weather
                                              const WeatherTransitionRow&) = default;
     };
 
+    /// @brief Maximum change per simulated minute for every archetype-driven continuous channel.
+    struct WeatherRates
+    {
+        float cloudCover = 0.0F;
+        float cloudCumuliform = 0.0F;
+        float precipIntensity = 0.0F;
+        float windSpeed = 0.0F;
+        float windDirectionDeg = 0.0F;
+        float gustFactor = 0.0F;
+        float fogDensity = 0.0F;
+        float thunderIntensity = 0.0F;
+        float temperatureC = 0.0F;
+        float humidity = 0.0F;
+
+        [[nodiscard]] friend bool operator==(const WeatherRates&, const WeatherRates&) = default;
+    };
+
     /// @brief The complete continuous weather vector of `cna-house.md` §36.1.
     ///
     /// This is live state, not an archetype. An archetype supplies a target and later systems move

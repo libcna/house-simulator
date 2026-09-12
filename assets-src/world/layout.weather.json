@@ -195,17 +195,18 @@
   },
 
   // §42.2's anti-absurdity guarantee: what stops a clear sky becoming a thunderstorm
-  // in four seconds. Per simulated minute, and every continuous quantity has one.
+  // in four seconds. Per simulated minute, for every archetype-driven continuous quantity.
   "rates": {
-    "cloudCoverPerMin": 0.06,
+    "cloudCoverPerMin": 0.045,
     "cloudCumuliformPerMin": 0.08,
-    "precipIntensityPerMin": 0.10,
-    "windSpeedPerMin": 1.2,
+    "precipIntensityPerMin": 0.07,
+    "windSpeedPerMin": 0.9,
+    "windDirectionDegPerMin": 4.5,
     "gustFactorPerMin": 0.15,
-    "fogDensityPerMin": 0.05,
-    "temperatureOffsetCPerMin": 0.4,
+    "fogDensityPerMin": 0.03,
+    "temperatureCPerMin": 0.25,
     "humidityPerMin": 0.08,
-    "thunderProbabilityPerMin": 0.20
+    "thunderIntensityPerMin": 0.055
   },
 
   // §36.3's four seasons. A weight multiplies the transition probability of arriving

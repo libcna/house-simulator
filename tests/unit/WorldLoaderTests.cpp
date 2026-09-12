@@ -586,7 +586,11 @@ namespace
                         R"(":{"dwellMinutes":[50,100],"transitionMinutes":[10,20]})";
             }
             text +=
-                R"(},"rates":{},"seasons":[)"
+                R"(},"rates":{"cloudCoverPerMin":0.045,"cloudCumuliformPerMin":0.08,)"
+                R"("precipIntensityPerMin":0.07,"windSpeedPerMin":0.9,)"
+                R"("windDirectionDegPerMin":4.5,"gustFactorPerMin":0.15,)"
+                R"("fogDensityPerMin":0.03,"thunderIntensityPerMin":0.055,)"
+                R"("temperatureCPerMin":0.25,"humidityPerMin":0.08},"seasons":[)"
                 R"({"id":"SPRING","months":[3,4,5],"weights":{"W_STATE_0":1.5},"dwellScale":{"W_STATE_0":1.5}},)"
                 R"({"id":"SUMMER","months":[6,7,8],"weights":{"W_STATE_0":2.0},"dwellScale":{"W_STATE_0":2.0}},)"
                 R"({"id":"AUTUMN","months":[9,10,11],"weights":{"W_STATE_0":0.5},"dwellScale":{"W_STATE_0":0.5}},)"
@@ -2590,6 +2594,9 @@ namespace
         EXPECT_FLOAT_EQ(contents.weatherArchetypes[0].seasonalDwellScales[0], 1.5F);
         EXPECT_FLOAT_EQ(contents.weatherArchetypes[1].seasonalDwellScales[0], 1.0F)
             << "an omitted seasonal dwell scale is neutral";
+        EXPECT_FLOAT_EQ(contents.weatherRates.cloudCover, 0.045F);
+        EXPECT_FLOAT_EQ(contents.weatherRates.windDirectionDeg, 4.5F);
+        EXPECT_FLOAT_EQ(contents.weatherRates.thunderIntensity, 0.055F);
     }
 
     TEST_F(WorldLoaderTest, EqualWeatherBandEndpointsAreValid)
@@ -2749,6 +2756,31 @@ namespace
             reject(R"("W_STATE_0":{"dwellMinutes":[50,100],"transitionMinutes":[10,20]},)", "");
         ASSERT_FALSE(missing);
         EXPECT_NE(missing.Error().Context().find("timing"), std::string::npos) << missing.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, WeatherRatesAreFinitePositiveAndComplete)
+    {
+        const auto reject = [this](const std::string& before, const std::string& after)
+        {
+            std::string text = Weather();
+            const std::size_t at = text.find(before);
+            EXPECT_NE(at, std::string::npos) << before;
+            if (at != std::string::npos)
+            {
+                text.replace(at, before.size(), after);
+            }
+            Write("layout.weather.json", text);
+            world::WorldData::Contents contents;
+            return world::WorldLoader::LoadWeather(directory_, contents);
+        };
+
+        const auto zero = reject(R"("windSpeedPerMin":0.9)", R"("windSpeedPerMin":0.0)");
+        ASSERT_FALSE(zero);
+        EXPECT_EQ(zero.Error().Code(), ErrorCode::OutOfRange);
+
+        const auto missing = reject(R"("windDirectionDegPerMin":4.5,)", "");
+        ASSERT_FALSE(missing);
+        EXPECT_NE(missing.Error().Context().find("rates"), std::string::npos) << missing.Error().ToString();
     }
 
     TEST_F(WorldLoaderTest, WeatherRequiresTheFourCalendarSeasonWeightVectors)
@@ -3395,6 +3427,12 @@ namespace
         EXPECT_FLOAT_EQ(windy->windSpeed.minimum, 12.0F);
         EXPECT_FLOAT_EQ(windy->windSpeed.maximum, 20.8F);
         EXPECT_FLOAT_EQ(windy->weight, 0.0F);
+        EXPECT_FLOAT_EQ(contents.weatherRates.cloudCover, 0.045F);
+        EXPECT_FLOAT_EQ(contents.weatherRates.precipIntensity, 0.07F);
+        EXPECT_FLOAT_EQ(contents.weatherRates.windSpeed, 0.9F);
+        EXPECT_FLOAT_EQ(contents.weatherRates.windDirectionDeg, 4.5F);
+        EXPECT_FLOAT_EQ(contents.weatherRates.fogDensity, 0.03F);
+        EXPECT_FLOAT_EQ(contents.weatherRates.thunderIntensity, 0.055F);
 
         const auto snow = find("W_SNOW");
         ASSERT_NE(snow, contents.weatherArchetypes.end());

@@ -598,7 +598,11 @@ there is no `isRaining`.
   "timing": {
     "W_PARTLY": { "dwellMinutes": [60, 180], "transitionMinutes": [10, 25] }
   },
-  "rates": { "cloudCoverPerMin": 0.06, "precipIntensityPerMin": 0.10, "windSpeedPerMin": 1.2 },
+  "rates": { "cloudCoverPerMin": 0.045, "cloudCumuliformPerMin": 0.08,
+    "precipIntensityPerMin": 0.07, "windSpeedPerMin": 0.9,
+    "windDirectionDegPerMin": 4.5, "gustFactorPerMin": 0.15,
+    "fogDensityPerMin": 0.03, "thunderIntensityPerMin": 0.055,
+    "temperatureCPerMin": 0.25, "humidityPerMin": 0.08 },
   "seasons": [ { "id": "WINTER", "months": [12, 1, 2],
     "weights": { "W_SNOW": 2.5, "W_CLEAR": 0.6 },
     "dwellScale": { "W_SNOW": 1.2, "W_CLEAR": 0.8 } } ]
@@ -606,7 +610,9 @@ there is no `isRaining`.
 ```
 
 `rates` is the anti-absurdity guarantee (`cna-house.md` §42.2): it is what stops a clear sky
-becoming a thunderstorm in four seconds.
+becoming a thunderstorm in four seconds. Its ten required rows cover every archetype-driven
+continuous channel. `surfaceWetness` and `snowDepth` are integrated by their own equations rather
+than moved toward archetype targets, and `precipType` is discrete.
 
 `timing` provides one uniform dwell and characteristic transition-time distribution per state.
 The effective transition range is the component-wise mean of the source and destination ranges,

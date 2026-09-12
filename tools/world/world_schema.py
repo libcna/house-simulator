@@ -458,8 +458,16 @@ def build() -> dict[str, dict]:
                  "transitionMinutes": {"type": "array", "minItems": 2, "maxItems": 2,
                                        "items": {"type": "number", "minimum": 5,
                                                  "maximum": 45}}})},
-            "rates": {"type": "object", "additionalProperties": {
-                "type": "number", "exclusiveMinimum": 0}},
+            "rates": obj(
+                ["cloudCoverPerMin", "cloudCumuliformPerMin", "precipIntensityPerMin",
+                 "windSpeedPerMin", "windDirectionDegPerMin", "gustFactorPerMin",
+                 "fogDensityPerMin", "thunderIntensityPerMin", "temperatureCPerMin",
+                 "humidityPerMin"],
+                {name: {"type": "number", "exclusiveMinimum": 0} for name in (
+                    "cloudCoverPerMin", "cloudCumuliformPerMin", "precipIntensityPerMin",
+                    "windSpeedPerMin", "windDirectionDegPerMin", "gustFactorPerMin",
+                    "fogDensityPerMin", "thunderIntensityPerMin", "temperatureCPerMin",
+                    "humidityPerMin")}),
             "seasons": {"type": "array", "items": obj(
                 ["id", "months", "weights", "dwellScale"],
                 {"id": ID,
