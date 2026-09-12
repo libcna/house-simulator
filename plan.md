@@ -14511,8 +14511,21 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: allowing the type assignment immediately, without checking the post-rate-limit
             intensity, changed rain to snow at intensity 0.73 and failed
             `TypeChangesOnlyAtTheProtectedIntensity`; production was restored.
-- [ ] HOUSE-01690 — Implement `surfaceWetness` integration (accumulation and drying)
+- [x] HOUSE-01690 — Implement `surfaceWetness` integration (accumulation and drying)
       dep: HOUSE-01686 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `SurfaceWetnessTests.*` (5)
+      note: `IntegrateSurfaceWetness` applies §37.4's 0.045 precipitation accumulation and 0.006
+            drying terms per simulated minute, clamps the integrated state to 0…1 and preserves
+            every non-wetness field. The drying driver continuously combines normalized
+            temperature, humidity and wind; a sampled sheltered surface retains 25% of the
+            exposed drying rate. The previously unspecified `dryingRate` expression is now pinned
+            in §37.4 so runtime and later material tests share one measurable definition.
+      finding: the first coefficient check derived its expected value from the production constant,
+            so a tenfold coefficient mutation survived. The test now asserts §37.4's literal 0.045
+            independently; the same mutation changes five minutes of rain from 0.38 to 0.218 and
+            fails `RainAccumulatesAtTheDocumentedRate`.
+      mutation: changing wetness accumulation from 0.045 to 0.0045 per minute failed
+            `RainAccumulatesAtTheDocumentedRate`; production was restored.
 - [ ] HOUSE-01691 — Implement `snowDepth` integration (accumulation and melt)
       dep: HOUSE-01690 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01692 — Implement RNG-state persistence so a reload reproduces the same weather future

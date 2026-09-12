@@ -42,6 +42,7 @@ add_library(cnahouse_core STATIC
 
     # weather -- §36's continuous state vector; the state machine follows in phase 26
     weather/PrecipitationTransition.cpp
+    weather/SurfaceWetness.cpp
     weather/WeatherBlend.cpp
     weather/WeatherRateLimiter.cpp
     weather/WeatherSampler.cpp

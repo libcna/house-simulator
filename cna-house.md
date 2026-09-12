@@ -3767,7 +3767,11 @@ the surface, 0.25 s life. On water surfaces they are ripples instead.
 ### 37.4 Wetness
 
 `surfaceWetness` integrates: `dW/dt = 0.045·intensity − 0.006·dryingRate(temperature, humidity,
-windSpeed, isSheltered)`. It drives the material wet response (§22.1): albedo darkening,
+windSpeed, isSheltered)`, clamped to 0…1. The dimensionless drying rate is
+`clamp((temperatureC + 18) / 56, 0, 1) · (1 − humidity) · (1 + windSpeed / 30) · shelter`, where
+`shelter` is 0.25 under cover and 1.0 when exposed. This makes the result continuous in every
+weather channel; `isSheltered` describes the sampled surface, not a duplicate weather state.
+It drives the material wet response (§22.1): albedo darkening,
 specular boost, and a subtle normal flattening on Tier E. Puddles appear on the driveway, the
 terrace and the road above `wetness > 0.55` as flat alpha-blended decals whose alpha follows
 wetness, placed offline at the height field's local minima.
