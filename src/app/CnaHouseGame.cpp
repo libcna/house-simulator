@@ -31,6 +31,7 @@
 #include "cnahouse/debug/VisibilityCommands.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
+#include "cnahouse/rendering/SunDiscPass.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/util/Log.hpp"
 #include "cnahouse/world/ChunkReader.hpp"
@@ -439,6 +440,9 @@ namespace cnahouse::app
         // §28.1 and §32.2, at `UpdateStage::Lighting` (`HOUSE-01251`, `HOUSE-01564`). Built once
         // over the cells, fixtures and windows; every frame reads the one simulation clock.
         lighting_.emplace(*world_, shading_, clock_);
+        auto sunDisc = std::make_unique<rendering::SunDiscPass>(blockoutCamera_);
+        sunDiscPass_ = sunDisc.get();
+        renderer_.Install(rendering::Pass::Sky, std::move(sunDisc));
         if (blockoutChunks_ != nullptr)
         {
             // With the world, so §12's nested cells are drawn with the room they stand in
@@ -851,6 +855,13 @@ namespace cnahouse::app
                 // on or off regardless of who is looking at it.
                 const debug::Timing::Scope scope(timing_, UpdateStage::Lighting);
                 lighting_->Update(frame);
+                // Drawing consumes the lighting stage's one solar answer. There is no second
+                // SunModel in rendering, so room light and the disc cannot disagree within a frame
+                // about where the sun is or how clouds attenuate it.
+                if (sunDiscPass_ != nullptr)
+                {
+                    sunDiscPass_->SetSun(lighting_->Sun(), lighting_->CloudCover());
+                }
             }
             if (walking_ && visibility_.has_value())
             {

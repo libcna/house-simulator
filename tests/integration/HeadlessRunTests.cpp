@@ -787,6 +787,11 @@ namespace
         ASSERT_GT(sun.altitudeDeg, cnahouse::environment::kRefractedHorizonDeg);
         EXPECT_NE(lighting->SunKeyForCell(cnahouse::util::Id::Of("EXT_WORLD")), nullptr)
             << "outdoor objects did not receive the sun key";
+
+        const cnahouse::debug::Counter* disc = game.CountersForTesting().Find("sun.disc.draws");
+        ASSERT_NE(disc, nullptr) << "the walk loaded daylight but never installed the sky pass";
+        EXPECT_EQ(disc->current, 1) << "the visible noon sun did not submit its quad this frame";
+        EXPECT_EQ(disc->Max(), 1) << "the sky pass submitted more than one sun quad in a frame";
     }
 
     TEST(HeadlessRunTests, HoldingForwardWalksTheBodyAcrossTheRoomAtSectionFortyThreesSpeed)

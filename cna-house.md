@@ -3339,7 +3339,9 @@ sky-diffuse term.
 
 A camera-facing quad at 890 units along `−sunDirection`, angular diameter 0.53°, drawn additively
 with a soft radial texture, sized up by ×2.6 near the horizon (atmospheric extinction makes the
-disc *look* bigger and much dimmer) and tinted by the same LUT.
+disc *look* bigger and much dimmer) and tinted by the same LUT. The apparent-size multiplier is
+×2.6 at and below 0° altitude, smoothsteps to ×1 over the 0–10° warm-LUT band, and stays ×1 above
+it; this makes both endpoints continuous without inventing a second atmospheric threshold.
 
 ### 32.4 Glare, and the sun-clock overlay
 

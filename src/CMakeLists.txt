@@ -111,6 +111,7 @@ add_library(cnahouse_core STATIC
     rendering/RenderStates.cpp
     rendering/StaticGeometryPass.cpp
     rendering/StateTracker.cpp
+    rendering/SunDiscPass.cpp
     rendering/WindowGlow.cpp
 
     # ui

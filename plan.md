@@ -14050,8 +14050,38 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 - [ ] HOUSE-01565 — Make the sun-patch decals follow the real sun by interpolating the 12 × 24 grid
       dep: HOUSE-01564, HOUSE-01268 · sys: rendering · plat: ALL · pri: MUST
       accept: a patch visibly crosses a bedroom floor over a simulated afternoon
-- [ ] HOUSE-01566 — Implement the sun disc quad with horizon scaling and reddening
+- [x] HOUSE-01566 — Implement the sun disc quad with horizon scaling and reddening
       dep: HOUSE-01563 · sys: rendering · plat: ALL · pri: MUST
+      verify: unit `SunDiscTests.*` (6); integration `SunDiscPassTests.*` (2) and
+              `HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight`; render
+              `SunDiscRenderTests.HorizonScalingAndReddeningReachTheRenderTarget`; full unit and
+              integration suites; `tools/ci/run_checks.sh`
+      note: (2026-09-12) `SunDiscPass` is the `Pass::Sky` owner of one generated 64 × 64 radial
+            texture, a four-vertex indexed billboard and its `BasicEffect`. Resources are created
+            on the first visible frame and retained; the lighting stage copies its one
+            `SunPosition` and cloud cover into the pass, so rendering does not own or evaluate a
+            second `SunModel`. The quad is 890 units toward the sun with a 0.53° angular diameter,
+            additive blending and no depth write. A sky-only 1000-unit projection keeps it behind
+            the scene's 420-unit far plane while later opaque passes remain able to cover it.
+      decision: §32.3 fixed the ×2.6 and ×1 endpoints but not the transition. The multiplier now
+            smoothsteps from ×2.6 at 0° to ×1 at 10°, exactly the warm interval already owned by
+            §32.2's LUT; this avoids a size discontinuity and adds no unrelated threshold. The
+            LUT hue is carried by `DiffuseColor`, while its cloud-attenuated direct intensity is
+            carried once by `Alpha`.
+      measured: software Mesa at 320 × 240 rasterised the 30° disc as **1 pixel,
+            RGB(224,215,202)** and the 0° disc as **21 pixels, RGB(8,4,2)**. This directly proves
+            both the material horizon magnification and the red-orange tint after XNA draw
+            submission, rather than only testing construction arithmetic.
+      qualified: **1 203 / 1 203 unit and 97 / 97 integration tests** under the main OPENGLES3
+            build; both real-device pass tests also pass in the `HEADLESS` consumer build. The
+            runtime path uses only XNA 4.0-shaped `BasicEffect`, buffers, texture and render state;
+            `CNA_CNAEXT=OFF` remains forced.
+      verified: three injected disconnects were all CAUGHT: replacing ×2.6 with ×1 reduced the
+            horizon raster from 21 pixels to 1; replacing the LUT tint with white produced
+            RGB(8,8,8); and dropping the app's non-owning pass link made the walk integration test
+            report that no sky pass counter existed. The final sources restore all three.
+      boundary: this task draws only §32.3's disc. The occlusion-query pool, glare sampling,
+            coverage smoothing, flare sprites and sun-clock remain `HOUSE-01567`–`HOUSE-01572`.
 - [ ] HOUSE-01567 — Implement the `OcclusionQuery` pool and its per-frame lifecycle (create once, reuse, read one frame late)
       dep: HOUSE-00090 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01568 — Implement the 3 × 3 glare sample grid with colour writes disabled and depth test on

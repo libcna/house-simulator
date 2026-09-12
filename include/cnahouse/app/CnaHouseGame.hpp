@@ -56,6 +56,11 @@
 #include "cnahouse/world/SpatialIndex.hpp"
 #include "cnahouse/world/WorldData.hpp"
 
+namespace cnahouse::rendering
+{
+    class SunDiscPass;
+}
+
 namespace cnahouse::app
 {
 
@@ -583,6 +588,11 @@ namespace cnahouse::app
         lighting::ShadingGrid shading_ = lighting::ShadingGrid::Unshaded();
         /// @brief §28.1's per-room lighting, at `UpdateStage::Lighting` (`HOUSE-01251`).
         std::optional<lighting::LightingSystem> lighting_;
+        /// @brief Non-owning handle to the `Pass::Sky` object owned by `renderer_`.
+        ///
+        /// The lighting stage copies its one current sun into the pass before drawing. The pass is
+        /// installed only for a successfully loaded walk world and remains owned by `renderer_`.
+        rendering::SunDiscPass* sunDiscPass_ = nullptr;
         std::optional<visibility::ChunkCuller> chunkCuller_;
         /// @brief §25.6's hierarchy over the exterior chunks, and the walk over it
         ///        (`HOUSE-00700`).
