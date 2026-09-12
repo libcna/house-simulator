@@ -13830,9 +13830,13 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             the named-season pattern dropped, the blend requirement dropped, a do-nothing exemption
             left alone, and every file scanned including a `.txt`.
       verify: unit SeasonPhaseTests.*
-- [ ] HOUSE-01544 — Implement seasonal day-length variation: sunrise and sunset drift with the declination, so the shortest and longest days are visibly different within one 6-hour year
+- [x] HOUSE-01544 — Implement seasonal day-length variation: sunrise and sunset drift with the declination, so the shortest and longest days are visibly different within one 6-hour year
       dep: HOUSE-01542, HOUSE-01561, HOUSE-01564, HOUSE-01566 · sys: environment · plat: ALL · pri: MUST
-      blocked: (2026-09-11) **the code is written and BOTH acceptance criteria are measured as
+      resolved: (2026-09-12) `HOUSE-01564` and `HOUSE-01566` are complete and the four owed
+            software-Mesa frames are now inspected, committed and covered by independently
+            runnable render tests. The original blocker is retained below as the reason this task
+            correctly stayed open for a day.
+      blocked-history: (2026-09-11) **the code is written and BOTH acceptance criteria are measured as
             met; the box does not move because the `verify` line's other half cannot be run yet.**
             *"screenshot scene sun-season-01..04"* needs the sun to be visible and to light
             something -- §32.3's disc (`HOUSE-01566`) and the wiring into `LightingSystem`
@@ -13878,7 +13882,19 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             every input, so a hit is by construction what a miss would have computed.
       note: the unit half of the `verify` line is done and green -- `SunTests.SeasonalDayLength`
             plus seven more in the same file -- and it is what both acceptance criteria are stated
-            in terms of. Only the scenes are owed.
+            in terms of. The four scenes are now the other half: `sun-season-01/02` put the
+            reddened disc at +3.66°/+4.70° at 06:00/20:00 on the long-day edge, while the matched
+            `sun-season-03/04` clocks put it at −15.43°/−37.29° on the short-day edge. Their road,
+            camera, canonical state, weather and seed are fixed in `docs/screenshot-scenes.md`.
+      measured: the accepted 640×360 pairs differ by exactly **28 morning pixels** and
+            **26 evening pixels** under software Mesa 25.0.7: the visible summer sun disc and no
+            moved geometry. All four reference comparisons pass when run in isolated Xvfb
+            processes; each also asserts the exact calendar position, frozen clock, solar
+            altitude and whether the real sky pass submitted a quad.
+      verified: disconnecting `sunDiscPass_` from the lighting stage is CAUGHT by the new scene
+            tests before image comparison: both summer cases report that their visible sun was
+            never drawn. `SunTests.SeasonalDayLength` remains green, as do the full unit suite and
+            the relevant broader render cases.
 - [ ] HOUSE-01545 — Implement the outdoor temperature model: seasonal base curve + diurnal curve + weather `Δtemp`, driven by `SeasonPhase` and blended, never switched
       dep: HOUSE-01543, HOUSE-01535 · sys: environment · plat: ALL · pri: MUST
       accept: (1) the annual minimum and maximum land in winter and summer respectively; (2) the

@@ -31,6 +31,7 @@ rather than letting a later scene inherit it.
 | `ui` | Prompt, held item, sun clock, menus | `ui-prompt-door-01` |
 | `content` | The content pipeline itself: one of each asset type, loaded and shown | `content-smoke-01` |
 | `fp` | First-person: twelve places a body can stand, seen through §44's camera at head height | `fp-l0-hall`, `fp-l3-room` |
+| `sun-season` | Longest/shortest-day edges at matched local clock times | `sun-season-01`, `sun-season-04` |
 
 A qualifier is only added where it distinguishes scenes within a family, and it always reads
 left-to-right from coarse to fine: family, place, state, ordinal.
@@ -42,11 +43,36 @@ tests/render/scenes/<id>.json         the scene definition — camera, clock, we
 tests/render/reference/<id>.png       the accepted image
 ```
 
+`HOUSE-02511` owns moving the existing C++ scene definitions into the JSON harness above. Until
+that task lands, the definition beside each render test is authoritative; the references already
+use the final paths and ids. In particular, `sun-season-01..04` live in
+`tests/render/SunSeasonRenderTests.cpp`. This is the same arrangement as the `fp`, `property` and
+`blockout` families and is recorded here rather than pretending an unimplemented JSON reader ran.
+
 A failing comparison writes three artefacts, named so they sort together:
 
 ```
 <id>.reference.png   <id>.actual.png   <id>.diff.png
 ```
+
+## The `sun-season` quartet
+
+All four stand at `(0.00, 0.00, +5.20)` on `EXT_ROAD`, use the canonical world state and
+`W_PARTLY` weather (`cloudCover 0.35`), seed `0x5EEDC0DEC0FFEE01`, Tier S/Low at 640×360, and
+freeze the clock before the capture. The date/time pairs are exact positions the 24× compressed
+calendar can reach, not arbitrary date/time combinations rounded by `SetStandard`.
+
+| Scene | Comparison | Exact calendar position | Player yaw/pitch | Measured sun |
+|---|---|---:|---:|---:|
+| `sun-season-01` | longest-day morning, 06:00 DST | day 173: 2031-06-23 | 30° / +3° | +3.66°, azimuth 62.19° |
+| `sun-season-02` | longest-day evening, 20:00 DST | day 187: 2031-07-07 | 330° / +3° | +4.70°, azimuth 295.64° |
+| `sun-season-03` | shortest-day morning, 06:00 standard | day 366: 2032-01-02 | 30° / +3° | −15.43°, azimuth 107.22° |
+| `sun-season-04` | shortest-day evening, 20:00 standard | day 356: 2031-12-23 | 330° / +3° | −37.29°, azimuth 269.28° |
+
+The same road-and-house composition is intentional. The summer references visibly contain the
+reddened sun disc; the matched winter references do not. Human inspection accepted all four under
+software Mesa 25.0.7. Exact-pixel comparison finds 28 changed pixels in the morning pair and 26 in
+the evening pair — the small disc itself, not a moved camera or changed house.
 
 ## The `fp` family is named for its PLACE, not numbered
 
