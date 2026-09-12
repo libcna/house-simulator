@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <array>
 #include <cstdint>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Result.hpp"
@@ -72,8 +74,28 @@ namespace cnahouse::weather
         WeatherRange thunderProbability;
         bool modifier = false;
         float weight = 0.0F;
+        /// Spring, summer, autumn, winter. An omitted authored entry keeps weight 1.
+        std::array<float, 4> seasonalWeights{1.0F, 1.0F, 1.0F, 1.0F};
 
         [[nodiscard]] friend bool operator==(const WeatherArchetype&, const WeatherArchetype&) = default;
+    };
+
+    struct WeatherTransition
+    {
+        util::Id target;
+        float probability = 0.0F;
+
+        [[nodiscard]] friend bool operator==(const WeatherTransition&, const WeatherTransition&) = default;
+    };
+
+    /// @brief One base transition-matrix row; seasonal weights turn it into four matrices.
+    struct WeatherTransitionRow
+    {
+        util::Id source;
+        std::vector<WeatherTransition> targets;
+
+        [[nodiscard]] friend bool operator==(const WeatherTransitionRow&,
+                                             const WeatherTransitionRow&) = default;
     };
 
     /// @brief The complete continuous weather vector of `cna-house.md` §36.1.

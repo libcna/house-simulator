@@ -14,12 +14,14 @@
 #include <fstream>
 #include <iterator>
 #include <map>
+#include <numeric>
 #include <string>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include "cnahouse/util/Ids.hpp"
+#include "cnahouse/weather/WeatherSampler.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
 
 namespace
@@ -562,7 +564,22 @@ namespace
                         R"("humidity":[0.0,1.0],"thunderProbability":[0.0,1.0],)"
                         R"("modifier":true,"weight":0.0})";
             }
-            text += R"(],"transitions":{},"rates":{}})";
+            text += R"(],"transitions":{)";
+            for (std::size_t index = 0; index < stateCount; ++index)
+            {
+                if (index != 0U)
+                {
+                    text += ',';
+                }
+                const std::size_t next = (index + 1U) % stateCount;
+                text += R"("W_STATE_)" + std::to_string(index) + R"(":{"W_STATE_)" + std::to_string(next) +
+                        R"(":1.0})";
+            }
+            text += R"(},"rates":{},"seasons":[)"
+                    R"({"id":"SPRING","months":[3,4,5],"weights":{"W_STATE_0":1.5}},)"
+                    R"({"id":"SUMMER","months":[6,7,8],"weights":{"W_STATE_0":2.0}},)"
+                    R"({"id":"AUTUMN","months":[9,10,11],"weights":{"W_STATE_0":0.5}},)"
+                    R"({"id":"WINTER","months":[12,1,2],"weights":{"W_STATE_0":0.25}}]})";
             return text;
         }
 
@@ -2548,6 +2565,15 @@ namespace
         EXPECT_FLOAT_EQ(windy.windSpeed.minimum, 12.0F);
         EXPECT_FLOAT_EQ(windy.windSpeed.maximum, 20.0F);
         EXPECT_FLOAT_EQ(windy.weight, 0.0F);
+        EXPECT_EQ(contents.weatherTransitions.size(), 13U);
+        ASSERT_EQ(contents.weatherTransitions[0].targets.size(), 1U);
+        EXPECT_EQ(contents.weatherTransitions[0].source, Intern("W_STATE_0"));
+        EXPECT_EQ(contents.weatherTransitions[0].targets[0].target, Intern("W_STATE_1"));
+        EXPECT_FLOAT_EQ(contents.weatherTransitions[0].targets[0].probability, 1.0F);
+        EXPECT_FLOAT_EQ(contents.weatherArchetypes[0].seasonalWeights[0], 1.5F);
+        EXPECT_FLOAT_EQ(contents.weatherArchetypes[0].seasonalWeights[1], 2.0F);
+        EXPECT_FLOAT_EQ(contents.weatherArchetypes[1].seasonalWeights[0], 1.0F)
+            << "an omitted seasonal entry keeps neutral weight";
     }
 
     TEST_F(WorldLoaderTest, EqualWeatherBandEndpointsAreValid)
@@ -2645,6 +2671,62 @@ namespace
         EXPECT_EQ(loaded.Error().Code(), ErrorCode::Duplicate);
         EXPECT_NE(loaded.Error().Message().find("W_STATE_11"), std::string::npos)
             << loaded.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, WeatherTransitionRowsAreCompleteDistributionsOverStates)
+    {
+        const auto replace = [](std::string text, const std::string& before, const std::string& after)
+        {
+            const std::size_t at = text.find(before);
+            EXPECT_NE(at, std::string::npos) << before;
+            if (at != std::string::npos)
+            {
+                text.replace(at, before.size(), after);
+            }
+            return text;
+        };
+        const std::array broken{
+            replace(Weather(), R"("W_STATE_1":1.0)", R"("W_STATE_1":0.8)"),
+            replace(Weather(), R"("W_STATE_1":1.0)", R"("W_WINDY":1.0)"),
+        };
+        for (const std::string& text : broken)
+        {
+            Write("layout.weather.json", text);
+            world::WorldData::Contents contents;
+            const auto loaded = world::WorldLoader::LoadWeather(directory_, contents);
+            ASSERT_FALSE(loaded);
+            EXPECT_NE(loaded.Error().Context().find("transitions"), std::string::npos)
+                << loaded.Error().ToString();
+        }
+    }
+
+    TEST_F(WorldLoaderTest, WeatherRequiresTheFourCalendarSeasonWeightVectors)
+    {
+        const auto mutate = [this](const std::string& before, const std::string& after)
+        {
+            std::string text = Weather();
+            const std::size_t at = text.find(before);
+            EXPECT_NE(at, std::string::npos) << before;
+            if (at != std::string::npos)
+            {
+                text.replace(at, before.size(), after);
+            }
+            Write("layout.weather.json", text);
+            world::WorldData::Contents contents;
+            return world::WorldLoader::LoadWeather(directory_, contents);
+        };
+
+        const auto name = mutate(R"("SPRING")", R"("MONSOON")");
+        ASSERT_FALSE(name);
+        EXPECT_NE(name.Error().Message().find("SPRING"), std::string::npos) << name.Error().ToString();
+
+        const auto months = mutate(R"("months":[3,4,5])", R"("months":[2,3,4])");
+        ASSERT_FALSE(months);
+        EXPECT_NE(months.Error().Context().find("months"), std::string::npos) << months.Error().ToString();
+
+        const auto weight = mutate(R"("W_STATE_0":1.5)", R"("W_STATE_0":-1.5)");
+        ASSERT_FALSE(weight);
+        EXPECT_EQ(weight.Error().Code(), ErrorCode::OutOfRange);
     }
 
     // --- the interactables ------------------------------------------------------------------
@@ -3225,6 +3307,7 @@ namespace
         const auto loaded = world::WorldLoader::LoadWeather(directory, contents);
         ASSERT_TRUE(loaded) << loaded.Error().ToString();
         ASSERT_EQ(contents.weatherArchetypes.size(), 14U);
+        EXPECT_EQ(contents.weatherTransitions.size(), 13U);
         EXPECT_EQ(std::count_if(contents.weatherArchetypes.begin(),
                                 contents.weatherArchetypes.end(),
                                 [](const cnahouse::weather::WeatherArchetype& row) { return row.modifier; }),
@@ -3250,6 +3333,33 @@ namespace
         EXPECT_FLOAT_EQ(windy->windSpeed.minimum, 12.0F);
         EXPECT_FLOAT_EQ(windy->windSpeed.maximum, 20.8F);
         EXPECT_FLOAT_EQ(windy->weight, 0.0F);
+
+        const auto snow = find("W_SNOW");
+        ASSERT_NE(snow, contents.weatherArchetypes.end());
+        EXPECT_FLOAT_EQ(snow->seasonalWeights[0], 0.2F) << "spring";
+        EXPECT_FLOAT_EQ(snow->seasonalWeights[1], 0.0F) << "summer's hard gate";
+        EXPECT_FLOAT_EQ(snow->seasonalWeights[2], 0.4F) << "autumn";
+        EXPECT_FLOAT_EQ(snow->seasonalWeights[3], 2.4F) << "winter";
+
+        const cnahouse::weather::WeatherSampler sampler(contents.weatherArchetypes,
+                                                        contents.weatherTransitions);
+        const auto spring = sampler.Distribution(Intern("W_CLEAR"), cnahouse::environment::SeasonAt(0.125));
+        const auto winter = sampler.Distribution(Intern("W_CLEAR"), cnahouse::environment::SeasonAt(0.875));
+        ASSERT_TRUE(spring) << spring.Error().ToString();
+        ASSERT_TRUE(winter) << winter.Error().ToString();
+        ASSERT_EQ(spring.Value().size(), 12U);
+        ASSERT_EQ(winter.Value().size(), 12U);
+        const auto sum = [](const std::vector<cnahouse::weather::WeatherChoice>& choices)
+        {
+            return std::accumulate(choices.begin(),
+                                   choices.end(),
+                                   0.0F,
+                                   [](float total, const cnahouse::weather::WeatherChoice& choice)
+                                   { return total + choice.probability; });
+        };
+        EXPECT_NEAR(sum(spring.Value()), 1.0F, 1e-6F);
+        EXPECT_NEAR(sum(winter.Value()), 1.0F, 1e-6F);
+        EXPECT_NE(spring.Value(), winter.Value()) << "the authored seasonal vectors change the matrix";
 
         IdRegistry::ResetForTesting();
     }

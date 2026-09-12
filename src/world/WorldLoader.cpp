@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstddef>
 #include <optional>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -3413,6 +3414,12 @@ namespace cnahouse::world
             {
                 return maximum.Error();
             }
+            if (!std::isfinite(minimum.Value()) || !std::isfinite(maximum.Value()))
+            {
+                return Err(ErrorCode::InvalidData,
+                           "an archetype target must have finite endpoints",
+                           row.Path() + "/" + std::string(field));
+            }
             if (!(minimum.Value() <= maximum.Value()))
             {
                 return Err(ErrorCode::InvalidData,
@@ -3529,7 +3536,7 @@ namespace cnahouse::world
             {
                 return weight.Error().WithContext("layout.weather.json");
             }
-            if (!(weight.Value() >= 0.0F))
+            if (!std::isfinite(weight.Value()) || !(weight.Value() >= 0.0F))
             {
                 return Err(ErrorCode::OutOfRange,
                            "an archetype weight is non-negative; this is " + std::to_string(weight.Value()),
@@ -3555,7 +3562,263 @@ namespace cnahouse::world
                        "layout.weather.json/archetypes");
         }
 
+        std::unordered_map<util::Id, std::size_t> archetypeById;
+        for (std::size_t index = 0; index < parsed.size(); ++index)
+        {
+            archetypeById.emplace(parsed[index].id, index);
+        }
+        const auto internKey = [](std::string_view name, std::string context) -> Result<util::Id>
+        {
+            if (name.empty())
+            {
+                return Err(ErrorCode::InvalidData, "an id may not be empty", std::move(context));
+            }
+            util::IdRegistry::ClearConflict();
+            const util::Id id = util::Intern(name);
+            if (util::IdRegistry::HadConflict())
+            {
+                return Err(ErrorCode::Duplicate,
+                           "\"" + std::string(name) + "\" hashes to the same id as \"" +
+                               util::IdRegistry::ConflictExisting() + "\"",
+                           std::move(context));
+            }
+            return id;
+        };
+
+        const Result<JsonValue> transitionObject = document.Value().Root().RequireObject("transitions");
+        if (!transitionObject)
+        {
+            return transitionObject.Error().WithContext("layout.weather.json");
+        }
+        const Result<std::vector<std::pair<std::string, JsonValue>>> transitionMembers =
+            transitionObject.Value().Members();
+        if (!transitionMembers)
+        {
+            return transitionMembers.Error().WithContext("layout.weather.json");
+        }
+
+        std::vector<weather::WeatherTransitionRow> transitions;
+        transitions.reserve(transitionMembers.Value().size());
+        std::unordered_set<util::Id> transitionSources;
+        for (const auto& [sourceName, targetObject] : transitionMembers.Value())
+        {
+            const Result<util::Id> source =
+                internKey(sourceName, "layout.weather.json/transitions/" + sourceName);
+            if (!source)
+            {
+                return source.Error();
+            }
+            const auto sourceArchetype = archetypeById.find(source.Value());
+            if (sourceArchetype == archetypeById.end() || parsed[sourceArchetype->second].modifier)
+            {
+                return Err(ErrorCode::InvalidData,
+                           sourceName + " has a transition row and is not a weather state",
+                           "layout.weather.json/transitions/" + sourceName);
+            }
+            if (!transitionSources.insert(source.Value()).second)
+            {
+                return Err(ErrorCode::Duplicate,
+                           sourceName + " has more than one transition row",
+                           "layout.weather.json/transitions/" + sourceName);
+            }
+
+            const Result<std::vector<std::pair<std::string, JsonValue>>> targetMembers =
+                targetObject.Members();
+            if (!targetMembers)
+            {
+                return targetMembers.Error().WithContext("layout.weather.json");
+            }
+            if (targetMembers.Value().empty())
+            {
+                return Err(ErrorCode::InvalidData,
+                           "a transition row must have somewhere to go",
+                           "layout.weather.json/transitions/" + sourceName);
+            }
+
+            weather::WeatherTransitionRow transitionRow;
+            transitionRow.source = source.Value();
+            std::unordered_set<util::Id> targets;
+            double total = 0.0;
+            for (const auto& [targetName, probabilityValue] : targetMembers.Value())
+            {
+                const Result<util::Id> target =
+                    internKey(targetName, "layout.weather.json/transitions/" + sourceName + "/" + targetName);
+                if (!target)
+                {
+                    return target.Error();
+                }
+                const auto targetArchetype = archetypeById.find(target.Value());
+                if (targetArchetype == archetypeById.end() || parsed[targetArchetype->second].modifier)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               sourceName + " can become " + targetName + ", which is not a weather state",
+                               "layout.weather.json/transitions/" + sourceName + "/" + targetName);
+                }
+                if (!targets.insert(target.Value()).second)
+                {
+                    return Err(ErrorCode::Duplicate,
+                               targetName + " appears twice in " + sourceName + "'s transition row",
+                               "layout.weather.json/transitions/" + sourceName + "/" + targetName);
+                }
+                const Result<float> probability = probabilityValue.AsFloat();
+                if (!probability)
+                {
+                    return probability.Error().WithContext("layout.weather.json");
+                }
+                if (!(probability.Value() >= 0.0F && probability.Value() <= 1.0F))
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "a transition probability is inside 0..1; this is " +
+                                   std::to_string(probability.Value()),
+                               "layout.weather.json/transitions/" + sourceName + "/" + targetName);
+                }
+                transitionRow.targets.push_back({target.Value(), probability.Value()});
+                total += static_cast<double>(probability.Value());
+            }
+            if (std::abs(total - 1.0) > 1e-3)
+            {
+                return Err(ErrorCode::InvalidData,
+                           sourceName + "'s transition row sums to " + std::to_string(total) + ", not 1",
+                           "layout.weather.json/transitions/" + sourceName);
+            }
+            transitions.push_back(std::move(transitionRow));
+        }
+        if (transitions.size() != parsed.size() - 1U)
+        {
+            return Err(ErrorCode::InvalidData,
+                       "every one of the thirteen weather states needs one transition row; found " +
+                           std::to_string(transitions.size()),
+                       "layout.weather.json/transitions");
+        }
+
+        const Result<JsonValue> seasonArray = document.Value().Root().RequireArray("seasons");
+        if (!seasonArray)
+        {
+            return seasonArray.Error().WithContext("layout.weather.json");
+        }
+        const Result<std::vector<JsonValue>> seasonRows = seasonArray.Value().Elements();
+        if (!seasonRows)
+        {
+            return seasonRows.Error().WithContext("layout.weather.json");
+        }
+        if (seasonRows.Value().size() != 4U)
+        {
+            return Err(ErrorCode::InvalidData,
+                       "§36.3 defines four seasonal weight vectors; found " +
+                           std::to_string(seasonRows.Value().size()),
+                       "layout.weather.json/seasons");
+        }
+
+        constexpr std::array<std::string_view, 4> kSeasonNames{"SPRING", "SUMMER", "AUTUMN", "WINTER"};
+        constexpr std::array<std::array<std::int64_t, 3>, 4> kSeasonMonths{
+            std::array<std::int64_t, 3>{3, 4, 5},
+            std::array<std::int64_t, 3>{6, 7, 8},
+            std::array<std::int64_t, 3>{9, 10, 11},
+            std::array<std::int64_t, 3>{12, 1, 2},
+        };
+        std::array<bool, 4> seenSeasons{};
+        for (const JsonValue& seasonRow : seasonRows.Value())
+        {
+            const Result<std::string> name = seasonRow.RequireString("id");
+            if (!name)
+            {
+                return name.Error().WithContext("layout.weather.json");
+            }
+            const auto found = std::ranges::find(kSeasonNames, name.Value());
+            if (found == kSeasonNames.end())
+            {
+                return Err(ErrorCode::InvalidData,
+                           name.Value() + " is not SPRING, SUMMER, AUTUMN or WINTER",
+                           "layout.weather.json/" + seasonRow.Path() + "/id");
+            }
+            const std::size_t seasonIndex =
+                static_cast<std::size_t>(std::distance(kSeasonNames.begin(), found));
+            if (seenSeasons[seasonIndex])
+            {
+                return Err(ErrorCode::Duplicate,
+                           name.Value() + " appears more than once",
+                           "layout.weather.json/" + seasonRow.Path() + "/id");
+            }
+            seenSeasons[seasonIndex] = true;
+
+            const Result<JsonValue> months = seasonRow.RequireArray("months");
+            if (!months)
+            {
+                return months.Error().WithContext("layout.weather.json");
+            }
+            const Result<std::vector<JsonValue>> monthValues = months.Value().Elements();
+            if (!monthValues || monthValues.Value().size() != 3U)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "a season has exactly three months",
+                           "layout.weather.json/" + seasonRow.Path() + "/months");
+            }
+            for (std::size_t monthIndex = 0; monthIndex < 3U; ++monthIndex)
+            {
+                const Result<std::int64_t> month = monthValues.Value()[monthIndex].AsInt();
+                if (!month)
+                {
+                    return month.Error().WithContext("layout.weather.json");
+                }
+                if (month.Value() != kSeasonMonths[seasonIndex][monthIndex])
+                {
+                    return Err(ErrorCode::InvalidData,
+                               name.Value() + " must name its calendar months in order",
+                               "layout.weather.json/" + seasonRow.Path() + "/months");
+                }
+            }
+
+            const Result<JsonValue> weightsObject = seasonRow.RequireObject("weights");
+            if (!weightsObject)
+            {
+                return weightsObject.Error().WithContext("layout.weather.json");
+            }
+            const Result<std::vector<std::pair<std::string, JsonValue>>> weights =
+                weightsObject.Value().Members();
+            if (!weights)
+            {
+                return weights.Error().WithContext("layout.weather.json");
+            }
+            std::unordered_set<util::Id> weighted;
+            for (const auto& [targetName, weightValue] : weights.Value())
+            {
+                const Result<util::Id> target = internKey(
+                    targetName, "layout.weather.json/" + seasonRow.Path() + "/weights/" + targetName);
+                if (!target)
+                {
+                    return target.Error();
+                }
+                const auto targetArchetype = archetypeById.find(target.Value());
+                if (targetArchetype == archetypeById.end() || parsed[targetArchetype->second].modifier)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               name.Value() + " weights " + targetName + ", which is not a weather state",
+                               "layout.weather.json/" + seasonRow.Path() + "/weights/" + targetName);
+                }
+                if (!weighted.insert(target.Value()).second)
+                {
+                    return Err(ErrorCode::Duplicate,
+                               targetName + " is weighted twice",
+                               "layout.weather.json/" + seasonRow.Path() + "/weights/" + targetName);
+                }
+                const Result<float> weightValueFloat = weightValue.AsFloat();
+                if (!weightValueFloat)
+                {
+                    return weightValueFloat.Error().WithContext("layout.weather.json");
+                }
+                if (!std::isfinite(weightValueFloat.Value()) || !(weightValueFloat.Value() >= 0.0F))
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "a seasonal weight is non-negative; this is " +
+                                   std::to_string(weightValueFloat.Value()),
+                               "layout.weather.json/" + seasonRow.Path() + "/weights/" + targetName);
+                }
+                parsed[targetArchetype->second].seasonalWeights[seasonIndex] = weightValueFloat.Value();
+            }
+        }
+
         contents.weatherArchetypes = std::move(parsed);
+        contents.weatherTransitions = std::move(transitions);
         return util::Ok();
     }
 

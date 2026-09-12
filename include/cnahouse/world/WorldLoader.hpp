@@ -177,8 +177,8 @@ namespace cnahouse::world
 
         /// @brief Reads and validates §36.2's fourteen target bands and wind modifier.
         ///
-        /// Transition rows, seasonal weights and rate limits are deliberately left for the tasks
-        /// that own their behaviour (`HOUSE-01683` and `HOUSE-01685`).
+        /// Transition rows and seasonal weights join the archetypes in `HOUSE-01683`; rate limits
+        /// remain the responsibility of the system that applies them (`HOUSE-01685`).
         [[nodiscard]] static util::Result<void> LoadWeather(std::string_view directory,
                                                             WorldData::Contents& contents);
 

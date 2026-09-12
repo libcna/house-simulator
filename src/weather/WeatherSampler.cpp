@@ -1,0 +1,109 @@
+// SPDX-License-Identifier: MIT
+#include "cnahouse/weather/WeatherSampler.hpp"
+
+#include <algorithm>
+#include <cmath>
+#include <format>
+
+namespace cnahouse::weather
+{
+    WeatherSampler::WeatherSampler(std::span<const WeatherArchetype> archetypes,
+                                   std::span<const WeatherTransitionRow> transitions)
+        : archetypes_(archetypes.begin(), archetypes.end())
+        , transitions_(transitions.begin(), transitions.end())
+    {
+    }
+
+    const WeatherArchetype* WeatherSampler::FindArchetype(util::Id id) const noexcept
+    {
+        const auto found = std::ranges::find(archetypes_, id, &WeatherArchetype::id);
+        return found == archetypes_.end() ? nullptr : &*found;
+    }
+
+    const WeatherTransitionRow* WeatherSampler::FindRow(util::Id id) const noexcept
+    {
+        const auto found = std::ranges::find(transitions_, id, &WeatherTransitionRow::source);
+        return found == transitions_.end() ? nullptr : &*found;
+    }
+
+    util::Result<std::vector<WeatherChoice>>
+    WeatherSampler::Distribution(util::Id current, const environment::SeasonPhase& season) const
+    {
+        const WeatherTransitionRow* row = FindRow(current);
+        if (row == nullptr)
+        {
+            return util::Err(util::ErrorCode::NotFound,
+                             "the current archetype has no transition row",
+                             std::format("weather/{}", current.Value()));
+        }
+
+        std::vector<WeatherChoice> choices;
+        choices.reserve(row->targets.size());
+        double total = 0.0;
+        for (const WeatherTransition& transition : row->targets)
+        {
+            const WeatherArchetype* target = FindArchetype(transition.target);
+            if (target == nullptr || target->modifier)
+            {
+                return util::Err(util::ErrorCode::InvalidData,
+                                 "a transition target is missing or is a modifier",
+                                 std::format("weather/{}/{}", current.Value(), transition.target.Value()));
+            }
+            const float perSeason[4]{target->seasonalWeights[0],
+                                     target->seasonalWeights[1],
+                                     target->seasonalWeights[2],
+                                     target->seasonalWeights[3]};
+            const float seasonalWeight = environment::MixBySeason(season, perSeason);
+            const float effective = transition.probability * target->weight * seasonalWeight;
+            if (!std::isfinite(effective) || !(effective >= 0.0F))
+            {
+                return util::Err(util::ErrorCode::InvalidData,
+                                 "an effective transition weight is negative or non-finite",
+                                 std::format("weather/{}/{}", current.Value(), transition.target.Value()));
+            }
+            choices.push_back({transition.target, effective});
+            total += static_cast<double>(effective);
+        }
+        if (!(total > 0.0))
+        {
+            return util::Err(util::ErrorCode::InvalidData,
+                             "seasonal weighting leaves the transition row with zero probability",
+                             std::format("weather/{}", current.Value()));
+        }
+        for (WeatherChoice& choice : choices)
+        {
+            choice.probability = static_cast<float>(static_cast<double>(choice.probability) / total);
+        }
+        return choices;
+    }
+
+    util::Result<util::Id>
+    WeatherSampler::SampleNext(util::Id current, const environment::SeasonPhase& season, util::Rng& rng) const
+    {
+        const util::Result<std::vector<WeatherChoice>> choices = Distribution(current, season);
+        if (!choices)
+        {
+            return choices.Error();
+        }
+
+        const float draw = rng.NextFloat();
+        float cumulative = 0.0F;
+        util::Id lastPositive;
+        for (const WeatherChoice& choice : choices.Value())
+        {
+            if (choice.probability > 0.0F)
+            {
+                lastPositive = choice.archetype;
+            }
+            cumulative += choice.probability;
+            if (draw < cumulative)
+            {
+                return choice.archetype;
+            }
+        }
+        // Float normalisation may sum to one ULP below 1. The final positive target owns that
+        // sliver; returning no state would turn a harmless rounding detail into a stuck sky.
+        return lastPositive;
+    }
+
+} // namespace cnahouse::weather

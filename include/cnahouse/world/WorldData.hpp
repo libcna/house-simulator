@@ -82,6 +82,7 @@ namespace cnahouse::world
             std::vector<AudioEmitter> audioEmitters;
             std::vector<AudioTransmission> audioTransmission;
             std::vector<weather::WeatherArchetype> weatherArchetypes;
+            std::vector<weather::WeatherTransitionRow> weatherTransitions;
             std::vector<Interactable> interactables;
             InitialState initialState;
             Exterior exterior;
@@ -198,6 +199,11 @@ namespace cnahouse::world
         [[nodiscard]] std::span<const weather::WeatherArchetype> WeatherArchetypes() const noexcept
         {
             return m_contents.weatherArchetypes;
+        }
+
+        [[nodiscard]] std::span<const weather::WeatherTransitionRow> WeatherTransitions() const noexcept
+        {
+            return m_contents.weatherTransitions;
         }
 
         /// @brief The named loss pair, or null when the table does not have that kind.

@@ -14389,8 +14389,21 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: widening the unit-interval ceiling from 1 to 2 made
             `InvalidWeatherBandsNameTheirField` accept humidity 1.7 and fail exactly that case; the
             production bound was restored before the final green run.
-- [ ] HOUSE-01683 — Implement the seasonal transition matrices and archetype sampling from the seeded RNG
+- [x] HOUSE-01683 — Implement the seasonal transition matrices and archetype sampling from the seeded RNG
       dep: HOUSE-01682, HOUSE-00027 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `WeatherSeasonTests.*`, `WorldLoaderTest.*Weather*`,
+              `AuthoredWorldTest.TheAuthoredWeatherHasThirteenStatesAndItsWindModifier` (16 tests)
+      note: (2026-09-12) `WorldLoader::LoadWeather` reads and validates all thirteen authored
+            transition rows, their normalised probabilities and the four sparse seasonal weight
+            vectors. `WeatherSampler` preserves authored target order, produces a normalised
+            effective row and consumes exactly one draw from the caller-owned RNG. Seed
+            `0xC0FFEE` pins the first twelve spring choices to
+            `B,C,B,B,B,B,B,C,B,B,B,C`; invalid modifier targets and zero effective rows are
+            rejected instead of silently sticking the weather.
+      decision: completed with `HOUSE-01703` in one coherent change. A discrete season selector
+            would contradict current §36.3 and the already-active `season-usage` gate, so there is
+            no dependency-valid intermediate implementation to commit between the base matrix
+            reader and its required continuous blend.
 - [ ] HOUSE-01684 — Implement dwell and transition-time distributions
       dep: HOUSE-01683 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01685 — Implement the per-channel rate limiter with the table of §42.2
@@ -14471,13 +14484,21 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             cheap rules that overlap beat one that has to be right about C++ syntax.
 - [ ] HOUSE-01701 — Tune the archetype table and the transition matrices against a subjective "does a week of weather feel right?" review over 7 simulated days
       dep: HOUSE-01698 · sys: weather · plat: LNX · pri: MUST
-- [ ] HOUSE-01703 — Blend the four seasonal transition matrices continuously from `SeasonPhase::blend` instead of selecting one by day-of-year
+- [x] HOUSE-01703 — Blend the four seasonal transition matrices continuously from `SeasonPhase::blend` instead of selecting one by day-of-year
       dep: HOUSE-01543, HOUSE-01683 · sys: weather · plat: ALL · pri: MUST
       accept: (1) the effective archetype probabilities are the blend-weighted mix of the two
               neighbouring seasons; (2) crossing a season boundary changes no probability
               discontinuously; (3) determinism is preserved — the same seed still reproduces the
               same weather sequence
       verify: unit WeatherSeasonTests.BlendedMatrices
+      note: (2026-09-12) Every target's two neighbouring seasonal weights are mixed through
+            `environment::MixBySeason(SeasonPhase)` before the transition row is normalised. The
+            exact 25 % spring→summer case is `[0.65, 0.35]`; values immediately before and after a
+            boundary differ by less than `2e-6`, and the deployed world's spring and winter rows
+            are both normalised but measurably different.
+      mutation: replacing the blend with the primary spring weight changed the asserted
+            `[0.65, 0.35]` row to `[0.8, 0.2]` and failed `WeatherSeasonTests.BlendedMatrices`.
+            The production blend was restored before the final green run.
 - [ ] HOUSE-01704 — Gate the archetypes on the measured outdoor temperature: `W_SNOW` impossible in summer, `W_THUNDERSTORM` probability rising with the summer temperature excess
       dep: HOUSE-01703, HOUSE-01545 · sys: weather · plat: ALL · pri: MUST
       accept: (1) over a full simulated year, `W_SNOW` is never selected while the outdoor
