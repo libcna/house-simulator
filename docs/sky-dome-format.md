@@ -1,6 +1,6 @@
 # `sky_dome.bin` — the dynamic-colour sky geometry
 
-*`HOUSE-01642` writer and `HOUSE-01643` runtime reader. Normative. The only writer is
+*`HOUSE-01642` writer and `HOUSE-01643`/`HOUSE-01644` runtime readers. Normative. The only writer is
 `tools/world/build_skydome.py`; `rendering::SkyDomeReader` is the only runtime reader.*
 
 ## 1. Geometry
@@ -18,9 +18,9 @@ of 594 vertices was `33 × 18`: it duplicated every seam vertex, still omitted t
 naive pole row would add 32 zero-area triangles. Measured generated topology replaces that stale
 arithmetic.
 
-Only positions are stored. `SkySystem` creates XNA `VertexPositionColor` vertices, initially in a
-visible bootstrap blue; `HOUSE-01644` computes their changing colours from the LUT. Baking a colour
-into this file would duplicate the LUT and be stale as soon as the sun moves.
+Only positions are stored. `SkySystem` creates XNA `VertexPositionColor` vertices and computes their
+changing colours from `layout.sky.json`'s generated 32-row gradient and overcast term. Baking a
+colour into this file would duplicate the LUT and be stale as soon as the sun moves.
 
 ## 2. Encoding
 
@@ -57,6 +57,8 @@ At runtime `SkyDomeReader` rejects any other length, magic, version, flags, dime
 skirt depth or counts before allocating the arrays, then rejects non-finite positions and indices
 outside the 610-vertex table. `SkySystem` uploads the resulting 610 vertices and 3,648 `u16`
 indices once, draws 1,216 triangles with opaque blending, `DepthStencilState::None` and
-`RasterizerState::CullNone`, and translates the object by the current camera eye every draw. It is
-also the single `Pass::Sky` owner and draws the existing additive sun disc after the dome; the
-renderer intentionally permits only one implementation per pass.
+`RasterizerState::CullNone`, and translates the object by the current camera eye every draw. A
+greater-than 0.25-degree sun-altitude change or greater-than 0.01 cloud-cover change recomputes the
+610 CPU colours and updates the existing XNA vertex buffer; smaller changes allocate and upload
+nothing. `SkySystem` is also the single `Pass::Sky` owner and draws the existing additive sun disc
+after the dome; the renderer intentionally permits only one implementation per pass.

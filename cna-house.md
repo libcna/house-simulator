@@ -3265,6 +3265,13 @@ analytic atmospheric model to runtime. Sunrise/sunset warmth is concentrated aro
 than tinting every azimuth orange, and the same elevation curve naturally treats dawn and dusk
 identically. The later reference-photo pass (`HOUSE-01652`) art-directs these same anchors.
 
+`HOUSE-01644` implements the altitude interpolation, altitude-fraction gradient and overcast mix
+above. It retains the 610 expanded vertices and calls `SetData` on the existing buffer only after
+one of the material-change thresholds is crossed. A 64-update debug-build measurement averaged
+0.105 ms and reached 0.121 ms maximum. The sun-direction glow and night contribution remain the
+deliberately separate `HOUSE-01645`; the formula above describes the complete Tier S result after
+that successor task.
+
 610 vertices × 16 bytes = 9.8 KB per update. Negligible. The earlier 594-vertex estimate was
 `33 × 18`: it duplicated each seam vertex, omitted the skirt and, if used for the pole, produced
 32 zero-area triangles. `HOUSE-01642` records the generated non-degenerate topology in

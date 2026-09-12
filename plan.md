@@ -14376,9 +14376,23 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             replacing it. A Python-generated CMake fixture proves the writer/reader boundary, and
             malformed length, magic, version, flags, geometry header, NaN position and out-of-range
             index mutations are rejected.
-- [ ] HOUSE-01644 — Implement CPU vertex-colour recomputation from the LUTs, triggered by a material change in the sky state
+- [x] HOUSE-01644 — Implement CPU vertex-colour recomputation from the LUTs, triggered by a material change in the sky state
       dep: HOUSE-01643 · sys: rendering · plat: ALL · pri: MUST
       accept: recomputed a few times per simulated minute, not per frame; measured cost negligible
+      verify: unit `SkySystemTests.*` (6); integration `SkySystemPassTests.*` (1) and
+            `HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight` (1), all graphics
+            invocations with `SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy`
+      note: (2026-09-12) `SkyColourModelReader` strictly loads the generated schema, 32 ascending
+            gradient rows, 8 × 16 conceptual sample axes and bounded colour/scalar inputs through
+            XNA `TitleContainer`. `SkySystem` retains 610 expanded `VertexPositionColor` values,
+            linearly interpolates the sun-altitude rows, smoothsteps horizon to zenith, applies the
+            generated `cloudCover^1.5` overcast mix, and uploads the existing XNA vertex buffer
+            without reallocating. A 600-frame half-degree transition caused only two updates
+            including construction; the exact >0.25-degree and >0.01 cloud-cover thresholds are
+            covered. Across 64 forced updates, the debug-build CPU mean was 0.105 ms and the
+            maximum was 0.121 ms; the test records both and gates the maximum below 5 ms.
+            `sky.colour.updates` and `sky.colour.micros` expose live behaviour. Night blending and
+            directional glow remain `HOUSE-01645`.
 - [ ] HOUSE-01645 — Implement the night sky blend and the sun-glow term
       dep: HOUSE-01644 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01646 — Author the three cloud textures (cirrus, cumulus, stratus) with alpha

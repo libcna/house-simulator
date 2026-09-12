@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01643`. The dome crosses a live XNA GraphicsDevice under the HEADLESS renderer. This is
-// still launched with SDL's offscreen driver by the local verification command.
+// `HOUSE-01643` and `HOUSE-01644`. The dome and a later colour-buffer upload cross a live XNA
+// GraphicsDevice. This is always launched with SDL's offscreen driver by the local verification
+// command.
 #include <cstdint>
+#include <fstream>
+#include <iterator>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -34,6 +37,11 @@ namespace
             CNAHOUSE_TEST_SKY_DOME_FIXTURE, System::IO::FileMode::Open, System::IO::FileAccess::Read);
         auto mesh = cnahouse::rendering::SkyDomeReader::Read(stream, CNAHOUSE_TEST_SKY_DOME_FIXTURE);
         ASSERT_TRUE(mesh) << (mesh ? std::string() : mesh.Error().ToString());
+        std::ifstream skyJsonFile("content/world/layout.sky.json", std::ios::binary);
+        const std::string skyJson{std::istreambuf_iterator<char>(skyJsonFile),
+                                  std::istreambuf_iterator<char>()};
+        auto colourModel = cnahouse::rendering::SkyColourModelReader::Read(skyJson, "layout.sky.json");
+        ASSERT_TRUE(colourModel) << (colourModel ? std::string() : colourModel.Error().ToString());
 
         std::int64_t draws = 0;
         std::int64_t triangles = 0;
@@ -42,7 +50,7 @@ namespace
             {
                 cnahouse::rendering::Camera camera;
                 camera.eye = Microsoft::Xna::Framework::Vector3(20.0F, 4.0F, -30.0F);
-                cnahouse::rendering::SkySystem sky(camera, std::move(*mesh));
+                cnahouse::rendering::SkySystem sky(camera, std::move(*mesh), std::move(*colourModel));
                 cnahouse::environment::SunPosition sun;
                 sun.altitudeDeg = cnahouse::environment::kRefractedHorizonDeg - 1.0;
                 sky.SetSun(sun, 0.0);
@@ -52,6 +60,8 @@ namespace
                 cnahouse::rendering::PassContext context{device, states, counters, 1.0F / 60.0F};
                 sky.Draw(context);
                 camera.eye = Microsoft::Xna::Framework::Vector3(-50.0F, 9.0F, 120.0F);
+                sky.Draw(context);
+                ASSERT_TRUE(sky.SetSky(45.0, 0.5));
                 sky.Draw(context);
 
                 const Gfx::BlendState& blend = device.getBlendStateProperty();
@@ -68,16 +78,22 @@ namespace
                 EXPECT_EQ(states.Current().blendApplied, 1u);
                 EXPECT_EQ(states.Current().depthApplied, 1u);
                 EXPECT_EQ(states.Current().rasterApplied, 1u);
-                EXPECT_EQ(states.Current().blendSkipped, 1u);
-                EXPECT_EQ(states.Current().depthSkipped, 1u);
-                EXPECT_EQ(states.Current().rasterSkipped, 1u);
+                EXPECT_EQ(states.Current().blendSkipped, 2u);
+                EXPECT_EQ(states.Current().depthSkipped, 2u);
+                EXPECT_EQ(states.Current().rasterSkipped, 2u);
 
                 const auto* drawCounter = counters.Find("sky.dome.draws");
                 const auto* triangleCounter = counters.Find("sky.dome.triangles");
+                const auto* colourUpdatesCounter = counters.Find("sky.colour.updates");
+                const auto* colourMicrosCounter = counters.Find("sky.colour.micros");
                 ASSERT_NE(drawCounter, nullptr);
                 ASSERT_NE(triangleCounter, nullptr);
+                ASSERT_NE(colourUpdatesCounter, nullptr);
+                ASSERT_NE(colourMicrosCounter, nullptr);
                 draws = drawCounter->current;
                 triangles = triangleCounter->current;
+                EXPECT_GE(colourUpdatesCounter->current, 2);
+                EXPECT_GE(colourMicrosCounter->current, 0);
             });
         host.Run();
 

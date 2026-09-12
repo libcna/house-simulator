@@ -491,9 +491,11 @@ namespace cnahouse::app
         // over the cells, fixtures and windows; every frame reads the one simulation clock.
         lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
         auto skyDome = rendering::SkyDomeReader::ReadFromTitle("content/world/sky_dome.bin");
-        if (skyDome)
+        auto skyColours = rendering::SkyColourModelReader::ReadFromTitle("content/world/layout.sky.json");
+        if (skyDome && skyColours)
         {
-            auto sky = std::make_unique<rendering::SkySystem>(blockoutCamera_, std::move(*skyDome));
+            auto sky = std::make_unique<rendering::SkySystem>(
+                blockoutCamera_, std::move(*skyDome), std::move(*skyColours));
             skySystem_ = sky.get();
             renderer_.Install(rendering::Pass::Sky, std::move(sky));
         }
@@ -501,7 +503,9 @@ namespace cnahouse::app
         {
             // The walk remains usable in a source checkout that has not built generated content,
             // but the missing layer is never silent or disguised as a plausible sky.
-            Log::Error(LogCat::Content, "--scene=walk: {}", skyDome.Error().ToString());
+            Log::Error(LogCat::Content,
+                       "--scene=walk: {}",
+                       skyDome ? skyColours.Error().ToString() : skyDome.Error().ToString());
         }
         if (blockoutChunks_ != nullptr)
         {
