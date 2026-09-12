@@ -5,9 +5,8 @@
 // A **presenter**: it owns no measurement and takes no queries of its own, so what it says can be
 // asserted here rather than looked at. §71 lists `F8` as *"simulated date/time, sun/moon altitude
 // and azimuth, moon phase and name, the full weather state vector, the current archetype and time
-// to the next transition, RNG state"*; everything after the first clause is §35.3's sun and §36's
-// weather, which are later phases. That the panel SAYS so is one of the claims below -- a debug
-// overlay silently missing half its rows teaches its reader that the missing rows do not exist.
+// to the next transition, RNG state"*. `HOUSE-01695` supplies the weather half; the panel continues
+// to say explicitly that the later §35.3 sun/moon rows are absent.
 #include <string>
 #include <vector>
 
@@ -17,6 +16,9 @@
 #include "cnahouse/environment/DayLength.hpp"
 #include "cnahouse/environment/Season.hpp"
 #include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/util/Ids.hpp"
+#include "cnahouse/util/Rng.hpp"
+#include "cnahouse/weather/WeatherSystem.hpp"
 
 namespace
 {
@@ -151,14 +153,63 @@ TEST(EnvironmentOverlayTests, TheBaseTemperatureIsHereBecauseSection36DerivesThe
         << "nothing says this is the base rather than the temperature outside";
 }
 
-TEST(EnvironmentOverlayTests, ThePanelSaysWhichOfSection71sRowsAreNotBuiltYet)
+TEST(EnvironmentOverlayTests, ThePanelSaysWhichOfSection71sRowsAreUnavailableOrNotBuiltYet)
 {
-    // The claim that keeps this overlay honest as the phases land: §71 lists sun, moon, weather
-    // and RNG on `F8`, and none of them exists. Saying so is what stops the panel looking finished.
+    // A non-walk scene has no weather owner, while §35.3's sun/moon overlay rows are still future
+    // work. Both absences are explicit rather than looking like an accidentally truncated panel.
     const std::string all = Joined(EnvironmentOverlay().Lines(SimClock()));
     EXPECT_NE(all.find("not built yet"), std::string::npos) << all;
     EXPECT_NE(all.find("§35.3"), std::string::npos) << "the missing sun is not attributed";
-    EXPECT_NE(all.find("§36"), std::string::npos) << "the missing weather is not attributed";
+    EXPECT_NE(all.find("weather  unavailable"), std::string::npos) << all;
+}
+
+TEST(EnvironmentOverlayTests, EveryLiveWeatherFieldTargetTimerAndRngWordAreShown)
+{
+    cnahouse::util::IdRegistry::ResetForTesting();
+    const cnahouse::util::Id targetId = cnahouse::util::Intern("W_RAIN");
+    cnahouse::weather::WeatherArchetype archetype;
+    archetype.id = targetId;
+    std::vector<cnahouse::weather::WeatherArchetype> archetypes{archetype};
+    cnahouse::weather::WeatherRates rates{1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F, 1.0F};
+    cnahouse::weather::WeatherState state;
+    state.cloudCover = 0.35F;
+    state.cloudCumuliform = 0.9F;
+    state.precipType = cnahouse::weather::PrecipType::Rain;
+    state.precipIntensity = 0.42F;
+    state.windSpeed = 3.2F;
+    state.windDirectionDeg = 225.0F;
+    state.gustFactor = 0.28F;
+    state.fogDensity = 0.03F;
+    state.thunderIntensity = 0.17F;
+    state.temperatureC = 21.5F;
+    state.humidity = 0.55F;
+    state.surfaceWetness = 0.61F;
+    state.snowDepth = 0.123F;
+    state.rngState = cnahouse::util::Rng(123U).GetState();
+    auto created = cnahouse::weather::WeatherSystem::Create(archetypes, {}, rates, state, targetId, 17.5F);
+    ASSERT_TRUE(created) << created.Error().ToString();
+    const std::string all = Joined(EnvironmentOverlay().Lines(SimClock(), &created.Value()));
+
+    EXPECT_NE(all.find("W_RAIN"), std::string::npos) << all;
+    EXPECT_NE(all.find("next 17.5 min"), std::string::npos) << all;
+    EXPECT_NE(all.find("blend 0.0 min"), std::string::npos) << all;
+    for (const std::string_view value : {"cover 0.350",
+                                         "cumuliform 0.900",
+                                         "Rain 0.420",
+                                         "wet 0.610",
+                                         "snow 0.123 m",
+                                         "3.20 m/s",
+                                         "225.0 deg",
+                                         "gust 0.280",
+                                         "21.50 C",
+                                         "humidity 0.550",
+                                         "fog 0.030",
+                                         "thunder 0.170"})
+    {
+        EXPECT_NE(all.find(value), std::string::npos) << value << " is absent from:\n" << all;
+    }
+    EXPECT_NE(all.find(cnahouse::util::Rng(state.rngState).ToHex()), std::string::npos) << all;
+    cnahouse::util::IdRegistry::ResetForTesting();
 }
 
 TEST(EnvironmentOverlayTests, SeasonNameCoversEverySeasonAndRefusesNonsense)

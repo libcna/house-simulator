@@ -10,6 +10,9 @@
 #include "cnahouse/environment/DayLength.hpp"
 #include "cnahouse/environment/Season.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
+#include "cnahouse/util/Ids.hpp"
+#include "cnahouse/util/Rng.hpp"
+#include "cnahouse/weather/WeatherSystem.hpp"
 
 namespace cnahouse::debug
 {
@@ -35,7 +38,8 @@ namespace cnahouse::debug
         }
     }
 
-    std::vector<std::string> EnvironmentOverlay::Lines(const environment::SimClock& clock) const
+    std::vector<std::string> EnvironmentOverlay::Lines(const environment::SimClock& clock,
+                                                       const weather::WeatherSystem* weather) const
     {
         const environment::CivilTime wall = clock.Wall();
         const environment::CivilTime standard = clock.Standard();
@@ -86,13 +90,45 @@ namespace cnahouse::debug
         // precipitation a person is debugging can be snow at all.
         lines.push_back(
             std::format("temp     {:.1f} C base (§36.2, before weather)", clock.OutdoorBaseTemperatureC()));
-        lines.push_back("sun/moon, weather, RNG: §35.3 and §36, not built yet");
+        if (weather == nullptr)
+        {
+            lines.push_back("weather  unavailable in this scene");
+        }
+        else
+        {
+            const weather::WeatherState& state = weather->State();
+            const std::string_view archetype = util::IdRegistry::NameOf(weather->TargetArchetype());
+            lines.push_back(std::format("weather  {}  {}  next {:.1f} min  blend {:.1f} min",
+                                        archetype.empty() ? std::string_view{"<none>"} : archetype,
+                                        weather->TransitionsPaused() ? "FROZEN" : "running",
+                                        weather->TargetExpiryMinutes(),
+                                        weather->TransitionRemainingMinutes()));
+            lines.push_back(std::format(
+                "cloud    cover {:.3f}  cumuliform {:.3f}", state.cloudCover, state.cloudCumuliform));
+            lines.push_back(std::format("precip   {} {:.3f}  wet {:.3f}  snow {:.3f} m",
+                                        weather::PrecipTypeName(state.precipType),
+                                        state.precipIntensity,
+                                        state.surfaceWetness,
+                                        state.snowDepth));
+            lines.push_back(std::format("wind     {:.2f} m/s at {:.1f} deg  gust {:.3f}",
+                                        state.windSpeed,
+                                        state.windDirectionDeg,
+                                        state.gustFactor));
+            lines.push_back(std::format("air      {:.2f} C  humidity {:.3f}  fog {:.3f}  thunder {:.3f}",
+                                        state.temperatureC,
+                                        state.humidity,
+                                        state.fogDensity,
+                                        state.thunderIntensity));
+            lines.push_back(std::format("rng      {}", util::Rng(state.rngState).ToHex()));
+        }
+        lines.push_back("sun/moon: §35.3 not built yet");
         return lines;
     }
 
     void EnvironmentOverlay::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
                                   const ui::TextRenderer& text,
-                                  const environment::SimClock& clock) const
+                                  const environment::SimClock& clock,
+                                  const weather::WeatherSystem* weather) const
     {
         if (!visible_ || !text.HasFont())
         {
@@ -104,7 +140,7 @@ namespace cnahouse::debug
         constexpr float kLeft = 12.0F;
         constexpr float kTop = 40.0F;
 
-        const std::vector<std::string> lines = Lines(clock);
+        const std::vector<std::string> lines = Lines(clock, weather);
         for (std::size_t i = 0; i < lines.size(); ++i)
         {
             text.DrawShadowed(

@@ -14580,8 +14580,18 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: bypassing the modifier check let `weather set W_WINDY` replace the state target and
             failed `UnknownAndModifierTargetsAreRejectedWithoutChangingState`; production was
             restored.
-- [ ] HOUSE-01695 — Implement the `F8` overlay's weather section (full vector, archetype, time to transition, RNG state)
+- [x] HOUSE-01695 — Implement the `F8` overlay's weather section (full vector, archetype, time to transition, RNG state)
       dep: HOUSE-01686, HOUSE-01537, HOUSE-01706 · sys: debug · plat: ALL · pri: MUST
+      verify: unit `EnvironmentOverlayTests.*` (9); integration
+              `HeadlessRunTests.PressingF8ShowsTheClockTheFrameActuallyRanOn` on `DISPLAY=:99`
+      note: F8 now reads the game's one `WeatherSystem` and prints all thirteen live weather
+            fields over four compact rows, followed by the selected archetype, pause state,
+            remaining dwell and blend minutes, and the complete four-word xoshiro state as 64 hex
+            digits. Non-walk scenes say weather is unavailable; only §35.3's later sun/moon rows
+            remain marked unbuilt. A real F8 key edge on the virtual display printed the authored
+            `W_PARTLY` vector and its already-advanced 139.8-minute dwell.
+      mutation: truncating the displayed generator state after its first 16 hex digits failed
+            `EveryLiveWeatherFieldTargetTimerAndRngWordAreShown`; the complete state was restored.
 - [ ] HOUSE-01696 — Wire the weather into the sky (cloud cover, thunder), lighting (cloud modulation) and fog
       dep: HOUSE-01686, HOUSE-01648, HOUSE-01706 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01697 — Test: determinism — the same seed produces an identical 10 000-simulated-minute history

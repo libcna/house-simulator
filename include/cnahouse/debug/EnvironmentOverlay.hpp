@@ -6,6 +6,11 @@
 
 #include "cnahouse/environment/SimClock.hpp"
 
+namespace cnahouse::weather
+{
+    class WeatherSystem;
+}
+
 namespace Microsoft::Xna::Framework::Graphics
 {
     class SpriteBatch;
@@ -19,19 +24,16 @@ namespace cnahouse::ui
 namespace cnahouse::debug
 {
 
-    /// @brief §71's `F8` environment overlay -- its TIME section (`HOUSE-01537`).
+    /// @brief §71's `F8` environment overlay (`HOUSE-01537`, `HOUSE-01695`).
     ///
     /// §71 lists `F8` as *"simulated date/time, sun/moon altitude and azimuth, moon phase and name,
     /// the full weather state vector, the current archetype and time to the next transition, RNG
-    /// state"*. Everything after the first clause belongs to §35.3's sun and §36's weather, which
-    /// are later phases. **The overlay says so on its own last line** rather than looking finished:
-    /// a debug panel that is silently missing half its rows teaches its reader that the missing
-    /// rows do not exist.
+    /// state"*. The weather rows read `WeatherSystem`'s one live state; only §35.3's sun/moon rows
+    /// remain explicitly marked as not built.
     ///
     /// A **presenter**, like §69's `F2` and §71's `F1`: it owns no measurement and takes no queries
     /// of its own, so what it says is asserted in a unit test rather than looked at. It reads a
-    /// `SimClock` and nothing else, because §35.1 says everything time-dependent reads that one
-    /// clock and nothing keeps its own.
+    /// `SimClock` and `WeatherSystem` and owns neither measurement.
     class EnvironmentOverlay
     {
     public:
@@ -51,11 +53,13 @@ namespace cnahouse::debug
         }
 
         /// @brief The lines the overlay would draw, top to bottom.
-        [[nodiscard]] std::vector<std::string> Lines(const environment::SimClock& clock) const;
+        [[nodiscard]] std::vector<std::string> Lines(const environment::SimClock& clock,
+                                                     const weather::WeatherSystem* weather = nullptr) const;
 
         void Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
                   const ui::TextRenderer& text,
-                  const environment::SimClock& clock) const;
+                  const environment::SimClock& clock,
+                  const weather::WeatherSystem* weather) const;
 
     private:
         bool visible_ = false;

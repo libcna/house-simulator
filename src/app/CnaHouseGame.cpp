@@ -1496,7 +1496,7 @@ namespace cnahouse::app
         }
         // NOT gated on `walking_`: §35's clock runs in every scene, and the blockout scene is
         // where somebody watching the sun move would be standing.
-        environmentOverlay_.Draw(hud_->batch, text_, clock_);
+        environmentOverlay_.Draw(hud_->batch, text_, clock_, weather_.has_value() ? &*weather_ : nullptr);
 #if CNAHOUSE_DEBUG_TOOLS
         if (walking_ && physicsOverlay_.Visible())
         {
