@@ -52,6 +52,7 @@
 #include "cnahouse/visibility/ExteriorScene.hpp"
 #include "cnahouse/visibility/RenderList.hpp"
 #include "cnahouse/visibility/VisibilitySystem.hpp"
+#include "cnahouse/weather/WeatherSystem.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkData.hpp"
 #include "cnahouse/world/SpatialIndex.hpp"
@@ -255,6 +256,11 @@ namespace cnahouse::app
         [[nodiscard]] const lighting::LightingSystem* LightingForTesting() const noexcept
         {
             return lighting_.has_value() ? &*lighting_ : nullptr;
+        }
+
+        [[nodiscard]] const weather::WeatherSystem* WeatherForTesting() const noexcept
+        {
+            return weather_.has_value() ? &*weather_ : nullptr;
         }
 
         /// @brief The version line drawn in the corner and printed at startup.
@@ -584,11 +590,8 @@ namespace cnahouse::app
         /// hitch advances the afternoon by the time that really passed (`HOUSE-01540`), while
         /// §49.3's accumulator runs the simulation slow for that frame.
         environment::SimClock clock_;
-        /// §36's selected target and §71's debug pause. The continuous runtime driver lands as
-        /// its own phase-26 task; these two values are already the live control plane used by the
-        /// console and are initialised from authored world/settings data.
-        util::Id weatherTargetArchetype_;
-        bool weatherTransitionsPaused_ = false;
+        /// §36 and §42's sole live weather vector, target, expiry, RNG and transition snapshot.
+        std::optional<weather::WeatherSystem> weather_;
         std::optional<visibility::VisibilitySystem> visibility_;
         /// @brief §22's baked window occlusion. It outlives `lighting_`, whose daylight model
         ///        keeps a pointer to it.

@@ -3944,6 +3944,12 @@ captured vector, never recursively from the rate-limited live state. Scalar chan
 `t²(3−2t)` smoothstep; `windDirectionDeg` follows the shortest wrapped arc. Precipitation phase,
 integrated surface state and RNG state are not interpolation channels.
 
+`WeatherSystem` is the sole runtime owner of the live vector, selected target, expiry, persisted
+RNG and immutable snapshot. `Weather: Fixed` disables automatic selection after converging to its
+chosen target but continues the continuous and surface integration; `Weather: Off` freezes that
+same owner. The console's `weather set` and `weather freeze` address those controls directly rather
+than maintaining a debug copy of weather state.
+
 ### 42.2 Rate limits — the anti-absurdity guarantee
 
 | Channel | Max rate (per simulated minute) | Time for a full 0→1 swing |

@@ -189,6 +189,31 @@ namespace
         EXPECT_TRUE(std::isfinite(clock.OutdoorBaseTemperatureC()));
     }
 
+    TEST(HeadlessRunTests, TheWalkSessionAdvancesItsOneLiveWeatherSystem)
+    {
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetFrameLimit(30);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+
+        const cnahouse::weather::WeatherSystem* weather = game.WeatherForTesting();
+        ASSERT_NE(weather, nullptr);
+        EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(weather->TargetArchetype()), "W_PARTLY");
+        EXPECT_LT(weather->TargetExpiryMinutes(), 140.0F);
+        EXPECT_GT(weather->TargetExpiryMinutes(), 139.0F);
+        EXPECT_FALSE(weather->TransitionsPaused());
+    }
+
     TEST(HeadlessRunTests, PressingF8ShowsTheClockTheFrameActuallyRanOn)
     {
         // `HOUSE-01537`. §71's `F8`, end to end: the key reaches the overlay, and behind it the

@@ -362,6 +362,60 @@ namespace
         EXPECT_EQ(sampled.GetState(), oracle.GetState());
     }
 
+    TEST_F(WeatherSeasonTests, FullTargetSamplesEveryContinuousBandAndCommitsTenDraws)
+    {
+        archetypes_[1].cloudCover = {0.0F, 1.0F};
+        archetypes_[1].cloudCumuliform = {0.0F, 1.0F};
+        archetypes_[1].precipIntensity = {0.0F, 1.0F};
+        archetypes_[1].fogDensity = {0.0F, 1.0F};
+        archetypes_[1].thunderProbability = {0.0F, 1.0F};
+        archetypes_[1].temperatureOffsetC = {0.0F, 1.0F};
+        archetypes_[1].humidity = {0.0F, 1.0F};
+        WeatherState state;
+        state.surfaceWetness = 0.37F;
+        state.snowDepth = 0.12F;
+        state.rngState = Rng(991U).GetState();
+        Rng oracle(state.rngState);
+        const float cloud = oracle.NextFloat();
+        const float cumuliform = oracle.NextFloat();
+        const float intensity = oracle.NextFloat();
+        const float speed = 5.0F + 2.0F * oracle.NextFloat();
+        const float gust = 0.4F + 0.2F * oracle.NextFloat();
+        const float direction = 360.0F * oracle.NextFloat();
+        const float fog = oracle.NextFloat();
+        const float thunder = oracle.NextFloat();
+        const float temperatureOffset = oracle.NextFloat();
+        const float humidity = oracle.NextFloat();
+
+        const auto target = Sampler().SampleTarget(b_, 10.0F, 0.0F, state);
+        ASSERT_TRUE(target) << target.Error().ToString();
+        EXPECT_FLOAT_EQ(target->state.cloudCover, cloud * archetypes_[1].cloudCover.maximum);
+        EXPECT_FLOAT_EQ(target->state.cloudCumuliform, cumuliform * archetypes_[1].cloudCumuliform.maximum);
+        EXPECT_FLOAT_EQ(target->state.precipIntensity, intensity * archetypes_[1].precipIntensity.maximum);
+        EXPECT_FLOAT_EQ(target->state.windSpeed, speed);
+        EXPECT_FLOAT_EQ(target->state.gustFactor, gust);
+        EXPECT_FLOAT_EQ(target->state.windDirectionDeg, direction);
+        EXPECT_FLOAT_EQ(target->state.fogDensity, fog * archetypes_[1].fogDensity.maximum);
+        EXPECT_FLOAT_EQ(target->state.thunderIntensity, thunder * archetypes_[1].thunderProbability.maximum);
+        EXPECT_FLOAT_EQ(target->temperatureOffsetC, temperatureOffset);
+        EXPECT_FLOAT_EQ(target->state.temperatureC, 10.0F + temperatureOffset);
+        EXPECT_FLOAT_EQ(target->state.humidity, humidity * archetypes_[1].humidity.maximum);
+        EXPECT_FLOAT_EQ(target->state.surfaceWetness, 0.37F);
+        EXPECT_FLOAT_EQ(target->state.snowDepth, 0.12F);
+        EXPECT_EQ(target->state.precipType, cnahouse::weather::PrecipType::Rain);
+        EXPECT_EQ(state.rngState, oracle.GetState());
+        EXPECT_EQ(target->state.rngState, oracle.GetState());
+    }
+
+    TEST_F(WeatherSeasonTests, InvalidFullTargetDoesNotMoveTheStoredStream)
+    {
+        archetypes_[1].humidity.maximum = 1.01F;
+        WeatherState state;
+        const auto before = state.rngState;
+        EXPECT_FALSE(WeatherSampler(archetypes_, transitions_).SampleTarget(b_, 10.0F, 0.0F, state));
+        EXPECT_EQ(state.rngState, before);
+    }
+
     TEST_F(WeatherSeasonTests, AnUnknownCurrentStateAndAZeroRowAreErrors)
     {
         const WeatherSampler sampler = Sampler();

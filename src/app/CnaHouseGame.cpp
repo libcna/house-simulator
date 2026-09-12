@@ -12,6 +12,7 @@
 
 #include <format>
 #include <optional>
+#include <stdexcept>
 
 #include "Microsoft/Xna/Framework/Color.hpp"
 #include "Microsoft/Xna/Framework/Content/ContentManager.hpp"
@@ -30,6 +31,8 @@
 #include "cnahouse/debug/TimeCommands.hpp"
 #include "cnahouse/debug/VisibilityCommands.hpp"
 #include "cnahouse/debug/WeatherCommands.hpp"
+#include "cnahouse/environment/SunLight.hpp"
+#include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
 #include "cnahouse/rendering/SunDiscPass.hpp"
@@ -357,10 +360,23 @@ namespace cnahouse::app
             return;
         }
         world_.emplace(std::move(built.Value()));
-        weatherTargetArchetype_ = world_->GetInitialState().weather.target;
-        weatherTransitionsPaused_ = settings_.weatherMode != WeatherMode::On;
+        const world::WeatherStart& weatherStart = world_->GetInitialState().weather;
+        auto weatherSystem = weather::WeatherSystem::Create(world_->WeatherArchetypes(),
+                                                            world_->WeatherTransitions(),
+                                                            world_->WeatherRates(),
+                                                            weatherStart.state,
+                                                            weatherStart.target,
+                                                            weatherStart.targetExpiryMinutes);
+        if (!weatherSystem)
+        {
+            Log::Error(LogCat::Content, "--scene=walk: {}", weatherSystem.Error().ToString());
+            world_.reset();
+            return;
+        }
+        weather_.emplace(std::move(weatherSystem.Value()));
         if (settings_.weatherMode == WeatherMode::Fixed)
         {
+            weather_->SetAutomaticTransitions(false);
             const auto selected = std::ranges::find_if(world_->WeatherArchetypes(),
                                                        [this](const weather::WeatherArchetype& archetype)
                                                        {
@@ -370,15 +386,20 @@ namespace cnahouse::app
                                                        });
             if (selected != world_->WeatherArchetypes().end())
             {
-                weatherTargetArchetype_ = selected->id;
+                weather_->TargetArchetypeControl() = selected->id;
             }
             else
             {
                 Log::Warn(LogCat::Content,
                           "fixed weather '{}' is not an authored state; keeping {}",
                           settings_.fixedWeatherArchetype,
-                          util::IdRegistry::NameOf(weatherTargetArchetype_));
+                          util::IdRegistry::NameOf(weather_->TargetArchetype()));
             }
+        }
+        else if (settings_.weatherMode == WeatherMode::Off)
+        {
+            weather_->SetAutomaticTransitions(false);
+            weather_->TransitionsPausedControl() = true;
         }
         index_.emplace(world::SpatialIndex::Build(*world_));
 
@@ -390,6 +411,7 @@ namespace cnahouse::app
             if (!loaded)
             {
                 Log::Error(LogCat::Content, "--scene=walk: {}", loaded.Error().Message());
+                weather_.reset();
                 world_.reset();
                 index_.reset();
                 return;
@@ -399,6 +421,7 @@ namespace cnahouse::app
         catch (const std::exception& e)
         {
             Log::Error(LogCat::Content, "--scene=walk: collision.bin: {}", e.what());
+            weather_.reset();
             world_.reset();
             index_.reset();
             return;
@@ -439,6 +462,7 @@ namespace cnahouse::app
                        feet.X,
                        feet.Y,
                        feet.Z);
+            weather_.reset();
             world_.reset();
             index_.reset();
             collision_.reset();
@@ -499,8 +523,8 @@ namespace cnahouse::app
         debug::RegisterTimeCommands(console_, debug::TimeCommandContext{&clock_});
         debug::RegisterWeatherCommands(console_,
                                        debug::WeatherCommandContext{world_->WeatherArchetypes(),
-                                                                    &weatherTargetArchetype_,
-                                                                    &weatherTransitionsPaused_});
+                                                                    &weather_->TargetArchetypeControl(),
+                                                                    &weather_->TransitionsPausedControl()});
         debug::RegisterPlayerCommands(console_,
                                       debug::PlayerCommandContext{&player_, &tracker_, &*world_, &*index_});
 
@@ -855,6 +879,27 @@ namespace cnahouse::app
             {
                 const debug::Timing::Scope scope(timing_, UpdateStage::Input);
                 Input().Update(frame.deltaSeconds);
+            }
+
+            if (weather_.has_value())
+            {
+                const debug::Timing::Scope scope(timing_, UpdateStage::Weather);
+                const environment::SunPosition sun = environment::SunPositionFor(clock_);
+                const environment::SunShading shading =
+                    environment::SunShadingFor(sun, weather_->State().cloudCover);
+                const float directSunlight =
+                    sun.altitudeDeg > environment::kRefractedHorizonDeg ? shading.directIntensity : 0.0F;
+                const float simulatedMinutes =
+                    frame.realDeltaSeconds * static_cast<float>(clock_.timeScale / 60.0);
+                if (const util::Result<void> advanced =
+                        weather_->Advance(simulatedMinutes,
+                                          clock_.Season(),
+                                          static_cast<float>(clock_.OutdoorBaseTemperatureC()),
+                                          directSunlight);
+                    !advanced)
+                {
+                    throw std::runtime_error(advanced.Error().ToString());
+                }
             }
 
             if (walking_ && !visibilityFrozen_)

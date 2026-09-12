@@ -48,6 +48,8 @@ add_library(cnahouse_core STATIC
     weather/WeatherRateLimiter.cpp
     weather/WeatherSampler.cpp
     weather/WeatherState.cpp
+    weather/WeatherSystem.cpp
+    weather/WeatherSystem.cpp
 
     # player -- input first, because nothing else may read the devices
     player/BoundaryGuard.cpp

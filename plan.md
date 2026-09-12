@@ -14706,13 +14706,30 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: replacing the parsed seed with the default generator seed changed all four
             expanded words and failed `WorldLoaderTest.TheInitialStateIsRead`; production was
             restored.
-- [ ] HOUSE-01706 — Implement the phase-26 runtime weather orchestrator over the completed transition components
+- [x] HOUSE-01706 — Implement the phase-26 runtime weather orchestrator over the completed transition components
       dep: HOUSE-01683…HOUSE-01693, HOUSE-01704, HOUSE-01705 · sys: weather · plat: ALL · pri: MUST
       accept: the game owns and advances one live state, target, expiry and immutable transition
               snapshot at `UpdateStage::Weather`; console freeze pauses that same state
       note: added after `HOUSE-01704` exposed that phase 26 had implemented every transition
             component but no owner composed or advanced them. `HOUSE-01695`–`HOUSE-01697` cannot
             honestly observe, wire or test a history until this dependency exists.
+      verify: unit `WeatherSystemTests.*`,
+              `WeatherSeasonTests.FullTargetSamplesEveryContinuousBandAndCommitsTenDraws`,
+              `WeatherSeasonTests.InvalidFullTargetDoesNotMoveTheStoredStream` (7); integration
+              `HeadlessRunTests.TheWalkSessionAdvancesItsOneLiveWeatherSystem` on `DISPLAY=:99`
+      note: `WeatherSystem` now owns the complete live vector, selected/requested target, remaining
+            dwell, persisted xoshiro stream and immutable blend snapshot. It divides hitches at
+            one-minute and expiry boundaries, composes the protected precipitation limiter with
+            wetness and snow integration, and derives the moving target's precipitation phase from
+            the current base temperature without re-sampling. The game advances that one owner at
+            `UpdateStage::Weather`; the console holds stable addresses to its request and pause
+            controls. Fixed mode converges once and disables automatic selection; Off freezes it.
+      measured: an automatic decision consumes exactly 13 draws (choice + two timing + ten target),
+            a reached fresh state consumes none before expiry, and a 30-frame game session on the
+            virtual display advanced the authored 140-minute expiry while retaining `W_PARTLY`.
+      mutation: evaluating the second transition minute from the already rate-limited live state
+            changed cloud cover from the immutable-snapshot result 0.4816 to 0.53551364 and failed
+            `ExpiryStartsOneSampledTransitionFromAnImmutableSnapshot`; production was restored.
 - [ ] HOUSE-01702 — Phase-26 review and commit
       dep: HOUSE-01681…HOUSE-01701, HOUSE-01703…HOUSE-01706 · sys: — · plat: ALL · pri: MUST
 

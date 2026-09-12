@@ -18,6 +18,12 @@ namespace cnahouse::weather
                    range.minimum <= range.maximum && range.maximum <= maximum;
         }
 
+        [[nodiscard]] bool ValidRange(const WeatherRange& range, float minimum, float maximum) noexcept
+        {
+            return std::isfinite(range.minimum) && std::isfinite(range.maximum) && range.minimum >= minimum &&
+                   range.minimum <= range.maximum && range.maximum <= maximum;
+        }
+
         [[nodiscard]] float SampleRange(const WeatherRange& range, util::Rng& rng) noexcept
         {
             return range.minimum + (range.maximum - range.minimum) * rng.NextFloat();
@@ -314,6 +320,83 @@ namespace cnahouse::weather
             state.rngState = rng.GetState();
         }
         return sampled;
+    }
+
+    util::Result<WeatherTarget> WeatherSampler::SampleTarget(util::Id archetypeId,
+                                                             float baseTemperatureC,
+                                                             float windyModifierAmount,
+                                                             WeatherState& state) const
+    {
+        if (const util::Result<void> valid = state.Validate(); !valid)
+        {
+            return valid.Error().WithContext("weather/target/state");
+        }
+        const WeatherArchetype* archetype = FindArchetype(archetypeId);
+        if (archetype == nullptr || archetype->modifier)
+        {
+            return util::Err(util::ErrorCode::NotFound,
+                             "a target needs a complete weather-state archetype",
+                             std::format("weather/{}", archetypeId.Value()));
+        }
+        if (!std::isfinite(baseTemperatureC) || baseTemperatureC < -18.0F || baseTemperatureC > 38.0F)
+        {
+            return util::Err(util::ErrorCode::OutOfRange,
+                             "base temperature must be finite and in -18..38 C",
+                             "weather/target/baseTemperatureC");
+        }
+        if (!ValidRange(archetype->cloudCover, 0.0F, 1.0F) ||
+            !ValidRange(archetype->cloudCumuliform, 0.0F, 1.0F) ||
+            !ValidRange(archetype->precipIntensity, 0.0F, 1.0F) ||
+            !ValidRange(archetype->fogDensity, 0.0F, 1.0F) ||
+            !ValidRange(archetype->temperatureOffsetC, -11.0F, 9.0F) ||
+            !ValidRange(archetype->humidity, 0.0F, 1.0F) ||
+            !ValidRange(archetype->thunderProbability, 0.0F, 1.0F))
+        {
+            return util::Err(util::ErrorCode::InvalidData,
+                             "an archetype target band is invalid",
+                             std::format("weather/{}", archetypeId.Value()));
+        }
+
+        util::Rng rng(state.rngState);
+        WeatherTarget target;
+        target.state = state;
+        target.nominalPrecipType = archetype->precipType;
+        target.state.cloudCover = SampleRange(archetype->cloudCover, rng);
+        target.state.cloudCumuliform = SampleRange(archetype->cloudCumuliform, rng);
+        target.state.precipIntensity = SampleRange(archetype->precipIntensity, rng);
+        const util::Result<WeatherWindTarget> wind = SampleWind(archetypeId, windyModifierAmount, rng);
+        if (!wind)
+        {
+            return wind.Error().WithContext("weather/target");
+        }
+        target.state.windSpeed = wind.Value().speed;
+        target.state.windDirectionDeg = rng.NextFloat(0.0F, 360.0F);
+        target.state.gustFactor = wind.Value().gustFactor;
+        target.state.fogDensity = SampleRange(archetype->fogDensity, rng);
+        target.state.thunderIntensity = SampleRange(archetype->thunderProbability, rng);
+        target.temperatureOffsetC = SampleRange(archetype->temperatureOffsetC, rng);
+        target.state.temperatureC = baseTemperatureC + target.temperatureOffsetC;
+        if (target.state.temperatureC < -18.0F || target.state.temperatureC > 38.0F)
+        {
+            return util::Err(util::ErrorCode::OutOfRange,
+                             "the base temperature plus archetype offset leaves -18..38 C",
+                             std::format("weather/{}/temperatureOffsetC", archetypeId.Value()));
+        }
+        target.state.humidity = SampleRange(archetype->humidity, rng);
+        const util::Result<PrecipType> phase =
+            PrecipTypeAtTemperature(target.nominalPrecipType, target.state.temperatureC);
+        if (!phase)
+        {
+            return phase.Error().WithContext("weather/target");
+        }
+        target.state.precipType = phase.Value();
+        target.state.rngState = rng.GetState();
+        if (const util::Result<void> valid = target.state.Validate(); !valid)
+        {
+            return valid.Error().WithContext("weather/target/result");
+        }
+        state.rngState = rng.GetState();
+        return target;
     }
 
 } // namespace cnahouse::weather

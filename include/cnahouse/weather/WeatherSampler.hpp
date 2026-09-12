@@ -39,6 +39,15 @@ namespace cnahouse::weather
         [[nodiscard]] friend bool operator==(const WeatherWindTarget&, const WeatherWindTarget&) = default;
     };
 
+    /// @brief One fully sampled archetype target plus the values needed to follow a moving base
+    /// temperature without drawing again.
+    struct WeatherTarget
+    {
+        WeatherState state;
+        PrecipType nominalPrecipType = PrecipType::None;
+        float temperatureOffsetC = 0.0F;
+    };
+
     /// @brief §36.3's deterministic, continuously season-weighted archetype selector.
     ///
     /// The authored file stores one base transition row per state and four sparse seasonal weight
@@ -108,6 +117,15 @@ namespace cnahouse::weather
         /// @brief Samples wind from and persists @p state's weather RNG.
         [[nodiscard]] util::Result<WeatherWindTarget>
         SampleWind(util::Id archetype, float windyModifierAmount, WeatherState& state) const;
+
+        /// @brief Samples every continuous channel of one archetype target atomically.
+        ///
+        /// The caller's stored RNG advances only if every authored band and the derived
+        /// temperature are valid. Persistent wetness and snow depth are copied, never sampled.
+        [[nodiscard]] util::Result<WeatherTarget> SampleTarget(util::Id archetype,
+                                                               float baseTemperatureC,
+                                                               float windyModifierAmount,
+                                                               WeatherState& state) const;
 
     private:
         [[nodiscard]] const WeatherArchetype* FindArchetype(util::Id id) const noexcept;
