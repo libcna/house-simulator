@@ -14594,8 +14594,20 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             `EveryLiveWeatherFieldTargetTimerAndRngWordAreShown`; the complete state was restored.
 - [ ] HOUSE-01696 — Wire the weather into the sky (cloud cover, thunder), lighting (cloud modulation) and fog
       dep: HOUSE-01686, HOUSE-01648, HOUSE-01706 · sys: weather · plat: ALL · pri: MUST
-- [ ] HOUSE-01697 — Test: determinism — the same seed produces an identical 10 000-simulated-minute history
+- [x] HOUSE-01697 — Test: determinism — the same seed produces an identical 10 000-simulated-minute history
       dep: HOUSE-01692, HOUSE-01706 · sys: ci · plat: CI · pri: MUST
+      verify: integration
+              `WeatherSeasonTests.TheSameSeedProducesTheSameTenThousandMinuteHistory` on
+              `SDL_VIDEODRIVER=offscreen`
+      note: two independent `WeatherSystem` instances now replay the deployed thirteen-state
+            transition table from the canonical fresh-world seed. For each of 10,000 one-minute
+            steps the test advances the real `SimClock` exactly as the game does, derives each
+            run's sunlight from its own live cloud cover, and requires bit-identical complete
+            state (including RNG), target, expiry and immutable transition snapshot. The history
+            both changes target and consumes the persisted stream, so a frozen initial state
+            cannot satisfy the claim.
+      mutation: flipping one bit of only the second initial RNG word failed at simulated minute 1;
+            the identical canonical seed was restored.
 - [ ] HOUSE-01698 — Test: over 30 simulated days the system visits ≥ 8 archetypes and never produces an impossible combination
       dep: HOUSE-01697 · sys: ci · plat: CI · pri: MUST
 - [x] HOUSE-01699 — Test: it snows in January and rains in July at the default location, with no special-casing

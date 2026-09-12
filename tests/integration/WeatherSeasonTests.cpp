@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01704`: a ten-year run through the deployed transition table. It needs the authored
-// world but no GraphicsDevice, so this is an integration test without a graphical surface.
+// `HOUSE-01704` / `HOUSE-01697`: long runs through the deployed transition table. They need the
+// authored world but no GraphicsDevice, so these are integration tests without a graphical surface.
 #include <algorithm>
 #include <gtest/gtest.h>
 
 #include <string>
 
 #include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/environment/SunLight.hpp"
+#include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Rng.hpp"
 #include "cnahouse/weather/WeatherSampler.hpp"
+#include "cnahouse/weather/WeatherSystem.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
 
 namespace
@@ -22,7 +25,15 @@ namespace
     using cnahouse::util::Rng;
     using cnahouse::weather::PrecipType;
     using cnahouse::weather::WeatherSampler;
+    using cnahouse::weather::WeatherSystem;
     using cnahouse::world::WorldLoader;
+
+    [[nodiscard]] float DirectSunlight(const SimClock& clock, float cloudCover)
+    {
+        const auto sun = cnahouse::environment::SunPositionFor(clock);
+        const auto shading = cnahouse::environment::SunShadingFor(sun, cloudCover);
+        return sun.altitudeDeg > cnahouse::environment::kRefractedHorizonDeg ? shading.directIntensity : 0.0F;
+    }
 
     TEST(WeatherSeasonTests, NoSummerSnowOverTenYearsAtTheDefaultLocation)
     {
@@ -69,6 +80,71 @@ namespace
         EXPECT_EQ(summerDraws, 3'680U);
         EXPECT_EQ(frozenWaterDraws, 0U)
             << "a snow archetype was selected while measured outdoor temperature was above freezing";
+    }
+
+    TEST(WeatherSeasonTests, TheSameSeedProducesTheSameTenThousandMinuteHistory)
+    {
+        cnahouse::world::WorldData::Contents contents;
+        const std::string directory = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
+        const auto weather = WorldLoader::LoadWeather(directory, contents);
+        ASSERT_TRUE(weather) << weather.Error().ToString();
+        const auto initial = WorldLoader::LoadInitialState(directory, contents);
+        ASSERT_TRUE(initial) << initial.Error().ToString();
+
+        const auto& start = contents.initialState.weather;
+        auto firstResult = WeatherSystem::Create(contents.weatherArchetypes,
+                                                 contents.weatherTransitions,
+                                                 contents.weatherRates,
+                                                 start.state,
+                                                 start.target,
+                                                 start.targetExpiryMinutes);
+        auto secondResult = WeatherSystem::Create(contents.weatherArchetypes,
+                                                  contents.weatherTransitions,
+                                                  contents.weatherRates,
+                                                  start.state,
+                                                  start.target,
+                                                  start.targetExpiryMinutes);
+        ASSERT_TRUE(firstResult) << firstResult.Error().ToString();
+        ASSERT_TRUE(secondResult) << secondResult.Error().ToString();
+        WeatherSystem first = std::move(firstResult.Value());
+        WeatherSystem second = std::move(secondResult.Value());
+
+        SimClock clock;
+        clock.SetCalendar(cnahouse::environment::kNewGameCalendarDays);
+        const auto initialRng = start.state.rngState;
+        Id previousTarget = first.TargetArchetype();
+        std::size_t targetChanges = 0U;
+
+        for (std::size_t minute = 1U; minute <= 10'000U; ++minute)
+        {
+            SCOPED_TRACE(::testing::Message() << "simulated minute " << minute);
+            // One real second is one simulated minute at the default 60x rate. Advance the clock
+            // first, exactly as CnaHouseGame does, then feed both histories independently derived
+            // sunlight from their own live cloud cover.
+            clock.Advance(1.0);
+            const float baseTemperature = static_cast<float>(clock.OutdoorBaseTemperatureC());
+            const float firstSunlight = DirectSunlight(clock, first.State().cloudCover);
+            const float secondSunlight = DirectSunlight(clock, second.State().cloudCover);
+            ASSERT_FLOAT_EQ(firstSunlight, secondSunlight);
+            ASSERT_TRUE(first.Advance(1.0F, clock.Season(), baseTemperature, firstSunlight));
+            ASSERT_TRUE(second.Advance(1.0F, clock.Season(), baseTemperature, secondSunlight));
+
+            ASSERT_EQ(first.State(), second.State());
+            ASSERT_EQ(first.TargetArchetype(), second.TargetArchetype());
+            ASSERT_FLOAT_EQ(first.TargetExpiryMinutes(), second.TargetExpiryMinutes());
+            ASSERT_FLOAT_EQ(first.TransitionRemainingMinutes(), second.TransitionRemainingMinutes());
+            ASSERT_EQ(first.TransitionSnapshot(), second.TransitionSnapshot());
+
+            if (first.TargetArchetype() != previousTarget)
+            {
+                ++targetChanges;
+                previousTarget = first.TargetArchetype();
+            }
+        }
+
+        EXPECT_GT(targetChanges, 0U) << "the claimed history never left its authored initial state";
+        EXPECT_NE(first.State().rngState, initialRng)
+            << "the claimed history never consumed its persisted random stream";
     }
 
 } // namespace
