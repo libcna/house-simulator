@@ -3621,7 +3621,7 @@ struct WeatherState {
     float humidity;           // 0..1
     float surfaceWetness;     // 0..1, integrated
     float snowDepth;          // 0..0.35 m, integrated
-    uint64 rngState;          // xoshiro256++ — saved
+    uint64 rngState[4];       // xoshiro256++ — all four words are saved
 };
 ```
 
@@ -5486,7 +5486,8 @@ tester says "the fridge was open". Size is not a concern at 90 KB.
                  "temperatureC": 9.4, "humidity": 0.88,
                  "surfaceWetness": 0.71, "snowDepth": 0.0,
                  "target": "W_RAIN", "targetExpiry": 1939478600.0,
-                 "transitionEnd": 1939473500.0, "rngState": "0x9E3779B97F4A7C15" },
+                 "transitionEnd": 1939473500.0,
+                 "rngState": "0xA62B82F58DB8A985B4B6BEDE1E6EF7F29AC2F6B53B3F23C6D7B2A9D19E4A74B2" },
     "interactables": {                 // DELTA only
       "DOOR_L0_FRONT":        { "openFraction": 0.0, "latched": true, "locked": true },
       "DOOR_L1_MASTER":       { "openFraction": 0.53 },

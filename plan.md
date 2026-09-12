@@ -14353,8 +14353,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 26 — Weather core
 
-- [ ] HOUSE-01681 — Implement `WeatherState` with every field of `cna-house.md` §36.1, and its JSON round trip
+- [x] HOUSE-01681 — Implement `WeatherState` with every field of `cna-house.md` §36.1, and its JSON round trip
       dep: HOUSE-00393 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `WeatherStateTests.*` (9)
+      note: (2026-09-12) `WeatherState` is the live continuous vector, deliberately separate from
+            the archetype targets that `HOUSE-01682` will load. All thirteen scalar/enum channels
+            and the RNG state are required at the JSON boundary, range-checked on read and write,
+            and written with `System::Text::Json::Utf8JsonWriter`; the five `PrecipType` values are
+            stable names rather than ordinals. Non-finite channels, an invalid enum value and
+            xoshiro256++'s forbidden all-zero state are rejected instead of being normalised into
+            a plausible different state.
+      correction: §36.1 said `uint64 rngState`, and §68's example consequently stored 16 hex
+            digits. That cannot be the state of the xoshiro256++ generator this repository already
+            implements: `util::Rng::State` is **four** `uint64_t` words and `Rng::ToHex`/`FromHex`
+            already define its lossless 64-digit representation. The architecture and example now
+            say four words; `WeatherState` reuses that exact type and codec so `HOUSE-01692` can
+            later reproduce the weather future rather than restoring one quarter of a generator.
+      mutation: deleting `snowDepth` from the writer made the round-trip fail with
+            `SchemaMismatch [snowDepth]`; mapping `Hail` to `Snow` made the five-name test fail.
+            Both production mutations were restored before the final 9/9 green run.
 - [ ] HOUSE-01682 — Implement archetype loading and validation from `layout.weather.json`
       dep: HOUSE-01681 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01683 — Implement the seasonal transition matrices and archetype sampling from the seeded RNG
