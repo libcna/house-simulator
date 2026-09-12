@@ -12,6 +12,29 @@
 namespace cnahouse::app
 {
 
+    enum class WeatherMode : std::uint8_t
+    {
+        On,
+        Fixed,
+        Off,
+    };
+
+    [[nodiscard]] constexpr std::string_view WeatherModeName(WeatherMode mode) noexcept
+    {
+        switch (mode)
+        {
+            case WeatherMode::On:
+                return "on";
+            case WeatherMode::Fixed:
+                return "fixed";
+            case WeatherMode::Off:
+                return "off";
+        }
+        return "on";
+    }
+
+    [[nodiscard]] WeatherMode WeatherModeFromName(std::string_view name, WeatherMode fallback) noexcept;
+
     /// @brief The persisted user settings, versioned so an old file can be migrated rather than lost.
     ///
     /// **Why a version and a migration chain from day one.** `R-15` names save-format churn during
@@ -22,7 +45,7 @@ namespace cnahouse::app
     struct Settings
     {
         /// @brief Bumped whenever a field changes meaning. `Migrate` handles every older value.
-        static constexpr std::int32_t kCurrentVersion = 6;
+        static constexpr std::int32_t kCurrentVersion = 7;
 
         std::int32_t version = kCurrentVersion;
 
@@ -88,6 +111,15 @@ namespace cnahouse::app
 
         /// @brief Whether §67's compact player-facing environment readout is visible in play.
         bool showEnvironmentReadout = true;
+
+        /// @brief §68's weather simulation policy.
+        WeatherMode weatherMode = WeatherMode::On;
+
+        /// @brief Stable id of the state archetype used while `weatherMode == Fixed`.
+        ///
+        /// The settings layer preserves the string; the weather system resolves it against the
+        /// thirteen loaded state archetypes. `W_WINDY` is a modifier and cannot be selected alone.
+        std::string fixedWeatherArchetype = "W_PARTLY";
 
         [[nodiscard]] static Settings Defaults()
         {

@@ -28,6 +28,20 @@ namespace cnahouse::weather
     {
     }
 
+    std::vector<util::Id> WeatherSampler::StateArchetypes() const
+    {
+        std::vector<util::Id> result;
+        result.reserve(archetypes_.size());
+        for (const WeatherArchetype& archetype : archetypes_)
+        {
+            if (!archetype.modifier)
+            {
+                result.push_back(archetype.id);
+            }
+        }
+        return result;
+    }
+
     const WeatherArchetype* WeatherSampler::FindArchetype(util::Id id) const noexcept
     {
         const auto found = std::ranges::find(archetypes_, id, &WeatherArchetype::id);

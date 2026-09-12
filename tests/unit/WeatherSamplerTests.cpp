@@ -103,6 +103,13 @@ namespace
         EXPECT_FLOAT_EQ(summer.Value()[1].probability, 0.8F);
     }
 
+    TEST_F(WeatherSeasonTests, FixedWeatherSelectorContainsStatesAndNotTheWindModifier)
+    {
+        const auto choices = Sampler().StateArchetypes();
+        EXPECT_EQ(choices, (std::vector<Id>{a_, b_, c_}));
+        EXPECT_EQ(std::ranges::find(choices, Id::Of("W_WINDY")), choices.end());
+    }
+
     TEST_F(WeatherSeasonTests, BlendedMatrices)
     {
         const WeatherSampler sampler = Sampler();

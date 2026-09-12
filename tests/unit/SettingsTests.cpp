@@ -11,6 +11,8 @@ namespace
 {
     using cnahouse::app::QualityPreset;
     using cnahouse::app::Settings;
+    using cnahouse::app::WeatherMode;
+    using cnahouse::app::WeatherModeName;
     using cnahouse::player::HeadBobLevelName;
 
     TEST(SettingsTests, DefaultsAreTheDocumentedOnes)
@@ -22,6 +24,8 @@ namespace
         EXPECT_EQ(settings.quality, QualityPreset::High);
         EXPECT_FLOAT_EQ(settings.masterVolume, 1.0f);
         EXPECT_TRUE(settings.showEnvironmentReadout);
+        EXPECT_EQ(settings.weatherMode, WeatherMode::On);
+        EXPECT_EQ(settings.fixedWeatherArchetype, "W_PARTLY");
     }
 
     TEST(SettingsTests, RoundTripsThroughItsOwnJson)
@@ -37,6 +41,8 @@ namespace
         written.fieldOfView = 90.0f;
         written.headBob = cnahouse::player::HeadBobLevel::Off;
         written.showEnvironmentReadout = false;
+        written.weatherMode = WeatherMode::Fixed;
+        written.fixedWeatherArchetype = "W_HEAVY_SNOW";
 
         auto read = Settings::FromJson(written.ToJson(), "settings.json");
         ASSERT_TRUE(read) << read.Error().ToString();
@@ -52,6 +58,28 @@ namespace
             << "§68's level did not survive the file";
         EXPECT_FALSE(read->showEnvironmentReadout)
             << "the player's choice to hide HOUSE-01546's readout did not survive the file";
+        EXPECT_EQ(read->weatherMode, WeatherMode::Fixed);
+        EXPECT_EQ(read->fixedWeatherArchetype, "W_HEAVY_SNOW");
+    }
+
+    TEST(SettingsTests, EveryWeatherModeHasAStableFileName)
+    {
+        for (const WeatherMode mode : {WeatherMode::On, WeatherMode::Fixed, WeatherMode::Off})
+        {
+            Settings written = Settings::Defaults();
+            written.weatherMode = mode;
+            const auto read = Settings::FromJson(written.ToJson(), "settings.json");
+            ASSERT_TRUE(read) << read.Error().ToString();
+            EXPECT_EQ(read->weatherMode, mode);
+            EXPECT_NE(written.ToJson().find(std::string{"\"weatherMode\": \""} +
+                                            std::string{WeatherModeName(mode)} + "\""),
+                      std::string::npos);
+        }
+
+        const auto future =
+            Settings::FromJson(R"({"version":99,"weatherMode":"seasonal-ai"})", "settings.json");
+        ASSERT_TRUE(future);
+        EXPECT_EQ(future->weatherMode, WeatherMode::On);
     }
 
     TEST(SettingsTests, TheHeadBobLevelIsAName)
@@ -117,6 +145,8 @@ namespace
         EXPECT_EQ(settings->headBob, cnahouse::player::HeadBobLevel::Subtle);
         EXPECT_TRUE(settings->showEnvironmentReadout)
             << "a pre-HOUSE-01546 file takes the documented visible default";
+        EXPECT_EQ(settings->weatherMode, WeatherMode::On);
+        EXPECT_EQ(settings->fixedWeatherArchetype, "W_PARTLY");
     }
 
     TEST(SettingsTests, AFileFromANewerBuildStillLoads)
@@ -160,6 +190,7 @@ namespace
         settings.masterVolume = 40.0f;
         settings.mouseSensitivity = -1.0f;
         settings.fieldOfView = 179.0f;
+        settings.fixedWeatherArchetype.clear();
 
         const std::string changed = settings.ClampToSupportedRanges();
         EXPECT_FALSE(changed.empty()) << "the user is told, not silently overruled";
@@ -176,6 +207,7 @@ namespace
         // `FirstPersonCamera::SetFieldOfView`, so the player was overruled in the one place they
         // could not see it.
         EXPECT_FLOAT_EQ(settings.fieldOfView, cnahouse::player::kMaxFovDegrees);
+        EXPECT_EQ(settings.fixedWeatherArchetype, "W_PARTLY");
 
         settings.fieldOfView = 10.0f;
         EXPECT_FALSE(settings.ClampToSupportedRanges().empty());

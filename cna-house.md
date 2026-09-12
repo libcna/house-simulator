@@ -5768,7 +5768,7 @@ Stored in `settings.json` beside the save, versioned and migrated the same way. 
 | **Simulation** | Day length | 20 / 24 / 48 / 96 min, Real time, Frozen, Custom | **24 min** |
 | | Environment readout | On / Off | On |
 | | Weather | On / Fixed / Off | On |
-| | Fixed weather archetype | the 14 archetypes | `W_PARTLY` |
+| | Fixed weather archetype | the 13 state archetypes | `W_PARTLY` |
 | | Moon phase speed | 1× – 8× | 1× |
 | | Location | Default / Reykjavík / Equator / Custom lat-long | Default |
 | | Pets | On / Off | On |

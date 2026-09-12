@@ -36,6 +36,23 @@ namespace cnahouse::app
 
     } // namespace
 
+    WeatherMode WeatherModeFromName(std::string_view name, WeatherMode fallback) noexcept
+    {
+        if (name == "on")
+        {
+            return WeatherMode::On;
+        }
+        if (name == "fixed")
+        {
+            return WeatherMode::Fixed;
+        }
+        if (name == "off")
+        {
+            return WeatherMode::Off;
+        }
+        return fallback;
+    }
+
     util::Result<Settings> Settings::FromJson(std::string_view text, std::string_view name)
     {
         auto document = util::JsonDocument::Parse(text, std::string(name));
@@ -170,6 +187,21 @@ namespace cnahouse::app
         }
         settings.showEnvironmentReadout = *environmentReadout;
 
+        auto weatherMode =
+            root.OptionalString("weatherMode", std::string(WeatherModeName(settings.weatherMode)));
+        if (!weatherMode)
+        {
+            return weatherMode.Error();
+        }
+        settings.weatherMode = WeatherModeFromName(*weatherMode, settings.weatherMode);
+
+        auto fixedWeather = root.OptionalString("fixedWeatherArchetype", settings.fixedWeatherArchetype);
+        if (!fixedWeather)
+        {
+            return fixedWeather.Error();
+        }
+        settings.fixedWeatherArchetype = *fixedWeather;
+
         Migrate(settings);
         return settings;
     }
@@ -214,6 +246,15 @@ namespace cnahouse::app
             // players get the documented visible default; they can then hide it in settings.
             settings.showEnvironmentReadout = true;
             settings.version = 6;
+        }
+        if (settings.version < 7)
+        {
+            // Version 7 added §68's weather policy. An older file has never disabled or fixed the
+            // simulation, so it receives the documented live-weather default and its canonical
+            // fixed selection.
+            settings.weatherMode = WeatherMode::On;
+            settings.fixedWeatherArchetype = "W_PARTLY";
+            settings.version = 7;
         }
         settings.version = kCurrentVersion;
     }
@@ -284,6 +325,11 @@ namespace cnahouse::app
                                        : static_cast<float>(environment::kDefaultDayLengthRealMinutes);
             note("dayLengthRealMinutes");
         }
+        if (fixedWeatherArchetype.empty())
+        {
+            fixedWeatherArchetype = "W_PARTLY";
+            note("fixedWeatherArchetype");
+        }
         return changed;
     }
 
@@ -308,7 +354,9 @@ namespace cnahouse::app
                            "  \"fieldOfView\": {},\n"
                            "  \"fastWalk\": {},\n"
                            "  \"dayLengthRealMinutes\": {},\n"
-                           "  \"showEnvironmentReadout\": {}\n"
+                           "  \"showEnvironmentReadout\": {},\n"
+                           "  \"weatherMode\": \"{}\",\n"
+                           "  \"fixedWeatherArchetype\": \"{}\"\n"
                            "}}\n",
                            version,
                            backBufferWidth,
@@ -326,7 +374,9 @@ namespace cnahouse::app
                            fieldOfView,
                            fastWalk ? "true" : "false",
                            dayLengthRealMinutes,
-                           showEnvironmentReadout ? "true" : "false");
+                           showEnvironmentReadout ? "true" : "false",
+                           WeatherModeName(weatherMode),
+                           fixedWeatherArchetype);
     }
 
 } // namespace cnahouse::app

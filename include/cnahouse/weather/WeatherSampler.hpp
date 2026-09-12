@@ -51,6 +51,12 @@ namespace cnahouse::weather
         WeatherSampler(std::span<const WeatherArchetype> archetypes,
                        std::span<const WeatherTransitionRow> transitions);
 
+        /// @brief Fixed-weather selector entries in authored order.
+        ///
+        /// Modifier rows such as `W_WINDY` are deliberately absent: they do not define a complete
+        /// weather target and therefore cannot stand alone in §68's selector.
+        [[nodiscard]] std::vector<util::Id> StateArchetypes() const;
+
         /// @brief The effective normalised transition row at @p season.
         [[nodiscard]] util::Result<std::vector<WeatherChoice>>
         Distribution(util::Id current, const environment::SeasonPhase& season) const;

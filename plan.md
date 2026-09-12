@@ -14550,8 +14550,20 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: omitting the write-back after a successful four-draw wind sample left the stored
             stream four draws behind its oracle and failed
             `StoredWeatherRngAdvancesAfterSuccessAndNotAfterFailure`; production was restored.
-- [ ] HOUSE-01693 — Implement the settings: weather on / fixed / off, and the fixed-archetype selector
+- [x] HOUSE-01693 — Implement the settings: weather on / fixed / off, and the fixed-archetype selector
       dep: HOUSE-01686, HOUSE-00131 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `SettingsTests.*`,
+              `WeatherSeasonTests.FixedWeatherSelectorContainsStatesAndNotTheWindModifier` (13)
+      note: settings schema v7 persists the named `on`, `fixed` and `off` modes plus the stable id
+            of the selected fixed archetype, defaulting to On / `W_PARTLY`; v1–v6 files migrate to
+            those defaults. The selector is derived in authored order from loaded archetypes, so
+            future state rows require no settings-code edit.
+      correction: §68 previously offered all 14 authored rows in the fixed selector, contradicting
+            §36.2: `W_WINDY` is a modifier without a complete weather target and cannot stand
+            alone. The selector now exposes the 13 state archetypes and excludes modifier rows.
+      mutation: serializing the canonical default instead of the selected `W_HEAVY_SNOW` lost the
+            user's fixed choice and failed `SettingsTests.RoundTripsThroughItsOwnJson`; production
+            was restored.
 - [ ] HOUSE-01694 — Implement the console `weather set <archetype>` and `weather freeze`
       dep: HOUSE-01693 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-01695 — Implement the `F8` overlay's weather section (full vector, archetype, time to transition, RNG state)
