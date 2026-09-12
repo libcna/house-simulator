@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01704` / `HOUSE-01697`: long runs through the deployed transition table. They need the
-// authored world but no GraphicsDevice, so these are integration tests without a graphical surface.
+// `HOUSE-01704` / `HOUSE-01697` / `HOUSE-01701`: long runs through the deployed transition table. They need
+// the authored world but no GraphicsDevice, so these are integration tests without a graphical surface.
 #include <algorithm>
 #include <gtest/gtest.h>
 
@@ -211,6 +211,109 @@ namespace
         }
 
         EXPECT_GE(visited.size(), 8U);
+    }
+
+    TEST(WeatherSeasonTests, CalmAuthoredTargetsContainNeitherHiddenRainNorThunder)
+    {
+        cnahouse::world::WorldData::Contents contents;
+        const auto loaded =
+            WorldLoader::LoadWeather(std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world", contents);
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+
+        for (const auto& archetype : contents.weatherArchetypes)
+        {
+            if (archetype.modifier)
+            {
+                continue;
+            }
+            SCOPED_TRACE(cnahouse::util::IdRegistry::NameOf(archetype.id));
+            if (archetype.precipType == PrecipType::None)
+            {
+                EXPECT_FLOAT_EQ(archetype.precipIntensity.minimum, 0.0F);
+                EXPECT_FLOAT_EQ(archetype.precipIntensity.maximum, 0.0F);
+            }
+            if (archetype.id != Intern("W_RAIN") && archetype.id != Intern("W_HEAVY_RAIN") &&
+                archetype.id != Intern("W_THUNDERSTORM") && archetype.id != Intern("W_HAIL"))
+            {
+                EXPECT_FLOAT_EQ(archetype.thunderProbability.minimum, 0.0F);
+                EXPECT_FLOAT_EQ(archetype.thunderProbability.maximum, 0.0F);
+            }
+        }
+    }
+
+    TEST(WeatherSeasonTests, TheCanonicalSevenDayReviewHasReadablePacing)
+    {
+        cnahouse::world::WorldData::Contents contents;
+        const std::string directory = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
+        const auto weather = WorldLoader::LoadWeather(directory, contents);
+        ASSERT_TRUE(weather) << weather.Error().ToString();
+        const auto initial = WorldLoader::LoadInitialState(directory, contents);
+        ASSERT_TRUE(initial) << initial.Error().ToString();
+
+        const auto& start = contents.initialState.weather;
+        auto systemResult = WeatherSystem::Create(contents.weatherArchetypes,
+                                                  contents.weatherTransitions,
+                                                  contents.weatherRates,
+                                                  start.state,
+                                                  start.target,
+                                                  start.targetExpiryMinutes);
+        ASSERT_TRUE(systemResult) << systemResult.Error().ToString();
+        WeatherSystem system = std::move(systemResult.Value());
+
+        SimClock clock;
+        clock.SetCalendar(cnahouse::environment::kNewGameCalendarDays);
+        Id previousTarget = system.TargetArchetype();
+        std::vector<Id> visited{previousTarget};
+        std::size_t episodes = 1U;
+        std::size_t precipitationTargetMinutes = 0U;
+        std::size_t severeTargetMinutes = 0U;
+        std::size_t fogTargetMinutes = 0U;
+        constexpr std::size_t kSevenDaysInMinutes = 7U * 24U * 60U;
+        for (std::size_t minute = 1U; minute <= kSevenDaysInMinutes; ++minute)
+        {
+            SCOPED_TRACE(::testing::Message() << "simulated minute " << minute);
+            clock.Advance(1.0);
+            const float sunlight = DirectSunlight(clock, system.State().cloudCover);
+            ASSERT_TRUE(system.Advance(
+                1.0F, clock.Season(), static_cast<float>(clock.OutdoorBaseTemperatureC()), sunlight));
+
+            const Id targetId = system.TargetArchetype();
+            const auto target = std::ranges::find(
+                contents.weatherArchetypes, targetId, &cnahouse::weather::WeatherArchetype::id);
+            ASSERT_NE(target, contents.weatherArchetypes.end());
+            if (targetId != previousTarget)
+            {
+                ++episodes;
+                previousTarget = targetId;
+            }
+            if (std::ranges::find(visited, targetId) == visited.end())
+            {
+                visited.push_back(targetId);
+            }
+            if (target->precipType != PrecipType::None)
+            {
+                ++precipitationTargetMinutes;
+            }
+            if (targetId == Intern("W_HEAVY_RAIN") || targetId == Intern("W_THUNDERSTORM") ||
+                targetId == Intern("W_HAIL") || targetId == Intern("W_HEAVY_SNOW"))
+            {
+                ++severeTargetMinutes;
+            }
+            if (targetId == Intern("W_FOG"))
+            {
+                ++fogTargetMinutes;
+            }
+        }
+
+        EXPECT_GE(visited.size(), 10U);
+        EXPECT_GE(episodes, 55U);
+        EXPECT_LE(episodes, 90U);
+        EXPECT_GE(precipitationTargetMinutes, 1'200U);
+        EXPECT_LE(precipitationTargetMinutes, 2'500U);
+        EXPECT_GE(severeTargetMinutes, 100U);
+        EXPECT_LE(severeTargetMinutes, 600U);
+        EXPECT_GE(fogTargetMinutes, 100U);
+        EXPECT_LE(fogTargetMinutes, 800U);
     }
 
 } // namespace

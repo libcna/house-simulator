@@ -14685,8 +14685,30 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             replaced by it. It fires on the identifier wherever it appears, so `auto IsRaining() ->
             bool` and a call to one are caught although neither has `bool` in front of a name. Two
             cheap rules that overlap beat one that has to be right about C++ syntax.
-- [ ] HOUSE-01701 — Tune the archetype table and the transition matrices against a subjective "does a week of weather feel right?" review over 7 simulated days
+- [x] HOUSE-01701 — Tune the archetype table and the transition matrices against a subjective "does a week of weather feel right?" review over 7 simulated days
       dep: HOUSE-01698 · sys: weather · plat: LNX · pri: MUST
+      verify: integration `WeatherSeasonTests.CalmAuthoredTargetsContainNeitherHiddenRainNorThunder`,
+              `WeatherSeasonTests.TheCanonicalSevenDayReviewHasReadablePacing`, and the retained
+              30-day impossible-combination test, with `SDL_VIDEODRIVER=offscreen`
+      review: the canonical fresh-world week (10,080 simulated minutes, June 14 through late
+            November under the compressed calendar) produced 72 target episodes across 11
+            archetypes: 1,738 minutes (17.2 %) in precipitation targets, 297 (3.0 %) in severe
+            rain/thunder/hail, and 313 (3.1 %) in fog. It built two storms through cloud, overcast,
+            drizzle and rain; kept a two-day mostly-clear spell; and returned through ordinary
+            cloud instead of teleporting between extremes. The authored transition matrix and
+            seasonal weights therefore remain unchanged. This is a pacing/sequence review of the
+            live numeric system; phase 25's sky and phase 27's precipitation still own the visual
+            review.
+      finding: every `None` archetype targeted a random 0..0.1 precipitation intensity, although
+            §36.2 says zero and `SurfaceWetness` integrates the continuous intensity without
+            consulting the type. Dry weather could therefore wet a surface invisibly. Calm,
+            drizzle and snow targets likewise requested random 0..0.05 thunder despite their
+            documented zero.
+      correction: all dry target intensity bands and all non-storm thunder bands are now exact
+            zero; §36.2 and the format example agree with the deployed authored data.
+      mutation: setting `W_CLEAR`'s summer, autumn and winter seasonal weights to 100 reduced the
+            canonical week's precipitation from 1,738 to 421 minutes and failed the review guard;
+            the measured weights were restored.
 - [x] HOUSE-01703 — Blend the four seasonal transition matrices continuously from `SeasonPhase::blend` instead of selecting one by day-of-year
       dep: HOUSE-01543, HOUSE-01683 · sys: weather · plat: ALL · pri: MUST
       accept: (1) the effective archetype probabilities are the blend-weighted mix of the two

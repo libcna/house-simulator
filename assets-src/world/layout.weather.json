@@ -16,45 +16,45 @@
     // Clear / calm.
     { "id": "W_CLEAR", "precipType": "None",
       "cloudCover": [0.0, 0.1], "cloudCumuliform": [0.45, 0.75],
-      "precipIntensity": [0.0, 0.1], "windSpeed": [1.05, 2.03],
+      "precipIntensity": [0.0, 0.0], "windSpeed": [1.05, 2.03],
       "gustFactor": [0.02, 0.18], "fogDensity": [0.0, 0.07],
       "temperatureOffsetC": [0.5, 3.5], "humidity": [0.292, 0.453],
-      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+      "thunderProbability": [0.0, 0.0], "modifier": false, "weight": 1.0 },
     // Mostly clear.
     { "id": "W_MOSTLY_CLEAR", "precipType": "None",
       "cloudCover": [0.17, 0.27], "cloudCumuliform": [0.65, 0.95],
-      "precipIntensity": [0.0, 0.1], "windSpeed": [1.75, 3.38],
+      "precipIntensity": [0.0, 0.0], "windSpeed": [1.75, 3.38],
       "gustFactor": [0.12, 0.28], "fogDensity": [0.0, 0.08],
       "temperatureOffsetC": [-0.5, 2.5], "humidity": [0.369, 0.529],
-      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+      "thunderProbability": [0.0, 0.0], "modifier": false, "weight": 1.0 },
     // Partly cloudy.
     { "id": "W_PARTLY", "precipType": "None",
       "cloudCover": [0.4, 0.5], "cloudCumuliform": [0.75, 1.0],
-      "precipIntensity": [0.0, 0.1], "windSpeed": [2.45, 4.73],
+      "precipIntensity": [0.0, 0.0], "windSpeed": [2.45, 4.73],
       "gustFactor": [0.22, 0.38], "fogDensity": [0.0, 0.09],
       "temperatureOffsetC": [-1.5, 1.5], "humidity": [0.472, 0.632],
-      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+      "thunderProbability": [0.0, 0.0], "modifier": false, "weight": 1.0 },
     // Cloudy.
     { "id": "W_CLOUDY", "precipType": "None",
       "cloudCover": [0.67, 0.77], "cloudCumuliform": [0.35, 0.65],
-      "precipIntensity": [0.0, 0.1], "windSpeed": [3.15, 6.08],
+      "precipIntensity": [0.0, 0.0], "windSpeed": [3.15, 6.08],
       "gustFactor": [0.27, 0.43], "fogDensity": [0.01, 0.11],
       "temperatureOffsetC": [-2.5, 0.5], "humidity": [0.594, 0.754],
-      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+      "thunderProbability": [0.0, 0.0], "modifier": false, "weight": 1.0 },
     // Overcast.
     { "id": "W_OVERCAST", "precipType": "None",
       "cloudCover": [0.9, 1.0], "cloudCumuliform": [0.0, 0.25],
-      "precipIntensity": [0.0, 0.1], "windSpeed": [2.1, 4.05],
+      "precipIntensity": [0.0, 0.0], "windSpeed": [2.1, 4.05],
       "gustFactor": [0.12, 0.28], "fogDensity": [0.07, 0.17],
       "temperatureOffsetC": [-3.5, -0.5], "humidity": [0.698, 0.857],
-      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+      "thunderProbability": [0.0, 0.0], "modifier": false, "weight": 1.0 },
     // Light rain.
     { "id": "W_DRIZZLE", "precipType": "Rain",
       "cloudCover": [0.87, 0.97], "cloudCumuliform": [0.05, 0.35],
       "precipIntensity": [0.12, 0.32], "windSpeed": [2.8, 5.4],
       "gustFactor": [0.22, 0.38], "fogDensity": [0.17, 0.27],
       "temperatureOffsetC": [-3.5, -0.5], "humidity": [0.728, 0.888],
-      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+      "thunderProbability": [0.0, 0.0], "modifier": false, "weight": 1.0 },
     // Rain.
     { "id": "W_RAIN", "precipType": "Rain",
       "cloudCover": [0.92, 1.0], "cloudCumuliform": [0.15, 0.45],
@@ -89,14 +89,14 @@
       "precipIntensity": [0.35, 0.55], "windSpeed": [2.45, 4.73],
       "gustFactor": [0.22, 0.38], "fogDensity": [0.35, 0.45],
       "temperatureOffsetC": [-5.5, -2.5], "humidity": [0.792, 0.952],
-      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+      "thunderProbability": [0.0, 0.0], "modifier": false, "weight": 1.0 },
     // Heavy snow / blizzard.
     { "id": "W_HEAVY_SNOW", "precipType": "Snow",
       "cloudCover": [0.95, 1.0], "cloudCumuliform": [0.35, 0.65],
       "precipIntensity": [0.85, 1.0], "windSpeed": [9.8, 18.9],
       "gustFactor": [0.67, 0.83], "fogDensity": [0.65, 0.75],
       "temperatureOffsetC": [-7.5, -4.5], "humidity": [0.91, 1.0],
-      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 },
+      "thunderProbability": [0.0, 0.0], "modifier": false, "weight": 1.0 },
     // W_WINDY is a MODIFIER, not a state (§36.2): it combines with any precipitation archetype,
     // which is how "windy heavy rain" and "blizzard" arise without a combinatorial state list. Its
     // weight is zero because nothing transitions TO it, and its unconstrained bands say it
@@ -110,10 +110,10 @@
     // Fog.
     { "id": "W_FOG", "precipType": "None",
       "cloudCover": [0.8, 0.9], "cloudCumuliform": [0.0, 0.15],
-      "precipIntensity": [0.0, 0.1], "windSpeed": [0.7, 1.35],
+      "precipIntensity": [0.0, 0.0], "windSpeed": [0.7, 1.35],
       "gustFactor": [0.0, 0.13], "fogDensity": [0.87, 0.97],
       "temperatureOffsetC": [-2.5, 0.5], "humidity": [0.652, 0.812],
-      "thunderProbability": [0.0, 0.05], "modifier": false, "weight": 1.0 }
+      "thunderProbability": [0.0, 0.0], "modifier": false, "weight": 1.0 }
   ],
 
   // What follows what. Each row sums to 1: it is a distribution over the NEXT target,

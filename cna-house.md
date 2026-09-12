@@ -3671,6 +3671,12 @@ special-casing, and a spring storm can produce sleet. This override applies to t
 phases: a non-precipitating archetype remains `None`, while `W_HAIL` remains `Hail` for the separate
 hail coupling of §40.
 
+The authored target bands preserve those meanings: every `None` archetype targets exactly zero
+precipitation intensity, so dry weather cannot wet a surface through a hidden continuous value.
+Only rain, heavy rain, thunderstorm and hail targets may request non-zero thunder; drizzle, snow
+and every dry archetype target exactly zero. A protected phase transition may still expose the
+small residuals specified by §42.3 while it settles.
+
 ### 36.3 Seasons
 
 Four transition matrices (winter / spring / summer / autumn), differing in archetype probabilities
