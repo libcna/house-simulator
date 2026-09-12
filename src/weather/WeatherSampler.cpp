@@ -106,4 +106,59 @@ namespace cnahouse::weather
         return lastPositive;
     }
 
+    util::Result<WeatherTiming> WeatherSampler::SampleTiming(util::Id current,
+                                                             util::Id next,
+                                                             const environment::SeasonPhase& season,
+                                                             util::Rng& rng) const
+    {
+        const WeatherArchetype* source = FindArchetype(current);
+        const WeatherArchetype* target = FindArchetype(next);
+        if (source == nullptr || source->modifier)
+        {
+            return util::Err(util::ErrorCode::NotFound,
+                             "the current archetype has no timing distribution",
+                             std::format("weather/{}", current.Value()));
+        }
+        if (target == nullptr || target->modifier)
+        {
+            return util::Err(util::ErrorCode::NotFound,
+                             "the next archetype has no timing distribution",
+                             std::format("weather/{}", next.Value()));
+        }
+
+        const float dwellScales[4]{target->seasonalDwellScales[0],
+                                   target->seasonalDwellScales[1],
+                                   target->seasonalDwellScales[2],
+                                   target->seasonalDwellScales[3]};
+        const float dwellScale = environment::MixBySeason(season, dwellScales);
+        const float dwellMinimum = target->dwellMinutes.minimum * dwellScale;
+        const float dwellMaximum = target->dwellMinutes.maximum * dwellScale;
+        const float transitionMinimum =
+            0.5F * (source->transitionMinutes.minimum + target->transitionMinutes.minimum);
+        const float transitionMaximum =
+            0.5F * (source->transitionMinutes.maximum + target->transitionMinutes.maximum);
+        if (!std::isfinite(dwellMinimum) || !std::isfinite(dwellMaximum) ||
+            !(dwellMinimum >= 25.0F && dwellMinimum <= dwellMaximum && dwellMaximum <= 380.0F))
+        {
+            return util::Err(util::ErrorCode::InvalidData,
+                             "the seasonal dwell distribution is outside 25..380 simulated minutes",
+                             std::format("weather/{}", next.Value()));
+        }
+        if (!std::isfinite(transitionMinimum) || !std::isfinite(transitionMaximum) ||
+            !(transitionMinimum >= 5.0F && transitionMinimum <= transitionMaximum &&
+              transitionMaximum <= 45.0F))
+        {
+            return util::Err(util::ErrorCode::InvalidData,
+                             "the transition distribution is outside 5..45 simulated minutes",
+                             std::format("weather/{}/{}", current.Value(), next.Value()));
+        }
+
+        const float dwellDraw = rng.NextFloat();
+        const float transitionDraw = rng.NextFloat();
+        return WeatherTiming{
+            dwellMinimum + (dwellMaximum - dwellMinimum) * dwellDraw,
+            transitionMinimum + (transitionMaximum - transitionMinimum) * transitionDraw,
+        };
+    }
+
 } // namespace cnahouse::weather

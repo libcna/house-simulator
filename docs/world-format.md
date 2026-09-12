@@ -595,13 +595,25 @@ there is no `isRaining`.
       "temperatureOffsetC": [-1.0, 2.0], "humidity": [0.4, 0.7], "weight": 1.0 }
   ],
   "transitions": { "W_PARTLY": { "W_CLEAR": 0.35, "W_OVERCAST": 0.40, "W_RAIN": 0.25 } },
+  "timing": {
+    "W_PARTLY": { "dwellMinutes": [60, 180], "transitionMinutes": [10, 25] }
+  },
   "rates": { "cloudCoverPerMin": 0.06, "precipIntensityPerMin": 0.10, "windSpeedPerMin": 1.2 },
-  "seasons": [ { "id": "WINTER", "months": [12, 1, 2], "weights": { "W_SNOW": 2.5, "W_CLEAR": 0.6 } } ]
+  "seasons": [ { "id": "WINTER", "months": [12, 1, 2],
+    "weights": { "W_SNOW": 2.5, "W_CLEAR": 0.6 },
+    "dwellScale": { "W_SNOW": 1.2, "W_CLEAR": 0.8 } } ]
 }
 ```
 
 `rates` is the anti-absurdity guarantee (`cna-house.md` §42.2): it is what stops a clear sky
 becoming a thunderstorm in four seconds.
+
+`timing` provides one uniform dwell and characteristic transition-time distribution per state.
+The effective transition range is the component-wise mean of the source and destination ranges,
+so an abrupt state and a slow state both influence the change without duplicating timing data in a
+13 × 13 table. A season's sparse `dwellScale` multiplies the destination dwell range; omitted
+states keep scale 1, and the two neighbouring seasonal scales are blended continuously. The
+effective bounds must remain inside §42.1's 25–380 minute dwell and 5–45 minute transition limits.
 
 Every quantity is a **range**, not a value: §36.2's table gives the archetype's centre and the
 target is drawn from the band, which is why two thunderstorms are not identical. `thunderProbability`

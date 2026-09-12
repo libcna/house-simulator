@@ -157,6 +157,13 @@
       "items": {
         "additionalProperties": false,
         "properties": {
+          "dwellScale": {
+            "additionalProperties": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "type": "object"
+          },
           "id": {
             "$ref": "#/$defs/id"
           },
@@ -178,11 +185,46 @@
         },
         "required": [
           "id",
-          "months"
+          "months",
+          "weights",
+          "dwellScale"
         ],
         "type": "object"
       },
       "type": "array"
+    },
+    "timing": {
+      "additionalProperties": {
+        "additionalProperties": false,
+        "properties": {
+          "dwellMinutes": {
+            "items": {
+              "maximum": 380,
+              "minimum": 25,
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "transitionMinutes": {
+            "items": {
+              "maximum": 45,
+              "minimum": 5,
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          }
+        },
+        "required": [
+          "dwellMinutes",
+          "transitionMinutes"
+        ],
+        "type": "object"
+      },
+      "type": "object"
     },
     "transitions": {
       "additionalProperties": {
@@ -198,7 +240,9 @@
     "schema",
     "archetypes",
     "transitions",
-    "rates"
+    "timing",
+    "rates",
+    "seasons"
   ],
   "title": "layout.weather.json",
   "type": "object"

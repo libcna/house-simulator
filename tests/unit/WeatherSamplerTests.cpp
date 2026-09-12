@@ -33,14 +33,21 @@ namespace
             WeatherArchetype a;
             a.id = a_;
             a.weight = 1.0F;
+            a.dwellMinutes = {100.0F, 200.0F};
+            a.transitionMinutes = {10.0F, 20.0F};
             WeatherArchetype b;
             b.id = b_;
             b.weight = 1.0F;
             b.seasonalWeights = {2.0F, 0.5F, 1.0F, 1.0F};
+            b.dwellMinutes = {40.0F, 80.0F};
+            b.transitionMinutes = {30.0F, 40.0F};
+            b.seasonalDwellScales = {1.0F, 0.75F, 1.25F, 1.5F};
             WeatherArchetype c;
             c.id = c_;
             c.weight = 1.0F;
             c.seasonalWeights = {0.5F, 2.0F, 1.0F, 1.0F};
+            c.dwellMinutes = {60.0F, 120.0F};
+            c.transitionMinutes = {20.0F, 30.0F};
             archetypes_ = {a, b, c};
             transitions_ = {
                 WeatherTransitionRow{a_, {{b_, 0.5F}, {c_, 0.5F}}},
@@ -137,6 +144,65 @@ namespace
         Rng oracle(42);
         ASSERT_TRUE(sampler.SampleNext(a_, SeasonAt(0.125), sampled));
         (void)oracle.NextFloat();
+        EXPECT_EQ(sampled.GetState(), oracle.GetState());
+    }
+
+    TEST_F(WeatherSeasonTests, TimingDrawsStayInsideTheAuthoredGlobalBounds)
+    {
+        const WeatherSampler sampler = Sampler();
+        for (std::uint64_t seed = 1; seed <= 10000U; ++seed)
+        {
+            Rng rng(seed);
+            const auto timing =
+                sampler.SampleTiming(a_, b_, SeasonAt(static_cast<double>(seed) / 10000.0), rng);
+            ASSERT_TRUE(timing) << timing.Error().ToString();
+            EXPECT_GE(timing.Value().dwellMinutes, 30.0F);
+            EXPECT_LE(timing.Value().dwellMinutes, 120.0F);
+            EXPECT_GE(timing.Value().transitionMinutes, 20.0F);
+            EXPECT_LE(timing.Value().transitionMinutes, 30.0F);
+        }
+    }
+
+    TEST_F(WeatherSeasonTests, SeasonalDwellScaleIsBlendedContinuously)
+    {
+        const WeatherSampler sampler = Sampler();
+        cnahouse::environment::SeasonPhase blended;
+        blended.primary = 0;
+        blended.secondary = 1;
+        blended.blend = 0.25F;
+        Rng springRng(77);
+        Rng blendedRng(77);
+        const auto spring = sampler.SampleTiming(a_, b_, SeasonAt(0.125), springRng);
+        const auto between = sampler.SampleTiming(a_, b_, blended, blendedRng);
+        ASSERT_TRUE(spring);
+        ASSERT_TRUE(between);
+        EXPECT_FLOAT_EQ(between.Value().dwellMinutes, spring.Value().dwellMinutes * 0.9375F);
+        EXPECT_FLOAT_EQ(between.Value().transitionMinutes, spring.Value().transitionMinutes);
+    }
+
+    TEST_F(WeatherSeasonTests, TransitionTimingUsesBothArchetypesAndExactlyTwoDraws)
+    {
+        const WeatherSampler sampler = Sampler();
+        Rng sampled(42);
+        Rng oracle(42);
+        const float expectedDwell = 40.0F + 40.0F * oracle.NextFloat();
+        // The source's [10, 20] and destination's [30, 40] become [20, 30].
+        const float expectedTransition = 20.0F + 10.0F * oracle.NextFloat();
+        const auto timing = sampler.SampleTiming(a_, b_, SeasonAt(0.125), sampled);
+        ASSERT_TRUE(timing) << timing.Error().ToString();
+        EXPECT_FLOAT_EQ(timing.Value().dwellMinutes, expectedDwell);
+        EXPECT_FLOAT_EQ(timing.Value().transitionMinutes, expectedTransition);
+        EXPECT_EQ(sampled.GetState(), oracle.GetState());
+    }
+
+    TEST_F(WeatherSeasonTests, InvalidTimingIsRefusedBeforeTheRngMoves)
+    {
+        archetypes_[1].dwellMinutes = {24.0F, 80.0F};
+        const WeatherSampler sampler = Sampler();
+        Rng sampled(91);
+        Rng oracle(91);
+        const auto timing = sampler.SampleTiming(a_, b_, SeasonAt(0.125), sampled);
+        ASSERT_FALSE(timing);
         EXPECT_EQ(sampled.GetState(), oracle.GetState());
     }
 

@@ -175,6 +175,25 @@
       "W_THUNDERSTORM": 0.0185 }
   },
 
+  // §42.1's uniform distributions, in simulated minutes. `transitionMinutes` is each
+  // archetype's characteristic tempo; a transition averages the source and destination
+  // endpoints, so both sides of a weather change contribute without a 13 x 13 timing table.
+  "timing": {
+    "W_CLEAR":        { "dwellMinutes": [120, 300], "transitionMinutes": [20, 40] },
+    "W_MOSTLY_CLEAR": { "dwellMinutes": [ 90, 240], "transitionMinutes": [12, 28] },
+    "W_PARTLY":       { "dwellMinutes": [ 60, 180], "transitionMinutes": [10, 25] },
+    "W_CLOUDY":       { "dwellMinutes": [ 75, 210], "transitionMinutes": [12, 30] },
+    "W_OVERCAST":     { "dwellMinutes": [ 90, 280], "transitionMinutes": [15, 35] },
+    "W_DRIZZLE":      { "dwellMinutes": [ 45, 160], "transitionMinutes": [12, 28] },
+    "W_RAIN":         { "dwellMinutes": [ 45, 150], "transitionMinutes": [15, 35] },
+    "W_HEAVY_RAIN":   { "dwellMinutes": [ 30,  90], "transitionMinutes": [20, 45] },
+    "W_THUNDERSTORM": { "dwellMinutes": [ 35,  75], "transitionMinutes": [15, 35] },
+    "W_HAIL":         { "dwellMinutes": [ 35,  60], "transitionMinutes": [ 5, 15] },
+    "W_SNOW":         { "dwellMinutes": [ 60, 220], "transitionMinutes": [15, 35] },
+    "W_HEAVY_SNOW":   { "dwellMinutes": [ 45, 160], "transitionMinutes": [20, 45] },
+    "W_FOG":          { "dwellMinutes": [ 60, 240], "transitionMinutes": [20, 45] }
+  },
+
   // §42.2's anti-absurdity guarantee: what stops a clear sky becoming a thunderstorm
   // in four seconds. Per simulated minute, and every continuous quantity has one.
   "rates": {
@@ -196,19 +215,25 @@
     // ---- SPRING -- the most variable, and the only season with no bias at all towards one look.
     { "id": "SPRING", "months": [3, 4, 5],
       "weights": { "W_CLEAR": 1.0, "W_DRIZZLE": 1.6, "W_FOG": 0.9, "W_HEAVY_SNOW": 0.05, "W_PARTLY":
-        1.4, "W_RAIN": 1.3, "W_SNOW": 0.2, "W_THUNDERSTORM": 0.7 } },
+        1.4, "W_RAIN": 1.3, "W_SNOW": 0.2, "W_THUNDERSTORM": 0.7 },
+      "dwellScale": { "W_CLEAR": 0.9, "W_HAIL": 0.8, "W_THUNDERSTORM": 0.8 } },
     // ---- SUMMER -- §36.3's sharp afternoon storms in the heat; snow is weight ZERO, not merely
     // unlikely.
     { "id": "SUMMER", "months": [6, 7, 8],
       "weights": { "W_CLEAR": 2.2, "W_FOG": 0.3, "W_HAIL": 0.4, "W_HEAVY_RAIN": 0.8, "W_HEAVY_SNOW":
-        0.0, "W_MOSTLY_CLEAR": 1.8, "W_PARTLY": 1.5, "W_SNOW": 0.0, "W_THUNDERSTORM": 1.4 } },
+        0.0, "W_MOSTLY_CLEAR": 1.8, "W_PARTLY": 1.5, "W_SNOW": 0.0, "W_THUNDERSTORM": 1.4 },
+      "dwellScale": { "W_CLEAR": 1.2, "W_HEAVY_RAIN": 0.85, "W_RAIN": 0.85,
+        "W_THUNDERSTORM": 0.75 } },
     // ---- AUTUMN -- wind, sustained rain and fog.
     { "id": "AUTUMN", "months": [9, 10, 11],
       "weights": { "W_CLEAR": 0.7, "W_DRIZZLE": 1.4, "W_FOG": 2.0, "W_HEAVY_SNOW": 0.15, "W_OVERCAST":
-        1.5, "W_RAIN": 1.8, "W_SNOW": 0.4, "W_THUNDERSTORM": 0.4 } },
+        1.5, "W_RAIN": 1.8, "W_SNOW": 0.4, "W_THUNDERSTORM": 0.4 },
+      "dwellScale": { "W_DRIZZLE": 1.2, "W_FOG": 1.1, "W_OVERCAST": 1.15, "W_RAIN": 1.2 } },
     // ---- WINTER -- overcast and snow, and the coldest temperatures.
     { "id": "WINTER", "months": [12, 1, 2],
       "weights": { "W_CLEAR": 0.6, "W_CLOUDY": 1.4, "W_DRIZZLE": 0.5, "W_HAIL": 0.6, "W_HEAVY_SNOW":
-        1.2, "W_OVERCAST": 2.0, "W_SNOW": 2.4, "W_THUNDERSTORM": 0.1 } }
+        1.2, "W_OVERCAST": 2.0, "W_SNOW": 2.4, "W_THUNDERSTORM": 0.1 },
+      "dwellScale": { "W_CLEAR": 0.8, "W_HEAVY_SNOW": 1.1, "W_OVERCAST": 1.2,
+        "W_SNOW": 1.2 } }
   ]
 }

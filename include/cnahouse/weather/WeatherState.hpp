@@ -76,6 +76,12 @@ namespace cnahouse::weather
         float weight = 0.0F;
         /// Spring, summer, autumn, winter. An omitted authored entry keeps weight 1.
         std::array<float, 4> seasonalWeights{1.0F, 1.0F, 1.0F, 1.0F};
+        /// The target's residence time before another archetype is selected, in simulated minutes.
+        WeatherRange dwellMinutes;
+        /// The target's characteristic transition time, in simulated minutes.
+        WeatherRange transitionMinutes;
+        /// Seasonal multipliers for `dwellMinutes`, in spring-to-winter order.
+        std::array<float, 4> seasonalDwellScales{1.0F, 1.0F, 1.0F, 1.0F};
 
         [[nodiscard]] friend bool operator==(const WeatherArchetype&, const WeatherArchetype&) = default;
     };

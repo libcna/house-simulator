@@ -21,6 +21,14 @@ namespace cnahouse::weather
         [[nodiscard]] friend bool operator==(const WeatherChoice&, const WeatherChoice&) = default;
     };
 
+    struct WeatherTiming
+    {
+        float dwellMinutes = 0.0F;
+        float transitionMinutes = 0.0F;
+
+        [[nodiscard]] friend bool operator==(const WeatherTiming&, const WeatherTiming&) = default;
+    };
+
     /// @brief §36.3's deterministic, continuously season-weighted archetype selector.
     ///
     /// The authored file stores one base transition row per state and four sparse seasonal weight
@@ -40,6 +48,16 @@ namespace cnahouse::weather
         /// @brief Draws one destination from `Distribution`, in authored target order.
         [[nodiscard]] util::Result<util::Id>
         SampleNext(util::Id current, const environment::SeasonPhase& season, util::Rng& rng) const;
+
+        /// @brief Draws the destination dwell and the source-to-destination transition duration.
+        ///
+        /// Both are uniform authored distributions. The dwell range is scaled by the continuously
+        /// blended season; the transition range is the component-wise mean of the two
+        /// archetypes' characteristic ranges. Exactly two RNG draws are consumed on success.
+        [[nodiscard]] util::Result<WeatherTiming> SampleTiming(util::Id current,
+                                                               util::Id next,
+                                                               const environment::SeasonPhase& season,
+                                                               util::Rng& rng) const;
 
     private:
         [[nodiscard]] const WeatherArchetype* FindArchetype(util::Id id) const noexcept;

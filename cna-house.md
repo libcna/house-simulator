@@ -3908,6 +3908,13 @@ every simulated minute:
         state[c] = moveTowards(state[c], desired, maxRate[c] · dt)
 ```
 
+Both timing draws are uniform over authored ranges. `dwell(next, season, rng)` multiplies the
+destination's base range by the continuously blended seasonal dwell scale.
+`transitionTime(current, next, rng)` uses the component-wise mean of the current and next
+archetypes' characteristic transition ranges: both sides of the change influence its tempo, but
+the data does not repeat a timing range for all 169 source/destination pairs. Authored and
+seasonally scaled ranges must keep the §42.1 bounds shown above.
+
 ### 42.2 Rate limits — the anti-absurdity guarantee
 
 | Channel | Max rate (per simulated minute) | Time for a full 0→1 swing |

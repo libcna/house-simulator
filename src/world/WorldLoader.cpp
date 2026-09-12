@@ -3691,6 +3691,61 @@ namespace cnahouse::world
                        "layout.weather.json/transitions");
         }
 
+        const Result<JsonValue> timingObject = document.Value().Root().RequireObject("timing");
+        if (!timingObject)
+        {
+            return timingObject.Error().WithContext("layout.weather.json");
+        }
+        const Result<std::vector<std::pair<std::string, JsonValue>>> timingMembers =
+            timingObject.Value().Members();
+        if (!timingMembers)
+        {
+            return timingMembers.Error().WithContext("layout.weather.json");
+        }
+        std::unordered_set<util::Id> timedArchetypes;
+        for (const auto& [name, timingRow] : timingMembers.Value())
+        {
+            const Result<util::Id> id = internKey(name, "layout.weather.json/timing/" + name);
+            if (!id)
+            {
+                return id.Error();
+            }
+            const auto archetype = archetypeById.find(id.Value());
+            if (archetype == archetypeById.end() || parsed[archetype->second].modifier)
+            {
+                return Err(ErrorCode::InvalidData,
+                           name + " has timing but is not a weather state",
+                           "layout.weather.json/timing/" + name);
+            }
+            if (!timedArchetypes.insert(id.Value()).second)
+            {
+                return Err(ErrorCode::Duplicate,
+                           name + " has more than one timing distribution",
+                           "layout.weather.json/timing/" + name);
+            }
+            const Result<weather::WeatherRange> dwell =
+                range(timingRow, "dwellMinutes", std::pair<float, float>{25.0F, 380.0F});
+            if (!dwell)
+            {
+                return dwell.Error().WithContext("layout.weather.json");
+            }
+            const Result<weather::WeatherRange> transition =
+                range(timingRow, "transitionMinutes", std::pair<float, float>{5.0F, 45.0F});
+            if (!transition)
+            {
+                return transition.Error().WithContext("layout.weather.json");
+            }
+            parsed[archetype->second].dwellMinutes = dwell.Value();
+            parsed[archetype->second].transitionMinutes = transition.Value();
+        }
+        if (timedArchetypes.size() != parsed.size() - 1U)
+        {
+            return Err(ErrorCode::InvalidData,
+                       "every one of the thirteen weather states needs timing distributions; found " +
+                           std::to_string(timedArchetypes.size()),
+                       "layout.weather.json/timing");
+        }
+
         const Result<JsonValue> seasonArray = document.Value().Root().RequireArray("seasons");
         if (!seasonArray)
         {
@@ -3814,6 +3869,77 @@ namespace cnahouse::world
                                "layout.weather.json/" + seasonRow.Path() + "/weights/" + targetName);
                 }
                 parsed[targetArchetype->second].seasonalWeights[seasonIndex] = weightValueFloat.Value();
+            }
+
+            const Result<JsonValue> dwellScaleObject = seasonRow.RequireObject("dwellScale");
+            if (!dwellScaleObject)
+            {
+                return dwellScaleObject.Error().WithContext("layout.weather.json");
+            }
+            const Result<std::vector<std::pair<std::string, JsonValue>>> dwellScales =
+                dwellScaleObject.Value().Members();
+            if (!dwellScales)
+            {
+                return dwellScales.Error().WithContext("layout.weather.json");
+            }
+            std::unordered_set<util::Id> dwellScaled;
+            for (const auto& [targetName, scaleValue] : dwellScales.Value())
+            {
+                const Result<util::Id> target = internKey(
+                    targetName, "layout.weather.json/" + seasonRow.Path() + "/dwellScale/" + targetName);
+                if (!target)
+                {
+                    return target.Error();
+                }
+                const auto targetArchetype = archetypeById.find(target.Value());
+                if (targetArchetype == archetypeById.end() || parsed[targetArchetype->second].modifier)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               name.Value() + " scales dwell for " + targetName +
+                                   ", which is not a weather state",
+                               "layout.weather.json/" + seasonRow.Path() + "/dwellScale/" + targetName);
+                }
+                if (!dwellScaled.insert(target.Value()).second)
+                {
+                    return Err(ErrorCode::Duplicate,
+                               targetName + " has its dwell scaled twice",
+                               "layout.weather.json/" + seasonRow.Path() + "/dwellScale/" + targetName);
+                }
+                const Result<float> scale = scaleValue.AsFloat();
+                if (!scale)
+                {
+                    return scale.Error().WithContext("layout.weather.json");
+                }
+                if (!std::isfinite(scale.Value()) || !(scale.Value() > 0.0F))
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               "a seasonal dwell scale is positive; this is " + std::to_string(scale.Value()),
+                               "layout.weather.json/" + seasonRow.Path() + "/dwellScale/" + targetName);
+                }
+                parsed[targetArchetype->second].seasonalDwellScales[seasonIndex] = scale.Value();
+            }
+        }
+
+        for (const weather::WeatherArchetype& archetype : parsed)
+        {
+            if (archetype.modifier)
+            {
+                continue;
+            }
+            for (std::size_t seasonIndex = 0; seasonIndex < 4U; ++seasonIndex)
+            {
+                const float minimum =
+                    archetype.dwellMinutes.minimum * archetype.seasonalDwellScales[seasonIndex];
+                const float maximum =
+                    archetype.dwellMinutes.maximum * archetype.seasonalDwellScales[seasonIndex];
+                if (!(minimum >= 25.0F && maximum <= 380.0F))
+                {
+                    return Err(ErrorCode::OutOfRange,
+                               Name(archetype.id) + " has seasonal dwell bounds " + std::to_string(minimum) +
+                                   ".." + std::to_string(maximum) +
+                                   ", outside §42.1's 25..380 simulated minutes",
+                               "layout.weather.json/seasons");
+                }
             }
         }
 

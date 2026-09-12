@@ -575,11 +575,22 @@ namespace
                 text += R"("W_STATE_)" + std::to_string(index) + R"(":{"W_STATE_)" + std::to_string(next) +
                         R"(":1.0})";
             }
-            text += R"(},"rates":{},"seasons":[)"
-                    R"({"id":"SPRING","months":[3,4,5],"weights":{"W_STATE_0":1.5}},)"
-                    R"({"id":"SUMMER","months":[6,7,8],"weights":{"W_STATE_0":2.0}},)"
-                    R"({"id":"AUTUMN","months":[9,10,11],"weights":{"W_STATE_0":0.5}},)"
-                    R"({"id":"WINTER","months":[12,1,2],"weights":{"W_STATE_0":0.25}}]})";
+            text += R"(},"timing":{)";
+            for (std::size_t index = 0; index < stateCount; ++index)
+            {
+                if (index != 0U)
+                {
+                    text += ',';
+                }
+                text += R"("W_STATE_)" + std::to_string(index) +
+                        R"(":{"dwellMinutes":[50,100],"transitionMinutes":[10,20]})";
+            }
+            text +=
+                R"(},"rates":{},"seasons":[)"
+                R"({"id":"SPRING","months":[3,4,5],"weights":{"W_STATE_0":1.5},"dwellScale":{"W_STATE_0":1.5}},)"
+                R"({"id":"SUMMER","months":[6,7,8],"weights":{"W_STATE_0":2.0},"dwellScale":{"W_STATE_0":2.0}},)"
+                R"({"id":"AUTUMN","months":[9,10,11],"weights":{"W_STATE_0":0.5},"dwellScale":{"W_STATE_0":0.5}},)"
+                R"({"id":"WINTER","months":[12,1,2],"weights":{"W_STATE_0":0.25},"dwellScale":{"W_STATE_0":0.5}}]})";
             return text;
         }
 
@@ -2574,6 +2585,11 @@ namespace
         EXPECT_FLOAT_EQ(contents.weatherArchetypes[0].seasonalWeights[1], 2.0F);
         EXPECT_FLOAT_EQ(contents.weatherArchetypes[1].seasonalWeights[0], 1.0F)
             << "an omitted seasonal entry keeps neutral weight";
+        EXPECT_FLOAT_EQ(contents.weatherArchetypes[0].dwellMinutes.minimum, 50.0F);
+        EXPECT_FLOAT_EQ(contents.weatherArchetypes[0].transitionMinutes.maximum, 20.0F);
+        EXPECT_FLOAT_EQ(contents.weatherArchetypes[0].seasonalDwellScales[0], 1.5F);
+        EXPECT_FLOAT_EQ(contents.weatherArchetypes[1].seasonalDwellScales[0], 1.0F)
+            << "an omitted seasonal dwell scale is neutral";
     }
 
     TEST_F(WorldLoaderTest, EqualWeatherBandEndpointsAreValid)
@@ -2700,6 +2716,41 @@ namespace
         }
     }
 
+    TEST_F(WorldLoaderTest, WeatherTimingStaysInsideTheArchitecturalBounds)
+    {
+        const auto reject = [this](const std::string& before, const std::string& after)
+        {
+            std::string text = Weather();
+            const std::size_t at = text.find(before);
+            EXPECT_NE(at, std::string::npos) << before;
+            if (at != std::string::npos)
+            {
+                text.replace(at, before.size(), after);
+            }
+            Write("layout.weather.json", text);
+            world::WorldData::Contents contents;
+            const auto loaded = world::WorldLoader::LoadWeather(directory_, contents);
+            EXPECT_FALSE(loaded);
+            return loaded;
+        };
+
+        const auto shortDwell = reject(R"("dwellMinutes":[50,100])", R"("dwellMinutes":[24,100])");
+        ASSERT_FALSE(shortDwell);
+        EXPECT_NE(shortDwell.Error().Context().find("dwellMinutes"), std::string::npos)
+            << shortDwell.Error().ToString();
+
+        const auto slowTransition =
+            reject(R"("transitionMinutes":[10,20])", R"("transitionMinutes":[10,46])");
+        ASSERT_FALSE(slowTransition);
+        EXPECT_NE(slowTransition.Error().Context().find("transitionMinutes"), std::string::npos)
+            << slowTransition.Error().ToString();
+
+        const auto missing =
+            reject(R"("W_STATE_0":{"dwellMinutes":[50,100],"transitionMinutes":[10,20]},)", "");
+        ASSERT_FALSE(missing);
+        EXPECT_NE(missing.Error().Context().find("timing"), std::string::npos) << missing.Error().ToString();
+    }
+
     TEST_F(WorldLoaderTest, WeatherRequiresTheFourCalendarSeasonWeightVectors)
     {
         const auto mutate = [this](const std::string& before, const std::string& after)
@@ -2727,6 +2778,17 @@ namespace
         const auto weight = mutate(R"("W_STATE_0":1.5)", R"("W_STATE_0":-1.5)");
         ASSERT_FALSE(weight);
         EXPECT_EQ(weight.Error().Code(), ErrorCode::OutOfRange);
+
+        const auto dwellScale =
+            mutate(R"("dwellScale":{"W_STATE_0":1.5})", R"("dwellScale":{"W_STATE_0":0.0})");
+        ASSERT_FALSE(dwellScale);
+        EXPECT_EQ(dwellScale.Error().Code(), ErrorCode::OutOfRange);
+
+        const auto excessiveDwell =
+            mutate(R"("dwellScale":{"W_STATE_0":2.0})", R"("dwellScale":{"W_STATE_0":4.0})");
+        ASSERT_FALSE(excessiveDwell);
+        EXPECT_NE(excessiveDwell.Error().Message().find("25..380"), std::string::npos)
+            << excessiveDwell.Error().ToString();
     }
 
     // --- the interactables ------------------------------------------------------------------
@@ -3340,6 +3402,9 @@ namespace
         EXPECT_FLOAT_EQ(snow->seasonalWeights[1], 0.0F) << "summer's hard gate";
         EXPECT_FLOAT_EQ(snow->seasonalWeights[2], 0.4F) << "autumn";
         EXPECT_FLOAT_EQ(snow->seasonalWeights[3], 2.4F) << "winter";
+        EXPECT_FLOAT_EQ(snow->dwellMinutes.minimum, 60.0F);
+        EXPECT_FLOAT_EQ(snow->dwellMinutes.maximum, 220.0F);
+        EXPECT_FLOAT_EQ(snow->seasonalDwellScales[3], 1.2F);
 
         const cnahouse::weather::WeatherSampler sampler(contents.weatherArchetypes,
                                                         contents.weatherTransitions);
@@ -3360,6 +3425,15 @@ namespace
         EXPECT_NEAR(sum(spring.Value()), 1.0F, 1e-6F);
         EXPECT_NEAR(sum(winter.Value()), 1.0F, 1e-6F);
         EXPECT_NE(spring.Value(), winter.Value()) << "the authored seasonal vectors change the matrix";
+
+        cnahouse::util::Rng timingRng(0x1234U);
+        const auto timing = sampler.SampleTiming(
+            Intern("W_CLEAR"), Intern("W_SNOW"), cnahouse::environment::SeasonAt(0.875), timingRng);
+        ASSERT_TRUE(timing) << timing.Error().ToString();
+        EXPECT_GE(timing.Value().dwellMinutes, 72.0F);
+        EXPECT_LE(timing.Value().dwellMinutes, 264.0F);
+        EXPECT_GE(timing.Value().transitionMinutes, 17.5F);
+        EXPECT_LE(timing.Value().transitionMinutes, 37.5F);
 
         IdRegistry::ResetForTesting();
     }

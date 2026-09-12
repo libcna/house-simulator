@@ -428,7 +428,7 @@ def build() -> dict[str, dict]:
                                    "scale": {"type": "number", "exclusiveMinimum": 0}})}})}}})
 
     schemas["weather"] = envelope("weather", "layout.weather.json", {
-        "required": ["archetypes", "transitions", "rates"],
+        "required": ["archetypes", "transitions", "timing", "rates", "seasons"],
         "properties": {
             "archetypes": {"type": "array", "items": obj(
                 ["id", "cloudCover", "precipType", "precipIntensity", "windSpeed"],
@@ -450,15 +450,26 @@ def build() -> dict[str, dict]:
                  "weight": {"type": "number", "minimum": 0}})},
             "transitions": {"type": "object", "additionalProperties": {
                 "type": "object", "additionalProperties": UNIT}},
+            "timing": {"type": "object", "additionalProperties": obj(
+                ["dwellMinutes", "transitionMinutes"],
+                {"dwellMinutes": {"type": "array", "minItems": 2, "maxItems": 2,
+                                  "items": {"type": "number", "minimum": 25,
+                                            "maximum": 380}},
+                 "transitionMinutes": {"type": "array", "minItems": 2, "maxItems": 2,
+                                       "items": {"type": "number", "minimum": 5,
+                                                 "maximum": 45}}})},
             "rates": {"type": "object", "additionalProperties": {
                 "type": "number", "exclusiveMinimum": 0}},
             "seasons": {"type": "array", "items": obj(
-                ["id", "months"],
+                ["id", "months", "weights", "dwellScale"],
                 {"id": ID,
                  "months": {"type": "array", "items": {"type": "integer",
                                                        "minimum": 1, "maximum": 12}},
                  "weights": {"type": "object",
-                             "additionalProperties": {"type": "number", "minimum": 0}}})}}})
+                             "additionalProperties": {"type": "number", "minimum": 0}},
+                 "dwellScale": {"type": "object",
+                                "additionalProperties": {"type": "number",
+                                                         "exclusiveMinimum": 0}}})}}})
 
     schemas["sky"] = envelope("sky", "layout.sky.json", {
         "required": ["gradient"],

@@ -6294,6 +6294,12 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             so a screenshot comparison means something.
 - [x] HOUSE-00393 — Author `layout.weather.json`: the 14 archetypes, 4 seasonal transition matrices, dwell and transition distributions, rate limits
       dep: HOUSE-00341 · sys: world · plat: TOOL · pri: MUST
+      correction: (2026-09-12, `HOUSE-01684`) the original commit did **not** contain the dwell or
+            transition distributions named by this task: the JSON ended at transitions, rates and
+            seasonal probability weights, and the schema had no timing field. Measured runtime
+            implementation exposed the omission. `HOUSE-01684` added the missing thirteen timing
+            rows, seasonal dwell scales, schema contract and deployed data; this task's authored
+            output is only genuinely complete with that repair.
       finding: **§36.2 says "twelve named archetypes" over a table of fourteen rows.** Thirteen
             states and one modifier. Corrected there with the count.
       finding: **the format could not carry two of §36.2's own columns.** The table has a `thunder`
@@ -14404,8 +14410,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             would contradict current §36.3 and the already-active `season-usage` gate, so there is
             no dependency-valid intermediate implementation to commit between the base matrix
             reader and its required continuous blend.
-- [ ] HOUSE-01684 — Implement dwell and transition-time distributions
+- [x] HOUSE-01684 — Implement dwell and transition-time distributions
       dep: HOUSE-01683 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `WeatherSeasonTests.*`, `WorldLoaderTest.*Weather*`,
+              `AuthoredWorldTest.TheAuthoredWeatherHasThirteenStatesAndItsWindModifier` (21 tests)
+      finding: `HOUSE-00393` said the distributions were authored, but neither its original commit
+            nor any later revision contained them; `layout.weather.json`, its schema and the format
+            document had no timing field. The missing data contract is repaired here rather than
+            hidden behind C++ constants, and the historical ledger entry now records the evidence.
+      note: (2026-09-12) All thirteen states have uniform 25–380 simulated-minute dwell ranges and
+            5–45 minute characteristic transition ranges in `layout.weather.json`. Sparse seasonal
+            dwell scales are blended through `SeasonPhase`; loader validation proves every scaled
+            endpoint remains inside §42.1. A source-to-destination transition uses the
+            component-wise mean of both characteristic ranges, avoiding a redundant 13 × 13
+            timing table while still making both states influence the tempo. A successful timing
+            sample consumes exactly two RNG draws; 10 000 seeds across a full seasonal cycle stayed
+            inside the authored effective bounds.
+      mutation: replacing the blended dwell scale with spring's fixed scale changed the pinned
+            blended draw from 51.313 to 54.733 simulated minutes and failed
+            `WeatherSeasonTests.SeasonalDwellScaleIsBlendedContinuously`; production was restored.
 - [ ] HOUSE-01685 — Implement the per-channel rate limiter with the table of §42.2
       dep: HOUSE-01684 · sys: weather · plat: ALL · pri: MUST
       accept: **no channel can ever exceed its rate**; asserted over 10 000 simulated minutes × 200 seeds
