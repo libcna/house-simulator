@@ -138,6 +138,7 @@ add_library(cnahouse_core STATIC
     debug/PlayerCommands.cpp
     debug/EnvironmentOverlay.cpp
     debug/TimeCommands.cpp
+    debug/WeatherCommands.cpp
     debug/VisibilityCommands.cpp
     debug/FreeFlyCamera.cpp
     debug/Timing.cpp

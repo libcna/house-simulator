@@ -584,6 +584,11 @@ namespace cnahouse::app
         /// hitch advances the afternoon by the time that really passed (`HOUSE-01540`), while
         /// §49.3's accumulator runs the simulation slow for that frame.
         environment::SimClock clock_;
+        /// §36's selected target and §71's debug pause. The continuous runtime driver lands as
+        /// its own phase-26 task; these two values are already the live control plane used by the
+        /// console and are initialised from authored world/settings data.
+        util::Id weatherTargetArchetype_;
+        bool weatherTransitionsPaused_ = false;
         std::optional<visibility::VisibilitySystem> visibility_;
         /// @brief §22's baked window occlusion. It outlives `lighting_`, whose daylight model
         ///        keeps a pointer to it.

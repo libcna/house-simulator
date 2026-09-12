@@ -29,6 +29,7 @@
 #include "cnahouse/debug/Screenshot.hpp"
 #include "cnahouse/debug/TimeCommands.hpp"
 #include "cnahouse/debug/VisibilityCommands.hpp"
+#include "cnahouse/debug/WeatherCommands.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
 #include "cnahouse/rendering/SunDiscPass.hpp"
@@ -338,10 +339,12 @@ namespace cnahouse::app
         const auto openings = world::WorldLoader::LoadOpenings("content/world", contents);
         const auto interactables = world::WorldLoader::LoadInteractables("content/world", contents);
         const auto initialState = world::WorldLoader::LoadInitialState("content/world", contents);
+        const auto weather = world::WorldLoader::LoadWeather("content/world", contents);
         // §28's fixtures, for `LightingSystem` (`HOUSE-01251`). 243 rows; the loader is the same
         // one the tests use, so a lights file that would fail CI fails here too.
         const auto lights = world::WorldLoader::LoadLights("content/world", contents);
-        if (!levels || !cells || !portals || !openings || !interactables || !initialState || !lights)
+        if (!levels || !cells || !portals || !openings || !interactables || !initialState || !lights ||
+            !weather)
         {
             Log::Error(LogCat::Content,
                        "--scene=walk: the world did not load; drawing from the fixed camera");
@@ -354,6 +357,29 @@ namespace cnahouse::app
             return;
         }
         world_.emplace(std::move(built.Value()));
+        weatherTargetArchetype_ = world_->GetInitialState().weather.target;
+        weatherTransitionsPaused_ = settings_.weatherMode != WeatherMode::On;
+        if (settings_.weatherMode == WeatherMode::Fixed)
+        {
+            const auto selected = std::ranges::find_if(world_->WeatherArchetypes(),
+                                                       [this](const weather::WeatherArchetype& archetype)
+                                                       {
+                                                           return !archetype.modifier &&
+                                                                  util::IdRegistry::NameOf(archetype.id) ==
+                                                                      settings_.fixedWeatherArchetype;
+                                                       });
+            if (selected != world_->WeatherArchetypes().end())
+            {
+                weatherTargetArchetype_ = selected->id;
+            }
+            else
+            {
+                Log::Warn(LogCat::Content,
+                          "fixed weather '{}' is not an authored state; keeping {}",
+                          settings_.fixedWeatherArchetype,
+                          util::IdRegistry::NameOf(weatherTargetArchetype_));
+            }
+        }
         index_.emplace(world::SpatialIndex::Build(*world_));
 
         try
@@ -471,6 +497,10 @@ namespace cnahouse::app
         // is (`HOUSE-01538`), this is the value it replaces.
         clock_.SetCalendar(environment::kNewGameCalendarDays);
         debug::RegisterTimeCommands(console_, debug::TimeCommandContext{&clock_});
+        debug::RegisterWeatherCommands(console_,
+                                       debug::WeatherCommandContext{world_->WeatherArchetypes(),
+                                                                    &weatherTargetArchetype_,
+                                                                    &weatherTransitionsPaused_});
         debug::RegisterPlayerCommands(console_,
                                       debug::PlayerCommandContext{&player_, &tracker_, &*world_, &*index_});
 

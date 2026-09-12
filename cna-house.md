@@ -5832,6 +5832,12 @@ Console commands (development builds only): `time set <hh:mm>`, `time scale <x>`
 `save`, `load`, `screenshot [path]`, `cull off|on`, `tier s|e`, `budget report`,
 `nav draw`, `pet <dog|cat> state <state>`, `validate world`.
 
+`weather set` accepts only one of §36.2's thirteen complete state archetypes; `W_WINDY` is a
+modifier and is refused as a stand-alone target. `weather freeze` is a toggle: the first call
+pauses the weather at its current continuous state and the next resumes transitions. A bare
+`weather` reports both the selected target and whether transitions are running, so neither command
+depends on invisible console state.
+
 The **free-fly camera** (`cnahouse::debug::FreeFlyCamera`, `HOUSE-00476`) is what F5 flies out
 with, and it is what `--scene=blockout` is steered by. It ignores collision, gravity, head height
 and the portal graph on purpose: what it is for is standing inside a wall to see which side of it is

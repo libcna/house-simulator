@@ -14564,8 +14564,22 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: serializing the canonical default instead of the selected `W_HEAVY_SNOW` lost the
             user's fixed choice and failed `SettingsTests.RoundTripsThroughItsOwnJson`; production
             was restored.
-- [ ] HOUSE-01694 — Implement the console `weather set <archetype>` and `weather freeze`
+- [x] HOUSE-01694 — Implement the console `weather set <archetype>` and `weather freeze`
       dep: HOUSE-01693 · sys: debug · plat: ALL · pri: MUST
+      verify: unit `WeatherCommandTests.*`, `SettingsTests.*`,
+              `WeatherSeasonTests.FixedWeatherSelectorContainsStatesAndNotTheWindModifier` (19)
+      note: `debug::RegisterWeatherCommands` controls the game-owned target id and transition-pause
+            flag. `weather set` accepts exactly one of the thirteen loaded state rows and preserves
+            the current pause state; it refuses `W_WINDY`, unknown ids and malformed argument
+            counts without mutation. `weather freeze` toggles pause/resume, while a bare `weather`
+            reports the target and mode without changing either.
+      finding: the walk load path had never loaded `layout.weather.json`, although the full world
+            loader did. The console now has the authored table in a real game session rather than
+            a second hard-coded id list; a missing or invalid weather file makes the walk load fail
+            visibly like every other required world table.
+      mutation: bypassing the modifier check let `weather set W_WINDY` replace the state target and
+            failed `UnknownAndModifierTargetsAreRejectedWithoutChangingState`; production was
+            restored.
 - [ ] HOUSE-01695 — Implement the `F8` overlay's weather section (full vector, archetype, time to transition, RNG state)
       dep: HOUSE-01686, HOUSE-01537 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-01696 — Wire the weather into the sky (cloud cover, thunder), lighting (cloud modulation) and fog
