@@ -18,8 +18,10 @@ namespace cnahouse::lighting
 
     LightingSystem::LightingSystem(const world::WorldData& world,
                                    const ShadingGrid& shading,
-                                   const environment::SimClock& clock)
+                                   const environment::SimClock& clock,
+                                   std::span<const visibility::PortalRuntime> portals)
         : daylight_(world, shading)
+        , borrowed_(world, portals)
         , clock_(&clock)
         , cloudCover_(world.GetInitialState().weather.cloudCover)
     {
@@ -29,6 +31,7 @@ namespace cnahouse::lighting
         cells_.reserve(worldCells.size());
         outdoorCells_.reserve(worldCells.size());
         daylightLevels_.resize(worldCells.size());
+        borrowedLevels_.resize(worldCells.size());
         cellGroups_.reserve(worldCells.size());
         cellIndex_.reserve(worldCells.size());
         for (const world::Cell& cell : worldCells)
@@ -151,6 +154,11 @@ namespace cnahouse::lighting
                 lit > 0.0F ? Microsoft::Xna::Framework::Vector3(
                                  colorLumens.X / lit, colorLumens.Y / lit, colorLumens.Z / lit)
                            : Microsoft::Xna::Framework::Vector3();
+        }
+        borrowed_.Evaluate(cells_, borrowedLevels_);
+        for (std::size_t index = 0; index < cells_.size(); ++index)
+        {
+            cells_[index].borrowed = borrowedLevels_[index];
         }
     }
 

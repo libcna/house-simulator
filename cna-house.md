@@ -3104,8 +3104,10 @@ interior daylight feel real.
 **Light through open doors**: a cell with no windows still receives light from a neighbouring lit
 cell. Rather than an expensive propagation, `LightingSystem` runs a **2-hop flood** over open
 portals: `borrowed(cell) += Σ_p aperture(p) · portalArea(p)/cellArea · 0.30 · brightness(other)`,
-capped at 0.35 of the source. This makes a dark corridor genuinely brighten when you open the
-kitchen door — visible, cheap, and it uses the portal graph we already have.
+capped at 0.35 of the source. This makes a dark neighbour genuinely brighten when a door opens. In
+the authored house, switching the kitchen light brightens the hall through their permanently open
+cased opening, while opening the kitchen's actual opaque door brightens the pantry. Both effects
+use the portal graph we already have.
 
 ### 28.5 Dynamic object lighting
 

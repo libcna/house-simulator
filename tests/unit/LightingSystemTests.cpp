@@ -26,6 +26,7 @@
 #include "cnahouse/lighting/LightingSystem.hpp"
 #include "cnahouse/lighting/PlanckianLut.hpp"
 #include "cnahouse/lighting/ShadingGrid.hpp"
+#include "cnahouse/visibility/VisibilitySystem.hpp"
 #include "cnahouse/world/WorldData.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
 
@@ -74,7 +75,8 @@ namespace
         world::WorldData world = LoadWorld();
         ShadingGrid shading = LoadShading();
         cnahouse::environment::SimClock clock;
-        LightingSystem lighting{world, shading, clock};
+        cnahouse::visibility::VisibilitySystem visibility{world};
+        LightingSystem lighting{world, shading, clock, visibility.Portals()};
     };
 
     FrameContext Frame(std::uint64_t index)
@@ -530,10 +532,60 @@ TEST(LightingSystemTests, TheFramePublishesTheSunAndTheDaylightModelInWorldCellO
     {
         const RoomLightState& cell = lighting.Cells()[index];
         EXPECT_FLOAT_EQ(cell.daylight, expected[index]) << house.world.Cells()[index].name;
-        EXPECT_FLOAT_EQ(cell.borrowed, 0.0F) << "HOUSE-01265 has not landed";
+        EXPECT_GE(cell.borrowed, 0.0F);
+        EXPECT_LE(cell.borrowed, 1.0F);
         lit += cell.daylight > 0.0F ? 1 : 0;
     }
     EXPECT_GT(lit, 25) << "the wired system left the June-noon house dark";
+}
+
+TEST(LightingSystemTests, KitchenLightSpillsIntoTheHallAndItsDoorBrightensThePantry)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    for (const SwitchGroupState& group : house.lighting.Groups())
+    {
+        ASSERT_TRUE(house.lighting.SetGroupOn(group.group, false));
+    }
+    cnahouse::environment::CivilTime midnight;
+    midnight.year = 2031;
+    midnight.month = 6;
+    midnight.day = 21;
+    midnight.hour = 0;
+    house.clock.SetStandard(midnight);
+    house.lighting.Update(Frame(20));
+
+    const Id kitchen = Id::Of("L0_KITCHEN");
+    const Id hall = Id::Of("L0_HALL");
+    const Id pantry = Id::Of("L0_PANTRY");
+    const Id kitchenMain = Id::Of("LG_L0_KITCHEN_MAIN");
+    ASSERT_TRUE(house.lighting.SetGroupOn(kitchenMain, true));
+    house.lighting.Update(Frame(21));
+    const RoomLightState* kitchenState = house.lighting.FindCell(kitchen);
+    const RoomLightState* hallState = house.lighting.FindCell(hall);
+    const RoomLightState* pantryState = house.lighting.FindCell(pantry);
+    ASSERT_NE(kitchenState, nullptr);
+    ASSERT_NE(hallState, nullptr);
+    ASSERT_NE(pantryState, nullptr);
+    EXPECT_GT(kitchenState->artificial, 0.0F);
+    EXPECT_FLOAT_EQ(hallState->artificial, 0.0F);
+    EXPECT_GT(hallState->borrowed, 0.0F) << "the permanent kitchen-to-hall cased opening passed no light";
+    const float pantryClosed = pantryState->borrowed;
+
+    ASSERT_TRUE(house.visibility.SetAperture(Id::Of("P_L0_KITCHEN__L0_PANTRY"), 1.0F));
+    house.lighting.Update(Frame(22));
+    pantryState = house.lighting.FindCell(pantry);
+    ASSERT_NE(pantryState, nullptr);
+    EXPECT_GT(pantryState->borrowed, pantryClosed)
+        << "opening the actual kitchen door did not brighten its dark neighbour";
+    EXPECT_LE(pantryState->borrowed, kitchenState->artificial * 0.35F + 1e-6F);
+    std::printf("  kitchen spill: hall %.4f; pantry %.4f closed -> %.4f open\n",
+                static_cast<double>(hallState->borrowed),
+                static_cast<double>(pantryClosed),
+                static_cast<double>(pantryState->borrowed));
 }
 
 TEST(LightingSystemTests, TheSunIsDirectionalLightZeroOutdoorsAndAboveTheIndoorThreshold)

@@ -439,7 +439,7 @@ namespace cnahouse::app
         }
         // §28.1 and §32.2, at `UpdateStage::Lighting` (`HOUSE-01251`, `HOUSE-01564`). Built once
         // over the cells, fixtures and windows; every frame reads the one simulation clock.
-        lighting_.emplace(*world_, shading_, clock_);
+        lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
         auto sunDisc = std::make_unique<rendering::SunDiscPass>(blockoutCamera_);
         sunDiscPass_ = sunDisc.get();
         renderer_.Install(rendering::Pass::Sky, std::move(sunDisc));

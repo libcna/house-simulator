@@ -13170,9 +13170,37 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             reaches 1.65 at the 73.4° this latitude sees. Read as `sin(altitude)` when implemented.
 - [ ] HOUSE-01264 — Implement the `LM_DAY` additive pass driven by `daylightLevel`
       dep: HOUSE-01263, HOUSE-00910 · sys: rendering · plat: ALL · pri: MUST
-- [ ] HOUSE-01265 — Implement the 2-hop light flood through open portals, capped at 0.35 of the source
+- [x] HOUSE-01265 — Implement the 2-hop light flood through open portals, capped at 0.35 of the source
       dep: HOUSE-01263, HOUSE-00665 · sys: lighting · plat: ALL · pri: MUST
-      accept: opening the kitchen door visibly brightens the hall
+      accept: switching the kitchen main lights visibly brightens the hall through their permanent
+              cased opening; opening the kitchen-to-pantry door visibly brightens the pantry
+      verify: unit BorrowedLightModelTests.* (3),
+              LightingSystemTests.KitchenLightSpillsIntoTheHallAndItsDoorBrightensThePantry,
+              the complete 1,213-test unit binary, and integration
+              HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight under isolated Xvfb
+      correction: the old acceptance said *"opening the kitchen door visibly brightens the hall"*,
+            but the authored `P_L0_HALL__L0_KITCHEN` is a `cased_opening` with no aperture and is
+            therefore permanently open. The kitchen's real opaque door is
+            `P_L0_KITCHEN__L0_PANTRY`. Measured reality wins: the acceptance now checks both parts
+            of the intended behaviour against the portals that actually exist, without changing
+            the house data to rescue a stale sentence.
+      decision: each cell's LOCAL saturating combination of artificial light and daylight is a
+            source. `borrowed` and the 0.025 ambient floor are not fed back: doing that would turn
+            a fixed 2-hop walk into a frame-to-frame recurrence and let an entirely dark chain
+            manufacture light. First- and second-hop paths from each origin are combined and then
+            capped at 0.35 of that origin; an `A -> B -> A` bounce is excluded.
+      note: `BorrowedLightModel` builds the immutable two-direction edge table and its scratch
+            arrays once, then reads `VisibilitySystem`'s stable `PortalRuntime` span each frame.
+            It does not call that system and allocates nothing in `Evaluate`. The authored graph
+            is 177 portals / 354 directed edges: 46 permanently open and 131 leaf-controlled.
+      measured: at midnight with every other group off, `LG_L0_KITCHEN_MAIN` contributes 0.0218
+            borrowed light to `L0_HALL`. `L0_PANTRY` measures 0.0000 with its kitchen door shut and
+            0.0205 with it fully open. On the exact four-cell fixture, a half-open 1 m² door gives
+            0.150 at hop 1 and 0.045 at hop 2, while hop 3 remains exactly zero; a raw 0.60
+            transfer is capped to 0.35.
+      mutation: changing the source cap from 0.35 to 1.0 made the cap test report the escaped
+            0.600 first hop and 0.180 second hop; restoring 0.35 returned all four focused tests
+            to green.
 - [ ] HOUSE-01266 — Implement the exposure model: per-cell target, asymmetric adaptation, Tier S implementation by effect scaling plus a tint quad
       dep: HOUSE-01264 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-01267 — Implement blob shadows: projected ellipse, direction from the dominant light, sun-elongation outdoors

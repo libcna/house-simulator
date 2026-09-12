@@ -11,6 +11,7 @@
 
 #include "cnahouse/app/ISystem.hpp"
 #include "cnahouse/environment/SunLight.hpp"
+#include "cnahouse/lighting/BorrowedLightModel.hpp"
 #include "cnahouse/lighting/DaylightModel.hpp"
 #include "cnahouse/lighting/RoomLightState.hpp"
 #include "cnahouse/util/Ids.hpp"
@@ -50,8 +51,7 @@ namespace cnahouse::lighting
     ///
     /// This is §28.1's loop with `artificial` from the switch groups and `daylight` from
     /// `DaylightModel`. `HOUSE-01255` supplies the lumen-weighted Planckian artificial colour.
-    /// `borrowed` is `HOUSE-01265`'s and remains a **field left at zero and named**, never a
-    /// plausible number nothing computed.
+    /// `borrowed` is the bounded 2-hop flood through the live portal apertures (`HOUSE-01265`).
     ///
     /// **Nothing here allocates after `Build`.** The cells and the groups are fixed for the
     /// session — §15's data is const once loaded — so the states, the group table and the index
@@ -59,15 +59,16 @@ namespace cnahouse::lighting
     class LightingSystem final : public app::ISystem
     {
     public:
-        /// @brief Takes the world, baked window shading and §35's one simulation clock.
+        /// @brief Takes the world, baked window shading, §35's clock and live portal apertures.
         ///
-        /// All three outlive the system. Groups are discovered from the LIGHTS and not from the
+        /// All four outlive the system. Groups are discovered from the LIGHTS and not from the
         /// cells' `lightGroups` lists, because a group's default state is a property of its
         /// fixtures; the cell lists say which groups light which room and are read for that. The
         /// starting cloud cover comes from the world's `initialstate.json`.
         LightingSystem(const world::WorldData& world,
                        const ShadingGrid& shading,
-                       const environment::SimClock& clock);
+                       const environment::SimClock& clock,
+                       std::span<const visibility::PortalRuntime> portals);
 
         [[nodiscard]] app::UpdateStage Stage() const noexcept override
         {
@@ -169,7 +170,9 @@ namespace cnahouse::lighting
         std::unordered_map<std::uint32_t, std::size_t> groupIndex_;
         std::vector<bool> outdoorCells_;
         std::vector<float> daylightLevels_;
+        std::vector<float> borrowedLevels_;
         DaylightModel daylight_;
+        BorrowedLightModel borrowed_;
         const environment::SimClock* clock_ = nullptr;
         environment::SunPosition sun_;
         SunKeyLight sunKey_;
