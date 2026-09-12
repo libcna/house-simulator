@@ -14372,8 +14372,23 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: deleting `snowDepth` from the writer made the round-trip fail with
             `SchemaMismatch [snowDepth]`; mapping `Hail` to `Snow` made the five-name test fail.
             Both production mutations were restored before the final 9/9 green run.
-- [ ] HOUSE-01682 — Implement archetype loading and validation from `layout.weather.json`
+- [x] HOUSE-01682 — Implement archetype loading and validation from `layout.weather.json`
       dep: HOUSE-01681 · sys: weather · plat: ALL · pri: MUST
+      verify: unit `WorldLoaderTest.*Weather*`,
+              `WorldLoaderTest.DuplicateWeatherIdsAreRefusedBeforeSamplingCanBecomeAmbiguous`,
+              `WorldLoaderTest.LoadProducesAWorldDataWithItsIndicesBuilt`,
+              `AuthoredWorldTest.TheAuthoredWeatherHasThirteenStatesAndItsWindModifier` (18 with
+              the prerequisite `WeatherStateTests.*`)
+      note: (2026-09-12) `WorldLoader::LoadWeather` now reads all ten target bands plus the nominal
+            precipitation type, modifier flag and weight into immutable `WorldData`. It enforces
+            §36.2's thirteen states plus the sole zero-weight `W_WINDY` modifier, inclusive ordered
+            bands (so `[0, 0]` remains valid), the state-vector bounds, non-negative weights and
+            unique ids. The main load path builds a weather-id index for the transition sampler
+            that follows in `HOUSE-01683`; the authored 14-row deployed file is exercised by the
+            real C++ reader rather than only by Python's schema gate.
+      mutation: widening the unit-interval ceiling from 1 to 2 made
+            `InvalidWeatherBandsNameTheirField` accept humidity 1.7 and fail exactly that case; the
+            production bound was restored before the final green run.
 - [ ] HOUSE-01683 — Implement the seasonal transition matrices and archetype sampling from the seeded RNG
       dep: HOUSE-01682, HOUSE-00027 · sys: weather · plat: ALL · pri: MUST
 - [ ] HOUSE-01684 — Implement dwell and transition-time distributions

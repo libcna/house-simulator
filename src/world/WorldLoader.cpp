@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstddef>
 #include <optional>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -3346,6 +3347,218 @@ namespace cnahouse::world
         return util::Ok();
     }
 
+    Result<void> WorldLoader::LoadWeather(std::string_view directory, WorldData::Contents& contents)
+    {
+        std::int32_t version = 0;
+        const Result<JsonDocument> document = Open(directory, "layout.weather.json", "weather", version);
+        if (!document)
+        {
+            return document.Error();
+        }
+        if (version != 1)
+        {
+            return Err(ErrorCode::VersionMismatch,
+                       "only weather schema version 1 is supported; this is version " +
+                           std::to_string(version),
+                       "layout.weather.json/schema");
+        }
+
+        const Result<JsonValue> array = document.Value().Root().RequireArray("archetypes");
+        if (!array)
+        {
+            return array.Error().WithContext("layout.weather.json");
+        }
+        const Result<std::vector<JsonValue>> rows = array.Value().Elements();
+        if (!rows)
+        {
+            return rows.Error().WithContext("layout.weather.json");
+        }
+        if (rows.Value().size() != 14U)
+        {
+            return Err(ErrorCode::InvalidData,
+                       "§36.2 defines thirteen weather states and one modifier; expected 14 "
+                       "archetypes, found " +
+                           std::to_string(rows.Value().size()),
+                       "layout.weather.json/archetypes");
+        }
+
+        const auto range = [](const JsonValue& row,
+                              std::string_view field,
+                              std::optional<std::pair<float, float>> bounds) -> Result<weather::WeatherRange>
+        {
+            const Result<JsonValue> value = row.RequireArray(field);
+            if (!value)
+            {
+                return value.Error();
+            }
+            const Result<std::vector<JsonValue>> parts = value.Value().Elements();
+            if (!parts)
+            {
+                return parts.Error();
+            }
+            if (parts.Value().size() != 2U)
+            {
+                return Err(ErrorCode::InvalidData,
+                           "an archetype target is [min, max]; this has " +
+                               std::to_string(parts.Value().size()) + " element(s)",
+                           row.Path() + "/" + std::string(field));
+            }
+            const Result<float> minimum = parts.Value()[0].AsFloat();
+            if (!minimum)
+            {
+                return minimum.Error();
+            }
+            const Result<float> maximum = parts.Value()[1].AsFloat();
+            if (!maximum)
+            {
+                return maximum.Error();
+            }
+            if (!(minimum.Value() <= maximum.Value()))
+            {
+                return Err(ErrorCode::InvalidData,
+                           "an archetype target has min <= max; this is [" + std::to_string(minimum.Value()) +
+                               ", " + std::to_string(maximum.Value()) + "]",
+                           row.Path() + "/" + std::string(field));
+            }
+            if (bounds.has_value() &&
+                (!(minimum.Value() >= bounds->first) || !(maximum.Value() <= bounds->second)))
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "the target [" + std::to_string(minimum.Value()) + ", " +
+                               std::to_string(maximum.Value()) + "] is outside " +
+                               std::to_string(bounds->first) + ".." + std::to_string(bounds->second),
+                           row.Path() + "/" + std::string(field));
+            }
+            return weather::WeatherRange{minimum.Value(), maximum.Value()};
+        };
+
+        std::vector<weather::WeatherArchetype> parsed;
+        parsed.reserve(rows.Value().size());
+        std::unordered_set<util::Id> ids;
+        std::size_t modifiers = 0;
+        for (const JsonValue& row : rows.Value())
+        {
+            weather::WeatherArchetype archetype;
+            const Result<util::Id> id = RequireId(row, "id");
+            if (!id)
+            {
+                return id.Error().WithContext("layout.weather.json");
+            }
+            archetype.id = id.Value();
+            if (!ids.insert(archetype.id).second)
+            {
+                return Err(ErrorCode::Duplicate,
+                           Name(archetype.id) + " appears more than once",
+                           "layout.weather.json/" + row.Path() + "/id");
+            }
+
+            const auto readRange = [&](std::string_view field,
+                                       weather::WeatherRange& target,
+                                       std::optional<std::pair<float, float>> bounds) -> Result<void>
+            {
+                const Result<weather::WeatherRange> value = range(row, field, bounds);
+                if (!value)
+                {
+                    return value.Error().WithContext("layout.weather.json");
+                }
+                target = value.Value();
+                return util::Ok();
+            };
+            constexpr std::pair<float, float> kUnit{0.0F, 1.0F};
+            if (auto value = readRange("cloudCover", archetype.cloudCover, kUnit); !value)
+            {
+                return value.Error();
+            }
+            if (auto value = readRange("cloudCumuliform", archetype.cloudCumuliform, kUnit); !value)
+            {
+                return value.Error();
+            }
+            const Result<std::string> precip = row.RequireString("precipType");
+            if (!precip)
+            {
+                return precip.Error().WithContext("layout.weather.json");
+            }
+            const Result<weather::PrecipType> precipType =
+                weather::ParsePrecipType(precip.Value(), row.Path() + "/precipType");
+            if (!precipType)
+            {
+                return precipType.Error().WithContext("layout.weather.json");
+            }
+            archetype.precipType = precipType.Value();
+            if (auto value = readRange("precipIntensity", archetype.precipIntensity, kUnit); !value)
+            {
+                return value.Error();
+            }
+            if (auto value =
+                    readRange("windSpeed", archetype.windSpeed, std::pair<float, float>{0.0F, 30.0F});
+                !value)
+            {
+                return value.Error();
+            }
+            if (auto value = readRange("gustFactor", archetype.gustFactor, kUnit); !value)
+            {
+                return value.Error();
+            }
+            if (auto value = readRange("fogDensity", archetype.fogDensity, kUnit); !value)
+            {
+                return value.Error();
+            }
+            if (auto value = readRange("temperatureOffsetC", archetype.temperatureOffsetC, std::nullopt);
+                !value)
+            {
+                return value.Error();
+            }
+            if (auto value = readRange("humidity", archetype.humidity, kUnit); !value)
+            {
+                return value.Error();
+            }
+            if (auto value = readRange("thunderProbability", archetype.thunderProbability, kUnit); !value)
+            {
+                return value.Error();
+            }
+
+            const Result<bool> modifier = row.RequireBool("modifier");
+            if (!modifier)
+            {
+                return modifier.Error().WithContext("layout.weather.json");
+            }
+            archetype.modifier = modifier.Value();
+            modifiers += archetype.modifier ? 1U : 0U;
+            const Result<float> weight = row.RequireFloat("weight");
+            if (!weight)
+            {
+                return weight.Error().WithContext("layout.weather.json");
+            }
+            if (!(weight.Value() >= 0.0F))
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "an archetype weight is non-negative; this is " + std::to_string(weight.Value()),
+                           "layout.weather.json/" + row.Path() + "/weight");
+            }
+            archetype.weight = weight.Value();
+            parsed.push_back(archetype);
+        }
+
+        if (modifiers != 1U)
+        {
+            return Err(ErrorCode::InvalidData,
+                       "§36.2 defines exactly one modifier; found " + std::to_string(modifiers),
+                       "layout.weather.json/archetypes");
+        }
+        const auto windy =
+            std::ranges::find_if(parsed, [](const weather::WeatherArchetype& row) { return row.modifier; });
+        if (windy == parsed.end() || windy->id != util::Intern("W_WINDY") || windy->weight != 0.0F)
+        {
+            return Err(ErrorCode::InvalidData,
+                       "the sole modifier is W_WINDY and has weight 0 because transitions never "
+                       "select it",
+                       "layout.weather.json/archetypes");
+        }
+
+        contents.weatherArchetypes = std::move(parsed);
+        return util::Ok();
+    }
+
     Result<void> WorldLoader::LoadInteractables(std::string_view directory, WorldData::Contents& contents)
     {
         std::int32_t version = 0;
@@ -4046,6 +4259,10 @@ namespace cnahouse::world
         if (const Result<void> exterior = LoadExterior(directory, contents); !exterior)
         {
             return exterior.Error();
+        }
+        if (const Result<void> weather = LoadWeather(directory, contents); !weather)
+        {
+            return weather.Error();
         }
         if (const Result<void> interactables = LoadInteractables(directory, contents); !interactables)
         {

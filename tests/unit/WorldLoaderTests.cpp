@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -528,6 +529,43 @@ namespace
             })";
         }
 
+        /// Fourteen complete target rows. The loader tests use synthetic ids so they test the
+        /// format independently of the authored house; `AuthoredWorldTest` below covers the real
+        /// names and values.
+        static std::string Weather(std::size_t stateCount = 13U, bool includeModifier = true)
+        {
+            std::string text = R"({"schema":"cna-house/weather/1","archetypes":[)";
+            for (std::size_t index = 0; index < stateCount; ++index)
+            {
+                if (index != 0U)
+                {
+                    text += ',';
+                }
+                text += R"({"id":"W_STATE_)" + std::to_string(index) + R"(","precipType":")" +
+                        (index == 4U ? "Rain" : "None") +
+                        R"(","cloudCover":[0.1,0.4],"cloudCumuliform":[0.2,0.8],)"
+                        R"("precipIntensity":[0.0,0.0],"windSpeed":[1.0,5.0],)"
+                        R"("gustFactor":[0.1,0.3],"fogDensity":[0.0,0.2],)"
+                        R"("temperatureOffsetC":[-2.0,3.0],"humidity":[0.4,0.7],)"
+                        R"("thunderProbability":[0.0,0.1],"modifier":false,"weight":1.0})";
+            }
+            if (includeModifier)
+            {
+                if (stateCount != 0U)
+                {
+                    text += ',';
+                }
+                text += R"({"id":"W_WINDY","precipType":"None","cloudCover":[0.0,1.0],)"
+                        R"("cloudCumuliform":[0.0,1.0],"precipIntensity":[0.0,0.0],)"
+                        R"("windSpeed":[12.0,20.0],"gustFactor":[0.8,1.0],)"
+                        R"("fogDensity":[0.0,1.0],"temperatureOffsetC":[-1.0,1.0],)"
+                        R"("humidity":[0.0,1.0],"thunderProbability":[0.0,1.0],)"
+                        R"("modifier":true,"weight":0.0})";
+            }
+            text += R"(],"transitions":{},"rates":{}})";
+            return text;
+        }
+
         /// The refrigerator of `world-format.md`'s example, and a light switch that states no
         /// `when` at all -- the case most of the 640 rows are.
         static std::string Interactables()
@@ -645,6 +683,7 @@ namespace
             Write("layout.nav.json", Nav());
             Write("layout.audio.json", Audio());
             Write("layout.exterior.json", Exterior());
+            Write("layout.weather.json", Weather());
             Write("interactables.json", Interactables());
             Write("initialstate.json", InitialState());
             WriteManifest({"layout.levels.json",
@@ -658,6 +697,7 @@ namespace
                            "layout.nav.json",
                            "layout.audio.json",
                            "layout.exterior.json",
+                           "layout.weather.json",
                            "interactables.json",
                            "initialstate.json"});
         }
@@ -2482,6 +2522,131 @@ namespace
             << exterior.Error().ToString();
     }
 
+    // --- the weather archetypes ---------------------------------------------------------------
+
+    TEST_F(WorldLoaderTest, EveryWeatherArchetypeTargetBandIsRead)
+    {
+        Write("layout.weather.json", Weather());
+        world::WorldData::Contents contents;
+        const auto weather = world::WorldLoader::LoadWeather(directory_, contents);
+        ASSERT_TRUE(weather) << weather.Error().ToString();
+
+        ASSERT_EQ(contents.weatherArchetypes.size(), 14U);
+        const auto& rain = contents.weatherArchetypes[4];
+        EXPECT_EQ(rain.id, Intern("W_STATE_4"));
+        EXPECT_EQ(rain.precipType, cnahouse::weather::PrecipType::Rain);
+        EXPECT_FLOAT_EQ(rain.cloudCover.minimum, 0.1F);
+        EXPECT_FLOAT_EQ(rain.cloudCover.maximum, 0.4F);
+        EXPECT_FLOAT_EQ(rain.temperatureOffsetC.minimum, -2.0F);
+        EXPECT_FLOAT_EQ(rain.thunderProbability.maximum, 0.1F);
+        EXPECT_FALSE(rain.modifier);
+        EXPECT_FLOAT_EQ(rain.weight, 1.0F);
+
+        const auto& windy = contents.weatherArchetypes.back();
+        EXPECT_EQ(windy.id, Intern("W_WINDY"));
+        EXPECT_TRUE(windy.modifier);
+        EXPECT_FLOAT_EQ(windy.windSpeed.minimum, 12.0F);
+        EXPECT_FLOAT_EQ(windy.windSpeed.maximum, 20.0F);
+        EXPECT_FLOAT_EQ(windy.weight, 0.0F);
+    }
+
+    TEST_F(WorldLoaderTest, EqualWeatherBandEndpointsAreValid)
+    {
+        Write("layout.weather.json", Weather());
+        world::WorldData::Contents contents;
+        ASSERT_TRUE(world::WorldLoader::LoadWeather(directory_, contents));
+        EXPECT_EQ(contents.weatherArchetypes[0].precipIntensity,
+                  (cnahouse::weather::WeatherRange{0.0F, 0.0F}));
+    }
+
+    TEST_F(WorldLoaderTest, InvalidWeatherBandsNameTheirField)
+    {
+        const auto replaced = [](std::string text, const std::string& before, const std::string& after)
+        {
+            const std::size_t at = text.find(before);
+            EXPECT_NE(at, std::string::npos) << before;
+            if (at != std::string::npos)
+            {
+                text.replace(at, before.size(), after);
+            }
+            return text;
+        };
+        const std::array broken{
+            std::pair{replaced(Weather(), R"("cloudCover":[0.1,0.4])", R"("cloudCover":[0.4,0.1])"),
+                      "cloudCover"},
+            std::pair{replaced(Weather(), R"("humidity":[0.4,0.7])", R"("humidity":[0.4,1.7])"), "humidity"},
+            std::pair{replaced(Weather(), R"("windSpeed":[1.0,5.0])", R"("windSpeed":[-1.0,5.0])"),
+                      "windSpeed"},
+        };
+        for (const auto& [json, field] : broken)
+        {
+            Write("layout.weather.json", json);
+            world::WorldData::Contents contents;
+            const auto loaded = world::WorldLoader::LoadWeather(directory_, contents);
+            ASSERT_FALSE(loaded) << "accepted invalid " << field;
+            EXPECT_NE(loaded.Error().Context().find(field), std::string::npos) << loaded.Error().ToString();
+        }
+    }
+
+    TEST_F(WorldLoaderTest, WeatherPrecipitationUsesTheClosedVocabulary)
+    {
+        std::string text = Weather();
+        const std::size_t at = text.find(R"("precipType":"Rain")");
+        ASSERT_NE(at, std::string::npos);
+        text.replace(at, std::string(R"("precipType":"Rain")").size(), R"("precipType":"Mist")");
+        Write("layout.weather.json", text);
+
+        world::WorldData::Contents contents;
+        const auto loaded = world::WorldLoader::LoadWeather(directory_, contents);
+        ASSERT_FALSE(loaded);
+        EXPECT_EQ(loaded.Error().Code(), ErrorCode::InvalidData);
+        EXPECT_NE(loaded.Error().Context().find("precipType"), std::string::npos)
+            << loaded.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, WeatherHasThirteenStatesAndTheWindModifier)
+    {
+        Write("layout.weather.json", Weather(12U));
+        world::WorldData::Contents tooFew;
+        const auto count = world::WorldLoader::LoadWeather(directory_, tooFew);
+        ASSERT_FALSE(count);
+        EXPECT_NE(count.Error().Message().find("expected 14"), std::string::npos) << count.Error().ToString();
+
+        Write("layout.weather.json", Weather(14U, false));
+        world::WorldData::Contents noModifier;
+        const auto absent = world::WorldLoader::LoadWeather(directory_, noModifier);
+        ASSERT_FALSE(absent);
+        EXPECT_NE(absent.Error().Message().find("exactly one modifier"), std::string::npos)
+            << absent.Error().ToString();
+
+        std::string twoModifiers = Weather();
+        const std::size_t first = twoModifiers.find(R"("modifier":false)");
+        ASSERT_NE(first, std::string::npos);
+        twoModifiers.replace(first, std::string(R"("modifier":false)").size(), R"("modifier":true)");
+        Write("layout.weather.json", twoModifiers);
+        world::WorldData::Contents contents;
+        const auto loaded = world::WorldLoader::LoadWeather(directory_, contents);
+        ASSERT_FALSE(loaded);
+        EXPECT_NE(loaded.Error().Message().find("exactly one modifier"), std::string::npos)
+            << loaded.Error().ToString();
+    }
+
+    TEST_F(WorldLoaderTest, DuplicateWeatherIdsAreRefusedBeforeSamplingCanBecomeAmbiguous)
+    {
+        std::string text = Weather();
+        const std::size_t at = text.find("W_STATE_12");
+        ASSERT_NE(at, std::string::npos);
+        text.replace(at, std::string("W_STATE_12").size(), "W_STATE_11");
+        Write("layout.weather.json", text);
+
+        world::WorldData::Contents contents;
+        const auto loaded = world::WorldLoader::LoadWeather(directory_, contents);
+        ASSERT_FALSE(loaded);
+        EXPECT_EQ(loaded.Error().Code(), ErrorCode::Duplicate);
+        EXPECT_NE(loaded.Error().Message().find("W_STATE_11"), std::string::npos)
+            << loaded.Error().ToString();
+    }
+
     // --- the interactables ------------------------------------------------------------------
 
     TEST_F(WorldLoaderTest, AnInteractableIsReadWithItsStateAndItsParsedActions)
@@ -2855,6 +3020,8 @@ namespace
         EXPECT_EQ(world.Value().AudioZones().size(), 2U);
         EXPECT_NE(world.Value().FindTransmission("door_solid"), nullptr);
         EXPECT_EQ(world.Value().GetExterior().vegetation.size(), 2U);
+        EXPECT_EQ(world.Value().WeatherArchetypes().size(), 14U);
+        EXPECT_NE(world.Value().FindWeatherArchetype(Intern("W_WINDY")), nullptr);
         EXPECT_EQ(world.Value().Interactables().size(), 2U);
         EXPECT_NE(world.Value().FindInteractable(Intern("SWITCH_L0_HALL")), nullptr);
         EXPECT_EQ(world.Value().GetInitialState().player.cell, Intern("L0_FOYER"));
@@ -2891,6 +3058,7 @@ namespace
         Write("layout.nav.json", Nav());
         Write("layout.audio.json", Audio());
         Write("layout.exterior.json", Exterior());
+        Write("layout.weather.json", Weather());
         Write("interactables.json", Interactables());
         Write("initialstate.json", InitialState());
         WriteManifest({"layout.levels.json",
@@ -2904,6 +3072,7 @@ namespace
                        "layout.nav.json",
                        "layout.audio.json",
                        "layout.exterior.json",
+                       "layout.weather.json",
                        "interactables.json",
                        "initialstate.json"});
 
@@ -3039,6 +3208,48 @@ namespace
         EXPECT_EQ(stack("STACK_E").cells.size(), 2U) << "the kitchen sink and the wet bar";
         EXPECT_FALSE(stack("STACK_F").dropTo.IsValid())
             << "the basement stack drops into an ejector pit, which is machinery and not a cell";
+
+        IdRegistry::ResetForTesting();
+    }
+
+    TEST(AuthoredWorldTest, TheAuthoredWeatherHasThirteenStatesAndItsWindModifier)
+    {
+        IdRegistry::ResetForTesting();
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/layout.weather.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
+        }
+
+        world::WorldData::Contents contents;
+        const auto loaded = world::WorldLoader::LoadWeather(directory, contents);
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+        ASSERT_EQ(contents.weatherArchetypes.size(), 14U);
+        EXPECT_EQ(std::count_if(contents.weatherArchetypes.begin(),
+                                contents.weatherArchetypes.end(),
+                                [](const cnahouse::weather::WeatherArchetype& row) { return row.modifier; }),
+                  1);
+
+        const auto find = [&contents](const char* name)
+        {
+            return std::find_if(contents.weatherArchetypes.begin(),
+                                contents.weatherArchetypes.end(),
+                                [name](const cnahouse::weather::WeatherArchetype& row)
+                                { return row.id == Intern(name); });
+        };
+        const auto thunderstorm = find("W_THUNDERSTORM");
+        ASSERT_NE(thunderstorm, contents.weatherArchetypes.end());
+        EXPECT_EQ(thunderstorm->precipType, cnahouse::weather::PrecipType::Rain);
+        EXPECT_FLOAT_EQ(thunderstorm->cloudCover.minimum, 0.95F);
+        EXPECT_FLOAT_EQ(thunderstorm->thunderProbability.minimum, 0.8F);
+        EXPECT_FLOAT_EQ(thunderstorm->thunderProbability.maximum, 0.9F);
+
+        const auto windy = find("W_WINDY");
+        ASSERT_NE(windy, contents.weatherArchetypes.end());
+        EXPECT_TRUE(windy->modifier);
+        EXPECT_FLOAT_EQ(windy->windSpeed.minimum, 12.0F);
+        EXPECT_FLOAT_EQ(windy->windSpeed.maximum, 20.8F);
+        EXPECT_FLOAT_EQ(windy->weight, 0.0F);
 
         IdRegistry::ResetForTesting();
     }

@@ -5,6 +5,7 @@
 #include <string>
 #include <string_view>
 
+#include "cnahouse/util/Ids.hpp"
 #include "cnahouse/util/Result.hpp"
 #include "cnahouse/util/Rng.hpp"
 
@@ -38,6 +39,42 @@ namespace cnahouse::weather
         }
         return "None";
     }
+
+    /// @brief Parses the stable JSON spelling used by weather state and authored archetypes.
+    [[nodiscard]] util::Result<PrecipType> ParsePrecipType(std::string_view name,
+                                                           std::string_view context = "precipType");
+
+    /// @brief One inclusive target band from `layout.weather.json`.
+    ///
+    /// Equal endpoints are valid: clear weather deliberately carries a precipitation band of
+    /// `[0, 0]`. Sampling is owned by `HOUSE-01683`; this type only preserves authored intent.
+    struct WeatherRange
+    {
+        float minimum = 0.0F;
+        float maximum = 0.0F;
+
+        [[nodiscard]] friend bool operator==(const WeatherRange&, const WeatherRange&) = default;
+    };
+
+    /// @brief One of §36.2's thirteen weather targets or its independent wind modifier.
+    struct WeatherArchetype
+    {
+        util::Id id;
+        WeatherRange cloudCover;
+        WeatherRange cloudCumuliform;
+        PrecipType precipType = PrecipType::None;
+        WeatherRange precipIntensity;
+        WeatherRange windSpeed;
+        WeatherRange gustFactor;
+        WeatherRange fogDensity;
+        WeatherRange temperatureOffsetC;
+        WeatherRange humidity;
+        WeatherRange thunderProbability;
+        bool modifier = false;
+        float weight = 0.0F;
+
+        [[nodiscard]] friend bool operator==(const WeatherArchetype&, const WeatherArchetype&) = default;
+    };
 
     /// @brief The complete continuous weather vector of `cna-house.md` §36.1.
     ///

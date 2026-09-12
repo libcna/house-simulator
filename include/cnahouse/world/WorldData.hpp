@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cnahouse/util/Result.hpp"
+#include "cnahouse/weather/WeatherState.hpp"
 #include "cnahouse/world/WorldTypes.hpp"
 
 /// @file
@@ -80,6 +81,7 @@ namespace cnahouse::world
             std::vector<AudioZone> audioZones;
             std::vector<AudioEmitter> audioEmitters;
             std::vector<AudioTransmission> audioTransmission;
+            std::vector<weather::WeatherArchetype> weatherArchetypes;
             std::vector<Interactable> interactables;
             InitialState initialState;
             Exterior exterior;
@@ -193,6 +195,11 @@ namespace cnahouse::world
             return m_contents.audioTransmission;
         }
 
+        [[nodiscard]] std::span<const weather::WeatherArchetype> WeatherArchetypes() const noexcept
+        {
+            return m_contents.weatherArchetypes;
+        }
+
         /// @brief The named loss pair, or null when the table does not have that kind.
         [[nodiscard]] const AudioTransmission* FindTransmission(std::string_view kind) const noexcept;
 
@@ -202,6 +209,8 @@ namespace cnahouse::world
         }
 
         [[nodiscard]] const Interactable* FindInteractable(util::Id id) const noexcept;
+
+        [[nodiscard]] const weather::WeatherArchetype* FindWeatherArchetype(util::Id id) const noexcept;
 
         [[nodiscard]] const InitialState& GetInitialState() const noexcept
         {
@@ -297,6 +306,7 @@ namespace cnahouse::world
         Index m_propIndex;
         Index m_plumbingIndex;
         Index m_interactableIndex;
+        Index m_weatherArchetypeIndex;
 
         /// Cell id -> the slice of the flat array below that belongs to it.
         std::unordered_map<util::Id, detail::CellRange> m_portalsOfCell;

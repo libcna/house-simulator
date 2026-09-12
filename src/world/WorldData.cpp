@@ -156,6 +156,12 @@ namespace cnahouse::world
         {
             return step.Error();
         }
+        if (auto step =
+                BuildIndex(rows.weatherArchetypes, "weather archetype", world.m_weatherArchetypeIndex, seen);
+            !step)
+        {
+            return step.Error();
+        }
         if (auto step = BuildIndex(rows.interactables, "interactable", world.m_interactableIndex, seen);
             !step)
         {
@@ -298,6 +304,12 @@ namespace cnahouse::world
         return at == nullptr ? nullptr : &m_contents.interactables[*at];
     }
 
+    const weather::WeatherArchetype* WorldData::FindWeatherArchetype(util::Id id) const noexcept
+    {
+        const std::uint32_t* at = Lookup(m_weatherArchetypeIndex, id);
+        return at == nullptr ? nullptr : &m_contents.weatherArchetypes[*at];
+    }
+
     namespace
     {
         [[nodiscard]] std::span<const std::uint32_t>
@@ -423,7 +435,7 @@ namespace cnahouse::world
                m_contents.openings.size() + m_contents.stairs.size() + m_contents.lights.size() +
                m_contents.materials.size() + m_contents.props.size() + m_contents.navNodes.size() +
                m_contents.navEdges.size() + m_contents.navMarkers.size() + m_contents.audioZones.size() +
-               m_contents.audioEmitters.size();
+               m_contents.audioEmitters.size() + m_contents.weatherArchetypes.size();
     }
 
 } // namespace cnahouse::world

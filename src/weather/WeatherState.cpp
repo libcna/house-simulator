@@ -33,27 +33,6 @@ namespace cnahouse::weather
             return util::Ok();
         }
 
-        Result<PrecipType> PrecipTypeFromName(std::string_view name)
-        {
-            constexpr std::array<std::pair<std::string_view, PrecipType>, 5> kNames{
-                std::pair{"None", PrecipType::None},
-                std::pair{"Rain", PrecipType::Rain},
-                std::pair{"Snow", PrecipType::Snow},
-                std::pair{"Sleet", PrecipType::Sleet},
-                std::pair{"Hail", PrecipType::Hail},
-            };
-            for (const auto& [candidate, value] : kNames)
-            {
-                if (name == candidate)
-                {
-                    return value;
-                }
-            }
-            return util::Err(ErrorCode::InvalidData,
-                             std::format("'{}' is not None, Rain, Snow, Sleet or Hail", name),
-                             "precipType");
-        }
-
         Result<util::Rng::State> RngStateFromHex(std::string_view text)
         {
             if (!text.starts_with("0x") || text.size() != 66)
@@ -85,6 +64,27 @@ namespace cnahouse::weather
         }
 
     } // namespace
+
+    util::Result<PrecipType> ParsePrecipType(std::string_view name, std::string_view context)
+    {
+        constexpr std::array<std::pair<std::string_view, PrecipType>, 5> kNames{
+            std::pair{"None", PrecipType::None},
+            std::pair{"Rain", PrecipType::Rain},
+            std::pair{"Snow", PrecipType::Snow},
+            std::pair{"Sleet", PrecipType::Sleet},
+            std::pair{"Hail", PrecipType::Hail},
+        };
+        for (const auto& [candidate, value] : kNames)
+        {
+            if (name == candidate)
+            {
+                return value;
+            }
+        }
+        return util::Err(ErrorCode::InvalidData,
+                         std::format("'{}' is not None, Rain, Snow, Sleet or Hail", name),
+                         std::string(context));
+    }
 
     util::Result<void> WeatherState::Validate() const
     {
@@ -158,7 +158,7 @@ namespace cnahouse::weather
         {
             return precipTypeText.Error();
         }
-        auto precipTypeValue = PrecipTypeFromName(*precipTypeText);
+        auto precipTypeValue = ParsePrecipType(*precipTypeText);
         if (!precipTypeValue)
         {
             return precipTypeValue.Error();
