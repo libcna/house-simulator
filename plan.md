@@ -14574,8 +14574,21 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01692 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-01698 — Test: over 30 simulated days the system visits ≥ 8 archetypes and never produces an impossible combination
       dep: HOUSE-01697 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-01699 — Test: it snows in January and rains in July at the default location, with no special-casing
+- [x] HOUSE-01699 — Test: it snows in January and rains in July at the default location, with no special-casing
       dep: HOUSE-01688 · sys: ci · plat: CI · pri: MUST
+      verify: unit
+              `WeatherPrecipTypeTests.TheSameSnowArchetypeSnowsInJanuaryAndRainsInJuly`,
+              `TemperatureCurveTests.ItSnowsInJanuaryAndRainsInJulyWithoutASpecialCase` (2)
+      note: the same nominal `W_SNOW` water phase is fed the default location's analytic
+            temperature curve: at mid-January dawn it derives Snow, while at mid-July dawn it
+            derives Rain. The companion full-day measurement finds 13 snow-capable January hours,
+            24 rainy July hours, and no summer hour at or below the 2.5 C rain threshold. There is
+            no month or season branch in the production derivation.
+      finding: this acceptance was already implemented as load-bearing coverage by
+            `HOUSE-01535` and `HOUSE-01688`; this task records and re-runs those exact executable
+            claims instead of duplicating them under a third test name.
+      mutation: `HOUSE-01688`'s threshold mutation (`> 2.5` to `>= 2.5`) failed the exact boundary
+            test in the same production path; the unmodified derivation is retained.
 - [x] HOUSE-01700 — Test: no `bool isRaining`-style field exists anywhere (lint)
       dep: HOUSE-00021 · sys: ci · plat: CI · pri: MUST
       verify: `tools/ci/check_xna_only.py --selftest`; the `xna-only` gate over `src/` and
