@@ -12843,8 +12843,20 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: max-4-core warning-clean build; 19 `MaterialBinderTests` on live stock-XNA effects,
             including both slots/tint/fog and both missing-input cases; unit + integration
             1501/1501; `tools/ci/run_checks.sh` all gates green.
-- [ ] HOUSE-00894 — Implement `MaterialBinder` for `AlphaTestEffect`: cutoff, compare function, two-sided
+- [x] HOUSE-00894 — Implement `MaterialBinder` for `AlphaTestEffect`: cutoff, compare function, two-sided
       dep: HOUSE-00892, HOUSE-00080 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-14) the AlphaTest path requires and writes its albedo, material tint, alpha,
+            vertex-colour mode, exact 0..255 cutoff and the project-selected `Greater` comparison.
+            The material's two-sided flag remains renderer state exposed by `CullFor`, not an effect
+            parameter; both positive and mirrored placements resolve to `CullPolicy::TwoSided`.
+      finding: the old conditional texture setter allowed a null input to retain the preceding
+            alpha-tested draw's texture in the shared effect. It is now refused before effect
+            allocation. `AlphaTestEffect` implements XNA's fog interface too, so foliage in
+            `EXT_WORLD` now consumes and clears the same per-draw fog values as other stock effects;
+            §31.5's accidental omission of this effect is corrected.
+      verified: max-4-core warning-clean build; 21 `MaterialBinderTests`, including live-device
+            inspection of texture/tint/cutoff/compare/fog, fog reset, both two-sided determinant
+            cases and missing-texture refusal; unit + integration 1503/1503; XNA-only gates.
 - [ ] HOUSE-00895 — Implement `MaterialBinder` for `SkinnedEffect`
       dep: HOUSE-00892, HOUSE-00077 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00896 — Implement `MaterialBinder` for `EnvironmentMapEffect` with the baked cube maps

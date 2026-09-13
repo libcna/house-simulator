@@ -3423,10 +3423,11 @@ vertex-interpolated gradient always shows on a large flat sky.
 
 ### 31.5 Fog
 
-`BasicEffect`/`DualTextureEffect`/`SkinnedEffect` all support fog. Fog colour = the horizon colour
-in the view direction; fog start/end are driven by `fogDensity` and precipitation intensity. Fog is
-disabled for interior cells (a room does not have fog) and enabled for `EXT_WORLD` — the switch
-happens per draw batch, which is free because batches are already grouped by cell.
+`BasicEffect`/`DualTextureEffect`/`AlphaTestEffect`/`SkinnedEffect` all support fog. Fog colour = the
+horizon colour in the view direction; fog start/end are driven by `fogDensity` and precipitation
+intensity. Fog is disabled for interior cells (a room does not have fog) and enabled for
+`EXT_WORLD` — the switch happens per draw batch, which is free because batches are already grouped
+by cell.
 `rendering::FogParams` is that per-draw boundary: a null `DrawParams::fog` disables stock-effect
 fog, while a value carries the already-derived colour and start/end distances. The binder owns no
 weather state.

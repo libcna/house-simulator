@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 
+#include "Microsoft/Xna/Framework/Graphics/AlphaTestEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/DualTextureEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
@@ -457,6 +458,70 @@ namespace
                 EXPECT_EQ(binder.Bind(id, noAlbedo).Error().Code(), ErrorCode::InvalidArgument);
                 EXPECT_EQ(binder.EffectsCreated(), 0U)
                     << "an invalid draw must fail before allocating the shared effect";
+            });
+    }
+
+    TEST(MaterialBinderTests, AlphaTestEffectReceivesTextureCutoffTintAndFog)
+    {
+        RunWithDeviceBinder(
+            [](Gfx::GraphicsDevice& device, MaterialBinder& binder)
+            {
+                MaterialDesc desc = Foliage();
+                desc.diffuse[0] = 0.25F;
+                desc.diffuse[1] = 0.50F;
+                desc.diffuse[2] = 0.75F;
+                desc.alpha = 0.625F;
+                desc.vertexColour = true;
+                desc.referenceAlpha = 173;
+                const Id id = Id::Of("MAT_ALPHA_LEAF");
+                ASSERT_TRUE(binder.Register(id, desc).HasValue());
+
+                Gfx::Texture2D albedo(device, 2, 2);
+                FogParams fog;
+                fog.colour[0] = 0.15F;
+                fog.colour[1] = 0.20F;
+                fog.colour[2] = 0.25F;
+                fog.start = 12.0F;
+                fog.end = 72.0F;
+                DrawParams draw;
+                draw.diffuse = &albedo;
+                draw.fog = &fog;
+
+                const auto bound = binder.Bind(id, draw);
+                ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
+                auto* effect = static_cast<Gfx::AlphaTestEffect*>(*bound);
+                EXPECT_EQ(effect->getTextureProperty(), &albedo);
+                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.25F, 0.50F, 0.75F));
+                EXPECT_FLOAT_EQ(effect->getAlphaProperty(), 0.625F);
+                EXPECT_TRUE(effect->getVertexColorEnabledProperty());
+                EXPECT_EQ(effect->getAlphaFunctionProperty(), Gfx::CompareFunction::Greater);
+                EXPECT_EQ(effect->getReferenceAlphaProperty(), 173);
+                EXPECT_TRUE(effect->getFogEnabledProperty());
+                EXPECT_EQ(effect->getFogColorProperty(), Vector3(0.15F, 0.20F, 0.25F));
+                EXPECT_FLOAT_EQ(effect->getFogStartProperty(), 12.0F);
+                EXPECT_FLOAT_EQ(effect->getFogEndProperty(), 72.0F);
+
+                EXPECT_EQ(*binder.CullFor(id, 1.0F), CullPolicy::TwoSided);
+                EXPECT_EQ(*binder.CullFor(id, -1.0F), CullPolicy::TwoSided);
+
+                draw.fog = nullptr;
+                ASSERT_TRUE(binder.Bind(id, draw).HasValue());
+                EXPECT_FALSE(effect->getFogEnabledProperty());
+            });
+    }
+
+    TEST(MaterialBinderTests, AlphaTestEffectRefusesAMissingTextureBeforeAllocation)
+    {
+        RunWithBinder(
+            [](MaterialBinder& binder)
+            {
+                const Id id = Id::Of("MAT_ALPHA_LEAF");
+                ASSERT_TRUE(binder.Register(id, Foliage()).HasValue());
+
+                const auto bound = binder.Bind(id, DrawParams{});
+                ASSERT_FALSE(bound.HasValue());
+                EXPECT_EQ(bound.Error().Code(), ErrorCode::InvalidArgument);
+                EXPECT_EQ(binder.EffectsCreated(), 0U);
             });
     }
 

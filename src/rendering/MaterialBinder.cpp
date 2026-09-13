@@ -310,6 +310,13 @@ namespace cnahouse::rendering
             }
             case MaterialKind::AlphaTest:
             {
+                if (draw.diffuse == nullptr)
+                {
+                    return Err(ErrorCode::InvalidArgument,
+                               std::format("material {:#010x} is alpha-tested and needs an albedo "
+                                           "texture",
+                                           id.Value()));
+                }
                 auto& effect = AlphaTestFor();
                 ApplyMatrices(effect, draw);
                 effect.setDiffuseColorProperty(ToVector(desc->diffuse));
@@ -320,10 +327,8 @@ namespace cnahouse::rendering
                 // six functions -- so which one is chosen is a visible decision, not a detail.
                 effect.setAlphaFunctionProperty(Gfx::CompareFunction::Greater);
                 effect.setReferenceAlphaProperty(desc->referenceAlpha);
-                if (draw.diffuse != nullptr)
-                {
-                    effect.setTextureProperty(draw.diffuse);
-                }
+                effect.setTextureProperty(draw.diffuse);
+                ApplyFog(effect, draw);
                 return &effect;
             }
             case MaterialKind::Skinned:
