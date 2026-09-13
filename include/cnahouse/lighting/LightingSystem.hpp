@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
 #include <span>
 #include <string_view>
 #include <unordered_map>
@@ -25,6 +26,11 @@ namespace cnahouse::environment
 namespace cnahouse::world
 {
     class WorldData;
+}
+
+namespace cnahouse::rendering
+{
+    struct SkyColourModel;
 }
 
 namespace cnahouse::lighting
@@ -70,6 +76,19 @@ namespace cnahouse::lighting
                        const ShadingGrid& shading,
                        const environment::SimClock& clock,
                        std::span<const visibility::PortalRuntime> portals);
+
+        /// @brief The normal runtime constructor, additionally sharing §31's authored sky model.
+        ///
+        /// The value is copied once because the renderer takes ownership of its own copy; only its
+        /// 32 gradient rows and small scalar tables are retained, and no allocation occurs during
+        /// `Update`. The four-argument overload remains the no-sky fallback for content failures.
+        LightingSystem(const world::WorldData& world,
+                       const ShadingGrid& shading,
+                       const environment::SimClock& clock,
+                       std::span<const visibility::PortalRuntime> portals,
+                       const rendering::SkyColourModel& skyColourModel);
+
+        ~LightingSystem();
 
         [[nodiscard]] app::UpdateStage Stage() const noexcept override
         {
@@ -189,6 +208,7 @@ namespace cnahouse::lighting
         std::vector<bool> outdoorCells_;
         std::vector<float> daylightLevels_;
         std::vector<float> borrowedLevels_;
+        std::unique_ptr<rendering::SkyColourModel> skyColourModel_;
         DaylightModel daylight_;
         BorrowedLightModel borrowed_;
         const environment::SimClock* clock_ = nullptr;

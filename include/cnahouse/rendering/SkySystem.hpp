@@ -135,6 +135,32 @@ namespace cnahouse::rendering
         [[nodiscard]] static util::Result<SkyColourModel> ReadFromTitle(std::string_view contentPath);
     };
 
+    /// @brief The non-directional part of §31.2's live sky at one dome altitude fraction.
+    ///
+    /// This is shared by the dome, §28's ambient and §23.3's future `LM_DAY` pass so those three
+    /// consumers cannot disagree about the altitude gradient, overcast mix or night/moon blend.
+    /// The directional sun-glow lobe and town light pollution are deliberately excluded: they are
+    /// localized visible-sky effects, not uniform illumination baked into `LM_DAY`.
+    [[nodiscard]] Microsoft::Xna::Framework::Vector3 SkyBaseColourAt(const SkyColourModel& model,
+                                                                     const environment::SunPosition& sun,
+                                                                     const environment::MoonPosition& moon,
+                                                                     const environment::MoonPhase& phase,
+                                                                     double cloudCover,
+                                                                     float altitudeFraction) noexcept;
+
+    /// @brief Uniform hemispherical sky colour for lighting.
+    ///
+    /// Uniform solid-angle integration over a hemisphere is uniform in `sin(altitude)`, which is
+    /// exactly the dome's altitude fraction. The mean of §31.2's smoothstep over `[0, 1]` is 0.5,
+    /// so sampling the shared base at 0.5 is the exact mean of the gradient without a per-frame
+    /// numerical integration.
+    [[nodiscard]] Microsoft::Xna::Framework::Vector3
+    SkyAmbientColourFor(const SkyColourModel& model,
+                        const environment::SunPosition& sun,
+                        const environment::MoonPosition& moon,
+                        const environment::MoonPhase& phase,
+                        double cloudCover) noexcept;
+
     /// @brief Strict reader for the generated `CSKY` v1 sky dome.
     class SkyDomeReader
     {

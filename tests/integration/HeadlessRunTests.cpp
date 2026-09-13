@@ -835,6 +835,17 @@ namespace
             daylit += cell.daylight > 0.0F ? 1 : 0;
         }
         EXPECT_GT(daylit, 25) << "the walk loaded a daylight model but no windows reached it";
+        const cnahouse::lighting::RoomLightState* outside =
+            lighting->FindCell(cnahouse::util::Id::Of("EXT_WORLD"));
+        ASSERT_NE(outside, nullptr);
+        EXPECT_GT(outside->skyAmbientColor.Z, outside->skyAmbientColor.X)
+            << "the walk loaded the sky dome but did not share its blue daytime colour with lighting";
+        bool foundTintedLmDay = false;
+        for (const cnahouse::lighting::RoomLightState& cell : lighting->Cells())
+        {
+            foundTintedLmDay = foundTintedLmDay || cell.daylightTint.Z > 0.0F;
+        }
+        EXPECT_TRUE(foundTintedLmDay) << "no room published the tint for its future LM_DAY pass";
         ASSERT_GT(sun.altitudeDeg, cnahouse::environment::kRefractedHorizonDeg);
         EXPECT_NE(lighting->SunKeyForCell(cnahouse::util::Id::Of("EXT_WORLD")), nullptr)
             << "outdoor objects did not receive the sun key";

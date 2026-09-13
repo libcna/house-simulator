@@ -3287,6 +3287,17 @@ the existing altitude/cover thresholds. `CnaHouseGame` supplies all four celesti
 single per-frame `LightingSystem` evaluation. With all terms active, 64 forced debug-build updates
 averaged 0.168 ms and reached 0.232 ms maximum.
 
+`HOUSE-01651` also makes the non-directional part of this colour model the one source for room
+lighting. A uniform hemispherical sky is the solid-angle mean of the altitude gradient: solid
+angle is uniform in `sin(altitude)`, which is the dome's altitude fraction, and the mean of the
+gradient's smoothstep is exactly 0.5. The resulting live colour includes the same altitude rows,
+overcast mix and night/moon blend as the dome. It deliberately excludes the localized sun-glow
+lobe and town light pollution; neither is uniform illumination in the baked `LM_DAY` map. For an
+interior cell, `LightingSystem` publishes both the sky ambient contribution and §23.3's complete
+`LM_DAY` diffuse tint as `skyColor · daylightLevel`; a sky-open exterior receives the unscaled sky
+ambient. Paint tint, the ambient floor's draw and exposure scaling remain the separately owned
+`HOUSE-01257`, `HOUSE-01264` and `HOUSE-01266` work.
+
 610 vertices × 16 bytes = 9.8 KB per update. Negligible. The earlier 594-vertex estimate was
 `33 × 18`: it duplicated each seam vertex, omitted the skirt and, if used for the pole, produced
 32 zero-area triangles. `HOUSE-01642` records the generated non-degenerate topology in

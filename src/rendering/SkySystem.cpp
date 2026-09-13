@@ -140,6 +140,37 @@ namespace cnahouse::rendering
         }
     } // namespace
 
+    Xna::Vector3 SkyBaseColourAt(const SkyColourModel& model,
+                                 const environment::SunPosition& sun,
+                                 const environment::MoonPosition& moon,
+                                 const environment::MoonPhase& phase,
+                                 double cloudCover,
+                                 float altitudeFraction) noexcept
+    {
+        const auto [zenith, horizon] = GradientAt(model, sun.altitudeDeg);
+        const auto [nightZenith, nightHorizon] = GradientAt(model, -18.0);
+        const float altitude = std::clamp(altitudeFraction, 0.0F, 1.0F);
+        const float altitudeBlend = altitude * altitude * (3.0F - 2.0F * altitude);
+        const float cover = static_cast<float>(std::clamp(cloudCover, 0.0, 1.0));
+        const float cloudMix = std::pow(cover, 1.5F);
+        const Xna::Vector3 day = Lerp(Lerp(horizon, zenith, altitudeBlend), model.overcastGrey, cloudMix);
+        const environment::MoonShading moonShading = environment::MoonShadingFor(moon, phase, cover);
+        const Xna::Vector3 night = AddScaled(
+            Lerp(nightHorizon, nightZenith, altitudeBlend), moonShading.color, moonShading.intensity);
+        const float nightWeight =
+            static_cast<float>(1.0 - environment::TwilightAmbientFactor(sun.altitudeDeg));
+        return Lerp(day, night, nightWeight);
+    }
+
+    Xna::Vector3 SkyAmbientColourFor(const SkyColourModel& model,
+                                     const environment::SunPosition& sun,
+                                     const environment::MoonPosition& moon,
+                                     const environment::MoonPhase& phase,
+                                     double cloudCover) noexcept
+    {
+        return SkyBaseColourAt(model, sun, moon, phase, cloudCover, 0.5F);
+    }
+
     util::Result<SkyColourModel> SkyColourModelReader::Read(std::string_view json, std::string name)
     {
         auto document = util::JsonDocument::Parse(json, name);
@@ -1040,26 +1071,18 @@ namespace cnahouse::rendering
                                      double cloudCover) noexcept
     {
         const auto started = std::chrono::steady_clock::now();
-        const auto [zenith, horizon] = GradientAt(colourModel_, sun.altitudeDeg);
-        const auto [nightZenith, nightHorizon] = GradientAt(colourModel_, -18.0);
-        const float cloudMix = std::pow(static_cast<float>(cloudCover), 1.5F);
         const float clearSky = static_cast<float>((1.0 - cloudCover) * (1.0 - cloudCover));
         const float sunIntensity = SunIntensityAt(colourModel_, sun.altitudeDeg);
         const Xna::Vector3 directionToSun = environment::DirectionToSun(sun);
-        const environment::MoonShading moonShading = environment::MoonShadingFor(moon, phase, cloudCover);
         const float nightWeight =
             static_cast<float>(1.0 - environment::TwilightAmbientFactor(sun.altitudeDeg));
 
-        Xna::Vector3 cloudColour = Lerp(horizon, colourModel_.overcastGrey, cloudMix);
-        cloudColour =
-            Lerp(cloudColour, AddScaled(nightHorizon, moonShading.color, moonShading.intensity), nightWeight);
+        const Xna::Vector3 cloudColour = SkyBaseColourAt(colourModel_, sun, moon, phase, cloudCover, 0.0F);
         const Xna::Color cloudTint(cloudColour);
         for (std::size_t i = 0; i < mesh_.positions.size(); ++i)
         {
             const float altitude = std::clamp(mesh_.positions[i].Y / mesh_.radius, 0.0F, 1.0F);
-            const float altitudeBlend = altitude * altitude * (3.0F - 2.0F * altitude);
-            const Xna::Vector3 clear = Lerp(horizon, zenith, altitudeBlend);
-            Xna::Vector3 colour = Lerp(clear, colourModel_.overcastGrey, cloudMix);
+            Xna::Vector3 colour = SkyBaseColourAt(colourModel_, sun, moon, phase, cloudCover, altitude);
 
             const Xna::Vector3& position = mesh_.positions[i];
             const double x = static_cast<double>(position.X);
@@ -1073,17 +1096,16 @@ namespace cnahouse::rendering
             {
                 const float dot = static_cast<float>((x * sunX + y * sunY + z * sunZ) / length);
                 const float lobe = std::pow(std::max(dot, 0.0F), colourModel_.sunGlowExponent);
-                const float glow = colourModel_.sunGlowStrength * sunIntensity * lobe * clearSky;
+                const float glow =
+                    colourModel_.sunGlowStrength * sunIntensity * lobe * clearSky * (1.0F - nightWeight);
                 colour = AddScaled(colour, colourModel_.sunGlowColor, glow);
             }
 
-            const Xna::Vector3 nightBase = Lerp(nightHorizon, nightZenith, altitudeBlend);
-            Xna::Vector3 night = AddScaled(nightBase, moonShading.color, moonShading.intensity);
             const float pollution = colourModel_.lightPollution.strength *
                                     StarLightPollutionFactor(position, colourModel_.lightPollution) *
-                                    clearSky;
-            night = AddScaled(night, colourModel_.lightPollution.colour, pollution);
-            colouredVertices_[i].Color = Xna::Color(Lerp(colour, night, nightWeight));
+                                    clearSky * nightWeight;
+            colour = AddScaled(colour, colourModel_.lightPollution.colour, pollution);
+            colouredVertices_[i].Color = Xna::Color(colour);
         }
         for (CloudRingMesh& ring : cloudRings_)
         {

@@ -51,6 +51,20 @@ namespace cnahouse::lighting
         ///        the result here in world-cell order on every lighting update.
         float daylight = 0.0F;
 
+        /// @brief The live sky contribution to §28.1's eventual `ambientColor`.
+        ///
+        /// For an interior cell this is the hemispherical sky colour scaled by `daylight`; for a
+        /// sky-open exterior it is the unscaled sky colour. Paint tint and exposure are owned by
+        /// `HOUSE-01257` and `HOUSE-01266`, so this field names only the contribution implemented
+        /// here rather than presenting their unfinished composition as complete.
+        Microsoft::Xna::Framework::Vector3 skyAmbientColor{0.0F, 0.0F, 0.0F};
+
+        /// @brief §23.3's complete `LM_DAY` diffuse tint: `skyColor * daylightLevel`.
+        ///
+        /// `HOUSE-01264` will consume this value in the additive draw; it must not independently
+        /// sample the sky or multiply the daylight a second time.
+        Microsoft::Xna::Framework::Vector3 daylightTint{0.0F, 0.0F, 0.0F};
+
         /// @brief §28.4's 2-hop flood through open portals. `HOUSE-01265` computes this.
         float borrowed = 0.0F;
 

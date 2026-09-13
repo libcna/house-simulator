@@ -9,6 +9,7 @@
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/lighting/PlanckianLut.hpp"
+#include "cnahouse/rendering/SkySystem.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -118,6 +119,18 @@ namespace cnahouse::lighting
         }
     }
 
+    LightingSystem::LightingSystem(const world::WorldData& world,
+                                   const ShadingGrid& shading,
+                                   const environment::SimClock& clock,
+                                   std::span<const visibility::PortalRuntime> portals,
+                                   const rendering::SkyColourModel& skyColourModel)
+        : LightingSystem(world, shading, clock, portals)
+    {
+        skyColourModel_ = std::make_unique<rendering::SkyColourModel>(skyColourModel);
+    }
+
+    LightingSystem::~LightingSystem() = default;
+
     void LightingSystem::Update(const app::FrameContext& frame)
     {
         computedForFrame_ = frame.frameIndex;
@@ -138,11 +151,24 @@ namespace cnahouse::lighting
                                                moonShading.color.Z * moonShading.intensity);
         moonKeyActive_ = moonShading.intensity > 0.0F;
         sunComputed_ = true;
+        const Microsoft::Xna::Framework::Vector3 skyColour =
+            skyColourModel_ != nullptr
+                ? rendering::SkyAmbientColourFor(*skyColourModel_, sun_, moon_, moonPhase_, cloudCover_)
+                : Microsoft::Xna::Framework::Vector3(shading.color.X * shading.skyDiffuseIntensity,
+                                                     shading.color.Y * shading.skyDiffuseIntensity,
+                                                     shading.color.Z * shading.skyDiffuseIntensity);
 
         daylight_.Evaluate(sun_.altitudeDeg, sun_.azimuthDeg, cloudCover_, daylightLevels_);
         for (std::size_t index = 0; index < cells_.size(); ++index)
         {
             cells_[index].daylight = daylightLevels_[index];
+            const float ambientLevel = outdoorCells_[index] ? 1.0F : cells_[index].daylight;
+            cells_[index].skyAmbientColor = Microsoft::Xna::Framework::Vector3(
+                skyColour.X * ambientLevel, skyColour.Y * ambientLevel, skyColour.Z * ambientLevel);
+            cells_[index].daylightTint =
+                Microsoft::Xna::Framework::Vector3(skyColour.X * cells_[index].daylight,
+                                                   skyColour.Y * cells_[index].daylight,
+                                                   skyColour.Z * cells_[index].daylight);
             const CellGroups& packed = cellGroups_[index];
             float lit = 0.0F;
             Microsoft::Xna::Framework::Vector3 colorLumens;

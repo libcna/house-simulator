@@ -14785,8 +14785,24 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             stationary tint causes exactly three further uploads through stock XNA.
 - [ ] HOUSE-01650 — Implement fog: colour from the horizon in the view direction, start/end from `fogDensity` and precipitation, enabled only for exterior batches
       dep: HOUSE-01649, HOUSE-00892 · sys: rendering · plat: ALL · pri: MUST
-- [ ] HOUSE-01651 — Implement the sky's contribution to `LightingSystem`'s ambient and to the `LM_DAY` tint
+- [x] HOUSE-01651 — Implement the sky's contribution to `LightingSystem`'s ambient and to the `LM_DAY` tint
       dep: HOUSE-01645, HOUSE-01263 · sys: lighting · plat: ALL · pri: MUST
+      verify: unit `LightingSystemTests.*` (18) and `SkySystemTests.*` (14); integration
+              `HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight` and
+              `SkySystemPassTests.*` (3), all graphics invocations with
+              `SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy`
+      note: (2026-09-13) `LightingSystem` and the dome now consume copies of the same strictly
+            loaded `layout.sky.json` model. Their shared pure evaluator takes the exact
+            solid-angle mean of §31.2's altitude gradient (smoothstep mean 0.5), then applies the
+            common overcast and night/moon blend while excluding the localized sun-glow and town
+            pollution. Every interior cell publishes both `skyAmbientColor` and the complete
+            future `LM_DAY` diffuse value `daylightTint = skyColor × daylightLevel`; the 17
+            sky-open exterior cells receive unscaled sky ambient, while a windowless interior
+            receives neither. The walk integration crosses the deployed JSON, app wiring and
+            lighting update boundary. Full **1382/1382** unit and **110/110** offscreen integration
+            suites pass. Paint tint, the ambient-floor draw and exposure remain honestly owned by
+            `HOUSE-01257`, `HOUSE-01264` and `HOUSE-01266` rather than being hidden placeholders in
+            this contribution task.
 - [ ] HOUSE-01652 — Tune the six sky states against reference photographs; record the final LUTs
       dep: HOUSE-01650 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-01653 — Render tests: the six sky states at four times of day (24 scenes)

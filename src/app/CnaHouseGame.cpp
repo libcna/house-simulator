@@ -488,12 +488,21 @@ namespace cnahouse::app
                       "--scene=walk: {}; daylight uses unshaded windows",
                       shading.Error().ToString());
         }
-        // §28.1 and §32.2, at `UpdateStage::Lighting` (`HOUSE-01251`, `HOUSE-01564`). Built once
-        // over the cells, fixtures and windows; every frame reads the one simulation clock.
-        lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
         auto skyDome = rendering::SkyDomeReader::ReadFromTitle("content/world/sky_dome.bin");
         auto skyColours = rendering::SkyColourModelReader::ReadFromTitle("content/world/layout.sky.json");
         auto stars = rendering::StarCatalogueReader::ReadFromTitle("content/world/stars.bin");
+        // §28.1 and §32.2, at `UpdateStage::Lighting` (`HOUSE-01251`, `HOUSE-01564`). Built once
+        // over the cells, fixtures and windows; every frame reads the one simulation clock. The
+        // same authored sky model is copied into lighting before rendering takes ownership of it,
+        // so ambient and the future LM_DAY pass cannot drift from the dome.
+        if (skyColours)
+        {
+            lighting_.emplace(*world_, shading_, clock_, visibility_->Portals(), *skyColours);
+        }
+        else
+        {
+            lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
+        }
         if (skyDome && skyColours && stars)
         {
             try

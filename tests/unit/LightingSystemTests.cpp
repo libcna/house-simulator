@@ -28,6 +28,7 @@
 #include "cnahouse/lighting/LightingSystem.hpp"
 #include "cnahouse/lighting/PlanckianLut.hpp"
 #include "cnahouse/lighting/ShadingGrid.hpp"
+#include "cnahouse/rendering/SkySystem.hpp"
 #include "cnahouse/visibility/VisibilitySystem.hpp"
 #include "cnahouse/world/WorldData.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
@@ -72,13 +73,22 @@ namespace
         return grid ? std::move(grid.Value()) : ShadingGrid::Unshaded();
     }
 
+    cnahouse::rendering::SkyColourModel LoadSkyColours()
+    {
+        auto model =
+            cnahouse::rendering::SkyColourModelReader::ReadFromTitle("content/world/layout.sky.json");
+        EXPECT_TRUE(model) << (model ? std::string() : model.Error().ToString());
+        return std::move(model.Value());
+    }
+
     struct HouseLighting
     {
         world::WorldData world = LoadWorld();
         ShadingGrid shading = LoadShading();
         cnahouse::environment::SimClock clock;
         cnahouse::visibility::VisibilitySystem visibility{world};
-        LightingSystem lighting{world, shading, clock, visibility.Portals()};
+        cnahouse::rendering::SkyColourModel skyColours = LoadSkyColours();
+        LightingSystem lighting{world, shading, clock, visibility.Portals(), skyColours};
     };
 
     FrameContext Frame(std::uint64_t index)
@@ -748,4 +758,128 @@ TEST(LightingSystemTests, CloudCoverIsContinuousClampedAndCannotBecomeNotANumber
     EXPECT_TRUE(house.lighting.SetCloudCover(0.4F));
     EXPECT_FALSE(house.lighting.SetCloudCover(std::nanf("")));
     EXPECT_FLOAT_EQ(house.lighting.CloudCover(), 0.4F) << "the refused NaN was applied";
+}
+
+TEST(LightingSystemTests, AuthoredSkyColoursDriveOutdoorAmbientAndTheLmDayTint)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    cnahouse::environment::CivilTime noon;
+    noon.year = 2031;
+    noon.month = 6;
+    noon.day = 21;
+    noon.hour = 12;
+    house.clock.SetStandard(noon);
+    ASSERT_TRUE(house.lighting.SetCloudCover(1.0F));
+    house.lighting.Update(Frame(900));
+
+    const RoomLightState* outdoors = house.lighting.FindCell(Id::Of("EXT_WORLD"));
+    ASSERT_NE(outdoors, nullptr);
+    // Full overcast collapses every altitude and azimuth to the one authored grey. This is an
+    // independent content checkpoint, not an expected value computed by the production sampler.
+    EXPECT_NEAR(outdoors->skyAmbientColor.X, 0.370F, 1.0e-6F);
+    EXPECT_NEAR(outdoors->skyAmbientColor.Y, 0.400F, 1.0e-6F);
+    EXPECT_NEAR(outdoors->skyAmbientColor.Z, 0.440F, 1.0e-6F);
+    EXPECT_EQ(outdoors->daylightTint, Microsoft::Xna::Framework::Vector3())
+        << "outdoor geometry has no baked interior LM_DAY pass";
+
+    const RoomLightState* daylit = nullptr;
+    const RoomLightState* windowless = nullptr;
+    for (const RoomLightState& cell : house.lighting.Cells())
+    {
+        if (cell.daylight > 0.20F && daylit == nullptr)
+        {
+            daylit = &cell;
+        }
+        if (cell.daylight == 0.0F && cell.cell != Id::Of("EXT_WORLD") && windowless == nullptr)
+        {
+            const world::Cell* row = house.world.FindCell(cell.cell);
+            if (row != nullptr && row->kind != world::CellKind::Exterior)
+            {
+                windowless = &cell;
+            }
+        }
+    }
+    ASSERT_NE(daylit, nullptr);
+    ASSERT_NE(windowless, nullptr);
+    EXPECT_NEAR(daylit->daylightTint.X, 0.370F * daylit->daylight, 1.0e-6F);
+    EXPECT_NEAR(daylit->daylightTint.Y, 0.400F * daylit->daylight, 1.0e-6F);
+    EXPECT_NEAR(daylit->daylightTint.Z, 0.440F * daylit->daylight, 1.0e-6F);
+    EXPECT_EQ(daylit->skyAmbientColor, daylit->daylightTint)
+        << "interior ambient and LM_DAY sampled different skies";
+    EXPECT_EQ(windowless->skyAmbientColor, Microsoft::Xna::Framework::Vector3());
+    EXPECT_EQ(windowless->daylightTint, Microsoft::Xna::Framework::Vector3());
+}
+
+TEST(LightingSystemTests, ClearSkyAmbientChangesContinuouslyFromWarmHorizonToBlueDay)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    ASSERT_TRUE(house.lighting.SetCloudCover(0.0F));
+
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 6;
+    time.day = 21;
+    time.hour = 12;
+    house.clock.SetStandard(time);
+    house.lighting.Update(Frame(910));
+    const RoomLightState* outdoors = house.lighting.FindCell(Id::Of("EXT_WORLD"));
+    ASSERT_NE(outdoors, nullptr);
+    const auto day = outdoors->skyAmbientColor;
+    EXPECT_LT(day.X, day.Y);
+    EXPECT_LT(day.Y, day.Z) << "the clear daytime ambient did not take the blue sky gradient";
+
+    // Find the minute closest to the authored -0.58-degree sunset row rather than embedding a
+    // locale-dependent wall-clock guess. The clock and sky still cross their real shared seam.
+    double closest = 1.0e9;
+    Microsoft::Xna::Framework::Vector3 sunset;
+    for (int minute = 15 * 60; minute < 22 * 60; ++minute)
+    {
+        time.hour = minute / 60;
+        time.minute = minute % 60;
+        house.clock.SetStandard(time);
+        house.lighting.Update(Frame(static_cast<std::uint64_t>(1000 + minute)));
+        const double distance = std::abs(house.lighting.Sun().altitudeDeg + 0.58);
+        if (distance < closest)
+        {
+            closest = distance;
+            sunset = house.lighting.FindCell(Id::Of("EXT_WORLD"))->skyAmbientColor;
+        }
+    }
+    EXPECT_LT(closest, 0.20) << "the summer-day scan missed the authored sunset anchor";
+    EXPECT_GT(sunset.X, sunset.Y);
+    EXPECT_GT(sunset.Y, sunset.Z) << "the sky contribution did not carry sunset warmth";
+
+    // A one-minute scan also bounds continuity at the system boundary: no tint channel may jump
+    // while the sun moves through a continuously interpolated LUT.
+    float worstStep = 0.0F;
+    Microsoft::Xna::Framework::Vector3 previous;
+    bool havePrevious = false;
+    for (int minute = 17 * 60; minute <= 21 * 60; ++minute)
+    {
+        time.hour = minute / 60;
+        time.minute = minute % 60;
+        house.clock.SetStandard(time);
+        house.lighting.Update(Frame(static_cast<std::uint64_t>(3000 + minute)));
+        const auto current = house.lighting.FindCell(Id::Of("EXT_WORLD"))->skyAmbientColor;
+        if (havePrevious)
+        {
+            worstStep = std::max({worstStep,
+                                  std::abs(current.X - previous.X),
+                                  std::abs(current.Y - previous.Y),
+                                  std::abs(current.Z - previous.Z)});
+        }
+        previous = current;
+        havePrevious = true;
+    }
+    EXPECT_LT(worstStep, 0.025F) << "the sky ambient stepped between adjacent civil minutes";
 }
