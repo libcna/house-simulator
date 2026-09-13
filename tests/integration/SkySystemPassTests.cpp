@@ -198,6 +198,7 @@ namespace
                 cnahouse::rendering::SkySystem sky(
                     camera, std::move(*mesh), std::move(*model), std::move(textures));
                 ASSERT_TRUE(sky.SetWind(8.0, 225.0));
+                ASSERT_TRUE(sky.SetCloudState(0.325, 0.5));
                 cnahouse::rendering::StateTracker states(device);
                 cnahouse::debug::Counters counters;
                 cnahouse::rendering::PassContext context{device, states, counters, 0.5F};
@@ -209,12 +210,15 @@ namespace
                 const auto* drawsCounter = counters.Find("sky.cloud.draws");
                 const auto* trianglesCounter = counters.Find("sky.cloud.triangles");
                 const auto* uploadsCounter = counters.Find("sky.cloud.uploads");
+                const auto* alphaUpdatesCounter = counters.Find("sky.cloud.alpha_updates");
                 ASSERT_NE(drawsCounter, nullptr);
                 ASSERT_NE(trianglesCounter, nullptr);
                 ASSERT_NE(uploadsCounter, nullptr);
+                ASSERT_NE(alphaUpdatesCounter, nullptr);
                 draws = drawsCounter->current;
                 triangles = trianglesCounter->current;
                 uploads = uploadsCounter->current;
+                EXPECT_EQ(alphaUpdatesCounter->current, 1);
 
                 const Gfx::BlendState& blend = device.getBlendStateProperty();
                 EXPECT_EQ(blend.getColorSourceBlendProperty(),

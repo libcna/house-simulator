@@ -76,6 +76,14 @@ namespace cnahouse::rendering
         std::vector<std::uint16_t> indices;
     };
 
+    /// @brief One contiguous `cloudCover` band and its three §31.3 layer alphas.
+    struct CloudAlphaBand
+    {
+        float minimumCover = 0.0F;
+        float maximumCover = 0.0F;
+        std::array<float, 3> alpha{};
+    };
+
     /// @brief The compact 32-row colour model generated into `layout.sky.json`.
     struct SkyColourModel
     {
@@ -87,6 +95,8 @@ namespace cnahouse::rendering
         std::uint32_t cloudCoverSamples = 0;
         std::uint32_t azimuthOffsetSamples = 0;
         std::array<CloudLayer, 3> cloudLayers;
+        std::vector<CloudAlphaBand> cloudAlphaBands;
+        std::array<float, 3> stormCloudAlpha{};
     };
 
     /// @brief Reads only §31.2's generated colour block from `layout.sky.json`.
@@ -148,6 +158,8 @@ namespace cnahouse::rendering
         void SetSun(const environment::SunPosition& sun, double cloudCover) noexcept;
         /// @brief Sets §36.1's meteorological wind (`direction` is where it comes from).
         bool SetWind(double speedMetresPerSecond, double directionDegrees) noexcept;
+        /// @brief Maps continuous cover and thunder into the three live layer alphas.
+        bool SetCloudState(double cloudCover, double thunderIntensity) noexcept;
         /// @brief Advances the bounded UV offsets without requiring a graphics device.
         bool AdvanceClouds(double deltaSeconds) noexcept;
         /// @brief Recomputes and uploads colours only past §31.2's material-change thresholds.
@@ -181,6 +193,11 @@ namespace cnahouse::rendering
             return cloudOffsets_;
         }
 
+        [[nodiscard]] const std::array<float, 3>& CloudAlphas() const noexcept
+        {
+            return cloudAlphas_;
+        }
+
         [[nodiscard]] std::uint64_t ColourUpdateCount() const noexcept
         {
             return colourUpdateCount_;
@@ -198,6 +215,10 @@ namespace cnahouse::rendering
         [[nodiscard]] static std::array<CloudRingMesh, 3>
         BuildCloudRings(const std::array<CloudLayer, 3>& layers);
 
+        /// @brief Pure form of §31.3's continuous cover/thunder interpolation.
+        [[nodiscard]] static std::array<float, 3>
+        CloudAlphasFor(const SkyColourModel& model, double cloudCover, double thunderIntensity) noexcept;
+
     private:
         class Resources;
 
@@ -209,6 +230,7 @@ namespace cnahouse::rendering
         std::vector<Microsoft::Xna::Framework::Graphics::VertexPositionColor> colouredVertices_;
         std::array<CloudRingMesh, 3> cloudRings_;
         std::array<Microsoft::Xna::Framework::Vector2, 3> cloudOffsets_{};
+        std::array<float, 3> cloudAlphas_{};
         std::optional<CloudTextures> cloudTextures_;
         SunDiscPass sunDisc_;
         std::unique_ptr<Resources> resources_;
@@ -227,7 +249,9 @@ namespace cnahouse::rendering
         std::size_t cloudDrawsCounter_ = 0;
         std::size_t cloudTrianglesCounter_ = 0;
         std::size_t cloudUploadsCounter_ = 0;
+        std::size_t cloudAlphaUpdatesCounter_ = 0;
         std::uint64_t cloudUploadCount_ = 0;
+        std::uint64_t cloudAlphaUpdateCount_ = 0;
     };
 
 } // namespace cnahouse::rendering

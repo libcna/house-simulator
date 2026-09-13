@@ -14428,8 +14428,19 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             0.15/0.60/1.00 speed ratios. The walk loads all three compiled mipmapped `Texture2D`
             values through `ContentManager`; integration crosses that real content/device boundary
             and records three UV-buffer uploads per moving frame.
-- [ ] HOUSE-01648 — Implement the cloud-state → layer-alpha mapping, interpolated continuously from `cloudCover` and `thunderIntensity`
+- [x] HOUSE-01648 — Implement the cloud-state → layer-alpha mapping, interpolated continuously from `cloudCover` and `thunderIntensity`
       dep: HOUSE-01647 · sys: rendering · plat: ALL · pri: MUST
+      verify: unit `SkySystemTests.*` (9); integration `SkySystemPassTests.*` (2) and
+            `HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight` (1), all graphics
+            invocations with `SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy`
+      note: (2026-09-13) The five contiguous `cloudAlpha` rows are anchors at their band centres;
+            cover interpolates between neighbours and clamps outside the end centres. Thunder then
+            continuously blends that ordinary result toward the separately-authored storm vector.
+            Both inputs clamp to 0..1, non-finite live updates are rejected, and unchanged results
+            do not churn state. The three live values now drive the retained `BasicEffect` alpha
+            properties and `sky.cloud.alpha_updates` exposes material changes. The implemented
+            data also corrects the previously-authored cloudy/overcast values to §31.3's
+            authoritative table.
 - [ ] HOUSE-01649 — Implement cloud tinting by the sky colour so clouds pick up sunset light
       dep: HOUSE-01648 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01650 — Implement fog: colour from the horizon in the view direction, start/end from `fogDensity` and precipitation, enabled only for exterior batches

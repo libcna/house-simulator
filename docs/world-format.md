@@ -651,8 +651,22 @@ reference.
   "gradient": [ { "sunElevationDeg": -18.0, "zenith": [0.01,0.01,0.03], "horizon": [0.02,0.02,0.05] },
                 { "sunElevationDeg":   0.0, "zenith": [0.16,0.24,0.45], "horizon": [0.95,0.55,0.28] },
                 { "sunElevationDeg":  60.0, "zenith": [0.16,0.35,0.78], "horizon": [0.62,0.74,0.90] } ],
-  "cloudLayers": [ { "id": "CL_HIGH", "texture": "Textures/Sky/cirrus", "altitude": 8000.0,
-                     "scrollScale": 0.15, "opacity": 0.5 } ],
+  "cloudLayers": [
+    { "id": "CL_HIGH", "texture": "Textures/Sky/cloud_cirrus", "altitude": 880.0,
+      "scrollScale": 0.15, "opacity": 0.5 },
+    { "id": "CL_MID", "texture": "Textures/Sky/cloud_cumulus", "altitude": 860.0,
+      "scrollScale": 0.60, "opacity": 0.7 },
+    { "id": "CL_LOW", "texture": "Textures/Sky/cloud_stratus", "altitude": 830.0,
+      "scrollScale": 1.00, "opacity": 0.85 }
+  ],
+  "cloudAlpha": [
+    { "cloudCover": [0.00, 0.10], "high": 0.15, "mid": 0.00, "low": 0.00,
+      "midTint": null },
+    // Three further contiguous bands omitted here.
+    { "cloudCover": [0.85, 1.00], "high": 0.00, "mid": 0.60, "low": 0.95,
+      "midTint": "storm_grey" }
+  ],
+  "stormCloudAlpha": { "high": 0.00, "mid": 0.70, "low": 1.00 },
   "stars": { "catalogue": "world/stars.bin", "count": 1800, "magnitudeLimit": 5.5 }
 }
 ```
@@ -677,7 +691,10 @@ painting the entire horizon orange (`HOUSE-01641`).
 §32/§33's disc colours by elevation had nowhere to live. Rule 10 checks that the three elevation
 tables are in ascending order — one that is not interpolates backwards, and a sun table out of
 order reddens at noon — and that the cloud-alpha bands are contiguous from 0 to 1, because a cover
-in a gap is a sky with no clouds drawn at all.
+in a gap is a sky with no clouds drawn at all. At runtime each `cloudAlpha` row is an anchor at its
+band centre. Cover interpolates linearly between adjacent anchors and clamps outside the first and
+last centre; `thunderIntensity` then linearly blends all three values toward `stormCloudAlpha`.
+This makes both weather inputs continuous (`HOUSE-01648`).
 
 ## `interactables.json`
 

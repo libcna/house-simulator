@@ -2513,6 +2513,7 @@ def fixture() -> dict[str, dict]:
                            "midTint": None},
                           {"cloudCover": [0.5, 1.0], "high": 0.1, "mid": 0.8, "low": 0.6,
                            "midTint": "grey"}],
+           "stormCloudAlpha": {"high": 0.0, "mid": 0.7, "low": 1.0},
            "sun": [{"elevationDeg": -6.0, "color": [0.35, 0.16, 0.08], "intensity": 0.0},
                    {"elevationDeg": 30.0, "color": [1.0, 0.98, 0.94], "intensity": 1.0}],
            "moon": [{"elevationDeg": -6.0, "color": [0.30, 0.33, 0.42], "intensity": 0.0},

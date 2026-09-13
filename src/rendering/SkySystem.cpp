@@ -302,6 +302,108 @@ namespace cnahouse::rendering
             model.cloudLayers[i] =
                 CloudLayer{std::string(*id), std::string(*texture), *radius, *scrollScale, *opacity};
         }
+
+        auto cloudAlphaValue = root.RequireArray("cloudAlpha");
+        if (!cloudAlphaValue)
+        {
+            return InFile(cloudAlphaValue.Error(), name);
+        }
+        auto cloudAlphaRows = cloudAlphaValue->Elements();
+        if (!cloudAlphaRows)
+        {
+            return InFile(cloudAlphaRows.Error(), name);
+        }
+        if (cloudAlphaRows->size() < 2u)
+        {
+            return Bad(util::ErrorCode::InvalidData,
+                       "cloudAlpha needs at least two bands for continuous interpolation",
+                       name);
+        }
+        model.cloudAlphaBands.reserve(cloudAlphaRows->size());
+        for (std::size_t i = 0; i < cloudAlphaRows->size(); ++i)
+        {
+            auto coverValue = (*cloudAlphaRows)[i].RequireArray("cloudCover");
+            auto high = (*cloudAlphaRows)[i].RequireFloat("high");
+            auto mid = (*cloudAlphaRows)[i].RequireFloat("mid");
+            auto low = (*cloudAlphaRows)[i].RequireFloat("low");
+            if (!coverValue)
+            {
+                return InFile(coverValue.Error(), name);
+            }
+            if (!high)
+            {
+                return InFile(high.Error(), name);
+            }
+            if (!mid)
+            {
+                return InFile(mid.Error(), name);
+            }
+            if (!low)
+            {
+                return InFile(low.Error(), name);
+            }
+            auto cover = coverValue->Elements();
+            if (!cover || cover->size() != 2u)
+            {
+                return Bad(util::ErrorCode::InvalidData,
+                           std::format("cloudAlpha row {} does not have a two-number cover band", i),
+                           name);
+            }
+            auto minimum = (*cover)[0].AsFloat();
+            auto maximum = (*cover)[1].AsFloat();
+            if (!minimum)
+            {
+                return InFile(minimum.Error(), name);
+            }
+            if (!maximum)
+            {
+                return InFile(maximum.Error(), name);
+            }
+            const bool contiguous =
+                i == 0u ? *minimum == 0.0F : *minimum == model.cloudAlphaBands.back().maximumCover;
+            if (!std::isfinite(*minimum) || !std::isfinite(*maximum) || *minimum < 0.0F || *maximum > 1.0F ||
+                *minimum >= *maximum || !contiguous || !std::isfinite(*high) || *high < 0.0F ||
+                *high > 1.0F || !std::isfinite(*mid) || *mid < 0.0F || *mid > 1.0F || !std::isfinite(*low) ||
+                *low < 0.0F || *low > 1.0F)
+            {
+                return Bad(util::ErrorCode::OutOfRange,
+                           std::format("cloudAlpha row {} is not a contiguous unit-range band", i),
+                           name);
+            }
+            model.cloudAlphaBands.push_back(CloudAlphaBand{*minimum, *maximum, {*high, *mid, *low}});
+        }
+        if (model.cloudAlphaBands.back().maximumCover != 1.0F)
+        {
+            return Bad(util::ErrorCode::InvalidData, "cloudAlpha does not cover through 1", name);
+        }
+
+        auto stormValue = root.RequireObject("stormCloudAlpha");
+        if (!stormValue)
+        {
+            return InFile(stormValue.Error(), name);
+        }
+        auto stormHigh = stormValue->RequireFloat("high");
+        auto stormMid = stormValue->RequireFloat("mid");
+        auto stormLow = stormValue->RequireFloat("low");
+        if (!stormHigh)
+        {
+            return InFile(stormHigh.Error(), name);
+        }
+        if (!stormMid)
+        {
+            return InFile(stormMid.Error(), name);
+        }
+        if (!stormLow)
+        {
+            return InFile(stormLow.Error(), name);
+        }
+        model.stormCloudAlpha = {*stormHigh, *stormMid, *stormLow};
+        if (std::any_of(model.stormCloudAlpha.begin(),
+                        model.stormCloudAlpha.end(),
+                        [](float alpha) { return !std::isfinite(alpha) || alpha < 0.0F || alpha > 1.0F; }))
+        {
+            return Bad(util::ErrorCode::OutOfRange, "stormCloudAlpha has a value outside 0..1", name);
+        }
         return model;
     }
 
@@ -564,6 +666,10 @@ namespace cnahouse::rendering
         {
             colouredVertices_.emplace_back(position, Xna::Color::CornflowerBlue);
         }
+        for (std::size_t i = 0; i < cloudAlphas_.size(); ++i)
+        {
+            cloudAlphas_[i] = colourModel_.cloudLayers[i].opacity;
+        }
         RecomputeColours(-18.0, 0.0);
     }
 
@@ -596,6 +702,70 @@ namespace cnahouse::rendering
         {
             windDirectionDegrees_ += 360.0;
         }
+        return true;
+    }
+
+    std::array<float, 3> SkySystem::CloudAlphasFor(const SkyColourModel& model,
+                                                   double cloudCover,
+                                                   double thunderIntensity) noexcept
+    {
+        std::array<float, 3> base{};
+        if (model.cloudAlphaBands.empty())
+        {
+            return base;
+        }
+
+        const float cover =
+            std::isfinite(cloudCover) ? static_cast<float>(std::clamp(cloudCover, 0.0, 1.0)) : 0.0F;
+        const auto centre = [](const CloudAlphaBand& band) noexcept
+        { return (band.minimumCover + band.maximumCover) * 0.5F; };
+        const auto upper =
+            std::lower_bound(model.cloudAlphaBands.begin(),
+                             model.cloudAlphaBands.end(),
+                             cover,
+                             [&](const CloudAlphaBand& band, float value) { return centre(band) < value; });
+        if (upper == model.cloudAlphaBands.begin())
+        {
+            base = upper->alpha;
+        }
+        else if (upper == model.cloudAlphaBands.end())
+        {
+            base = model.cloudAlphaBands.back().alpha;
+        }
+        else
+        {
+            const CloudAlphaBand& lower = *(upper - 1);
+            const float lowerCentre = centre(lower);
+            const float amount = (cover - lowerCentre) / (centre(*upper) - lowerCentre);
+            for (std::size_t i = 0; i < base.size(); ++i)
+            {
+                base[i] = lower.alpha[i] + (upper->alpha[i] - lower.alpha[i]) * amount;
+            }
+        }
+
+        const float thunder = std::isfinite(thunderIntensity)
+                                  ? static_cast<float>(std::clamp(thunderIntensity, 0.0, 1.0))
+                                  : 0.0F;
+        for (std::size_t i = 0; i < base.size(); ++i)
+        {
+            base[i] += (model.stormCloudAlpha[i] - base[i]) * thunder;
+        }
+        return base;
+    }
+
+    bool SkySystem::SetCloudState(double cloudCover, double thunderIntensity) noexcept
+    {
+        if (!std::isfinite(cloudCover) || !std::isfinite(thunderIntensity))
+        {
+            return false;
+        }
+        const std::array<float, 3> next = CloudAlphasFor(colourModel_, cloudCover, thunderIntensity);
+        if (next == cloudAlphas_)
+        {
+            return false;
+        }
+        cloudAlphas_ = next;
+        ++cloudAlphaUpdateCount_;
         return true;
     }
 
@@ -789,6 +959,7 @@ namespace cnahouse::rendering
             cloudDrawsCounter_ = context.counters.Resolve("sky.cloud.draws");
             cloudTrianglesCounter_ = context.counters.Resolve("sky.cloud.triangles");
             cloudUploadsCounter_ = context.counters.Resolve("sky.cloud.uploads");
+            cloudAlphaUpdatesCounter_ = context.counters.Resolve("sky.cloud.alpha_updates");
         }
         context.counters.Set(drawsCounter_, 1);
         context.counters.Set(trianglesCounter_, static_cast<std::int64_t>(mesh_.indices.size() / 3u));
@@ -819,7 +990,7 @@ namespace cnahouse::rendering
                 cloud.effect.setWorldProperty(world);
                 cloud.effect.setViewProperty(view);
                 cloud.effect.setProjectionProperty(projection);
-                cloud.effect.setAlphaProperty(colourModel_.cloudLayers[i].opacity);
+                cloud.effect.setAlphaProperty(cloudAlphas_[i]);
                 context.device.SetVertexBuffer(&cloud.vertices);
                 context.device.setIndicesProperty(&cloud.indices);
 
@@ -843,6 +1014,7 @@ namespace cnahouse::rendering
         context.counters.Set(cloudDrawsCounter_, cloudDraws);
         context.counters.Set(cloudTrianglesCounter_, cloudTriangles);
         context.counters.Set(cloudUploadsCounter_, static_cast<std::int64_t>(cloudUploadCount_));
+        context.counters.Set(cloudAlphaUpdatesCounter_, static_cast<std::int64_t>(cloudAlphaUpdateCount_));
     }
 
 } // namespace cnahouse::rendering

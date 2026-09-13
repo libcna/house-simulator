@@ -3323,6 +3323,12 @@ Alphas are interpolated continuously from `cloudCover` and `thunderIntensity`, s
 over ten simulated minutes reads as a gradual thickening rather than a state swap. Cloud UV scroll
 is `windDirection`-aligned, so the sky moves the way the trees bend.
 
+`HOUSE-01648` treats each ordinary row as an anchor at the centre of its contiguous cover band,
+linearly interpolates between adjacent anchors and clamps beyond the first and last centres. It
+then linearly pulls that result toward the separate storm row by `thunderIntensity`; there is no
+weather-state branch and both inputs are clamped to 0..1. The resulting three live alphas feed the
+retained cloud effects directly, while `sky.cloud.alpha_updates` shows material state changes.
+
 ### 31.4 Tier E
 
 `SkyDome.fx` replaces the vertex-colour dome with a per-pixel analytic gradient (the same LUTs

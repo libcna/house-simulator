@@ -77,9 +77,11 @@
     { "cloudCover": [0.00, 0.10], "high": 0.15, "mid": 0.00, "low": 0.00, "midTint": null },   // clear
     { "cloudCover": [0.10, 0.30], "high": 0.35, "mid": 0.20, "low": 0.00, "midTint": "white" },   // mostly clear
     { "cloudCover": [0.30, 0.60], "high": 0.30, "mid": 0.60, "low": 0.05, "midTint": "white_grey" },   // partly cloudy
-    { "cloudCover": [0.60, 0.85], "high": 0.20, "mid": 0.85, "low": 0.30, "midTint": "grey" },   // cloudy
-    { "cloudCover": [0.85, 1.00], "high": 0.05, "mid": 0.70, "low": 0.90, "midTint": "storm_grey" }    // overcast and storm
+    { "cloudCover": [0.60, 0.85], "high": 0.10, "mid": 0.85, "low": 0.35, "midTint": "grey" },   // cloudy
+    { "cloudCover": [0.85, 1.00], "high": 0.00, "mid": 0.60, "low": 0.95, "midTint": "storm_grey" }    // overcast
   ],
+  // Thunder continuously pulls the ordinary cover result toward §31.3's storm row.
+  "stormCloudAlpha": { "high": 0.00, "mid": 0.70, "low": 1.00 },
 
   // The sun and moon discs (§32, §33): colour and brightness by their own elevation, so
   // the sun reddens as it sets without a special case at the horizon.

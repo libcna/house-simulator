@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01643`, `HOUSE-01644` and `HOUSE-01647`. The success case crosses the
+// `HOUSE-01643`, `HOUSE-01644`, `HOUSE-01647` and `HOUSE-01648`. The success case crosses the
 // Python-writer/C++-reader boundary.
 // Mutations then prove that the runtime does not allocate or draw plausible-looking sky data from
 // damaged content.
@@ -156,6 +156,10 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
     EXPECT_FLOAT_EQ(model->cloudLayers[0].scrollScale, 0.15F);
     EXPECT_FLOAT_EQ(model->cloudLayers[1].scrollScale, 0.60F);
     EXPECT_FLOAT_EQ(model->cloudLayers[2].scrollScale, 1.00F);
+    ASSERT_EQ(model->cloudAlphaBands.size(), 5u);
+    EXPECT_FLOAT_EQ(model->cloudAlphaBands.front().minimumCover, 0.0F);
+    EXPECT_FLOAT_EQ(model->cloudAlphaBands.back().maximumCover, 1.0F);
+    EXPECT_EQ(model->stormCloudAlpha, (std::array<float, 3>{0.0F, 0.7F, 1.0F}));
 
     for (const std::pair<std::string, std::string>& mutation : {
              std::pair<std::string, std::string>{"cna-house/sky/1", "cna-house/sky/2"},
@@ -164,6 +168,8 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
              {"\"id\": \"CL_HIGH\"", "\"id\": \"CL_LOW\""},
              {"\"altitude\": 860.0", "\"altitude\": 890.0"},
              {"\"scrollScale\": 0.15", "\"scrollScale\": -0.15"},
+             {"\"cloudCover\": [\n        0.0", "\"cloudCover\": [\n        0.01"},
+             {"\"stormCloudAlpha\": {\n    \"high\": 0.0", "\"stormCloudAlpha\": {\n    \"high\": 1.2"},
          })
     {
         std::string changed = json;
@@ -254,6 +260,47 @@ TEST(SkySystemTests, CloudUvMotionFollowsMeteorologicalWindAndEachAuthoredRate)
         EXPECT_LE(std::abs(offset.X), 0.5F);
         EXPECT_LE(std::abs(offset.Y), 0.5F);
     }
+}
+
+TEST(SkySystemTests, CloudLayerAlphasInterpolateContinuouslyThroughCoverAndThunder)
+{
+    auto model = cnahouse::rendering::SkyColourModelReader::Read(SkyJson(), "layout.sky.json");
+    ASSERT_TRUE(model);
+
+    const auto clear = cnahouse::rendering::SkySystem::CloudAlphasFor(*model, 0.0, 0.0);
+    EXPECT_EQ(clear, (std::array<float, 3>{0.15F, 0.0F, 0.0F}));
+    const auto mostly = cnahouse::rendering::SkySystem::CloudAlphasFor(*model, 0.20, 0.0);
+    EXPECT_EQ(mostly, (std::array<float, 3>{0.35F, 0.20F, 0.0F}));
+
+    // 0.325 is halfway from the mostly-clear band's 0.20 centre to partly-cloudy's 0.45.
+    const auto between = cnahouse::rendering::SkySystem::CloudAlphasFor(*model, 0.325, 0.0);
+    EXPECT_NEAR(between[0], 0.325F, 1.0e-6F);
+    EXPECT_NEAR(between[1], 0.400F, 1.0e-6F);
+    EXPECT_NEAR(between[2], 0.025F, 1.0e-6F);
+    const auto justBefore = cnahouse::rendering::SkySystem::CloudAlphasFor(*model, 0.29999, 0.0);
+    const auto justAfter = cnahouse::rendering::SkySystem::CloudAlphasFor(*model, 0.30001, 0.0);
+    for (std::size_t i = 0; i < justBefore.size(); ++i)
+    {
+        EXPECT_NEAR(justBefore[i], justAfter[i], 0.0001F)
+            << "a band boundary became a visible state swap in layer " << i;
+    }
+
+    const auto storm = cnahouse::rendering::SkySystem::CloudAlphasFor(*model, 0.2, 1.0);
+    EXPECT_EQ(storm, (std::array<float, 3>{0.0F, 0.7F, 1.0F}));
+    const auto halfStorm = cnahouse::rendering::SkySystem::CloudAlphasFor(*model, 0.325, 0.5);
+    EXPECT_NEAR(halfStorm[0], 0.1625F, 1.0e-6F);
+    EXPECT_NEAR(halfStorm[1], 0.5500F, 1.0e-6F);
+    EXPECT_NEAR(halfStorm[2], 0.5125F, 1.0e-6F);
+
+    auto mesh = ReadOf(FixtureBytes());
+    ASSERT_TRUE(mesh);
+    cnahouse::rendering::Camera camera;
+    cnahouse::rendering::SkySystem sky(camera, std::move(*mesh), std::move(*model));
+    EXPECT_TRUE(sky.SetCloudState(0.325, 0.5));
+    EXPECT_EQ(sky.CloudAlphas(), halfStorm);
+    EXPECT_FALSE(sky.SetCloudState(0.325, 0.5));
+    EXPECT_FALSE(sky.SetCloudState(std::numeric_limits<double>::quiet_NaN(), 0.5));
+    EXPECT_EQ(sky.CloudAlphas(), halfStorm);
 }
 
 TEST(SkySystemTests, ColoursFollowAltitudeAndOvercastButUpdatesAreMaterialNotPerFrame)

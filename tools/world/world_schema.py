@@ -480,7 +480,8 @@ def build() -> dict[str, dict]:
                                                          "exclusiveMinimum": 0}}})}}})
 
     schemas["sky"] = envelope("sky", "layout.sky.json", {
-        "required": ["gradient", "colourModel"],
+        "required": ["gradient", "colourModel", "cloudLayers", "cloudAlpha",
+                     "stormCloudAlpha"],
         "properties": {
             "gradient": {"type": "array", "minItems": 2, "items": obj(
                 ["sunElevationDeg", "zenith", "horizon"],
@@ -509,6 +510,8 @@ def build() -> dict[str, dict]:
                 ["cloudCover", "high", "mid", "low"],
                 {"cloudCover": INTERVAL, "high": UNIT, "mid": UNIT, "low": UNIT,
                  "midTint": {"anyOf": [STR, {"type": "null"}]}})},
+            "stormCloudAlpha": obj(["high", "mid", "low"],
+                                   {"high": UNIT, "mid": UNIT, "low": UNIT}),
             "sun": {"type": "array", "minItems": 2, "items": obj(
                 ["elevationDeg", "color"],
                 {"elevationDeg": {"type": "number", "minimum": -90, "maximum": 90},

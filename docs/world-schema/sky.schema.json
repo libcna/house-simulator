@@ -253,6 +253,26 @@
       ],
       "type": "object"
     },
+    "stormCloudAlpha": {
+      "additionalProperties": false,
+      "properties": {
+        "high": {
+          "$ref": "#/$defs/unit"
+        },
+        "low": {
+          "$ref": "#/$defs/unit"
+        },
+        "mid": {
+          "$ref": "#/$defs/unit"
+        }
+      },
+      "required": [
+        "high",
+        "mid",
+        "low"
+      ],
+      "type": "object"
+    },
     "sun": {
       "items": {
         "additionalProperties": false,
@@ -282,7 +302,10 @@
   "required": [
     "schema",
     "gradient",
-    "colourModel"
+    "colourModel",
+    "cloudLayers",
+    "cloudAlpha",
+    "stormCloudAlpha"
   ],
   "title": "layout.sky.json",
   "type": "object"

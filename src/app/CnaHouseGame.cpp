@@ -967,6 +967,7 @@ namespace cnahouse::app
                     {
                         const weather::WeatherState& state = weather_->State();
                         skySystem_->SetWind(state.windSpeed, state.windDirectionDeg);
+                        skySystem_->SetCloudState(state.cloudCover, state.thunderIntensity);
                     }
                 }
             }
