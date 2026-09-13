@@ -3515,6 +3515,10 @@ presentation detail used only by the debug overlay and the almanac line:
 | 0.715–0.785 | Last quarter |
 | 0.785–0.965 | Waning crescent |
 
+`HOUSE-01603` keeps these half-open intervals in the single allocation-free `MoonPhaseName`
+function used by both presentation sites. Phase values wrap because a lunation is circular;
+non-finite input fails closed to New moon instead of leaking an empty or unstable label.
+
 ### 33.3 Rendering the phase
 
 Four implementations were considered:

@@ -24,6 +24,7 @@ namespace
     using cnahouse::environment::MoonPhaseAt;
     using cnahouse::environment::MoonPhaseFor;
     using cnahouse::environment::MoonPhaseFromPositions;
+    using cnahouse::environment::MoonPhaseName;
     using cnahouse::environment::MoonPosition;
     using cnahouse::environment::SimClock;
     using cnahouse::environment::SunObserver;
@@ -220,4 +221,47 @@ TEST(MoonPhaseTests, ClockConvenienceUsesTheCompressedCivilInstantAndBadInputFai
     EXPECT_DOUBLE_EQ(bad.phase, 0.0);
     EXPECT_DOUBLE_EQ(bad.illuminatedFraction, 0.0);
     EXPECT_DOUBLE_EQ(MoonPhaseAt(std::numeric_limits<double>::infinity(), SunObserver{}).phase, 0.0);
+}
+
+TEST(MoonPhaseTests, EveryNamedPhaseOwnsExactlyTheAuthoredHalfOpenInterval)
+{
+    struct Boundary
+    {
+        double phase;
+        const char* name;
+    };
+
+    constexpr Boundary cases[] = {
+        {0.000, "New moon"},
+        {0.034999, "New moon"},
+        {0.035, "Waxing crescent"},
+        {0.214999, "Waxing crescent"},
+        {0.215, "First quarter"},
+        {0.284999, "First quarter"},
+        {0.285, "Waxing gibbous"},
+        {0.464999, "Waxing gibbous"},
+        {0.465, "Full moon"},
+        {0.534999, "Full moon"},
+        {0.535, "Waning gibbous"},
+        {0.714999, "Waning gibbous"},
+        {0.715, "Last quarter"},
+        {0.784999, "Last quarter"},
+        {0.785, "Waning crescent"},
+        {0.964999, "Waning crescent"},
+        {0.965, "New moon"},
+        {0.999999, "New moon"},
+    };
+    for (const Boundary& boundary : cases)
+    {
+        EXPECT_EQ(MoonPhaseName(boundary.phase), boundary.name) << boundary.phase;
+    }
+}
+
+TEST(MoonPhaseTests, NamesWrapWithTheCircularPhaseAndInvalidInputFailsClosed)
+{
+    EXPECT_EQ(MoonPhaseName(1.1), "Waxing crescent");
+    EXPECT_EQ(MoonPhaseName(-0.25), "Last quarter");
+    EXPECT_EQ(MoonPhaseName(1234.5), "Full moon");
+    EXPECT_EQ(MoonPhaseName(std::numeric_limits<double>::quiet_NaN()), "New moon");
+    EXPECT_EQ(MoonPhaseName(std::numeric_limits<double>::infinity()), "New moon");
 }

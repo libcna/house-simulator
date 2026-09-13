@@ -14317,8 +14317,12 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             every non-singular row; direction is deliberately not asserted at published 0%/100%,
             where full/new has no directional distinction and the two ephemerides may cross the
             exact primary phase a few hours apart.
-- [ ] HOUSE-01603 — Implement the phase-name mapping for the overlay and the almanac line
+- [x] HOUSE-01603 — Implement the phase-name mapping for the overlay and the almanac line
       dep: HOUSE-01602 · sys: environment · plat: ALL · pri: MUST
+      note: (2026-09-13) `MoonPhaseName` is the one allocation-free mapping for both future
+            presentation sites. It implements all eight §33.2 half-open intervals exactly, wraps
+            finite inputs because a lunation is circular, and fails a non-finite value closed to
+            `New moon`. Unit tests pin both sides of every boundary plus positive/negative wraps.
 - [ ] HOUSE-01604 — Implement the CPU-generated 128² phase mask with the exact elliptical terminator, earthshine and libration rotation
       dep: HOUSE-01602 · sys: rendering · plat: ALL · pri: MUST
       accept: regenerated only when `phase` moves by > 1/128; upload cost measured and negligible

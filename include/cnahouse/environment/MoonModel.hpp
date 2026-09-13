@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <string_view>
+
 #include "cnahouse/environment/SunModel.hpp"
 
 namespace cnahouse::environment
@@ -57,6 +59,12 @@ namespace cnahouse::environment
 
     /// @brief §33.2's phase at the compressed civil instant held by @p clock.
     [[nodiscard]] MoonPhase MoonPhaseFor(const SimClock& clock) noexcept;
+
+    /// @brief The eight presentation names from §33.2 for a continuous circular @p phase.
+    ///
+    /// This is the one mapping shared by the overlay and almanac. Finite values are wrapped rather
+    /// than clamped because phase is circular; a non-finite value fails closed to "New moon".
+    [[nodiscard]] std::string_view MoonPhaseName(double phase) noexcept;
 
     struct MoonEvent
     {

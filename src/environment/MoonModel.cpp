@@ -215,6 +215,44 @@ namespace cnahouse::environment
                            observer);
     }
 
+    std::string_view MoonPhaseName(double phase) noexcept
+    {
+        if (!std::isfinite(phase))
+        {
+            return "New moon";
+        }
+        const double wrapped = phase - std::floor(phase);
+        if (wrapped < 0.035 || wrapped >= 0.965)
+        {
+            return "New moon";
+        }
+        if (wrapped < 0.215)
+        {
+            return "Waxing crescent";
+        }
+        if (wrapped < 0.285)
+        {
+            return "First quarter";
+        }
+        if (wrapped < 0.465)
+        {
+            return "Waxing gibbous";
+        }
+        if (wrapped < 0.535)
+        {
+            return "Full moon";
+        }
+        if (wrapped < 0.715)
+        {
+            return "Waning gibbous";
+        }
+        if (wrapped < 0.785)
+        {
+            return "Last quarter";
+        }
+        return "Waning crescent";
+    }
+
     MoonDay
     MoonDayFor(const CivilTime& localStandardDate, const SunObserver& observer, double thresholdDeg) noexcept
     {
