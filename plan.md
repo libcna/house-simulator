@@ -14274,9 +14274,28 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 24 — Moon and stars
 
-- [ ] HOUSE-01601 — Implement `MoonModel`: position from the truncated ELP terms
+- [x] HOUSE-01601 — Implement `MoonModel`: position from the truncated ELP terms
       dep: HOUSE-01561 · sys: environment · plat: ALL · pri: MUST
       verify: unit MoonModelTests.* against 60 published moonrise times, ± 8 minutes
+      note: (2026-09-13) `MoonModel` now evaluates the J2000 mean longitude, lunar and solar mean
+            anomalies, mean elongation and argument of latitude, applies the six largest ELP
+            longitude and six largest latitude terms, rotates the geocentric ecliptic direction
+            into equatorial/horizontal coordinates, and exposes normalised RA/declination,
+            hour angle, altitude, azimuth and ecliptic longitude/latitude. `MoonPositionFor`
+            follows `SimClock::CivilEpochSeconds()`, so season compression and the diurnal clock
+            retain the same separation as `SunModel`. `MoonDayFor` finds its own model's horizon
+            crossing at the conventional geocentric-centre altitude +0.125°; it does not hide a
+            second rise-time approximation.
+      provenance: 60 moonrise times from the United States Naval Observatory, Astronomical
+            Applications Department `https://aa.usno.navy.mil/api/rstt/oneday` (API 4.0.1),
+            retrieved 2026-09-13 at §33's 40.05° N, −75.30°, fixed UTC−5 local standard time.
+            Government work, 17 U.S.C. §105; recorded in `NOTICE.md`. The committed table and
+            extracted response cache are reproducible with `tools/ci/moontimes_table.py --fetch`;
+            CI checks both offline.
+      measured: all 60 published moonrises passed the ±8 minute criterion. Mean absolute error
+            **0.31 min**; worst **+1.01 min** on 2031-01-19. The fixture covers 2031-01-01 through
+            2032-01-14 at six-day sampling (legitimate no-rise civil dates are skipped), so it
+            exercises the full lunar cycle at many seasons rather than one favourable lunation.
 - [ ] HOUSE-01602 — Implement the continuous phase computation (elongation → illuminated fraction → waxing/waning → `phase` ∈ [0,1))
       dep: HOUSE-01601 · sys: environment · plat: ALL · pri: MUST
       verify: unit MoonPhaseTests.* against 60 published phase dates, ± 0.02

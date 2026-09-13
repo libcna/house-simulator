@@ -199,6 +199,10 @@ run_gate "calendar-table" python3 tools/ci/calendar_table.py --check
 # responses and compared. `--check` never touches the network; only `--fetch` does.
 run_gate "suntimes-table" python3 tools/ci/suntimes_table.py --check
 run_gate "suntimes-selftest" python3 tools/ci/suntimes_table.py --selftest
+# `HOUSE-01601`. The compact lunar series is checked against 60 moonrise times published by the
+# US Naval Observatory. The responses are cached so these two gates remain entirely offline.
+run_gate "moontimes-table" python3 tools/ci/moontimes_table.py --check
+run_gate "moontimes-selftest" python3 tools/ci/moontimes_table.py --selftest
 # `HOUSE-01641`. The 32 committed gradient rows are generated from eleven art-direction anchors;
 # the selftest expands the compact cloud and azimuth terms into the conceptual 32 x 8 x 16 table.
 # Both matter: `--check` catches a hand edit and `--selftest` catches a plausible but broken model.

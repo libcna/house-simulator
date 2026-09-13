@@ -114,10 +114,11 @@ own arithmetic proves only that the arithmetic is self-consistent.
 |---|---|---|
 | `tests/unit/reference/calendar.golden.txt` | Python's `datetime` and `zoneinfo`, over the IANA time-zone database | PSF-2.0 / IANA database public domain; the file is generated output, not a copy |
 | `tests/unit/reference/suntimes.usno.txt` and its `.raw.json` cache | [US Naval Observatory, Astronomical Applications Department](https://aa.usno.navy.mil/api/rstt/oneday), retrieved 2026-09-11 | a work of the United States Government, **not subject to copyright in the United States** (17 U.S.C. §105) |
+| `tests/unit/reference/moontimes.usno.txt` and its `.raw.json` cache | [US Naval Observatory, Astronomical Applications Department](https://aa.usno.navy.mil/api/rstt/oneday), retrieved 2026-09-13 | a work of the United States Government, **not subject to copyright in the United States** (17 U.S.C. §105) |
 
-The USNO extract is 195 days of sunrise, sunset and transit times at one location — §33's
-40.05° N, 75.30° W — kept so that CI never needs the network. `tools/ci/suntimes_table.py --fetch`
-reproduces it.
+The USNO extracts contain 195 days of sunrise, sunset and transit times and 60 moonrise times at
+one location — §33's 40.05° N, 75.30° W — kept so that CI never needs the network.
+`tools/ci/suntimes_table.py --fetch` and `tools/ci/moontimes_table.py --fetch` reproduce them.
 
 ---
 

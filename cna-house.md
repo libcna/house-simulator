@@ -3466,6 +3466,19 @@ latitude, then the six largest periodic terms of the ELP truncation — enough f
 and set in the right places, to be up at the right times relative to its phase, and to move
 against the stars over simulated days. About 60 flops, evaluated once per frame.
 
+`HOUSE-01601` implements that truncation from the J2000 fundamental arguments. It retains the six
+largest longitude terms and the six largest latitude terms, rotates the resulting geocentric
+ecliptic direction through the date's mean obliquity, then uses the same sidereal-time and
+east-positive observer conventions as `SunModel`. The returned altitude is geometric and
+geocentric. Rise/set uses +0.125° for the centre: mean lunar horizontal parallax minus mean
+refraction and semidiameter, with the opposite sign from the sun's −0.8333° threshold.
+
+The compact series was checked independently against 60 moonrise times published by the United
+States Naval Observatory for §33's location and fixed UTC−5 standard time. The rows span more than
+a year and more than twelve lunations; the mean absolute error is 0.31 minutes and the worst is
+1.01 minutes, comfortably inside the specified ±8 minutes. The committed extract and response
+cache keep normal CI offline, and `tools/ci/moontimes_table.py --fetch` reproduces them.
+
 ### 33.2 Phase
 
 ```

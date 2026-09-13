@@ -37,6 +37,7 @@ add_library(cnahouse_core STATIC
     environment/Season.cpp
     environment/Temperature.cpp
     environment/SimClock.cpp
+    environment/MoonModel.cpp
     environment/SunModel.cpp
     environment/SunLight.cpp
 
