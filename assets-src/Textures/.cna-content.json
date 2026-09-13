@@ -31,6 +31,12 @@
         "generateMipmaps": { "type": "bool", "value": true },
         "premultiplyAlpha": { "type": "bool", "value": true }
       }
+    },
+    "Sky/moon_albedo.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "premultiplyAlpha": { "type": "bool", "value": true }
+      }
     }
   }
 }

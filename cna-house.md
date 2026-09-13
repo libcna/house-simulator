@@ -3550,8 +3550,14 @@ last value it actually generated: equality at `1/128` does not update, the first
 does, and a wrap through new moon cannot look like a whole-lunation jump. Its position angle is
 sampled on that phase-driven update, so rotation never creates a second upload cadence.
 
-The moon texture itself is a real greyscale lunar albedo map (public-domain NASA imagery is
-available; provenance recorded), 1024 × 1024, modulated by the mask.
+The moon texture itself is a real 1024 × 1024 greyscale lunar albedo map, modulated by the mask.
+`HOUSE-01605` prepares it from NASA SVS CGI Moon Kit's 2019 LRO colour mosaic. The reviewed
+2048 × 1024 TIFF is hash-pinned, orthographically projected onto the visible near-side disc and
+converted to Rec.709 greyscale by `tools/assets/moon_albedo.py`. The nearest limb texel is extended
+outside the geometric disc so bilinear filtering cannot introduce a black fringe; `MoonMask`, not
+the albedo, owns disc opacity. Normal builds remain offline and check the exact committed output,
+while `--fetch` reproduces it from NASA. The NASA public-domain terms, source credit and both hashes
+are carried by the manifest, generated credits and `assets-src/Textures/Sky/SOURCE.md`.
 
 Disc drawn at 890 units along `−moonDirection`, angular diameter 0.52°, `BlendState::Additive`,
 with the same horizon-scaling and reddening treatment as the sun.

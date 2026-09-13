@@ -1,0 +1,25 @@
+NASA Images and Media Usage Guidelines
+
+NASA content – images, audio, video, and media files used in the rendition of 3-dimensional
+models, such as texture maps and polygon data in any format – generally are not subject to
+copyright in the United States. You may use this material for educational or informational
+purposes, including photo collections, textbooks, public exhibits, computer graphical simulations
+and Internet Web pages. This general permission extends to personal Web pages.
+
+News outlets, schools, and text-book authors may use NASA content without needing explicit
+permission, subject to compliance with these guidelines. NASA content used in a factual manner
+that does not imply endorsement may be used without needing explicit permission. NASA should be
+acknowledged as the source of the material. NASA occasionally uses copyright-protected material
+of third parties with permission on its website. Those images will be marked identified as
+copyright protected with the name of the copyright holder. NASA’s use does not convey any rights
+to others to use the same material. Those wishing to use copyright protected material of third
+parties must contact the copyright holder directly.
+
+If the NASA material is to be used for commercial purposes, including advertisements, it must not
+explicitly or implicitly convey NASA’s endorsement of commercial goods or services.
+
+The NASA Insignia (the blue "meatball" logo), the retired NASA Logotype (the red "worm" logo) and
+the NASA Seal may not be used for any purpose without explicit permission.
+
+Archived verbatim from the portions of NASA's official Images and Media Usage Guidelines that
+govern this texture. The source URL and retrieval date are recorded beside this file.

@@ -467,6 +467,13 @@ Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 - `SOUND_NOX_HUMAN_MALE_THROAT_CLEANING_VOICE_MALE_V2_THROAT_CLEANING_MONO_01` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 - `SOUND_NOX_HUMAN_MALE_THROAT_CLEANING_VOICE_MALE_V2_THROAT_CLEANING_MONO_02` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 
+## NASA-PD
+
+Full text: [`licenses/nasa-pd/LICENCE.txt`](nasa-pd/LICENCE.txt)
+
+- `TEX_SKY_MOON_ALBEDO` — **NASA SVS CGI Moon Kit lunar albedo map** by NASA's Scientific Visualization Studio / Ernie Wright (USRA) — <https://svs.gsfc.nasa.gov/4720> (retrieved 2026-09-13)
+  - Attribution: NASA's Scientific Visualization Studio; visualization by Ernie Wright (USRA)
+
 ## OFL-1.1
 
 Full text: [`licenses/ofl-1.1/LICENCE.txt`](ofl-1.1/LICENCE.txt)
@@ -478,4 +485,4 @@ Full text: [`licenses/ofl-1.1/LICENCE.txt`](ofl-1.1/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `ffd523fe7387cb2161c99d4e17974a3f1cdf5ee51266872485143c93bbbb83a2`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `41547b9d5ee5bbd2560002de56efc5294d00a443cdf65226edb88c999da765a5`.*

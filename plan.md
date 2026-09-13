@@ -14337,8 +14337,28 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       measured: a real OPENGLES3 `Texture2D::SetData` of the 64 KiB mask, synchronised to GPU
             completion after each sample, took **0.284 ms median over 21 samples** after three
             warm-ups — 1.7% of a 16.67 ms frame, and incurred only on a phase-threshold crossing.
-- [ ] HOUSE-01605 — Acquire and prepare the lunar albedo texture (1024², public domain, provenance recorded)
+- [x] HOUSE-01605 — Acquire and prepare the lunar albedo texture (1024², public domain, provenance recorded)
       dep: HOUSE-00274 · sys: content · plat: TOOL · pri: MUST
+      verify: `tools/assets/moon_albedo.py --check`; `tools/assets/moon_albedo.py --selftest`;
+              manifest, licence, content-graph and content-pipeline gates; real `cna-content`
+              compilation of `Textures/Sky/moon_albedo.cnb`
+      provenance: NASA SVS CGI Moon Kit's original 2019 `lroc_color_poles_2k.tif`, LRO camera and
+            altimeter data, reviewed source SHA-256
+            `13b797422e8c4b8607ff2b2623ac3a046a6da0132d567c2d272d92fad7052c4a`, retrieved 2026-09-13.
+            NASA's official terms expressly cover texture maps and computer graphical simulations;
+            the item carries no third-party copyright marking. The archived terms, required credit,
+            no-endorsement constraint and conversion history are in `licenses/nasa-pd/`, generated
+            credits, `docs/licence-evidence/astronomical.md` and the asset directory's `SOURCE.md`.
+      note: (2026-09-13) `moon_albedo.py` refuses any upstream bytes except the reviewed TIFF,
+            orthographically projects its near hemisphere into §33.3's camera-facing square,
+            converts to Rec.709 greyscale and extends the nearest limb texel outside the disc so
+            bilinear filtering cannot create a black rim beneath `MoonMask`. `--fetch` is the only
+            network path; normal builds verify the committed PNG entirely offline. The selftest
+            pins centre, ±90° limbs, north-pole orientation, bilinear sampling and PNG round-trip.
+      measured: exact 1024 × 1024 opaque RGBA8 greyscale; 885,108 source bytes and 5,593,268
+            compiled `.cnb` bytes with mipmaps; 208 levels spanning 45-254 with mean 129.86;
+            output SHA-256
+            `d7fa53d450a40b605ab29dd28a51b9be4b43cae1b10481d5f9a91f428b851e75`.
 - [ ] HOUSE-01606 — Implement the moon disc quad with the mask, horizon scaling and reddening
       dep: HOUSE-01604, HOUSE-01605 · sys: rendering · plat: ALL · pri: MUST
 - [x] HOUSE-01607 — Implement moonlight: intensity from the non-linear phase curve, the blue colour, and the cloud modulation

@@ -58,6 +58,22 @@ condition, but carried in the manifest's `attribution` field anyway, so it reach
 | `commercialUse` | true, subject to the no-endorsement constraint above |
 | `modification` | true |
 
+### Acquired asset (`HOUSE-01605`)
+
+The selected upstream file is the original 2019 RGB map `lroc_color_poles_2k.tif`, not the 2025
+revision. It is 2048 × 1024, and its reviewed SHA-256 is
+`13b797422e8c4b8607ff2b2623ac3a046a6da0132d567c2d272d92fad7052c4a`. The item page marks no
+third-party copyright on it and gives the requested credit to NASA's Scientific Visualization
+Studio, with Ernie Wright (USRA) as visualizer.
+
+`tools/assets/moon_albedo.py --fetch` downloads only that official SVS URL, refuses bytes with any
+other hash, then performs the project-owned derivation needed by the Tier-S quad: an orthographic
+projection of the near side, 1024-square resampling, Rec.709 greyscale conversion and opaque
+nearest-limb extension beneath the separately generated phase mask. The committed RGBA8 PNG is
+885,108 bytes, spans 208 grey levels, and has SHA-256
+`d7fa53d450a40b605ab29dd28a51b9be4b43cae1b10481d5f9a91f428b851e75`. Normal CI is offline: it
+pins this output and tests the projection orientation independently.
+
 ## 2. Star catalogue — the expectation does NOT hold
 
 The obvious source, and the one a search leads to, is the **HYG database**:

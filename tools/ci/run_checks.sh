@@ -216,6 +216,10 @@ run_gate "sky-lut-selftest" python3 tools/world/sky_lut.py --selftest
 # 1024-square RGBA tiles, with a periodic seam and distinct sparse/body/overcast alpha profiles.
 run_gate "cloud-textures" python3 tools/world/cloud_textures.py --check
 run_gate "cloud-textures-selftest" python3 tools/world/cloud_textures.py --selftest
+# `HOUSE-01605`. The committed near-side map is a deterministic projection of one hash-pinned
+# NASA TIFF. Normal CI stays offline while checking both the exact asset and the projection maths.
+run_gate "moon-albedo" python3 tools/assets/moon_albedo.py --check
+run_gate "moon-albedo-selftest" python3 tools/assets/moon_albedo.py --selftest
 # `HOUSE-01642`. Geometry that begins with a ring of duplicate poles can look right while carrying
 # zero-area triangles, so the offline mesh proves its topology before `SkySystem` ever uploads it.
 run_gate "sky-dome-selftest" python3 tools/world/build_skydome.py --selftest

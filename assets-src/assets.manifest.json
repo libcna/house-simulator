@@ -16075,6 +16075,30 @@
       }
     },
     {
+      "id": "TEX_SKY_MOON_ALBEDO",
+      "category": "sky",
+      "sourceFile": "assets-src/Textures/Sky/moon_albedo.png",
+      "sourceSha256": "d7fa53d450a40b605ab29dd28a51b9be4b43cae1b10481d5f9a91f428b851e75",
+      "contentName": "Textures/Sky/moon_albedo",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "downloaded",
+        "name": "NASA SVS CGI Moon Kit lunar albedo map",
+        "licence": "NASA-PD",
+        "licenceFile": "licenses/nasa-pd/LICENCE.txt",
+        "attribution": "NASA's Scientific Visualization Studio; visualization by Ernie Wright (USRA)",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "url": "https://svs.gsfc.nasa.gov/4720",
+        "author": "NASA's Scientific Visualization Studio / Ernie Wright (USRA)",
+        "retrieved": "2026-09-13",
+        "note": "Prepared by tools/assets/moon_albedo.py for HOUSE-01605 from hash-pinned lroc_color_poles_2k.tif: orthographic near-side projection, 1024-square resample and Rec.709 greyscale conversion. NASA source and usage terms verified in docs/licence-evidence/astronomical.md and assets-src/Textures/Sky/SOURCE.md; no NASA identifier or logo is present."
+      }
+    },
+    {
       "id": "VIDEO_SMOKE_CLIP",
       "category": "fixture",
       "sourceFile": "assets-src/Media/Video/smoke_clip.ogv",

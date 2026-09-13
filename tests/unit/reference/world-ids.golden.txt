@@ -2061,6 +2061,7 @@ assets	TEXTURE_SMOKE_QUADRANTS
 assets	TEX_SKY_CLOUD_CIRRUS
 assets	TEX_SKY_CLOUD_CUMULUS
 assets	TEX_SKY_CLOUD_STRATUS
+assets	TEX_SKY_MOON_ALBEDO
 interactables/interactables	TV_B1_CINEMA
 interactables/interactables	TV_L0_FAMILY
 interactables/interactables	TV_L1_MASTER_BED
