@@ -2198,6 +2198,13 @@ Hero assets (human, dog, cat, car) additionally require a **visual sign-off task
 screenshots (front, side, three-quarter, close-up) at final scale in the actual scene lighting,
 compared against a reference photograph, recorded in `docs/asset-review/`.
 
+`HOUSE-00293` exhausted R-03's three sources and fixed the player car as a project-authored,
+unbranded contemporary five-door family estate: **4.65 × 1.84 × 1.48 m**, with a simplified
+visible cabin, LOD1/LOD2 and collision proxy. `HOUSE-01035` owns the source model and visual
+sign-off, `HOUSE-01036` owns the pipeline proof, `HOUSE-00778` derives its snow shell, and
+`HOUSE-00998` places it in the garage. It remains a static prop; the deferred drivable-car scope is
+unchanged.
+
 ### 19.4 Category plan
 
 | Category | Unique models | Approach |
@@ -2217,7 +2224,7 @@ compared against a reference photograph, recorded in `docs/asset-review/`.
 | Vegetation: 6 tree species × 3 ages, 9 shrubs, 5 flowers, grass cards | 32 sourced | Plus impostors |
 | Exterior: fence kit, gates, mailbox, bins, hose reel, AC unit, shed, garden furniture, fire pit, swing | 24 sourced + generated fence | |
 | Neighbourhood houses | 8 sourced/generated bodies × material variants | Plus 3 LOD levels and impostors |
-| Vehicles: the player's car, 3 parked neighbour cars, 1 delivery van | 5 sourced | The player's car is a hero asset |
+| Vehicles: the player's car, 3 parked neighbour cars, 1 delivery van | 1 project-authored + 4 sourced | The player's car is a hero asset |
 | Characters: 2 base bodies, 6 hair, 5 clothing sets | 13 built from MakeHuman + Blender | Hero |
 | Animals: dog, cat | 2 project-authored | Hero |
 | **Total unique models** | **≈ 420** | |
@@ -6509,7 +6516,7 @@ and phase 9 must precede 13.
 |---|---|---|---|---|
 | R-01 | ~~No high-quality CC0 rigged **dog** exists~~ — **realised by `HOUSE-00291`** | Realised | High — it is a headline feature | All three named attempts failed the fixed quality/provenance bar. Build it ourselves in `HOUSE-02041`–`HOUSE-02043`, budgeted at 5 days of Blender work, then verify the pipeline in `HOUSE-02044`. |
 | R-02 | ~~No high-quality CC0 rigged **cat** exists~~ — **realised by `HOUSE-00292`** | Realised | High | All three sourcing attempts failed the fixed quality/provenance bar. Build it ourselves in `HOUSE-02091`–`HOUSE-02093`, then verify the pipeline in `HOUSE-02094`. |
-| R-03 | Same for a realistic **car** | Medium | Medium | The car is always seen in a dim garage at ≤ 6 m; a good but not spectacular model suffices |
+| R-03 | ~~No suitable cleanly licensed realistic **car** exists~~ — **realised by `HOUSE-00293`** | Realised | Medium | All three sources failed provenance, ordinary realism or the 45,000-triangle budget. Author the fixed unbranded estate in `HOUSE-01035`, prove it in `HOUSE-01036`, then place it in `HOUSE-00998`; it is seen in a dim garage at ≤ 6 m, so a good but not spectacular model suffices. |
 | R-04 | MakeHuman output quality or licence is not what we expect | Low | High | Verify early (phase 4). Fallbacks: Khronos sample characters, or a purchased-then-not-redistributed pipeline is **not** acceptable — so the real fallback is hand-modelling two stylised-but-plausible humans |
 | R-05 | Mocap licence (CMU) turns out to be restrictive | Low | Medium | Fallback: hand-animate 18 clips, ~8 days |
 | R-06 | ~~`.fx` compilation through Wine is fragile or fxc rejects our HLSL~~ — **largely retired 2026-09-06.** `HOUSE-00087` compiled a two-technique `.fx` through a genuine Microsoft `fxc` (DXSDK June 2010) under Wine and drew with it, with parameters arriving exactly. The one fragility found was real but ours to fix and now fixed: `cna-content` passes Unix paths to a Windows tool, so the launcher must be `tools/effects/fxc-wine.sh`, not bare `wine`. | Low | Medium | Tier S is complete without it (by design). Compiled `.xnb` is committed once it works. |

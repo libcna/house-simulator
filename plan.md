@@ -4990,8 +4990,20 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
       decision: R-02's authored fallback is scheduled through the existing `HOUSE-02091` model and
             sign-off, `HOUSE-02092` 34-bone rig, `HOUSE-02093` eleven authored clips and
             `HOUSE-02094` pipeline verification. No duplicate task id was added.
-- [ ] HOUSE-00293 — **Hero asset research: the car.** Same (R-03)
+- [x] HOUSE-00293 — **Hero asset research: the car.** Same (R-03)
       dep: HOUSE-00291 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-13) `docs/asset-selection/car-hero-research.md`; **build it ourselves.** The
+            fixed §19.3/§70.5/§72 bar was applied first. Sketchfab's author-declared CC0 concept
+            cars were futuristic and 198,300–300,700 triangles. Blend Swap's plausible CC0 match
+            was an unmeasured high-poly 1968 Mustang modelled after the car in *Bullitt*, with the
+            aggregator's unresolved brand/design chain of title. Quaternius's eight-car set is
+            deliberately low-poly and repeats the CC0-versus-QAL redistribution contradiction. No
+            candidate passed provenance, ordinary realism and the 45,000-triangle budget, so no
+            bytes were downloaded.
+      decision: author an unbranded contemporary five-door family estate, 4.65 × 1.84 × 1.48 m,
+            as a static prop. New permanent phase-13 tasks `HOUSE-01035` and `HOUSE-01036` own its
+            source/LODs/sign-off and pipeline proof; `HOUSE-00998` then places the verified asset.
+            The tasks use the next free ids in phase 13's reserved range.
 - [ ] HOUSE-00294 — **Hero asset research: the human base meshes.** Produce two MakeHuman bodies, evaluate topology and silhouette, and sign off (R-04)
       dep: HOUSE-00269 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00295 — **Hero asset research: locomotion clips.** Retarget 6 CMU clips onto the base rig and evaluate quality (R-05)
@@ -11916,7 +11928,10 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             becomes its roof), a building with no lid (the shed is open to the sky), and a porch
             given a roof of its own (the soffit stops being the balcony's floor).
 - [ ] HOUSE-00778 — Build the snow shells (`build_snowshell.py`) for terrain, roofs, decks, rails, furniture and the car
-      dep: HOUSE-00214, HOUSE-00777 · sys: content · plat: TOOL · pri: MUST
+      dep: HOUSE-00214, HOUSE-00777, HOUSE-00975…HOUSE-00985, HOUSE-01036 · sys: content · plat: TOOL · pri: MUST
+      dep-note: the asset dependencies were added by `HOUSE-00293`: derived furniture and car
+            shells cannot be generated before the source models exist and pass the content
+            pipeline. Depending only on `HOUSE-00777` could never satisfy the task's own noun list.
 - [x] HOUSE-00779 — Build the sky-exposure data (`build_skyexposure.py`) per cell and per facade
       dep: HOUSE-00213, HOUSE-00777 · sys: content · plat: TOOL · pri: MUST
       verify: `tools/world/build_skyexposure.py --selftest`
@@ -12752,6 +12767,19 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-00296 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00985 — `prop_kit_gen.py`: generate cabinet carcasses, shelving, boxes, radiators, ducts, pipe runs and wire runs from data
       dep: HOUSE-00971 · sys: content · plat: TOOL · pri: MUST
+- [ ] HOUSE-01035 — Author the unbranded player-car model, LOD1/LOD2 and collision proxy to the fixed acceptance bar; complete the four-view visual sign-off
+      dep: HOUSE-00293, HOUSE-00298 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-13) **New tasks `HOUSE-01035` and `HOUSE-01036`, the next free ids in phase
+            13's reserved 00971–01120 range.** `HOUSE-00293` exhausted the three R-03 sources and
+            selected a project-authored, unbranded 4.65 × 1.84 × 1.48 m five-door estate. A hero
+            source model cannot be hidden inside `HOUSE-00998`'s 55-prop room-furnishing scope.
+      accept: LOD0 ≤ 45,000 triangles; real-scale exterior and simplified visible cabin; clean
+            winding, normals and topology; support-point origin; four reference-photo comparisons
+            in the actual garage lighting; the car and all parts remain static
+- [ ] HOUSE-01036 — Export, manifest, validate and build the authored player car through the real `.glb`/`.cnb` pipeline
+      dep: HOUSE-01035, HOUSE-00220, HOUSE-00222 · sys: content · plat: TOOL · pri: MUST
+      accept: `gltf_validate.py`, `scale_check.py`, `origin_check.py`, the manifest/licence gates and
+            the content build pass for all LOD and collision outputs
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -12777,7 +12805,7 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 - [ ] HOUSE-00997 — Furnish `L0_STOR`, `L0_STAIR_MAIN`
       dep: HOUSE-00986 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00998 — Furnish `L0_GARAGE` (car, workbench, shelving, tools, bikes, bins, 28 containers, the door mechanism)
-      dep: HOUSE-00293, HOUSE-00984 · sys: world · plat: TOOL · pri: MUST
+      dep: HOUSE-01036, HOUSE-00984 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00999 — Furnish `L1_LANDING` and `L1_HALL`, `L1_HALL_W`
       dep: HOUSE-00986 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-01000 — Furnish `L1_MASTER_BED`
