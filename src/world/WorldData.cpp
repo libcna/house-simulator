@@ -280,7 +280,7 @@ namespace cnahouse::world
         return at == nullptr ? nullptr : &m_contents.lights[*at];
     }
 
-    const Material* WorldData::FindMaterial(util::Id id) const noexcept
+    const MaterialDef* WorldData::FindMaterial(util::Id id) const noexcept
     {
         const std::uint32_t* at = Lookup(m_materialIndex, id);
         return at == nullptr ? nullptr : &m_contents.materials[*at];

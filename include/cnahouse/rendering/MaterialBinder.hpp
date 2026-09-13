@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <span>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -22,6 +23,11 @@ namespace Microsoft::Xna::Framework::Graphics
     class SkinnedEffect;
     class Texture2D;
 } // namespace Microsoft::Xna::Framework::Graphics
+
+namespace cnahouse::world
+{
+    struct MaterialDef;
+}
 
 namespace cnahouse::rendering
 {
@@ -53,8 +59,6 @@ namespace cnahouse::rendering
 
         /// @brief Content asset names. Empty means "no texture", which is legal and draws untextured.
         std::string diffuseTexture;
-        /// @brief The second UV channel's texture. `DualTexture` only.
-        std::string secondTexture;
 
         /// @brief Linear RGB in 0..1, and **already premultiplied where alpha applies**.
         ///
@@ -132,8 +136,20 @@ namespace cnahouse::rendering
         /// @brief Registers @p desc under @p id.
         ///
         /// Fails on a duplicate id, and on a description this project has measured to be
-        /// unbuildable — an unlit `Skinned` material, or a `DualTexture` one with no second texture.
+        /// unbuildable — an unlit `Skinned` material.
         util::Result<void> Register(util::Id id, MaterialDesc desc);
+
+        /// @brief Converts and registers one loaded `layout.materials.json` definition.
+        ///
+        /// The lightmap is deliberately absent from `MaterialDesc`: §23 supplies it per draw from
+        /// the visible room/light group, so it is not a property of a material definition.
+        util::Result<void> Register(const world::MaterialDef& definition);
+
+        /// @brief Registers a complete loaded material table atomically.
+        ///
+        /// On the first bad row, every row inserted by this call is removed again. Registrations
+        /// that predate the call are left untouched.
+        util::Result<void> RegisterAll(std::span<const world::MaterialDef> definitions);
 
         [[nodiscard]] const MaterialDesc* Find(util::Id id) const noexcept;
 

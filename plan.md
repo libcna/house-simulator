@@ -12801,8 +12801,20 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
 
 ## Phase 12 — Materials and textures
 
-- [ ] HOUSE-00891 — Implement `MaterialDef` loading and the material registry
+- [x] HOUSE-00891 — Implement `MaterialDef` loading and the material registry
       dep: HOUSE-00349, HOUSE-00385 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-14) `layout.materials.json` now has the deliberately named runtime boundary
+            `world::MaterialDef`; `MaterialBinder::Register` maps its Tier S effect, albedo, tint,
+            alpha/cutoff, specular values and two-sided flag into the stock-XNA draw description.
+            `RegisterAll` keys the complete table by permanent `Id` and is transactional: one bad
+            or duplicate row rolls back only this call, so no frame can see half a material table.
+      finding: a lightmap is selected from the visible room/light group per draw (§23), not loaded
+            from a material. The unused `MaterialDesc::secondTexture` field and its registration-time
+            refusal falsely made it material-owned; the field is removed while `DrawParams::second`
+            remains the honest per-draw input for `HOUSE-00893`.
+      verified: max-4-core warning-clean build; 15 `MaterialBinderTests` plus the current-world fixture;
+            complete suite 1551/1551 executed tests; `check_xna_strict.py --all --jobs 4` 317/317;
+            `tools/ci/run_checks.sh` all gates green.
 - [ ] HOUSE-00892 — Implement `MaterialBinder` for `BasicEffect`: diffuse, specular, texture, vertex colour, alpha, fog
       dep: HOUSE-00891, HOUSE-00162 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00893 — Implement `MaterialBinder` for `DualTextureEffect`: albedo + lightmap + diffuse tint

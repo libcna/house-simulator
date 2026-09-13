@@ -1098,7 +1098,7 @@ namespace
         ASSERT_TRUE(materials) << materials.Error().ToString();
 
         ASSERT_EQ(contents.materials.size(), 5U);
-        const world::Material& tile = contents.materials[0];
+        const world::MaterialDef& tile = contents.materials[0];
         EXPECT_EQ(tile.id, Intern("MAT_TILE_PORCELAIN_GREY"));
         EXPECT_EQ(tile.materialClass, world::MaterialClass::Tile);
         EXPECT_EQ(tile.surfaceState, world::SurfaceState::Dry);
@@ -1128,12 +1128,12 @@ namespace
         world::WorldData::Contents contents;
         ASSERT_TRUE(world::WorldLoader::LoadMaterials(directory_, contents));
 
-        const world::Material& wet = contents.materials[3];
+        const world::MaterialDef& wet = contents.materials[3];
         EXPECT_EQ(wet.materialClass, world::MaterialClass::Wood);
         EXPECT_EQ(wet.surfaceState, world::SurfaceState::Wet);
         EXPECT_EQ(world::SpellMaterialClass({wet.materialClass, wet.surfaceState}), "wet_wood");
 
-        const world::Material& snowy = contents.materials[4];
+        const world::MaterialDef& snowy = contents.materials[4];
         EXPECT_EQ(snowy.materialClass, world::MaterialClass::Asphalt);
         EXPECT_EQ(snowy.surfaceState, world::SurfaceState::Snowy);
     }
@@ -3539,10 +3539,10 @@ namespace
 
         const auto glassAt = std::find_if(contents.materials.begin(),
                                           contents.materials.end(),
-                                          [](const world::Material& material)
+                                          [](const world::MaterialDef& material)
                                           { return material.id == Intern("MAT_GLASS_CLEAR"); });
         ASSERT_NE(glassAt, contents.materials.end());
-        const world::Material& glass = *glassAt;
+        const world::MaterialDef& glass = *glassAt;
         EXPECT_EQ(glass.materialClass, world::MaterialClass::Glass);
         EXPECT_EQ(glass.alphaMode, world::AlphaMode::Blend);
         EXPECT_FLOAT_EQ(glass.alpha, 0.12F) << "section 22.2's clear-glass opacity is data";
@@ -3550,19 +3550,19 @@ namespace
 
         const auto lawnAt = std::find_if(contents.materials.begin(),
                                          contents.materials.end(),
-                                         [](const world::Material& material)
+                                         [](const world::MaterialDef& material)
                                          { return material.id == Intern("MAT_GROUND_LAWN"); });
         ASSERT_NE(lawnAt, contents.materials.end());
-        const world::Material& lawn = *lawnAt;
+        const world::MaterialDef& lawn = *lawnAt;
         EXPECT_TRUE(lawn.snow.coverable);
         EXPECT_FLOAT_EQ(lawn.snow.slopeLimitDeg, 40.0F);
         EXPECT_EQ(lawn.effectTierS, world::EffectTier::DualTexture);
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
-                                [](const world::Material& material) { return material.snow.coverable; }),
+                                [](const world::MaterialDef& material) { return material.snow.coverable; }),
                   11);
-        for (const world::Material& material : contents.materials)
+        for (const world::MaterialDef& material : contents.materials)
         {
             EXPECT_GT(material.specularPower, 0.0F);
             EXPECT_FALSE(material.footstepSurface.empty());

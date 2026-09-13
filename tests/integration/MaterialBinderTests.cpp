@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-00162`. The binder's whole reason to exist is that it refuses, at registration, two things
-// phase 1 MEASURED to be impossible -- an unlit `SkinnedEffect`, and a bone palette above 72 -- so
-// that they fail where the error can name the material rather than two hundred draws later where it
-// can only name the effect. Those refusals are what these tests are mostly about.
+// `HOUSE-00162`, `HOUSE-00891`. The binder refuses, at registration, things phase 1 MEASURED to be
+// impossible, and turns the loaded material table into the small draw-time descriptions consumed by
+// stock XNA effects. A bad table fails before a frame can observe it.
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -13,6 +12,8 @@
 
 #include "cnahouse/rendering/MaterialBinder.hpp"
 #include "cnahouse/util/Ids.hpp"
+#include "cnahouse/world/WorldLoader.hpp"
+#include "cnahouse/world/WorldTypes.hpp"
 
 #include "integration/DeviceHost.hpp"
 
@@ -45,7 +46,6 @@ namespace
         MaterialDesc desc;
         desc.kind = MaterialKind::DualTexture;
         desc.diffuseTexture = "Textures/wall";
-        desc.secondTexture = "Textures/wall_lm";
         return desc;
     }
 
@@ -114,18 +114,107 @@ namespace
             });
     }
 
-    TEST(MaterialBinderTests, ADualTextureMaterialWithoutASecondTextureIsRefused)
+    TEST(MaterialBinderTests, TheLoadedDefinitionBecomesTheRegisteredDrawDescription)
     {
-        // Left alone it draws black, because the `HOUSE-00078` lightmap product is with nothing --
-        // a material that meant to be `Basic`.
         RunWithBinder(
             [](MaterialBinder& binder)
             {
-                MaterialDesc desc = Wall();
-                desc.secondTexture.clear();
-                const auto result = binder.Register(Id::Of("MAT_WALL"), desc);
+                cnahouse::world::MaterialDef definition;
+                definition.id = Id::Of("MAT_LEAF");
+                definition.albedo = "Textures/leaf";
+                definition.tint = {0.25F, 0.50F, 0.75F};
+                definition.alpha = 0.80F;
+                definition.specularColor = {0.10F, 0.20F, 0.30F};
+                definition.specularPower = 24.0F;
+                definition.alphaMode = cnahouse::world::AlphaMode::Mask;
+                definition.alphaCutoff = 0.5F;
+                definition.twoSided = true;
+                definition.effectTierS = cnahouse::world::EffectTier::AlphaTest;
+
+                ASSERT_TRUE(binder.Register(definition).HasValue());
+                const MaterialDesc* desc = binder.Find(definition.id);
+                ASSERT_NE(desc, nullptr);
+                EXPECT_EQ(desc->kind, MaterialKind::AlphaTest);
+                EXPECT_EQ(desc->diffuseTexture, "Textures/leaf");
+                EXPECT_FLOAT_EQ(desc->diffuse[0], 0.25F);
+                EXPECT_FLOAT_EQ(desc->diffuse[1], 0.50F);
+                EXPECT_FLOAT_EQ(desc->diffuse[2], 0.75F);
+                EXPECT_FLOAT_EQ(desc->alpha, 0.80F);
+                EXPECT_FLOAT_EQ(desc->specularColour[0], 0.10F);
+                EXPECT_FLOAT_EQ(desc->specularColour[1], 0.20F);
+                EXPECT_FLOAT_EQ(desc->specularColour[2], 0.30F);
+                EXPECT_FLOAT_EQ(desc->specularPower, 24.0F);
+                EXPECT_EQ(desc->referenceAlpha, 128);
+                EXPECT_TRUE(desc->twoSided);
+            });
+    }
+
+    TEST(MaterialBinderTests, TheCompleteAuthoredMaterialTableRegistersByItsPermanentIds)
+    {
+        // Integration tests run from the build tree, exactly where the game finds deployed data.
+        // The `world-content-current` fixture proves this copy matches `assets-src/world` first.
+        cnahouse::world::WorldData::Contents contents;
+        const auto loaded = cnahouse::world::WorldLoader::LoadMaterials("content/world", contents);
+        ASSERT_TRUE(loaded.HasValue()) << loaded.Error().ToString();
+
+        RunWithBinder(
+            [&contents](MaterialBinder& binder)
+            {
+                ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
+                EXPECT_EQ(binder.Count(), contents.materials.size());
+                EXPECT_EQ(binder.Count(), 20U);
+
+                const MaterialDesc* glass = binder.Find(Id::Of("MAT_GLASS_CLEAR"));
+                ASSERT_NE(glass, nullptr);
+                EXPECT_EQ(glass->kind, MaterialKind::Basic);
+                EXPECT_FLOAT_EQ(glass->alpha, 0.12F);
+
+                const MaterialDesc* lawn = binder.Find(Id::Of("MAT_GROUND_LAWN"));
+                ASSERT_NE(lawn, nullptr);
+                EXPECT_EQ(lawn->kind, MaterialKind::DualTexture);
+                EXPECT_EQ(lawn->diffuseTexture, "Textures/Materials/grass_lawn_albedo");
+            });
+    }
+
+    TEST(MaterialBinderTests, AnInvalidLoadedAlphaOrCutoffIsRefusedAtTheRegistryBoundary)
+    {
+        RunWithBinder(
+            [](MaterialBinder& binder)
+            {
+                cnahouse::world::MaterialDef definition;
+                definition.id = Id::Of("MAT_BAD");
+                definition.alpha = 1.01F;
+                EXPECT_EQ(binder.Register(definition).Error().Code(), ErrorCode::OutOfRange);
+
+                definition.alpha = 1.0F;
+                definition.alphaMode = cnahouse::world::AlphaMode::Mask;
+                definition.alphaCutoff = -0.01F;
+                EXPECT_EQ(binder.Register(definition).Error().Code(), ErrorCode::OutOfRange);
+
+                definition.alphaCutoff.reset();
+                EXPECT_EQ(binder.Register(definition).Error().Code(), ErrorCode::InvalidData);
+                EXPECT_EQ(binder.Count(), 0U);
+            });
+    }
+
+    TEST(MaterialBinderTests, AFailedTableRegistrationLeavesNoPartialRowsBehind)
+    {
+        RunWithBinder(
+            [](MaterialBinder& binder)
+            {
+                const Id existing = Id::Of("MAT_EXISTING");
+                ASSERT_TRUE(binder.Register(existing, Wall()).HasValue());
+
+                std::vector<cnahouse::world::MaterialDef> definitions(2);
+                definitions[0].id = Id::Of("MAT_NEW");
+                definitions[1].id = existing;
+
+                const auto result = binder.RegisterAll(definitions);
                 ASSERT_FALSE(result.HasValue());
-                EXPECT_EQ(result.Error().Code(), ErrorCode::InvalidData);
+                EXPECT_EQ(result.Error().Code(), ErrorCode::Duplicate);
+                EXPECT_EQ(binder.Count(), 1U);
+                EXPECT_NE(binder.Find(existing), nullptr);
+                EXPECT_EQ(binder.Find(definitions[0].id), nullptr);
             });
     }
 

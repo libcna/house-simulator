@@ -765,7 +765,7 @@ namespace cnahouse::world
 
         for (const JsonValue& row : rows.Value())
         {
-            Material material;
+            MaterialDef material;
             const Result<util::Id> id = RequireId(row, "id");
             if (!id)
             {

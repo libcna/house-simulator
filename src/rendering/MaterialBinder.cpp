@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/rendering/MaterialBinder.hpp"
 
+#include <cmath>
 #include <format>
 
 #include "Microsoft/Xna/Framework/Graphics/AlphaTestEffect.hpp"
@@ -11,6 +12,8 @@
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Matrix.hpp"
 #include "Microsoft/Xna/Framework/Vector3.hpp"
+
+#include "cnahouse/world/WorldTypes.hpp"
 
 namespace cnahouse::rendering
 {
@@ -41,6 +44,43 @@ namespace cnahouse::rendering
             effect.setWorldProperty(draw.world != nullptr ? *draw.world : Identity());
             effect.setViewProperty(draw.view != nullptr ? *draw.view : Identity());
             effect.setProjectionProperty(draw.projection != nullptr ? *draw.projection : Identity());
+        }
+
+        MaterialKind ToMaterialKind(world::EffectTier tier) noexcept
+        {
+            switch (tier)
+            {
+                case world::EffectTier::Basic:
+                    return MaterialKind::Basic;
+                case world::EffectTier::DualTexture:
+                    return MaterialKind::DualTexture;
+                case world::EffectTier::AlphaTest:
+                    return MaterialKind::AlphaTest;
+                case world::EffectTier::Skinned:
+                    return MaterialKind::Skinned;
+            }
+            return MaterialKind::Basic;
+        }
+
+        MaterialDesc Describe(const world::MaterialDef& definition)
+        {
+            MaterialDesc desc;
+            desc.kind = ToMaterialKind(definition.effectTierS);
+            desc.diffuseTexture = definition.albedo;
+            desc.diffuse[0] = definition.tint.X;
+            desc.diffuse[1] = definition.tint.Y;
+            desc.diffuse[2] = definition.tint.Z;
+            desc.alpha = definition.alpha;
+            desc.specularColour[0] = definition.specularColor.X;
+            desc.specularColour[1] = definition.specularColor.Y;
+            desc.specularColour[2] = definition.specularColor.Z;
+            desc.specularPower = definition.specularPower;
+            desc.twoSided = definition.twoSided;
+            if (definition.alphaCutoff.has_value())
+            {
+                desc.referenceAlpha = static_cast<int>(std::lround(*definition.alphaCutoff * 255.0F));
+            }
+            return desc;
         }
     } // namespace
 
@@ -93,13 +133,6 @@ namespace cnahouse::rendering
                                    "refuses LightingEnabled = false",
                                    id.Value()));
         }
-        if (desc.kind == MaterialKind::DualTexture && desc.secondTexture.empty())
-        {
-            // A dual-texture material with one texture is a material that meant to be `Basic`. Left
-            // alone it draws black, because the lightmap product is with nothing.
-            return Err(ErrorCode::InvalidData,
-                       std::format("material {:#010x} is dual-texture with no second texture", id.Value()));
-        }
         if (desc.kind == MaterialKind::AlphaTest && (desc.referenceAlpha < 0 || desc.referenceAlpha > 255))
         {
             return Err(ErrorCode::OutOfRange,
@@ -109,6 +142,51 @@ namespace cnahouse::rendering
         }
 
         materials_.emplace(id, std::move(desc));
+        return Ok();
+    }
+
+    util::Result<void> MaterialBinder::Register(const world::MaterialDef& definition)
+    {
+        if (definition.alpha < 0.0F || definition.alpha > 1.0F)
+        {
+            return Err(ErrorCode::OutOfRange,
+                       std::format("material {:#010x} has alpha {}, outside 0..1",
+                                   definition.id.Value(),
+                                   definition.alpha));
+        }
+        if (definition.alphaCutoff.has_value() &&
+            (*definition.alphaCutoff < 0.0F || *definition.alphaCutoff > 1.0F))
+        {
+            return Err(ErrorCode::OutOfRange,
+                       std::format("material {:#010x} has alpha cutoff {}, outside 0..1",
+                                   definition.id.Value(),
+                                   *definition.alphaCutoff));
+        }
+        if (definition.alphaMode == world::AlphaMode::Mask && !definition.alphaCutoff.has_value())
+        {
+            return Err(
+                ErrorCode::InvalidData,
+                std::format("material {:#010x} is alpha-masked but has no cutoff", definition.id.Value()));
+        }
+        return Register(definition.id, Describe(definition));
+    }
+
+    util::Result<void> MaterialBinder::RegisterAll(std::span<const world::MaterialDef> definitions)
+    {
+        std::vector<util::Id> inserted;
+        inserted.reserve(definitions.size());
+        for (const world::MaterialDef& definition : definitions)
+        {
+            if (auto result = Register(definition); !result)
+            {
+                for (const util::Id id : inserted)
+                {
+                    materials_.erase(id);
+                }
+                return result;
+            }
+            inserted.push_back(definition.id);
+        }
         return Ok();
     }
 

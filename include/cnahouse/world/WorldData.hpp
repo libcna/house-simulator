@@ -72,7 +72,7 @@ namespace cnahouse::world
             std::vector<Opening> openings;
             std::vector<StairFlight> stairs;
             std::vector<Light> lights;
-            std::vector<Material> materials;
+            std::vector<MaterialDef> materials;
             std::vector<Prop> props;
             std::vector<NavNode> navNodes;
             std::vector<NavEdge> navEdges;
@@ -149,7 +149,7 @@ namespace cnahouse::world
             return m_contents.lights;
         }
 
-        [[nodiscard]] std::span<const Material> Materials() const noexcept
+        [[nodiscard]] std::span<const MaterialDef> Materials() const noexcept
         {
             return m_contents.materials;
         }
@@ -245,7 +245,7 @@ namespace cnahouse::world
         [[nodiscard]] const Opening* FindOpening(util::Id id) const noexcept;
         [[nodiscard]] const StairFlight* FindStair(util::Id id) const noexcept;
         [[nodiscard]] const Light* FindLight(util::Id id) const noexcept;
-        [[nodiscard]] const Material* FindMaterial(util::Id id) const noexcept;
+        [[nodiscard]] const MaterialDef* FindMaterial(util::Id id) const noexcept;
         [[nodiscard]] const Prop* FindProp(util::Id id) const noexcept;
         [[nodiscard]] const PlumbingStack* FindPlumbingStack(util::Id id) const noexcept;
 

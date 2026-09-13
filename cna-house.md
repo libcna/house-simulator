@@ -2479,6 +2479,11 @@ can do.
 }
 ```
 
+At runtime these rows load as `world::MaterialDef` records. `MaterialBinder::RegisterAll` converts
+the complete table into an ID-keyed registry before the first frame and refuses the table
+atomically if any row is invalid or duplicated. A lightmap is not part of `MaterialDef`: §23 chooses
+it from the visible room/light group for each draw.
+
 ### 22.2 Material classes and their effect mapping
 
 | Class | Tier S effect | Tier E technique | Notes |

@@ -182,7 +182,7 @@ namespace
         stack.chase = Box(2.0F, 4.0F, 4.0F, 6.0F);
         contents.plumbing = {stack};
 
-        world::Material tile;
+        world::MaterialDef tile;
         tile.id = Intern("MAT_TILE");
         tile.materialClass = world::MaterialClass::Tile;
         contents.materials = {tile};
@@ -236,7 +236,7 @@ namespace
         // References in the data are bare ids and do not carry the kind they point at, so two kinds
         // sharing a name make a resolved reference answer a question nobody asked.
         auto contents = Fixture();
-        world::Material clash;
+        world::MaterialDef clash;
         clash.id = Intern("L0_HALL");
         clash.materialClass = world::MaterialClass::Paint;
         contents.materials.push_back(clash);

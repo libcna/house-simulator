@@ -605,7 +605,7 @@ namespace cnahouse::world
     };
 
     /// @brief `layout.materials.json`: §22's material definition.
-    struct Material
+    struct MaterialDef
     {
         util::Id id;
         MaterialClass materialClass = MaterialClass::Paint;
