@@ -24,6 +24,7 @@
 #include "Microsoft/Xna/Framework/Graphics/RenderTarget2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteBatch.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteFont.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
 #include "cnahouse/debug/PlayerCommands.hpp"
@@ -494,10 +495,22 @@ namespace cnahouse::app
         auto skyColours = rendering::SkyColourModelReader::ReadFromTitle("content/world/layout.sky.json");
         if (skyDome && skyColours)
         {
-            auto sky = std::make_unique<rendering::SkySystem>(
-                blockoutCamera_, std::move(*skyDome), std::move(*skyColours));
-            skySystem_ = sky.get();
-            renderer_.Install(rendering::Pass::Sky, std::move(sky));
+            try
+            {
+                using Texture = Microsoft::Xna::Framework::Graphics::Texture2D;
+                rendering::SkySystem::CloudTextures cloudTextures{
+                    getContentProperty().Load<Texture>(skyColours->cloudLayers[0].texture),
+                    getContentProperty().Load<Texture>(skyColours->cloudLayers[1].texture),
+                    getContentProperty().Load<Texture>(skyColours->cloudLayers[2].texture)};
+                auto sky = std::make_unique<rendering::SkySystem>(
+                    blockoutCamera_, std::move(*skyDome), std::move(*skyColours), std::move(cloudTextures));
+                skySystem_ = sky.get();
+                renderer_.Install(rendering::Pass::Sky, std::move(sky));
+            }
+            catch (const std::exception& e)
+            {
+                Log::Error(LogCat::Content, "--scene=walk: the cloud texture set did not load: {}", e.what());
+            }
         }
         else
         {
@@ -950,6 +963,11 @@ namespace cnahouse::app
                 if (skySystem_ != nullptr)
                 {
                     skySystem_->SetSun(lighting_->Sun(), lighting_->CloudCover());
+                    if (weather_.has_value())
+                    {
+                        const weather::WeatherState& state = weather_->State();
+                        skySystem_->SetWind(state.windSpeed, state.windDirectionDeg);
+                    }
                 }
             }
             if (walking_ && visibility_.has_value())

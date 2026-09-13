@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01643` and `HOUSE-01644`. The success case crosses the Python-writer/C++-reader boundary.
+// `HOUSE-01643`, `HOUSE-01644` and `HOUSE-01647`. The success case crosses the
+// Python-writer/C++-reader boundary.
 // Mutations then prove that the runtime does not allocate or draw plausible-looking sky data from
 // damaged content.
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -144,11 +146,24 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
     EXPECT_DOUBLE_EQ(model->gradient.back().sunElevationDeg, 90.0);
     EXPECT_EQ(model->cloudCoverSamples, 8u);
     EXPECT_EQ(model->azimuthOffsetSamples, 16u);
+    EXPECT_EQ(model->cloudLayers[0].id, "CL_HIGH");
+    EXPECT_EQ(model->cloudLayers[1].id, "CL_MID");
+    EXPECT_EQ(model->cloudLayers[2].id, "CL_LOW");
+    EXPECT_EQ(model->cloudLayers[0].texture, "Textures/Sky/cloud_cirrus");
+    EXPECT_FLOAT_EQ(model->cloudLayers[0].radius, 880.0F);
+    EXPECT_FLOAT_EQ(model->cloudLayers[1].radius, 860.0F);
+    EXPECT_FLOAT_EQ(model->cloudLayers[2].radius, 830.0F);
+    EXPECT_FLOAT_EQ(model->cloudLayers[0].scrollScale, 0.15F);
+    EXPECT_FLOAT_EQ(model->cloudLayers[1].scrollScale, 0.60F);
+    EXPECT_FLOAT_EQ(model->cloudLayers[2].scrollScale, 1.00F);
 
     for (const std::pair<std::string, std::string>& mutation : {
              std::pair<std::string, std::string>{"cna-house/sky/1", "cna-house/sky/2"},
              {"\"cloudCoverSamples\": 8", "\"cloudCoverSamples\": 7"},
              {"\"azimuthOffsetSamples\": 16", "\"azimuthOffsetSamples\": 15"},
+             {"\"id\": \"CL_HIGH\"", "\"id\": \"CL_LOW\""},
+             {"\"altitude\": 860.0", "\"altitude\": 890.0"},
+             {"\"scrollScale\": 0.15", "\"scrollScale\": -0.15"},
          })
     {
         std::string changed = json;
@@ -156,6 +171,88 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
         ASSERT_NE(at, std::string::npos);
         changed.replace(at, mutation.first.size(), mutation.second);
         EXPECT_FALSE(cnahouse::rendering::SkyColourModelReader::Read(changed, "layout.sky.json"));
+    }
+}
+
+TEST(SkySystemTests, ThreeCloudRingsHaveTheAuthoredRadiiAndNoDegenerateTriangles)
+{
+    auto model = cnahouse::rendering::SkyColourModelReader::Read(SkyJson(), "layout.sky.json");
+    ASSERT_TRUE(model);
+    const auto rings = cnahouse::rendering::SkySystem::BuildCloudRings(model->cloudLayers);
+    constexpr std::array<float, 3> kRadii{880.0F, 860.0F, 830.0F};
+
+    for (std::size_t layer = 0; layer < rings.size(); ++layer)
+    {
+        const auto& ring = rings[layer];
+        ASSERT_EQ(ring.vertices.size(), cnahouse::rendering::SkySystem::kCloudVerticesPerLayer);
+        ASSERT_EQ(ring.indices.size(), cnahouse::rendering::SkySystem::kCloudIndicesPerLayer);
+        float smallestAreaSquared = std::numeric_limits<float>::max();
+        for (std::size_t index = 0; index < ring.indices.size(); index += 3u)
+        {
+            ASSERT_LT(ring.indices[index], ring.vertices.size());
+            ASSERT_LT(ring.indices[index + 1u], ring.vertices.size());
+            ASSERT_LT(ring.indices[index + 2u], ring.vertices.size());
+            const auto& a = ring.vertices[ring.indices[index]].Position;
+            const auto& b = ring.vertices[ring.indices[index + 1u]].Position;
+            const auto& c = ring.vertices[ring.indices[index + 2u]].Position;
+            const float abX = b.X - a.X;
+            const float abY = b.Y - a.Y;
+            const float abZ = b.Z - a.Z;
+            const float acX = c.X - a.X;
+            const float acY = c.Y - a.Y;
+            const float acZ = c.Z - a.Z;
+            const float crossX = abY * acZ - abZ * acY;
+            const float crossY = abZ * acX - abX * acZ;
+            const float crossZ = abX * acY - abY * acX;
+            smallestAreaSquared =
+                std::min(smallestAreaSquared, crossX * crossX + crossY * crossY + crossZ * crossZ);
+        }
+        EXPECT_GT(smallestAreaSquared, 1.0F) << "layer " << layer;
+        EXPECT_FLOAT_EQ(ring.vertices.front().Position.Y, kRadii[layer]);
+        EXPECT_NEAR(ring.vertices.back().Position.Y, 0.0F, 0.001F);
+        for (const auto& vertex : ring.vertices)
+        {
+            const float radius =
+                std::sqrt(vertex.Position.X * vertex.Position.X + vertex.Position.Y * vertex.Position.Y +
+                          vertex.Position.Z * vertex.Position.Z);
+            EXPECT_NEAR(radius, kRadii[layer], 0.001F);
+            EXPECT_FLOAT_EQ(vertex.TextureCoordinate.X,
+                            vertex.Position.X / cnahouse::rendering::SkySystem::kCloudTextureRepeatMetres);
+            EXPECT_FLOAT_EQ(vertex.TextureCoordinate.Y,
+                            vertex.Position.Z / cnahouse::rendering::SkySystem::kCloudTextureRepeatMetres);
+        }
+    }
+}
+
+TEST(SkySystemTests, CloudUvMotionFollowsMeteorologicalWindAndEachAuthoredRate)
+{
+    auto mesh = ReadOf(FixtureBytes());
+    auto model = cnahouse::rendering::SkyColourModelReader::Read(SkyJson(), "layout.sky.json");
+    ASSERT_TRUE(mesh);
+    ASSERT_TRUE(model);
+    cnahouse::rendering::Camera camera;
+    cnahouse::rendering::SkySystem sky(camera, std::move(*mesh), std::move(*model));
+
+    ASSERT_TRUE(sky.SetWind(12.0, 0.0)); // from north: the visible pattern travels south (+Z)
+    ASSERT_TRUE(sky.AdvanceClouds(10.0));
+    EXPECT_NEAR(sky.CloudOffsets()[0].X, 0.0F, 1.0e-6F);
+    EXPECT_NEAR(sky.CloudOffsets()[0].Y, -0.075F, 1.0e-6F);
+    EXPECT_NEAR(sky.CloudOffsets()[1].Y, -0.300F, 1.0e-6F);
+    EXPECT_NEAR(sky.CloudOffsets()[2].Y, -0.500F, 1.0e-6F);
+
+    const auto beforeInvalid = sky.CloudOffsets();
+    EXPECT_FALSE(sky.SetWind(std::numeric_limits<double>::quiet_NaN(), 90.0));
+    EXPECT_FALSE(sky.AdvanceClouds(-1.0));
+    EXPECT_EQ(sky.CloudOffsets(), beforeInvalid);
+
+    ASSERT_TRUE(sky.SetWind(10.0, 90.0)); // from east: the visible pattern travels west (-X)
+    ASSERT_TRUE(sky.AdvanceClouds(1.0));
+    EXPECT_GT(sky.CloudOffsets()[0].X, 0.0F)
+        << "sampling must move east for the texture feature itself to move west";
+    for (const auto& offset : sky.CloudOffsets())
+    {
+        EXPECT_LE(std::abs(offset.X), 0.5F);
+        EXPECT_LE(std::abs(offset.Y), 0.5F);
     }
 }
 

@@ -14413,8 +14413,21 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             65.9 %, 38.7 % and 1.6 %, while opposite-edge jumps remain no larger than ordinary
             neighbouring-texel changes. The three `core` manifest rows record exact hashes and
             project provenance; `cna-content` premultiplies alpha and generates mipmaps offline.
-- [ ] HOUSE-01647 — Implement the three cloud dome rings with wind-aligned UV scrolling
+- [x] HOUSE-01647 — Implement the three cloud dome rings with wind-aligned UV scrolling
       dep: HOUSE-01646, HOUSE-01643 · sys: rendering · plat: ALL · pri: MUST
+      verify: unit `SkySystemTests.*` (8); integration `SkySystemPassTests.*` (2) and
+            `HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight` (1), all graphics
+            invocations with `SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy`
+      note: (2026-09-13) `SkyColourModelReader` now owns the strict three-layer contract from
+            `layout.sky.json`, including ordered IDs, descending radii, content names, scroll rates
+            and baseline opacity. Each ring is a non-degenerate 48 × 8 hemisphere: 440
+            `VertexPositionColorTexture` vertices and 720 triangles, for three stock-XNA
+            `BasicEffect` draws and 2,160 triangles total. Planar XZ UVs repeat every 240 m under
+            `LinearWrap`; their bounded offsets account for meteorological “from” direction so the
+            visible texture moves where the air travels and preserves the authored
+            0.15/0.60/1.00 speed ratios. The walk loads all three compiled mipmapped `Texture2D`
+            values through `ContentManager`; integration crosses that real content/device boundary
+            and records three UV-buffer uploads per moving frame.
 - [ ] HOUSE-01648 — Implement the cloud-state → layer-alpha mapping, interpolated continuously from `cloudCover` and `thunderIntensity`
       dep: HOUSE-01647 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01649 — Implement cloud tinting by the sky colour so clouds pick up sunset light

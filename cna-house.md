@@ -3296,6 +3296,18 @@ wind-stretched, cumulus broken into cloud bodies, and stratus substantially clos
 not pre-lit, because `HOUSE-01649` supplies the live sky tint; the graded alpha is the cloud
 density. The content compiler premultiplies alpha and generates the mip chain offline.
 
+`HOUSE-01647` draws the three authored radii as 48 × 8 hemispherical shells. Each uses 440
+`VertexPositionColorTexture` vertices and 720 non-degenerate triangles: the top is a 48-triangle
+fan with one pole carrier per wedge, followed by seven quad strips down to the horizon. Planar XZ
+UVs repeat every 240 world metres and use `SamplerState::LinearWrap`; this both avoids a longitude
+seam and makes the scroll a real horizontal direction. The meteorological direction names where
+the wind comes *from*, so the sampling offset runs opposite the air's travel and the visible
+texture feature moves with the wind. Offsets stay bounded to one repeat while their rates retain
+the authored 0.15/0.60/1.00 ratios. The stock XNA `BasicEffect` draws the outer shell first under
+`AlphaBlend`, no depth and two-sided rasterisation, after the sun overlay, for three draws and 2,160
+triangles total; only the three small UV vertex buffers change while the textures, indices and
+effects are retained.
+
 Cloud state maps to layer alphas by a table:
 
 | Sky state | `cloudCover` | High α | Mid α | Low α | Mid tint |

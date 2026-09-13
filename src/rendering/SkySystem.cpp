@@ -6,6 +6,7 @@
 #include <cmath>
 #include <format>
 #include <memory>
+#include <numbers>
 #include <utility>
 
 #include "Microsoft/Xna/Framework/Color.hpp"
@@ -20,8 +21,11 @@
 #include "Microsoft/Xna/Framework/Graphics/IndexBuffer.hpp"
 #include "Microsoft/Xna/Framework/Graphics/IndexElementSize.hpp"
 #include "Microsoft/Xna/Framework/Graphics/PrimitiveType.hpp"
+#include "Microsoft/Xna/Framework/Graphics/SamplerState.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexBuffer.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexPositionColor.hpp"
+#include "Microsoft/Xna/Framework/Graphics/VertexPositionColorTexture.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Viewport.hpp"
 #include "Microsoft/Xna/Framework/MathHelper.hpp"
 #include "Microsoft/Xna/Framework/TitleContainer.hpp"
@@ -42,6 +46,7 @@ namespace cnahouse::rendering
     namespace
     {
         constexpr float kSkyFarPlane = 1000.0F;
+        constexpr std::array<std::string_view, 3> kCloudLayerIds{"CL_HIGH", "CL_MID", "CL_LOW"};
 
         util::Error Bad(util::ErrorCode code, std::string message, std::string_view name)
         {
@@ -65,6 +70,11 @@ namespace cnahouse::rendering
             return Xna::Vector3(from.X + (to.X - from.X) * amount,
                                 from.Y + (to.Y - from.Y) * amount,
                                 from.Z + (to.Z - from.Z) * amount);
+        }
+
+        float WrapUv(double value) noexcept
+        {
+            return static_cast<float>(std::remainder(value, 1.0));
         }
 
         std::pair<Xna::Vector3, Xna::Vector3> GradientAt(const SkyColourModel& model,
@@ -227,6 +237,71 @@ namespace cnahouse::rendering
         model.sunGlowColor = *glowColour;
         model.sunGlowStrength = *glowStrength;
         model.sunGlowExponent = *glowExponent;
+
+        auto cloudLayersValue = root.RequireArray("cloudLayers");
+        if (!cloudLayersValue)
+        {
+            return InFile(cloudLayersValue.Error(), name);
+        }
+        auto cloudLayers = cloudLayersValue->Elements();
+        if (!cloudLayers)
+        {
+            return InFile(cloudLayers.Error(), name);
+        }
+        if (cloudLayers->size() != model.cloudLayers.size())
+        {
+            return Bad(
+                util::ErrorCode::InvalidData,
+                std::format("cloudLayers has {} rows; §31.3 requires exactly three", cloudLayers->size()),
+                name);
+        }
+        for (std::size_t i = 0; i < cloudLayers->size(); ++i)
+        {
+            auto id = (*cloudLayers)[i].RequireString("id");
+            auto texture = (*cloudLayers)[i].RequireString("texture");
+            auto radius = (*cloudLayers)[i].RequireFloat("altitude");
+            auto scrollScale = (*cloudLayers)[i].RequireFloat("scrollScale");
+            auto opacity = (*cloudLayers)[i].RequireFloat("opacity");
+            if (!id)
+            {
+                return InFile(id.Error(), name);
+            }
+            if (!texture)
+            {
+                return InFile(texture.Error(), name);
+            }
+            if (!radius)
+            {
+                return InFile(radius.Error(), name);
+            }
+            if (!scrollScale)
+            {
+                return InFile(scrollScale.Error(), name);
+            }
+            if (!opacity)
+            {
+                return InFile(opacity.Error(), name);
+            }
+            if (*id != kCloudLayerIds[i])
+            {
+                return Bad(util::ErrorCode::InvalidData,
+                           std::format("cloud layer {} is '{}', not '{}'", i, *id, kCloudLayerIds[i]),
+                           name);
+            }
+            if (texture->empty() || !std::isfinite(*radius) || *radius <= 0.0F ||
+                *radius >= SkyDomeReader::kRadius ||
+                (i > 0u && *radius >= model.cloudLayers[i - 1u].radius) || !std::isfinite(*scrollScale) ||
+                *scrollScale < 0.0F || !std::isfinite(*opacity) || *opacity < 0.0F || *opacity > 1.0F)
+            {
+                return Bad(util::ErrorCode::OutOfRange,
+                           std::format("cloud layer {} has an empty texture, unordered radius, or "
+                                       "scalar outside its supported range",
+                                       i),
+                           name);
+            }
+            model.cloudLayers[i] =
+                CloudLayer{std::string(*id), std::string(*texture), *radius, *scrollScale, *opacity};
+        }
         return model;
     }
 
@@ -377,12 +452,71 @@ namespace cnahouse::rendering
         }
     }
 
+    namespace
+    {
+        class CloudGpuLayer
+        {
+        public:
+            CloudGpuLayer(Gfx::GraphicsDevice& device, Gfx::Texture2D textureValue, const CloudRingMesh& mesh)
+                : texture(std::move(textureValue))
+                , vertices(device,
+                           Gfx::VertexPositionColorTexture::getVertexDeclarationStatic(),
+                           static_cast<int>(mesh.vertices.size()),
+                           Gfx::BufferUsage::WriteOnly)
+                , indices(device,
+                          Gfx::IndexElementSize::SixteenBits,
+                          static_cast<int>(mesh.indices.size()),
+                          Gfx::BufferUsage::WriteOnly)
+                , effect(device)
+                , uploadedVertices(mesh.vertices)
+            {
+                vertices.SetData(uploadedVertices.data(), static_cast<int>(uploadedVertices.size()));
+                indices.SetData(mesh.indices.data(), static_cast<int>(mesh.indices.size()));
+                lastOffset = Xna::Vector2(0.0F, 0.0F);
+                hasOffset = true;
+                effect.setLightingEnabledProperty(false);
+                effect.setTextureEnabledProperty(true);
+                effect.setVertexColorEnabledProperty(true);
+                effect.setTextureProperty(&texture);
+            }
+
+            bool SetOffset(const CloudRingMesh& mesh, const Xna::Vector2& offset)
+            {
+                if (hasOffset && offset.X == lastOffset.X && offset.Y == lastOffset.Y)
+                {
+                    return false;
+                }
+                for (std::size_t i = 0; i < uploadedVertices.size(); ++i)
+                {
+                    uploadedVertices[i].TextureCoordinate =
+                        Xna::Vector2(mesh.vertices[i].TextureCoordinate.X + offset.X,
+                                     mesh.vertices[i].TextureCoordinate.Y + offset.Y);
+                }
+                vertices.SetData(uploadedVertices.data(), static_cast<int>(uploadedVertices.size()));
+                lastOffset = offset;
+                hasOffset = true;
+                return true;
+            }
+
+            Gfx::Texture2D texture;
+            Gfx::VertexBuffer vertices;
+            Gfx::IndexBuffer indices;
+            // Last among the XNA resources, therefore first destroyed: it borrows `texture`.
+            Gfx::BasicEffect effect;
+            std::vector<Gfx::VertexPositionColorTexture> uploadedVertices;
+            Xna::Vector2 lastOffset;
+            bool hasOffset = false;
+        };
+    } // namespace
+
     class SkySystem::Resources
     {
     public:
         Resources(Gfx::GraphicsDevice& device,
                   const SkyDomeMesh& mesh,
-                  const std::vector<Gfx::VertexPositionColor>& colouredVertices)
+                  const std::vector<Gfx::VertexPositionColor>& colouredVertices,
+                  const std::array<CloudRingMesh, 3>& cloudRings,
+                  std::optional<CloudTextures>& cloudTextures)
             : vertices(device,
                        Gfx::VertexPositionColor::getVertexDeclarationStatic(),
                        static_cast<int>(mesh.positions.size()),
@@ -399,17 +533,30 @@ namespace cnahouse::rendering
             effect.setLightingEnabledProperty(false);
             effect.setTextureEnabledProperty(false);
             effect.setVertexColorEnabledProperty(true);
+
+            if (cloudTextures.has_value())
+            {
+                clouds.reserve(cloudRings.size());
+                for (std::size_t i = 0; i < cloudRings.size(); ++i)
+                {
+                    clouds.push_back(std::make_unique<CloudGpuLayer>(
+                        device, std::move((*cloudTextures)[i]), cloudRings[i]));
+                }
+                cloudTextures.reset();
+            }
         }
 
         Gfx::VertexBuffer vertices;
         Gfx::IndexBuffer indices;
         Gfx::BasicEffect effect;
+        std::vector<std::unique_ptr<CloudGpuLayer>> clouds;
     };
 
     SkySystem::SkySystem(const Camera& camera, SkyDomeMesh mesh, SkyColourModel colourModel)
         : camera_(&camera)
         , mesh_(std::move(mesh))
         , colourModel_(std::move(colourModel))
+        , cloudRings_(BuildCloudRings(colourModel_.cloudLayers))
         , sunDisc_(camera)
     {
         colouredVertices_.reserve(mesh_.positions.size());
@@ -420,12 +567,60 @@ namespace cnahouse::rendering
         RecomputeColours(-18.0, 0.0);
     }
 
+    SkySystem::SkySystem(const Camera& camera,
+                         SkyDomeMesh mesh,
+                         SkyColourModel colourModel,
+                         CloudTextures cloudTextures)
+        : SkySystem(camera, std::move(mesh), std::move(colourModel))
+    {
+        cloudTextures_.emplace(std::move(cloudTextures));
+    }
+
     SkySystem::~SkySystem() = default;
 
     void SkySystem::SetSun(const environment::SunPosition& sun, double cloudCover) noexcept
     {
         SetSky(sun.altitudeDeg, cloudCover);
         sunDisc_.SetSun(sun, cloudCover);
+    }
+
+    bool SkySystem::SetWind(double speedMetresPerSecond, double directionDegrees) noexcept
+    {
+        if (!std::isfinite(speedMetresPerSecond) || !std::isfinite(directionDegrees))
+        {
+            return false;
+        }
+        windSpeedMetresPerSecond_ = std::clamp(speedMetresPerSecond, 0.0, 30.0);
+        windDirectionDegrees_ = std::fmod(directionDegrees, 360.0);
+        if (windDirectionDegrees_ < 0.0)
+        {
+            windDirectionDegrees_ += 360.0;
+        }
+        return true;
+    }
+
+    bool SkySystem::AdvanceClouds(double deltaSeconds) noexcept
+    {
+        if (!std::isfinite(deltaSeconds) || deltaSeconds <= 0.0 || windSpeedMetresPerSecond_ <= 0.0)
+        {
+            return false;
+        }
+
+        // Meteorological direction names where the wind comes FROM. With north = -Z and east =
+        // +X, the air therefore travels (-sin(direction), 0, +cos(direction)). Texture coordinates
+        // move the other way so that a feature sampled from the texture visibly follows the air.
+        const double radians = windDirectionDegrees_ * std::numbers::pi / 180.0;
+        const double sampleU = std::sin(radians) * windSpeedMetresPerSecond_ * deltaSeconds /
+                               static_cast<double>(kCloudTextureRepeatMetres);
+        const double sampleV = -std::cos(radians) * windSpeedMetresPerSecond_ * deltaSeconds /
+                               static_cast<double>(kCloudTextureRepeatMetres);
+        for (std::size_t i = 0; i < cloudOffsets_.size(); ++i)
+        {
+            const double scale = static_cast<double>(colourModel_.cloudLayers[i].scrollScale);
+            cloudOffsets_[i].X = WrapUv(static_cast<double>(cloudOffsets_[i].X) + sampleU * scale);
+            cloudOffsets_[i].Y = WrapUv(static_cast<double>(cloudOffsets_[i].Y) + sampleV * scale);
+        }
+        return true;
     }
 
     bool SkySystem::SetSky(double sunAltitudeDeg, double cloudCover) noexcept
@@ -474,11 +669,78 @@ namespace cnahouse::rendering
         return Xna::Matrix::CreateTranslation(camera.eye);
     }
 
+    std::array<CloudRingMesh, 3> SkySystem::BuildCloudRings(const std::array<CloudLayer, 3>& layers)
+    {
+        std::array<CloudRingMesh, 3> result;
+        constexpr float kHalfPi = std::numbers::pi_v<float> * 0.5F;
+        constexpr float kTwoPi = std::numbers::pi_v<float> * 2.0F;
+
+        for (std::size_t layerIndex = 0; layerIndex < layers.size(); ++layerIndex)
+        {
+            CloudRingMesh& mesh = result[layerIndex];
+            mesh.vertices.reserve(kCloudVerticesPerLayer);
+            mesh.indices.reserve(kCloudIndicesPerLayer);
+            const float radius = layers[layerIndex].radius;
+
+            // One pole vertex per wedge gives the planar UV projection a continuous top without
+            // the zero-area triangles made by a seam-wrapped rectangular grid.
+            for (std::uint32_t longitude = 0; longitude < kCloudLongitudeSegments; ++longitude)
+            {
+                mesh.vertices.emplace_back(
+                    Xna::Vector3(0.0F, radius, 0.0F), Xna::Color::White, Xna::Vector2(0.0F, 0.0F));
+            }
+
+            for (std::uint32_t latitude = 1; latitude <= kCloudLatitudeSegments; ++latitude)
+            {
+                const float elevation =
+                    kHalfPi * (1.0F - static_cast<float>(latitude) / kCloudLatitudeSegments);
+                const float horizontal = radius * std::cos(elevation);
+                const float y = radius * std::sin(elevation);
+                for (std::uint32_t longitude = 0; longitude <= kCloudLongitudeSegments; ++longitude)
+                {
+                    const float azimuth = kTwoPi * static_cast<float>(longitude) / kCloudLongitudeSegments;
+                    const float x = horizontal * std::sin(azimuth);
+                    const float z = -horizontal * std::cos(azimuth);
+                    mesh.vertices.emplace_back(
+                        Xna::Vector3(x, y, z),
+                        Xna::Color::White,
+                        Xna::Vector2(x / kCloudTextureRepeatMetres, z / kCloudTextureRepeatMetres));
+                }
+            }
+
+            const std::uint16_t firstRing = static_cast<std::uint16_t>(kCloudLongitudeSegments);
+            for (std::uint16_t longitude = 0; longitude < kCloudLongitudeSegments; ++longitude)
+            {
+                mesh.indices.push_back(longitude);
+                mesh.indices.push_back(static_cast<std::uint16_t>(firstRing + longitude));
+                mesh.indices.push_back(static_cast<std::uint16_t>(firstRing + longitude + 1u));
+            }
+            for (std::uint16_t latitude = 0; latitude + 1u < kCloudLatitudeSegments; ++latitude)
+            {
+                const std::uint16_t upper =
+                    static_cast<std::uint16_t>(firstRing + latitude * (kCloudLongitudeSegments + 1u));
+                const std::uint16_t lower = static_cast<std::uint16_t>(upper + kCloudLongitudeSegments + 1u);
+                for (std::uint16_t longitude = 0; longitude < kCloudLongitudeSegments; ++longitude)
+                {
+                    mesh.indices.push_back(static_cast<std::uint16_t>(upper + longitude));
+                    mesh.indices.push_back(static_cast<std::uint16_t>(lower + longitude));
+                    mesh.indices.push_back(static_cast<std::uint16_t>(lower + longitude + 1u));
+                    mesh.indices.push_back(static_cast<std::uint16_t>(upper + longitude));
+                    mesh.indices.push_back(static_cast<std::uint16_t>(lower + longitude + 1u));
+                    mesh.indices.push_back(static_cast<std::uint16_t>(upper + longitude + 1u));
+                }
+            }
+        }
+        return result;
+    }
+
     void SkySystem::Draw(PassContext& context)
     {
+        AdvanceClouds(context.deltaSeconds);
         if (resources_ == nullptr)
         {
-            resources_ = std::make_unique<Resources>(context.device, mesh_, colouredVertices_);
+            resources_ = std::make_unique<Resources>(
+                context.device, mesh_, colouredVertices_, cloudRings_, cloudTextures_);
         }
 
         Resources& resources = *resources_;
@@ -487,13 +749,16 @@ namespace cnahouse::rendering
                                  ? static_cast<float>(viewport.getWidthProperty()) /
                                        static_cast<float>(viewport.getHeightProperty())
                                  : 1.0F;
-        resources.effect.setWorldProperty(DomeWorld(*camera_));
-        resources.effect.setViewProperty(camera_->View());
-        resources.effect.setProjectionProperty(
+        const Xna::Matrix world = DomeWorld(*camera_);
+        const Xna::Matrix view = camera_->View();
+        const Xna::Matrix projection =
             Xna::Matrix::CreatePerspectiveFieldOfView(Xna::MathHelper::ToRadians(camera_->fieldOfViewDegrees),
                                                       aspect,
                                                       camera_->nearPlane,
-                                                      kSkyFarPlane));
+                                                      kSkyFarPlane);
+        resources.effect.setWorldProperty(world);
+        resources.effect.setViewProperty(view);
+        resources.effect.setProjectionProperty(projection);
 
         context.states.SetBlend(Gfx::BlendState::Opaque);
         context.states.SetDepthStencil(Gfx::DepthStencilState::None);
@@ -521,6 +786,9 @@ namespace cnahouse::rendering
             trianglesCounter_ = context.counters.Resolve("sky.dome.triangles");
             colourUpdatesCounter_ = context.counters.Resolve("sky.colour.updates");
             colourMicrosCounter_ = context.counters.Resolve("sky.colour.micros");
+            cloudDrawsCounter_ = context.counters.Resolve("sky.cloud.draws");
+            cloudTrianglesCounter_ = context.counters.Resolve("sky.cloud.triangles");
+            cloudUploadsCounter_ = context.counters.Resolve("sky.cloud.uploads");
         }
         context.counters.Set(drawsCounter_, 1);
         context.counters.Set(trianglesCounter_, static_cast<std::int64_t>(mesh_.indices.size() / 3u));
@@ -531,6 +799,50 @@ namespace cnahouse::rendering
         // Celestial layers belong after the opaque dome but before world geometry. The existing sun
         // pass retains its own additive blend and no-depth state and lazily owns its texture.
         sunDisc_.Draw(context);
+
+        std::int64_t cloudDraws = 0;
+        std::int64_t cloudTriangles = 0;
+        if (!resources.clouds.empty())
+        {
+            context.states.SetBlend(Gfx::BlendState::AlphaBlend);
+            context.states.SetDepthStencil(Gfx::DepthStencilState::None);
+            context.states.SetRasterizer(StateFor(CullPolicy::TwoSided));
+            context.states.SetSampler(0, Gfx::SamplerState::LinearWrap);
+
+            for (std::size_t i = 0; i < resources.clouds.size(); ++i)
+            {
+                CloudGpuLayer& cloud = *resources.clouds[i];
+                if (cloud.SetOffset(cloudRings_[i], cloudOffsets_[i]))
+                {
+                    ++cloudUploadCount_;
+                }
+                cloud.effect.setWorldProperty(world);
+                cloud.effect.setViewProperty(view);
+                cloud.effect.setProjectionProperty(projection);
+                cloud.effect.setAlphaProperty(colourModel_.cloudLayers[i].opacity);
+                context.device.SetVertexBuffer(&cloud.vertices);
+                context.device.setIndicesProperty(&cloud.indices);
+
+                Gfx::EffectPassCollection& cloudPasses =
+                    cloud.effect.getCurrentTechniqueProperty()->getPassesProperty();
+                for (int pass = 0; pass < cloudPasses.getCountProperty(); ++pass)
+                {
+                    cloudPasses[pass].Apply();
+                    context.device.DrawIndexedPrimitives(
+                        Gfx::PrimitiveType::TriangleList,
+                        0,
+                        0,
+                        static_cast<int>(cloudRings_[i].vertices.size()),
+                        0,
+                        static_cast<int>(cloudRings_[i].indices.size() / 3u));
+                    ++cloudDraws;
+                    cloudTriangles += static_cast<std::int64_t>(cloudRings_[i].indices.size() / 3u);
+                }
+            }
+        }
+        context.counters.Set(cloudDrawsCounter_, cloudDraws);
+        context.counters.Set(cloudTrianglesCounter_, cloudTriangles);
+        context.counters.Set(cloudUploadsCounter_, static_cast<std::int64_t>(cloudUploadCount_));
     }
 
 } // namespace cnahouse::rendering

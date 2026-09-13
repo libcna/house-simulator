@@ -1,16 +1,21 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <vector>
 
+#include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexPositionColor.hpp"
+#include "Microsoft/Xna/Framework/Graphics/VertexPositionColorTexture.hpp"
 #include "Microsoft/Xna/Framework/Matrix.hpp"
+#include "Microsoft/Xna/Framework/Vector2.hpp"
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 
 #include "cnahouse/rendering/Renderer.hpp"
@@ -54,6 +59,23 @@ namespace cnahouse::rendering
         Microsoft::Xna::Framework::Vector3 horizon;
     };
 
+    /// @brief One of §31.3's three authored cloud shells.
+    struct CloudLayer
+    {
+        std::string id;
+        std::string texture;
+        float radius = 0.0F;
+        float scrollScale = 0.0F;
+        float opacity = 0.0F;
+    };
+
+    /// @brief CPU geometry for one 48 × 8 cloud hemisphere.
+    struct CloudRingMesh
+    {
+        std::vector<Microsoft::Xna::Framework::Graphics::VertexPositionColorTexture> vertices;
+        std::vector<std::uint16_t> indices;
+    };
+
     /// @brief The compact 32-row colour model generated into `layout.sky.json`.
     struct SkyColourModel
     {
@@ -64,6 +86,7 @@ namespace cnahouse::rendering
         float sunGlowExponent = 0.0F;
         std::uint32_t cloudCoverSamples = 0;
         std::uint32_t azimuthOffsetSamples = 0;
+        std::array<CloudLayer, 3> cloudLayers;
     };
 
     /// @brief Reads only §31.2's generated colour block from `layout.sky.json`.
@@ -100,17 +123,33 @@ namespace cnahouse::rendering
 
     /// @brief §31's complete `Pass::Sky` owner: camera-following dome, then celestial overlays.
     ///
-    /// `HOUSE-01643` supplies the geometry and its bootstrap colour. `HOUSE-01644` replaces that
-    /// colour from the generated LUT only when the sky state changes materially. Keeping the sun
-    /// pass inside this object is necessary because `Renderer` deliberately owns one implementation
-    /// per pass; installing two independent `Pass::Sky` objects would silently replace the first.
+    /// `HOUSE-01643` supplies the dome and `HOUSE-01644` its live colour. `HOUSE-01647` adds the
+    /// three textured, wind-scrolling cloud shells after the sun. Keeping every layer inside this
+    /// object is necessary because `Renderer` deliberately owns one implementation per pass;
+    /// installing independent `Pass::Sky` objects would silently replace one another.
     class SkySystem final : public IRenderPass
     {
     public:
+        using CloudTextures = std::array<Microsoft::Xna::Framework::Graphics::Texture2D, 3>;
+
+        static constexpr std::uint32_t kCloudLongitudeSegments = 48u;
+        static constexpr std::uint32_t kCloudLatitudeSegments = 8u;
+        static constexpr std::uint32_t kCloudVerticesPerLayer = 440u;
+        static constexpr std::uint32_t kCloudIndicesPerLayer = 2160u;
+        static constexpr float kCloudTextureRepeatMetres = 240.0F;
+
         SkySystem(const Camera& camera, SkyDomeMesh mesh, SkyColourModel colourModel);
+        SkySystem(const Camera& camera,
+                  SkyDomeMesh mesh,
+                  SkyColourModel colourModel,
+                  CloudTextures cloudTextures);
         ~SkySystem() override;
 
         void SetSun(const environment::SunPosition& sun, double cloudCover) noexcept;
+        /// @brief Sets §36.1's meteorological wind (`direction` is where it comes from).
+        bool SetWind(double speedMetresPerSecond, double directionDegrees) noexcept;
+        /// @brief Advances the bounded UV offsets without requiring a graphics device.
+        bool AdvanceClouds(double deltaSeconds) noexcept;
         /// @brief Recomputes and uploads colours only past §31.2's material-change thresholds.
         /// @return true when an update occurred.
         bool SetSky(double sunAltitudeDeg, double cloudCover) noexcept;
@@ -132,6 +171,16 @@ namespace cnahouse::rendering
             return colouredVertices_;
         }
 
+        [[nodiscard]] const std::array<CloudRingMesh, 3>& CloudRings() const noexcept
+        {
+            return cloudRings_;
+        }
+
+        [[nodiscard]] const std::array<Microsoft::Xna::Framework::Vector2, 3>& CloudOffsets() const noexcept
+        {
+            return cloudOffsets_;
+        }
+
         [[nodiscard]] std::uint64_t ColourUpdateCount() const noexcept
         {
             return colourUpdateCount_;
@@ -145,6 +194,10 @@ namespace cnahouse::rendering
         /// @brief The dome follows all three camera axes, so its 900 m shell can never be reached.
         [[nodiscard]] static Microsoft::Xna::Framework::Matrix DomeWorld(const Camera& camera) noexcept;
 
+        /// @brief Builds §31.3's non-degenerate 48 × 8 hemispheres from the authored radii.
+        [[nodiscard]] static std::array<CloudRingMesh, 3>
+        BuildCloudRings(const std::array<CloudLayer, 3>& layers);
+
     private:
         class Resources;
 
@@ -154,8 +207,13 @@ namespace cnahouse::rendering
         SkyDomeMesh mesh_;
         SkyColourModel colourModel_;
         std::vector<Microsoft::Xna::Framework::Graphics::VertexPositionColor> colouredVertices_;
+        std::array<CloudRingMesh, 3> cloudRings_;
+        std::array<Microsoft::Xna::Framework::Vector2, 3> cloudOffsets_{};
+        std::optional<CloudTextures> cloudTextures_;
         SunDiscPass sunDisc_;
         std::unique_ptr<Resources> resources_;
+        double windSpeedMetresPerSecond_ = 0.0;
+        double windDirectionDegrees_ = 0.0;
         double lastSunAltitudeDeg_ = 0.0;
         double lastCloudCover_ = 0.0;
         bool hasColourState_ = false;
@@ -166,6 +224,10 @@ namespace cnahouse::rendering
         std::size_t trianglesCounter_ = 0;
         std::size_t colourUpdatesCounter_ = 0;
         std::size_t colourMicrosCounter_ = 0;
+        std::size_t cloudDrawsCounter_ = 0;
+        std::size_t cloudTrianglesCounter_ = 0;
+        std::size_t cloudUploadsCounter_ = 0;
+        std::uint64_t cloudUploadCount_ = 0;
     };
 
 } // namespace cnahouse::rendering
