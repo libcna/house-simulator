@@ -1,0 +1,60 @@
+{
+  "schema": "cna-house/human-base-research/1",
+  "generator": "tools/assets/generate_human_bases.py",
+  "blender": "4.3.2",
+  "mpfb": {
+    "version": "2.0.17",
+    "build": "20260722"
+  },
+  "assetsUsed": [
+    "MPFB bundled basemesh",
+    "MPFB bundled macro targets"
+  ],
+  "communityAssetsUsed": [],
+  "bodies": {
+    "female": {
+      "vertices": 6772,
+      "edges": 13794,
+      "faces": 7024,
+      "triangles": 13540,
+      "facesByVertexCount": {
+        "4": 6516,
+        "3": 508
+      },
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "uvLayers": 1,
+      "macroHeight": 0.55938721,
+      "boundsMetresBlenderXYZ": [
+        1.013159,
+        0.400624,
+        1.660067
+      ],
+      "targetHeightMetres": 1.66,
+      "measuredHeightMetres": 1.660067,
+      "sourceTopology": "MPFB body surface followed by one Blender unsubdivide pass"
+    },
+    "male": {
+      "vertices": 6772,
+      "edges": 13794,
+      "faces": 7024,
+      "triangles": 13540,
+      "facesByVertexCount": {
+        "4": 6516,
+        "3": 508
+      },
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "uvLayers": 1,
+      "macroHeight": 0.54595947,
+      "boundsMetresBlenderXYZ": [
+        1.161882,
+        0.489377,
+        1.779991
+      ],
+      "targetHeightMetres": 1.78,
+      "measuredHeightMetres": 1.779991,
+      "sourceTopology": "MPFB body surface followed by one Blender unsubdivide pass"
+    }
+  }
+}

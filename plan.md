@@ -5004,8 +5004,22 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             as a static prop. New permanent phase-13 tasks `HOUSE-01035` and `HOUSE-01036` own its
             source/LODs/sign-off and pipeline proof; `HOUSE-00998` then places the verified asset.
             The tasks use the next free ids in phase 13's reserved range.
-- [ ] HOUSE-00294 — **Hero asset research: the human base meshes.** Produce two MakeHuman bodies, evaluate topology and silhouette, and sign off (R-04)
+- [x] HOUSE-00294 — **Hero asset research: the human base meshes.** Produce two MakeHuman bodies, evaluate topology and silhouette, and sign off (R-04)
       dep: HOUSE-00269 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-13) Generated the two core-only MPFB 2.0.17/build 20260722 bodies in
+            `assets-src/Models/Characters/` with a version-pinned reproducible Blender tool and
+            solid/wireframe four-view review. The helper-free upstream surface (26,756 triangles)
+            and official generic proxies (27,300–27,732) exceed §72's 22,000-triangle bar; the
+            official 1,591/1,605-vertex proxies are visibly too angular. One topology-preserving
+            unsubdivide pass gives each selected body 6,772 vertices, 13,540 triangles, one UV
+            layer and zero boundary/non-manifold edges at measured heights 1.660067/1.779991 m.
+            Both GLBs pass `gltf_validate.py` including the real CNA importer.
+      decision: R-04 is retired and its hand-modelled fallback is not triggered. Only MPFB's
+            bundled basemesh and macro targets are used; no community asset is present and the
+            bodies are CC0-1.0. The unrigged GLBs remain `notPackaged` research inputs until
+            `HOUSE-02131`; deformation is explicitly evaluated by `HOUSE-00295`/`HOUSE-02131`.
+            Evidence, candidate counts and sign-off are in
+            `docs/asset-selection/human-base-mesh-research.md`.
 - [ ] HOUSE-00295 — **Hero asset research: locomotion clips.** Retarget 6 CMU clips onto the base rig and evaluate quality (R-05)
       dep: HOUSE-00270, HOUSE-00294 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00296 — Grouped: acquire the base material set from ambientCG/Poly Haven — 34 PBR materials (paint ×6, wood ×6, tile ×4, carpet ×3, stone ×3, brick, plaster, concrete, asphalt, gravel, grass, soil, fabric ×3, metal ×2)

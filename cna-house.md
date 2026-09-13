@@ -2402,6 +2402,13 @@ manifest row with `origin.kind = "generated"` recording the generator, its versi
 ### 21.5 Characters specifically
 
 1. MakeHuman / MPFB2 produces two base meshes (male ~1.78 m, female ~1.66 m) with clean topology.
+   **Measured and fixed by `HOUSE-00294`:** MPFB 2.0.17's helper-free basemesh is 26,756
+   triangles and exceeds §72's 22,000-triangle bar; its official generic proxies are larger and
+   its 1,600-vertex proxies are visibly too angular. One topology-preserving Blender unsubdivide
+   pass produces the selected 6,772-vertex / 13,540-triangle closed mesh for each sex, retaining
+   the UV and the neutral silhouette. The exact core-only recipe and four-view review live in
+   `tools/assets/generate_human_bases.py` and
+   `docs/asset-selection/human-base-mesh-research.md`; no community asset is part of either body.
 2. Blender: Rigify → a **32-bone game rig** (well within `SkinnedEffect::MaxBones = 72`), skin
    weights limited to **4 influences per vertex** (`WeightsPerVertex = 4`, and CNA now enforces
    the count on the GPU — `docs/skinnedeffect-support.md` Task 895).
@@ -6517,7 +6524,7 @@ and phase 9 must precede 13.
 | R-01 | ~~No high-quality CC0 rigged **dog** exists~~ — **realised by `HOUSE-00291`** | Realised | High — it is a headline feature | All three named attempts failed the fixed quality/provenance bar. Build it ourselves in `HOUSE-02041`–`HOUSE-02043`, budgeted at 5 days of Blender work, then verify the pipeline in `HOUSE-02044`. |
 | R-02 | ~~No high-quality CC0 rigged **cat** exists~~ — **realised by `HOUSE-00292`** | Realised | High | All three sourcing attempts failed the fixed quality/provenance bar. Build it ourselves in `HOUSE-02091`–`HOUSE-02093`, then verify the pipeline in `HOUSE-02094`. |
 | R-03 | ~~No suitable cleanly licensed realistic **car** exists~~ — **realised by `HOUSE-00293`** | Realised | Medium | All three sources failed provenance, ordinary realism or the 45,000-triangle budget. Author the fixed unbranded estate in `HOUSE-01035`, prove it in `HOUSE-01036`, then place it in `HOUSE-00998`; it is seen in a dim garage at ≤ 6 m, so a good but not spectacular model suffices. |
-| R-04 | MakeHuman output quality or licence is not what we expect | Low | High | Verify early (phase 4). Fallbacks: Khronos sample characters, or a purchased-then-not-redistributed pipeline is **not** acceptable — so the real fallback is hand-modelling two stylised-but-plausible humans |
+| R-04 | ~~MakeHuman output quality or licence is not what we expect~~ — **retired by `HOUSE-00269` and `HOUSE-00294`** | Retired | High | Core output is CC0 and the two measured, reviewed MPFB 2.0.17 bodies pass silhouette, manifold, UV, height and triangle-budget checks after one unsubdivide pass. The hand-modelled fallback is not triggered; rig deformation remains separately owned by `HOUSE-00295`/`HOUSE-02131`. |
 | R-05 | Mocap licence (CMU) turns out to be restrictive | Low | Medium | Fallback: hand-animate 18 clips, ~8 days |
 | R-06 | ~~`.fx` compilation through Wine is fragile or fxc rejects our HLSL~~ — **largely retired 2026-09-06.** `HOUSE-00087` compiled a two-technique `.fx` through a genuine Microsoft `fxc` (DXSDK June 2010) under Wine and drew with it, with parameters arriving exactly. The one fragility found was real but ours to fix and now fixed: `cna-content` passes Unix paths to a Windows tool, so the launcher must be `tools/effects/fxc-wine.sh`, not bare `wine`. | Low | Medium | Tier S is complete without it (by design). Compiled `.xnb` is committed once it works. |
 | R-07 | Lightmap baking for 78 cells is slow or produces seams | Medium | Medium | Per-cell bakes are independent and parallel; seams are handled by the packer's 4-texel gutter; a fallback to per-room vertex lighting exists and is 3 lines |
