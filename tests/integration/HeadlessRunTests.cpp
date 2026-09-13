@@ -158,6 +158,7 @@ namespace
         options.scene = "walk";
         Settings settings = Settings::Defaults();
         settings.verticalSync = false;
+        settings.moonPhaseSpeedMultiplier = 6.0F;
 
         CnaHouseGame game(options, settings);
         game.SetFrameLimit(30);
@@ -171,6 +172,8 @@ namespace
             clock.timeScale,
             cnahouse::environment::TimeScaleForDayLength(static_cast<double>(settings.dayLengthRealMinutes)));
         EXPECT_DOUBLE_EQ(clock.timeScale, 60.0) << "§35.2's chosen 60x did not reach the game";
+        EXPECT_DOUBLE_EQ(clock.moonPhaseSpeedMultiplier, 6.0)
+            << "§33.5's saved phase speed did not reach the shared clock";
         // §35.2b's table, end to end: *"Starting season: Spring -- a new game begins at the vernal
         // equinox."* §35.1's epoch is 1 January, so a clock left at zero starts every session in
         // the middle of winter, and nothing downstream would ever say so (`HOUSE-01543`).

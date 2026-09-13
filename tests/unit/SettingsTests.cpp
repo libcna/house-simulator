@@ -24,6 +24,7 @@ namespace
         EXPECT_EQ(settings.quality, QualityPreset::High);
         EXPECT_FLOAT_EQ(settings.masterVolume, 1.0f);
         EXPECT_TRUE(settings.showEnvironmentReadout);
+        EXPECT_FLOAT_EQ(settings.moonPhaseSpeedMultiplier, 1.0F);
         EXPECT_EQ(settings.weatherMode, WeatherMode::On);
         EXPECT_EQ(settings.fixedWeatherArchetype, "W_PARTLY");
     }
@@ -41,6 +42,7 @@ namespace
         written.fieldOfView = 90.0f;
         written.headBob = cnahouse::player::HeadBobLevel::Off;
         written.showEnvironmentReadout = false;
+        written.moonPhaseSpeedMultiplier = 6.5F;
         written.weatherMode = WeatherMode::Fixed;
         written.fixedWeatherArchetype = "W_HEAVY_SNOW";
 
@@ -58,6 +60,7 @@ namespace
             << "§68's level did not survive the file";
         EXPECT_FALSE(read->showEnvironmentReadout)
             << "the player's choice to hide HOUSE-01546's readout did not survive the file";
+        EXPECT_FLOAT_EQ(read->moonPhaseSpeedMultiplier, 6.5F);
         EXPECT_EQ(read->weatherMode, WeatherMode::Fixed);
         EXPECT_EQ(read->fixedWeatherArchetype, "W_HEAVY_SNOW");
     }
@@ -147,6 +150,7 @@ namespace
             << "a pre-HOUSE-01546 file takes the documented visible default";
         EXPECT_EQ(settings->weatherMode, WeatherMode::On);
         EXPECT_EQ(settings->fixedWeatherArchetype, "W_PARTLY");
+        EXPECT_FLOAT_EQ(settings->moonPhaseSpeedMultiplier, 1.0F);
     }
 
     TEST(SettingsTests, AFileFromANewerBuildStillLoads)
@@ -191,6 +195,7 @@ namespace
         settings.mouseSensitivity = -1.0f;
         settings.fieldOfView = 179.0f;
         settings.fixedWeatherArchetype.clear();
+        settings.moonPhaseSpeedMultiplier = 99.0F;
 
         const std::string changed = settings.ClampToSupportedRanges();
         EXPECT_FALSE(changed.empty()) << "the user is told, not silently overruled";
@@ -208,6 +213,11 @@ namespace
         // could not see it.
         EXPECT_FLOAT_EQ(settings.fieldOfView, cnahouse::player::kMaxFovDegrees);
         EXPECT_EQ(settings.fixedWeatherArchetype, "W_PARTLY");
+        EXPECT_FLOAT_EQ(settings.moonPhaseSpeedMultiplier, 8.0F);
+
+        settings.moonPhaseSpeedMultiplier = 0.0F;
+        EXPECT_NE(settings.ClampToSupportedRanges().find("moonPhaseSpeedMultiplier"), std::string::npos);
+        EXPECT_FLOAT_EQ(settings.moonPhaseSpeedMultiplier, 1.0F);
 
         settings.fieldOfView = 10.0f;
         EXPECT_FALSE(settings.ClampToSupportedRanges().empty());

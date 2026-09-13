@@ -542,6 +542,9 @@ namespace cnahouse::app
         // and not after opening the menu (`HOUSE-01533`).
         clock_.timeScale =
             environment::TimeScaleForDayLength(static_cast<double>(settings_.dayLengthRealMinutes));
+        // §33.5 accelerates only the illuminated phase. Keeping the rate on the one shared clock
+        // lets both frame updates and `time advance` feed the same deterministic calendar delta.
+        clock_.moonPhaseSpeedMultiplier = static_cast<double>(settings_.moonPhaseSpeedMultiplier);
         // §35.2b's table: *"Starting season: Spring -- a new game begins at the vernal equinox."*
         // §35.1's epoch is 1 January, so a clock left at zero would start every session in the
         // middle of winter (`HOUSE-01543`). There is no save to load a time from yet; when there

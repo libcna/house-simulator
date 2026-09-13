@@ -15,6 +15,9 @@ namespace cnahouse::environment
     /// low-precision value is +0.125 degrees; unlike the sun's threshold, its sign is positive.
     inline constexpr double kMoonRefractedHorizonDeg = 0.125;
 
+    /// @brief §33.5's mean interval between like lunar phases.
+    inline constexpr double kSynodicMonthDays = 29.530588;
+
     /// @brief §33.1's geocentric lunar position, expressed in the same conventions as SunPosition.
     struct MoonPosition
     {
@@ -59,6 +62,13 @@ namespace cnahouse::environment
 
     /// @brief §33.2's phase at the compressed civil instant held by @p clock.
     [[nodiscard]] MoonPhase MoonPhaseFor(const SimClock& clock) noexcept;
+
+    /// @brief The same phase, reusing positions already evaluated for this frame.
+    ///
+    /// At the default 1x rate this is exactly `MoonPhaseFromPositions`. Above 1x, only the phase
+    /// advances faster; @p moon remains the physical position used to draw and light the scene.
+    [[nodiscard]] MoonPhase
+    MoonPhaseFor(const SimClock& clock, const MoonPosition& moon, const SunPosition& sun) noexcept;
 
     /// @brief The eight presentation names from §33.2 for a continuous circular @p phase.
     ///

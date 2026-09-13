@@ -6,6 +6,7 @@
 
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/environment/DayLength.hpp"
+#include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/player/HeadBob.hpp"
 #include "cnahouse/util/Result.hpp"
 
@@ -45,7 +46,7 @@ namespace cnahouse::app
     struct Settings
     {
         /// @brief Bumped whenever a field changes meaning. `Migrate` handles every older value.
-        static constexpr std::int32_t kCurrentVersion = 7;
+        static constexpr std::int32_t kCurrentVersion = 8;
 
         std::int32_t version = kCurrentVersion;
 
@@ -108,6 +109,12 @@ namespace cnahouse::app
         /// `SimClock::timeScale`, and the default 24 is the one §35.2 chose because it makes
         /// 1 real second exactly 1 simulated minute.
         float dayLengthRealMinutes = static_cast<float>(environment::kDefaultDayLengthRealMinutes);
+
+        /// @brief §33.5's phase-only acceleration, 1x astronomical through 8x.
+        ///
+        /// This never speeds the civil clock or the moon's path across the sky. It only makes the
+        /// illuminated phase progress faster, with 1x preserving the real ephemeris exactly.
+        float moonPhaseSpeedMultiplier = static_cast<float>(environment::kDefaultMoonPhaseSpeedMultiplier);
 
         /// @brief Whether §67's compact player-facing environment readout is visible in play.
         bool showEnvironmentReadout = true;

@@ -223,6 +223,40 @@ TEST(MoonPhaseTests, ClockConvenienceUsesTheCompressedCivilInstantAndBadInputFai
     EXPECT_DOUBLE_EQ(MoonPhaseAt(std::numeric_limits<double>::infinity(), SunObserver{}).phase, 0.0);
 }
 
+TEST(MoonPhaseTests, SpeedMultiplierAddsOnlyPhaseTurnsFromTheNewGameAnchor)
+{
+    constexpr double elapsedCalendarDays = 1.25;
+    constexpr double speed = 8.0;
+    SimClock clock;
+    clock.SetCalendar(cnahouse::environment::kNewGameCalendarDays + elapsedCalendarDays);
+
+    const MoonPosition position = cnahouse::environment::MoonPositionFor(clock);
+    const SunPosition sun = cnahouse::environment::SunPositionFor(clock);
+    const MoonPhase astronomical = MoonPhaseFor(clock, position, sun);
+
+    clock.moonPhaseSpeedMultiplier = speed;
+    const MoonPhase accelerated = MoonPhaseFor(clock, position, sun);
+    double expectedPhase =
+        astronomical.phase + (speed - 1.0) * elapsedCalendarDays / cnahouse::environment::kSynodicMonthDays;
+    expectedPhase -= std::floor(expectedPhase);
+
+    EXPECT_NEAR(accelerated.phase, expectedPhase, 1e-12);
+    EXPECT_EQ(accelerated.waxing, accelerated.phase < 0.5);
+    EXPECT_NEAR(accelerated.illuminatedFraction,
+                accelerated.waxing ? accelerated.phase * 2.0 : (1.0 - accelerated.phase) * 2.0,
+                1e-12);
+    // The caller's physical position is deliberately untouched: phase acceleration must not move
+    // moonrise, sidereal motion, the sun, the season or the civil clock.
+    EXPECT_DOUBLE_EQ(cnahouse::environment::MoonPositionFor(clock).altitudeDeg, position.altitudeDeg);
+
+    clock.SetCalendar(cnahouse::environment::kNewGameCalendarDays);
+    const MoonPhase anchoredFast = MoonPhaseFor(clock);
+    clock.moonPhaseSpeedMultiplier = 1.0;
+    const MoonPhase anchoredReal = MoonPhaseFor(clock);
+    EXPECT_DOUBLE_EQ(anchoredFast.phase, anchoredReal.phase)
+        << "changing speed must not jump the fresh-game moon";
+}
+
 TEST(MoonPhaseTests, EveryNamedPhaseOwnsExactlyTheAuthoredHalfOpenInterval)
 {
     struct Boundary

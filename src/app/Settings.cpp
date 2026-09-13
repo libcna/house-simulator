@@ -179,6 +179,14 @@ namespace cnahouse::app
         }
         settings.dayLengthRealMinutes = *dayLength;
 
+        auto moonPhaseSpeed =
+            root.OptionalFloat("moonPhaseSpeedMultiplier", settings.moonPhaseSpeedMultiplier);
+        if (!moonPhaseSpeed)
+        {
+            return moonPhaseSpeed.Error();
+        }
+        settings.moonPhaseSpeedMultiplier = *moonPhaseSpeed;
+
         auto environmentReadout =
             root.OptionalBool("showEnvironmentReadout", settings.showEnvironmentReadout);
         if (!environmentReadout)
@@ -256,6 +264,14 @@ namespace cnahouse::app
             settings.fixedWeatherArchetype = "W_PARTLY";
             settings.version = 7;
         }
+        if (settings.version < 8)
+        {
+            // Version 8 added §33.5's phase-only speed escape hatch. Old files retain the real
+            // astronomical rate, so upgrading cannot visibly jump the moon.
+            settings.moonPhaseSpeedMultiplier =
+                static_cast<float>(environment::kDefaultMoonPhaseSpeedMultiplier);
+            settings.version = 8;
+        }
         settings.version = kCurrentVersion;
     }
 
@@ -325,6 +341,17 @@ namespace cnahouse::app
                                        : static_cast<float>(environment::kDefaultDayLengthRealMinutes);
             note("dayLengthRealMinutes");
         }
+        const auto minimumMoonSpeed = static_cast<float>(environment::kMinMoonPhaseSpeedMultiplier);
+        const auto maximumMoonSpeed = static_cast<float>(environment::kMaxMoonPhaseSpeedMultiplier);
+        if (!std::isfinite(moonPhaseSpeedMultiplier) || moonPhaseSpeedMultiplier < minimumMoonSpeed ||
+            moonPhaseSpeedMultiplier > maximumMoonSpeed)
+        {
+            moonPhaseSpeedMultiplier =
+                std::isfinite(moonPhaseSpeedMultiplier)
+                    ? std::clamp(moonPhaseSpeedMultiplier, minimumMoonSpeed, maximumMoonSpeed)
+                    : static_cast<float>(environment::kDefaultMoonPhaseSpeedMultiplier);
+            note("moonPhaseSpeedMultiplier");
+        }
         if (fixedWeatherArchetype.empty())
         {
             fixedWeatherArchetype = "W_PARTLY";
@@ -354,6 +381,7 @@ namespace cnahouse::app
                            "  \"fieldOfView\": {},\n"
                            "  \"fastWalk\": {},\n"
                            "  \"dayLengthRealMinutes\": {},\n"
+                           "  \"moonPhaseSpeedMultiplier\": {},\n"
                            "  \"showEnvironmentReadout\": {},\n"
                            "  \"weatherMode\": \"{}\",\n"
                            "  \"fixedWeatherArchetype\": \"{}\"\n"
@@ -374,6 +402,7 @@ namespace cnahouse::app
                            fieldOfView,
                            fastWalk ? "true" : "false",
                            dayLengthRealMinutes,
+                           moonPhaseSpeedMultiplier,
                            showEnvironmentReadout ? "true" : "false",
                            WeatherModeName(weatherMode),
                            fixedWeatherArchetype);

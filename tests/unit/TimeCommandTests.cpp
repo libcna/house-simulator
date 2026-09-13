@@ -7,6 +7,7 @@
 // first. The console is the only way to reach §35's clock from inside a running game, so the
 // interesting claims here are the refusals: a console takes typing, and a typo that silently
 // becomes a valid clock setting is worse than an error message.
+#include <cmath>
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -17,6 +18,7 @@
 #include "cnahouse/debug/Console.hpp"
 #include "cnahouse/debug/TimeCommands.hpp"
 #include "cnahouse/environment/DayLength.hpp"
+#include "cnahouse/environment/MoonModel.hpp"
 #include "cnahouse/environment/SimClock.hpp"
 
 namespace
@@ -165,6 +167,28 @@ TEST(TimeCommandTests, AdvanceMovesTheCalendarByTheDaysItIsGiven)
     {
         EXPECT_FALSE(fixture.Run(bad).ok) << bad;
     }
+}
+
+TEST(TimeCommandTests, AdvanceFeedsTheConfiguredPhaseSpeedWithoutMovingAnythingElseFaster)
+{
+    Fixture astronomical;
+    Fixture accelerated;
+    astronomical.clock.SetCalendar(cnahouse::environment::kNewGameCalendarDays);
+    accelerated.clock.SetCalendar(cnahouse::environment::kNewGameCalendarDays);
+    accelerated.clock.moonPhaseSpeedMultiplier = 4.0;
+
+    ASSERT_TRUE(astronomical.Run("time advance 2").ok);
+    ASSERT_TRUE(accelerated.Run("time advance 2").ok);
+    const auto realPhase = cnahouse::environment::MoonPhaseFor(astronomical.clock);
+    const auto fastPhase = cnahouse::environment::MoonPhaseFor(accelerated.clock);
+    double separation = fastPhase.phase - realPhase.phase;
+    separation -= std::floor(separation);
+
+    EXPECT_NEAR(separation, 6.0 / cnahouse::environment::kSynodicMonthDays, 1e-12)
+        << "the extra three phase turns per day did not see the command's two-day jump";
+    EXPECT_DOUBLE_EQ(accelerated.clock.CalendarDays(), astronomical.clock.CalendarDays());
+    EXPECT_DOUBLE_EQ(accelerated.clock.epochSeconds, astronomical.clock.epochSeconds)
+        << "phase speed leaked into the civil or diurnal clock";
 }
 
 TEST(TimeCommandTests, AnUnknownVerbIsRefusedByName)

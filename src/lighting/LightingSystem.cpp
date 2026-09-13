@@ -123,7 +123,7 @@ namespace cnahouse::lighting
         computedForFrame_ = frame.frameIndex;
         sun_ = environment::SunPositionFor(*clock_);
         moon_ = environment::MoonPositionFor(*clock_);
-        moonPhase_ = environment::MoonPhaseFromPositions(moon_, sun_);
+        moonPhase_ = environment::MoonPhaseFor(*clock_, moon_, sun_);
         const environment::SunShading shading = environment::SunShadingFor(sun_, cloudCover_);
         sunKey_.direction = environment::SunDirection(sun_);
         sunKey_.diffuseColor = Microsoft::Xna::Framework::Vector3(shading.color.X * shading.directIntensity,

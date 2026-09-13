@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/environment/MoonModel.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 namespace cnahouse::environment
@@ -22,6 +23,42 @@ namespace cnahouse::environment
         [[nodiscard]] double Wrap180(double degrees) noexcept
         {
             return Wrap360(degrees + 180.0) - 180.0;
+        }
+
+        [[nodiscard]] double ClampMoonPhaseSpeed(double multiplier) noexcept
+        {
+            if (!std::isfinite(multiplier))
+            {
+                return kDefaultMoonPhaseSpeedMultiplier;
+            }
+            return std::clamp(multiplier, kMinMoonPhaseSpeedMultiplier, kMaxMoonPhaseSpeedMultiplier);
+        }
+
+        [[nodiscard]] MoonPhase
+        AcceleratePhase(MoonPhase phase, double calendarDays, double multiplier) noexcept
+        {
+            if (!std::isfinite(calendarDays))
+            {
+                return MoonPhase{};
+            }
+            const double speed = ClampMoonPhaseSpeed(multiplier);
+            const double elapsedCalendarDays = calendarDays - kNewGameCalendarDays;
+            if (speed == kDefaultMoonPhaseSpeedMultiplier || elapsedCalendarDays == 0.0)
+            {
+                return phase;
+            }
+            const double extraTurns = (speed - 1.0) * elapsedCalendarDays / kSynodicMonthDays;
+            phase.phase += extraTurns;
+            phase.phase -= std::floor(phase.phase);
+
+            // Keep all four public quantities internally consistent after moving around the
+            // circle. MoonPhaseFromPositions defines phase through illuminated fraction, so this
+            // is its exact inverse rather than a second approximation to the terminator.
+            phase.waxing = phase.phase < 0.5;
+            phase.illuminatedFraction = phase.waxing ? phase.phase * 2.0 : (1.0 - phase.phase) * 2.0;
+            const double cosine = 1.0 - 2.0 * phase.illuminatedFraction;
+            phase.elongationDeg = std::acos(std::clamp(cosine, -1.0, 1.0)) * kRadToDeg;
+            return phase;
         }
 
         [[nodiscard]] double SinDeg(double degrees) noexcept
@@ -211,8 +248,20 @@ namespace cnahouse::environment
     MoonPhase MoonPhaseFor(const SimClock& clock) noexcept
     {
         const SunObserver observer{clock.latitudeDeg, clock.longitudeDeg, clock.utcOffsetMinutes};
-        return MoonPhaseAt(DaysSinceJ2000ForEpochSeconds(clock.CivilEpochSeconds(), clock.utcOffsetMinutes),
-                           observer);
+        const double instant =
+            DaysSinceJ2000ForEpochSeconds(clock.CivilEpochSeconds(), clock.utcOffsetMinutes);
+        return MoonPhaseFor(clock, MoonPositionAt(instant, observer), SunPositionAt(instant, observer));
+    }
+
+    MoonPhase MoonPhaseFor(const SimClock& clock, const MoonPosition& moon, const SunPosition& sun) noexcept
+    {
+        if (!std::isfinite(moon.eclipticLongitudeDeg) || !std::isfinite(moon.eclipticLatitudeDeg) ||
+            !std::isfinite(sun.eclipticLongitudeDeg))
+        {
+            return MoonPhase{};
+        }
+        return AcceleratePhase(
+            MoonPhaseFromPositions(moon, sun), clock.CalendarDays(), clock.moonPhaseSpeedMultiplier);
     }
 
     std::string_view MoonPhaseName(double phase) noexcept

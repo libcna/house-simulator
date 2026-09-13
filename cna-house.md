@@ -3575,8 +3575,15 @@ A synodic month is 29.530 588 days. At the default 24 real minutes per simulated
 lunation takes 11.8 real hours — so within one session the phase barely moves, but **across
 sessions it visibly does**, because the date is saved. This is the correct default and it is
 recorded as a deliberate decision (D-14, §77). Two escape hatches exist: a
-`moonPhaseSpeedMultiplier` setting (1.0 default, up to 8.0) and a debug `advance day` command used
-by the tests.
+`moonPhaseSpeedMultiplier` setting (1.0 default, up to 8.0) and the debug `time advance <days>`
+command used by the tests.
+
+`HOUSE-01608` implements the multiplier as a **phase-only** rate. The physical lunar position,
+moonrise, sun, season and civil clock remain on the saved calendar; only the continuous phase gains
+`(multiplier − 1) · elapsedCalendarDays / 29.530588` turns. Elapsed time is anchored at the new-game
+vernal equinox, so changing the setting before a new game cannot change its initial moon. Both
+normal frame advance and `time advance <days>` feed `SimClock::CalendarDays`, making the setting
+deterministic and keeping the debug command exact even while the diurnal clock is frozen.
 
 ---
 

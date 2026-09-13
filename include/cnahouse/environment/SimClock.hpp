@@ -60,6 +60,15 @@ namespace cnahouse::environment
     /// what every calendar test in the project uses.
     inline constexpr double kDefaultCalendarDaysPerSimDay = 24.0;
 
+    /// @brief §33.5's phase-only acceleration range.
+    ///
+    /// One is the real astronomical rate. Faster values deliberately affect only the illuminated
+    /// phase: the moon's position, sunrise, seasons and civil clock continue to use the saved
+    /// calendar. This is an accessibility/debug escape hatch, not a second clock.
+    inline constexpr double kMinMoonPhaseSpeedMultiplier = 1.0;
+    inline constexpr double kDefaultMoonPhaseSpeedMultiplier = 1.0;
+    inline constexpr double kMaxMoonPhaseSpeedMultiplier = 8.0;
+
     /// @brief §35.1's clock. Everything time-dependent reads it; nothing else keeps its own.
     ///
     /// **`epochSeconds` is local STANDARD time, and that is a decision.** §35.1 says *"seconds
@@ -87,6 +96,8 @@ namespace cnahouse::environment
         bool dstRulesUS = true;
         /// @brief §35.2b's compression. 1.0 is a realistic calendar; the default is 24.0.
         double calendarDaysPerSimDay = kDefaultCalendarDaysPerSimDay;
+        /// @brief §33.5's phase-only rate. One is astronomical; settings constrain it to [1, 8].
+        double moonPhaseSpeedMultiplier = kDefaultMoonPhaseSpeedMultiplier;
 
         /// @brief §35.1: *"`Update` accumulates `gameTime.ElapsedGameTime · timeScale`"*.
         ///

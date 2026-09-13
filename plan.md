@@ -14360,8 +14360,26 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       boundary: this task publishes the complete celestial key value and selection. The still-open
             `HOUSE-01261` owns copying key/fill/bounce into future dynamic-object effects; no absent
             object draw is presented as implemented here.
-- [ ] HOUSE-01608 — Implement `moonPhaseSpeedMultiplier` and the `time advance <days>` command's effect on the phase
+- [x] HOUSE-01608 — Implement `moonPhaseSpeedMultiplier` and the `time advance <days>` command's effect on the phase
       dep: HOUSE-01602, HOUSE-00131 · sys: environment · plat: ALL · pri: MUST
+      verify: unit `MoonPhaseTests.SpeedMultiplierAddsOnlyPhaseTurnsFromTheNewGameAnchor`,
+              `TimeCommandTests.AdvanceFeedsTheConfiguredPhaseSpeedWithoutMovingAnythingElseFaster`,
+              and `SettingsTests.*`; integration `HeadlessRunTests.TheSessionHasSection35sClockAndItRan`;
+              full unit and integration suites; `tools/ci/run_checks.sh`
+      note: (2026-09-13) Settings schema v8 persists `moonPhaseSpeedMultiplier`, defaults old
+            files to the astronomical 1x rate and clamps edited files to 1-8x. `SimClock` carries
+            the resolved rate so ordinary frame advance and the existing exact `time advance
+            <days>` command share one calendar source. `MoonPhaseFor` adds only the extra phase
+            turns, anchored at the fresh-game vernal equinox; lunar position, moonrise, sun,
+            season and civil time remain at their physical saved-calendar values. `LightingSystem`
+            consumes this result, so the setting reaches actual moonlight as well as callers of
+            the model.
+      qualified: **1 350 / 1 350 unit and 106 / 106 integration tests**. The first sandboxed
+            integration invocation passed 98 tests and denied only the eight `SaveStoreTest`
+            writes outside the workspace; rerunning the complete binary with its normal user-data
+            access passed all 106. The focused 4x command test advances two calendar days and
+            observes exactly `6 / 29.530588` additional phase turns without any difference in
+            `epochSeconds` or `CalendarDays`.
 - [ ] HOUSE-01609 — Generate the 1 500-star catalogue binary from a public-domain source (RA, Dec, magnitude, B−V)
       dep: HOUSE-00274 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-01610 — Implement `StarField`: the dynamic vertex buffer of camera-facing quads with magnitude-driven size and B−V colour
