@@ -5112,8 +5112,20 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             and satisfying both intents. The final avatar had no task explicitly owning this last
             review step, so `HOUSE-02131` now does; dog, cat and car already had named sign-off
             owners.
-- [ ] HOUSE-00299 — Run `verify_licences.py` over everything acquired so far; fix every gap
+- [x] HOUSE-00299 — Run `verify_licences.py` over everything acquired so far; fix every gap
       dep: HOUSE-00296, HOUSE-00297 · sys: ci · plat: CI · pri: MUST
+      note: (2026-09-14) The complete manifest passes both the development and stricter packaging
+            modes: **606 / 606 rows**, comprising 551 downloaded, 36 derived, 13 generated and 6
+            authored assets. Licence totals are 583 CC0-1.0, 19 Ms-PL, 2 OFL-1.1, 1 NASA-PD and
+            1 US-GOV-PD; no row has unknown provenance or forbids redistribution of its compiled
+            derivative. All downloaded-asset directories have a `SOURCE.md` naming every row, all
+            referenced licence texts exist, all four permission fields are real JSON booleans and
+            all source hashes match. The generated credits file also matches the manifest, so the
+            audit found no gap to repair.
+      verify: `python3 tools/assets/verify_licences.py`;
+            `python3 tools/assets/verify_licences.py --packaging`;
+            `python3 tools/assets/manifest.py validate`;
+            `python3 tools/assets/verify_licences.py --check`
 - [ ] HOUSE-00300 — Generate and review `licenses/THIRD-PARTY-ASSETS.md`
       dep: HOUSE-00299 · sys: — · plat: TOOL · pri: MUST
 - [x] HOUSE-00301 — Establish the asset-acquisition runbook so later sessions add assets consistently
