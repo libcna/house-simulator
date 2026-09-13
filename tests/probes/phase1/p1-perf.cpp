@@ -171,7 +171,7 @@ namespace
                         gd.SetVertexBuffer(&vbNear);
                         for (int p = 0; p < passes.getCountProperty(); ++p)
                         {
-                            passes[p].Apply();
+                            passes[p]->Apply();
                             gd.DrawIndexedPrimitives(PrimitiveType::TriangleList, 0, 0, 4, 0, 2);
                         }
                     }
@@ -180,7 +180,7 @@ namespace
                     gd.SetVertexBuffer(&vb);
                     for (int p = 0; p < passes.getCountProperty(); ++p)
                     {
-                        passes[p].Apply();
+                        passes[p]->Apply();
                         gd.DrawIndexedPrimitives(PrimitiveType::TriangleList, 0, 0, 4, 0, 2);
                     }
                     q.End();
@@ -252,7 +252,7 @@ namespace
                     EffectPassCollection& passes = fx.getCurrentTechniqueProperty()->getPassesProperty();
                     for (int p = 0; p < passes.getCountProperty(); ++p)
                     {
-                        passes[p].Apply();
+                        passes[p]->Apply();
                         gd.DrawIndexedPrimitives(PrimitiveType::TriangleList, 0, 0, count, 0, 1);
                     }
                     gd.SetRenderTarget(nullptr);
@@ -329,7 +329,7 @@ namespace
                     EffectPassCollection& passes = fx.getCurrentTechniqueProperty()->getPassesProperty();
                     for (int p = 0; p < passes.getCountProperty(); ++p)
                     {
-                        passes[p].Apply();
+                        passes[p]->Apply();
                         gd.DrawIndexedPrimitives(PrimitiveType::TriangleList, 0, 0, verts, 0, quads * 2);
                     }
                     gd.SetRenderTarget(nullptr);
@@ -374,7 +374,7 @@ namespace
                     gd.SetRenderTarget(&rt);
                     for (int i = 0; i < n; ++i)
                     {
-                        passes[0].Apply();
+                        passes[0]->Apply();
                     }
                     gd.SetRenderTarget(nullptr);
                 };
@@ -388,7 +388,7 @@ namespace
                     gd.setIndicesProperty(&ib);
                     for (int i = 0; i < n; ++i)
                     {
-                        passes[0].Apply();
+                        passes[0]->Apply();
                         gd.DrawIndexedPrimitives(PrimitiveType::TriangleList, 0, 0, 3, 0, 1);
                     }
                     gd.SetRenderTarget(nullptr);
@@ -487,7 +487,7 @@ namespace
                     gd.setIndicesProperty(&ib);
                     for (int p = 0; p < passes.getCountProperty(); ++p)
                     {
-                        passes[p].Apply();
+                        passes[p]->Apply();
                         gd.DrawInstancedPrimitives(PrimitiveType::TriangleList, 0, 0, 3, 0, 1, instances);
                     }
                     gd.SetRenderTarget(nullptr);
@@ -504,7 +504,7 @@ namespace
                     {
                         for (int p = 0; p < passes.getCountProperty(); ++p)
                         {
-                            passes[p].Apply();
+                            passes[p]->Apply();
                             gd.DrawIndexedPrimitives(PrimitiveType::TriangleList, 0, 0, 3, 0, 1);
                         }
                     }

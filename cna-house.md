@@ -488,6 +488,7 @@ eventually be modified — `cna-house` never modifies CNA.
 | **BL-13** | Android | CNA selects the **2D-only `SDL_RENDERER`** on Android (`CMAKE_SYSTEM_NAME` is `Android`, not `Linux`), and the Android cross-compile currently fails in two `sharp-runtime` NDK-portability bugs before reaching any graphics code (upstream Task 920). No CNA graphics has ever run on Android. | `docs/android-graphics-limitations.md` | **H** *(Android phase)* | Android phase 49 begins with an upstream gate: `OPENGLES3` must be selectable and buildable for `arm64-v8a`. `cna-house` does not fix CNA. | **Yes — required** | Not for Android |
 | **BL-14** | Web | `WEBGL2` has no implicit WebGL 1 fallback; the Web build needs Asyncify + JS exceptions; SharedArrayBuffer needs COOP/COEP headers for the threaded variant | `docs/web-emscripten-graphics-limitations.md` | M | Single-threaded WebGL 2 build in phase 48; threads only if measurement demands them | No | Yes (later) |
 | **BL-15** | Graphics / effects | `SpriteBatch::Begin(effect)` on a renderer without `CompiledEffects` throws | `docs/fx-compiled-effects.md` §3 | L | Tier E is a build configuration, never a runtime query (§7.3): `SpriteBatch::Begin(effect)` is compiled only into a Tier-E build and is reached only after that build's effect set has loaded successfully. Every Tier-E path has a named Tier-S fallback | No | Yes |
+| **BL-16** | Graphics / samplers | CNA's public XNA-shaped `SamplerStateCollection::operator[]` returns a `SamplerState&`, but assigning an XNA singleton to it selects `SamplerState::operator=`, which CNA marks `CNAEXT`; there is no separate strict-XNA setter. Measured after CNA merge `fcd43e995` by `HOUSE-01620`, 2026-09-13. | `SamplerStateCollection.hpp`; strict-XNA gate | L | Runtime does not assign sampler slots. CNA initializes every slot to XNA's default `LinearWrap`; repeating cloud UVs require wrap, while the procedural sun and moon textures carry transparent/same-colour borders so wrap and clamp produce the same visible edge. Real-device sky, sun and moon tests protect that assumption. | **Yes — an XNA-shaped indexed-property setter or equivalent is required** | Yes |
 
 **Manufactured blockers are not welcome.** Things that are merely *work* — writing a portal
 system, baking lightmaps, authoring 640 interactables — are not blockers and do not appear here.
@@ -2580,8 +2581,11 @@ reason Tier E exists.
 
 Draw order within the opaque pass: **effect → material → chunk**, so `EffectPass::Apply()` and
 texture binds are minimised. Render state is set by *pass group*, not per draw. A per-frame
-`StateTracker` skips redundant `BlendState`/`DepthStencilState`/`RasterizerState`/`SamplerState`
-assignments and is asserted correct by a unit test that replays a recorded command list.
+`StateTracker` skips redundant `BlendState`/`DepthStencilState`/`RasterizerState` assignments and is
+asserted correct by a real-device test that replays a recorded command list. Sampler slots retain
+CNA's XNA-default `LinearWrap`: the current CNA public API cannot express an indexed sampler
+assignment without selecting a `CNAEXT` copy assignment (BL-16), and these passes' textures are
+authored so wrap is correct or edge-equivalent to clamp.
 
 ### 23.6 Transparency
 

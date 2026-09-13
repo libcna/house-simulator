@@ -167,7 +167,7 @@ namespace cnahouse::rendering
                     // `Apply` is what copies the effect's parameters to the device, so it belongs
                     // with the parameter that changed and nowhere else. AFTER the buffers, which is
                     // the order the pass has always bound them in.
-                    passes[p].Apply();
+                    passes[p]->Apply();
                     boundMaterial = item.material;
                     bound = true;
                     ++stateChanges_;

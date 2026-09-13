@@ -8,6 +8,7 @@
 #include <fstream>
 #include <functional>
 #include <iterator>
+#include <memory>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -184,20 +185,25 @@ namespace
                 ASSERT_TRUE(model) << (model ? std::string() : model.Error().ToString());
 
                 cnahouse::rendering::SkySystem::CloudTextures textures{
-                    content.Load<Gfx::Texture2D>(model->cloudLayers[0].texture),
-                    content.Load<Gfx::Texture2D>(model->cloudLayers[1].texture),
-                    content.Load<Gfx::Texture2D>(model->cloudLayers[2].texture)};
-                for (const Gfx::Texture2D& texture : textures)
+                    std::unique_ptr<Gfx::Texture2D>(
+                        new Gfx::Texture2D(content.Load<Gfx::Texture2D>(model->cloudLayers[0].texture))),
+                    std::unique_ptr<Gfx::Texture2D>(
+                        new Gfx::Texture2D(content.Load<Gfx::Texture2D>(model->cloudLayers[1].texture))),
+                    std::unique_ptr<Gfx::Texture2D>(
+                        new Gfx::Texture2D(content.Load<Gfx::Texture2D>(model->cloudLayers[2].texture)))};
+                for (const std::unique_ptr<Gfx::Texture2D>& texture : textures)
                 {
-                    EXPECT_EQ(texture.getWidthProperty(), 1024);
-                    EXPECT_EQ(texture.getHeightProperty(), 1024);
-                    EXPECT_GT(texture.getLevelCountProperty(), 1)
+                    ASSERT_NE(texture, nullptr);
+                    EXPECT_EQ(texture->getWidthProperty(), 1024);
+                    EXPECT_EQ(texture->getHeightProperty(), 1024);
+                    EXPECT_GT(texture->getLevelCountProperty(), 1)
                         << "the offline content build dropped HOUSE-01646's mip chain";
                 }
-                Gfx::Texture2D moonAlbedo = content.Load<Gfx::Texture2D>("Textures/Sky/moon_albedo");
-                EXPECT_EQ(moonAlbedo.getWidthProperty(), 1024);
-                EXPECT_EQ(moonAlbedo.getHeightProperty(), 1024);
-                EXPECT_GT(moonAlbedo.getLevelCountProperty(), 1);
+                std::unique_ptr<Gfx::Texture2D> moonAlbedo(
+                    new Gfx::Texture2D(content.Load<Gfx::Texture2D>("Textures/Sky/moon_albedo")));
+                EXPECT_EQ(moonAlbedo->getWidthProperty(), 1024);
+                EXPECT_EQ(moonAlbedo->getHeightProperty(), 1024);
+                EXPECT_GT(moonAlbedo->getLevelCountProperty(), 1);
 
                 cnahouse::rendering::Camera camera;
                 cnahouse::rendering::SkySystem sky(
@@ -234,8 +240,10 @@ namespace
                 EXPECT_EQ(blend.getColorDestinationBlendProperty(),
                           Gfx::BlendState::AlphaBlend.getColorDestinationBlendProperty());
                 EXPECT_FALSE(device.getDepthStencilStateProperty().getDepthBufferEnableProperty());
-                EXPECT_EQ(states.Current().samplerApplied, 1u);
-                EXPECT_EQ(states.Current().samplerSkipped, 2u);
+                EXPECT_EQ(device.getSamplerStatesProperty()[0].getFilterProperty(),
+                          Gfx::SamplerState::LinearWrap.getFilterProperty());
+                EXPECT_EQ(device.getSamplerStatesProperty()[0].getAddressUProperty(),
+                          Gfx::SamplerState::LinearWrap.getAddressUProperty());
 
                 cnahouse::environment::SunPosition sun;
                 sun.altitudeDeg = -20.0;

@@ -16,7 +16,6 @@
 #include "Microsoft/Xna/Framework/Graphics/DepthStencilState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
 #include "Microsoft/Xna/Framework/Graphics/RasterizerState.hpp"
-#include "Microsoft/Xna/Framework/Graphics/SamplerState.hpp"
 #include "Microsoft/Xna/Framework/GraphicsDeviceManager.hpp"
 
 #include "cnahouse/rendering/RenderStates.hpp"
@@ -58,8 +57,6 @@ namespace
                 tracker.SetDepthStencil(Gfx::DepthStencilState::Default);
                 tracker.SetRasterizer(StateFor(CullPolicy::ImportedFront));
                 tracker.SetRasterizer(StateFor(CullPolicy::ImportedFront));
-                tracker.SetSampler(0, Gfx::SamplerState::LinearWrap);
-                tracker.SetSampler(0, Gfx::SamplerState::LinearWrap);
             });
 
         EXPECT_EQ(counts.blendApplied, 1u);
@@ -68,10 +65,8 @@ namespace
         EXPECT_EQ(counts.depthSkipped, 1u);
         EXPECT_EQ(counts.rasterApplied, 1u);
         EXPECT_EQ(counts.rasterSkipped, 1u);
-        EXPECT_EQ(counts.samplerApplied, 1u);
-        EXPECT_EQ(counts.samplerSkipped, 1u);
-        EXPECT_EQ(counts.TotalApplied(), 4u);
-        EXPECT_EQ(counts.TotalSkipped(), 4u);
+        EXPECT_EQ(counts.TotalApplied(), 3u);
+        EXPECT_EQ(counts.TotalSkipped(), 3u);
     }
 
     TEST(StateTrackerTests, ADifferentStateOfTheSameKindIsNotSkipped)
@@ -94,36 +89,6 @@ namespace
         EXPECT_EQ(counts.blendSkipped, 0u);
     }
 
-    TEST(StateTrackerTests, SamplerSlotsAreTrackedIndependently)
-    {
-        // One belief per slot. A single remembered sampler would skip slot 1 because slot 0 already
-        // held that object, and the second texture would be sampled with the wrong filter.
-        const auto counts = RunWithTracker(
-            [](StateTracker& tracker)
-            {
-                tracker.SetSampler(0, Gfx::SamplerState::LinearWrap);
-                tracker.SetSampler(1, Gfx::SamplerState::LinearWrap);
-                tracker.SetSampler(0, Gfx::SamplerState::LinearWrap);
-                tracker.SetSampler(1, Gfx::SamplerState::PointClamp);
-            });
-
-        EXPECT_EQ(counts.samplerApplied, 3u) << "slot 0, slot 1, then slot 1 again with a new state";
-        EXPECT_EQ(counts.samplerSkipped, 1u) << "only the repeat on slot 0";
-    }
-
-    TEST(StateTrackerTests, AnOutOfRangeSamplerSlotIsIgnoredRatherThanWritingPastTheArray)
-    {
-        const auto counts = RunWithTracker(
-            [](StateTracker& tracker)
-            {
-                tracker.SetSampler(-1, Gfx::SamplerState::LinearWrap);
-                tracker.SetSampler(999, Gfx::SamplerState::LinearWrap);
-            });
-
-        EXPECT_EQ(counts.samplerApplied, 0u);
-        EXPECT_EQ(counts.samplerSkipped, 0u) << "an ignored call is neither applied nor skipped";
-    }
-
     TEST(StateTrackerTests, InvalidateForcesTheNextSetOfEveryKind)
     {
         // The case this protects: `SpriteBatch::End` restores several states at once, so a tracker
@@ -135,17 +100,15 @@ namespace
                 tracker.SetBlend(Gfx::BlendState::Opaque);
                 tracker.SetDepthStencil(Gfx::DepthStencilState::Default);
                 tracker.SetRasterizer(StateFor(CullPolicy::ImportedFront));
-                tracker.SetSampler(0, Gfx::SamplerState::LinearWrap);
 
                 tracker.Invalidate();
 
                 tracker.SetBlend(Gfx::BlendState::Opaque);
                 tracker.SetDepthStencil(Gfx::DepthStencilState::Default);
                 tracker.SetRasterizer(StateFor(CullPolicy::ImportedFront));
-                tracker.SetSampler(0, Gfx::SamplerState::LinearWrap);
             });
 
-        EXPECT_EQ(counts.TotalApplied(), 8u) << "every one of the four was set twice, for real";
+        EXPECT_EQ(counts.TotalApplied(), 6u) << "every one of the three was set twice, for real";
         EXPECT_EQ(counts.TotalSkipped(), 0u);
     }
 

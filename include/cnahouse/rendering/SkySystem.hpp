@@ -155,7 +155,7 @@ namespace cnahouse::rendering
     class SkySystem final : public IRenderPass
     {
     public:
-        using CloudTextures = std::array<Microsoft::Xna::Framework::Graphics::Texture2D, 3>;
+        using CloudTextures = std::array<std::unique_ptr<Microsoft::Xna::Framework::Graphics::Texture2D>, 3>;
 
         static constexpr std::uint32_t kCloudLongitudeSegments = 48u;
         static constexpr std::uint32_t kCloudLatitudeSegments = 8u;
@@ -172,12 +172,12 @@ namespace cnahouse::rendering
                   SkyDomeMesh mesh,
                   SkyColourModel colourModel,
                   CloudTextures cloudTextures,
-                  Microsoft::Xna::Framework::Graphics::Texture2D moonAlbedo);
+                  std::unique_ptr<Microsoft::Xna::Framework::Graphics::Texture2D> moonAlbedo);
         SkySystem(const Camera& camera,
                   SkyDomeMesh mesh,
                   SkyColourModel colourModel,
                   CloudTextures cloudTextures,
-                  Microsoft::Xna::Framework::Graphics::Texture2D moonAlbedo,
+                  std::unique_ptr<Microsoft::Xna::Framework::Graphics::Texture2D> moonAlbedo,
                   StarCatalogue stars);
         ~SkySystem() override;
 
@@ -290,6 +290,7 @@ namespace cnahouse::rendering
         double lastCloudCover_ = 0.0;
         bool hasColourState_ = false;
         std::uint64_t colourUpdateCount_ = 0;
+        std::uint64_t colourRevision_ = 0;
         double lastColourMilliseconds_ = 0.0;
         debug::Counters* counterOwner_ = nullptr;
         std::size_t drawsCounter_ = 0;

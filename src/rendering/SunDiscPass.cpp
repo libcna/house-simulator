@@ -20,7 +20,6 @@
 #include "Microsoft/Xna/Framework/Graphics/IndexElementSize.hpp"
 #include "Microsoft/Xna/Framework/Graphics/PrimitiveType.hpp"
 #include "Microsoft/Xna/Framework/Graphics/RasterizerState.hpp"
-#include "Microsoft/Xna/Framework/Graphics/SamplerState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexBuffer.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexPositionTexture.hpp"
@@ -204,7 +203,6 @@ namespace cnahouse::rendering
         context.states.SetBlend(Gfx::BlendState::Additive);
         context.states.SetDepthStencil(Gfx::DepthStencilState::None);
         context.states.SetRasterizer(StateFor(CullPolicy::TwoSided));
-        context.states.SetSampler(0, Gfx::SamplerState::LinearClamp);
         context.device.SetVertexBuffer(&resources.vertices);
         context.device.setIndicesProperty(&resources.indices);
 
@@ -212,7 +210,7 @@ namespace cnahouse::rendering
             resources.effect.getCurrentTechniqueProperty()->getPassesProperty();
         for (int pass = 0; pass < passes.getCountProperty(); ++pass)
         {
-            passes[pass].Apply();
+            passes[pass]->Apply();
             context.device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList, 0, 0, 4, 0, 2);
         }
 

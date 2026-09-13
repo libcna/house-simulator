@@ -230,7 +230,7 @@ namespace cnahouse::debug
             device.SetVertexBuffer(&impl_->buffer);
             for (int p = 0; p < passes.getCountProperty(); ++p)
             {
-                passes[p].Apply();
+                passes[p]->Apply();
                 device.DrawPrimitives(type, 0, static_cast<int>(vertices.size()) / perPrimitive);
             }
         };

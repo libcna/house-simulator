@@ -238,7 +238,7 @@ namespace
                     EffectPassCollection& passes = fx.getCurrentTechniqueProperty()->getPassesProperty();
                     for (int q = 0; q < passes.getCountProperty(); ++q)
                     {
-                        passes[q].Apply();
+                        passes[q]->Apply();
                         gd.DrawIndexedPrimitives(PrimitiveType::TriangleList,
                                                  p->part->getVertexOffsetProperty(),
                                                  0,

@@ -21,7 +21,6 @@
 #include "Microsoft/Xna/Framework/Graphics/IndexBuffer.hpp"
 #include "Microsoft/Xna/Framework/Graphics/IndexElementSize.hpp"
 #include "Microsoft/Xna/Framework/Graphics/PrimitiveType.hpp"
-#include "Microsoft/Xna/Framework/Graphics/SamplerState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexBuffer.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexDeclaration.hpp"
@@ -180,11 +179,8 @@ namespace cnahouse::rendering
     class MoonDiscPass::Resources
     {
     public:
-        Resources(Gfx::GraphicsDevice& device,
-                  Gfx::Texture2D albedoValue,
-                  std::span<const Xna::Color> maskPixels)
-            : albedo(std::move(albedoValue))
-            , mask(device, kMoonMaskSize, kMoonMaskSize)
+        Resources(Gfx::GraphicsDevice& device, Gfx::Texture2D& albedo, std::span<const Xna::Color> maskPixels)
+            : mask(device, kMoonMaskSize, kMoonMaskSize)
             , vertices(device,
                        Gfx::VertexDeclaration({
                            Gfx::VertexElement(
@@ -219,7 +215,6 @@ namespace cnahouse::rendering
             effect.setFogEnabledProperty(false);
         }
 
-        Gfx::Texture2D albedo;
         Gfx::Texture2D mask;
         Gfx::VertexBuffer vertices;
         Gfx::IndexBuffer indices;
@@ -232,18 +227,25 @@ namespace cnahouse::rendering
     {
     }
 
-    MoonDiscPass::MoonDiscPass(const Camera& camera, Gfx::Texture2D albedo)
+    MoonDiscPass::MoonDiscPass(const Camera& camera, std::unique_ptr<Gfx::Texture2D> albedo) noexcept
         : camera_(&camera)
-        , albedo_(std::make_unique<Gfx::Texture2D>(std::move(albedo)))
+        , albedo_(std::move(albedo))
+    {
+    }
+
+    MoonDiscPass::MoonDiscPass(const Camera& camera, Gfx::Texture2D* borrowedAlbedo) noexcept
+        : camera_(&camera)
+        , borrowedAlbedo_(borrowedAlbedo)
     {
     }
 
     MoonDiscPass::~MoonDiscPass() = default;
 
-    void MoonDiscPass::SetAlbedo(Gfx::Texture2D albedo)
+    void MoonDiscPass::SetAlbedo(std::unique_ptr<Gfx::Texture2D> albedo) noexcept
     {
         resources_.reset();
-        albedo_ = std::make_unique<Gfx::Texture2D>(std::move(albedo));
+        albedo_ = std::move(albedo);
+        borrowedAlbedo_ = nullptr;
         uploadedGeneration_ = 0;
     }
 
@@ -258,7 +260,8 @@ namespace cnahouse::rendering
 
     bool MoonDiscPass::IsActive() const
     {
-        return frame_.visible && mask_.HasPixels() && (resources_ != nullptr || albedo_ != nullptr);
+        return frame_.visible && mask_.HasPixels() &&
+               (resources_ != nullptr || albedo_ != nullptr || borrowedAlbedo_ != nullptr);
     }
 
     void MoonDiscPass::Draw(PassContext& context)
@@ -269,8 +272,8 @@ namespace cnahouse::rendering
         }
         if (resources_ == nullptr)
         {
-            resources_ = std::make_unique<Resources>(context.device, std::move(*albedo_), mask_.Pixels());
-            albedo_.reset();
+            Gfx::Texture2D* albedo = borrowedAlbedo_ != nullptr ? borrowedAlbedo_ : albedo_.get();
+            resources_ = std::make_unique<Resources>(context.device, *albedo, mask_.Pixels());
             uploadedGeneration_ = mask_.GenerationCount();
             ++maskUploadCount_;
         }
@@ -307,8 +310,6 @@ namespace cnahouse::rendering
         context.states.SetBlend(Gfx::BlendState::Additive);
         context.states.SetDepthStencil(Gfx::DepthStencilState::None);
         context.states.SetRasterizer(StateFor(CullPolicy::TwoSided));
-        context.states.SetSampler(0, Gfx::SamplerState::LinearClamp);
-        context.states.SetSampler(1, Gfx::SamplerState::LinearClamp);
         context.device.SetVertexBuffer(&resources.vertices);
         context.device.setIndicesProperty(&resources.indices);
 
@@ -316,7 +317,7 @@ namespace cnahouse::rendering
             resources.effect.getCurrentTechniqueProperty()->getPassesProperty();
         for (int pass = 0; pass < passes.getCountProperty(); ++pass)
         {
-            passes[pass].Apply();
+            passes[pass]->Apply();
             context.device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList, 0, 0, 4, 0, 2);
         }
 

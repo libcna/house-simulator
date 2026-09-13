@@ -330,7 +330,7 @@ TEST(CellRuntimeRenderTests, TheCarriersStreamIsSixFloatsThenTwo)
     WithDevice(
         [](GraphicsDevice& device)
         {
-            const VertexDeclaration declaration = CellRuntime::DeclarationFor(ChunkLayout::Dual);
+            const VertexDeclaration& declaration = CellRuntime::DeclarationFor(ChunkLayout::Dual);
             VertexBuffer buffer(device, declaration, 2, BufferUsage::None);
             const VertexPositionNormalTexture written[2] = {
                 VertexPositionNormalTexture(Microsoft::Xna::Framework::Vector3(1.0f, 2.0f, 3.0f),

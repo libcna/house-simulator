@@ -500,10 +500,14 @@ namespace cnahouse::app
             {
                 using Texture = Microsoft::Xna::Framework::Graphics::Texture2D;
                 rendering::SkySystem::CloudTextures cloudTextures{
-                    getContentProperty().Load<Texture>(skyColours->cloudLayers[0].texture),
-                    getContentProperty().Load<Texture>(skyColours->cloudLayers[1].texture),
-                    getContentProperty().Load<Texture>(skyColours->cloudLayers[2].texture)};
-                Texture moonAlbedo = getContentProperty().Load<Texture>("Textures/Sky/moon_albedo");
+                    std::unique_ptr<Texture>(
+                        new Texture(getContentProperty().Load<Texture>(skyColours->cloudLayers[0].texture))),
+                    std::unique_ptr<Texture>(
+                        new Texture(getContentProperty().Load<Texture>(skyColours->cloudLayers[1].texture))),
+                    std::unique_ptr<Texture>(
+                        new Texture(getContentProperty().Load<Texture>(skyColours->cloudLayers[2].texture)))};
+                std::unique_ptr<Texture> moonAlbedo(
+                    new Texture(getContentProperty().Load<Texture>("Textures/Sky/moon_albedo")));
                 auto sky = std::make_unique<rendering::SkySystem>(blockoutCamera_,
                                                                   std::move(*skyDome),
                                                                   std::move(*skyColours),

@@ -55,10 +55,14 @@ namespace cnahouse::rendering
     {
     public:
         explicit MoonDiscPass(const Camera& camera) noexcept;
-        MoonDiscPass(const Camera& camera, Microsoft::Xna::Framework::Graphics::Texture2D albedo);
+        MoonDiscPass(const Camera& camera,
+                     std::unique_ptr<Microsoft::Xna::Framework::Graphics::Texture2D> albedo) noexcept;
+        /// @brief Uses an XNA-style borrowed texture reference; it must outlive this pass.
+        MoonDiscPass(const Camera& camera,
+                     Microsoft::Xna::Framework::Graphics::Texture2D* borrowedAlbedo) noexcept;
         ~MoonDiscPass() override;
 
-        void SetAlbedo(Microsoft::Xna::Framework::Graphics::Texture2D albedo);
+        void SetAlbedo(std::unique_ptr<Microsoft::Xna::Framework::Graphics::Texture2D> albedo) noexcept;
         void SetMoon(const environment::MoonPosition& moon,
                      const environment::MoonPhase& phase,
                      const environment::SunPosition& sun) noexcept;
@@ -88,6 +92,7 @@ namespace cnahouse::rendering
         MoonDiscFrame frame_;
         MoonMask mask_;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::Texture2D> albedo_;
+        Microsoft::Xna::Framework::Graphics::Texture2D* borrowedAlbedo_ = nullptr;
         std::unique_ptr<Resources> resources_;
         std::uint64_t uploadedGeneration_ = 0;
         std::uint64_t maskUploadCount_ = 0;

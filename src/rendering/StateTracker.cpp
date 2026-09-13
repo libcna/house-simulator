@@ -5,8 +5,6 @@
 #include "Microsoft/Xna/Framework/Graphics/DepthStencilState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
 #include "Microsoft/Xna/Framework/Graphics/RasterizerState.hpp"
-#include "Microsoft/Xna/Framework/Graphics/SamplerState.hpp"
-#include "Microsoft/Xna/Framework/Graphics/SamplerStateCollection.hpp"
 
 namespace cnahouse::rendering
 {
@@ -47,22 +45,6 @@ namespace cnahouse::rendering
         device_->setRasterizerStateProperty(state);
     }
 
-    void StateTracker::SetSampler(int slot, const Microsoft::Xna::Framework::Graphics::SamplerState& state)
-    {
-        if (slot < 0 || slot >= kMaxSamplerSlots)
-        {
-            return;
-        }
-        if (samplers_[slot] == &state)
-        {
-            ++current_.samplerSkipped;
-            return;
-        }
-        samplers_[slot] = &state;
-        ++current_.samplerApplied;
-        device_->getSamplerStatesProperty()[slot] = state;
-    }
-
     void StateTracker::Invalidate() noexcept
     {
         // Everything, not just the one thing that changed. `SpriteBatch::End` restores several states
@@ -73,10 +55,6 @@ namespace cnahouse::rendering
         blend_ = nullptr;
         depth_ = nullptr;
         raster_ = nullptr;
-        for (auto& sampler : samplers_)
-        {
-            sampler = nullptr;
-        }
     }
 
     void StateTracker::BeginFrame() noexcept

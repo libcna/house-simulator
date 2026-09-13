@@ -582,6 +582,9 @@ namespace cnahouse::rendering
             resources_ = std::make_unique<Resources>(context.device, catalogue_.size());
         }
         Resources& resources = *resources_;
+        // The previous frame may still retain this stream. XNA requires it to be unbound before a
+        // dynamic Discard upload, even though this pass immediately binds it again below.
+        context.device.SetVertexBuffer(nullptr);
         resources.vertices.SetData(
             vertices_.data(), 0, static_cast<int>(vertices_.size()), Gfx::SetDataOptions::Discard);
         ++uploadCount_;
@@ -609,7 +612,7 @@ namespace cnahouse::rendering
             resources.effect.getCurrentTechniqueProperty()->getPassesProperty();
         for (int pass = 0; pass < passes.getCountProperty(); ++pass)
         {
-            passes[pass].Apply();
+            passes[pass]->Apply();
             context.device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList,
                                                  0,
                                                  0,

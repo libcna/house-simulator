@@ -51,7 +51,7 @@ Corrections made to the planning documents during implementation are recorded in
 | Network access during planning | **None used.** No licence in this plan is asserted as verified; phase 4 verifies every one. |
 | Default simulated day length | **24 real minutes** (`timeScale = 60`, 1 real second = 1 simulated minute) |
 | House size | 5 levels (`B1`/`L0`/`L1`/`L2`/`L3`), ≈ 935 m² above grade, ≈ 1 306 m² total enclosed, 95 cells, 186 portals |
-| Blockers identified | 15 (`BL-01` … `BL-15`, `cna-house.md` §6) — 1 High for the Android phase only, 0 High for Linux |
+| Blockers identified | 16 (`BL-01` … `BL-16`, `cna-house.md` §6) — 1 High for the Android phase only, 0 High for Linux |
 
 ---
 
@@ -123,7 +123,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 21 | Television and video | 01491–01530 | 14 | Both backends |
 | 22 | Time | 01531–01560 | 17 | |
 | 23 | Sun, glare, sun-clock | 01561–01600 | 18 | |
-| 24 | Moon and stars | 01601–01640 | 19 | |
+| 24 | Moon and stars | 01601–01640 | 20 | |
 | 25 | Sky and clouds | 01641–01680 | 15 | |
 | 26 | Weather core | 01681–01740 | 24 | |
 | 27 | Rain | 01741–01790 | 16 | |
@@ -1956,9 +1956,13 @@ system update order, the settings file, the logging, and a CI that runs lints an
             would be a second model of XNA's behaviour to keep in sync, and a tracker that believes
             a stale binding skips the set that was actually needed — a frame drawn with someone
             else's blend state, which is far worse than a redundant set.
-      finding: sampler slots are tracked independently and an out-of-range slot is ignored rather
-            than counted. One remembered sampler would skip slot 1 because slot 0 already held that
-            object, and the second texture would be sampled with the wrong filter.
+      correction: (2026-09-13) CNA merge `fcd43e995` made the sampler half of this historical task
+            impossible through the strict XNA surface: assigning `SamplerStates[i]` necessarily
+            selects `SamplerState::operator=`, now correctly marked `CNAEXT`, and CNA exposes no
+            XNA-shaped setter alternative. `HOUSE-01620` therefore removes sampler tracking while
+            retaining blend/depth/raster tracking and records BL-16. Runtime keeps CNA's XNA default
+            `LinearWrap`; cloud UVs require it and the sun/moon borders make it edge-equivalent to
+            clamp. The completed historical task and its original criterion remain recorded.
 - [x] HOUSE-00159 — Implement `Renderer` with the pass list of `cna-house.md` §7.5 as empty passes
       dep: HOUSE-00158 · sys: rendering · plat: ALL · pri: MUST
       note: (2026-09-06) `rendering/Renderer.{hpp,cpp}`: a `Pass` enum in §7.5 order, `IRenderPass`,
@@ -14514,8 +14518,36 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             lunation criterion.
       measured: **1.022997541 lunations**, an error of 0.022997541 from one complete turn; the
             complete integration binary passed **107 / 107 tests**.
+- [x] HOUSE-01620 — Restore current CNA build compatibility and repair strict-XNA overload traps
+      dep: HOUSE-01606, HOUSE-00168 · sys: rendering, ci · plat: ALL · pri: MUST
+      verify: focused offscreen OPENGLES3 `MoonDiscRenderTests.*` and
+              `CellRuntimeRenderTests.TheCarriersStreamIsSixFloatsThenTwo`; strict-XNA all
+              translation units with at most 4 compiler jobs
+      note: (2026-09-13) CNA merge `fcd43e995` changed indexed effect passes to pointers and exposed
+            strict-XNA copy/move traps for retained `VertexDeclaration` and `Texture2D` values.
+            Every effect-pass call now follows the current pointer API. The cell test retains the
+            declaration by reference; moon and sky texture ownership is project-owned
+            `unique_ptr`, with an explicit borrowed moon-texture path for the render fixture. No XNA
+            graphics resource is copied or moved.
+      correction: indexed sampler assignment now necessarily selects CNA's `CNAEXT`
+            `SamplerState::operator=` and no strict-XNA setter exists. State tracking is limited to
+            blend/depth/raster state; BL-16 records why the runtime relies on CNA's default
+            `LinearWrap` and why that is correct for the authored cloud and celestial textures.
+      finding: CNA now enforces XNA's rule that a bound vertex buffer cannot be updated. Sky colour
+            uploads are therefore revisioned and performed lazily at the start of `Draw`, after
+            explicitly unbinding the previous stream; the dynamic star stream follows the same
+            contract before its `Discard` upload.
+      finding: this execution environment injects empty `.agents` and `.codex` control directories
+            at repository root (read-only mounts in the sandbox, ordinary directories in the commit
+            hook namespace). The layout gate excludes only these two exact names while they remain
+            empty and untracked; other directories, non-empty controls, and indexed paths still
+            fail, with five policy cases protecting that boundary.
+      measured: focused compatibility coverage passed **8 / 8 integration**, **2 / 2 render**, and
+            **29 / 29 sky/star unit tests**; the complete suites passed **1374 / 1374 unit** and
+            **109 / 109 integration** tests; strict XNA passed **313 translation units** with four
+            compiler jobs.
 - [ ] HOUSE-01619 — Phase-24 review and commit
-      dep: HOUSE-01601…HOUSE-01618 · sys: — · plat: ALL · pri: MUST
+      dep: HOUSE-01601…HOUSE-01618, HOUSE-01620 · sys: — · plat: ALL · pri: MUST
 
 ---
 
@@ -16448,6 +16480,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-13 | `HOUSE-01620` | **New task, next free id in phase 24's reserved range.** Restore compatibility with CNA merge `fcd43e995`, repair all newly exposed strict-XNA overload traps, record BL-16, and add the task to the phase review dependency. | The first full strict-XNA run during `HOUSE-01614` found that the merged CNA changed effect-pass indexing and now correctly rejects C++ copy/move conveniences for XNA reference objects. It also proved that indexed sampler assignment has no callable strict-XNA path. The gate cannot be waived: retained declarations are referenced, texture ownership is now explicit in project code, and the runtime uses the documented XNA default sampler. No CNA code or rule was weakened. |
 | 2026-09-12 | `HOUSE-01707` | **New task, next free id in phase 26's reserved range.** Repair `validate_world.py --selftest`'s weather fixture and add it to the phase review dependency. | `HOUSE-01684` made timing mandatory and `HOUSE-01685` expanded the rate contract from three channels to ten, but neither updated the validator's synthetic world. Its schema failure prevented every semantic mutation from running, yielding 112 secondary failures with empty problem lists. The authored world and normal CI gate remained valid; the fixture now states the complete contract and all self-test claims run again. No schema or semantic rule was weakened. |
 | 2026-09-06 | `HOUSE-00021` | `assets-src/effects/` → `assets-src/Effects/` in `cna-house.md` §70.1, in the §18.1 CMake snippet and in this task's text | Four statements in the two documents disagreed on the case of one path. §18.1's pipeline diagram, §17.5 and the "directories are PascalCase" rule of §8.3 said `Effects/`; §70.1 and the §18.1 CMake snippet said `effects/`. `check_xna_only.py` enforces where a `.fx` may live and needs exactly one spelling. |
 | 2026-09-06 | `HOUSE-00021` | `SOURCE_DIR assets-src/content` → `SOURCE_DIR assets-src` in the §18.1 CMake snippet, with the config file moved to `assets-src/.cna-content.json` | The same snippet placed the ContentManager-bound trees under `assets-src/content/`, while §18.1's own diagram, §17.5 and §15.1 place `Models/`, `Textures/`, `Audio/`, `Fonts/`, `Video/`, `Effects/` and `world/` directly under `assets-src/`. The directory skeleton created by `HOUSE-00001` follows the majority, and `check_layout.py` asserts it. |

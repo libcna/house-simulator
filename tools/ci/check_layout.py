@@ -99,6 +99,11 @@ ADR_RE = re.compile(r"^ADR-\d{4}-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
 
 SKIP_DIRS_ANYWHERE = {".git", "__pycache__", ".idea", ".vscode", ".vs", ".cache", "node_modules"}
 
+# Codex creates these empty control directories at repository root. Inside its filesystem sandbox
+# they are read-only mounts; the commit hook runs outside that namespace and sees ordinary empty
+# directories. They are not repository content and git cannot record an empty directory.
+INJECTED_EMPTY_ROOT_DIRS = {".agents", ".codex"}
+
 
 @dataclass(frozen=True)
 class Problem:
@@ -126,6 +131,9 @@ def check_required(root: Path, out: list[Problem]) -> None:
 
 def check_root_entries(root: Path, out: list[Problem]) -> None:
     for entry in sorted(os.listdir(root)):
+        path = root / entry
+        if _is_injected_empty_root_dir(root, path):
+            continue
         if entry in ALLOWED_ROOT_ENTRIES:
             continue
         if entry in ALLOWED_BUILD_DIRS:
@@ -159,6 +167,8 @@ def check_placement(root: Path, out: list[Problem]) -> None:
         dirnames[:] = sorted(d for d in dirnames if d not in SKIP_DIRS_ANYWHERE)
         here = Path(dirpath)
         if here == root:
+            dirnames[:] = [d for d in dirnames
+                           if not _is_injected_empty_root_dir(root, root / d)]
             dirnames[:] = [d for d in dirnames
                            if d not in ALLOWED_BUILD_DIRS and not BUILD_LIKE_RE.match(d)]
             dirnames[:] = [d for d in dirnames if d != "content"]
@@ -205,6 +215,8 @@ def check_gitkeep(root: Path, out: list[Problem]) -> None:
         here = Path(dirpath)
         if here == root:
             dirnames[:] = [d for d in dirnames
+                           if not _is_injected_empty_root_dir(root, root / d)]
+            dirnames[:] = [d for d in dirnames
                            if d not in ALLOWED_BUILD_DIRS and not BUILD_LIKE_RE.match(d)]
         if ".gitkeep" not in filenames:
             continue
@@ -233,6 +245,34 @@ def _git_ignores(root: Path, path: Path) -> bool:
     except (OSError, ValueError):
         return False
     return result.returncode == 0
+
+
+def _git_tracks(root: Path, path: Path) -> bool:
+    """Does the repository index contain this path, even if a mount hides it on disk?"""
+    try:
+        rel = path.relative_to(root).as_posix()
+        result = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "--error-unmatch", "--", rel],
+            capture_output=True, check=False)
+    except (OSError, ValueError):
+        return False
+    return result.returncode == 0
+
+
+def _injected_root_policy(*, name: str, directory: bool, empty: bool, tracked: bool) -> bool:
+    """Recognise only the two empty, untracked control directories Codex injects."""
+    return name in INJECTED_EMPTY_ROOT_DIRS and directory and empty and not tracked
+
+
+def _is_injected_empty_root_dir(root: Path, path: Path) -> bool:
+    """Exclude environment control points without admitting repository content or debris."""
+    try:
+        directory = path.is_dir()
+        empty = directory and next(path.iterdir(), None) is None
+    except OSError:
+        return False
+    return _injected_root_policy(
+        name=path.name, directory=directory, empty=empty, tracked=_git_tracks(root, path))
 
 
 def scan(root: Path) -> tuple[list[Problem], list[str]]:
@@ -299,6 +339,20 @@ def _stale_gitkeep(root: Path) -> None:
 def selftest() -> int:
     failures: list[str] = []
 
+    injected_cases = {
+        "empty untracked .agents": (".agents", True, True, False, True),
+        "empty untracked .codex": (".codex", True, True, False, True),
+        "ordinary empty directory": ("scratch", True, True, False, False),
+        "non-empty .agents": (".agents", True, False, False, False),
+        "tracked .codex": (".codex", True, True, True, False),
+    }
+    for label, (name, directory, empty, tracked, expected) in injected_cases.items():
+        actual = _injected_root_policy(
+            name=name, directory=directory, empty=empty, tracked=tracked)
+        if actual != expected:
+            failures.append(
+                f"injected-directory policy classified {label!r} as {actual}, expected {expected}")
+
     with tempfile.TemporaryDirectory(prefix="cnahouse-layout-") as tmp:
         root = Path(tmp)
         _build_clean_tree(root)
@@ -358,6 +412,7 @@ def selftest() -> int:
         return 3
 
     print(f"check_layout self-test passed: {len(PLANTED)} planted layout faults detected, "
+          f"{len(injected_cases)} injected-directory cases classified, "
           f"a .gitkeep beside ignored output accepted and beside tracked content rejected, "
           f"clean tree accepted.")
     return 0

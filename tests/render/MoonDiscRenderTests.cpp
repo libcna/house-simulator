@@ -55,7 +55,7 @@ namespace
                 cnahouse::rendering::Camera camera;
                 camera.eye = Xna::Vector3(0.0F, 2.0F, 0.0F);
                 camera.fieldOfViewDegrees = 4.0F;
-                cnahouse::rendering::MoonDiscPass pass(camera, std::move(albedo));
+                cnahouse::rendering::MoonDiscPass pass(camera, &albedo);
                 cnahouse::rendering::StateTracker states(device);
                 cnahouse::debug::Counters counters;
                 cnahouse::rendering::PassContext context{device, states, counters, 1.0F / 60.0F};

@@ -135,7 +135,7 @@ namespace
             EffectPassCollection& passes = fx.getCurrentTechniqueProperty()->getPassesProperty();
             for (int p = 0; p < passes.getCountProperty(); ++p)
             {
-                passes[p].Apply();
+                passes[p]->Apply();
                 gd.DrawIndexedPrimitives(PrimitiveType::TriangleList, 0, 0, 4, 0, 2);
             }
             gd.SetRenderTarget(nullptr);
@@ -211,7 +211,7 @@ namespace
             gd.setIndicesProperty(&ib);
             for (int p = 0; p < passes.getCountProperty(); ++p)
             {
-                passes[p].Apply();
+                passes[p]->Apply();
                 gd.DrawIndexedPrimitives(PrimitiveType::TriangleList, 0, 0, 4, 0, 2);
             }
             gd.SetRenderTarget(nullptr);

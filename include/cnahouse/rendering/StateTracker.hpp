@@ -9,7 +9,6 @@ namespace Microsoft::Xna::Framework::Graphics
     class DepthStencilState;
     class GraphicsDevice;
     class RasterizerState;
-    class SamplerState;
 } // namespace Microsoft::Xna::Framework::Graphics
 
 namespace cnahouse::rendering
@@ -41,7 +40,6 @@ namespace cnahouse::rendering
         void SetBlend(const Microsoft::Xna::Framework::Graphics::BlendState& state);
         void SetDepthStencil(const Microsoft::Xna::Framework::Graphics::DepthStencilState& state);
         void SetRasterizer(const Microsoft::Xna::Framework::Graphics::RasterizerState& state);
-        void SetSampler(int slot, const Microsoft::Xna::Framework::Graphics::SamplerState& state);
 
         /// @brief Forgets what it believes is bound.
         ///
@@ -61,17 +59,15 @@ namespace cnahouse::rendering
             std::uint32_t depthSkipped = 0;
             std::uint32_t rasterApplied = 0;
             std::uint32_t rasterSkipped = 0;
-            std::uint32_t samplerApplied = 0;
-            std::uint32_t samplerSkipped = 0;
 
             [[nodiscard]] std::uint32_t TotalApplied() const noexcept
             {
-                return blendApplied + depthApplied + rasterApplied + samplerApplied;
+                return blendApplied + depthApplied + rasterApplied;
             }
 
             [[nodiscard]] std::uint32_t TotalSkipped() const noexcept
             {
-                return blendSkipped + depthSkipped + rasterSkipped + samplerSkipped;
+                return blendSkipped + depthSkipped + rasterSkipped;
             }
         };
 
@@ -86,13 +82,10 @@ namespace cnahouse::rendering
         }
 
     private:
-        static constexpr int kMaxSamplerSlots = 16;
-
         Microsoft::Xna::Framework::Graphics::GraphicsDevice* device_ = nullptr;
         const Microsoft::Xna::Framework::Graphics::BlendState* blend_ = nullptr;
         const Microsoft::Xna::Framework::Graphics::DepthStencilState* depth_ = nullptr;
         const Microsoft::Xna::Framework::Graphics::RasterizerState* raster_ = nullptr;
-        const Microsoft::Xna::Framework::Graphics::SamplerState* samplers_[kMaxSamplerSlots]{};
         Counts current_;
         Counts lastFrame_;
     };

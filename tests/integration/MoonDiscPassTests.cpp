@@ -3,6 +3,7 @@
 // `HOUSE-01606`. The two-texture lunar quad through a real XNA GraphicsDevice.
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <utility>
 
 #include <gtest/gtest.h>
@@ -31,10 +32,10 @@ namespace
         cnahouse::testsupport::DeviceHost host(
             [&](Gfx::GraphicsDevice& device)
             {
-                Gfx::Texture2D albedo(device, 8, 8);
+                auto albedo = std::make_unique<Gfx::Texture2D>(device, 8, 8);
                 std::array<Xna::Color, 64> texels;
                 texels.fill(Xna::Color::White);
-                albedo.SetData(texels.data(), static_cast<int>(texels.size()));
+                albedo->SetData(texels.data(), static_cast<int>(texels.size()));
 
                 cnahouse::rendering::Camera camera;
                 camera.eye = Xna::Vector3(0.0F, 2.0F, 0.0F);

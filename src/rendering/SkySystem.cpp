@@ -21,7 +21,6 @@
 #include "Microsoft/Xna/Framework/Graphics/IndexBuffer.hpp"
 #include "Microsoft/Xna/Framework/Graphics/IndexElementSize.hpp"
 #include "Microsoft/Xna/Framework/Graphics/PrimitiveType.hpp"
-#include "Microsoft/Xna/Framework/Graphics/SamplerState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexBuffer.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexPositionColor.hpp"
@@ -641,7 +640,7 @@ namespace cnahouse::rendering
         {
         public:
             CloudGpuLayer(Gfx::GraphicsDevice& device,
-                          Gfx::Texture2D textureValue,
+                          std::unique_ptr<Gfx::Texture2D> textureValue,
                           const CloudRingMesh& mesh,
                           std::uint64_t tintRevision)
                 : texture(std::move(textureValue))
@@ -664,7 +663,7 @@ namespace cnahouse::rendering
                 effect.setLightingEnabledProperty(false);
                 effect.setTextureEnabledProperty(true);
                 effect.setVertexColorEnabledProperty(true);
-                effect.setTextureProperty(&texture);
+                effect.setTextureProperty(texture.get());
             }
 
             bool SetState(const CloudRingMesh& mesh, const Xna::Vector2& offset, std::uint64_t tintRevision)
@@ -688,7 +687,7 @@ namespace cnahouse::rendering
                 return true;
             }
 
-            Gfx::Texture2D texture;
+            std::unique_ptr<Gfx::Texture2D> texture;
             Gfx::VertexBuffer vertices;
             Gfx::IndexBuffer indices;
             // Last among the XNA resources, therefore first destroyed: it borrows `texture`.
@@ -708,7 +707,8 @@ namespace cnahouse::rendering
                   const std::vector<Gfx::VertexPositionColor>& colouredVertices,
                   const std::array<CloudRingMesh, 3>& cloudRings,
                   std::optional<CloudTextures>& cloudTextures,
-                  std::uint64_t cloudTintRevision)
+                  std::uint64_t cloudTintRevision,
+                  std::uint64_t colourRevision)
             : vertices(device,
                        Gfx::VertexPositionColor::getVertexDeclarationStatic(),
                        static_cast<int>(mesh.positions.size()),
@@ -721,6 +721,7 @@ namespace cnahouse::rendering
         {
             vertices.SetData(colouredVertices.data(), static_cast<int>(colouredVertices.size()));
             indices.SetData(mesh.indices.data(), static_cast<int>(mesh.indices.size()));
+            uploadedColourRevision = colourRevision;
 
             effect.setLightingEnabledProperty(false);
             effect.setTextureEnabledProperty(false);
@@ -742,6 +743,7 @@ namespace cnahouse::rendering
         Gfx::IndexBuffer indices;
         Gfx::BasicEffect effect;
         std::vector<std::unique_ptr<CloudGpuLayer>> clouds;
+        std::uint64_t uploadedColourRevision = 0;
     };
 
     SkySystem::SkySystem(const Camera& camera, SkyDomeMesh mesh, SkyColourModel colourModel)
@@ -781,7 +783,7 @@ namespace cnahouse::rendering
                          SkyDomeMesh mesh,
                          SkyColourModel colourModel,
                          CloudTextures cloudTextures,
-                         Gfx::Texture2D moonAlbedo)
+                         std::unique_ptr<Gfx::Texture2D> moonAlbedo)
         : SkySystem(camera, std::move(mesh), std::move(colourModel), std::move(cloudTextures))
     {
         moonDisc_.SetAlbedo(std::move(moonAlbedo));
@@ -791,7 +793,7 @@ namespace cnahouse::rendering
                          SkyDomeMesh mesh,
                          SkyColourModel colourModel,
                          CloudTextures cloudTextures,
-                         Gfx::Texture2D moonAlbedo,
+                         std::unique_ptr<Gfx::Texture2D> moonAlbedo,
                          StarCatalogue stars)
         : SkySystem(camera,
                     std::move(mesh),
@@ -1044,11 +1046,7 @@ namespace cnahouse::rendering
             }
         }
         ++cloudTintRevision_;
-        if (resources_ != nullptr)
-        {
-            resources_->vertices.SetData(colouredVertices_.data(),
-                                         static_cast<int>(colouredVertices_.size()));
-        }
+        ++colourRevision_;
         lastSunAltitudeDeg_ = sun.altitudeDeg;
         lastSunAzimuthDeg_ = sun.azimuthDeg;
         lastMoonAltitudeDeg_ = moon.altitudeDeg;
@@ -1135,11 +1133,24 @@ namespace cnahouse::rendering
         AdvanceClouds(context.deltaSeconds);
         if (resources_ == nullptr)
         {
-            resources_ = std::make_unique<Resources>(
-                context.device, mesh_, colouredVertices_, cloudRings_, cloudTextures_, cloudTintRevision_);
+            resources_ = std::make_unique<Resources>(context.device,
+                                                     mesh_,
+                                                     colouredVertices_,
+                                                     cloudRings_,
+                                                     cloudTextures_,
+                                                     cloudTintRevision_,
+                                                     colourRevision_);
         }
 
         Resources& resources = *resources_;
+        if (resources.uploadedColourRevision != colourRevision_)
+        {
+            // CNA enforces XNA's resource-binding contract: SetData cannot update the vertex buffer
+            // still retained by the previous draw. Upload lazily here, after explicitly unbinding it.
+            context.device.SetVertexBuffer(nullptr);
+            resources.vertices.SetData(colouredVertices_.data(), static_cast<int>(colouredVertices_.size()));
+            resources.uploadedColourRevision = colourRevision_;
+        }
         const auto& viewport = context.device.getViewportProperty();
         const float aspect = viewport.getHeightProperty() > 0
                                  ? static_cast<float>(viewport.getWidthProperty()) /
@@ -1166,7 +1177,7 @@ namespace cnahouse::rendering
             resources.effect.getCurrentTechniqueProperty()->getPassesProperty();
         for (int pass = 0; pass < passes.getCountProperty(); ++pass)
         {
-            passes[pass].Apply();
+            passes[pass]->Apply();
             context.device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList,
                                                  0,
                                                  0,
@@ -1210,7 +1221,6 @@ namespace cnahouse::rendering
             context.states.SetBlend(Gfx::BlendState::AlphaBlend);
             context.states.SetDepthStencil(Gfx::DepthStencilState::None);
             context.states.SetRasterizer(StateFor(CullPolicy::TwoSided));
-            context.states.SetSampler(0, Gfx::SamplerState::LinearWrap);
 
             for (std::size_t i = 0; i < resources.clouds.size(); ++i)
             {
@@ -1230,7 +1240,7 @@ namespace cnahouse::rendering
                     cloud.effect.getCurrentTechniqueProperty()->getPassesProperty();
                 for (int pass = 0; pass < cloudPasses.getCountProperty(); ++pass)
                 {
-                    cloudPasses[pass].Apply();
+                    cloudPasses[pass]->Apply();
                     context.device.DrawIndexedPrimitives(
                         Gfx::PrimitiveType::TriangleList,
                         0,

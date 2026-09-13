@@ -432,7 +432,7 @@ namespace cnahouse::content
                 auto& passes = effect_->getCurrentTechniqueProperty()->getPassesProperty();
                 for (int pass = 0; pass < passes.getCountProperty(); ++pass)
                 {
-                    passes[pass].Apply();
+                    passes[pass]->Apply();
                     device.DrawIndexedPrimitives(Xna::Graphics::PrimitiveType::TriangleList,
                                                  part->getVertexOffsetProperty(),
                                                  0,
