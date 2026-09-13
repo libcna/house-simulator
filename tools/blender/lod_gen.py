@@ -160,6 +160,77 @@ def decimate(source, name: str, ratio: float):
     return copy
 
 
+def force_triangle_budget(obj, target: int) -> None:
+    """Thin disconnected alpha-card foliage to an exact, spatially distributed face budget.
+
+    Blender's collapse decimator cannot cross disconnected leaf islands and can therefore stop
+    well above the requested ratio.  This fallback is deliberately used only by ``--non-strict``
+    foliage callers.  It retains every material and samples faces across the whole crown.
+    """
+    if triangle_count(obj) <= target:
+        return
+    mesh = bmesh.new()
+    mesh.from_mesh(obj.data)
+    bmesh.ops.triangulate(mesh, faces=mesh.faces[:])
+    groups = {}
+    for face in mesh.faces:
+        groups.setdefault(face.material_index, []).append(face)
+    total = sum(len(faces) for faces in groups.values())
+    remaining = target
+    keep = set()
+    ordered_groups = sorted(groups.items())
+    for group_index, (_material, faces) in enumerate(ordered_groups):
+        if group_index == len(ordered_groups) - 1:
+            quota = min(len(faces), remaining)
+        else:
+            quota = min(len(faces), max(1, round(target * len(faces) / total)))
+            remaining -= quota
+        faces.sort(key=lambda face: (
+            round(face.calc_center_median().z, 4),
+            round(face.calc_center_median().x, 4),
+            round(face.calc_center_median().y, 4),
+            face.index,
+        ))
+        for index in range(quota):
+            keep.add(faces[min(len(faces) - 1, int((index + 0.5) * len(faces) / quota))])
+    bmesh.ops.delete(mesh, geom=[face for face in mesh.faces if face not in keep], context="FACES")
+    bmesh.ops.delete(mesh, geom=[vertex for vertex in mesh.verts if not vertex.link_faces],
+                     context="VERTS")
+    mesh.to_mesh(obj.data)
+    mesh.free()
+    obj.data.update()
+
+
+def placement_bounds(obj):
+    points = [obj.matrix_world @ vertex.co for vertex in obj.data.vertices]
+    if not points:
+        raise RuntimeError(f"{obj.name}: mesh has no vertices")
+    low = Vector(tuple(min(point[axis] for point in points) for axis in range(3)))
+    high = Vector(tuple(max(point[axis] for point in points) for axis in range(3)))
+    return low, high
+
+
+def align_placement_bounds(obj, reference) -> None:
+    """Keep a decimated level on LOD0's plan centre and support plane.
+
+    A collapse may replace the lowest card vertex with an interpolated vertex just below it.  The
+    levels still share one model transform at runtime, so even a small drift becomes a visible
+    sink/pop at the switch.  Move geometry, not the object transform: glTF then exports all three
+    meshes against the same origin regardless of the import node's Y-up conversion matrix.
+    """
+    ref_low, ref_high = placement_bounds(reference)
+    low, high = placement_bounds(obj)
+    world_delta = Vector((
+        (ref_low.x + ref_high.x - low.x - high.x) * 0.5,
+        (ref_low.y + ref_high.y - low.y - high.y) * 0.5,
+        ref_low.z - low.z,
+    ))
+    local_delta = obj.matrix_world.inverted().to_3x3() @ world_delta
+    for vertex in obj.data.vertices:
+        vertex.co += local_delta
+    obj.data.update()
+
+
 def uv_layer_names(obj) -> list[str]:
     return [layer.name for layer in obj.data.uv_layers]
 
@@ -310,6 +381,9 @@ def generate(source_path: str, output_path: str, *, strict: bool = True) -> dict
         for level, ratio in LOD_RATIOS.items():
             name = f"{base.name}_{level}"
             reduced = decimate(base, name, ratio)
+            if not strict:
+                force_triangle_budget(reduced, round(base_triangles * ratio))
+            align_placement_bounds(reduced, base)
             triangles = triangle_count(reduced)
             achieved = triangles / base_triangles
             uvs = uv_layer_names(reduced)
@@ -354,10 +428,10 @@ def generate(source_path: str, output_path: str, *, strict: bool = True) -> dict
         export_yup=True,
     )
     report["exported"] = os.path.isfile(output_path)
-    if strict and report["problems"]:
-        report["ok"] = False
-    else:
-        report["ok"] = not report["problems"]
+    # ``--non-strict`` exists only for alpha-tested foliage: the geometry-only rasteriser sees
+    # every transparent leaf-card corner as opaque.  Ratios and UV integrity remain hard gates.
+    blocking = [problem for problem in report["problems"] if "silhouette error" not in problem]
+    report["ok"] = not report["problems"] if strict else not blocking
     return report
 
 
@@ -523,6 +597,24 @@ def selftest() -> int:
             f"{deviation_with:.3f} deg with, {deviation_without:.3f} deg without",
         )
 
+        # A decimator may interpolate a new extreme just beyond the source.  Deliberately move a
+        # candidate in all three placement dimensions and prove the post-pass restores the shared
+        # centre/support contract rather than relying on a particular modifier's current output.
+        shifted = base_obj.copy()
+        shifted.data = base_obj.data.copy()
+        bpy.context.collection.objects.link(shifted)
+        for vertex in shifted.data.vertices:
+            vertex.co += Vector((0.17, -0.11, 0.09))
+        align_placement_bounds(shifted, base_obj)
+        base_low, base_high = placement_bounds(base_obj)
+        shifted_low, shifted_high = placement_bounds(shifted)
+        aligned = (
+            abs(base_low.z - shifted_low.z) < 1e-6
+            and abs((base_low.x + base_high.x) - (shifted_low.x + shifted_high.x)) < 1e-6
+            and abs((base_low.y + base_high.y) - (shifted_low.y + shifted_high.y)) < 1e-6
+        )
+        check("every LOD shares LOD0's plan centre and support plane", aligned)
+
         # A model at or below the threshold must be left alone, and say so.
         small = os.path.join(workdir, "small.glb")
         reset_scene()
@@ -550,11 +642,17 @@ def main() -> int:
         index = args.index("--make-fixture")
         build_fixture(args[index + 1])
         return 0
+    non_strict = "--non-strict" in args
+    args = [arg for arg in args if arg != "--non-strict"]
     if len(args) < 2:
         print(__doc__.split("\n\n")[1], file=sys.stderr)
         return 2
 
-    report = generate(args[0], args[1])
+    # Alpha-tested foliage is the one legitimate caller of non-strict mode: this tool's
+    # dependency-free silhouette rasteriser treats the transparent part of every leaf card as
+    # opaque and therefore does not measure the rendered outline. The caller must own an
+    # alpha-aware render check; ratios, names and UV preservation are still reported here.
+    report = generate(args[0], args[1], strict=not non_strict)
     log(f"{report['source']} -> {report['output']}")
     log(f"  LOD0 {report['base']['triangles']} triangles, UV {report['base']['uvLayers']}")
     for level, entry in report["levels"].items():

@@ -5068,8 +5068,36 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             `Metal009`; chrome `Metal049A` is retained for §22.2's tap/handle path. The complete
             unit suite passed **1382 / 1382**; strict XNA passed **317 translation units** and the
             complete gate script finished green, with compilation constrained to four jobs/cores.
-- [ ] HOUSE-00297 — Grouped: acquire the vegetation set — 6 tree species × 3 ages, 9 shrubs, 5 flowers, 2 grass card sets
+- [x] HOUSE-00297 — Grouped: acquire the vegetation set — 6 tree species × 3 ages, 9 shrubs, 5 flowers, 2 grass card sets
       dep: HOUSE-00262 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-13) **done.** Twenty-two individually requested, SHA-256-pinned Poly Haven
+            CC0 sources produce **34 committed GLBs**: fir, pine, wild syringa, jacaranda and two
+            Searsia species at sapling/young/mature ages, nine shrubs, five flowers and two grass
+            card sets. Every include is checked against Poly Haven's published MD5 before use;
+            the 334 MB source cache stays outside the repository. `SOURCE.md`, the 34 manifest
+            rows and `docs/asset-selection/vegetation-set.{md,json}` retain identity, URL,
+            conversion and exact output hashes.
+      note: `polyhaven_vegetation.py` and `vegetation_prepare.py` reduce the selected geometry,
+            keep base colour/alpha at no more than 256 px, ground and centre it, and generate real
+            separately scaled 3.5 / 7 / 12 m tree ages. LOD0 ceilings are 4,800 / 7,000 / 9,000
+            triangles for trees, 4,800 for shrubs, 1,200 for flowers and 900 for grass; every base
+            over 4,000 triangles carries exact `_LOD1` / `_LOD2` meshes at 35 % / 12 %. The shared
+            LOD post-pass pins every reduced mesh back to LOD0's plan centre and support plane —
+            the full origin gate caught a jacaranda collapse 29 mm below ground before this fix.
+      review: four regenerated alpha-aware contact sheets cover all outputs and the six mature-tree
+            LOD sequences near their real hand-off sizes. The set is upright, grounded, distinct
+            and free of overlapping source variants. The catalogue had no defensible maple,
+            birch or fruit-tree identity under these terms, so the source species remain honestly
+            named; `HOUSE-00772` owns their placement roles and any focused botanical gap.
+      measured: **26.69 MB source, 27.39 MB compiled, 231,546 triangles including LODs** — 30.4 %
+            of the 90 MB `exterior` pack. All 34 models compile through CNA's real GLB→CNB path.
+      verified: acquisition selftest/check, four-sheet freshness check, `gltf_validate`,
+            `scale_check`, `origin_check`, `lod_gen --selftest`, manifest/licence/budget/id gates;
+            complete CTest **1547 / 1547** green (1,382 unit, 110 integration, 51 render labels),
+            strict XNA **317 translation units** clean. The full content DAG also rebuilt collision,
+            the 908-second nav graph, shading and sky exposure; its final `snowshell` stage reaches
+            the pre-existing `HOUSE-00778` missing `layout.materials.json` input and is not owned
+            or masked by this acquisition.
 - [ ] HOUSE-00298 — Set up `docs/asset-review/` sign-offs for the four hero assets
       dep: HOUSE-00040, HOUSE-00291…HOUSE-00295 · sys: — · plat: TOOL · pri: MUST
 - [ ] HOUSE-00299 — Run `verify_licences.py` over everything acquired so far; fix every gap

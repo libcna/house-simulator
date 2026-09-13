@@ -63,6 +63,15 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "car": [("z", 4.2, 5.2, "car length"),
             ("x", 1.7, 2.0, "car width"),
             ("y", 1.4, 1.9, "car height")],
+    # HOUSE-00297's age bands are deliberately disjoint. A mature tree accidentally registered
+    # as a sapling is a layout collision bug as well as an art bug, and the three rows make that
+    # mistake measurable instead of relying on the filename.
+    "tree-sapling": [("y", 3.40, 3.60, "tree sapling height")],
+    "tree-young": [("y", 6.85, 7.15, "young tree height")],
+    "tree-mature": [("y", 11.75, 12.25, "mature tree height")],
+    "shrub": [("y", 0.45, 1.85, "shrub / bush height")],
+    "flower": [("y", 0.20, 0.50, "flower clump height")],
+    "grass-card": [("y", 0.20, 0.60, "grass-card height")],
     # A pipeline fixture is not a real-world object, but it is still geometry with a size, and the
     # bug this table exists to catch -- a model authored in centimetres -- is exactly as possible
     # here as anywhere. The band is wide because the size is chosen to be legible in a screenshot;

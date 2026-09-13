@@ -126,6 +126,12 @@ run_gate "licences"   python3 tools/assets/verify_licences.py --check
 run_gate "base-materials-selftest" python3 tools/assets/ambientcg_materials.py --selftest
 run_gate "base-materials" python3 tools/assets/ambientcg_materials.py --check
 run_gate "base-material-previews" python3 tools/blender/material_preview.py --check
+# `HOUSE-00297`. Counts alone would accept repeated files and a model lying on its side: the set
+# gate checks pinned source identities, hashes, per-age scale, triangle/LOD ratios and textures;
+# the compact render sheets retain the alpha-aware visual review.
+run_gate "vegetation-selftest" python3 tools/assets/polyhaven_vegetation.py --selftest
+run_gate "vegetation" python3 tools/assets/polyhaven_vegetation.py --check
+run_gate "vegetation-previews" python3 tools/blender/vegetation_preview.py --check
 # `HOUSE-00203`. The committed report is generated from the manifest ALONE, so this gate needs no
 # build tree and gives the same answer everywhere. Its compiled column is empty by design; pass
 # --content/--effects by hand for the numbers the pack budgets are written against.

@@ -1,0 +1,667 @@
+{
+  "schema": "cna-house/vegetation-set/1",
+  "source": "Poly Haven CC0",
+  "retrieved": "2026-09-13",
+  "sourceAssetCount": 22,
+  "outputAssetCount": 34,
+  "assets": [
+    {
+      "id": "MODEL_VEGETATION_TREE_FIR_SAPLING",
+      "file": "assets-src/Models/Vegetation/tree_fir_sapling.glb",
+      "source": "fir_sapling",
+      "role": "tree",
+      "age": "sapling",
+      "boundsMetres": [
+        1.1378,
+        3.5,
+        1.0539
+      ],
+      "triangles": {
+        "tree_fir_sapling": 4800,
+        "tree_fir_sapling_LOD1": 1680,
+        "tree_fir_sapling_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 857460,
+      "sha256": "f8c22eaf2a0db3c4ac3d3facaa166020df9ce0adcb86bad7f87bd3bdd87a3793"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_FIR_YOUNG",
+      "file": "assets-src/Models/Vegetation/tree_fir_young.glb",
+      "source": "fir_sapling",
+      "role": "tree",
+      "age": "young",
+      "boundsMetres": [
+        3.5286,
+        7.0,
+        3.0178
+      ],
+      "triangles": {
+        "tree_fir_young": 7000,
+        "tree_fir_young_LOD1": 2450,
+        "tree_fir_young_LOD2": 840
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1187392,
+      "sha256": "21b5cf8cebac9e7827d0d6f5bb58e353a479bb20e3531d0d14ae5522e25b7e69"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_FIR_MATURE",
+      "file": "assets-src/Models/Vegetation/tree_fir_mature.glb",
+      "source": "fir_sapling",
+      "role": "tree",
+      "age": "mature",
+      "boundsMetres": [
+        7.9587,
+        12.0,
+        6.6127
+      ],
+      "triangles": {
+        "tree_fir_mature": 9000,
+        "tree_fir_mature_LOD1": 3150,
+        "tree_fir_mature_LOD2": 1080
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1487008,
+      "sha256": "176257afdb4a31b60ade304c321ce274a46a14c8d92e7acf88f76d20f0bcb63f"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_PINE_SAPLING",
+      "file": "assets-src/Models/Vegetation/tree_pine_sapling.glb",
+      "source": "pine_sapling_small",
+      "role": "tree",
+      "age": "sapling",
+      "boundsMetres": [
+        0.9665,
+        3.5009,
+        1.3365
+      ],
+      "triangles": {
+        "tree_pine_sapling": 4800,
+        "tree_pine_sapling_LOD1": 1680,
+        "tree_pine_sapling_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 837072,
+      "sha256": "8f6ac2650d6696aca48e251ceede29a4aa6bec84e907a0de7f26916afdf8efb5"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_PINE_YOUNG",
+      "file": "assets-src/Models/Vegetation/tree_pine_young.glb",
+      "source": "pine_sapling_small",
+      "role": "tree",
+      "age": "young",
+      "boundsMetres": [
+        2.7422,
+        7.0029,
+        3.7985
+      ],
+      "triangles": {
+        "tree_pine_young": 7000,
+        "tree_pine_young_LOD1": 2450,
+        "tree_pine_young_LOD2": 840
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1120692,
+      "sha256": "079799e3be2a466b32ad6c31223be83f5e90ea955f207a18186536accd40e655"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_PINE_MATURE",
+      "file": "assets-src/Models/Vegetation/tree_pine_mature.glb",
+      "source": "pine_sapling_small",
+      "role": "tree",
+      "age": "mature",
+      "boundsMetres": [
+        6.0678,
+        12.0115,
+        8.378
+      ],
+      "triangles": {
+        "tree_pine_mature": 8999,
+        "tree_pine_mature_LOD1": 3149,
+        "tree_pine_mature_LOD2": 1078
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1287748,
+      "sha256": "3442ec23f487dcbd40c156de93434c08973dd65a85e2c7e81a350d3c380fd43e"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_TREE_SMALL_02_SAPLING",
+      "file": "assets-src/Models/Vegetation/tree_tree_small_02_sapling.glb",
+      "source": "tree_small_02",
+      "role": "tree",
+      "age": "sapling",
+      "boundsMetres": [
+        1.207,
+        3.5,
+        1.7828
+      ],
+      "triangles": {
+        "tree_tree_small_02_sapling": 4800,
+        "tree_tree_small_02_sapling_LOD1": 1680,
+        "tree_tree_small_02_sapling_LOD2": 575
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1077888,
+      "sha256": "c3f34c187c5c1ad9e5b799979254d05406a13ecba95864519d3c4f7a76780d5e"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_TREE_SMALL_02_YOUNG",
+      "file": "assets-src/Models/Vegetation/tree_tree_small_02_young.glb",
+      "source": "tree_small_02",
+      "role": "tree",
+      "age": "young",
+      "boundsMetres": [
+        3.3418,
+        7.0,
+        5.1463
+      ],
+      "triangles": {
+        "tree_tree_small_02_young": 7000,
+        "tree_tree_small_02_young_LOD1": 2450,
+        "tree_tree_small_02_young_LOD2": 840
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1363916,
+      "sha256": "a053cf8672112caa3765dcb50bfcd27767bc2657ff5843fc20b0e290990a4c77"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_TREE_SMALL_02_MATURE",
+      "file": "assets-src/Models/Vegetation/tree_tree_small_02_mature.glb",
+      "source": "tree_small_02",
+      "role": "tree",
+      "age": "mature",
+      "boundsMetres": [
+        7.4715,
+        12.0,
+        11.2969
+      ],
+      "triangles": {
+        "tree_tree_small_02_mature": 8999,
+        "tree_tree_small_02_mature_LOD1": 3149,
+        "tree_tree_small_02_mature_LOD2": 1079
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1624272,
+      "sha256": "ab90c95ceb5094ae88ba003a8feeaf6b3a2543db1aecbbbdba1ed18bdcb4c027"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_JACARANDA_SAPLING",
+      "file": "assets-src/Models/Vegetation/tree_jacaranda_sapling.glb",
+      "source": "jacaranda_tree",
+      "role": "tree",
+      "age": "sapling",
+      "boundsMetres": [
+        2.3742,
+        3.5,
+        1.824
+      ],
+      "triangles": {
+        "tree_jacaranda_sapling": 4800,
+        "tree_jacaranda_sapling_LOD1": 1680,
+        "tree_jacaranda_sapling_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1376412,
+      "sha256": "9298e00491ff8fac73ed5006e425af3f865f299b40f98e3abc17390bf6465992"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_JACARANDA_YOUNG",
+      "file": "assets-src/Models/Vegetation/tree_jacaranda_young.glb",
+      "source": "jacaranda_tree",
+      "role": "tree",
+      "age": "young",
+      "boundsMetres": [
+        6.7142,
+        7.0,
+        5.2587
+      ],
+      "triangles": {
+        "tree_jacaranda_young": 7000,
+        "tree_jacaranda_young_LOD1": 2450,
+        "tree_jacaranda_young_LOD2": 840
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1825236,
+      "sha256": "0b2f867ae8bae5b3f01d01761d2688c73ed93dfad335855ca59bb6edcec01721"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_JACARANDA_MATURE",
+      "file": "assets-src/Models/Vegetation/tree_jacaranda_mature.glb",
+      "source": "jacaranda_tree",
+      "role": "tree",
+      "age": "mature",
+      "boundsMetres": [
+        14.7582,
+        12.0,
+        11.4754
+      ],
+      "triangles": {
+        "tree_jacaranda_mature": 9000,
+        "tree_jacaranda_mature_LOD1": 3150,
+        "tree_jacaranda_mature_LOD2": 1080
+      },
+      "maxTextureEdge": 256,
+      "bytes": 2232916,
+      "sha256": "7fc3d22dec151552c7d2d47ffb5f65311f0c6b2c746979619757a7e73f92ff51"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_SEARSIA_BURCHELLII_SAPLING",
+      "file": "assets-src/Models/Vegetation/tree_searsia_burchellii_sapling.glb",
+      "source": "searsia_burchellii",
+      "role": "tree",
+      "age": "sapling",
+      "boundsMetres": [
+        2.4525,
+        3.5,
+        3.1483
+      ],
+      "triangles": {
+        "tree_searsia_burchellii_sapling": 4800,
+        "tree_searsia_burchellii_sapling_LOD1": 1680,
+        "tree_searsia_burchellii_sapling_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 905604,
+      "sha256": "0a5c619ca31eb654eee8735ed1323fac51c4d25eb422a47d330bf5d2bf2603a3"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_SEARSIA_BURCHELLII_YOUNG",
+      "file": "assets-src/Models/Vegetation/tree_searsia_burchellii_young.glb",
+      "source": "searsia_burchellii",
+      "role": "tree",
+      "age": "young",
+      "boundsMetres": [
+        7.1527,
+        7.0,
+        8.8385
+      ],
+      "triangles": {
+        "tree_searsia_burchellii_young": 7000,
+        "tree_searsia_burchellii_young_LOD1": 2450,
+        "tree_searsia_burchellii_young_LOD2": 840
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1181092,
+      "sha256": "6a29375b7ccef726e5575d874d07b91afa2bca9bcc4995c0eafc8c684c8fc2db"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_SEARSIA_BURCHELLII_MATURE",
+      "file": "assets-src/Models/Vegetation/tree_searsia_burchellii_mature.glb",
+      "source": "searsia_burchellii",
+      "role": "tree",
+      "age": "mature",
+      "boundsMetres": [
+        16.0676,
+        12.0,
+        19.4252
+      ],
+      "triangles": {
+        "tree_searsia_burchellii_mature": 9000,
+        "tree_searsia_burchellii_mature_LOD1": 3150,
+        "tree_searsia_burchellii_mature_LOD2": 1080
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1391896,
+      "sha256": "5cf76ed0b449bd98ad1ced66b93d23b3410e36f8b900c7101830ce569e27b05f"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_SEARSIA_LUCIDA_SAPLING",
+      "file": "assets-src/Models/Vegetation/tree_searsia_lucida_sapling.glb",
+      "source": "searsia_lucida",
+      "role": "tree",
+      "age": "sapling",
+      "boundsMetres": [
+        1.5019,
+        3.5,
+        1.5901
+      ],
+      "triangles": {
+        "tree_searsia_lucida_sapling": 4800,
+        "tree_searsia_lucida_sapling_LOD1": 1680,
+        "tree_searsia_lucida_sapling_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 820952,
+      "sha256": "781743bb31925923f50ed1d4b1175adbee6bc7f3fd32993428c7534c8bc32e17"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_SEARSIA_LUCIDA_YOUNG",
+      "file": "assets-src/Models/Vegetation/tree_searsia_lucida_young.glb",
+      "source": "searsia_lucida",
+      "role": "tree",
+      "age": "young",
+      "boundsMetres": [
+        4.1857,
+        7.0,
+        4.5375
+      ],
+      "triangles": {
+        "tree_searsia_lucida_young": 7000,
+        "tree_searsia_lucida_young_LOD1": 2450,
+        "tree_searsia_lucida_young_LOD2": 840
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1032112,
+      "sha256": "31780b9a788bdfe01d5e97039d6adbc180e8cfd0b01575285907ac89a318bbfb"
+    },
+    {
+      "id": "MODEL_VEGETATION_TREE_SEARSIA_LUCIDA_MATURE",
+      "file": "assets-src/Models/Vegetation/tree_searsia_lucida_mature.glb",
+      "source": "searsia_lucida",
+      "role": "tree",
+      "age": "mature",
+      "boundsMetres": [
+        9.1994,
+        12.0,
+        10.2536
+      ],
+      "triangles": {
+        "tree_searsia_lucida_mature": 9000,
+        "tree_searsia_lucida_mature_LOD1": 3150,
+        "tree_searsia_lucida_mature_LOD2": 1080
+      },
+      "maxTextureEdge": 256,
+      "bytes": 1234360,
+      "sha256": "e73c7e06df0cd83d782995f7d3d012cb96076ec6a7b6d75d904f085afffdf95f"
+    },
+    {
+      "id": "MODEL_VEGETATION_SHRUB_01",
+      "file": "assets-src/Models/Vegetation/shrub_01.glb",
+      "source": "shrub_01",
+      "role": "shrub",
+      "age": null,
+      "boundsMetres": [
+        4.8516,
+        1.4088,
+        0.9888
+      ],
+      "triangles": {
+        "shrub_01": 4800,
+        "shrub_01_LOD1": 1680,
+        "shrub_01_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 358608,
+      "sha256": "8093583f80250f7026fd361f30c5136807b621f32c3cbd83e1e6893eb8503585"
+    },
+    {
+      "id": "MODEL_VEGETATION_SHRUB_02",
+      "file": "assets-src/Models/Vegetation/shrub_02.glb",
+      "source": "shrub_02",
+      "role": "shrub",
+      "age": null,
+      "boundsMetres": [
+        3.7215,
+        1.8017,
+        2.7073
+      ],
+      "triangles": {
+        "shrub_02": 4800,
+        "shrub_02_LOD1": 1680,
+        "shrub_02_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 376864,
+      "sha256": "4424005b86ec952cb1f345ed3fc0df9d712489bffe5ef69bc6c0ae41fff1d734"
+    },
+    {
+      "id": "MODEL_VEGETATION_SHRUB_03",
+      "file": "assets-src/Models/Vegetation/shrub_03.glb",
+      "source": "shrub_03",
+      "role": "shrub",
+      "age": null,
+      "boundsMetres": [
+        1.3963,
+        0.9,
+        0.3129
+      ],
+      "triangles": {
+        "shrub_03": 3924
+      },
+      "maxTextureEdge": 256,
+      "bytes": 231604,
+      "sha256": "5d9404e908fa2079d4873f98889727e9f6cbb76d91a99f7e2c3839530bde9df3"
+    },
+    {
+      "id": "MODEL_VEGETATION_SHRUB_04",
+      "file": "assets-src/Models/Vegetation/shrub_04.glb",
+      "source": "shrub_04",
+      "role": "shrub",
+      "age": null,
+      "boundsMetres": [
+        1.5294,
+        0.7524,
+        0.4725
+      ],
+      "triangles": {
+        "shrub_04": 4800,
+        "shrub_04_LOD1": 1680,
+        "shrub_04_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 376576,
+      "sha256": "d0cde92d1daf4d96814e22b40def0cd90b8348299213960a914946e2674ea6cc"
+    },
+    {
+      "id": "MODEL_VEGETATION_FERN_02",
+      "file": "assets-src/Models/Vegetation/fern_02.glb",
+      "source": "fern_02",
+      "role": "shrub",
+      "age": null,
+      "boundsMetres": [
+        2.2108,
+        0.65,
+        2.2096
+      ],
+      "triangles": {
+        "fern_02": 697
+      },
+      "maxTextureEdge": 256,
+      "bytes": 114776,
+      "sha256": "32ad123189eea97b1b99e44fe797230687dfaef4511a91eb8fc93b050d794495"
+    },
+    {
+      "id": "MODEL_VEGETATION_NETTLE_PLANT",
+      "file": "assets-src/Models/Vegetation/nettle_plant.glb",
+      "source": "nettle_plant",
+      "role": "shrub",
+      "age": null,
+      "boundsMetres": [
+        1.8785,
+        0.9,
+        0.6103
+      ],
+      "triangles": {
+        "nettle_plant": 4800,
+        "nettle_plant_LOD1": 1680,
+        "nettle_plant_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 443500,
+      "sha256": "e37f5ca009a2412533abb56d20c2e84dd761a6c439ff471cbee3419796536be2"
+    },
+    {
+      "id": "MODEL_VEGETATION_WEED_PLANT_02",
+      "file": "assets-src/Models/Vegetation/weed_plant_02.glb",
+      "source": "weed_plant_02",
+      "role": "shrub",
+      "age": null,
+      "boundsMetres": [
+        1.5522,
+        0.7,
+        1.5485
+      ],
+      "triangles": {
+        "weed_plant_02": 1528
+      },
+      "maxTextureEdge": 256,
+      "bytes": 167816,
+      "sha256": "0d9e69e3e8cfd76aee4d4fe2b0a415f175b0bca183d4f6d5790f568804435d53"
+    },
+    {
+      "id": "MODEL_VEGETATION_SHRUB_SORREL_01",
+      "file": "assets-src/Models/Vegetation/shrub_sorrel_01.glb",
+      "source": "shrub_sorrel_01",
+      "role": "shrub",
+      "age": null,
+      "boundsMetres": [
+        1.1325,
+        0.5,
+        1.0965
+      ],
+      "triangles": {
+        "shrub_sorrel_01": 765
+      },
+      "maxTextureEdge": 256,
+      "bytes": 131860,
+      "sha256": "6a54055e98ed29078cf8139ac6eb35fb4fe155e310a123bea6123547b6a3886b"
+    },
+    {
+      "id": "MODEL_VEGETATION_WILD_ROOIBOS_BUSH",
+      "file": "assets-src/Models/Vegetation/wild_rooibos_bush.glb",
+      "source": "wild_rooibos_bush",
+      "role": "shrub",
+      "age": null,
+      "boundsMetres": [
+        2.6054,
+        1.3,
+        1.2096
+      ],
+      "triangles": {
+        "wild_rooibos_bush": 4800,
+        "wild_rooibos_bush_LOD1": 1680,
+        "wild_rooibos_bush_LOD2": 576
+      },
+      "maxTextureEdge": 256,
+      "bytes": 698272,
+      "sha256": "3e63bc266b43c650cf6298e72489d782361cdeeeb39f690ebc51ae76107a55ef"
+    },
+    {
+      "id": "MODEL_VEGETATION_CELANDINE_01",
+      "file": "assets-src/Models/Vegetation/celandine_01.glb",
+      "source": "celandine_01",
+      "role": "flower",
+      "age": null,
+      "boundsMetres": [
+        0.5115,
+        0.35,
+        0.3707
+      ],
+      "triangles": {
+        "celandine_01": 1199
+      },
+      "maxTextureEdge": 256,
+      "bytes": 166256,
+      "sha256": "d168ec445dee4f3d6c2990d1a8ebc8b9984da6a2ce48acdace8794f57c548227"
+    },
+    {
+      "id": "MODEL_VEGETATION_DANDELION_01",
+      "file": "assets-src/Models/Vegetation/dandelion_01.glb",
+      "source": "dandelion_01",
+      "role": "flower",
+      "age": null,
+      "boundsMetres": [
+        0.4206,
+        0.25,
+        0.4137
+      ],
+      "triangles": {
+        "dandelion_01": 1200
+      },
+      "maxTextureEdge": 256,
+      "bytes": 155764,
+      "sha256": "4c2a106b7136d9f6b1b1ba753000343f405678be2e4589b170302adbfa5fe2ef"
+    },
+    {
+      "id": "MODEL_VEGETATION_PERIWINKLE_PLANT",
+      "file": "assets-src/Models/Vegetation/periwinkle_plant.glb",
+      "source": "periwinkle_plant",
+      "role": "flower",
+      "age": null,
+      "boundsMetres": [
+        0.611,
+        0.3,
+        0.18
+      ],
+      "triangles": {
+        "periwinkle_plant": 1200
+      },
+      "maxTextureEdge": 256,
+      "bytes": 204068,
+      "sha256": "188833168d6583dc040eb6b84efc5da6357eaa68bf07f932f4e086dc67a658fc"
+    },
+    {
+      "id": "MODEL_VEGETATION_FLOWER_GAZANIA",
+      "file": "assets-src/Models/Vegetation/flower_gazania.glb",
+      "source": "flower_gazania",
+      "role": "flower",
+      "age": null,
+      "boundsMetres": [
+        1.5922,
+        0.3,
+        1.5921
+      ],
+      "triangles": {
+        "flower_gazania": 130
+      },
+      "maxTextureEdge": 256,
+      "bytes": 106600,
+      "sha256": "c4cd7e06939ea1a2c028b9a15fcdd83e8b4a11c1bcbbc52b923f66aa70911807"
+    },
+    {
+      "id": "MODEL_VEGETATION_FLOWER_STINKKRUID",
+      "file": "assets-src/Models/Vegetation/flower_stinkkruid.glb",
+      "source": "flower_stinkkruid",
+      "role": "flower",
+      "age": null,
+      "boundsMetres": [
+        1.0715,
+        0.45,
+        0.6157
+      ],
+      "triangles": {
+        "flower_stinkkruid": 1200
+      },
+      "maxTextureEdge": 256,
+      "bytes": 172728,
+      "sha256": "e61b1c5d4439412d305ab4999b52e989a4fb3a6c82779da42b38b13bd121a9d9"
+    },
+    {
+      "id": "MODEL_VEGETATION_GRASS_BERMUDA_01",
+      "file": "assets-src/Models/Vegetation/grass_bermuda_01.glb",
+      "source": "grass_bermuda_01",
+      "role": "grass-card",
+      "age": null,
+      "boundsMetres": [
+        0.8836,
+        0.28,
+        0.272
+      ],
+      "triangles": {
+        "grass_bermuda_01": 75
+      },
+      "maxTextureEdge": 256,
+      "bytes": 47776,
+      "sha256": "96f3e1d0517953a5f873c6401a40e721298be1bfa688df8c8c3761ec9e9dedd7"
+    },
+    {
+      "id": "MODEL_VEGETATION_GRASS_MEDIUM_02",
+      "file": "assets-src/Models/Vegetation/grass_medium_02.glb",
+      "source": "grass_medium_02",
+      "role": "grass-card",
+      "age": null,
+      "boundsMetres": [
+        1.3185,
+        0.55,
+        0.5171
+      ],
+      "triangles": {
+        "grass_medium_02": 900
+      },
+      "maxTextureEdge": 256,
+      "bytes": 89444,
+      "sha256": "19a859f8c060f2a2d9b667c4ae7dc9d8725a37ce1e62665c0d0346f5445d05bc"
+    }
+  ]
+}

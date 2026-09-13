@@ -2189,6 +2189,15 @@ the complete `core` pack at **47.23 MB / 55 MB**; packaging ORM as an unused run
 instead make it 58.4 MB and is rejected. Selection, hashes, measurements and 34 sphere-and-floor
 renders are in `docs/asset-selection/base-material-set.md`.
 
+`HOUSE-00297` retained 22 specifically pinned Poly Haven CC0 vegetation sources and derived the
+34-model set required below: six botanically distinct trees at three real geometry ages, nine
+shrubs, five flowers and two grass-card sets. Prepared GLBs contain only stock-XNA-consumable base
+colour/alpha at no more than 256 px; every tree age is grounded and scaled to its §70.5 band, LOD meshes
+hit §26.1's ratios, and the locally rendered alpha-aware review is in
+`docs/asset-selection/vegetation-set.md`. The source catalogue did not offer identified maple,
+birch or fruit trees under the required terms, so no unrelated species was deceptively renamed;
+`HOUSE-00772` owns visual role assignment and any focused exact-species gap it reveals.
+
 ### 19.3 Quality bar and rejection criteria
 
 An asset is rejected if any of these is true:
@@ -2230,7 +2239,7 @@ unchanged.
 | Decoration: rugs ×8, curtains ×5, mirrors ×4, clocks ×4, vases ×6, plants ×12, books (kit), frames ×6 | 55 sourced + kit | |
 | Kitchenware and food props | 40 sourced/generated | Reused heavily in cupboards and the fridge |
 | Boxes, crates, bins, tools, garage clutter, attic clutter | 45 sourced + generated | The generated ones are boxes, which is honest |
-| Vegetation: 6 tree species × 3 ages, 9 shrubs, 5 flowers, grass cards | 32 sourced | Plus impostors |
+| Vegetation: 6 tree species × 3 ages, 9 shrubs, 5 flowers, 2 grass-card sets | 34 derived from 22 sourced | Plus impostors |
 | Exterior: fence kit, gates, mailbox, bins, hose reel, AC unit, shed, garden furniture, fire pit, swing | 24 sourced + generated fence | |
 | Neighbourhood houses | 8 sourced/generated bodies × material variants | Plus 3 LOD levels and impostors |
 | Vehicles: the player's car, 3 parked neighbour cars, 1 delivery van | 1 project-authored + 4 sourced | The player's car is a hero asset |
@@ -2910,6 +2919,11 @@ at 0.85 × the threshold) so an object at a boundary does not oscillate.
 | LOD2 | h ≥ 30 px | 0.12 |
 | Impostor | h ≥ 8 px | 2 triangles |
 | Culled | h < 8 px | 0 |
+
+The offline geometric silhouette gate treats every triangle as opaque. Alpha-tested vegetation is
+the one exception because this would measure the transparent corners of leaf cards as foliage.
+Its ratios, UVs and names remain hard gates, while silhouette quality is reviewed by rendering the
+actual alpha material at the transition levels; the evidence is retained with the acquisition.
 
 Global `lodBias` from the quality settings shifts every threshold; the Web and Android tiers ship
 with `+1`.
@@ -6201,6 +6215,8 @@ Run by `validate_world.py` over the layout and by `scale_check.py` over every as
 | Dog withers height | 0.50–0.70 m |
 | Cat shoulder height | 0.20–0.32 m |
 | Car length / width / height | 4.2–5.2 / 1.7–2.0 / 1.4–1.9 m |
+| Tree height, sapling / young / mature | 3.40–3.60 / 6.85–7.15 / 11.75–12.25 m |
+| Shrub / flower / grass-card height | 0.45–1.85 / 0.20–0.50 / 0.20–0.60 m |
 | Player capsule clearance through every portal | ≥ 0.62 m width, ≥ 1.95 m height (or the portal is marked `crouch`) |
 | Every interactable reachable from a standing eye position | a 2.5 m ray must reach `focus.point` |
 | Room area vs. its function | a bedroom ≥ 9 m², a bathroom ≥ 3.5 m², a WC ≥ 1.8 m², a corridor ≥ 0.9 m wide |
@@ -6212,7 +6228,7 @@ height, `2·rise + going`, capsule clearance, window sill over the room's own fl
 and door handle centres, room area against what the room's `name` says it is for, and the corridor
 width. `scale_check.py` owns every row that is a property of an *asset*: counter, upper cabinet,
 dining table, desk, chair and sofa seat, mattress, WC seat, basin and bath rim, handrail, human,
-dog, cat — and **car**, which this table listed and that tool did not transcribe until now.
+dog, cat and car, plus the vegetation age/category bands acquired by `HOUSE-00297`.
 
 Four rows are checked by neither, and each is a missing **input**, not a missing check:
 
