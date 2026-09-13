@@ -10,6 +10,7 @@
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 
 #include "cnahouse/app/ISystem.hpp"
+#include "cnahouse/environment/MoonLight.hpp"
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/lighting/BorrowedLightModel.hpp"
 #include "cnahouse/lighting/DaylightModel.hpp"
@@ -29,13 +30,13 @@ namespace cnahouse::world
 namespace cnahouse::lighting
 {
 
-    /// @brief The sun values copied into XNA's `DirectionalLight0` for an eligible object.
+    /// @brief Celestial values copied into XNA's `DirectionalLight0` for an eligible object.
     ///
     /// XNA has no separate intensity parameter: the LUT colour is multiplied by the direct-beam
     /// intensity here, once, and the consumer writes @c diffuseColor to `DiffuseColor`. Keeping
     /// this value-shaped also makes `HOUSE-01261`'s later per-object assignment independent of an
     /// effect instance.
-    struct SunKeyLight
+    struct CelestialKeyLight
     {
         Microsoft::Xna::Framework::Vector3 direction{0.0F, -1.0F, 0.0F};
         Microsoft::Xna::Framework::Vector3 diffuseColor{0.0F, 0.0F, 0.0F};
@@ -141,12 +142,29 @@ namespace cnahouse::lighting
             return sun_;
         }
 
+        /// @brief The current lunar position and phase, evaluated at the same instant as `Sun()`.
+        [[nodiscard]] const environment::MoonPosition& Moon() const noexcept
+        {
+            return moon_;
+        }
+
+        [[nodiscard]] const environment::MoonPhase& LunarPhase() const noexcept
+        {
+            return moonPhase_;
+        }
+
         /// @brief The shared `DirectionalLight0` values, or null when the cell should use a bulb.
         ///
         /// Outdoors takes the sun whenever it is above the refracted horizon. Indoors takes it
         /// only when §28.5's daylight threshold is met. Unknown cells and night return null;
         /// `HOUSE-01261` supplies the fixture key/fill/bounce alternatives later.
-        [[nodiscard]] const SunKeyLight* SunKeyForCell(util::Id cell) const noexcept;
+        [[nodiscard]] const CelestialKeyLight* SunKeyForCell(util::Id cell) const noexcept;
+
+        /// @brief §33.4's moon key, only for a sky-open exterior cell on a moonlit night.
+        [[nodiscard]] const CelestialKeyLight* MoonKeyForCell(util::Id cell) const noexcept;
+
+        /// @brief The one celestial key for @p cell: daylight sun first, then night-time moon.
+        [[nodiscard]] const CelestialKeyLight* CelestialKeyForCell(util::Id cell) const noexcept;
 
     private:
         struct CellGroups
@@ -175,9 +193,13 @@ namespace cnahouse::lighting
         BorrowedLightModel borrowed_;
         const environment::SimClock* clock_ = nullptr;
         environment::SunPosition sun_;
-        SunKeyLight sunKey_;
+        environment::MoonPosition moon_;
+        environment::MoonPhase moonPhase_;
+        CelestialKeyLight sunKey_;
+        CelestialKeyLight moonKey_;
         float cloudCover_ = 0.0F;
         bool sunComputed_ = false;
+        bool moonKeyActive_ = false;
         std::uint64_t computedForFrame_ = 0;
     };
 

@@ -14159,9 +14159,9 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             pointer to the grid, so the reverse destruction order is part of the implementation.
       decision: **the value published for XNA is already intensity-folded.** XNA's
             `DirectionalLight` carries `Direction`, `DiffuseColor` and `SpecularColor` but no
-            separate intensity. `SunKeyLight::diffuseColor` is therefore §32.2's LUT colour times
-            its cloud-attenuated direct intensity, exactly once; its direction is the direction
-            the beam travels. `SunKeyForCell` selects it for the 17 sky-open exterior cells while
+            separate intensity. `CelestialKeyLight::diffuseColor` is therefore §32.2's LUT
+            colour times its cloud-attenuated direct intensity, exactly once; its direction is the
+            direction the beam travels. `SunKeyForCell` selects it for the 17 sky-open exterior cells while
             the sun is above the refracted horizon, and indoors at §28.5's 0.15 daylight threshold.
       boundary: this task publishes the exact value and source selection for `DirectionalLight0`.
             `HOUSE-01261` remains the task that walks future dynamic draws and copies key, fill and
@@ -14341,9 +14341,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-00274 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-01606 — Implement the moon disc quad with the mask, horizon scaling and reddening
       dep: HOUSE-01604, HOUSE-01605 · sys: rendering · plat: ALL · pri: MUST
-- [ ] HOUSE-01607 — Implement moonlight: intensity from the non-linear phase curve, the blue colour, and the cloud modulation
+- [x] HOUSE-01607 — Implement moonlight: intensity from the non-linear phase curve, the blue colour, and the cloud modulation
       dep: HOUSE-01602, HOUSE-01564 · sys: lighting · plat: ALL · pri: MUST
       accept: a new-moon overcast night with the lights off is genuinely dark; a full-moon clear night is navigable
+      verify: unit `MoonLightTests.*` (5) for exact phase/altitude/cloud/cutoff/direction arithmetic;
+              unit `LightingSystemTests.AFullClearMoonBecomesTheOutdoorKeyOnlyOnADarkNight`
+      note: (2026-09-13) `MoonShadingFor` implements `0.0022 · illum^1.8 ·
+            max(0,sin(altitude))^0.6 · (1−0.95·cloudCover)` and keeps §33.4's `(0.62,0.70,1.00)`
+            hue separate from intensity. `LightingSystem` evaluates the moon at the same civil
+            instant as its one sun answer. The combined selector preserves the daylight sun, then
+            offers the blue lunar key only to sky-open exterior cells with the sun strictly below
+            −4° and the moon above its horizon. Exact new moon is zero even before overcast; a
+            model-found 97.2% clear moon at 39.4° produces blue intensity **0.001591**.
+      correction: §28.5's table formerly shortened the rule to “sun or moon if daylight ≥ 0.15”,
+            which would make moonlight impossible because solar daylight is zero at night. The
+            more specific §33.4 says outdoor objects become moonlit, so the table now distinguishes
+            the sun's daylight threshold from the moon's sky-open exterior rule.
+      boundary: this task publishes the complete celestial key value and selection. The still-open
+            `HOUSE-01261` owns copying key/fill/bounce into future dynamic-object effects; no absent
+            object draw is presented as implemented here.
 - [ ] HOUSE-01608 — Implement `moonPhaseSpeedMultiplier` and the `time advance <days>` command's effect on the phase
       dep: HOUSE-01602, HOUSE-00131 · sys: environment · plat: ALL · pri: MUST
 - [ ] HOUSE-01609 — Generate the 1 500-star catalogue binary from a public-domain source (RA, Dec, magnitude, B−V)

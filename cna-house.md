@@ -3116,7 +3116,7 @@ recomputed per object per frame (it is three normalises and a few dot products):
 
 | Slot | Source |
 |---|---|
-| `DirectionalLight0` | **Key** — the sun or moon if the object's cell has daylight ≥ 0.15, else the brightest fixture in range, as a directional approximation `normalize(object.centre − light.position)` attenuated by `1/(1 + (d/range)²)` |
+| `DirectionalLight0` | **Key** — the sun if the object's cell has daylight ≥ 0.15, the moon for a sky-open exterior at night, else the brightest fixture in range, as a directional approximation `normalize(object.centre − light.position)` attenuated by `1/(1 + (d/range)²)` |
 | `DirectionalLight1` | **Fill** — the second-brightest fixture, or the daylight direction from the strongest window |
 | `DirectionalLight2` | **Bounce** — `−(key + fill)` normalised, at 0.18 intensity, tinted by the room's dominant surface colour |
 | `AmbientLightColor` | the cell's `ambientColor` |
@@ -3558,6 +3558,16 @@ moonColor     = (0.62, 0.70, 1.00)
 `phaseIlluminationCurve` is deliberately non-linear (`illum^1.8`): a half moon gives far less than
 half a full moon's light, which is both physically true (opposition surge) and dramatically
 useful — a new-moon night with the lights off is genuinely, usefully dark.
+
+`HOUSE-01607` evaluates this once in `LightingSystem` beside the sun. `MoonShadingFor` clamps the
+phase and cloud inputs, removes the beam at and below the geometric horizon, and returns the
+normalised blue hue separately from intensity so cloud attenuation cannot be applied twice.
+`CelestialKeyForCell` preserves the daytime sun, then selects the moon only when the sun is
+strictly below −4°, the lunar intensity is non-zero and the cell is a sky-open exterior. Indoor
+rooms keep their fixture key at night; this resolves §28.5's former shorthand against this
+section's more specific outdoor-only rule. On 2031-01-06 at 19:00 the model supplies 97.2%
+illumination at 39.4° altitude and a clear-sky blue-channel intensity of 0.001591; exact new moon
+is zero even before the 95% overcast attenuation.
 
 ### 33.5 Lunation speed
 

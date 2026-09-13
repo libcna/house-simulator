@@ -3,6 +3,8 @@
 
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 
+#include "cnahouse/environment/MoonLight.hpp"
+#include "cnahouse/environment/MoonModel.hpp"
 #include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/environment/SunModel.hpp"
@@ -120,11 +122,21 @@ namespace cnahouse::lighting
     {
         computedForFrame_ = frame.frameIndex;
         sun_ = environment::SunPositionFor(*clock_);
+        moon_ = environment::MoonPositionFor(*clock_);
+        moonPhase_ = environment::MoonPhaseFromPositions(moon_, sun_);
         const environment::SunShading shading = environment::SunShadingFor(sun_, cloudCover_);
         sunKey_.direction = environment::SunDirection(sun_);
         sunKey_.diffuseColor = Microsoft::Xna::Framework::Vector3(shading.color.X * shading.directIntensity,
                                                                   shading.color.Y * shading.directIntensity,
                                                                   shading.color.Z * shading.directIntensity);
+        const environment::MoonShading moonShading =
+            environment::MoonShadingFor(moon_, moonPhase_, cloudCover_);
+        moonKey_.direction = environment::MoonDirection(moon_);
+        moonKey_.diffuseColor =
+            Microsoft::Xna::Framework::Vector3(moonShading.color.X * moonShading.intensity,
+                                               moonShading.color.Y * moonShading.intensity,
+                                               moonShading.color.Z * moonShading.intensity);
+        moonKeyActive_ = moonShading.intensity > 0.0F;
         sunComputed_ = true;
 
         daylight_.Evaluate(sun_.altitudeDeg, sun_.azimuthDeg, cloudCover_, daylightLevels_);
@@ -253,7 +265,7 @@ namespace cnahouse::lighting
         return true;
     }
 
-    const SunKeyLight* LightingSystem::SunKeyForCell(util::Id cell) const noexcept
+    const CelestialKeyLight* LightingSystem::SunKeyForCell(util::Id cell) const noexcept
     {
         const auto found = cellIndex_.find(cell.Value());
         if (found == cellIndex_.end() || !sunComputed_ ||
@@ -263,6 +275,26 @@ namespace cnahouse::lighting
         }
         const std::size_t index = found->second;
         return outdoorCells_[index] || cells_[index].DaylightIsKey() ? &sunKey_ : nullptr;
+    }
+
+    const CelestialKeyLight* LightingSystem::MoonKeyForCell(util::Id cell) const noexcept
+    {
+        const auto found = cellIndex_.find(cell.Value());
+        if (found == cellIndex_.end() || !sunComputed_ || !environment::MoonlightMayBeKey(sun_.altitudeDeg) ||
+            !moonKeyActive_)
+        {
+            return nullptr;
+        }
+        return outdoorCells_[found->second] ? &moonKey_ : nullptr;
+    }
+
+    const CelestialKeyLight* LightingSystem::CelestialKeyForCell(util::Id cell) const noexcept
+    {
+        if (const CelestialKeyLight* sun = SunKeyForCell(cell); sun != nullptr)
+        {
+            return sun;
+        }
+        return MoonKeyForCell(cell);
     }
 
 } // namespace cnahouse::lighting

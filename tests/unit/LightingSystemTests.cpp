@@ -20,6 +20,8 @@
 #include <gtest/gtest.h>
 
 #include "cnahouse/app/FrameTimer.hpp"
+#include "cnahouse/environment/MoonLight.hpp"
+#include "cnahouse/environment/MoonModel.hpp"
 #include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/environment/SunModel.hpp"
@@ -33,13 +35,13 @@
 namespace
 {
     using cnahouse::app::FrameContext;
+    using cnahouse::lighting::CelestialKeyLight;
     using cnahouse::lighting::kAmbientFloor;
     using cnahouse::lighting::kDaylightKeyThreshold;
     using cnahouse::lighting::LightingSystem;
     using cnahouse::lighting::PlanckianRgb;
     using cnahouse::lighting::RoomLightState;
     using cnahouse::lighting::ShadingGrid;
-    using cnahouse::lighting::SunKeyLight;
     using cnahouse::lighting::SwitchGroupState;
     using cnahouse::util::Id;
     namespace world = cnahouse::world;
@@ -628,10 +630,12 @@ TEST(LightingSystemTests, TheSunIsDirectionalLightZeroOutdoorsAndAboveTheIndoorT
     ASSERT_TRUE(daylitRoom.IsValid());
     ASSERT_TRUE(darkRoom.IsValid());
 
-    const SunKeyLight* outdoorKey = house.lighting.SunKeyForCell(outdoors);
-    const SunKeyLight* indoorKey = house.lighting.SunKeyForCell(daylitRoom);
+    const CelestialKeyLight* outdoorKey = house.lighting.SunKeyForCell(outdoors);
+    const CelestialKeyLight* indoorKey = house.lighting.SunKeyForCell(daylitRoom);
     ASSERT_NE(outdoorKey, nullptr);
     ASSERT_NE(indoorKey, nullptr);
+    EXPECT_EQ(house.lighting.CelestialKeyForCell(outdoors), outdoorKey)
+        << "the combined selector did not preserve the daytime sun";
     EXPECT_EQ(house.lighting.SunKeyForCell(darkRoom), nullptr);
     EXPECT_EQ(house.lighting.SunKeyForCell(Id::Of("NO_SUCH_CELL")), nullptr);
 
@@ -651,6 +655,81 @@ TEST(LightingSystemTests, TheSunIsDirectionalLightZeroOutdoorsAndAboveTheIndoorT
     house.lighting.Update(Frame(8));
     EXPECT_LT(house.lighting.Sun().altitudeDeg, cnahouse::environment::kRefractedHorizonDeg);
     EXPECT_EQ(house.lighting.SunKeyForCell(outdoors), nullptr) << "the sun is below the horizon";
+}
+
+TEST(LightingSystemTests, AFullClearMoonBecomesTheOutdoorKeyOnlyOnADarkNight)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    Id outdoors;
+    Id indoors;
+    for (const world::Cell& cell : house.world.Cells())
+    {
+        if (cell.kind == world::CellKind::Exterior && cell.visibilityHint == world::VisibilityHint::Open)
+        {
+            outdoors = cell.id;
+        }
+        else if (cell.kind != world::CellKind::Exterior)
+        {
+            indoors = cell.id;
+        }
+    }
+    ASSERT_TRUE(outdoors.IsValid());
+    ASSERT_TRUE(indoors.IsValid());
+    ASSERT_TRUE(house.lighting.SetCloudCover(0.0F));
+
+    bool foundMoonlitNight = false;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 1;
+    for (int day = 1; day <= 60 && !foundMoonlitNight; ++day)
+    {
+        const std::int64_t dayIndex = cnahouse::environment::DaysFromCivil(2031, 1, 1) + day - 1;
+        const cnahouse::environment::CivilTime date = cnahouse::environment::CivilFromDays(dayIndex);
+        time.year = date.year;
+        time.month = date.month;
+        time.day = date.day;
+        for (int hour = 0; hour < 24; ++hour)
+        {
+            time.hour = hour;
+            house.clock.SetStandard(time);
+            house.lighting.Update(Frame(static_cast<std::uint64_t>(100 + day * 24 + hour)));
+            if (house.lighting.Sun().altitudeDeg < cnahouse::environment::kMoonlightSunCutoffDeg &&
+                house.lighting.Moon().altitudeDeg > 30.0 &&
+                house.lighting.LunarPhase().illuminatedFraction > 0.95)
+            {
+                foundMoonlitNight = true;
+                break;
+            }
+        }
+    }
+    ASSERT_TRUE(foundMoonlitNight) << "two lunations contained no high, full moon at night";
+
+    const CelestialKeyLight* moonKey = house.lighting.MoonKeyForCell(outdoors);
+    ASSERT_NE(moonKey, nullptr);
+    EXPECT_EQ(house.lighting.CelestialKeyForCell(outdoors), moonKey);
+    EXPECT_EQ(house.lighting.MoonKeyForCell(indoors), nullptr)
+        << "§33.4 assigns moonlight only to outdoor objects";
+    EXPECT_GT(moonKey->diffuseColor.X, 0.0F);
+    EXPECT_GT(moonKey->diffuseColor.Y, moonKey->diffuseColor.X);
+    EXPECT_GT(moonKey->diffuseColor.Z, moonKey->diffuseColor.Y);
+
+    const auto expectedDirection = cnahouse::environment::MoonDirection(house.lighting.Moon());
+    EXPECT_NEAR(moonKey->direction.X, expectedDirection.X, 1e-6F);
+    EXPECT_NEAR(moonKey->direction.Y, expectedDirection.Y, 1e-6F);
+    EXPECT_NEAR(moonKey->direction.Z, expectedDirection.Z, 1e-6F);
+    std::printf("  moon key: %04d-%02d-%02d %02d:00, phase %.3f, altitude %.1f deg, blue %.6f\n",
+                time.year,
+                time.month,
+                time.day,
+                time.hour,
+                house.lighting.LunarPhase().illuminatedFraction,
+                house.lighting.Moon().altitudeDeg,
+                static_cast<double>(moonKey->diffuseColor.Z));
 }
 
 TEST(LightingSystemTests, CloudCoverIsContinuousClampedAndCannotBecomeNotANumber)
