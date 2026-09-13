@@ -20,6 +20,7 @@
 
 #include "cnahouse/rendering/MoonDiscPass.hpp"
 #include "cnahouse/rendering/Renderer.hpp"
+#include "cnahouse/rendering/StarField.hpp"
 #include "cnahouse/rendering/SunDiscPass.hpp"
 #include "cnahouse/util/Result.hpp"
 
@@ -171,6 +172,12 @@ namespace cnahouse::rendering
                   SkyColourModel colourModel,
                   CloudTextures cloudTextures,
                   Microsoft::Xna::Framework::Graphics::Texture2D moonAlbedo);
+        SkySystem(const Camera& camera,
+                  SkyDomeMesh mesh,
+                  SkyColourModel colourModel,
+                  CloudTextures cloudTextures,
+                  Microsoft::Xna::Framework::Graphics::Texture2D moonAlbedo,
+                  StarCatalogue stars);
         ~SkySystem() override;
 
         void SetSun(const environment::SunPosition& sun, double cloudCover) noexcept;
@@ -265,6 +272,7 @@ namespace cnahouse::rendering
         std::optional<CloudTextures> cloudTextures_;
         SunDiscPass sunDisc_;
         MoonDiscPass moonDisc_;
+        std::unique_ptr<StarField> starField_;
         std::unique_ptr<Resources> resources_;
         double windSpeedMetresPerSecond_ = 0.0;
         double windDirectionDegrees_ = 0.0;

@@ -14434,8 +14434,22 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             `CSTR` v1 output is exactly **24,016 bytes**, spans V **−1.46..4.94**, contains Sirius,
             Canopus, Vega and Polaris at checked J2000 coordinates, and has SHA-256
             `cf1145ec49855acced63cbb509f044b02977cd3a7233c3d0921145d5a30d4a20`.
-- [ ] HOUSE-01610 — Implement `StarField`: the dynamic vertex buffer of camera-facing quads with magnitude-driven size and B−V colour
+- [x] HOUSE-01610 — Implement `StarField`: the dynamic vertex buffer of camera-facing quads with magnitude-driven size and B−V colour
       dep: HOUSE-01609 · sys: rendering · plat: ALL · pri: MUST
+      verify: unit `StarFieldTests.*` (6/6); offscreen OPENGLES3 integration
+              `StarFieldPassTests.CompleteCatalogueStreamsAndSubmitsAsOneAdditiveDraw`; walk-scene
+              headless content load; strict-XNA **313 translation units** with `--jobs 4`; complete
+              `tools/ci/run_checks.sh`
+      note: (2026-09-13) the strict `CSTR` v1 reader validates the exact 24,016-byte writer output,
+            header, bounds, finite values and brightest-first order. The retained J2000 catalogue
+            expands to 6,000 `VertexPositionColor` vertices and a static 9,000-index list. One XNA
+            `DynamicVertexBuffer` is uploaded with `Discard` per rendered frame and the entire
+            1,500-star field is submitted as one additive, unlit, no-depth draw (3,000 triangles).
+            Each quad lies tangent to the 880 m celestial shell and faces the observer; visual
+            magnitude monotonically drives angular size and alpha, while an eight-stop clamped B−V
+            LUT supplies colour. `SkySystem` draws it between the opaque dome and moon/sun, before
+            clouds, and the walk scene now loads the generated catalogue. Sidereal/horizon rotation
+            and environmental visibility remain explicitly owned by HOUSE-01611/01612.
 - [ ] HOUSE-01611 — Implement sidereal rotation about the celestial pole at the configured latitude
       dep: HOUSE-01610, HOUSE-01532 · sys: rendering · plat: ALL · pri: MUST
       accept: Polaris sits at altitude ≈ latitude; constellations change with the season

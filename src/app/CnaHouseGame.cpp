@@ -493,7 +493,8 @@ namespace cnahouse::app
         lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
         auto skyDome = rendering::SkyDomeReader::ReadFromTitle("content/world/sky_dome.bin");
         auto skyColours = rendering::SkyColourModelReader::ReadFromTitle("content/world/layout.sky.json");
-        if (skyDome && skyColours)
+        auto stars = rendering::StarCatalogueReader::ReadFromTitle("content/world/stars.bin");
+        if (skyDome && skyColours && stars)
         {
             try
             {
@@ -507,7 +508,8 @@ namespace cnahouse::app
                                                                   std::move(*skyDome),
                                                                   std::move(*skyColours),
                                                                   std::move(cloudTextures),
-                                                                  std::move(moonAlbedo));
+                                                                  std::move(moonAlbedo),
+                                                                  std::move(*stars));
                 skySystem_ = sky.get();
                 renderer_.Install(rendering::Pass::Sky, std::move(sky));
             }
@@ -522,7 +524,8 @@ namespace cnahouse::app
             // but the missing layer is never silent or disguised as a plausible sky.
             Log::Error(LogCat::Content,
                        "--scene=walk: {}",
-                       skyDome ? skyColours.Error().ToString() : skyDome.Error().ToString());
+                       !skyDome ? skyDome.Error().ToString()
+                                : (!skyColours ? skyColours.Error().ToString() : stars.Error().ToString()));
         }
         if (blockoutChunks_ != nullptr)
         {

@@ -786,6 +786,21 @@ namespace cnahouse::rendering
         moonDisc_.SetAlbedo(std::move(moonAlbedo));
     }
 
+    SkySystem::SkySystem(const Camera& camera,
+                         SkyDomeMesh mesh,
+                         SkyColourModel colourModel,
+                         CloudTextures cloudTextures,
+                         Gfx::Texture2D moonAlbedo,
+                         StarCatalogue stars)
+        : SkySystem(camera,
+                    std::move(mesh),
+                    std::move(colourModel),
+                    std::move(cloudTextures),
+                    std::move(moonAlbedo))
+    {
+        starField_ = std::make_unique<StarField>(camera, std::move(stars));
+    }
+
     SkySystem::~SkySystem() = default;
 
     void SkySystem::SetSun(const environment::SunPosition& sun, double cloudCover) noexcept
@@ -1155,7 +1170,12 @@ namespace cnahouse::rendering
                              static_cast<std::int64_t>(std::lround(lastColourMilliseconds_ * 1000.0)));
 
         // Celestial layers belong after the opaque dome but before both clouds and world geometry.
-        // Each retains its own additive blend/no-depth state; clouds then obscure both naturally.
+        // Stars are first so the nearer moon and sun remain legible; each component owns its
+        // additive/no-depth state, and clouds then obscure the complete sky naturally.
+        if (starField_ != nullptr)
+        {
+            starField_->Draw(context);
+        }
         moonDisc_.Draw(context);
         sunDisc_.Draw(context);
 

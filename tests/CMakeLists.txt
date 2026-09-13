@@ -128,6 +128,24 @@ else()
                     "generated and SkySystemTests will not build.")
 endif()
 
+# `HOUSE-01610`. Exercise the real CSTR writer/reader boundary instead of duplicating its byte
+# layout in the success test. Mutations of this generated fixture cover every strict failure.
+set(CNAHOUSE_STAR_CATALOGUE_FIXTURE "${CMAKE_BINARY_DIR}/test-fixtures/stars/stars.bin")
+if(CNAHOUSE_PYTHON3)
+    add_custom_command(
+        OUTPUT "${CNAHOUSE_STAR_CATALOGUE_FIXTURE}"
+        COMMAND "${CNAHOUSE_PYTHON3}" "${CMAKE_SOURCE_DIR}/tools/world/build_stars.py"
+                --emit --out "${CNAHOUSE_STAR_CATALOGUE_FIXTURE}"
+        DEPENDS "${CMAKE_SOURCE_DIR}/tools/world/build_stars.py"
+                "${CMAKE_SOURCE_DIR}/assets-src/world/bsc5p.psv"
+        COMMENT "Generating the stars.bin round-trip fixture with build_stars.py"
+        VERBATIM)
+    add_custom_target(cnahouse_star_catalogue_fixture DEPENDS "${CNAHOUSE_STAR_CATALOGUE_FIXTURE}")
+else()
+    message(WARNING "cna-house: no python3, so the stars.bin round-trip fixture is not generated "
+                    "and StarFieldTests will not build.")
+endif()
+
 function(cnahouse_test_target kind)
     set(_target "cnahouse_${kind}_tests")
     file(GLOB_RECURSE _sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/${kind}/*.cpp")
@@ -155,7 +173,8 @@ function(cnahouse_test_target kind)
         CNAHOUSE_TEST_CHUNK_FIXTURE="${CNAHOUSE_CHUNK_FIXTURE}"
         CNAHOUSE_TEST_COLLISION_FIXTURE="${CNAHOUSE_COLLISION_FIXTURE}"
         CNAHOUSE_TEST_NEIGHBOURHOOD_FIXTURE="${CNAHOUSE_NEIGHBOURHOOD_FIXTURE}"
-        CNAHOUSE_TEST_SKY_DOME_FIXTURE="${CNAHOUSE_SKY_DOME_FIXTURE}")
+        CNAHOUSE_TEST_SKY_DOME_FIXTURE="${CNAHOUSE_SKY_DOME_FIXTURE}"
+        CNAHOUSE_TEST_STAR_CATALOGUE_FIXTURE="${CNAHOUSE_STAR_CATALOGUE_FIXTURE}")
     if(TARGET cnahouse_anim_fixture)
         add_dependencies(${_target} cnahouse_anim_fixture)
     endif()
@@ -170,6 +189,9 @@ function(cnahouse_test_target kind)
     endif()
     if(TARGET cnahouse_sky_dome_fixture)
         add_dependencies(${_target} cnahouse_sky_dome_fixture)
+    endif()
+    if(TARGET cnahouse_star_catalogue_fixture)
+        add_dependencies(${_target} cnahouse_star_catalogue_fixture)
     endif()
     set_target_properties(${_target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
     # The working directory is the REPOSITORY ROOT, not the build directory, so a test's fixture
