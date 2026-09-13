@@ -749,6 +749,7 @@ namespace cnahouse::rendering
         , colourModel_(std::move(colourModel))
         , cloudRings_(BuildCloudRings(colourModel_.cloudLayers))
         , sunDisc_(camera)
+        , moonDisc_(camera)
     {
         colouredVertices_.reserve(mesh_.positions.size());
         for (const Xna::Vector3& position : mesh_.positions)
@@ -775,14 +776,26 @@ namespace cnahouse::rendering
         cloudTextures_.emplace(std::move(cloudTextures));
     }
 
+    SkySystem::SkySystem(const Camera& camera,
+                         SkyDomeMesh mesh,
+                         SkyColourModel colourModel,
+                         CloudTextures cloudTextures,
+                         Gfx::Texture2D moonAlbedo)
+        : SkySystem(camera, std::move(mesh), std::move(colourModel), std::move(cloudTextures))
+    {
+        moonDisc_.SetAlbedo(std::move(moonAlbedo));
+    }
+
     SkySystem::~SkySystem() = default;
 
     void SkySystem::SetSun(const environment::SunPosition& sun, double cloudCover) noexcept
     {
         environment::MoonPosition moon;
         moon.altitudeDeg = -90.0;
-        SetSky(sun, moon, environment::MoonPhase{}, cloudCover);
+        const environment::MoonPhase phase{};
+        SetSky(sun, moon, phase, cloudCover);
         sunDisc_.SetSun(sun, cloudCover);
+        moonDisc_.SetMoon(moon, phase, sun);
     }
 
     void SkySystem::SetCelestial(const environment::SunPosition& sun,
@@ -792,6 +805,7 @@ namespace cnahouse::rendering
     {
         SetSky(sun, moon, phase, cloudCover);
         sunDisc_.SetSun(sun, cloudCover);
+        moonDisc_.SetMoon(moon, phase, sun);
     }
 
     bool SkySystem::SetWind(double speedMetresPerSecond, double directionDegrees) noexcept
@@ -1140,8 +1154,9 @@ namespace cnahouse::rendering
         context.counters.Set(colourMicrosCounter_,
                              static_cast<std::int64_t>(std::lround(lastColourMilliseconds_ * 1000.0)));
 
-        // Celestial layers belong after the opaque dome but before world geometry. The existing sun
-        // pass retains its own additive blend and no-depth state and lazily owns its texture.
+        // Celestial layers belong after the opaque dome but before both clouds and world geometry.
+        // Each retains its own additive blend/no-depth state; clouds then obscure both naturally.
+        moonDisc_.Draw(context);
         sunDisc_.Draw(context);
 
         std::int64_t cloudDraws = 0;

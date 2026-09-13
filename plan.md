@@ -14359,8 +14359,24 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             compiled `.cnb` bytes with mipmaps; 208 levels spanning 45-254 with mean 129.86;
             output SHA-256
             `d7fa53d450a40b605ab29dd28a51b9be4b43cae1b10481d5f9a91f428b851e75`.
-- [ ] HOUSE-01606 — Implement the moon disc quad with the mask, horizon scaling and reddening
+- [x] HOUSE-01606 — Implement the moon disc quad with the mask, horizon scaling and reddening
       dep: HOUSE-01604, HOUSE-01605 · sys: rendering · plat: ALL · pri: MUST
+      verify: unit `MoonDiscTests.*` (5) and existing `MoonMaskTests.*` (4); integration
+            `MoonDiscPassTests.*` (2) plus compiled-albedo coverage in
+            `SkySystemPassTests.ThreeCompiledCloudRingsScrollTintAndSubmitThroughStockXna`;
+            render `MoonDiscRenderTests.MaskOrientationHorizonScaleAndReddeningReachTheRenderTarget`;
+            complete build, unit and integration suites; XNA-only and strict-XNA gates
+      note: (2026-09-13) `MoonDiscPass` now places one two-UV quad 890 units along
+            `DirectionToMoon` at a 0.52° angular diameter, combines the real compiled lunar
+            albedo and `MoonMask` through stock XNA `DualTextureEffect`, and draws additively with
+            no depth before the cloud rings. The projected sun direction supplies the mask's
+            bright-limb angle; the mask texture uploads on first draw and thereafter only when
+            the retained CPU mask crosses its >1/128 phase threshold. The shared sun-disc curve
+            supplies both the 2.6× horizon easing and the atmospheric red-orange tint.
+      qualified: **1 357 / 1 357 unit and 109 / 109 integration tests**; the focused render test
+            read back non-zero earthshine, a bright half aimed at the projected western sun, a
+            brighter full-phase raster, more than 4× as many lit horizon pixels and R > G > B at
+            moonrise. Static XNA-only and strict-XNA checks passed all **310 translation units**.
 - [x] HOUSE-01607 — Implement moonlight: intensity from the non-linear phase curve, the blue colour, and the cloud modulation
       dep: HOUSE-01602, HOUSE-01564 · sys: lighting · plat: ALL · pri: MUST
       accept: a new-moon overcast night with the lights off is genuinely dark; a full-moon clear night is navigable

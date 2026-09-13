@@ -502,14 +502,18 @@ namespace cnahouse::app
                     getContentProperty().Load<Texture>(skyColours->cloudLayers[0].texture),
                     getContentProperty().Load<Texture>(skyColours->cloudLayers[1].texture),
                     getContentProperty().Load<Texture>(skyColours->cloudLayers[2].texture)};
-                auto sky = std::make_unique<rendering::SkySystem>(
-                    blockoutCamera_, std::move(*skyDome), std::move(*skyColours), std::move(cloudTextures));
+                Texture moonAlbedo = getContentProperty().Load<Texture>("Textures/Sky/moon_albedo");
+                auto sky = std::make_unique<rendering::SkySystem>(blockoutCamera_,
+                                                                  std::move(*skyDome),
+                                                                  std::move(*skyColours),
+                                                                  std::move(cloudTextures),
+                                                                  std::move(moonAlbedo));
                 skySystem_ = sky.get();
                 renderer_.Install(rendering::Pass::Sky, std::move(sky));
             }
             catch (const std::exception& e)
             {
-                Log::Error(LogCat::Content, "--scene=walk: the cloud texture set did not load: {}", e.what());
+                Log::Error(LogCat::Content, "--scene=walk: the sky texture set did not load: {}", e.what());
             }
         }
         else

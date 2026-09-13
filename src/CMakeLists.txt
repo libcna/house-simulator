@@ -123,6 +123,7 @@ add_library(cnahouse_core STATIC
     rendering/Camera.cpp
     rendering/MaterialBinder.cpp
     rendering/MoonMask.cpp
+    rendering/MoonDiscPass.cpp
     rendering/Quality.cpp
     rendering/RenderStates.cpp
     rendering/SkySystem.cpp

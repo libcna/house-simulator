@@ -3562,6 +3562,15 @@ are carried by the manifest, generated credits and `assets-src/Textures/Sky/SOUR
 Disc drawn at 890 units along `−moonDirection`, angular diameter 0.52°, `BlendState::Additive`,
 with the same horizon-scaling and reddening treatment as the sun.
 
+`HOUSE-01606` implements that disc as the `MoonDiscPass` component of `SkySystem`. It projects the
+sun direction into a stable world-up billboard basis to obtain the bright-limb position angle,
+places a two-UV quad at the stated distance and size, and combines the compiled albedo with
+`MoonMask` through stock XNA `DualTextureEffect`. Because that effect's light-map convention
+multiplies by two, the pass supplies half the atmospheric tint and therefore leaves the intended
+`albedo × mask × tint` product. The dynamic mask texture is uploaded only when `MoonMask` advances
+past its phase threshold. Moon and sun are submitted after the opaque dome but before the three
+cloud rings, so the ordinary alpha-blended cloud layer obscures both without a second cloud term.
+
 ### 33.4 Moonlight
 
 When the sun is below −4°, `DirectionalLight0` for outdoor objects becomes the moon:

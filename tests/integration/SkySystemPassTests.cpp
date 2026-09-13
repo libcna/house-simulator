@@ -26,6 +26,7 @@
 #include "Microsoft/Xna/Framework/GraphicsDeviceManager.hpp"
 
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/environment/MoonModel.hpp"
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/RenderStates.hpp"
@@ -168,6 +169,7 @@ namespace
         std::int64_t draws = 0;
         std::int64_t triangles = 0;
         std::int64_t uploads = 0;
+        std::int64_t moonDraws = 0;
         SkyContentHost host(
             [&](Microsoft::Xna::Framework::Content::ContentManager& content, Gfx::GraphicsDevice& device)
             {
@@ -192,10 +194,14 @@ namespace
                     EXPECT_GT(texture.getLevelCountProperty(), 1)
                         << "the offline content build dropped HOUSE-01646's mip chain";
                 }
+                Gfx::Texture2D moonAlbedo = content.Load<Gfx::Texture2D>("Textures/Sky/moon_albedo");
+                EXPECT_EQ(moonAlbedo.getWidthProperty(), 1024);
+                EXPECT_EQ(moonAlbedo.getHeightProperty(), 1024);
+                EXPECT_GT(moonAlbedo.getLevelCountProperty(), 1);
 
                 cnahouse::rendering::Camera camera;
                 cnahouse::rendering::SkySystem sky(
-                    camera, std::move(*mesh), std::move(*model), std::move(textures));
+                    camera, std::move(*mesh), std::move(*model), std::move(textures), std::move(moonAlbedo));
                 ASSERT_TRUE(sky.SetWind(8.0, 225.0));
                 ASSERT_TRUE(sky.SetCloudState(0.325, 0.5));
                 cnahouse::rendering::StateTracker states(device);
@@ -230,6 +236,20 @@ namespace
                 EXPECT_FALSE(device.getDepthStencilStateProperty().getDepthBufferEnableProperty());
                 EXPECT_EQ(states.Current().samplerApplied, 1u);
                 EXPECT_EQ(states.Current().samplerSkipped, 2u);
+
+                cnahouse::environment::SunPosition sun;
+                sun.altitudeDeg = -20.0;
+                sun.azimuthDeg = 270.0;
+                cnahouse::environment::MoonPosition moon;
+                moon.altitudeDeg = 30.0;
+                moon.azimuthDeg = 0.0;
+                cnahouse::environment::MoonPhase phase;
+                phase.phase = 0.25;
+                sky.SetCelestial(sun, moon, phase, 0.0);
+                sky.Draw(context);
+                const auto* moonDrawCounter = counters.Find("moon.disc.draws");
+                ASSERT_NE(moonDrawCounter, nullptr);
+                moonDraws = moonDrawCounter->current;
             });
         host.Run();
 
@@ -238,5 +258,6 @@ namespace
         EXPECT_EQ(draws, 3);
         EXPECT_EQ(triangles, 2160);
         EXPECT_EQ(uploads, 9) << "three UV buffers moved twice, then all three accepted a stationary tint";
+        EXPECT_EQ(moonDraws, 1) << "the compiled lunar albedo reached SkySystem's moon pass";
     }
 } // namespace
