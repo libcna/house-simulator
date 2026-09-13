@@ -7,6 +7,7 @@
 #include "Microsoft/Xna/Framework/Graphics/AlphaTestEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/DualTextureEffect.hpp"
+#include "Microsoft/Xna/Framework/Graphics/EnvironmentMapEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SkinnedEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
@@ -257,6 +258,16 @@ namespace cnahouse::rendering
         return *skinned_;
     }
 
+    Gfx::EnvironmentMapEffect& MaterialBinder::EnvironmentMapFor()
+    {
+        if (environmentMap_ == nullptr)
+        {
+            environmentMap_ = std::make_unique<Gfx::EnvironmentMapEffect>(*device_);
+            ++effectsCreated_;
+        }
+        return *environmentMap_;
+    }
+
     util::Result<Gfx::Effect*> MaterialBinder::Bind(util::Id id, const DrawParams& draw)
     {
         const MaterialDesc* desc = Find(id);
@@ -384,6 +395,57 @@ namespace cnahouse::rendering
             }
         }
         return Err(ErrorCode::Unknown, "unreachable: a material kind with no case");
+    }
+
+    util::Result<Gfx::Effect*> MaterialBinder::BindEnvironmentMap(util::Id id,
+                                                                  const DrawParams& draw,
+                                                                  const EnvironmentMapParams& environment)
+    {
+        const MaterialDesc* desc = Find(id);
+        if (desc == nullptr)
+        {
+            return Err(ErrorCode::NotFound, std::format("no material {:#010x} is registered", id.Value()));
+        }
+        if (!desc->lightingEnabled)
+        {
+            return Err(ErrorCode::Unsupported,
+                       std::format("material {:#010x} is unlit, and EnvironmentMapEffect requires "
+                                   "lighting",
+                                   id.Value()));
+        }
+        if (draw.diffuse == nullptr || environment.cubeMap == nullptr)
+        {
+            return Err(ErrorCode::InvalidArgument,
+                       std::format("material {:#010x} needs both an albedo and a baked cube map for "
+                                   "its environment pass",
+                                   id.Value()));
+        }
+        if (!std::isfinite(environment.amount) || environment.amount < 0.0F || environment.amount > 1.0F)
+        {
+            return Err(ErrorCode::OutOfRange,
+                       std::format("material {:#010x} has environment-map amount {}, outside 0..1",
+                                   id.Value(),
+                                   environment.amount));
+        }
+        if (!std::isfinite(environment.fresnelFactor) || environment.fresnelFactor < 0.0F)
+        {
+            return Err(ErrorCode::OutOfRange,
+                       std::format("material {:#010x} has negative or non-finite Fresnel factor {}",
+                                   id.Value(),
+                                   environment.fresnelFactor));
+        }
+
+        auto& effect = EnvironmentMapFor();
+        ApplyMatrices(effect, draw);
+        effect.setDiffuseColorProperty(ToVector(desc->diffuse));
+        effect.setAlphaProperty(desc->alpha);
+        effect.setTextureProperty(draw.diffuse);
+        effect.setEnvironmentMapProperty(environment.cubeMap);
+        effect.setEnvironmentMapAmountProperty(environment.amount);
+        effect.setEnvironmentMapSpecularProperty(ToVector(desc->specularColour));
+        effect.setFresnelFactorProperty(environment.fresnelFactor);
+        ApplyFog(effect, draw);
+        return &effect;
     }
 
 } // namespace cnahouse::rendering

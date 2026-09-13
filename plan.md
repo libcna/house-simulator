@@ -12873,8 +12873,21 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             inspection of all material values, four-weight mode, a distinctive first bone, identity
             padding through slot 71, fog reset, four invalid-input cases and the exact 72-bone cap;
             unit + integration 1503/1503; XNA-only gates.
-- [ ] HOUSE-00896 — Implement `MaterialBinder` for `EnvironmentMapEffect` with the baked cube maps
+- [x] HOUSE-00896 — Implement `MaterialBinder` for `EnvironmentMapEffect` with the baked cube maps
       dep: HOUSE-00892, HOUSE-00081 · sys: rendering · plat: ALL · pri: SHOULD
+      note: (2026-09-14) `BindEnvironmentMap` now applies a registered base material's tint, alpha
+            and specular colour with a per-draw albedo, placement-owned baked `TextureCube`, linear
+            blend amount, Fresnel factor and fog through the stock XNA effect. Both textures and all
+            numeric controls are validated before the one shared effect is allocated.
+      finding: §22.2 specifies environment mapping as a supplemental pass for chrome, glass and
+            mirrors, not as a fifth primary material tier. Adding it to `effectTierS` would replace
+            glass's transparent Basic pass and could not represent four mirrors sharing a material
+            but needing four different bakes. The explicit supplemental binder preserves both facts
+            and keeps the cube at its honest per-placement boundary.
+      verified: max-4-core warning-clean build; 24 `MaterialBinderTests`, including live-device
+            inspection of both textures, material tint/alpha/specular, measured amount/Fresnel
+            controls, fog reset, effect reuse, missing inputs, invalid ranges, unknown material and
+            unlit-material refusal; unit + integration 1506/1506; XNA-only gates.
 - [ ] HOUSE-00897 — Implement the effect-instance pool: one instance per (effect class, material variant), cloned as needed, never allocated per draw
       dep: HOUSE-00895 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00898 — Implement the transparency pass with back-to-front sorting by cell then by object

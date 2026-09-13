@@ -12,8 +12,10 @@
 #include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/DualTextureEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
+#include "Microsoft/Xna/Framework/Graphics/EnvironmentMapEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SkinnedEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
+#include "Microsoft/Xna/Framework/Graphics/TextureCube.hpp"
 #include "Microsoft/Xna/Framework/Matrix.hpp"
 #include "Microsoft/Xna/Framework/Vector3.hpp"
 
@@ -29,6 +31,7 @@ namespace
     namespace Gfx = Microsoft::Xna::Framework::Graphics;
     using cnahouse::rendering::CullPolicy;
     using cnahouse::rendering::DrawParams;
+    using cnahouse::rendering::EnvironmentMapParams;
     using cnahouse::rendering::FogParams;
     using cnahouse::rendering::MaterialBinder;
     using cnahouse::rendering::MaterialDesc;
@@ -522,6 +525,111 @@ namespace
                 const auto bound = binder.Bind(id, DrawParams{});
                 ASSERT_FALSE(bound.HasValue());
                 EXPECT_EQ(bound.Error().Code(), ErrorCode::InvalidArgument);
+                EXPECT_EQ(binder.EffectsCreated(), 0U);
+            });
+    }
+
+    TEST(MaterialBinderTests, EnvironmentMapPassReceivesBakedCubeMaterialAndFog)
+    {
+        RunWithDeviceBinder(
+            [](Gfx::GraphicsDevice& device, MaterialBinder& binder)
+            {
+                MaterialDesc desc;
+                desc.kind = MaterialKind::Basic;
+                desc.diffuse[0] = 0.20F;
+                desc.diffuse[1] = 0.35F;
+                desc.diffuse[2] = 0.50F;
+                desc.alpha = 0.70F;
+                desc.specularColour[0] = 0.80F;
+                desc.specularColour[1] = 0.60F;
+                desc.specularColour[2] = 0.40F;
+                const Id id = Id::Of("MAT_CHROME");
+                ASSERT_TRUE(binder.Register(id, desc).HasValue());
+
+                Gfx::Texture2D albedo(device, 2, 2);
+                Gfx::TextureCube cube(device, 4, false, Gfx::SurfaceFormat::Color);
+                FogParams fog;
+                fog.colour[0] = 0.08F;
+                fog.colour[1] = 0.12F;
+                fog.colour[2] = 0.16F;
+                fog.start = 11.0F;
+                fog.end = 71.0F;
+                DrawParams draw;
+                draw.diffuse = &albedo;
+                draw.fog = &fog;
+                EnvironmentMapParams environment;
+                environment.cubeMap = &cube;
+                environment.amount = 0.65F;
+                environment.fresnelFactor = 3.0F;
+
+                const auto bound = binder.BindEnvironmentMap(id, draw, environment);
+                ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
+                auto* effect = static_cast<Gfx::EnvironmentMapEffect*>(*bound);
+                EXPECT_EQ(effect->getTextureProperty(), &albedo);
+                EXPECT_EQ(effect->getEnvironmentMapProperty(), &cube);
+                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.20F, 0.35F, 0.50F));
+                EXPECT_FLOAT_EQ(effect->getAlphaProperty(), 0.70F);
+                EXPECT_FLOAT_EQ(effect->getEnvironmentMapAmountProperty(), 0.65F);
+                EXPECT_EQ(effect->getEnvironmentMapSpecularProperty(), Vector3(0.80F, 0.60F, 0.40F));
+                EXPECT_FLOAT_EQ(effect->getFresnelFactorProperty(), 3.0F);
+                EXPECT_TRUE(effect->getFogEnabledProperty());
+                EXPECT_EQ(effect->getFogColorProperty(), Vector3(0.08F, 0.12F, 0.16F));
+                EXPECT_FLOAT_EQ(effect->getFogStartProperty(), 11.0F);
+                EXPECT_FLOAT_EQ(effect->getFogEndProperty(), 71.0F);
+
+                draw.fog = nullptr;
+                ASSERT_TRUE(binder.BindEnvironmentMap(id, draw, environment).HasValue());
+                EXPECT_FALSE(effect->getFogEnabledProperty());
+                EXPECT_EQ(binder.EffectsCreated(), 1U);
+            });
+    }
+
+    TEST(MaterialBinderTests, EnvironmentMapPassRefusesIncompleteOrInvalidInputsBeforeAllocation)
+    {
+        RunWithDeviceBinder(
+            [](Gfx::GraphicsDevice& device, MaterialBinder& binder)
+            {
+                const Id id = Id::Of("MAT_CHROME");
+                ASSERT_TRUE(binder.Register(id, MaterialDesc{}).HasValue());
+                Gfx::Texture2D albedo(device, 2, 2);
+                Gfx::TextureCube cube(device, 4, false, Gfx::SurfaceFormat::Color);
+                DrawParams draw;
+                EnvironmentMapParams environment;
+
+                EXPECT_EQ(binder.BindEnvironmentMap(id, draw, environment).Error().Code(),
+                          ErrorCode::InvalidArgument);
+                draw.diffuse = &albedo;
+                EXPECT_EQ(binder.BindEnvironmentMap(id, draw, environment).Error().Code(),
+                          ErrorCode::InvalidArgument);
+
+                environment.cubeMap = &cube;
+                environment.amount = 1.01F;
+                EXPECT_EQ(binder.BindEnvironmentMap(id, draw, environment).Error().Code(),
+                          ErrorCode::OutOfRange);
+                environment.amount = 1.0F;
+                environment.fresnelFactor = -0.01F;
+                EXPECT_EQ(binder.BindEnvironmentMap(id, draw, environment).Error().Code(),
+                          ErrorCode::OutOfRange);
+                EXPECT_EQ(binder.EffectsCreated(), 0U);
+
+                EXPECT_EQ(binder.BindEnvironmentMap(Id::Of("MAT_UNKNOWN"), draw, environment).Error().Code(),
+                          ErrorCode::NotFound);
+            });
+    }
+
+    TEST(MaterialBinderTests, EnvironmentMapPassRefusesAnUnlitMaterial)
+    {
+        RunWithBinder(
+            [](MaterialBinder& binder)
+            {
+                MaterialDesc desc;
+                desc.lightingEnabled = false;
+                const Id id = Id::Of("MAT_EMISSIVE_SCREEN");
+                ASSERT_TRUE(binder.Register(id, desc).HasValue());
+
+                const auto bound = binder.BindEnvironmentMap(id, DrawParams{}, EnvironmentMapParams{});
+                ASSERT_FALSE(bound.HasValue());
+                EXPECT_EQ(bound.Error().Code(), ErrorCode::Unsupported);
                 EXPECT_EQ(binder.EffectsCreated(), 0U);
             });
     }

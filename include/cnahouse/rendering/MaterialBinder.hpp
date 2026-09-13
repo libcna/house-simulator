@@ -19,9 +19,11 @@ namespace Microsoft::Xna::Framework::Graphics
     class BasicEffect;
     class DualTextureEffect;
     class Effect;
+    class EnvironmentMapEffect;
     class GraphicsDevice;
     class SkinnedEffect;
     class Texture2D;
+    class TextureCube;
 } // namespace Microsoft::Xna::Framework::Graphics
 
 namespace cnahouse::world
@@ -34,10 +36,11 @@ namespace cnahouse::rendering
 
     /// @brief Which stock XNA effect a material is drawn with.
     ///
-    /// **Four, and this list is closed for Tier S.** ADR-0003 promises Tier S is complete using
-    /// stock effects only, and phase 1 measured all four end to end against analytic expectations
-    /// (`HOUSE-00078`, `HOUSE-00080`, `HOUSE-00082`, `HOUSE-00075`/`HOUSE-00077`). A fifth kind
-    /// would be a fifth thing to measure; adding one is a decision, not a convenience.
+    /// **Four primary kinds, and this list is closed for Tier S.** ADR-0003 promises Tier S is
+    /// complete using stock effects only, and phase 1 measured all four end to end against analytic
+    /// expectations (`HOUSE-00078`, `HOUSE-00080`, `HOUSE-00082`, `HOUSE-00075`/`HOUSE-00077`).
+    /// `EnvironmentMapEffect` was measured too (`HOUSE-00081`), but §22.2 defines it as an extra
+    /// reflection pass over one of these materials; `BindEnvironmentMap` represents that distinction.
     enum class MaterialKind
     {
         /// @brief `BasicEffect`. Lit geometry with one texture. The default.
@@ -98,6 +101,17 @@ namespace cnahouse::rendering
         float end = 1.0F;
     };
 
+    /// @brief Per-pass controls for §22.2's supplemental stock-XNA reflection pass.
+    ///
+    /// The cube is selected by the reflecting object's placement: four mirrors sharing one
+    /// material see four different baked rooms, so it cannot honestly live in `MaterialDesc`.
+    struct EnvironmentMapParams
+    {
+        Microsoft::Xna::Framework::Graphics::TextureCube* cubeMap = nullptr;
+        float amount = 1.0F;
+        float fresnelFactor = 1.0F;
+    };
+
     /// @brief The per-draw values a material cannot know: where the thing is and where it is seen from.
     struct DrawParams
     {
@@ -117,11 +131,11 @@ namespace cnahouse::rendering
 
     /// @brief Material id → effect instance with that material's parameters applied.
     ///
-    /// **One effect instance per KIND, not per material.** An XNA effect object holds the parameter
-    /// values that were last written to it, so the parameters are set per draw whatever happens; an
-    /// instance per material would therefore buy nothing and cost one shader object per material in
-    /// the house. `HOUSE-00106` measured `EffectPass::Apply()` at 0.184 µs against a draw call at
-    /// 8.15 µs, so re-writing parameters is not where the frame goes.
+    /// **One effect instance per effect class, not per material.** An XNA effect object holds the
+    /// parameter values that were last written to it, so the parameters are set per draw whatever
+    /// happens; an instance per material would therefore buy nothing and cost one shader object per
+    /// material in the house. `HOUSE-00106` measured `EffectPass::Apply()` at 0.184 µs against a draw
+    /// call at 8.15 µs, so re-writing parameters is not where the frame goes.
     ///
     /// **What it refuses is the point.** Two of phase 1's measurements are enforced at their honest
     /// boundaries rather than left to throw inside an effect: registration refuses a `SkinnedEffect`
@@ -183,7 +197,15 @@ namespace cnahouse::rendering
         /// just been overwritten.
         util::Result<Microsoft::Xna::Framework::Graphics::Effect*> Bind(util::Id id, const DrawParams& draw);
 
-        /// @brief How many times an effect object was actually created. One per kind, at most.
+        /// @brief The supplemental `EnvironmentMapEffect` pass for @p id (§22.2, §59).
+        ///
+        /// Environment mapping is deliberately not a fifth `MaterialKind`: chrome and mirror
+        /// reflections are extra passes over a Basic material, and glass keeps its transparent
+        /// Basic pass as well. The baked cube is placement-owned and supplied in @p environment.
+        util::Result<Microsoft::Xna::Framework::Graphics::Effect*>
+        BindEnvironmentMap(util::Id id, const DrawParams& draw, const EnvironmentMapParams& environment);
+
+        /// @brief How many effect objects were actually created. One per effect class, at most.
         [[nodiscard]] std::size_t EffectsCreated() const noexcept
         {
             return effectsCreated_;
@@ -194,6 +216,7 @@ namespace cnahouse::rendering
         Microsoft::Xna::Framework::Graphics::DualTextureEffect& DualTextureFor();
         Microsoft::Xna::Framework::Graphics::AlphaTestEffect& AlphaTestFor();
         Microsoft::Xna::Framework::Graphics::SkinnedEffect& SkinnedFor();
+        Microsoft::Xna::Framework::Graphics::EnvironmentMapEffect& EnvironmentMapFor();
 
         Microsoft::Xna::Framework::Graphics::GraphicsDevice* device_;
         std::unordered_map<util::Id, MaterialDesc> materials_;
@@ -201,6 +224,7 @@ namespace cnahouse::rendering
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::DualTextureEffect> dualTexture_;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::AlphaTestEffect> alphaTest_;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::SkinnedEffect> skinned_;
+        std::unique_ptr<Microsoft::Xna::Framework::Graphics::EnvironmentMapEffect> environmentMap_;
         std::size_t effectsCreated_ = 0;
 
         /// The 72-matrix skinning palette, allocated once and refilled per draw.

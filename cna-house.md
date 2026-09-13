@@ -5304,6 +5304,10 @@ Mirrors: 4 of them. Implementation is a **static cube map** per mirror baked off
 The player's reflection is **not** rendered — a deliberate, documented limitation (D-19, §77),
 because a real planar reflection would need a second render pass per mirror per frame and the
 budget is better spent elsewhere. The mirrors are positioned so this is not conspicuous.
+`MaterialBinder::BindEnvironmentMap` supplies that supplemental pass: the base material contributes
+its tint, alpha and specular colour, while the draw supplies both its albedo and the placement-owned
+baked cube plus blend amount, Fresnel factor and §31.5 fog. It is deliberately not a fifth primary
+`effectTierS`: §22.2's glass and chrome retain their Basic pass and reflect in an additional pass.
 
 ---
 
