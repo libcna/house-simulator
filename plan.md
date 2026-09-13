@@ -14611,8 +14611,31 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             **29 / 29 sky/star unit tests**; the complete suites passed **1374 / 1374 unit** and
             **109 / 109 integration** tests; strict XNA passed **313 translation units** with four
             compiler jobs.
-- [ ] HOUSE-01619 — Phase-24 review and commit
+- [x] HOUSE-01619 — Phase-24 review and commit
       dep: HOUSE-01601…HOUSE-01618, HOUSE-01620 · sys: — · plat: ALL · pri: MUST
+      note: (2026-09-13) **Phase 24 is complete: 20 of 20 task rows.** §33 is present end to end:
+            truncated lunar position, continuous phase and names, the generated mask and licensed
+            albedo, the XNA disc, outdoor moonlight and the phase-only speed control. §34 likewise
+            reaches the frame: the licensed 1,500-star catalogue, one dynamic quad field, sidereal
+            rotation, twilight/cloud/moon visibility, 20 Hz twinkle, southern light pollution and
+            deterministic satellites/meteors. F8 exposes the retained live answer, the thirty-day
+            integration test closes one lunation, and real-device pixel tests cover the named
+            phases, moonrise and clear/overcast twilight.
+      measured: the independent anchors remain comfortably inside their criteria: 60 USNO
+            moonrises have **0.31 min mean / 1.01 min worst** error against ±8 min; 60 USNO phase
+            samples have **0.0014 mean / 0.0030 worst** circular error against ±0.02; Polaris is
+            within **0.75° altitude / 1.25° azimuth** of the configured pole; and the synchronised
+            64 KiB moon-mask upload is **0.284 ms median**, 1.7% of one frame.
+      review: every implementation id `HOUSE-01601`…`HOUSE-01618` plus compatibility correction
+            `HOUSE-01620` has exactly one completing commit. The review found no remaining §33/§34
+            contradiction. Its one integration finding was stale pre-sky golden frames; that was
+            resolved and visually reviewed in `HOUSE-01617`, leaving the normal render binary
+            green rather than recording a known failure at phase close.
+      verified: full build; **1380 / 1380 unit**, **110 / 110 integration**, and **43 / 43 render**
+            tests; strict XNA **317 translation units** with four compiler jobs; complete
+            `tools/ci/run_checks.sh`. The build cache still forces `CNA_CNAEXT=OFF`; `../cna` and
+            `../sharp-runtime` are clean; all compilation and checks were pinned to at most four
+            CPU cores.
 
 ---
 
