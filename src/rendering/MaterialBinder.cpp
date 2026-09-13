@@ -76,6 +76,7 @@ namespace cnahouse::rendering
             desc.specularColour[2] = definition.specularColor.Z;
             desc.specularPower = definition.specularPower;
             desc.twoSided = definition.twoSided;
+            desc.lightingEnabled = definition.materialClass != world::MaterialClass::Emissive;
             if (definition.alphaCutoff.has_value())
             {
                 desc.referenceAlpha = static_cast<int>(std::lround(*definition.alphaCutoff * 255.0F));
@@ -122,12 +123,11 @@ namespace cnahouse::rendering
         // Both of these are MEASURED impossibilities, refused HERE rather than inside a frame. A
         // material that cannot be drawn should fail where the error can name it, not two hundred
         // draws later where it can only name the effect.
-        if (desc.kind == MaterialKind::Skinned && !desc.perPixelLighting)
+        if (desc.kind == MaterialKind::Skinned && !desc.lightingEnabled)
         {
             // MEASURED (`HOUSE-00077`): `SkinnedEffect` throws "SkinnedEffect does not support
-            // setting LightingEnabled to false.", exactly as XNA 4.0 does. `perPixelLighting` is
-            // the only lighting switch this project exposes, so an unlit skinned material is the
-            // shape that would trip it.
+            // setting LightingEnabled to false.", exactly as XNA 4.0 does. `lightingEnabled` is the
+            // material switch, so an unlit skinned material is the shape that would trip it.
             return Err(ErrorCode::Unsupported,
                        std::format("material {:#010x} is skinned and unlit, and SkinnedEffect "
                                    "refuses LightingEnabled = false",
@@ -265,11 +265,19 @@ namespace cnahouse::rendering
                 effect.setSpecularColorProperty(ToVector(desc->specularColour));
                 effect.setSpecularPowerProperty(desc->specularPower);
                 effect.setVertexColorEnabledProperty(desc->vertexColour);
+                effect.setLightingEnabledProperty(desc->lightingEnabled);
                 effect.setPreferPerPixelLightingProperty(desc->perPixelLighting);
                 effect.setTextureEnabledProperty(draw.diffuse != nullptr);
                 if (draw.diffuse != nullptr)
                 {
                     effect.setTextureProperty(draw.diffuse);
+                }
+                effect.setFogEnabledProperty(draw.fog != nullptr);
+                if (draw.fog != nullptr)
+                {
+                    effect.setFogColorProperty(ToVector(draw.fog->colour));
+                    effect.setFogStartProperty(draw.fog->start);
+                    effect.setFogEndProperty(draw.fog->end);
                 }
                 return &effect;
             }

@@ -74,6 +74,8 @@ namespace cnahouse::rendering
         /// @brief Foliage cards, glass panes seen from behind, the sky dome.
         bool twoSided = false;
         bool vertexColour = false;
+        /// @brief Whether a stock effect evaluates its ambient/directional lights.
+        bool lightingEnabled = true;
         /// @brief Per-pixel where the effect supports it. `BasicEffect` and `SkinnedEffect` only.
         bool perPixelLighting = true;
 
@@ -83,6 +85,17 @@ namespace cnahouse::rendering
         /// functions, so a reference of 128 with `Greater` keeps alpha 129 and drops 128 — there is
         /// no half-texel of tolerance to lean on.
         int referenceAlpha = 128;
+    };
+
+    /// @brief The environment-owned fog parameters for one exterior draw batch (§31.5).
+    ///
+    /// Their derivation from weather and the horizon belongs to `HOUSE-01650`; the material binder
+    /// only carries the resulting stock-XNA values without retaining per-frame environment state.
+    struct FogParams
+    {
+        float colour[3] = {0.0F, 0.0F, 0.0F};
+        float start = 0.0F;
+        float end = 1.0F;
     };
 
     /// @brief The per-draw values a material cannot know: where the thing is and where it is seen from.
@@ -95,6 +108,8 @@ namespace cnahouse::rendering
         /// in the binder would hide that fact at the one place a reader would look for it.
         Microsoft::Xna::Framework::Graphics::Texture2D* diffuse = nullptr;
         Microsoft::Xna::Framework::Graphics::Texture2D* second = nullptr;
+        /// Null disables fog. Non-null enables it with the supplied environment-owned values.
+        const FogParams* fog = nullptr;
         /// @brief `Skinned` only. Skin-local, and at most `SkinnedEffect::MaxBones`.
         const std::vector<Microsoft::Xna::Framework::Matrix>* bones = nullptr;
     };

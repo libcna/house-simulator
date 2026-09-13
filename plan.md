@@ -12815,8 +12815,20 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: max-4-core warning-clean build; 15 `MaterialBinderTests` plus the current-world fixture;
             complete suite 1551/1551 executed tests; `check_xna_strict.py --all --jobs 4` 317/317;
             `tools/ci/run_checks.sh` all gates green.
-- [ ] HOUSE-00892 — Implement `MaterialBinder` for `BasicEffect`: diffuse, specular, texture, vertex colour, alpha, fog
+- [x] HOUSE-00892 — Implement `MaterialBinder` for `BasicEffect`: diffuse, specular, texture, vertex colour, alpha, fog
       dep: HOUSE-00891, HOUSE-00162 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-14) the Basic path writes diffuse colour, alpha, specular colour/power,
+            vertex-colour mode, lighting/per-pixel mode and the supplied texture on every bind.
+            Nullable per-draw `FogParams` now writes stock-XNA fog colour/start/end for an exterior
+            batch and explicitly disables fog on the next interior batch, so the shared effect cannot
+            leak environment state between cells. Loaded emissive-class definitions become unlit
+            Basic materials; `LightingEnabled` is separate from the per-pixel preference.
+      finding: CNA's XNA-compatible `BasicEffect` starts with `LightingEnabled == false`. Merely
+            writing specular values, as the phase-1 binder did, cannot produce specular lighting;
+            the binder must explicitly apply the material's lighting switch each draw.
+      verified: max-4-core warning-clean build; 17 `MaterialBinderTests`, including a live-device
+            inspection of every Basic value and the texture/fog reset; unit + integration suites;
+            `tools/ci/run_checks.sh` all gates green.
 - [ ] HOUSE-00893 — Implement `MaterialBinder` for `DualTextureEffect`: albedo + lightmap + diffuse tint
       dep: HOUSE-00892, HOUSE-00078 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00894 — Implement `MaterialBinder` for `AlphaTestEffect`: cutoff, compare function, two-sided

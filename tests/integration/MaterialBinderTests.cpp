@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-00162`, `HOUSE-00891`. The binder refuses, at registration, things phase 1 MEASURED to be
-// impossible, and turns the loaded material table into the small draw-time descriptions consumed by
-// stock XNA effects. A bad table fails before a frame can observe it.
+// `HOUSE-00162`, `HOUSE-00891`, `HOUSE-00892`. The binder refuses, at registration, things phase 1
+// MEASURED to be impossible, turns the loaded material table into small draw-time descriptions, and
+// writes every requested value to the selected stock XNA effect. A bad table fails before a frame can
+// observe it.
 #include <vector>
 
 #include <gtest/gtest.h>
 
+#include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Matrix.hpp"
+#include "Microsoft/Xna/Framework/Vector3.hpp"
 
 #include "cnahouse/rendering/MaterialBinder.hpp"
 #include "cnahouse/util/Ids.hpp"
@@ -22,11 +26,13 @@ namespace
     namespace Gfx = Microsoft::Xna::Framework::Graphics;
     using cnahouse::rendering::CullPolicy;
     using cnahouse::rendering::DrawParams;
+    using cnahouse::rendering::FogParams;
     using cnahouse::rendering::MaterialBinder;
     using cnahouse::rendering::MaterialDesc;
     using cnahouse::rendering::MaterialKind;
     using cnahouse::util::ErrorCode;
     using cnahouse::util::Id;
+    using Microsoft::Xna::Framework::Vector3;
 
     void RunWithBinder(const std::function<void(MaterialBinder&)>& body)
     {
@@ -105,7 +111,7 @@ namespace
             [](MaterialBinder& binder)
             {
                 MaterialDesc desc = Pet();
-                desc.perPixelLighting = false;
+                desc.lightingEnabled = false;
                 const auto result = binder.Register(Id::Of("MAT_PET"), desc);
                 ASSERT_FALSE(result.HasValue());
                 EXPECT_EQ(result.Error().Code(), ErrorCode::Unsupported);
@@ -277,6 +283,83 @@ namespace
 
                 EXPECT_EQ(*first, *second) << "two Basic materials must share one BasicEffect";
                 EXPECT_EQ(binder.EffectsCreated(), 1u);
+            });
+    }
+
+    TEST(MaterialBinderTests, BasicEffectReceivesEveryMaterialAndFogParameterAndClearsPerDrawState)
+    {
+        cnahouse::testsupport::DeviceHost host(
+            [](Gfx::GraphicsDevice& device)
+            {
+                MaterialBinder binder(device);
+                MaterialDesc desc;
+                desc.kind = MaterialKind::Basic;
+                desc.diffuse[0] = 0.25F;
+                desc.diffuse[1] = 0.50F;
+                desc.diffuse[2] = 0.75F;
+                desc.alpha = 0.60F;
+                desc.specularColour[0] = 0.10F;
+                desc.specularColour[1] = 0.20F;
+                desc.specularColour[2] = 0.30F;
+                desc.specularPower = 27.0F;
+                desc.vertexColour = true;
+                desc.lightingEnabled = true;
+                desc.perPixelLighting = true;
+                const Id id = Id::Of("MAT_BASIC_COMPLETE");
+                ASSERT_TRUE(binder.Register(id, desc).HasValue());
+
+                Gfx::Texture2D texture(device, 2, 2);
+                FogParams fog;
+                fog.colour[0] = 0.12F;
+                fog.colour[1] = 0.24F;
+                fog.colour[2] = 0.36F;
+                fog.start = 7.0F;
+                fog.end = 43.0F;
+                DrawParams draw;
+                draw.diffuse = &texture;
+                draw.fog = &fog;
+
+                const auto bound = binder.Bind(id, draw);
+                ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
+                auto* effect = static_cast<Gfx::BasicEffect*>(*bound);
+                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.25F, 0.50F, 0.75F));
+                EXPECT_FLOAT_EQ(effect->getAlphaProperty(), 0.60F);
+                EXPECT_EQ(effect->getSpecularColorProperty(), Vector3(0.10F, 0.20F, 0.30F));
+                EXPECT_FLOAT_EQ(effect->getSpecularPowerProperty(), 27.0F);
+                EXPECT_TRUE(effect->getVertexColorEnabledProperty());
+                EXPECT_TRUE(effect->getLightingEnabledProperty());
+                EXPECT_TRUE(effect->getPreferPerPixelLightingProperty());
+                EXPECT_TRUE(effect->getTextureEnabledProperty());
+                EXPECT_EQ(effect->getTextureProperty(), &texture);
+                EXPECT_TRUE(effect->getFogEnabledProperty());
+                EXPECT_EQ(effect->getFogColorProperty(), Vector3(0.12F, 0.24F, 0.36F));
+                EXPECT_FLOAT_EQ(effect->getFogStartProperty(), 7.0F);
+                EXPECT_FLOAT_EQ(effect->getFogEndProperty(), 43.0F);
+
+                ASSERT_TRUE(binder.Bind(id, DrawParams{}).HasValue());
+                EXPECT_FALSE(effect->getTextureEnabledProperty());
+                EXPECT_FALSE(effect->getFogEnabledProperty());
+            });
+        host.Run();
+        EXPECT_TRUE(host.Ran()) << "the frame that does the measuring never ran";
+        EXPECT_EQ(host.Failure(), "") << "BasicEffect rejected a binder parameter";
+    }
+
+    TEST(MaterialBinderTests, AnEmissiveDefinitionBecomesAnUnlitBasicMaterial)
+    {
+        RunWithBinder(
+            [](MaterialBinder& binder)
+            {
+                cnahouse::world::MaterialDef definition;
+                definition.id = Id::Of("MAT_EMISSIVE");
+                definition.materialClass = cnahouse::world::MaterialClass::Emissive;
+                definition.effectTierS = cnahouse::world::EffectTier::Basic;
+                ASSERT_TRUE(binder.Register(definition).HasValue());
+
+                const auto bound = binder.Bind(definition.id, DrawParams{});
+                ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
+                auto* effect = static_cast<Gfx::BasicEffect*>(*bound);
+                EXPECT_FALSE(effect->getLightingEnabledProperty());
             });
     }
 
