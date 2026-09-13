@@ -29,8 +29,10 @@ namespace System::IO
 
 namespace cnahouse::environment
 {
+    struct MoonPhase;
+    struct MoonPosition;
     struct SunPosition;
-}
+} // namespace cnahouse::environment
 
 namespace cnahouse::rendering
 {
@@ -57,6 +59,13 @@ namespace cnahouse::rendering
         double sunElevationDeg = 0.0;
         Microsoft::Xna::Framework::Vector3 zenith;
         Microsoft::Xna::Framework::Vector3 horizon;
+    };
+
+    /// @brief One authored sun-disc row reused as §31.2's directional-glow intensity curve.
+    struct SkySunIntensityRow
+    {
+        double elevationDeg = 0.0;
+        float intensity = 0.0F;
     };
 
     /// @brief One of §31.3's three authored cloud shells.
@@ -92,6 +101,7 @@ namespace cnahouse::rendering
         Microsoft::Xna::Framework::Vector3 sunGlowColor;
         float sunGlowStrength = 0.0F;
         float sunGlowExponent = 0.0F;
+        std::vector<SkySunIntensityRow> sunIntensity;
         std::uint32_t cloudCoverSamples = 0;
         std::uint32_t azimuthOffsetSamples = 0;
         std::array<CloudLayer, 3> cloudLayers;
@@ -106,6 +116,7 @@ namespace cnahouse::rendering
         static constexpr std::size_t kGradientRows = 32u;
         static constexpr std::uint32_t kCloudCoverSamples = 8u;
         static constexpr std::uint32_t kAzimuthOffsetSamples = 16u;
+        static constexpr std::size_t kSunIntensityRows = 7u;
 
         [[nodiscard]] static util::Result<SkyColourModel> Read(std::string_view json, std::string name);
         [[nodiscard]] static util::Result<SkyColourModel> ReadFromTitle(std::string_view contentPath);
@@ -157,6 +168,11 @@ namespace cnahouse::rendering
         ~SkySystem() override;
 
         void SetSun(const environment::SunPosition& sun, double cloudCover) noexcept;
+        /// @brief Sets the complete §31.2 celestial state and the composed sun disc.
+        void SetCelestial(const environment::SunPosition& sun,
+                          const environment::MoonPosition& moon,
+                          const environment::MoonPhase& phase,
+                          double cloudCover) noexcept;
         /// @brief Sets §36.1's meteorological wind (`direction` is where it comes from).
         bool SetWind(double speedMetresPerSecond, double directionDegrees) noexcept;
         /// @brief Maps continuous cover and thunder into the three live layer alphas.
@@ -166,6 +182,11 @@ namespace cnahouse::rendering
         /// @brief Recomputes dome and cloud colours only past §31.2's material-change thresholds.
         /// @return true when an update occurred.
         bool SetSky(double sunAltitudeDeg, double cloudCover) noexcept;
+        /// @brief Pure-device-independent update with all inputs needed by glow and night colour.
+        bool SetSky(const environment::SunPosition& sun,
+                    const environment::MoonPosition& moon,
+                    const environment::MoonPhase& phase,
+                    double cloudCover) noexcept;
         void Draw(PassContext& context) override;
 
         [[nodiscard]] bool DisturbsDeviceState() const override
@@ -223,7 +244,10 @@ namespace cnahouse::rendering
     private:
         class Resources;
 
-        void RecomputeColours(double sunAltitudeDeg, double cloudCover) noexcept;
+        void RecomputeColours(const environment::SunPosition& sun,
+                              const environment::MoonPosition& moon,
+                              const environment::MoonPhase& phase,
+                              double cloudCover) noexcept;
 
         const Camera* camera_ = nullptr;
         SkyDomeMesh mesh_;
@@ -238,6 +262,9 @@ namespace cnahouse::rendering
         double windSpeedMetresPerSecond_ = 0.0;
         double windDirectionDegrees_ = 0.0;
         double lastSunAltitudeDeg_ = 0.0;
+        double lastSunAzimuthDeg_ = 0.0;
+        double lastMoonAltitudeDeg_ = -90.0;
+        double lastMoonIllumination_ = 0.0;
         double lastCloudCover_ = 0.0;
         bool hasColourState_ = false;
         std::uint64_t colourUpdateCount_ = 0;

@@ -3268,9 +3268,20 @@ identically. The later reference-photo pass (`HOUSE-01652`) art-directs these sa
 `HOUSE-01644` implements the altitude interpolation, altitude-fraction gradient and overcast mix
 above. It retains the 610 expanded vertices and calls `SetData` on the existing buffer only after
 one of the material-change thresholds is crossed. A 64-update debug-build measurement averaged
-0.105 ms and reached 0.121 ms maximum. The sun-direction glow and night contribution remain the
-deliberately separate `HOUSE-01645`; the formula above describes the complete Tier S result after
-that successor task.
+0.105 ms and reached 0.121 ms maximum.
+
+`HOUSE-01645` completes the two formerly symbolic terms. For each vertex,
+`sunGlowTerm = sunGlowColor · sunGlowStrength · sunIntensity · max(0, dot(vertexDirection,
+directionToSun))^sunGlowExponent`; `sunIntensity` is interpolated from `layout.sky.json`'s authored
+sun curve, and the existing `(1 − cloudCover)²` factor then extinguishes it under overcast. The
+night weight is `1 − TwilightAmbientFactor(sunAltitude)`: zero through civil twilight at −6°,
+smoothly rising, and one at astronomical night −18°. Its target is the −18° gradient at the same
+vertex altitude plus `MoonShadingFor(moon, phase, cloudCover)`, so the already-shared phase curve,
+geometric-horizon rule and cloud attenuation cannot disagree with moonlight. The sky refreshes for
+more than 1° of solar azimuth or lunar altitude and more than 1/128 phase illumination as well as
+the existing altitude/cover thresholds. `CnaHouseGame` supplies all four celestial values from the
+single per-frame `LightingSystem` evaluation. With all terms active, 64 forced debug-build updates
+averaged 0.168 ms and reached 0.232 ms maximum.
 
 610 vertices × 16 bytes = 9.8 KB per update. Negligible. The earlier 594-vertex estimate was
 `33 × 18`: it duplicated each seam vertex, omitted the skirt and, if used for the pole, produced

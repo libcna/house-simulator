@@ -14487,14 +14487,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             maximum was 0.121 ms; the test records both and gates the maximum below 5 ms.
             `sky.colour.updates` and `sky.colour.micros` expose live behaviour. Night blending and
             directional glow remain `HOUSE-01645`.
-- [ ] HOUSE-01645 — Implement the night sky blend and the sun-glow term
+- [x] HOUSE-01645 — Implement the night sky blend and the sun-glow term
       dep: HOUSE-01644, HOUSE-01602 · sys: rendering · plat: ALL · pri: MUST
-      blocked: (2026-09-13) §31.2 defines the final blend in terms of `moonAltitude` and
-            `moonPhase`, but those runtime inputs do not exist until the still-open HOUSE-01601
-            and HOUSE-01602. The old dependency on HOUSE-01644 alone therefore made the task
-            falsely runnable. The smallest correction is the transitive dependency on
-            HOUSE-01602; directional sun glow is only half of this indivisible task and is not
-            presented as completion on its own.
+      verify: unit `SkySystemTests.*` (12); integration `SkySystemPassTests.*` (2) and
+            `HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight` (1); full
+            **1 352 / 1 352 unit and 107 / 107 integration tests**; `tools/ci/run_checks.sh`
+      note: (2026-09-13) The directional lobe now uses each dome vertex's dot product with the
+            live solar direction, the generated strength/exponent/colour, the seven strictly
+            loaded authored sun intensities and `(1-cloudCover)^2`. The no-glow azimuth is no
+            longer painted orange, while full cloud removes the lobe exactly. From civil through
+            astronomical twilight, the final sky smoothly blends toward the −18° gradient plus
+            `MoonShadingFor`, reusing the one physical moon altitude, accelerated phase curve and
+            cloud attenuation already consumed by lighting. `CnaHouseGame` passes that shared
+            celestial state instead of evaluating another model in rendering.
+      cadence: colour updates additionally require more than 1° of solar azimuth or lunar
+            altitude, or more than 1/128 phase illumination. Unit tests pin every inclusive
+            boundary. Across 64 forced updates the completed CPU path averaged **0.168 ms** and
+            reached **0.232 ms** maximum in the debug build.
+      resolved: the blocker recorded before HOUSE-01601/01602 existed is gone; both permanent
+            dependencies are now complete and no placeholder moon data was introduced.
 - [x] HOUSE-01646 — Author the three cloud textures (cirrus, cumulus, stratus) with alpha
       dep: HOUSE-01641 · sys: content · plat: TOOL · pri: MUST
       verify: `python3 tools/world/cloud_textures.py --check`;

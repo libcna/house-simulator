@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01643`, `HOUSE-01644`, `HOUSE-01647`, `HOUSE-01648` and `HOUSE-01649`. The success case crosses the
-// Python-writer/C++-reader boundary.
+// `HOUSE-01643` through `HOUSE-01649`. The success case crosses the Python-writer/C++-reader
+// boundary.
 // Mutations then prove that the runtime does not allocate or draw plausible-looking sky data from
 // damaged content.
 #include <algorithm>
@@ -19,6 +19,8 @@
 
 #include "System/IO/MemoryStream.hpp"
 
+#include "cnahouse/environment/MoonModel.hpp"
+#include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/SkySystem.hpp"
 #include "cnahouse/util/Result.hpp"
@@ -146,6 +148,11 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
     EXPECT_DOUBLE_EQ(model->gradient.back().sunElevationDeg, 90.0);
     EXPECT_EQ(model->cloudCoverSamples, 8u);
     EXPECT_EQ(model->azimuthOffsetSamples, 16u);
+    ASSERT_EQ(model->sunIntensity.size(), 7u);
+    EXPECT_DOUBLE_EQ(model->sunIntensity.front().elevationDeg, -6.0);
+    EXPECT_FLOAT_EQ(model->sunIntensity.front().intensity, 0.0F);
+    EXPECT_DOUBLE_EQ(model->sunIntensity.back().elevationDeg, 90.0);
+    EXPECT_FLOAT_EQ(model->sunIntensity.back().intensity, 1.0F);
     EXPECT_EQ(model->cloudLayers[0].id, "CL_HIGH");
     EXPECT_EQ(model->cloudLayers[1].id, "CL_MID");
     EXPECT_EQ(model->cloudLayers[2].id, "CL_LOW");
@@ -170,6 +177,7 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
              {"\"scrollScale\": 0.15", "\"scrollScale\": -0.15"},
              {"\"cloudCover\": [\n        0.0", "\"cloudCover\": [\n        0.01"},
              {"\"stormCloudAlpha\": {\n    \"high\": 0.0", "\"stormCloudAlpha\": {\n    \"high\": 1.2"},
+             {"\"intensity\": 0.0", "\"intensity\": 1.2"},
          })
     {
         std::string changed = json;
@@ -178,6 +186,86 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
         changed.replace(at, mutation.first.size(), mutation.second);
         EXPECT_FALSE(cnahouse::rendering::SkyColourModelReader::Read(changed, "layout.sky.json"));
     }
+}
+
+TEST(SkySystemTests, SunGlowIsDirectionalMatchesTheAuthoredCurveAndVanishesUnderCloud)
+{
+    auto mesh = ReadOf(FixtureBytes());
+    auto model = cnahouse::rendering::SkyColourModelReader::Read(SkyJson(), "layout.sky.json");
+    ASSERT_TRUE(mesh);
+    ASSERT_TRUE(model);
+    cnahouse::rendering::Camera camera;
+    cnahouse::rendering::SkySystem sky(camera, std::move(*mesh), std::move(*model));
+
+    cnahouse::environment::SunPosition sun;
+    sun.altitudeDeg = 0.0;
+    sun.azimuthDeg = 90.0; // east, +X
+    cnahouse::environment::MoonPosition moon;
+    moon.altitudeDeg = -20.0;
+    const cnahouse::environment::MoonPhase phase{};
+    ASSERT_TRUE(sky.SetSky(sun, moon, phase, 0.0));
+
+    const auto east = std::max_element(sky.ColouredVertices().begin(),
+                                       sky.ColouredVertices().end(),
+                                       [](const auto& left, const auto& right)
+                                       { return left.Position.X < right.Position.X; });
+    const auto west = std::min_element(sky.ColouredVertices().begin(),
+                                       sky.ColouredVertices().end(),
+                                       [](const auto& left, const auto& right)
+                                       { return left.Position.X < right.Position.X; });
+    ASSERT_NE(east, sky.ColouredVertices().end());
+    ASSERT_NE(west, sky.ColouredVertices().end());
+    const float eastRed = east->Color.ToVector3().X;
+    const float westRed = west->Color.ToVector3().X;
+    EXPECT_GT(eastRed - westRed, 0.07F)
+        << "the generated 0-degree sun curve's 0.45 intensity did not drive its 0.18 glow";
+
+    sun.azimuthDeg = 91.0;
+    EXPECT_FALSE(sky.SetSky(sun, moon, phase, 0.0));
+    sun.azimuthDeg = 91.001;
+    EXPECT_TRUE(sky.SetSky(sun, moon, phase, 0.0));
+
+    ASSERT_TRUE(sky.SetSky(sun, moon, phase, 1.0));
+    EXPECT_EQ(east->Color, west->Color) << "(1-cloudCover)^2 did not extinguish directional glow";
+}
+
+TEST(SkySystemTests, AstronomicalNightRespondsToMoonAltitudeAndPhase)
+{
+    auto mesh = ReadOf(FixtureBytes());
+    auto model = cnahouse::rendering::SkyColourModelReader::Read(SkyJson(), "layout.sky.json");
+    ASSERT_TRUE(mesh);
+    ASSERT_TRUE(model);
+    cnahouse::rendering::Camera camera;
+    cnahouse::rendering::SkySystem sky(camera, std::move(*mesh), std::move(*model));
+
+    cnahouse::environment::SunPosition sun;
+    sun.altitudeDeg = -18.0;
+    cnahouse::environment::MoonPosition moon;
+    moon.altitudeDeg = 60.0;
+    cnahouse::environment::MoonPhase phase;
+    phase.illuminatedFraction = 1.0;
+    ASSERT_TRUE(sky.SetSky(sun, moon, phase, 0.0));
+    moon.altitudeDeg = 61.0;
+    EXPECT_FALSE(sky.SetSky(sun, moon, phase, 0.0));
+    moon.altitudeDeg = 61.001;
+    EXPECT_TRUE(sky.SetSky(sun, moon, phase, 0.0));
+    constexpr std::size_t kFirstHorizonVertex = 1u + 17u * 32u;
+    const auto fullMoon = sky.ColouredVertices()[kFirstHorizonVertex].Color.ToVector3();
+
+    phase.illuminatedFraction = 0.0;
+    ASSERT_TRUE(sky.SetSky(sun, moon, phase, 0.0));
+    const auto newMoon = sky.ColouredVertices()[kFirstHorizonVertex].Color.ToVector3();
+    EXPECT_GT(fullMoon.Z, newMoon.Z) << "an elevated full moon did not lift the night sky";
+    phase.illuminatedFraction = 1.0 / 128.0;
+    EXPECT_FALSE(sky.SetSky(sun, moon, phase, 0.0));
+    phase.illuminatedFraction += 1.0e-6;
+    EXPECT_TRUE(sky.SetSky(sun, moon, phase, 0.0));
+
+    moon.altitudeDeg = -1.0;
+    phase.illuminatedFraction = 1.0;
+    ASSERT_TRUE(sky.SetSky(sun, moon, phase, 0.0));
+    EXPECT_EQ(sky.ColouredVertices()[kFirstHorizonVertex].Color.ToVector3(), newMoon)
+        << "a moon below the geometric horizon brightened the night";
 }
 
 TEST(SkySystemTests, ThreeCloudRingsHaveTheAuthoredRadiiAndNoDegenerateTriangles)

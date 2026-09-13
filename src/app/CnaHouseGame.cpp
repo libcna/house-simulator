@@ -960,12 +960,15 @@ namespace cnahouse::app
                 // on or off regardless of who is looking at it.
                 const debug::Timing::Scope scope(timing_, UpdateStage::Lighting);
                 lighting_->Update(frame);
-                // Drawing consumes the lighting stage's one solar answer. There is no second
-                // SunModel in rendering, so room light and the disc cannot disagree within a frame
-                // about where the sun is or how clouds attenuate it.
+                // Drawing consumes the lighting stage's one celestial answer. There is no second
+                // sun or moon model in rendering, so room light, sky and disc cannot disagree
+                // within a frame about the bodies, lunar phase or cloud attenuation.
                 if (skySystem_ != nullptr)
                 {
-                    skySystem_->SetSun(lighting_->Sun(), lighting_->CloudCover());
+                    skySystem_->SetCelestial(lighting_->Sun(),
+                                             lighting_->Moon(),
+                                             lighting_->LunarPhase(),
+                                             lighting_->CloudCover());
                     if (weather_.has_value())
                     {
                         const weather::WeatherState& state = weather_->State();

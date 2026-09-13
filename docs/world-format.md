@@ -696,6 +696,12 @@ band centre. Cover interpolates linearly between adjacent anchors and clamps out
 last centre; `thunderIntensity` then linearly blends all three values toward `stormCloudAlpha`.
 This makes both weather inputs continuous (`HOUSE-01648`).
 
+`HOUSE-01645` also reuses the seven authored `sun` intensities for the directional dome glow.
+`SkyColourModelReader` therefore requires those rows, validates their ascending elevations and
+unit-range intensities, and interpolates the same values that `sky_lut.py` uses when expanding the
+conceptual azimuth axis. The committed compact model and its 4,096-cell expansion oracle therefore
+cannot silently diverge at twilight.
+
 The cloud RGB is not another authored table. `HOUSE-01649` takes the live horizon colour produced
 by `gradient` plus `colourModel.overcastGrey` and writes that common tint into all three rings'
 vertex colours. Thus the white procedural textures take on dusk light and converge on the same

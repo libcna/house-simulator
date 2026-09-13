@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01643`, `HOUSE-01644`, `HOUSE-01647`, `HOUSE-01648` and `HOUSE-01649`. The dome, cloud
+// `HOUSE-01643` through `HOUSE-01649`. The dome, celestial colour, cloud
 // textures and later buffer uploads cross a live XNA GraphicsDevice. This is always launched with
 // SDL's offscreen driver by the local verification command.
 #include <array>

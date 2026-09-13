@@ -33,6 +33,8 @@
 #include "System/IO/Stream.hpp"
 
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/environment/MoonLight.hpp"
+#include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
@@ -70,6 +72,43 @@ namespace cnahouse::rendering
             return Xna::Vector3(from.X + (to.X - from.X) * amount,
                                 from.Y + (to.Y - from.Y) * amount,
                                 from.Z + (to.Z - from.Z) * amount);
+        }
+
+        Xna::Vector3 AddScaled(const Xna::Vector3& colour, const Xna::Vector3& addition, float scale) noexcept
+        {
+            return Xna::Vector3(std::clamp(colour.X + addition.X * scale, 0.0F, 1.0F),
+                                std::clamp(colour.Y + addition.Y * scale, 0.0F, 1.0F),
+                                std::clamp(colour.Z + addition.Z * scale, 0.0F, 1.0F));
+        }
+
+        float SunIntensityAt(const SkyColourModel& model, double elevationDeg) noexcept
+        {
+            if (model.sunIntensity.empty())
+            {
+                return 0.0F;
+            }
+            const auto upper = std::lower_bound(model.sunIntensity.begin(),
+                                                model.sunIntensity.end(),
+                                                elevationDeg,
+                                                [](const SkySunIntensityRow& row, double elevation)
+                                                { return row.elevationDeg < elevation; });
+            if (upper == model.sunIntensity.begin())
+            {
+                return upper->intensity;
+            }
+            if (upper == model.sunIntensity.end())
+            {
+                return model.sunIntensity.back().intensity;
+            }
+            const SkySunIntensityRow& lower = *(upper - 1);
+            const float amount = static_cast<float>((elevationDeg - lower.elevationDeg) /
+                                                    (upper->elevationDeg - lower.elevationDeg));
+            return lower.intensity + (upper->intensity - lower.intensity) * amount;
+        }
+
+        double CircularDifferenceDeg(double a, double b) noexcept
+        {
+            return std::abs(std::remainder(a - b, 360.0));
         }
 
         float WrapUv(double value) noexcept
@@ -237,6 +276,47 @@ namespace cnahouse::rendering
         model.sunGlowColor = *glowColour;
         model.sunGlowStrength = *glowStrength;
         model.sunGlowExponent = *glowExponent;
+
+        auto sunValue = root.RequireArray("sun");
+        if (!sunValue)
+        {
+            return InFile(sunValue.Error(), name);
+        }
+        auto sunRows = sunValue->Elements();
+        if (!sunRows)
+        {
+            return InFile(sunRows.Error(), name);
+        }
+        if (sunRows->size() != kSunIntensityRows)
+        {
+            return Bad(util::ErrorCode::InvalidData,
+                       std::format(
+                           "sun has {} rows; the glow curve requires {}", sunRows->size(), kSunIntensityRows),
+                       name);
+        }
+        model.sunIntensity.reserve(sunRows->size());
+        for (std::size_t i = 0; i < sunRows->size(); ++i)
+        {
+            auto elevation = (*sunRows)[i].RequireNumber("elevationDeg");
+            auto intensity = (*sunRows)[i].RequireFloat("intensity");
+            if (!elevation)
+            {
+                return InFile(elevation.Error(), name);
+            }
+            if (!intensity)
+            {
+                return InFile(intensity.Error(), name);
+            }
+            if (!std::isfinite(*elevation) || *elevation < -90.0 || *elevation > 90.0 ||
+                (!model.sunIntensity.empty() && *elevation <= model.sunIntensity.back().elevationDeg) ||
+                !std::isfinite(*intensity) || *intensity < 0.0F || *intensity > 1.0F)
+            {
+                return Bad(util::ErrorCode::OutOfRange,
+                           std::format("sun row {} has unordered elevation or intensity outside 0..1", i),
+                           name);
+            }
+            model.sunIntensity.push_back(SkySunIntensityRow{*elevation, *intensity});
+        }
 
         auto cloudLayersValue = root.RequireArray("cloudLayers");
         if (!cloudLayersValue)
@@ -679,7 +759,11 @@ namespace cnahouse::rendering
         {
             cloudAlphas_[i] = colourModel_.cloudLayers[i].opacity;
         }
-        RecomputeColours(-18.0, 0.0);
+        environment::SunPosition sun;
+        sun.altitudeDeg = -18.0;
+        environment::MoonPosition moon;
+        moon.altitudeDeg = -90.0;
+        RecomputeColours(sun, moon, environment::MoonPhase{}, 0.0);
     }
 
     SkySystem::SkySystem(const Camera& camera,
@@ -695,7 +779,18 @@ namespace cnahouse::rendering
 
     void SkySystem::SetSun(const environment::SunPosition& sun, double cloudCover) noexcept
     {
-        SetSky(sun.altitudeDeg, cloudCover);
+        environment::MoonPosition moon;
+        moon.altitudeDeg = -90.0;
+        SetSky(sun, moon, environment::MoonPhase{}, cloudCover);
+        sunDisc_.SetSun(sun, cloudCover);
+    }
+
+    void SkySystem::SetCelestial(const environment::SunPosition& sun,
+                                 const environment::MoonPosition& moon,
+                                 const environment::MoonPhase& phase,
+                                 double cloudCover) noexcept
+    {
+        SetSky(sun, moon, phase, cloudCover);
         sunDisc_.SetSun(sun, cloudCover);
     }
 
@@ -804,32 +899,89 @@ namespace cnahouse::rendering
 
     bool SkySystem::SetSky(double sunAltitudeDeg, double cloudCover) noexcept
     {
-        if (!std::isfinite(sunAltitudeDeg) || !std::isfinite(cloudCover))
+        environment::SunPosition sun;
+        sun.altitudeDeg = sunAltitudeDeg;
+        sun.azimuthDeg = hasColourState_ ? lastSunAzimuthDeg_ : 0.0;
+        environment::MoonPosition moon;
+        moon.altitudeDeg = lastMoonAltitudeDeg_;
+        environment::MoonPhase phase;
+        phase.illuminatedFraction = lastMoonIllumination_;
+        return SetSky(sun, moon, phase, cloudCover);
+    }
+
+    bool SkySystem::SetSky(const environment::SunPosition& sun,
+                           const environment::MoonPosition& moon,
+                           const environment::MoonPhase& phase,
+                           double cloudCover) noexcept
+    {
+        if (!std::isfinite(sun.altitudeDeg) || !std::isfinite(sun.azimuthDeg) ||
+            !std::isfinite(moon.altitudeDeg) || !std::isfinite(phase.illuminatedFraction) ||
+            !std::isfinite(cloudCover))
         {
             return false;
         }
         const double clampedCover = std::clamp(cloudCover, 0.0, 1.0);
-        if (hasColourState_ && std::abs(sunAltitudeDeg - lastSunAltitudeDeg_) <= 0.25 &&
+        const double clampedIllumination = std::clamp(phase.illuminatedFraction, 0.0, 1.0);
+        if (hasColourState_ && std::abs(sun.altitudeDeg - lastSunAltitudeDeg_) <= 0.25 &&
+            CircularDifferenceDeg(sun.azimuthDeg, lastSunAzimuthDeg_) <= 1.0 &&
+            std::abs(moon.altitudeDeg - lastMoonAltitudeDeg_) <= 1.0 &&
+            std::abs(clampedIllumination - lastMoonIllumination_) <= 1.0 / 128.0 &&
             std::abs(clampedCover - lastCloudCover_) <= 0.01)
         {
             return false;
         }
-        RecomputeColours(sunAltitudeDeg, clampedCover);
+        environment::MoonPhase clampedPhase = phase;
+        clampedPhase.illuminatedFraction = clampedIllumination;
+        RecomputeColours(sun, moon, clampedPhase, clampedCover);
         return true;
     }
 
-    void SkySystem::RecomputeColours(double sunAltitudeDeg, double cloudCover) noexcept
+    void SkySystem::RecomputeColours(const environment::SunPosition& sun,
+                                     const environment::MoonPosition& moon,
+                                     const environment::MoonPhase& phase,
+                                     double cloudCover) noexcept
     {
         const auto started = std::chrono::steady_clock::now();
-        const auto [zenith, horizon] = GradientAt(colourModel_, sunAltitudeDeg);
+        const auto [zenith, horizon] = GradientAt(colourModel_, sun.altitudeDeg);
+        const auto [nightZenith, nightHorizon] = GradientAt(colourModel_, -18.0);
         const float cloudMix = std::pow(static_cast<float>(cloudCover), 1.5F);
-        const Xna::Color cloudTint(Lerp(horizon, colourModel_.overcastGrey, cloudMix));
+        const float clearSky = static_cast<float>((1.0 - cloudCover) * (1.0 - cloudCover));
+        const float sunIntensity = SunIntensityAt(colourModel_, sun.altitudeDeg);
+        const Xna::Vector3 directionToSun = environment::DirectionToSun(sun);
+        const environment::MoonShading moonShading = environment::MoonShadingFor(moon, phase, cloudCover);
+        const float nightWeight =
+            static_cast<float>(1.0 - environment::TwilightAmbientFactor(sun.altitudeDeg));
+
+        Xna::Vector3 cloudColour = Lerp(horizon, colourModel_.overcastGrey, cloudMix);
+        cloudColour =
+            Lerp(cloudColour, AddScaled(nightHorizon, moonShading.color, moonShading.intensity), nightWeight);
+        const Xna::Color cloudTint(cloudColour);
         for (std::size_t i = 0; i < mesh_.positions.size(); ++i)
         {
             const float altitude = std::clamp(mesh_.positions[i].Y / mesh_.radius, 0.0F, 1.0F);
             const float altitudeBlend = altitude * altitude * (3.0F - 2.0F * altitude);
             const Xna::Vector3 clear = Lerp(horizon, zenith, altitudeBlend);
-            colouredVertices_[i].Color = Xna::Color(Lerp(clear, colourModel_.overcastGrey, cloudMix));
+            Xna::Vector3 colour = Lerp(clear, colourModel_.overcastGrey, cloudMix);
+
+            const Xna::Vector3& position = mesh_.positions[i];
+            const double x = static_cast<double>(position.X);
+            const double y = static_cast<double>(position.Y);
+            const double z = static_cast<double>(position.Z);
+            const double sunX = static_cast<double>(directionToSun.X);
+            const double sunY = static_cast<double>(directionToSun.Y);
+            const double sunZ = static_cast<double>(directionToSun.Z);
+            const double length = std::sqrt(x * x + y * y + z * z);
+            if (length > 0.0)
+            {
+                const float dot = static_cast<float>((x * sunX + y * sunY + z * sunZ) / length);
+                const float lobe = std::pow(std::max(dot, 0.0F), colourModel_.sunGlowExponent);
+                const float glow = colourModel_.sunGlowStrength * sunIntensity * lobe * clearSky;
+                colour = AddScaled(colour, colourModel_.sunGlowColor, glow);
+            }
+
+            const Xna::Vector3 nightBase = Lerp(nightHorizon, nightZenith, altitudeBlend);
+            const Xna::Vector3 night = AddScaled(nightBase, moonShading.color, moonShading.intensity);
+            colouredVertices_[i].Color = Xna::Color(Lerp(colour, night, nightWeight));
         }
         for (CloudRingMesh& ring : cloudRings_)
         {
@@ -844,7 +996,10 @@ namespace cnahouse::rendering
             resources_->vertices.SetData(colouredVertices_.data(),
                                          static_cast<int>(colouredVertices_.size()));
         }
-        lastSunAltitudeDeg_ = sunAltitudeDeg;
+        lastSunAltitudeDeg_ = sun.altitudeDeg;
+        lastSunAzimuthDeg_ = sun.azimuthDeg;
+        lastMoonAltitudeDeg_ = moon.altitudeDeg;
+        lastMoonIllumination_ = phase.illuminatedFraction;
         lastCloudCover_ = cloudCover;
         hasColourState_ = true;
         ++colourUpdateCount_;
