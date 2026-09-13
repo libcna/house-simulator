@@ -667,7 +667,7 @@ reference.
       "midTint": "storm_grey" }
   ],
   "stormCloudAlpha": { "high": 0.00, "mid": 0.70, "low": 1.00 },
-  "stars": { "catalogue": "world/stars.bin", "count": 1800, "magnitudeLimit": 5.5 }
+  "stars": { "catalogue": "world/stars.bin", "count": 1500, "magnitudeLimit": 5.5 }
 }
 ```
 

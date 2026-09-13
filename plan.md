@@ -14416,8 +14416,24 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             access passed all 106. The focused 4x command test advances two calendar days and
             observes exactly `6 / 29.530588` additional phase turns without any difference in
             `epochSeconds` or `CalendarDays`.
-- [ ] HOUSE-01609 — Generate the 1 500-star catalogue binary from a public-domain source (RA, Dec, magnitude, B−V)
+- [x] HOUSE-01609 — Generate the 1 500-star catalogue binary from a public-domain source (RA, Dec, magnitude, B−V)
       dep: HOUSE-00274 · sys: content · plat: TOOL · pri: MUST
+      verify: `python3 tools/world/build_stars.py --check`; `python3
+              tools/world/build_stars.py --selftest`; manifest, licence, budget, content-DAG and
+              world-id gates; complete `tools/ci/run_checks.sh` including strict-XNA's 310
+              translation units
+      note: (2026-09-13) the source is NASA HEASARC's government-work-licensed BSC5P distribution,
+            not the tempting CC BY-SA HYG derivative. The committed 376,801-byte Xamin snapshot
+            contains all 9,110 HR rows and only the five auditable fields this renderer needs.
+            Its query and SHA-256 are pinned; ordinary generation is offline and the explicit
+            `--fetch` path refuses any upstream revision before it writes output.
+      selection: the tool rejects missing/duplicate HR ids and malformed coordinates, excludes
+            HEASARC's 14 named non-stellar objects and rows without V magnitude or B−V, sorts by
+            `(magnitude, HR)` and writes the brightest 1,500 complete stars. Nine otherwise-brighter
+            BSC rows have no B−V and are excluded rather than assigned invented colours. The packed
+            `CSTR` v1 output is exactly **24,016 bytes**, spans V **−1.46..4.94**, contains Sirius,
+            Canopus, Vega and Polaris at checked J2000 coordinates, and has SHA-256
+            `cf1145ec49855acced63cbb509f044b02977cd3a7233c3d0921145d5a30d4a20`.
 - [ ] HOUSE-01610 — Implement `StarField`: the dynamic vertex buffer of camera-facing quads with magnitude-driven size and B−V colour
       dep: HOUSE-01609 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01611 — Implement sidereal rotation about the celestial pole at the configured latitude

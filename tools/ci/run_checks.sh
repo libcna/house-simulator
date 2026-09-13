@@ -220,6 +220,11 @@ run_gate "cloud-textures-selftest" python3 tools/world/cloud_textures.py --selft
 # NASA TIFF. Normal CI stays offline while checking both the exact asset and the projection maths.
 run_gate "moon-albedo" python3 tools/assets/moon_albedo.py --check
 run_gate "moon-albedo-selftest" python3 tools/assets/moon_albedo.py --selftest
+# `HOUSE-01609`. The complete 9,110-row NASA HEASARC snapshot and the selected 1,500-row binary
+# are both hash-pinned. The second gate independently exercises selection, known stars and every
+# binary-header refusal without touching the network.
+run_gate "star-catalogue" python3 tools/world/build_stars.py --check
+run_gate "star-catalogue-selftest" python3 tools/world/build_stars.py --selftest
 # `HOUSE-01642`. Geometry that begins with a ring of duplicate poles can look right while carrying
 # zero-area triangles, so the offline mesh proves its topology before `SkySystem` ever uploads it.
 run_gate "sky-dome-selftest" python3 tools/world/build_skydome.py --selftest

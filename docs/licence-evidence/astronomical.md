@@ -1,14 +1,15 @@
 # Lunar albedo map and star catalogue — licence evidence
 
-`HOUSE-00274`. Feeds phase 24 (moon and stars). The plan's expectation was "public domain
-expected". **That holds for the Moon and does not hold for the star catalogue**, which is the
-finding.
+`HOUSE-00274`, completed for the Moon by `HOUSE-01605` and revisited for the catalogue by
+`HOUSE-01609`. Feeds phase 24 (moon and stars). The plan's expectation was "public domain
+expected". That holds for the NASA Moon map and, after checking the specific federal dataset
+record rather than assuming it from the subject matter, for NASA HEASARC's BSC5P distribution.
 
 | | |
 |---|---|
-| Retrieved | 2026-09-07 |
+| Retrieved | 2026-09-07 (Moon), 2026-09-13 (stars) |
 | **Moon** | **APPROVED** — NASA, not subject to US copyright |
-| **Stars** | **CC BY-SA 4.0** for the obvious source. Usable, but share-alike, and not public domain |
+| **Stars** | **APPROVED** — NASA HEASARC BSC5P; Data.gov explicitly records the government-work licence |
 
 ---
 
@@ -74,39 +75,64 @@ nearest-limb extension beneath the separately generated phase mask. The committe
 `d7fa53d450a40b605ab29dd28a51b9be4b43cae1b10481d5f9a91f428b851e75`. Normal CI is offline: it
 pins this output and tests the projection orientation independently.
 
-## 2. Star catalogue — the expectation does NOT hold
+## 2. Star catalogue — NASA HEASARC BSC5P
 
-The obvious source, and the one a search leads to, is the **HYG database**:
+The first review correctly rejected an unsupported shortcut: the convenient **HYG v4.4** database
+at <https://codeberg.org/astronexus/hyg> is CC BY-SA 4.0, not public domain. It also correctly
+refused to infer a licence for the upstream Yale/ADC/CDS data merely because astronomical facts are
+not copyrightable. `HOUSE-01609` closes that open evidence question through a specific publisher
+record:
 
 | | |
 |---|---|
-| Current home | <https://codeberg.org/astronexus/hyg> (**moved** from GitHub, which now carries only a pointer) |
-| Version | HYG v4.4 |
-| Licence | **Creative Commons Attribution-ShareAlike 4.0 International** |
+| Dataset | <https://catalog.data.gov/dataset/bright-star-catalog> |
+| Publisher | NASA High Energy Astrophysics Science Archive Research Center (HEASARC) |
+| Identifier | `ivo://nasa.heasarc/bsc5p` |
+| HEASARC table | <https://heasarc.gsfc.nasa.gov/W3Browse/catalog/bsc5p.html> |
+| Licence recorded by Data.gov | <https://www.usa.gov/government-works> |
 
-Verified from both the repository's `README.md` and its `LICENSE` file:
+This is not a blanket “NASA website means public domain” inference. The federal Data.gov record
+names this exact dataset, its HEASARC publisher and distribution URLs, and explicitly assigns the
+government-work licence. It also documents the chain honestly: HEASARC created its table in 1995
+from an ADC or CDS file and subsequently revised it, including positions for 14 non-stellar HR
+objects and later corrections. The catalogue generator excludes those 14 objects.
 
-> This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+17 U.S.C. §105(a), archived verbatim in `licenses/us-gov-pd/LICENCE.txt`, says US copyright
+protection is unavailable for a work of the United States Government. USA.gov adds the limits that
+matter to use here: not every item merely hosted on a federal site is a government work; agency
+logos and implied endorsement remain restricted; and the United States may assert copyright in
+other jurisdictions. The per-dataset Data.gov licence field is therefore the permission evidence,
+while the statutory text explains the US public-domain status. No NASA mark or endorsement appears
+in the catalogue or game.
 
-**That is not public domain, and share-alike matters here.** Phase 24 does not ship the CSV; it
-bakes a table of positions and magnitudes for the naked-eye stars into a content file. That baked
-table is a *derivative of a database*, and CC BY-SA 4.0 requires derivatives to be offered under
-BY-SA. Workable — a star table can be published under BY-SA without touching the rest of the game,
-exactly as `blendswap.md` describes for BY-SA models — but it is an obligation that has to be
-recorded and honoured, not discovered at packaging time.
+| Manifest field | Value |
+|---|---|
+| `licence` | `US-GOV-PD` (not an SPDX id; US government work) |
+| `redistributeSource` / `redistributeDerived` | true / true |
+| `commercialUse` | true, without implied endorsement |
+| `modification` | true |
 
-Also worth noting: the GitHub repository most links point at is **stale**, and its GitHub licence
-metadata reads `NOASSERTION`. A reader who stopped there would have no licence at all.
+### Acquired source and generated subset (`HOUSE-01609`)
 
-**The alternative, and what still needs checking.** HYG is itself compiled from older scientific
-catalogues — principally the Yale Bright Star Catalogue and Hipparcos/Tycho — distributed through
-CDS/VizieR. Those upstream catalogues are the natural non-share-alike route, and 9 110 naked-eye
-stars is exactly what phase 24 wants. **Their terms have not been verified here** and must be
-before they are used; this file records the option, not an approval.
+`assets-src/world/bsc5p.psv` is the complete 9,110-row response from HEASARC's public Xamin
+interface, restricted to `name`, J2000 `ra`, J2000 `dec`, `vmag` and `bv_color`, and sorted by
+`name`. It is 376,801 bytes with SHA-256
+`31464f3928a834a44c1a7b1c960081550357b6e4134c2ff568223d6b03e865b7`. The exact query is retained
+in `assets-src/world/SOURCE.md`; `tools/world/build_stars.py --fetch` is the only network route and
+refuses a response whose bytes differ from that pin.
+
+The source has 14 missing V magnitudes and 324 missing B−V values. After removing incomplete rows
+and HEASARC's named non-stellar objects, 8,786 complete stars remain. The generator orders them by
+`(V magnitude, HR number)` and writes the brightest 1,500. Nine otherwise-brighter rows lack B−V;
+they are excluded rather than assigned an invented colour. The selected range is V −1.46 through
+4.94. Its 24,016-byte `content/world/stars.bin` has SHA-256
+`cf1145ec49855acced63cbb509f044b02977cd3a7233c3d0921145d5a30d4a20`.
 
 ## Disposition
 
-* The Moon map is cleared and may be acquired when phase 24 reaches it.
-* For stars, either accept BY-SA on the derived table and record it, or verify a CDS/VizieR
-  catalogue first. **Do not assume "astronomical data is public domain"** — it is a reasonable prior
-  and it is false for the most convenient source.
+* The Moon map and NASA HEASARC BSC5P distribution are cleared and acquired.
+* HYG remains rejected for this asset because its BY-SA obligation is unnecessary when the
+  specifically licensed federal distribution supplies the required fields.
+* **Do not generalise this result to other astronomical catalogues.** The approval rests on the
+  exact Data.gov record for `ivo://nasa.heasarc/bsc5p`, not on a claim that scientific data or files
+  on NASA servers are automatically public domain.

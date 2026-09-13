@@ -82,6 +82,28 @@
   ],
   "assets": [
     {
+      "id": "DATA_SKY_BSC5P",
+      "category": "sky",
+      "sourceFile": "assets-src/world/bsc5p.psv",
+      "sourceSha256": "31464f3928a834a44c1a7b1c960081550357b6e4134c2ff568223d6b03e865b7",
+      "notPackaged": "Offline source snapshot for tools/world/build_stars.py; only the generated compact content/world/stars.bin is deployed.",
+      "origin": {
+        "kind": "downloaded",
+        "name": "NASA HEASARC BSC5P five-field catalogue export",
+        "licence": "US-GOV-PD",
+        "licenceFile": "licenses/us-gov-pd/LICENCE.txt",
+        "attribution": "NASA High Energy Astrophysics Science Archive Research Center (HEASARC)",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "url": "https://catalog.data.gov/dataset/bright-star-catalog",
+        "author": "NASA High Energy Astrophysics Science Archive Research Center (HEASARC)",
+        "retrieved": "2026-09-13",
+        "note": "Complete 9,110-row HEASARC Xamin export of HR id, J2000 RA/Dec, V magnitude and B-V. tools/world/build_stars.py validates the hash-pinned snapshot, excludes incomplete and 14 HEASARC-identified non-stellar rows, and generates the 1,500-row content/world/stars.bin for HOUSE-01609. Licence evidence is specific to ivo://nasa.heasarc/bsc5p and recorded in docs/licence-evidence/astronomical.md."
+      }
+    },
+    {
       "id": "EFFECT_P1PROBE",
       "category": "effect",
       "sourceFile": "assets-src/Effects/P1Probe.fx",

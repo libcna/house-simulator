@@ -138,6 +138,7 @@ cells/cells	CELL_FRIDGE_INTERIOR
 sky/cloudLayers	CL_HIGH
 sky/cloudLayers	CL_LOW
 sky/cloudLayers	CL_MID
+assets	DATA_SKY_BSC5P
 interactables/interactables	DOOR_B1_CELLAR
 interactables/interactables	DOOR_B1_CINEMA
 openings/openings	DOOR_B1_CINEMA__B1_UTILITY

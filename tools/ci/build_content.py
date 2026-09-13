@@ -178,6 +178,11 @@ def default_stages() -> list[Stage]:
               inputs=["tools/assets/moon_albedo.py", "assets-src/Textures/Sky/moon_albedo.png"],
               outputs=[],
               description="§33.3's pinned 1024-square NASA lunar albedo source"),
+        Stage("star-catalogue", "validate",
+              ["python3", "tools/world/build_stars.py", "--check"],
+              inputs=["tools/world/build_stars.py", "assets-src/world/bsc5p.psv"],
+              outputs=[],
+              description="§34's pinned 1,500-row NASA HEASARC BSC5P subset"),
         # --- the world chain (`HOUSE-00210`…`HOUSE-00215`) --------------------------------------
         # `HOUSE-00363`. The layout gate comes first in this chain, because `build_collision.py`
         # and the five tools after it read the layout and believe it; §15.7 says a validation
@@ -216,6 +221,10 @@ def default_stages() -> list[Stage]:
                "content/world/sky_dome.bin"],
               inputs=["tools/world/build_skydome.py"], outputs=["content/world/sky_dome.bin"],
               needs=["sky-lut"], description="§31.1's indexed hemisphere, skirt and ground disc"),
+        Stage("stars", "world", ["python3", "tools/world/build_stars.py", "--emit"],
+              inputs=["tools/world/build_stars.py", "assets-src/world/bsc5p.psv"],
+              outputs=["content/world/stars.bin"], needs=["star-catalogue"],
+              description="§34's brightest complete 1,500-star catalogue binary"),
         # --- the generated exterior tree (`HOUSE-00227`) -----------------------------------------
         # These four write `.glb` that `build_chunks.py` then reads, and until `HOUSE-00227` NO
         # stage ran them: `run_checks.sh` gates their selftests, which is a different question from

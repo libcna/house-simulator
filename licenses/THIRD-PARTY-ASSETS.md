@@ -483,6 +483,13 @@ Full text: [`licenses/ofl-1.1/LICENCE.txt`](ofl-1.1/LICENCE.txt)
 - `FONT_NOTO_SANS_REGULAR` — **Noto Sans Regular 2.015** by The Noto Project Authors — <https://github.com/notofonts/latin-greek-cyrillic/releases/download/NotoSans-v2.015/NotoSans-v2.015.zip> (retrieved 2026-09-07)
   - Attribution: Copyright 2022 The Noto Project Authors (https://github.com/notofonts/latin-greek-cyrillic)
 
+## US-GOV-PD
+
+Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
+
+- `DATA_SKY_BSC5P` — **NASA HEASARC BSC5P five-field catalogue export** by NASA High Energy Astrophysics Science Archive Research Center (HEASARC) — <https://catalog.data.gov/dataset/bright-star-catalog> (retrieved 2026-09-13)
+  - Attribution: NASA High Energy Astrophysics Science Archive Research Center (HEASARC)
+
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `41547b9d5ee5bbd2560002de56efc5294d00a443cdf65226edb88c999da765a5`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `8c9759e2c695c19d2dcdba299bf629ab73387f7963cfb2baecda72136b56b856`.*
