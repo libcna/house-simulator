@@ -20,6 +20,7 @@
 
 #include "cnahouse/rendering/MoonDiscPass.hpp"
 #include "cnahouse/rendering/Renderer.hpp"
+#include "cnahouse/rendering/SkyTransientPass.hpp"
 #include "cnahouse/rendering/StarField.hpp"
 #include "cnahouse/rendering/SunDiscPass.hpp"
 #include "cnahouse/util/Result.hpp"
@@ -246,6 +247,11 @@ namespace cnahouse::rendering
             return colourUpdateCount_;
         }
 
+        [[nodiscard]] const SkyTransientFrame& TransientFrame() const noexcept
+        {
+            return transients_.Frame();
+        }
+
         [[nodiscard]] double LastColourMilliseconds() const noexcept
         {
             return lastColourMilliseconds_;
@@ -280,6 +286,7 @@ namespace cnahouse::rendering
         std::optional<CloudTextures> cloudTextures_;
         SunDiscPass sunDisc_;
         MoonDiscPass moonDisc_;
+        SkyTransientPass transients_;
         std::unique_ptr<StarField> starField_;
         std::unique_ptr<Resources> resources_;
         double windSpeedMetresPerSecond_ = 0.0;

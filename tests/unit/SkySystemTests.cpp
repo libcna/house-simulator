@@ -20,6 +20,7 @@
 #include "System/IO/MemoryStream.hpp"
 
 #include "cnahouse/environment/MoonModel.hpp"
+#include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/SkySystem.hpp"
@@ -234,6 +235,29 @@ TEST(SkySystemTests, NightTownGlowIsWarmSouthernAndConfinedToTheHorizon)
     EXPECT_LT(southColour.Z - northColour.Z, southColour.X - northColour.X)
         << "the town dome must be warm rather than another blue night gradient";
     EXPECT_NEAR(zenith->Color.ToVector3().X, 0.01F, 0.005F) << "the low-horizon glow leaked into the zenith";
+}
+
+TEST(SkySystemTests, SharedClockFeedsTheSatelliteAndMeteorPass)
+{
+    auto mesh = ReadOf(FixtureBytes());
+    auto model = cnahouse::rendering::SkyColourModelReader::Read(SkyJson(), "layout.sky.json");
+    ASSERT_TRUE(mesh);
+    ASSERT_TRUE(model);
+    cnahouse::rendering::Camera camera;
+    cnahouse::rendering::SkySystem sky(camera, std::move(*mesh), std::move(*model));
+
+    cnahouse::environment::SimClock clock;
+    clock.epochSeconds = cnahouse::rendering::kMeteorDurationSimSeconds * 0.5;
+    cnahouse::environment::SunPosition sun;
+    sun.altitudeDeg = -18.0;
+    cnahouse::environment::MoonPosition moon;
+    moon.altitudeDeg = -20.0;
+    sky.SetCelestial(clock, sun, moon, cnahouse::environment::MoonPhase{}, 0.0);
+
+    const auto& frame = sky.TransientFrame();
+    EXPECT_GT(frame.satellites[0].alpha, 0.0F);
+    EXPECT_GT(frame.satellites[1].alpha, 0.0F);
+    EXPECT_TRUE(frame.meteor.active);
 }
 
 TEST(SkySystemTests, SunGlowIsDirectionalMatchesTheAuthoredCurveAndVanishesUnderCloud)

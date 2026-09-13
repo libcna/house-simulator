@@ -3640,7 +3640,12 @@ deterministic and keeping the debug command exact even while the diurnal clock i
 * **Light pollution**: a faint warm dome glow toward the town, which also hides the faintest stars
   near the southern horizon. One extra gradient in the sky LUT.
 * Two visible **satellites** and an occasional **meteor** (one every ~4 simulated minutes on clear
-  nights) — three lines of code each, and they make the night sky feel alive.
+  nights) — three lines of code each, and they make the night sky feel alive. `HOUSE-01615` makes
+  both effects deterministic functions of the one simulation clock. The two satellites repeat
+  distinct 420 s and 660 s horizon-to-horizon tracks, fading at each reset; the meteor schedule is
+  one 8 s streak per 240 simulated seconds when the sun is at or below −14° and cloud cover is at
+  most 0.25. Its event number hashes to direction and slope, so save/load and frame rate cannot
+  change which streak is due. All three are vertex-colour geometry in one additive XNA draw.
 
 ---
 

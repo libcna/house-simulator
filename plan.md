@@ -14518,8 +14518,24 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       measured: the focused sky/star suite passed **29 / 29 tests**; complete suites passed
             **1374 / 1374 unit** and **109 / 109 integration** tests; strict XNA passed **313
             translation units** with four compiler jobs.
-- [ ] HOUSE-01615 — Implement the two satellites and the occasional meteor
+- [x] HOUSE-01615 — Implement the two satellites and the occasional meteor
       dep: HOUSE-01612 · sys: rendering · plat: ALL · pri: OPT
+      verify: unit `SkyTransientPassTests.*` plus
+              `SkySystemTests.SharedClockFeedsTheSatelliteAndMeteorPass` (4/4); offscreen OPENGLES3
+              `SkyTransientPassTests.*` (1/1); complete unit and integration suites; strict-XNA all
+              translation units with at most 4 compiler jobs; complete `tools/ci/run_checks.sh`
+      note: (2026-09-13) `SkyTransientPass` samples two distinct 420 s / 660 s
+            horizon-to-horizon satellite tracks directly from `SimClock::epochSeconds`; both fade
+            through their horizon reset and share the existing star twilight/cloud transmission.
+            The same clock selects one deterministic 8 s meteor window every 240 simulated seconds
+            on full, clear nights (sun ≤ −14°, cloud ≤ 0.25). A stable event hash chooses each
+            streak's azimuth and slope, so save/load and frame rate cannot change the event.
+            `SkySystem` draws the two point quads and optional fading trail as at most six triangles
+            in one additive, no-depth XNA submission between the stars and the moon/sun, before
+            clouds; five counters expose draws, triangles, uploads, satellites and meteors.
+      measured: focused coverage passed **4 / 4 unit** and **1 / 1 real-device integration** test;
+            complete suites passed **1378 / 1378 unit** and **110 / 110 integration** tests; strict
+            XNA passed **316 translation units** with four compiler jobs.
 - [ ] HOUSE-01616 — Implement the `F8` overlay's sun/moon/star section
       dep: HOUSE-01612, HOUSE-01537 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-01617 — Render tests: the 8 named phases, a clear night, an overcast night, moonrise, and the star field at three twilight stages

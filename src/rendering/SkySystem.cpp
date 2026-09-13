@@ -794,6 +794,7 @@ namespace cnahouse::rendering
         , cloudRings_(BuildCloudRings(colourModel_.cloudLayers))
         , sunDisc_(camera)
         , moonDisc_(camera)
+        , transients_(camera)
     {
         colouredVertices_.reserve(mesh_.positions.size());
         for (const Xna::Vector3& position : mesh_.positions)
@@ -888,6 +889,7 @@ namespace cnahouse::rendering
         {
             static_cast<void>(starField_->SetCelestial(clock, sun, moon, phase, cloudCover));
         }
+        static_cast<void>(transients_.SetCelestial(clock, sun, cloudCover));
     }
 
     bool SkySystem::SetWind(double speedMetresPerSecond, double directionDegrees) noexcept
@@ -1250,12 +1252,13 @@ namespace cnahouse::rendering
                              static_cast<std::int64_t>(std::lround(lastColourMilliseconds_ * 1000.0)));
 
         // Celestial layers belong after the opaque dome but before both clouds and world geometry.
-        // Stars are first so the nearer moon and sun remain legible; each component owns its
-        // additive/no-depth state, and clouds then obscure the complete sky naturally.
+        // Stars are first, then moving sky points, so the nearer moon and sun remain legible; each
+        // component owns its additive/no-depth state, and clouds obscure the complete sky naturally.
         if (starField_ != nullptr)
         {
             starField_->Draw(context);
         }
+        transients_.Draw(context);
         moonDisc_.Draw(context);
         sunDisc_.Draw(context);
 
