@@ -21,8 +21,11 @@ namespace System::IO
 
 namespace cnahouse::environment
 {
+    struct MoonPhase;
+    struct MoonPosition;
     struct SimClock;
-}
+    struct SunPosition;
+} // namespace cnahouse::environment
 
 namespace cnahouse::rendering
 {
@@ -67,6 +70,19 @@ namespace cnahouse::rendering
         double latitudeDeg = 0.0;
     };
 
+    /// @brief Section 34's environmental attenuation and twilight limiting magnitude.
+    struct StarVisibility
+    {
+        float twilight = 1.0F;
+        float cloudTransmission = 1.0F;
+        float moonBrightness = 0.0F;
+        float overallAlpha = 1.0F;
+        float magnitudeCutoff = 5.5F;
+    };
+
+    inline constexpr double kStarCloudExponent = 1.6;
+    inline constexpr double kStarMoonSuppression = 0.55;
+
     /// @brief Converts a J2000 catalogue position into the unrotated equatorial unit frame.
     ///
     /// +Y is the north celestial pole, +X is RA 0 and -Z is RA 6h. `HOUSE-01611` rotates this
@@ -80,6 +96,18 @@ namespace cnahouse::rendering
     /// @brief Converts one catalogue position to world axes: +X east, +Y up, -Z north.
     [[nodiscard]] Microsoft::Xna::Framework::Vector3
     HorizonDirection(const StarCatalogueEntry& star, const StarOrientation& orientation) noexcept;
+
+    /// @brief Evaluates §34's twilight, cloud, moon and limiting-magnitude rules.
+    ///
+    /// Moon brightness reuses the clear-sky phase/altitude response of §33.4. The caller supplies
+    /// the retained catalogue's magnitude endpoints so any future regenerated catalogue still
+    /// reveals exactly its brightest-to-faintest range.
+    [[nodiscard]] StarVisibility StarVisibilityFor(const environment::SunPosition& sun,
+                                                   const environment::MoonPosition& moon,
+                                                   const environment::MoonPhase& phase,
+                                                   double cloudCover,
+                                                   float brightestMagnitude,
+                                                   float faintestMagnitude) noexcept;
 
     /// @brief Samples §34's small B-V LUT and magnitude response.
     [[nodiscard]] StarAppearance AppearanceForStar(float visualMagnitude, float bvColourIndex) noexcept;
@@ -102,6 +130,19 @@ namespace cnahouse::rendering
         /// @brief Rotates the retained catalogue to the clock's current local horizon frame.
         /// @return true when the geometry changed; invalid clock/location data leaves it unchanged.
         bool SetObserver(const environment::SimClock& clock) noexcept;
+
+        /// @brief Applies §34's environmental visibility without changing sidereal orientation.
+        bool SetVisibility(const environment::SunPosition& sun,
+                           const environment::MoonPosition& moon,
+                           const environment::MoonPhase& phase,
+                           double cloudCover) noexcept;
+
+        /// @brief Applies one frame's shared celestial state, rebuilding the retained allocation once.
+        bool SetCelestial(const environment::SimClock& clock,
+                          const environment::SunPosition& sun,
+                          const environment::MoonPosition& moon,
+                          const environment::MoonPhase& phase,
+                          double cloudCover) noexcept;
         void Draw(PassContext& context) override;
 
         [[nodiscard]] bool IsActive() const override
@@ -135,6 +176,16 @@ namespace cnahouse::rendering
             return orientation_;
         }
 
+        [[nodiscard]] const StarVisibility& Visibility() const noexcept
+        {
+            return visibility_;
+        }
+
+        [[nodiscard]] std::size_t VisibleStarCount() const noexcept
+        {
+            return visibleStarCount_;
+        }
+
         [[nodiscard]] std::uint64_t GeometryUpdateCount() const noexcept
         {
             return geometryUpdateCount_;
@@ -143,11 +194,15 @@ namespace cnahouse::rendering
     private:
         class Resources;
 
+        bool ApplyState(const StarOrientation& orientation, const StarVisibility& visibility) noexcept;
+
         const Camera* camera_ = nullptr;
         StarCatalogue catalogue_;
         std::vector<Microsoft::Xna::Framework::Graphics::VertexPositionColor> vertices_;
         StarOrientation orientation_;
+        StarVisibility visibility_;
         std::unique_ptr<Resources> resources_;
+        std::size_t visibleStarCount_ = 0;
         std::uint64_t geometryUpdateCount_ = 0;
         std::uint64_t uploadCount_ = 0;
         debug::Counters* counterOwner_ = nullptr;

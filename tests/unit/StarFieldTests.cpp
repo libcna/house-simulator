@@ -18,6 +18,7 @@
 
 #include "System/IO/MemoryStream.hpp"
 
+#include "cnahouse/environment/MoonModel.hpp"
 #include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/rendering/Camera.hpp"
@@ -164,6 +165,79 @@ TEST(StarFieldTests, MagnitudeDrivesSizeAndAlphaWhileBvSamplesAClampedColourLut)
     EXPECT_FLOAT_EQ(clampedBlue.alpha, 1.0F);
     EXPECT_FLOAT_EQ(clampedBlue.colour.X, brightBlue.colour.X);
     EXPECT_FLOAT_EQ(clampedRed.colour.Z, faintRed.colour.Z);
+}
+
+TEST(StarFieldTests, VisibilityCombinesTwilightCloudAndVisibleMoonExactlyOnce)
+{
+    cnahouse::environment::SunPosition sun;
+    cnahouse::environment::MoonPosition moon;
+    cnahouse::environment::MoonPhase phase;
+    moon.altitudeDeg = -1.0;
+    phase.illuminatedFraction = 1.0;
+
+    sun.altitudeDeg = -4.0;
+    auto visibility = cnahouse::rendering::StarVisibilityFor(sun, moon, phase, 0.0, -1.46F, 4.94F);
+    EXPECT_FLOAT_EQ(visibility.twilight, 0.0F);
+    EXPECT_FLOAT_EQ(visibility.overallAlpha, 0.0F);
+    EXPECT_FLOAT_EQ(visibility.magnitudeCutoff, -1.46F);
+
+    sun.altitudeDeg = -14.0;
+    visibility = cnahouse::rendering::StarVisibilityFor(sun, moon, phase, 0.0, -1.46F, 4.94F);
+    EXPECT_FLOAT_EQ(visibility.twilight, 1.0F);
+    EXPECT_FLOAT_EQ(visibility.moonBrightness, 0.0F) << "a moon below the horizon is not sky glow";
+    EXPECT_FLOAT_EQ(visibility.overallAlpha, 1.0F);
+    EXPECT_FLOAT_EQ(visibility.magnitudeCutoff, 4.94F);
+
+    sun.altitudeDeg = -9.0;
+    moon.altitudeDeg = 90.0;
+    visibility = cnahouse::rendering::StarVisibilityFor(sun, moon, phase, 0.25, -1.46F, 4.94F);
+    const double cloud = std::pow(0.75, cnahouse::rendering::kStarCloudExponent);
+    EXPECT_FLOAT_EQ(visibility.twilight, 0.5F);
+    EXPECT_NEAR(visibility.cloudTransmission, cloud, 1e-7);
+    EXPECT_FLOAT_EQ(visibility.moonBrightness, 1.0F);
+    EXPECT_NEAR(
+        visibility.overallAlpha, 0.5 * cloud * (1.0 - cnahouse::rendering::kStarMoonSuppression), 1e-7);
+    EXPECT_NEAR(visibility.magnitudeCutoff, 1.74F, 1e-6F);
+
+    sun.altitudeDeg = -14.0;
+    visibility = cnahouse::rendering::StarVisibilityFor(sun, moon, phase, 1.0, -1.46F, 4.94F);
+    EXPECT_FLOAT_EQ(visibility.cloudTransmission, 0.0F);
+    EXPECT_FLOAT_EQ(visibility.overallAlpha, 0.0F);
+}
+
+TEST(StarFieldTests, TwilightRevealsOnlyTheBrightestPrefixAndReusesVertexStorage)
+{
+    cnahouse::rendering::Camera camera;
+    const StarCatalogue catalogue{{0.0F, 0.0F, -1.0F, 0.0F},
+                                  {30.0F, 10.0F, 0.0F, 0.3F},
+                                  {60.0F, 20.0F, 2.0F, 0.6F},
+                                  {90.0F, 30.0F, 4.0F, 1.0F}};
+    cnahouse::rendering::StarField field(camera, catalogue);
+    const auto* storage = field.Vertices().data();
+    cnahouse::environment::SimClock clock;
+    cnahouse::environment::SunPosition sun;
+    cnahouse::environment::MoonPosition moon;
+    cnahouse::environment::MoonPhase phase;
+    sun.altitudeDeg = -9.0;
+    moon.altitudeDeg = -10.0;
+
+    ASSERT_TRUE(field.SetCelestial(clock, sun, moon, phase, 0.0));
+    EXPECT_EQ(field.Vertices().data(), storage);
+    ASSERT_EQ(field.VisibleStarCount(), 2u);
+    EXPECT_GT(field.Vertices()[0].Color.getAProperty(), 0);
+    EXPECT_GT(field.Vertices()[4].Color.getAProperty(), 0);
+    EXPECT_EQ(field.Vertices()[8].Color.getAProperty(), 0);
+    EXPECT_EQ(field.Vertices()[12].Color.getAProperty(), 0);
+
+    sun.altitudeDeg = -14.0;
+    ASSERT_TRUE(field.SetCelestial(clock, sun, moon, phase, 0.0));
+    EXPECT_EQ(field.VisibleStarCount(), catalogue.size());
+    EXPECT_EQ(field.Vertices().data(), storage);
+
+    sun.altitudeDeg = -4.0;
+    ASSERT_TRUE(field.SetCelestial(clock, sun, moon, phase, 0.0));
+    EXPECT_EQ(field.VisibleStarCount(), 0u);
+    EXPECT_EQ(field.Vertices()[0].Color.getAProperty(), 0);
 }
 
 TEST(StarFieldTests, EveryQuadFacesTheObserverAtTheAuthoredCelestialRadius)

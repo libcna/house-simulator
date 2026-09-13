@@ -14466,8 +14466,21 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             hour-angle step rotates an equatorial star by 90°, while equal local midnights six
             months apart face nearly opposite constellations. The live walk update supplies its
             configured `SimClock`, including compressed calendar date, every lighting frame.
-- [ ] HOUSE-01612 — Implement star visibility: the twilight ramp, the magnitude cutoff that tightens with twilight, cloud and moon suppression
+- [x] HOUSE-01612 — Implement star visibility: the twilight ramp, the magnitude cutoff that tightens with twilight, cloud and moon suppression
       dep: HOUSE-01611, HOUSE-01574 · sys: rendering · plat: ALL · pri: MUST
+      verify: unit `StarFieldTests.*` (13/13), complete unit suite (1370/1370); offscreen OPENGLES3
+              `StarFieldPassTests.*` (2/2), complete integration suite (111/111); static XNA-only
+              gate and strict-XNA **313 translation units** with at most 4 compiler jobs
+      note: (2026-09-13) the live lighting answer now drives the exact §34 product
+            `starVisibility · (1−cloudCover)^1.6 · (1−0.55·moonBrightness)` into vertex alpha.
+            `moonBrightness` deliberately reuses §33.4's clear-sky nonlinear phase and
+            above-horizon altitude response, so a moon below the horizon cannot suppress stars
+            and cloud cover is applied only by the star formula. The smooth −4°..−14° twilight
+            value also interpolates the real retained catalogue's −1.46..4.94 limiting magnitude.
+            Because the catalogue is brightest-first, only that prefix is submitted: halfway
+            through twilight the faint suffix has zero-alpha vertices and no triangles, while
+            daylight or complete overcast skips both the dynamic upload and draw. Orientation and
+            visibility share one in-place 6,000-vertex rebuild on the clock-aware game path.
 - [ ] HOUSE-01613 — Implement twinkle with the altitude-dependent amplitude, updated at 20 Hz
       dep: HOUSE-01612 · sys: rendering · plat: ALL · pri: SHOULD
 - [ ] HOUSE-01614 — Implement the light-pollution dome glow toward the town

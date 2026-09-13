@@ -812,6 +812,10 @@ namespace cnahouse::rendering
         SetSky(sun, moon, phase, cloudCover);
         sunDisc_.SetSun(sun, cloudCover);
         moonDisc_.SetMoon(moon, phase, sun);
+        if (starField_ != nullptr)
+        {
+            static_cast<void>(starField_->SetVisibility(sun, moon, phase, cloudCover));
+        }
     }
 
     void SkySystem::SetCelestial(const environment::SunPosition& sun,
@@ -822,6 +826,10 @@ namespace cnahouse::rendering
         SetSky(sun, moon, phase, cloudCover);
         sunDisc_.SetSun(sun, cloudCover);
         moonDisc_.SetMoon(moon, phase, sun);
+        if (starField_ != nullptr)
+        {
+            static_cast<void>(starField_->SetVisibility(sun, moon, phase, cloudCover));
+        }
     }
 
     void SkySystem::SetCelestial(const environment::SimClock& clock,
@@ -830,10 +838,12 @@ namespace cnahouse::rendering
                                  const environment::MoonPhase& phase,
                                  double cloudCover) noexcept
     {
-        SetCelestial(sun, moon, phase, cloudCover);
+        SetSky(sun, moon, phase, cloudCover);
+        sunDisc_.SetSun(sun, cloudCover);
+        moonDisc_.SetMoon(moon, phase, sun);
         if (starField_ != nullptr)
         {
-            static_cast<void>(starField_->SetObserver(clock));
+            static_cast<void>(starField_->SetCelestial(clock, sun, moon, phase, cloudCover));
         }
     }
 

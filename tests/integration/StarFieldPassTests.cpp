@@ -13,6 +13,9 @@
 #include "System/IO/FileStream.hpp"
 
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/environment/MoonModel.hpp"
+#include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/StarField.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
@@ -73,5 +76,58 @@ namespace
         EXPECT_EQ(draws, 1);
         EXPECT_EQ(triangles, 3000);
         EXPECT_EQ(uploads, 2) << "the dynamic field uses Discard once per rendered frame";
+    }
+
+    TEST(StarFieldPassTests, TwilightDrawsTheBrightestPrefixAndDaylightSkipsTheUpload)
+    {
+        std::size_t visibleStars = 0;
+        std::int64_t twilightTriangles = 0;
+        std::int64_t daylightDraws = -1;
+        std::int64_t daylightTriangles = -1;
+        std::int64_t uploads = -1;
+        cnahouse::testsupport::DeviceHost host(
+            [&](Gfx::GraphicsDevice& device)
+            {
+                System::IO::FileStream stream(std::string(CNAHOUSE_TEST_STAR_CATALOGUE_FIXTURE),
+                                              System::IO::FileMode::Open,
+                                              System::IO::FileAccess::Read);
+                auto catalogue = cnahouse::rendering::StarCatalogueReader::Read(
+                    stream, CNAHOUSE_TEST_STAR_CATALOGUE_FIXTURE);
+                ASSERT_TRUE(catalogue);
+
+                cnahouse::rendering::Camera camera;
+                cnahouse::rendering::StarField field(camera, std::move(*catalogue));
+                cnahouse::environment::SimClock clock;
+                cnahouse::environment::SunPosition sun;
+                cnahouse::environment::MoonPosition moon;
+                cnahouse::environment::MoonPhase phase;
+                moon.altitudeDeg = -10.0;
+                sun.altitudeDeg = -9.0;
+                ASSERT_TRUE(field.SetCelestial(clock, sun, moon, phase, 0.0));
+                visibleStars = field.VisibleStarCount();
+                ASSERT_GT(visibleStars, 0u);
+                ASSERT_LT(visibleStars, field.Catalogue().size());
+
+                cnahouse::rendering::StateTracker states(device);
+                cnahouse::debug::Counters counters;
+                cnahouse::rendering::PassContext context{device, states, counters, 1.0F / 60.0F};
+                field.Draw(context);
+                twilightTriangles = counters.Find("stars.triangles")->current;
+
+                sun.altitudeDeg = -4.0;
+                ASSERT_TRUE(field.SetCelestial(clock, sun, moon, phase, 0.0));
+                field.Draw(context);
+                daylightDraws = counters.Find("stars.draws")->current;
+                daylightTriangles = counters.Find("stars.triangles")->current;
+                uploads = counters.Find("stars.uploads")->current;
+            });
+        host.Run();
+
+        ASSERT_TRUE(host.Ran());
+        ASSERT_EQ(host.Failure(), "") << "the real device rejected the visibility-limited star field";
+        EXPECT_EQ(twilightTriangles, static_cast<std::int64_t>(visibleStars * 2u));
+        EXPECT_EQ(daylightDraws, 0);
+        EXPECT_EQ(daylightTriangles, 0);
+        EXPECT_EQ(uploads, 1) << "a fully hidden daytime field must not stream to the GPU";
     }
 } // namespace

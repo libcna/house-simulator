@@ -31,7 +31,9 @@
 #include "System/IO/Stream.hpp"
 
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/environment/MoonLight.hpp"
 #include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/RenderStates.hpp"
@@ -132,6 +134,7 @@ namespace cnahouse::rendering
 
         void FillStarVertices(std::span<const StarCatalogueEntry> catalogue,
                               const StarOrientation* orientation,
+                              const StarVisibility* visibility,
                               std::vector<Gfx::VertexPositionColor>& vertices)
         {
             vertices.clear();
@@ -152,7 +155,12 @@ namespace cnahouse::rendering
                     right = Normalised(right, Xna::Vector3(1.0F, 0.0F, 0.0F));
                 }
                 const Xna::Vector3 up = Normalised(Cross(direction, right), Xna::Vector3::Up);
-                const StarAppearance appearance = AppearanceForStar(star.visualMagnitude, star.bvColourIndex);
+                StarAppearance appearance = AppearanceForStar(star.visualMagnitude, star.bvColourIndex);
+                if (visibility != nullptr)
+                {
+                    appearance.alpha *=
+                        star.visualMagnitude <= visibility->magnitudeCutoff ? visibility->overallAlpha : 0.0F;
+                }
                 const Xna::Vector3 horizontal = Scaled(right, appearance.halfSize);
                 const Xna::Vector3 vertical = Scaled(up, appearance.halfSize);
                 const Xna::Color colour(Xna::Vector4(
@@ -314,6 +322,35 @@ namespace cnahouse::rendering
             static_cast<float>(sinLatitude * cosDeclination * cosHourAngle - cosLatitude * sinDeclination));
     }
 
+    StarVisibility StarVisibilityFor(const environment::SunPosition& sun,
+                                     const environment::MoonPosition& moon,
+                                     const environment::MoonPhase& phase,
+                                     double cloudCover,
+                                     float brightestMagnitude,
+                                     float faintestMagnitude) noexcept
+    {
+        StarVisibility result;
+        result.twilight = static_cast<float>(environment::StarVisibilityForSunAltitude(sun.altitudeDeg));
+        const double cover = std::isfinite(cloudCover) ? std::clamp(cloudCover, 0.0, 1.0) : 0.0;
+        result.cloudTransmission = static_cast<float>(std::pow(1.0 - cover, kStarCloudExponent));
+
+        const environment::MoonShading clearMoon = environment::MoonShadingFor(moon, phase, 0.0);
+        result.moonBrightness =
+            std::clamp(clearMoon.intensity / environment::kMoonMaximumIntensity, 0.0F, 1.0F);
+        result.overallAlpha = result.twilight * result.cloudTransmission *
+                              (1.0F - static_cast<float>(kStarMoonSuppression) * result.moonBrightness);
+
+        if (!std::isfinite(brightestMagnitude) || !std::isfinite(faintestMagnitude) ||
+            faintestMagnitude < brightestMagnitude)
+        {
+            brightestMagnitude = kMinimumMagnitude;
+            faintestMagnitude = kMaximumMagnitude;
+        }
+        result.magnitudeCutoff =
+            brightestMagnitude + (faintestMagnitude - brightestMagnitude) * result.twilight;
+        return result;
+    }
+
     StarAppearance AppearanceForStar(float visualMagnitude, float bvColourIndex) noexcept
     {
         const float magnitude = std::clamp(visualMagnitude, kMinimumMagnitude, kMaximumMagnitude);
@@ -333,7 +370,7 @@ namespace cnahouse::rendering
     std::vector<Gfx::VertexPositionColor> BuildStarVertices(std::span<const StarCatalogueEntry> catalogue)
     {
         std::vector<Gfx::VertexPositionColor> vertices;
-        FillStarVertices(catalogue, nullptr, vertices);
+        FillStarVertices(catalogue, nullptr, nullptr, vertices);
         return vertices;
     }
 
@@ -341,7 +378,7 @@ namespace cnahouse::rendering
                                                             const StarOrientation& orientation)
     {
         std::vector<Gfx::VertexPositionColor> vertices;
-        FillStarVertices(catalogue, &orientation, vertices);
+        FillStarVertices(catalogue, &orientation, nullptr, vertices);
         return vertices;
     }
 
@@ -389,11 +426,41 @@ namespace cnahouse::rendering
         , catalogue_(std::move(catalogue))
     {
         orientation_ = StarOrientationFor(environment::SimClock{});
-        FillStarVertices(catalogue_, &orientation_, vertices_);
+        visibleStarCount_ = catalogue_.size();
+        FillStarVertices(catalogue_, &orientation_, &visibility_, vertices_);
         geometryUpdateCount_ = 1;
     }
 
     StarField::~StarField() = default;
+
+    bool StarField::ApplyState(const StarOrientation& orientation, const StarVisibility& visibility) noexcept
+    {
+        if (orientation.localSiderealTimeDeg == orientation_.localSiderealTimeDeg &&
+            orientation.latitudeDeg == orientation_.latitudeDeg &&
+            visibility.twilight == visibility_.twilight &&
+            visibility.cloudTransmission == visibility_.cloudTransmission &&
+            visibility.moonBrightness == visibility_.moonBrightness &&
+            visibility.overallAlpha == visibility_.overallAlpha &&
+            visibility.magnitudeCutoff == visibility_.magnitudeCutoff)
+        {
+            return false;
+        }
+
+        orientation_ = orientation;
+        visibility_ = visibility;
+        visibleStarCount_ =
+            visibility_.overallAlpha > 0.0F
+                ? static_cast<std::size_t>(std::upper_bound(catalogue_.begin(),
+                                                            catalogue_.end(),
+                                                            visibility_.magnitudeCutoff,
+                                                            [](float cutoff, const StarCatalogueEntry& star)
+                                                            { return cutoff < star.visualMagnitude; }) -
+                                           catalogue_.begin())
+                : 0u;
+        FillStarVertices(catalogue_, &orientation_, &visibility_, vertices_);
+        ++geometryUpdateCount_;
+        return true;
+    }
 
     bool StarField::SetObserver(const environment::SimClock& clock) noexcept
     {
@@ -404,22 +471,55 @@ namespace cnahouse::rendering
         {
             return false;
         }
-        const StarOrientation next = StarOrientationFor(clock);
-        if (next.localSiderealTimeDeg == orientation_.localSiderealTimeDeg &&
-            next.latitudeDeg == orientation_.latitudeDeg)
+        return ApplyState(StarOrientationFor(clock), visibility_);
+    }
+
+    bool StarField::SetVisibility(const environment::SunPosition& sun,
+                                  const environment::MoonPosition& moon,
+                                  const environment::MoonPhase& phase,
+                                  double cloudCover) noexcept
+    {
+        const float brightest = catalogue_.empty() ? kMinimumMagnitude : catalogue_.front().visualMagnitude;
+        const float faintest = catalogue_.empty() ? kMaximumMagnitude : catalogue_.back().visualMagnitude;
+        return ApplyState(orientation_, StarVisibilityFor(sun, moon, phase, cloudCover, brightest, faintest));
+    }
+
+    bool StarField::SetCelestial(const environment::SimClock& clock,
+                                 const environment::SunPosition& sun,
+                                 const environment::MoonPosition& moon,
+                                 const environment::MoonPhase& phase,
+                                 double cloudCover) noexcept
+    {
+        const double civilEpochSeconds = clock.CivilEpochSeconds();
+        if (!std::isfinite(civilEpochSeconds) || !std::isfinite(clock.latitudeDeg) ||
+            !std::isfinite(clock.longitudeDeg) || clock.latitudeDeg < -90.0 || clock.latitudeDeg > 90.0 ||
+            clock.longitudeDeg < -180.0 || clock.longitudeDeg > 180.0)
         {
             return false;
         }
-        orientation_ = next;
-        FillStarVertices(catalogue_, &orientation_, vertices_);
-        ++geometryUpdateCount_;
-        return true;
+
+        const StarOrientation nextOrientation = StarOrientationFor(clock);
+        const float brightest = catalogue_.empty() ? kMinimumMagnitude : catalogue_.front().visualMagnitude;
+        const float faintest = catalogue_.empty() ? kMaximumMagnitude : catalogue_.back().visualMagnitude;
+        const StarVisibility nextVisibility =
+            StarVisibilityFor(sun, moon, phase, cloudCover, brightest, faintest);
+        return ApplyState(nextOrientation, nextVisibility);
     }
 
     void StarField::Draw(PassContext& context)
     {
-        if (!IsActive())
+        if (counterOwner_ != &context.counters)
         {
+            counterOwner_ = &context.counters;
+            drawsCounter_ = context.counters.Resolve("stars.draws");
+            trianglesCounter_ = context.counters.Resolve("stars.triangles");
+            uploadsCounter_ = context.counters.Resolve("stars.uploads");
+        }
+        if (!IsActive() || visibleStarCount_ == 0u)
+        {
+            context.counters.Set(drawsCounter_, 0);
+            context.counters.Set(trianglesCounter_, 0);
+            context.counters.Set(uploadsCounter_, static_cast<std::int64_t>(uploadCount_));
             return;
         }
         if (resources_ == nullptr)
@@ -460,18 +560,11 @@ namespace cnahouse::rendering
                                                  0,
                                                  static_cast<int>(vertices_.size()),
                                                  0,
-                                                 static_cast<int>(catalogue_.size() * 2u));
+                                                 static_cast<int>(visibleStarCount_ * 2u));
         }
 
-        if (counterOwner_ != &context.counters)
-        {
-            counterOwner_ = &context.counters;
-            drawsCounter_ = context.counters.Resolve("stars.draws");
-            trianglesCounter_ = context.counters.Resolve("stars.triangles");
-            uploadsCounter_ = context.counters.Resolve("stars.uploads");
-        }
         context.counters.Set(drawsCounter_, 1);
-        context.counters.Set(trianglesCounter_, static_cast<std::int64_t>(catalogue_.size() * 2u));
+        context.counters.Set(trianglesCounter_, static_cast<std::int64_t>(visibleStarCount_ * 2u));
         context.counters.Set(uploadsCounter_, static_cast<std::int64_t>(uploadCount_));
     }
 } // namespace cnahouse::rendering
