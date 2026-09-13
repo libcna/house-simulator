@@ -240,6 +240,58 @@ TEST(StarFieldTests, TwilightRevealsOnlyTheBrightestPrefixAndReusesVertexStorage
     EXPECT_EQ(field.Vertices()[0].Color.getAProperty(), 0);
 }
 
+TEST(StarFieldTests, TwinkleAmplitudeRisesTowardTheHorizonAndStaysBounded)
+{
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarTwinkleAmplitude(1.0F),
+                    cnahouse::rendering::kStarZenithTwinkleAmplitude);
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarTwinkleAmplitude(0.5F), 0.08F);
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarTwinkleAmplitude(0.1F),
+                    cnahouse::rendering::kStarMaximumTwinkleAmplitude);
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarTwinkleAmplitude(0.0F), 0.0F);
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarTwinkleAmplitude(-0.5F), 0.0F);
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarTwinkleAmplitude(std::numeric_limits<float>::quiet_NaN()), 0.0F);
+
+    for (std::size_t star = 0; star < 1500u; ++star)
+    {
+        for (std::uint64_t tick = 0; tick < 40u; ++tick)
+        {
+            const float factor = cnahouse::rendering::StarTwinkleFactor(star, 0.1F, tick);
+            EXPECT_GE(factor, 1.0F - cnahouse::rendering::kStarMaximumTwinkleAmplitude);
+            EXPECT_LE(factor, 1.0F + cnahouse::rendering::kStarMaximumTwinkleAmplitude);
+            EXPECT_FLOAT_EQ(factor, cnahouse::rendering::StarTwinkleFactor(star, 0.1F, tick));
+        }
+    }
+}
+
+TEST(StarFieldTests, TwinkleSamplesExactlyAtTwentyHertzAndKeepsTheRemainder)
+{
+    cnahouse::rendering::Camera camera;
+    const StarCatalogue catalogue{{0.0F, 90.0F, -1.0F, 0.0F}};
+    cnahouse::rendering::StarField field(camera, catalogue);
+    const auto* storage = field.Vertices().data();
+    const auto initialColour = field.Vertices().front().Color;
+    const std::uint64_t initialGeometryUpdates = field.GeometryUpdateCount();
+
+    EXPECT_FALSE(field.AdvanceTwinkle(0.049));
+    EXPECT_EQ(field.TwinkleSampleTick(), 0u);
+    EXPECT_EQ(field.GeometryUpdateCount(), initialGeometryUpdates);
+    EXPECT_TRUE(field.AdvanceTwinkle(0.001));
+    EXPECT_EQ(field.TwinkleSampleTick(), 1u);
+    EXPECT_EQ(field.GeometryUpdateCount(), initialGeometryUpdates + 1u);
+    EXPECT_EQ(field.Vertices().data(), storage);
+    EXPECT_NE(field.Vertices().front().Color, initialColour);
+
+    for (int frame = 0; frame < 60; ++frame)
+    {
+        static_cast<void>(field.AdvanceTwinkle(1.0 / 60.0));
+    }
+    EXPECT_EQ(field.TwinkleSampleTick(), 21u);
+    EXPECT_FALSE(field.AdvanceTwinkle(0.0));
+    EXPECT_FALSE(field.AdvanceTwinkle(-1.0));
+    EXPECT_FALSE(field.AdvanceTwinkle(std::numeric_limits<double>::quiet_NaN()));
+    EXPECT_EQ(field.TwinkleSampleTick(), 21u);
+}
+
 TEST(StarFieldTests, EveryQuadFacesTheObserverAtTheAuthoredCelestialRadius)
 {
     const StarCatalogue catalogue{

@@ -14481,8 +14481,20 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             through twilight the faint suffix has zero-alpha vertices and no triangles, while
             daylight or complete overcast skips both the dynamic upload and draw. Orientation and
             visibility share one in-place 6,000-vertex rebuild on the clock-aware game path.
-- [ ] HOUSE-01613 — Implement twinkle with the altitude-dependent amplitude, updated at 20 Hz
+- [x] HOUSE-01613 — Implement twinkle with the altitude-dependent amplitude, updated at 20 Hz
       dep: HOUSE-01612 · sys: rendering · plat: ALL · pri: SHOULD
+      verify: unit `StarFieldTests.*` (15/15), including all 1,500 deterministic oscillators over
+              40 sample ticks and a one-second 60 Hz cadence; offscreen OPENGLES3
+              `StarFieldPassTests.*` (2/2); static XNA-only gate; strict-XNA **313 translation
+              units** with at most 4 compiler jobs; complete `tools/ci/run_checks.sh`
+      note: (2026-09-13) each catalogue index hashes to a stable 0.65-1.75 Hz frequency and phase,
+            then modulates the existing magnitude/environment alpha in the same CPU vertex-fill
+            loop. The amplitude is 4% at zenith and follows `1/sin(altitude)` toward the horizon,
+            capped at 20% to remove the mathematical singularity; below-horizon stars receive no
+            twinkle. A retained double-precision accumulator crosses exact 50 ms boundaries,
+            preserves sub-tick remainder, rejects invalid time, and publishes the sample count as
+            `stars.twinkle_updates`. Three 60 Hz real-device draws cross exactly one twinkle tick;
+            every render frame still retains HOUSE-01610's one Discard upload and one star draw.
 - [ ] HOUSE-01614 — Implement the light-pollution dome glow toward the town
       dep: HOUSE-01612 · sys: rendering · plat: ALL · pri: SHOULD
 - [ ] HOUSE-01615 — Implement the two satellites and the occasional meteor

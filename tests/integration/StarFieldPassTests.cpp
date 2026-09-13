@@ -31,6 +31,7 @@ namespace
         std::int64_t draws = 0;
         std::int64_t triangles = 0;
         std::int64_t uploads = 0;
+        std::int64_t twinkleUpdates = 0;
         cnahouse::testsupport::DeviceHost host(
             [&](Gfx::GraphicsDevice& device)
             {
@@ -51,6 +52,7 @@ namespace
                 cnahouse::rendering::PassContext context{device, states, counters, 1.0F / 60.0F};
                 field.Draw(context);
                 field.Draw(context);
+                field.Draw(context);
 
                 const Gfx::BlendState& blend = device.getBlendStateProperty();
                 EXPECT_EQ(blend.getColorSourceBlendProperty(),
@@ -62,12 +64,15 @@ namespace
                 const auto* drawCounter = counters.Find("stars.draws");
                 const auto* triangleCounter = counters.Find("stars.triangles");
                 const auto* uploadCounter = counters.Find("stars.uploads");
+                const auto* twinkleCounter = counters.Find("stars.twinkle_updates");
                 ASSERT_NE(drawCounter, nullptr);
                 ASSERT_NE(triangleCounter, nullptr);
                 ASSERT_NE(uploadCounter, nullptr);
+                ASSERT_NE(twinkleCounter, nullptr);
                 draws = drawCounter->current;
                 triangles = triangleCounter->current;
                 uploads = uploadCounter->current;
+                twinkleUpdates = twinkleCounter->current;
             });
         host.Run();
 
@@ -75,7 +80,8 @@ namespace
         ASSERT_EQ(host.Failure(), "") << "the real device rejected the streamed XNA star field";
         EXPECT_EQ(draws, 1);
         EXPECT_EQ(triangles, 3000);
-        EXPECT_EQ(uploads, 2) << "the dynamic field uses Discard once per rendered frame";
+        EXPECT_EQ(uploads, 3) << "the dynamic field uses Discard once per rendered frame";
+        EXPECT_EQ(twinkleUpdates, 1) << "three 60 Hz frames cross exactly one 20 Hz sample";
     }
 
     TEST(StarFieldPassTests, TwilightDrawsTheBrightestPrefixAndDaylightSkipsTheUpload)

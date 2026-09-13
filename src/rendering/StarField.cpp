@@ -135,12 +135,14 @@ namespace cnahouse::rendering
         void FillStarVertices(std::span<const StarCatalogueEntry> catalogue,
                               const StarOrientation* orientation,
                               const StarVisibility* visibility,
+                              const std::uint64_t* twinkleSampleTick,
                               std::vector<Gfx::VertexPositionColor>& vertices)
         {
             vertices.clear();
             vertices.reserve(catalogue.size() * 4u);
-            for (const StarCatalogueEntry& star : catalogue)
+            for (std::size_t starIndex = 0; starIndex < catalogue.size(); ++starIndex)
             {
+                const StarCatalogueEntry& star = catalogue[starIndex];
                 const Xna::Vector3 direction =
                     orientation == nullptr ? EquatorialDirection(star.rightAscensionDeg, star.declinationDeg)
                                            : HorizonDirection(star, *orientation);
@@ -160,6 +162,10 @@ namespace cnahouse::rendering
                 {
                     appearance.alpha *=
                         star.visualMagnitude <= visibility->magnitudeCutoff ? visibility->overallAlpha : 0.0F;
+                }
+                if (twinkleSampleTick != nullptr)
+                {
+                    appearance.alpha *= StarTwinkleFactor(starIndex, direction.Y, *twinkleSampleTick);
                 }
                 const Xna::Vector3 horizontal = Scaled(right, appearance.halfSize);
                 const Xna::Vector3 vertical = Scaled(up, appearance.halfSize);
@@ -351,6 +357,32 @@ namespace cnahouse::rendering
         return result;
     }
 
+    float StarTwinkleAmplitude(float altitudeSine) noexcept
+    {
+        if (!std::isfinite(altitudeSine) || altitudeSine <= 0.0F)
+        {
+            return 0.0F;
+        }
+        return std::min(kStarMaximumTwinkleAmplitude,
+                        kStarZenithTwinkleAmplitude / std::clamp(altitudeSine, 0.0F, 1.0F));
+    }
+
+    float StarTwinkleFactor(std::size_t starIndex, float altitudeSine, std::uint64_t sampleTick) noexcept
+    {
+        std::uint32_t hash = static_cast<std::uint32_t>(starIndex) + 1u;
+        hash ^= hash >> 16u;
+        hash *= 0x7FEB352Du;
+        hash ^= hash >> 15u;
+        hash *= 0x846CA68Bu;
+        hash ^= hash >> 16u;
+        const double phase = static_cast<double>(hash & 0xFFFFu) * (2.0 * std::numbers::pi / 65536.0);
+        const double frequencyHz = 0.65 + static_cast<double>((hash >> 16u) & 0xFFFFu) * (1.10 / 65535.0);
+        const double seconds = static_cast<double>(sampleTick) * kStarTwinkleStepSeconds;
+        const float wave =
+            static_cast<float>(std::sin(2.0 * std::numbers::pi * frequencyHz * seconds + phase));
+        return 1.0F + StarTwinkleAmplitude(altitudeSine) * wave;
+    }
+
     StarAppearance AppearanceForStar(float visualMagnitude, float bvColourIndex) noexcept
     {
         const float magnitude = std::clamp(visualMagnitude, kMinimumMagnitude, kMaximumMagnitude);
@@ -370,7 +402,7 @@ namespace cnahouse::rendering
     std::vector<Gfx::VertexPositionColor> BuildStarVertices(std::span<const StarCatalogueEntry> catalogue)
     {
         std::vector<Gfx::VertexPositionColor> vertices;
-        FillStarVertices(catalogue, nullptr, nullptr, vertices);
+        FillStarVertices(catalogue, nullptr, nullptr, nullptr, vertices);
         return vertices;
     }
 
@@ -378,7 +410,7 @@ namespace cnahouse::rendering
                                                             const StarOrientation& orientation)
     {
         std::vector<Gfx::VertexPositionColor> vertices;
-        FillStarVertices(catalogue, &orientation, nullptr, vertices);
+        FillStarVertices(catalogue, &orientation, nullptr, nullptr, vertices);
         return vertices;
     }
 
@@ -427,7 +459,7 @@ namespace cnahouse::rendering
     {
         orientation_ = StarOrientationFor(environment::SimClock{});
         visibleStarCount_ = catalogue_.size();
-        FillStarVertices(catalogue_, &orientation_, &visibility_, vertices_);
+        FillStarVertices(catalogue_, &orientation_, &visibility_, &twinkleSampleTick_, vertices_);
         geometryUpdateCount_ = 1;
     }
 
@@ -457,7 +489,7 @@ namespace cnahouse::rendering
                                                             { return cutoff < star.visualMagnitude; }) -
                                            catalogue_.begin())
                 : 0u;
-        FillStarVertices(catalogue_, &orientation_, &visibility_, vertices_);
+        FillStarVertices(catalogue_, &orientation_, &visibility_, &twinkleSampleTick_, vertices_);
         ++geometryUpdateCount_;
         return true;
     }
@@ -506,20 +538,43 @@ namespace cnahouse::rendering
         return ApplyState(nextOrientation, nextVisibility);
     }
 
+    bool StarField::AdvanceTwinkle(double deltaSeconds) noexcept
+    {
+        if (!std::isfinite(deltaSeconds) || deltaSeconds <= 0.0)
+        {
+            return false;
+        }
+        twinkleAccumulatorSeconds_ += deltaSeconds;
+        const auto elapsedTicks = static_cast<std::uint64_t>(
+            std::floor((twinkleAccumulatorSeconds_ + 1.0e-12) / kStarTwinkleStepSeconds));
+        if (elapsedTicks == 0u)
+        {
+            return false;
+        }
+        twinkleAccumulatorSeconds_ -= static_cast<double>(elapsedTicks) * kStarTwinkleStepSeconds;
+        twinkleSampleTick_ += elapsedTicks;
+        FillStarVertices(catalogue_, &orientation_, &visibility_, &twinkleSampleTick_, vertices_);
+        ++geometryUpdateCount_;
+        return true;
+    }
+
     void StarField::Draw(PassContext& context)
     {
+        static_cast<void>(AdvanceTwinkle(context.deltaSeconds));
         if (counterOwner_ != &context.counters)
         {
             counterOwner_ = &context.counters;
             drawsCounter_ = context.counters.Resolve("stars.draws");
             trianglesCounter_ = context.counters.Resolve("stars.triangles");
             uploadsCounter_ = context.counters.Resolve("stars.uploads");
+            twinkleUpdatesCounter_ = context.counters.Resolve("stars.twinkle_updates");
         }
         if (!IsActive() || visibleStarCount_ == 0u)
         {
             context.counters.Set(drawsCounter_, 0);
             context.counters.Set(trianglesCounter_, 0);
             context.counters.Set(uploadsCounter_, static_cast<std::int64_t>(uploadCount_));
+            context.counters.Set(twinkleUpdatesCounter_, static_cast<std::int64_t>(twinkleSampleTick_));
             return;
         }
         if (resources_ == nullptr)
@@ -566,5 +621,6 @@ namespace cnahouse::rendering
         context.counters.Set(drawsCounter_, 1);
         context.counters.Set(trianglesCounter_, static_cast<std::int64_t>(visibleStarCount_ * 2u));
         context.counters.Set(uploadsCounter_, static_cast<std::int64_t>(uploadCount_));
+        context.counters.Set(twinkleUpdatesCounter_, static_cast<std::int64_t>(twinkleSampleTick_));
     }
 } // namespace cnahouse::rendering

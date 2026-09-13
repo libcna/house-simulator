@@ -82,6 +82,9 @@ namespace cnahouse::rendering
 
     inline constexpr double kStarCloudExponent = 1.6;
     inline constexpr double kStarMoonSuppression = 0.55;
+    inline constexpr double kStarTwinkleStepSeconds = 1.0 / 20.0;
+    inline constexpr float kStarZenithTwinkleAmplitude = 0.04F;
+    inline constexpr float kStarMaximumTwinkleAmplitude = 0.20F;
 
     /// @brief Converts a J2000 catalogue position into the unrotated equatorial unit frame.
     ///
@@ -108,6 +111,13 @@ namespace cnahouse::rendering
                                                    double cloudCover,
                                                    float brightestMagnitude,
                                                    float faintestMagnitude) noexcept;
+
+    /// @brief Section 34's bounded `1/sin(altitude)` twinkle amplitude.
+    [[nodiscard]] float StarTwinkleAmplitude(float altitudeSine) noexcept;
+
+    /// @brief Deterministic per-star sinusoid sampled at the field's 20 Hz tick.
+    [[nodiscard]] float
+    StarTwinkleFactor(std::size_t starIndex, float altitudeSine, std::uint64_t sampleTick) noexcept;
 
     /// @brief Samples §34's small B-V LUT and magnitude response.
     [[nodiscard]] StarAppearance AppearanceForStar(float visualMagnitude, float bvColourIndex) noexcept;
@@ -143,6 +153,9 @@ namespace cnahouse::rendering
                           const environment::MoonPosition& moon,
                           const environment::MoonPhase& phase,
                           double cloudCover) noexcept;
+
+        /// @brief Advances the deterministic twinkle sampler and rebuilds only on a 20 Hz boundary.
+        bool AdvanceTwinkle(double deltaSeconds) noexcept;
         void Draw(PassContext& context) override;
 
         [[nodiscard]] bool IsActive() const override
@@ -191,6 +204,11 @@ namespace cnahouse::rendering
             return geometryUpdateCount_;
         }
 
+        [[nodiscard]] std::uint64_t TwinkleSampleTick() const noexcept
+        {
+            return twinkleSampleTick_;
+        }
+
     private:
         class Resources;
 
@@ -203,11 +221,14 @@ namespace cnahouse::rendering
         StarVisibility visibility_;
         std::unique_ptr<Resources> resources_;
         std::size_t visibleStarCount_ = 0;
+        double twinkleAccumulatorSeconds_ = 0.0;
+        std::uint64_t twinkleSampleTick_ = 0;
         std::uint64_t geometryUpdateCount_ = 0;
         std::uint64_t uploadCount_ = 0;
         debug::Counters* counterOwner_ = nullptr;
         std::size_t drawsCounter_ = 0;
         std::size_t trianglesCounter_ = 0;
         std::size_t uploadsCounter_ = 0;
+        std::size_t twinkleUpdatesCounter_ = 0;
     };
 } // namespace cnahouse::rendering
