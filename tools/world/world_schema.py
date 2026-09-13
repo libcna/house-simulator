@@ -307,7 +307,7 @@ def build() -> dict[str, dict]:
              "lightmapChannel": {"type": "integer", "minimum": 0, "maximum": 1},
              "tint": RGB, "specularColor": RGB, "specularPower": NUM,
              "alphaMode": {"enum": ["opaque", "mask", "blend"]},
-             "alphaCutoff": nullable(UNIT), "twoSided": BOOL,
+             "alpha": UNIT, "alphaCutoff": nullable(UNIT), "twoSided": BOOL,
              "uvScale": {"type": "array", "items": NUM, "minItems": 2, "maxItems": 2},
              "wetResponse": obj([], {"albedoDarken": UNIT, "specularBoost": NUM,
                                      "powerBoost": NUM}),

@@ -135,7 +135,7 @@ namespace
                   "albedo": "Textures/Architecture/tile-porcelain-grey", "normal": null,
                   "lightmapChannel": 1, "tint": [1.0, 1.0, 1.0],
                   "specularPower": 48.0, "specularColor": [0.30, 0.30, 0.30],
-                  "alphaMode": "opaque", "alphaCutoff": null, "twoSided": false,
+                  "alphaMode": "opaque", "alpha": 0.75, "alphaCutoff": null, "twoSided": false,
                   "uvScale": [4.0, 4.0],
                   "wetResponse": {"albedoDarken": 0.22, "specularBoost": 2.1, "powerBoost": 2.5},
                   "snowResponse": {"coverable": true, "slopeLimitDeg": 40},
@@ -1107,6 +1107,7 @@ namespace
         EXPECT_EQ(tile.lightmapChannel, 1);
         EXPECT_FLOAT_EQ(tile.specularPower, 48.0F);
         EXPECT_EQ(tile.alphaMode, world::AlphaMode::Opaque);
+        EXPECT_FLOAT_EQ(tile.alpha, 0.75F);
         EXPECT_FALSE(tile.alphaCutoff.has_value());
         EXPECT_FLOAT_EQ(tile.uvScaleU, 4.0F);
         EXPECT_FLOAT_EQ(tile.wet.albedoDarken, 0.22F);
@@ -1226,6 +1227,7 @@ namespace
     {
         for (const std::string row :
              {R"({"id": "MAT_X", "class": "tile", "lightmapChannel": 2})",
+              R"({"id": "MAT_X", "class": "tile", "alpha": 1.1})",
               R"({"id": "MAT_X", "class": "tile", "snowResponse": {"slopeLimitDeg": 400}})"})
         {
             Write("layout.materials.json",
@@ -3517,6 +3519,55 @@ namespace
         EXPECT_LE(timing.Value().dwellMinutes, 264.0F);
         EXPECT_GE(timing.Value().transitionMinutes, 17.5F);
         EXPECT_LE(timing.Value().transitionMinutes, 37.5F);
+
+        IdRegistry::ResetForTesting();
+    }
+
+    TEST(AuthoredWorldTest, TheAuthoredMaterialsResolveTheBlockoutAndWeatherSurfaces)
+    {
+        IdRegistry::ResetForTesting();
+        const std::string directory = "content/world";
+        if (!std::filesystem::exists(directory + "/layout.materials.json"))
+        {
+            GTEST_SKIP() << "no deployed materials; run tools/world/deploy_world.py";
+        }
+
+        world::WorldData::Contents contents;
+        const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
+        ASSERT_TRUE(materials) << materials.Error().ToString();
+        EXPECT_EQ(contents.materials.size(), 20U);
+
+        const auto glassAt = std::find_if(contents.materials.begin(),
+                                          contents.materials.end(),
+                                          [](const world::Material& material)
+                                          { return material.id == Intern("MAT_GLASS_CLEAR"); });
+        ASSERT_NE(glassAt, contents.materials.end());
+        const world::Material& glass = *glassAt;
+        EXPECT_EQ(glass.materialClass, world::MaterialClass::Glass);
+        EXPECT_EQ(glass.alphaMode, world::AlphaMode::Blend);
+        EXPECT_FLOAT_EQ(glass.alpha, 0.12F) << "section 22.2's clear-glass opacity is data";
+        EXPECT_TRUE(glass.twoSided);
+
+        const auto lawnAt = std::find_if(contents.materials.begin(),
+                                         contents.materials.end(),
+                                         [](const world::Material& material)
+                                         { return material.id == Intern("MAT_GROUND_LAWN"); });
+        ASSERT_NE(lawnAt, contents.materials.end());
+        const world::Material& lawn = *lawnAt;
+        EXPECT_TRUE(lawn.snow.coverable);
+        EXPECT_FLOAT_EQ(lawn.snow.slopeLimitDeg, 40.0F);
+        EXPECT_EQ(lawn.effectTierS, world::EffectTier::DualTexture);
+
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::Material& material) { return material.snow.coverable; }),
+                  11);
+        for (const world::Material& material : contents.materials)
+        {
+            EXPECT_GT(material.specularPower, 0.0F);
+            EXPECT_FALSE(material.footstepSurface.empty());
+            EXPECT_FALSE(material.effectTierE.empty());
+        }
 
         IdRegistry::ResetForTesting();
     }

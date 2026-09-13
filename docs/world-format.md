@@ -407,6 +407,7 @@ systems read as well as the visual ones.
       "tint": [1.00, 1.00, 1.00],
       "specularPower": 48.0, "specularColor": [0.30, 0.30, 0.30],
       "alphaMode": "opaque",             // opaque | mask | blend
+      "alpha": 1.0,                       // stock-effect opacity, 0..1
       "alphaCutoff": null,
       "twoSided": false,
       "uvScale": [4.0, 4.0],

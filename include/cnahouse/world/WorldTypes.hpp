@@ -617,6 +617,7 @@ namespace cnahouse::world
         Microsoft::Xna::Framework::Vector3 specularColor;
         float specularPower = 0.0F;
         AlphaMode alphaMode = AlphaMode::Opaque;
+        float alpha = 1.0F;
         std::optional<float> alphaCutoff;
         bool twoSided = false;
         float uvScaleU = 1.0F;

@@ -862,6 +862,19 @@ namespace cnahouse::world
             }
             material.alphaMode = mode.Value();
 
+            const Result<float> alpha = row.OptionalFloat("alpha", 1.0F);
+            if (!alpha)
+            {
+                return alpha.Error().WithContext("layout.materials.json");
+            }
+            if (alpha.Value() < 0.0F || alpha.Value() > 1.0F)
+            {
+                return Err(ErrorCode::OutOfRange,
+                           "alpha is a unit value; this is " + std::to_string(alpha.Value()),
+                           "layout.materials.json/" + row.Path() + "/alpha");
+            }
+            material.alpha = alpha.Value();
+
             if (row.Has("alphaCutoff") && !row.IsNull("alphaCutoff"))
             {
                 const Result<float> cutoff = row.RequireFloat("alphaCutoff");

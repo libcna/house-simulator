@@ -2468,6 +2468,7 @@ can do.
   "twoSided": false,
   "specularColor": [0.18, 0.16, 0.13],
   "specularPower": 24,
+  "alpha": 1.0,
   "uvScale": [1.0, 1.0],
   "wetResponse":  { "albedoDarken": 0.28, "specularBoost": 2.4, "powerBoost": 3.0 },
   "snowResponse": { "coverable": true, "slopeLimitDeg": 40 },

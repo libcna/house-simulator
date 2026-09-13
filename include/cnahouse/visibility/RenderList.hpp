@@ -39,12 +39,12 @@ namespace cnahouse::visibility
     /// transparent pass is *"glass, water, curtains, particles"*, and what decides it is the
     /// material's `alphaMode` (§22.1) -- which `chunks.bin` does not carry: `docs/chunk-format.md`
     /// §5 collapses §17.4's four-part key to the material id precisely because `alphaMode` is a
-    /// field of the material, and the runtime's material table is `HOUSE-00385`, which has not been
-    /// authored. A `blend` material's chunks are `basic` today and are drawn opaque, which is what
-    /// the blockout's `BLOCKOUT_glass` is. Transparent items therefore arrive through `Add`, and
-    /// this function will gain its third answer when `layout.materials.json` exists -- guessing one
-    /// from a material NAME here would be a second opinion about a decision the data is going to
-    /// state.
+    /// field of the material. `HOUSE-00385` authored that table, but a chunk render item does not
+    /// yet carry the resolved record; `HOUSE-00891` adds the runtime registry and `HOUSE-00898`
+    /// consumes its blend mode. A `blend` material's chunks are therefore `basic` today and are
+    /// drawn opaque, which is what the blockout's `BLOCKOUT_glass` is. Transparent items arrive
+    /// through `Add` until then; guessing from a material NAME here would be a second opinion about
+    /// a decision the data already states.
     [[nodiscard]] constexpr rendering::Pass PassForLayout(world::ChunkLayout layout) noexcept
     {
         // `alphatest` is the one alpha mode the format does carry, because it is a different vertex

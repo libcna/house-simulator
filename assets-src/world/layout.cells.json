@@ -4,16 +4,18 @@
   //
   // Complete: every level and every exterior region (`HOUSE-00367`…`HOUSE-00372`).
   //
-  // Four fields are deliberately left unset on every row and each is a forward reference, not an
-  // omission. Filling them here would make this file the source of truth for a table another task
-  // owns, and `validate_world.py` rule 6 cannot check any of them until that table exists:
+  // The remaining unset fields are forward references, not omissions. Filling them here would
+  // make this file the source of truth for a table another task owns:
   //
-  //   floorMaterial / wallMaterial / ceilingMaterial   HOUSE-00385 authors §22.2's material table
-  //   lightGroups                                      HOUSE-00381..HOUSE-00384 author the lights
-  //   daylight.windowIds                               HOUSE-00374..HOUSE-00379 author the portals
-  //   acoustic.roomTone                                HOUSE-00397 authors the ambience beds
+  //   floorMaterial / wallMaterial / ceilingMaterial   HOUSE-00908 authors the room palettes
+  //   daylight.windowIds                               a later daylight-window assignment
   //
-  // `footstepSurface`, `acoustic.absorption`, `thermal` and `residencyPack` ARE authored: they are
+  // `HOUSE-00385` assigns `floorMaterial` now wherever the snow-shell build sees a floor: every
+  // exterior cell and every interior cell with `visibilityHint: open`. The latter deliberately
+  // use a non-coverable material, proving that an open stair is not an outdoor snow surface. The
+  // complete room-by-room wall, ceiling and floor palette remains `HOUSE-00908`'s work.
+  //
+  // `footstepSurface`, `acoustic`, `lightGroups`, `thermal` and `residencyPack` ARE authored: they are
   // properties of the room as experienced (§22.3) and nothing else declares them.
   "schema": "cna-house/cells/1",
 
@@ -237,6 +239,7 @@
       // the flight passes through the slab.
       "yOverride": [0.60, 3.65],
       "footstepSurface": "stair_wood_open",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.18, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_CENTRE" },
       "daylight": { "orientation": "E", "exposure": 0.28 },
@@ -450,6 +453,7 @@
       // the front door one 30 mm threshold above the deck (`HOUSE-00379`).
       "yOverride": [0.57, 3.35],
       "footstepSurface": "hardwood",
+      "floorMaterial": "MAT_DECK_WOOD",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.55, "reverbHint": "outdoor_sheltered" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 0.70 },
@@ -469,6 +473,7 @@
       // The window seat is the cat's favourite perch (§61): `layout.nav.json` will put a
       // `perch` marker here reserved to the cat.
       "footstepSurface": "hardwood",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.24, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_CENTRE" },
       "daylight": { "orientation": "N", "exposure": 0.42 },
@@ -481,6 +486,7 @@
       // Continues to L2, so it pierces this level's ceiling as well as its floor.
       "yOverride": [3.65, 6.55],
       "footstepSurface": "stair_wood_open",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.18, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_CENTRE" },
       "daylight": { "orientation": "E", "exposure": 0.26 },
@@ -673,6 +679,7 @@
       // rain reaches it (`build_coverage.py`); the 1.10 m railing is §12.3's.
       "yOverride": [3.65, 9.00],
       "footstepSurface": "bluestone",
+      "floorMaterial": "MAT_BLUESTONE_PAVER",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.80, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
@@ -686,6 +693,7 @@
       // The porch roof, and the porch's ceiling. Two chairs and a small table.
       "yOverride": [3.65, 9.00],
       "footstepSurface": "hardwood",
+      "floorMaterial": "MAT_DECK_WOOD",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.78, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 1.00 },
@@ -706,6 +714,7 @@
       "id": "L2_LANDING", "level": "L2", "name": "Stair Landing", "kind": "room",
       "boxes": [{ "x": [-2.20, 2.20], "z": [-18.30, -14.30] }],
       "footstepSurface": "hardwood",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.26, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
       "daylight": { "orientation": "N", "exposure": 0.44 },
@@ -717,6 +726,7 @@
       "boxes": [{ "x": [2.20, 4.90], "z": [-20.20, -14.30] }],
       // The main flight ends here; the attic is reached by its own stair.
       "footstepSurface": "stair_wood_open",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.20, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
       "daylight": { "orientation": "E", "exposure": 0.24 },
@@ -885,6 +895,7 @@
       // the sky, hence the extent to +9.00 and no ceiling of its own.
       "yOverride": [6.55, 9.00],
       "footstepSurface": "metal",
+      "floorMaterial": "MAT_METAL_BALCONY",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.85, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 1.00 },
@@ -1020,6 +1031,7 @@
       "boxes": [{ "x": [-22.5, 22.5], "z": [0.0, 13.4] }],
       "yOverride": [0.0, 20.0],
       "footstepSurface": "asphalt",
+      "floorMaterial": "MAT_ASPHALT_01",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.90, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
@@ -1031,6 +1043,7 @@
       "boxes": [{ "x": [-1.0, 1.0], "z": [-11.6, 0.0] }],
       "yOverride": [0.0, 20.0],
       "footstepSurface": "bluestone",
+      "floorMaterial": "MAT_BLUESTONE_PAVER",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.90, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
@@ -1050,6 +1063,7 @@
       // east side yard does not, because the garage is there and it has no basement.
       "yOverride": [-0.90, 20.0],
       "footstepSurface": "grass",
+      "floorMaterial": "MAT_GROUND_LAWN",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.92, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
@@ -1067,6 +1081,7 @@
       // east side yard does not, because the garage is there and it has no basement.
       "yOverride": [-0.90, 20.0],
       "footstepSurface": "grass",
+      "floorMaterial": "MAT_GROUND_LAWN",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.92, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },
@@ -1079,6 +1094,7 @@
       "boxes": [{ "x": [9.3, 17.1], "z": [-13.3, 0.0] }],
       "yOverride": [0.0, 20.0],
       "footstepSurface": "asphalt",
+      "floorMaterial": "MAT_ASPHALT_01",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.88, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "SE", "exposure": 1.00 },
@@ -1099,6 +1115,7 @@
       // east side yard does not, because the garage is there and it has no basement.
       "yOverride": [-0.90, 20.0],
       "footstepSurface": "grass",
+      "floorMaterial": "MAT_GROUND_LAWN",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.92, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "W", "exposure": 0.92 },
@@ -1115,6 +1132,7 @@
                 { "x": [17.1, 22.5], "z": [-21.7, -14.0] }],
       "yOverride": [0.0, 20.0],
       "footstepSurface": "grass",
+      "floorMaterial": "MAT_GROUND_LAWN",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.92, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "E", "exposure": 0.92 },
@@ -1131,6 +1149,7 @@
       // `STEPS_TERRACE_LAWN` is how you get onto it (`HOUSE-00379`).
       "yOverride": [0.45, 20.0],
       "footstepSurface": "bluestone",
+      "floorMaterial": "MAT_BLUESTONE_PAVER",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.86, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 0.96 },
@@ -1159,6 +1178,7 @@
       // east side yard does not, because the garage is there and it has no basement.
       "yOverride": [-0.90, 20.0],
       "footstepSurface": "grass",
+      "floorMaterial": "MAT_GROUND_LAWN",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.93, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 1.00 },
@@ -1173,6 +1193,7 @@
                 { "x": [-19.8, -13.0], "z": [-44.0, -43.8] }],
       "yOverride": [0.0, 20.0],
       "footstepSurface": "soil",
+      "floorMaterial": "MAT_SOIL_GARDEN",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.94, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 1.00 },
@@ -1186,6 +1207,7 @@
       "boxes": [{ "x": [-19.8, -16.6], "z": [-43.8, -40.6] }],
       "yOverride": [0.0, 2.35],
       "footstepSurface": "hardwood",
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.30, "reverbHint": "tiny_hard" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "E", "exposure": 0.18 },
@@ -1199,6 +1221,7 @@
       "boxes": [{ "x": [12.0, 17.1], "z": [-46.0, -38.0] }],
       "yOverride": [0.0, 20.0],
       "footstepSurface": "grass",
+      "floorMaterial": "MAT_GROUND_LAWN",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.95, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 0.94 },
@@ -1211,6 +1234,7 @@
       "boxes": [{ "x": [-22.5, 22.5], "z": [-52.0, -48.0] }],
       "yOverride": [0.0, 20.0],
       "footstepSurface": "grass",
+      "floorMaterial": "MAT_GROUND_LAWN",
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.95, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "N", "exposure": 1.00 },
@@ -1228,6 +1252,7 @@
                 { "x": [22.5, 200.0], "z": [-52.0, 13.4] }],
       "yOverride": [-5.0, 60.0],
       "footstepSurface": "grass",
+      "floorMaterial": "MAT_GROUND_LAWN",
       "acoustic": { "absorption": 0.96, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "S", "exposure": 1.00 },

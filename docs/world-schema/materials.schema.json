@@ -94,6 +94,9 @@
               }
             ]
           },
+          "alpha": {
+            "$ref": "#/$defs/unit"
+          },
           "alphaCutoff": {
             "anyOf": [
               {

@@ -30,13 +30,14 @@ namespace
             GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
         }
 
-        // Loaded file by file rather than through `Load`, which requires all sixteen: materials
-        // and props are `HOUSE-00385` and later, and waiting for them would mean the C++ rules
-        // check nothing until then. Every file that exists is read.
+        // Loaded file by file rather than through `Load`, which requires all sixteen: props are
+        // later work, and waiting for them would mean the C++ rules check nothing until then.
+        // Every file that exists is read, in dependency order.
         world::WorldData::Contents contents;
         using Loader = cnahouse::util::Result<void> (*)(std::string_view, world::WorldData::Contents&);
         for (const auto& [file, load] : std::initializer_list<std::pair<const char*, Loader>>{
                  {"layout.levels.json", &world::WorldLoader::LoadLevels},
+                 {"layout.materials.json", &world::WorldLoader::LoadMaterials},
                  {"layout.cells.json", &world::WorldLoader::LoadCells},
                  {"layout.portals.json", &world::WorldLoader::LoadPortals},
                  {"layout.openings.json", &world::WorldLoader::LoadOpenings},

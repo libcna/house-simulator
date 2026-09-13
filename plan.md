@@ -6241,8 +6241,35 @@ loads it in under 250 ms; `report_graph.py` produces the adjacency tables of `cn
             behaviour classes; these are the light switches and the file grows.
       note: `AuthoredWorldTest` asserts the 80 plates, the 121 gangs, that every gang names a real
             group, and that exactly two groups are on two plates each.
-- [ ] HOUSE-00385 — Author `layout.materials.json`: the material class table of §22.2 with all fields
+- [x] HOUSE-00385 — Author `layout.materials.json`: the material class table of §22.2 with all fields
       dep: HOUSE-00296 · sys: world · plat: TOOL · pri: MUST
+      finding: **§22.2's clear-glass opacity was impossible to author.** The class table requires
+            `Alpha ≈ 0.12`, and the stock XNA effects expose it, but §22.1, the JSON schema and
+            `world::Material` carried only `alphaMode` and `alphaCutoff`. Added the smallest missing
+            datum, unit-range `alpha` with an opaque-compatible default of 1.0, to the architecture,
+            prose format, generated schema, C++ loader and range tests. `MAT_GLASS_CLEAR` now states
+            0.12 and obscured glass 0.32; the future binder does not have to guess by material name.
+      note: 20 complete §22.1 records resolve every material already named by openings and exterior
+            data, plus the four floor identities the snow-shell source needs: outdoor deck wood,
+            balcony metal, garden soil and indoor oak. Every row carries every field and both nested
+            weather records; all albedo/normal content names resolve against the asset manifest.
+            Initial specular colour/power values are the fixed `pbr_to_stock.py` mapping of measured
+            mean albedo, roughness and metalness from `HOUSE-00296`'s acquired maps. The interactive
+            three-light preview and tuning of the full 34-set library remains `HOUSE-00900`.
+      note: the 23 cells whose floors `build_snowshell.py` examines now state a material. Interior
+            open stairs and landings, and the roofed shed, use non-coverable oak; eleven outdoor
+            materials are coverable. The build therefore rejects 12 indoor faces by authored
+            response rather than confusing `visibilityHint: open` with exposure to weather.
+      verified: generated schema, id-golden list, deploy and all 13 world rules are green; the C++
+            loader reads all 20 records and their glass alpha; the four-core build succeeds. The
+            complete world content DAG is 16/16 fresh after rebuilding 14 stages (navigation
+            856.41 s), and the formerly blocked snow-shell stage emits 17 groups from 74 accepted
+            faces, rejecting 12 non-coverable faces. Regenerating the 99-cell architectural shell
+            changed no geometry byte; only its world-input hash changed, as the manifest records.
+            Across the complete suite, 1,544 executed tests are green; four reference-only
+            captures are skipped and eight regeneration cases disabled as configured. Strict XNA
+            recompilation is clean across 317 translation units; every compile used at most four
+            jobs/cores.
 - [x] HOUSE-00422 — `deploy_world.py` reports another tool's dotfile in `content/world/` as a world file to delete
       dep: HOUSE-00421 · sys: ci · plat: CI · pri: MUST
       verify: `tools/world/deploy_world.py --selftest`
