@@ -37,6 +37,27 @@ namespace cnahouse::environment
     /// @brief The moon at the compressed civil instant and location held by @p clock.
     [[nodiscard]] MoonPosition MoonPositionFor(const SimClock& clock) noexcept;
 
+    /// @brief §33.2's continuous lunar phase and the quantities from which it is built.
+    struct MoonPhase
+    {
+        /// @brief Angle between geocentric sun and moon directions, `[0, 180]` degrees.
+        double elongationDeg = 0.0;
+        /// @brief Fraction of the apparent lunar disc illuminated, `[0, 1]`.
+        double illuminatedFraction = 0.0;
+        bool waxing = true;
+        /// @brief Continuous lunation position, `[0, 1)`: zero new, 0.5 full.
+        double phase = 0.0;
+    };
+
+    /// @brief Compute §33.2's phase from already-evaluated geocentric positions.
+    [[nodiscard]] MoonPhase MoonPhaseFromPositions(const MoonPosition& moon, const SunPosition& sun) noexcept;
+
+    /// @brief Compute the moon and sun at one J2000 instant, then derive their phase relation.
+    [[nodiscard]] MoonPhase MoonPhaseAt(double daysSinceJ2000, const SunObserver& observer) noexcept;
+
+    /// @brief §33.2's phase at the compressed civil instant held by @p clock.
+    [[nodiscard]] MoonPhase MoonPhaseFor(const SimClock& clock) noexcept;
+
     struct MoonEvent
     {
         bool occurs = false;

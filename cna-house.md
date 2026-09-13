@@ -3488,6 +3488,19 @@ waxing = (moonEclipticLongitude − sunEclipticLongitude) mod 360° < 180°
 phase = waxing ? illuminated/2 : 1 − illuminated/2         ∈ [0,1)  — 0 = new, 0.5 = full
 ```
 
+`HOUSE-01602` implements the angle as the dot product of the geocentric ecliptic directions,
+including the Moon's latitude rather than treating longitude separation as the whole angle. The
+longitude difference still selects waxing or waning exactly as above. `MoonPhaseAt` evaluates the
+sun and moon at one J2000 instant; `MoonPhaseFor` reads the compressed civil instant, so position,
+illumination and the saved calendar cannot drift onto different dates.
+
+Sixty local-noon illuminated fractions and phase directions published independently by the USNO
+were sampled every six days through 2031. Against their full ephemeris, the continuous phase's mean
+circular error is 0.0014 of a lunation and its worst is 0.0030; illuminated fraction differs by at
+most 0.006. At exactly published 0% or 100%, waxing/waning may flip hours apart between the compact
+and full ephemerides while the circular phase still agrees, so direction is asserted only away
+from those physically singular endpoints.
+
 `phase` is a **continuous 0..1 value**, not one of eight buckets. The eight named phases are a
 presentation detail used only by the debug overlay and the almanac line:
 

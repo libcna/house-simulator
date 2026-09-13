@@ -162,6 +162,59 @@ namespace cnahouse::environment
             DaysSinceJ2000ForEpochSeconds(clock.CivilEpochSeconds(), clock.utcOffsetMinutes), observer);
     }
 
+    MoonPhase MoonPhaseFromPositions(const MoonPosition& moon, const SunPosition& sun) noexcept
+    {
+        MoonPhase result;
+        if (!std::isfinite(moon.eclipticLongitudeDeg) || !std::isfinite(moon.eclipticLatitudeDeg) ||
+            !std::isfinite(sun.eclipticLongitudeDeg))
+        {
+            return result;
+        }
+
+        const double longitudeDifferenceDeg = Wrap360(moon.eclipticLongitudeDeg - sun.eclipticLongitudeDeg);
+        const double longitudeDifferenceRad = longitudeDifferenceDeg * kDegToRad;
+        const double latitudeRad = moon.eclipticLatitudeDeg * kDegToRad;
+        // The sun's geocentric ecliptic latitude is zero in §32.1. Keeping the moon's latitude in
+        // the dot product makes this the actual angle between directions, not merely a longitude
+        // subtraction that is wrong by the orbital inclination near the nodes.
+        const double cosElongation = std::cos(latitudeRad) * std::cos(longitudeDifferenceRad);
+        const double clampedCosElongation =
+            cosElongation > 1.0 ? 1.0 : (cosElongation < -1.0 ? -1.0 : cosElongation);
+        const double elongationRad = std::acos(clampedCosElongation);
+        const double illuminated = 0.5 * (1.0 - clampedCosElongation);
+        const bool waxing = longitudeDifferenceDeg < 180.0;
+
+        result.elongationDeg = elongationRad * kRadToDeg;
+        result.illuminatedFraction = illuminated;
+        result.waxing = waxing;
+        result.phase = waxing ? illuminated * 0.5 : 1.0 - illuminated * 0.5;
+        // Exact equality is only reachable at an artificial, exactly coincident input. Preserve
+        // the public `[0,1)` contract even there.
+        if (result.phase >= 1.0)
+        {
+            result.phase = 0.0;
+        }
+        return result;
+    }
+
+    MoonPhase MoonPhaseAt(double daysSinceJ2000, const SunObserver& observer) noexcept
+    {
+        if (!std::isfinite(daysSinceJ2000) || !std::isfinite(observer.latitudeDeg) ||
+            !std::isfinite(observer.longitudeDeg))
+        {
+            return MoonPhase{};
+        }
+        return MoonPhaseFromPositions(MoonPositionAt(daysSinceJ2000, observer),
+                                      SunPositionAt(daysSinceJ2000, observer));
+    }
+
+    MoonPhase MoonPhaseFor(const SimClock& clock) noexcept
+    {
+        const SunObserver observer{clock.latitudeDeg, clock.longitudeDeg, clock.utcOffsetMinutes};
+        return MoonPhaseAt(DaysSinceJ2000ForEpochSeconds(clock.CivilEpochSeconds(), clock.utcOffsetMinutes),
+                           observer);
+    }
+
     MoonDay
     MoonDayFor(const CivilTime& localStandardDate, const SunObserver& observer, double thresholdDeg) noexcept
     {

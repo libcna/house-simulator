@@ -203,6 +203,10 @@ run_gate "suntimes-selftest" python3 tools/ci/suntimes_table.py --selftest
 # US Naval Observatory. The responses are cached so these two gates remain entirely offline.
 run_gate "moontimes-table" python3 tools/ci/moontimes_table.py --check
 run_gate "moontimes-selftest" python3 tools/ci/moontimes_table.py --selftest
+# `HOUSE-01602`. The phase calculation is compared with 60 USNO-published noon illumination and
+# waxing/waning observations, retained beside the rise-time fixture but regenerated independently.
+run_gate "moonphases-table" python3 tools/ci/moonphases_table.py --check
+run_gate "moonphases-selftest" python3 tools/ci/moonphases_table.py --selftest
 # `HOUSE-01641`. The 32 committed gradient rows are generated from eleven art-direction anchors;
 # the selftest expands the compact cloud and azimuth terms into the conceptual 32 x 8 x 16 table.
 # Both matter: `--check` catches a hand edit and `--selftest` catches a plausible but broken model.
