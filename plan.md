@@ -5040,9 +5040,34 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             gate triggers its existing hand-animation fallback. `HOUSE-02219` will author the 18
             player clips directly on the final 32-bone game rig; `HOUSE-02131` therefore does not
             inherit a temporary 31-bone CMU skeleton.
-- [ ] HOUSE-00296 — Grouped: acquire the base material set from ambientCG/Poly Haven — 34 PBR materials (paint ×6, wood ×6, tile ×4, carpet ×3, stone ×3, brick, plaster, concrete, asphalt, gravel, grass, soil, fabric ×3, metal ×2)
+- [x] HOUSE-00296 — Grouped: acquire the base material set from ambientCG/Poly Haven — 34 PBR materials (paint ×6, wood ×6, tile ×4, carpet ×3, stone ×3, brick, plaster, concrete, asphalt, gravel, grass, soil, fabric ×3, metal ×2)
       dep: HOUSE-00262, HOUSE-00263 · sys: content · plat: TOOL · pri: MUST
       accept: each manifested, resized to budget, converted, and previewed on a test sphere and a test floor
+      verify: `ambientcg_materials.py --selftest/--check`, `material_preview.py --check`, manifest
+            and packaging-licence gates, real CNA content build, measured `core` pack report,
+            complete unit suite and `tools/ci/run_checks.sh`; all compilation limited to 4 jobs
+      note: (2026-09-13) 34 fixed ambientCG 1K-JPG archives provide exactly paint 6, wood 6,
+            tile 4, carpet 3, stone 3, brick/plaster/concrete/asphalt/gravel/grass/soil 1 each,
+            fabric 3 and metal 2. Every archive is SHA-256 pinned and every output has its own
+            CC0 manifest row. The deterministic converter retains source aspect ratio and writes
+            matched albedo (sRGB), OpenGL normal (linear) and packed ORM (linear R=AO,
+            G=roughness, B=metalness) at a maximum 256-pixel power-of-two edge. Exact selection,
+            provenance and measurements are in `docs/asset-selection/base-material-set.md` and
+            `assets-src/Textures/Materials/SOURCE.md`.
+      finding: a first real build with all 102 maps packaged measured `core` at **58.4 MB / 55 MB**.
+            Section 22.1 has runtime slots for albedo and normal but no ORM texture: HOUSE-00900
+            converts its roughness/metalness into stock-XNA `specularColor`/`specularPower`.
+            Therefore all 34 ORM maps remain hash-manifested authoring inputs but are explicitly
+            not packaged. The 68 runtime maps have pre-generated mips and the complete core pack
+            measures **47.23 MB (85.9%)**, leaving 7.77 MB. Shrinking useful colour/normal detail
+            merely to ship unused ORM data was rejected.
+      measured: 102 retained PNGs, 90 at 256×256 and 12 at 256×128, 9,489,783 source bytes;
+            68 runtime maps compile to 22,422,896 bytes including mip chains. All 34 materials
+            passed individual 640×400 Eevee PBR renders on the same test sphere and tiled floor.
+            Visual review replaced the initial dark `Metal063` candidate with brushed-steel
+            `Metal009`; chrome `Metal049A` is retained for §22.2's tap/handle path. The complete
+            unit suite passed **1382 / 1382**; strict XNA passed **317 translation units** and the
+            complete gate script finished green, with compilation constrained to four jobs/cores.
 - [ ] HOUSE-00297 — Grouped: acquire the vegetation set — 6 tree species × 3 ages, 9 shrubs, 5 flowers, 2 grass card sets
       dep: HOUSE-00262 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00298 — Set up `docs/asset-review/` sign-offs for the four hero assets

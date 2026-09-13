@@ -4,38 +4,890 @@
   "assets": {
     "Fallback/grey.png": {
       "parameters": {
-        "generateMipmaps": { "type": "bool", "value": false },
-        "premultiplyAlpha": { "type": "bool", "value": true }
+        "generateMipmaps": {
+          "type": "bool",
+          "value": false
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": true
+        }
       }
     },
     "Fallback/missing.png": {
       "parameters": {
-        "generateMipmaps": { "type": "bool", "value": false },
-        "premultiplyAlpha": { "type": "bool", "value": true }
+        "generateMipmaps": {
+          "type": "bool",
+          "value": false
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": true
+        }
+      }
+    },
+    "Materials/asphalt_road_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/asphalt_road_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/brick_red_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/brick_red_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/carpet_beige_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/carpet_beige_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/carpet_brown_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/carpet_brown_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/carpet_grey_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/carpet_grey_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/concrete_smooth_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/concrete_smooth_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/fabric_coarse_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/fabric_coarse_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/fabric_plain_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/fabric_plain_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/fabric_weave_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/fabric_weave_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/grass_lawn_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/grass_lawn_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/gravel_mixed_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/gravel_mixed_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/metal_brushed_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/metal_brushed_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/metal_chrome_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/metal_chrome_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_aged_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_aged_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_cool_rough_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_cool_rough_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_cream_rough_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_cream_rough_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_grey_fine_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_grey_fine_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_warm_fine_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_warm_fine_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_white_fine_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/paint_white_fine_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/plaster_natural_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/plaster_natural_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/soil_garden_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/soil_garden_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/stone_marble_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/stone_marble_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/stone_onyx_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/stone_onyx_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/stone_rough_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/stone_rough_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/tile_dark_square_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/tile_dark_square_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/tile_grey_square_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/tile_grey_square_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/tile_light_square_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/tile_light_square_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/tile_warm_square_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/tile_warm_square_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_board_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_board_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_dark_floor_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_dark_floor_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_light_floor_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_light_floor_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_oak_floor_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_oak_floor_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_parquet_floor_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_parquet_floor_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_worn_floor_albedo.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
+      }
+    },
+    "Materials/wood_worn_floor_normal.png": {
+      "parameters": {
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": false
+        }
       }
     },
     "Sky/cloud_cirrus.png": {
       "parameters": {
-        "generateMipmaps": { "type": "bool", "value": true },
-        "premultiplyAlpha": { "type": "bool", "value": true }
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": true
+        }
       }
     },
     "Sky/cloud_cumulus.png": {
       "parameters": {
-        "generateMipmaps": { "type": "bool", "value": true },
-        "premultiplyAlpha": { "type": "bool", "value": true }
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": true
+        }
       }
     },
     "Sky/cloud_stratus.png": {
       "parameters": {
-        "generateMipmaps": { "type": "bool", "value": true },
-        "premultiplyAlpha": { "type": "bool", "value": true }
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": true
+        }
       }
     },
     "Sky/moon_albedo.png": {
       "parameters": {
-        "generateMipmaps": { "type": "bool", "value": true },
-        "premultiplyAlpha": { "type": "bool", "value": true }
+        "generateMipmaps": {
+          "type": "bool",
+          "value": true
+        },
+        "premultiplyAlpha": {
+          "type": "bool",
+          "value": true
+        }
       }
     }
   }

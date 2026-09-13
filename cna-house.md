@@ -2180,6 +2180,15 @@ Daylight atlases add the same again. See §72.
 | **Google Fonts / SIL OFL fonts** | OFL | HUD fonts |
 | **Blender's own bundled assets** | CC0 | Occasional |
 
+`HOUSE-00296` verified ambientCG and retained its fixed 34-material base set. Each upstream
+1K-JPG archive is SHA-256 pinned; the prepared sources are albedo, OpenGL normal and packed ORM at
+a power-of-two size with a maximum 256-pixel edge. Albedo and normal are runtime `core` textures.
+ORM remains manifested offline input for §22.1's `pbr_to_stock.py` scalar mapping because the
+application-owned runtime record has no ORM texture slot. The real uncompressed-CNB build measures
+the complete `core` pack at **47.23 MB / 55 MB**; packaging ORM as an unused runtime texture would
+instead make it 58.4 MB and is rejected. Selection, hashes, measurements and 34 sphere-and-floor
+renders are in `docs/asset-selection/base-material-set.md`.
+
 ### 19.3 Quality bar and rejection criteria
 
 An asset is rejected if any of these is true:

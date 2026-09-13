@@ -120,6 +120,12 @@ run_gate "effects-baseline" tools/effects/build_effects.sh --check
 run_gate "manifest"   python3 tools/ci/check_manifest.py
 # And the credits document cannot drift from the manifest it is generated from (`HOUSE-00198`).
 run_gate "licences"   python3 tools/assets/verify_licences.py --check
+# `HOUSE-00296`. The 34 fixed ambientCG selections are three-map sets, not an unstructured pile of
+# PNGs: exact category counts, equal channel dimensions, opaque RGBA data and the retained
+# sphere-and-floor review all remain executable acceptance criteria.
+run_gate "base-materials-selftest" python3 tools/assets/ambientcg_materials.py --selftest
+run_gate "base-materials" python3 tools/assets/ambientcg_materials.py --check
+run_gate "base-material-previews" python3 tools/blender/material_preview.py --check
 # `HOUSE-00203`. The committed report is generated from the manifest ALONE, so this gate needs no
 # build tree and gives the same answer everywhere. Its compiled column is empty by design; pass
 # --content/--effects by hand for the numbers the pack budgets are written against.
