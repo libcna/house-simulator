@@ -5020,8 +5020,26 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             `HOUSE-02131`; deformation is explicitly evaluated by `HOUSE-00295`/`HOUSE-02131`.
             Evidence, candidate counts and sign-off are in
             `docs/asset-selection/human-base-mesh-research.md`.
-- [ ] HOUSE-00295 — **Hero asset research: locomotion clips.** Retarget 6 CMU clips onto the base rig and evaluate quality (R-05)
+- [x] HOUSE-00295 — **Hero asset research: locomotion clips.** Retarget 6 CMU clips onto the base rig and evaluate quality (R-05)
       dep: HOUSE-00270, HOUSE-00294 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-13) `docs/asset-selection/human-locomotion-research.md`. The fixed subject-91
+            trials 02/10/17/22/29/31 were fetched individually, SHA-256 pinned in both original
+            AMC and Bruce Hahn MotionBuilder-BVH form, retargeted onto the selected female body's
+            31-bone MPFB `cmu_mb` research rig, and sampled as centred 4-second/30 Hz windows. Raw
+            CMU data remains outside the repository. The reproducible Blender tool and seven
+            four-view sheets record the experiment; the clean bind-pose sheet isolates animation
+            from the already-approved mesh and four-weight skin preparation.
+      finding: **all six retargets fail the quality bar.** Even after correcting the BVH's Y-up
+            axis, object-space conversion, prepended T-pose calibration and horizontal root
+            removal, the animated skin tears at shoulders, pelvis, hands and feet. Direct Euler
+            transfer and source-roll substitution fail more severely. This is systemic rig/bind
+            incompatibility, not a poor choice of walk speed, and loop cleanup or toe smoothing
+            cannot repair it. The rejected temporary GLB is not committed and no `.chanim` is
+            extracted from knowingly bad animation.
+      decision: R-05's *licence* concern is retired by `HOUSE-00270`, but this independent quality
+            gate triggers its existing hand-animation fallback. `HOUSE-02219` will author the 18
+            player clips directly on the final 32-bone game rig; `HOUSE-02131` therefore does not
+            inherit a temporary 31-bone CMU skeleton.
 - [ ] HOUSE-00296 — Grouped: acquire the base material set from ambientCG/Poly Haven — 34 PBR materials (paint ×6, wood ×6, tile ×4, carpet ×3, stone ×3, brick, plaster, concrete, asphalt, gravel, grass, soil, fabric ×3, metal ×2)
       dep: HOUSE-00262, HOUSE-00263 · sys: content · plat: TOOL · pri: MUST
       accept: each manifested, resized to budget, converted, and previewed on a test sphere and a test floor

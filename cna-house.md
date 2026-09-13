@@ -2414,7 +2414,10 @@ manifest row with `origin.kind = "generated"` recording the generator, its versi
    the count on the GPU — `docs/skinnedeffect-support.md` Task 895).
 3. Clothing and hair are separate meshes bound to the same rig, exported as separate `.glb`
    files sharing the skeleton, so customisation is a matter of which meshes are drawn.
-4. Locomotion clips are retargeted from CMU mocap, cleaned, loop-trimmed and exported.
+4. **Updated by `HOUSE-00295`:** six fixed CMU subject-91 walk trials were retargeted onto the
+   31-bone MPFB research rig and all failed the deformation bar at the rig/bind boundary. The raw
+   data and rejected GLB are not shipped. `HOUSE-02219` authors the 18 clips directly on the final
+   32-bone game rig instead; its cleanup, loop and gait bars are unchanged.
 5. One `.glb` per (body, clip-set); a second per clothing piece; a third per hair piece.
 6. `cna-content` produces a `Model` per file; `tools/assets/anim_extract.py` produces one
    `.chanim` sidecar carrying the body's skeleton and clip set (§47.0). The game verifies at load
@@ -4465,8 +4468,10 @@ never called, and the CI gate makes calling it impossible (§70.1).
 | `land_soft`, `land_hard` | 0.4 / 0.8 s | no | |
 
 **18 clips per sex** (the two sexes share clips where the skeleton allows; separate clips only for
-`idle`, `walk_fwd` and `fastwalk_fwd`, where gait differences are visible). Sourced from CMU
-mocap, retargeted and cleaned in Blender, exported in the body `.glb`.
+`idle`, `walk_fwd` and `fastwalk_fwd`, where gait differences are visible). `HOUSE-00295` rejected
+the CMU-to-MPFB research retarget after all six trials tore the skin at the bind boundary, so these
+are authored and cleaned directly on the final 32-bone game rig in Blender by `HOUSE-02219`, then
+exported in the body `.glb`.
 
 ### 47.2 State machine and blending
 
@@ -6525,7 +6530,7 @@ and phase 9 must precede 13.
 | R-02 | ~~No high-quality CC0 rigged **cat** exists~~ — **realised by `HOUSE-00292`** | Realised | High | All three sourcing attempts failed the fixed quality/provenance bar. Build it ourselves in `HOUSE-02091`–`HOUSE-02093`, then verify the pipeline in `HOUSE-02094`. |
 | R-03 | ~~No suitable cleanly licensed realistic **car** exists~~ — **realised by `HOUSE-00293`** | Realised | Medium | All three sources failed provenance, ordinary realism or the 45,000-triangle budget. Author the fixed unbranded estate in `HOUSE-01035`, prove it in `HOUSE-01036`, then place it in `HOUSE-00998`; it is seen in a dim garage at ≤ 6 m, so a good but not spectacular model suffices. |
 | R-04 | ~~MakeHuman output quality or licence is not what we expect~~ — **retired by `HOUSE-00269` and `HOUSE-00294`** | Retired | High | Core output is CC0 and the two measured, reviewed MPFB 2.0.17 bodies pass silhouette, manifold, UV, height and triangle-budget checks after one unsubdivide pass. The hand-modelled fallback is not triggered; rig deformation remains separately owned by `HOUSE-00295`/`HOUSE-02131`. |
-| R-05 | Mocap licence (CMU) turns out to be restrictive | Low | Medium | Fallback: hand-animate 18 clips, ~8 days |
+| R-05 | ~~Mocap licence (CMU) turns out to be restrictive~~ — **retired by `HOUSE-00270`; technical fallback triggered by `HOUSE-00295`** | Retired | Medium | CMU permits derivatives in products while raw capture data remains external. Six pinned walk trials nevertheless failed the MPFB rig/bind deformation bar, so `HOUSE-02219` uses the already-budgeted fallback: author 18 clips directly on the final game rig, ~8 days. |
 | R-06 | ~~`.fx` compilation through Wine is fragile or fxc rejects our HLSL~~ — **largely retired 2026-09-06.** `HOUSE-00087` compiled a two-technique `.fx` through a genuine Microsoft `fxc` (DXSDK June 2010) under Wine and drew with it, with parameters arriving exactly. The one fragility found was real but ours to fix and now fixed: `cna-content` passes Unix paths to a Windows tool, so the launcher must be `tools/effects/fxc-wine.sh`, not bare `wine`. | Low | Medium | Tier S is complete without it (by design). Compiled `.xnb` is committed once it works. |
 | R-07 | Lightmap baking for 78 cells is slow or produces seams | Medium | Medium | Per-cell bakes are independent and parallel; seams are handled by the packer's 4-texel gutter; a fallback to per-room vertex lighting exists and is 3 lines |
 | R-08 | Portal traversal is slower than budgeted in the worst case | Low | High | The screen-area cutoff and depth caps bound it; the design has a `maxVisibleCells` hard stop that degrades gracefully (drop the smallest-frustum cells first) |
