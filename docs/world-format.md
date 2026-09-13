@@ -696,6 +696,11 @@ band centre. Cover interpolates linearly between adjacent anchors and clamps out
 last centre; `thunderIntensity` then linearly blends all three values toward `stormCloudAlpha`.
 This makes both weather inputs continuous (`HOUSE-01648`).
 
+The cloud RGB is not another authored table. `HOUSE-01649` takes the live horizon colour produced
+by `gradient` plus `colourModel.overcastGrey` and writes that common tint into all three rings'
+vertex colours. Thus the white procedural textures take on dusk light and converge on the same
+flat grey as the sky under complete cover, without a second colour curve that could drift.
+
 ## `interactables.json`
 
 The 640 rows. `kind` selects one of the 12 behaviours; `actions` are declarative and use the

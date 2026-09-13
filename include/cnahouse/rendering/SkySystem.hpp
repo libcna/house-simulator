@@ -134,9 +134,10 @@ namespace cnahouse::rendering
     /// @brief §31's complete `Pass::Sky` owner: camera-following dome, then celestial overlays.
     ///
     /// `HOUSE-01643` supplies the dome and `HOUSE-01644` its live colour. `HOUSE-01647` adds the
-    /// three textured, wind-scrolling cloud shells after the sun. Keeping every layer inside this
-    /// object is necessary because `Renderer` deliberately owns one implementation per pass;
-    /// installing independent `Pass::Sky` objects would silently replace one another.
+    /// three textured, wind-scrolling cloud shells after the sun, and `HOUSE-01649` tints them from
+    /// that same live colour model. Keeping every layer inside this object is necessary because
+    /// `Renderer` deliberately owns one implementation per pass; installing independent
+    /// `Pass::Sky` objects would silently replace one another.
     class SkySystem final : public IRenderPass
     {
     public:
@@ -162,7 +163,7 @@ namespace cnahouse::rendering
         bool SetCloudState(double cloudCover, double thunderIntensity) noexcept;
         /// @brief Advances the bounded UV offsets without requiring a graphics device.
         bool AdvanceClouds(double deltaSeconds) noexcept;
-        /// @brief Recomputes and uploads colours only past §31.2's material-change thresholds.
+        /// @brief Recomputes dome and cloud colours only past §31.2's material-change thresholds.
         /// @return true when an update occurred.
         bool SetSky(double sunAltitudeDeg, double cloudCover) noexcept;
         void Draw(PassContext& context) override;
@@ -252,6 +253,7 @@ namespace cnahouse::rendering
         std::size_t cloudAlphaUpdatesCounter_ = 0;
         std::uint64_t cloudUploadCount_ = 0;
         std::uint64_t cloudAlphaUpdateCount_ = 0;
+        std::uint64_t cloudTintRevision_ = 0;
     };
 
 } // namespace cnahouse::rendering

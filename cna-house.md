@@ -3329,6 +3329,14 @@ then linearly pulls that result toward the separate storm row by `thunderIntensi
 weather-state branch and both inputs are clamped to 0..1. The resulting three live alphas feed the
 retained cloud effects directly, while `sky.cloud.alpha_updates` shows material state changes.
 
+`HOUSE-01649` uses the current horizon result from the same gradient and overcast computation as
+the dome as the common cloud tint. It is pale blue by day, warm at sunrise and sunset, dark blue at
+night, and converges on the authored overcast grey as cover reaches one. The tint is stored in
+every cloud vertex, as the Tier-S design above requires. A revision makes all three retained vertex
+buffers accept a colour-only change even when the wind is still; otherwise tint uploads piggyback
+on the UV upload already needed for scrolling, and they retain `HOUSE-01644`'s material-change
+cadence rather than becoming per-frame work.
+
 ### 31.4 Tier E
 
 `SkyDome.fx` replaces the vertex-colour dome with a per-pixel analytic gradient (the same LUTs

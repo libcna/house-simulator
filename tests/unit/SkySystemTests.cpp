@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01643`, `HOUSE-01644`, `HOUSE-01647` and `HOUSE-01648`. The success case crosses the
+// `HOUSE-01643`, `HOUSE-01644`, `HOUSE-01647`, `HOUSE-01648` and `HOUSE-01649`. The success case crosses the
 // Python-writer/C++-reader boundary.
 // Mutations then prove that the runtime does not allocate or draw plausible-looking sky data from
 // damaged content.
@@ -301,6 +301,42 @@ TEST(SkySystemTests, CloudLayerAlphasInterpolateContinuouslyThroughCoverAndThund
     EXPECT_FALSE(sky.SetCloudState(0.325, 0.5));
     EXPECT_FALSE(sky.SetCloudState(std::numeric_limits<double>::quiet_NaN(), 0.5));
     EXPECT_EQ(sky.CloudAlphas(), halfStorm);
+}
+
+TEST(SkySystemTests, EveryCloudLayerTakesTheLiveHorizonTint)
+{
+    auto mesh = ReadOf(FixtureBytes());
+    auto model = cnahouse::rendering::SkyColourModelReader::Read(SkyJson(), "layout.sky.json");
+    ASSERT_TRUE(mesh);
+    ASSERT_TRUE(model);
+    cnahouse::rendering::Camera camera;
+    cnahouse::rendering::SkySystem sky(camera, std::move(*mesh), std::move(*model));
+
+    ASSERT_TRUE(sky.SetSky(-0.58, 0.0));
+    const auto sunset = sky.CloudRings()[0].vertices.front().Color.ToVector3();
+    EXPECT_NEAR(sunset.X, 0.7634F, 1.0F / 255.0F);
+    EXPECT_NEAR(sunset.Y, 0.3576F, 1.0F / 255.0F);
+    EXPECT_NEAR(sunset.Z, 0.1519F, 1.0F / 255.0F);
+    EXPECT_GT(sunset.X, sunset.Y);
+    EXPECT_GT(sunset.Y, sunset.Z) << "sunset did not warm the cloud texture";
+    for (const auto& ring : sky.CloudRings())
+    {
+        for (const auto& vertex : ring.vertices)
+        {
+            EXPECT_EQ(vertex.Color, ring.vertices.front().Color);
+        }
+    }
+
+    ASSERT_TRUE(sky.SetSky(60.0, 0.0));
+    const auto daytimeTint = sky.CloudRings()[1].vertices.front().Color.ToVector3();
+    EXPECT_LT(daytimeTint.X, daytimeTint.Y);
+    EXPECT_LT(daytimeTint.Y, daytimeTint.Z) << "daylight did not restore the blue sky tint";
+
+    ASSERT_TRUE(sky.SetSky(60.0, 1.0));
+    const auto overcast = sky.CloudRings()[2].vertices.back().Color.ToVector3();
+    EXPECT_NEAR(overcast.X, 0.370F, 1.0F / 255.0F);
+    EXPECT_NEAR(overcast.Y, 0.400F, 1.0F / 255.0F);
+    EXPECT_NEAR(overcast.Z, 0.440F, 1.0F / 255.0F);
 }
 
 TEST(SkySystemTests, ColoursFollowAltitudeAndOvercastButUpdatesAreMaterialNotPerFrame)

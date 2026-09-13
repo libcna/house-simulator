@@ -14441,8 +14441,19 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             properties and `sky.cloud.alpha_updates` exposes material changes. The implemented
             data also corrects the previously-authored cloudy/overcast values to §31.3's
             authoritative table.
-- [ ] HOUSE-01649 — Implement cloud tinting by the sky colour so clouds pick up sunset light
+- [x] HOUSE-01649 — Implement cloud tinting by the sky colour so clouds pick up sunset light
       dep: HOUSE-01648 · sys: rendering · plat: ALL · pri: MUST
+      verify: unit `SkySystemTests.*` (10); integration `SkySystemPassTests.*` (2) and
+            `HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight` (1), all graphics
+            invocations with `SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy`
+      note: (2026-09-13) Every cloud vertex now carries the live horizon result from the same
+            gradient interpolation and overcast mix as the dome: orange at sunset, pale blue by
+            day, dark blue at night and the authored flat grey at full cover. This uses one colour
+            model and makes the generated textures' white RGB an actual runtime tint carrier. A
+            tint revision uploads all three retained vertex buffers after a material sky change
+            even with zero wind; moving layers fold the new colours into their existing UV upload.
+            Unit tests pin sunset/day/overcast colours, and the live-device test proves a
+            stationary tint causes exactly three further uploads through stock XNA.
 - [ ] HOUSE-01650 — Implement fog: colour from the horizon in the view direction, start/end from `fogDensity` and precipitation, enabled only for exterior batches
       dep: HOUSE-01649, HOUSE-00892 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01651 — Implement the sky's contribution to `LightingSystem`'s ambient and to the `LM_DAY` tint

@@ -559,7 +559,10 @@ namespace cnahouse::rendering
         class CloudGpuLayer
         {
         public:
-            CloudGpuLayer(Gfx::GraphicsDevice& device, Gfx::Texture2D textureValue, const CloudRingMesh& mesh)
+            CloudGpuLayer(Gfx::GraphicsDevice& device,
+                          Gfx::Texture2D textureValue,
+                          const CloudRingMesh& mesh,
+                          std::uint64_t tintRevision)
                 : texture(std::move(textureValue))
                 , vertices(device,
                            Gfx::VertexPositionColorTexture::getVertexDeclarationStatic(),
@@ -576,20 +579,23 @@ namespace cnahouse::rendering
                 indices.SetData(mesh.indices.data(), static_cast<int>(mesh.indices.size()));
                 lastOffset = Xna::Vector2(0.0F, 0.0F);
                 hasOffset = true;
+                lastTintRevision = tintRevision;
                 effect.setLightingEnabledProperty(false);
                 effect.setTextureEnabledProperty(true);
                 effect.setVertexColorEnabledProperty(true);
                 effect.setTextureProperty(&texture);
             }
 
-            bool SetOffset(const CloudRingMesh& mesh, const Xna::Vector2& offset)
+            bool SetState(const CloudRingMesh& mesh, const Xna::Vector2& offset, std::uint64_t tintRevision)
             {
-                if (hasOffset && offset.X == lastOffset.X && offset.Y == lastOffset.Y)
+                if (hasOffset && offset.X == lastOffset.X && offset.Y == lastOffset.Y &&
+                    tintRevision == lastTintRevision)
                 {
                     return false;
                 }
                 for (std::size_t i = 0; i < uploadedVertices.size(); ++i)
                 {
+                    uploadedVertices[i].Color = mesh.vertices[i].Color;
                     uploadedVertices[i].TextureCoordinate =
                         Xna::Vector2(mesh.vertices[i].TextureCoordinate.X + offset.X,
                                      mesh.vertices[i].TextureCoordinate.Y + offset.Y);
@@ -597,6 +603,7 @@ namespace cnahouse::rendering
                 vertices.SetData(uploadedVertices.data(), static_cast<int>(uploadedVertices.size()));
                 lastOffset = offset;
                 hasOffset = true;
+                lastTintRevision = tintRevision;
                 return true;
             }
 
@@ -608,6 +615,7 @@ namespace cnahouse::rendering
             std::vector<Gfx::VertexPositionColorTexture> uploadedVertices;
             Xna::Vector2 lastOffset;
             bool hasOffset = false;
+            std::uint64_t lastTintRevision = 0;
         };
     } // namespace
 
@@ -618,7 +626,8 @@ namespace cnahouse::rendering
                   const SkyDomeMesh& mesh,
                   const std::vector<Gfx::VertexPositionColor>& colouredVertices,
                   const std::array<CloudRingMesh, 3>& cloudRings,
-                  std::optional<CloudTextures>& cloudTextures)
+                  std::optional<CloudTextures>& cloudTextures,
+                  std::uint64_t cloudTintRevision)
             : vertices(device,
                        Gfx::VertexPositionColor::getVertexDeclarationStatic(),
                        static_cast<int>(mesh.positions.size()),
@@ -642,7 +651,7 @@ namespace cnahouse::rendering
                 for (std::size_t i = 0; i < cloudRings.size(); ++i)
                 {
                     clouds.push_back(std::make_unique<CloudGpuLayer>(
-                        device, std::move((*cloudTextures)[i]), cloudRings[i]));
+                        device, std::move((*cloudTextures)[i]), cloudRings[i], cloudTintRevision));
                 }
                 cloudTextures.reset();
             }
@@ -814,6 +823,7 @@ namespace cnahouse::rendering
         const auto started = std::chrono::steady_clock::now();
         const auto [zenith, horizon] = GradientAt(colourModel_, sunAltitudeDeg);
         const float cloudMix = std::pow(static_cast<float>(cloudCover), 1.5F);
+        const Xna::Color cloudTint(Lerp(horizon, colourModel_.overcastGrey, cloudMix));
         for (std::size_t i = 0; i < mesh_.positions.size(); ++i)
         {
             const float altitude = std::clamp(mesh_.positions[i].Y / mesh_.radius, 0.0F, 1.0F);
@@ -821,6 +831,14 @@ namespace cnahouse::rendering
             const Xna::Vector3 clear = Lerp(horizon, zenith, altitudeBlend);
             colouredVertices_[i].Color = Xna::Color(Lerp(clear, colourModel_.overcastGrey, cloudMix));
         }
+        for (CloudRingMesh& ring : cloudRings_)
+        {
+            for (Gfx::VertexPositionColorTexture& vertex : ring.vertices)
+            {
+                vertex.Color = cloudTint;
+            }
+        }
+        ++cloudTintRevision_;
         if (resources_ != nullptr)
         {
             resources_->vertices.SetData(colouredVertices_.data(),
@@ -910,7 +928,7 @@ namespace cnahouse::rendering
         if (resources_ == nullptr)
         {
             resources_ = std::make_unique<Resources>(
-                context.device, mesh_, colouredVertices_, cloudRings_, cloudTextures_);
+                context.device, mesh_, colouredVertices_, cloudRings_, cloudTextures_, cloudTintRevision_);
         }
 
         Resources& resources = *resources_;
@@ -983,7 +1001,7 @@ namespace cnahouse::rendering
             for (std::size_t i = 0; i < resources.clouds.size(); ++i)
             {
                 CloudGpuLayer& cloud = *resources.clouds[i];
-                if (cloud.SetOffset(cloudRings_[i], cloudOffsets_[i]))
+                if (cloud.SetState(cloudRings_[i], cloudOffsets_[i], cloudTintRevision_))
                 {
                     ++cloudUploadCount_;
                 }

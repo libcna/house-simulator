@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01643`, `HOUSE-01644` and `HOUSE-01647`. The dome, cloud textures and later buffer uploads
-// cross a live XNA
-// GraphicsDevice. This is always launched with SDL's offscreen driver by the local verification
-// command.
+// `HOUSE-01643`, `HOUSE-01644`, `HOUSE-01647`, `HOUSE-01648` and `HOUSE-01649`. The dome, cloud
+// textures and later buffer uploads cross a live XNA GraphicsDevice. This is always launched with
+// SDL's offscreen driver by the local verification command.
 #include <array>
 #include <cstdint>
 #include <fstream>
@@ -164,7 +163,7 @@ namespace
         EXPECT_EQ(triangles, 1216);
     }
 
-    TEST(SkySystemPassTests, ThreeCompiledCloudRingsScrollAndSubmitThroughStockXna)
+    TEST(SkySystemPassTests, ThreeCompiledCloudRingsScrollTintAndSubmitThroughStockXna)
     {
         std::int64_t draws = 0;
         std::int64_t triangles = 0;
@@ -206,6 +205,9 @@ namespace
                 const auto firstOffsets = sky.CloudOffsets();
                 sky.Draw(context);
                 EXPECT_NE(sky.CloudOffsets(), firstOffsets);
+                ASSERT_TRUE(sky.SetWind(0.0, 225.0));
+                ASSERT_TRUE(sky.SetSky(-0.58, 0.0));
+                sky.Draw(context);
 
                 const auto* drawsCounter = counters.Find("sky.cloud.draws");
                 const auto* trianglesCounter = counters.Find("sky.cloud.triangles");
@@ -227,7 +229,7 @@ namespace
                           Gfx::BlendState::AlphaBlend.getColorDestinationBlendProperty());
                 EXPECT_FALSE(device.getDepthStencilStateProperty().getDepthBufferEnableProperty());
                 EXPECT_EQ(states.Current().samplerApplied, 1u);
-                EXPECT_EQ(states.Current().samplerSkipped, 1u);
+                EXPECT_EQ(states.Current().samplerSkipped, 2u);
             });
         host.Run();
 
@@ -235,6 +237,6 @@ namespace
         ASSERT_EQ(host.Failure(), "") << host.Failure();
         EXPECT_EQ(draws, 3);
         EXPECT_EQ(triangles, 2160);
-        EXPECT_EQ(uploads, 6) << "three UV buffers updated on each of two moving frames";
+        EXPECT_EQ(uploads, 9) << "three UV buffers moved twice, then all three accepted a stationary tint";
     }
 } // namespace
