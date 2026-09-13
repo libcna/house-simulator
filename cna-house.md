@@ -3530,6 +3530,15 @@ Four implementations were considered:
 | **CPU-generated 128 × 128 RGBA mask, uploaded when `phase` changes by > 1/128** | **Chosen for Tier S.** 64 KB, regenerated a handful of times per simulated day. The terminator is an exact ellipse: for texel `(u,v)` on the unit disc, lit iff `u ≥ k·√(1−v²)` (waxing) where `k = cos(π·2·phase)`. Adds earthshine as a 4 % blue-grey fill on the unlit part, and libration by rotating the mask by the position angle of the bright limb. |
 | A shader terminator in `MoonDisc.fx` | Tier E. Identical maths per pixel, no upload, plus limb darkening. |
 
+`HOUSE-01604` implements the chosen Tier-S path in `MoonMask`. Texel centres are classified
+directly against the ellipse; the waning half mirrors the inequality, pixels outside the unit disc
+are transparent, and the unlit disc is opaque RGB `(8,9,10)` earthshine so it can still mask a
+square albedo texture. Rotation is applied by inverse-transforming each texel into the canonical
+mask, avoiding a second resampling pass. The retained mask compares circular phase distance to the
+last value it actually generated: equality at `1/128` does not update, the first value beyond it
+does, and a wrap through new moon cannot look like a whole-lunation jump. Its position angle is
+sampled on that phase-driven update, so rotation never creates a second upload cadence.
+
 The moon texture itself is a real greyscale lunar albedo map (public-domain NASA imagery is
 available; provenance recorded), 1024 × 1024, modulated by the mask.
 

@@ -129,6 +129,12 @@ over §10.3's extents — because the real vegetation (`HOUSE-00772`) and neighb
 (`HOUSE-00852`) are Phase 10 content. The 49 real ones are the ground, the road, the fences and
 the garden structures. Retake these numbers when the content lands.
 
+### Phase 24 — moon and stars
+
+| date | task | what | config | scene | value | budget | verdict | notes |
+|---|---|---|---|---|---|---|---|---|
+| 2026-09-13 | HOUSE-01604 | 64 KiB `Texture2D::SetData` for the 128² RGBA moon mask, to completion | Debug / OPENGLES3 / Tier S+E / offscreen | perf `MoonMaskUploadTests` | **0.284 ms median** | 16.67 ms | **1.7 % of budget — negligible** | 3 warm-up uploads discarded, then the median of 21 samples. Each timed sample includes a one-texel render-target readback after `SetData`, forcing completion rather than measuring submission alone. Debug is stated because the active shared build is Debug; this path is driver/upload-bound and the number is used only to establish that the infrequent mask update is not a frame-budget concern. |
+
 ## Budgets this log is measured against
 
 Recorded here for convenience; `cna-house.md` §71–72 is authoritative.

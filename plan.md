@@ -14323,10 +14323,20 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             presentation sites. It implements all eight §33.2 half-open intervals exactly, wraps
             finite inputs because a lunation is circular, and fails a non-finite value closed to
             `New moon`. Unit tests pin both sides of every boundary plus positive/negative wraps.
-- [ ] HOUSE-01604 — Implement the CPU-generated 128² phase mask with the exact elliptical terminator, earthshine and libration rotation
+- [x] HOUSE-01604 — Implement the CPU-generated 128² phase mask with the exact elliptical terminator, earthshine and libration rotation
       dep: HOUSE-01602 · sys: rendering · plat: ALL · pri: MUST
       accept: regenerated only when `phase` moves by > 1/128; upload cost measured and negligible
       verify: unit MoonMaskTests.* comparing generated masks against analytic references at 16 phases
+      note: (2026-09-13) `MoonMask` classifies all 16 384 texel centres against §33.3's ellipse,
+            mirrors the waning inequality, writes transparent off-disc pixels and an opaque cool
+            4% earthshine fill, and inverse-rotates samples by the supplied bright-limb position
+            angle without a second resampling pass. The retained cache uses circular distance from
+            the last generated phase: exactly `1/128` is retained and the first larger movement
+            regenerates, including correctly across the new-moon wrap. `MoonMaskTests.*` compares
+            every texel against analytic references at 16 phases and pins rotation and cache edges.
+      measured: a real OPENGLES3 `Texture2D::SetData` of the 64 KiB mask, synchronised to GPU
+            completion after each sample, took **0.284 ms median over 21 samples** after three
+            warm-ups — 1.7% of a 16.67 ms frame, and incurred only on a phase-threshold crossing.
 - [ ] HOUSE-01605 — Acquire and prepare the lunar albedo texture (1024², public domain, provenance recorded)
       dep: HOUSE-00274 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-01606 — Implement the moon disc quad with the mask, horizon scaling and reddening
