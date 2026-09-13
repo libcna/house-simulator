@@ -88,6 +88,12 @@ namespace cnahouse::environment
     /// not the earth.
     [[nodiscard]] double DaysSinceJ2000ForEpochSeconds(double epochSeconds, int utcOffsetMinutes) noexcept;
 
+    /// @brief Local mean sidereal time in degrees, east-positive and wrapped to `[0, 360)`.
+    ///
+    /// This is the earth-rotation term shared by sun, moon and `StarField`. Keeping one function
+    /// prevents a sky whose catalogue slowly drifts away from the two bodies it is drawn beside.
+    [[nodiscard]] double LocalSiderealTimeDeg(double daysSinceJ2000, double longitudeDeg) noexcept;
+
     /// @brief §32.1's solar position model, evaluated at @p daysSinceJ2000 for @p observer.
     ///
     /// ~40 flops, and cheap enough to call once a frame as §32.1 says. The formulation is the

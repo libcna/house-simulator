@@ -164,9 +164,8 @@ namespace cnahouse::environment
         const double declinationRad = std::asin(equatorialZ);
         const double rightAscensionDeg = Wrap360(std::atan2(equatorialY, equatorialX) * kRadToDeg);
 
-        const double gmstHours = 18.697374558 + 24.06570982441908 * daysSinceJ2000;
         const double hourAngleDeg =
-            Wrap180((gmstHours + observer.longitudeDeg / 15.0) * 15.0 - rightAscensionDeg);
+            Wrap180(LocalSiderealTimeDeg(daysSinceJ2000, observer.longitudeDeg) - rightAscensionDeg);
         const double observerLatitudeRad = observer.latitudeDeg * kDegToRad;
         const double hourAngleRad = hourAngleDeg * kDegToRad;
         const double sinObserverLatitude = std::sin(observerLatitudeRad);

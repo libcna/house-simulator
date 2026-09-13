@@ -34,6 +34,7 @@
 
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/environment/MoonLight.hpp"
+#include "cnahouse/environment/SimClock.hpp"
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/RenderStates.hpp"
@@ -821,6 +822,19 @@ namespace cnahouse::rendering
         SetSky(sun, moon, phase, cloudCover);
         sunDisc_.SetSun(sun, cloudCover);
         moonDisc_.SetMoon(moon, phase, sun);
+    }
+
+    void SkySystem::SetCelestial(const environment::SimClock& clock,
+                                 const environment::SunPosition& sun,
+                                 const environment::MoonPosition& moon,
+                                 const environment::MoonPhase& phase,
+                                 double cloudCover) noexcept
+    {
+        SetCelestial(sun, moon, phase, cloudCover);
+        if (starField_ != nullptr)
+        {
+            static_cast<void>(starField_->SetObserver(clock));
+        }
     }
 
     bool SkySystem::SetWind(double speedMetresPerSecond, double directionDegrees) noexcept

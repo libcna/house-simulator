@@ -31,6 +31,8 @@
 #include "System/IO/Stream.hpp"
 
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
@@ -126,6 +128,41 @@ namespace cnahouse::rendering
             return Xna::Vector3(lower.colour.X + (upper->colour.X - lower.colour.X) * amount,
                                 lower.colour.Y + (upper->colour.Y - lower.colour.Y) * amount,
                                 lower.colour.Z + (upper->colour.Z - lower.colour.Z) * amount);
+        }
+
+        void FillStarVertices(std::span<const StarCatalogueEntry> catalogue,
+                              const StarOrientation* orientation,
+                              std::vector<Gfx::VertexPositionColor>& vertices)
+        {
+            vertices.clear();
+            vertices.reserve(catalogue.size() * 4u);
+            for (const StarCatalogueEntry& star : catalogue)
+            {
+                const Xna::Vector3 direction =
+                    orientation == nullptr ? EquatorialDirection(star.rightAscensionDeg, star.declinationDeg)
+                                           : HorizonDirection(star, *orientation);
+                const Xna::Vector3 centre = Scaled(direction, kDistance);
+                Xna::Vector3 right = Cross(Xna::Vector3::Up, direction);
+                if (Dot(right, right) <= kVectorEpsilonSquared)
+                {
+                    right = Xna::Vector3(1.0F, 0.0F, 0.0F);
+                }
+                else
+                {
+                    right = Normalised(right, Xna::Vector3(1.0F, 0.0F, 0.0F));
+                }
+                const Xna::Vector3 up = Normalised(Cross(direction, right), Xna::Vector3::Up);
+                const StarAppearance appearance = AppearanceForStar(star.visualMagnitude, star.bvColourIndex);
+                const Xna::Vector3 horizontal = Scaled(right, appearance.halfSize);
+                const Xna::Vector3 vertical = Scaled(up, appearance.halfSize);
+                const Xna::Color colour(Xna::Vector4(
+                    appearance.colour.X, appearance.colour.Y, appearance.colour.Z, appearance.alpha));
+                vertices.emplace_back(Add(Add(centre, Scaled(horizontal, -1.0F)), Scaled(vertical, -1.0F)),
+                                      colour);
+                vertices.emplace_back(Add(Add(centre, horizontal), Scaled(vertical, -1.0F)), colour);
+                vertices.emplace_back(Add(Add(centre, horizontal), vertical), colour);
+                vertices.emplace_back(Add(Add(centre, Scaled(horizontal, -1.0F)), vertical), colour);
+            }
         }
     } // namespace
 
@@ -243,6 +280,40 @@ namespace cnahouse::rendering
         return Xna::Vector3(cosDec * std::cos(ra), std::sin(dec), -cosDec * std::sin(ra));
     }
 
+    StarOrientation StarOrientationFor(const environment::SimClock& clock) noexcept
+    {
+        StarOrientation result;
+        result.latitudeDeg = clock.latitudeDeg;
+        const double daysSinceJ2000 =
+            environment::DaysSinceJ2000ForEpochSeconds(clock.CivilEpochSeconds(), clock.utcOffsetMinutes);
+        result.localSiderealTimeDeg = environment::LocalSiderealTimeDeg(daysSinceJ2000, clock.longitudeDeg);
+        return result;
+    }
+
+    Xna::Vector3 HorizonDirection(const StarCatalogueEntry& star, const StarOrientation& orientation) noexcept
+    {
+        if (!std::isfinite(star.rightAscensionDeg) || !std::isfinite(star.declinationDeg) ||
+            !std::isfinite(orientation.localSiderealTimeDeg) || !std::isfinite(orientation.latitudeDeg))
+        {
+            return Xna::Vector3::Forward;
+        }
+        const double hourAngleRad =
+            (orientation.localSiderealTimeDeg - static_cast<double>(star.rightAscensionDeg)) *
+            std::numbers::pi / 180.0;
+        const double declinationRad = static_cast<double>(star.declinationDeg) * std::numbers::pi / 180.0;
+        const double latitudeRad = orientation.latitudeDeg * std::numbers::pi / 180.0;
+        const double sinHourAngle = std::sin(hourAngleRad);
+        const double cosHourAngle = std::cos(hourAngleRad);
+        const double sinDeclination = std::sin(declinationRad);
+        const double cosDeclination = std::cos(declinationRad);
+        const double sinLatitude = std::sin(latitudeRad);
+        const double cosLatitude = std::cos(latitudeRad);
+        return Xna::Vector3(
+            static_cast<float>(-cosDeclination * sinHourAngle),
+            static_cast<float>(sinLatitude * sinDeclination + cosLatitude * cosDeclination * cosHourAngle),
+            static_cast<float>(sinLatitude * cosDeclination * cosHourAngle - cosLatitude * sinDeclination));
+    }
+
     StarAppearance AppearanceForStar(float visualMagnitude, float bvColourIndex) noexcept
     {
         const float magnitude = std::clamp(visualMagnitude, kMinimumMagnitude, kMaximumMagnitude);
@@ -262,32 +333,15 @@ namespace cnahouse::rendering
     std::vector<Gfx::VertexPositionColor> BuildStarVertices(std::span<const StarCatalogueEntry> catalogue)
     {
         std::vector<Gfx::VertexPositionColor> vertices;
-        vertices.reserve(catalogue.size() * 4u);
-        for (const StarCatalogueEntry& star : catalogue)
-        {
-            const Xna::Vector3 direction = EquatorialDirection(star.rightAscensionDeg, star.declinationDeg);
-            const Xna::Vector3 centre = Scaled(direction, kDistance);
-            Xna::Vector3 right = Cross(Xna::Vector3::Up, direction);
-            if (Dot(right, right) <= kVectorEpsilonSquared)
-            {
-                right = Xna::Vector3(1.0F, 0.0F, 0.0F);
-            }
-            else
-            {
-                right = Normalised(right, Xna::Vector3(1.0F, 0.0F, 0.0F));
-            }
-            const Xna::Vector3 up = Normalised(Cross(direction, right), Xna::Vector3::Up);
-            const StarAppearance appearance = AppearanceForStar(star.visualMagnitude, star.bvColourIndex);
-            const Xna::Vector3 horizontal = Scaled(right, appearance.halfSize);
-            const Xna::Vector3 vertical = Scaled(up, appearance.halfSize);
-            const Xna::Color colour(Xna::Vector4(
-                appearance.colour.X, appearance.colour.Y, appearance.colour.Z, appearance.alpha));
-            vertices.emplace_back(Add(Add(centre, Scaled(horizontal, -1.0F)), Scaled(vertical, -1.0F)),
-                                  colour);
-            vertices.emplace_back(Add(Add(centre, horizontal), Scaled(vertical, -1.0F)), colour);
-            vertices.emplace_back(Add(Add(centre, horizontal), vertical), colour);
-            vertices.emplace_back(Add(Add(centre, Scaled(horizontal, -1.0F)), vertical), colour);
-        }
+        FillStarVertices(catalogue, nullptr, vertices);
+        return vertices;
+    }
+
+    std::vector<Gfx::VertexPositionColor> BuildStarVertices(std::span<const StarCatalogueEntry> catalogue,
+                                                            const StarOrientation& orientation)
+    {
+        std::vector<Gfx::VertexPositionColor> vertices;
+        FillStarVertices(catalogue, &orientation, vertices);
         return vertices;
     }
 
@@ -333,11 +387,34 @@ namespace cnahouse::rendering
     StarField::StarField(const Camera& camera, StarCatalogue catalogue)
         : camera_(&camera)
         , catalogue_(std::move(catalogue))
-        , vertices_(BuildStarVertices(catalogue_))
     {
+        orientation_ = StarOrientationFor(environment::SimClock{});
+        FillStarVertices(catalogue_, &orientation_, vertices_);
+        geometryUpdateCount_ = 1;
     }
 
     StarField::~StarField() = default;
+
+    bool StarField::SetObserver(const environment::SimClock& clock) noexcept
+    {
+        const double civilEpochSeconds = clock.CivilEpochSeconds();
+        if (!std::isfinite(civilEpochSeconds) || !std::isfinite(clock.latitudeDeg) ||
+            !std::isfinite(clock.longitudeDeg) || clock.latitudeDeg < -90.0 || clock.latitudeDeg > 90.0 ||
+            clock.longitudeDeg < -180.0 || clock.longitudeDeg > 180.0)
+        {
+            return false;
+        }
+        const StarOrientation next = StarOrientationFor(clock);
+        if (next.localSiderealTimeDeg == orientation_.localSiderealTimeDeg &&
+            next.latitudeDeg == orientation_.latitudeDeg)
+        {
+            return false;
+        }
+        orientation_ = next;
+        FillStarVertices(catalogue_, &orientation_, vertices_);
+        ++geometryUpdateCount_;
+        return true;
+    }
 
     void StarField::Draw(PassContext& context)
     {

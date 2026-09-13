@@ -105,6 +105,16 @@ namespace cnahouse::environment
         return epochDayFromJ2000 + universalSeconds / kSecondsPerDay - 0.5;
     }
 
+    double LocalSiderealTimeDeg(double daysSinceJ2000, double longitudeDeg) noexcept
+    {
+        if (!std::isfinite(daysSinceJ2000) || !std::isfinite(longitudeDeg))
+        {
+            return 0.0;
+        }
+        const double gmstHours = 18.697374558 + 24.06570982441908 * daysSinceJ2000;
+        return Wrap360(gmstHours * 15.0 + longitudeDeg);
+    }
+
     SunPosition SunPositionAt(double daysSinceJ2000, const SunObserver& observer) noexcept
     {
         SunPosition position;
@@ -135,9 +145,8 @@ namespace cnahouse::environment
         // GMST in HOURS, so the hour angle is assembled in hours and converted once. The longitude
         // enters as itself because east is positive here and §32.1's `longitude/15` is east-positive
         // too — at §33's −75.30 the local meridian is five hours behind Greenwich.
-        const double gmstHours = 18.697374558 + 24.06570982441908 * n;
         const double hourAngleDeg =
-            Wrap180((gmstHours + observer.longitudeDeg / 15.0) * 15.0 - rightAscensionDeg);
+            Wrap180(LocalSiderealTimeDeg(n, observer.longitudeDeg) - rightAscensionDeg);
 
         const double latitudeRad = observer.latitudeDeg * kDegToRad;
         const double hourAngleRad = hourAngleDeg * kDegToRad;

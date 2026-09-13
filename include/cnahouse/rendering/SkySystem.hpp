@@ -33,6 +33,7 @@ namespace cnahouse::environment
 {
     struct MoonPhase;
     struct MoonPosition;
+    struct SimClock;
     struct SunPosition;
 } // namespace cnahouse::environment
 
@@ -183,6 +184,12 @@ namespace cnahouse::rendering
         void SetSun(const environment::SunPosition& sun, double cloudCover) noexcept;
         /// @brief Sets the complete §31.2 celestial state and the composed sun disc.
         void SetCelestial(const environment::SunPosition& sun,
+                          const environment::MoonPosition& moon,
+                          const environment::MoonPhase& phase,
+                          double cloudCover) noexcept;
+        /// @brief The complete celestial update including §34's local sidereal rotation.
+        void SetCelestial(const environment::SimClock& clock,
+                          const environment::SunPosition& sun,
                           const environment::MoonPosition& moon,
                           const environment::MoonPhase& phase,
                           double cloudCover) noexcept;

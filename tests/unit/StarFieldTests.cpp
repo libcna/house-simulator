@@ -2,12 +2,14 @@
 //
 // `HOUSE-01610`. The success case crosses the Python CSTR writer/C++ runtime reader boundary;
 // mutations and pure geometry checks keep damaged catalogues and fake billboards off the GPU.
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <iterator>
 #include <limits>
+#include <numbers>
 #include <string>
 #include <utility>
 #include <vector>
@@ -16,6 +18,9 @@
 
 #include "System/IO/MemoryStream.hpp"
 
+#include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/environment/SunModel.hpp"
+#include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/StarField.hpp"
 
 namespace
@@ -52,6 +57,19 @@ namespace
     Xna::Vector3 Subtract(const Xna::Vector3& a, const Xna::Vector3& b)
     {
         return Xna::Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+    }
+
+    cnahouse::environment::SimClock At(int year, int month, int day, int hour)
+    {
+        cnahouse::environment::SimClock clock;
+        clock.calendarDaysPerSimDay = 1.0;
+        cnahouse::environment::CivilTime time;
+        time.year = year;
+        time.month = month;
+        time.day = day;
+        time.hour = hour;
+        clock.SetStandard(time);
+        return clock;
     }
 } // namespace
 
@@ -167,4 +185,93 @@ TEST(StarFieldTests, EveryQuadFacesTheObserverAtTheAuthoredCelestialRadius)
         }
         EXPECT_EQ(vertices[star * 4u].Color, vertices[star * 4u + 3u].Color);
     }
+}
+
+TEST(StarFieldTests, SiderealTimeUsesTheSharedJ2000EarthRotationAndObserverLongitude)
+{
+    constexpr double kGreenwichAtJ2000Deg = 18.697374558 * 15.0;
+    EXPECT_NEAR(cnahouse::environment::LocalSiderealTimeDeg(0.0, 0.0), kGreenwichAtJ2000Deg, 1e-10);
+    EXPECT_NEAR(
+        cnahouse::environment::LocalSiderealTimeDeg(0.0, -75.30), kGreenwichAtJ2000Deg - 75.30, 1e-10);
+    const double nextDay = cnahouse::environment::LocalSiderealTimeDeg(1.0, 0.0);
+    EXPECT_NEAR(nextDay - kGreenwichAtJ2000Deg, 0.9856473662862, 1e-9)
+        << "one solar day turns the stars almost, but not exactly, one revolution";
+}
+
+TEST(StarFieldTests, NorthCelestialPoleAlwaysHasAltitudeEqualToConfiguredLatitude)
+{
+    const cnahouse::rendering::StarCatalogueEntry pole{0.0F, 90.0F, 2.0F, 0.6F};
+    for (const double latitude : {-64.13, 0.0, 40.05, 64.13})
+    {
+        const cnahouse::rendering::StarOrientation orientation{137.0, latitude};
+        const Xna::Vector3 direction = cnahouse::rendering::HorizonDirection(pole, orientation);
+        const double altitudeDeg = std::asin(static_cast<double>(direction.Y)) * 180.0 / std::numbers::pi;
+        EXPECT_NEAR(altitudeDeg, latitude, 1e-5);
+        EXPECT_NEAR(direction.X, 0.0F, 1e-6F);
+        EXPECT_LT(direction.Z, 0.0F) << "the north celestial pole is due north";
+    }
+}
+
+TEST(StarFieldTests, PolarisFromTheGeneratedCatalogueSitsAtPhiladelphiaLatitude)
+{
+    const auto catalogue = ReadOf(FixtureBytes());
+    ASSERT_TRUE(catalogue);
+    const auto polaris = std::find_if(catalogue->begin(),
+                                      catalogue->end(),
+                                      [](const cnahouse::rendering::StarCatalogueEntry& star)
+                                      {
+                                          return std::abs(star.rightAscensionDeg - 37.952917F) < 1e-3F &&
+                                                 std::abs(star.declinationDeg - 89.264194F) < 1e-3F;
+                                      });
+    ASSERT_NE(polaris, catalogue->end());
+    const cnahouse::environment::SimClock clock;
+    const Xna::Vector3 direction =
+        cnahouse::rendering::HorizonDirection(*polaris, cnahouse::rendering::StarOrientationFor(clock));
+    const double altitudeDeg = std::asin(static_cast<double>(direction.Y)) * 180.0 / std::numbers::pi;
+    const double azimuthDeg =
+        std::atan2(static_cast<double>(direction.X), -static_cast<double>(direction.Z)) * 180.0 /
+        std::numbers::pi;
+    EXPECT_NEAR(altitudeDeg, clock.latitudeDeg, 0.75);
+    EXPECT_NEAR(azimuthDeg, 0.0, 1.25);
+}
+
+TEST(StarFieldTests, HourAngleRotatesTheSkyAndSixMonthsChangeTheMidnightConstellations)
+{
+    const cnahouse::rendering::StarCatalogueEntry equator{30.0F, 0.0F, 1.0F, 0.0F};
+    const cnahouse::rendering::StarOrientation transit{30.0, 40.05};
+    const cnahouse::rendering::StarOrientation sixSiderealHoursLater{120.0, 40.05};
+    const Xna::Vector3 onMeridian = cnahouse::rendering::HorizonDirection(equator, transit);
+    const Xna::Vector3 onWesternHorizon =
+        cnahouse::rendering::HorizonDirection(equator, sixSiderealHoursLater);
+    EXPECT_NEAR(Dot(onMeridian, onWesternHorizon), 0.0F, 1e-6F);
+    EXPECT_NEAR(onWesternHorizon.X, -1.0F, 1e-6F);
+
+    const auto january = cnahouse::rendering::StarOrientationFor(At(2031, 1, 15, 0));
+    const auto july = cnahouse::rendering::StarOrientationFor(At(2031, 7, 16, 0));
+    const Xna::Vector3 januaryDirection = cnahouse::rendering::HorizonDirection(equator, january);
+    const Xna::Vector3 julyDirection = cnahouse::rendering::HorizonDirection(equator, july);
+    EXPECT_LT(Dot(januaryDirection, julyDirection), -0.95F)
+        << "the same local clock time six months apart must face the opposite constellations";
+}
+
+TEST(StarFieldTests, LiveClockRebuildsInPlaceAndInvalidObserverDataIsIgnored)
+{
+    cnahouse::rendering::Camera camera;
+    const StarCatalogue catalogue{{0.0F, 0.0F, -1.0F, 0.0F}, {90.0F, 30.0F, 4.0F, 1.5F}};
+    cnahouse::rendering::StarField field(camera, catalogue);
+    ASSERT_EQ(field.GeometryUpdateCount(), 1u);
+    const auto* storage = field.Vertices().data();
+    const Xna::Vector3 initialCorner = field.Vertices().front().Position;
+
+    cnahouse::environment::SimClock clock;
+    EXPECT_FALSE(field.SetObserver(clock)) << "construction already used the default clock";
+    clock.Advance(60.0);
+    EXPECT_TRUE(field.SetObserver(clock));
+    EXPECT_EQ(field.GeometryUpdateCount(), 2u);
+    EXPECT_EQ(field.Vertices().data(), storage) << "the per-frame rotation must not allocate";
+    EXPECT_NE(field.Vertices().front().Position, initialCorner);
+
+    clock.latitudeDeg = std::numeric_limits<double>::quiet_NaN();
+    EXPECT_FALSE(field.SetObserver(clock));
+    EXPECT_EQ(field.GeometryUpdateCount(), 2u);
 }

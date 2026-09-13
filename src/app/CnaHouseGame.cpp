@@ -972,7 +972,8 @@ namespace cnahouse::app
                 // within a frame about the bodies, lunar phase or cloud attenuation.
                 if (skySystem_ != nullptr)
                 {
-                    skySystem_->SetCelestial(lighting_->Sun(),
+                    skySystem_->SetCelestial(clock_,
+                                             lighting_->Sun(),
                                              lighting_->Moon(),
                                              lighting_->LunarPhase(),
                                              lighting_->CloudCover());

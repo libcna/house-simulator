@@ -14450,9 +14450,22 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             LUT supplies colour. `SkySystem` draws it between the opaque dome and moon/sun, before
             clouds, and the walk scene now loads the generated catalogue. Sidereal/horizon rotation
             and environmental visibility remain explicitly owned by HOUSE-01611/01612.
-- [ ] HOUSE-01611 — Implement sidereal rotation about the celestial pole at the configured latitude
+- [x] HOUSE-01611 — Implement sidereal rotation about the celestial pole at the configured latitude
       dep: HOUSE-01610, HOUSE-01532 · sys: rendering · plat: ALL · pri: MUST
       accept: Polaris sits at altitude ≈ latitude; constellations change with the season
+      verify: unit `StarFieldTests.*` (11/11), plus the complete USNO-backed `SunModelTests.*` and
+              `MoonModelTests.*` regressions (18/18); offscreen OPENGLES3 star-field and walk-scene
+              integration; strict-XNA **313 translation units** with at most 4 compiler jobs;
+              complete `tools/ci/run_checks.sh`
+      note: (2026-09-13) sun, moon and stars now share one local-mean-sidereal-time function over
+            the same J2000 civil instant and east-positive longitude. `StarField::SetObserver`
+            transforms every retained `(RA, Dec)` into +X east, +Y up, −Z north, then rebuilds the
+            existing 6,000-vertex allocation in place before its dynamic-buffer upload. The
+            north-celestial-pole identity is tested at four latitudes; real catalogue Polaris is
+            within **0.75°** of configured 40.05° altitude and **1.25°** of due north. A six-hour
+            hour-angle step rotates an equatorial star by 90°, while equal local midnights six
+            months apart face nearly opposite constellations. The live walk update supplies its
+            configured `SimClock`, including compressed calendar date, every lighting frame.
 - [ ] HOUSE-01612 — Implement star visibility: the twilight ramp, the magnitude cutoff that tightens with twilight, cloud and moon suppression
       dep: HOUSE-01611, HOUSE-01574 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01613 — Implement twinkle with the altitude-dependent amplitude, updated at 20 Hz

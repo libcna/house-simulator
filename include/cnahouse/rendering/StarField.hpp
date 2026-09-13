@@ -19,6 +19,11 @@ namespace System::IO
     class Stream;
 }
 
+namespace cnahouse::environment
+{
+    struct SimClock;
+}
+
 namespace cnahouse::rendering
 {
     struct Camera;
@@ -55,12 +60,26 @@ namespace cnahouse::rendering
         float halfSize = 0.0F;
     };
 
+    /// @brief Observer-dependent rotation of the equatorial catalogue into the local sky.
+    struct StarOrientation
+    {
+        double localSiderealTimeDeg = 0.0;
+        double latitudeDeg = 0.0;
+    };
+
     /// @brief Converts a J2000 catalogue position into the unrotated equatorial unit frame.
     ///
     /// +Y is the north celestial pole, +X is RA 0 and -Z is RA 6h. `HOUSE-01611` rotates this
     /// frame into the observer's horizon frame without changing catalogue or billboard geometry.
     [[nodiscard]] Microsoft::Xna::Framework::Vector3 EquatorialDirection(float rightAscensionDeg,
                                                                          float declinationDeg) noexcept;
+
+    /// @brief Derives the field's earth rotation from §35's one simulation clock.
+    [[nodiscard]] StarOrientation StarOrientationFor(const environment::SimClock& clock) noexcept;
+
+    /// @brief Converts one catalogue position to world axes: +X east, +Y up, -Z north.
+    [[nodiscard]] Microsoft::Xna::Framework::Vector3
+    HorizonDirection(const StarCatalogueEntry& star, const StarOrientation& orientation) noexcept;
 
     /// @brief Samples §34's small B-V LUT and magnitude response.
     [[nodiscard]] StarAppearance AppearanceForStar(float visualMagnitude, float bvColourIndex) noexcept;
@@ -69,6 +88,10 @@ namespace cnahouse::rendering
     [[nodiscard]] std::vector<Microsoft::Xna::Framework::Graphics::VertexPositionColor>
     BuildStarVertices(std::span<const StarCatalogueEntry> catalogue);
 
+    /// @brief Builds the same billboards after applying local sidereal time and latitude.
+    [[nodiscard]] std::vector<Microsoft::Xna::Framework::Graphics::VertexPositionColor>
+    BuildStarVertices(std::span<const StarCatalogueEntry> catalogue, const StarOrientation& orientation);
+
     /// @brief `Pass::Sky` component that streams and submits the complete catalogue in one draw.
     class StarField final : public IRenderPass
     {
@@ -76,6 +99,9 @@ namespace cnahouse::rendering
         StarField(const Camera& camera, StarCatalogue catalogue);
         ~StarField() override;
 
+        /// @brief Rotates the retained catalogue to the clock's current local horizon frame.
+        /// @return true when the geometry changed; invalid clock/location data leaves it unchanged.
+        bool SetObserver(const environment::SimClock& clock) noexcept;
         void Draw(PassContext& context) override;
 
         [[nodiscard]] bool IsActive() const override
@@ -104,13 +130,25 @@ namespace cnahouse::rendering
             return uploadCount_;
         }
 
+        [[nodiscard]] const StarOrientation& Orientation() const noexcept
+        {
+            return orientation_;
+        }
+
+        [[nodiscard]] std::uint64_t GeometryUpdateCount() const noexcept
+        {
+            return geometryUpdateCount_;
+        }
+
     private:
         class Resources;
 
         const Camera* camera_ = nullptr;
         StarCatalogue catalogue_;
         std::vector<Microsoft::Xna::Framework::Graphics::VertexPositionColor> vertices_;
+        StarOrientation orientation_;
         std::unique_ptr<Resources> resources_;
+        std::uint64_t geometryUpdateCount_ = 0;
         std::uint64_t uploadCount_ = 0;
         debug::Counters* counterOwner_ = nullptr;
         std::size_t drawsCounter_ = 0;
