@@ -14399,8 +14399,17 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01612, HOUSE-01537 · sys: debug · plat: ALL · pri: MUST
 - [ ] HOUSE-01617 — Render tests: the 8 named phases, a clear night, an overcast night, moonrise, and the star field at three twilight stages
       dep: HOUSE-01612 · sys: ci · plat: CI · pri: MUST
-- [ ] HOUSE-01618 — Test: 30 simulated days advance the phase through exactly one lunation ± 0.03
+- [x] HOUSE-01618 — Test: 30 simulated days advance the phase through exactly one lunation ± 0.03
       dep: HOUSE-01608 · sys: ci · plat: CI · pri: MUST
+      verify: integration `LunationCycleTests.ThirtyDayAdvanceCompletesOneLunation`; complete
+              integration suite; `tools/ci/run_checks.sh`
+      note: (2026-09-13) The dedicated long-run acceptance test starts at the fresh-game calendar
+            anchor and issues the public `time advance 1` command thirty times. It unwraps all
+            thirty continuous phase samples, rejects backward or implausibly large daily steps,
+            and checks both the exact 30-day calendar displacement and §70.3's 1.00 ± 0.03
+            lunation criterion.
+      measured: **1.022997541 lunations**, an error of 0.022997541 from one complete turn; the
+            complete integration binary passed **107 / 107 tests**.
 - [ ] HOUSE-01619 — Phase-24 review and commit
       dep: HOUSE-01601…HOUSE-01618 · sys: — · plat: ALL · pri: MUST
 
