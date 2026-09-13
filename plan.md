@@ -14394,9 +14394,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             `sky.colour.updates` and `sky.colour.micros` expose live behaviour. Night blending and
             directional glow remain `HOUSE-01645`.
 - [ ] HOUSE-01645 — Implement the night sky blend and the sun-glow term
-      dep: HOUSE-01644 · sys: rendering · plat: ALL · pri: MUST
-- [ ] HOUSE-01646 — Author the three cloud textures (cirrus, cumulus, stratus) with alpha
+      dep: HOUSE-01644, HOUSE-01602 · sys: rendering · plat: ALL · pri: MUST
+      blocked: (2026-09-13) §31.2 defines the final blend in terms of `moonAltitude` and
+            `moonPhase`, but those runtime inputs do not exist until the still-open HOUSE-01601
+            and HOUSE-01602. The old dependency on HOUSE-01644 alone therefore made the task
+            falsely runnable. The smallest correction is the transitive dependency on
+            HOUSE-01602; directional sun glow is only half of this indivisible task and is not
+            presented as completion on its own.
+- [x] HOUSE-01646 — Author the three cloud textures (cirrus, cumulus, stratus) with alpha
       dep: HOUSE-01641 · sys: content · plat: TOOL · pri: MUST
+      verify: `python3 tools/world/cloud_textures.py --check`;
+            `python3 tools/world/cloud_textures.py --selftest` (10 claims);
+            build `cnahouse_content_Textures`
+      note: (2026-09-13) `cloud_textures.py` generates three byte-stable, project-owned 1024²
+            RGBA PNGs from periodic multi-octave value noise. All RGB texels stay white for the
+            later live sky tint; alpha spans all 256 values. Measured mean alpha rises by layer
+            from 34.5 (cirrus) through 94.1 (cumulus) to 200.1 (stratus); transparent coverage is
+            65.9 %, 38.7 % and 1.6 %, while opposite-edge jumps remain no larger than ordinary
+            neighbouring-texel changes. The three `core` manifest rows record exact hashes and
+            project provenance; `cna-content` premultiplies alpha and generates mipmaps offline.
 - [ ] HOUSE-01647 — Implement the three cloud dome rings with wind-aligned UV scrolling
       dep: HOUSE-01646, HOUSE-01643 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01648 — Implement the cloud-state → layer-alpha mapping, interpolated continuously from `cloudCover` and `thunderIntensity`

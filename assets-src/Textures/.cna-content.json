@@ -13,6 +13,24 @@
         "generateMipmaps": { "type": "bool", "value": false },
         "premultiplyAlpha": { "type": "bool", "value": true }
       }
+    },
+    "Sky/cloud_cirrus.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "premultiplyAlpha": { "type": "bool", "value": true }
+      }
+    },
+    "Sky/cloud_cumulus.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "premultiplyAlpha": { "type": "bool", "value": true }
+      }
+    },
+    "Sky/cloud_stratus.png": {
+      "parameters": {
+        "generateMipmaps": { "type": "bool", "value": true },
+        "premultiplyAlpha": { "type": "bool", "value": true }
+      }
     }
   }
 }

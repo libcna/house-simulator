@@ -16012,6 +16012,69 @@
       }
     },
     {
+      "id": "TEX_SKY_CLOUD_CIRRUS",
+      "category": "sky",
+      "sourceFile": "assets-src/Textures/Sky/cloud_cirrus.png",
+      "sourceSha256": "b2ad6654c5c0114fa9cbd7ce020cd2d438db2d0b115226c1b5f2a11598498523",
+      "contentName": "Textures/Sky/cloud_cirrus",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural high cirrus cloud opacity texture",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/world/cloud_textures.py for HOUSE-01646. A 1024 x 1024 tileable RGBA source whose white RGB is reserved for live sky tinting and whose graded alpha carries sparse wind-stretched cloud density."
+      }
+    },
+    {
+      "id": "TEX_SKY_CLOUD_CUMULUS",
+      "category": "sky",
+      "sourceFile": "assets-src/Textures/Sky/cloud_cumulus.png",
+      "sourceSha256": "90b91049fffb37bc4d30e444b586e1ea9c1c2d23e382e730fdf4b43dac463f76",
+      "contentName": "Textures/Sky/cloud_cumulus",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural mid-level cumulus cloud opacity texture",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/world/cloud_textures.py for HOUSE-01646. A 1024 x 1024 tileable RGBA source whose white RGB is reserved for live sky tinting and whose graded alpha carries separated cloud bodies and open sky."
+      }
+    },
+    {
+      "id": "TEX_SKY_CLOUD_STRATUS",
+      "category": "sky",
+      "sourceFile": "assets-src/Textures/Sky/cloud_stratus.png",
+      "sourceSha256": "22b3e9809d032f073ce40ffc39d5d540a30595e4dbab2ab5d5bb980a28f1833b",
+      "contentName": "Textures/Sky/cloud_stratus",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural low stratus cloud opacity texture",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/world/cloud_textures.py for HOUSE-01646. A 1024 x 1024 tileable RGBA source whose white RGB is reserved for live sky tinting and whose graded alpha carries the substantially closed overcast layer."
+      }
+    },
+    {
       "id": "VIDEO_SMOKE_CLIP",
       "category": "fixture",
       "sourceFile": "assets-src/Media/Video/smoke_clip.ogv",

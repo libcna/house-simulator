@@ -2058,6 +2058,9 @@ assets	TERRAIN_MATERIAL_INDEX
 assets	TEXTURE_FALLBACK_GREY
 assets	TEXTURE_FALLBACK_MISSING
 assets	TEXTURE_SMOKE_QUADRANTS
+assets	TEX_SKY_CLOUD_CIRRUS
+assets	TEX_SKY_CLOUD_CUMULUS
+assets	TEX_SKY_CLOUD_STRATUS
 interactables/interactables	TV_B1_CINEMA
 interactables/interactables	TV_L0_FAMILY
 interactables/interactables	TV_L1_MASTER_BED

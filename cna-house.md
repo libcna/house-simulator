@@ -3289,6 +3289,13 @@ carries the same sky tint so clouds pick up sunset colour correctly).
 | Mid | `cloud_cumulus` (1024², alpha) | 0.60 × wind | The main cloud body |
 | Low | `cloud_stratus` (1024², alpha) | 1.00 × wind | Overcast and storm |
 
+`HOUSE-01646` makes these project-owned, deterministic RGBA source textures with
+`tools/world/cloud_textures.py`: periodic multi-octave value noise gives every texture continuous
+wrap-around edges, while separate anisotropy and density thresholds make cirrus sparse and
+wind-stretched, cumulus broken into cloud bodies, and stratus substantially closed. RGB is white,
+not pre-lit, because `HOUSE-01649` supplies the live sky tint; the graded alpha is the cloud
+density. The content compiler premultiplies alpha and generates the mip chain offline.
+
 Cloud state maps to layer alphas by a table:
 
 | Sky state | `cloudCover` | High α | Mid α | Low α | Mid tint |

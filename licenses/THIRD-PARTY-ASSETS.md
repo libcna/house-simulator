@@ -478,4 +478,4 @@ Full text: [`licenses/ofl-1.1/LICENCE.txt`](ofl-1.1/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `ede4def093eac3e72c9537dfc4b025ef4296baa3102e1149bcf05d8ed3b9af76`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `ffd523fe7387cb2161c99d4e17974a3f1cdf5ee51266872485143c93bbbb83a2`.*

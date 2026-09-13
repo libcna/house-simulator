@@ -204,6 +204,10 @@ run_gate "suntimes-selftest" python3 tools/ci/suntimes_table.py --selftest
 # Both matter: `--check` catches a hand edit and `--selftest` catches a plausible but broken model.
 run_gate "sky-lut" python3 tools/world/sky_lut.py --check
 run_gate "sky-lut-selftest" python3 tools/world/sky_lut.py --selftest
+# `HOUSE-01646`. These are source textures, not screenshots: all three must remain exact generated
+# 1024-square RGBA tiles, with a periodic seam and distinct sparse/body/overcast alpha profiles.
+run_gate "cloud-textures" python3 tools/world/cloud_textures.py --check
+run_gate "cloud-textures-selftest" python3 tools/world/cloud_textures.py --selftest
 # `HOUSE-01642`. Geometry that begins with a ring of duplicate poles can look right while carrying
 # zero-area triangles, so the offline mesh proves its topology before `SkySystem` ever uploads it.
 run_gate "sky-dome-selftest" python3 tools/world/build_skydome.py --selftest
