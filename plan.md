@@ -5098,8 +5098,20 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             the 908-second nav graph, shading and sky exposure; its final `snowshell` stage reaches
             the pre-existing `HOUSE-00778` missing `layout.materials.json` input and is not owned
             or masked by this acquisition.
-- [ ] HOUSE-00298 — Set up `docs/asset-review/` sign-offs for the four hero assets
+- [x] HOUSE-00298 — Set up `docs/asset-review/` sign-offs for the four hero assets
       dep: HOUSE-00040, HOUSE-00291…HOUSE-00295 · sys: — · plat: TOOL · pri: MUST
+      note: (2026-09-13) `docs/asset-review/README.md` registers permanent prepared reviews for
+            the human avatar, dog, cat and player car, with exact downstream completion owners.
+            Each record fixes identity/provenance obligations, the four scene-lit views plus a
+            licensed reference, scale/origin/topology/material/tier checks and the category's
+            triangle budget. Missing assets, ids, images, reviewers and dates are stated as missing
+            rather than fabricated; `prepared` is explicitly not an approval.
+      correction: §19.3 is authoritative and calls the fourth render a close-up in actual scene
+            lighting, while the phase-0 template called it merely an in-situ view. The template now
+            names one close-up in the actual cell at eye height, preserving the four-render count
+            and satisfying both intents. The final avatar had no task explicitly owning this last
+            review step, so `HOUSE-02131` now does; dog, cat and car already had named sign-off
+            owners.
 - [ ] HOUSE-00299 — Run `verify_licences.py` over everything acquired so far; fix every gap
       dep: HOUSE-00296, HOUSE-00297 · sys: ci · plat: CI · pri: MUST
 - [ ] HOUSE-00300 — Generate and review `licenses/THIRD-PARTY-ASSETS.md`
@@ -15779,7 +15791,7 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 35 — Third-person avatar
 
-- [ ] HOUSE-02131 — Build the two base bodies through the pipeline, extract their `.chanim` sidecars, and verify the skeletons and bone lists bind to the models (`check_anim_assets.py`)
+- [ ] HOUSE-02131 — Build the two base bodies through the pipeline, extract their `.chanim` sidecars, verify the skeletons and bone lists bind to the models (`check_anim_assets.py`), and complete the prepared final-avatar visual sign-off
       dep: HOUSE-00294, HOUSE-00223, HOUSE-00225 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-02132 — Implement `PlayerAvatar`: the model set, the shared bone palette, and the multi-mesh draw
       dep: HOUSE-02131 · sys: player · plat: ALL · pri: MUST

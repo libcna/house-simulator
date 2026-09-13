@@ -18,9 +18,15 @@ Ordinary props do not need one. The test is whether a wrong proportion would be 
 | Source file | `assets-src/Models/…/….glb` |
 | Category | *(appliance, seating, architecture, character, vehicle, vegetation, …)* |
 | Used in | *(cell ids)* |
+| Review state | **prepared** / **ready for review** / **complete** |
+| Completion owner | `HOUSE-…` |
 | Reviewer | |
 | Date | *(ISO)* |
-| Verdict | **approved** / **approved with changes** / **rejected** |
+| Verdict | **pending** / **approved** / **approved with changes** / **rejected** |
+
+`prepared` means that the acceptance record exists before the asset does. It is not an approval.
+Only change the state to `complete` when every required file and check below has real evidence,
+and never put a reviewer or date on a review they did not perform.
 
 ## Provenance
 
@@ -48,7 +54,7 @@ Four renders at a consistent camera distance and the same neutral lighting, plus
 | Front (+Z) | `front.png` |
 | Three-quarter | `three-quarter.png` |
 | Side (+X) | `side.png` |
-| In situ, in its actual cell, at eye height | `in-situ.png` |
+| Close-up, in its actual cell at eye height | `close-up.png` |
 | Reference photograph or drawing | `reference.png` (record where it came from) |
 
 ## Checks
