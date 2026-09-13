@@ -12,6 +12,7 @@
 #include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/DualTextureEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
+#include "Microsoft/Xna/Framework/Graphics/SkinnedEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Matrix.hpp"
 #include "Microsoft/Xna/Framework/Vector3.hpp"
@@ -542,17 +543,35 @@ namespace
         // MEASURED (`HOUSE-00077`): `SkinnedEffect::MaxBones == 72`; 72 accepted, 73 throws
         // "boneTransforms exceeds MaxBones.". Reported rather than thrown, because a skin one bone
         // over the limit is a content problem and the frame should say so and keep going.
-        RunWithBinder(
-            [](MaterialBinder& binder)
+        RunWithDeviceBinder(
+            [](Gfx::GraphicsDevice& device, MaterialBinder& binder)
             {
                 ASSERT_TRUE(binder.Register(Id::Of("MAT_PET"), Pet()).HasValue());
+                Gfx::Texture2D texture(device, 2, 2);
 
                 DrawParams noBones;
+                noBones.diffuse = &texture;
                 EXPECT_EQ(binder.Bind(Id::Of("MAT_PET"), noBones).Error().Code(), ErrorCode::InvalidArgument);
+
+                std::vector<Microsoft::Xna::Framework::Matrix> emptyPalette;
+                DrawParams empty;
+                empty.diffuse = &texture;
+                empty.bones = &emptyPalette;
+                EXPECT_EQ(binder.Bind(Id::Of("MAT_PET"), empty).Error().Code(), ErrorCode::InvalidArgument);
+
+                std::vector<Microsoft::Xna::Framework::Matrix> oneBone(
+                    1, Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+                DrawParams noTexture;
+                noTexture.bones = &oneBone;
+                EXPECT_EQ(binder.Bind(Id::Of("MAT_PET"), noTexture).Error().Code(),
+                          ErrorCode::InvalidArgument);
+                EXPECT_EQ(binder.EffectsCreated(), 0U)
+                    << "invalid skinned draws must fail before allocating the shared effect";
 
                 std::vector<Microsoft::Xna::Framework::Matrix> palette(
                     MaterialBinder::kMaxBones, Microsoft::Xna::Framework::Matrix::getIdentityProperty());
                 DrawParams exact;
+                exact.diffuse = &texture;
                 exact.bones = &palette;
                 EXPECT_TRUE(binder.Bind(Id::Of("MAT_PET"), exact).HasValue())
                     << "72 is the measured limit and must be accepted";
@@ -569,15 +588,65 @@ namespace
         // MEASURED (`HOUSE-00075`): blend indices are SKIN-LOCAL, so slot i is joint i of this skin
         // and the padding beyond the skin's joint count is never referenced. A four-bone pet must
         // not have to ship 72 matrices.
-        RunWithBinder(
-            [](MaterialBinder& binder)
+        RunWithDeviceBinder(
+            [](Gfx::GraphicsDevice& device, MaterialBinder& binder)
             {
-                ASSERT_TRUE(binder.Register(Id::Of("MAT_PET"), Pet()).HasValue());
+                MaterialDesc desc = Pet();
+                desc.diffuse[0] = 0.30F;
+                desc.diffuse[1] = 0.50F;
+                desc.diffuse[2] = 0.70F;
+                desc.alpha = 0.80F;
+                desc.specularColour[0] = 0.10F;
+                desc.specularColour[1] = 0.20F;
+                desc.specularColour[2] = 0.25F;
+                desc.specularPower = 19.0F;
+                desc.perPixelLighting = true;
+                const Id id = Id::Of("MAT_PET");
+                ASSERT_TRUE(binder.Register(id, desc).HasValue());
+
+                const auto firstBone = Microsoft::Xna::Framework::Matrix::CreateTranslation(
+                    Microsoft::Xna::Framework::Vector3(1.0F, 2.0F, 3.0F));
                 std::vector<Microsoft::Xna::Framework::Matrix> palette(
                     4, Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+                palette[0] = firstBone;
+                Gfx::Texture2D texture(device, 2, 2);
+                FogParams fog;
+                fog.colour[0] = 0.10F;
+                fog.colour[1] = 0.15F;
+                fog.colour[2] = 0.20F;
+                fog.start = 9.0F;
+                fog.end = 63.0F;
                 DrawParams draw;
+                draw.diffuse = &texture;
                 draw.bones = &palette;
-                EXPECT_TRUE(binder.Bind(Id::Of("MAT_PET"), draw).HasValue());
+                draw.fog = &fog;
+
+                const auto bound = binder.Bind(id, draw);
+                ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
+                auto* effect = static_cast<Gfx::SkinnedEffect*>(*bound);
+                EXPECT_EQ(effect->getTextureProperty(), &texture);
+                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.30F, 0.50F, 0.70F));
+                EXPECT_FLOAT_EQ(effect->getAlphaProperty(), 0.80F);
+                EXPECT_EQ(effect->getSpecularColorProperty(), Vector3(0.10F, 0.20F, 0.25F));
+                EXPECT_FLOAT_EQ(effect->getSpecularPowerProperty(), 19.0F);
+                EXPECT_TRUE(effect->getPreferPerPixelLightingProperty());
+                EXPECT_EQ(effect->getWeightsPerVertexProperty(), 4);
+                EXPECT_TRUE(effect->getFogEnabledProperty());
+                EXPECT_EQ(effect->getFogColorProperty(), Vector3(0.10F, 0.15F, 0.20F));
+                EXPECT_FLOAT_EQ(effect->getFogStartProperty(), 9.0F);
+                EXPECT_FLOAT_EQ(effect->getFogEndProperty(), 63.0F);
+
+                const auto applied = effect->GetBoneTransforms(static_cast<int>(MaterialBinder::kMaxBones));
+                ASSERT_EQ(applied.size(), MaterialBinder::kMaxBones);
+                EXPECT_EQ(applied[0], firstBone);
+                EXPECT_EQ(applied[3], Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+                EXPECT_EQ(applied[4], Microsoft::Xna::Framework::Matrix::getIdentityProperty())
+                    << "the first slot beyond the short skin must be identity padding";
+                EXPECT_EQ(applied.back(), Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+
+                draw.fog = nullptr;
+                ASSERT_TRUE(binder.Bind(id, draw).HasValue());
+                EXPECT_FALSE(effect->getFogEnabledProperty());
             });
     }
 

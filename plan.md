@@ -12857,8 +12857,22 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: max-4-core warning-clean build; 21 `MaterialBinderTests`, including live-device
             inspection of texture/tint/cutoff/compare/fog, fog reset, both two-sided determinant
             cases and missing-texture refusal; unit + integration 1503/1503; XNA-only gates.
-- [ ] HOUSE-00895 — Implement `MaterialBinder` for `SkinnedEffect`
+- [x] HOUSE-00895 — Implement `MaterialBinder` for `SkinnedEffect`
       dep: HOUSE-00892, HOUSE-00077 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-14) the Skinned path now requires an albedo and a non-empty skin-local palette,
+            fixes the authored vertex layout at four weights, writes tint/alpha/specular/per-pixel
+            lighting/fog, and pads short palettes with identities to the measured 72-matrix XNA
+            upload shape. Null, empty and oversized palettes and a missing texture are reported
+            before an effect is allocated.
+      finding: the existing path already reused one 72-matrix scratch vector, but never selected
+            `WeightsPerVertex = 4`, never applied fog, conditionally retained an old texture, and
+            turned an empty palette into 72 identities. The binder's class documentation also
+            incorrectly claimed the draw-time bone limit was checked at material registration;
+            it now names the two honest validation boundaries.
+      verified: max-4-core warning-clean build; 21 `MaterialBinderTests`, including live-device
+            inspection of all material values, four-weight mode, a distinctive first bone, identity
+            padding through slot 71, fog reset, four invalid-input cases and the exact 72-bone cap;
+            unit + integration 1503/1503; XNA-only gates.
 - [ ] HOUSE-00896 — Implement `MaterialBinder` for `EnvironmentMapEffect` with the baked cube maps
       dep: HOUSE-00892, HOUSE-00081 · sys: rendering · plat: ALL · pri: SHOULD
 - [ ] HOUSE-00897 — Implement the effect-instance pool: one instance per (effect class, material variant), cloned as needed, never allocated per draw

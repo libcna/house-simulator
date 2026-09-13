@@ -57,7 +57,7 @@ namespace cnahouse::rendering
     {
         MaterialKind kind = MaterialKind::Basic;
 
-        /// @brief Content asset names. Empty means "no texture", which is legal and draws untextured.
+        /// @brief Content asset name. An empty name is legal only for an untextured `Basic` draw.
         std::string diffuseTexture;
 
         /// @brief Linear RGB in 0..1, and **already premultiplied where alpha applies**.
@@ -123,11 +123,10 @@ namespace cnahouse::rendering
     /// the house. `HOUSE-00106` measured `EffectPass::Apply()` at 0.184 µs against a draw call at
     /// 8.15 µs, so re-writing parameters is not where the frame goes.
     ///
-    /// **What it refuses is the point.** Two of phase 1's measurements are enforced here, at
-    /// registration, rather than left to fail inside a frame: `SkinnedEffect` refuses
-    /// `LightingEnabled = false` (`HOUSE-00077`), and its palette is capped at
-    /// `SkinnedEffect::MaxBones == 72` — 72 accepted, 73 throwing. A material that would violate
-    /// either is rejected when it is registered, where the error names the material.
+    /// **What it refuses is the point.** Two of phase 1's measurements are enforced at their honest
+    /// boundaries rather than left to throw inside an effect: registration refuses a `SkinnedEffect`
+    /// material with `LightingEnabled = false` (`HOUSE-00077`), while `Bind` refuses a draw palette
+    /// beyond `SkinnedEffect::MaxBones == 72` — 72 accepted, 73 throwing in the measured API.
     class MaterialBinder
     {
     public:

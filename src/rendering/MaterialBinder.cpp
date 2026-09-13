@@ -333,10 +333,10 @@ namespace cnahouse::rendering
             }
             case MaterialKind::Skinned:
             {
-                if (draw.bones == nullptr)
+                if (draw.bones == nullptr || draw.bones->empty())
                 {
                     return Err(ErrorCode::InvalidArgument,
-                               std::format("material {:#010x} is skinned and was bound with no bone "
+                               std::format("material {:#010x} is skinned and needs a non-empty bone "
                                            "palette",
                                            id.Value()));
                 }
@@ -352,6 +352,12 @@ namespace cnahouse::rendering
                                            draw.bones->size(),
                                            kMaxBones));
                 }
+                if (draw.diffuse == nullptr)
+                {
+                    return Err(
+                        ErrorCode::InvalidArgument,
+                        std::format("material {:#010x} is skinned and needs an albedo texture", id.Value()));
+                }
                 auto& effect = SkinnedFor();
                 ApplyMatrices(effect, draw);
                 effect.setDiffuseColorProperty(ToVector(desc->diffuse));
@@ -359,10 +365,9 @@ namespace cnahouse::rendering
                 effect.setSpecularColorProperty(ToVector(desc->specularColour));
                 effect.setSpecularPowerProperty(desc->specularPower);
                 effect.setPreferPerPixelLightingProperty(desc->perPixelLighting);
-                if (draw.diffuse != nullptr)
-                {
-                    effect.setTextureProperty(draw.diffuse);
-                }
+                effect.setWeightsPerVertexProperty(4);
+                effect.setTextureProperty(draw.diffuse);
+                ApplyFog(effect, draw);
                 // The palette is fixed-length, so a shorter one is padded with identities. MEASURED
                 // (`HOUSE-00075`): blend indices are SKIN-LOCAL, so slot i is joint i of this skin and
                 // padding beyond the skin's joint count is never referenced.

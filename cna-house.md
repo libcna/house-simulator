@@ -2663,6 +2663,9 @@ model.Draw(actorWorld, view, projection);        // or manual mesh-part draws fo
 
 Bone budget: player 32, dog 38, cat 34 — all well under `MaxBones = 72`.
 `WeightsPerVertex = 4` throughout.
+`rendering::MaterialBinder` requires a non-empty skin-local palette and albedo before allocating its
+shared `SkinnedEffect`, fixes `WeightsPerVertex` at 4, pads a short palette to 72 identities, and
+applies the material tint/specular values plus the per-draw fog boundary from §31.5.
 
 ### 24.2 Animated props
 
