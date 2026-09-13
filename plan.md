@@ -4977,8 +4977,19 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             `HOUSE-02041` model/sign-off, `HOUSE-02042` 38-bone rig, `HOUSE-02043` eight authored
             clips and `HOUSE-02044` pipeline verification. No duplicate task id was invented for
             work that phase 33 already owns.
-- [ ] HOUSE-00292 — **Hero asset research: the cat.** Same (R-02)
+- [x] HOUSE-00292 — **Hero asset research: the cat.** Same (R-02)
       dep: HOUSE-00291 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-13) `docs/asset-selection/cat-hero-research.md`; **build it ourselves.** The
+            fixed §61/§72 bar was applied first. Sketchfab's technically capable 110-animation cat
+            is only a showcase with no downloadable licence; its downloads were personal-use or a
+            794-triangle CC-BY model with one run. Blend Swap's CC0 cats were rig-only or toon, and
+            its animated CC-BY result named only walk/run. Quaternius has a low-poly cat in its
+            animated-animal pack, but does not establish the eleven cat-specific clips and repeats
+            the CC0-versus-QAL redistribution contradiction. No candidate passed both provenance
+            and quality, so no bytes were downloaded.
+      decision: R-02's authored fallback is scheduled through the existing `HOUSE-02091` model and
+            sign-off, `HOUSE-02092` 34-bone rig, `HOUSE-02093` eleven authored clips and
+            `HOUSE-02094` pipeline verification. No duplicate task id was added.
 - [ ] HOUSE-00293 — **Hero asset research: the car.** Same (R-03)
       dep: HOUSE-00291 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00294 — **Hero asset research: the human base meshes.** Produce two MakeHuman bodies, evaluate topology and silhouette, and sign off (R-04)
@@ -15615,8 +15626,10 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 34 — Cat
 
-- [ ] HOUSE-02091 — Acquire or build the cat model to the acceptance bar; complete the visual sign-off
+- [ ] HOUSE-02091 — Build the cat model to the acceptance bar; complete the visual sign-off
       dep: HOUSE-00292, HOUSE-00298 · sys: content · plat: TOOL · pri: MUST
+      decision: `HOUSE-00292` exhausted the three R-02 sources and selected the project-authored
+            Blender fallback; sourcing is no longer an open branch of this task.
 - [ ] HOUSE-02092 — Rig the cat (34 bones) and verify
       dep: HOUSE-02091 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-02093 — Author or retarget the 11 cat clips
