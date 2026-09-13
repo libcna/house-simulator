@@ -4961,9 +4961,22 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             `HOUSE-00272` established that the licence assurance rests on ToS §87b/§87c, whose
             warranty and indemnity bind **the account holder**, which is the same reason the
             account cannot be created on the owner's behalf.
-- [ ] HOUSE-00291 — **Hero asset research: the dog.** Three sourcing attempts with recorded results; if none passes the bar, schedule the build-it-ourselves fallback (R-01)
+- [x] HOUSE-00291 — **Hero asset research: the dog.** Three sourcing attempts with recorded results; if none passes the bar, schedule the build-it-ourselves fallback (R-01)
       dep: HOUSE-00267, HOUSE-00268 · sys: content · plat: TOOL · pri: MUST
       accept: a decision with evidence: chosen asset + licence, or "build it" with a task list
+      note: (2026-09-13) `docs/asset-selection/dog-hero-research.md`; **build it ourselves.** The
+            fixed §60.1 acceptance bar was applied before looking. Sketchfab's plausible Labradors
+            were CC-BY, store-only or personal-use, and either carried only an idle or failed this
+            public repository's hero-provenance rule. Blend Swap's one concrete CC0 rig was a
+            1,428-vertex low-poly Jack Russell with no clip set; its closer dog was CC-BY, derived
+            from another upload and still idle-only. Quaternius supplied an animated low-poly pug,
+            not a realistic Labrador, and its CC0-labelled pack/FAQ now contradict QAL v1.0's ban
+            on redistributing original **or modified** assets. No candidate passed both provenance
+            and quality, so no bytes were downloaded.
+      decision: R-01's five-day hand-build fallback is selected and scheduled through the existing
+            `HOUSE-02041` model/sign-off, `HOUSE-02042` 38-bone rig, `HOUSE-02043` eight authored
+            clips and `HOUSE-02044` pipeline verification. No duplicate task id was invented for
+            work that phase 33 already owns.
 - [ ] HOUSE-00292 — **Hero asset research: the cat.** Same (R-02)
       dep: HOUSE-00291 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00293 — **Hero asset research: the car.** Same (R-03)
@@ -15550,8 +15563,10 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 
 ## Phase 33 — Dog
 
-- [ ] HOUSE-02041 — Acquire or build the dog model to the acceptance bar; complete the visual sign-off
+- [ ] HOUSE-02041 — Build the dog model to the acceptance bar; complete the visual sign-off
       dep: HOUSE-00291, HOUSE-00298 · sys: content · plat: TOOL · pri: MUST
+      decision: `HOUSE-00291` exhausted the three R-01 sources and selected the project-authored
+            Blender fallback; sourcing is no longer an open branch of this task.
 - [ ] HOUSE-02042 — Rig the dog (38 bones) and verify the bone list, weights (≤ 4 influences) and scale
       dep: HOUSE-02041 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-02043 — Author or retarget the 8 dog clips (idle, sit, lie, walk, trot, trot_stairs, bark, eat)

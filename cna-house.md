@@ -2219,7 +2219,7 @@ compared against a reference photograph, recorded in `docs/asset-review/`.
 | Neighbourhood houses | 8 sourced/generated bodies × material variants | Plus 3 LOD levels and impostors |
 | Vehicles: the player's car, 3 parked neighbour cars, 1 delivery van | 5 sourced | The player's car is a hero asset |
 | Characters: 2 base bodies, 6 hair, 5 clothing sets | 13 built from MakeHuman + Blender | Hero |
-| Animals: dog, cat | 2 sourced or built | Hero |
+| Animals: dog, cat | 2 built unless the cat's independent research clears a source | Hero |
 | **Total unique models** | **≈ 420** | |
 
 ---
@@ -5257,6 +5257,13 @@ research task, an acceptance bar and a visual sign-off (§19.3). A malformed gen
 acceptable at any point, including as a temporary placeholder — the placeholder is a plain grey
 box labelled `DOG`, which is honest, rather than a bad dog, which is not.
 
+`HOUSE-00291` exhausted R-01's three named sources. Sketchfab's plausible Labradors did not have
+CC0 hero-grade provenance or the clip set; Blend Swap's CC0 match was a low-poly Jack Russell; and
+Quaternius's animated pug was both the wrong style and covered by contradictory redistribution
+terms. The decision is therefore to author the model, textures, 38-bone rig and eight clips in
+Blender through `HOUSE-02041`–`HOUSE-02043`, with a five-day art allowance, then prove the real
+pipeline in `HOUSE-02044`. No downloaded animal model is used as a base.
+
 ### 60.2 Behaviour
 
 A utility-scored state machine, updated at 10 Hz:
@@ -6494,7 +6501,7 @@ and phase 9 must precede 13.
 
 | ID | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|---|
-| R-01 | No high-quality CC0 rigged **dog** exists | Medium | High — it is a headline feature | Three sourcing attempts (Sketchfab CC0, Blend Swap CC0, Quaternius), then a build-it-ourselves fallback budgeted at 5 days of Blender work; the acceptance bar is fixed in advance so we do not drift into accepting a bad one |
+| R-01 | ~~No high-quality CC0 rigged **dog** exists~~ — **realised by `HOUSE-00291`** | Realised | High — it is a headline feature | All three named attempts failed the fixed quality/provenance bar. Build it ourselves in `HOUSE-02041`–`HOUSE-02043`, budgeted at 5 days of Blender work, then verify the pipeline in `HOUSE-02044`. |
 | R-02 | Same for the **cat** | Medium | High | Same |
 | R-03 | Same for a realistic **car** | Medium | Medium | The car is always seen in a dim garage at ≤ 6 m; a good but not spectacular model suffices |
 | R-04 | MakeHuman output quality or licence is not what we expect | Low | High | Verify early (phase 4). Fallbacks: Khronos sample characters, or a purchased-then-not-redistributed pipeline is **not** acceptable — so the real fallback is hand-modelling two stylised-but-plausible humans |
