@@ -1547,7 +1547,12 @@ namespace cnahouse::app
         }
         // NOT gated on `walking_`: §35's clock runs in every scene, and the blockout scene is
         // where somebody watching the sun move would be standing.
-        environmentOverlay_.Draw(hud_->batch, text_, clock_, weather_.has_value() ? &*weather_ : nullptr);
+        const std::optional<debug::CelestialOverlayState> celestial = CelestialSnapshot();
+        environmentOverlay_.Draw(hud_->batch,
+                                 text_,
+                                 clock_,
+                                 weather_.has_value() ? &*weather_ : nullptr,
+                                 celestial.has_value() ? &*celestial : nullptr);
 #if CNAHOUSE_DEBUG_TOOLS
         if (walking_ && physicsOverlay_.Visible())
         {
@@ -1569,6 +1574,31 @@ namespace cnahouse::app
 #endif
 #endif
         hud_->batch.End();
+    }
+
+    std::optional<debug::CelestialOverlayState> CnaHouseGame::CelestialSnapshot() const noexcept
+    {
+        if (!lighting_.has_value())
+        {
+            return std::nullopt;
+        }
+
+        debug::CelestialOverlayState result;
+        result.sun = lighting_->Sun();
+        result.moon = lighting_->Moon();
+        result.moonPhase = lighting_->LunarPhase();
+        if (skySystem_ != nullptr)
+        {
+            const std::optional<rendering::StarFieldSnapshot> stars = skySystem_->StarSnapshot();
+            if (stars.has_value())
+            {
+                result.starVisibility = stars->visibility;
+                result.visibleStarCount = stars->visibleStarCount;
+                result.catalogueStarCount = stars->catalogueStarCount;
+                result.starFieldAvailable = true;
+            }
+        }
+        return result;
     }
 
 } // namespace cnahouse::app

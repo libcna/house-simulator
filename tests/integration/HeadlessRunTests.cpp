@@ -249,8 +249,10 @@ namespace
         // The panel reads the SESSION's clock. Thirty frames have advanced it, so the lines must
         // describe a clock that has moved -- a panel built over a default-constructed `SimClock`
         // would read exactly midnight on 1 January and pass every other claim in this file.
-        const std::vector<std::string> lines =
-            game.EnvironmentOverlayForTesting().Lines(game.ClockForTesting(), game.WeatherForTesting());
+        const std::optional<cnahouse::debug::CelestialOverlayState> celestial = game.CelestialSnapshot();
+        ASSERT_TRUE(celestial.has_value());
+        const std::vector<std::string> lines = game.EnvironmentOverlayForTesting().Lines(
+            game.ClockForTesting(), game.WeatherForTesting(), &*celestial);
         ASSERT_GE(lines.size(), 4U);
         EXPECT_EQ(lines[0], "F8  environment");
         EXPECT_GT(game.ClockForTesting().epochSeconds, 0.0);
@@ -267,6 +269,16 @@ namespace
         }();
         EXPECT_NE(joined.find("weather  W_PARTLY"), std::string::npos) << joined;
         EXPECT_NE(joined.find("rng      "), std::string::npos) << joined;
+        EXPECT_NE(joined.find("sun      alt "), std::string::npos) << joined;
+        EXPECT_NE(joined.find("moon     alt "), std::string::npos) << joined;
+        EXPECT_NE(joined.find("phase    "), std::string::npos) << joined;
+        EXPECT_NE(joined.find("stars    draw "), std::string::npos) << joined;
+        EXPECT_EQ(joined.find("celestial unavailable"), std::string::npos) << joined;
+        const cnahouse::lighting::LightingSystem* lighting = game.LightingForTesting();
+        ASSERT_NE(lighting, nullptr);
+        EXPECT_DOUBLE_EQ(celestial->sun.altitudeDeg, lighting->Sun().altitudeDeg);
+        EXPECT_DOUBLE_EQ(celestial->moon.azimuthDeg, lighting->Moon().azimuthDeg);
+        EXPECT_DOUBLE_EQ(celestial->moonPhase.phase, lighting->LunarPhase().phase);
         for (const std::string& line : lines)
         {
             std::printf("  %s\n", line.c_str());

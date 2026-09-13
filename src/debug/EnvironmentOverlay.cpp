@@ -8,6 +8,7 @@
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
 #include "cnahouse/environment/DayLength.hpp"
+#include "cnahouse/environment/MoonModel.hpp"
 #include "cnahouse/environment/Season.hpp"
 #include "cnahouse/ui/TextRenderer.hpp"
 #include "cnahouse/util/Ids.hpp"
@@ -39,7 +40,8 @@ namespace cnahouse::debug
     }
 
     std::vector<std::string> EnvironmentOverlay::Lines(const environment::SimClock& clock,
-                                                       const weather::WeatherSystem* weather) const
+                                                       const weather::WeatherSystem* weather,
+                                                       const CelestialOverlayState* celestial) const
     {
         const environment::CivilTime wall = clock.Wall();
         const environment::CivilTime standard = clock.Standard();
@@ -121,14 +123,47 @@ namespace cnahouse::debug
                                         state.thunderIntensity));
             lines.push_back(std::format("rng      {}", util::Rng(state.rngState).ToHex()));
         }
-        lines.push_back("sun/moon: §35.3 not built yet");
+        if (celestial == nullptr)
+        {
+            lines.push_back("celestial unavailable in this scene");
+        }
+        else
+        {
+            lines.push_back(std::format("sun      alt {:+.2f} deg  az {:.2f} deg",
+                                        celestial->sun.altitudeDeg,
+                                        celestial->sun.azimuthDeg));
+            lines.push_back(std::format("moon     alt {:+.2f} deg  az {:.2f} deg",
+                                        celestial->moon.altitudeDeg,
+                                        celestial->moon.azimuthDeg));
+            lines.push_back(std::format("phase    {}  {:.1f}% lit  p {:.3f}",
+                                        environment::MoonPhaseName(celestial->moonPhase.phase),
+                                        celestial->moonPhase.illuminatedFraction * 100.0,
+                                        celestial->moonPhase.phase));
+            if (!celestial->starFieldAvailable)
+            {
+                lines.push_back("stars    unavailable (sky catalogue not loaded)");
+            }
+            else
+            {
+                lines.push_back(std::format("stars    draw {} / {}  alpha {:.3f}  cutoff {:+.2f} mag",
+                                            celestial->visibleStarCount,
+                                            celestial->catalogueStarCount,
+                                            celestial->starVisibility.overallAlpha,
+                                            celestial->starVisibility.magnitudeCutoff));
+                lines.push_back(std::format("star env twilight {:.3f}  cloud {:.3f}  moon {:.3f}",
+                                            celestial->starVisibility.twilight,
+                                            celestial->starVisibility.cloudTransmission,
+                                            celestial->starVisibility.moonBrightness));
+            }
+        }
         return lines;
     }
 
     void EnvironmentOverlay::Draw(Microsoft::Xna::Framework::Graphics::SpriteBatch& batch,
                                   const ui::TextRenderer& text,
                                   const environment::SimClock& clock,
-                                  const weather::WeatherSystem* weather) const
+                                  const weather::WeatherSystem* weather,
+                                  const CelestialOverlayState* celestial) const
     {
         if (!visible_ || !text.HasFont())
         {
@@ -140,7 +175,7 @@ namespace cnahouse::debug
         constexpr float kLeft = 12.0F;
         constexpr float kTop = 40.0F;
 
-        const std::vector<std::string> lines = Lines(clock, weather);
+        const std::vector<std::string> lines = Lines(clock, weather, celestial);
         for (std::size_t i = 0; i < lines.size(); ++i)
         {
             text.DrawShadowed(

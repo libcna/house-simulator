@@ -5,8 +5,8 @@
 // A **presenter**: it owns no measurement and takes no queries of its own, so what it says can be
 // asserted here rather than looked at. §71 lists `F8` as *"simulated date/time, sun/moon altitude
 // and azimuth, moon phase and name, the full weather state vector, the current archetype and time
-// to the next transition, RNG state"*. `HOUSE-01695` supplies the weather half; the panel continues
-// to say explicitly that the later §35.3 sun/moon rows are absent.
+// to the next transition, RNG state"*. `HOUSE-01695` supplies the weather half; `HOUSE-01616`
+// supplies the celestial half from the retained lighting and sky answer.
 #include <string>
 #include <vector>
 
@@ -153,14 +153,51 @@ TEST(EnvironmentOverlayTests, TheBaseTemperatureIsHereBecauseSection36DerivesThe
         << "nothing says this is the base rather than the temperature outside";
 }
 
-TEST(EnvironmentOverlayTests, ThePanelSaysWhichOfSection71sRowsAreUnavailableOrNotBuiltYet)
+TEST(EnvironmentOverlayTests, ThePanelSaysWhichOfSection71sRowsAreUnavailable)
 {
-    // A non-walk scene has no weather owner, while §35.3's sun/moon overlay rows are still future
-    // work. Both absences are explicit rather than looking like an accidentally truncated panel.
+    // A non-walk scene has neither owner. Both absences are explicit rather than looking like an
+    // accidentally truncated panel.
     const std::string all = Joined(EnvironmentOverlay().Lines(SimClock()));
-    EXPECT_NE(all.find("not built yet"), std::string::npos) << all;
-    EXPECT_NE(all.find("§35.3"), std::string::npos) << "the missing sun is not attributed";
+    EXPECT_NE(all.find("celestial unavailable"), std::string::npos) << all;
+    EXPECT_EQ(all.find("not built yet"), std::string::npos) << all;
     EXPECT_NE(all.find("weather  unavailable"), std::string::npos) << all;
+}
+
+TEST(EnvironmentOverlayTests, SunMoonPhaseNameAndEveryStarVisibilityTermAreShown)
+{
+    cnahouse::debug::CelestialOverlayState celestial;
+    celestial.sun.altitudeDeg = -12.345;
+    celestial.sun.azimuthDeg = 359.75;
+    celestial.moon.altitudeDeg = 6.5;
+    celestial.moon.azimuthDeg = 42.25;
+    celestial.moonPhase.phase = 0.74;
+    celestial.moonPhase.illuminatedFraction = 0.618;
+    celestial.starVisibility.twilight = 0.25F;
+    celestial.starVisibility.cloudTransmission = 0.375F;
+    celestial.starVisibility.moonBrightness = 0.5F;
+    celestial.starVisibility.overallAlpha = 0.067F;
+    celestial.starVisibility.magnitudeCutoff = 0.14F;
+    celestial.visibleStarCount = 321;
+    celestial.catalogueStarCount = 1500;
+    celestial.starFieldAvailable = true;
+
+    const std::string all = Joined(EnvironmentOverlay().Lines(SimClock(), nullptr, &celestial));
+    EXPECT_NE(all.find("sun      alt -12.35 deg  az 359.75 deg"), std::string::npos) << all;
+    EXPECT_NE(all.find("moon     alt +6.50 deg  az 42.25 deg"), std::string::npos) << all;
+    EXPECT_NE(all.find("Last quarter  61.8% lit  p 0.740"), std::string::npos) << all;
+    EXPECT_NE(all.find("draw 321 / 1500  alpha 0.067  cutoff +0.14 mag"), std::string::npos) << all;
+    EXPECT_NE(all.find("twilight 0.250  cloud 0.375  moon 0.500"), std::string::npos) << all;
+}
+
+TEST(EnvironmentOverlayTests, MissingCatalogueDoesNotHideTheAvailableSunAndMoon)
+{
+    cnahouse::debug::CelestialOverlayState celestial;
+    celestial.sun.altitudeDeg = 20.0;
+    celestial.moon.altitudeDeg = -30.0;
+    const std::string all = Joined(EnvironmentOverlay().Lines(SimClock(), nullptr, &celestial));
+    EXPECT_NE(all.find("sun      alt +20.00"), std::string::npos) << all;
+    EXPECT_NE(all.find("moon     alt -30.00"), std::string::npos) << all;
+    EXPECT_NE(all.find("stars    unavailable"), std::string::npos) << all;
 }
 
 TEST(EnvironmentOverlayTests, EveryLiveWeatherFieldTargetTimerAndRngWordAreShown)

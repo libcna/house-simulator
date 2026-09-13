@@ -43,6 +43,14 @@ namespace cnahouse::rendering
 
     struct Camera;
 
+    /// @brief The retained §34 values exposed to §71's diagnostic overlay without exposing ownership.
+    struct StarFieldSnapshot
+    {
+        StarVisibility visibility;
+        std::size_t visibleStarCount = 0;
+        std::size_t catalogueStarCount = 0;
+    };
+
     /// @brief CPU-side contents of `docs/sky-dome-format.md`'s `CSKY` v1 file.
     ///
     /// Positions remain resident after upload because `HOUSE-01644` colours them from altitude
@@ -250,6 +258,16 @@ namespace cnahouse::rendering
         [[nodiscard]] const SkyTransientFrame& TransientFrame() const noexcept
         {
             return transients_.Frame();
+        }
+
+        [[nodiscard]] std::optional<StarFieldSnapshot> StarSnapshot() const noexcept
+        {
+            if (starField_ == nullptr)
+            {
+                return std::nullopt;
+            }
+            return StarFieldSnapshot{
+                starField_->Visibility(), starField_->VisibleStarCount(), starField_->Catalogue().size()};
         }
 
         [[nodiscard]] double LastColourMilliseconds() const noexcept

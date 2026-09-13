@@ -14536,8 +14536,21 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       measured: focused coverage passed **4 / 4 unit** and **1 / 1 real-device integration** test;
             complete suites passed **1378 / 1378 unit** and **110 / 110 integration** tests; strict
             XNA passed **316 translation units** with four compiler jobs.
-- [ ] HOUSE-01616 — Implement the `F8` overlay's sun/moon/star section
+- [x] HOUSE-01616 — Implement the `F8` overlay's sun/moon/star section
       dep: HOUSE-01612, HOUSE-01537 · sys: debug · plat: ALL · pri: MUST
+      verify: unit `EnvironmentOverlayTests.*` (11/11); offscreen OPENGLES3 integration
+              `HeadlessRunTests.PressingF8ShowsTheClockTheFrameActuallyRanOn`; complete unit and
+              integration suites; static XNA-only and strict-XNA all translation units with at
+              most four compiler jobs
+      note: (2026-09-13) F8 now presents the lighting stage's retained sun and moon altitude and
+            azimuth, the shared continuous phase plus its §33.2 name and illuminated percentage,
+            and the sky pass's retained star draw-prefix, limiting magnitude and twilight/cloud/
+            moon attenuation factors. `CelestialOverlayState` is copied from those two owners
+            after their update, so the debug panel cannot run a second ephemeris or disagree with
+            the frame being drawn. A missing scene owner or star catalogue is stated explicitly.
+      measured: focused coverage passed **11 / 11 unit** and **1 / 1 real-device integration**
+            test; complete suites passed **1380 / 1380 unit** and **110 / 110 integration** tests;
+            strict XNA passed **316 translation units** with four compiler jobs.
 - [ ] HOUSE-01617 — Render tests: the 8 named phases, a clear night, an overcast night, moonrise, and the star field at three twilight stages
       dep: HOUSE-01612 · sys: ci · plat: CI · pri: MUST
 - [x] HOUSE-01618 — Test: 30 simulated days advance the phase through exactly one lunation ± 0.03

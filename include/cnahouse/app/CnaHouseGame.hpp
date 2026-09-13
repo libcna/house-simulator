@@ -263,6 +263,9 @@ namespace cnahouse::app
             return weather_.has_value() ? &*weather_ : nullptr;
         }
 
+        /// @brief §71's current celestial diagnostic snapshot, absent outside a lit world scene.
+        [[nodiscard]] std::optional<debug::CelestialOverlayState> CelestialSnapshot() const noexcept;
+
         /// @brief The version line drawn in the corner and printed at startup.
         [[nodiscard]] static std::string VersionLine();
 
