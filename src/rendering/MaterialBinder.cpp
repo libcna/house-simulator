@@ -46,6 +46,17 @@ namespace cnahouse::rendering
             effect.setProjectionProperty(draw.projection != nullptr ? *draw.projection : Identity());
         }
 
+        void ApplyFog(auto& effect, const DrawParams& draw)
+        {
+            effect.setFogEnabledProperty(draw.fog != nullptr);
+            if (draw.fog != nullptr)
+            {
+                effect.setFogColorProperty(ToVector(draw.fog->colour));
+                effect.setFogStartProperty(draw.fog->start);
+                effect.setFogEndProperty(draw.fog->end);
+            }
+        }
+
         MaterialKind ToMaterialKind(world::EffectTier tier) noexcept
         {
             switch (tier)
@@ -272,17 +283,18 @@ namespace cnahouse::rendering
                 {
                     effect.setTextureProperty(draw.diffuse);
                 }
-                effect.setFogEnabledProperty(draw.fog != nullptr);
-                if (draw.fog != nullptr)
-                {
-                    effect.setFogColorProperty(ToVector(draw.fog->colour));
-                    effect.setFogStartProperty(draw.fog->start);
-                    effect.setFogEndProperty(draw.fog->end);
-                }
+                ApplyFog(effect, draw);
                 return &effect;
             }
             case MaterialKind::DualTexture:
             {
+                if (draw.diffuse == nullptr || draw.lightmap == nullptr)
+                {
+                    return Err(ErrorCode::InvalidArgument,
+                               std::format("material {:#010x} is dual-texture and needs both an "
+                                           "albedo and a per-draw lightmap",
+                                           id.Value()));
+                }
                 // MEASURED (`HOUSE-00078`): the product carries FNA's `*2` doubling factor, so a
                 // lightmap authored for it must be authored at half. Do NOT compensate here as well --
                 // the probe confirmed 128 x 128 -> 128, and a second correction would halve every room.
@@ -291,14 +303,9 @@ namespace cnahouse::rendering
                 effect.setDiffuseColorProperty(ToVector(desc->diffuse));
                 effect.setAlphaProperty(desc->alpha);
                 effect.setVertexColorEnabledProperty(desc->vertexColour);
-                if (draw.diffuse != nullptr)
-                {
-                    effect.setTextureProperty(draw.diffuse);
-                }
-                if (draw.second != nullptr)
-                {
-                    effect.setTexture2Property(draw.second);
-                }
+                effect.setTextureProperty(draw.diffuse);
+                effect.setTexture2Property(draw.lightmap);
+                ApplyFog(effect, draw);
                 return &effect;
             }
             case MaterialKind::AlphaTest:

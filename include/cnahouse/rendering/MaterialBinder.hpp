@@ -107,7 +107,8 @@ namespace cnahouse::rendering
         /// Non-const because XNA's `setTextureProperty` takes a non-const pointer, and a `const_cast`
         /// in the binder would hide that fact at the one place a reader would look for it.
         Microsoft::Xna::Framework::Graphics::Texture2D* diffuse = nullptr;
-        Microsoft::Xna::Framework::Graphics::Texture2D* second = nullptr;
+        /// @brief `DualTexture` only: the room/light-group lightmap selected for this pass.
+        Microsoft::Xna::Framework::Graphics::Texture2D* lightmap = nullptr;
         /// Null disables fog. Non-null enables it with the supplied environment-owned values.
         const FogParams* fog = nullptr;
         /// @brief `Skinned` only. Skin-local, and at most `SkinnedEffect::MaxBones`.

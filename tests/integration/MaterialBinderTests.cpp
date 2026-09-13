@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 
 #include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
+#include "Microsoft/Xna/Framework/Graphics/DualTextureEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Matrix.hpp"
@@ -34,17 +35,22 @@ namespace
     using cnahouse::util::Id;
     using Microsoft::Xna::Framework::Vector3;
 
-    void RunWithBinder(const std::function<void(MaterialBinder&)>& body)
+    void RunWithDeviceBinder(const std::function<void(Gfx::GraphicsDevice&, MaterialBinder&)>& body)
     {
         cnahouse::testsupport::DeviceHost host(
             [&](Gfx::GraphicsDevice& device)
             {
                 MaterialBinder binder(device);
-                body(binder);
+                body(device, binder);
             });
         host.Run();
         EXPECT_TRUE(host.Ran()) << "the frame that does the measuring never ran";
         EXPECT_EQ(host.Failure(), "") << "an effect rejected a parameter the binder set";
+    }
+
+    void RunWithBinder(const std::function<void(MaterialBinder&)>& body)
+    {
+        RunWithDeviceBinder([&](Gfx::GraphicsDevice&, MaterialBinder& binder) { body(binder); });
     }
 
     MaterialDesc Wall()
@@ -365,21 +371,92 @@ namespace
 
     TEST(MaterialBinderTests, EachKindGetsItsOwnEffectAndOnlyWhenItIsFirstUsed)
     {
-        RunWithBinder(
-            [](MaterialBinder& binder)
+        RunWithDeviceBinder(
+            [](Gfx::GraphicsDevice& device, MaterialBinder& binder)
             {
                 ASSERT_TRUE(binder.Register(Id::Of("MAT_WALL"), Wall()).HasValue());
                 ASSERT_TRUE(binder.Register(Id::Of("MAT_LEAF"), Foliage()).HasValue());
                 EXPECT_EQ(binder.EffectsCreated(), 0u)
                     << "registering a material must not create a shader object";
 
+                Gfx::Texture2D albedo(device, 2, 2);
+                Gfx::Texture2D lightmap(device, 2, 2);
                 DrawParams draw;
+                draw.diffuse = &albedo;
+                draw.lightmap = &lightmap;
                 ASSERT_TRUE(binder.Bind(Id::Of("MAT_WALL"), draw).HasValue());
                 EXPECT_EQ(binder.EffectsCreated(), 1u);
                 ASSERT_TRUE(binder.Bind(Id::Of("MAT_LEAF"), draw).HasValue());
                 EXPECT_EQ(binder.EffectsCreated(), 2u);
                 ASSERT_TRUE(binder.Bind(Id::Of("MAT_WALL"), draw).HasValue());
                 EXPECT_EQ(binder.EffectsCreated(), 2u) << "the second bind reuses the instance";
+            });
+    }
+
+    TEST(MaterialBinderTests, DualTextureEffectReceivesAlbedoLightmapTintAndFog)
+    {
+        RunWithDeviceBinder(
+            [](Gfx::GraphicsDevice& device, MaterialBinder& binder)
+            {
+                MaterialDesc desc = Wall();
+                desc.diffuse[0] = 0.20F;
+                desc.diffuse[1] = 0.40F;
+                desc.diffuse[2] = 0.60F;
+                desc.alpha = 0.75F;
+                desc.vertexColour = true;
+                const Id id = Id::Of("MAT_LIT_WALL");
+                ASSERT_TRUE(binder.Register(id, desc).HasValue());
+
+                Gfx::Texture2D albedo(device, 2, 2);
+                Gfx::Texture2D lightmap(device, 2, 2);
+                FogParams fog;
+                fog.colour[0] = 0.10F;
+                fog.colour[1] = 0.15F;
+                fog.colour[2] = 0.20F;
+                fog.start = 8.0F;
+                fog.end = 48.0F;
+                DrawParams draw;
+                draw.diffuse = &albedo;
+                draw.lightmap = &lightmap;
+                draw.fog = &fog;
+
+                const auto bound = binder.Bind(id, draw);
+                ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
+                auto* effect = static_cast<Gfx::DualTextureEffect*>(*bound);
+                EXPECT_EQ(effect->getTextureProperty(), &albedo);
+                EXPECT_EQ(effect->getTexture2Property(), &lightmap);
+                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.20F, 0.40F, 0.60F));
+                EXPECT_FLOAT_EQ(effect->getAlphaProperty(), 0.75F);
+                EXPECT_TRUE(effect->getVertexColorEnabledProperty());
+                EXPECT_TRUE(effect->getFogEnabledProperty());
+                EXPECT_EQ(effect->getFogColorProperty(), Vector3(0.10F, 0.15F, 0.20F));
+                EXPECT_FLOAT_EQ(effect->getFogStartProperty(), 8.0F);
+                EXPECT_FLOAT_EQ(effect->getFogEndProperty(), 48.0F);
+
+                draw.fog = nullptr;
+                ASSERT_TRUE(binder.Bind(id, draw).HasValue());
+                EXPECT_FALSE(effect->getFogEnabledProperty());
+            });
+    }
+
+    TEST(MaterialBinderTests, DualTextureEffectRefusesEitherMissingTexture)
+    {
+        RunWithDeviceBinder(
+            [](Gfx::GraphicsDevice& device, MaterialBinder& binder)
+            {
+                const Id id = Id::Of("MAT_LIT_WALL");
+                ASSERT_TRUE(binder.Register(id, Wall()).HasValue());
+                Gfx::Texture2D texture(device, 2, 2);
+
+                DrawParams noLightmap;
+                noLightmap.diffuse = &texture;
+                EXPECT_EQ(binder.Bind(id, noLightmap).Error().Code(), ErrorCode::InvalidArgument);
+
+                DrawParams noAlbedo;
+                noAlbedo.lightmap = &texture;
+                EXPECT_EQ(binder.Bind(id, noAlbedo).Error().Code(), ErrorCode::InvalidArgument);
+                EXPECT_EQ(binder.EffectsCreated(), 0U)
+                    << "an invalid draw must fail before allocating the shared effect";
             });
     }
 

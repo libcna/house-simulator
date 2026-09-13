@@ -2581,6 +2581,11 @@ for (auto& pass : effect.getCurrentTechniqueProperty()->getPassesProperty()) {
 }
 ```
 
+The `DualTexture` binder contract therefore requires both `DrawParams::diffuse` and
+`DrawParams::lightmap`; omitting either is a draw error reported before an effect is allocated.
+The same per-draw fog boundary as §31.5 is applied here, because exterior static surfaces are the
+largest fog receivers.
+
 Chunks are pre-transformed into **world space** at build time, so `World` is identity and no
 per-prop matrix upload happens. The cost is that a chunk cannot be instanced — which is the right
 trade for a building.

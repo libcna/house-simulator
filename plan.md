@@ -2102,10 +2102,11 @@ system update order, the settings file, the logging, and a CI that runs lints an
       finding: a duplicate material id is refused rather than replacing silently. Replacing is the
             worse failure — two rooms sharing a material name would render correctly for whichever
             loaded second, a bug that reproduces one room at a time.
-      finding: a `DualTexture` material with no second texture is refused as `InvalidData`. Left
-            alone it draws black, because `HOUSE-00078`'s lightmap product is with nothing; what the
-            author meant was `Basic`. The `*2` doubling factor that probe found is documented at the
-            bind site with an explicit instruction NOT to compensate for it a second time.
+      finding: a `DualTexture` draw with no per-draw lightmap is refused as `InvalidArgument`. Left
+            alone it draws black, because `HOUSE-00078`'s lightmap product is with nothing. The `*2`
+            doubling factor that probe found is documented at the bind site with an explicit
+            instruction NOT to compensate for it a second time. `HOUSE-00891` later made explicit
+            that the lightmap belongs to the room/light-group draw, not to the material definition.
       finding: the constructor as well as the destructor had to move into the .cpp. The effect
             members are `unique_ptr`s to forward-declared XNA types, and an inline constructor needs
             their complete types for the exception path that unwinds a partly built object — which
@@ -12810,7 +12811,7 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             or duplicate row rolls back only this call, so no frame can see half a material table.
       finding: a lightmap is selected from the visible room/light group per draw (§23), not loaded
             from a material. The unused `MaterialDesc::secondTexture` field and its registration-time
-            refusal falsely made it material-owned; the field is removed while `DrawParams::second`
+            refusal falsely made it material-owned; the field is removed while `DrawParams::lightmap`
             remains the honest per-draw input for `HOUSE-00893`.
       verified: max-4-core warning-clean build; 15 `MaterialBinderTests` plus the current-world fixture;
             complete suite 1551/1551 executed tests; `check_xna_strict.py --all --jobs 4` 317/317;
@@ -12829,8 +12830,19 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: max-4-core warning-clean build; 17 `MaterialBinderTests`, including a live-device
             inspection of every Basic value and the texture/fog reset; unit + integration suites;
             `tools/ci/run_checks.sh` all gates green.
-- [ ] HOUSE-00893 — Implement `MaterialBinder` for `DualTextureEffect`: albedo + lightmap + diffuse tint
+- [x] HOUSE-00893 — Implement `MaterialBinder` for `DualTextureEffect`: albedo + lightmap + diffuse tint
       dep: HOUSE-00892, HOUSE-00078 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-14) the DualTexture path now requires and writes the per-draw albedo and
+            room/light-group lightmap, plus material tint, alpha and vertex-colour mode. It also
+            applies the shared per-draw fog contract because exterior static surfaces are fog
+            receivers; the next non-fogged batch explicitly disables it.
+      finding: the old conditional setters accepted either null texture and retained the previous
+            draw's pointer in the one shared effect instance. A missing input now returns
+            `InvalidArgument` before allocating that effect. `DrawParams::second` is renamed
+            `lightmap`, making the §23 ownership and two-UV-channel contract explicit at call sites.
+      verified: max-4-core warning-clean build; 19 `MaterialBinderTests` on live stock-XNA effects,
+            including both slots/tint/fog and both missing-input cases; unit + integration
+            1501/1501; `tools/ci/run_checks.sh` all gates green.
 - [ ] HOUSE-00894 — Implement `MaterialBinder` for `AlphaTestEffect`: cutoff, compare function, two-sided
       dep: HOUSE-00892, HOUSE-00080 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00895 — Implement `MaterialBinder` for `SkinnedEffect`
