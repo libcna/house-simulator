@@ -5126,8 +5126,18 @@ is imported and manifested; the hero-asset research tasks have concrete answers.
             `python3 tools/assets/verify_licences.py --packaging`;
             `python3 tools/assets/manifest.py validate`;
             `python3 tools/assets/verify_licences.py --check`
-- [ ] HOUSE-00300 — Generate and review `licenses/THIRD-PARTY-ASSETS.md`
+- [x] HOUSE-00300 — Generate and review `licenses/THIRD-PARTY-ASSETS.md`
       dep: HOUSE-00299 · sys: — · plat: TOOL · pri: MUST
+      note: (2026-09-14) Regenerating from the audited manifest is byte-identical to the committed
+            document (sha256 `85fd5d3463e911bacd9510e5d39d4b3ca1c8ba1bc6ffb8b29045b8d36e267b23`).
+            The review counted exactly **551 downloaded rows**: 547 CC0-1.0, 1 NASA-PD, 2 OFL-1.1
+            and 1 US-GOV-PD. Each group links to its one non-empty archived licence text; every
+            non-CC0 row carries its attribution, author, source URL and retrieval date. Ordering is
+            the generator's deterministic licence/author/id order, the trailing stamp matches the
+            manifest sha256 `2ff6daff668f405eda6c148ecfbce86868b55b7f76ac729cab19a93e9f5faa1e`,
+            and no unknown-provenance or derived-output-restricted section is present.
+      verify: `python3 tools/assets/verify_licences.py --emit`; no diff;
+            `python3 tools/assets/verify_licences.py --check`; manifest/group-count cross-check
 - [x] HOUSE-00301 — Establish the asset-acquisition runbook so later sessions add assets consistently
       dep: HOUSE-00300 · sys: — · plat: TOOL · pri: MUST
       note: `docs/asset-acquisition-runbook.md`: the seven steps every asset in this repository
