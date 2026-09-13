@@ -228,6 +228,12 @@ namespace cnahouse::rendering
         auto glowColour = colourValue->RequireVector3("sunGlowColor");
         auto glowStrength = colourValue->RequireFloat("sunGlowStrength");
         auto glowExponent = colourValue->RequireFloat("sunGlowExponent");
+        auto pollutionColour = colourValue->RequireVector3("lightPollutionColor");
+        auto pollutionStrength = colourValue->RequireFloat("lightPollutionStrength");
+        auto townAzimuth = colourValue->RequireFloat("townAzimuthDeg");
+        auto pollutionAzimuthExponent = colourValue->RequireFloat("lightPollutionAzimuthExponent");
+        auto pollutionAltitudeExponent = colourValue->RequireFloat("lightPollutionAltitudeExponent");
+        auto pollutionMagnitudeLoss = colourValue->RequireFloat("lightPollutionStarMagnitudeLoss");
         if (!cloudSamples)
         {
             return InFile(cloudSamples.Error(), name);
@@ -252,6 +258,30 @@ namespace cnahouse::rendering
         {
             return InFile(glowExponent.Error(), name);
         }
+        if (!pollutionColour)
+        {
+            return InFile(pollutionColour.Error(), name);
+        }
+        if (!pollutionStrength)
+        {
+            return InFile(pollutionStrength.Error(), name);
+        }
+        if (!townAzimuth)
+        {
+            return InFile(townAzimuth.Error(), name);
+        }
+        if (!pollutionAzimuthExponent)
+        {
+            return InFile(pollutionAzimuthExponent.Error(), name);
+        }
+        if (!pollutionAltitudeExponent)
+        {
+            return InFile(pollutionAltitudeExponent.Error(), name);
+        }
+        if (!pollutionMagnitudeLoss)
+        {
+            return InFile(pollutionMagnitudeLoss.Error(), name);
+        }
         if (*cloudSamples != kCloudCoverSamples || *azimuthSamples != kAzimuthOffsetSamples)
         {
             return Bad(util::ErrorCode::InvalidData,
@@ -264,7 +294,12 @@ namespace cnahouse::rendering
         }
         if (!IsUnitColour(*overcast) || !IsUnitColour(*glowColour) || !std::isfinite(*glowStrength) ||
             *glowStrength < 0.0F || *glowStrength > 1.0F || !std::isfinite(*glowExponent) ||
-            *glowExponent <= 0.0F)
+            *glowExponent <= 0.0F || !IsUnitColour(*pollutionColour) || !std::isfinite(*pollutionStrength) ||
+            *pollutionStrength < 0.0F || *pollutionStrength > 1.0F || !std::isfinite(*townAzimuth) ||
+            *townAzimuth < 0.0F || *townAzimuth >= 360.0F || !std::isfinite(*pollutionAzimuthExponent) ||
+            *pollutionAzimuthExponent <= 0.0F || !std::isfinite(*pollutionAltitudeExponent) ||
+            *pollutionAltitudeExponent <= 0.0F || !std::isfinite(*pollutionMagnitudeLoss) ||
+            *pollutionMagnitudeLoss < 0.0F || *pollutionMagnitudeLoss > 5.5F)
         {
             return Bad(util::ErrorCode::OutOfRange,
                        "colourModel has a colour or scalar outside its supported range",
@@ -276,6 +311,12 @@ namespace cnahouse::rendering
         model.sunGlowColor = *glowColour;
         model.sunGlowStrength = *glowStrength;
         model.sunGlowExponent = *glowExponent;
+        model.lightPollution = StarLightPollution{*pollutionColour,
+                                                  *pollutionStrength,
+                                                  *townAzimuth,
+                                                  *pollutionAzimuthExponent,
+                                                  *pollutionAltitudeExponent,
+                                                  *pollutionMagnitudeLoss};
 
         auto sunValue = root.RequireArray("sun");
         if (!sunValue)
@@ -801,7 +842,7 @@ namespace cnahouse::rendering
                     std::move(cloudTextures),
                     std::move(moonAlbedo))
     {
-        starField_ = std::make_unique<StarField>(camera, std::move(stars));
+        starField_ = std::make_unique<StarField>(camera, std::move(stars), colourModel_.lightPollution);
     }
 
     SkySystem::~SkySystem() = default;
@@ -1035,7 +1076,11 @@ namespace cnahouse::rendering
             }
 
             const Xna::Vector3 nightBase = Lerp(nightHorizon, nightZenith, altitudeBlend);
-            const Xna::Vector3 night = AddScaled(nightBase, moonShading.color, moonShading.intensity);
+            Xna::Vector3 night = AddScaled(nightBase, moonShading.color, moonShading.intensity);
+            const float pollution = colourModel_.lightPollution.strength *
+                                    StarLightPollutionFactor(position, colourModel_.lightPollution) *
+                                    clearSky;
+            night = AddScaled(night, colourModel_.lightPollution.colour, pollution);
             colouredVertices_[i].Color = Xna::Color(Lerp(colour, night, nightWeight));
         }
         for (CloudRingMesh& ring : cloudRings_)

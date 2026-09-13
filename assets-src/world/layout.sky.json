@@ -53,7 +53,11 @@
     "cloudCoverSamples": 8, "azimuthOffsetSamples": 16,
     "overcastGrey": [0.370, 0.400, 0.440],
     "sunGlowColor": [1.000, 0.620, 0.300],
-    "sunGlowStrength": 0.180, "sunGlowExponent": 6.0
+    "sunGlowStrength": 0.180, "sunGlowExponent": 6.0,
+    "lightPollutionColor": [1.000, 0.450, 0.160],
+    "lightPollutionStrength": 0.055, "townAzimuthDeg": 180.0,
+    "lightPollutionAzimuthExponent": 4.0, "lightPollutionAltitudeExponent": 3.0,
+    "lightPollutionStarMagnitudeLoss": 2.5
   },
   // END GENERATED: sky_lut.py
 

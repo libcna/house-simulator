@@ -492,13 +492,29 @@ def build() -> dict[str, dict]:
             # in the offline generator would let its 4096-cell proof disagree with the frame.
             "colourModel": obj(
                 ["cloudCoverSamples", "azimuthOffsetSamples", "overcastGrey", "sunGlowColor",
-                 "sunGlowStrength", "sunGlowExponent"],
+                 "sunGlowStrength", "sunGlowExponent", "lightPollutionColor",
+                 "lightPollutionStrength", "townAzimuthDeg",
+                 "lightPollutionAzimuthExponent", "lightPollutionAltitudeExponent",
+                 "lightPollutionStarMagnitudeLoss"],
                 {"cloudCoverSamples": {"const": 8},
                  "azimuthOffsetSamples": {"const": 16},
                  "overcastGrey": RGB,
                  "sunGlowColor": RGB,
                  "sunGlowStrength": UNIT,
-                 "sunGlowExponent": {"type": "number", "exclusiveMinimum": 0}}),
+                 "sunGlowExponent": {"type": "number", "exclusiveMinimum": 0},
+                 # `HOUSE-01614`: one generated low-horizon lobe is shared by the warm dome
+                 # gradient and the directional loss of faint stars. Keep its bounds identical
+                 # to SkyColourModelReader so authored data cannot pass here and fail at runtime.
+                 "lightPollutionColor": RGB,
+                 "lightPollutionStrength": UNIT,
+                 "townAzimuthDeg": {"type": "number", "minimum": 0,
+                                     "exclusiveMaximum": 360},
+                 "lightPollutionAzimuthExponent": {"type": "number",
+                                                     "exclusiveMinimum": 0},
+                 "lightPollutionAltitudeExponent": {"type": "number",
+                                                      "exclusiveMinimum": 0},
+                 "lightPollutionStarMagnitudeLoss": {"type": "number", "minimum": 0,
+                                                       "maximum": 5.5}}),
             "cloudLayers": {"type": "array", "items": obj(
                 ["id", "texture", "altitude"],
                 {"id": ID, "texture": STR, "altitude": NUM,
@@ -767,6 +783,20 @@ def selftest() -> int:
         "id": "L", "cell": "C", "group": "G", "type": "point", "position": [0.0, 0.0]}]}
     require(validate_document("lights", flat),
             "and a position of two numbers is refused -- vectors are [x, y, z]")
+
+    sky = layout_io.load_file(REPO / "assets-src" / "world" / "layout.sky.json", "sky")
+    require(validate_document("sky", sky) == [],
+            "the generated town-glow model crosses the authored sky/schema boundary")
+    bad_pollution = json.loads(json.dumps(sky))
+    bad_pollution["colourModel"]["townAzimuthDeg"] = 360.0
+    require(any("townAzimuthDeg" in problem
+                for problem in validate_document("sky", bad_pollution)),
+            "a town azimuth outside the runtime's half-open compass range is refused")
+    bad_pollution["colourModel"]["townAzimuthDeg"] = 180.0
+    bad_pollution["colourModel"]["lightPollutionStarMagnitudeLoss"] = 6.0
+    require(any("lightPollutionStarMagnitudeLoss" in problem
+                for problem in validate_document("sky", bad_pollution)),
+            "the light-pollution star loss cannot exceed the catalogue's magnitude span")
 
     # 9. The emitted files are current, and round trip.
     stale = emit(dry_run=True)

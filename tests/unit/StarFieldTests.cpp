@@ -292,6 +292,35 @@ TEST(StarFieldTests, TwinkleSamplesExactlyAtTwentyHertzAndKeepsTheRemainder)
     EXPECT_EQ(field.TwinkleSampleTick(), 21u);
 }
 
+TEST(StarFieldTests, TownGlowTightensOnlyTheFaintSouthernHorizonCutoff)
+{
+    cnahouse::rendering::StarLightPollution pollution;
+    pollution.colour = Xna::Vector3(1.0F, 0.45F, 0.16F);
+    pollution.strength = 0.055F;
+    pollution.townAzimuthDeg = 180.0F;
+    pollution.azimuthExponent = 4.0F;
+    pollution.altitudeExponent = 3.0F;
+    pollution.starMagnitudeLoss = 2.5F;
+
+    const Xna::Vector3 southHorizon(0.0F, 0.0F, 1.0F);
+    const Xna::Vector3 northHorizon(0.0F, 0.0F, -1.0F);
+    const Xna::Vector3 eastHorizon(1.0F, 0.0F, 0.0F);
+    const Xna::Vector3 southThirtyDegrees(0.0F, 0.5F, 0.8660254F);
+    const Xna::Vector3 zenith(0.0F, 1.0F, 0.0F);
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarLightPollutionFactor(southHorizon, pollution), 1.0F);
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarLightPollutionFactor(northHorizon, pollution), 0.0F);
+    EXPECT_NEAR(cnahouse::rendering::StarLightPollutionFactor(eastHorizon, pollution), 0.0F, 1e-24F);
+    EXPECT_NEAR(cnahouse::rendering::StarLightPollutionFactor(southThirtyDegrees, pollution), 0.125F, 1e-6F);
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarLightPollutionFactor(zenith, pollution), 0.0F);
+
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarMagnitudeCutoffWithPollution(5.5F, southHorizon, pollution),
+                    3.0F);
+    EXPECT_FLOAT_EQ(cnahouse::rendering::StarMagnitudeCutoffWithPollution(5.5F, northHorizon, pollution),
+                    5.5F);
+    EXPECT_LT(cnahouse::rendering::StarMagnitudeCutoffWithPollution(5.5F, southThirtyDegrees, pollution),
+              5.5F);
+}
+
 TEST(StarFieldTests, EveryQuadFacesTheObserverAtTheAuthoredCelestialRadius)
 {
     const StarCatalogue catalogue{

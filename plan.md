@@ -14499,8 +14499,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             preserves sub-tick remainder, rejects invalid time, and publishes the sample count as
             `stars.twinkle_updates`. Three 60 Hz real-device draws cross exactly one twinkle tick;
             every render frame still retains HOUSE-01610's one Discard upload and one star draw.
-- [ ] HOUSE-01614 — Implement the light-pollution dome glow toward the town
+- [x] HOUSE-01614 — Implement the light-pollution dome glow toward the town
       dep: HOUSE-01612 · sys: rendering · plat: ALL · pri: SHOULD
+      verify: unit `SkySystemTests.*` and `StarFieldTests.*` (29/29); complete unit and offscreen
+              OPENGLES3 integration suites; `sky_lut.py --check/--selftest`,
+              `world_schema.py --check/--selftest`, `validate_world.py --selftest`; strict-XNA all
+              translation units with at most 4 compiler jobs; complete `tools/ci/run_checks.sh`
+      note: (2026-09-13) `colourModel` now owns one generated warm town lobe: due south at the
+            horizon, cosine-to-the-fourth across azimuth and cubically absent toward the zenith.
+            `SkySystem` adds its 5.5% orange term only to the clear night blend. The same strictly
+            parsed six-value contract tightens the local limiting magnitude by up to 2.5 around
+            the southern horizon, so faint stars disappear where the glow is visible while north,
+            east and the zenith retain the existing cutoff. Schema, format documentation, runtime
+            reader and independent generator oracle share the range and direction contract.
+      finding: the full content DAG rebuilt and deployed the changed sky/world stages, then reached
+            the pre-existing later `snowshell` input gap (`assets-src/world/layout.materials.json`);
+            this task neither owns nor masks that independent missing phase input.
+      measured: the focused sky/star suite passed **29 / 29 tests**; complete suites passed
+            **1374 / 1374 unit** and **109 / 109 integration** tests; strict XNA passed **313
+            translation units** with four compiler jobs.
 - [ ] HOUSE-01615 — Implement the two satellites and the occasional meteor
       dep: HOUSE-01612 · sys: rendering · plat: ALL · pri: OPT
 - [ ] HOUSE-01616 — Implement the `F8` overlay's sun/moon/star section

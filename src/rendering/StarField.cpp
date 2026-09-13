@@ -135,6 +135,7 @@ namespace cnahouse::rendering
         void FillStarVertices(std::span<const StarCatalogueEntry> catalogue,
                               const StarOrientation* orientation,
                               const StarVisibility* visibility,
+                              const StarLightPollution* lightPollution,
                               const std::uint64_t* twinkleSampleTick,
                               std::vector<Gfx::VertexPositionColor>& vertices)
         {
@@ -160,8 +161,12 @@ namespace cnahouse::rendering
                 StarAppearance appearance = AppearanceForStar(star.visualMagnitude, star.bvColourIndex);
                 if (visibility != nullptr)
                 {
-                    appearance.alpha *=
-                        star.visualMagnitude <= visibility->magnitudeCutoff ? visibility->overallAlpha : 0.0F;
+                    const float localCutoff =
+                        lightPollution == nullptr
+                            ? visibility->magnitudeCutoff
+                            : StarMagnitudeCutoffWithPollution(
+                                  visibility->magnitudeCutoff, direction, *lightPollution);
+                    appearance.alpha *= star.visualMagnitude <= localCutoff ? visibility->overallAlpha : 0.0F;
                 }
                 if (twinkleSampleTick != nullptr)
                 {
@@ -383,6 +388,48 @@ namespace cnahouse::rendering
         return 1.0F + StarTwinkleAmplitude(altitudeSine) * wave;
     }
 
+    float StarLightPollutionFactor(const Xna::Vector3& direction,
+                                   const StarLightPollution& pollution) noexcept
+    {
+        const double lengthSquared = Dot(direction, direction);
+        if (!std::isfinite(lengthSquared) || lengthSquared <= kVectorEpsilonSquared ||
+            !std::isfinite(pollution.townAzimuthDeg) || !std::isfinite(pollution.azimuthExponent) ||
+            !std::isfinite(pollution.altitudeExponent) || pollution.azimuthExponent <= 0.0F ||
+            pollution.altitudeExponent <= 0.0F)
+        {
+            return 0.0F;
+        }
+        const double length = std::sqrt(lengthSquared);
+        const double horizontalLength =
+            std::hypot(static_cast<double>(direction.X), static_cast<double>(direction.Z));
+        if (horizontalLength <= 1.0e-12)
+        {
+            return 0.0F;
+        }
+        const double azimuthRad = static_cast<double>(pollution.townAzimuthDeg) * std::numbers::pi / 180.0;
+        const double townX = std::sin(azimuthRad);
+        const double townZ = -std::cos(azimuthRad);
+        const double directional =
+            std::max(0.0,
+                     (static_cast<double>(direction.X) * townX + static_cast<double>(direction.Z) * townZ) /
+                         horizontalLength);
+        const double altitudeSine = std::clamp(static_cast<double>(direction.Y) / length, 0.0, 1.0);
+        return static_cast<float>(std::pow(directional, pollution.azimuthExponent) *
+                                  std::pow(1.0 - altitudeSine, pollution.altitudeExponent));
+    }
+
+    float StarMagnitudeCutoffWithPollution(float baseCutoff,
+                                           const Xna::Vector3& direction,
+                                           const StarLightPollution& pollution) noexcept
+    {
+        if (!std::isfinite(baseCutoff) || !std::isfinite(pollution.starMagnitudeLoss) ||
+            pollution.starMagnitudeLoss <= 0.0F)
+        {
+            return baseCutoff;
+        }
+        return baseCutoff - pollution.starMagnitudeLoss * StarLightPollutionFactor(direction, pollution);
+    }
+
     StarAppearance AppearanceForStar(float visualMagnitude, float bvColourIndex) noexcept
     {
         const float magnitude = std::clamp(visualMagnitude, kMinimumMagnitude, kMaximumMagnitude);
@@ -402,7 +449,7 @@ namespace cnahouse::rendering
     std::vector<Gfx::VertexPositionColor> BuildStarVertices(std::span<const StarCatalogueEntry> catalogue)
     {
         std::vector<Gfx::VertexPositionColor> vertices;
-        FillStarVertices(catalogue, nullptr, nullptr, nullptr, vertices);
+        FillStarVertices(catalogue, nullptr, nullptr, nullptr, nullptr, vertices);
         return vertices;
     }
 
@@ -410,7 +457,7 @@ namespace cnahouse::rendering
                                                             const StarOrientation& orientation)
     {
         std::vector<Gfx::VertexPositionColor> vertices;
-        FillStarVertices(catalogue, &orientation, nullptr, nullptr, vertices);
+        FillStarVertices(catalogue, &orientation, nullptr, nullptr, nullptr, vertices);
         return vertices;
     }
 
@@ -454,12 +501,19 @@ namespace cnahouse::rendering
     };
 
     StarField::StarField(const Camera& camera, StarCatalogue catalogue)
+        : StarField(camera, std::move(catalogue), StarLightPollution{})
+    {
+    }
+
+    StarField::StarField(const Camera& camera, StarCatalogue catalogue, StarLightPollution lightPollution)
         : camera_(&camera)
         , catalogue_(std::move(catalogue))
+        , lightPollution_(lightPollution)
     {
         orientation_ = StarOrientationFor(environment::SimClock{});
         visibleStarCount_ = catalogue_.size();
-        FillStarVertices(catalogue_, &orientation_, &visibility_, &twinkleSampleTick_, vertices_);
+        FillStarVertices(
+            catalogue_, &orientation_, &visibility_, &lightPollution_, &twinkleSampleTick_, vertices_);
         geometryUpdateCount_ = 1;
     }
 
@@ -489,7 +543,8 @@ namespace cnahouse::rendering
                                                             { return cutoff < star.visualMagnitude; }) -
                                            catalogue_.begin())
                 : 0u;
-        FillStarVertices(catalogue_, &orientation_, &visibility_, &twinkleSampleTick_, vertices_);
+        FillStarVertices(
+            catalogue_, &orientation_, &visibility_, &lightPollution_, &twinkleSampleTick_, vertices_);
         ++geometryUpdateCount_;
         return true;
     }
@@ -553,7 +608,8 @@ namespace cnahouse::rendering
         }
         twinkleAccumulatorSeconds_ -= static_cast<double>(elapsedTicks) * kStarTwinkleStepSeconds;
         twinkleSampleTick_ += elapsedTicks;
-        FillStarVertices(catalogue_, &orientation_, &visibility_, &twinkleSampleTick_, vertices_);
+        FillStarVertices(
+            catalogue_, &orientation_, &visibility_, &lightPollution_, &twinkleSampleTick_, vertices_);
         ++geometryUpdateCount_;
         return true;
     }

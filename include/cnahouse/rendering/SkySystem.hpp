@@ -104,6 +104,7 @@ namespace cnahouse::rendering
         Microsoft::Xna::Framework::Vector3 sunGlowColor;
         float sunGlowStrength = 0.0F;
         float sunGlowExponent = 0.0F;
+        StarLightPollution lightPollution;
         std::vector<SkySunIntensityRow> sunIntensity;
         std::uint32_t cloudCoverSamples = 0;
         std::uint32_t azimuthOffsetSamples = 0;

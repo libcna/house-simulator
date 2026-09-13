@@ -155,6 +155,25 @@
         "cloudCoverSamples": {
           "const": 8
         },
+        "lightPollutionAltitudeExponent": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "lightPollutionAzimuthExponent": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "lightPollutionColor": {
+          "$ref": "#/$defs/rgb"
+        },
+        "lightPollutionStarMagnitudeLoss": {
+          "maximum": 5.5,
+          "minimum": 0,
+          "type": "number"
+        },
+        "lightPollutionStrength": {
+          "$ref": "#/$defs/unit"
+        },
         "overcastGrey": {
           "$ref": "#/$defs/rgb"
         },
@@ -167,6 +186,11 @@
         },
         "sunGlowStrength": {
           "$ref": "#/$defs/unit"
+        },
+        "townAzimuthDeg": {
+          "exclusiveMaximum": 360,
+          "minimum": 0,
+          "type": "number"
         }
       },
       "required": [
@@ -175,7 +199,13 @@
         "overcastGrey",
         "sunGlowColor",
         "sunGlowStrength",
-        "sunGlowExponent"
+        "sunGlowExponent",
+        "lightPollutionColor",
+        "lightPollutionStrength",
+        "townAzimuthDeg",
+        "lightPollutionAzimuthExponent",
+        "lightPollutionAltitudeExponent",
+        "lightPollutionStarMagnitudeLoss"
       ],
       "type": "object"
     },

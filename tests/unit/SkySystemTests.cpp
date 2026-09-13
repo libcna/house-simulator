@@ -153,6 +153,12 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
     EXPECT_FLOAT_EQ(model->sunIntensity.front().intensity, 0.0F);
     EXPECT_DOUBLE_EQ(model->sunIntensity.back().elevationDeg, 90.0);
     EXPECT_FLOAT_EQ(model->sunIntensity.back().intensity, 1.0F);
+    EXPECT_EQ(model->lightPollution.colour, (Microsoft::Xna::Framework::Vector3{1.0F, 0.45F, 0.16F}));
+    EXPECT_FLOAT_EQ(model->lightPollution.strength, 0.055F);
+    EXPECT_FLOAT_EQ(model->lightPollution.townAzimuthDeg, 180.0F);
+    EXPECT_FLOAT_EQ(model->lightPollution.azimuthExponent, 4.0F);
+    EXPECT_FLOAT_EQ(model->lightPollution.altitudeExponent, 3.0F);
+    EXPECT_FLOAT_EQ(model->lightPollution.starMagnitudeLoss, 2.5F);
     EXPECT_EQ(model->cloudLayers[0].id, "CL_HIGH");
     EXPECT_EQ(model->cloudLayers[1].id, "CL_MID");
     EXPECT_EQ(model->cloudLayers[2].id, "CL_LOW");
@@ -178,6 +184,9 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
              {"\"cloudCover\": [\n        0.0", "\"cloudCover\": [\n        0.01"},
              {"\"stormCloudAlpha\": {\n    \"high\": 0.0", "\"stormCloudAlpha\": {\n    \"high\": 1.2"},
              {"\"intensity\": 0.0", "\"intensity\": 1.2"},
+             {"\"townAzimuthDeg\": 180.0", "\"townAzimuthDeg\": 360.0"},
+             {"\"lightPollutionAltitudeExponent\": 3.0", "\"lightPollutionAltitudeExponent\": 0.0"},
+             {"\"lightPollutionStarMagnitudeLoss\": 2.5", "\"lightPollutionStarMagnitudeLoss\": 6.0"},
          })
     {
         std::string changed = json;
@@ -186,6 +195,45 @@ TEST(SkySystemTests, TheGeneratedColourModelLoadsAndItsIdentityAndSampleAxesAreS
         changed.replace(at, mutation.first.size(), mutation.second);
         EXPECT_FALSE(cnahouse::rendering::SkyColourModelReader::Read(changed, "layout.sky.json"));
     }
+}
+
+TEST(SkySystemTests, NightTownGlowIsWarmSouthernAndConfinedToTheHorizon)
+{
+    auto mesh = ReadOf(FixtureBytes());
+    auto model = cnahouse::rendering::SkyColourModelReader::Read(SkyJson(), "layout.sky.json");
+    ASSERT_TRUE(mesh);
+    ASSERT_TRUE(model);
+    cnahouse::rendering::Camera camera;
+    cnahouse::rendering::SkySystem sky(camera, std::move(*mesh), std::move(*model));
+
+    cnahouse::environment::SunPosition sun;
+    sun.altitudeDeg = -18.0;
+    cnahouse::environment::MoonPosition moon;
+    moon.altitudeDeg = -20.0;
+    ASSERT_TRUE(sky.SetSky(sun, moon, cnahouse::environment::MoonPhase{}, 0.0));
+
+    const auto south = std::max_element(sky.ColouredVertices().begin(),
+                                        sky.ColouredVertices().end(),
+                                        [](const auto& left, const auto& right)
+                                        { return left.Position.Z < right.Position.Z; });
+    const auto north = std::min_element(sky.ColouredVertices().begin(),
+                                        sky.ColouredVertices().end(),
+                                        [](const auto& left, const auto& right)
+                                        { return left.Position.Z < right.Position.Z; });
+    const auto zenith = std::max_element(sky.ColouredVertices().begin(),
+                                         sky.ColouredVertices().end(),
+                                         [](const auto& left, const auto& right)
+                                         { return left.Position.Y < right.Position.Y; });
+    ASSERT_NE(south, sky.ColouredVertices().end());
+    ASSERT_NE(north, sky.ColouredVertices().end());
+    ASSERT_NE(zenith, sky.ColouredVertices().end());
+    const auto southColour = south->Color.ToVector3();
+    const auto northColour = north->Color.ToVector3();
+    EXPECT_GT(southColour.X - northColour.X, 0.045F);
+    EXPECT_GT(southColour.Y - northColour.Y, 0.015F);
+    EXPECT_LT(southColour.Z - northColour.Z, southColour.X - northColour.X)
+        << "the town dome must be warm rather than another blue night gradient";
+    EXPECT_NEAR(zenith->Color.ToVector3().X, 0.01F, 0.005F) << "the low-horizon glow leaked into the zenith";
 }
 
 TEST(SkySystemTests, SunGlowIsDirectionalMatchesTheAuthoredCurveAndVanishesUnderCloud)

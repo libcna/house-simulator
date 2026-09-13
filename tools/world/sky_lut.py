@@ -38,6 +38,12 @@ OVERCAST_GREY = (0.370, 0.400, 0.440)
 SUN_GLOW_COLOUR = (1.000, 0.620, 0.300)
 SUN_GLOW_STRENGTH = 0.180
 SUN_GLOW_EXPONENT = 6.0
+LIGHT_POLLUTION_COLOUR = (1.000, 0.450, 0.160)
+LIGHT_POLLUTION_STRENGTH = 0.055
+TOWN_AZIMUTH_DEG = 180.0
+LIGHT_POLLUTION_AZIMUTH_EXPONENT = 4.0
+LIGHT_POLLUTION_ALTITUDE_EXPONENT = 3.0
+LIGHT_POLLUTION_STAR_MAGNITUDE_LOSS = 2.5
 
 
 @dataclass(frozen=True)
@@ -140,6 +146,14 @@ def evaluated_zenith(elevation: float, cloud_cover: float) -> tuple[float, float
     return mix(zenith, OVERCAST_GREY, cloud_cover ** 1.5)
 
 
+def light_pollution_factor(azimuth_deg: float, altitude_sine: float) -> float:
+    """The generated town-facing low-horizon gradient shared by dome and stars."""
+    offset = math.radians(azimuth_deg - TOWN_AZIMUTH_DEG)
+    directional = max(math.cos(offset), 0.0) ** LIGHT_POLLUTION_AZIMUTH_EXPONENT
+    horizon = (1.0 - min(max(altitude_sine, 0.0), 1.0)) ** LIGHT_POLLUTION_ALTITUDE_EXPONENT
+    return directional * horizon
+
+
 def virtual_lut() -> list[tuple[float, float, float]]:
     """Materialise the horizon table represented by the committed compact form."""
     return [
@@ -168,7 +182,14 @@ def render_block() -> str:
         '    "overcastGrey": [' + ", ".join(f"{value:.3f}" for value in OVERCAST_GREY) + "],",
         '    "sunGlowColor": [' + ", ".join(f"{value:.3f}" for value in SUN_GLOW_COLOUR) + "],",
         f'    "sunGlowStrength": {SUN_GLOW_STRENGTH:.3f}, '
-        f'"sunGlowExponent": {SUN_GLOW_EXPONENT:.1f}',
+        f'"sunGlowExponent": {SUN_GLOW_EXPONENT:.1f},',
+        '    "lightPollutionColor": [' +
+        ", ".join(f"{value:.3f}" for value in LIGHT_POLLUTION_COLOUR) + "],",
+        f'    "lightPollutionStrength": {LIGHT_POLLUTION_STRENGTH:.3f}, '
+        f'"townAzimuthDeg": {TOWN_AZIMUTH_DEG:.1f},',
+        f'    "lightPollutionAzimuthExponent": {LIGHT_POLLUTION_AZIMUTH_EXPONENT:.1f}, '
+        f'"lightPollutionAltitudeExponent": {LIGHT_POLLUTION_ALTITUDE_EXPONENT:.1f},',
+        f'    "lightPollutionStarMagnitudeLoss": {LIGHT_POLLUTION_STAR_MAGNITUDE_LOSS:.1f}',
         "  },",
     ])
     return "\n".join(lines)
@@ -228,6 +249,17 @@ def selftest() -> int:
     require(near_sun[0] > away_sun[0] and near_sun[0] > 4.0 * near_sun[2],
             f"the clear sunrise glow is local and warm ({near_sun} versus {away_sun})")
     require(max(near_sun) <= 1.0, "the tuned sunrise remains in XNA Color's 0..1 range")
+
+    require(light_pollution_factor(180.0, 0.0) == 1.0,
+            "the extra night gradient peaks on the southern town horizon")
+    require(light_pollution_factor(0.0, 0.0) == 0.0
+            and light_pollution_factor(90.0, 0.0) < 1e-60,
+            "the town gradient contributes nothing on the northern or eastern horizon")
+    require(abs(light_pollution_factor(180.0, 0.5) - 0.125) < 1e-12
+            and light_pollution_factor(180.0, 1.0) == 0.0,
+            "the town gradient falls cubically from horizon to zenith")
+    require(LIGHT_POLLUTION_STAR_MAGNITUDE_LOSS == 2.5,
+            "the glow removes 2.5 magnitudes only at its strongest point")
 
     print("sky_lut: selftest passed." if not failures
           else f"sky_lut: {failures} claim(s) FAILED")

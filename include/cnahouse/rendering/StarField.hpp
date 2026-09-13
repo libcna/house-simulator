@@ -80,6 +80,17 @@ namespace cnahouse::rendering
         float magnitudeCutoff = 5.5F;
     };
 
+    /// @brief Section 34's authored town glow, shared by the dome and star suppression.
+    struct StarLightPollution
+    {
+        Microsoft::Xna::Framework::Vector3 colour;
+        float strength = 0.0F;
+        float townAzimuthDeg = 180.0F;
+        float azimuthExponent = 4.0F;
+        float altitudeExponent = 3.0F;
+        float starMagnitudeLoss = 0.0F;
+    };
+
     inline constexpr double kStarCloudExponent = 1.6;
     inline constexpr double kStarMoonSuppression = 0.55;
     inline constexpr double kStarTwinkleStepSeconds = 1.0 / 20.0;
@@ -119,6 +130,15 @@ namespace cnahouse::rendering
     [[nodiscard]] float
     StarTwinkleFactor(std::size_t starIndex, float altitudeSine, std::uint64_t sampleTick) noexcept;
 
+    /// @brief Directional low-horizon lobe: one toward the town, zero away or at zenith.
+    [[nodiscard]] float StarLightPollutionFactor(const Microsoft::Xna::Framework::Vector3& direction,
+                                                 const StarLightPollution& pollution) noexcept;
+
+    /// @brief Tightens the local limiting magnitude inside the town glow.
+    [[nodiscard]] float StarMagnitudeCutoffWithPollution(float baseCutoff,
+                                                         const Microsoft::Xna::Framework::Vector3& direction,
+                                                         const StarLightPollution& pollution) noexcept;
+
     /// @brief Samples §34's small B-V LUT and magnitude response.
     [[nodiscard]] StarAppearance AppearanceForStar(float visualMagnitude, float bvColourIndex) noexcept;
 
@@ -135,6 +155,7 @@ namespace cnahouse::rendering
     {
     public:
         StarField(const Camera& camera, StarCatalogue catalogue);
+        StarField(const Camera& camera, StarCatalogue catalogue, StarLightPollution lightPollution);
         ~StarField() override;
 
         /// @brief Rotates the retained catalogue to the clock's current local horizon frame.
@@ -219,6 +240,7 @@ namespace cnahouse::rendering
         std::vector<Microsoft::Xna::Framework::Graphics::VertexPositionColor> vertices_;
         StarOrientation orientation_;
         StarVisibility visibility_;
+        StarLightPollution lightPollution_;
         std::unique_ptr<Resources> resources_;
         std::size_t visibleStarCount_ = 0;
         double twinkleAccumulatorSeconds_ = 0.0;
