@@ -136,6 +136,11 @@ namespace cnahouse::testsupport
         settings.backBufferWidth = width;
         settings.backBufferHeight = height;
         settings.verticalSync = false;
+        // A reference scene owns every pixel it presents. Keep the general-purpose harness free
+        // of the player-facing environment readout; its dedicated render fixture enables and
+        // verifies that HUD explicitly. Otherwise changing the default setting invalidates every
+        // unrelated geometry reference without changing the geometry it is meant to protect.
+        settings.showEnvironmentReadout = false;
 
         try
         {

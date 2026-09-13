@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 //
-// `HOUSE-01544`. Four frames at the edges of the longest and shortest days.
+// `HOUSE-01544`, `HOUSE-01617`. Four frames at the edges of the longest and shortest days,
+// including the production sky behind each solar state.
 //
 // These are deliberately reached through §71's production `time` command. Under §35.2b's
 // compressed year a calendar date and a clock face are not independent, so each fixture names one
@@ -139,6 +140,8 @@ namespace
         settings.backBufferWidth = kWidth;
         settings.backBufferHeight = kHeight;
         settings.verticalSync = false;
+        // The environment readout has its own fixture. These references isolate the sky and sun.
+        settings.showEnvironmentReadout = false;
 
         CnaHouseGame game(OptionsFor(scene, path), settings);
         SeasonClockDriver driver(game, scene.calendarDays);

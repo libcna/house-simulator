@@ -14551,8 +14551,27 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       measured: focused coverage passed **11 / 11 unit** and **1 / 1 real-device integration**
             test; complete suites passed **1380 / 1380 unit** and **110 / 110 integration** tests;
             strict XNA passed **316 translation units** with four compiler jobs.
-- [ ] HOUSE-01617 — Render tests: the 8 named phases, a clear night, an overcast night, moonrise, and the star field at three twilight stages
+- [x] HOUSE-01617 — Render tests: the 8 named phases, a clear night, an overcast night, moonrise, and the star field at three twilight stages
       dep: HOUSE-01612 · sys: ci · plat: CI · pri: MUST
+      verify: offscreen software-OPENGLES3 `MoonDiscRenderTests.*:StarFieldRenderTests.*`;
+              complete `cnahouse_render_tests`; visual review of the regenerated reference sheet
+      note: (2026-09-13) Real-device render-target readback now walks the exact eight §33.2 phase
+            names at eighth-lunation samples, proves continuous brightening/darkening around full
+            moon and the waxing/waning limb orientation, and retains the existing refracted-horizon
+            moonrise scale and red-orange tint proof. A real generated 1,500-star CSTR catalogue is
+            drawn at -4, -9 and -14 degrees solar altitude: daylight submits none, twilight submits
+            a non-empty prefix, clear night submits and lights more pixels, and total overcast
+            suppresses the field completely.
+      note: The new production sky and the default-on player environment readout exposed stale
+            golden frames in the broader suite. The general render harness now explicitly hides
+            that unrelated HUD while its dedicated fixture keeps it enabled. The accepted software
+            references were regenerated under Mesa 25.0.7 and reviewed as one contact sheet; the
+            four seasonal scenes now deliberately include their production sky.
+      measured: focused celestial coverage passed **3 / 3 render tests**; the complete render
+            binary passed **43 / 43 tests** after the reference refresh (8 disabled regeneration
+            cases were not part of the normal run); the complete unit binary passed **1380 / 1380
+            tests**; strict XNA passed **317 translation units** with four compiler jobs; the full
+            build and `tools/ci/run_checks.sh` passed with the process pinned to four CPU cores.
 - [x] HOUSE-01618 — Test: 30 simulated days advance the phase through exactly one lunation ± 0.03
       dep: HOUSE-01608 · sys: ci · plat: CI · pri: MUST
       verify: integration `LunationCycleTests.ThirtyDayAdvanceCompletesOneLunation`; complete
