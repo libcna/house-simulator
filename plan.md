@@ -13544,8 +13544,18 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             depth enabled, depth writes off and `Equal`; HOUSE-00079's depth-tilted GPU probe proves
             exact 60 + 40 and 60 + 40 + 40 pixel sums with zero rejected pixels; 12-pose blockout
             goldens and all 18 culled-vs-unculled comparisons pass.
-- [ ] HOUSE-01257 — Implement the `ambientFloor` so an unlit windowless room is very dark but not black
+- [x] HOUSE-01257 — Implement the `ambientFloor` so an unlit windowless room is very dark but not black
       dep: HOUSE-01256 · sys: lighting · plat: ALL · pri: MUST
+      note: (2026-09-14) The opaque Tier-S receiver pass now adds the shared 0.025 ambient floor
+            through the room's authored primary lightmap and material tint. Cells with no
+            artificial group use the neutral half-grey map at the same floor; Basic-effect detail
+            receives the floor alongside its live sky ambient. The base group follows the cell's
+            semantic `lightGroups` order rather than the bake report's alphabetical product order,
+            so `MAIN` rather than an aisle/accent group carries the dark-room silhouette.
+      verified: the `RoomLightState` unit suite pins exactly 0.025 for a room with no source;
+            MaterialBinder tests pin per-draw colour multiplication; the live production pass test
+            verifies the authored primary map is the opaque pass before additive groups;
+            warning-clean max-4-core game/integration build.
 - [ ] HOUSE-01258 — Implement the switch-on transition per bulb class (filament ramp, instant LED, fluorescent flicker start)
       dep: HOUSE-01256 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-01259 — Implement fixture emissive materials and their on/off state

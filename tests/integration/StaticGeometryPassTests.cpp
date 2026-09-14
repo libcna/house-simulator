@@ -179,6 +179,17 @@ namespace
         ASSERT_NE(kitchen, nullptr);
         ASSERT_TRUE(kitchen->lightmaps.daylight.has_value());
         ASSERT_GE(kitchen->lightmaps.artificial.size(), 2U);
+        ASSERT_FALSE(kitchen->lightGroups.empty());
+        const auto primary = std::find_if(kitchen->lightmaps.artificial.begin(),
+                                          kitchen->lightmaps.artificial.end(),
+                                          [&](const cnahouse::world::CellLightmapGroup& binding)
+                                          { return binding.group == kitchen->lightGroups.front(); });
+        ASSERT_NE(primary, kitchen->lightmaps.artificial.end());
+        const auto secondary = std::find_if(kitchen->lightmaps.artificial.begin(),
+                                            kitchen->lightmaps.artificial.end(),
+                                            [&](const cnahouse::world::CellLightmapGroup& binding)
+                                            { return binding.group != primary->group; });
+        ASSERT_NE(secondary, kitchen->lightmaps.artificial.end());
         const cnahouse::world::MaterialDef* floor = world.FindMaterial(kitchen->floorMaterial);
         ASSERT_NE(floor, nullptr);
         ASSERT_EQ(floor->effectTierS, cnahouse::world::EffectTier::DualTexture);
@@ -207,8 +218,8 @@ namespace
                 cnahouse::lighting::ShadingGrid shading = cnahouse::lighting::ShadingGrid::Unshaded();
                 cnahouse::environment::SimClock clock;
                 cnahouse::lighting::LightingSystem lighting(world, shading, clock, visibility.Portals());
-                ASSERT_TRUE(lighting.SetGroupOn(kitchen->lightmaps.artificial[0].group, true));
-                ASSERT_TRUE(lighting.SetGroupOn(kitchen->lightmaps.artificial[1].group, true));
+                ASSERT_TRUE(lighting.SetGroupOn(primary->group, true));
+                ASSERT_TRUE(lighting.SetGroupOn(secondary->group, true));
                 cnahouse::app::FrameContext frame;
                 frame.frameIndex = 1U;
                 lighting.Update(frame);
@@ -254,14 +265,11 @@ namespace
         ASSERT_TRUE(host.Ran());
         ASSERT_EQ(host.Failure(), "");
         EXPECT_EQ(drawn, 1U);
+        ASSERT_GE(requested.size(), 3U);
         EXPECT_NE(std::find(requested.begin(), requested.end(), floor->albedo), requested.end());
-        EXPECT_NE(std::find(requested.begin(),
-                            requested.end(),
-                            kitchen->lightmaps.artificial[0].texture.contentName),
-                  requested.end());
-        EXPECT_NE(std::find(requested.begin(),
-                            requested.end(),
-                            kitchen->lightmaps.artificial[1].texture.contentName),
+        EXPECT_EQ(requested[1], primary->texture.contentName)
+            << "the opaque ambient-bearing pass follows the authored lightGroups order";
+        EXPECT_NE(std::find(requested.begin(), requested.end(), secondary->texture.contentName),
                   requested.end());
         EXPECT_EQ(std::find(requested.begin(), requested.end(), kitchen->lightmaps.daylight->contentName),
                   requested.end())

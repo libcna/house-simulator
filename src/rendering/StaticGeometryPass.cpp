@@ -383,13 +383,36 @@ namespace cnahouse::rendering
             {
                 if (!cell->lightmaps.artificial.empty())
                 {
-                    const world::CellLightmapGroup& base = cell->lightmaps.artificial.front();
+                    auto bindingFor = [&](util::Id group) -> const world::CellLightmapGroup*
+                    {
+                        const auto found = std::find_if(cell->lightmaps.artificial.begin(),
+                                                        cell->lightmaps.artificial.end(),
+                                                        [group](const world::CellLightmapGroup& candidate)
+                                                        { return candidate.group == group; });
+                        return found == cell->lightmaps.artificial.end() ? nullptr : &*found;
+                    };
+                    const world::CellLightmapGroup* base = nullptr;
+                    for (const util::Id group : cell->lightGroups)
+                    {
+                        base = bindingFor(group);
+                        if (base != nullptr)
+                        {
+                            break;
+                        }
+                    }
+                    if (base == nullptr)
+                    {
+                        first = last;
+                        continue;
+                    }
                     DrawParams draw = common;
-                    draw.lightmap = textures_(base.texture.contentName);
-                    const float level = lighting_->GroupLevelInCell(cell->id, base.group);
-                    const Vector3 colour = lighting_->GroupColor(base.group);
-                    const float scale = 0.5F * base.texture.scale * level;
-                    draw.colourMultiplier = Vector3(scale * colour.X, scale * colour.Y, scale * colour.Z);
+                    draw.lightmap = textures_(base->texture.contentName);
+                    const float level = lighting_->GroupLevelInCell(cell->id, base->group);
+                    const Vector3 colour = lighting_->GroupColor(base->group);
+                    const float scale = 0.5F * base->texture.scale;
+                    draw.colourMultiplier = Vector3(scale * (level * colour.X + lighting::kAmbientFloor),
+                                                    scale * (level * colour.Y + lighting::kAmbientFloor),
+                                                    scale * (level * colour.Z + lighting::kAmbientFloor));
                     if (!submit(draw, false, true))
                     {
                         first = last;
@@ -399,18 +422,22 @@ namespace cnahouse::rendering
                     // The first group establishes colour and depth even when its switch is off.
                     // Later groups with no contribution cost no draw; active ones repeat exactly
                     // the same geometry under the depth-equal state measured by HOUSE-00079.
-                    for (std::size_t index = 1U; index < cell->lightmaps.artificial.size(); ++index)
+                    for (const util::Id groupId : cell->lightGroups)
                     {
-                        const world::CellLightmapGroup& group = cell->lightmaps.artificial[index];
-                        const float groupLevel = lighting_->GroupLevelInCell(cell->id, group.group);
+                        const world::CellLightmapGroup* group = bindingFor(groupId);
+                        if (group == nullptr || group == base)
+                        {
+                            continue;
+                        }
+                        const float groupLevel = lighting_->GroupLevelInCell(cell->id, group->group);
                         if (groupLevel <= 0.0F)
                         {
                             continue;
                         }
                         DrawParams additional = common;
-                        additional.lightmap = textures_(group.texture.contentName);
-                        const Vector3 groupColour = lighting_->GroupColor(group.group);
-                        const float groupScale = 0.5F * group.texture.scale * groupLevel;
+                        additional.lightmap = textures_(group->texture.contentName);
+                        const Vector3 groupColour = lighting_->GroupColor(group->group);
+                        const float groupScale = 0.5F * group->texture.scale * groupLevel;
                         additional.colourMultiplier = Vector3(groupScale * groupColour.X,
                                                               groupScale * groupColour.Y,
                                                               groupScale * groupColour.Z);
@@ -421,13 +448,14 @@ namespace cnahouse::rendering
                 {
                     // Exterior surfaces have no room bake. Half-grey is neutral under
                     // DualTextureEffect's measured x2 product. An interior receiver with no
-                    // artificial group is black until HOUSE-01257 adds its ambient floor and
-                    // HOUSE-01264 adds daylight, but still writes the depth those passes need.
+                    // artificial group uses the neutral map for its ambient floor and still writes
+                    // the depth HOUSE-01264's daylight pass needs.
                     DrawParams draw = common;
                     draw.lightmap = textures_(kNeutralLightmap);
                     if (cell->lightmaps.daylight.has_value())
                     {
-                        draw.colourMultiplier = Vector3();
+                        draw.colourMultiplier = Vector3(
+                            lighting::kAmbientFloor, lighting::kAmbientFloor, lighting::kAmbientFloor);
                     }
                     submit(draw, false, true);
                 }
@@ -437,7 +465,10 @@ namespace cnahouse::rendering
                 DrawParams draw = common;
                 if (room != nullptr)
                 {
-                    draw.ambientLight = room->skyAmbientColor;
+                    draw.ambientLight =
+                        Vector3(std::min(1.0F, room->skyAmbientColor.X + lighting::kAmbientFloor),
+                                std::min(1.0F, room->skyAmbientColor.Y + lighting::kAmbientFloor),
+                                std::min(1.0F, room->skyAmbientColor.Z + lighting::kAmbientFloor));
                 }
                 submit(draw, false, true);
             }
