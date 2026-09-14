@@ -2499,6 +2499,13 @@ the generated row. These neutral base rows are authoring sources, while `HOUSE-0
 placement-specific variants with explicit tint, UV scale and environmental response. Each base row
 is retained in a sphere/floor/wall preview at low, medium and high light levels.
 
+`HOUSE-00901` defines the first placement library as 12 reusable wall colours and 6 ceiling
+finishes. Occupied rooms share the clean fine-plaster source and a restrained warm/cool family;
+chipped maps are reserved for the named dusty-blue, aged-plaster, smoky-ochre and attic finishes
+after contact-sheet review showed they read as deliberate wear rather than ordinary fresh paint.
+The exact ids, source mapping, tints and review are in
+`docs/asset-selection/interior-paints.md`. Cell assignments remain solely `HOUSE-00908`'s data.
+
 ### 22.2 Material classes and their effect mapping
 
 | Class | Tier S effect | Tier E technique | Notes |

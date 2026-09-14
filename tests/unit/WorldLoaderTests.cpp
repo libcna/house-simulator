@@ -3535,7 +3535,7 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 54U);
+        EXPECT_EQ(contents.materials.size(), 72U);
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
@@ -3543,6 +3543,12 @@ namespace
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_BASE_"); }),
                   34)
             << "HOUSE-00900's complete measured base-material library loads through WorldLoader";
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return IdRegistry::NameOf(material.id).starts_with("MAT_PAINT_"); }),
+                  18)
+            << "HOUSE-00901's wall and ceiling palette loads as complete material rows";
 
         const auto glassAt = std::find_if(contents.materials.begin(),
                                           contents.materials.end(),
@@ -3584,6 +3590,18 @@ namespace
         EXPECT_FLOAT_EQ(chromeAt->tint.Y, 0.0F);
         EXPECT_FLOAT_EQ(chromeAt->tint.Z, 0.0F);
         EXPECT_EQ(chromeAt->effectTierS, world::EffectTier::Basic);
+
+        const auto warmWhiteAt = std::find_if(contents.materials.begin(),
+                                              contents.materials.end(),
+                                              [](const world::MaterialDef& material)
+                                              { return material.id == Intern("MAT_PAINT_WARM_WHITE"); });
+        ASSERT_NE(warmWhiteAt, contents.materials.end());
+        EXPECT_EQ(warmWhiteAt->materialClass, world::MaterialClass::Paint);
+        EXPECT_EQ(warmWhiteAt->albedo, "Textures/Materials/paint_white_fine_albedo");
+        EXPECT_FLOAT_EQ(warmWhiteAt->tint.X, 1.0F);
+        EXPECT_FLOAT_EQ(warmWhiteAt->tint.Y, 0.96F);
+        EXPECT_FLOAT_EQ(warmWhiteAt->tint.Z, 0.90F);
+        EXPECT_FALSE(warmWhiteAt->snow.coverable);
         for (const world::MaterialDef& material : contents.materials)
         {
             EXPECT_GT(material.specularPower, 0.0F);

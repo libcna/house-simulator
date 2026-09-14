@@ -179,7 +179,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 54U);
+                EXPECT_EQ(binder.Count(), 72U);
 
                 const MaterialDesc* glass = binder.Find(Id::Of("MAT_GLASS_CLEAR"));
                 ASSERT_NE(glass, nullptr);
@@ -197,6 +197,12 @@ namespace
                 EXPECT_FLOAT_EQ(chrome->diffuse[0], 0.0F);
                 EXPECT_FLOAT_EQ(chrome->specularColour[0], 0.987504F);
                 EXPECT_FLOAT_EQ(chrome->specularPower, 256.0F);
+
+                const MaterialDesc* wall = binder.Find(Id::Of("MAT_PAINT_WARM_WHITE"));
+                ASSERT_NE(wall, nullptr);
+                EXPECT_EQ(wall->kind, MaterialKind::DualTexture);
+                EXPECT_EQ(wall->diffuseTexture, "Textures/Materials/paint_white_fine_albedo");
+                EXPECT_FLOAT_EQ(wall->diffuse[1], 0.96F);
             });
     }
 

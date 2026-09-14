@@ -12954,8 +12954,21 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             increasing bay luminance. Visual contact-sheet review, mapping self-test, manifest,
             deploy/id-golden checks, max-4-core warning-clean build and complete suite 1564/1564
             executed tests (0 failures); `tools/ci/run_checks.sh` all gates green.
-- [ ] HOUSE-00901 — Grouped: author the 18 interior paint variants (walls and ceilings per room palette)
+- [x] HOUSE-00901 — Grouped: author the 18 interior paint variants (walls and ceilings per room palette)
       dep: HOUSE-00900 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-14) `paint_variants.py` owns 12 wall and 6 ceiling ids as complete §22.1
+            rows derived from their measured `MAT_BASE_*` source, changing only id, tint and the
+            indoor snow response. It checks every field and regenerates a pixel-exact tint sheet;
+            actual cell-to-palette assignments remain HOUSE-00908's responsibility.
+      finding: a first six-source-by-three-role draft was visually rejected because five acquired
+            paint maps show obvious peeling or exposed masonry. Regular occupied-room colours now
+            share clean `paint_white_fine`; distressed sources are limited to the explicitly named
+            dusty-blue, aged-plaster, smoky-ochre and attic finishes, keeping one maintained-house
+            palette while preserving appropriate basement/service wear.
+      verified: 18/18 derived rows and preview pixels; 12 wall + 6 ceiling count; architecture
+            example ids; world schema/deploy/id-golden checks; max-4-core warning-clean loader and
+            live-device binder build; both targeted authored-table tests; complete suite 1564/1564
+            executed tests (0 failures); `tools/ci/run_checks.sh` all gates green.
 - [ ] HOUSE-00902 — Grouped: author the 12 floor materials (oak, walnut, 3 carpets, 4 tiles, concrete, stone, vinyl)
       dep: HOUSE-00900 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00903 — Grouped: author the 9 exterior materials (siding ×3, brick, roof shingle, soffit, concrete, asphalt, gravel)
