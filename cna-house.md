@@ -1821,6 +1821,12 @@ CnaHouseGame : Microsoft::Xna::Framework::Game
       └── SaveStore          ISaveStore: desktop (StorageDevice) / web (IsolatedStorage)
 ```
 
+For Tier S, `MaterialBinder` is the effect pool: one lazily constructed instance of each of the
+four primary stock-effect classes plus the supplemental `EnvironmentMapEffect`. It rewrites that
+instance immediately before each draw and never clones by material. A clone per material variant
+would retain the same values already written per draw while multiplying effect objects by the
+material count; `HOUSE-00162` measured and rejected that ownership model.
+
 ### 17.2 Ownership and lifetime
 
 * `Game` owns `Services`; `Services` owns every system by `std::unique_ptr`, constructed in

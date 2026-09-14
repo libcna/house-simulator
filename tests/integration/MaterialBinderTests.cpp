@@ -398,6 +398,111 @@ namespace
             });
     }
 
+    TEST(MaterialBinderTests, FiveEffectClassesAreLazyAndReusedAcrossMaterialAndDrawVariants)
+    {
+        RunWithDeviceBinder(
+            [](Gfx::GraphicsDevice& device, MaterialBinder& binder)
+            {
+                const Id basicA = Id::Of("MAT_POOL_BASIC_A");
+                const Id basicB = Id::Of("MAT_POOL_BASIC_B");
+                const Id dualA = Id::Of("MAT_POOL_DUAL_A");
+                const Id dualB = Id::Of("MAT_POOL_DUAL_B");
+                const Id alphaA = Id::Of("MAT_POOL_ALPHA_A");
+                const Id alphaB = Id::Of("MAT_POOL_ALPHA_B");
+                const Id skinA = Id::Of("MAT_POOL_SKIN_A");
+                const Id skinB = Id::Of("MAT_POOL_SKIN_B");
+
+                MaterialDesc first;
+                first.diffuse[0] = 0.25F;
+                MaterialDesc second;
+                second.diffuse[2] = 0.25F;
+                ASSERT_TRUE(binder.Register(basicA, first).HasValue());
+                ASSERT_TRUE(binder.Register(basicB, second).HasValue());
+                first.kind = MaterialKind::DualTexture;
+                second.kind = MaterialKind::DualTexture;
+                ASSERT_TRUE(binder.Register(dualA, first).HasValue());
+                ASSERT_TRUE(binder.Register(dualB, second).HasValue());
+                first.kind = MaterialKind::AlphaTest;
+                second.kind = MaterialKind::AlphaTest;
+                second.referenceAlpha = 192;
+                ASSERT_TRUE(binder.Register(alphaA, first).HasValue());
+                ASSERT_TRUE(binder.Register(alphaB, second).HasValue());
+                first.kind = MaterialKind::Skinned;
+                second.kind = MaterialKind::Skinned;
+                ASSERT_TRUE(binder.Register(skinA, first).HasValue());
+                ASSERT_TRUE(binder.Register(skinB, second).HasValue());
+                EXPECT_EQ(binder.EffectsCreated(), 0U);
+
+                Gfx::Texture2D albedoA(device, 2, 2);
+                Gfx::Texture2D albedoB(device, 2, 2);
+                Gfx::Texture2D lightmapA(device, 2, 2);
+                Gfx::Texture2D lightmapB(device, 2, 2);
+                Gfx::TextureCube cubeA(device, 4, false, Gfx::SurfaceFormat::Color);
+                Gfx::TextureCube cubeB(device, 4, false, Gfx::SurfaceFormat::Color);
+                std::vector<Microsoft::Xna::Framework::Matrix> bonesA(
+                    1, Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+                std::vector<Microsoft::Xna::Framework::Matrix> bonesB(
+                    2, Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+                DrawParams drawA;
+                drawA.diffuse = &albedoA;
+                drawA.lightmap = &lightmapA;
+                drawA.bones = &bonesA;
+                DrawParams drawB;
+                drawB.diffuse = &albedoB;
+                drawB.lightmap = &lightmapB;
+                drawB.bones = &bonesB;
+
+                const auto basicFirst = binder.Bind(basicA, drawA);
+                const auto basicSecond = binder.Bind(basicB, drawB);
+                ASSERT_TRUE(basicFirst.HasValue());
+                ASSERT_TRUE(basicSecond.HasValue());
+                EXPECT_EQ(*basicFirst, *basicSecond);
+                EXPECT_EQ(binder.EffectsCreated(), 1U);
+
+                const auto dualFirst = binder.Bind(dualA, drawA);
+                const auto dualSecond = binder.Bind(dualB, drawB);
+                ASSERT_TRUE(dualFirst.HasValue());
+                ASSERT_TRUE(dualSecond.HasValue());
+                EXPECT_EQ(*dualFirst, *dualSecond);
+                EXPECT_EQ(binder.EffectsCreated(), 2U);
+
+                const auto alphaFirst = binder.Bind(alphaA, drawA);
+                const auto alphaSecond = binder.Bind(alphaB, drawB);
+                ASSERT_TRUE(alphaFirst.HasValue());
+                ASSERT_TRUE(alphaSecond.HasValue());
+                EXPECT_EQ(*alphaFirst, *alphaSecond);
+                EXPECT_EQ(binder.EffectsCreated(), 3U);
+
+                const auto skinFirst = binder.Bind(skinA, drawA);
+                const auto skinSecond = binder.Bind(skinB, drawB);
+                ASSERT_TRUE(skinFirst.HasValue());
+                ASSERT_TRUE(skinSecond.HasValue());
+                EXPECT_EQ(*skinFirst, *skinSecond);
+                EXPECT_EQ(binder.EffectsCreated(), 4U);
+
+                EnvironmentMapParams environmentA;
+                environmentA.cubeMap = &cubeA;
+                EnvironmentMapParams environmentB;
+                environmentB.cubeMap = &cubeB;
+                environmentB.amount = 0.5F;
+                environmentB.fresnelFactor = 4.0F;
+                const auto environmentFirst = binder.BindEnvironmentMap(basicA, drawA, environmentA);
+                const auto environmentSecond = binder.BindEnvironmentMap(basicB, drawB, environmentB);
+                ASSERT_TRUE(environmentFirst.HasValue());
+                ASSERT_TRUE(environmentSecond.HasValue());
+                EXPECT_EQ(*environmentFirst, *environmentSecond);
+                EXPECT_EQ(binder.EffectsCreated(), 5U);
+
+                ASSERT_TRUE(binder.Bind(basicA, drawB).HasValue());
+                ASSERT_TRUE(binder.Bind(dualA, drawB).HasValue());
+                ASSERT_TRUE(binder.Bind(alphaA, drawB).HasValue());
+                ASSERT_TRUE(binder.Bind(skinA, drawB).HasValue());
+                ASSERT_TRUE(binder.BindEnvironmentMap(basicA, drawB, environmentA).HasValue());
+                EXPECT_EQ(binder.EffectsCreated(), 5U)
+                    << "a second sweep may overwrite values but must allocate no effect";
+            });
+    }
+
     TEST(MaterialBinderTests, DualTextureEffectReceivesAlbedoLightmapTintAndFog)
     {
         RunWithDeviceBinder(

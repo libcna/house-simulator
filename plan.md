@@ -12888,8 +12888,21 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             inspection of both textures, material tint/alpha/specular, measured amount/Fresnel
             controls, fog reset, effect reuse, missing inputs, invalid ranges, unknown material and
             unlit-material refusal; unit + integration 1506/1506; XNA-only gates.
-- [ ] HOUSE-00897 — Implement the effect-instance pool: one instance per (effect class, material variant), cloned as needed, never allocated per draw
+- [x] HOUSE-00897 — Prove the effect-instance pool: one lazy instance per effect class, reused across material and draw variants, never allocated per draw
       dep: HOUSE-00895 · sys: rendering · plat: ALL · pri: MUST
+      correction: (2026-09-14) the original title's clone per `(effect class, material variant)`
+            contradicts `HOUSE-00162`'s earlier measured and implemented decision: effects retain
+            the last values written and the binder writes every value per draw, so such clones add
+            objects without retaining useful state. The task therefore proves that decision instead
+            of reversing it silently; the permanent id and no-per-draw-allocation criterion remain.
+      note: one live-device test registers two distinct variants of every primary material kind,
+            observes zero eager allocations, then binds both variants through Basic, DualTexture,
+            AlphaTest, Skinned and the supplemental EnvironmentMap path. Exactly five distinct
+            effect objects are created, each pair shares its class instance, and a second complete
+            sweep leaves the count at five.
+      verified: max-4-core warning-clean build; 25 `MaterialBinderTests`; unit + integration
+            1561/1561 (0 failures; disabled/reference-regeneration cases excluded);
+            `tools/ci/run_checks.sh` all gates green.
 - [ ] HOUSE-00898 — Implement the transparency pass with back-to-front sorting by cell then by object
       dep: HOUSE-00676 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00899 — Implement the alpha-test pass before transparency with full depth writes
@@ -16893,6 +16906,7 @@ evidence that it fails.
 | 2026-09-09 | `collision.bin` v2 → **v3** | A `u8` per cell: **is §11.5's ground part of this cell's collision?** (`HOUSE-00774`) | The height field is one surface over the whole lot and the house stands on it, so it runs through the basement and 0.1 m under `L0`'s floor. Giving §49.3's step 5 the ground -- which the outdoors needs, because a body that walked off the terrace's edge landed inside the slope and stayed there -- pushed a body on the basement stair out of the lawn above it instead. Nothing else in the file can tell the two apart: `EXT_SHED` is an `exterior` cell that is a building, and §15's yards are cells like any other. `docs/collision-format.md` §3.4 is normative. No id was renumbered or struck. |
 | 2026-09-09 | §15.7 | A **twelfth rule**: *"nothing outdoors stands in something else"* -- no two `structures` footprints overlap, no `paths` box runs into one, no `vegetation` instance is inside one (`HOUSE-00769`) | §15.7's rules 2 and 3 make exactly this statement about the house's cells and nothing made it about the LOT, which has three kinds of rectangle that can be authored on top of each other. Two of them were: the garden path ran three metres through the shed and reached no door, and three of §11.1's six raised beds were vegetation instances inside the shed's walls. Both were invisible to every other rule -- a path and a shed pad are both gravel at the same height, and an instance is a point with no size for anything to overlap. The rule found two more the day it was written. `docs/world-format.md` and `WorldValidator.hpp` say the same twelve; the C++ mirror does not carry the exterior file, so this one is the Python gate's alone, and its header now says so. No id was renumbered or struck. |
 | 2026-09-09 | `HOUSE-00488`, `HOUSE-00688` | **New task, next free id in phase 6's reserved 00451–00540 range**, and two more `dep`s on `HOUSE-00688`. Found by `HOUSE-00688`'s first run: a cell does not always draw the surfaces a body standing in it looks at, and §25 removes the cell that does -- 8 450 pixels of four frames become the clear colour with culling on. | The most important test in the project was written, run and left FAILING and DISABLED, with its numbers, rather than weakened to pass. Its 46 881 differing pixels separate into two shell defects and no culling defect: 38 431 are `HOUSE-00485`'s coplanar pairs resolving the other way, and 8 450 are this. No id was renumbered or struck. |
+| 2026-09-14 | `HOUSE-00897` | `one instance per (effect class, material variant), cloned as needed` → **one lazy instance per effect class, reused across material and draw variants** | The original task contradicted the already completed `HOUSE-00162`, whose measured finding says an XNA effect merely holds the values last written and the binder must rewrite them per draw regardless. A clone per material therefore preserves no state the draw can rely on and multiplies shader objects by the material count. The unchanged acceptance point — no effect allocation per draw — is now proven across all five stock-effect paths by a real-device test. No id was renumbered or retired. |
 
 ---
 
