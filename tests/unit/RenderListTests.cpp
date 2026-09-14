@@ -315,28 +315,28 @@ TEST(RenderListTests, TheWholeHouseAtOnceFitsSection71Point2sBudget)
     EXPECT_LE(list.StateChanges(), 90);
 }
 
-TEST(RenderListTests, TheTransparentPassIsBackToFrontWhateverItsMaterialsAre)
+TEST(RenderListTests, TheTransparentPassIsBackToFrontByCellThenObjectWhateverItsMaterialsAre)
 {
-    // §7.5's F: *"transparent (back-to-front) -- glass, water, curtains, particles"*. Sorting this
-    // pass by material would be fewer state changes and a visibly wrong picture, which is the one
-    // trade a draw list must not make. The materials below are in exactly the order the other
-    // passes' key would want, and the depths are in the opposite one.
+    // §23.6: a cell is the coarse key and an object the fine one. The object at 100 m deliberately
+    // belongs to the nearer cell: a global object sort would put it first, while the required cell
+    // grouping puts both objects of the farther cell before it.
     RenderList list;
-    for (const auto& [material, depth] : {std::pair<std::uint16_t, float>{1, 2.0F},
-                                          std::pair<std::uint16_t, float>{2, 9.0F},
-                                          std::pair<std::uint16_t, float>{3, 5.0F}})
+    for (const auto& [material, cellDepth, objectDepth] :
+         {std::tuple<std::uint16_t, float, float>{1, 10.0F, 100.0F},
+          std::tuple<std::uint16_t, float, float>{2, 20.0F, 2.0F},
+          std::tuple<std::uint16_t, float, float>{3, 20.0F, 9.0F}})
     {
         RenderItem item = Item(Pass::Transparent, world::EffectTier::Basic, material, material);
-        item.depth = depth;
+        item.cellDepth = cellDepth;
+        item.objectDepth = objectDepth;
         list.Add(item);
     }
     list.Sort();
 
     ASSERT_EQ(list.Size(), 3U);
-    EXPECT_FLOAT_EQ(list.Items()[0].depth, 9.0F) << "the farthest pane must be drawn first";
-    EXPECT_FLOAT_EQ(list.Items()[1].depth, 5.0F);
-    EXPECT_FLOAT_EQ(list.Items()[2].depth, 2.0F);
-    EXPECT_EQ(list.Items()[0].material, 2) << "the material key won, so the picture is wrong";
+    EXPECT_EQ(list.Items()[0].material, 3) << "the farther object in the farther cell goes first";
+    EXPECT_EQ(list.Items()[1].material, 2) << "the farther cell must remain contiguous";
+    EXPECT_EQ(list.Items()[2].material, 1) << "global object distance overrode cell distance";
 
     // And the opaque passes do NOT sort by depth: front-to-back would be fewer overdrawn pixels and
     // more state changes, and §25.1 chose the state changes.
@@ -345,7 +345,7 @@ TEST(RenderListTests, TheTransparentPassIsBackToFrontWhateverItsMaterialsAre)
          {std::pair<std::uint16_t, float>{5, 1.0F}, std::pair<std::uint16_t, float>{4, 30.0F}})
     {
         RenderItem item = Item(Pass::OpaqueStatic, world::EffectTier::Basic, material, material);
-        item.depth = depth;
+        item.objectDepth = depth;
         opaque.Add(item);
     }
     opaque.Sort();
@@ -471,7 +471,7 @@ TEST(RenderListTests, AChunkIndexPastTheLibraryIsSkippedRatherThanDereferenced)
     EXPECT_EQ(list.Items()[0].geometry, 0u);
 }
 
-TEST(RenderListTests, TheDepthIsMetresFromTheEyeToTheChunkCentre)
+TEST(RenderListTests, TheObjectAndCellDepthsAreMetresFromTheEyeToTheirCentres)
 {
     world::ChunkLibrary library;
     library.materials = {"BLOCKOUT_wall"};
@@ -486,7 +486,64 @@ TEST(RenderListTests, TheDepthIsMetresFromTheEyeToTheChunkCentre)
     // The centre is (3, 2, 0); the eye is 3 m below it and 4 m to its west, so 5 m away.
     list.AddChunks(library, indices, Vector3(-1.0F, -1.0F, 0.0F));
     ASSERT_EQ(list.Size(), 1U);
-    EXPECT_FLOAT_EQ(list.Items()[0].depth, 5.0F);
+    EXPECT_FLOAT_EQ(list.Items()[0].objectDepth, 5.0F);
+    EXPECT_FLOAT_EQ(list.Items()[0].cellDepth, 5.0F);
+}
+
+TEST(RenderListTests, BlendMaterialsEnterTransparencyThroughTheRuntimeRegistry)
+{
+    IdRegistry::ResetForTesting();
+    world::WorldData::Contents contents;
+    for (const auto& [name, alphaMode] :
+         {std::pair<std::string_view, world::AlphaMode>{"MAT_OPAQUE", world::AlphaMode::Opaque},
+          std::pair<std::string_view, world::AlphaMode>{"MAT_BLEND", world::AlphaMode::Blend},
+          std::pair<std::string_view, world::AlphaMode>{"MAT_MASK", world::AlphaMode::Mask}})
+    {
+        world::MaterialDef material;
+        material.id = cnahouse::util::Intern(name);
+        material.alphaMode = alphaMode;
+        contents.materials.push_back(material);
+    }
+    auto built = world::WorldData::Create(std::move(contents));
+    ASSERT_TRUE(built) << built.Error().ToString();
+
+    world::ChunkLibrary library;
+    library.cells = {"FAR_CELL", "NEAR_CELL"};
+    library.materials = {"MAT_OPAQUE", "MAT_BLEND", "MAT_MASK"};
+    auto addChunk = [&](std::uint16_t cell, std::uint16_t material, world::ChunkLayout layout, float x)
+    {
+        world::Chunk chunk;
+        chunk.cell = cell;
+        chunk.material = material;
+        chunk.layout = layout;
+        chunk.bounds = Microsoft::Xna::Framework::BoundingBox(Vector3(x - 1.0F, 0.0F, -1.0F),
+                                                              Vector3(x + 1.0F, 2.0F, 1.0F));
+        library.chunks.push_back(std::move(chunk));
+    };
+    addChunk(0u, 1u, world::ChunkLayout::Basic, 12.0F);
+    addChunk(0u, 1u, world::ChunkLayout::Basic, 8.0F);
+    addChunk(1u, 0u, world::ChunkLayout::Basic, 2.0F);
+    addChunk(1u, 2u, world::ChunkLayout::AlphaTest, 3.0F);
+
+    const std::array<std::uint32_t, 4> indices{0u, 1u, 2u, 3u};
+    RenderList list;
+    list.AddChunks(library, indices, Vector3(0.0F, 1.0F, 0.0F), &*built);
+    list.Sort();
+
+    const auto transparent = list.ItemsFor(Pass::Transparent);
+    ASSERT_EQ(transparent.size(), 2U);
+    EXPECT_FLOAT_EQ(transparent[0].cellDepth, transparent[1].cellDepth)
+        << "two objects of one cell need one coarse sort key";
+    EXPECT_GT(transparent[0].objectDepth, transparent[1].objectDepth)
+        << "objects inside the cell are ordered farthest first";
+    EXPECT_EQ(list.ItemsFor(Pass::OpaqueStatic).size(), 1U);
+    EXPECT_EQ(list.ItemsFor(Pass::AlphaTest).size(), 1U)
+        << "the distinct alpha-test layout remains the earlier depth-writing pass";
+
+    RenderList withoutRegistry;
+    withoutRegistry.AddChunks(library, indices, Vector3(0.0F, 1.0F, 0.0F));
+    EXPECT_TRUE(withoutRegistry.ItemsFor(Pass::Transparent).empty())
+        << "a missing registry must not be replaced by a material-name guess";
 }
 
 TEST(RenderListTests, ItemsTheKeyCannotSeparateKeepTheOrderTheyArrivedIn)
@@ -509,7 +566,8 @@ TEST(RenderListTests, ItemsTheKeyCannotSeparateKeepTheOrderTheyArrivedIn)
                                world::EffectTier::Basic,
                                static_cast<std::uint16_t>(kCount - i),
                                static_cast<std::uint32_t>(kCount - i));
-        item.depth = 3.0F;
+        item.cellDepth = 3.0F;
+        item.objectDepth = 3.0F;
         list.Add(item);
     }
     list.Sort();
@@ -544,6 +602,7 @@ TEST(RenderListTests, TheSameFrameBuiltTwiceIsTheSameList)
     for (std::size_t i = 0; i < first.Size(); ++i)
     {
         EXPECT_EQ(Key(first.Items()[i]), Key(second.Items()[i])) << "item " << i;
-        EXPECT_FLOAT_EQ(first.Items()[i].depth, second.Items()[i].depth);
+        EXPECT_FLOAT_EQ(first.Items()[i].cellDepth, second.Items()[i].cellDepth);
+        EXPECT_FLOAT_EQ(first.Items()[i].objectDepth, second.Items()[i].objectDepth);
     }
 }

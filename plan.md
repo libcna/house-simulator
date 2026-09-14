@@ -12903,8 +12903,24 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: max-4-core warning-clean build; 25 `MaterialBinderTests`; unit + integration
             1561/1561 (0 failures; disabled/reference-regeneration cases excluded);
             `tools/ci/run_checks.sh` all gates green.
-- [ ] HOUSE-00898 — Implement the transparency pass with back-to-front sorting by cell then by object
+- [x] HOUSE-00898 — Implement the transparency pass with back-to-front sorting by cell then by object
       dep: HOUSE-00676 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-14) `RenderItem` now carries separate cell and object distances. For chunks,
+            `RenderList` derives one coarse distance from the union of every bound in the owning
+            cell, then stable-sorts that cell back to front and its objects back to front. The
+            scratch buffers are retained across frames, and transparent sorting never regroups by
+            effect or material.
+      note: `AddChunks` resolves the chunk material name through the loaded `WorldData` registry;
+            exactly `AlphaMode::Blend` enters `Pass::Transparent`, while alpha-test retains its
+            earlier depth-writing pass. A missing registry or unknown current placeholder is not
+            guessed from its name. The walk scene now loads the material table and installs the
+            pass; `HOUSE-00907` is what replaces current `BLOCKOUT_*` chunk names with authored ids.
+      note: `TransparentPass` submits the sorted resident static slice with the authored tint and
+            alpha through stock `BasicEffect`, `CullNone`, premultiplied `AlphaBlend` and
+            `DepthRead` (test on, writes off), publishing chunk/triangle/material-bind counters.
+      verified: max-4-core warning-clean build; 14 `RenderListTests`; 1 real-device
+            `TransparentPassTests`; 21 walk/static integration tests; complete suite 1563/1563
+            executed tests (0 failures); `tools/ci/run_checks.sh` all gates green.
 - [ ] HOUSE-00899 — Implement the alpha-test pass before transparency with full depth writes
       dep: HOUSE-00894 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-00900 — Grouped: author the 34 base materials from the acquired PBR set, mapped through `pbr_to_stock.py`, previewed and tuned

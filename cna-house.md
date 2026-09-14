@@ -2646,6 +2646,14 @@ per-object distance, with `DepthStencilState::DepthRead` (test, no write). Windo
 common case: a window pane is one quad per opening, drawn after the room behind it. Interior
 glass (cabinet doors, the shower screen) sorts within its cell.
 
+`HOUSE-00898` makes those two distances separate `RenderItem` keys. For static chunks, the cell
+distance is measured to the centre of the union of all chunk bounds in that cell and the object
+distance to the individual chunk centre; reusable scratch keeps that derivation allocation-free
+after warm-up. `RenderList` resolves `MaterialDef::alphaMode` through the loaded `WorldData` table:
+only `blend` enters `Transparent`, while a missing table or unknown material remains on the
+layout-derived pass rather than being guessed from its name. `TransparentPass` consumes the sorted
+slice without material regrouping under `CullNone`, premultiplied `AlphaBlend` and `DepthRead`.
+
 Alpha-tested foliage and fences are drawn **before** transparency with full depth writes, because
 `AlphaTestEffect` gives correct depth and sorting is then unnecessary.
 

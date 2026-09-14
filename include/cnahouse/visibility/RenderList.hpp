@@ -11,6 +11,11 @@
 #include "cnahouse/world/ChunkData.hpp"
 #include "cnahouse/world/WorldTypes.hpp"
 
+namespace cnahouse::world
+{
+    class WorldData;
+}
+
 namespace cnahouse::visibility
 {
 
@@ -70,8 +75,14 @@ namespace cnahouse::visibility
         ///        because two draws sharing an effect and a material cost nothing to reorder -- so
         ///        this key is here to make the order DEFINED, not to make it fast.
         std::uint32_t geometry = 0u;
-        /// @brief Metres from the eye to the bounds' centre. Only `Transparent` sorts by it.
-        float depth = 0.0F;
+        /// @brief Metres from the eye to the centre of the cell containing this item.
+        ///
+        /// `Transparent` sorts this first so all panes in a farther room are submitted before any
+        /// pane in a nearer room (§23.6). A caller adding a non-chunk item supplies the distance of
+        /// that item's owning cell.
+        float cellDepth = 0.0F;
+        /// @brief Metres from the eye to this object's bounds centre, the second transparent key.
+        float objectDepth = 0.0F;
     };
 
     /// @brief §25.1's step 5 -- *"sort by pass/effect/material"* -- as the frame's draw list.
@@ -112,14 +123,18 @@ namespace cnahouse::visibility
         /// @brief Adds §17.4's visible chunks, taking each one's key from the chunk itself.
         ///
         /// @param chunks indices into `library.chunks`, as `ChunkCuller::Chunks()` returns them.
-        /// @param eye the camera position, for the depth the transparent pass sorts on.
+        /// @param eye the camera position, for both transparent-pass distance keys.
+        /// @param world the loaded material registry, when available. A resolved `blend` material
+        ///        enters `Pass::Transparent`; without a registry the function makes no guess from
+        ///        a material name and preserves the layout-derived opaque/alpha-test answer.
         ///
         /// An index past the end of the library is skipped rather than dereferenced: the visible set
         /// and the library are two files that agree only because the content build says so
         /// (`worldHash`), and a mismatch must not be a read past the end of a vector.
         void AddChunks(const world::ChunkLibrary& library,
                        std::span<const std::uint32_t> chunks,
-                       const Microsoft::Xna::Framework::Vector3& eye);
+                       const Microsoft::Xna::Framework::Vector3& eye,
+                       const world::WorldData* world = nullptr);
 
         /// @brief §25.1's step 5, in place.
         void Sort();
@@ -192,7 +207,19 @@ namespace cnahouse::visibility
         }
 
     private:
+        struct CellBoundsScratch
+        {
+            Microsoft::Xna::Framework::Vector3 min;
+            Microsoft::Xna::Framework::Vector3 max;
+            bool present = false;
+        };
+
         std::vector<RenderItem> items_;
+        /// Reused scratch for deriving one cell-centre distance from the immutable chunk library.
+        /// The binary stores chunk bounds rather than a redundant cell bound, so the union is
+        /// rebuilt in linear time when chunks are added and without a steady-frame allocation.
+        std::vector<CellBoundsScratch> cellBounds_;
+        std::vector<float> cellDepths_;
         bool sorted_ = true;
     };
 

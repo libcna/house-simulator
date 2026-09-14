@@ -37,6 +37,7 @@
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
 #include "cnahouse/rendering/SkySystem.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
+#include "cnahouse/rendering/TransparentPass.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/util/Log.hpp"
 #include "cnahouse/world/ChunkReader.hpp"
@@ -338,6 +339,7 @@ namespace cnahouse::app
         // a question only the world data can answer (§16.4).
         world::WorldData::Contents contents;
         const auto levels = world::WorldLoader::LoadLevels("content/world", contents);
+        const auto materials = world::WorldLoader::LoadMaterials("content/world", contents);
         const auto cells = world::WorldLoader::LoadCells("content/world", contents);
         const auto portals = world::WorldLoader::LoadPortals("content/world", contents);
         const auto openings = world::WorldLoader::LoadOpenings("content/world", contents);
@@ -347,8 +349,8 @@ namespace cnahouse::app
         // §28's fixtures, for `LightingSystem` (`HOUSE-01251`). 243 rows; the loader is the same
         // one the tests use, so a lights file that would fail CI fails here too.
         const auto lights = world::WorldLoader::LoadLights("content/world", contents);
-        if (!levels || !cells || !portals || !openings || !interactables || !initialState || !lights ||
-            !weather)
+        if (!levels || !materials || !cells || !portals || !openings || !interactables || !initialState ||
+            !lights || !weather)
         {
             Log::Error(LogCat::Content,
                        "--scene=walk: the world did not load; drawing from the fixed camera");
@@ -468,6 +470,13 @@ namespace cnahouse::app
             index_.reset();
             collision_.reset();
             return;
+        }
+
+        if (blockoutChunks_ != nullptr && blockoutCells_ != nullptr)
+        {
+            renderer_.Install(rendering::Pass::Transparent,
+                              std::make_unique<rendering::TransparentPass>(
+                                  *blockoutChunks_, *blockoutCells_, *world_, blockoutCamera_, renderList_));
         }
 
         // §25's walk, over the world just loaded. It runs every frame from here on and `F3`
@@ -1393,7 +1402,7 @@ namespace cnahouse::app
                             already.end(),
                             std::back_inserter(extra));
         exteriorAdded_ = extra.size();
-        renderList_.AddChunks(*blockoutChunks_, extra, eye);
+        renderList_.AddChunks(*blockoutChunks_, extra, eye, world_ ? &*world_ : nullptr);
     }
 
     void CnaHouseGame::CullExterior()
@@ -1439,7 +1448,7 @@ namespace cnahouse::app
         {
             // §25.1's steps 1-3, all the way through to the draw list: the walk's answer, then the
             // chunks of it that are in one of its cones...
-            renderList_.AddChunks(*blockoutChunks_, chunkCuller_->Chunks(), eye);
+            renderList_.AddChunks(*blockoutChunks_, chunkCuller_->Chunks(), eye, world_ ? &*world_ : nullptr);
             // ...and §25.6's, which is a different question about a different structure
             // (`HOUSE-00700`). Added rather than replacing: the two sets overlap wherever the
             // walk did reach an exterior cell, and a chunk drawn twice is a chunk drawn twice, so
@@ -1451,7 +1460,8 @@ namespace cnahouse::app
         // `cull off`, which `HOUSE-00688` uses to render the same pose twice; and a scene with no
         // walk at all -- `--scene=blockout` looks at the house from the road, where §16.4 has no
         // cell for the camera and a portal walk has nowhere to start.
-        renderList_.AddChunks(*blockoutChunks_, blockoutCells_->ResidentChunkIndices(), eye);
+        renderList_.AddChunks(
+            *blockoutChunks_, blockoutCells_->ResidentChunkIndices(), eye, world_ ? &*world_ : nullptr);
     }
 
     Microsoft::Xna::Framework::Matrix CnaHouseGame::DebugView() const
