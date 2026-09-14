@@ -13000,8 +13000,25 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             shell-manifest checks; max-4-core warning-clean loader/binder build and targeted tests;
             complete suite 1564/1564 executed tests (0 failures); `tools/ci/run_checks.sh` all
             gates green, including 321 strict-XNA translation units.
-- [ ] HOUSE-00904 — Grouped: author the 8 glass and water materials
+- [x] HOUSE-00904 — Grouped: author the 8 glass and water materials
       dep: HOUSE-00900 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-14) `glass_water_materials.py` owns the exact four glass roles (clear,
+            obscured, cabinet and shower) and four water roles (flow, basin/bath, toilet and
+            puddle) as complete §22.1 blend/Basic/two-sided rows. It also deterministically
+            generates and pixel-checks one shared 256-square RGBA albedo/+Y normal pair and the
+            transparency contact sheet; the manifest and content configuration pin the albedo's
+            premultiplication and the normal's linear treatment.
+      finding: the acquired 34-set contains no glass or water source. Glass therefore remains an
+            honest untextured tint, preserving the two pre-existing ids and values; water needs
+            visible directional structure for §56.2, so its project-owned periodic maps vary by
+            tint, alpha and UV scale instead of duplicating four textures. The ambientCG exact-set
+            gate explicitly excludes only those two files, whose bytes the glass/water gate owns.
+      verified: exact 4+4 role membership, generated rows, source maps and preview pixels; clean
+            608-row manifest/licence/budget/world schema/deploy/id-golden checks; both maps compile
+            to `.cnb`; the complete content graph is fresh after rebuilding its stale lightmap
+            shell; max-4-core warning-clean full build; complete suite 1564/1564 executed tests
+            (0 failures); `tools/ci/run_checks.sh` all gates green, including 321 strict-XNA
+            translation units.
 - [ ] HOUSE-00905 — Grouped: author the 14 wet-variant materials for the outdoor surfaces
       dep: HOUSE-00903 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00906 — Grouped: author the 6 snow materials and the snow-shell material

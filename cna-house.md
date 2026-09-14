@@ -2521,6 +2521,13 @@ shingle-course source, then gives it explicit asphalt wet, snow and audio semant
 the only member that rejects snow because it faces downward. Exact rows and the review sheet are
 in `docs/asset-selection/exterior-materials.md`; shell assignment remains `HOUSE-00907`'s work.
 
+`HOUSE-00904` fixes four glass and four water records. Clear, obscured, cabinet and shower glass
+retain the untextured tinted `BasicEffect` path; tap/shower flow, bath/basin level, toilet bowl and
+rain puddle share a deterministic tileable RGBA/normal pair with role-specific tint, opacity and UV
+scale. The source alpha is premultiplied by the content pipeline, matching §23.6; normals stay
+linear. Exact rows, texture hashes and the transparency review are in
+`docs/asset-selection/glass-water-materials.md`.
+
 ### 22.2 Material classes and their effect mapping
 
 | Class | Tier S effect | Tier E technique | Notes |

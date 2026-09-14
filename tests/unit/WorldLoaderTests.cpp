@@ -3535,7 +3535,7 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 89U);
+        EXPECT_EQ(contents.materials.size(), 95U);
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
@@ -3631,6 +3631,30 @@ namespace
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_SIDING_"); }),
                   3)
             << "HOUSE-00903's three reviewed siding colours load as full material records";
+
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return material.materialClass == world::MaterialClass::Glass; }),
+                  4);
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return material.materialClass == world::MaterialClass::Water; }),
+                  4)
+            << "HOUSE-00904's transparent library has four glass and four water roles";
+
+        const auto flowAt = std::find_if(contents.materials.begin(),
+                                         contents.materials.end(),
+                                         [](const world::MaterialDef& material)
+                                         { return material.id == Intern("MAT_WATER_FLOW"); });
+        ASSERT_NE(flowAt, contents.materials.end());
+        EXPECT_EQ(flowAt->albedo, "Textures/Materials/water_flow_albedo");
+        EXPECT_EQ(flowAt->normal, "Textures/Materials/water_flow_normal");
+        EXPECT_EQ(flowAt->alphaMode, world::AlphaMode::Blend);
+        EXPECT_EQ(flowAt->effectTierS, world::EffectTier::Basic);
+        EXPECT_FLOAT_EQ(flowAt->uvScaleV, 3.0F);
+        EXPECT_FALSE(flowAt->snow.coverable);
         for (const world::MaterialDef& material : contents.materials)
         {
             EXPECT_GT(material.specularPower, 0.0F);

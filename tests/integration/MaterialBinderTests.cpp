@@ -179,7 +179,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 89U);
+                EXPECT_EQ(binder.Count(), 95U);
 
                 const MaterialDesc* glass = binder.Find(Id::Of("MAT_GLASS_CLEAR"));
                 ASSERT_NE(glass, nullptr);
@@ -221,6 +221,18 @@ namespace
                 EXPECT_EQ(siding->kind, MaterialKind::DualTexture);
                 EXPECT_EQ(siding->diffuseTexture, "Textures/Materials/wood_board_albedo");
                 EXPECT_FLOAT_EQ(siding->diffuse[1], 0.78F);
+
+                const MaterialDesc* flow = binder.Find(Id::Of("MAT_WATER_FLOW"));
+                ASSERT_NE(flow, nullptr);
+                EXPECT_EQ(flow->kind, MaterialKind::Basic);
+                EXPECT_EQ(flow->diffuseTexture, "Textures/Materials/water_flow_albedo");
+                EXPECT_FLOAT_EQ(flow->alpha, 0.52F);
+
+                const MaterialDesc* shower = binder.Find(Id::Of("MAT_GLASS_SHOWER"));
+                ASSERT_NE(shower, nullptr);
+                EXPECT_EQ(shower->kind, MaterialKind::Basic);
+                EXPECT_TRUE(shower->diffuseTexture.empty());
+                EXPECT_FLOAT_EQ(shower->alpha, 0.16F);
             });
     }
 

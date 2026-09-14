@@ -19381,6 +19381,48 @@
       "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
+      "id": "TEXTURE_MATERIAL_WATER_FLOW_ALBEDO",
+      "category": "material",
+      "sourceFile": "assets-src/Textures/Materials/water_flow_albedo.png",
+      "sourceSha256": "b62d32dae4a0b3c3d702fef1c182e65b1bcf08a24f45a353fe05c123329c8919",
+      "contentName": "Textures/Materials/water_flow_albedo",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural tileable water flow albedo",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/assets/glass_water_materials.py for HOUSE-00904. Tileable RGBA ripples serve the stock tinted transparent path and the later scrolling WaterFlow effect."
+      }
+    },
+    {
+      "id": "TEXTURE_MATERIAL_WATER_FLOW_NORMAL",
+      "category": "material",
+      "sourceFile": "assets-src/Textures/Materials/water_flow_normal.png",
+      "sourceSha256": "b849a3b4bd851a037adee28d8d30cc752e4825f9b45f583a946ed4947ec6a271",
+      "contentName": "Textures/Materials/water_flow_normal",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural tileable water flow normal",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/assets/glass_water_materials.py for HOUSE-00904 from the same periodic height field as the albedo. Linear +Y tangent normals serve the later WaterFlow effect."
+      }
+    },
+    {
       "id": "TEXTURE_MATERIAL_WOOD_BOARD_ALBEDO",
       "category": "material",
       "sourceFile": "assets-src/Textures/Materials/wood_board_albedo.png",

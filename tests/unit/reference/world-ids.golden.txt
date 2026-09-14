@@ -887,8 +887,10 @@ materials/materials	MAT_FLOOR_CONCRETE
 materials/materials	MAT_FLOOR_STONE
 materials/materials	MAT_FLOOR_VINYL
 materials/materials	MAT_FRAME_ALUMINIUM
+materials/materials	MAT_GLASS_CABINET
 materials/materials	MAT_GLASS_CLEAR
 materials/materials	MAT_GLASS_OBSCURED
+materials/materials	MAT_GLASS_SHOWER
 materials/materials	MAT_GRAVEL_PATH
 materials/materials	MAT_GROUND_LAWN
 materials/materials	MAT_HATCH_PLY
@@ -922,6 +924,10 @@ materials/materials	MAT_TILE_CERAMIC_DARK
 materials/materials	MAT_TILE_CERAMIC_LIGHT
 materials/materials	MAT_TILE_CERAMIC_WARM
 materials/materials	MAT_TILE_PORCELAIN_GREY
+materials/materials	MAT_WATER_BASIN
+materials/materials	MAT_WATER_FLOW
+materials/materials	MAT_WATER_PUDDLE
+materials/materials	MAT_WATER_TOILET
 materials/materials	MAT_WOOD_OAK_FLOOR
 materials/materials	MAT_WOOD_WALNUT_FLOOR
 assets	MODEL_FALLBACK_BOX
@@ -2267,6 +2273,8 @@ assets	TEXTURE_MATERIAL_TILE_LIGHT_SQUARE_ORM
 assets	TEXTURE_MATERIAL_TILE_WARM_SQUARE_ALBEDO
 assets	TEXTURE_MATERIAL_TILE_WARM_SQUARE_NORMAL
 assets	TEXTURE_MATERIAL_TILE_WARM_SQUARE_ORM
+assets	TEXTURE_MATERIAL_WATER_FLOW_ALBEDO
+assets	TEXTURE_MATERIAL_WATER_FLOW_NORMAL
 assets	TEXTURE_MATERIAL_WOOD_BOARD_ALBEDO
 assets	TEXTURE_MATERIAL_WOOD_BOARD_NORMAL
 assets	TEXTURE_MATERIAL_WOOD_BOARD_ORM

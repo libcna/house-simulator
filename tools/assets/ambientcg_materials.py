@@ -140,6 +140,15 @@ EXPECTED_COUNTS = {
     "grass": 1, "soil": 1, "fabric": 3, "metal": 2,
 }
 
+# The directory and its content configuration are shared with project-generated material maps.
+# Keep this list explicit: silently accepting every non-ambientCG PNG would weaken HOUSE-00296's
+# exact-set gate, while claiming another generator's output would make the two ownership checks
+# contradict each other.  `glass_water_materials.py --check` owns these two bytes and entries.
+FOREIGN_TEXTURES = {
+    "water_flow_albedo.png",
+    "water_flow_normal.png",
+}
+
 
 def archive_name(material: Material) -> str:
     return f"{material.asset_id}_{SOURCE_FORMAT}.zip"
@@ -410,7 +419,8 @@ def check_outputs(root: Path = OUTPUT) -> list[str]:
     problems = validate_selection()
     expected = {f"{material.slug}_{channel}.png"
                 for material in MATERIALS for channel in ("albedo", "normal", "orm")}
-    actual = {path.name for path in root.glob("*.png")} if root.is_dir() else set()
+    actual = ({path.name for path in root.glob("*.png")} - FOREIGN_TEXTURES
+              if root.is_dir() else set())
     for missing in sorted(expected - actual):
         problems.append(f"missing {root / missing}")
     for extra in sorted(actual - expected):
@@ -440,8 +450,9 @@ def check_outputs(root: Path = OUTPUT) -> list[str]:
 def check_registration() -> list[str]:
     problems = []
     config = json.loads(CONTENT_CONFIG.read_text(encoding="utf-8"))
+    foreign_config = {f"Materials/{name}" for name in FOREIGN_TEXTURES}
     configured = {name: entry for name, entry in config.get("assets", {}).items()
-                  if name.startswith("Materials/")}
+                  if name.startswith("Materials/") and name not in foreign_config}
     expected_config = {
         f"Materials/{material.slug}_{channel}.png"
         for material in MATERIALS for channel in ("albedo", "normal")

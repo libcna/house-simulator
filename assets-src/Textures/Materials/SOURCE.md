@@ -1,4 +1,14 @@
-# ambientCG base materials
+# Material texture provenance
+
+## Project-generated water maps
+
+`water_flow_albedo.png` and `water_flow_normal.png` are deterministic project-authored assets from
+`tools/assets/glass_water_materials.py` (`HOUSE-00904`), licensed with the project under Ms-PL.
+They share one periodic directional height field: RGBA carries blue-white ripple colour and graded
+opacity for stock XNA, while the linear +Y tangent normal is ready for the later `WaterFlow`
+effect. There is no upstream asset or downloaded source.
+
+## ambientCG base materials
 
 `HOUSE-00296`, retrieved 2026-09-13 from the official ambientCG per-asset download endpoint. The source and its preview renders are CC0; the evidence and quoted grant are in `docs/licence-evidence/ambientcg.md`, with the full text in `licenses/cc0-1.0/LICENCE.txt`.
 
