@@ -2514,6 +2514,13 @@ maps the misleadingly named acquired tile slugs by their visible finish rather t
 their source-selection labels. Exact rows and the review sheet are in
 `docs/asset-selection/interior-floors.md`; cell assignments still belong to `HOUSE-00908`.
 
+`HOUSE-00903` fixes the nine exterior records: three siding colours, brick water table, roof
+shingle, white soffit, broomed concrete, asphalt and gravel. The acquired set contains no named
+roofing map; retained visual review selected its charcoal square-unit texture as the closest honest
+shingle-course source, then gives it explicit asphalt wet, snow and audio semantics. The soffit is
+the only member that rejects snow because it faces downward. Exact rows and the review sheet are
+in `docs/asset-selection/exterior-materials.md`; shell assignment remains `HOUSE-00907`'s work.
+
 ### 22.2 Material classes and their effect mapping
 
 | Class | Tier S effect | Tier E technique | Notes |

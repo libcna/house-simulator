@@ -872,6 +872,7 @@ materials/materials	MAT_BASE_WOOD_OAK_FLOOR
 materials/materials	MAT_BASE_WOOD_PARQUET_FLOOR
 materials/materials	MAT_BASE_WOOD_WORN_FLOOR
 materials/materials	MAT_BLUESTONE_PAVER
+materials/materials	MAT_BRICK_WATER_TABLE
 materials/materials	MAT_CARPET_BEIGE
 materials/materials	MAT_CARPET_BROWN
 materials/materials	MAT_CARPET_GREY
@@ -911,6 +912,11 @@ materials/materials	MAT_PAINT_SMOKY_OCHRE
 materials/materials	MAT_PAINT_SOFT_GREY
 materials/materials	MAT_PAINT_SOFT_WHITE
 materials/materials	MAT_PAINT_WARM_WHITE
+materials/materials	MAT_ROOF_SHINGLE
+materials/materials	MAT_SIDING_DUSTY_BLUE
+materials/materials	MAT_SIDING_SAGE
+materials/materials	MAT_SIDING_WARM_WHITE
+materials/materials	MAT_SOFFIT_WHITE
 materials/materials	MAT_SOIL_GARDEN
 materials/materials	MAT_TILE_CERAMIC_DARK
 materials/materials	MAT_TILE_CERAMIC_LIGHT

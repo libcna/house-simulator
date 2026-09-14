@@ -12983,8 +12983,23 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             lightmap receiver; world schema/deploy/id-golden checks; max-4-core warning-clean loader
             and binder build; targeted authored-table tests; complete suite 1564/1564 executed
             tests (0 failures); `tools/ci/run_checks.sh` all gates green.
-- [ ] HOUSE-00903 — Grouped: author the 9 exterior materials (siding ×3, brick, roof shingle, soffit, concrete, asphalt, gravel)
+- [x] HOUSE-00903 — Grouped: author the 9 exterior materials (siding ×3, brick, roof shingle, soffit, concrete, asphalt, gravel)
       dep: HOUSE-00900 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-14) `exterior_materials.py` owns the exact 3 siding + brick + roof shingle +
+            soffit + concrete + asphalt + gravel library as complete §22.1 rows derived from the
+            measured bases. Existing `MAT_ASPHALT_01`, `MAT_CONCRETE_BROOM` and `MAT_GRAVEL_PATH`
+            ids are adopted unchanged; the generator checks every field and the retained tint
+            sheet pixel for pixel.
+      finding: the acquired 34-set has no named roofing texture. Visual review selected its
+            charcoal square-unit texture as the only honest retained source that reads as
+            weather-shedding courses, then explicitly restores asphalt wet/audio semantics. Its
+            55° snow limit accepts the approximately 34° house pitch; the downward-facing soffit
+            alone rejects snow.
+      verified: 9/9 exact roles, generated rows and preview pixels; all are static lightmap
+            receivers and eight are snow-coverable; world schema/deploy/id-golden and refreshed
+            shell-manifest checks; max-4-core warning-clean loader/binder build and targeted tests;
+            complete suite 1564/1564 executed tests (0 failures); `tools/ci/run_checks.sh` all
+            gates green, including 321 strict-XNA translation units.
 - [ ] HOUSE-00904 — Grouped: author the 8 glass and water materials
       dep: HOUSE-00900 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00905 — Grouped: author the 14 wet-variant materials for the outdoor surfaces

@@ -179,7 +179,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 83U);
+                EXPECT_EQ(binder.Count(), 89U);
 
                 const MaterialDesc* glass = binder.Find(Id::Of("MAT_GLASS_CLEAR"));
                 ASSERT_NE(glass, nullptr);
@@ -209,6 +209,18 @@ namespace
                 EXPECT_EQ(vinyl->kind, MaterialKind::DualTexture);
                 EXPECT_EQ(vinyl->diffuseTexture, "Textures/Materials/wood_light_floor_albedo");
                 EXPECT_FLOAT_EQ(vinyl->diffuse[0], 0.90F);
+
+                const MaterialDesc* roof = binder.Find(Id::Of("MAT_ROOF_SHINGLE"));
+                ASSERT_NE(roof, nullptr);
+                EXPECT_EQ(roof->kind, MaterialKind::DualTexture);
+                EXPECT_EQ(roof->diffuseTexture, "Textures/Materials/tile_light_square_albedo");
+                EXPECT_FLOAT_EQ(roof->diffuse[2], 0.74F);
+
+                const MaterialDesc* siding = binder.Find(Id::Of("MAT_SIDING_SAGE"));
+                ASSERT_NE(siding, nullptr);
+                EXPECT_EQ(siding->kind, MaterialKind::DualTexture);
+                EXPECT_EQ(siding->diffuseTexture, "Textures/Materials/wood_board_albedo");
+                EXPECT_FLOAT_EQ(siding->diffuse[1], 0.78F);
             });
     }
 

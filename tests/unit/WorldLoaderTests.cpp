@@ -3535,7 +3535,7 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 83U);
+        EXPECT_EQ(contents.materials.size(), 89U);
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
@@ -3578,7 +3578,8 @@ namespace
                                     return !IdRegistry::NameOf(material.id).starts_with("MAT_BASE_") &&
                                            material.snow.coverable;
                                 }),
-                  11);
+                  16)
+            << "HOUSE-00903 adds five coverable exterior finishes; the soffit faces downward";
 
         const auto chromeAt = std::find_if(contents.materials.begin(),
                                            contents.materials.end(),
@@ -3613,6 +3614,23 @@ namespace
         EXPECT_EQ(vinylAt->footstepSurface, "vinyl");
         EXPECT_EQ(vinylAt->effectTierS, world::EffectTier::DualTexture);
         EXPECT_FALSE(vinylAt->snow.coverable);
+
+        const auto roofAt = std::find_if(contents.materials.begin(),
+                                         contents.materials.end(),
+                                         [](const world::MaterialDef& material)
+                                         { return material.id == Intern("MAT_ROOF_SHINGLE"); });
+        ASSERT_NE(roofAt, contents.materials.end());
+        EXPECT_EQ(roofAt->materialClass, world::MaterialClass::Asphalt);
+        EXPECT_EQ(roofAt->albedo, "Textures/Materials/tile_light_square_albedo");
+        EXPECT_FLOAT_EQ(roofAt->snow.slopeLimitDeg, 55.0F);
+        EXPECT_EQ(roofAt->footstepSurface, "asphalt");
+
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return IdRegistry::NameOf(material.id).starts_with("MAT_SIDING_"); }),
+                  3)
+            << "HOUSE-00903's three reviewed siding colours load as full material records";
         for (const world::MaterialDef& material : contents.materials)
         {
             EXPECT_GT(material.specularPower, 0.0F);
