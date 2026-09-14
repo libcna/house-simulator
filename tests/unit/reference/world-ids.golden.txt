@@ -872,6 +872,9 @@ materials/materials	MAT_BASE_WOOD_OAK_FLOOR
 materials/materials	MAT_BASE_WOOD_PARQUET_FLOOR
 materials/materials	MAT_BASE_WOOD_WORN_FLOOR
 materials/materials	MAT_BLUESTONE_PAVER
+materials/materials	MAT_CARPET_BEIGE
+materials/materials	MAT_CARPET_BROWN
+materials/materials	MAT_CARPET_GREY
 materials/materials	MAT_CONCRETE_BROOM
 materials/materials	MAT_CONCRETE_KERB
 materials/materials	MAT_CONCRETE_SLAB
@@ -879,6 +882,9 @@ materials/materials	MAT_DECK_WOOD
 materials/materials	MAT_DOOR_HARDWOOD
 materials/materials	MAT_DOOR_PAINTED
 materials/materials	MAT_DOOR_STEEL
+materials/materials	MAT_FLOOR_CONCRETE
+materials/materials	MAT_FLOOR_STONE
+materials/materials	MAT_FLOOR_VINYL
 materials/materials	MAT_FRAME_ALUMINIUM
 materials/materials	MAT_GLASS_CLEAR
 materials/materials	MAT_GLASS_OBSCURED
@@ -906,7 +912,12 @@ materials/materials	MAT_PAINT_SOFT_GREY
 materials/materials	MAT_PAINT_SOFT_WHITE
 materials/materials	MAT_PAINT_WARM_WHITE
 materials/materials	MAT_SOIL_GARDEN
+materials/materials	MAT_TILE_CERAMIC_DARK
+materials/materials	MAT_TILE_CERAMIC_LIGHT
+materials/materials	MAT_TILE_CERAMIC_WARM
+materials/materials	MAT_TILE_PORCELAIN_GREY
 materials/materials	MAT_WOOD_OAK_FLOOR
+materials/materials	MAT_WOOD_WALNUT_FLOOR
 assets	MODEL_FALLBACK_BOX
 assets	MODEL_HUMAN_FEMALE_BASE_RESEARCH
 assets	MODEL_HUMAN_MALE_BASE_RESEARCH

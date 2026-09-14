@@ -2506,6 +2506,14 @@ after contact-sheet review showed they read as deliberate wear rather than ordin
 The exact ids, source mapping, tints and review are in
 `docs/asset-selection/interior-paints.md`. Cell assignments remain solely `HOUSE-00908`'s data.
 
+`HOUSE-00902` similarly fixes 12 interior floor records: oak, walnut, three carpets, four tiles,
+concrete, stone and vinyl. Vinyl maps to the `tile` class because §22.2 deliberately has no vinyl
+class and a static floor needs `DualTextureEffect`'s lightmap slot; its explicit `vinyl` footstep
+and absorption retain the distinct gameplay semantics that the class cannot express. Review also
+maps the misleadingly named acquired tile slugs by their visible finish rather than propagating
+their source-selection labels. Exact rows and the review sheet are in
+`docs/asset-selection/interior-floors.md`; cell assignments still belong to `HOUSE-00908`.
+
 ### 22.2 Material classes and their effect mapping
 
 | Class | Tier S effect | Tier E technique | Notes |

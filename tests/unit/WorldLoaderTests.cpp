@@ -3535,7 +3535,7 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 72U);
+        EXPECT_EQ(contents.materials.size(), 83U);
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
@@ -3602,6 +3602,17 @@ namespace
         EXPECT_FLOAT_EQ(warmWhiteAt->tint.Y, 0.96F);
         EXPECT_FLOAT_EQ(warmWhiteAt->tint.Z, 0.90F);
         EXPECT_FALSE(warmWhiteAt->snow.coverable);
+
+        const auto vinylAt = std::find_if(contents.materials.begin(),
+                                          contents.materials.end(),
+                                          [](const world::MaterialDef& material)
+                                          { return material.id == Intern("MAT_FLOOR_VINYL"); });
+        ASSERT_NE(vinylAt, contents.materials.end());
+        EXPECT_EQ(vinylAt->materialClass, world::MaterialClass::Tile);
+        EXPECT_EQ(vinylAt->albedo, "Textures/Materials/wood_light_floor_albedo");
+        EXPECT_EQ(vinylAt->footstepSurface, "vinyl");
+        EXPECT_EQ(vinylAt->effectTierS, world::EffectTier::DualTexture);
+        EXPECT_FALSE(vinylAt->snow.coverable);
         for (const world::MaterialDef& material : contents.materials)
         {
             EXPECT_GT(material.specularPower, 0.0F);
