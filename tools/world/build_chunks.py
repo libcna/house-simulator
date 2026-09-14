@@ -121,12 +121,6 @@ CHUNK_BUDGET_EXCEPTIONS = {
                 "ceiling (`HOUSE-00496`), and since `HOUSE-00488` the RAFTERS under that roof as "
                 "well -- two classes no room below it has, and both of them things you are "
                 "looking at when you stand in it"),
-    "L3_STORE_N": (7,
-                   "an attic store: roof and structure instead of a ceiling, and the two dormers "
-                   "put glass in it"),
-    "L3_STORE_W": (7,
-                   "the same, and it keeps a collar ceiling over the finished end as well as the "
-                   "roof over the rest"),
 }
 
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
@@ -247,8 +241,9 @@ def read_shell_geometry(path: Path) -> dict:
     that threw the material away could not do it.
 
     The material's `extras` come back with it, because `HOUSE-00471` writes the lightmap-receiver
-    decision there and that is what decides the effect a chunk is drawn with. Reading it from the
-    generated data rather than from a table here is the whole point of emitting it.
+    decision there and `HOUSE-00907` writes the authored `materialId`. Reading the semantic
+    receiver flag from generated geometry and the visual identity from the world table keeps two
+    different questions from being conflated when the same finish occurs on floor and detail.
     """
     document, blob = gltf_io.read_model(path)
     buffers = gltf_io.buffer_bytes(document, blob, path.parent)
@@ -330,8 +325,8 @@ def shell_layout(name: str, extras: dict, baked: bool) -> int:
     §18.3 bakes "per cell", which is a description of an INTERIOR: outdoors the sun and the sky
     light the surface directly every frame (§22), and `shell_unwrap.py` therefore skips the yards,
     the decks, the roofs and the chimney -- `EXT_WORLD` alone is 160 000 m². Those files still
-    carry `BLOCKOUT_wall` and `BLOCKOUT_exterior`, which ARE receiver classes; a terrace's deck is
-    a floor whichever way you light it. So a receiver class in a cell that is not baked draws with
+    carry the semantic receiver flag on their real material slots; a terrace's deck is a floor
+    whichever way you light it. So a receiver class in a cell that is not baked draws with
     the outdoor dynamic path, which is what §22 says lights it, and a receiver class in a cell that
     IS baked and still has no lightmap UV is an error naming the tool that should have made one.
     """
@@ -432,12 +427,13 @@ def group_key(prop: dict, cell: dict, material: dict) -> tuple:
 
 def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
           exterior_dirs=()) -> dict:
-    # `materials` and `props` are OPTIONAL, because the shell exists before either does: §11's
-    # material table is `HOUSE-00296`'s and the prop placements are Phase 8's, and `HOUSE-00473`
-    # chunks the blockout today. A prop cannot be chunked without a material and says so when it
-    # is reached; the shell carries its own placeholder materials in the `.glb` (`HOUSE-00470`).
+    # Props remain optional, but materials no longer are: `HOUSE-00907` gives every shell primitive
+    # an authored id and the chunk must validate that id and take its alpha mode from the same row
+    # runtime loads. Accepting a missing table would turn a typo back into blockout geometry.
     layout = layout_io.load_layout(world_dir, ["levels", "cells"])
-    for optional in ("materials", "props"):
+    layout["materials"] = layout_io.load_file(world_dir / layout_io.FILES["materials"][0],
+                                               "materials")
+    for optional in ("props",):
         name, _ = layout_io.FILES[optional]
         if (world_dir / name).is_file():
             layout[optional] = layout_io.load_file(world_dir / name, optional)
@@ -491,9 +487,9 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
         groups.setdefault(key, []).append({
             "prop": prop["id"], "mesh": placed, "layout": layout_id, "material": material_id})
 
-    for member, key in _shell_members(shell_dirs, cells, stats):
+    for member, key in _shell_members(shell_dirs, cells, materials, stats):
         groups.setdefault(key, []).append(member)
-    for member, key in _shell_members(exterior_dirs, cells, stats, outdoors=True,
+    for member, key in _shell_members(exterior_dirs, cells, materials, stats, outdoors=True,
                                       levels=layout_io.by_id(layout_io.rows(layout, "levels"),
                                                              "level")):
         groups.setdefault(key, []).append(member)
@@ -728,7 +724,7 @@ def _refuse_stale_preference(shell_dirs) -> None:
                     f"tools/blender/shell_unwrap.py")
 
 
-def _shell_members(shell_dirs, cells: dict, stats: dict, outdoors: bool = False,
+def _shell_members(shell_dirs, cells: dict, materials: dict, stats: dict, outdoors: bool = False,
                    levels: dict | None = None):
     """Every surface class of every generated shell file, as a chunk member and its group key.
 
@@ -788,6 +784,22 @@ def _shell_members(shell_dirs, cells: dict, stats: dict, outdoors: bool = False,
                     f"shell file {path.name} belongs to cell {cell_id!r}, which does not exist")
             for name, entry in sorted(surfaces.items()):
                 stats["shellSurfaces"] += 1
+                material_id = entry["extras"].get("materialId")
+                if not isinstance(material_id, str) or not material_id:
+                    if outdoors:
+                        # Terrain and fence generators share this geometry reader but are not the
+                        # house shell; their legacy role names are replaced by their own Phase 9
+                        # material-assignment tasks.
+                        material_id = name
+                    else:
+                        raise LayoutError(
+                            f"{path.name}: shell slot {name!r} carries no authored `materialId`; "
+                            f"regenerate with tools/blender/house_shell_gen.py (HOUSE-00907)")
+                material = materials.get(material_id)
+                if material is None and not outdoors:
+                    raise LayoutError(
+                        f"{path.name}: shell slot {name!r} names material {material_id!r}, which "
+                        f"does not exist in layout.materials.json")
                 layout_id = shell_layout(name, entry["extras"], lightmapped)
                 if layout_id == LAYOUT_DUAL and not entry["hasUv1"]:
                     raise LayoutError(
@@ -798,16 +810,15 @@ def _shell_members(shell_dirs, cells: dict, stats: dict, outdoors: bool = False,
                     stats["shellDynamicReceivers"] += 1
                 mesh = {key: entry[key] for key in
                         ("positions", "normals", "uv0", "uv1", "triangles")}
-                # §22.2 gives glass its own path, and it is transparent: a blended chunk is
-                # drawn after the opaque ones and cannot share a buffer with them. The class comes
-                # from the material's own `surfaceClass` -- `HOUSE-00471` asks for structured
-                # semantic data rather than string heuristics over names, and matching `*glass`
-                # would be exactly the heuristic it names.
-                alpha = "blend" if entry["extras"].get("surfaceClass") == "glass" else "opaque"
-                key = (cell_id, (LAYOUTS[layout_id][0], name,
+                # Alpha is authored once in the real material row. `surfaceClass == glass` was the
+                # placeholder-era proxy and became a second opinion the moment HOUSE-00907 put
+                # `MAT_GLASS_CLEAR` in the file.
+                alpha = (material or {}).get("alphaMode", "opaque")
+                surface_class = entry["extras"].get("surfaceClass") or name
+                key = (cell_id, (LAYOUTS[layout_id][0], material_id,
                                  tuple(sorted(cell.get("lightGroups") or ())), alpha))
-                yield ({"prop": f"{path.stem}:{name}", "mesh": mesh,
-                        "layout": layout_id, "material": name}, key)
+                yield ({"prop": f"{path.stem}:{surface_class}", "mesh": mesh,
+                        "layout": layout_id, "material": material_id}, key)
 
 
 def _split(members: list[dict], stats: dict) -> list[dict]:
@@ -1209,9 +1220,9 @@ def _fixture_shell(path: Path, classes) -> None:
     """A `.glb` shaped like `house_shell_gen.py`'s output: one primitive per surface class.
 
     @p classes is `[(name, receiver, uv1), ...]`, and each becomes a material carrying the
-    `surfaceClass`/`lightmapReceiver` extras `HOUSE-00471` writes. That is the whole shape of the
-    file this tool has to read: `read_geometry` welds the primitives together, which is right for
-    a prop and destroys exactly the information chunking is grouping by.
+    semantic extras `house_shell_gen.py` writes. That is the whole shape of the file this tool has
+    to read: `read_geometry` welds the primitives together, which is right for a prop and destroys
+    exactly the information chunking is grouping by.
     """
     blob = bytearray()
     accessors: list[dict] = []
@@ -1254,8 +1265,10 @@ def _fixture_shell(path: Path, classes) -> None:
         index_accessor = len(accessors)
         accessors.append({"bufferView": view(indices, "H"), "componentType": 5123,
                           "count": len(indices), "type": "SCALAR"})
-        materials.append({"name": f"BLOCKOUT_{name}",
-                          "extras": {"surfaceClass": name, "lightmapReceiver": receiver}})
+        material_id = f"MAT_{name.upper()}"
+        materials.append({"name": f"{material_id}__shell_{name}",
+                          "extras": {"materialId": material_id, "surfaceClass": name,
+                                     "lightmapReceiver": receiver}})
         primitives.append({"attributes": attributes, "indices": index_accessor,
                            "material": slot, "mode": 4})
 
@@ -1307,6 +1320,16 @@ def selftest() -> int:
                  "effectTierS": "AlphaTest"},
                 {"id": "MAT_LAMP", "class": "emissive", "alphaMode": "opaque",
                  "effectTierS": "Basic"},
+                {"id": "MAT_FLOOR", "class": "tile", "alphaMode": "opaque",
+                 "effectTierS": "DualTexture"},
+                {"id": "MAT_WALL", "class": "paint", "alphaMode": "opaque",
+                 "effectTierS": "DualTexture"},
+                {"id": "MAT_TRIM", "class": "paint", "alphaMode": "opaque",
+                 "effectTierS": "Basic"},
+                {"id": "MAT_GLASS", "class": "glass", "alphaMode": "blend",
+                 "effectTierS": "Basic"},
+                {"id": "MAT_ROOF", "class": "asphalt", "alphaMode": "opaque",
+                 "effectTierS": "DualTexture"},
             ]}
         (world_dir / "layout.materials.json").write_text(
             json.dumps(materials_doc, indent=2) + "\n", encoding="utf-8")
@@ -1659,22 +1682,22 @@ def selftest() -> int:
                 f"a cell's four surface classes are four chunks, not one welded mesh "
                 f"({len(by_cell['L0_HALL'])})")
         require(sorted(chunk["material"] for chunk in by_cell["L0_HALL"])
-                == ["BLOCKOUT_floor", "BLOCKOUT_glass", "BLOCKOUT_trim", "BLOCKOUT_wall"],
-                "each named by the material it is drawn with")
+                == ["MAT_FLOOR", "MAT_GLASS", "MAT_TRIM", "MAT_WALL"],
+                "each named by its authored material id rather than its diagnostic slot name")
         alphas = {chunk["material"]: chunk["key"][3] for chunk in by_cell["L0_HALL"]}
-        require(alphas["BLOCKOUT_glass"] == "blend"
+        require(alphas["MAT_GLASS"] == "blend"
                 and set(alphas.values()) == {"blend", "opaque"},
-                f"and the glass is BLENDED where the rest is opaque, so it cannot share a buffer "
-                f"with geometry drawn before it ({alphas})")
+                f"and alpha comes from the authored material row, so glass cannot share a buffer "
+                f"with opaque geometry ({alphas})")
         layouts = {chunk["material"]: chunk["layout"] for chunk in by_cell["L0_HALL"]}
-        require(layouts["BLOCKOUT_floor"] == LAYOUT_DUAL
-                and layouts["BLOCKOUT_wall"] == LAYOUT_DUAL
-                and layouts["BLOCKOUT_trim"] == LAYOUT_BASIC,
+        require(layouts["MAT_FLOOR"] == LAYOUT_DUAL
+                and layouts["MAT_WALL"] == LAYOUT_DUAL
+                and layouts["MAT_TRIM"] == LAYOUT_BASIC,
                 f"a receiver draws with DualTextureEffect and detail with BasicEffect, from the "
                 f"material's own `lightmapReceiver` ({layouts})")
         require(all(len(v) == LAYOUTS[chunk["layout"]][2] // 4 - 2 or True
                     for chunk in by_cell["L0_HALL"] for v in ()) and
-                LAYOUTS[layouts["BLOCKOUT_trim"]][1] == ("position", "normal", "uv0"),
+                LAYOUTS[layouts["MAT_TRIM"]][1] == ("position", "normal", "uv0"),
                 "so the detail chunk carries the normal its effect reads and no lightmap UV")
 
         # The LIGHTMAPPED copy wins where there is one: `L0_HALL` exists in both directories and
@@ -1689,7 +1712,7 @@ def selftest() -> int:
         # decks, so their floors and walls -- receiver CLASSES both -- reach this tool with no
         # lightmap UV, and §22 says the sun and the sky light them directly every frame.
         terrace = {chunk["material"]: chunk["layout"] for chunk in by_cell["EXT_TERRACE"]}
-        require(terrace["BLOCKOUT_floor"] == LAYOUT_BASIC,
+        require(terrace["MAT_FLOOR"] == LAYOUT_BASIC,
                 f"a receiver class in a cell that is NOT baked draws dynamically rather than "
                 f"failing for want of a lightmap it was never going to have ({terrace})")
         require(shelled["stats"]["shellDynamicReceivers"] == 1
@@ -1765,18 +1788,18 @@ def selftest() -> int:
                 "a world that declares no such pack falls back to the biggest outdoor cell "
                 "rather than refusing to build")
         require("EXT_YARD" in by_cell and any(
-            chunk["material"] == "BLOCKOUT_roof" for chunk in by_cell["EXT_YARD"]),
+            chunk["material"] == "MAT_ROOF" for chunk in by_cell["EXT_YARD"]),
             "-- the yard is 6 400 m² and the terrace 9, and it is the roof that lands there")
         require("ROOF_MAIN" not in by_cell,
                 "and not left as a cell of its own, which nothing would ever draw")
 
         # World space already: a prop is placed by `place()`, the shell is not placed at all.
-        floor_chunk = [c for c in by_cell["L0_HALL"] if c["material"] == "BLOCKOUT_floor"][0]
+        floor_chunk = [c for c in by_cell["L0_HALL"] if c["material"] == "MAT_FLOOR"][0]
         require(abs(floor_chunk["bounds"][0]) < 1e-6 and abs(floor_chunk["bounds"][3] - 1.0) < 1e-6,
                 f"the shell arrives in world space and is not moved "
                 f"({tuple(round(v, 3) for v in floor_chunk['bounds'])})")
         require(all(len(chunk["subRanges"]) == 1 for chunk in by_cell["L0_HALL"])
-                and floor_chunk["subRanges"][0]["prop"] == "L0_HALL:BLOCKOUT_floor",
+                and floor_chunk["subRanges"][0]["prop"] == "L0_HALL:floor",
                 f"and each surface class is one sub-range, named for the file and the class it "
                 f"came from ({floor_chunk['subRanges'][0]['prop']})")
 
@@ -1789,9 +1812,11 @@ def selftest() -> int:
         require(len(undeclared) == 1 and "declares no exception" in undeclared[0],
                 f"a cell over it with no exception is an ERROR, and the message says what to do "
                 f"({undeclared})")
-        require(not chunk_budget_problems({"L0_GARAGE": CHUNK_BUDGET_EXCEPTIONS["L0_GARAGE"][0]}),
+        require(not chunk_budget_problems(
+            {"L0_STAIR_MAIN": CHUNK_BUDGET_EXCEPTIONS["L0_STAIR_MAIN"][0]}),
                 "a declared cell at its own ceiling is fine -- that is what the exception is")
-        grown = chunk_budget_problems({"L0_GARAGE": CHUNK_BUDGET_EXCEPTIONS["L0_GARAGE"][0] + 1})
+        grown = chunk_budget_problems(
+            {"L0_STAIR_MAIN": CHUNK_BUDGET_EXCEPTIONS["L0_STAIR_MAIN"][0] + 1})
         require(len(grown) == 1 and "its own exception allows" in grown[0],
                 f"...and one PAST its ceiling is an error, so an exception is a ceiling and not a "
                 f"licence ({grown})")
@@ -1849,7 +1874,7 @@ def selftest() -> int:
 
         outdoor_dir = workspace / "outdoors"
         outdoor_dir.mkdir()
-        _fixture_shell(outdoor_dir / "TERRAIN_R0C0.glb", [("BLOCKOUT_floor", False, False)])
+        _fixture_shell(outdoor_dir / "TERRAIN_R0C0.glb", [("floor", False, False)])
         outdoors = build(world_dir, manifest, [(shell_lm, True), (shell_raw, False)],
                          [(outdoor_dir, False)])
         require(outdoors["stats"]["exteriorFiles"] == 1,

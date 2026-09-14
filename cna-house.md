@@ -2555,6 +2555,15 @@ missing: it selects a non-lightmapped `BasicEffect` joinery finish independently
 lightmapped wall paint. The complete reviewable table is
 `docs/asset-selection/room-palettes.md`; runtime and offline shell tools read the same cell fields.
 
+`HOUSE-00907` applies those palettes to the generated shell. Each glTF material records both its
+authored `materialId` and its semantic `surfaceClass`: keeping both lets a bluestone terrace floor
+remain a lightmap receiver while a step in the same finish remains dynamically lit detail. Window
+glass comes from `layout.openings.json` (including the three obscured bathroom sets), stair finish
+comes from `layout.stairs.json`, basement outer skin and the chimney use the brick water-table
+finish, upper outer skin uses warm-white siding, and roof/eaves/metalwork use the authored shingle,
+white-soffit and gutter finishes. The chunk builder validates every shell id against
+`layout.materials.json` and reads alpha mode from that row rather than guessing from a class name.
+
 ### 22.2 Material classes and their effect mapping
 
 | Class | Tier S effect | Tier E technique | Notes |

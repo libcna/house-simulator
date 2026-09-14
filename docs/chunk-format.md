@@ -110,18 +110,22 @@ three differences worth stating:
   is exactly what chunking groups by, so the shell is read by a separate function that keeps the
   primitives apart. `read_geometry`, which welds them, stays as it is because that is right for a
   prop.
-* **The material is the placeholder in the `.glb`** (`BLOCKOUT_wall`, `BLOCKOUT_glass`, …), and
-  what it is drawn with comes from the `lightmapReceiver` `HOUSE-00471` writes into the material's
-  glTF `extras`: a receiver is `DualTextureEffect`, everything else `BasicEffect`. A table here
-  would be a second opinion about a decision the data already carries.
+* **The material is the authored `materialId` in the `.glb`** (`MAT_PAINT_WARM_WHITE`,
+  `MAT_GLASS_CLEAR`, …), written by `HOUSE-00907` from the cell palette, opening schedule or fixed
+  architectural role. The diagnostic glTF slot name also contains its `surfaceClass`; both values
+  live in material `extras`, because the same finish can be a receiver on a floor and detail on a
+  step. What it is drawn with comes from the `lightmapReceiver` `HOUSE-00471` writes beside them: a
+  baked receiver is `DualTextureEffect`, everything else `BasicEffect`. The material's
+  `alphaMode`, however, comes from `layout.materials.json`; glass is no longer guessed from a
+  surface-class name.
 * **Baked and not baked are different questions.** §18.3 bakes per cell, which is a description of
   an interior; `shell_unwrap.py` skips the yards, decks, roofs and chimney, so their floors and
   walls — receiver classes both — arrive with no `TEXCOORD_1` and §22 lights them directly every
   frame. A receiver class outside a baked cell is therefore `BasicEffect`; a receiver **inside**
   one with no second UV is an error naming `shell_unwrap.py`.
 
-A sub-range's `prop` is the `layout.props.json` id for a prop and `<file>:<material>` for a surface
-class of the shell. A shell file whose name is not a cell — `ROOF_MAIN`, `ROOF_GARAGE`, `CHIMNEY` —
+A sub-range's `prop` is the `layout.props.json` id for a prop and `<file>:<surface-class>` for a
+surface class of the shell. A shell file whose name is not a cell — `ROOF_MAIN`, `ROOF_GARAGE`, `CHIMNEY` —
 draws with **the property's own outdoors**: the largest exterior cell in §27.2's `exterior` pack,
 derived rather than named (`HOUSE-00494`). It was the largest exterior cell full stop until then,
 which is `EXT_WORLD`, whose pack is `neighbourhood` — so the player's own roof loaded after the

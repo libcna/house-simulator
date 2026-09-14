@@ -206,6 +206,9 @@ run_gate "shell-realism" python3 tools/world/verify_shell.py --selftest
 # question is answered here instead: which generator, at which version, over which layout,
 # producing which bytes. Needs Blender, and says so loudly on a checkout without a shell.
 run_gate "shell-manifest" python3 tools/blender/house_shell_gen.py --check-manifest
+# `HOUSE-00907`. The manifest proves which bytes were generated; this proves every shell slot in
+# those bytes resolves to the exact room/opening/stair palette and no `BLOCKOUT_*` survived.
+run_gate "shell-materials" python3 tools/blender/house_shell_gen.py --check-materials
 # `HOUSE-00399`. An id is the only durable name anything has, and a save file is a list of them
 # (§68). Renaming a room leaves the layout internally consistent and every save broken, so none of
 # §15.7's twelve rules can see it. This gate can: the golden list is append-only, and an id that

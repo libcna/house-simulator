@@ -1,8 +1,10 @@
-# Session handoff — 2026-09-12
+# Session handoff — 2026-09-14
 
-This is the authoritative session handoff for the next agent. Read it first, then read only the
-parts of `plan.md`, `cna-house.md`, `AGENTS.md`/`CLAUDE.md`, and source files needed for the next
-dependency-valid task. Do not restart the project or repeat completed audits.
+This is the authoritative handoff for the next agent. The owner explicitly wants a **fresh Sol
+High context with a new optimisation target: make House Simulator visually convincing**. Do not
+resume this session's habit of mechanically following the dependency DAG. Read the visual brief in
+§5 first, inspect the current game on the real screen, and then select the highest-leverage
+dependency-valid work.
 
 ## 1. Exact repository state
 
@@ -10,32 +12,15 @@ dependency-valid task. Do not restart the project or repeat completed audits.
 |---|---|
 | Repository | `/rv/data/development/github.com/libcna/house-simulator` |
 | Branch | `develop` |
-| Code baseline | `94b160e` — `feat: update sky dome colours from LUT (HOUSE-01644)` |
-| Remote | `origin/develop`; `94b160e` was pushed before this handoff commit |
-| Handoff commit | The commit containing this file; it is a docs-only child of `94b160e` and is also intended to be pushed |
-| Working tree at handoff | Clean after the handoff commit |
-| Ledger count before the handoff commit | 509 completed / 833 open task rows |
+| Parent baseline | `8c40790` — `world: author all room palettes (HOUSE-00908)` |
+| Handoff commit | The commit containing this file completes `HOUSE-00907` |
+| Working tree | Clean after that commit |
+| Active unfinished task | None |
 
-Verify these claims with `git branch --show-current`, `git rev-parse HEAD`, `git status --short`,
-and `git log --oneline -5` before changing anything.
+Verify with `git branch --show-current`, `git rev-parse HEAD`, `git status --short`, and
+`git log --oneline -5` before changing anything.
 
-The previous build-directory migration is complete. The active `build/` cache uses the sibling
-repositories the owner requested:
-
-| Dependency | Branch / HEAD | Build use |
-|---|---|---|
-| `../cna` | `next` / `0a3a1460169c9256897626f5b9c7bc308735949d` | `CNA_SOURCE_DIR`; clean |
-| `../sharp-runtime` | `next` / `0c82d9b888bdf5f7d5663c77942f339bcb2a7445` | `CNAHOUSE_SHARP_RUNTIME_ROOT`; clean |
-| SDL3 prebuilt | `../cna/.sdl-prebuilt-Linux-x86_64-wayland` | present and used by the build |
-
-There are no standalone `../cna/build` or `../sharp-runtime/build` directories. This is not a
-problem: house-simulator builds both dependencies as CMake subprojects under `build/CNA_BUILD/`
-and `build/CNA_BUILD/SHARP_RUNTIME/`. The current tree contains the CNA libraries, 14
-sharp-runtime archives, and `build/CNA_BUILD/modules/renderers/easygl/libcna_renderer_easygl.a`.
-The `cna-house`, unit-test, and integration-test binaries all build successfully from this cache.
-Do not reconfigure merely to create standalone sibling build directories.
-
-The cache also confirms:
+The active `build/` cache is usable and configured with:
 
 ```text
 CNA_SOURCE_DIR=/rv/data/development/github.com/libcna/cna
@@ -45,119 +30,110 @@ CMAKE_C_COMPILER_LAUNCHER=ccache
 CMAKE_CXX_COMPILER_LAUNCHER=ccache
 ```
 
-Neither sibling repository was modified by this session.
+`../sharp-runtime` is on `next` at `0c82d9b888bd` and clean. At the last check, `../cna` was on
+`native-platforms-integration` at `5f583a2bece0` with an unrelated removed video fixture from
+another session. That sibling changed underneath this session, so verify it again but do not touch,
+restore, stage or commit its state. This session did not modify either sibling.
 
 ## 2. Mandatory display and build rules
 
-**Never use `DISPLAY=:99` here. It is a real, visible display on this machine.** An earlier test
-invocation incorrectly assumed otherwise and opened test windows on the owner's screen. There
-were no test/game processes left running at handoff.
-
-Every graphical or integration invocation must explicitly use:
-
-```bash
-SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy <command>
-```
-
-Pure static checks do not create windows. Do not run broad graphical suites when a focused test is
-sufficient. A real-screen game launch requires an explicit owner request.
-
-For every build use the established environment and the existing `build/` directory:
+The owner requires **at most four CPU cores** for compilation and tests. Use the existing `build/`
+directory and pin every expensive command to four cores:
 
 ```bash
 PATH=/home/robertvokac/.pyenv/versions/3.11.9/bin:/usr/local/bin:/usr/bin:/bin \
 CCACHE_DIR=/rv/cnaccache CCACHE_BASEDIR=/rv \
-cmake --build build --target <targets> -j$(nproc)
+CMAKE_BUILD_PARALLEL_LEVEL=4 CTEST_PARALLEL_LEVEL=4 MAKEFLAGS=-j4 \
+OMP_NUM_THREADS=1 PYTHON_CPU_COUNT=4 \
+taskset -c 4,5,7,9 <command>
 ```
 
-Keep that Python first in `PATH` when committing too. The pre-commit hook runs world validation,
-and `/usr/bin/python3` does not have `jsonschema`; the Python 3.11.9 environment does. Do not bypass
-the hook with `--no-verify`.
+Keep Python 3.11.9 first in `PATH` when committing because the hook needs `jsonschema`. Never
+bypass the hook. Graphical tests must add:
 
-All normal project constraints remain absolute: strict XNA 4.0-shaped runtime API,
-`CNA_CNAEXT=OFF`, no CNAEXT/model convenience API, no sibling-repository edits, and one completed
-task plus its `plan.md` checkbox per commit.
+```bash
+SDL_VIDEODRIVER=offscreen SDL_AUDIODRIVER=dummy
+```
 
-## 3. Work completed in the sky chain
+Do not use `DISPLAY=:99`; it is a real visible display here. Conversely, the next session should
+launch `cna-house` normally on the real screen for the owner because that visual audit is explicitly
+requested. Stop the game cleanly after inspection.
 
-The dependency chain `HOUSE-01641` through `HOUSE-01644` is complete. Do not redo it.
+All project rules remain absolute: XNA-only runtime, `CNA_CNAEXT=OFF`, no sibling-repository edits,
+the house is data rather than C++, and one completed task plus its `plan.md` checkbox per commit.
 
-| Commit | Task | Result |
-|---|---|---|
-| `969f735` | `HOUSE-01641` | Generated the compact 32-row sky colour curve and analytic cloud/azimuth model in `layout.sky.json`. |
-| `5837243` | `HOUSE-01642` | Generated the non-degenerate 610-vertex / 1,216-triangle `CSKY` v1 dome. |
-| `461ac3e` | `HOUSE-01643` | Added the camera-following XNA `SkySystem` dome and composed the existing sun disc in the one `Pass::Sky` slot. |
-| `94b160e` | `HOUSE-01644` | Added strict colour-model loading, material-change CPU recolouring, and live XNA vertex-buffer updates. |
+## 3. Work completed by HOUSE-00907
 
-`HOUSE-01644` specifically added:
+`HOUSE-00907` replaced the generated house shell's diagnostic placeholder materials with real
+authored ids:
 
-* `SkyColourModelReader`, which validates schema `cna-house/sky/1`, exactly 32 strictly ascending
-  elevation rows, the 8 × 16 conceptual sample axes, unit RGB values, and finite bounded scalars;
-* retained `VertexPositionColor` data for all 610 vertices;
-* interpolation between altitude rows, smoothstep from horizon to zenith, and the generated
-  `cloudCover^1.5` overcast mix;
-* updates only after a greater-than 0.25-degree altitude change or greater-than 0.01 cloud-cover
-  change, with no per-update vector allocation;
-* re-upload to the existing XNA vertex buffer and counters `sky.colour.updates` and
-  `sky.colour.micros`;
-* unit coverage for the parser, values, exact thresholds, 600-frame non-per-frame behaviour, full
-  overcast, and timing; and an offscreen device test that performs a second GPU upload.
+* each cell's floor, wall, ceiling and trim come directly from the `HOUSE-00908` palette fields;
+* window glass comes from `layout.openings.json`, including obscured bathroom glazing;
+* stair finish comes from `layout.stairs.json`;
+* basement outer skin and chimney use brick water table, upper outer skin uses warm-white siding,
+  roofs use shingles, eaves use white soffit, and metal uses balcony/gutter finishes;
+* all 99 generated GLBs use 43 real material ids, with no surviving `BLOCKOUT_*` material;
+* each glTF slot retains structured `materialId`, `surfaceClass`, and `lightmapReceiver` extras;
+* `build_chunks.py` validates shell ids against `layout.materials.json` and takes `alphaMode` from
+  the real row rather than guessing that glass is transparent from a class name;
+* one real finish can be both a receiver and detail, so keeping `surfaceClass` separately prevents
+  bluestone floor/step and plywood trim/structure from being incorrectly merged;
+* real grouping reduced chunk-budget exceptions from seven cells to five.
 
-Measured across 64 forced debug-build updates: mean **0.105 ms**, maximum **0.121 ms**. A
-600-frame half-degree transition caused only two updates including construction. These figures and
-the completed checkbox are recorded in `plan.md`; architecture and format details are in
-`cna-house.md` §31.2 and `docs/sky-dome-format.md`.
-
-Important input detail: `assets-src/world/layout.sky.json` is JSONC with comments and is consumed by
-offline tooling. Runtime and C++ tests must read the deployed, comment-free
-`content/world/layout.sky.json`. Do not switch the tests back to the source JSONC file.
-
-## 4. Verification paid at `94b160e`
-
-All commands below completed successfully. Graphical commands used the offscreen/dummy drivers.
+The final generated measurements are:
 
 ```text
-Build: cna-house, cnahouse_unit_tests, cnahouse_integration_tests
-Unit:  SkySystemTests.* — 6 / 6 passed
-Integration: SkySystemPassTests.* plus
-             HeadlessRunTests.TheWalkSceneLoadsTheSunBakeAndPublishesDaylight — 2 / 2 passed
-Static: tools/ci/run_checks.sh — all gates green
-Strict API: check_xna_strict — 297 translation units clean, 27 destructor exemptions
-Diff: git diff --check — clean
+Material gate: 96 cell maps, 99 GLBs, 115 authored material rows
+Unwrap:        78 cells, 5,286 receiver faces, 35,306 detail faces, 78 atlases
+Chunks:        459 chunks / 93 cells, 108,023 vertices
+Packed bytes:  3,428,956 (raw 5,185,104), five documented exceptions, no problems
 ```
 
-The first commit attempt was correctly rejected because the hook inherited `/usr/bin/python3` and
-could not import `jsonschema`. No commit was created by that attempt. Re-running with the PATH in
-§2 made every staged gate green and produced `94b160e` normally.
+The generated shell is under `build/shell`, its unwrapped form is under `build/shell-lm`, and the
+deployed chunk file is `content/world/chunks.bin`. `docs/shell-manifest.json` matches the final
+generator and shell bytes. `tools/ci/run_checks.sh` now includes a `shell-materials` gate.
 
-## 5. Next dependency-valid work
+## 4. Verification paid by this commit
 
-Start by reassessing the DAG in `plan.md`. The immediate Phase-25 successor is:
+All builds and tests were limited to four cores. Graphical tests used offscreen video and dummy
+audio.
 
-* **`HOUSE-01645` — implement the night-sky blend and sun-glow term.**
+```text
+Generator self-test:                         passed
+Shell material assignment gate:             96 maps / 99 GLBs passed
+Chunk builder self-test and production run: passed
+Build:                                       complete, warning-clean
+Complete ctest suite:                        1,555 non-failures; 9 initial failures
+Focused retry, headless weather:             passed
+Focused retry, SaveStoreTest.*:              10 / 10 passed outside sandbox
+Static gates:                                tools/ci/run_checks.sh all green
+Whitespace:                                  git diff --check clean
+```
 
-Useful existing seams:
+The first eight SaveStore failures were sandbox permission failures when writing the measured user
+save directory. All SaveStore tests passed outside the sandbox. The remaining headless weather
+case passed immediately in isolation. No HOUSE-00907 failure remained.
 
-* `SkyColourModel` already loads and retains `sunGlowColor`, `sunGlowStrength`, and
-  `sunGlowExponent`.
-* `SkySystem::SetSun` receives the full `environment::SunPosition`; its `azimuthDeg` is available,
-  although `HOUSE-01644` intentionally forwards only altitude and cloud cover to `SetSky`.
-* The generated model and its independent expansion oracle are in `tools/world/sky_lut.py`.
-  Preserve that oracle rather than duplicating expected values from the runtime.
-* The full target formula is in `cna-house.md` §31.2. `HOUSE-01644` implemented the altitude,
-  vertex-altitude, and overcast portions only. Directional glow and night blending are intentionally
-  still open.
+## 5. The next session's visual objective
 
-There is a dependency question to resolve honestly before marking `HOUSE-01645` complete:
-§31.2 writes the final night mix in terms of moon altitude and phase, but `MoonModel` and phase are
-still open as `HOUSE-01601` and `HOUSE-01602`, while `HOUSE-01645` currently depends only on
-`HOUSE-01644`. Do not invent moon data or fake completion. Inspect the architecture and ledger for
-the smallest justified resolution; if the moon inputs genuinely block the whole task, record the
-evidence in `plan.md` and continue independent dependency-valid work.
+Open a **new clean Sol High context**. Its objective is not “continue the dependency DAG”; it is:
 
-The nearest independent task is:
+> Make House Simulator finally look visually convincing.
 
-* **`HOUSE-01646` — author the three alpha cloud textures** (depends only on completed
-  `HOUSE-01641`). It unblocks `HOUSE-01647` through `HOUSE-01650`.
+Begin by launching the current `cna-house` binary on the owner's real screen and walking a useful
+exterior/interior route. Record the largest visible blockers with screenshots or precise poses.
+Then map those blockers to the smallest dependency-valid tasks and execute the highest-impact one.
+Architecture and the ledger still constrain implementation, but task ordering should serve the
+visual result.
 
-Do not proceed past this handoff until the owner starts a new session or gives new instructions.
+The strongest known blocker before that audit is that real material ids now reach `chunks.bin`,
+but `StaticGeometryPass` still computes a hashed diagnostic `BlockoutColour` instead of binding the
+authored albedo/tint. The canonical DAG offers `HOUSE-00909`–`HOUSE-00911` for lightmap baking and
+`HOUSE-00912` for lightmap loading plus the shell `DualTextureEffect` draw path. A visually driven
+agent should inspect the real frame first, then determine whether accelerating the real material
+binding/render path (while preserving honest dependencies and task acceptance criteria) is the
+highest-leverage route. Do not claim visual completion merely because offline material ids exist.
+
+The previous real-screen inspection, before HOUSE-00907, showed a functional 60 fps walk/HUD but
+mostly diagnostic magenta/green blockout rendering. HOUSE-00907 fixes the offline identities, not
+that runtime presentation. The new context should use this as the baseline to beat.

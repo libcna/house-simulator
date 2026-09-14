@@ -737,11 +737,9 @@ FASCIA_DEPTH = 0.20
 FASCIA_THICK = 0.035
 
 
-#: `HOUSE-00470`: one placeholder material per surface class, so the blockout is readable before
-#: `HOUSE-00296` acquires a single real texture. Flat base colours, deliberately unlike each other
-#: rather than pretty: the point is to be able to tell a wall from a ceiling in a screenshot.
-#: The names are the classes §11's material table will use, so the swap is a rename and not a
-#: re-authoring.
+#: `HOUSE-00470`'s diagnostic colours remain useful when a material definition cannot be supplied
+#: by a small unit fixture. Production generation (`HOUSE-00907`) replaces every `BLOCKOUT_*`
+#: name with an authored material id and uses that row's tint and alpha.
 SURFACE_COLOURS = {
     "floor":     (0.62, 0.51, 0.38, 1.0),
     "ceiling":   (0.92, 0.92, 0.90, 1.0),
@@ -755,6 +753,31 @@ SURFACE_COLOURS = {
     "metal":     (0.45, 0.46, 0.48, 1.0),
 }
 SURFACE_ORDER = list(SURFACE_COLOURS)
+
+#: Real finishes for shell classes which are not one of a cell palette's four fields. The
+#: assignments are semantic defaults; stairs and glazing override them from their authored rows.
+SHELL_MATERIALS = {
+    "floor": "MAT_CONCRETE_BROOM",
+    "ceiling": "MAT_SOFFIT_WHITE",
+    "wall": "MAT_SIDING_WARM_WHITE",
+    "exterior": "MAT_SIDING_WARM_WHITE",
+    "trim": "MAT_DOOR_PAINTED",
+    "glass": "MAT_GLASS_CLEAR",
+    "stair": "MAT_DOOR_HARDWOOD",
+    "roof": "MAT_ROOF_SHINGLE",
+    "structure": "MAT_HATCH_PLY",
+    "metal": "MAT_METAL_BALCONY",
+}
+
+STAIR_MATERIALS = {
+    "stair_wood": "MAT_DOOR_HARDWOOD",
+    "stair_wood_open": "MAT_HATCH_PLY",
+    "concrete": "MAT_CONCRETE_BROOM",
+    "bluestone": "MAT_BLUESTONE_PAVER",
+}
+
+ROOF_MATERIALS = dict(SHELL_MATERIALS,
+                      trim="MAT_SOFFIT_WHITE", metal="MAT_METAL_GUTTER")
 
 #: The surface classes that receive a baked lightmap (`HOUSE-00471`, `cna-house.md` §18.3).
 #:
@@ -801,23 +824,85 @@ def planar_uvs(mesh) -> None:
                 layer.data[loop_index].uv = (point.x, point.y)
 
 
-def material_slots(mesh) -> None:
-    """Give @p mesh one material per surface class, in `SURFACE_ORDER`, and colour them.
+def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
+                           cells_by_id=None) -> dict[str, str]:
+    """Resolve the ten semantic shell classes to authored material ids for one cell.
 
-    The material IS the semantic classification, and it is what survives into the `.glb`: glTF
-    splits a mesh into one primitive per material, so "this primitive is a wall" is carried by the
-    file itself rather than by a name a later tool has to parse. Each material also carries a
-    `lightmapReceiver` custom property, which the exporter writes into its `extras` -- so the
-    unwrap and the bake read the generator's own decision instead of re-deriving it.
+    Floor, wall, ceiling and trim are the `HOUSE-00908` room palette. A window already names its
+    clear or obscured glass in `layout.openings.json`, and a stair already names its construction
+    surface in `layout.stairs.json`; using either from a room-name heuristic would make those data
+    ornamental. Exterior cells have only a floor palette because they have no generated walls.
     """
+    result = dict(SHELL_MATERIALS)
+    for klass, field in (("floor", "floorMaterial"), ("wall", "wallMaterial"),
+                         ("ceiling", "ceilingMaterial"), ("trim", "trimMaterial")):
+        if cell.get(field):
+            result[klass] = cell[field]
+
+    # The basement shell is the brick water table under the painted siding. Nested appliance
+    # cells are inside the house, so their outward faces retain their own wall finish rather than
+    # pretending a refrigerator is clad in siding.
+    if cell.get("parent") and cell.get("wallMaterial"):
+        result["exterior"] = cell["wallMaterial"]
+    elif cell.get("level") == "B1":
+        result["exterior"] = "MAT_BRICK_WATER_TABLE"
+
+    portal_cells = {row["id"]: (row.get("cellA"), row.get("cellB")) for row in portals}
+    glass = {
+        row.get("material")
+        for row in openings
+        if row.get("kind") == "window" and cell.get("id") in portal_cells.get(row.get("portal"), ())
+        and window_owner(portal_cells.get(row.get("portal")), cells_by_id or {}, cell.get("id"))
+        == cell.get("id")
+        and row.get("material")
+    }
+    if len(glass) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated glass is one surface class but its windows name "
+            f"multiple materials: {', '.join(sorted(glass))}")
+    if glass:
+        result["glass"] = next(iter(glass))
+
+    stair_surfaces = {
+        row.get("surface") for row in flights if row.get("fromCell") == cell.get("id")
+    }
+    unknown = sorted(surface for surface in stair_surfaces if surface not in STAIR_MATERIALS)
+    if unknown:
+        raise ValueError(f"{cell.get('id')}: no shell material for stair surface {unknown}")
+    stair_materials = {STAIR_MATERIALS[surface] for surface in stair_surfaces}
+    if len(stair_materials) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated stairs are one surface class but resolve to multiple "
+            f"materials: {', '.join(sorted(stair_materials))}")
+    if stair_materials:
+        result["stair"] = next(iter(stair_materials))
+    return result
+
+
+def material_slots(mesh, assignments: dict[str, str], definitions: dict[str, dict] | None = None) -> None:
+    """Give @p mesh one authored material per surface class, in `SURFACE_ORDER`.
+
+    A slot name is diagnostic (`<material-id>__shell_<surface-class>`); `materialId` is the
+    machine-readable identity. Keeping both fields matters when two classes use the same finish:
+    the terrace's bluestone floor receives a lightmap while its bluestone step remains detail, so
+    merging both into one Blender material would erase the receiver decision before export.
+    """
+    definitions = definitions or {}
     for name in SURFACE_ORDER:
-        material = bpy.data.materials.get(f"BLOCKOUT_{name}")
-        if material is None:
-            material = bpy.data.materials.new(f"BLOCKOUT_{name}")
-            material.use_nodes = False
-            material.diffuse_color = SURFACE_COLOURS[name]
-            material["surfaceClass"] = name
-            material["lightmapReceiver"] = name in LIGHTMAP_RECEIVERS
+        material_id = assignments.get(name)
+        if not material_id:
+            raise ValueError(f"shell surface {name!r} resolves to no authored material")
+        definition = definitions.get(material_id)
+        if definitions and definition is None:
+            raise ValueError(f"shell surface {name!r} names unknown material {material_id!r}")
+        material = bpy.data.materials.new(f"{material_id}__shell_{name}")
+        material.use_nodes = False
+        tint = tuple(float(value) for value in (definition or {}).get("tint", SURFACE_COLOURS[name][:3]))
+        alpha = float((definition or {}).get("alpha", SURFACE_COLOURS[name][3]))
+        material.diffuse_color = (*tint, alpha)
+        material["materialId"] = material_id
+        material["surfaceClass"] = name
+        material["lightmapReceiver"] = name in LIGHTMAP_RECEIVERS
         mesh.materials.append(material)
 
 
@@ -1109,7 +1194,8 @@ def roof_planes_for(level, layout, construction):
 
 def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), construction=None,
                level=None, levels=None, portals=(), openings=None, cells_by_id=None,
-               flights=(), roof=(), roof_planes_here=(), rafters_here=()):
+               flights=(), roof=(), roof_planes_here=(), rafters_here=(),
+               material_definitions=None):
     """One mesh object named for the cell: its floor, its ceiling and its walls' inner faces.
 
     @p roof is `roof_geometry.plane_equations` for the roof this cell's level is bounded by, or
@@ -1607,7 +1693,9 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
     mesh.from_pydata(vertices, [], faces)
     mesh.validate()
     mesh.update()
-    material_slots(mesh)
+    material_slots(mesh, cell_surface_materials(cell, (openings or {}).values(), portals, flights,
+                                                cells_by_id),
+                   material_definitions)
     for polygon, klass in zip(mesh.polygons, classes):
         polygon.material_index = SURFACE_ORDER.index(klass)
     weld(mesh)          # before the UVs: welding moves loops, and a face keeps its material
@@ -1630,12 +1718,17 @@ def export(obj, path: Path) -> None:
 
 def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> dict:
     """Every cell the layout declares, as one `.glb` each. Returns a report."""
-    layout = layout_io.load_layout(directory, kinds=["levels", "cells", "portals", "openings", "stairs", "interactables"])
+    layout = layout_io.load_layout(
+        directory,
+        kinds=["levels", "cells", "portals", "openings", "stairs", "interactables", "materials"])
     levels = {row["id"]: row for row in layout_io.rows(layout, "levels")}
     portals = layout_io.rows(layout, "portals")
     openings = {row["portal"]: row for row in layout_io.rows(layout, "openings")
                 if row.get("portal")}
     stair_rows = layout_io.rows(layout, "stairs")
+    material_definitions = {
+        row["id"]: row for row in layout_io.rows(layout, "materials")
+    }
     construction = (layout.get("levels") or {}).get("construction") or {}
     report = {"written": [], "skipped": [], "problems": []}
 
@@ -1658,7 +1751,8 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
                          cells_by_id={row["id"]: row for row in layout_io.rows(layout, "cells")},
                          flights=stair_rows, roof=roof_planes_for(level, layout, construction),
                          roof_planes_here=roof_faces_for(level, layout, construction),
-                         rafters_here=rafters_for(level, layout, construction))
+                         rafters_here=rafters_for(level, layout, construction),
+                         material_definitions=material_definitions)
         destination = output / f"{cell['id']}.glb"
         export(obj, destination)
         report["written"].append(cell["id"])
@@ -1691,7 +1785,8 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
         mesh.from_pydata(reset_vertices, [], reset_faces)
         mesh.validate()
         mesh.update()
-        material_slots(mesh)
+        material_slots(mesh, dict(SHELL_MATERIALS, exterior="MAT_BRICK_WATER_TABLE"),
+                       material_definitions)
         for polygon in mesh.polygons:
             polygon.material_index = SURFACE_ORDER.index("exterior")
         weld(mesh)
@@ -1722,7 +1817,8 @@ def generate(directory: Path, output: Path, wanted: set[str] | None = None) -> d
                          dormers=dormers_on(box, portals, openings.values()),
                          eaves=roof_geometry.roof_eaves(layout, name, box, construction),
                          spouts=[row for row in all_spouts if row["roof"] == name],
-                         structure_by_cells=bounded)
+                         structure_by_cells=bounded,
+                         material_definitions=material_definitions)
         export(obj, output / f"{name}.glb")
         report["written"].append(name)
     return report
@@ -1783,7 +1879,7 @@ def rafter_faces(outer: tuple, eaves_y: float, pitch: float):
 
 
 def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None,
-               spouts=(), structure_by_cells: bool = False):
+               spouts=(), structure_by_cells: bool = False, material_definitions=None):
     """One roof object over @p box, with its fascia. @p box is the WALL CENTRE-LINE rectangle.
 
     @p eaves is `roof_geometry.roof_eaves`'s answer, which is §12's ridge for the roof a level
@@ -1829,7 +1925,8 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
               (x0, eaves_y, z0), (x0, eaves_y, z1)], (-1.0, 0.0, 0.0)),
             ([(x1, eaves_y - FASCIA_DEPTH, z0), (x1, eaves_y - FASCIA_DEPTH, z1),
               (x1, eaves_y, z1), (x1, eaves_y, z0)], (1.0, 0.0, 0.0))):
-        add(corners, outward)
+        # Fascia and soffit are one painted eaves finish; shingles stop at the roof plane.
+        add(corners, outward, "trim")
     soffit_y = eaves_y - FASCIA_DEPTH + FASCIA_THICK
     for corners in (
             [(x0, soffit_y, z0), (x1, soffit_y, z0),
@@ -1895,7 +1992,7 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
     mesh.from_pydata(vertices, [], faces)
     mesh.validate()
     mesh.update()
-    material_slots(mesh)
+    material_slots(mesh, ROOF_MATERIALS, material_definitions)
     for polygon, klass in zip(mesh.polygons, classes):
         polygon.material_index = SURFACE_ORDER.index(klass)
     weld(mesh)          # before the UVs: welding moves loops, and a face keeps its material
@@ -2577,7 +2674,7 @@ def selftest(output: Path) -> int:
             f"chimney ({len(everything['written'])} written, {len(everything['skipped'])} "
             f"skipped, {everything['problems'][:1]})")
 
-    # ---- `HOUSE-00470`: the placeholder materials -----------------------------------------------
+    # ---- `HOUSE-00907`: authored shell materials ------------------------------------------------
     reset_scene()
     painted = build_cell(subject, extent, neighbours=neighbours, construction=construction,
                          level=levels[subject["level"]], levels=levels, portals=all_portals,
@@ -2586,15 +2683,25 @@ def selftest(output: Path) -> int:
     require(len(painted.data.materials) == len(SURFACE_ORDER),
             f"a cell carries one material per surface class ({len(painted.data.materials)})")
     require({"floor", "ceiling", "wall", "exterior", "trim", "glass"} <= used,
-            f"and the kitchen uses the six a room has -- you can tell its floor from its ceiling "
-            f"from its walls in a screenshot ({sorted(used)})")
-    require(len({SURFACE_COLOURS[name] for name in SURFACE_ORDER}) == len(SURFACE_ORDER),
-            "no two classes share a colour, which is the whole point of a placeholder")
-    require(SURFACE_COLOURS["glass"][3] < 1.0,
-            f"and the glass is the one that is not opaque ({SURFACE_COLOURS['glass'][3]})")
+            f"and the kitchen uses the six classes a room has ({sorted(used)})")
+    assigned = cell_surface_materials(subject, openings_by_portal.values(), all_portals,
+                                      cells_by_id=cells)
+    require(assigned["floor"] == subject["floorMaterial"]
+            and assigned["wall"] == subject["wallMaterial"]
+            and assigned["ceiling"] == subject["ceilingMaterial"]
+            and assigned["trim"] == subject["trimMaterial"],
+            f"its four palette fields are the four generated finishes ({assigned})")
+    require(assigned["glass"] == "MAT_GLASS_CLEAR"
+            and assigned["exterior"] == "MAT_SIDING_WARM_WHITE",
+            "and its opening schedule and Colonial siding supply glass and outer skin")
     document, _error = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
     require(len(document.get("materials", [])) >= 6,
             f"the exported file carries them ({len(document.get('materials', []))})")
+    exported_ids = {row.get("extras", {}).get("materialId")
+                    for row in document.get("materials", [])}
+    require(None not in exported_ids and not any(str(value).startswith("BLOCKOUT_")
+                                                  for value in exported_ids),
+            f"every exported primitive names a real material id ({sorted(exported_ids)})")
 
     # ---- `HOUSE-00471`: the albedo UVs ----------------------------------------------------------
     uv_layers = list(painted.data.uv_layers)
@@ -2650,9 +2757,10 @@ def selftest(output: Path) -> int:
     exported, _err = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
     tagged = [material for material in exported.get("materials", [])
               if isinstance(material.get("extras"), dict)
-              and "lightmapReceiver" in material["extras"]]
+              and "lightmapReceiver" in material["extras"]
+              and "materialId" in material["extras"]]
     require(len(tagged) == len(exported.get("materials", [])),
-            f"and it survives into the .glb as material `extras`, on every material "
+            f"and receiver semantics plus the real id survive in `.glb` extras, on every material "
             f"({len(tagged)} of {len(exported.get('materials', []))})")
 
     # ---- `HOUSE-00469`: the basement window wells -----------------------------------------------
@@ -2817,10 +2925,11 @@ def selftest(output: Path) -> int:
     require(len(dormered.data.polygons) == expected,
             "the roof's face count is the cut planes, the dormers, the eaves boards and the "
             "structure")
-    # planes, fascia, soffit, four gutters of four faces, one ridge vent -- and NO downspouts,
+    # planes, fascia, soffit, four gutters of four faces, one closed six-face ridge-vent box --
+    # and NO downspouts,
     # since `HOUSE-00776`: they are `roof_geometry.house_downspouts`'s to place, because two of the
     # eight corners are under the other roof, and a roof built without that list has none.
-    bare = plain_roof_faces - (4 + 4 + 4 + 4 * 4 + 1)
+    bare = plain_roof_faces - (4 + 4 + 4 + 4 * 4 + 6)
     require(bare == expected_rafters + 2,
             f"a rafter every {RAFTER_SPACING * 1000:.0f} mm over the ridge's {ridge_run:.2f} m, "
             f"both slopes, and a purlin under each ({bare} against {expected_rafters + 2})")
@@ -2974,9 +3083,9 @@ def selftest(output: Path) -> int:
                            level=levels[yard["level"]], levels=levels,
                            portals=list(portal_rows.values()), openings=openings_by_portal,
                            cells_by_id=cells)
-        used = {built.data.materials[polygon.material_index].name
+        used = {built.data.materials[polygon.material_index].get("surfaceClass")
                 for polygon in built.data.polygons} if built.data.polygons else set()
-        require("BLOCKOUT_wall" not in used,
+        require("wall" not in used,
                 f"{identifier} is open to the sky and has no walls ({sorted(used)})")
         if identifier == "EXT_WORLD":
             require(not used,
@@ -2992,9 +3101,9 @@ def selftest(output: Path) -> int:
                              construction=construction, level=levels[outer_cell["level"]],
                              levels=levels, portals=list(portal_rows.values()),
                              openings=openings_by_portal, cells_by_id=cells)
-    outer_used = {outer_built.data.materials[polygon.material_index].name
+    outer_used = {outer_built.data.materials[polygon.material_index].get("surfaceClass")
                   for polygon in outer_built.data.polygons}
-    require("BLOCKOUT_exterior" in outer_used and "BLOCKOUT_wall" in outer_used,
+    require("exterior" in outer_used and "wall" in outer_used,
             f"while the living room keeps both its inner wall and its outer skin ({sorted(outer_used)})")
     require(slab_here(porch, porch_extent, True) and not slab_here(porch, porch_extent, False),
             "the porch is a deck, so it has a floor and still no ceiling")
@@ -3168,6 +3277,63 @@ def write_shell_manifest(source: Path, output: Path, destination: Path, check: b
     return 1
 
 
+def check_material_assignments(source: Path, output: Path) -> int:
+    """Validate HOUSE-00907's data-driven mapping and, when present, the generated GLBs."""
+    layout = layout_io.load_layout(
+        source, kinds=["cells", "portals", "openings", "stairs", "materials"])
+    cells = {row["id"]: row for row in layout_io.rows(layout, "cells")}
+    portals = layout_io.rows(layout, "portals")
+    openings = layout_io.rows(layout, "openings")
+    flights = layout_io.rows(layout, "stairs")
+    definitions = {row["id"]: row for row in layout_io.rows(layout, "materials")}
+    expected = {
+        cell_id: cell_surface_materials(cell, openings, portals, flights, cells)
+        for cell_id, cell in cells.items()
+    }
+    problems: list[str] = []
+    for cell_id, assignments in expected.items():
+        for klass, material_id in assignments.items():
+            if material_id not in definitions:
+                problems.append(f"{cell_id}/{klass}: unknown material {material_id}")
+            if material_id.startswith("BLOCKOUT_"):
+                problems.append(f"{cell_id}/{klass}: placeholder {material_id} remains")
+
+    checked_files = 0
+    if output.is_dir():
+        for path in sorted(output.glob("*.glb")):
+            document, error = gltf_validate.read_gltf_json(path)
+            if document is None:
+                problems.append(f"{path.name}: {error}")
+                continue
+            checked_files += 1
+            if path.stem == "CHIMNEY":
+                wanted = dict(SHELL_MATERIALS, exterior="MAT_BRICK_WATER_TABLE")
+            elif path.stem.startswith("ROOF_"):
+                wanted = ROOF_MATERIALS
+            else:
+                wanted = expected.get(path.stem)
+            if wanted is None:
+                problems.append(f"{path.name}: no cell or fixed shell role owns this file")
+                continue
+            for material in document.get("materials", []):
+                extras = material.get("extras") or {}
+                klass = extras.get("surfaceClass")
+                material_id = extras.get("materialId")
+                if "BLOCKOUT_" in str(material.get("name")):
+                    problems.append(f"{path.name}: placeholder slot {material.get('name')}")
+                if klass not in SURFACE_ORDER:
+                    problems.append(f"{path.name}: unknown surface class {klass!r}")
+                elif material_id != wanted[klass]:
+                    problems.append(
+                        f"{path.name}/{klass}: generated {material_id!r}, expected {wanted[klass]!r}")
+
+    for problem in problems:
+        print(f"house_shell_gen: {problem}", file=sys.stderr)
+    print(f"house_shell_gen: {len(cells)} cell material maps and {checked_files} generated "
+          f"file(s) checked; {len(definitions)} authored materials")
+    return 1 if problems else 0
+
+
 def determinism(source: Path, reference: Path, scratch: Path) -> int:
     """`HOUSE-00481`: generate again and compare every byte with the tree at @p reference.
 
@@ -3214,12 +3380,16 @@ def main() -> int:
                         help="write docs/shell-manifest.json from the shell in --output")
     parser.add_argument("--check-manifest", action="store_true",
                         help="compare docs/shell-manifest.json with the shell in --output")
+    parser.add_argument("--check-materials", action="store_true",
+                        help="validate real shell assignments against world material data")
     parser.add_argument("--selftest", action="store_true")
     args = parser.parse_args(blender_env_argv())
 
     if args.manifest or args.check_manifest:
         return write_shell_manifest(args.source, args.output, SHELL_MANIFEST,
                                     args.check_manifest)
+    if args.check_materials:
+        return check_material_assignments(args.source, args.output)
 
     if args.selftest:
         return selftest(args.output / "selftest")

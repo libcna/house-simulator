@@ -13053,8 +13053,27 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             id-golden and shell-manifest checks; max-4-core warning-clean full build; complete suite
             1564/1564 executed tests (0 failures); `tools/ci/run_checks.sh` all gates green,
             including the snow self-test/check and 321 strict-XNA translation units.
-- [ ] HOUSE-00907 — Apply the real materials to the generated shell, replacing the placeholders, room by room per the palette table
+- [x] HOUSE-00907 — Apply the real materials to the generated shell, replacing the placeholders, room by room per the palette table
       dep: HOUSE-00901, HOUSE-00902 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-14) Every generated shell primitive now carries its real material id from the
+            78-cell palette, opening schedule, stair construction or fixed architectural role;
+            all 99 shell GLBs resolve to 43 of the 115 authored rows and none retains a
+            `BLOCKOUT_*` material. Basement outer skin and the chimney use brick water table,
+            upper outer skin uses warm-white siding, roofs use shingles, eaves use white soffit,
+            and exposed metalwork uses the applicable balcony or gutter finish.
+      finding: a real finish can span two semantic classes — notably bluestone floor/step and
+            plywood trim/structure — so `materialId` alone would erase whether a primitive is a
+            lightmap receiver. The glTF material extras therefore retain both `materialId` and
+            `surfaceClass`; the chunk builder validates the former against the material table,
+            takes `alphaMode` from that row, and retains the latter for receiver/detail identity.
+            This legitimate grouping also reduced the measured shell exceptions over the
+            six-chunk target from seven cells to five.
+      verified: generator material gate checked 96 cell maps and 99 generated files against 115
+            authored materials; shell generator and chunk-builder self-tests; 78-cell unwrap with
+            5,286 receiver faces / 35,306 detail faces and 78 atlases; 459 chunks across 93 cells,
+            108,023 vertices and 3,428,956 packed bytes; max-4-core warning-clean build; complete
+            suite with 1,555 non-failures plus all nine initially sandbox/transient-sensitive cases
+            green in isolated retries; `tools/ci/run_checks.sh` all gates green.
 - [x] HOUSE-00908 — Author the room palette table (wall colour, ceiling colour, floor material, trim colour) for all 78 interior cells
       dep: HOUSE-00901 · sys: world · plat: TOOL · pri: MUST
       accept: the palette reads as one house decorated by one family, not 78 unrelated rooms
