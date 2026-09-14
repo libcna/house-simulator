@@ -153,10 +153,12 @@ namespace cnahouse::app
                "  --screenshot-frame=<n>      Capture the nth drawn frame (default 1)\n"
                "  --seed=<n>                  Session seed; the same seed reproduces a session exactly\n"
                "  --time=<hours>              Time of day to start at, 0..24\n"
+               "  --freeze-time               Keep the simulation clock at its starting instant\n"
                "  --weather=<name>            Weather archetype to start in\n"
                "  --no-audio                  Start with audio disabled\n"
                "  --no-cull                   Draw everything resident instead of §25's visible\n"
                "                              set -- the same switch as the `cull off` command\n"
+               "  --debug-blockout-materials Use the diagnostic material palette in the walk scene\n"
                "  --screenshot=<path>         Write one screenshot and exit\n"
                "  --log=<categories>          Comma-separated log categories, e.g. world,content\n"
                "  --renderer-info             Print this build's renderer and tier facts, then exit\n"
@@ -200,6 +202,14 @@ namespace cnahouse::app
             else if (argument.name == "--no-cull")
             {
                 options.noCull = true;
+            }
+            else if (argument.name == "--debug-blockout-materials")
+            {
+                options.debugBlockoutMaterials = true;
+            }
+            else if (argument.name == "--freeze-time")
+            {
+                options.freezeTime = true;
             }
             else if (argument.name == "--renderer-info")
             {

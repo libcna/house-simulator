@@ -13724,8 +13724,34 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             is the standard solar-geometry notation and the quantity irradiance on a horizontal
             surface actually scales with — and not the hyperbolic sine, which is unbounded and
             reaches 1.65 at the 73.4° this latitude sees. Read as `sin(altitude)` when implemented.
-- [ ] HOUSE-01264 — Implement the `LM_DAY` additive pass driven by `daylightLevel`
-      dep: HOUSE-01263, HOUSE-00910 · sys: rendering · plat: ALL · pri: MUST
+- [x] HOUSE-01264 — Implement the `LM_DAY` additive pass driven by `daylightLevel`
+      dep: HOUSE-01263, HOUSE-00910, HOUSE-01256 · sys: rendering · plat: ALL · pri: MUST
+      correction: `HOUSE-01256` added to `dep` because this pass consumes the depth-equal,
+            no-write additive composition infrastructure introduced there; the old edge omitted a
+            real implementation dependency.
+      note: receiver chunks finish their authored artificial passes with the cell-owned `LM_DAY`
+            atlas, scaled by the live `skyColor * daylightLevel`. The pass is additive with
+            `CompareFunction::Equal` and depth writes disabled, so it cannot change visibility or
+            double-count the opaque ambient-bearing base pass.
+      note: the canonical visual-review options are now honest runtime inputs: `--time` sets the
+            shared wall clock, `--weather` installs a deterministic reached archetype, live cloud
+            cover reaches `LightingSystem` each frame, and `--freeze-time` holds all six review
+            cameras at exactly 10:30. Previously those captures silently remained at the authored
+            07:00 / `W_PARTLY` state.
+      verify: integration
+            StaticGeometryPassTests.ProductionComposesArtificialAndDaylightAtEqualDepth and
+            HeadlessRunTests.ReviewOverridesDriveTheSharedClockWeatherAndLighting; unit
+            CommandLineTests.*; culling equivalence across all 18 comparable poses in the explicit
+            `--debug-blockout-materials` walk mode (worst `l0-sunroom`, 0.1966% at the unchanged
+            0.2% limit); intentionally inspected and regenerated 12 production first-person plus
+            5 HUD/season-sun references whose predecessors still showed the blockout path;
+            six-view human review capture
+            `docs/visual-review/captures/house-01264-daylight-r1`.
+      finding: production light is cell-owned, so `--no-cull` can submit both coincident receiver
+            copies at a shared room boundary and let the other room's bake win. That is not a
+            missing-surface result. The culling equivalence test now explicitly selects the
+            deterministic material-id palette, which still catches silhouette, surface and
+            material loss; the production path remains the default and has its own 12 golden poses.
 - [x] HOUSE-01265 — Implement the 2-hop light flood through open portals, capped at 0.35 of the source
       dep: HOUSE-01263, HOUSE-00665 · sys: lighting · plat: ALL · pri: MUST
       accept: switching the kitchen main lights visibly brightens the hall through their permanent

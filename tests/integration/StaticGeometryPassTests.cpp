@@ -156,7 +156,7 @@ namespace
         EXPECT_FALSE(activeWithAnotherPassOnly) << "another pass's item made this one active";
     }
 
-    TEST(StaticGeometryPassTests, ProductionDrawsActiveArtificialGroupsAdditivelyAtEqualDepth)
+    TEST(StaticGeometryPassTests, ProductionComposesArtificialAndDaylightAtEqualDepth)
     {
         const std::string worldPath = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
         if (!std::filesystem::exists(worldPath + "/layout.cells.json"))
@@ -217,6 +217,11 @@ namespace
                 cnahouse::visibility::VisibilitySystem visibility(world);
                 cnahouse::lighting::ShadingGrid shading = cnahouse::lighting::ShadingGrid::Unshaded();
                 cnahouse::environment::SimClock clock;
+                cnahouse::environment::CivilTime noon;
+                noon.month = 3;
+                noon.day = 20;
+                noon.hour = 12;
+                clock.SetStandard(noon);
                 cnahouse::lighting::LightingSystem lighting(world, shading, clock, visibility.Portals());
                 ASSERT_TRUE(lighting.SetGroupOn(primary->group, true));
                 ASSERT_TRUE(lighting.SetGroupOn(secondary->group, true));
@@ -250,7 +255,8 @@ namespace
                 cnahouse::rendering::PassContext context{device, tracker, counters, 1.0F / 60.0F};
                 pass.Draw(context);
                 drawn = pass.ChunksDrawn();
-                EXPECT_EQ(pass.StateChanges(), 2U) << "one opaque group plus one active additive group";
+                EXPECT_EQ(pass.StateChanges(), 3U)
+                    << "one opaque group, one active additive group and the daylight pass";
                 const Gfx::BlendState& blend = device.getBlendStateProperty();
                 EXPECT_EQ(blend.getColorSourceBlendProperty(),
                           Gfx::BlendState::Additive.getColorSourceBlendProperty());
@@ -265,15 +271,15 @@ namespace
         ASSERT_TRUE(host.Ran());
         ASSERT_EQ(host.Failure(), "");
         EXPECT_EQ(drawn, 1U);
-        ASSERT_GE(requested.size(), 3U);
+        ASSERT_GE(requested.size(), 4U);
         EXPECT_NE(std::find(requested.begin(), requested.end(), floor->albedo), requested.end());
         EXPECT_EQ(requested[1], primary->texture.contentName)
             << "the opaque ambient-bearing pass follows the authored lightGroups order";
         EXPECT_NE(std::find(requested.begin(), requested.end(), secondary->texture.contentName),
                   requested.end());
-        EXPECT_EQ(std::find(requested.begin(), requested.end(), kitchen->lightmaps.daylight->contentName),
+        EXPECT_NE(std::find(requested.begin(), requested.end(), kitchen->lightmaps.daylight->contentName),
                   requested.end())
-            << "HOUSE-01264 owns the separate daylight pass";
+            << "the live daylight pass did not request the cell-owned LM_DAY atlas";
     }
 
 } // namespace

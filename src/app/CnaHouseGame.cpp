@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+#include <algorithm>
 #include <array>
 
 #include "cnahouse/app/CnaHouseGame.hpp"
@@ -10,6 +11,7 @@
 #include "cnahouse/physics/CollisionLoader.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
 
+#include <cmath>
 #include <format>
 #include <optional>
 #include <stdexcept>
@@ -43,6 +45,7 @@
 #include "cnahouse/rendering/TransparentPass.hpp"
 #include "cnahouse/ui/LoadingScreen.hpp"
 #include "cnahouse/util/Log.hpp"
+#include "cnahouse/weather/WeatherSampler.hpp"
 #include "cnahouse/world/ChunkReader.hpp"
 
 namespace cnahouse::app
@@ -59,6 +62,17 @@ namespace cnahouse::app
         constexpr Microsoft::Xna::Framework::Color ClearColour()
         {
             return Microsoft::Xna::Framework::Color(18, 20, 24, 255);
+        }
+
+        void SetWallTimeOfDay(environment::SimClock& clock, float hours) noexcept
+        {
+            const environment::CivilTime wall = clock.Wall();
+            const double wallEpoch = environment::EpochSecondsFor(wall);
+            const double midnight =
+                wallEpoch - static_cast<double>(wall.hour * 3600 + wall.minute * 60 + wall.second);
+            const double requestedWall = midnight + static_cast<double>(hours) * 3600.0;
+            const double requestedStandard = requestedWall - (clock.IsDaylightSaving() ? 3600.0 : 0.0);
+            clock.SetStandard(environment::CivilFromEpochSeconds(requestedStandard));
         }
 
     } // namespace
@@ -366,13 +380,64 @@ namespace cnahouse::app
             return;
         }
         world_.emplace(std::move(built.Value()));
+
+        // Establish the one shared clock before weather is sampled: a forced clear review at 10:30
+        // must derive its temperature and daylight from 10:30, not from the zero-initialised epoch.
+        clock_.timeScale =
+            environment::TimeScaleForDayLength(static_cast<double>(settings_.dayLengthRealMinutes));
+        clock_.moonPhaseSpeedMultiplier = static_cast<double>(settings_.moonPhaseSpeedMultiplier);
+        clock_.SetCalendar(environment::kNewGameCalendarDays);
+        if (options_.timeOfDay.has_value())
+        {
+            SetWallTimeOfDay(clock_, *options_.timeOfDay);
+        }
+        if (options_.freezeTime)
+        {
+            clock_.timeScale = 0.0;
+        }
+
         const world::WeatherStart& weatherStart = world_->GetInitialState().weather;
+        weather::WeatherState initialWeather = weatherStart.state;
+        util::Id initialWeatherTarget = weatherStart.target;
+        float initialWeatherExpiry = weatherStart.targetExpiryMinutes;
+        bool commandWeatherApplied = false;
+        if (options_.weather.has_value())
+        {
+            const auto selected = std::ranges::find_if(
+                world_->WeatherArchetypes(),
+                [this](const weather::WeatherArchetype& archetype)
+                {
+                    return !archetype.modifier && util::IdRegistry::NameOf(archetype.id) == *options_.weather;
+                });
+            if (selected == world_->WeatherArchetypes().end())
+            {
+                Log::Error(LogCat::Content,
+                           "--weather={}: no complete authored weather state has that id",
+                           *options_.weather);
+                world_.reset();
+                return;
+            }
+            weather::WeatherSampler sampler(world_->WeatherArchetypes(), world_->WeatherTransitions());
+            auto sampled = sampler.SampleTarget(
+                selected->id, static_cast<float>(clock_.OutdoorBaseTemperatureC()), 0.0F, initialWeather);
+            if (!sampled)
+            {
+                Log::Error(
+                    LogCat::Content, "--weather={}: {}", *options_.weather, sampled.Error().ToString());
+                world_.reset();
+                return;
+            }
+            initialWeather = std::move(sampled.Value().state);
+            initialWeatherTarget = selected->id;
+            initialWeatherExpiry = 380.0F;
+            commandWeatherApplied = true;
+        }
         auto weatherSystem = weather::WeatherSystem::Create(world_->WeatherArchetypes(),
                                                             world_->WeatherTransitions(),
                                                             world_->WeatherRates(),
-                                                            weatherStart.state,
-                                                            weatherStart.target,
-                                                            weatherStart.targetExpiryMinutes);
+                                                            initialWeather,
+                                                            initialWeatherTarget,
+                                                            initialWeatherExpiry);
         if (!weatherSystem)
         {
             Log::Error(LogCat::Content, "--scene=walk: {}", weatherSystem.Error().ToString());
@@ -380,7 +445,12 @@ namespace cnahouse::app
             return;
         }
         weather_.emplace(std::move(weatherSystem.Value()));
-        if (settings_.weatherMode == WeatherMode::Fixed)
+        if (commandWeatherApplied)
+        {
+            weather_->SetAutomaticTransitions(false);
+            weather_->TransitionsPausedControl() = true;
+        }
+        else if (settings_.weatherMode == WeatherMode::Fixed)
         {
             weather_->SetAutomaticTransitions(false);
             const auto selected = std::ranges::find_if(world_->WeatherArchetypes(),
@@ -539,8 +609,8 @@ namespace cnahouse::app
         {
             lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
         }
-        if (blockoutChunks_ != nullptr && blockoutCells_ != nullptr && materialBinder_ != nullptr &&
-            materialBinder_->Count() != 0U && caches_ != nullptr)
+        if (!options_.debugBlockoutMaterials && blockoutChunks_ != nullptr && blockoutCells_ != nullptr &&
+            materialBinder_ != nullptr && materialBinder_->Count() != 0U && caches_ != nullptr)
         {
             // The walk is the production presentation. `LoadBlockout` installed the explicit
             // diagnostic palette before the world existed; replace that slot now that canonical
@@ -610,19 +680,6 @@ namespace cnahouse::app
         // test drives the game through `Options` and cannot type into a console.
         cullingEnabled_ = !options_.noCull;
         debug::RegisterVisibilityCommands(console_, debug::VisibilityCommandContext{&cullingEnabled_});
-        // §35.2's day length is a SETTING, so the clock's rate comes from the settings file rather
-        // than from the constant: a player who chose the slow preset gets it from the first frame
-        // and not after opening the menu (`HOUSE-01533`).
-        clock_.timeScale =
-            environment::TimeScaleForDayLength(static_cast<double>(settings_.dayLengthRealMinutes));
-        // §33.5 accelerates only the illuminated phase. Keeping the rate on the one shared clock
-        // lets both frame updates and `time advance` feed the same deterministic calendar delta.
-        clock_.moonPhaseSpeedMultiplier = static_cast<double>(settings_.moonPhaseSpeedMultiplier);
-        // §35.2b's table: *"Starting season: Spring -- a new game begins at the vernal equinox."*
-        // §35.1's epoch is 1 January, so a clock left at zero would start every session in the
-        // middle of winter (`HOUSE-01543`). There is no save to load a time from yet; when there
-        // is (`HOUSE-01538`), this is the value it replaces.
-        clock_.SetCalendar(environment::kNewGameCalendarDays);
         debug::RegisterTimeCommands(console_, debug::TimeCommandContext{&clock_});
         debug::RegisterWeatherCommands(console_,
                                        debug::WeatherCommandContext{world_->WeatherArchetypes(),
@@ -1036,6 +1093,10 @@ namespace cnahouse::app
                 // what to draw. It runs whether or not the body is walking -- a room's lights are
                 // on or off regardless of who is looking at it.
                 const debug::Timing::Scope scope(timing_, UpdateStage::Lighting);
+                if (weather_.has_value() && !lighting_->SetCloudCover(weather_->State().cloudCover))
+                {
+                    throw std::runtime_error("validated weather published an invalid cloud cover");
+                }
                 lighting_->Update(frame);
                 // Drawing consumes the lighting stage's one celestial answer. There is no second
                 // sun or moon model in rendering, so room light, sky and disc cannot disagree

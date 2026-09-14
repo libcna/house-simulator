@@ -50,3 +50,34 @@ All 78 receiver cells own deterministic daylight bindings and 124 artificial-gro
 
 Remaining: additive artificial/daylight composition, ambient floor, exposure, fixed review time,
 furniture and finish inspection. `VISUAL-GATE-1` has not passed.
+
+## Round 2 — live daylight composition
+
+Commit: `HOUSE-01264` working tree (`2026-09-14`)
+
+Capture: [`captures/house-01264-daylight-r1`](captures/house-01264-daylight-r1)
+
+Ranked defects:
+
+1. Exposure is now unambiguously the largest defect: even at a fixed clear 10:30, wall and ceiling
+   albedos are almost black outside the strongest baked texels.
+2. Every selected interior is empty; the newly readable window and trim silhouettes have no
+   furniture-scale context and do not yet form believable rooms.
+3. The exterior has a plausible blue daylight background but the house, drive, planting and
+   ground remain nearly black line work.
+4. Bright window apertures clip against dark interiors, making the contrast look like an
+   unexposed camera rather than adapted human vision.
+5. Material scale and finish quality cannot be judged on most walls until exposure is present.
+
+Fixed in this round: `LM_DAY` is a final sky-tinted additive, depth-equal/no-write pass after the
+opaque and additive artificial groups. The canonical capture's `--time=10.5` and
+`--weather=W_CLEAR` now drive the one shared simulation, and `--freeze-time` keeps all six views
+at exactly 10:30; the live weather cloud cover reaches the daylight model each frame. Compared
+with Round 1, windows and nearby trim/floor receive cool daylight and the exterior sky is blue.
+The 12 first-person and 5 HUD/season-sun golden references were intentionally replaced after
+inspection because their pre-production predecessors still showed the saturated blockout palette.
+Geometry culling is independently compared across 18 paired views through explicit
+`--debug-blockout-materials`; the worst pair remains under the unchanged 0.2% threshold.
+
+Remaining: implement the approved exposure model next, then reassess lightmap calibration before
+placing primary furniture. `VISUAL-GATE-1` has not passed.

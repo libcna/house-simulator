@@ -57,8 +57,9 @@ namespace cnahouse::rendering
     ///
     /// In production, receiver chunks use stock XNA `DualTextureEffect` with their authored albedo
     /// and cell-owned baked-light atlases. The first artificial group is opaque; each other active
-    /// group repeats identical geometry with additive blending and depth-equal/no-write. Detail
-    /// uses stock `BasicEffect`. `--scene=blockout` retains the old unlit hashed palette
+    /// group repeats identical geometry with additive blending and depth-equal/no-write; the live
+    /// sky-tinted daylight atlas is the final additive pass. Detail uses stock `BasicEffect`.
+    /// `--scene=blockout` retains the old unlit hashed palette
     /// deliberately, so a diagnostic can still separate surface classes without leaking into
     /// ordinary play.
     class StaticGeometryPass final : public IRenderPass

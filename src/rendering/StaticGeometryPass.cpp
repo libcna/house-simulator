@@ -457,7 +457,28 @@ namespace cnahouse::rendering
                         draw.colourMultiplier = Vector3(
                             lighting::kAmbientFloor, lighting::kAmbientFloor, lighting::kAmbientFloor);
                     }
-                    submit(draw, false, true);
+                    if (!submit(draw, false, true))
+                    {
+                        first = last;
+                        continue;
+                    }
+                }
+
+                if (cell->lightmaps.daylight.has_value() && room != nullptr &&
+                    (room->daylightTint.X > 0.0F || room->daylightTint.Y > 0.0F ||
+                     room->daylightTint.Z > 0.0F))
+                {
+                    const world::CellLightmapTexture& lightmap = *cell->lightmaps.daylight;
+                    DrawParams daylight = common;
+                    daylight.lightmap = textures_(lightmap.contentName);
+                    const float scale = 0.5F * lightmap.scale;
+                    daylight.colourMultiplier = Vector3(scale * room->daylightTint.X,
+                                                        scale * room->daylightTint.Y,
+                                                        scale * room->daylightTint.Z);
+                    // `daylightTint` is already sky colour times the room's live daylight level.
+                    // Re-evaluating either here would let the dome and the shell disagree. It is
+                    // the final additive pass so the opaque/artificial depth remains authoritative.
+                    submit(daylight, true, false);
                 }
             }
             else

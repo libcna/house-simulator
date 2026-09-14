@@ -621,6 +621,48 @@ namespace
         cnahouse::debug::CommandResult result_;
     };
 
+    TEST(HeadlessRunTests, ReviewOverridesDriveTheSharedClockWeatherAndLighting)
+    {
+        // Visual-review captures only compare like with like if their command-line inputs reach
+        // the simulation. These options existed before HOUSE-01264 but were not consumed by the
+        // walk scene, leaving every supposedly 10:30 clear capture at the authored 07:00 partly
+        // cloudy start. Prove the complete route rather than trusting the HUD pixels.
+        cnahouse::util::Log::ResetForTesting();
+        Options options;
+        options.headless = true;
+        options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
+        options.noAudio = true;
+        options.scene = "walk";
+        options.timeOfDay = 10.5F;
+        options.freezeTime = true;
+        options.weather = "W_CLEAR";
+        Settings settings = Settings::Defaults();
+        settings.backBufferWidth = 320;
+        settings.backBufferHeight = 180;
+        settings.verticalSync = false;
+
+        CnaHouseGame game(options, settings);
+        game.SetFrameLimit(4);
+        game.Run();
+        ASSERT_EQ(game.ExitCode(), 0);
+
+        const cnahouse::environment::CivilTime wall = game.ClockForTesting().Wall();
+        EXPECT_EQ(wall.hour, 10);
+        EXPECT_EQ(wall.minute, 30);
+        EXPECT_DOUBLE_EQ(game.ClockForTesting().timeScale, 0.0);
+        const cnahouse::weather::WeatherSystem* weather = game.WeatherForTesting();
+        ASSERT_NE(weather, nullptr);
+        EXPECT_EQ(cnahouse::util::IdRegistry::NameOf(weather->TargetArchetype()), "W_CLEAR");
+        EXPECT_FALSE(weather->AutomaticTransitions());
+        EXPECT_TRUE(weather->TransitionsPaused());
+        EXPECT_GE(weather->State().cloudCover, 0.0F);
+        EXPECT_LE(weather->State().cloudCover, 0.1F);
+        const cnahouse::lighting::LightingSystem* lighting = game.LightingForTesting();
+        ASSERT_NE(lighting, nullptr);
+        EXPECT_FLOAT_EQ(lighting->CloudCover(), weather->State().cloudCover)
+            << "the fixed review weather did not drive the daylight model";
+    }
+
     TEST(HeadlessRunTests, CullOffDrawsTheWholeHouseAndCullOnDrawsTheVisibleSet)
     {
         // `HOUSE-00684`, end to end and through the console the way a person would type it. The

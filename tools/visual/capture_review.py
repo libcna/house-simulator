@@ -53,6 +53,7 @@ def main() -> int:
             "--quality=high",
             f"--seed={SEED}",
             "--time=10.5",
+            "--freeze-time",
             "--weather=W_CLEAR",
             "--no-audio",
             "--screenshot-frame=3",

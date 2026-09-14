@@ -65,6 +65,12 @@ namespace cnahouse::app
         /// two frames, and the harness drives the game through `Options` and not through a
         /// console. §25's walk still runs and `F3` still reports it either way.
         bool noCull = false;
+        /// @brief Keep the walk/collision/visibility scene but colour static geometry with the
+        ///        deterministic diagnostic palette instead of room-dependent production lighting.
+        ///
+        /// Deliberately separate from `--scene=blockout`: render and culling tests need to drive
+        /// the normal first-person path while isolating geometry visibility from lightmap ownership.
+        bool debugBlockoutMaterials = false;
         bool rendererInfo = false;
         bool help = false;
         std::optional<std::string> scene;
@@ -86,6 +92,8 @@ namespace cnahouse::app
         std::optional<std::uint64_t> seed;
         /// @brief Time of day to start at, in hours since midnight.
         std::optional<float> timeOfDay;
+        /// @brief Keep the simulation clock at its starting instant for deterministic review captures.
+        bool freezeTime = false;
         std::optional<std::string> weather;
         /// @brief Take a screenshot to this path and exit.
         std::optional<std::string> screenshot;

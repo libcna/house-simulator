@@ -38,9 +38,11 @@ namespace
                               "--tier=s",
                               "--headless",
                               "--no-audio",
+                              "--debug-blockout-materials",
                               "--scene=kitchen",
                               "--seed=12345",
                               "--time=6.5",
+                              "--freeze-time",
                               "--weather=rain",
                               "--screenshot=/tmp/shot.png",
                               "--log=world,content"});
@@ -49,9 +51,11 @@ namespace
         EXPECT_EQ(options->tier, RenderTier::S);
         EXPECT_TRUE(options->headless);
         EXPECT_TRUE(options->noAudio);
+        EXPECT_TRUE(options->debugBlockoutMaterials);
         EXPECT_EQ(options->scene.value_or(""), "kitchen");
         EXPECT_EQ(options->seed.value_or(0), 12345u);
         EXPECT_FLOAT_EQ(options->timeOfDay.value_or(0.0f), 6.5f);
+        EXPECT_TRUE(options->freezeTime);
         EXPECT_EQ(options->weather.value_or(""), "rain");
         EXPECT_EQ(options->screenshot.value_or(""), "/tmp/shot.png");
         EXPECT_EQ(options->logCategories.value_or(""), "world,content");

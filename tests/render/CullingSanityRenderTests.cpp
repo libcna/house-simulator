@@ -66,6 +66,18 @@ namespace
         options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
         options.scene = "walk";
         options.player = std::array<float, 5>{pose.x, pose.y, pose.z, pose.yawDegrees, 0.0F};
+        // The pair is two game instances. Once LM_DAY became live, allowing their clocks and
+        // weather to advance independently compared two lighting conditions instead of two
+        // visibility policies and produced false missing-room failures.
+        options.timeOfDay = 10.5F;
+        options.freezeTime = true;
+        options.weather = "W_CLEAR";
+        // This test answers a geometry question, not which cell's bake wins when `--no-cull`
+        // deliberately submits both copies of a shared boundary receiver. The diagnostic palette
+        // still distinguishes every material and therefore exposes missing or extra surfaces,
+        // while keeping colour independent of the owning cell's room light state. Production
+        // appearance is guarded separately by FirstPersonPoseRenderTests and visual-review views.
+        options.debugBlockoutMaterials = true;
         options.noCull = !cull;
         return options;
     }

@@ -103,6 +103,12 @@ namespace
         options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
         options.scene = "walk";
         options.player = pose.player;
+        // Production lighting is live now. Freeze a useful authored condition so these remain
+        // geometry/material regressions rather than a comparison against whatever time elapsed
+        // while each game instance loaded its content.
+        options.timeOfDay = 10.5F;
+        options.freezeTime = true;
+        options.weather = "W_CLEAR";
         // The FIRST frame, which is the only one that is the same on every machine: the corner
         // line carries the frame time, and frame 1's is `FrameTimer`'s clamped default while
         // frame 30's is however long this machine took. Captured at 30 the twelve references
