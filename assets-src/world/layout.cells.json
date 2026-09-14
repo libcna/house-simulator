@@ -4,16 +4,15 @@
   //
   // Complete: every level and every exterior region (`HOUSE-00367`…`HOUSE-00372`).
   //
-  // The remaining unset fields are forward references, not omissions. Filling them here would
+  // The remaining unset field is a forward reference, not an omission. Filling it here would
   // make this file the source of truth for a table another task owns:
   //
-  //   floorMaterial / wallMaterial / ceilingMaterial   HOUSE-00908 authors the room palettes
   //   daylight.windowIds                               a later daylight-window assignment
   //
-  // `HOUSE-00385` assigns `floorMaterial` now wherever the snow-shell build sees a floor: every
-  // exterior cell and every interior cell with `visibilityHint: open`. The latter deliberately
-  // use a non-coverable material, proving that an open stair is not an outdoor snow surface. The
-  // complete room-by-room wall, ceiling and floor palette remains `HOUSE-00908`'s work.
+  // `HOUSE-00908` assigns floor, wall, ceiling and trim materials to all 78 non-exterior cells.
+  // Exterior floors retain `HOUSE-00385`'s assignments for the snow-shell build; exterior wall,
+  // trim and roof assignment belongs to `HOUSE-00907` because those are shell surface classes,
+  // not room palettes.
   //
   // `footstepSurface`, `acoustic`, `lightGroups`, `thermal` and `residencyPack` ARE authored: they are
   // properties of the room as experienced (§22.3) and nothing else declares them.
@@ -34,6 +33,8 @@
       // where the flight passes the slab, so the two stair cells have to meet there for the portal
       // to have a plane to sit in. `stair` is exempt from rule 2's slab bounds for this reason.
       "yOverride": [-2.30, 0.60],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "stair_wood",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.14, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -45,6 +46,8 @@
       "boxes": [{ "x": [-2.20, 2.20], "z": [-27.10, -14.30] }],
       // Exposed joists and the duct trunk overhead: hard, bright, and the longest run in the
       // house at 12.8 m.
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.12, "reverbHint": "corridor_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_SPINE" },
@@ -56,6 +59,8 @@
       "boxes": [{ "x": [4.90, 8.70], "z": [-18.30, -14.30] }],
       // Furnace, air handler, water heater, water main, expansion tank. Where the heat is made,
       // so it is not on a duct branch of its own.
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -66,6 +71,8 @@
     {
       "id": "B1_ELECTRICAL", "level": "B1", "name": "Electrical Service", "kind": "room",
       "boxes": [{ "x": [4.90, 8.70], "z": [-20.60, -18.30] }],
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -76,6 +83,8 @@
       "id": "B1_UTILITY", "level": "B1", "name": "Utility", "kind": "room",
       "boxes": [{ "x": [4.90, 8.70], "z": [-23.00, -20.60] }],
       // Sump, ejector pit, main drain, softener. STACK-A and STACK-D land here (§12.5).
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.10, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_EAST" },
@@ -87,6 +96,8 @@
       "boxes": [{ "x": [2.20, 8.70], "z": [-27.10, -23.00] }],
       // Acoustic panels and no windows: the most absorbent room in the house, and the one place
       // where a reverb tail would be wrong.
+      "floorMaterial": "MAT_CARPET_BROWN", "wallMaterial": "MAT_PAINT_SMOKY_OCHRE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.62, "reverbHint": "dead" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_EAST" },
@@ -98,6 +109,8 @@
       "boxes": [{ "x": [2.20, 3.80], "z": [-23.00, -21.20] }],
       // Off B1_HALL, on STACK-F. Carved out of the under-stair block below, which is why that
       // cell is an L.
+      "floorMaterial": "MAT_TILE_CERAMIC_LIGHT", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.08, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_EAST" },
@@ -110,6 +123,8 @@
       // Rubber floor over the slab. §62.4 has no `rubber` surface and adding one for a single
       // room would be a twenty-first surface with one sample; `concrete` is the nearest of the
       // twenty and the mat is a prop.
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.30, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
@@ -120,6 +135,8 @@
     {
       "id": "B1_WORKSHOP", "level": "B1", "name": "Workshop", "kind": "room",
       "boxes": [{ "x": [-12.70, -8.20], "z": [-18.30, -14.30] }],
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.16, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
@@ -131,6 +148,8 @@
       "id": "B1_STOR1", "level": "B1", "name": "Storage 1", "kind": "room",
       "boxes": [{ "x": [-12.70, -8.20], "z": [-22.00, -18.30] }],
       // Steel shelving; STACK-B's chase runs through it (§12.5).
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.22, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
@@ -142,6 +161,8 @@
       "id": "B1_STOR2", "level": "B1", "name": "Storage 2", "kind": "room",
       "boxes": [{ "x": [-12.70, -8.20], "z": [-27.10, -22.00] }],
       // Seasonal goods, paint, luggage; STACK-C and STACK-E drop here.
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.24, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
@@ -152,6 +173,8 @@
     {
       "id": "B1_HOBBY", "level": "B1", "name": "Hobby Room", "kind": "room",
       "boxes": [{ "x": [-8.20, -2.20], "z": [-24.00, -18.30] }],
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_DUSTY_BLUE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.34, "reverbHint": "small_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
@@ -163,6 +186,8 @@
       "boxes": [{ "x": [-8.20, -4.60], "z": [-27.10, -24.00] }],
       // Stone floor, cool, and §13.2's one room with no heating duct -- which is the point of a
       // cellar and the reason the thermal model has to be able to say so.
+      "floorMaterial": "MAT_FLOOR_STONE", "wallMaterial": "MAT_PAINT_SMOKY_OCHRE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "rock",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.11, "reverbHint": "small_hard" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -173,6 +198,8 @@
       "id": "B1_LAUNDRY2", "level": "B1", "name": "Secondary Laundry", "kind": "room",
       "boxes": [{ "x": [-4.60, -2.20], "z": [-27.10, -24.00] }],
       // Deep sink and drying rack; on STACK-F with the WC.
+      "floorMaterial": "MAT_TILE_PORCELAIN_GREY", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.13, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_B1_WEST" },
@@ -196,6 +223,8 @@
       ],
       // "Low, sloped ceiling": it is under the flight, so its ceiling is not the level's.
       "yOverride": [-2.30, -0.55],
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_BASEMENT", "absorption": 0.20, "reverbHint": "tiny_hard" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -214,6 +243,8 @@
       "boxes": [{ "x": [-2.20, 2.20], "z": [-18.30, -14.30] }],
       // Where §15.7 rule 5 starts its walk: every interior cell in the house must be reachable
       // from this room through open or door portals.
+      "floorMaterial": "MAT_FLOOR_STONE", "wallMaterial": "MAT_PAINT_IVORY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.16, "reverbHint": "medium_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_CENTRE" },
@@ -225,6 +256,8 @@
       "id": "L0_HALL", "level": "L0", "name": "Central Hall", "kind": "corridor",
       "boxes": [{ "x": [-2.20, 2.20], "z": [-23.00, -18.30] }],
       // The family photo gallery wall (§59.4) lives here.
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.20, "reverbHint": "corridor_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_CENTRE" },
@@ -238,8 +271,9 @@
       // system see three floors at once from here (§16.2). `yOverride` reaches L1's floor because
       // the flight passes through the slab.
       "yOverride": [0.60, 3.65],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "stair_wood_open",
-      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.18, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_CENTRE" },
       "daylight": { "orientation": "E", "exposure": 0.28 },
@@ -250,6 +284,8 @@
       "id": "L0_MUDROOM", "level": "L0", "name": "Mudroom", "kind": "room",
       "boxes": [{ "x": [4.90, 8.70], "z": [-18.30, -14.30] }],
       // Bench, cubbies, boots, leashes, dog towel: the door the dog comes in through.
+      "floorMaterial": "MAT_TILE_CERAMIC_WARM", "wallMaterial": "MAT_PAINT_SAGE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.22, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_EAST" },
@@ -261,6 +297,8 @@
       "id": "L0_LAUNDRY", "level": "L0", "name": "Laundry Room", "kind": "room",
       "boxes": [{ "x": [4.90, 8.70], "z": [-22.00, -18.30] }],
       // Washer, dryer, folding counter, sink. On STACK-D (§12.5).
+      "floorMaterial": "MAT_TILE_PORCELAIN_GREY", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.15, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_EAST" },
@@ -272,6 +310,8 @@
       "id": "L0_WC1", "level": "L0", "name": "Powder Room", "kind": "room",
       "boxes": [{ "x": [2.20, 4.90], "z": [-22.00, -20.20] }],
       // WC and basin, on STACK-A: directly under L1_WC4 and L2_WC6.
+      "floorMaterial": "MAT_TILE_CERAMIC_LIGHT", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_EAST" },
@@ -284,6 +324,8 @@
       "boxes": [{ "x": [2.20, 8.70], "z": [-27.10, -22.00] }],
       // Television, sectional sofa, dog bed, bookshelves. The most furnished room in the house
       // and the softest of the hard-floored ones.
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.38, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_EAST" },
@@ -295,6 +337,8 @@
       "id": "L0_LIVING", "level": "L0", "name": "Formal Living Room", "kind": "room",
       "boxes": [{ "x": [-8.20, -2.20], "z": [-20.20, -14.30] }],
       // Fireplace on the west wall, piano, two armchairs. A bay window and a tall one.
+      "floorMaterial": "MAT_WOOD_WALNUT_FLOOR", "wallMaterial": "MAT_PAINT_IVORY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.32, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
@@ -307,6 +351,8 @@
       "boxes": [{ "x": [-12.70, -8.20], "z": [-18.30, -14.30] }],
       // Glazed double doors to the living room: §15.4's `translucent` portal, the one case where
       // vision passes and the player does not.
+      "floorMaterial": "MAT_CARPET_BROWN", "wallMaterial": "MAT_PAINT_DUSTY_BLUE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.44, "reverbHint": "small_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
@@ -318,6 +364,8 @@
       "id": "L0_WC2", "level": "L0", "name": "Guest Powder Room", "kind": "room",
       "boxes": [{ "x": [-10.40, -8.20], "z": [-20.20, -18.30] }],
       // On STACK-B, which shares its corner with L1_BATH2 and L2_BATH4.
+      "floorMaterial": "MAT_TILE_CERAMIC_WARM", "wallMaterial": "MAT_PAINT_SAGE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
@@ -328,6 +376,8 @@
     {
       "id": "L0_CLOSET_W", "level": "L0", "name": "Study Closet", "kind": "closet",
       "boxes": [{ "x": [-12.70, -10.40], "z": [-20.20, -18.30] }],
+      "floorMaterial": "MAT_CARPET_BROWN", "wallMaterial": "MAT_PAINT_DUSTY_BLUE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.40, "reverbHint": "tiny_soft" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -338,6 +388,8 @@
       "id": "L0_DINING", "level": "L0", "name": "Formal Dining Room", "kind": "room",
       "boxes": [{ "x": [-8.20, -2.20], "z": [-23.00, -20.20] }],
       // Cased openings to the hall and the kitchen: no doors at all (§13.3's Doors column).
+      "floorMaterial": "MAT_WOOD_WALNUT_FLOOR", "wallMaterial": "MAT_PAINT_LINEN",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.28, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
@@ -348,6 +400,8 @@
     {
       "id": "L0_STOR", "level": "L0", "name": "Hall Storage", "kind": "closet",
       "boxes": [{ "x": [-12.70, -8.20], "z": [-22.60, -20.20] }],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.24, "reverbHint": "tiny_hard" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -358,6 +412,8 @@
       "id": "L0_BUTLERS", "level": "L0", "name": "Butler's Pantry", "kind": "room",
       "boxes": [{ "x": [-12.70, -8.20], "z": [-25.00, -22.60] }],
       // Second sink and wine fridge; STACK-C's chase runs up the west wall from here.
+      "floorMaterial": "MAT_TILE_CERAMIC_WARM", "wallMaterial": "MAT_PAINT_LINEN",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_KITCHEN", "absorption": 0.18, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
@@ -369,6 +425,8 @@
       "id": "L0_PANTRY", "level": "L0", "name": "Walk-in Pantry", "kind": "closet",
       "boxes": [{ "x": [-12.70, -8.20], "z": [-27.10, -25.00] }],
       // Shelved dry goods and the chest freezer -- one of §50.4's containers.
+      "floorMaterial": "MAT_FLOOR_VINYL", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_KITCHEN", "absorption": 0.20, "reverbHint": "tiny_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
@@ -381,6 +439,8 @@
       "boxes": [{ "x": [-8.20, 2.20], "z": [-27.10, -23.00] }],
       // The busiest cell in the house: §16.3 gives it the maximum interior degree of 8. Island,
       // refrigerator, range, ovens, dishwasher, sink; STACK-E on the north wall.
+      "floorMaterial": "MAT_TILE_PORCELAIN_GREY", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_KITCHEN", "absorption": 0.28, "reverbHint": "medium_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_WEST" },
@@ -396,6 +456,8 @@
       "boxes": [{ "x": [-6.70, 2.70], "z": [-32.10, -27.10] }],
       // The rear extension: five glazed panels and a slider onto the terrace. Its flat roof is
       // the master balcony at +3.65, so nothing on L1 sits over the room itself.
+      "floorMaterial": "MAT_FLOOR_STONE", "wallMaterial": "MAT_PAINT_SAGE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_KITCHEN", "absorption": 0.17, "reverbHint": "bright_glass" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_REAR" },
@@ -415,6 +477,8 @@
       // ceiling above L1's slab underside -- and the reason that rule asks what is actually above
       // a cell rather than which level it is on.
       "yOverride": [0.15, 4.30],
+      "floorMaterial": "MAT_FLOOR_CONCRETE", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "concrete",
       "acoustic": { "roomTone": "AMB_GARAGE", "absorption": 0.11, "reverbHint": "large_hard" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -433,6 +497,8 @@
       // has to be the one that checks it.
       "boxes": [{ "x": [9.20, 16.60], "z": [-21.20, -17.50] }],
       "yOverride": [2.90, 4.30],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "hardwood",
       "acoustic": { "absorption": 0.16, "reverbHint": "small_hard" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -472,8 +538,9 @@
       "boxes": [{ "x": [-2.20, 2.20], "z": [-18.30, -14.30] }],
       // The window seat is the cat's favourite perch (§61): `layout.nav.json` will put a
       // `perch` marker here reserved to the cat.
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
-      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.24, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_CENTRE" },
       "daylight": { "orientation": "N", "exposure": 0.42 },
@@ -485,8 +552,9 @@
       "boxes": [{ "x": [2.20, 4.90], "z": [-20.20, -14.30] }],
       // Continues to L2, so it pierces this level's ceiling as well as its floor.
       "yOverride": [3.65, 6.55],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "stair_wood_open",
-      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.18, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_CENTRE" },
       "daylight": { "orientation": "E", "exposure": 0.26 },
@@ -496,6 +564,8 @@
     {
       "id": "L1_HALL", "level": "L1", "name": "Upper Hall", "kind": "corridor",
       "boxes": [{ "x": [-2.20, 2.20], "z": [-22.00, -18.30] }],
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.42, "reverbHint": "corridor_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_CENTRE" },
@@ -506,6 +576,8 @@
       "id": "L1_HALL_W", "level": "L1", "name": "West Corridor", "kind": "corridor",
       "boxes": [{ "x": [-9.70, -2.20], "z": [-20.60, -18.30] }],
       // 2.30 m wide, which clears §70.5's 0.90 m minimum for a corridor with room to spare.
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.44, "reverbHint": "corridor_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_WEST" },
@@ -517,6 +589,8 @@
       "boxes": [{ "x": [-7.00, 2.20], "z": [-27.10, -22.00] }],
       // The slider onto the rear balcony -- the sunroom's flat roof -- is the level threshold
       // §12.2 calls out.
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_LINEN",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.52, "reverbHint": "large_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_CENTRE" },
@@ -532,6 +606,8 @@
       "boxes": [{ "x": [-12.70, -9.40], "z": [-27.10, -22.00] }],
       // Freestanding bath, shower, double vanity, WC. STACK-C rises here through the west wall
       // over L0_PANTRY and L0_BUTLERS (§12.5).
+      "floorMaterial": "MAT_FLOOR_STONE", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.12, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_WEST" },
@@ -544,6 +620,8 @@
       "boxes": [{ "x": [-9.40, -7.00], "z": [-27.10, -22.00] }],
       // 12.2 m² and walked into, so a `closet` by kind but not by §70.5's standing test: it is
       // 2.40 m wide and the player stands in it.
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_LINEN",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.58, "reverbHint": "small_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_WEST" },
@@ -553,6 +631,8 @@
     {
       "id": "L1_BED2", "level": "L1", "name": "Bedroom 2", "kind": "room",
       "boxes": [{ "x": [2.20, 8.70], "z": [-27.10, -22.90] }],
+      "floorMaterial": "MAT_CARPET_GREY", "wallMaterial": "MAT_PAINT_SAGE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.48, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_EAST" },
@@ -565,6 +645,8 @@
       "boxes": [{ "x": [2.20, 4.90], "z": [-22.90, -22.00] }],
       // 0.90 m deep: reached into from the hall rather than stood in, which is the case §15.7
       // rule 11's neighbour search exists for.
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.50, "reverbHint": "tiny_soft" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -574,6 +656,8 @@
     {
       "id": "L1_STOR", "level": "L1", "name": "Upper Store", "kind": "closet",
       "boxes": [{ "x": [4.90, 8.70], "z": [-22.90, -22.00] }],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.34, "reverbHint": "tiny_soft" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -583,6 +667,8 @@
     {
       "id": "L1_BED3", "level": "L1", "name": "Bedroom 3", "kind": "room",
       "boxes": [{ "x": [-12.70, -8.20], "z": [-18.30, -14.30] }],
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_PALE_ROSE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.50, "reverbHint": "small_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_WEST" },
@@ -593,6 +679,8 @@
     {
       "id": "L1_BED4", "level": "L1", "name": "Bedroom 4", "kind": "room",
       "boxes": [{ "x": [-8.20, -2.20], "z": [-18.30, -14.30] }],
+      "floorMaterial": "MAT_CARPET_GREY", "wallMaterial": "MAT_PAINT_MUTED_TEAL",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.50, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_WEST" },
@@ -604,6 +692,8 @@
       "id": "L1_BATH2", "level": "L1", "name": "Family Bathroom", "kind": "room",
       "boxes": [{ "x": [-12.70, -9.70], "z": [-22.00, -18.30] }],
       // On STACK-B, sharing its corner with L0_WC2 below and L2_BATH4 above.
+      "floorMaterial": "MAT_TILE_CERAMIC_WARM", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.10, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_WEST" },
@@ -614,6 +704,8 @@
     {
       "id": "L1_WC3", "level": "L1", "name": "WC 3", "kind": "room",
       "boxes": [{ "x": [-7.00, -4.40], "z": [-22.00, -20.60] }],
+      "floorMaterial": "MAT_TILE_CERAMIC_LIGHT", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_WEST" },
@@ -623,6 +715,8 @@
     {
       "id": "L1_CLOSET_2", "level": "L1", "name": "Hall Closet 2", "kind": "closet",
       "boxes": [{ "x": [-9.70, -7.00], "z": [-22.00, -20.60] }],
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.46, "reverbHint": "tiny_soft" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -632,6 +726,8 @@
     {
       "id": "L1_CLOSET_3", "level": "L1", "name": "Hall Closet 3", "kind": "closet",
       "boxes": [{ "x": [-4.40, -2.20], "z": [-22.00, -20.60] }],
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_WARM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.46, "reverbHint": "tiny_soft" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -642,6 +738,8 @@
       "id": "L1_BED5", "level": "L1", "name": "Guest Bedroom", "kind": "room",
       "boxes": [{ "x": [4.90, 8.70], "z": [-18.30, -14.30] }],
       // Made up and unused: §65.6's initial state leaves its door shut and its light off.
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_PALE_SAND",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.48, "reverbHint": "small_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_EAST" },
@@ -653,6 +751,8 @@
       "id": "L1_BATH3", "level": "L1", "name": "Guest Bathroom", "kind": "room",
       "boxes": [{ "x": [4.90, 8.70], "z": [-22.00, -18.30] }],
       // On STACK-D, perfectly aligned with L0_LAUNDRY below and L2_BATH5 above.
+      "floorMaterial": "MAT_TILE_PORCELAIN_GREY", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.11, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_EAST" },
@@ -665,6 +765,8 @@
       "boxes": [{ "x": [2.20, 4.90], "z": [-22.00, -20.20] }],
       // STACK-A: directly over L0_WC1 and directly under L2_WC6, "perfectly aligned on all three
       // floors" (§12.5).
+      "floorMaterial": "MAT_TILE_CERAMIC_LIGHT", "wallMaterial": "MAT_PAINT_SAGE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L1_EAST" },
@@ -713,8 +815,9 @@
     {
       "id": "L2_LANDING", "level": "L2", "name": "Stair Landing", "kind": "room",
       "boxes": [{ "x": [-2.20, 2.20], "z": [-18.30, -14.30] }],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
-      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.26, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
       "daylight": { "orientation": "N", "exposure": 0.44 },
@@ -725,8 +828,9 @@
       "id": "L2_STAIR_MAIN", "level": "L2", "name": "Staircase L2 Head", "kind": "stair",
       "boxes": [{ "x": [2.20, 4.90], "z": [-20.20, -14.30] }],
       // The main flight ends here; the attic is reached by its own stair.
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "stair_wood_open",
-      "floorMaterial": "MAT_WOOD_OAK_FLOOR",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.20, "reverbHint": "tall_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
       "daylight": { "orientation": "E", "exposure": 0.24 },
@@ -740,6 +844,8 @@
       // Straight, narrow, painted timber, a bare bulb on a pull cord. It climbs through the slab,
       // so its extent reaches L3's floor.
       "yOverride": [6.55, 9.30],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "stair_wood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.16, "reverbHint": "narrow_hard" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -749,6 +855,8 @@
     {
       "id": "L2_HALL", "level": "L2", "name": "Upper Hall", "kind": "corridor",
       "boxes": [{ "x": [-2.20, 2.20], "z": [-22.00, -18.30] }],
+      "floorMaterial": "MAT_CARPET_GREY", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.42, "reverbHint": "corridor_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
@@ -758,6 +866,8 @@
     {
       "id": "L2_HALL_W", "level": "L2", "name": "West Corridor", "kind": "corridor",
       "boxes": [{ "x": [-9.70, -2.20], "z": [-20.60, -18.30] }],
+      "floorMaterial": "MAT_CARPET_GREY", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.44, "reverbHint": "corridor_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
@@ -768,6 +878,8 @@
       "id": "L2_LIBRARY", "level": "L2", "name": "Library", "kind": "room",
       "boxes": [{ "x": [-8.20, -2.20], "z": [-18.30, -14.30] }],
       // Floor-to-ceiling shelves: books are the most absorbent wall in a house.
+      "floorMaterial": "MAT_WOOD_WALNUT_FLOOR", "wallMaterial": "MAT_PAINT_DUSTY_BLUE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.56, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
@@ -778,6 +890,8 @@
     {
       "id": "L2_BED6", "level": "L2", "name": "Bedroom 6", "kind": "room",
       "boxes": [{ "x": [-12.70, -8.20], "z": [-18.30, -14.30] }],
+      "floorMaterial": "MAT_CARPET_BEIGE", "wallMaterial": "MAT_PAINT_SAGE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.50, "reverbHint": "small_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
@@ -789,6 +903,8 @@
       "id": "L2_BATH4", "level": "L2", "name": "Bathroom 4", "kind": "room",
       "boxes": [{ "x": [-12.70, -9.70], "z": [-22.00, -18.30] }],
       // The top of STACK-B.
+      "floorMaterial": "MAT_TILE_PORCELAIN_GREY", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.10, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
@@ -799,6 +915,8 @@
     {
       "id": "L2_CLOSET_4", "level": "L2", "name": "Hall Closet 4", "kind": "closet",
       "boxes": [{ "x": [-9.70, -7.00], "z": [-22.00, -20.60] }],
+      "floorMaterial": "MAT_CARPET_GREY", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.46, "reverbHint": "tiny_soft" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -808,6 +926,8 @@
     {
       "id": "L2_WC5", "level": "L2", "name": "WC 5", "kind": "room",
       "boxes": [{ "x": [-7.00, -4.40], "z": [-22.00, -20.60] }],
+      "floorMaterial": "MAT_TILE_CERAMIC_LIGHT", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
@@ -817,6 +937,8 @@
     {
       "id": "L2_LINEN2", "level": "L2", "name": "Linen Closet 2", "kind": "closet",
       "boxes": [{ "x": [-4.40, -2.20], "z": [-22.00, -20.60] }],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.48, "reverbHint": "tiny_soft" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -827,6 +949,8 @@
       "id": "L2_BED7", "level": "L2", "name": "Bedroom 7", "kind": "room",
       "boxes": [{ "x": [-12.70, -7.00], "z": [-27.10, -22.00] }],
       // A store-room-in-waiting: furnished as a bedroom, used as neither.
+      "floorMaterial": "MAT_CARPET_BROWN", "wallMaterial": "MAT_PAINT_PALE_SAND",
+      "ceilingMaterial": "MAT_PAINT_CEILING_CREAM", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.46, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_WEST" },
@@ -839,6 +963,8 @@
       "boxes": [{ "x": [-7.00, 2.20], "z": [-27.10, -22.00] }],
       // Pool table, dartboard, sofa, arcade cabinet. The largest room on the level, directly over
       // the master bedroom -- which is why §64 cares what its floor is made of.
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_MUTED_TEAL",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.34, "reverbHint": "large_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_CENTRE" },
@@ -849,6 +975,8 @@
     {
       "id": "L2_SITTING", "level": "L2", "name": "Secondary Sitting Room", "kind": "room",
       "boxes": [{ "x": [2.20, 8.70], "z": [-27.10, -22.90] }],
+      "floorMaterial": "MAT_CARPET_GREY", "wallMaterial": "MAT_PAINT_LINEN",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "carpet",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.50, "reverbHint": "medium_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_EAST" },
@@ -860,6 +988,8 @@
       "id": "L2_STOR2", "level": "L2", "name": "Upper Store 2", "kind": "closet",
       "boxes": [{ "x": [2.20, 8.70], "z": [-22.90, -22.00] }],
       // Shallow but long: 0.90 m deep and 6.50 m wide, so it is reached into along its length.
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_COOL", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ROOM_QUIET", "absorption": 0.36, "reverbHint": "tiny_soft" },
       "thermal": { "heated": true, "ductBranch": null },
@@ -870,6 +1000,8 @@
       "id": "L2_BATH5", "level": "L2", "name": "Bathroom 5", "kind": "room",
       "boxes": [{ "x": [4.90, 8.70], "z": [-22.00, -18.30] }],
       // The top of STACK-D.
+      "floorMaterial": "MAT_TILE_CERAMIC_DARK", "wallMaterial": "MAT_PAINT_SOFT_GREY",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.11, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_EAST" },
@@ -881,6 +1013,8 @@
       "id": "L2_WC6", "level": "L2", "name": "WC 6", "kind": "room",
       "boxes": [{ "x": [2.20, 4.90], "z": [-22.00, -20.20] }],
       // The top of STACK-A: L0_WC1, L1_WC4, L2_WC6, perfectly aligned on all three floors.
+      "floorMaterial": "MAT_TILE_CERAMIC_LIGHT", "wallMaterial": "MAT_PAINT_SAGE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_BATH", "absorption": 0.09, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L2_EAST" },
@@ -920,6 +1054,8 @@
       // 2.2 → 3.4 m: the dormer above the head is what gives standing room at the top of a stair
       // that would otherwise arrive under a rafter.
       "yOverride": [9.30, 12.70],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "stair_wood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.18, "reverbHint": "narrow_hard" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -942,6 +1078,8 @@
       // that range is a range for a FLAT ceiling. Rule 10 skips a rafter-bounded level for
       // exactly this room.
       "yOverride": [9.30, 12.60],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_WARM_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_DOOR_HARDWOOD",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.40, "reverbHint": "attic_soft" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L3_ROOM" },
@@ -956,6 +1094,8 @@
       // 1.2 → 4.6 m, so most of it is crouch-only -- §13.6's headroom-aware capsule, the one
       // place in the house where crouching exists.
       "yOverride": [9.30, 13.90],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.66, "reverbHint": "attic_soft" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -968,6 +1108,8 @@
       "boxes": [{ "x": [4.90, 8.70], "z": [-27.10, -18.30] }],
       // Header tank, HVAC branch ducts, an aerial mast, cable runs. 1.2 → 4.2 m.
       "yOverride": [9.30, 13.50],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.58, "reverbHint": "attic_soft" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -981,6 +1123,8 @@
       // Christmas decorations, a cot, framed pictures. 1.2 → 3.2 m, two dormers.
       // §16.3 makes this the far end of the house's longest path: EXT_ROAD to here is 11 hops.
       "yOverride": [9.30, 12.50],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.60, "reverbHint": "attic_soft" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -995,6 +1139,8 @@
       "boxes": [{ "x": [-3.60, 3.60], "z": [-17.00, -14.30] }],
       // The roof-space void behind the front knee wall: 1.2 → 3.0 m and no window at all.
       "yOverride": [9.30, 12.30],
+      "floorMaterial": "MAT_WOOD_OAK_FLOOR", "wallMaterial": "MAT_PAINT_AGED_PLASTER",
+      "ceilingMaterial": "MAT_PAINT_CEILING_ATTIC", "trimMaterial": "MAT_HATCH_PLY",
       "footstepSurface": "hardwood",
       "acoustic": { "roomTone": "AMB_ATTIC", "absorption": 0.62, "reverbHint": "attic_soft" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -1290,6 +1436,8 @@
       // carcass: 1.60 × 0.50 × 1.75, which is a large American refrigerator-freezer.
       "boxes": [{ "x": [0.40, 2.00], "z": [-26.95, -26.45] }],
       "yOverride": [0.70, 2.45],
+      "floorMaterial": "MAT_TILE_CERAMIC_LIGHT", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": null,
       "acoustic": { "absorption": 0.20, "reverbHint": "tiny_hard" },
       "thermal": { "heated": false, "ductBranch": null },
@@ -1304,6 +1452,8 @@
       // for after the stair well (`HOUSE-00358`).
       "boxes": [{ "x": [-12.40, -11.00], "z": [-26.90, -26.20] }],
       "yOverride": [0.75, 1.35],
+      "floorMaterial": "MAT_TILE_CERAMIC_LIGHT", "wallMaterial": "MAT_PAINT_SOFT_WHITE",
+      "ceilingMaterial": "MAT_PAINT_CEILING_MOISTURE", "trimMaterial": "MAT_DOOR_PAINTED",
       "footstepSurface": null,
       "acoustic": { "absorption": 0.22, "reverbHint": "tiny_hard" },
       "thermal": { "heated": false, "ductBranch": null },

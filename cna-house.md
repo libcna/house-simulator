@@ -1496,6 +1496,7 @@ game owns, not framework content, so no reader registration is needed.
       "floorMaterial": "MAT_TILE_PORCELAIN_GREY",
       "wallMaterial":  "MAT_PAINT_WARM_WHITE",
       "ceilingMaterial": "MAT_PAINT_FLAT_WHITE",
+      "trimMaterial": "MAT_DOOR_PAINTED",       // unlightmapped joinery finish
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_KITCHEN", "absorption": 0.28, "reverbHint": "small_hard" },
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_W" },
@@ -2544,6 +2545,15 @@ albedo/normal maps through `SurfaceBlend/Snowy`. Slight class tints retain the s
 at shallow coverage without duplicating texture bytes. Snow rows reject recursive cover, select
 the `snow` footstep surface and use 0.85 absorption. Exact rows, hashes and shallow/deep review are
 in `docs/asset-selection/snow-materials.md`.
+
+`HOUSE-00908` assigns a complete four-finish palette to all 78 non-exterior cells: the 76
+tabulated interiors plus the refrigerator and freezer sub-cells. The ground floor and main
+circulation share warm whites and oak, formal rooms repeat walnut and hardwood joinery, bedrooms
+vary within the same muted paint family, the upper floor shifts cooler, and chipped finishes are
+confined to basement service rooms and roof-space. `trimMaterial` is the one cell datum §15.3 was
+missing: it selects a non-lightmapped `BasicEffect` joinery finish independently from the
+lightmapped wall paint. The complete reviewable table is
+`docs/asset-selection/room-palettes.md`; runtime and offline shell tools read the same cell fields.
 
 ### 22.2 Material classes and their effect mapping
 

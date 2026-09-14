@@ -419,6 +419,8 @@ namespace cnahouse::world
         util::Id floorMaterial;
         util::Id wallMaterial;
         util::Id ceilingMaterial;
+        /// @brief Non-lightmapped joinery finish for skirtings, casings and room-side leaves.
+        util::Id trimMaterial;
         std::string footstepSurface;
         CellAcoustic acoustic;
         CellThermal thermal;

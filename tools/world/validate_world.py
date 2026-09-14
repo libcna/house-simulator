@@ -956,7 +956,7 @@ def rule_6_references(world: World) -> list[Problem]:
     have_interactables = "interactables" in world.layout
 
     for index, cell in enumerate(world.cells):
-        for field in ("floorMaterial", "wallMaterial", "ceilingMaterial"):
+        for field in ("floorMaterial", "wallMaterial", "ceilingMaterial", "trimMaterial"):
             check("cells", index, field, cell.get(field), materials, "material", have_materials)
         # ...and the cell's list has to be exactly the groups its own lights belong to. It is an
         # index -- §28.1 walks `cell.lightGroups` once per frame -- and an index that has drifted

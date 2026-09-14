@@ -177,6 +177,7 @@ stair, closet, garage bay and exterior region.
       "floorMaterial":   "MAT_TILE_PORCELAIN_GREY",
       "wallMaterial":    "MAT_PAINT_WARM_WHITE",
       "ceilingMaterial": "MAT_PAINT_FLAT_WHITE",
+      "trimMaterial":    "MAT_DOOR_PAINTED",
       "footstepSurface": "tile",
       "acoustic": { "roomTone": "AMB_KITCHEN", "absorption": 0.28, "reverbHint": "small_hard" },
       "thermal":  { "heated": true, "ductBranch": "DUCT_L0_W" },

@@ -1133,6 +1133,7 @@ namespace cnahouse::world
                      {"floorMaterial", &cell.floorMaterial},
                      {"wallMaterial", &cell.wallMaterial},
                      {"ceilingMaterial", &cell.ceilingMaterial},
+                     {"trimMaterial", &cell.trimMaterial},
                      {"navMeshRegion", &cell.navMeshRegion},
                      {"parent", &cell.parent}})
             {

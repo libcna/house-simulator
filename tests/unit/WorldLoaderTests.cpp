@@ -163,6 +163,7 @@ namespace
                   "floorMaterial": "MAT_TILE_PORCELAIN_GREY",
                   "wallMaterial": "MAT_PAINT_WARM_WHITE",
                   "ceilingMaterial": "MAT_PAINT_FLAT_WHITE",
+                  "trimMaterial": "MAT_DOOR_PAINTED",
                   "footstepSurface": "tile",
                   "acoustic": { "roomTone": "AMB_KITCHEN", "absorption": 0.28,
                                 "reverbHint": "small_hard" },
@@ -1264,6 +1265,9 @@ namespace
         EXPECT_EQ(kitchen.name, "Kitchen");
         EXPECT_EQ(kitchen.kind, world::CellKind::Room);
         EXPECT_EQ(kitchen.floorMaterial, Intern("MAT_TILE_PORCELAIN_GREY"));
+        EXPECT_EQ(kitchen.wallMaterial, Intern("MAT_PAINT_WARM_WHITE"));
+        EXPECT_EQ(kitchen.ceilingMaterial, Intern("MAT_PAINT_FLAT_WHITE"));
+        EXPECT_EQ(kitchen.trimMaterial, Intern("MAT_DOOR_PAINTED"));
         EXPECT_EQ(kitchen.footstepSurface, "tile");
         EXPECT_EQ(kitchen.acoustic.roomTone, Intern("AMB_KITCHEN"));
         EXPECT_FLOAT_EQ(kitchen.acoustic.absorption, 0.28F);
@@ -1383,6 +1387,7 @@ namespace
         const world::Cell& terrace = contents.cells[3];
         EXPECT_EQ(terrace.kind, world::CellKind::Exterior);
         EXPECT_FALSE(terrace.floorMaterial.IsValid());
+        EXPECT_FALSE(terrace.trimMaterial.IsValid());
         EXPECT_FALSE(terrace.acoustic.roomTone.IsValid());
         EXPECT_FALSE(terrace.thermal.heated);
         EXPECT_TRUE(terrace.lightGroups.empty());
@@ -3733,12 +3738,28 @@ namespace
             ASSERT_TRUE(loaded) << name << ": " << loaded.Error().ToString();
         }
 
-        // §16.3, measured: 75 rooms, 3 nested sub-cells and 18 exterior cells.
+        // §13.7, measured: 76 tabulated interior cells, two appliance sub-cells and 18 exterior
+        // cells. Three rows have a parent because the tabulated garage loft is nested too.
         EXPECT_EQ(contents.cells.size(), 96U);
+        EXPECT_EQ(std::count_if(contents.cells.begin(),
+                                contents.cells.end(),
+                                [](const world::Cell& cell)
+                                { return cell.kind != world::CellKind::Exterior; }),
+                  78);
         EXPECT_EQ(std::count_if(contents.cells.begin(),
                                 contents.cells.end(),
                                 [](const world::Cell& cell) { return cell.parent.IsValid(); }),
                   3);
+        EXPECT_EQ(std::count_if(contents.cells.begin(),
+                                contents.cells.end(),
+                                [](const world::Cell& cell)
+                                {
+                                    return cell.kind != world::CellKind::Exterior &&
+                                           cell.floorMaterial.IsValid() && cell.wallMaterial.IsValid() &&
+                                           cell.ceilingMaterial.IsValid() && cell.trimMaterial.IsValid();
+                                }),
+                  78)
+            << "HOUSE-00908 gives every interior and appliance sub-cell a complete palette";
 
         // 179 and 66 until `HOUSE-00491` retired §12.6's two `W_GABLE` louvres: they were in
         // "attic gable ends" and §12.1's roof is a hip with none, so both stood 1.44 m inside

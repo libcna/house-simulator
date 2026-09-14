@@ -333,6 +333,7 @@ namespace cnahouse::world
                 material(cell, cell.floorMaterial, "floorMaterial");
                 material(cell, cell.wallMaterial, "wallMaterial");
                 material(cell, cell.ceilingMaterial, "ceilingMaterial");
+                material(cell, cell.trimMaterial, "trimMaterial");
 
                 // A cell's `lightGroups` is §28.1's per-frame index and rule 6 checks it both
                 // ways: a group listed with no light of that group in the cell, and a light in

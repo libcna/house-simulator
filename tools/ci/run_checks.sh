@@ -134,6 +134,8 @@ run_gate "glass-water-materials" python3 tools/assets/glass_water_materials.py -
 run_gate "wet-materials" python3 tools/assets/wet_materials.py --check
 run_gate "snow-materials-selftest" python3 tools/assets/snow_materials.py --selftest
 run_gate "snow-materials" python3 tools/assets/snow_materials.py --check
+run_gate "room-palettes-selftest" python3 tools/world/room_palettes.py --selftest
+run_gate "room-palettes" python3 tools/world/room_palettes.py --check
 # `HOUSE-00297`. Counts alone would accept repeated files and a model lying on its side: the set
 # gate checks pinned source identities, hashes, per-age scale, triangle/LOD ratios and textures;
 # the compact render sheets retain the alpha-aware visual review.

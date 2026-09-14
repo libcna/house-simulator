@@ -209,6 +209,9 @@
             "required": [],
             "type": "object"
           },
+          "trimMaterial": {
+            "$ref": "#/$defs/idOrNull"
+          },
           "visibilityHint": {
             "enum": [
               "opaque",

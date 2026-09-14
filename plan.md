@@ -13055,9 +13055,30 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             including the snow self-test/check and 321 strict-XNA translation units.
 - [ ] HOUSE-00907 — Apply the real materials to the generated shell, replacing the placeholders, room by room per the palette table
       dep: HOUSE-00901, HOUSE-00902 · sys: content · plat: TOOL · pri: MUST
-- [ ] HOUSE-00908 — Author the room palette table (wall colour, ceiling colour, floor material, trim colour) for all 78 interior cells
+- [x] HOUSE-00908 — Author the room palette table (wall colour, ceiling colour, floor material, trim colour) for all 78 interior cells
       dep: HOUSE-00901 · sys: world · plat: TOOL · pri: MUST
       accept: the palette reads as one house decorated by one family, not 78 unrelated rooms
+      note: (2026-09-14) All 78 non-exterior rows now carry an explicit floor, wall, ceiling and
+            trim material. Repeated adjacent palettes form seven enforced families: a warm oak
+            public floor, related bedroom colours, a cooler upper floor, coherent circulation,
+            matching appliance interiors and deliberately worn service/roof-space rooms. The
+            complete table is retained in `docs/asset-selection/room-palettes.md` and checked
+            against the authoritative JSON by `room_palettes.py`.
+      finding: the title's 78 is exact but includes the refrigerator and freezer sub-cells: §13
+            tabulates 76 interiors and the two appliance cells make 78. Three rows have a `parent`
+            only because the garage loft is also nested, but unlike the appliances it is already
+            one of §13's 76. `trimMaterial` was absent from §15.3, the schema and the C++ cell
+            model even though the task explicitly requires trim colour; the smallest correction
+            adds that one optional material id and validates it through both world validators.
+      ordering: completed before HOUSE-00907 because `layout.cells.json` names this task as the
+            palette owner and HOUSE-00907 consumes those values when replacing generated shell
+            slots. No dependency was changed and no temporary material assignment was introduced.
+      verified: exact 78-row assignment and idempotence self-test; all material references and
+            lightmapped/non-lightmapped effect roles; 16 current JSON schemas; all 13 world rules;
+            deployed-world, id-golden and shell-manifest checks; max-4-core warning-clean full
+            build; 148 focused loader/authored-world/validator tests; complete suite with 1,555
+            non-failures plus all nine initially environment/load-sensitive cases green in
+            isolated retries; `tools/ci/run_checks.sh` including 321 strict-XNA translation units.
 - [ ] HOUSE-00909 — Run the first lightmap bake over the whole shell (`lightmap_bake.py`) — artificial groups only
       dep: HOUSE-00206, HOUSE-00907 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00910 — Run the daylight bake per cell
