@@ -1,0 +1,799 @@
+{
+  "atlasSizes": [
+    128
+  ],
+  "atlases": 78,
+  "cells": 78,
+  "fullBakeSeconds": 278.846,
+  "groups": 0,
+  "invocationSeconds": 0.017,
+  "mode": "daylight",
+  "products": [
+    {
+      "cell": "B1_CELLAR",
+      "daylight": {
+        "image": "B1_CELLAR_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:cecb02a97304101bdc18fde0862ae8b9b235e80524709f518f2d35bd538f270c"
+    },
+    {
+      "cell": "B1_CINEMA",
+      "daylight": {
+        "image": "B1_CINEMA_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:44d8e5fe47eb4ce0aba006f5e152c4df7b638cefbb2121fd3a5b0546efa17af2"
+    },
+    {
+      "cell": "B1_ELECTRICAL",
+      "daylight": {
+        "image": "B1_ELECTRICAL_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:52030cf267a35261677ed3ba140e4c421002d89cc22532e4cadeec78b09ccdca"
+    },
+    {
+      "cell": "B1_GYM",
+      "daylight": {
+        "image": "B1_GYM_LM_DAY.png",
+        "scale": 1.0013494491577148,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:6b0dc88a271c937e6785d36583e2adbef65a81d4ecf116518a96540dc3e759b4"
+    },
+    {
+      "cell": "B1_HALL",
+      "daylight": {
+        "image": "B1_HALL_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:6234f361dbfa4ee0d30a80646df8f83005347bc91a82f77d6f083ca9abe7634d"
+    },
+    {
+      "cell": "B1_HOBBY",
+      "daylight": {
+        "image": "B1_HOBBY_LM_DAY.png",
+        "scale": 0.0035758186131715775,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:3a773931806ecdd602bb5762bec3d2ea886e66223fee0c0159daaf2e1380f094"
+    },
+    {
+      "cell": "B1_LAUNDRY2",
+      "daylight": {
+        "image": "B1_LAUNDRY2_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:8639f9749ffff0765a554fcc57cf6ba75e48da2b467ec468921785dbdb01279b"
+    },
+    {
+      "cell": "B1_MECHANICAL",
+      "daylight": {
+        "image": "B1_MECHANICAL_LM_DAY.png",
+        "scale": 1.0004640817642212,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:4845bd79519f4b1d366641444aa630065405bca7dc6640cce2cb7b7ed8ac2685"
+    },
+    {
+      "cell": "B1_STAIR",
+      "daylight": {
+        "image": "B1_STAIR_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:8bd7ef4de663282f05bb87f15c72cb7dcf69763295203e5fdd8ae651e786931c"
+    },
+    {
+      "cell": "B1_STOR1",
+      "daylight": {
+        "image": "B1_STOR1_LM_DAY.png",
+        "scale": 1.0003461837768555,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:cc87151c0bccc1506df6105dfa0ea1e883a09e1caf21d10554dc6b4896ed6b11"
+    },
+    {
+      "cell": "B1_STOR2",
+      "daylight": {
+        "image": "B1_STOR2_LM_DAY.png",
+        "scale": 1.0014009475708008,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:69205c190fbd254a35a1563bd9ea653bec2bb4ed74c3e14cfe044454e1042088"
+    },
+    {
+      "cell": "B1_UNDERSTAIR",
+      "daylight": {
+        "image": "B1_UNDERSTAIR_LM_DAY.png",
+        "scale": 1.0001024007797241,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:8e9b8e89ebbeea81b47d5c0b3de17d781d8dbbcdaf810bac03cf31b2d95c5694"
+    },
+    {
+      "cell": "B1_UTILITY",
+      "daylight": {
+        "image": "B1_UTILITY_LM_DAY.png",
+        "scale": 1.0024057626724243,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:0671a83d2059d3ee7c43f112b99b2d3a0ca9194d8944051223d410aef16ef874"
+    },
+    {
+      "cell": "B1_WC7",
+      "daylight": {
+        "image": "B1_WC7_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:38276c76a5600e4858e537981b08f71a7345ad07595297a74f05845f4665c2e3"
+    },
+    {
+      "cell": "B1_WORKSHOP",
+      "daylight": {
+        "image": "B1_WORKSHOP_LM_DAY.png",
+        "scale": 1.000951886177063,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:b3e91a278edee748e5c84e6c89b655497c693ea54303aa31d26d2baed8e4b42f"
+    },
+    {
+      "cell": "CELL_FREEZER_INTERIOR",
+      "daylight": {
+        "image": "CELL_FREEZER_INTERIOR_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:9534b7cdf4b42dbacd7c78c300e0e6ebea40fa3fb23b83fc6131894b0d65d745"
+    },
+    {
+      "cell": "CELL_FRIDGE_INTERIOR",
+      "daylight": {
+        "image": "CELL_FRIDGE_INTERIOR_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:7ab544dc6f3f1ac1923670c16565bde22a57b73421aadc9843a00e5e53e6bf35"
+    },
+    {
+      "cell": "L0_BUTLERS",
+      "daylight": {
+        "image": "L0_BUTLERS_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:45412076fc2be26a78dab0d998b1c901e9c97955ce2eff38f7276b5caa4d1799"
+    },
+    {
+      "cell": "L0_CLOSET_W",
+      "daylight": {
+        "image": "L0_CLOSET_W_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:5e894909332a04b03dcd01dae8496442df88e95d70b04488d83d4eaa5597d224"
+    },
+    {
+      "cell": "L0_DINING",
+      "daylight": {
+        "image": "L0_DINING_LM_DAY.png",
+        "scale": 0.6929526329040527,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:94e3ab94a3561baaafbfaebaa4b986518781db84cea2fb6c07408e082a0e9760"
+    },
+    {
+      "cell": "L0_FAMILY",
+      "daylight": {
+        "image": "L0_FAMILY_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:09381332c387fc48107cbc5650ec8a16dc410847814174e394febc190b71bbc1"
+    },
+    {
+      "cell": "L0_FOYER",
+      "daylight": {
+        "image": "L0_FOYER_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:3eef7f097e253eb52d3b934feb3b6d2f269dde5c65f8c0cb7224a161ef326b98"
+    },
+    {
+      "cell": "L0_GARAGE",
+      "daylight": {
+        "image": "L0_GARAGE_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:4635910dbb529b1b2d04ba23c29060efab735d74cf69d86633fdeea2c845c666"
+    },
+    {
+      "cell": "L0_GARAGE_LOFT",
+      "daylight": {
+        "image": "L0_GARAGE_LOFT_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:ebbc2cc7158b033f9db0772fe642929278644c0e094d27ec73c8d15560ff9c5d"
+    },
+    {
+      "cell": "L0_HALL",
+      "daylight": {
+        "image": "L0_HALL_LM_DAY.png",
+        "scale": 0.7765084505081177,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:57958ca3804ce5197aa8aa499ab63fc8605be7662460e8b5c9594c95773c07a8"
+    },
+    {
+      "cell": "L0_KITCHEN",
+      "daylight": {
+        "image": "L0_KITCHEN_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:7b95f7a0f2d1a3831361184db09d63ce51d0c831840cfd44d176afb0edfcd236"
+    },
+    {
+      "cell": "L0_LAUNDRY",
+      "daylight": {
+        "image": "L0_LAUNDRY_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:027cda723fa2360edcd385156d772f8c775c02c4a68ee4562dc4c1df534999a9"
+    },
+    {
+      "cell": "L0_LIVING",
+      "daylight": {
+        "image": "L0_LIVING_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:39bb5b1c3a6920f735d06f39704e9139558dbef6494fed158091c558abdf941a"
+    },
+    {
+      "cell": "L0_MUDROOM",
+      "daylight": {
+        "image": "L0_MUDROOM_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:88a400f4fe74c5da3de1ccc746d47be80297da566edb4beb77663b660eef7988"
+    },
+    {
+      "cell": "L0_OFFICE",
+      "daylight": {
+        "image": "L0_OFFICE_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:823428476063d2afdab741b44586e5bf0f575e65ed8bb3987a3a59fcde32ce31"
+    },
+    {
+      "cell": "L0_PANTRY",
+      "daylight": {
+        "image": "L0_PANTRY_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:978453d71e9d36b6309c023708ef2647126bd31c8535323a50050d50459e10b8"
+    },
+    {
+      "cell": "L0_STAIR_MAIN",
+      "daylight": {
+        "image": "L0_STAIR_MAIN_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:462c9dfe74d0d3b5b3e9a986d6edf03035bce1d8b83d2a8d57e34ac86abae627"
+    },
+    {
+      "cell": "L0_STOR",
+      "daylight": {
+        "image": "L0_STOR_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:9f335becf90fcc93e05a0d95a19197836248a6b4364f1638571b517110152a1e"
+    },
+    {
+      "cell": "L0_SUNROOM",
+      "daylight": {
+        "image": "L0_SUNROOM_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:3d3b7c497600489fa6e2e9df2ee4773f8bc569754fe3c624dc36d612b32d45c7"
+    },
+    {
+      "cell": "L0_WC1",
+      "daylight": {
+        "image": "L0_WC1_LM_DAY.png",
+        "scale": 0.0036079538986086845,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:e9e396fe049b774450bd6ac7b21bc473909fe2af64df7771678ce125d8f13dd6"
+    },
+    {
+      "cell": "L0_WC2",
+      "daylight": {
+        "image": "L0_WC2_LM_DAY.png",
+        "scale": 0.0038971847388893366,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:dbd87908a83b24373f313cc4bdc283164b20780d5d46b50e4b3ed4e0e70b4e11"
+    },
+    {
+      "cell": "L1_BATH2",
+      "daylight": {
+        "image": "L1_BATH2_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:d360d82a2120c0adada77553a80c63783f34de090c86674837bd7662b56e9ee6"
+    },
+    {
+      "cell": "L1_BATH3",
+      "daylight": {
+        "image": "L1_BATH3_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:8e4978b7d6216eab9190dc46d001d2c75b7133426567626557aaafd6305982bb"
+    },
+    {
+      "cell": "L1_BED2",
+      "daylight": {
+        "image": "L1_BED2_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:2a5f6e01baaf00883ea934e006859f90ccda5d8e32dd6ed14133affc72ae5948"
+    },
+    {
+      "cell": "L1_BED3",
+      "daylight": {
+        "image": "L1_BED3_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:debbe70fd2ac31e64eebf2ccd96037c46b5a81a0d1a763a6190da10cd070e36e"
+    },
+    {
+      "cell": "L1_BED4",
+      "daylight": {
+        "image": "L1_BED4_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:6169af730cc5b8fe16ff4ad37ba3a8fcc771b46dd166af753be7cc92779a2271"
+    },
+    {
+      "cell": "L1_BED5",
+      "daylight": {
+        "image": "L1_BED5_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:18801e4e3e42bf546218345090e6dc6275cb96b3043d074a2fae3fea5ff2f771"
+    },
+    {
+      "cell": "L1_CLOSET_2",
+      "daylight": {
+        "image": "L1_CLOSET_2_LM_DAY.png",
+        "scale": 0.003988554235547781,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:2edddb7b902f9aeaf0c308a4e3db68c475f955abcfc8bdc52af6b657b66185a1"
+    },
+    {
+      "cell": "L1_CLOSET_3",
+      "daylight": {
+        "image": "L1_CLOSET_3_LM_DAY.png",
+        "scale": 0.003926399629563093,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:7ecbf6fff282978d6266496d42e5c49bc81667ac0c157046f960e124a8a663dc"
+    },
+    {
+      "cell": "L1_HALL",
+      "daylight": {
+        "image": "L1_HALL_LM_DAY.png",
+        "scale": 0.7425538897514343,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:8152b489b1cd9c558f1591d4095b619870fe14fa6ab11ce6cfbfa9b981324024"
+    },
+    {
+      "cell": "L1_HALL_W",
+      "daylight": {
+        "image": "L1_HALL_W_LM_DAY.png",
+        "scale": 0.6427707076072693,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:eb31f8d4f9234cab3a3d81f89176a29b3ee4e5e560a8d60409b5c62c9ed9db45"
+    },
+    {
+      "cell": "L1_LANDING",
+      "daylight": {
+        "image": "L1_LANDING_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:0e63a77ce45ac25c7d46a522165c7d92a57e212482506ddc412c287514007749"
+    },
+    {
+      "cell": "L1_LINEN",
+      "daylight": {
+        "image": "L1_LINEN_LM_DAY.png",
+        "scale": 0.0040336716920137405,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:88fbc6d66ea14cc517c188efe5fec45009c78645432be58485cc01f9eddc51f5"
+    },
+    {
+      "cell": "L1_MASTER_BATH",
+      "daylight": {
+        "image": "L1_MASTER_BATH_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:96045c5ae7b0fd2886a304ba9d21590845751fcb43a9563f4e4deafd466bea07"
+    },
+    {
+      "cell": "L1_MASTER_BED",
+      "daylight": {
+        "image": "L1_MASTER_BED_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:93b7611aceef4d437d63c4c7fcba7a2c0bbe314ba4d7d927c19b86a03b4b0cd1"
+    },
+    {
+      "cell": "L1_MASTER_CLOSET",
+      "daylight": {
+        "image": "L1_MASTER_CLOSET_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:f1d081b37f1ff9050b3f4865650c5bfaf45ee262761f5b509d89a8a1a67f7ed9"
+    },
+    {
+      "cell": "L1_STAIR_MAIN",
+      "daylight": {
+        "image": "L1_STAIR_MAIN_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:36432b0eeaf1915f8ba33cbe0c429176ff4b3d7362e338b53c263c4e0dcacf99"
+    },
+    {
+      "cell": "L1_STOR",
+      "daylight": {
+        "image": "L1_STOR_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:6b36585bfa1fb50377708126dd3a5245ef8ef3b11cdf83469305a396f3e10eda"
+    },
+    {
+      "cell": "L1_WC3",
+      "daylight": {
+        "image": "L1_WC3_LM_DAY.png",
+        "scale": 0.00418097386136651,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:d044d6d17b100b9fefe539c2fe70fd9a681837543829bf4bfb9a300ffeec177e"
+    },
+    {
+      "cell": "L1_WC4",
+      "daylight": {
+        "image": "L1_WC4_LM_DAY.png",
+        "scale": 0.004686655476689339,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:9d9671834ec34c7b3c8d6857f2bf1a6415d74350511f0bebf867d48064547ec6"
+    },
+    {
+      "cell": "L2_BATH4",
+      "daylight": {
+        "image": "L2_BATH4_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:830f4c8df1a9686cf675e6d293de71b7ca0fc75b312612e066d015b130fa76ff"
+    },
+    {
+      "cell": "L2_BATH5",
+      "daylight": {
+        "image": "L2_BATH5_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:6e0ea53786f0c61cfb7dfcbecce9301b8f042e55c0a30483e75b53d21e34dfa8"
+    },
+    {
+      "cell": "L2_BED6",
+      "daylight": {
+        "image": "L2_BED6_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:9da94753d67a55352cc40aec52a3924caccfd2ba1b2e6bab9f92495fc2bbab5b"
+    },
+    {
+      "cell": "L2_BED7",
+      "daylight": {
+        "image": "L2_BED7_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:ff07910f2d92eba56a38a7fad55798cb95417c20537646c4eb465d420b3b6d84"
+    },
+    {
+      "cell": "L2_CLOSET_4",
+      "daylight": {
+        "image": "L2_CLOSET_4_LM_DAY.png",
+        "scale": 0.0038901828229427338,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:481b7f9150252353acd4b87db59d3a876014818d0dba9bf6f6c53a8a030982a9"
+    },
+    {
+      "cell": "L2_GAMES",
+      "daylight": {
+        "image": "L2_GAMES_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:85533d21e41ca429bce07afafe81bcfea744da505f1dd9293ed30f5dea3c8afc"
+    },
+    {
+      "cell": "L2_HALL",
+      "daylight": {
+        "image": "L2_HALL_LM_DAY.png",
+        "scale": 0.7516455054283142,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:522ab3bd2ba702d44c9fdba8910dcc07da079bb13b43509d34f0ad35d614ca0d"
+    },
+    {
+      "cell": "L2_HALL_W",
+      "daylight": {
+        "image": "L2_HALL_W_LM_DAY.png",
+        "scale": 0.6255369782447815,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:c616111ee7ac7f696738121a29dd7fd31fab9c3e8021fdb54151672579687a21"
+    },
+    {
+      "cell": "L2_LANDING",
+      "daylight": {
+        "image": "L2_LANDING_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:4838852ae4f5eb65c6b8c5fa1a0515bdb7c22daa838ec7557ec7da57549b11f6"
+    },
+    {
+      "cell": "L2_LIBRARY",
+      "daylight": {
+        "image": "L2_LIBRARY_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:3fb97d61bec4321257cf5c639630d559f07f0cee49f0b44db33f223b5d322ca6"
+    },
+    {
+      "cell": "L2_LINEN2",
+      "daylight": {
+        "image": "L2_LINEN2_LM_DAY.png",
+        "scale": 0.0039056572131812572,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:1df50d5b54265791e606a3a431936ea7f34a89c08e625a582067d2d999ed8995"
+    },
+    {
+      "cell": "L2_SITTING",
+      "daylight": {
+        "image": "L2_SITTING_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:4a9a7a68e1f4deea797c3bdf3c141431ff8da3e0dfadbe0596b12a81d74d396c"
+    },
+    {
+      "cell": "L2_STAIR_ATTIC",
+      "daylight": {
+        "image": "L2_STAIR_ATTIC_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:3172ab6ae31ea7f6de71daad52c38694899c70cb853674e796b3ffe46fe86b17"
+    },
+    {
+      "cell": "L2_STAIR_MAIN",
+      "daylight": {
+        "image": "L2_STAIR_MAIN_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:3da7c11d498cbc7bd0e4bc77b829a2103c04b07ad67409c3d21a1e21071305fa"
+    },
+    {
+      "cell": "L2_STOR2",
+      "daylight": {
+        "image": "L2_STOR2_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:ab07f9984e860b2c06dd42645e7c82f394e7630ae1b8245fb1b6d70a29b7a874"
+    },
+    {
+      "cell": "L2_WC5",
+      "daylight": {
+        "image": "L2_WC5_LM_DAY.png",
+        "scale": 0.0040616183541715145,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:71195d8466041da6c25e83f7222e20921ee3d991ffb7b5fd91b5ce550d618f48"
+    },
+    {
+      "cell": "L2_WC6",
+      "daylight": {
+        "image": "L2_WC6_LM_DAY.png",
+        "scale": 0.004160682205110788,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:61eed3a472981f47ec853cd1dd68b8e6f0c30106728a22620a0b8217dcf8adba"
+    },
+    {
+      "cell": "L3_ROOM",
+      "daylight": {
+        "image": "L3_ROOM_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:88f6154376c2e6e8cb33f5db2b239c51cdf1be8176aa45f410398ec487e6a408"
+    },
+    {
+      "cell": "L3_STAIR_HEAD",
+      "daylight": {
+        "image": "L3_STAIR_HEAD_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:c46335d563db35592f15f65a706438fde0fab94c7eb68951938d8b1709bde41d"
+    },
+    {
+      "cell": "L3_STORE_E",
+      "daylight": {
+        "image": "L3_STORE_E_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:5c3b072dad733853830f3e97238fce32f5e1d9e4ebfb68e3ba7c3278235046fc"
+    },
+    {
+      "cell": "L3_STORE_N",
+      "daylight": {
+        "image": "L3_STORE_N_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:62745ee8a8f8641f6908acfa39c0943dae9c4d782a565a9e4f8cad10a0f13340"
+    },
+    {
+      "cell": "L3_STORE_S",
+      "daylight": {
+        "image": "L3_STORE_S_LM_DAY.png",
+        "scale": 1.0000001192092896,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:04a5723488c07cecde5c2c70013b914326726d644810831c5e2e5087a3e0fb9f"
+    },
+    {
+      "cell": "L3_STORE_W",
+      "daylight": {
+        "image": "L3_STORE_W_LM_DAY.png",
+        "scale": 1.000000238418579,
+        "skyStrength": 1.0
+      },
+      "groups": [],
+      "shellHash": "sha256:71437d422e4f025f337b471447f4916cea0dbe8e06265ca95dbe3e486d7aac20"
+    }
+  ],
+  "reusedCells": 78,
+  "rgba8Bytes": 5111808,
+  "samples": 256,
+  "seed": 20260907,
+  "sourceBytes": 477478,
+  "tool": "bake_house_lightmaps.py"
+}

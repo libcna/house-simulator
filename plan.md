@@ -13142,8 +13142,17 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             world and culling-equivalence tests; reviewed and intentionally refreshed the stale
             blockout/first-person/property/season references left by HOUSE-00907's material-id
             replacement, then all ten affected golden tests passed.
-- [ ] HOUSE-00910 — Run the daylight bake per cell
+- [x] HOUSE-00910 — Run the daylight bake per cell
       dep: HOUSE-00909 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-14) Baked one deterministic 128² uniform-sky irradiance atlas for every one
+            of the 78 receiver cells at 256 samples and seed 20260907. The fresh bake took
+            278.846 seconds and produced 0.48 MB of source PNGs; its per-cell scales and shell
+            hashes are retained in `docs/lightmaps/daylight-bake.json`.
+      verified: all 78 atlases compiled to `.cnb`; the foyer/hall/living/family/kitchen/dining
+            contact sheet was inspected and shows distinct opening-driven gradients and occlusion,
+            not flat or black output. The house driver now rejects black daylight products on both
+            fresh and resumed runs, and inspection subsets cannot overwrite the full-house report
+            or replace its 78 manifest rows.
 - [ ] HOUSE-00911 — Measure the lightmap atlas count, size and bake time; adjust texel density to fit the 60 MB budget
       dep: HOUSE-00910 · sys: — · plat: TOOL · pri: MUST
 - [ ] HOUSE-00912 — Implement lightmap loading and binding, and the shell's `DualTextureEffect` draw path

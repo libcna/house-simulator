@@ -104,6 +104,17 @@ def update_manifest(images: list[Path], mode: str, size_by_cell: dict[str, int])
     MANIFEST.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def unlit_products(sidecar: dict, mode: str) -> list[str]:
+    """Name any baked product whose measured irradiance is effectively black."""
+    if mode == "artificial":
+        return [entry["group"] for entry in sidecar.get("groups", [])
+                if float(entry.get("peak", 0.0)) <= 1e-6]
+    daylight = sidecar.get("daylight")
+    if not isinstance(daylight, dict) or float(daylight.get("scale", 0.0)) <= 1e-6:
+        return ["LM_DAY"]
+    return []
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     modes = parser.add_mutually_exclusive_group(required=True)
@@ -141,6 +152,7 @@ def main() -> int:
             print(f"bake_house_lightmaps: unknown receiver cell(s): {', '.join(unknown)}", file=sys.stderr)
             return 2
         wanted = requested
+    full_house = wanted == set(per_cell)
 
     mode = "daylight" if args.daylight else "artificial"
     destination = OUTPUT / ("Daylight" if args.daylight else "Artificial")
@@ -170,6 +182,11 @@ def main() -> int:
                     and previous.get("cellLightsSha256") == lights_hash
                     and previous.get("bakerSha256") == baker_hash
                     and all((destination / name).is_file() for name in products)):
+                dark = unlit_products(previous, mode)
+                if dark:
+                    print(f"bake_house_lightmaps: {cell} has unlit cached product(s): "
+                          f"{', '.join(dark)}", file=sys.stderr)
+                    return 1
                 print(f"bake_house_lightmaps: reused {len(products)} completed product(s)")
                 sidecars.append(previous)
                 reused_cells += 1
@@ -188,11 +205,10 @@ def main() -> int:
         sidecar["cellLightsSha256"] = lights_hash
         sidecar["bakerSha256"] = baker_hash
         meta_path.write_text(json.dumps(sidecar, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        dark_groups = [entry["group"] for entry in sidecar["groups"]
-                       if float(entry.get("peak", 0.0)) <= 1e-6]
-        if args.artificial and dark_groups:
-            print(f"bake_house_lightmaps: {cell} produced unlit group(s): "
-                  f"{', '.join(dark_groups)}", file=sys.stderr)
+        dark = unlit_products(sidecar, mode)
+        if dark:
+            print(f"bake_house_lightmaps: {cell} produced unlit product(s): "
+                  f"{', '.join(dark)}", file=sys.stderr)
             return 1
         sidecars.append(sidecar)
 
@@ -207,6 +223,12 @@ def main() -> int:
     selected_images = [path for path in images
                        if path.stem.split("_LM_", 1)[0] in wanted]
     elapsed = time.monotonic() - started
+    docs = REPO / "docs" / "lightmaps"
+    durable = docs / f"{mode}-bake.json"
+    previous_full_seconds = None
+    if durable.is_file():
+        previous_full_seconds = json.loads(durable.read_text(encoding="utf-8")).get(
+            "fullBakeSeconds")
     report = {
         "tool": "bake_house_lightmaps.py",
         "mode": mode,
@@ -215,7 +237,6 @@ def main() -> int:
         "cells": len(wanted),
         "atlases": len(selected_images),
         "groups": sum(len(row["groups"]) for row in sidecars),
-        "emptyArtificialCells": sum(not row["groups"] for row in sidecars),
         "atlasSizes": sorted({per_cell[cell] for cell in wanted}),
         "sourceBytes": sum(path.stat().st_size for path in selected_images),
         "rgba8Bytes": sum(per_cell[cell] ** 2 * 4 for cell in wanted)
@@ -230,14 +251,26 @@ def main() -> int:
             "daylight": row["daylight"],
         } for row in sidecars],
     }
-    docs = REPO / "docs" / "lightmaps"
-    docs.mkdir(parents=True, exist_ok=True)
-    durable = docs / f"{mode}-bake.json"
-    durable.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    update_manifest(selected_images, mode, per_cell)
+    if full_house and reused_cells == 0:
+        report["fullBakeSeconds"] = round(elapsed, 3)
+    elif previous_full_seconds is not None:
+        report["fullBakeSeconds"] = previous_full_seconds
+    if args.artificial:
+        report["emptyArtificialCells"] = sum(not row["groups"] for row in sidecars)
+    if full_house:
+        docs.mkdir(parents=True, exist_ok=True)
+        durable.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        update_manifest(selected_images, mode, per_cell)
+    else:
+        subset_report = META / f"{mode}-subset-report.json"
+        subset_report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",
+                                 encoding="utf-8")
     print(f"bake_house_lightmaps: {len(wanted)} cells, {len(selected_images)} atlas(es), "
           f"{report['sourceBytes'] / 1e6:.2f} MB PNG in {elapsed:.1f} s")
-    print(f"bake_house_lightmaps: wrote {durable.relative_to(REPO)} and updated asset provenance")
+    if full_house:
+        print(f"bake_house_lightmaps: wrote {durable.relative_to(REPO)} and updated asset provenance")
+    else:
+        print("bake_house_lightmaps: inspection subset left the durable report and manifest alone")
     return 0
 
 

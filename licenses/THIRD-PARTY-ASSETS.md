@@ -594,4 +594,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `86cecefd170f944093d17f5be13593a38aff15e021f739e69318f4f3e85dd0fa`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `379f8b149ab26af53358d13f60fd4c24e15a03263e1325407988f7b54dbdf78d`.*

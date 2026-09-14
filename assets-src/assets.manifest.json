@@ -23486,6 +23486,2112 @@
         "modification": true,
         "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
       }
+    },
+    {
+      "id": "TEXTURE_B1_CELLAR_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_CELLAR_LM_DAY.png",
+      "sourceSha256": "21fe9da56dc7c9a135634d4580528143a108cd8700fd7e42921b3cfb1ef231fb",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_CELLAR_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_CELLAR",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_CINEMA_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_CINEMA_LM_DAY.png",
+      "sourceSha256": "d7ab375d6dccc65bf08b1baeda302d4a08ecea612ce86ed100822ed8a0c2e8bd",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_CINEMA_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_CINEMA",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_ELECTRICAL_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_ELECTRICAL_LM_DAY.png",
+      "sourceSha256": "9d9010eeba9fa4acb99e52be416d76500c5219cb35e7e7ff0edab8227ea5ee47",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_ELECTRICAL_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_ELECTRICAL",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_GYM_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_GYM_LM_DAY.png",
+      "sourceSha256": "c5108892a90ff3a003378caed5c9c87c6f3652068eacc0ada1742269ddbe2c4d",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_GYM_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_GYM",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_HALL_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_HALL_LM_DAY.png",
+      "sourceSha256": "bc612d815ded49b9b288d6d88d832a8707e9dbfa1ff34892a15d02ee681441c6",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_HALL_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_HALL",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_HOBBY_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_HOBBY_LM_DAY.png",
+      "sourceSha256": "30a9216061c7b4e10d05fe4c0f85038e7429079f51bbc5ce68b1e60020cb895f",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_HOBBY_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_HOBBY",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_LAUNDRY2_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_LAUNDRY2_LM_DAY.png",
+      "sourceSha256": "939567db0d3ab504d7ec0637c25bae82c3c5e8630ca1f4db0ca728c2f25dde6a",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_LAUNDRY2_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_LAUNDRY2",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_MECHANICAL_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_MECHANICAL_LM_DAY.png",
+      "sourceSha256": "517d83b8eb3a1914465dc0fe8774956fda3c3a5fafc7c67e2ca47e880871321f",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_MECHANICAL_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_MECHANICAL",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_STAIR_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STAIR_LM_DAY.png",
+      "sourceSha256": "d0b98bd9e564b94f5ebd480a012c0682ad39f3dd49406b9948cac200e01d648a",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_STAIR_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_STAIR",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_STOR1_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STOR1_LM_DAY.png",
+      "sourceSha256": "5fa7fecf8beea55c451199b8b7a2aedceb6da39647e2a2636e9926eea55f8ed7",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_STOR1_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_STOR1",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_STOR2_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STOR2_LM_DAY.png",
+      "sourceSha256": "f0a0944713c32a6ee868baed460af95940ca6283754e352744c87cc6b9b0bbe7",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_STOR2_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_STOR2",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_UNDERSTAIR_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_UNDERSTAIR_LM_DAY.png",
+      "sourceSha256": "ffafa37efb7a0c87eea5e1393be94d079e819b3816e63648ba44369ef8e74f5d",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_UNDERSTAIR_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_UNDERSTAIR",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_UTILITY_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_UTILITY_LM_DAY.png",
+      "sourceSha256": "e92342fc98f3fe3a0c99af81904d29e529f2b62a0ead961cedaf69dc5bf98b02",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_UTILITY_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_UTILITY",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_WC7_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_WC7_LM_DAY.png",
+      "sourceSha256": "646a3e8c43a1d2b32c1160e797c49465e799e5b1db1e5adae945c07a60ca7d2e",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_WC7_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_WC7",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_B1_WORKSHOP_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_WORKSHOP_LM_DAY.png",
+      "sourceSha256": "dd4fdaed0447718fab26e6e8508d53379fafa80d52b7dafaf8c7ca28af619cfb",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/B1_WORKSHOP_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-b1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for B1_WORKSHOP",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_CELL_FREEZER_INTERIOR_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/CELL_FREEZER_INTERIOR_LM_DAY.png",
+      "sourceSha256": "4f3fa21f15b9a234285e2961aac5e430ae436e1ef034a8a659523311a4b8ee54",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/CELL_FREEZER_INTERIOR_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for CELL_FREEZER_INTERIOR",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_CELL_FRIDGE_INTERIOR_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/CELL_FRIDGE_INTERIOR_LM_DAY.png",
+      "sourceSha256": "1c336aa02fb66e37a2e838e9ba9d742c12c0efbae4e538735da662e734c71900",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/CELL_FRIDGE_INTERIOR_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for CELL_FRIDGE_INTERIOR",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_BUTLERS_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_BUTLERS_LM_DAY.png",
+      "sourceSha256": "65979761fa1779e6552edc608d5fea4a9a4aec0920449b3aa99c1b557b88514b",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_BUTLERS_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_BUTLERS",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_CLOSET_W_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_CLOSET_W_LM_DAY.png",
+      "sourceSha256": "052c9b41b089d282f4e696b9314f83efd20138b2ddaaed1dd937c61873db430b",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_CLOSET_W_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_CLOSET_W",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_DINING_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_DINING_LM_DAY.png",
+      "sourceSha256": "f5fbb832d4df35dc039ad1b9dc0434b56e14ddbc191f6cf94703b09c6878b920",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_DINING_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_DINING",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_FAMILY_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_FAMILY_LM_DAY.png",
+      "sourceSha256": "8cab52f7ca4ed3323750a62d52fd59c638a552fb6bb31d2e20bee78db07bd6c2",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_FAMILY_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_FAMILY",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_FOYER_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY.png",
+      "sourceSha256": "98129c7f92e20244c422581d4dc5bfe127326d9aeeca89b35676e9c71950326e",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_FOYER",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_GARAGE_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY.png",
+      "sourceSha256": "4e9d2e796e913d087ec73f97767130d08d36324ae6805e6243e8deec2210a8f3",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_GARAGE",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_GARAGE_LOFT_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_GARAGE_LOFT_LM_DAY.png",
+      "sourceSha256": "3531bbdaebb25b7afe5573b41bd16edd0591fff81d2b3a9a44a67d9cd4733305",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_GARAGE_LOFT_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_GARAGE_LOFT",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_HALL_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_HALL_LM_DAY.png",
+      "sourceSha256": "d0807dd946cd620f34b9cedb13968ee600c1a698feb517a8dd10e74a0e7621cc",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_HALL_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_HALL",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_KITCHEN_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY.png",
+      "sourceSha256": "3ce9a7bf01881815730604b7e13d46fa80577211ab94cb3c4634febf7ac75248",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_KITCHEN",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_LAUNDRY_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_LAUNDRY_LM_DAY.png",
+      "sourceSha256": "f842ae77c13964edcb815e70a1ec4896cdc43894ca5617716ea5f4bc8fae2200",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_LAUNDRY_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_LAUNDRY",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_LIVING_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY.png",
+      "sourceSha256": "8f56c20c4eea1f778c06d1d23856bd0512c06e07202d3de52f247e5dfc06757f",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_LIVING",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_MUDROOM_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_MUDROOM_LM_DAY.png",
+      "sourceSha256": "64d3b1285174a14e4b90ae3e206414c34e22005cad04f4a2eadd167ecd3056dc",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_MUDROOM_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_MUDROOM",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_OFFICE_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_OFFICE_LM_DAY.png",
+      "sourceSha256": "e687045a205c964ad08c375d102518b18883f475e2c10c8a47dafaf6fb2ab6a4",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_OFFICE_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_OFFICE",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_PANTRY_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_PANTRY_LM_DAY.png",
+      "sourceSha256": "c6a9fdf4bad3c7b967db0277fc6d0198ad0077f09cd8b88d669629e1590795ad",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_PANTRY_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_PANTRY",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_STAIR_MAIN_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY.png",
+      "sourceSha256": "db4f02e30310423c0295cfe67f01e4e9280727653881a18271e0906a07362b88",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_STAIR_MAIN",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_STOR_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_STOR_LM_DAY.png",
+      "sourceSha256": "99f8e954f7017c154e63871a622072a5fc38984845c6f50bab6aa84148708787",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_STOR_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_STOR",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_SUNROOM_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY.png",
+      "sourceSha256": "d49f32bba95f01bc83156863aaa22c356d58973337ab946b013c20809d89ac27",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_SUNROOM",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_WC1_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_WC1_LM_DAY.png",
+      "sourceSha256": "d62ebd6dc1ecb93cc217e835309ec93b44ac0d0121100d23304d6541920e76a1",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_WC1_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_WC1",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L0_WC2_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_WC2_LM_DAY.png",
+      "sourceSha256": "ac13e882cb4a5856bbdd5a64fee2ce5712a8a3b555b17ae3e6f0853d1ebc3d2c",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L0_WC2_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L0_WC2",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_BATH2_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BATH2_LM_DAY.png",
+      "sourceSha256": "c4210c87f65ab226e3d33b7b446434a35aed8a4a91cf1cdcfef1bcb8471e7b1a",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_BATH2_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_BATH2",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_BATH3_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BATH3_LM_DAY.png",
+      "sourceSha256": "6d2393f3609fb1f8f7272ceccdc6311907ea4be58365e479a84a2f82df17bebf",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_BATH3_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_BATH3",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_BED2_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BED2_LM_DAY.png",
+      "sourceSha256": "96cb39467a2b799578c2ef37790d05c13689a0d84cd101ff9320228deccacf7e",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_BED2_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_BED2",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_BED3_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BED3_LM_DAY.png",
+      "sourceSha256": "2c9b6831240995af678692df56278d28e301e0c1739c37c344196a4a16ded6d0",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_BED3_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_BED3",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_BED4_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BED4_LM_DAY.png",
+      "sourceSha256": "675f68cd53fbae725874aae61c63c6a0df96783d391bbd08147f0ce87110777c",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_BED4_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_BED4",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_BED5_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_BED5_LM_DAY.png",
+      "sourceSha256": "ca32cf493f2403f7bd23a913b1f7cb00eccdedb6b906a90d48af404fd6cd07b9",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_BED5_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_BED5",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_CLOSET_2_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_CLOSET_2_LM_DAY.png",
+      "sourceSha256": "36e5f3edd1768cf9bf1ef9dfa8af44350ef8c92203cdb2e60738735c425a5905",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_CLOSET_2_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_CLOSET_2",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_CLOSET_3_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_CLOSET_3_LM_DAY.png",
+      "sourceSha256": "5ec550892d991b6eaf04d2b1eec4da98443d10fb007fbd1f5f19da3e369d9d05",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_CLOSET_3_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_CLOSET_3",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_HALL_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_HALL_LM_DAY.png",
+      "sourceSha256": "672f0bf765ca2a4e189bcbf37d857b5e9a8ab89b4d7e5d8571b7fd206af829ba",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_HALL_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_HALL",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_HALL_W_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_HALL_W_LM_DAY.png",
+      "sourceSha256": "c3619ec729146e78eca716012f0c1ca064d991cdd2b5ed08d75681fa7d6781d3",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_HALL_W_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_HALL_W",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_LANDING_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_LANDING_LM_DAY.png",
+      "sourceSha256": "662356561d198d3e699a670723ade5d1eaf9b59dbddc365c0d876e6512be33a9",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_LANDING_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_LANDING",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_LINEN_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_LINEN_LM_DAY.png",
+      "sourceSha256": "579027d2abee4d6e029538e2f37b29c097c0b3c78b3f981fadc70171a6c767a9",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_LINEN_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_LINEN",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_MASTER_BATH_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_MASTER_BATH_LM_DAY.png",
+      "sourceSha256": "10192686ddf0b9c8ebe3ab42bbd771726f13da7a9d04e48526698cf8ff9141dc",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_MASTER_BATH_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_MASTER_BATH",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_MASTER_BED_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_MASTER_BED_LM_DAY.png",
+      "sourceSha256": "eb4b88de0ded69017e8aad99cd0219470156d4be0b4ccc9d249b25bed062153c",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_MASTER_BED_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_MASTER_BED",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_MASTER_CLOSET_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_MASTER_CLOSET_LM_DAY.png",
+      "sourceSha256": "0e6531d2d30140396def1fdabc185b3694dbc4711c7d3345f422c6091ffc36ab",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_MASTER_CLOSET_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_MASTER_CLOSET",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_STAIR_MAIN_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY.png",
+      "sourceSha256": "4dd6d52a8f9faf3fb0e7ba7042664dc854478d372213a32f5df8a7730666d0a5",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_STAIR_MAIN",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_STOR_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_STOR_LM_DAY.png",
+      "sourceSha256": "0339492e9a7ca012ba1cc4658d04d6178ea41047c39c2957c67a102486514328",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_STOR_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_STOR",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_WC3_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_WC3_LM_DAY.png",
+      "sourceSha256": "da3e3ae2a6fa0e4ac0c6807089a20ed880e372ab0e3f60c464296eefc4742f68",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_WC3_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_WC3",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L1_WC4_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_WC4_LM_DAY.png",
+      "sourceSha256": "12e8a92ddc1823c9719d70ce5d5ad625871cdc1fb7c33974d8677930fa5d7cb7",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L1_WC4_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l1",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L1_WC4",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_BATH4_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_BATH4_LM_DAY.png",
+      "sourceSha256": "f1b624068a603fdcc841f23f51380f9717fd62775b8ca9e9a02159c854c0e503",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_BATH4_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_BATH4",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_BATH5_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_BATH5_LM_DAY.png",
+      "sourceSha256": "7295eeccd9bf9508cf3bcf713564287d6ba7ec01b3213d0c2e685516d702b1c6",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_BATH5_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_BATH5",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_BED6_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_BED6_LM_DAY.png",
+      "sourceSha256": "91cd0351aa12824f57e2def368d4714fe5864116b6473f71e4bd9f78f7a65f7a",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_BED6_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_BED6",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_BED7_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_BED7_LM_DAY.png",
+      "sourceSha256": "94f189fe2148918f2fb89bc8351c914b9cdf19ad43874883ed24f6f55221fb15",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_BED7_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_BED7",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_CLOSET_4_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_CLOSET_4_LM_DAY.png",
+      "sourceSha256": "ccdd9f63ef8236b554e6f71ca8e9111df779677d774766bdd49440f44b4940ef",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_CLOSET_4_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_CLOSET_4",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_GAMES_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_GAMES_LM_DAY.png",
+      "sourceSha256": "cc4b2a0f0828f98ca3db70489660e3d55331c6665235043a90aa393a9668d386",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_GAMES_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_GAMES",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_HALL_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_HALL_LM_DAY.png",
+      "sourceSha256": "b08f4be73babd2e7d51603abec3b20324edb906c328e5216ab0f783b1080fffd",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_HALL_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_HALL",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_HALL_W_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_HALL_W_LM_DAY.png",
+      "sourceSha256": "20e294d03f49ddb9abc9868ed67e3c2e28a87d29b9d866ee1d2717da5912a8f3",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_HALL_W_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_HALL_W",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_LANDING_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_LANDING_LM_DAY.png",
+      "sourceSha256": "8599c7a98be6d973703c4dda3a926c224df0c031de189dd6fc87e09ea255c938",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_LANDING_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_LANDING",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_LIBRARY_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_LIBRARY_LM_DAY.png",
+      "sourceSha256": "fe187882b62fec2fc273399a3c8198f79f5c31dae59c54839b9f0d9bd1e0e93d",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_LIBRARY_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_LIBRARY",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_LINEN2_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_LINEN2_LM_DAY.png",
+      "sourceSha256": "eaa2356fcf64bd3fd7646481066766ece79a7e888802bc21f78937eaff67d147",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_LINEN2_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_LINEN2",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_SITTING_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_SITTING_LM_DAY.png",
+      "sourceSha256": "796e7e93a91907f731253cdbb02d87b422ef732b3cb498d90455441ee6fe37c5",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_SITTING_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_SITTING",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_STAIR_ATTIC_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STAIR_ATTIC_LM_DAY.png",
+      "sourceSha256": "426cad356ea072ad95f63c7ebda94ffdd92372ddb92680310644b3987fda0195",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_STAIR_ATTIC_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_STAIR_ATTIC",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_STAIR_MAIN_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY.png",
+      "sourceSha256": "8419f685607f080da9e4395a205b181fd13cf17b7e535add0f664ab8c295519b",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_STAIR_MAIN",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_STOR2_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STOR2_LM_DAY.png",
+      "sourceSha256": "a749e81a509d28a48797add65768868236969c830fd66caf42fb7a7681e3fab9",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_STOR2_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_STOR2",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_WC5_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_WC5_LM_DAY.png",
+      "sourceSha256": "c8d3d5bd6ce05605c517d2d43713cffb91a2ae77ef569a778466740f9107a4b5",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_WC5_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_WC5",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L2_WC6_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_WC6_LM_DAY.png",
+      "sourceSha256": "6a9f4c49a96244d7625e39862ac7bdacb919714f2c088647da0cb0b41e72a124",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L2_WC6_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l2",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L2_WC6",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L3_ROOM_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_ROOM_LM_DAY.png",
+      "sourceSha256": "a742774b749ddb9592d11b6be59af4c3614b9d2da18c9cc0b1a0a5808a8280ab",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L3_ROOM_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l3",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L3_ROOM",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L3_STAIR_HEAD_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STAIR_HEAD_LM_DAY.png",
+      "sourceSha256": "4de5c12bfd242f416087b24aac738de11979954f02702fa944d59cfda48f4e70",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L3_STAIR_HEAD_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l3",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L3_STAIR_HEAD",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L3_STORE_E_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_E_LM_DAY.png",
+      "sourceSha256": "0586c1f380b5e0f057ef0db774ca79097ac32794f02222164ff6a8f78cdb3f74",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L3_STORE_E_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l3",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L3_STORE_E",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L3_STORE_N_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_N_LM_DAY.png",
+      "sourceSha256": "952035a8f634b0507255a13292c4a99491727c47efe64d5e4efa3c858d3bfa07",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L3_STORE_N_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l3",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L3_STORE_N",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L3_STORE_S_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_S_LM_DAY.png",
+      "sourceSha256": "7811373c038d90e4902e686a2e73e235e81bf5cfbec471e5f7a2f019965441ca",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L3_STORE_S_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l3",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L3_STORE_S",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
+    },
+    {
+      "id": "TEXTURE_L3_STORE_W_LM_DAY",
+      "category": "lightmap-daylight",
+      "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_W_LM_DAY.png",
+      "sourceSha256": "6c6e3a8073866995aad383483c7b12aa36c57853d87af0bbac9fae476756edc1",
+      "texture": {
+        "width": 128,
+        "height": 128,
+        "colourSpace": "linear",
+        "channelLayout": "RGB normalised irradiance; scale is in the bake report"
+      },
+      "contentName": "Textures/Lightmaps/Daylight/L3_STORE_W_LM_DAY",
+      "kind": "texture",
+      "residencyPack": "house-l3",
+      "origin": {
+        "kind": "generated",
+        "name": "Canonical daylight lightmap for L3_STORE_W",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+      }
     }
   ]
 }
