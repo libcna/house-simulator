@@ -12921,8 +12921,23 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: max-4-core warning-clean build; 14 `RenderListTests`; 1 real-device
             `TransparentPassTests`; 21 walk/static integration tests; complete suite 1563/1563
             executed tests (0 failures); `tools/ci/run_checks.sh` all gates green.
-- [ ] HOUSE-00899 — Implement the alpha-test pass before transparency with full depth writes
+- [x] HOUSE-00899 — Implement the alpha-test pass before transparency with full depth writes
       dep: HOUSE-00894 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-14) `AlphaTestPass` consumes the effect/material-grouped static slice and
+            resolves one cached albedo per resident material run. It binds the run once through the
+            game's shared lazy `MaterialBinder`, applies the authored exact cutoff/tint/cull policy,
+            and publishes chunk, triangle and material-bind counters.
+      note: accepted texels use `BlendState::Opaque` with `DepthStencilState::Default`, so they
+            write full opaque depth for the following transparent pass while rejected texels write
+            nothing. `Pass::AlphaTest` already precedes `Pass::Transparent` in the enum-defined
+            immutable frame order.
+      finding: the walk path had neither a shared content cache nor a game-owned material binder.
+            Declaring both before `Renderer` gives renderer-owned passes an explicit safe borrowed
+            lifetime and preserves `HOUSE-00897`'s one-instance-per-effect-class guarantee instead
+            of constructing a second pool inside this pass.
+      verified: max-4-core warning-clean build; 1 real-device `AlphaTestPassTests` plus the binder,
+            renderer-order and live walk integration tests; complete suite 1564/1564 executed
+            tests (0 failures); `tools/ci/run_checks.sh` all gates green.
 - [ ] HOUSE-00900 — Grouped: author the 34 base materials from the acquired PBR set, mapped through `pbr_to_stock.py`, previewed and tuned
       dep: HOUSE-00296, HOUSE-00891 · sys: content · plat: TOOL · pri: MUST
       accept: each material previewed on a sphere, a floor plane and a wall at three light levels

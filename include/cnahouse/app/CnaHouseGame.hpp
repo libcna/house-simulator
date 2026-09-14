@@ -60,7 +60,13 @@
 
 namespace cnahouse::rendering
 {
+    class MaterialBinder;
     class SkySystem;
+} // namespace cnahouse::rendering
+
+namespace cnahouse::content
+{
+    struct Caches;
 }
 
 namespace cnahouse::app
@@ -383,6 +389,13 @@ namespace cnahouse::app
         FrameTimer timer_;
         Platform platform_;
         rendering::RenderTier tier_;
+
+        /// Shared typed content caches. Declared before `renderer_` so renderer-owned passes release
+        /// effects and texture lookup closures before the cached textures are destroyed.
+        std::unique_ptr<content::Caches> caches_;
+        /// The shared stock-effect pool for binder-backed material passes (`HOUSE-00897`). It
+        /// outlives the renderer-owned passes that borrow it because it is declared first.
+        std::unique_ptr<rendering::MaterialBinder> materialBinder_;
 
         /// The draw side of `cna-house.md` §7.5. Constructed with the tier, so the two Tier-E-only
         /// passes are gated in ONE place rather than at each pass. Only the HUD pass is installed

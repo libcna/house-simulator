@@ -2657,6 +2657,15 @@ slice without material regrouping under `CullNone`, premultiplied `AlphaBlend` a
 Alpha-tested foliage and fences are drawn **before** transparency with full depth writes, because
 `AlphaTestEffect` gives correct depth and sorting is then unnecessary.
 
+`HOUSE-00899` implements that rule as `AlphaTestPass`. It consumes the effect/material-grouped
+alpha-test slice, resolves each run's albedo through the shared content cache, and binds the run
+once through the game's single lazy `MaterialBinder` pool. The binder supplies the material's exact
+cutoff, tint and two-sided cull policy; the pass supplies `BlendState::Opaque` and
+`DepthStencilState::Default`, so rejected texels write nothing and accepted texels write full
+opaque depth. Both caches and the binder are owned ahead of `Renderer`, making their lifetime
+longer than every renderer-owned pass that borrows them. The enum-defined frame order keeps this
+pass immediately before `Transparent`.
+
 ---
 
 ## 24. Animated rendering

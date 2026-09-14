@@ -118,6 +118,7 @@ add_library(cnahouse_core STATIC
     persistence/DesktopSaveStore.cpp
 
     # rendering
+    rendering/AlphaTestPass.cpp
     rendering/RenderTier.cpp
     rendering/Renderer.cpp
     rendering/Camera.cpp

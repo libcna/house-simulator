@@ -27,6 +27,7 @@
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
+#include "cnahouse/content/Caches.hpp"
 #include "cnahouse/debug/PlayerCommands.hpp"
 #include "cnahouse/debug/Screenshot.hpp"
 #include "cnahouse/debug/TimeCommands.hpp"
@@ -35,6 +36,8 @@
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/environment/SunModel.hpp"
 #include "cnahouse/persistence/DesktopSaveStore.hpp"
+#include "cnahouse/rendering/AlphaTestPass.hpp"
+#include "cnahouse/rendering/MaterialBinder.hpp"
 #include "cnahouse/rendering/SkySystem.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
 #include "cnahouse/rendering/TransparentPass.hpp"
@@ -474,6 +477,30 @@ namespace cnahouse::app
 
         if (blockoutChunks_ != nullptr && blockoutCells_ != nullptr)
         {
+            if (caches_ == nullptr)
+            {
+                caches_ = std::make_unique<content::Caches>(getContentProperty());
+            }
+            materialBinder_ = std::make_unique<rendering::MaterialBinder>(getGraphicsDeviceProperty());
+            const util::Result<void> registered = materialBinder_->RegisterAll(world_->Materials());
+            if (registered)
+            {
+                renderer_.Install(rendering::Pass::AlphaTest,
+                                  std::make_unique<rendering::AlphaTestPass>(
+                                      *blockoutChunks_,
+                                      *blockoutCells_,
+                                      *world_,
+                                      blockoutCamera_,
+                                      renderList_,
+                                      *materialBinder_,
+                                      [this](std::string_view name) { return caches_->textures.Get(name); }));
+            }
+            else
+            {
+                util::Log::Error(util::LogCat::Rendering,
+                                 "walk material registry could not be bound: {}",
+                                 registered.Error().ToString());
+            }
             renderer_.Install(rendering::Pass::Transparent,
                               std::make_unique<rendering::TransparentPass>(
                                   *blockoutChunks_, *blockoutCells_, *world_, blockoutCamera_, renderList_));
