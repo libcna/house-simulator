@@ -1,8 +1,8 @@
 {
   // The material table combines HOUSE-00900's 34 measured bases, HOUSE-00901's 18 paints,
   // HOUSE-00902's 12 interior floors, HOUSE-00903's 9 exteriors, HOUSE-00904's 8 transparent
-  // materials and HOUSE-00385's 14 remaining foundational rows. Every row is a complete §22.1
-  // record; generated markers keep derived libraries reproducible.
+  // materials, HOUSE-00905's 14 wet endpoints and HOUSE-00385's 14 remaining foundational rows.
+  // Every row is a complete §22.1 record; generated markers keep derived libraries reproducible.
   //
   // Base specular values are the fixed `pbr_to_stock.py` mapping of each source texture's mean
   // roughness/metalness and, for metals, mean albedo. Generated markers make drift testable.
@@ -1153,6 +1153,204 @@
       "effectTierS": "Basic", "effectTierE": "WaterFlow"
     },
     // END GENERATED GLASS/WATER MATERIALS
+    // BEGIN GENERATED WET MATERIALS (wet_materials.py)
+    {
+      "id": "MAT_ASPHALT_01_WET", "class": "wet_asphalt",
+      "albedo": "Textures/Materials/asphalt_road_albedo",
+      "normal": "Textures/Materials/asphalt_road_normal", "lightmapChannel": 1,
+      "tint": [0.65, 0.65, 0.65], "specularColor": [0.096, 0.096, 0.096],
+      "specularPower": 11.7104, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [0.5, 0.5],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 12.0},
+      "footstepSurface": "asphalt",
+      "audioAbsorption": 0.12,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_BLUESTONE_PAVER_WET", "class": "wet_stone",
+      "albedo": "Textures/Materials/stone_rough_albedo",
+      "normal": "Textures/Materials/stone_rough_normal", "lightmapChannel": 1,
+      "tint": [0.4032, 0.4896, 0.5616], "specularColor": [0.088, 0.088, 0.088],
+      "specularPower": 48.9325, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [1.5, 1.5],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 40.0},
+      "footstepSurface": "bluestone",
+      "audioAbsorption": 0.04,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_BRICK_WATER_TABLE_WET", "class": "wet_stone",
+      "albedo": "Textures/Materials/brick_red_albedo",
+      "normal": "Textures/Materials/brick_red_normal", "lightmapChannel": 1,
+      "tint": [0.74, 0.6808, 0.6364], "specularColor": [0.08, 0.08, 0.08],
+      "specularPower": 29.854, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [0.75, 0.75],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 40.0},
+      "footstepSurface": "rock",
+      "audioAbsorption": 0.08,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_CONCRETE_BROOM_WET", "class": "wet_concrete",
+      "albedo": "Textures/Materials/concrete_smooth_albedo",
+      "normal": "Textures/Materials/concrete_smooth_normal", "lightmapChannel": 1,
+      "tint": [0.6688, 0.6536, 0.6232], "specularColor": [0.08, 0.08, 0.08],
+      "specularPower": 13.454, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [0.75, 0.75],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 15.0},
+      "footstepSurface": "concrete",
+      "audioAbsorption": 0.06,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_CONCRETE_KERB_WET", "class": "wet_concrete",
+      "albedo": "Textures/Materials/concrete_smooth_albedo",
+      "normal": "Textures/Materials/concrete_smooth_normal", "lightmapChannel": 1,
+      "tint": [0.684, 0.684, 0.684], "specularColor": [0.08, 0.08, 0.08],
+      "specularPower": 13.454, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [0.5, 0.5],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 45.0},
+      "footstepSurface": "concrete",
+      "audioAbsorption": 0.06,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_CONCRETE_SLAB_WET", "class": "wet_concrete",
+      "albedo": "Textures/Materials/concrete_smooth_albedo",
+      "normal": "Textures/Materials/concrete_smooth_normal", "lightmapChannel": 1,
+      "tint": [0.76, 0.76, 0.76], "specularColor": [0.08, 0.08, 0.08],
+      "specularPower": 13.454, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [0.5, 0.5],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 15.0},
+      "footstepSurface": "concrete",
+      "audioAbsorption": 0.06,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_DECK_WOOD_WET", "class": "wet_wood",
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 1,
+      "tint": [0.4464, 0.4176, 0.3744], "specularColor": [0.096, 0.096, 0.096],
+      "specularPower": 51.903, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 35.0},
+      "footstepSurface": "hardwood",
+      "audioAbsorption": 0.16,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_GRAVEL_PATH_WET", "class": "wet_gravel",
+      "albedo": "Textures/Materials/gravel_mixed_albedo",
+      "normal": "Textures/Materials/gravel_mixed_normal", "lightmapChannel": 1,
+      "tint": [0.644, 0.63, 0.602], "specularColor": [0.072, 0.072, 0.072],
+      "specularPower": 28.9116, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 30.0},
+      "footstepSurface": "gravel",
+      "audioAbsorption": 0.25,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_GROUND_LAWN_WET", "class": "wet_grass",
+      "albedo": "Textures/Materials/grass_lawn_albedo",
+      "normal": "Textures/Materials/grass_lawn_normal", "lightmapChannel": 1,
+      "tint": [0.672, 0.736, 0.576], "specularColor": [0.052, 0.052, 0.052],
+      "specularPower": 7.5048, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [0.5, 0.5],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 40.0},
+      "footstepSurface": "grass",
+      "audioAbsorption": 0.65,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_ROOF_SHINGLE_WET", "class": "wet_asphalt",
+      "albedo": "Textures/Materials/tile_light_square_albedo",
+      "normal": "Textures/Materials/tile_light_square_normal", "lightmapChannel": 1,
+      "tint": [0.429, 0.4485, 0.481], "specularColor": [0.096, 0.096, 0.096],
+      "specularPower": 65.8112, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [1.5, 1.5],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 55.0},
+      "footstepSurface": "asphalt",
+      "audioAbsorption": 0.12,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_SIDING_DUSTY_BLUE_WET", "class": "wet_wood",
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 1,
+      "tint": [0.4608, 0.5328, 0.648], "specularColor": [0.096, 0.096, 0.096],
+      "specularPower": 51.903, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 40.0},
+      "footstepSurface": "hardwood",
+      "audioAbsorption": 0.16,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_SIDING_SAGE_WET", "class": "wet_wood",
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 1,
+      "tint": [0.4896, 0.5616, 0.4464], "specularColor": [0.096, 0.096, 0.096],
+      "specularPower": 51.903, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 40.0},
+      "footstepSurface": "hardwood",
+      "audioAbsorption": 0.16,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_SIDING_WARM_WHITE_WET", "class": "wet_wood",
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 1,
+      "tint": [0.72, 0.6912, 0.6336], "specularColor": [0.096, 0.096, 0.096],
+      "specularPower": 51.903, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 40.0},
+      "footstepSurface": "hardwood",
+      "audioAbsorption": 0.16,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    {
+      "id": "MAT_SOIL_GARDEN_WET", "class": "wet_soil",
+      "albedo": "Textures/Materials/soil_garden_albedo",
+      "normal": "Textures/Materials/soil_garden_normal", "lightmapChannel": 1,
+      "tint": [0.5148, 0.4752, 0.4092], "specularColor": [0.072, 0.072, 0.072],
+      "specularPower": 12.1824, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [0.75, 0.75],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 25.0},
+      "footstepSurface": "mud",
+      "audioAbsorption": 0.55,
+      "effectTierS": "DualTexture", "effectTierE": "SurfaceBlend/Wet"
+    },
+    // END GENERATED WET MATERIALS
     {
       "id": "MAT_APPLIANCE_STEEL", "class": "metal",
       "albedo": "Textures/Materials/metal_brushed_albedo",

@@ -13019,8 +13019,22 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             shell; max-4-core warning-clean full build; complete suite 1564/1564 executed tests
             (0 failures); `tools/ci/run_checks.sh` all gates green, including 321 strict-XNA
             translation units.
-- [ ] HOUSE-00905 — Grouped: author the 14 wet-variant materials for the outdoor surfaces
+- [x] HOUSE-00905 — Grouped: author the 14 wet-variant materials for the outdoor surfaces
       dep: HOUSE-00903 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-14) `wet_materials.py` owns the exact fourteen exposed non-metal exterior
+            endpoints as complete §22.1 rows. Each bakes its dry row's authored albedo darkening
+            and specular boosts once, preserves texture/lightmap/UV/snow/audio data, uses an
+            identity response against double application, and retains `SurfaceBlend/Wet` for
+            Tier E; saturated garden soil alone changes its footstep surface to `mud`.
+      finding: the complete exterior library contains seventeen finishes. The downward-facing
+            soffit is sheltered, while balcony and gutter metal already have black diffuse tints
+            and the metal BasicEffect response; excluding exactly those three produces fourteen
+            meaningful stock-XNA wet endpoints without pretending a black tint became darker or
+            duplicating any texture.
+      verified: 14/14 field-exact dry/wet pairs and retained contact-sheet pixels; world schema,
+            deploy/id-golden and shell-manifest checks; max-4-core warning-clean full build;
+            complete suite 1564/1564 executed tests (0 failures); `tools/ci/run_checks.sh` all
+            gates green, including 321 strict-XNA translation units.
 - [ ] HOUSE-00906 — Grouped: author the 6 snow materials and the snow-shell material
       dep: HOUSE-00903 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00907 — Apply the real materials to the generated shell, replacing the placeholders, room by room per the palette table

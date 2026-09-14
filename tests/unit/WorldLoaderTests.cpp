@@ -3535,7 +3535,7 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 95U);
+        EXPECT_EQ(contents.materials.size(), 109U);
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
@@ -3576,6 +3576,7 @@ namespace
                                 [](const world::MaterialDef& material)
                                 {
                                     return !IdRegistry::NameOf(material.id).starts_with("MAT_BASE_") &&
+                                           material.surfaceState == world::SurfaceState::Dry &&
                                            material.snow.coverable;
                                 }),
                   16)
@@ -3628,7 +3629,10 @@ namespace
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
-                                { return IdRegistry::NameOf(material.id).starts_with("MAT_SIDING_"); }),
+                                {
+                                    return material.surfaceState == world::SurfaceState::Dry &&
+                                           IdRegistry::NameOf(material.id).starts_with("MAT_SIDING_");
+                                }),
                   3)
             << "HOUSE-00903's three reviewed siding colours load as full material records";
 
@@ -3655,6 +3659,25 @@ namespace
         EXPECT_EQ(flowAt->effectTierS, world::EffectTier::Basic);
         EXPECT_FLOAT_EQ(flowAt->uvScaleV, 3.0F);
         EXPECT_FALSE(flowAt->snow.coverable);
+
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return material.surfaceState == world::SurfaceState::Wet; }),
+                  14)
+            << "HOUSE-00905 owns exactly fourteen fully-wet Tier-S endpoints";
+        const auto wetSoilAt = std::find_if(contents.materials.begin(),
+                                            contents.materials.end(),
+                                            [](const world::MaterialDef& material)
+                                            { return material.id == Intern("MAT_SOIL_GARDEN_WET"); });
+        ASSERT_NE(wetSoilAt, contents.materials.end());
+        EXPECT_EQ(wetSoilAt->materialClass, world::MaterialClass::Soil);
+        EXPECT_EQ(wetSoilAt->surfaceState, world::SurfaceState::Wet);
+        EXPECT_EQ(wetSoilAt->footstepSurface, "mud");
+        EXPECT_FLOAT_EQ(wetSoilAt->tint.X, 0.5148F);
+        EXPECT_FLOAT_EQ(wetSoilAt->wet.albedoDarken, 0.0F);
+        EXPECT_FLOAT_EQ(wetSoilAt->wet.specularBoost, 1.0F);
+        EXPECT_EQ(wetSoilAt->effectTierE, "SurfaceBlend/Wet");
         for (const world::MaterialDef& material : contents.materials)
         {
             EXPECT_GT(material.specularPower, 0.0F);

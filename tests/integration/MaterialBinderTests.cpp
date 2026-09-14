@@ -179,7 +179,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 95U);
+                EXPECT_EQ(binder.Count(), 109U);
 
                 const MaterialDesc* glass = binder.Find(Id::Of("MAT_GLASS_CLEAR"));
                 ASSERT_NE(glass, nullptr);
@@ -233,6 +233,14 @@ namespace
                 EXPECT_EQ(shower->kind, MaterialKind::Basic);
                 EXPECT_TRUE(shower->diffuseTexture.empty());
                 EXPECT_FLOAT_EQ(shower->alpha, 0.16F);
+
+                const MaterialDesc* wetDeck = binder.Find(Id::Of("MAT_DECK_WOOD_WET"));
+                ASSERT_NE(wetDeck, nullptr);
+                EXPECT_EQ(wetDeck->kind, MaterialKind::DualTexture);
+                EXPECT_EQ(wetDeck->diffuseTexture, "Textures/Materials/wood_board_albedo");
+                EXPECT_FLOAT_EQ(wetDeck->diffuse[0], 0.4464F);
+                EXPECT_FLOAT_EQ(wetDeck->specularColour[0], 0.096F);
+                EXPECT_FLOAT_EQ(wetDeck->specularPower, 51.903F);
             });
     }
 

@@ -2528,6 +2528,14 @@ scale. The source alpha is premultiplied by the content pipeline, matching §23.
 linear. Exact rows, texture hashes and the transparency review are in
 `docs/asset-selection/glass-water-materials.md`.
 
+`HOUSE-00905` fixes fourteen fully-wet Tier-S endpoints for every exposed non-metallic exterior
+finish. Each reuses its dry texture and bakes that row's `wetResponse` into a darker tint, stronger
+specular colour and tighter highlight; its `wet_<class>` state and `SurfaceBlend/Wet` technique
+retain the continuous Tier-E path. The sheltered soffit and the two already-specular black-tint
+metal finishes are the three deliberate exclusions from the seventeen-finish outdoor inventory.
+Saturated garden soil changes its footstep surface to `mud`. Exact pairs and dry/wet review are in
+`docs/asset-selection/wet-materials.md`.
+
 ### 22.2 Material classes and their effect mapping
 
 | Class | Tier S effect | Tier E technique | Notes |
