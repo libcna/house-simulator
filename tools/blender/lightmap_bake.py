@@ -58,6 +58,7 @@ import sys
 
 try:
     import bpy  # type: ignore
+    from mathutils import Vector  # type: ignore
 
     INSIDE_BLENDER = True
 except ImportError:
@@ -121,17 +122,51 @@ def mesh_objects():
     return [o for o in bpy.context.scene.objects if o.type == "MESH"]
 
 
-def select_lightmap_uv() -> None:
-    """Make `HOUSE-00205`'s second UV set the active one on every mesh, or say why it cannot."""
+def receiver_objects():
+    """Meshes that own UV2 and receive the bake; detail remains present only as an occluder.
+
+    `shell_unwrap.py` deliberately writes the receiver and detail halves into the same GLB.  The
+    detail half has no `Lightmap` UV (it must not consume atlas space), but it still has to remain
+    in the scene so a casing or stair rail can cast onto the wall beside it.  A material exported
+    by the shell generator carries an explicit `lightmapReceiver` flag.  Hand-authored fixtures
+    predate that flag, so an entirely unclassified mesh retains the old receiver behaviour.
+    """
+    receivers = []
     for obj in mesh_objects():
-        layers = obj.data.uv_layers
-        if LIGHTMAP_UV not in layers:
+        flags = [material.get("lightmapReceiver") for material in obj.data.materials
+                 if material is not None and material.get("lightmapReceiver") is not None]
+        if not flags or any(bool(flag) for flag in flags):
+            receivers.append(obj)
+    return receivers
+
+
+def lightmap_uv(obj):
+    """The authored `Lightmap` layer, or glTF's second texture-coordinate channel.
+
+    glTF stores `TEXCOORD_0`/`TEXCOORD_1`, not Blender UV-layer names.  Importing the unwrapped
+    shell therefore reconstructs the two channels as `UVMap` and `UVMap.001`.  Channel one is the
+    durable contract; accepting only the pre-export spelling made every real shell look unwrapped
+    to the chunk builder and unwrapped to nobody who could bake it.
+    """
+    layers = obj.data.uv_layers
+    if LIGHTMAP_UV in layers:
+        return layers[LIGHTMAP_UV]
+    if len(layers) >= 2:
+        return layers[1]
+    return None
+
+
+def select_lightmap_uv() -> None:
+    """Make `HOUSE-00205`'s second UV set active on every receiver, or say why it cannot."""
+    for obj in receiver_objects():
+        layer = lightmap_uv(obj)
+        if layer is None:
             raise SystemExit(
                 f"lightmap_bake: {obj.name} has no {LIGHTMAP_UV!r} UV set; run "
                 f"tools/blender/lightmap_unwrap.py over it first (HOUSE-00205). "
                 f"Baking into the albedo UVs would put the room's lighting wherever the tiling "
                 f"texture sends it.")
-        layers.active = layers[LIGHTMAP_UV]
+        obj.data.uv_layers.active = layer
 
 
 def shell_hash(lights: list[dict]) -> str:
@@ -148,7 +183,7 @@ def shell_hash(lights: list[dict]) -> str:
         for vertex in mesh.vertices:
             world = matrix @ vertex.co
             digest.update(f"{world.x:.5f},{world.y:.5f},{world.z:.5f};".encode())
-        layer = mesh.uv_layers.get(LIGHTMAP_UV)
+        layer = lightmap_uv(obj)
         if layer is not None:
             for item in layer.data:
                 digest.update(f"{item.uv[0]:.5f},{item.uv[1]:.5f};".encode())
@@ -158,12 +193,12 @@ def shell_hash(lights: list[dict]) -> str:
 
 
 def make_bake_target(size: int):
-    """One float image, and an image-texture node in every material pointing at it."""
+    """One float image, and an image-texture node in every receiver material pointing at it."""
     if "cnahouse_bake" in bpy.data.images:
         bpy.data.images.remove(bpy.data.images["cnahouse_bake"])
     image = bpy.data.images.new("cnahouse_bake", size, size, float_buffer=True)
     image.colorspace_settings.name = "Non-Color"
-    for obj in mesh_objects():
+    for obj in receiver_objects():
         if not obj.data.materials:
             material = bpy.data.materials.new(f"{obj.name}_mat")
             material.use_nodes = True
@@ -187,6 +222,60 @@ def light_objects():
     return [o for o in bpy.context.scene.objects if o.type == "LIGHT"]
 
 
+def create_light_objects(lights: list[dict]) -> None:
+    """Turn the authored XNA light rows into the white emitters the irradiance bake needs.
+
+    The shell GLBs contain geometry, not fixtures.  The original tool filtered Blender light
+    objects by the JSON ids but never created those objects, so its first production invocation
+    would have baked every artificial atlas black.  Colour remains white here intentionally:
+    §28 supplies each group's temperature at runtime, while the bake owns only spatial shape.
+    """
+    # glTF is Y-up, while Blender is Z-up.  Blender's importer converts every shell vertex as
+    # (x, y, z) -> (x, -z, y); authored rows must undergo the identical conversion or a lamp that
+    # belongs near a room ceiling lands tens of metres away along Blender Z.  A few groups then
+    # happened to illuminate geometry by accident, which made this particularly easy to miss.
+    def blender_space(vector: list[float] | tuple[float, ...]) -> tuple[float, float, float]:
+        x, y, z = (float(value) for value in vector)
+        return (x, -z, y)
+
+    existing = {obj.name for obj in light_objects()}
+    for light in lights:
+        if not light.get("bakedIntoLightmap", True) or light.get("type") == "emissive_only":
+            continue
+        name = str(light["id"])
+        if name in existing:
+            continue
+        kind = str(light.get("type", "point"))
+        if kind not in ("point", "spot"):
+            raise SystemExit(f"lightmap_bake: {name} has unsupported light type {kind!r}")
+        data = bpy.data.lights.new(name, type="SPOT" if kind == "spot" else "POINT")
+        # Blender's point/spot energy is radiant watts.  683 lm/W is the photopic maximum; the
+        # recorded per-atlas scale preserves the absolute result while normalisation preserves
+        # its 8-bit spatial detail.
+        data.energy = float(light.get("intensityLm", 0.0)) / 683.0
+        data.color = (1.0, 1.0, 1.0)
+        # Recessed rows sit 20 mm below the ceiling.  A 50 mm emitter intersects that receiver and
+        # produces one white firefly; max-normalising against it crushes the whole useful atlas to
+        # black.  Five millimetres stays inside the authored clearance while retaining a finite,
+        # deterministic source.
+        data.shadow_soft_size = 0.005
+        data.use_custom_distance = True
+        data.cutoff_distance = float(light.get("range", 10.0))
+        if kind == "spot":
+            data.spot_size = math.radians(float(light.get("coneOuterDeg", 45.0)))
+            outer = max(float(light.get("coneOuterDeg", 45.0)), 1e-3)
+            inner = min(max(float(light.get("coneInnerDeg", 0.0)), 0.0), outer)
+            data.spot_blend = max(0.0, min(1.0, 1.0 - inner / outer))
+        obj = bpy.data.objects.new(name, data)
+        obj.location = blender_space(light["position"])
+        if kind == "spot":
+            direction = Vector(blender_space(light.get("direction", (0, -1, 0))))
+            if direction.length_squared <= 1e-12:
+                raise SystemExit(f"lightmap_bake: {name} has a zero spot direction")
+            obj.rotation_euler = direction.normalized().to_track_quat("-Z", "Y").to_euler()
+        bpy.context.scene.collection.objects.link(obj)
+
+
 def set_world_sky(strength: float) -> None:
     """A uniform sky dome, or darkness. §18.3's daylight bake is "a uniform sky dome"."""
     world = bpy.context.scene.world
@@ -205,9 +294,9 @@ def set_world_sky(strength: float) -> None:
 
 
 def bake_once(image, size: int) -> list[float]:
-    """Run the bake and return the pixels. Every mesh at once, into the one shared image."""
+    """Run the bake and return pixels; detail stays unselected but still casts onto receivers."""
     bpy.ops.object.select_all(action="DESELECT")
-    meshes = mesh_objects()
+    meshes = receiver_objects()
     if not meshes:
         raise SystemExit("lightmap_bake: the scene has no mesh to bake")
     for obj in meshes:
@@ -218,6 +307,13 @@ def bake_once(image, size: int) -> list[float]:
     return list(image.pixels)
 
 
+def rgb_peak(pixels: list[float]) -> float:
+    """Highest RGB sample, excluding alpha and retaining a real zero for an unlit bake."""
+    return max((pixels[i + channel]
+                for i in range(0, len(pixels), 4)
+                for channel in range(3)), default=0.0)
+
+
 def normalise_and_save(pixels: list[float], size: int, path: str) -> float:
     """Scale to 0..1 by the image's own maximum, save as PNG, and return the scale.
 
@@ -225,9 +321,7 @@ def normalise_and_save(pixels: list[float], size: int, path: str) -> float:
     everything bright to flat white and loses exactly the shape §28.3 says the bake exists to
     capture. The scale folds into §23.4's `artLevels` at runtime and costs nothing there.
     """
-    peak = max((pixels[i] for i in range(0, len(pixels), 4)), default=0.0)
-    peak = max(peak, max((pixels[i] for i in range(1, len(pixels), 4)), default=0.0))
-    peak = max(peak, max((pixels[i] for i in range(2, len(pixels), 4)), default=0.0))
+    peak = rgb_peak(pixels)
     scale = peak if peak > 1e-6 else 1.0
     image = bpy.data.images.new(f"save_{os.path.basename(path)}", size, size, alpha=False)
     image.colorspace_settings.name = "Non-Color"
@@ -293,8 +387,9 @@ def pack_rgb(channels: list[list[float]], size: int, path: str) -> list[float]:
 
 
 def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: int,
-              seed: int, pack: bool) -> dict:
-    """Every light group in the cell, then the daylight bake. Returns the sidecar."""
+              seed: int, pack: bool, *, artificial: bool = True,
+              daylight: bool = True) -> dict:
+    """The requested artificial groups and/or daylight atlas. Returns the sidecar."""
     scene = bpy.context.scene
     configure(scene, seed, samples)
     select_lightmap_uv()
@@ -303,12 +398,13 @@ def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: i
 
     by_group: dict[str, list[str]] = {}
     for light in lights:
-        by_group.setdefault(light.get("group") or "LG_DEFAULT", []).append(light["id"])
+        if light.get("bakedIntoLightmap", True) and light.get("type") != "emissive_only":
+            by_group.setdefault(light.get("group") or "LG_DEFAULT", []).append(light["id"])
     every = {o.name: o for o in light_objects()}
 
     entries = []
     channels = []
-    for group in sorted(by_group):
+    for group in sorted(by_group) if artificial else []:
         # Only this group's lamps. §28.3 bakes one lightmap per switch group precisely so the
         # runtime can turn one group off without the others changing.
         for name, obj in every.items():
@@ -316,24 +412,28 @@ def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: i
         set_world_sky(0.0)
         pixels = bake_once(image, size)
         name = f"{cell}_LM_{group}.png"
+        peak = rgb_peak(pixels)
         scale = normalise_and_save(pixels, size, os.path.join(out_dir, name))
         entries.append({"group": group, "image": name, "scale": scale,
                         "lights": sorted(by_group[group]),
-                        "peak": scale, "mean": sum(luminance(pixels, i)
+                        "peak": peak, "mean": sum(luminance(pixels, i)
                                                    for i in range(size * size)) / (size * size)})
         channels.append(pixels)
-        report(f"{group}: {len(by_group[group])} light(s), peak {scale:.4f}")
+        report(f"{group}: {len(by_group[group])} light(s), peak {peak:.4f}")
 
-    # The daylight bake: every lamp off, a uniform sky on. §18.3's "lit only by a uniform sky dome
-    # through that cell's window openings" -- the openings are holes in the shell, so the sky
-    # reaches through them and nothing else has to know what a window is.
-    for obj in every.values():
-        obj.hide_render = True
-    set_world_sky(SKY_STRENGTH)
-    day_pixels = bake_once(image, size)
-    day_name = f"{cell}_LM_DAY.png"
-    day_scale = normalise_and_save(day_pixels, size, os.path.join(out_dir, day_name))
-    report(f"LM_DAY: sky only, peak {day_scale:.4f}")
+    day_entry = None
+    if daylight:
+        # The daylight bake: every lamp off, a uniform sky on. §18.3's "lit only by a uniform sky
+        # dome through that cell's window openings" -- the openings are holes in the shell, so
+        # the sky reaches through them and nothing else has to know what a window is.
+        for obj in every.values():
+            obj.hide_render = True
+        set_world_sky(SKY_STRENGTH)
+        day_pixels = bake_once(image, size)
+        day_name = f"{cell}_LM_DAY.png"
+        day_scale = normalise_and_save(day_pixels, size, os.path.join(out_dir, day_name))
+        day_entry = {"image": day_name, "scale": day_scale, "skyStrength": SKY_STRENGTH}
+        report(f"LM_DAY: sky only, peak {day_scale:.4f}")
 
     packed_scales = None
     if pack and channels:
@@ -348,7 +448,7 @@ def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: i
         "uvSet": LIGHTMAP_UV,
         "shellHash": shell_hash(lights),
         "groups": entries,
-        "daylight": {"image": day_name, "scale": day_scale, "skyStrength": SKY_STRENGTH},
+        "daylight": day_entry,
         "packed": f"{cell}_LM_PACKED.png" if (pack and channels) else None,
         "packedScales": packed_scales,
     }
@@ -356,7 +456,10 @@ def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: i
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(sidecar, handle, indent=2, sort_keys=True)
         handle.write("\n")
-    report(f"wrote {len(entries)} group atlas(es) + LM_DAY and {os.path.basename(path)}")
+    products = f"{len(entries)} group atlas(es)"
+    if daylight:
+        products += " + LM_DAY"
+    report(f"wrote {products} and {os.path.basename(path)}")
     return sidecar
 
 
@@ -664,7 +767,30 @@ def selftest() -> int:
                 f"{lit_texels})")
         select_lightmap_uv()
 
+        # 6b. glTF preserves TEXCOORD_1 but not Blender's layer spelling.  Exercise the imported
+        #      shape rather than letting the fixture's friendly in-memory name hide that fact.
+        mesh.uv_layers[LIGHTMAP_UV].name = "UVMap.001"
+        select_lightmap_uv()
+        require(mesh.uv_layers.active == mesh.uv_layers[1],
+                "a glTF-style second UV channel is selected even though the Blender layer name "
+                "did not survive export")
+
+        # 6c. An explicit detail mesh has no UV2 and remains an occluder rather than consuming
+        #      atlas space or making the bake reject the correctly unwrapped receiver beside it.
+        detail_mesh = bpy.data.meshes.new("detail_mesh")
+        detail_mesh.from_pydata([(0, 0, 0), (0.1, 0, 0), (0, 0.1, 0)], [], [(0, 1, 2)])
+        detail_material = bpy.data.materials.new("detail_material")
+        detail_material["lightmapReceiver"] = False
+        detail_mesh.materials.append(detail_material)
+        detail = bpy.data.objects.new("detail", detail_mesh)
+        bpy.context.collection.objects.link(detail)
+        select_lightmap_uv()
+        require(detail not in receiver_objects(),
+                "an explicit non-receiver with no UV2 stays in the bake scene only as an occluder")
+        bpy.data.objects.remove(detail, do_unlink=True)
+
         # 7. A missing lightmap UV set is refused, naming the tool that makes one.
+        mesh.uv_layers[1].name = LIGHTMAP_UV
         mesh.uv_layers.remove(mesh.uv_layers[LIGHTMAP_UV])
         try:
             select_lightmap_uv()
@@ -678,6 +804,23 @@ def selftest() -> int:
         # reference to it is a dangling StructRNA. Re-bind rather than reuse.
         scene = bpy.context.scene
         configure(scene, seed, samples)
+
+        # 7b. Production GLBs contain no Blender lights; the authored JSON rows create them.
+        authored = [{"id": "AUTHORED_SPOT", "type": "spot", "position": [0.0, 2.0, 0.0],
+                     "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 20.0,
+                     "coneOuterDeg": 40.0, "intensityLm": 683.0, "range": 5.0,
+                     "bakedIntoLightmap": True}]
+        create_light_objects(authored)
+        created = bpy.data.objects.get("AUTHORED_SPOT")
+        require(created is not None and created.type == "LIGHT" and created.data.type == "SPOT"
+                and abs(created.data.energy - 1.0) < 1e-6
+                and created.data.shadow_soft_size < 0.02
+                and tuple(round(value, 6) for value in created.location) == (0.0, 0.0, 2.0)
+                and (created.rotation_euler.to_matrix() @ Vector((0.0, 0.0, -1.0))
+                     - Vector((0.0, 0.0, -1.0))).length < 1e-6,
+                "an authored Y-up spot row becomes a correctly placed, downward-facing white "
+                "one-watt Blender emitter small enough for a 20 mm recessed-fixture clearance")
+        bpy.data.objects.remove(created, do_unlink=True)
         select_lightmap_uv()
         image = make_bake_target(size)
 
@@ -879,25 +1022,38 @@ def main() -> int:
     if len(positional) != 1 or "lights" not in options or "cell" not in options \
             or "out" not in options:
         print("lightmap_bake: usage: SHELL.glb --lights lights.json --cell ID --out DIR "
-              "[--size N] [--samples N] [--seed N] [--pack]", file=sys.stderr)
+              "[--size N] [--samples N] [--seed N] [--pack] "
+              "[--artificial-only|--daylight-only]", file=sys.stderr)
+        return 2
+
+    artificial_only = "--artificial-only" in argv
+    daylight_only = "--daylight-only" in argv
+    if artificial_only and daylight_only:
+        print("lightmap_bake: --artificial-only and --daylight-only are mutually exclusive",
+              file=sys.stderr)
         return 2
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=positional[0])
+    # The authoritative world files are JSONC.  The deployed copy happens to be plain JSON, but a
+    # bake must be reproducible from source rather than depending on an earlier deploy stage.
+    world_tools = os.path.join(os.path.dirname(os.path.dirname(__file__)), "world")
+    if world_tools not in sys.path:
+        sys.path.insert(0, world_tools)
+    import layout_io  # type: ignore  # noqa: E402
     with open(options["lights"], encoding="utf-8") as handle:
-        document = json.load(handle)
+        document = json.loads(layout_io.strip_jsonc(handle.read()))
     cell = options["cell"]
     lights = [light for light in document.get("lights", []) if light.get("cell") == cell]
-    if not lights:
-        print(f"lightmap_bake: no light in {options['lights']} names cell {cell!r}",
-              file=sys.stderr)
-        return 1
+    create_light_objects(lights)
 
     bake_cell(lights, cell, options["out"],
               int(options.get("size", DEFAULT_SIZE)),
               int(options.get("samples", DEFAULT_SAMPLES)),
               int(options.get("seed", DEFAULT_SEED)),
-              "--pack" in argv)
+              "--pack" in argv,
+              artificial=not daylight_only,
+              daylight=not artificial_only)
     return 0
 
 
@@ -909,7 +1065,11 @@ if __name__ == "__main__":
     try:
         _status = main()
     except SystemExit as _exit:
-        _status = int(_exit.code or 0)
+        if isinstance(_exit.code, int):
+            _status = _exit.code
+        else:
+            print(str(_exit.code), file=sys.stderr)
+            _status = 1
     except BaseException:  # noqa: BLE001
         import traceback
 

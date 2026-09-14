@@ -19,6 +19,28 @@ Corrections made to the planning documents during implementation are recorded in
 
 ---
 
+## Active priority override — Visual Convergence Sprint
+
+From `2026-09-14` until `VISUAL-GATE-1` passes, dependency-valid visible work outranks simple task
+number order. The first slice is the continuous route from the front approach through
+`L0_FOYER`, `L0_HALL`, `L0_LIVING`, `L0_FAMILY`, `L0_KITCHEN` and naturally connected
+`L0_DINING`. Normal gameplay must use production materials; the hashed blockout palette may remain
+only as an explicit debug view.
+
+The active dependency chain is `HOUSE-00909` → `HOUSE-00910` → `HOUSE-00912`, followed by visible
+seam repair (`HOUSE-00913`), material regression coverage (`HOUSE-00917`), the minimum real prop
+pipeline/assets needed by the named rooms (`HOUSE-00971` onward), and their relevant phase-16
+lighting tasks. After each substantial visible change, recapture the six fixed views recorded in
+[`docs/visual-review/README.md`](docs/visual-review/README.md), inspect them, and schedule the
+largest visible defect. Unrelated platform, character, pet and simulation work remains frozen.
+
+`VISUAL-GATE-1`: the route has no major debug-coloured architectural surface in normal gameplay,
+uses coherent real finishes and plausible glass/trim, contains real furniture and props, and has
+lighting depth sufficient for the screenshots to read as a believable house rather than a test
+level. This gate is **not passed**.
+
+---
+
 ## Planning baseline
 
 | Item | Value |
@@ -13098,8 +13120,28 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             build; 148 focused loader/authored-world/validator tests; complete suite with 1,555
             non-failures plus all nine initially environment/load-sensitive cases green in
             isolated retries; `tools/ci/run_checks.sh` including 321 strict-XNA translation units.
-- [ ] HOUSE-00909 — Run the first lightmap bake over the whole shell (`lightmap_bake.py`) — artificial groups only
+- [x] HOUSE-00909 — Run the first lightmap bake over the whole shell (`lightmap_bake.py`) — artificial groups only
       dep: HOUSE-00206, HOUSE-00907 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-14) The deterministic house driver baked all 124 authored artificial groups
+            over all 78 receiver cells at 128², 256 samples and seed 20260907. The two appliance
+            interior cells correctly have no artificial group. Every non-empty group has measured
+            non-zero irradiance, its own normalisation scale and project-owned Ms-PL provenance;
+            the complete ledger is `docs/lightmaps/artificial-bake.json`.
+      finding: glTF import converts the shell from Y-up to Blender Z-up, but the dormant production
+            path had inserted JSON light positions without that transform. It also demanded UV2 on
+            detail-only occluders, expected the glTF layer name `Lightmap` to survive import, and
+            never created Blender lamps from the authored rows. Correcting those three facts turned
+            the first attempted all-black bake into the real result. A black-group gate now makes
+            this class of failure fatal rather than shippable.
+      finding: five L3 fixture rows were 20 mm below their cells' AABB maxima but above the actual
+            sloping roof. Their Y values now follow the generated roof underside with 75 mm
+            clearance. Resume staleness hashes only the current cell's semantic light rows, so
+            correcting one attic lamp invalidates one cell rather than all 78.
+      verified: expanded `lightmap_bake.py --selftest`; complete 78-cell artificial bake; 124/124
+            PNGs compiled into `.cnb` (0 failures); warning-clean max-4-core full build; authored
+            world and culling-equivalence tests; reviewed and intentionally refreshed the stale
+            blockout/first-person/property/season references left by HOUSE-00907's material-id
+            replacement, then all ten affected golden tests passed.
 - [ ] HOUSE-00910 — Run the daylight bake per cell
       dep: HOUSE-00909 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00911 — Measure the lightmap atlas count, size and bake time; adjust texel density to fit the 60 MB budget

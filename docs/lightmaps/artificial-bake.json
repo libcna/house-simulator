@@ -1,0 +1,1891 @@
+{
+  "atlasSizes": [
+    128
+  ],
+  "atlases": 124,
+  "cells": 78,
+  "emptyArtificialCells": 2,
+  "groups": 124,
+  "invocationSeconds": 0.016,
+  "mode": "artificial",
+  "products": [
+    {
+      "cell": "B1_CELLAR",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_CELLAR_MAIN",
+          "image": "B1_CELLAR_LM_LG_B1_CELLAR_MAIN.png",
+          "lights": [
+            "LIGHT_B1_CELLAR_MAIN_1"
+          ],
+          "mean": 0.0070210188523485316,
+          "peak": 6.148845195770264,
+          "scale": 6.148845195770264
+        }
+      ],
+      "shellHash": "sha256:cecb02a97304101bdc18fde0862ae8b9b235e80524709f518f2d35bd538f270c"
+    },
+    {
+      "cell": "B1_CINEMA",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_CINEMA_AISLE",
+          "image": "B1_CINEMA_LM_LG_B1_CINEMA_AISLE.png",
+          "lights": [
+            "LIGHT_B1_CINEMA_AISLE_1",
+            "LIGHT_B1_CINEMA_AISLE_2"
+          ],
+          "mean": 0.0008919385590158844,
+          "peak": 0.029628900811076164,
+          "scale": 0.029628900811076164
+        },
+        {
+          "group": "LG_B1_CINEMA_MAIN",
+          "image": "B1_CINEMA_LM_LG_B1_CINEMA_MAIN.png",
+          "lights": [
+            "LIGHT_B1_CINEMA_MAIN_1",
+            "LIGHT_B1_CINEMA_MAIN_2",
+            "LIGHT_B1_CINEMA_MAIN_3",
+            "LIGHT_B1_CINEMA_MAIN_4"
+          ],
+          "mean": 0.012292052125299331,
+          "peak": 4.272716999053955,
+          "scale": 4.272716999053955
+        }
+      ],
+      "shellHash": "sha256:44d8e5fe47eb4ce0aba006f5e152c4df7b638cefbb2121fd3a5b0546efa17af2"
+    },
+    {
+      "cell": "B1_ELECTRICAL",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_ELECTRICAL_MAIN",
+          "image": "B1_ELECTRICAL_LM_LG_B1_ELECTRICAL_MAIN.png",
+          "lights": [
+            "LIGHT_B1_ELECTRICAL_MAIN_1"
+          ],
+          "mean": 0.03868467619087011,
+          "peak": 15.855287551879883,
+          "scale": 15.855287551879883
+        }
+      ],
+      "shellHash": "sha256:52030cf267a35261677ed3ba140e4c421002d89cc22532e4cadeec78b09ccdca"
+    },
+    {
+      "cell": "B1_GYM",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_GYM_MAIN",
+          "image": "B1_GYM_LM_LG_B1_GYM_MAIN.png",
+          "lights": [
+            "LIGHT_B1_GYM_MAIN_1",
+            "LIGHT_B1_GYM_MAIN_2",
+            "LIGHT_B1_GYM_MAIN_3",
+            "LIGHT_B1_GYM_MAIN_4"
+          ],
+          "mean": 0.045662770033931196,
+          "peak": 15.885458946228027,
+          "scale": 15.885458946228027
+        },
+        {
+          "group": "LG_B1_GYM_MIRROR",
+          "image": "B1_GYM_LM_LG_B1_GYM_MIRROR.png",
+          "lights": [
+            "LIGHT_B1_GYM_MIRROR_1"
+          ],
+          "mean": 0.0020240627385718054,
+          "peak": 0.916225790977478,
+          "scale": 0.916225790977478
+        }
+      ],
+      "shellHash": "sha256:6b0dc88a271c937e6785d36583e2adbef65a81d4ecf116518a96540dc3e759b4"
+    },
+    {
+      "cell": "B1_HALL",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_HALL_MAIN_C",
+          "image": "B1_HALL_LM_LG_B1_HALL_MAIN_C.png",
+          "lights": [
+            "LIGHT_B1_HALL_MAIN_C_1"
+          ],
+          "mean": 0.011169950813163776,
+          "peak": 4.875042915344238,
+          "scale": 4.875042915344238
+        },
+        {
+          "group": "LG_B1_HALL_MAIN_N",
+          "image": "B1_HALL_LM_LG_B1_HALL_MAIN_N.png",
+          "lights": [
+            "LIGHT_B1_HALL_MAIN_N_1"
+          ],
+          "mean": 0.011169950813163776,
+          "peak": 4.875042915344238,
+          "scale": 4.875042915344238
+        },
+        {
+          "group": "LG_B1_HALL_MAIN_S",
+          "image": "B1_HALL_LM_LG_B1_HALL_MAIN_S.png",
+          "lights": [
+            "LIGHT_B1_HALL_MAIN_S_1"
+          ],
+          "mean": 0.011169950813163776,
+          "peak": 4.875042915344238,
+          "scale": 4.875042915344238
+        }
+      ],
+      "shellHash": "sha256:6234f361dbfa4ee0d30a80646df8f83005347bc91a82f77d6f083ca9abe7634d"
+    },
+    {
+      "cell": "B1_HOBBY",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_HOBBY_MAIN",
+          "image": "B1_HOBBY_LM_LG_B1_HOBBY_MAIN.png",
+          "lights": [
+            "LIGHT_B1_HOBBY_MAIN_1",
+            "LIGHT_B1_HOBBY_MAIN_2",
+            "LIGHT_B1_HOBBY_MAIN_3"
+          ],
+          "mean": 0.06313129728465598,
+          "peak": 24.313438415527344,
+          "scale": 24.313438415527344
+        },
+        {
+          "group": "LG_B1_HOBBY_TABLE",
+          "image": "B1_HOBBY_LM_LG_B1_HOBBY_TABLE.png",
+          "lights": [
+            "LIGHT_B1_HOBBY_TABLE_1"
+          ],
+          "mean": 0.00020157034587882461,
+          "peak": 0.004035338759422302,
+          "scale": 0.004035338759422302
+        }
+      ],
+      "shellHash": "sha256:3a773931806ecdd602bb5762bec3d2ea886e66223fee0c0159daaf2e1380f094"
+    },
+    {
+      "cell": "B1_LAUNDRY2",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_LAUNDRY2_MAIN",
+          "image": "B1_LAUNDRY2_LM_LG_B1_LAUNDRY2_MAIN.png",
+          "lights": [
+            "LIGHT_B1_LAUNDRY2_MAIN_1"
+          ],
+          "mean": 0.013558033931262358,
+          "peak": 17.570175170898438,
+          "scale": 17.570175170898438
+        }
+      ],
+      "shellHash": "sha256:8639f9749ffff0765a554fcc57cf6ba75e48da2b467ec468921785dbdb01279b"
+    },
+    {
+      "cell": "B1_MECHANICAL",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_MECHANICAL_MAIN",
+          "image": "B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN.png",
+          "lights": [
+            "LIGHT_B1_MECHANICAL_MAIN_1",
+            "LIGHT_B1_MECHANICAL_MAIN_2"
+          ],
+          "mean": 0.041227504606786355,
+          "peak": 11.607794761657715,
+          "scale": 11.607794761657715
+        }
+      ],
+      "shellHash": "sha256:4845bd79519f4b1d366641444aa630065405bca7dc6640cce2cb7b7ed8ac2685"
+    },
+    {
+      "cell": "B1_STAIR",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_STAIR_MAIN",
+          "image": "B1_STAIR_LM_LG_B1_STAIR_MAIN.png",
+          "lights": [
+            "LIGHT_B1_STAIR_MAIN_1"
+          ],
+          "mean": 0.006101633049186564,
+          "peak": 0.08837300539016724,
+          "scale": 0.08837300539016724
+        }
+      ],
+      "shellHash": "sha256:8bd7ef4de663282f05bb87f15c72cb7dcf69763295203e5fdd8ae651e786931c"
+    },
+    {
+      "cell": "B1_STOR1",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_STOR1_MAIN",
+          "image": "B1_STOR1_LM_LG_B1_STOR1_MAIN.png",
+          "lights": [
+            "LIGHT_B1_STOR1_MAIN_1"
+          ],
+          "mean": 0.006906312931853477,
+          "peak": 10.895790100097656,
+          "scale": 10.895790100097656
+        }
+      ],
+      "shellHash": "sha256:cc87151c0bccc1506df6105dfa0ea1e883a09e1caf21d10554dc6b4896ed6b11"
+    },
+    {
+      "cell": "B1_STOR2",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_STOR2_MAIN",
+          "image": "B1_STOR2_LM_LG_B1_STOR2_MAIN.png",
+          "lights": [
+            "LIGHT_B1_STOR2_MAIN_1"
+          ],
+          "mean": 0.003844071825855993,
+          "peak": 3.828664541244507,
+          "scale": 3.828664541244507
+        }
+      ],
+      "shellHash": "sha256:69205c190fbd254a35a1563bd9ea653bec2bb4ed74c3e14cfe044454e1042088"
+    },
+    {
+      "cell": "B1_UNDERSTAIR",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_UNDERSTAIR_MAIN",
+          "image": "B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN.png",
+          "lights": [
+            "LIGHT_B1_UNDERSTAIR_MAIN_1"
+          ],
+          "mean": 0.014397473430663969,
+          "peak": 11.389572143554688,
+          "scale": 11.389572143554688
+        }
+      ],
+      "shellHash": "sha256:8e9b8e89ebbeea81b47d5c0b3de17d781d8dbbcdaf810bac03cf31b2d95c5694"
+    },
+    {
+      "cell": "B1_UTILITY",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_UTILITY_MAIN",
+          "image": "B1_UTILITY_LM_LG_B1_UTILITY_MAIN.png",
+          "lights": [
+            "LIGHT_B1_UTILITY_MAIN_1"
+          ],
+          "mean": 0.03225288718033989,
+          "peak": 16.829572677612305,
+          "scale": 16.829572677612305
+        }
+      ],
+      "shellHash": "sha256:0671a83d2059d3ee7c43f112b99b2d3a0ca9194d8944051223d410aef16ef874"
+    },
+    {
+      "cell": "B1_WC7",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_WC7_MAIN",
+          "image": "B1_WC7_LM_LG_B1_WC7_MAIN.png",
+          "lights": [
+            "LIGHT_B1_WC7_MAIN_1"
+          ],
+          "mean": 0.024561920340771464,
+          "peak": 39.32825469970703,
+          "scale": 39.32825469970703
+        }
+      ],
+      "shellHash": "sha256:38276c76a5600e4858e537981b08f71a7345ad07595297a74f05845f4665c2e3"
+    },
+    {
+      "cell": "B1_WORKSHOP",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_B1_WORKSHOP_BENCH",
+          "image": "B1_WORKSHOP_LM_LG_B1_WORKSHOP_BENCH.png",
+          "lights": [
+            "LIGHT_B1_WORKSHOP_BENCH_1"
+          ],
+          "mean": 0.00012524650388038588,
+          "peak": 0.004157417919486761,
+          "scale": 0.004157417919486761
+        },
+        {
+          "group": "LG_B1_WORKSHOP_MAIN",
+          "image": "B1_WORKSHOP_LM_LG_B1_WORKSHOP_MAIN.png",
+          "lights": [
+            "LIGHT_B1_WORKSHOP_MAIN_1",
+            "LIGHT_B1_WORKSHOP_MAIN_2"
+          ],
+          "mean": 0.027143408640193017,
+          "peak": 7.542011737823486,
+          "scale": 7.542011737823486
+        }
+      ],
+      "shellHash": "sha256:b3e91a278edee748e5c84e6c89b655497c693ea54303aa31d26d2baed8e4b42f"
+    },
+    {
+      "cell": "CELL_FREEZER_INTERIOR",
+      "daylight": null,
+      "groups": [],
+      "shellHash": "sha256:9534b7cdf4b42dbacd7c78c300e0e6ebea40fa3fb23b83fc6131894b0d65d745"
+    },
+    {
+      "cell": "CELL_FRIDGE_INTERIOR",
+      "daylight": null,
+      "groups": [],
+      "shellHash": "sha256:7ab544dc6f3f1ac1923670c16565bde22a57b73421aadc9843a00e5e53e6bf35"
+    },
+    {
+      "cell": "L0_BUTLERS",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_BUTLERS_MAIN",
+          "image": "L0_BUTLERS_LM_LG_L0_BUTLERS_MAIN.png",
+          "lights": [
+            "LIGHT_L0_BUTLERS_MAIN_1",
+            "LIGHT_L0_BUTLERS_MAIN_2"
+          ],
+          "mean": 0.014035041403250459,
+          "peak": 9.929945945739746,
+          "scale": 9.929945945739746
+        }
+      ],
+      "shellHash": "sha256:45412076fc2be26a78dab0d998b1c901e9c97955ce2eff38f7276b5caa4d1799"
+    },
+    {
+      "cell": "L0_CLOSET_W",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_CLOSET_W_MAIN",
+          "image": "L0_CLOSET_W_LM_LG_L0_CLOSET_W_MAIN.png",
+          "lights": [
+            "LIGHT_L0_CLOSET_W_MAIN_1"
+          ],
+          "mean": 0.01768327740573168,
+          "peak": 28.606794357299805,
+          "scale": 28.606794357299805
+        }
+      ],
+      "shellHash": "sha256:5e894909332a04b03dcd01dae8496442df88e95d70b04488d83d4eaa5597d224"
+    },
+    {
+      "cell": "L0_DINING",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_DINING_CHANDELIER",
+          "image": "L0_DINING_LM_LG_L0_DINING_CHANDELIER.png",
+          "lights": [
+            "LIGHT_L0_DINING_CHANDELIER_1"
+          ],
+          "mean": 0.010285439185824521,
+          "peak": 0.1360144466161728,
+          "scale": 0.1360144466161728
+        },
+        {
+          "group": "LG_L0_DINING_SIDE",
+          "image": "L0_DINING_LM_LG_L0_DINING_SIDE.png",
+          "lights": [
+            "LIGHT_L0_DINING_SIDE_1",
+            "LIGHT_L0_DINING_SIDE_2"
+          ],
+          "mean": 0.0031845717969040594,
+          "peak": 0.021425170823931694,
+          "scale": 0.021425170823931694
+        }
+      ],
+      "shellHash": "sha256:94e3ab94a3561baaafbfaebaa4b986518781db84cea2fb6c07408e082a0e9760"
+    },
+    {
+      "cell": "L0_FAMILY",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_FAMILY_MAIN",
+          "image": "L0_FAMILY_LM_LG_L0_FAMILY_MAIN.png",
+          "lights": [
+            "LIGHT_L0_FAMILY_MAIN_1",
+            "LIGHT_L0_FAMILY_MAIN_2",
+            "LIGHT_L0_FAMILY_MAIN_3",
+            "LIGHT_L0_FAMILY_MAIN_4"
+          ],
+          "mean": 0.013365347049969351,
+          "peak": 6.417865753173828,
+          "scale": 6.417865753173828
+        },
+        {
+          "group": "LG_L0_FAMILY_MEDIA",
+          "image": "L0_FAMILY_LM_LG_L0_FAMILY_MEDIA.png",
+          "lights": [
+            "LIGHT_L0_FAMILY_MEDIA_1"
+          ],
+          "mean": 0.0022355893614423813,
+          "peak": 1.0876368284225464,
+          "scale": 1.0876368284225464
+        },
+        {
+          "group": "LG_L0_FAMILY_READING",
+          "image": "L0_FAMILY_LM_LG_L0_FAMILY_READING.png",
+          "lights": [
+            "LIGHT_L0_FAMILY_READING_1"
+          ],
+          "mean": 0.002481988823811404,
+          "peak": 0.02002924494445324,
+          "scale": 0.02002924494445324
+        }
+      ],
+      "shellHash": "sha256:09381332c387fc48107cbc5650ec8a16dc410847814174e394febc190b71bbc1"
+    },
+    {
+      "cell": "L0_FOYER",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_FOYER_ACCENT",
+          "image": "L0_FOYER_LM_LG_L0_FOYER_ACCENT.png",
+          "lights": [
+            "LIGHT_L0_FOYER_ACCENT_1",
+            "LIGHT_L0_FOYER_ACCENT_2"
+          ],
+          "mean": 0.003077923073861009,
+          "peak": 0.02183302864432335,
+          "scale": 0.02183302864432335
+        },
+        {
+          "group": "LG_L0_FOYER_MAIN",
+          "image": "L0_FOYER_LM_LG_L0_FOYER_MAIN.png",
+          "lights": [
+            "LIGHT_L0_FOYER_MAIN_1"
+          ],
+          "mean": 0.005813395759804752,
+          "peak": 0.07169205695390701,
+          "scale": 0.07169205695390701
+        }
+      ],
+      "shellHash": "sha256:3eef7f097e253eb52d3b934feb3b6d2f269dde5c65f8c0cb7224a161ef326b98"
+    },
+    {
+      "cell": "L0_GARAGE",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_GARAGE_MAIN",
+          "image": "L0_GARAGE_LM_LG_L0_GARAGE_MAIN.png",
+          "lights": [
+            "LIGHT_L0_GARAGE_MAIN_1",
+            "LIGHT_L0_GARAGE_MAIN_2",
+            "LIGHT_L0_GARAGE_MAIN_3",
+            "LIGHT_L0_GARAGE_MAIN_4"
+          ],
+          "mean": 0.01915571414006602,
+          "peak": 3.2405972480773926,
+          "scale": 3.2405972480773926
+        },
+        {
+          "group": "LG_L0_GARAGE_OPENER",
+          "image": "L0_GARAGE_LM_LG_L0_GARAGE_OPENER.png",
+          "lights": [
+            "LIGHT_L0_GARAGE_OPENER_1"
+          ],
+          "mean": 0.0015101805814581694,
+          "peak": 0.4404882490634918,
+          "scale": 0.4404882490634918
+        }
+      ],
+      "shellHash": "sha256:4635910dbb529b1b2d04ba23c29060efab735d74cf69d86633fdeea2c845c666"
+    },
+    {
+      "cell": "L0_GARAGE_LOFT",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_GARAGE_LOFT_MAIN",
+          "image": "L0_GARAGE_LOFT_LM_LG_L0_GARAGE_LOFT_MAIN.png",
+          "lights": [
+            "LIGHT_L0_GARAGE_LOFT_MAIN_1"
+          ],
+          "mean": 0.004660648723392528,
+          "peak": 14.35192584991455,
+          "scale": 14.35192584991455
+        }
+      ],
+      "shellHash": "sha256:ebbc2cc7158b033f9db0772fe642929278644c0e094d27ec73c8d15560ff9c5d"
+    },
+    {
+      "cell": "L0_HALL",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_HALL_GALLERY",
+          "image": "L0_HALL_LM_LG_L0_HALL_GALLERY.png",
+          "lights": [
+            "LIGHT_L0_HALL_GALLERY_1",
+            "LIGHT_L0_HALL_GALLERY_2",
+            "LIGHT_L0_HALL_GALLERY_3"
+          ],
+          "mean": 0.0001408117658828485,
+          "peak": 0.002580567030236125,
+          "scale": 0.002580567030236125
+        },
+        {
+          "group": "LG_L0_HALL_MAIN",
+          "image": "L0_HALL_LM_LG_L0_HALL_MAIN.png",
+          "lights": [
+            "LIGHT_L0_HALL_MAIN_1",
+            "LIGHT_L0_HALL_MAIN_2"
+          ],
+          "mean": 0.011641442907853704,
+          "peak": 20.984493255615234,
+          "scale": 20.984493255615234
+        }
+      ],
+      "shellHash": "sha256:57958ca3804ce5197aa8aa499ab63fc8605be7662460e8b5c9594c95773c07a8"
+    },
+    {
+      "cell": "L0_KITCHEN",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_KITCHEN_ISLAND",
+          "image": "L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND.png",
+          "lights": [
+            "LIGHT_L0_KITCHEN_ISLAND_1",
+            "LIGHT_L0_KITCHEN_ISLAND_2",
+            "LIGHT_L0_KITCHEN_ISLAND_3"
+          ],
+          "mean": 0.013495077698146543,
+          "peak": 0.11717136949300766,
+          "scale": 0.11717136949300766
+        },
+        {
+          "group": "LG_L0_KITCHEN_MAIN",
+          "image": "L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN.png",
+          "lights": [
+            "LIGHT_L0_KITCHEN_MAIN_1",
+            "LIGHT_L0_KITCHEN_MAIN_2",
+            "LIGHT_L0_KITCHEN_MAIN_3",
+            "LIGHT_L0_KITCHEN_MAIN_4"
+          ],
+          "mean": 0.011263115422032621,
+          "peak": 15.104341506958008,
+          "scale": 15.104341506958008
+        },
+        {
+          "group": "LG_L0_KITCHEN_SINK",
+          "image": "L0_KITCHEN_LM_LG_L0_KITCHEN_SINK.png",
+          "lights": [
+            "LIGHT_L0_KITCHEN_SINK_1"
+          ],
+          "mean": 0.00010642203244052705,
+          "peak": 0.003496917663142085,
+          "scale": 0.003496917663142085
+        },
+        {
+          "group": "LG_L0_KITCHEN_UNDERCAB",
+          "image": "L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB.png",
+          "lights": [
+            "LIGHT_L0_KITCHEN_UNDERCAB_1",
+            "LIGHT_L0_KITCHEN_UNDERCAB_2",
+            "LIGHT_L0_KITCHEN_UNDERCAB_3",
+            "LIGHT_L0_KITCHEN_UNDERCAB_4"
+          ],
+          "mean": 0.007004367714544544,
+          "peak": 1.260299563407898,
+          "scale": 1.260299563407898
+        }
+      ],
+      "shellHash": "sha256:7b95f7a0f2d1a3831361184db09d63ce51d0c831840cfd44d176afb0edfcd236"
+    },
+    {
+      "cell": "L0_LAUNDRY",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_LAUNDRY_MAIN",
+          "image": "L0_LAUNDRY_LM_LG_L0_LAUNDRY_MAIN.png",
+          "lights": [
+            "LIGHT_L0_LAUNDRY_MAIN_1",
+            "LIGHT_L0_LAUNDRY_MAIN_2"
+          ],
+          "mean": 0.01559040230221258,
+          "peak": 7.0453362464904785,
+          "scale": 7.0453362464904785
+        }
+      ],
+      "shellHash": "sha256:027cda723fa2360edcd385156d772f8c775c02c4a68ee4562dc4c1df534999a9"
+    },
+    {
+      "cell": "L0_LIVING",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_LIVING_FIRE",
+          "image": "L0_LIVING_LM_LG_L0_LIVING_FIRE.png",
+          "lights": [
+            "LIGHT_L0_LIVING_FIRE_1",
+            "LIGHT_L0_LIVING_FIRE_2"
+          ],
+          "mean": 0.0025575284995750613,
+          "peak": 0.01760788820683956,
+          "scale": 0.01760788820683956
+        },
+        {
+          "group": "LG_L0_LIVING_MAIN",
+          "image": "L0_LIVING_LM_LG_L0_LIVING_MAIN.png",
+          "lights": [
+            "LIGHT_L0_LIVING_MAIN_1",
+            "LIGHT_L0_LIVING_MAIN_2",
+            "LIGHT_L0_LIVING_MAIN_3",
+            "LIGHT_L0_LIVING_MAIN_4"
+          ],
+          "mean": 0.010958178148021407,
+          "peak": 10.550629615783691,
+          "scale": 10.550629615783691
+        },
+        {
+          "group": "LG_L0_LIVING_PIANO",
+          "image": "L0_LIVING_LM_LG_L0_LIVING_PIANO.png",
+          "lights": [
+            "LIGHT_L0_LIVING_PIANO_1"
+          ],
+          "mean": 0.0019115356004965481,
+          "peak": 0.018805617466568947,
+          "scale": 0.018805617466568947
+        }
+      ],
+      "shellHash": "sha256:39bb5b1c3a6920f735d06f39704e9139558dbef6494fed158091c558abdf941a"
+    },
+    {
+      "cell": "L0_MUDROOM",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_MUDROOM_MAIN",
+          "image": "L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN.png",
+          "lights": [
+            "LIGHT_L0_MUDROOM_MAIN_1",
+            "LIGHT_L0_MUDROOM_MAIN_2"
+          ],
+          "mean": 0.010708954727688682,
+          "peak": 3.072723865509033,
+          "scale": 3.072723865509033
+        }
+      ],
+      "shellHash": "sha256:88a400f4fe74c5da3de1ccc746d47be80297da566edb4beb77663b660eef7988"
+    },
+    {
+      "cell": "L0_OFFICE",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_OFFICE_DESK",
+          "image": "L0_OFFICE_LM_LG_L0_OFFICE_DESK.png",
+          "lights": [
+            "LIGHT_L0_OFFICE_DESK_1"
+          ],
+          "mean": 0.00015906598307510042,
+          "peak": 0.0036318739876151085,
+          "scale": 0.0036318739876151085
+        },
+        {
+          "group": "LG_L0_OFFICE_MAIN",
+          "image": "L0_OFFICE_LM_LG_L0_OFFICE_MAIN.png",
+          "lights": [
+            "LIGHT_L0_OFFICE_MAIN_1",
+            "LIGHT_L0_OFFICE_MAIN_2"
+          ],
+          "mean": 0.011484173566200897,
+          "peak": 21.977012634277344,
+          "scale": 21.977012634277344
+        }
+      ],
+      "shellHash": "sha256:823428476063d2afdab741b44586e5bf0f575e65ed8bb3987a3a59fcde32ce31"
+    },
+    {
+      "cell": "L0_PANTRY",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_PANTRY_MAIN",
+          "image": "L0_PANTRY_LM_LG_L0_PANTRY_MAIN.png",
+          "lights": [
+            "LIGHT_L0_PANTRY_MAIN_1"
+          ],
+          "mean": 0.011164083871172624,
+          "peak": 34.058258056640625,
+          "scale": 34.058258056640625
+        }
+      ],
+      "shellHash": "sha256:978453d71e9d36b6309c023708ef2647126bd31c8535323a50050d50459e10b8"
+    },
+    {
+      "cell": "L0_STAIR_MAIN",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_STAIR_MAIN_MAIN",
+          "image": "L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN.png",
+          "lights": [
+            "LIGHT_L0_STAIR_MAIN_MAIN_1"
+          ],
+          "mean": 0.0017467589861518017,
+          "peak": 0.07684403657913208,
+          "scale": 0.07684403657913208
+        },
+        {
+          "group": "LG_L0_STAIR_MAIN_STEP",
+          "image": "L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP.png",
+          "lights": [
+            "LIGHT_L0_STAIR_MAIN_STEP_1",
+            "LIGHT_L0_STAIR_MAIN_STEP_2"
+          ],
+          "mean": 0.00022438539276099694,
+          "peak": 0.00444997102022171,
+          "scale": 0.00444997102022171
+        }
+      ],
+      "shellHash": "sha256:462c9dfe74d0d3b5b3e9a986d6edf03035bce1d8b83d2a8d57e34ac86abae627"
+    },
+    {
+      "cell": "L0_STOR",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_STOR_MAIN",
+          "image": "L0_STOR_LM_LG_L0_STOR_MAIN.png",
+          "lights": [
+            "LIGHT_L0_STOR_MAIN_1"
+          ],
+          "mean": 0.010431801104944027,
+          "peak": 7.406718730926514,
+          "scale": 7.406718730926514
+        }
+      ],
+      "shellHash": "sha256:9f335becf90fcc93e05a0d95a19197836248a6b4364f1638571b517110152a1e"
+    },
+    {
+      "cell": "L0_SUNROOM",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_SUNROOM_BAR",
+          "image": "L0_SUNROOM_LM_LG_L0_SUNROOM_BAR.png",
+          "lights": [
+            "LIGHT_L0_SUNROOM_BAR_1"
+          ],
+          "mean": 8.558937880998225e-05,
+          "peak": 0.003468880197033286,
+          "scale": 0.003468880197033286
+        },
+        {
+          "group": "LG_L0_SUNROOM_MAIN",
+          "image": "L0_SUNROOM_LM_LG_L0_SUNROOM_MAIN.png",
+          "lights": [
+            "LIGHT_L0_SUNROOM_MAIN_1",
+            "LIGHT_L0_SUNROOM_MAIN_2",
+            "LIGHT_L0_SUNROOM_MAIN_3",
+            "LIGHT_L0_SUNROOM_MAIN_4"
+          ],
+          "mean": 0.009612344417147946,
+          "peak": 14.07666301727295,
+          "scale": 14.07666301727295
+        }
+      ],
+      "shellHash": "sha256:3d3b7c497600489fa6e2e9df2ee4773f8bc569754fe3c624dc36d612b32d45c7"
+    },
+    {
+      "cell": "L0_WC1",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_WC1_MAIN",
+          "image": "L0_WC1_LM_LG_L0_WC1_MAIN.png",
+          "lights": [
+            "LIGHT_L0_WC1_MAIN_1"
+          ],
+          "mean": 0.01916068541254699,
+          "peak": 29.042829513549805,
+          "scale": 29.042829513549805
+        }
+      ],
+      "shellHash": "sha256:e9e396fe049b774450bd6ac7b21bc473909fe2af64df7771678ce125d8f13dd6"
+    },
+    {
+      "cell": "L0_WC2",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L0_WC2_MAIN",
+          "image": "L0_WC2_LM_LG_L0_WC2_MAIN.png",
+          "lights": [
+            "LIGHT_L0_WC2_MAIN_1"
+          ],
+          "mean": 0.02340249700839984,
+          "peak": 30.970720291137695,
+          "scale": 30.970720291137695
+        }
+      ],
+      "shellHash": "sha256:dbd87908a83b24373f313cc4bdc283164b20780d5d46b50e4b3ed4e0e70b4e11"
+    },
+    {
+      "cell": "L1_BATH2",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_BATH2_MAIN",
+          "image": "L1_BATH2_LM_LG_L1_BATH2_MAIN.png",
+          "lights": [
+            "LIGHT_L1_BATH2_MAIN_1",
+            "LIGHT_L1_BATH2_MAIN_2"
+          ],
+          "mean": 0.01712460975573267,
+          "peak": 20.56555938720703,
+          "scale": 20.56555938720703
+        },
+        {
+          "group": "LG_L1_BATH2_VANITY",
+          "image": "L1_BATH2_LM_LG_L1_BATH2_VANITY.png",
+          "lights": [
+            "LIGHT_L1_BATH2_VANITY_1"
+          ],
+          "mean": 0.00531007382880599,
+          "peak": 1.3854410648345947,
+          "scale": 1.3854410648345947
+        }
+      ],
+      "shellHash": "sha256:d360d82a2120c0adada77553a80c63783f34de090c86674837bd7662b56e9ee6"
+    },
+    {
+      "cell": "L1_BATH3",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_BATH3_MAIN",
+          "image": "L1_BATH3_LM_LG_L1_BATH3_MAIN.png",
+          "lights": [
+            "LIGHT_L1_BATH3_MAIN_1",
+            "LIGHT_L1_BATH3_MAIN_2"
+          ],
+          "mean": 0.013671111091100233,
+          "peak": 7.889060974121094,
+          "scale": 7.889060974121094
+        },
+        {
+          "group": "LG_L1_BATH3_VANITY",
+          "image": "L1_BATH3_LM_LG_L1_BATH3_VANITY.png",
+          "lights": [
+            "LIGHT_L1_BATH3_VANITY_1"
+          ],
+          "mean": 0.004424660915354355,
+          "peak": 1.145842432975769,
+          "scale": 1.145842432975769
+        }
+      ],
+      "shellHash": "sha256:8e4978b7d6216eab9190dc46d001d2c75b7133426567626557aaafd6305982bb"
+    },
+    {
+      "cell": "L1_BED2",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_BED2_DESK",
+          "image": "L1_BED2_LM_LG_L1_BED2_DESK.png",
+          "lights": [
+            "LIGHT_L1_BED2_DESK_1"
+          ],
+          "mean": 0.00012459746814031,
+          "peak": 0.003929628990590572,
+          "scale": 0.003929628990590572
+        },
+        {
+          "group": "LG_L1_BED2_MAIN",
+          "image": "L1_BED2_LM_LG_L1_BED2_MAIN.png",
+          "lights": [
+            "LIGHT_L1_BED2_MAIN_1",
+            "LIGHT_L1_BED2_MAIN_2",
+            "LIGHT_L1_BED2_MAIN_3"
+          ],
+          "mean": 0.011559332535792425,
+          "peak": 11.491515159606934,
+          "scale": 11.491515159606934
+        }
+      ],
+      "shellHash": "sha256:2a5f6e01baaf00883ea934e006859f90ccda5d8e32dd6ed14133affc72ae5948"
+    },
+    {
+      "cell": "L1_BED3",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_BED3_BEDSIDE",
+          "image": "L1_BED3_LM_LG_L1_BED3_BEDSIDE.png",
+          "lights": [
+            "LIGHT_L1_BED3_BEDSIDE_1"
+          ],
+          "mean": 0.003980783891113344,
+          "peak": 0.0296475887298584,
+          "scale": 0.0296475887298584
+        },
+        {
+          "group": "LG_L1_BED3_MAIN",
+          "image": "L1_BED3_LM_LG_L1_BED3_MAIN.png",
+          "lights": [
+            "LIGHT_L1_BED3_MAIN_1",
+            "LIGHT_L1_BED3_MAIN_2"
+          ],
+          "mean": 0.013055729075725869,
+          "peak": 22.392009735107422,
+          "scale": 22.392009735107422
+        }
+      ],
+      "shellHash": "sha256:debbe70fd2ac31e64eebf2ccd96037c46b5a81a0d1a763a6190da10cd070e36e"
+    },
+    {
+      "cell": "L1_BED4",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_BED4_DESK",
+          "image": "L1_BED4_LM_LG_L1_BED4_DESK.png",
+          "lights": [
+            "LIGHT_L1_BED4_DESK_1"
+          ],
+          "mean": 0.00019876959054758708,
+          "peak": 0.004080937243998051,
+          "scale": 0.004080937243998051
+        },
+        {
+          "group": "LG_L1_BED4_MAIN",
+          "image": "L1_BED4_LM_LG_L1_BED4_MAIN.png",
+          "lights": [
+            "LIGHT_L1_BED4_MAIN_1",
+            "LIGHT_L1_BED4_MAIN_2",
+            "LIGHT_L1_BED4_MAIN_3"
+          ],
+          "mean": 0.018586061579104262,
+          "peak": 24.246185302734375,
+          "scale": 24.246185302734375
+        }
+      ],
+      "shellHash": "sha256:6169af730cc5b8fe16ff4ad37ba3a8fcc771b46dd166af753be7cc92779a2271"
+    },
+    {
+      "cell": "L1_BED5",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_BED5_BEDSIDE",
+          "image": "L1_BED5_LM_LG_L1_BED5_BEDSIDE.png",
+          "lights": [
+            "LIGHT_L1_BED5_BEDSIDE_1"
+          ],
+          "mean": 0.00442161579177721,
+          "peak": 0.03071259893476963,
+          "scale": 0.03071259893476963
+        },
+        {
+          "group": "LG_L1_BED5_MAIN",
+          "image": "L1_BED5_LM_LG_L1_BED5_MAIN.png",
+          "lights": [
+            "LIGHT_L1_BED5_MAIN_1",
+            "LIGHT_L1_BED5_MAIN_2"
+          ],
+          "mean": 0.012062177655229421,
+          "peak": 3.086684226989746,
+          "scale": 3.086684226989746
+        }
+      ],
+      "shellHash": "sha256:18801e4e3e42bf546218345090e6dc6275cb96b3043d074a2fae3fea5ff2f771"
+    },
+    {
+      "cell": "L1_CLOSET_2",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_CLOSET_2_MAIN",
+          "image": "L1_CLOSET_2_LM_LG_L1_CLOSET_2_MAIN.png",
+          "lights": [
+            "LIGHT_L1_CLOSET_2_MAIN_1"
+          ],
+          "mean": 0.03167245846946419,
+          "peak": 17.392282485961914,
+          "scale": 17.392282485961914
+        }
+      ],
+      "shellHash": "sha256:2edddb7b902f9aeaf0c308a4e3db68c475f955abcfc8bdc52af6b657b66185a1"
+    },
+    {
+      "cell": "L1_CLOSET_3",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_CLOSET_3_MAIN",
+          "image": "L1_CLOSET_3_LM_LG_L1_CLOSET_3_MAIN.png",
+          "lights": [
+            "LIGHT_L1_CLOSET_3_MAIN_1"
+          ],
+          "mean": 0.0324121421566233,
+          "peak": 15.57068157196045,
+          "scale": 15.57068157196045
+        }
+      ],
+      "shellHash": "sha256:7ecbf6fff282978d6266496d42e5c49bc81667ac0c157046f960e124a8a663dc"
+    },
+    {
+      "cell": "L1_HALL",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_HALL_ART",
+          "image": "L1_HALL_LM_LG_L1_HALL_ART.png",
+          "lights": [
+            "LIGHT_L1_HALL_ART_1",
+            "LIGHT_L1_HALL_ART_2"
+          ],
+          "mean": 0.00013125505945185565,
+          "peak": 0.002790597500279546,
+          "scale": 0.002790597500279546
+        },
+        {
+          "group": "LG_L1_HALL_MAIN",
+          "image": "L1_HALL_LM_LG_L1_HALL_MAIN.png",
+          "lights": [
+            "LIGHT_L1_HALL_MAIN_1",
+            "LIGHT_L1_HALL_MAIN_2"
+          ],
+          "mean": 0.015024611407601926,
+          "peak": 21.773239135742188,
+          "scale": 21.773239135742188
+        }
+      ],
+      "shellHash": "sha256:8152b489b1cd9c558f1591d4095b619870fe14fa6ab11ce6cfbfa9b981324024"
+    },
+    {
+      "cell": "L1_HALL_W",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_HALL_W_MAIN",
+          "image": "L1_HALL_W_LM_LG_L1_HALL_W_MAIN.png",
+          "lights": [
+            "LIGHT_L1_HALL_W_MAIN_1",
+            "LIGHT_L1_HALL_W_MAIN_2",
+            "LIGHT_L1_HALL_W_MAIN_3"
+          ],
+          "mean": 0.021727642961812284,
+          "peak": 16.101720809936523,
+          "scale": 16.101720809936523
+        },
+        {
+          "group": "LG_L1_HALL_W_NIGHT",
+          "image": "L1_HALL_W_LM_LG_L1_HALL_W_NIGHT.png",
+          "lights": [
+            "LIGHT_L1_HALL_W_NIGHT_1",
+            "LIGHT_L1_HALL_W_NIGHT_2"
+          ],
+          "mean": 0.0020171789434445617,
+          "peak": 0.034845028072595596,
+          "scale": 0.034845028072595596
+        }
+      ],
+      "shellHash": "sha256:eb31f8d4f9234cab3a3d81f89176a29b3ee4e5e560a8d60409b5c62c9ed9db45"
+    },
+    {
+      "cell": "L1_LANDING",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_LANDING_MAIN",
+          "image": "L1_LANDING_LM_LG_L1_LANDING_MAIN.png",
+          "lights": [
+            "LIGHT_L1_LANDING_MAIN_1",
+            "LIGHT_L1_LANDING_MAIN_2"
+          ],
+          "mean": 0.009484722991896215,
+          "peak": 12.7000150680542,
+          "scale": 12.7000150680542
+        },
+        {
+          "group": "LG_L1_LANDING_SEAT",
+          "image": "L1_LANDING_LM_LG_L1_LANDING_SEAT.png",
+          "lights": [
+            "LIGHT_L1_LANDING_SEAT_1"
+          ],
+          "mean": 0.0032824166381097935,
+          "peak": 0.02595117874443531,
+          "scale": 0.02595117874443531
+        }
+      ],
+      "shellHash": "sha256:0e63a77ce45ac25c7d46a522165c7d92a57e212482506ddc412c287514007749"
+    },
+    {
+      "cell": "L1_LINEN",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_LINEN_MAIN",
+          "image": "L1_LINEN_LM_LG_L1_LINEN_MAIN.png",
+          "lights": [
+            "LIGHT_L1_LINEN_MAIN_1"
+          ],
+          "mean": 0.039979501151526466,
+          "peak": 17.526880264282227,
+          "scale": 17.526880264282227
+        }
+      ],
+      "shellHash": "sha256:88fbc6d66ea14cc517c188efe5fec45009c78645432be58485cc01f9eddc51f5"
+    },
+    {
+      "cell": "L1_MASTER_BATH",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_MASTER_BATH_BATH",
+          "image": "L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_BATH.png",
+          "lights": [
+            "LIGHT_L1_MASTER_BATH_BATH_1"
+          ],
+          "mean": 0.006700170192576608,
+          "peak": 17.96245002746582,
+          "scale": 17.96245002746582
+        },
+        {
+          "group": "LG_L1_MASTER_BATH_MAIN",
+          "image": "L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_MAIN.png",
+          "lights": [
+            "LIGHT_L1_MASTER_BATH_MAIN_1",
+            "LIGHT_L1_MASTER_BATH_MAIN_2",
+            "LIGHT_L1_MASTER_BATH_MAIN_3"
+          ],
+          "mean": 0.018727906378743803,
+          "peak": 17.98140525817871,
+          "scale": 17.98140525817871
+        },
+        {
+          "group": "LG_L1_MASTER_BATH_VANITY",
+          "image": "L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_VANITY.png",
+          "lights": [
+            "LIGHT_L1_MASTER_BATH_VANITY_1",
+            "LIGHT_L1_MASTER_BATH_VANITY_2"
+          ],
+          "mean": 0.007775290547816406,
+          "peak": 1.194915533065796,
+          "scale": 1.194915533065796
+        }
+      ],
+      "shellHash": "sha256:96045c5ae7b0fd2886a304ba9d21590845751fcb43a9563f4e4deafd466bea07"
+    },
+    {
+      "cell": "L1_MASTER_BED",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_MASTER_BED_BEDSIDE",
+          "image": "L1_MASTER_BED_LM_LG_L1_MASTER_BED_BEDSIDE.png",
+          "lights": [
+            "LIGHT_L1_MASTER_BED_BEDSIDE_1",
+            "LIGHT_L1_MASTER_BED_BEDSIDE_2"
+          ],
+          "mean": 0.0038758038045651816,
+          "peak": 0.032821688801050186,
+          "scale": 0.032821688801050186
+        },
+        {
+          "group": "LG_L1_MASTER_BED_DRESSER",
+          "image": "L1_MASTER_BED_LM_LG_L1_MASTER_BED_DRESSER.png",
+          "lights": [
+            "LIGHT_L1_MASTER_BED_DRESSER_1"
+          ],
+          "mean": 0.001300207956362336,
+          "peak": 0.01398427877575159,
+          "scale": 0.01398427877575159
+        },
+        {
+          "group": "LG_L1_MASTER_BED_MAIN",
+          "image": "L1_MASTER_BED_LM_LG_L1_MASTER_BED_MAIN.png",
+          "lights": [
+            "LIGHT_L1_MASTER_BED_MAIN_1",
+            "LIGHT_L1_MASTER_BED_MAIN_2",
+            "LIGHT_L1_MASTER_BED_MAIN_3",
+            "LIGHT_L1_MASTER_BED_MAIN_4"
+          ],
+          "mean": 0.01021092761323455,
+          "peak": 3.0870189666748047,
+          "scale": 3.0870189666748047
+        },
+        {
+          "group": "LG_L1_MASTER_BED_SEATING",
+          "image": "L1_MASTER_BED_LM_LG_L1_MASTER_BED_SEATING.png",
+          "lights": [
+            "LIGHT_L1_MASTER_BED_SEATING_1"
+          ],
+          "mean": 0.0019507778389214647,
+          "peak": 0.024464229121804237,
+          "scale": 0.024464229121804237
+        }
+      ],
+      "shellHash": "sha256:93b7611aceef4d437d63c4c7fcba7a2c0bbe314ba4d7d927c19b86a03b4b0cd1"
+    },
+    {
+      "cell": "L1_MASTER_CLOSET",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_MASTER_CLOSET_MAIN",
+          "image": "L1_MASTER_CLOSET_LM_LG_L1_MASTER_CLOSET_MAIN.png",
+          "lights": [
+            "LIGHT_L1_MASTER_CLOSET_MAIN_1",
+            "LIGHT_L1_MASTER_CLOSET_MAIN_2"
+          ],
+          "mean": 0.009339048445654072,
+          "peak": 1.0937094688415527,
+          "scale": 1.0937094688415527
+        },
+        {
+          "group": "LG_L1_MASTER_CLOSET_MIRROR",
+          "image": "L1_MASTER_CLOSET_LM_LG_L1_MASTER_CLOSET_MIRROR.png",
+          "lights": [
+            "LIGHT_L1_MASTER_CLOSET_MIRROR_1"
+          ],
+          "mean": 0.004552378660510824,
+          "peak": 1.0696842670440674,
+          "scale": 1.0696842670440674
+        }
+      ],
+      "shellHash": "sha256:f1d081b37f1ff9050b3f4865650c5bfaf45ee262761f5b509d89a8a1a67f7ed9"
+    },
+    {
+      "cell": "L1_STAIR_MAIN",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_STAIR_MAIN_MAIN",
+          "image": "L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN.png",
+          "lights": [
+            "LIGHT_L1_STAIR_MAIN_MAIN_1"
+          ],
+          "mean": 0.001634132172624778,
+          "peak": 0.06499706208705902,
+          "scale": 0.06499706208705902
+        }
+      ],
+      "shellHash": "sha256:36432b0eeaf1915f8ba33cbe0c429176ff4b3d7362e338b53c263c4e0dcacf99"
+    },
+    {
+      "cell": "L1_STOR",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_STOR_MAIN",
+          "image": "L1_STOR_LM_LG_L1_STOR_MAIN.png",
+          "lights": [
+            "LIGHT_L1_STOR_MAIN_1"
+          ],
+          "mean": 0.01890376430720296,
+          "peak": 29.211833953857422,
+          "scale": 29.211833953857422
+        }
+      ],
+      "shellHash": "sha256:6b36585bfa1fb50377708126dd3a5245ef8ef3b11cdf83469305a396f3e10eda"
+    },
+    {
+      "cell": "L1_WC3",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_WC3_MAIN",
+          "image": "L1_WC3_LM_LG_L1_WC3_MAIN.png",
+          "lights": [
+            "LIGHT_L1_WC3_MAIN_1"
+          ],
+          "mean": 0.02769008210607963,
+          "peak": 17.5367488861084,
+          "scale": 17.5367488861084
+        }
+      ],
+      "shellHash": "sha256:d044d6d17b100b9fefe539c2fe70fd9a681837543829bf4bfb9a300ffeec177e"
+    },
+    {
+      "cell": "L1_WC4",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L1_WC4_MAIN",
+          "image": "L1_WC4_LM_LG_L1_WC4_MAIN.png",
+          "lights": [
+            "LIGHT_L1_WC4_MAIN_1"
+          ],
+          "mean": 0.022865367689684193,
+          "peak": 14.223576545715332,
+          "scale": 14.223576545715332
+        }
+      ],
+      "shellHash": "sha256:9d9671834ec34c7b3c8d6857f2bf1a6415d74350511f0bebf867d48064547ec6"
+    },
+    {
+      "cell": "L2_BATH4",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_BATH4_MAIN",
+          "image": "L2_BATH4_LM_LG_L2_BATH4_MAIN.png",
+          "lights": [
+            "LIGHT_L2_BATH4_MAIN_1",
+            "LIGHT_L2_BATH4_MAIN_2"
+          ],
+          "mean": 0.01645083257781051,
+          "peak": 6.820467472076416,
+          "scale": 6.820467472076416
+        },
+        {
+          "group": "LG_L2_BATH4_VANITY",
+          "image": "L2_BATH4_LM_LG_L2_BATH4_VANITY.png",
+          "lights": [
+            "LIGHT_L2_BATH4_VANITY_1"
+          ],
+          "mean": 0.00532878508294823,
+          "peak": 1.1778919696807861,
+          "scale": 1.1778919696807861
+        }
+      ],
+      "shellHash": "sha256:830f4c8df1a9686cf675e6d293de71b7ca0fc75b312612e066d015b130fa76ff"
+    },
+    {
+      "cell": "L2_BATH5",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_BATH5_MAIN",
+          "image": "L2_BATH5_LM_LG_L2_BATH5_MAIN.png",
+          "lights": [
+            "LIGHT_L2_BATH5_MAIN_1",
+            "LIGHT_L2_BATH5_MAIN_2"
+          ],
+          "mean": 0.013128075294103756,
+          "peak": 6.18767786026001,
+          "scale": 6.18767786026001
+        },
+        {
+          "group": "LG_L2_BATH5_VANITY",
+          "image": "L2_BATH5_LM_LG_L2_BATH5_VANITY.png",
+          "lights": [
+            "LIGHT_L2_BATH5_VANITY_1"
+          ],
+          "mean": 0.00426249858173202,
+          "peak": 1.0300395488739014,
+          "scale": 1.0300395488739014
+        }
+      ],
+      "shellHash": "sha256:6e0ea53786f0c61cfb7dfcbecce9301b8f042e55c0a30483e75b53d21e34dfa8"
+    },
+    {
+      "cell": "L2_BED6",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_BED6_MAIN",
+          "image": "L2_BED6_LM_LG_L2_BED6_MAIN.png",
+          "lights": [
+            "LIGHT_L2_BED6_MAIN_1",
+            "LIGHT_L2_BED6_MAIN_2"
+          ],
+          "mean": 0.01239719204048565,
+          "peak": 21.97340965270996,
+          "scale": 21.97340965270996
+        },
+        {
+          "group": "LG_L2_BED6_SEWING",
+          "image": "L2_BED6_LM_LG_L2_BED6_SEWING.png",
+          "lights": [
+            "LIGHT_L2_BED6_SEWING_1"
+          ],
+          "mean": 0.000192960406711311,
+          "peak": 0.004498985130339861,
+          "scale": 0.004498985130339861
+        }
+      ],
+      "shellHash": "sha256:9da94753d67a55352cc40aec52a3924caccfd2ba1b2e6bab9f92495fc2bbab5b"
+    },
+    {
+      "cell": "L2_BED7",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_BED7_BEDSIDE",
+          "image": "L2_BED7_LM_LG_L2_BED7_BEDSIDE.png",
+          "lights": [
+            "LIGHT_L2_BED7_BEDSIDE_1"
+          ],
+          "mean": 0.002981835485417256,
+          "peak": 0.030781906098127365,
+          "scale": 0.030781906098127365
+        },
+        {
+          "group": "LG_L2_BED7_MAIN",
+          "image": "L2_BED7_LM_LG_L2_BED7_MAIN.png",
+          "lights": [
+            "LIGHT_L2_BED7_MAIN_1",
+            "LIGHT_L2_BED7_MAIN_2",
+            "LIGHT_L2_BED7_MAIN_3"
+          ],
+          "mean": 0.012738298790172424,
+          "peak": 5.170466423034668,
+          "scale": 5.170466423034668
+        }
+      ],
+      "shellHash": "sha256:ff07910f2d92eba56a38a7fad55798cb95417c20537646c4eb465d420b3b6d84"
+    },
+    {
+      "cell": "L2_CLOSET_4",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_CLOSET_4_MAIN",
+          "image": "L2_CLOSET_4_LM_LG_L2_CLOSET_4_MAIN.png",
+          "lights": [
+            "LIGHT_L2_CLOSET_4_MAIN_1"
+          ],
+          "mean": 0.031008893231921807,
+          "peak": 17.38433265686035,
+          "scale": 17.38433265686035
+        }
+      ],
+      "shellHash": "sha256:481b7f9150252353acd4b87db59d3a876014818d0dba9bf6f6c53a8a030982a9"
+    },
+    {
+      "cell": "L2_GAMES",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_GAMES_ARCADE",
+          "image": "L2_GAMES_LM_LG_L2_GAMES_ARCADE.png",
+          "lights": [
+            "LIGHT_L2_GAMES_ARCADE_1"
+          ],
+          "mean": 0.0019837009831587347,
+          "peak": 0.6705254912376404,
+          "scale": 0.6705254912376404
+        },
+        {
+          "group": "LG_L2_GAMES_MAIN",
+          "image": "L2_GAMES_LM_LG_L2_GAMES_MAIN.png",
+          "lights": [
+            "LIGHT_L2_GAMES_MAIN_1",
+            "LIGHT_L2_GAMES_MAIN_2",
+            "LIGHT_L2_GAMES_MAIN_3",
+            "LIGHT_L2_GAMES_MAIN_4"
+          ],
+          "mean": 0.011945415943933228,
+          "peak": 6.656170845031738,
+          "scale": 6.656170845031738
+        },
+        {
+          "group": "LG_L2_GAMES_TABLE",
+          "image": "L2_GAMES_LM_LG_L2_GAMES_TABLE.png",
+          "lights": [
+            "LIGHT_L2_GAMES_TABLE_1",
+            "LIGHT_L2_GAMES_TABLE_2"
+          ],
+          "mean": 0.010819025802786162,
+          "peak": 0.0896439328789711,
+          "scale": 0.0896439328789711
+        }
+      ],
+      "shellHash": "sha256:85533d21e41ca429bce07afafe81bcfea744da505f1dd9293ed30f5dea3c8afc"
+    },
+    {
+      "cell": "L2_HALL",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_HALL_MAIN",
+          "image": "L2_HALL_LM_LG_L2_HALL_MAIN.png",
+          "lights": [
+            "LIGHT_L2_HALL_MAIN_1",
+            "LIGHT_L2_HALL_MAIN_2"
+          ],
+          "mean": 0.014310054522939276,
+          "peak": 12.100024223327637,
+          "scale": 12.100024223327637
+        },
+        {
+          "group": "LG_L2_HALL_NIGHT",
+          "image": "L2_HALL_LM_LG_L2_HALL_NIGHT.png",
+          "lights": [
+            "LIGHT_L2_HALL_NIGHT_1",
+            "LIGHT_L2_HALL_NIGHT_2"
+          ],
+          "mean": 0.0019390044015528704,
+          "peak": 0.0546019971370697,
+          "scale": 0.0546019971370697
+        }
+      ],
+      "shellHash": "sha256:522ab3bd2ba702d44c9fdba8910dcc07da079bb13b43509d34f0ad35d614ca0d"
+    },
+    {
+      "cell": "L2_HALL_W",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_HALL_W_ART",
+          "image": "L2_HALL_W_LM_LG_L2_HALL_W_ART.png",
+          "lights": [
+            "LIGHT_L2_HALL_W_ART_1",
+            "LIGHT_L2_HALL_W_ART_2"
+          ],
+          "mean": 0.0001233537699454455,
+          "peak": 0.0032660115975886583,
+          "scale": 0.0032660115975886583
+        },
+        {
+          "group": "LG_L2_HALL_W_MAIN",
+          "image": "L2_HALL_W_LM_LG_L2_HALL_W_MAIN.png",
+          "lights": [
+            "LIGHT_L2_HALL_W_MAIN_1",
+            "LIGHT_L2_HALL_W_MAIN_2",
+            "LIGHT_L2_HALL_W_MAIN_3"
+          ],
+          "mean": 0.023997182799283267,
+          "peak": 22.273649215698242,
+          "scale": 22.273649215698242
+        }
+      ],
+      "shellHash": "sha256:c616111ee7ac7f696738121a29dd7fd31fab9c3e8021fdb54151672579687a21"
+    },
+    {
+      "cell": "L2_LANDING",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_LANDING_JULIET",
+          "image": "L2_LANDING_LM_LG_L2_LANDING_JULIET.png",
+          "lights": [
+            "LIGHT_L2_LANDING_JULIET_1"
+          ],
+          "mean": 0.002268393986419793,
+          "peak": 0.015267145819962025,
+          "scale": 0.015267145819962025
+        },
+        {
+          "group": "LG_L2_LANDING_MAIN",
+          "image": "L2_LANDING_LM_LG_L2_LANDING_MAIN.png",
+          "lights": [
+            "LIGHT_L2_LANDING_MAIN_1",
+            "LIGHT_L2_LANDING_MAIN_2"
+          ],
+          "mean": 0.009474150547967,
+          "peak": 5.375096321105957,
+          "scale": 5.375096321105957
+        }
+      ],
+      "shellHash": "sha256:4838852ae4f5eb65c6b8c5fa1a0515bdb7c22daa838ec7557ec7da57549b11f6"
+    },
+    {
+      "cell": "L2_LIBRARY",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_LIBRARY_MAIN",
+          "image": "L2_LIBRARY_LM_LG_L2_LIBRARY_MAIN.png",
+          "lights": [
+            "LIGHT_L2_LIBRARY_MAIN_1",
+            "LIGHT_L2_LIBRARY_MAIN_2",
+            "LIGHT_L2_LIBRARY_MAIN_3"
+          ],
+          "mean": 0.01588227963834499,
+          "peak": 3.6483817100524902,
+          "scale": 3.6483817100524902
+        },
+        {
+          "group": "LG_L2_LIBRARY_READING",
+          "image": "L2_LIBRARY_LM_LG_L2_LIBRARY_READING.png",
+          "lights": [
+            "LIGHT_L2_LIBRARY_READING_1",
+            "LIGHT_L2_LIBRARY_READING_2"
+          ],
+          "mean": 0.007501823005898128,
+          "peak": 0.040709976106882095,
+          "scale": 0.040709976106882095
+        },
+        {
+          "group": "LG_L2_LIBRARY_SHELVES",
+          "image": "L2_LIBRARY_LM_LG_L2_LIBRARY_SHELVES.png",
+          "lights": [
+            "LIGHT_L2_LIBRARY_SHELVES_1",
+            "LIGHT_L2_LIBRARY_SHELVES_2",
+            "LIGHT_L2_LIBRARY_SHELVES_3",
+            "LIGHT_L2_LIBRARY_SHELVES_4"
+          ],
+          "mean": 0.014043496225754997,
+          "peak": 1.4081227779388428,
+          "scale": 1.4081227779388428
+        }
+      ],
+      "shellHash": "sha256:3fb97d61bec4321257cf5c639630d559f07f0cee49f0b44db33f223b5d322ca6"
+    },
+    {
+      "cell": "L2_LINEN2",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_LINEN2_MAIN",
+          "image": "L2_LINEN2_LM_LG_L2_LINEN2_MAIN.png",
+          "lights": [
+            "LIGHT_L2_LINEN2_MAIN_1"
+          ],
+          "mean": 0.03294948577251837,
+          "peak": 36.65042495727539,
+          "scale": 36.65042495727539
+        }
+      ],
+      "shellHash": "sha256:1df50d5b54265791e606a3a431936ea7f34a89c08e625a582067d2d999ed8995"
+    },
+    {
+      "cell": "L2_SITTING",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_SITTING_MAIN",
+          "image": "L2_SITTING_LM_LG_L2_SITTING_MAIN.png",
+          "lights": [
+            "LIGHT_L2_SITTING_MAIN_1",
+            "LIGHT_L2_SITTING_MAIN_2",
+            "LIGHT_L2_SITTING_MAIN_3"
+          ],
+          "mean": 0.011273950547444891,
+          "peak": 8.101346969604492,
+          "scale": 8.101346969604492
+        },
+        {
+          "group": "LG_L2_SITTING_READING",
+          "image": "L2_SITTING_LM_LG_L2_SITTING_READING.png",
+          "lights": [
+            "LIGHT_L2_SITTING_READING_1"
+          ],
+          "mean": 0.002662559686457599,
+          "peak": 0.03013928420841694,
+          "scale": 0.03013928420841694
+        }
+      ],
+      "shellHash": "sha256:4a9a7a68e1f4deea797c3bdf3c141431ff8da3e0dfadbe0596b12a81d74d396c"
+    },
+    {
+      "cell": "L2_STAIR_ATTIC",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_STAIR_ATTIC_MAIN",
+          "image": "L2_STAIR_ATTIC_LM_LG_L2_STAIR_ATTIC_MAIN.png",
+          "lights": [
+            "LIGHT_L2_STAIR_ATTIC_MAIN_1"
+          ],
+          "mean": 0.002079711031965802,
+          "peak": 0.015156349167227745,
+          "scale": 0.015156349167227745
+        }
+      ],
+      "shellHash": "sha256:3172ab6ae31ea7f6de71daad52c38694899c70cb853674e796b3ffe46fe86b17"
+    },
+    {
+      "cell": "L2_STAIR_MAIN",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_STAIR_MAIN_MAIN",
+          "image": "L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN.png",
+          "lights": [
+            "LIGHT_L2_STAIR_MAIN_MAIN_1"
+          ],
+          "mean": 0.0048955653658271795,
+          "peak": 0.06818404793739319,
+          "scale": 0.06818404793739319
+        }
+      ],
+      "shellHash": "sha256:3da7c11d498cbc7bd0e4bc77b829a2103c04b07ad67409c3d21a1e21071305fa"
+    },
+    {
+      "cell": "L2_STOR2",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_STOR2_MAIN",
+          "image": "L2_STOR2_LM_LG_L2_STOR2_MAIN.png",
+          "lights": [
+            "LIGHT_L2_STOR2_MAIN_1"
+          ],
+          "mean": 0.012859768043054715,
+          "peak": 8.94132137298584,
+          "scale": 8.94132137298584
+        }
+      ],
+      "shellHash": "sha256:ab07f9984e860b2c06dd42645e7c82f394e7630ae1b8245fb1b6d70a29b7a874"
+    },
+    {
+      "cell": "L2_WC5",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_WC5_MAIN",
+          "image": "L2_WC5_LM_LG_L2_WC5_MAIN.png",
+          "lights": [
+            "LIGHT_L2_WC5_MAIN_1"
+          ],
+          "mean": 0.027360099767887103,
+          "peak": 17.427770614624023,
+          "scale": 17.427770614624023
+        }
+      ],
+      "shellHash": "sha256:71195d8466041da6c25e83f7222e20921ee3d991ffb7b5fd91b5ce550d618f48"
+    },
+    {
+      "cell": "L2_WC6",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L2_WC6_MAIN",
+          "image": "L2_WC6_LM_LG_L2_WC6_MAIN.png",
+          "lights": [
+            "LIGHT_L2_WC6_MAIN_1"
+          ],
+          "mean": 0.0186195022430897,
+          "peak": 23.706968307495117,
+          "scale": 23.706968307495117
+        }
+      ],
+      "shellHash": "sha256:61eed3a472981f47ec853cd1dd68b8e6f0c30106728a22620a0b8217dcf8adba"
+    },
+    {
+      "cell": "L3_ROOM",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L3_ROOM_DESK",
+          "image": "L3_ROOM_LM_LG_L3_ROOM_DESK.png",
+          "lights": [
+            "LIGHT_L3_ROOM_DESK_1"
+          ],
+          "mean": 5.29084812555963e-05,
+          "peak": 0.002245976123958826,
+          "scale": 0.002245976123958826
+        },
+        {
+          "group": "LG_L3_ROOM_MAIN",
+          "image": "L3_ROOM_LM_LG_L3_ROOM_MAIN.png",
+          "lights": [
+            "LIGHT_L3_ROOM_MAIN_1",
+            "LIGHT_L3_ROOM_MAIN_2"
+          ],
+          "mean": 0.005026220507137257,
+          "peak": 0.07385279983282089,
+          "scale": 0.07385279983282089
+        }
+      ],
+      "shellHash": "sha256:88f6154376c2e6e8cb33f5db2b239c51cdf1be8176aa45f410398ec487e6a408"
+    },
+    {
+      "cell": "L3_STAIR_HEAD",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L3_STAIR_HEAD_MAIN",
+          "image": "L3_STAIR_HEAD_LM_LG_L3_STAIR_HEAD_MAIN.png",
+          "lights": [
+            "LIGHT_L3_STAIR_HEAD_MAIN_1"
+          ],
+          "mean": 0.0024335839374940004,
+          "peak": 0.03745025396347046,
+          "scale": 0.03745025396347046
+        }
+      ],
+      "shellHash": "sha256:c46335d563db35592f15f65a706438fde0fab94c7eb68951938d8b1709bde41d"
+    },
+    {
+      "cell": "L3_STORE_E",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L3_STORE_E_MAIN",
+          "image": "L3_STORE_E_LM_LG_L3_STORE_E_MAIN.png",
+          "lights": [
+            "LIGHT_L3_STORE_E_MAIN_1"
+          ],
+          "mean": 0.003423119985651692,
+          "peak": 0.0465780533850193,
+          "scale": 0.0465780533850193
+        }
+      ],
+      "shellHash": "sha256:5c3b072dad733853830f3e97238fce32f5e1d9e4ebfb68e3ba7c3278235046fc"
+    },
+    {
+      "cell": "L3_STORE_N",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L3_STORE_N_MAIN",
+          "image": "L3_STORE_N_LM_LG_L3_STORE_N_MAIN.png",
+          "lights": [
+            "LIGHT_L3_STORE_N_MAIN_1"
+          ],
+          "mean": 0.002392851198612102,
+          "peak": 0.04895671829581261,
+          "scale": 0.04895671829581261
+        }
+      ],
+      "shellHash": "sha256:62745ee8a8f8641f6908acfa39c0943dae9c4d782a565a9e4f8cad10a0f13340"
+    },
+    {
+      "cell": "L3_STORE_S",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L3_STORE_S_MAIN",
+          "image": "L3_STORE_S_LM_LG_L3_STORE_S_MAIN.png",
+          "lights": [
+            "LIGHT_L3_STORE_S_MAIN_1"
+          ],
+          "mean": 0.005070771114222505,
+          "peak": 0.06155269220471382,
+          "scale": 0.06155269220471382
+        }
+      ],
+      "shellHash": "sha256:04a5723488c07cecde5c2c70013b914326726d644810831c5e2e5087a3e0fb9f"
+    },
+    {
+      "cell": "L3_STORE_W",
+      "daylight": null,
+      "groups": [
+        {
+          "group": "LG_L3_STORE_W_MAIN",
+          "image": "L3_STORE_W_LM_LG_L3_STORE_W_MAIN.png",
+          "lights": [
+            "LIGHT_L3_STORE_W_MAIN_1"
+          ],
+          "mean": 0.0014634036507075278,
+          "peak": 0.02825901098549366,
+          "scale": 0.02825901098549366
+        }
+      ],
+      "shellHash": "sha256:71437d422e4f025f337b471447f4916cea0dbe8e06265ca95dbe3e486d7aac20"
+    }
+  ],
+  "reusedCells": 78,
+  "rgba8Bytes": 8126464,
+  "samples": 256,
+  "seed": 20260907,
+  "sourceBytes": 993589,
+  "tool": "bake_house_lightmaps.py"
+}

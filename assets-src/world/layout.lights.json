@@ -1969,7 +1969,9 @@
     // ---- LG_L3_STAIR_HEAD_MAIN x1
     {
       "id": "LIGHT_L3_STAIR_HEAD_MAIN_1", "cell": "L3_STAIR_HEAD", "group": "LG_L3_STAIR_HEAD_MAIN",
-      "type": "point", "position": [6.80, 12.68, -16.30],
+      // The stair head is below the main roof slope at this X, not below the cell AABB's 12.70 m
+      // maximum. 11.60 m leaves the emitter 75 mm below the generated rafter underside.
+      "type": "point", "position": [6.80, 11.60, -16.30],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 4.86,
       "fixtureProp": null, "emissiveMaterialSlot": null,
@@ -2007,7 +2009,7 @@
     // ---- LG_L3_STORE_W_MAIN x1 -- one bulb between the rafters
     {
       "id": "LIGHT_L3_STORE_W_MAIN_1", "cell": "L3_STORE_W", "group": "LG_L3_STORE_W_MAIN",
-      "type": "point", "position": [-9.35, 13.88, -20.70],
+      "type": "point", "position": [-9.35, 12.45, -20.70],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 9.05,
       "fixtureProp": null, "emissiveMaterialSlot": null,
@@ -2017,7 +2019,8 @@
     // ---- LG_L3_STORE_E_MAIN x1
     {
       "id": "LIGHT_L3_STORE_E_MAIN_1", "cell": "L3_STORE_E", "group": "LG_L3_STORE_E_MAIN",
-      "type": "point", "position": [6.80, 13.48, -22.70],
+      // Attic fixture heights follow the roof underside at their X/Z, not each cell AABB's peak.
+      "type": "point", "position": [6.80, 11.60, -22.70],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 6.86,
       "fixtureProp": null, "emissiveMaterialSlot": null,
@@ -2027,7 +2030,7 @@
     // ---- LG_L3_STORE_N_MAIN x1
     {
       "id": "LIGHT_L3_STORE_N_MAIN_1", "cell": "L3_STORE_N", "group": "LG_L3_STORE_N_MAIN",
-      "type": "point", "position": [-0.55, 12.48, -25.55],
+      "type": "point", "position": [-0.55, 11.40, -25.55],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 7.00,
       "fixtureProp": null, "emissiveMaterialSlot": null,
@@ -2037,7 +2040,7 @@
     // ---- LG_L3_STORE_S_MAIN x1
     {
       "id": "LIGHT_L3_STORE_S_MAIN_1", "cell": "L3_STORE_S", "group": "LG_L3_STORE_S_MAIN",
-      "type": "point", "position": [0.00, 12.28, -15.65],
+      "type": "point", "position": [0.00, 11.28, -15.65],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 800.0, "range": 5.36,
       "fixtureProp": null, "emissiveMaterialSlot": null,
