@@ -784,6 +784,8 @@ TEST(LightingSystemTests, AuthoredSkyColoursDriveOutdoorAmbientAndTheLmDayTint)
     EXPECT_NEAR(outdoors->skyAmbientColor.X, 0.370F, 1.0e-6F);
     EXPECT_NEAR(outdoors->skyAmbientColor.Y, 0.400F, 1.0e-6F);
     EXPECT_NEAR(outdoors->skyAmbientColor.Z, 0.440F, 1.0e-6F);
+    EXPECT_EQ(house.lighting.SkyAmbientColor(), outdoors->skyAmbientColor)
+        << "the public outdoor value diverged from the sky-open cell states";
     EXPECT_EQ(outdoors->daylightTint, Microsoft::Xna::Framework::Vector3())
         << "outdoor geometry has no baked interior LM_DAY pass";
 

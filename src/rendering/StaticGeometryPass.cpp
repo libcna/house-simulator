@@ -26,6 +26,7 @@
 #include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
 #include "cnahouse/util/Ids.hpp"
+#include "cnahouse/visibility/ExteriorScene.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkData.hpp"
 #include "cnahouse/world/WorldData.hpp"
@@ -382,6 +383,33 @@ namespace cnahouse::rendering
 
             if (leaderChunk.layout == world::ChunkLayout::Dual)
             {
+                const bool exteriorSkin =
+                    visibility::IsExteriorSkinMaterial(library_.materials[leader.material]);
+                if (exteriorSkin)
+                {
+                    // The shell keeps its adjacent room as the residency owner, but the outside
+                    // face is not illuminated through that room's windows and must never receive
+                    // its lamps. Its own LM_DAY islands contain the uniform-sky bake and preserve
+                    // the eave/reveal occlusion; only the live intensity comes from the globally
+                    // shared outdoor sky. This remains the stock DualTexture path.
+                    DrawParams draw = common;
+                    float scale = exposure;
+                    if (cell->lightmaps.daylight.has_value())
+                    {
+                        draw.lightmap = textures_(cell->lightmaps.daylight->contentName);
+                        scale = 0.5F * cell->lightmaps.daylight->scale * exposure;
+                    }
+                    else
+                    {
+                        draw.lightmap = textures_(kNeutralLightmap);
+                    }
+                    const Vector3& sky = lighting_->SkyAmbientColor();
+                    draw.colourMultiplier = Vector3(scale * sky.X, scale * sky.Y, scale * sky.Z);
+                    submit(draw, false, true);
+                    first = last;
+                    continue;
+                }
+
                 if (!cell->lightmaps.artificial.empty())
                 {
                     auto bindingFor = [&](util::Id group) -> const world::CellLightmapGroup*

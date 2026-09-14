@@ -156,6 +156,16 @@ namespace cnahouse::lighting
             return cloudCover_;
         }
 
+        /// @brief The live unoccluded hemispherical sky colour shared by outdoor receivers.
+        ///
+        /// Interior states multiply this by their window-derived daylight level. House outer-skin
+        /// chunks retain an interior cell as their residency key, so their renderer needs the
+        /// unattenuated value rather than borrowing that room's window transmission.
+        [[nodiscard]] const Microsoft::Xna::Framework::Vector3& SkyAmbientColor() const noexcept
+        {
+            return skyAmbientColor_;
+        }
+
         /// @brief The current solar position, recomputed from §35's clock by every `Update`.
         [[nodiscard]] const environment::SunPosition& Sun() const noexcept
         {
@@ -245,6 +255,7 @@ namespace cnahouse::lighting
         environment::MoonPhase moonPhase_;
         CelestialKeyLight sunKey_;
         CelestialKeyLight moonKey_;
+        Microsoft::Xna::Framework::Vector3 skyAmbientColor_;
         float cloudCover_ = 0.0F;
         bool sunComputed_ = false;
         bool moonKeyActive_ = false;

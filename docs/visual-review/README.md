@@ -142,3 +142,33 @@ missing building; interior and property references did not change.
 
 Remaining: give the outer skin a correct outdoor daylight path, then reassess exterior material
 scale/contrast before moving to primary furnishings. `VISUAL-GATE-1` has not passed.
+
+## Round 5 — live outdoor sky on the house skin
+
+Commit: `HOUSE-00922` working tree (`2026-09-14`)
+
+Capture: [`captures/house-00922-outdoor-sky-r1`](captures/house-00922-outdoor-sky-r1)
+
+Ranked defects:
+
+1. The façade is now materially solid and readable, but broad siding areas remain too uniformly
+   dark and flat. They need directional daylight/form separation and a more convincing siding
+   scale before the exterior reads as a finished home.
+2. Drive, lawn and surrounding ground still merge into a low-contrast foreground, while the
+   property has almost no vegetation or domestic exterior detail in this view.
+3. Every selected interior is empty: furniture and kitchen fixtures are now the largest repeated
+   defect across five of the six canonical views.
+4. Foyer and living room remain markedly darker than the other selected interiors.
+5. The peeling `paint_warm_fine` door/boundary finish remains inappropriate for maintained rooms.
+
+Fixed in this round: outer-skin chunks retain their per-cell uniform-sky bake for eave/reveal
+occlusion, but now tint it with the live unattenuated outdoor sky in one opaque Tier-S draw. They
+no longer receive the adjacent room's lamp atlases or window-transmission attenuation. The fixed
+front capture changed 19.02% of pixels and its façade crop mean rose from RGB
+(35.3, 39.8, 45.9) to (73.1, 77.5, 83.3); all five interior captures are pixel-identical to Round
+4. The five affected exterior regression references were inspected side by side and deliberately
+updated; culling equivalence remains green.
+
+Remaining: add believable exterior form/daylight separation and correct the large-scale siding
+read, then start primary furniture placement because emptiness dominates the connected-room
+views. `VISUAL-GATE-1` has not passed.

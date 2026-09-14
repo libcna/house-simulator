@@ -2594,7 +2594,8 @@ says what it is; §18.3 says whether it is lit by a bake:
 
 | Shell surface | Lit by | Tier S | Tier E |
 |---|---|---|---|
-| Floors, ceilings, wall surfaces, outer skin — the **lightmap receivers** | baked lightmap + dynamic room term | `DualTextureEffect`, lightmap in texture 2 | `RoomLit/LitLightmap` |
+| Floors, ceilings, wall surfaces — the **interior lightmap receivers** | baked lightmap + dynamic room term | `DualTextureEffect`, lightmap in texture 2 | `RoomLit/LitLightmap` |
+| House outer skin — room-resident but outdoor-lit | its baked uniform-sky shape × the live unattenuated outdoor sky; never the adjacent room's lamps or window attenuation | `DualTextureEffect`, `LM_DAY` in texture 2 | `RoomLit/LitLightmap` |
 | Skirtings, cornices, architraves, thresholds, frames, sashes, nosings, handrails, balusters, rafters, gutters, downspouts — **architectural detail** | the room's or the exterior's dynamic term only | `BasicEffect` (the stock path its class already names above) | `RoomLit`, no lightmap sample |
 | Glass | its own transparent/reflection path | `BasicEffect` + `EnvironmentMapEffect` as §22.2's `glass` row says | `RoomLit/Glass` |
 | Door and window leaves, cabinet fronts, anything an interactable moves | dynamic only | as the class's row | as the class's row |
@@ -2603,6 +2604,14 @@ Detail geometry needs no second UV channel and no artificially high lightmap den
 it is close to the receiver behind it, and the room term it shares with that receiver is what keeps
 the two consistent. Tier S is complete on its own here — nothing about this arrangement depends on
 Tier E, which improves the result and is not required for correctness.
+
+The outer skin is the deliberate exception to residency implying lighting ownership
+(`HOUSE-00922`). Its siding and brick islands already live in the adjacent cell's `LM_DAY` atlas,
+where the uniform world sky bakes eave, reveal and self-occlusion into them. At runtime that atlas
+is the opaque base draw, tinted by `LightingSystem`'s global sky ambient and camera exposure. The
+room's artificial atlases and its window-transmission-scaled daylight pass are not submitted for
+the outside face. Thus closing a room or turning on its lamp cannot darken or illuminate the
+façade, while no second bake format or runtime shader is introduced.
 
 ### 22.3 Why `footstepSurface` and `audioAbsorption` live here
 

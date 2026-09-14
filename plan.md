@@ -133,7 +133,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 9 | Room/portal visibility | 00661–00760 | 40 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
-| 12 | Materials and textures | 00891–00970 | 31 | The blockout reads as a building |
+| 12 | Materials and textures | 00891–00970 | 32 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 64 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
@@ -13211,6 +13211,27 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             pairs (worst 0.1966%, below the unchanged 0.2% limit); complete render suite after
             inspecting and intentionally updating only the five exterior HUD/sun references;
             six-view capture `docs/visual-review/captures/house-00921-facade-r1`.
+- [x] HOUSE-00922 — Light the room-owned outer skin from the live outdoor sky instead of its adjacent room
+      dep: HOUSE-00910, HOUSE-00921, HOUSE-01264, HOUSE-01651 · sys: rendering · plat: ALL · pri: MUST
+      accept: (1) siding and brick consume their own baked `LM_DAY` shape with the unattenuated
+              live sky colour; (2) room lights and window-transmission attenuation do not reach
+              those outdoor faces; (3) the ordinary interior multi-pass composition is unchanged;
+              (4) the fixed clear-day front capture exposes a readable, materially solid façade
+      verify: `LightingSystemTests.AuthoredSkyColoursDriveOutdoorAmbientAndTheLmDayTint`;
+              `StaticGeometryPassTests.*`; complete render/culling suites; fixed six-view capture
+      note: (2026-09-14) `LightingSystem` now publishes the one sky ambient value it already gives
+            sky-open cells. The production static pass uses that value for outer-skin runs, keeps
+            their uniform-sky bake as the occlusion/shape term and establishes colour/depth in one
+            opaque `DualTextureEffect` draw. It deliberately submits neither an artificial room
+            atlas nor the room-attenuated additive daylight pass for those runs.
+      measured: at the fixed front view exactly 19.02% of pixels changed while all five interior
+            views remained pixel-identical; the façade crop mean rose from RGB (35.3,39.8,45.9) to
+            (73.1,77.5,83.3), revealing the complete mass and brick water table without altering
+            exposure or the sky.
+      verified: complete unit suite 1392/1392; 4/4 production/debug `StaticGeometryPassTests`;
+            complete render suite with 39 unaffected tests green plus the five inspected exterior
+            references green after their intentional update; all 18 culled/unculled pairs green;
+            six-view capture `docs/visual-review/captures/house-00922-outdoor-sky-r1`.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -17155,19 +17176,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 332 numbered tasks across 53 phases.**
+**1 333 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 135 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 136 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 336** |
+| **Total** | **0–52** | **1 337** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -17203,6 +17224,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-14 | `HOUSE-00922` | **New task, next free id in phase 12's reserved 00891–00970 range.** Give the room-owned outer skin an explicitly outdoor lighting path while preserving its `DualTextureEffect` material and per-cell bake. | `HOUSE-00921` made the missing geometry visible and thereby exposed that residency ownership had been mistaken for lighting ownership: a closed room's window attenuation and lamps made its outside face nearly black. The already-shared sky colour and existing LM_DAY islands are the dependency-valid Tier-S answer; no renderer, room id or lightmap format changes. No id was renumbered or struck. |
 | 2026-09-14 | `HOUSE-00921` | **New task, next free id in phase 12's reserved 00891–00970 range.** Include the house's room-owned siding and brick water-table chunks in §25.6's exterior hierarchy. | The first fixed production front capture showed the sky through nearly the whole façade. A same-pose blockout capture proved this was geometry omission, not exposure: shell generation assigns each outer face to its adjacent interior cell, while `BuildExteriorScene` admitted only exterior-cell chunks and closed portals correctly kept those interior cells out of the walk. The material ids already distinguish the outer skin from the room's inner walls, so no room is hard-coded and portal/cell architecture remains intact. No id was renumbered or struck. |
 | 2026-09-13 | `HOUSE-01620` | **New task, next free id in phase 24's reserved range.** Restore compatibility with CNA merge `fcd43e995`, repair all newly exposed strict-XNA overload traps, record BL-16, and add the task to the phase review dependency. | The first full strict-XNA run during `HOUSE-01614` found that the merged CNA changed effect-pass indexing and now correctly rejects C++ copy/move conveniences for XNA reference objects. It also proved that indexed sampler assignment has no callable strict-XNA path. The gate cannot be waived: retained declarations are referenced, texture ownership is now explicit in project code, and the runtime uses the documented XNA default sampler. No CNA code or rule was weakened. |
 | 2026-09-12 | `HOUSE-01707` | **New task, next free id in phase 26's reserved range.** Repair `validate_world.py --selftest`'s weather fixture and add it to the phase review dependency. | `HOUSE-01684` made timing mandatory and `HOUSE-01685` expanded the rate contract from three channels to ten, but neither updated the validator's synthetic world. Its schema failure prevented every semantic mutation from running, yielding 112 secondary failures with empty problem lists. The authored world and normal CI gate remained valid; the fixture now states the complete contract and all self-test claims run again. No schema or semantic rule was weakened. |

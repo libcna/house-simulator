@@ -157,6 +157,7 @@ namespace cnahouse::lighting
                 : Microsoft::Xna::Framework::Vector3(shading.color.X * shading.skyDiffuseIntensity,
                                                      shading.color.Y * shading.skyDiffuseIntensity,
                                                      shading.color.Z * shading.skyDiffuseIntensity);
+        skyAmbientColor_ = skyColour;
 
         daylight_.Evaluate(sun_.altitudeDeg, sun_.azimuthDeg, cloudCover_, daylightLevels_);
         for (std::size_t index = 0; index < cells_.size(); ++index)

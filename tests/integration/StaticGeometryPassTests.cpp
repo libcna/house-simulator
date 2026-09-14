@@ -282,4 +282,116 @@ namespace
             << "the live daylight pass did not request the cell-owned LM_DAY atlas";
     }
 
+    TEST(StaticGeometryPassTests, ProductionOuterSkinUsesOnlyItsOutdoorDaylightBake)
+    {
+        const std::string worldPath = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
+        if (!std::filesystem::exists(worldPath + "/layout.cells.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/ci/build_content.py --only world";
+        }
+        cnahouse::world::WorldData::Contents contents;
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadLevels(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadMaterials(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadCells(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadPortals(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadOpenings(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadLights(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadInteractables(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadInitialState(worldPath, contents));
+        auto loaded = cnahouse::world::WorldData::Create(std::move(contents));
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+        cnahouse::world::WorldData world = std::move(loaded.Value());
+        const cnahouse::world::Cell* foyer = world.FindCell(cnahouse::util::Id::Of("L0_FOYER"));
+        const cnahouse::world::MaterialDef* siding =
+            world.FindMaterial(cnahouse::util::Id::Of("MAT_SIDING_WARM_WHITE"));
+        ASSERT_NE(foyer, nullptr);
+        ASSERT_NE(siding, nullptr);
+        ASSERT_TRUE(foyer->lightmaps.daylight.has_value());
+        ASSERT_FALSE(foyer->lightmaps.artificial.empty())
+            << "the test cannot prove room lamps were bypassed without one to bypass";
+        ASSERT_EQ(siding->effectTierS, cnahouse::world::EffectTier::DualTexture);
+
+        ChunkLibrary library;
+        library.cells = {"L0_FOYER"};
+        library.materials = {"MAT_SIDING_WARM_WHITE"};
+        cnahouse::world::Chunk chunk;
+        chunk.cell = 0U;
+        chunk.material = 0U;
+        chunk.layout = ChunkLayout::Dual;
+        chunk.vertexCount = 3U;
+        chunk.vertices.assign(3U * cnahouse::world::ChunkVertexStride(ChunkLayout::Dual), 0U);
+        chunk.indexCount = 3U;
+        chunk.indices.assign(3U * sizeof(std::uint16_t), 0U);
+        library.chunks.push_back(std::move(chunk));
+
+        std::vector<std::string> requested;
+        std::uint32_t drawn = 0U;
+        std::uint32_t states = 0U;
+        Gfx::Blend blend = Gfx::Blend::Zero;
+        bool depthWrites = false;
+        cnahouse::testsupport::DeviceHost host(
+            [&](Gfx::GraphicsDevice& device)
+            {
+                CellRuntime cells(device, library);
+                ASSERT_TRUE(cells.Load("L0_FOYER"));
+                cnahouse::visibility::VisibilitySystem visibility(world);
+                cnahouse::lighting::ShadingGrid shading = cnahouse::lighting::ShadingGrid::Unshaded();
+                cnahouse::environment::SimClock clock;
+                cnahouse::environment::CivilTime noon;
+                noon.month = 3;
+                noon.day = 20;
+                noon.hour = 12;
+                clock.SetStandard(noon);
+                cnahouse::lighting::LightingSystem lighting(world, shading, clock, visibility.Portals());
+                for (const cnahouse::util::Id group : foyer->lightGroups)
+                {
+                    lighting.SetGroupOn(group, true);
+                }
+                cnahouse::app::FrameContext frame;
+                frame.frameIndex = 1U;
+                lighting.Update(frame);
+                ASSERT_GT(lighting.SkyAmbientColor().X, 0.0F);
+
+                cnahouse::rendering::MaterialBinder binder(device);
+                ASSERT_TRUE(binder.RegisterAll(world.Materials()));
+                Gfx::Texture2D albedo(device, 2, 2);
+                Gfx::Texture2D lightmap(device, 2, 2);
+                Camera camera;
+                RenderList list;
+                RenderItem item = StaticItem(0U, 0U);
+                item.effect = cnahouse::world::EffectTier::DualTexture;
+                list.Add(item);
+                StateTracker tracker(device);
+                cnahouse::debug::Counters counters;
+                StaticGeometryPass pass(library,
+                                        cells,
+                                        world,
+                                        lighting,
+                                        camera,
+                                        list,
+                                        binder,
+                                        [&](std::string_view name)
+                                        {
+                                            requested.emplace_back(name);
+                                            return name == siding->albedo ? &albedo : &lightmap;
+                                        });
+                cnahouse::rendering::PassContext context{device, tracker, counters, 1.0F / 60.0F};
+                pass.Draw(context);
+                drawn = pass.ChunksDrawn();
+                states = pass.StateChanges();
+                blend = device.getBlendStateProperty().getColorDestinationBlendProperty();
+                depthWrites = device.getDepthStencilStateProperty().getDepthBufferWriteEnableProperty();
+            });
+        host.Run();
+        ASSERT_TRUE(host.Ran());
+        ASSERT_EQ(host.Failure(), "");
+        EXPECT_EQ(drawn, 1U);
+        EXPECT_EQ(states, 1U) << "room lamps or additive interior daylight reached the outer skin";
+        ASSERT_EQ(requested.size(), 2U);
+        EXPECT_EQ(requested[0], siding->albedo);
+        EXPECT_EQ(requested[1], foyer->lightmaps.daylight->contentName);
+        EXPECT_EQ(blend, Gfx::Blend::Zero) << "the outdoor daylight bake was not the opaque base";
+        EXPECT_TRUE(depthWrites);
+    }
+
 } // namespace
