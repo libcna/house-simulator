@@ -34,8 +34,8 @@ namespace cnahouse::visibility
     /// whether it is DRAWN.
     struct ExteriorScene
     {
-        /// @brief One per exterior chunk, in chunk order. `id` is `chunk index + 1`, so it
-        ///        survives the reordering `ExteriorBvh::Build` does.
+        /// @brief One per exterior-space or house-outer-skin chunk, in chunk order. `id` is
+        ///        `chunk index + 1`, so it survives the reordering `ExteriorBvh::Build` does.
         std::vector<ExteriorInstance> instances;
 
         /// @brief The hierarchy over them, built once at load.
@@ -58,11 +58,19 @@ namespace cnahouse::visibility
     /// removes nothing.
     [[nodiscard]] PropCategory CategoryForMaterial(std::string_view material) noexcept;
 
-    /// @brief Every chunk in an exterior cell, as instances, with the hierarchy over them.
+    /// @brief Whether a material identifies the house's outer skin.
+    ///
+    /// Outer-skin geometry deliberately keeps the adjacent room as its residency key, but a closed
+    /// room is not reached by portal traversal from the yard. The stable authored siding and
+    /// water-table ids are therefore the chunk-level bridge that places those surfaces in §25.6's
+    /// exterior hierarchy without placing the room's interior walls there too.
+    [[nodiscard]] bool IsExteriorSkinMaterial(std::string_view material) noexcept;
+
+    /// @brief Every chunk in an exterior cell plus the house's outer-skin chunks, as instances,
+    ///        with the hierarchy over them.
     ///
     /// @param library the chunks the content build produced.
-    /// @param world what says which cells are exterior. Without it nothing is exterior and the
-    ///        scene is empty, which is the right answer for a fixture with no world.
+    /// @param world what says which cells are exterior and validates every chunk's residency key.
     [[nodiscard]] ExteriorScene BuildExteriorScene(const world::ChunkLibrary& library,
                                                    const world::WorldData& world);
 

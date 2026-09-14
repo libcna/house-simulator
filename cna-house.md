@@ -1923,6 +1923,9 @@ move them, not an assertion in either direction.
   exterior cell building walls at its own `yOverride` height — 20 m round each yard, 65 m round
   `EXT_WORLD`'s 400 m square — so the first frame the blockout drew was the inside of that box.
   The wall a yard abuts belongs to the house, which draws its own outer skin.
+  That skin keeps the adjacent room as its residency key, but its siding and brick water-table
+  chunks also enter §25.6's exterior hierarchy: a closed portal must not make the façade disappear
+  from the yard (`HOUSE-00921`). Interior wall chunks remain exclusively on the room/portal path.
 
 ### 17.5 Directory layout
 

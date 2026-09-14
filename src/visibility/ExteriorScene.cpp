@@ -64,6 +64,12 @@ namespace cnahouse::visibility
         return PropCategory::Ground;
     }
 
+    bool IsExteriorSkinMaterial(std::string_view material) noexcept
+    {
+        return StartsWith(material, "MAT_SIDING_") || material == "MAT_BRICK_WATER_TABLE" ||
+               material == "MAT_BRICK_WATER_TABLE_WET";
+    }
+
     ExteriorScene BuildExteriorScene(const world::ChunkLibrary& library, const world::WorldData& world)
     {
         ExteriorScene scene;
@@ -76,13 +82,15 @@ namespace cnahouse::visibility
                 continue;
             }
             const world::Cell* cell = world.FindCell(util::Id::Of(library.cells[chunk.cell]));
-            if (cell == nullptr || cell->kind != world::CellKind::Exterior)
+            const std::string_view material = library.materials[chunk.material];
+            if (cell == nullptr ||
+                (cell->kind != world::CellKind::Exterior && !IsExteriorSkinMaterial(material)))
             {
                 continue;
             }
             ExteriorInstance instance;
             instance.id = util::Id(index + 1u);
-            instance.category = CategoryForMaterial(library.materials[chunk.material]);
+            instance.category = CategoryForMaterial(material);
             instance.bounds = chunk.bounds;
             scene.instances.push_back(instance);
         }

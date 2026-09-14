@@ -133,7 +133,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 9 | Room/portal visibility | 00661–00760 | 40 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
-| 12 | Materials and textures | 00891–00970 | 30 | The blockout reads as a building |
+| 12 | Materials and textures | 00891–00970 | 31 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 64 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
@@ -13194,6 +13194,23 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       accept: (1) density is a continuous function of `SeasonPhase`, not a step; (2) litter
               accumulates then thins; (3) by the start of winter the deciduous trees are bare
       verify: render test vegetation-leaffall-01..05 sampling the last fifth of autumn
+- [x] HOUSE-00921 — Put the room-owned house outer skin in §25.6's exterior hierarchy so a closed façade remains visible from the yard
+      dep: HOUSE-00700, HOUSE-00907 · sys: visibility · plat: ALL · pri: MUST
+      accept: (1) siding and brick water-table chunks enter the exterior BVH even though their
+              residency key is the adjacent room; (2) ordinary interior chunks do not; (3) the
+              fixed front-approach capture shows a solid façade with all portals closed
+      verify: unit ExteriorSceneTests.*; render/culling suites; visual-review exterior-front
+      note: (2026-09-14) `BuildExteriorScene` now recognizes the stable `MAT_SIDING_*` and brick
+            water-table vocabulary as the house outer skin. Fifty-seven room-owned façade chunks
+            join the existing 47 exterior-cell chunks without changing their residency key or
+            admitting any ordinary room wall; the fixed approach now shows the complete building.
+      finding: the newly solid façade is almost black in production because it still consumes the
+            adjacent room's interior lightmap. That is the next visible lighting defect; hiding the
+            geometry again or raising whole-frame exposure would be incorrect.
+      verified: 7/7 `ExteriorSceneTests`; complete unit suite 1392/1392; 18 culled/unculled render
+            pairs (worst 0.1966%, below the unchanged 0.2% limit); complete render suite after
+            inspecting and intentionally updating only the five exterior HUD/sun references;
+            six-view capture `docs/visual-review/captures/house-00921-facade-r1`.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -17138,19 +17155,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 331 numbered tasks across 53 phases.**
+**1 332 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 134 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 135 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 335** |
+| **Total** | **0–52** | **1 336** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -17186,6 +17203,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-14 | `HOUSE-00921` | **New task, next free id in phase 12's reserved 00891–00970 range.** Include the house's room-owned siding and brick water-table chunks in §25.6's exterior hierarchy. | The first fixed production front capture showed the sky through nearly the whole façade. A same-pose blockout capture proved this was geometry omission, not exposure: shell generation assigns each outer face to its adjacent interior cell, while `BuildExteriorScene` admitted only exterior-cell chunks and closed portals correctly kept those interior cells out of the walk. The material ids already distinguish the outer skin from the room's inner walls, so no room is hard-coded and portal/cell architecture remains intact. No id was renumbered or struck. |
 | 2026-09-13 | `HOUSE-01620` | **New task, next free id in phase 24's reserved range.** Restore compatibility with CNA merge `fcd43e995`, repair all newly exposed strict-XNA overload traps, record BL-16, and add the task to the phase review dependency. | The first full strict-XNA run during `HOUSE-01614` found that the merged CNA changed effect-pass indexing and now correctly rejects C++ copy/move conveniences for XNA reference objects. It also proved that indexed sampler assignment has no callable strict-XNA path. The gate cannot be waived: retained declarations are referenced, texture ownership is now explicit in project code, and the runtime uses the documented XNA default sampler. No CNA code or rule was weakened. |
 | 2026-09-12 | `HOUSE-01707` | **New task, next free id in phase 26's reserved range.** Repair `validate_world.py --selftest`'s weather fixture and add it to the phase review dependency. | `HOUSE-01684` made timing mandatory and `HOUSE-01685` expanded the rate contract from three channels to ten, but neither updated the validator's synthetic world. Its schema failure prevented every semantic mutation from running, yielding 112 secondary failures with empty problem lists. The authored world and normal CI gate remained valid; the fixture now states the complete contract and all self-test claims run again. No schema or semantic rule was weakened. |
 | 2026-09-06 | `HOUSE-00021` | `assets-src/effects/` → `assets-src/Effects/` in `cna-house.md` §70.1, in the §18.1 CMake snippet and in this task's text | Four statements in the two documents disagreed on the case of one path. §18.1's pipeline diagram, §17.5 and the "directories are PascalCase" rule of §8.3 said `Effects/`; §70.1 and the §18.1 CMake snippet said `effects/`. `check_xna_only.py` enforces where a `.fx` may live and needs exactly one spelling. |

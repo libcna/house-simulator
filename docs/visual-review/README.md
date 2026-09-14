@@ -114,3 +114,31 @@ remain equivalent, with the worst still below the unchanged 0.2% threshold.
 Remaining: correct the exterior material/lighting collapse first, replace the inappropriate door
 finish, calibrate the darkest main-floor bakes, then place primary furniture. `VISUAL-GATE-1` has
 not passed.
+
+## Round 4 — complete exterior-skin visibility
+
+Commit: `HOUSE-00921` working tree (`2026-09-14`)
+
+Capture: [`captures/house-00921-facade-r1`](captures/house-00921-facade-r1)
+
+Ranked defects:
+
+1. The complete façade is now visible but nearly black. Its siding and brick receivers use the
+   adjacent room's interior bake even when viewed from outdoors, so real exterior daylight does
+   not yet reveal the material.
+2. Drive, lawn and other foreground finishes still have too little separation from one another;
+   the black building makes this flat exterior balance especially obvious.
+3. Every selected interior remains empty, with no furniture, kitchen fixtures or domestic scale.
+4. Foyer and living room remain markedly darker than the other selected rooms.
+5. The peeling `paint_warm_fine` door/boundary finish remains inappropriate for maintained rooms.
+
+Fixed in this round: 57 room-owned siding and brick water-table chunks now join §25.6's 47
+exterior-cell instances while retaining their canonical room residency keys. The front camera
+therefore sees a solid house with doors and windows shut instead of the sky through an outline;
+ordinary interior walls remain portal-culled. The exterior BVH now contains 104 instances. All 18
+culled/unculled pairs remain below the unchanged 0.2% threshold. Five wide exterior regression
+references were inspected and intentionally updated because they now contain the previously
+missing building; interior and property references did not change.
+
+Remaining: give the outer skin a correct outdoor daylight path, then reassess exterior material
+scale/contrast before moving to primary furnishings. `VISUAL-GATE-1` has not passed.
