@@ -6,6 +6,8 @@
 // determinant. Neither question has a device in it.
 #include <gtest/gtest.h>
 
+#include "Microsoft/Xna/Framework/Graphics/CompareFunction.hpp"
+#include "Microsoft/Xna/Framework/Graphics/DepthStencilState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/RasterizerState.hpp"
 #include "cnahouse/app/CommandLine.hpp"
 #include "cnahouse/rendering/RenderStates.hpp"
@@ -16,6 +18,7 @@ namespace
     namespace Gfx = Microsoft::Xna::Framework::Graphics;
     using cnahouse::app::RenderTier;
     using cnahouse::rendering::CullPolicy;
+    using cnahouse::rendering::DepthEqualReadOnly;
     using cnahouse::rendering::PolicyForDeterminant;
     using cnahouse::rendering::StateFor;
 
@@ -107,6 +110,15 @@ namespace
         // visible in that, and XNA state objects are immutable after first use anyway.
         EXPECT_EQ(&StateFor(CullPolicy::ImportedFront), &StateFor(CullPolicy::ImportedFront));
         EXPECT_NE(&StateFor(CullPolicy::ImportedFront), &StateFor(CullPolicy::Mirrored));
+    }
+
+    TEST(RenderStatesTests, AdditiveStaticLightingUsesSharedDepthEqualWithoutWrites)
+    {
+        const Gfx::DepthStencilState& state = DepthEqualReadOnly();
+        EXPECT_TRUE(state.getDepthBufferEnableProperty());
+        EXPECT_FALSE(state.getDepthBufferWriteEnableProperty());
+        EXPECT_EQ(state.getDepthBufferFunctionProperty(), Gfx::CompareFunction::Equal);
+        EXPECT_EQ(&state, &DepthEqualReadOnly()) << "a lightmap pass must not allocate a state";
     }
 
     TEST(RenderStatesTests, AMirroringWorldMatrixReversesTheWinding)

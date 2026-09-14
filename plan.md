@@ -13528,9 +13528,22 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             replacing the per-room colour with black is CAUGHT by the active-group test. The full
             **1209/1209** unit suite and the isolated virtual-display walk lighting integration
             case are green.
-- [ ] HOUSE-01256 — Implement the multi-pass additive static lighting draw (pass 1 opaque + up to 3 additive light-group passes)
+- [x] HOUSE-01256 — Implement the multi-pass additive static lighting draw (pass 1 opaque + up to 3 additive light-group passes)
       dep: HOUSE-00912, HOUSE-00079 · sys: rendering · plat: ALL · pri: MUST
       accept: depth-equal on the additive passes; no z-fighting; exact addition
+      note: (2026-09-14) Tier S now draws the first canonical `LM_ART` atlas opaque and each
+            additional active group additively over identical world-space geometry. Every pass uses
+            that group's independent switch/dimmer level, Planckian colour and baked HDR scale;
+            inactive later groups submit nothing. Logical chunk and triangle counters count the
+            geometry once rather than inflating with lighting passes.
+      correction: §23.3 said `k <= 3` while this task has always specified one opaque plus up to
+            three additive group passes, the schema permits four, and canonical `L0_KITCHEN`
+            actually owns four. The architecture now says `k <= 4`; no id or dependency changed.
+      verified: warning-clean max-4-core game/unit/integration build; shared depth state unit test;
+            live-device production pass test with two active kitchen groups proves `Additive`,
+            depth enabled, depth writes off and `Equal`; HOUSE-00079's depth-tilted GPU probe proves
+            exact 60 + 40 and 60 + 40 + 40 pixel sums with zero rejected pixels; 12-pose blockout
+            goldens and all 18 culled-vs-unculled comparisons pass.
 - [ ] HOUSE-01257 — Implement the `ambientFloor` so an unlit windowless room is very dark but not black
       dep: HOUSE-01256 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-01258 — Implement the switch-on transition per bulb class (filament ramp, instant LED, fluorescent flicker start)

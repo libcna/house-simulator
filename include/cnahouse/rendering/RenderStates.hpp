@@ -3,8 +3,9 @@
 
 namespace Microsoft::Xna::Framework::Graphics
 {
+    class DepthStencilState;
     class RasterizerState;
-}
+} // namespace Microsoft::Xna::Framework::Graphics
 
 namespace cnahouse::rendering
 {
@@ -64,5 +65,12 @@ namespace cnahouse::rendering
     /// state has to reverse with it. Computing this in one place is what stops every draw site making
     /// the same judgement independently and one of them getting it wrong.
     [[nodiscard]] CullPolicy PolicyForDeterminant(float worldDeterminant, bool twoSided) noexcept;
+
+    /// @brief Depth test used after Tier S's opaque static-light pass.
+    ///
+    /// The same world-space geometry and matrices are submitted again, so `Equal` keeps every
+    /// covered pixel while disabled writes preserve the first pass's depth for later overlays.
+    /// `HOUSE-00079` measured this on a depth-tilted quad: no rejected pixels and exact addition.
+    [[nodiscard]] const Microsoft::Xna::Framework::Graphics::DepthStencilState& DepthEqualReadOnly() noexcept;
 
 } // namespace cnahouse::rendering

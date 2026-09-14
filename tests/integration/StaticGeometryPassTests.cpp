@@ -14,6 +14,9 @@
 
 #include <gtest/gtest.h>
 
+#include "Microsoft/Xna/Framework/Graphics/BlendState.hpp"
+#include "Microsoft/Xna/Framework/Graphics/CompareFunction.hpp"
+#include "Microsoft/Xna/Framework/Graphics/DepthStencilState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 
@@ -153,7 +156,7 @@ namespace
         EXPECT_FALSE(activeWithAnotherPassOnly) << "another pass's item made this one active";
     }
 
-    TEST(StaticGeometryPassTests, ProductionLoadsCanonicalAlbedoAndCellLightmapBeforeDrawing)
+    TEST(StaticGeometryPassTests, ProductionDrawsActiveArtificialGroupsAdditivelyAtEqualDepth)
     {
         const std::string worldPath = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
         if (!std::filesystem::exists(worldPath + "/layout.cells.json"))
@@ -175,6 +178,7 @@ namespace
         const cnahouse::world::Cell* kitchen = world.FindCell(cnahouse::util::Id::Of("L0_KITCHEN"));
         ASSERT_NE(kitchen, nullptr);
         ASSERT_TRUE(kitchen->lightmaps.daylight.has_value());
+        ASSERT_GE(kitchen->lightmaps.artificial.size(), 2U);
         const cnahouse::world::MaterialDef* floor = world.FindMaterial(kitchen->floorMaterial);
         ASSERT_NE(floor, nullptr);
         ASSERT_EQ(floor->effectTierS, cnahouse::world::EffectTier::DualTexture);
@@ -203,6 +207,8 @@ namespace
                 cnahouse::lighting::ShadingGrid shading = cnahouse::lighting::ShadingGrid::Unshaded();
                 cnahouse::environment::SimClock clock;
                 cnahouse::lighting::LightingSystem lighting(world, shading, clock, visibility.Portals());
+                ASSERT_TRUE(lighting.SetGroupOn(kitchen->lightmaps.artificial[0].group, true));
+                ASSERT_TRUE(lighting.SetGroupOn(kitchen->lightmaps.artificial[1].group, true));
                 cnahouse::app::FrameContext frame;
                 frame.frameIndex = 1U;
                 lighting.Update(frame);
@@ -233,14 +239,33 @@ namespace
                 cnahouse::rendering::PassContext context{device, tracker, counters, 1.0F / 60.0F};
                 pass.Draw(context);
                 drawn = pass.ChunksDrawn();
+                EXPECT_EQ(pass.StateChanges(), 2U) << "one opaque group plus one active additive group";
+                const Gfx::BlendState& blend = device.getBlendStateProperty();
+                EXPECT_EQ(blend.getColorSourceBlendProperty(),
+                          Gfx::BlendState::Additive.getColorSourceBlendProperty());
+                EXPECT_EQ(blend.getColorDestinationBlendProperty(),
+                          Gfx::BlendState::Additive.getColorDestinationBlendProperty());
+                const Gfx::DepthStencilState& depth = device.getDepthStencilStateProperty();
+                EXPECT_TRUE(depth.getDepthBufferEnableProperty());
+                EXPECT_FALSE(depth.getDepthBufferWriteEnableProperty());
+                EXPECT_EQ(depth.getDepthBufferFunctionProperty(), Gfx::CompareFunction::Equal);
             });
         host.Run();
         ASSERT_TRUE(host.Ran());
         ASSERT_EQ(host.Failure(), "");
         EXPECT_EQ(drawn, 1U);
         EXPECT_NE(std::find(requested.begin(), requested.end(), floor->albedo), requested.end());
-        EXPECT_NE(std::find(requested.begin(), requested.end(), kitchen->lightmaps.daylight->contentName),
+        EXPECT_NE(std::find(requested.begin(),
+                            requested.end(),
+                            kitchen->lightmaps.artificial[0].texture.contentName),
                   requested.end());
+        EXPECT_NE(std::find(requested.begin(),
+                            requested.end(),
+                            kitchen->lightmaps.artificial[1].texture.contentName),
+                  requested.end());
+        EXPECT_EQ(std::find(requested.begin(), requested.end(), kitchen->lightmaps.daylight->contentName),
+                  requested.end())
+            << "HOUSE-01264 owns the separate daylight pass";
     }
 
 } // namespace

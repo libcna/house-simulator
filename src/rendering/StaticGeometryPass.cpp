@@ -256,9 +256,6 @@ namespace cnahouse::rendering
         const Microsoft::Xna::Framework::Matrix view = camera_.View();
         const Microsoft::Xna::Framework::Matrix projection = camera_.Projection(aspect);
 
-        context.states.SetDepthStencil(Gfx::DepthStencilState::Default);
-        context.states.SetBlend(Gfx::BlendState::Opaque);
-
         constexpr std::string_view kNeutralLightmap = "Textures/Fallback/grey";
         const std::span<const visibility::RenderItem> items = list_.ItemsFor(Pass::OpaqueStatic);
         std::size_t first = 0u;
@@ -313,93 +310,136 @@ namespace cnahouse::rendering
                 continue;
             }
 
-            DrawParams draw;
-            draw.world = &worldMatrix;
-            draw.view = &view;
-            draw.projection = &projection;
+            DrawParams common;
+            common.world = &worldMatrix;
+            common.view = &view;
+            common.projection = &projection;
             if (!material->albedo.empty())
             {
-                draw.diffuse = textures_(material->albedo);
+                common.diffuse = textures_(material->albedo);
             }
 
             const lighting::RoomLightState* room = lighting_->FindCell(cell->id);
-            if (leaderChunk.layout == world::ChunkLayout::Dual)
-            {
-                if (cell->lightmaps.daylight.has_value())
-                {
-                    const world::CellLightmapTexture& lightmap = *cell->lightmaps.daylight;
-                    draw.lightmap = textures_(lightmap.contentName);
-                    const Vector3 daylight = room != nullptr ? room->daylightTint : Vector3();
-                    // DualTextureEffect evaluates 2 * texture0 * texture1. The bake is stored at
-                    // full normalised range, so the 0.5 here is the one compensation for that
-                    // measured stock-effect factor. The small floor keeps a dark receiver legible
-                    // until HOUSE-01257 moves it into the complete additive composition.
-                    const float scale = 0.5F * lightmap.scale;
-                    draw.colourMultiplier = Vector3(scale * (daylight.X + lighting::kAmbientFloor),
-                                                    scale * (daylight.Y + lighting::kAmbientFloor),
-                                                    scale * (daylight.Z + lighting::kAmbientFloor));
-                }
-                else
-                {
-                    // Exterior ground cells have no baked receiver atlas. Half-grey is the neutral
-                    // value under DualTextureEffect's measured x2 product, so their real albedo is
-                    // shown without pretending they own a room bake.
-                    draw.lightmap = textures_(kNeutralLightmap);
-                }
-            }
-            else if (room != nullptr)
-            {
-                draw.ambientLight =
-                    Vector3(std::min(1.0F, room->skyAmbientColor.X + lighting::kAmbientFloor),
-                            std::min(1.0F, room->skyAmbientColor.Y + lighting::kAmbientFloor),
-                            std::min(1.0F, room->skyAmbientColor.Z + lighting::kAmbientFloor));
-            }
-
-            const util::Result<Gfx::Effect*> effectResult = binder_->Bind(material->id, draw);
             const util::Result<CullPolicy> cull = binder_->CullFor(material->id, 1.0F);
-            if (!effectResult || !cull)
+            if (!cull)
             {
                 first = last;
                 continue;
             }
-            ++stateChanges_;
             context.states.SetRasterizer(showBackFaces_ ? Gfx::RasterizerState::CullCounterClockwise
                                                         : StateFor(cull.Value()));
 
-            Gfx::EffectPassCollection& passes =
-                effectResult.Value()->getCurrentTechniqueProperty()->getPassesProperty();
-            const int passCount = passes.getCountProperty();
-            for (int p = 0; p < passCount; ++p)
+            auto submit = [&](const DrawParams& draw, bool additive, bool countGeometry)
             {
-                bool applied = false;
-                for (std::size_t index = first; index < last; ++index)
+                const util::Result<Gfx::Effect*> effectResult = binder_->Bind(material->id, draw);
+                if (!effectResult)
                 {
-                    const visibility::RenderItem& item = items[index];
-                    const world::CellRuntime::ResidentChunk* resident = cells_.Find(item.geometry);
-                    if (resident == nullptr)
+                    return false;
+                }
+                ++stateChanges_;
+                context.states.SetBlend(additive ? Gfx::BlendState::Additive : Gfx::BlendState::Opaque);
+                context.states.SetDepthStencil(additive ? DepthEqualReadOnly()
+                                                        : Gfx::DepthStencilState::Default);
+
+                Gfx::EffectPassCollection& passes =
+                    effectResult.Value()->getCurrentTechniqueProperty()->getPassesProperty();
+                const int passCount = passes.getCountProperty();
+                for (int p = 0; p < passCount; ++p)
+                {
+                    bool applied = false;
+                    for (std::size_t index = first; index < last; ++index)
                     {
-                        continue;
-                    }
-                    const world::Chunk& chunk = library_.chunks[item.geometry];
-                    device.SetVertexBuffer(resident->vertices.get());
-                    device.setIndicesProperty(resident->indices.get());
-                    if (!applied)
-                    {
-                        passes[p]->Apply();
-                        applied = true;
-                    }
-                    device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList,
-                                                 0,
-                                                 0,
-                                                 static_cast<int>(chunk.vertexCount),
-                                                 0,
-                                                 static_cast<int>(resident->primitiveCount));
-                    if (p == 0)
-                    {
-                        ++chunksDrawn_;
-                        trianglesDrawn_ += resident->primitiveCount;
+                        const visibility::RenderItem& item = items[index];
+                        const world::CellRuntime::ResidentChunk* resident = cells_.Find(item.geometry);
+                        if (resident == nullptr)
+                        {
+                            continue;
+                        }
+                        const world::Chunk& chunk = library_.chunks[item.geometry];
+                        device.SetVertexBuffer(resident->vertices.get());
+                        device.setIndicesProperty(resident->indices.get());
+                        if (!applied)
+                        {
+                            passes[p]->Apply();
+                            applied = true;
+                        }
+                        device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList,
+                                                     0,
+                                                     0,
+                                                     static_cast<int>(chunk.vertexCount),
+                                                     0,
+                                                     static_cast<int>(resident->primitiveCount));
+                        if (countGeometry && p == 0)
+                        {
+                            ++chunksDrawn_;
+                            trianglesDrawn_ += resident->primitiveCount;
+                        }
                     }
                 }
+                return true;
+            };
+
+            if (leaderChunk.layout == world::ChunkLayout::Dual)
+            {
+                if (!cell->lightmaps.artificial.empty())
+                {
+                    const world::CellLightmapGroup& base = cell->lightmaps.artificial.front();
+                    DrawParams draw = common;
+                    draw.lightmap = textures_(base.texture.contentName);
+                    const float level = lighting_->GroupLevelInCell(cell->id, base.group);
+                    const Vector3 colour = lighting_->GroupColor(base.group);
+                    const float scale = 0.5F * base.texture.scale * level;
+                    draw.colourMultiplier = Vector3(scale * colour.X, scale * colour.Y, scale * colour.Z);
+                    if (!submit(draw, false, true))
+                    {
+                        first = last;
+                        continue;
+                    }
+
+                    // The first group establishes colour and depth even when its switch is off.
+                    // Later groups with no contribution cost no draw; active ones repeat exactly
+                    // the same geometry under the depth-equal state measured by HOUSE-00079.
+                    for (std::size_t index = 1U; index < cell->lightmaps.artificial.size(); ++index)
+                    {
+                        const world::CellLightmapGroup& group = cell->lightmaps.artificial[index];
+                        const float groupLevel = lighting_->GroupLevelInCell(cell->id, group.group);
+                        if (groupLevel <= 0.0F)
+                        {
+                            continue;
+                        }
+                        DrawParams additional = common;
+                        additional.lightmap = textures_(group.texture.contentName);
+                        const Vector3 groupColour = lighting_->GroupColor(group.group);
+                        const float groupScale = 0.5F * group.texture.scale * groupLevel;
+                        additional.colourMultiplier = Vector3(groupScale * groupColour.X,
+                                                              groupScale * groupColour.Y,
+                                                              groupScale * groupColour.Z);
+                        submit(additional, true, false);
+                    }
+                }
+                else
+                {
+                    // Exterior surfaces have no room bake. Half-grey is neutral under
+                    // DualTextureEffect's measured x2 product. An interior receiver with no
+                    // artificial group is black until HOUSE-01257 adds its ambient floor and
+                    // HOUSE-01264 adds daylight, but still writes the depth those passes need.
+                    DrawParams draw = common;
+                    draw.lightmap = textures_(kNeutralLightmap);
+                    if (cell->lightmaps.daylight.has_value())
+                    {
+                        draw.colourMultiplier = Vector3();
+                    }
+                    submit(draw, false, true);
+                }
+            }
+            else
+            {
+                DrawParams draw = common;
+                if (room != nullptr)
+                {
+                    draw.ambientLight = room->skyAmbientColor;
+                }
+                submit(draw, false, true);
             }
             first = last;
         }

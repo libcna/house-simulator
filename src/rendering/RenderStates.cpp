@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/rendering/RenderStates.hpp"
 
+#include "Microsoft/Xna/Framework/Graphics/CompareFunction.hpp"
+#include "Microsoft/Xna/Framework/Graphics/DepthStencilState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/RasterizerState.hpp"
 
 namespace cnahouse::rendering
@@ -35,6 +37,26 @@ namespace cnahouse::rendering
             return CullPolicy::TwoSided;
         }
         return worldDeterminant < 0.0f ? CullPolicy::Mirrored : CullPolicy::ImportedFront;
+    }
+
+    const Microsoft::Xna::Framework::Graphics::DepthStencilState& DepthEqualReadOnly() noexcept
+    {
+        namespace Gfx = Microsoft::Xna::Framework::Graphics;
+
+        struct Holder
+        {
+            Holder()
+            {
+                state.setDepthBufferEnableProperty(true);
+                state.setDepthBufferWriteEnableProperty(false);
+                state.setDepthBufferFunctionProperty(Gfx::CompareFunction::Equal);
+            }
+
+            Gfx::DepthStencilState state;
+        };
+
+        static const Holder state;
+        return state.state;
     }
 
 } // namespace cnahouse::rendering

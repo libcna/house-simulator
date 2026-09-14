@@ -2680,8 +2680,9 @@ For each static chunk in a lit room:
 | 2..k | `DualTextureEffect` | `LM_ART_<groupN>` | `artColor(groupN) · level(groupN)` | `Additive` | no write, `Equal` |
 | k+1 | `DualTextureEffect` | `LM_DAY` | `skyColor · daylightLevel` | `Additive` | no write, `Equal` |
 
-`k` ≤ 3 light groups per room (enforced by the validator). A dark room with no daylight draws one
-pass; a fully lit kitchen at noon draws five. The `ambientFloor` (≈ 0.025 × the room's paint
+`k` ≤ 4 light groups per room (one opaque plus up to three additive, enforced by the validator).
+A dark room with no daylight draws one pass; the four-group kitchen at noon draws five. The
+`ambientFloor` (≈ 0.025 × the room's paint
 colour) means an unlit windowless room is *very* dark but not pure black — silhouettes remain
 legible, which is what a real dark room looks like once your eyes adjust.
 
