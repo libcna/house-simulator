@@ -1,5 +1,14 @@
 # Material texture provenance
 
+## Project-generated snow-shell maps
+
+`snow_shell_albedo.png` and `snow_shell_normal.png` are deterministic project-authored assets from
+`tools/assets/snow_materials.py` (`HOUSE-00906`), licensed with the project under Ms-PL. Four
+octaves of wrapping value noise form one subtle, non-directional powder height field; opaque RGBA
+provides the stock-XNA shell detail and the linear +Y tangent normal is ready for
+`SurfaceBlend/Snowy`. All six `snow_<class>` rows share these maps. There is no upstream asset or
+downloaded source.
+
 ## Project-generated water maps
 
 `water_flow_albedo.png` and `water_flow_normal.png` are deterministic project-authored assets from

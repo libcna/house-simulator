@@ -143,8 +143,10 @@ EXPECTED_COUNTS = {
 # The directory and its content configuration are shared with project-generated material maps.
 # Keep this list explicit: silently accepting every non-ambientCG PNG would weaken HOUSE-00296's
 # exact-set gate, while claiming another generator's output would make the two ownership checks
-# contradict each other.  `glass_water_materials.py --check` owns these two bytes and entries.
+# contradict each other.  Their dedicated material generators own these bytes and entries.
 FOREIGN_TEXTURES = {
+    "snow_shell_albedo.png",
+    "snow_shell_normal.png",
     "water_flow_albedo.png",
     "water_flow_normal.png",
 }

@@ -19381,6 +19381,48 @@
       "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
+      "id": "TEXTURE_MATERIAL_SNOW_SHELL_ALBEDO",
+      "category": "material",
+      "sourceFile": "assets-src/Textures/Materials/snow_shell_albedo.png",
+      "sourceSha256": "8f90ea1961bfc9780b03be30e9f3b72c58027128dd4d0e784b78a080b2c595c3",
+      "contentName": "Textures/Materials/snow_shell_albedo",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural tileable snow-shell albedo",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/assets/snow_materials.py for HOUSE-00906. Opaque high-value powder detail is shared by all six snow_<class> shell endpoints."
+      }
+    },
+    {
+      "id": "TEXTURE_MATERIAL_SNOW_SHELL_NORMAL",
+      "category": "material",
+      "sourceFile": "assets-src/Textures/Materials/snow_shell_normal.png",
+      "sourceSha256": "011731ba30cd2a304f6d53131dec642ff36aaa2f24d909826b96fad5b7636af1",
+      "contentName": "Textures/Materials/snow_shell_normal",
+      "kind": "texture",
+      "residencyPack": "core",
+      "origin": {
+        "kind": "generated",
+        "name": "Procedural tileable snow-shell normal",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Generated deterministically by tools/assets/snow_materials.py for HOUSE-00906 from the same four-octave periodic height field as the albedo. The linear +Y tangent normal is reserved for SurfaceBlend/Snowy; Tier S uses the shared albedo through BasicEffect."
+      }
+    },
+    {
       "id": "TEXTURE_MATERIAL_WATER_FLOW_ALBEDO",
       "category": "material",
       "sourceFile": "assets-src/Textures/Materials/water_flow_albedo.png",

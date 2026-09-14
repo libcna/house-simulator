@@ -2536,6 +2536,15 @@ metal finishes are the three deliberate exclusions from the seventeen-finish out
 Saturated garden soil changes its footstep surface to `mud`. Exact pairs and dry/wet review are in
 `docs/asset-selection/wet-materials.md`.
 
+`HOUSE-00906` fixes the snow shell's one shared procedural powder surface and its six
+`snow_<class>` rows: asphalt, grass, metal, soil, stone and wood, exactly matching the offline
+shell source graph. Tier S draws the unlightmapped `TEXCOORD_0` shell through `BasicEffect` and
+multiplies the row's full-opacity endpoint by §38's depth smoothstep; Tier E consumes the same
+albedo/normal maps through `SurfaceBlend/Snowy`. Slight class tints retain the substrate influence
+at shallow coverage without duplicating texture bytes. Snow rows reject recursive cover, select
+the `snow` footstep surface and use 0.85 absorption. Exact rows, hashes and shallow/deep review are
+in `docs/asset-selection/snow-materials.md`.
+
 ### 22.2 Material classes and their effect mapping
 
 | Class | Tier S effect | Tier E technique | Notes |

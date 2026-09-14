@@ -13035,8 +13035,24 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             deploy/id-golden and shell-manifest checks; max-4-core warning-clean full build;
             complete suite 1564/1564 executed tests (0 failures); `tools/ci/run_checks.sh` all
             gates green, including 321 strict-XNA translation units.
-- [ ] HOUSE-00906 — Grouped: author the 6 snow materials and the snow-shell material
+- [x] HOUSE-00906 — Grouped: author the 6 snow materials and the snow-shell material
       dep: HOUSE-00903 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-14) `snow_materials.py` owns one complete `snow_<class>` row for asphalt,
+            grass, metal, soil, stone and wood over a single shared 256-square procedural powder
+            albedo/normal pair. Tier S uses an unlightmapped, alpha-blended `BasicEffect` shell;
+            Tier E names `SurfaceBlend/Snowy`. All six reject recursive cover, select `snow`
+            footsteps and set the markedly quiet 0.85 absorption required by §38.
+      finding: `build_snowshell.py`'s real 17 groups resolve to exactly those six source classes.
+            The title's singular snow-shell material is therefore the one shared visual surface,
+            not a seventh invented base class; class identity remains in six rows as §22.2 and the
+            shell format require. An initial directional-wave texture read as cross-hatched and
+            was visually rejected in favour of seamless four-octave value noise.
+      verified: six exact rows and live snow-shell class census; byte-deterministic opaque RGBA
+            albedo and linear RGB normal with <= 1-level edge jumps; retained shallow/deep preview;
+            both maps compile to `.cnb`; 610-row manifest, licence, budget, world deploy/schema,
+            id-golden and shell-manifest checks; max-4-core warning-clean full build; complete suite
+            1564/1564 executed tests (0 failures); `tools/ci/run_checks.sh` all gates green,
+            including the snow self-test/check and 321 strict-XNA translation units.
 - [ ] HOUSE-00907 — Apply the real materials to the generated shell, replacing the placeholders, room by room per the palette table
       dep: HOUSE-00901, HOUSE-00902 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00908 — Author the room palette table (wall colour, ceiling colour, floor material, trim colour) for all 78 interior cells

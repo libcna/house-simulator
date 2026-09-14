@@ -3535,7 +3535,7 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 109U);
+        EXPECT_EQ(contents.materials.size(), 115U);
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
@@ -3678,6 +3678,29 @@ namespace
         EXPECT_FLOAT_EQ(wetSoilAt->wet.albedoDarken, 0.0F);
         EXPECT_FLOAT_EQ(wetSoilAt->wet.specularBoost, 1.0F);
         EXPECT_EQ(wetSoilAt->effectTierE, "SurfaceBlend/Wet");
+
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return material.surfaceState == world::SurfaceState::Snowy; }),
+                  6)
+            << "HOUSE-00906 owns one snow-shell endpoint for each source class";
+        const auto snowMetalAt = std::find_if(contents.materials.begin(),
+                                              contents.materials.end(),
+                                              [](const world::MaterialDef& material)
+                                              { return material.id == Intern("MAT_SNOW_METAL"); });
+        ASSERT_NE(snowMetalAt, contents.materials.end());
+        EXPECT_EQ(snowMetalAt->materialClass, world::MaterialClass::Metal);
+        EXPECT_EQ(snowMetalAt->surfaceState, world::SurfaceState::Snowy);
+        EXPECT_EQ(snowMetalAt->albedo, "Textures/Materials/snow_shell_albedo");
+        EXPECT_EQ(snowMetalAt->normal, "Textures/Materials/snow_shell_normal");
+        EXPECT_EQ(snowMetalAt->alphaMode, world::AlphaMode::Blend);
+        EXPECT_EQ(snowMetalAt->effectTierS, world::EffectTier::Basic);
+        EXPECT_EQ(snowMetalAt->lightmapChannel, 0);
+        EXPECT_EQ(snowMetalAt->footstepSurface, "snow");
+        EXPECT_FLOAT_EQ(snowMetalAt->audioAbsorption, 0.85F);
+        EXPECT_FALSE(snowMetalAt->snow.coverable);
+        EXPECT_EQ(snowMetalAt->effectTierE, "SurfaceBlend/Snowy");
         for (const world::MaterialDef& material : contents.materials)
         {
             EXPECT_GT(material.specularPower, 0.0F);
