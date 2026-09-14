@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
 
+#include <algorithm>
 #include <cmath>
+#include <utility>
 
 #include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/BlendState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/DepthStencilState.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/EffectPass.hpp"
 #include "Microsoft/Xna/Framework/Graphics/EffectPassCollection.hpp"
 #include "Microsoft/Xna/Framework/Graphics/EffectTechnique.hpp"
@@ -17,9 +20,15 @@
 #include "Microsoft/Xna/Framework/Graphics/Viewport.hpp"
 
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/lighting/LightingSystem.hpp"
+#include "cnahouse/lighting/RoomLightState.hpp"
+#include "cnahouse/rendering/MaterialBinder.hpp"
+#include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
+#include "cnahouse/util/Ids.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkData.hpp"
+#include "cnahouse/world/WorldData.hpp"
 
 namespace cnahouse::rendering
 {
@@ -83,11 +92,33 @@ namespace cnahouse::rendering
     StaticGeometryPass::StaticGeometryPass(const world::ChunkLibrary& library,
                                            const world::CellRuntime& cells,
                                            const Camera& camera,
-                                           visibility::RenderList& list)
+                                           visibility::RenderList& list,
+                                           StaticGeometryMode mode)
         : library_(library)
         , cells_(cells)
         , camera_(camera)
         , list_(list)
+        , mode_(mode)
+    {
+    }
+
+    StaticGeometryPass::StaticGeometryPass(const world::ChunkLibrary& library,
+                                           const world::CellRuntime& cells,
+                                           const world::WorldData& world,
+                                           const lighting::LightingSystem& lighting,
+                                           const Camera& camera,
+                                           visibility::RenderList& list,
+                                           MaterialBinder& binder,
+                                           TextureLookup textures)
+        : library_(library)
+        , cells_(cells)
+        , world_(&world)
+        , lighting_(&lighting)
+        , camera_(camera)
+        , list_(list)
+        , binder_(&binder)
+        , textures_(std::move(textures))
+        , mode_(StaticGeometryMode::ProductionMaterials)
     {
     }
 
@@ -107,6 +138,26 @@ namespace cnahouse::rendering
         chunksDrawn_ = 0u;
         trianglesDrawn_ = 0u;
         stateChanges_ = 0u;
+
+        if (mode_ == StaticGeometryMode::ProductionMaterials)
+        {
+            DrawProduction(context);
+        }
+        else
+        {
+            DrawDebug(context);
+        }
+
+        static const debug::Counters::Handle kChunks = context.counters.Resolve("static.chunks");
+        static const debug::Counters::Handle kTriangles = context.counters.Resolve("static.triangles");
+        static const debug::Counters::Handle kStates = context.counters.Resolve("static.stateChanges");
+        context.counters.Set(kChunks, static_cast<std::int64_t>(chunksDrawn_));
+        context.counters.Set(kTriangles, static_cast<std::int64_t>(trianglesDrawn_));
+        context.counters.Set(kStates, static_cast<std::int64_t>(stateChanges_));
+    }
+
+    void StaticGeometryPass::DrawDebug(PassContext& context)
+    {
         Gfx::GraphicsDevice& device = context.device;
 
         if (effect_ == nullptr)
@@ -185,13 +236,173 @@ namespace cnahouse::rendering
                 }
             }
         }
+    }
 
-        static const debug::Counters::Handle kChunks = context.counters.Resolve("static.chunks");
-        static const debug::Counters::Handle kTriangles = context.counters.Resolve("static.triangles");
-        static const debug::Counters::Handle kStates = context.counters.Resolve("static.stateChanges");
-        context.counters.Set(kChunks, static_cast<std::int64_t>(chunksDrawn_));
-        context.counters.Set(kTriangles, static_cast<std::int64_t>(trianglesDrawn_));
-        context.counters.Set(kStates, static_cast<std::int64_t>(stateChanges_));
+    void StaticGeometryPass::DrawProduction(PassContext& context)
+    {
+        if (world_ == nullptr || lighting_ == nullptr || binder_ == nullptr || !textures_)
+        {
+            return;
+        }
+
+        Gfx::GraphicsDevice& device = context.device;
+        const auto& viewport = device.getViewportProperty();
+        const float aspect = viewport.getHeightProperty() > 0
+                                 ? static_cast<float>(viewport.getWidthProperty()) /
+                                       static_cast<float>(viewport.getHeightProperty())
+                                 : 0.0F;
+        const Microsoft::Xna::Framework::Matrix worldMatrix =
+            Microsoft::Xna::Framework::Matrix::getIdentityProperty();
+        const Microsoft::Xna::Framework::Matrix view = camera_.View();
+        const Microsoft::Xna::Framework::Matrix projection = camera_.Projection(aspect);
+
+        context.states.SetDepthStencil(Gfx::DepthStencilState::Default);
+        context.states.SetBlend(Gfx::BlendState::Opaque);
+
+        constexpr std::string_view kNeutralLightmap = "Textures/Fallback/grey";
+        const std::span<const visibility::RenderItem> items = list_.ItemsFor(Pass::OpaqueStatic);
+        std::size_t first = 0u;
+        while (first < items.size())
+        {
+            const visibility::RenderItem& leader = items[first];
+            if (leader.geometry >= library_.chunks.size())
+            {
+                ++first;
+                continue;
+            }
+            const world::Chunk& leaderChunk = library_.chunks[leader.geometry];
+            std::size_t last = first + 1u;
+            while (last < items.size() && items[last].effect == leader.effect &&
+                   items[last].material == leader.material && items[last].geometry < library_.chunks.size())
+            {
+                const world::Chunk& candidate = library_.chunks[items[last].geometry];
+                if (candidate.cell != leaderChunk.cell || candidate.layout != leaderChunk.layout)
+                {
+                    break;
+                }
+                ++last;
+            }
+
+            if (leader.material >= library_.materials.size() || leaderChunk.cell >= library_.cells.size())
+            {
+                first = last;
+                continue;
+            }
+            bool hasResident = false;
+            for (std::size_t index = first; index < last; ++index)
+            {
+                if (cells_.Find(items[index].geometry) != nullptr)
+                {
+                    hasResident = true;
+                    break;
+                }
+            }
+            if (!hasResident)
+            {
+                first = last;
+                continue;
+            }
+
+            const world::MaterialDef* material =
+                world_->FindMaterial(util::Id::Of(library_.materials[leader.material]));
+            const world::Cell* cell = world_->FindCell(util::Id::Of(library_.cells[leaderChunk.cell]));
+            if (material == nullptr || cell == nullptr ||
+                material->effectTierS != visibility::EffectForLayout(leaderChunk.layout))
+            {
+                first = last;
+                continue;
+            }
+
+            DrawParams draw;
+            draw.world = &worldMatrix;
+            draw.view = &view;
+            draw.projection = &projection;
+            if (!material->albedo.empty())
+            {
+                draw.diffuse = textures_(material->albedo);
+            }
+
+            const lighting::RoomLightState* room = lighting_->FindCell(cell->id);
+            if (leaderChunk.layout == world::ChunkLayout::Dual)
+            {
+                if (cell->lightmaps.daylight.has_value())
+                {
+                    const world::CellLightmapTexture& lightmap = *cell->lightmaps.daylight;
+                    draw.lightmap = textures_(lightmap.contentName);
+                    const Vector3 daylight = room != nullptr ? room->daylightTint : Vector3();
+                    // DualTextureEffect evaluates 2 * texture0 * texture1. The bake is stored at
+                    // full normalised range, so the 0.5 here is the one compensation for that
+                    // measured stock-effect factor. The small floor keeps a dark receiver legible
+                    // until HOUSE-01257 moves it into the complete additive composition.
+                    const float scale = 0.5F * lightmap.scale;
+                    draw.colourMultiplier = Vector3(scale * (daylight.X + lighting::kAmbientFloor),
+                                                    scale * (daylight.Y + lighting::kAmbientFloor),
+                                                    scale * (daylight.Z + lighting::kAmbientFloor));
+                }
+                else
+                {
+                    // Exterior ground cells have no baked receiver atlas. Half-grey is the neutral
+                    // value under DualTextureEffect's measured x2 product, so their real albedo is
+                    // shown without pretending they own a room bake.
+                    draw.lightmap = textures_(kNeutralLightmap);
+                }
+            }
+            else if (room != nullptr)
+            {
+                draw.ambientLight =
+                    Vector3(std::min(1.0F, room->skyAmbientColor.X + lighting::kAmbientFloor),
+                            std::min(1.0F, room->skyAmbientColor.Y + lighting::kAmbientFloor),
+                            std::min(1.0F, room->skyAmbientColor.Z + lighting::kAmbientFloor));
+            }
+
+            const util::Result<Gfx::Effect*> effectResult = binder_->Bind(material->id, draw);
+            const util::Result<CullPolicy> cull = binder_->CullFor(material->id, 1.0F);
+            if (!effectResult || !cull)
+            {
+                first = last;
+                continue;
+            }
+            ++stateChanges_;
+            context.states.SetRasterizer(showBackFaces_ ? Gfx::RasterizerState::CullCounterClockwise
+                                                        : StateFor(cull.Value()));
+
+            Gfx::EffectPassCollection& passes =
+                effectResult.Value()->getCurrentTechniqueProperty()->getPassesProperty();
+            const int passCount = passes.getCountProperty();
+            for (int p = 0; p < passCount; ++p)
+            {
+                bool applied = false;
+                for (std::size_t index = first; index < last; ++index)
+                {
+                    const visibility::RenderItem& item = items[index];
+                    const world::CellRuntime::ResidentChunk* resident = cells_.Find(item.geometry);
+                    if (resident == nullptr)
+                    {
+                        continue;
+                    }
+                    const world::Chunk& chunk = library_.chunks[item.geometry];
+                    device.SetVertexBuffer(resident->vertices.get());
+                    device.setIndicesProperty(resident->indices.get());
+                    if (!applied)
+                    {
+                        passes[p]->Apply();
+                        applied = true;
+                    }
+                    device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList,
+                                                 0,
+                                                 0,
+                                                 static_cast<int>(chunk.vertexCount),
+                                                 0,
+                                                 static_cast<int>(resident->primitiveCount));
+                    if (p == 0)
+                    {
+                        ++chunksDrawn_;
+                        trianglesDrawn_ += resident->primitiveCount;
+                    }
+                }
+            }
+            first = last;
+        }
     }
 
 } // namespace cnahouse::rendering

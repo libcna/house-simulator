@@ -389,17 +389,20 @@ namespace
                 DrawParams draw;
                 draw.diffuse = &texture;
                 draw.fog = &fog;
+                draw.colourMultiplier = Vector3(0.50F, 0.25F, 1.0F);
+                draw.ambientLight = Vector3(0.05F, 0.06F, 0.07F);
 
                 const auto bound = binder.Bind(id, draw);
                 ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
                 auto* effect = static_cast<Gfx::BasicEffect*>(*bound);
-                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.25F, 0.50F, 0.75F));
+                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.125F, 0.125F, 0.75F));
                 EXPECT_FLOAT_EQ(effect->getAlphaProperty(), 0.60F);
                 EXPECT_EQ(effect->getSpecularColorProperty(), Vector3(0.10F, 0.20F, 0.30F));
                 EXPECT_FLOAT_EQ(effect->getSpecularPowerProperty(), 27.0F);
                 EXPECT_TRUE(effect->getVertexColorEnabledProperty());
                 EXPECT_TRUE(effect->getLightingEnabledProperty());
                 EXPECT_TRUE(effect->getPreferPerPixelLightingProperty());
+                EXPECT_EQ(effect->getAmbientLightColorProperty(), Vector3(0.05F, 0.06F, 0.07F));
                 EXPECT_TRUE(effect->getTextureEnabledProperty());
                 EXPECT_EQ(effect->getTextureProperty(), &texture);
                 EXPECT_TRUE(effect->getFogEnabledProperty());
@@ -408,6 +411,8 @@ namespace
                 EXPECT_FLOAT_EQ(effect->getFogEndProperty(), 43.0F);
 
                 ASSERT_TRUE(binder.Bind(id, DrawParams{}).HasValue());
+                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.25F, 0.50F, 0.75F));
+                EXPECT_EQ(effect->getAmbientLightColorProperty(), Vector3());
                 EXPECT_FALSE(effect->getTextureEnabledProperty());
                 EXPECT_FALSE(effect->getFogEnabledProperty());
             });
@@ -589,13 +594,14 @@ namespace
                 draw.diffuse = &albedo;
                 draw.lightmap = &lightmap;
                 draw.fog = &fog;
+                draw.colourMultiplier = Vector3(0.50F, 0.25F, 1.0F);
 
                 const auto bound = binder.Bind(id, draw);
                 ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
                 auto* effect = static_cast<Gfx::DualTextureEffect*>(*bound);
                 EXPECT_EQ(effect->getTextureProperty(), &albedo);
                 EXPECT_EQ(effect->getTexture2Property(), &lightmap);
-                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.20F, 0.40F, 0.60F));
+                EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.10F, 0.10F, 0.60F));
                 EXPECT_FLOAT_EQ(effect->getAlphaProperty(), 0.75F);
                 EXPECT_TRUE(effect->getVertexColorEnabledProperty());
                 EXPECT_TRUE(effect->getFogEnabledProperty());

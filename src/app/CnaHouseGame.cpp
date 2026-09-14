@@ -539,6 +539,23 @@ namespace cnahouse::app
         {
             lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
         }
+        if (blockoutChunks_ != nullptr && blockoutCells_ != nullptr && materialBinder_ != nullptr &&
+            materialBinder_->Count() != 0U && caches_ != nullptr)
+        {
+            // The walk is the production presentation. `LoadBlockout` installed the explicit
+            // diagnostic palette before the world existed; replace that slot now that canonical
+            // materials, cell lightmaps and live daylight are all available.
+            renderer_.Install(rendering::Pass::OpaqueStatic,
+                              std::make_unique<rendering::StaticGeometryPass>(
+                                  *blockoutChunks_,
+                                  *blockoutCells_,
+                                  *world_,
+                                  *lighting_,
+                                  blockoutCamera_,
+                                  renderList_,
+                                  *materialBinder_,
+                                  [this](std::string_view name) { return caches_->textures.Get(name); }));
+        }
         if (skyDome && skyColours && stars)
         {
             try
@@ -786,8 +803,12 @@ namespace cnahouse::app
         // key does not jump the view (`HOUSE-00476`). With no input at all it changes nothing,
         // which is what makes `blockout-01` a fixed frame.
         freeFly_.Adopt(blockoutCamera_);
-        auto pass = std::make_unique<rendering::StaticGeometryPass>(
-            *blockoutChunks_, *blockoutCells_, blockoutCamera_, renderList_);
+        auto pass =
+            std::make_unique<rendering::StaticGeometryPass>(*blockoutChunks_,
+                                                            *blockoutCells_,
+                                                            blockoutCamera_,
+                                                            renderList_,
+                                                            rendering::StaticGeometryMode::DebugBlockout);
         // `--scene=blockout-normals` is the same house with the culling reversed (`HOUSE-00478`).
         // A separate scene name rather than a key, because what looks at it is a render test.
         pass->SetShowBackFaces(options_.scene.has_value() && *options_.scene == kBackFaceScene);

@@ -407,6 +407,29 @@ namespace cnahouse::world
         float exposure = 0.0F;
     };
 
+    /// @brief One baked irradiance texture generated for a cell's shell receivers.
+    struct CellLightmapTexture
+    {
+        std::string contentName;
+        /// @brief Multiplier that restores the HDR peak removed before the PNG was written.
+        float scale = 1.0F;
+    };
+
+    struct CellLightmapGroup
+    {
+        util::Id group;
+        CellLightmapTexture texture;
+    };
+
+    /// @brief Generated §18.3 lightmap bindings, stored beside the cell they illuminate.
+    struct CellLightmaps
+    {
+        /// @brief SHA-256 of the receiver shell used by the bake, including the `sha256:` prefix.
+        std::string shellHash;
+        std::optional<CellLightmapTexture> daylight;
+        std::vector<CellLightmapGroup> artificial;
+    };
+
     /// @brief `layout.cells.json`: the unit of visibility, audio, lighting and residency.
     struct Cell
     {
@@ -426,6 +449,7 @@ namespace cnahouse::world
         CellThermal thermal;
         std::vector<util::Id> lightGroups;
         CellDaylight daylight;
+        CellLightmaps lightmaps;
         std::string residencyPack;
         std::int32_t lodBias = 0;
         VisibilityHint visibilityHint = VisibilityHint::Opaque;

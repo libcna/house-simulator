@@ -7,20 +7,30 @@
 // An integration test and not a unit one, for `StateTrackerTests`' reason: the pass exists to talk
 // to a `GraphicsDevice`, and a mock in place of one would verify only that the mock and the pass
 // agree with each other.
+#include <algorithm>
+#include <filesystem>
 #include <string>
 #include <vector>
 
 #include <gtest/gtest.h>
 
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 
+#include "cnahouse/app/FrameTimer.hpp"
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/environment/SimClock.hpp"
+#include "cnahouse/lighting/LightingSystem.hpp"
+#include "cnahouse/lighting/ShadingGrid.hpp"
 #include "cnahouse/rendering/Camera.hpp"
+#include "cnahouse/rendering/MaterialBinder.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
 #include "cnahouse/rendering/StaticGeometryPass.hpp"
 #include "cnahouse/visibility/RenderList.hpp"
+#include "cnahouse/visibility/VisibilitySystem.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkData.hpp"
+#include "cnahouse/world/WorldLoader.hpp"
 
 #include "integration/DeviceHost.hpp"
 
@@ -30,6 +40,7 @@ namespace
     using cnahouse::rendering::Camera;
     using cnahouse::rendering::Pass;
     using cnahouse::rendering::StateTracker;
+    using cnahouse::rendering::StaticGeometryMode;
     using cnahouse::rendering::StaticGeometryPass;
     using cnahouse::visibility::RenderItem;
     using cnahouse::visibility::RenderList;
@@ -92,7 +103,7 @@ namespace
 
                 StateTracker tracker(device);
                 cnahouse::debug::Counters counters;
-                StaticGeometryPass pass(library, cells, camera, list);
+                StaticGeometryPass pass(library, cells, camera, list, StaticGeometryMode::DebugBlockout);
                 ASSERT_TRUE(pass.IsActive()) << "a list with static items in it is work to do";
 
                 cnahouse::rendering::PassContext context{device, tracker, counters, 1.0f / 60.0f};
@@ -125,7 +136,7 @@ namespace
                 ASSERT_TRUE(cells.Load("A_ROOM"));
                 Camera camera;
                 RenderList list;
-                StaticGeometryPass pass(library, cells, camera, list);
+                StaticGeometryPass pass(library, cells, camera, list, StaticGeometryMode::DebugBlockout);
                 // The whole house on the GPU and nothing asked for: "ran" and "had nothing to do"
                 // are different numbers in §71's overlay, and this is the difference.
                 activeWithNothing = pass.IsActive();
@@ -140,6 +151,96 @@ namespace
         ASSERT_EQ(host.Failure(), "");
         EXPECT_FALSE(activeWithNothing);
         EXPECT_FALSE(activeWithAnotherPassOnly) << "another pass's item made this one active";
+    }
+
+    TEST(StaticGeometryPassTests, ProductionLoadsCanonicalAlbedoAndCellLightmapBeforeDrawing)
+    {
+        const std::string worldPath = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
+        if (!std::filesystem::exists(worldPath + "/layout.cells.json"))
+        {
+            GTEST_SKIP() << "no deployed world; run tools/ci/build_content.py --only world";
+        }
+        cnahouse::world::WorldData::Contents contents;
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadLevels(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadMaterials(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadCells(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadPortals(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadOpenings(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadLights(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadInteractables(worldPath, contents));
+        ASSERT_TRUE(cnahouse::world::WorldLoader::LoadInitialState(worldPath, contents));
+        auto loaded = cnahouse::world::WorldData::Create(std::move(contents));
+        ASSERT_TRUE(loaded) << loaded.Error().ToString();
+        cnahouse::world::WorldData world = std::move(loaded.Value());
+        const cnahouse::world::Cell* kitchen = world.FindCell(cnahouse::util::Id::Of("L0_KITCHEN"));
+        ASSERT_NE(kitchen, nullptr);
+        ASSERT_TRUE(kitchen->lightmaps.daylight.has_value());
+        const cnahouse::world::MaterialDef* floor = world.FindMaterial(kitchen->floorMaterial);
+        ASSERT_NE(floor, nullptr);
+        ASSERT_EQ(floor->effectTierS, cnahouse::world::EffectTier::DualTexture);
+
+        ChunkLibrary library;
+        library.cells = {"L0_KITCHEN"};
+        library.materials = {std::string(cnahouse::util::IdRegistry::NameOf(floor->id))};
+        cnahouse::world::Chunk chunk;
+        chunk.cell = 0U;
+        chunk.material = 0U;
+        chunk.layout = ChunkLayout::Dual;
+        chunk.vertexCount = 3U;
+        chunk.vertices.assign(3U * cnahouse::world::ChunkVertexStride(ChunkLayout::Dual), 0U);
+        chunk.indexCount = 3U;
+        chunk.indices.assign(3U * sizeof(std::uint16_t), 0U);
+        library.chunks.push_back(std::move(chunk));
+
+        std::vector<std::string> requested;
+        std::uint32_t drawn = 0U;
+        cnahouse::testsupport::DeviceHost host(
+            [&](Gfx::GraphicsDevice& device)
+            {
+                CellRuntime cells(device, library);
+                ASSERT_TRUE(cells.Load("L0_KITCHEN"));
+                cnahouse::visibility::VisibilitySystem visibility(world);
+                cnahouse::lighting::ShadingGrid shading = cnahouse::lighting::ShadingGrid::Unshaded();
+                cnahouse::environment::SimClock clock;
+                cnahouse::lighting::LightingSystem lighting(world, shading, clock, visibility.Portals());
+                cnahouse::app::FrameContext frame;
+                frame.frameIndex = 1U;
+                lighting.Update(frame);
+
+                cnahouse::rendering::MaterialBinder binder(device);
+                ASSERT_TRUE(binder.RegisterAll(world.Materials()));
+                Gfx::Texture2D albedo(device, 2, 2);
+                Gfx::Texture2D lightmap(device, 2, 2);
+                Camera camera;
+                RenderList list;
+                RenderItem item = StaticItem(0U, 0U);
+                item.effect = cnahouse::world::EffectTier::DualTexture;
+                list.Add(item);
+                StateTracker tracker(device);
+                cnahouse::debug::Counters counters;
+                StaticGeometryPass pass(library,
+                                        cells,
+                                        world,
+                                        lighting,
+                                        camera,
+                                        list,
+                                        binder,
+                                        [&](std::string_view name)
+                                        {
+                                            requested.emplace_back(name);
+                                            return name == floor->albedo ? &albedo : &lightmap;
+                                        });
+                cnahouse::rendering::PassContext context{device, tracker, counters, 1.0F / 60.0F};
+                pass.Draw(context);
+                drawn = pass.ChunksDrawn();
+            });
+        host.Run();
+        ASSERT_TRUE(host.Ran());
+        ASSERT_EQ(host.Failure(), "");
+        EXPECT_EQ(drawn, 1U);
+        EXPECT_NE(std::find(requested.begin(), requested.end(), floor->albedo), requested.end());
+        EXPECT_NE(std::find(requested.begin(), requested.end(), kitchen->lightmaps.daylight->contentName),
+                  requested.end());
     }
 
 } // namespace

@@ -25,6 +25,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 SHELL = REPO / "build" / "shell-lm"
 LIGHTS = REPO / "assets-src" / "world" / "layout.lights.json"
+CELLS = REPO / "assets-src" / "world" / "layout.cells.json"
 OUTPUT = REPO / "assets-src" / "Textures" / "Lightmaps"
 META = REPO / "build" / "visual-lightmap-meta"
 MANIFEST = REPO / "assets-src" / "assets.manifest.json"
@@ -102,6 +103,117 @@ def update_manifest(images: list[Path], mode: str, size_by_cell: dict[str, int])
             },
         })
     MANIFEST.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def object_end(text: str, start: int) -> int:
+    """Return one past the object at *start*, ignoring braces in strings and JSONC comments."""
+    depth = 0
+    quote = False
+    escaped = False
+    line_comment = False
+    block_comment = False
+    index = start
+    while index < len(text):
+        char = text[index]
+        following = text[index + 1] if index + 1 < len(text) else ""
+        if line_comment:
+            if char == "\n":
+                line_comment = False
+        elif block_comment:
+            if char == "*" and following == "/":
+                block_comment = False
+                index += 1
+        elif quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == '"':
+                quote = False
+        elif char == '"':
+            quote = True
+        elif char == "/" and following == "/":
+            line_comment = True
+            index += 1
+        elif char == "/" and following == "*":
+            block_comment = True
+            index += 1
+        elif char == "{":
+            depth += 1
+        elif char == "}":
+            depth -= 1
+            if depth == 0:
+                return index + 1
+        index += 1
+    raise ValueError("unterminated JSON object")
+
+
+def set_lightmap_field(text: str, cell: str, binding: dict) -> str:
+    """Insert or replace one generated cell field without discarding authored JSONC comments."""
+    needle = f'"id": "{cell}"'
+    identifier = text.find(needle)
+    if identifier < 0:
+        raise ValueError(f"layout.cells.json has no {cell} row")
+    row_start = text.rfind("{", 0, identifier)
+    row_end = object_end(text, row_start)
+    row = text[row_start:row_end]
+    formatted = json.dumps(binding, indent=2, ensure_ascii=False).replace("\n", "\n      ")
+    field = f'      "lightmaps": {formatted},\n'
+
+    existing = row.find('"lightmaps"')
+    if existing >= 0:
+        line_start = row.rfind("\n", 0, existing) + 1
+        value_start = row.find("{", existing)
+        value_end = object_end(row, value_start)
+        comma_end = value_end + (1 if row[value_end:value_end + 1] == "," else 0)
+        if row[comma_end:comma_end + 1] == "\n":
+            comma_end += 1
+        row = row[:line_start] + field + row[comma_end:]
+    else:
+        residency = row.find('"residencyPack"')
+        if residency < 0:
+            raise ValueError(f"{cell} has no residencyPack insertion point")
+        line_start = row.rfind("\n", 0, residency) + 1
+        row = row[:line_start] + field + row[line_start:]
+    return text[:row_start] + row + text[row_end:]
+
+
+def update_cell_bindings() -> None:
+    """Merge the two durable bake reports into the canonical cell-owned runtime bindings."""
+    reports = {}
+    for mode in ("daylight", "artificial"):
+        path = REPO / "docs" / "lightmaps" / f"{mode}-bake.json"
+        if not path.is_file():
+            return
+        reports[mode] = json.loads(path.read_text(encoding="utf-8"))
+        if reports[mode].get("cells") != 78:
+            return
+    daylight = {row["cell"]: row for row in reports["daylight"]["products"]}
+    artificial = {row["cell"]: row for row in reports["artificial"]["products"]}
+    if set(daylight) != set(artificial):
+        raise ValueError("daylight and artificial reports name different receiver cells")
+
+    text = CELLS.read_text(encoding="utf-8")
+    for cell in sorted(daylight):
+        day = daylight[cell]
+        art = artificial[cell]
+        if day["shellHash"] != art["shellHash"]:
+            raise ValueError(f"{cell} daylight/artificial shell hashes disagree")
+        day_product = day.get("daylight")
+        binding = {
+            "shellHash": day["shellHash"],
+            "daylight": ({
+                "contentName": f"Textures/Lightmaps/Daylight/{Path(day_product['image']).stem}",
+                "scale": day_product["scale"],
+            } if day_product else None),
+            "artificial": [{
+                "group": group["group"],
+                "contentName": f"Textures/Lightmaps/Artificial/{Path(group['image']).stem}",
+                "scale": group["scale"],
+            } for group in art.get("groups", [])],
+        }
+        text = set_lightmap_field(text, cell, binding)
+    CELLS.write_text(text, encoding="utf-8")
 
 
 def unlit_products(sidecar: dict, mode: str) -> list[str]:
@@ -261,6 +373,7 @@ def main() -> int:
         docs.mkdir(parents=True, exist_ok=True)
         durable.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         update_manifest(selected_images, mode, per_cell)
+        update_cell_bindings()
     else:
         subset_report = META / f"{mode}-subset-report.json"
         subset_report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n",

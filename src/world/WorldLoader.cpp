@@ -1285,6 +1285,110 @@ namespace cnahouse::world
                 cell.daylight.exposure = exposure.Value();
             }
 
+            if (row.Has("lightmaps") && !row.IsNull("lightmaps"))
+            {
+                const Result<JsonValue> lightmaps = row.RequireObject("lightmaps");
+                if (!lightmaps)
+                {
+                    return lightmaps.Error().WithContext("layout.cells.json");
+                }
+                const Result<std::string> shellHash = lightmaps.Value().RequireString("shellHash");
+                if (!shellHash)
+                {
+                    return shellHash.Error().WithContext("layout.cells.json");
+                }
+                const std::string_view hash = shellHash.Value();
+                const bool validHash = hash.size() == 71U && hash.starts_with("sha256:") &&
+                                       std::all_of(hash.begin() + 7,
+                                                   hash.end(),
+                                                   [](char character)
+                                                   {
+                                                       return (character >= '0' && character <= '9') ||
+                                                              (character >= 'a' && character <= 'f');
+                                                   });
+                if (!validHash)
+                {
+                    return Err(ErrorCode::InvalidData,
+                               "lightmaps.shellHash must be 'sha256:' followed by 64 lower-case "
+                               "hexadecimal digits",
+                               "layout.cells.json/" + row.Path() + "/lightmaps/shellHash");
+                }
+                cell.lightmaps.shellHash = shellHash.Value();
+
+                const auto readTexture = [&row](const JsonValue& value,
+                                                std::string_view path) -> Result<CellLightmapTexture>
+                {
+                    CellLightmapTexture texture;
+                    const Result<std::string> contentName = value.RequireString("contentName");
+                    if (!contentName)
+                    {
+                        return contentName.Error();
+                    }
+                    const Result<float> scale = value.RequireFloat("scale");
+                    if (!scale)
+                    {
+                        return scale.Error();
+                    }
+                    if (contentName.Value().empty())
+                    {
+                        return Err(ErrorCode::InvalidData,
+                                   "a lightmap contentName cannot be empty",
+                                   "layout.cells.json/" + row.Path() + "/" + std::string(path));
+                    }
+                    if (!std::isfinite(scale.Value()) || !(scale.Value() > 0.0F))
+                    {
+                        return Err(ErrorCode::OutOfRange,
+                                   "a lightmap scale must be finite and greater than zero",
+                                   "layout.cells.json/" + row.Path() + "/" + std::string(path));
+                    }
+                    texture.contentName = contentName.Value();
+                    texture.scale = scale.Value();
+                    return texture;
+                };
+
+                if (lightmaps.Value().Has("daylight") && !lightmaps.Value().IsNull("daylight"))
+                {
+                    const Result<JsonValue> daylight = lightmaps.Value().RequireObject("daylight");
+                    if (!daylight)
+                    {
+                        return daylight.Error().WithContext("layout.cells.json");
+                    }
+                    const Result<CellLightmapTexture> texture =
+                        readTexture(daylight.Value(), "lightmaps/daylight");
+                    if (!texture)
+                    {
+                        return texture.Error().WithContext("layout.cells.json");
+                    }
+                    cell.lightmaps.daylight = texture.Value();
+                }
+
+                const Result<JsonValue> artificial = lightmaps.Value().RequireArray("artificial");
+                if (!artificial)
+                {
+                    return artificial.Error().WithContext("layout.cells.json");
+                }
+                const Result<std::vector<JsonValue>> lightmapRows = artificial.Value().Elements();
+                if (!lightmapRows)
+                {
+                    return lightmapRows.Error().WithContext("layout.cells.json");
+                }
+                for (const JsonValue& lightmapRow : lightmapRows.Value())
+                {
+                    const Result<util::Id> group = RequireId(lightmapRow, "group");
+                    if (!group)
+                    {
+                        return group.Error().WithContext("layout.cells.json");
+                    }
+                    const Result<CellLightmapTexture> texture =
+                        readTexture(lightmapRow, "lightmaps/artificial");
+                    if (!texture)
+                    {
+                        return texture.Error().WithContext("layout.cells.json");
+                    }
+                    cell.lightmaps.artificial.push_back(CellLightmapGroup{group.Value(), texture.Value()});
+                }
+            }
+
             const Result<std::int64_t> bias = row.OptionalInt("lodBias", 0);
             if (!bias)
             {

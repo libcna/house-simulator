@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "Microsoft/Xna/Framework/Matrix.hpp"
+#include "Microsoft/Xna/Framework/Vector3.hpp"
 
 #include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/util/Ids.hpp"
@@ -123,6 +124,14 @@ namespace cnahouse::rendering
         Microsoft::Xna::Framework::Graphics::Texture2D* diffuse = nullptr;
         /// @brief `DualTexture` only: the room/light-group lightmap selected for this pass.
         Microsoft::Xna::Framework::Graphics::Texture2D* lightmap = nullptr;
+        /// @brief Per-pass colour multiplied by the material tint before it reaches the effect.
+        ///
+        /// For a lightmapped draw this is the selected bake's colour/intensity (including the
+        /// measured HDR scale). Keeping it draw-owned is essential: one wall material is shared by
+        /// many cells whose daylight and switch state differ.
+        Microsoft::Xna::Framework::Vector3 colourMultiplier{1.0F, 1.0F, 1.0F};
+        /// @brief `Basic`/`Skinned` ambient term for non-lightmapped detail geometry.
+        Microsoft::Xna::Framework::Vector3 ambientLight{0.0F, 0.0F, 0.0F};
         /// Null disables fog. Non-null enables it with the supplied environment-owned values.
         const FogParams* fog = nullptr;
         /// @brief `Skinned` only. Skin-local, and at most `SkinnedEffect::MaxBones`.

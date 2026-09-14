@@ -13155,8 +13155,23 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             or replace its 78 manifest rows.
 - [ ] HOUSE-00911 — Measure the lightmap atlas count, size and bake time; adjust texel density to fit the 60 MB budget
       dep: HOUSE-00910 · sys: — · plat: TOOL · pri: MUST
-- [ ] HOUSE-00912 — Implement lightmap loading and binding, and the shell's `DualTextureEffect` draw path
+- [x] HOUSE-00912 — Implement lightmap loading and binding, and the shell's `DualTextureEffect` draw path
       dep: HOUSE-00893, HOUSE-00910 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-14) Normal `--scene=walk` rendering now resolves canonical albedo and each
+            cell's baked daylight atlas through stock XNA `DualTextureEffect`; the hashed palette
+            remains only behind the explicit `--scene=blockout` diagnostic. The bake driver merges
+            the full daylight/artificial ledgers into deterministic canonical bindings for all 78
+            receiver cells (78 daylight and 124 artificial-group textures), and schema/runtime
+            validation rejects invalid hashes, scales, names and group ids.
+      finding: the six reviewed production captures prove that real textures replace the saturated
+            blockout colours, but also expose the single daylight pass as severely underexposed.
+            Additive group/daylight composition, ambient floor and exposure remain owned by
+            HOUSE-01256, HOUSE-01257, HOUSE-01264 and HOUSE-01266; this task does not claim that
+            lighting work or `VISUAL-GATE-1`.
+      verified: loader/schema/authored-world, MaterialBinder and production/debug StaticGeometryPass
+            tests; all four culling/blockout/first-person render suites (including the 12 fixed
+            first-person poses); warning-clean max-4-core game/unit/integration builds; reviewed
+            `docs/visual-review/captures/house-00912-production-r2`.
 - [ ] HOUSE-00913 — Fix lightmap seams and gutter bleed found on inspection
       dep: HOUSE-00912 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00914 — Implement the texture streaming-free residency for the `house-*` packs (load-at-start for now)

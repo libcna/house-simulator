@@ -171,6 +171,25 @@ namespace
                   "lightGroups": ["LG_L0_KITCHEN_MAIN", "LG_L0_KITCHEN_UNDERCAB"],
                   "daylight": { "windowIds": ["W_L0_KITCHEN_N1", "W_L0_KITCHEN_N2"],
                                 "orientation": "NE", "exposure": 0.55 },
+                  "lightmaps": {
+                    "shellHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+                    "daylight": {
+                      "contentName": "Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY",
+                      "scale": 1.25
+                    },
+                    "artificial": [
+                      {
+                        "group": "LG_L0_KITCHEN_MAIN",
+                        "contentName": "Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN",
+                        "scale": 2.5
+                      },
+                      {
+                        "group": "LG_L0_KITCHEN_UNDERCAB",
+                        "contentName": "Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB",
+                        "scale": 0.75
+                      }
+                    ]
+                  },
                   "residencyPack": "house-l0", "lodBias": 0,
                   "visibilityHint": "opaque", "navMeshRegion": "NAV_L0_KITCHEN"
                 },
@@ -1282,6 +1301,18 @@ namespace
         // of the enum, so a reader that ignored the field entirely would still pass.
         EXPECT_EQ(*kitchen.daylight.orientation, world::Orientation::NE);
         EXPECT_FLOAT_EQ(kitchen.daylight.exposure, 0.55F);
+        EXPECT_EQ(kitchen.lightmaps.shellHash,
+                  "sha256:0000000000000000000000000000000000000000000000000000000000000000");
+        ASSERT_TRUE(kitchen.lightmaps.daylight.has_value());
+        EXPECT_EQ(kitchen.lightmaps.daylight->contentName, "Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY");
+        EXPECT_FLOAT_EQ(kitchen.lightmaps.daylight->scale, 1.25F);
+        ASSERT_EQ(kitchen.lightmaps.artificial.size(), 2U);
+        EXPECT_EQ(kitchen.lightmaps.artificial[0].group, Intern("LG_L0_KITCHEN_MAIN"));
+        EXPECT_EQ(kitchen.lightmaps.artificial[0].texture.contentName,
+                  "Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN");
+        EXPECT_FLOAT_EQ(kitchen.lightmaps.artificial[0].texture.scale, 2.5F);
+        EXPECT_EQ(kitchen.lightmaps.artificial[1].group, Intern("LG_L0_KITCHEN_UNDERCAB"));
+        EXPECT_FLOAT_EQ(kitchen.lightmaps.artificial[1].texture.scale, 0.75F);
         EXPECT_EQ(kitchen.residencyPack, "house-l0");
         EXPECT_EQ(kitchen.lodBias, 0);
         EXPECT_EQ(kitchen.visibilityHint, world::VisibilityHint::Opaque);
@@ -1392,6 +1423,9 @@ namespace
         EXPECT_FALSE(terrace.thermal.heated);
         EXPECT_TRUE(terrace.lightGroups.empty());
         EXPECT_FALSE(terrace.daylight.orientation.has_value()) << "an unstated orientation is not North";
+        EXPECT_TRUE(terrace.lightmaps.shellHash.empty());
+        EXPECT_FALSE(terrace.lightmaps.daylight.has_value());
+        EXPECT_TRUE(terrace.lightmaps.artificial.empty());
         EXPECT_EQ(terrace.visibilityHint, world::VisibilityHint::Opaque);
         EXPECT_EQ(terrace.residencyPack, "");
         EXPECT_NE(terrace.acoustic.roomTone, contents.cells[0].acoustic.roomTone)
@@ -1404,6 +1438,31 @@ namespace
         world::WorldData::Contents contents;
         ASSERT_TRUE(world::WorldLoader::LoadCells(directory_, contents));
         EXPECT_EQ(contents.cells[2].visibilityHint, world::VisibilityHint::Open);
+    }
+
+    TEST_F(WorldLoaderTest, AGeneratedLightmapBindingRefusesAnInvalidHashNameOrScale)
+    {
+        const std::string hash(64U, '0');
+        const std::array rows{
+            std::string(R"({"shellHash":"sha256:)") + std::string(63U, '0') +
+                R"(","daylight":null,"artificial":[]})",
+            std::string(R"({"shellHash":"sha256:)") + hash +
+                R"(","daylight":{"contentName":"","scale":1},"artificial":[]})",
+            std::string(R"({"shellHash":"sha256:)") + hash +
+                R"(","daylight":{"contentName":"Textures/Lightmaps/test","scale":0},"artificial":[]})"};
+        for (const std::string& lightmaps : rows)
+        {
+            Write(
+                "layout.cells.json",
+                R"({"schema":"cna-house/cells/1","cells":[{"id":"L0_A","level":"L0","kind":"room","boxes":[{"x":[0,1],"z":[0,1]}],"lightmaps":)" +
+                    lightmaps + "}]}");
+            world::WorldData::Contents contents;
+            const auto cells = world::WorldLoader::LoadCells(directory_, contents);
+            ASSERT_FALSE(cells) << "accepted " << lightmaps;
+            EXPECT_TRUE(cells.Error().Code() == ErrorCode::InvalidData ||
+                        cells.Error().Code() == ErrorCode::OutOfRange)
+                << cells.Error().ToString();
+        }
     }
 
     TEST_F(WorldLoaderTest, TheLoaderDoesNotResolveCrossFileReferences)
@@ -3760,6 +3819,23 @@ namespace
                                 }),
                   78)
             << "HOUSE-00908 gives every interior and appliance sub-cell a complete palette";
+        EXPECT_EQ(std::count_if(contents.cells.begin(),
+                                contents.cells.end(),
+                                [](const world::Cell& cell)
+                                {
+                                    return cell.kind != world::CellKind::Exterior &&
+                                           !cell.lightmaps.shellHash.empty() &&
+                                           cell.lightmaps.daylight.has_value();
+                                }),
+                  78)
+            << "every baked receiver cell carries its canonical daylight binding";
+        EXPECT_EQ(std::accumulate(contents.cells.begin(),
+                                  contents.cells.end(),
+                                  std::size_t{0},
+                                  [](std::size_t count, const world::Cell& cell)
+                                  { return count + cell.lightmaps.artificial.size(); }),
+                  124U)
+            << "the canonical cell bindings cover every artificial group bake exactly once";
 
         // 179 and 66 until `HOUSE-00491` retired §12.6's two `W_GABLE` louvres: they were in
         // "attic gable ends" and §12.1's roof is a hip with none, so both stood 1.44 m inside

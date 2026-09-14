@@ -2,8 +2,10 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "cnahouse/rendering/Camera.hpp"
@@ -13,42 +15,57 @@
 namespace Microsoft::Xna::Framework::Graphics
 {
     class BasicEffect;
+    class Texture2D;
+} // namespace Microsoft::Xna::Framework::Graphics
+
+namespace cnahouse::lighting
+{
+    class LightingSystem;
 }
 
 namespace cnahouse::world
 {
     class CellRuntime;
+    class WorldData;
     struct ChunkLibrary;
 } // namespace cnahouse::world
 
 namespace cnahouse::rendering
 {
+    class MaterialBinder;
 
-    /// @brief `Pass::OpaqueStatic`: the draw list's static slice, with `BasicEffect`
-    ///        (`HOUSE-00475`, `HOUSE-00676`).
+    enum class StaticGeometryMode
+    {
+        /// Canonical albedo plus cell-owned baked lighting. The normal playable presentation.
+        ProductionMaterials,
+        /// Stable hashed colours for geometry/material diagnosis. Explicit debug presentation.
+        DebugBlockout,
+    };
+
+    /// @brief `Pass::OpaqueStatic`: production shell materials, or the explicit debug blockout.
     ///
     /// **This pass no longer decides what to draw.** It walked the residency map itself until
     /// `HOUSE-00676`; now it draws `RenderList::ItemsFor(Pass::OpaqueStatic)` and whoever built the
     /// list decided. That is §25.1's shape -- step 5 produces a sorted list and the passes submit
-    /// it -- and it is what lets the sort do something: the list arrives grouped by material, so
-    /// the blockout colour is written and `Apply`d once per material instead of once per chunk.
+    /// it. Production binds a material/lightmap once per contiguous material-and-cell run; the
+    /// debug mode binds one hashed colour per material run.
     ///
     /// **No culling here either.** What the list holds is somebody else's answer; today the
     /// blockout and walk scenes put every resident chunk in it, and §25's visible set replaces
     /// that source without this pass changing at all -- which is the point of taking the decision
     /// out of it.
     ///
-    /// **`BasicEffect` with lighting off, one flat colour per material.** §22.2 puts the receivers
-    /// on `DualTextureEffect` and the detail on `BasicEffect`, and neither can draw anything yet:
-    /// `HOUSE-00296` acquires the first texture and `HOUSE-00490` bakes the first lightmap. Until
-    /// then a lit blockout would be a lie about the lighting and a single grey one would be a
-    /// silhouette. So each material gets a stable colour derived from its own name -- a colour to
-    /// tell a wall from a floor by, stated to be nothing more. Lighting is off because 60 % of the
-    /// chunks are `dual` and carry no normal at all (`docs/chunk-format.md` §4b).
+    /// In production, receiver chunks use stock XNA `DualTextureEffect` with their authored albedo
+    /// and cell-owned daylight atlas; architectural detail uses stock `BasicEffect` with the same
+    /// room's ambient term. `--scene=blockout` retains the old unlit hashed palette deliberately,
+    /// so a diagnostic can still separate surface classes without leaking into ordinary play.
     class StaticGeometryPass final : public IRenderPass
     {
     public:
-        /// @brief Borrows all four; each must outlive this pass.
+        using TextureLookup =
+            std::function<Microsoft::Xna::Framework::Graphics::Texture2D*(std::string_view contentName)>;
+
+        /// @brief Explicit debug constructor. Borrows all four; each must outlive this pass.
         ///
         /// @param list the frame's draw list. Non-const because the first pass to ask for its own
         ///        slice sorts it (`RenderList::ItemsFor`), which is what makes a caller that
@@ -56,7 +73,18 @@ namespace cnahouse::rendering
         StaticGeometryPass(const world::ChunkLibrary& library,
                            const world::CellRuntime& cells,
                            const Camera& camera,
-                           visibility::RenderList& list);
+                           visibility::RenderList& list,
+                           StaticGeometryMode mode);
+
+        /// @brief Production constructor. All borrowed services must outlive this pass.
+        StaticGeometryPass(const world::ChunkLibrary& library,
+                           const world::CellRuntime& cells,
+                           const world::WorldData& world,
+                           const lighting::LightingSystem& lighting,
+                           const Camera& camera,
+                           visibility::RenderList& list,
+                           MaterialBinder& binder,
+                           TextureLookup textures);
         ~StaticGeometryPass() override;
 
         void Draw(PassContext& context) override;
@@ -75,6 +103,11 @@ namespace cnahouse::rendering
         }
 
         [[nodiscard]] bool IsActive() const override;
+
+        [[nodiscard]] StaticGeometryMode Mode() const noexcept
+        {
+            return mode_;
+        }
 
         /// @brief Chunks and triangles submitted by the last `Draw`.
         [[nodiscard]] std::uint32_t ChunksDrawn() const noexcept
@@ -106,11 +139,19 @@ namespace cnahouse::rendering
         [[nodiscard]] static Microsoft::Xna::Framework::Vector3 BlockoutColour(const std::string& material);
 
     private:
+        void DrawDebug(PassContext& context);
+        void DrawProduction(PassContext& context);
+
         const world::ChunkLibrary& library_;
         const world::CellRuntime& cells_;
+        const world::WorldData* world_ = nullptr;
+        const lighting::LightingSystem* lighting_ = nullptr;
         const Camera& camera_;
         visibility::RenderList& list_;
+        MaterialBinder* binder_ = nullptr;
+        TextureLookup textures_;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::BasicEffect> effect_;
+        StaticGeometryMode mode_ = StaticGeometryMode::DebugBlockout;
         bool showBackFaces_ = false;
         std::uint32_t chunksDrawn_ = 0u;
         std::uint32_t trianglesDrawn_ = 0u;

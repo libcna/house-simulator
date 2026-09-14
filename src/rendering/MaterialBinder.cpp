@@ -32,6 +32,11 @@ namespace cnahouse::rendering
             return Vector3(rgb[0], rgb[1], rgb[2]);
         }
 
+        Vector3 Modulated(const float (&rgb)[3], const Vector3& multiplier) noexcept
+        {
+            return Vector3(rgb[0] * multiplier.X, rgb[1] * multiplier.Y, rgb[2] * multiplier.Z);
+        }
+
         /// MEASURED: `Matrix::getIdentityProperty()` returns BY VALUE, not by reference, so this
         /// cannot hand back a reference to it. A shorter name for it at the call sites that need a
         /// default, and nothing more.
@@ -282,10 +287,11 @@ namespace cnahouse::rendering
             {
                 auto& effect = BasicFor();
                 ApplyMatrices(effect, draw);
-                effect.setDiffuseColorProperty(ToVector(desc->diffuse));
+                effect.setDiffuseColorProperty(Modulated(desc->diffuse, draw.colourMultiplier));
                 effect.setAlphaProperty(desc->alpha);
                 effect.setSpecularColorProperty(ToVector(desc->specularColour));
                 effect.setSpecularPowerProperty(desc->specularPower);
+                effect.setAmbientLightColorProperty(draw.ambientLight);
                 effect.setVertexColorEnabledProperty(desc->vertexColour);
                 effect.setLightingEnabledProperty(desc->lightingEnabled);
                 effect.setPreferPerPixelLightingProperty(desc->perPixelLighting);
@@ -311,7 +317,7 @@ namespace cnahouse::rendering
                 // the probe confirmed 128 x 128 -> 128, and a second correction would halve every room.
                 auto& effect = DualTextureFor();
                 ApplyMatrices(effect, draw);
-                effect.setDiffuseColorProperty(ToVector(desc->diffuse));
+                effect.setDiffuseColorProperty(Modulated(desc->diffuse, draw.colourMultiplier));
                 effect.setAlphaProperty(desc->alpha);
                 effect.setVertexColorEnabledProperty(desc->vertexColour);
                 effect.setTextureProperty(draw.diffuse);
@@ -330,7 +336,7 @@ namespace cnahouse::rendering
                 }
                 auto& effect = AlphaTestFor();
                 ApplyMatrices(effect, draw);
-                effect.setDiffuseColorProperty(ToVector(desc->diffuse));
+                effect.setDiffuseColorProperty(Modulated(desc->diffuse, draw.colourMultiplier));
                 effect.setAlphaProperty(desc->alpha);
                 effect.setVertexColorEnabledProperty(desc->vertexColour);
                 // `Greater` and not `GreaterEqual`: with a reference of 128 this keeps 129 and drops
@@ -371,10 +377,11 @@ namespace cnahouse::rendering
                 }
                 auto& effect = SkinnedFor();
                 ApplyMatrices(effect, draw);
-                effect.setDiffuseColorProperty(ToVector(desc->diffuse));
+                effect.setDiffuseColorProperty(Modulated(desc->diffuse, draw.colourMultiplier));
                 effect.setAlphaProperty(desc->alpha);
                 effect.setSpecularColorProperty(ToVector(desc->specularColour));
                 effect.setSpecularPowerProperty(desc->specularPower);
+                effect.setAmbientLightColorProperty(draw.ambientLight);
                 effect.setPreferPerPixelLightingProperty(desc->perPixelLighting);
                 effect.setWeightsPerVertexProperty(4);
                 effect.setTextureProperty(draw.diffuse);
@@ -437,7 +444,7 @@ namespace cnahouse::rendering
 
         auto& effect = EnvironmentMapFor();
         ApplyMatrices(effect, draw);
-        effect.setDiffuseColorProperty(ToVector(desc->diffuse));
+        effect.setDiffuseColorProperty(Modulated(desc->diffuse, draw.colourMultiplier));
         effect.setAlphaProperty(desc->alpha);
         effect.setTextureProperty(draw.diffuse);
         effect.setEnvironmentMapProperty(environment.cubeMap);
