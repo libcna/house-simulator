@@ -21,6 +21,11 @@ namespace cnahouse::world
     struct ChunkLibrary;
 } // namespace cnahouse::world
 
+namespace cnahouse::lighting
+{
+    class LightingSystem;
+}
+
 namespace cnahouse::rendering
 {
     class MaterialBinder;
@@ -44,7 +49,8 @@ namespace cnahouse::rendering
                       const Camera& camera,
                       visibility::RenderList& list,
                       MaterialBinder& binder,
-                      TextureLookup textures);
+                      TextureLookup textures,
+                      const lighting::LightingSystem* lighting = nullptr);
         ~AlphaTestPass() override;
 
         void Draw(PassContext& context) override;
@@ -73,6 +79,7 @@ namespace cnahouse::rendering
         visibility::RenderList& list_;
         MaterialBinder& binder_;
         TextureLookup textures_;
+        const lighting::LightingSystem* lighting_ = nullptr;
         std::uint32_t chunksDrawn_ = 0u;
         std::uint32_t trianglesDrawn_ = 0u;
         std::uint32_t materialBinds_ = 0u;

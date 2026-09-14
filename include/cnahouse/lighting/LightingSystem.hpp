@@ -15,6 +15,7 @@
 #include "cnahouse/environment/SunLight.hpp"
 #include "cnahouse/lighting/BorrowedLightModel.hpp"
 #include "cnahouse/lighting/DaylightModel.hpp"
+#include "cnahouse/lighting/ExposureModel.hpp"
 #include "cnahouse/lighting/RoomLightState.hpp"
 #include "cnahouse/util/Ids.hpp"
 
@@ -185,6 +186,33 @@ namespace cnahouse::lighting
         /// @brief The one celestial key for @p cell: daylight sun first, then night-time moon.
         [[nodiscard]] const CelestialKeyLight* CelestialKeyForCell(util::Id cell) const noexcept;
 
+        /// @brief Select the cell whose exposure the camera follows this frame.
+        void SetCameraCell(util::Id cell) noexcept
+        {
+            cameraCell_ = cell;
+        }
+
+        [[nodiscard]] util::Id CameraCell() const noexcept
+        {
+            return cameraCell_;
+        }
+
+        /// @brief The adapted display multiplier, before Tier S splits it across its two paths.
+        [[nodiscard]] float CameraExposureScale() const noexcept
+        {
+            return cameraExposure_.Scale();
+        }
+
+        [[nodiscard]] float CameraEffectExposure() const noexcept
+        {
+            return cameraExposure_.EffectScale();
+        }
+
+        [[nodiscard]] float CameraExposureTintAlpha() const noexcept
+        {
+            return cameraExposure_.TintAlpha();
+        }
+
     private:
         struct CellGroups
         {
@@ -220,6 +248,8 @@ namespace cnahouse::lighting
         float cloudCover_ = 0.0F;
         bool sunComputed_ = false;
         bool moonKeyActive_ = false;
+        util::Id cameraCell_;
+        ExposureAdapter cameraExposure_;
         std::uint64_t computedForFrame_ = 0;
     };
 

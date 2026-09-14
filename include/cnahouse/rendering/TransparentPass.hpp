@@ -20,6 +20,11 @@ namespace cnahouse::world
     struct ChunkLibrary;
 } // namespace cnahouse::world
 
+namespace cnahouse::lighting
+{
+    class LightingSystem;
+}
+
 namespace cnahouse::rendering
 {
 
@@ -41,7 +46,8 @@ namespace cnahouse::rendering
                         const world::CellRuntime& cells,
                         const world::WorldData& world,
                         const Camera& camera,
-                        visibility::RenderList& list);
+                        visibility::RenderList& list,
+                        const lighting::LightingSystem* lighting = nullptr);
         ~TransparentPass() override;
 
         void Draw(PassContext& context) override;
@@ -69,6 +75,7 @@ namespace cnahouse::rendering
         const world::WorldData& world_;
         const Camera& camera_;
         visibility::RenderList& list_;
+        const lighting::LightingSystem* lighting_ = nullptr;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::BasicEffect> effect_;
         std::uint32_t chunksDrawn_ = 0u;
         std::uint32_t trianglesDrawn_ = 0u;

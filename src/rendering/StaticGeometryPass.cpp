@@ -255,6 +255,7 @@ namespace cnahouse::rendering
             Microsoft::Xna::Framework::Matrix::getIdentityProperty();
         const Microsoft::Xna::Framework::Matrix view = camera_.View();
         const Microsoft::Xna::Framework::Matrix projection = camera_.Projection(aspect);
+        const float exposure = lighting_->CameraEffectExposure();
 
         constexpr std::string_view kNeutralLightmap = "Textures/Fallback/grey";
         const std::span<const visibility::RenderItem> items = list_.ItemsFor(Pass::OpaqueStatic);
@@ -409,7 +410,7 @@ namespace cnahouse::rendering
                     draw.lightmap = textures_(base->texture.contentName);
                     const float level = lighting_->GroupLevelInCell(cell->id, base->group);
                     const Vector3 colour = lighting_->GroupColor(base->group);
-                    const float scale = 0.5F * base->texture.scale;
+                    const float scale = 0.5F * base->texture.scale * exposure;
                     draw.colourMultiplier = Vector3(scale * (level * colour.X + lighting::kAmbientFloor),
                                                     scale * (level * colour.Y + lighting::kAmbientFloor),
                                                     scale * (level * colour.Z + lighting::kAmbientFloor));
@@ -437,7 +438,7 @@ namespace cnahouse::rendering
                         DrawParams additional = common;
                         additional.lightmap = textures_(group->texture.contentName);
                         const Vector3 groupColour = lighting_->GroupColor(group->group);
-                        const float groupScale = 0.5F * group->texture.scale * groupLevel;
+                        const float groupScale = 0.5F * group->texture.scale * groupLevel * exposure;
                         additional.colourMultiplier = Vector3(groupScale * groupColour.X,
                                                               groupScale * groupColour.Y,
                                                               groupScale * groupColour.Z);
@@ -452,10 +453,12 @@ namespace cnahouse::rendering
                     // the depth HOUSE-01264's daylight pass needs.
                     DrawParams draw = common;
                     draw.lightmap = textures_(kNeutralLightmap);
+                    draw.colourMultiplier = Vector3(exposure, exposure, exposure);
                     if (cell->lightmaps.daylight.has_value())
                     {
-                        draw.colourMultiplier = Vector3(
-                            lighting::kAmbientFloor, lighting::kAmbientFloor, lighting::kAmbientFloor);
+                        draw.colourMultiplier = Vector3(lighting::kAmbientFloor * exposure,
+                                                        lighting::kAmbientFloor * exposure,
+                                                        lighting::kAmbientFloor * exposure);
                     }
                     if (!submit(draw, false, true))
                     {
@@ -471,7 +474,7 @@ namespace cnahouse::rendering
                     const world::CellLightmapTexture& lightmap = *cell->lightmaps.daylight;
                     DrawParams daylight = common;
                     daylight.lightmap = textures_(lightmap.contentName);
-                    const float scale = 0.5F * lightmap.scale;
+                    const float scale = 0.5F * lightmap.scale * exposure;
                     daylight.colourMultiplier = Vector3(scale * room->daylightTint.X,
                                                         scale * room->daylightTint.Y,
                                                         scale * room->daylightTint.Z);
@@ -487,9 +490,14 @@ namespace cnahouse::rendering
                 if (room != nullptr)
                 {
                     draw.ambientLight =
-                        Vector3(std::min(1.0F, room->skyAmbientColor.X + lighting::kAmbientFloor),
-                                std::min(1.0F, room->skyAmbientColor.Y + lighting::kAmbientFloor),
-                                std::min(1.0F, room->skyAmbientColor.Z + lighting::kAmbientFloor));
+                        Vector3(exposure * std::min(1.0F, room->skyAmbientColor.X + lighting::kAmbientFloor),
+                                exposure * std::min(1.0F, room->skyAmbientColor.Y + lighting::kAmbientFloor),
+                                exposure * std::min(1.0F, room->skyAmbientColor.Z + lighting::kAmbientFloor));
+                }
+                const MaterialDesc* description = binder_->Find(material->id);
+                if (description != nullptr && !description->lightingEnabled)
+                {
+                    draw.colourMultiplier = Vector3(exposure, exposure, exposure);
                 }
                 submit(draw, false, true);
             }

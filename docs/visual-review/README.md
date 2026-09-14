@@ -81,3 +81,36 @@ Geometry culling is independently compared across 18 paired views through explic
 
 Remaining: implement the approved exposure model next, then reassess lightmap calibration before
 placing primary furniture. `VISUAL-GATE-1` has not passed.
+
+## Round 3 — cell-aware adaptive exposure
+
+Commit: `HOUSE-01266` working tree (`2026-09-14`)
+
+Capture: [`captures/house-01266-exposure-r1`](captures/house-01266-exposure-r1)
+
+Ranked defects:
+
+1. The front façade, drive and surrounding ground still collapse into almost the same value as the
+   sky; the exterior reads as sparse dark line work rather than a solid house.
+2. Foyer and living-room bakes remain substantially darker than the kitchen and family-room bakes;
+   increasing global exposure farther would flatten the rooms that are already readable.
+3. Every selected interior remains empty, so there are no domestic scale cues, seating groups,
+   kitchen work surfaces or lived-in detail.
+4. The peeling `paint_warm_fine` surface on doors and maintained-room boundaries is stylistically
+   wrong and competes with the otherwise cleaner interior finishes.
+5. Window apertures retain harsh white/blue contrast and the route has no localized sun patches or
+   fixture-visible pools to anchor the lighting.
+
+Fixed in this round: each canonical room publishes a bounded exposure target from its final light
+level, and the camera adapts asymmetrically when it crosses cells. The strict Tier-S path applies
+the lift through existing world effects and the sub-unity exterior residual through a black tint
+quad below the unaffected HUD. The kitchen, family room, central hall and foyer stair now expose
+recognizable wall, floor, ceiling and trim materials where Round 2 quantised them close to black.
+Six times was selected from the fixed views after four times proved insufficient; the adaptation
+does not invent light or alter the baked hierarchy. Twelve first-person, one HUD/readout and four
+season/sun references were inspected side by side and intentionally updated. All 18 culling pairs
+remain equivalent, with the worst still below the unchanged 0.2% threshold.
+
+Remaining: correct the exterior material/lighting collapse first, replace the inappropriate door
+finish, calibrate the darkest main-floor bakes, then place primary furniture. `VISUAL-GATE-1` has
+not passed.

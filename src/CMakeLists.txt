@@ -31,6 +31,7 @@ add_library(cnahouse_core STATIC
     lighting/PlanckianLut.cpp
     lighting/ShadingGrid.cpp
     lighting/DaylightModel.cpp
+    lighting/ExposureModel.cpp
     lighting/RoomLightState.cpp
 
     environment/DayLength.cpp

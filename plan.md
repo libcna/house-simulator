@@ -13783,8 +13783,34 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       mutation: changing the source cap from 0.35 to 1.0 made the cap test report the escaped
             0.600 first hop and 0.180 second hop; restoring 0.35 returned all four focused tests
             to green.
-- [ ] HOUSE-01266 — Implement the exposure model: per-cell target, asymmetric adaptation, Tier S implementation by effect scaling plus a tint quad
+- [x] HOUSE-01266 — Implement the exposure model: per-cell target, asymmetric adaptation, Tier S implementation by effect scaling plus a tint quad
       dep: HOUSE-01264 · sys: lighting · plat: ALL · pri: MUST
+      note: every `RoomLightState` publishes a bounded target derived monotonically from its final
+            local + borrowed + daylight level. A fully lit interior remains at 1x, a room at the
+            0.025 ambient floor opens towards a measured 6x maximum, and the 17 sky-open exterior
+            cells use 0.82x to retain sky highlight headroom. The observed camera cell is supplied
+            by the existing canonical cell tracker; spawn/load snaps to its target, then entering a
+            bright scene adapts with a 0.9 s time constant and entering a dark one with 2.2 s.
+      note: the strict Tier-S implementation scales every production static, alpha-tested and
+            transparent world effect for targets at or above 1x. Values below 1x use the residual
+            premultiplied-black full-screen quad before HUD text, so the sky and world constrict
+            together while the environment readout remains legible. The explicit blockout path is
+            unaffected except for the same camera-wide exterior adaptation.
+      measured: 4x left the fixed foyer and living-room wall planes quantised near black; 6x makes
+            the kitchen, family-room, hall and stair materials readable without turning the 0.025
+            silhouette floor into uniform fill. The six reviewed 10:30 clear-weather captures are
+            in `docs/visual-review/captures/house-01266-exposure-r1`.
+      verify: 1,391/1,391 unit tests; 126/127 integration tests in the single full process, with
+            `TransparentPassTests.ItDrawsCellThenObjectWithAlphaBlendAndReadOnlyDepth` passing in
+            isolation (its process-order counter registration issue predates this change); all 18
+            culled/unculled pairs equivalent, worst `l0-sunroom` 0.1966% at the unchanged 0.2%
+            limit; all 43 render tests; inspected and intentionally regenerated the 12
+            first-person, one HUD/readout and four season/sun production references changed by
+            exposure.
+      finding: exposure reveals rather than conceals the remaining visual work. The exterior
+            façade still collapses into the sky value, the foyer and living bake remain too dark,
+            and every selected room lacks furnishing; raising exposure farther would wash the
+            readable rooms instead of correcting those material, bake and content defects.
 - [ ] HOUSE-01267 — Implement blob shadows: projected ellipse, direction from the dominant light, sun-elongation outdoors
       dep: HOUSE-01261 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01268 — Implement the sun-patch decals from the precomputed polygons, interpolated between grid entries

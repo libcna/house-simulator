@@ -18,6 +18,7 @@
 #include "Microsoft/Xna/Framework/Graphics/Viewport.hpp"
 
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/lighting/LightingSystem.hpp"
 #include "cnahouse/rendering/MaterialBinder.hpp"
 #include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
@@ -36,7 +37,8 @@ namespace cnahouse::rendering
                                  const Camera& camera,
                                  visibility::RenderList& list,
                                  MaterialBinder& binder,
-                                 TextureLookup textures)
+                                 TextureLookup textures,
+                                 const lighting::LightingSystem* lighting)
         : library_(library)
         , cells_(cells)
         , world_(world)
@@ -44,6 +46,7 @@ namespace cnahouse::rendering
         , list_(list)
         , binder_(binder)
         , textures_(std::move(textures))
+        , lighting_(lighting)
     {
     }
 
@@ -132,6 +135,8 @@ namespace cnahouse::rendering
             draw.view = &view;
             draw.projection = &projection;
             draw.diffuse = texture;
+            const float exposure = lighting_ == nullptr ? 1.0F : lighting_->CameraEffectExposure();
+            draw.colourMultiplier = Microsoft::Xna::Framework::Vector3(exposure, exposure, exposure);
             const util::Result<Gfx::Effect*> effectResult = binder_.Bind(material->id, draw);
             const util::Result<CullPolicy> cull = binder_.CullFor(material->id, 1.0F);
             if (!effectResult || !cull)

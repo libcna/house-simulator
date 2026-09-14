@@ -197,6 +197,12 @@ namespace cnahouse::lighting
         for (std::size_t index = 0; index < cells_.size(); ++index)
         {
             cells_[index].borrowed = borrowedLevels_[index];
+            cells_[index].exposureTarget = ExposureTargetFor(cells_[index], outdoorCells_[index]);
+        }
+        const RoomLightState* observed = FindCell(cameraCell_);
+        if (observed != nullptr)
+        {
+            cameraExposure_.Advance(observed->exposureTarget, frame.deltaSeconds);
         }
     }
 

@@ -883,3 +883,35 @@ TEST(LightingSystemTests, ClearSkyAmbientChangesContinuouslyFromWarmHorizonToBlu
     }
     EXPECT_LT(worstStep, 0.025F) << "the sky ambient stepped between adjacent civil minutes";
 }
+
+TEST(LightingSystemTests, CameraExposureFollowsTheObservedCellsPublishedTarget)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.cells.json";
+    }
+    HouseLighting house;
+    LightingSystem& lighting = house.lighting;
+    const Id outside = Id::Of("EXT_WORLD");
+    const Id living = Id::Of("L0_LIVING");
+
+    lighting.SetCameraCell(outside);
+    lighting.Update(Frame(1));
+    const RoomLightState* exteriorState = lighting.FindCell(outside);
+    ASSERT_NE(exteriorState, nullptr);
+    EXPECT_FLOAT_EQ(lighting.CameraExposureScale(), exteriorState->exposureTarget);
+    EXPECT_LT(lighting.CameraExposureScale(), 1.0F);
+    EXPECT_GT(lighting.CameraExposureTintAlpha(), 0.0F);
+
+    lighting.SetCameraCell(living);
+    FrameContext transition = Frame(2);
+    transition.deltaSeconds = 0.9F;
+    lighting.Update(transition);
+    const RoomLightState* livingState = lighting.FindCell(living);
+    ASSERT_NE(livingState, nullptr);
+    EXPECT_EQ(lighting.CameraCell(), living);
+    EXPECT_GT(livingState->exposureTarget, exteriorState->exposureTarget);
+    EXPECT_GT(lighting.CameraExposureScale(), exteriorState->exposureTarget);
+    EXPECT_LT(lighting.CameraExposureScale(), livingState->exposureTarget)
+        << "entering a dark room adapts over §25.7's 2.2 seconds rather than snapping";
+}

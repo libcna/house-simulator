@@ -15,6 +15,7 @@
 #include "Microsoft/Xna/Framework/Graphics/Viewport.hpp"
 
 #include "cnahouse/debug/Counters.hpp"
+#include "cnahouse/lighting/LightingSystem.hpp"
 #include "cnahouse/rendering/StateTracker.hpp"
 #include "cnahouse/util/Ids.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
@@ -30,12 +31,14 @@ namespace cnahouse::rendering
                                      const world::CellRuntime& cells,
                                      const world::WorldData& world,
                                      const Camera& camera,
-                                     visibility::RenderList& list)
+                                     visibility::RenderList& list,
+                                     const lighting::LightingSystem* lighting)
         : library_(library)
         , cells_(cells)
         , world_(world)
         , camera_(camera)
         , list_(list)
+        , lighting_(lighting)
     {
     }
 
@@ -108,7 +111,10 @@ namespace cnahouse::rendering
                 device.setIndicesProperty(resident->indices.get());
                 if (!bound || item.material != boundMaterial)
                 {
-                    effect_->setDiffuseColorProperty(material->tint);
+                    const float exposure = lighting_ == nullptr ? 1.0F : lighting_->CameraEffectExposure();
+                    effect_->setDiffuseColorProperty(Vector3(material->tint.X * exposure,
+                                                             material->tint.Y * exposure,
+                                                             material->tint.Z * exposure));
                     effect_->setAlphaProperty(material->alpha);
                     passes[p]->Apply();
                     bound = true;

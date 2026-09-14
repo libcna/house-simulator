@@ -27,9 +27,10 @@ namespace cnahouse::lighting
     /// Planckian hue of the groups that are on; the later renderer combines it with paint and sky
     /// into §28.1's `ambientColor`.
     ///
-    /// Everything here is in `[0, 1]` and everything is a **blend rather than a switch**, for the
-    /// reason §36.3 gives about seasons and §28.4 gives about doors: a level that stepped would be
-    /// seen, because a player watches a room while a door swings.
+    /// Every source level and colour is in `[0, 1]` and is a **blend rather than a switch**, for
+    /// the reason §36.3 gives about seasons and §28.4 gives about doors: a level that stepped would
+    /// be seen, because a player watches a room while a door swings. `exposureTarget` is the one
+    /// display multiplier and is therefore allowed above one.
     struct RoomLightState
     {
         util::Id cell;
@@ -67,6 +68,12 @@ namespace cnahouse::lighting
 
         /// @brief §28.4's 2-hop flood through open portals. `HOUSE-01265` computes this.
         float borrowed = 0.0F;
+
+        /// @brief §28.1's display-light multiplier for an eye adapted to this cell.
+        ///
+        /// Computed after borrowed light, because an open door changes both the room and what an
+        /// observer standing in it adapts to. `ExposureAdapter` follows this target over time.
+        float exposureTarget = 1.0F;
 
         /// @brief What the cell is lit to in all: the floor, plus whichever sources reach it.
         ///

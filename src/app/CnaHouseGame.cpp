@@ -85,10 +85,15 @@ namespace cnahouse::app
     public:
         explicit Hud(Microsoft::Xna::Framework::Graphics::GraphicsDevice& device)
             : batch(device)
+            , exposureTint(device, 1, 1)
         {
+            const Microsoft::Xna::Framework::Color white = Microsoft::Xna::Framework::Color::White;
+            exposureTint.SetData(&white, 1);
         }
 
         Microsoft::Xna::Framework::Graphics::SpriteBatch batch;
+        /// §25.7's Tier-S residual. One white texel tinted premultiplied black by `DrawHud`.
+        Microsoft::Xna::Framework::Graphics::Texture2D exposureTint;
         // MEASURED: `SpriteFont` has no default constructor, so it cannot simply be a member waiting to
         // be assigned. `std::optional` is the honest shape anyway -- the font is genuinely absent until
         // it loads, and a build whose content tree has not been generated is allowed to start without
@@ -143,9 +148,8 @@ namespace cnahouse::app
     /// The HUD as a §7.5 pass. An adapter, deliberately: `DrawHud` is where the HUD is drawn and
     /// duplicating it here to satisfy an interface would be the dead abstraction layer this project
     /// forbids. What the adapter adds is real -- the pass declares that it disturbs device state, so
-    /// `Renderer` invalidates the tracker after it, and it declares itself inactive when there is no
-    /// font, so an empty HUD is a *skipped* pass in the counters rather than a pass that silently
-    /// did nothing.
+    /// `Renderer` invalidates the tracker after it. It runs for either text or §25.7's exposure tint;
+    /// with neither, an empty HUD is a *skipped* pass rather than one that silently did nothing.
     /// `HOUSE-00201`. The smoke scene draws in `OpaqueDynamic` -- the pass a prop belongs in --
     /// rather than in a pass of its own, so what it exercises is the frame's real shape.
     class CnaHouseGame::SmokePass final : public rendering::IRenderPass
@@ -192,7 +196,9 @@ namespace cnahouse::app
 
         [[nodiscard]] bool IsActive() const override
         {
-            return game_->contentLoaded_ && game_->hud_ != nullptr && game_->hud_->font.has_value();
+            return game_->contentLoaded_ && game_->hud_ != nullptr &&
+                   (game_->hud_->font.has_value() ||
+                    (game_->lighting_.has_value() && game_->lighting_->CameraExposureTintAlpha() > 0.0F));
         }
 
         [[nodiscard]] bool DisturbsDeviceState() const override
@@ -553,27 +559,12 @@ namespace cnahouse::app
             }
             materialBinder_ = std::make_unique<rendering::MaterialBinder>(getGraphicsDeviceProperty());
             const util::Result<void> registered = materialBinder_->RegisterAll(world_->Materials());
-            if (registered)
-            {
-                renderer_.Install(rendering::Pass::AlphaTest,
-                                  std::make_unique<rendering::AlphaTestPass>(
-                                      *blockoutChunks_,
-                                      *blockoutCells_,
-                                      *world_,
-                                      blockoutCamera_,
-                                      renderList_,
-                                      *materialBinder_,
-                                      [this](std::string_view name) { return caches_->textures.Get(name); }));
-            }
-            else
+            if (!registered)
             {
                 util::Log::Error(util::LogCat::Rendering,
                                  "walk material registry could not be bound: {}",
                                  registered.Error().ToString());
             }
-            renderer_.Install(rendering::Pass::Transparent,
-                              std::make_unique<rendering::TransparentPass>(
-                                  *blockoutChunks_, *blockoutCells_, *world_, blockoutCamera_, renderList_));
         }
 
         // §25's walk, over the world just loaded. It runs every frame from here on and `F3`
@@ -608,6 +599,24 @@ namespace cnahouse::app
         else
         {
             lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
+        }
+        if (blockoutChunks_ != nullptr && blockoutCells_ != nullptr && materialBinder_ != nullptr &&
+            materialBinder_->Count() != 0U && caches_ != nullptr)
+        {
+            renderer_.Install(rendering::Pass::AlphaTest,
+                              std::make_unique<rendering::AlphaTestPass>(
+                                  *blockoutChunks_,
+                                  *blockoutCells_,
+                                  *world_,
+                                  blockoutCamera_,
+                                  renderList_,
+                                  *materialBinder_,
+                                  [this](std::string_view name) { return caches_->textures.Get(name); },
+                                  &*lighting_));
+            renderer_.Install(
+                rendering::Pass::Transparent,
+                std::make_unique<rendering::TransparentPass>(
+                    *blockoutChunks_, *blockoutCells_, *world_, blockoutCamera_, renderList_, &*lighting_));
         }
         if (!options_.debugBlockoutMaterials && blockoutChunks_ != nullptr && blockoutCells_ != nullptr &&
             materialBinder_ != nullptr && materialBinder_->Count() != 0U && caches_ != nullptr)
@@ -1097,6 +1106,7 @@ namespace cnahouse::app
                 {
                     throw std::runtime_error("validated weather published an invalid cloud cover");
                 }
+                lighting_->SetCameraCell(tracker_.Current());
                 lighting_->Update(frame);
                 // Drawing consumes the lighting stage's one celestial answer. There is no second
                 // sun or moon model in rendering, so room light, sky and disc cannot disagree
@@ -1631,7 +1641,7 @@ namespace cnahouse::app
 
     void CnaHouseGame::DrawHud()
     {
-        if (!contentLoaded_ || hud_ == nullptr || !hud_->font.has_value())
+        if (!contentLoaded_ || hud_ == nullptr)
         {
             return;
         }
@@ -1641,6 +1651,23 @@ namespace cnahouse::app
         // ONE batch for the whole HUD. `HOUSE-00106` measured a draw call at 8.15 us of CPU, so
         // a batch per string would spend more on submission than the rest of the frame does.
         hud_->batch.Begin();
+        if (lighting_.has_value())
+        {
+            const float alpha = lighting_->CameraExposureTintAlpha();
+            if (alpha > 0.0F)
+            {
+                const auto& viewport = getGraphicsDeviceProperty().getViewportProperty();
+                hud_->batch.Draw(hud_->exposureTint,
+                                 Microsoft::Xna::Framework::Rectangle(
+                                     0, 0, viewport.getWidthProperty(), viewport.getHeightProperty()),
+                                 Microsoft::Xna::Framework::Color(0.0F, 0.0F, 0.0F, alpha));
+            }
+        }
+        if (!hud_->font.has_value())
+        {
+            hud_->batch.End();
+            return;
+        }
         // The menus draw INSIDE the HUD's one batch (`HOUSE-00106`: a draw call is 8.15 us, so a
         // second batch would cost more than everything in it) and BEFORE the corner lines, so the
         // version and frame time stay readable over a title screen.
