@@ -48,26 +48,32 @@ The first real CNB build measured `core` at 58.4 MB when all three channels were
 its 55 MB limit. Section 22.1's application-owned runtime record has albedo and normal texture
 slots but deliberately stores metallic/roughness as the `specularColor` and `specularPower`
 scalars derived by `pbr_to_stock.py`. The 34 ORM maps therefore remain hash-manifested offline
-inputs for `HOUSE-00900`, not packaged runtime textures. The 68 packaged maps occupy 22,422,896
+inputs for the reproducible `HOUSE-00900` mapping, not packaged runtime textures. The 68 packaged maps occupy 22,422,896
 compiled bytes including mip chains; the complete `core` pack then measures 47.2 MB, leaving
 7.8 MB headroom. That is also why 512 was not used: the packaged pair would require four times
 this memory. The content configuration explicitly enables mips and disables alpha
 premultiplication for every packaged map.
 
-## Sphere-and-floor review
+## Stock-mapped authoring review
 
 [The labelled contact sheet](../asset-review/materials/contact-sheet.jpg) summarizes the 34
-retained 640×400 renders. Each linked image above is the full-resolution evidence. The Blender
-scene uses the committed albedo, normal and ORM maps together on both a UV sphere and a tiled floor
-under warm key, cool fill and neutral rim lights.
+retained 960×480 renders. Each linked image above is the full-resolution evidence. Every image
+shows the authored stock mapping on a UV sphere, tiled floor and vertical wall, repeated at low,
+medium and high direct-light levels from left to right. The preview reconstructs the fixed
+Blinn-Phong lobe from the row's `specularColor` and `specularPower`; ORM is not sampled by the
+preview or runtime and remains an offline reproducibility input.
 
 All 34 sets tile across the floor without an edge discontinuity, keep their tangent-space relief
-continuous around the sphere, and contain no transparency or baked directional shadow. Surface
-classes remain visually distinct at 256 pixels: carpet/fabric stay matte, floor woods retain board
-or parquet structure, masonry joints remain readable, and brushed steel resolves its directional
-grain. Chrome is dark away from the three area-light reflections because this deliberately small
-review scene has no environment map; that is expected metallic behaviour, not missing albedo.
+continuous around the sphere, remain readable against the wall, and preserve their identity at all
+three light levels. Surface classes remain distinct at 256 pixels: carpet/fabric stay matte, floor
+woods retain board or parquet structure, masonry joints remain readable, and brushed steel
+resolves its directional grain. Chrome is intentionally dark away from the direct highlights
+because the stock mapping has no diffuse metal lobe or image-based lighting.
 
-The acquired maps are approved as inputs. Colour tint, UV scale and the PBR-to-Blinn-Phong scalar
-tuning remain the explicit downstream work of `HOUSE-00900`; this task does not claim that those
-un-authored material records already exist.
+`layout.materials.json` now contains one complete, neutral `MAT_BASE_*` §22.1 row for every set.
+`pbr_to_stock.py` measures mean roughness, maps it to the clamped 4–256 Blinn-Phong power, gives
+dielectrics F0 0.04, and uses mean albedo as the tint of a metal's specular lobe. JPEG endpoint noise
+is snapped to the reviewed class: dielectrics are metallic 0 and the two metals metallic 1. Brick
+uses §22.2's `stone` path and plaster its `paint` path instead of inventing runtime classes. The
+base rows deliberately keep neutral tint and UV scale; room- and object-specific variants tune
+those fields in `HOUSE-00901` onward.

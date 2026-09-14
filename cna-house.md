@@ -2192,8 +2192,10 @@ a power-of-two size with a maximum 256-pixel edge. Albedo and normal are runtime
 ORM remains manifested offline input for §22.1's `pbr_to_stock.py` scalar mapping because the
 application-owned runtime record has no ORM texture slot. The real uncompressed-CNB build measures
 the complete `core` pack at **47.23 MB / 55 MB**; packaging ORM as an unused runtime texture would
-instead make it 58.4 MB and is rejected. Selection, hashes, measurements and 34 sphere-and-floor
-renders are in `docs/asset-selection/base-material-set.md`.
+instead make it 58.4 MB and is rejected. `HOUSE-00900` mapped all 34 sets to complete §22.1
+`MAT_BASE_*` rows and reviewed each on a sphere, floor and wall at three light levels. Selection,
+hashes, measurements, mapping decisions and renders are in
+`docs/asset-selection/base-material-set.md`.
 
 `HOUSE-00297` retained 22 specifically pinned Poly Haven CC0 vegetation sources and derived the
 34-model set required below: six botanically distinct trees at three real geometry ages, nine
@@ -2489,6 +2491,13 @@ At runtime these rows load as `world::MaterialDef` records. `MaterialBinder::Reg
 the complete table into an ID-keyed registry before the first frame and refuses the table
 atomically if any row is invalid or duplicated. A lightmap is not part of `MaterialDef`: §23 chooses
 it from the visible room/light group for each draw.
+
+`HOUSE-00900` adds a deterministic `MAT_BASE_*` reference row for each of the 34 acquired PBR
+sets. `tools/assets/pbr_to_stock.py` measures the prepared albedo and ORM images, fixes the reviewed
+dielectric/metal endpoint, and writes the mapping above; its CI check compares every field against
+the generated row. These neutral base rows are authoring sources, while `HOUSE-00901` onward names
+placement-specific variants with explicit tint, UV scale and environmental response. Each base row
+is retained in a sphere/floor/wall preview at low, medium and high light levels.
 
 ### 22.2 Material classes and their effect mapping
 

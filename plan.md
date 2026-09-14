@@ -12938,9 +12938,22 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       verified: max-4-core warning-clean build; 1 real-device `AlphaTestPassTests` plus the binder,
             renderer-order and live walk integration tests; complete suite 1564/1564 executed
             tests (0 failures); `tools/ci/run_checks.sh` all gates green.
-- [ ] HOUSE-00900 — Grouped: author the 34 base materials from the acquired PBR set, mapped through `pbr_to_stock.py`, previewed and tuned
+- [x] HOUSE-00900 — Grouped: author the 34 base materials from the acquired PBR set, mapped through `pbr_to_stock.py`, previewed and tuned
       dep: HOUSE-00296, HOUSE-00891 · sys: content · plat: TOOL · pri: MUST
       accept: each material previewed on a sphere, a floor plane and a wall at three light levels
+      note: (2026-09-14) `pbr_to_stock.py` now measures each prepared albedo/ORM pair and owns 34
+            complete, generated `MAT_BASE_*` §22.1 records. Dielectrics use F0 0.04, metals use
+            mean albedo for their constant specular colour, roughness maps to the documented
+            clamped Blinn-Phong power, and reviewed JPG endpoint noise is snapped to metallic 0/1.
+      finding: brick and plaster map to §22.2's existing `stone` and `paint` runtime classes;
+            inventing parallel effect paths would contradict the architecture. ORM remains a
+            manifested offline reproducibility input because neither §22.1 nor stock XNA consumes
+            it at runtime. Neutral base rows leave placement tint/scale to HOUSE-00901 onward.
+      verified: all 34 retained 960×480 renders show the stock-mapped material on sphere, floor
+            and wall in low/medium/high bays; the checker proves exact membership, dimensions and
+            increasing bay luminance. Visual contact-sheet review, mapping self-test, manifest,
+            deploy/id-golden checks, max-4-core warning-clean build and complete suite 1564/1564
+            executed tests (0 failures); `tools/ci/run_checks.sh` all gates green.
 - [ ] HOUSE-00901 — Grouped: author the 18 interior paint variants (walls and ceilings per room palette)
       dep: HOUSE-00900 · sys: content · plat: TOOL · pri: MUST
 - [ ] HOUSE-00902 — Grouped: author the 12 floor materials (oak, walnut, 3 carpets, 4 tiles, concrete, stone, vinyl)

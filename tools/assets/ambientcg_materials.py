@@ -339,8 +339,9 @@ def register_outputs() -> int:
             if channel == "orm":
                 row["notPackaged"] = (
                     "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; "
-                    "HOUSE-00900 maps its roughness and metalness to the stock XNA effect's "
-                    "specularColor/specularPower scalars through pbr_to_stock.py."
+                    "HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's "
+                    "specularColor/specularPower scalars through pbr_to_stock.py; this map is "
+                    "retained as the reproducibility input."
                 )
             else:
                 row.update({
@@ -380,8 +381,8 @@ def register_outputs() -> int:
         "`tools/assets/ambientcg_materials.py` extracts Color, NormalGL, Roughness, optional "
         "AmbientOcclusion and optional Metalness; resizes them to a maximum 256-pixel edge; and "
         "writes albedo, normal and packed ORM PNGs. Albedo and normal compile as runtime textures; "
-        "ORM remains a manifested offline input for HOUSE-00900 because §22.1 stores the stock "
-        "effect's derived specular scalars rather than an ORM texture. Displacement and DirectX "
+        "ORM remains a manifested offline input because HOUSE-00900 mapped it to §22.1's stock-"
+        "effect specular scalars. Displacement and DirectX "
         "normals are rejected because the runtime material contract uses neither.",
         "",
         "| Class | ambientCG id | Local slug | Upstream archive SHA-256 | Manifest ids |",
@@ -396,9 +397,9 @@ def register_outputs() -> int:
             f"`{ARCHIVE_SHA256[material.asset_id]}` | {ids} |")
     source_lines += [
         "",
-        "Every output was rendered with all three maps on the same test sphere and tiled test "
-        "floor. The 34 retained renders and visual findings are in "
-        "`docs/asset-review/materials/`.",
+        "HOUSE-00900 mapped every set through `pbr_to_stock.py`, then rendered the authored stock "
+        "parameters on a sphere, tiled floor and wall at low, medium and high light levels. The "
+        "34 retained renders and visual findings are in `docs/asset-review/materials/`.",
     ]
     (OUTPUT / "SOURCE.md").write_text("\n".join(source_lines) + "\n", encoding="utf-8")
     print(f"ambientcg_materials: registered {len(owned_ids)} textures and wrote SOURCE.md")

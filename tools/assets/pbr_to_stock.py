@@ -55,6 +55,34 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import gltf_validate  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
+TEXTURES = REPO / "assets-src" / "Textures" / "Materials"
+MATERIALS_FILE = REPO / "assets-src" / "world" / "layout.materials.json"
+BASE_BEGIN = "    // BEGIN GENERATED BASE MATERIALS (pbr_to_stock.py)"
+BASE_END = "    // END GENERATED BASE MATERIALS"
+
+# Visual mapping plus the neutral §22.1 properties from which the placement-specific variants in
+# HOUSE-00901 onward are authored.  Brick is a masonry/stone class and plaster is a paint class in
+# §22.2's deliberately small runtime vocabulary; neither needs a duplicate effect path.
+BASE_DEFAULTS = {
+    "paint": ("paint", "DualTexture", 1, "concrete", 0.10, (0.18, 1.6, 1.8), (True, 40.0)),
+    "plaster": ("paint", "DualTexture", 1, "concrete", 0.12, (0.18, 1.6, 1.8), (True, 45.0)),
+    "wood": ("wood", "DualTexture", 1, "hardwood", 0.16, (0.28, 2.4, 3.0), (True, 35.0)),
+    "tile": ("tile", "DualTexture", 1, "tile", 0.06, (0.22, 2.1, 2.5), (True, 30.0)),
+    "carpet": ("carpet", "DualTexture", 1, "carpet", 0.65, (0.12, 1.2, 1.1), (False, 0.0)),
+    "stone": ("stone", "DualTexture", 1, "rock", 0.04, (0.28, 2.2, 2.5), (True, 40.0)),
+    "brick": ("stone", "DualTexture", 1, "rock", 0.08, (0.26, 2.0, 2.2), (True, 45.0)),
+    "concrete": (
+        "concrete", "DualTexture", 1, "concrete", 0.06, (0.24, 2.0, 2.0), (True, 45.0)
+    ),
+    "asphalt": (
+        "asphalt", "DualTexture", 1, "asphalt", 0.12, (0.35, 2.4, 2.6), (True, 12.0)
+    ),
+    "gravel": ("gravel", "DualTexture", 1, "gravel", 0.25, (0.30, 1.8, 1.8), (True, 30.0)),
+    "grass": ("grass", "DualTexture", 1, "grass", 0.65, (0.20, 1.3, 1.2), (True, 40.0)),
+    "soil": ("soil", "DualTexture", 1, "soil", 0.55, (0.34, 1.8, 1.6), (True, 25.0)),
+    "fabric": ("fabric", "Basic", 0, "carpet", 0.55, (0.12, 1.2, 1.1), (False, 0.0)),
+    "metal": ("metal", "Basic", 0, "metal", 0.02, (0.08, 1.3, 1.2), (True, 20.0)),
+}
 
 #: Normal-incidence reflectance of a dielectric. 0.04 is the value every metallic-roughness
 #: renderer uses; it corresponds to an index of refraction of about 1.5, which is glass, most
@@ -92,6 +120,148 @@ def convert(base_colour: tuple[float, float, float], metallic: float, roughness:
             "roughness": round(roughness, 6),
         },
     }
+
+
+def convert_textures(albedo_path: Path, orm_path: Path, *, metal: bool) -> dict:
+    """Measure one prepared PBR set and return the scalars stored in §22.1.
+
+    The albedo remains a texture, so its mean colour is used only for a metal's constant stock
+    specular colour.  `tint` is the diffuse *scale*: one for a dielectric and zero for a metal.
+    ambientCG's JPG metalness maps contain a few compression-level off-by-one samples; the reviewed
+    material class therefore snaps the workflow to its physically meaningful endpoint instead of
+    giving wood a 0.03% metallic lobe or chrome a 0.0005% diffuse lobe.
+    """
+    from PIL import Image, ImageStat
+
+    with Image.open(albedo_path) as source:
+        albedo = source.convert("RGB")
+        albedo.load()
+    with Image.open(orm_path) as source:
+        orm = source.convert("RGB")
+        orm.load()
+    if albedo.size != orm.size:
+        raise ValueError(f"{albedo_path} and {orm_path} do not have the same dimensions")
+
+    base_colour = tuple(value / 255.0 for value in ImageStat.Stat(albedo).mean)
+    source_orm = tuple(value / 255.0 for value in ImageStat.Stat(orm).mean)
+    metallic = 1.0 if metal else 0.0
+    result = convert(base_colour, metallic, source_orm[1])
+    result["tint"] = [1.0 - metallic] * 3
+    result["from"]["sourceMetallic"] = round(source_orm[2], 6)
+    return result
+
+
+def base_material_id(slug: str) -> str:
+    return "MAT_BASE_" + slug.upper()
+
+
+def base_material_row(material) -> dict:
+    mapped = convert_textures(
+        TEXTURES / f"{material.slug}_albedo.png",
+        TEXTURES / f"{material.slug}_orm.png",
+        metal=material.category == "metal",
+    )
+    material_class, tier_s, lightmap, footstep, absorption, wet, snow = BASE_DEFAULTS[material.category]
+    return {
+        "id": base_material_id(material.slug),
+        "class": material_class,
+        "albedo": f"Textures/Materials/{material.slug}_albedo",
+        "normal": f"Textures/Materials/{material.slug}_normal",
+        "lightmapChannel": lightmap,
+        "tint": mapped["tint"],
+        "specularColor": mapped["specularColour"],
+        "specularPower": mapped["specularPower"],
+        "alphaMode": "opaque",
+        "alpha": 1.0,
+        "alphaCutoff": None,
+        "twoSided": False,
+        "uvScale": [1.0, 1.0],
+        "wetResponse": {"albedoDarken": wet[0], "specularBoost": wet[1], "powerBoost": wet[2]},
+        "snowResponse": {"coverable": snow[0], "slopeLimitDeg": snow[1]},
+        "footstepSurface": footstep,
+        "audioAbsorption": absorption,
+        "effectTierS": tier_s,
+        "effectTierE": "RoomLit",
+    }
+
+
+def check_base_materials() -> int:
+    """Prove that all 34 authored base rows are the fixed conversion of their PBR maps."""
+    import ambientcg_materials
+
+    sys.path.insert(0, str(REPO / "tools" / "world"))
+    import layout_io
+
+    document = json.loads(layout_io.strip_jsonc(MATERIALS_FILE.read_text(encoding="utf-8")))
+    rows = document.get("materials", [])
+    indexed = {row.get("id"): row for row in rows if isinstance(row, dict)}
+    expected_ids = {base_material_id(material.slug) for material in ambientcg_materials.MATERIALS}
+    actual_ids = {name for name in indexed if isinstance(name, str) and name.startswith("MAT_BASE_")}
+    problems = [f"missing {name} in {MATERIALS_FILE}" for name in sorted(expected_ids - actual_ids)]
+    problems += [f"unexpected base row {name} in {MATERIALS_FILE}" for name in sorted(actual_ids - expected_ids)]
+
+    for material in ambientcg_materials.MATERIALS:
+        material_id = base_material_id(material.slug)
+        row = indexed.get(material_id)
+        if row is None:
+            continue
+        expected = base_material_row(material)
+        if row != expected:
+            for field in sorted(set(row) | set(expected)):
+                if row.get(field) != expected.get(field):
+                    problems.append(
+                        f"{material_id}/{field}: {row.get(field)!r}, expected {expected.get(field)!r}"
+                    )
+
+    if problems:
+        for problem in problems:
+            print(f"pbr_to_stock: {problem}", file=sys.stderr)
+        return 1
+    print("pbr_to_stock: 34 authored base materials match their measured PBR maps")
+    return 0
+
+
+def write_base_materials() -> int:
+    """Replace only the marked derived rows, preserving every hand-authored world material."""
+    import ambientcg_materials
+
+    text = MATERIALS_FILE.read_text(encoding="utf-8")
+    if text.count(BASE_BEGIN) != 1 or text.count(BASE_END) != 1:
+        print("pbr_to_stock: base-material markers are missing or duplicated", file=sys.stderr)
+        return 1
+    rows = [base_material_row(material) for material in ambientcg_materials.MATERIALS]
+    rows.sort(key=lambda row: row["id"])
+    rendered = []
+    for row in rows:
+        def value(field: str) -> str:
+            return json.dumps(row[field])
+
+        rendered.extend(
+            [
+                "    {",
+                f'      "id": {value("id")}, "class": {value("class")},',
+                f'      "albedo": {value("albedo")},',
+                f'      "normal": {value("normal")}, "lightmapChannel": {value("lightmapChannel")},',
+                f'      "tint": {value("tint")}, "specularColor": {value("specularColor")},',
+                f'      "specularPower": {value("specularPower")}, "alphaMode": {value("alphaMode")},',
+                f'      "alpha": {value("alpha")}, "alphaCutoff": {value("alphaCutoff")},',
+                f'      "twoSided": {value("twoSided")}, "uvScale": {value("uvScale")},',
+                f'      "wetResponse": {value("wetResponse")},',
+                f'      "snowResponse": {value("snowResponse")},',
+                f'      "footstepSurface": {value("footstepSurface")},',
+                f'      "audioAbsorption": {value("audioAbsorption")},',
+                f'      "effectTierS": {value("effectTierS")}, "effectTierE": {value("effectTierE")}',
+                "    },",
+            ]
+        )
+    before, remainder = text.split(BASE_BEGIN, 1)
+    _, after = remainder.split(BASE_END, 1)
+    MATERIALS_FILE.write_text(
+        before + BASE_BEGIN + "\n" + "\n".join(rendered) + "\n" + BASE_END + after,
+        encoding="utf-8",
+    )
+    print(f"pbr_to_stock: wrote {len(rows)} base materials to {MATERIALS_FILE}")
+    return 0
 
 
 def convert_gltf(path: Path) -> list[dict]:
@@ -201,10 +371,18 @@ def main() -> int:
     parser.add_argument("--metallic", type=float, default=0.0)
     parser.add_argument("--roughness", type=float, default=0.5)
     parser.add_argument("--selftest", action="store_true")
+    parser.add_argument("--check-base-materials", action="store_true")
+    parser.add_argument("--write-base-materials", action="store_true")
     args = parser.parse_args()
 
     if args.selftest:
         return selftest()
+
+    if args.check_base_materials:
+        return check_base_materials()
+
+    if args.write_base_materials:
+        return write_base_materials()
 
     if args.value:
         result = convert(tuple(args.value), args.metallic, args.roughness)

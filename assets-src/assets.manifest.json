@@ -16921,7 +16921,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Asphalt033_1K-JPG.zip (sha256 c71801b342dbea594dbdd0bd2ddc0a6d13f813c923fca408b9f5b9ee5e58aba2). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_BRICK_RED_ALBEDO",
@@ -17012,7 +17012,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Bricks097_1K-JPG.zip (sha256 97b5df360161e48bcfed609aef361e8115b680ddc0aea4ad9321d4b00e222ad0). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_CARPET_BEIGE_ALBEDO",
@@ -17103,7 +17103,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Carpet016_1K-JPG.zip (sha256 b9e67b5d42cb47cead082dedae3767ae228175c857b6b3af6fe7bd4e69237b81). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_CARPET_BROWN_ALBEDO",
@@ -17194,7 +17194,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Carpet001_1K-JPG.zip (sha256 f06d551e40d4d4d31a84df310bad2a1ec70753cd330342c7d8bcff3587fccbd1). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_CARPET_GREY_ALBEDO",
@@ -17285,7 +17285,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Carpet012_1K-JPG.zip (sha256 f5c459f278a3b50dc5c2bf535b8c3b6fd4bb6fc458c836b64023961b167fe4f6). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_CONCRETE_SMOOTH_ALBEDO",
@@ -17376,7 +17376,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Concrete031_1K-JPG.zip (sha256 3068e551435d3cdae3942017799d8871b940c88ebfaf5c2b87376972ae448fd6). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_FABRIC_COARSE_ALBEDO",
@@ -17467,7 +17467,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Fabric066_1K-JPG.zip (sha256 bcd274190979010b2056cab1b10d0420da6e2f58a8e1cf37bc527d8a67772684). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_FABRIC_PLAIN_ALBEDO",
@@ -17558,7 +17558,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Fabric081C_1K-JPG.zip (sha256 54cb93482845a9b74b34b1294ce40ff9427df88ec700c7fcfec72125551dca31). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_FABRIC_WEAVE_ALBEDO",
@@ -17649,7 +17649,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Fabric061_1K-JPG.zip (sha256 537a84d3a91d50bc907d2e86f4f024041643eb6a04c10b115cdf308f29508eb2). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_GRASS_LAWN_ALBEDO",
@@ -17740,7 +17740,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Grass005_1K-JPG.zip (sha256 58a7fb7f32c44a86879483325b62781d04e0ab8f70b0f70ede36c8f1726f8a22). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_GRAVEL_MIXED_ALBEDO",
@@ -17831,7 +17831,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Gravel043_1K-JPG.zip (sha256 bca54835c7c71bea4b4b9f27fbef127d666fa1cf7de16f2b04f0ceb4294e784c). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_METAL_BRUSHED_ALBEDO",
@@ -17922,7 +17922,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Metal009_1K-JPG.zip (sha256 1b1970219b40fe707e7194b28702f1a65b0d227bbea56da69dfbc8d8b5cfcb5e). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_METAL_CHROME_ALBEDO",
@@ -18013,7 +18013,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Metal049A_1K-JPG.zip (sha256 4f6a79e535261ab55cc6feefed0037124885720ce7b781fc2efa3fa22792af42). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_PAINT_AGED_ALBEDO",
@@ -18104,7 +18104,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from PaintedPlaster013_1K-JPG.zip (sha256 6af62729cbea466d35bd2482d3b20c989518e32d7633928e301caf423b2795db). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_PAINT_COOL_ROUGH_ALBEDO",
@@ -18195,7 +18195,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from PaintedPlaster014_1K-JPG.zip (sha256 064347e8cb994ea8b4e1b504883f98917b00a8170d81d01ad39d6ad161cdcf02). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_PAINT_CREAM_ROUGH_ALBEDO",
@@ -18286,7 +18286,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from PaintedPlaster010_1K-JPG.zip (sha256 8755d4560396c038f0e924ad52463ca8830f3f7ac9f6aafd008ffc96df6df5f4). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_PAINT_GREY_FINE_ALBEDO",
@@ -18377,7 +18377,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from PaintedPlaster015_1K-JPG.zip (sha256 792b97898cd4f583059de5eafd62293a11a44834ec9b771bf1a515d98c464d03). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_PAINT_WARM_FINE_ALBEDO",
@@ -18468,7 +18468,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from PaintedPlaster016_1K-JPG.zip (sha256 7cb21ab2f0dbe7b599ba31c0140c0b85a100e30a0406e66502c18d067ec8f60e). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_PAINT_WHITE_FINE_ALBEDO",
@@ -18559,7 +18559,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from PaintedPlaster017_1K-JPG.zip (sha256 bae0380d82b6ccac8943b4980417cb3c9de5c896218339c108056f1dfb8e886c). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_PLASTER_NATURAL_ALBEDO",
@@ -18650,7 +18650,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Plaster007_1K-JPG.zip (sha256 75c7d96a8e60c4c5073767508e34e88c73677a3641e40bb8aaa0f1d6674391c0). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_SOIL_GARDEN_ALBEDO",
@@ -18741,7 +18741,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Ground109_1K-JPG.zip (sha256 be2cdb97845d895bddcf75f3d7a307301e1cb22dee2c41c47b9af0b64ee0db3d). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_STONE_MARBLE_ALBEDO",
@@ -18832,7 +18832,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Marble012_1K-JPG.zip (sha256 b04384c6d49ce73baeb70db7ea4abfe9948fc9b74b9fd92c3766970662bf2c43). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_STONE_ONYX_ALBEDO",
@@ -18923,7 +18923,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Onyx015_1K-JPG.zip (sha256 6d46ffbd0800b3153588feeff81861561e2b2932ce1400102d5c58f54f7e1d89). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_STONE_ROUGH_ALBEDO",
@@ -19014,7 +19014,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Rock064_1K-JPG.zip (sha256 560f23fdd24f4abe27f5c272b86e69fd026c3d111e22f60d7fb647306830367b). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_TILE_DARK_SQUARE_ALBEDO",
@@ -19105,7 +19105,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Tiles143_1K-JPG.zip (sha256 afbda7adaf4c0048a9224a09ab326fe0f8313e9add1343ad8c09c157a98d881f). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_TILE_GREY_SQUARE_ALBEDO",
@@ -19196,7 +19196,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Tiles139_1K-JPG.zip (sha256 0ac4f6e094874948027a1477ad4b9e4986d48ccede608ae59874672ab46265db). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_TILE_LIGHT_SQUARE_ALBEDO",
@@ -19287,7 +19287,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Tiles140_1K-JPG.zip (sha256 6eb73dd78bcfff358f09720242fed543edd9fc6ea3a6c0d4f46ecef59fa08308). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_TILE_WARM_SQUARE_ALBEDO",
@@ -19378,7 +19378,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Tiles141_1K-JPG.zip (sha256 6ee56eba21592b9c02c6ee78dd93c6b585b62a2558d143d53e19457c82379d52). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_WOOD_BOARD_ALBEDO",
@@ -19469,7 +19469,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from Wood095_1K-JPG.zip (sha256 04acff5a13e8ada6749b58ff5f6c49402692aadbfde87d65b06d35d70a9601d8). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_WOOD_DARK_FLOOR_ALBEDO",
@@ -19560,7 +19560,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from WoodFloor070_1K-JPG.zip (sha256 a8b11f1d6632faa674a5dcd903d7a932fd328e1239ef598f2b38014424547137). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_WOOD_LIGHT_FLOOR_ALBEDO",
@@ -19651,7 +19651,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from WoodFloor064_1K-JPG.zip (sha256 edd177798c9fa641531ef32970418ff9781e3bf3ceb7808257d2b6c09d7d3cc1). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_WOOD_OAK_FLOOR_ALBEDO",
@@ -19742,7 +19742,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from WoodFloor051_1K-JPG.zip (sha256 3f493484eab1ec5e1c466b90e515003b286fc6d7f84ff8ff6485900bfc26cef5). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_WOOD_PARQUET_FLOOR_ALBEDO",
@@ -19833,7 +19833,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from WoodFloor043_1K-JPG.zip (sha256 0bd1309b36c9a0add6fd9b4108f8cba73ba475afb6fb824c42bb05080c01403b). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_MATERIAL_WOOD_WORN_FLOOR_ALBEDO",
@@ -19924,7 +19924,7 @@
         "retrieved": "2026-09-13",
         "note": "linear packed R=ambient occlusion, G=roughness, B=metalness, prepared by tools/assets/ambientcg_materials.py from WoodFloor040_1K-JPG.zip (sha256 c83a01f1733f2a1f6e95ad6703689eb12fe259e77245d4c0a5652728d07c87cb). Resized with Lanczos to a maximum 256-pixel edge while preserving aspect ratio; licence verified in docs/licence-evidence/ambientcg.md."
       },
-      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 maps its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py."
+      "notPackaged": "Offline PBR authoring input. cna-house.md §22.1 has no ORM texture slot; HOUSE-00900 mapped its roughness and metalness to the stock XNA effect's specularColor/specularPower scalars through pbr_to_stock.py; this map is retained as the reproducibility input."
     },
     {
       "id": "TEXTURE_SMOKE_QUADRANTS",

@@ -125,6 +125,7 @@ run_gate "licences"   python3 tools/assets/verify_licences.py --check
 # sphere-and-floor review all remain executable acceptance criteria.
 run_gate "base-materials-selftest" python3 tools/assets/ambientcg_materials.py --selftest
 run_gate "base-materials" python3 tools/assets/ambientcg_materials.py --check
+run_gate "base-material-mapping" python3 tools/assets/pbr_to_stock.py --check-base-materials
 run_gate "base-material-previews" python3 tools/blender/material_preview.py --check
 # `HOUSE-00297`. Counts alone would accept repeated files and a model lying on its side: the set
 # gate checks pinned source identities, hashes, per-age scale, triangle/LOD ratios and textures;

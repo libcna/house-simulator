@@ -3535,7 +3535,14 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 20U);
+        EXPECT_EQ(contents.materials.size(), 54U);
+
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return IdRegistry::NameOf(material.id).starts_with("MAT_BASE_"); }),
+                  34)
+            << "HOUSE-00900's complete measured base-material library loads through WorldLoader";
 
         const auto glassAt = std::find_if(contents.materials.begin(),
                                           contents.materials.end(),
@@ -3560,8 +3567,23 @@ namespace
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
-                                [](const world::MaterialDef& material) { return material.snow.coverable; }),
+                                [](const world::MaterialDef& material)
+                                {
+                                    return !IdRegistry::NameOf(material.id).starts_with("MAT_BASE_") &&
+                                           material.snow.coverable;
+                                }),
                   11);
+
+        const auto chromeAt = std::find_if(contents.materials.begin(),
+                                           contents.materials.end(),
+                                           [](const world::MaterialDef& material)
+                                           { return material.id == Intern("MAT_BASE_METAL_CHROME"); });
+        ASSERT_NE(chromeAt, contents.materials.end());
+        EXPECT_EQ(chromeAt->materialClass, world::MaterialClass::Metal);
+        EXPECT_FLOAT_EQ(chromeAt->tint.X, 0.0F);
+        EXPECT_FLOAT_EQ(chromeAt->tint.Y, 0.0F);
+        EXPECT_FLOAT_EQ(chromeAt->tint.Z, 0.0F);
+        EXPECT_EQ(chromeAt->effectTierS, world::EffectTier::Basic);
         for (const world::MaterialDef& material : contents.materials)
         {
             EXPECT_GT(material.specularPower, 0.0F);

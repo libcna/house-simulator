@@ -2,7 +2,7 @@
 
 `HOUSE-00296`, retrieved 2026-09-13 from the official ambientCG per-asset download endpoint. The source and its preview renders are CC0; the evidence and quoted grant are in `docs/licence-evidence/ambientcg.md`, with the full text in `licenses/cc0-1.0/LICENCE.txt`.
 
-The upstream ZIP files are hash-pinned below and cached only outside the repository. `tools/assets/ambientcg_materials.py` extracts Color, NormalGL, Roughness, optional AmbientOcclusion and optional Metalness; resizes them to a maximum 256-pixel edge; and writes albedo, normal and packed ORM PNGs. Albedo and normal compile as runtime textures; ORM remains a manifested offline input for HOUSE-00900 because §22.1 stores the stock effect's derived specular scalars rather than an ORM texture. Displacement and DirectX normals are rejected because the runtime material contract uses neither.
+The upstream ZIP files are hash-pinned below and cached only outside the repository. `tools/assets/ambientcg_materials.py` extracts Color, NormalGL, Roughness, optional AmbientOcclusion and optional Metalness; resizes them to a maximum 256-pixel edge; and writes albedo, normal and packed ORM PNGs. Albedo and normal compile as runtime textures; ORM remains a manifested offline input because HOUSE-00900 mapped it to §22.1's stock-effect specular scalars. Displacement and DirectX normals are rejected because the runtime material contract uses neither.
 
 | Class | ambientCG id | Local slug | Upstream archive SHA-256 | Manifest ids |
 |---|---|---|---|---|
@@ -41,4 +41,4 @@ The upstream ZIP files are hash-pinned below and cached only outside the reposit
 | metal | [Metal009](https://ambientcg.com/a/Metal009) | `metal_brushed` | `1b1970219b40fe707e7194b28702f1a65b0d227bbea56da69dfbc8d8b5cfcb5e` | `TEXTURE_MATERIAL_METAL_BRUSHED_ALBEDO`, `TEXTURE_MATERIAL_METAL_BRUSHED_NORMAL`, `TEXTURE_MATERIAL_METAL_BRUSHED_ORM` |
 | metal | [Metal049A](https://ambientcg.com/a/Metal049A) | `metal_chrome` | `4f6a79e535261ab55cc6feefed0037124885720ce7b781fc2efa3fa22792af42` | `TEXTURE_MATERIAL_METAL_CHROME_ALBEDO`, `TEXTURE_MATERIAL_METAL_CHROME_NORMAL`, `TEXTURE_MATERIAL_METAL_CHROME_ORM` |
 
-Every output was rendered with all three maps on the same test sphere and tiled test floor. The 34 retained renders and visual findings are in `docs/asset-review/materials/`.
+HOUSE-00900 mapped every set through `pbr_to_stock.py`, then rendered the authored stock parameters on a sphere, tiled floor and wall at low, medium and high light levels. The 34 retained renders and visual findings are in `docs/asset-review/materials/`.

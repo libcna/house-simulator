@@ -179,7 +179,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 20U);
+                EXPECT_EQ(binder.Count(), 54U);
 
                 const MaterialDesc* glass = binder.Find(Id::Of("MAT_GLASS_CLEAR"));
                 ASSERT_NE(glass, nullptr);
@@ -190,6 +190,13 @@ namespace
                 ASSERT_NE(lawn, nullptr);
                 EXPECT_EQ(lawn->kind, MaterialKind::DualTexture);
                 EXPECT_EQ(lawn->diffuseTexture, "Textures/Materials/grass_lawn_albedo");
+
+                const MaterialDesc* chrome = binder.Find(Id::Of("MAT_BASE_METAL_CHROME"));
+                ASSERT_NE(chrome, nullptr);
+                EXPECT_EQ(chrome->kind, MaterialKind::Basic);
+                EXPECT_FLOAT_EQ(chrome->diffuse[0], 0.0F);
+                EXPECT_FLOAT_EQ(chrome->specularColour[0], 0.987504F);
+                EXPECT_FLOAT_EQ(chrome->specularPower, 256.0F);
             });
     }
 
