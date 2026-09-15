@@ -1,4 +1,41 @@
-# Visual-sprint handoff — 2026-09-15 (`HOUSE-00923` checkpoint)
+# Visual-sprint handoff — 2026-09-15 (`HOUSE-00924` checkpoint)
+
+Branch `develop`; verify HEAD and worktree before acting. This sprint session started at
+`238d6aed27c1e8662f0d118013ef08bb801ae018` and has committed `HOUSE-01037`, `HOUSE-01280`
+and `HOUSE-00923`. The `HOUSE-00924` glass checkpoint is the latest one-task change. Normal
+gameplay uses production materials; hashed blockout remains explicit debug only. `VISUAL-GATE-1`
+is **not passed**.
+
+Before glass: [`house-00923-outdoor-r1`](visual-review/captures/house-00923-outdoor-r1).
+After glass: [`house-00924-glass-r1`](visual-review/captures/house-00924-glass-r1). All eight fixed
+clear-10:30 Tier-S/High software-Mesa normal-game views were inspected. In the living composition
+the left pane changes from clipped `(255,255,255)` to sky `(175,200,228)` while the adjacent wall
+is identical; family panes now show sky/fence contours. The exterior-front camera is unaffected.
+Three intentionally changed strict first-person references (kitchen, foyer stair, master bedroom)
+were inspected individually before selective update; debug/property/sun/season/culling refs were
+stable. The glass's authored tint and alpha, XNA BasicEffect premultiplication, AlphaBlend and
+DepthRead are unchanged; only the spurious dark-room exposure multiplier on unlit glass tint was
+removed. Non-glass translucent surfaces keep their existing adapted path. Focused transparency,
+content and 15-registration actual-software render subset pass, including the 18 paired culling
+views. `tools/ci/run_checks.sh` is green (323 strict-XNA units), and the isolated full
+1,585-registration CTest passes all 1,577 runnable cases. The first concurrent run flaked only
+the world-load performance case while strict XNA compilation was active; it passed alone at
+237 ms and in the isolated full rerun. Check the plan's HOUSE-00924 row and Round 10 in
+`visual-review/README.md`.
+
+Largest next visible defect: the tall white shape in the living composition is an **opaque
+chimney, not `WIN_L0_LIVING_2`**. An explicit blockout screenshot isolates its solid cyan mesh;
+the deployed `chunks.bin` reports `CHIMNEY:exterior` using `MAT_OUTDOOR_BRICK` in `EXT_ROAD`.
+It and pale fence/lawn behind other windows receive the dark interior camera's up-to-6x effect
+exposure, clipping outdoor lighting that should remain scene-referred. The left bay and family
+panes now expose blue sky, proving the glass path works. Trace the exterior-receiver exposure
+boundary from an adapted indoor camera rather than altering glass opacity or bypassing the
+canonical portal/world architecture. Keep strict XNA-only Tier-S.
+After that, prioritize the broad dark façade and empty/dark foyer/hall/kitchen. The selected
+living/family primary seating groups exist but do not yet constitute realistic interiors. Do not
+claim the visual gate passed or that the fixed HUD 32.1-fps overlay measures GPU performance.
+
+## Archived HOUSE-00923 checkpoint — 2026-09-15
 
 Branch `develop`. Verify `git log -4`, `git status` and the current HEAD before work. This visual
 sprint session started at `238d6aed27c1e8662f0d118013ef08bb801ae018` (`HOUSE-00922`) and

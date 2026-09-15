@@ -27,6 +27,11 @@ namespace cnahouse::rendering
     namespace Gfx = Microsoft::Xna::Framework::Graphics;
     using Microsoft::Xna::Framework::Vector3;
 
+    float TransparentTintExposure(world::MaterialClass materialClass, float cameraEffectExposure) noexcept
+    {
+        return materialClass == world::MaterialClass::Glass ? 1.0F : cameraEffectExposure;
+    }
+
     TransparentPass::TransparentPass(const world::ChunkLibrary& library,
                                      const world::CellRuntime& cells,
                                      const world::WorldData& world,
@@ -111,7 +116,8 @@ namespace cnahouse::rendering
                 device.setIndicesProperty(resident->indices.get());
                 if (!bound || item.material != boundMaterial)
                 {
-                    const float exposure = lighting_ == nullptr ? 1.0F : lighting_->CameraEffectExposure();
+                    const float adapted = lighting_ == nullptr ? 1.0F : lighting_->CameraEffectExposure();
+                    const float exposure = TransparentTintExposure(material->materialClass, adapted);
                     effect_->setDiffuseColorProperty(Vector3(material->tint.X * exposure,
                                                              material->tint.Y * exposure,
                                                              material->tint.Z * exposure));

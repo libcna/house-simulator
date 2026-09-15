@@ -78,6 +78,15 @@ namespace
         return library;
     }
 
+    TEST(TransparentPassTests, GlassTintDoesNotBecomeAnEmitterWhenTheEyeAdaptsToADarkRoom)
+    {
+        using cnahouse::rendering::TransparentTintExposure;
+        EXPECT_FLOAT_EQ(TransparentTintExposure(world::MaterialClass::Glass, 6.0F), 1.0F);
+        EXPECT_FLOAT_EQ(TransparentTintExposure(world::MaterialClass::Glass, 1.0F), 1.0F);
+        EXPECT_FLOAT_EQ(TransparentTintExposure(world::MaterialClass::Water, 6.0F), 6.0F);
+        EXPECT_FLOAT_EQ(TransparentTintExposure(world::MaterialClass::Fabric, 2.5F), 2.5F);
+    }
+
     TEST(TransparentPassTests, ItDrawsCellThenObjectWithAlphaBlendAndReadOnlyDepth)
     {
         const world::WorldData materials = TransparentMaterials();

@@ -28,13 +28,13 @@ number order. The first slice is the continuous route from the front approach th
 only as an explicit debug view.
 
 The initial material/daylight chain `HOUSE-00909` → `HOUSE-00910` → `HOUSE-00912` has reached
-normal rendering. The first minimum real static prop kit (`HOUSE-01037`) uses completed
+normal rendering, and `HOUSE-00923` restored canonical outdoor material parity at the start view.
+The first minimum real static prop kit (`HOUSE-01037`) uses completed
 `HOUSE-00215` batching without claiming `HOUSE-00971`'s unfinished dynamic/jitter/tint criteria.
 `HOUSE-01280` corrects the measured receiver/furniture lighting mismatch visible in its reviewed
-images. The exterior start actually omits authored road, fence, gate, yard and roof chunks in
-production while the identical explicit debug pose shows them: unregistered generator role names
-and unbaked outdoor `Basic` layout need canonical stock-XNA material parity. Fix that first;
-almost-white windows are next. Diagnose both from the fixed in/out poses before minor seams or
+images. Round 9 proves the exterior material omission is fixed; `HOUSE-00924` removes the
+exposure-scaled glass tint. Round 10 leaves the room-visible chimney/other exterior receivers
+clipped white and the façade a dark slab. Diagnose the fixed in/out receiver view before seams or
 unrelated systems. Primary
 foyer/hall/kitchen furnishing follows in the connected slice. `HOUSE-00913` seam repair,
 `HOUSE-00917` material
@@ -142,7 +142,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 9 | Room/portal visibility | 00661–00760 | 40 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
-| 12 | Materials and textures | 00891–00970 | 33 | The blockout reads as a building |
+| 12 | Materials and textures | 00891–00970 | 34 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 65 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
@@ -13270,6 +13270,40 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             XNA units), `git diff --check` is clean, and the full 1,584-registration CTest exits
             green with its established capture-only/disabled cases preserved. `VISUAL-GATE-1`
             remains FAILED because windows/façade and empty/dark route rooms are still conspicuous
+- [x] HOUSE-00924 — Composite unlit architectural glass against the scene without overexposing its tint at dark-room eye adaptation
+      dep: HOUSE-00904, HOUSE-00907, HOUSE-00912, HOUSE-00923, HOUSE-01266 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-15) Visual-sprint P0, next free phase-12 id. In Round 9's fixed clear 10:30
+            living composition, both sampled window interiors are `(255,255,255)` while the wall
+            beside them is `(44,33,25)` and the normal-game sky outside is `(131,152,179)`.
+            `TransparentPass` applies the room's up-to-6× `CameraEffectExposure` to an **unlit**
+            glass tint before XNA `BasicEffect` supplies its 0.12 alpha, but the sky behind the
+            pane is not lifted by that same effect. This is a compositing mismatch, not permission
+            to double-premultiply alpha or replace glass with an opaque tint.
+      accept: clear/obscured/cabinet/shower glass keeps its authored alpha, tint and XNA
+            premultiplied blend/depth behavior; glass tint no longer acts as an exposure-scaled
+            emitter against the sky, while non-glass transparent surfaces keep their intended
+            exposure path; the same fixed living/family cameras show exterior colour/detail
+            instead of uniform clipped-white panes, in and out views are inspected, regression
+            refs are updated selectively after visual inspection, culled/unculled and XNA/content
+            gates remain green
+      verified: (2026-09-15) The XNA BasicEffect glass branch now uses the authored scene-referred
+            tint without multiplying it by the room's up-to-6x eye adaptation; its existing alpha,
+            AlphaBlend and DepthRead path is unchanged. Non-glass blend rows retain adaptation.
+            All eight fixed normal-game views were inspected at
+            `docs/visual-review/captures/house-00924-glass-r1`: living left-window RGB moves
+            from (255,255,255) to (175,200,228), family panes show blue sky and fence outlines,
+            and the exterior/front view is unaffected. The tall white shape at the center of the
+            living composition is **not a window**: explicit blockout isolates it as opaque,
+            and `chunks.bin` identifies `CHIMNEY:exterior`, `MAT_OUTDOOR_BRICK`, `EXT_ROAD`.
+            It is an explicitly remaining outdoor-receiver/indoor-eye exposure defect, not an
+            uncorrected glass tint. Only three changed first-person
+            refs (kitchen, foyer stair, master bedroom) were inspected and deliberately updated.
+            The 15-registration actual-software render/content subset, including the 18-pair
+            culled/unculled check, is green. `tools/ci/run_checks.sh` passes, including 323
+            strict-XNA units. The isolated full 1,585-registration CTest passes all 1,577
+            runnable cases (the established disabled/capture-only cases remain), after one
+            performance case was re-run alone to eliminate concurrent strict-build load.
+            `VISUAL-GATE-1` remains FAILED.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -17310,6 +17344,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-15 | `HOUSE-00924` | **New task, next free phase-12 id.** Correct the stock-XNA translucent-glass tint/exposure composition at the architectural window path. | Round 9's reviewed gameplay images show pure-white window pixels against a blue exterior sky and almost-black room. Source tracing proves the unlit glass pass multiplies its 12%-alpha tint by dark-room camera exposure while the background sky is unexposed; neither `HOUSE-00904`'s glass table nor `HOUSE-01266`'s opaque exposure model owns that boundary. Fixing it is dependency-valid visible work without a new renderer or altered alpha/provenance. |
 | 2026-09-15 | `HOUSE-00923` | **New task, next free id in phase 12's reserved 00891–00970 range.** Assign real canonical stock-XNA materials to every generated unbaked outdoor chunk and make the exterior start visible in production. | Fixed gameplay/debug captures at the same road pose proved that 31 unregistered generator roles and 17 material/layout mismatches hide road, ground, fence, gate, roof and porch finishes in production despite valid collision and blockout geometry. `HOUSE-00907` covered the canonical house shell only, not the outdoor generators or dynamic outdoor receiver variants. The missing dependency-valid visual work belongs to this phase; no id was renumbered or completed prematurely. |
 | 2026-09-14 | `HOUSE-00922` | **New task, next free id in phase 12's reserved 00891–00970 range.** Give the room-owned outer skin an explicitly outdoor lighting path while preserving its `DualTextureEffect` material and per-cell bake. | `HOUSE-00921` made the missing geometry visible and thereby exposed that residency ownership had been mistaken for lighting ownership: a closed room's window attenuation and lamps made its outside face nearly black. The already-shared sky colour and existing LM_DAY islands are the dependency-valid Tier-S answer; no renderer, room id or lightmap format changes. No id was renumbered or struck. |
 | 2026-09-14 | `HOUSE-00921` | **New task, next free id in phase 12's reserved 00891–00970 range.** Include the house's room-owned siding and brick water-table chunks in §25.6's exterior hierarchy. | The first fixed production front capture showed the sky through nearly the whole façade. A same-pose blockout capture proved this was geometry omission, not exposure: shell generation assigns each outer face to its adjacent interior cell, while `BuildExteriorScene` admitted only exterior-cell chunks and closed portals correctly kept those interior cells out of the walk. The material ids already distinguish the outer skin from the room's inner walls, so no room is hard-coded and portal/cell architecture remains intact. No id was renumbered or struck. |

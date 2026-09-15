@@ -331,3 +331,39 @@ route/interior poses and 18-pair culled/unculled check provide independent stabi
 
 Remaining: window/background and façade brightness, then entrance/hall/kitchen primary furnishing
 and meaningful day/night fixture lighting. `VISUAL-GATE-1` has **not passed**.
+
+## Round 10 — glass tint no longer emits adapted white
+
+Commit: `HOUSE-00924` checkpoint (`2026-09-15`).
+
+Before: [Round 9 fixed gameplay views](captures/house-00923-outdoor-r1).
+After: [same eight views with glass composition corrected](captures/house-00924-glass-r1).
+
+Ranked visible defects after the correction:
+
+1. The tall white shape in the living composition is an **opaque chimney, not a pane**. The
+   blockout diagnostic shows a solid cyan column, and `chunks.bin` names `CHIMNEY:exterior`,
+   `MAT_OUTDOOR_BRICK`, `EXT_ROAD`. It and pale fence/lawn receivers clip when outdoor lighting
+   inherits a dark room's eye exposure. Diagnose that cell/exposure boundary next.
+2. The exterior façade is broad, flat, dark and visually open at the windows; it does not yet read
+   like a finished house despite real road, grass, fence, gate and roof materials.
+3. Foyer and central hall remain dark and mostly empty; living/family seating groups are present
+   but the route still lacks depth and warm, human-scale lighting.
+4. Kitchen has no cabinets, worktop, sink, appliances or dining composition.
+5. The distant aqua room finish and fluorescent-looking foliage compete with the otherwise
+   neutral route; both require material/asset inspection rather than more debug recolouring.
+
+Fixed: `TransparentPass` no longer multiplies unlit glass tint by the room's up-to-6x adaptive
+exposure against a background sky that has not received the same lift. Stock XNA `BasicEffect`
+continues to supply the authored 0.12 alpha and premultiplied `AlphaBlend` with read-only depth;
+other translucent classes retain their adapted path. At a fixed living composition pixel, the
+left window changes from `(255,255,255)` to `(175,200,228)` without moving the adjacent wall;
+the family windows now visibly contain blue sky and fence contours rather than solid white.
+Exterior/front is unaffected. The three intentionally changed first-person strict refs were
+inspected old/new and updated individually; the debug, property, sun/season and culling views
+remain stable. The actual-software 15-registration render/content subset and isolated full
+1,585-registration CTest are green; the initial concurrent strict-XNA/full-CTest attempt produced
+only a world-load performance flake, which passed alone at 237 ms and in the isolated rerun.
+
+Remaining: solve outdoor-receiver exposure and façade/window finish, then furnish and light the
+entrance/hall/kitchen route. `VISUAL-GATE-1` has **not passed**.

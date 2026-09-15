@@ -17,6 +17,7 @@ namespace cnahouse::world
 {
     class CellRuntime;
     class WorldData;
+    enum class MaterialClass : std::uint8_t;
     struct ChunkLibrary;
 } // namespace cnahouse::world
 
@@ -27,6 +28,14 @@ namespace cnahouse::lighting
 
 namespace cnahouse::rendering
 {
+
+    /// @brief Glass is a scene-referred filter, not a camera-exposure-scaled emitter.
+    ///
+    /// The stock unlit BasicEffect applies its own Alpha to DiffuseColor. Multiplying glass tint
+    /// by dark-room exposure before that blend whitens an unexposed sky behind a clear pane; all
+    /// non-glass transparent materials retain the existing effect-side camera exposure.
+    [[nodiscard]] float TransparentTintExposure(world::MaterialClass materialClass,
+                                                float cameraEffectExposure) noexcept;
 
     /// @brief §23.6's static transparent submission: cell then object, back to front.
     ///
