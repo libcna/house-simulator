@@ -237,9 +237,59 @@ Ranked visible defects after the correction:
 
 Fixed: moved the family sofa, coffee table, rug and armchair and the living purple armchair after
 actual depenetration/tour tests found a cell-midpoint overlap and two wall-recovery wedges. The
-collision limits were preserved. Both collision tests, strict interior render references and the
-18-pose culled/unculled check pass with the final placement. The source and build world content
-now include the matching rebuilt pet navigation graph.
+collision limits were preserved. Both collision tests and the 18-pose culled/unculled check pass
+with the final placement. The source and build world content now include the matching rebuilt pet
+navigation graph. Correction recorded in Round 8: the ordinary hardware CTest run at this
+checkpoint was capture-only for reference tests, so its green result was not proof of a strict
+pixel comparison after these final placement shifts.
 
 Remaining: correct visible room/furniture lighting before clutter or distant-house polish.
 `VISUAL-GATE-1` has not passed.
+
+## Round 8 — ambient receiver floor and live-cell furniture key
+
+Commit: `HOUSE-01280` checkpoint (`2026-09-15`)
+
+Before: [Round 7 eight fixed gameplay views](captures/house-01037-furniture-r7).
+Intermediate: [receiver-floor correction only](captures/house-01280-ambient-r1).
+After: [receiver floor plus Basic detail correction](captures/house-01280-detail-r2).
+
+Ranked visible defects after the correction:
+
+1. The normal-game exterior start is missing major ground, road, fence, gate and roof detail that
+   the identical player pose shows in explicit debug blockout. This is absent geometry, not just
+   a flat gray material or weak planting. Exterior generated chunks still carry unregistered role
+   names such as `TERRAIN_asphalt`, `FENCE_board` and `ROAD_paint` instead of canonical material
+   ids; their unbaked outdoor `Basic` layout also needs matching stock-XNA material rows.
+2. Large window apertures are still nearly pure white. Views through the glass disappear and the
+   extreme window/room contrast continues to dominate the furnished compositions.
+3. Foyer and central hall remain both dark and empty at the fixed clear 10:30 pose. The foyer's
+   measured daylight level is only 0.027, and the current fixtures do not make the route readable.
+4. The kitchen has no worktop, cabinets, appliances or domestic layout; from the hall it still
+   reads as an empty shell rather than the end of a real connected route.
+5. The furnished rooms are now less clipped, but sofa/source style, subdued floor/wall balance,
+   peeling boundary paint and overly bright plant leaves still prevent a believable finish.
+
+Fixed: Tier-S receivers write a neutral 0.025 ambient floor instead of multiplying that floor by
+the primary fixture's mostly black atlas. Each switched-on artificial group keeps its authored
+UV2 bake in an additive depth-equal pass, with `LM_DAY` last; the all-off case still shows wall and
+floor silhouettes. Stock `BasicEffect` no longer inherits its constructor's white downward light:
+static detail receives an explicit conservative key and sky/fixture ambient derived from the live
+cell. The R1 image showed brighter walls but still-white sofas; R2 removes much of the white/cyan
+clipping without replacing source textures or resorting to diagnostic colouring. This is not the
+later three-light dynamic-object assignment (`HOUSE-01261`). The source-light correction adds one
+receiver pass whenever the formerly opaque primary group is on: up to six at four active groups
+plus daylight, rather than five. The all-off/daylit integration case uses two passes.
+
+Strict-reference correction: the earlier hardware render test configuration was capture-only, so
+the Round 7 statement that final-placement pixels were green was too strong. The first true
+software comparison found only three stale pose references from the final collision-safe shifts
+(production `fp-l0-kitchen`, diagnostic `blockout-l0-kitchen` and `blockout-l0-living`). Their
+before/after silhouettes were inspected and only these three were corrected. The new ambient/key
+rendering then deliberately changes every production first-person pose and four season/sun outer
+skin details; all 12 interior and four seasonal pairs were inspected before selective reference
+updates. Diagnostic blockout, property poses and the 18 culled/unculled pairs remain unchanged.
+
+Remaining: register and render the missing authored outdoor surfaces first, then window/background
+brightness, primary foyer/hall/kitchen furnishing and exterior form/context. `VISUAL-GATE-1` has
+not passed.

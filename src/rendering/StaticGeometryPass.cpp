@@ -38,6 +38,16 @@ namespace cnahouse::rendering
 
     namespace
     {
+        // Non-lightmapped Basic detail has no per-surface LM_DAY attenuation. The first fixed
+        // furniture captures measured the room's full sky term * 5.875 eye exposure plus XNA's
+        // constructor-white key, clipping every pale seat. A conservative diffuse fraction
+        // roughly follows the 0.12–0.21 atlas means of the two furnished daylit rooms, while
+        // the 0.025 floor stays identical to the neutral DualTexture receiver underneath.
+        constexpr float kBasicSkyBounce = 0.18F;
+        constexpr float kBasicSunWindowKey = 0.10F;
+        constexpr float kBasicFixtureAmbient = 0.035F;
+        constexpr float kBasicFixtureKey = 0.055F;
+
         /// FNV-1a over the name. A fixed, stated algorithm rather than `std::hash`, whose value is
         /// allowed to differ between standard libraries -- and a render test compares pixels.
         std::uint32_t Fnv1a(const std::string& text) noexcept
@@ -420,41 +430,43 @@ namespace cnahouse::rendering
                                                         { return candidate.group == group; });
                         return found == cell->lightmaps.artificial.end() ? nullptr : &*found;
                     };
-                    const world::CellLightmapGroup* base = nullptr;
+                    bool hasMappedGroup = false;
                     for (const util::Id group : cell->lightGroups)
                     {
-                        base = bindingFor(group);
-                        if (base != nullptr)
+                        if (bindingFor(group) != nullptr)
                         {
+                            hasMappedGroup = true;
                             break;
                         }
                     }
-                    if (base == nullptr)
+                    if (!hasMappedGroup)
                     {
                         first = last;
                         continue;
                     }
-                    DrawParams draw = common;
-                    draw.lightmap = textures_(base->texture.contentName);
-                    const float level = lighting_->GroupLevelInCell(cell->id, base->group);
-                    const Vector3 colour = lighting_->GroupColor(base->group);
-                    const float scale = 0.5F * base->texture.scale * exposure;
-                    draw.colourMultiplier = Vector3(scale * (level * colour.X + lighting::kAmbientFloor),
-                                                    scale * (level * colour.Y + lighting::kAmbientFloor),
-                                                    scale * (level * colour.Z + lighting::kAmbientFloor));
-                    if (!submit(draw, false, true))
+                    // A lamp's spatial bake is close to black away from the fixture. Multiplying
+                    // the unlit ambient floor by that bake made a daylight room's walls disappear
+                    // when the switch was off (L0_LIVING: peak 10.55, mean 0.011 irradiance).
+                    // Half-grey is neutral under DualTextureEffect's measured x2 product: it
+                    // writes the true 0.025 floor and depth, while each *active* group retains
+                    // its authored UV2 bake in an additive depth-equal pass.
+                    DrawParams ambient = common;
+                    ambient.lightmap = textures_(kNeutralLightmap);
+                    ambient.colourMultiplier = Vector3(lighting::kAmbientFloor * exposure,
+                                                       lighting::kAmbientFloor * exposure,
+                                                       lighting::kAmbientFloor * exposure);
+                    if (!submit(ambient, false, true))
                     {
                         first = last;
                         continue;
                     }
 
-                    // The first group establishes colour and depth even when its switch is off.
-                    // Later groups with no contribution cost no draw; active ones repeat exactly
-                    // the same geometry under the depth-equal state measured by HOUSE-00079.
+                    // No group with zero contribution costs a draw. Active groups repeat the
+                    // identical geometry/transform against the depth written above.
                     for (const util::Id groupId : cell->lightGroups)
                     {
                         const world::CellLightmapGroup* group = bindingFor(groupId);
-                        if (group == nullptr || group == base)
+                        if (group == nullptr)
                         {
                             continue;
                         }
@@ -517,10 +529,42 @@ namespace cnahouse::rendering
                 DrawParams draw = common;
                 if (room != nullptr)
                 {
+                    const float artificial = room->artificial * kBasicFixtureAmbient;
                     draw.ambientLight =
-                        Vector3(exposure * std::min(1.0F, room->skyAmbientColor.X + lighting::kAmbientFloor),
-                                exposure * std::min(1.0F, room->skyAmbientColor.Y + lighting::kAmbientFloor),
-                                exposure * std::min(1.0F, room->skyAmbientColor.Z + lighting::kAmbientFloor));
+                        Vector3(exposure * std::min(1.0F,
+                                                    lighting::kAmbientFloor +
+                                                        kBasicSkyBounce * room->skyAmbientColor.X +
+                                                        artificial * room->artificialColor.X),
+                                exposure * std::min(1.0F,
+                                                    lighting::kAmbientFloor +
+                                                        kBasicSkyBounce * room->skyAmbientColor.Y +
+                                                        artificial * room->artificialColor.Y),
+                                exposure * std::min(1.0F,
+                                                    lighting::kAmbientFloor +
+                                                        kBasicSkyBounce * room->skyAmbientColor.Z +
+                                                        artificial * room->artificialColor.Z));
+                    if (const lighting::CelestialKeyLight* celestial =
+                            lighting_->CelestialKeyForCell(cell->id);
+                        celestial != nullptr)
+                    {
+                        const bool skyOpen = cell->kind == world::CellKind::Exterior &&
+                                             cell->visibilityHint == world::VisibilityHint::Open;
+                        const float scale = exposure * kBasicSunWindowKey * (skyOpen ? 1.0F : room->daylight);
+                        draw.basicKey = BasicKeyLight{celestial->direction,
+                                                      Vector3(scale * celestial->diffuseColor.X,
+                                                              scale * celestial->diffuseColor.Y,
+                                                              scale * celestial->diffuseColor.Z),
+                                                      Vector3(0.0F, 0.0F, 0.0F)};
+                    }
+                    else if (room->artificial > 0.0F)
+                    {
+                        const float scale = exposure * kBasicFixtureKey * room->artificial;
+                        draw.basicKey = BasicKeyLight{Vector3(0.0F, -1.0F, 0.0F),
+                                                      Vector3(scale * room->artificialColor.X,
+                                                              scale * room->artificialColor.Y,
+                                                              scale * room->artificialColor.Z),
+                                                      Vector3(0.0F, 0.0F, 0.0F)};
+                    }
                 }
                 const MaterialDesc* description = binder_->Find(material->id);
                 if (description != nullptr && !description->lightingEnabled)

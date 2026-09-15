@@ -180,6 +180,8 @@ namespace
         ASSERT_TRUE(kitchen->lightmaps.daylight.has_value());
         ASSERT_GE(kitchen->lightmaps.artificial.size(), 2U);
         ASSERT_FALSE(kitchen->lightGroups.empty());
+        ASSERT_EQ(kitchen->lightGroups.size(), 4U)
+            << "the four-group kitchen is the Tier-S receiver pass-budget worst case";
         const auto primary = std::find_if(kitchen->lightmaps.artificial.begin(),
                                           kitchen->lightmaps.artificial.end(),
                                           [&](const cnahouse::world::CellLightmapGroup& binding)
@@ -208,6 +210,9 @@ namespace
         library.chunks.push_back(std::move(chunk));
 
         std::vector<std::string> requested;
+        std::vector<std::string> onRequested;
+        std::vector<std::string> offRequested;
+        std::vector<std::string> allRequested;
         std::uint32_t drawn = 0U;
         cnahouse::testsupport::DeviceHost host(
             [&](Gfx::GraphicsDevice& device)
@@ -255,8 +260,8 @@ namespace
                 cnahouse::rendering::PassContext context{device, tracker, counters, 1.0F / 60.0F};
                 pass.Draw(context);
                 drawn = pass.ChunksDrawn();
-                EXPECT_EQ(pass.StateChanges(), 3U)
-                    << "one opaque group, one active additive group and the daylight pass";
+                EXPECT_EQ(pass.StateChanges(), 4U)
+                    << "one neutral opaque floor, two active artificial groups and daylight";
                 const Gfx::BlendState& blend = device.getBlendStateProperty();
                 EXPECT_EQ(blend.getColorSourceBlendProperty(),
                           Gfx::BlendState::Additive.getColorSourceBlendProperty());
@@ -266,20 +271,66 @@ namespace
                 EXPECT_TRUE(depth.getDepthBufferEnableProperty());
                 EXPECT_FALSE(depth.getDepthBufferWriteEnableProperty());
                 EXPECT_EQ(depth.getDepthBufferFunctionProperty(), Gfx::CompareFunction::Equal);
+
+                onRequested = requested;
+                requested.clear();
+                ASSERT_TRUE(lighting.SetGroupOn(primary->group, false));
+                ASSERT_TRUE(lighting.SetGroupOn(secondary->group, false));
+                frame.frameIndex = 2U;
+                lighting.Update(frame);
+                pass.Draw(context);
+                EXPECT_EQ(pass.StateChanges(), 2U)
+                    << "with both switches off, only neutral ambient and live daylight remain";
+                offRequested = requested;
+
+                requested.clear();
+                for (const cnahouse::world::CellLightmapGroup& binding : kitchen->lightmaps.artificial)
+                {
+                    ASSERT_TRUE(lighting.SetGroupOn(binding.group, true));
+                }
+                frame.frameIndex = 3U;
+                lighting.Update(frame);
+                pass.Draw(context);
+                EXPECT_EQ(pass.StateChanges(), 6U)
+                    << "the four-group kitchen at noon is floor + four lamps + daylight";
+                allRequested = requested;
             });
         host.Run();
         ASSERT_TRUE(host.Ran());
         ASSERT_EQ(host.Failure(), "");
         EXPECT_EQ(drawn, 1U);
-        ASSERT_GE(requested.size(), 4U);
-        EXPECT_NE(std::find(requested.begin(), requested.end(), floor->albedo), requested.end());
-        EXPECT_EQ(requested[1], primary->texture.contentName)
-            << "the opaque ambient-bearing pass follows the authored lightGroups order";
-        EXPECT_NE(std::find(requested.begin(), requested.end(), secondary->texture.contentName),
-                  requested.end());
-        EXPECT_NE(std::find(requested.begin(), requested.end(), kitchen->lightmaps.daylight->contentName),
-                  requested.end())
+        ASSERT_GE(onRequested.size(), 5U);
+        EXPECT_NE(std::find(onRequested.begin(), onRequested.end(), floor->albedo), onRequested.end());
+        EXPECT_EQ(onRequested[1], "Textures/Fallback/grey")
+            << "the opaque ambient floor cannot multiply the primary lamp's spatial bake";
+        EXPECT_NE(std::find(onRequested.begin(), onRequested.end(), primary->texture.contentName),
+                  onRequested.end())
+            << "the active primary lamp still needs its authored UV2 bake";
+        EXPECT_NE(std::find(onRequested.begin(), onRequested.end(), secondary->texture.contentName),
+                  onRequested.end());
+        EXPECT_NE(std::find(onRequested.begin(), onRequested.end(), kitchen->lightmaps.daylight->contentName),
+                  onRequested.end())
             << "the live daylight pass did not request the cell-owned LM_DAY atlas";
+        ASSERT_GE(offRequested.size(), 3U);
+        EXPECT_EQ(offRequested[1], "Textures/Fallback/grey");
+        EXPECT_EQ(std::find(offRequested.begin(), offRequested.end(), primary->texture.contentName),
+                  offRequested.end())
+            << "the dark primary bake must not carry ambient when its switch is off";
+        EXPECT_EQ(std::find(offRequested.begin(), offRequested.end(), secondary->texture.contentName),
+                  offRequested.end());
+        EXPECT_NE(
+            std::find(offRequested.begin(), offRequested.end(), kitchen->lightmaps.daylight->contentName),
+            offRequested.end());
+        ASSERT_GE(allRequested.size(), 7U);
+        EXPECT_EQ(allRequested[1], "Textures/Fallback/grey");
+        for (const cnahouse::world::CellLightmapGroup& binding : kitchen->lightmaps.artificial)
+        {
+            EXPECT_NE(std::find(allRequested.begin(), allRequested.end(), binding.texture.contentName),
+                      allRequested.end());
+        }
+        EXPECT_NE(
+            std::find(allRequested.begin(), allRequested.end(), kitchen->lightmaps.daylight->contentName),
+            allRequested.end());
     }
 
     TEST(StaticGeometryPassTests, ProductionOuterSkinUsesOnlyItsOutdoorDaylightBake)

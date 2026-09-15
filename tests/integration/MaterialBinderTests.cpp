@@ -398,6 +398,8 @@ namespace
                 draw.fog = &fog;
                 draw.colourMultiplier = Vector3(0.50F, 0.25F, 1.0F);
                 draw.ambientLight = Vector3(0.05F, 0.06F, 0.07F);
+                draw.basicKey = cnahouse::rendering::BasicKeyLight{
+                    Vector3(0.0F, -1.0F, 0.0F), Vector3(0.20F, 0.30F, 0.40F), Vector3(0.01F, 0.02F, 0.03F)};
 
                 const auto bound = binder.Bind(id, draw);
                 ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
@@ -410,6 +412,15 @@ namespace
                 EXPECT_TRUE(effect->getLightingEnabledProperty());
                 EXPECT_TRUE(effect->getPreferPerPixelLightingProperty());
                 EXPECT_EQ(effect->getAmbientLightColorProperty(), Vector3(0.05F, 0.06F, 0.07F));
+                EXPECT_TRUE(effect->getDirectionalLight0Property().getEnabledProperty());
+                EXPECT_EQ(effect->getDirectionalLight0Property().getDirectionProperty(),
+                          Vector3(0.0F, -1.0F, 0.0F));
+                EXPECT_EQ(effect->getDirectionalLight0Property().getDiffuseColorProperty(),
+                          Vector3(0.20F, 0.30F, 0.40F));
+                EXPECT_EQ(effect->getDirectionalLight0Property().getSpecularColorProperty(),
+                          Vector3(0.01F, 0.02F, 0.03F));
+                EXPECT_FALSE(effect->getDirectionalLight1Property().getEnabledProperty());
+                EXPECT_FALSE(effect->getDirectionalLight2Property().getEnabledProperty());
                 EXPECT_TRUE(effect->getTextureEnabledProperty());
                 EXPECT_EQ(effect->getTextureProperty(), &texture);
                 EXPECT_TRUE(effect->getFogEnabledProperty());
@@ -420,6 +431,8 @@ namespace
                 ASSERT_TRUE(binder.Bind(id, DrawParams{}).HasValue());
                 EXPECT_EQ(effect->getDiffuseColorProperty(), Vector3(0.25F, 0.50F, 0.75F));
                 EXPECT_EQ(effect->getAmbientLightColorProperty(), Vector3());
+                EXPECT_FALSE(effect->getDirectionalLight0Property().getEnabledProperty())
+                    << "a later draw without a cell key must not inherit BasicEffect's white light";
                 EXPECT_FALSE(effect->getTextureEnabledProperty());
                 EXPECT_FALSE(effect->getFogEnabledProperty());
             });

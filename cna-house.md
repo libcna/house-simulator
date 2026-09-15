@@ -2661,8 +2661,8 @@ Per visible cell, per chunk (§17.4):
 device.SetVertexBuffer(chunk.vb);
 device.setIndicesProperty(chunk.ib);
 effect.setTextureProperty(chunk.albedo);          // DualTextureEffect
-effect.setTexture2Property(chunk.lightmap);
-effect.setDiffuseColorProperty(room.artificialColor * room.artificialLevel + kMinAmbient);
+effect.setTexture2Property(pass.lightmap);     // neutral base, LM_ART group or LM_DAY
+effect.setDiffuseColorProperty(pass.tint);      // floor or one live source's intensity/colour
 effect.setWorldProperty(Matrix::Identity);        // baked into the chunk
 effect.setViewProperty(view);
 effect.setProjectionProperty(projection);
@@ -2688,15 +2688,26 @@ For each static chunk in a lit room:
 
 | Pass | Effect | Texture2 | Diffuse | Blend | Depth |
 |---|---|---|---|---|---|
-| 1 | `DualTextureEffect` | `LM_ART_<group0>` | `artColor(group0) · level(group0) + ambientFloor` | `Opaque` | write, `LessEqual` |
-| 2..k | `DualTextureEffect` | `LM_ART_<groupN>` | `artColor(groupN) · level(groupN)` | `Additive` | no write, `Equal` |
-| k+1 | `DualTextureEffect` | `LM_DAY` | `skyColor · daylightLevel` | `Additive` | no write, `Equal` |
+| 1 | `DualTextureEffect` | neutral half-grey | `ambientFloor` | `Opaque` | write, `LessEqual` |
+| 2..k+1 (active only) | `DualTextureEffect` | `LM_ART_<groupN>` | `artColor(groupN) · level(groupN)` | `Additive` | no write, `Equal` |
+| k+2 (daylit only) | `DualTextureEffect` | `LM_DAY` | `skyColor · daylightLevel` | `Additive` | no write, `Equal` |
 
-`k` ≤ 4 light groups per room (one opaque plus up to three additive, enforced by the validator).
-A dark room with no daylight draws one pass; the four-group kitchen at noon draws five. The
+`k` ≤ 4 light groups per room (the validator enforces this). A dark room with no daylight draws
+one pass; the four-group kitchen at noon with all switches on draws six. The
 `ambientFloor` (≈ 0.025 × the room's paint
 colour) means an unlit windowless room is *very* dark but not pure black — silhouettes remain
 legible, which is what a real dark room looks like once your eyes adjust.
+
+Correction (2026-09-15, `HOUSE-01280`): the original first row multiplied the 0.025 floor by the
+primary lamp's spatial bake. `L0_LIVING`'s primary bake has peak 10.55 but mean 0.011 irradiance;
+with that switch off, most painted walls were effectively black even at 10:30 in clear weather.
+The advertised floor could not survive that product. Separating a neutral opaque floor from the
+active authored lamp passes is the smallest stock-XNA correction that retains UV2, switchable
+baked fixture shape and depth-equal additive composition. Budget and render equivalence must be
+re-measured with the extra pass when groups are on: the canonical four-group kitchen's pass count
+is six (two with its groups off and daylight present), asserted by `HOUSE-01280`'s integration
+test; the 18 paired culled/unculled render views remain pixel-equivalent. Full GPU frame-time
+measurement still belongs to `HOUSE-01276`, not the screenshot HUD's fixed-step FPS readout.
 
 Depth-`Equal` on the additive passes requires an exact depth match, which is guaranteed because
 the passes draw identical geometry with an identical transform.

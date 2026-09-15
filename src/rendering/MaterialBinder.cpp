@@ -295,6 +295,20 @@ namespace cnahouse::rendering
                 effect.setVertexColorEnabledProperty(desc->vertexColour);
                 effect.setLightingEnabledProperty(desc->lightingEnabled);
                 effect.setPreferPerPixelLightingProperty(desc->perPixelLighting);
+                auto& key = effect.getDirectionalLight0Property();
+                if (desc->lightingEnabled && draw.basicKey.has_value())
+                {
+                    key.setDirectionProperty(draw.basicKey->direction);
+                    key.setDiffuseColorProperty(draw.basicKey->diffuse);
+                    key.setSpecularColorProperty(draw.basicKey->specular);
+                    key.setEnabledProperty(true);
+                }
+                else
+                {
+                    key.setEnabledProperty(false);
+                }
+                effect.getDirectionalLight1Property().setEnabledProperty(false);
+                effect.getDirectionalLight2Property().setEnabledProperty(false);
                 effect.setTextureEnabledProperty(draw.diffuse != nullptr);
                 if (draw.diffuse != nullptr)
                 {

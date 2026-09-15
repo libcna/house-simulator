@@ -30,8 +30,14 @@ only as an explicit debug view.
 The initial material/daylight chain `HOUSE-00909` → `HOUSE-00910` → `HOUSE-00912` has reached
 normal rendering. The first minimum real static prop kit (`HOUSE-01037`) uses completed
 `HOUSE-00215` batching without claiming `HOUSE-00971`'s unfinished dynamic/jitter/tint criteria.
-Its reviewed images make room/furniture light balance the next highest-value defect; address that
-before minor seams or unrelated systems. `HOUSE-00913` seam repair, `HOUSE-00917` material
+`HOUSE-01280` corrects the measured receiver/furniture lighting mismatch visible in its reviewed
+images. The exterior start actually omits authored road, fence, gate, yard and roof chunks in
+production while the identical explicit debug pose shows them: unregistered generator role names
+and unbaked outdoor `Basic` layout need canonical stock-XNA material parity. Fix that first;
+almost-white windows are next. Diagnose both from the fixed in/out poses before minor seams or
+unrelated systems. Primary
+foyer/hall/kitchen furnishing follows in the connected slice. `HOUSE-00913` seam repair,
+`HOUSE-00917` material
 regression and broader furnishing remain in the visible chain when their defects lead the review.
 After each substantial visible change, recapture the eight fixed views recorded in
 [`docs/visual-review/README.md`](docs/visual-review/README.md), inspect them, and schedule the
@@ -140,7 +146,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 13 | Static furniture and dressing | 00971–01120 | 65 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
-| 16 | Lights and switches | 01251–01310 | 28 | The house can be lit — **first playable** |
+| 16 | Lights and switches | 01251–01310 | 29 | The house can be lit — **first playable** |
 | 17 | Containers | 01311–01360 | 13 | 214 things open with contents |
 | 18 | Kitchen and refrigerator | 01361–01410 | 23 | |
 | 19 | Plumbing and water | 01411–01460 | 19 | |
@@ -13310,7 +13316,11 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             476-chunk world and pet navigation build are fresh, full CMake and all 1,583 CTest
             registrations return green, `tools/ci/run_checks.sh` is green (323 strict-XNA
             translation units), and the eight normal-game views in `house-01037-furniture-r7`
-            were inspected. `VISUAL-GATE-1` remains failed for lighting and empty route spaces.
+            were inspected. Correction (HOUSE-01280): that hardware CTest result was capture-only
+            for pixel-reference render tests; the first actual software comparison found three
+            reference poses stale after the final collision-safe placement shifts. Their intended
+            silhouette changes were inspected and corrected under HOUSE-01280. `VISUAL-GATE-1`
+            remains failed for lighting and empty route spaces.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -13896,6 +13906,31 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01276 · sys: — · plat: LNX · pri: MUST
 - [ ] HOUSE-01278 — Tag and record the first-playable build; capture a screenshot set for the documentation
       dep: HOUSE-01277 · sys: — · plat: ALL · pri: MUST
+- [x] HOUSE-01280 — Align Tier-S static receiver ambient and non-lightmapped detail with live cell illumination
+      dep: HOUSE-00912, HOUSE-01037, HOUSE-01257, HOUSE-01264, HOUSE-01266 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-15) Visual-sprint correction in phase 16's next free id. R7 gameplay images
+            show white furniture against nearly black walls/floors. `BasicEffect` constructs with
+            a fully enabled white downward key, while `L0_LIVING`'s primary artificial bake has
+            peak 10.55 versus mean 0.011 and is currently also the unlit ambient-floor carrier.
+            Preserve strict XNA/Tier S and all cell/lightmap identities. This is *static* detail
+            alignment only; `HOUSE-01261`'s later per-dynamic-object key/fill/bounce remains open.
+      accept: the ambient floor on a DualTexture receiver survives an all-off/dark primary atlas
+            without erasing the art group's baked fixture shape when on; BasicEffect static detail
+            never inherits its constructor's white key and uses the cell's live day/artificial
+            state; the same eight fixed gameplay poses are recaptured and inspected for visible
+            improvement; strict refs/culling, XNA gates and broader suites remain green
+      verified: (2026-09-15) the kitchen integration checks two-group on/off and all-four-on
+            counts of four/two/six passes, including neutral-floor and each authored UV2 atlas;
+            MaterialBinder clears BasicEffect's constructor key when absent and binds an explicit
+            live-cell key when supplied. The R7 → R1 → R2 eight-pose review shows readable
+            receivers and much less clipped furniture. All 12 production first-person and four
+            sun/season references were inspected and intentionally updated for the new light;
+            three stale placement refs from HOUSE-01037's final moves were inspected and corrected
+            separately. Actual software comparisons pass production, debug, property, season and
+            18-pair culled/unculled suites; broader 1,583-registration CTest and
+            `tools/ci/run_checks.sh` pass (323 strict-XNA units). `VISUAL-GATE-1` remains failed:
+            normal outdoor ground/road/fence/gate/roof chunks are missing, windows clip and the
+            foyer/hall/kitchen lack primary furnishings.
 
 ---
 

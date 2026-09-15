@@ -1,4 +1,60 @@
-# Visual-sprint handoff — 2026-09-15 (`HOUSE-01037` checkpoint)
+# Visual-sprint handoff — 2026-09-15 (`HOUSE-01280` checkpoint)
+
+Branch `develop`; verify HEAD and `git status` before acting. This session began at
+`238d6aed27c1e8662f0d118013ef08bb801ae018` (`HOUSE-00922`) and committed the first real
+living/family static kit as `86a80f705c10f146b71d70c63f36813860914053` (`HOUSE-01037`). The
+second one-task checkpoint is `HOUSE-01280`: stock-XNA Tier-S receiver ambient and static Basic
+detail now follow the live cell rather than a mostly black lamp bake or XNA's constructor-white
+directional key. Check `git log -3` for the exact HOUSE-01280 commit. No ordinary gameplay route
+uses the hashed blockout palette; `--scene=blockout` and `--debug-blockout-materials` remain
+explicit diagnostics. `VISUAL-GATE-1` is **not passed**.
+
+Before: [`house-01037-furniture-r7`](visual-review/captures/house-01037-furniture-r7).
+After: [`house-01280-detail-r2`](visual-review/captures/house-01280-detail-r2). Both are the same
+eight normal-game fixed cameras, clear 10:30, Tier S/High and software Mesa. R2 makes the walls,
+floors and sofas appreciably more readable but is still visibly incomplete. Largest defects, in
+review order: **missing production outdoor ground/road/fence/gate/roof geometry**; almost
+pure-white windows; dark, empty foyer and hall; empty kitchen; peeling boundary paint, bright
+leaves and sofa style/lighting mismatch. See [`visual-review/README.md`](visual-review/README.md),
+Round 8. The first high-value follow-up is the outdoor production material assignment: at the
+same `EXT_ROAD` player pose looking down 10°, explicit `--debug-blockout-materials` visibly draws
+road, fence, gate, landscaping and roof while normal production does not. The generated chunk
+string table still contains role names (`TERRAIN_asphalt`, `FENCE_board`, `ROAD_paint`) absent from
+canonical `layout.materials.json`. Outdoor generators omit `materialId` and `build_chunks.py` still
+accepts those legacy roles, while unbaked outdoor receivers are deliberately `Basic` layout.
+The stock-XNA production pass correctly skips a chunk whose material cannot be resolved. Fix the
+generator/material-table parity through canonical data and existing content stages, not a
+diagnostic colour fallback. Then diagnose **window/background brightness** with actual
+inside/outside captures; do not assume the clear-glass alpha is wrong. CNA's local BasicEffect
+forwarding already multiplies diffuse RGB by `Alpha`, matching XNA premultiplied
+`BlendState::AlphaBlend`, so blindly premultiplying it again would darken the pane. Primary
+`L0_FOYER`/`L0_HALL`/`L0_KITCHEN` furnishings remain a priority; the existing 15 static props only
+furnish `L0_LIVING`/`L0_FAMILY`.
+
+`HOUSE-01280` renderer integration proves two live lamp groups at noon use four receiver passes,
+the same room with both off uses two, and canonical four-group `L0_KITCHEN` at noon uses six
+(neutral opaque floor + four authored artificial maps + daylight). The extra pass is real;
+GPU frame-time budget has **not** been proven by the fixed-step screenshot HUD. Do not claim that
+32.1-fps overlay is a measured renderer result. Static Basic detail gets one cell-derived key and
+coarse sky/fixture ambient; full per-dynamic-object key/fill/bounce (`HOUSE-01261`) remains open.
+
+Critical test correction: a green hardware CTest render registration may be **capture-only** if
+`RenderingInSoftware()` is false. Under `LIBGL_ALWAYS_SOFTWARE=1`, the first strict comparison
+found three stale refs after final HOUSE-01037 furniture shifts. The actual silhouettes were
+inspected and only `blockout-l0-kitchen`, `blockout-l0-living` and `fp-l0-kitchen` were corrected.
+The new ambient/key composition then changed all 12 production first-person views and four
+season/sun outer-skin detail views; all 16 before/after pairs were inspected and their refs
+deliberately updated. A subsequent **actual software** test passed production, explicit debug,
+property, season/sun and 18-pair culling suites. Run these software pixel checks in the default
+sandbox with `LIBGL_ALWAYS_SOFTWARE=1`, offscreen video and dummy audio. The complete broader
+CTest suite should use the escalated four-core environment below **without** forcing LIBGL
+software, which otherwise makes this machine's hardware-EGL cases fail for environmental reasons.
+The full 1,583-registration CTest run passed in that broader configuration; `git diff --check`
+was clean. `tools/ci/run_checks.sh` passed, including 323 strict-XNA translation units, before the
+HOUSE-01280 commit. Sibling CNA had an unrelated deleted video fixture at the final read-only
+status check; neither CNA nor sharp-runtime was changed by this task.
+
+## Archived HOUSE-01037 checkpoint — 2026-09-15
 
 The 2026-09-14 handoff below is an **archive**, not the present repository state. Verify the
 branch, HEAD and worktree before acting. Current starting HEAD is

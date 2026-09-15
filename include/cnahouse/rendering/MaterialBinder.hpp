@@ -2,6 +2,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <unordered_map>
@@ -113,6 +114,18 @@ namespace cnahouse::rendering
         float fresnelFactor = 1.0F;
     };
 
+    /// @brief One explicit stock-XNA key for non-lightmapped Basic detail.
+    ///
+    /// A shared BasicEffect constructs with DirectionalLight0 enabled at white (1,1,1). Leaving
+    /// it untouched makes a dark room's furniture look self-lit. The caller must supply a live
+    /// cell-derived light; null means no directional contribution, never the constructor default.
+    struct BasicKeyLight
+    {
+        Microsoft::Xna::Framework::Vector3 direction{0.0F, -1.0F, 0.0F};
+        Microsoft::Xna::Framework::Vector3 diffuse{0.0F, 0.0F, 0.0F};
+        Microsoft::Xna::Framework::Vector3 specular{0.0F, 0.0F, 0.0F};
+    };
+
     /// @brief The per-draw values a material cannot know: where the thing is and where it is seen from.
     struct DrawParams
     {
@@ -132,6 +145,8 @@ namespace cnahouse::rendering
         Microsoft::Xna::Framework::Vector3 colourMultiplier{1.0F, 1.0F, 1.0F};
         /// @brief `Basic`/`Skinned` ambient term for non-lightmapped detail geometry.
         Microsoft::Xna::Framework::Vector3 ambientLight{0.0F, 0.0F, 0.0F};
+        /// @brief `Basic` only: explicit live-cell key, or no key. Never inherits XNA's white one.
+        std::optional<BasicKeyLight> basicKey;
         /// Null disables fog. Non-null enables it with the supplied environment-owned values.
         const FogParams* fog = nullptr;
         /// @brief `Skinned` only. Skin-local, and at most `SkinnedEffect::MaxBones`.
