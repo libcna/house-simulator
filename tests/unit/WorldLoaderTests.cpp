@@ -3599,7 +3599,14 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 145U);
+        EXPECT_EQ(contents.materials.size(), 147U)
+            << "HOUSE-01040 adds only the stone counter and brushed-steel hardware finishes";
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return IdRegistry::NameOf(material.id).starts_with("MAT_KITCHEN_"); }),
+                  2)
+            << "the authored kitchen kit loads both close-range finishes through WorldLoader";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

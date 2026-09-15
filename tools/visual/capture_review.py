@@ -20,10 +20,13 @@ POSES = (
     ("entrance-foyer", "0.00,0.60,-14.90,0.0,0.0"),
     ("foyer-facing-front", "0.00,0.60,-16.70,180.0,0.0"),
     ("central-hall", "0.00,0.60,-20.65,0.0,0.0"),
+    ("kitchen-from-hall", "0.00,0.60,-23.55,285.0,0.0"),
     ("living-room", "-5.20,0.60,-17.25,90.0,0.0"),
     ("living-composition", "-3.10,0.60,-18.50,270.0,0.0"),
-    ("kitchen", "-3.00,0.60,-25.05,90.0,0.0"),
-    ("kitchen-facing-west", "-3.00,0.60,-25.05,270.0,0.0"),
+    # HOUSE-01040: -3.0,-25.05 was inside the newly authored island's proxy. The paired
+    # east/west pose moves to the measured 1.04 m circulation lane beside its east end.
+    ("kitchen", "-1.10,0.60,-25.05,90.0,0.0"),
+    ("kitchen-facing-west", "-1.10,0.60,-25.05,270.0,0.0"),
     ("family-room", "5.45,0.60,-24.55,270.0,0.0"),
     ("family-composition", "3.20,0.60,-25.80,90.0,0.0"),
 )

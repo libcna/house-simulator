@@ -5,11 +5,14 @@ These captures answer “does the playable house look good?”, not “did a pix
 fixes six route poses plus two composition poses (added for HOUSE-01037 after the original
 living/family cameras proved to face away from their seating groups), Tier S/High, software Mesa,
 clear weather, 10:30, the session seed and capture frame. Strict golden render tests remain
-separate. The original six poses stay unchanged for the route before/after comparison; the two
+separate. The original six poses stayed unchanged through Round 16 for route comparison; the two
 extra poses are stable review cameras from that round onward. `HOUSE-01038` adds a ninth, reverse
 foyer pose and fixed noon, overcast and night review scenarios without moving any prior camera.
 `HOUSE-01039` adds a tenth pose facing back across the kitchen; its original east-facing pose
 mostly showed the neighboring family room and hid the kitchen's empty west side.
+`HOUSE-01040` places a real island across the old east/west kitchen-camera position, so both
+kitchen poses move to a measured 1.04 m east-side aisle and an eleventh fixed pose is added just
+beyond the hall opening, angled toward the island and sink run. The other eight poses are unchanged.
 
 ## Round 0 — visual-convergence baseline
 
@@ -654,3 +657,50 @@ SDL audit (BL-17); direct verification and the exact build workaround are in the
 
 `VISUAL-GATE-1` still **FAILS**. The route is less black, but a lit, empty kitchen is not a
 realistic furnished house.
+
+## Round 17 — first real L0 kitchen joinery, measured from the hall route
+
+Commit: `HOUSE-01040` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: [Round 16's empty kitchen](captures/house-01039-entry-r4/kitchen-facing-west.png)
+and unchanged [hall aperture](captures/house-01039-entry-r4/central-hall.png). The original
+kitchen camera lay inside the new island's footprint, so this round moves its paired east/west
+poses to the measured east aisle and adds a stable [entry-stride camera](captures/house-01040-clear-day-r4/kitchen-from-hall.png).
+After: eleven-view [clear 10:30](captures/house-01040-clear-day-r4),
+[noon](captures/house-01040-noon-r4),
+[overcast](captures/house-01040-overcast-r4) and
+[22:00](captures/house-01040-night-r4) sets. The route, cabinet, family and exterior frames
+were actually inspected at relevant conditions; the other fixed images were retained for
+comparison. The corrected [west kitchen view](captures/house-01040-clear-day-r4/kitchen-facing-west.png)
+shows the sink above doors, visible marble veining and a clear lane beside the island.
+
+Ranked defects remaining:
+
+1. Kitchen still lacks upper cabinetry, refrigerator, range/hood, dishwasher, oven, splashback
+   and controlled worktop objects. The now-recognizable island/base run is not a finished kitchen.
+2. The nearby family room stays flat and partly dark: pale seating, bright leaf cards, blank art
+   walls and little room-light depth. From the unchanged hall camera, a large dark kitchen-side
+   block still dominates the opening until the player takes the entry stride.
+3. The front facade is skeletal at clear day (thin roof/porch/balcony, little entrance depth),
+   and [night front](captures/house-01040-night-r4/exterior-front.png) remains almost invisible.
+4. The kitchen practicals read at night and overcast, but the cabinet paint is still low-contrast
+   brown at distance; window/daylight contribution adds little room depth.
+
+Fixed: two deterministic project-authored static built-ins through canonical `layout.props.json`
+and the approved chunk/content route. The 2.8 m north run has a true 560 × 440 mm stone sink
+cutout, steel basin/gooseneck, two under-sink doors, drawers and recessed oak toe. A 2.2 m island
+anchors the room with five-piece fronts and a 0.94 m marble top. Both have real-metre UV repeats,
+individual material-map splits, one 12-triangle collision proxy and support-centred origins.
+The final measured wall-to-island working aisle is about 1.18 m; the hall-side clearance is
+about 1.08 m. The imported paint/oak/stone/steel sources are already approved, with authored
+Ms-PL geometry provenance; a CI check reproduces both GLBs and metadata byte-for-byte.
+`L0_KITCHEN` rises only from its measured eight to eleven chunks, without a new Reach split.
+Screenshot diagnostics with an island-intersecting camera and a protruding end-return were
+moved recoverably to `/tmp/house01040-review-diagnostics.7mzwzB/`, not committed as quality
+evidence. Three changed strict references were viewed individually: production kitchen pose
+relocated for furniture, a tiny hall shading recomputation, and explicit debug kitchen pose
+relocated away from the sink run. They were selectively replaced; normal gameplay still uses
+production materials, never the colourful blockout reference.
+
+`VISUAL-GATE-1` still **FAILS**. This is a credible primary kitchen built-in checkpoint, not a
+completed or fully lit room.

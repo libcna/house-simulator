@@ -44,6 +44,11 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
         ("x", 0.76, 0.95, "interior door leaf width"),
     ],
     "counter-kitchen": [("y", 0.88, 0.95, "kitchen counter height")],
+    # A combined base run plus faucet exceeds counter height by design. Keep the established
+    # counter band on a measured manifest property, and constrain the assembly's full AABB too.
+    "kitchen-sink-run": [("x", 2.70, 2.95, "kitchen sink run width"),
+                         ("z", 0.72, 0.95, "kitchen sink run depth including tap"),
+                         ("y", 0.88, 0.95, "kitchen counter height under faucet")],
     "cabinet-upper": [("y", 1.40, 1.55, "upper cabinet underside")],
     "table-dining": [("y", 0.72, 0.78, "dining table top")],
     "desk": [("y", 0.72, 0.78, "desk top")],
@@ -178,6 +183,19 @@ def check(path: Path, category: str, geometry: dict | None = None) -> list[str]:
                     f"{what}: measured seat {value:.3f} m must lie within the model's "
                     f"{size[1]:.3f} m height")
                 continue
+        if category == "kitchen-sink-run" and axis == "y":
+            counter = (geometry or {}).get("counterHeightMetres")
+            if not isinstance(counter, (int, float)):
+                problems.append(
+                    f"{what}: manifest geometry.counterHeightMetres is required; the model's "
+                    f"{size[1]:.3f} m overall height includes the tap")
+                continue
+            value = float(counter)
+            if not math.isfinite(value) or value <= 0.0 or value > size[1]:
+                problems.append(
+                    f"{what}: measured counter {value:.3f} m must lie within the model's "
+                    f"{size[1]:.3f} m overall height")
+                continue
         if not (minimum <= value <= maximum):
             # The message names the RATIO, because that is what identifies the mistake: 100x is
             # centimetres, 2.54x is inches, 0.01x is a model authored in a scene scaled down.
@@ -250,6 +268,23 @@ def selftest() -> int:
             failures += 1
         else:
             print("  a 1.90 m door is rejected, so the tolerance is a tolerance")
+
+        # HOUSE-01040: a real tap raises the whole sink-run AABB to 1.25 m. The separately
+        # measured working top stays in the original counter-height band, not a relaxed one.
+        sink_run = Path(work) / "sink_run.glb"
+        sink_run.write_bytes(make(2.86, 1.252, 0.738))
+        if check(sink_run, "kitchen-sink-run", {"counterHeightMetres": 0.94}):
+            print("  SELFTEST FAILED: measured 0.94 m sink counter was rejected",
+                  file=sys.stderr)
+            failures += 1
+        if not check(sink_run, "kitchen-sink-run"):
+            print("  SELFTEST FAILED: sink run without measured counter was accepted",
+                  file=sys.stderr)
+            failures += 1
+        if not check(sink_run, "kitchen-sink-run", {"counterHeightMetres": 0.84}):
+            print("  SELFTEST FAILED: 0.84 m sink counter was accepted", file=sys.stderr)
+            failures += 1
+        print("  sink run requires a measured in-band counter despite its 1.25 m tap")
 
         # A car is checked on all three axes, and the axis is what makes the check mean anything:
         # a model 1.8 m long and 4.6 m wide is a car turned sideways, which a "largest dimension"

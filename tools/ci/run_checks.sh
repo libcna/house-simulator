@@ -118,6 +118,9 @@ run_gate "effects-baseline" tools/effects/build_effects.sh --check
 # `cna-house.md` §20.1: no row, no build. An unlisted file under `assets-src/` is a file whose
 # licence nobody has looked at, and a gate is the only moment anyone reliably looks (`HOUSE-00196`).
 run_gate "manifest"   python3 tools/ci/check_manifest.py
+# HOUSE-01040: the project-authored close-range kitchen joinery must remain reproducible from
+# its measured Blender source, including the same small collidable GLBs and manifest hashes.
+run_gate "kitchen-builtins" python3 tools/assets/kitchen_builtins_prepare.py --check
 # And the credits document cannot drift from the manifest it is generated from (`HOUSE-00198`).
 run_gate "licences-selftest" python3 tools/assets/verify_licences.py --selftest
 run_gate "licences"   python3 tools/assets/verify_licences.py --check

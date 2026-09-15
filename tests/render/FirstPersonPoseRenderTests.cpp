@@ -64,7 +64,9 @@ namespace
         // drive beyond it is phase 10's, so what was behind it was nothing. The blockout leaf
         // closes it; §15's animated door and phase 10's drive replace this picture again.
         {"l0-front-door", {0.00f, 0.60f, -14.90f, 180.0f, 0.0f}, 0.90},
-        {"l0-kitchen", {-3.00f, 0.60f, -25.05f, 90.0f, 0.0f}},
+        // HOUSE-01040: the old centre pose lies inside the primary island's collision proxy.
+        // A stride beyond the hall opening now reviews the visible island/sink run instead.
+        {"l0-kitchen", {0.00f, 0.60f, -23.55f, 285.0f, 0.0f}},
         // As close to a corner as §43.1's 0.30 m capsule lets a body get, looking into it at 45°.
         //
         // It was chosen to make §10.3's 0.10 m near plane matter, and MEASURED not to: rendering

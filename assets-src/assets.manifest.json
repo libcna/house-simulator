@@ -470,6 +470,77 @@
       ]
     },
     {
+      "id": "MODEL_KITCHEN_NORTH_BASE_RUN",
+      "category": "kitchen-sink-run",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/north_run.glb",
+      "sourceSha256": "94136ac5512b4be0c86a2b6036434073899d777c9135b94c319a7f2aa441da79",
+      "contentName": "Models/Furniture/Kitchen/north_run",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "L0 kitchen north sink base run",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured joinery from tools/blender/kitchen_builtins.py for HOUSE-01040. The source material ids resolve to already approved material records; no third-party source mesh is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [2.86, 1.252, 0.738182],
+        "counterHeightMetres": 0.94,
+        "triangles": {"LOD0": 7836},
+        "collision": "north_run_001_run_toe_COL"
+      },
+      "materialMap": {
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": ["L0_KITCHEN"]
+    },
+    {
+      "id": "MODEL_KITCHEN_ISLAND",
+      "category": "counter-kitchen",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/island.glb",
+      "sourceSha256": "58795beab4656763f926efda3389b4645c265b3dbc1cdef3c525862e25a247c0",
+      "contentName": "Models/Furniture/Kitchen/island",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "L0 kitchen primary island",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured island from tools/blender/kitchen_builtins.py for HOUSE-01040. Approved paint, oak, stone and steel material records are mapped at content build; no external model mesh is included."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [2.32, 0.94, 1.088182],
+        "triangles": {"LOD0": 4860},
+        "collision": "island_001_island_toe_COL"
+      },
+      "materialMap": {
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": ["L0_KITCHEN"]
+    },
+    {
       "id": "MODEL_FURNITURE_LEATHER_ARMCHAIR_A",
       "category": "chair",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/leather_armchair_a.glb",

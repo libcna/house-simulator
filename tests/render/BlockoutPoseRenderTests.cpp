@@ -64,7 +64,9 @@ namespace
     /// are not round.
     constexpr Pose kInterior[] = {
         {"b1-cinema", {3.10f, -0.70f, -25.05f, 8.30f, -0.85f, -25.05f}},
-        {"l0-kitchen", {-7.30f, 2.20f, -25.05f, 1.80f, 2.05f, -25.05f}},
+        // HOUSE-01040: the old floating eye stood over the new sink run. Keep the explicit
+        // debug/blockout view, but inspect both kitchen built-ins from the clear east aisle.
+        {"l0-kitchen", {-1.10f, 2.20f, -25.05f, -7.30f, 2.05f, -25.05f}},
         {"l0-living", {-7.30f, 2.20f, -17.25f, -2.60f, 2.05f, -17.25f}},
         {"l0-hall", {0.00f, 2.20f, -22.10f, 0.00f, 2.05f, -18.70f}},
         {"l0-stair-main", {3.55f, 2.20f, -19.30f, 3.55f, 2.05f, -14.70f}},

@@ -1562,6 +1562,34 @@
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
     // END FOYER FURNITURE MATERIALS
+    // The kitchen joinery's 0.58 m GLB UV repeat keeps the approved marble base map at a
+    // plausible working-surface scale. Unlike the shell floor, this static prop has no UV2.
+    {
+      "id": "MAT_KITCHEN_COUNTER_STONE", "class": "stone",
+      "albedo": "Textures/Materials/stone_marble_albedo",
+      "normal": "Textures/Materials/stone_marble_normal", "lightmapChannel": 0,
+      "tint": [0.96, 0.96, 0.94], "specularColor": [0.08, 0.08, 0.08],
+      "specularPower": 48.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.14, "specularBoost": 1.8, "powerBoost": 1.5 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "rock", "audioAbsorption": 0.04,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    // Brushed kitchen hardware needs a nonzero diffuse term under XNA BasicEffect. Reusing
+    // MAT_APPLIANCE_STEEL made every 6 mm pull and the faucet nearly black in gameplay.
+    {
+      "id": "MAT_KITCHEN_HARDWARE_STEEL", "class": "metal",
+      "albedo": "Textures/Materials/metal_brushed_albedo",
+      "normal": "Textures/Materials/metal_brushed_normal", "lightmapChannel": 0,
+      "tint": [0.80, 0.82, 0.84], "specularColor": [0.35, 0.37, 0.40],
+      "specularPower": 64.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.10, "specularBoost": 1.5, "powerBoost": 1.4 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "metal", "audioAbsorption": 0.02,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     {
       "id": "MAT_APPLIANCE_STEEL", "class": "metal",
       "albedo": "Textures/Materials/metal_brushed_albedo",

@@ -1,4 +1,61 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01039` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01040` checkpoint)
+
+Branch `develop`. The continuous sprint began at
+`238d6aed27c1e8662f0d118013ef08bb801ae018`; the preceding clean checkpoint was
+`38e76860df4aa02a05b8d9d5df75d74eaf90a777` (`HOUSE-01039`). This file is committed
+with the one-task `HOUSE-01040` change; verify the exact new HEAD and clean tree before the next
+checkpoint. **VISUAL-GATE-1 still FAILS.** Production materials, useful kitchen practicals and
+the first real built-ins are present in the normal first-person route, but the kitchen has no
+upper cabinets/tall appliances/backsplash, the hall aperture is dark, family-room composition
+is flat and the front roof/porch and night façade remain skeletal.
+
+Before: [Round 16 west-facing empty kitchen](visual-review/captures/house-01039-entry-r4/kitchen-facing-west.png).
+After: [Round 17 first-stride kitchen entry](visual-review/captures/house-01040-clear-day-r4/kitchen-from-hall.png),
+[west-facing built-ins](visual-review/captures/house-01040-clear-day-r4/kitchen-facing-west.png)
+and [night kitchen entry](visual-review/captures/house-01040-night-r4/kitchen-from-hall.png).
+Eleven fixed normal-game views each were also captured at
+[noon](visual-review/captures/house-01040-noon-r4),
+[overcast](visual-review/captures/house-01040-overcast-r4) and
+[22:00](visual-review/captures/house-01040-night-r4); changed route, family and exterior frames
+were actually inspected. The before camera was inside the new collidable island, so the two
+kitchen review poses and strict/debug kitchen poses were deliberately relocated to measured
+walkable positions; other review views remained fixed. See [Round 17 review](visual-review/README.md).
+
+Implementation: two deterministic project-authored Blender GLBs form a 2.8 m north sink base
+run with stone counter, real cutout/basin/faucet, doors/drawers/oak toe and a 2.2 m island with
+stone top/painted fronts/hardware. The canonical source model/manifest/prop/material data,
+source support origins, collision proxies, exact glTF source hashes, measured counter height,
+physical UV scale, legal project-authored provenance, and deterministic regeneration checker
+are committed together. The north run aligns with canonical STACK-E; player/work aisles remain
+at least ~1.04 m. Only the measured L0_KITCHEN static chunk ceiling changes from 8 to 11 for
+three extra source finish groups; no portal, Reach/vertex or other-cell limit is weakened.
+Normal materials use approved map-derived painted wood/oak/stone/brushed steel finishes, not
+the explicit debug blockout path. The changed kitchen and nearby strict golden images were
+paired and viewed before selective updates.
+
+Verification: both authored source GLBs regenerate bit-for-bit and pass import/scale/origin/
+height checks; the 31-stage full content dry run is fresh, and the canonical world products
+were deployed only into the existing build directory. **48/48 direct software-render tests**
+pass, including culling equivalence; **195/195 targeted unit** and **12/12 targeted
+integration** tests pass. `tools/ci/run_checks.sh` is green with 323 strict-XNA translation
+units and `CNA_CNAEXT=OFF`; `git diff --check` was verified before commit. Do **not** claim a
+fresh full CMake/CTest pass: BL-17 now reaches sibling CNA's required MojoShader-series writer,
+which cannot write in shared FNA3D under this workspace sandbox. The patcher also has a
+destructive fallback for modified shared dependencies, so no unsandboxed regeneration was
+attempted. Existing exact generated house compile/link commands and direct binaries passed;
+no CNA, FNA3D or sibling repository was modified.
+
+Next highest visible value: complete the kitchen silhouette with suitable upper/tall cabinetry,
+appliances and restrained worktop details, then fix the dark hall opening and investigate the
+flat blue-green family room. The first exterior view still needs credible roof/porch/front-door
+form and usable night lighting; do not chase invisible systems while these fixed screenshots
+remain weak. Keep the strict XNA/content/provenance/canonical room/portal/collision/culling
+foundation. The original 19-hour navigation process previously queried by the user has ended;
+this task's fresh navigation bake took about 12 seconds, not a persistent zombie.
+
+## Prior `HOUSE-01039` handoff
+
+Visual-sprint handoff — 2026-09-16 (`HOUSE-01039` checkpoint)
 
 Branch `develop`. This continuous visual session began at
 `238d6aed27c1e8662f0d118013ef08bb801ae018`; the preceding clean checkpoint was

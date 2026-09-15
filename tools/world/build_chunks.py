@@ -141,9 +141,11 @@ CHUNK_BUDGET_EXCEPTIONS = {
                 "a rafter-bounded attic room draws the ROOF it looks up at as well as its collar "
                 "ceiling (`HOUSE-00496`), and since `HOUSE-00488` the RAFTERS under that roof as "
                 "well -- two classes no room below it has, plus an outside window-frame chunk"),
-    "L0_KITCHEN": (8,
-                   "two separate weather-facing window roles: the outside frame and glazing "
-                   "are distinct from indoor borrowed-light glass and the six shell finishes"),
+    "L0_KITCHEN": (11,
+                   "HOUSE-01040's measured first built-in kit: eight shell/window finish "
+                   "groups plus separate oak joinery, approved marble counter stone and "
+                   "brushed-steel sink/handles. The painted cabinet fronts reuse the existing "
+                   "painted trim material; no Reach or vertex-cap splits were added"),
 }
 
 # `HOUSE-00926`: a separate weather-facing frame keeps indoor skirting out of the outdoor BVH.
