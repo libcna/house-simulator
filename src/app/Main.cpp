@@ -8,6 +8,9 @@
 // include under ADR-0001. A plain `int main` links and runs.
 #include <cstdio>
 #include <exception>
+#include <string>
+
+#include "Microsoft/Xna/Framework/TitleLocation.hpp"
 
 #include "cnahouse/app/CnaHouseGame.hpp"
 #include "cnahouse/app/CommandLine.hpp"
@@ -36,6 +39,19 @@ int main(int argc, char** argv)
         std::fputs(app::RendererInfo(*options).c_str(), stdout);
         return 0;
     }
+
+    // ContentManager resolves a relative RootDirectory against the *process working directory*,
+    // while TitleContainer resolves the canonical world against XNA's title location. A launcher
+    // started from the repository root could therefore pair fresh build/content/world with stale
+    // repository-root content/Textures. Keep both content managers beside the executable, using
+    // the same XNA title base as TitleContainer, regardless of the launcher's working directory.
+    std::string titleDirectory = Microsoft::Xna::Framework::TitleLocation::getPathProperty();
+    if (!titleDirectory.empty() && titleDirectory.back() != '/' && titleDirectory.back() != '\\')
+    {
+        titleDirectory += '/';
+    }
+    options->contentRoot = titleDirectory + "content";
+    options->effectRoot = titleDirectory + "content-fx";
 
     if (options->logCategories.has_value())
     {

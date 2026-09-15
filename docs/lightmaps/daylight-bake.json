@@ -227,7 +227,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:42a02f5b31361a992df96d3a9a235879dcc45dee8672ea438ab736feef362771"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:ddb9c29db0e409270b80aa95c63338d98e28f0bd54c72e31c8818a9b47e7be30"
     },
     {
       "cell": "L0_GARAGE",
@@ -257,7 +258,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:57958ca3804ce5197aa8aa499ab63fc8605be7662460e8b5c9594c95773c07a8"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:d0f6f27d58ba6ca23ed7198b3976b1a2244748b6c4f18705149f374f72ed132f"
     },
     {
       "cell": "L0_KITCHEN",
@@ -789,6 +791,10 @@
       "groups": [],
       "shellHash": "sha256:71437d422e4f025f337b471447f4916cea0dbe8e06265ca95dbe3e486d7aac20"
     }
+  ],
+  "promotedSubsetCells": [
+    "L0_FOYER",
+    "L0_HALL"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,

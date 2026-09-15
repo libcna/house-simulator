@@ -96,6 +96,10 @@ Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 - `MODEL_VEGETATION_TREE_TREE_SMALL_02_YOUNG` — **Burkea africana / wild syringa — young** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
 - `MODEL_VEGETATION_WEED_PLANT_02` — **Weed plant 02 — shrub** — <https://polyhaven.com/a/weed_plant_02> (retrieved 2026-09-13)
 - `MODEL_VEGETATION_WILD_ROOIBOS_BUSH` — **Wild rooibos bush — shrub** — <https://polyhaven.com/a/wild_rooibos_bush> (retrieved 2026-09-13)
+- `MODEL_FURNITURE_FOYER_ARMCHAIR` — **Arm Chair 01** by Kirill Sannikov — <https://polyhaven.com/a/ArmChair_01> (retrieved 2026-09-15)
+- `MODEL_FURNITURE_FOYER_CONSOLE` — **Chinese Console Table** by Kirill Sannikov — <https://polyhaven.com/a/chinese_console_table> (retrieved 2026-09-15)
+- `TEXTURE_FURNITURE_FOYER_ARMCHAIR_ALBEDO` — **Arm Chair 01 base colour** by Kirill Sannikov — <https://polyhaven.com/a/ArmChair_01> (retrieved 2026-09-15)
+- `TEXTURE_FURNITURE_FOYER_CONSOLE_ALBEDO` — **Chinese Console Table base colour** by Kirill Sannikov — <https://polyhaven.com/a/chinese_console_table> (retrieved 2026-09-15)
 - `SOUND_NOX_AMBIENCE_CICADAS_AMBIANCE_CICADAS_LOOP_STEREO` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 - `SOUND_NOX_AMBIENCE_FIRE_AMBIANCE_FIRECAMP_MEDIUM_LOOP_MONO` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 - `SOUND_NOX_AMBIENCE_FIRE_AMBIANCE_FIRECAMP_SMALL_LOOP_MONO` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
@@ -669,4 +673,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `b96a31b8468ad98b06685d46f66b42ded7a11ace9cf1c3cf88dc57f83b2e8b2b`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `626677f52f0c4dea18c7c1f12ec98426ac68fd8aea855280435d55e63a038b9c`.*

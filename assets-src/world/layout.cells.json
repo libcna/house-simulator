@@ -491,7 +491,7 @@
       "daylight": { "orientation": "N", "exposure": 0.35 },
       "lightGroups": ["LG_L0_FOYER_MAIN", "LG_L0_FOYER_ACCENT"],
       "lightmaps": {
-        "shellHash": "sha256:42a02f5b31361a992df96d3a9a235879dcc45dee8672ea438ab736feef362771",
+        "shellHash": "sha256:ddb9c29db0e409270b80aa95c63338d98e28f0bd54c72e31c8818a9b47e7be30",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY",
           "scale": 1.0000001192092896
@@ -500,12 +500,12 @@
           {
             "group": "LG_L0_FOYER_ACCENT",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT",
-            "scale": 0.02189040184020996
+            "scale": 0.1495114266872406
           },
           {
             "group": "LG_L0_FOYER_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN",
-            "scale": 0.07171715050935745
+            "scale": 0.4898282289505005
           }
         ]
       },
@@ -522,7 +522,7 @@
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_CENTRE" },
       "lightGroups": ["LG_L0_HALL_MAIN", "LG_L0_HALL_GALLERY"],
       "lightmaps": {
-        "shellHash": "sha256:57958ca3804ce5197aa8aa499ab63fc8605be7662460e8b5c9594c95773c07a8",
+        "shellHash": "sha256:d0f6f27d58ba6ca23ed7198b3976b1a2244748b6c4f18705149f374f72ed132f",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_HALL_LM_DAY",
           "scale": 0.7765084505081177
@@ -531,12 +531,12 @@
           {
             "group": "LG_L0_HALL_GALLERY",
             "contentName": "Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_GALLERY",
-            "scale": 0.002580567030236125
+            "scale": 0.017625274136662483
           },
           {
             "group": "LG_L0_HALL_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_MAIN",
-            "scale": 20.984493255615234
+            "scale": 0.5134106278419495
           }
         ]
       },

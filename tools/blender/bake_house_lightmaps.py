@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import subprocess
 import sys
 import time
@@ -181,7 +182,7 @@ def set_lightmap_field(text: str, cell: str, binding: dict) -> str:
     return text[:row_start] + row + text[row_end:]
 
 
-def update_cell_bindings() -> None:
+def update_cell_bindings(selected_cells: set[str] | None = None) -> None:
     """Merge the two durable bake reports into the canonical cell-owned runtime bindings."""
     reports = {}
     for mode in ("daylight", "artificial"):
@@ -197,7 +198,7 @@ def update_cell_bindings() -> None:
         raise ValueError("daylight and artificial reports name different receiver cells")
 
     text = CELLS.read_text(encoding="utf-8")
-    for cell in sorted(daylight):
+    for cell in sorted(selected_cells if selected_cells is not None else daylight):
         day = daylight[cell]
         art = artificial[cell]
         if day["shellHash"] != art["shellHash"]:
@@ -219,6 +220,87 @@ def update_cell_bindings() -> None:
     CELLS.write_text(text, encoding="utf-8")
 
 
+def promote_subset(selected: set[str], per_cell: dict[str, int],
+                   lights_by_cell: dict[str, list[dict]], samples: int, seed: int,
+                   lumens_per_radiant_watt: float) -> None:
+    """Atomically validate both selected bakes before updating durable reports and bindings.
+
+    The other 76 rooms keep their existing assets. A subset bake is an explicit vertical-slice
+    promotion, not a counterfeit 78-room rebake or an unmanifested image overwrite.
+    """
+    sidecars: dict[str, dict[str, dict]] = {"daylight": {}, "artificial": {}}
+    images: dict[str, list[Path]] = {"daylight": [], "artificial": []}
+    for cell in sorted(selected):
+        shell = SHELL / f"{cell}.glb"
+        expected_shell = sha256(shell)
+        expected_lights = json_sha256(lights_by_cell[cell])
+        for mode in sidecars:
+            path = META / f"{cell}_{mode}.json"
+            sidecar = json.loads(path.read_text(encoding="utf-8"))
+            if (sidecar.get("sourceGlbSha256") != expected_shell or
+                    sidecar.get("cellLightsSha256") != expected_lights or
+                    sidecar.get("bakerSha256") != sha256(BAKER) or
+                    sidecar.get("seed") != seed or sidecar.get("samples") != samples or
+                    sidecar.get("size") != per_cell[cell] or
+                    sidecar.get("lumensPerRadiantWatt") != lumens_per_radiant_watt):
+                raise ValueError(f"{cell} {mode}: selected bake is stale or miscalibrated")
+            destination = OUTPUT / ("Daylight" if mode == "daylight" else "Artificial")
+            products = ([sidecar["daylight"]["image"]] if mode == "daylight"
+                        else [group["image"] for group in sidecar["groups"]])
+            if not products or unlit_products(sidecar, mode):
+                raise ValueError(f"{cell} {mode}: empty or unlit selected bake")
+            for name in products:
+                image = destination / name
+                if not image.is_file():
+                    raise ValueError(f"{cell} {mode}: missing {image}")
+                images[mode].append(image)
+            sidecars[mode][cell] = sidecar
+        if sidecars["daylight"][cell]["shellHash"] != sidecars["artificial"][cell]["shellHash"]:
+            raise ValueError(f"{cell}: artificial and daylight shell/light/calibration hashes differ")
+
+    reports = {}
+    for mode, selected_products in sidecars.items():
+        durable = REPO / "docs" / "lightmaps" / f"{mode}-bake.json"
+        report = json.loads(durable.read_text(encoding="utf-8"))
+        products = {row["cell"]: row for row in report["products"]}
+        if report.get("cells") != 78 or len(products) != 78 or selected - products.keys():
+            raise ValueError(f"{mode}: durable 78-cell report is incomplete")
+        for cell, sidecar in selected_products.items():
+            products[cell] = {"cell": cell, "shellHash": sidecar["shellHash"],
+                              "groups": sidecar["groups"], "daylight": sidecar["daylight"],
+                              "lumensPerRadiantWatt": lumens_per_radiant_watt}
+        report["products"] = [products[cell] for cell in sorted(products)]
+        family = OUTPUT / ("Daylight" if mode == "daylight" else "Artificial")
+        marker = "*_LM_DAY.png" if mode == "daylight" else "*_LM_LG_*.png"
+        report["sourceBytes"] = sum(path.stat().st_size for path in family.glob(marker))
+        report["promotedSubsetCells"] = sorted(selected)
+        reports[mode] = (durable, report)
+
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    source_paths = {path.relative_to(REPO).as_posix(): path
+                    for family in images.values() for path in family}
+    found = set()
+    for row in manifest["assets"]:
+        path = source_paths.get(row.get("sourceFile"))
+        if path is None:
+            continue
+        row["sourceSha256"] = sha256(path)
+        row["origin"]["note"] = (
+            f"Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed "
+            f"{seed}, {samples} samples and {lumens_per_radiant_watt:g} lm per radiant watt; "
+            "selected-cell calibration, not a full-house rebake.")
+        found.add(row["sourceFile"])
+    if found != source_paths.keys():
+        raise ValueError(f"selected lightmap assets lack manifest rows: {source_paths.keys() - found}")
+
+    # Validation above is read-only. These writes happen only after both complete modes agree.
+    for durable, report in reports.values():
+        durable.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    update_cell_bindings(selected)
+    print(f"bake_house_lightmaps: promoted both modes for {', '.join(sorted(selected))}")
+
+
 def unlit_products(sidecar: dict, mode: str) -> list[str]:
     """Name any baked product whose measured irradiance is effectively black."""
     if mode == "artificial":
@@ -235,12 +317,18 @@ def main() -> int:
     modes = parser.add_mutually_exclusive_group(required=True)
     modes.add_argument("--artificial", action="store_true")
     modes.add_argument("--daylight", action="store_true")
+    modes.add_argument("--promote-subset", action="store_true",
+                       help="validate both already baked --cells modes and promote only those cells")
     parser.add_argument("--cells", help="comma-separated subset for an inspection bake")
     parser.add_argument("--samples", type=int, default=SAMPLES)
     parser.add_argument("--seed", type=int, default=SEED)
+    parser.add_argument("--lumens-per-radiant-watt", type=float, default=683.0,
+                        help="explicit white-light calibration for selected receiver cells")
     parser.add_argument("--resume", action="store_true",
                         help="reuse matching completed sidecars after an interrupted house bake")
     args = parser.parse_args()
+    if args.lumens_per_radiant_watt <= 0 or not math.isfinite(args.lumens_per_radiant_watt):
+        parser.error("--lumens-per-radiant-watt must be positive and finite")
 
     report_path = SHELL / "report.json"
     if not report_path.is_file():
@@ -268,6 +356,12 @@ def main() -> int:
             return 2
         wanted = requested
     full_house = wanted == set(per_cell)
+    if args.promote_subset:
+        if full_house or not args.cells:
+            parser.error("--promote-subset requires a proper --cells subset")
+        promote_subset(wanted, per_cell, lights_by_cell, args.samples, args.seed,
+                       args.lumens_per_radiant_watt)
+        return 0
 
     mode = "daylight" if args.daylight else "artificial"
     destination = OUTPUT / ("Daylight" if args.daylight else "Artificial")
@@ -309,6 +403,7 @@ def main() -> int:
         command = [sys.executable, str(BAKER), str(shell), "--lights", str(LIGHTS),
                    "--cell", cell, "--out", str(destination), "--size", str(per_cell[cell]),
                    "--samples", str(args.samples), "--seed", str(args.seed),
+                   "--lumens-per-radiant-watt", str(args.lumens_per_radiant_watt),
                    "--daylight-only" if args.daylight else "--artificial-only"]
         completed = subprocess.run(command, cwd=REPO, check=False)
         if completed.returncode != 0:

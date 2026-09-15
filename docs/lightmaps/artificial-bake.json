@@ -461,9 +461,9 @@
             "LIGHT_L0_FOYER_ACCENT_1",
             "LIGHT_L0_FOYER_ACCENT_2"
           ],
-          "mean": 0.0030999494115337618,
-          "peak": 0.02189040184020996,
-          "scale": 0.02189040184020996
+          "mean": 0.021172652343375786,
+          "peak": 0.1495114266872406,
+          "scale": 0.1495114266872406
         },
         {
           "group": "LG_L0_FOYER_MAIN",
@@ -471,12 +471,13 @@
           "lights": [
             "LIGHT_L0_FOYER_MAIN_1"
           ],
-          "mean": 0.005849998193741913,
-          "peak": 0.07171715050935745,
-          "scale": 0.07171715050935745
+          "mean": 0.039955489684237136,
+          "peak": 0.4898282289505005,
+          "scale": 0.4898282289505005
         }
       ],
-      "shellHash": "sha256:42a02f5b31361a992df96d3a9a235879dcc45dee8672ea438ab736feef362771"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:ddb9c29db0e409270b80aa95c63338d98e28f0bd54c72e31c8818a9b47e7be30"
     },
     {
       "cell": "L0_GARAGE",
@@ -537,9 +538,9 @@
             "LIGHT_L0_HALL_GALLERY_2",
             "LIGHT_L0_HALL_GALLERY_3"
           ],
-          "mean": 0.0001408117658828485,
-          "peak": 0.002580567030236125,
-          "scale": 0.002580567030236125
+          "mean": 0.000961744333963137,
+          "peak": 0.017625274136662483,
+          "scale": 0.017625274136662483
         },
         {
           "group": "LG_L0_HALL_MAIN",
@@ -548,12 +549,13 @@
             "LIGHT_L0_HALL_MAIN_1",
             "LIGHT_L0_HALL_MAIN_2"
           ],
-          "mean": 0.011641442907853704,
-          "peak": 20.984493255615234,
-          "scale": 20.984493255615234
+          "mean": 0.09337249139748105,
+          "peak": 0.5134106278419495,
+          "scale": 0.5134106278419495
         }
       ],
-      "shellHash": "sha256:57958ca3804ce5197aa8aa499ab63fc8605be7662460e8b5c9594c95773c07a8"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:d0f6f27d58ba6ca23ed7198b3976b1a2244748b6c4f18705149f374f72ed132f"
     },
     {
       "cell": "L0_KITCHEN",
@@ -1882,10 +1884,14 @@
       "shellHash": "sha256:71437d422e4f025f337b471447f4916cea0dbe8e06265ca95dbe3e486d7aac20"
     }
   ],
+  "promotedSubsetCells": [
+    "L0_FOYER",
+    "L0_HALL"
+  ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 993705,
+  "sourceBytes": 1005258,
   "tool": "bake_house_lightmaps.py"
 }

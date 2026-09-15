@@ -333,7 +333,7 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 1100.0, "range": 4.00,
       "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L0_FOYER_ACCENT x2 -- either side of the mirror
@@ -357,19 +357,19 @@
     // ---- LG_L0_HALL_MAIN x2
     {
       "id": "LIGHT_L0_HALL_MAIN_1", "cell": "L0_HALL", "group": "LG_L0_HALL_MAIN",
-      "type": "point", "position": [0.00, 3.28, -21.43],
+      "type": "point", "position": [0.00, 2.45, -22.10],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 5.17,
+      "colorK": 2700, "intensityLm": 900.0, "range": 5.17,
       "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_HALL_MAIN_2", "cell": "L0_HALL", "group": "LG_L0_HALL_MAIN",
-      "type": "point", "position": [0.00, 3.28, -19.87],
+      "type": "point", "position": [0.00, 2.45, -20.35],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 5.17,
+      "colorK": 2700, "intensityLm": 900.0, "range": 5.17,
       "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L0_HALL_GALLERY x3 -- §59.4's family photo wall

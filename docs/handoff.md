@@ -1,4 +1,62 @@
-# Visual-sprint handoff — 2026-09-15 (`HOUSE-00928` checkpoint)
+# Visual-sprint handoff — 2026-09-15 (`HOUSE-01038` checkpoint)
+
+Branch `develop`. This continuous visual session began at
+`238d6aed27c1e8662f0d118013ef08bb801ae018`; the preceding clean checkpoint was
+`49d1f0959fce5f973c6f8dc5d37e4a046426e03f` (`HOUSE-00928`). This file is committed
+with the one-task `HOUSE-01038` change; verify its exact HEAD and clean tree before the next
+checkpoint. **VISUAL-GATE-1 still FAILS**: normal gameplay no longer uses hash/blockout colours,
+but the foyer→hall→kitchen route falls into a black empty threshold, front roof/door/porch look
+skeletal, and night exterior is nearly invisible.
+
+Before: [Round 14's eight fixed normal-game views](visual-review/captures/house-00928-entry-r1).
+After: [Round 15's nine fixed clear-day views](visual-review/captures/house-01038-clear-day-r5),
+including the new [reverse foyer/console](visual-review/captures/house-01038-clear-day-r5/foyer-facing-front.png),
+and matched nine-view [noon](visual-review/captures/house-01038-noon-r5),
+[overcast](visual-review/captures/house-01038-overcast-r5) and
+[22:00](visual-review/captures/house-01038-night-r5) sets. All were actually inspected.
+The [forward entrance](visual-review/captures/house-01038-clear-day-r5/entrance-foyer.png) now
+shows a real upholstered chair, painted/wood/tile materials and warm practicals; the
+[central hall](visual-review/captures/house-01038-clear-day-r5/central-hall.png) is readable on
+the near side of its unlit kitchen opening. The [living composition](visual-review/captures/house-01038-clear-day-r5/living-composition.png)
+still has flat pale seating and a bare brick chimney, and the [front façade](visual-review/captures/house-01038-clear-day-r5/exterior-front.png)
+still needs form/detail/night lighting. See [Round 15 review](visual-review/README.md) for the
+ranked actual-image defects, not only pixel-regression results.
+
+Implemented: two pinned Poly Haven CC0 2K-source-mapped, metred console/chair models with
+deterministic GLB transformation, 3.4 cm chair POSITION recenter, manifest/licence credits and
+canonical foyer prop/material rows. The chair and console respect measured ≥1.2 m circulation,
+front-door swing and portals; static batching gets a measured two-group foyer ceiling exception.
+Default-on canonical foyer/hall practicals and selected deterministic daylight/artificial atlas
+bakes now illuminate those rooms at day/overcast/night. Stock-XNA Basic furniture/trim receives
+calibrated fixture bounce while architectural lightmapped DualTexture rendering remains intact.
+The normal shell now resolves both `ContentManager` roots through strict-XNA `TitleLocation`,
+eliminating a stale-working-directory texture/lightmap mismatch that made a fresh hall seem dark.
+Navigation content with the new furniture proxy is fresh: conservative OBB/swept-shape pruning
+and bounded candidate sampling reduced its bake from 29 minutes to **12.5 seconds**, with all
+selected foyer/hall/living/family/kitchen/dining nodes and 396 local edges unchanged; 29 outdoor
+candidate positions were intentionally resampled. No CNA/sharp-runtime source was edited.
+
+Verification: full world content 16/16 fresh, strict CI gates green including 323 XNA-strict
+translation units, `CNA_CNAEXT=OFF`, 22 lighting unit tests green, 48/48 direct software-Mesa
+render tests green (including culling and the new actual atlas-sampling tests). Exactly six
+affected pixel references were visually inspected and updated, not regenerated wholesale.
+Full offscreen CTest: 1,595 registrations, zero failures among 1,587 eligible cases; 8 disabled
+and 4 capture-only pixel checks skipped on that runner. `git diff --check` passed before the
+commit. The initially failed sandboxed CTest was an idempotent FNA3D configure write denied by
+sandbox; `LIBGL_ALWAYS_SOFTWARE=1` conflicts with EGL device selection in a per-test CTest run.
+The build-access offscreen rerun without that override passed; the direct actual-software render
+binary was separately green. The original host `build_nav.py` PID 936066 queried by the user
+had already exited and was not killed; only this session's exact stale child bake was
+gracefully interrupted after its replacement input changed.
+
+Next highest visible value: make the **L0_HALL→L0_KITCHEN** threshold and kitchen itself
+visibly habitable with a credible practical/daylight mix and legally provenanced primary
+fixtures/furniture, then recapture these same fixed views. Keep room/portal/collision, strict
+XNA, deterministic content/licence and culling regressions. Exterior front roof/door/night
+practicals and living/family lighting/decor remain the next large image defects. Do not chase
+numerical tasks or claim VISUAL-GATE-1 until several connected L0 rooms genuinely read as a house.
+
+## Prior `HOUSE-00928` handoff
 
 Branch `develop`; verify HEAD and worktree before continuing. This visual-sprint session started
 at `238d6aed27c1e8662f0d118013ef08bb801ae018` and now has one-task commits for

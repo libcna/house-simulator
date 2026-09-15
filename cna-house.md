@@ -1920,6 +1920,13 @@ remains, the six pre-existing interior exceptions each grow by exactly one, and 
 `CHUNK_BUDGET_EXCEPTIONS`, not a new unlimited exception or a changed six-chunk target; the
 existing over-ceiling and stale-entry gates still apply.
 
+`HOUSE-01038` (2026-09-15) measures the first furnished foyer at **nine** static material
+chunks: its previous six shell-finish groups and one weather-facing window-frame group,
+plus two source-specific CC0 furniture albedos. Its cell-specific exception ceiling moves
+from seven to exactly nine; the six-chunk target, Reach per-draw limit and culling roles
+do not change. The two extra groups are visible close-range carved wood and upholstered
+fabric, not permission to fragment other rooms.
+
 §71's frame budget is what may tighten or restructure these later; a measurement is what should
 move them, not an assertion in either direction.
 * **The outdoors is chunked too, since `HOUSE-00780`.** The terrain tiles, road segments, fences,
@@ -2046,6 +2053,14 @@ assets-src/                                        content/
 with no ambiguity: only effects are `.xnb`. `Anim/*.chanim` and `world/*.json` are not
 `ContentManager` assets at all: they are project-owned files opened with `TitleContainer::OpenStream`
 and parsed by our own reader, which is why neither depends on a CNA content type.
+
+The shell resolves both `ContentManager` roots from XNA's `TitleLocation` before starting normal
+gameplay. `TitleContainer` already resolves `world/` from that executable-relative base, whereas
+a *relative* `ContentManager::RootDirectory` follows the process working directory in CNA. Without
+the shared title base, launching `build/cna-house` from the repository root silently paired fresh
+`build/content/world` with stale root-level `content/Textures`/`content/Models`; the first furnished
+foyer and hall lightmaps then appeared nearly black despite passing isolated GPU/content tests.
+Tests may inject fixture roots through `Options`, but the shipping shell always uses the title base.
 
 CMake wiring:
 

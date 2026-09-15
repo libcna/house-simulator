@@ -180,7 +180,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 143U);
+                EXPECT_EQ(binder.Count(), 145U);
                 const MaterialDesc* outdoorRoof = binder.Find(Id::Of("MAT_OUTDOOR_ROOF"));
                 ASSERT_NE(outdoorRoof, nullptr);
                 EXPECT_EQ(outdoorRoof->kind, MaterialKind::Basic);
@@ -188,6 +188,12 @@ namespace
                 const MaterialDesc* upholstery = binder.Find(Id::Of("MAT_FURNITURE_WHITE_ROOM_PALETTE"));
                 ASSERT_NE(upholstery, nullptr);
                 EXPECT_EQ(upholstery->kind, MaterialKind::Basic);
+                const MaterialDesc* foyerConsole = binder.Find(Id::Of("MAT_FURNITURE_FOYER_CONSOLE"));
+                ASSERT_NE(foyerConsole, nullptr);
+                EXPECT_EQ(foyerConsole->kind, MaterialKind::Basic);
+                const MaterialDesc* foyerArmchair = binder.Find(Id::Of("MAT_FURNITURE_FOYER_ARMCHAIR"));
+                ASSERT_NE(foyerArmchair, nullptr);
+                EXPECT_EQ(foyerArmchair->kind, MaterialKind::Basic);
                 const MaterialDesc* leaves = binder.Find(Id::Of("MAT_FURNITURE_PLANT_LEAF"));
                 ASSERT_NE(leaves, nullptr);
                 EXPECT_EQ(leaves->kind, MaterialKind::AlphaTest);

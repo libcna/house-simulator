@@ -2,6 +2,32 @@
   "schema": "cna-house/props/1",
   "props": [
     {
+      "id": "PROP_FOYER_CONSOLE",
+      "asset": "MODEL_FURNITURE_FOYER_CONSOLE",
+      "cell": "L0_FOYER",
+      "position": [1.39, 0.6, -14.52],
+      "yawDeg": 0,
+      "scale": 0.92,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FOYER_ARMCHAIR",
+      "asset": "MODEL_FURNITURE_FOYER_ARMCHAIR",
+      "cell": "L0_FOYER",
+      "position": [1.6, 0.6, -17.7],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_LIVING_SOFA",
       "asset": "MODEL_FURNITURE_LEATHER_SOFA",
       "cell": "L0_LIVING",

@@ -18,6 +18,7 @@ SEED = 6840335469064670721
 POSES = (
     ("exterior-front", "0.00,0.00,5.20,0.0,3.0"),
     ("entrance-foyer", "0.00,0.60,-14.90,0.0,0.0"),
+    ("foyer-facing-front", "0.00,0.60,-16.70,180.0,0.0"),
     ("central-hall", "0.00,0.60,-20.65,0.0,0.0"),
     ("living-room", "-5.20,0.60,-17.25,90.0,0.0"),
     ("living-composition", "-3.10,0.60,-18.50,270.0,0.0"),
@@ -25,12 +26,20 @@ POSES = (
     ("family-room", "5.45,0.60,-24.55,270.0,0.0"),
     ("family-composition", "3.20,0.60,-25.80,90.0,0.0"),
 )
+SCENARIOS = {
+    "clear-day": (10.5, "W_CLEAR"),
+    "clear-noon": (12.0, "W_CLEAR"),
+    "overcast-day": (10.5, "W_OVERCAST"),
+    "clear-night": (22.0, "W_CLEAR"),
+}
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("label", help="capture directory label, normally <short-head>-<round>")
     parser.add_argument("--binary", type=Path, default=REPO / "build" / "cna-house")
+    parser.add_argument("--scenario", choices=SCENARIOS, default="clear-day",
+                        help="fixed time/weather review condition (default: clear-day)")
     args = parser.parse_args()
 
     binary = args.binary.resolve()
@@ -44,6 +53,7 @@ def main() -> int:
         "SDL_AUDIODRIVER": "dummy",
         "LIBGL_ALWAYS_SOFTWARE": "1",
     })
+    time_of_day, weather = SCENARIOS[args.scenario]
 
     for name, pose in POSES:
         output = destination / f"{name}.png"
@@ -54,9 +64,9 @@ def main() -> int:
             "--tier=s",
             "--quality=high",
             f"--seed={SEED}",
-            "--time=10.5",
+            f"--time={time_of_day}",
             "--freeze-time",
-            "--weather=W_CLEAR",
+            f"--weather={weather}",
             "--no-audio",
             "--screenshot-frame=3",
             f"--screenshot={output}",

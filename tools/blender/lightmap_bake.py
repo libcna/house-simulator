@@ -85,7 +85,8 @@ DEFAULT_SEED = 20260907
 #: patch into a static texture, which is what `HOUSE-00208`'s sun patches exist to avoid.
 SKY_STRENGTH = 1.0
 
-VERSION = 1
+VERSION = 2
+LEGACY_LUMENS_PER_RADIANT_WATT = 683.0
 
 
 def report(message: str) -> None:
@@ -169,7 +170,7 @@ def select_lightmap_uv() -> None:
         obj.data.uv_layers.active = layer
 
 
-def shell_hash(lights: list[dict]) -> str:
+def shell_hash(lights: list[dict], lumens_per_radiant_watt: float = LEGACY_LUMENS_PER_RADIANT_WATT) -> str:
     """A hash over the geometry, the lightmap UVs and the lights.
 
     Everything the bake depends on and nothing else: move a wall, move a lamp, or repack the
@@ -189,6 +190,10 @@ def shell_hash(lights: list[dict]) -> str:
                 digest.update(f"{item.uv[0]:.5f},{item.uv[1]:.5f};".encode())
     for light in sorted(lights, key=lambda light: light["id"]):
         digest.update(json.dumps(light, sort_keys=True).encode())
+    # Preserve existing bake hashes for the legacy conversion. A deliberately calibrated slice
+    # has a distinct contract even when its shell and fixtures are otherwise byte-identical.
+    if lumens_per_radiant_watt != LEGACY_LUMENS_PER_RADIANT_WATT:
+        digest.update(f"photometric:{lumens_per_radiant_watt:.6f}".encode())
     return "sha256:" + digest.hexdigest()
 
 
@@ -222,7 +227,8 @@ def light_objects():
     return [o for o in bpy.context.scene.objects if o.type == "LIGHT"]
 
 
-def create_light_objects(lights: list[dict]) -> None:
+def create_light_objects(lights: list[dict],
+                         lumens_per_radiant_watt: float = LEGACY_LUMENS_PER_RADIANT_WATT) -> None:
     """Turn the authored XNA light rows into the white emitters the irradiance bake needs.
 
     The shell GLBs contain geometry, not fixtures.  The original tool filtered Blender light
@@ -249,10 +255,11 @@ def create_light_objects(lights: list[dict]) -> None:
         if kind not in ("point", "spot"):
             raise SystemExit(f"lightmap_bake: {name} has unsupported light type {kind!r}")
         data = bpy.data.lights.new(name, type="SPOT" if kind == "spot" else "POINT")
-        # Blender's point/spot energy is radiant watts.  683 lm/W is the photopic maximum; the
-        # recorded per-atlas scale preserves the absolute result while normalisation preserves
-        # its 8-bit spatial detail.
-        data.energy = float(light.get("intensityLm", 0.0)) / 683.0
+        # 683 lm/W is the old monochromatic photopic maximum, not a calibrated broadband
+        # household emitter. Keep it as the legacy default so old products remain reproducible;
+        # a measured vertical slice may explicitly request a lower, documented white-light
+        # efficacy. The sidecar and shell hash record that choice.
+        data.energy = float(light.get("intensityLm", 0.0)) / lumens_per_radiant_watt
         data.color = (1.0, 1.0, 1.0)
         # Recessed rows sit 20 mm below the ceiling.  A 50 mm emitter intersects that receiver and
         # produces one white firefly; max-normalising against it crushes the whole useful atlas to
@@ -388,7 +395,8 @@ def pack_rgb(channels: list[list[float]], size: int, path: str) -> list[float]:
 
 def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: int,
               seed: int, pack: bool, *, artificial: bool = True,
-              daylight: bool = True) -> dict:
+              daylight: bool = True,
+              lumens_per_radiant_watt: float = LEGACY_LUMENS_PER_RADIANT_WATT) -> dict:
     """The requested artificial groups and/or daylight atlas. Returns the sidecar."""
     scene = bpy.context.scene
     configure(scene, seed, samples)
@@ -446,7 +454,8 @@ def bake_cell(lights: list[dict], cell: str, out_dir: str, size: int, samples: i
         "denoised": True, "viewTransform": scene.view_settings.view_transform,
         "bakePassColor": scene.render.bake.use_pass_color,
         "uvSet": LIGHTMAP_UV,
-        "shellHash": shell_hash(lights),
+        "shellHash": shell_hash(lights, lumens_per_radiant_watt),
+        "lumensPerRadiantWatt": lumens_per_radiant_watt,
         "groups": entries,
         "daylight": day_entry,
         "packed": f"{cell}_LM_PACKED.png" if (pack and channels) else None,
@@ -821,6 +830,16 @@ def selftest() -> int:
                 "an authored Y-up spot row becomes a correctly placed, downward-facing white "
                 "one-watt Blender emitter small enough for a 20 mm recessed-fixture clearance")
         bpy.data.objects.remove(created, do_unlink=True)
+        calibrated = {**authored[0], "id": "CALIBRATED_SPOT"}
+        create_light_objects([calibrated], 100.0)
+        calibrated_object = bpy.data.objects.get("CALIBRATED_SPOT")
+        require(calibrated_object is not None and
+                abs(calibrated_object.data.energy - 6.83) < 1e-5 and
+                shell_hash(authored, 100.0) != shell_hash(authored) and
+                shell_hash(authored, 100.0) == shell_hash(authored, 100.0),
+                "an explicit broadband-white calibration changes radiometric power and the "
+                "recorded product hash without changing legacy bake identities")
+        bpy.data.objects.remove(calibrated_object, do_unlink=True)
         select_lightmap_uv()
         image = make_bake_target(size)
 
@@ -1016,13 +1035,13 @@ def main() -> int:
             index += 2
         else:
             index += 1
-    for key in ("lights", "cell", "out", "size", "samples", "seed"):
+    for key in ("lights", "cell", "out", "size", "samples", "seed", "lumens-per-radiant-watt"):
         positional = [p for p in positional if p != options.get(key)]
 
     if len(positional) != 1 or "lights" not in options or "cell" not in options \
             or "out" not in options:
         print("lightmap_bake: usage: SHELL.glb --lights lights.json --cell ID --out DIR "
-              "[--size N] [--samples N] [--seed N] [--pack] "
+              "[--size N] [--samples N] [--seed N] [--lumens-per-radiant-watt N] [--pack] "
               "[--artificial-only|--daylight-only]", file=sys.stderr)
         return 2
 
@@ -1030,6 +1049,12 @@ def main() -> int:
     daylight_only = "--daylight-only" in argv
     if artificial_only and daylight_only:
         print("lightmap_bake: --artificial-only and --daylight-only are mutually exclusive",
+              file=sys.stderr)
+        return 2
+    lumens_per_radiant_watt = float(options.get("lumens-per-radiant-watt",
+                                               LEGACY_LUMENS_PER_RADIANT_WATT))
+    if not math.isfinite(lumens_per_radiant_watt) or lumens_per_radiant_watt <= 0.0:
+        print("lightmap_bake: --lumens-per-radiant-watt must be positive and finite",
               file=sys.stderr)
         return 2
 
@@ -1045,7 +1070,7 @@ def main() -> int:
         document = json.loads(layout_io.strip_jsonc(handle.read()))
     cell = options["cell"]
     lights = [light for light in document.get("lights", []) if light.get("cell") == cell]
-    create_light_objects(lights)
+    create_light_objects(lights, lumens_per_radiant_watt)
 
     bake_cell(lights, cell, options["out"],
               int(options.get("size", DEFAULT_SIZE)),
@@ -1053,7 +1078,8 @@ def main() -> int:
               int(options.get("seed", DEFAULT_SEED)),
               "--pack" in argv,
               artificial=not daylight_only,
-              daylight=not artificial_only)
+              daylight=not artificial_only,
+              lumens_per_radiant_watt=lumens_per_radiant_watt)
     return 0
 
 

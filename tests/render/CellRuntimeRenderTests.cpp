@@ -2,7 +2,7 @@
 //
 // `HOUSE-00474`. `CellRuntime` uploads a cell's chunks into real `VertexBuffer`s and
 // `IndexBuffer`s, so testing it needs a real `GraphicsDevice`. It lives here rather than in the
-// unit suite for that reason alone; nothing below draws anything.
+// unit suite for that reason alone; the UV-channel contract is also checked by one GPU draw.
 //
 // The claim that matters most is the one about the CARRIER. CNA has no generic
 // `VertexBuffer::SetData<T>`, so a `dual` chunk -- `Position` `TexCoord0` `TexCoord1`, which is
@@ -11,6 +11,8 @@
 // does: *"this buffer may carry any declaration the caller chose, so every declared element still
 // has to fit in the bytes actually uploaded"*. `TheCarriersStreamIsSixFloatsThenTwo` measures the
 // stream order that rests on, rather than trusting the comment that states it.
+#include <array>
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <string>
@@ -18,19 +20,35 @@
 
 #include <gtest/gtest.h>
 
+#include "Microsoft/Xna/Framework/Content/ContentManager.hpp"
 #include "Microsoft/Xna/Framework/Game.hpp"
+#include "Microsoft/Xna/Framework/Graphics/BlendState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/BufferUsage.hpp"
+#include "Microsoft/Xna/Framework/Graphics/DepthStencilState.hpp"
+#include "Microsoft/Xna/Framework/Graphics/DualTextureEffect.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
+#include "Microsoft/Xna/Framework/Graphics/EffectPass.hpp"
+#include "Microsoft/Xna/Framework/Graphics/EffectPassCollection.hpp"
+#include "Microsoft/Xna/Framework/Graphics/EffectTechnique.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
+#include "Microsoft/Xna/Framework/Graphics/PrimitiveType.hpp"
+#include "Microsoft/Xna/Framework/Graphics/RasterizerState.hpp"
+#include "Microsoft/Xna/Framework/Graphics/RenderTarget2D.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexBuffer.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexDeclaration.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexElementFormat.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexElementUsage.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexPositionNormalTexture.hpp"
 #include "Microsoft/Xna/Framework/GraphicsDeviceManager.hpp"
+#include "Microsoft/Xna/Framework/Matrix.hpp"
+#include "Microsoft/Xna/Framework/Vector3.hpp"
 #include "System/IO/FileAccess.hpp"
 #include "System/IO/FileMode.hpp"
 #include "System/IO/FileStream.hpp"
 
+#include "cnahouse/rendering/Camera.hpp"
+#include "cnahouse/rendering/RenderStates.hpp"
 #include "cnahouse/world/CellRuntime.hpp"
 #include "cnahouse/world/ChunkReader.hpp"
 
@@ -57,7 +75,8 @@ namespace
     class DeviceHost final : public Microsoft::Xna::Framework::Game
     {
     public:
-        explicit DeviceHost(std::function<void(GraphicsDevice&)> body)
+        explicit DeviceHost(
+            std::function<void(GraphicsDevice&, Microsoft::Xna::Framework::Content::ContentManager&)> body)
             : gdm_(this)
             , body_(std::move(body))
         {
@@ -65,6 +84,7 @@ namespace
             gdm_.setPreferredBackBufferHeightProperty(64);
             gdm_.setSynchronizeWithVerticalRetraceProperty(false);
             setIsFixedTimeStepProperty(false);
+            getContentProperty().setRootDirectoryProperty(CNAHOUSE_TEST_CONTENT_ROOT);
         }
 
         std::string failure;
@@ -80,7 +100,7 @@ namespace
             done_ = true;
             try
             {
-                body_(getGraphicsDeviceProperty());
+                body_(getGraphicsDeviceProperty(), getContentProperty());
             }
             catch (const std::exception& e)
             {
@@ -91,11 +111,21 @@ namespace
 
     private:
         Microsoft::Xna::Framework::GraphicsDeviceManager gdm_;
-        std::function<void(GraphicsDevice&)> body_;
+        std::function<void(GraphicsDevice&, Microsoft::Xna::Framework::Content::ContentManager&)> body_;
         bool done_ = false;
     };
 
     void WithDevice(std::function<void(GraphicsDevice&)> body)
+    {
+        DeviceHost host([body = std::move(body)](GraphicsDevice& device,
+                                                 Microsoft::Xna::Framework::Content::ContentManager&)
+                        { body(device); });
+        host.Run();
+        ASSERT_TRUE(host.failure.empty()) << host.failure;
+    }
+
+    void WithDeviceAndContent(
+        std::function<void(GraphicsDevice&, Microsoft::Xna::Framework::Content::ContentManager&)> body)
     {
         DeviceHost host(std::move(body));
         host.Run();
@@ -377,5 +407,247 @@ TEST(CellRuntimeRenderTests, TheDualChunksUvSetsArriveInTheDeclaredSlots)
             // `ChunkRoundTripTests` on the way in, so what is left to check here is the shape.
             EXPECT_EQ(library.chunks[(*hall)[0].chunk].vertexCount, 4u);
             EXPECT_EQ((*hall)[0].bytes, 4u * 32u + 6u * 2u);
+        });
+}
+
+TEST(CellRuntimeRenderTests, AResidentDualChunkSamplesItsSecondUvOnTheGpu)
+{
+    // Readback of the carrier's bytes is necessary but insufficient: the live effect also has to
+    // see the custom TEXCOORD1 declaration when GraphicsDevice binds the resident buffer. The
+    // first UV lands in a red texel, the second in a blue one; a shared/default UV cannot pass.
+    ChunkLibrary library;
+    library.cells.emplace_back("L0_HALL");
+    library.materials.emplace_back("MAT_TEST");
+    cnahouse::world::Chunk chunk;
+    chunk.layout = ChunkLayout::Dual;
+    chunk.vertexCount = 4u;
+    chunk.indexCount = 6u;
+    constexpr float vertices[4][7] = {
+        {-1.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.5F, 0.5F},
+        {1.0F, 1.0F, 0.0F, 0.0F, 0.0F, 0.5F, 0.5F},
+        {1.0F, -1.0F, 0.0F, 0.0F, 0.0F, 0.5F, 0.5F},
+        {-1.0F, -1.0F, 0.0F, 0.0F, 0.0F, 0.5F, 0.5F},
+    };
+    constexpr std::uint16_t indices[6] = {0u, 1u, 2u, 0u, 2u, 3u};
+    chunk.vertices.resize(sizeof(vertices));
+    chunk.indices.resize(sizeof(indices));
+    std::memcpy(chunk.vertices.data(), vertices, sizeof(vertices));
+    std::memcpy(chunk.indices.data(), indices, sizeof(indices));
+    library.chunks.push_back(std::move(chunk));
+
+    WithDevice(
+        [&library](GraphicsDevice& device)
+        {
+            CellRuntime runtime(device, library);
+            ASSERT_TRUE(runtime.Load("L0_HALL"));
+            const auto* resident = runtime.Chunks("L0_HALL");
+            ASSERT_NE(resident, nullptr);
+            ASSERT_EQ(resident->size(), 1u);
+
+            Microsoft::Xna::Framework::Graphics::Texture2D albedo(device, 1, 1);
+            const std::array<Microsoft::Xna::Framework::Color, 1> white = {
+                Microsoft::Xna::Framework::Color::White};
+            albedo.SetData(white.data(), static_cast<int>(white.size()));
+            Microsoft::Xna::Framework::Graphics::Texture2D lightmap(device, 4, 4);
+            std::array<Microsoft::Xna::Framework::Color, 16> texels;
+            texels.fill(Microsoft::Xna::Framework::Color::Red);
+            for (int y = 1; y <= 2; ++y)
+            {
+                for (int x = 1; x <= 2; ++x)
+                {
+                    texels[static_cast<std::size_t>(y * 4 + x)] = Microsoft::Xna::Framework::Color::Blue;
+                }
+            }
+            lightmap.SetData(texels.data(), static_cast<int>(texels.size()));
+
+            DualTextureEffect effect(device);
+            effect.setWorldProperty(Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+            effect.setViewProperty(Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+            effect.setProjectionProperty(Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+            effect.setTextureProperty(&albedo);
+            effect.setTexture2Property(&lightmap);
+            effect.setVertexColorEnabledProperty(false);
+
+            RenderTarget2D target(device,
+                                  64,
+                                  64,
+                                  false,
+                                  SurfaceFormat::Color,
+                                  DepthFormat::None,
+                                  0,
+                                  RenderTargetUsage::PreserveContents);
+            device.SetRenderTarget(&target);
+            device.Clear(Microsoft::Xna::Framework::Color::Black);
+            device.setBlendStateProperty(BlendState::Opaque);
+            device.setDepthStencilStateProperty(DepthStencilState::None);
+            device.setRasterizerStateProperty(RasterizerState::CullNone);
+            device.SetVertexBuffer((*resident)[0].vertices.get());
+            device.setIndicesProperty((*resident)[0].indices.get());
+            auto& passes = effect.getCurrentTechniqueProperty()->getPassesProperty();
+            for (int pass = 0; pass < passes.getCountProperty(); ++pass)
+            {
+                passes[pass]->Apply();
+                device.DrawIndexedPrimitives(PrimitiveType::TriangleList, 0, 0, 4, 0, 2);
+            }
+            device.SetRenderTarget(nullptr);
+            std::array<Microsoft::Xna::Framework::Color, 64 * 64> pixels;
+            target.GetData(pixels.data(), static_cast<int>(pixels.size()));
+            const auto& centre = pixels[32u * 64u + 32u];
+            EXPECT_GE(centre.getBProperty(), 180)
+                << "TEXCOORD1 should sample the blue centre of the lightmap";
+            EXPECT_LE(centre.getRProperty(), 40)
+                << "TEXCOORD0 samples red; a red result means the second UV was lost";
+        });
+}
+
+TEST(CellRuntimeRenderTests, CompiledHallArtificialAtlasRetainsWallTexelsOnTheGpu)
+{
+    // The source atlas has a lit wall texel at (50,64). Check the loaded XNA Texture2D rather than
+    // trusting the .cnb bytes: a content/upload orientation error can leave those bytes correct
+    // while the shader sees black at the wall's authored UV2.
+    WithDeviceAndContent(
+        [](GraphicsDevice&, Microsoft::Xna::Framework::Content::ContentManager& content)
+        {
+            auto atlas = content.Load<Texture2D>("Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_MAIN");
+            ASSERT_EQ(atlas.getWidthProperty(), 128);
+            ASSERT_EQ(atlas.getHeightProperty(), 128);
+            std::array<Microsoft::Xna::Framework::Color, 128 * 128> texels;
+            atlas.GetData(texels.data(), static_cast<int>(texels.size()));
+            const auto& wall = texels[64u * 128u + 50u];
+            EXPECT_GE(wall.getRProperty(), 100)
+                << "the authored lit wall island was lost before reaching the GPU";
+            EXPECT_GE(wall.getGProperty(), 90);
+        });
+}
+
+TEST(CellRuntimeRenderTests, CanonicalHallWallUsesItsArtificialAtlasAtTheReviewPose)
+{
+    // Only the actual packed hall paint receiver is drawn. A bright neutral second texture first
+    // proves that the review pixel really lands on that receiver, then its compiled atlas reveals
+    // whether the authored UV2 samples light there before other game passes can cover the wall.
+    WithDeviceAndContent(
+        [](GraphicsDevice& device, Microsoft::Xna::Framework::Content::ContentManager& content)
+        {
+            const std::string file = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world/chunks.bin";
+            System::IO::FileStream stream(file, System::IO::FileMode::Open, System::IO::FileAccess::Read);
+            auto parsed = ChunkReader::Read(stream, file);
+            ASSERT_TRUE(parsed) << (parsed ? std::string() : parsed.Error().Message());
+            ChunkLibrary library = std::move(*parsed);
+            CellRuntime runtime(device, library);
+            ASSERT_TRUE(runtime.Load("L0_HALL"));
+            std::uint32_t wallIndex = static_cast<std::uint32_t>(library.chunks.size());
+            for (const std::uint32_t index : library.ChunksOf("L0_HALL"))
+            {
+                if (library.materials[library.chunks[index].material] == "MAT_PAINT_WARM_WHITE" &&
+                    library.chunks[index].layout == ChunkLayout::Dual)
+                {
+                    wallIndex = index;
+                    break;
+                }
+            }
+            ASSERT_LT(wallIndex, library.chunks.size());
+            const auto* wall = runtime.Find(wallIndex);
+            ASSERT_NE(wall, nullptr);
+            const auto& chunk = library.chunks[wallIndex];
+
+            Texture2D albedo(device, 1, 1);
+            const std::array<Microsoft::Xna::Framework::Color, 1> white = {
+                Microsoft::Xna::Framework::Color::White};
+            albedo.SetData(white.data(), 1);
+            Texture2D neutral(device, 1, 1);
+            neutral.SetData(white.data(), 1);
+            auto atlas = content.Load<Texture2D>("Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_MAIN");
+
+            cnahouse::rendering::Camera camera;
+            camera.eye = Microsoft::Xna::Framework::Vector3(0.0F, 2.30F, -20.65F);
+            camera.target = Microsoft::Xna::Framework::Vector3(0.0F, 2.30F, -21.65F);
+            camera.fieldOfViewDegrees = 70.0F;
+            camera.nearPlane = 0.05F;
+            camera.farPlane = 100.0F;
+            DualTextureEffect effect(device);
+            effect.setWorldProperty(Microsoft::Xna::Framework::Matrix::getIdentityProperty());
+            effect.setViewProperty(camera.View());
+            effect.setProjectionProperty(camera.Projection(400.0F / 225.0F));
+            effect.setTextureProperty(&albedo);
+            effect.setVertexColorEnabledProperty(false);
+
+            RenderTarget2D target(device,
+                                  400,
+                                  225,
+                                  false,
+                                  SurfaceFormat::Color,
+                                  DepthFormat::Depth24,
+                                  0,
+                                  RenderTargetUsage::PreserveContents);
+            auto sample = [&](Texture2D& second)
+            {
+                effect.setTexture2Property(&second);
+                device.SetRenderTarget(&target);
+                device.Clear(Microsoft::Xna::Framework::Color::Black);
+                device.setBlendStateProperty(BlendState::Opaque);
+                device.setDepthStencilStateProperty(DepthStencilState::None);
+                device.setRasterizerStateProperty(RasterizerState::CullClockwise);
+                device.SetVertexBuffer(wall->vertices.get());
+                device.setIndicesProperty(wall->indices.get());
+                auto& passes = effect.getCurrentTechniqueProperty()->getPassesProperty();
+                for (int pass = 0; pass < passes.getCountProperty(); ++pass)
+                {
+                    passes[pass]->Apply();
+                    device.DrawIndexedPrimitives(PrimitiveType::TriangleList,
+                                                 0,
+                                                 0,
+                                                 static_cast<int>(chunk.vertexCount),
+                                                 0,
+                                                 static_cast<int>(wall->primitiveCount));
+                }
+                device.SetRenderTarget(nullptr);
+                std::vector<Microsoft::Xna::Framework::Color> pixels(400u * 225u);
+                target.GetData(pixels.data(), static_cast<int>(pixels.size()));
+                return pixels[112u * 400u + 88u];
+            };
+            const auto whiteWall = sample(neutral);
+            const auto bakedWall = sample(atlas);
+            EXPECT_GE(whiteWall.getRProperty(), 180)
+                << "the selected review pixel missed the canonical hall paint wall";
+            EXPECT_GE(bakedWall.getRProperty(), 60)
+                << "the compiled artificial atlas/UV2 is black at the visible wall";
+
+            // Reproduce the approved receiver composition rather than the atlas alone. The
+            // ambient draw writes depth; the switched-on group must add over precisely that depth.
+            device.SetRenderTarget(&target);
+            device.Clear(Microsoft::Xna::Framework::Color::Black);
+            device.setRasterizerStateProperty(RasterizerState::CullClockwise);
+            device.SetVertexBuffer(wall->vertices.get());
+            device.setIndicesProperty(wall->indices.get());
+            auto draw = [&]()
+            {
+                auto& passes = effect.getCurrentTechniqueProperty()->getPassesProperty();
+                for (int pass = 0; pass < passes.getCountProperty(); ++pass)
+                {
+                    passes[pass]->Apply();
+                    device.DrawIndexedPrimitives(PrimitiveType::TriangleList,
+                                                 0,
+                                                 0,
+                                                 static_cast<int>(chunk.vertexCount),
+                                                 0,
+                                                 static_cast<int>(wall->primitiveCount));
+                }
+            };
+            device.setBlendStateProperty(BlendState::Opaque);
+            device.setDepthStencilStateProperty(DepthStencilState::Default);
+            effect.setTexture2Property(&neutral);
+            effect.setDiffuseColorProperty(Microsoft::Xna::Framework::Vector3(0.025F, 0.025F, 0.025F));
+            draw();
+            device.setBlendStateProperty(BlendState::Additive);
+            device.setDepthStencilStateProperty(cnahouse::rendering::DepthEqualReadOnly());
+            effect.setTexture2Property(&atlas);
+            effect.setDiffuseColorProperty(Microsoft::Xna::Framework::Vector3(0.25F, 0.20F, 0.15F));
+            draw();
+            device.SetRenderTarget(nullptr);
+            std::vector<Microsoft::Xna::Framework::Color> compositePixels(400u * 225u);
+            target.GetData(compositePixels.data(), static_cast<int>(compositePixels.size()));
+            const auto& composite = compositePixels[112u * 400u + 88u];
+            EXPECT_GE(composite.getRProperty(), 40)
+                << "the depth-equal additive group was lost on the canonical hall wall";
         });
 }

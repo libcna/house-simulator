@@ -47,13 +47,14 @@ namespace cnahouse::rendering
     {
         // Non-lightmapped Basic detail has no per-surface LM_DAY attenuation. The first fixed
         // furniture captures measured the room's full sky term * 5.875 eye exposure plus XNA's
-        // constructor-white key, clipping every pale seat. A conservative diffuse fraction
-        // roughly follows the 0.12–0.21 atlas means of the two furnished daylit rooms, while
-        // the 0.025 floor stays identical to the neutral DualTexture receiver underneath.
+        // constructor-white key, clipping every pale seat. Keep the attenuated daylight terms,
+        // while an *active* authored fixture supplies enough room bounce for close furniture and
+        // trim to read: the foyer chair's fixed pixel rose from RGB(17,14,12) to RGB(53,37,23)
+        // without altering any artificial-lightmapped architectural receiver.
         constexpr float kBasicSkyBounce = 0.18F;
         constexpr float kBasicSunWindowKey = 0.10F;
-        constexpr float kBasicFixtureAmbient = 0.035F;
-        constexpr float kBasicFixtureKey = 0.055F;
+        constexpr float kBasicFixtureAmbient = 0.20F;
+        constexpr float kBasicFixtureKey = 0.22F;
 
         /// FNV-1a over the name. A fixed, stated algorithm rather than `std::hash`, whose value is
         /// allowed to differ between standard libraries -- and a render test compares pixels.

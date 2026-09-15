@@ -13531,6 +13531,50 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             reference poses stale after the final collision-safe placement shifts. Their intended
             silhouette changes were inspected and corrected under HOUSE-01280. `VISUAL-GATE-1`
             remains failed for lighting and empty route spaces.
+- [x] HOUSE-01038 — Curate and place the first real foyer furniture and make the entry/hall light readable
+      dep: HOUSE-00215, HOUSE-00296, HOUSE-00891, HOUSE-01037, HOUSE-01252, HOUSE-01256 · sys: world/content/lighting · plat: ALL · pri: MUST
+      note: (2026-09-15) New next-free phase-13 visual-sprint subtask. Round 14's fixed
+            `entrance-foyer` and `central-hall` remain mostly empty/dark despite production
+            shell materials. The already implemented static batching path can admit a small,
+            legally verified real-furniture kit without claiming the blocked full-density
+            `HOUSE-00986`/`HOUSE-00987` task scope or falsifying their acquisition dependencies.
+            Use canonical prop/light data and existing Tier-S baked groups; do not hard-code a
+            room, replace collision/portal behavior or add a renderer experiment.
+      finding: (2026-09-15) The first screenshot loop paired fresh executable-relative world
+            files with stale working-directory-relative compiled materials/lightmaps. Resolve
+            both normal-shell ContentManager roots from strict-XNA `TitleLocation`, as the
+            canonical world already does. The pinned chair source needs a 3.4 cm POSITION
+            recenter to satisfy the existing 2 cm support-axis gate, not a tolerance exception.
+            A >40-minute outdated navigation bake was interrupted only after identifying this
+            agent's exact child PID; the replacement broadphase encloses each yawed OBB, prunes
+            only impossible improvements and passes exact-answer fixture comparisons. Adaptive
+            external-cell candidates and a conservative swept-shape segment prefilter cut the
+            corrected full nav bake from 29 minutes to 12.5 seconds. The old/new graph retains
+            exactly the same selected foyer/hall/living/family/kitchen/dining node IDs, positions
+            and all 396 route-local edges. Outdoor candidate nodes are resampled (29 changed
+            positions, net +1 edge); the new links use the same exact clearance threshold.
+      verified: (2026-09-15) Two pinned Poly Haven CC0 LOD0 models pass metre-scale/origin,
+            source/material/licence and deterministic import gates. Canonical props fit the
+            measured ≥1.2 m foyer route without front-door swing or portal intrusion; authored
+            default-on foyer/hall practicals and their selected day/artificial atlas bakes are
+            visible in nine fixed normal-game cameras at clear 10:30, noon, overcast 10:30 and
+            clear 22:00. Six affected strict references were individually inspected/updated;
+            all 48 direct software-render tests pass, including culling-equivalence and new
+            hall atlas sampling. The full 1,595-registration offscreen CTest has zero failures
+            (8 disabled, 4 capture-only skipped); world content is 16/16 fresh, the 22 lighting
+            tests pass, and CI gates pass 323 strict-XNA translation units with CNA_CNAEXT=OFF.
+            This narrow checkpoint does not complete the full foyer/porch density of HOUSE-00986
+            or VISUAL-GATE-1: the next kitchen/stair connection remains black and empty.
+      accept: at least a high-quality metred console and upholstered chair with pinned CC0
+            source/provenance and CNA-compatible LOD0 material import are positioned in
+            `L0_FOYER` with ≥ 1.2 m circulation clearance, no front-door swing intrusion
+            and no blocked living/stair/hall portal; the fixed normal-game forward and
+            reverse entrance review cameras actually show believable furniture rather than
+            floating/primitive placeholders; the adjacent hall's authored practical light is visibly useful
+            without clipping windows or destroying switch behavior, and noon/overcast/night
+            route review proves continuity. Existing static chunk, Reach draw, content,
+            provenance, licence, collision, stable-ID, strict-XNA and culled/unculled gates
+            pass; affected golden references are updated only after image inspection.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -17491,6 +17535,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-15 | `HOUSE-01038` | **New task, next free phase-13 id.** Deliver a small foyer furniture/light vertical slice through already completed static batching rather than falsely completing the full-house furnishing prerequisite chain. Adjust the foyer's explicit measured §17.4 ceiling from seven to nine, not the global six-chunk target. | The inspected Round 14 entrance/hall gameplay views remain empty and dim; `HOUSE-00986` requires all large grouped furniture acquisitions and generator tasks that are still legitimately open. Approved CC0 sources and the existing static chunk/Tier-S light paths permit a narrower dependency-valid checkpoint. The first build measured exactly two new close-range source-material groups (carved wood and upholstery); retaining them is necessary for real furniture rather than flattening both into architectural paint. All other per-cell ceilings, Reach and culling rules remain unchanged. |
 | 2026-09-15 | `HOUSE-00928` | **New task, next free phase-12 id.** Correct the entry-facing canonical paint/metal material finish rather than adding a shader or a new unprovenanced asset. | Round 13's fixed game image now has real tiled siding, making the zero-tinted, full-width front balcony parapet and distressed-painted porch columns the largest exterior material defects. The existing approved smooth white paint and brushed-metal sources are available; visual review of the same approach will decide whether a material-row correction alone is enough or a role split is needed. |
 | 2026-09-15 | `HOUSE-00927` | **New task, next free phase-12 id.** Restore physically tiled production-texture sampling after the HUD's strict-XNA SpriteBatch handoff and separate Tier-S outer-skin daylight energy from display-sky RGB while retaining `LM_DAY`, material and residency roles. | Round 12's close front is a uniform `(70,69,66)` façade despite approved warm-wood albedo, 48 distinct deployed UV0s and white UV2 islands. A controlled higher-contrast bitmap remains uniformly sampled, proving a sampler problem; XNA's HUD Begin overload restores wrap without the CNAEXT indexed `SamplerState::operator=` forbidden by BL-16. The highly saturated sky-dome display RGB also darkens a baked outdoor receiver as if its colour were illuminance, while `SunShadingFor` already has the daylight scalar. Both corrections are directly visible and dependency-valid; no existing id or renderer tier is changed. |
 | 2026-09-15 | `HOUSE-00926` | **New task, next free phase-12 id.** Split outside-facing window frame/sash/glass detail from room-owned indoor trim/glass and admit only those distinct roles to the exterior hierarchy. | The fixed front normal-game crop shows open-looking holes despite 64 canonical windows. Source tracing finds window geometry merged with each closed room's interior skirting/glass chunks, so §25.6's correct façade-only exterior BVH cannot show it. Admitting the unsplit chunks would bypass room/portal culling; a production material/chunk role split is the dependency-valid fix. |

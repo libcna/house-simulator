@@ -3599,7 +3599,7 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 143U);
+        EXPECT_EQ(contents.materials.size(), 145U);
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3610,8 +3610,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_FURNITURE_"); }),
-                  8)
-            << "HOUSE-01037's furnished vertical slice loads all eight authored materials";
+                  10)
+            << "HOUSE-01037 and HOUSE-01038 load the eight living/family and two foyer furniture materials";
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),

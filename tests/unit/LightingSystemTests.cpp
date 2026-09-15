@@ -210,35 +210,60 @@ TEST(LightingSystemTests, EveryGroupTheLightsNameGetsAState)
                 world.Lights().size());
 }
 
-TEST(LightingSystemTests, TheHouseStartsWithEveryLightOffBecauseThatIsWhatTheDataSays)
+TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeSwitchedOff)
 {
     if (!ContentIsBuilt())
     {
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
-    // `layout.lights.json` says so in terms: *"a house with every light burning is not it"*. This
-    // asserts the system READ that rather than defaulting to it, by checking against the data.
+    // Most groups start off; the foyer and hall main groups now start on to make the playable
+    // entrance readable. The data, not an all-off or all-on system default, owns each initial state.
     HouseLighting house;
     const world::WorldData& world = house.world;
     LightingSystem& lighting = house.lighting;
     lighting.Update(Frame(1));
 
-    for (const world::Light& light : world.Lights())
+    for (const SwitchGroupState& state : lighting.Groups())
     {
-        const SwitchGroupState* group = lighting.FindGroup(light.group);
-        ASSERT_NE(group, nullptr);
-        if (light.defaultOn)
-        {
-            EXPECT_TRUE(group->on) << "a fixture with defaultOn left its group off";
-        }
+        const bool authoredOn = std::any_of(world.Lights().begin(),
+                                            world.Lights().end(),
+                                            [&state](const world::Light& light)
+                                            { return light.group == state.group && light.defaultOn; });
+        EXPECT_EQ(state.on, authoredOn) << "initial group state disagrees with authored fixtures";
     }
     for (const RoomLightState& cell : lighting.Cells())
     {
-        EXPECT_FLOAT_EQ(cell.artificial, 0.0F);
-        EXPECT_EQ(cell.artificialColor, Microsoft::Xna::Framework::Vector3());
-        // ...and a dark room is still not black: §30's first row.
-        EXPECT_FLOAT_EQ(cell.Level(), kAmbientFloor);
+        const auto groups = lighting.GroupsForCell(cell.cell);
+        const bool hasOnGroup = std::any_of(
+            groups.begin(), groups.end(), [&lighting](const Id id) { return lighting.FindGroup(id)->on; });
+        if (hasOnGroup)
+        {
+            EXPECT_GT(cell.artificial, 0.0F);
+            EXPECT_GT(cell.Level(), kAmbientFloor);
+        }
+        else
+        {
+            EXPECT_FLOAT_EQ(cell.artificial, 0.0F);
+            EXPECT_EQ(cell.artificialColor, Microsoft::Xna::Framework::Vector3());
+            EXPECT_GE(cell.Level(), kAmbientFloor);
+        }
     }
+
+    const Id foyerMain = Id::Of("LG_L0_FOYER_MAIN");
+    const Id hallMain = Id::Of("LG_L0_HALL_MAIN");
+    ASSERT_NE(lighting.FindGroup(foyerMain), nullptr);
+    ASSERT_NE(lighting.FindGroup(hallMain), nullptr);
+    EXPECT_TRUE(lighting.FindGroup(foyerMain)->on);
+    EXPECT_TRUE(lighting.FindGroup(hallMain)->on);
+    EXPECT_TRUE(lighting.SetGroupOn(foyerMain, false));
+    EXPECT_TRUE(lighting.SetGroupOn(hallMain, false));
+    lighting.Update(Frame(2));
+    const RoomLightState* foyer = lighting.FindCell(Id::Of("L0_FOYER"));
+    const RoomLightState* hall = lighting.FindCell(Id::Of("L0_HALL"));
+    ASSERT_NE(foyer, nullptr);
+    ASSERT_NE(hall, nullptr);
+    EXPECT_FLOAT_EQ(foyer->artificial, 0.0F);
+    EXPECT_FLOAT_EQ(hall->artificial, 0.0F);
 }
 
 TEST(LightingSystemTests, TurningOnEveryGroupInARoomLightsItExactlyFully)

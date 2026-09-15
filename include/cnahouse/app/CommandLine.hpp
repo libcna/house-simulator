@@ -110,11 +110,10 @@ namespace cnahouse::app
 
         /// @brief Where `ContentManager` looks. Not a command-line option, deliberately.
         ///
-        /// The shipping convention is "beside the executable", which is what the default means and
-        /// what `RUNTIME_OUTPUT_DIRECTORY` arranges. It is a FIELD rather than an option because the
-        /// only caller that needs to change it is a test: the test targets run from the repository
-        /// root so their fixture paths are stable, and the content they need is in the build tree.
-        /// Exposing that as a user-facing option would invite it to be used as one.
+        /// The shell resolves this default against XNA's `TitleLocation` before constructing the
+        /// game, so shipping loads beside the executable even when its launcher has another working
+        /// directory. Tests can still inject their fixture roots directly through this field.
+        /// Exposing it as a user-facing option would invite it to be used as one.
         std::string contentRoot = "content";
 
         /// @brief Where the Tier-E effect tree lives. A SECOND root, deliberately.

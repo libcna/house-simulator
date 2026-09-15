@@ -6,7 +6,8 @@ fixes six route poses plus two composition poses (added for HOUSE-01037 after th
 living/family cameras proved to face away from their seating groups), Tier S/High, software Mesa,
 clear weather, 10:30, the session seed and capture frame. Strict golden render tests remain
 separate. The original six poses stay unchanged for the route before/after comparison; the two
-extra poses are stable review cameras from this round onward.
+extra poses are stable review cameras from that round onward. `HOUSE-01038` adds a ninth, reverse
+foyer pose and fixed noon, overcast and night review scenarios without moving any prior camera.
 
 ## Round 0 — visual-convergence baseline
 
@@ -557,3 +558,56 @@ recorded in the handoff.
 Remaining: furnish and light foyer/hall/kitchen, finish the front door/roof/porch composition and
 night approach, then calibrate living/family materials and light. `VISUAL-GATE-1` has **not
 passed**.
+
+## Round 15 — first foyer furniture and current room lightmaps
+
+Commit: `HOUSE-01038` checkpoint (`2026-09-15`; exact HEAD in `docs/handoff.md`).
+
+Before: [Round 14's eight fixed normal-game views](captures/house-00928-entry-r1).
+After: [nine fixed clear-day views](captures/house-01038-clear-day-r5), including the new
+[reverse entrance](captures/house-01038-clear-day-r5/foyer-facing-front.png); the same nine
+views were inspected at [noon](captures/house-01038-noon-r5),
+[overcast 10:30](captures/house-01038-overcast-r5) and
+[22:00](captures/house-01038-night-r5).
+
+Ranked visible defects after the corrected content-root captures:
+
+1. The foyer and nearest hall walls/floor now read under warm practicals, but the next unlit
+   kitchen/stair connection is a black threshold at all four review conditions. The continuous
+   route is not yet convincing.
+2. The real upholstered chair and carved console have useful silhouettes and source texture, but
+   are still darker than the surrounding plaster, and the foyer grouping needs more furniture/
+   controlled decor. The front-door panel remains a broad, nearly featureless field.
+3. Daytime front siding is coherent, but porch/roof form and grass/context are sparse; at night
+   the front façade/path are nearly invisible without exterior practicals.
+4. Living/family seating still looks pale and flat, with fluorescent plants and a bare brick
+   chimney; the original living-route camera faces an empty wall, so its composition camera must
+   also be judged.
+
+Fixed: two pinned Poly Haven CC0 2K source-mapped models were imported and placed as canonical
+foyer props with measured ≥1.2 m circulation, no front-door swing/portal conflict and authored
+proxy collision. The chair's pinned off-axis source geometry was recentered by 3.4 cm before
+proxy generation; `origin_check` and metre-scale gates now pass without an exception. The
+foyer/hall practical groups and their selected deterministic artificial
+atlas bakes now contribute at daytime, overcast and night, without making neighboring unlit rooms
+uniformly bright. An important capture/runtime fault was found while investigating the black
+hall: `TitleContainer` used fresh executable-relative `build/content/world`, but the default
+relative `ContentManager` roots followed the review launcher's repository working directory and
+loaded stale root-level texture/model products. The normal shell now resolves both roots from
+XNA `TitleLocation`; rejected stale-root and UV-flip diagnostic captures were moved out of the
+committed review set. The exact hall screenshot changes from a near-black foreground in Round 14
+to visible warm painted walls, ceiling and trim in this round. Stock-XNA Basic detail gets
+calibrated active-fixture bounce: the fixed chair pixel `(1210,710)` changes
+`RGB(17,14,12)→(53,37,23)` while the artificial-mapped architectural pass stays separate.
+Only six visually inspected strict references changed (five nearby production poses and one
+debug pose containing the new console). The current nav bake of the furniture-bearing world
+fell from 29 minutes to 12.5 seconds after conservative shape prefiltering and adaptive sampling
+of large outdoor cells: all selected foyer/hall/living/family/kitchen/dining node IDs,
+positions and 396 within-route edges match the pre-optimization graph exactly. The 29 shifted
+outdoor candidate nodes and their recomputed edges are not claimed byte-identical. Direct software
+render, full world/content and strict-XNA gate results are recorded in the handoff after final
+verification.
+
+Remaining: make the kitchen/stair transition and furniture styling believable, add coherent
+front-door/porch/night exterior light, then finish living/family material and lighting. The
+normal house no longer uses hashed blockout colours, but `VISUAL-GATE-1` still **FAILS**.

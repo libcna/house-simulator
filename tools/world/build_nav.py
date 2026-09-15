@@ -86,6 +86,10 @@ KIND_NAMES = ["room", "doorway", "open", "perch", "bed", "bowl"]
 
 #: At most this many generated open nodes per cell (§60.3's "2-6 additional nodes per room").
 MAX_OPEN_NODES = 6
+# At most six of a cell's candidate sites become nodes. A 400 m distant exterior ring does not
+# become more navigable by testing hundreds of thousands of 0.75 m sites; keep that fine spacing
+# in ordinary rooms and adapt only giant cells to a bounded, distributed sample.
+MAX_CANDIDATES_PER_CELL = 512
 MIN_OPEN_NODES = 2
 
 #: Candidate open nodes are taken from a grid this fine inside each cell box.
@@ -215,6 +219,18 @@ class World:
     def __init__(self, built: dict) -> None:
         shapes: bc.Shapes = built["shapes"]
         self.obbs = [o for o in shapes.obbs if o[4] in self.BLOCKING]
+        # A safe broadphase for the thousand-plus house/exterior boxes. The exact yawed OBB
+        # distance still decides every clearance; an enclosing AABB can only discard a box
+        # whose minimum possible distance cannot improve the current answer. This matters when
+        # every sampled animal segment would otherwise redo sin/cos for all 1,539 shapes.
+        self.obb_bounds = []
+        for centre, half, yaw, _surface, _kind in self.obbs:
+            cx, cy, cz = centre
+            hx, hy, hz = half
+            c, s = abs(math.cos(yaw)), abs(math.sin(yaw))
+            ex, ez = c * hx + s * hz + 1e-6, s * hx + c * hz + 1e-6
+            self.obb_bounds.append((cx - ex, cy - hy - 1e-6, cz - ez,
+                                    cx + ex, cy + hy + 1e-6, cz + ez))
         self.meshes = [m for m in shapes.meshes if m["kind"] in self.BLOCKING]
         self.mesh_bounds = [
             (min(v[0] for v in mesh["vertices"]), min(v[1] for v in mesh["vertices"]),
@@ -225,15 +241,24 @@ class World:
 
     def clearance(self, foot, species: str) -> float:
         """How far the nearest blocking shape is from `species`' capsule axis standing at `foot`."""
+        return self._clearance_for(foot, species, range(len(self.obbs)),
+                                   range(len(self.meshes)))
+
+    def _clearance_for(self, foot, species: str, obb_indices, mesh_indices) -> float:
+        """Exact clearance over an enclosing subset of shapes, for swept-edge broadphase."""
         x, y, z = foot
         low, high = capsule_axis(species)
         y_low, y_high = y + low, y + high
         best = float("inf")
-        for record in self.obbs:
+        for index in obb_indices:
+            record, bounds = self.obbs[index], self.obb_bounds[index]
+            if _axis_aabb_lower_bound(x, z, y_low, y_high, bounds) >= best:
+                continue
             best = min(best, _axis_obb_distance(x, z, y_low, y_high, record))
             if best == 0.0:
                 return 0.0
-        for mesh, bounds in zip(self.meshes, self.mesh_bounds):
+        for index in mesh_indices:
+            mesh, bounds = self.meshes[index], self.mesh_bounds[index]
             if _axis_aabb_lower_bound(x, z, y_low, y_high, bounds) >= best:
                 continue
             vertices = mesh["vertices"]
@@ -245,6 +270,39 @@ class World:
                     if best == 0.0:
                         return 0.0
         return best
+
+    def segment_is_clear(self, start, end, species: str) -> bool:
+        """Exact `segment_clearance > radius`, skipping shapes outside the whole swept capsule.
+
+        The interval box enlarged by the capsule radius encloses every 5 cm axis sample. A shape
+        whose own enclosing AABB misses it cannot possibly fail that species' clearance test;
+        selecting those shapes once avoids checking the remote 565 m ring against the house's
+        1,539 boxes at every one of its 11,293 samples. The original exact-distance API remains
+        available to callers/tests that need a distance rather than the graph's passability bit.
+        """
+        radius = CAPSULE[species][0]
+        low, high = capsule_axis(species)
+        x0, x1 = min(start[0], end[0]) - radius, max(start[0], end[0]) + radius
+        y0, y1 = min(start[1], end[1]) + low - radius, max(start[1], end[1]) + high + radius
+        z0, z1 = min(start[2], end[2]) - radius, max(start[2], end[2]) + radius
+
+        def intersects(bounds) -> bool:
+            bx0, by0, bz0, bx1, by1, bz1 = bounds
+            return not (bx1 < x0 or bx0 > x1 or by1 < y0 or by0 > y1 or
+                        bz1 < z0 or bz0 > z1)
+
+        obb_indices = [i for i, bounds in enumerate(self.obb_bounds) if intersects(bounds)]
+        mesh_indices = [i for i, bounds in enumerate(self.mesh_bounds) if intersects(bounds)]
+        if not obb_indices and not mesh_indices:
+            return True
+        length = math.dist(start, end)
+        steps = max(1, int(math.ceil(length / SAMPLE_SPACING)))
+        for i in range(steps + 1):
+            t = i / steps
+            foot = tuple(start[k] + (end[k] - start[k]) * t for k in range(3))
+            if self._clearance_for(foot, species, obb_indices, mesh_indices) <= radius:
+                return False
+        return True
 
     def segment_clearance(self, start, end, species: str) -> float:
         """The worst clearance along a horizontal walk, sampled at `SAMPLE_SPACING`."""
@@ -377,9 +435,12 @@ def generate_nodes(layout, world: World, stats: dict):
         floor = _cell_floor(cell, levels)
         boxes = layout_io.cell_boxes(cell)
         candidates = []
+        area = sum((x1 - x0) * (z1 - z0) for x0, x1, z0, z1 in boxes)
+        spacing = max(CANDIDATE_SPACING,
+                      math.sqrt(area / MAX_CANDIDATES_PER_CELL))
         for x0, x1, z0, z1 in boxes:
-            nx = max(1, int((x1 - x0) / CANDIDATE_SPACING))
-            nz = max(1, int((z1 - z0) / CANDIDATE_SPACING))
+            nx = max(1, int((x1 - x0) / spacing))
+            nz = max(1, int((z1 - z0) / spacing))
             for i in range(nx):
                 for j in range(nz):
                     candidates.append((x0 + (i + 0.5) * (x1 - x0) / nx, floor,
@@ -396,7 +457,6 @@ def generate_nodes(layout, world: World, stats: dict):
         # The room centre is the passable candidate nearest the cell's own centroid, not the
         # centroid itself: a centroid inside the sofa is not somewhere an animal can stand, and an
         # L-shaped room's centroid can be outside the room entirely.
-        area = sum((x1 - x0) * (z1 - z0) for x0, x1, z0, z1 in boxes)
         cx = sum((x0 + x1) / 2 * (x1 - x0) * (z1 - z0) for x0, x1, z0, z1 in boxes) / area
         cz = sum((z0 + z1) / 2 * (x1 - x0) * (z1 - z0) for x0, x1, z0, z1 in boxes) / area
         centre, centre_mask = min(passable, key=lambda p: math.dist(p[0], (cx, floor, cz)))
@@ -460,8 +520,7 @@ def generate_edges(nodes, layout, world: World, stats: dict):
                     if not shared & (1 << bit):
                         continue
                     tested += 1
-                    if world.segment_clearance(nodes[a]["position"], nodes[b]["position"],
-                                               name) > CAPSULE[name][0]:
+                    if world.segment_is_clear(nodes[a]["position"], nodes[b]["position"], name):
                         mask |= 1 << bit
                 if mask:
                     edges.append({"a": a, "b": b, "portal": None, "species": mask,
@@ -489,8 +548,7 @@ def generate_edges(nodes, layout, world: World, stats: dict):
                 if not (node["species"] & nodes[candidate]["species"] & (1 << bit)):
                     continue
                 stats["clearanceTests"] += 1
-                if world.segment_clearance(node["position"], nodes[candidate]["position"],
-                                           name) > CAPSULE[name][0]:
+                if world.segment_is_clear(node["position"], nodes[candidate]["position"], name):
                     mask |= 1 << bit
             if mask:
                 chosen = (candidate, mask)
@@ -758,6 +816,29 @@ def selftest() -> int:
         require(abs(_axis_obb_distance(0.0, 3.0, -1.0, 1.0, turned) - 1.0) < 1e-6,
                 "a yawed box is measured in its own frame: the long axis is now along z, so an "
                 "axis at z=3 is 1 m away, not 2.5")
+        broadphase_shapes = bc.Shapes()
+        broadphase_shapes.obb((0.0, 0.6, 0.0), (1.0, 0.6, 0.35),
+                              math.pi / 3, None, bc.KIND_PROP)
+        broadphase_shapes.obb((8.0, 0.6, -4.0), (0.8, 0.6, 0.4),
+                              0.0, None, bc.KIND_WALL)
+        broadphase_world = World({"shapes": broadphase_shapes, "cells": [], "worldHash": ""})
+        unsafe_bounds = []
+        changed_answers = []
+        for x in (-5.0, -1.0, 0.0, 2.5, 8.0):
+            for z in (-4.0, -0.3, 0.0, 1.8, 6.0):
+                low, high = capsule_axis("dog")
+                for record, bounds in zip(broadphase_world.obbs, broadphase_world.obb_bounds):
+                    if (_axis_aabb_lower_bound(x, z, low, high, bounds) >
+                            _axis_obb_distance(x, z, low, high, record) + 1e-9):
+                        unsafe_bounds.append((x, z))
+                brute = min(_axis_obb_distance(x, z, low, high, record)
+                            for record in broadphase_world.obbs)
+                if abs(broadphase_world.clearance((x, 0.0, z), "dog") - brute) >= 1e-9:
+                    changed_answers.append((x, z))
+        require(not unsafe_bounds,
+                f"the yawed OBB's AABB is a conservative lower bound ({unsafe_bounds})")
+        require(not changed_answers,
+                f"AABB pruning preserves the exact capsule-to-OBB answer ({changed_answers})")
         tri = ((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0))
         require(abs(_point_triangle_distance((0.25, 2.0, 0.25), *tri) - 2.0) < 1e-9,
                 "a point above a triangle's interior measures its height")
@@ -781,6 +862,15 @@ def selftest() -> int:
                 "...so the dog (r 0.22) is refused the edge")
         require(narrow.segment_clearance(*walk, "cat") > CAPSULE["cat"][0],
                 "...and the cat (r 0.11) is allowed it -- two species, two graphs, one node set")
+        require(not narrow.segment_is_clear(*walk, "dog") and
+                narrow.segment_is_clear(*walk, "cat"),
+                "the swept-shape passability path keeps the exact dog/cat gap decision")
+        distant = only(((0.0, 0.5, 0.0), (1.0, 0.5, 1.0), bc.KIND_PROP))
+        require(distant.segment_is_clear((-100.0, 0.0, 50.0), (100.0, 0.0, 50.0), "dog"),
+                "a 200 m path 50 m from a shape needs no per-sample shape checks")
+        require(not distant.segment_is_clear((-100.0, 0.0, 0.0),
+                                             (100.0, 0.0, 0.0), "dog"),
+                "a long path crossing a near shape still fails the exact capsule test")
 
         # 2b. The query is the animal's whole capsule, not a probe at one height. A 0.25 m bench
         #     stops a dog; a point probe at its chest sails over it and a point probe at its feet

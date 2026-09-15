@@ -383,6 +383,93 @@
       ]
     },
     {
+      "id": "MODEL_FURNITURE_FOYER_ARMCHAIR",
+      "category": "chair",
+      "sourceFile": "assets-src/Models/Furniture/Foyer/upholstered_armchair.glb",
+      "sourceSha256": "2275431b076b5c00aa52cc67895b0eaab40d109fc557e28e69b6445a24fc9317",
+      "contentName": "Models/Furniture/Foyer/upholstered_armchair",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "Arm Chair 01",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "url": "https://polyhaven.com/a/ArmChair_01",
+        "author": "Kirill Sannikov",
+        "retrieved": "2026-09-15",
+        "note": "Pinned Poly Haven 2K glTF; 3.4 cm chair-axis recenter, collidable GLB and sRGB albedo derived by tools/assets/foyer_furniture_prepare.py for HOUSE-01038."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.848431,
+          1.065088,
+          0.76576
+        ],
+        "seatHeightMetres": 0.47,
+        "triangles": {
+          "LOD0": 5626
+        },
+        "collision": "ArmChair_01_COL"
+      },
+      "materialMap": {
+        "Armchair_01": "MAT_FURNITURE_FOYER_ARMCHAIR"
+      },
+      "usedIn": [
+        "L0_FOYER"
+      ]
+    },
+    {
+      "id": "MODEL_FURNITURE_FOYER_CONSOLE",
+      "category": "occasional-table",
+      "sourceFile": "assets-src/Models/Furniture/Foyer/console_table.glb",
+      "sourceSha256": "510eb7ec93484353c8091f0ed86a786cbb0d9679964cd21a104bde7803f2cf6f",
+      "contentName": "Models/Furniture/Foyer/console_table",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "Chinese Console Table",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "url": "https://polyhaven.com/a/chinese_console_table",
+        "author": "Kirill Sannikov",
+        "retrieved": "2026-09-15",
+        "note": "Pinned Poly Haven 2K glTF; collidable GLB and sRGB albedo derived by tools/assets/foyer_furniture_prepare.py for HOUSE-01038."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.719625,
+          0.660742,
+          0.338793
+        ],
+        "triangles": {
+          "LOD0": 13648
+        },
+        "collision": "chinese_console_table_COL"
+      },
+      "materialMap": {
+        "chinese_console_table": "MAT_FURNITURE_FOYER_CONSOLE"
+      },
+      "usedIn": [
+        "L0_FOYER"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_LEATHER_ARMCHAIR_A",
       "category": "chair",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/leather_armchair_a.glb",
@@ -18348,6 +18435,66 @@
       }
     },
     {
+      "id": "TEXTURE_FURNITURE_FOYER_ARMCHAIR_ALBEDO",
+      "category": "furniture-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Foyer/upholstered_armchair_albedo.png",
+      "sourceSha256": "74ff6a302a8679d429532d142aebe7b0c43d62f86e0e8c59abfee559ea6706bc",
+      "texture": {
+        "width": 2048,
+        "height": 2048,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Furniture/Foyer/upholstered_armchair_albedo",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "Arm Chair 01 base colour",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "url": "https://polyhaven.com/a/ArmChair_01",
+        "author": "Kirill Sannikov",
+        "retrieved": "2026-09-15",
+        "note": "Pinned Poly Haven 2K glTF; collidable GLB and sRGB albedo derived by tools/assets/foyer_furniture_prepare.py for HOUSE-01038."
+      }
+    },
+    {
+      "id": "TEXTURE_FURNITURE_FOYER_CONSOLE_ALBEDO",
+      "category": "furniture-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/Foyer/console_table_albedo.png",
+      "sourceSha256": "c77497050fbd90f86d90aa2aaad46ecac1956b3ca6a37bad0f435f8d8b0e7f43",
+      "texture": {
+        "width": 2048,
+        "height": 2048,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Furniture/Foyer/console_table_albedo",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "Chinese Console Table base colour",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "url": "https://polyhaven.com/a/chinese_console_table",
+        "author": "Kirill Sannikov",
+        "retrieved": "2026-09-15",
+        "note": "Pinned Poly Haven 2K glTF; collidable GLB and sRGB albedo derived by tools/assets/foyer_furniture_prepare.py for HOUSE-01038."
+      }
+    },
+    {
       "id": "TEXTURE_FURNITURE_GREY_ROOM_PALETTE",
       "category": "furniture-albedo",
       "sourceFile": "assets-src/Textures/Furniture/LivingRoom/grey_room_palette.png",
@@ -18818,7 +18965,7 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
       }
     },
     {
@@ -18845,7 +18992,7 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
       }
     },
     {
@@ -18872,7 +19019,7 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
       }
     },
     {
@@ -19034,7 +19181,7 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
       }
     },
     {
@@ -19061,14 +19208,14 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
       }
     },
     {
       "id": "TEXTURE_L0_HALL_LM_LG_L0_HALL_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_MAIN.png",
-      "sourceSha256": "54e20461b656e791cc088d742c4c706b069083af25502d73707aed2625d92048",
+      "sourceSha256": "330c224a57890ee29a8c789f4224893343a3a1bf3ec0c4fb804b91c27f45d7f3",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19088,7 +19235,7 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Generated deterministically by tools/blender/bake_house_lightmaps.py with seed 20260907 from the project-owned canonical shell and light rows."
+        "note": "Generated by tools/blender/bake_house_lightmaps.py for HOUSE-01038 with seed 20260907, 256 samples and 100 lm per radiant watt; selected-cell calibration, not a full-house rebake."
       }
     },
     {
