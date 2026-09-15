@@ -1,4 +1,65 @@
-# Visual-sprint handoff — 2026-09-15 (`HOUSE-01038` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01039` checkpoint)
+
+Branch `develop`. This continuous visual session began at
+`238d6aed27c1e8662f0d118013ef08bb801ae018`; the preceding clean checkpoint was
+`dcffd7c6f03d5baa24fef86cefb84f86ed1f0eac` (`HOUSE-01038`). This file is committed
+with the one-task `HOUSE-01039` change; verify exact HEAD/tree before the next checkpoint.
+**VISUAL-GATE-1 still FAILS.** Normal gameplay uses production materials and the
+foyer/hall/kitchen floor now connects under practical light, but the kitchen has no real
+cabinet/appliance/fixture furnishing, dark neighboring openings remain, the exterior night
+façade is almost invisible and living/family light/decor are unfinished.
+
+Before: [Round 15 nine-view clear-day set](visual-review/captures/house-01038-clear-day-r5),
+especially the [dark hall threshold](visual-review/captures/house-01038-clear-day-r5/central-hall.png).
+After: [Round 16 ten-view clear-day set](visual-review/captures/house-01039-entry-r4), including
+the unchanged [hall camera](visual-review/captures/house-01039-entry-r4/central-hall.png) and a
+new fixed [opposite kitchen camera](visual-review/captures/house-01039-entry-r4/kitchen-facing-west.png).
+Ten matching views were captured at [noon](visual-review/captures/house-01039-noon-r4),
+[overcast](visual-review/captures/house-01039-overcast-r4) and
+[22:00](visual-review/captures/house-01039-night-r4); the changed route and exterior frames
+were inspected in each set. The threshold's porcelain floor/warm
+plaster now read at all four conditions without hot spots; the new kitchen view exposes the
+unfurnished room. The [22:00 front](visual-review/captures/house-01039-night-r4/exterior-front.png)
+is still practically black. See [Round 16 review](visual-review/README.md) for ranked defects.
+
+Implementation: canonical `LG_L0_KITCHEN_MAIN` now starts on as one switchable four-light group.
+Its original 3.28 m omnidirectional point placements nearly coincided with the ceiling and
+produced four white discs (selected atlas peak 102.9) while leaving the room dark. A narrow
+downward spot removed those discs but underlit the room. The final 3.02 m downward 140° spots,
+3000 K and 1000 lm each, use only the already approved Tier-S path. Selected L0_KITCHEN
+artificial/daylight receiver products were deterministically rebaked/promoted; the rest of the
+78-room house was not churned. Three affected strict first-person goldens were paired, viewed
+and selectively updated (hall, kitchen, hall corner). A data-driven unit test protects the
+default-on state, kitchen switch and borrowed hall light. The new tenth fixed review pose faces
+west across the actual kitchen; prior east-facing `kitchen` showed mostly the family room.
+
+Verification: full 31-stage repository content dry run is fresh; nav selftest green; 23/23
+lighting unit tests green; **48/48 direct software-render tests green**, including the existing
+culling-equivalence checks; `tools/ci/run_checks.sh` green with 323 strict-XNA translation units,
+`CNA_CNAEXT=OFF` and `git diff --check` verified before commit. The direct integration binary
+gave 130/131 in one process; its synthetic `TransparentPass` counter test passes separately,
+matching CTest's isolated per-case mode. The serial full unit binary was interrupted by the
+tool/session SIGTERM while entering the long `RandomWalkTests` (not a reported assertion);
+targeted lighting/nav checks are green. Do **not** claim a fresh full CMake/CTest pass:
+the current sibling CNA worktree adds a Wayland SDL test unclassified by CNA's own
+non-production audit, so Ninja's CMake regenerate fails before house compilation. BL-17 in
+`cna-house.md` §6 records the exact upstream diagnostic. This repository did not edit CNA.
+For the data-only house change, normal `tools/ci/build_content.py` compiled source products;
+the five exact changed kitchen `.cnb` products and `content/world` were copied into existing
+`build/content`, and the two already-generated Ninja commands for the changed unit TU/link were
+executed in `build/` without new directories, a renderer workaround or audit weakening. Once
+CNA fixes/classifies its own test, re-run normal `cmake --build build` and full CTest.
+
+Next highest visible value: primary **L0_KITCHEN** cabinetry/countertop/island/appliance
+furnishing using metred, suitable, legally approved/provenanced assets; keep the route clear
+and actually inspect the new opposite camera. Avoid repeating lighting coefficient passes while
+the room is bare. Then fix the adjacent dark opening if it remains a dominant image defect,
+exterior front form/night practicals, and living/family lighting/decor. Preserve canonical
+data/portal/collision/culling, strict XNA and deterministic content. The former 19-hour host
+navigation PID queried by the user had exited before this session's own fast bake work;
+current navigation bake is ~12.5 seconds, not a lingering zombie.
+
+## Prior `HOUSE-01038` handoff
 
 Branch `develop`. This continuous visual session began at
 `238d6aed27c1e8662f0d118013ef08bb801ae018`; the preceding clean checkpoint was

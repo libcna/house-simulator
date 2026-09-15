@@ -269,7 +269,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:0323dac7ad306576f5d37f4e0f342556391b2115726e1bbdf4fa55cdbc634419"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:e6806d6c0115de0a4eaaf843288d29f23006f7c7915bb6d266a21cab1ad7f7a5"
     },
     {
       "cell": "L0_LAUNDRY",
@@ -793,8 +794,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_FOYER",
-    "L0_HALL"
+    "L0_KITCHEN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,

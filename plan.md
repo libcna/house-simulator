@@ -13575,6 +13575,41 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             route review proves continuity. Existing static chunk, Reach draw, content,
             provenance, licence, collision, stable-ID, strict-XNA and culled/unculled gates
             pass; affected golden references are updated only after image inspection.
+- [x] HOUSE-01039 — Light the foyer→hall→kitchen threshold as a continuous playable route
+      dep: HOUSE-01038, HOUSE-01256, HOUSE-01265, HOUSE-01266 · sys: world/lighting/content · plat: ALL · pri: MUST
+      note: (2026-09-15) Round 15's fixed `central-hall` camera has a black kitchen aperture
+            at clear day, overcast and 22:00, despite the near foyer/hall being readable.
+            The canonical kitchen already has four authored downlights and Tier-S receivers,
+            all default-off; selected calibrated lightmap promotion can make this exact
+            connected transition visible without pretending to complete the 24-model kitchen
+            acquisition prerequisite of HOUSE-00990. Keep kitchen furniture as the next
+            visible task rather than claiming a bright empty room passes VISUAL-GATE-1.
+      finding: (2026-09-16) Merely enabling the four 3.28 m omnidirectional kitchen points
+            produced white ceiling discs (selected atlas peak 102.9) while the floor remained
+            dark. A downward 82° spot avoided clipping but left the room underlit (peak 0.068).
+            The final 140° / 1000 lm / 3000 K authored spots at 3.02 m produced a much more
+            balanced selected receiver (peak 0.144) and visibly readable porcelain/plaster in
+            ten deterministic review cameras at clear 10:30, noon, overcast 10:30 and 22:00.
+            The old kitchen camera looks east into the family room; a fixed west-facing reverse
+            pose reveals the kitchen itself, still empty. A neighboring dark opening remains.
+      verified: (2026-09-16) Selected L0_KITCHEN artificial/daylight bakes and manifest/bindings
+            are deterministic, the full 31-stage repository content graph is fresh, 23/23
+            lighting unit tests pass including kitchen default-on/switch-off/borrowed-hall light,
+            and 48/48 direct software-render tests pass including culled-vs-unculled equivalence.
+            Exactly three affected first-person references were paired, inspected and updated;
+            all CI gates pass 323 strict-XNA translation units with CNA_CNAEXT=OFF. The existing
+            full CMake/CTest reconfigure is temporarily blocked by unrelated in-progress CNA
+            Wayland SDL audit BL-17, not a kitchen/world test failure: the two exact generated
+            house test build commands, deterministic content deployment and direct test binaries
+            were used without editing CNA. The direct integration binary passed 130/131 cases
+            sequentially; the synthetic transparent counter case passes alone as CTest isolates
+            it. VISUAL-GATE-1 remains failed for unfurnished kitchen, dark neighbor/exterior.
+      accept: normal-game fixed hall and kitchen cameras show the kitchen opening and floor/walls
+            coherently at clear 10:30, noon, overcast 10:30 and 22:00; the kitchen main group
+            remains switchable, baked atlas coverage has no obvious inverted UV/bleed, light
+            does not clip the adjacent lit hall or bright exterior windows, and the change is
+            made in canonical light data and deterministic selected lightmap products. Content,
+            strict XNA, culling-equivalence and deliberately inspected render references pass.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -17536,6 +17571,7 @@ evidence that it fails.
 | Date | Task | Correction | Why |
 |---|---|---|---|
 | 2026-09-15 | `HOUSE-01038` | **New task, next free phase-13 id.** Deliver a small foyer furniture/light vertical slice through already completed static batching rather than falsely completing the full-house furnishing prerequisite chain. Adjust the foyer's explicit measured §17.4 ceiling from seven to nine, not the global six-chunk target. | The inspected Round 14 entrance/hall gameplay views remain empty and dim; `HOUSE-00986` requires all large grouped furniture acquisitions and generator tasks that are still legitimately open. Approved CC0 sources and the existing static chunk/Tier-S light paths permit a narrower dependency-valid checkpoint. The first build measured exactly two new close-range source-material groups (carved wood and upholstery); retaining them is necessary for real furniture rather than flattening both into architectural paint. All other per-cell ceilings, Reach and culling rules remain unchanged. |
+| 2026-09-15 | `HOUSE-01039` | **New task, next free phase-13 id.** Calibrate only the already authored kitchen main practical group and its selected Tier-S receivers as a visible hall→kitchen continuity checkpoint. Do not claim the large kitchen furnishing prerequisite or a new light renderer. | The same fixed Round 15 hall screenshot is warmly readable near the camera but black at the permanently open kitchen portal in all four review conditions. Existing `HOUSE-01265` borrowed-light behavior and deterministic subset lightmap promotion permit a narrow dependency-valid correction. The highest-impact visual defect is the threshold itself; the still-empty kitchen will remain a separate, explicit furnishing defect. |
 | 2026-09-15 | `HOUSE-00928` | **New task, next free phase-12 id.** Correct the entry-facing canonical paint/metal material finish rather than adding a shader or a new unprovenanced asset. | Round 13's fixed game image now has real tiled siding, making the zero-tinted, full-width front balcony parapet and distressed-painted porch columns the largest exterior material defects. The existing approved smooth white paint and brushed-metal sources are available; visual review of the same approach will decide whether a material-row correction alone is enough or a role split is needed. |
 | 2026-09-15 | `HOUSE-00927` | **New task, next free phase-12 id.** Restore physically tiled production-texture sampling after the HUD's strict-XNA SpriteBatch handoff and separate Tier-S outer-skin daylight energy from display-sky RGB while retaining `LM_DAY`, material and residency roles. | Round 12's close front is a uniform `(70,69,66)` façade despite approved warm-wood albedo, 48 distinct deployed UV0s and white UV2 islands. A controlled higher-contrast bitmap remains uniformly sampled, proving a sampler problem; XNA's HUD Begin overload restores wrap without the CNAEXT indexed `SamplerState::operator=` forbidden by BL-16. The highly saturated sky-dome display RGB also darkens a baked outdoor receiver as if its colour were illuminance, while `SunShadingFor` already has the daylight scalar. Both corrections are directly visible and dependency-valid; no existing id or renderer tier is changed. |
 | 2026-09-15 | `HOUSE-00926` | **New task, next free phase-12 id.** Split outside-facing window frame/sash/glass detail from room-owned indoor trim/glass and admit only those distinct roles to the exterior hierarchy. | The fixed front normal-game crop shows open-looking holes despite 64 canonical windows. Source tracing finds window geometry merged with each closed room's interior skirting/glass chunks, so §25.6's correct façade-only exterior BVH cannot show it. Admitting the unsplit chunks would bypass room/portal culling; a production material/chunk role split is the dependency-valid fix. |

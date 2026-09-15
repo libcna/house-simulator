@@ -569,9 +569,9 @@
             "LIGHT_L0_KITCHEN_ISLAND_2",
             "LIGHT_L0_KITCHEN_ISLAND_3"
           ],
-          "mean": 0.013495034301419967,
-          "peak": 0.11717137694358826,
-          "scale": 0.11717137694358826
+          "mean": 0.09217108981059463,
+          "peak": 0.8002802133560181,
+          "scale": 0.8002802133560181
         },
         {
           "group": "LG_L0_KITCHEN_MAIN",
@@ -582,9 +582,9 @@
             "LIGHT_L0_KITCHEN_MAIN_3",
             "LIGHT_L0_KITCHEN_MAIN_4"
           ],
-          "mean": 0.011263079941007172,
-          "peak": 15.104341506958008,
-          "scale": 15.104341506958008
+          "mean": 0.02909701084010712,
+          "peak": 0.14438781142234802,
+          "scale": 0.14438781142234802
         },
         {
           "group": "LG_L0_KITCHEN_SINK",
@@ -592,9 +592,9 @@
           "lights": [
             "LIGHT_L0_KITCHEN_SINK_1"
           ],
-          "mean": 0.00010642194858526053,
-          "peak": 0.003496917663142085,
-          "scale": 0.003496917663142085
+          "mean": 0.000726861911777804,
+          "peak": 0.023883968591690063,
+          "scale": 0.023883968591690063
         },
         {
           "group": "LG_L0_KITCHEN_UNDERCAB",
@@ -605,12 +605,13 @@
             "LIGHT_L0_KITCHEN_UNDERCAB_3",
             "LIGHT_L0_KITCHEN_UNDERCAB_4"
           ],
-          "mean": 0.007004340194804047,
-          "peak": 1.260299563407898,
-          "scale": 1.260299563407898
+          "mean": 0.04776386352092447,
+          "peak": 8.603860855102539,
+          "scale": 8.603860855102539
         }
       ],
-      "shellHash": "sha256:0323dac7ad306576f5d37f4e0f342556391b2115726e1bbdf4fa55cdbc634419"
+      "lumensPerRadiantWatt": 100.0,
+      "shellHash": "sha256:e6806d6c0115de0a4eaaf843288d29f23006f7c7915bb6d266a21cab1ad7f7a5"
     },
     {
       "cell": "L0_LAUNDRY",
@@ -1885,13 +1886,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_FOYER",
-    "L0_HALL"
+    "L0_KITCHEN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1005258,
+  "sourceBytes": 1018089,
   "tool": "bake_house_lightmaps.py"
 }

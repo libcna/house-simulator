@@ -8,6 +8,8 @@ clear weather, 10:30, the session seed and capture frame. Strict golden render t
 separate. The original six poses stay unchanged for the route before/after comparison; the two
 extra poses are stable review cameras from that round onward. `HOUSE-01038` adds a ninth, reverse
 foyer pose and fixed noon, overcast and night review scenarios without moving any prior camera.
+`HOUSE-01039` adds a tenth pose facing back across the kitchen; its original east-facing pose
+mostly showed the neighboring family room and hid the kitchen's empty west side.
 
 ## Round 0 — visual-convergence baseline
 
@@ -611,3 +613,44 @@ verification.
 Remaining: make the kitchen/stair transition and furniture styling believable, add coherent
 front-door/porch/night exterior light, then finish living/family material and lighting. The
 normal house no longer uses hashed blockout colours, but `VISUAL-GATE-1` still **FAILS**.
+
+## Round 16 — kitchen main practicals, with the kitchen itself in view
+
+Commit: `HOUSE-01039` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: [Round 15's nine fixed clear-day views](captures/house-01038-clear-day-r5), including
+the near-black [hall threshold](captures/house-01038-clear-day-r5/central-hall.png).
+After: [ten fixed clear-day views](captures/house-01039-entry-r4), including the newly fixed
+[kitchen-facing-west](captures/house-01039-entry-r4/kitchen-facing-west.png). Matching ten-view
+[noon](captures/house-01039-noon-r4), [overcast](captures/house-01039-overcast-r4) and
+[22:00](captures/house-01039-night-r4) sets were captured; the changed route and exterior
+frames were inspected at all four conditions.
+
+Ranked defects remaining:
+
+1. The kitchen is visibly empty: no cabinets, countertop, island, range, refrigerator or task
+   fixtures. The new opposite camera makes this unmistakable. Real primary furnishing is now
+   the largest value, not another lighting coefficient change.
+2. From the hall, a neighboring dark opening/large partition still forms a black block on the
+   right side of the kitchen view. Its material/ownership and connected-room light need review
+   after furniture establishes the composition. Kitchen walls/ceiling also need stronger
+   daylight/window depth; the current practicals are useful but subdued.
+3. Night exterior/front remains almost invisible; roof, porch and front-door form are still thin.
+4. Living/family seating and leaves remain pale/flat, with a bare brick chimney and little decor.
+
+Fixed: the four authored `LG_L0_KITCHEN_MAIN` downlights now start on as a single switchable
+group, use plausible 3000 K / 1000 lm each, and bake as downward 140° spot receivers from
+3.02 m rather than omnidirectional points just beneath the ceiling. The first diagnostic bake
+gave **four pure-white ceiling discs (peak 102.9)** while leaving the room dark; the narrow
+spot removed those discs but underlit the floor (peak 0.068). The final wider beam yields
+peak **0.144**, a readable porcelain floor and warm plaster at clear day, overcast and night,
+without washing out adjacent windows or the already-lit hall. Only this selected cell's
+artificial/daylight atlas products were promoted; normal gameplay uses the canonical data and
+Tier-S paths. Three directly reviewed strict first-person references (hall, kitchen and hall
+corner) changed intentionally; all 48 direct software-render tests pass with culling equivalence.
+The default-on/switch-off and borrowed hall light are protected by a new lighting unit test.
+The full CMake/CTest configure gate is temporarily upstream-blocked by CNA's in-progress Wayland
+SDL audit (BL-17); direct verification and the exact build workaround are in the handoff.
+
+`VISUAL-GATE-1` still **FAILS**. The route is less black, but a lit, empty kitchen is not a
+realistic furnished house.

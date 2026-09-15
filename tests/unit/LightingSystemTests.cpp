@@ -216,8 +216,8 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     {
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
-    // Most groups start off; the foyer and hall main groups now start on to make the playable
-    // entrance readable. The data, not an all-off or all-on system default, owns each initial state.
+    // Most groups start off; the foyer, hall and kitchen main groups now start on to make the
+    // playable entrance route readable. Data, not an all-off/on system default, owns each state.
     HouseLighting house;
     const world::WorldData& world = house.world;
     LightingSystem& lighting = house.lighting;
@@ -264,6 +264,47 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     ASSERT_NE(hall, nullptr);
     EXPECT_FLOAT_EQ(foyer->artificial, 0.0F);
     EXPECT_FLOAT_EQ(hall->artificial, 0.0F);
+}
+
+TEST(LightingSystemTests, KitchenMainDefaultsOnAndItsSwitchRemovesBorrowedHallLight)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    LightingSystem& lighting = house.lighting;
+    const Id kitchenMain = Id::Of("LG_L0_KITCHEN_MAIN");
+    const SwitchGroupState* mainGroup = lighting.FindGroup(kitchenMain);
+    ASSERT_NE(mainGroup, nullptr);
+    ASSERT_TRUE(mainGroup->on) << "the canonical kitchen main practical should start on";
+
+    // Isolate the permanent kitchen/hall cased opening from the already-on entry fixtures.
+    ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_FOYER_MAIN"), false));
+    ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_HALL_MAIN"), false));
+    cnahouse::environment::CivilTime midnight;
+    midnight.year = 2031;
+    midnight.month = 6;
+    midnight.day = 21;
+    midnight.hour = 0;
+    house.clock.SetStandard(midnight);
+    lighting.Update(Frame(3));
+    const RoomLightState* litKitchen = lighting.FindCell(Id::Of("L0_KITCHEN"));
+    const RoomLightState* litHall = lighting.FindCell(Id::Of("L0_HALL"));
+    ASSERT_NE(litKitchen, nullptr);
+    ASSERT_NE(litHall, nullptr);
+    ASSERT_GT(litKitchen->artificial, 0.0F);
+    const float borrowedFromKitchen = litHall->borrowed;
+    EXPECT_GT(borrowedFromKitchen, 0.0F);
+
+    ASSERT_TRUE(lighting.SetGroupOn(kitchenMain, false));
+    lighting.Update(Frame(4));
+    const RoomLightState* darkKitchen = lighting.FindCell(Id::Of("L0_KITCHEN"));
+    const RoomLightState* darkHall = lighting.FindCell(Id::Of("L0_HALL"));
+    ASSERT_NE(darkKitchen, nullptr);
+    ASSERT_NE(darkHall, nullptr);
+    EXPECT_FLOAT_EQ(darkKitchen->artificial, 0.0F);
+    EXPECT_LT(darkHall->borrowed, borrowedFromKitchen);
 }
 
 TEST(LightingSystemTests, TurningOnEveryGroupInARoomLightsItExactlyFully)
