@@ -13,6 +13,7 @@
 #include <cmath>
 #include <cstdio>
 #include <filesystem>
+#include <limits>
 #include <span>
 #include <string>
 #include <vector>
@@ -40,6 +41,7 @@ namespace
     using cnahouse::lighting::kAmbientFloor;
     using cnahouse::lighting::kDaylightKeyThreshold;
     using cnahouse::lighting::LightingSystem;
+    using cnahouse::lighting::OutdoorSkyIrradianceFor;
     using cnahouse::lighting::PlanckianRgb;
     using cnahouse::lighting::RoomLightState;
     using cnahouse::lighting::ShadingGrid;
@@ -101,6 +103,54 @@ namespace
     }
 
 } // namespace
+
+TEST(LightingSystemTests, OutdoorBakedSkinUsesDaylightEnergyWithoutDisplaySkySaturation)
+{
+    const Microsoft::Xna::Framework::Vector3 display(0.45F, 0.55F, 0.80F);
+    const Microsoft::Xna::Framework::Vector3 solar(1.0F, 0.95F, 0.90F);
+    const auto clear = OutdoorSkyIrradianceFor(display, solar, 1.0F, 1.0F);
+    EXPECT_NEAR(clear.X, 0.890625F, 1.0e-6F);
+    EXPECT_NEAR(clear.Y, 0.884375F, 1.0e-6F);
+    EXPECT_NEAR(clear.Z, 0.925F, 1.0e-6F);
+    EXPECT_GT(clear.X / clear.Z, display.X / display.Z);
+
+    const auto cloudy = OutdoorSkyIrradianceFor(display, solar, 0.65F, 1.0F);
+    EXPECT_NEAR(cloudy.Z, 0.60125F, 1.0e-6F);
+    EXPECT_LT(cloudy.X, clear.X);
+    EXPECT_LT(cloudy.Y, clear.Y);
+}
+
+TEST(LightingSystemTests, OutdoorSkyTwilightFallsBackToTheDimNightDisplayGradient)
+{
+    const Microsoft::Xna::Framework::Vector3 display(0.01F, 0.02F, 0.04F);
+    const Microsoft::Xna::Framework::Vector3 solar(1.0F, 0.5F, 0.3F);
+    const auto night = OutdoorSkyIrradianceFor(display, solar, 0.0F, 0.0F);
+    EXPECT_FLOAT_EQ(night.X, display.X);
+    EXPECT_FLOAT_EQ(night.Y, display.Y);
+    EXPECT_FLOAT_EQ(night.Z, display.Z);
+    const auto dusk = OutdoorSkyIrradianceFor(display, solar, 0.05F, 0.50F);
+    EXPECT_GT(dusk.Z, night.Z);
+    EXPECT_LT(dusk.Z, 0.06F);
+    const auto dark = OutdoorSkyIrradianceFor(display, solar, 0.0F, 1.0F);
+    EXPECT_FLOAT_EQ(dark.Z, 0.0F);
+}
+
+TEST(LightingSystemTests, OutdoorSkyIrradianceRejectsNonFiniteInputsWithoutPoisoningAFrame)
+{
+    const Microsoft::Xna::Framework::Vector3 display(0.40F, 0.50F, 0.70F);
+    const Microsoft::Xna::Framework::Vector3 solar(1.0F, 0.95F, 0.90F);
+    const auto badLight =
+        OutdoorSkyIrradianceFor(display, solar, std::numeric_limits<float>::quiet_NaN(), 1.0F);
+    EXPECT_FLOAT_EQ(badLight.X, 0.0F);
+    const auto badColour = OutdoorSkyIrradianceFor(
+        Microsoft::Xna::Framework::Vector3(std::numeric_limits<float>::infinity(), 0.50F, 0.70F),
+        solar,
+        0.8F,
+        1.0F);
+    EXPECT_FLOAT_EQ(badColour.X, 0.0F);
+    EXPECT_FLOAT_EQ(badColour.Y, 0.0F);
+    EXPECT_FLOAT_EQ(badColour.Z, 0.0F);
+}
 
 TEST(LightingSystemTests, EveryGroupTheLightsNameGetsAState)
 {
@@ -535,6 +585,10 @@ TEST(LightingSystemTests, TheFramePublishesTheSunAndTheDaylightModelInWorldCellO
     const auto expectedSun = cnahouse::environment::SunPositionFor(house.clock);
     EXPECT_NEAR(lighting.Sun().altitudeDeg, expectedSun.altitudeDeg, 1e-10);
     EXPECT_NEAR(lighting.Sun().azimuthDeg, expectedSun.azimuthDeg, 1e-10);
+    const auto& sky = lighting.SkyAmbientColor();
+    const auto& outdoorEnergy = lighting.OutdoorSkyIrradianceColor();
+    EXPECT_GT(std::max({outdoorEnergy.X, outdoorEnergy.Y, outdoorEnergy.Z}), std::max({sky.X, sky.Y, sky.Z}))
+        << "a clear June noon outer skin must not inherit the dim display-gradient scalar";
 
     const cnahouse::lighting::DaylightModel oracle(house.world, house.shading);
     std::vector<float> expected(house.world.Cells().size());

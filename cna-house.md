@@ -488,7 +488,7 @@ eventually be modified — `cna-house` never modifies CNA.
 | **BL-13** | Android | CNA selects the **2D-only `SDL_RENDERER`** on Android (`CMAKE_SYSTEM_NAME` is `Android`, not `Linux`), and the Android cross-compile currently fails in two `sharp-runtime` NDK-portability bugs before reaching any graphics code (upstream Task 920). No CNA graphics has ever run on Android. | `docs/android-graphics-limitations.md` | **H** *(Android phase)* | Android phase 49 begins with an upstream gate: `OPENGLES3` must be selectable and buildable for `arm64-v8a`. `cna-house` does not fix CNA. | **Yes — required** | Not for Android |
 | **BL-14** | Web | `WEBGL2` has no implicit WebGL 1 fallback; the Web build needs Asyncify + JS exceptions; SharedArrayBuffer needs COOP/COEP headers for the threaded variant | `docs/web-emscripten-graphics-limitations.md` | M | Single-threaded WebGL 2 build in phase 48; threads only if measurement demands them | No | Yes (later) |
 | **BL-15** | Graphics / effects | `SpriteBatch::Begin(effect)` on a renderer without `CompiledEffects` throws | `docs/fx-compiled-effects.md` §3 | L | Tier E is a build configuration, never a runtime query (§7.3): `SpriteBatch::Begin(effect)` is compiled only into a Tier-E build and is reached only after that build's effect set has loaded successfully. Every Tier-E path has a named Tier-S fallback | No | Yes |
-| **BL-16** | Graphics / samplers | CNA's public XNA-shaped `SamplerStateCollection::operator[]` returns a `SamplerState&`, but assigning an XNA singleton to it selects `SamplerState::operator=`, which CNA marks `CNAEXT`; there is no separate strict-XNA setter. Measured after CNA merge `fcd43e995` by `HOUSE-01620`, 2026-09-13. | `SamplerStateCollection.hpp`; strict-XNA gate | L | Runtime does not assign sampler slots. CNA initializes every slot to XNA's default `LinearWrap`; repeating cloud UVs require wrap, while the procedural sun and moon textures carry transparent/same-colour borders so wrap and clamp produce the same visible edge. Real-device sky, sun and moon tests protect that assumption. | **Yes — an XNA-shaped indexed-property setter or equivalent is required** | Yes |
+| **BL-16** | Graphics / samplers | CNA's public XNA-shaped `SamplerStateCollection::operator[]` returns a `SamplerState&`, but assigning an XNA singleton to it selects `SamplerState::operator=`, which CNA marks `CNAEXT`; there is no separate strict-XNA setter. Measured after CNA merge `fcd43e995` by `HOUSE-01620`, 2026-09-13. | `SamplerStateCollection.hpp`; strict-XNA gate | L | Runtime does not assign sampler slots. CNA initializes every slot to XNA's default `LinearWrap`. `HOUSE-00927` found that the HUD's default `SpriteBatch::Begin()` instead left `LinearClamp` in slot 0 after `End()`, flattening repeat-UV house materials in the next frame. The existing XNA-shaped `SpriteBatch::Begin(..., &SamplerState::LinearWrap, ...)` keeps the HUD premultiplied and leaves repeat sampling correct without calling the forbidden assignment. Fonts/UI and real-device material/golden tests protect the boundary. Sky sun/moon texture borders remain wrap/clamp-equivalent. | **Yes — an XNA-shaped indexed-property setter or equivalent is still required for arbitrary per-pass sampler control** | Yes |
 
 **Manufactured blockers are not welcome.** Things that are merely *work* — writing a portal
 system, baking lightmaps, authoring 640 interactables — are not blockers and do not appear here.
@@ -2607,7 +2607,7 @@ says what it is; §18.3 says whether it is lit by a bake:
 | Shell surface | Lit by | Tier S | Tier E |
 |---|---|---|---|
 | Floors, ceilings, wall surfaces — the **interior lightmap receivers** | baked lightmap + dynamic room term | `DualTextureEffect`, lightmap in texture 2 | `RoomLit/LitLightmap` |
-| House outer skin — room-resident but outdoor-lit | its baked uniform-sky shape × the live unattenuated outdoor sky; never the adjacent room's lamps or window attenuation | `DualTextureEffect`, `LM_DAY` in texture 2 | `RoomLit/LitLightmap` |
+| House outer skin — room-resident but outdoor-lit | its baked uniform-sky shape × live, unattenuated outdoor hemisphere irradiance; never the adjacent room's lamps or window attenuation | `DualTextureEffect`, `LM_DAY` in texture 2 | `RoomLit/LitLightmap` |
 | Skirtings, cornices, architraves, thresholds, frames, sashes, nosings, handrails, balusters, rafters, gutters, downspouts — **architectural detail** | the room's or the exterior's dynamic term only | `BasicEffect` (the stock path its class already names above) | `RoomLit`, no lightmap sample |
 | Glass | its own transparent/reflection path | `BasicEffect` + `EnvironmentMapEffect` as §22.2's `glass` row says | `RoomLit/Glass` |
 | Door and window leaves, cabinet fronts, anything an interactable moves | dynamic only | as the class's row | as the class's row |
@@ -2620,7 +2620,12 @@ Tier E, which improves the result and is not required for correctness.
 The outer skin is the deliberate exception to residency implying lighting ownership
 (`HOUSE-00922`). Its siding and brick islands already live in the adjacent cell's `LM_DAY` atlas,
 where the uniform world sky bakes eave, reveal and self-occlusion into them. At runtime that atlas
-is the opaque base draw, tinted by `LightingSystem`'s global sky ambient. In Tier S the outdoor
+is the opaque base draw, tinted by `LightingSystem`'s global outdoor hemisphere irradiance. This
+is distinct from the intentionally saturated sky-display gradient: `HOUSE-00927` mixes the
+existing solar colour anchors with normalized sky chroma and scales them by `SunShadingFor`'s
+cloud-aware diffuse energy, with dim display-gradient fallback through twilight and night. The
+approved albedo's physical repeat UV0 then remains visible instead of becoming a dark blue-grey
+slab. In Tier S the outdoor
 receiver remains scene-referred against the unexposed sky even when an indoor camera has adapted
 to a dark room (`HOUSE-00925`); the room's receiver still uses that camera's effect exposure. The
 room's artificial atlases and its window-transmission-scaled daylight pass are not submitted for
@@ -2746,10 +2751,13 @@ reason Tier E exists.
 Draw order within the opaque pass: **effect → material → chunk**, so `EffectPass::Apply()` and
 texture binds are minimised. Render state is set by *pass group*, not per draw. A per-frame
 `StateTracker` skips redundant `BlendState`/`DepthStencilState`/`RasterizerState` assignments and is
-asserted correct by a real-device test that replays a recorded command list. Sampler slots retain
-CNA's XNA-default `LinearWrap`: the current CNA public API cannot express an indexed sampler
-assignment without selecting a `CNAEXT` copy assignment (BL-16), and these passes' textures are
-authored so wrap is correct or edge-equivalent to clamp.
+asserted correct by a real-device test that replays a recorded command list. The repeat-UV world
+needs `LinearWrap` in sampler 0. CNA initializes it that way, but its HUD `SpriteBatch::End()` leaves
+the batch sampler bound for the next frame; `HOUSE-00927` therefore explicitly selects XNA
+`LinearWrap` in the HUD's ordinary Begin overload. An indexed assignment would select a forbidden
+`CNAEXT` copy assignment (BL-16). Lightmap UV1 islands remain inside the atlas and carry baked
+gutters, so slot 1's default wrap never intentionally tiles a lightmap; no runtime bypass of the
+strict-XNA API is used.
 
 ### 23.6 Transparency
 

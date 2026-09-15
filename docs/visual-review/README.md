@@ -449,3 +449,55 @@ strict-XNA translation units.
 
 Remaining: make the approved façade material respond to useful exterior daylight/form, then
 furnish and light the empty connected L0 route. `VISUAL-GATE-1` has **not passed**.
+
+## Round 13 — repeat-UV materials become visible in the playable house
+
+Commit: `HOUSE-00927` checkpoint (`2026-09-15`; exact HEAD in `docs/handoff.md`).
+
+Before: [Round 12's eight fixed gameplay views](captures/house-00926-windows-r1).
+After: [the same eight views](captures/house-00927-siding-r1), plus an identical
+[close approach before](captures/house-00927-siding-r1/exterior-approach-close-before.png) /
+[after](captures/house-00927-siding-r1/exterior-approach-close-after.png) pair.
+
+Ranked visible defects after inspecting all eight new views:
+
+1. The front now has warm, physically tiled wood siding instead of a dark grey slab, but its
+   solid front-balcony parapet is a heavy black strip, the porch/front door are skeletal and the
+   distressed paint pattern on the columns is noisy. The gate-to-door approach still lacks
+   believable detail/form.
+2. Foyer, central hall and kitchen remain nearly empty and markedly underlit. Walking inside
+   would immediately trade the improved façade for rooms with no primary furniture.
+3. The living chimney now actually reads as brick, but its undecorated vertical stack dominates
+   a dim room; seating is pale/flat and plant leaves are fluorescent. The family-room furniture
+   has the same flat lighting and conspicuous yellow-green plant.
+4. The roof, grass and neighboring context still have simplified shapes; nighttime window rails
+   remain disproportionately bright against the dark outside walls.
+
+Fixed: the deployed `L0_FOYER` façade retains 48 distinct UV0s, but CNA's default HUD
+`SpriteBatch::Begin()` left `LinearClamp` in sampler 0 after `End()`. At frame 3 this clamped the
+physically repeated source to one texel across the siding and the living brick. The HUD's
+existing strict-XNA Begin overload now explicitly selects `LinearWrap` while retaining XNA's
+premultiplied blend; an attempted direct indexed assignment was rejected by the strict gate as
+the known BL-16 `CNAEXT` overload and removed. Outdoor `LM_DAY` receivers now use the existing
+sun/cloud diffuse energy and a less saturated, calibrated hemisphere tint instead of multiplying
+the highly blue sky-display LUT into the material. The same close façade crop changes from
+**1 to 111 colours**, a wall sample from `(70,69,66)` to `(139,105,71)`, and the identical
+living-chimney crop from **1 to 12,001 colours**. The approved wood and brick bitmaps, canonical
+geometry/UVs, UV2/lightmap ownership, materials and licences were not replaced. Close-front
+clear, overcast, 17:30 and 22:00 software-Mesa captures were inspected: overcast is dimmer,
+late-day siding stays readable and night walls darken without daytime clipping. The new
+three-frame playable-facade render test asserts source variation and a useful daytime wall
+level so HUD sampler leakage cannot silently turn the texture back into a slab.
+The inspected strict daylight façade pairs in sun/season 01 and 02 were selectively replaced;
+sun/season 03 and 04, the twelve first-person geometry references, eight property references
+and twenty explicit blockout references were not. The dedicated 07:00 HUD reference was also
+inspected old/new and refreshed: it had retained a pre-`HOUSE-00923` empty-property silhouette,
+whereas the current normal game includes the previously approved fence/ground as well as this
+material/daylight change. Title and font images remain intact. The affected actual-software
+render suite is green across 20 tests, including all 18 culled/unculled comparisons; the CI
+script passes 323 strict-XNA translation units and licence/content gates.
+The relinked full offscreen CTest has 1,591 registrations, all 1,579 actual tests passing,
+12 disabled/skipped and zero failures.
+
+Remaining: form/material improvement at the porch/roof and actual furnishing plus lighting of
+the empty connected L0 route. `VISUAL-GATE-1` has **not passed**.

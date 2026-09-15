@@ -1,4 +1,52 @@
-# Visual-sprint handoff — 2026-09-15 (`HOUSE-00926` checkpoint)
+# Visual-sprint handoff — 2026-09-15 (`HOUSE-00927` checkpoint)
+
+Branch `develop`; verify current HEAD and worktree before continuing. This long visual session
+started at `238d6aed27c1e8662f0d118013ef08bb801ae018` and now has one-task commits for
+`HOUSE-01037`, `HOUSE-01280`, `HOUSE-00923`, `HOUSE-00924`, `HOUSE-00925`, `HOUSE-00926`, then
+`HOUSE-00927`. Normal playable rendering uses canonical production materials; the hash-coloured
+blockout is explicit debug mode only. **`VISUAL-GATE-1` still FAILS** despite a marked improvement.
+
+Before: [Round 12 eight fixed views](visual-review/captures/house-00926-windows-r1).
+After: [Round 13 same eight views](visual-review/captures/house-00927-siding-r1), all inspected
+under clear 10:30 Tier S/High software Mesa. An exact normal-game
+[close approach before](visual-review/captures/house-00927-siding-r1/exterior-approach-close-before.png)
+and [after](visual-review/captures/house-00927-siding-r1/exterior-approach-close-after.png) pair
+shows the approved wood siding changing from a flat grey slab to tiled, warm boards. Its measured
+40×70 crop changes **1→111 colours** and a wall pixel `(70,69,66)→(139,105,71)`. The living
+chimney's identical brick crop changes **1→12,001 colours** without replacing its licensed source
+asset. Floors, brick, stone and trim now expose real source detail in the normal house. Foyer,
+hall and kitchen remain nearly empty/dark; the front porch/balcony rail remains black/heavy;
+roof/detail and living/family lighting/plant materials still need visible work. Clear, overcast,
+17:30 and 22:00 close-front captures were visually checked; overcast dims the exterior and night
+walls go dark, while the authored window rails are still disproportionately bright.
+
+Root cause: deployed canonical façade geometry had 48 valid distinct repeat UV0s; CNA's default
+HUD `SpriteBatch::Begin()` left `LinearClamp` in sampler 0 after End, clamping that whole source
+to one edge texel on later frames. A direct slot assignment is forbidden by BL-16's strict-XNA
+overload gate and was removed; the existing XNA-shaped HUD Begin overload now selects
+`LinearWrap` while retaining premultiplied blend. The outdoor stock-`DualTextureEffect` `LM_DAY`
+receiver also uses `SunShadingFor`'s weather/daylight diffuse intensity and a less saturated
+hemisphere tint instead of the blue sky-display RGB as energy. Interior lighting, canonical world,
+portal visibility/collision, UV1/lightmap ownership, stable IDs/provenance and
+`CNA_CNAEXT=OFF` remain intact. A new 3-frame first-person render test protects the previously
+invisible sampler leak. The direct affected software-render suite passes 20 tests, including all
+18 culled/unculled pairs. Only three inspected stale/affected strict references were changed:
+sun/season 01 and 02 for the actual siding/bake and the HUD dawn exterior frame that had remained
+at the pre-`HOUSE-00923` property layout; title/font/interior/property/debug references remain
+untouched. `tools/ci/run_checks.sh` passes all gates and 323 strict-XNA translation units.
+The relinked full offscreen CTest passes all 1,579 actual tests among 1,591 registrations
+(12 disabled/skipped; zero failures). The sister CNA repository was not edited by this task;
+its concurrent source-glob change only caused an authorized reconfigure of this repo's existing
+`build/` directory. `git diff --check` is clean.
+
+Next highest visible value: resolve the porch/front balcony's near-solid black band. The canonical
+`MAT_METAL_BALCONY` row has `tint:[0,0,0]`, suppressing its approved brushed-metal source even
+under real light; inspect its exact geometry and capture after a material-data correction rather
+than rewriting the renderer. Then place licensed primary furnishings/fixtures and useful day/night
+light in foyer, hall and kitchen so the gate-to-room route stops falling back into empty darkness.
+See [Round 13 visual-review notes](visual-review/README.md) and `plan.md` for the durable ledger.
+
+## Prior `HOUSE-00926` handoff
 
 Branch `develop`; verify exact HEAD and worktree before proceeding. This sprint session started at
 `238d6aed27c1e8662f0d118013ef08bb801ae018` and committed `HOUSE-01037`, `HOUSE-01280`,

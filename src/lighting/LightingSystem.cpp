@@ -19,6 +19,43 @@
 namespace cnahouse::lighting
 {
 
+    Microsoft::Xna::Framework::Vector3
+    OutdoorSkyIrradianceFor(const Microsoft::Xna::Framework::Vector3& displaySky,
+                            const Microsoft::Xna::Framework::Vector3& solarTint,
+                            float skyDiffuseIntensity,
+                            float twilightAmbientFactor) noexcept
+    {
+        using Microsoft::Xna::Framework::Vector3;
+        if (!std::isfinite(displaySky.X) || !std::isfinite(displaySky.Y) || !std::isfinite(displaySky.Z) ||
+            !std::isfinite(solarTint.X) || !std::isfinite(solarTint.Y) || !std::isfinite(solarTint.Z))
+        {
+            return Vector3(0.0F, 0.0F, 0.0F);
+        }
+        const float peak = std::max({0.0F, displaySky.X, displaySky.Y, displaySky.Z});
+        const float daylight =
+            std::isfinite(skyDiffuseIntensity) ? std::clamp(skyDiffuseIntensity, 0.0F, 1.0F) : 0.0F;
+        const float twilight =
+            std::isfinite(twilightAmbientFactor) ? std::clamp(twilightAmbientFactor, 0.0F, 1.0F) : 0.0F;
+        const Vector3 skyTint = peak > 1.0e-6F ? Vector3(std::max(0.0F, displaySky.X) / peak,
+                                                         std::max(0.0F, displaySky.Y) / peak,
+                                                         std::max(0.0F, displaySky.Z) / peak)
+                                               : Vector3(0.0F, 0.0F, 0.0F);
+        // Sky appearance is deliberately saturated blue; surface irradiance averages light from
+        // the whole hemisphere and is markedly less blue. Mix the existing solar colour anchors
+        // with normalized sky chroma, then let the existing cloud/daylight scalar set brightness.
+        constexpr float kSkyChromaticShare = 0.25F;
+        const Vector3 dayTint((1.0F - kSkyChromaticShare) * std::clamp(solarTint.X, 0.0F, 1.0F) +
+                                  kSkyChromaticShare * skyTint.X,
+                              (1.0F - kSkyChromaticShare) * std::clamp(solarTint.Y, 0.0F, 1.0F) +
+                                  kSkyChromaticShare * skyTint.Y,
+                              (1.0F - kSkyChromaticShare) * std::clamp(solarTint.Z, 0.0F, 1.0F) +
+                                  kSkyChromaticShare * skyTint.Z);
+        const float nightScale = 1.0F - twilight;
+        return Vector3(dayTint.X * daylight + std::max(0.0F, displaySky.X) * nightScale,
+                       dayTint.Y * daylight + std::max(0.0F, displaySky.Y) * nightScale,
+                       dayTint.Z * daylight + std::max(0.0F, displaySky.Z) * nightScale);
+    }
+
     LightingSystem::LightingSystem(const world::WorldData& world,
                                    const ShadingGrid& shading,
                                    const environment::SimClock& clock,
@@ -158,6 +195,11 @@ namespace cnahouse::lighting
                                                      shading.color.Y * shading.skyDiffuseIntensity,
                                                      shading.color.Z * shading.skyDiffuseIntensity);
         skyAmbientColor_ = skyColour;
+        outdoorSkyIrradianceColor_ =
+            OutdoorSkyIrradianceFor(skyColour,
+                                    shading.color,
+                                    shading.skyDiffuseIntensity,
+                                    static_cast<float>(environment::TwilightAmbientFactor(sun_.altitudeDeg)));
 
         daylight_.Evaluate(sun_.altitudeDeg, sun_.azimuthDeg, cloudCover_, daylightLevels_);
         for (std::size_t index = 0; index < cells_.size(); ++index)

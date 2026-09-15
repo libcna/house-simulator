@@ -13371,6 +13371,46 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             `tools/ci/run_checks.sh` passes with 323 strict-XNA units; offscreen isolated full
             1,587-registration CTest passes all 1,575 runnable tests. The façade, foyer, hall and
             kitchen still look unfinished: `VISUAL-GATE-1` remains FAILED, not silently claimed.
+- [x] HOUSE-00927 — Restore tiled production-material sampling and calibrate outdoor baked-skin daylight
+      dep: HOUSE-00903, HOUSE-00907, HOUSE-00922, HOUSE-00925, HOUSE-00926, HOUSE-01257 · sys: lighting/rendering/materials · plat: ALL · pri: MUST
+      note: (2026-09-15) The fixed Round 12 front and a closer production view both show a
+            uniform dark-grey slab. An identical close debug view proves the façade geometry
+            exists. The `L0_FOYER:exterior` primitive has `MAT_SIDING_WARM_WHITE`, valid UV0,
+            and a white `LM_DAY` UV2 island, while the approved source albedo is warm wood.
+            Screen samples `(70,69,66)` initially seemed to implicate the blue display-sky RGB.
+            Subsequent controlled tests were decisive: a contrasting approved brick bitmap still
+            made the facade crop exactly one colour, while deployed `chunks.bin` retained 48
+            distinct UV0 pairs spanning -2.125…2.125. CNA's HUD `SpriteBatch::End` leaves its
+            default `LinearClamp` in sampler slot 0 for the next frame, flattening all physically
+            tiled house textures. A direct indexed assignment restores 111 facade crop colours
+            but fails BL-16's strict-XNA gate (`SamplerState::operator=` is CNAEXT). Use the
+            existing XNA-shaped HUD Begin overload with `LinearWrap` instead, preserving
+            premultiplied blending, and distinguish display sky from the daylight energy and
+            less saturated irradiance already modelled by `SunShadingFor`. Preserve the stock
+            `DualTextureEffect`/LM_DAY path; do not recolour debug walls or alter indoor exposure.
+      accept: in identical normal-gameplay close and road-front views, siding is appreciably
+            brighter and its approved source/physical UV variation is visible, without clipping
+            frames, snow, sky or glass; interior/room lighting remains unchanged; day, cloudy,
+            dusk and night remain continuous and plausible; material/chunk/lightmap ownership,
+            strict XNA-only, culling equivalence and content licences remain valid; before/after
+            captures are actually inspected, strict affected goldens selectively updated, and
+            XNA/render/full gates pass; `VISUAL-GATE-1` is still judged independently
+      verified: (2026-09-15) Eight fixed Round 12→13 gameplay views and an identical closer
+            before/after approach were visually inspected. The close facade crop gains 111
+            colours versus 1 and a midday sample rises `(70,69,66)→(139,105,71)`; the
+            living-chimney brick crop gains 12,001 versus 1. Clear, overcast, 17:30 and
+            22:00 close front images show daylight/weather/night behavior without material,
+            sky or window clipping. `OutdoorSkyIrradianceFor` has pure daytime/cloud/twilight/
+            invalid-input tests; a new frame-3 actual-game render test catches the old
+            HUD→sampler leak. Direct affected software-render comparison passes 20 tests,
+            including all 18 culled/unculled pairs. Only three inspected references changed:
+            sun-season 01/02 and the dawn HUD/property silhouette stale since HOUSE-00923;
+            diagnostic blockout, interior/property, title/font and other seasons are not
+            regenerated. Full offscreen CTest: 1,591 registrations, 1,579 actual passes,
+            12 disabled/skipped, zero failures. `tools/ci/run_checks.sh` passes all gates,
+            323 strict-XNA translation units and source/provenance/content checks. The
+            authored/licensed textures and world/lightmap geometry are unchanged.
+            `VISUAL-GATE-1` remains FAILED: porch/front roof and interior route remain unfinished.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -17411,6 +17451,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-15 | `HOUSE-00927` | **New task, next free phase-12 id.** Restore physically tiled production-texture sampling after the HUD's strict-XNA SpriteBatch handoff and separate Tier-S outer-skin daylight energy from display-sky RGB while retaining `LM_DAY`, material and residency roles. | Round 12's close front is a uniform `(70,69,66)` façade despite approved warm-wood albedo, 48 distinct deployed UV0s and white UV2 islands. A controlled higher-contrast bitmap remains uniformly sampled, proving a sampler problem; XNA's HUD Begin overload restores wrap without the CNAEXT indexed `SamplerState::operator=` forbidden by BL-16. The highly saturated sky-dome display RGB also darkens a baked outdoor receiver as if its colour were illuminance, while `SunShadingFor` already has the daylight scalar. Both corrections are directly visible and dependency-valid; no existing id or renderer tier is changed. |
 | 2026-09-15 | `HOUSE-00926` | **New task, next free phase-12 id.** Split outside-facing window frame/sash/glass detail from room-owned indoor trim/glass and admit only those distinct roles to the exterior hierarchy. | The fixed front normal-game crop shows open-looking holes despite 64 canonical windows. Source tracing finds window geometry merged with each closed room's interior skirting/glass chunks, so §25.6's correct façade-only exterior BVH cannot show it. Admitting the unsplit chunks would bypass room/portal culling; a production material/chunk role split is the dependency-valid fix. |
 | 2026-09-15 | `HOUSE-00925` | **New task, next free phase-12 id.** Make outdoor opaque receivers scene-referred when viewed from a dark adapted room, without changing their canonical residency or stock-XNA effects. | Round 10's solid white `CHIMNEY:exterior` belongs to `EXT_ROAD` and receives up to 6x camera effect exposure although sky/glass in the same view do not. The source material is approved red brick; normal gameplay clips it to an apparent white window. This is a receiver-domain boundary left unresolved by `HOUSE-00922`'s outdoor light ownership and `HOUSE-01266`'s camera adaptation, not permission for debug recolouring. |
 | 2026-09-15 | `HOUSE-00924` | **New task, next free phase-12 id.** Correct the stock-XNA translucent-glass tint/exposure composition at the architectural window path. | Round 9's reviewed gameplay images show pure-white window pixels against a blue exterior sky and almost-black room. Source tracing proves the unlit glass pass multiplies its 12%-alpha tint by dark-room camera exposure while the background sky is unexposed; neither `HOUSE-00904`'s glass table nor `HOUSE-01266`'s opaque exposure model owns that boundary. Fixing it is dependency-valid visible work without a new renderer or altered alpha/provenance. |

@@ -37,6 +37,19 @@ namespace cnahouse::rendering
 namespace cnahouse::lighting
 {
 
+    /// @brief Calibrated diffuse sky energy for a baked weather-facing receiver.
+    ///
+    /// The authored sky gradient is a display colour, not an illuminance scalar. Preserve its
+    /// daylight irradiance much less saturated than the visible blue gradient, while the existing
+    /// sun/cloud model supplies daytime energy; at night the gradient's dim moon/town colour is
+    /// the fallback. This is a pure per-frame
+    /// calculation, not a material or room-specific exposure multiplier.
+    [[nodiscard]] Microsoft::Xna::Framework::Vector3
+    OutdoorSkyIrradianceFor(const Microsoft::Xna::Framework::Vector3& displaySky,
+                            const Microsoft::Xna::Framework::Vector3& solarTint,
+                            float skyDiffuseIntensity,
+                            float twilightAmbientFactor) noexcept;
+
     /// @brief Celestial values copied into XNA's `DirectionalLight0` for an eligible object.
     ///
     /// XNA has no separate intensity parameter: the LUT colour is multiplied by the direct-beam
@@ -156,14 +169,20 @@ namespace cnahouse::lighting
             return cloudCover_;
         }
 
-        /// @brief The live unoccluded hemispherical sky colour shared by outdoor receivers.
+        /// @brief The live unoccluded hemispherical sky display colour shared by Basic detail.
         ///
-        /// Interior states multiply this by their window-derived daylight level. House outer-skin
-        /// chunks retain an interior cell as their residency key, so their renderer needs the
-        /// unattenuated value rather than borrowing that room's window transmission.
+        /// Interior states multiply this by their window-derived daylight level. The baked house
+        /// outer skin uses `OutdoorSkyIrradianceColor` instead: its `LM_DAY` already captures the
+        /// uniform-sky shape but the display-gradient RGB alone is not calibrated light energy.
         [[nodiscard]] const Microsoft::Xna::Framework::Vector3& SkyAmbientColor() const noexcept
         {
             return skyAmbientColor_;
+        }
+
+        /// @brief Live, unoccluded daylight energy for the weather-facing `LM_DAY` skin only.
+        [[nodiscard]] const Microsoft::Xna::Framework::Vector3& OutdoorSkyIrradianceColor() const noexcept
+        {
+            return outdoorSkyIrradianceColor_;
         }
 
         /// @brief The current solar position, recomputed from §35's clock by every `Update`.
@@ -256,6 +275,7 @@ namespace cnahouse::lighting
         CelestialKeyLight sunKey_;
         CelestialKeyLight moonKey_;
         Microsoft::Xna::Framework::Vector3 skyAmbientColor_;
+        Microsoft::Xna::Framework::Vector3 outdoorSkyIrradianceColor_;
         float cloudCover_ = 0.0F;
         bool sunComputed_ = false;
         bool moonKeyActive_ = false;

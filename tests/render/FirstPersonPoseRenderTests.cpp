@@ -16,7 +16,9 @@
 // The references were generated under `LIBGL_ALWAYS_SOFTWARE=1`, which is what CI uses
 // (`HOUSE-00138`). On hardware the comparison is skipped and the coverage assertions still run.
 #include <array>
+#include <cstdint>
 #include <cstdio>
+#include <set>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -186,6 +188,46 @@ namespace
             SCOPED_TRACE(pose.name);
             CompareOnePose(pose);
         }
+    }
+
+    TEST(FirstPersonPoseRenderTests, ProductionSidingRetainsTiledAlbedoAfterTheHudHasDrawn)
+    {
+        if (!ContentIsBuilt())
+        {
+            GTEST_SKIP() << "no content/world/collision.bin";
+        }
+        Options options = OptionsFor(kPoses[0]);
+        options.quality = QualityPreset::High;
+        options.player = std::array<float, 5>{0.00F, 0.60F, -5.00F, 0.0F, 0.0F};
+        options.seed = 6840335469064670721ULL;
+        options.screenshotFrame = 3;
+        const std::string actual = std::string(CNAHOUSE_TEST_OUTPUT_DIR) + "/siding-front-actual.png";
+        ASSERT_TRUE(RenderHarness::CaptureFrame(options, 1600, 900, actual));
+        const auto image = RenderHarness::LoadPng(actual);
+        ASSERT_TRUE(image.HasValue()) << image.Error().ToString();
+        ASSERT_EQ(image->width, 1600);
+        ASSERT_EQ(image->height, 900);
+
+        // A real, repeated wood source covers this central front panel. Its 40x70 crop was exactly
+        // one colour after the HUD's default LinearClamp was retained in slot 0, despite 48
+        // distinct deployed UV0s. Frame 3 is essential: frame 1 still has CNA's initial wrap.
+        std::set<std::uint32_t> sidingColours;
+        for (int y = 260; y < 330; ++y)
+        {
+            for (int x = 370; x < 410; ++x)
+            {
+                const auto& pixel =
+                    image->pixels[static_cast<std::size_t>(y) * 1600u + static_cast<std::size_t>(x)];
+                sidingColours.insert((static_cast<std::uint32_t>(pixel.getRProperty()) << 16u) |
+                                     (static_cast<std::uint32_t>(pixel.getGProperty()) << 8u) |
+                                     static_cast<std::uint32_t>(pixel.getBProperty()));
+            }
+        }
+        EXPECT_GT(sidingColours.size(), 40u)
+            << "the close production facade collapsed a physically tiled source to one texel";
+        const auto& midWall = image->pixels[150u * 1600u + 400u];
+        EXPECT_GT(midWall.getRProperty(), 100)
+            << "clear daytime approved wood must not become a near-black display-sky slab";
     }
 
     /// @brief Rewrites all twelve references. DISABLED, and run by hand after an intended change:

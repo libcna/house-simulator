@@ -424,7 +424,7 @@ namespace cnahouse::rendering
                     {
                         draw.lightmap = textures_(kNeutralLightmap);
                     }
-                    const Vector3& sky = lighting_->SkyAmbientColor();
+                    const Vector3& sky = lighting_->OutdoorSkyIrradianceColor();
                     draw.colourMultiplier = Vector3(scale * sky.X, scale * sky.Y, scale * sky.Z);
                     submit(draw, false, true);
                     first = last;

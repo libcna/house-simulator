@@ -20,12 +20,15 @@
 #include "Microsoft/Xna/Framework/Content/ContentManager.hpp"
 #include "Microsoft/Xna/Framework/GameServiceContainer.hpp"
 #include "Microsoft/Xna/Framework/GameTime.hpp"
+#include "Microsoft/Xna/Framework/Graphics/BlendState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Effect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsAdapter.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
 #include "Microsoft/Xna/Framework/Graphics/RenderTarget2D.hpp"
+#include "Microsoft/Xna/Framework/Graphics/SamplerState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteBatch.hpp"
 #include "Microsoft/Xna/Framework/Graphics/SpriteFont.hpp"
+#include "Microsoft/Xna/Framework/Graphics/SpriteSortMode.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Vector2.hpp"
 
@@ -1646,11 +1649,17 @@ namespace cnahouse::app
             return;
         }
         // MEASURED (`HOUSE-00065`): the content pipeline premultiplies alpha by default and
-        // `SpriteBatch::Begin()` selects `BlendState::AlphaBlend`, which is the premultiplied blend --
-        // so the default state is the correct one and nothing may be drawn with `NonPremultiplied`.
+        // `BlendState::AlphaBlend` is premultiplied (HOUSE-00065), matching the content pipeline.
+        // Specify LinearWrap as well: CNA leaves SpriteBatch's sampler[0] bound after End, and
+        // otherwise its default LinearClamp flattens the next frame's physically tiled house UVs.
+        // XNA's indexed SamplerState assignment is unavailable to our strict-XNA runtime (BL-16).
         // ONE batch for the whole HUD. `HOUSE-00106` measured a draw call at 8.15 us of CPU, so
         // a batch per string would spend more on submission than the rest of the frame does.
-        hud_->batch.Begin();
+        hud_->batch.Begin(Microsoft::Xna::Framework::Graphics::SpriteSortMode::Deferred,
+                          &Microsoft::Xna::Framework::Graphics::BlendState::AlphaBlend,
+                          &Microsoft::Xna::Framework::Graphics::SamplerState::LinearWrap,
+                          nullptr,
+                          nullptr);
         if (lighting_.has_value())
         {
             const float alpha = lighting_->CameraExposureTintAlpha();
