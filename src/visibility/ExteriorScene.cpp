@@ -38,7 +38,8 @@ namespace cnahouse::visibility
         {
             return PropCategory::Ground;
         }
-        if (StartsWith(material, "FENCE_") || StartsWith(material, "GATE_"))
+        if (StartsWith(material, "FENCE_") || StartsWith(material, "GATE_") ||
+            material == "MAT_OUTDOOR_FENCE_BOARD" || material == "MAT_OUTDOOR_FENCE_METAL")
         {
             return PropCategory::Fence;
         }

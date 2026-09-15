@@ -50,6 +50,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import layout_io  # noqa: E402
+import outdoor_materials  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "assets"))
 import gltf_io  # noqa: E402
@@ -1013,6 +1014,9 @@ def _tile_document(tile: dict, receiver: bool = True) -> tuple[dict, bytes]:
         return len(accessors) - 1
 
     for primitive in tile["primitives"]:
+        material_id = outdoor_materials.ROLE_IDS.get(primitive["material"])
+        if material_id is None:
+            raise LayoutError(f"outdoor source role {primitive['material']!r} has no canonical materialId")
         vertices = primitive["vertices"]
         position = store([v[0] for v in vertices], "VEC3")
         normal = store([v[1] for v in vertices], "VEC3")
@@ -1029,6 +1033,7 @@ def _tile_document(tile: dict, receiver: bool = True) -> tuple[dict, bytes]:
         materials.append({
             "name": primitive["material"],
             "extras": {
+                "materialId": material_id,
                 "surfaceClass": "terrain" if receiver else "road",
                 # §11.5's ground is lit by §22's baked sun shading over the same second UV
                 # channel a room's lightmap uses, which is why the tiles carry one at all. The
@@ -1472,6 +1477,10 @@ def selftest() -> int:
         first = _tile_document(rows[0])
         again = _tile_document(tiles(SOURCE)[0])
         require(first == again, "a tile renders the same bytes twice")
+        require(all(material["extras"]["materialId"] ==
+                    outdoor_materials.ROLE_IDS[material["name"]]
+                    for material in first[0]["materials"]),
+                "and every terrain slot names its canonical unbaked stock-XNA material")
 
         # 8. `HOUSE-00763`'s street.
         street = road_pieces(SOURCE)
@@ -1565,6 +1574,10 @@ def selftest() -> int:
         require(_tile_document(street[0], receiver=False)
                 == _tile_document(road_pieces(SOURCE)[0], receiver=False),
                 "a road segment renders the same bytes twice")
+        require(all(material["extras"]["materialId"] ==
+                    outdoor_materials.ROLE_IDS[material["name"]]
+                    for material in _tile_document(street[0], receiver=False)[0]["materials"]),
+                "and every road slot names its canonical unbaked stock-XNA material")
         # 9. `HOUSE-00765`: every paved surface §11 declares is IN the field, at its own height
         #    and its own material. The front walk, the terrace paving and the garden paths are
         #    therefore drawn by `HOUSE-00762`'s tiles, and nothing has to draw them again -- which

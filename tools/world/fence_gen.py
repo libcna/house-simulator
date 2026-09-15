@@ -45,6 +45,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "assets"))
 import gltf_io  # noqa: E402
 import layout_io  # noqa: E402
 import terrain_gen  # noqa: E402
+import outdoor_materials  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 SOURCE = REPO / "assets-src" / "world"
@@ -714,6 +715,9 @@ def _document(parts: list[tuple[str, list, dict]], material: str,
     part that swings is its own node with its pivot in `extras`, which is what §65's behaviour
     reads off the asset instead of re-deriving it from the layout.
     """
+    material_id = outdoor_materials.ROLE_IDS.get(material)
+    if material_id is None:
+        raise layout_io.LayoutError(f"outdoor source role {material!r} has no canonical materialId")
     blob = bytearray()
     accessors: list[dict] = []
     views: list[dict] = []
@@ -774,7 +778,8 @@ def _document(parts: list[tuple[str, list, dict]], material: str,
         "nodes": nodes,
         "meshes": meshes,
         "materials": [{"name": material,
-                       "extras": {"surfaceClass": "fence",
+                       "extras": {"materialId": material_id,
+                                  "surfaceClass": "fence",
                                   # Lit by the sun term like the rest of the boundary: a fence is
                                   # thin, and §18.3 keeps the lightmap for surfaces that carry
                                   # low-frequency light rather than for every board.
@@ -1003,6 +1008,10 @@ def selftest() -> int:
 
     require(_fence_document(runs[0]) == _fence_document(fences(SOURCE)[0]),
             "a fence renders the same bytes twice")
+    fence_slot = _fence_document(runs[0])[0]["materials"][0]
+    require(fence_slot["extras"]["materialId"] ==
+            outdoor_materials.ROLE_IDS[fence_slot["name"]],
+            "and the fence slot names its canonical unbaked stock-XNA material")
 
     # 7. `HOUSE-00767`'s gates.
     hung = gates(SOURCE)
@@ -1054,6 +1063,10 @@ def selftest() -> int:
             f"opening, {abs(sliding[0]['travel'][0]):.1f} m of travel")
 
     document, _blob = _gate_document(hung[0])
+    gate_slot = document["materials"][0]
+    require(gate_slot["extras"]["materialId"] ==
+            outdoor_materials.ROLE_IDS[gate_slot["name"]],
+            "the moving gate and fixed ironmongery share an authored stock-XNA material")
     names = [node["name"] for node in document["nodes"]]
     moving = next(node for node in document["nodes"] if node["name"].endswith("_LEAF"))
     require(names == [f"{hung[0]['id']}_LEAF", f"{hung[0]['id']}_FIXED"]

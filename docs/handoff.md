@@ -1,4 +1,51 @@
-# Visual-sprint handoff — 2026-09-15 (`HOUSE-01280` checkpoint)
+# Visual-sprint handoff — 2026-09-15 (`HOUSE-00923` checkpoint)
+
+Branch `develop`. Verify `git log -4`, `git status` and the current HEAD before work. This visual
+sprint session started at `238d6aed27c1e8662f0d118013ef08bb801ae018` (`HOUSE-00922`) and
+committed `HOUSE-01037` furniture and `HOUSE-01280` live receiver/furniture light correction
+before this `HOUSE-00923` outdoor material-parity checkpoint. No ordinary gameplay path uses
+hashed blockout colours; `--scene=blockout` and `--debug-blockout-materials` are explicit tools.
+`VISUAL-GATE-1` is **not passed**.
+
+Fixed-camera before: [`house-01280-detail-r2`](visual-review/captures/house-01280-detail-r2).
+After: [`house-00923-outdoor-r1`](visual-review/captures/house-00923-outdoor-r1). All eight normal
+gameplay views were captured at clear 10:30, Tier S/High, software Mesa and actually inspected.
+The front screenshot changes from a façade floating over sky to asphalt, grass, a white fence and
+gate, walk, garage roof and main roof around the same house. The façade itself remains a flat dark
+slab; windows are still visually empty from outside and almost pure white from inside. Foyer/hall
+are dark/empty, kitchen has no cabinetry or appliance, living/family have only their primary groups.
+See [`visual-review/README.md`](visual-review/README.md), Round 9.
+
+Cause/fix: the old deployed 476-chunk file had 31 unregistered outdoor generator roles and 17
+`Basic`-packed shell slots bound to `DualTexture` materials. A fresh source-shell audit found 20
+unbaked base-finish slots, including concrete stairs and attic roof detail **inside files with
+other baked receivers**. Source generators now emit canonical `materialId` extras, 17 derived
+stock-XNA `Basic` material rows reuse already approved albedos/provenance and preserve physical
+source UV scale, and the chunk builder refuses unknown/mismatched rows. The fresh 472-chunk file
+has **zero** unknown ids or effect/vertex mismatches; the new integration test checks every chunk.
+The existing live sky/sun drives unbaked outdoor Basic surfaces while indoor Basic bounce remains
+conservative. Terrain/road/fence/collision, stable ids, culling and XNA-only architecture were not
+bypassed. All 22 intentionally affected pixel references were inspected old/new before selective
+updates. The actual software render subset is 22/22 green, including the 18-pair culled/unculled
+suite. `tools/ci/run_checks.sh` passed including 323 strict-XNA translation units. The full
+1,584-registration CTest also exits green in the unforced-LIBGL configuration; its capture-only,
+disabled and intentional skipped render cases remain as before, so the separate software pixel
+subset is the strict visual-regression evidence.
+
+Safety: sibling `cna` presently has substantial independent, uncommitted audio/platform/X11 work
+and a deleted video fixture; this sprint did not edit, stage or commit it. `sharp-runtime` and
+`living-room-simulator` were read-only and clean at the status check. Use the existing `build/`
+and shared ccache; the four-core owner limit and graphical-test environment are recorded below.
+
+Next highest visible defect: pure-white window apertures and dark main-floor route. There is a
+measured compositing suspect, not yet a completed fix: `TransparentPass` multiplies unlit clear
+glass tint by adapted interior exposure (often ×6) before its 0.12 XNA alpha while the sky behind
+it is not exposed by the same pass. Do **not** apply a second alpha premultiply; CNA's stock
+`BasicEffect` forwarding already applies `DiffuseColor × Alpha`. Compare identical in/out camera
+views and correct this at the material-class/light-composition boundary, then recapture. More
+foyer/hall/kitchen primary furnishing follows; do not detour into distant platform/features.
+
+## Archived HOUSE-01280 checkpoint — 2026-09-15
 
 Branch `develop`; verify HEAD and `git status` before acting. This session began at
 `238d6aed27c1e8662f0d118013ef08bb801ae018` (`HOUSE-00922`) and committed the first real

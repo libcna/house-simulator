@@ -73,6 +73,7 @@ sys.path.insert(0, str(TOOLS / "assets"))
 import build_collision as bc  # noqa: E402
 import gltf_io  # noqa: E402
 import layout_io  # noqa: E402
+import outdoor_materials  # noqa: E402
 from layout_io import LayoutError  # noqa: E402
 
 MAGIC = b"CCHK"
@@ -918,21 +919,26 @@ def _shell_members(shell_dirs, cells: dict, materials: dict, stats: dict, outdoo
                 stats["shellSurfaces"] += 1
                 material_id = entry["extras"].get("materialId")
                 if not isinstance(material_id, str) or not material_id:
-                    if outdoors:
-                        # Terrain and fence generators share this geometry reader but are not the
-                        # house shell; their legacy role names are replaced by their own Phase 9
-                        # material-assignment tasks.
-                        material_id = name
-                    else:
-                        raise LayoutError(
-                            f"{path.name}: shell slot {name!r} carries no authored `materialId`; "
-                            f"regenerate with tools/blender/house_shell_gen.py (HOUSE-00907)")
-                material = materials.get(material_id)
-                if material is None and not outdoors:
                     raise LayoutError(
-                        f"{path.name}: shell slot {name!r} names material {material_id!r}, which "
-                        f"does not exist in layout.materials.json")
+                        f"{path.name}: surface {name!r} carries no canonical `materialId`; "
+                        "regenerate the source shell/outdoor geometry (HOUSE-00907/00923)")
                 layout_id = shell_layout(name, entry["extras"], lightmapped)
+                # The house-shell slot names the real base finish. Every unbaked surface packs
+                # Basic vertices: outdoor receivers in the raw shell, but also non-receiver
+                # stairs/roof detail inside a lightmapped room file. Give any such DualTexture
+                # base finish its explicit source-preserving Basic variant; only true baked
+                # receivers continue to use the original DualTexture identity.
+                if not outdoors and layout_id == LAYOUT_BASIC:
+                    material_id = outdoor_materials.UNBAKED_VARIANTS.get(material_id, material_id)
+                material = materials.get(material_id)
+                if material is None:
+                    raise LayoutError(
+                        f"{path.name}: surface {name!r} names material {material_id!r}, which "
+                        "does not exist in layout.materials.json")
+                if effect_layout(material) != layout_id:
+                    raise LayoutError(
+                        f"{path.name}: {material_id} requests {material.get('effectTierS')!r}, "
+                        f"but its un/baked source packs {LAYOUTS[layout_id][0]!r} vertices")
                 if layout_id == LAYOUT_DUAL and not entry["hasUv1"]:
                     raise LayoutError(
                         f"{path.name}: {name} is a lightmap receiver in a baked cell and has no "
@@ -942,10 +948,16 @@ def _shell_members(shell_dirs, cells: dict, materials: dict, stats: dict, outdoo
                     stats["shellDynamicReceivers"] += 1
                 mesh = {key: entry[key] for key in
                         ("positions", "normals", "uv0", "uv1", "triangles")}
+                if outdoors:
+                    # Terrain/fence UV0 is authored in world metres. The row's physical repeat
+                    # was not sampled by BasicEffect itself; bake that repeat into the packed
+                    # vertices once, without touching the already-scaled house-shell UVs.
+                    scale_u, scale_v = material.get("uvScale", [1.0, 1.0])
+                    mesh["uv0"] = [(u * scale_u, v * scale_v) for u, v in mesh["uv0"]]
                 # Alpha is authored once in the real material row. `surfaceClass == glass` was the
                 # placeholder-era proxy and became a second opinion the moment HOUSE-00907 put
                 # `MAT_GLASS_CLEAR` in the file.
-                alpha = (material or {}).get("alphaMode", "opaque")
+                alpha = material.get("alphaMode", "opaque")
                 surface_class = entry["extras"].get("surfaceClass") or name
                 key = (cell_id, (LAYOUTS[layout_id][0], material_id,
                                  tuple(sorted(cell.get("lightGroups") or ())), alpha))
@@ -1363,7 +1375,7 @@ def fixture_library() -> dict:
             "worldHash": "0123456789abcdef0123456789abcdef"}
 
 
-def _fixture_shell(path: Path, classes) -> None:
+def _fixture_shell(path: Path, classes, material_ids=None) -> None:
     """A `.glb` shaped like `house_shell_gen.py`'s output: one primitive per surface class.
 
     @p classes is `[(name, receiver, uv1), ...]`, and each becomes a material carrying the
@@ -1412,7 +1424,7 @@ def _fixture_shell(path: Path, classes) -> None:
         index_accessor = len(accessors)
         accessors.append({"bufferView": view(indices, "H"), "componentType": 5123,
                           "count": len(indices), "type": "SCALAR"})
-        material_id = f"MAT_{name.upper()}"
+        material_id = (material_ids or {}).get(name, f"MAT_{name.upper()}")
         materials.append({"name": f"{material_id}__shell_{name}",
                           "extras": {"materialId": material_id, "surfaceClass": name,
                                      "lightmapReceiver": receiver}})
@@ -1490,6 +1502,10 @@ def selftest() -> int:
                  "effectTierS": "Basic"},
                 {"id": "MAT_ROOF", "class": "asphalt", "alphaMode": "opaque",
                  "effectTierS": "DualTexture"},
+                {"id": "MAT_OUTDOOR_FLOOR", "class": "tile", "alphaMode": "opaque",
+                 "effectTierS": "Basic"},
+                {"id": "MAT_OUTDOOR_ROOF", "class": "asphalt", "alphaMode": "opaque",
+                 "effectTierS": "Basic"},
             ]}
         (world_dir / "layout.materials.json").write_text(
             json.dumps(materials_doc, indent=2) + "\n", encoding="utf-8")
@@ -1889,8 +1905,10 @@ def selftest() -> int:
                         ("glass", False, False)])
         _fixture_shell(shell_raw / "L0_HALL.glb", [("floor", True, False)])
         _fixture_shell(shell_raw / "EXT_TERRACE.glb",
-                       [("floor", True, False), ("trim", False, False)])
-        _fixture_shell(shell_raw / "ROOF_MAIN.glb", [("roof", False, False)])
+                       [("floor", True, False), ("trim", False, False)],
+                       {"floor": "MAT_OUTDOOR_FLOOR"})
+        _fixture_shell(shell_raw / "ROOF_MAIN.glb", [("roof", False, False)],
+                       {"roof": "MAT_OUTDOOR_ROOF"})
         shelled = build(world_dir, manifest, [(shell_lm, True), (shell_raw, False)])
         by_cell: dict[str, list] = {}
         for chunk in shelled["chunks"]:
@@ -1932,9 +1950,9 @@ def selftest() -> int:
         # decks, so their floors and walls -- receiver CLASSES both -- reach this tool with no
         # lightmap UV, and §22 says the sun and the sky light them directly every frame.
         terrace = {chunk["material"]: chunk["layout"] for chunk in by_cell["EXT_TERRACE"]}
-        require(terrace["MAT_FLOOR"] == LAYOUT_BASIC,
-                f"a receiver class in a cell that is NOT baked draws dynamically rather than "
-                f"failing for want of a lightmap it was never going to have ({terrace})")
+        require(terrace["MAT_OUTDOOR_FLOOR"] == LAYOUT_BASIC,
+                f"a receiver class in an unbaked cell carries an explicit BasicEffect variant "
+                f"instead of a DualTexture base row it cannot draw ({terrace})")
         require(shelled["stats"]["shellDynamicReceivers"] == 1
                 and len(by_cell["EXT_TERRACE"]) == 2,
                 f"and it is counted rather than silently downgraded, alongside the trim it "
@@ -2008,7 +2026,7 @@ def selftest() -> int:
                 "a world that declares no such pack falls back to the biggest outdoor cell "
                 "rather than refusing to build")
         require("EXT_YARD" in by_cell and any(
-            chunk["material"] == "MAT_ROOF" for chunk in by_cell["EXT_YARD"]),
+            chunk["material"] == "MAT_OUTDOOR_ROOF" for chunk in by_cell["EXT_YARD"]),
             "-- the yard is 6 400 m² and the terrace 9, and it is the roof that lands there")
         require("ROOF_MAIN" not in by_cell,
                 "and not left as a cell of its own, which nothing would ever draw")
@@ -2094,7 +2112,8 @@ def selftest() -> int:
 
         outdoor_dir = workspace / "outdoors"
         outdoor_dir.mkdir()
-        _fixture_shell(outdoor_dir / "TERRAIN_R0C0.glb", [("floor", False, False)])
+        _fixture_shell(outdoor_dir / "TERRAIN_R0C0.glb", [("floor", False, False)],
+                       {"floor": "MAT_OUTDOOR_FLOOR"})
         outdoors = build(world_dir, manifest, [(shell_lm, True), (shell_raw, False)],
                          [(outdoor_dir, False)])
         require(outdoors["stats"]["exteriorFiles"] == 1,

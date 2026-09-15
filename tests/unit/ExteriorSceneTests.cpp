@@ -93,6 +93,8 @@ TEST(ExteriorSceneTests, TheCategoryComesFromTheMaterialsOwnPrefix)
     EXPECT_EQ(CategoryForMaterial("ROAD_paint"), PropCategory::Ground);
     EXPECT_EQ(CategoryForMaterial("FENCE_board"), PropCategory::Fence);
     EXPECT_EQ(CategoryForMaterial("GATE_ornamental"), PropCategory::Fence);
+    EXPECT_EQ(CategoryForMaterial("MAT_OUTDOOR_FENCE_BOARD"), PropCategory::Fence);
+    EXPECT_EQ(CategoryForMaterial("MAT_OUTDOOR_FENCE_METAL"), PropCategory::Fence);
     EXPECT_EQ(CategoryForMaterial("GARDEN_bed"), PropCategory::GardenFurniture);
     EXPECT_EQ(CategoryForMaterial("TREE_maple"), PropCategory::Tree);
     EXPECT_EQ(CategoryForMaterial("VEG_shrub"), PropCategory::Tree);

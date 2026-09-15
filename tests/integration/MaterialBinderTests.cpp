@@ -21,6 +21,7 @@
 
 #include "cnahouse/rendering/MaterialBinder.hpp"
 #include "cnahouse/util/Ids.hpp"
+#include "cnahouse/world/ChunkReader.hpp"
 #include "cnahouse/world/WorldLoader.hpp"
 #include "cnahouse/world/WorldTypes.hpp"
 
@@ -179,7 +180,10 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 123U);
+                EXPECT_EQ(binder.Count(), 140U);
+                const MaterialDesc* outdoorRoof = binder.Find(Id::Of("MAT_OUTDOOR_ROOF"));
+                ASSERT_NE(outdoorRoof, nullptr);
+                EXPECT_EQ(outdoorRoof->kind, MaterialKind::Basic);
 
                 const MaterialDesc* upholstery = binder.Find(Id::Of("MAT_FURNITURE_WHITE_ROOM_PALETTE"));
                 ASSERT_NE(upholstery, nullptr);
@@ -257,6 +261,42 @@ namespace
                 EXPECT_FLOAT_EQ(snowMetal->alpha, 1.0F);
                 EXPECT_FLOAT_EQ(snowMetal->specularColour[0], 0.14F);
                 EXPECT_FLOAT_EQ(snowMetal->specularPower, 12.0F);
+            });
+    }
+
+    TEST(MaterialBinderTests, EveryPlayableStaticChunkHasTheEffectItsVerticesActuallyPack)
+    {
+        cnahouse::world::WorldData::Contents contents;
+        const auto loaded = cnahouse::world::WorldLoader::LoadMaterials("content/world", contents);
+        ASSERT_TRUE(loaded.HasValue()) << loaded.Error().ToString();
+        const auto chunks = cnahouse::world::ChunkReader::ReadFromTitle("content/world/chunks.bin");
+        ASSERT_TRUE(chunks.HasValue()) << chunks.Error().ToString();
+        ASSERT_GT(chunks->chunks.size(), 100U);
+
+        RunWithBinder(
+            [&contents, &chunks](MaterialBinder& binder)
+            {
+                ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
+                for (const cnahouse::world::Chunk& chunk : chunks->chunks)
+                {
+                    ASSERT_LT(chunk.material, chunks->materials.size());
+                    const std::string& name = chunks->materials[chunk.material];
+                    SCOPED_TRACE(name);
+                    const MaterialDesc* desc = binder.Find(Id::Of(name));
+                    ASSERT_NE(desc, nullptr) << "production must not silently skip a static chunk";
+                    switch (chunk.layout)
+                    {
+                        case cnahouse::world::ChunkLayout::Basic:
+                            EXPECT_EQ(desc->kind, MaterialKind::Basic);
+                            break;
+                        case cnahouse::world::ChunkLayout::Dual:
+                            EXPECT_EQ(desc->kind, MaterialKind::DualTexture);
+                            break;
+                        case cnahouse::world::ChunkLayout::AlphaTest:
+                            EXPECT_EQ(desc->kind, MaterialKind::AlphaTest);
+                            break;
+                    }
+                }
             });
     }
 

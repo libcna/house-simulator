@@ -142,7 +142,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 9 | Room/portal visibility | 00661–00760 | 40 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
-| 12 | Materials and textures | 00891–00970 | 32 | The blockout reads as a building |
+| 12 | Materials and textures | 00891–00970 | 33 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 65 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
@@ -13241,6 +13241,35 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             complete render suite with 39 unaffected tests green plus the five inspected exterior
             references green after their intentional update; all 18 culled/unculled pairs green;
             six-view capture `docs/visual-review/captures/house-00922-outdoor-sky-r1`.
+- [x] HOUSE-00923 — Assign canonical stock-XNA outdoor materials to every generated terrain, road, fence, gate, garden and unbaked shell chunk
+      dep: HOUSE-00763, HOUSE-00766, HOUSE-00903, HOUSE-00907, HOUSE-00912, HOUSE-01280 · sys: content/rendering · plat: ALL · pri: MUST
+      note: (2026-09-15) Visual-sprint P0 in phase 12's next free id. At the same normal/debug
+            `EXT_ROAD` player pose, production omits ground, fence, gate and roof that explicit
+            blockout draws. The deployed 476-chunk file has 31 unregistered generator-role
+            materials (`TERRAIN_*`, `FENCE_*`, `ROAD_*`, etc.) and 17 unbaked `Basic` chunks bound
+            to `DualTexture` rows. A fresh source-shell audit exposes 20 such slots, including
+            unbaked stair/attic-roof detail inside lightmapped room files. The production pass
+            correctly refuses missing/mismatched rows.
+            Use the existing source textures and canonical content graph; never present the
+            diagnostic palette as a production material or silently coerce an effect at runtime.
+      accept: all 48 currently unresolved/mismatched chunks resolve to authored, provenance-safe
+            stock-XNA rows with exactly their packed vertex layout; generated glTF and chunk
+            materials carry valid stable ids, including unbaked outdoor variants of roof/porch
+            finishes; source UV scale and day/night illumination remain plausible; the fixed
+            exterior-front normal-game screenshot actually contains road/ground/fence/gate/roof
+            detail; software render references are inspected/updated only where intended, culling
+            equivalence and collision remain intact, content/XNA/broader suites pass
+      verified: (2026-09-15) The rebuilt `chunks.bin` has 472 chunks, 44 using `MAT_OUTDOOR_*`,
+            zero unknown ids and zero effect/vertex mismatches; every chunk passes the new runtime
+            binder integration gate. The eight fixed normal-game views in
+            `docs/visual-review/captures/house-00923-outdoor-r1` were inspected against Round 8:
+            front road, lawn, white fence/gate and roof are present, day/night seasonal exterior
+            poses gain physically scaled source finishes. The 22 actually changed strict pixel
+            pairs were inspected before selective ref updates; 22/22 software registrations pass,
+            including all 18 culled/unculled pairs. `tools/ci/run_checks.sh` is green (323 strict
+            XNA units), `git diff --check` is clean, and the full 1,584-registration CTest exits
+            green with its established capture-only/disabled cases preserved. `VISUAL-GATE-1`
+            remains FAILED because windows/façade and empty/dark route rooms are still conspicuous
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -17281,6 +17310,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-15 | `HOUSE-00923` | **New task, next free id in phase 12's reserved 00891–00970 range.** Assign real canonical stock-XNA materials to every generated unbaked outdoor chunk and make the exterior start visible in production. | Fixed gameplay/debug captures at the same road pose proved that 31 unregistered generator roles and 17 material/layout mismatches hide road, ground, fence, gate, roof and porch finishes in production despite valid collision and blockout geometry. `HOUSE-00907` covered the canonical house shell only, not the outdoor generators or dynamic outdoor receiver variants. The missing dependency-valid visual work belongs to this phase; no id was renumbered or completed prematurely. |
 | 2026-09-14 | `HOUSE-00922` | **New task, next free id in phase 12's reserved 00891–00970 range.** Give the room-owned outer skin an explicitly outdoor lighting path while preserving its `DualTextureEffect` material and per-cell bake. | `HOUSE-00921` made the missing geometry visible and thereby exposed that residency ownership had been mistaken for lighting ownership: a closed room's window attenuation and lamps made its outside face nearly black. The already-shared sky colour and existing LM_DAY islands are the dependency-valid Tier-S answer; no renderer, room id or lightmap format changes. No id was renumbered or struck. |
 | 2026-09-14 | `HOUSE-00921` | **New task, next free id in phase 12's reserved 00891–00970 range.** Include the house's room-owned siding and brick water-table chunks in §25.6's exterior hierarchy. | The first fixed production front capture showed the sky through nearly the whole façade. A same-pose blockout capture proved this was geometry omission, not exposure: shell generation assigns each outer face to its adjacent interior cell, while `BuildExteriorScene` admitted only exterior-cell chunks and closed portals correctly kept those interior cells out of the walk. The material ids already distinguish the outer skin from the room's inner walls, so no room is hard-coded and portal/cell architecture remains intact. No id was renumbered or struck. |
 | 2026-09-13 | `HOUSE-01620` | **New task, next free id in phase 24's reserved range.** Restore compatibility with CNA merge `fcd43e995`, repair all newly exposed strict-XNA overload traps, record BL-16, and add the task to the phase review dependency. | The first full strict-XNA run during `HOUSE-01614` found that the merged CNA changed effect-pass indexing and now correctly rejects C++ copy/move conveniences for XNA reference objects. It also proved that indexed sampler assignment has no callable strict-XNA path. The gate cannot be waived: retained declarations are referenced, texture ownership is now explicit in project code, and the runtime uses the documented XNA default sampler. No CNA code or rule was weakened. |

@@ -529,27 +529,26 @@ namespace cnahouse::rendering
                 DrawParams draw = common;
                 if (room != nullptr)
                 {
+                    const bool skyOpen = cell->kind == world::CellKind::Exterior &&
+                                         cell->visibilityHint == world::VisibilityHint::Open;
                     const float artificial = room->artificial * kBasicFixtureAmbient;
+                    const Vector3& sky = skyOpen ? lighting_->SkyAmbientColor() : room->skyAmbientColor;
+                    const float skyScale = skyOpen ? 1.0F : kBasicSkyBounce;
                     draw.ambientLight =
                         Vector3(exposure * std::min(1.0F,
-                                                    lighting::kAmbientFloor +
-                                                        kBasicSkyBounce * room->skyAmbientColor.X +
+                                                    lighting::kAmbientFloor + skyScale * sky.X +
                                                         artificial * room->artificialColor.X),
                                 exposure * std::min(1.0F,
-                                                    lighting::kAmbientFloor +
-                                                        kBasicSkyBounce * room->skyAmbientColor.Y +
+                                                    lighting::kAmbientFloor + skyScale * sky.Y +
                                                         artificial * room->artificialColor.Y),
                                 exposure * std::min(1.0F,
-                                                    lighting::kAmbientFloor +
-                                                        kBasicSkyBounce * room->skyAmbientColor.Z +
+                                                    lighting::kAmbientFloor + skyScale * sky.Z +
                                                         artificial * room->artificialColor.Z));
                     if (const lighting::CelestialKeyLight* celestial =
                             lighting_->CelestialKeyForCell(cell->id);
                         celestial != nullptr)
                     {
-                        const bool skyOpen = cell->kind == world::CellKind::Exterior &&
-                                             cell->visibilityHint == world::VisibilityHint::Open;
-                        const float scale = exposure * kBasicSunWindowKey * (skyOpen ? 1.0F : room->daylight);
+                        const float scale = exposure * (skyOpen ? 1.0F : kBasicSunWindowKey * room->daylight);
                         draw.basicKey = BasicKeyLight{celestial->direction,
                                                       Vector3(scale * celestial->diffuseColor.X,
                                                               scale * celestial->diffuseColor.Y,

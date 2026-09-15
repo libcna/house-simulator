@@ -3599,7 +3599,13 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 123U);
+        EXPECT_EQ(contents.materials.size(), 140U);
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return IdRegistry::NameOf(material.id).starts_with("MAT_OUTDOOR_"); }),
+                  17)
+            << "HOUSE-00923's unbaked exterior has every canonical Basic material variant";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3649,8 +3655,15 @@ namespace
                                            material.surfaceState == world::SurfaceState::Dry &&
                                            material.snow.coverable;
                                 }),
-                  16)
-            << "HOUSE-00903 adds five coverable exterior finishes; the soffit faces downward";
+                  31)
+            << "HOUSE-00923 adds 15 coverable unbaked outdoor variants to the earlier 16";
+        const auto outdoorRoof = std::find_if(contents.materials.begin(),
+                                              contents.materials.end(),
+                                              [](const world::MaterialDef& material)
+                                              { return material.id == Intern("MAT_OUTDOOR_ROOF"); });
+        ASSERT_NE(outdoorRoof, contents.materials.end());
+        EXPECT_EQ(outdoorRoof->effectTierS, world::EffectTier::Basic);
+        EXPECT_TRUE(outdoorRoof->snow.coverable);
 
         const auto chromeAt = std::find_if(contents.materials.begin(),
                                            contents.materials.end(),

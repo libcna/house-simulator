@@ -293,3 +293,41 @@ updates. Diagnostic blockout, property poses and the 18 culled/unculled pairs re
 Remaining: register and render the missing authored outdoor surfaces first, then window/background
 brightness, primary foyer/hall/kitchen furnishing and exterior form/context. `VISUAL-GATE-1` has
 not passed.
+
+## Round 9 — outdoor production material parity
+
+Commit: `HOUSE-00923` checkpoint (`2026-09-15`)
+
+Before: [Round 8 eight fixed gameplay views](captures/house-01280-detail-r2).
+After: [same eight gameplay views with the outdoor surfaces restored](captures/house-00923-outdoor-r1).
+
+Ranked visible defects after the correction:
+
+1. The front now has a real asphalt foreground, lawn, white fence/gate, walk and roof, but its broad
+   façade remains an almost-flat dark slab; window openings show sky instead of convincing glass,
+   sash and interior depth. This is still recognizably an engineering shell.
+2. Living/family window apertures are nearly pure white, erasing the exterior view and drawing the
+   eye before the new furniture. Their brightness/background needs an inside/outside diagnosis.
+3. Foyer and central hall are mostly dark and empty; the connected entrance route has no human-scale
+   furniture or attractive fixture pools.
+4. Kitchen is an empty shell with no cabinetry, worktop, sink, appliance or table arrangement.
+5. The two seating groups read as furniture, but walls/floors remain subdued, the palette/style is
+   inconsistent, and plant foliage is too bright.
+
+Fixed: the deployed 476-chunk baseline had 31 unknown generated outdoor roles and 17 mismatched
+`Basic`/`DualTexture` bindings. A fresh shell audit exposed 20 unbaked base-finish slots, including
+stairs and attic roof detail inside otherwise lightmapped files. Outdoor generators now emit stable
+canonical `materialId`s; six unbaked shell finishes and generated outdoor roles use 17 deterministic
+source-preserving stock-XNA `Basic` variants of already approved textures. The chunk builder refuses
+unknown ids and effect/vertex disagreement. Four source-role groups merge, yielding 472 chunks and
+**zero unknown or mismatched bindings**; the new integration gate checks every one. Outdoor Basic
+surfaces use the existing live full sky/sun term rather than the conservative indoor bounce. No
+normal-game path uses the hashed debug palette; diagnostic blockout is explicit.
+
+The intentional material-id changes alter eight exterior and two attic diagnostic references, six
+property views, two production garage/attic detail views and four seasonal exterior views. All 22
+changed before/after pairs were inspected individually; only those refs were updated. The unchanged
+route/interior poses and 18-pair culled/unculled check provide independent stability evidence.
+
+Remaining: window/background and façade brightness, then entrance/hall/kitchen primary furnishing
+and meaningful day/night fixture lighting. `VISUAL-GATE-1` has **not passed**.

@@ -131,6 +131,7 @@ run_gate "base-material-previews" python3 tools/blender/material_preview.py --ch
 run_gate "interior-paint-variants" python3 tools/assets/paint_variants.py --check
 run_gate "interior-floor-materials" python3 tools/assets/floor_materials.py --check
 run_gate "exterior-materials" python3 tools/assets/exterior_materials.py --check
+run_gate "outdoor-static-materials" python3 tools/assets/outdoor_static_materials.py --check
 run_gate "glass-water-materials" python3 tools/assets/glass_water_materials.py --check
 run_gate "wet-materials" python3 tools/assets/wet_materials.py --check
 run_gate "snow-materials-selftest" python3 tools/assets/snow_materials.py --selftest
