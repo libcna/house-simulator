@@ -2608,7 +2608,9 @@ Tier E, which improves the result and is not required for correctness.
 The outer skin is the deliberate exception to residency implying lighting ownership
 (`HOUSE-00922`). Its siding and brick islands already live in the adjacent cell's `LM_DAY` atlas,
 where the uniform world sky bakes eave, reveal and self-occlusion into them. At runtime that atlas
-is the opaque base draw, tinted by `LightingSystem`'s global sky ambient and camera exposure. The
+is the opaque base draw, tinted by `LightingSystem`'s global sky ambient. In Tier S the outdoor
+receiver remains scene-referred against the unexposed sky even when an indoor camera has adapted
+to a dark room (`HOUSE-00925`); the room's receiver still uses that camera's effect exposure. The
 room's artificial atlases and its window-transmission-scaled daylight pass are not submitted for
 the outside face. Thus closing a room or turning on its lamp cannot darken or illuminate the
 façade, while no second bake format or runtime shader is introduced.
@@ -3002,8 +3004,13 @@ need care:
 * **Exposure**: `LightingSystem` keeps a target exposure per cell (bright outdoors, dim indoors).
   The camera's exposure follows it with an asymmetric time constant (0.9 s brightening, 2.2 s
   darkening — matching human adaptation being slower in the dark). Tier E applies it in
-  `PostComposite.fx`; Tier S applies it by scaling every effect's `DiffuseColor`/`AmbientLightColor`
-  and drawing a full-screen `SpriteBatch` tint quad for the residual. This is what makes stepping
+  `PostComposite.fx`; Tier S applies it by scaling indoor receivers and their lit detail through the
+  stock effect's `DiffuseColor`/`AmbientLightColor` and drawing a full-screen `SpriteBatch` tint
+  quad for the residual. Clear glass and opaque outdoor receivers remain scene-referred against
+  the unexposed sky when visible through a window (`HOUSE-00924`/`HOUSE-00925`): otherwise an
+  indoor effect lift clips the approved red-brick chimney, fence and grass while the same frame's
+  sky stays blue. The outdoor camera has a sub-unity target, so its residual tint remains global.
+  This is what makes stepping
   from the sunlit terrace into the basement stair feel right.
 * **Residency**: entering the house from outside promotes the interior packs and demotes the
   neighbourhood detail (§27).

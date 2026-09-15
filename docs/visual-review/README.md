@@ -367,3 +367,40 @@ only a world-load performance flake, which passed alone at 237 ms and in the iso
 
 Remaining: solve outdoor-receiver exposure and façade/window finish, then furnish and light the
 entrance/hall/kitchen route. `VISUAL-GATE-1` has **not passed**.
+
+## Round 11 — outdoor receivers no longer clip from a dark room
+
+Commit: `HOUSE-00925` checkpoint (`2026-09-15`).
+
+Before: [Round 10 fixed gameplay views](captures/house-00924-glass-r1).
+After: [same eight views with receiver-domain exposure corrected](captures/house-00925-exterior-exposure-r1).
+
+Ranked visible defects after the correction:
+
+1. The exterior start still has a broad, flat dark façade with conspicuously open-looking windows,
+   thin roof silhouette and a front entry lacking finished depth. This is the worst full-frame
+   normal-game view and does not read like a realistic home.
+2. The chimney is now warm beige rather than white, but remains a 0.6 m by 14.3 m bare vertical
+   box intruding visually into the living-room seating composition. Its approved brick source
+   bitmap contains clear mortar; a 150x250 screen crop is exactly one colour, so source texture
+   detail is not reaching the player at this pose. Diagnose UV/sampler/mip behaviour separately.
+3. Foyer, central hall and kitchen remain empty or near-empty and underlit, making the connected
+   route feel like an engineering shell despite believable authored wall/floor material ids.
+4. Family/living primary seating groups are present but lighting depth is weak, the upholstery
+   looks pale and the small plants are fluorescent green.
+
+Fixed: the deployed `CHIMNEY:exterior` chunk owns approved `MAT_OUTDOOR_BRICK` in `EXT_ROAD`; it
+was not a window. The common static pass formerly multiplied exterior-cell Basic sky/sun and
+room-owned outer-skin DualTexture daylight by an adapted indoor camera up to 6x, but the sky and
+glass in that same frame remained scene-referred. Exterior opaque receivers now use the sky's 1x
+Tier-S effect domain while indoor receivers still adapt. A fixed living pixel moves from white
+`(255,255,255)` to material-tinted `(178,164,150)`; sampled lawn moves from yellow-white
+`(242,249,202)` to green `(110,156,92)`. Family windows reveal fence and grass instead of pale
+bands. Exterior-front, entrance, hall and original living views are pixel-identical; the other
+four views' changed regions were inspected. Three intentionally changed strict first-person refs
+were inspected individually and updated; software culling pairs remain equivalent.
+The 20-registration actual-software regression subset, 323-unit strict-XNA check and isolated
+full 1,586-registration CTest (1,578 runnable cases) pass.
+
+Remaining: finish the front façade and route furnishing/lighting, then audit why the brick bitmap
+collapses to one screen colour. `VISUAL-GATE-1` has **not passed**.

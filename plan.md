@@ -33,9 +33,9 @@ The first minimum real static prop kit (`HOUSE-01037`) uses completed
 `HOUSE-00215` batching without claiming `HOUSE-00971`'s unfinished dynamic/jitter/tint criteria.
 `HOUSE-01280` corrects the measured receiver/furniture lighting mismatch visible in its reviewed
 images. Round 9 proves the exterior material omission is fixed; `HOUSE-00924` removes the
-exposure-scaled glass tint. Round 10 leaves the room-visible chimney/other exterior receivers
-clipped white and the façade a dark slab. Diagnose the fixed in/out receiver view before seams or
-unrelated systems. Primary
+exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
+from a dark room. Round 11 leaves the front façade and empty/dark entrance route as the largest
+defects; the chimney's flat source-texture presentation also needs inspection. Primary
 foyer/hall/kitchen furnishing follows in the connected slice. `HOUSE-00913` seam repair,
 `HOUSE-00917` material
 regression and broader furnishing remain in the visible chain when their defects lead the review.
@@ -142,7 +142,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 9 | Room/portal visibility | 00661–00760 | 40 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
-| 12 | Materials and textures | 00891–00970 | 34 | The blockout reads as a building |
+| 12 | Materials and textures | 00891–00970 | 35 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 65 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
@@ -13304,6 +13304,40 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             runnable cases (the established disabled/capture-only cases remain), after one
             performance case was re-run alone to eliminate concurrent strict-build load.
             `VISUAL-GATE-1` remains FAILED.
+- [x] HOUSE-00925 — Keep outdoor opaque receivers scene-referred when an adapted interior camera sees them
+      dep: HOUSE-00921, HOUSE-00922, HOUSE-00923, HOUSE-00924, HOUSE-01266, HOUSE-01280 · sys: rendering · plat: ALL · pri: MUST
+      note: (2026-09-15) Round 10's white vertical shape in the living composition is not glass:
+            explicit blockout shows an opaque mesh and the deployed chunk table reports
+            `CHIMNEY:exterior` / `MAT_OUTDOOR_BRICK` / `EXT_ROAD`. Outdoor `Basic` sky/sun terms
+            and outdoor `DualTexture` outer-skin terms inherit the indoor camera's up-to-6x Tier-S
+            effect multiplier, while the visible sky dome and now scene-referred glass do not.
+            That boundary clips brick, grass and fence through windows and misreads as missing
+            materials. Use the existing stock-XNA paths and canonical cell/outer-skin ownership;
+            record the smallest correction to §25.7/§22.2 if receiver-specific exposure is needed.
+      accept: exterior-cell opaque receivers and room-owned outer skin do not inherit a dark-room
+            effect lift that the sky behind them lacks; indoor receiver/furniture adaptation and
+            outdoor camera behaviour stay unchanged; the fixed living/family windows retain sky,
+            grass and fence colour/contours and the chimney ceases to clip white; source texture
+            detail is audited, not silently claimed as fixed; front/foyer/hall/kitchen views are
+            inspected old/new; software refs change only after pairwise visual inspection,
+            culled/unculled and strict-XNA/content/full suites pass; `VISUAL-GATE-1` is judged
+            honestly, not inferred from test green
+      verified: (2026-09-15) The stock-XNA opaque pass now bounds exterior-cell and room-owned
+            outer-skin effect exposure to the unexposed sky's scene-referred 1x while all indoor
+            receivers retain their camera adaptation. At the same normal-game clear-10:30 living
+            composition, `CHIMNEY:exterior` moves from white (255,255,255) to source-tinted
+            (178,164,150), lawn (242,249,202) to green (110,156,92), and fence gains an outline.
+            Eight fixed views were inspected: exterior-front, entrance, hall and the original
+            living pose are pixel-identical; only window/receiver-rich views changed. The brick
+            source bitmap has visible mortar, but the chimney screen crop is uniform (`unique=1`
+            over 150x250): texture detail/UV-or-sampler behaviour remains a separate major visual
+            defect, not falsely attributed to exposure. Only three first-person refs (kitchen,
+            foyer stair, master bedroom) were inspected old/new and intentionally updated.
+            The actual-software 20-registration subset passes, including 18 paired culling views;
+            `tools/ci/run_checks.sh` passes with 323 strict-XNA translation units. The isolated
+            full 1,586-registration CTest passes all 1,578 runnable tests (established
+            disabled/capture-only cases preserved). `VISUAL-GATE-1` remains FAILED because
+            façade/openings and the empty/dark route dominate.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -17344,6 +17378,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-15 | `HOUSE-00925` | **New task, next free phase-12 id.** Make outdoor opaque receivers scene-referred when viewed from a dark adapted room, without changing their canonical residency or stock-XNA effects. | Round 10's solid white `CHIMNEY:exterior` belongs to `EXT_ROAD` and receives up to 6x camera effect exposure although sky/glass in the same view do not. The source material is approved red brick; normal gameplay clips it to an apparent white window. This is a receiver-domain boundary left unresolved by `HOUSE-00922`'s outdoor light ownership and `HOUSE-01266`'s camera adaptation, not permission for debug recolouring. |
 | 2026-09-15 | `HOUSE-00924` | **New task, next free phase-12 id.** Correct the stock-XNA translucent-glass tint/exposure composition at the architectural window path. | Round 9's reviewed gameplay images show pure-white window pixels against a blue exterior sky and almost-black room. Source tracing proves the unlit glass pass multiplies its 12%-alpha tint by dark-room camera exposure while the background sky is unexposed; neither `HOUSE-00904`'s glass table nor `HOUSE-01266`'s opaque exposure model owns that boundary. Fixing it is dependency-valid visible work without a new renderer or altered alpha/provenance. |
 | 2026-09-15 | `HOUSE-00923` | **New task, next free id in phase 12's reserved 00891–00970 range.** Assign real canonical stock-XNA materials to every generated unbaked outdoor chunk and make the exterior start visible in production. | Fixed gameplay/debug captures at the same road pose proved that 31 unregistered generator roles and 17 material/layout mismatches hide road, ground, fence, gate, roof and porch finishes in production despite valid collision and blockout geometry. `HOUSE-00907` covered the canonical house shell only, not the outdoor generators or dynamic outdoor receiver variants. The missing dependency-valid visual work belongs to this phase; no id was renumbered or completed prematurely. |
 | 2026-09-14 | `HOUSE-00922` | **New task, next free id in phase 12's reserved 00891–00970 range.** Give the room-owned outer skin an explicitly outdoor lighting path while preserving its `DualTextureEffect` material and per-cell bake. | `HOUSE-00921` made the missing geometry visible and thereby exposed that residency ownership had been mistaken for lighting ownership: a closed room's window attenuation and lamps made its outside face nearly black. The already-shared sky colour and existing LM_DAY islands are the dependency-valid Tier-S answer; no renderer, room id or lightmap format changes. No id was renumbered or struck. |

@@ -1,4 +1,40 @@
-# Visual-sprint handoff — 2026-09-15 (`HOUSE-00924` checkpoint)
+# Visual-sprint handoff — 2026-09-15 (`HOUSE-00925` checkpoint)
+
+Branch `develop`; verify HEAD and worktree before acting. This sprint session started at
+`238d6aed27c1e8662f0d118013ef08bb801ae018` (`HOUSE-00922`) and has committed
+`HOUSE-01037` (`86a80f705c10`), `HOUSE-01280` (`160fd7515ff2`), `HOUSE-00923`
+(`3926af7af0ea`) and `HOUSE-00924` (`3eb1073cebfd`). The latest one-task change is
+`HOUSE-00925`. Normal gameplay uses production materials; hashed blockout colours are explicit
+debug only. `VISUAL-GATE-1` is **not passed**.
+
+Before outdoor exposure: [`house-00924-glass-r1`](visual-review/captures/house-00924-glass-r1).
+After: [`house-00925-exterior-exposure-r1`](visual-review/captures/house-00925-exterior-exposure-r1).
+All eight fixed clear-10:30 Tier-S/High software-Mesa gameplay views were inspected. The white
+column in the living composition was proved to be an opaque, exterior-cell `CHIMNEY:exterior` /
+`MAT_OUTDOOR_BRICK` chunk, **not a window**. Its pixel changes from clipped white
+`(255,255,255)` to source-tinted `(178,164,150)`; lawn visible through the window changes from
+yellow-white `(242,249,202)` to green `(110,156,92)`. Outdoor opaque receivers share the sky's
+scene-referred Tier-S effect domain when a dark indoor camera sees them; indoor receivers and
+furniture still follow camera adaptation. The front, entrance, hall and original living review
+views remain pixel-identical. Three intentionally changed first-person golden views (kitchen,
+foyer stair, master bedroom) were inspected old/new before selective update. The 20-registration
+actual-software render/content subset is green, including 18 culled/unculled pairs. See Round 11
+in `visual-review/README.md` and HOUSE-00925 in `plan.md`: `tools/ci/run_checks.sh` is green
+(323 strict-XNA units), and the isolated full 1,586-registration CTest passes all 1,578
+runnable cases. The smallest evidence-backed §22.2/§25.7 architecture correction is recorded in
+`cna-house.md`; XNA-only, canonical world, stable IDs and content licences are unchanged.
+
+Largest remaining visible defect: the exterior-front façade is a dark slab with open-looking
+window holes and little front-entry depth; foyer/hall/kitchen remain empty and underlit. A second
+measured defect is the living-room chimney: although its brick bitmap has visible mortar, its
+150x250 screen crop is exactly one colour (`unique=1`). The exposed vertical stack also looks
+like a bare box rather than a fireplace composition. Do not conflate this source-texture
+presentation problem with the now-correct outdoor exposure domain. Prioritize the largest visible
+defect from fixed screenshots, then recapture. `VISUAL-GATE-1` is still FAILED; do not claim that
+the fixed 32.1-fps HUD overlay measures renderer throughput. Sibling CNA work is independent;
+never edit, stage or commit it from this repository.
+
+## Archived HOUSE-00924 checkpoint — 2026-09-15
 
 Branch `develop`; verify HEAD and worktree before acting. This sprint session started at
 `238d6aed27c1e8662f0d118013ef08bb801ae018` and has committed `HOUSE-01037`, `HOUSE-01280`

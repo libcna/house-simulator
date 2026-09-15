@@ -51,6 +51,17 @@ namespace
     using cnahouse::world::ChunkLayout;
     using cnahouse::world::ChunkLibrary;
 
+    TEST(StaticGeometryPassTests, OutdoorReceiversDoNotInheritAnIndoorCameraLift)
+    {
+        using cnahouse::rendering::OpaqueReceiverEffectExposure;
+        using cnahouse::world::CellKind;
+        EXPECT_FLOAT_EQ(OpaqueReceiverEffectExposure(CellKind::Exterior, false, 6.0F), 1.0F);
+        EXPECT_FLOAT_EQ(OpaqueReceiverEffectExposure(CellKind::Room, true, 6.0F), 1.0F);
+        EXPECT_FLOAT_EQ(OpaqueReceiverEffectExposure(CellKind::Room, false, 6.0F), 6.0F);
+        EXPECT_FLOAT_EQ(OpaqueReceiverEffectExposure(CellKind::Garage, false, 2.5F), 2.5F);
+        EXPECT_FLOAT_EQ(OpaqueReceiverEffectExposure(CellKind::Exterior, false, 1.0F), 1.0F);
+    }
+
     /// Two cells, two materials, one triangle each -- enough to be drawn and to be counted.
     ChunkLibrary TinyHouse()
     {

@@ -36,6 +36,13 @@ namespace cnahouse::rendering
     namespace Gfx = Microsoft::Xna::Framework::Graphics;
     using Microsoft::Xna::Framework::Vector3;
 
+    float OpaqueReceiverEffectExposure(world::CellKind cellKind,
+                                       bool exteriorSkin,
+                                       float cameraEffectExposure) noexcept
+    {
+        return cellKind == world::CellKind::Exterior || exteriorSkin ? 1.0F : cameraEffectExposure;
+    }
+
     namespace
     {
         // Non-lightmapped Basic detail has no per-surface LM_DAY attenuation. The first fixed
@@ -266,7 +273,7 @@ namespace cnahouse::rendering
             Microsoft::Xna::Framework::Matrix::getIdentityProperty();
         const Microsoft::Xna::Framework::Matrix view = camera_.View();
         const Microsoft::Xna::Framework::Matrix projection = camera_.Projection(aspect);
-        const float exposure = lighting_->CameraEffectExposure();
+        const float cameraExposure = lighting_->CameraEffectExposure();
 
         constexpr std::string_view kNeutralLightmap = "Textures/Fallback/grey";
         const std::span<const visibility::RenderItem> items = list_.ItemsFor(Pass::OpaqueStatic);
@@ -321,6 +328,9 @@ namespace cnahouse::rendering
                 first = last;
                 continue;
             }
+
+            const bool exteriorSkin = visibility::IsExteriorSkinMaterial(library_.materials[leader.material]);
+            const float exposure = OpaqueReceiverEffectExposure(cell->kind, exteriorSkin, cameraExposure);
 
             DrawParams common;
             common.world = &worldMatrix;
@@ -393,8 +403,6 @@ namespace cnahouse::rendering
 
             if (leaderChunk.layout == world::ChunkLayout::Dual)
             {
-                const bool exteriorSkin =
-                    visibility::IsExteriorSkinMaterial(library_.materials[leader.material]);
                 if (exteriorSkin)
                 {
                     // The shell keeps its adjacent room as the residency owner, but the outside
