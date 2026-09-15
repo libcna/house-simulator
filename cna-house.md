@@ -1938,6 +1938,11 @@ move them, not an assertion in either direction.
   glazing distinct material/chunk roles in the same hierarchy. Ordinary indoor skirting, door
   trim, borrowed-light glass and interior walls remain exclusively on the room/portal path; adding
   those whole chunks to the outdoors would leak interior geometry through closed rooms.
+  `HOUSE-00928` keeps the elevated balcony's **solid guard** in the existing painted-trim role
+  and its separate narrow rail in the approved brushed-metal role. Both remain owned by their
+  exterior balcony cell; this is a material-role correction, not an added indoor BVH admission or
+  a change to guard collision/portal geometry. The source-to-chunk material check and deterministic
+  shell manifest record the split.
 
 ### 17.5 Directory layout
 

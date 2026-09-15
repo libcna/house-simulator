@@ -230,6 +230,51 @@ namespace
             << "clear daytime approved wood must not become a near-black display-sky slab";
     }
 
+    TEST(FirstPersonPoseRenderTests, ThePlayableEntryHasAReadablePaintedBalconyAndPorch)
+    {
+        if (!ContentIsBuilt())
+        {
+            GTEST_SKIP() << "no content/world/collision.bin";
+        }
+        Options options = OptionsFor(kPoses[0]);
+        options.quality = QualityPreset::High;
+        options.player = std::array<float, 5>{0.00F, 0.60F, -5.00F, 0.0F, 0.0F};
+        options.seed = 6840335469064670721ULL;
+        options.screenshotFrame = 3;
+        const std::string actual = std::string(CNAHOUSE_TEST_OUTPUT_DIR) + "/entry-finish-actual.png";
+        ASSERT_TRUE(RenderHarness::CaptureFrame(options, 1600, 900, actual));
+        const auto image = RenderHarness::LoadPng(actual);
+        ASSERT_TRUE(image.HasValue()) << image.Error().ToString();
+        ASSERT_EQ(image->width, 1600);
+        ASSERT_EQ(image->height, 900);
+
+        // This is the same normal-game, close front approach as the visual review, after the HUD
+        // has drawn. The previously zero-tinted metal parapet was an opaque black band across the
+        // entrance, and the porch's chipped-plaster source made painted structural trim look
+        // ruin-like. Protect the repaired *presentation*, not a particular debug material hue.
+        const auto& parapet = image->pixels[230u * 1600u + 800u];
+        EXPECT_GT(parapet.getRProperty(), 95)
+            << "the daylight-painted balcony parapet must not collapse to a black band";
+        const auto& support = image->pixels[380u * 1600u + 450u];
+        EXPECT_GT(support.getRProperty(), 95)
+            << "the painted front porch support must remain readable in normal gameplay";
+
+        std::set<std::uint32_t> supportColours;
+        for (int y = 355; y < 455; ++y)
+        {
+            for (int x = 446; x < 458; ++x)
+            {
+                const auto& pixel =
+                    image->pixels[static_cast<std::size_t>(y) * 1600u + static_cast<std::size_t>(x)];
+                supportColours.insert((static_cast<std::uint32_t>(pixel.getRProperty()) << 16u) |
+                                      (static_cast<std::uint32_t>(pixel.getGProperty()) << 8u) |
+                                      static_cast<std::uint32_t>(pixel.getBProperty()));
+            }
+        }
+        EXPECT_LT(supportColours.size(), 200u)
+            << "a painted porch column must not expose the heavily chipped masonry pattern";
+    }
+
     /// @brief Rewrites all twelve references. DISABLED, and run by hand after an intended change:
     ///
     ///     LIBGL_ALWAYS_SOFTWARE=1 ./build/cnahouse_render_tests

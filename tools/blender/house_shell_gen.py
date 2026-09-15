@@ -1058,7 +1058,7 @@ def open_sides_of(cell: dict, box: tuple, neighbours: list) -> list:
 
 def build_balcony_edge(cell: dict, extent: tuple, neighbours: list, construction, solid, add
                        ) -> int:
-    """A parapet with a railing on it round a deck you could fall a storey off. Returns the count.
+    """A painted parapet with a metal railing round an elevated deck. Returns the count.
 
     §70.5's threshold is a drop over a metre, and the same number decides the rail's height, so it
     is asked once. A ground-level deck -- the porch at +0.57, the terrace at +0.45 -- gets nothing
@@ -1074,10 +1074,10 @@ def build_balcony_edge(cell: dict, extent: tuple, neighbours: list, construction
             near, far_edge = plane, plane + PARAPET_THICK * inward
             if side in ("-X", "+X"):
                 solid(min(near, far_edge), max(near, far_edge),
-                      extent[0], extent[0] + PARAPET_HEIGHT, lo, hi)
+                      extent[0], extent[0] + PARAPET_HEIGHT, lo, hi, "trim")
             else:
                 solid(lo, hi, extent[0], extent[0] + PARAPET_HEIGHT,
-                      min(near, far_edge), max(near, far_edge))
+                      min(near, far_edge), max(near, far_edge), "trim")
             rail_along(add, side in ("-X", "+X"), lo, hi,
                        extent[0] + float(construction.get("railing", 0.0)),
                        extent[0] + float(construction.get("railing", 0.0)),
@@ -3061,6 +3061,8 @@ def selftest(output: Path) -> int:
             and len(rail_faces) == 6 * len(open_sides),
             f"it gains a parapet and a railing on each of its {len(open_sides)} open sides "
             f"({len(parapets)} parapets, {len(rail_faces)} rail faces)")
+    require(all(box[6] == "trim" for box in parapets),
+            "balcony parapets use painted trim while their upper rails retain metal")
     tops_of = {round(box[3], 4) for box in parapets}
     require(tops_of == {round(balcony_extent[0] + PARAPET_HEIGHT, 4)},
             f"the parapet stands {PARAPET_HEIGHT} m off the deck ({sorted(tops_of)})")

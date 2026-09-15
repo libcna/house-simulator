@@ -13411,6 +13411,46 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             323 strict-XNA translation units and source/provenance/content checks. The
             authored/licensed textures and world/lightmap geometry are unchanged.
             `VISUAL-GATE-1` remains FAILED: porch/front roof and interior route remain unfinished.
+- [x] HOUSE-00928 — Give the playable front balcony and porch coherent painted/metal finishes
+      dep: HOUSE-00903, HOUSE-00907, HOUSE-00923, HOUSE-00926, HOUSE-00927 · sys: materials/exterior · plat: ALL · pri: MUST
+      note: (2026-09-15) The inspected Round 13 front and exact close-approach views show a
+            near-solid black parapet across the entrance and noisy, ruin-like distressed paint
+            on the four porch columns/beams. Source/chunk tracing identifies the solid front
+            balcony guard and rail as `MAT_METAL_BALCONY`: its approved brushed-metal bitmap
+            is currently multiplied by canonical `tint:[0,0,0]`. The porch's painted structural
+            trim uses `MAT_DOOR_PAINTED`'s approved but heavily chipped/brick-exposing paint
+            bitmap, visually wrong for the selected main entry. Prefer coherent approved
+            existing clean white paint and nonzero brushed-metal tint, but inspect the actual
+            normal-game close/front images: if a still-solid dark parapet remains, make the
+            smallest canonical material-role correction rather than claiming a palette swap
+            solved its form. Keep doorway/portal/collision geometry and IDs stable.
+      accept: the same normal-game exterior-front and close entry cameras visibly show clean
+            painted supports and a readable, plausible balcony/parapet finish instead of an
+            opaque black band; the approved metal source's physical detail survives the CNA
+            content path; indoor painted doors/trim and nearby window/glass materials do not
+            become visibly inconsistent; day/overcast/night remain plausible; no ordinary
+            debug recolouring, XNA rule break, portal/culling leak, asset-licence gap or
+            unnecessary renderer change; the exact before/after captures are inspected,
+            intentional strict references reviewed selectively, all relevant gates pass,
+            and VISUAL-GATE-1 is judged honestly
+      verified: (2026-09-15) All eight fixed Round 13→14 normal-game views and an exact close
+            front before/after were inspected. The zero-tinted black solid guard is now painted
+            white while a separate narrow rail retains the approved nonzero-tinted brushed-metal
+            source; the porch columns/beams and indoor painted openings use the approved smooth
+            white map rather than chipped/brick-exposing paint. A parapet crop changes 1→39
+            colours, a support crop 1,138→38; clear, overcast and night close views were actually
+            reviewed. Exactly three balcony source GLBs and their deterministic shell manifest
+            were updated, with no geometry/collision/portal/ID/licence change; 511 deployed
+            chunks and 173 outside BVH instances preserve canonical role ownership. The new
+            frame-3 playable-entry render property passes. Twenty-two **inspected** strict
+            references were updated selectively for the balcony/paint roles, including one old
+            base-debug palette reference stale since HOUSE-00909; unaffected goldens were left
+            intact. The complete direct software-render suite passes 45/45, including all 18
+            culling parity views. The relinked offscreen CTest has 1,592 registrations, 1,580
+            actual passes, 12 disabled/skipped and zero failures; `tools/ci/run_checks.sh`
+            passes source/provenance/material gates and 323 strict-XNA translation units.
+            `git diff --check` is clean. `VISUAL-GATE-1` remains FAILED: foyer/hall/kitchen,
+            roof/front door and night approach are visibly unfinished.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -17451,6 +17491,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-15 | `HOUSE-00928` | **New task, next free phase-12 id.** Correct the entry-facing canonical paint/metal material finish rather than adding a shader or a new unprovenanced asset. | Round 13's fixed game image now has real tiled siding, making the zero-tinted, full-width front balcony parapet and distressed-painted porch columns the largest exterior material defects. The existing approved smooth white paint and brushed-metal sources are available; visual review of the same approach will decide whether a material-row correction alone is enough or a role split is needed. |
 | 2026-09-15 | `HOUSE-00927` | **New task, next free phase-12 id.** Restore physically tiled production-texture sampling after the HUD's strict-XNA SpriteBatch handoff and separate Tier-S outer-skin daylight energy from display-sky RGB while retaining `LM_DAY`, material and residency roles. | Round 12's close front is a uniform `(70,69,66)` façade despite approved warm-wood albedo, 48 distinct deployed UV0s and white UV2 islands. A controlled higher-contrast bitmap remains uniformly sampled, proving a sampler problem; XNA's HUD Begin overload restores wrap without the CNAEXT indexed `SamplerState::operator=` forbidden by BL-16. The highly saturated sky-dome display RGB also darkens a baked outdoor receiver as if its colour were illuminance, while `SunShadingFor` already has the daylight scalar. Both corrections are directly visible and dependency-valid; no existing id or renderer tier is changed. |
 | 2026-09-15 | `HOUSE-00926` | **New task, next free phase-12 id.** Split outside-facing window frame/sash/glass detail from room-owned indoor trim/glass and admit only those distinct roles to the exterior hierarchy. | The fixed front normal-game crop shows open-looking holes despite 64 canonical windows. Source tracing finds window geometry merged with each closed room's interior skirting/glass chunks, so §25.6's correct façade-only exterior BVH cannot show it. Admitting the unsplit chunks would bypass room/portal culling; a production material/chunk role split is the dependency-valid fix. |
 | 2026-09-15 | `HOUSE-00925` | **New task, next free phase-12 id.** Make outdoor opaque receivers scene-referred when viewed from a dark adapted room, without changing their canonical residency or stock-XNA effects. | Round 10's solid white `CHIMNEY:exterior` belongs to `EXT_ROAD` and receives up to 6x camera effect exposure although sky/glass in the same view do not. The source material is approved red brick; normal gameplay clips it to an apparent white window. This is a receiver-domain boundary left unresolved by `HOUSE-00922`'s outdoor light ownership and `HOUSE-01266`'s camera adaptation, not permission for debug recolouring. |

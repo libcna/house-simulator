@@ -1,4 +1,60 @@
-# Visual-sprint handoff — 2026-09-15 (`HOUSE-00927` checkpoint)
+# Visual-sprint handoff — 2026-09-15 (`HOUSE-00928` checkpoint)
+
+Branch `develop`; verify HEAD and worktree before continuing. This visual-sprint session started
+at `238d6aed27c1e8662f0d118013ef08bb801ae018` and now has one-task commits for
+`HOUSE-01037`, `HOUSE-01280`, `HOUSE-00923`, `HOUSE-00924`, `HOUSE-00925`, `HOUSE-00926`,
+`HOUSE-00927`, then `HOUSE-00928`. Normal gameplay continues to use real canonical production
+materials; material-hash colours require explicit blockout/debug mode. **`VISUAL-GATE-1` still
+FAILS**: the front roof/door/form are thin, foyer/hall/kitchen are almost empty and underlit,
+living/family have flat seating light/fluorescent plants, and night exterior lacks visible
+fixtures.
+
+Before: [Round 13's eight fixed gameplay views](visual-review/captures/house-00927-siding-r1)
+and the [exact close front](visual-review/captures/house-00927-siding-r1/exterior-approach-close-after.png).
+After: [Round 14's same eight views](visual-review/captures/house-00928-entry-r1) and its
+[close front](visual-review/captures/house-00928-entry-r1/exterior-approach-close.png), all
+visually inspected. The full-width black balcony slab is now a readable painted solid parapet;
+the narrow rail keeps the approved brushed-metal source with a nonzero canonical tint. The four
+porch columns/beams now use the existing approved smooth white paint instead of exposed-brick,
+chipped plaster. The close balcony crop changes **1 black colour→39 painted shades** and the
+support crop **1,138 distressed colours→38 clean-paint shades**. Matching
+[overcast](visual-review/captures/house-00928-entry-r1/exterior-approach-overcast.png) and
+[22:00](visual-review/captures/house-00928-entry-r1/exterior-approach-night.png) close views were
+also inspected. Overcast is dimmer but coherent; nighttime remains almost black without local
+porch/path light, so the visual gate is not being claimed.
+
+The source correction is two existing licensed/provenanced material rows and one generated shell
+role: `MAT_DOOR_PAINTED` now points at the approved fine white paint; `MAT_METAL_BALCONY` keeps
+the approved brushed source with nonzero tint; `build_balcony_edge` sends the *solid* guard to
+painted trim while the thin rail remains metal. Exactly three affected balcony shell GLBs and
+`docs/shell-manifest.json` were deterministically regenerated. The deployed world/chunks/content
+pipeline is fresh, with **511 chunks** and **173** façade/outdoor BVH instances; no stable ID,
+collision/portal, UV geometry, lightmap ownership, season/time, CNA runtime call, licence source
+or `CNA_CNAEXT=OFF` rule changed. The metal and white-paint maps compile into CNA `.cnb` content.
+The normal-game close-entry frame-3 render property now protects against returning to a black
+balcony band or chipped porch support. An initial source-JSON deploy invalidated navigation and
+required its deterministic ~20-minute rebuild; the later three-GLB role split only invalidated
+chunks/shading, and the final 16-stage world dry run is fresh. Do not rerun navigation merely to
+inspect a renderer or shell-material tweak.
+
+The **full direct software-Mesa render suite passes 45/45** after inspecting and selectively
+refreshing 22 reference images: affected exterior debug, painted-trim first-person, balcony-
+visible property, sun/season and HUD views; the older base debug image was also brought forward
+from its `HOUSE-00909` palette. No blanket reference regeneration was used, and unaffected
+title/font/geometry views remain untouched. All 18 culled/unculled comparisons remain equivalent.
+The relinked offscreen CTest has **1,592 registrations, 1,580 actual passes, 12 disabled/skipped,
+zero failures**. `tools/ci/run_checks.sh` and `git diff --check` were run; verify final log after
+the commit. The project itself did not edit CNA or sharp-runtime; CNA has an independently dirty
+test-fixture deletion visible in its sibling worktree, which is not staged here.
+
+Next highest visible value is the continuous interior route, **foyer→hall→kitchen**: acquire/use
+approved suitable primary furniture and fixtures, place them in canonical JSON with actual
+clearances, make daytime/evening light readable, capture the same eight review views and fix the
+worst image defect. The roof/front door and porch/night approach also need real finished form,
+but another material-palette pass alone will not cure the nearly empty L0 interior. See
+[Round 14 review](visual-review/README.md) and `plan.md` for the exact ledger.
+
+## Prior `HOUSE-00927` handoff
 
 Branch `develop`; verify current HEAD and worktree before continuing. This long visual session
 started at `238d6aed27c1e8662f0d118013ef08bb801ae018` and now has one-task commits for

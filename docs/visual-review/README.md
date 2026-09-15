@@ -501,3 +501,59 @@ The relinked full offscreen CTest has 1,591 registrations, all 1,579 actual test
 
 Remaining: form/material improvement at the porch/roof and actual furnishing plus lighting of
 the empty connected L0 route. `VISUAL-GATE-1` has **not passed**.
+
+## Round 14 — painted front entry and separated balcony metal
+
+Commit: `HOUSE-00928` checkpoint (`2026-09-15`; exact HEAD in `docs/handoff.md`).
+
+Before: [Round 13's eight fixed gameplay views](captures/house-00927-siding-r1) and its
+[exact close front](captures/house-00927-siding-r1/exterior-approach-close-after.png).
+After: [the same eight views](captures/house-00928-entry-r1) and the
+[same close front](captures/house-00928-entry-r1/exterior-approach-close.png). The close approach
+was also inspected [overcast](captures/house-00928-entry-r1/exterior-approach-overcast.png) and
+[at 22:00](captures/house-00928-entry-r1/exterior-approach-night.png).
+
+Ranked visible defects after inspecting all eight new gameplay views:
+
+1. The front balcony is no longer a black strip and the porch supports are clean paint, but the
+   roof/dormers, door and porch joinery still look skeletal; grass and neighbouring context are
+   flat. The gate-to-door view does not yet read as a finished Colonial Revival entry.
+2. The foyer, hall and kitchen remain dark and almost devoid of furniture. This is now the largest
+   defect on the continuous playable route, even though the door/trim finish is less noisy.
+3. Night exterior is nearly black and has no path or porch light; window rails remain relatively
+   bright. Overcast is credibly dimmer than clear day but needs more local readability.
+4. The living/family seating is present, but remains flat grey in weak light; bright lime plant
+   leaves and the undecorated brick chimney still dominate their compositions.
+
+Fixed: `MAT_METAL_BALCONY`'s approved brushed-metal albedo/normal had been multiplied by the
+canonical zero tint, yielding a near-solid black full-width band in normal daylight. A nonzero
+metal tint restores the source, but applying it to the whole solid guard made an industrial-looking
+silver slab. The shell generator now assigns the existing painted-trim role to the **solid**
+balcony parapet while the narrow railing retains the distinct metal role. The approved smooth
+white paint replaces the chipped/brick-exposing bitmap previously assigned to
+`MAT_DOOR_PAINTED`, so the porch columns/beams and indoor painted openings have a coherent
+maintained finish. No collision, cell/portal, stable ID, UV layout, shell geometry, XNA runtime
+or licence source changed. The same close-front balcony crop changes from **one black colour to
+39 painted-shade colours**; the support crop changes from **1,138 distressed colours to 38
+clean-paint shades**. Three affected balcony shell GLBs and `docs/shell-manifest.json` were
+deterministically regenerated; canonical chunk roles now separate the painted guard from its
+metal rail. The approved metal and white-paint bitmaps compile to CNA content products, and the
+source/provenance/material gates remain in force. The new frame-3 normal-game render property
+asserts a non-black entry band and readable, non-chipped porch support. The clear/overcast/night
+review does not claim finished lighting: at 22:00 the façade properly darkens, but lacks visible
+fixtures.
+The direct software-Mesa render suite passes **45 tests**, including the fixed first-person,
+property and explicit debug views plus all 18 culled/unculled comparisons. Only **22 inspected
+strict reference images** were selectively refreshed: seven affected exterior debug poses, the
+older base debug frame, four painted-trim first-person poses, five balcony-visible property poses,
+four sun/season façade views and one HUD dawn façade view. The base debug frame's prior reference
+dated from `HOUSE-00909`, before the other debug property views were brought to the current
+material palette; its whole-frame palette change is not a claim that normal gameplay became
+debug-coloured. The remaining references, including title/font and unaffected interior/sideyard
+views, were untouched. The full relinked offscreen CTest has **1,592 registrations, 1,580 actual
+passes, 12 disabled/skipped and zero failures**; strict-XNA and content/provenance gates are
+recorded in the handoff.
+
+Remaining: furnish and light foyer/hall/kitchen, finish the front door/roof/porch composition and
+night approach, then calibrate living/family materials and light. `VISUAL-GATE-1` has **not
+passed**.
