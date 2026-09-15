@@ -37,10 +37,10 @@ namespace cnahouse::rendering
     /// @brief Outdoor opaque receivers share the sky's scene-referred Tier-S exposure domain.
     ///
     /// Interior receivers continue following the camera's adapted stock-effect multiplier. An
-    /// exterior cell, or an outer-skin chunk resident in a room, must not become a bright emitter
+    /// exterior cell, or a weather-facing chunk resident in a room, must not become a bright emitter
     /// merely because the camera is in a dark room and the sky dome behind it remains unexposed.
     [[nodiscard]] float OpaqueReceiverEffectExposure(world::CellKind cellKind,
-                                                     bool exteriorSkin,
+                                                     bool exteriorFacing,
                                                      float cameraEffectExposure) noexcept;
     class MaterialBinder;
 

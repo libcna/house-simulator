@@ -1,4 +1,49 @@
-# Visual-sprint handoff — 2026-09-15 (`HOUSE-00925` checkpoint)
+# Visual-sprint handoff — 2026-09-15 (`HOUSE-00926` checkpoint)
+
+Branch `develop`; verify exact HEAD and worktree before proceeding. This sprint session started at
+`238d6aed27c1e8662f0d118013ef08bb801ae018` and committed `HOUSE-01037`, `HOUSE-01280`,
+`HOUSE-00923`, `HOUSE-00924`, `HOUSE-00925`, then this `HOUSE-00926` one-task window checkpoint.
+Normal gameplay still uses canonical production materials; hashed debug/blockout colours require
+an explicit scene or debug flag. **`VISUAL-GATE-1` has not passed.**
+
+Before window-role split: [eight Round 11 fixed gameplay views](visual-review/captures/house-00925-exterior-exposure-r1).
+After: [the same eight Round 12 views](visual-review/captures/house-00926-windows-r1), fixed to
+clear 10:30 Tier S/High software Mesa. All eight were recaptured and visually inspected. The
+front windows now show pale painted frames, sashes, meeting rails and glass instead of naked blue
+holes, while living/family/kitchen window-facing views also improve. Entrance, central hall and
+the original living-room camera are unchanged. The front façade remains a dark, almost featureless
+slab with thin roof/front-entry composition; the foyer, hall and kitchen still look empty and
+underlit. Living/family have primary seating groups but flat light, fluorescent plant leaves and
+a bare beige chimney. The fixed winter night sun/season views expose silver-bright window rails
+against a nearly unlit wall, to assess together with façade daylight. See Round 12 in
+[the visual-review log](visual-review/README.md). Screenshot evidence is not a claim of final polish.
+
+Implementation: three stable, approved-derived outside-window material ids split their frame and
+pane shell classes from portal-owned indoor skirting/borrowed-light glass. The existing exterior
+BVH includes only these exact weather-facing roles, not whole room trim/glass chunks; deployed
+instances increase from 104 to 170. Measured chunk exceptions are explicit and retain the stale
+budget gate. Affected cell lightmaps were deterministically rebaked (78 daylight/124 switch-group
+products), the 508-chunk world and pet navigation were rebuilt, the 16-stage content graph is
+fresh and new IDs/licence credits/budget reports are durable. Strict golden changes were limited
+to 31 visually reviewed window-affected views, not a blanket regeneration. The direct 12-test
+actual-software render suite passes, including 18 culled/unculled pairs. The full 1,587-case
+offscreen CTest passes all 1,575 runnable tests; `tools/ci/run_checks.sh` passes 323 strict-XNA
+translation units. `CNA_CNAEXT=OFF`, canonical room/portal/collision architecture, provenance and
+stable IDs remain intact. A first desktop-video parallel run received mouse input and failed one
+headless camera test; that test passed alone and in the full offscreen rerun. A separate software
+CTest run was obstructed by a concurrent sibling CNA source-glob change causing CMake to write a
+read-only third-party dependency; build-access content-current and direct software-image checks
+provided the intended verification without modifying CNA.
+
+Next highest visible value: diagnose why approved `MAT_SIDING_WARM_WHITE`/LM_DAY presents as a
+uniform dark grey façade and why the central entry/roof composition appears skeletal in the
+normal front camera; use actual pixels, material/UV/lightmap evidence and recapture rather than
+recolouring. Then place licensed primary furnishing and visible room fixtures in the foyer/hall/
+kitchen route and make their day/evening light credible. Do not detour into distant systems or
+claim the first visual gate passed. The HUD's fixed 32.1-fps overlay is not a measured throughput
+result. Sibling CNA remains independent and was not edited or staged here.
+
+## Archived HOUSE-00925 checkpoint — 2026-09-15
 
 Branch `develop`; verify HEAD and worktree before acting. This sprint session started at
 `238d6aed27c1e8662f0d118013ef08bb801ae018` (`HOUSE-00922`) and has committed

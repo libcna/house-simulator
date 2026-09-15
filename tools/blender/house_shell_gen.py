@@ -747,6 +747,8 @@ SURFACE_COLOURS = {
     "exterior":  (0.72, 0.70, 0.64, 1.0),
     "trim":      (0.96, 0.96, 0.94, 1.0),
     "glass":     (0.55, 0.72, 0.80, 0.35),
+    "window_frame": (0.96, 0.94, 0.90, 1.0),
+    "window_glass": (0.55, 0.72, 0.80, 0.35),
     "stair":     (0.55, 0.42, 0.30, 1.0),
     "roof":      (0.32, 0.30, 0.30, 1.0),
     "structure": (0.68, 0.58, 0.44, 1.0),
@@ -763,6 +765,8 @@ SHELL_MATERIALS = {
     "exterior": "MAT_SIDING_WARM_WHITE",
     "trim": "MAT_DOOR_PAINTED",
     "glass": "MAT_GLASS_CLEAR",
+    "window_frame": "MAT_WINDOW_FRAME_WHITE",
+    "window_glass": "MAT_WINDOW_GLASS_CLEAR",
     "stair": "MAT_DOOR_HARDWOOD",
     "roof": "MAT_ROOF_SHINGLE",
     "structure": "MAT_HATCH_PLY",
@@ -826,7 +830,7 @@ def planar_uvs(mesh) -> None:
 
 def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
                            cells_by_id=None) -> dict[str, str]:
-    """Resolve the ten semantic shell classes to authored material ids for one cell.
+    """Resolve the semantic shell classes to authored material ids for one cell.
 
     Floor, wall, ceiling and trim are the `HOUSE-00908` room palette. A window already names its
     clear or obscured glass in `layout.openings.json`, and a stair already names its construction
@@ -861,7 +865,12 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
             f"{cell.get('id')}: generated glass is one surface class but its windows name "
             f"multiple materials: {', '.join(sorted(glass))}")
     if glass:
-        result["glass"] = next(iter(glass))
+        source_glass = next(iter(glass))
+        result["glass"] = source_glass
+        result["window_glass"] = {
+            "MAT_GLASS_CLEAR": "MAT_WINDOW_GLASS_CLEAR",
+            "MAT_GLASS_OBSCURED": "MAT_WINDOW_GLASS_OBSCURED",
+        }.get(source_glass, source_glass)
 
     stair_surfaces = {
         row.get("surface") for row in flights if row.get("fromCell") == cell.get("id")
@@ -1414,28 +1423,31 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
 
                     owner = window_owner(portal_cells.get(hole[4]), cells_by_id, cell["id"])
                     if owner == cell["id"]:
+                        frame_class = "window_frame" if outside else "trim"
+                        glass_class = "window_glass" if outside else "glass"
                         # The frame: a ring round the hole, filling the reveal's depth.
                         f = FRAME_SECTION
-                        band(hu0, hu1, hv0, hv0 + f)
-                        band(hu0, hu1, hv1 - f, hv1)
-                        band(hu0, hu0 + f, hv0 + f, hv1 - f)
-                        band(hu1 - f, hu1, hv0 + f, hv1 - f)
+                        band(hu0, hu1, hv0, hv0 + f, klass=frame_class)
+                        band(hu0, hu1, hv1 - f, hv1, klass=frame_class)
+                        band(hu0, hu0 + f, hv0 + f, hv1 - f, klass=frame_class)
+                        band(hu1 - f, hu1, hv0 + f, hv1 - f, klass=frame_class)
                         # The sash, inside the frame, and the glass inside the sash.
                         su0, su1, sv0, sv1 = hu0 + f, hu1 - f, hv0 + f, hv1 - f
                         g = SASH_SECTION
                         depth = (lo_face + hi_face) / 2.0
                         sash_lo, sash_hi = depth - g / 2.0, depth + g / 2.0
-                        band(su0, su1, sv0, sv0 + g, sash_lo, sash_hi)
-                        band(su0, su1, sv1 - g, sv1, sash_lo, sash_hi)
-                        band(su0, su0 + g, sv0 + g, sv1 - g, sash_lo, sash_hi)
-                        band(su1 - g, su1, sv0 + g, sv1 - g, sash_lo, sash_hi)
+                        band(su0, su1, sv0, sv0 + g, sash_lo, sash_hi, klass=frame_class)
+                        band(su0, su1, sv1 - g, sv1, sash_lo, sash_hi, klass=frame_class)
+                        band(su0, su0 + g, sv0 + g, sv1 - g, sash_lo, sash_hi, klass=frame_class)
+                        band(su1 - g, su1, sv0 + g, sv1 - g, sash_lo, sash_hi, klass=frame_class)
                         if has_meeting_rail(opening.get("type")):
                             middle = (sv0 + sv1) / 2.0
                             band(su0, su1, middle - MEETING_RAIL / 2.0,
-                                 middle + MEETING_RAIL / 2.0, sash_lo, sash_hi)
+                                 middle + MEETING_RAIL / 2.0, sash_lo, sash_hi,
+                                 klass=frame_class)
                         band(su0 + g, su1 - g, sv0 + g, sv1 - g,
                              depth - GLASS_THICK / 2.0, depth + GLASS_THICK / 2.0,
-                             klass="glass")
+                             klass=glass_class)
 
                     # `HOUSE-00469`: a basement hopper sits in a well, outside the wall, open to
                     # the sky. §12.6 says so and gives the sill at −0.45 absolute; the well holds
@@ -2684,6 +2696,8 @@ def selftest(output: Path) -> int:
             f"a cell carries one material per surface class ({len(painted.data.materials)})")
     require({"floor", "ceiling", "wall", "exterior", "trim", "glass"} <= used,
             f"and the kitchen uses the six classes a room has ({sorted(used)})")
+    require({"window_frame", "window_glass"} <= used,
+            f"weather-facing frames and panes split from borrowed indoor detail ({sorted(used)})")
     assigned = cell_surface_materials(subject, openings_by_portal.values(), all_portals,
                                       cells_by_id=cells)
     require(assigned["floor"] == subject["floorMaterial"]
@@ -2692,8 +2706,9 @@ def selftest(output: Path) -> int:
             and assigned["trim"] == subject["trimMaterial"],
             f"its four palette fields are the four generated finishes ({assigned})")
     require(assigned["glass"] == "MAT_GLASS_CLEAR"
+            and assigned["window_glass"] == "MAT_WINDOW_GLASS_CLEAR"
             and assigned["exterior"] == "MAT_SIDING_WARM_WHITE",
-            "and its opening schedule and Colonial siding supply glass and outer skin")
+            "and the opening schedule supplies both indoor and weather-facing glass")
     document, _error = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
     require(len(document.get("materials", [])) >= 6,
             f"the exported file carries them ({len(document.get('materials', []))})")
@@ -2729,7 +2744,7 @@ def selftest(output: Path) -> int:
     require(set(LIGHTMAP_RECEIVERS) == {"floor", "ceiling", "wall", "exterior"},
             f"the receivers are the room-scale classes, named once ({LIGHTMAP_RECEIVERS})")
     require(not (set(LIGHTMAP_RECEIVERS) & {"trim", "glass", "metal", "stair", "structure",
-                                            "roof"}),
+                                            "roof", "window_frame", "window_glass"}),
             "and no detail class is one of them")
     receiver_indices = {SURFACE_ORDER.index(name) for name in LIGHTMAP_RECEIVERS}
     loose = 0

@@ -105,7 +105,7 @@
       "daylight": { "orientation": "E", "exposure": 0.10 },
       "lightGroups": ["LG_B1_MECHANICAL_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:4845bd79519f4b1d366641444aa630065405bca7dc6640cce2cb7b7ed8ac2685",
+        "shellHash": "sha256:1f4ccb7e19216e7581bd0db43c53411c5cdbadbcef285ba7dde9af7d8a9bc8a4",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/B1_MECHANICAL_LM_DAY",
           "scale": 1.0004640817642212
@@ -114,7 +114,7 @@
           {
             "group": "LG_B1_MECHANICAL_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN",
-            "scale": 11.607794761657715
+            "scale": 11.607935905456543
           }
         ]
       },
@@ -244,21 +244,21 @@
       "daylight": { "orientation": "N", "exposure": 0.18 },
       "lightGroups": ["LG_B1_GYM_MAIN", "LG_B1_GYM_MIRROR"],
       "lightmaps": {
-        "shellHash": "sha256:6b0dc88a271c937e6785d36583e2adbef65a81d4ecf116518a96540dc3e759b4",
+        "shellHash": "sha256:63ec03161853385353262319e00cfef2c1554104a16668d13375317f704e0df7",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/B1_GYM_LM_DAY",
-          "scale": 1.0013494491577148
+          "scale": 1.0013505220413208
         },
         "artificial": [
           {
             "group": "LG_B1_GYM_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/B1_GYM_LM_LG_B1_GYM_MAIN",
-            "scale": 15.885458946228027
+            "scale": 15.885442733764648
           },
           {
             "group": "LG_B1_GYM_MIRROR",
             "contentName": "Textures/Lightmaps/Artificial/B1_GYM_LM_LG_B1_GYM_MIRROR",
-            "scale": 0.916225790977478
+            "scale": 0.9162259101867676
           }
         ]
       },
@@ -275,7 +275,7 @@
       "daylight": { "orientation": "NW", "exposure": 0.18 },
       "lightGroups": ["LG_B1_WORKSHOP_MAIN", "LG_B1_WORKSHOP_BENCH"],
       "lightmaps": {
-        "shellHash": "sha256:b3e91a278edee748e5c84e6c89b655497c693ea54303aa31d26d2baed8e4b42f",
+        "shellHash": "sha256:663e49e9a4c1b73d2985574d96e355b419be4b6ee197c3668c9f2417a537d926",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/B1_WORKSHOP_LM_DAY",
           "scale": 1.000951886177063
@@ -284,12 +284,12 @@
           {
             "group": "LG_B1_WORKSHOP_BENCH",
             "contentName": "Textures/Lightmaps/Artificial/B1_WORKSHOP_LM_LG_B1_WORKSHOP_BENCH",
-            "scale": 0.004157417919486761
+            "scale": 0.004158456344157457
           },
           {
             "group": "LG_B1_WORKSHOP_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/B1_WORKSHOP_LM_LG_B1_WORKSHOP_MAIN",
-            "scale": 7.542011737823486
+            "scale": 7.542081356048584
           }
         ]
       },
@@ -307,7 +307,7 @@
       "daylight": { "orientation": "W", "exposure": 0.12 },
       "lightGroups": ["LG_B1_STOR1_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:cc87151c0bccc1506df6105dfa0ea1e883a09e1caf21d10554dc6b4896ed6b11",
+        "shellHash": "sha256:a12634c92c2c2ae650ed2753a99f93296bd4dd526cec1f2e40827496de793d71",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/B1_STOR1_LM_DAY",
           "scale": 1.0003461837768555
@@ -316,7 +316,7 @@
           {
             "group": "LG_B1_STOR1_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/B1_STOR1_LM_LG_B1_STOR1_MAIN",
-            "scale": 10.895790100097656
+            "scale": 10.895824432373047
           }
         ]
       },
@@ -334,7 +334,7 @@
       "daylight": { "orientation": "W", "exposure": 0.12 },
       "lightGroups": ["LG_B1_STOR2_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:69205c190fbd254a35a1563bd9ea653bec2bb4ed74c3e14cfe044454e1042088",
+        "shellHash": "sha256:e4df2a33c4c729ab19cb28ca0024f096b324ba8a58e6e5c497f992f89b1911d5",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/B1_STOR2_LM_DAY",
           "scale": 1.0014009475708008
@@ -343,7 +343,7 @@
           {
             "group": "LG_B1_STOR2_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/B1_STOR2_LM_LG_B1_STOR2_MAIN",
-            "scale": 3.828664541244507
+            "scale": 3.82867169380188
           }
         ]
       },
@@ -491,7 +491,7 @@
       "daylight": { "orientation": "N", "exposure": 0.35 },
       "lightGroups": ["LG_L0_FOYER_MAIN", "LG_L0_FOYER_ACCENT"],
       "lightmaps": {
-        "shellHash": "sha256:3eef7f097e253eb52d3b934feb3b6d2f269dde5c65f8c0cb7224a161ef326b98",
+        "shellHash": "sha256:42a02f5b31361a992df96d3a9a235879dcc45dee8672ea438ab736feef362771",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY",
           "scale": 1.0000001192092896
@@ -500,12 +500,12 @@
           {
             "group": "LG_L0_FOYER_ACCENT",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT",
-            "scale": 0.02183302864432335
+            "scale": 0.02189040184020996
           },
           {
             "group": "LG_L0_FOYER_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN",
-            "scale": 0.07169205695390701
+            "scale": 0.07171715050935745
           }
         ]
       },
@@ -557,7 +557,7 @@
       "daylight": { "orientation": "E", "exposure": 0.28 },
       "lightGroups": ["LG_L0_STAIR_MAIN_MAIN", "LG_L0_STAIR_MAIN_STEP"],
       "lightmaps": {
-        "shellHash": "sha256:462c9dfe74d0d3b5b3e9a986d6edf03035bce1d8b83d2a8d57e34ac86abae627",
+        "shellHash": "sha256:a97b4b261b1062b9213eee85fe679713b5d9161ea25d3272087c29b5a501be64",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY",
           "scale": 1.000000238418579
@@ -589,7 +589,7 @@
       "daylight": { "orientation": "E", "exposure": 0.22 },
       "lightGroups": ["LG_L0_MUDROOM_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:88a400f4fe74c5da3de1ccc746d47be80297da566edb4beb77663b660eef7988",
+        "shellHash": "sha256:494373c797ed6938900b23c07f126d59341f25b8cdae83258aebaab93300d1c7",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_MUDROOM_LM_DAY",
           "scale": 1.000000238418579
@@ -598,7 +598,7 @@
           {
             "group": "LG_L0_MUDROOM_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN",
-            "scale": 3.072723865509033
+            "scale": 3.0727241039276123
           }
         ]
       },
@@ -671,7 +671,7 @@
       "daylight": { "orientation": "S", "exposure": 0.52 },
       "lightGroups": ["LG_L0_FAMILY_MAIN", "LG_L0_FAMILY_MEDIA", "LG_L0_FAMILY_READING"],
       "lightmaps": {
-        "shellHash": "sha256:09381332c387fc48107cbc5650ec8a16dc410847814174e394febc190b71bbc1",
+        "shellHash": "sha256:4cf846938d15a67e3bb7784a72ceb64a1cfbb73bc3e7698409261bcc05280d20",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_FAMILY_LM_DAY",
           "scale": 1.0000001192092896
@@ -680,7 +680,7 @@
           {
             "group": "LG_L0_FAMILY_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MAIN",
-            "scale": 6.417865753173828
+            "scale": 6.417866230010986
           },
           {
             "group": "LG_L0_FAMILY_MEDIA",
@@ -690,7 +690,7 @@
           {
             "group": "LG_L0_FAMILY_READING",
             "contentName": "Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_READING",
-            "scale": 0.02002924494445324
+            "scale": 0.02002936601638794
           }
         ]
       },
@@ -708,7 +708,7 @@
       "daylight": { "orientation": "NW", "exposure": 0.46 },
       "lightGroups": ["LG_L0_LIVING_MAIN", "LG_L0_LIVING_FIRE", "LG_L0_LIVING_PIANO"],
       "lightmaps": {
-        "shellHash": "sha256:39bb5b1c3a6920f735d06f39704e9139558dbef6494fed158091c558abdf941a",
+        "shellHash": "sha256:b02cb041138f87eff4a29a8d76651dd5f2f6df8b719b4bab38560b4a06e8220e",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY",
           "scale": 1.000000238418579
@@ -717,17 +717,17 @@
           {
             "group": "LG_L0_LIVING_FIRE",
             "contentName": "Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_FIRE",
-            "scale": 0.01760788820683956
+            "scale": 0.01768873631954193
           },
           {
             "group": "LG_L0_LIVING_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_MAIN",
-            "scale": 10.550629615783691
+            "scale": 10.550644874572754
           },
           {
             "group": "LG_L0_LIVING_PIANO",
             "contentName": "Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_PIANO",
-            "scale": 0.018805617466568947
+            "scale": 0.018816860392689705
           }
         ]
       },
@@ -746,7 +746,7 @@
       "daylight": { "orientation": "NW", "exposure": 0.40 },
       "lightGroups": ["LG_L0_OFFICE_MAIN", "LG_L0_OFFICE_DESK"],
       "lightmaps": {
-        "shellHash": "sha256:823428476063d2afdab741b44586e5bf0f575e65ed8bb3987a3a59fcde32ce31",
+        "shellHash": "sha256:085afb8a7a2280663e0168131e5d25ce286b13657c9ed41dc3e5012a8ce10190",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_OFFICE_LM_DAY",
           "scale": 1.0000001192092896
@@ -755,12 +755,12 @@
           {
             "group": "LG_L0_OFFICE_DESK",
             "contentName": "Textures/Lightmaps/Artificial/L0_OFFICE_LM_LG_L0_OFFICE_DESK",
-            "scale": 0.0036318739876151085
+            "scale": 0.003632058622315526
           },
           {
             "group": "LG_L0_OFFICE_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_OFFICE_LM_LG_L0_OFFICE_MAIN",
-            "scale": 21.977012634277344
+            "scale": 21.977073669433594
           }
         ]
       },
@@ -887,7 +887,7 @@
       "daylight": { "orientation": "W", "exposure": 0.14 },
       "lightGroups": ["LG_L0_BUTLERS_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:45412076fc2be26a78dab0d998b1c901e9c97955ce2eff38f7276b5caa4d1799",
+        "shellHash": "sha256:75d0e22d39fd9c6aa1c4e353c900f307b5c8002bbe05768d40bad2f007741e20",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_BUTLERS_LM_DAY",
           "scale": 1.0000001192092896
@@ -896,7 +896,7 @@
           {
             "group": "LG_L0_BUTLERS_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_BUTLERS_LM_LG_L0_BUTLERS_MAIN",
-            "scale": 9.929945945739746
+            "scale": 9.930042266845703
           }
         ]
       },
@@ -914,7 +914,7 @@
       "daylight": { "orientation": "W", "exposure": 0.10 },
       "lightGroups": ["LG_L0_PANTRY_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:978453d71e9d36b6309c023708ef2647126bd31c8535323a50050d50459e10b8",
+        "shellHash": "sha256:a541cf56b381fee98e23f18958da83596587da1a5ba44ccde7f4738bce235cb7",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_PANTRY_LM_DAY",
           "scale": 1.000000238418579
@@ -945,7 +945,7 @@
                        "LG_L0_KITCHEN_UNDERCAB",
                        "LG_L0_KITCHEN_SINK"],
       "lightmaps": {
-        "shellHash": "sha256:7b95f7a0f2d1a3831361184db09d63ce51d0c831840cfd44d176afb0edfcd236",
+        "shellHash": "sha256:0323dac7ad306576f5d37f4e0f342556391b2115726e1bbdf4fa55cdbc634419",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY",
           "scale": 1.0000001192092896
@@ -954,7 +954,7 @@
           {
             "group": "LG_L0_KITCHEN_ISLAND",
             "contentName": "Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND",
-            "scale": 0.11717136949300766
+            "scale": 0.11717137694358826
           },
           {
             "group": "LG_L0_KITCHEN_MAIN",
@@ -988,7 +988,7 @@
       "daylight": { "orientation": "S", "exposure": 0.82 },
       "lightGroups": ["LG_L0_SUNROOM_MAIN", "LG_L0_SUNROOM_BAR"],
       "lightmaps": {
-        "shellHash": "sha256:3d3b7c497600489fa6e2e9df2ee4773f8bc569754fe3c624dc36d612b32d45c7",
+        "shellHash": "sha256:186dd631678d4367b2e619ebc584f14e288a9fc0d91b2aa0af07d3ef261d09ba",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY",
           "scale": 1.000000238418579
@@ -1028,7 +1028,7 @@
       "daylight": { "orientation": "E", "exposure": 0.26 },
       "lightGroups": ["LG_L0_GARAGE_MAIN", "LG_L0_GARAGE_OPENER"],
       "lightmaps": {
-        "shellHash": "sha256:4635910dbb529b1b2d04ba23c29060efab735d74cf69d86633fdeea2c845c666",
+        "shellHash": "sha256:bd3f15a581b326cdce1e8deb156490fc296f6d089b5e24130e16fc056c8fc213",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY",
           "scale": 1.000000238418579
@@ -1037,12 +1037,12 @@
           {
             "group": "LG_L0_GARAGE_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN",
-            "scale": 3.2405972480773926
+            "scale": 3.240710496902466
           },
           {
             "group": "LG_L0_GARAGE_OPENER",
             "contentName": "Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER",
-            "scale": 0.4404882490634918
+            "scale": 0.44049352407455444
           }
         ]
       },
@@ -1122,7 +1122,7 @@
       "daylight": { "orientation": "N", "exposure": 0.42 },
       "lightGroups": ["LG_L1_LANDING_MAIN", "LG_L1_LANDING_SEAT"],
       "lightmaps": {
-        "shellHash": "sha256:0e63a77ce45ac25c7d46a522165c7d92a57e212482506ddc412c287514007749",
+        "shellHash": "sha256:57218f4ce29c1c1320a4f37cf7727cb10cbedf59c1dc6a60eb1150fa3e450189",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_LANDING_LM_DAY",
           "scale": 1.0000001192092896
@@ -1136,7 +1136,7 @@
           {
             "group": "LG_L1_LANDING_SEAT",
             "contentName": "Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_SEAT",
-            "scale": 0.02595117874443531
+            "scale": 0.025951264426112175
           }
         ]
       },
@@ -1155,7 +1155,7 @@
       "daylight": { "orientation": "E", "exposure": 0.26 },
       "lightGroups": ["LG_L1_STAIR_MAIN_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:36432b0eeaf1915f8ba33cbe0c429176ff4b3d7362e338b53c263c4e0dcacf99",
+        "shellHash": "sha256:9308bea5a34bfe2f985a7954dab596809e184ccf6ba0ce3c80aed28dc3c6405a",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY",
           "scale": 1.000000238418579
@@ -1164,7 +1164,7 @@
           {
             "group": "LG_L1_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN",
-            "scale": 0.06499706208705902
+            "scale": 0.06499706953763962
           }
         ]
       },
@@ -1247,7 +1247,7 @@
                        "LG_L1_MASTER_BED_DRESSER",
                        "LG_L1_MASTER_BED_SEATING"],
       "lightmaps": {
-        "shellHash": "sha256:93b7611aceef4d437d63c4c7fcba7a2c0bbe314ba4d7d927c19b86a03b4b0cd1",
+        "shellHash": "sha256:8ece5992ae324b01d0e1ad9552a30591af3da9b71b0ad7a9f6471087a6a1bb5a",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_MASTER_BED_LM_DAY",
           "scale": 1.000000238418579
@@ -1256,22 +1256,22 @@
           {
             "group": "LG_L1_MASTER_BED_BEDSIDE",
             "contentName": "Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_BEDSIDE",
-            "scale": 0.032821688801050186
+            "scale": 0.03283298760652542
           },
           {
             "group": "LG_L1_MASTER_BED_DRESSER",
             "contentName": "Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_DRESSER",
-            "scale": 0.01398427877575159
+            "scale": 0.013995498418807983
           },
           {
             "group": "LG_L1_MASTER_BED_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_MAIN",
-            "scale": 3.0870189666748047
+            "scale": 3.087151050567627
           },
           {
             "group": "LG_L1_MASTER_BED_SEATING",
             "contentName": "Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_SEATING",
-            "scale": 0.024464229121804237
+            "scale": 0.02448180504143238
           }
         ]
       },
@@ -1290,7 +1290,7 @@
       "daylight": { "orientation": "W", "exposure": 0.16 },
       "lightGroups": ["LG_L1_MASTER_BATH_MAIN", "LG_L1_MASTER_BATH_VANITY", "LG_L1_MASTER_BATH_BATH"],
       "lightmaps": {
-        "shellHash": "sha256:96045c5ae7b0fd2886a304ba9d21590845751fcb43a9563f4e4deafd466bea07",
+        "shellHash": "sha256:058f198fa51712adc2e90155cc49aadedc90bfd6709826e8bfd9e72ae24b66db",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_MASTER_BATH_LM_DAY",
           "scale": 1.0000001192092896
@@ -1304,12 +1304,12 @@
           {
             "group": "LG_L1_MASTER_BATH_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_MAIN",
-            "scale": 17.98140525817871
+            "scale": 17.981403350830078
           },
           {
             "group": "LG_L1_MASTER_BATH_VANITY",
             "contentName": "Textures/Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_VANITY",
-            "scale": 1.194915533065796
+            "scale": 1.1949141025543213
           }
         ]
       },
@@ -1358,7 +1358,7 @@
       "daylight": { "orientation": "S", "exposure": 0.50 },
       "lightGroups": ["LG_L1_BED2_MAIN", "LG_L1_BED2_DESK"],
       "lightmaps": {
-        "shellHash": "sha256:2a5f6e01baaf00883ea934e006859f90ccda5d8e32dd6ed14133affc72ae5948",
+        "shellHash": "sha256:7894822de9705c3e13e8efb298ba2f94b7f0b05f612cbfce8d9eca5b837752d3",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_BED2_LM_DAY",
           "scale": 1.000000238418579
@@ -1372,7 +1372,7 @@
           {
             "group": "LG_L1_BED2_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_BED2_LM_LG_L1_BED2_MAIN",
-            "scale": 11.491515159606934
+            "scale": 11.491518020629883
           }
         ]
       },
@@ -1441,7 +1441,7 @@
       "daylight": { "orientation": "NW", "exposure": 0.38 },
       "lightGroups": ["LG_L1_BED3_MAIN", "LG_L1_BED3_BEDSIDE"],
       "lightmaps": {
-        "shellHash": "sha256:debbe70fd2ac31e64eebf2ccd96037c46b5a81a0d1a763a6190da10cd070e36e",
+        "shellHash": "sha256:37000d9f220deb4a6f7b2294a817d4e3a7e319280da3b82cd04b0abab1073d9e",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_BED3_LM_DAY",
           "scale": 1.000000238418579
@@ -1450,7 +1450,7 @@
           {
             "group": "LG_L1_BED3_BEDSIDE",
             "contentName": "Textures/Lightmaps/Artificial/L1_BED3_LM_LG_L1_BED3_BEDSIDE",
-            "scale": 0.0296475887298584
+            "scale": 0.029647625982761383
           },
           {
             "group": "LG_L1_BED3_MAIN",
@@ -1472,7 +1472,7 @@
       "daylight": { "orientation": "N", "exposure": 0.40 },
       "lightGroups": ["LG_L1_BED4_MAIN", "LG_L1_BED4_DESK"],
       "lightmaps": {
-        "shellHash": "sha256:6169af730cc5b8fe16ff4ad37ba3a8fcc771b46dd166af753be7cc92779a2271",
+        "shellHash": "sha256:5682f795de9de4e5396d42ccd2fa60bbd209453809f86a0ff3f5a752f03cb882",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_BED4_LM_DAY",
           "scale": 1.0000001192092896
@@ -1481,12 +1481,12 @@
           {
             "group": "LG_L1_BED4_DESK",
             "contentName": "Textures/Lightmaps/Artificial/L1_BED4_LM_LG_L1_BED4_DESK",
-            "scale": 0.004080937243998051
+            "scale": 0.004080836661159992
           },
           {
             "group": "LG_L1_BED4_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_BED4_LM_LG_L1_BED4_MAIN",
-            "scale": 24.246185302734375
+            "scale": 24.246158599853516
           }
         ]
       },
@@ -1504,7 +1504,7 @@
       "daylight": { "orientation": "W", "exposure": 0.12 },
       "lightGroups": ["LG_L1_BATH2_MAIN", "LG_L1_BATH2_VANITY"],
       "lightmaps": {
-        "shellHash": "sha256:d360d82a2120c0adada77553a80c63783f34de090c86674837bd7662b56e9ee6",
+        "shellHash": "sha256:01d88af9d13bcf33e7d7d8946808850ce33a0a49a1d77c43658eb796f6ad8524",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_BATH2_LM_DAY",
           "scale": 1.000000238418579
@@ -1513,12 +1513,12 @@
           {
             "group": "LG_L1_BATH2_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_BATH2_LM_LG_L1_BATH2_MAIN",
-            "scale": 20.56555938720703
+            "scale": 20.565561294555664
           },
           {
             "group": "LG_L1_BATH2_VANITY",
             "contentName": "Textures/Lightmaps/Artificial/L1_BATH2_LM_LG_L1_BATH2_VANITY",
-            "scale": 1.3854410648345947
+            "scale": 1.3854411840438843
           }
         ]
       },
@@ -1611,7 +1611,7 @@
       "daylight": { "orientation": "NE", "exposure": 0.34 },
       "lightGroups": ["LG_L1_BED5_MAIN", "LG_L1_BED5_BEDSIDE"],
       "lightmaps": {
-        "shellHash": "sha256:18801e4e3e42bf546218345090e6dc6275cb96b3043d074a2fae3fea5ff2f771",
+        "shellHash": "sha256:53545afcd659a0f36eba3566b3f44e3718b25613a41177537ff7883848c5ec43",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_BED5_LM_DAY",
           "scale": 1.0000001192092896
@@ -1620,7 +1620,7 @@
           {
             "group": "LG_L1_BED5_BEDSIDE",
             "contentName": "Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_BEDSIDE",
-            "scale": 0.03071259893476963
+            "scale": 0.030712604522705078
           },
           {
             "group": "LG_L1_BED5_MAIN",
@@ -1740,7 +1740,7 @@
       "daylight": { "orientation": "N", "exposure": 0.44 },
       "lightGroups": ["LG_L2_LANDING_MAIN", "LG_L2_LANDING_JULIET"],
       "lightmaps": {
-        "shellHash": "sha256:4838852ae4f5eb65c6b8c5fa1a0515bdb7c22daa838ec7557ec7da57549b11f6",
+        "shellHash": "sha256:7bb32cf1e8a3655ee1801cb1d74110b87f60bee49e5b3a079d91e5f80745ba96",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_LANDING_LM_DAY",
           "scale": 1.0000001192092896
@@ -1749,12 +1749,12 @@
           {
             "group": "LG_L2_LANDING_JULIET",
             "contentName": "Textures/Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_JULIET",
-            "scale": 0.015267145819962025
+            "scale": 0.015262341126799583
           },
           {
             "group": "LG_L2_LANDING_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_MAIN",
-            "scale": 5.375096321105957
+            "scale": 5.375097274780273
           }
         ]
       },
@@ -1772,7 +1772,7 @@
       "daylight": { "orientation": "E", "exposure": 0.24 },
       "lightGroups": ["LG_L2_STAIR_MAIN_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:3da7c11d498cbc7bd0e4bc77b829a2103c04b07ad67409c3d21a1e21071305fa",
+        "shellHash": "sha256:e27ee9a460863818b3d81f6377512474f4ee4242ad5afedbca66ac5aa5e4437d",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY",
           "scale": 1.0000001192092896
@@ -1781,7 +1781,7 @@
           {
             "group": "LG_L2_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN",
-            "scale": 0.06818404793739319
+            "scale": 0.06818307936191559
           }
         ]
       },
@@ -1888,7 +1888,7 @@
       "daylight": { "orientation": "NW", "exposure": 0.36 },
       "lightGroups": ["LG_L2_LIBRARY_MAIN", "LG_L2_LIBRARY_SHELVES", "LG_L2_LIBRARY_READING"],
       "lightmaps": {
-        "shellHash": "sha256:3fb97d61bec4321257cf5c639630d559f07f0cee49f0b44db33f223b5d322ca6",
+        "shellHash": "sha256:277f93654c6751e60016604718ba97b6123330e9569295c70d7b463dd1fb2be2",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_LIBRARY_LM_DAY",
           "scale": 1.0000001192092896
@@ -1897,17 +1897,17 @@
           {
             "group": "LG_L2_LIBRARY_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_MAIN",
-            "scale": 3.6483817100524902
+            "scale": 3.6484274864196777
           },
           {
             "group": "LG_L2_LIBRARY_READING",
             "contentName": "Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_READING",
-            "scale": 0.040709976106882095
+            "scale": 0.040985528379678726
           },
           {
             "group": "LG_L2_LIBRARY_SHELVES",
             "contentName": "Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_SHELVES",
-            "scale": 1.4081227779388428
+            "scale": 1.4082435369491577
           }
         ]
       },
@@ -1924,7 +1924,7 @@
       "daylight": { "orientation": "NW", "exposure": 0.36 },
       "lightGroups": ["LG_L2_BED6_MAIN", "LG_L2_BED6_SEWING"],
       "lightmaps": {
-        "shellHash": "sha256:9da94753d67a55352cc40aec52a3924caccfd2ba1b2e6bab9f92495fc2bbab5b",
+        "shellHash": "sha256:b07c083bce2643f13fe5760272963f156dd64616d04bedefafddd5423f0a8997",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_BED6_LM_DAY",
           "scale": 1.0000001192092896
@@ -1938,7 +1938,7 @@
           {
             "group": "LG_L2_BED6_SEWING",
             "contentName": "Textures/Lightmaps/Artificial/L2_BED6_LM_LG_L2_BED6_SEWING",
-            "scale": 0.004498985130339861
+            "scale": 0.004498985596001148
           }
         ]
       },
@@ -1956,7 +1956,7 @@
       "daylight": { "orientation": "W", "exposure": 0.12 },
       "lightGroups": ["LG_L2_BATH4_MAIN", "LG_L2_BATH4_VANITY"],
       "lightmaps": {
-        "shellHash": "sha256:830f4c8df1a9686cf675e6d293de71b7ca0fc75b312612e066d015b130fa76ff",
+        "shellHash": "sha256:2d32ba14602cc55df91ade28938e61e04119a6d13d3d0eed7b17b353ae93e8bc",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_BATH4_LM_DAY",
           "scale": 1.0000001192092896
@@ -1965,12 +1965,12 @@
           {
             "group": "LG_L2_BATH4_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L2_BATH4_LM_LG_L2_BATH4_MAIN",
-            "scale": 6.820467472076416
+            "scale": 6.820461750030518
           },
           {
             "group": "LG_L2_BATH4_VANITY",
             "contentName": "Textures/Lightmaps/Artificial/L2_BATH4_LM_LG_L2_BATH4_VANITY",
-            "scale": 1.1778919696807861
+            "scale": 1.1778886318206787
           }
         ]
       },
@@ -2063,7 +2063,7 @@
       "daylight": { "orientation": "SW", "exposure": 0.42 },
       "lightGroups": ["LG_L2_BED7_MAIN", "LG_L2_BED7_BEDSIDE"],
       "lightmaps": {
-        "shellHash": "sha256:ff07910f2d92eba56a38a7fad55798cb95417c20537646c4eb465d420b3b6d84",
+        "shellHash": "sha256:a3d819d8a406a440bfdade2a1a699b9c4990c780751f39adfaac4dd616c0c0bf",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_BED7_LM_DAY",
           "scale": 1.000000238418579
@@ -2072,7 +2072,7 @@
           {
             "group": "LG_L2_BED7_BEDSIDE",
             "contentName": "Textures/Lightmaps/Artificial/L2_BED7_LM_LG_L2_BED7_BEDSIDE",
-            "scale": 0.030781906098127365
+            "scale": 0.030781909823417664
           },
           {
             "group": "LG_L2_BED7_MAIN",
@@ -2096,7 +2096,7 @@
       "daylight": { "orientation": "S", "exposure": 0.48 },
       "lightGroups": ["LG_L2_GAMES_MAIN", "LG_L2_GAMES_TABLE", "LG_L2_GAMES_ARCADE"],
       "lightmaps": {
-        "shellHash": "sha256:85533d21e41ca429bce07afafe81bcfea744da505f1dd9293ed30f5dea3c8afc",
+        "shellHash": "sha256:26566fc60c0b76098e71fbd97cc14df8994472e026e3b28c7fc84c6607709e78",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_GAMES_LM_DAY",
           "scale": 1.000000238418579
@@ -2115,7 +2115,7 @@
           {
             "group": "LG_L2_GAMES_TABLE",
             "contentName": "Textures/Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_TABLE",
-            "scale": 0.0896439328789711
+            "scale": 0.08964411914348602
           }
         ]
       },
@@ -2132,7 +2132,7 @@
       "daylight": { "orientation": "S", "exposure": 0.46 },
       "lightGroups": ["LG_L2_SITTING_MAIN", "LG_L2_SITTING_READING"],
       "lightmaps": {
-        "shellHash": "sha256:4a9a7a68e1f4deea797c3bdf3c141431ff8da3e0dfadbe0596b12a81d74d396c",
+        "shellHash": "sha256:3927f9553587b5171bce32c124d13ba30e12160e1fa37b60bd72ba5bc3d6808b",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L2_SITTING_LM_DAY",
           "scale": 1.0000001192092896
@@ -2141,12 +2141,12 @@
           {
             "group": "LG_L2_SITTING_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L2_SITTING_LM_LG_L2_SITTING_MAIN",
-            "scale": 8.101346969604492
+            "scale": 8.101349830627441
           },
           {
             "group": "LG_L2_SITTING_READING",
             "contentName": "Textures/Lightmaps/Artificial/L2_SITTING_LM_LG_L2_SITTING_READING",
-            "scale": 0.03013928420841694
+            "scale": 0.030139902606606483
           }
         ]
       },
@@ -2315,7 +2315,7 @@
       "daylight": { "orientation": "S", "exposure": 0.40 },
       "lightGroups": ["LG_L3_ROOM_MAIN", "LG_L3_ROOM_DESK"],
       "lightmaps": {
-        "shellHash": "sha256:88f6154376c2e6e8cb33f5db2b239c51cdf1be8176aa45f410398ec487e6a408",
+        "shellHash": "sha256:17d7202149b0f01cf2c2b6f7abc945bd563f013c92a6423bb0a41bf06c7d7b93",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L3_ROOM_LM_DAY",
           "scale": 1.000000238418579
@@ -2407,7 +2407,7 @@
       "daylight": { "orientation": "S", "exposure": 0.22 },
       "lightGroups": ["LG_L3_STORE_N_MAIN"],
       "lightmaps": {
-        "shellHash": "sha256:62745ee8a8f8641f6908acfa39c0943dae9c4d782a565a9e4f8cad10a0f13340",
+        "shellHash": "sha256:b429f8ce8f220fc61720e45f23e78fdb6a61a3579511f29b88426f3a56d2b9e8",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L3_STORE_N_LM_DAY",
           "scale": 1.0000001192092896
@@ -2416,7 +2416,7 @@
           {
             "group": "LG_L3_STORE_N_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L3_STORE_N_LM_LG_L3_STORE_N_MAIN",
-            "scale": 0.04895671829581261
+            "scale": 0.048964377492666245
           }
         ]
       },

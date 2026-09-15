@@ -973,6 +973,9 @@ materials/materials	MAT_WATER_BASIN
 materials/materials	MAT_WATER_FLOW
 materials/materials	MAT_WATER_PUDDLE
 materials/materials	MAT_WATER_TOILET
+materials/materials	MAT_WINDOW_FRAME_WHITE
+materials/materials	MAT_WINDOW_GLASS_CLEAR
+materials/materials	MAT_WINDOW_GLASS_OBSCURED
 materials/materials	MAT_WOOD_OAK_FLOOR
 materials/materials	MAT_WOOD_WALNUT_FLOOR
 assets	MODEL_FALLBACK_BOX

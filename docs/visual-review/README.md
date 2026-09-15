@@ -404,3 +404,48 @@ full 1,586-registration CTest (1,578 runnable cases) pass.
 
 Remaining: finish the front façade and route furnishing/lighting, then audit why the brick bitmap
 collapses to one screen colour. `VISUAL-GATE-1` has **not passed**.
+
+## Round 12 — exterior windows join the playable façade
+
+Commit: `HOUSE-00926` checkpoint (`2026-09-15`; exact HEAD in `docs/handoff.md`).
+
+Before: [Round 11 fixed gameplay views](captures/house-00925-exterior-exposure-r1).
+After: [same eight views with exterior-window roles](captures/house-00926-windows-r1).
+
+Ranked visible defects after inspecting all eight new images:
+
+1. The front windows now have painted frames, sashes, meeting rails and tinted glazing, but the
+   broad façade is still a nearly uniform dark slab. Its siding, wall form and daylight are the
+   largest remaining exterior defect; the roof and front-door composition are thin and flat.
+2. Foyer, central hall and kitchen are empty and severely underlit; crossing the threshold still
+   feels like entering an unfinished shell. Their three fixed views did not materially improve.
+3. The living-room chimney still presents as one untextured beige box beside dark seating, and
+   living/family plant leaves remain fluorescent green against flat, pale upholstery. Exterior
+   window rails also read too silver-bright in the fixed winter night sun/season views, because
+   the unlit façade gives them no tonal context; the next exterior light/material pass must assess
+   both surfaces together.
+
+Fixed: canonical weather-facing window frames and panes now have their own licensed, approved
+material identities and Basic shell chunks instead of sharing each room's indoor trim and glass.
+The exterior BVH can show only those outside roles with the façade when a neighboring room is
+portal-closed; its deployed count grows from 104 to 170 instances. The front and four interior
+window-facing views visibly change; entrance, hall and the original living view are byte-identical.
+The 64-window schedule, borrowed-light interior glass, skirting, collision and room-owned
+residency remain intact. Both daylight and switch-group lightmaps for affected cells were
+deterministically rebaked and their shell hashes/bindings agree. All 31 deliberately changed
+golden pairs were inspected old/new before selective reference replacement: 17 explicit debug
+blockout, three production first-person, seven property blockout and four production sun/season
+views. The final content-build graph is 16/16 fresh; its second run rebuilt the navigation graph
+after collision's manifest fingerprint changed. The direct actual-software 12-test render suite
+passes, including all 18 culled/unculled view pairs. The first CTest attempt could not run image
+tests because a concurrent sibling CNA source-glob change triggered a CMake reconfiguration in a
+filesystem-restricted test sandbox; the same `world-content-current` build gate passed with
+proper build access, and direct software-render comparison then proved the images. The complete
+offscreen 1,587-registration CTest passes all 1,575 runnable tests after the exact canonical
+material-count fixtures were extended. An initial full desktop-video parallel run moved the
+headless camera through ambient mouse input; that test passed alone in software and hardware
+offscreen runs, then in the full offscreen rerun. `tools/ci/run_checks.sh` is green with 323
+strict-XNA translation units.
+
+Remaining: make the approved façade material respond to useful exterior daylight/form, then
+furnish and light the empty connected L0 route. `VISUAL-GATE-1` has **not passed**.

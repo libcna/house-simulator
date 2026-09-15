@@ -6,7 +6,7 @@
   "cells": 78,
   "emptyArtificialCells": 2,
   "groups": 124,
-  "invocationSeconds": 0.016,
+  "invocationSeconds": 0.011,
   "mode": "artificial",
   "products": [
     {
@@ -87,9 +87,9 @@
             "LIGHT_B1_GYM_MAIN_3",
             "LIGHT_B1_GYM_MAIN_4"
           ],
-          "mean": 0.045662770033931196,
-          "peak": 15.885458946228027,
-          "scale": 15.885458946228027
+          "mean": 0.045662916661174086,
+          "peak": 15.885442733764648,
+          "scale": 15.885442733764648
         },
         {
           "group": "LG_B1_GYM_MIRROR",
@@ -97,12 +97,12 @@
           "lights": [
             "LIGHT_B1_GYM_MIRROR_1"
           ],
-          "mean": 0.0020240627385718054,
-          "peak": 0.916225790977478,
-          "scale": 0.916225790977478
+          "mean": 0.0020240648492267687,
+          "peak": 0.9162259101867676,
+          "scale": 0.9162259101867676
         }
       ],
-      "shellHash": "sha256:6b0dc88a271c937e6785d36583e2adbef65a81d4ecf116518a96540dc3e759b4"
+      "shellHash": "sha256:63ec03161853385353262319e00cfef2c1554104a16668d13375317f704e0df7"
     },
     {
       "cell": "B1_HALL",
@@ -198,12 +198,12 @@
             "LIGHT_B1_MECHANICAL_MAIN_1",
             "LIGHT_B1_MECHANICAL_MAIN_2"
           ],
-          "mean": 0.041227504606786355,
-          "peak": 11.607794761657715,
-          "scale": 11.607794761657715
+          "mean": 0.04139815039393108,
+          "peak": 11.607935905456543,
+          "scale": 11.607935905456543
         }
       ],
-      "shellHash": "sha256:4845bd79519f4b1d366641444aa630065405bca7dc6640cce2cb7b7ed8ac2685"
+      "shellHash": "sha256:1f4ccb7e19216e7581bd0db43c53411c5cdbadbcef285ba7dde9af7d8a9bc8a4"
     },
     {
       "cell": "B1_STAIR",
@@ -232,12 +232,12 @@
           "lights": [
             "LIGHT_B1_STOR1_MAIN_1"
           ],
-          "mean": 0.006906312931853477,
-          "peak": 10.895790100097656,
-          "scale": 10.895790100097656
+          "mean": 0.006923138916205072,
+          "peak": 10.895824432373047,
+          "scale": 10.895824432373047
         }
       ],
-      "shellHash": "sha256:cc87151c0bccc1506df6105dfa0ea1e883a09e1caf21d10554dc6b4896ed6b11"
+      "shellHash": "sha256:a12634c92c2c2ae650ed2753a99f93296bd4dd526cec1f2e40827496de793d71"
     },
     {
       "cell": "B1_STOR2",
@@ -249,12 +249,12 @@
           "lights": [
             "LIGHT_B1_STOR2_MAIN_1"
           ],
-          "mean": 0.003844071825855993,
-          "peak": 3.828664541244507,
-          "scale": 3.828664541244507
+          "mean": 0.0038631991663601616,
+          "peak": 3.82867169380188,
+          "scale": 3.82867169380188
         }
       ],
-      "shellHash": "sha256:69205c190fbd254a35a1563bd9ea653bec2bb4ed74c3e14cfe044454e1042088"
+      "shellHash": "sha256:e4df2a33c4c729ab19cb28ca0024f096b324ba8a58e6e5c497f992f89b1911d5"
     },
     {
       "cell": "B1_UNDERSTAIR",
@@ -317,9 +317,9 @@
           "lights": [
             "LIGHT_B1_WORKSHOP_BENCH_1"
           ],
-          "mean": 0.00012524650388038588,
-          "peak": 0.004157417919486761,
-          "scale": 0.004157417919486761
+          "mean": 0.00012568146435871247,
+          "peak": 0.004158456344157457,
+          "scale": 0.004158456344157457
         },
         {
           "group": "LG_B1_WORKSHOP_MAIN",
@@ -328,12 +328,12 @@
             "LIGHT_B1_WORKSHOP_MAIN_1",
             "LIGHT_B1_WORKSHOP_MAIN_2"
           ],
-          "mean": 0.027143408640193017,
-          "peak": 7.542011737823486,
-          "scale": 7.542011737823486
+          "mean": 0.027324184727847867,
+          "peak": 7.542081356048584,
+          "scale": 7.542081356048584
         }
       ],
-      "shellHash": "sha256:b3e91a278edee748e5c84e6c89b655497c693ea54303aa31d26d2baed8e4b42f"
+      "shellHash": "sha256:663e49e9a4c1b73d2985574d96e355b419be4b6ee197c3668c9f2417a537d926"
     },
     {
       "cell": "CELL_FREEZER_INTERIOR",
@@ -358,12 +358,12 @@
             "LIGHT_L0_BUTLERS_MAIN_1",
             "LIGHT_L0_BUTLERS_MAIN_2"
           ],
-          "mean": 0.014035041403250459,
-          "peak": 9.929945945739746,
-          "scale": 9.929945945739746
+          "mean": 0.014106529012676363,
+          "peak": 9.930042266845703,
+          "scale": 9.930042266845703
         }
       ],
-      "shellHash": "sha256:45412076fc2be26a78dab0d998b1c901e9c97955ce2eff38f7276b5caa4d1799"
+      "shellHash": "sha256:75d0e22d39fd9c6aa1c4e353c900f307b5c8002bbe05768d40bad2f007741e20"
     },
     {
       "cell": "L0_CLOSET_W",
@@ -423,9 +423,9 @@
             "LIGHT_L0_FAMILY_MAIN_3",
             "LIGHT_L0_FAMILY_MAIN_4"
           ],
-          "mean": 0.013365347049969351,
-          "peak": 6.417865753173828,
-          "scale": 6.417865753173828
+          "mean": 0.013365613661324308,
+          "peak": 6.417866230010986,
+          "scale": 6.417866230010986
         },
         {
           "group": "LG_L0_FAMILY_MEDIA",
@@ -433,7 +433,7 @@
           "lights": [
             "LIGHT_L0_FAMILY_MEDIA_1"
           ],
-          "mean": 0.0022355893614423813,
+          "mean": 0.0022355441371456454,
           "peak": 1.0876368284225464,
           "scale": 1.0876368284225464
         },
@@ -443,12 +443,12 @@
           "lights": [
             "LIGHT_L0_FAMILY_READING_1"
           ],
-          "mean": 0.002481988823811404,
-          "peak": 0.02002924494445324,
-          "scale": 0.02002924494445324
+          "mean": 0.002481924619898047,
+          "peak": 0.02002936601638794,
+          "scale": 0.02002936601638794
         }
       ],
-      "shellHash": "sha256:09381332c387fc48107cbc5650ec8a16dc410847814174e394febc190b71bbc1"
+      "shellHash": "sha256:4cf846938d15a67e3bb7784a72ceb64a1cfbb73bc3e7698409261bcc05280d20"
     },
     {
       "cell": "L0_FOYER",
@@ -461,9 +461,9 @@
             "LIGHT_L0_FOYER_ACCENT_1",
             "LIGHT_L0_FOYER_ACCENT_2"
           ],
-          "mean": 0.003077923073861009,
-          "peak": 0.02183302864432335,
-          "scale": 0.02183302864432335
+          "mean": 0.0030999494115337618,
+          "peak": 0.02189040184020996,
+          "scale": 0.02189040184020996
         },
         {
           "group": "LG_L0_FOYER_MAIN",
@@ -471,12 +471,12 @@
           "lights": [
             "LIGHT_L0_FOYER_MAIN_1"
           ],
-          "mean": 0.005813395759804752,
-          "peak": 0.07169205695390701,
-          "scale": 0.07169205695390701
+          "mean": 0.005849998193741913,
+          "peak": 0.07171715050935745,
+          "scale": 0.07171715050935745
         }
       ],
-      "shellHash": "sha256:3eef7f097e253eb52d3b934feb3b6d2f269dde5c65f8c0cb7224a161ef326b98"
+      "shellHash": "sha256:42a02f5b31361a992df96d3a9a235879dcc45dee8672ea438ab736feef362771"
     },
     {
       "cell": "L0_GARAGE",
@@ -491,9 +491,9 @@
             "LIGHT_L0_GARAGE_MAIN_3",
             "LIGHT_L0_GARAGE_MAIN_4"
           ],
-          "mean": 0.01915571414006602,
-          "peak": 3.2405972480773926,
-          "scale": 3.2405972480773926
+          "mean": 0.01917644418091582,
+          "peak": 3.240710496902466,
+          "scale": 3.240710496902466
         },
         {
           "group": "LG_L0_GARAGE_OPENER",
@@ -501,12 +501,12 @@
           "lights": [
             "LIGHT_L0_GARAGE_OPENER_1"
           ],
-          "mean": 0.0015101805814581694,
-          "peak": 0.4404882490634918,
-          "scale": 0.4404882490634918
+          "mean": 0.0015117356782751244,
+          "peak": 0.44049352407455444,
+          "scale": 0.44049352407455444
         }
       ],
-      "shellHash": "sha256:4635910dbb529b1b2d04ba23c29060efab735d74cf69d86633fdeea2c845c666"
+      "shellHash": "sha256:bd3f15a581b326cdce1e8deb156490fc296f6d089b5e24130e16fc056c8fc213"
     },
     {
       "cell": "L0_GARAGE_LOFT",
@@ -567,9 +567,9 @@
             "LIGHT_L0_KITCHEN_ISLAND_2",
             "LIGHT_L0_KITCHEN_ISLAND_3"
           ],
-          "mean": 0.013495077698146543,
-          "peak": 0.11717136949300766,
-          "scale": 0.11717136949300766
+          "mean": 0.013495034301419967,
+          "peak": 0.11717137694358826,
+          "scale": 0.11717137694358826
         },
         {
           "group": "LG_L0_KITCHEN_MAIN",
@@ -580,7 +580,7 @@
             "LIGHT_L0_KITCHEN_MAIN_3",
             "LIGHT_L0_KITCHEN_MAIN_4"
           ],
-          "mean": 0.011263115422032621,
+          "mean": 0.011263079941007172,
           "peak": 15.104341506958008,
           "scale": 15.104341506958008
         },
@@ -590,7 +590,7 @@
           "lights": [
             "LIGHT_L0_KITCHEN_SINK_1"
           ],
-          "mean": 0.00010642203244052705,
+          "mean": 0.00010642194858526053,
           "peak": 0.003496917663142085,
           "scale": 0.003496917663142085
         },
@@ -603,12 +603,12 @@
             "LIGHT_L0_KITCHEN_UNDERCAB_3",
             "LIGHT_L0_KITCHEN_UNDERCAB_4"
           ],
-          "mean": 0.007004367714544544,
+          "mean": 0.007004340194804047,
           "peak": 1.260299563407898,
           "scale": 1.260299563407898
         }
       ],
-      "shellHash": "sha256:7b95f7a0f2d1a3831361184db09d63ce51d0c831840cfd44d176afb0edfcd236"
+      "shellHash": "sha256:0323dac7ad306576f5d37f4e0f342556391b2115726e1bbdf4fa55cdbc634419"
     },
     {
       "cell": "L0_LAUNDRY",
@@ -639,9 +639,9 @@
             "LIGHT_L0_LIVING_FIRE_1",
             "LIGHT_L0_LIVING_FIRE_2"
           ],
-          "mean": 0.0025575284995750613,
-          "peak": 0.01760788820683956,
-          "scale": 0.01760788820683956
+          "mean": 0.002577636481601109,
+          "peak": 0.01768873631954193,
+          "scale": 0.01768873631954193
         },
         {
           "group": "LG_L0_LIVING_MAIN",
@@ -652,9 +652,9 @@
             "LIGHT_L0_LIVING_MAIN_3",
             "LIGHT_L0_LIVING_MAIN_4"
           ],
-          "mean": 0.010958178148021407,
-          "peak": 10.550629615783691,
-          "scale": 10.550629615783691
+          "mean": 0.01103170248491604,
+          "peak": 10.550644874572754,
+          "scale": 10.550644874572754
         },
         {
           "group": "LG_L0_LIVING_PIANO",
@@ -662,12 +662,12 @@
           "lights": [
             "LIGHT_L0_LIVING_PIANO_1"
           ],
-          "mean": 0.0019115356004965481,
-          "peak": 0.018805617466568947,
-          "scale": 0.018805617466568947
+          "mean": 0.0019247984166534677,
+          "peak": 0.018816860392689705,
+          "scale": 0.018816860392689705
         }
       ],
-      "shellHash": "sha256:39bb5b1c3a6920f735d06f39704e9139558dbef6494fed158091c558abdf941a"
+      "shellHash": "sha256:b02cb041138f87eff4a29a8d76651dd5f2f6df8b719b4bab38560b4a06e8220e"
     },
     {
       "cell": "L0_MUDROOM",
@@ -680,12 +680,12 @@
             "LIGHT_L0_MUDROOM_MAIN_1",
             "LIGHT_L0_MUDROOM_MAIN_2"
           ],
-          "mean": 0.010708954727688682,
-          "peak": 3.072723865509033,
-          "scale": 3.072723865509033
+          "mean": 0.010708841996093024,
+          "peak": 3.0727241039276123,
+          "scale": 3.0727241039276123
         }
       ],
-      "shellHash": "sha256:88a400f4fe74c5da3de1ccc746d47be80297da566edb4beb77663b660eef7988"
+      "shellHash": "sha256:494373c797ed6938900b23c07f126d59341f25b8cdae83258aebaab93300d1c7"
     },
     {
       "cell": "L0_OFFICE",
@@ -697,9 +697,9 @@
           "lights": [
             "LIGHT_L0_OFFICE_DESK_1"
           ],
-          "mean": 0.00015906598307510042,
-          "peak": 0.0036318739876151085,
-          "scale": 0.0036318739876151085
+          "mean": 0.00015999912939596017,
+          "peak": 0.003632058622315526,
+          "scale": 0.003632058622315526
         },
         {
           "group": "LG_L0_OFFICE_MAIN",
@@ -708,12 +708,12 @@
             "LIGHT_L0_OFFICE_MAIN_1",
             "LIGHT_L0_OFFICE_MAIN_2"
           ],
-          "mean": 0.011484173566200897,
-          "peak": 21.977012634277344,
-          "scale": 21.977012634277344
+          "mean": 0.011560502086363288,
+          "peak": 21.977073669433594,
+          "scale": 21.977073669433594
         }
       ],
-      "shellHash": "sha256:823428476063d2afdab741b44586e5bf0f575e65ed8bb3987a3a59fcde32ce31"
+      "shellHash": "sha256:085afb8a7a2280663e0168131e5d25ce286b13657c9ed41dc3e5012a8ce10190"
     },
     {
       "cell": "L0_PANTRY",
@@ -725,12 +725,12 @@
           "lights": [
             "LIGHT_L0_PANTRY_MAIN_1"
           ],
-          "mean": 0.011164083871172624,
+          "mean": 0.011163933787051734,
           "peak": 34.058258056640625,
           "scale": 34.058258056640625
         }
       ],
-      "shellHash": "sha256:978453d71e9d36b6309c023708ef2647126bd31c8535323a50050d50459e10b8"
+      "shellHash": "sha256:a541cf56b381fee98e23f18958da83596587da1a5ba44ccde7f4738bce235cb7"
     },
     {
       "cell": "L0_STAIR_MAIN",
@@ -742,7 +742,7 @@
           "lights": [
             "LIGHT_L0_STAIR_MAIN_MAIN_1"
           ],
-          "mean": 0.0017467589861518017,
+          "mean": 0.001746756788715342,
           "peak": 0.07684403657913208,
           "scale": 0.07684403657913208
         },
@@ -753,12 +753,12 @@
             "LIGHT_L0_STAIR_MAIN_STEP_1",
             "LIGHT_L0_STAIR_MAIN_STEP_2"
           ],
-          "mean": 0.00022438539276099694,
+          "mean": 0.00022438504403879126,
           "peak": 0.00444997102022171,
           "scale": 0.00444997102022171
         }
       ],
-      "shellHash": "sha256:462c9dfe74d0d3b5b3e9a986d6edf03035bce1d8b83d2a8d57e34ac86abae627"
+      "shellHash": "sha256:a97b4b261b1062b9213eee85fe679713b5d9161ea25d3272087c29b5a501be64"
     },
     {
       "cell": "L0_STOR",
@@ -787,7 +787,7 @@
           "lights": [
             "LIGHT_L0_SUNROOM_BAR_1"
           ],
-          "mean": 8.558937880998225e-05,
+          "mean": 8.558945194029241e-05,
           "peak": 0.003468880197033286,
           "scale": 0.003468880197033286
         },
@@ -800,12 +800,12 @@
             "LIGHT_L0_SUNROOM_MAIN_3",
             "LIGHT_L0_SUNROOM_MAIN_4"
           ],
-          "mean": 0.009612344417147946,
+          "mean": 0.009612445171979487,
           "peak": 14.07666301727295,
           "scale": 14.07666301727295
         }
       ],
-      "shellHash": "sha256:3d3b7c497600489fa6e2e9df2ee4773f8bc569754fe3c624dc36d612b32d45c7"
+      "shellHash": "sha256:186dd631678d4367b2e619ebc584f14e288a9fc0d91b2aa0af07d3ef261d09ba"
     },
     {
       "cell": "L0_WC1",
@@ -852,9 +852,9 @@
             "LIGHT_L1_BATH2_MAIN_1",
             "LIGHT_L1_BATH2_MAIN_2"
           ],
-          "mean": 0.01712460975573267,
-          "peak": 20.56555938720703,
-          "scale": 20.56555938720703
+          "mean": 0.017124313871085463,
+          "peak": 20.565561294555664,
+          "scale": 20.565561294555664
         },
         {
           "group": "LG_L1_BATH2_VANITY",
@@ -862,12 +862,12 @@
           "lights": [
             "LIGHT_L1_BATH2_VANITY_1"
           ],
-          "mean": 0.00531007382880599,
-          "peak": 1.3854410648345947,
-          "scale": 1.3854410648345947
+          "mean": 0.0053100292730025615,
+          "peak": 1.3854411840438843,
+          "scale": 1.3854411840438843
         }
       ],
-      "shellHash": "sha256:d360d82a2120c0adada77553a80c63783f34de090c86674837bd7662b56e9ee6"
+      "shellHash": "sha256:01d88af9d13bcf33e7d7d8946808850ce33a0a49a1d77c43658eb796f6ad8524"
     },
     {
       "cell": "L1_BATH3",
@@ -907,7 +907,7 @@
           "lights": [
             "LIGHT_L1_BED2_DESK_1"
           ],
-          "mean": 0.00012459746814031,
+          "mean": 0.0001245967928685036,
           "peak": 0.003929628990590572,
           "scale": 0.003929628990590572
         },
@@ -919,12 +919,12 @@
             "LIGHT_L1_BED2_MAIN_2",
             "LIGHT_L1_BED2_MAIN_3"
           ],
-          "mean": 0.011559332535792425,
-          "peak": 11.491515159606934,
-          "scale": 11.491515159606934
+          "mean": 0.011558279292519773,
+          "peak": 11.491518020629883,
+          "scale": 11.491518020629883
         }
       ],
-      "shellHash": "sha256:2a5f6e01baaf00883ea934e006859f90ccda5d8e32dd6ed14133affc72ae5948"
+      "shellHash": "sha256:7894822de9705c3e13e8efb298ba2f94b7f0b05f612cbfce8d9eca5b837752d3"
     },
     {
       "cell": "L1_BED3",
@@ -936,9 +936,9 @@
           "lights": [
             "LIGHT_L1_BED3_BEDSIDE_1"
           ],
-          "mean": 0.003980783891113344,
-          "peak": 0.0296475887298584,
-          "scale": 0.0296475887298584
+          "mean": 0.003980688624777247,
+          "peak": 0.029647625982761383,
+          "scale": 0.029647625982761383
         },
         {
           "group": "LG_L1_BED3_MAIN",
@@ -947,12 +947,12 @@
             "LIGHT_L1_BED3_MAIN_1",
             "LIGHT_L1_BED3_MAIN_2"
           ],
-          "mean": 0.013055729075725869,
+          "mean": 0.013055532322144011,
           "peak": 22.392009735107422,
           "scale": 22.392009735107422
         }
       ],
-      "shellHash": "sha256:debbe70fd2ac31e64eebf2ccd96037c46b5a81a0d1a763a6190da10cd070e36e"
+      "shellHash": "sha256:37000d9f220deb4a6f7b2294a817d4e3a7e319280da3b82cd04b0abab1073d9e"
     },
     {
       "cell": "L1_BED4",
@@ -964,9 +964,9 @@
           "lights": [
             "LIGHT_L1_BED4_DESK_1"
           ],
-          "mean": 0.00019876959054758708,
-          "peak": 0.004080937243998051,
-          "scale": 0.004080937243998051
+          "mean": 0.000198767465090079,
+          "peak": 0.004080836661159992,
+          "scale": 0.004080836661159992
         },
         {
           "group": "LG_L1_BED4_MAIN",
@@ -976,12 +976,12 @@
             "LIGHT_L1_BED4_MAIN_2",
             "LIGHT_L1_BED4_MAIN_3"
           ],
-          "mean": 0.018586061579104262,
-          "peak": 24.246185302734375,
-          "scale": 24.246185302734375
+          "mean": 0.018585964398211825,
+          "peak": 24.246158599853516,
+          "scale": 24.246158599853516
         }
       ],
-      "shellHash": "sha256:6169af730cc5b8fe16ff4ad37ba3a8fcc771b46dd166af753be7cc92779a2271"
+      "shellHash": "sha256:5682f795de9de4e5396d42ccd2fa60bbd209453809f86a0ff3f5a752f03cb882"
     },
     {
       "cell": "L1_BED5",
@@ -993,9 +993,9 @@
           "lights": [
             "LIGHT_L1_BED5_BEDSIDE_1"
           ],
-          "mean": 0.00442161579177721,
-          "peak": 0.03071259893476963,
-          "scale": 0.03071259893476963
+          "mean": 0.0044215683872335645,
+          "peak": 0.030712604522705078,
+          "scale": 0.030712604522705078
         },
         {
           "group": "LG_L1_BED5_MAIN",
@@ -1004,12 +1004,12 @@
             "LIGHT_L1_BED5_MAIN_1",
             "LIGHT_L1_BED5_MAIN_2"
           ],
-          "mean": 0.012062177655229421,
+          "mean": 0.012062365318273264,
           "peak": 3.086684226989746,
           "scale": 3.086684226989746
         }
       ],
-      "shellHash": "sha256:18801e4e3e42bf546218345090e6dc6275cb96b3043d074a2fae3fea5ff2f771"
+      "shellHash": "sha256:53545afcd659a0f36eba3566b3f44e3718b25613a41177537ff7883848c5ec43"
     },
     {
       "cell": "L1_CLOSET_2",
@@ -1115,7 +1115,7 @@
             "LIGHT_L1_LANDING_MAIN_1",
             "LIGHT_L1_LANDING_MAIN_2"
           ],
-          "mean": 0.009484722991896215,
+          "mean": 0.009484548316760731,
           "peak": 12.7000150680542,
           "scale": 12.7000150680542
         },
@@ -1125,12 +1125,12 @@
           "lights": [
             "LIGHT_L1_LANDING_SEAT_1"
           ],
-          "mean": 0.0032824166381097935,
-          "peak": 0.02595117874443531,
-          "scale": 0.02595117874443531
+          "mean": 0.0032823433170313062,
+          "peak": 0.025951264426112175,
+          "scale": 0.025951264426112175
         }
       ],
-      "shellHash": "sha256:0e63a77ce45ac25c7d46a522165c7d92a57e212482506ddc412c287514007749"
+      "shellHash": "sha256:57218f4ce29c1c1320a4f37cf7727cb10cbedf59c1dc6a60eb1150fa3e450189"
     },
     {
       "cell": "L1_LINEN",
@@ -1159,7 +1159,7 @@
           "lights": [
             "LIGHT_L1_MASTER_BATH_BATH_1"
           ],
-          "mean": 0.006700170192576608,
+          "mean": 0.00670017032886868,
           "peak": 17.96245002746582,
           "scale": 17.96245002746582
         },
@@ -1171,9 +1171,9 @@
             "LIGHT_L1_MASTER_BATH_MAIN_2",
             "LIGHT_L1_MASTER_BATH_MAIN_3"
           ],
-          "mean": 0.018727906378743803,
-          "peak": 17.98140525817871,
-          "scale": 17.98140525817871
+          "mean": 0.018727894786838388,
+          "peak": 17.981403350830078,
+          "scale": 17.981403350830078
         },
         {
           "group": "LG_L1_MASTER_BATH_VANITY",
@@ -1182,12 +1182,12 @@
             "LIGHT_L1_MASTER_BATH_VANITY_1",
             "LIGHT_L1_MASTER_BATH_VANITY_2"
           ],
-          "mean": 0.007775290547816406,
-          "peak": 1.194915533065796,
-          "scale": 1.194915533065796
+          "mean": 0.007775249929214524,
+          "peak": 1.1949141025543213,
+          "scale": 1.1949141025543213
         }
       ],
-      "shellHash": "sha256:96045c5ae7b0fd2886a304ba9d21590845751fcb43a9563f4e4deafd466bea07"
+      "shellHash": "sha256:058f198fa51712adc2e90155cc49aadedc90bfd6709826e8bfd9e72ae24b66db"
     },
     {
       "cell": "L1_MASTER_BED",
@@ -1200,9 +1200,9 @@
             "LIGHT_L1_MASTER_BED_BEDSIDE_1",
             "LIGHT_L1_MASTER_BED_BEDSIDE_2"
           ],
-          "mean": 0.0038758038045651816,
-          "peak": 0.032821688801050186,
-          "scale": 0.032821688801050186
+          "mean": 0.003894246276520137,
+          "peak": 0.03283298760652542,
+          "scale": 0.03283298760652542
         },
         {
           "group": "LG_L1_MASTER_BED_DRESSER",
@@ -1210,9 +1210,9 @@
           "lights": [
             "LIGHT_L1_MASTER_BED_DRESSER_1"
           ],
-          "mean": 0.001300207956362336,
-          "peak": 0.01398427877575159,
-          "scale": 0.01398427877575159
+          "mean": 0.0013065407940494626,
+          "peak": 0.013995498418807983,
+          "scale": 0.013995498418807983
         },
         {
           "group": "LG_L1_MASTER_BED_MAIN",
@@ -1223,9 +1223,9 @@
             "LIGHT_L1_MASTER_BED_MAIN_3",
             "LIGHT_L1_MASTER_BED_MAIN_4"
           ],
-          "mean": 0.01021092761323455,
-          "peak": 3.0870189666748047,
-          "scale": 3.0870189666748047
+          "mean": 0.010267876511290346,
+          "peak": 3.087151050567627,
+          "scale": 3.087151050567627
         },
         {
           "group": "LG_L1_MASTER_BED_SEATING",
@@ -1233,12 +1233,12 @@
           "lights": [
             "LIGHT_L1_MASTER_BED_SEATING_1"
           ],
-          "mean": 0.0019507778389214647,
-          "peak": 0.024464229121804237,
-          "scale": 0.024464229121804237
+          "mean": 0.0019601698418206413,
+          "peak": 0.02448180504143238,
+          "scale": 0.02448180504143238
         }
       ],
-      "shellHash": "sha256:93b7611aceef4d437d63c4c7fcba7a2c0bbe314ba4d7d927c19b86a03b4b0cd1"
+      "shellHash": "sha256:8ece5992ae324b01d0e1ad9552a30591af3da9b71b0ad7a9f6471087a6a1bb5a"
     },
     {
       "cell": "L1_MASTER_CLOSET",
@@ -1278,12 +1278,12 @@
           "lights": [
             "LIGHT_L1_STAIR_MAIN_MAIN_1"
           ],
-          "mean": 0.001634132172624778,
-          "peak": 0.06499706208705902,
-          "scale": 0.06499706208705902
+          "mean": 0.0016341123555623548,
+          "peak": 0.06499706953763962,
+          "scale": 0.06499706953763962
         }
       ],
-      "shellHash": "sha256:36432b0eeaf1915f8ba33cbe0c429176ff4b3d7362e338b53c263c4e0dcacf99"
+      "shellHash": "sha256:9308bea5a34bfe2f985a7954dab596809e184ccf6ba0ce3c80aed28dc3c6405a"
     },
     {
       "cell": "L1_STOR",
@@ -1347,9 +1347,9 @@
             "LIGHT_L2_BATH4_MAIN_1",
             "LIGHT_L2_BATH4_MAIN_2"
           ],
-          "mean": 0.01645083257781051,
-          "peak": 6.820467472076416,
-          "scale": 6.820467472076416
+          "mean": 0.016450746437603945,
+          "peak": 6.820461750030518,
+          "scale": 6.820461750030518
         },
         {
           "group": "LG_L2_BATH4_VANITY",
@@ -1357,12 +1357,12 @@
           "lights": [
             "LIGHT_L2_BATH4_VANITY_1"
           ],
-          "mean": 0.00532878508294823,
-          "peak": 1.1778919696807861,
-          "scale": 1.1778919696807861
+          "mean": 0.005328767726991808,
+          "peak": 1.1778886318206787,
+          "scale": 1.1778886318206787
         }
       ],
-      "shellHash": "sha256:830f4c8df1a9686cf675e6d293de71b7ca0fc75b312612e066d015b130fa76ff"
+      "shellHash": "sha256:2d32ba14602cc55df91ade28938e61e04119a6d13d3d0eed7b17b353ae93e8bc"
     },
     {
       "cell": "L2_BATH5",
@@ -1403,7 +1403,7 @@
             "LIGHT_L2_BED6_MAIN_1",
             "LIGHT_L2_BED6_MAIN_2"
           ],
-          "mean": 0.01239719204048565,
+          "mean": 0.012397025915083987,
           "peak": 21.97340965270996,
           "scale": 21.97340965270996
         },
@@ -1413,12 +1413,12 @@
           "lights": [
             "LIGHT_L2_BED6_SEWING_1"
           ],
-          "mean": 0.000192960406711311,
-          "peak": 0.004498985130339861,
-          "scale": 0.004498985130339861
+          "mean": 0.00019296009737931584,
+          "peak": 0.004498985596001148,
+          "scale": 0.004498985596001148
         }
       ],
-      "shellHash": "sha256:9da94753d67a55352cc40aec52a3924caccfd2ba1b2e6bab9f92495fc2bbab5b"
+      "shellHash": "sha256:b07c083bce2643f13fe5760272963f156dd64616d04bedefafddd5423f0a8997"
     },
     {
       "cell": "L2_BED7",
@@ -1430,9 +1430,9 @@
           "lights": [
             "LIGHT_L2_BED7_BEDSIDE_1"
           ],
-          "mean": 0.002981835485417256,
-          "peak": 0.030781906098127365,
-          "scale": 0.030781906098127365
+          "mean": 0.0029818037950135085,
+          "peak": 0.030781909823417664,
+          "scale": 0.030781909823417664
         },
         {
           "group": "LG_L2_BED7_MAIN",
@@ -1442,12 +1442,12 @@
             "LIGHT_L2_BED7_MAIN_2",
             "LIGHT_L2_BED7_MAIN_3"
           ],
-          "mean": 0.012738298790172424,
+          "mean": 0.01273811556500068,
           "peak": 5.170466423034668,
           "scale": 5.170466423034668
         }
       ],
-      "shellHash": "sha256:ff07910f2d92eba56a38a7fad55798cb95417c20537646c4eb465d420b3b6d84"
+      "shellHash": "sha256:a3d819d8a406a440bfdade2a1a699b9c4990c780751f39adfaac4dd616c0c0bf"
     },
     {
       "cell": "L2_CLOSET_4",
@@ -1476,7 +1476,7 @@
           "lights": [
             "LIGHT_L2_GAMES_ARCADE_1"
           ],
-          "mean": 0.0019837009831587347,
+          "mean": 0.001983687815829412,
           "peak": 0.6705254912376404,
           "scale": 0.6705254912376404
         },
@@ -1489,7 +1489,7 @@
             "LIGHT_L2_GAMES_MAIN_3",
             "LIGHT_L2_GAMES_MAIN_4"
           ],
-          "mean": 0.011945415943933228,
+          "mean": 0.011945277197966987,
           "peak": 6.656170845031738,
           "scale": 6.656170845031738
         },
@@ -1500,12 +1500,12 @@
             "LIGHT_L2_GAMES_TABLE_1",
             "LIGHT_L2_GAMES_TABLE_2"
           ],
-          "mean": 0.010819025802786162,
-          "peak": 0.0896439328789711,
-          "scale": 0.0896439328789711
+          "mean": 0.010818952961551597,
+          "peak": 0.08964411914348602,
+          "scale": 0.08964411914348602
         }
       ],
-      "shellHash": "sha256:85533d21e41ca429bce07afafe81bcfea744da505f1dd9293ed30f5dea3c8afc"
+      "shellHash": "sha256:26566fc60c0b76098e71fbd97cc14df8994472e026e3b28c7fc84c6607709e78"
     },
     {
       "cell": "L2_HALL",
@@ -1576,9 +1576,9 @@
           "lights": [
             "LIGHT_L2_LANDING_JULIET_1"
           ],
-          "mean": 0.002268393986419793,
-          "peak": 0.015267145819962025,
-          "scale": 0.015267145819962025
+          "mean": 0.002268331943040068,
+          "peak": 0.015262341126799583,
+          "scale": 0.015262341126799583
         },
         {
           "group": "LG_L2_LANDING_MAIN",
@@ -1587,12 +1587,12 @@
             "LIGHT_L2_LANDING_MAIN_1",
             "LIGHT_L2_LANDING_MAIN_2"
           ],
-          "mean": 0.009474150547967,
-          "peak": 5.375096321105957,
-          "scale": 5.375096321105957
+          "mean": 0.009473913196140559,
+          "peak": 5.375097274780273,
+          "scale": 5.375097274780273
         }
       ],
-      "shellHash": "sha256:4838852ae4f5eb65c6b8c5fa1a0515bdb7c22daa838ec7557ec7da57549b11f6"
+      "shellHash": "sha256:7bb32cf1e8a3655ee1801cb1d74110b87f60bee49e5b3a079d91e5f80745ba96"
     },
     {
       "cell": "L2_LIBRARY",
@@ -1606,9 +1606,9 @@
             "LIGHT_L2_LIBRARY_MAIN_2",
             "LIGHT_L2_LIBRARY_MAIN_3"
           ],
-          "mean": 0.01588227963834499,
-          "peak": 3.6483817100524902,
-          "scale": 3.6483817100524902
+          "mean": 0.016037396557846348,
+          "peak": 3.6484274864196777,
+          "scale": 3.6484274864196777
         },
         {
           "group": "LG_L2_LIBRARY_READING",
@@ -1617,9 +1617,9 @@
             "LIGHT_L2_LIBRARY_READING_1",
             "LIGHT_L2_LIBRARY_READING_2"
           ],
-          "mean": 0.007501823005898128,
-          "peak": 0.040709976106882095,
-          "scale": 0.040709976106882095
+          "mean": 0.007564507734524409,
+          "peak": 0.040985528379678726,
+          "scale": 0.040985528379678726
         },
         {
           "group": "LG_L2_LIBRARY_SHELVES",
@@ -1630,12 +1630,12 @@
             "LIGHT_L2_LIBRARY_SHELVES_3",
             "LIGHT_L2_LIBRARY_SHELVES_4"
           ],
-          "mean": 0.014043496225754997,
-          "peak": 1.4081227779388428,
-          "scale": 1.4081227779388428
+          "mean": 0.014158657675326968,
+          "peak": 1.4082435369491577,
+          "scale": 1.4082435369491577
         }
       ],
-      "shellHash": "sha256:3fb97d61bec4321257cf5c639630d559f07f0cee49f0b44db33f223b5d322ca6"
+      "shellHash": "sha256:277f93654c6751e60016604718ba97b6123330e9569295c70d7b463dd1fb2be2"
     },
     {
       "cell": "L2_LINEN2",
@@ -1666,9 +1666,9 @@
             "LIGHT_L2_SITTING_MAIN_2",
             "LIGHT_L2_SITTING_MAIN_3"
           ],
-          "mean": 0.011273950547444891,
-          "peak": 8.101346969604492,
-          "scale": 8.101346969604492
+          "mean": 0.011273809847381269,
+          "peak": 8.101349830627441,
+          "scale": 8.101349830627441
         },
         {
           "group": "LG_L2_SITTING_READING",
@@ -1676,12 +1676,12 @@
           "lights": [
             "LIGHT_L2_SITTING_READING_1"
           ],
-          "mean": 0.002662559686457599,
-          "peak": 0.03013928420841694,
-          "scale": 0.03013928420841694
+          "mean": 0.0026625053819478717,
+          "peak": 0.030139902606606483,
+          "scale": 0.030139902606606483
         }
       ],
-      "shellHash": "sha256:4a9a7a68e1f4deea797c3bdf3c141431ff8da3e0dfadbe0596b12a81d74d396c"
+      "shellHash": "sha256:3927f9553587b5171bce32c124d13ba30e12160e1fa37b60bd72ba5bc3d6808b"
     },
     {
       "cell": "L2_STAIR_ATTIC",
@@ -1710,12 +1710,12 @@
           "lights": [
             "LIGHT_L2_STAIR_MAIN_MAIN_1"
           ],
-          "mean": 0.0048955653658271795,
-          "peak": 0.06818404793739319,
-          "scale": 0.06818404793739319
+          "mean": 0.00489542769521569,
+          "peak": 0.06818307936191559,
+          "scale": 0.06818307936191559
         }
       ],
-      "shellHash": "sha256:3da7c11d498cbc7bd0e4bc77b829a2103c04b07ad67409c3d21a1e21071305fa"
+      "shellHash": "sha256:e27ee9a460863818b3d81f6377512474f4ee4242ad5afedbca66ac5aa5e4437d"
     },
     {
       "cell": "L2_STOR2",
@@ -1789,12 +1789,12 @@
             "LIGHT_L3_ROOM_MAIN_1",
             "LIGHT_L3_ROOM_MAIN_2"
           ],
-          "mean": 0.005026220507137257,
+          "mean": 0.005026220554775453,
           "peak": 0.07385279983282089,
           "scale": 0.07385279983282089
         }
       ],
-      "shellHash": "sha256:88f6154376c2e6e8cb33f5db2b239c51cdf1be8176aa45f410398ec487e6a408"
+      "shellHash": "sha256:17d7202149b0f01cf2c2b6f7abc945bd563f013c92a6423bb0a41bf06c7d7b93"
     },
     {
       "cell": "L3_STAIR_HEAD",
@@ -1840,12 +1840,12 @@
           "lights": [
             "LIGHT_L3_STORE_N_MAIN_1"
           ],
-          "mean": 0.002392851198612102,
-          "peak": 0.04895671829581261,
-          "scale": 0.04895671829581261
+          "mean": 0.002394705211729956,
+          "peak": 0.048964377492666245,
+          "scale": 0.048964377492666245
         }
       ],
-      "shellHash": "sha256:62745ee8a8f8641f6908acfa39c0943dae9c4d782a565a9e4f8cad10a0f13340"
+      "shellHash": "sha256:b429f8ce8f220fc61720e45f23e78fdb6a61a3579511f29b88426f3a56d2b9e8"
     },
     {
       "cell": "L3_STORE_S",
@@ -1886,6 +1886,6 @@
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 993589,
+  "sourceBytes": 993705,
   "tool": "bake_house_lightmaps.py"
 }

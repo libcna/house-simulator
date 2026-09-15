@@ -102,6 +102,9 @@ def update_manifest(images: list[Path], mode: str, size_by_cell: dict[str, int])
                          f"with seed {SEED} from the project-owned canonical shell and light rows."),
             },
         })
+    # Keep `tools/assets/manifest.py`'s durable id order. Removing and re-appending a generated
+    # family must not turn a few changed source hashes into a several-thousand-line reorder diff.
+    document["assets"].sort(key=lambda row: row["id"])
     MANIFEST.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 

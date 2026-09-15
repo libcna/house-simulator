@@ -6,7 +6,7 @@
   "cells": 78,
   "fullBakeSeconds": 278.846,
   "groups": 0,
-  "invocationSeconds": 0.017,
+  "invocationSeconds": 0.01,
   "mode": "daylight",
   "products": [
     {
@@ -43,11 +43,11 @@
       "cell": "B1_GYM",
       "daylight": {
         "image": "B1_GYM_LM_DAY.png",
-        "scale": 1.0013494491577148,
+        "scale": 1.0013505220413208,
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:6b0dc88a271c937e6785d36583e2adbef65a81d4ecf116518a96540dc3e759b4"
+      "shellHash": "sha256:63ec03161853385353262319e00cfef2c1554104a16668d13375317f704e0df7"
     },
     {
       "cell": "B1_HALL",
@@ -87,7 +87,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:4845bd79519f4b1d366641444aa630065405bca7dc6640cce2cb7b7ed8ac2685"
+      "shellHash": "sha256:1f4ccb7e19216e7581bd0db43c53411c5cdbadbcef285ba7dde9af7d8a9bc8a4"
     },
     {
       "cell": "B1_STAIR",
@@ -107,7 +107,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:cc87151c0bccc1506df6105dfa0ea1e883a09e1caf21d10554dc6b4896ed6b11"
+      "shellHash": "sha256:a12634c92c2c2ae650ed2753a99f93296bd4dd526cec1f2e40827496de793d71"
     },
     {
       "cell": "B1_STOR2",
@@ -117,7 +117,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:69205c190fbd254a35a1563bd9ea653bec2bb4ed74c3e14cfe044454e1042088"
+      "shellHash": "sha256:e4df2a33c4c729ab19cb28ca0024f096b324ba8a58e6e5c497f992f89b1911d5"
     },
     {
       "cell": "B1_UNDERSTAIR",
@@ -157,7 +157,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:b3e91a278edee748e5c84e6c89b655497c693ea54303aa31d26d2baed8e4b42f"
+      "shellHash": "sha256:663e49e9a4c1b73d2985574d96e355b419be4b6ee197c3668c9f2417a537d926"
     },
     {
       "cell": "CELL_FREEZER_INTERIOR",
@@ -187,7 +187,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:45412076fc2be26a78dab0d998b1c901e9c97955ce2eff38f7276b5caa4d1799"
+      "shellHash": "sha256:75d0e22d39fd9c6aa1c4e353c900f307b5c8002bbe05768d40bad2f007741e20"
     },
     {
       "cell": "L0_CLOSET_W",
@@ -217,7 +217,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:09381332c387fc48107cbc5650ec8a16dc410847814174e394febc190b71bbc1"
+      "shellHash": "sha256:4cf846938d15a67e3bb7784a72ceb64a1cfbb73bc3e7698409261bcc05280d20"
     },
     {
       "cell": "L0_FOYER",
@@ -227,7 +227,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:3eef7f097e253eb52d3b934feb3b6d2f269dde5c65f8c0cb7224a161ef326b98"
+      "shellHash": "sha256:42a02f5b31361a992df96d3a9a235879dcc45dee8672ea438ab736feef362771"
     },
     {
       "cell": "L0_GARAGE",
@@ -237,7 +237,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:4635910dbb529b1b2d04ba23c29060efab735d74cf69d86633fdeea2c845c666"
+      "shellHash": "sha256:bd3f15a581b326cdce1e8deb156490fc296f6d089b5e24130e16fc056c8fc213"
     },
     {
       "cell": "L0_GARAGE_LOFT",
@@ -267,7 +267,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:7b95f7a0f2d1a3831361184db09d63ce51d0c831840cfd44d176afb0edfcd236"
+      "shellHash": "sha256:0323dac7ad306576f5d37f4e0f342556391b2115726e1bbdf4fa55cdbc634419"
     },
     {
       "cell": "L0_LAUNDRY",
@@ -287,7 +287,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:39bb5b1c3a6920f735d06f39704e9139558dbef6494fed158091c558abdf941a"
+      "shellHash": "sha256:b02cb041138f87eff4a29a8d76651dd5f2f6df8b719b4bab38560b4a06e8220e"
     },
     {
       "cell": "L0_MUDROOM",
@@ -297,7 +297,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:88a400f4fe74c5da3de1ccc746d47be80297da566edb4beb77663b660eef7988"
+      "shellHash": "sha256:494373c797ed6938900b23c07f126d59341f25b8cdae83258aebaab93300d1c7"
     },
     {
       "cell": "L0_OFFICE",
@@ -307,7 +307,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:823428476063d2afdab741b44586e5bf0f575e65ed8bb3987a3a59fcde32ce31"
+      "shellHash": "sha256:085afb8a7a2280663e0168131e5d25ce286b13657c9ed41dc3e5012a8ce10190"
     },
     {
       "cell": "L0_PANTRY",
@@ -317,7 +317,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:978453d71e9d36b6309c023708ef2647126bd31c8535323a50050d50459e10b8"
+      "shellHash": "sha256:a541cf56b381fee98e23f18958da83596587da1a5ba44ccde7f4738bce235cb7"
     },
     {
       "cell": "L0_STAIR_MAIN",
@@ -327,7 +327,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:462c9dfe74d0d3b5b3e9a986d6edf03035bce1d8b83d2a8d57e34ac86abae627"
+      "shellHash": "sha256:a97b4b261b1062b9213eee85fe679713b5d9161ea25d3272087c29b5a501be64"
     },
     {
       "cell": "L0_STOR",
@@ -347,7 +347,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:3d3b7c497600489fa6e2e9df2ee4773f8bc569754fe3c624dc36d612b32d45c7"
+      "shellHash": "sha256:186dd631678d4367b2e619ebc584f14e288a9fc0d91b2aa0af07d3ef261d09ba"
     },
     {
       "cell": "L0_WC1",
@@ -377,7 +377,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:d360d82a2120c0adada77553a80c63783f34de090c86674837bd7662b56e9ee6"
+      "shellHash": "sha256:01d88af9d13bcf33e7d7d8946808850ce33a0a49a1d77c43658eb796f6ad8524"
     },
     {
       "cell": "L1_BATH3",
@@ -397,7 +397,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:2a5f6e01baaf00883ea934e006859f90ccda5d8e32dd6ed14133affc72ae5948"
+      "shellHash": "sha256:7894822de9705c3e13e8efb298ba2f94b7f0b05f612cbfce8d9eca5b837752d3"
     },
     {
       "cell": "L1_BED3",
@@ -407,7 +407,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:debbe70fd2ac31e64eebf2ccd96037c46b5a81a0d1a763a6190da10cd070e36e"
+      "shellHash": "sha256:37000d9f220deb4a6f7b2294a817d4e3a7e319280da3b82cd04b0abab1073d9e"
     },
     {
       "cell": "L1_BED4",
@@ -417,7 +417,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:6169af730cc5b8fe16ff4ad37ba3a8fcc771b46dd166af753be7cc92779a2271"
+      "shellHash": "sha256:5682f795de9de4e5396d42ccd2fa60bbd209453809f86a0ff3f5a752f03cb882"
     },
     {
       "cell": "L1_BED5",
@@ -427,7 +427,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:18801e4e3e42bf546218345090e6dc6275cb96b3043d074a2fae3fea5ff2f771"
+      "shellHash": "sha256:53545afcd659a0f36eba3566b3f44e3718b25613a41177537ff7883848c5ec43"
     },
     {
       "cell": "L1_CLOSET_2",
@@ -477,7 +477,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:0e63a77ce45ac25c7d46a522165c7d92a57e212482506ddc412c287514007749"
+      "shellHash": "sha256:57218f4ce29c1c1320a4f37cf7727cb10cbedf59c1dc6a60eb1150fa3e450189"
     },
     {
       "cell": "L1_LINEN",
@@ -497,7 +497,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:96045c5ae7b0fd2886a304ba9d21590845751fcb43a9563f4e4deafd466bea07"
+      "shellHash": "sha256:058f198fa51712adc2e90155cc49aadedc90bfd6709826e8bfd9e72ae24b66db"
     },
     {
       "cell": "L1_MASTER_BED",
@@ -507,7 +507,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:93b7611aceef4d437d63c4c7fcba7a2c0bbe314ba4d7d927c19b86a03b4b0cd1"
+      "shellHash": "sha256:8ece5992ae324b01d0e1ad9552a30591af3da9b71b0ad7a9f6471087a6a1bb5a"
     },
     {
       "cell": "L1_MASTER_CLOSET",
@@ -527,7 +527,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:36432b0eeaf1915f8ba33cbe0c429176ff4b3d7362e338b53c263c4e0dcacf99"
+      "shellHash": "sha256:9308bea5a34bfe2f985a7954dab596809e184ccf6ba0ce3c80aed28dc3c6405a"
     },
     {
       "cell": "L1_STOR",
@@ -567,7 +567,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:830f4c8df1a9686cf675e6d293de71b7ca0fc75b312612e066d015b130fa76ff"
+      "shellHash": "sha256:2d32ba14602cc55df91ade28938e61e04119a6d13d3d0eed7b17b353ae93e8bc"
     },
     {
       "cell": "L2_BATH5",
@@ -587,7 +587,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:9da94753d67a55352cc40aec52a3924caccfd2ba1b2e6bab9f92495fc2bbab5b"
+      "shellHash": "sha256:b07c083bce2643f13fe5760272963f156dd64616d04bedefafddd5423f0a8997"
     },
     {
       "cell": "L2_BED7",
@@ -597,7 +597,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:ff07910f2d92eba56a38a7fad55798cb95417c20537646c4eb465d420b3b6d84"
+      "shellHash": "sha256:a3d819d8a406a440bfdade2a1a699b9c4990c780751f39adfaac4dd616c0c0bf"
     },
     {
       "cell": "L2_CLOSET_4",
@@ -617,7 +617,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:85533d21e41ca429bce07afafe81bcfea744da505f1dd9293ed30f5dea3c8afc"
+      "shellHash": "sha256:26566fc60c0b76098e71fbd97cc14df8994472e026e3b28c7fc84c6607709e78"
     },
     {
       "cell": "L2_HALL",
@@ -647,7 +647,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:4838852ae4f5eb65c6b8c5fa1a0515bdb7c22daa838ec7557ec7da57549b11f6"
+      "shellHash": "sha256:7bb32cf1e8a3655ee1801cb1d74110b87f60bee49e5b3a079d91e5f80745ba96"
     },
     {
       "cell": "L2_LIBRARY",
@@ -657,7 +657,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:3fb97d61bec4321257cf5c639630d559f07f0cee49f0b44db33f223b5d322ca6"
+      "shellHash": "sha256:277f93654c6751e60016604718ba97b6123330e9569295c70d7b463dd1fb2be2"
     },
     {
       "cell": "L2_LINEN2",
@@ -677,7 +677,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:4a9a7a68e1f4deea797c3bdf3c141431ff8da3e0dfadbe0596b12a81d74d396c"
+      "shellHash": "sha256:3927f9553587b5171bce32c124d13ba30e12160e1fa37b60bd72ba5bc3d6808b"
     },
     {
       "cell": "L2_STAIR_ATTIC",
@@ -697,7 +697,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:3da7c11d498cbc7bd0e4bc77b829a2103c04b07ad67409c3d21a1e21071305fa"
+      "shellHash": "sha256:e27ee9a460863818b3d81f6377512474f4ee4242ad5afedbca66ac5aa5e4437d"
     },
     {
       "cell": "L2_STOR2",
@@ -737,7 +737,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:88f6154376c2e6e8cb33f5db2b239c51cdf1be8176aa45f410398ec487e6a408"
+      "shellHash": "sha256:17d7202149b0f01cf2c2b6f7abc945bd563f013c92a6423bb0a41bf06c7d7b93"
     },
     {
       "cell": "L3_STAIR_HEAD",
@@ -767,7 +767,7 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:62745ee8a8f8641f6908acfa39c0943dae9c4d782a565a9e4f8cad10a0f13340"
+      "shellHash": "sha256:b429f8ce8f220fc61720e45f23e78fdb6a61a3579511f29b88426f3a56d2b9e8"
     },
     {
       "cell": "L3_STORE_S",
@@ -794,6 +794,6 @@
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 477478,
+  "sourceBytes": 477412,
   "tool": "bake_house_lightmaps.py"
 }

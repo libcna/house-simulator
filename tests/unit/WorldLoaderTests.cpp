@@ -3599,7 +3599,7 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 140U);
+        EXPECT_EQ(contents.materials.size(), 143U);
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3636,6 +3636,36 @@ namespace
         EXPECT_EQ(glass.alphaMode, world::AlphaMode::Blend);
         EXPECT_FLOAT_EQ(glass.alpha, 0.12F) << "section 22.2's clear-glass opacity is data";
         EXPECT_TRUE(glass.twoSided);
+
+        const auto frameAt = std::find_if(contents.materials.begin(),
+                                          contents.materials.end(),
+                                          [](const world::MaterialDef& material)
+                                          { return material.id == Intern("MAT_WINDOW_FRAME_WHITE"); });
+        ASSERT_NE(frameAt, contents.materials.end());
+        EXPECT_EQ(frameAt->materialClass, world::MaterialClass::Paint);
+        EXPECT_EQ(frameAt->albedo, "Textures/Materials/paint_white_fine_albedo");
+        EXPECT_EQ(frameAt->lightmapChannel, 0);
+        EXPECT_EQ(frameAt->effectTierS, world::EffectTier::Basic);
+
+        const auto windowGlassAt = std::find_if(contents.materials.begin(),
+                                                contents.materials.end(),
+                                                [](const world::MaterialDef& material)
+                                                { return material.id == Intern("MAT_WINDOW_GLASS_CLEAR"); });
+        ASSERT_NE(windowGlassAt, contents.materials.end());
+        EXPECT_EQ(windowGlassAt->materialClass, world::MaterialClass::Glass);
+        EXPECT_EQ(windowGlassAt->alphaMode, world::AlphaMode::Blend);
+        EXPECT_FLOAT_EQ(windowGlassAt->alpha, glass.alpha);
+        EXPECT_EQ(windowGlassAt->effectTierS, world::EffectTier::Basic);
+
+        const auto obscuredAt = std::find_if(contents.materials.begin(),
+                                             contents.materials.end(),
+                                             [](const world::MaterialDef& material)
+                                             { return material.id == Intern("MAT_WINDOW_GLASS_OBSCURED"); });
+        ASSERT_NE(obscuredAt, contents.materials.end());
+        EXPECT_EQ(obscuredAt->materialClass, world::MaterialClass::Glass);
+        EXPECT_EQ(obscuredAt->alphaMode, world::AlphaMode::Blend);
+        EXPECT_FLOAT_EQ(obscuredAt->alpha, 0.32F);
+        EXPECT_EQ(obscuredAt->effectTierS, world::EffectTier::Basic);
 
         const auto lawnAt = std::find_if(contents.materials.begin(),
                                          contents.materials.end(),
@@ -3723,7 +3753,7 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return material.materialClass == world::MaterialClass::Glass; }),
-                  4);
+                  6);
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

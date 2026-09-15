@@ -1911,6 +1911,15 @@ where the partitioning is done and the only place that can measure them. Measure
 | `L3_ROOM` | 8 | a rafter-bounded attic room draws the **roof** it looks up at as well as its collar ceiling (`HOUSE-00496`), and the **rafters** under that roof (`HOUSE-00488`) — two classes no room below it has, and both of them things you are looking at when you stand in it |
 | `L3_STORE_N`, `L3_STORE_W` | 7 | attic stores: roof and structure instead of a ceiling, plus dormer glass |
 
+`HOUSE-00926` (2026-09-15) separates weather-facing window frames from each room's indoor
+skirting, so those frames can enter §25.6 without revealing ordinary trim through a closed
+portal. The canonical source chunk report now measures 36 exception cells: 28 additional rooms
+at exactly seven chunks, `L0_KITCHEN` at eight because its indoor borrowed-light glass also
+remains, the six pre-existing interior exceptions each grow by exactly one, and the outdoor
+`EXT_ROAD` exception is unchanged. These are **explicit cell-specific ceilings** in
+`CHUNK_BUDGET_EXCEPTIONS`, not a new unlimited exception or a changed six-chunk target; the
+existing over-ceiling and stale-entry gates still apply.
+
 §71's frame budget is what may tighten or restructure these later; a measurement is what should
 move them, not an assertion in either direction.
 * **The outdoors is chunked too, since `HOUSE-00780`.** The terrain tiles, road segments, fences,
@@ -1925,7 +1934,10 @@ move them, not an assertion in either direction.
   The wall a yard abuts belongs to the house, which draws its own outer skin.
   That skin keeps the adjacent room as its residency key, but its siding and brick water-table
   chunks also enter §25.6's exterior hierarchy: a closed portal must not make the façade disappear
-  from the yard (`HOUSE-00921`). Interior wall chunks remain exclusively on the room/portal path.
+  from the yard (`HOUSE-00921`). `HOUSE-00926` gives weather-facing window frames/sashes and
+  glazing distinct material/chunk roles in the same hierarchy. Ordinary indoor skirting, door
+  trim, borrowed-light glass and interior walls remain exclusively on the room/portal path; adding
+  those whole chunks to the outdoors would leak interior geometry through closed rooms.
 
 ### 17.5 Directory layout
 

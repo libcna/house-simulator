@@ -38,6 +38,7 @@ namespace
     using cnahouse::visibility::ExteriorScene;
     using cnahouse::visibility::GatherExteriorCones;
     using cnahouse::visibility::IsExteriorSkinMaterial;
+    using cnahouse::visibility::IsExteriorWindowMaterial;
     using cnahouse::visibility::PropCategory;
     using cnahouse::visibility::VisibleCell;
     using Microsoft::Xna::Framework::BoundingBox;
@@ -129,7 +130,18 @@ TEST(ExteriorSceneTests, TheHouseOuterSkinIsAnExteriorInstance)
     EXPECT_FALSE(IsExteriorSkinMaterial("BLOCKOUT_wall"));
 }
 
-TEST(ExteriorSceneTests, OnlyTheExteriorSpaceAndOuterSkinChunksBecomeInstances)
+TEST(ExteriorSceneTests, OutsideWindowRolesDoNotIncludeIndoorTrimOrBorrowedGlass)
+{
+    EXPECT_TRUE(IsExteriorWindowMaterial("MAT_WINDOW_FRAME_WHITE"));
+    EXPECT_TRUE(IsExteriorWindowMaterial("MAT_WINDOW_GLASS_CLEAR"));
+    EXPECT_TRUE(IsExteriorWindowMaterial("MAT_WINDOW_GLASS_OBSCURED"));
+    EXPECT_FALSE(IsExteriorWindowMaterial("MAT_DOOR_HARDWOOD"));
+    EXPECT_FALSE(IsExteriorWindowMaterial("MAT_GLASS_CLEAR"));
+    EXPECT_FALSE(IsExteriorWindowMaterial("MAT_GLASS_OBSCURED"));
+    EXPECT_FALSE(IsExteriorWindowMaterial("MAT_SIDING_WARM_WHITE"));
+}
+
+TEST(ExteriorSceneTests, OnlyExteriorSpaceSkinAndOutsideWindowChunksBecomeInstances)
 {
     if (!ContentIsBuilt())
     {
@@ -139,7 +151,14 @@ TEST(ExteriorSceneTests, OnlyTheExteriorSpaceAndOuterSkinChunksBecomeInstances)
 
     world::ChunkLibrary library;
     library.cells = {"EXT_FRONTYARD_E", "B1_GYM", "EXT_BACKYARD", "NOT_A_CELL_AT_ALL"};
-    library.materials = {"TERRAIN_grass", "BLOCKOUT_wall", "MAT_SIDING_WARM_WHITE", "MAT_BRICK_WATER_TABLE"};
+    library.materials = {"TERRAIN_grass",
+                         "BLOCKOUT_wall",
+                         "MAT_SIDING_WARM_WHITE",
+                         "MAT_BRICK_WATER_TABLE",
+                         "MAT_WINDOW_FRAME_WHITE",
+                         "MAT_WINDOW_GLASS_CLEAR",
+                         "MAT_DOOR_HARDWOOD",
+                         "MAT_GLASS_CLEAR"};
     library.chunks.push_back(Piece(0, 0, 0.0F, 0.0F));  // exterior: in
     library.chunks.push_back(Piece(1, 1, 2.0F, 0.0F));  // a room's inner wall: out
     library.chunks.push_back(Piece(2, 0, 4.0F, 0.0F));  // exterior: in
@@ -148,9 +167,13 @@ TEST(ExteriorSceneTests, OnlyTheExteriorSpaceAndOuterSkinChunksBecomeInstances)
     library.chunks.push_back(Piece(3, 2, 10.0F, 0.0F)); // no such cell: out
     library.chunks.push_back(Piece(9, 2, 12.0F, 0.0F)); // cell index past the end: out
     library.chunks.push_back(Piece(0, 9, 14.0F, 0.0F)); // material index past the end: out
+    library.chunks.push_back(Piece(1, 4, 16.0F, 0.0F)); // room-owned outside frame: in
+    library.chunks.push_back(Piece(1, 5, 18.0F, 0.0F)); // room-owned outside glass: in
+    library.chunks.push_back(Piece(1, 6, 20.0F, 0.0F)); // ordinary room skirting: out
+    library.chunks.push_back(Piece(1, 7, 22.0F, 0.0F)); // borrowed indoor glass: out
 
     const ExteriorScene scene = BuildExteriorScene(library, world);
-    ASSERT_EQ(scene.instances.size(), 4u);
+    ASSERT_EQ(scene.instances.size(), 6u);
     std::vector<bool> seen(library.chunks.size(), false);
     for (std::uint32_t index = 0; index < scene.instances.size(); ++index)
     {
@@ -160,6 +183,10 @@ TEST(ExteriorSceneTests, OnlyTheExteriorSpaceAndOuterSkinChunksBecomeInstances)
     EXPECT_TRUE(seen[2u]);
     EXPECT_TRUE(seen[3u]);
     EXPECT_TRUE(seen[4u]);
+    EXPECT_TRUE(seen[8u]);
+    EXPECT_TRUE(seen[9u]);
+    EXPECT_FALSE(seen[10u]);
+    EXPECT_FALSE(seen[11u]);
     EXPECT_FALSE(scene.Empty());
 
     // A room's inner wall is not merely absent from the hierarchy, it is not REACHABLE through it.
@@ -253,6 +280,7 @@ TEST(ExteriorSceneTests, TheWholePropertysOutdoorsIsInTheHierarchy)
     std::size_t expected = 0;
     std::size_t ground = 0;
     std::size_t outerSkin = 0;
+    std::size_t outsideWindows = 0;
     for (const world::Chunk& chunk : library.chunks)
     {
         if (chunk.cell >= library.cells.size() || chunk.material >= library.materials.size())
@@ -266,17 +294,20 @@ TEST(ExteriorSceneTests, TheWholePropertysOutdoorsIsInTheHierarchy)
         }
         const std::string_view material = library.materials[chunk.material];
         const bool skin = IsExteriorSkinMaterial(material);
-        if (cell->kind != world::CellKind::Exterior && !skin)
+        const bool window = IsExteriorWindowMaterial(material);
+        if (cell->kind != world::CellKind::Exterior && !skin && !window)
         {
             continue;
         }
         ++expected;
         outerSkin += skin ? 1u : 0u;
+        outsideWindows += window ? 1u : 0u;
         ground += CategoryForMaterial(material) == PropCategory::Ground ? 1u : 0u;
     }
     EXPECT_EQ(scene.instances.size(), expected);
     EXPECT_GT(expected, 20u) << "the property has a lawn, a road, fences and a garden";
     EXPECT_GT(outerSkin, 50u) << "the canonical house facade was omitted from the hierarchy";
+    EXPECT_GT(outsideWindows, 40u) << "weather-facing frames and glazing stayed room-culled";
     EXPECT_GT(ground, 0u) << "no chunk of the outdoors is the ground itself";
 
     // Every instance is inside the hierarchy's own root box, which is the invariant a wrong bounds

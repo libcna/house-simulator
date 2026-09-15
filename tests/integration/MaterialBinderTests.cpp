@@ -180,7 +180,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 140U);
+                EXPECT_EQ(binder.Count(), 143U);
                 const MaterialDesc* outdoorRoof = binder.Find(Id::Of("MAT_OUTDOOR_ROOF"));
                 ASSERT_NE(outdoorRoof, nullptr);
                 EXPECT_EQ(outdoorRoof->kind, MaterialKind::Basic);
@@ -196,6 +196,19 @@ namespace
                 ASSERT_NE(glass, nullptr);
                 EXPECT_EQ(glass->kind, MaterialKind::Basic);
                 EXPECT_FLOAT_EQ(glass->alpha, 0.12F);
+
+                const MaterialDesc* outsideFrame = binder.Find(Id::Of("MAT_WINDOW_FRAME_WHITE"));
+                ASSERT_NE(outsideFrame, nullptr);
+                EXPECT_EQ(outsideFrame->kind, MaterialKind::Basic);
+                EXPECT_EQ(outsideFrame->diffuseTexture, "Textures/Materials/paint_white_fine_albedo");
+                const MaterialDesc* outsideClear = binder.Find(Id::Of("MAT_WINDOW_GLASS_CLEAR"));
+                ASSERT_NE(outsideClear, nullptr);
+                EXPECT_EQ(outsideClear->kind, MaterialKind::Basic);
+                EXPECT_FLOAT_EQ(outsideClear->alpha, glass->alpha);
+                const MaterialDesc* outsideObscured = binder.Find(Id::Of("MAT_WINDOW_GLASS_OBSCURED"));
+                ASSERT_NE(outsideObscured, nullptr);
+                EXPECT_EQ(outsideObscured->kind, MaterialKind::Basic);
+                EXPECT_FLOAT_EQ(outsideObscured->alpha, 0.32F);
 
                 const MaterialDesc* lawn = binder.Find(Id::Of("MAT_GROUND_LAWN"));
                 ASSERT_NE(lawn, nullptr);

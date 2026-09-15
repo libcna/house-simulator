@@ -71,6 +71,12 @@ namespace cnahouse::visibility
                material == "MAT_BRICK_WATER_TABLE_WET";
     }
 
+    bool IsExteriorWindowMaterial(std::string_view material) noexcept
+    {
+        return material == "MAT_WINDOW_FRAME_WHITE" || material == "MAT_WINDOW_GLASS_CLEAR" ||
+               material == "MAT_WINDOW_GLASS_OBSCURED";
+    }
+
     ExteriorScene BuildExteriorScene(const world::ChunkLibrary& library, const world::WorldData& world)
     {
         ExteriorScene scene;
@@ -84,8 +90,8 @@ namespace cnahouse::visibility
             }
             const world::Cell* cell = world.FindCell(util::Id::Of(library.cells[chunk.cell]));
             const std::string_view material = library.materials[chunk.material];
-            if (cell == nullptr ||
-                (cell->kind != world::CellKind::Exterior && !IsExteriorSkinMaterial(material)))
+            if (cell == nullptr || (cell->kind != world::CellKind::Exterior &&
+                                    !IsExteriorSkinMaterial(material) && !IsExteriorWindowMaterial(material)))
             {
                 continue;
             }

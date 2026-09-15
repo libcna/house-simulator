@@ -17382,7 +17382,7 @@
       "id": "TEXTURE_B1_GYM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_GYM_LM_DAY.png",
-      "sourceSha256": "c5108892a90ff3a003378caed5c9c87c6f3652068eacc0ada1742269ddbe2c4d",
+      "sourceSha256": "22304e6b4e3825722946865f3b272b6c1c48021a4e49a32f5c7bfd37239d5bb2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -17409,7 +17409,7 @@
       "id": "TEXTURE_B1_GYM_LM_LG_B1_GYM_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_GYM_LM_LG_B1_GYM_MAIN.png",
-      "sourceSha256": "17ffa966fd48d08889929b09ea7f1525de687a9c37592a6d1fc5044352a3e2a6",
+      "sourceSha256": "2d3ce7170bb6a1b9c1572c532539a2b6ec5611260611145af7bdd9986d213ca9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -17436,7 +17436,7 @@
       "id": "TEXTURE_B1_GYM_LM_LG_B1_GYM_MIRROR",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_GYM_LM_LG_B1_GYM_MIRROR.png",
-      "sourceSha256": "4305260809c09078deb161a15833480781ddfccc0af94abf0ec9099cf664609a",
+      "sourceSha256": "da33e1eaced88ec2af5e12d6feba5a48a4039f2f87187ab1e30415d4fbf21b0f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -17706,7 +17706,7 @@
       "id": "TEXTURE_B1_MECHANICAL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_MECHANICAL_LM_DAY.png",
-      "sourceSha256": "517d83b8eb3a1914465dc0fe8774956fda3c3a5fafc7c67e2ca47e880871321f",
+      "sourceSha256": "494b4fe449b2776d8761a51b9b6b97c174496471b642f37de0aab4d4b445ca18",
       "texture": {
         "width": 128,
         "height": 128,
@@ -17733,7 +17733,7 @@
       "id": "TEXTURE_B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_MECHANICAL_LM_LG_B1_MECHANICAL_MAIN.png",
-      "sourceSha256": "a93e8b1b791a66c12ce21c17d58091b00caeb239ae81ff4cd34752b7d600fbc2",
+      "sourceSha256": "d405bf614fc3c5f7f1461cbeade25b617b0776cca677fa38efbc4b7e58483b55",
       "texture": {
         "width": 128,
         "height": 128,
@@ -17814,7 +17814,7 @@
       "id": "TEXTURE_B1_STOR1_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STOR1_LM_DAY.png",
-      "sourceSha256": "5fa7fecf8beea55c451199b8b7a2aedceb6da39647e2a2636e9926eea55f8ed7",
+      "sourceSha256": "63b4eb94fb6f478c8e7f9e5d4016fabdf6644804f40ae156bb7ded8f57df5529",
       "texture": {
         "width": 128,
         "height": 128,
@@ -17841,7 +17841,7 @@
       "id": "TEXTURE_B1_STOR1_LM_LG_B1_STOR1_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_STOR1_LM_LG_B1_STOR1_MAIN.png",
-      "sourceSha256": "dcdeabf37483ce3f16b4f179ad644ff7428fc917d8a472c15e5e7fcde437d3dd",
+      "sourceSha256": "6a4aad6a31ed4755740d77cee2fa9e5c83a4e6aba0692c28a1e672f0e28668c4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -17868,7 +17868,7 @@
       "id": "TEXTURE_B1_STOR2_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_STOR2_LM_DAY.png",
-      "sourceSha256": "f0a0944713c32a6ee868baed460af95940ca6283754e352744c87cc6b9b0bbe7",
+      "sourceSha256": "ebe0f563c83f80fe4c9f06ece75bbecb693fecf19a1c482502a3e01494dfa8d6",
       "texture": {
         "width": 128,
         "height": 128,
@@ -17895,7 +17895,7 @@
       "id": "TEXTURE_B1_STOR2_LM_LG_B1_STOR2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_STOR2_LM_LG_B1_STOR2_MAIN.png",
-      "sourceSha256": "47e0cb467cc0f66309348bf18bb67d4a0762d26c57dcca5961c563535cde42cb",
+      "sourceSha256": "d0981efaac551fa3a460a8c1fc484b3ef0d6e7e48f3648d00e3cadf9cb4024de",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18084,7 +18084,7 @@
       "id": "TEXTURE_B1_WORKSHOP_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_WORKSHOP_LM_DAY.png",
-      "sourceSha256": "dd4fdaed0447718fab26e6e8508d53379fafa80d52b7dafaf8c7ca28af619cfb",
+      "sourceSha256": "0e3254dfed52d59f1c4bbf333b4ef08ed173301c6bedff8b07d58ccb4dad0b67",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18111,7 +18111,7 @@
       "id": "TEXTURE_B1_WORKSHOP_LM_LG_B1_WORKSHOP_BENCH",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_WORKSHOP_LM_LG_B1_WORKSHOP_BENCH.png",
-      "sourceSha256": "1b7bf195bbfd36f08ef10e82c33e605b76c1a57f98c3094f65a20766b3e8578c",
+      "sourceSha256": "a05831013abd9b561393e8ba37903e28488264aebdcf51b6417ae88d2cbce021",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18138,7 +18138,7 @@
       "id": "TEXTURE_B1_WORKSHOP_LM_LG_B1_WORKSHOP_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_WORKSHOP_LM_LG_B1_WORKSHOP_MAIN.png",
-      "sourceSha256": "605c20aa488eb63aa63372acc3337e8291a7ef1386d3a733c7a0176cbf0c8ed7",
+      "sourceSha256": "4200a09ec57fcef6f511fa119bbbd38349ffdfacd42814b2cfa6e08e3bb258ce",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18501,7 +18501,7 @@
       "id": "TEXTURE_L0_BUTLERS_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_BUTLERS_LM_DAY.png",
-      "sourceSha256": "65979761fa1779e6552edc608d5fea4a9a4aec0920449b3aa99c1b557b88514b",
+      "sourceSha256": "281d5bbde80827beb6000724bbd3b2a2ddd7eda60ed533c5208a7231aeabb8b3",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18528,7 +18528,7 @@
       "id": "TEXTURE_L0_BUTLERS_LM_LG_L0_BUTLERS_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_BUTLERS_LM_LG_L0_BUTLERS_MAIN.png",
-      "sourceSha256": "d5274c104af89d22d28a085ab886dd93b21dbed428a9ba1c21db17fc9ba7f7fd",
+      "sourceSha256": "4b3a0ec6f502455dd6791cb6f1826a0a02cb7a92fdee8053d7df4215dfb1ae7a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18690,7 +18690,7 @@
       "id": "TEXTURE_L0_FAMILY_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_FAMILY_LM_DAY.png",
-      "sourceSha256": "8cab52f7ca4ed3323750a62d52fd59c638a552fb6bb31d2e20bee78db07bd6c2",
+      "sourceSha256": "a422b10c5c628ceaed7d2878ac9319b096b414893de28936d4dcf81e275128ce",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18717,7 +18717,7 @@
       "id": "TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MAIN.png",
-      "sourceSha256": "4a3a94e8f6304fe4108e86d5852a525f8d7d8e59a097f68a01f392fa23dc850b",
+      "sourceSha256": "0e28255d7c10194f54730441816f06e931dbba21fd4c25ef229c9f5af509f2d2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18771,7 +18771,7 @@
       "id": "TEXTURE_L0_FAMILY_LM_LG_L0_FAMILY_READING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_READING.png",
-      "sourceSha256": "703a1c57a82f74524caae87b8c60bfba20939855ecae8bf5c8aa64f38ad49d39",
+      "sourceSha256": "3189e5acb850ef21b83e21f12b3ce6c512b23f813c77fa5872475970eb0adafe",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18798,7 +18798,7 @@
       "id": "TEXTURE_L0_FOYER_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY.png",
-      "sourceSha256": "98129c7f92e20244c422581d4dc5bfe127326d9aeeca89b35676e9c71950326e",
+      "sourceSha256": "cf30a696e9507384662d254bc8d170d7c37692bd41571b672f1d102c03261276",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18825,7 +18825,7 @@
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_FOYER_ACCENT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT.png",
-      "sourceSha256": "0d02cbe7157045ada798055efd1555c8ddeee6f225c810761b8b6aa1a2d1eba4",
+      "sourceSha256": "474af984aa7726f700676ae80b9aa116fa19a9b2a368df6fba12357168625f8c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18852,7 +18852,7 @@
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_FOYER_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN.png",
-      "sourceSha256": "0c9526d89164a2cee872414167b69a1cbc2829c23bd211d21ce621f63c4618cd",
+      "sourceSha256": "5d060270e991e4095a6880904a7ea7cac7aff2bdbd69d54b64b9fe0885f3efc3",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18906,7 +18906,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN.png",
-      "sourceSha256": "a234266d7b9e783e62d68769408de9a73a07f5cfed5ac99f3e2e704db24102bc",
+      "sourceSha256": "7d0b59b28bc297109d496304e96af04d77027afe47a3e202b01c9050a4438ca4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18933,7 +18933,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_OPENER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER.png",
-      "sourceSha256": "80ca2334536c3b5272abcef18544448902c5560b0e08167ac371acd68fac7115",
+      "sourceSha256": "e93a9cf086e6cd7d945f81769d2d73133e824c3c69b6c849054be2a323593b00",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19095,7 +19095,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY.png",
-      "sourceSha256": "3ce9a7bf01881815730604b7e13d46fa80577211ab94cb3c4634febf7ac75248",
+      "sourceSha256": "326c811eb917a816b362a1858c0b020b4a631f465ed969ece93dbbf28a202e07",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19122,7 +19122,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND.png",
-      "sourceSha256": "4a147eed5b6695a2bf94e88a79245810592fe84f94f5fadda2094eca006bfe41",
+      "sourceSha256": "cb2e505c00a66debc74e77ea29d67dcd60794cb4f278a7da40bbc284d27f4d83",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19176,7 +19176,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_SINK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_SINK.png",
-      "sourceSha256": "c7ae8db6e9e406c2a0ad38f20493925f9c9a59b653cd741164876fedc2252b28",
+      "sourceSha256": "99d96f56e30047849a4c261eec90f923321104b56a03ac37de880a1367366518",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19203,7 +19203,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB.png",
-      "sourceSha256": "51e96e3ceb4b6293f57daf77d5e7d3b40c9eb100b2e341eaee1246c8d520c378",
+      "sourceSha256": "038252682b11c5edc941ba3d9fea287fe5b5bc18ac19819bc5faa686087bccc9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19284,7 +19284,7 @@
       "id": "TEXTURE_L0_LIVING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY.png",
-      "sourceSha256": "8f56c20c4eea1f778c06d1d23856bd0512c06e07202d3de52f247e5dfc06757f",
+      "sourceSha256": "5686bcc54e3e647448cd1b0600e4eedc285caa77e5b1c19e89830906cc548cfb",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19311,7 +19311,7 @@
       "id": "TEXTURE_L0_LIVING_LM_LG_L0_LIVING_FIRE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_FIRE.png",
-      "sourceSha256": "4f4be9335e433f10bab157423d616695505758788292abf99d9fd066986940a2",
+      "sourceSha256": "fdd8bd40c7dbed7538079feeeb73e53f97c433af157046f6431725e8394d9f6a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19338,7 +19338,7 @@
       "id": "TEXTURE_L0_LIVING_LM_LG_L0_LIVING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_MAIN.png",
-      "sourceSha256": "cfcd6967802c8e39aad61c12f5f4c2f5026e9fce7ec7daf82845f639235176c9",
+      "sourceSha256": "50d0996876884973fe96698d5b510f706ac4177430cb9cd66929f1494c907cf2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19365,7 +19365,7 @@
       "id": "TEXTURE_L0_LIVING_LM_LG_L0_LIVING_PIANO",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_PIANO.png",
-      "sourceSha256": "16e5e322180a0ea8c8c943af02400d5a5095b9a8c7d09245371a71d1383668c6",
+      "sourceSha256": "7a0509cccae803b0f57df9069a80208fb6e9e99dbcdfa1a8e5eacd1b01d82ca2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19392,7 +19392,7 @@
       "id": "TEXTURE_L0_MUDROOM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_MUDROOM_LM_DAY.png",
-      "sourceSha256": "64d3b1285174a14e4b90ae3e206414c34e22005cad04f4a2eadd167ecd3056dc",
+      "sourceSha256": "8899af36d48dc2b001878c6cd43702d6d8522bbe0cfccb36e94cb8bb9d5c891a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19419,7 +19419,7 @@
       "id": "TEXTURE_L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_MUDROOM_LM_LG_L0_MUDROOM_MAIN.png",
-      "sourceSha256": "85a3e0085fe8b098fe18e4ea3752e4f464a9edac562d57b3671d1ede3473e74f",
+      "sourceSha256": "e3797a599373210c57b3389cfbe8c5bcc1291d657007e3e28b6dfb5fb9f17082",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19473,7 +19473,7 @@
       "id": "TEXTURE_L0_OFFICE_LM_LG_L0_OFFICE_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_OFFICE_LM_LG_L0_OFFICE_DESK.png",
-      "sourceSha256": "7d3eaa35a6914e39a8ce29c78cea9e7527d0fa2677933859a0fa2f784e06fab8",
+      "sourceSha256": "d0b62769e922758ee2068884e15f3cf7de21c7cc21d16b35f7e9ebeddaf060f1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19500,7 +19500,7 @@
       "id": "TEXTURE_L0_OFFICE_LM_LG_L0_OFFICE_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_OFFICE_LM_LG_L0_OFFICE_MAIN.png",
-      "sourceSha256": "3bfd9a8758fb571cea05c5f3f8e3f11eb6b7b0b1c85e47d9d3de8fdecde027da",
+      "sourceSha256": "45eb2b95e9369c5c403088eefa09e7c9ac5f36ce9c3b6b2953d968a77b52c899",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19581,7 +19581,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "db4f02e30310423c0295cfe67f01e4e9280727653881a18271e0906a07362b88",
+      "sourceSha256": "572133d2e559684ff0f645454e28e11bbc2a4ce34c039c074f4f5e75acb7e77a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19608,7 +19608,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "9843dc91df950966cd1c6d075d39c9ced28d1d3709573763886d201c7c9a1658",
+      "sourceSha256": "e6a72da91de01d136e2f70703a29eda02e6b9985e751a679254b05c6e78151b8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19635,7 +19635,7 @@
       "id": "TEXTURE_L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_STEP.png",
-      "sourceSha256": "5d5d0f84fd407607eec994865f22a1c825af13a548ff7248ede6367b55520fd7",
+      "sourceSha256": "092545ff6d1e2edbdecd84d6e08f73f268e54983b4c186a553da0e0f784b584b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19716,7 +19716,7 @@
       "id": "TEXTURE_L0_SUNROOM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_SUNROOM_LM_DAY.png",
-      "sourceSha256": "d49f32bba95f01bc83156863aaa22c356d58973337ab946b013c20809d89ac27",
+      "sourceSha256": "76f0397ccea96ca6947e6fe9374068ea04bc2d46c98faa1aaa31f13cc6e7e7a1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19743,7 +19743,7 @@
       "id": "TEXTURE_L0_SUNROOM_LM_LG_L0_SUNROOM_BAR",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_SUNROOM_LM_LG_L0_SUNROOM_BAR.png",
-      "sourceSha256": "8d4dee576bf2b599c7307400de8b4d897940d0c850305396aad2711bd9118442",
+      "sourceSha256": "97ef473d7bc649b0da71135955a7e6e905abf35e7e129b2e9b9e7d03eb05e5d8",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19932,7 +19932,7 @@
       "id": "TEXTURE_L1_BATH2_LM_LG_L1_BATH2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BATH2_LM_LG_L1_BATH2_MAIN.png",
-      "sourceSha256": "78734dceef05261a212ae01ea53666f4df7600a246dbbd39a911961150220206",
+      "sourceSha256": "ee5f5aff0b9f16d5d6648218023150b8bfec43bf21b9050775e0bc98005241df",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19959,7 +19959,7 @@
       "id": "TEXTURE_L1_BATH2_LM_LG_L1_BATH2_VANITY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BATH2_LM_LG_L1_BATH2_VANITY.png",
-      "sourceSha256": "1746295a2654b6dc7d6d25e073f2f34d5e48451eb3ae5e38ddf4d76cc224bad3",
+      "sourceSha256": "2ebd548e463504b036254fe02203e100ff0faadc854f75f0e7716c3ffec2e1fc",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20094,7 +20094,7 @@
       "id": "TEXTURE_L1_BED2_LM_LG_L1_BED2_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED2_LM_LG_L1_BED2_DESK.png",
-      "sourceSha256": "bcfd5e39a030deb2981be23061c8906a8c699267b3d425c7c141af7d8ca51b6a",
+      "sourceSha256": "05dda51ef0c9bbe3cc15e1cf45bb29b2d42c67a433cd9d6ce4e7bd5df4159c9b",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20121,7 +20121,7 @@
       "id": "TEXTURE_L1_BED2_LM_LG_L1_BED2_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED2_LM_LG_L1_BED2_MAIN.png",
-      "sourceSha256": "8a390b7292ca2eea1d15742d9b9dcbfaac6cfc59ea945217caef4816ead1eb1b",
+      "sourceSha256": "f60725d120564ff5733572576ecadc005f881fef77cf789033b542fba976b566",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20175,7 +20175,7 @@
       "id": "TEXTURE_L1_BED3_LM_LG_L1_BED3_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED3_LM_LG_L1_BED3_BEDSIDE.png",
-      "sourceSha256": "6a97804b50cd7a5f24a6215aecba1f0ea59c1f0679ab33075c4ddca81d2ad595",
+      "sourceSha256": "1efbff63024cbc562daa1baf1c9f159c0cd0c3f1cdebfc46aa2dd9bf81386413",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20202,7 +20202,7 @@
       "id": "TEXTURE_L1_BED3_LM_LG_L1_BED3_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED3_LM_LG_L1_BED3_MAIN.png",
-      "sourceSha256": "7b94c8ff747857245ab7bc8552595e6062be70b8951da244013f80048b29c6c3",
+      "sourceSha256": "3e6e918546107b973643f0858c0600a0cc39a93f40c8910ca113d1dc80578f9a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20256,7 +20256,7 @@
       "id": "TEXTURE_L1_BED4_LM_LG_L1_BED4_DESK",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED4_LM_LG_L1_BED4_DESK.png",
-      "sourceSha256": "03af731acb6db4c93fc24da93780e51a0086ce3293a5ad5298355c51b3333997",
+      "sourceSha256": "871bee31118d6292222301d51cabff8902d118a6f0c3b2e30b8503a60edccd12",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20283,7 +20283,7 @@
       "id": "TEXTURE_L1_BED4_LM_LG_L1_BED4_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED4_LM_LG_L1_BED4_MAIN.png",
-      "sourceSha256": "3a115be2275c0c7314473a2ef283adfd65504dd0164e4015b14796789cce583b",
+      "sourceSha256": "cbe23e555937f57b9493c5f74301a198e410fe62b681d1e8cd7625471fb3cef1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20337,7 +20337,7 @@
       "id": "TEXTURE_L1_BED5_LM_LG_L1_BED5_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_BEDSIDE.png",
-      "sourceSha256": "3094ea1bb9c838eb638122067fe34bf36f72efd4b9fb4c6305d8986a10b4a428",
+      "sourceSha256": "7f728b279372d9a0bfd62312c1f4e4b4d236b08e49483f64780716d8ad53c11f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20364,7 +20364,7 @@
       "id": "TEXTURE_L1_BED5_LM_LG_L1_BED5_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_BED5_LM_LG_L1_BED5_MAIN.png",
-      "sourceSha256": "c90f9d892629040516ce0851152bf647ffd192c5e91a77f9345dabe0dbe0a8b2",
+      "sourceSha256": "b376da996524058cfe3e177e847bc91a94bd2ba9e10e8c3be4f64c4d472006f1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20661,7 +20661,7 @@
       "id": "TEXTURE_L1_LANDING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_LANDING_LM_DAY.png",
-      "sourceSha256": "662356561d198d3e699a670723ade5d1eaf9b59dbddc365c0d876e6512be33a9",
+      "sourceSha256": "aca834e919258c25c3e4f8ffa4670d6344e530f8495137e074045f4a1b82195c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20688,7 +20688,7 @@
       "id": "TEXTURE_L1_LANDING_LM_LG_L1_LANDING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_MAIN.png",
-      "sourceSha256": "3b54f992b4002b6a1c148aade6d4d90425d45b7b51e548eb3a2b3ea4d2060472",
+      "sourceSha256": "7999fb4ab4aff14c4d9a11aa2b821380134f0438be66204efdb804364aab30c6",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20715,7 +20715,7 @@
       "id": "TEXTURE_L1_LANDING_LM_LG_L1_LANDING_SEAT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_SEAT.png",
-      "sourceSha256": "7b05c16bc2ea17581be611571e04d6f1a52b8fe145a9f9525a07f50ac8c4c9a5",
+      "sourceSha256": "06694779586d3f43094e300cb96be3d210e96596b31c186dacdc36b1bf171f59",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20850,7 +20850,7 @@
       "id": "TEXTURE_L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_MAIN.png",
-      "sourceSha256": "6bfa228df4e239b607ebacba5b11e8bfa6b14f2560c901d98c35202f7fe1ee93",
+      "sourceSha256": "7b0e144559daa8be46572855c115d28d7317bda34a14198e957c30268dbce1c5",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20877,7 +20877,7 @@
       "id": "TEXTURE_L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_VANITY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BATH_LM_LG_L1_MASTER_BATH_VANITY.png",
-      "sourceSha256": "b8dfdcc34619584e593cfe2633a0c30dbfefb585827e275b0207f7d2a7de005b",
+      "sourceSha256": "fb20e842fe3ecad3289db5bd31272441bf222baa322c94936bd6e3cd6085f17f",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20931,7 +20931,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_BEDSIDE.png",
-      "sourceSha256": "3f87d2e8fb8dde45e46caf98256c94abd02ec21d76efb95b7f65b2a26ad57d6f",
+      "sourceSha256": "77753360703a4dd8f868298476a58d9badfd261286ccb17f2a1c9c8e4acd8388",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20958,7 +20958,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_DRESSER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_DRESSER.png",
-      "sourceSha256": "1f8dbff382c518d9d4337db942557be05ebdce23cea9c00614ec1e2c9fa338da",
+      "sourceSha256": "774ce5d94ab34cb87c2ed3b75519dbda1d6f55c036eb48281d545d68c2a8a4f2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20985,7 +20985,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_MAIN.png",
-      "sourceSha256": "7bd215eb8d3e91481abecd87f11d509a8a2bd76ab5263d1d25daa6a575a34c86",
+      "sourceSha256": "230446270b571f710c436cedee9337b4ef4104b05fc8ba092ad305e552cec717",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21012,7 +21012,7 @@
       "id": "TEXTURE_L1_MASTER_BED_LM_LG_L1_MASTER_BED_SEATING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_MASTER_BED_LM_LG_L1_MASTER_BED_SEATING.png",
-      "sourceSha256": "a6fb0e098929cd981742ad95d47fce3e5574afe9c741094374cf543519fd7728",
+      "sourceSha256": "8171bb393c9d0bae49c15fe08f73800b6119d8722731b27789a47cdb4f92d8c3",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21120,7 +21120,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L1_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "4dd6d52a8f9faf3fb0e7ba7042664dc854478d372213a32f5df8a7730666d0a5",
+      "sourceSha256": "d38232eb04581c5d92d0d395826828cc09947045c4acab1231720c6d45fadca4",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21147,7 +21147,7 @@
       "id": "TEXTURE_L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L1_STAIR_MAIN_LM_LG_L1_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "ced55900294806fdb12852b29d7bafaebd2bb2044542480c6ae1211c866677e4",
+      "sourceSha256": "0cbb692e72d240c53aabd169de578c5e0aabb1514feddac5f610670a4fa91eaa",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21363,7 +21363,7 @@
       "id": "TEXTURE_L2_BATH4_LM_LG_L2_BATH4_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BATH4_LM_LG_L2_BATH4_MAIN.png",
-      "sourceSha256": "86b044edf3563c3d0121196a40c2047132ab8b9dd169e19a3be5173594a20490",
+      "sourceSha256": "fe3c046335487e557c0684c8ee6d3dc20cb43d5983cc04728e6cbbddfe5e7e67",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21390,7 +21390,7 @@
       "id": "TEXTURE_L2_BATH4_LM_LG_L2_BATH4_VANITY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BATH4_LM_LG_L2_BATH4_VANITY.png",
-      "sourceSha256": "72a41ff11bacada714367e7077cb04c7d056a71d8498309fb09098ce1f2313d9",
+      "sourceSha256": "144727cc6d0f77ef9f295f927026c990e4fc2c8b9ab097486e77742fe71fbf00",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21525,7 +21525,7 @@
       "id": "TEXTURE_L2_BED6_LM_LG_L2_BED6_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED6_LM_LG_L2_BED6_MAIN.png",
-      "sourceSha256": "81beaac70d97a7f949aa4cfb5efcca05c31b69873e91a090e7f4298fa94655fd",
+      "sourceSha256": "6f49200760a978e1d0e65ea471bc98b6adcc7645d1e2a1c1e8baa016a2ebbca1",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21552,7 +21552,7 @@
       "id": "TEXTURE_L2_BED6_LM_LG_L2_BED6_SEWING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED6_LM_LG_L2_BED6_SEWING.png",
-      "sourceSha256": "add6df19d50a2c21d105204b90169a9c02ed03fda7ba250f0496c8649228c43e",
+      "sourceSha256": "1e3f564eefab0beb3f416033d9112428565771e96fcda66628b60c48192a74b3",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21606,7 +21606,7 @@
       "id": "TEXTURE_L2_BED7_LM_LG_L2_BED7_BEDSIDE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED7_LM_LG_L2_BED7_BEDSIDE.png",
-      "sourceSha256": "2f20d52e8bd62d0c0c60ae5fd907240f138e5676366a9bac0aa9a3cf8b7c46ce",
+      "sourceSha256": "b80c418f87179741c55e6c404d1cb9552d9be7aea15bca2bee6ae2157228b533",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21633,7 +21633,7 @@
       "id": "TEXTURE_L2_BED7_LM_LG_L2_BED7_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_BED7_LM_LG_L2_BED7_MAIN.png",
-      "sourceSha256": "c399bb9069c2d05c7aeb723181a291eb7ddcd7ee9c0a34bd351e78255180d967",
+      "sourceSha256": "2e7126f709158e9132313eb2a25dc83c24b4a4910097e9fd34f242587259f729",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21741,7 +21741,7 @@
       "id": "TEXTURE_L2_GAMES_LM_LG_L2_GAMES_ARCADE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_ARCADE.png",
-      "sourceSha256": "7f6f2fbaaeb247c739162e6929a2a1f5781c211d2c95fbaba62a3647ac8349e2",
+      "sourceSha256": "f3e4cdd0cf0156afec44581d16df837110070e336a19d082f1e003c599e80fdd",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21768,7 +21768,7 @@
       "id": "TEXTURE_L2_GAMES_LM_LG_L2_GAMES_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_MAIN.png",
-      "sourceSha256": "ed83353766edc96c27748b6a95483a288822df2c768c19a254b186e4a84cc639",
+      "sourceSha256": "a2056a1576435963a59756c1f8c96432d39b244e9c51dd552b1f79f47da0e302",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21795,7 +21795,7 @@
       "id": "TEXTURE_L2_GAMES_LM_LG_L2_GAMES_TABLE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_GAMES_LM_LG_L2_GAMES_TABLE.png",
-      "sourceSha256": "6601a3dc4c4ea017c885be4c44e684ebc6c9dc2f4bfb3f7fd863fd9b8cd6b961",
+      "sourceSha256": "6480a35650eb21b86c527e0430a126493c29c1d6addd8caa608b2a9655e3fc95",
       "texture": {
         "width": 128,
         "height": 128,
@@ -21984,7 +21984,7 @@
       "id": "TEXTURE_L2_LANDING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_LANDING_LM_DAY.png",
-      "sourceSha256": "8599c7a98be6d973703c4dda3a926c224df0c031de189dd6fc87e09ea255c938",
+      "sourceSha256": "36a324519359c183085efcce9045d79d277faa26e7d72d251d0ccea819816508",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22011,7 +22011,7 @@
       "id": "TEXTURE_L2_LANDING_LM_LG_L2_LANDING_JULIET",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_JULIET.png",
-      "sourceSha256": "4572332a72413416eab32b6828ba24b58b4baf2bf8e59e2b7402e92d926c5e8b",
+      "sourceSha256": "bf262ae78038129030c7284b312621bb6d2537d199f9edc69d29fe408d163962",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22038,7 +22038,7 @@
       "id": "TEXTURE_L2_LANDING_LM_LG_L2_LANDING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LANDING_LM_LG_L2_LANDING_MAIN.png",
-      "sourceSha256": "60c04f0f40379074e010c417ce5935825184306367ecbe77e2540f01ed633457",
+      "sourceSha256": "b15907c66bb40230ef2bfc65ac6991444ed2aca100c4685591d29116f1f83a38",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22092,7 +22092,7 @@
       "id": "TEXTURE_L2_LIBRARY_LM_LG_L2_LIBRARY_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_MAIN.png",
-      "sourceSha256": "6c7e4909ff5660dd577ae36ac8464ab02d26d7b47f297b650c00a542b934affd",
+      "sourceSha256": "b535567c33453f66cd62c9f2dfa9624c8cc26110224ddbf4ee65b1385b22eb9d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22119,7 +22119,7 @@
       "id": "TEXTURE_L2_LIBRARY_LM_LG_L2_LIBRARY_READING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_READING.png",
-      "sourceSha256": "1ce7e88086bc43e58a50a61f1aec065fcbe2519afdd0d3507824ef3f6ac0c9a6",
+      "sourceSha256": "98a68a3b3201b5cd9891362646deba1f4f4170e8ed3066a0d38aa30f08ff5ebf",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22146,7 +22146,7 @@
       "id": "TEXTURE_L2_LIBRARY_LM_LG_L2_LIBRARY_SHELVES",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_LIBRARY_LM_LG_L2_LIBRARY_SHELVES.png",
-      "sourceSha256": "1593a9db084b2844e102220f1c278e6bcd04c9e8a80e0c3403e349eda5999835",
+      "sourceSha256": "bde4519b261c85f0baa3ce577ed9ada410f0d6346d2cbddbd0cc81a09049580a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22254,7 +22254,7 @@
       "id": "TEXTURE_L2_SITTING_LM_LG_L2_SITTING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_SITTING_LM_LG_L2_SITTING_MAIN.png",
-      "sourceSha256": "885aa9caa001374d3d6b5d8031540d7974897662947a7024b5def835ce362d8e",
+      "sourceSha256": "267d61b8a1709f85bde548f1c9fb6bbc0f25252781c3613264fc2b1aa0a9e464",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22281,7 +22281,7 @@
       "id": "TEXTURE_L2_SITTING_LM_LG_L2_SITTING_READING",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_SITTING_LM_LG_L2_SITTING_READING.png",
-      "sourceSha256": "074148941e9b6fa457f02de2575adbb0f63ce9e3325dc427bde7911c866da316",
+      "sourceSha256": "fd8ebc84019b1af9b04efa8aca4119340b04df87e588fff74f23e44a3f6da783",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22362,7 +22362,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L2_STAIR_MAIN_LM_DAY.png",
-      "sourceSha256": "8419f685607f080da9e4395a205b181fd13cf17b7e535add0f664ab8c295519b",
+      "sourceSha256": "59e7be165a3441b03cb5712daa42173efacb645b3c59bad2454dd5e5e2bc0944",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22389,7 +22389,7 @@
       "id": "TEXTURE_L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L2_STAIR_MAIN_LM_LG_L2_STAIR_MAIN_MAIN.png",
-      "sourceSha256": "7755858dc87c5f6d4d236f1f4935b993512fb4579bc431532fc1babd300baf5c",
+      "sourceSha256": "59ab47784eabb5dc1e1ebda01df32673e2a3c60465e3d1747c439402ae7404b9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22578,7 +22578,7 @@
       "id": "TEXTURE_L3_ROOM_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_ROOM_LM_DAY.png",
-      "sourceSha256": "a742774b749ddb9592d11b6be59af4c3614b9d2da18c9cc0b1a0a5808a8280ab",
+      "sourceSha256": "1029fa71c639a3d40b1dd9f235040264b6ab80272be9e20074a0eb8565e885d9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22767,7 +22767,7 @@
       "id": "TEXTURE_L3_STORE_N_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L3_STORE_N_LM_DAY.png",
-      "sourceSha256": "952035a8f634b0507255a13292c4a99491727c47efe64d5e4efa3c858d3bfa07",
+      "sourceSha256": "ad5cbf42429ca34250e1e810e478e24959eb2f2199ab0b88574d7c34885e69d9",
       "texture": {
         "width": 128,
         "height": 128,
@@ -22794,7 +22794,7 @@
       "id": "TEXTURE_L3_STORE_N_LM_LG_L3_STORE_N_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L3_STORE_N_LM_LG_L3_STORE_N_MAIN.png",
-      "sourceSha256": "47327abd8659b5dc012d340e96dcbc253afebdd72273164a7fb1ab0314a432d1",
+      "sourceSha256": "bb5f7f92ee0c1aa60101e8a7799f4d1e36c4e2f15724061d623a8611e57f52c7",
       "texture": {
         "width": 128,
         "height": 128,

@@ -1620,6 +1620,44 @@
       "footstepSurface": "painted_wood", "audioAbsorption": 0.10,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // Exterior-window frame/sash finish, derived from approved MAT_SOFFIT_WHITE albedo/maps.
+    // A distinct id keeps weather-facing frames out of each room's indoor skirting chunk.
+    {
+      "id": "MAT_WINDOW_FRAME_WHITE", "class": "paint",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [1.0, 0.98, 0.93], "specularColor": [0.04, 0.04, 0.04],
+      "specularPower": 26.382, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.18, "specularBoost": 1.6, "powerBoost": 1.8},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "painted_wood", "audioAbsorption": 0.12,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    // Same authored glass filters as MAT_GLASS_CLEAR/OBSCURED, with exterior-window-only ids.
+    // No new asset is introduced; the separate chunk role is for §25.6 visibility ownership.
+    {
+      "id": "MAT_WINDOW_GLASS_CLEAR", "class": "glass",
+      "albedo": null, "normal": null, "lightmapChannel": 0,
+      "tint": [0.78, 0.9, 1.0], "specularColor": [0.9, 0.95, 1.0],
+      "specularPower": 128.0, "alphaMode": "blend", "alpha": 0.12,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "glass", "audioAbsorption": 0.03,
+      "effectTierS": "Basic", "effectTierE": "RoomLit/Glass"
+    },
+    {
+      "id": "MAT_WINDOW_GLASS_OBSCURED", "class": "glass",
+      "albedo": null, "normal": null, "lightmapChannel": 0,
+      "tint": [0.82, 0.9, 0.92], "specularColor": [0.78, 0.84, 0.86],
+      "specularPower": 64.0, "alphaMode": "blend", "alpha": 0.32,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "glass", "audioAbsorption": 0.05,
+      "effectTierS": "Basic", "effectTierE": "RoomLit/Glass"
+    },
     {
       "id": "MAT_DOOR_STEEL", "class": "metal",
       "albedo": "Textures/Materials/metal_brushed_albedo",

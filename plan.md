@@ -142,7 +142,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 9 | Room/portal visibility | 00661–00760 | 40 | Culling correct, proved, and within budget |
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
-| 12 | Materials and textures | 00891–00970 | 35 | The blockout reads as a building |
+| 12 | Materials and textures | 00891–00970 | 36 | The blockout reads as a building |
 | 13 | Static furniture and dressing | 00971–01120 | 65 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
@@ -13338,6 +13338,39 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             full 1,586-registration CTest passes all 1,578 runnable tests (established
             disabled/capture-only cases preserved). `VISUAL-GATE-1` remains FAILED because
             façade/openings and the empty/dark route dominate.
+- [x] HOUSE-00926 — Make exterior window frame, sash and glazing chunks visible without exposing interior trim through closed rooms
+      dep: HOUSE-00457, HOUSE-00471, HOUSE-00907, HOUSE-00921, HOUSE-00923, HOUSE-00924, HOUSE-00925 · sys: world/content/rendering · plat: ALL · pri: MUST
+      note: (2026-09-15) Round 11's enlarged fixed front screenshot has naked sky-coloured holes
+            where the façade should show frames, rails and window depth. The deployed
+            `L0_LIVING:trim` chunk is a single `MAT_DOOR_HARDWOOD` source-class grouping of both
+            indoor skirting and window frame/sash geometry; `L0_LIVING:glass` is also room-owned.
+            §25.6 correctly excludes both when that room's portal is closed. Adding all interior
+            trim/glass to the outdoor BVH would leak room content and break portal visibility.
+            Separate only outside-facing window detail into stable authored material/chunk roles,
+            reuse approved finishes, and admit those roles via the existing exterior hierarchy.
+      accept: the fixed normal-game exterior-front view visibly contains coherent window frames,
+            sashes/meeting rails and glazing rather than bare debug-like holes; the interior
+            living/family/kitchen view remains coherent; only exterior-window geometry may be
+            visible through the exterior hierarchy when adjacent rooms are closed, not ordinary
+            skirting/door trim or interior glass; canonical window schedule, collision, portal
+            culling and content/lightmap ownership stay valid; all source finishes are licensed
+            and stock-XNA effect/layout compatible; before/after images are reviewed and strict
+            golden refs updated selectively; XNA/content/culling/full gates pass, with the visual
+            gate judged honestly
+      verified: (2026-09-15) Outside-facing frames/panes have three stable, approved-derived
+            Basic material ids and separate source chunks; deployed exterior BVH instances grow
+            from 104 to 170 without admitting `MAT_DOOR_HARDWOOD` skirting/casing or room-owned
+            borrowed-light `MAT_GLASS_*`. All 64 authored windows, collision and portal contracts
+            validate. The final shell report has 508 chunks in 93 cells, zero material/layout
+            mismatches, and measured explicit §17.4 exceptions; 78 daylight and 124 artificial
+            bake products agree on shell hashes, and the 16-stage world content graph is fresh.
+            All eight fixed normal-game views were recaptured and inspected against Round 11;
+            only the front and four window-facing interior views changed. Thirty-one affected
+            golden pairs were inspected individually, updated selectively and confirmed by the
+            12-test actual-software render suite, including 18 culled/unculled paired views.
+            `tools/ci/run_checks.sh` passes with 323 strict-XNA units; offscreen isolated full
+            1,587-registration CTest passes all 1,575 runnable tests. The façade, foyer, hall and
+            kitchen still look unfinished: `VISUAL-GATE-1` remains FAILED, not silently claimed.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -17378,6 +17411,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-15 | `HOUSE-00926` | **New task, next free phase-12 id.** Split outside-facing window frame/sash/glass detail from room-owned indoor trim/glass and admit only those distinct roles to the exterior hierarchy. | The fixed front normal-game crop shows open-looking holes despite 64 canonical windows. Source tracing finds window geometry merged with each closed room's interior skirting/glass chunks, so §25.6's correct façade-only exterior BVH cannot show it. Admitting the unsplit chunks would bypass room/portal culling; a production material/chunk role split is the dependency-valid fix. |
 | 2026-09-15 | `HOUSE-00925` | **New task, next free phase-12 id.** Make outdoor opaque receivers scene-referred when viewed from a dark adapted room, without changing their canonical residency or stock-XNA effects. | Round 10's solid white `CHIMNEY:exterior` belongs to `EXT_ROAD` and receives up to 6x camera effect exposure although sky/glass in the same view do not. The source material is approved red brick; normal gameplay clips it to an apparent white window. This is a receiver-domain boundary left unresolved by `HOUSE-00922`'s outdoor light ownership and `HOUSE-01266`'s camera adaptation, not permission for debug recolouring. |
 | 2026-09-15 | `HOUSE-00924` | **New task, next free phase-12 id.** Correct the stock-XNA translucent-glass tint/exposure composition at the architectural window path. | Round 9's reviewed gameplay images show pure-white window pixels against a blue exterior sky and almost-black room. Source tracing proves the unlit glass pass multiplies its 12%-alpha tint by dark-room camera exposure while the background sky is unexposed; neither `HOUSE-00904`'s glass table nor `HOUSE-01266`'s opaque exposure model owns that boundary. Fixing it is dependency-valid visible work without a new renderer or altered alpha/provenance. |
 | 2026-09-15 | `HOUSE-00923` | **New task, next free id in phase 12's reserved 00891–00970 range.** Assign real canonical stock-XNA materials to every generated unbaked outdoor chunk and make the exterior start visible in production. | Fixed gameplay/debug captures at the same road pose proved that 31 unregistered generator roles and 17 material/layout mismatches hide road, ground, fence, gate, roof and porch finishes in production despite valid collision and blockout geometry. `HOUSE-00907` covered the canonical house shell only, not the outdoor generators or dynamic outdoor receiver variants. The missing dependency-valid visual work belongs to this phase; no id was renumbered or completed prematurely. |

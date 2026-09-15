@@ -37,10 +37,10 @@ namespace cnahouse::rendering
     using Microsoft::Xna::Framework::Vector3;
 
     float OpaqueReceiverEffectExposure(world::CellKind cellKind,
-                                       bool exteriorSkin,
+                                       bool exteriorFacing,
                                        float cameraEffectExposure) noexcept
     {
-        return cellKind == world::CellKind::Exterior || exteriorSkin ? 1.0F : cameraEffectExposure;
+        return cellKind == world::CellKind::Exterior || exteriorFacing ? 1.0F : cameraEffectExposure;
     }
 
     namespace
@@ -330,7 +330,10 @@ namespace cnahouse::rendering
             }
 
             const bool exteriorSkin = visibility::IsExteriorSkinMaterial(library_.materials[leader.material]);
-            const float exposure = OpaqueReceiverEffectExposure(cell->kind, exteriorSkin, cameraExposure);
+            const bool exteriorWindow =
+                visibility::IsExteriorWindowMaterial(library_.materials[leader.material]);
+            const float exposure =
+                OpaqueReceiverEffectExposure(cell->kind, exteriorSkin || exteriorWindow, cameraExposure);
 
             DrawParams common;
             common.world = &worldMatrix;
@@ -537,9 +540,10 @@ namespace cnahouse::rendering
                 DrawParams draw = common;
                 if (room != nullptr)
                 {
-                    const bool skyOpen = cell->kind == world::CellKind::Exterior &&
-                                         cell->visibilityHint == world::VisibilityHint::Open;
-                    const float artificial = room->artificial * kBasicFixtureAmbient;
+                    const bool skyOpen =
+                        exteriorWindow || (cell->kind == world::CellKind::Exterior &&
+                                           cell->visibilityHint == world::VisibilityHint::Open);
+                    const float artificial = exteriorWindow ? 0.0F : room->artificial * kBasicFixtureAmbient;
                     const Vector3& sky = skyOpen ? lighting_->SkyAmbientColor() : room->skyAmbientColor;
                     const float skyScale = skyOpen ? 1.0F : kBasicSkyBounce;
                     draw.ambientLight =
@@ -563,7 +567,7 @@ namespace cnahouse::rendering
                                                               scale * celestial->diffuseColor.Z),
                                                       Vector3(0.0F, 0.0F, 0.0F)};
                     }
-                    else if (room->artificial > 0.0F)
+                    else if (!exteriorWindow && room->artificial > 0.0F)
                     {
                         const float scale = exposure * kBasicFixtureKey * room->artificial;
                         draw.basicKey = BasicKeyLight{Vector3(0.0F, -1.0F, 0.0F),

@@ -116,29 +116,45 @@ CHUNK_BUDGET_EXCEPTIONS = {
                  "on it, and -- since `HOUSE-00494` -- the house's two roofs and its chimney, "
                  "which are five more and have to load with the exterior rather than with the "
                  "neighbourhood"),
-    "L0_GARAGE": (7,
+    "L0_GARAGE": (8,
                   "a garage is a room and stays one (`HOUSE-00487`). The four receiver classes, "
-                  "plus the stair to the loft, plus the glazing, plus trim"),
-    "L0_FAMILY": (14,
+                  "plus the stair to the loft, glazing, trim and an outside window-frame chunk"),
+    "L0_FAMILY": (15,
                   "measured with HOUSE-01037's first furnished media/seating group: five shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
-                  "Reach's per-draw primitive cap. Merging cushion, leaf, shade and rug maps into "
-                  "generic paint would erase the visible asset detail"),
-    "L0_LIVING": (15,
+                  "Reach's per-draw primitive cap, plus one outside window-frame chunk. Merging "
+                  "cushion, leaf, shade and rug maps into generic paint would erase the detail"),
+    "L0_LIVING": (16,
                   "measured with HOUSE-01037's first furnished conversation group: six shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
-                  "Reach's per-draw primitive cap. The extra materials retain source cushions, "
-                  "lampshade, leaf and rug instead of flattening them"),
-    "L0_STAIR_MAIN": (7,
+                  "Reach's per-draw primitive cap, plus one outside window-frame chunk. The extra "
+                  "materials retain source cushions, lampshade, leaf and rug"),
+    "L0_STAIR_MAIN": (8,
                       "a stair hall: the four receiver classes plus a STAIR class, glazing and "
-                      "trim. The stair is the whole purpose of the room"),
-    "L1_STAIR_MAIN": (7, "the same hall a storey up, and the same seven"),
-    "L3_ROOM": (8,
+                      "trim, plus the outside window frame. The stair is the room's purpose"),
+    "L1_STAIR_MAIN": (8, "the same hall a storey up, plus an outside window-frame chunk"),
+    "L3_ROOM": (9,
                 "a rafter-bounded attic room draws the ROOF it looks up at as well as its collar "
                 "ceiling (`HOUSE-00496`), and since `HOUSE-00488` the RAFTERS under that roof as "
-                "well -- two classes no room below it has, and both of them things you are "
-                "looking at when you stand in it"),
+                "well -- two classes no room below it has, plus an outside window-frame chunk"),
+    "L0_KITCHEN": (8,
+                   "two separate weather-facing window roles: the outside frame and glazing "
+                   "are distinct from indoor borrowed-light glass and the six shell finishes"),
 }
+
+# `HOUSE-00926`: a separate weather-facing frame keeps indoor skirting out of the outdoor BVH.
+# These are the *measured* seven-chunk cells, not a blanket allowance for all 78 rooms. Each id
+# remains visible in `--report`; a room that falls to six chunks makes its entry stale and fails.
+for window_cell in (
+        "B1_GYM", "B1_MECHANICAL", "B1_STOR1", "B1_STOR2", "B1_WORKSHOP",
+        "L0_BUTLERS", "L0_FOYER", "L0_MUDROOM", "L0_OFFICE", "L0_PANTRY", "L0_SUNROOM",
+        "L1_BATH2", "L1_BED2", "L1_BED3", "L1_BED4", "L1_BED5", "L1_LANDING",
+        "L1_MASTER_BATH", "L1_MASTER_BED",
+        "L2_BATH4", "L2_BED6", "L2_BED7", "L2_GAMES", "L2_LANDING", "L2_LIBRARY",
+        "L2_SITTING", "L2_STAIR_MAIN", "L3_STORE_N"):
+    CHUNK_BUDGET_EXCEPTIONS[window_cell] = (
+        7, "six measured shell finish chunks plus one weather-facing window-frame chunk; "
+           "ordinary room trim and borrowed-light glass stay portal-owned")
 
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
