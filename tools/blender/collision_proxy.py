@@ -35,6 +35,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 import sys
 
 try:
@@ -421,17 +422,37 @@ def build_proxy(source, mode: str, name: str):
 def generate(source_path: str, output_path: str, mode: str = "auto") -> dict:
     reset_scene()
     bpy.ops.import_scene.gltf(filepath=source_path)
-    meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+    meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"
+              and not o.name.endswith("_COL")
+              and not re.search(r"_LOD[1-9][0-9]*$", o.name)]
     if not meshes:
-        raise SystemExit(f"collision_proxy: {source_path} contains no mesh")
-    source = max(meshes, key=triangle_count)
+        raise SystemExit(f"collision_proxy: {source_path} contains no LOD0 render mesh")
+    source_name = max(meshes, key=triangle_count).name
+    # A logical prop often has several material meshes (tabletop/legs, sofa/cushions).
+    # Analyse copies joined into one temporary source so the proxy encloses the WHOLE prop,
+    # not merely whichever material happened to own the most triangles. Keep the originals
+    # untouched for the export and remove the temporary source before writing the GLB.
+    copies = []
+    for mesh in meshes:
+        duplicate = mesh.copy()
+        duplicate.data = mesh.data.copy()
+        bpy.context.collection.objects.link(duplicate)
+        transform = mesh.matrix_world.copy()
+        duplicate.parent = None
+        duplicate.matrix_world = transform
+        bpy.ops.object.select_all(action="DESELECT")
+        duplicate.select_set(True)
+        bpy.context.view_layer.objects.active = duplicate
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        copies.append(duplicate)
+    source = join(copies, "__collision_source")
     source_volume = mesh_volume(source)
-    name = f"{source.name}_COL"
+    name = f"{source_name}_COL"
 
     report = {
         "source": source_path,
         "output": output_path,
-        "sourceName": source.name,
+        "sourceName": source_name,
         "proxyName": name,
         "sourceVolume": round(source_volume, 6),
         "problems": [],
@@ -488,6 +509,7 @@ def generate(source_path: str, output_path: str, mode: str = "auto") -> dict:
             f"the proxy does not enclose the source; worst vertex is {outside:.4f} outside"
         )
 
+    bpy.data.objects.remove(source, do_unlink=True)
     bpy.ops.object.select_all(action="DESELECT")
     for obj in bpy.context.scene.objects:
         obj.select_set(True)
@@ -554,6 +576,25 @@ def fixture_sofa(path: str) -> None:
     _export(obj, path)
 
 
+def fixture_multi_part(path: str) -> None:
+    """Two render meshes, plus a remote LOD: only both LOD0 pieces belong in the proxy."""
+    reset_scene()
+    bpy.ops.mesh.primitive_cube_add(size=0.4, location=(-0.9, 0.0, 0.0))
+    left = bpy.context.active_object
+    left.name = "tabletop"
+    bpy.ops.mesh.primitive_cube_add(size=0.4, location=(0.9, 0.0, 0.0))
+    right = bpy.context.active_object
+    right.name = "tablelegs"
+    bpy.ops.mesh.primitive_cube_add(size=0.4, location=(25.0, 0.0, 0.0))
+    lod = bpy.context.active_object
+    lod.name = "tabletop_LOD1"
+    bpy.ops.object.select_all(action="DESELECT")
+    for obj in (left, right, lod):
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = left
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True)
+
+
 def selftest() -> int:
     import os
     import tempfile
@@ -596,6 +637,20 @@ def selftest() -> int:
             check(f"{label}: named <name>_COL", report["proxyName"].endswith("_COL"),
                   report["proxyName"])
             check(f"{label}: no problems", not report["problems"], "; ".join(report["problems"]))
+
+        multi = os.path.join(workdir, "multi_part.glb")
+        fixture_multi_part(multi)
+        report = generate(multi, os.path.join(workdir, "multi_part_col.glb"), mode="box")
+        reset_scene()
+        bpy.ops.import_scene.gltf(filepath=report["output"])
+        proxy = next(obj for obj in bpy.context.scene.objects
+                     if obj.type == "MESH" and obj.name.endswith("_COL"))
+        minimum, maximum = local_bounds(proxy)
+        check("the collision proxy encloses both LOD0 material meshes, in world metres",
+              minimum.x < -1.09 and maximum.x > 1.09,
+              f"x bounds {minimum.x:.2f} to {maximum.x:.2f}")
+        check("an authored LOD is excluded from collision source geometry",
+              maximum.x < 2.0, f"right bound {maximum.x:.2f}, not 25.2")
 
         # The enclosure test must be able to fail, or it proves nothing. A box deliberately shrunk
         # to 80 % has to be rejected.

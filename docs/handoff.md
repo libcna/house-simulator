@@ -1,4 +1,48 @@
-# Session handoff — 2026-09-14
+# Visual-sprint handoff — 2026-09-15 (`HOUSE-01037` checkpoint)
+
+The 2026-09-14 handoff below is an **archive**, not the present repository state. Verify the
+branch, HEAD and worktree before acting. Current starting HEAD is
+`238d6aed27c1e8662f0d118013ef08bb801ae018` (`HOUSE-00922`) on `develop`.
+
+`HOUSE-01037` completes this first static-furniture checkpoint: nine licensed/attributed furniture
+GLBs and eight sRGB albedos, 15 static placements in `L0_LIVING` and `L0_FAMILY`, five heavy-model
+LOD/collision preparations, source-material-preserving chunks, Reach primitive splitting and
+power-of-two static textures. Current reviewed normal-game captures are
+[`house-01037-furniture-r7`](visual-review/captures/house-01037-furniture-r7), with the earlier
+empty route at [`house-00922-outdoor-sky-r1`](visual-review/captures/house-00922-outdoor-sky-r1).
+`VISUAL-GATE-1` is **not passed**: furnishings are now visible but white upholstery clips against
+almost-black walls/floors, kitchen and foyer remain empty, and the front façade lacks convincing
+ground/vegetation context. The concise ranked review is in
+[`docs/visual-review/README.md`](visual-review/README.md), Rounds 6–7.
+
+The source glTF importer, scale/origin, manifest, packaging licence and exact credit-generation
+checks pass. One important credit-generator correction now includes CC BY `derived` furniture in
+the in-game credits. The initial furniture-aware `nav.bin` build reached roughly 50 minutes before
+signal 143; an **exact conservative mesh-AABB lower bound** then reduced a full build to 19 minutes
+without changing the clearance answer. Its selftest passed, including near/far equivalence. After
+the first full unit suite found authored furniture crowding at two room midpoints and wedges at
+three wall poses, the source placements were adjusted, **not the collision limits**. The final
+world build completed in 1,282.09 s (nav 1,267.51 s), the full content graph is fresh, the full
+CMake build passes and the final eight views have been inspected. Strict interior refs, the
+18-pose culled/unculled comparison and the complete 1,583-registration CTest run return green
+(existing intentional skips/disabled cases preserved). Two old integration
+tests needed corrected pass-slice/material-count expectations for the real plant leaves and eight
+new furniture materials; their stronger invariants also pass. `tools/ci/run_checks.sh` passed again
+after those two test edits, including 323 strict-XNA translation units. The task checkbox is
+complete in the one `HOUSE-01037` commit.
+Build/test CPU usage stays pinned to cores 4,5,7,9 with the env block below. Never bypass the
+Python 3.11 `jsonschema` commit hook. Do not modify CNA or sharp-runtime. CNA acquired concurrent,
+unrelated X11/platform edits during this session; they are outside this repository/task and were
+not touched here. `sharp-runtime` and `living-room-simulator` remain clean.
+
+Once this checkpoint is committed, the next highest-visible-value work is to reconcile the
+stock `BasicEffect`'s default white downward furniture key with the live room lighting and to
+restore a plausible ambient/daylight base to L0 receiver surfaces. The artificial main atlas for
+`L0_LIVING` has a 10.55 peak against 0.011 mean irradiance; using its mostly dark spatial pattern
+as the sole opaque ambient-floor carrier is a measured source of black walls. Keep the Tier-S/XNA
+architecture and validate any correction against the fixed eight review cameras.
+
+## Archived handoff — 2026-09-14
 
 This is the authoritative handoff for the next agent. The owner explicitly wants a **fresh Sol
 High context with a new optimisation target: make House Simulator visually convincing**. Do not

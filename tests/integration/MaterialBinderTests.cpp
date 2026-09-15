@@ -179,7 +179,14 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 115U);
+                EXPECT_EQ(binder.Count(), 123U);
+
+                const MaterialDesc* upholstery = binder.Find(Id::Of("MAT_FURNITURE_WHITE_ROOM_PALETTE"));
+                ASSERT_NE(upholstery, nullptr);
+                EXPECT_EQ(upholstery->kind, MaterialKind::Basic);
+                const MaterialDesc* leaves = binder.Find(Id::Of("MAT_FURNITURE_PLANT_LEAF"));
+                ASSERT_NE(leaves, nullptr);
+                EXPECT_EQ(leaves->kind, MaterialKind::AlphaTest);
 
                 const MaterialDesc* glass = binder.Find(Id::Of("MAT_GLASS_CLEAR"));
                 ASSERT_NE(glass, nullptr);

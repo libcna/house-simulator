@@ -1438,6 +1438,104 @@
       "effectTierS": "Basic", "effectTierE": "SurfaceBlend/Snowy"
     },
     // END GENERATED SNOW MATERIALS
+    // BEGIN VISUAL-SLICE FURNITURE MATERIALS (HOUSE-01037)
+    {
+      "id": "MAT_FURNITURE_WHITE_ROOM_PALETTE", "class": "fabric",
+      "albedo": "Textures/Furniture/LivingRoom/white_room_palette",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.07, 0.07, 0.07],
+      "specularPower": 24.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.2, "powerBoost": 1.2 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.40,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_CUSHION_GREEN", "class": "fabric",
+      "albedo": "Textures/Furniture/LivingRoom/cushion_green_circles",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.88, 0.93, 0.82], "specularColor": [0.03, 0.03, 0.03],
+      "specularPower": 4.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.2, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.55,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_CUSHION_PURPLE", "class": "fabric",
+      "albedo": "Textures/Furniture/LivingRoom/cushion_purple_stripe",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.92, 0.88, 0.98], "specularColor": [0.03, 0.03, 0.03],
+      "specularPower": 4.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.2, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.55,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_CUSHION_PURPLE_YELLOW", "class": "fabric",
+      "albedo": "Textures/Furniture/LivingRoom/cushion_purple_yellow",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.94, 0.90, 0.98], "specularColor": [0.03, 0.03, 0.03],
+      "specularPower": 4.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.2, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.55,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_RUG_CHARCOAL", "class": "fabric",
+      "albedo": "Textures/Furniture/LivingRoom/rug_charcoal",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.92, 0.92, 0.96], "specularColor": [0.02, 0.02, 0.02],
+      "specularPower": 3.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.72,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_LAMP_SHADE", "class": "fabric",
+      "albedo": "Textures/Furniture/LivingRoom/lamp_shade_stripes",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.92, 0.94, 1.0], "specularColor": [0.02, 0.02, 0.02],
+      "specularPower": 3.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.50,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_GREY_ROOM_PALETTE", "class": "plastic",
+      "albedo": "Textures/Furniture/LivingRoom/grey_room_palette",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.06, 0.06, 0.06],
+      "specularPower": 18.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.10, "specularBoost": 1.2, "powerBoost": 1.2 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "ceramic", "audioAbsorption": 0.08,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_PLANT_LEAF", "class": "foliage",
+      "albedo": "Textures/Furniture/LivingRoom/plant_leaf",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.82, 0.92, 0.78], "specularColor": [0.02, 0.02, 0.02],
+      "specularPower": 4.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.38, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.18, "specularBoost": 1.3, "powerBoost": 1.2 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "grass", "audioAbsorption": 0.42,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
+    // END VISUAL-SLICE FURNITURE MATERIALS
     {
       "id": "MAT_APPLIANCE_STEEL", "class": "metal",
       "albedo": "Textures/Materials/metal_brushed_albedo",

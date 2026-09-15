@@ -136,13 +136,19 @@ def verify(document: dict, *, packaging: bool) -> list[str]:
     return problems
 
 
+def third_party_rows(rows: list[dict]) -> list[dict]:
+    """Downloaded sources AND their adaptations still need the upstream licence credit."""
+    return [row for row in rows
+            if (row.get("origin") or {}).get("kind") in {"downloaded", "derived"}]
+
+
 def render(document: dict) -> str:
     rows = list(document.get("assets", []))
 
-    # Third-party ONLY. An asset this project authored or generated is covered by the program's own
-    # licence and listing it here would bury the assets that actually need attribution among the
-    # ones that do not -- which is how an attribution document stops being read.
-    third_party = [r for r in rows if (r.get("origin") or {}).get("kind") == "downloaded"]
+    # Third-party ONLY. Project-authored/generated assets are covered by its own licence, but
+    # extracting or resampling a downloaded model/texture does not erase its upstream licence.
+    # Excluding `derived` would leave the first CC BY furniture absent from the in-game credits.
+    third_party = third_party_rows(rows)
 
     body: list[str] = []
     if not third_party:
@@ -257,12 +263,40 @@ def render(document: dict) -> str:
     return HEADER + "\n".join(body) + "\n"
 
 
+def selftest() -> int:
+    fixture = {"assets": [
+        {"id": "DOWNLOADED", "origin": {"kind": "downloaded", "licence": "CC0-1.0"}},
+        {"id": "DERIVED", "origin": {"kind": "derived", "licence": "CC-BY-3.0",
+                                      "name": "A sourced model", "author": "An artist",
+                                      "attribution": "A sourced model by An artist"}},
+        {"id": "AUTHORED", "origin": {"kind": "authored", "licence": "Ms-PL"}},
+        {"id": "GENERATED", "origin": {"kind": "generated", "licence": "Ms-PL"}},
+    ]}
+    selected = [row["id"] for row in third_party_rows(fixture["assets"])]
+    if selected != ["DOWNLOADED", "DERIVED"]:
+        print(f"verify_licences: wrong third-party partition: {selected}", file=sys.stderr)
+        return 1
+    credits = render(fixture)
+    if not all(mark in credits for mark in ("`DERIVED`", "A sourced model by An artist")):
+        print("verify_licences: a sourced adaptation lost its attribution", file=sys.stderr)
+        return 1
+    if "`AUTHORED`" in credits or "`GENERATED`" in credits:
+        print("verify_licences: project-owned rows polluted third-party credits", file=sys.stderr)
+        return 1
+    print("verify_licences: selftest passed (downloaded and derived credited)")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--packaging", action="store_true", help="apply the shipping rules")
     parser.add_argument("--emit", action="store_true", help="write licenses/THIRD-PARTY-ASSETS.md")
     parser.add_argument("--check", action="store_true", help="fail if the document is stale")
+    parser.add_argument("--selftest", action="store_true", help="check third-party credit selection")
     args = parser.parse_args()
+
+    if args.selftest:
+        return selftest()
 
     document = manifest_tool.load()
 

@@ -2,8 +2,11 @@
 
 These captures answer “does the playable house look good?”, not “did a pixel change?”. Run
 `python3 tools/visual/capture_review.py <short-head>-<round>` from the repository root. The tool
-fixes the six player poses, Tier S/High, software Mesa, clear weather, 10:30, the session seed and
-capture frame. Strict golden render tests remain separate.
+fixes six route poses plus two composition poses (added for HOUSE-01037 after the original
+living/family cameras proved to face away from their seating groups), Tier S/High, software Mesa,
+clear weather, 10:30, the session seed and capture frame. Strict golden render tests remain
+separate. The original six poses stay unchanged for the route before/after comparison; the two
+extra poses are stable review cameras from this round onward.
 
 ## Round 0 — visual-convergence baseline
 
@@ -172,3 +175,71 @@ updated; culling equivalence remains green.
 Remaining: add believable exterior form/daylight separation and correct the large-scale siding
 read, then start primary furniture placement because emptiness dominates the connected-room
 views. `VISUAL-GATE-1` has not passed.
+
+## Round 6 — first real L0 seating groups
+
+Commit: `HOUSE-01037` working tree (`2026-09-15`)
+
+Before: [Round 5 six-view route](captures/house-00922-outdoor-sky-r1).
+After: [eight-view furnished route](captures/house-01037-furniture-r6).
+Intermediate defect proof: [Round 6 pre-FFL composition](captures/house-01037-furniture-r5).
+
+Ranked visible defects after the fix:
+
+1. White seating/table surfaces clip against very dark wall/floor finishes; the room lighting and
+   material balance still feel like a staged scene, not daylight in a lived-in house.
+2. The original route cameras face away from most of the seating, so the two new fixed composition
+   views are essential to judging these rooms. Kitchen and foyer remain empty.
+3. The living room remains too dark away from its white furnishings; source leather/palette
+   contrast and room ambient need a purposeful rebalance.
+4. The façade is a broad flat gray silhouette above nearly empty blue-gray foreground; the
+   driveway/ground/vegetation do not read at this front-review pose. Exterior start quality is
+   unchanged.
+5. The peeling warm paint and blown-out window apertures still distract from real finishes.
+
+Fixed: nine metre-scaled, CC BY-attributed source models and eight intact source albedo slots now
+form two measured sofa/chair/table/rug/lamp/plant groups plus a family media wall. The first real
+captures found NPOT sampler failure, an unsplit 65,535-primitive Reach draw and, most visibly,
+`y=0` furniture sunk 0.60 m below the L0 finished floor; all three were corrected and recaptured.
+The basement cinema artefact vanished when props moved to `L0.ffl=0.60`. The two groups now read
+as furniture in normal gameplay rather than debug blocks. Three strict references changed only
+where the new furnishings enter the debug kitchen/living and production kitchen views; their
+before/after images were inspected before the intentional update. The 18-pose culled/unculled
+comparison remained below 0.2%.
+
+Remaining: daylight/fixture depth and a less clipped furnishing finish, then primary kitchen and
+foyer fixtures. This is a **primary-kit checkpoint**, not fully furnished rooms; `VISUAL-GATE-1`
+has not passed.
+
+Diagnosis for the next round: the unbaked BasicEffect props still inherit its 1.0 white downward
+key while the shell uses cell lightmaps. The `L0_LIVING` main artificial atlas has peak 10.55 but
+mean 0.011 irradiance; binding its dark spatial pattern as the only opaque ambient-floor carrier
+leaves most walls nearly black with that group off. Correct these two mismatched light paths before
+judging the sofa's final colour or adding more small clutter.
+
+## Round 7 — collision-safe final furniture placement
+
+Commit: `HOUSE-01037` working tree (`2026-09-15`)
+
+Before: [initial furnished composition](captures/house-01037-furniture-r6).
+After: [final eight-view capture](captures/house-01037-furniture-r7).
+
+Ranked visible defects after the correction:
+
+1. White/cyan seating remains overexposed against dark plaster, wood and ceiling; light-path
+   mismatch still dominates the two furnished views.
+2. Large window apertures are almost pure white; both interior depth and exterior view are lost.
+3. The family composition pose now crops the shifted chair/table in the foreground, though the
+   kitchen-to-family route pose shows the seating group and clear opening.
+4. Foyer, hall and kitchen lack visible primary furniture and their shells remain too dark.
+5. The exterior-front capture is bit-identical to the prior empty route: flat gray façade and
+   unconvincing ground/context remain.
+
+Fixed: moved the family sofa, coffee table, rug and armchair and the living purple armchair after
+actual depenetration/tour tests found a cell-midpoint overlap and two wall-recovery wedges. The
+collision limits were preserved. Both collision tests, strict interior render references and the
+18-pose culled/unculled check pass with the final placement. The source and build world content
+now include the matching rebuilt pet navigation graph.
+
+Remaining: correct visible room/furniture lighting before clutter or distant-house polish.
+`VISUAL-GATE-1` has not passed.

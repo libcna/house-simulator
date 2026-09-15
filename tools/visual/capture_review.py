@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture the six fixed, human-reviewed views used by the visual-convergence sprint.
+"""Capture fixed, human-reviewed views used by the visual-convergence sprint.
 
 This is deliberately separate from pixel-golden render tests.  The camera, simulation inputs and
 software renderer are fixed so two rounds are compositionally comparable; a person still decides
@@ -20,8 +20,10 @@ POSES = (
     ("entrance-foyer", "0.00,0.60,-14.90,0.0,0.0"),
     ("central-hall", "0.00,0.60,-20.65,0.0,0.0"),
     ("living-room", "-5.20,0.60,-17.25,90.0,0.0"),
+    ("living-composition", "-3.10,0.60,-18.50,270.0,0.0"),
     ("kitchen", "-3.00,0.60,-25.05,90.0,0.0"),
     ("family-room", "5.45,0.60,-24.55,270.0,0.0"),
+    ("family-composition", "3.20,0.60,-25.80,90.0,0.0"),
 )
 
 

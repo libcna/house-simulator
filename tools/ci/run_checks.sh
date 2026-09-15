@@ -119,6 +119,7 @@ run_gate "effects-baseline" tools/effects/build_effects.sh --check
 # licence nobody has looked at, and a gate is the only moment anyone reliably looks (`HOUSE-00196`).
 run_gate "manifest"   python3 tools/ci/check_manifest.py
 # And the credits document cannot drift from the manifest it is generated from (`HOUSE-00198`).
+run_gate "licences-selftest" python3 tools/assets/verify_licences.py --selftest
 run_gate "licences"   python3 tools/assets/verify_licences.py --check
 # `HOUSE-00296`. The 34 fixed ambientCG selections are three-map sets, not an unstructured pile of
 # PNGs: exact category counts, equal channel dimensions, opaque RGBA data and the retained
@@ -197,6 +198,9 @@ run_gate "neighbourhood" python3 tools/world/neighbourhood_gen.py --selftest
 # writer and `NeighbourhoodReader` drifting apart.
 run_gate "neighbourhood-bin" python3 tools/world/build_neighbourhood.py --selftest
 run_gate "world-deploy" python3 tools/world/deploy_world.py --check
+# Furniture-aware pet waypoints must keep conservative mesh broad-phase equivalent to the exact
+# triangle-distance query. The fixture is cheap; the production graph is a content-build stage.
+run_gate "nav-selftest" python3 tools/world/build_nav.py --selftest
 # `HOUSE-00477`. §70.5 over the GENERATED SHELL, not over the layout: `validate_world.py` rule 10
 # checks the numbers an author typed and this checks the geometry the generator made of them. It
 # pins the exact set of problems the house has, so a new one fails the day it appears. Skipped,

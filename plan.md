@@ -27,10 +27,13 @@ number order. The first slice is the continuous route from the front approach th
 `L0_DINING`. Normal gameplay must use production materials; the hashed blockout palette may remain
 only as an explicit debug view.
 
-The active dependency chain is `HOUSE-00909` → `HOUSE-00910` → `HOUSE-00912`, followed by visible
-seam repair (`HOUSE-00913`), material regression coverage (`HOUSE-00917`), the minimum real prop
-pipeline/assets needed by the named rooms (`HOUSE-00971` onward), and their relevant phase-16
-lighting tasks. After each substantial visible change, recapture the six fixed views recorded in
+The initial material/daylight chain `HOUSE-00909` → `HOUSE-00910` → `HOUSE-00912` has reached
+normal rendering. The first minimum real static prop kit (`HOUSE-01037`) uses completed
+`HOUSE-00215` batching without claiming `HOUSE-00971`'s unfinished dynamic/jitter/tint criteria.
+Its reviewed images make room/furniture light balance the next highest-value defect; address that
+before minor seams or unrelated systems. `HOUSE-00913` seam repair, `HOUSE-00917` material
+regression and broader furnishing remain in the visible chain when their defects lead the review.
+After each substantial visible change, recapture the eight fixed views recorded in
 [`docs/visual-review/README.md`](docs/visual-review/README.md), inspect them, and schedule the
 largest visible defect. Unrelated platform, character, pet and simulation work remains frozen.
 
@@ -134,7 +137,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 32 | The blockout reads as a building |
-| 13 | Static furniture and dressing | 00971–01120 | 64 | Every room furnished to density |
+| 13 | Static furniture and dressing | 00971–01120 | 65 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
 | 16 | Lights and switches | 01251–01310 | 28 | The house can be lit — **first playable** |
@@ -13289,6 +13292,25 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
       dep: HOUSE-01035, HOUSE-00220, HOUSE-00222 · sys: content · plat: TOOL · pri: MUST
       accept: `gltf_validate.py`, `scale_check.py`, `origin_check.py`, the manifest/licence gates and
             the content build pass for all LOD and collision outputs
+- [x] HOUSE-01037 — Curate, provenance, prepare and place the first L0 living/family primary-furniture kit through existing static chunks
+      dep: HOUSE-00215, HOUSE-00296, HOUSE-00891 · sys: content · plat: TOOL · pri: MUST
+      note: (2026-09-15) Visual-sprint focus task in phase 13's next free id. This places a
+            deliberately limited, dependency-valid primary group through the already implemented
+            `HOUSE-00215` static batching path; it does **not** claim `HOUSE-00971`'s dynamic
+            placement, jitter or tint, nor the full 20-seat acquisition or final furnished-room
+            criteria of `HOUSE-00977`, `HOUSE-00988` and `HOUSE-00992`.
+      accept: two linked L0 rooms receive a measured sofa/chair/table/rug/lamp/plant composition,
+            with the family media pair; source geometry and embedded albedos have individual
+            hashes, CC BY attribution, correct metre-scale bounds, LODs for heavy assets and
+            collidable primary pieces; no `_LOD` or `_COL` geometry leaks into the LOD0 chunks;
+            the normal-gameplay canonical review views are captured and inspected
+      verified: (2026-09-15) nine source GLBs/eight individually hashed source albedos and 15
+            placements form the two real static groups; all imported GLBs, metre bounds, LODs,
+            proxy collisions, asset manifest and CC BY packaging credits validate. The final
+            476-chunk world and pet navigation build are fresh, full CMake and all 1,583 CTest
+            registrations return green, `tools/ci/run_checks.sh` is green (323 strict-XNA
+            translation units), and the eight normal-game views in `house-01037-furniture-r7`
+            were inspected. `VISUAL-GATE-1` remains failed for lighting and empty route spaces.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)

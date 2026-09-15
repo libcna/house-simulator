@@ -45,10 +45,12 @@ vertex against 48, a 42 % saving on the geometry that dominates §22's budget.
 
 A group over 65 535 vertices must be split to keep 16-bit indices, and splitting makes more chunks
 -- which is the other criterion. The rule here is: **split on prop boundaries** to stay 16-bit,
-because a sub-range is a prop already; and if one prop alone exceeds the cap, that chunk goes to
-32-bit indices instead, since it cannot be split at all. Both outcomes are reported rather than
-being resolved silently, because a cell that needs eight chunks is an authoring problem and the
-tool's job is to say so.
+because a sub-range is a prop already; and if one prop alone exceeds the vertex cap, that chunk
+goes to 32-bit indices instead. Stock XNA Reach independently caps one indexed draw at 65 535
+triangles: groups split on the same prop boundary for that ceiling too, and a single source
+material over it is rejected for LOD0 preparation. The first furnished gameplay capture proved
+that the vertex cap alone was insufficient. Both outcomes are reported rather than silently
+accepted, because a cell that needs extra chunks is an authoring concern.
 
 Offline tooling: not runtime code, not subject to the XNA-only rule.
 """
@@ -58,6 +60,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import struct
 import sys
 from pathlib import Path
@@ -78,6 +81,9 @@ VERSION = 1
 #: §17.4's two limits.
 MAX_CHUNKS_PER_CELL = 6
 MAX_VERTICES_16BIT = 0xFFFF
+# Stock XNA's Reach DrawIndexedPrimitives limit applies to a DRAW, not to a source
+# mesh or to its vertex format. A legal 16-bit chunk can still exceed it.
+MAX_PRIMITIVES_REACH = 0xFFFF
 
 #: §17.4's per-cell exceptions to the six-chunk TARGET (`HOUSE-00487`, owner decision 2026-09-10).
 #:
@@ -112,6 +118,16 @@ CHUNK_BUDGET_EXCEPTIONS = {
     "L0_GARAGE": (7,
                   "a garage is a room and stays one (`HOUSE-00487`). The four receiver classes, "
                   "plus the stair to the loft, plus the glazing, plus trim"),
+    "L0_FAMILY": (14,
+                  "measured with HOUSE-01037's first furnished media/seating group: five shell "
+                  "finishes plus eight source-specific furniture albedos and one split to respect "
+                  "Reach's per-draw primitive cap. Merging cushion, leaf, shade and rug maps into "
+                  "generic paint would erase the visible asset detail"),
+    "L0_LIVING": (15,
+                  "measured with HOUSE-01037's first furnished conversation group: six shell "
+                  "finishes plus eight source-specific furniture albedos and one split to respect "
+                  "Reach's per-draw primitive cap. The extra materials retain source cushions, "
+                  "lampshade, leaf and rug instead of flattening them"),
     "L0_STAIR_MAIN": (7,
                       "a stair hall: the four receiver classes plus a STAIR class, glazing and "
                       "trim. The stair is the whole purpose of the room"),
@@ -163,6 +179,16 @@ SKINNED_CLASSES = {"skin", "fur"}
 EPS = 1e-6
 
 
+def _is_auxiliary_node(document: dict, node: dict) -> bool:
+    """Collision and authored LOD nodes are not part of the cell's LOD0 static batch."""
+    names = [str(node.get("name", ""))]
+    mesh_index = node.get("mesh")
+    if isinstance(mesh_index, int) and 0 <= mesh_index < len(document.get("meshes", [])):
+        names.append(str(document["meshes"][mesh_index].get("name", "")))
+    return any(name.endswith("_COL") or re.search(r"_LOD[1-9][0-9]*$", name)
+               for name in names)
+
+
 # ================================================================================ reading geometry
 
 
@@ -185,7 +211,7 @@ def read_geometry(path: Path) -> dict:
     has_uv1 = True
 
     for index, node in enumerate(document.get("nodes", [])):
-        if "mesh" not in node or node.get("name", "").endswith("_COL"):
+        if "mesh" not in node or _is_auxiliary_node(document, node):
             continue
         matrix = transforms[index]
         for primitive in document["meshes"][node["mesh"]].get("primitives", []):
@@ -230,6 +256,88 @@ def read_geometry(path: Path) -> dict:
         raise LayoutError(f"{path.name}: no renderable geometry (only `_COL` proxies?)")
     return {"positions": positions, "normals": normals, "uv0": uv0, "uv1": uv1,
             "triangles": triangles, "hasUv1": has_uv1}
+
+
+def read_geometry_by_material(path: Path) -> dict[str, dict]:
+    """Read a prop as one welded mesh per source material, excluding `_COL` and LOD nodes.
+
+    Static chunks carry project material ids, not glTF material records.  A manifest
+    `materialMap` supplies the explicit bridge; retaining the source split here preserves a
+    sofa's upholstery/cushion distinction while still allowing many placed sofas to batch into
+    the same two canonical material chunks.
+    """
+    document, blob = gltf_io.read_model(path)
+    buffers = gltf_io.buffer_bytes(document, blob, path.parent)
+    transforms = bc.node_world_transforms(document)
+    materials = document.get("materials", [])
+    groups: dict[str, list[dict]] = {}
+
+    for index, node in enumerate(document.get("nodes", [])):
+        if "mesh" not in node or _is_auxiliary_node(document, node):
+            continue
+        matrix = transforms[index]
+        for primitive in document["meshes"][node["mesh"]].get("primitives", []):
+            if primitive.get("mode", 4) != 4:
+                continue
+            slot = primitive.get("material")
+            if not isinstance(slot, int) or slot < 0 or slot >= len(materials):
+                raise LayoutError(
+                    f"{path.name}: a primitive has no named source material; set the prop's "
+                    "`material` override or repair the asset")
+            source_material = materials[slot].get("name")
+            if not isinstance(source_material, str) or not source_material:
+                raise LayoutError(
+                    f"{path.name}: source material {slot} has no name, so `materialMap` cannot "
+                    "identify it")
+
+            attributes = primitive.get("attributes", {})
+            if "POSITION" not in attributes:
+                raise LayoutError(f"{path.name}: a primitive has no POSITION")
+            raw = gltf_io.read_accessor(document, buffers, attributes["POSITION"])
+            positions = [tuple(
+                matrix[r][0] * px + matrix[r][1] * py + matrix[r][2] * pz + matrix[r][3]
+                for r in range(3)) for px, py, pz in raw]
+            if "NORMAL" in attributes:
+                normals = [tuple(
+                    matrix[r][0] * nx + matrix[r][1] * ny + matrix[r][2] * nz
+                    for r in range(3)) for nx, ny, nz in
+                    gltf_io.read_accessor(document, buffers, attributes["NORMAL"])]
+            else:
+                normals = [(0.0, 1.0, 0.0)] * len(raw)
+            uv0 = (list(tuple(v[:2]) for v in gltf_io.read_accessor(
+                document, buffers, attributes["TEXCOORD_0"]))
+                   if "TEXCOORD_0" in attributes else [(0.0, 0.0)] * len(raw))
+            has_uv1 = "TEXCOORD_1" in attributes
+            uv1 = (list(tuple(v[:2]) for v in gltf_io.read_accessor(
+                document, buffers, attributes["TEXCOORD_1"]))
+                   if has_uv1 else [(0.0, 0.0)] * len(raw))
+            if "indices" in primitive:
+                flat = [int(v[0]) for v in gltf_io.read_accessor(
+                    document, buffers, primitive["indices"])]
+            else:
+                flat = list(range(len(raw)))
+            triangles = [(flat[i], flat[i + 1], flat[i + 2])
+                         for i in range(0, len(flat) - 2, 3)]
+            groups.setdefault(source_material, []).append({
+                "positions": positions, "normals": normals, "uv0": uv0, "uv1": uv1,
+                "triangles": triangles, "hasUv1": has_uv1})
+
+    def merge(parts: list[dict]) -> dict:
+        merged = {"positions": [], "normals": [], "uv0": [], "uv1": [],
+                  "triangles": [], "hasUv1": True}
+        for part in parts:
+            base = len(merged["positions"])
+            for field in ("positions", "normals", "uv0", "uv1"):
+                merged[field].extend(part[field])
+            merged["triangles"].extend(tuple(base + index for index in tri)
+                                       for tri in part["triangles"])
+            merged["hasUv1"] = merged["hasUv1"] and part["hasUv1"]
+        return merged
+
+    result = {name: merge(parts) for name, parts in groups.items()}
+    if not result:
+        raise LayoutError(f"{path.name}: no renderable LOD0 geometry (only `_COL`/LOD nodes?)")
+    return result
 
 
 def read_shell_geometry(path: Path) -> dict:
@@ -440,15 +548,15 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
     cells = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
     materials = layout_io.by_id(layout_io.rows(layout, "materials"), "material")
 
-    asset_paths: dict[str, Path] = {}
+    asset_rows: dict[str, dict] = {}
     if manifest_path and manifest_path.is_file():
         for row in layout_io.load_file(manifest_path, "assets").get("assets", []):
             if row.get("sourceFile"):
-                asset_paths[row["id"]] = REPO / row["sourceFile"]
+                asset_rows[row["id"]] = row
 
-    geometry_cache: dict[str, dict] = {}
+    geometry_cache: dict[tuple[str, str | None], dict] = {}
     groups: dict[tuple[str, tuple], list[dict]] = {}
-    stats = {"props": 0, "dynamic": 0, "split": 0, "wide": 0,
+    stats = {"props": 0, "dynamic": 0, "split": 0, "primitiveSplit": 0, "wide": 0,
              "cellsOverChunkLimit": [], "materialsPerCell": {},
              "shellFiles": 0, "exteriorFiles": 0, "shellLightmapped": 0, "shellSurfaces": 0, "shellUnplaced": {}, "shellDynamicReceivers": 0,
              "shellEmpty": 0}
@@ -461,31 +569,55 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
         cell = cells.get(prop["cell"])
         if cell is None:
             raise LayoutError(f"prop {prop['id']!r} names cell {prop['cell']!r}, which does not exist")
-        material_id = prop.get("material") or cell.get("wallMaterial")
-        material = materials.get(material_id)
-        if material is None:
-            raise LayoutError(
-                f"prop {prop['id']!r} resolves to material {material_id!r}, which does not exist")
-        path = asset_paths.get(prop["asset"])
-        if path is None:
+        asset = asset_rows.get(prop["asset"])
+        if asset is None:
             raise LayoutError(
                 f"prop {prop['id']!r} names asset {prop['asset']!r}, not in assets.manifest.json")
-        if prop["asset"] not in geometry_cache:
-            geometry_cache[prop["asset"]] = read_geometry(path)
-        mesh = geometry_cache[prop["asset"]]
+        path = REPO / asset["sourceFile"]
+        override = prop.get("material")
+        source_meshes: list[tuple[str | None, dict]]
+        if override:
+            cache_key = (prop["asset"], None)
+            if cache_key not in geometry_cache:
+                geometry_cache[cache_key] = read_geometry(path)
+            source_meshes = [(None, geometry_cache[cache_key])]
+        else:
+            material_map = asset.get("materialMap")
+            if not isinstance(material_map, dict) or not material_map:
+                raise LayoutError(
+                    f"prop {prop['id']!r} has no `material` override and asset "
+                    f"{prop['asset']!r} has no `materialMap` in assets.manifest.json")
+            cache_key = (prop["asset"], "source-materials")
+            if cache_key not in geometry_cache:
+                geometry_cache[cache_key] = read_geometry_by_material(path)
+            source_meshes = list(geometry_cache[cache_key].items())
 
-        layout_id = effect_layout(material)
-        if layout_id == LAYOUT_DUAL and not mesh["hasUv1"]:
-            raise LayoutError(
-                f"prop {prop['id']!r} is drawn with DualTextureEffect (material "
-                f"{material_id!r}, class {material.get('class')!r}) but {path.name} has no "
-                f"TEXCOORD_1; run tools/blender/lightmap_unwrap.py over it (HOUSE-00205)")
+        for source_material, mesh in source_meshes:
+            material_id = override
+            if not material_id:
+                material_id = asset["materialMap"].get(source_material)
+                if not isinstance(material_id, str) or not material_id:
+                    raise LayoutError(
+                        f"prop {prop['id']!r}: asset {prop['asset']!r} source material "
+                        f"{source_material!r} has no entry in `materialMap`")
+            material = materials.get(material_id)
+            if material is None:
+                raise LayoutError(
+                    f"prop {prop['id']!r} resolves to material {material_id!r}, which does not exist")
 
-        placed = place(mesh, [float(c) for c in prop["position"]],
-                       float(prop.get("yawDeg", 0.0)), float(prop.get("scale", 1.0)))
-        key = (prop["cell"], group_key(prop, cell, material))
-        groups.setdefault(key, []).append({
-            "prop": prop["id"], "mesh": placed, "layout": layout_id, "material": material_id})
+            layout_id = effect_layout(material)
+            if layout_id == LAYOUT_DUAL and not mesh["hasUv1"]:
+                raise LayoutError(
+                    f"prop {prop['id']!r} is drawn with DualTextureEffect (material "
+                    f"{material_id!r}, class {material.get('class')!r}) but {path.name} has no "
+                    f"TEXCOORD_1; run tools/blender/lightmap_unwrap.py over it (HOUSE-00205)")
+
+            placed = place(mesh, [float(c) for c in prop["position"]],
+                           float(prop.get("yawDeg", 0.0)), float(prop.get("scale", 1.0)))
+            key = (prop["cell"], group_key(prop, cell, material))
+            groups.setdefault(key, []).append({
+                "prop": prop["id"], "mesh": placed, "layout": layout_id,
+                "material": material_id})
 
     for member, key in _shell_members(shell_dirs, cells, materials, stats):
         groups.setdefault(key, []).append(member)
@@ -822,7 +954,7 @@ def _shell_members(shell_dirs, cells: dict, materials: dict, stats: dict, outdoo
 
 
 def _split(members: list[dict], stats: dict) -> list[dict]:
-    """One group becomes one chunk, or several if it would exceed the 16-bit vertex cap.
+    """One group becomes chunks below both the 16-bit vertex and Reach draw limits.
 
     Splitting is on **prop boundaries**, because a sub-range is a prop already and a sub-range that
     straddled two buffers could not have one bounding box. A single prop over the cap cannot be
@@ -832,6 +964,7 @@ def _split(members: list[dict], stats: dict) -> list[dict]:
     out: list[dict] = []
     current: list[dict] = []
     current_vertices = 0
+    current_primitives = 0
 
     def flush(batch, wide: bool):
         if not batch:
@@ -857,18 +990,28 @@ def _split(members: list[dict], stats: dict) -> list[dict]:
 
     for member in members:
         count = len(member["mesh"]["positions"])
+        primitives = len(member["mesh"]["triangles"])
+        if primitives > MAX_PRIMITIVES_REACH:
+            raise LayoutError(
+                f"{member['prop']}: one source-material mesh has {primitives} triangles, over "
+                f"stock XNA Reach's {MAX_PRIMITIVES_REACH} primitives per draw. Prepare a lower "
+                "LOD0 or separate the source material before static batching")
         if count > MAX_VERTICES_16BIT:
             flush(current, False)
-            current, current_vertices = [], 0
+            current, current_vertices, current_primitives = [], 0, 0
             flush([member], True)
             stats["wide"] += 1
             continue
-        if current_vertices + count > MAX_VERTICES_16BIT:
+        over_vertices = current_vertices + count > MAX_VERTICES_16BIT
+        over_primitives = current_primitives + primitives > MAX_PRIMITIVES_REACH
+        if over_vertices or over_primitives:
             flush(current, False)
-            stats["split"] += 1
-            current, current_vertices = [], 0
+            stats["split"] += int(over_vertices)
+            stats["primitiveSplit"] += int(over_primitives)
+            current, current_vertices, current_primitives = [], 0, 0
         current.append(member)
         current_vertices += count
+        current_primitives += primitives
     flush(current, False)
     return out
 
@@ -1006,8 +1149,9 @@ def report(built: dict) -> str:
         f"({100 * (1 - packed / (vertices * 48)):.0f} % saved)" if vertices else "  no geometry",
         f"  §17.4's key separated {stats['keysBeyondMaterial']} chunk(s) beyond what the "
         f"material id alone would have",
-        f"  {stats['split']} group(s) split for the 16-bit cap, {stats['wide']} chunk(s) on "
-        f"32-bit indices",
+        f"  {stats['split']} split(s) for the 16-bit cap, "
+        f"{stats['primitiveSplit']} for Reach's primitive cap, "
+        f"{stats['wide']} chunk(s) on 32-bit indices",
     ]
     if not built.get("worldHash"):
         lines.append(
@@ -1071,7 +1215,8 @@ def report(built: dict) -> str:
 # ======================================================================================= selftest
 
 
-def _fixture_model(path: Path, *, uv1: bool, boxes=1, col_proxy=False) -> None:
+def _fixture_model(path: Path, *, uv1: bool, boxes=1, col_proxy=False,
+                   triangles_per_box=12) -> None:
     """A `.glb` with POSITION, NORMAL, TEXCOORD_0 and optionally TEXCOORD_1.
 
     `bc._fixture_proxy` writes positions only, which is right for a collision proxy and useless
@@ -1097,9 +1242,10 @@ def _fixture_model(path: Path, *, uv1: bool, boxes=1, col_proxy=False) -> None:
             normals += [1.0, 0.0, 0.0]
             uvs0 += [(i % 2), (i // 2) / 4.0]
             uvs1 += [(i % 4) / 4.0, (i // 4)]
-        for a, bb, c in [(0, 1, 2), (0, 2, 3), (4, 6, 5), (4, 7, 6),
-                         (0, 4, 5), (0, 5, 1), (3, 2, 6), (3, 6, 7),
-                         (0, 3, 7), (0, 7, 4), (1, 5, 6), (1, 6, 2)]:
+        faces = [(0, 1, 2), (0, 2, 3), (4, 6, 5), (4, 7, 6),
+                 (0, 4, 5), (0, 5, 1), (3, 2, 6), (3, 6, 7),
+                 (0, 3, 7), (0, 7, 4), (1, 5, 6), (1, 6, 2)]
+        for a, bb, c in faces[:triangles_per_box]:
             indices += [base + a, base + bb, base + c]
 
     blob = bytearray()
@@ -1210,7 +1356,8 @@ def fixture_library() -> dict:
                        "bounds": (-2.0, 0.9, 6.0, -0.5, 2.1, 6.0)}],
     }
     return {"chunks": [dual, basic, alpha],
-            "stats": {"props": 0, "dynamic": 0, "split": 0, "wide": 0,
+            "stats": {"props": 0, "dynamic": 0, "split": 0,
+                      "primitiveSplit": 0, "wide": 0,
                       "cellsOverChunkLimit": [], "materialsPerCell": {}, "chunksPerCell": {},
                       "keysBeyondMaterial": 0},
             "worldHash": "0123456789abcdef0123456789abcdef"}
@@ -1304,9 +1451,22 @@ def selftest() -> int:
         assets.mkdir()
         _fixture_model(assets / "lit.glb", uv1=True)
         _fixture_model(assets / "nouv1.glb", uv1=False)
-        _fixture_model(assets / "wide.glb", uv1=True, boxes=8300)    # 66 400 vertices, over the cap
-        _fixture_model(assets / "medium.glb", uv1=True, boxes=3800)  # 30 400, under it alone
+        _fixture_model(assets / "wide.glb", uv1=True, boxes=8300,
+                       triangles_per_box=2)  # 66 400 vertices, but Reach-safe
+        _fixture_model(assets / "medium.glb", uv1=True, boxes=3800,
+                       triangles_per_box=2)  # 30 400 vertices, but Reach-safe
+        _fixture_model(assets / "primitive_heavy.glb", uv1=True, boxes=1000)
         _fixture_model(assets / "withcol.glb", uv1=True, col_proxy=True)
+        _fixture_model(assets / "multi.glb", uv1=False)
+        multi_doc, multi_blob = gltf_io.read_model(assets / "multi.glb")
+        primitive = multi_doc["meshes"][0]["primitives"][0]
+        multi_doc["materials"] = [{"name": "Cloth"}, {"name": "Wood"}]
+        multi_doc["meshes"][0]["primitives"] = [dict(primitive, material=0),
+                                                   dict(primitive, material=1)]
+        # A generated LOD carries the same material slots but must not be baked beside LOD0.
+        multi_doc["nodes"].append({"name": "multi_LOD1", "mesh": 0})
+        multi_doc["scenes"][0]["nodes"].append(1)
+        gltf_io.write_glb(assets / "multi.glb", multi_doc, multi_blob)
 
         # §22.2's vocabulary, and §22.1's stated `effectTierS`. `MAT_WOOD` deliberately omits
         # `effectTierS` so the class fallback is exercised as well as the stated path.
@@ -1350,7 +1510,11 @@ def selftest() -> int:
             {"id": "MODEL_NOUV1", "sourceFile": str(assets / "nouv1.glb")},
             {"id": "MODEL_WIDE", "sourceFile": str(assets / "wide.glb")},
             {"id": "MODEL_MEDIUM", "sourceFile": str(assets / "medium.glb")},
+            {"id": "MODEL_PRIMITIVE_HEAVY",
+             "sourceFile": str(assets / "primitive_heavy.glb")},
             {"id": "MODEL_WITHCOL", "sourceFile": str(assets / "withcol.glb")},
+            {"id": "MODEL_MULTI", "sourceFile": str(assets / "multi.glb"),
+             "materialMap": {"Cloth": "MAT_LAMP", "Wood": "MAT_LEAF"}},
         ])
 
         def prop(identifier, material, **kw):
@@ -1421,6 +1585,38 @@ def selftest() -> int:
                 f"turned 90 degrees it is -z: normals are rotated with the prop, not left in "
                 f"asset space where every lit surface would face the wrong way "
                 f"({tuple(round(c, 3) for c in rotated[0][1])})")
+
+        # 4b. A null per-placement override retains the asset's authored material split through
+        #     an explicit manifest bridge. The LOD node deliberately repeats both primitives; if
+        #     it leaked into LOD0, this would report twice the expected triangles.
+        write_props([prop("PROP_MULTI", None, asset="MODEL_MULTI")])
+        mapped = build(world_dir, manifest)
+        require({c["material"] for c in mapped["chunks"]} == {"MAT_LAMP", "MAT_LEAF"},
+                "a multi-material prop becomes one canonical chunk member per source material")
+        require(sum(len(c["indices"]) // 3 for c in mapped["chunks"]) == 24,
+                "the authored LOD node is excluded instead of drawing on top of LOD0")
+        bad_manifest = write_manifest([
+            {"id": "MODEL_MULTI", "sourceFile": str(assets / "multi.glb"),
+             "materialMap": {"Cloth": "MAT_LAMP"}},
+        ])
+        try:
+            build(world_dir, bad_manifest)
+            raised = ""
+        except LayoutError as exc:
+            raised = str(exc)
+        require("Wood" in raised and "materialMap" in raised,
+                "a source material omitted from the manifest bridge is refused by name")
+        manifest = write_manifest([
+            {"id": "MODEL_LIT", "sourceFile": str(assets / "lit.glb")},
+            {"id": "MODEL_NOUV1", "sourceFile": str(assets / "nouv1.glb")},
+            {"id": "MODEL_WIDE", "sourceFile": str(assets / "wide.glb")},
+            {"id": "MODEL_MEDIUM", "sourceFile": str(assets / "medium.glb")},
+            {"id": "MODEL_PRIMITIVE_HEAVY",
+             "sourceFile": str(assets / "primitive_heavy.glb")},
+            {"id": "MODEL_WITHCOL", "sourceFile": str(assets / "withcol.glb")},
+            {"id": "MODEL_MULTI", "sourceFile": str(assets / "multi.glb"),
+             "materialMap": {"Cloth": "MAT_LAMP", "Wood": "MAT_LEAF"}},
+        ])
 
         # 5. A DualTexture prop with no second UV set is refused, naming the tool that makes one.
         write_props([prop("PROP_A", "MAT_SHELL", asset="MODEL_NOUV1")])
@@ -1513,6 +1709,30 @@ def selftest() -> int:
                 f"({sorted(len(c['subRanges']) for c in split['chunks'])})")
         require(all(split["stats"]["wide"] == 0 for _ in (0,)),
                 "no chunk needed 32-bit indices, because splitting removed the need")
+
+        # 9a. Reach caps triangles per DrawIndexedPrimitives call separately from index width.
+        #     Six 12,000-triangle props have only 48,000 vertices but 72,000 primitives; without
+        #     this split the game crashes the first time the group comes into view.
+        write_props([prop(f"PROP_TRI_{i}", "MAT_SHELL",
+                          asset="MODEL_PRIMITIVE_HEAVY") for i in range(6)])
+        reach = build(world_dir, manifest)
+        require(len(reach["chunks"]) == 2 and reach["stats"]["primitiveSplit"] == 1,
+                "a Reach-overlimit group splits at a prop boundary despite fitting 16-bit "
+                "indices")
+        require(all(len(c["indices"]) // 3 <= MAX_PRIMITIVES_REACH
+                    for c in reach["chunks"]),
+                "every emitted draw stays within Reach's 65,535 primitive ceiling")
+        oversized = read_geometry(assets / "primitive_heavy.glb")
+        oversized["triangles"] = oversized["triangles"] * 6
+        try:
+            _split([{"prop": "PROP_BAD_LOD0", "mesh": oversized,
+                     "layout": LAYOUT_BASIC}], {"split": 0, "primitiveSplit": 0, "wide": 0})
+            raised = ""
+        except LayoutError as exc:
+            raised = str(exc)
+        require("PROP_BAD_LOD0" in raised and "LOD0" in raised,
+                "a single unsplittable overlimit source material is rejected with a preparation "
+                "instruction")
 
         # 9b. A `_COL` proxy inside the model is stripped, not batched (§18). The fixture's proxy
         #     is a second node over the same mesh, so a tool that batched it would double every

@@ -1,0 +1,260 @@
+{
+  "schema": "cna-house/props/1",
+  "props": [
+    {
+      "id": "PROP_LIVING_SOFA",
+      "asset": "MODEL_FURNITURE_LEATHER_SOFA",
+      "cell": "L0_LIVING",
+      "position": [
+        -5.2,
+        0.6,
+        -19.15
+      ],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_LIVING_CHAIR_GREEN",
+      "asset": "MODEL_FURNITURE_LEATHER_ARMCHAIR_A",
+      "cell": "L0_LIVING",
+      "position": [
+        -7.3,
+        0.6,
+        -18
+      ],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_LIVING_CHAIR_PURPLE",
+      "asset": "MODEL_FURNITURE_LEATHER_ARMCHAIR_B",
+      "cell": "L0_LIVING",
+      "position": [
+        -5.1,
+        0.6,
+        -15.65
+      ],
+      "yawDeg": 180,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_LIVING_COFFEE",
+      "asset": "MODEL_FURNITURE_COFFEE_TABLE",
+      "cell": "L0_LIVING",
+      "position": [
+        -6.3,
+        0.6,
+        -17.55
+      ],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_LIVING_RUG",
+      "asset": "MODEL_FURNITURE_RUG",
+      "cell": "L0_LIVING",
+      "position": [
+        -6.3,
+        0.614,
+        -17.55
+      ],
+      "yawDeg": 0,
+      "scale": 1.34,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_LIVING_LAMP",
+      "asset": "MODEL_FURNITURE_FLOOR_LAMP",
+      "cell": "L0_LIVING",
+      "position": [
+        -7.35,
+        0.6,
+        -19.2
+      ],
+      "yawDeg": 35,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_LIVING_PLANT",
+      "asset": "MODEL_FURNITURE_POTTED_PLANT_A",
+      "cell": "L0_LIVING",
+      "position": [
+        -7.45,
+        0.6,
+        -14.95
+      ],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FAMILY_SOFA",
+      "asset": "MODEL_FURNITURE_LEATHER_SOFA",
+      "cell": "L0_FAMILY",
+      "position": [
+        6.65,
+        0.6,
+        -24.75
+      ],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FAMILY_CHAIR",
+      "asset": "MODEL_FURNITURE_LEATHER_ARMCHAIR_B",
+      "cell": "L0_FAMILY",
+      "position": [
+        4.15,
+        0.6,
+        -26.15
+      ],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FAMILY_COFFEE",
+      "asset": "MODEL_FURNITURE_COFFEE_TABLE",
+      "cell": "L0_FAMILY",
+      "position": [
+        5.15,
+        0.6,
+        -24.75
+      ],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FAMILY_RUG",
+      "asset": "MODEL_FURNITURE_RUG",
+      "cell": "L0_FAMILY",
+      "position": [
+        5.9,
+        0.614,
+        -24.75
+      ],
+      "yawDeg": 90,
+      "scale": 1.35,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FAMILY_LAMP",
+      "asset": "MODEL_FURNITURE_FLOOR_LAMP",
+      "cell": "L0_FAMILY",
+      "position": [
+        8.05,
+        0.6,
+        -26.45
+      ],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FAMILY_PLANT",
+      "asset": "MODEL_FURNITURE_POTTED_PLANT_A",
+      "cell": "L0_FAMILY",
+      "position": [
+        8,
+        0.6,
+        -22.65
+      ],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FAMILY_TV_UNIT",
+      "asset": "MODEL_FURNITURE_TV_UNIT",
+      "cell": "L0_FAMILY",
+      "position": [
+        4.1,
+        0.6,
+        -22.55
+      ],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FAMILY_TV",
+      "asset": "MODEL_FURNITURE_TV",
+      "cell": "L0_FAMILY",
+      "position": [
+        4.1,
+        1.87,
+        -22.26
+      ],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    }
+  ]
+}

@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import struct
 import sys
 from pathlib import Path
@@ -90,6 +91,12 @@ UNSIZED_CATEGORIES = {
     "font": "not geometry",
     "audio": "not geometry",
     "video": "not geometry",
+    "floor-lamp": "§70.5 states no lamp-height band; manifest bounds and room review own it",
+    "houseplant": "§70.5 states no indoor-plant band; manifest bounds and room review own it",
+    "media-console": "§70.5 states no media-furniture band; manifest bounds and room review own it",
+    "occasional-table": "§70.5 states no coffee/side-table band; manifest bounds and room review own it",
+    "rug": "§70.5 states no rug-size band; manifest bounds and room review own it",
+    "television": "§70.5 states no television-size band; manifest bounds and room review own it",
 }
 
 
@@ -126,7 +133,7 @@ def accessor_bounds(document: dict) -> tuple[list[float], list[float]] | None:
 AXIS_INDEX = {"x": 0, "y": 1, "z": 2}
 
 
-def check(path: Path, category: str) -> list[str]:
+def check(path: Path, category: str, geometry: dict | None = None) -> list[str]:
     if category in UNSIZED_CATEGORIES:
         return []
     rules = CATEGORIES.get(category)
@@ -154,6 +161,23 @@ def check(path: Path, category: str) -> list[str]:
     problems: list[str] = []
     for axis, minimum, maximum, what in rules:
         value = size[AXIS_INDEX[axis]]
+        # §70.5 constrains the SEAT of a chair/sofa, not the top of its back. The original checker
+        # compared the whole Y bound and would reject every correctly proportioned armchair around
+        # 0.84 m tall. Seat height cannot be recovered from an AABB, so it is an explicit measured
+        # asset property in the same manifest geometry block that records the overall bounds.
+        if category in {"chair", "sofa"} and axis == "y":
+            seat = (geometry or {}).get("seatHeightMetres")
+            if not isinstance(seat, (int, float)):
+                problems.append(
+                    f"{what}: manifest geometry.seatHeightMetres is required; the model's "
+                    "{:.3f} m overall height is not a seat measurement".format(size[1]))
+                continue
+            value = float(seat)
+            if not math.isfinite(value) or value <= 0.0 or value > size[1]:
+                problems.append(
+                    f"{what}: measured seat {value:.3f} m must lie within the model's "
+                    f"{size[1]:.3f} m height")
+                continue
         if not (minimum <= value <= maximum):
             # The message names the RATIO, because that is what identifies the mistake: 100x is
             # centimetres, 2.54x is inches, 0.01x is a model authored in a scene scaled down.
@@ -250,6 +274,27 @@ def selftest() -> int:
         else:
             print("  and the same car rotated 90 degrees fails on length AND width")
 
+        chair = Path(work) / "chair_ok.glb"
+        chair.write_bytes(make(0.80, 0.84, 0.85))
+        if check(chair, "chair", {"seatHeightMetres": 0.45}):
+            print("  SELFTEST FAILED: a 0.45 m seat in a 0.84 m chair was rejected",
+                  file=sys.stderr)
+            failures += 1
+        else:
+            print("  a chair checks its 0.45 m seat, not its 0.84 m back")
+        problems = check(chair, "chair")
+        if not any("seatHeightMetres" in problem for problem in problems):
+            print("  SELFTEST FAILED: a chair without a measured seat height passed",
+                  file=sys.stderr)
+            failures += 1
+        else:
+            print("  and a chair without a measured seat height is refused")
+        if not check(chair, "chair", {"seatHeightMetres": 1.0}):
+            print("  SELFTEST FAILED: a seat above its chair back passed", file=sys.stderr)
+            failures += 1
+        else:
+            print("  and a seat above its chair back is refused")
+
         # An unknown category must be an ERROR, never a silent skip.
         if not check(good, "spaceship"):
             print("  SELFTEST FAILED: an unknown category was silently skipped", file=sys.stderr)
@@ -307,7 +352,7 @@ def main() -> int:
             total += 1
             continue
         category = row.get("category", "")
-        problems = check(path, category)
+        problems = check(path, category, row.get("geometry"))
         if problems:
             print(f"scale_check: {relative} (category '{category}')", file=sys.stderr)
             for problem in problems:

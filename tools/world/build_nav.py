@@ -148,6 +148,20 @@ def _axis_obb_distance(x, z, y_low, y_high, record) -> float:
     return math.sqrt(ex * ex + ey * ey + ez * ez)
 
 
+def _axis_aabb_lower_bound(x, z, y_low, y_high, bounds) -> float:
+    """A conservative distance to a mesh's box; never greater than its triangle distance.
+
+    Mesh proxies can be anywhere in the property. Evaluating every triangle at every candidate
+    pet waypoint made the first furnished nav build exceed the session's process lifetime. A box
+    too far to beat an already measured shape can be skipped *without changing the answer*.
+    """
+    x0, y0, z0, x1, y1, z1 = bounds
+    dx = max(x0 - x, x - x1, 0.0)
+    dy = max(y0 - y_high, y_low - y1, 0.0)
+    dz = max(z0 - z, z - z1, 0.0)
+    return math.sqrt(dx * dx + dy * dy + dz * dz)
+
+
 def _point_triangle_distance(point, a, b, c) -> float:
     """Distance from a point to a triangle, by projection with a clamp to the triangle's region."""
     ax, ay, az = a
@@ -202,6 +216,11 @@ class World:
         shapes: bc.Shapes = built["shapes"]
         self.obbs = [o for o in shapes.obbs if o[4] in self.BLOCKING]
         self.meshes = [m for m in shapes.meshes if m["kind"] in self.BLOCKING]
+        self.mesh_bounds = [
+            (min(v[0] for v in mesh["vertices"]), min(v[1] for v in mesh["vertices"]),
+             min(v[2] for v in mesh["vertices"]), max(v[0] for v in mesh["vertices"]),
+             max(v[1] for v in mesh["vertices"]), max(v[2] for v in mesh["vertices"]))
+            for mesh in self.meshes]
         self.cells = {c["id"]: c for c in built["cells"]}
 
     def clearance(self, foot, species: str) -> float:
@@ -214,7 +233,9 @@ class World:
             best = min(best, _axis_obb_distance(x, z, y_low, y_high, record))
             if best == 0.0:
                 return 0.0
-        for mesh in self.meshes:
+        for mesh, bounds in zip(self.meshes, self.mesh_bounds):
+            if _axis_aabb_lower_bound(x, z, y_low, y_high, bounds) >= best:
+                continue
             vertices = mesh["vertices"]
             for i in range(MESH_HEIGHT_SAMPLES):
                 point = (x, y_low + (y_high - y_low) * i / (MESH_HEIGHT_SAMPLES - 1), z)
@@ -793,8 +814,7 @@ def selftest() -> int:
                 f"a 0.15 m partition a quarter of the way along -- the thinnest shape the layout "
                 f"can produce -- is found by {SAMPLE_SPACING} m sampling, with a threefold margin")
 
-        # 3b. Triangle meshes block too. Nothing generated so far is one, so it is built by hand:
-        #     a mesh obstacle the dog cannot pass and the cat can walk under.
+        # 3b. Triangle meshes block too. A hand-built proxy lets the two species differ here.
         mesh_only = bc.Shapes()
         mesh_only.mesh([(-0.2, 0.30, -1.0), (0.2, 0.30, -1.0), (0.2, 0.30, 1.0),
                         (-0.2, 0.30, 1.0), (0.0, 0.90, 0.0)],
@@ -805,6 +825,20 @@ def selftest() -> int:
                 "a triangle mesh is an obstacle: the dog's 0.60 m capsule meets it")
         require(pyramid.segment_clearance(*walk, "cat") > CAPSULE["cat"][0],
                 "...and the cat, 0.25 m tall, passes under its 0.30 m underside")
+        bounds = pyramid.mesh_bounds[0]
+        require(_axis_aabb_lower_bound(0.0, 0.0, 0.22, 0.38, bounds) == 0.0,
+                "a capsule inside a mesh's box is never incorrectly culled")
+        require(abs(_axis_aabb_lower_bound(3.0, 0.0, 0.22, 0.38, bounds) - 2.8) < 1e-9,
+                "a distant mesh box supplies an exact horizontal lower bound")
+        with_distant_mesh = bc.Shapes()
+        for mesh in mesh_only.meshes:
+            with_distant_mesh.mesh(mesh["vertices"], mesh["triangles"], None, bc.KIND_PROP)
+        with_distant_mesh.mesh([(100.0, 0.3, -1.0), (100.0, 0.3, 1.0),
+                                (100.0, 0.9, 0.0)], [(0, 1, 2)], None, bc.KIND_PROP)
+        combined = World({"shapes": with_distant_mesh, "cells": [], "worldHash": ""})
+        for foot in ((-3.0, 0.0, 0.0), (0.0, 0.0, 0.0), (3.0, 0.0, 0.0)):
+            require(combined.clearance(foot, "dog") == pyramid.clearance(foot, "dog"),
+                    "a far mesh skipped by its box cannot change the exact nearest clearance")
 
         graph = build(world_dir, manifest)
 

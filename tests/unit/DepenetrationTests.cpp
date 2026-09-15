@@ -17,6 +17,8 @@
 #include <cmath>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -537,6 +539,7 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
     BroadPhase broad;
     std::size_t stood = 0;
     std::size_t crowded = 0;
+    std::vector<std::pair<float, float>> crowdedPositions;
     std::size_t nudged = 0;
     std::size_t unresolved = 0;
     std::size_t sloped = 0;
@@ -578,6 +581,7 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
             // left, and the count is asserted small so it cannot quietly become "most of the
             // house".
             ++crowded;
+            crowdedPositions.emplace_back(midX, midZ);
             continue;
         }
         ++stood;
@@ -634,6 +638,14 @@ TEST(DepenetrationTests, TheRealHouseIsClearWhereABodyStandsAndRecoversWhereItIs
     // `EXT_BACKYARD` joined them when the yards stopped having floor slabs -- its nine boxes make
     // an L round the house and the middle of their bounding grid is inside the house, which is
     // what a body stood "in the middle of the cell" then finds.
+    if (crowded > 5u)
+    {
+        for (const auto& [x, z] : crowdedPositions)
+        {
+            std::printf(
+                "  crowded cell midpoint: x=%.2f z=%.2f\n", static_cast<double>(x), static_cast<double>(z));
+        }
+    }
     EXPECT_LE(crowded, 5u) << crowded
                            << " cells put a body inside something just by standing it on their "
                               "floor; a stair or two is expected, a house is not";

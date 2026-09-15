@@ -17,10 +17,85 @@ dependency notices are in [`../NOTICE.md`](../NOTICE.md). This file covers **con
 
 ---
 
+## CC-BY-3.0
+
+Full text: [`licenses/cc-by-3.0/LICENCE.txt`](cc-by-3.0/LICENCE.txt)
+
+- `MODEL_FURNITURE_COFFEE_TABLE` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `MODEL_FURNITURE_FLOOR_LAMP` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `MODEL_FURNITURE_LEATHER_ARMCHAIR_A` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `MODEL_FURNITURE_LEATHER_ARMCHAIR_B` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `MODEL_FURNITURE_LEATHER_SOFA` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `MODEL_FURNITURE_RUG` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `MODEL_FURNITURE_TV` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `MODEL_FURNITURE_TV_UNIT` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `TEXTURE_FURNITURE_CUSHION_GREEN` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `TEXTURE_FURNITURE_CUSHION_PURPLE` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `TEXTURE_FURNITURE_CUSHION_PURPLE_YELLOW` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `TEXTURE_FURNITURE_LAMP_SHADE` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `TEXTURE_FURNITURE_RUG_CHARCOAL` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `TEXTURE_FURNITURE_WHITE_ROOM_PALETTE` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `MODEL_FURNITURE_POTTED_PLANT_A` — **Furniture extracted from The Grey & White Room** by Wig42 — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The Grey & White Room by Wig42, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `TEXTURE_FURNITURE_GREY_ROOM_PALETTE` — **Furniture extracted from The Grey & White Room** by Wig42 — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The Grey & White Room by Wig42, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+- `TEXTURE_FURNITURE_PLANT_LEAF` — **Furniture extracted from The Grey & White Room** by Wig42 — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The Grey & White Room by Wig42, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
+
 ## CC0-1.0
 
 Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 
+- `MODEL_HUMAN_FEMALE_BASE_RESEARCH` — **MPFB 2.0.17 core female base body**
+- `MODEL_HUMAN_MALE_BASE_RESEARCH` — **MPFB 2.0.17 core male base body**
+- `MODEL_VEGETATION_CELANDINE_01` — **Celandine 01 — flower** — <https://polyhaven.com/a/celandine_01> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_DANDELION_01` — **Dandelion 01 — flower** — <https://polyhaven.com/a/dandelion_01> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_FERN_02` — **Fern 02 — shrub** — <https://polyhaven.com/a/fern_02> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_FLOWER_GAZANIA` — **Gazania — flower** — <https://polyhaven.com/a/flower_gazania> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_FLOWER_STINKKRUID` — **Stinkkruid — flower** — <https://polyhaven.com/a/flower_stinkkruid> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_GRASS_BERMUDA_01` — **Bermuda grass 01 — grass-card** — <https://polyhaven.com/a/grass_bermuda_01> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_GRASS_MEDIUM_02` — **Grass medium 02 — grass-card** — <https://polyhaven.com/a/grass_medium_02> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_NETTLE_PLANT` — **Nettle plant — shrub** — <https://polyhaven.com/a/nettle_plant> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_PERIWINKLE_PLANT` — **Periwinkle plant — flower** — <https://polyhaven.com/a/periwinkle_plant> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_SHRUB_01` — **Shrub 01 — shrub** — <https://polyhaven.com/a/shrub_01> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_SHRUB_02` — **Shrub 02 — shrub** — <https://polyhaven.com/a/shrub_02> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_SHRUB_03` — **Shrub 03 — shrub** — <https://polyhaven.com/a/shrub_03> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_SHRUB_04` — **Shrub 04 — shrub** — <https://polyhaven.com/a/shrub_04> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_SHRUB_SORREL_01` — **Shrub sorrel 01 — shrub** — <https://polyhaven.com/a/shrub_sorrel_01> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_FIR_MATURE` — **Fir — mature** — <https://polyhaven.com/a/fir_sapling> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_FIR_SAPLING` — **Fir — sapling** — <https://polyhaven.com/a/fir_sapling> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_FIR_YOUNG` — **Fir — young** — <https://polyhaven.com/a/fir_sapling> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_JACARANDA_MATURE` — **Jacaranda — mature** — <https://polyhaven.com/a/jacaranda_tree> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_JACARANDA_SAPLING` — **Jacaranda — sapling** — <https://polyhaven.com/a/jacaranda_tree> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_JACARANDA_YOUNG` — **Jacaranda — young** — <https://polyhaven.com/a/jacaranda_tree> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_PINE_MATURE` — **Pine — mature** — <https://polyhaven.com/a/pine_sapling_small> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_PINE_SAPLING` — **Pine — sapling** — <https://polyhaven.com/a/pine_sapling_small> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_PINE_YOUNG` — **Pine — young** — <https://polyhaven.com/a/pine_sapling_small> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_SEARSIA_BURCHELLII_MATURE` — **Searsia burchellii — mature** — <https://polyhaven.com/a/searsia_burchellii> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_SEARSIA_BURCHELLII_SAPLING` — **Searsia burchellii — sapling** — <https://polyhaven.com/a/searsia_burchellii> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_SEARSIA_BURCHELLII_YOUNG` — **Searsia burchellii — young** — <https://polyhaven.com/a/searsia_burchellii> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_SEARSIA_LUCIDA_MATURE` — **Searsia lucida — mature** — <https://polyhaven.com/a/searsia_lucida> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_SEARSIA_LUCIDA_SAPLING` — **Searsia lucida — sapling** — <https://polyhaven.com/a/searsia_lucida> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_SEARSIA_LUCIDA_YOUNG` — **Searsia lucida — young** — <https://polyhaven.com/a/searsia_lucida> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_TREE_SMALL_02_MATURE` — **Burkea africana / wild syringa — mature** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_TREE_SMALL_02_SAPLING` — **Burkea africana / wild syringa — sapling** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_TREE_TREE_SMALL_02_YOUNG` — **Burkea africana / wild syringa — young** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_WEED_PLANT_02` — **Weed plant 02 — shrub** — <https://polyhaven.com/a/weed_plant_02> (retrieved 2026-09-13)
+- `MODEL_VEGETATION_WILD_ROOIBOS_BUSH` — **Wild rooibos bush — shrub** — <https://polyhaven.com/a/wild_rooibos_bush> (retrieved 2026-09-13)
 - `SOUND_NOX_AMBIENCE_CICADAS_AMBIANCE_CICADAS_LOOP_STEREO` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 - `SOUND_NOX_AMBIENCE_FIRE_AMBIANCE_FIRECAMP_MEDIUM_LOOP_MONO` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 - `SOUND_NOX_AMBIENCE_FIRE_AMBIANCE_FIRECAMP_SMALL_LOOP_MONO` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
@@ -594,4 +669,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `379f8b149ab26af53358d13f60fd4c24e15a03263e1325407988f7b54dbdf78d`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `d90d50616552b8180e169fefe2912accd402ab22516c5bead28ef15e6f5a6091`.*

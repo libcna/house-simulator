@@ -93,8 +93,37 @@ namespace
                     static_cast<long long>(states->Max()),
                     list.Size());
 
-        // Every item in the list was drawn: nothing in it named a chunk the runtime could not find.
-        EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), list.Size());
+        // The static blockout diagnostic only draws its opaque slice. HOUSE-01037's one plant
+        // in each furnished room adds two *real* alpha-tested leaf chunks to the whole sorted
+        // list; counting those as missing opaque draws would hide the reason for the mismatch.
+        std::size_t opaque = 0;
+        std::size_t cutouts = 0;
+        int opaqueChanges = 0;
+        const cnahouse::visibility::RenderItem* previousOpaque = nullptr;
+        for (const cnahouse::visibility::RenderItem& item : list.Items())
+        {
+            if (item.pass == cnahouse::rendering::Pass::AlphaTest)
+            {
+                ++cutouts;
+                continue;
+            }
+            if (item.pass != cnahouse::rendering::Pass::OpaqueStatic)
+            {
+                continue;
+            }
+            if (previousOpaque != nullptr &&
+                (item.effect != previousOpaque->effect || item.material != previousOpaque->material))
+            {
+                ++opaqueChanges;
+            }
+            previousOpaque = &item;
+            ++opaque;
+        }
+        EXPECT_EQ(cutouts, 2U) << "one alpha-tested plant-leaf chunk per furnished L0 room";
+        EXPECT_EQ(opaque + cutouts, list.Size()) << "unexpected pass items entered the blockout list";
+        // Every opaque item was drawn: nothing in that slice named a chunk the runtime could
+        // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
+        EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), opaque);
         // And the material was bound once per run, not once per chunk. §71.2 budgets 90 typically.
         EXPECT_GT(states->Max(), 0);
         EXPECT_LE(states->Max(), 90);
@@ -102,9 +131,11 @@ namespace
             << "the sort bought nothing: the pass is rebinding almost per chunk";
         // The pass's own count and the list's agree, which is what says the two are counting the
         // same thing rather than each counting its own.
-        EXPECT_EQ(states->Max(), list.StateChanges() + 1)
-            << "the list counts CHANGES between neighbours and the pass counts BINDS, so the pass "
-               "is always one ahead -- the first bind is not a change";
+        EXPECT_EQ(states->Max(), opaqueChanges + 1)
+            << "the opaque slice counts CHANGES between neighbours and the pass counts BINDS; "
+               "the first bind is not a change";
+        EXPECT_EQ(list.StateChanges(), opaqueChanges + 1)
+            << "the full list adds one pass transition into the shared plant-leaf material";
     }
 
     /// Presses one key on the first frame and holds nothing afterwards, which is what an EDGE is.
