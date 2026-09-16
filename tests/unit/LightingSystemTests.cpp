@@ -535,6 +535,21 @@ TEST(LightingSystemTests, FamilyMainDefaultsOnAndBorrowsThroughTheKitchenOpening
     EXPECT_LT(darkerKitchen->borrowed, borrowedFromFamily);
 }
 
+TEST(LightingSystemTests, LivingPianoAccentDefaultsOnWithoutEnablingMainCeilingGroup)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    const SwitchGroupState* piano = house.lighting.FindGroup(Id::Of("LG_L0_LIVING_PIANO"));
+    const SwitchGroupState* main = house.lighting.FindGroup(Id::Of("LG_L0_LIVING_MAIN"));
+    ASSERT_NE(piano, nullptr);
+    ASSERT_NE(main, nullptr);
+    EXPECT_TRUE(piano->on) << "the formal-room focal piece needs its authored accent";
+    EXPECT_FALSE(main->on) << "the arrival state must not flatten the room with every ceiling light";
+}
+
 TEST(LightingSystemTests, TurningOnEveryGroupInARoomLightsItExactlyFully)
 {
     if (!ContentIsBuilt())

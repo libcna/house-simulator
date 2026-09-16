@@ -1961,6 +1961,16 @@ from seven to exactly nine; the six-chunk target, Reach per-draw limit and culli
 do not change. The two extra groups are visible close-range carved wood and upholstered
 fabric, not permission to fragment other rooms.
 
+`HOUSE-01045` (2026-09-16) gives `L0_LIVING` its specified upright piano on the short east-wall
+run beside the foyer doors. The 1.485 × 1.240 × 0.733 m project-authored model has separately
+modelled 52/36 keys, casework, music desk, legs and pedals; its four stock-`BasicEffect` finish
+roles move that cell's base material ceiling from sixteen to twenty chunks. The existing measured
+front-shutter group raises the final generated exception to **21 chunks / 20 materials**. The
+collision proxy and placed bounds remain clear of the double-door portal and the room's main
+circulation route. The deliberately unculled whole-house diagnostic is now 603 draws / 93 state
+changes, inside §71.2's 1,400 / 210 worst-case envelope; named visible poses continue to protect
+the 620 / 90 typical row.
+
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.
 `HOUSE-00932` gives that generated leaf four-panel millwork on both faces, paired bronze
@@ -5273,6 +5283,9 @@ decal. That is the right scope.
   deterministic transition output drives the atlas, room state and borrowed light. Initial/load
   state snaps to its authored value; only a live off→on edge plays the start-up, so loading a night
   exterior does not replay every street lamp.
+* The formal living room's narrow `LG_L0_LIVING_PIANO` accent starts on for the visual-slice
+  arrival state (`HOUSE-01045`); its main ceiling group remains off. This is an authored switch
+  state, not an exposure override, and saved state can still turn either group on or off.
 * Persistence: one bit per group plus a dimmer byte for the 6 dimmable groups.
 * Exterior lights: 2 porch lanterns, 1 garage flood, 2 rear terrace lights, 4 path lights,
   1 shed light, plus the 9 street lights and the neighbours' porch lights (not player-controlled).
@@ -6518,6 +6531,7 @@ Run by `validate_world.py` over the layout and by `scale_check.py` over every as
 | Fitted kitchen cooking bay | 0.95–1.05 m width, 0.65–0.80 m full depth including pulls; its separate measured counter top stays 0.88–0.95 m |
 | Large kitchen refrigerator appliance | 1.60–1.90 m width, 0.70–0.90 m depth including pulls, 1.80–2.10 m body height; a bridge cabinet's combined AABB must not stand in for body height |
 | Integrated refrigerator/bridge bay height | 2.60–2.80 m overall from L0 finished floor to ceiling |
+| Domestic upright piano | 1.35–1.60 m width, 1.10–1.35 m height, 0.50–0.76 m full depth including pedals |
 | Upper cabinet underside | 1.40–1.55 m |
 | Dining table top | 0.72–0.78 m |
 | Desk top | 0.72–0.78 m |

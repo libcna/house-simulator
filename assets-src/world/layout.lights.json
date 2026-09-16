@@ -26,9 +26,10 @@
   // material name in that prop, not a semantic guess such as "shade". The chunk build validates
   // the linkage before preserving its group for the stock-XNA emissive draw.
   //
-  // `defaultOn` is false everywhere. The switch state a game actually starts in is
-  // `initialstate.json`'s (§65.6, `HOUSE-00395`); this is what the world is before any state is
-  // applied, and a house with every light burning is not it.
+  // `defaultOn` is normally false. Selected visual-slice practical and accent groups may start
+  // on where the authored arrival state depends on them; the switch state a saved game restores
+  // still comes from `initialstate.json` (§65.6, `HOUSE-00395`). A house with every light burning
+  // is deliberately not the default.
   "schema": "cna-house/lights/1",
   "lights": [
     // ---- LG_B1_STAIR_MAIN x1 -- one batten over the flight
@@ -588,7 +589,7 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 450.0, "range": 4.85,
       "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L0_OFFICE_MAIN x2

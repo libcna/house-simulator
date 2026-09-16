@@ -180,8 +180,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 172U)
-                    << "HOUSE-00935 adds the exterior-resident garage-door body and panel finishes";
+                EXPECT_EQ(binder.Count(), 176U) << "HOUSE-01045 adds the four upright-piano finish roles";
                 const MaterialDesc* entryPanel = binder.Find(Id::Of("MAT_EXTERIOR_DOOR_PANEL_HARDWOOD"));
                 ASSERT_NE(entryPanel, nullptr);
                 EXPECT_EQ(entryPanel->kind, MaterialKind::Basic);
@@ -237,6 +236,20 @@ namespace
                 const MaterialDesc* foyerArmchair = binder.Find(Id::Of("MAT_FURNITURE_FOYER_ARMCHAIR"));
                 ASSERT_NE(foyerArmchair, nullptr);
                 EXPECT_EQ(foyerArmchair->kind, MaterialKind::Basic);
+                const MaterialDesc* pianoWood = binder.Find(Id::Of("MAT_FURNITURE_PIANO_WOOD"));
+                ASSERT_NE(pianoWood, nullptr);
+                EXPECT_EQ(pianoWood->kind, MaterialKind::Basic);
+                EXPECT_EQ(pianoWood->diffuseTexture, "Textures/Materials/wood_board_albedo");
+                const MaterialDesc* pianoIvory = binder.Find(Id::Of("MAT_FURNITURE_PIANO_IVORY"));
+                ASSERT_NE(pianoIvory, nullptr);
+                EXPECT_EQ(pianoIvory->kind, MaterialKind::Basic);
+                const MaterialDesc* pianoBlack = binder.Find(Id::Of("MAT_FURNITURE_PIANO_EBONITE"));
+                ASSERT_NE(pianoBlack, nullptr);
+                EXPECT_EQ(pianoBlack->kind, MaterialKind::Basic);
+                EXPECT_LT(pianoBlack->diffuse[0], pianoIvory->diffuse[0]);
+                const MaterialDesc* pianoBrass = binder.Find(Id::Of("MAT_FURNITURE_PIANO_BRASS"));
+                ASSERT_NE(pianoBrass, nullptr);
+                EXPECT_EQ(pianoBrass->kind, MaterialKind::Basic);
                 const MaterialDesc* leaves = binder.Find(Id::Of("MAT_FURNITURE_PLANT_LEAF"));
                 ASSERT_NE(leaves, nullptr);
                 EXPECT_EQ(leaves->kind, MaterialKind::AlphaTest);

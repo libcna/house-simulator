@@ -146,11 +146,12 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "finishes plus eight source-specific furniture albedos and one split to respect "
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. Merging "
                   "cushion, leaf, shade and rug maps into generic paint would erase the detail"),
-    "L0_LIVING": (16,
+    "L0_LIVING": (20,
                   "measured with HOUSE-01037's first furnished conversation group: six shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. The extra "
-                  "materials retain source cushions, lampshade, leaf and rug"),
+                  "materials retain source cushions, lampshade, leaf and rug; HOUSE-01045 adds "
+                  "four non-mergeable close piano finishes for case, ivory, black keys and pedals"),
     "L0_STAIR_MAIN": (8,
                       "a stair hall: the four receiver classes plus a STAIR class, glazing and "
                       "trim, plus the outside window frame. The stair is the room's purpose"),

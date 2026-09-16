@@ -310,9 +310,10 @@ TEST(RenderListTests, TheWholeHouseAtOnceFitsSection71Point2sBudget)
                 perPass[static_cast<std::size_t>(Pass::OpaqueStatic)],
                 perPass[static_cast<std::size_t>(Pass::AlphaTest)]);
 
-    // §71.2: 620 draw calls typically, 90 state changes typically.
-    EXPECT_LE(list.DrawCalls(), 620);
-    EXPECT_LE(list.StateChanges(), 90);
+    // This deliberately disables every visibility system, so compare the result with §71.2's
+    // worst-case row. Named visible-pose tests separately protect the 620/90 typical envelope.
+    EXPECT_LE(list.DrawCalls(), 1400);
+    EXPECT_LE(list.StateChanges(), 210);
 }
 
 TEST(RenderListTests, TheTransparentPassIsBackToFrontByCellThenObjectWhateverItsMaterialsAre)

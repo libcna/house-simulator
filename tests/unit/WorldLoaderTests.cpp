@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 172U)
-            << "HOUSE-00935 adds weather-facing painted garage-door body and panel finishes";
+        EXPECT_EQ(contents.materials.size(), 176U)
+            << "HOUSE-01045 adds four measured upright-piano finish roles";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3638,8 +3638,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_FURNITURE_"); }),
-                  10)
-            << "HOUSE-01037 and HOUSE-01038 load the eight living/family and two foyer furniture materials";
+                  14)
+            << "HOUSE-01045 adds four piano finishes to the ten prior furniture materials";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

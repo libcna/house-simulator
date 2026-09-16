@@ -1485,3 +1485,47 @@ culled/unculled comparison remains under its unchanged 0.2% threshold at 0.1599%
 `VISUAL-GATE-1` still **FAILS**. Highest visible value is the empty straight living-room view,
 followed by garage-facade articulation and the remaining connected-route furnishing gaps. Do not
 undo the room ownership boundary or broaden the exterior-door prefix to ordinary indoor joinery.
+
+## Round 37 — formal living-room upright piano
+
+Commit: `HOUSE-01045` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 36's fixed [straight living-room view](captures/house-00935-garage-door-r1/living-room.png)
+looked across the seating foreground to an almost completely blank east wall. After: the identical
+[clear-day view](captures/house-01045-piano-r2/living-room.png) has a full-size walnut upright as a
+focal object, with its inset case, 88-key keyboard, music desk, legs and pedals readable rather
+than implied by a box. The same camera was inspected at [clear noon](captures/house-01045-piano-noon-r2/living-room.png),
+[overcast 10:30](captures/house-01045-piano-overcast-r2/living-room.png) and
+[clear 22:00](captures/house-01045-piano-night-r2/living-room.png). The complete
+[Round 37 clear set](captures/house-01045-piano-r2) contains all twelve fixed route, composition
+and facade cameras; every frame was opened.
+
+Ranked visible defects remaining:
+
+1. The broad garage wall above the finished sectional door still lacks facade hierarchy and is
+   the largest defect in the exterior approach.
+2. Dining remains unfurnished and breaks the otherwise increasingly credible connected L0 route.
+3. Kitchen practical clutter and family-room secondary detail lag their completed primary pieces.
+4. The piano wall still needs restrained art or a physical accent fixture; the existing authored
+   piano light is useful, but its `fixtureProp` remains null.
+5. Most of the facade outside the localized porch and stair spill remains too dark at night.
+
+Fixed: one deterministic, project-authored 1.485 × 1.240 × 0.733 m upright adds 12,444 visible
+triangles, a 12-triangle collision proxy and four approved stock-`BasicEffect` finish roles. Its
+east-wall placement remains south of the foyer portal; the double leaves swing into the foyer and
+the main route remains clear. The existing 450 lm `LG_L0_LIVING_PIANO` accent starts on, while the
+main ceiling group stays off after an all-main-lights iteration visibly flattened the room. The
+world is 603 chunks / 24 static props; `L0_LIVING` is 21 chunks / 20 materials. The unculled
+diagnostic is 603 draws / 93 state changes, inside §71.2's worst-case envelope.
+
+The only strict golden that changed is the explicit debug `blockout-l0-living` frame: its 10,800
+changed pixels (4.6875%) are exactly the new piano silhouette, inspected before selective
+advancement. All production first-person references remained valid, and the 18-pose
+culled/unculled suite passed unchanged.
+
+Final gates: deterministic generation and the full 31-stage content build pass; unit tests are
+1,408/1,408, integration registrations 135/135, software render cases 49/49 active and strict-XNA
+translation units 323/323. Compilation was capped at six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only; this round
+closes its most obvious formal-living blank but does not claim the room or the whole route final.

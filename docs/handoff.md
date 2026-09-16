@@ -1,4 +1,47 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-00935` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01045` checkpoint)
+
+Branch `develop`. Task-start HEAD `9907d45` (`HOUSE-00935`). This file belongs to the single
+`HOUSE-01045` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The formal living room's formerly blank straight sightline now contains its architecture-specified
+upright piano. The deterministic project-authored model is 1.485 × 1.240 × 0.733 m, support
+grounded, and contains inset casework, a separately modelled 52/36-key keyboard, music desk, legs,
+feet and three physical pedals. Its 12,444 visible triangles and 12-triangle collision box map to
+four existing approved texture sources through stock `BasicEffect`; no third-party mesh or texture
+was introduced. The double foyer leaves swing away into `L0_FOYER`, and the piano remains south of
+their portal without narrowing the main living-room circulation below 1.2 m.
+
+Before: Round 36's [straight view](visual-review/captures/house-00935-garage-door-r1/living-room.png)
+faces an empty wall. After: the identical [clear-day view](visual-review/captures/house-01045-piano-r2/living-room.png)
+has a recognizable walnut focal piece. Matching [clear noon](visual-review/captures/house-01045-piano-noon-r2/living-room.png),
+[overcast](visual-review/captures/house-01045-piano-overcast-r2/living-room.png) and
+[night](visual-review/captures/house-01045-piano-night-r2/living-room.png) captures were inspected,
+as were all twelve frames in the complete [Round 37 clear set](visual-review/captures/house-01045-piano-r2).
+An experiment enabling the four main ceiling lights made the room flatter and darker and was
+rejected; only the existing 450 lm piano accent starts on, with the main group still off.
+
+The generated world is 603 chunks / 24 static props. `L0_LIVING` is exactly its derived 21-chunk
+ceiling over 20 materials; the deliberately unculled diagnostic is 603 draws / 93 state changes,
+inside §71.2's worst-case envelope. The only intentionally changed strict reference is explicit
+debug `blockout-l0-living`: its 4.6875% difference is the inspected piano silhouette. Production
+first-person references remain unchanged, and the 18-pose culling-equivalence suite passes.
+
+Verification is clean: deterministic piano regeneration, a forced 31-stage content build, all
+1,408 unit tests, all 135 integration registrations, all 49 active software-render cases and all
+323 strict-XNA translation units pass. The one initial `-j6` unit run saw the unrelated sky
+recolour microbenchmark's maximum sample delayed to 9.46 ms; it passed immediately in isolation
+and the complete `-j2` rerun passed 1,408/1,408. No compilation used more than six workers.
+
+Next highest visible value is the broad, unarticulated garage wall above the finished door. Then
+furnish dining, add kitchen practical clutter, deepen family-room detail, give the piano wall a
+restrained artwork/physical accent fixture and improve the night facade. Preserve the piano's
+measured placement and four meaningful finishes; do not collapse the keys into a texture or turn
+its accent into a global living-room exposure lift.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-00935` checkpoint)
 
 Branch `develop`. Task-start HEAD `9723a9d` (`HOUSE-00934`). This file belongs to the single
 `HOUSE-00935` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

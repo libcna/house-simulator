@@ -1562,6 +1562,58 @@
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
     // END FOYER FURNITURE MATERIALS
+    // BEGIN FORMAL LIVING PIANO MATERIALS (HOUSE-01045)
+    // These close-range static finishes deliberately use stock-XNA BasicEffect: the piano has
+    // physical UV0 but no shell UV2. All four reuse already approved project texture sources.
+    {
+      "id": "MAT_FURNITURE_PIANO_WOOD", "class": "wood",
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 0,
+      "tint": [0.78, 0.50, 0.30], "specularColor": [0.14, 0.10, 0.07],
+      "specularPower": 72.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.2, "powerBoost": 1.2 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "hardwood", "audioAbsorption": 0.14,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_PIANO_IVORY", "class": "plastic",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.96, 0.91, 0.78], "specularColor": [0.10, 0.09, 0.07],
+      "specularPower": 42.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.10, "specularBoost": 1.2, "powerBoost": 1.2 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.05,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_PIANO_EBONITE", "class": "plastic",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.055, 0.060, 0.070], "specularColor": [0.18, 0.18, 0.20],
+      "specularPower": 64.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.08, "specularBoost": 1.2, "powerBoost": 1.2 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.04,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_FURNITURE_PIANO_BRASS", "class": "metal",
+      "albedo": "Textures/Materials/metal_brushed_albedo",
+      "normal": "Textures/Materials/metal_brushed_normal", "lightmapChannel": 0,
+      "tint": [0.82, 0.62, 0.28], "specularColor": [0.38, 0.30, 0.14],
+      "specularPower": 80.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.08, "specularBoost": 1.3, "powerBoost": 1.2 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "metal", "audioAbsorption": 0.02,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    // END FORMAL LIVING PIANO MATERIALS
     // The kitchen joinery's 0.58 m GLB UV repeat keeps the approved marble base map at a
     // plausible working-surface scale. Unlike the shell floor, this static prop has no UV2.
     {

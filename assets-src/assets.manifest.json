@@ -317,14 +317,22 @@
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
-        "boundsMetres": [0.33, 0.6075, 0.3105],
-        "triangles": { "LOD0": 232 }
+        "boundsMetres": [
+          0.33,
+          0.6075,
+          0.3105
+        ],
+        "triangles": {
+          "LOD0": 232
+        }
       },
       "materialMap": {
         "LanternMetal": "MAT_FIXTURE_DARK_BRONZE",
         "LanternShade": "MAT_FIXTURE_EMISSIVE_WARM"
       },
-      "usedIn": ["L0_PORCH"]
+      "usedIn": [
+        "L0_PORCH"
+      ]
     },
     {
       "id": "MODEL_FURNITURE_COFFEE_TABLE",
@@ -810,6 +818,49 @@
       },
       "usedIn": [
         "L0_FAMILY"
+      ]
+    },
+    {
+      "id": "MODEL_FURNITURE_UPRIGHT_PIANO",
+      "category": "upright-piano",
+      "sourceFile": "assets-src/Models/Furniture/LivingRoom/upright_piano.glb",
+      "sourceSha256": "3208d3717cd8482cae4a75b1c700bf7d2435a50e026891369f5aefaa6bfab86d",
+      "contentName": "Models/Furniture/LivingRoom/upright_piano",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Measured formal-living upright piano",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured upright from tools/blender/living_piano.py for HOUSE-01045: inset casework, a 52/36-key keyboard, music desk, legs, feet and three physical pedals. Approved project material maps are bound during content build; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.485,
+          1.24,
+          0.7325
+        ],
+        "triangles": {
+          "LOD0": 12444
+        },
+        "collision": "upright_piano_001_case_back_COL"
+      },
+      "materialMap": {
+        "PIANO_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "PIANO_IVORY": "MAT_FURNITURE_PIANO_IVORY",
+        "PIANO_EBONITE": "MAT_FURNITURE_PIANO_EBONITE",
+        "PIANO_BRASS": "MAT_FURNITURE_PIANO_BRASS"
+      },
+      "usedIn": [
+        "L0_LIVING"
       ]
     },
     {

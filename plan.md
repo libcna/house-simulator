@@ -14109,6 +14109,41 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             clear/noon/overcast/night. Repository CI is green, including 323 strict-XNA
             translation units; `git diff --check` passes. The normal path remains
             production-material only.
+- [x] HOUSE-01045 — Give the straight formal-living sightline a real upright piano focal piece
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-01037 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-16) New next-free phase-13 visual-sprint subtask. Round 36's fixed
+            `living-room` camera looks directly at a three-metre blank east-wall segment beside
+            the foyer double doors, while the reverse composition already contains the first
+            seating group. The architecture has always specified a piano for this formal room.
+            Add one measured, detailed, project-authored static upright through the proven prop
+            and stock-XNA material path; do not block the foyer portal, move the settled seating
+            group or claim the whole room complete.
+      accept: a support-grounded 1.35–1.60 m wide domestic upright has recognisable inset casework,
+            a separately modelled 52/36-key keyboard, music desk, legs and three pedals; physical
+            UV0, approved materials, collision, scale, provenance and deterministic regeneration
+            are checked. Its east-wall placement leaves the double-door swing and ≥1.2 m route
+            clear. Fixed clear/noon/overcast/night normal-game views show a credible focal object,
+            not a dark cuboid; affected strict references are individually inspected and content,
+            XNA-only and culling-equivalence gates pass.
+      finding: the deterministic 1.485 × 1.240 × 0.733 m project-authored upright contributes
+            12,444 visible triangles plus a 12-triangle collision box. Its 52 white and 36 black
+            keys, recessed case, music desk, legs and three pedals use four stock-XNA finishes
+            sourced from already approved project maps. The case ends 0.708 m south of the foyer
+            portal; that pair swings into the foyer, while the open westward room route retains
+            well over 1.2 m. `L0_LIVING` is 21 chunks / 20 materials after its existing shutter
+            group, and the deliberately unculled house is 603 draws / 93 state changes.
+      review: Round 37 opens all twelve fixed clear-day views plus the living-room view at clear
+            noon, overcast 10:30 and clear 22:00. The straight view changes from a blank wall to a
+            recognisable walnut upright with readable keys and pedals. Enabling the room's main
+            group flattened the composition and was rejected; only its existing 450 lm piano
+            accent starts on, with the main ceiling group still off.
+      verified: (2026-09-16) the piano regenerates bit-for-bit; scale, support-origin, manifest,
+            licence and all 13 world-validation rules pass. A forced 31-stage content build
+            completes in 46.88 s, including navigation in 8.71 s. Unit tests pass 1408/1408,
+            integration registrations pass 135/135, and the complete software-render run passes
+            all 49 active cases, including production first-person references and 18-pose
+            culled-vs-unculled equivalence. Repository CI is green with 323 strict-XNA translation
+            units clean and no compilation above six workers; `git diff --check` passes.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
