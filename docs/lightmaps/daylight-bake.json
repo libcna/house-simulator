@@ -123,11 +123,12 @@
       "cell": "B1_UNDERSTAIR",
       "daylight": {
         "image": "B1_UNDERSTAIR_LM_DAY.png",
-        "scale": 1.0001024007797241,
+        "scale": 0.9108688235282898,
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:8e9b8e89ebbeea81b47d5c0b3de17d781d8dbbcdaf810bac03cf31b2d95c5694"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:54fd1a525786e2bd7262c5a2ae3ca22d0e1783b1e2d1b0bd6b035b7d005855dd"
     },
     {
       "cell": "B1_UTILITY",
@@ -241,7 +242,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:bd3f15a581b326cdce1e8deb156490fc296f6d089b5e24130e16fc056c8fc213"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:e3025f08b04f92d6ff66c7199fc930b11d2c840e0b50a562740fd553f065abfc"
     },
     {
       "cell": "L0_GARAGE_LOFT",
@@ -798,12 +800,13 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_FOYER"
+    "B1_UNDERSTAIR",
+    "L0_GARAGE"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 507149,
+  "sourceBytes": 507117,
   "tool": "bake_house_lightmaps.py"
 }

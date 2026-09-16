@@ -1,4 +1,50 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01045` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01046` checkpoint)
+
+Branch `develop`. Task-start HEAD `d76933d` (`HOUSE-01045`). This file belongs to the single
+`HOUSE-01046` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The garage's authored +4.30 m head is its settled roof eave, not an ordinary storey ceiling. The
+generic exterior-skin rule had nevertheless searched for the next FFL and extended the garage
+siding to L2 at +6.55 m, placing a nine-metre-wide wall through `ROOF_GARAGE`. `outer_span` now
+adds a floor-structure band only when a cell head matches an actual canonical ceiling. Standard
+L0 walls still seal +3.30–+3.65 m; custom roof/stair-bound heads stop at their authored height.
+The rule is data-driven and contains no garage identifier.
+
+Before: Round 37's [driveway view](visual-review/captures/house-01045-piano-r2/garage-approach.png)
+shows the false brown rectangle. After: the identical [clear 10:30 view](visual-review/captures/house-01046-garage-roof-r1/garage-approach.png)
+shows the separate charcoal-shingle hip and its real silhouette. Matching
+[clear noon](visual-review/captures/house-01046-garage-roof-noon-r1/garage-approach.png),
+[overcast](visual-review/captures/house-01046-garage-roof-overcast-r1/garage-approach.png) and
+[clear night](visual-review/captures/house-01046-garage-roof-night-r1/garage-approach.png) captures
+were inspected, along with all twelve views in each scenario set.
+
+Only `L0_GARAGE.glb` and `B1_UNDERSTAIR.glb` changed among 99 regenerated source shells. Their UV2
+and daylight/artificial atlases were selectively rebuilt and promoted with fresh manifest, bake
+and licence provenance. The compiled world remains 603 chunks / 24 props. Fourteen strict golden
+references that actually contain the corrected geometry or deterministic UV2 repack were inspected
+and selectively advanced; all other references remained untouched. The complete software-render
+suite passes 49/49 active cases, including 18-pose culled/unculled equivalence.
+
+Verification is clean: shell selftest and generated-manifest checks, the forced 31-stage content
+build, 1,408/1,408 unit tests, 135/135 integration registrations, staged repository gates and all
+323 strict-XNA translation units pass. The first sandboxed integration run denied only eight save
+tests access to the user-data directory; the complete authorized rerun passed. Compilation was
+capped at six workers throughout, and `git diff --check` passes.
+
+The previous 19-hour `tools/world/build_nav.py` PID 936066 was already gone when checked; this
+task's complete replacement navigation build finished normally in 10.83 seconds. It was therefore
+a stuck historical bake, not required work. No process was killed.
+
+Next highest visible value is a plausible physical garage/front practical: the corrected roof is
+readable by day and overcast, but the garage face and most of the facade are almost black at 22:00.
+Then furnish dining, add controlled kitchen clutter and family-room secondary detail, and give the
+piano wall a restrained artwork/fixture. Preserve the new ceiling-derived span rule and separate
+roof; do not reintroduce a facade patch or global night-exposure lift.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-01045` checkpoint)
 
 Branch `develop`. Task-start HEAD `9907d45` (`HOUSE-00935`). This file belongs to the single
 `HOUSE-01045` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

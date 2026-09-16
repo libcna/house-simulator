@@ -640,8 +640,8 @@ A `+` after a total means at least one row in that pack could not be measured, s
 | `house-b1` | `TEXTURE_B1_STOR1_LM_LG_B1_STOR1_MAIN` | texture | `Textures/Lightmaps/Artificial/B1_STOR1_LM_LG_B1_STOR1_MAIN` | 2,871 | -- | 65,536 | · | · |
 | `house-b1` | `TEXTURE_B1_STOR2_LM_DAY` | texture | `Textures/Lightmaps/Daylight/B1_STOR2_LM_DAY` | 7,524 | -- | 65,536 | · | · |
 | `house-b1` | `TEXTURE_B1_STOR2_LM_LG_B1_STOR2_MAIN` | texture | `Textures/Lightmaps/Artificial/B1_STOR2_LM_LG_B1_STOR2_MAIN` | 4,180 | -- | 65,536 | · | · |
-| `house-b1` | `TEXTURE_B1_UNDERSTAIR_LM_DAY` | texture | `Textures/Lightmaps/Daylight/B1_UNDERSTAIR_LM_DAY` | 8,380 | -- | 65,536 | · | · |
-| `house-b1` | `TEXTURE_B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN` | texture | `Textures/Lightmaps/Artificial/B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN` | 3,869 | -- | 65,536 | · | · |
+| `house-b1` | `TEXTURE_B1_UNDERSTAIR_LM_DAY` | texture | `Textures/Lightmaps/Daylight/B1_UNDERSTAIR_LM_DAY` | 8,395 | -- | 65,536 | · | · |
+| `house-b1` | `TEXTURE_B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN` | texture | `Textures/Lightmaps/Artificial/B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN` | 3,053 | -- | 65,536 | · | · |
 | `house-b1` | `TEXTURE_B1_UTILITY_LM_DAY` | texture | `Textures/Lightmaps/Daylight/B1_UTILITY_LM_DAY` | 5,416 | -- | 65,536 | · | · |
 | `house-b1` | `TEXTURE_B1_UTILITY_LM_LG_B1_UTILITY_MAIN` | texture | `Textures/Lightmaps/Artificial/B1_UTILITY_LM_LG_B1_UTILITY_MAIN` | 5,118 | -- | 65,536 | · | · |
 | `house-b1` | `TEXTURE_B1_WC7_LM_DAY` | texture | `Textures/Lightmaps/Daylight/B1_WC7_LM_DAY` | 683 | -- | 65,536 | · | · |
@@ -693,9 +693,9 @@ A `+` after a total means at least one row in that pack could not be measured, s
 | `house-l0` | `TEXTURE_L0_FOYER_LM_LG_L0_FOYER_ACCENT` | texture | `Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT` | 11,096 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_FOYER_LM_LG_L0_FOYER_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN` | 9,926 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_FOYER_LM_LG_L0_PORCH_LANTERN` | texture | `Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_PORCH_LANTERN` | 897 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_GARAGE_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY` | 1,196 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN` | 8,788 | -- | 65,536 | · | · |
-| `house-l0` | `TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_OPENER` | texture | `Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER` | 7,205 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_GARAGE_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY` | 1,149 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN` | 5,284 | -- | 65,536 | · | · |
+| `house-l0` | `TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_OPENER` | texture | `Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER` | 9,546 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_GARAGE_LOFT_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_GARAGE_LOFT_LM_DAY` | 17,733 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_GARAGE_LOFT_LM_LG_L0_GARAGE_LOFT_MAIN` | texture | `Textures/Lightmaps/Artificial/L0_GARAGE_LOFT_LM_LG_L0_GARAGE_LOFT_MAIN` | 6,752 | -- | 65,536 | · | · |
 | `house-l0` | `TEXTURE_L0_HALL_LM_DAY` | texture | `Textures/Lightmaps/Daylight/L0_HALL_LM_DAY` | 16,368 | -- | 65,536 | · | · |

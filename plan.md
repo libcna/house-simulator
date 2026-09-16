@@ -14144,6 +14144,37 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             all 49 active cases, including production first-person references and 18-pose
             culled-vs-unculled equivalence. Repository CI is green with 323 strict-XNA translation
             units clean and no compilation above six workers; `git diff --check` passes.
+- [x] HOUSE-01046 — Remove the false garage siding volume that hides the production roof
+      dep: HOUSE-00454, HOUSE-00461, HOUSE-00934, HOUSE-00935 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-16) New next-free phase-13 visual-sprint subtask. Round 37's fixed
+            `garage-approach` view shows a 9 m wide brown rectangle above the finished sectional
+            door. Geometry inspection proves it is not merely an empty facade: `L0_GARAGE` ends
+            at the +4.30 m roof eave, but the generic inter-storey skin rule extends its siding to
+            L2 at +6.55 m, through the front plane of `ROOF_GARAGE`. Correct the rule from authored
+            level geometry without naming the garage or changing its settled roof/portal/collision.
+      accept: an outer skin carries a joist band only when its authored head coincides with a real
+            level ceiling; a custom roof-bound head stops at its own height. The garage exterior
+            mesh ends at +4.30 m, the approved charcoal shingle hip is unobstructed in the fixed
+            clear/noon/overcast/night views, ordinary storey bands remain sealed, and shell,
+            content, XNA-only, render-reference and culled-vs-unculled gates pass.
+      findings: (2026-09-16) `outer_span` now extends a skin to the next FFL only when its authored
+            head matches a canonical level ceiling. The ordinary L0 kitchen still closes the
+            +3.30–+3.65 m joist band, while `L0_GARAGE` stops at +4.30 m and `B1_UNDERSTAIR` also
+            avoids an unrelated inter-storey jump. Of 99 regenerated source shells, only those two
+            hashes change. Their UV2 layouts and daylight/artificial atlases were selectively
+            rebuilt and promoted with updated licence, manifest and bake provenance.
+      review: (2026-09-16) Round 38 compares the fixed `garage-approach` before
+            `docs/visual-review/captures/house-01045-piano-r2/garage-approach.png` with clear 10:30,
+            clear noon, overcast 10:30 and clear 22:00 sets under the `house-01046-garage-roof-*`
+            labels. The former 9 m brown rectangle is gone in every condition and the separate
+            charcoal hip is readable. The night facade remains underlit; that is the next defect,
+            not a reason to retain false geometry.
+      verified: (2026-09-16) Shell selftest, manifest/material checks and the forced 31-stage
+            content build pass; navigation completes in 10.83 s. Unit tests pass 1408/1408,
+            integration registrations 135/135 and all 49 active software-render cases pass after
+            inspecting and selectively advancing 14 affected references; 18-pose culling
+            equivalence remains green. Staged repository gates and 323 strict-XNA translation
+            units pass, with compilation capped at six workers; `git diff --check` is clean.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)

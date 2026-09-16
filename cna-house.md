@@ -993,6 +993,12 @@ remains non-lightmapped and room-owned, while only those two narrow weather-faci
 enter the exterior hierarchy. The opening, portal, threshold, collision and §54 five-segment
 animation contract do not move.
 
+The garage's authored +4.30 m head is also its roof eave (`HOUSE-01046`). It lies between ordinary
+storey ceilings and therefore carries no 350 mm inter-storey floor band. Exterior skin extends to
+the next FFL only when its cell head coincides with an actual level ceiling; a custom roof-bound
+head stops at its own value. This keeps garage siding below the separate `ROOF_GARAGE` planes
+instead of projecting a false wall through the front hip to L2 at +6.55.
+
 Three above-grade storeys plus a habitable attic. This is what makes "several floors" believable
 rather than a stack of arbitrary levels: three-storey Colonials of this size were genuinely built,
 and the attic under a 7:12 roof over a 13.4 m span has real usable volume.

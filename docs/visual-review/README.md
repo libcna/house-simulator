@@ -1529,3 +1529,39 @@ translation units 323/323. Compilation was capped at six workers.
 
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only; this round
 closes its most obvious formal-living blank but does not claim the room or the whole route final.
+
+## Round 38 — garage hip roof revealed
+
+Commit: `HOUSE-01046` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 37's fixed [driveway view](captures/house-01045-piano-r2/garage-approach.png) had a
+nine-metre-wide siding rectangle above the sectional door. The garage's authored head was already
+the +4.30 m roof eave, but the generic outer-skin rule jumped to L2's +6.55 m floor and placed that
+wall through the separate roof. After: the identical [clear-day camera](captures/house-01046-garage-roof-r1/garage-approach.png)
+shows the approved charcoal-shingle hip and its real silhouette. Matching [clear noon](captures/house-01046-garage-roof-noon-r1/garage-approach.png),
+[overcast](captures/house-01046-garage-roof-overcast-r1/garage-approach.png) and
+[night](captures/house-01046-garage-roof-night-r1/garage-approach.png) views were opened, as were
+all twelve frames in each complete scenario set.
+
+Ranked visible defects remaining:
+
+1. The garage and most of the facade are almost black at night; a plausible physical garage/front
+   practical is now the largest exterior defect.
+2. Dining remains unfurnished and breaks the connected L0 domestic route.
+3. Kitchen practical clutter and family-room secondary detail trail their primary furniture.
+4. The garage face is materially coherent but still broad and simple below the now-correct roof.
+5. The piano wall needs restrained art or a physical accent fixture.
+
+Fixed: the generic rule now adds a joist band only when a cell head coincides with a real level
+ceiling. Ordinary L0 walls still bridge +3.30 to +3.65 m, while custom roof/stair-bound heads stop
+where authored; no garage id, facade overlay or roof edit was introduced. Only `L0_GARAGE` and
+`B1_UNDERSTAIR` changed among 99 source shell files. Both received fresh UV2 and promoted day/night
+atlases. The world remains 603 chunks / 24 props.
+
+Fourteen strict references that actually contain the corrected shell or its deterministic UV2
+repack were compared and intentionally advanced; unaffected references were retained. All 49
+active software-render cases pass, including 18-pose culled/unculled equivalence.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. Highest visible
+value is a real exterior garage/front practical with bounded warm spill, followed by dining
+furniture and controlled kitchen/family detail.

@@ -311,13 +311,26 @@ INTERIOR_GAP = 0.75
 
 
 def outer_span(cell: dict, extent: tuple[float, float], level: dict, levels: dict):
-    """The Y range an exterior run's OUTER face covers: this cell's floor to the next level's.
+    """The Y range an exterior run's OUTER face covers.
 
     A cell's own extent stops at its ceiling -- 3.30 on `L0` -- and the next storey's floor is at
     3.65. Between them is 0.35 m of floor structure, and an outer skin built from cell extents
     alone leaves a slot round the whole house at every storey, level with the joists. The lower
     cell carries that band, so every band is carried once.
+
+    A custom head that is not any storey's ceiling has no such floor band. The garage is the
+    visible case: its own roof starts at +4.30, between L1's +3.65 floor and +6.20 ceiling. Looking
+    merely for the first FFL above +4.30 extended siding to L2 at +6.55, straight through the hip
+    roof. Stop at the authored head unless it is an actual level ceiling; this remains data-driven
+    and also handles stair wells and nested volumes without naming a room.
     """
+    ceiling_matches = any(
+        isinstance(row.get("ceiling"), (int, float))
+        and abs(float(row["ceiling"]) - extent[1]) <= 1e-6
+        for row in levels.values()
+    )
+    if not ceiling_matches:
+        return extent
     above = [float(row["ffl"]) for row in levels.values()
              if isinstance(row.get("ffl"), (int, float)) and float(row["ffl"]) > extent[1] - 1e-6]
     return (extent[0], min(above) if above else extent[1])
@@ -2844,6 +2857,11 @@ def selftest(output: Path) -> int:
     span = outer_span(subject, extent, levels["L0"], levels)
     require(span == (extent[0], float(levels["L1"]["ffl"])),
             f"an outer run runs from its own floor to the NEXT storey's, {span}")
+    garage_head_extent = extent_of(garage, levels[garage["level"]])[0]
+    garage_span = outer_span(garage, garage_head_extent, levels["L0"], levels)
+    require(garage_span == garage_head_extent,
+            f"but a custom head between level ceilings has no joist band: the garage siding "
+            f"stops at its +4.30 eave instead of piercing the roof to L2 ({garage_span})")
     top = cells["L3_STORE_W"]
     top_extent = extent_of(top, levels["L3"])[0]
     require(outer_span(top, top_extent, levels["L3"], levels)[1] == top_extent[1],

@@ -18401,7 +18401,7 @@
       "id": "TEXTURE_B1_UNDERSTAIR_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/B1_UNDERSTAIR_LM_DAY.png",
-      "sourceSha256": "ffafa37efb7a0c87eea5e1393be94d079e819b3816e63648ba44369ef8e74f5d",
+      "sourceSha256": "e08d6b892ecae413ba910bda857dfc4a173f4764e2743155ca23b93eec169ddb",
       "texture": {
         "width": 128,
         "height": 128,
@@ -18428,7 +18428,7 @@
       "id": "TEXTURE_B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/B1_UNDERSTAIR_LM_LG_B1_UNDERSTAIR_MAIN.png",
-      "sourceSha256": "c0dec2b84ca7e89d778ea0a151efc44c4571d8e88342743fb4049338b7ba2eeb",
+      "sourceSha256": "97cde385447233e84ad975a92e337d0fae95c5e0f5e9681ac5453fa622cd0a69",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19445,7 +19445,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY.png",
-      "sourceSha256": "4e9d2e796e913d087ec73f97767130d08d36324ae6805e6243e8deec2210a8f3",
+      "sourceSha256": "ac03af2c044bd58328343a2ae8b9ff51bfe1ee35dacc6a741fb73d7944f7170d",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19472,7 +19472,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN.png",
-      "sourceSha256": "7d0b59b28bc297109d496304e96af04d77027afe47a3e202b01c9050a4438ca4",
+      "sourceSha256": "80efba4f679a671c3450d7b932231a9e2a2a8d269ce2a3f5d372449817545ce6",
       "texture": {
         "width": 128,
         "height": 128,
@@ -19499,7 +19499,7 @@
       "id": "TEXTURE_L0_GARAGE_LM_LG_L0_GARAGE_OPENER",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_OPENER.png",
-      "sourceSha256": "e93a9cf086e6cd7d945f81769d2d73133e824c3c69b6c849054be2a323593b00",
+      "sourceSha256": "48fb2a2bd11e038512eb998ef8e798c84c339da217f46ed8cce8dd9d5a95f54b",
       "texture": {
         "width": 128,
         "height": 128,
