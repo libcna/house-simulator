@@ -180,8 +180,8 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 149U)
-                    << "HOUSE-01044 adds the cooking bay's tile and opaque oven-glass finishes";
+                EXPECT_EQ(binder.Count(), 163U)
+                    << "HOUSE-00772 adds five fallback and nine exact-atlas vegetation roles";
                 const MaterialDesc* kitchenCounter = binder.Find(Id::Of("MAT_KITCHEN_COUNTER_STONE"));
                 ASSERT_NE(kitchenCounter, nullptr);
                 EXPECT_EQ(kitchenCounter->kind, MaterialKind::Basic);
@@ -210,6 +210,15 @@ namespace
                 const MaterialDesc* leaves = binder.Find(Id::Of("MAT_FURNITURE_PLANT_LEAF"));
                 ASSERT_NE(leaves, nullptr);
                 EXPECT_EQ(leaves->kind, MaterialKind::AlphaTest);
+                const MaterialDesc* treeLeaves = binder.Find(Id::Of("MAT_VEGETATION_TREE_FOLIAGE"));
+                ASSERT_NE(treeLeaves, nullptr);
+                EXPECT_EQ(treeLeaves->kind, MaterialKind::AlphaTest);
+                EXPECT_EQ(treeLeaves->diffuseTexture, "Textures/Vegetation/tree_foliage");
+                EXPECT_EQ(treeLeaves->referenceAlpha, 115);
+                EXPECT_TRUE(treeLeaves->twoSided);
+                const MaterialDesc* bark = binder.Find(Id::Of("MAT_VEGETATION_BARK"));
+                ASSERT_NE(bark, nullptr);
+                EXPECT_EQ(bark->kind, MaterialKind::Basic);
 
                 const MaterialDesc* glass = binder.Find(Id::Of("MAT_GLASS_CLEAR"));
                 ASSERT_NE(glass, nullptr);

@@ -110,12 +110,26 @@ MAX_PRIMITIVES_REACH = 0xFFFF
 #: Every maximum below is the measured count on 2026-09-10, not a round number with room in it.
 #: §71's frame budget is what may tighten or restructure them later.
 CHUNK_BUDGET_EXCEPTIONS = {
-    "EXT_ROAD": (13,
+    "EXT_ROAD": (17,
                  "not a room: the residency key for the property's outdoors. The carriageway's "
                  "own six ground and marking materials, the ornamental fence and gate that stand "
                  "on it, and -- since `HOUSE-00494` -- the house's two roofs and its chimney, "
-                 "which are five more and have to load with the exterior rather than with the "
-                 "neighbourhood"),
+                 "which have to load with the exterior rather than with the neighbourhood. "
+                 "HOUSE-00772 adds AlphaTest foliage, BasicEffect bark and measured Reach-cap "
+                 "splits for the street trees and the far road-edge hedge"),
+    "EXT_FRONTYARD_E": (12,
+                         "HOUSE-00772's planted east lawn: its existing ground/building finishes "
+                         "plus measured source-exact bark, branch, leaf, flower and grass atlases. "
+                         "This exterior cell is a landscape region rather than a room"),
+    "EXT_SIDEYARD_W": (11,
+                        "HOUSE-00772's densely planted west border: existing exterior finishes "
+                        "plus measured source-exact bark and cutout foliage, including Reach-cap "
+                        "splits. Per-instance sub-ranges retain BVH culling"),
+    "EXT_WORLD": (24,
+                   "the neighbourhood ring is not a room. HOUSE-00772's two rows of street trees "
+                   "and the 2.1 m road-edge hedge add source-exact bark/cutout foliage with "
+                   "measured vertex/Reach-cap splits; every placement remains a separately "
+                   "bounded sub-range in the exterior BVH"),
     "L0_GARAGE": (8,
                   "a garage is a room and stays one (`HOUSE-00487`). The four receiver classes, "
                   "plus the stair to the loft, glazing, trim and an outside window-frame chunk"),
@@ -564,7 +578,7 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
     layout = layout_io.load_layout(world_dir, ["levels", "cells"])
     layout["materials"] = layout_io.load_file(world_dir / layout_io.FILES["materials"][0],
                                                "materials")
-    for optional in ("props",):
+    for optional in ("props", "exterior"):
         name, _ = layout_io.FILES[optional]
         if (world_dir / name).is_file():
             layout[optional] = layout_io.load_file(world_dir / name, optional)
@@ -579,10 +593,55 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
 
     geometry_cache: dict[tuple[str, str | None], dict] = {}
     groups: dict[tuple[str, tuple], list[dict]] = {}
-    stats = {"props": 0, "dynamic": 0, "split": 0, "primitiveSplit": 0, "wide": 0,
+    stats = {"props": 0, "dynamic": 0, "vegetationGroups": 0, "vegetationInstances": 0,
+             "split": 0, "primitiveSplit": 0, "wide": 0,
              "cellsOverChunkLimit": [], "materialsPerCell": {},
              "shellFiles": 0, "exteriorFiles": 0, "shellLightmapped": 0, "shellSurfaces": 0, "shellUnplaced": {}, "shellDynamicReceivers": 0,
              "shellEmpty": 0}
+
+    def source_meshes(identifier: str, asset_id: str, material_override: str | None):
+        """Resolve one authored asset to its LOD0 source-material meshes.
+
+        Props and vegetation use the same approved manifest bridge. Keeping that bridge here
+        means exterior planting cannot bypass provenance by naming a loose file, and it cannot
+        quietly collapse bark and cutout leaves onto one material merely because the schema
+        groups many placements under one asset id.
+        """
+        asset = asset_rows.get(asset_id)
+        if asset is None:
+            raise LayoutError(
+                f"{identifier!r} names asset {asset_id!r}, not in assets.manifest.json")
+        path = REPO / asset["sourceFile"]
+        if material_override:
+            cache_key = (asset_id, None)
+            if cache_key not in geometry_cache:
+                geometry_cache[cache_key] = read_geometry(path)
+            return asset, path, [(None, geometry_cache[cache_key])]
+
+        material_map = asset.get("materialMap")
+        if not isinstance(material_map, dict) or not material_map:
+            raise LayoutError(
+                f"{identifier!r} has no `material` override and asset {asset_id!r} has no "
+                "`materialMap` in assets.manifest.json")
+        cache_key = (asset_id, "source-materials")
+        if cache_key not in geometry_cache:
+            geometry_cache[cache_key] = read_geometry_by_material(path)
+        return asset, path, list(geometry_cache[cache_key].items())
+
+    def canonical_material(identifier: str, asset: dict, source_material: str | None,
+                           material_override: str | None) -> tuple[str, dict]:
+        material_id = material_override
+        if not material_id:
+            material_id = asset["materialMap"].get(source_material)
+            if not isinstance(material_id, str) or not material_id:
+                raise LayoutError(
+                    f"{identifier!r}: asset {asset['id']!r} source material "
+                    f"{source_material!r} has no entry in `materialMap`")
+        material = materials.get(material_id)
+        if material is None:
+            raise LayoutError(
+                f"{identifier!r} resolves to material {material_id!r}, which does not exist")
+        return material_id, material
 
     for prop in sorted(layout_io.rows(layout, "props"), key=lambda p: p["id"]):
         stats["props"] += 1
@@ -592,41 +651,12 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
         cell = cells.get(prop["cell"])
         if cell is None:
             raise LayoutError(f"prop {prop['id']!r} names cell {prop['cell']!r}, which does not exist")
-        asset = asset_rows.get(prop["asset"])
-        if asset is None:
-            raise LayoutError(
-                f"prop {prop['id']!r} names asset {prop['asset']!r}, not in assets.manifest.json")
-        path = REPO / asset["sourceFile"]
         override = prop.get("material")
-        source_meshes: list[tuple[str | None, dict]]
-        if override:
-            cache_key = (prop["asset"], None)
-            if cache_key not in geometry_cache:
-                geometry_cache[cache_key] = read_geometry(path)
-            source_meshes = [(None, geometry_cache[cache_key])]
-        else:
-            material_map = asset.get("materialMap")
-            if not isinstance(material_map, dict) or not material_map:
-                raise LayoutError(
-                    f"prop {prop['id']!r} has no `material` override and asset "
-                    f"{prop['asset']!r} has no `materialMap` in assets.manifest.json")
-            cache_key = (prop["asset"], "source-materials")
-            if cache_key not in geometry_cache:
-                geometry_cache[cache_key] = read_geometry_by_material(path)
-            source_meshes = list(geometry_cache[cache_key].items())
+        asset, path, meshes = source_meshes(f"prop {prop['id']}", prop["asset"], override)
 
-        for source_material, mesh in source_meshes:
-            material_id = override
-            if not material_id:
-                material_id = asset["materialMap"].get(source_material)
-                if not isinstance(material_id, str) or not material_id:
-                    raise LayoutError(
-                        f"prop {prop['id']!r}: asset {prop['asset']!r} source material "
-                        f"{source_material!r} has no entry in `materialMap`")
-            material = materials.get(material_id)
-            if material is None:
-                raise LayoutError(
-                    f"prop {prop['id']!r} resolves to material {material_id!r}, which does not exist")
+        for source_material, mesh in meshes:
+            material_id, material = canonical_material(
+                f"prop {prop['id']}", asset, source_material, override)
 
             layout_id = effect_layout(material)
             if layout_id == LAYOUT_DUAL and not mesh["hasUv1"]:
@@ -642,11 +672,46 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
                 "prop": prop["id"], "mesh": placed, "layout": layout_id,
                 "material": material_id})
 
+    # `HOUSE-00772`: exterior vegetation was authored in `layout.exterior.json` years before the
+    # canonical renderer consumed it. Batch every deterministic placement through the same stock
+    # XNA material/chunk path as static props: opaque bark uses BasicEffect, leaves and flowers use
+    # AlphaTestEffect, and `_LOD1`/`_LOD2` nodes remain auxiliary rather than being drawn on top of
+    # LOD0. A synthetic per-instance sub-range id preserves the existing BVH's partial culling.
+    levels = layout_io.by_id(layout_io.rows(layout, "levels"), "level")
+    vegetation = (layout.get("exterior") or {}).get("vegetation") or []
+    fallback_outdoors = house_exterior_cell(cells) if vegetation else None
+    for planting in sorted(vegetation, key=lambda row: row["id"]):
+        stats["vegetationGroups"] += 1
+        asset, path, meshes = source_meshes(
+            f"vegetation group {planting['id']}", planting["asset"], None)
+        instances = planting.get("instances") or []
+        group_scale = float(planting.get("scale", 1.0))
+        stats["vegetationInstances"] += len(instances)
+        for index, instance in enumerate(instances):
+            instance_id = f"{planting['id']}:{index:03d}"
+            for source_material, mesh in meshes:
+                material_id, material = canonical_material(
+                    f"vegetation instance {instance_id}", asset, source_material, None)
+                layout_id = effect_layout(material)
+                if layout_id == LAYOUT_DUAL and not mesh["hasUv1"]:
+                    raise LayoutError(
+                        f"vegetation instance {instance_id!r} is drawn with DualTextureEffect "
+                        f"(material {material_id!r}) but {path.name} has no TEXCOORD_1")
+                placed = place(mesh, [float(c) for c in instance["position"]],
+                               float(instance.get("yawDeg", 0.0)),
+                               group_scale * float(instance.get("scale", 1.0)))
+                cell_id = place_outdoors(cells, bounds_of(placed["positions"]),
+                                         fallback_outdoors, levels)
+                cell = cells[cell_id]
+                key = (cell_id, group_key({"id": instance_id}, cell, material))
+                groups.setdefault(key, []).append({
+                    "prop": f"{instance_id}:{source_material}", "mesh": placed,
+                    "layout": layout_id, "material": material_id})
+
     for member, key in _shell_members(shell_dirs, cells, materials, stats):
         groups.setdefault(key, []).append(member)
     for member, key in _shell_members(exterior_dirs, cells, materials, stats, outdoors=True,
-                                      levels=layout_io.by_id(layout_io.rows(layout, "levels"),
-                                                             "level")):
+                                      levels=levels):
         groups.setdefault(key, []).append(member)
 
     chunks = []
@@ -1187,6 +1252,10 @@ def report(built: dict) -> str:
         f"{stats['primitiveSplit']} for Reach's primitive cap, "
         f"{stats['wide']} chunk(s) on 32-bit indices",
     ]
+    if stats.get("vegetationGroups"):
+        lines.append(
+            f"  vegetation: {stats['vegetationInstances']} deterministic placement(s) in "
+            f"{stats['vegetationGroups']} group(s), LOD0 batched with per-instance sub-ranges")
     if not built.get("worldHash"):
         lines.append(
             "  the world hash is EMPTY: deploy_world.py has not written content/world/"
@@ -1917,6 +1986,36 @@ def selftest() -> int:
             "boxes": [{"x": [6.0, 9.0], "z": [0.0, 3.0]}],
             "yOverride": [0.0, 3.0], "visibilityHint": "open"})
         cells_file.write_text(json.dumps(cell_rows, indent=2) + "\n", encoding="utf-8")
+
+        # `HOUSE-00772`: vegetation is not a second renderer. The exterior schema's grouped
+        # placements enter the same chunks as static props, retain the source model's material
+        # split and become individually bounded sub-ranges for the outdoor BVH.
+        exterior_file = world_dir / "layout.exterior.json"
+        exterior_file.write_text(json.dumps({
+            "schema": "cna-house/exterior/1",
+            "vegetation": [{
+                "id": "VEG_TEST", "asset": "MODEL_MULTI", "instances": [
+                    {"position": [1.0, 0.0, -2.0], "yawDeg": 0.0, "scale": 1.0},
+                    {"position": [3.0, 0.0, -2.0], "yawDeg": 90.0, "scale": 0.8},
+                ],
+            }],
+        }, indent=2) + "\n", encoding="utf-8")
+        planted = build(world_dir, manifest)
+        require(planted["stats"]["vegetationGroups"] == 1
+                and planted["stats"]["vegetationInstances"] == 2,
+                "one authored vegetation group expands to two deterministic placements")
+        require({chunk["material"] for chunk in planted["chunks"]}
+                == {"MAT_LAMP", "MAT_LEAF"},
+                "vegetation retains its manifest material bridge: opaque wood and cutout leaf")
+        require({chunk["layout"] for chunk in planted["chunks"]}
+                == {LAYOUT_BASIC, LAYOUT_ALPHATEST},
+                "those two materials select stock BasicEffect and AlphaTestEffect layouts")
+        require(all(chunk["cell"] == "EXT_YARD" for chunk in planted["chunks"])
+                and all(len(chunk["subRanges"]) == 2 for chunk in planted["chunks"]),
+                "placements are filed by their bounds and each remains an outdoor BVH sub-range")
+        require(sum(len(chunk["indices"]) // 3 for chunk in planted["chunks"]) == 48,
+                "only LOD0 is batched for two placements; the fixture's LOD node is excluded")
+        exterior_file.unlink()
 
         shell_lm = workspace / "shell-lm"
         shell_raw = workspace / "shell"

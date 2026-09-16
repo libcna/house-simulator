@@ -441,6 +441,10 @@
               "type": "object"
             },
             "type": "array"
+          },
+          "scale": {
+            "exclusiveMinimum": 0,
+            "type": "number"
           }
         },
         "required": [

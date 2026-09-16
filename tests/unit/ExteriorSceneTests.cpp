@@ -99,6 +99,8 @@ TEST(ExteriorSceneTests, TheCategoryComesFromTheMaterialsOwnPrefix)
     EXPECT_EQ(CategoryForMaterial("GARDEN_bed"), PropCategory::GardenFurniture);
     EXPECT_EQ(CategoryForMaterial("TREE_maple"), PropCategory::Tree);
     EXPECT_EQ(CategoryForMaterial("VEG_shrub"), PropCategory::Tree);
+    EXPECT_EQ(CategoryForMaterial("MAT_VEGETATION_TREE_FOLIAGE"), PropCategory::Tree);
+    EXPECT_EQ(CategoryForMaterial("MAT_VEGETATION_BARK"), PropCategory::Tree);
     EXPECT_EQ(CategoryForMaterial("NB_HORIZON"), PropCategory::Impostor);
     EXPECT_EQ(CategoryForMaterial("NB_IMPOSTOR_row"), PropCategory::Impostor);
     // ...and the neighbourhood's SOLID geometry is not an impostor, which is the pair of prefixes

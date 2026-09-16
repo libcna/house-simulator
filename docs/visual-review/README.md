@@ -902,3 +902,48 @@ consume the already canonical/provenanced vegetation and improve façade/porch/r
 composition without bypassing the exterior hierarchy. Kitchen under-cabinet
 readability and restrained clutter follow; the full 62-container kitchen remains
 open rather than being falsely claimed by this bay.
+
+## Round 22 — the front approach is planted
+
+Commit: `HOUSE-00772` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 21's eleven-view [clear](captures/house-01044-clear-day-r1),
+[noon](captures/house-01044-noon-r1),
+[overcast](captures/house-01044-overcast-r1) and
+[22:00](captures/house-01044-night-r1) normal-game sets. After: the same eleven
+poses and fixed conditions in [clear](captures/house-00772-clear-day-r2),
+[noon](captures/house-00772-noon-r2),
+[overcast](captures/house-00772-overcast-r2) and
+[22:00](captures/house-00772-night-r2). The first
+[clear iteration](captures/house-00772-clear-day-r1) is retained as rejected
+evidence: oversized property trees hid the central entrance rather than framing it.
+
+Ranked visible defects remaining:
+
+1. The [night first view](captures/house-00772-night-r2/exterior-front.png) is
+   still almost black while cutout foliage catches too much residual sky light.
+   The porch lanterns and entrance hierarchy do not yet read as a destination.
+2. The [clear front](captures/house-00772-clear-day-r2/exterior-front.png) is now
+   recognizably landscaped, but its thin roof edges, open balcony/porch frame and
+   broad flat timber façade still read as an engineering shell.
+3. The east-front `tree_small_02` crown is visibly sparse at the fixed road camera;
+   its tiny cutout fragments read as speckles against sky. Distance LOD/impostor
+   selection and a better approved role asset remain open work, not hidden here.
+4. The connected interior route is materially unchanged: kitchen practicals and
+   restrained clutter, family-room finish depth and dining furnishing remain weak.
+
+Fixed: 309 deterministic approved CC0 placements now flow through the production
+material/chunk/exterior hierarchy: 41 trees, 60 shrubs, 169 hedge shrubs, 18 flowers
+and 21 grass patches. Selected visible roles use source-exact bark/branch/leaf
+atlases; other catalogue roles use explicit vegetation fallbacks. Opaque wood uses
+`BasicEffect`, cutouts use `AlphaTestEffect`, and no material-name hash/debug colour
+is involved. The final property-tree positions preserve the gate→porch sightline.
+Tree trunks and the 2.1 m hedge use the established collision build; the 18-pose
+culled/unculled gate passes at a worst 0.1603% difference. The fixed clear-front
+capture changes from an empty lawn at 44.3 fps to a planted frame at 38.8 fps; later
+LOD work must recover distance cost without removing the composition.
+
+`VISUAL-GATE-1` still **FAILS**. The next highest visible value is the night entrance
+and façade/porch/roof depth, followed by the sparse close-road tree/foliage quality
+and `HOUSE-00773`'s grass-card jitter. Normal gameplay remains production-material
+only; explicit debug blockout remains separate.

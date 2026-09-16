@@ -518,10 +518,15 @@ is placed as instance arrays so it can be drawn instanced where that measures fa
                  "height": 1.80, "gate": "GATE_N1" } ],
   "neighbourhood": [ { "id": "NB_HOUSE_01", "asset": "MODEL_NB_HOUSE_01", "position": [-38.0, 0.0, 30.0],
                        "yawDeg": 180.0, "lodGroup": "LODG_NB_HOUSE", "impostorFrom": 70.0 } ],
-  "vegetation":    [ { "id": "VEG_OAK_01", "asset": "MODEL_TREE_OAK_01",
+  "vegetation":    [ { "id": "VEG_OAK_01", "asset": "MODEL_TREE_OAK_01", "scale": 1.0,
                        "instances": [ { "position": [-14.0, 0.0, -6.0], "yawDeg": 31.0, "scale": 1.12 } ] } ]
 }
 ```
+
+An optional vegetation-group `scale` is a measured role scale shared by all of its instances;
+each optional instance `scale` is deterministic natural variation and multiplies it. Both must be
+positive. This keeps a 2.1 m hedge's authored height in one place instead of copying it into every
+section while retaining the fixed per-section variation.
 
 `HOUSE-00390` added four arrays the file needed and did not have: `gates` (§11.2's three),
 `kerbs` (§11.4's two), `paths` (the walk, the driveway and its apron, the two sidewalks, the verge

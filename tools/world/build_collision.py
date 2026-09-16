@@ -1139,15 +1139,15 @@ KERB_WIDTH = 0.16
 #: §49.2 collides with **tree trunks**, not canopies: `(width, height)` in metres, per species.
 #: A canopy you cannot walk under is a tree that has swallowed the garden it stands in.
 TRUNKS = {
-    "MODEL_TREE_MAPLE_MATURE": (0.45, 3.0),
-    "MODEL_TREE_MAPLE_STREET": (0.35, 3.0),
-    "MODEL_TREE_BIRCH": (0.30, 3.0),
-    "MODEL_TREE_FRUIT": (0.25, 2.2),
+    "MODEL_VEGETATION_TREE_JACARANDA_SAPLING": (0.25, 3.0),
+    "MODEL_VEGETATION_TREE_SEARSIA_LUCIDA_MATURE": (0.45, 3.0),
+    "MODEL_VEGETATION_TREE_TREE_SMALL_02_MATURE": (0.30, 3.0),
+    "MODEL_VEGETATION_TREE_TREE_SMALL_02_YOUNG": (0.25, 2.2),
 }
 #: §10.4's hedges, which bound the road corridor: `(depth, height)`. 2.1 m is §10.4's own figure
 #: and 0.5 m is what an extruded 1 m strip is thick. A hedge is not a tree -- it is a barrier, and
 #: `HOUSE-00775` is where the road's ends became ones.
-HEDGES = {"MODEL_HEDGE_PRIVET_1M": (0.5, 2.1)}
+HEDGES = {"MODEL_VEGETATION_SHRUB_01": (0.5, 2.1)}
 #: §70.5's car, which §49.2 lists: 4.4 m long, 1.80 m across and 1.50 m tall, and written the way
 #: the MODEL is -- `(across, tall, along)`. §14 puts a model's forward at -Z and yaws it about +Y,
 #: so a car's length runs along its own Z and the two cars parked at this east-west kerb are
@@ -2679,7 +2679,10 @@ def selftest() -> int:
         #     attic and no balcony, and inventing one here would be claiming about the fixture.
         authored = Path(__file__).resolve().parents[2] / "assets-src" / "world"
         if (authored / "layout.cells.json").is_file():
-            house = build(authored)
+            # The authored house now contains real static furniture. Unlike the synthetic worlds
+            # above, its collision build therefore needs the same authoritative asset manifest as
+            # the command-line default; omitting it would test a configuration the game never uses.
+            house = build(authored, REPO / "assets-src" / "assets.manifest.json")
             house_shapes: Shapes = house["shapes"]
             offset = len(house_shapes.obbs)
             references = {row["id"]: row["shapes"] for row in house["cells"]}
@@ -2881,6 +2884,11 @@ def selftest() -> int:
                 authored / layout_io.FILES["exterior"][0], "exterior")
             outdoor = {row["id"] for row in house["cells"] if row["outdoors"]}
             open_cells = {cell_id for cell_id, _boxes in _exterior_cells(rows_exterior)}
+            ground_open_cells = {
+                cell_id for cell_id in open_cells
+                if abs(float(house_levels[house_cells[cell_id]["level"]]["ffl"])
+                       - grade_of_house) <= EPS
+            }
             require(outdoor == open_cells | {"EXT_WORLD"},
                     f"exactly the open exterior cells carry §11.5's ground, and every room is "
                     f"without it ({sorted(outdoor.symmetric_difference(open_cells | {'EXT_WORLD'}))[:3]})")
@@ -2892,7 +2900,7 @@ def selftest() -> int:
                     f"({house['stats']['openBoundaries']} of them)")
             walled = []
             for row in house["cells"]:
-                if row["id"] not in open_cells:
+                if row["id"] not in ground_open_cells:
                     continue
                 for index in row["shapes"]:
                     if index >= offset or house_shapes.obbs[index][4] != KIND_WALL:
@@ -2903,10 +2911,11 @@ def selftest() -> int:
                     owners = [other["id"] for other in house["cells"]
                               if index in other["shapes"]
                               and (other["id"], index) not in house["borrowed"]]
-                    if len(owners) > 1 and all(one in open_cells for one in owners):
+                    if len(owners) > 1 and all(one in ground_open_cells for one in owners):
                         walled.append((row["id"], index))
             require(not walled,
-                    f"and not one wall piece is shared by two of them ({walled[:3]})")
+                    f"and not one wall piece is shared by two ground-level open cells "
+                    f"({walled[:3]})")
 
             fences = [index for index in range(len(house_shapes.obbs))
                       if house_shapes.obbs[index][4] == KIND_EXTERIOR

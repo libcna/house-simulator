@@ -1,6 +1,6 @@
 {
   "schema": "cna-house/manifest/1",
-  "worldHash": "sha256:4db7b4bbafb66db86c1e4a5275d67b1091d32de5ea348ffa3313a83f8cc52274",
+  "worldHash": "sha256:bae9e2fa6979b5079fbfbfb226cb7b2bc42845a11ad5eb3a9a10252a2ba7580f",
   "members": [
     {
       "file": "layout.levels.json",
@@ -32,7 +32,7 @@
     },
     {
       "file": "layout.materials.json",
-      "sha256": "sha256:3c4839ad016edd152eec2c2f85c173d4b639e3be61c85c30da8d920d0cabc85e"
+      "sha256": "sha256:e1966ed878b4aee81741e8065a90b6f5856fe55125fd501c258f082588933e6d"
     },
     {
       "file": "layout.nav.json",
@@ -44,7 +44,7 @@
     },
     {
       "file": "layout.exterior.json",
-      "sha256": "sha256:7ef3b561f7ffaaec4b756359aced06ab14a5452ff68082ebd7167ac8815653b0"
+      "sha256": "sha256:45deacbde5e22e1c9f6c354dd7f4c87d344f9bc672e78f5cc26954a014463f22"
     },
     {
       "file": "layout.weather.json",

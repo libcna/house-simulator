@@ -96,6 +96,19 @@ Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 - `MODEL_VEGETATION_TREE_TREE_SMALL_02_YOUNG` — **Burkea africana / wild syringa — young** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
 - `MODEL_VEGETATION_WEED_PLANT_02` — **Weed plant 02 — shrub** — <https://polyhaven.com/a/weed_plant_02> (retrieved 2026-09-13)
 - `MODEL_VEGETATION_WILD_ROOIBOS_BUSH` — **Wild rooibos bush — shrub** — <https://polyhaven.com/a/wild_rooibos_bush> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_FLOWER` — **Gazania flower atlas** — <https://polyhaven.com/a/flower_gazania> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_GRASS` — **Bermuda grass atlas** — <https://polyhaven.com/a/grass_bermuda_01> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_GRASS_MEDIUM_02` — **Grass medium 02 cutout atlas** — <https://polyhaven.com/a/grass_medium_02> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_JACARANDA_BRANCHES` — **Jacaranda branch atlas** — <https://polyhaven.com/a/jacaranda_tree> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_JACARANDA_TRUNK` — **Jacaranda trunk atlas** — <https://polyhaven.com/a/jacaranda_tree> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_PERIWINKLE` — **Periwinkle cutout atlas** — <https://polyhaven.com/a/periwinkle_plant> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_SEARSIA_LUCIDA` — **Searsia lucida cutout atlas** — <https://polyhaven.com/a/searsia_lucida> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_SHRUB_04` — **Shrub 04 cutout atlas** — <https://polyhaven.com/a/shrub_04> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_SHRUB_FOLIAGE` — **Shrub 01 leaf atlas** — <https://polyhaven.com/a/shrub_01> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_TREE_FOLIAGE` — **Jacaranda leaf atlas** — <https://polyhaven.com/a/jacaranda_tree> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_TREE_SMALL_02_BRANCHES` — **Wild syringa branch atlas** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_TREE_SMALL_02_LEAVES` — **Wild syringa leaf atlas** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
+- `TEXTURE_VEGETATION_TREE_SMALL_02_TRUNK` — **Wild syringa trunk atlas** — <https://polyhaven.com/a/tree_small_02> (retrieved 2026-09-13)
 - `MODEL_FURNITURE_FOYER_ARMCHAIR` — **Arm Chair 01** by Kirill Sannikov — <https://polyhaven.com/a/ArmChair_01> (retrieved 2026-09-15)
 - `MODEL_FURNITURE_FOYER_CONSOLE` — **Chinese Console Table** by Kirill Sannikov — <https://polyhaven.com/a/chinese_console_table> (retrieved 2026-09-15)
 - `TEXTURE_FURNITURE_FOYER_ARMCHAIR_ALBEDO` — **Arm Chair 01 base colour** by Kirill Sannikov — <https://polyhaven.com/a/ArmChair_01> (retrieved 2026-09-15)
@@ -673,4 +686,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `8efd0eda12320ef8f7df9e4220829909d9804755d03948dd7ba904b55e5ff3ad`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `69b04dcfd8efc4e4a1e575a040bbfee6bc54d1e7d89bb75dfc0dcf2f1f96f916`.*

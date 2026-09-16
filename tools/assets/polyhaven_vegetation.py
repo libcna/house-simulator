@@ -9,6 +9,7 @@ sets.  Tree ages are separate meshes, not placement-time scale aliases.
 Usage:
     tools/assets/polyhaven_vegetation.py --download --cache /tmp/house-00297
     tools/assets/polyhaven_vegetation.py --download --cache /tmp/house-00297 --source periwinkle_plant
+    tools/assets/polyhaven_vegetation.py --emit-runtime
     tools/assets/polyhaven_vegetation.py --check
     tools/assets/polyhaven_vegetation.py --selftest
 """
@@ -44,6 +45,65 @@ LOD_GEN = REPO / "tools" / "blender" / "lod_gen.py"
 API = "https://api.polyhaven.com/files/"
 MAX_TEXTURE_EDGE = 256
 RETRIEVED = "2026-09-13"
+RUNTIME_TEXTURE_DIR = REPO / "assets-src" / "Textures" / "Vegetation"
+RUNTIME_TEXTURES = (
+    ("tree_foliage.png", "tree_jacaranda_mature", "jacaranda_tree_leaves",
+     "TEXTURE_VEGETATION_TREE_FOLIAGE", "vegetation-tree-albedo", "Jacaranda leaf atlas"),
+    ("shrub_foliage.png", "shrub_01", "shrub_01",
+     "TEXTURE_VEGETATION_SHRUB_FOLIAGE", "vegetation-shrub-albedo", "Shrub 01 leaf atlas"),
+    ("flower.png", "flower_gazania", "flower_gazania",
+     "TEXTURE_VEGETATION_FLOWER", "vegetation-flower-albedo", "Gazania flower atlas"),
+    ("grass.png", "grass_bermuda_01", "grass_bermuda_01",
+     "TEXTURE_VEGETATION_GRASS", "vegetation-grass-albedo", "Bermuda grass atlas"),
+    ("jacaranda_branches.png", "tree_jacaranda_mature", "jacaranda_tree_branches",
+     "TEXTURE_VEGETATION_JACARANDA_BRANCHES", "vegetation-tree-albedo",
+     "Jacaranda branch atlas"),
+    ("jacaranda_trunk.png", "tree_jacaranda_mature", "jacaranda_tree_trunk",
+     "TEXTURE_VEGETATION_JACARANDA_TRUNK", "vegetation-tree-albedo",
+     "Jacaranda trunk atlas"),
+    ("searsia_lucida.png", "tree_searsia_lucida_mature", "searsia_lucida_leaves",
+     "TEXTURE_VEGETATION_SEARSIA_LUCIDA", "vegetation-tree-albedo",
+     "Searsia lucida cutout atlas"),
+    ("tree_small_02_trunk.png", "tree_tree_small_02_mature", "tree_small_02_trunk",
+     "TEXTURE_VEGETATION_TREE_SMALL_02_TRUNK", "vegetation-tree-albedo",
+     "Wild syringa trunk atlas"),
+    ("tree_small_02_branches.png", "tree_tree_small_02_mature", "tree_small_02_branches",
+     "TEXTURE_VEGETATION_TREE_SMALL_02_BRANCHES", "vegetation-tree-albedo",
+     "Wild syringa branch atlas"),
+    ("tree_small_02_leaves.png", "tree_tree_small_02_mature", "tree_small_02_leaves",
+     "TEXTURE_VEGETATION_TREE_SMALL_02_LEAVES", "vegetation-tree-albedo",
+     "Wild syringa leaf atlas"),
+    ("shrub_04.png", "shrub_04", "shrub_04",
+     "TEXTURE_VEGETATION_SHRUB_04", "vegetation-shrub-albedo", "Shrub 04 cutout atlas"),
+    ("periwinkle.png", "periwinkle_plant", "periwinkle_plant",
+     "TEXTURE_VEGETATION_PERIWINKLE", "vegetation-flower-albedo",
+     "Periwinkle cutout atlas"),
+    ("grass_medium_02.png", "grass_medium_02", "grass_medium_02",
+     "TEXTURE_VEGETATION_GRASS_MEDIUM_02", "vegetation-grass-albedo",
+     "Grass medium 02 cutout atlas"),
+)
+
+# Source-specific slots used by HOUSE-00772's playable planting. Four deliberately share the
+# compact role textures above because those textures come from the exact same source material;
+# the remaining nine retain their own atlas. Catalogue assets not placed yet keep the generic
+# fallback roles until their own visual slice gives them a reason to enter runtime content.
+EXACT_RUNTIME_MATERIALS = {
+    ("jacaranda_tree", "jacaranda_tree_leaves"): "MAT_VEGETATION_TREE_FOLIAGE",
+    ("jacaranda_tree", "jacaranda_tree_branches"): "MAT_VEGETATION_JACARANDA_BRANCHES",
+    ("jacaranda_tree", "jacaranda_tree_trunk"): "MAT_VEGETATION_JACARANDA_TRUNK",
+    ("searsia_lucida", "searsia_lucida_twigs"): "MAT_VEGETATION_SEARSIA_LUCIDA",
+    ("searsia_lucida", "searsia_lucida"): "MAT_VEGETATION_SEARSIA_LUCIDA",
+    ("searsia_lucida", "searsia_lucida_leaves"): "MAT_VEGETATION_SEARSIA_LUCIDA",
+    ("tree_small_02", "tree_small_02_trunk"): "MAT_VEGETATION_TREE_SMALL_02_TRUNK",
+    ("tree_small_02", "tree_small_02_branches"): "MAT_VEGETATION_TREE_SMALL_02_BRANCHES",
+    ("tree_small_02", "tree_small_02_leaves"): "MAT_VEGETATION_TREE_SMALL_02_LEAVES",
+    ("shrub_01", "shrub_01"): "MAT_VEGETATION_SHRUB_FOLIAGE",
+    ("shrub_04", "shrub_04"): "MAT_VEGETATION_SHRUB_04",
+    ("flower_gazania", "flower_gazania"): "MAT_VEGETATION_FLOWER",
+    ("periwinkle_plant", "periwinkle_plant"): "MAT_VEGETATION_PERIWINKLE",
+    ("grass_bermuda_01", "grass_bermuda_01"): "MAT_VEGETATION_GRASS",
+    ("grass_medium_02", "grass_medium_02"): "MAT_VEGETATION_GRASS_MEDIUM_02",
+}
 
 
 @dataclass(frozen=True)
@@ -265,6 +325,124 @@ def normalise_samplers(path: Path) -> None:
         gltf_io.write_glb(path, document, blob)
 
 
+def runtime_material_map(item: Output) -> dict[str, str]:
+    """Map every retained source slot to a stock-XNA vegetation material.
+
+    The GLBs keep their complete embedded source textures for the ordinary CNA model pipeline.
+    Static chunks cannot reach a model-owned texture, so the playable exterior extracts the exact
+    atlas for every model HOUSE-00772 places. The rest of the prepared catalogue uses four compact
+    fallback roles plus outdoor wood until it is selected for a later visual slice.
+    """
+    path = OUTPUT / f"{item.slug}.glb"
+    document, _blob = gltf_io.read_model(path)
+    names = [material.get("name") for material in document.get("materials", [])]
+    if any(not isinstance(name, str) or not name for name in names):
+        raise ValueError(f"{path}: every source material needs a stable name")
+    exact = {name: EXACT_RUNTIME_MATERIALS[(item.source, name)]
+             for name in names if (item.source, name) in EXACT_RUNTIME_MATERIALS}
+    if item.role == "tree":
+        return {
+            name: exact.get(name, "MAT_VEGETATION_TREE_FOLIAGE"
+                            if "leaf" in name.lower() or "leaves" in name.lower() or
+                            "twig" in name.lower() else "MAT_VEGETATION_BARK")
+            for name in names
+        }
+    role = {
+        "shrub": "MAT_VEGETATION_SHRUB_FOLIAGE",
+        "flower": "MAT_VEGETATION_FLOWER",
+        "grass-card": "MAT_VEGETATION_GRASS",
+    }[item.role]
+    return {name: exact.get(name, role) for name in names}
+
+
+def embedded_material_image(model_slug: str, material_name: str) -> bytes:
+    path = OUTPUT / f"{model_slug}.glb"
+    document, blob = gltf_io.read_model(path)
+    buffers = gltf_io.buffer_bytes(document, blob, path.parent)
+    material = next((row for row in document.get("materials", [])
+                     if row.get("name") == material_name), None)
+    if material is None:
+        raise ValueError(f"{path}: no material {material_name!r}")
+    texture_index = material.get("pbrMetallicRoughness", {}).get("baseColorTexture", {}).get("index")
+    if not isinstance(texture_index, int):
+        raise ValueError(f"{path}: material {material_name!r} has no base-colour texture")
+    textures = document.get("textures", [])
+    if texture_index < 0 or texture_index >= len(textures):
+        raise ValueError(f"{path}: material {material_name!r} has an invalid texture index")
+    image_index = textures[texture_index].get("source")
+    if not isinstance(image_index, int):
+        raise ValueError(f"{path}: texture {texture_index} has no source image")
+    return gltf_io.image_bytes(document, buffers, path.parent, image_index)
+
+
+def emit_runtime_textures() -> None:
+    RUNTIME_TEXTURE_DIR.mkdir(parents=True, exist_ok=True)
+    for filename, model_slug, material_name, _asset_id, _category, _display in RUNTIME_TEXTURES:
+        data = embedded_material_image(model_slug, material_name)
+        with Image.open(io.BytesIO(data)) as image:
+            if (image.format != "PNG" or image.mode not in ("RGB", "RGBA") or
+                    max(image.size) > MAX_TEXTURE_EDGE):
+                raise ValueError(
+                    f"{model_slug}/{material_name}: expected <= {MAX_TEXTURE_EDGE}px RGB(A) PNG, "
+                    f"got {image.format} {image.mode} {image.size}")
+        (RUNTIME_TEXTURE_DIR / filename).write_bytes(data)
+
+
+def runtime_texture_rows() -> list[dict]:
+    rows = []
+    output_by_slug = {item.slug: item for item in OUTPUTS}
+    for filename, model_slug, _material_name, asset_id, category, display in RUNTIME_TEXTURES:
+        path = RUNTIME_TEXTURE_DIR / filename
+        item = output_by_slug[model_slug]
+        source = BY_SOURCE[item.source]
+        with Image.open(path) as image:
+            width, height = image.size
+            channels = image.mode
+        rows.append({
+            "id": asset_id,
+            "category": category,
+            "sourceFile": path.relative_to(REPO).as_posix(),
+            "sourceSha256": digest(path.read_bytes()),
+            "texture": {"width": width, "height": height,
+                        "colourSpace": "sRGB", "channelLayout": channels},
+            "contentName": f"Textures/Vegetation/{path.stem}",
+            "kind": "texture",
+            "residencyPack": "exterior",
+            "origin": {
+                "kind": "derived",
+                "name": display,
+                "url": f"https://polyhaven.com/a/{source.slug}",
+                "retrieved": RETRIEVED,
+                "licence": "CC0-1.0",
+                "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+                "attribution": "",
+                "redistributeSource": True,
+                "redistributeDerived": True,
+                "commercialUse": True,
+                "modification": True,
+                "note": ("Byte-identical stock-XNA runtime extraction from the pinned prepared "
+                         "vegetation GLB; the originating model and metadata remain recorded by "
+                         "polyhaven_vegetation.py and SOURCE.md."),
+            },
+        })
+    return rows
+
+
+def update_runtime_bridge() -> None:
+    emit_runtime_textures()
+    document = manifest_tool.load()
+    rows = {row.get("id"): row for row in document["assets"]}
+    for item in OUTPUTS:
+        row = rows.get(item.asset_id)
+        if row is None:
+            raise ValueError(f"manifest is missing {item.asset_id}; prepare the model set first")
+        row["materialMap"] = runtime_material_map(item)
+    texture_ids = {row[3] for row in RUNTIME_TEXTURES}
+    document["assets"] = [row for row in document["assets"] if row.get("id") not in texture_ids]
+    document["assets"].extend(runtime_texture_rows())
+    manifest_tool.save(document)
+
+
 def prepare_all(cache: Path, sources: tuple[Source, ...] = SOURCES) -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="p2-vegetation-", dir=REPO / "build") as work_text:
@@ -296,6 +474,7 @@ def prepare_all(cache: Path, sources: tuple[Source, ...] = SOURCES) -> None:
                     shutil.copyfile(raw, target)
     for item in OUTPUTS:
         normalise_samplers(OUTPUT / f"{item.slug}.glb")
+    emit_runtime_textures()
     register_manifest()
     write_report()
     write_source()
@@ -370,6 +549,7 @@ def register_manifest() -> None:
             "contentName": f"Models/Vegetation/{item.slug}",
             "kind": "model",
             "residencyPack": "exterior",
+            "materialMap": runtime_material_map(item),
             "origin": {
                 "kind": "derived",
                 "name": f"{source.name} — {item.age or item.role}",
@@ -385,6 +565,9 @@ def register_manifest() -> None:
                 "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md.",
             },
         })
+    texture_ids = {row[3] for row in RUNTIME_TEXTURES}
+    document["assets"] = [row for row in document["assets"] if row.get("id") not in texture_ids]
+    document["assets"].extend(runtime_texture_rows())
     manifest_tool.save(document)
 
 
@@ -439,6 +622,21 @@ def check() -> int:
             problems.append(f"manifest is missing {item.asset_id}")
         elif row.get("category") != item.category:
             problems.append(f"{item.asset_id}: category is {row.get('category')}, expected {item.category}")
+        elif row.get("materialMap") != runtime_material_map(item):
+            problems.append(f"{item.asset_id}: runtime materialMap is stale; rerun --emit-runtime")
+    for filename, model_slug, material_name, asset_id, category, _display in RUNTIME_TEXTURES:
+        path = RUNTIME_TEXTURE_DIR / filename
+        if not path.is_file():
+            problems.append(f"missing {path.relative_to(REPO)}; rerun --emit-runtime")
+            continue
+        expected = embedded_material_image(model_slug, material_name)
+        if path.read_bytes() != expected:
+            problems.append(f"{path.relative_to(REPO)} is stale; rerun --emit-runtime")
+        row = rows.get(asset_id)
+        if row is None:
+            problems.append(f"manifest is missing {asset_id}")
+        elif row.get("category") != category or row.get("sourceSha256") != digest(expected):
+            problems.append(f"{asset_id}: runtime texture manifest row is stale")
     source_text = (OUTPUT / "SOURCE.md").read_text(encoding="utf-8") if (OUTPUT / "SOURCE.md").is_file() else ""
     for item in OUTPUTS:
         if item.asset_id not in source_text:
@@ -510,6 +708,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--download", action="store_true")
+    group.add_argument("--emit-runtime", action="store_true")
     group.add_argument("--check", action="store_true")
     group.add_argument("--selftest", action="store_true")
     parser.add_argument("--cache", type=Path)
@@ -524,6 +723,9 @@ def main() -> int:
         return check()
     if args.source:
         parser.error("--source requires --download")
+    if args.emit_runtime:
+        update_runtime_bridge()
+        return check()
     return selftest() if args.selftest else check()
 
 

@@ -47,7 +47,8 @@ namespace cnahouse::visibility
         {
             return PropCategory::GardenFurniture;
         }
-        if (StartsWith(material, "TREE_") || StartsWith(material, "VEG_"))
+        if (StartsWith(material, "TREE_") || StartsWith(material, "VEG_") ||
+            StartsWith(material, "MAT_VEGETATION_"))
         {
             return PropCategory::Tree;
         }

@@ -94,8 +94,9 @@ namespace
                     list.Size());
 
         // The static blockout diagnostic only draws its opaque slice. HOUSE-01037's one plant
-        // in each furnished room adds two *real* alpha-tested leaf chunks to the whole sorted
-        // list; counting those as missing opaque draws would hide the reason for the mismatch.
+        // in each furnished room and HOUSE-00772's canonical vegetation add *real* alpha-tested
+        // leaf chunks to the whole sorted list; counting those as missing opaque draws would hide
+        // the reason for the mismatch.
         std::size_t opaque = 0;
         std::size_t cutouts = 0;
         int opaqueChanges = 0;
@@ -119,7 +120,7 @@ namespace
             previousOpaque = &item;
             ++opaque;
         }
-        EXPECT_EQ(cutouts, 2U) << "one alpha-tested plant-leaf chunk per furnished L0 room";
+        EXPECT_EQ(cutouts, 46U) << "two indoor plant-leaf chunks plus the canonical exterior foliage batches";
         EXPECT_EQ(opaque + cutouts, list.Size()) << "unexpected pass items entered the blockout list";
         // Every opaque item was drawn: nothing in that slice named a chunk the runtime could
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
@@ -134,8 +135,20 @@ namespace
         EXPECT_EQ(states->Max(), opaqueChanges + 1)
             << "the opaque slice counts CHANGES between neighbours and the pass counts BINDS; "
                "the first bind is not a change";
-        EXPECT_EQ(list.StateChanges(), opaqueChanges + 1)
-            << "the full list adds one pass transition into the shared plant-leaf material";
+        int sortedChanges = 0;
+        const cnahouse::visibility::RenderItem* previous = nullptr;
+        for (const cnahouse::visibility::RenderItem& item : list.Items())
+        {
+            if (previous != nullptr && (item.pass != previous->pass || item.effect != previous->effect ||
+                                        item.material != previous->material))
+            {
+                ++sortedChanges;
+            }
+            previous = &item;
+        }
+        EXPECT_EQ(list.StateChanges(), sortedChanges)
+            << "the list's metric must include the opaque-to-cutout boundary and each foliage "
+               "material transition";
     }
 
     /// Presses one key on the first frame and holds nothing afterwards, which is what an EDGE is.
@@ -481,7 +494,9 @@ namespace
         options.contentRoot = CNAHOUSE_TEST_CONTENT_ROOT;
         options.noAudio = true;
         options.scene = "walk";
-        options.player = std::array<float, 5>{-3.00f, 0.60f, -25.05f, 90.0f, 0.0f};
+        // Clear circulation west of HOUSE-01040's island. The old (-3.00, -25.05) pose is now
+        // correctly depenetrated from the measured island instead of standing in a bare kitchen.
+        options.player = std::array<float, 5>{-5.50f, 0.60f, -24.50f, 90.0f, 0.0f};
         Settings settings = Settings::Defaults();
         settings.backBufferWidth = 320;
         settings.backBufferHeight = 180;
@@ -500,8 +515,8 @@ namespace
 
         // The body stood still: `W` was held for sixty frames and §49.3's step never ran.
         const cnahouse::player::PlayerState& player = game.PlayerForTesting();
-        EXPECT_NEAR(player.position.X, -3.00f, 0.05f) << "the body walked while the walk was frozen";
-        EXPECT_NEAR(player.position.Z, -25.05f, 0.05f);
+        EXPECT_NEAR(player.position.X, -5.50f, 0.05f) << "the body walked while the walk was frozen";
+        EXPECT_NEAR(player.position.Z, -24.50f, 0.05f);
         EXPECT_EQ(game.FixedStepsForTesting(), 0U) << "§49.3's step ran during a freeze";
 
         // ...and the camera did not: the same `W` flew the inspection camera out of the room.

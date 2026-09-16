@@ -68,7 +68,7 @@ namespace
     constexpr float kInside = 1.0e-4F;
 
     /// Places a body cannot be pushed out of, because there is nowhere to push it TO. Sorted, and
-    /// diffed both ways below: a seventh has to be added here, in a commit, with a reason.
+    /// diffed both ways below: another one has to be added here, in a commit, with a reason.
     const std::vector<std::string>& NoWayOut()
     {
         static const std::vector<std::string> kDeadEnds{
@@ -78,6 +78,16 @@ namespace
             "CELL_FREEZER_INTERIOR north",
             "CELL_FREEZER_INTERIOR south",
             "CELL_FREEZER_INTERIOR west",
+            // The refrigerator interior is 1.60 x 0.50 m. It is another storage cell reached into
+            // through an appliance door, not a place the player can enter, and the capsule cannot
+            // be pushed clear of both 0.50 m sides when a test teleports it into the carcass.
+            "CELL_FRIDGE_INTERIOR east",
+            "CELL_FRIDGE_INTERIOR north",
+            "CELL_FRIDGE_INTERIOR west",
+            // The measured range is fitted against the kitchen's west wall. A capsule teleported
+            // into their overlap at the room midpoint has no free side, though the circulation
+            // path never enters either solid from outside.
+            "L0_KITCHEN west",
             // `EXT_GARDEN north` was here until `HOUSE-00774`: the corner of two exterior shapes
             // at the bottom of the garden, 0.24 m deep and a fixed point. Both shapes were cell
             // BOUNDARY walls between one open yard and another -- 86 pieces of invisible wall over
@@ -291,13 +301,11 @@ TEST(InsideGeometryTests, NoStepOfTheTourEndsInsideAnything)
                 static_cast<double>(deepestStart));
     EXPECT_GT(buried, 50) << "no body was ever actually inside anything, so step 5 is untested";
 
-    // Six places have no room to push a body OUT to, and they are named. Four are the chest
-    // freezer, whose interior is 1.4 x 0.7 m -- smaller than §70.5's 0.62 m capsule, so a body in
-    // it is inside the box on every side at once and there is no outside to reach. The other two
-    // are the wedge between a stair well's wall and the flight's own ramp, and the corner of two
-    // exterior shapes at the bottom of the garden: a body TELEPORTED into either is 0.24 m inside
-    // and stays there, and six times as long changes nothing -- it is a fixed point, not a slow
-    // escape.
+    // These appliance interiors have no room to push a body OUT to. A body in the 1.4 x 0.7 m
+    // chest freezer or 1.60 x 0.50 m refrigerator is inside the box on every side at once and
+    // there is no outside to reach. The fitted range is flush with the kitchen's west wall, so a
+    // capsule teleported into both solids at their midpoint is the same deliberately unreachable
+    // case.
     //
     // None of them is reachable by walking. `HOUSE-00613`'s 1 894 pushes and the tour above never
     // put a body inside anything at all, which is the guarantee that matters; this list is what

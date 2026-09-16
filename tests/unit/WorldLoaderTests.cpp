@@ -3599,8 +3599,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 149U)
-            << "HOUSE-01044 adds the cooking bay's tile and opaque oven-glass finishes";
+        EXPECT_EQ(contents.materials.size(), 163U)
+            << "HOUSE-00772 adds five fallback and nine exact-atlas vegetation roles";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3619,6 +3619,12 @@ namespace
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_FURNITURE_"); }),
                   10)
             << "HOUSE-01037 and HOUSE-01038 load the eight living/family and two foyer furniture materials";
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return IdRegistry::NameOf(material.id).starts_with("MAT_VEGETATION_"); }),
+                  14)
+            << "HOUSE-00772 loads five fallback and nine source-exact vegetation roles";
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
@@ -3703,8 +3709,8 @@ namespace
                                            material.surfaceState == world::SurfaceState::Dry &&
                                            material.snow.coverable;
                                 }),
-                  31)
-            << "HOUSE-00923 adds 15 coverable unbaked outdoor variants to the earlier 16";
+                  36)
+            << "HOUSE-00772 adds five snow-coverable bark/branch roles to the previous 31";
         const auto outdoorRoof = std::find_if(contents.materials.begin(),
                                               contents.materials.end(),
                                               [](const world::MaterialDef& material)

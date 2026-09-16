@@ -11936,8 +11936,39 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
       dep: HOUSE-00764 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00771 — Place the garden furniture: terrace table and chairs, two loungers, swing bench, fire pit, birdbath, planters
       dep: HOUSE-00765 · sys: world · plat: TOOL · pri: MUST
-- [ ] HOUSE-00772 — Place the vegetation: 34 street trees, 9 property trees, 4 fruit trees, 40 shrubs, hedges, flower beds, grass patches
+- [x] HOUSE-00772 — Place the vegetation: 34 street trees, 3 property trees, 4 fruit trees, 60 shrubs, hedges, flower beds, grass patches
       dep: HOUSE-00297, HOUSE-00392 · sys: world · plat: TOOL · pri: MUST
+      verify: `tools/assets/polyhaven_vegetation.py --check`; `tools/world/build_chunks.py
+              --selftest`; `tools/world/build_collision.py --selftest`; unit
+              `InsideGeometryTests.NoStepOfTheTourEndsInsideAnything`; integration
+              `HeadlessRunTests.TheOpaquePassDrawsTheSortedListAndNotTheResidencyMap`;
+              render `CullingSanityRenderTests.EveryPoseLooksTheSameCulledAndUnculled`
+      correction: (2026-09-16) the title's 9-property-tree/40-shrub census contradicted
+            authoritative §11.1 and `layout.exterior.json`, which contain **3 property trees and
+            60 shrubs**. The title now says what the unchanged canonical data has always authored;
+            no placement or task id was invented to satisfy the stale summary.
+      done: 309 deterministic placements in 14 groups: 34 street trees, 3 property trees,
+            4 young orchard trees, 60 shrubs, 169 hedge shrubs at a measured 2.1 m group scale,
+            18 flowers and 21 grass patches. All use the pinned CC0 Poly Haven sources selected by
+            `HOUSE-00297`; ten visible roles retain source-exact albedo/alpha atlases and the other
+            catalogue roles use explicit bark/foliage/flower/grass fallbacks rather than a material
+            hash or debug colour.
+      note: the source set contains no licence-compatible exact maple, birch or fruit species.
+            The three legacy group ids remain stable authoring roles, while their assets and
+            comments honestly name the approved Searsia and `tree_small_02` substitutes. The first
+            visual iteration put mature crowns across the entrance; the final measured positions
+            frame the façade and keep the gate→porch route readable.
+      measured: production chunks rise to **574 / 1,806,301 vertices / 41,618,420 packed bytes**,
+            including 44 exterior AlphaTest foliage batches, 8 vertex-cap and 17 Reach-cap splits,
+            with zero 32-bit-index chunks. Per-placement sub-ranges remain separately bounded for
+            the exterior BVH. Tree trunks and the 2.1 m hedge enter the established collision path;
+            nav rebuilds in 16.60–18.14 s, not the runaway 19-hour process from the abandoned
+            session. The 18-pose culled/unculled image gate passes (worst 0.1603% < 0.2%).
+      visual: Round 22's four fixed eleven-view sets show real trees, shrubs, hedges, flowers and
+            grass along the road→gate→porch approach. Daylight framing is materially better than
+            Round 21's empty lawn; sparse small-tree foliage, the skeletal façade/roof and an almost
+            black night entrance remain explicit defects. `HOUSE-00773` still owns grass jitter and
+            wind; this task does not falsely claim that renderer work.
 - [ ] HOUSE-00773 — Implement grass-card rendering with `AlphaTestEffect` and per-instance jitter
       dep: HOUSE-00772, HOUSE-00080 · sys: rendering · plat: ALL · pri: MUST
 - [x] HOUSE-00774 — Build the exterior collision: terrain, fences, kerbs, walls, shed, tree trunks, vehicles
@@ -17780,6 +17811,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-00772` | Correct the task title's vegetation census from 9 property trees / 40 shrubs to **3 property trees / 60 shrubs**, without renumbering or adding placements. Route the already selected CC0 source models and their exact/fallback material roles through the existing static chunk, exterior BVH and collision paths. Add only the four exterior-cell chunk ceilings measured by the result. | §11.1 and the authoritative exterior file have always contained two mature role trees plus one small-tree role and sixty shrubs; the title was stale. The first real build measures 309 placements, 44 AlphaTest batches, 8 vertex-cap and 17 Reach-cap splits. `EXT_FRONTYARD_E`, `EXT_ROAD`, `EXT_SIDEYARD_W` and `EXT_WORLD` are landscape/residency regions rather than rooms; their exact source-material groups cannot be merged without erasing bark/leaf/flower/grass identity. A first screenshot iteration let mature crowns obscure the entrance, so the final positions/scales were selected from the unchanged front camera before completion. |
 | 2026-09-15 | `HOUSE-01038` | **New task, next free phase-13 id.** Deliver a small foyer furniture/light vertical slice through already completed static batching rather than falsely completing the full-house furnishing prerequisite chain. Adjust the foyer's explicit measured §17.4 ceiling from seven to nine, not the global six-chunk target. | The inspected Round 14 entrance/hall gameplay views remain empty and dim; `HOUSE-00986` requires all large grouped furniture acquisitions and generator tasks that are still legitimately open. Approved CC0 sources and the existing static chunk/Tier-S light paths permit a narrower dependency-valid checkpoint. The first build measured exactly two new close-range source-material groups (carved wood and upholstery); retaining them is necessary for real furniture rather than flattening both into architectural paint. All other per-cell ceilings, Reach and culling rules remain unchanged. |
 | 2026-09-15 | `HOUSE-01039` | **New task, next free phase-13 id.** Calibrate only the already authored kitchen main practical group and its selected Tier-S receivers as a visible hall→kitchen continuity checkpoint. Do not claim the large kitchen furnishing prerequisite or a new light renderer. | The same fixed Round 15 hall screenshot is warmly readable near the camera but black at the permanently open kitchen portal in all four review conditions. Existing `HOUSE-01265` borrowed-light behavior and deterministic subset lightmap promotion permit a narrow dependency-valid correction. The highest-impact visual defect is the threshold itself; the still-empty kitchen will remain a separate, explicit furnishing defect. |
 | 2026-09-16 | `HOUSE-01040` | **New task, next free phase-13 id.** Author only a real first static island and north sink base run, not HOUSE-00975's 24-model acquisition or HOUSE-00990's finished 62-container kitchen. Adjust the explicitly measured `L0_KITCHEN` chunk ceiling from 8 to 11, add the sink-run scale band with a measured counter-top property, relocate the two island-intersecting review poses and the affected kitchen render/debug poses. | Round 16 exposes a lit, empty kitchen; these fixed built-ins are supported by the completed static batch and approved material paths. The final build measures exactly three additional source-finish groups (oak, stone, steel), zero new Reach/vertex splits, and cabinet paint reuses existing trim; relaxing any other cell would be unjustified. A combined sink/faucet AABB cannot stand in for counter height, so the manifest's 0.94 m stone top is verified against the actual mesh rather than widening §70.5. Keeping cameras inside a new collidable island would be false visual review and bad regression coverage. |

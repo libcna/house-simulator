@@ -434,7 +434,13 @@ def build() -> dict[str, dict]:
                  "lodGroup": ID_OR_NULL, "impostorFrom": NUM})},
             "vegetation": {"type": "array", "items": obj(
                 ["id", "asset", "instances"],
-                {"id": ID, "asset": ID, "instances": {"type": "array", "items": obj(
+                {"id": ID, "asset": ID,
+                 # `HOUSE-00772`: a source model can be the right species and proportion but a
+                 # different authored role. The hedge's one measured height belongs on its group,
+                 # not copied into 169 deterministic jittered placement scales. The renderer
+                 # multiplies both positive factors; collision remains the role's authored proxy.
+                 "scale": {"type": "number", "exclusiveMinimum": 0},
+                 "instances": {"type": "array", "items": obj(
                     ["position"], {"position": VEC3, "yawDeg": NUM,
                                    "scale": {"type": "number", "exclusiveMinimum": 0}})}})}}})
 

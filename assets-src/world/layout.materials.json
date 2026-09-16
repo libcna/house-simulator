@@ -1939,6 +1939,181 @@
       "audioAbsorption": 0.65,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // HOUSE-00772's static exterior bridge keeps the prepared models' geometry and UVs while
+    // exposing a compact five-role material palette to the stock-XNA chunk passes. The four
+    // cutout atlases are byte-identical extractions from the pinned CC0 GLBs; bark deliberately
+    // reuses the approved core wood map so every outdoor residency cell remains batchable.
+    {
+      "id": "MAT_VEGETATION_BARK", "class": "wood",
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 0,
+      "tint": [0.42, 0.31, 0.22], "specularColor": [0.025, 0.025, 0.025],
+      "specularPower": 8.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.26, "specularBoost": 1.35, "powerBoost": 1.2},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 50.0},
+      "footstepSurface": "hardwood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_VEGETATION_TREE_FOLIAGE", "class": "foliage",
+      "albedo": "Textures/Vegetation/tree_foliage",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.78, 0.90, 0.72], "specularColor": [0.02, 0.025, 0.02],
+      "specularPower": 4.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.45, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.18, "specularBoost": 1.35, "powerBoost": 1.25},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "grass", "audioAbsorption": 0.42,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
+    {
+      "id": "MAT_VEGETATION_SHRUB_FOLIAGE", "class": "foliage",
+      "albedo": "Textures/Vegetation/shrub_foliage",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.72, 0.86, 0.67], "specularColor": [0.02, 0.025, 0.02],
+      "specularPower": 4.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.45, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.18, "specularBoost": 1.35, "powerBoost": 1.25},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "grass", "audioAbsorption": 0.48,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
+    {
+      "id": "MAT_VEGETATION_FLOWER", "class": "foliage",
+      "albedo": "Textures/Vegetation/flower",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 0.94, 0.90], "specularColor": [0.02, 0.02, 0.02],
+      "specularPower": 3.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.45, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.16, "specularBoost": 1.3, "powerBoost": 1.2},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "grass", "audioAbsorption": 0.50,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
+    {
+      "id": "MAT_VEGETATION_GRASS", "class": "foliage",
+      "albedo": "Textures/Vegetation/grass",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.72, 0.86, 0.61], "specularColor": [0.015, 0.02, 0.015],
+      "specularPower": 3.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.45, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.18, "specularBoost": 1.3, "powerBoost": 1.2},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "grass", "audioAbsorption": 0.62,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
+    // Exact source atlases for every species placed in the current exterior vertical slice.
+    // These rows intentionally preserve the prepared GLB's UV layout; substituting one plant's
+    // atlas onto another plant is a visible authoring error even when both happen to be green.
+    {
+      "id": "MAT_VEGETATION_JACARANDA_BRANCHES", "class": "wood",
+      "albedo": "Textures/Vegetation/jacaranda_branches",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.025, 0.025, 0.025],
+      "specularPower": 8.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.26, "specularBoost": 1.35, "powerBoost": 1.2},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 50.0},
+      "footstepSurface": "hardwood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_VEGETATION_JACARANDA_TRUNK", "class": "wood",
+      "albedo": "Textures/Vegetation/jacaranda_trunk",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.025, 0.025, 0.025],
+      "specularPower": 8.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.26, "specularBoost": 1.35, "powerBoost": 1.2},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 50.0},
+      "footstepSurface": "hardwood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_VEGETATION_SEARSIA_LUCIDA", "class": "foliage",
+      "albedo": "Textures/Vegetation/searsia_lucida",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.02, 0.025, 0.02],
+      "specularPower": 4.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.45, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.18, "specularBoost": 1.35, "powerBoost": 1.25},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "grass", "audioAbsorption": 0.44,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
+    {
+      "id": "MAT_VEGETATION_TREE_SMALL_02_TRUNK", "class": "wood",
+      "albedo": "Textures/Vegetation/tree_small_02_trunk",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.025, 0.025, 0.025],
+      "specularPower": 8.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.26, "specularBoost": 1.35, "powerBoost": 1.2},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 50.0},
+      "footstepSurface": "hardwood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_VEGETATION_TREE_SMALL_02_BRANCHES", "class": "wood",
+      "albedo": "Textures/Vegetation/tree_small_02_branches",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.025, 0.025, 0.025],
+      "specularPower": 8.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.26, "specularBoost": 1.35, "powerBoost": 1.2},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 50.0},
+      "footstepSurface": "hardwood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_VEGETATION_TREE_SMALL_02_LEAVES", "class": "foliage",
+      "albedo": "Textures/Vegetation/tree_small_02_leaves",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.02, 0.025, 0.02],
+      "specularPower": 4.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.45, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.18, "specularBoost": 1.35, "powerBoost": 1.25},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "grass", "audioAbsorption": 0.42,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
+    {
+      "id": "MAT_VEGETATION_SHRUB_04", "class": "foliage",
+      "albedo": "Textures/Vegetation/shrub_04",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.02, 0.025, 0.02],
+      "specularPower": 4.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.45, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.18, "specularBoost": 1.35, "powerBoost": 1.25},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "grass", "audioAbsorption": 0.48,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
+    {
+      "id": "MAT_VEGETATION_PERIWINKLE", "class": "foliage",
+      "albedo": "Textures/Vegetation/periwinkle",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.02, 0.02, 0.02],
+      "specularPower": 3.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.45, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.16, "specularBoost": 1.3, "powerBoost": 1.2},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "grass", "audioAbsorption": 0.50,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
+    {
+      "id": "MAT_VEGETATION_GRASS_MEDIUM_02", "class": "foliage",
+      "albedo": "Textures/Vegetation/grass_medium_02",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [1.0, 1.0, 1.0], "specularColor": [0.015, 0.02, 0.015],
+      "specularPower": 3.0, "alphaMode": "mask", "alpha": 1.0,
+      "alphaCutoff": 0.45, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.18, "specularBoost": 1.3, "powerBoost": 1.2},
+      "snowResponse": {"coverable": false, "slopeLimitDeg": 0.0},
+      "footstepSurface": "grass", "audioAbsorption": 0.62,
+      "effectTierS": "AlphaTest", "effectTierE": "FoliageWind"
+    },
     {
       "id": "MAT_OUTDOOR_GRAVEL", "class": "gravel",
       "albedo": "Textures/Materials/gravel_mixed_albedo",

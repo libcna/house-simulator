@@ -1,4 +1,67 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01044` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-00772` checkpoint)
+
+Branch `develop`. Continuous visual-sprint start HEAD
+`238d6aed27c1e8662f0d118013ef08bb801ae018`; clean task-start HEAD
+`5c2e32be3e107f984a4db2e7665f93ea821d244d` (`HOUSE-01044`). This file
+belongs to the single `HOUSE-00772` commit; use that commit as the ending HEAD.
+**VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only,
+with explicit debug blockout separate. The road→gate→porch view now has real trees,
+shrubs, hedges, flowers and grass, but the façade/roof/porch and night entrance are
+not yet a credible finished-house presentation.
+
+Round 21 before: identical eleven-view [clear](visual-review/captures/house-01044-clear-day-r1),
+[noon](visual-review/captures/house-01044-noon-r1),
+[overcast](visual-review/captures/house-01044-overcast-r1) and
+[night](visual-review/captures/house-01044-night-r1) normal-game sets. Round 22
+after: matching [clear](visual-review/captures/house-00772-clear-day-r2),
+[noon](visual-review/captures/house-00772-noon-r2),
+[overcast](visual-review/captures/house-00772-overcast-r2) and
+[night](visual-review/captures/house-00772-night-r2) sets; camera, time, weather
+and exposure are unchanged. The clearest result is the
+[planted clear front](visual-review/captures/house-00772-clear-day-r2/exterior-front.png),
+while the [night front](visual-review/captures/house-00772-night-r2/exterior-front.png)
+shows the next defect: the house remains nearly black and foliage is relatively
+bright. The first [rejected clear set](visual-review/captures/house-00772-clear-day-r1)
+records why mature trees were moved/scaled down after they obscured the entrance.
+
+`HOUSE-00772` routes the already approved/pinned Poly Haven CC0 vegetation through
+the established manifest/material/static-chunk/exterior-BVH path. The final canonical
+file has 309 deterministic placements in 14 groups: 34 street trees, 3 property
+trees, 4 young orchard trees, 60 shrubs, 169 hedge shrubs at 2.1 m group scale,
+18 flowers and 21 grass patches. Ten selected roles retain source-exact <=256 px
+runtime atlases; the other catalogue roles use explicit bark/foliage/flower/grass
+fallbacks from the pinned sources. The stable `VEG_MAPLE`, `VEG_BIRCH` and
+`VEG_FRUIT` role IDs remain, but comments/assets honestly name Searsia and
+`tree_small_02`; the approved source set contains no exact maple/birch/fruit model.
+
+The production library measures 574 chunks, 1,806,301 vertices and 41,618,420 packed
+bytes: 44 AlphaTest foliage batches, 8 16-bit vertex splits, 17 Reach primitive
+splits and no 32-bit-index chunk. Per-placement sub-ranges retain exterior BVH
+bounds. Four measured exterior-cell budget exceptions are explicit rather than a
+global relaxation. Tree trunks and the 2.1 m hedge enter canonical collision. The
+content nav stages measured 18.14 s and 16.60 s, confirming the earlier 19-hour
+`build_nav.py` was a runaway abandoned process, not required project work.
+
+Verification is green: the 850-row asset manifest and all 13 world-validator rules
+pass, the forced 31-stage content graph is fresh, and chunk/collision selftests pass.
+The unit suite is **1398/1398**; the integration suite is **130/130** plus its known
+order-sensitive GL-state test **1/1** in isolation; the complete software render is
+**48/48**. All 18 culled-vs-unculled poses pass (worst 0.1603% < 0.2%). Sixteen
+strict references were updated selectively only after paired inspection showed the
+new vegetation as the intended difference. `tools/ci/run_checks.sh` is green through
+all **323 strict-XNA translation units**, and `git diff --check` is clean. No CNA,
+sharp-runtime or sibling source was modified, and `CNA_CNAEXT=OFF` remains forced.
+
+Next highest visible value: make the 22:00 porch/entrance and the front façade/roof
+read with the existing Tier-S/Tier-E lighting architecture, then improve the sparse
+east-front small tree/cutout quality and complete `HOUSE-00773` grass jitter without
+adding a special renderer. Kitchen practical readability/clutter, family-room
+material depth and dining furnishing follow. Do not resume unrelated Android/Web,
+pet, IK or astronomy work. See [Round 22 review](visual-review/README.md).
+
+---
+
+# Prior handoff — 2026-09-16 (`HOUSE-01044` checkpoint)
 
 Branch `develop`. Continuous visual-sprint start HEAD
 `238d6aed27c1e8662f0d118013ef08bb801ae018`; clean task-start HEAD

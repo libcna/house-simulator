@@ -2244,6 +2244,17 @@ hit §26.1's ratios, and the locally rendered alpha-aware review is in
 birch or fruit trees under the required terms, so no unrelated species was deceptively renamed;
 `HOUSE-00772` owns visual role assignment and any focused exact-species gap it reveals.
 
+`HOUSE-00772` places that set in the canonical exterior: **309 deterministic placements in 14
+groups** (34 street trees, 3 property trees, 4 young orchard trees, 60 shrubs, 169 hedge shrubs,
+18 flowers and 21 grass patches). Stable legacy role ids do not pretend their substitutes are exact
+species: source and material records name Jacaranda, Searsia lucida and `tree_small_02`. Ten selected
+visible roles use source-exact runtime atlases; the remainder use explicit category fallbacks from
+the same pinned sources. Bark/branch groups use `BasicEffect`, cutout foliage/flowers/grass use
+`AlphaTestEffect`, and all enter the normal static chunk/exterior-BVH path with per-placement
+sub-ranges. Trunk and hedge proxies enter the canonical collision build. `HOUSE-00773` remains the
+owner of grass-card jitter/wind, while later LOD work remains the owner of distance selection; the
+placement task does not collapse those scopes into an unmaintainable special renderer.
+
 ### 19.3 Quality bar and rejection criteria
 
 An asset is rejected if any of these is true:

@@ -470,165 +470,6 @@
       ]
     },
     {
-      "id": "MODEL_KITCHEN_NORTH_BASE_RUN",
-      "category": "kitchen-sink-run",
-      "sourceFile": "assets-src/Models/Furniture/Kitchen/north_run.glb",
-      "sourceSha256": "94136ac5512b4be0c86a2b6036434073899d777c9135b94c319a7f2aa441da79",
-      "contentName": "Models/Furniture/Kitchen/north_run",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "L0 kitchen north sink base run",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored measured joinery from tools/blender/kitchen_builtins.py for HOUSE-01040. The source material ids resolve to already approved material records; no third-party source mesh is copied."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [
-          2.86,
-          1.252,
-          0.738182
-        ],
-        "counterHeightMetres": 0.94,
-        "triangles": {
-          "LOD0": 7836
-        },
-        "collision": "north_run_001_run_toe_COL"
-      },
-      "materialMap": {
-        "CAB_PAINT": "MAT_DOOR_PAINTED",
-        "CAB_OAK": "MAT_DOOR_HARDWOOD",
-        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE",
-        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
-      },
-      "usedIn": [
-        "L0_KITCHEN"
-      ]
-    },
-    {
-      "id": "MODEL_KITCHEN_ISLAND",
-      "category": "counter-kitchen",
-      "sourceFile": "assets-src/Models/Furniture/Kitchen/island.glb",
-      "sourceSha256": "58795beab4656763f926efda3389b4645c265b3dbc1cdef3c525862e25a247c0",
-      "contentName": "Models/Furniture/Kitchen/island",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "L0 kitchen primary island",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored measured island from tools/blender/kitchen_builtins.py for HOUSE-01040. Approved paint, oak, stone and steel material records are mapped at content build; no external model mesh is included."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [
-          2.32,
-          0.94,
-          1.088182
-        ],
-        "triangles": {
-          "LOD0": 4860
-        },
-        "collision": "island_001_island_toe_COL"
-      },
-      "materialMap": {
-        "CAB_PAINT": "MAT_DOOR_PAINTED",
-        "CAB_OAK": "MAT_DOOR_HARDWOOD",
-        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE",
-        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
-      },
-      "usedIn": [
-        "L0_KITCHEN"
-      ]
-    },
-    {
-      "id": "MODEL_KITCHEN_RANGE_WALL",
-      "category": "kitchen-cooking-wall",
-      "sourceFile": "assets-src/Models/Furniture/Kitchen/range_wall.glb",
-      "sourceSha256": "505f4b70e9a4976bda2b7e7b939c0db9e00d072f81a8174a829c1cd128b0c68d",
-      "contentName": "Models/Furniture/Kitchen/range_wall",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "L0 kitchen fitted cooking wall",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored measured joinery from tools/blender/kitchen_builtins.py for HOUSE-01044: a 900 mm range with modelled burners, 150 mm tile splashback, fitted scribes and hood. The compact bay fits between the canonical pantry door and butler's opening. Approved project materials are mapped during content build; no third-party source mesh is copied."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [1.0, 2.65, 0.738182],
-        "counterHeightMetres": 0.94,
-        "triangles": { "LOD0": 2260 },
-        "collision": "range_wall_001_range_scribe_-1_COL"
-      },
-      "materialMap": {
-        "CAB_PAINT": "MAT_DOOR_PAINTED",
-        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE",
-        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
-        "CAB_TILE": "MAT_KITCHEN_BACKSPLASH_TILE",
-        "CAB_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS"
-      },
-      "usedIn": ["L0_KITCHEN"]
-    },
-    {
-      "id": "MODEL_KITCHEN_REFRIGERATOR",
-      "category": "appliance-refrigerator",
-      "sourceFile": "assets-src/Models/Furniture/Kitchen/refrigerator.glb",
-      "sourceSha256": "45cb8a3e0552994f2c923071733fdf05c291638fc8c396c3bc4c81772b092ada",
-      "contentName": "Models/Furniture/Kitchen/refrigerator",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "Measured L0 kitchen refrigerator and overhead bridge cabinet",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored enamel-front refrigerator, carcass and real joinery bridge cabinet from tools/blender/kitchen_refrigerator.py for HOUSE-01042; no third-party mesh. The 1.95 m appliance aligns with the canonical refrigerator cell/portal. Its box proxy collides while shut; a later animated-door task must replace static frontage/proxy with moving parts. The upper cabinet closes the 0.75 m ceiling gap."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [1.8, 2.6995, 0.833],
-        "applianceHeightMetres": 1.95,
-        "triangles": { "LOD0": 5524 },
-        "collision": "refrigerator_001_carcass_back_COL"
-      },
-      "materialMap": {
-        "CAB_PAINT": "MAT_DOOR_PAINTED",
-        "CAB_OAK": "MAT_DOOR_HARDWOOD",
-        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
-      },
-      "usedIn": ["L0_KITCHEN"]
-    },
-    {
       "id": "MODEL_FURNITURE_LEATHER_ARMCHAIR_A",
       "category": "chair",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/leather_armchair_a.glb",
@@ -978,6 +819,181 @@
       }
     },
     {
+      "id": "MODEL_KITCHEN_ISLAND",
+      "category": "counter-kitchen",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/island.glb",
+      "sourceSha256": "58795beab4656763f926efda3389b4645c265b3dbc1cdef3c525862e25a247c0",
+      "contentName": "Models/Furniture/Kitchen/island",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "L0 kitchen primary island",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured island from tools/blender/kitchen_builtins.py for HOUSE-01040. Approved paint, oak, stone and steel material records are mapped at content build; no external model mesh is included."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.32,
+          0.94,
+          1.088182
+        ],
+        "triangles": {
+          "LOD0": 4860
+        },
+        "collision": "island_001_island_toe_COL"
+      },
+      "materialMap": {
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
+      "id": "MODEL_KITCHEN_NORTH_BASE_RUN",
+      "category": "kitchen-sink-run",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/north_run.glb",
+      "sourceSha256": "94136ac5512b4be0c86a2b6036434073899d777c9135b94c319a7f2aa441da79",
+      "contentName": "Models/Furniture/Kitchen/north_run",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "L0 kitchen north sink base run",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured joinery from tools/blender/kitchen_builtins.py for HOUSE-01040. The source material ids resolve to already approved material records; no third-party source mesh is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.86,
+          1.252,
+          0.738182
+        ],
+        "counterHeightMetres": 0.94,
+        "triangles": {
+          "LOD0": 7836
+        },
+        "collision": "north_run_001_run_toe_COL"
+      },
+      "materialMap": {
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
+      "id": "MODEL_KITCHEN_RANGE_WALL",
+      "category": "kitchen-cooking-wall",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/range_wall.glb",
+      "sourceSha256": "505f4b70e9a4976bda2b7e7b939c0db9e00d072f81a8174a829c1cd128b0c68d",
+      "contentName": "Models/Furniture/Kitchen/range_wall",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "L0 kitchen fitted cooking wall",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured joinery from tools/blender/kitchen_builtins.py for HOUSE-01044: a 900 mm range with modelled burners, 150 mm tile splashback, fitted scribes and hood. The compact bay fits between the canonical pantry door and butler's opening. Approved project materials are mapped during content build; no third-party source mesh is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.0,
+          2.65,
+          0.738182
+        ],
+        "counterHeightMetres": 0.94,
+        "triangles": {
+          "LOD0": 2260
+        },
+        "collision": "range_wall_001_range_scribe_-1_COL"
+      },
+      "materialMap": {
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "CAB_TILE": "MAT_KITCHEN_BACKSPLASH_TILE",
+        "CAB_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
+      "id": "MODEL_KITCHEN_REFRIGERATOR",
+      "category": "appliance-refrigerator",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/refrigerator.glb",
+      "sourceSha256": "45cb8a3e0552994f2c923071733fdf05c291638fc8c396c3bc4c81772b092ada",
+      "contentName": "Models/Furniture/Kitchen/refrigerator",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Measured L0 kitchen refrigerator and overhead bridge cabinet",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored enamel-front refrigerator, carcass and real joinery bridge cabinet from tools/blender/kitchen_refrigerator.py for HOUSE-01042; no third-party mesh. The 1.95 m appliance aligns with the canonical refrigerator cell/portal. Its box proxy collides while shut; a later animated-door task must replace static frontage/proxy with moving parts. The upper cabinet closes the 0.75 m ceiling gap."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.8,
+          2.6995,
+          0.833
+        ],
+        "applianceHeightMetres": 1.95,
+        "triangles": {
+          "LOD0": 5524
+        },
+        "collision": "refrigerator_001_carcass_back_COL"
+      },
+      "materialMap": {
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
       "id": "MODEL_SMOKE_MARKER",
       "category": "fixture",
       "sourceFile": "assets-src/Models/Smoke/marker.glb",
@@ -1019,6 +1035,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "celandine_01": "MAT_VEGETATION_FLOWER"
       }
     },
     {
@@ -1042,6 +1061,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "dandelion_01": "MAT_VEGETATION_FLOWER"
       }
     },
     {
@@ -1065,6 +1087,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "fern_02": "MAT_VEGETATION_SHRUB_FOLIAGE"
       }
     },
     {
@@ -1088,6 +1113,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "flower_gazania": "MAT_VEGETATION_FLOWER"
       }
     },
     {
@@ -1111,6 +1139,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "flower_stinkkruid": "MAT_VEGETATION_FLOWER"
       }
     },
     {
@@ -1134,6 +1165,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "grass_bermuda_01": "MAT_VEGETATION_GRASS"
       }
     },
     {
@@ -1157,6 +1191,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "grass_medium_02": "MAT_VEGETATION_GRASS_MEDIUM_02"
       }
     },
     {
@@ -1180,6 +1217,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "nettle_plant": "MAT_VEGETATION_SHRUB_FOLIAGE"
       }
     },
     {
@@ -1203,6 +1243,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "periwinkle_plant": "MAT_VEGETATION_PERIWINKLE"
       }
     },
     {
@@ -1226,6 +1269,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "shrub_01": "MAT_VEGETATION_SHRUB_FOLIAGE"
       }
     },
     {
@@ -1249,6 +1295,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "shrub_02": "MAT_VEGETATION_SHRUB_FOLIAGE"
       }
     },
     {
@@ -1272,6 +1321,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "shrub_03": "MAT_VEGETATION_SHRUB_FOLIAGE"
       }
     },
     {
@@ -1295,6 +1347,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "shrub_04": "MAT_VEGETATION_SHRUB_04"
       }
     },
     {
@@ -1318,6 +1373,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "shrub_sorrel_01": "MAT_VEGETATION_SHRUB_FOLIAGE"
       }
     },
     {
@@ -1341,6 +1399,10 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "fir_sapling_twigs": "MAT_VEGETATION_TREE_FOLIAGE",
+        "fir_sapling_branches": "MAT_VEGETATION_BARK"
       }
     },
     {
@@ -1364,6 +1426,10 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "fir_sapling_twigs": "MAT_VEGETATION_TREE_FOLIAGE",
+        "fir_sapling_branches": "MAT_VEGETATION_BARK"
       }
     },
     {
@@ -1387,6 +1453,10 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "fir_sapling_twigs": "MAT_VEGETATION_TREE_FOLIAGE",
+        "fir_sapling_branches": "MAT_VEGETATION_BARK"
       }
     },
     {
@@ -1410,6 +1480,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "jacaranda_tree_leaves": "MAT_VEGETATION_TREE_FOLIAGE",
+        "jacaranda_tree_branches": "MAT_VEGETATION_JACARANDA_BRANCHES",
+        "jacaranda_tree_trunk": "MAT_VEGETATION_JACARANDA_TRUNK"
       }
     },
     {
@@ -1433,6 +1508,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "jacaranda_tree_leaves": "MAT_VEGETATION_TREE_FOLIAGE",
+        "jacaranda_tree_branches": "MAT_VEGETATION_JACARANDA_BRANCHES",
+        "jacaranda_tree_trunk": "MAT_VEGETATION_JACARANDA_TRUNK"
       }
     },
     {
@@ -1456,6 +1536,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "jacaranda_tree_leaves": "MAT_VEGETATION_TREE_FOLIAGE",
+        "jacaranda_tree_branches": "MAT_VEGETATION_JACARANDA_BRANCHES",
+        "jacaranda_tree_trunk": "MAT_VEGETATION_JACARANDA_TRUNK"
       }
     },
     {
@@ -1479,6 +1564,10 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "pine_sapling_small_twig": "MAT_VEGETATION_TREE_FOLIAGE",
+        "pine_sapling_small_bark": "MAT_VEGETATION_BARK"
       }
     },
     {
@@ -1502,6 +1591,10 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "pine_sapling_small_twig": "MAT_VEGETATION_TREE_FOLIAGE",
+        "pine_sapling_small_bark": "MAT_VEGETATION_BARK"
       }
     },
     {
@@ -1525,6 +1618,10 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "pine_sapling_small_twig": "MAT_VEGETATION_TREE_FOLIAGE",
+        "pine_sapling_small_bark": "MAT_VEGETATION_BARK"
       }
     },
     {
@@ -1548,6 +1645,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "searsia_burchellii_twigs": "MAT_VEGETATION_TREE_FOLIAGE",
+        "searsia_burchellii_leaves": "MAT_VEGETATION_TREE_FOLIAGE",
+        "searsia_burchellii": "MAT_VEGETATION_BARK"
       }
     },
     {
@@ -1571,6 +1673,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "searsia_burchellii_twigs": "MAT_VEGETATION_TREE_FOLIAGE",
+        "searsia_burchellii_leaves": "MAT_VEGETATION_TREE_FOLIAGE",
+        "searsia_burchellii": "MAT_VEGETATION_BARK"
       }
     },
     {
@@ -1594,6 +1701,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "searsia_burchellii_twigs": "MAT_VEGETATION_TREE_FOLIAGE",
+        "searsia_burchellii_leaves": "MAT_VEGETATION_TREE_FOLIAGE",
+        "searsia_burchellii": "MAT_VEGETATION_BARK"
       }
     },
     {
@@ -1617,6 +1729,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "searsia_lucida_twigs": "MAT_VEGETATION_SEARSIA_LUCIDA",
+        "searsia_lucida": "MAT_VEGETATION_SEARSIA_LUCIDA",
+        "searsia_lucida_leaves": "MAT_VEGETATION_SEARSIA_LUCIDA"
       }
     },
     {
@@ -1640,6 +1757,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "searsia_lucida_twigs": "MAT_VEGETATION_SEARSIA_LUCIDA",
+        "searsia_lucida": "MAT_VEGETATION_SEARSIA_LUCIDA",
+        "searsia_lucida_leaves": "MAT_VEGETATION_SEARSIA_LUCIDA"
       }
     },
     {
@@ -1663,6 +1785,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "searsia_lucida_twigs": "MAT_VEGETATION_SEARSIA_LUCIDA",
+        "searsia_lucida": "MAT_VEGETATION_SEARSIA_LUCIDA",
+        "searsia_lucida_leaves": "MAT_VEGETATION_SEARSIA_LUCIDA"
       }
     },
     {
@@ -1686,6 +1813,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "tree_small_02_trunk": "MAT_VEGETATION_TREE_SMALL_02_TRUNK",
+        "tree_small_02_branches": "MAT_VEGETATION_TREE_SMALL_02_BRANCHES",
+        "tree_small_02_leaves": "MAT_VEGETATION_TREE_SMALL_02_LEAVES"
       }
     },
     {
@@ -1709,6 +1841,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "tree_small_02_trunk": "MAT_VEGETATION_TREE_SMALL_02_TRUNK",
+        "tree_small_02_branches": "MAT_VEGETATION_TREE_SMALL_02_BRANCHES",
+        "tree_small_02_leaves": "MAT_VEGETATION_TREE_SMALL_02_LEAVES"
       }
     },
     {
@@ -1732,6 +1869,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "tree_small_02_trunk": "MAT_VEGETATION_TREE_SMALL_02_TRUNK",
+        "tree_small_02_branches": "MAT_VEGETATION_TREE_SMALL_02_BRANCHES",
+        "tree_small_02_leaves": "MAT_VEGETATION_TREE_SMALL_02_LEAVES"
       }
     },
     {
@@ -1755,6 +1897,9 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "weed_plant_02.001": "MAT_VEGETATION_SHRUB_FOLIAGE"
       }
     },
     {
@@ -1778,6 +1923,11 @@
         "commercialUse": true,
         "modification": true,
         "note": "Poly Haven 1K glTF; textures reduced to 256 px, stock-XNA-unused PBR maps removed, mesh grounded/scaled/decimated. Exact source metadata is SHA-256 pinned by polyhaven_vegetation.py; see SOURCE.md."
+      },
+      "materialMap": {
+        "wild_rooibos_bush": "MAT_VEGETATION_SHRUB_FOLIAGE",
+        "wild_rooibos_bush_twigs": "MAT_VEGETATION_SHRUB_FOLIAGE",
+        "wild_rooibos_bush_leaves": "MAT_VEGETATION_SHRUB_FOLIAGE"
       }
     },
     {
@@ -26428,6 +26578,383 @@
         "commercialUse": true,
         "modification": true,
         "note": "Generated by tools/assets/make_smoke_assets.py for HOUSE-00201. Four saturated quadrants inside a white border: four because one colour cannot show that the texture is the right way up."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_FLOWER",
+      "category": "vegetation-flower-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/flower.png",
+      "sourceSha256": "33430e82af28e5e888d570db63a8e11e30aeff2e7168c246b35bf542bd1c6295",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Vegetation/flower",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Gazania flower atlas",
+        "url": "https://polyhaven.com/a/flower_gazania",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_GRASS",
+      "category": "vegetation-grass-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/grass.png",
+      "sourceSha256": "594ed4d7a85809a2b229dbb643b7750853fcc28b3eb972016815d3893e7165fe",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Vegetation/grass",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Bermuda grass atlas",
+        "url": "https://polyhaven.com/a/grass_bermuda_01",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_GRASS_MEDIUM_02",
+      "category": "vegetation-grass-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/grass_medium_02.png",
+      "sourceSha256": "01ec367a0d77cf46004e8deba662dbafefd76525eebd6d9d0cf2ba4b869df2b7",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Vegetation/grass_medium_02",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Grass medium 02 cutout atlas",
+        "url": "https://polyhaven.com/a/grass_medium_02",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_JACARANDA_BRANCHES",
+      "category": "vegetation-tree-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/jacaranda_branches.png",
+      "sourceSha256": "e13d51a11f9e814159d5fd55191eb4f349433c956180add5db14e268d4081045",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Vegetation/jacaranda_branches",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Jacaranda branch atlas",
+        "url": "https://polyhaven.com/a/jacaranda_tree",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_JACARANDA_TRUNK",
+      "category": "vegetation-tree-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/jacaranda_trunk.png",
+      "sourceSha256": "4907e4a0123ec5b15bcd36b79f1b7804d7ecf0e278bd9f499f17f5a34a4d8033",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Vegetation/jacaranda_trunk",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Jacaranda trunk atlas",
+        "url": "https://polyhaven.com/a/jacaranda_tree",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_PERIWINKLE",
+      "category": "vegetation-flower-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/periwinkle.png",
+      "sourceSha256": "694bb36e98c129718bd8d51ccba90e2498dbba7348d326c1953c60066255d241",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Vegetation/periwinkle",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Periwinkle cutout atlas",
+        "url": "https://polyhaven.com/a/periwinkle_plant",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_SEARSIA_LUCIDA",
+      "category": "vegetation-tree-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/searsia_lucida.png",
+      "sourceSha256": "5a2db0c2f42c142fb990e01cbb563a9e2b637a44ee313478821e5551fd173bf0",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Vegetation/searsia_lucida",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Searsia lucida cutout atlas",
+        "url": "https://polyhaven.com/a/searsia_lucida",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_SHRUB_04",
+      "category": "vegetation-shrub-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/shrub_04.png",
+      "sourceSha256": "347928472a1ada30e4cdeecd156707206387daeb4146658d6bacfceb70c77c4a",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Vegetation/shrub_04",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Shrub 04 cutout atlas",
+        "url": "https://polyhaven.com/a/shrub_04",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_SHRUB_FOLIAGE",
+      "category": "vegetation-shrub-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/shrub_foliage.png",
+      "sourceSha256": "46bcfecc458a6816d530ff916bc3f1debc59d730212fd3efc1efce0122a75486",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Vegetation/shrub_foliage",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Shrub 01 leaf atlas",
+        "url": "https://polyhaven.com/a/shrub_01",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_TREE_FOLIAGE",
+      "category": "vegetation-tree-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/tree_foliage.png",
+      "sourceSha256": "4d6682579d866b0fac3497731e519cf814958ab6f66f4661dddb143eb706c543",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Vegetation/tree_foliage",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Jacaranda leaf atlas",
+        "url": "https://polyhaven.com/a/jacaranda_tree",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_TREE_SMALL_02_BRANCHES",
+      "category": "vegetation-tree-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/tree_small_02_branches.png",
+      "sourceSha256": "b3b5c39b605e3de3cf80cc43ddf144de4da9b14b69d76ecbd1b1b4fac7ef6038",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Vegetation/tree_small_02_branches",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Wild syringa branch atlas",
+        "url": "https://polyhaven.com/a/tree_small_02",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_TREE_SMALL_02_LEAVES",
+      "category": "vegetation-tree-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/tree_small_02_leaves.png",
+      "sourceSha256": "42aff6db19c3bb6a6b428a5310c4dea0ca8db173e4345e5250b31d487c3870bf",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Vegetation/tree_small_02_leaves",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Wild syringa leaf atlas",
+        "url": "https://polyhaven.com/a/tree_small_02",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
+      }
+    },
+    {
+      "id": "TEXTURE_VEGETATION_TREE_SMALL_02_TRUNK",
+      "category": "vegetation-tree-albedo",
+      "sourceFile": "assets-src/Textures/Vegetation/tree_small_02_trunk.png",
+      "sourceSha256": "3e8cb4b55e5cdb9b73bdce2a2055b5eca0cc0a1a509405ec792e1c977396cc80",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Vegetation/tree_small_02_trunk",
+      "kind": "texture",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "derived",
+        "name": "Wild syringa trunk atlas",
+        "url": "https://polyhaven.com/a/tree_small_02",
+        "retrieved": "2026-09-13",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Byte-identical stock-XNA runtime extraction from the pinned prepared vegetation GLB; the originating model and metadata remain recorded by polyhaven_vegetation.py and SOURCE.md."
       }
     },
     {
