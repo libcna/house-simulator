@@ -557,6 +557,43 @@
       ]
     },
     {
+      "id": "MODEL_KITCHEN_RANGE_WALL",
+      "category": "kitchen-cooking-wall",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/range_wall.glb",
+      "sourceSha256": "505f4b70e9a4976bda2b7e7b939c0db9e00d072f81a8174a829c1cd128b0c68d",
+      "contentName": "Models/Furniture/Kitchen/range_wall",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "L0 kitchen fitted cooking wall",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured joinery from tools/blender/kitchen_builtins.py for HOUSE-01044: a 900 mm range with modelled burners, 150 mm tile splashback, fitted scribes and hood. The compact bay fits between the canonical pantry door and butler's opening. Approved project materials are mapped during content build; no third-party source mesh is copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.0, 2.65, 0.738182],
+        "counterHeightMetres": 0.94,
+        "triangles": { "LOD0": 2260 },
+        "collision": "range_wall_001_range_scribe_-1_COL"
+      },
+      "materialMap": {
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_STONE": "MAT_KITCHEN_COUNTER_STONE",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "CAB_TILE": "MAT_KITCHEN_BACKSPLASH_TILE",
+        "CAB_OVEN_GLASS": "MAT_KITCHEN_OVEN_GLASS"
+      },
+      "usedIn": ["L0_KITCHEN"]
+    },
+    {
       "id": "MODEL_KITCHEN_REFRIGERATOR",
       "category": "appliance-refrigerator",
       "sourceFile": "assets-src/Models/Furniture/Kitchen/refrigerator.glb",

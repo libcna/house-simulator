@@ -25,14 +25,15 @@ import scale_check  # noqa: E402
 sys.path.insert(0, str(REPO / "tools" / "world"))
 import layout_io  # noqa: E402
 
-NAMES = ("north_run", "island")
+NAMES = ("north_run", "island", "range_wall")
 SCRIPT = REPO / "tools" / "blender" / "kitchen_builtins.py"
 FRIDGE_SCRIPT = REPO / "tools" / "blender" / "kitchen_refrigerator.py"
 COLLISION = REPO / "tools" / "blender" / "collision_proxy.py"
 MODELS = REPO / "assets-src" / "Models" / "Furniture" / "Kitchen"
 MANIFEST = REPO / "assets-src" / "assets.manifest.json"
 ASSET_IDS = {"north_run": "MODEL_KITCHEN_NORTH_BASE_RUN",
-             "island": "MODEL_KITCHEN_ISLAND"}
+             "island": "MODEL_KITCHEN_ISLAND",
+             "range_wall": "MODEL_KITCHEN_RANGE_WALL"}
 FRIDGE_ID = "MODEL_KITCHEN_REFRIGERATOR"
 
 
@@ -77,6 +78,37 @@ def check_manifest_geometry(path: Path, row: dict) -> None:
         raise RuntimeError(
             f"{path.name}: stone top is {actual_top:.3f} m, manifest says "
             f"{expected_top:.3f} m")
+
+
+def check_range_wall_geometry(path: Path, row: dict) -> None:
+    """Keep the measured cooking wall recognizable, not merely manifest-valid."""
+    document, _ = gltf_io.read_model(path)
+    visible_nodes = [node for node in document["nodes"] if "mesh" in node and
+                     not node.get("name", "").endswith("_COL")]
+    names = {node.get("name", "") for node in visible_nodes}
+    required_fragments = ("range_body", "oven_glass", "backsplash", "hood_canopy",
+                          "hood_chimney", "range_scribe_-1", "range_scribe_1")
+    for fragment in required_fragments:
+        if not any(fragment in name for name in names):
+            raise RuntimeError(f"range_wall: missing authored {fragment} component")
+    if sum("burner_" in name for name in names) != 4:
+        raise RuntimeError("range_wall: expected four separately modelled burners")
+    materials = {document["materials"][primitive["material"]]["name"]
+                 for node in visible_nodes
+                 for primitive in document["meshes"][node["mesh"]]["primitives"]
+                 if "material" in primitive}
+    expected = {"CAB_PAINT", "CAB_STONE", "CAB_STEEL", "CAB_TILE",
+                "CAB_OVEN_GLASS"}
+    if materials != expected:
+        raise RuntimeError(f"range_wall: unexpected source finishes {sorted(materials)}")
+    layout = layout_io.load_layout(REPO / "assets-src" / "world", ["props"])
+    prop = layout_io.by_id(layout_io.rows(layout, "props"), "prop")[
+        "PROP_L0_KITCHEN_RANGE_WALL"]
+    if (prop["asset"] != "MODEL_KITCHEN_RANGE_WALL" or
+            prop["cell"] != "L0_KITCHEN" or
+            prop["position"] != [-7.75, 0.6, -25.075] or prop["yawDeg"] != 270 or
+            prop["collision"] != "proxy"):
+        raise RuntimeError("range_wall: canonical prop no longer fits the west working wall")
 
 
 def check_refrigerator_geometry(path: Path, row: dict) -> None:
@@ -187,6 +219,8 @@ def check() -> None:
                     f"{name}: regenerated={actual_hash}, committed={committed_hash}, "
                     f"manifest={manifest_hash}")
             check_manifest_geometry(expected, rows[ASSET_IDS[name]])
+            if name == "range_wall":
+                check_range_wall_geometry(expected, rows[ASSET_IDS[name]])
             print(f"kitchen_builtins_prepare: {name} {actual_hash[:16]} deterministic")
         fridge_raw = folder / "refrigerator_raw.glb"
         fridge_generated = folder / "refrigerator.glb"

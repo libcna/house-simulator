@@ -67,6 +67,19 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_KITCHEN_RANGE_WALL",
+      "asset": "MODEL_KITCHEN_RANGE_WALL",
+      "cell": "L0_KITCHEN",
+      "position": [-7.75, 0.6, -25.075],
+      "yawDeg": 270,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_LIVING_SOFA",
       "asset": "MODEL_FURNITURE_LEATHER_SOFA",
       "cell": "L0_LIVING",

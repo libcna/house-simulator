@@ -3599,14 +3599,14 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 147U)
-            << "HOUSE-01040 adds only the stone counter and brushed-steel hardware finishes";
+        EXPECT_EQ(contents.materials.size(), 149U)
+            << "HOUSE-01044 adds the cooking bay's tile and opaque oven-glass finishes";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_KITCHEN_"); }),
-                  2)
-            << "the authored kitchen kit loads both close-range finishes through WorldLoader";
+                  4)
+            << "the authored kitchen kit loads all four close-range finishes through WorldLoader";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3673,6 +3673,17 @@ namespace
         EXPECT_EQ(obscuredAt->alphaMode, world::AlphaMode::Blend);
         EXPECT_FLOAT_EQ(obscuredAt->alpha, 0.32F);
         EXPECT_EQ(obscuredAt->effectTierS, world::EffectTier::Basic);
+
+        const auto ovenGlassAt = std::find_if(contents.materials.begin(),
+                                              contents.materials.end(),
+                                              [](const world::MaterialDef& material)
+                                              { return material.id == Intern("MAT_KITCHEN_OVEN_GLASS"); });
+        ASSERT_NE(ovenGlassAt, contents.materials.end());
+        EXPECT_EQ(ovenGlassAt->materialClass, world::MaterialClass::Glass);
+        EXPECT_EQ(ovenGlassAt->alphaMode, world::AlphaMode::Opaque)
+            << "Tier-S oven glass is deliberately opaque rather than an order-dependent blend";
+        EXPECT_FLOAT_EQ(ovenGlassAt->alpha, 1.0F);
+        EXPECT_EQ(ovenGlassAt->effectTierS, world::EffectTier::Basic);
 
         const auto lawnAt = std::find_if(contents.materials.begin(),
                                          contents.materials.end(),
@@ -3760,7 +3771,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return material.materialClass == world::MaterialClass::Glass; }),
-                  6);
+                  7)
+            << "HOUSE-01044 adds one deliberately opaque glass role for the range";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

@@ -855,3 +855,50 @@ selected-room lighting. Debug colours remain explicit-only, not normal gameplay.
 primary kit and make its static Basic-effect detail readable; then front façade,
 porch, roof and first-view night illumination. Do not mistake this focused defect
 repair for a completed kitchen or exterior.
+
+## Round 21 — measured kitchen cooking bay
+
+Commit: `HOUSE-01044` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 20 eleven-view [clear](captures/house-01043-clear-day-r1),
+[noon](captures/house-01043-noon-r1), [overcast](captures/house-01043-overcast-r1)
+and [22:00](captures/house-01043-night-r1). After: the same eleven unchanged
+poses/conditions in [clear](captures/house-01044-clear-day-r1),
+[noon](captures/house-01044-noon-r1),
+[overcast](captures/house-01044-overcast-r1) and
+[22:00](captures/house-01044-night-r1). The west kitchen, hall, family and front
+frames were opened at all four conditions.
+
+Ranked visible defects remaining:
+
+1. The [clear front](captures/house-01044-clear-day-r1/exterior-front.png) remains
+   the largest defect: a skeletal orange/brown façade and porch, simple roof and
+   almost no readable vegetation. The [night front](captures/house-01044-night-r1/exterior-front.png)
+   is nearly invisible.
+2. The [west kitchen](captures/house-01044-clear-day-r1/kitchen-facing-west.png)
+   now has a recognizable range, burners, splashback and hood, but the compact bay
+   and existing cabinetry are still too dark and lack controlled countertop detail.
+3. The [hall view](captures/house-01044-clear-day-r1/kitchen-from-hall.png) reads as
+   a real working kitchen silhouette, but brown static-prop lighting and the empty
+   adjacent room flatten its depth.
+4. Family seating remains pale and sparse; its bright plant and broad empty surfaces
+   read as staging rather than an inhabited room.
+
+Fixed: canonical portal measurements replace the image's misleading apparent
+2.55 m blank span. A first 2.40 m assembly was visibly fuller but failed the closed
+door walk gate by covering the pantry portal, so it was rejected. The final
+1.00 m bay fits between pantry and butler openings with two 50 mm scribes. Its
+23 deterministic parts include a 900 mm range, oven/control face, four burners,
+150 mm physically tiled splashback and a steel filter hood/chimney. The separate
+0.94 m counter measurement, source finish map, origin, stable IDs and 12-triangle
+collision proxy are checked. Oven glass remains opaque at Tier S to avoid a new
+order-dependent blend and was brightened only after the four captures were opened.
+The affected west frame changes 1.279–1.304% and the hall frame 0.828–0.847%
+across the four conditions. Both circulation routes and culling equivalence pass;
+normal gameplay still uses production materials, not debug colour.
+
+`VISUAL-GATE-1` still **FAILS**. Highest visible value is now the front approach:
+consume the already canonical/provenanced vegetation and improve façade/porch/roof
+composition without bypassing the exterior hierarchy. Kitchen under-cabinet
+readability and restrained clutter follow; the full 62-container kitchen remains
+open rather than being falsely claimed by this bay.

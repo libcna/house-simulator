@@ -23,9 +23,11 @@ MATERIAL_COLOURS = {
     "CAB_OAK": (0.55, 0.32, 0.17, 1.0),
     "CAB_STONE": (0.83, 0.82, 0.78, 1.0),
     "CAB_STEEL": (0.44, 0.47, 0.50, 1.0),
+    "CAB_TILE": (0.77, 0.80, 0.79, 1.0),
+    "CAB_OVEN_GLASS": (0.035, 0.055, 0.075, 1.0),
 }
 MATERIALS = {}
-COUNTERS = {"north_run": 0, "island": 0}
+COUNTERS = {"north_run": 0, "island": 0, "range_wall": 0}
 CURRENT = ""
 
 
@@ -81,7 +83,7 @@ def box(label, location, size, finish="CAB_PAINT", bevel=0.002):
     # whole-asset accessor AABB; write the actual world coordinates into vertex streams instead.
     bake_world_vertices(obj)
     obj.data.materials.append(material(finish))
-    metre_uv(obj, 0.58 if finish == "CAB_STONE" else 0.45)
+    metre_uv(obj, {"CAB_STONE": 0.58, "CAB_TILE": 0.15}.get(finish, 0.45))
     if bevel:
         modifier = obj.modifiers.new("joinery_edge", "BEVEL")
         modifier.width = min(bevel, min(size) * 0.2)
@@ -119,6 +121,22 @@ def pull(label, x, y, front_z, length=0.13):
         (x + length * 0.36, y, front_z - projection), 0.004)
     rod(f"{label}_grip", (x - length * 0.5, y, front_z - projection),
         (x + length * 0.5, y, front_z - projection), 0.0065)
+
+
+def disc(label, location, radius, depth, finish="CAB_STEEL", vertices=20):
+    """A Y-up horizontal disc, used for real burner/control silhouettes."""
+    COUNTERS[CURRENT] += 1
+    bpy.ops.mesh.primitive_cylinder_add(vertices=vertices, radius=radius, depth=depth,
+                                        location=blender_xyz(location))
+    obj = bpy.context.object
+    obj.name = f"{CURRENT}_{COUNTERS[CURRENT]:03d}_{label}"
+    # Blender's cylinder axis is Z, which `blender_xyz` maps to glTF Y.
+    bake_world_vertices(obj)
+    obj.data.materials.append(material(finish))
+    metre_uv(obj, 0.45)
+    for polygon in obj.data.polygons:
+        polygon.use_smooth = not abs(polygon.normal.z) > 0.9
+    return obj
 
 
 def shaker(label, x, z, width, bottom, top, pull_y):
@@ -247,6 +265,60 @@ def island():
                 finish="CAB_OAK", bevel=0.002)
 
 
+def range_wall():
+    """A 1.00 m cooking bay between the pantry door and butler's opening."""
+    global CURRENT
+    CURRENT = "range_wall"
+    width, depth = 1.00, 0.64
+    front = -depth * 0.5 - 0.013
+    range_width = 0.90
+
+    # Two 50 mm fitted scribes/stone strips close the bay without pretending there is room for
+    # another cabinet beside a domestic 900 mm range. The adjacent canonical openings stay clear.
+    for sign in (-1, 1):
+        x = sign * (range_width * 0.5 + 0.025)
+        box(f"range_scribe_{sign}", (x, 0.47, 0),
+            (0.05, 0.88, depth), bevel=0.002)
+        box(f"counter_scribe_{sign}", (x, 0.918, 0),
+            (0.05, 0.044, depth + 0.06), finish="CAB_STONE", bevel=0.002)
+
+    # A domestic 900 mm range, not a blank cabinet with a dark rectangle painted on it.
+    box("range_plinth", (0, 0.03, 0.015),
+        (0.88, 0.06, 0.62), finish="CAB_STEEL", bevel=0.003)
+    box("range_body", (0, 0.47, 0), (0.88, 0.88, 0.65), finish="CAB_STEEL", bevel=0.006)
+    box("oven_glass", (0, 0.48, front - 0.010),
+        (0.69, 0.40, 0.018), finish="CAB_OVEN_GLASS", bevel=0.009)
+    box("oven_lower_rail", (0, 0.235, front - 0.012),
+        (0.72, 0.050, 0.025), finish="CAB_STEEL", bevel=0.004)
+    box("range_control", (0, 0.80, front - 0.008),
+        (0.82, 0.145, 0.022), finish="CAB_STEEL", bevel=0.004)
+    for index, x in enumerate((-0.30, -0.10, 0.10, 0.30)):
+        # Knobs face the room: cylinders run along local Z rather than Y.
+        rod(f"range_knob_{index}", (x, 0.80, front - 0.012),
+            (x, 0.80, front - 0.055), radius=0.025, vertices=18)
+    box("cooktop", (0, 0.916, 0),
+        (0.88, 0.020, 0.64), finish="CAB_OVEN_GLASS", bevel=0.005)
+    for index, (x, z, radius) in enumerate(((-0.24, -0.17, 0.105),
+                                             (0.24, -0.17, 0.085),
+                                             (-0.24, 0.17, 0.085),
+                                             (0.24, 0.17, 0.105))):
+        disc(f"burner_{index}", (x, 0.932, z), radius, 0.008,
+             finish="CAB_STEEL", vertices=24)
+
+    # 150 mm physical-repeat tile over the whole compact working zone, behind every object.
+    box("backsplash", (0, 1.22, depth * 0.5 - 0.009),
+        (width, 0.56, 0.018), finish="CAB_TILE", bevel=0.001)
+
+    box("hood_canopy", (0, 1.70, 0.015),
+        (0.98, 0.18, 0.56), finish="CAB_STEEL", bevel=0.012)
+    box("hood_filter", (0, 1.602, -0.05),
+        (0.82, 0.018, 0.38), finish="CAB_OVEN_GLASS", bevel=0.004)
+    box("hood_chimney", (0, 2.18, 0.17),
+        (0.42, 0.82, 0.28), finish="CAB_STEEL", bevel=0.004)
+    box("hood_cap", (0, 2.6325, 0.17),
+        (0.46, 0.035, 0.31), finish="CAB_STEEL", bevel=0.003)
+
+
 def export(path: Path, author):
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
@@ -276,6 +348,7 @@ def main():
     options = parser.parse_args(args)
     export(options.out / "north_run_raw.glb", north_run)
     export(options.out / "island_raw.glb", island)
+    export(options.out / "range_wall_raw.glb", range_wall)
     # Debian Blender exits 0 after a Python exception; callers require this terminal marker.
     print("kitchen_builtins: EXIT 0")
 

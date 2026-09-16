@@ -1,4 +1,76 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01043` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01044` checkpoint)
+
+Branch `develop`. Continuous visual-sprint start HEAD
+`238d6aed27c1e8662f0d118013ef08bb801ae018`; clean task-start HEAD
+`2d993a66643d1c7a33093f5997313c0655b1115c` (`HOUSE-01043`). This file
+belongs to the single `HOUSE-01044` commit; use that commit as the ending HEAD.
+**VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only,
+with explicit debug blockout separate. The connected kitchen is more credible,
+but the front approach is still unmistakably an engineering shell.
+
+Round 20 before: identical eleven-view [clear](visual-review/captures/house-01043-clear-day-r1),
+[noon](visual-review/captures/house-01043-noon-r1),
+[overcast](visual-review/captures/house-01043-overcast-r1) and
+[night](visual-review/captures/house-01043-night-r1) normal-game sets. Round 21
+after: matching [clear](visual-review/captures/house-01044-clear-day-r1),
+[noon](visual-review/captures/house-01044-noon-r1),
+[overcast](visual-review/captures/house-01044-overcast-r1) and
+[night](visual-review/captures/house-01044-night-r1) sets; camera, time, weather
+and exposure are unchanged. The clearest result is the
+[west kitchen](visual-review/captures/house-01044-clear-day-r1/kitchen-facing-west.png),
+with the new bay also visible [from the hall](visual-review/captures/house-01044-clear-day-r1/kitchen-from-hall.png).
+The [clear front](visual-review/captures/house-01044-clear-day-r1/exterior-front.png)
+and [night front](visual-review/captures/house-01044-night-r1/exterior-front.png)
+remain the largest defects.
+
+`HOUSE-01044` adds one project-authored deterministic kitchen cooking bay through
+the established manifest/material/prop/chunk path: 1.00 × 2.65 × 0.738 m,
+23 components, 2,260 visible triangles, a separately measured 0.94 m counter,
+900 mm range and oven, four burners, 150 mm physically tiled backsplash and
+steel hood/filter/chimney. It sits at `[-7.75, 0.60, -25.075]`, yaw 270°, between
+the pantry door and butler opening. A 12-triangle box proxy preserves collision.
+Paint/stone/steel reuse approved materials; backsplash tile and deliberately
+opaque Tier-S oven glass have permanent IDs, provenance and explicit loader/binder
+coverage. The GLB SHA-256 is
+`505f4b70e9a4976bda2b7e7b939c0db9e00d072f81a8174a829c1cd128b0c68d`.
+`L0_KITCHEN` measures 13/13 chunks, exactly two above the prior ceiling for those
+new finish groups, with no vertex/Reach split.
+
+Important rejected iteration: the first 2.40 m west-wall assembly looked visually
+stronger but covered `P_KITCHEN__PANTRY`. `ClosedDoorTests` caught the inaccessible
+pantry before commit. It was discarded and regenerated as the final measured 1.00 m
+bay; do not restore the wide version merely from the image. The final gate exercises
+62 doors, 144 closed-door walks and 124 open controls. All four kitchen built-ins
+regenerate bit-for-bit and the new scale selftest checks width, full depth and the
+counter separately from the 2.65 m hood height.
+
+Verification: asset manifest 837 rows; all 13 world-validator rules; forced 31-stage
+content graph in 42.31 s with nav in 12.63 s; 186 focused unit tests; 34 focused
+material/content integration tests; full software render **48/48**, including
+culled-vs-unculled equivalence. Four 11-pose review sets were opened. The final bay
+changes 1.279–1.304% of the west frame and 0.828–0.847% of the hall frame across
+clear/noon/overcast/night. Repository CI is green, including **323 strict-XNA
+translation units**; `git diff --check` passes. Two kitchen strict-reference PNGs
+are intentionally updated and inspected. Full CMake/CTest remains unclaimed: a sibling BL-17 glob
+forces regeneration and the CNA FNA3D patch step cannot write outside this sandbox.
+The two changed test objects were compiled and linked with their existing generated
+`build.ninja` commands; no CNA, FNA3D or sibling file was modified.
+
+The previously reported 19 h `build_nav.py` was a runaway old session, not required
+work: both PIDs disappeared, no replacement process exists, and the same nav stage
+now completes in 12.63 s. No partial nav output is present.
+
+Next highest visible value: the front approach is now decisively worse than the
+kitchen in the fixed set. Investigate the already authored/provenanced vegetation
+records and dependency-valid `HOUSE-00772`/`HOUSE-00773` path, then make the façade,
+porch, roof and night entrance readable without bypassing the canonical exterior
+hierarchy. Kitchen under-cabinet/static-prop readability and restrained clutter are
+next. Do not resume unrelated Android/Web/pet/astronomy work. See
+[Round 21 review](visual-review/README.md).
+
+---
+
+# Prior handoff — 2026-09-16 (`HOUSE-01043` checkpoint)
 
 Branch `develop`. Continuous visual-sprint start HEAD
 `238d6aed27c1e8662f0d118013ef08bb801ae018`; clean task-start HEAD

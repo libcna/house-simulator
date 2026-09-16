@@ -6391,6 +6391,7 @@ Run by `validate_world.py` over the layout and by `scale_check.py` over every as
 | Balustrade / railing height | ≥ 0.90 m interior, ≥ 1.05 m at a drop > 1 m |
 | Kitchen counter height | 0.88–0.95 m |
 | First authored kitchen sink run | 2.70–2.95 m width, 0.72–0.95 m full depth including tap; its separate measured counter top stays 0.88–0.95 m |
+| Fitted kitchen cooking bay | 0.95–1.05 m width, 0.65–0.80 m full depth including pulls; its separate measured counter top stays 0.88–0.95 m |
 | Large kitchen refrigerator appliance | 1.60–1.90 m width, 0.70–0.90 m depth including pulls, 1.80–2.10 m body height; a bridge cabinet's combined AABB must not stand in for body height |
 | Integrated refrigerator/bridge bay height | 2.60–2.80 m overall from L0 finished floor to ceiling |
 | Upper cabinet underside | 1.40–1.55 m |
@@ -6417,6 +6418,9 @@ Run by `validate_world.py` over the layout and by `scale_check.py` over every as
 The combined `HOUSE-01040` sink run includes its gooseneck tap, so its whole-model Y bound
 cannot stand in for counter height. Its manifest records `geometry.counterHeightMetres`, which
 `scale_check.py` verifies inside the same 0.88–0.95 m band; the tap does not relax that rule.
+The `HOUSE-01044` cooking bay similarly reaches 2.65 m at its hood; its 1.00 m width, full depth
+and separately measured 0.94 m stone scribes are all checked instead of
+mistaking the assembly height for a counter height.
 | Every interactable reachable from a standing eye position | a 2.5 m ray must reach `focus.point` |
 | Room area vs. its function | a bedroom ≥ 9 m², a bathroom ≥ 3.5 m², a WC ≥ 1.8 m², a corridor ≥ 0.9 m wide |
 

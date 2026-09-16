@@ -49,6 +49,11 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "kitchen-sink-run": [("x", 2.70, 2.95, "kitchen sink run width"),
                          ("z", 0.72, 0.95, "kitchen sink run depth including tap"),
                          ("y", 0.88, 0.95, "kitchen counter height under faucet")],
+    # The fitted cooking wall includes 2.65 m upper cabinets and hood. Its working top is a
+    # separately measured manifest property, exactly as for the sink/faucet assembly.
+    "kitchen-cooking-wall": [("x", 0.95, 1.05, "fitted cooking bay width"),
+                             ("z", 0.65, 0.80, "cooking wall depth including pulls"),
+                             ("y", 0.88, 0.95, "cooking wall counter height")],
     # A large refrigerator plus an overhead bridge reaches the L0 ceiling. The appliance
     # body height is separately measured, as a combined AABB cannot identify its top.
     "appliance-refrigerator": [("x", 1.60, 1.90, "large refrigerator width"),
@@ -188,7 +193,7 @@ def check(path: Path, category: str, geometry: dict | None = None) -> list[str]:
                     f"{what}: measured seat {value:.3f} m must lie within the model's "
                     f"{size[1]:.3f} m height")
                 continue
-        if category == "kitchen-sink-run" and axis == "y":
+        if category in {"kitchen-sink-run", "kitchen-cooking-wall"} and axis == "y":
             counter = (geometry or {}).get("counterHeightMetres")
             if not isinstance(counter, (int, float)):
                 problems.append(
@@ -307,6 +312,24 @@ def selftest() -> int:
             print("  SELFTEST FAILED: 0.84 m sink counter was accepted", file=sys.stderr)
             failures += 1
         print("  sink run requires a measured in-band counter despite its 1.25 m tap")
+
+        # HOUSE-01044: the hood raises the compact assembly to 2.65 m, while the two stone
+        # scribe tops remain at the same human-scale 0.94 m datum as the sink run.
+        cooking = Path(work) / "cooking_wall.glb"
+        cooking.write_bytes(make(1.00, 2.65, 0.738))
+        if check(cooking, "kitchen-cooking-wall", {"counterHeightMetres": 0.94}):
+            print("  SELFTEST FAILED: measured 1.00 m cooking bay was rejected",
+                  file=sys.stderr)
+            failures += 1
+        if not check(cooking, "kitchen-cooking-wall"):
+            print("  SELFTEST FAILED: cooking wall without measured counter was accepted",
+                  file=sys.stderr)
+            failures += 1
+        if not check(cooking, "kitchen-cooking-wall", {"counterHeightMetres": 0.98}):
+            print("  SELFTEST FAILED: 0.98 m cooking-wall counter was accepted",
+                  file=sys.stderr)
+            failures += 1
+        print("  cooking-bay width, depth and separate counter height are measured")
 
         # HOUSE-01042: the bridge cupboard must not let the appliance body pass an
         # arbitrary 2.70 m height check, or leave its own ceiling band unverified.
