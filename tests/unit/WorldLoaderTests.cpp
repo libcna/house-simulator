@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 176U)
-            << "HOUSE-01045 adds four measured upright-piano finish roles";
+        EXPECT_EQ(contents.materials.size(), 177U)
+            << "HOUSE-01047 adds the neutral garage-flood lens to the settled material library";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3650,8 +3650,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_FIXTURE_"); }),
-                  2)
-            << "HOUSE-01259 keeps the lantern cage and switched diffuser independent";
+                  3)
+            << "HOUSE-01047 adds a neutral flood lens beside the lantern cage and diffuser";
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),

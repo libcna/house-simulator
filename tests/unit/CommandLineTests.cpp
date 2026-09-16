@@ -44,6 +44,8 @@ namespace
                               "--time=6.5",
                               "--freeze-time",
                               "--weather=rain",
+                              "--light-on=LG_EXT_DRIVEWAY_FLOOD",
+                              "--light-on=LG_L0_GARAGE_MAIN",
                               "--screenshot=/tmp/shot.png",
                               "--log=world,content"});
         ASSERT_TRUE(options) << options.Error().ToString();
@@ -57,6 +59,9 @@ namespace
         EXPECT_FLOAT_EQ(options->timeOfDay.value_or(0.0f), 6.5f);
         EXPECT_TRUE(options->freezeTime);
         EXPECT_EQ(options->weather.value_or(""), "rain");
+        ASSERT_EQ(options->lightGroupsOn.size(), 2u);
+        EXPECT_EQ(options->lightGroupsOn[0], "LG_EXT_DRIVEWAY_FLOOD");
+        EXPECT_EQ(options->lightGroupsOn[1], "LG_L0_GARAGE_MAIN");
         EXPECT_EQ(options->screenshot.value_or(""), "/tmp/shot.png");
         EXPECT_EQ(options->logCategories.value_or(""), "world,content");
     }

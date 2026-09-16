@@ -657,10 +657,25 @@ namespace cnahouse::rendering
                                                         artificial * room->artificialColor.Z));
                     const bool celestial = lighting_->CelestialKeyForCell(cell->id) != nullptr;
                     const Vector3 objectCentre = (runMin + runMax) * 0.5F;
-                    const lighting::ObjectLightAssignment objectLights =
+                    lighting::ObjectLightAssignment objectLights =
                         exteriorDoor && !celestial
                             ? lighting_->CrossCellReceiverLightsForObject(cell->id, objectCentre)
                             : lighting_->StaticDetailLightsForObject(cell->id, objectCentre);
+                    // A weather-facing leaf may be paired either with a baked facade source
+                    // (`bakeCells`, the front entry) or with an explicitly unbaked practical
+                    // (`spillCells`, the outward-aimed garage flood). Prefer the matching baked
+                    // source when it exists, but do not make an unbaked fixed receiver invisible
+                    // merely because exterior doors use this narrower lighting boundary.
+                    if (exteriorDoor && !celestial && !objectLights.slots[0].has_value())
+                    {
+                        const lighting::ObjectLightAssignment spillLights =
+                            lighting_->StaticDetailLightsForObject(cell->id, objectCentre);
+                        const Vector3& spill = spillLights.spillDiffuseColor;
+                        if (spill.X > 0.0F || spill.Y > 0.0F || spill.Z > 0.0F)
+                        {
+                            objectLights = spillLights;
+                        }
+                    }
                     if (!celestial)
                     {
                         const Vector3& spill = objectLights.spillDiffuseColor;

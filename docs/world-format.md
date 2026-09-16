@@ -391,6 +391,11 @@ range-bounded key/fill/bounce; the receiver's room state, exposure, switches and
 objects do not acquire the foreign group. The owning cell is likewise implicit, and an
 `emissive_only` row cannot name a receiver because it emits no illumination.
 
+`coneInnerDeg` and `coneOuterDeg` are full spot-cone angles, matching the offline Blender bake
+contract. Runtime stock-effect approximation compares the source-to-receiver direction with their
+half-angle cosines: full strength inside the inner cone, smooth feather between them and zero
+outside the outer cone. Point, directional and area-proxy sources ignore these fields.
+
 `bulbClass` drives §53's switch-on envelope and all fixtures in a group must agree: filament ramps
 over 0.12 s, LED is instant, and fluorescent has a deterministic 0.4 s flicker-start. It is explicit
 where the source is not the default warm filament; neither a `tube` material slot nor kelvin is a

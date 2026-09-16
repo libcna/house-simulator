@@ -3449,7 +3449,7 @@ recomputed per object per frame (it is three normalises and a few dot products):
 
 | Slot | Source |
 |---|---|
-| `DirectionalLight0` | **Key** — the sun if the object's cell has daylight ≥ 0.15, the moon for a sky-open exterior at night, else the brightest fixture in range, as a directional approximation `normalize(object.centre − light.position)` attenuated by `1/(1 + (d/range)²)` |
+| `DirectionalLight0` | **Key** — the sun if the object's cell has daylight ≥ 0.15, the moon for a sky-open exterior at night, else the brightest fixture in range, as a directional approximation `normalize(object.centre − light.position)` attenuated by `1/(1 + (d/range)²)` and, for a spot, its authored feathered cone |
 | `DirectionalLight1` | **Fill** — the second-brightest fixture, or the daylight direction from the strongest window |
 | `DirectionalLight2` | **Bounce** — `−(key + fill)` normalised, at 0.18 intensity, tinted by the room's dominant surface colour |
 | `AmbientLightColor` | the cell's `ambientColor` |
@@ -3470,6 +3470,10 @@ fixtures and drops the approximation.
 > centre of their resident chunks, so this contract is exercised by today's house as well as later
 > dynamic actors; genuinely directional sources retain their authored direction. Candidate lists,
 > positions and ranges are built once and assignment remains allocation-free during drawing.
+> `HOUSE-01047` completes the existing spot contract at this same stock-effect boundary. The
+> canonical inner/outer values are full cone angles, so their half-angle cosines bound a smooth
+> feather before distance-ranked assignment. A spot therefore cannot illuminate fixed detail
+> behind or beside its reflector as if it were a point light.
 
 ### 28.6 Emissive surfaces
 

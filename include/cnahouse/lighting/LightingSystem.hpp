@@ -67,6 +67,14 @@ namespace cnahouse::lighting
     /// zero so malformed draw bounds cannot inject NaNs into a shared XNA effect.
     [[nodiscard]] float PointLightAttenuation(float distance, float range) noexcept;
 
+    /// @brief Smooth stock-effect energy envelope for an authored spot cone.
+    ///
+    /// The cone values are full angles, matching Blender's @c spot_size and the canonical JSON.
+    /// One is returned through the inner cone, zero outside the outer cone, and a smoothstep
+    /// transition between them. Invalid inputs return zero.
+    [[nodiscard]] float
+    SpotLightAttenuation(float directionCosine, float innerConeDeg, float outerConeDeg) noexcept;
+
     /// @brief Calibrated diffuse sky energy for a baked weather-facing receiver.
     ///
     /// The authored sky gradient is a display colour, not an illuminance scalar. Preserve its
@@ -348,7 +356,10 @@ namespace cnahouse::lighting
             Microsoft::Xna::Framework::Vector3 color{1.0F, 1.0F, 1.0F};
             float lumens = 0.0F;
             float range = 0.0F;
+            float coneInnerDeg = 0.0F;
+            float coneOuterDeg = 0.0F;
             bool positional = true;
+            bool spot = false;
         };
 
         [[nodiscard]] SwitchGroupState* FindGroupMutable(util::Id group) noexcept;

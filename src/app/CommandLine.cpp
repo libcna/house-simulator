@@ -155,6 +155,8 @@ namespace cnahouse::app
                "  --time=<hours>              Time of day to start at, 0..24\n"
                "  --freeze-time               Keep the simulation clock at its starting instant\n"
                "  --weather=<name>            Weather archetype to start in\n"
+               "  --light-on=<group>          Turn one authored group on for deterministic review;\n"
+               "                              repeat for additional groups\n"
                "  --no-audio                  Start with audio disabled\n"
                "  --no-cull                   Draw everything resident instead of §25's visible\n"
                "                              set -- the same switch as the `cull off` command\n"
@@ -398,6 +400,15 @@ namespace cnahouse::app
                     return value.Error();
                 }
                 options.weather = std::string(*value);
+            }
+            else if (argument.name == "--light-on")
+            {
+                auto value = requireValue("--light-on");
+                if (!value)
+                {
+                    return value.Error();
+                }
+                options.lightGroupsOn.emplace_back(*value);
             }
             else if (argument.name == "--screenshot")
             {

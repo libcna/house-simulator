@@ -95,6 +95,12 @@ namespace cnahouse::app
         /// @brief Keep the simulation clock at its starting instant for deterministic review captures.
         bool freezeTime = false;
         std::optional<std::string> weather;
+        /// @brief Repeatable deterministic review override for a real authored switch group.
+        ///
+        /// Normal play never supplies this: the authored/default/saved switch state remains the
+        /// authority. Visual review uses it to photograph a manually controlled practical in its
+        /// real on-state without rewriting world data or pretending it belongs on a dusk sensor.
+        std::vector<std::string> lightGroupsOn;
         /// @brief Take a screenshot to this path and exit.
         std::optional<std::string> screenshot;
         /// @brief Which drawn frame `--screenshot` captures. 1 is the first, and the default.

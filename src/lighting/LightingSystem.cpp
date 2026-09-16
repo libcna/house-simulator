@@ -12,6 +12,7 @@
 #include "cnahouse/rendering/SkySystem.hpp"
 #include <algorithm>
 #include <cmath>
+#include <numbers>
 
 #include "cnahouse/app/FrameTimer.hpp"
 #include "cnahouse/world/WorldData.hpp"
@@ -136,6 +137,30 @@ namespace cnahouse::lighting
         }
         const float normalized = distance / range;
         return 1.0F / (1.0F + normalized * normalized);
+    }
+
+    float SpotLightAttenuation(float directionCosine, float innerConeDeg, float outerConeDeg) noexcept
+    {
+        if (!std::isfinite(directionCosine) || !std::isfinite(innerConeDeg) || !std::isfinite(outerConeDeg) ||
+            innerConeDeg < 0.0F || outerConeDeg <= 0.0F || innerConeDeg > outerConeDeg ||
+            outerConeDeg > 180.0F)
+        {
+            return 0.0F;
+        }
+        constexpr float kDegreesToRadians = std::numbers::pi_v<float> / 180.0F;
+        const float innerCosine = std::cos(0.5F * innerConeDeg * kDegreesToRadians);
+        const float outerCosine = std::cos(0.5F * outerConeDeg * kDegreesToRadians);
+        const float cosine = std::clamp(directionCosine, -1.0F, 1.0F);
+        if (cosine >= innerCosine)
+        {
+            return 1.0F;
+        }
+        if (cosine <= outerCosine || innerCosine <= outerCosine)
+        {
+            return 0.0F;
+        }
+        const float t = (cosine - outerCosine) / (innerCosine - outerCosine);
+        return t * t * (3.0F - 2.0F * t);
     }
 
     Microsoft::Xna::Framework::Vector3
@@ -297,7 +322,10 @@ namespace cnahouse::lighting
             fixture.color = PlanckianRgb(light.colorK);
             fixture.lumens = light.intensityLm;
             fixture.range = light.range;
+            fixture.coneInnerDeg = light.coneInnerDeg;
+            fixture.coneOuterDeg = light.coneOuterDeg;
             fixture.positional = light.type != world::LightType::Directional;
+            fixture.spot = light.type == world::LightType::Spot;
             const std::size_t fixtureIndex = objectFixtures_.size();
             objectFixturesByCell_[cell->second].push_back(fixtureIndex);
             staticDetailFixturesByCell_[cell->second].push_back(fixtureIndex);
@@ -743,6 +771,18 @@ namespace cnahouse::lighting
                     continue;
                 }
                 direction = NormalizedOr(toObject, fixture.direction);
+                if (fixture.spot)
+                {
+                    const float directionCosine = fixture.direction.X * direction.X +
+                                                  fixture.direction.Y * direction.Y +
+                                                  fixture.direction.Z * direction.Z;
+                    attenuation *=
+                        SpotLightAttenuation(directionCosine, fixture.coneInnerDeg, fixture.coneOuterDeg);
+                    if (attenuation <= 0.0F)
+                    {
+                        continue;
+                    }
+                }
             }
             const float emitted = fixture.lumens * GroupOutputLevel(fixture.groupIndex) * attenuation;
             const RankedFixture ranked{emitted, fixtureIndex, direction};

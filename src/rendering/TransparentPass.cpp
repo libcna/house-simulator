@@ -85,9 +85,14 @@ namespace cnahouse::rendering
         const float relativeLumens = std::clamp(light.intensityLm / 400.0F, 0.0F, 16.0F);
         const float fluxForRadius = std::sqrt(std::sqrt(relativeLumens));
         const float exposureForRadius = std::clamp(std::pow(exposure, 0.2F), 0.85F, 1.45F);
-        visual.radius = 0.42F * fluxForRadius * std::sqrt(level) * exposureForRadius;
-        visual.alpha =
-            std::clamp(0.34F * level * std::sqrt(relativeLumens) * std::sqrt(exposure), 0.0F, 0.85F);
+        // A spot's reflector and visor expose much less apparent emitter area than an unshielded
+        // globe at the same delivered lumens. Its receiver contribution still uses all authored
+        // lumens; only the camera-facing presentation halo is restrained here.
+        const float opticRadius = light.type == world::LightType::Spot ? 0.72F : 1.0F;
+        const float opticAlpha = light.type == world::LightType::Spot ? 0.72F : 1.0F;
+        visual.radius = 0.42F * opticRadius * fluxForRadius * std::sqrt(level) * exposureForRadius;
+        visual.alpha = std::clamp(
+            0.34F * opticAlpha * level * std::sqrt(relativeLumens) * std::sqrt(exposure), 0.0F, 0.85F);
         visual.visible = visual.radius >= 0.01F && visual.alpha >= 0.001F &&
                          (visual.tint.X > 0.0F || visual.tint.Y > 0.0F || visual.tint.Z > 0.0F);
         return visual;

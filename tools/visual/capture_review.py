@@ -45,6 +45,8 @@ def main() -> int:
     parser.add_argument("--binary", type=Path, default=REPO / "build" / "cna-house")
     parser.add_argument("--scenario", choices=SCENARIOS, default="clear-day",
                         help="fixed time/weather review condition (default: clear-day)")
+    parser.add_argument("--light-on", action="append", default=[], metavar="GROUP",
+                        help="turn on an authored manual group for this review set (repeatable)")
     args = parser.parse_args()
 
     binary = args.binary.resolve()
@@ -72,6 +74,7 @@ def main() -> int:
             f"--time={time_of_day}",
             "--freeze-time",
             f"--weather={weather}",
+            *(f"--light-on={group}" for group in args.light_on),
             "--no-audio",
             "--screenshot-frame=3",
             f"--screenshot={output}",

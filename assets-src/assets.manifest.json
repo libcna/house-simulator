@@ -295,6 +295,46 @@
       }
     },
     {
+      "id": "MODEL_FIXTURE_GARAGE_FLOODLIGHT",
+      "category": "fixture",
+      "sourceFile": "assets-src/Models/Fixtures/garage_floodlight.glb",
+      "sourceSha256": "a8d62fcf068d613de106ffa8e3ddd996b749e6e8a2670d3eafd3e4641b3b6697",
+      "contentName": "Models/Fixtures/garage_floodlight",
+      "kind": "model",
+      "residencyPack": "exterior",
+      "origin": {
+        "kind": "generated",
+        "name": "Measured garage LED wall pack",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored dark-bronze garage floodlight generated deterministically by tools/assets/garage_floodlight.py for HOUSE-01047. Its bottom/depth-centred origin and canonical prop transform place the physical lens at the authored optical point; FloodLens is the exact emissive slot named by layout.lights.json. No third-party mesh or texture is embedded."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.42,
+          0.2025,
+          0.195
+        ],
+        "triangles": {
+          "LOD0": 156
+        }
+      },
+      "materialMap": {
+        "FloodMetal": "MAT_FIXTURE_DARK_BRONZE",
+        "FloodLens": "MAT_FIXTURE_EMISSIVE_NEUTRAL"
+      },
+      "usedIn": [
+        "EXT_DRIVEWAY"
+      ]
+    },
+    {
       "id": "MODEL_FIXTURE_PORCH_LANTERN",
       "category": "fixture",
       "sourceFile": "assets-src/Models/Fixtures/porch_lantern.glb",

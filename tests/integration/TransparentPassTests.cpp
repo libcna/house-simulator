@@ -141,6 +141,13 @@ namespace
         EXPECT_GT(brighter.radius, on.radius);
         EXPECT_GT(brighter.alpha, on.alpha);
 
+        light.type = world::LightType::Spot;
+        const auto shielded = FixtureGlowFor(light, 1.0F, warm, 1.0F);
+        EXPECT_LT(shielded.radius, brighter.radius);
+        EXPECT_LT(shielded.alpha, brighter.alpha);
+        EXPECT_GT(shielded.radius, on.radius)
+            << "a four-times brighter shielded fixture must still read larger than the globe";
+
         light.fixtureProp = {};
         EXPECT_FALSE(FixtureGlowFor(light, 1.0F, warm, 1.0F).visible)
             << "canonical light points without a physical fixture must never become floating orbs";

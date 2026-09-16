@@ -947,6 +947,42 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     EXPECT_GT(stepLights.spillDiffuseColor.X, stepLights.spillDiffuseColor.Z);
     EXPECT_GT(stepLights.spillDiffuseColor.Z, 0.0F);
 
+    // The garage flood is deliberately manual and aims away from the wall, so it is an unbaked
+    // fixed-detail spill rather than a fake facade lightmap. It reaches the garage door only
+    // through its explicit receiver id, never through proximity or an invented foreign binding.
+    // The terrain tile under the driveway is resident in EXT_SIDEYARD_E by largest overlap, so
+    // that exact receiver is named too; otherwise switching the flood would light the door but
+    // leave the asphalt beneath its cone byte-identical to the off frame.
+    const Id garage = Id::Of("L0_GARAGE");
+    const Id drivewayTerrain = Id::Of("EXT_SIDEYARD_E");
+    const Id garageFlood = Id::Of("LG_EXT_DRIVEWAY_FLOOD");
+    const Microsoft::Xna::Framework::Vector3 garageDoorCentre(13.20F, 1.35F, -13.30F);
+    const Microsoft::Xna::Framework::Vector3 drivewayCentre(13.0F, 0.0F, -8.5F);
+    const Microsoft::Xna::Framework::Vector3 outsideFloodCone(22.0F, 0.0F, -13.0F);
+    EXPECT_FALSE(house.lighting.StaticDetailLightsForObject(garage, garageDoorCentre).slots[0].has_value());
+    EXPECT_FALSE(
+        house.lighting.StaticDetailLightsForObject(drivewayTerrain, drivewayCentre).slots[0].has_value());
+    ASSERT_TRUE(house.lighting.SetGroupOn(garageFlood, true));
+    house.lighting.Update(Frame(31));
+    EXPECT_FALSE(house.lighting.DirectionalLightsForObject(garage, garageDoorCentre).slots[0].has_value());
+    EXPECT_FALSE(
+        house.lighting.CrossCellReceiverLightsForObject(garage, garageDoorCentre).slots[0].has_value());
+    const ObjectLightAssignment garageSpill =
+        house.lighting.StaticDetailLightsForObject(garage, garageDoorCentre);
+    ASSERT_TRUE(garageSpill.slots[0].has_value());
+    ASSERT_TRUE(garageSpill.slots[2].has_value());
+    EXPECT_GT(garageSpill.spillDiffuseColor.X, 0.0F);
+    EXPECT_GT(garageSpill.spillDiffuseColor.Y, garageSpill.spillDiffuseColor.Z);
+    const ObjectLightAssignment drivewaySpill =
+        house.lighting.StaticDetailLightsForObject(drivewayTerrain, drivewayCentre);
+    ASSERT_TRUE(drivewaySpill.slots[0].has_value());
+    EXPECT_GT(drivewaySpill.spillDiffuseColor.X, 0.0F);
+    EXPECT_GT(drivewaySpill.spillDiffuseColor.Y, drivewaySpill.spillDiffuseColor.Z);
+    EXPECT_FALSE(
+        house.lighting.StaticDetailLightsForObject(drivewayTerrain, outsideFloodCone).slots[0].has_value());
+    ASSERT_TRUE(house.lighting.SetGroupOn(garageFlood, false));
+    house.lighting.Update(Frame(32));
+
     ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_PORCH_LANTERN"), false));
     const ObjectLightAssignment dark = house.lighting.DirectionalLightsForObject(porch, centre);
     EXPECT_FALSE(dark.slots[0].has_value());
@@ -988,6 +1024,23 @@ TEST(LightingSystemTests, PointFixtureAttenuationIsBoundedAndObjectsOutsideRange
     EXPECT_FALSE(outside.slots[0].has_value());
     EXPECT_FALSE(outside.slots[1].has_value());
     EXPECT_FALSE(outside.slots[2].has_value());
+}
+
+TEST(LightingSystemTests, SpotFixtureAttenuationUsesAuthoredFullConeAngles)
+{
+    using cnahouse::lighting::SpotLightAttenuation;
+    constexpr float kPi = std::numbers::pi_v<float>;
+    const auto cosineAtDegrees = [](float degrees) { return std::cos(degrees * kPi / 180.0F); };
+
+    EXPECT_FLOAT_EQ(SpotLightAttenuation(1.0F, 40.0F, 70.0F), 1.0F);
+    EXPECT_FLOAT_EQ(SpotLightAttenuation(cosineAtDegrees(20.0F), 40.0F, 70.0F), 1.0F);
+    const float feather = SpotLightAttenuation(cosineAtDegrees(27.5F), 40.0F, 70.0F);
+    EXPECT_GT(feather, 0.0F);
+    EXPECT_LT(feather, 1.0F);
+    EXPECT_FLOAT_EQ(SpotLightAttenuation(cosineAtDegrees(35.0F), 40.0F, 70.0F), 0.0F);
+    EXPECT_FLOAT_EQ(SpotLightAttenuation(-1.0F, 40.0F, 70.0F), 0.0F);
+    EXPECT_FLOAT_EQ(SpotLightAttenuation(1.0F, 80.0F, 70.0F), 0.0F);
+    EXPECT_FLOAT_EQ(SpotLightAttenuation(std::numeric_limits<float>::quiet_NaN(), 40.0F, 70.0F), 0.0F);
 }
 
 TEST(LightingSystemTests, TheFramePublishesTheSunAndTheDaylightModelInWorldCellOrder)

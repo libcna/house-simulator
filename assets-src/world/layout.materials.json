@@ -2405,6 +2405,18 @@
       "effectTierS": "Basic", "effectTierE": "Emissive"
     },
     {
+      "id": "MAT_FIXTURE_EMISSIVE_NEUTRAL", "class": "emissive",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.94, 0.96, 0.94], "specularColor": [0.0, 0.0, 0.0],
+      "specularPower": 1.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "glass", "audioAbsorption": 0.02,
+      "effectTierS": "Basic", "effectTierE": "Emissive"
+    },
+    {
       "id": "MAT_SOIL_GARDEN", "class": "soil",
       "albedo": "Textures/Materials/soil_garden_albedo",
       "normal": "Textures/Materials/soil_garden_normal", "lightmapChannel": 1,

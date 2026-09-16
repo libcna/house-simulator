@@ -603,6 +603,13 @@ namespace cnahouse::app
         {
             lighting_.emplace(*world_, shading_, clock_, visibility_->Portals());
         }
+        for (const std::string& name : options_.lightGroupsOn)
+        {
+            if (!lighting_->SetGroupOn(util::Id::Of(name), true))
+            {
+                throw std::runtime_error(std::format("--light-on names unknown authored group '{}'", name));
+            }
+        }
         if (blockoutChunks_ != nullptr && blockoutCells_ != nullptr && materialBinder_ != nullptr &&
             materialBinder_->Count() != 0U && caches_ != nullptr)
         {

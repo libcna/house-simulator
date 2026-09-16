@@ -2091,14 +2091,15 @@
       "duskSensor": true
     },
 
-    // ---- LG_EXT_DRIVEWAY_FLOOD x1 -- over the garage door, aimed down the drive and not at the
-    // ---- street: +Z is south, so the direction leans away from the house as well as down
+    // ---- LG_EXT_DRIVEWAY_FLOOD x1 -- over the garage door, aimed 25 degrees out from vertical:
+    // ---- enough wall wash for the sectional door and apron, but not enough reach for the street
     {
       "id": "LIGHT_EXT_DRIVEWAY_FLOOD_1", "cell": "EXT_DRIVEWAY", "group": "LG_EXT_DRIVEWAY_FLOOD",
-      "type": "spot", "position": [13.20, 3.10, -13.25],
-      "direction": [0.0, -0.71, 0.71], "coneInnerDeg": 40.0, "coneOuterDeg": 70.0,
+      "type": "spot", "position": [13.20, 3.10, -13.136],
+      "direction": [0.0, -0.91, 0.42], "coneInnerDeg": 40.0, "coneOuterDeg": 70.0,
       "colorK": 4000, "bulbClass": "led", "intensityLm": 3000.0, "range": 14.00,
-      "fixtureProp": null, "emissiveMaterialSlot": "lens",
+      "spillCells": ["L0_GARAGE", "EXT_SIDEYARD_E"],
+      "fixtureProp": "PROP_EXT_DRIVEWAY_FLOODLIGHT", "emissiveMaterialSlot": "FloodLens",
       "castsBlobShadow": true, "bakedIntoLightmap": false, "defaultOn": false
     },
 

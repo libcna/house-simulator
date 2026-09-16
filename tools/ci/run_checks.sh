@@ -121,6 +121,9 @@ run_gate "manifest"   python3 tools/ci/check_manifest.py
 # HOUSE-01259: the close-range porch fixture is a deterministic project-authored GLB, and its
 # exact two-slot split is what lets the runtime switch only the diffuser rather than the cage.
 run_gate "porch-lantern" python3 tools/assets/porch_lantern.py --check
+# HOUSE-01047: the manually switched garage wall pack is another physical linked fixture, not a
+# bare light point or a one-off binary checked in without its deterministic source.
+run_gate "garage-floodlight" python3 tools/assets/garage_floodlight.py --check
 # HOUSE-01040: the project-authored close-range kitchen joinery must remain reproducible from
 # its measured Blender source, including the same small collidable GLBs and manifest hashes.
 run_gate "kitchen-builtins" python3 tools/assets/kitchen_builtins_prepare.py --check

@@ -1,4 +1,54 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01046` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01047` checkpoint)
+
+Branch `develop`. Task-start HEAD `f5aedc3` (`HOUSE-01046`). This file belongs to the single
+`HOUSE-01047` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The already canonical manual `LG_EXT_DRIVEWAY_FLOOD` is now a complete practical rather than an
+unlinked light row. A deterministic project-authored 420 × 203 × 195 mm bronze wall pack sits over
+the sectional opening; its physical lens is the source position and its exact `FloodLens` slot
+drives the neutral emissive/glow path. The source remains 4000 K, 3000 lm, manual and default off.
+It explicitly spills only to `L0_GARAGE` and the `EXT_SIDEYARD_E` terrain chunk that actually owns
+the driveway asphalt. The latter follows generated chunk residency, not a misleading logical cell
+name.
+
+Before: Round 38's [22:00 driveway](visual-review/captures/house-01046-garage-roof-night-r1/garage-approach.png)
+has no visible source and an almost black door/apron. The fixed camera now records the fixture in
+[daylight](visual-review/captures/house-01047-garage-flood-day-r1/garage-approach.png), its real
+[manual-off night](visual-review/captures/house-01047-garage-flood-night-off-r1/garage-approach.png)
+and the production [manual-on state](visual-review/captures/house-01047-garage-flood-night-on-r1/garage-approach.png).
+All twelve frames in each set were opened. The lit door and nearby asphalt become readable while
+the distant right fence remains dark.
+
+`--light-on=<group>` is a repeatable deterministic visual-review override applied to the genuine
+switch group after world construction. Unknown groups fail loudly; normal startup, save state and
+the authored manual switch are unchanged. The review wrapper forwards the option. The fixture
+assignment now also applies authored full-angle spot cones before ranking stock-XNA directional
+approximations. This removed the first iteration's point-like yard flood. A second rejected
+fallback had exposed the foyer's ceiling group to the weather-facing front door; the final path
+admits only an actual explicit spill contribution.
+
+The deterministic model is 156 triangles and contains no third-party mesh or texture. Provenance,
+licence credits and three new stable ids are recorded. Only the two inspected first-person
+references that see the corrected default-on kitchen spot cones were advanced; the hall changes
+through its kitchen opening. Front-door and serial season references remain unchanged.
+
+The fixture regenerates bit-for-bit and origin, manifest, material, licence, stable-ID and all
+content checks pass. The forced 31-stage content build completes in 36.40 s (navigation 7.37 s).
+Unit tests pass 1409/1409, integration registrations 135/135, and all 49 active software-render
+cases pass, including first-person references and 18-pose culled-vs-unculled equivalence. Full
+repository CI is green with 323 strict-XNA translation units clean. Compilation and strict-XNA
+work remained capped at six workers throughout this checkpoint.
+
+Next highest visible value is primary dining furniture, followed by controlled kitchen practical
+clutter and family-room secondary detail. The remaining dark facade needs its own authored
+practical/landscape composition rather than a wider garage cone or global exposure lift. Preserve
+the manual group, explicit receiver boundary and physically bounded spot; do not turn it into an
+automatic flood or neighbour-by-proximity lighting.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-01046` checkpoint)
 
 Branch `develop`. Task-start HEAD `d76933d` (`HOUSE-01045`). This file belongs to the single
 `HOUSE-01046` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

@@ -1565,3 +1565,48 @@ active software-render cases pass, including 18-pose culled/unculled equivalence
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. Highest visible
 value is a real exterior garage/front practical with bounded warm spill, followed by dining
 furniture and controlled kitchen/family detail.
+
+## Round 39 — physical garage floodlight and bounded night spill
+
+Commit: `HOUSE-01047` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 38's fixed [22:00 driveway](captures/house-01046-garage-roof-night-r1/garage-approach.png)
+has no physical source and leaves the door and asphalt almost black. After: the identical camera
+shows the compact wall pack in [clear daylight](captures/house-01047-garage-flood-day-r1/garage-approach.png),
+its truthful [manual-off night](captures/house-01047-garage-flood-night-off-r1/garage-approach.png)
+and its [manual-on night](captures/house-01047-garage-flood-night-on-r1/garage-approach.png). All
+twelve frames in each fixed set were opened and inspected.
+
+Ranked visible defects remaining:
+
+1. Dining remains unfurnished and is the largest break in the connected L0 domestic route.
+2. Kitchen practical clutter and family-room secondary detail still trail their primary pieces.
+3. The night garage is now locally readable, but the broader facade remains correctly dark beyond
+   the flood cone and still needs its own authored practical/landscape composition.
+4. The garage elevation remains broad and simple even though its door, roof and practical now read.
+5. The living-room piano wall needs restrained art or a linked physical accent fixture.
+
+Fixed: the existing manual 4000 K / 3000 lm group now owns a deterministic 420 × 203 × 195 mm
+dark-bronze wall pack, a linked neutral emissive lens and explicit fixed receivers for the
+sectional door and the terrain chunk beneath the driveway. The authored source sits at the lens
+and aims 25° outward from vertical through a 40°/70° feathered cone. Stock-`BasicEffect` fixture
+assignment now respects that full-angle cone, preventing the former test iteration from lighting
+the side fence and whole yard like a point source. Spot presentation glows expose less apparent
+area than an equal-lumen globe while receiver energy remains unchanged.
+
+The normal manual switch remains off. Repeatable `--light-on=<group>` is a deterministic
+review-only override of the real group, so the on-state does not create a parallel lighting path
+or change saved/default gameplay. In the fixed crop the door mean rises from approximately
+RGB(5.28,4.55,4.85) to RGB(15.78,10.73,8.70), and the near asphalt from
+RGB(2.33,2.35,3.82) to RGB(9.96,8.01,7.60), while the right fence changes only marginally.
+
+Two strict first-person references were intentionally advanced after inspection: the kitchen's
+four default-on downlights now obey their 140° cones, and the hall changes only where it looks
+through that kitchen opening. A too-broad exterior-door fallback that initially warmed the front
+door with the foyer ceiling light was rejected and narrowed to explicit spill before reference
+updates. No season reference changed in its serial confirmation run.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only; the flood is
+one finished practical, not permission to lift global night exposure. Highest visible value is
+dining furniture, followed by controlled kitchen/family detail and a separate authored treatment
+for the remaining dark facade.
