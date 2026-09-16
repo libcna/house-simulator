@@ -130,6 +130,8 @@ run_gate "kitchen-builtins" python3 tools/assets/kitchen_builtins_prepare.py --c
 # HOUSE-01045: the formal-room piano is a close-range deterministic authored asset, not a
 # one-off binary or a cuboid standing in for furniture.
 run_gate "living-piano" python3 tools/assets/living_piano_prepare.py --check
+# HOUSE-01048: the formal table, chair and physical chandelier remain reproducible measured assets.
+run_gate "dining-suite" python3 tools/assets/dining_suite_prepare.py --check
 # And the credits document cannot drift from the manifest it is generated from (`HOUSE-00198`).
 run_gate "licences-selftest" python3 tools/assets/verify_licences.py --selftest
 run_gate "licences"   python3 tools/assets/verify_licences.py --check

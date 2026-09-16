@@ -152,6 +152,11 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. The extra "
                   "materials retain source cushions, lampshade, leaf and rug; HOUSE-01045 adds "
                   "four non-mergeable close piano finishes for case, ivory, black keys and pedals"),
+    "L0_DINING": (10,
+                  "HOUSE-01048's measured formal composition: four shell finishes plus walnut, "
+                  "brass, upholstered fabric, rug, chandelier metal and the independently switched "
+                  "emissive shades. Merging those six close-range roles would repaint the chairs, "
+                  "erase the rug or prevent the physical fixture from switching correctly"),
     "L0_STAIR_MAIN": (8,
                       "a stair hall: the four receiver classes plus a STAIR class, glazing and "
                       "trim, plus the outside window frame. The stair is the room's purpose"),

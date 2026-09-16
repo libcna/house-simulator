@@ -646,8 +646,8 @@
       "type": "point", "position": [-5.20, 2.55, -21.60],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2700, "intensityLm": 1800.0, "range": 4.34,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "fixtureProp": "PROP_L0_DINING_CHANDELIER", "emissiveMaterialSlot": "ChandelierShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L0_DINING_SIDE x2 -- over the sideboard

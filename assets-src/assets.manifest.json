@@ -295,6 +295,46 @@
       }
     },
     {
+      "id": "MODEL_FIXTURE_DINING_CHANDELIER",
+      "category": "fixture",
+      "sourceFile": "assets-src/Models/Furniture/Dining/dining_chandelier.glb",
+      "sourceSha256": "c0ca961179c90ba54dc8c83d6c1b4ed4046f9217fa0d9721270792437afd9bcd",
+      "contentName": "Models/Furniture/Dining/dining_chandelier",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Six-shade formal dining chandelier",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured chandelier generated deterministically by tools/blender/dining_suite.py for HOUSE-01048. The ceiling canopy, drop stem, rectangular bronze frame and six physical frosted shades form one close-range fixture; ChandelierShade is the exact switched emissive slot. No third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.25,
+          1.19,
+          0.586
+        ],
+        "triangles": {
+          "LOD0": 1488
+        }
+      },
+      "materialMap": {
+        "CHANDELIER_METAL": "MAT_FIXTURE_DARK_BRONZE",
+        "ChandelierShade": "MAT_FIXTURE_EMISSIVE_WARM"
+      },
+      "usedIn": [
+        "L0_DINING"
+      ]
+    },
+    {
       "id": "MODEL_FIXTURE_GARAGE_FLOODLIGHT",
       "category": "fixture",
       "sourceFile": "assets-src/Models/Fixtures/garage_floodlight.glb",
@@ -416,6 +456,89 @@
       "usedIn": [
         "L0_LIVING",
         "L0_FAMILY"
+      ]
+    },
+    {
+      "id": "MODEL_FURNITURE_DINING_CHAIR",
+      "category": "chair",
+      "sourceFile": "assets-src/Models/Furniture/Dining/dining_chair.glb",
+      "sourceSha256": "e7b58cc9713973e124b46e978f72ddf68221f14efbc80874617ea3c7a32f0955",
+      "contentName": "Models/Furniture/Dining/dining_chair",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Upholstered formal dining chair",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured dining chair generated deterministically by tools/blender/dining_suite.py for HOUSE-01048. It has a separate walnut frame, tapered legs, rails, framed upholstered back and support-grounded 0.47 m seat. Approved project materials are bound during content build; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.535,
+          0.985436,
+          0.51987
+        ],
+        "seatHeightMetres": 0.47,
+        "triangles": {
+          "LOD0": 1492
+        },
+        "collision": "dining_chair_001_seat_frame_COL"
+      },
+      "materialMap": {
+        "DINING_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "DINING_FABRIC": "MAT_FURNITURE_DINING_UPHOLSTERY"
+      },
+      "usedIn": [
+        "L0_DINING"
+      ]
+    },
+    {
+      "id": "MODEL_FURNITURE_DINING_TABLE",
+      "category": "table-dining",
+      "sourceFile": "assets-src/Models/Furniture/Dining/dining_table.glb",
+      "sourceSha256": "92233301f3538433253963e10d12160407038f64866f1f16770383abac6b86fc",
+      "contentName": "Models/Furniture/Dining/dining_table",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Eight-place formal walnut dining table",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured dining table generated deterministically by tools/blender/dining_suite.py for HOUSE-01048. Breadboard ends, moulded aprons, a low stretcher and four tapered brass-footed legs give the close view real joinery at a 0.76 m top. Approved project materials are bound during content build; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.35,
+          0.76,
+          0.98
+        ],
+        "triangles": {
+          "LOD0": 1496
+        },
+        "collision": "dining_table_001_top_panel_COL"
+      },
+      "materialMap": {
+        "DINING_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "DINING_BRASS": "MAT_FURNITURE_PIANO_BRASS"
+      },
+      "usedIn": [
+        "L0_DINING"
       ]
     },
     {
@@ -771,7 +894,8 @@
       },
       "usedIn": [
         "L0_LIVING",
-        "L0_FAMILY"
+        "L0_FAMILY",
+        "L0_DINING"
       ]
     },
     {

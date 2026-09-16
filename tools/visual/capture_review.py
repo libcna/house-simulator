@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import os
 import subprocess
+import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -24,6 +25,9 @@ POSES = (
     ("kitchen-from-hall", "0.00,0.60,-23.55,285.0,0.0"),
     ("living-room", "-5.20,0.60,-17.25,90.0,0.0"),
     ("living-composition", "-3.10,0.60,-18.50,270.0,0.0"),
+    # HOUSE-01048: look east along the formal dining room's long axis so table scale, all eight
+    # chair positions, the hall door and the living/kitchen circulation edges remain reviewable.
+    ("dining-room", "-7.70,0.60,-21.60,90.0,0.0"),
     # HOUSE-01040: -3.0,-25.05 was inside the newly authored island's proxy. The paired
     # east/west pose moves to the measured 1.04 m circulation lane beside its east end.
     ("kitchen", "-1.10,0.60,-25.05,90.0,0.0"),
@@ -60,6 +64,11 @@ def main() -> int:
         "SDL_AUDIODRIVER": "dummy",
         "LIBGL_ALWAYS_SOFTWARE": "1",
     })
+    # A review set must show the authored new-game state, never whichever switches a developer's
+    # interactive save happened to leave on or off. Keep one clean profile alive for the complete
+    # set so every view shares the same deterministic starting state without touching user data.
+    review_data_home = tempfile.TemporaryDirectory(prefix="cnahouse-visual-review-")
+    environment["XDG_DATA_HOME"] = review_data_home.name
     time_of_day, weather = SCENARIOS[args.scenario]
 
     for name, pose in POSES:
@@ -83,6 +92,7 @@ def main() -> int:
         completed = subprocess.run(command, cwd=REPO, env=environment, check=False)
         if completed.returncode != 0 or not output.is_file():
             return completed.returncode or 1
+    review_data_home.cleanup()
     return 0
 
 

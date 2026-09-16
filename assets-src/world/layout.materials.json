@@ -1562,6 +1562,20 @@
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
     // END FOYER FURNITURE MATERIALS
+    // BEGIN FORMAL DINING FURNITURE MATERIALS (HOUSE-01048)
+    {
+      "id": "MAT_FURNITURE_DINING_UPHOLSTERY", "class": "fabric",
+      "albedo": "Textures/Materials/fabric_plain_albedo",
+      "normal": "Textures/Materials/fabric_plain_normal", "lightmapChannel": 0,
+      "tint": [0.52, 0.65, 0.42], "specularColor": [0.025, 0.030, 0.020],
+      "specularPower": 4.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.55,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    // END FORMAL DINING FURNITURE MATERIALS
     // BEGIN FORMAL LIVING PIANO MATERIALS (HOUSE-01045)
     // These close-range static finishes deliberately use stock-XNA BasicEffect: the piano has
     // physical UV0 but no shell UV2. All four reuse already approved project texture sources.

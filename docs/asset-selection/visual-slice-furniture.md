@@ -21,3 +21,20 @@ would make those parts almost disappear. This is a consciously limited screen/ca
 a claim that the house has physically rendered decorative glass.
 
 Deferred: a second sofa design and full decor density. A repeated copy in each of two different rooms is acceptable for the first playable slice, but further rooms should vary the seating language.
+
+## Formal dining primary set
+
+2026-09-17, HOUSE-01048. No approved source in the established living-room kit contains a dining
+table or dining chair, and stretching its coffee table/armchair would fail both use and scale.
+The selected solution is therefore a deterministic project-authored matching set, reusing the
+approved walnut, brass, plain-fabric and warm-emissive source maps through stock-XNA materials.
+
+| Object | Measured bound (m) | LOD0 triangles | Review contract |
+|---|---:|---:|---|
+| Eight-place table | 2.350 × 0.760 × 0.980 | 1,496 | breadboard top, aprons, low stretcher, tapered brass-footed legs |
+| Upholstered chair | 0.535 × 0.985 × 0.520 | 1,492 | 0.470 m seat, framed pad/back, tapered legs; eight expected matching uses |
+| Six-shade chandelier | 1.250 × 1.190 × 0.586 | 1,488 | physical canopy/stem/frame; exact linked `ChandelierShade` slot |
+
+Matching chair repetition is intentional furniture-set language, not procedural duplication.
+The room's four portal edges and measured end circulation own placement acceptance; later dressing
+may add a shallow credenza only if it preserves those routes.

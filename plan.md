@@ -14213,6 +14213,46 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             including first-person references and 18-pose culled-vs-unculled equivalence. Full
             repository CI is green with 323 strict-XNA translation units clean; every compilation
             path was capped at six workers and `git diff --check` passes.
+- [x] HOUSE-01048 — Establish the formal dining room's primary furniture and physical chandelier
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-01037, HOUSE-01256, HOUSE-01259 · sys: content/world/lighting · plat: ALL · pri: MUST
+      note: (2026-09-17) New next-free phase-13 visual-sprint subtask. Round 39 identifies the
+            completely empty `L0_DINING` as the largest remaining break in the connected main-floor
+            route. Use the proven static-prop and stock-XNA fixture paths for a measured coherent
+            set; do not claim the dependency-blocked full-room `HOUSE-00989`, scatter micro-clutter
+            or obstruct its four portals merely to raise prop count.
+      accept: the canonical 6.0 × 2.8 m room receives a support-grounded walnut table for eight,
+            eight correctly scaled upholstered chairs, an anchoring rug and a physical chandelier
+            linked to the existing 2700 K group/exact emissive slot. Measured circulation remains
+            available around the two table ends between living, hall, kitchen and storage routes;
+            asset source, UV0, finish mapping, collision proxy, origin, scale, provenance and stable
+            IDs validate. Add a fixed dining review camera, capture and inspect matched before/after
+            day plus chandelier-on night views, and pass content, navigation, stock-XNA, render and
+            culled-vs-unculled gates without exceeding six compile workers.
+      findings: (2026-09-17) A deterministic project-authored suite supplies a 2.35 × 0.98 ×
+            0.76 m breadboard table (1,496 visible triangles), a 0.535 × 0.520 × 0.985 m chair
+            reused eight times (1,492 triangles each) and a 1.25 × 0.586 × 1.19 m six-shade
+            chandelier (1,488 triangles). Table and chair have explicit `_COL` proxies; UV0,
+            grounded origins, finish slots, bounds, hashes, manifest links and world placement are
+            checked by the new permanent `dining-suite` gate. The eleven props preserve all four
+            routes and retain measured table-end clearances. Existing approved walnut, brass and
+            rug sources are reused; the only new finish is approved sage plain-fabric upholstery.
+      review: (2026-09-17) The new thirteenth fixed camera records the empty before set at
+            `house-01048-dining-before-r1`, the finished clear-day set at
+            `house-01048-dining-day-final` and the chandelier-on 22:00 set at
+            `house-01048-dining-night-final`; every frame was opened. The previously windowless
+            black room is now a coherent seating composition. Its real 2700 K group owns the exact
+            `ChandelierShade` slot and starts on for a readable new-game route while retaining its
+            authored switch. The review wrapper now isolates `XDG_DATA_HOME`, after an old save
+            state proved capable of falsifying otherwise fixed captures.
+      verified: (2026-09-17) Deterministic asset, origin, scale, glTF, material, licence, stable-ID,
+            world-rule and budget checks pass. The incremental world build completes normally with
+            navigation in 7.13 s and reports 611 chunks / 36 props; `L0_DINING` alone has the exact
+            ten-chunk exception measured from its shell, furniture, rug and switched fixture. Unit
+            registrations pass 1409/1409 after correcting the one expected furniture-material
+            count; integration passes 135/135. Two kitchen goldens that visibly contain the new
+            dining silhouettes/spill were inspected and selectively advanced; all 49 active render
+            cases pass, including 18-pose culled-vs-unculled equivalence. Compilation and heavy
+            build work were capped at six workers / CPU 0–5.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -18380,6 +18420,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01048` | **New task, next free phase-13 id.** Establish a measured primary dining composition and link a physical chandelier through the existing stock-XNA static-prop/light paths; raise only `L0_DINING` to its measured ten-chunk exception. | Round 39's fixed connected-route view shows a completely empty, nearly black 6.0 × 2.8 m room between already finished living and kitchen spaces. The full `HOUSE-00989` remains dependency-blocked on whole-house furnishing work, but a project-authored table/chair/fixture suite is dependency-valid now. The room has no exterior window, so its existing switchable 2700 K chandelier starts on like the other selected readable-route practicals rather than adding ambient light, a new renderer or a screenshot-only normal-play path. |
 | 2026-09-16 | `HOUSE-00935` | **New task, next free phase-12 id.** Route the already-authored closed garage leaf through the bounded exterior-door role and finish it as the five-section door its canonical data already declares. | Round 35's normal front frame sees through the entire 4.90 × 2.40 m opening because the room-owned leaf still uses ordinary indoor `MAT_DOOR_STEEL`, which §25.6 correctly culls with `L0_GARAGE`. Making all indoor metal or trim exterior-visible would leak the room; moving the leaf to an exterior cell would break portal ownership. A dedicated weather-facing finish is the same narrow architectural solution already proven by the entry door. |
 | 2026-09-16 | `HOUSE-00934` | **New task, next free phase-12 id.** Finish the settled hip/dormer geometry with a measured layered eave cornice, correct vertical dormer faces from shingles to approved siding, and add painted dormer trim without moving the roof or its collision envelope. | Round 34's fixed road view makes the remaining defect explicit: the four-storey facade ends at one thin line, while the five existing dormers read as dark boxes because `build_roof` assigns all eight of each dormer's faces to the shingle role. The architecture already calls for Colonial Revival massing and five gabled dormers; finish roles and joinery are missing, not a new roof design. |
 | 2026-09-16 | `HOUSE-00933` | **New task, next free phase-12 id.** Complete only §12.1's already-required front-window vocabulary: canonical `W_DH_*` rows opt into 6-over-6 grilles and black louvered shutters, generated as exterior-window detail through the existing shell/content path. | Round 33's fixed clear-day front still reads as a broad undifferentiated siding box. The source architecture explicitly specifies both missing elements, but `HOUSE-00457` implemented only frames, sashes, glass and the double-hung meeting rail. Data-authored patterns avoid a front-cell heuristic, and a narrow exterior-window material role avoids exposing general indoor trim. |

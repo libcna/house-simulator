@@ -337,8 +337,9 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     {
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
-    // Most groups start off; the foyer, hall and kitchen main groups now start on to make the
-    // playable entrance route readable. Automatic exterior groups instead read the live sun.
+    // Most groups start off; the foyer, hall, kitchen, dining and family main groups now start on
+    // to make the playable main-floor route readable. Automatic exterior groups instead read the
+    // live sun.
     HouseLighting house;
     const world::WorldData& world = house.world;
     LightingSystem& lighting = house.lighting;
@@ -382,10 +383,14 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
 
     const Id foyerMain = Id::Of("LG_L0_FOYER_MAIN");
     const Id hallMain = Id::Of("LG_L0_HALL_MAIN");
+    const Id diningChandelier = Id::Of("LG_L0_DINING_CHANDELIER");
     ASSERT_NE(lighting.FindGroup(foyerMain), nullptr);
     ASSERT_NE(lighting.FindGroup(hallMain), nullptr);
+    ASSERT_NE(lighting.FindGroup(diningChandelier), nullptr);
     EXPECT_TRUE(lighting.FindGroup(foyerMain)->on);
     EXPECT_TRUE(lighting.FindGroup(hallMain)->on);
+    EXPECT_TRUE(lighting.FindGroup(diningChandelier)->on)
+        << "the windowless dining room should be readable on the new-game route";
     EXPECT_TRUE(lighting.SetGroupOn(foyerMain, false));
     EXPECT_TRUE(lighting.SetGroupOn(hallMain, false));
     lighting.Update(Frame(2));

@@ -1610,3 +1610,48 @@ updates. No season reference changed in its serial confirmation run.
 one finished practical, not permission to lift global night exposure. Highest visible value is
 dining furniture, followed by controlled kitchen/family detail and a separate authored treatment
 for the remaining dark facade.
+
+## Round 40 — furnished and illuminated formal dining room
+
+Commit: `HOUSE-01048` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: the fixed [clear-day dining view](captures/house-01048-dining-before-r1/dining-room.png)
+looks through a completely empty, almost black 6.0 × 2.8 m room between the finished kitchen and
+living room. After: the identical [clear-day camera](captures/house-01048-dining-day-final/dining-room.png)
+shows a measured walnut table for eight, eight upholstered chairs, an anchoring rug and a physical
+six-shade chandelier. The matched [22:00 view](captures/house-01048-dining-night-final/dining-room.png)
+proves the real 2700 K group drives both the exact shade emission and the existing baked room
+contribution. Each linked directory is a complete thirteen-camera route set and every frame was
+opened; the new dining camera looks along the table while retaining both kitchen and living edges.
+
+Ranked visible defects remaining:
+
+1. The kitchen has its primary cabinetry/appliances but still lacks purposeful countertop and
+   island detail; it is the clearest remaining furnished-route gap.
+2. Dining needs a restrained sideboard, wall art and table setting to progress from primary
+   furnishing to a lived-in room without obstructing its unusually narrow circulation.
+3. Family-room secondary objects and finish depth still lag its primary seating composition.
+4. The 2700 K Tier-S practical reads more orange/saturated than a camera-white-balanced interior;
+   later lighting calibration should address that locally rather than lifting global exposure.
+5. The garage/front elevation remains broad and the facade outside authored practicals is still
+   sparse and appropriately dark at night.
+
+Fixed: three deterministic project-authored models add a 2.35 × 0.98 × 0.76 m breadboard table,
+a 0.535 × 0.520 × 0.985 m chair reused eight times, and a 1.25 m six-shade bronze chandelier.
+The table and chair carry explicit collision proxies; all three have validated UV0, material-slot,
+origin, scale and deterministic-hash contracts. Existing approved walnut/brass/rug sources are
+reused, with one new approved sage upholstery binding. The eleven placements preserve the four
+portal routes and leave measured clearance at both table ends. The physical `ChandelierShade`
+slot now belongs to the existing source, which starts on for a readable windowless new-game route
+but remains controllable by its authored switch.
+
+The review harness now runs every set in a clean temporary XDG profile, preventing an old saved
+switch state from silently changing an otherwise fixed screenshot. The world is 611 chunks / 36
+static props; `L0_DINING` has an explicit ten-chunk measured exception for its shell, four furniture
+finishes, rug, fixture metal and switched emissive role. Only the two inspected kitchen references
+that see the new chairs/warm spill through the dining opening were intentionally advanced. All 49
+active software-render cases pass, including the unchanged 18-pose culled/unculled comparison.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and the connected
+L0 route no longer crosses an empty dining blockout, but kitchen/family secondary detail and the
+remaining exterior composition are not yet at the gate's credible-house bar.

@@ -1,4 +1,51 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01047` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01048` checkpoint)
+
+Branch `develop`. Task-start HEAD `43b6b40` (`HOUSE-01047`). This file belongs to the single
+`HOUSE-01048` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The connected L0 route no longer crosses an empty formal dining blockout. `L0_DINING` now has a
+project-authored 2.35 × 0.98 m walnut breadboard table for eight, eight correctly scaled sage
+upholstered chairs, the existing charcoal rug and a physical six-shade bronze chandelier. The
+eleven placements retain the permanent kitchen/living openings and the hall/storage portals, with
+measured clearance at the table ends. The table and chair have explicit collision proxies; their
+deterministic Blender generation, UV0, origins, bounds, material slots, manifest rows and stable
+ids are checked by `tools/assets/dining_suite_prepare.py --check` and the permanent `dining-suite`
+CI gate.
+
+Before: the fixed [clear-day dining camera](visual-review/captures/house-01048-dining-before-r1/dining-room.png)
+shows a dark empty room. The matched [final clear-day view](visual-review/captures/house-01048-dining-day-final/dining-room.png)
+shows the complete seating composition and its readable 2700 K practical; the
+[final 22:00 view](visual-review/captures/house-01048-dining-night-final/dining-room.png) proves the
+same production group drives the exact `ChandelierShade` emission and baked room contribution.
+All thirteen views in each canonical set were opened and inspected.
+
+The existing windowless dining chandelier now starts on so a new-game walk from living through
+dining to kitchen is readable; its authored wall switch can still turn it off. This is a data
+default, not a review-only light or global exposure change. `capture_review.py` now gives every
+set a clean temporary XDG profile, so an unrelated interactive save can no longer override
+authored defaults and make the fixed review cameras nondeterministic.
+
+The new dining finish boundary raises only `L0_DINING` to its measured ten-chunk exception. The
+world is 611 chunks / 36 static props. Only `blockout-l0-kitchen.png` and `fp-l0-kitchen.png` were
+intentionally advanced after direct before/actual inspection: each sees the new chair silhouettes
+and localized warm spill through the dining opening. All other generated golden changes were
+discarded. The complete render suite passes 49/49 active cases, including the unchanged 18-pose
+culled-vs-unculled equivalence.
+
+Verification is clean: deterministic asset/content checks and the full repository gate pass, as do
+1,409/1,409 unit registrations, 135/135 integration registrations and all 49 active render cases.
+The strict-XNA compiler accepts all 323 translation units. Compilation, tests and heavy content
+work remained capped to CPU 0–5 / six workers, and `git diff --check` passes.
+
+Next highest visible value is controlled kitchen countertop/island detail, followed by a dining
+sideboard/art/table setting and family-room secondary detail. The dining fixture is visibly too
+orange/saturated under the current Tier-S 2700 K approximation; tune that locally in later lighting
+work rather than removing the real fixture, widening spill or lifting global exposure.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01047` checkpoint)
 
 Branch `develop`. Task-start HEAD `f5aedc3` (`HOUSE-01046`). This file belongs to the single
 `HOUSE-01047` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

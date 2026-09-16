@@ -180,7 +180,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 177U) << "HOUSE-01047 adds the neutral garage-flood lens finish";
+                EXPECT_EQ(binder.Count(), 178U) << "HOUSE-01048 adds measured dining upholstery";
                 const MaterialDesc* entryPanel = binder.Find(Id::Of("MAT_EXTERIOR_DOOR_PANEL_HARDWOOD"));
                 ASSERT_NE(entryPanel, nullptr);
                 EXPECT_EQ(entryPanel->kind, MaterialKind::Basic);
@@ -211,6 +211,10 @@ namespace
                 ASSERT_NE(fixtureFloodLens, nullptr);
                 EXPECT_EQ(fixtureFloodLens->kind, MaterialKind::Basic);
                 EXPECT_FALSE(fixtureFloodLens->lightingEnabled);
+                const MaterialDesc* diningFabric = binder.Find(Id::Of("MAT_FURNITURE_DINING_UPHOLSTERY"));
+                ASSERT_NE(diningFabric, nullptr);
+                EXPECT_EQ(diningFabric->kind, MaterialKind::Basic);
+                EXPECT_TRUE(diningFabric->lightingEnabled);
                 const MaterialDesc* kitchenCounter = binder.Find(Id::Of("MAT_KITCHEN_COUNTER_STONE"));
                 ASSERT_NE(kitchenCounter, nullptr);
                 EXPECT_EQ(kitchenCounter->kind, MaterialKind::Basic);
