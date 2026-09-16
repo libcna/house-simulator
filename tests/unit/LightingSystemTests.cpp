@@ -47,6 +47,7 @@ namespace
     using cnahouse::lighting::ObjectLightAssignment;
     using cnahouse::lighting::OutdoorSkyIrradianceFor;
     using cnahouse::lighting::PlanckianRgb;
+    using cnahouse::lighting::PointLightAttenuation;
     using cnahouse::lighting::RoomLightState;
     using cnahouse::lighting::ShadingGrid;
     using cnahouse::lighting::SwitchGroupState;
@@ -875,25 +876,70 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     house.lighting.Update(Frame(30));
 
     const Id porch = Id::Of("L0_PORCH");
-    const ObjectLightAssignment lights = house.lighting.DirectionalLightsForObject(porch);
+    const Microsoft::Xna::Framework::Vector3 centre(0.0F, 0.57F, -12.95F);
+    const ObjectLightAssignment lights = house.lighting.DirectionalLightsForObject(porch, centre);
     ASSERT_TRUE(lights.slots[0].has_value());
     ASSERT_TRUE(lights.slots[1].has_value());
     ASSERT_TRUE(lights.slots[2].has_value());
-    EXPECT_EQ(lights.slots[0]->direction, Microsoft::Xna::Framework::Vector3(0.0F, -1.0F, 0.0F));
-    EXPECT_EQ(lights.slots[1]->direction, Microsoft::Xna::Framework::Vector3(0.0F, -1.0F, 0.0F));
+    const float dx = 0.90F;
+    const float dy = 0.57F - 2.62F;
+    const float dz = -12.95F - (-14.073F);
+    const float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+    EXPECT_NEAR(lights.slots[0]->direction.X, dx / distance, 1.0e-6F);
+    EXPECT_NEAR(lights.slots[0]->direction.Y, dy / distance, 1.0e-6F);
+    EXPECT_NEAR(lights.slots[0]->direction.Z, dz / distance, 1.0e-6F);
+    EXPECT_NEAR(lights.slots[1]->direction.X, -dx / distance, 1.0e-6F);
+    EXPECT_NEAR(lights.slots[1]->direction.Y, dy / distance, 1.0e-6F);
+    EXPECT_NEAR(lights.slots[1]->direction.Z, dz / distance, 1.0e-6F);
     EXPECT_NEAR(lights.slots[0]->diffuseColor.X, lights.slots[1]->diffuseColor.X, 1.0e-6F)
-        << "the equal porch pair must have equal energy before distance attenuation";
-    EXPECT_GT(lights.slots[2]->direction.Y, 0.99F);
+        << "the symmetric porch receiver must retain equal energy after distance attenuation";
+    const float attenuation = PointLightAttenuation(distance, 6.50F);
+    EXPECT_NEAR(lights.slots[0]->diffuseColor.X, 0.5F * attenuation * PlanckianRgb(2400.0F).X, 1.0e-6F);
+    const float bounceLength = std::sqrt(dy * dy + dz * dz);
+    EXPECT_NEAR(lights.slots[2]->direction.X, 0.0F, 1.0e-6F);
+    EXPECT_NEAR(lights.slots[2]->direction.Y, -dy / bounceLength, 1.0e-6F);
+    EXPECT_NEAR(lights.slots[2]->direction.Z, -dz / bounceLength, 1.0e-6F);
     EXPECT_GT(lights.slots[2]->diffuseColor.X, 0.0F);
     EXPECT_LT(lights.slots[2]->diffuseColor.X,
               lights.slots[0]->diffuseColor.X + lights.slots[1]->diffuseColor.X);
 
     ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_PORCH_LANTERN"), false));
-    const ObjectLightAssignment dark = house.lighting.DirectionalLightsForObject(porch);
+    const ObjectLightAssignment dark = house.lighting.DirectionalLightsForObject(porch, centre);
     EXPECT_FALSE(dark.slots[0].has_value());
     EXPECT_FALSE(dark.slots[1].has_value());
     EXPECT_FALSE(dark.slots[2].has_value());
-    EXPECT_FALSE(house.lighting.DirectionalLightsForObject(Id::Of("NO_SUCH_CELL")).slots[0].has_value());
+    EXPECT_FALSE(
+        house.lighting.DirectionalLightsForObject(Id::Of("NO_SUCH_CELL"), centre).slots[0].has_value());
+}
+
+TEST(LightingSystemTests, PointFixtureAttenuationIsBoundedAndObjectsOutsideRangeReceiveNoFixture)
+{
+    EXPECT_FLOAT_EQ(PointLightAttenuation(0.0F, 6.5F), 1.0F);
+    EXPECT_FLOAT_EQ(PointLightAttenuation(6.5F, 6.5F), 0.5F);
+    EXPECT_FLOAT_EQ(PointLightAttenuation(13.0F, 6.5F), 0.0F);
+    EXPECT_FLOAT_EQ(PointLightAttenuation(-1.0F, 6.5F), 0.0F);
+    EXPECT_FLOAT_EQ(PointLightAttenuation(1.0F, 0.0F), 0.0F);
+    EXPECT_FLOAT_EQ(PointLightAttenuation(std::numeric_limits<float>::infinity(), 6.5F), 0.0F);
+
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    cnahouse::environment::CivilTime night;
+    night.year = 2031;
+    night.month = 6;
+    night.day = 21;
+    night.hour = 22;
+    house.clock.SetStandard(night);
+    house.lighting.Update(Frame(31));
+
+    const ObjectLightAssignment outside = house.lighting.DirectionalLightsForObject(
+        Id::Of("L0_PORCH"), Microsoft::Xna::Framework::Vector3(0.0F, 0.57F, 100.0F));
+    EXPECT_FALSE(outside.slots[0].has_value());
+    EXPECT_FALSE(outside.slots[1].has_value());
+    EXPECT_FALSE(outside.slots[2].has_value());
 }
 
 TEST(LightingSystemTests, TheFramePublishesTheSunAndTheDaylightModelInWorldCellOrder)

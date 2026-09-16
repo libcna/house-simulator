@@ -1121,3 +1121,46 @@ reject an undeclared foreign binding.
 floor/steps/columns with the approved distance-attenuated approximation, then deepen the
 facade/roof/porch construction. Do not broaden the wall atlas or raise global exposure to fake the
 missing receiver classes.
+
+## Round 28 — distance-aware stock-XNA object lights
+
+Commit: `HOUSE-01262` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 27's fixed [22:00 set](captures/house-01281-porch-spill-r1). After: the same eleven
+cameras and condition in the [distance-aware set](captures/house-01262-point-light-r1), plus the
+exact [close night entrance](captures/house-01262-point-light-r1/exterior-approach-close.png) and
+[matching day view](captures/house-01262-point-light-r1/exterior-approach-day-check.png). The road,
+close night and close day frames were opened at original resolution.
+
+Ranked visible defects remaining:
+
+1. The close daylight view makes the largest defect unambiguous: a thin slab edge and oversized
+   open rectangular porch frame read as structural blockout, not layered eaves, soffit, fascia,
+   balcony guard and believable painted joinery.
+2. At night, the broad facade outside the two baked wall pools remains almost black. The porch
+   floor reads, but its energy-preserving local model is still too weak to make the whole entrance
+   composition feel grounded; this should be addressed with form/receiver calibration, not global
+   exposure or a larger glow billboard.
+3. The front steps belong to the adjacent exterior walk rather than the porch cell, so the two
+   cell-local fixtures do not model them. Any cross-cell live receiver rule needs a real visibility/
+   ownership contract rather than a porch-only exception.
+4. The connected interior route is unchanged: kitchen practical clutter, family-room finish depth
+   and dining furnishing remain the largest interior gaps.
+
+Fixed: positional fixtures now aim from their canonical source to each submitted object's bounds
+centre and use the approved authored-range falloff before the two brightest are selected. At the
+exact close night camera the porch crop changes 28.46%, the floor crop 29.85%, the column crop
+30.99% and the facade crop 28.29%. The two 400 lm sources arrive from opposite sides; their
+attenuated energy slightly lowers the broad floor mean from RGB(15.36,8.69,4.99) to
+RGB(14.24,8.36,4.95), while local form raises the column crop from RGB(17.35,12.88,10.70) to
+RGB(17.85,13.24,10.78). This is an honest directional/falloff correction, not an exposure lift.
+The matching day world changes 6.57%, confined to the intended Basic-detail fill/bounce response.
+
+Nine strict day references changed because Round 27 predates both `HOUSE-01261`'s three-slot
+daylight fill/bounce and this bounds-centre submission. All nine pairs were opened; camera and
+geometry remain fixed, and only material/vegetation lighting changes. They were intentionally
+advanced. The 18-pose culled/unculled maximum remains 0.1603%.
+
+`VISUAL-GATE-1` still **FAILS**. Highest visible value is now facade/roof/porch construction depth,
+followed by a principled adjacent-step receiver and the already identified interior furnishing
+gaps. Do not spend the next checkpoint on invisible lighting infrastructure.

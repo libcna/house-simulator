@@ -354,13 +354,28 @@ namespace cnahouse::rendering
                 continue;
             }
             bool hasResident = false;
+            Vector3 runMin;
+            Vector3 runMax;
             for (std::size_t index = first; index < last; ++index)
             {
-                if (cells_.Find(items[index].geometry) != nullptr)
+                if (cells_.Find(items[index].geometry) == nullptr)
                 {
-                    hasResident = true;
-                    break;
+                    continue;
                 }
+                const world::Chunk& chunk = library_.chunks[items[index].geometry];
+                if (!hasResident)
+                {
+                    runMin = chunk.bounds.Min;
+                    runMax = chunk.bounds.Max;
+                    hasResident = true;
+                    continue;
+                }
+                runMin.X = std::min(runMin.X, chunk.bounds.Min.X);
+                runMin.Y = std::min(runMin.Y, chunk.bounds.Min.Y);
+                runMin.Z = std::min(runMin.Z, chunk.bounds.Min.Z);
+                runMax.X = std::max(runMax.X, chunk.bounds.Max.X);
+                runMax.Y = std::max(runMax.Y, chunk.bounds.Max.Y);
+                runMax.Z = std::max(runMax.Z, chunk.bounds.Max.Z);
             }
             if (!hasResident)
             {
@@ -638,8 +653,9 @@ namespace cnahouse::rendering
                                                     lighting::kAmbientFloor + skyScale * sky.Z +
                                                         artificial * room->artificialColor.Z));
                     const bool celestial = lighting_->CelestialKeyForCell(cell->id) != nullptr;
+                    const Vector3 objectCentre = (runMin + runMax) * 0.5F;
                     const lighting::ObjectLightAssignment objectLights =
-                        lighting_->DirectionalLightsForObject(cell->id);
+                        lighting_->DirectionalLightsForObject(cell->id, objectCentre);
                     const float directionalScale =
                         celestial ? exposure * (skyOpen ? 1.0F : kBasicSunWindowKey * room->daylight)
                                   : exposure * kBasicFixtureKey;

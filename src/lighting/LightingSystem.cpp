@@ -127,6 +127,17 @@ namespace cnahouse::lighting
         return 0.0F;
     }
 
+    float PointLightAttenuation(float distance, float range) noexcept
+    {
+        if (!std::isfinite(distance) || !std::isfinite(range) || distance < 0.0F || range <= 0.0F ||
+            distance > range)
+        {
+            return 0.0F;
+        }
+        const float normalized = distance / range;
+        return 1.0F / (1.0F + normalized * normalized);
+    }
+
     Microsoft::Xna::Framework::Vector3
     OutdoorSkyIrradianceFor(const Microsoft::Xna::Framework::Vector3& displaySky,
                             const Microsoft::Xna::Framework::Vector3& solarTint,
@@ -274,9 +285,12 @@ namespace cnahouse::lighting
             }
             ObjectFixture fixture;
             fixture.groupIndex = group->second;
+            fixture.position = light.position;
             fixture.direction = NormalizedOr(light.direction, Vector3(0.0F, -1.0F, 0.0F));
             fixture.color = PlanckianRgb(light.colorK);
             fixture.lumens = light.intensityLm;
+            fixture.range = light.range;
+            fixture.positional = light.type != world::LightType::Directional;
             objectFixturesByCell_[cell->second].push_back(objectFixtures_.size());
             objectFixtures_.push_back(fixture);
         }
@@ -626,7 +640,8 @@ namespace cnahouse::lighting
         return MoonKeyForCell(cell);
     }
 
-    ObjectLightAssignment LightingSystem::DirectionalLightsForObject(util::Id cell) const noexcept
+    ObjectLightAssignment
+    LightingSystem::DirectionalLightsForObject(util::Id cell, const Vector3& objectCentre) const noexcept
     {
         ObjectLightAssignment assignment;
         const auto found = cellIndex_.find(cell.Value());
@@ -650,32 +665,61 @@ namespace cnahouse::lighting
         }
         else
         {
-            std::array<std::pair<float, std::size_t>, 2> brightest{{{-1.0F, 0u}, {-1.0F, 0u}}};
+            struct RankedFixture
+            {
+                float emitted = -1.0F;
+                std::size_t fixtureIndex = 0u;
+                Vector3 direction;
+            };
+
+            std::array<RankedFixture, 2> brightest;
             for (const std::size_t fixtureIndex : objectFixturesByCell_[cellIndex])
             {
                 const ObjectFixture& fixture = objectFixtures_[fixtureIndex];
-                const float emitted = fixture.lumens * GroupOutputLevel(fixture.groupIndex);
-                if (emitted > brightest[0].first)
+                float attenuation = 1.0F;
+                Vector3 direction = fixture.direction;
+                if (fixture.positional)
+                {
+                    const Vector3 toObject(objectCentre.X - fixture.position.X,
+                                           objectCentre.Y - fixture.position.Y,
+                                           objectCentre.Z - fixture.position.Z);
+                    const float distanceSquared =
+                        toObject.X * toObject.X + toObject.Y * toObject.Y + toObject.Z * toObject.Z;
+                    if (!std::isfinite(distanceSquared))
+                    {
+                        continue;
+                    }
+                    const float distance = std::sqrt(std::max(distanceSquared, 0.0F));
+                    attenuation = PointLightAttenuation(distance, fixture.range);
+                    if (attenuation <= 0.0F)
+                    {
+                        continue;
+                    }
+                    direction = NormalizedOr(toObject, fixture.direction);
+                }
+                const float emitted = fixture.lumens * GroupOutputLevel(fixture.groupIndex) * attenuation;
+                const RankedFixture ranked{emitted, fixtureIndex, direction};
+                if (emitted > brightest[0].emitted)
                 {
                     brightest[1] = brightest[0];
-                    brightest[0] = {emitted, fixtureIndex};
+                    brightest[0] = ranked;
                 }
-                else if (emitted > brightest[1].first)
+                else if (emitted > brightest[1].emitted)
                 {
-                    brightest[1] = {emitted, fixtureIndex};
+                    brightest[1] = ranked;
                 }
             }
             const float denominator = cellGroups_[cellIndex].totalLumens;
             for (std::size_t slot = 0; slot < brightest.size(); ++slot)
             {
-                if (brightest[slot].first <= 0.0F || denominator <= 0.0F)
+                if (brightest[slot].emitted <= 0.0F || denominator <= 0.0F)
                 {
                     continue;
                 }
-                const ObjectFixture& fixture = objectFixtures_[brightest[slot].second];
-                const float share = std::clamp(brightest[slot].first / denominator, 0.0F, 1.0F);
+                const ObjectFixture& fixture = objectFixtures_[brightest[slot].fixtureIndex];
+                const float share = std::clamp(brightest[slot].emitted / denominator, 0.0F, 1.0F);
                 assignment.slots[slot] = ObjectDirectionalLight{
-                    fixture.direction,
+                    brightest[slot].direction,
                     Vector3(share * fixture.color.X, share * fixture.color.Y, share * fixture.color.Z)};
             }
         }

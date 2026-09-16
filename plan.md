@@ -14287,10 +14287,36 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             exactly `HOUSE-01262`'s next dependency-valid step.
       verified: all 1,405 unit tests pass; 32 focused live-device MaterialBinder and
             StaticGeometryPass integration tests pass under the offscreen driver; the existing
-            app, unit, integration and render targets compile warning-clean. No content or strict
-            image reference changed, and no review round is claimed before the distance-aware step.
-- [ ] HOUSE-01262 — Implement the point-light-as-directional approximation with distance attenuation
+            app, unit, integration and render targets compile warning-clean. No content reference
+            changed, and no review round is claimed before the distance-aware step. The successor's
+            first complete software-render run found that this task's intentional daylight
+            fill/bounce had changed nine strict production frames; `HOUSE-01262` inspected and
+            advanced those exact references rather than preserving this provisional claim.
+- [x] HOUSE-01262 — Implement the point-light-as-directional approximation with distance attenuation
       dep: HOUSE-01261 · sys: lighting · plat: ALL · pri: MUST
+      accept: positional fixtures derive the stock-XNA direction from source to the submitted
+              object's world-space bounds centre; rank after the authored range-bounded
+              `1/(1+(d/range)^2)` attenuation; objects beyond range receive no fixture slot;
+              static Basic batches use their resident union bounds without draw-time allocation
+      done: (2026-09-16) `ObjectFixture` now retains the canonical source position and range.
+            `DirectionalLightsForObject` aims every positional source at the caller's centre,
+            removes out-of-range candidates, ranks the two live sources by attenuated lumens and
+            preserves authored direction for the genuinely directional case. `StaticGeometryPass`
+            supplies the centre of the resident bounds union for each cell/material/layout run,
+            so the porch pair now arrives from opposite sides instead of one global downward key.
+            Zero, boundary, outside-range and non-finite attenuation cases are pinned directly;
+            the symmetric canonical porch pins both directions, strength and the derived bounce.
+      visual: Round 28 compares the exact fixed 22:00 set and close entrance against Round 27.
+              The close porch crop changes 28.46%, the floor crop 29.85% and the columns crop
+              30.99%. The deliberately energy-preserving falloff makes the floor mean slightly
+              lower rather than faking a brighter pool, while opposite-side modelling raises the
+              column/facade means. Day remains stable in composition and changes only where the
+              preceding three-slot daylight assignment adds material form.
+      verified: focused LightingSystem unit tests and all 32 MaterialBinder/StaticGeometryPass
+              live-device integration tests pass; all 48 active software-render tests pass after
+              nine inspected production references were intentionally advanced; the 18-pose
+              culled/unculled maximum remains 0.1603%. Full unit/static/XNA gates are recorded in
+              the checkpoint handoff.
 - [x] HOUSE-01279 — Bake `shading.bin` for the authored house and wire it into the content build
       dep: HOUSE-00207, HOUSE-00465 · sys: content · plat: TOOL · pri: MUST
       accept: (1) the file is baked from the authored shell and the placed neighbourhood; (2) §22's

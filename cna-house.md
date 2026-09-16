@@ -3385,8 +3385,12 @@ fixtures and drops the approximation.
 > strongest-window fill by day, or the two brightest live fixtures by night, followed by the
 > opposite 0.18 surface-tinted bounce. `MaterialBinder` writes all three slots to both
 > `BasicEffect` and `SkinnedEffect` and explicitly disables absent slots on every shared-effect
-> bind. This first step deliberately uses a point fixture's authored direction; `HOUSE-01262` owns
-> replacing that provisional direction and strength with the object-centre/distance approximation.
+> bind. `HOUSE-01262` completes the spatial half: positional fixtures aim from their canonical
+> source to the submitted world-space bounds centre, rank after the authored range-bounded
+> `1/(1+(d/range)^2)` falloff and disappear outside range. Static Basic runs submit the union
+> centre of their resident chunks, so this contract is exercised by today's house as well as later
+> dynamic actors; genuinely directional sources retain their authored direction. Candidate lists,
+> positions and ranges are built once and assignment remains allocation-free during drawing.
 
 ### 28.6 Emissive surfaces
 

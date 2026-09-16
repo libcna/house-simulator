@@ -60,6 +60,13 @@ namespace cnahouse::lighting
     /// 0.4 s. Switching off is intentionally immediate and is applied by `LightingSystem`.
     [[nodiscard]] float BulbTransitionLevel(world::BulbClass bulbClass, float elapsedSeconds) noexcept;
 
+    /// @brief §28.5's bounded point-fixture falloff for the stock directional approximation.
+    ///
+    /// A receiver outside the authored range gets no light. At the source the factor is one and
+    /// at the range boundary it is one half: @c 1/(1+(distance/range)^2). Invalid inputs return
+    /// zero so malformed draw bounds cannot inject NaNs into a shared XNA effect.
+    [[nodiscard]] float PointLightAttenuation(float distance, float range) noexcept;
+
     /// @brief Calibrated diffuse sky energy for a baked weather-facing receiver.
     ///
     /// The authored sky gradient is a display colour, not an illuminance scalar. Preserve its
@@ -265,10 +272,12 @@ namespace cnahouse::lighting
 
         /// @brief Assign §28.5's key, fill and bounce for an object in @p cell.
         ///
-        /// This task establishes the stable three-slot assignment. Point fixtures use their
-        /// authored direction here; `HOUSE-01262` adds the object's centre and the approved
-        /// point-as-directional distance attenuation without changing the effect contract.
-        [[nodiscard]] ObjectLightAssignment DirectionalLightsForObject(util::Id cell) const noexcept;
+        /// Positional fixtures aim from their authored source to @p objectCentre and are ranked
+        /// after §28.5's range-bounded distance attenuation. The returned value remains the same
+        /// stable stock-effect contract used by both `BasicEffect` and `SkinnedEffect`.
+        [[nodiscard]] ObjectLightAssignment
+        DirectionalLightsForObject(util::Id cell,
+                                   const Microsoft::Xna::Framework::Vector3& objectCentre) const noexcept;
 
         /// @brief Select the cell whose exposure the camera follows this frame.
         void SetCameraCell(util::Id cell) noexcept
@@ -316,9 +325,12 @@ namespace cnahouse::lighting
         struct ObjectFixture
         {
             std::size_t groupIndex = 0;
+            Microsoft::Xna::Framework::Vector3 position;
             Microsoft::Xna::Framework::Vector3 direction{0.0F, -1.0F, 0.0F};
             Microsoft::Xna::Framework::Vector3 color{1.0F, 1.0F, 1.0F};
             float lumens = 0.0F;
+            float range = 0.0F;
+            bool positional = true;
         };
 
         [[nodiscard]] SwitchGroupState* FindGroupMutable(util::Id group) noexcept;

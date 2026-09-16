@@ -1,4 +1,44 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01261` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01262` checkpoint)
+
+Branch `develop`. Task-start HEAD `6aa33b8` (`HOUSE-01261`). This file belongs to the single
+`HOUSE-01262` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The stock-XNA key/fill/bounce contract is now spatial. `LightingSystem` retains each canonical
+fixture position and range, aims positional sources at the submitted world-space object centre,
+removes candidates beyond range and ranks by live attenuated lumens. The falloff is the approved
+`1/(1+(d/range)^2)` with a hard authored-range bound. Directional sources retain their authored
+direction. The static Basic path submits the centre of each resident cell/material/layout run's
+combined chunk bounds; no draw-time allocation or CNAEXT path was introduced.
+
+Before: [Round 27](visual-review/captures/house-01281-porch-spill-r1). After: the same eleven fixed
+22:00 views in [Round 28](visual-review/captures/house-01262-point-light-r1), plus the exact
+[close live entrance](visual-review/captures/house-01262-point-light-r1/exterior-approach-close.png)
+and [matching day view](visual-review/captures/house-01262-point-light-r1/exterior-approach-day-check.png).
+At the close night camera the porch/floor/column/facade crops change 28.46/29.85/30.99/28.29%.
+The two sources now model opposite sides and raise column/facade form slightly; the approved
+falloff lowers the broad floor mean rather than inventing extra energy. The result is correct and
+visible, but deliberately modest.
+
+The first full software-render run exposed nine expected production-day changes introduced by the
+new three-slot daylight path and bounds-centre submission. Every before/after pair was opened;
+only Basic material/vegetation lighting changed, so those nine references were intentionally
+advanced. All 48 active software-render tests pass, including the 18-pose culled/unculled check at
+its unchanged 0.1603% maximum. Focused LightingSystem unit tests and all 32 live-device
+MaterialBinder/StaticGeometryPass integration cases pass. Full unit/static/XNA gates are green as
+recorded by the commit hook.
+
+The close daylight image now makes the next defect unmistakable: the porch is an oversized open
+rectangular frame beneath a thin slab, with no convincing layered eave/soffit/fascia/balcony
+construction. At night the broad facade remains too dark, and the steps are an adjacent cell that
+does not receive the porch-local approximation. Highest visible value is a small, canonical
+facade/roof/porch form-depth task, then a principled adjacent-step receiver; interior priority
+remains kitchen practical clutter, family finish depth and dining furnishing. Do not raise global
+exposure, enlarge glow billboards or divert into unrelated systems.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-01261` checkpoint)
 
 Branch `develop`. Task-start HEAD `a13149e` (`HOUSE-01281`). This file belongs to the single
 `HOUSE-01261` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
