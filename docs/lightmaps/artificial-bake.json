@@ -339,13 +339,15 @@
       "cell": "CELL_FREEZER_INTERIOR",
       "daylight": null,
       "groups": [],
-      "shellHash": "sha256:9534b7cdf4b42dbacd7c78c300e0e6ebea40fa3fb23b83fc6131894b0d65d745"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:c62fac423d91dcdf717a20537932a0d9ff0d2ed567be35054c5fd28d32c8e94c"
     },
     {
       "cell": "CELL_FRIDGE_INTERIOR",
       "daylight": null,
       "groups": [],
-      "shellHash": "sha256:7ab544dc6f3f1ac1923670c16565bde22a57b73421aadc9843a00e5e53e6bf35"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:b0ed049745517314964bfce991b99bd2fc6f1f472270e536ca2b7b72f1e0e4ef"
     },
     {
       "cell": "L0_BUTLERS",
@@ -520,12 +522,13 @@
           "lights": [
             "LIGHT_L0_GARAGE_LOFT_MAIN_1"
           ],
-          "mean": 0.004660648723392528,
-          "peak": 14.35192584991455,
-          "scale": 14.35192584991455
+          "mean": 0.008312029153977394,
+          "peak": 4.695493221282959,
+          "scale": 4.695493221282959
         }
       ],
-      "shellHash": "sha256:ebbc2cc7158b033f9db0772fe642929278644c0e094d27ec73c8d15560ff9c5d"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:92865683acac1663f44895d0136b729a161c46b14b91bcc934ff79ffa2b438ae"
     },
     {
       "cell": "L0_HALL",
@@ -1887,13 +1890,14 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_FAMILY",
-    "L0_KITCHEN"
+    "CELL_FREEZER_INTERIOR",
+    "CELL_FRIDGE_INTERIOR",
+    "L0_GARAGE_LOFT"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1030914,
+  "sourceBytes": 1036111,
   "tool": "bake_house_lightmaps.py"
 }

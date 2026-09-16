@@ -13711,6 +13711,10 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             Ray picking at hall pixel (900,380) confirms the old black upper band was the
             painted L0_KITCHEN rear wall at y≈2.67, not refrigerator interior. This task does
             not falsely mark the whole kitchen furnished or VISUAL-GATE-1 achieved.
+            Corrected at HOUSE-01043: the *new* upper-front RGB(10,10,10) was primarily an
+            erroneous nested-cell outer skin at z=-26.3 in front of cabinet panel z=-26.307,
+            not merely an underpowered BasicEffect. Basic detail remains too dark after the
+            skin is removed, but raising ambient would not have removed that occlusion.
       verified: (2026-09-16) The 59-piece GLB regenerates bit-for-bit from its Blender source;
             its 6.65 cm pulled-front Z asymmetry is centred in the authoring script and the
             prop translation adjusted by the same amount, keeping every world vertex fixed.
@@ -13736,6 +13740,49 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             no third-party runtime/CNAEXT path or debug colouring enters production, and
             content, strict-XNA and intentionally inspected render/culling gates pass. Dark
             Basic-effect furnishing, dynamic fridge operation and full kitchen fit-out stay open.
+- [x] HOUSE-01043 — Stop nested-cell outer skins occluding the furnished kitchen bay
+      dep: HOUSE-00206, HOUSE-00471, HOUSE-00482, HOUSE-00485, HOUSE-01042 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-16) Round 19's fixed normal-game hall lens shows almost-black upper
+            cabinet rectangles. The canonical nested refrigerator, freezer and garage loft
+            are authored inside parent cells, but side-adjacency detects no *matching edge*
+            of a larger parent and erroneously treats their walls as weather-facing.
+            Fix only wholly enclosed child boxes; a genuinely exposed side still uses the
+            existing §25/outdoor skin and portal path. This is a visual content blocker,
+            not HOUSE-00990's claim of a fully furnished kitchen.
+      finding: (2026-09-16) The refrigerator's false `MAT_PAINT_SOFT_WHITE` outer wall at
+            z=-26.300 extended from its declared y=2.45 ceiling to L1's y=3.65 floor,
+            placing it 7 mm ahead of the bridge cabinet's recessed painted panel at
+            z=-26.307. The unchanged hall pixel (900,350) was RGB(10,10,10) while its
+            unobscured lower door was (47,36,26). After removing the nested outer skin,
+            the upper panel becomes the same (47,36,26), without a lighting/global
+            material change. A full shell regeneration changes only the three enclosed
+            child GLBs plus an already-stale L0_PORCH build product; the latter's small
+            exterior/debug-reference changes were inspected, not silently accepted.
+      verified: (2026-09-16) The focused Blender shell selftest checks containment and
+            zero outer-skin faces for all three nested cells and retention of the
+            kitchen's real outside run. Full 99-GLB deterministic regeneration has
+            zero byte differences. Receiver-only UV2 report remains 78 cells;
+            three daylight plus the garage-loft artificial atlas were separately
+            rebaked and paired/promoted, with correct empty artificial families for
+            fridge/freezer. New shell/world/lightmap/asset/credits/budget hashes
+            validate. The 31-stage content graph passed, with fresh nav in 12.76 s
+            under a 180 s whole-build limit. Four unchanged eleven-view normal-game
+            review sets were captured and hall, kitchen, exterior and family frames
+            inspected; fixed cabinet pixel RGB(10,10,10) → (47,36,26).
+            Ten affected strict goldens were paired/inspected and selectively
+            updated, no wholesale regeneration; the full direct software render
+            suite passes 48/48 including culling equivalence. Full repository
+            checks pass after deterministic provenance and budget-report emission,
+            with 323 strict-XNA translation units clean. Runtime/CNAEXT, stable
+            cell/portal/door IDs and collision were not changed. Fresh full
+            CMake/CTest remains externally blocked by sibling BL-17, not claimed.
+      accept: canonical child/parent extents decide whether an exterior skin is valid; the
+            three genuinely enclosed subcells emit zero weather-facing outer polygons,
+            while the kitchen's actual outside wall is retained. UV2 receiver-only atlases,
+            changed-cell artificial/daylight bakes, cell bindings, asset/world/shell
+            provenance and collision/portal IDs remain valid. The unchanged normal-game
+            hall/kitchen views visibly lose the false-black cabinet overlays at clear,
+            noon, overcast and night, and selectively inspected render/culling/XNA gates pass.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -17701,6 +17748,7 @@ evidence that it fails.
 | 2026-09-16 | `HOUSE-01040` | **New task, next free phase-13 id.** Author only a real first static island and north sink base run, not HOUSE-00975's 24-model acquisition or HOUSE-00990's finished 62-container kitchen. Adjust the explicitly measured `L0_KITCHEN` chunk ceiling from 8 to 11, add the sink-run scale band with a measured counter-top property, relocate the two island-intersecting review poses and the affected kitchen render/debug poses. | Round 16 exposes a lit, empty kitchen; these fixed built-ins are supported by the completed static batch and approved material paths. The final build measures exactly three additional source-finish groups (oak, stone, steel), zero new Reach/vertex splits, and cabinet paint reuses existing trim; relaxing any other cell would be unjustified. A combined sink/faucet AABB cannot stand in for counter height, so the manifest's 0.94 m stone top is verified against the actual mesh rather than widening §70.5. Keeping cameras inside a new collidable island would be false visual review and bad regression coverage. |
 | 2026-09-16 | `HOUSE-01041` | **New task, next free phase-13 id.** Calibrate the family-room main practical and its incorrectly ceiling-centred TV accent, plus the existing kitchen east-row downlights, as one selected connected-route lighting review. Do not claim the fridge-interior black mass fixed by lighting. | Round 17's family seating remains flat/dark at day/night. The first family bake demonstrates that leaving all four 3.28 m points off wastes the approved Tier-S atlas while switching the nominal TV point under the selected broadband calibration creates a white firefly. The same fixed hall image shows a weak east kitchen rear-wall atlas texel; shifting two authored downlights changes that texel without a new fixture family. A full-chunk ray probe then proves the dominant hall silhouette is the separate, model-less canonical `CELL_FRIDGE_INTERIOR`, so the acceptance scope is narrowed transparently to real lighting improvement. |
 | 2026-09-16 | `HOUSE-01042` | **New task, next free phase-13 id.** Add only a measured static appliance exterior and integrated bridge cabinet to the canonical refrigerator bay. Change this fridge opening's declared finish from steel to painted white, matching the inspected front/pre-existing painted shell leaf; retain the freezer's steel declaration and stable IDs. Use the authored 12-triangle box proxy only for today's shut static appliance; later moving doors must replace the static frontage/proxy, not bypass the portal. Add two narrow §70.5 appliance/bay scale rows, their manifest-backed checker/selftest, and the two new IDs to the golden; regenerate only the stale world/shell manifests. | The unmodified hall lens sees the undressed nested fridge front as a black slab. A quick steel-front gameplay iteration also looked black, so a white domestic appliance plus authentic upper joinery has higher visible value. The shell punches the refrigerator portal hole and no dynamic door obstacle exists yet; leaving `collision: none` would allow walking into the visible shut fridge. Origin check catches the authored front handles shifting the assembled Z centre by 6.65 cm; recentering the glTF and compensating the canonical prop position keeps the photographed world vertices fixed. A combined cabinet+fridge AABB cannot measure the body's separate 1.95 m height. The world ledger also had prior stale member hashes for untouched cells/lights/materials, and the shell manifest embeds that world hash. Source finishes reuse the existing 11 kitchen chunks. An inspected upper ray identifies the old black band as rear painted wall, explaining why this furnishing remains underexposed and cannot by itself pass VISUAL-GATE-1. |
+| 2026-09-16 | `HOUSE-01043` | **New task, next free phase-13 id.** Exclude weather-facing outer-skin extension only where the complete child box is physically enclosed by its authored parent; keep adjacency/cell residency and genuine outside skins. Re-unwrap/bake/promote exactly the affected nested lightmap receivers and inspect changed visual/golden poses. Permit the two legitimate no-baked-lamp child cells in the existing selected-bake promotion validator; do not invent artificial products. | The new HOUSE-01042 bridge cabinet still showed RGB(10,10,10) in the fixed normal-game hall because the nested refrigerator's erroneously extended outer wall at z=-26.300 sat 7 mm ahead of its recessed panel at z=-26.307 above the child's actual 2.45 m ceiling. A global Basic ambient increase cannot reveal a depth-occluded door. The same edge-only adjacency problem affected the freezer and garage loft; their parent links and full containment allow a narrow non-weather classification without loosening the house's true exterior rule. The daylight/lightmap tooling otherwise rejected valid cells with no bakeable artificial group, and a full 78-cell default bake would overwrite deliberately selected 100 lm/W vertical-slice calibrations; selected promotion is the valid path. |
 | 2026-09-15 | `HOUSE-00928` | **New task, next free phase-12 id.** Correct the entry-facing canonical paint/metal material finish rather than adding a shader or a new unprovenanced asset. | Round 13's fixed game image now has real tiled siding, making the zero-tinted, full-width front balcony parapet and distressed-painted porch columns the largest exterior material defects. The existing approved smooth white paint and brushed-metal sources are available; visual review of the same approach will decide whether a material-row correction alone is enough or a role split is needed. |
 | 2026-09-15 | `HOUSE-00927` | **New task, next free phase-12 id.** Restore physically tiled production-texture sampling after the HUD's strict-XNA SpriteBatch handoff and separate Tier-S outer-skin daylight energy from display-sky RGB while retaining `LM_DAY`, material and residency roles. | Round 12's close front is a uniform `(70,69,66)` façade despite approved warm-wood albedo, 48 distinct deployed UV0s and white UV2 islands. A controlled higher-contrast bitmap remains uniformly sampled, proving a sampler problem; XNA's HUD Begin overload restores wrap without the CNAEXT indexed `SamplerState::operator=` forbidden by BL-16. The highly saturated sky-dome display RGB also darkens a baked outdoor receiver as if its colour were illuminance, while `SunShadingFor` already has the daylight scalar. Both corrections are directly visible and dependency-valid; no existing id or renderer tier is changed. |
 | 2026-09-15 | `HOUSE-00926` | **New task, next free phase-12 id.** Split outside-facing window frame/sash/glass detail from room-owned indoor trim/glass and admit only those distinct roles to the exterior hierarchy. | The fixed front normal-game crop shows open-looking holes despite 64 canonical windows. Source tracing finds window geometry merged with each closed room's interior skirting/glass chunks, so §25.6's correct façade-only exterior BVH cannot show it. Admitting the unsplit chunks would bypass room/portal culling; a production material/chunk role split is the dependency-valid fix. |

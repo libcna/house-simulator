@@ -322,6 +322,28 @@ def outer_span(cell: dict, extent: tuple[float, float], level: dict, levels: dic
     return (extent[0], min(above) if above else extent[1])
 
 
+def enclosed_by_parent(cell: dict, box: tuple, cells_by_id: dict, levels: dict) -> bool:
+    """A child wholly inside its parent has no weather-facing outer wall.
+
+    Side adjacency alone cannot find a parent whose larger footprint surrounds a fridge,
+    freezer or mezzanine cell. In that case the normal exterior-skin extension to the next
+    storey's floor would draw a wall *inside* the parent, above the child's own ceiling.
+    Check the actual authored extents rather than treating every `parent` link as enclosure.
+    """
+    parent = cells_by_id.get(cell.get("parent"))
+    parent_level = levels.get(parent.get("level")) if parent else None
+    if parent_level is None:
+        return False
+    parent_extent, _ = extent_of(parent, parent_level)
+    if parent_extent is None:
+        return False
+    x0, x1, y0, y1, z0, z1 = box
+    return any(px0 <= x0 + 1e-6 and px1 >= x1 - 1e-6 and
+               py0 <= y0 + 1e-6 and py1 >= y1 - 1e-6 and
+               pz0 <= z0 + 1e-6 and pz1 >= z1 - 1e-6
+               for px0, px1, py0, py1, pz0, pz1 in cell_boxes(parent, parent_extent))
+
+
 def holes_in(side: str, box: tuple, cell: dict, portals: list) -> list:
     """The portal rectangles that pierce @p side, as `(u0, u1, v0, v1, portal_id)`.
 
@@ -1250,6 +1272,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
     for box in cell_boxes(cell, extent):
         x0, x1, y0, y1, z0, z1 = box
         ix0, ix1, _, _, iz0, iz1 = inset_box(box, cell, neighbours, construction)
+        nested = enclosed_by_parent(cell, box, cells_by_id, levels or {})
 
         # `HOUSE-00453`: one face per run of the side, at the inner face of the wall that bounds
         # THAT run. A shared wall is described once -- here, from the pair of cells that share the
@@ -1310,9 +1333,9 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                 # took the skin off the whole storey and left a hole above the garage roof, where
                 # the same wall really does face the weather. So the span this would have drawn has
                 # the cells across the run subtracted from it, and what is left is drawn.
-                outside = not covers and level is not None
+                outside = not covers and level is not None and not nested
                 outer_plane = plane
-                if level is not None:
+                if level is not None and not nested:
                     outer_name = outer_wall_name(level, wall)
                     outer_half = float(construction.get(outer_name, 0.0)) / 2.0
                     outer_plane = {"-X": x0 - outer_half, "+X": x1 + outer_half,
@@ -2151,6 +2174,44 @@ def selftest(output: Path) -> int:
     require(set(walls.values()) == {"wallPartition"},
             f"the kitchen's thinnest wall on every side is a partition -- three of them entirely, "
             f"and the fourth for most of its length ({walls})")
+    fridge = cells["CELL_FRIDGE_INTERIOR"]
+    fridge_extent = layout_io.cell_extent(fridge, levels[fridge["level"]])
+    fridge_box = list(cell_boxes(fridge, fridge_extent))[0]
+    require(enclosed_by_parent(fridge, fridge_box, cells, levels),
+            "the canonical refrigerator is fully enclosed by its parent kitchen")
+    require(not enclosed_by_parent(subject, kitchen_box, cells, levels),
+            "a normal kitchen cell must retain its genuine outside wall")
+    generated_fridge = generate(SOURCE, output, wanted={"CELL_FRIDGE_INTERIOR"})
+    require(generated_fridge["written"] == ["CELL_FRIDGE_INTERIOR"] and
+            not generated_fridge["problems"],
+            f"the nested refrigerator shell exports ({generated_fridge})")
+    fridge_document, fridge_error = gltf_validate.read_gltf_json(
+        output / "CELL_FRIDGE_INTERIOR.glb")
+    require(fridge_document is not None,
+            f"the nested refrigerator export is valid glTF ({fridge_error})")
+    if fridge_document is not None:
+        fridge_positions = [accessor for accessor in fridge_document.get("accessors", [])
+                            if accessor.get("type") == "VEC3" and "max" in accessor]
+        require(bool(fridge_positions) and
+                max(float(accessor["max"][1]) for accessor in fridge_positions) <=
+                fridge_extent[1] + 0.03,
+                "the nested cell has no exterior skin extended above its own 2.45 m ceiling "
+                "(allowing its 20 mm door-head trim)")
+    for nested_name in ("CELL_FREEZER_INTERIOR", "CELL_FRIDGE_INTERIOR", "L0_GARAGE_LOFT"):
+        child = cells[nested_name]
+        child_extent = layout_io.cell_extent(child, levels[child["level"]])
+        require(all(enclosed_by_parent(child, box, cells, levels)
+                    for box in cell_boxes(child, child_extent)),
+                f"{nested_name} is wholly enclosed by its authored parent")
+        reset_scene()
+        child_mesh = build_cell(child, child_extent, neighbours=neighbours,
+                                construction=construction, level=levels[child["level"]],
+                                levels=levels, portals=all_portals,
+                                openings=openings_by_portal, cells_by_id=cells)
+        outside_faces = sum(polygon.material_index == SURFACE_ORDER.index("exterior")
+                            for polygon in child_mesh.data.polygons)
+        require(outside_faces == 0,
+                f"{nested_name} emits no weather-facing outer-skin polygon ({outside_faces})")
     # ...and that fourth side is MIXED, which is the case a single wall per side gets wrong.
     north = side_intervals("-Z", kitchen_box, subject, neighbours)
     require(len(north) == 2 and {wall for _lo, _hi, wall, _covers in north}

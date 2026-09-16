@@ -811,3 +811,47 @@ paired/viewed and deliberately updated; no wholesale golden regeneration.
 fixture-aware lighting/readability for Basic-effect furniture and appliances in
 the selected L0 route, then the skeletal/day and unlit/night front approach and
 the kitchen's remaining real primary kit. Do not hide this with debug colouring.
+
+## Round 20 — remove false weather skin from enclosed cells
+
+Commit: `HOUSE-01043` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 19 eleven-view [clear](captures/house-01042-clear-day-r2),
+[noon](captures/house-01042-noon-r2), [overcast](captures/house-01042-overcast-r2)
+and [22:00](captures/house-01042-night-r2). After: the same eleven unchanged
+poses/conditions in [clear](captures/house-01043-clear-day-r1),
+[noon](captures/house-01043-noon-r1),
+[overcast](captures/house-01043-overcast-r1) and
+[22:00](captures/house-01043-night-r1). The hall, inside kitchen, front and
+family frames were actually opened; the golden changes were inspected in pairs.
+
+Ranked visible defects remaining:
+
+1. The unchanged [clear front](captures/house-01043-clear-day-r1/exterior-front.png)
+   still has a skeletal roof/balcony/porch, repeated pale window squares and weak
+   landscaping; the [night first view](captures/house-01043-night-r1/exterior-front.png)
+   is still nearly invisible.
+2. The [inside kitchen](captures/house-01043-clear-day-r1/kitchen.png) now shows
+   the overhead shaker faces, but static joinery/appliances remain brown/dark;
+   west/north uppers, range/hood, backsplash and purposeful props are missing.
+3. The [clear hall](captures/house-01043-clear-day-r1/central-hall.png) is no longer
+   pierced by pure-black cabinet rectangles, but its distant refrigerator
+   presentation still needs light and the connected rooms need furnishing depth.
+4. Family seating still reads pale and sparse; its foliage is too bright.
+
+Fixed: ray picking of the *new* upper front identified an enclosed fridge cell's
+falsely weather-facing wall at z=-26.300, y up to 3.65, 7 mm ahead of a recessed
+painted cabinet door at z=-26.307; its actual declared ceiling is y=2.45. The
+previous Round 19 attribution to BasicEffect lighting alone was incomplete.
+The same hall pixel (900,350) changes from RGB(10,10,10) to (47,36,26), exactly
+matching the unchanged lower painted panel. Its 11-pose day/noon/overcast/night
+captures verify this in normal gameplay without a global brightness tweak.
+The physically contained fridge, freezer and garage loft no longer generate any
+outer-skin polygons; real exterior walls retain their existing path. Only those
+three receiver UV2/lightmap products were rebaked/promoted, preserving 100 lm/W
+selected-room lighting. Debug colours remain explicit-only, not normal gameplay.
+
+`VISUAL-GATE-1` still **FAILS**. Next visible value: finish the west/north kitchen
+primary kit and make its static Basic-effect detail readable; then front façade,
+porch, roof and first-view night illumination. Do not mistake this focused defect
+repair for a completed kitchen or exterior.

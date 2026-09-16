@@ -1,6 +1,6 @@
 {
   "schema": "cna-house/manifest/1",
-  "worldHash": "sha256:abe2ce11680f4bd01fde2d3c3169411e4b2107c161a400b747c3c792aa79d74d",
+  "worldHash": "sha256:9030917107313371371f55f1b5077b70ebbc723b40564ef87c676576c9a8f3a1",
   "members": [
     {
       "file": "layout.levels.json",
@@ -8,7 +8,7 @@
     },
     {
       "file": "layout.cells.json",
-      "sha256": "sha256:85898997ec7b94072ae1b1bac008ea8207230fbced7b0a3be46eec728b63c50e"
+      "sha256": "sha256:2b199dc976ae5509c613dc92e8deedd9c6c92b169a5d0286d6249a5daf9e28f3"
     },
     {
       "file": "layout.portals.json",

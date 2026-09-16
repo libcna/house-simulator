@@ -1,4 +1,97 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01042` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01043` checkpoint)
+
+Branch `develop`. Continuous visual-sprint start HEAD
+`238d6aed27c1e8662f0d118013ef08bb801ae018`; clean task-start HEAD
+`7ae8c5e28d2f3b892b4e93c828e977ca74ca1e50` (`HOUSE-01042`). This file
+belongs to the single `HOUSE-01043` commit; verify its ending HEAD and clean
+tree before the next visual task. **VISUAL-GATE-1 still FAILS.** Normal walk
+rendering already uses production materials, not hashed blockout colouring,
+but the front façade/roof/porch and kitchen completeness/lighting are far from
+a believable playable vertical slice.
+
+Round 19 before: identical eleven-view [clear](visual-review/captures/house-01042-clear-day-r2),
+[noon](visual-review/captures/house-01042-noon-r2),
+[overcast](visual-review/captures/house-01042-overcast-r2) and
+[night](visual-review/captures/house-01042-night-r2) normal-game sets. Round 20
+after: matching [clear](visual-review/captures/house-01043-clear-day-r1),
+[noon](visual-review/captures/house-01043-noon-r1),
+[overcast](visual-review/captures/house-01043-overcast-r1) and
+[night](visual-review/captures/house-01043-night-r1) sets; no camera, time,
+weather or exposure setting moved. The [hall before](visual-review/captures/house-01042-clear-day-r2/central-hall.png)
+had nearly black rectangles in the *new* painted upper refrigerator cabinet.
+The [hall after](visual-review/captures/house-01043-clear-day-r1/central-hall.png)
+shows the actual upper fronts. Fixed upper pixel (900,350) changes
+RGB(10,10,10) → (47,36,26), exactly the unchanged lower painted-door value.
+The [inside kitchen after](visual-review/captures/house-01043-clear-day-r1/kitchen.png)
+also shows those faces, though all static detail is still too brown/dark. The
+[unchanged clear front](visual-review/captures/house-01043-clear-day-r1/exterior-front.png)
+and [night first view](visual-review/captures/house-01043-night-r1/exterior-front.png)
+remain the largest visual defects; the family composition is pale/sparse.
+
+Corrected diagnosis: `CELL_FRIDGE_INTERIOR` declares `yOverride` 0.70..2.45
+inside `L0_KITCHEN`, but `side_intervals` matches only coincident *edges*. Its
+parent's larger enclosing footprint was missed and the shell generator drew
+a weather-facing `MAT_PAINT_SOFT_WHITE` outer wall at z=-26.300 through y=3.65.
+The recessed upper cabinet panel is at z=-26.307, so the false skin lay **7 mm
+in front** of it. This was depth occlusion, not merely an underpowered
+BasicEffect. Fridge source `build/shell`/`shell-lm`/`chunks.bin` now caps the
+wall at y=2.45 and emits no exterior polygon; the 20 mm door-head trim ends
+at y=2.47. The same full-containment predicate covers the canonical freezer
+interior and garage loft, with real exterior runs unchanged. Three-data-cell
+selftests assert both containment and zero outer polygons, and the complete
+99-GLB shell determinism check regenerated with zero differences. The full
+shell manifest changes only those three child GLB hashes plus `L0_PORCH`'s
+previously stale generated file; its small debug exterior/property pose
+differences were paired and inspected before selective golden replacement.
+
+`shell_unwrap.py` (receiver-only) regenerated all 78 UV2 receiver files, with
+only affected nested geometry intended to differ; its report remains 78 cells,
+1.28 million texels and approved densities. The first generic unwrap trial
+was rejected because it included non-receiver detail and made the garage loft
+atlas 256² rather than the canonical 128². A first **full** daylight bake
+finished but correctly failed at the binding gate: it used default 683 lm/W
+against four intentionally selected 100 lm/W L0 rooms and old artificial
+signatures. Its transient manifest/report were moved recoverably to
+`/tmp/house01043-manifest-backup-1WJHmg`, then the exact clean task-start
+versions restored; no 100 lm/W selected-room map was committed from that
+trial. Correct `--daylight/--artificial --cells` products for fridge/freezer/
+garage loft were then baked at 683 lm/W and atomically promoted together.
+The selected-promotion validator was narrowly corrected to permit an empty
+artificial family **only** when a cell has no bakeable lamp. The fridge lamp is
+runtime-only `emissive_only`, and the freezer has none; it would be wrong to
+invent an artificial atlas for either. One garage-loft artificial and three
+daylight PNGs, their sidecars, cell bindings, provenance/credits, world and
+shell manifests changed. Portal/door/collision stable IDs and normal XNA-only
+runtime source were not touched.
+
+Verification at this checkpoint: full 31-stage content graph is green after
+the targeted promotion and exact `build/content` copy; the fresh nav stage
+took **12.76 s** under a 180-second whole-build timeout. The earlier reported
+PID 936066 (`build_nav.py`, allegedly ~20 h CPU) and parent PID 4067428 no
+longer existed when checked; no nav process was active and none was killed.
+That long CPU burn, if accurate, was a pathological run, not required bake
+work. Four 11-pose review sets were opened and compared. The 48-test render
+run initially passed 44 and failed four *reference suites* covering ten exact
+poses, all from inspected intended changed regions; culling equivalence
+passed. Only these ten named PNG references were selectively copied from
+their newly captured actual images, with original references saved under
+`/tmp/house01043-golden-before-zWI022`; the complete software render rerun
+passes **48/48**, including culling equivalence. Full repository CI is green
+after provenance and budget-report generation; **323 strict-XNA translation
+units** compiled clean. `git diff --check` passes. Fresh full CMake/CTest
+remains unclaimed under sibling BL-17 MojoShader-series regeneration, without
+any CNA/sibling edit.
+
+Next highest visible value: complete west/north kitchen upper runs, range,
+hood, backsplash and controlled props; make Basic-effect static furnishings
+readable without debug colour or arbitrary global ambient; then improve the
+front approach's skeletal façade/porch/roof and night visibility. Do not
+resume Android/Web/pet/astronomy subsystem work while the first screenshot
+still reads as an engineering shell. See [Round 20 review](visual-review/README.md).
+
+---
+
+# Prior handoff — 2026-09-16 (`HOUSE-01042` checkpoint)
 
 Branch `develop`. Continuous sprint start HEAD:
 `238d6aed27c1e8662f0d118013ef08bb801ae018`. Preceding clean HEAD:

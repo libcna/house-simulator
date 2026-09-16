@@ -247,7 +247,16 @@ def promote_subset(selected: set[str], per_cell: dict[str, int],
             destination = OUTPUT / ("Daylight" if mode == "daylight" else "Artificial")
             products = ([sidecar["daylight"]["image"]] if mode == "daylight"
                         else [group["image"] for group in sidecar["groups"]])
-            if not products or unlit_products(sidecar, mode):
+            # A container lamp can be runtime-only (`emissive_only`) and a cell can
+            # legitimately have no baked artificial group at all. Its empty atlas family
+            # is the correct result, not a missing product. A genuinely bakeable lamp
+            # with no product remains a hard failure.
+            baked_lights = [light for light in lights_by_cell[cell]
+                            if light.get("bakedIntoLightmap", True) and
+                            light.get("type") != "emissive_only"]
+            if ((mode == "artificial" and not products and baked_lights) or
+                    (mode == "daylight" and not products) or
+                    unlit_products(sidecar, mode)):
                 raise ValueError(f"{cell} {mode}: empty or unlit selected bake")
             for name in products:
                 image = destination / name
