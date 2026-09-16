@@ -1237,3 +1237,45 @@ are confined to the two entry apertures.
 
 `VISUAL-GATE-1` still **FAILS**. The next highest visible value is the upper balcony/front-facade
 silhouette, followed by entry-panel/hardware depth and the already identified night-step receiver.
+
+## Round 31 — open canonical balcony guards
+
+Commit: `HOUSE-00931` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 30's matching [day](captures/house-00930-entry-door-r1/exterior-approach-day.png)
+and [night](captures/house-00930-entry-door-r1/exterior-approach-night.png) approaches put one broad
+painted block across the landing windows. After: the identical
+[day](captures/house-00931-balustrade-r1/exterior-approach-day.png) and
+[night](captures/house-00931-balustrade-r1/exterior-approach-night.png) cameras expose the facade,
+windows and upper door through a complete open guard. The directory contains the unchanged eleven
+route/composition cameras plus this exact pair; all thirteen frames were opened and inspected.
+
+Ranked visible defects remaining:
+
+1. The entry leaf is now the most conspicuous close-range simplification: licensed hardwood makes
+   it materially credible, but it is still a flat slab without panel relief, threshold or hardware.
+2. At night the two real lanterns identify the doorway and guard silhouette, but the adjacent steps
+   and most of the facade remain too dark for a confident arrival sequence.
+3. From the road the house still has a broad box-like roof/facade mass, thin eaves outside the porch
+   and little balcony/landscape dressing to break its scale.
+4. Inside, kitchen practical clutter, family-room finish depth, dining furnishing and the empty
+   straight living-room view remain the largest connected-route gaps.
+
+Fixed: every elevated exterior deck now uses one deterministic measured guard rule: 80 mm lower
+rails, 45 mm painted balusters, 120 mm end newels and the existing brushed-metal rail at the
+authored 1.10 m height. The spacing solver keeps the worst clear opening to 94.5 mm across the
+front, rear and Juliet geometries. The visual guard opens, but the existing 200 mm-wide full-height
+collision band remains continuous behind it. The exact daylight guard crop changes 38.883% of
+pixels over two channel levels, while the already finished porch crop changes only 0.447%; the
+whole close day/night frames change 5.4022%/3.7632%. The world remains 579 chunks and 234 exterior
+instances. The larger detail count remains within budget: 44,607 shell triangles overall and
+1,742/3,500 in the worst cell.
+
+Seventeen strict references with a visible front or rear guard were inspected and intentionally
+advanced; unaffected side views were retained. A close gameplay test now measures more than sixty
+luma transitions through the guard rather than asserting that a solid parapet pixel is bright.
+The 18-pose culled/unculled comparison remains green.
+
+`VISUAL-GATE-1` still **FAILS**. Highest visible value is entry-door panel/hardware depth, followed
+by the principled adjacent-step/night receiver and the connected-room furnishing gaps. Do not hide
+the night defect with global exposure or turn the door into an exterior-only billboard.

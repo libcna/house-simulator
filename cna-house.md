@@ -1972,11 +1972,14 @@ move them, not an assertion in either direction.
   behind its closed portal. Ordinary indoor skirting, door trim, borrowed-light glass and interior
   walls remain exclusively on the room/portal path; adding those whole chunks to the outdoors
   would leak interior geometry through closed rooms.
-  `HOUSE-00928` keeps the elevated balcony's **solid guard** in the existing painted-trim role
-  and its separate narrow rail in the approved brushed-metal role. Both remain owned by their
-  exterior balcony cell; this is a material-role correction, not an added indoor BVH admission or
-  a change to guard collision/portal geometry. The source-to-chunk material check and deterministic
-  shell manifest record the split.
+  `HOUSE-00931` replaces the elevated balcony's old 550 mm solid visual parapet with a measured
+  open balustrade: 80 mm lower rails, 45 mm painted balusters with no clear gap over 95 mm,
+  120 mm end newels and the existing narrow brushed-metal top rail centred at the authored 1.10 m
+  height. All remain owned by their exterior balcony cell and batch into the same painted-trim and
+  metal chunks. The independent 200 mm-wide, full-height collision guard stays deliberately
+  continuous so a swept capsule cannot find a fall-through gap between visual members; this is an
+  offline conservative proxy, not visible geometry or a portal/BVH exception. The source-to-chunk
+  material check and deterministic shell manifest record the split.
 
 ### 17.5 Directory layout
 
@@ -4963,9 +4966,10 @@ this stage:
   hit is the roof you see.
 * **Drop guards.** 13 of them, at the only four places in the house you could fall more than
   §70.5's metre with nothing in the way: the two balconies, the juliet, and the garage's storage
-  loft. The shell *draws* a parapet and a rail at each; nothing stopped you walking through it,
-  because an open side of an exterior cell has no wall by construction. The porch at +0.57 and the
-  terrace at +0.45 get none, which is the same metre deciding it.
+  loft. The shell draws an open balustrade at each balcony edge; collision uses one continuous OBB
+  behind its physical outline so the player capsule cannot pass through the necessarily open visual
+  gaps. An open side of an exterior cell otherwise has no wall by construction. The porch at +0.57
+  and the terrace at +0.45 get none, which is the same metre deciding it.
 * **Stair rails.** 24 pieces, §12.3's 0.95 m balustrade round every well, open where a flight
   climbs from that floor and closed where one passes *under* it — a rail with a gap over a flight
   is a gap you fall through. `HOUSE-00567` built them, `HOUSE-00618`'s twenty-minute bot is what

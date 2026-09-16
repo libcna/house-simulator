@@ -91,6 +91,7 @@ if not INSIDE_BLENDER:
 import argparse  # noqa: E402
 import hashlib  # noqa: E402
 import json  # noqa: E402
+import math  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
@@ -1019,11 +1020,18 @@ CHIMNEY_ALONG = 1.10
 CHIMNEY_ACROSS = 0.60
 CHIMNEY_OVER_RIDGE = 0.60
 
-#: A balcony's edge (`HOUSE-00465`): a solid parapet with a railing capping it to §12's `railing`
-#: height. §12.2 says the rear-extension roof is "open" and used as the master balcony and gives no
-#: section, so the parapet's thickness and height are this generator's.
-PARAPET_THICK = 0.20
-PARAPET_HEIGHT = 0.55
+#: A balcony's edge (`HOUSE-00465`, corrected by `HOUSE-00931`). §12.2 says the rear-extension
+#: roof is "open" and used as the master balcony, while §12.3 supplies only the 1.10 m guard
+#: height. These are ordinary painted-timber balustrade proportions: a low rail, 45 mm square
+#: balusters with no clear opening over 95 mm, and 120 mm newels. The whole assembly is centred
+#: 100 mm inside the deck edge, matching the conservative 200 mm collision band.
+BALCONY_GUARD_INSET = 0.10
+BALCONY_BOTTOM_RAIL_DEPTH = 0.10
+BALCONY_BOTTOM_RAIL_HEIGHT = 0.08
+BALCONY_BOTTOM_RAIL_CENTRE = 0.15
+BALCONY_BALUSTER_SECTION = 0.045
+BALCONY_BALUSTER_MAX_CLEAR = 0.095
+BALCONY_NEWEL_SECTION = 0.12
 
 #: The porch (`HOUSE-00464`, finished by `HOUSE-00929`). §12.1 says "a full-width front porch on
 #: four square columns" and gives no section. The base/shaft/capital proportions below are in the
@@ -1118,33 +1126,88 @@ def open_sides_of(cell: dict, box: tuple, neighbours: list) -> list:
                        for _lo, _hi, _wall, covers in side_intervals(side, box, cell, neighbours))]
 
 
+def balcony_baluster_centres(lo: float, hi: float) -> list[float]:
+    """Evenly spaced baluster centres between two end newels.
+
+    The count is solved from the clear-opening limit rather than from an attractive-looking pitch:
+    ``available = balusters + gaps`` and there is one more gap than baluster. This keeps the two
+    end gaps under the same 95 mm bound as every internal one, including a short Juliet return.
+    """
+    available = hi - lo - 2.0 * BALCONY_NEWEL_SECTION
+    if available <= 0.0:
+        return []
+    count = max(1, math.ceil((available - BALCONY_BALUSTER_MAX_CLEAR) /
+                             (BALCONY_BALUSTER_SECTION + BALCONY_BALUSTER_MAX_CLEAR)))
+    gap = (available - count * BALCONY_BALUSTER_SECTION) / (count + 1)
+    first = lo + BALCONY_NEWEL_SECTION + gap + BALCONY_BALUSTER_SECTION / 2.0
+    pitch = BALCONY_BALUSTER_SECTION + gap
+    return [first + index * pitch for index in range(count)]
+
+
+def balcony_clear_gaps(lo: float, hi: float) -> list[float]:
+    """Clear gaps across the open guard span, including those beside its end newels."""
+    centres = [lo + BALCONY_NEWEL_SECTION / 2.0]
+    sections = [BALCONY_NEWEL_SECTION]
+    for centre in balcony_baluster_centres(lo, hi):
+        centres.append(centre)
+        sections.append(BALCONY_BALUSTER_SECTION)
+    centres.append(hi - BALCONY_NEWEL_SECTION / 2.0)
+    sections.append(BALCONY_NEWEL_SECTION)
+    return [centres[index + 1] - centres[index] -
+            (sections[index] + sections[index + 1]) / 2.0
+            for index in range(len(centres) - 1)]
+
+
 def build_balcony_edge(cell: dict, extent: tuple, neighbours: list, construction, solid, add
                        ) -> int:
-    """A painted parapet with a metal railing round an elevated deck. Returns the count.
+    """An open painted balustrade with a metal top rail round an elevated deck.
 
     §70.5's threshold is a drop over a metre, and the same number decides the rail's height, so it
     is asked once. A ground-level deck -- the porch at +0.57, the terrace at +0.45 -- gets nothing
-    here; the porch's own balustrade is `HOUSE-00464`'s and is a different thing.
+    here; the porch's own balustrade is `HOUSE-00464`'s and is a different thing. Returns guarded
+    side count, not primitive count: changing baluster spacing must not change what a caller thinks
+    is an open edge.
     """
     if cell.get("kind") != "exterior" or not construction or extent[0] <= 1.0:
         return 0
     built = 0
+    deck = extent[0]
+    rail_height = float(construction.get("railing", 0.0))
+    def emit_along(side, plane, a0, a1, y0, y1, depth, surface):
+        inward = 1.0 if side in ("-X", "-Z") else -1.0
+        across = plane + BALCONY_GUARD_INSET * inward
+        if side in ("-X", "+X"):
+            solid(across - depth / 2.0, across + depth / 2.0,
+                  y0, y1, a0, a1, surface)
+        else:
+            solid(a0, a1, y0, y1,
+                  across - depth / 2.0, across + depth / 2.0, surface)
+        return across
+
     for box in cell_boxes(cell, extent):
         for side in open_sides_of(cell, box, neighbours):
             plane, lo, hi = side_span(side, box)
-            inward = 1.0 if side in ("-X", "-Z") else -1.0
-            near, far_edge = plane, plane + PARAPET_THICK * inward
-            if side in ("-X", "+X"):
-                solid(min(near, far_edge), max(near, far_edge),
-                      extent[0], extent[0] + PARAPET_HEIGHT, lo, hi, "trim")
-            else:
-                solid(lo, hi, extent[0], extent[0] + PARAPET_HEIGHT,
-                      min(near, far_edge), max(near, far_edge), "trim")
+            bottom_low = deck + BALCONY_BOTTOM_RAIL_CENTRE - BALCONY_BOTTOM_RAIL_HEIGHT / 2.0
+            bottom_high = bottom_low + BALCONY_BOTTOM_RAIL_HEIGHT
+            guard_centre = emit_along(side, plane, lo, hi, bottom_low, bottom_high,
+                                      BALCONY_BOTTOM_RAIL_DEPTH, "trim")
+            post_top = deck + rail_height + RAIL_SECTION / 2.0
+            for centre in (lo + BALCONY_NEWEL_SECTION / 2.0,
+                           hi - BALCONY_NEWEL_SECTION / 2.0):
+                emit_along(side, plane,
+                           centre - BALCONY_NEWEL_SECTION / 2.0,
+                           centre + BALCONY_NEWEL_SECTION / 2.0,
+                           deck, post_top, BALCONY_NEWEL_SECTION, "trim")
+            for centre in balcony_baluster_centres(lo, hi):
+                emit_along(side, plane,
+                           centre - BALCONY_BALUSTER_SECTION / 2.0,
+                           centre + BALCONY_BALUSTER_SECTION / 2.0,
+                           bottom_high, deck + rail_height - RAIL_SECTION / 2.0,
+                           BALCONY_BALUSTER_SECTION, "trim")
             rail_along(add, side in ("-X", "+X"), lo, hi,
-                       extent[0] + float(construction.get("railing", 0.0)),
-                       extent[0] + float(construction.get("railing", 0.0)),
-                       plane + (PARAPET_THICK / 2.0) * inward, RAIL_SECTION)
-            built += 2
+                       deck + rail_height, deck + rail_height,
+                       guard_centre, RAIL_SECTION)
+            built += 1
     return built
 
 
@@ -3221,30 +3284,47 @@ def selftest(output: Path) -> int:
     require(balcony_extent[0] > 1.0 and porch_extent[0] < 1.0,
             f"the rear balcony is a storey up ({balcony_extent[0]}) and the porch deck is not "
             f"({porch_extent[0]}), which is §70.5's own threshold for a drop")
+    balcony_box = list(cell_boxes(balcony, balcony_extent))[0]
     open_sides = [side for side in ("-X", "+X", "-Z", "+Z")
                   if not any(covers for _lo, _hi, _wall, covers in side_intervals(
-                      side, list(cell_boxes(balcony, balcony_extent))[0], balcony,
-                      neighbours))]
-    parapets, rail_faces = [], []
+                      side, balcony_box, balcony, neighbours))]
+    painted, rail_faces = [], []
     built = build_balcony_edge(balcony, balcony_extent, neighbours, construction,
-                               lambda *args: parapets.append(args),
+                               lambda *args: painted.append(args),
                                lambda *args: rail_faces.append(args))
-    require(built == 2 * len(open_sides) and len(parapets) == len(open_sides)
+    expected_verticals = sum(2 + len(balcony_baluster_centres(
+        *side_span(side, balcony_box)[1:])) for side in open_sides)
+    require(built == len(open_sides) and len(painted) == len(open_sides) + expected_verticals
             and len(rail_faces) == 6 * len(open_sides),
-            f"it gains a parapet and a railing on each of its {len(open_sides)} open sides "
-            f"({len(parapets)} parapets, {len(rail_faces)} rail faces)")
-    require(all(box[6] == "trim" for box in parapets),
-            "balcony parapets use painted trim while their upper rails retain metal")
-    tops_of = {round(box[3], 4) for box in parapets}
-    require(tops_of == {round(balcony_extent[0] + PARAPET_HEIGHT, 4)},
-            f"the parapet stands {PARAPET_HEIGHT} m off the deck ({sorted(tops_of)})")
+            f"it gains a low rail, measured balusters, two newels and a top rail on each of its "
+            f"{len(open_sides)} open sides ({len(painted)} painted boxes, "
+            f"{len(rail_faces)} top-rail faces)")
+    require(all(box[6] == "trim" for box in painted),
+            "balcony lower rails, balusters and newels use painted trim while their upper rails "
+            "retain metal")
+    bottom_rails = [box for box in painted
+                    if abs((box[3] - box[2]) - BALCONY_BOTTOM_RAIL_HEIGHT) < 1e-9]
+    require(len(bottom_rails) == len(open_sides),
+            f"one low rail anchors every open side instead of a solid half-height parapet "
+            f"({len(bottom_rails)})")
+    verticals = [box for box in painted if box not in bottom_rails]
+    tops_of = {round(box[3], 4) for box in verticals}
+    require(tops_of == {round(balcony_extent[0] + float(construction["railing"]) -
+                              RAIL_SECTION / 2.0, 4),
+                        round(balcony_extent[0] + float(construction["railing"]) +
+                              RAIL_SECTION / 2.0, 4)},
+            f"balusters meet the rail underside and newels support its full depth "
+            f"({sorted(tops_of)})")
+    clear_gaps = []
+    for side in open_sides:
+        _plane, lo, hi = side_span(side, balcony_box)
+        clear_gaps.extend(balcony_clear_gaps(lo, hi))
+    require(clear_gaps and max(clear_gaps) <= BALCONY_BALUSTER_MAX_CLEAR + 1e-9,
+            f"no opening in the balustrade exceeds {BALCONY_BALUSTER_MAX_CLEAR * 1000:.0f} mm "
+            f"(worst {max(clear_gaps) * 1000:.1f} mm)")
     rail_tops = {round(point[1], 4) for corners in rail_faces for point in corners[0]}
-    require(max(tops_of) < balcony_extent[0] + float(construction["railing"]) - RAIL_SECTION,
-            f"which is below the rail, so the rail sits ON the parapet rather than inside it "
-            f"({max(tops_of)} against "
-            f"{balcony_extent[0] + float(construction['railing']) - RAIL_SECTION:.3f})")
     require(max(rail_tops) > balcony_extent[0] + float(construction["railing"]),
-            f"and the rail's top is over §12's railing height above it "
+            f"and the rail's top is over §12's authored railing centre height "
             f"({max(rail_tops)} against {balcony_extent[0] + float(construction['railing'])})")
     require(len(open_sides) == 3,
             f"three of them: the fourth is the house ({open_sides})")
@@ -3309,8 +3389,8 @@ def selftest(output: Path) -> int:
     juliet_extent = extent_of(juliet, levels["L2"])[0]
     juliet_edges = build_balcony_edge(juliet, juliet_extent, neighbours, construction,
                                       lambda *args: None, lambda *args: None)
-    require(juliet_edges == 2 * 3,
-            f"the juliet balcony gets its parapet and rail from the same rule as the rear one "
+    require(juliet_edges == 3,
+            f"the juliet balcony gets its open balustrade from the same rule as the rear one "
             f"({juliet_edges})")
 
     # ---- `HOUSE-00467`: the garage wing ---------------------------------------------------------

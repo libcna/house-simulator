@@ -251,12 +251,37 @@ namespace
         ASSERT_EQ(image->height, 900);
 
         // This is the same normal-game, close front approach as the visual review, after the HUD
-        // has drawn. The previously zero-tinted metal parapet was an opaque black band across the
-        // entrance, and the porch's chipped-plaster source made painted structural trim look
-        // ruin-like. Protect the repaired *presentation*, not a particular debug material hue.
-        const auto& parapet = image->pixels[230u * 1600u + 800u];
-        EXPECT_GT(parapet.getRProperty(), 95)
-            << "the daylight-painted balcony parapet must not collapse to a black band";
+        // has drawn. HOUSE-00931 replaced the opaque parapet band with a measured open guard. A
+        // horizontal scan through its balusters must retain alternating painted uprights and open
+        // facade, while the porch's painted structural trim remains free of chipped masonry.
+        std::size_t guardTransitions = 0u;
+        std::size_t guardBrightPixels = 0u;
+        int previousLuma = -1;
+        for (int x = 440; x < 1160; ++x)
+        {
+            const auto& pixel = image->pixels[200u * 1600u + static_cast<std::size_t>(x)];
+            const int luma =
+                (static_cast<int>(pixel.getRProperty()) * 54 + static_cast<int>(pixel.getGProperty()) * 183 +
+                 static_cast<int>(pixel.getBProperty()) * 19) /
+                256;
+            if (previousLuma >= 0)
+            {
+                const int delta = luma > previousLuma ? luma - previousLuma : previousLuma - luma;
+                if (delta > 35)
+                {
+                    ++guardTransitions;
+                }
+            }
+            if (luma > 120)
+            {
+                ++guardBrightPixels;
+            }
+            previousLuma = luma;
+        }
+        EXPECT_GT(guardTransitions, 60u)
+            << "the balcony guard must read as an open rhythm, not a solid blockout band";
+        EXPECT_GT(guardBrightPixels, 300u)
+            << "the painted balcony balusters must remain readable in daylight";
         const auto& support = image->pixels[380u * 1600u + 450u];
         EXPECT_GT(support.getRProperty(), 95)
             << "the painted front porch support must remain readable in normal gameplay";

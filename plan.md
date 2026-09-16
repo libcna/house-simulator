@@ -13564,6 +13564,42 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
               checks pass with `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still FAILS: the broad solid upper
               balcony/front facade, slab-like door geometry, dark night steps and interior dressing
               gaps remain the largest visible defects.
+- [x] HOUSE-00931 — Replace the canonical balcony's solid blockout parapet with a proportioned open balustrade
+      dep: HOUSE-00465, HOUSE-00928, HOUSE-00929, HOUSE-00930 · sys: world/content/exterior · plat: ALL · pri: MUST
+      note: (2026-09-16) Round 30's fixed daylight approach shows that the dominant remaining
+            entrance mass is not a wall or material failure: `build_balcony_edge` deliberately
+            emits a continuous 550 mm parapet around every elevated exterior deck, then leaves an
+            empty gap to one 55 mm top rail. From below the front run hides the landing windows and
+            reads as a featureless blockout band. Replace that generator-wide section with a
+            plausible open guard — low rail, bounded clear gaps, vertical balusters, end newels and
+            the existing top rail — without naming the front balcony, moving its footprint or
+            weakening the independent full-height collision guard. Record the smallest architecture
+            correction because §17.4/§49.2 currently describe the old solid visual parapet.
+      accept: the identical fixed approach/road cameras see the upper facade and window rhythm
+              through a coherent balcony guard instead of a solid band; rail height remains the
+              authored 1.10 m, clear openings are no larger than 100 mm, corners and side returns
+              are supported, and front/rear/Juliet balconies follow one deterministic rule;
+              approved existing finishes and physical texture scale remain valid; balcony floor,
+              porch roof, portal, collision, culling and entry geometry do not move; shell triangle
+              and chunk budgets, render/culling regression, strict XNA/content/full gates pass;
+              exact before/after captures are inspected and references updated selectively;
+              `VISUAL-GATE-1` is judged honestly
+      result: (2026-09-16) The general elevated-deck generator now emits an 80 mm lower rail,
+              45 mm painted balusters, 120 mm end newels and the existing brushed-metal top rail
+              instead of a continuous 550 mm blockout parapet. Spacing is solved from each real
+              open span; the measured worst clear gap is 94.5 mm, while the independent continuous
+              collision OBB remains full height. Front, rear and Juliet balconies use the same
+              rule without a cell-name exception. The shell has 44,607 triangles; the worst cell
+              is `L1_BALCONY_REAR` at 1,742/3,500, and the compiled world remains 579 chunks / 234
+              exterior instances. Round 31's exact day guard crop changes 38.883% while the porch
+              crop changes only 0.447%; the fixed night silhouette also improves. All thirteen
+              review frames were inspected. Seventeen deliberately affected golden images were
+              compared and advanced; the new semantic scan protects the open painted rhythm.
+              Generator/shell/collision self-tests, all 1,407 unit tests, all 135 serial integration
+              registrations and the affected strict software-render suite including the 18-pose
+              culling comparison pass; full source/content/provenance/strict-XNA checks pass with
+              `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still FAILS: the slab-like entry door, under-readable
+              night steps/facade, broad roof mass and connected-room dressing gaps remain visible.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -18072,6 +18108,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-00931` | **New task, next free phase-12 id.** Replace the general elevated-deck visual section from a solid 550 mm parapet plus isolated top rail to an open, measured balustrade while preserving the separate full-height collision guard. | Round 30 makes the old generator decision the largest visible facade defect: it masks the landing windows as one blank band, and its half-metre gap below the top rail is neither a convincing masonry parapet nor a complete balustrade. The collision representation is already deliberately conservative and layout-derived, so visual openings need not create fall-through gaps. |
 | 2026-09-16 | `HOUSE-00930` | **New task, next free phase-12 id.** Split only authored weather-facing entry leaves into a stable exterior-door role and bridge that role through the existing §25.6 hierarchy; do not make general room trim two-sided or externally resident. | Round 29's fixed pair shows the same front leaf present from the foyer and absent from the porch. The old `HOUSE-00486` assumption that both portal cells build a leaf fails when one is an exterior cell, because exterior cells intentionally generate no walls. A dedicated role keeps the interior cell as residency owner while preventing its skirting, cornice and other hardwood trim from leaking outdoors. |
 | 2026-09-16 | `HOUSE-00929` | **New task, next free phase-12 id.** Finish the existing data-driven covered-porch grammar with measured column dressings, soffit and roof-edge layers rather than masking the defect with a façade prop or renderer exception. | Round 28's fixed daylight approach shows that the dominant remaining exterior shape is the generator's bare 200 mm post-and-beam cage beneath an unfinished 300 mm balcony-floor zone. The general `covered_by` rule already derives the porch from stacked canonical cells, so it can produce the missing architectural finish without hard-coding a room id or changing the footprint, portal graph, collision model or material architecture. |
 | 2026-09-16 | `HOUSE-01281` | **New task, next free phase-16 id.** Permit a fixed light to name additional fixed bake receivers without changing its canonical owning cell, and admit only those foreign bindings to an outside-facing skin. | Round 26 shows both real porch emitters live while their adjacent foyer-owned facade remains black. `L0_PORCH` is intentionally unbaked exterior geometry; moving the facade out of `L0_FOYER`, adding the porch group to the foyer's runtime control index, or enlarging the glow quad would each violate an existing architecture boundary. A measured bake also exposed the two old canonical point positions 10 cm behind the facade; the physical emissive sub-range places their centres at z -14.073, which now drives the bake, glow and later dynamic approximation consistently. |

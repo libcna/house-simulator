@@ -1,4 +1,45 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-00930` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-00931` checkpoint)
+
+Branch `develop`. Task-start HEAD `4aafc67` (`HOUSE-00930`). This file belongs to the single
+`HOUSE-00931` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The general elevated-deck generator no longer draws its old 550 mm solid parapet. It now derives
+one measured open guard from every real open side: an 80 mm lower rail, 45 mm painted balusters,
+120 mm end newels and the existing brushed-metal rail at the authored 1.10 m height. The spacing
+solver limits the measured worst clear gap to 94.5 mm on the front, rear and Juliet balconies
+without naming any one cell. The visual openings do not weaken safety: collision retains its
+independent continuous 200 mm-wide, full-height OBB behind the guard.
+
+Before: Round 30's matching [day](visual-review/captures/house-00930-entry-door-r1/exterior-approach-day.png)
+and [night](visual-review/captures/house-00930-entry-door-r1/exterior-approach-night.png) approaches
+show one broad painted band masking the upper facade. After: the identical
+[day](visual-review/captures/house-00931-balustrade-r1/exterior-approach-day.png) and
+[night](visual-review/captures/house-00931-balustrade-r1/exterior-approach-night.png) views expose
+the landing windows and upper entry through a complete balustrade. The full
+[Round 31 set](visual-review/captures/house-00931-balustrade-r1) contains all eleven fixed clear-day
+cameras plus this pair; every frame was opened. The exact day guard crop changes 38.883%, while
+the finished porch crop changes only 0.447%; the close day/night frames change 5.4022%/3.7632%.
+
+The world remains 579 chunks and 234 exterior instances. The shell is 44,607 triangles, with
+`L1_BALCONY_REAR` worst at 1,742/3,500. Seventeen affected golden pairs were inspected and advanced
+selectively; side views without a visible guard were left alone. The close-entry semantic test now
+protects the open baluster rhythm rather than one pixel in a solid band. Generator, shell and
+collision self-tests pass. All 1,407 unit tests, all 135 serial integration registrations and the
+focused strict software-render suite pass, including the 18-pose culled/unculled comparison. A
+known wall-clock-sensitive sky unit and a weather integration assertion each failed only under
+high parallel load, passed isolated, and their complete suites passed at controlled parallelism.
+Project source/content/provenance checks and the strict-XNA build with `CNA_CNAEXT=OFF` pass.
+
+Next highest visible value: give the plain hardwood entry slab measured panel relief, threshold and
+restrained hardware while keeping the existing portal leaf/collision/exterior-residency contract.
+Then solve the adjacent front-step/night receiver without global exposure. Exterior roof/facade
+mass and balcony/landscape dressing remain broad defects; interior priority remains kitchen
+practical clutter, family finish depth, dining furnishing and the empty straight living view.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-00930` checkpoint)
 
 Branch `develop`. Task-start HEAD `d2f0ea0` (`HOUSE-00929`). This file belongs to the single
 `HOUSE-00930` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

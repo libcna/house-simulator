@@ -52,8 +52,8 @@
     "L0_SUNROOM.glb": "sha256:478705513fa1126762dff5bae4c6fd1358bcbfa7b3127c8f5abfb1429de42037",
     "L0_WC1.glb": "sha256:2057c94923d854c9cf6fc6a64fb4ac6b28bd0f14e534e43a1e30b28c6371c57d",
     "L0_WC2.glb": "sha256:1f8e7e976a523d22cac43329ec8a450d4523463196b629aec575fc82df530a95",
-    "L1_BALCONY_FRONT.glb": "sha256:caa97872f9c9e5a371264cd30c047828499bf08d88f334bea596ce63291a9025",
-    "L1_BALCONY_REAR.glb": "sha256:4d0ed85d793ae239026c2a4dbf9ae2bbea2a3c739d7df9a11e9927f729cda3f4",
+    "L1_BALCONY_FRONT.glb": "sha256:ca753c13df3715b14be5ba29ddd736f669bfccd8765b234ec31180bdf80ffc1a",
+    "L1_BALCONY_REAR.glb": "sha256:a5115584772ec813933c320adef95328b3cd6d9ab0147aaf30bbdea78cd2712e",
     "L1_BATH2.glb": "sha256:081f61b7ffe64908d412cc50694ed7ca941f2872a24bef45d9b45ab846b88f7a",
     "L1_BATH3.glb": "sha256:0e024df5b6ce7146cbe0928e1fa6f6e9ad45d14ce36a93587a116bf4e95b9f8b",
     "L1_BED2.glb": "sha256:7a708bac04e82307cbc210b4d1a4ce74d47c58d91c7741b649dc0ff143cb6164",
@@ -73,7 +73,7 @@
     "L1_STOR.glb": "sha256:8b6883d8a8ae61cfb9b80b56f9b41cbdf6dea7e46634625410d5bba1a436e694",
     "L1_WC3.glb": "sha256:3e93ada580bcff4df1723cb6b36616c882fc527828c32c51b5946ed80fe8442b",
     "L1_WC4.glb": "sha256:7d0735d0b9d2a41e0197fdd1663392e9834b1dd2df837499a8ba1492e8631317",
-    "L2_BALCONY_JULIET.glb": "sha256:a9cf8d68383c3ed6733400c56988f21596bed5325d01a6074fde8abbd4383a3a",
+    "L2_BALCONY_JULIET.glb": "sha256:43b877c2ebc3e56bb01c3c332a5c2c0b34fe5628f7e48f85fc45a53a57f9da58",
     "L2_BATH4.glb": "sha256:8571e6f156700da11a7cc905a7fce709c34ff1e85d5ed17ac7bd098480a9ee96",
     "L2_BATH5.glb": "sha256:3462a7b7d50e19a7b2fc3b436f799f4436c3c510800e985ba2c02c99db31a4bf",
     "L2_BED6.glb": "sha256:e0b5b99076070fe3addaaff82c0e375251e7b6439667bc6f6c73f83ed82e785a",
@@ -101,7 +101,7 @@
     "ROOF_MAIN.glb": "sha256:4596298e0792150e63cdfd9fc899e6ce02a8c8cc1b875caa8709707e2cc9dd05"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:bad2958485fc8cd8d27a070ca54f5a1fe99cc02e691648e480c8a3517a63c223",
+  "generatorVersion": "sha256:311817ca669fa578df7772fc81a9c0b584a54cc7938a9409666bf6d617e9d290",
   "origin": {
     "attribution": "",
     "kind": "generated",

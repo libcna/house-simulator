@@ -602,8 +602,9 @@ def build_shell(layout, shapes: Shapes, stats: dict, has_ground: bool = False) -
                         cell, box, side, cells_by_level.get(cell["level"], []), boxes_by_cell):
                     if outdoors and neighbour is None:
                         # An open side a storey up is a drop, and §70.5 asks for a guard at more
-                        # than a metre of it. The shell DRAWS one -- a 0.20 m parapet with a rail
-                        # on top (`HOUSE-00465`) -- and nothing stopped you walking through it:
+                        # than a metre of it. The shell DRAWS an open balustrade inside a 0.20 m
+                        # edge band (`HOUSE-00465`, refined by `HOUSE-00931`) -- and nothing
+                        # stopped you walking through it:
                         # this cell has no wall here by construction, so until `HOUSE-00472` you
                         # could step off the rear balcony at +3.65 and off the juliet at +6.55.
                         # The porch at +0.57 and the terrace at +0.45 get nothing, which is the
@@ -679,12 +680,12 @@ def build_shell(layout, shapes: Shapes, stats: dict, has_ground: bool = False) -
 #: the front porch (+0.57) and the terrace (+0.45) are decks or drops. `house_shell_gen.py` asks it
 #: of the same two places for the geometry it draws.
 GUARD_DROP = 1.0
-#: A parapet's thickness, `house_shell_gen.py`'s `PARAPET_THICK`. The drawn guard is a parapet with
-#: a rail above it; what stops you is one solid box from the deck to the rail's height, because a
-#: capsule does not fit between a 0.55 m parapet and a 1.10 m rail.
+#: The balcony guard's conservative edge band, twice `house_shell_gen.py`'s
+#: `BALCONY_GUARD_INSET`. The visual guard is an open balustrade since `HOUSE-00931`; collision is
+#: one solid box to authored rail height so a swept capsule cannot find gaps between its members.
 GUARD_THICK = 0.20
 
-#: A stair balustrade is a RAIL and not a parapet: 60 mm, against the balcony guard's masonry.
+#: A stair balustrade uses a narrow rail proxy: 60 mm against the balcony guard's conservative band.
 #: §12.3 gives the height (0.95 m) and not the thickness, and the difference matters only in that a
 #: fat one leaves a slot behind it that nothing can stand in.
 BALUSTRADE_THICK = 0.06
@@ -692,7 +693,7 @@ BALUSTRADE_THICK = 0.06
 
 def _guard_obb(shapes: Shapes, axis: str, value: float, u0: float, u1: float, outward: int,
                floor: float, height: float, surface, thickness: float = None) -> int:
-    """One guard box along an open edge, standing INSIDE it the way the drawn parapet does."""
+    """One conservative guard box inside the same edge band as the drawn balustrade."""
     thick = GUARD_THICK if thickness is None else thickness
     inward = -outward * thick / 2.0
     centre_u, half_u = (u0 + u1) / 2, (u1 - u0) / 2
@@ -2760,7 +2761,7 @@ def selftest() -> int:
                     f"a level that declares a roof AND a ceiling plane gets no rafters: the slab "
                     f"is its lid ({probe_stats['rafterMeshes']})")
 
-            # The guards. The shell DRAWS a parapet and a rail here; nothing stopped you.
+            # The guards. The shell DRAWS an open balustrade here; nothing stopped you.
             railing = float(build_rules["railing"])
             guarded = {}
             for identifier, indices in references.items():
@@ -2797,7 +2798,7 @@ def selftest() -> int:
             require(all(box[0] - 1e-6 <= record[0][0] <= box[1] + 1e-6
                         and box[2] - 1e-6 <= record[0][2] <= box[3] + 1e-6
                         for record in guarded["L1_BALCONY_REAR"]),
-                    "and it stands INSIDE the deck's edge, like the parapet the shell draws, "
+                    "and it stands INSIDE the deck's edge, behind the balustrade the shell draws, "
                     "rather than hanging in the air outside it")
 
             # 7f. `HOUSE-00568`: a body standing in a hole is in BOTH rooms, so what is within

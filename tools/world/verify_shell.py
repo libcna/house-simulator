@@ -124,7 +124,7 @@ def winding_rows(shell: dict, cells: dict) -> list[dict]:
     faces up and a ceiling faces down, whatever shape the room is. `wall` and `exterior` are
     counted and NOT judged, because those classes carry two different kinds of thing -- a room's
     bounding surface, where "in" is the middle of the box, and free-standing boxes that are not a
-    boundary at all: a balcony parapet, a mezzanine guard, a basement window well. A thin box has
+    boundary at all: a balcony balustrade, a mezzanine guard, a basement window well. A thin box has
     faces pointing both ways by construction, and half of them look wrong to any test that assumes
     the class is a boundary. `oneWay` counts the faces that do point into their box and `other` the
     rest; the arbiter for those is `BlockoutRenderTests.NothingIsInsideOut`, which draws the house
@@ -689,7 +689,7 @@ def report(result: dict) -> str:
                      f"{sum(row['degenerate'] for row in winding)} with no area, "
                      f"{sum(row['wrong'] for row in winding)} pointing the wrong way over "
                      f"{sum(row['faces'] for row in slabs)} floor and ceiling faces; {free} "
-                     f"wall/exterior face(s) are not on their box's side (parapets, guards, "
+                     f"wall/exterior face(s) are not on their box's side (balustrades, guards, "
                      f"window wells)")
     lines.append(f"  {len(result['problems'])} problem(s)")
     return "\n".join(lines)
@@ -804,7 +804,7 @@ def selftest() -> int:
 
     require(sum(row["other"] for row in winding) > 0,
             f"{sum(row['other'] for row in winding)} wall and exterior faces are not on their "
-            f"box's side, which is what a parapet, a mezzanine guard and a window well are -- "
+            f"box's side, which is what a balustrade, a mezzanine guard and a window well are -- "
             f"free-standing boxes with faces both ways, and why those two classes are counted "
             f"here and judged by `BlockoutRenderTests.NothingIsInsideOut` instead")
 
