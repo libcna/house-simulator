@@ -3617,8 +3617,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 166U)
-            << "HOUSE-00930 adds the isolated weather-facing entry-leaf finish";
+        EXPECT_EQ(contents.materials.size(), 168U)
+            << "HOUSE-00932 adds separate weather-facing entry panel and hardware finishes";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3691,9 +3691,30 @@ namespace
                          { return material.id == Intern("MAT_EXTERIOR_DOOR_HARDWOOD"); });
         ASSERT_NE(exteriorDoorAt, contents.materials.end());
         EXPECT_EQ(exteriorDoorAt->materialClass, world::MaterialClass::Wood);
-        EXPECT_EQ(exteriorDoorAt->albedo, "Textures/Materials/wood_oak_floor_albedo");
+        EXPECT_EQ(exteriorDoorAt->albedo, "Textures/Materials/wood_board_albedo");
         EXPECT_EQ(exteriorDoorAt->lightmapChannel, 0);
         EXPECT_EQ(exteriorDoorAt->effectTierS, world::EffectTier::Basic);
+
+        const auto exteriorDoorPanelAt =
+            std::find_if(contents.materials.begin(),
+                         contents.materials.end(),
+                         [](const world::MaterialDef& material)
+                         { return material.id == Intern("MAT_EXTERIOR_DOOR_PANEL_HARDWOOD"); });
+        ASSERT_NE(exteriorDoorPanelAt, contents.materials.end());
+        EXPECT_EQ(exteriorDoorPanelAt->materialClass, world::MaterialClass::Wood);
+        EXPECT_EQ(exteriorDoorPanelAt->albedo, exteriorDoorAt->albedo);
+        EXPECT_LT(exteriorDoorPanelAt->tint.X, exteriorDoorAt->tint.X)
+            << "the panel sibling must preserve readable relief beneath the porch";
+
+        const auto exteriorDoorHardwareAt =
+            std::find_if(contents.materials.begin(),
+                         contents.materials.end(),
+                         [](const world::MaterialDef& material)
+                         { return material.id == Intern("MAT_EXTERIOR_DOOR_HARDWARE_BRONZE"); });
+        ASSERT_NE(exteriorDoorHardwareAt, contents.materials.end());
+        EXPECT_EQ(exteriorDoorHardwareAt->materialClass, world::MaterialClass::Metal);
+        EXPECT_EQ(exteriorDoorHardwareAt->albedo, "Textures/Materials/metal_brushed_albedo");
+        EXPECT_EQ(exteriorDoorHardwareAt->effectTierS, world::EffectTier::Basic);
 
         const auto windowGlassAt = std::find_if(contents.materials.begin(),
                                                 contents.materials.end(),

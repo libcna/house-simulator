@@ -279,6 +279,13 @@ namespace cnahouse::lighting
         DirectionalLightsForObject(util::Id cell,
                                    const Microsoft::Xna::Framework::Vector3& objectCentre) const noexcept;
 
+        /// @brief Fixture approximation for detail on an explicitly baked foreign receiver.
+        ///
+        /// Only foreign groups already bound in the canonical cell lightmap data participate;
+        /// ordinary neighbouring lights remain isolated.
+        [[nodiscard]] ObjectLightAssignment CrossCellReceiverLightsForObject(
+            util::Id receiverCell, const Microsoft::Xna::Framework::Vector3& objectCentre) const noexcept;
+
         /// @brief Select the cell whose exposure the camera follows this frame.
         void SetCameraCell(util::Id cell) noexcept
         {
@@ -335,6 +342,12 @@ namespace cnahouse::lighting
 
         [[nodiscard]] SwitchGroupState* FindGroupMutable(util::Id group) noexcept;
         [[nodiscard]] float GroupOutputLevel(std::size_t groupIndex) const noexcept;
+        [[nodiscard]] ObjectLightAssignment
+        FixtureLightsForObject(std::span<const std::size_t> fixtureIndices,
+                               float denominatorLumens,
+                               const Microsoft::Xna::Framework::Vector3& objectCentre) const noexcept;
+        [[nodiscard]] ObjectLightAssignment WithReceiverBounce(ObjectLightAssignment assignment,
+                                                               std::size_t cellIndex) const noexcept;
         void AdvanceBulbTransitions(float deltaSeconds) noexcept;
 
         std::vector<RoomLightState> cells_;
@@ -353,6 +366,8 @@ namespace cnahouse::lighting
         std::vector<CellGroups> cellGroups_;
         std::vector<ObjectFixture> objectFixtures_;
         std::vector<std::vector<std::size_t>> objectFixturesByCell_;
+        std::vector<std::vector<std::size_t>> crossCellFixturesByCell_;
+        std::vector<float> crossCellFixtureLumens_;
         std::vector<Microsoft::Xna::Framework::Vector3> dominantSurfaceColors_;
         std::vector<Microsoft::Xna::Framework::Vector3> daylightFillDirections_;
         std::vector<bool> hasDaylightFillDirection_;

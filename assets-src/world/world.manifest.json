@@ -1,6 +1,6 @@
 {
   "schema": "cna-house/manifest/1",
-  "worldHash": "sha256:5c20ec5fb18f247428f8b0851e82997345573465c8f0d2b0c2219d3dd3fc2f79",
+  "worldHash": "sha256:a5e5266b134e521289c5664555cf199ff05c0bce16c65bfc48f516f6dd3446cc",
   "members": [
     {
       "file": "layout.levels.json",
@@ -8,7 +8,7 @@
     },
     {
       "file": "layout.cells.json",
-      "sha256": "sha256:2b199dc976ae5509c613dc92e8deedd9c6c92b169a5d0286d6249a5daf9e28f3"
+      "sha256": "sha256:3c3013464a6595d77fcfc3cfc0c931dab99a3c49c65bdf98b71421c53880bf5e"
     },
     {
       "file": "layout.portals.json",
@@ -16,7 +16,7 @@
     },
     {
       "file": "layout.openings.json",
-      "sha256": "sha256:ec7ce96e700e66bc40becf55dc452cbc42e9e337b7eddc5f161a01d6e944404e"
+      "sha256": "sha256:b4eececd3b9d9301f1395ed1eebfefefe257898216dbbeb6f1aa6f2c5dfdd279"
     },
     {
       "file": "layout.stairs.json",
@@ -24,15 +24,15 @@
     },
     {
       "file": "layout.lights.json",
-      "sha256": "sha256:a1791fc6b3ae7295d0c1e718e2ef60749061ab9f7375a6896ce37d69723bbbcd"
+      "sha256": "sha256:94fe2036b644808103964fc5c50a9532e8336f909f9455aa018dbebfcab9ce1b"
     },
     {
       "file": "layout.props.json",
-      "sha256": "sha256:505e3a394527164ec3f55cb4ec3cb0d0b063282022645a0f7c015c387bbb862d"
+      "sha256": "sha256:c26bbe2bea4b5007063cc0e3dfb7c3c4db9c5b370c37e956ca62a4cdd92cddab"
     },
     {
       "file": "layout.materials.json",
-      "sha256": "sha256:28aedb231a91382df953103826b508c5ab7f93290a7552758d01e0427b1bc65d"
+      "sha256": "sha256:0a1adedddbb84dafe67b397bff31edb1b1296b36c1b23f706402c5cf3ae1bea8"
     },
     {
       "file": "layout.nav.json",

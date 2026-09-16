@@ -396,8 +396,10 @@ namespace cnahouse::rendering
             const bool exteriorSkin = visibility::IsExteriorSkinMaterial(library_.materials[leader.material]);
             const bool exteriorWindow =
                 visibility::IsExteriorWindowMaterial(library_.materials[leader.material]);
+            const bool exteriorDoor = visibility::IsExteriorDoorMaterial(library_.materials[leader.material]);
+            const bool weatherFacingDetail = exteriorWindow || exteriorDoor;
             const float exposure =
-                OpaqueReceiverEffectExposure(cell->kind, exteriorSkin || exteriorWindow, cameraExposure);
+                OpaqueReceiverEffectExposure(cell->kind, exteriorSkin || weatherFacingDetail, cameraExposure);
 
             DrawParams common;
             common.world = &worldMatrix;
@@ -637,9 +639,10 @@ namespace cnahouse::rendering
                 if (room != nullptr)
                 {
                     const bool skyOpen =
-                        exteriorWindow || (cell->kind == world::CellKind::Exterior &&
-                                           cell->visibilityHint == world::VisibilityHint::Open);
-                    const float artificial = exteriorWindow ? 0.0F : room->artificial * kBasicFixtureAmbient;
+                        weatherFacingDetail || (cell->kind == world::CellKind::Exterior &&
+                                                cell->visibilityHint == world::VisibilityHint::Open);
+                    const float artificial =
+                        weatherFacingDetail ? 0.0F : room->artificial * kBasicFixtureAmbient;
                     const Vector3& sky = skyOpen ? lighting_->SkyAmbientColor() : room->skyAmbientColor;
                     const float skyScale = skyOpen ? 1.0F : kBasicSkyBounce;
                     draw.ambientLight =
@@ -655,7 +658,34 @@ namespace cnahouse::rendering
                     const bool celestial = lighting_->CelestialKeyForCell(cell->id) != nullptr;
                     const Vector3 objectCentre = (runMin + runMax) * 0.5F;
                     const lighting::ObjectLightAssignment objectLights =
-                        lighting_->DirectionalLightsForObject(cell->id, objectCentre);
+                        exteriorDoor && !celestial
+                            ? lighting_->CrossCellReceiverLightsForObject(cell->id, objectCentre)
+                            : lighting_->DirectionalLightsForObject(cell->id, objectCentre);
+                    if (exteriorDoor && !celestial)
+                    {
+                        // Wall-mounted sources graze a coplanar door, so their direct Lambert term
+                        // is deliberately small. Reuse the same restrained fixture-bounce factor
+                        // as indoor Basic detail to represent the lit porch enclosure around it.
+                        Vector3 localBounce;
+                        for (std::size_t slot = 0; slot < 2; ++slot)
+                        {
+                            if (!objectLights.slots[slot].has_value())
+                            {
+                                continue;
+                            }
+                            const Vector3& source = objectLights.slots[slot]->diffuseColor;
+                            localBounce.X += source.X;
+                            localBounce.Y += source.Y;
+                            localBounce.Z += source.Z;
+                        }
+                        draw.ambientLight = Vector3(
+                            std::min(1.0F,
+                                     draw.ambientLight.X + exposure * kBasicFixtureAmbient * localBounce.X),
+                            std::min(1.0F,
+                                     draw.ambientLight.Y + exposure * kBasicFixtureAmbient * localBounce.Y),
+                            std::min(1.0F,
+                                     draw.ambientLight.Z + exposure * kBasicFixtureAmbient * localBounce.Z));
+                    }
                     const float directionalScale =
                         celestial ? exposure * (skyOpen ? 1.0F : kBasicSunWindowKey * room->daylight)
                                   : exposure * kBasicFixtureKey;

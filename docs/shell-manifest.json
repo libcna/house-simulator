@@ -36,7 +36,7 @@
     "L0_CLOSET_W.glb": "sha256:d81a99f448ecc9b4df98dbe5c0e090ba128beb6b8d089904179a83ad28361f91",
     "L0_DINING.glb": "sha256:ead93935c88e7028d2ff6796e675726e20f9f8450ba9e4a17f39ac2106e790ae",
     "L0_FAMILY.glb": "sha256:ee25be315a4d0e72680f74dd12debbe9aaa959b9e7477a32a6a7ab71829829c3",
-    "L0_FOYER.glb": "sha256:a74c9ef3ea23cd03ae7105ce4717bb4af9cd4bb0aa93b832959ff68529574507",
+    "L0_FOYER.glb": "sha256:1bbefa880d9268eb5c9aeda0efcca56c61ab1d2d1e63c3c63988ace03a5ad68c",
     "L0_GARAGE.glb": "sha256:454bf432c3619a4cfc126b7ccd8856316d77b36b90c22bf146b4b78f8bbe6b1f",
     "L0_GARAGE_LOFT.glb": "sha256:7d7471c63340ea8587daa0d026bf165c4ce63eaff559cacc56820e70748c9769",
     "L0_HALL.glb": "sha256:395560109f747e7db5dbc0d929c457445875b84671b67caa381d09f844389abe",
@@ -64,7 +64,7 @@
     "L1_CLOSET_3.glb": "sha256:e4899e418028c1d3ef391d80e8eee77df48e951f870009504a10256ca0d6ac6b",
     "L1_HALL.glb": "sha256:5d3d3785fdafa912fc5c4919d9abb4dc493ea23852d52e5f04eb6f70bc701fb1",
     "L1_HALL_W.glb": "sha256:164573817dea1a24a6af503832ffb0553d0399065d1e6465ff6f1d9ed73d8ba0",
-    "L1_LANDING.glb": "sha256:f1102fc55c25d513ae6a35e18d7e567284bacb71eafda24824be70864a97ac1e",
+    "L1_LANDING.glb": "sha256:c920a19ba7415778effd9dc5580355a09ba6cec1d312dcc4b2dfa34e789a864f",
     "L1_LINEN.glb": "sha256:c9f5e1471bb8f24ae1a5479fe568b268d22160556365a0bbd420e2d58831d178",
     "L1_MASTER_BATH.glb": "sha256:904f84d0f0e1892f320e475de1041bb3d288a93800eb52c74cd1190fe7ab56f7",
     "L1_MASTER_BED.glb": "sha256:1f89554859fd77fdaef2d9d56d342116b6665d0ccbec213cd53db714b080e737",
@@ -101,12 +101,12 @@
     "ROOF_MAIN.glb": "sha256:4596298e0792150e63cdfd9fc899e6ce02a8c8cc1b875caa8709707e2cc9dd05"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:311817ca669fa578df7772fc81a9c0b584a54cc7938a9409666bf6d617e9d290",
+  "generatorVersion": "sha256:59cf81c0a98ab84eab64093b4c1092b44215fb24189041710240d98d28eac60d",
   "origin": {
     "attribution": "",
     "kind": "generated",
     "licence": "MIT"
   },
   "schema": "cna-house/shell-manifest/1",
-  "worldHash": "sha256:5c20ec5fb18f247428f8b0851e82997345573465c8f0d2b0c2219d3dd3fc2f79"
+  "worldHash": "sha256:a5e5266b134e521289c5664555cf199ff05c0bce16c65bfc48f516f6dd3446cc"
 }

@@ -13600,6 +13600,41 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
               culling comparison pass; full source/content/provenance/strict-XNA checks pass with
               `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still FAILS: the slab-like entry door, under-readable
               night steps/facade, broad roof mass and connected-room dressing gaps remain visible.
+- [x] HOUSE-00932 — Finish canonical D_ENTRY leaves with panel millwork, threshold cap and restrained hardware
+      dep: HOUSE-00486, HOUSE-00930, HOUSE-00931 · sys: world/content/exterior · plat: ALL · pri: MUST
+      note: (2026-09-16) Round 31's fixed approach exposes the correctly resident hardwood leaf as
+            one texture-mapped rectangular slab. Use §19.4's generated-door path to derive detail
+            from the authored leaf size and hinge: four raised panel outlines on both faces, a
+            measured lever/escutcheon and deadbolt opposite the hinge, and a thin cap over the
+            existing threshold. The first in-game close capture showed same-finish relief merging
+            into the broad leaf beneath the porch, so retain the approved board maps but give the
+            millwork one darker hardwood sibling role; add one stable exterior-visible dark-bronze
+            hardware role reusing approved metal maps, without admitting general room wood/metal
+            to §25.6. Raise only the two measured D_ENTRY owner chunk ceilings.
+      accept: identical close day/night entrance and foyer-reverse cameras show a recognizably
+              finished entry door rather than a flat slab; panel and hardware geometry is present
+              on both faces, handle height is within §70.5's 0.95–1.10 m band, and the lock side
+              mirrors from the authored hinge; the portal leaf, collision, opening, lightmap UVs
+              and exterior ownership do not move; material provenance remains complete; shell
+              triangle/chunk budgets, strict render/culling and full XNA/content gates pass;
+              before/after captures are inspected and VISUAL-GATE-1 is judged honestly
+      result: (2026-09-16) Both canonical entry leaves keep their original six-face portal boxes
+              and add four raised panel outlines on each face, paired 0.98 m levers/backplates,
+              paired 1.35 m deadbolts and one 9 mm bronze threshold cap. The first same-finish
+              capture was rejected because the relief merged under the porch; the final panel role
+              uses a darker tint over the same approved broad-board maps, while hardware reuses
+              approved brushed-metal maps. Both narrowly prefixed roles enter §25.6 without
+              exposing ordinary indoor wood/metal. Weather-facing detail uses outdoor daylight;
+              at night only explicitly foreign-bound porch fixtures supply its stock-XNA key/fill/
+              bounce, so foyer props do not inherit them. Round 32's fifteen fixed frames show the
+              completed exterior and foyer faces; all were opened. The world measures 583 chunks /
+              238 exterior instances and 45,543 shell triangles, with `L1_BALCONY_REAR` still worst
+              at 1,742/3,500. Ten affected strict references were inspected and advanced, including
+              five stale seasonal/HUD views that also exposed Round 31's intended guard change.
+              All 1,407 unit, 134 integration and 48 active software-render tests pass; the 18-pose
+              culling maximum remains 0.1599%, and full content/provenance/strict-XNA gates pass
+              with `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still FAILS: night steps/approach, broad
+              facade/roof mass and the named connected-room furnishing gaps remain visible.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -18108,6 +18143,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-00932` | **New task, next free phase-12 id.** Finish only the existing canonical `D_ENTRY` leaf with generated, dimensioned panel relief, hardware and a threshold cap; reuse approved wood/metal maps and raise only its two measured owner-cell chunk ceilings. The first close in-game capture additionally split the relief into one darker sibling hardwood role. | Round 31 removes the balcony blockout mass and leaves the close entrance's single flat textured rectangle as the largest local defect. §19.4 already assigns doors/windows to a parametric generator plus hardware. Same-finish relief disappeared under the covered porch even at arm's length; a darker tint on the same approved board maps made the moulding readable without pretending it was paint. Narrow `MAT_EXTERIOR_DOOR_*` panel/hardware roles preserve the bounded exterior hierarchy instead of leaking general indoor wood/metal or creating a facade prop. |
 | 2026-09-16 | `HOUSE-00931` | **New task, next free phase-12 id.** Replace the general elevated-deck visual section from a solid 550 mm parapet plus isolated top rail to an open, measured balustrade while preserving the separate full-height collision guard. | Round 30 makes the old generator decision the largest visible facade defect: it masks the landing windows as one blank band, and its half-metre gap below the top rail is neither a convincing masonry parapet nor a complete balustrade. The collision representation is already deliberately conservative and layout-derived, so visual openings need not create fall-through gaps. |
 | 2026-09-16 | `HOUSE-00930` | **New task, next free phase-12 id.** Split only authored weather-facing entry leaves into a stable exterior-door role and bridge that role through the existing §25.6 hierarchy; do not make general room trim two-sided or externally resident. | Round 29's fixed pair shows the same front leaf present from the foyer and absent from the porch. The old `HOUSE-00486` assumption that both portal cells build a leaf fails when one is an exterior cell, because exterior cells intentionally generate no walls. A dedicated role keeps the interior cell as residency owner while preventing its skirting, cornice and other hardwood trim from leaking outdoors. |
 | 2026-09-16 | `HOUSE-00929` | **New task, next free phase-12 id.** Finish the existing data-driven covered-porch grammar with measured column dressings, soffit and roof-edge layers rather than masking the defect with a façade prop or renderer exception. | Round 28's fixed daylight approach shows that the dominant remaining exterior shape is the generator's bare 200 mm post-and-beam cage beneath an unfinished 300 mm balcony-floor zone. The general `covered_by` rule already derives the porch from stacked canonical cells, so it can produce the missing architectural finish without hard-coding a room id or changing the footprint, portal graph, collision model or material architecture. |

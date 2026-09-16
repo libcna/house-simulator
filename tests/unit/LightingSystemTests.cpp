@@ -903,11 +903,26 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     EXPECT_LT(lights.slots[2]->diffuseColor.X,
               lights.slots[0]->diffuseColor.X + lights.slots[1]->diffuseColor.X);
 
+    // The same two sources have an explicit foreign lightmap binding on the foyer facade. Basic
+    // detail on that receiver (the entry leaf and hardware) must use those porch sources, while a
+    // cell with no foreign binding must not gain a neighbouring light by proximity alone.
+    const Id foyer = Id::Of("L0_FOYER");
+    const Microsoft::Xna::Framework::Vector3 doorCentre(0.0F, 1.65F, -14.15F);
+    const ObjectLightAssignment receiverLights =
+        house.lighting.CrossCellReceiverLightsForObject(foyer, doorCentre);
+    ASSERT_TRUE(receiverLights.slots[0].has_value());
+    ASSERT_TRUE(receiverLights.slots[1].has_value());
+    ASSERT_TRUE(receiverLights.slots[2].has_value());
+    EXPECT_NEAR(receiverLights.slots[0]->direction.X, -receiverLights.slots[1]->direction.X, 1.0e-6F);
+    EXPECT_GT(receiverLights.slots[0]->diffuseColor.X, receiverLights.slots[0]->diffuseColor.Z);
+    EXPECT_FALSE(house.lighting.CrossCellReceiverLightsForObject(porch, centre).slots[0].has_value());
+
     ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_PORCH_LANTERN"), false));
     const ObjectLightAssignment dark = house.lighting.DirectionalLightsForObject(porch, centre);
     EXPECT_FALSE(dark.slots[0].has_value());
     EXPECT_FALSE(dark.slots[1].has_value());
     EXPECT_FALSE(dark.slots[2].has_value());
+    EXPECT_FALSE(house.lighting.CrossCellReceiverLightsForObject(foyer, doorCentre).slots[0].has_value());
     EXPECT_FALSE(
         house.lighting.DirectionalLightsForObject(Id::Of("NO_SUCH_CELL"), centre).slots[0].has_value());
 }

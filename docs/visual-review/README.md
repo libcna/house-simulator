@@ -1279,3 +1279,48 @@ The 18-pose culled/unculled comparison remains green.
 `VISUAL-GATE-1` still **FAILS**. Highest visible value is entry-door panel/hardware depth, followed
 by the principled adjacent-step/night receiver and the connected-room furnishing gaps. Do not hide
 the night defect with global exposure or turn the door into an exterior-only billboard.
+
+## Round 32 — finished canonical entry doors
+
+Commit: `HOUSE-00932` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 31's matching [day](captures/house-00931-balustrade-r1/exterior-approach-day.png) and
+[night](captures/house-00931-balustrade-r1/exterior-approach-night.png) approaches showed a dark,
+flat timber rectangle. After: the identical [day](captures/house-00932-entry-detail-r1/exterior-approach-day.png)
+and [night](captures/house-00932-entry-detail-r1/exterior-approach-night.png) cameras show a four-panel
+entry with a lock stile. The new [close day](captures/house-00932-entry-detail-r1/entry-door-close-day.png),
+[close night](captures/house-00932-entry-detail-r1/entry-door-close-night.png) and
+[foyer-side](captures/house-00932-entry-detail-r1/foyer-facing-front.png) frames verify both faces;
+the [complete Round 32 set](captures/house-00932-entry-detail-r1) contains all eleven fixed clear-day
+cameras plus the two approach and two close views. Every frame was opened at original resolution.
+
+Ranked visible defects remaining:
+
+1. At night the door and its two lanterns read, but the front steps, lawn-side approach and most of
+   the facade remain almost black. The adjacent-step receiver is now the clearest arrival defect.
+2. From the road, the house still has a broad box-like facade/roof mass and sparse balcony and
+   landscape dressing; the detailed entrance occupies too little of that silhouette to carry it.
+3. The connected interior route still needs kitchen practical clutter, family-room finish depth,
+   dining furnishing and a composition for the empty straight living-room view.
+4. The close facade exposes very broad siding repeats and dark lantern housings. Later facade
+   material/detail work should improve them without undoing the finished door grammar.
+
+Fixed: both canonical `D_ENTRY` leaves keep their original portal box and now gain four raised
+panel outlines on both faces, paired 0.98 m lever/backplate sets, paired 1.35 m deadbolts and one
+thin bronze threshold cap. The panel relief shares the approved board maps with a darker hardwood
+tint; hardware reuses the approved brushed-metal maps. These two narrowly prefixed roles join the
+existing exterior hierarchy without exposing general indoor wood or metal. Daylight uses the
+outdoor sky/celestial term. At night, only fixture groups with an explicit foreign bake binding on
+the owning cell can supply the matching stock-XNA directional/bounce approximation, so the front
+leaf remains readable under its real porch lanterns without leaking those lights into foyer props.
+
+The canonical result is 583 chunks and 238 exterior instances. The 45,543-triangle shell remains
+well inside budget; `L1_BALCONY_REAR` is still worst at 1,742/3,500. Ten strict references were
+inspected and selectively advanced: five route/property views see the new door directly, while
+the HUD and four seasonal road views also exposed the prior Round 31 guard change that their old
+references had not recorded. The 18-pose culled/unculled comparison remains below its unchanged
+0.2% threshold (0.1599% worst).
+
+`VISUAL-GATE-1` still **FAILS**. Highest visible value is a principled night treatment for the
+front steps and immediate approach, followed by broad facade/roof depth and the named connected-
+room furnishing gaps. Do not raise global exposure or enlarge the lantern billboards to mask it.

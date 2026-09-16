@@ -612,6 +612,90 @@ ARCHITRAVE_PROUD = 0.018
 TRIM_PROUD = 0.018
 THRESHOLD_THICK = 0.015
 
+#: `D_ENTRY` is the one close-range exterior leaf in the canonical route. Its source row gives
+#: the overall leaf but §19.4 deliberately leaves generated doors' joinery to this tool. These
+#: are measured millwork/hardware sections, not fractions disguised as magic geometry: a 32 mm
+#: raised moulding standing 16 mm proud, a 52 x 270 mm escutcheon, a 153 mm lever and a separate
+#: 65 mm deadbolt. The panel bounds themselves scale with the leaf so the two authored entry
+#: leaves share one grammar even if their schedule changes later.
+ENTRY_PANEL_MOULDING = 0.032
+ENTRY_PANEL_RELIEF = 0.016
+ENTRY_BACKPLATE_WIDTH = 0.052
+ENTRY_BACKPLATE_HEIGHT = 0.270
+ENTRY_LEVER_LENGTH = 0.153
+ENTRY_LEVER_HEIGHT = 0.022
+ENTRY_HARDWARE_PROJECTION = 0.055
+ENTRY_DEADBOLT_SIZE = 0.065
+ENTRY_THRESHOLD_CAP = 0.009
+
+
+def entry_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
+                            depth_lo: float, depth_hi: float, hinge: str):
+    """Raised four-panel millwork and hardware boxes in the leaf's local wall axes.
+
+    Each tuple is ``(u0, u1, v0, v1, d0, d1, surface_class, part)``. Both faces are complete:
+    the entry can be inspected from the porch or foyer without a two-sided material exception.
+    The lock stile mirrors with the authored hinge rather than assuming the canonical left hinge.
+    """
+    width = lu1 - lu0
+    height = lv1 - lv0
+    if width <= 0.0 or height <= 0.0 or depth_hi <= depth_lo:
+        return []
+
+    # Four restrained raised-panel outlines. The wider lock stile is on the side opposite the
+    # hinge; mirroring the whole layout keeps the two panel columns optically balanced with it.
+    columns = [(0.10, 0.40), (0.48, 0.77)]
+    if str(hinge or "left").lower() == "right":
+        columns = sorted((1.0 - hi, 1.0 - lo) for lo, hi in columns)
+    rows = [(0.067, 0.343), (0.400, 0.924)]
+    moulding = min(ENTRY_PANEL_MOULDING, width * 0.04, height * 0.02)
+    boxes = []
+
+    def both_faces(u0, u1, v0, v1, klass, part, projection):
+        boxes.append((u0, u1, v0, v1, depth_lo - projection, depth_lo, klass, part))
+        boxes.append((u0, u1, v0, v1, depth_hi, depth_hi + projection, klass, part))
+
+    for column_lo, column_hi in columns:
+        for row_lo, row_hi in rows:
+            panel_u0, panel_u1 = lu0 + column_lo * width, lu0 + column_hi * width
+            panel_v0, panel_v1 = lv0 + row_lo * height, lv0 + row_hi * height
+            both_faces(panel_u0, panel_u1, panel_v0, panel_v0 + moulding,
+                       "exterior_door_panel", "panel_moulding", ENTRY_PANEL_RELIEF)
+            both_faces(panel_u0, panel_u1, panel_v1 - moulding, panel_v1,
+                       "exterior_door_panel", "panel_moulding", ENTRY_PANEL_RELIEF)
+            both_faces(panel_u0, panel_u0 + moulding, panel_v0 + moulding,
+                       panel_v1 - moulding, "exterior_door_panel", "panel_moulding",
+                       ENTRY_PANEL_RELIEF)
+            both_faces(panel_u1 - moulding, panel_u1, panel_v0 + moulding,
+                       panel_v1 - moulding, "exterior_door_panel", "panel_moulding",
+                       ENTRY_PANEL_RELIEF)
+
+    lock_right = str(hinge or "left").lower() != "right"
+    handle_u = lu0 + (0.865 if lock_right else 0.135) * width
+    handle_v = lv0 + min(0.98, height * 0.47)
+    plate_u0, plate_u1 = (handle_u - ENTRY_BACKPLATE_WIDTH / 2.0,
+                           handle_u + ENTRY_BACKPLATE_WIDTH / 2.0)
+    plate_v0, plate_v1 = (handle_v - ENTRY_BACKPLATE_HEIGHT / 2.0,
+                           handle_v + ENTRY_BACKPLATE_HEIGHT / 2.0)
+    both_faces(plate_u0, plate_u1, plate_v0, plate_v1,
+               "exterior_door_hardware", "backplate", ENTRY_PANEL_RELIEF + 0.008)
+
+    if lock_right:
+        lever_u0, lever_u1 = handle_u - ENTRY_LEVER_LENGTH + 0.018, handle_u + 0.018
+    else:
+        lever_u0, lever_u1 = handle_u - 0.018, handle_u + ENTRY_LEVER_LENGTH - 0.018
+    both_faces(lever_u0, lever_u1, handle_v - ENTRY_LEVER_HEIGHT / 2.0,
+               handle_v + ENTRY_LEVER_HEIGHT / 2.0, "exterior_door_hardware", "lever",
+               ENTRY_HARDWARE_PROJECTION)
+
+    deadbolt_v = lv0 + min(1.35, height * 0.64)
+    both_faces(handle_u - ENTRY_DEADBOLT_SIZE / 2.0,
+               handle_u + ENTRY_DEADBOLT_SIZE / 2.0,
+               deadbolt_v - ENTRY_DEADBOLT_SIZE / 2.0,
+               deadbolt_v + ENTRY_DEADBOLT_SIZE / 2.0,
+               "exterior_door_hardware", "deadbolt", ENTRY_PANEL_RELIEF + 0.008)
+    return boxes
+
 
 def build_flight(flight: dict, solid, bottom: float, *, add=None, construction=None,
                  inner=None, portals=()) -> None:
@@ -769,6 +853,8 @@ SURFACE_COLOURS = {
     "wall":      (0.80, 0.78, 0.74, 1.0),
     "exterior":  (0.72, 0.70, 0.64, 1.0),
     "exterior_door": (0.55, 0.42, 0.30, 1.0),
+    "exterior_door_panel": (0.44, 0.28, 0.17, 1.0),
+    "exterior_door_hardware": (0.55, 0.34, 0.14, 1.0),
     "trim":      (0.96, 0.96, 0.94, 1.0),
     "glass":     (0.55, 0.72, 0.80, 0.35),
     "window_frame": (0.96, 0.94, 0.90, 1.0),
@@ -788,6 +874,8 @@ SHELL_MATERIALS = {
     "wall": "MAT_SIDING_WARM_WHITE",
     "exterior": "MAT_SIDING_WARM_WHITE",
     "exterior_door": "MAT_EXTERIOR_DOOR_HARDWOOD",
+    "exterior_door_panel": "MAT_EXTERIOR_DOOR_PANEL_HARDWOOD",
+    "exterior_door_hardware": "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
     "trim": "MAT_DOOR_PAINTED",
     "glass": "MAT_GLASS_CLEAR",
     "window_frame": "MAT_WINDOW_FRAME_WHITE",
@@ -1644,6 +1732,17 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                   else "trim")
                     leaf_box(lu0, lu1, lv0, lv1,
                              middle - thickness / 2.0, middle + thickness / 2.0, leaf_class)
+                    if leaf_class == "exterior_door" and opening.get("type") == "D_ENTRY":
+                        for detail in entry_door_detail_boxes(
+                                lu0, lu1, lv0, lv1, middle - thickness / 2.0,
+                                middle + thickness / 2.0, opening.get("hinge")):
+                            leaf_box(*detail[:6], detail[6])
+                        # A thin bronze cap finishes the existing full-depth timber threshold.
+                        # It begins exactly at that board's top, so it neither changes the clear
+                        # opening nor introduces coincident faces.
+                        leaf_box(hu0 + 0.010, hu1 - 0.010, hv0 + THRESHOLD_THICK,
+                                 hv0 + THRESHOLD_THICK + ENTRY_THRESHOLD_CAP,
+                                 reveal_lo, reveal_hi, "exterior_door_hardware")
                     # The lining: the reveal's full depth, filling what the leaf does not.
                     leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "trim")
                     leaf_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
@@ -2932,12 +3031,23 @@ def selftest(output: Path) -> int:
                        portals=all_portals, openings=openings_by_portal, cells_by_id=cells)
     entry_classes = [SURFACE_ORDER[polygon.material_index] for polygon in entry.data.polygons]
     require(entry_classes.count("exterior_door") == 6,
-            f"the weather-facing D_ENTRY leaf is one closed six-face box in its own role "
-            f"({entry_classes.count('exterior_door')})")
+            "the weather-facing D_ENTRY leaf retains one closed six-face body")
+    require(entry_classes.count("exterior_door_panel") == 192,
+            f"the weather-facing D_ENTRY leaf has 32 two-faced panel moulding boxes "
+            f"({entry_classes.count('exterior_door_panel')} faces)")
+    require(entry_classes.count("exterior_door_hardware") == 42,
+            f"its two handle sets, two deadbolts and one threshold cap are seven closed metal "
+            f"boxes ({entry_classes.count('exterior_door_hardware')} faces)")
     entry_materials = cell_surface_materials(foyer, openings_by_portal.values(), all_portals,
                                              cells_by_id=cells)
     require(entry_materials["exterior_door"] == "MAT_EXTERIOR_DOOR_HARDWOOD",
             f"and the opening row supplies that role's material ({entry_materials['exterior_door']})")
+    require(entry_materials["exterior_door_panel"]
+            == "MAT_EXTERIOR_DOOR_PANEL_HARDWOOD",
+            "and raised panels have a stable exterior-visible hardwood role")
+    require(entry_materials["exterior_door_hardware"]
+            == "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
+            "and entry hardware has a stable exterior-visible metal role")
     document, _error = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
     require(len(document.get("materials", [])) >= 6,
             f"the exported file carries them ({len(document.get('materials', []))})")
@@ -2974,7 +3084,8 @@ def selftest(output: Path) -> int:
             f"the receivers are the room-scale classes, named once ({LIGHTMAP_RECEIVERS})")
     require(not (set(LIGHTMAP_RECEIVERS) & {"trim", "glass", "metal", "stair", "structure",
                                             "roof", "window_frame", "window_glass",
-                                            "exterior_door"}),
+                                            "exterior_door", "exterior_door_panel",
+                                            "exterior_door_hardware"}),
             "and no detail class is one of them")
     receiver_indices = {SURFACE_ORDER.index(name) for name in LIGHTMAP_RECEIVERS}
     loose = 0

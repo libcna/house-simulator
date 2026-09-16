@@ -1,4 +1,53 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-00931` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-00932` checkpoint)
+
+Branch `develop`. Task-start HEAD `b22767d` (`HOUSE-00931`). This file belongs to the single
+`HOUSE-00932` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+Both canonical `D_ENTRY` leaves retain their original portal/collision boxes and now carry the
+same generated finish grammar on both faces: four raised panel outlines, a 0.98 m lever on a
+backplate, a separate 1.35 m deadbolt and a thin cap over the existing timber threshold. The broad
+leaf and relief share the already approved board maps; the relief uses a darker hardwood tint and
+the hardware uses the approved brushed-metal maps with a restrained bronze response. Only the
+narrow `MAT_EXTERIOR_DOOR_*` roles enter the exterior hierarchy, so ordinary room wood and metal
+remain portal-owned. The first same-finish panel iteration was rejected after its close capture
+merged into the leaf beneath the porch.
+
+Daylight-facing door detail now uses the outdoor sky/celestial term rather than the owning foyer's
+dim indirect level. At night it can use only fixture groups already present as explicit foreign
+lightmap bindings on that receiver cell. This gives the entry the two real porch lanterns' local
+stock-`BasicEffect` direction and restrained bounce without giving those sources to foyer props or
+arbitrary neighbouring cells. No custom shader, CNAEXT call, new renderer or cell-name exception
+was introduced.
+
+Before: Round 31's matching [day](visual-review/captures/house-00931-balustrade-r1/exterior-approach-day.png)
+and [night](visual-review/captures/house-00931-balustrade-r1/exterior-approach-night.png) views show
+a flat dark slab. After: the identical [day](visual-review/captures/house-00932-entry-detail-r1/exterior-approach-day.png)
+and [night](visual-review/captures/house-00932-entry-detail-r1/exterior-approach-night.png) approaches,
+plus the new [close day](visual-review/captures/house-00932-entry-detail-r1/entry-door-close-day.png),
+[close night](visual-review/captures/house-00932-entry-detail-r1/entry-door-close-night.png) and
+[foyer side](visual-review/captures/house-00932-entry-detail-r1/foyer-facing-front.png), show a
+recognizable finished entry from both sides. The full [Round 32 set](visual-review/captures/house-00932-entry-detail-r1)
+contains all fifteen fixed review frames; every frame was opened at original resolution.
+
+The world now has 583 chunks and 238 exterior instances. The shell is 45,543 triangles, with
+`L1_BALCONY_REAR` still worst at 1,742/3,500. Ten strict references were inspected and selectively
+advanced; five directly see the new door, and the HUD/four seasonal road frames also record the
+prior open-guard change their stale references exposed. Generator, world validation, material,
+shell, collision and chunk checks pass. All 1,407 unit tests and all 134 integration tests pass.
+The focused production/debug/property references pass, and the 18-pose culled/unculled comparison
+remains under its unchanged 0.2% threshold at 0.1599% worst. Project source/content/provenance and
+strict-XNA gates are green with `CNA_CNAEXT=OFF`.
+
+Next highest visible value is a principled night receiver treatment for the front steps and
+immediate approach; they remain almost black even though the door and lanterns now read. Then
+improve the broad facade/roof mass and sparse balcony/landscape dressing. Interior priority remains
+kitchen practical clutter, family-room finish depth, dining furnishing and the empty straight
+living-room composition. Do not hide the night defect with global exposure or larger glow sprites.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-00931` checkpoint)
 
 Branch `develop`. Task-start HEAD `4aafc67` (`HOUSE-00930`). This file belongs to the single
 `HOUSE-00931` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

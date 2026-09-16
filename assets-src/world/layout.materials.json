@@ -1690,18 +1690,48 @@
       "footstepSurface": "hardwood", "audioAbsorption": 0.16,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
-    // Weather-facing D_ENTRY leaf. It deliberately reuses the approved hardwood maps while its
-    // distinct id keeps ordinary room joinery out of the exterior visibility hierarchy.
+    // Weather-facing D_ENTRY leaf. Its approved broad-board map reads as joinery at arm's length;
+    // the floor-strip map used by ordinary room doors looked like horizontal parquet here. The
+    // distinct id also keeps ordinary room joinery out of the exterior visibility hierarchy.
     {
       "id": "MAT_EXTERIOR_DOOR_HARDWOOD", "class": "wood",
-      "albedo": "Textures/Materials/wood_oak_floor_albedo",
-      "normal": "Textures/Materials/wood_oak_floor_normal", "lightmapChannel": 0,
-      "tint": [0.86, 0.72, 0.58], "specularColor": [0.04, 0.04, 0.04],
-      "specularPower": 128.149, "alphaMode": "opaque", "alpha": 1.0,
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 0,
+      "tint": [0.68, 0.45, 0.28], "specularColor": [0.04, 0.04, 0.04],
+      "specularPower": 32.0, "alphaMode": "opaque", "alpha": 1.0,
       "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
       "wetResponse": { "albedoDarken": 0.28, "specularBoost": 2.4, "powerBoost": 3.0 },
       "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
       "footstepSurface": "hardwood", "audioAbsorption": 0.16,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    // Slightly darker hardwood makes the 32 mm raised panel moulding legible under the covered
+    // porch without substituting paint or metal for millwork. It shares the leaf's approved maps.
+    {
+      "id": "MAT_EXTERIOR_DOOR_PANEL_HARDWOOD", "class": "wood",
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 0,
+      "tint": [0.44, 0.28, 0.17], "specularColor": [0.04, 0.04, 0.04],
+      "specularPower": 32.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.28, "specularBoost": 2.4, "powerBoost": 3.0 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "hardwood", "audioAbsorption": 0.16,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    // Generated D_ENTRY handles, escutcheons, deadbolts and threshold cap. It reuses the approved
+    // brushed-metal maps and a readable mid-bronze response; the distinct
+    // prefix admits only this door hardware to the exterior hierarchy, not all indoor metal.
+    {
+      "id": "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE", "class": "metal",
+      "albedo": "Textures/Materials/metal_brushed_albedo",
+      "normal": "Textures/Materials/metal_brushed_normal", "lightmapChannel": 0,
+      "tint": [0.55, 0.34, 0.14], "specularColor": [0.45, 0.31, 0.16],
+      "specularPower": 72.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.18, "specularBoost": 1.8, "powerBoost": 1.5 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "metal", "audioAbsorption": 0.02,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
     {

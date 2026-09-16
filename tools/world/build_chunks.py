@@ -133,11 +133,12 @@ CHUNK_BUDGET_EXCEPTIONS = {
     "L0_GARAGE": (8,
                   "a garage is a room and stays one (`HOUSE-00487`). The four receiver classes, "
                   "plus the stair to the loft, glazing, trim and an outside window-frame chunk"),
-    "L0_FOYER": (10,
+    "L0_FOYER": (12,
                   "HOUSE-01038's measured entrance: six shell finishes and an outside window "
                   "frame plus two source-specific CC0 furniture albedos. Keeping the carved "
                   "console wood and upholstered chair separate avoids repainting either as trim; "
-                  "HOUSE-00930 isolates the weather-facing entry leaf for exterior residency"),
+                  "HOUSE-00930 isolates the weather-facing entry leaf for exterior residency; "
+                  "HOUSE-00932 adds distinct raised-panel hardwood and bronze hardware groups"),
     "L0_FAMILY": (15,
                   "measured with HOUSE-01037's first furnished media/seating group: five shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
@@ -184,8 +185,9 @@ for window_cell in (
            "ordinary room trim and borrowed-light glass stay portal-owned")
 
 CHUNK_BUDGET_EXCEPTIONS["L1_LANDING"] = (
-    8, "six measured shell finish chunks plus a weather-facing window-frame chunk and "
-       "HOUSE-00930's isolated upper-balcony entry leaf; ordinary room trim stays portal-owned")
+    10, "six measured shell finish chunks plus a weather-facing window-frame chunk, "
+        "HOUSE-00930's isolated upper-balcony entry leaf and HOUSE-00932's raised-panel hardwood "
+        "and bronze hardware groups; ordinary room trim stays portal-owned")
 
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here

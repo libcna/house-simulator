@@ -1947,9 +1947,13 @@ fabric, not permission to fragment other rooms.
 
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.
-The measured result is one additional Basic-effect chunk in each affected owner: `L0_FOYER` is
-exactly **ten** and `L1_LANDING` exactly **eight**. The ordinary six-chunk target remains; both
-cell-specific ceilings name this one role and retain the over-ceiling/stale-entry gates.
+`HOUSE-00932` gives that generated leaf four-panel millwork on both faces, paired bronze
+handle/lock sets and a capped threshold. A darker sibling of the approved hardwood finish lets
+the relief read beneath the covered porch without painting it; that role and the stable
+weather-facing hardware role each add one Basic-effect chunk. The measured result is `L0_FOYER`
+at exactly **twelve** and `L1_LANDING` exactly **ten**. The ordinary six-chunk target
+remains; both cell-specific ceilings name these roles and retain the over-ceiling/stale-entry
+gates.
 
 §71's frame budget is what may tighten or restructure these later; a measurement is what should
 move them, not an assertion in either direction.
@@ -1980,6 +1984,11 @@ move them, not an assertion in either direction.
   continuous so a swept capsule cannot find a fall-through gap between visual members; this is an
   offline conservative proxy, not visible geometry or a portal/BVH exception. The source-to-chunk
   material check and deterministic shell manifest record the split.
+  `HOUSE-00932` keeps each `D_ENTRY` leaf's canonical box and adds generated millwork/hardware on
+  both faces: four raised panel outlines, an opposite-hinge lock stile with a 0.98 m lever, a
+  separate deadbolt and a thin capped threshold. The relief uses the leaf's approved broad-board
+  map with a darker hardwood tint; it and `MAT_EXTERIOR_DOOR_HARDWARE_BRONZE` join §25.6 through
+  the existing `MAT_EXTERIOR_DOOR_*` contract, so ordinary room wood and metal remain portal-owned.
 
 ### 17.5 Directory layout
 
@@ -3356,6 +3365,12 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > accepts only such explicitly baked foreign groups, scaled by their global live envelope. This
 > lets the porch lanterns illuminate the foyer-owned facade without making the foyer switch or
 > exposure state claim those lamps, duplicating geometry, or introducing a custom shader.
+> `HOUSE-00932` applies the same authored boundary to non-baked weather-facing door detail. The
+> runtime derives a separate stock-`BasicEffect` candidate set only from foreign groups already
+> bound to that receiver cell, so the panelled foyer entry follows the two porch lanterns at night
+> while ordinary foyer objects and merely adjacent rooms cannot acquire them. During daylight,
+> weather-facing door and window detail instead uses the outdoor sky/celestial term, matching the
+> facade rather than the owning room's indirect level.
 
 ### 28.4 Daylight through windows
 
