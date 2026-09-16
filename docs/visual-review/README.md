@@ -1360,3 +1360,45 @@ needed advancing. All 48 software-render cases pass; culled/unculled remains 0.1
 `VISUAL-GATE-1` still **FAILS**. Highest visible value is broad front-facade/roof depth and night
 readability, followed by the named interior composition/furnishing gaps. Preserve the explicit
 lighting ownership boundary; do not turn this into neighbour-by-proximity lighting.
+
+## Round 34 — Colonial Revival front-window finish
+
+Commit: `HOUSE-00933` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 32's clear-day [front](captures/house-00932-entry-detail-r1/exterior-front.png) used
+plain blue-grey rectangles around the completed entrance. After: the identical
+[front camera](captures/house-00933-front-windows-r1/exterior-front.png) shows a repeated white
+6-over-6 grille rhythm and paired black shutters across the canonical front elevation. The
+[foyer-side view](captures/house-00933-front-windows-r1/foyer-facing-front.png) confirms that the
+new outside detail does not intrude through the entrance or expose closed-room trim. The complete
+[Round 34 set](captures/house-00933-front-windows-r1) contains all eleven fixed clear-day route and
+composition cameras; every frame was opened and inspected.
+
+Ranked visible defects remaining:
+
+1. The broad uninterrupted siding planes still read as a flat box from the road; window rhythm is
+   now coherent, but facade depth and hierarchy are too weak at the mansion's scale.
+2. The roof/eave silhouette remains thin and unfinished, and the dormers do not yet carry enough
+   mass or trim to balance the improved lower windows.
+3. The large right garage wing is a blank mass with little opening, planting or material breakup.
+4. The straight living-room view remains nearly empty, while dining, kitchen practical clutter and
+   family-room finish depth remain the largest connected-route interior gaps.
+5. The facade and lawn-side approach still become too dark beyond the localized porch-step
+   treatment at night.
+
+Fixed: seventeen canonical front `W_DH_*` opening rows explicitly select the two features. Each
+sash receives one vertical and two horizontal muntins, producing exactly six lights, while every
+paired shutter is assembled from two stiles, three rails and eighteen angled slats at the standard
+size rather than a flat black slab. Bays, sidelights, transoms, hoppers, dormers and all side/rear
+windows remain unchanged. The new narrow shutter role reuses approved paint textures and is the
+only added role admitted to the exterior-window hierarchy. The deterministic build contains 596
+chunks and 251 exterior instances.
+
+Sixteen strict references actually containing the new front detail were compared and intentionally
+advanced; unaffected references were retained. All 48 active software-render cases pass, and the
+18-pose culled/unculled comparison remains under its unchanged 0.2% threshold at 0.1599% worst.
+
+`VISUAL-GATE-1` still **FAILS**. Highest visible value is deeper roof/eave and facade massing, then
+the blank garage wing and the named connected-room furnishing gaps. Do not turn the new grammar
+into a front-cell heuristic or spread shutters to elevations and opening types that do not author
+them.

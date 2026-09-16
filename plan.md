@@ -13635,6 +13635,40 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
               culling maximum remains 0.1599%, and full content/provenance/strict-XNA gates pass
               with `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still FAILS: night steps/approach, broad
               facade/roof mass and the named connected-room furnishing gaps remain visible.
+- [x] HOUSE-00933 — Finish the Colonial Revival front windows with authored 6-over-6 grilles and black louvered shutters
+      dep: HOUSE-00457, HOUSE-00907, HOUSE-00926, HOUSE-00927, HOUSE-00932 · sys: world/content/exterior · plat: ALL · pri: MUST
+      note: (2026-09-16) Round 33's fixed daylight front still reads as a broad siding box with
+            sparse rectangular holes. This is not permission to invent a new facade style:
+            `cna-house.md` §12.1 already requires black shutters and 6-over-6 muntins on the front
+            elevation, while the current window generator stops at one meeting rail. Author those
+            two visual choices on the applicable opening rows and generate measured joinery through
+            the existing outside-window roles. Keep all ordinary side/rear windows unchanged and
+            do not expose indoor trim through the exterior hierarchy.
+      accept: the identical fixed front and approach cameras show a coherent white 6-over-6 grille
+              and paired black louvered shutters on every authored front `W_DH_*` window, with no
+              shutters on bays, sidelights, transoms, basement hoppers, dormers or side/rear
+              elevations; grille divisions are exactly six lights per sash, shutter proportions
+              and relief remain plausible at close range, and the canonical rows rather than cell
+              ids select both features; approved existing texture sources, stock-XNA effects,
+              portal ownership, window operation/collision, exterior BVH and physical UV scale
+              remain valid; shell/chunk budgets, strict render/culling and full XNA/content gates
+              pass; before/after images are inspected and `VISUAL-GATE-1` is judged honestly
+      result: (2026-09-16) Seventeen canonical front-elevation `W_DH_*` rows now opt into one
+              vertical and two horizontal muntins per sash (exactly six lights) plus paired black
+              louvered shutters built from stiles, rails and eighteen angled slats per standard
+              leaf. Side/rear windows, bays, sidelights, transoms, hoppers and dormers remain
+              unchanged. The approved paint maps feed the new narrow Basic material role; only
+              that role joins the exterior-window hierarchy, preserving room ownership and closed-
+              room trim culling. The deterministic world is 596 chunks / 251 exterior instances;
+              shell and chunk budgets pass. All eleven Round 34 frames were opened against Round
+              32's clear-day front: the repeated white grille rhythm and black shutters visibly
+              replace plain blue-grey rectangles, while foyer-side inspection shows no portal or
+              door interference. Sixteen actually changed strict references were inspected and
+              selectively advanced. All 1,407 unit, 134 integration and 48 active software-render
+              tests pass; culled/unculled remains below 0.2% at 0.1599% worst, and the full content,
+              provenance and strict-XNA gate passes with `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still
+              FAILS: the broad flat facade, thin roof/eaves and named connected-room furnishing
+              gaps remain conspicuous.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -18171,6 +18205,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-00933` | **New task, next free phase-12 id.** Complete only §12.1's already-required front-window vocabulary: canonical `W_DH_*` rows opt into 6-over-6 grilles and black louvered shutters, generated as exterior-window detail through the existing shell/content path. | Round 33's fixed clear-day front still reads as a broad undifferentiated siding box. The source architecture explicitly specifies both missing elements, but `HOUSE-00457` implemented only frames, sashes, glass and the double-hung meeting rail. Data-authored patterns avoid a front-cell heuristic, and a narrow exterior-window material role avoids exposing general indoor trim. |
 | 2026-09-16 | `HOUSE-01282` | **New task, next free phase-16 id.** Add an explicit `spillCells` list for fixed sources illuminating adjacent unbaked static detail, and use it first for the canonical porch lamps → `EXT_WALK` front stair. Keep dynamic-object, group-control and exposure ownership in the source/receiver cells unchanged. | Round 32 proves the stair is a single 72-triangle Basic chunk correctly owned by its `fromCell`, `EXT_WALK`, while the two dusk-controlled 400 lm sources are correctly owned by `L0_PORCH`. The only local `EXT_WALK` group is the deliberately player-switched, initially-off path lighting. Reassigning the stair, making path lights automatic or lifting global night exposure would falsify one of those authored facts. |
 | 2026-09-16 | `HOUSE-00932` | **New task, next free phase-12 id.** Finish only the existing canonical `D_ENTRY` leaf with generated, dimensioned panel relief, hardware and a threshold cap; reuse approved wood/metal maps and raise only its two measured owner-cell chunk ceilings. The first close in-game capture additionally split the relief into one darker sibling hardwood role. | Round 31 removes the balcony blockout mass and leaves the close entrance's single flat textured rectangle as the largest local defect. §19.4 already assigns doors/windows to a parametric generator plus hardware. Same-finish relief disappeared under the covered porch even at arm's length; a darker tint on the same approved board maps made the moulding readable without pretending it was paint. Narrow `MAT_EXTERIOR_DOOR_*` panel/hardware roles preserve the bounded exterior hierarchy instead of leaking general indoor wood/metal or creating a facade prop. |
 | 2026-09-16 | `HOUSE-00931` | **New task, next free phase-12 id.** Replace the general elevated-deck visual section from a solid 550 mm parapet plus isolated top rail to an open, measured balustrade while preserving the separate full-height collision guard. | Round 30 makes the old generator decision the largest visible facade defect: it masks the landing windows as one blank band, and its half-metre gap below the top rail is neither a convincing masonry parapet nor a complete balustrade. The collision representation is already deliberately conservative and layout-derived, so visual openings need not create fall-through gaps. |

@@ -1,4 +1,40 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01282` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-00933` checkpoint)
+
+Branch `develop`. Task-start HEAD `20716bd` (`HOUSE-01282`). This file belongs to the single
+`HOUSE-00933` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+Seventeen canonical front-elevation `W_DH_*` openings now opt into the Colonial Revival vocabulary
+already required by §12.1. Each double-hung sash has one vertical and two horizontal white muntins,
+giving exactly six lights. Its paired black shutters are spatial joinery—stiles, rails and eighteen
+angled slats per standard leaf—not dark rectangles painted beside a window. The choice lives on the
+opening rows, so bays, sidelights, transoms, basement hoppers, dormers and side/rear elevations are
+unchanged. The narrow shutter material reuses approved paint maps and is the only new role admitted
+to the exterior-window hierarchy; ordinary interior trim remains portal-culled.
+
+Before: Round 32's clear-day [front](visual-review/captures/house-00932-entry-detail-r1/exterior-front.png)
+has plain blue-grey window rectangles around the finished entrance. After: the identical
+[front](visual-review/captures/house-00933-front-windows-r1/exterior-front.png) has a coherent white
+grille rhythm and black shutters across the elevation. The
+[foyer-side frame](visual-review/captures/house-00933-front-windows-r1/foyer-facing-front.png) shows
+no entrance/portal interference. The full [Round 34 set](visual-review/captures/house-00933-front-windows-r1)
+contains all eleven fixed clear-day route/composition cameras and every frame was opened.
+
+The deterministic world now contains 596 chunks and 251 exterior hierarchy instances. Sixteen
+actually changed strict references were inspected before selective advancement; unaffected refs
+were retained. All 1,407 unit tests, all 134 integration tests and all 48 active software-render
+tests pass. The 18-pose culled/unculled comparison remains below its unchanged 0.2% threshold at
+0.1599% worst. Schema, generator, world/content and repository gates pass with `CNA_CNAEXT=OFF`.
+
+Next highest visible value is the broad flat facade and thin roof/eave silhouette, followed by the
+blank garage/right wing. Interior priorities remain the empty straight living-room view, dining
+furnishing, kitchen practical clutter and family-room finish depth. At night, the approach and
+facade beyond the localized porch-step spill remain too dark. Preserve the row-authored window
+grammar and bounded material role; do not generalize this into a front-cell heuristic.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-01282` checkpoint)
 
 Branch `develop`. Task-start HEAD `dd8c223` (`HOUSE-00932`). This file belongs to the single
 `HOUSE-01282` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

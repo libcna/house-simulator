@@ -136,6 +136,7 @@ TEST(ExteriorSceneTests, TheHouseOuterSkinIsAnExteriorInstance)
 TEST(ExteriorSceneTests, OutsideWindowRolesDoNotIncludeIndoorTrimOrBorrowedGlass)
 {
     EXPECT_TRUE(IsExteriorWindowMaterial("MAT_WINDOW_FRAME_WHITE"));
+    EXPECT_TRUE(IsExteriorWindowMaterial("MAT_WINDOW_SHUTTER_BLACK"));
     EXPECT_TRUE(IsExteriorWindowMaterial("MAT_WINDOW_GLASS_CLEAR"));
     EXPECT_TRUE(IsExteriorWindowMaterial("MAT_WINDOW_GLASS_OBSCURED"));
     EXPECT_FALSE(IsExteriorWindowMaterial("MAT_DOOR_HARDWOOD"));
@@ -173,23 +174,25 @@ TEST(ExteriorSceneTests, OnlyExteriorSpaceSkinAndOutsideWindowChunksBecomeInstan
                          "MAT_WINDOW_GLASS_CLEAR",
                          "MAT_DOOR_HARDWOOD",
                          "MAT_GLASS_CLEAR",
-                         "MAT_EXTERIOR_DOOR_HARDWOOD"};
-    library.chunks.push_back(Piece(0, 0, 0.0F, 0.0F));  // exterior: in
-    library.chunks.push_back(Piece(1, 1, 2.0F, 0.0F));  // a room's inner wall: out
-    library.chunks.push_back(Piece(2, 0, 4.0F, 0.0F));  // exterior: in
-    library.chunks.push_back(Piece(1, 2, 6.0F, 0.0F));  // room-owned siding: in
-    library.chunks.push_back(Piece(1, 3, 8.0F, 0.0F));  // room-owned water table: in
-    library.chunks.push_back(Piece(3, 2, 10.0F, 0.0F)); // no such cell: out
-    library.chunks.push_back(Piece(9, 2, 12.0F, 0.0F)); // cell index past the end: out
-    library.chunks.push_back(Piece(0, 9, 14.0F, 0.0F)); // material index past the end: out
-    library.chunks.push_back(Piece(1, 4, 16.0F, 0.0F)); // room-owned outside frame: in
-    library.chunks.push_back(Piece(1, 5, 18.0F, 0.0F)); // room-owned outside glass: in
-    library.chunks.push_back(Piece(1, 6, 20.0F, 0.0F)); // ordinary room skirting: out
-    library.chunks.push_back(Piece(1, 7, 22.0F, 0.0F)); // borrowed indoor glass: out
-    library.chunks.push_back(Piece(1, 8, 24.0F, 0.0F)); // room-owned outside door: in
+                         "MAT_EXTERIOR_DOOR_HARDWOOD",
+                         "MAT_WINDOW_SHUTTER_BLACK"};
+    library.chunks.push_back(Piece(0, 0, 0.0F, 0.0F));   // exterior: in
+    library.chunks.push_back(Piece(1, 1, 2.0F, 0.0F));   // a room's inner wall: out
+    library.chunks.push_back(Piece(2, 0, 4.0F, 0.0F));   // exterior: in
+    library.chunks.push_back(Piece(1, 2, 6.0F, 0.0F));   // room-owned siding: in
+    library.chunks.push_back(Piece(1, 3, 8.0F, 0.0F));   // room-owned water table: in
+    library.chunks.push_back(Piece(3, 2, 10.0F, 0.0F));  // no such cell: out
+    library.chunks.push_back(Piece(9, 2, 12.0F, 0.0F));  // cell index past the end: out
+    library.chunks.push_back(Piece(0, 10, 14.0F, 0.0F)); // material index past the end: out
+    library.chunks.push_back(Piece(1, 4, 16.0F, 0.0F));  // room-owned outside frame: in
+    library.chunks.push_back(Piece(1, 5, 18.0F, 0.0F));  // room-owned outside glass: in
+    library.chunks.push_back(Piece(1, 6, 20.0F, 0.0F));  // ordinary room skirting: out
+    library.chunks.push_back(Piece(1, 7, 22.0F, 0.0F));  // borrowed indoor glass: out
+    library.chunks.push_back(Piece(1, 8, 24.0F, 0.0F));  // room-owned outside door: in
+    library.chunks.push_back(Piece(1, 9, 26.0F, 0.0F));  // room-owned outside shutter: in
 
     const ExteriorScene scene = BuildExteriorScene(library, world);
-    ASSERT_EQ(scene.instances.size(), 7u);
+    ASSERT_EQ(scene.instances.size(), 8u);
     std::vector<bool> seen(library.chunks.size(), false);
     for (std::uint32_t index = 0; index < scene.instances.size(); ++index)
     {
@@ -202,6 +205,7 @@ TEST(ExteriorSceneTests, OnlyExteriorSpaceSkinAndOutsideWindowChunksBecomeInstan
     EXPECT_TRUE(seen[8u]);
     EXPECT_TRUE(seen[9u]);
     EXPECT_TRUE(seen[12u]);
+    EXPECT_TRUE(seen[13u]);
     EXPECT_FALSE(seen[10u]);
     EXPECT_FALSE(seen[11u]);
     EXPECT_FALSE(scene.Empty());

@@ -180,8 +180,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 168U)
-                    << "HOUSE-00932 adds the exterior entry panel and hardware finishes";
+                EXPECT_EQ(binder.Count(), 169U) << "HOUSE-00933 adds the exterior shutter finish";
                 const MaterialDesc* entryPanel = binder.Find(Id::Of("MAT_EXTERIOR_DOOR_PANEL_HARDWOOD"));
                 ASSERT_NE(entryPanel, nullptr);
                 EXPECT_EQ(entryPanel->kind, MaterialKind::Basic);
@@ -245,6 +244,11 @@ namespace
                 ASSERT_NE(outsideFrame, nullptr);
                 EXPECT_EQ(outsideFrame->kind, MaterialKind::Basic);
                 EXPECT_EQ(outsideFrame->diffuseTexture, "Textures/Materials/paint_white_fine_albedo");
+                const MaterialDesc* outsideShutter = binder.Find(Id::Of("MAT_WINDOW_SHUTTER_BLACK"));
+                ASSERT_NE(outsideShutter, nullptr);
+                EXPECT_EQ(outsideShutter->kind, MaterialKind::Basic);
+                EXPECT_EQ(outsideShutter->diffuseTexture, "Textures/Materials/paint_white_fine_albedo");
+                EXPECT_LT(outsideShutter->diffuse[0], 0.15F);
                 const MaterialDesc* outsideClear = binder.Find(Id::Of("MAT_WINDOW_GLASS_CLEAR"));
                 ASSERT_NE(outsideClear, nullptr);
                 EXPECT_EQ(outsideClear->kind, MaterialKind::Basic);

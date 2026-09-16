@@ -144,7 +144,15 @@
           "maxAngleDeg": {
             "type": "number"
           },
+          "muntinPattern": {
+            "enum": [
+              "six_over_six"
+            ]
+          },
           "portal": {
+            "$ref": "#/$defs/id"
+          },
+          "shutterMaterial": {
             "$ref": "#/$defs/id"
           },
           "solid": {

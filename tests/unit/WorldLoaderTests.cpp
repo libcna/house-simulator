@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 168U)
-            << "HOUSE-00932 adds separate weather-facing entry panel and hardware finishes";
+        EXPECT_EQ(contents.materials.size(), 169U)
+            << "HOUSE-00933 adds the separate front-window shutter finish";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3768,8 +3768,8 @@ namespace
                                            material.surfaceState == world::SurfaceState::Dry &&
                                            material.snow.coverable;
                                 }),
-                  36)
-            << "HOUSE-00772 adds five snow-coverable bark/branch roles to the previous 31";
+                  37)
+            << "HOUSE-00933 adds one snow-coverable painted-shutter role to the previous 36";
         const auto outdoorRoof = std::find_if(contents.materials.begin(),
                                               contents.materials.end(),
                                               [](const world::MaterialDef& material)

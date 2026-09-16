@@ -75,7 +75,7 @@ namespace cnahouse::visibility
     bool IsExteriorWindowMaterial(std::string_view material) noexcept
     {
         return material == "MAT_WINDOW_FRAME_WHITE" || material == "MAT_WINDOW_GLASS_CLEAR" ||
-               material == "MAT_WINDOW_GLASS_OBSCURED";
+               material == "MAT_WINDOW_GLASS_OBSCURED" || material == "MAT_WINDOW_SHUTTER_BLACK";
     }
 
     bool IsExteriorDoorMaterial(std::string_view material) noexcept

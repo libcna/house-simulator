@@ -1760,6 +1760,20 @@
       "footstepSurface": "painted_wood", "audioAbsorption": 0.12,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // Exterior-window shutter finish. It reuses the approved fine-paint source maps; the near-
+    // black tint is the authored Colonial Revival finish, not an unprovenanced new bitmap.
+    {
+      "id": "MAT_WINDOW_SHUTTER_BLACK", "class": "paint",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.11, 0.12, 0.14], "specularColor": [0.025, 0.028, 0.032],
+      "specularPower": 22.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.14, "specularBoost": 1.5, "powerBoost": 1.5},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 25.0},
+      "footstepSurface": "painted_wood", "audioAbsorption": 0.12,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     // Same authored glass filters as MAT_GLASS_CLEAR/OBSCURED, with exterior-window-only ids.
     // No new asset is introduced; the separate chunk role is for §25.6 visibility ownership.
     {

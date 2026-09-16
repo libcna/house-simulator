@@ -1027,6 +1027,8 @@ def rule_6_references(world: World) -> list[Problem]:
         check("openings", index, "swing", opening.get("swing"), cells, "cell", have_cells)
         check("openings", index, "material", opening.get("material"), materials, "material",
               have_materials)
+        check("openings", index, "shutterMaterial", opening.get("shutterMaterial"), materials,
+              "material", have_materials)
         check("openings", index, "asset", opening.get("asset"), assets, "asset", have_assets)
 
     for index, flight in enumerate(world.flights):
@@ -1385,6 +1387,23 @@ def rule_7_openings(world: World) -> list[Problem]:
                 7, FILE_OF["openings"], f"openings/{index}/portal",
                 f"portal {portal_id} is already claimed by opening "
                 f"{claimed[portal_id][0]}; a portal carries exactly one leaf"))
+
+        # Grilles and shutters are one authored exterior-window treatment. Keeping both selectors
+        # on the opening means the generator never guesses from a room id, but a half-authored
+        # treatment would leave either a floating grille or un-divided shutters behind it.
+        pattern = opening.get("muntinPattern")
+        shutter = opening.get("shutterMaterial")
+        if (pattern is None) != (shutter is None):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}",
+                f"opening {opening.get('id')} must author muntinPattern and shutterMaterial "
+                "together"))
+        if pattern is not None and (opening.get("kind") != "window" or
+                                    not str(opening.get("type") or "").startswith("W_DH_")):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}/muntinPattern",
+                f"opening {opening.get('id')} assigns a sash grille/shutter treatment to "
+                f"non-double-hung type {opening.get('type')!r}"))
 
     for index, portal in enumerate(world.portals):
         kind = portal.get("kind")

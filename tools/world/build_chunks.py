@@ -189,6 +189,18 @@ CHUNK_BUDGET_EXCEPTIONS["L1_LANDING"] = (
         "HOUSE-00930's isolated upper-balcony entry leaf and HOUSE-00932's raised-panel hardwood "
         "and bronze hardware groups; ordinary room trim stays portal-owned")
 
+# `HOUSE-00933`: the separately finished black shutters are one unavoidable BasicEffect material
+# group in each of the thirteen owner cells behind §12.1's seventeen styled front windows. This is
+# measured after generation, not a blanket allowance for every cell that happens to have glazing.
+for shutter_cell in (
+        "L0_LIVING", "L0_MUDROOM", "L0_OFFICE", "L0_STAIR_MAIN",
+        "L1_BED3", "L1_BED4", "L1_BED5", "L1_LANDING", "L1_STAIR_MAIN",
+        "L2_BED6", "L2_LANDING", "L2_LIBRARY", "L2_STAIR_MAIN"):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[shutter_cell]
+    CHUNK_BUDGET_EXCEPTIONS[shutter_cell] = (
+        previous_limit + 1,
+        previous_reason + "; HOUSE-00933 adds one measured black-shutter finish group")
+
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
 #: because a skinned prop is an animated one and animated props are not batched (§17.4).

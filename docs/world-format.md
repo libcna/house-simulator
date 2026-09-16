@@ -285,7 +285,10 @@ cells' boundary planes within 1 cm and its `v` range to lie inside both cells' v
 
 Doors and windows as geometry plus entity: leaf size, hinge side, swing direction, frame. Each row
 pairs with exactly one portal in `layout.portals.json` (validator rule 7), and with one
-interactable.
+interactable. A double-hung window may additionally opt into the generated exterior treatment with
+`"muntinPattern": "six_over_six"` and a `shutterMaterial` material id. The two fields are authored
+together: `six_over_six` means two columns by three rows in each sash, while `shutterMaterial`
+selects the finish for its paired louvered shutters. Windows without both fields remain plain.
 
 ```jsonc
 {

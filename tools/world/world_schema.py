@@ -258,6 +258,11 @@ def build() -> dict[str, dict]:
          "swing": {"anyOf": [STR, {"type": "null"}]},
          "maxAngleDeg": NUM,
          "frame": obj([], {"asset": ID_OR_NULL, "casing": NUM}),
+         # Exterior joinery is authored per opening rather than inferred from a cell id or world
+         # coordinate. `six_over_six` means two columns by three rows in each sash; the material
+         # id opts the same opening into the generated paired shutter assembly.
+         "muntinPattern": {"enum": ["six_over_six"]},
+         "shutterMaterial": ID,
          "asset": ID_OR_NULL, "material": ID_OR_NULL,
          "solid": BOOL, "lockable": BOOL})))
 

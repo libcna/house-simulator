@@ -526,6 +526,19 @@ SILL_PROJECT = 0.030
 #: from the type prefix, which `docs/conventions.md` makes an id and §12.6 makes a schedule entry.
 MEETING_RAIL = 0.050
 
+#: `HOUSE-00933`: the front elevation's authored `six_over_six` grille and louvered shutter
+#: sections. Opening rows decide WHERE they exist; these are joinery dimensions, kept beside the
+#: frame/sash dimensions for the same reason. A 25 mm muntin is visibly lighter than the 42 mm
+#: sash. Each decorative 420 mm shutter has 55 mm stiles, 70 mm rails and recessed 22 mm slats.
+MUNTIN_SECTION = 0.025
+SHUTTER_WIDTH = 0.420
+SHUTTER_GAP = 0.065
+SHUTTER_DEPTH = 0.040
+SHUTTER_STILE = 0.055
+SHUTTER_RAIL = 0.070
+SHUTTER_SLAT = 0.022
+SHUTTER_SLAT_PITCH = 0.070
+
 
 def has_meeting_rail(opening_type: str) -> bool:
     return str(opening_type or "").startswith("W_DH_")
@@ -858,6 +871,7 @@ SURFACE_COLOURS = {
     "trim":      (0.96, 0.96, 0.94, 1.0),
     "glass":     (0.55, 0.72, 0.80, 0.35),
     "window_frame": (0.96, 0.94, 0.90, 1.0),
+    "window_shutter": (0.11, 0.12, 0.14, 1.0),
     "window_glass": (0.55, 0.72, 0.80, 0.35),
     "stair":     (0.55, 0.42, 0.30, 1.0),
     "roof":      (0.32, 0.30, 0.30, 1.0),
@@ -879,6 +893,7 @@ SHELL_MATERIALS = {
     "trim": "MAT_DOOR_PAINTED",
     "glass": "MAT_GLASS_CLEAR",
     "window_frame": "MAT_WINDOW_FRAME_WHITE",
+    "window_shutter": "MAT_WINDOW_SHUTTER_BLACK",
     "window_glass": "MAT_WINDOW_GLASS_CLEAR",
     "stair": "MAT_DOOR_HARDWOOD",
     "roof": "MAT_ROOF_SHINGLE",
@@ -989,6 +1004,21 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
             "MAT_GLASS_CLEAR": "MAT_WINDOW_GLASS_CLEAR",
             "MAT_GLASS_OBSCURED": "MAT_WINDOW_GLASS_OBSCURED",
         }.get(source_glass, source_glass)
+
+    shutters = {
+        row.get("shutterMaterial")
+        for row in openings
+        if row.get("kind") == "window" and cell.get("id") in portal_cells.get(row.get("portal"), ())
+        and window_owner(portal_cells.get(row.get("portal")), cells_by_id or {}, cell.get("id"))
+        == cell.get("id")
+        and row.get("shutterMaterial")
+    }
+    if len(shutters) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated shutters are one surface class but name "
+            f"multiple materials: {', '.join(sorted(shutters))}")
+    if shutters:
+        result["window_shutter"] = next(iter(shutters))
 
     exterior_doors = {
         row.get("material")
@@ -1662,6 +1692,78 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         band(su0 + g, su1 - g, sv0 + g, sv1 - g,
                              depth - GLASS_THICK / 2.0, depth + GLASS_THICK / 2.0,
                              klass=glass_class)
+
+                        # `HOUSE-00933`: §12.1's front windows are 6-over-6, not one broad pane
+                        # above another. The opening row opts in; each sash receives one vertical
+                        # and two horizontal bars, hence exactly two columns by three rows. These
+                        # stay in the existing weather-facing frame role and therefore cannot pull
+                        # a room's skirting into the exterior scene.
+                        if opening.get("muntinPattern") == "six_over_six":
+                            middle = (sv0 + sv1) / 2.0
+                            pane_lo = sv0 + g
+                            pane_hi = sv1 - g
+                            sash_panes = ((pane_lo, middle - MEETING_RAIL / 2.0),
+                                          (middle + MEETING_RAIL / 2.0, pane_hi))
+                            muntin_u = (su0 + su1) / 2.0
+                            for pane_v0, pane_v1 in sash_panes:
+                                band(muntin_u - MUNTIN_SECTION / 2.0,
+                                     muntin_u + MUNTIN_SECTION / 2.0,
+                                     pane_v0, pane_v1, sash_lo, sash_hi,
+                                     klass=frame_class)
+                                for division in (1.0 / 3.0, 2.0 / 3.0):
+                                    muntin_v = pane_v0 + (pane_v1 - pane_v0) * division
+                                    band(su0 + g, su1 - g,
+                                         muntin_v - MUNTIN_SECTION / 2.0,
+                                         muntin_v + MUNTIN_SECTION / 2.0,
+                                         sash_lo, sash_hi, klass=frame_class)
+
+                        # The same authored treatment supplies paired decorative shutters. They
+                        # are joinery, not two black slabs: full-depth stiles/rails surround two
+                        # banks of recessed horizontal louvers. Their 420 mm width fits the close
+                        # pairs on this elevation without overlapping, while remaining a credible
+                        # proportion for the 1.20 m openings.
+                        if outside and opening.get("shutterMaterial"):
+                            outward = -1.0 if side in ("-X", "-Z") else 1.0
+                            frame_d0, frame_d1 = sorted(
+                                (far_side, far_side + outward * SHUTTER_DEPTH))
+                            slat_d0, slat_d1 = sorted(
+                                (far_side, far_side + outward * SHUTTER_DEPTH * 0.62))
+
+                            def shutter_leaf(shutter_u0, shutter_u1):
+                                band(shutter_u0, shutter_u0 + SHUTTER_STILE, hv0, hv1,
+                                     frame_d0, frame_d1, klass="window_shutter")
+                                band(shutter_u1 - SHUTTER_STILE, shutter_u1, hv0, hv1,
+                                     frame_d0, frame_d1, klass="window_shutter")
+                                shutter_middle = (hv0 + hv1) / 2.0
+                                for rail_v0, rail_v1 in (
+                                        (hv0, hv0 + SHUTTER_RAIL),
+                                        (shutter_middle - SHUTTER_RAIL / 2.0,
+                                         shutter_middle + SHUTTER_RAIL / 2.0),
+                                        (hv1 - SHUTTER_RAIL, hv1)):
+                                    band(shutter_u0 + SHUTTER_STILE,
+                                         shutter_u1 - SHUTTER_STILE, rail_v0, rail_v1,
+                                         frame_d0, frame_d1, klass="window_shutter")
+                                louver_u0 = shutter_u0 + SHUTTER_STILE
+                                louver_u1 = shutter_u1 - SHUTTER_STILE
+                                for panel_v0, panel_v1 in (
+                                        (hv0 + SHUTTER_RAIL,
+                                         shutter_middle - SHUTTER_RAIL / 2.0),
+                                        (shutter_middle + SHUTTER_RAIL / 2.0,
+                                         hv1 - SHUTTER_RAIL)):
+                                    span = panel_v1 - panel_v0
+                                    count = max(1, int(span / SHUTTER_SLAT_PITCH))
+                                    spacing = span / (count + 1)
+                                    for slat_index in range(1, count + 1):
+                                        slat_v = panel_v0 + spacing * slat_index
+                                        band(louver_u0, louver_u1,
+                                             slat_v - SHUTTER_SLAT / 2.0,
+                                             slat_v + SHUTTER_SLAT / 2.0,
+                                             slat_d0, slat_d1, klass="window_shutter")
+
+                            shutter_leaf(hu0 - SHUTTER_GAP - SHUTTER_WIDTH,
+                                         hu0 - SHUTTER_GAP)
+                            shutter_leaf(hu1 + SHUTTER_GAP,
+                                         hu1 + SHUTTER_GAP + SHUTTER_WIDTH)
 
                     # `HOUSE-00469`: a basement hopper sits in a well, outside the wall, open to
                     # the sky. §12.6 says so and gives the sill at −0.45 absolute; the well holds
@@ -2794,6 +2896,31 @@ def selftest(output: Path) -> int:
     require(rails and plain and all(name.startswith("W_DH_") for name in rails),
             f"only §12.6's double-hung types get a meeting rail ({sorted(rails)}), and the "
             f"single lights do not ({sorted(plain)})")
+    styled = [row for row in openings_by_portal.values()
+              if row.get("muntinPattern") == "six_over_six"]
+    require(len(styled) == 17 and all(row.get("shutterMaterial")
+                                      == "MAT_WINDOW_SHUTTER_BLACK" for row in styled),
+            f"§12.1's seventeen front double-hungs author one complete grille/shutter treatment "
+            f"({len(styled)})")
+    require(all(portal_rows[row["portal"]]["plane"]["axis"] == "z"
+                and abs(float(portal_rows[row["portal"]]["plane"]["value"]) + 14.30) < 1e-9
+                and str(row.get("type")).startswith("W_DH_") for row in styled),
+            "and only front-elevation W_DH_* rows select it; side/rear/special windows stay plain")
+    stair_cell = cells["L0_STAIR_MAIN"]
+    stair_extent = extent_of(stair_cell, levels[stair_cell["level"]])[0]
+    reset_scene()
+    styled_window = build_cell(stair_cell, stair_extent, neighbours=neighbours,
+                               construction=construction, level=levels[stair_cell["level"]],
+                               levels=levels, portals=list(portal_rows.values()),
+                               openings=openings_by_portal, cells_by_id=cells)
+    styled_classes = [SURFACE_ORDER[polygon.material_index]
+                      for polygon in styled_window.data.polygons]
+    require(styled_classes.count("window_frame") == 90,
+            f"one standard 6-over-6 has the original nine frame/sash boxes plus six muntin "
+            f"boxes ({styled_classes.count('window_frame')} faces)")
+    require(styled_classes.count("window_shutter") == 276,
+            f"and its paired louvered shutters have two stiles, three rails and eighteen "
+            f"recessed slats per leaf ({styled_classes.count('window_shutter')} faces)")
     require(window_owner(("L0_KITCHEN", "EXT_BACKYARD"), cells, "EXT_BACKYARD") == "L0_KITCHEN",
             "a window onto the back lawn is built by the room, not by the lawn")
     require(window_owner(("L0_SUNROOM", "L0_KITCHEN"), cells, "L0_SUNROOM") == "L0_KITCHEN",
@@ -3083,7 +3210,7 @@ def selftest(output: Path) -> int:
     require(set(LIGHTMAP_RECEIVERS) == {"floor", "ceiling", "wall", "exterior"},
             f"the receivers are the room-scale classes, named once ({LIGHTMAP_RECEIVERS})")
     require(not (set(LIGHTMAP_RECEIVERS) & {"trim", "glass", "metal", "stair", "structure",
-                                            "roof", "window_frame", "window_glass",
+                                            "roof", "window_frame", "window_shutter", "window_glass",
                                             "exterior_door", "exterior_door_panel",
                                             "exterior_door_hardware"}),
             "and no detail class is one of them")

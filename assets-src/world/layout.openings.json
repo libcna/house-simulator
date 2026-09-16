@@ -667,6 +667,7 @@
     {
       "id": "WIN_L0_STAIR_MAIN_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L0_STAIR_MAIN__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "left", "swing": "L0_STAIR_MAIN",
       "frame": { "asset": null, "casing": 0.060 },
@@ -676,6 +677,7 @@
     {
       "id": "WIN_L0_MUDROOM_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L0_MUDROOM__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "left", "swing": "L0_MUDROOM",
       "frame": { "asset": null, "casing": 0.060 },
@@ -721,6 +723,7 @@
     {
       "id": "WIN_L1_LANDING_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L1_LANDING__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "right", "swing": "L1_LANDING",
       "frame": { "asset": null, "casing": 0.060 },
@@ -730,6 +733,7 @@
     {
       "id": "WIN_L1_LANDING_2", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L1_LANDING__W2",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "left", "swing": "L1_LANDING",
       "frame": { "asset": null, "casing": 0.060 },
@@ -739,6 +743,7 @@
     {
       "id": "WIN_L1_STAIR_MAIN_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L1_STAIR_MAIN__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "left", "swing": "L1_STAIR_MAIN",
       "frame": { "asset": null, "casing": 0.060 },
@@ -793,6 +798,7 @@
     {
       "id": "WIN_L1_BED3_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L1_BED3__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "right", "swing": "L1_BED3",
       "frame": { "asset": null, "casing": 0.060 },
@@ -811,6 +817,7 @@
     {
       "id": "WIN_L1_BED4_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L1_BED4__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "right", "swing": "L1_BED4",
       "frame": { "asset": null, "casing": 0.060 },
@@ -820,6 +827,7 @@
     {
       "id": "WIN_L1_BED4_2", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L1_BED4__W2",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "left", "swing": "L1_BED4",
       "frame": { "asset": null, "casing": 0.060 },
@@ -829,6 +837,7 @@
     {
       "id": "WIN_L1_BED5_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L1_BED5__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "left", "swing": "L1_BED5",
       "frame": { "asset": null, "casing": 0.060 },
@@ -838,6 +847,7 @@
     {
       "id": "WIN_L2_LANDING_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L2_LANDING__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "right", "swing": "L2_LANDING",
       "frame": { "asset": null, "casing": 0.060 },
@@ -847,6 +857,7 @@
     {
       "id": "WIN_L2_LANDING_2", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L2_LANDING__W2",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "left", "swing": "L2_LANDING",
       "frame": { "asset": null, "casing": 0.060 },
@@ -856,6 +867,7 @@
     {
       "id": "WIN_L2_STAIR_MAIN_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L2_STAIR_MAIN__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "left", "swing": "L2_STAIR_MAIN",
       "frame": { "asset": null, "casing": 0.060 },
@@ -865,6 +877,7 @@
     {
       "id": "WIN_L2_LIBRARY_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L2_LIBRARY__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "right", "swing": "L2_LIBRARY",
       "frame": { "asset": null, "casing": 0.060 },
@@ -874,6 +887,7 @@
     {
       "id": "WIN_L2_LIBRARY_2", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L2_LIBRARY__W2",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "left", "swing": "L2_LIBRARY",
       "frame": { "asset": null, "casing": 0.060 },
@@ -883,6 +897,7 @@
     {
       "id": "WIN_L2_BED6_1", "kind": "window", "type": "W_DH_STD",
       "portal": "P_L2_BED6__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.480, "thickness": 0.030 },
       "hinge": "right", "swing": "L2_BED6",
       "frame": { "asset": null, "casing": 0.060 },
@@ -966,6 +981,7 @@
     {
       "id": "WIN_L0_LIVING_2", "kind": "window", "type": "W_DH_TALL",
       "portal": "P_L0_LIVING__W2",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.780, "thickness": 0.030 },
       "hinge": "left", "swing": "L0_LIVING",
       "frame": { "asset": null, "casing": 0.060 },
@@ -975,6 +991,7 @@
     {
       "id": "WIN_L0_OFFICE_1", "kind": "window", "type": "W_DH_TALL",
       "portal": "P_L0_OFFICE__W1",
+      "muntinPattern": "six_over_six", "shutterMaterial": "MAT_WINDOW_SHUTTER_BLACK",
       "leaf": { "width": 1.180, "height": 1.780, "thickness": 0.030 },
       "hinge": "left", "swing": "L0_OFFICE",
       "frame": { "asset": null, "casing": 0.060 },
