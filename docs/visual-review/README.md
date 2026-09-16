@@ -754,3 +754,60 @@ production-material path; blockout colours occur only in explicit debug mode.
 refrigerator carcass/front aligned with the existing nested fridge cell, with collision and
 material/provenance checks, then recapture the unchanged hall route. Do not boost global
 ambient to hide the missing appliance.
+
+## Round 19 — the refrigerator bay gets real closed frontage
+
+Commit: `HOUSE-01042` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: unchanged eleven-view [Round 18 clear](captures/house-01041-clear-day-r1),
+[noon](captures/house-01041-noon-r1), [overcast](captures/house-01041-overcast-r1)
+and [22:00](captures/house-01041-night-r1). After: matching eleven-view
+[clear](captures/house-01042-clear-day-r2), [noon](captures/house-01042-noon-r2),
+[overcast](captures/house-01042-overcast-r2) and
+[22:00](captures/house-01042-night-r2) normal-game sets; no camera or simulated
+condition was moved. The affected hall/kitchen, unchanged front/night and family
+frames were actually inspected. The first [steel-front hall](captures/house-01042-rejected-r1/central-hall.png)
+and [kitchen](captures/house-01042-rejected-r1/kitchen.png) looked nearly as black as
+the undressed portal; two representative rejected frames are kept, not the entire
+transient eleven-frame set.
+
+Ranked visible defects remaining:
+
+1. The [clear hall→kitchen appliance](captures/house-01042-clear-day-r2/central-hall.png)
+   now has identifiable doors, vertical pulls, dispenser, plinth and upper shaker
+   fronts, but the white painted/steel Basic-effect pieces are still brown/dark,
+   especially the upper fronts. At the same upper hall ray (900,380), the first
+   hit is now project-authored `MAT_DOOR_PAINTED` frontage at z=-26.336 rather than
+   the dark rear `MAT_PAINT_WARM_WHITE` wall at z=-27.025. Geometry/content alone
+   cannot give the room's static furnishings sufficient practical-light depth.
+2. The [front at clear day](captures/house-01042-clear-day-r2/exterior-front.png)
+   still reads as a thin-roof/porch/balcony engineering shell; the
+   [22:00 first view](captures/house-01042-night-r2/exterior-front.png) is almost
+   invisible beyond pale window squares.
+3. The kitchen still lacks west/north upper runs, range, hood, backsplash, other
+   appliances and controlled decor. Its first island and base sink run are not a
+   finished 62-container room.
+4. The [family composition](captures/house-01042-clear-day-r2/family-composition.png)
+   is warm enough to see but pale/sparse, with overly bright leaf-card foliage.
+
+Fixed: a deterministic, project-authored 1.80 × 1.95 m large refrigerator exterior
+with plausible dual closed fronts, real-scale paint/steel/oak UVs and an integrated
+0.75 m bridge cabinet covers the original model-less black aperture and ceiling gap.
+The source origin was recentered after an origin gate exposed 6.65 cm of front-pull
+asymmetry; the canonical prop translation compensates exactly, with zero >2-channel
+pixel differences below the HUD in a final paired hall capture.
+The unchanged canonical nested cell, opaque portal and door ID remain the gameplay
+source of truth. Its currently static closed exterior uses the measured box proxy:
+the shell punches the door hole and no moving obstacle exists yet, so leaving the
+new closed appliance non-collidable would let the player pass through it. A later
+door-animation task must replace the static frontage/proxy without changing those
+stable IDs; this furnishing is not falsely called a functional fridge. The opening's
+declared finish now agrees with the
+visible white front and already-painted generated shut leaf. The measured kitchen
+material-chunk count remains 11/11. Exactly the changed strict hall reference was
+paired/viewed and deliberately updated; no wholesale golden regeneration.
+
+`VISUAL-GATE-1` still **FAILS**. The next dependency-valid visual priority is
+fixture-aware lighting/readability for Basic-effect furniture and appliances in
+the selected L0 route, then the skeletal/day and unlit/night front approach and
+the kitchen's remaining real primary kit. Do not hide this with debug colouring.

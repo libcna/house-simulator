@@ -637,7 +637,7 @@
       "leaf": { "width": 1.560, "height": 1.700, "thickness": 0.070 },
       "hinge": "left", "swing": "CELL_FRIDGE_INTERIOR", "maxAngleDeg": 120.0,
       "frame": { "asset": null, "casing": 0.020 },
-      "asset": null, "material": "MAT_APPLIANCE_STEEL",
+      "asset": null, "material": "MAT_DOOR_PAINTED",
       "solid": true, "lockable": false
     },
 

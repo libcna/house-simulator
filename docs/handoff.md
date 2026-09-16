@@ -1,4 +1,105 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01041` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01042` checkpoint)
+
+Branch `develop`. Continuous sprint start HEAD:
+`238d6aed27c1e8662f0d118013ef08bb801ae018`. Preceding clean HEAD:
+`0bb8f499f8e8be8d079334f655fc999af77b215f` (`HOUSE-01041`). This file belongs
+to the single `HOUSE-01042` commit; verify exact new HEAD and clean tree before the
+next task. **VISUAL-GATE-1 still FAILS.** Normal first-person rendering uses real
+production materials rather than hashed blockout colours, but furnishings,
+static-prop light, kitchen completeness and the exterior/night entry are unfinished.
+
+Before: unchanged eleven-view [Round 18 clear](visual-review/captures/house-01041-clear-day-r1),
+[noon](visual-review/captures/house-01041-noon-r1),
+[overcast](visual-review/captures/house-01041-overcast-r1) and
+[night](visual-review/captures/house-01041-night-r1) sets. After: paired eleven-view
+[Round 19 clear](visual-review/captures/house-01042-clear-day-r2),
+[noon](visual-review/captures/house-01042-noon-r2),
+[overcast](visual-review/captures/house-01042-overcast-r2) and
+[night](visual-review/captures/house-01042-night-r2) sets; no pose/condition changed.
+The [central hall before](visual-review/captures/house-01041-clear-day-r1/central-hall.png)
+showed a nearly pure-black refrigerator-interior slab. The
+[central hall after](visual-review/captures/house-01042-clear-day-r2/central-hall.png)
+shows appliance fronts, pulls, dispenser, base vent and a bridge cupboard. The
+[inside-kitchen view](visual-review/captures/house-01042-clear-day-r2/kitchen.png)
+is still too brown/dark and its overhead cabinet panels are underlit. A first
+steel-front try was actually inspected and rejected; only its
+[hall](visual-review/captures/house-01042-rejected-r1/central-hall.png) and
+[kitchen](visual-review/captures/house-01042-rejected-r1/kitchen.png) evidence was
+kept. The transient other nine rejected frames were moved, recoverably for this
+session, to `/tmp/house01042-rejected-wiulPN`. Unchanged
+[clear front](visual-review/captures/house-01042-clear-day-r2/exterior-front.png),
+[night front](visual-review/captures/house-01042-night-r2/exterior-front.png) and
+[family](visual-review/captures/house-01042-clear-day-r2/family-composition.png)
+were inspected, not inferred from regression pass status. See
+[Round 19 review](visual-review/README.md) for ranked visible defects.
+
+Implementation: Blender-authored deterministic `refrigerator.glb` is 59 detailed
+pieces with 5,524 visible triangles, physical-repeat UV0, three approved reused
+material IDs, an actual 1.80 × 1.95 × 0.70 m refrigerator and 0.75 m two-door
+shaker cabinet joining the 3.30 m L0 ceiling. A 1.80 × 2.6995 × 0.833 m total
+accessor AABB includes the overhead cabinet and front pulls. `origin_check`
+found the first model's Z support axis off by 6.65 cm because of those pulls;
+the glTF was recentered to ±0.4165 m Z and the canonical prop moves from
+z=-26.6700 to -26.6035. A paired final 1600×900 hall capture has **zero**
+pixels differing by >2 channels below the HUD from the Round 19 clear frame,
+proving the photographed appliance did not shift. §70.5 now has separate
+large-appliance body and integrated-bay scale bands; manifest-backed body-height
+and source-mesh checks with synthetic selftests enforce both. It is Ms-PL
+project-authored, bit-for-bit re-export checked and entered through the existing
+manifest/CNA content/static batch paths, not copied from another project.
+Canonical `CELL_FRIDGE_INTERIOR`, `P_FRIDGE_INTERIOR` and `FRIDGE_L0_KITCHEN` IDs,
+portal and thermal data remain. Only the refrigerator opening's declared steel
+finish changes to the painted white front; the freezer stays steel. The kitchen
+stays measured at 11/11 material chunks. The two new asset/prop IDs were
+recorded in the stable-ID golden. The existing `world.manifest.json` also
+held stale hashes for already-committed `layout.cells`, `layout.lights` and
+`layout.materials`; this task regenerated the authoritative member ledger for
+those unchanged files along with its real opening/prop changes. No extra world
+source file was silently rewritten.
+
+Important collision finding: shell collision punches the fridge portal hole, and
+the planned moving door obstacle is not installed in today's playable house.
+The first tentative `collision: none` visual prop was therefore rejected: a
+player could walk through the shut fridge. The authored 12-triangle box proxy is
+now active for its **current static closed** frontage. Collision round-trip
+contains prop OBB index 1190 at centre (1.20,1.94975,-26.6035), half
+(0.90,1.34975,0.4165), indexed in `L0_KITCHEN` and
+`CELL_FRIDGE_INTERIOR`. Future animated-door work must replace this static
+frontage/proxy with moving parts while keeping the canonical IDs and portal,
+not leave a solid box over an open door. This checkpoint does not claim the
+fridge is functional or the kitchen finished. An upper hall ray at pixel
+(900,380) confirms the old black ceiling-gap area was rear
+`MAT_PAINT_WARM_WHITE` kitchen wall at z=-27.025; the new painted cabinet at
+z=-26.336 occludes it but remains too dark due the Basic-effect prop-light path.
+
+Verification: all 31 content stages pass after source, opening, origin and collision
+changes; final navigation bake takes 12.58 seconds. The prop uses the existing
+canonical collision writer, the fridge GLB and both previous kitchen built-ins
+regenerate bit-for-bit, the manifest/credits/WorldManifest now agree, and the
+strict hall first-person golden is the **only** changed >2-channel-tolerance
+pose. That before/after was opened and the one intended hall reference was
+selectively updated; no other golden was regenerated. The exact final build
+content was copied/hash-checked into `build/content`, and **48/48 direct software
+render tests** pass over it, including culled-vs-unculled equivalence. Full
+repository CI was green with **323 strict XNA translation units** after the
+four deterministic content-gate corrections (shell manifest, stable IDs,
+measured appliance scale and support origin). The source checker additionally
+protects physical UV repeat on both close fronts. `CNA_CNAEXT=OFF`
+and the runtime XNA-only design were not touched. There were no CNA/FNA3D or
+sibling edits. A fresh full CMake/CTest is still unclaimed because the external
+BL-17 MojoShader-series regeneration writes outside this sandbox; use the
+existing house binaries and generated commands without changing siblings.
+
+Next highest visible work: calibrate approved Basic-effect furniture/appliance
+lighting from canonical selected L0 fixtures so kitchen fronts and family seating
+read naturally rather than as uniformly dark/tan slabs. Then prioritize the
+skeletal front roof/porch/balcony and practically invisible night approach,
+followed by remaining range/hood/upper kitchen kit. Preserve screenshots and
+VISUAL-GATE-1 as a human visual review, not a pixel-only test.
+
+## Prior `HOUSE-01041` handoff
+
+Visual-sprint handoff — 2026-09-16 (`HOUSE-01041` checkpoint)
 
 Branch `develop`. This continuous visual sprint began at
 `238d6aed27c1e8662f0d118013ef08bb801ae018`; the preceding clean checkpoint was

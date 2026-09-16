@@ -6391,6 +6391,8 @@ Run by `validate_world.py` over the layout and by `scale_check.py` over every as
 | Balustrade / railing height | ≥ 0.90 m interior, ≥ 1.05 m at a drop > 1 m |
 | Kitchen counter height | 0.88–0.95 m |
 | First authored kitchen sink run | 2.70–2.95 m width, 0.72–0.95 m full depth including tap; its separate measured counter top stays 0.88–0.95 m |
+| Large kitchen refrigerator appliance | 1.60–1.90 m width, 0.70–0.90 m depth including pulls, 1.80–2.10 m body height; a bridge cabinet's combined AABB must not stand in for body height |
+| Integrated refrigerator/bridge bay height | 2.60–2.80 m overall from L0 finished floor to ceiling |
 | Upper cabinet underside | 1.40–1.55 m |
 | Dining table top | 0.72–0.78 m |
 | Desk top | 0.72–0.78 m |

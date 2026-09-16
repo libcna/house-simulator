@@ -557,6 +557,41 @@
       ]
     },
     {
+      "id": "MODEL_KITCHEN_REFRIGERATOR",
+      "category": "appliance-refrigerator",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/refrigerator.glb",
+      "sourceSha256": "45cb8a3e0552994f2c923071733fdf05c291638fc8c396c3bc4c81772b092ada",
+      "contentName": "Models/Furniture/Kitchen/refrigerator",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Measured L0 kitchen refrigerator and overhead bridge cabinet",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored enamel-front refrigerator, carcass and real joinery bridge cabinet from tools/blender/kitchen_refrigerator.py for HOUSE-01042; no third-party mesh. The 1.95 m appliance aligns with the canonical refrigerator cell/portal. Its box proxy collides while shut; a later animated-door task must replace static frontage/proxy with moving parts. The upper cabinet closes the 0.75 m ceiling gap."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.8, 2.6995, 0.833],
+        "applianceHeightMetres": 1.95,
+        "triangles": { "LOD0": 5524 },
+        "collision": "refrigerator_001_carcass_back_COL"
+      },
+      "materialMap": {
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_OAK": "MAT_DOOR_HARDWOOD",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": ["L0_KITCHEN"]
+    },
+    {
       "id": "MODEL_FURNITURE_LEATHER_ARMCHAIR_A",
       "category": "chair",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/leather_armchair_a.glb",

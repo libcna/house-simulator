@@ -49,6 +49,11 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "kitchen-sink-run": [("x", 2.70, 2.95, "kitchen sink run width"),
                          ("z", 0.72, 0.95, "kitchen sink run depth including tap"),
                          ("y", 0.88, 0.95, "kitchen counter height under faucet")],
+    # A large refrigerator plus an overhead bridge reaches the L0 ceiling. The appliance
+    # body height is separately measured, as a combined AABB cannot identify its top.
+    "appliance-refrigerator": [("x", 1.60, 1.90, "large refrigerator width"),
+                               ("z", 0.70, 0.90, "depth including door pulls"),
+                               ("y", 1.80, 2.10, "appliance body height under bridge")],
     "cabinet-upper": [("y", 1.40, 1.55, "upper cabinet underside")],
     "table-dining": [("y", 0.72, 0.78, "dining table top")],
     "desk": [("y", 0.72, 0.78, "desk top")],
@@ -196,6 +201,19 @@ def check(path: Path, category: str, geometry: dict | None = None) -> list[str]:
                     f"{what}: measured counter {value:.3f} m must lie within the model's "
                     f"{size[1]:.3f} m overall height")
                 continue
+        if category == "appliance-refrigerator" and axis == "y":
+            appliance = (geometry or {}).get("applianceHeightMetres")
+            if not isinstance(appliance, (int, float)):
+                problems.append(
+                    f"{what}: manifest geometry.applianceHeightMetres is required; "
+                    f"the {size[1]:.3f} m assembled AABB includes the bridge cabinet")
+                continue
+            value = float(appliance)
+            if not math.isfinite(value) or value <= 0.0 or value > size[1]:
+                problems.append(
+                    f"{what}: measured appliance height {value:.3f} m must lie within "
+                    f"the assembly's {size[1]:.3f} m height")
+                continue
         if not (minimum <= value <= maximum):
             # The message names the RATIO, because that is what identifies the mistake: 100x is
             # centimetres, 2.54x is inches, 0.01x is a model authored in a scene scaled down.
@@ -204,6 +222,10 @@ def check(path: Path, category: str, geometry: dict | None = None) -> list[str]:
                 f"{what}: {value:.3f} m is outside {minimum:.2f}-{maximum:.2f} m "
                 f"({ratio:.2f}x the nearest bound -- 100x is centimetres, 2.54x is inches)"
             )
+    if category == "appliance-refrigerator" and not (2.60 <= size[1] <= 2.80):
+        problems.append(
+            f"integrated fridge/bridge bay height: {size[1]:.3f} m is outside "
+            "2.60-2.80 m for L0's 2.70 m floor-to-ceiling clearance")
     return problems
 
 
@@ -285,6 +307,28 @@ def selftest() -> int:
             print("  SELFTEST FAILED: 0.84 m sink counter was accepted", file=sys.stderr)
             failures += 1
         print("  sink run requires a measured in-band counter despite its 1.25 m tap")
+
+        # HOUSE-01042: the bridge cupboard must not let the appliance body pass an
+        # arbitrary 2.70 m height check, or leave its own ceiling band unverified.
+        fridge = Path(work) / "fridge_bridge.glb"
+        fridge.write_bytes(make(1.80, 2.70, 0.833))
+        if check(fridge, "appliance-refrigerator", {"applianceHeightMetres": 1.95}):
+            print("  SELFTEST FAILED: measured large fridge/bridge was rejected",
+                  file=sys.stderr)
+            failures += 1
+        if not check(fridge, "appliance-refrigerator"):
+            print("  SELFTEST FAILED: fridge without measured body height was accepted",
+                  file=sys.stderr)
+            failures += 1
+        if not check(fridge, "appliance-refrigerator", {"applianceHeightMetres": 2.30}):
+            print("  SELFTEST FAILED: oversized fridge body was accepted", file=sys.stderr)
+            failures += 1
+        too_tall = Path(work) / "fridge_tall_bridge.glb"
+        too_tall.write_bytes(make(1.80, 3.10, 0.833))
+        if not check(too_tall, "appliance-refrigerator", {"applianceHeightMetres": 1.95}):
+            print("  SELFTEST FAILED: bridge above L0 ceiling was accepted", file=sys.stderr)
+            failures += 1
+        print("  fridge body and integrated bay heights are independently measured")
 
         # A car is checked on all three axes, and the axis is what makes the check mean anything:
         # a model 1.8 m long and 4.6 m wide is a car turned sideways, which a "largest dimension"

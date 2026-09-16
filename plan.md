@@ -13691,6 +13691,51 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             Selected family/kitchen bakes and bindings are deterministic and provenance-valid;
             world content, XNA-only, culled-vs-unculled, relevant unit and individually inspected
             golden references pass. The separate fridge-interior silhouette is not claimed fixed.
+- [x] HOUSE-01042 — Dress the canonical kitchen refrigerator bay in the playable hall sightline
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-01040, HOUSE-01041 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-16) Round 18's unchanged hall camera first hits the closed leaf of
+            `CELL_FRIDGE_INTERIOR`, which is a stable nested cell with portal/collision but no
+            visible appliance exterior. This is a narrow static furnishing checkpoint, not the
+            still-open HOUSE-00990 finished kitchen or phase-15 animated fridge operation.
+      finding: (2026-09-16) A measured 1.80 × 1.95 × 0.70 m project-authored appliance is
+            placed at [1.20,0.60,-26.6035] with yaw 180, so its fronts stand ahead of the shut
+            shell leaf while its sides remain within the existing 1.80 m bay. A 0.75 m
+            overhead bridge cabinet meets L0's 3.30 m ceiling and covers the particularly
+            dark rear-wall band. The first steel-front review looked almost as black as the
+            missing model; inspected r1 was rejected in favour of enamel paint fronts with
+            separate steel rails/handles, 978 mm pulls, recessed gasket, dispenser, louvred
+            plinth and real shaker upper fronts. Normal clear/noon/overcast/night hall and
+            kitchen frames now show a recognizable appliance and bridge rather than one pure
+            black slab. **It remains too dark**, especially the upper doors: BasicEffect's
+            room-prop practical/sky contribution is the next separate visible lighting defect.
+            Ray picking at hall pixel (900,380) confirms the old black upper band was the
+            painted L0_KITCHEN rear wall at y≈2.67, not refrigerator interior. This task does
+            not falsely mark the whole kitchen furnished or VISUAL-GATE-1 achieved.
+      verified: (2026-09-16) The 59-piece GLB regenerates bit-for-bit from its Blender source;
+            its 6.65 cm pulled-front Z asymmetry is centred in the authoring script and the
+            prop translation adjusted by the same amount, keeping every world vertex fixed.
+            Authoritative accessor bounds, support-centred origin, the new separately measured
+            §70.5 appliance/body-bay scale band, panel UV0, 5,524 visible triangles, source-material
+            mappings, portal/material/placement links and 12-triangle box proxy are checked.
+            The current static, shut refrigerator **does** use this proxy: shell collision
+            punches the canonical door opening and runtime animated door obstacles do not yet
+            exist, so `collision: none` would allow walking through a visible closed appliance.
+            The future animated-door task must replace static frontage/proxy with dynamic parts
+            while retaining the same cell, door and portal IDs. The kitchen remains at 11/11 chunks with
+            zero added groups. Manifest hash, authored Ms-PL provenance/credits, world hashes,
+            shell/world member hashes, stable-ID golden, full 31-stage content graph and fresh
+            12-second nav bake pass. Four unchanged
+            eleven-view normal-game sets were captured and the altered hall/kitchen, exterior
+            and family frames inspected. Only the hall first-person strict reference exceeded
+            its per-channel tolerance: before/after was viewed and that single intended image
+            was updated. Direct render/culling and full static gates are recorded in the handoff.
+      accept: the measured project-authored appliance and integrated overhead joinery are
+            legally/provenantly valid, physically placed and reproducible; ordinary first-person
+            hall/kitchen images at clear/noon/overcast/22:00 no longer show the undressed
+            refrigerator-interior slab. Stable cell/portal IDs and collision remain untouched,
+            no third-party runtime/CNAEXT path or debug colouring enters production, and
+            content, strict-XNA and intentionally inspected render/culling gates pass. Dark
+            Basic-effect furnishing, dynamic fridge operation and full kitchen fit-out stay open.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -17655,6 +17700,7 @@ evidence that it fails.
 | 2026-09-15 | `HOUSE-01039` | **New task, next free phase-13 id.** Calibrate only the already authored kitchen main practical group and its selected Tier-S receivers as a visible hall→kitchen continuity checkpoint. Do not claim the large kitchen furnishing prerequisite or a new light renderer. | The same fixed Round 15 hall screenshot is warmly readable near the camera but black at the permanently open kitchen portal in all four review conditions. Existing `HOUSE-01265` borrowed-light behavior and deterministic subset lightmap promotion permit a narrow dependency-valid correction. The highest-impact visual defect is the threshold itself; the still-empty kitchen will remain a separate, explicit furnishing defect. |
 | 2026-09-16 | `HOUSE-01040` | **New task, next free phase-13 id.** Author only a real first static island and north sink base run, not HOUSE-00975's 24-model acquisition or HOUSE-00990's finished 62-container kitchen. Adjust the explicitly measured `L0_KITCHEN` chunk ceiling from 8 to 11, add the sink-run scale band with a measured counter-top property, relocate the two island-intersecting review poses and the affected kitchen render/debug poses. | Round 16 exposes a lit, empty kitchen; these fixed built-ins are supported by the completed static batch and approved material paths. The final build measures exactly three additional source-finish groups (oak, stone, steel), zero new Reach/vertex splits, and cabinet paint reuses existing trim; relaxing any other cell would be unjustified. A combined sink/faucet AABB cannot stand in for counter height, so the manifest's 0.94 m stone top is verified against the actual mesh rather than widening §70.5. Keeping cameras inside a new collidable island would be false visual review and bad regression coverage. |
 | 2026-09-16 | `HOUSE-01041` | **New task, next free phase-13 id.** Calibrate the family-room main practical and its incorrectly ceiling-centred TV accent, plus the existing kitchen east-row downlights, as one selected connected-route lighting review. Do not claim the fridge-interior black mass fixed by lighting. | Round 17's family seating remains flat/dark at day/night. The first family bake demonstrates that leaving all four 3.28 m points off wastes the approved Tier-S atlas while switching the nominal TV point under the selected broadband calibration creates a white firefly. The same fixed hall image shows a weak east kitchen rear-wall atlas texel; shifting two authored downlights changes that texel without a new fixture family. A full-chunk ray probe then proves the dominant hall silhouette is the separate, model-less canonical `CELL_FRIDGE_INTERIOR`, so the acceptance scope is narrowed transparently to real lighting improvement. |
+| 2026-09-16 | `HOUSE-01042` | **New task, next free phase-13 id.** Add only a measured static appliance exterior and integrated bridge cabinet to the canonical refrigerator bay. Change this fridge opening's declared finish from steel to painted white, matching the inspected front/pre-existing painted shell leaf; retain the freezer's steel declaration and stable IDs. Use the authored 12-triangle box proxy only for today's shut static appliance; later moving doors must replace the static frontage/proxy, not bypass the portal. Add two narrow §70.5 appliance/bay scale rows, their manifest-backed checker/selftest, and the two new IDs to the golden; regenerate only the stale world/shell manifests. | The unmodified hall lens sees the undressed nested fridge front as a black slab. A quick steel-front gameplay iteration also looked black, so a white domestic appliance plus authentic upper joinery has higher visible value. The shell punches the refrigerator portal hole and no dynamic door obstacle exists yet; leaving `collision: none` would allow walking into the visible shut fridge. Origin check catches the authored front handles shifting the assembled Z centre by 6.65 cm; recentering the glTF and compensating the canonical prop position keeps the photographed world vertices fixed. A combined cabinet+fridge AABB cannot measure the body's separate 1.95 m height. The world ledger also had prior stale member hashes for untouched cells/lights/materials, and the shell manifest embeds that world hash. Source finishes reuse the existing 11 kitchen chunks. An inspected upper ray identifies the old black band as rear painted wall, explaining why this furnishing remains underexposed and cannot by itself pass VISUAL-GATE-1. |
 | 2026-09-15 | `HOUSE-00928` | **New task, next free phase-12 id.** Correct the entry-facing canonical paint/metal material finish rather than adding a shader or a new unprovenanced asset. | Round 13's fixed game image now has real tiled siding, making the zero-tinted, full-width front balcony parapet and distressed-painted porch columns the largest exterior material defects. The existing approved smooth white paint and brushed-metal sources are available; visual review of the same approach will decide whether a material-row correction alone is enough or a role split is needed. |
 | 2026-09-15 | `HOUSE-00927` | **New task, next free phase-12 id.** Restore physically tiled production-texture sampling after the HUD's strict-XNA SpriteBatch handoff and separate Tier-S outer-skin daylight energy from display-sky RGB while retaining `LM_DAY`, material and residency roles. | Round 12's close front is a uniform `(70,69,66)` façade despite approved warm-wood albedo, 48 distinct deployed UV0s and white UV2 islands. A controlled higher-contrast bitmap remains uniformly sampled, proving a sampler problem; XNA's HUD Begin overload restores wrap without the CNAEXT indexed `SamplerState::operator=` forbidden by BL-16. The highly saturated sky-dome display RGB also darkens a baked outdoor receiver as if its colour were illuminance, while `SunShadingFor` already has the daylight scalar. Both corrections are directly visible and dependency-valid; no existing id or renderer tier is changed. |
 | 2026-09-15 | `HOUSE-00926` | **New task, next free phase-12 id.** Split outside-facing window frame/sash/glass detail from room-owned indoor trim/glass and admit only those distinct roles to the exterior hierarchy. | The fixed front normal-game crop shows open-looking holes despite 64 canonical windows. Source tracing finds window geometry merged with each closed room's interior skirting/glass chunks, so §25.6's correct façade-only exterior BVH cannot show it. Admitting the unsplit chunks would bypass room/portal culling; a production material/chunk role split is the dependency-valid fix. |

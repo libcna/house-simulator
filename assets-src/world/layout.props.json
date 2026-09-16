@@ -54,6 +54,19 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_KITCHEN_REFRIGERATOR",
+      "asset": "MODEL_KITCHEN_REFRIGERATOR",
+      "cell": "L0_KITCHEN",
+      "position": [1.2, 0.6, -26.6035],
+      "yawDeg": 180,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_LIVING_SOFA",
       "asset": "MODEL_FURNITURE_LEATHER_SOFA",
       "cell": "L0_LIVING",

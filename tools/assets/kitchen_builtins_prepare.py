@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the two committed project-authored kitchen built-ins against a fresh Blender export.
+"""Check committed project-authored kitchen built-ins and fridge against fresh Blender exports.
 
 No network or third-party model cache is involved. The temporary Blender products are generated
 under /tmp; no compiler or CMake build is run there. `--check` compares final collidable GLBs and
@@ -22,14 +22,18 @@ sys.path.insert(0, str(REPO / "tools" / "blender"))
 import blender_env  # noqa: E402
 import gltf_io  # noqa: E402
 import scale_check  # noqa: E402
+sys.path.insert(0, str(REPO / "tools" / "world"))
+import layout_io  # noqa: E402
 
 NAMES = ("north_run", "island")
 SCRIPT = REPO / "tools" / "blender" / "kitchen_builtins.py"
+FRIDGE_SCRIPT = REPO / "tools" / "blender" / "kitchen_refrigerator.py"
 COLLISION = REPO / "tools" / "blender" / "collision_proxy.py"
 MODELS = REPO / "assets-src" / "Models" / "Furniture" / "Kitchen"
 MANIFEST = REPO / "assets-src" / "assets.manifest.json"
 ASSET_IDS = {"north_run": "MODEL_KITCHEN_NORTH_BASE_RUN",
              "island": "MODEL_KITCHEN_ISLAND"}
+FRIDGE_ID = "MODEL_KITCHEN_REFRIGERATOR"
 
 
 def sha256(data: bytes) -> str:
@@ -75,6 +79,85 @@ def check_manifest_geometry(path: Path, row: dict) -> None:
             f"{expected_top:.3f} m")
 
 
+def check_refrigerator_geometry(path: Path, row: dict) -> None:
+    document, blob = gltf_io.read_model(path)
+    bounds = scale_check.accessor_bounds(document)
+    if bounds is None:
+        raise RuntimeError("refrigerator: no authoritative POSITION bounds")
+    measured = [high - low for low, high in zip(*bounds)]
+    if any(abs(actual - stored) > 0.005 for actual, stored in
+           zip(measured, row["geometry"]["boundsMetres"])):
+        raise RuntimeError(f"refrigerator: declared bounds != actual {measured}")
+    if abs(measured[0] - 1.80) > 0.005 or abs(measured[1] - 2.70) > 0.005:
+        raise RuntimeError(f"refrigerator: appliance bay/ceiling mismatched {measured}")
+    appliance_tops = [document["accessors"][primitive["attributes"]["POSITION"]]
+                      ["max"][1] for node in document["nodes"] if "mesh" in node and
+                      "bridge_" not in node.get("name", "") and
+                      not node.get("name", "").endswith("_COL")
+                      for primitive in document["meshes"][node["mesh"]]["primitives"]]
+    if not appliance_tops or abs(max(appliance_tops) - 1.95) > 0.005 or abs(
+            max(appliance_tops) - row["geometry"]["applianceHeightMetres"]) > 0.005:
+        raise RuntimeError("refrigerator: appliance itself differs from 1.95 m shell/manifest")
+    visible = [primitive for node in document["nodes"] if "mesh" in node and
+               not node.get("name", "").endswith("_COL")
+               for primitive in document["meshes"][node["mesh"]]["primitives"]]
+    triangles = sum(document["accessors"][primitive["indices"]]["count"] // 3
+                    for primitive in visible)
+    if triangles != row["geometry"]["triangles"]["LOD0"]:
+        raise RuntimeError(f"refrigerator: declared triangles != actual {triangles}")
+    if not all("TEXCOORD_0" in primitive["attributes"] for primitive in visible):
+        raise RuntimeError("refrigerator: a close-range panel lacks physical UV0")
+    buffers = gltf_io.buffer_bytes(document, blob, path.parent)
+    enamel_fronts = [node for node in document["nodes"] if "mesh" in node and
+                     "_enamel_face" in node.get("name", "")]
+    if len(enamel_fronts) != 2:
+        raise RuntimeError("refrigerator: expected two independently authored closed fronts")
+    for node in enamel_fronts:
+        primitive = document["meshes"][node["mesh"]]["primitives"][0]
+        uv = gltf_io.read_accessor(document, buffers,
+                                   primitive["attributes"]["TEXCOORD_0"])
+        span = [max(value[i] for value in uv) - min(value[i] for value in uv)
+                for i in (0, 1)]
+        if span[0] < 1.5 or span[1] < 3.0:
+            raise RuntimeError(
+                f"refrigerator: close front UV0 is stretched, not metre-tiled: {span}")
+    materials = {document["materials"][primitive["material"]]["name"]
+                 for primitive in visible if "material" in primitive}
+    if materials != {"CAB_PAINT", "CAB_STEEL", "CAB_OAK"}:
+        raise RuntimeError(f"refrigerator: unexpected approved finishes {materials}")
+    if row["geometry"]["collision"] not in {node.get("name") for node in
+                                              document["nodes"]}:
+        raise RuntimeError("refrigerator: declared closed-appliance proxy missing")
+    # The yaw=180 placement takes local -Z toward the kitchen (+Z). The assembled
+    # centre must be the actual origin even though the door pulls protrude.
+    if abs((bounds[0][2] + bounds[1][2]) * 0.5) > 0.005:
+        raise RuntimeError(f"refrigerator: off-axis support origin {bounds}")
+    layout = layout_io.load_layout(REPO / "assets-src" / "world",
+                                   ["props", "openings", "portals"])
+    prop = layout_io.by_id(layout_io.rows(layout, "props"), "prop")[
+        "PROP_L0_KITCHEN_REFRIGERATOR"]
+    if (prop["asset"] != FRIDGE_ID or prop["cell"] != "L0_KITCHEN" or
+            prop["position"] != [1.2, 0.6, -26.6035] or prop["yawDeg"] != 180 or
+            prop["collision"] != "proxy"):
+        raise RuntimeError("refrigerator: canonical prop no longer aligns with appliance bay")
+    world_front = prop["position"][2] - bounds[0][2]
+    world_back = prop["position"][2] - bounds[1][2]
+    if world_front < -26.30 or world_back < -27.05 or world_back > -26.95:
+        raise RuntimeError(
+            f"refrigerator: front/back no longer dress the shut portal "
+            f"({world_front:.3f}, {world_back:.3f})")
+    opening = layout_io.by_id(layout_io.rows(layout, "openings"), "opening")[
+        "FRIDGE_L0_KITCHEN"]
+    portal = layout_io.by_id(layout_io.rows(layout, "portals"), "portal")[
+        "P_FRIDGE_INTERIOR"]
+    if (opening["portal"] != "P_FRIDGE_INTERIOR" or
+            opening["material"] != "MAT_DOOR_PAINTED" or
+            portal["cellA"] != "L0_KITCHEN" or
+            portal["cellB"] != "CELL_FRIDGE_INTERIOR" or
+            portal["plane"] != {"axis": "z", "value": -26.45}):
+        raise RuntimeError("refrigerator: canonical portal/front-material link changed")
+
+
 def check() -> None:
     rows = {row["id"]: row for row in json.loads(MANIFEST.read_text())["assets"]}
     with tempfile.TemporaryDirectory(prefix="house01040-builtins-", dir="/tmp") as scratch:
@@ -105,6 +188,28 @@ def check() -> None:
                     f"manifest={manifest_hash}")
             check_manifest_geometry(expected, rows[ASSET_IDS[name]])
             print(f"kitchen_builtins_prepare: {name} {actual_hash[:16]} deterministic")
+        fridge_raw = folder / "refrigerator_raw.glb"
+        fridge_generated = folder / "refrigerator.glb"
+        fridge_command = blender_env.build_command(
+            FRIDGE_SCRIPT, ["--out", str(fridge_raw)])
+        if fridge_command is None:
+            raise RuntimeError("Blender unavailable; cannot validate authored refrigerator")
+        checked_run(fridge_command, environment=blender_env.environment(),
+                    sentinel="kitchen_refrigerator: EXIT 0")
+        checked_run([sys.executable, str(COLLISION), str(fridge_raw),
+                     str(fridge_generated), "--mode", "box"])
+        expected = MODELS / fridge_generated.name
+        if not expected.is_file():
+            raise RuntimeError(f"{expected}: committed refrigerator model missing")
+        actual_hash = sha256(fridge_generated.read_bytes())
+        committed_hash = sha256(expected.read_bytes())
+        manifest_hash = rows[FRIDGE_ID]["sourceSha256"]
+        if actual_hash != committed_hash or actual_hash != manifest_hash:
+            raise RuntimeError(
+                f"refrigerator: regenerated={actual_hash}, committed={committed_hash}, "
+                f"manifest={manifest_hash}")
+        check_refrigerator_geometry(expected, rows[FRIDGE_ID])
+        print(f"kitchen_builtins_prepare: refrigerator {actual_hash[:16]} deterministic")
 
 
 def main() -> int:
