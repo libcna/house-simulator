@@ -372,7 +372,9 @@ namespace cnahouse::world
                 }
             }
 
-            // A light is inside the cell it names, and a duct branch and its cells agree.
+            // A light is inside the cell it names. Automatic control is a property of the whole
+            // group: one combined lightmap cannot be half wall-switched and half dusk-driven.
+            std::map<Id, bool> duskByGroup;
             for (const Light& light : world.Lights())
             {
                 const Cell* cell = world.FindCell(light.cell);
@@ -384,8 +386,26 @@ namespace cnahouse::world
                              "light " + Name(light.id) + " is in cell " + Name(light.cell) +
                                  ", which does not exist");
                 }
+                const auto [found, inserted] = duskByGroup.emplace(light.group, light.duskSensor);
+                if (!inserted && found->second != light.duskSensor)
+                {
+                    sink.Add(6,
+                             "layout.lights.json",
+                             "lights/" + Name(light.id) + "/duskSensor",
+                             "group " + Name(light.group) +
+                                 " mixes dusk-sensor and non-dusk fixtures; one group has one control");
+                }
+                if (light.duskSensor && light.defaultOn)
+                {
+                    sink.Add(6,
+                             "layout.lights.json",
+                             "lights/" + Name(light.id) + "/defaultOn",
+                             "dusk-controlled light " + Name(light.id) +
+                                 " must start off; the live sun decides its state");
+                }
             }
 
+            // A duct branch and its cells agree.
             std::set<Id> branches;
             for (const HvacBranch& branch : world.HvacBranches())
             {

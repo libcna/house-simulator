@@ -12742,7 +12742,7 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             card in the same plane as its frame, the card 0.25 m off the wall, the card overflowing
             its frame, and cards drawn at LOD1 as well).
 - [ ] HOUSE-00850 — Implement the neighbour porch lights and street lights on the dusk sensor with per-fixture offsets
-      dep: HOUSE-00849, HOUSE-01251, HOUSE-01531 · sys: lighting · plat: ALL · pri: MUST
+      dep: HOUSE-00849, HOUSE-01269 · sys: lighting · plat: ALL · pri: MUST
       note: (2026-09-10) **Two `dep`s added, no scope changed.** Reached in DAG order after
             `HOUSE-00849` and found to have nothing to switch and nothing to sense: §28's light
             groups are `HOUSE-01251`'s `LightingSystem` skeleton in phase 16, and §35's clock --
@@ -12752,6 +12752,11 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             a pure function and could be written now; a task that says "implement the lights on the
             sensor" is not done while no light exists to be on it, and `HOUSE-00849`'s own
             `WindowGlow` already shows the shape it will take.
+      correction: (2026-09-16) `HOUSE-01269` now owns the shared clock-to-group dusk controller,
+            so this visible-neighbour consumer depends on that completed contract rather than
+            repeating its two transitive dependencies. Its remaining scope is the neighbour porch
+            and window-card presentation; the canonical street and porch group states already
+            come from `HOUSE-01269`.
 - [ ] HOUSE-00851 — Implement impostor rendering: yaw slice selection, sky tinting, vertical-axis billboarding for trees
       dep: HOUSE-00845, HOUSE-00204, HOUSE-00856, HOUSE-00772 · sys: rendering · plat: ALL · pri: MUST
       note: (2026-09-10) **One `dep` added, no scope changed.** "Vertical-axis billboarding for
@@ -14416,8 +14421,41 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
 - [ ] HOUSE-01268 — Implement the sun-patch decals from the precomputed polygons, interpolated between grid entries
       dep: HOUSE-00208, HOUSE-01263 · sys: rendering · plat: ALL · pri: MUST
       dep-note: static until phase 23; then it moves with the sun
-- [ ] HOUSE-01269 — Implement the exterior dusk-sensor lights with per-fixture random offsets
-      dep: HOUSE-01252 · sys: lighting · plat: ALL · pri: MUST
+- [x] HOUSE-01269 — Implement the exterior dusk-sensor lights with per-fixture random offsets
+      dep: HOUSE-01251, HOUSE-01531 · sys: lighting · plat: ALL · pri: MUST
+      correction: (2026-09-16) the former `HOUSE-01252` dependency was logically wrong. An
+            automatic solar sensor neither has nor needs a `LightBehaviour` wall-switch action;
+            the already complete `LightingSystem` and `SimClock` are its exact dependencies.
+            Keeping the switch task in the path would make a non-interactive visual feature wait
+            on the unrelated behaviour factory without changing its implementation.
+      note: all **15** canonical automatic fixtures now declare `duskSensor`: two house porch
+            lanterns, nine street lamps and four neighbour porch lamps. The loader/schema and both
+            validators enforce one control owner per group and reject automatic fixtures that
+            also start `defaultOn`. The runtime crosses solar altitude -4 degrees and maps each
+            stable fixture id to one of the seventeen whole-minute offsets [-8,+8], so results are
+            deterministic on every platform without an RNG stream.
+      decision: Tier S owns one combined artificial atlas/state per group, not one draw per bulb.
+            During the short stagger, the group's level is therefore the lumen-weighted active
+            fixture fraction; after dusk it is exactly 1 and in daylight exactly 0. This preserves
+            the approved group/lightmap architecture and leaves fixture emissive meshes/glow quads
+            to `HOUSE-01259`/`HOUSE-01260`. `HOUSE-00850` remains the visible neighbour-card
+            consumer rather than a second solar controller.
+      measured: the fixed 22:00 front changes **40.507%** of pixels against Round 22. The porch
+            crop mean rises RGB(6.55,7.27,9.17) -> (12.67,11.04,11.02), and the foreground mean
+            rises RGB(3.30,4.38,4.08) -> (26.72,28.40,12.25). This makes the path/plot readable,
+            but the façade remains too black and no physical lantern body or local cone is yet
+            visible; this is deliberately not claimed as VISUAL-GATE-1.
+      verified: generated schema, both validator self-tests and the real 13-rule world validation
+            pass; the final world-content rebuild took 35.84 s including a 14.02 s nav build;
+            all 1,401 unit tests pass. The integration run has 122 passes, eight configured skips
+            and the established process-order-only `TransparentPassTests` failure, which passes
+            1/1 in isolation. The software render suite has 46 passes, two configured skips and
+            eight disabled capture cases with no golden update. `tools/ci/run_checks.sh` is fully
+            green through all 323 strict-XNA translation units, and `git diff --check` is clean.
+            The final commit hook also exposed that its Pillow 11.1 environment predates
+            `Image.get_flattened_data`; the snow-material self-test now falls back to Pillow's
+            equivalent legacy `getdata` iterator instead of making an unrelated CI gate depend on
+            the newest Pillow API.
 - [ ] HOUSE-01270 — Implement light-switch audio (plate click at the plate's position)
       dep: HOUSE-00283, HOUSE-01252 · sys: audio · plat: ALL · pri: MUST
 - [ ] HOUSE-01271 — Implement the `F6` lighting overlay

@@ -114,6 +114,9 @@
           "direction": {
             "$ref": "#/$defs/vector3"
           },
+          "duskSensor": {
+            "type": "boolean"
+          },
           "emissiveMaterialSlot": {
             "anyOf": [
               {

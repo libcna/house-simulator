@@ -947,3 +947,41 @@ LOD work must recover distance cost without removing the composition.
 and façade/porch/roof depth, followed by the sparse close-road tree/foliage quality
 and `HOUSE-00773`'s grass-card jitter. Normal gameplay remains production-material
 only; explicit debug blockout remains separate.
+
+## Round 23 — deterministic dusk control reaches the exterior
+
+Commit: `HOUSE-01269` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 22's eleven-view fixed [22:00 set](captures/house-00772-night-r2).
+After: the same eleven cameras, time, weather, exposure and Tier-S/High settings in
+[the dusk-sensor set](captures/house-01269-night-r2). The day sets are intentionally
+unchanged because the automatic groups are exactly off in daylight. The
+[front before](captures/house-00772-night-r2/exterior-front.png) and
+[front after](captures/house-01269-night-r2/exterior-front.png) were opened at original
+resolution rather than accepted from a pixel count alone.
+
+Ranked visible defects remaining:
+
+1. The foreground and porch frame are now readable, but the broad façade and windows remain
+   nearly black. The automatic state has exposed the next missing layer: neither porch lantern
+   has a fixture mesh/emissive shade or a spatially local pool on the porch receiver.
+2. The road cell currently receives its street group through the existing cell-level BasicEffect
+   approximation. At full night that gives the lawn/plot useful visibility but too little local
+   falloff; `HOUSE-01261`/`HOUSE-01262` own the approved per-object directional approximation.
+3. Thin roof edges, the skeletal balcony/porch frame and flat timber façade still read as an
+   engineering shell even where night illumination now separates them from the sky.
+4. The connected interior route is unchanged: kitchen practical detail, family-room material
+   depth and dining furnishing remain important after the first-view lighting defect.
+
+Fixed: the 2 house porch, 9 street and 4 neighbour-porch fixtures are explicit automatic data,
+not group-name special cases. They cross the shared live sun at -4° with deterministic stable-id
+offsets over ±8 simulated minutes. During the stagger the existing one-atlas-per-group Tier-S
+contract receives the lumen-weighted active fraction; it is 0 at noon and exactly 1 by 22:00.
+The fixed front changes 40.507% of pixels. Porch-crop mean rises from RGB(6.55,7.27,9.17) to
+(12.67,11.04,11.02); foreground mean rises from RGB(3.30,4.38,4.08) to
+(26.72,28.40,12.25). This is useful visual progress without debug colour, but it is not a
+substitute for the still-missing visible fixtures and local porch light.
+
+`VISUAL-GATE-1` still **FAILS**. Next highest visible value is a real porch-lantern presentation
+and localized warm entrance pool within the existing Tier-S architecture, followed by façade/
+roof depth. Do not raise global night exposure to conceal the missing source.

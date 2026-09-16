@@ -1,4 +1,60 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-00772` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01269` checkpoint)
+
+Branch `develop`. Continuous visual-sprint start HEAD
+`238d6aed27c1e8662f0d118013ef08bb801ae018`; clean task-start HEAD
+`06afbea324dd474b4730d92e3ca9b326910c00b2` (`HOUSE-00772`). This file belongs
+to the single `HOUSE-01269` commit; use that commit as the ending HEAD.
+**VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only,
+with explicit debug blockout separate. The fixed 22:00 front is now readable at the
+ground/plot/porch frame, but the façade is still nearly black and the two porch lights
+still lack visible fixture bodies, emissive shades and a local entrance pool.
+
+Round 22 before: the eleven-view [night set](visual-review/captures/house-00772-night-r2).
+Round 23 after: identical cameras, condition and exposure in the
+[dusk-sensor set](visual-review/captures/house-01269-night-r2). The paired
+[front before](visual-review/captures/house-00772-night-r2/exterior-front.png) and
+[front after](visual-review/captures/house-01269-night-r2/exterior-front.png) were
+opened at original resolution. The front changes 40.507% of pixels; porch-crop mean
+rises RGB(6.55,7.27,9.17) → (12.67,11.04,11.02), while foreground mean rises
+RGB(3.30,4.38,4.08) → (26.72,28.40,12.25). Daylight output is intentionally
+unchanged because every automatic group is exactly off by day.
+
+`HOUSE-01269` corrects its dependency from interactive `HOUSE-01252` to the already
+complete light-state/clock pair `HOUSE-01251` + `HOUSE-01531`. Fifteen fixtures now
+author `duskSensor`: two house porch, nine street and four neighbour porch lights.
+They cross live solar altitude -4° with stable-id whole-minute offsets in [-8,+8].
+The combined Tier-S group state uses lumen-weighted active fraction during the short
+stagger, then reaches exactly one at night. Loader/schema support and both validators
+reject mixed-control groups and automatic `defaultOn`. Visible fixture emissives/glow
+remain correctly owned by `HOUSE-01259`/`HOUSE-01260`; the neighbour/window-card
+presentation remains `HOUSE-00850` rather than duplicating the solar controller.
+
+The source/test build used the existing generated commands because upstream BL-17
+still makes CMake regeneration try to write CNA's read-only FNA3D patch record. No CNA,
+FNA3D, sharp-runtime or sibling source was modified. The world content graph rebuilt in
+35.84 s, including nav in 14.02 s, independently reconfirming that the earlier ~20-hour
+`build_nav.py` was a runaway, not required work. See
+[Round 23 review](visual-review/README.md) for the visual defect ranking.
+
+Generated schema, both validator self-tests and the real 13-rule world validation pass;
+all 1,401 unit tests pass. Integration has 122 passes, eight configured skips and the
+established process-order-only `TransparentPassTests` failure, which passes 1/1 in isolation.
+The software render suite has 46 passes, two configured skips and eight disabled capture cases
+with no golden update. `tools/ci/run_checks.sh` is fully green through all 323 strict-XNA
+translation units, and `git diff --check` is clean. The final commit hook exposed one unrelated
+environment compatibility defect: Pillow 11.1 lacks `Image.get_flattened_data`. The snow-material
+self-test now uses its equivalent legacy `getdata` iterator on older Pillow releases; generated
+bytes and validation thresholds are unchanged.
+
+Next highest visible value: give the entrance real porch-lantern bodies/emissive shades
+and a localized warm pool through the approved Tier-S/Tier-E paths, then deepen the
+façade/roof/porch geometry. Do not solve the still-black house by raising global exposure.
+Kitchen practical/clutter, family material depth and dining furnishing follow. Do not
+resume unrelated Android/Web/pet/IK/astronomy work.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-00772` checkpoint)
 
 Branch `develop`. Continuous visual-sprint start HEAD
 `238d6aed27c1e8662f0d118013ef08bb801ae018`; clean task-start HEAD

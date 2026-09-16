@@ -1011,8 +1011,23 @@ def rule_6_references(world: World) -> list[Problem]:
         for field in ("fromCell", "toCell"):
             check("stairs", index, field, flight.get(field), cells, "cell", have_cells)
 
+    dusk_by_group: dict[str, bool] = {}
     for index, light in enumerate(world.lights):
         check("lights", index, "cell", light.get("cell"), cells, "cell", have_cells)
+        group = light.get("group")
+        dusk = bool(light.get("duskSensor", False))
+        if group in dusk_by_group and dusk_by_group[group] != dusk:
+            problems.append(Problem(
+                6, FILE_OF["lights"], f"lights/{index}/duskSensor",
+                f"group {group} mixes dusk-sensor and non-dusk fixtures; "
+                "one group has one control"))
+        else:
+            dusk_by_group[group] = dusk
+        if dusk and light.get("defaultOn", False):
+            problems.append(Problem(
+                6, FILE_OF["lights"], f"lights/{index}/defaultOn",
+                f"dusk-controlled light {light.get('id')} must start off; "
+                "the live sun decides its state"))
 
     for index, prop in enumerate(world.props):
         check("props", index, "cell", prop.get("cell"), cells, "cell", have_cells)
@@ -2717,6 +2732,29 @@ def selftest() -> int:
         require(any("no light in that cell" in x.message for x in problems),
                 f"and so is a cell listing a group whose lights are somewhere else -- the group "
                 f"exists, so the old check said nothing ({[str(x) for x in problems]})")
+
+        mixed = copy.deepcopy(base)
+        dusk_light = copy.deepcopy(row(mixed, "lights", "LIGHT_HALL"))
+        dusk_light["id"] = "LIGHT_HALL_DUSK"
+        dusk_light["duskSensor"] = True
+        mixed["lights"]["lights"].append(dusk_light)
+        mixed_dir = workspace / "mixed-light-control"
+        write_fixture(mixed_dir, mixed)
+        _, problems = validate(mixed_dir, wanted=[6])
+        require(any("mixes dusk-sensor" in x.message for x in problems),
+                f"a group with both switch and dusk control is caught "
+                f"({[str(x) for x in problems]})")
+
+        defaulted = copy.deepcopy(base)
+        automatic = row(defaulted, "lights", "LIGHT_HALL")
+        automatic["duskSensor"] = True
+        automatic["defaultOn"] = True
+        defaulted_dir = workspace / "defaulted-dusk-light"
+        write_fixture(defaulted_dir, defaulted)
+        _, problems = validate(defaulted_dir, wanted=[6])
+        require(any("must start off" in x.message for x in problems),
+                f"a dusk-controlled light cannot also be default-on "
+                f"({[str(x) for x in problems]})")
 
         # ...and a swing that names no cell is a reference to nothing, exactly like a missing
         # asset. It is a reference because `HOUSE-00378` made it one.

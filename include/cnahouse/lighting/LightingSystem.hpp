@@ -37,6 +37,19 @@ namespace cnahouse::rendering
 namespace cnahouse::lighting
 {
 
+    /// @brief §35.3's stable whole-minute offset in the inclusive range [-8, +8].
+    ///
+    /// The light's stable FNV id is already the project's platform-independent hash. Mapping its
+    /// value to seventeen minute slots keeps captures deterministic and avoids a second RNG state.
+    [[nodiscard]] int DuskSensorOffsetMinutes(util::Id fixture) noexcept;
+
+    /// @brief Whether one dusk-controlled fixture is on at this clock instant.
+    ///
+    /// The base crossing is solar altitude -4 degrees. A positive offset delays both evening-on
+    /// and morning-off; a negative one advances them. The shifted clock keeps season and location
+    /// in the same sun model used by the rest of the frame.
+    [[nodiscard]] bool DuskSensorOn(const environment::SimClock& clock, util::Id fixture) noexcept;
+
     /// @brief Calibrated diffuse sky energy for a baked weather-facing receiver.
     ///
     /// The authored sky gradient is a display colour, not an illuminance scalar. Preserve its
@@ -125,6 +138,9 @@ namespace cnahouse::lighting
         bool SetGroupDimmer(util::Id group, float dimmer) noexcept;
 
         [[nodiscard]] const SwitchGroupState* FindGroup(util::Id group) const noexcept;
+
+        /// @brief True when the group's level is owned by §35.3 rather than a wall switch.
+        [[nodiscard]] bool IsGroupDuskControlled(util::Id group) const noexcept;
 
         [[nodiscard]] std::span<const SwitchGroupState> Groups() const noexcept
         {
@@ -243,6 +259,13 @@ namespace cnahouse::lighting
         }
 
     private:
+        struct DuskFixture
+        {
+            util::Id id;
+            std::size_t groupIndex = 0;
+            float lumens = 0.0F;
+        };
+
         struct CellGroups
         {
             std::size_t first = 0;
@@ -257,6 +280,9 @@ namespace cnahouse::lighting
         std::vector<SwitchGroupState> groups_;
         std::vector<float> groupLumens_;
         std::vector<Microsoft::Xna::Framework::Vector3> groupColors_;
+        std::vector<DuskFixture> duskFixtures_;
+        std::vector<bool> duskControlledGroups_;
+        std::vector<float> duskLitLumens_;
         /// @brief Every cell's group ids, packed end to end; `CellGroups` indexes into it.
         std::vector<util::Id> cellGroupIds_;
         std::vector<CellGroups> cellGroups_;

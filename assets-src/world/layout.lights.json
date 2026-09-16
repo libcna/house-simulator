@@ -2070,7 +2070,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
       "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_L0_PORCH_LANTERN_2", "cell": "L0_PORCH", "group": "LG_L0_PORCH_LANTERN",
@@ -2078,7 +2079,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
       "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
     },
 
     // ---- LG_EXT_DRIVEWAY_FLOOD x1 -- over the garage door, aimed down the drive and not at the
@@ -2165,7 +2167,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_STREET_2", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
@@ -2173,7 +2176,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_STREET_3", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
@@ -2181,7 +2185,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_STREET_4", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
@@ -2189,7 +2194,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_STREET_5", "cell": "EXT_ROAD", "group": "LG_EXT_STREET",
@@ -2197,7 +2203,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_STREET_6", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
@@ -2205,7 +2212,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_STREET_7", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
@@ -2213,7 +2221,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_STREET_8", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
@@ -2221,7 +2230,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_STREET_9", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
@@ -2229,7 +2239,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     // ---- LG_EXT_NEIGHBOUR_PORCH x4 -- §53's neighbours' porch lights, which `HOUSE-00383` could
     // ---- not place: their positions are N1's and N2's, and the two houses did not exist until
@@ -2240,7 +2251,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 380.0, "range": 6.50,
       "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_NEIGHBOUR_N1_2", "cell": "EXT_WORLD", "group": "LG_EXT_NEIGHBOUR_PORCH",
@@ -2248,7 +2260,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 380.0, "range": 6.50,
       "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_NEIGHBOUR_N2_1", "cell": "EXT_WORLD", "group": "LG_EXT_NEIGHBOUR_PORCH",
@@ -2256,7 +2269,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 380.0, "range": 6.50,
       "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     },
     {
       "id": "LIGHT_EXT_NEIGHBOUR_N2_2", "cell": "EXT_WORLD", "group": "LG_EXT_NEIGHBOUR_PORCH",
@@ -2264,7 +2278,8 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 380.0, "range": 6.50,
       "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
+      "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
+      "duskSensor": true
     }
   ]
 }

@@ -38,6 +38,8 @@ namespace
 {
     using cnahouse::app::FrameContext;
     using cnahouse::lighting::CelestialKeyLight;
+    using cnahouse::lighting::DuskSensorOffsetMinutes;
+    using cnahouse::lighting::DuskSensorOn;
     using cnahouse::lighting::kAmbientFloor;
     using cnahouse::lighting::kDaylightKeyThreshold;
     using cnahouse::lighting::LightingSystem;
@@ -152,6 +154,43 @@ TEST(LightingSystemTests, OutdoorSkyIrradianceRejectsNonFiniteInputsWithoutPoiso
     EXPECT_FLOAT_EQ(badColour.Z, 0.0F);
 }
 
+TEST(LightingSystemTests, DuskOffsetsAreStableBoundedAndActuallyStaggerTheAuthoredFixtures)
+{
+    EXPECT_EQ(DuskSensorOffsetMinutes(Id::Of("LIGHT_L0_PORCH_LANTERN_1")), -8);
+    EXPECT_EQ(DuskSensorOffsetMinutes(Id::Of("LIGHT_L0_PORCH_LANTERN_2")), -4);
+
+    int earliest = 8;
+    int latest = -8;
+    for (int index = 1; index <= 9; ++index)
+    {
+        const Id fixture = Id::Of("LIGHT_EXT_STREET_" + std::to_string(index));
+        const int offset = DuskSensorOffsetMinutes(fixture);
+        EXPECT_GE(offset, -8);
+        EXPECT_LE(offset, 8);
+        earliest = std::min(earliest, offset);
+        latest = std::max(latest, offset);
+    }
+    EXPECT_LE(earliest, -5);
+    EXPECT_GE(latest, 5);
+}
+
+TEST(LightingSystemTests, OneFixtureReadsTheSameSunAsTheClockAndCrossesAtNight)
+{
+    cnahouse::environment::SimClock clock;
+    clock.calendarDaysPerSimDay = 1.0;
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 6;
+    time.day = 14;
+    time.hour = 12;
+    clock.SetStandard(time);
+    EXPECT_FALSE(DuskSensorOn(clock, Id::Of("LIGHT_L0_PORCH_LANTERN_1")));
+
+    time.hour = 22;
+    clock.SetStandard(time);
+    EXPECT_TRUE(DuskSensorOn(clock, Id::Of("LIGHT_L0_PORCH_LANTERN_1")));
+}
+
 TEST(LightingSystemTests, EveryGroupTheLightsNameGetsAState)
 {
     if (!ContentIsBuilt())
@@ -217,7 +256,7 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
         GTEST_SKIP() << "no content/world/layout.lights.json";
     }
     // Most groups start off; the foyer, hall and kitchen main groups now start on to make the
-    // playable entrance route readable. Data, not an all-off/on system default, owns each state.
+    // playable entrance route readable. Automatic exterior groups instead read the live sun.
     HouseLighting house;
     const world::WorldData& world = house.world;
     LightingSystem& lighting = house.lighting;
@@ -225,11 +264,21 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
 
     for (const SwitchGroupState& state : lighting.Groups())
     {
-        const bool authoredOn = std::any_of(world.Lights().begin(),
-                                            world.Lights().end(),
-                                            [&state](const world::Light& light)
-                                            { return light.group == state.group && light.defaultOn; });
-        EXPECT_EQ(state.on, authoredOn) << "initial group state disagrees with authored fixtures";
+        bool expectedOn = std::any_of(world.Lights().begin(),
+                                      world.Lights().end(),
+                                      [&state](const world::Light& light)
+                                      { return light.group == state.group && light.defaultOn; });
+        if (lighting.IsGroupDuskControlled(state.group))
+        {
+            expectedOn = std::any_of(world.Lights().begin(),
+                                     world.Lights().end(),
+                                     [&house, &state](const world::Light& light)
+                                     {
+                                         return light.group == state.group && light.duskSensor &&
+                                                DuskSensorOn(house.clock, light.id);
+                                     });
+        }
+        EXPECT_EQ(state.on, expectedOn) << "initial group state disagrees with its control owner";
     }
     for (const RoomLightState& cell : lighting.Cells())
     {
@@ -264,6 +313,61 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     ASSERT_NE(hall, nullptr);
     EXPECT_FLOAT_EQ(foyer->artificial, 0.0F);
     EXPECT_FLOAT_EQ(hall->artificial, 0.0F);
+}
+
+TEST(LightingSystemTests, AllFifteenAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    const Id porch = Id::Of("LG_L0_PORCH_LANTERN");
+    const Id street = Id::Of("LG_EXT_STREET");
+    const Id neighbours = Id::Of("LG_EXT_NEIGHBOUR_PORCH");
+    ASSERT_TRUE(house.lighting.IsGroupDuskControlled(porch));
+    ASSERT_TRUE(house.lighting.IsGroupDuskControlled(street));
+    ASSERT_TRUE(house.lighting.IsGroupDuskControlled(neighbours));
+    EXPECT_EQ(std::count_if(house.world.Lights().begin(),
+                            house.world.Lights().end(),
+                            [](const world::Light& light) { return light.duskSensor; }),
+              15);
+
+    cnahouse::environment::CivilTime time;
+    time.year = 2031;
+    time.month = 6;
+    time.day = 14;
+    time.hour = 12;
+    house.clock.SetStandard(time);
+    house.lighting.Update(Frame(200));
+    EXPECT_FALSE(house.lighting.FindGroup(porch)->on);
+    EXPECT_FLOAT_EQ(house.lighting.FindGroup(porch)->Level(), 0.0F);
+    EXPECT_FALSE(house.lighting.FindGroup(street)->on);
+    EXPECT_FALSE(house.lighting.FindGroup(neighbours)->on);
+
+    time.hour = 22;
+    house.clock.SetStandard(time);
+    house.lighting.Update(Frame(201));
+    EXPECT_TRUE(house.lighting.FindGroup(porch)->on);
+    EXPECT_FLOAT_EQ(house.lighting.FindGroup(porch)->Level(), 1.0F);
+    EXPECT_TRUE(house.lighting.FindGroup(street)->on);
+    EXPECT_FLOAT_EQ(house.lighting.FindGroup(street)->Level(), 1.0F);
+    EXPECT_TRUE(house.lighting.FindGroup(neighbours)->on);
+    EXPECT_FLOAT_EQ(house.lighting.FindGroup(neighbours)->Level(), 1.0F);
+
+    bool sawPorchStagger = false;
+    time.hour = 18;
+    for (int minute = 0; minute < 240; ++minute)
+    {
+        time.hour = 18 + minute / 60;
+        time.minute = minute % 60;
+        house.clock.SetStandard(time);
+        house.lighting.Update(Frame(static_cast<std::uint64_t>(300 + minute)));
+        const float level = house.lighting.FindGroup(porch)->Level();
+        sawPorchStagger = sawPorchStagger || (level > 0.0F && level < 1.0F);
+    }
+    EXPECT_TRUE(sawPorchStagger) << "the two ±8-minute porch fixtures switched together";
 }
 
 TEST(LightingSystemTests, KitchenMainDefaultsOnAndItsSwitchRemovesBorrowedHallLight)

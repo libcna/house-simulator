@@ -417,7 +417,8 @@ namespace
                   "colorK": 3000, "intensityLm": 420.0, "range": 4.0,
                   "coneInnerDeg": 22.0, "coneOuterDeg": 38.0,
                   "fixtureProp": "PROP_L0_KITCHEN_DOWNLIGHT",
-                  "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true },
+                  "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true,
+                  "duskSensor": true },
                 { "id": "LIGHT_L0_STAIR_LOW", "cell": "L0_STAIR", "group": "LG_L0_STAIR",
                   "type": "point", "position": [-4.0, 3.00, 6.0], "colorK": 2700,
                   "intensityLm": 800.0, "bakedIntoLightmap": true, "castsBlobShadow": false,
@@ -2074,6 +2075,7 @@ namespace
         EXPECT_TRUE(spot.castsBlobShadow);
         EXPECT_TRUE(spot.bakedIntoLightmap);
         EXPECT_TRUE(spot.defaultOn);
+        EXPECT_TRUE(spot.duskSensor);
     }
 
     TEST_F(WorldLoaderTest, BakedAndBlobShadowAreIndependent)

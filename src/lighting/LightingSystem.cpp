@@ -19,6 +19,21 @@
 namespace cnahouse::lighting
 {
 
+    int DuskSensorOffsetMinutes(util::Id fixture) noexcept
+    {
+        constexpr std::uint32_t kSlots = 17u;
+        constexpr int kHalfRange = 8;
+        return static_cast<int>(fixture.Value() % kSlots) - kHalfRange;
+    }
+
+    bool DuskSensorOn(const environment::SimClock& clock, util::Id fixture) noexcept
+    {
+        constexpr double kDuskAltitudeDeg = -4.0;
+        environment::SimClock shifted = clock;
+        shifted.epochSeconds -= static_cast<double>(DuskSensorOffsetMinutes(fixture)) * 60.0;
+        return environment::SunPositionFor(shifted).altitudeDeg <= kDuskAltitudeDeg;
+    }
+
     Microsoft::Xna::Framework::Vector3
     OutdoorSkyIrradianceFor(const Microsoft::Xna::Framework::Vector3& displaySky,
                             const Microsoft::Xna::Framework::Vector3& solarTint,
@@ -135,6 +150,29 @@ namespace cnahouse::lighting
             }
         }
 
+        // Automatic fixtures are still grouped into §23.3's one atlas per switch group. During
+        // the sixteen-minute stagger the combined Tier-S atlas therefore uses the lumen-weighted
+        // active fraction; once night is established it is exactly the authored full group. The
+        // individual ids remain here so later emissive/glow draws can use the same timing without
+        // inventing another random offset.
+        duskControlledGroups_.assign(groups_.size(), false);
+        duskLitLumens_.resize(groups_.size());
+        duskFixtures_.reserve(world.Lights().size());
+        for (const world::Light& light : world.Lights())
+        {
+            if (!light.duskSensor)
+            {
+                continue;
+            }
+            const auto found = groupIndex_.find(light.group.Value());
+            if (found == groupIndex_.end())
+            {
+                continue;
+            }
+            duskControlledGroups_[found->second] = true;
+            duskFixtures_.push_back(DuskFixture{light.id, found->second, std::max(light.intensityLm, 0.0F)});
+        }
+
         // The cells' group lists, packed. Only groups that actually own a fixture are kept, and
         // the lumens are totalled once because the denominator of `artificial` never changes.
         for (std::size_t index = 0; index < worldCells.size(); ++index)
@@ -200,6 +238,27 @@ namespace cnahouse::lighting
                                     shading.color,
                                     shading.skyDiffuseIntensity,
                                     static_cast<float>(environment::TwilightAmbientFactor(sun_.altitudeDeg)));
+
+        std::fill(duskLitLumens_.begin(), duskLitLumens_.end(), 0.0F);
+        for (const DuskFixture& fixture : duskFixtures_)
+        {
+            if (DuskSensorOn(*clock_, fixture.id))
+            {
+                duskLitLumens_[fixture.groupIndex] += fixture.lumens;
+            }
+        }
+        for (std::size_t index = 0; index < groups_.size(); ++index)
+        {
+            if (!duskControlledGroups_[index])
+            {
+                continue;
+            }
+            const float level = groupLumens_[index] > 0.0F
+                                    ? std::clamp(duskLitLumens_[index] / groupLumens_[index], 0.0F, 1.0F)
+                                    : 0.0F;
+            groups_[index].on = level > 0.0F;
+            groups_[index].dimmer = level;
+        }
 
         daylight_.Evaluate(sun_.altitudeDeg, sun_.azimuthDeg, cloudCover_, daylightLevels_);
         for (std::size_t index = 0; index < cells_.size(); ++index)
@@ -281,6 +340,12 @@ namespace cnahouse::lighting
     {
         const auto found = groupIndex_.find(group.Value());
         return found == groupIndex_.end() ? nullptr : &groups_[found->second];
+    }
+
+    bool LightingSystem::IsGroupDuskControlled(util::Id group) const noexcept
+    {
+        const auto found = groupIndex_.find(group.Value());
+        return found != groupIndex_.end() && duskControlledGroups_[found->second];
     }
 
     SwitchGroupState* LightingSystem::FindGroupMutable(util::Id group) noexcept

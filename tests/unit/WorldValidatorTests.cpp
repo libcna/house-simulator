@@ -250,6 +250,24 @@ namespace
             EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a stale lightGroups index";
         }
 
+        // Rule 6: one combined group cannot have two different control owners.
+        {
+            auto contents = Fixture();
+            world::Light second = contents.lights.front();
+            second.id = Intern("LIGHT_HALL_DUSK");
+            second.duskSensor = true;
+            contents.lights.push_back(second);
+            EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a mixed-control light group";
+        }
+
+        // Rule 6: an automatic fixture's initial state comes from the sun, never `defaultOn`.
+        {
+            auto contents = Fixture();
+            contents.lights.front().duskSensor = true;
+            contents.lights.front().defaultOn = true;
+            EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a dusk light defaulted on";
+        }
+
         // Rule 6 again: a soundLoss that disagrees with §64.3's class for its leaf.
         {
             auto contents = Fixture();

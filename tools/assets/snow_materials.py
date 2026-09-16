@@ -345,7 +345,10 @@ def selftest() -> int:
         problems.append("snow albedo generation is not byte-deterministic")
     if png_bytes(normal) != png_bytes(texture_images()[1]):
         problems.append("snow normal generation is not byte-deterministic")
-    values = list(albedo.get_flattened_data())
+    if hasattr(albedo, "get_flattened_data"):
+        values = list(albedo.get_flattened_data())
+    else:
+        values = list(albedo.getdata())
     if albedo.mode != "RGBA" or normal.mode != "RGB" or albedo.size != (SIZE, SIZE) or \
             normal.size != (SIZE, SIZE):
         problems.append("snow maps must be 256-square RGBA albedo and RGB normal")

@@ -296,7 +296,8 @@ def build() -> dict[str, dict]:
          "coneInnerDeg": {"type": "number", "minimum": 0, "maximum": 180},
          "coneOuterDeg": {"type": "number", "minimum": 0, "maximum": 180},
          "fixtureProp": ID_OR_NULL, "emissiveMaterialSlot": {"anyOf": [STR, {"type": "null"}]},
-         "castsBlobShadow": BOOL, "bakedIntoLightmap": BOOL, "defaultOn": BOOL})))
+         "castsBlobShadow": BOOL, "bakedIntoLightmap": BOOL, "defaultOn": BOOL,
+         "duskSensor": BOOL})))
 
     schemas["props"] = envelope("props", "layout.props.json", rows("props", obj(
         ["id", "asset", "cell", "position"],

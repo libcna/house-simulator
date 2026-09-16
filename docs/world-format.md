@@ -360,7 +360,8 @@ is a rule that quietly says nothing about half the stairs in the house.
       "emissiveMaterialSlot": "shade",
       "castsBlobShadow": true,
       "bakedIntoLightmap": true,
-      "defaultOn": false
+      "defaultOn": false,
+      "duskSensor": false                  // true = §35.3 automatic exterior control
     }
   ]
 }
@@ -369,6 +370,12 @@ is a rule that quietly says nothing about half the stairs in the house.
 A light belongs to exactly one **group**, and a group is what a switch toggles and what a lightmap
 is baked per. `bakedIntoLightmap` and `castsBlobShadow` are independent: a baked light still needs
 a blob shadow for the dynamic objects the bake never saw.
+
+`duskSensor` is data, not a special-case group name. All fixtures in one group must agree. The
+lighting system applies each fixture's deterministic ±8 simulated-minute offset and uses the
+lumen-weighted active fraction for the group's combined Tier-S lightmap while the fixtures are
+staggering. At full night that fraction is one; in daylight it is zero. A dusk-controlled group
+is automatic and is not represented by a wall-switch interactable.
 
 A cell's `lightGroups` is the **index** of the groups its own lights belong to, and §28.1 walks it
 once per frame. Rule 6 checks it both ways: a group in the list with no light of that group in the

@@ -2499,7 +2499,8 @@ namespace cnahouse::world
             for (const auto& [field, target] : std::initializer_list<std::pair<std::string_view, bool*>>{
                      {"castsBlobShadow", &light.castsBlobShadow},
                      {"bakedIntoLightmap", &light.bakedIntoLightmap},
-                     {"defaultOn", &light.defaultOn}})
+                     {"defaultOn", &light.defaultOn},
+                     {"duskSensor", &light.duskSensor}})
             {
                 const Result<bool> value = row.OptionalBool(field, false);
                 if (!value)

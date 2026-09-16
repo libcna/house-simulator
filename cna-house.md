@@ -3998,6 +3998,13 @@ random offsets of ±8 simulated minutes so they do not all switch at once; the a
 (dawn chorus, daytime distant traffic, evening crickets, night quiet); the pets' activity level;
 weather seasonality; and the temperature curve.
 
+The fixture owns this control as authored `duskSensor` data; a group may not mix automatic and
+wall-switched fixtures. The common crossing is solar altitude -4°, and each stable fixture id maps
+deterministically to one of the seventeen whole-minute offsets from -8 to +8. Tier S still owns
+one combined artificial-light state/atlas per group, so the short stagger is represented by the
+lumen-weighted active-fixture fraction. Full night is exactly one and daylight exactly zero; this
+does not add a second per-fixture dynamic-light renderer (`HOUSE-01269`).
+
 ---
 
 ## 36. Weather model

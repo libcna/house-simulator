@@ -615,6 +615,8 @@ namespace cnahouse::world
         bool castsBlobShadow = false;
         bool bakedIntoLightmap = false;
         bool defaultOn = false;
+        /// @brief §35.3's clock-driven exterior control; never a player switch.
+        bool duskSensor = false;
     };
 
     struct WetResponse
