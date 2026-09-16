@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <vector>
+
+#include "Microsoft/Xna/Framework/Vector3.hpp"
 
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/Renderer.hpp"
@@ -19,6 +23,7 @@ namespace cnahouse::world
     class WorldData;
     enum class MaterialClass : std::uint8_t;
     struct ChunkLibrary;
+    struct Light;
 } // namespace cnahouse::world
 
 namespace cnahouse::lighting
@@ -36,6 +41,30 @@ namespace cnahouse::rendering
     /// non-glass transparent materials retain the existing effect-side camera exposure.
     [[nodiscard]] float TransparentTintExposure(world::MaterialClass materialClass,
                                                 float cameraEffectExposure) noexcept;
+
+    /// @brief One §28.6 camera-facing fixture glow after intensity and exposure response.
+    struct FixtureGlowVisual
+    {
+        Microsoft::Xna::Framework::Vector3 centre;
+        Microsoft::Xna::Framework::Vector3 tint;
+        float radius = 0.0F;
+        float alpha = 0.0F;
+        bool visible = false;
+    };
+
+    /// @brief Shared soft radial profile for fixture glow and §32.4's later flare sprites.
+    [[nodiscard]] float GlowQuadRadialOpacity(float normalisedRadius) noexcept;
+
+    /// @brief Resolves one linked fixture into a restrained world-space additive halo.
+    ///
+    /// Lumens establish source strength, @p groupLevel follows the exact bulb transition, and
+    /// @p cameraExposure grows both apparent radius and alpha as the eye opens in a dark space.
+    /// An unlinked light is deliberately invisible: canonical light points without a real fixture
+    /// must not become floating placeholder orbs.
+    [[nodiscard]] FixtureGlowVisual FixtureGlowFor(const world::Light& light,
+                                                   float groupLevel,
+                                                   const Microsoft::Xna::Framework::Vector3& groupColour,
+                                                   float cameraExposure) noexcept;
 
     /// @brief §23.6's static transparent submission: cell then object, back to front.
     ///
@@ -78,7 +107,14 @@ namespace cnahouse::rendering
             return materialBinds_;
         }
 
+        [[nodiscard]] std::uint32_t GlowsDrawn() const noexcept
+        {
+            return glowsDrawn_;
+        }
+
     private:
+        class GlowResources;
+
         const world::ChunkLibrary& library_;
         const world::CellRuntime& cells_;
         const world::WorldData& world_;
@@ -86,9 +122,19 @@ namespace cnahouse::rendering
         visibility::RenderList& list_;
         const lighting::LightingSystem* lighting_ = nullptr;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::BasicEffect> effect_;
+        std::unique_ptr<GlowResources> glowResources_;
+        std::vector<const world::Light*> glowLights_;
         std::uint32_t chunksDrawn_ = 0u;
         std::uint32_t trianglesDrawn_ = 0u;
         std::uint32_t materialBinds_ = 0u;
+        std::uint32_t glowsDrawn_ = 0u;
+        debug::Counters* counterOwner_ = nullptr;
+        std::size_t chunksCounter_ = 0u;
+        std::size_t trianglesCounter_ = 0u;
+        std::size_t bindsCounter_ = 0u;
+        std::size_t glowsCounter_ = 0u;
+
+        void DrawFixtureGlows(PassContext& context);
     };
 
 } // namespace cnahouse::rendering

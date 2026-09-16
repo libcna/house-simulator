@@ -1041,3 +1041,42 @@ equivalence, all pass.
 `VISUAL-GATE-1` still **FAILS**. `HOUSE-01260` is now the highest-value valid task: add restrained
 exposure-aware glow to these visible sources. Then use the approved local approximation for the
 porch receiver and address façade/roof depth; do not raise global night exposure.
+
+## Round 26 — exposure-aware physical fixture halos
+
+Commit: `HOUSE-01260` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 25's [physical-fixture night set](captures/house-01259-night-r1). After: the same
+eleven fixed 22:00 cameras in the [fixture-glow set](captures/house-01260-night-r1), plus the exact
+[close night entrance](captures/house-01260-night-r1/exterior-approach-close.png) and matching
+[10:30 off-state](captures/house-01260-night-r1/exterior-approach-day-check.png). The fixed road,
+close night and close day frames were opened at original resolution.
+
+Ranked visible defects remaining:
+
+1. The two entrance sources now have restrained soft halos, but still cast no spatially local pool
+   over siding, door surround, porch floor or steps. The broad façade therefore remains almost
+   black and flat beyond the source itself.
+2. Thin roof edges and the skeletal balcony/porch frame dominate both day and night. The close
+   daylight image still reads as a cleanly materialed engineering shell rather than finished
+   joinery and layered eaves.
+3. The road-cell illumination is broad and uniform while nearby foliage catches more light than
+   the house face. The approved per-object distance-attenuated approximation remains unfinished.
+4. The connected interior route is unchanged in this focused source task: kitchen practicals and
+   clutter, family-room material depth and dining furnishing remain high-value visual work.
+
+Fixed: each live linked porch lantern now contributes one generated 64 px soft radial billboard in
+the existing transparent pass. Its radius and alpha follow 400 lm source flux, the exact switched
+filament level and adapted exposure. Additive/read-only-depth rendering preserves wall occlusion;
+only the presentation sprite is shifted far enough toward the eye to clear its own shade. Unlinked
+light points and the daytime automatic-off state draw nothing. Against Round 25 at the exact close
+camera, each 100 x 100 fixture neighbourhood changes 35.2% of pixels and rises from approximately
+RGB(15,12,9) to (18,14,9); the full paired crop changes 18.0%. The fixed road view changes only
+subtly, which is intentional: this is source bloom, not a substitute for receiver lighting.
+
+The real-device test now reads the colour target rather than merely counting a draw, and the full
+render suite needs no golden update. The 18-pose culled/unculled maximum remains 0.1603%.
+
+`VISUAL-GATE-1` still **FAILS**. The next highest visible value is a local warm entrance pool using
+the approved Tier-S light assignment/receiver path, followed by façade/roof/porch form depth. Do
+not raise global exposure to conceal either defect.

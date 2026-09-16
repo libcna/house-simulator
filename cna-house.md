@@ -3381,6 +3381,16 @@ emitter's intensity and the camera's exposure. The glow quad is what sells a bul
 one quad, alpha-blended additively, and it is also what a lens flare is made of, so the code is
 shared with §32.4.
 
+> Implemented 2026-09-16 by `HOUSE-01260`. Tier S appends linked physical-fixture glows to the
+> existing transparent pass with stock `BasicEffect`, `BlendState::Additive` and read-only depth.
+> A generated radial texture and static quad are allocated lazily once; luminous flux, the live
+> bulb envelope and adapted camera exposure determine radius/alpha. An authored light without both
+> `fixtureProp` and `emissiveMaterialSlot` is deliberately not drawn, so incomplete canonical light
+> data cannot appear as floating debug orbs. The presentation quad clears its physical shade toward
+> the eye while the canonical light point and baked receiver stay fixed. The pure radial profile is
+> the shared boundary that §32.4's later flare sprites consume; no CNAEXT or custom shader path was
+> introduced.
+
 ### 28.7 Lightning
 
 A lightning strike raises `daylight` for every cell with an exterior window to 1.0 for 90–160 ms,

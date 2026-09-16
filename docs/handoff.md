@@ -1,4 +1,47 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01259` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01260` checkpoint)
+
+Branch `develop`. Task-start HEAD `03bf545` (`HOUSE-01259`). This file belongs to the single
+`HOUSE-01260` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The two real porch lanterns now have the restrained soft source bloom §28.6 requires. The existing
+transparent pass lazily owns one generated 64 px radial texture, static camera-facing quad and
+stock-XNA `BasicEffect`; it appends the two live glows under additive blending with read-only depth.
+Radius and alpha follow fixture lumens, the exact filament transition output and adapted exposure.
+Only lights with a real `fixtureProp` plus exact emissive slot are eligible, so the many canonical
+points whose physical bodies are not yet modelled do not become floating placeholder orbs. The
+presentation centre alone moves toward the eye enough to clear its own wall-mounted shade; the
+canonical light, baked lightmap receiver and collision data remain fixed. No custom shader,
+CNAEXT call or second light state was introduced.
+
+Before: [Round 25 night set](visual-review/captures/house-01259-night-r1). After: identical eleven
+fixed views in [Round 26](visual-review/captures/house-01260-night-r1), plus the exact
+[close live entrance](visual-review/captures/house-01260-night-r1/exterior-approach-close.png) and
+[matching day/off state](visual-review/captures/house-01260-night-r1/exterior-approach-day-check.png).
+The road, close-night and close-day images were opened at original resolution. At the exact close
+camera each 100 x 100 source neighbourhood changes 35.2% of pixels and rises from approximately
+RGB(15,12,9) to (18,14,9); the full pair crop changes 18.0%. The road view remains subtle by design:
+this task adds source bloom, not fake global illumination.
+
+The new real-device integration test reads back the colour target, proving the radial texture and
+alpha reach pixels rather than merely incrementing a draw counter. Pure tests cover off/dim/full,
+flux and exposure ordering. The test also exposed the transparent pass's old process-order counter
+bug; handles are now rebound when their owning registry changes. All 1,404 unit tests pass; 124
+non-save integration cases and all 10 SaveStore cases pass; all 48 active software-render tests
+pass with no golden update, including the 18-pose culled/unculled comparison at its unchanged
+0.1603% worst case. `tools/ci/run_checks.sh` is green through all 323 strict-XNA translation units
+with `CNA_CNAEXT=OFF`.
+
+Next highest visible value is the missing local warm receiver pool on the door surround, porch
+floor and steps. Use the approved Tier-S per-object/distance-attenuated path (`HOUSE-01261` then
+`HOUSE-01262`) or the smallest architecture-consistent static receiver step; do not turn the source
+quad into a giant fake light. After that, deepen the still-flat façade, roof/eaves and porch joinery,
+then return to kitchen practical detail, family material depth and dining furnishing. The broad
+night façade remains almost black and the close daylight porch still reads as an engineering shell.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-01259` checkpoint)
 
 Branch `develop`. Task-start HEAD `958f08f` (`HOUSE-01258`). This file belongs to the single
 `HOUSE-01259` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

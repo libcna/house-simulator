@@ -14215,8 +14215,33 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             rejected the wall-centred GLB pivot; the deterministic generator now authors the
             repository's bottom-centred fixture origin and the inverse canonical prop transform
             preserves the inspected world pose.
-- [ ] HOUSE-01260 — Implement the additive glow quads for bulbs, with camera-exposure-dependent size and alpha
+- [x] HOUSE-01260 — Implement the additive glow quads for bulbs, with camera-exposure-dependent size and alpha
       dep: HOUSE-01259 · sys: rendering · plat: ALL · pri: MUST
+      accept: linked physical fixture emitters draw one soft camera-facing additive quad whose
+              radius and alpha follow luminous flux, the live bulb envelope and adapted camera
+              exposure; switched-off or unlinked canonical light points draw no placeholder orb;
+              opaque geometry can still occlude the presentation
+      note: the existing Tier-S transparent pass now owns one lazily created 64 px radial texture,
+            static quad and stock `BasicEffect`. Only the two currently linked porch fixtures enter
+            the draw list; all other canonical light points remain invisible until they gain a real
+            fixture/slot contract. The quad uses additive blending with read-only depth and moves
+            only its presentation centre toward the eye enough to clear the physical shade/frame;
+            the canonical point, lightmap and receiver lighting do not move. The same pure radial
+            profile is exposed for §32.4's later flare sprites. The pass also now scopes its counter
+            handles to the owning registry, fixing the process-order failure that earlier integration
+            runs had documented rather than hiding it with test ordering.
+      measured: against `HOUSE-01259` at the exact 22:00 close camera, each 100 x 100 fixture
+            neighbourhood changes 35.2% of pixels and rises from approximately RGB(15,12,9) to
+            (18,14,9). The full two-fixture crop changes 18.0%. At the fixed road camera the result
+            stays deliberately restrained; the unresolved defect is now the missing local receiver
+            pool and broadly black façade, not a globally over-bright source.
+      verified: pure response/profile tests cover off, dim, full, exposure and lumen ordering; a
+            real-device pixel test proves the additive quad reaches a colour target, leaves depth
+            read-only and reports exactly one live fixture. The exact daytime close capture remains
+            non-emissive. All 1,404 unit tests, 124 non-save integration cases plus all 10
+            `SaveStoreTest` cases, and all 48 active software-render cases pass; the latter includes
+            the 18-pose culled/unculled comparison at its unchanged 0.1603% worst case. No golden
+            reference changed. Full static/XNA gates are recorded in the checkpoint handoff.
 - [ ] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-01262 — Implement the point-light-as-directional approximation with distance attenuation

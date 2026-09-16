@@ -1,18 +1,30 @@
 // SPDX-License-Identifier: MIT
 #include "cnahouse/rendering/TransparentPass.hpp"
 
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdint>
+
+#include "Microsoft/Xna/Framework/Color.hpp"
 #include "Microsoft/Xna/Framework/Graphics/BasicEffect.hpp"
 #include "Microsoft/Xna/Framework/Graphics/BlendState.hpp"
+#include "Microsoft/Xna/Framework/Graphics/BufferUsage.hpp"
 #include "Microsoft/Xna/Framework/Graphics/DepthStencilState.hpp"
 #include "Microsoft/Xna/Framework/Graphics/EffectPass.hpp"
 #include "Microsoft/Xna/Framework/Graphics/EffectPassCollection.hpp"
 #include "Microsoft/Xna/Framework/Graphics/EffectTechnique.hpp"
 #include "Microsoft/Xna/Framework/Graphics/GraphicsDevice.hpp"
 #include "Microsoft/Xna/Framework/Graphics/IndexBuffer.hpp"
+#include "Microsoft/Xna/Framework/Graphics/IndexElementSize.hpp"
 #include "Microsoft/Xna/Framework/Graphics/PrimitiveType.hpp"
 #include "Microsoft/Xna/Framework/Graphics/RasterizerState.hpp"
+#include "Microsoft/Xna/Framework/Graphics/Texture2D.hpp"
 #include "Microsoft/Xna/Framework/Graphics/VertexBuffer.hpp"
+#include "Microsoft/Xna/Framework/Graphics/VertexPositionTexture.hpp"
 #include "Microsoft/Xna/Framework/Graphics/Viewport.hpp"
+#include "Microsoft/Xna/Framework/Matrix.hpp"
+#include "Microsoft/Xna/Framework/Vector2.hpp"
 
 #include "cnahouse/debug/Counters.hpp"
 #include "cnahouse/lighting/LightingSystem.hpp"
@@ -32,6 +44,107 @@ namespace cnahouse::rendering
         return materialClass == world::MaterialClass::Glass ? 1.0F : cameraEffectExposure;
     }
 
+    float GlowQuadRadialOpacity(float normalisedRadius) noexcept
+    {
+        if (!std::isfinite(normalisedRadius) || normalisedRadius >= 1.0F)
+        {
+            return 0.0F;
+        }
+        if (normalisedRadius <= 0.0F)
+        {
+            return 1.0F;
+        }
+        // A squared parabola has no hard inner disc and reaches zero with a flat derivative. The
+        // same profile is suitable for §32.4's future flare sprites, so it is public pure maths.
+        const float fade = 1.0F - normalisedRadius * normalisedRadius;
+        return fade * fade;
+    }
+
+    FixtureGlowVisual FixtureGlowFor(const world::Light& light,
+                                     float groupLevel,
+                                     const Vector3& groupColour,
+                                     float cameraExposure) noexcept
+    {
+        FixtureGlowVisual visual;
+        visual.centre = light.position;
+        visual.tint = Vector3(std::clamp(groupColour.X, 0.0F, 1.0F),
+                              std::clamp(groupColour.Y, 0.0F, 1.0F),
+                              std::clamp(groupColour.Z, 0.0F, 1.0F));
+        if (!light.fixtureProp.IsValid() || light.emissiveMaterialSlot.empty() ||
+            !std::isfinite(groupLevel) || !std::isfinite(light.intensityLm) || light.intensityLm <= 0.0F)
+        {
+            return visual;
+        }
+
+        const float level = std::clamp(groupLevel, 0.0F, 1.0F);
+        if (level <= 0.0F)
+        {
+            return visual;
+        }
+        const float exposure = std::isfinite(cameraExposure) ? std::clamp(cameraExposure, 0.5F, 6.0F) : 1.0F;
+        const float relativeLumens = std::clamp(light.intensityLm / 400.0F, 0.0F, 16.0F);
+        const float fluxForRadius = std::sqrt(std::sqrt(relativeLumens));
+        const float exposureForRadius = std::clamp(std::pow(exposure, 0.2F), 0.85F, 1.45F);
+        visual.radius = 0.42F * fluxForRadius * std::sqrt(level) * exposureForRadius;
+        visual.alpha =
+            std::clamp(0.34F * level * std::sqrt(relativeLumens) * std::sqrt(exposure), 0.0F, 0.85F);
+        visual.visible = visual.radius >= 0.01F && visual.alpha >= 0.001F &&
+                         (visual.tint.X > 0.0F || visual.tint.Y > 0.0F || visual.tint.Z > 0.0F);
+        return visual;
+    }
+
+    class TransparentPass::GlowResources
+    {
+    public:
+        static constexpr int kTextureSize = 64;
+
+        explicit GlowResources(Gfx::GraphicsDevice& device)
+            : texture(device, kTextureSize, kTextureSize)
+            , vertices(device,
+                       Gfx::VertexPositionTexture::getVertexDeclarationStatic(),
+                       4,
+                       Gfx::BufferUsage::WriteOnly)
+            , indices(device, Gfx::IndexElementSize::SixteenBits, 6, Gfx::BufferUsage::WriteOnly)
+            , effect(device)
+        {
+            std::array<Microsoft::Xna::Framework::Color, kTextureSize * kTextureSize> texels;
+            for (int y = 0; y < kTextureSize; ++y)
+            {
+                for (int x = 0; x < kTextureSize; ++x)
+                {
+                    const float nx = (static_cast<float>(x) + 0.5F) * (2.0F / kTextureSize) - 1.0F;
+                    const float ny = (static_cast<float>(y) + 0.5F) * (2.0F / kTextureSize) - 1.0F;
+                    const float alpha = GlowQuadRadialOpacity(std::sqrt(nx * nx + ny * ny));
+                    const int alphaByte = static_cast<int>(std::lround(alpha * 255.0F));
+                    texels[static_cast<std::size_t>(y * kTextureSize + x)] =
+                        Microsoft::Xna::Framework::Color(255, 255, 255, alphaByte);
+                }
+            }
+            texture.SetData(texels.data(), static_cast<int>(texels.size()));
+
+            const std::array<Gfx::VertexPositionTexture, 4> quad{{
+                {Vector3(-1.0F, -1.0F, 0.0F), Microsoft::Xna::Framework::Vector2(0.0F, 1.0F)},
+                {Vector3(1.0F, -1.0F, 0.0F), Microsoft::Xna::Framework::Vector2(1.0F, 1.0F)},
+                {Vector3(1.0F, 1.0F, 0.0F), Microsoft::Xna::Framework::Vector2(1.0F, 0.0F)},
+                {Vector3(-1.0F, 1.0F, 0.0F), Microsoft::Xna::Framework::Vector2(0.0F, 0.0F)},
+            }};
+            constexpr std::array<std::uint16_t, 6> kIndices{{0, 1, 2, 0, 2, 3}};
+            vertices.SetData(quad.data(), static_cast<int>(quad.size()));
+            indices.SetData(kIndices.data(), static_cast<int>(kIndices.size()));
+
+            effect.setLightingEnabledProperty(false);
+            effect.setVertexColorEnabledProperty(false);
+            effect.setTextureEnabledProperty(true);
+            effect.setTextureProperty(&texture);
+        }
+
+        Gfx::Texture2D texture;
+        Gfx::VertexBuffer vertices;
+        Gfx::IndexBuffer indices;
+        // Last constructed, therefore first destroyed: the effect borrows the texture.
+        Gfx::BasicEffect effect;
+    };
+
     TransparentPass::TransparentPass(const world::ChunkLibrary& library,
                                      const world::CellRuntime& cells,
                                      const world::WorldData& world,
@@ -45,13 +158,35 @@ namespace cnahouse::rendering
         , list_(list)
         , lighting_(lighting)
     {
+        glowLights_.reserve(world.Lights().size());
+        for (const world::Light& light : world.Lights())
+        {
+            if (light.fixtureProp.IsValid() && !light.emissiveMaterialSlot.empty())
+            {
+                glowLights_.push_back(&light);
+            }
+        }
     }
 
     TransparentPass::~TransparentPass() = default;
 
     bool TransparentPass::IsActive() const
     {
-        return list_.Has(Pass::Transparent);
+        if (list_.Has(Pass::Transparent))
+        {
+            return true;
+        }
+        if (lighting_ != nullptr)
+        {
+            for (const world::Light* light : glowLights_)
+            {
+                if (lighting_->GroupOutputLevel(light->group) > 0.0F)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     void TransparentPass::Draw(PassContext& context)
@@ -59,6 +194,7 @@ namespace cnahouse::rendering
         chunksDrawn_ = 0u;
         trianglesDrawn_ = 0u;
         materialBinds_ = 0u;
+        glowsDrawn_ = 0u;
         Gfx::GraphicsDevice& device = context.device;
 
         if (effect_ == nullptr)
@@ -141,12 +277,100 @@ namespace cnahouse::rendering
             }
         }
 
-        static const debug::Counters::Handle kChunks = context.counters.Resolve("transparent.chunks");
-        static const debug::Counters::Handle kTriangles = context.counters.Resolve("transparent.triangles");
-        static const debug::Counters::Handle kBinds = context.counters.Resolve("transparent.materialBinds");
-        context.counters.Set(kChunks, static_cast<std::int64_t>(chunksDrawn_));
-        context.counters.Set(kTriangles, static_cast<std::int64_t>(trianglesDrawn_));
-        context.counters.Set(kBinds, static_cast<std::int64_t>(materialBinds_));
+        DrawFixtureGlows(context);
+
+        if (counterOwner_ != &context.counters)
+        {
+            counterOwner_ = &context.counters;
+            chunksCounter_ = context.counters.Resolve("transparent.chunks");
+            trianglesCounter_ = context.counters.Resolve("transparent.triangles");
+            bindsCounter_ = context.counters.Resolve("transparent.materialBinds");
+            glowsCounter_ = context.counters.Resolve("transparent.fixtureGlows");
+        }
+        context.counters.Set(chunksCounter_, static_cast<std::int64_t>(chunksDrawn_));
+        context.counters.Set(trianglesCounter_, static_cast<std::int64_t>(trianglesDrawn_));
+        context.counters.Set(bindsCounter_, static_cast<std::int64_t>(materialBinds_));
+        context.counters.Set(glowsCounter_, static_cast<std::int64_t>(glowsDrawn_));
+    }
+
+    void TransparentPass::DrawFixtureGlows(PassContext& context)
+    {
+        if (lighting_ == nullptr || glowLights_.empty())
+        {
+            return;
+        }
+
+        const float exposure = lighting_->CameraExposureScale();
+        bool prepared = false;
+        const Vector3 forward(camera_.target.X - camera_.eye.X,
+                              camera_.target.Y - camera_.eye.Y,
+                              camera_.target.Z - camera_.eye.Z);
+        for (const world::Light* light : glowLights_)
+        {
+            const FixtureGlowVisual glow = FixtureGlowFor(*light,
+                                                          lighting_->GroupOutputLevel(light->group),
+                                                          lighting_->GroupColor(light->group),
+                                                          exposure);
+            if (!glow.visible)
+            {
+                continue;
+            }
+            if (glowResources_ == nullptr)
+            {
+                glowResources_ = std::make_unique<GlowResources>(context.device);
+            }
+            GlowResources& resources = *glowResources_;
+            if (!prepared)
+            {
+                const auto& viewport = context.device.getViewportProperty();
+                const float aspect = viewport.getHeightProperty() > 0
+                                         ? static_cast<float>(viewport.getWidthProperty()) /
+                                               static_cast<float>(viewport.getHeightProperty())
+                                         : 1.0F;
+                resources.effect.setViewProperty(camera_.View());
+                resources.effect.setProjectionProperty(camera_.Projection(aspect));
+                context.states.SetRasterizer(Gfx::RasterizerState::CullNone);
+                context.states.SetDepthStencil(Gfx::DepthStencilState::DepthRead);
+                context.states.SetBlend(Gfx::BlendState::Additive);
+                context.device.SetVertexBuffer(&resources.vertices);
+                context.device.setIndicesProperty(&resources.indices);
+                prepared = true;
+            }
+
+            // Canonical point lights sit at the optical centre of their wall fixtures, commonly
+            // behind the front glass and frame. A depth-tested quad at that exact point is
+            // swallowed by the shade or wall it is meant to soften. Move only the presentation
+            // quad toward the eye by a radius-scaled fixture clearance; the physical light and
+            // baked receiver remain canonical. DepthRead still lets geometry in front of the
+            // whole fixture occlude it.
+            const Vector3 toEye(
+                camera_.eye.X - glow.centre.X, camera_.eye.Y - glow.centre.Y, camera_.eye.Z - glow.centre.Z);
+            const float eyeDistance = std::sqrt(toEye.X * toEye.X + toEye.Y * toEye.Y + toEye.Z * toEye.Z);
+            Vector3 presentationCentre = glow.centre;
+            if (eyeDistance > 0.001F)
+            {
+                const float fixtureClearance = std::clamp(glow.radius * 1.25F, 0.18F, 0.45F);
+                const float scale = fixtureClearance / eyeDistance;
+                presentationCentre = Vector3(glow.centre.X + toEye.X * scale,
+                                             glow.centre.Y + toEye.Y * scale,
+                                             glow.centre.Z + toEye.Z * scale);
+            }
+            const Microsoft::Xna::Framework::Matrix billboard =
+                Microsoft::Xna::Framework::Matrix::CreateBillboard(
+                    presentationCentre, camera_.eye, Vector3::Up, forward);
+            resources.effect.setWorldProperty(Microsoft::Xna::Framework::Matrix::CreateScale(glow.radius) *
+                                              billboard);
+            resources.effect.setDiffuseColorProperty(glow.tint);
+            resources.effect.setAlphaProperty(glow.alpha);
+            Gfx::EffectPassCollection& passes =
+                resources.effect.getCurrentTechniqueProperty()->getPassesProperty();
+            for (int pass = 0; pass < passes.getCountProperty(); ++pass)
+            {
+                passes[pass]->Apply();
+                context.device.DrawIndexedPrimitives(Gfx::PrimitiveType::TriangleList, 0, 0, 4, 0, 2);
+            }
+            ++glowsDrawn_;
+        }
     }
 
 } // namespace cnahouse::rendering
