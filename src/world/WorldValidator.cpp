@@ -413,6 +413,30 @@ namespace cnahouse::world
                              "dusk-controlled light " + Name(light.id) +
                                  " must start off; the live sun decides its state");
                 }
+                for (const Id receiver : light.spillCells)
+                {
+                    if (world.FindCell(receiver) == nullptr)
+                    {
+                        sink.Add(6,
+                                 "layout.lights.json",
+                                 "lights/" + Name(light.id) + "/spillCells",
+                                 "static-detail receiver " + Name(receiver) + " is not a known cell");
+                    }
+                    if (receiver == light.cell)
+                    {
+                        sink.Add(6,
+                                 "layout.lights.json",
+                                 "lights/" + Name(light.id) + "/spillCells",
+                                 "spillCells names only additional receivers; the owning cell is implicit");
+                    }
+                    if (light.type == LightType::EmissiveOnly)
+                    {
+                        sink.Add(6,
+                                 "layout.lights.json",
+                                 "lights/" + Name(light.id) + "/spillCells",
+                                 "an emissive-only source cannot illuminate a static-detail receiver");
+                    }
+                }
                 if (light.fixtureProp.IsValid())
                 {
                     const Prop* fixture = world.FindProp(light.fixtureProp);

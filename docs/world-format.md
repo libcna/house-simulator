@@ -357,6 +357,7 @@ is a rule that quietly says nothing about half the stairs in the house.
       "colorK": 2700,                      // kelvin, converted through a Planckian LUT
       "intensityLm": 800, "range": 6.0,
       "bakeCells": ["L0_HALL"],            // optional extra fixed receiver cells
+      "spillCells": ["EXT_TERRACE"],       // optional unbaked static-detail receivers
       "coneInnerDeg": 30, "coneOuterDeg": 55,
       "fixtureProp": "PROP_L0_KITCHEN_PENDANT_1",
       "emissiveMaterialSlot": "shade",
@@ -378,6 +379,12 @@ to `cell`: its switch group, room state, exposure contribution, fixture link and
 selection do not move. This is for a source whose fixed spill crosses a cell boundary, such as a
 porch lantern illuminating the outside-facing foyer shell. The owning cell is implicit and must
 not be repeated; every named receiver must exist, and a runtime-only light cannot name one.
+
+`spillCells` is the equivalent narrow declaration for fixed geometry that deliberately has no
+lightmap, such as exterior steps. Its stock-`BasicEffect` detail may use the named source's
+range-bounded key/fill/bounce; the receiver's room state, exposure, switches and ordinary dynamic
+objects do not acquire the foreign group. The owning cell is likewise implicit, and an
+`emissive_only` row cannot name a receiver because it emits no illumination.
 
 `bulbClass` drives §53's switch-on envelope and all fixtures in a group must agree: filament ramps
 over 0.12 s, LED is instant, and fluorescent has a deterministic 0.4 s flicker-start. It is explicit

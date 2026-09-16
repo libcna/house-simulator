@@ -415,6 +415,7 @@ namespace
                   "group": "LG_L0_KITCHEN_SINK", "type": "spot",
                   "position": [-4.0, 3.10, -26.0], "direction": [0.20, -0.90, 0.40],
                   "colorK": 3000, "bulbClass": "led", "intensityLm": 420.0, "range": 4.0,
+                  "spillCells": ["L0_STAIR"],
                   "coneInnerDeg": 22.0, "coneOuterDeg": 38.0,
                   "fixtureProp": "PROP_L0_KITCHEN_DOWNLIGHT",
                   "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true,
@@ -2072,6 +2073,8 @@ namespace
         EXPECT_FLOAT_EQ(spot.range, 4.0F);
         EXPECT_FLOAT_EQ(spot.coneInnerDeg, 22.0F);
         EXPECT_FLOAT_EQ(spot.coneOuterDeg, 38.0F);
+        ASSERT_EQ(spot.spillCells.size(), 1U);
+        EXPECT_EQ(spot.spillCells.front(), Intern("L0_STAIR"));
         EXPECT_EQ(spot.fixtureProp, Intern("PROP_L0_KITCHEN_DOWNLIGHT"));
         EXPECT_TRUE(spot.castsBlobShadow);
         EXPECT_TRUE(spot.bakedIntoLightmap);

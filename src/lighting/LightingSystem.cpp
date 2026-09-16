@@ -193,6 +193,10 @@ namespace cnahouse::lighting
         borrowedLevels_.resize(worldCells.size());
         cellGroups_.reserve(worldCells.size());
         objectFixturesByCell_.resize(worldCells.size());
+        staticDetailFixturesByCell_.resize(worldCells.size());
+        staticDetailFixtureLumens_.resize(worldCells.size());
+        staticDetailSpillFixturesByCell_.resize(worldCells.size());
+        staticDetailSpillFixtureLumens_.resize(worldCells.size());
         crossCellFixturesByCell_.resize(worldCells.size());
         crossCellFixtureLumens_.resize(worldCells.size());
         dominantSurfaceColors_.reserve(worldCells.size());
@@ -273,6 +277,7 @@ namespace cnahouse::lighting
         // uses live group output later, so switching and bulb envelopes cannot disagree with the
         // lightmaps or emissive fixtures.
         objectFixtures_.reserve(world.Lights().size());
+        std::vector<std::vector<std::size_t>> spillGroupsByCell(worldCells.size());
         for (const world::Light& light : world.Lights())
         {
             if (light.type == world::LightType::EmissiveOnly || light.intensityLm <= 0.0F)
@@ -293,7 +298,24 @@ namespace cnahouse::lighting
             fixture.lumens = light.intensityLm;
             fixture.range = light.range;
             fixture.positional = light.type != world::LightType::Directional;
-            objectFixturesByCell_[cell->second].push_back(objectFixtures_.size());
+            const std::size_t fixtureIndex = objectFixtures_.size();
+            objectFixturesByCell_[cell->second].push_back(fixtureIndex);
+            staticDetailFixturesByCell_[cell->second].push_back(fixtureIndex);
+            for (const util::Id receiverId : light.spillCells)
+            {
+                const auto receiver = cellIndex_.find(receiverId.Value());
+                if (receiver == cellIndex_.end())
+                {
+                    continue;
+                }
+                staticDetailFixturesByCell_[receiver->second].push_back(fixtureIndex);
+                staticDetailSpillFixturesByCell_[receiver->second].push_back(fixtureIndex);
+                std::vector<std::size_t>& spillGroups = spillGroupsByCell[receiver->second];
+                if (std::find(spillGroups.begin(), spillGroups.end(), group->second) == spillGroups.end())
+                {
+                    spillGroups.push_back(group->second);
+                }
+            }
             objectFixtures_.push_back(fixture);
         }
         groupTransitionElapsed_.resize(groups_.size());
@@ -341,6 +363,22 @@ namespace cnahouse::lighting
             }
             packed.count = cellGroupIds_.size() - packed.first;
             cellGroups_.push_back(packed);
+
+            // The ordinary cell denominator already contains every lumen in its locally owned
+            // groups. Add each explicitly spilled foreign group once; fixtures within a group
+            // still keep their individual positions and compete for the two direct-light slots.
+            staticDetailFixtureLumens_[index] = packed.totalLumens;
+            for (const std::size_t groupIndex : spillGroupsByCell[index])
+            {
+                const util::Id groupId = groups_[groupIndex].group;
+                staticDetailSpillFixtureLumens_[index] += groupLumens_[groupIndex];
+                if (std::find(worldCells[index].lightGroups.begin(),
+                              worldCells[index].lightGroups.end(),
+                              groupId) == worldCells[index].lightGroups.end())
+                {
+                    staticDetailFixtureLumens_[index] += groupLumens_[groupIndex];
+                }
+            }
 
             // A foreign artificial binding proves that an authored fixed source illuminates this
             // receiver. Keep those candidates separate: ordinary room objects still see only
@@ -788,6 +826,40 @@ namespace cnahouse::lighting
                 objectFixturesByCell_[cellIndex], cellGroups_[cellIndex].totalLumens, objectCentre);
         }
         return WithReceiverBounce(assignment, cellIndex);
+    }
+
+    ObjectLightAssignment
+    LightingSystem::StaticDetailLightsForObject(util::Id cell, const Vector3& objectCentre) const noexcept
+    {
+        const auto found = cellIndex_.find(cell.Value());
+        if (found == cellIndex_.end())
+        {
+            return {};
+        }
+        if (CelestialKeyForCell(cell) != nullptr)
+        {
+            return DirectionalLightsForObject(cell, objectCentre);
+        }
+        const std::size_t cellIndex = found->second;
+        ObjectLightAssignment assignment = WithReceiverBounce(
+            FixtureLightsForObject(
+                staticDetailFixturesByCell_[cellIndex], staticDetailFixtureLumens_[cellIndex], objectCentre),
+            cellIndex);
+        const ObjectLightAssignment spill =
+            FixtureLightsForObject(staticDetailSpillFixturesByCell_[cellIndex],
+                                   staticDetailSpillFixtureLumens_[cellIndex],
+                                   objectCentre);
+        for (std::size_t slot = 0; slot < 2; ++slot)
+        {
+            if (!spill.slots[slot].has_value())
+            {
+                continue;
+            }
+            assignment.spillDiffuseColor.X += spill.slots[slot]->diffuseColor.X;
+            assignment.spillDiffuseColor.Y += spill.slots[slot]->diffuseColor.Y;
+            assignment.spillDiffuseColor.Z += spill.slots[slot]->diffuseColor.Z;
+        }
+        return assignment;
     }
 
     ObjectLightAssignment

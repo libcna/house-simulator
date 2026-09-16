@@ -1,4 +1,43 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-00932` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01282` checkpoint)
+
+Branch `develop`. Task-start HEAD `dd8c223` (`HOUSE-00932`). This file belongs to the single
+`HOUSE-01282` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The front stair remains one canonical Basic-detail chunk owned by `EXT_WALK`; the two real 400 lm
+porch sources remain owned, switched and dusk-controlled by `L0_PORCH`. A new optional
+`spillCells` list lets a fixed source explicitly name an adjacent unbaked static-detail receiver.
+Only that rendering path admits the foreign, range-bounded candidates and their restrained warm
+receiver bounce. Ordinary dynamic objects, room state, exposure, group control and the independent
+default-off path lights do not inherit anything. Schema, loader and both semantic validators reject
+unknown, same-cell and emissive-only receivers. There is no proximity search, cell-name exception,
+custom shader, CNAEXT call or global exposure change.
+
+Before: Round 32's fixed [night approach](visual-review/captures/house-00932-entry-detail-r1/exterior-approach-night.png)
+shows the finished door and lanterns above a nearly black stair. After: the identical
+[night approach](visual-review/captures/house-01282-step-spill-r1/exterior-approach-night.png) makes
+the bluestone treads and risers readable; the crop changes 35.84% and rises from mean
+RGB(4.35,3.48,3.06) to RGB(7.71,5.93,3.84). The matching
+[day approach](visual-review/captures/house-01282-step-spill-r1/exterior-approach-day.png) changes
+zero world pixels. The full [Round 33 set](visual-review/captures/house-01282-step-spill-r1)
+contains all eleven fixed 22:00 route cameras plus the exact day/night approaches and was inspected
+as a contact sheet and at full resolution where affected.
+
+All 1,407 unit tests, all 134 integration tests and all 48 software-render tests pass. No golden
+reference changed. The 18-pose culled/unculled comparison remains under its unchanged 0.2%
+threshold at 0.1599% worst. World schema/selftests and static/XNA checks are green with
+`CNA_CNAEXT=OFF` as recorded by the commit hook.
+
+Next highest visible value is the broad front facade/roof: it is almost black at night and still
+reads as a large thin-eaved box by day. Then improve the immediate approach without automatically
+enabling the player-controlled path lights. Interior priority remains the empty straight
+living-room composition, kitchen practical clutter, family finish depth and dining furnishing.
+Do not replace the explicit receiver boundary with neighbour-by-proximity lighting or global
+ambient exposure.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-00932` checkpoint)
 
 Branch `develop`. Task-start HEAD `b22767d` (`HOUSE-00931`). This file belongs to the single
 `HOUSE-00932` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

@@ -1324,3 +1324,39 @@ references had not recorded. The 18-pose culled/unculled comparison remains belo
 `VISUAL-GATE-1` still **FAILS**. Highest visible value is a principled night treatment for the
 front steps and immediate approach, followed by broad facade/roof depth and the named connected-
 room furnishing gaps. Do not raise global exposure or enlarge the lantern billboards to mask it.
+
+## Round 33 — authored porch-light spill onto the front steps
+
+Commit: `HOUSE-01282` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 32's fixed [night approach](captures/house-00932-entry-detail-r1/exterior-approach-night.png)
+left the 72-triangle front stair almost black beneath two visibly live porch lanterns. After: the
+identical [night approach](captures/house-01282-step-spill-r1/exterior-approach-night.png) makes its
+treads, risers and bluestone texture readable. The matching
+[day approach](captures/house-01282-step-spill-r1/exterior-approach-day.png) and complete eleven-view
+[22:00 route set](captures/house-01282-step-spill-r1) were opened and inspected.
+
+Ranked visible defects remaining:
+
+1. The broad upper facade and roof are almost black at the road and approach cameras at night; by
+   day their uninterrupted box-like mass and thin outer eaves still dominate the otherwise finished
+   entrance.
+2. The immediate lawn-side walk remains intentionally dark while its player-switched path lights
+   are off. The now-readable destination needs a believable approach-lighting/composition decision,
+   not a global exposure increase.
+3. The straight living-room camera still faces a nearly empty wall, while the composition camera
+   shows the real seating group. Its layout needs a focal treatment that reads from circulation.
+4. Kitchen practical clutter, family-room finish depth and dining furnishing remain the largest
+   connected-route interior gaps.
+
+Fixed: lights can now explicitly name adjacent unbaked static-detail receivers without changing
+cell ownership. The two 400 lm dusk-controlled porch sources remain in `L0_PORCH`; only fixed
+stock-`BasicEffect` geometry in named `EXT_WALK` receives their range-bounded direct terms and a
+restrained warm receiver bounce. Dynamic objects, path-light switching, room state and exposure
+remain local. The stair crop changes 35.84% and its mean rises from RGB(4.35,3.48,3.06) to
+RGB(7.71,5.93,3.84). The matching daylight world crop changes zero pixels, and no strict reference
+needed advancing. All 48 software-render cases pass; culled/unculled remains 0.1599% worst.
+
+`VISUAL-GATE-1` still **FAILS**. Highest visible value is broad front-facade/roof depth and night
+readability, followed by the named interior composition/furnishing gaps. Preserve the explicit
+lighting ownership boundary; do not turn this into neighbour-by-proximity lighting.

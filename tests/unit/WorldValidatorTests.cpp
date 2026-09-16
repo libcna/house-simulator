@@ -279,6 +279,18 @@ namespace
             EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a dusk light defaulted on";
         }
 
+        // Rule 6: a static-detail spill names another real receiver, never its source cell.
+        {
+            auto contents = Fixture();
+            contents.lights.front().spillCells.push_back(Intern("L0_MISSING"));
+            EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "an unknown spill receiver";
+        }
+        {
+            auto contents = Fixture();
+            contents.lights.front().spillCells.push_back(contents.lights.front().cell);
+            EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a redundant spill receiver";
+        }
+
         // Rule 6: a visible emitter is a real prop in the same cell, not an unchecked string.
         {
             auto contents = Fixture();

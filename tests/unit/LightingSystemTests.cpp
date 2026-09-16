@@ -917,12 +917,30 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     EXPECT_GT(receiverLights.slots[0]->diffuseColor.X, receiverLights.slots[0]->diffuseColor.Z);
     EXPECT_FALSE(house.lighting.CrossCellReceiverLightsForObject(porch, centre).slots[0].has_value());
 
+    // The front stair is fixed Basic detail in EXT_WALK. Its own path-light switch remains off,
+    // so ordinary dynamic-object assignment is dark; the explicit static spill receives only the
+    // two range-bounded porch sources.
+    const Id walk = Id::Of("EXT_WALK");
+    const Microsoft::Xna::Framework::Vector3 stepCentre(0.0F, 0.285F, -11.1375F);
+    EXPECT_FALSE(house.lighting.DirectionalLightsForObject(walk, stepCentre).slots[0].has_value());
+    const ObjectLightAssignment stepLights = house.lighting.StaticDetailLightsForObject(walk, stepCentre);
+    ASSERT_TRUE(stepLights.slots[0].has_value());
+    ASSERT_TRUE(stepLights.slots[1].has_value());
+    ASSERT_TRUE(stepLights.slots[2].has_value());
+    EXPECT_NEAR(stepLights.slots[0]->direction.X, -stepLights.slots[1]->direction.X, 1.0e-6F);
+    EXPECT_GT(stepLights.slots[0]->diffuseColor.X, stepLights.slots[0]->diffuseColor.Z);
+    EXPECT_GT(stepLights.spillDiffuseColor.X, stepLights.spillDiffuseColor.Z);
+    EXPECT_GT(stepLights.spillDiffuseColor.Z, 0.0F);
+
     ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_PORCH_LANTERN"), false));
     const ObjectLightAssignment dark = house.lighting.DirectionalLightsForObject(porch, centre);
     EXPECT_FALSE(dark.slots[0].has_value());
     EXPECT_FALSE(dark.slots[1].has_value());
     EXPECT_FALSE(dark.slots[2].has_value());
     EXPECT_FALSE(house.lighting.CrossCellReceiverLightsForObject(foyer, doorCentre).slots[0].has_value());
+    const ObjectLightAssignment darkSteps = house.lighting.StaticDetailLightsForObject(walk, stepCentre);
+    EXPECT_FALSE(darkSteps.slots[0].has_value());
+    EXPECT_EQ(darkSteps.spillDiffuseColor, Microsoft::Xna::Framework::Vector3());
     EXPECT_FALSE(
         house.lighting.DirectionalLightsForObject(Id::Of("NO_SUCH_CELL"), centre).slots[0].has_value());
 }

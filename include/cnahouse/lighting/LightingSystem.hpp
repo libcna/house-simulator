@@ -103,6 +103,8 @@ namespace cnahouse::lighting
     struct ObjectLightAssignment
     {
         std::array<std::optional<ObjectDirectionalLight>, 3> slots;
+        /// @brief Foreign authored spill reaching a fixed receiver, before effect exposure/bounce.
+        Microsoft::Xna::Framework::Vector3 spillDiffuseColor{0.0F, 0.0F, 0.0F};
     };
 
     /// @brief §28.1's per-frame loop, at `UpdateStage::Lighting` (`HOUSE-01251`).
@@ -279,6 +281,15 @@ namespace cnahouse::lighting
         DirectionalLightsForObject(util::Id cell,
                                    const Microsoft::Xna::Framework::Vector3& objectCentre) const noexcept;
 
+        /// @brief Key/fill/bounce for fixed non-lightmapped detail in @p cell.
+        ///
+        /// This preserves the ordinary cell-local object contract above, but also admits sources
+        /// that explicitly name the cell in `spillCells`. It is the stock-BasicEffect companion
+        /// to a cross-cell fixed bake, not a general neighbour-light search.
+        [[nodiscard]] ObjectLightAssignment
+        StaticDetailLightsForObject(util::Id cell,
+                                    const Microsoft::Xna::Framework::Vector3& objectCentre) const noexcept;
+
         /// @brief Fixture approximation for detail on an explicitly baked foreign receiver.
         ///
         /// Only foreign groups already bound in the canonical cell lightmap data participate;
@@ -366,6 +377,10 @@ namespace cnahouse::lighting
         std::vector<CellGroups> cellGroups_;
         std::vector<ObjectFixture> objectFixtures_;
         std::vector<std::vector<std::size_t>> objectFixturesByCell_;
+        std::vector<std::vector<std::size_t>> staticDetailFixturesByCell_;
+        std::vector<float> staticDetailFixtureLumens_;
+        std::vector<std::vector<std::size_t>> staticDetailSpillFixturesByCell_;
+        std::vector<float> staticDetailSpillFixtureLumens_;
         std::vector<std::vector<std::size_t>> crossCellFixturesByCell_;
         std::vector<float> crossCellFixtureLumens_;
         std::vector<Microsoft::Xna::Framework::Vector3> dominantSurfaceColors_;

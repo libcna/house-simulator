@@ -660,7 +660,15 @@ namespace cnahouse::rendering
                     const lighting::ObjectLightAssignment objectLights =
                         exteriorDoor && !celestial
                             ? lighting_->CrossCellReceiverLightsForObject(cell->id, objectCentre)
-                            : lighting_->DirectionalLightsForObject(cell->id, objectCentre);
+                            : lighting_->StaticDetailLightsForObject(cell->id, objectCentre);
+                    if (!celestial)
+                    {
+                        const Vector3& spill = objectLights.spillDiffuseColor;
+                        draw.ambientLight = Vector3(
+                            std::min(1.0F, draw.ambientLight.X + exposure * kBasicFixtureAmbient * spill.X),
+                            std::min(1.0F, draw.ambientLight.Y + exposure * kBasicFixtureAmbient * spill.Y),
+                            std::min(1.0F, draw.ambientLight.Z + exposure * kBasicFixtureAmbient * spill.Z));
+                    }
                     if (exteriorDoor && !celestial)
                     {
                         // Wall-mounted sources graze a coplanar door, so their direct Lambert term

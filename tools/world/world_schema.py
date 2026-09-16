@@ -298,6 +298,9 @@ def build() -> dict[str, dict]:
          # for switching, exposure and dynamic-object assignment; this list only tells the
          # offline baker that a fixed neighbouring shell can see it.
          "bakeCells": {"type": "array", "items": ID, "uniqueItems": True},
+         # Optional adjacent unbaked static-detail receivers. Runtime uses the fixed source only
+         # for their stock-BasicEffect chunks; room state and dynamic objects remain cell-local.
+         "spillCells": {"type": "array", "items": ID, "uniqueItems": True},
          "coneInnerDeg": {"type": "number", "minimum": 0, "maximum": 180},
          "coneOuterDeg": {"type": "number", "minimum": 0, "maximum": 180},
          "fixtureProp": ID_OR_NULL, "emissiveMaterialSlot": {"anyOf": [STR, {"type": "null"}]},

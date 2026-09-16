@@ -3371,6 +3371,12 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > while ordinary foyer objects and merely adjacent rooms cannot acquire them. During daylight,
 > weather-facing door and window detail instead uses the outdoor sky/celestial term, matching the
 > facade rather than the owning room's indirect level.
+>
+> `HOUSE-01282` adds the corresponding explicit `spillCells` boundary for fixed unbaked detail.
+> Only the static `BasicEffect` path admits those range-bounded sources; cell light state,
+> exposure, switches and ordinary dynamic-object assignment remain local. The first use is the
+> `EXT_WALK` front stair receiving the adjacent porch lanterns without automatically enabling its
+> independently switched path-light group.
 
 ### 28.4 Daylight through windows
 

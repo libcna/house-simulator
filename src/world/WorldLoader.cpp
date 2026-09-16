@@ -2491,6 +2491,29 @@ namespace cnahouse::world
                            "layout.lights.json/" + row.Path() + "/coneInnerDeg");
             }
 
+            if (row.Has("spillCells") && !row.IsNull("spillCells"))
+            {
+                const Result<JsonValue> receivers = row.RequireArray("spillCells");
+                if (!receivers)
+                {
+                    return receivers.Error().WithContext("layout.lights.json");
+                }
+                const Result<std::vector<JsonValue>> entries = receivers.Value().Elements();
+                if (!entries)
+                {
+                    return entries.Error().WithContext("layout.lights.json");
+                }
+                for (const JsonValue& entry : entries.Value())
+                {
+                    const Result<std::string> spelling = entry.AsString();
+                    if (!spelling)
+                    {
+                        return spelling.Error().WithContext("layout.lights.json");
+                    }
+                    light.spillCells.push_back(util::Intern(spelling.Value()));
+                }
+            }
+
             const Result<util::Id> fixture = OptionalId(row, "fixtureProp");
             if (!fixture)
             {

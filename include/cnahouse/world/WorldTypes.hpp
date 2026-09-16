@@ -624,6 +624,8 @@ namespace cnahouse::world
         float range = 0.0F;
         float coneInnerDeg = 0.0F;
         float coneOuterDeg = 0.0F;
+        /// @brief Adjacent cells whose fixed unbaked static detail receives this source.
+        std::vector<util::Id> spillCells;
         util::Id fixtureProp;
         std::string emissiveMaterialSlot;
         bool castsBlobShadow = false;

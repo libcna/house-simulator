@@ -2073,6 +2073,7 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
       "bakeCells": ["L0_FOYER"],
+      "spillCells": ["EXT_WALK"],
       "fixtureProp": "PROP_L0_PORCH_LANTERN_1", "emissiveMaterialSlot": "LanternShade",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
       "duskSensor": true
@@ -2083,6 +2084,7 @@
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
       "bakeCells": ["L0_FOYER"],
+      "spillCells": ["EXT_WALK"],
       "fixtureProp": "PROP_L0_PORCH_LANTERN_2", "emissiveMaterialSlot": "LanternShade",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
       "duskSensor": true

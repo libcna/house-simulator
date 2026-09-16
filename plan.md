@@ -14417,6 +14417,34 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             non-save integration run had one unrelated timing-sensitive weather case fail once;
             its immediate isolated rerun passed. Full static/XNA gates are recorded in the
             checkpoint handoff.
+- [x] HOUSE-01282 — Let fixed lights name adjacent unbaked static-detail receivers and illuminate the canonical front steps
+      dep: HOUSE-00929, HOUSE-01261, HOUSE-01266, HOUSE-01281 · sys: lighting, content, rendering · plat: ALL · pri: MUST
+      accept: the two canonical porch fixtures remain owned, switched and dusk-controlled by
+              `L0_PORCH`, but explicitly name `EXT_WALK` as an unbaked static-detail receiver;
+              the front stair's stock-`BasicEffect` chunk receives their range-bounded warm
+              key/fill/bounce at night while ordinary `EXT_WALK` dynamic-object assignment and
+              all daylight output remain unchanged; schema/semantic tests reject unknown and
+              same-cell receivers; the fixed day/night approach is recaptured and inspected
+      note: (2026-09-16) **New task, next free phase-16 id.** Round 32 shows the finished entry
+            and its real emitters above a nearly black stair. The stair is correctly generated
+            once in its `fromCell`, `EXT_WALK`, and is unbaked Basic detail; the source fixtures
+            are correctly owned by adjacent `L0_PORCH`. Changing ownership, enabling the
+            player-switched path lights automatically or raising global night exposure would each
+            conceal that boundary rather than model it. Add one explicit runtime-only receiver
+            list beside `bakeCells` and consume it only for fixed static detail.
+      done: (2026-09-16) `spillCells` is now a schema-validated, runtime-only list on a canonical
+            light. Both 400 lm porch lanterns name `EXT_WALK`; only the fixed Basic-detail path
+            combines those range-bounded candidates and their restrained foreign bounce. The
+            stair remains owned by `EXT_WALK`, the path-light group remains independently off,
+            ordinary dynamic objects remain cell-local, and the existing source group still owns
+            switching, dusk control and transition envelopes. Unknown, self and emissive-only
+            receivers are rejected by both validation layers. At the fixed 22:00 approach the
+            stair crop changes 35.84% and rises from mean RGB(4.35,3.48,3.06) to
+            RGB(7.71,5.93,3.84); its tread/riser depth is now readable. The matching 10:30 world
+            crop is pixel-identical. All 1,407 unit, 134 integration and 48 software-render cases
+            pass without a golden update; the 18-pose culled/unculled maximum remains 0.1599%.
+            Full source/content/provenance and strict-XNA gates are recorded in the checkpoint
+            handoff.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -18143,6 +18171,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-01282` | **New task, next free phase-16 id.** Add an explicit `spillCells` list for fixed sources illuminating adjacent unbaked static detail, and use it first for the canonical porch lamps → `EXT_WALK` front stair. Keep dynamic-object, group-control and exposure ownership in the source/receiver cells unchanged. | Round 32 proves the stair is a single 72-triangle Basic chunk correctly owned by its `fromCell`, `EXT_WALK`, while the two dusk-controlled 400 lm sources are correctly owned by `L0_PORCH`. The only local `EXT_WALK` group is the deliberately player-switched, initially-off path lighting. Reassigning the stair, making path lights automatic or lifting global night exposure would falsify one of those authored facts. |
 | 2026-09-16 | `HOUSE-00932` | **New task, next free phase-12 id.** Finish only the existing canonical `D_ENTRY` leaf with generated, dimensioned panel relief, hardware and a threshold cap; reuse approved wood/metal maps and raise only its two measured owner-cell chunk ceilings. The first close in-game capture additionally split the relief into one darker sibling hardwood role. | Round 31 removes the balcony blockout mass and leaves the close entrance's single flat textured rectangle as the largest local defect. §19.4 already assigns doors/windows to a parametric generator plus hardware. Same-finish relief disappeared under the covered porch even at arm's length; a darker tint on the same approved board maps made the moulding readable without pretending it was paint. Narrow `MAT_EXTERIOR_DOOR_*` panel/hardware roles preserve the bounded exterior hierarchy instead of leaking general indoor wood/metal or creating a facade prop. |
 | 2026-09-16 | `HOUSE-00931` | **New task, next free phase-12 id.** Replace the general elevated-deck visual section from a solid 550 mm parapet plus isolated top rail to an open, measured balustrade while preserving the separate full-height collision guard. | Round 30 makes the old generator decision the largest visible facade defect: it masks the landing windows as one blank band, and its half-metre gap below the top rail is neither a convincing masonry parapet nor a complete balustrade. The collision representation is already deliberately conservative and layout-derived, so visual openings need not create fall-through gaps. |
 | 2026-09-16 | `HOUSE-00930` | **New task, next free phase-12 id.** Split only authored weather-facing entry leaves into a stable exterior-door role and bridge that role through the existing §25.6 hierarchy; do not make general room trim two-sided or externally resident. | Round 29's fixed pair shows the same front leaf present from the foyer and absent from the porch. The old `HOUSE-00486` assumption that both portal cells build a leaf fails when one is an exterior cell, because exterior cells intentionally generate no walls. A dedicated role keeps the interior cell as residency owner while preventing its skirting, cornice and other hardwood trim from leaking outdoors. |

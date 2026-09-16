@@ -1048,6 +1048,17 @@ def rule_6_references(world: World) -> list[Problem]:
                 problems.append(Problem(
                     6, FILE_OF["lights"], f"lights/{index}/bakeCells/{receiver_index}",
                     "a runtime-only light cannot name an offline baked receiver"))
+        for receiver_index, receiver in enumerate(light.get("spillCells", []) or []):
+            check("lights", index, f"spillCells/{receiver_index}", receiver, cells, "cell",
+                  have_cells)
+            if receiver == light.get("cell"):
+                problems.append(Problem(
+                    6, FILE_OF["lights"], f"lights/{index}/spillCells/{receiver_index}",
+                    "spillCells names only additional receivers; the owning cell is implicit"))
+            if light.get("type") == "emissive_only":
+                problems.append(Problem(
+                    6, FILE_OF["lights"], f"lights/{index}/spillCells/{receiver_index}",
+                    "an emissive-only source cannot illuminate a static-detail receiver"))
         fixture_prop = light.get("fixtureProp")
         check("lights", index, "fixtureProp", fixture_prop, set(props_by_id), "prop", have_props)
         fixture = props_by_id.get(fixture_prop)
@@ -2840,6 +2851,24 @@ def selftest() -> int:
         _, problems = validate(self_spill_dir, wanted=[6])
         require(any("owning cell is implicit" in x.message for x in problems),
                 f"a redundant same-cell bake receiver is caught "
+                f"({[str(x) for x in problems]})")
+
+        detail_spill = copy.deepcopy(base)
+        row(detail_spill, "lights", "LIGHT_HALL")["spillCells"] = ["L0_NOWHERE"]
+        detail_spill_dir = workspace / "unknown-detail-spill-receiver"
+        write_fixture(detail_spill_dir, detail_spill)
+        _, problems = validate(detail_spill_dir, wanted=[6])
+        require(any("spillCells/0" in x.path and "known cell" in x.message for x in problems),
+                f"a static-detail spill cannot name a receiver that does not exist "
+                f"({[str(x) for x in problems]})")
+
+        self_detail_spill = copy.deepcopy(base)
+        row(self_detail_spill, "lights", "LIGHT_HALL")["spillCells"] = ["L0_HALL"]
+        self_detail_spill_dir = workspace / "redundant-detail-spill-receiver"
+        write_fixture(self_detail_spill_dir, self_detail_spill)
+        _, problems = validate(self_detail_spill_dir, wanted=[6])
+        require(any("owning cell is implicit" in x.message for x in problems),
+                f"a redundant same-cell static-detail receiver is caught "
                 f"({[str(x) for x in problems]})")
 
         foreign_binding = copy.deepcopy(base)
