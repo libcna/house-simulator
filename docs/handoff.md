@@ -1,4 +1,69 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01040` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01041` checkpoint)
+
+Branch `develop`. This continuous visual sprint began at
+`238d6aed27c1e8662f0d118013ef08bb801ae018`; the preceding clean checkpoint was
+`c040f5fe2e7866a273c80308eac50e85fadd012e` (`HOUSE-01040`). This file is committed
+with the one-task `HOUSE-01041` change; verify the exact new HEAD/tree before another
+checkpoint. **VISUAL-GATE-1 still FAILS.** The playable family/kitchen route has production
+materials, primary kitchen built-ins and now useful family practical light, but the unchanged
+hall image still contains a large black refrigerator-interior silhouette, the kitchen lacks
+appliances/uppers, the family room is underdressed, and the front/night exterior is skeletal.
+
+Before: matching [Round 17 clear-day set](visual-review/captures/house-01040-clear-day-r4)
+and [family at night](visual-review/captures/house-01040-night-r4/family-composition.png).
+After: eleven-view [Round 18 clear](visual-review/captures/house-01041-clear-day-r1),
+[noon](visual-review/captures/house-01041-noon-r1),
+[overcast](visual-review/captures/house-01041-overcast-r1) and
+[22:00](visual-review/captures/house-01041-night-r1) sets, all at the same fixed cameras.
+Changed family, kitchen, hall and exterior route frames were actually inspected. The
+[new clear family composition](visual-review/captures/house-01041-clear-day-r1/family-composition.png)
+has a warm readable sofa rather than bluish near-blockout shading; its fixed pixel rises from
+RGB(48,56,71) to (77,62,52). The [night family composition](visual-review/captures/house-01041-night-r1/family-composition.png)
+gains useful practical depth (fixed sofa pixel 34 grey → 81/60/41), without hot discs. The
+[hall aperture](visual-review/captures/house-01041-clear-day-r1/central-hall.png) remains black.
+See [Round 18 visual review](visual-review/README.md) for ranked defects.
+
+Implementation: canonical `LG_L0_FAMILY_MAIN` is now a switchable default-on group of four
+3.02 m downward 140° spots at 3000 K/1000 lm, using only the approved Tier-S receiver bake.
+The independently switched TV media accent was no longer a ceiling-centred point: at the same
+100 lm/W selected broadband calibration it would have peaked at 7.4286; its wall-facing spot
+behind the authored TV peaks at 0.1161. Two existing kitchen east-row spots move toward its
+rear wall; the selected 128² atlas sample (112,68) changes 56/56/55 → 121/122/121.
+L0_FAMILY and L0_KITCHEN were deterministic selected-cell artificial/daylight bakes promoted
+together with durable reports, material provenance hashes and per-cell bindings. Other 76
+receiver products remain untouched. No new renderer, fixture family, external asset or CNA
+exception was added. A unit test protects family default-on, switch-off and light borrowing
+through the open kitchen portal. The subset-promotion provenance writer's stale hard-coded
+HOUSE-01038 label was made task-neutral so this checkpoint is not falsely attributed.
+
+Important corrected diagnosis: the initial green `MAT_DOOR_PAINTED` debug block and a
+partial wall-only ray query misidentified the hall defect. Explicit blockout uses a 55° lens;
+normal gameplay uses 70°. Full-chunk triangle picking of the actual hall pixel (900,450)
+hits `CELL_FRIDGE_INTERIOR`'s front at (0.897,2.28,-26.415), before the painted kitchen
+rear wall. That canonical nested refrigerator cell already has stable portal/thermal/collision
+data but no exterior refrigerator model. Its dark inside is plausible **inside** a shut fridge;
+as an exposed 1.8 × 1.95 × 0.7 m black mass in the hall sightline it is unfinished content.
+Do not increase ambient to mask it. Next highest visible work is a legally/provenantly valid
+measured refrigerator carcass/front aligned with the existing cell and its openable-door
+architecture, then inspect the unchanged hall camera. Exterior roof/porch/night and kitchen
+upper/range/hood/dressing remain major subsequent visible work.
+
+Verification: 31-stage content dry run is fresh after the two-cell promotion; selected source
+atlases/bindings were copied only into the existing build content directory. The changed unit
+test was compiled/linked with the exact pre-generated house Ninja commands and required
+shared ccache because BL-17 still blocks sibling CNA's MojoShader-series CMake regeneration.
+**24/24 lighting unit tests pass.** Exactly two changed first-person strict references (hall,
+kitchen) were paired, viewed and selectively updated; **48/48 direct software-render tests**
+pass after replacement, including culled-vs-unculled equivalence. The complete repository CI
+is green after deterministic budget-report regeneration, with 323 strict-XNA translation units;
+`git diff --check` was verified before commit. Do not claim a fresh full CMake/CTest while BL-17 remains.
+This repository did not edit CNA, FNA3D or another sibling. `CNA_CNAEXT=OFF` and strict
+XNA-only remain unchanged. The earlier 19-hour navigation PID is gone; this checkpoint's
+fresh graph navigation bake took 16.83 seconds, not a zombie.
+
+## Prior `HOUSE-01040` handoff
+
+Visual-sprint handoff — 2026-09-16 (`HOUSE-01040` checkpoint)
 
 Branch `develop`. The continuous sprint began at
 `238d6aed27c1e8662f0d118013ef08bb801ae018`; the preceding clean checkpoint was

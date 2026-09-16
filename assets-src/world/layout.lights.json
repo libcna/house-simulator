@@ -472,46 +472,46 @@
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 
-    // ---- LG_L0_FAMILY_MAIN x4
+    // ---- LG_L0_FAMILY_MAIN x4 -- selected living-space practicals, one switch
     {
       "id": "LIGHT_L0_FAMILY_MAIN_1", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
-      "type": "point", "position": [4.37, 3.28, -25.40],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 6.62,
+      "type": "spot", "position": [4.37, 3.02, -25.40],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "intensityLm": 1000.0, "range": 6.62,
       "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_FAMILY_MAIN_2", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
-      "type": "point", "position": [6.53, 3.28, -25.40],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 6.62,
+      "type": "spot", "position": [6.53, 3.02, -25.40],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "intensityLm": 1000.0, "range": 6.62,
       "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_FAMILY_MAIN_3", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
-      "type": "point", "position": [4.37, 3.28, -23.70],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 6.62,
+      "type": "spot", "position": [4.37, 3.02, -23.70],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "intensityLm": 1000.0, "range": 6.62,
       "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_FAMILY_MAIN_4", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
-      "type": "point", "position": [6.53, 3.28, -23.70],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 700.0, "range": 6.62,
+      "type": "spot", "position": [6.53, 3.02, -23.70],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "intensityLm": 1000.0, "range": 6.62,
       "fixtureProp": null, "emissiveMaterialSlot": null,
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L0_FAMILY_MEDIA x1 -- behind the television
     {
       "id": "LIGHT_L0_FAMILY_MEDIA_1", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MEDIA",
-      "type": "point", "position": [5.45, 3.20, -24.55],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 5.38,
+      "type": "spot", "position": [3.60, 2.05, -22.55],
+      "direction": [-1.0, 0.0, 0.0], "coneInnerDeg": 45.0, "coneOuterDeg": 110.0,
+      "colorK": 3000, "intensityLm": 400.0, "range": 3.50,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -713,7 +713,7 @@
     },
     {
       "id": "LIGHT_L0_KITCHEN_MAIN_2", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
-      "type": "spot", "position": [-1.27, 3.02, -25.73],
+      "type": "spot", "position": [0.10, 3.02, -26.05],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "intensityLm": 1000.0, "range": 8.42,
       "fixtureProp": null, "emissiveMaterialSlot": null,
@@ -729,7 +729,7 @@
     },
     {
       "id": "LIGHT_L0_KITCHEN_MAIN_4", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
-      "type": "spot", "position": [-1.27, 3.02, -24.37],
+      "type": "spot", "position": [0.10, 3.02, -24.37],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
       "colorK": 3000, "intensityLm": 1000.0, "range": 8.42,
       "fixtureProp": null, "emissiveMaterialSlot": null,

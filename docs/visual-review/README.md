@@ -13,6 +13,7 @@ mostly showed the neighboring family room and hid the kitchen's empty west side.
 `HOUSE-01040` places a real island across the old east/west kitchen-camera position, so both
 kitchen poses move to a measured 1.04 m east-side aisle and an eleventh fixed pose is added just
 beyond the hall opening, angled toward the island and sink run. The other eight poses are unchanged.
+`HOUSE-01041` retains all eleven poses and four conditions for an exact lighting comparison.
 
 ## Round 0 — visual-convergence baseline
 
@@ -704,3 +705,52 @@ production materials, never the colourful blockout reference.
 
 `VISUAL-GATE-1` still **FAILS**. This is a credible primary kitchen built-in checkpoint, not a
 completed or fully lit room.
+
+## Round 18 — useful family practicals; fridge silhouette diagnosed
+
+Commit: `HOUSE-01041` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: eleven-view [Round 17 clear](captures/house-01040-clear-day-r4) and
+[night](captures/house-01040-night-r4). After: matching eleven-view
+[clear](captures/house-01041-clear-day-r1),
+[noon](captures/house-01041-noon-r1),
+[overcast](captures/house-01041-overcast-r1) and
+[22:00](captures/house-01041-night-r1) normal-game sets; the same family, hall, kitchen and
+exterior frames were actually viewed at relevant conditions. No camera was moved. The
+[family composition at clear day](captures/house-01041-clear-day-r1/family-composition.png)
+and [22:00](captures/house-01041-night-r1/family-composition.png) now have useful warm light
+without ceiling fireflies or clipped windows. A fixed sofa pixel changes from RGB(48,56,71)
+to (77,62,52) at clear day, and from (34,34,34) to (81,60,41) at night; the room is still
+visually sparse, not final furnished quality.
+
+Ranked visible defects remaining:
+
+1. From the unchanged [central hall](captures/house-01041-clear-day-r1/central-hall.png), a
+   large almost-black appliance-shaped slab still masks the family/kitchen continuation.
+   Full-chunk triangle picking identifies its first front face as the canonical, externally
+   unfinished `CELL_FRIDGE_INTERIOR` door at (0.897,2.28,-26.415), not the newly authored
+   island or a wall needing ambient. The 55° explicit debug camera misled the first visual
+   inference against the normal game's 70° lens; the corrected diagnosis is recorded in plan.
+2. The clear front still has a thin/skeletal roof, balcony and porch; the night façade is
+   barely visible. It remains the player's first view.
+3. Kitchen upper/tall cabinetry, refrigerator exterior, range/hood and decor are missing;
+   the base run/island alone do not complete the room.
+4. Family room seating and art remain pale/blank, the leaf-card plant is too bright and the
+   room's new warm light does not replace needed material/decor work.
+
+Fixed: the existing family main four-light group now starts on as 3.02 m downward 140° warm
+spots using the selected Tier-S bake. The independently switched media accent moves from a
+ceiling-centred point (selected calibration peak 7.4286) behind the canonical TV as a
+wall-facing spot (peak 0.1161); the main group peak is 0.1977 at the same explicit 100 lm/W
+household-light calibration already selected for the kitchen. Two existing east kitchen
+downlights shift toward its rear painted receiver, changing that receiver's 128² atlas texel
+(112,68) from RGB(56,56,55) to (121,122,121), while the black fridge front does not move or
+brighten. Only L0_FAMILY/L0_KITCHEN selected atlas data, bindings and provenance are promoted;
+other 76 receivers retain their products. Exactly two affected strict first-person reference
+images were paired and viewed before selective replacement. Normal gameplay remains the
+production-material path; blockout colours occur only in explicit debug mode.
+
+`VISUAL-GATE-1` still **FAILS**. Next highest visible value: a believable measured exterior
+refrigerator carcass/front aligned with the existing nested fridge cell, with collision and
+material/provenance checks, then recapture the unchanged hall route. Do not boost global
+ambient to hide the missing appliance.

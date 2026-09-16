@@ -671,7 +671,7 @@
       "daylight": { "orientation": "S", "exposure": 0.52 },
       "lightGroups": ["LG_L0_FAMILY_MAIN", "LG_L0_FAMILY_MEDIA", "LG_L0_FAMILY_READING"],
       "lightmaps": {
-        "shellHash": "sha256:4cf846938d15a67e3bb7784a72ceb64a1cfbb73bc3e7698409261bcc05280d20",
+        "shellHash": "sha256:6a5d0f0599d73a4fac0c34a479ee5d024cd5afc4c1871a00dcd423b80b16a183",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_FAMILY_LM_DAY",
           "scale": 1.0000001192092896
@@ -680,17 +680,17 @@
           {
             "group": "LG_L0_FAMILY_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MAIN",
-            "scale": 6.417866230010986
+            "scale": 0.19770842790603638
           },
           {
             "group": "LG_L0_FAMILY_MEDIA",
             "contentName": "Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_MEDIA",
-            "scale": 1.0876368284225464
+            "scale": 0.11613651365041733
           },
           {
             "group": "LG_L0_FAMILY_READING",
             "contentName": "Textures/Lightmaps/Artificial/L0_FAMILY_LM_LG_L0_FAMILY_READING",
-            "scale": 0.02002936601638794
+            "scale": 0.13680057227611542
           }
         ]
       },
@@ -945,7 +945,7 @@
                        "LG_L0_KITCHEN_UNDERCAB",
                        "LG_L0_KITCHEN_SINK"],
       "lightmaps": {
-        "shellHash": "sha256:e6806d6c0115de0a4eaaf843288d29f23006f7c7915bb6d266a21cab1ad7f7a5",
+        "shellHash": "sha256:e0ae9c2799b2ccac09293cd1953609c99959246b8f640614f453c02c1ffa2427",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY",
           "scale": 1.0000001192092896
@@ -959,7 +959,7 @@
           {
             "group": "LG_L0_KITCHEN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_MAIN",
-            "scale": 0.14438781142234802
+            "scale": 0.16986533999443054
           },
           {
             "group": "LG_L0_KITCHEN_SINK",

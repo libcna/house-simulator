@@ -307,6 +307,48 @@ TEST(LightingSystemTests, KitchenMainDefaultsOnAndItsSwitchRemovesBorrowedHallLi
     EXPECT_LT(darkHall->borrowed, borrowedFromKitchen);
 }
 
+TEST(LightingSystemTests, FamilyMainDefaultsOnAndBorrowsThroughTheKitchenOpening)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    LightingSystem& lighting = house.lighting;
+    const Id familyMain = Id::Of("LG_L0_FAMILY_MAIN");
+    const SwitchGroupState* mainGroup = lighting.FindGroup(familyMain);
+    ASSERT_NE(mainGroup, nullptr);
+    ASSERT_TRUE(mainGroup->on) << "the connected family practical should start on";
+
+    // Leave only the permanent kitchen/family opening as a contributor at midnight.
+    ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_FOYER_MAIN"), false));
+    ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_HALL_MAIN"), false));
+    ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_KITCHEN_MAIN"), false));
+    cnahouse::environment::CivilTime midnight;
+    midnight.year = 2031;
+    midnight.month = 6;
+    midnight.day = 21;
+    midnight.hour = 0;
+    house.clock.SetStandard(midnight);
+    lighting.Update(Frame(5));
+    const RoomLightState* litFamily = lighting.FindCell(Id::Of("L0_FAMILY"));
+    const RoomLightState* adjacentKitchen = lighting.FindCell(Id::Of("L0_KITCHEN"));
+    ASSERT_NE(litFamily, nullptr);
+    ASSERT_NE(adjacentKitchen, nullptr);
+    ASSERT_GT(litFamily->artificial, 0.0F);
+    const float borrowedFromFamily = adjacentKitchen->borrowed;
+    EXPECT_GT(borrowedFromFamily, 0.0F);
+
+    ASSERT_TRUE(lighting.SetGroupOn(familyMain, false));
+    lighting.Update(Frame(6));
+    const RoomLightState* darkFamily = lighting.FindCell(Id::Of("L0_FAMILY"));
+    const RoomLightState* darkerKitchen = lighting.FindCell(Id::Of("L0_KITCHEN"));
+    ASSERT_NE(darkFamily, nullptr);
+    ASSERT_NE(darkerKitchen, nullptr);
+    EXPECT_FLOAT_EQ(darkFamily->artificial, 0.0F);
+    EXPECT_LT(darkerKitchen->borrowed, borrowedFromFamily);
+}
+
 TEST(LightingSystemTests, TurningOnEveryGroupInARoomLightsItExactlyFully)
 {
     if (!ContentIsBuilt())
