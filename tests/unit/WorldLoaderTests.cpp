@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 169U)
-            << "HOUSE-00933 adds the separate front-window shutter finish";
+        EXPECT_EQ(contents.materials.size(), 170U)
+            << "HOUSE-00934 adds an unbaked outdoor siding variant for the dormers";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3632,8 +3632,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_OUTDOOR_"); }),
-                  17)
-            << "HOUSE-00923's unbaked exterior has every canonical Basic material variant";
+                  18)
+            << "HOUSE-00934 adds the dormer siding to the canonical unbaked Basic variants";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3768,8 +3768,8 @@ namespace
                                            material.surfaceState == world::SurfaceState::Dry &&
                                            material.snow.coverable;
                                 }),
-                  37)
-            << "HOUSE-00933 adds one snow-coverable painted-shutter role to the previous 36";
+                  38)
+            << "HOUSE-00934 adds one snow-coverable outdoor siding role to the previous 37";
         const auto outdoorRoof = std::find_if(contents.materials.begin(),
                                               contents.materials.end(),
                                               [](const world::MaterialDef& material)

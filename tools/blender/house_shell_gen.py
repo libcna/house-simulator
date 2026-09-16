@@ -856,6 +856,18 @@ dormers_on = roof_geometry.dormers_on
 FASCIA_DEPTH = 0.20
 FASCIA_THICK = 0.035
 
+#: `HOUSE-00934`: a Colonial eave is not one thin fascia line. These two painted layers sit
+#: against the wall below the already settled fascia/soffit; they do not move the eaves edge or
+#: alter the roof planes. The dormer trim is equally restrained: 65 mm corner/header boards and
+#: 75 mm rakes, projected 30 mm in front of the sided vertical shell.
+EAVE_FRIEZE_HEIGHT = 0.28
+EAVE_FRIEZE_PROJECTION = 0.045
+EAVE_CROWN_HEIGHT = 0.10
+EAVE_CROWN_PROJECTION = 0.075
+DORMER_CORNER_TRIM = 0.065
+DORMER_RAKE_TRIM = 0.075
+DORMER_TRIM_PROJECTION = 0.030
+
 
 #: `HOUSE-00470`'s diagnostic colours remain useful when a material definition cannot be supplied
 #: by a small unit fixture. Production generation (`HOUSE-00907`) replaces every `BLOCKOUT_*`
@@ -865,6 +877,7 @@ SURFACE_COLOURS = {
     "ceiling":   (0.92, 0.92, 0.90, 1.0),
     "wall":      (0.80, 0.78, 0.74, 1.0),
     "exterior":  (0.72, 0.70, 0.64, 1.0),
+    "dormer_siding": (0.72, 0.70, 0.64, 1.0),
     "exterior_door": (0.55, 0.42, 0.30, 1.0),
     "exterior_door_panel": (0.44, 0.28, 0.17, 1.0),
     "exterior_door_hardware": (0.55, 0.34, 0.14, 1.0),
@@ -887,6 +900,7 @@ SHELL_MATERIALS = {
     "ceiling": "MAT_SOFFIT_WHITE",
     "wall": "MAT_SIDING_WARM_WHITE",
     "exterior": "MAT_SIDING_WARM_WHITE",
+    "dormer_siding": "MAT_SIDING_WARM_WHITE",
     "exterior_door": "MAT_EXTERIOR_DOOR_HARDWOOD",
     "exterior_door_panel": "MAT_EXTERIOR_DOOR_PANEL_HARDWOOD",
     "exterior_door_hardware": "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
@@ -2268,6 +2282,73 @@ def rafter_faces(outer: tuple, eaves_y: float, pitch: float):
     return faces
 
 
+def eave_finish_boxes(outer: tuple, eaves_y: float) -> list[tuple]:
+    """Eight painted boxes forming the frieze and crown below an existing fascia.
+
+    ``outer`` reaches the eaves edge. Moving back by the one canonical oversail finds the outer
+    wall face, so this finish follows both the main rectangle and the garage without knowing either
+    roof's name. The boxes overlap at their mitred-scale corners; they never alter the roof or the
+    collision envelope.
+    """
+    x0, x1, z0, z1 = outer
+    wall_x0, wall_x1 = x0 + EAVES_OVERHANG, x1 - EAVES_OVERHANG
+    wall_z0, wall_z1 = z0 + EAVES_OVERHANG, z1 - EAVES_OVERHANG
+    top = eaves_y - FASCIA_DEPTH
+    crown_bottom = top - EAVE_CROWN_HEIGHT
+    frieze_bottom = crown_bottom - EAVE_FRIEZE_HEIGHT
+
+    def ring(bottom, high, projection):
+        return [
+            (wall_x0, wall_x1, bottom, high,
+             wall_z0 - projection, wall_z0),
+            (wall_x0, wall_x1, bottom, high,
+             wall_z1, wall_z1 + projection),
+            (wall_x0 - projection, wall_x0, bottom, high,
+             wall_z0, wall_z1),
+            (wall_x1, wall_x1 + projection, bottom, high,
+             wall_z0, wall_z1),
+        ]
+
+    return ring(frieze_bottom, crown_bottom, EAVE_FRIEZE_PROJECTION) + \
+        ring(crown_bottom, top, EAVE_CROWN_PROJECTION)
+
+
+def dormer_finish_faces(rect_u: tuple, rect_v: tuple, plane_z: float, outer: tuple,
+                        eaves_y: float, pitch: float) -> list[tuple]:
+    """Painted front corner, header and rake boards for one wall dormer.
+
+    This is visual finish only. ``roof_geometry.dormer_shell`` remains the single source of the
+    opening, cheeks, roof and collision shape; deriving the same front metrics here merely places
+    five thin faces on that already-defined shell.
+    """
+    u0, u1 = rect_u[0] - DORMER_CHEEK, rect_u[1] + DORMER_CHEEK
+    head = rect_v[1] + DORMER_HEAD
+    middle = (u0 + u1) / 2.0
+    ridge_y = head + ((u1 - u0) / 2.0) * pitch
+    outward = 1.0 if abs(plane_z - outer[3]) < abs(plane_z - outer[2]) else -1.0
+    eaves_z = outer[3] if outward > 0.0 else outer[2]
+    foot = eaves_y + abs(eaves_z - plane_z) * pitch
+    front_z = plane_z + outward * DORMER_TRIM_PROJECTION
+    normal = (0.0, 0.0, outward)
+
+    return [
+        ([(u0, foot, front_z), (u0 + DORMER_CORNER_TRIM, foot, front_z),
+          (u0 + DORMER_CORNER_TRIM, head, front_z), (u0, head, front_z)], normal),
+        ([(u1 - DORMER_CORNER_TRIM, foot, front_z), (u1, foot, front_z),
+          (u1, head, front_z), (u1 - DORMER_CORNER_TRIM, head, front_z)], normal),
+        ([(u0 + DORMER_CORNER_TRIM, rect_v[1], front_z),
+          (u1 - DORMER_CORNER_TRIM, rect_v[1], front_z),
+          (u1 - DORMER_CORNER_TRIM, rect_v[1] + DORMER_CORNER_TRIM, front_z),
+          (u0 + DORMER_CORNER_TRIM, rect_v[1] + DORMER_CORNER_TRIM, front_z)], normal),
+        ([(u0, head, front_z), (u0 + DORMER_RAKE_TRIM, head, front_z),
+          (middle, ridge_y - DORMER_RAKE_TRIM, front_z),
+          (middle, ridge_y, front_z)], normal),
+        ([(middle, ridge_y, front_z),
+          (middle, ridge_y - DORMER_RAKE_TRIM, front_z),
+          (u1 - DORMER_RAKE_TRIM, head, front_z), (u1, head, front_z)], normal),
+    ]
+
+
 def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None,
                spouts=(), structure_by_cells: bool = False, material_definitions=None):
     """One roof object over @p box, with its fascia. @p box is the WALL CENTRE-LINE rectangle.
@@ -2292,15 +2373,33 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
         faces.append(tuple(range(base, base + len(points))))
         classes.append(klass)
 
+    def add_box(box_of, klass="trim") -> None:
+        bx0, bx1, by0, by1, bz0, bz1 = box_of
+        for value, outward in ((bx0, (-1.0, 0.0, 0.0)), (bx1, (1.0, 0.0, 0.0))):
+            add([(value, by0, bz0), (value, by1, bz0),
+                 (value, by1, bz1), (value, by0, bz1)], outward, klass)
+        for value, outward in ((by0, (0.0, -1.0, 0.0)), (by1, (0.0, 1.0, 0.0))):
+            add([(bx0, value, bz0), (bx1, value, bz0),
+                 (bx1, value, bz1), (bx0, value, bz1)], outward, klass)
+        for value, outward in ((bz0, (0.0, 0.0, -1.0)), (bz1, (0.0, 0.0, 1.0))):
+            add([(bx0, by0, value), (bx1, by0, value),
+                 (bx1, by1, value), (bx0, by1, value)], outward, klass)
+
     # The planes, with a hole in them where each dormer comes through (`HOUSE-00490`): leaving
     # them whole put a slope across the inside of every dormer window.
     for corners, outward in roof_planes(outer, eaves_y, pitch, dormers or ()):
         add(corners, outward, "roof")
 
-    # `HOUSE-00462`: the dormers, which belong to the roof they come through.
+    # `HOUSE-00462`: the dormers, which belong to the roof they come through. `HOUSE-00934`
+    # corrects the finish distinction the original shell omitted: only their sloping faces are
+    # shingles; the front and cheeks are little exterior walls. Their painted rake/corner/header
+    # joinery sits just in front of that shell and changes neither its hole nor its collision.
     for rect_u, rect_v, plane_z in dormers or ():
         for corners, face_outward in dormer_shell(rect_u, rect_v, plane_z, outer, eaves_y, pitch):
-            add(corners, face_outward, "roof")
+            add(corners, face_outward, "roof" if face_outward[1] > 0.0 else "dormer_siding")
+        for corners, face_outward in dormer_finish_faces(
+                rect_u, rect_v, plane_z, outer, eaves_y, pitch):
+            add(corners, face_outward, "trim")
 
 
     # The fascia: a board round the eaves edge, hanging below it, and the soffit closing the
@@ -2328,6 +2427,12 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
             [(x1 - reach, soffit_y, z0 + reach), (x1, soffit_y, z0 + reach),
              (x1, soffit_y, z1 - reach), (x1 - reach, soffit_y, z1 - reach)]):
         add(corners, (0.0, -1.0, 0.0), "trim")
+
+    # `HOUSE-00934`: the broad facade needs a real termination below the eaves, not a wider
+    # shingle cap. The frieze and crown follow the wall faces under every canonical hip roof; the
+    # existing fascia, soffit and gutter keep their original coordinates above and outside them.
+    for finish_box in eave_finish_boxes(outer, eaves_y):
+        add_box(finish_box, "trim")
 
     # `HOUSE-00463`: the rafters and the purlins, under the two long planes -- unless the cells
     # under this roof draw them themselves (`HOUSE-00488`). They are only ever seen from INSIDE
@@ -3210,7 +3315,8 @@ def selftest(output: Path) -> int:
     require(set(LIGHTMAP_RECEIVERS) == {"floor", "ceiling", "wall", "exterior"},
             f"the receivers are the room-scale classes, named once ({LIGHTMAP_RECEIVERS})")
     require(not (set(LIGHTMAP_RECEIVERS) & {"trim", "glass", "metal", "stair", "structure",
-                                            "roof", "window_frame", "window_shutter", "window_glass",
+                                            "roof", "dormer_siding", "window_frame",
+                                            "window_shutter", "window_glass",
                                             "exterior_door", "exterior_door_panel",
                                             "exterior_door_hardware"}),
             "and no detail class is one of them")
@@ -3383,6 +3489,25 @@ def selftest(output: Path) -> int:
     widths = {round(point[0], 4) for corners, _ in faces for point in corners}
     require(min(widths) < subject_dormer[0][0] and max(widths) > subject_dormer[0][1],
             "and its cheeks stand outside the window, not through it")
+    dormer_finish = dormer_finish_faces(
+        subject_dormer[0], subject_dormer[1], subject_dormer[2], outer, eaves_y,
+        float(construction["roofPitch"]))
+    require(len(dormer_finish) == 5,
+            f"HOUSE-00934 dresses one dormer with two corner boards, one header and two rakes "
+            f"({len(dormer_finish)})")
+    require(all(abs(point[2] - (subject_dormer[2]
+                                + dormer_out * DORMER_TRIM_PROJECTION)) < 1e-9
+                for corners, _ in dormer_finish for point in corners),
+            "and every painted dormer board projects from the existing front without moving its "
+            "roof hole or collision shell")
+
+    eave_boxes = eave_finish_boxes(outer, eaves_y)
+    require(len(eave_boxes) == 8,
+            f"the main eaves gain four frieze and four crown runs ({len(eave_boxes)})")
+    require(abs(min(box[2] for box in eave_boxes)
+                - (eaves_y - FASCIA_DEPTH - EAVE_CROWN_HEIGHT
+                   - EAVE_FRIEZE_HEIGHT)) < 1e-9,
+            "and their measured depth sits below, rather than moving, the settled fascia edge")
 
     reset_scene()
     plain_roof = build_roof("ROOF_PLAIN", main_box, construction)
@@ -3397,6 +3522,8 @@ def selftest(output: Path) -> int:
                 - len(roof_planes(outer, eaves_y, pitch_here))
                 + len(roof_planes(outer, eaves_y, pitch_here, dormer_list))
                 + sum(len(dormer_shell(one[0], one[1], one[2], outer, eaves_y, pitch_here))
+                      + len(dormer_finish_faces(
+                          one[0], one[1], one[2], outer, eaves_y, pitch_here))
                       for one in dormer_list))
     require(len(dormered.data.polygons) == expected,
             f"and the roof is its cut planes plus each dormer's own faces ({plain_roof_faces} -> "
@@ -3412,7 +3539,7 @@ def selftest(output: Path) -> int:
     # and NO downspouts,
     # since `HOUSE-00776`: they are `roof_geometry.house_downspouts`'s to place, because two of the
     # eight corners are under the other roof, and a roof built without that list has none.
-    bare = plain_roof_faces - (4 + 4 + 4 + 4 * 4 + 6)
+    bare = plain_roof_faces - (4 + 4 + 4 + 4 * 4 + 6 + len(eave_boxes) * 6)
     require(bare == expected_rafters + 2,
             f"a rafter every {RAFTER_SPACING * 1000:.0f} mm over the ridge's {ridge_run:.2f} m, "
             f"both slopes, and a purlin under each ({bare} against {expected_rafters + 2})")

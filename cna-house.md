@@ -977,6 +977,13 @@ reads the footprint, open sides and covering height from world data; it does not
 or invent a second shell. Existing trim/soffit materials, portal ownership and collision stay the
 single source of truth.
 
+The main and garage eaves use the same finish discipline (`HOUSE-00934`) without changing their
+settled roof planes: a 280 mm painted frieze and a 100 mm projecting crown sit below the existing
+200 mm fascia/soffit edge. The five wall dormers keep the holes, cheeks and gable roofs derived by
+`roof_geometry`; only their finish becomes architectural—approved upper siding on vertical faces,
+with 65–75 mm painted corner, header and rake trim. These finish layers are non-lightmapped detail
+and do not alter attic collision, drainage, ridge, pitch or eaves coordinates.
+
 Three above-grade storeys plus a habitable attic. This is what makes "several floors" believable
 rather than a stack of arbitrary levels: three-storey Colonials of this size were genuinely built,
 and the attic under a 7:12 roof over a 13.4 m span has real usable volume.

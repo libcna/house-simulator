@@ -13669,6 +13669,41 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
               provenance and strict-XNA gate passes with `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still
               FAILS: the broad flat facade, thin roof/eaves and named connected-room furnishing
               gaps remain conspicuous.
+- [x] HOUSE-00934 — Give the canonical roofline a layered Colonial cornice and properly finished wall dormers
+      dep: HOUSE-00461, HOUSE-00462, HOUSE-00468, HOUSE-00490, HOUSE-00907, HOUSE-00927, HOUSE-00933 · sys: world/content/exterior · plat: ALL · pri: MUST
+      note: (2026-09-16) Round 34 makes the front-window rhythm credible, leaving the main and
+            garage roofs as thin dark caps over uninterrupted siding. The five dormer shells also
+            assign their vertical faces the shingle role, so they read as grey boxes rather than
+            small sided walls with gable trim. Preserve §12.1's settled ridge, 7:12 pitch, hip
+            planes, dormer openings and collision envelope. Finish the existing geometry with a
+            measured frieze/crown below each eave, use the approved upper-siding role on vertical
+            dormer faces, and add restrained painted corner/header/rake trim in front of them.
+      accept: the identical fixed road/approach views show a materially deeper white roofline on
+              the main and garage masses and five recognizable sided, white-trimmed wall dormers;
+              the ridge, pitch, eaves edge, roof holes, window openings, attic collision and
+              rain/downspout geometry remain unchanged; trim is real spatial geometry rather than
+              a facade billboard, uses approved material sources and remains outside the lightmap
+              receiver set; the shell stays below §72 budgets; strict render/culling and full
+              XNA/content gates pass; before/after images are inspected and `VISUAL-GATE-1` is
+              judged honestly
+      result: (2026-09-16) The canonical main and garage eaves now carry a layout-derived 280 mm
+              painted frieze plus a 100 mm projecting crown below the unchanged fascia/soffit
+              edge. All five wall dormers retain their settled openings, cheeks and gable roofs,
+              but their vertical faces now use a dedicated stock-`BasicEffect` siding variant and
+              carry measured painted corner, header and rake trim. The finish remains non-
+              lightmapped spatial geometry; roof planes, ridge, 7:12 pitch, drainage and collision
+              did not move. The generated shell is 56,585 triangles; the deterministic world is
+              597 chunks / 252 exterior instances, and the established `EXT_ROAD` 17-chunk
+              exception is unchanged. All eleven Round 35 frames were opened. Against Round 34,
+              the main-eave crop changes 20.219% and the garage-eave crop 13.083%; both read as a
+              layered white cornice, while the formerly grey dormer boxes read as sided, outlined
+              gables. Seventeen actually changed strict references were inspected and selectively
+              advanced. All 1,407 unit and 134 serial integration tests pass; all strict software-
+              render references pass after that intentional advancement, and culled/unculled
+              remains below 0.2% at 0.1599% worst. Full content/provenance/strict-XNA gates pass
+              with `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still FAILS: the broad facade/garage masses,
+              empty straight living-room view, dining furnishing, kitchen practical clutter,
+              family-room finish depth and dark night facade remain conspicuous.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -18205,6 +18240,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-00934` | **New task, next free phase-12 id.** Finish the settled hip/dormer geometry with a measured layered eave cornice, correct vertical dormer faces from shingles to approved siding, and add painted dormer trim without moving the roof or its collision envelope. | Round 34's fixed road view makes the remaining defect explicit: the four-storey facade ends at one thin line, while the five existing dormers read as dark boxes because `build_roof` assigns all eight of each dormer's faces to the shingle role. The architecture already calls for Colonial Revival massing and five gabled dormers; finish roles and joinery are missing, not a new roof design. |
 | 2026-09-16 | `HOUSE-00933` | **New task, next free phase-12 id.** Complete only §12.1's already-required front-window vocabulary: canonical `W_DH_*` rows opt into 6-over-6 grilles and black louvered shutters, generated as exterior-window detail through the existing shell/content path. | Round 33's fixed clear-day front still reads as a broad undifferentiated siding box. The source architecture explicitly specifies both missing elements, but `HOUSE-00457` implemented only frames, sashes, glass and the double-hung meeting rail. Data-authored patterns avoid a front-cell heuristic, and a narrow exterior-window material role avoids exposing general indoor trim. |
 | 2026-09-16 | `HOUSE-01282` | **New task, next free phase-16 id.** Add an explicit `spillCells` list for fixed sources illuminating adjacent unbaked static detail, and use it first for the canonical porch lamps → `EXT_WALK` front stair. Keep dynamic-object, group-control and exposure ownership in the source/receiver cells unchanged. | Round 32 proves the stair is a single 72-triangle Basic chunk correctly owned by its `fromCell`, `EXT_WALK`, while the two dusk-controlled 400 lm sources are correctly owned by `L0_PORCH`. The only local `EXT_WALK` group is the deliberately player-switched, initially-off path lighting. Reassigning the stair, making path lights automatic or lifting global night exposure would falsify one of those authored facts. |
 | 2026-09-16 | `HOUSE-00932` | **New task, next free phase-12 id.** Finish only the existing canonical `D_ENTRY` leaf with generated, dimensioned panel relief, hardware and a threshold cap; reuse approved wood/metal maps and raise only its two measured owner-cell chunk ceilings. The first close in-game capture additionally split the relief into one darker sibling hardwood role. | Round 31 removes the balcony blockout mass and leaves the close entrance's single flat textured rectangle as the largest local defect. §19.4 already assigns doors/windows to a parametric generator plus hardware. Same-finish relief disappeared under the covered porch even at arm's length; a darker tint on the same approved board maps made the moulding readable without pretending it was paint. Narrow `MAT_EXTERIOR_DOOR_*` panel/hardware roles preserve the bounded exterior hierarchy instead of leaking general indoor wood/metal or creating a facade prop. |

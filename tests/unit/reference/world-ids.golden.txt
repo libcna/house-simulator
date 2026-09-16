@@ -939,6 +939,7 @@ materials/materials	MAT_OUTDOOR_MULCH
 materials/materials	MAT_OUTDOOR_ROAD_GRATE
 materials/materials	MAT_OUTDOOR_ROAD_MARKING
 materials/materials	MAT_OUTDOOR_ROOF
+materials/materials	MAT_OUTDOOR_SIDING
 materials/materials	MAT_OUTDOOR_SOFFIT
 materials/materials	MAT_OUTDOOR_SOIL
 materials/materials	MAT_PAINT_AGED_PLASTER

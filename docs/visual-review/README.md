@@ -1402,3 +1402,43 @@ advanced; unaffected references were retained. All 48 active software-render cas
 the blank garage wing and the named connected-room furnishing gaps. Do not turn the new grammar
 into a front-cell heuristic or spread shutters to elevations and opening types that do not author
 them.
+
+## Round 35 — layered cornice and finished dormers
+
+Commit: `HOUSE-00934` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 34's [front](captures/house-00933-front-windows-r1/exterior-front.png) ended both the
+main and garage siding planes at a thin dark roof edge, and its five wall dormers read as grey
+shingle boxes. After: the identical [front camera](captures/house-00934-roofline-r1/exterior-front.png)
+shows a continuous 280 mm white frieze and projecting 100 mm crown, with sided dormer fronts and
+painted corner/header/rake outlines. The complete
+[Round 35 set](captures/house-00934-roofline-r1) contains all eleven fixed clear-day route and
+composition cameras; every frame was opened and inspected.
+
+Ranked visible defects remaining:
+
+1. The broad siding planes still lack enough facade hierarchy and depth, especially across the
+   blank garage/right wing.
+2. The straight living-room view is almost empty despite the finished seating composition visible
+   from the alternate camera.
+3. Dining furnishing is missing; kitchen practical clutter and family-room finish depth remain
+   visibly behind the completed primary furniture.
+4. The night approach beyond the localized porch and step spill leaves most of the facade nearly
+   black.
+5. The dormers now read architecturally, but their small windows remain much simpler than the
+   finished front-elevation double-hung windows below.
+
+Fixed: the eave finish is generated from the settled canonical eave and wall faces, not a facade
+overlay. Its two spatial layers also finish the garage mass. Dormer roof faces remain shingles;
+only vertical faces switch to the approved wood-board siding source through a dedicated unbaked
+Basic variant, with measured painted trim in front. Roof planes, holes, ridge, drainage, collision
+and the lightmap receiver set are unchanged. The shell is 56,585 triangles and the world contains
+597 chunks / 252 exterior hierarchy instances.
+
+Seventeen strict references that actually see the finish were compared and intentionally
+advanced; unaffected references were retained. The 18-pose culled/unculled comparison remains
+under its unchanged 0.2% threshold at 0.1599% worst.
+
+`VISUAL-GATE-1` still **FAILS**. Highest visible value is now the broad flat garage/facade mass or
+the empty straight living-room composition; choose the shortest dependency-valid change with the
+largest improvement in the fixed captures rather than adding more invisible infrastructure.

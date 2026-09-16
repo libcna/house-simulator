@@ -2257,6 +2257,20 @@
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
     {
+      "id": "MAT_OUTDOOR_SIDING", "class": "wood",
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 0,
+      "tint": [1.0, 0.96, 0.88], "specularColor": [0.04, 0.04, 0.04],
+      "specularPower": 17.301, "alphaMode": "opaque",
+      "alpha": 1.0, "alphaCutoff": null,
+      "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": {"albedoDarken": 0.28, "specularBoost": 2.4, "powerBoost": 3.0},
+      "snowResponse": {"coverable": true, "slopeLimitDeg": 40.0},
+      "footstepSurface": "hardwood",
+      "audioAbsorption": 0.16,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
       "id": "MAT_OUTDOOR_SOFFIT", "class": "paint",
       "albedo": "Textures/Materials/paint_white_fine_albedo",
       "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,

@@ -1,4 +1,40 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-00933` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-00934` checkpoint)
+
+Branch `develop`. Task-start HEAD `f1301d2` (`HOUSE-00933`). This file belongs to the single
+`HOUSE-00934` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The unchanged canonical main and garage eaves now carry two real finish layers: a 280 mm painted
+frieze and a 100 mm projecting crown below the existing fascia/soffit edge. The five settled wall
+dormers keep their roof planes, holes and openings; their vertical fronts now use a dedicated
+unbaked stock-`BasicEffect` siding variant sourced from the approved wood-board maps, with 65–75 mm
+painted corner, header and rake trim. None of this changes the 7:12 pitch, ridge, eave coordinates,
+drainage, collision or lightmap receiver set.
+
+Before: Round 34's clear-day [front](visual-review/captures/house-00933-front-windows-r1/exterior-front.png)
+ends broad siding planes at thin dark roof edges and shows grey box-like dormers. After: the
+identical [front](visual-review/captures/house-00934-roofline-r1/exterior-front.png) has a continuous
+layered white cornice across the main and garage masses plus recognizably sided, outlined dormer
+gables. The main-eave crop changes 20.219% and the garage-eave crop 13.083%. The full
+[Round 35 set](visual-review/captures/house-00934-roofline-r1) contains all eleven fixed clear-day
+route/composition cameras and every frame was opened.
+
+The shell is 56,585 triangles, with `L1_LANDING` worst at 2,362/3,500. The deterministic world now
+contains 597 chunks and 252 exterior hierarchy instances; the established `EXT_ROAD` 17-chunk
+exception is unchanged. Seventeen actually changed strict references were inspected before
+selective advancement. All 1,407 unit tests and all 134 serial integration tests pass. The strict
+software-render suite passes after the intentional reference advancement, and the 18-pose
+culled/unculled comparison remains below its unchanged 0.2% threshold at 0.1599% worst. Schema,
+generator, world/content and repository gates pass with `CNA_CNAEXT=OFF`.
+
+Next highest visible value is the broad flat garage/right facade or the almost empty straight
+living-room camera. Dining furnishing, kitchen practical clutter, family finish depth and the dark
+night facade follow. Preserve the generator-derived eave/dormer finish and the narrow exterior
+material role; do not move settled roof geometry or make ordinary indoor wood externally resident.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-00933` checkpoint)
 
 Branch `develop`. Task-start HEAD `20716bd` (`HOUSE-01282`). This file belongs to the single
 `HOUSE-00933` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
