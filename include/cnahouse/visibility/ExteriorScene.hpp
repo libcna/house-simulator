@@ -34,7 +34,7 @@ namespace cnahouse::visibility
     /// whether it is DRAWN.
     struct ExteriorScene
     {
-        /// @brief One per exterior-space, house-outer-skin or weather-facing window chunk,
+        /// @brief One per exterior-space, house-outer-skin or weather-facing opening chunk,
         ///        in chunk order. `id` is
         ///        `chunk index + 1`, so it survives the reordering `ExteriorBvh::Build` does.
         std::vector<ExteriorInstance> instances;
@@ -70,7 +70,10 @@ namespace cnahouse::visibility
     /// @brief Stable weather-facing window roles split from room-owned indoor trim/glass.
     [[nodiscard]] bool IsExteriorWindowMaterial(std::string_view material) noexcept;
 
-    /// @brief Exterior-cell chunks plus house outer skin and outside-facing window detail,
+    /// @brief Stable weather-facing entry-leaf roles split from room-owned joinery.
+    [[nodiscard]] bool IsExteriorDoorMaterial(std::string_view material) noexcept;
+
+    /// @brief Exterior-cell chunks plus house outer skin and outside-facing opening detail,
     ///        with the hierarchy over them.
     ///
     /// @param library the chunks the content build produced.

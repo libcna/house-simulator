@@ -767,6 +767,7 @@ SURFACE_COLOURS = {
     "ceiling":   (0.92, 0.92, 0.90, 1.0),
     "wall":      (0.80, 0.78, 0.74, 1.0),
     "exterior":  (0.72, 0.70, 0.64, 1.0),
+    "exterior_door": (0.55, 0.42, 0.30, 1.0),
     "trim":      (0.96, 0.96, 0.94, 1.0),
     "glass":     (0.55, 0.72, 0.80, 0.35),
     "window_frame": (0.96, 0.94, 0.90, 1.0),
@@ -785,6 +786,7 @@ SHELL_MATERIALS = {
     "ceiling": "MAT_SOFFIT_WHITE",
     "wall": "MAT_SIDING_WARM_WHITE",
     "exterior": "MAT_SIDING_WARM_WHITE",
+    "exterior_door": "MAT_EXTERIOR_DOOR_HARDWOOD",
     "trim": "MAT_DOOR_PAINTED",
     "glass": "MAT_GLASS_CLEAR",
     "window_frame": "MAT_WINDOW_FRAME_WHITE",
@@ -821,6 +823,11 @@ ROOF_MATERIALS = dict(SHELL_MATERIALS,
 #: handrail
 #: face is a fifth of a texel across, so no atlas anyone can budget would light them from a bake.
 LIGHTMAP_RECEIVERS = ("floor", "ceiling", "wall", "exterior")
+
+
+def is_exterior_door_material(material_id) -> bool:
+    """Whether an authored leaf material is the isolated weather-facing door role."""
+    return isinstance(material_id, str) and material_id.startswith("MAT_EXTERIOR_DOOR_")
 
 
 def planar_uvs(mesh) -> None:
@@ -893,6 +900,20 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
             "MAT_GLASS_CLEAR": "MAT_WINDOW_GLASS_CLEAR",
             "MAT_GLASS_OBSCURED": "MAT_WINDOW_GLASS_OBSCURED",
         }.get(source_glass, source_glass)
+
+    exterior_doors = {
+        row.get("material")
+        for row in openings
+        if row.get("kind") == "door"
+        and cell.get("id") in portal_cells.get(row.get("portal"), ())
+        and is_exterior_door_material(row.get("material"))
+    }
+    if len(exterior_doors) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated exterior doors are one surface class but name "
+            f"multiple materials: {', '.join(sorted(exterior_doors))}")
+    if exterior_doors:
+        result["exterior_door"] = next(iter(exterior_doors))
 
     stair_surfaces = {
         row.get("surface") for row in flights if row.get("fromCell") == cell.get("id")
@@ -1550,8 +1571,16 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                     # architrave round it, the sash beside it and the skirting under it, and §18.3
                     # keeps all four out of the bake for the same reason. §11's material table
                     # separates them when it arrives.
+                    portal_pair = portal_cells.get(hole[4], ())
+                    weather_facing = any(
+                        (cells_by_id.get(adjacent) or {}).get("kind") == "exterior"
+                        for adjacent in portal_pair)
+                    leaf_class = ("exterior_door"
+                                  if weather_facing
+                                  and is_exterior_door_material(opening.get("material"))
+                                  else "trim")
                     leaf_box(lu0, lu1, lv0, lv1,
-                             middle - thickness / 2.0, middle + thickness / 2.0, "trim")
+                             middle - thickness / 2.0, middle + thickness / 2.0, leaf_class)
                     # The lining: the reveal's full depth, filling what the leaf does not.
                     leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "trim")
                     leaf_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
@@ -2832,6 +2861,20 @@ def selftest(output: Path) -> int:
             and assigned["window_glass"] == "MAT_WINDOW_GLASS_CLEAR"
             and assigned["exterior"] == "MAT_SIDING_WARM_WHITE",
             "and the opening schedule supplies both indoor and weather-facing glass")
+
+    foyer = cells["L0_FOYER"]
+    foyer_extent = extent_of(foyer, levels[foyer["level"]])[0]
+    entry = build_cell(foyer, foyer_extent, neighbours=neighbours,
+                       construction=construction, level=levels[foyer["level"]], levels=levels,
+                       portals=all_portals, openings=openings_by_portal, cells_by_id=cells)
+    entry_classes = [SURFACE_ORDER[polygon.material_index] for polygon in entry.data.polygons]
+    require(entry_classes.count("exterior_door") == 6,
+            f"the weather-facing D_ENTRY leaf is one closed six-face box in its own role "
+            f"({entry_classes.count('exterior_door')})")
+    entry_materials = cell_surface_materials(foyer, openings_by_portal.values(), all_portals,
+                                             cells_by_id=cells)
+    require(entry_materials["exterior_door"] == "MAT_EXTERIOR_DOOR_HARDWOOD",
+            f"and the opening row supplies that role's material ({entry_materials['exterior_door']})")
     document, _error = gltf_validate.read_gltf_json(output / "L0_KITCHEN.glb")
     require(len(document.get("materials", [])) >= 6,
             f"the exported file carries them ({len(document.get('materials', []))})")
@@ -2867,7 +2910,8 @@ def selftest(output: Path) -> int:
     require(set(LIGHTMAP_RECEIVERS) == {"floor", "ceiling", "wall", "exterior"},
             f"the receivers are the room-scale classes, named once ({LIGHTMAP_RECEIVERS})")
     require(not (set(LIGHTMAP_RECEIVERS) & {"trim", "glass", "metal", "stair", "structure",
-                                            "roof", "window_frame", "window_glass"}),
+                                            "roof", "window_frame", "window_glass",
+                                            "exterior_door"}),
             "and no detail class is one of them")
     receiver_indices = {SURFACE_ORDER.index(name) for name in LIGHTMAP_RECEIVERS}
     loose = 0

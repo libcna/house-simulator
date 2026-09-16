@@ -3617,8 +3617,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 165U)
-            << "HOUSE-01259 adds the physical porch fixture's bronze and emissive finishes";
+        EXPECT_EQ(contents.materials.size(), 166U)
+            << "HOUSE-00930 adds the isolated weather-facing entry-leaf finish";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3683,6 +3683,17 @@ namespace
         EXPECT_EQ(frameAt->albedo, "Textures/Materials/paint_white_fine_albedo");
         EXPECT_EQ(frameAt->lightmapChannel, 0);
         EXPECT_EQ(frameAt->effectTierS, world::EffectTier::Basic);
+
+        const auto exteriorDoorAt =
+            std::find_if(contents.materials.begin(),
+                         contents.materials.end(),
+                         [](const world::MaterialDef& material)
+                         { return material.id == Intern("MAT_EXTERIOR_DOOR_HARDWOOD"); });
+        ASSERT_NE(exteriorDoorAt, contents.materials.end());
+        EXPECT_EQ(exteriorDoorAt->materialClass, world::MaterialClass::Wood);
+        EXPECT_EQ(exteriorDoorAt->albedo, "Textures/Materials/wood_oak_floor_albedo");
+        EXPECT_EQ(exteriorDoorAt->lightmapChannel, 0);
+        EXPECT_EQ(exteriorDoorAt->effectTierS, world::EffectTier::Basic);
 
         const auto windowGlassAt = std::find_if(contents.materials.begin(),
                                                 contents.materials.end(),

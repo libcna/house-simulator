@@ -566,7 +566,7 @@
       "leaf": { "width": 0.960, "height": 2.100, "thickness": 0.055 },
       "hinge": "left", "swing": "L0_FOYER", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.090 },
-      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "asset": null, "material": "MAT_EXTERIOR_DOOR_HARDWOOD",
       "solid": true, "lockable": true
     },
     {
@@ -575,7 +575,7 @@
       "leaf": { "width": 0.960, "height": 2.100, "thickness": 0.055 },
       "hinge": "left", "swing": "L1_LANDING", "maxAngleDeg": 95.0,
       "frame": { "asset": null, "casing": 0.090 },
-      "asset": null, "material": "MAT_DOOR_HARDWOOD",
+      "asset": null, "material": "MAT_EXTERIOR_DOOR_HARDWOOD",
       "solid": true, "lockable": true
     },
 

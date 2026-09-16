@@ -1945,6 +1945,12 @@ from seven to exactly nine; the six-chunk target, Reach per-draw limit and culli
 do not change. The two extra groups are visible close-range carved wood and upholstered
 fabric, not permission to fragment other rooms.
 
+`HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
+joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.
+The measured result is one additional Basic-effect chunk in each affected owner: `L0_FOYER` is
+exactly **ten** and `L1_LANDING` exactly **eight**. The ordinary six-chunk target remains; both
+cell-specific ceilings name this one role and retain the over-ceiling/stale-entry gates.
+
 §71's frame budget is what may tighten or restructure these later; a measurement is what should
 move them, not an assertion in either direction.
 * **The outdoors is chunked too, since `HOUSE-00780`.** The terrain tiles, road segments, fences,
@@ -1960,9 +1966,12 @@ move them, not an assertion in either direction.
   That skin keeps the adjacent room as its residency key, but its siding and brick water-table
   chunks also enter §25.6's exterior hierarchy: a closed portal must not make the façade disappear
   from the yard (`HOUSE-00921`). `HOUSE-00926` gives weather-facing window frames/sashes and
-  glazing distinct material/chunk roles in the same hierarchy. Ordinary indoor skirting, door
-  trim, borrowed-light glass and interior walls remain exclusively on the room/portal path; adding
-  those whole chunks to the outdoors would leak interior geometry through closed rooms.
+  glazing distinct material/chunk roles in the same hierarchy. `HOUSE-00930` does the same only
+  for explicitly authored `MAT_EXTERIOR_DOOR_*` entry leaves: an exterior cell intentionally
+  generates no wall/leaf copy, while the remaining room-owned copy would otherwise disappear
+  behind its closed portal. Ordinary indoor skirting, door trim, borrowed-light glass and interior
+  walls remain exclusively on the room/portal path; adding those whole chunks to the outdoors
+  would leak interior geometry through closed rooms.
   `HOUSE-00928` keeps the elevated balcony's **solid guard** in the existing painted-trim role
   and its separate narrow rail in the approved brushed-metal role. Both remain owned by their
   exterior balcony cell; this is a material-role correction, not an added indoor BVH admission or
@@ -3064,6 +3073,11 @@ records the measurement and the feature is dropped.
    behind the far plane, and both of those are already answered.
 3. **LOD** (§26).
 4. **The house shell itself is an occluder** only in the optional experiment of §25.5.
+
+House siding/water-table, weather-facing window detail and explicitly authored exterior entry
+leaves participate as bounded instances even though their canonical residency owner remains an
+interior cell (`HOUSE-00921`, `HOUSE-00926`, `HOUSE-00930`). This is a visibility bridge, not a
+second copy of the mesh; the render list de-duplicates a chunk reached by both routes.
 
 ### 25.7 Indoor ⇄ outdoor transition
 

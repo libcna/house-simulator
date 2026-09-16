@@ -13532,6 +13532,38 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 exterior-facing front-door leaf is absent from the approach, the balcony parapet/
                 facade/roof remain plain, the night steps are dark, and the connected interior
                 still needs furnishing depth.
+- [x] HOUSE-00930 — Make the canonical entry-door exterior face visible through the exterior scene
+      dep: HOUSE-00486, HOUSE-00921, HOUSE-00926, HOUSE-00927, HOUSE-00929 · sys: world/content/rendering · plat: ALL · pri: MUST
+      note: (2026-09-16) Round 29 proves the closed hardwood leaf exists from the foyer but the
+            identical fixed exterior approach sees through its opening. `house_shell_gen.py`
+            builds door leaves while walking a cell's wall runs and assumes both portal cells
+            contribute their own half-reveal copy. Exterior cells deliberately have no walls, so
+            `L0_PORCH` contributes none; the only leaf remains in the closed `L0_FOYER` chunk and
+            its reverse face is correctly back-face culled. Give weather-facing entry leaves a
+            distinct canonical material/surface role and admit only that role through the same
+            bounded exterior hierarchy already used by siding and windows. Do not expose ordinary
+            room trim, disable back-face culling or special-case a camera/room id.
+      accept: the exact fixed day and night approach cameras show an opaque, correctly oriented,
+              hardwood front leaf while the fixed foyer view retains its interior face; the front
+              and upper-balcony `D_ENTRY` rows drive the shared role without hard-coded cell ids;
+              ordinary interior doors/skirting stay portal-owned; material provenance, stock-XNA
+              effects, exterior BVH/culling equivalence, collision/portal ids and entry clearance
+              remain valid; affected strict references are inspected selectively; full relevant
+              tests and visual review pass; `VISUAL-GATE-1` is judged honestly
+      result: (2026-09-16) The two `D_ENTRY` rows select `MAT_EXTERIOR_DOOR_HARDWOOD`, an exact
+              approved-map/tint sibling of the existing interior hardwood finish. The shell
+              generator derives an `exterior_door` surface only when that role meets an explicit
+              exterior portal; its owning room keeps one closed six-face leaf, while §25.6 admits
+              only that stable role to the exterior hierarchy. Ordinary interior leaves, trim and
+              skirting retain their old residency. The canonical build has 579 chunks and 234
+              exterior instances, exactly two more of each than Round 29. Fixed day/night approach
+              captures show the opaque textured leaf and the reverse foyer capture remains lit.
+              All ten changed strict references were compared and intentionally advanced. Shell
+              self-test/content generation, all 1,407 unit tests, all 134 integration tests and the
+              focused 18-test render/culling suite pass; full source/content/provenance/strict-XNA
+              checks pass with `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still FAILS: the broad solid upper
+              balcony/front facade, slab-like door geometry, dark night steps and interior dressing
+              gaps remain the largest visible defects.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -18040,6 +18072,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-00930` | **New task, next free phase-12 id.** Split only authored weather-facing entry leaves into a stable exterior-door role and bridge that role through the existing §25.6 hierarchy; do not make general room trim two-sided or externally resident. | Round 29's fixed pair shows the same front leaf present from the foyer and absent from the porch. The old `HOUSE-00486` assumption that both portal cells build a leaf fails when one is an exterior cell, because exterior cells intentionally generate no walls. A dedicated role keeps the interior cell as residency owner while preventing its skirting, cornice and other hardwood trim from leaking outdoors. |
 | 2026-09-16 | `HOUSE-00929` | **New task, next free phase-12 id.** Finish the existing data-driven covered-porch grammar with measured column dressings, soffit and roof-edge layers rather than masking the defect with a façade prop or renderer exception. | Round 28's fixed daylight approach shows that the dominant remaining exterior shape is the generator's bare 200 mm post-and-beam cage beneath an unfinished 300 mm balcony-floor zone. The general `covered_by` rule already derives the porch from stacked canonical cells, so it can produce the missing architectural finish without hard-coding a room id or changing the footprint, portal graph, collision model or material architecture. |
 | 2026-09-16 | `HOUSE-01281` | **New task, next free phase-16 id.** Permit a fixed light to name additional fixed bake receivers without changing its canonical owning cell, and admit only those foreign bindings to an outside-facing skin. | Round 26 shows both real porch emitters live while their adjacent foyer-owned facade remains black. `L0_PORCH` is intentionally unbaked exterior geometry; moving the facade out of `L0_FOYER`, adding the porch group to the foyer's runtime control index, or enlarging the glow quad would each violate an existing architecture boundary. A measured bake also exposed the two old canonical point positions 10 cm behind the facade; the physical emissive sub-range places their centres at z -14.073, which now drives the bake, glow and later dynamic approximation consistently. |
 | 2026-09-16 | `HOUSE-00772` | Correct the task title's vegetation census from 9 property trees / 40 shrubs to **3 property trees / 60 shrubs**, without renumbering or adding placements. Route the already selected CC0 source models and their exact/fallback material roles through the existing static chunk, exterior BVH and collision paths. Add only the four exterior-cell chunk ceilings measured by the result. | §11.1 and the authoritative exterior file have always contained two mature role trees plus one small-tree role and sixty shrubs; the title was stale. The first real build measures 309 placements, 44 AlphaTest batches, 8 vertex-cap and 17 Reach-cap splits. `EXT_FRONTYARD_E`, `EXT_ROAD`, `EXT_SIDEYARD_W` and `EXT_WORLD` are landscape/residency regions rather than rooms; their exact source-material groups cannot be merged without erasing bark/leaf/flower/grass identity. A first screenshot iteration let mature crowns obscure the entrance, so the final positions/scales were selected from the unchanged front camera before completion. |

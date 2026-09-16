@@ -1,41 +1,39 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-00929` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-00930` checkpoint)
 
-Branch `develop`. Task-start HEAD `1d756b4` (`HOUSE-01262`). This file belongs to the single
-`HOUSE-00929` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+Branch `develop`. Task-start HEAD `d2f0ea0` (`HOUSE-00929`). This file belongs to the single
+`HOUSE-00930` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
 gameplay remains production-material only and explicit blockout mode is unchanged.
 
-The canonical covered-exterior rule now finishes the front porch without naming it: a stacked
-cell with the same footprint supplies its actual covering-floor height, so the +3.35 porch head
-gets one downward-facing soffit and beam/fascia/cornice layers close the exact 300 mm zone to the
-+3.65 balcony floor. Four columns now have 400 mm bases/capitals around proportioned 260 mm shafts.
-The existing approved painted-trim and soffit materials remain separate. World footprint, portal
-ownership, entry and step clearances, collision architecture and the strict-XNA renderer are
-unchanged.
+The canonical front and upper-balcony entry rows now choose a distinct weather-facing hardwood
+role. The shell generator derives it only across an explicit exterior portal and leaves the single
+closed six-face leaf in its owning interior cell; the existing bounded §25.6 hierarchy additionally
+admits only that stable role. This closes the exterior view without making general room trim
+externally resident, disabling back-face culling or naming a camera/cell in runtime code. The
+approved wood map/tint is unchanged, and collision, portal ownership, entry clearance and strict-XNA
+rendering remain intact. The world now has 579 chunks and 234 exterior instances: exactly the two
+entry leaves added to Round 29's census.
 
-Before: Round 28's exact [day approach](visual-review/captures/house-01262-point-light-r1/exterior-approach-day-check.png)
-and [close night entrance](visual-review/captures/house-01262-point-light-r1/exterior-approach-close.png).
-After: the matching [day](visual-review/captures/house-00929-porch-r1/exterior-approach-day.png),
-[night](visual-review/captures/house-00929-porch-r1/exterior-approach-night.png) and full
-[Round 29 set](visual-review/captures/house-00929-porch-r1). All thirteen final frames and all
-thirteen changed strict-reference pairs were inspected. At a greater-than-two-channel threshold,
-the day porch/columns/roof-edge change 19.942/18.954/30.207%; night changes
-20.491/18.001/31.854%. The entrance now reads as a grounded covered porch instead of a bare
-rectangular frame. `L0_PORCH` measures 9/9 chunks; the world has 577 chunks and 232 exterior BVH
-instances.
+Before: Round 29's matching [day](visual-review/captures/house-00929-porch-r1/exterior-approach-day.png)
+and [night](visual-review/captures/house-00929-porch-r1/exterior-approach-night.png) approaches look
+through the nominally closed doorway. After: the identical [day](visual-review/captures/house-00930-entry-door-r1/exterior-approach-day.png)
+and [night](visual-review/captures/house-00930-entry-door-r1/exterior-approach-night.png) views show
+an opaque textured leaf, while the fixed [foyer reverse](visual-review/captures/house-00930-entry-door-r1/foyer-facing-front.png)
+remains properly lit. The full [Round 30 set](visual-review/captures/house-00930-entry-door-r1)
+contains the eleven clear-day review cameras plus this fixed exterior pair. All frames were opened;
+all ten changed strict-reference pairs were inspected and intentionally advanced.
 
-Shell generation and verification pass with 41,619 triangles, 41,360 faces, no degenerates and no
-wrong-wound faces. Collision self-test, deterministic content build, 24 focused round trips, all
-1,406 unit tests, all 135 isolated integration registrations and the 18-test live render/culling
-set pass; the latter retains 0.1599% maximum culled/unculled error. The sandbox integration run
-uses dummy audio and a writable temporary `XDG_DATA_HOME`. `tools/ci/run_checks.sh` passes every
-source/content/provenance gate and all 323 strict-XNA translation units with `CNA_CNAEXT=OFF`.
+Shell self-test and deterministic world content generation pass. All 1,407 unit tests, all 134
+integration tests and the focused 18-test live render/culling set pass. The integration suite uses
+dummy audio and a writable temporary `XDG_DATA_HOME`; one timing-sensitive weather case failed in
+the first long run and passed both its isolated retry and the rebuilt complete suite. Project checks
+pass source/content/provenance gates and the strict-XNA build with `CNA_CNAEXT=OFF`.
 
-Next highest visible value: the front-door leaf is clearly present from inside but absent from the
-exterior approach, leaving a see-through opening. Determine whether the exterior face is wound,
-owned or culled incorrectly and fix that canonical path without a camera-specific exception.
-Then replace/refine the broad blank balcony parapet and deepen the road-view facade/roof; after the
-entry composition holds, return to kitchen practical clutter, family-room material depth and dining
-furnishing. Do not conceal these defects with global exposure or a facade billboard.
+Next highest visible value: replace/refine the broad solid upper-balcony parapet and deepen the
+front-facade silhouette. It now dominates the fixed approach as a simplified blockout mass. The
+entry leaf then needs panel relief and restrained hardware; the night steps/facade need a principled
+receiver treatment. Interior priority remains kitchen practical clutter, family finish depth and
+dining furnishing. Do not hide these defects with global exposure, a facade billboard or a
+two-sided-material exception.
 
 ---
 

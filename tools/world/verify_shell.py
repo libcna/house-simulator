@@ -51,6 +51,9 @@ RISE_TOLERANCE = 0.002
 HEADROOM_MIN = 2.00
 #: How close a measured face has to be to an authored plane to be that face, in metres.
 EPS = 1e-4
+#: Door slabs are ordinary interior joinery except for the weather-facing role added by
+#: `HOUSE-00930`. Both classes must satisfy the same geometric doorway-fill claim.
+DOOR_LEAF_SURFACE_CLASSES = ("trim", "exterior_door")
 
 
 def load_shell(directory: Path) -> dict:
@@ -395,28 +398,35 @@ def opening_rows(shell: dict, layout: dict) -> list[dict]:
                         break
         # `HOUSE-00486`: and the LEAF, which is the opposite question. `blocked` asks whether the
         # wall was cut; this asks whether what was cut was then filled with a door. A leaf is
-        # `trim` -- a door is joinery, like the architrave round it -- and it is the only trim
-        # face across the middle of a door opening: the architrave is round the hole, the
-        # threshold is under it, and neither crosses it.
+        # An interior leaf is `trim` -- a door is joinery, like the architrave round it. A
+        # weather-facing leaf has the stable `exterior_door` role needed by the exterior BVH.
+        # Those are the only two surface classes allowed to satisfy this claim; their leaf face
+        # crosses the middle of the opening while architraves and thresholds do not.
         leafed = []
         for cell_id in (portal.get("cellA"), portal.get("cellB")):
-            mesh = (shell.get(cell_id) or {}).get("trim")
-            if mesh is None:
-                continue
-            for a, b, c in mesh["triangles"]:
-                points = [mesh["positions"][a], mesh["positions"][b], mesh["positions"][c]]
-                if min(abs(p[axis] - value) for p in points) > 0.35:
+            surfaces = shell.get(cell_id) or {}
+            found_leaf = False
+            for name in DOOR_LEAF_SURFACE_CLASSES:
+                mesh = surfaces.get(name)
+                if mesh is None:
                     continue
-                lo_u = min(p[cross] for p in points)
-                hi_u = max(p[cross] for p in points)
-                lo_v = min(p[1] for p in points)
-                hi_v = max(p[1] for p in points)
-                mid_u = (u0 + u1) / 2
-                # Two thirds up the opening: clear of the threshold under it and of the head
-                # above, so only a face that crosses the doorway itself can be here.
-                mid_v = v0 + (v1 - v0) * 2.0 / 3.0
-                if lo_u < mid_u < hi_u and lo_v < mid_v < hi_v:
-                    leafed.append(cell_id)
+                for a, b, c in mesh["triangles"]:
+                    points = [mesh["positions"][a], mesh["positions"][b], mesh["positions"][c]]
+                    if min(abs(p[axis] - value) for p in points) > 0.35:
+                        continue
+                    lo_u = min(p[cross] for p in points)
+                    hi_u = max(p[cross] for p in points)
+                    lo_v = min(p[1] for p in points)
+                    hi_v = max(p[1] for p in points)
+                    mid_u = (u0 + u1) / 2
+                    # Two thirds up the opening: clear of the threshold under it and of the head
+                    # above, so only a face that crosses the doorway itself can be here.
+                    mid_v = v0 + (v1 - v0) * 2.0 / 3.0
+                    if lo_u < mid_u < hi_u and lo_v < mid_v < hi_v:
+                        leafed.append(cell_id)
+                        found_leaf = True
+                        break
+                if found_leaf:
                     break
         # Which of the two cells could POSSIBLY build a leaf: one that draws walls. A landing
         # open on every side has a floor and a ceiling and nothing else, and an opening in a
@@ -851,6 +861,11 @@ def selftest() -> int:
     require(not leafless,
             f"every one of the {len(fillable)} door openings in a wall has a leaf in it "
             f"({leafless[:4] if leafless else 'none missing'})")
+    exterior_leaf_cells = sorted(cell_id for cell_id, surfaces in shell.items()
+                                 if "exterior_door" in surfaces)
+    require(exterior_leaf_cells == ["L0_FOYER", "L1_LANDING"],
+            f"and HOUSE-00930's two weather-facing entry leaves retain their dedicated role "
+            f"({exterior_leaf_cells})")
     require(len(doors) - len(fillable) == 1,
             f"and the {len(doors) - len(fillable)} that is in no wall at all is the shed's -- an "
             f"EXTERIOR cell draws no walls (`HOUSE-00475`), so there is nothing for a leaf to sit "

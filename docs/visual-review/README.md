@@ -1201,3 +1201,39 @@ unaffected first-person interior set was left unchanged. The focused 18-test ren
 passes, with 0.1599% worst culled/unculled error. `VISUAL-GATE-1` still **FAILS**. Fix the missing
 exterior door face next, then simplify/refine the balcony parapet and facade rather than starting
 another invisible subsystem.
+
+## Round 30 — exterior-resident canonical entry leaves
+
+Commit: `HOUSE-00930` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 29's matching [day](captures/house-00929-porch-r1/exterior-approach-day.png) and
+[night](captures/house-00929-porch-r1/exterior-approach-night.png) approaches showed the front
+walk, grass and foyer through the nominally closed entrance. After: the identical
+[day](captures/house-00930-entry-door-r1/exterior-approach-day.png) and
+[night](captures/house-00930-entry-door-r1/exterior-approach-night.png) cameras show an opaque
+textured hardwood leaf, while the fixed
+[reverse foyer view](captures/house-00930-entry-door-r1/foyer-facing-front.png) retains its lit
+interior face. The directory also contains the unchanged eleven-camera clear-day review set.
+
+Ranked visible defects remaining:
+
+1. The broad solid upper-balcony parapet and flat front facade now dominate the entrance; from the
+   road they still read as simplified blockout masses despite the finished porch beneath them.
+2. The entry leaf is materially real but geometrically plain: it needs believable panel relief and
+   restrained hardware rather than remaining a textured rectangular slab.
+3. The night porch profile is readable, but the adjacent front steps and broad facade remain too
+   dark for a convincing arrival sequence.
+4. Inside, kitchen practical clutter, family-room finish depth and dining furnishing remain the
+   largest connected-route gaps.
+
+Fixed: the two authored `D_ENTRY` rows now select a distinct approved hardwood role. The generator
+derives that role from the exterior portal, emits one closed six-face leaf in the owning interior
+cell, and the existing bounded exterior BVH admits only that role. Ordinary skirting, interior
+doors and borrowed glass stay portal-owned. The canonical build moves from 577 to 579 chunks and
+from 232 to 234 exterior instances: exactly the front and upper-balcony leaves. Ten affected
+strict references were opened and intentionally advanced; the first-person front-door change is
+the intended replacement of a flat colour by licensed wood detail, and all other changed regions
+are confined to the two entry apertures.
+
+`VISUAL-GATE-1` still **FAILS**. The next highest visible value is the upper balcony/front-facade
+silhouette, followed by entry-panel/hardware depth and the already identified night-step receiver.

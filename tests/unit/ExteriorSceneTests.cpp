@@ -37,6 +37,7 @@ namespace
     using cnahouse::visibility::ClipFrustum;
     using cnahouse::visibility::ExteriorScene;
     using cnahouse::visibility::GatherExteriorCones;
+    using cnahouse::visibility::IsExteriorDoorMaterial;
     using cnahouse::visibility::IsExteriorSkinMaterial;
     using cnahouse::visibility::IsExteriorWindowMaterial;
     using cnahouse::visibility::PropCategory;
@@ -143,6 +144,15 @@ TEST(ExteriorSceneTests, OutsideWindowRolesDoNotIncludeIndoorTrimOrBorrowedGlass
     EXPECT_FALSE(IsExteriorWindowMaterial("MAT_SIDING_WARM_WHITE"));
 }
 
+TEST(ExteriorSceneTests, OutsideDoorRolesDoNotIncludeOrdinaryRoomJoinery)
+{
+    EXPECT_TRUE(IsExteriorDoorMaterial("MAT_EXTERIOR_DOOR_HARDWOOD"));
+    EXPECT_TRUE(IsExteriorDoorMaterial("MAT_EXTERIOR_DOOR_PAINTED"));
+    EXPECT_FALSE(IsExteriorDoorMaterial("MAT_DOOR_HARDWOOD"));
+    EXPECT_FALSE(IsExteriorDoorMaterial("MAT_DOOR_PAINTED"));
+    EXPECT_FALSE(IsExteriorDoorMaterial("MAT_WINDOW_FRAME_WHITE"));
+}
+
 TEST(ExteriorSceneTests, OnlyExteriorSpaceSkinAndOutsideWindowChunksBecomeInstances)
 {
     if (!ContentIsBuilt())
@@ -160,7 +170,8 @@ TEST(ExteriorSceneTests, OnlyExteriorSpaceSkinAndOutsideWindowChunksBecomeInstan
                          "MAT_WINDOW_FRAME_WHITE",
                          "MAT_WINDOW_GLASS_CLEAR",
                          "MAT_DOOR_HARDWOOD",
-                         "MAT_GLASS_CLEAR"};
+                         "MAT_GLASS_CLEAR",
+                         "MAT_EXTERIOR_DOOR_HARDWOOD"};
     library.chunks.push_back(Piece(0, 0, 0.0F, 0.0F));  // exterior: in
     library.chunks.push_back(Piece(1, 1, 2.0F, 0.0F));  // a room's inner wall: out
     library.chunks.push_back(Piece(2, 0, 4.0F, 0.0F));  // exterior: in
@@ -173,9 +184,10 @@ TEST(ExteriorSceneTests, OnlyExteriorSpaceSkinAndOutsideWindowChunksBecomeInstan
     library.chunks.push_back(Piece(1, 5, 18.0F, 0.0F)); // room-owned outside glass: in
     library.chunks.push_back(Piece(1, 6, 20.0F, 0.0F)); // ordinary room skirting: out
     library.chunks.push_back(Piece(1, 7, 22.0F, 0.0F)); // borrowed indoor glass: out
+    library.chunks.push_back(Piece(1, 8, 24.0F, 0.0F)); // room-owned outside door: in
 
     const ExteriorScene scene = BuildExteriorScene(library, world);
-    ASSERT_EQ(scene.instances.size(), 6u);
+    ASSERT_EQ(scene.instances.size(), 7u);
     std::vector<bool> seen(library.chunks.size(), false);
     for (std::uint32_t index = 0; index < scene.instances.size(); ++index)
     {
@@ -187,6 +199,7 @@ TEST(ExteriorSceneTests, OnlyExteriorSpaceSkinAndOutsideWindowChunksBecomeInstan
     EXPECT_TRUE(seen[4u]);
     EXPECT_TRUE(seen[8u]);
     EXPECT_TRUE(seen[9u]);
+    EXPECT_TRUE(seen[12u]);
     EXPECT_FALSE(seen[10u]);
     EXPECT_FALSE(seen[11u]);
     EXPECT_FALSE(scene.Empty());
@@ -283,6 +296,7 @@ TEST(ExteriorSceneTests, TheWholePropertysOutdoorsIsInTheHierarchy)
     std::size_t ground = 0;
     std::size_t outerSkin = 0;
     std::size_t outsideWindows = 0;
+    std::size_t outsideDoors = 0;
     for (const world::Chunk& chunk : library.chunks)
     {
         if (chunk.cell >= library.cells.size() || chunk.material >= library.materials.size())
@@ -297,19 +311,22 @@ TEST(ExteriorSceneTests, TheWholePropertysOutdoorsIsInTheHierarchy)
         const std::string_view material = library.materials[chunk.material];
         const bool skin = IsExteriorSkinMaterial(material);
         const bool window = IsExteriorWindowMaterial(material);
-        if (cell->kind != world::CellKind::Exterior && !skin && !window)
+        const bool door = IsExteriorDoorMaterial(material);
+        if (cell->kind != world::CellKind::Exterior && !skin && !window && !door)
         {
             continue;
         }
         ++expected;
         outerSkin += skin ? 1u : 0u;
         outsideWindows += window ? 1u : 0u;
+        outsideDoors += door ? 1u : 0u;
         ground += CategoryForMaterial(material) == PropCategory::Ground ? 1u : 0u;
     }
     EXPECT_EQ(scene.instances.size(), expected);
     EXPECT_GT(expected, 20u) << "the property has a lawn, a road, fences and a garden";
     EXPECT_GT(outerSkin, 50u) << "the canonical house facade was omitted from the hierarchy";
     EXPECT_GT(outsideWindows, 40u) << "weather-facing frames and glazing stayed room-culled";
+    EXPECT_EQ(outsideDoors, 2u) << "the two canonical entry leaves stayed room-culled";
     EXPECT_GT(ground, 0u) << "no chunk of the outdoors is the ground itself";
 
     // Every instance is inside the hierarchy's own root box, which is the invariant a wrong bounds

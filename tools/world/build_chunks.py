@@ -133,10 +133,11 @@ CHUNK_BUDGET_EXCEPTIONS = {
     "L0_GARAGE": (8,
                   "a garage is a room and stays one (`HOUSE-00487`). The four receiver classes, "
                   "plus the stair to the loft, glazing, trim and an outside window-frame chunk"),
-    "L0_FOYER": (9,
+    "L0_FOYER": (10,
                   "HOUSE-01038's measured entrance: six shell finishes and an outside window "
                   "frame plus two source-specific CC0 furniture albedos. Keeping the carved "
-                  "console wood and upholstered chair separate avoids repainting either as trim"),
+                  "console wood and upholstered chair separate avoids repainting either as trim; "
+                  "HOUSE-00930 isolates the weather-facing entry leaf for exterior residency"),
     "L0_FAMILY": (15,
                   "measured with HOUSE-01037's first furnished media/seating group: five shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
@@ -174,13 +175,17 @@ CHUNK_BUDGET_EXCEPTIONS = {
 for window_cell in (
         "B1_GYM", "B1_MECHANICAL", "B1_STOR1", "B1_STOR2", "B1_WORKSHOP",
         "L0_BUTLERS", "L0_MUDROOM", "L0_OFFICE", "L0_PANTRY", "L0_SUNROOM",
-        "L1_BATH2", "L1_BED2", "L1_BED3", "L1_BED4", "L1_BED5", "L1_LANDING",
+        "L1_BATH2", "L1_BED2", "L1_BED3", "L1_BED4", "L1_BED5",
         "L1_MASTER_BATH", "L1_MASTER_BED",
         "L2_BATH4", "L2_BED6", "L2_BED7", "L2_GAMES", "L2_LANDING", "L2_LIBRARY",
         "L2_SITTING", "L2_STAIR_MAIN", "L3_STORE_N"):
     CHUNK_BUDGET_EXCEPTIONS[window_cell] = (
         7, "six measured shell finish chunks plus one weather-facing window-frame chunk; "
            "ordinary room trim and borrowed-light glass stay portal-owned")
+
+CHUNK_BUDGET_EXCEPTIONS["L1_LANDING"] = (
+    8, "six measured shell finish chunks plus a weather-facing window-frame chunk and "
+       "HOUSE-00930's isolated upper-balcony entry leaf; ordinary room trim stays portal-owned")
 
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
