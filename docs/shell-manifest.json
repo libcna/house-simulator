@@ -46,7 +46,7 @@
     "L0_MUDROOM.glb": "sha256:f5bf4bc5a5a0b2e75ee73b662ffb56b7a5798772d8c03e908548a51904170233",
     "L0_OFFICE.glb": "sha256:e59ac416a3e14c797ae42d1e65b14ecdeec190d4ac2ddd1bd80be56190dd7278",
     "L0_PANTRY.glb": "sha256:0b088dab3e71ac1c05d3fdb4578ad0211a852e0dbefc88bb82c4a8e3e1dc3ab1",
-    "L0_PORCH.glb": "sha256:3e49f72e61cf60d05b3ff5f8639aef3fde0bad3fef237c13ca1b27ac328da062",
+    "L0_PORCH.glb": "sha256:f2bae036f00d94c91854ca48cd67a3f69604aa2b9bf174395ced6b545e11d2f8",
     "L0_STAIR_MAIN.glb": "sha256:59da277a6b4e96c49944ed0476080d39b072c265f00332a63541a60aa168b045",
     "L0_STOR.glb": "sha256:25ab58dae292c0bc981fbc3e15f96a6bb14fd017c2ee8b6a0ce22bad1df28b50",
     "L0_SUNROOM.glb": "sha256:478705513fa1126762dff5bae4c6fd1358bcbfa7b3127c8f5abfb1429de42037",
@@ -101,7 +101,7 @@
     "ROOF_MAIN.glb": "sha256:4596298e0792150e63cdfd9fc899e6ce02a8c8cc1b875caa8709707e2cc9dd05"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:2670014204836b0dc0fe8a6a5229492048836556b93e541bc8b90a2eaf2dfd9e",
+  "generatorVersion": "sha256:423abc5fdf8665f8783e3aacafbaa1a5505df5ce96d5534d4ef000b207b0ad3d",
   "origin": {
     "attribution": "",
     "kind": "generated",

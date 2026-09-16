@@ -13487,6 +13487,51 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
             passes source/provenance/material gates and 323 strict-XNA translation units.
             `git diff --check` is clean. `VISUAL-GATE-1` remains FAILED: foyer/hall/kitchen,
             roof/front door and night approach are visibly unfinished.
+- [x] HOUSE-00929 — Give the canonical covered porch a finished soffit, entablature and proportioned Colonial Revival columns
+      dep: HOUSE-00464, HOUSE-00465, HOUSE-00903, HOUSE-00907, HOUSE-00923, HOUSE-00928 · sys: world/content/exterior · plat: ALL · pri: MUST
+      note: (2026-09-16) Round 28's exact 10:30 approach proves that production materials now
+            survive to normal gameplay, but the entrance still reads as a blockout: four bare
+            200 mm posts and three exposed beams form a thin rectangular cage below a balcony
+            slab with no finished underside or edge depth. The source is the canonical covered-
+            exterior rule in `house_shell_gen.py`, not a missing renderer feature. Refine that
+            general rule from measured geometry — bases, shafts, capitals, a real soffit and a
+            layered fascia/cornice — without naming `L0_PORCH` in production code, moving its
+            authored footprint, or changing the portal/collision architecture.
+      accept: the same fixed day and night approach cameras show four grounded, correctly scaled
+            columns supporting a visually continuous porch roof with a plausible underside and
+            edge profile; the front no longer reads as an open rectangular scaffold; additions
+            use existing approved exterior finishes at real-world texture scale and deterministic
+            generator output; entry/step clearances, the front door, sidelights, lanterns,
+            balcony guard, culling equivalence and collision remain correct; generated-shell,
+            chunk-budget, XNA-only, content and render gates pass; exact before/after captures are
+            inspected and strict render references are updated only where the intended canonical
+            geometry is visible; `VISUAL-GATE-1` is judged honestly
+      done: (2026-09-16) the general covered-exterior rule now derives its finish from the stacked
+            canonical footprint and the real covering-floor height. The porch gains four five-part
+            columns (400 mm base/capital, 260 mm shaft), one downward-facing soffit at +3.35 and a
+            beam/fascia/cornice profile that closes the exact 300 mm zone below the balcony floor;
+            no room id, footprint or renderer exception entered the production path. The approved
+            painted-trim and soffit materials remain distinct, making `L0_PORCH` the measured 9/9
+            chunk exception; the world has 577 chunks and 232 exterior BVH instances.
+      visual: Round 29 compares the exact fixed day and night approach against Round 28. At a
+              greater-than-two-channel threshold the day world/porch/column/roof-edge crops change
+              8.112/19.942/18.954/30.207%; night changes 8.334/20.491/18.001/31.854%. The day porch
+              mean moves from RGB(123.79,120.00,117.71) to RGB(122.41,123.40,127.00), while the
+              night porch rises from RGB(16.23,12.49,10.80) to RGB(22.44,16.45,12.70). All thirteen
+              fixed review frames were opened; the entrance now reads as a supported covered porch
+              rather than a bare post-and-beam cage. Thirteen affected strict references were
+              inspected and advanced; unaffected interior references were left unchanged.
+      verified: shell generator and verifier self-tests pass with 41,619 triangles, 41,360 faces,
+                zero degenerates and zero wrong-wound faces; collision self-test, deterministic
+                content build, 24 chunk/collision/exterior round trips, all 1,406 unit tests and
+                all 135 isolated integration registrations pass (headless dummy audio and a
+                writable temporary `XDG_DATA_HOME`). The focused 18-test render/culling suite
+                passes and its worst culled/unculled error remains 0.1599%. `tools/ci/run_checks.sh`
+                passes source/content/provenance gates and 323 strict-XNA translation units with
+                `CNA_CNAEXT=OFF`; `git diff --check` is clean. `VISUAL-GATE-1` still FAILS: the
+                exterior-facing front-door leaf is absent from the approach, the balcony parapet/
+                facade/roof remain plain, the night steps are dark, and the connected interior
+                still needs furnishing depth.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -17995,6 +18040,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-00929` | **New task, next free phase-12 id.** Finish the existing data-driven covered-porch grammar with measured column dressings, soffit and roof-edge layers rather than masking the defect with a façade prop or renderer exception. | Round 28's fixed daylight approach shows that the dominant remaining exterior shape is the generator's bare 200 mm post-and-beam cage beneath an unfinished 300 mm balcony-floor zone. The general `covered_by` rule already derives the porch from stacked canonical cells, so it can produce the missing architectural finish without hard-coding a room id or changing the footprint, portal graph, collision model or material architecture. |
 | 2026-09-16 | `HOUSE-01281` | **New task, next free phase-16 id.** Permit a fixed light to name additional fixed bake receivers without changing its canonical owning cell, and admit only those foreign bindings to an outside-facing skin. | Round 26 shows both real porch emitters live while their adjacent foyer-owned facade remains black. `L0_PORCH` is intentionally unbaked exterior geometry; moving the facade out of `L0_FOYER`, adding the porch group to the foyer's runtime control index, or enlarging the glow quad would each violate an existing architecture boundary. A measured bake also exposed the two old canonical point positions 10 cm behind the facade; the physical emissive sub-range places their centres at z -14.073, which now drives the bake, glow and later dynamic approximation consistently. |
 | 2026-09-16 | `HOUSE-00772` | Correct the task title's vegetation census from 9 property trees / 40 shrubs to **3 property trees / 60 shrubs**, without renumbering or adding placements. Route the already selected CC0 source models and their exact/fallback material roles through the existing static chunk, exterior BVH and collision paths. Add only the four exterior-cell chunk ceilings measured by the result. | §11.1 and the authoritative exterior file have always contained two mature role trees plus one small-tree role and sixty shrubs; the title was stale. The first real build measures 309 placements, 44 AlphaTest batches, 8 vertex-cap and 17 Reach-cap splits. `EXT_FRONTYARD_E`, `EXT_ROAD`, `EXT_SIDEYARD_W` and `EXT_WORLD` are landscape/residency regions rather than rooms; their exact source-material groups cannot be merged without erasing bark/leaf/flower/grass identity. A first screenshot iteration let mature crowns obscure the entrance, so the final positions/scales were selected from the unchanged front camera before completion. |
 | 2026-09-15 | `HOUSE-01038` | **New task, next free phase-13 id.** Deliver a small foyer furniture/light vertical slice through already completed static batching rather than falsely completing the full-house furnishing prerequisite chain. Adjust the foyer's explicit measured §17.4 ceiling from seven to nine, not the global six-chunk target. | The inspected Round 14 entrance/hall gameplay views remain empty and dim; `HOUSE-00986` requires all large grouped furniture acquisitions and generator tasks that are still legitimately open. Approved CC0 sources and the existing static chunk/Tier-S light paths permit a narrower dependency-valid checkpoint. The first build measured exactly two new close-range source-material groups (carved wood and upholstery); retaining them is necessary for real furniture rather than flattening both into architectural paint. All other per-cell ceilings, Reach and culling rules remain unchanged. |

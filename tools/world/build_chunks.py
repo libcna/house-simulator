@@ -160,10 +160,12 @@ CHUNK_BUDGET_EXCEPTIONS = {
                    "shell/window finish groups plus oak joinery, marble counter stone, brushed "
                    "steel, a close-range 150 mm backsplash tile and opaque oven glass. Painted "
                    "cabinet fronts reuse trim; no Reach or vertex-cap split was added"),
-    "L0_PORCH": (8,
+    "L0_PORCH": (9,
                  "HOUSE-01259's physical pair of entrance lanterns adds one shared dark-bronze "
                  "body chunk and one shared, independently switchable warm-diffuser chunk to "
-                 "the porch's existing six architectural and planting finishes"),
+                 "the porch's existing six architectural and planting finishes; HOUSE-00929's "
+                 "covered-deck finish adds one measured MAT_SOFFIT_WHITE receiver/detail role "
+                 "rather than flattening the underside into painted column trim"),
 }
 
 # `HOUSE-00926`: a separate weather-facing frame keeps indoor skirting out of the outdoor BVH.

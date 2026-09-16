@@ -968,6 +968,15 @@ double-hung windows with 6-over-6 muntins on the front elevation. The rear eleva
 a single-storey sunroom extension with a flat roof used as the master balcony, and a
 flagged terrace below.
 
+The covered-porch finish is derived rather than a second authored facade (`HOUSE-00929`). A cell
+whose full footprint is covered by the next stacked cell receives a downward-facing soffit at its
+own head height, with fascia and cornice closing the measured gap to the covering floor. On the
+front porch those canonical heights are +3.35 and +3.65: the 300 mm structure zone sits on four
+five-part painted square columns, each with a 260 mm shaft and 400 mm base/capital. The same rule
+reads the footprint, open sides and covering height from world data; it does not name `L0_PORCH`
+or invent a second shell. Existing trim/soffit materials, portal ownership and collision stay the
+single source of truth.
+
 Three above-grade storeys plus a habitable attic. This is what makes "several floors" believable
 rather than a stack of arbitrary levels: three-storey Colonials of this size were genuinely built,
 and the attic under a 7:12 roof over a 13.4 m span has real usable volume.

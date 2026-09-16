@@ -1164,3 +1164,40 @@ advanced. The 18-pose culled/unculled maximum remains 0.1603%.
 `VISUAL-GATE-1` still **FAILS**. Highest visible value is now facade/roof/porch construction depth,
 followed by a principled adjacent-step receiver and the already identified interior furnishing
 gaps. Do not spend the next checkpoint on invisible lighting infrastructure.
+
+## Round 29 — finished canonical covered porch
+
+Commit: `HOUSE-00929` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 28's exact [day approach](captures/house-01262-point-light-r1/exterior-approach-day-check.png)
+and [close night entrance](captures/house-01262-point-light-r1/exterior-approach-close.png). After:
+the matching [day](captures/house-00929-porch-r1/exterior-approach-day.png) and
+[night](captures/house-00929-porch-r1/exterior-approach-night.png), plus the complete thirteen-frame
+[Round 29 set](captures/house-00929-porch-r1). All were opened at original resolution.
+
+Ranked visible defects remaining:
+
+1. The front-door leaf is present in the fixed foyer view but absent when viewed from the exterior;
+   the approach looks through the opening. Its exterior face/visibility is now the largest defect.
+   The upper balcony's broad solid parapet is the next conspicuously plain entrance shape.
+2. At night the porch profile reads, but the wider facade and front steps remain too dark. The
+   steps are an adjacent-cell receiver and still need an architecture-consistent lighting answer.
+3. The front facade and roof remain under-detailed at the road start: flat wall spans, thin roof
+   edges and the large balcony band keep the whole house at an early-game level.
+4. Inside, kitchen practical clutter, family-room finish depth and dining furnishing remain the
+   largest connected-route gaps.
+
+Fixed: the data-driven covered-exterior rule now produces four five-part square columns, a
+continuous downward-facing soffit and a beam/fascia/cornice edge closing the actual 300 mm balcony
+floor zone. The fixed day world/porch/column/roof-edge crops change
+8.112/19.942/18.954/30.207% at a greater-than-two-channel threshold; night changes
+8.334/20.491/18.001/31.854%. The day porch mean shifts from RGB(123.79,120.00,117.71) to
+RGB(122.41,123.40,127.00); the night mean rises from RGB(16.23,12.49,10.80) to
+RGB(22.44,16.45,12.70). The entrance now reads as a grounded covered porch rather than an open
+rectangular scaffold.
+
+Thirteen strict references containing the porch were compared and intentionally advanced; the
+unaffected first-person interior set was left unchanged. The focused 18-test render/culling suite
+passes, with 0.1599% worst culled/unculled error. `VISUAL-GATE-1` still **FAILS**. Fix the missing
+exterior door face next, then simplify/refine the balcony parapet and facade rather than starting
+another invisible subsystem.

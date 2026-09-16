@@ -1004,12 +1004,24 @@ CHIMNEY_OVER_RIDGE = 0.60
 PARAPET_THICK = 0.20
 PARAPET_HEIGHT = 0.55
 
-#: The porch (`HOUSE-00464`). §12.1 says "a full-width front porch on four square columns" and
-#: gives no section, so the column is 0.20 square and the beam over it 0.25 deep, and the four are
-#: spread evenly along the open edge.
+#: The porch (`HOUSE-00464`, finished by `HOUSE-00929`). §12.1 says "a full-width front porch on
+#: four square columns" and gives no section. The base/shaft/capital proportions below are in the
+#: ordinary 250--400 mm range for a two-storey Colonial Revival entrance; the layered edge closes
+#: the authored 300 mm floor-structure zone between the porch head and the balcony floor.
 PORCH_COLUMNS = 4
-COLUMN_SECTION = 0.20
-PORCH_BEAM = 0.25
+COLUMN_SHAFT_SECTION = 0.26
+COLUMN_BASE_SECTION = 0.40
+COLUMN_BASE_HEIGHT = 0.14
+COLUMN_BASE_CAP_SECTION = 0.34
+COLUMN_BASE_CAP_HEIGHT = 0.08
+COLUMN_NECK_SECTION = 0.32
+COLUMN_NECK_HEIGHT = 0.08
+COLUMN_CAPITAL_SECTION = 0.40
+COLUMN_CAPITAL_HEIGHT = 0.12
+PORCH_BEAM = 0.22
+PORCH_FASCIA_DEPTH = 0.10
+PORCH_CORNICE_HEIGHT = 0.08
+PORCH_CORNICE_PROJECTION = 0.07
 
 #: The attic's structure (`HOUSE-00463`). §12 gives the pitch, the ridge and the collar tie and
 #: says nothing about members, so the spacing and the sections are this generator's: rafters at
@@ -1021,12 +1033,14 @@ PURLIN_SECTION = 0.15
 WALKWAY_WIDTH = 0.60
 WALKWAY_THICK = 0.030
 
-def covered_by(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> bool:
-    """Is another cell stacked over the whole of @p cell's footprint, just above it?
+def covering_floor(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> float | None:
+    """Return the floor height of a cell stacked over the whole footprint, or ``None``.
 
     That is what makes the porch a porch: `L1_BALCONY_FRONT` has the same box and its floor is
     0.30 m over the porch's head, so the porch has a roof and the rear balcony does not. Reading
-    it this way means no cell has to be named here.
+    it this way means no cell has to be named here. `HOUSE-00929` needs the height as well as the
+    yes/no answer so the finish closes the real authored floor-structure zone rather than a second
+    guessed thickness.
     """
     boxes = cell.get("boxes") or []
     if not boxes:
@@ -1046,8 +1060,13 @@ def covered_by(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> bo
             if not covered:
                 break
         else:
-            return True
-    return False
+            return float(above[0])
+    return None
+
+
+def covered_by(cell: dict, extent: tuple[float, float], cells_by_id: dict) -> bool:
+    """Is another cell stacked over the whole of @p cell's footprint, just above it?"""
+    return covering_floor(cell, extent, cells_by_id) is not None
 
 
 #: A deck is an exterior cell raised this far over grade. Below it, an exterior cell IS the ground
@@ -1646,8 +1665,8 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
     # The porch is the one cell in this house that is covered -- `L1_BALCONY_FRONT` sits on it --
     # and the open sides are the ones with no interior cell across them, which is the same test
     # the walls use.
-    if (cell.get("kind") == "exterior" and construction
-            and covered_by(cell, extent, cells_by_id)):
+    cover_y = covering_floor(cell, extent, cells_by_id)
+    if cell.get("kind") == "exterior" and construction and cover_y is not None:
         for box in cell_boxes(cell, extent):
             bx0, bx1, by0, by1, bz0, bz1 = box
             open_sides = [side for side in ("-X", "+X", "-Z", "+Z")
@@ -1655,26 +1674,69 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                                      for _lo, _hi, _wall, covers in side_intervals(
                                          side, box, cell, list(neighbours)))]
             beam_lo = by1 - PORCH_BEAM
-            half = COLUMN_SECTION / 2.0
+            shaft_half = COLUMN_SHAFT_SECTION / 2.0
+            base_half = COLUMN_BASE_SECTION / 2.0
+
+            # A covered exterior cell is not an indoor room and therefore receives no ordinary
+            # ceiling slab. It still needs the painted underside of the construction above it.
+            # A single downward-facing finish plane preserves the shell's floor/ceiling winding
+            # contract while the fascia closes the exact gap to the covering cell's floor.
+            add([(bx0, by1, bz0), (bx1, by1, bz0),
+                 (bx1, by1, bz1), (bx0, by1, bz1)],
+                (0.0, -1.0, 0.0), "ceiling")
+
             # The columns go along the longest open side, evenly spread including its two ends.
             longest = max(open_sides, key=lambda side: side_span(side, box)[2]
                           - side_span(side, box)[1], default=None)
             if longest is not None:
                 plane, lo, hi = side_span(longest, box)
                 for index in range(PORCH_COLUMNS):
-                    at = lo + half + (hi - lo - COLUMN_SECTION) * index / (PORCH_COLUMNS - 1)
-                    if longest in ("-X", "+X"):
-                        solid(plane - half, plane + half, by0, beam_lo, at - half, at + half,
-                              "trim")
-                    else:
-                        solid(at - half, at + half, by0, beam_lo, plane - half, plane + half,
-                              "trim")
+                    at = (lo + base_half
+                          + (hi - lo - COLUMN_BASE_SECTION) * index / (PORCH_COLUMNS - 1))
+                    centre_x, centre_z = ((plane, at) if longest in ("-X", "+X")
+                                          else (at, plane))
+
+                    def column_box(section: float, bottom: float, top: float) -> None:
+                        half = section / 2.0
+                        solid(centre_x - half, centre_x + half, bottom, top,
+                              centre_z - half, centre_z + half, "trim")
+
+                    base_top = by0 + COLUMN_BASE_HEIGHT
+                    base_cap_top = base_top + COLUMN_BASE_CAP_HEIGHT
+                    capital_bottom = beam_lo - COLUMN_CAPITAL_HEIGHT
+                    neck_bottom = capital_bottom - COLUMN_NECK_HEIGHT
+                    column_box(COLUMN_BASE_SECTION, by0, base_top)
+                    column_box(COLUMN_BASE_CAP_SECTION, base_top, base_cap_top)
+                    column_box(COLUMN_SHAFT_SECTION, base_cap_top, neck_bottom)
+                    column_box(COLUMN_NECK_SECTION, neck_bottom, capital_bottom)
+                    column_box(COLUMN_CAPITAL_SECTION, capital_bottom, beam_lo)
             for side in open_sides:
                 plane, lo, hi = side_span(side, box)
+                inward = 1.0 if side in ("-X", "-Z") else -1.0
                 if side in ("-X", "+X"):
-                    solid(plane - half, plane + half, beam_lo, by1, lo, hi, "trim")
+                    solid(plane - shaft_half, plane + shaft_half,
+                          beam_lo, by1, lo, hi, "trim")
                 else:
-                    solid(lo, hi, beam_lo, by1, plane - half, plane + half, "trim")
+                    solid(lo, hi, beam_lo, by1,
+                          plane - shaft_half, plane + shaft_half, "trim")
+
+                # The beam is structural; fascia and a slightly projecting cornice make the
+                # 300 mm balcony-floor zone read as a supported roof edge instead of a floating
+                # slab. Both follow every open side and retain the existing clean painted trim.
+                fascia_outer = plane
+                fascia_inner = plane + PORCH_FASCIA_DEPTH * inward
+                cornice_outer = plane - PORCH_CORNICE_PROJECTION * inward
+                if side in ("-X", "+X"):
+                    solid(min(fascia_outer, fascia_inner), max(fascia_outer, fascia_inner),
+                          by1, cover_y, lo, hi, "trim")
+                    solid(min(cornice_outer, fascia_inner), max(cornice_outer, fascia_inner),
+                          cover_y - PORCH_CORNICE_HEIGHT, cover_y, lo, hi, "trim")
+                else:
+                    solid(lo, hi, by1, cover_y,
+                          min(fascia_outer, fascia_inner), max(fascia_outer, fascia_inner), "trim")
+                    solid(lo, hi, cover_y - PORCH_CORNICE_HEIGHT, cover_y,
+                          min(cornice_outer, fascia_inner), max(cornice_outer, fascia_inner),
+                          "trim")
                 # The balustrade between the columns, broken where the steps come up.
                 drop = by0 - 0.0
                 height = float(construction.get("railing" if drop > 1.0 else "balustrade", 0.0))
@@ -3097,6 +3159,11 @@ def selftest(output: Path) -> int:
     require(covered_by(porch, porch_extent, cells),
             "the porch is covered -- `L1_BALCONY_FRONT` sits on it -- which is what makes it a "
             "porch and not a terrace")
+    porch_cover_y = covering_floor(porch, porch_extent, cells)
+    require(porch_cover_y is not None and abs(porch_cover_y - 3.65) < 1e-9
+            and abs(porch_cover_y - porch_extent[1] - 0.30) < 1e-9,
+            f"and the finish closes the authored 300 mm structure zone rather than guessing one "
+            f"({porch_extent[1]} -> {porch_cover_y})")
     require(not covered_by(cells["L1_BALCONY_REAR"],
                            extent_of(cells["L1_BALCONY_REAR"], levels["L1"])[0], cells),
             "and the rear balcony is not, so it gets no columns")
@@ -3184,7 +3251,8 @@ def selftest(output: Path) -> int:
     require("exterior" in outer_used and "wall" in outer_used,
             f"while the living room keeps both its inner wall and its outer skin ({sorted(outer_used)})")
     require(slab_here(porch, porch_extent, True) and not slab_here(porch, porch_extent, False),
-            "the porch is a deck, so it has a floor and still no ceiling")
+            "the porch is a deck, so it has a floor and no ordinary exterior ceiling slab; "
+            "its derived covered-deck soffit is separate")
     for deck in ("L1_BALCONY_FRONT", "L2_BALCONY_JULIET", "EXT_TERRACE"):
         row = cells[deck]
         deck_extent = extent_of(row, levels[row["level"]])[0]
@@ -3231,6 +3299,12 @@ def selftest(output: Path) -> int:
 
     require(PORCH_COLUMNS == 4,
             f"§12.1 says the porch stands on FOUR square columns ({PORCH_COLUMNS})")
+    require(0.24 <= COLUMN_SHAFT_SECTION <= 0.30
+            and COLUMN_BASE_SECTION > COLUMN_BASE_CAP_SECTION > COLUMN_SHAFT_SECTION
+            and COLUMN_CAPITAL_SECTION > COLUMN_NECK_SECTION > COLUMN_SHAFT_SECTION,
+            f"and each one has a grounded base, a 260 mm shaft, neck and capital "
+            f"({COLUMN_BASE_SECTION}, {COLUMN_BASE_CAP_SECTION}, {COLUMN_SHAFT_SECTION}, "
+            f"{COLUMN_NECK_SECTION}, {COLUMN_CAPITAL_SECTION})")
 
     flight_list = list(flight_rows.values())
     reset_scene()
@@ -3248,9 +3322,16 @@ def selftest(output: Path) -> int:
                                 levels=levels, portals=all_portals,
                                 openings=openings_by_portal, cells_by_id=uncovered,
                                 flights=flight_list).data.polygons)
-    require(porch_faces == bare_porch + 6 * (PORCH_COLUMNS + 3) + 6 * 4,
-            f"and it gains {PORCH_COLUMNS} columns, a beam over each of its three open sides and "
-            f"a balustrade broken by the steps ({bare_porch} -> {porch_faces})")
+    porch_box = list(cell_boxes(porch, porch_extent))[0]
+    porch_open_sides = open_sides_of(porch, porch_box, neighbours)
+    # Five boxes dress each column; each open side has a beam, fascia and cornice; the continuous
+    # soffit is one downward-facing quad. The four remaining six-face pieces are the rails either
+    # side of the centred stair opening and along the two returns.
+    finish_boxes = PORCH_COLUMNS * 5 + len(porch_open_sides) * 3
+    require(porch_faces == bare_porch + 6 * finish_boxes + 1 + 6 * 4,
+            f"and it gains {PORCH_COLUMNS} five-part columns, a continuous soffit, a beam/fascia/"
+            f"cornice on each of its {len(porch_open_sides)} open sides and a balustrade broken "
+            f"by the steps ({bare_porch} -> {porch_faces})")
     steps_here = [row for row in flight_list if row.get("toCell") == "L0_PORCH"]
     require(steps_here, "the porch steps arrive in it, so its balustrade has a gap for them")
 

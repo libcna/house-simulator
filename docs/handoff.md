@@ -1,4 +1,45 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01262` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-00929` checkpoint)
+
+Branch `develop`. Task-start HEAD `1d756b4` (`HOUSE-01262`). This file belongs to the single
+`HOUSE-00929` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The canonical covered-exterior rule now finishes the front porch without naming it: a stacked
+cell with the same footprint supplies its actual covering-floor height, so the +3.35 porch head
+gets one downward-facing soffit and beam/fascia/cornice layers close the exact 300 mm zone to the
++3.65 balcony floor. Four columns now have 400 mm bases/capitals around proportioned 260 mm shafts.
+The existing approved painted-trim and soffit materials remain separate. World footprint, portal
+ownership, entry and step clearances, collision architecture and the strict-XNA renderer are
+unchanged.
+
+Before: Round 28's exact [day approach](visual-review/captures/house-01262-point-light-r1/exterior-approach-day-check.png)
+and [close night entrance](visual-review/captures/house-01262-point-light-r1/exterior-approach-close.png).
+After: the matching [day](visual-review/captures/house-00929-porch-r1/exterior-approach-day.png),
+[night](visual-review/captures/house-00929-porch-r1/exterior-approach-night.png) and full
+[Round 29 set](visual-review/captures/house-00929-porch-r1). All thirteen final frames and all
+thirteen changed strict-reference pairs were inspected. At a greater-than-two-channel threshold,
+the day porch/columns/roof-edge change 19.942/18.954/30.207%; night changes
+20.491/18.001/31.854%. The entrance now reads as a grounded covered porch instead of a bare
+rectangular frame. `L0_PORCH` measures 9/9 chunks; the world has 577 chunks and 232 exterior BVH
+instances.
+
+Shell generation and verification pass with 41,619 triangles, 41,360 faces, no degenerates and no
+wrong-wound faces. Collision self-test, deterministic content build, 24 focused round trips, all
+1,406 unit tests, all 135 isolated integration registrations and the 18-test live render/culling
+set pass; the latter retains 0.1599% maximum culled/unculled error. The sandbox integration run
+uses dummy audio and a writable temporary `XDG_DATA_HOME`. `tools/ci/run_checks.sh` passes every
+source/content/provenance gate and all 323 strict-XNA translation units with `CNA_CNAEXT=OFF`.
+
+Next highest visible value: the front-door leaf is clearly present from inside but absent from the
+exterior approach, leaving a see-through opening. Determine whether the exterior face is wound,
+owned or culled incorrectly and fix that canonical path without a camera-specific exception.
+Then replace/refine the broad blank balcony parapet and deepen the road-view facade/roof; after the
+entry composition holds, return to kitchen practical clutter, family-room material depth and dining
+furnishing. Do not conceal these defects with global exposure or a facade billboard.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-01262` checkpoint)
 
 Branch `develop`. Task-start HEAD `6aa33b8` (`HOUSE-01261`). This file belongs to the single
 `HOUSE-01262` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
