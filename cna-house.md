@@ -3380,6 +3380,14 @@ approximation is good when the object is small relative to the light's distance,
 always true. Tier E's `RoomLit.fx` uses genuine point lights with attenuation for up to four
 fixtures and drops the approximation.
 
+> Implemented through the stock-effect boundary by `HOUSE-01261`. `LightingSystem` publishes a
+> stable key/fill/bounce assignment without allocating during a draw: celestial key plus the
+> strongest-window fill by day, or the two brightest live fixtures by night, followed by the
+> opposite 0.18 surface-tinted bounce. `MaterialBinder` writes all three slots to both
+> `BasicEffect` and `SkinnedEffect` and explicitly disables absent slots on every shared-effect
+> bind. This first step deliberately uses a point fixture's authored direction; `HOUSE-01262` owns
+> replacing that provisional direction and strength with the object-centre/distance approximation.
+
 ### 28.6 Emissive surfaces
 
 A lit lamp's shade, the TV screen, the fridge interior, appliance LEDs and the fireplace embers

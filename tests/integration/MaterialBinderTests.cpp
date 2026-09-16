@@ -487,8 +487,12 @@ namespace
                 draw.fog = &fog;
                 draw.colourMultiplier = Vector3(0.50F, 0.25F, 1.0F);
                 draw.ambientLight = Vector3(0.05F, 0.06F, 0.07F);
-                draw.basicKey = cnahouse::rendering::BasicKeyLight{
+                draw.directionalLights[0] = cnahouse::rendering::StockDirectionalLight{
                     Vector3(0.0F, -1.0F, 0.0F), Vector3(0.20F, 0.30F, 0.40F), Vector3(0.01F, 0.02F, 0.03F)};
+                draw.directionalLights[1] = cnahouse::rendering::StockDirectionalLight{
+                    Vector3(1.0F, 0.0F, 0.0F), Vector3(0.05F, 0.06F, 0.07F), Vector3()};
+                draw.directionalLights[2] = cnahouse::rendering::StockDirectionalLight{
+                    Vector3(0.0F, 1.0F, 0.0F), Vector3(0.02F, 0.03F, 0.04F), Vector3()};
 
                 const auto bound = binder.Bind(id, draw);
                 ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
@@ -508,8 +512,12 @@ namespace
                           Vector3(0.20F, 0.30F, 0.40F));
                 EXPECT_EQ(effect->getDirectionalLight0Property().getSpecularColorProperty(),
                           Vector3(0.01F, 0.02F, 0.03F));
-                EXPECT_FALSE(effect->getDirectionalLight1Property().getEnabledProperty());
-                EXPECT_FALSE(effect->getDirectionalLight2Property().getEnabledProperty());
+                EXPECT_TRUE(effect->getDirectionalLight1Property().getEnabledProperty());
+                EXPECT_EQ(effect->getDirectionalLight1Property().getDirectionProperty(),
+                          Vector3(1.0F, 0.0F, 0.0F));
+                EXPECT_TRUE(effect->getDirectionalLight2Property().getEnabledProperty());
+                EXPECT_EQ(effect->getDirectionalLight2Property().getDiffuseColorProperty(),
+                          Vector3(0.02F, 0.03F, 0.04F));
                 EXPECT_TRUE(effect->getTextureEnabledProperty());
                 EXPECT_EQ(effect->getTextureProperty(), &texture);
                 EXPECT_TRUE(effect->getFogEnabledProperty());
@@ -522,6 +530,8 @@ namespace
                 EXPECT_EQ(effect->getAmbientLightColorProperty(), Vector3());
                 EXPECT_FALSE(effect->getDirectionalLight0Property().getEnabledProperty())
                     << "a later draw without a cell key must not inherit BasicEffect's white light";
+                EXPECT_FALSE(effect->getDirectionalLight1Property().getEnabledProperty());
+                EXPECT_FALSE(effect->getDirectionalLight2Property().getEnabledProperty());
                 EXPECT_FALSE(effect->getTextureEnabledProperty());
                 EXPECT_FALSE(effect->getFogEnabledProperty());
             });
@@ -1008,6 +1018,12 @@ namespace
                 draw.diffuse = &texture;
                 draw.bones = &palette;
                 draw.fog = &fog;
+                draw.directionalLights[0] = cnahouse::rendering::StockDirectionalLight{
+                    Vector3(0.0F, -1.0F, 0.0F), Vector3(0.40F, 0.30F, 0.20F), Vector3()};
+                draw.directionalLights[1] = cnahouse::rendering::StockDirectionalLight{
+                    Vector3(1.0F, 0.0F, 0.0F), Vector3(0.10F, 0.12F, 0.14F), Vector3()};
+                draw.directionalLights[2] = cnahouse::rendering::StockDirectionalLight{
+                    Vector3(0.0F, 1.0F, 0.0F), Vector3(0.04F, 0.03F, 0.02F), Vector3()};
 
                 const auto bound = binder.Bind(id, draw);
                 ASSERT_TRUE(bound.HasValue()) << bound.Error().ToString();
@@ -1018,6 +1034,13 @@ namespace
                 EXPECT_EQ(effect->getSpecularColorProperty(), Vector3(0.10F, 0.20F, 0.25F));
                 EXPECT_FLOAT_EQ(effect->getSpecularPowerProperty(), 19.0F);
                 EXPECT_TRUE(effect->getPreferPerPixelLightingProperty());
+                EXPECT_TRUE(effect->getDirectionalLight0Property().getEnabledProperty());
+                EXPECT_EQ(effect->getDirectionalLight0Property().getDiffuseColorProperty(),
+                          Vector3(0.40F, 0.30F, 0.20F));
+                EXPECT_TRUE(effect->getDirectionalLight1Property().getEnabledProperty());
+                EXPECT_EQ(effect->getDirectionalLight1Property().getDirectionProperty(),
+                          Vector3(1.0F, 0.0F, 0.0F));
+                EXPECT_TRUE(effect->getDirectionalLight2Property().getEnabledProperty());
                 EXPECT_EQ(effect->getWeightsPerVertexProperty(), 4);
                 EXPECT_TRUE(effect->getFogEnabledProperty());
                 EXPECT_EQ(effect->getFogColorProperty(), Vector3(0.10F, 0.15F, 0.20F));

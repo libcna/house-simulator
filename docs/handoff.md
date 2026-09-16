@@ -1,4 +1,37 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01281` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01261` checkpoint)
+
+Branch `develop`. Task-start HEAD `a13149e` (`HOUSE-01281`). This file belongs to the single
+`HOUSE-01261` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The stock-XNA object-light contract now carries all three §28.5 directional slots rather than a
+single Basic-effect key. `LightingSystem` chooses the existing celestial key plus a cell-facing
+window fill by day, or the two brightest live local fixtures by night, and derives an opposite
+0.18 bounce tinted by the authored dominant room surface. The assignment is value-shaped and
+allocation-free during a draw. `MaterialBinder` applies the same slots to `BasicEffect` and
+`SkinnedEffect`, explicitly disabling absent slots so its shared instances cannot leak light
+between objects or cells. Static Basic detail already consumes the contract; future actor draws
+do not need another lighting implementation.
+
+This dependency step intentionally leaves point fixtures on their authored direction and
+unattenuated lumen share. It therefore has no claimed visual-review round: the fixed porch pair
+still points downward and the substantial entrance correction belongs to immediate successor
+`HOUSE-01262`, which adds object-centre direction and the approved `1/(1+(d/range)^2)` attenuation.
+Do not confuse effect plumbing with completion of the visible porch receiver defect.
+
+All 1,405 unit tests pass. Thirty-two focused live-device `MaterialBinder` and
+`StaticGeometryPass` integration tests pass with the offscreen driver, and the app/unit/integration/
+render targets compile warning-clean. The first normal Ninja attempt encountered recorded BL-17
+CMake regeneration state; the established existing-generated-build path was used without editing
+CNA, FNA3D or another sibling source. No content or strict visual reference changed.
+
+Next: complete `HOUSE-01262`, capture the identical 22:00 fixed set plus close entrance, inspect
+the floor/step/column pixels against Round 27, then update the visual review. Roof/eave/balcony
+construction remains the next defect after the approach reads as one lit composition.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-01281` checkpoint)
 
 Branch `develop`. Task-start HEAD `7fec420` (`HOUSE-01260`). This file belongs to the single
 `HOUSE-01281` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

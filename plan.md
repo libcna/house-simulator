@@ -14269,8 +14269,26 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             non-save integration run had one unrelated timing-sensitive weather case fail once;
             its immediate isolated rerun passed. Full static/XNA gates are recorded in the
             checkpoint handoff.
-- [ ] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
+- [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
+      accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
+              contract; celestial daylight and live fixture sources are selected from the one
+              `LightingSystem` state; bounce opposes key+fill at 0.18 and is tinted by the cell's
+              dominant authored surface; absent slots are disabled on every shared-effect bind
+      done: (2026-09-16) `LightingSystem::DirectionalLightsForObject` now publishes an
+            allocation-free three-slot value. Daylit cells use the existing sun/moon key plus a
+            cell-orientation window fill; dark cells rank the two live local fixtures by emitted
+            lumens in stable source order; the final slot is the normalized opposite sum tinted
+            by the authored wall/floor material. `MaterialBinder` copies all three slots to both
+            stock XNA effect families and clears every missing slot per draw. The current static
+            Basic-detail path consumes the same contract, so the implementation is exercised now
+            rather than waiting for a later actor pass. Point fixtures intentionally retain their
+            authored direction and unattenuated share here; object-centre direction/range remain
+            exactly `HOUSE-01262`'s next dependency-valid step.
+      verified: all 1,405 unit tests pass; 32 focused live-device MaterialBinder and
+            StaticGeometryPass integration tests pass under the offscreen driver; the existing
+            app, unit, integration and render targets compile warning-clean. No content or strict
+            image reference changed, and no review round is claimed before the distance-aware step.
 - [ ] HOUSE-01262 — Implement the point-light-as-directional approximation with distance attenuation
       dep: HOUSE-01261 · sys: lighting · plat: ALL · pri: MUST
 - [x] HOUSE-01279 — Bake `shading.bin` for the authored house and wire it into the content build

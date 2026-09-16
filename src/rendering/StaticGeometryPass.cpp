@@ -637,25 +637,25 @@ namespace cnahouse::rendering
                                 exposure * std::min(1.0F,
                                                     lighting::kAmbientFloor + skyScale * sky.Z +
                                                         artificial * room->artificialColor.Z));
-                    if (const lighting::CelestialKeyLight* celestial =
-                            lighting_->CelestialKeyForCell(cell->id);
-                        celestial != nullptr)
+                    const bool celestial = lighting_->CelestialKeyForCell(cell->id) != nullptr;
+                    const lighting::ObjectLightAssignment objectLights =
+                        lighting_->DirectionalLightsForObject(cell->id);
+                    const float directionalScale =
+                        celestial ? exposure * (skyOpen ? 1.0F : kBasicSunWindowKey * room->daylight)
+                                  : exposure * kBasicFixtureKey;
+                    for (std::size_t slot = 0; slot < objectLights.slots.size(); ++slot)
                     {
-                        const float scale = exposure * (skyOpen ? 1.0F : kBasicSunWindowKey * room->daylight);
-                        draw.basicKey = BasicKeyLight{celestial->direction,
-                                                      Vector3(scale * celestial->diffuseColor.X,
-                                                              scale * celestial->diffuseColor.Y,
-                                                              scale * celestial->diffuseColor.Z),
-                                                      Vector3(0.0F, 0.0F, 0.0F)};
-                    }
-                    else if (!exteriorWindow && room->artificial > 0.0F)
-                    {
-                        const float scale = exposure * kBasicFixtureKey * room->artificial;
-                        draw.basicKey = BasicKeyLight{Vector3(0.0F, -1.0F, 0.0F),
-                                                      Vector3(scale * room->artificialColor.X,
-                                                              scale * room->artificialColor.Y,
-                                                              scale * room->artificialColor.Z),
-                                                      Vector3(0.0F, 0.0F, 0.0F)};
+                        if (!objectLights.slots[slot].has_value() || (exteriorWindow && !celestial))
+                        {
+                            continue;
+                        }
+                        const lighting::ObjectDirectionalLight& light = *objectLights.slots[slot];
+                        draw.directionalLights[slot] =
+                            StockDirectionalLight{light.direction,
+                                                  Vector3(directionalScale * light.diffuseColor.X,
+                                                          directionalScale * light.diffuseColor.Y,
+                                                          directionalScale * light.diffuseColor.Z),
+                                                  Vector3(0.0F, 0.0F, 0.0F)};
                     }
                 }
                 const MaterialDesc* description = binder_->Find(material->id);

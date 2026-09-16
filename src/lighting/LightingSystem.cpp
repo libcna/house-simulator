@@ -18,6 +18,48 @@
 
 namespace cnahouse::lighting
 {
+    namespace
+    {
+        using Microsoft::Xna::Framework::Vector3;
+
+        Vector3 NormalizedOr(const Vector3& value, const Vector3& fallback) noexcept
+        {
+            const float lengthSquared = value.X * value.X + value.Y * value.Y + value.Z * value.Z;
+            if (!std::isfinite(lengthSquared) || lengthSquared <= 1.0e-8F)
+            {
+                return fallback;
+            }
+            const float inverse = 1.0F / std::sqrt(lengthSquared);
+            return Vector3(value.X * inverse, value.Y * inverse, value.Z * inverse);
+        }
+
+        Vector3 DaylightFillDirection(world::Orientation orientation) noexcept
+        {
+            constexpr float kVertical = -0.35F;
+            constexpr float kHorizontal = 0.9367497F;
+            constexpr float kDiagonal = 0.662382F;
+            switch (orientation)
+            {
+                case world::Orientation::N:
+                    return Vector3(0.0F, kVertical, kHorizontal);
+                case world::Orientation::NE:
+                    return Vector3(-kDiagonal, kVertical, kDiagonal);
+                case world::Orientation::E:
+                    return Vector3(-kHorizontal, kVertical, 0.0F);
+                case world::Orientation::SE:
+                    return Vector3(-kDiagonal, kVertical, -kDiagonal);
+                case world::Orientation::S:
+                    return Vector3(0.0F, kVertical, -kHorizontal);
+                case world::Orientation::SW:
+                    return Vector3(kDiagonal, kVertical, -kDiagonal);
+                case world::Orientation::W:
+                    return Vector3(kHorizontal, kVertical, 0.0F);
+                case world::Orientation::NW:
+                    return Vector3(kDiagonal, kVertical, kDiagonal);
+            }
+            return Vector3(0.0F, -1.0F, 0.0F);
+        }
+    } // namespace
 
     int DuskSensorOffsetMinutes(util::Id fixture) noexcept
     {
@@ -139,6 +181,10 @@ namespace cnahouse::lighting
         daylightLevels_.resize(worldCells.size());
         borrowedLevels_.resize(worldCells.size());
         cellGroups_.reserve(worldCells.size());
+        objectFixturesByCell_.resize(worldCells.size());
+        dominantSurfaceColors_.reserve(worldCells.size());
+        daylightFillDirections_.reserve(worldCells.size());
+        hasDaylightFillDirection_.reserve(worldCells.size());
         cellIndex_.reserve(worldCells.size());
         for (const world::Cell& cell : worldCells)
         {
@@ -150,6 +196,14 @@ namespace cnahouse::lighting
             // includes indoor stair wells. Together they are the 17 sky-open outdoor cells.
             outdoorCells_.push_back(cell.kind == world::CellKind::Exterior &&
                                     cell.visibilityHint == world::VisibilityHint::Open);
+            const world::MaterialDef* dominant =
+                world.FindMaterial(cell.wallMaterial.IsValid() ? cell.wallMaterial : cell.floorMaterial);
+            dominantSurfaceColors_.push_back(dominant != nullptr ? dominant->tint
+                                                                 : Vector3(0.70F, 0.70F, 0.70F));
+            hasDaylightFillDirection_.push_back(cell.daylight.orientation.has_value());
+            daylightFillDirections_.push_back(cell.daylight.orientation.has_value()
+                                                  ? DaylightFillDirection(*cell.daylight.orientation)
+                                                  : Vector3());
         }
 
         // The groups come from the LIGHTS: a group's default state is a property of its fixtures,
@@ -200,6 +254,31 @@ namespace cnahouse::lighting
                 groupColors_[index].Y /= lumens;
                 groupColors_[index].Z /= lumens;
             }
+        }
+
+        // Keep the effect-facing candidates cell-local and allocation-free at draw time. Ranking
+        // uses live group output later, so switching and bulb envelopes cannot disagree with the
+        // lightmaps or emissive fixtures.
+        objectFixtures_.reserve(world.Lights().size());
+        for (const world::Light& light : world.Lights())
+        {
+            if (light.type == world::LightType::EmissiveOnly || light.intensityLm <= 0.0F)
+            {
+                continue;
+            }
+            const auto cell = cellIndex_.find(light.cell.Value());
+            const auto group = groupIndex_.find(light.group.Value());
+            if (cell == cellIndex_.end() || group == groupIndex_.end())
+            {
+                continue;
+            }
+            ObjectFixture fixture;
+            fixture.groupIndex = group->second;
+            fixture.direction = NormalizedOr(light.direction, Vector3(0.0F, -1.0F, 0.0F));
+            fixture.color = PlanckianRgb(light.colorK);
+            fixture.lumens = light.intensityLm;
+            objectFixturesByCell_[cell->second].push_back(objectFixtures_.size());
+            objectFixtures_.push_back(fixture);
         }
         groupTransitionElapsed_.resize(groups_.size());
         groupTransitionLevels_.resize(groups_.size());
@@ -545,6 +624,83 @@ namespace cnahouse::lighting
             return sun;
         }
         return MoonKeyForCell(cell);
+    }
+
+    ObjectLightAssignment LightingSystem::DirectionalLightsForObject(util::Id cell) const noexcept
+    {
+        ObjectLightAssignment assignment;
+        const auto found = cellIndex_.find(cell.Value());
+        if (found == cellIndex_.end())
+        {
+            return assignment;
+        }
+        const std::size_t cellIndex = found->second;
+
+        if (const CelestialKeyLight* celestial = CelestialKeyForCell(cell); celestial != nullptr)
+        {
+            assignment.slots[0] = ObjectDirectionalLight{celestial->direction, celestial->diffuseColor};
+            if (hasDaylightFillDirection_[cellIndex] && cells_[cellIndex].daylight > 0.0F)
+            {
+                constexpr float kWindowFill = 0.35F;
+                assignment.slots[1] = ObjectDirectionalLight{daylightFillDirections_[cellIndex],
+                                                             Vector3(kWindowFill * skyAmbientColor_.X,
+                                                                     kWindowFill * skyAmbientColor_.Y,
+                                                                     kWindowFill * skyAmbientColor_.Z)};
+            }
+        }
+        else
+        {
+            std::array<std::pair<float, std::size_t>, 2> brightest{{{-1.0F, 0u}, {-1.0F, 0u}}};
+            for (const std::size_t fixtureIndex : objectFixturesByCell_[cellIndex])
+            {
+                const ObjectFixture& fixture = objectFixtures_[fixtureIndex];
+                const float emitted = fixture.lumens * GroupOutputLevel(fixture.groupIndex);
+                if (emitted > brightest[0].first)
+                {
+                    brightest[1] = brightest[0];
+                    brightest[0] = {emitted, fixtureIndex};
+                }
+                else if (emitted > brightest[1].first)
+                {
+                    brightest[1] = {emitted, fixtureIndex};
+                }
+            }
+            const float denominator = cellGroups_[cellIndex].totalLumens;
+            for (std::size_t slot = 0; slot < brightest.size(); ++slot)
+            {
+                if (brightest[slot].first <= 0.0F || denominator <= 0.0F)
+                {
+                    continue;
+                }
+                const ObjectFixture& fixture = objectFixtures_[brightest[slot].second];
+                const float share = std::clamp(brightest[slot].first / denominator, 0.0F, 1.0F);
+                assignment.slots[slot] = ObjectDirectionalLight{
+                    fixture.direction,
+                    Vector3(share * fixture.color.X, share * fixture.color.Y, share * fixture.color.Z)};
+            }
+        }
+
+        if (assignment.slots[0].has_value())
+        {
+            const ObjectDirectionalLight& key = *assignment.slots[0];
+            const Vector3 fillDirection =
+                assignment.slots[1].has_value() ? assignment.slots[1]->direction : Vector3();
+            const Vector3 fillColor =
+                assignment.slots[1].has_value() ? assignment.slots[1]->diffuseColor : Vector3();
+            const Vector3 bounceDirection =
+                NormalizedOr(Vector3(-(key.direction.X + fillDirection.X),
+                                     -(key.direction.Y + fillDirection.Y),
+                                     -(key.direction.Z + fillDirection.Z)),
+                             Vector3(-key.direction.X, -key.direction.Y, -key.direction.Z));
+            const Vector3& surface = dominantSurfaceColors_[cellIndex];
+            constexpr float kBounce = 0.18F;
+            assignment.slots[2] =
+                ObjectDirectionalLight{bounceDirection,
+                                       Vector3(kBounce * surface.X * (key.diffuseColor.X + fillColor.X),
+                                               kBounce * surface.Y * (key.diffuseColor.Y + fillColor.Y),
+                                               kBounce * surface.Z * (key.diffuseColor.Z + fillColor.Z))};
+        }
+        return assignment;
     }
 
 } // namespace cnahouse::lighting

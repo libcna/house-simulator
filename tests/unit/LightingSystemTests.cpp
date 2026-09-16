@@ -44,6 +44,7 @@ namespace
     using cnahouse::lighting::kAmbientFloor;
     using cnahouse::lighting::kDaylightKeyThreshold;
     using cnahouse::lighting::LightingSystem;
+    using cnahouse::lighting::ObjectLightAssignment;
     using cnahouse::lighting::OutdoorSkyIrradianceFor;
     using cnahouse::lighting::PlanckianRgb;
     using cnahouse::lighting::RoomLightState;
@@ -855,6 +856,44 @@ TEST(LightingSystemTests, DaylightIsKeyOnlyAboveSectionTwentyEightsThreshold)
     EXPECT_FALSE(state.DaylightIsKey());
     state.daylight = 0.15F;
     EXPECT_TRUE(state.DaylightIsKey());
+}
+
+TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInStableSlots)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    house.clock.calendarDaysPerSimDay = 1.0;
+    cnahouse::environment::CivilTime night;
+    night.year = 2031;
+    night.month = 6;
+    night.day = 21;
+    night.hour = 22;
+    house.clock.SetStandard(night);
+    house.lighting.Update(Frame(30));
+
+    const Id porch = Id::Of("L0_PORCH");
+    const ObjectLightAssignment lights = house.lighting.DirectionalLightsForObject(porch);
+    ASSERT_TRUE(lights.slots[0].has_value());
+    ASSERT_TRUE(lights.slots[1].has_value());
+    ASSERT_TRUE(lights.slots[2].has_value());
+    EXPECT_EQ(lights.slots[0]->direction, Microsoft::Xna::Framework::Vector3(0.0F, -1.0F, 0.0F));
+    EXPECT_EQ(lights.slots[1]->direction, Microsoft::Xna::Framework::Vector3(0.0F, -1.0F, 0.0F));
+    EXPECT_NEAR(lights.slots[0]->diffuseColor.X, lights.slots[1]->diffuseColor.X, 1.0e-6F)
+        << "the equal porch pair must have equal energy before distance attenuation";
+    EXPECT_GT(lights.slots[2]->direction.Y, 0.99F);
+    EXPECT_GT(lights.slots[2]->diffuseColor.X, 0.0F);
+    EXPECT_LT(lights.slots[2]->diffuseColor.X,
+              lights.slots[0]->diffuseColor.X + lights.slots[1]->diffuseColor.X);
+
+    ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_PORCH_LANTERN"), false));
+    const ObjectLightAssignment dark = house.lighting.DirectionalLightsForObject(porch);
+    EXPECT_FALSE(dark.slots[0].has_value());
+    EXPECT_FALSE(dark.slots[1].has_value());
+    EXPECT_FALSE(dark.slots[2].has_value());
+    EXPECT_FALSE(house.lighting.DirectionalLightsForObject(Id::Of("NO_SUCH_CELL")).slots[0].has_value());
 }
 
 TEST(LightingSystemTests, TheFramePublishesTheSunAndTheDaylightModelInWorldCellOrder)

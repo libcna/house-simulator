@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <array>
 #include <memory>
 #include <optional>
 #include <span>
@@ -114,12 +115,12 @@ namespace cnahouse::rendering
         float fresnelFactor = 1.0F;
     };
 
-    /// @brief One explicit stock-XNA key for non-lightmapped Basic detail.
+    /// @brief One explicit stock-XNA directional-light slot for lit object detail.
     ///
     /// A shared BasicEffect constructs with DirectionalLight0 enabled at white (1,1,1). Leaving
     /// it untouched makes a dark room's furniture look self-lit. The caller must supply a live
     /// cell-derived light; null means no directional contribution, never the constructor default.
-    struct BasicKeyLight
+    struct StockDirectionalLight
     {
         Microsoft::Xna::Framework::Vector3 direction{0.0F, -1.0F, 0.0F};
         Microsoft::Xna::Framework::Vector3 diffuse{0.0F, 0.0F, 0.0F};
@@ -145,8 +146,11 @@ namespace cnahouse::rendering
         Microsoft::Xna::Framework::Vector3 colourMultiplier{1.0F, 1.0F, 1.0F};
         /// @brief `Basic`/`Skinned` ambient term for non-lightmapped detail geometry.
         Microsoft::Xna::Framework::Vector3 ambientLight{0.0F, 0.0F, 0.0F};
-        /// @brief `Basic` only: explicit live-cell key, or no key. Never inherits XNA's white one.
-        std::optional<BasicKeyLight> basicKey;
+        /// @brief `Basic`/`Skinned`: key, fill and bounce in XNA slot order.
+        ///
+        /// A missing slot is explicitly disabled. This is important for the shared effect objects:
+        /// no later draw may inherit a light written for an earlier room or actor.
+        std::array<std::optional<StockDirectionalLight>, 3> directionalLights;
         /// Null disables fog. Non-null enables it with the supplied environment-owned values.
         const FogParams* fog = nullptr;
         /// @brief `Skinned` only. Skin-local, and at most `SkinnedEffect::MaxBones`.

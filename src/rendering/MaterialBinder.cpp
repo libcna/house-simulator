@@ -63,6 +63,24 @@ namespace cnahouse::rendering
             }
         }
 
+        void ApplyDirectionalLight(auto& slot, const std::optional<StockDirectionalLight>& light)
+        {
+            slot.setEnabledProperty(light.has_value());
+            if (light.has_value())
+            {
+                slot.setDirectionProperty(light->direction);
+                slot.setDiffuseColorProperty(light->diffuse);
+                slot.setSpecularColorProperty(light->specular);
+            }
+        }
+
+        void ApplyDirectionalLights(auto& effect, const DrawParams& draw)
+        {
+            ApplyDirectionalLight(effect.getDirectionalLight0Property(), draw.directionalLights[0]);
+            ApplyDirectionalLight(effect.getDirectionalLight1Property(), draw.directionalLights[1]);
+            ApplyDirectionalLight(effect.getDirectionalLight2Property(), draw.directionalLights[2]);
+        }
+
         MaterialKind ToMaterialKind(world::EffectTier tier) noexcept
         {
             switch (tier)
@@ -295,20 +313,16 @@ namespace cnahouse::rendering
                 effect.setVertexColorEnabledProperty(desc->vertexColour);
                 effect.setLightingEnabledProperty(desc->lightingEnabled);
                 effect.setPreferPerPixelLightingProperty(desc->perPixelLighting);
-                auto& key = effect.getDirectionalLight0Property();
-                if (desc->lightingEnabled && draw.basicKey.has_value())
+                if (desc->lightingEnabled)
                 {
-                    key.setDirectionProperty(draw.basicKey->direction);
-                    key.setDiffuseColorProperty(draw.basicKey->diffuse);
-                    key.setSpecularColorProperty(draw.basicKey->specular);
-                    key.setEnabledProperty(true);
+                    ApplyDirectionalLights(effect, draw);
                 }
                 else
                 {
-                    key.setEnabledProperty(false);
+                    effect.getDirectionalLight0Property().setEnabledProperty(false);
+                    effect.getDirectionalLight1Property().setEnabledProperty(false);
+                    effect.getDirectionalLight2Property().setEnabledProperty(false);
                 }
-                effect.getDirectionalLight1Property().setEnabledProperty(false);
-                effect.getDirectionalLight2Property().setEnabledProperty(false);
                 effect.setTextureEnabledProperty(draw.diffuse != nullptr);
                 if (draw.diffuse != nullptr)
                 {
@@ -399,6 +413,7 @@ namespace cnahouse::rendering
                 effect.setPreferPerPixelLightingProperty(desc->perPixelLighting);
                 effect.setWeightsPerVertexProperty(4);
                 effect.setTextureProperty(draw.diffuse);
+                ApplyDirectionalLights(effect, draw);
                 ApplyFog(effect, draw);
                 // The palette is fixed-length, so a shorter one is padded with identities. MEASURED
                 // (`HOUSE-00075`): blend indices are SKIN-LOCAL, so slot i is joint i of this skin and

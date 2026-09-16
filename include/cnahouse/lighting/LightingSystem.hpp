@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string_view>
 #include <unordered_map>
@@ -81,6 +83,19 @@ namespace cnahouse::lighting
     {
         Microsoft::Xna::Framework::Vector3 direction{0.0F, -1.0F, 0.0F};
         Microsoft::Xna::Framework::Vector3 diffuseColor{0.0F, 0.0F, 0.0F};
+    };
+
+    /// @brief One of §28.5's stock-XNA key/fill/bounce values before effect-specific exposure.
+    struct ObjectDirectionalLight
+    {
+        Microsoft::Xna::Framework::Vector3 direction{0.0F, -1.0F, 0.0F};
+        Microsoft::Xna::Framework::Vector3 diffuseColor{0.0F, 0.0F, 0.0F};
+    };
+
+    /// @brief The three stock-XNA slots in key, fill, bounce order.
+    struct ObjectLightAssignment
+    {
+        std::array<std::optional<ObjectDirectionalLight>, 3> slots;
     };
 
     /// @brief §28.1's per-frame loop, at `UpdateStage::Lighting` (`HOUSE-01251`).
@@ -248,6 +263,13 @@ namespace cnahouse::lighting
         /// @brief The one celestial key for @p cell: daylight sun first, then night-time moon.
         [[nodiscard]] const CelestialKeyLight* CelestialKeyForCell(util::Id cell) const noexcept;
 
+        /// @brief Assign §28.5's key, fill and bounce for an object in @p cell.
+        ///
+        /// This task establishes the stable three-slot assignment. Point fixtures use their
+        /// authored direction here; `HOUSE-01262` adds the object's centre and the approved
+        /// point-as-directional distance attenuation without changing the effect contract.
+        [[nodiscard]] ObjectLightAssignment DirectionalLightsForObject(util::Id cell) const noexcept;
+
         /// @brief Select the cell whose exposure the camera follows this frame.
         void SetCameraCell(util::Id cell) noexcept
         {
@@ -291,6 +313,14 @@ namespace cnahouse::lighting
             float totalLumens = 0.0F;
         };
 
+        struct ObjectFixture
+        {
+            std::size_t groupIndex = 0;
+            Microsoft::Xna::Framework::Vector3 direction{0.0F, -1.0F, 0.0F};
+            Microsoft::Xna::Framework::Vector3 color{1.0F, 1.0F, 1.0F};
+            float lumens = 0.0F;
+        };
+
         [[nodiscard]] SwitchGroupState* FindGroupMutable(util::Id group) noexcept;
         [[nodiscard]] float GroupOutputLevel(std::size_t groupIndex) const noexcept;
         void AdvanceBulbTransitions(float deltaSeconds) noexcept;
@@ -309,6 +339,11 @@ namespace cnahouse::lighting
         /// @brief Every cell's group ids, packed end to end; `CellGroups` indexes into it.
         std::vector<util::Id> cellGroupIds_;
         std::vector<CellGroups> cellGroups_;
+        std::vector<ObjectFixture> objectFixtures_;
+        std::vector<std::vector<std::size_t>> objectFixturesByCell_;
+        std::vector<Microsoft::Xna::Framework::Vector3> dominantSurfaceColors_;
+        std::vector<Microsoft::Xna::Framework::Vector3> daylightFillDirections_;
+        std::vector<bool> hasDaylightFillDirection_;
         std::unordered_map<std::uint32_t, std::size_t> cellIndex_;
         std::unordered_map<std::uint32_t, std::size_t> groupIndex_;
         std::vector<bool> outdoorCells_;
