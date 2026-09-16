@@ -195,7 +195,7 @@ GPU. **The cost is four bytes a vertex** — 32 uploaded where this file stores 
 and `CellRuntime::ResidentBytes()` counts what was uploaded so the difference is measured rather
 than assumed. A generic `SetData<T>` in CNA would remove it.
 
-## 5. Grouping: the four-part key has one free part
+## 5. Grouping: the architectural key plus switched emitters
 
 §17.4 groups by `(effectClass, material, lightGroupSet, alphaMode)`. Measured against the data
 model, three of those four are not independent:
@@ -204,14 +204,17 @@ model, three of those four are not independent:
 * `class`, which decides `effectClass`, is a **field of the material**;
 * `lightGroups` lives on the **cell**, and a chunk never spans two cells.
 
-So the key collapses, exactly and without loss, to **the material id**, and *"≤ 6 chunks per cell"*
-means *"≤ 6 distinct materials among a cell's static props"* — which is a far more useful sentence
-to give an author, because it is the thing they control.
+So for ordinary geometry the key collapses, exactly and without loss, to **the material id**, and
+*"≤ 6 chunks per cell"* normally means *"≤ 6 distinct materials among a cell's static props"* —
+which is a far more useful sentence to give an author, because it is the thing they control.
 
-The writer still builds the key from all four parts, so that a schema which later gives a prop its
-own light groups needs no change, and `--report` prints how many chunks the other three parts
-actually separated. Today that number is zero, and printing it is better than a comment asserting
-it.
+`HOUSE-01259` adds one internal fifth discriminator: the switch group of a linked fixture's exact
+emissive source slot. It is empty for shell, vegetation and ordinary props. It is deliberately not
+serialized as a new chunk-file field: sub-range source prop ids and canonical light links let the
+runtime derive the same group, while the build-time discriminator ensures two shades that share a
+material but have independent switches can never merge into one draw. The porcelain/wood/etc.
+case still batches exactly as before. `--report` prints how many chunks the non-material parts
+actually separate rather than assuming that number is zero.
 
 ## 6. Where the two limits pull against each other
 

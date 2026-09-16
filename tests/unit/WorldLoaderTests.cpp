@@ -3617,8 +3617,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 163U)
-            << "HOUSE-00772 adds five fallback and nine exact-atlas vegetation roles";
+        EXPECT_EQ(contents.materials.size(), 165U)
+            << "HOUSE-01259 adds the physical porch fixture's bronze and emissive finishes";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3643,6 +3643,12 @@ namespace
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_VEGETATION_"); }),
                   14)
             << "HOUSE-00772 loads five fallback and nine source-exact vegetation roles";
+        EXPECT_EQ(std::count_if(contents.materials.begin(),
+                                contents.materials.end(),
+                                [](const world::MaterialDef& material)
+                                { return IdRegistry::NameOf(material.id).starts_with("MAT_FIXTURE_"); }),
+                  2)
+            << "HOUSE-01259 keeps the lantern cage and switched diffuser independent";
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),

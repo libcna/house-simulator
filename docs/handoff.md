@@ -1,32 +1,48 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01258` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01259` checkpoint)
 
-Branch `develop`. Task-start HEAD `f5af4b81b923235bdaecbb9c02283f7176d99bde`
-(`HOUSE-01269`). This file belongs to the single `HOUSE-01258` commit; use that commit as the
-ending HEAD. **VISUAL-GATE-1 still FAILS.** This checkpoint is the shortest real dependency of
-visible fixture emissives rather than a claim that the fixed still image improved: the eleven
-Round 23 captures remain the canonical latest set.
+Branch `develop`. Task-start HEAD `958f08f` (`HOUSE-01258`). This file belongs to the single
+`HOUSE-01259` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and the explicit blockout mode is untouched.
 
-All 243 fixtures now resolve through the closed `bulbClass` vocabulary: 166 filament, 73 LED and
-four fluorescent, forming 94/40/1 internally consistent groups. Filament ramps smoothly over
-0.12 s, LED switches instantly, and the garage fluorescent follows a deterministic two-drop
-strike curve before settling at 0.4 s. A group's transition output is shared by its Tier-S atlas,
-room state and borrowed-light consumers; its persistent switch bit/dimmer remains the target.
-Loaded/default/dusk state snaps on the first update, and only a live off→on edge plays the start,
-so a 22:00 review does not replay the entire street.
+The entrance now has two real deterministic 0.608 m wall lanterns rather than placeholder strips.
+Each 232-triangle model has a dark-bronze framed body and a separate warm diffuser; both source
+slots map through the canonical manifest/material system with generated/Ms-PL provenance. The
+two static props live in `L0_PORCH`. Their exact `LanternShade` slots link to the existing automatic
+porch group, so the stock-BasicEffect production pass consumes its Kelvin colour and post-filament
+`GroupOutputLevel`. The close 10:30 check shows non-glowing physical bodies and the matching 22:00
+check shows warm live shades. No custom shader, CNAEXT path or second switch state was added.
 
-The schema, loader and Python/C++ validators know the new class and reject mixed envelopes inside
-one baked group. Focused validation, 32 unit tests, all five software-device
-`StaticGeometryPassTests` and all 1,404 unit tests pass. Integration reports 122 passes, eight
-configured skips and its pre-existing order-sensitive transparent-pass failure (1/1 alone). The
-render suite's 46 unchanged frames pass; `sun-season-03/04` were visibly inspected, identified as
-the intended carry-over from `HOUSE-01269` dusk lighting, intentionally advanced, and both pass on
-recapture. The world build rebuilt 14 stages in 24.41 s, including nav in 8.11 s. The complete
-`tools/ci/run_checks.sh` gate is green, including strict-XNA recompilation of 323 translation units.
+The cross-file fixture contract is now enforced: a linked prop must exist in the light's cell,
+name a source slot, and map that exact slot to an emissive canonical material. The chunk builder
+keeps independently switched shades apart with an internal fifth key discriminator while retaining
+the four-part on-disk format and prop sub-ranges. A missed shell-key update briefly split kitchen
+paint into a four/five-tuple pair; it was diagnosed rather than budgeted away and kitchen is back
+at 13/13 chunks. Porch is a measured 8/8: its existing six finish/plant chunks plus one shared
+bronze-body and one shared switched-diffuser chunk.
 
-Next highest visible value remains `HOUSE-01259`: consume `GroupOutputLevel` for actual fixture
-emissive materials, beginning with real porch-lantern bodies/shades in the fixed exterior-front
-view. `HOUSE-01260` then adds restrained exposure-aware bulb glows; the still-dark façade and
-missing local entrance pool remain explicit defects. Do not raise global exposure.
+Before: [Round 23 fixed night set](visual-review/captures/house-01269-night-r2). After: identical
+eleven-view [Round 25 night set](visual-review/captures/house-01259-night-r1), plus the
+[close live entrance](visual-review/captures/house-01259-night-r1/exterior-approach-close.png) and
+[close day/off state](visual-review/captures/house-01259-night-r1/exterior-approach-day-check.png).
+All three relevant frames were opened at original resolution. The road view changes 0.0602% of
+pixels; its tight fixture crop rises RGB(15.29,12.65,12.32) → (18.54,14.82,12.85). This is a
+correctly scaled source presentation, not yet a local-light solution.
+
+Verification is green. The complete 1,404-test unit suite passes; 123 non-save integration cases
+and all 10 save-store cases pass; all 49 active software render cases pass, including the
+culled/unculled comparison. Five exterior references were advanced only after their diffs showed
+the intended new fixtures; two unrelated low-level vegetation differences from bulk regeneration
+were rejected. Chunk self-test, deterministic source-asset check, GLB scale/origin validation,
+all 13 world rules and the incremental world content build pass. `tools/ci/run_checks.sh` is green
+through all 323 strict-XNA translation units with `CNA_CNAEXT=OFF`. Its first run caught the GLB's
+wall-centred pivot; the generator now emits the standard bottom-centred fixture origin while the
+inverse prop translation preserves the inspected world pose. The earlier ~20-hour `build_nav.py`
+was a runaway/stale session: the dirty nav build in this checkpoint finished in 9.22 seconds.
+
+Next highest visible value is `HOUSE-01260`: add restrained exposure-aware glow to the two now
+physical sources. The largest remaining visible defect is the missing local halo/pool, followed by
+the broad black façade, flat/skeletal porch and roof, then kitchen practical detail, family material
+depth and dining furnishing. Do not hide any of these by raising global exposure.
 
 ---
 

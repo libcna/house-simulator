@@ -935,6 +935,7 @@ def rule_6_references(world: World) -> list[Problem]:
     assets = _asset_ids(world)
     light_groups = {row.get("group") for row in world.lights}
     interactables = {row.get("id") for row in world.interactables}
+    props_by_id = {row.get("id"): row for row in world.props}
     nav_regions = {cell.get("navMeshRegion") for cell in world.cells
                    if cell.get("navMeshRegion")}
 
@@ -954,6 +955,7 @@ def rule_6_references(world: World) -> list[Problem]:
     have_cells = "cells" in world.layout
     have_portals = "portals" in world.layout
     have_interactables = "interactables" in world.layout
+    have_props = "props" in world.layout
 
     for index, cell in enumerate(world.cells):
         for field in ("floorMaterial", "wallMaterial", "ceilingMaterial", "trimMaterial"):
@@ -1015,6 +1017,21 @@ def rule_6_references(world: World) -> list[Problem]:
     bulb_class_by_group: dict[str, str] = {}
     for index, light in enumerate(world.lights):
         check("lights", index, "cell", light.get("cell"), cells, "cell", have_cells)
+        fixture_prop = light.get("fixtureProp")
+        check("lights", index, "fixtureProp", fixture_prop, set(props_by_id), "prop", have_props)
+        fixture = props_by_id.get(fixture_prop)
+        if fixture is not None and fixture.get("cell") != light.get("cell"):
+            problems.append(Problem(
+                6, FILE_OF["lights"], f"lights/{index}/fixtureProp",
+                f"light {light.get('id')} and fixture prop {fixture_prop} are in different cells"))
+        if fixture is not None and not fixture.get("static", True):
+            problems.append(Problem(
+                6, FILE_OF["lights"], f"lights/{index}/fixtureProp",
+                f"linked fixture prop {fixture_prop} must be static geometry"))
+        if fixture_prop is not None and not light.get("emissiveMaterialSlot"):
+            problems.append(Problem(
+                6, FILE_OF["lights"], f"lights/{index}/emissiveMaterialSlot",
+                "a linked fixture must name its exact emissive source material slot"))
         group = light.get("group")
         dusk = bool(light.get("duskSensor", False))
         if group in dusk_by_group and dusk_by_group[group] != dusk:

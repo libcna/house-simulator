@@ -413,6 +413,41 @@ namespace cnahouse::world
                              "dusk-controlled light " + Name(light.id) +
                                  " must start off; the live sun decides its state");
                 }
+                if (light.fixtureProp.IsValid())
+                {
+                    const Prop* fixture = world.FindProp(light.fixtureProp);
+                    if (fixture == nullptr)
+                    {
+                        sink.Add(6,
+                                 "layout.lights.json",
+                                 "lights/" + Name(light.id) + "/fixtureProp",
+                                 "light " + Name(light.id) + " names fixture prop " +
+                                     Name(light.fixtureProp) + ", which does not exist");
+                    }
+                    else if (fixture->cell != light.cell)
+                    {
+                        sink.Add(6,
+                                 "layout.lights.json",
+                                 "lights/" + Name(light.id) + "/fixtureProp",
+                                 "light " + Name(light.id) + " and fixture prop " + Name(light.fixtureProp) +
+                                     " are in different cells");
+                    }
+                    else if (!fixture->isStatic)
+                    {
+                        sink.Add(6,
+                                 "layout.lights.json",
+                                 "lights/" + Name(light.id) + "/fixtureProp",
+                                 "linked fixture prop " + Name(light.fixtureProp) +
+                                     " must be static geometry");
+                    }
+                    if (light.emissiveMaterialSlot.empty())
+                    {
+                        sink.Add(6,
+                                 "layout.lights.json",
+                                 "lights/" + Name(light.id) + "/emissiveMaterialSlot",
+                                 "a linked fixture must name its exact emissive source material slot");
+                    }
+                }
             }
 
             // A duct branch and its cells agree.

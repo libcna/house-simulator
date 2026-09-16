@@ -1,6 +1,6 @@
 {
   "schema": "cna-house/manifest/1",
-  "worldHash": "sha256:cc134d662fc07ae7888a379ab2637351aa54f0b7c5e206a998db1843a4326444",
+  "worldHash": "sha256:5c20ec5fb18f247428f8b0851e82997345573465c8f0d2b0c2219d3dd3fc2f79",
   "members": [
     {
       "file": "layout.levels.json",
@@ -24,15 +24,15 @@
     },
     {
       "file": "layout.lights.json",
-      "sha256": "sha256:10bd5f275a8aa1c7a6c5c698b581031357ae4bae121cdeb3c218a2ed95b7c178"
+      "sha256": "sha256:a1791fc6b3ae7295d0c1e718e2ef60749061ab9f7375a6896ce37d69723bbbcd"
     },
     {
       "file": "layout.props.json",
-      "sha256": "sha256:5261fbd78d737999e8967a7cbf7b8324d10d816458989d6a22849d57ce8475ea"
+      "sha256": "sha256:505e3a394527164ec3f55cb4ec3cb0d0b063282022645a0f7c015c387bbb862d"
     },
     {
       "file": "layout.materials.json",
-      "sha256": "sha256:e1966ed878b4aee81741e8065a90b6f5856fe55125fd501c258f082588933e6d"
+      "sha256": "sha256:28aedb231a91382df953103826b508c5ab7f93290a7552758d01e0427b1bc65d"
     },
     {
       "file": "layout.nav.json",

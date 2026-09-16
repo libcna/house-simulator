@@ -21,9 +21,10 @@
   // `bulbClass` is explicit for the non-default LED and fluorescent fixtures because shape and
   // kelvin do not identify technology. Omitted means the warm filament default.
   //
-  // `fixtureProp` is null throughout: the props are `HOUSE-00450` onwards and a made-up id would
-  // be a reference to nothing. `emissiveMaterialSlot` is NOT null where the fixture has a visible
-  // lit part -- a shade, a tube -- because §53 lights that slot when the group comes on.
+  // `fixtureProp` remains null until a real canonical prop exists; `HOUSE-01259` establishes the
+  // contract with the two measured porch lanterns. `emissiveMaterialSlot` is the exact source
+  // material name in that prop, not a semantic guess such as "shade". The chunk build validates
+  // the linkage before preserving its group for the stock-XNA emissive draw.
   //
   // `defaultOn` is false everywhere. The switch state a game actually starts in is
   // `initialstate.json`'s (§65.6, `HOUSE-00395`); this is what the world is before any state is
@@ -2071,7 +2072,7 @@
       "type": "point", "position": [-0.90, 2.62, -14.25],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "fixtureProp": "PROP_L0_PORCH_LANTERN_1", "emissiveMaterialSlot": "LanternShade",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
       "duskSensor": true
     },
@@ -2080,7 +2081,7 @@
       "type": "point", "position": [0.90, 2.62, -14.25],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "fixtureProp": "PROP_L0_PORCH_LANTERN_2", "emissiveMaterialSlot": "LanternShade",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
       "duskSensor": true
     },

@@ -890,6 +890,8 @@ materials/materials	MAT_DECK_WOOD_WET
 materials/materials	MAT_DOOR_HARDWOOD
 materials/materials	MAT_DOOR_PAINTED
 materials/materials	MAT_DOOR_STEEL
+materials/materials	MAT_FIXTURE_DARK_BRONZE
+materials/materials	MAT_FIXTURE_EMISSIVE_WARM
 materials/materials	MAT_FLOOR_CONCRETE
 materials/materials	MAT_FLOOR_STONE
 materials/materials	MAT_FLOOR_VINYL
@@ -999,6 +1001,7 @@ materials/materials	MAT_WINDOW_GLASS_OBSCURED
 materials/materials	MAT_WOOD_OAK_FLOOR
 materials/materials	MAT_WOOD_WALNUT_FLOOR
 assets	MODEL_FALLBACK_BOX
+assets	MODEL_FIXTURE_PORCH_LANTERN
 assets	MODEL_FURNITURE_COFFEE_TABLE
 assets	MODEL_FURNITURE_FLOOR_LAMP
 assets	MODEL_FURNITURE_FOYER_ARMCHAIR
@@ -1525,6 +1528,8 @@ props/props	PROP_L0_KITCHEN_ISLAND
 props/props	PROP_L0_KITCHEN_NORTH_BASE_RUN
 props/props	PROP_L0_KITCHEN_RANGE_WALL
 props/props	PROP_L0_KITCHEN_REFRIGERATOR
+props/props	PROP_L0_PORCH_LANTERN_1
+props/props	PROP_L0_PORCH_LANTERN_2
 props/props	PROP_LIVING_CHAIR_GREEN
 props/props	PROP_LIVING_CHAIR_PURPLE
 props/props	PROP_LIVING_COFFEE

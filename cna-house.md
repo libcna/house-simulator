@@ -1590,6 +1590,13 @@ in a rectilinear wall.
 }
 ```
 
+`fixtureProp` is an optional link to the visible source of the light. When it is present, the prop
+must exist in the same cell and `emissiveMaterialSlot` names the exact source material slot in its
+model. That slot's manifest bridge resolves to an `emissive` canonical material. The content build
+keeps differently switched emitters in separate static chunks, and the production Tier-S pass
+tints the physical diffuser from the light group's live Kelvin colour and switch-on envelope.
+This is a stock `BasicEffect` material path, not a custom shader or a second light-state system.
+
 ### 15.6 Schema — interactables
 
 ```jsonc

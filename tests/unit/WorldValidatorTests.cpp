@@ -30,15 +30,16 @@ namespace
             GTEST_SKIP() << "no deployed world; run tools/world/deploy_world.py";
         }
 
-        // Loaded file by file rather than through `Load`, which requires all sixteen: props are
-        // later work, and waiting for them would mean the C++ rules check nothing until then.
-        // Every file that exists is read, in dependency order.
+        // Loaded file by file rather than through `Load`, which requires all sixteen. Every file
+        // that exists is read in dependency order, including props now that visible light fixtures
+        // make the light-to-prop edge part of rule 6.
         world::WorldData::Contents contents;
         using Loader = cnahouse::util::Result<void> (*)(std::string_view, world::WorldData::Contents&);
         for (const auto& [file, load] : std::initializer_list<std::pair<const char*, Loader>>{
                  {"layout.levels.json", &world::WorldLoader::LoadLevels},
                  {"layout.materials.json", &world::WorldLoader::LoadMaterials},
                  {"layout.cells.json", &world::WorldLoader::LoadCells},
+                 {"layout.props.json", &world::WorldLoader::LoadProps},
                  {"layout.portals.json", &world::WorldLoader::LoadPortals},
                  {"layout.openings.json", &world::WorldLoader::LoadOpenings},
                  {"layout.stairs.json", &world::WorldLoader::LoadStairs},
@@ -276,6 +277,26 @@ namespace
             contents.lights.front().duskSensor = true;
             contents.lights.front().defaultOn = true;
             EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a dusk light defaulted on";
+        }
+
+        // Rule 6: a visible emitter is a real prop in the same cell, not an unchecked string.
+        {
+            auto contents = Fixture();
+            contents.lights.front().fixtureProp = Intern("PROP_MISSING_FIXTURE");
+            contents.lights.front().emissiveMaterialSlot = "Shade";
+            EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a missing fixture prop";
+        }
+        {
+            auto contents = Fixture();
+            world::Prop fixture;
+            fixture.id = Intern("PROP_DYNAMIC_FIXTURE");
+            fixture.asset = Intern("MODEL_DYNAMIC_FIXTURE");
+            fixture.cell = contents.lights.front().cell;
+            fixture.isStatic = false;
+            contents.props.push_back(fixture);
+            contents.lights.front().fixtureProp = fixture.id;
+            contents.lights.front().emissiveMaterialSlot = "Shade";
+            EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a dynamic fixture prop";
         }
 
         // Rule 6 again: a soundLoss that disagrees with §64.3's class for its leaf.

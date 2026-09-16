@@ -43,6 +43,40 @@ namespace cnahouse::rendering
         return cellKind == world::CellKind::Exterior || exteriorFacing ? 1.0F : cameraEffectExposure;
     }
 
+    util::Id FixtureGroupForChunk(const world::Chunk& chunk, std::span<const world::Light> lights) noexcept
+    {
+        util::Id group;
+        for (const world::ChunkSubRange& range : chunk.subRanges)
+        {
+            const util::Id prop = util::Id::Of(range.source);
+            for (const world::Light& light : lights)
+            {
+                if (light.fixtureProp != prop || light.emissiveMaterialSlot.empty())
+                {
+                    continue;
+                }
+                if (group.IsValid() && group != light.group)
+                {
+                    return {};
+                }
+                group = light.group;
+            }
+        }
+        return group;
+    }
+
+    Vector3
+    FixtureEmissiveMultiplier(const Vector3& groupColour, float groupLevel, float effectExposure) noexcept
+    {
+        const float level = std::isfinite(groupLevel) ? std::clamp(groupLevel, 0.0F, 1.0F) : 0.0F;
+        const float exposure = std::isfinite(effectExposure) ? std::clamp(effectExposure, 0.0F, 6.0F) : 1.0F;
+        const float reflected = 0.06F * exposure;
+        const float emitted = level * (0.38F + 0.92F * std::min(exposure, 1.5F));
+        return Vector3(reflected + emitted * std::max(groupColour.X, 0.0F),
+                       reflected + emitted * std::max(groupColour.Y, 0.0F),
+                       reflected + emitted * std::max(groupColour.Z, 0.0F));
+    }
+
     namespace
     {
         // Non-lightmapped Basic detail has no per-surface LM_DAY attenuation. The first fixed
@@ -139,6 +173,11 @@ namespace cnahouse::rendering
         , textures_(std::move(textures))
         , mode_(StaticGeometryMode::ProductionMaterials)
     {
+        fixtureGroups_.reserve(library_.chunks.size());
+        for (const world::Chunk& chunk : library_.chunks)
+        {
+            fixtureGroups_.push_back(FixtureGroupForChunk(chunk, world.Lights()));
+        }
     }
 
     StaticGeometryPass::~StaticGeometryPass() = default;
@@ -288,12 +327,21 @@ namespace cnahouse::rendering
                 continue;
             }
             const world::Chunk& leaderChunk = library_.chunks[leader.geometry];
+            const util::Id leaderFixtureGroup =
+                leader.geometry < fixtureGroups_.size() ? fixtureGroups_[leader.geometry] : util::Id{};
             std::size_t last = first + 1u;
             while (last < items.size() && items[last].effect == leader.effect &&
                    items[last].material == leader.material && items[last].geometry < library_.chunks.size())
             {
                 const world::Chunk& candidate = library_.chunks[items[last].geometry];
                 if (candidate.cell != leaderChunk.cell || candidate.layout != leaderChunk.layout)
+                {
+                    break;
+                }
+                const util::Id candidateFixtureGroup = items[last].geometry < fixtureGroups_.size()
+                                                           ? fixtureGroups_[items[last].geometry]
+                                                           : util::Id{};
+                if (candidateFixtureGroup != leaderFixtureGroup)
                 {
                     break;
                 }
@@ -579,7 +627,14 @@ namespace cnahouse::rendering
                     }
                 }
                 const MaterialDesc* description = binder_->Find(material->id);
-                if (description != nullptr && !description->lightingEnabled)
+                if (material->materialClass == world::MaterialClass::Emissive && leaderFixtureGroup.IsValid())
+                {
+                    draw.colourMultiplier =
+                        FixtureEmissiveMultiplier(lighting_->GroupColor(leaderFixtureGroup),
+                                                  lighting_->GroupOutputLevel(leaderFixtureGroup),
+                                                  exposure);
+                }
+                else if (description != nullptr && !description->lightingEnabled)
                 {
                     draw.colourMultiplier = Vector3(exposure, exposure, exposure);
                 }

@@ -160,6 +160,10 @@ CHUNK_BUDGET_EXCEPTIONS = {
                    "shell/window finish groups plus oak joinery, marble counter stone, brushed "
                    "steel, a close-range 150 mm backsplash tile and opaque oven glass. Painted "
                    "cabinet fronts reuse trim; no Reach or vertex-cap split was added"),
+    "L0_PORCH": (8,
+                 "HOUSE-01259's physical pair of entrance lanterns adds one shared dark-bronze "
+                 "body chunk and one shared, independently switchable warm-diffuser chunk to "
+                 "the porch's existing six architectural and planting finishes"),
 }
 
 # `HOUSE-00926`: a separate weather-facing frame keeps indoor skirting out of the outdoor BVH.
@@ -557,17 +561,18 @@ def effect_layout(material: dict) -> int:
         f"{', '.join(sorted(CLASS_TO_LAYOUT))} (§22.2)")
 
 
-def group_key(prop: dict, cell: dict, material: dict) -> tuple:
-    """§17.4's key, built from all four parts even though three of them are not free.
+def group_key(prop: dict, cell: dict, material: dict, emissive_group: str = "") -> tuple:
+    """§17.4's key plus the fixture group needed by a switched emissive slot.
 
     Kept faithful rather than reduced, so that a schema which later gives a prop its own light
-    groups needs no change here. `--report` says how many chunks the three non-material parts
-    actually separated, which today is none -- and saying so is better than a comment claiming it.
+    groups needs no change here.  The final value is empty for ordinary geometry.  A linked
+    fixture's exact emissive source slot carries its switch group so two independently switched
+    shades in one cell can never be merged into one draw.
     """
     layout_id = effect_layout(material)
     light_groups = tuple(sorted(cell.get("lightGroups") or ()))
     return (LAYOUTS[layout_id][0], material["id"], light_groups,
-            material.get("alphaMode", "opaque"))
+            material.get("alphaMode", "opaque"), emissive_group)
 
 
 def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
@@ -578,12 +583,30 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
     layout = layout_io.load_layout(world_dir, ["levels", "cells"])
     layout["materials"] = layout_io.load_file(world_dir / layout_io.FILES["materials"][0],
                                                "materials")
-    for optional in ("props", "exterior"):
+    for optional in ("props", "lights", "exterior"):
         name, _ = layout_io.FILES[optional]
         if (world_dir / name).is_file():
             layout[optional] = layout_io.load_file(world_dir / name, optional)
     cells = layout_io.by_id(layout_io.rows(layout, "cells"), "cell")
     materials = layout_io.by_id(layout_io.rows(layout, "materials"), "material")
+
+    fixtures: dict[str, tuple[str, str, str]] = {}
+    for light in layout_io.rows(layout, "lights"):
+        prop_id = light.get("fixtureProp")
+        if not prop_id:
+            continue
+        slot = light.get("emissiveMaterialSlot")
+        if not isinstance(slot, str) or not slot:
+            raise LayoutError(
+                f"light {light['id']!r} links fixture prop {prop_id!r} but names no "
+                "emissiveMaterialSlot")
+        contract = (light["group"], slot, light["id"])
+        previous = fixtures.get(prop_id)
+        if previous is not None and previous[:2] != contract[:2]:
+            raise LayoutError(
+                f"fixture prop {prop_id!r} is linked by incompatible lights "
+                f"{previous[2]!r} and {light['id']!r}")
+        fixtures[prop_id] = contract
 
     asset_rows: dict[str, dict] = {}
     if manifest_path and manifest_path.is_file():
@@ -646,6 +669,10 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
     for prop in sorted(layout_io.rows(layout, "props"), key=lambda p: p["id"]):
         stats["props"] += 1
         if not prop.get("static", True):
+            if prop["id"] in fixtures:
+                raise LayoutError(
+                    f"fixture prop {prop['id']!r} is dynamic; linked emissive slots must be "
+                    "static geometry")
             stats["dynamic"] += 1
             continue
         cell = cells.get(prop["cell"])
@@ -654,9 +681,20 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
         override = prop.get("material")
         asset, path, meshes = source_meshes(f"prop {prop['id']}", prop["asset"], override)
 
+        fixture = fixtures.get(prop["id"])
+        found_emissive_slot = False
         for source_material, mesh in meshes:
             material_id, material = canonical_material(
                 f"prop {prop['id']}", asset, source_material, override)
+
+            emissive_group = ""
+            if fixture is not None and source_material == fixture[1]:
+                found_emissive_slot = True
+                if base_class(material.get("class")) != "emissive":
+                    raise LayoutError(
+                        f"light {fixture[2]!r} names source slot {fixture[1]!r} on prop "
+                        f"{prop['id']!r}, but it maps to non-emissive material {material_id!r}")
+                emissive_group = fixture[0]
 
             layout_id = effect_layout(material)
             if layout_id == LAYOUT_DUAL and not mesh["hasUv1"]:
@@ -667,10 +705,14 @@ def build(world_dir: Path, manifest_path: Path | None = None, shell_dirs=(),
 
             placed = place(mesh, [float(c) for c in prop["position"]],
                            float(prop.get("yawDeg", 0.0)), float(prop.get("scale", 1.0)))
-            key = (prop["cell"], group_key(prop, cell, material))
+            key = (prop["cell"], group_key(prop, cell, material, emissive_group))
             groups.setdefault(key, []).append({
                 "prop": prop["id"], "mesh": placed, "layout": layout_id,
                 "material": material_id})
+        if fixture is not None and not found_emissive_slot:
+            raise LayoutError(
+                f"light {fixture[2]!r} names emissive slot {fixture[1]!r}, but asset "
+                f"{asset['id']!r} on prop {prop['id']!r} has no source material by that name")
 
     # `HOUSE-00772`: exterior vegetation was authored in `layout.exterior.json` years before the
     # canonical renderer consumed it. Batch every deterministic placement through the same stock
@@ -1046,8 +1088,11 @@ def _shell_members(shell_dirs, cells: dict, materials: dict, stats: dict, outdoo
                 # `MAT_GLASS_CLEAR` in the file.
                 alpha = material.get("alphaMode", "opaque")
                 surface_class = entry["extras"].get("surfaceClass") or name
+                # The fifth discriminator is empty for every shell surface.  It must still be
+                # present: an ordinary prop using the same material must batch with the shell,
+                # while a linked emissive source slot supplies its fixture group there instead.
                 key = (cell_id, (LAYOUTS[layout_id][0], material_id,
-                                 tuple(sorted(cell.get("lightGroups") or ())), alpha))
+                                 tuple(sorted(cell.get("lightGroups") or ())), alpha, ""))
                 yield ({"prop": f"{path.stem}:{surface_class}", "mesh": mesh,
                         "layout": layout_id, "material": material_id}, key)
 
@@ -1606,6 +1651,11 @@ def selftest() -> int:
                 "schema": "cna-house/props/1", "props": rows}, indent=2) + "\n",
                 encoding="utf-8")
 
+        def write_lights(rows):
+            (world_dir / "layout.lights.json").write_text(json.dumps({
+                "schema": "cna-house/lights/1", "lights": rows}, indent=2) + "\n",
+                encoding="utf-8")
+
         def write_manifest(rows):
             path = workspace / "assets.manifest.json"
             path.write_text(json.dumps({"schema": "cna-house/assets/1", "assets": rows},
@@ -1724,6 +1774,47 @@ def selftest() -> int:
             {"id": "MODEL_MULTI", "sourceFile": str(assets / "multi.glb"),
              "materialMap": {"Cloth": "MAT_LAMP", "Wood": "MAT_LEAF"}},
         ])
+
+        # 4c. The exact source slot, rather than every material on a fixture prop, follows its
+        #     live switch group. Two independent groups sharing one canonical shade material must
+        #     not collapse into one draw; their ordinary source material still may.
+        write_props([prop("PROP_MULTI_A", None, asset="MODEL_MULTI"),
+                     prop("PROP_MULTI_B", None, asset="MODEL_MULTI")])
+        write_lights([
+            {"id": "LIGHT_A", "group": "LG_A", "fixtureProp": "PROP_MULTI_A",
+             "emissiveMaterialSlot": "Cloth"},
+            {"id": "LIGHT_B", "group": "LG_B", "fixtureProp": "PROP_MULTI_B",
+             "emissiveMaterialSlot": "Cloth"},
+        ])
+        switched = build(world_dir, manifest)
+        require(sum(c["material"] == "MAT_LAMP" for c in switched["chunks"]) == 2,
+                "two independently switched shades sharing one canonical material stay in "
+                "separate chunks")
+        require(sum(c["material"] == "MAT_LEAF" for c in switched["chunks"]) == 1,
+                "the same fixture props' ordinary material still batches into one chunk")
+        require(switched["stats"]["keysBeyondMaterial"] == 1,
+                "the report exposes the one extra switched-emitter draw")
+
+        write_lights([{"id": "LIGHT_A", "group": "LG_A",
+                       "fixtureProp": "PROP_MULTI_A", "emissiveMaterialSlot": "Wood"}])
+        try:
+            build(world_dir, manifest)
+            raised = ""
+        except LayoutError as exc:
+            raised = str(exc)
+        require("non-emissive material" in raised and "MAT_LEAF" in raised,
+                "a linked source slot must map to an emissive canonical material")
+
+        write_lights([{"id": "LIGHT_A", "group": "LG_A",
+                       "fixtureProp": "PROP_MULTI_A", "emissiveMaterialSlot": "Missing"}])
+        try:
+            build(world_dir, manifest)
+            raised = ""
+        except LayoutError as exc:
+            raised = str(exc)
+        require("has no source material" in raised and "Missing" in raised,
+                "a linked emitter must name an exact source material slot")
+        write_lights([])
 
         # 5. A DualTexture prop with no second UV set is refused, naming the tool that makes one.
         write_props([prop("PROP_A", "MAT_SHELL", asset="MODEL_NOUV1")])

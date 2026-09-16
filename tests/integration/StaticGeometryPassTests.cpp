@@ -8,6 +8,7 @@
 // to a `GraphicsDevice`, and a mock in place of one would verify only that the mock and the pass
 // agree with each other.
 #include <algorithm>
+#include <array>
 #include <filesystem>
 #include <string>
 #include <vector>
@@ -41,6 +42,8 @@ namespace
 {
     namespace Gfx = Microsoft::Xna::Framework::Graphics;
     using cnahouse::rendering::Camera;
+    using cnahouse::rendering::FixtureEmissiveMultiplier;
+    using cnahouse::rendering::FixtureGroupForChunk;
     using cnahouse::rendering::Pass;
     using cnahouse::rendering::StateTracker;
     using cnahouse::rendering::StaticGeometryMode;
@@ -50,6 +53,40 @@ namespace
     using cnahouse::world::CellRuntime;
     using cnahouse::world::ChunkLayout;
     using cnahouse::world::ChunkLibrary;
+
+    TEST(StaticGeometryPassTests, FixtureEmissionFollowsOnlyItsLinkedGroup)
+    {
+        cnahouse::world::Chunk chunk;
+        cnahouse::world::ChunkSubRange first;
+        first.source = "PROP_LANTERN_A";
+        chunk.subRanges.push_back(first);
+        cnahouse::world::ChunkSubRange second;
+        second.source = "PROP_LANTERN_B";
+        chunk.subRanges.push_back(second);
+
+        cnahouse::world::Light a;
+        a.fixtureProp = cnahouse::util::Id::Of("PROP_LANTERN_A");
+        a.group = cnahouse::util::Id::Of("LG_PORCH");
+        a.emissiveMaterialSlot = "LanternShade";
+        cnahouse::world::Light b = a;
+        b.fixtureProp = cnahouse::util::Id::Of("PROP_LANTERN_B");
+        std::array lights{a, b};
+        EXPECT_EQ(FixtureGroupForChunk(chunk, lights), cnahouse::util::Id::Of("LG_PORCH"));
+
+        lights[1].group = cnahouse::util::Id::Of("LG_OTHER");
+        EXPECT_FALSE(FixtureGroupForChunk(chunk, lights).IsValid())
+            << "independently switched emitters must be separate chunks";
+
+        const Microsoft::Xna::Framework::Vector3 warm(1.0F, 0.65F, 0.32F);
+        const auto off = FixtureEmissiveMultiplier(warm, 0.0F, 1.0F);
+        const auto half = FixtureEmissiveMultiplier(warm, 0.5F, 1.0F);
+        const auto on = FixtureEmissiveMultiplier(warm, 1.0F, 1.0F);
+        EXPECT_GT(off.X, 0.0F) << "an unlit physical shade remains faintly reflective";
+        EXPECT_LT(off.X, half.X);
+        EXPECT_LT(half.X, on.X);
+        EXPECT_GT(on.X, on.Y);
+        EXPECT_GT(on.Y, on.Z);
+    }
 
     TEST(StaticGeometryPassTests, OutdoorReceiversDoNotInheritAnIndoorCameraLift)
     {

@@ -333,6 +333,32 @@
       "collision": "none",
       "material": null,
       "interactable": null
+    },
+    {
+      "id": "PROP_L0_PORCH_LANTERN_1",
+      "asset": "MODEL_FIXTURE_PORCH_LANTERN",
+      "cell": "L0_PORCH",
+      "position": [-0.9, 2.345, -14.11275],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_PORCH_LANTERN_2",
+      "asset": "MODEL_FIXTURE_PORCH_LANTERN",
+      "cell": "L0_PORCH",
+      "position": [0.9, 2.345, -14.11275],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
     }
   ]
 }

@@ -14184,8 +14184,37 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             pass; the two dark-season references were inspected and deliberately advanced to the
             already-approved `HOUSE-01269` dusk-sensor output, then both pass byte-for-byte on a
             second capture. No settled frame changed because of this task's transition envelope.
-- [ ] HOUSE-01259 — Implement fixture emissive materials and their on/off state
+- [x] HOUSE-01259 — Implement fixture emissive materials and their on/off state
       dep: HOUSE-01258 · sys: rendering · plat: ALL · pri: MUST
+      note: the first production fixture is a deterministic project-authored pair of 0.608 m
+            bronze entrance lanterns. Their `LanternMetal` and `LanternShade` source slots map to
+            separate canonical metal/emissive materials; the two physical props remain ordinary
+            canonical world data in `L0_PORCH`, with generated/Ms-PL provenance and an exact
+            reproducibility check. Day inspection shows framed, roofed bodies beside the door;
+            the fixed 22:00 review shows the same diffusers warm and live.
+      decision: `fixtureProp` plus exact `emissiveMaterialSlot` is now a checked cross-file
+            contract. The chunk build gives only that source slot its switch-group discriminator,
+            preventing independently controlled shades that share a material from batching into
+            one draw. Runtime derives the group from preserved sub-range prop ids and modulates
+            the stock-BasicEffect emissive material with the existing Kelvin colour and
+            `GroupOutputLevel`; there is no custom shader, CNAEXT call or duplicate switch state.
+            Off shades retain a small reflected term rather than disappearing into black.
+      verified: the fixed eleven-view 22:00 set and close night/day entrance checks were opened at
+            original resolution. Against `HOUSE-01269`, the fixed front changes 0.0602% of pixels
+            and its tight fixture-pair crop rises from RGB(15.29,12.65,12.32) to
+            (18.54,14.82,12.85). Focused C++ validator/renderer tests (10/10), chunk-builder
+            self-test, deterministic lantern check, GLB validation, all 13 world rules and the
+            incremental world content build pass. The porch budget is a measured 8/8 chunks;
+            fixing the fifth-key shape also restores kitchen batching from an accidental 14 to
+            its measured 13/13. The complete 1,404-test unit suite, 123 non-save integration
+            cases plus all 10 `SaveStoreTest` cases, and all 49 active software-render cases pass;
+            the latter includes the culled/unculled suite. Five exterior golden frames were
+            advanced only after their pixel diffs showed the new fixtures; two unrelated
+            vegetation-raster differences were explicitly rejected. The full `run_checks.sh`
+            path is green through 323 strict-XNA translation units. Its first run correctly
+            rejected the wall-centred GLB pivot; the deterministic generator now authors the
+            repository's bottom-centred fixture origin and the inverse canonical prop transform
+            preserves the inspected world pose.
 - [ ] HOUSE-01260 — Implement the additive glow quads for bulbs, with camera-exposure-dependent size and alpha
       dep: HOUSE-01259 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects

@@ -383,6 +383,14 @@ lumen-weighted active fraction for the group's combined Tier-S lightmap while th
 staggering. At full night that fraction is one; in daylight it is zero. A dusk-controlled group
 is automatic and is not represented by a wall-switch interactable.
 
+`fixtureProp` is the optional physical-emitter link. When present it must resolve to a static prop
+in the same cell, and `emissiveMaterialSlot` is the **exact source material name in that prop's
+GLB**, not a canonical material id or a descriptive role. The manifest bridge for that slot must
+resolve to a material whose base class is `emissive`. The chunk build keeps slots driven by
+different groups in separate draws; normal gameplay then multiplies the physical diffuser by the
+group's live colour and post-`bulbClass` output level. An unlinked light continues to contribute
+its baked atlas, but has no physical shade to illuminate.
+
 A cell's `lightGroups` is the **index** of the groups its own lights belong to, and §28.1 walks it
 once per frame. Rule 6 checks it both ways: a group in the list with no light of that group in the
 cell, and a light in the cell whose group the list omits, are both errors. An index that has

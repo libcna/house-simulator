@@ -180,8 +180,16 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 163U)
-                    << "HOUSE-00772 adds five fallback and nine exact-atlas vegetation roles";
+                EXPECT_EQ(binder.Count(), 165U)
+                    << "HOUSE-01259 adds the porch lantern's bronze and emissive finishes";
+                const MaterialDesc* fixtureMetal = binder.Find(Id::Of("MAT_FIXTURE_DARK_BRONZE"));
+                ASSERT_NE(fixtureMetal, nullptr);
+                EXPECT_EQ(fixtureMetal->kind, MaterialKind::Basic);
+                EXPECT_TRUE(fixtureMetal->lightingEnabled);
+                const MaterialDesc* fixtureShade = binder.Find(Id::Of("MAT_FIXTURE_EMISSIVE_WARM"));
+                ASSERT_NE(fixtureShade, nullptr);
+                EXPECT_EQ(fixtureShade->kind, MaterialKind::Basic);
+                EXPECT_FALSE(fixtureShade->lightingEnabled);
                 const MaterialDesc* kitchenCounter = binder.Find(Id::Of("MAT_KITCHEN_COUNTER_STONE"));
                 ASSERT_NE(kitchenCounter, nullptr);
                 EXPECT_EQ(kitchenCounter->kind, MaterialKind::Basic);

@@ -295,6 +295,38 @@
       }
     },
     {
+      "id": "MODEL_FIXTURE_PORCH_LANTERN",
+      "category": "fixture",
+      "sourceFile": "assets-src/Models/Fixtures/porch_lantern.glb",
+      "sourceSha256": "680cb86003b3ab6ef6fa34a2df2662edf724d4c2d5c2217659a211cfba77f37a",
+      "contentName": "Models/Fixtures/porch_lantern",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "generated",
+        "name": "Measured front-porch wall lantern",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored dark-bronze framed wall lantern generated deterministically by tools/assets/porch_lantern.py for HOUSE-01259. Its pivot follows the fixture bottom-centre convention; the canonical prop transform places its optical centre at the linked light. LanternShade is the exact emissive slot named by layout.lights.json. No third-party mesh or texture is embedded."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.33, 0.6075, 0.3105],
+        "triangles": { "LOD0": 232 }
+      },
+      "materialMap": {
+        "LanternMetal": "MAT_FIXTURE_DARK_BRONZE",
+        "LanternShade": "MAT_FIXTURE_EMISSIVE_WARM"
+      },
+      "usedIn": ["L0_PORCH"]
+    },
+    {
       "id": "MODEL_FURNITURE_COFFEE_TABLE",
       "category": "occasional-table",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/coffee_table.glb",

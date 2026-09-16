@@ -1002,3 +1002,42 @@ Their 42.24%/41.46% deltas were opened and inspected: the only material change i
 dusk-sensor readability already measured in Round 23 (porch frame, fence, lawn and road), not this
 task's settled-state transition. Those two references were intentionally advanced; all other 46
 render tests passed without a golden change.
+
+## Round 25 — physical entrance lanterns and live diffusers
+
+Commit: `HOUSE-01259` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 23's fixed [22:00 set](captures/house-01269-night-r2). After: the same eleven
+cameras and condition in the [physical-fixture set](captures/house-01259-night-r1), plus a
+[close night entrance](captures/house-01259-night-r1/exterior-approach-close.png) and the exact
+[10:30 off-state check](captures/house-01259-night-r1/exterior-approach-day-check.png). The front,
+close night and close day images were opened at original resolution.
+
+Ranked visible defects remaining:
+
+1. The two real bronze lanterns and warm diffusers now identify the door, but they cast no
+   exposure-aware halo and no spatially local pool on the siding, porch floor or steps. At the
+   road camera they are therefore small amber rectangles rather than convincing light sources.
+2. The broad night façade remains almost black; thin roof edges, skeletal porch/balcony framing
+   and flat timber siding still read as an engineering shell.
+3. The road-cell approximation illuminates too uniformly, while nearby foliage catches more
+   residual light than the house face. The approved per-object falloff path remains unfinished.
+4. Connected interiors still need kitchen practicals/clutter, family material depth and dining
+   furnishing after the first-view source presentation is complete.
+
+Fixed: both placeholder entrance strips are replaced by deterministic 232-triangle, 0.608 m
+wall lanterns with separate dark-bronze frames and exact switched diffuser slots. The live shade
+uses the existing group colour and filament transition; its daylight state remains a faint
+physical surface instead of glowing. Against Round 23, the fixed front changes 0.0602% of pixels
+and a tight crop around the pair rises from RGB(15.29,12.65,12.32) to (18.54,14.82,12.85). The
+small whole-frame delta is expected for two correctly scaled fixtures and is why the close checks
+are retained. This passes the physical-emitter milestone, not the local-light milestone.
+
+Golden review was selective: five exterior references changed only where the fixture pair is
+visible. Two additional bulk-regeneration candidates showed unrelated vegetation-edge noise and
+were rejected. The resulting 49 active software-render cases, including culled/unculled
+equivalence, all pass.
+
+`VISUAL-GATE-1` still **FAILS**. `HOUSE-01260` is now the highest-value valid task: add restrained
+exposure-aware glow to these visible sources. Then use the approved local approximation for the
+porch receiver and address façade/roof depth; do not raise global night exposure.

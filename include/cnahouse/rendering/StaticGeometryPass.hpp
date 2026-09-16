@@ -4,12 +4,14 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include "cnahouse/rendering/Camera.hpp"
 #include "cnahouse/rendering/Renderer.hpp"
+#include "cnahouse/util/Ids.hpp"
 #include "cnahouse/visibility/RenderList.hpp"
 
 namespace Microsoft::Xna::Framework::Graphics
@@ -28,7 +30,9 @@ namespace cnahouse::world
     class CellRuntime;
     class WorldData;
     enum class CellKind : std::uint8_t;
+    struct Chunk;
     struct ChunkLibrary;
+    struct Light;
 } // namespace cnahouse::world
 
 namespace cnahouse::rendering
@@ -42,6 +46,19 @@ namespace cnahouse::rendering
     [[nodiscard]] float OpaqueReceiverEffectExposure(world::CellKind cellKind,
                                                      bool exteriorFacing,
                                                      float cameraEffectExposure) noexcept;
+
+    /// @brief The one switch group shared by every linked fixture prop in @p chunk.
+    ///
+    /// The content build keeps independently switched emissive slots in separate chunks. An
+    /// invalid id means the chunk is ordinary geometry, unlinked, or violates that contract.
+    [[nodiscard]] util::Id FixtureGroupForChunk(const world::Chunk& chunk,
+                                                std::span<const world::Light> lights) noexcept;
+
+    /// @brief Stock-BasicEffect colour for a physical diffuser at its live transition level.
+    [[nodiscard]] Microsoft::Xna::Framework::Vector3
+    FixtureEmissiveMultiplier(const Microsoft::Xna::Framework::Vector3& groupColour,
+                              float groupLevel,
+                              float effectExposure) noexcept;
     class MaterialBinder;
 
     enum class StaticGeometryMode
@@ -166,6 +183,7 @@ namespace cnahouse::rendering
         MaterialBinder* binder_ = nullptr;
         TextureLookup textures_;
         std::unique_ptr<Microsoft::Xna::Framework::Graphics::BasicEffect> effect_;
+        std::vector<util::Id> fixtureGroups_;
         StaticGeometryMode mode_ = StaticGeometryMode::DebugBlockout;
         bool showBackFaces_ = false;
         std::uint32_t chunksDrawn_ = 0u;
