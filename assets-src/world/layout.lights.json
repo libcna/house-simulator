@@ -18,6 +18,8 @@
   //
   // `colorK` is the number §28.2 says is converted through a Planckian LUT, so 2700 K living
   // spaces and 4000 K service rooms genuinely differ rather than differing by a comment.
+  // `bulbClass` is explicit for the non-default LED and fluorescent fixtures because shape and
+  // kelvin do not identify technology. Omitted means the warm filament default.
   //
   // `fixtureProp` is null throughout: the props are `HOUSE-00450` onwards and a made-up id would
   // be a reference to nothing. `emissiveMaterialSlot` is NOT null where the fixture has a visible
@@ -33,7 +35,7 @@
       "id": "LIGHT_B1_STAIR_MAIN_1", "cell": "B1_STAIR", "group": "LG_B1_STAIR_MAIN",
       "type": "point", "position": [3.55, 0.55, -17.25],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 4.82,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.82,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -43,7 +45,7 @@
       "id": "LIGHT_B1_HALL_MAIN_S_1", "cell": "B1_HALL", "group": "LG_B1_HALL_MAIN_S",
       "type": "point", "position": [0.00, 0.20, -20.70],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 7.71,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 7.71,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -53,7 +55,7 @@
       "id": "LIGHT_B1_HALL_MAIN_C_1", "cell": "B1_HALL", "group": "LG_B1_HALL_MAIN_C",
       "type": "point", "position": [0.00, 0.20, -20.70],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 7.71,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 7.71,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -63,7 +65,7 @@
       "id": "LIGHT_B1_HALL_MAIN_N_1", "cell": "B1_HALL", "group": "LG_B1_HALL_MAIN_N",
       "type": "point", "position": [0.00, 0.20, -20.70],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 7.71,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 7.71,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -73,7 +75,7 @@
       "id": "LIGHT_B1_MECHANICAL_MAIN_1", "cell": "B1_MECHANICAL", "group": "LG_B1_MECHANICAL_MAIN",
       "type": "point", "position": [6.80, 0.20, -16.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 4.62,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.62,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -81,7 +83,7 @@
       "id": "LIGHT_B1_MECHANICAL_MAIN_2", "cell": "B1_MECHANICAL", "group": "LG_B1_MECHANICAL_MAIN",
       "type": "point", "position": [6.80, 0.20, -15.63],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 4.62,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.62,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -91,7 +93,7 @@
       "id": "LIGHT_B1_ELECTRICAL_MAIN_1", "cell": "B1_ELECTRICAL", "group": "LG_B1_ELECTRICAL_MAIN",
       "type": "point", "position": [6.80, 0.20, -19.45],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 3.84,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 3.84,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -101,7 +103,7 @@
       "id": "LIGHT_B1_UTILITY_MAIN_1", "cell": "B1_UTILITY", "group": "LG_B1_UTILITY_MAIN",
       "type": "point", "position": [6.80, 0.20, -21.80],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 3.86,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 3.86,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -173,7 +175,7 @@
       "id": "LIGHT_B1_GYM_MAIN_1", "cell": "B1_GYM", "group": "LG_B1_GYM_MAIN",
       "type": "point", "position": [-6.20, 0.20, -16.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 5.92,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.92,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -181,7 +183,7 @@
       "id": "LIGHT_B1_GYM_MAIN_2", "cell": "B1_GYM", "group": "LG_B1_GYM_MAIN",
       "type": "point", "position": [-4.20, 0.20, -16.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 5.92,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.92,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -189,7 +191,7 @@
       "id": "LIGHT_B1_GYM_MAIN_3", "cell": "B1_GYM", "group": "LG_B1_GYM_MAIN",
       "type": "point", "position": [-6.20, 0.20, -15.63],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 5.92,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.92,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -197,7 +199,7 @@
       "id": "LIGHT_B1_GYM_MAIN_4", "cell": "B1_GYM", "group": "LG_B1_GYM_MAIN",
       "type": "point", "position": [-4.20, 0.20, -15.63],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 5.92,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.92,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -207,7 +209,7 @@
       "id": "LIGHT_B1_GYM_MIRROR_1", "cell": "B1_GYM", "group": "LG_B1_GYM_MIRROR",
       "type": "point", "position": [-5.20, 0.15, -16.30],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 4.86,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 4.86,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -217,7 +219,7 @@
       "id": "LIGHT_B1_WORKSHOP_MAIN_1", "cell": "B1_WORKSHOP", "group": "LG_B1_WORKSHOP_MAIN",
       "type": "point", "position": [-10.45, 0.20, -16.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 4.79,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.79,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -225,7 +227,7 @@
       "id": "LIGHT_B1_WORKSHOP_MAIN_2", "cell": "B1_WORKSHOP", "group": "LG_B1_WORKSHOP_MAIN",
       "type": "point", "position": [-10.45, 0.20, -15.63],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 4.79,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 4.79,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -235,7 +237,7 @@
       "id": "LIGHT_B1_WORKSHOP_BENCH_1", "cell": "B1_WORKSHOP", "group": "LG_B1_WORKSHOP_BENCH",
       "type": "spot", "position": [-10.45, -0.05, -16.30],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "intensityLm": 500.0, "range": 4.26,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 4.26,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -265,7 +267,7 @@
       "id": "LIGHT_B1_HOBBY_MAIN_1", "cell": "B1_HOBBY", "group": "LG_B1_HOBBY_MAIN",
       "type": "point", "position": [-5.20, 0.20, -22.57],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 6.29,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 6.29,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -273,7 +275,7 @@
       "id": "LIGHT_B1_HOBBY_MAIN_2", "cell": "B1_HOBBY", "group": "LG_B1_HOBBY_MAIN",
       "type": "point", "position": [-5.20, 0.20, -21.15],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 5.33,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 5.33,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -281,7 +283,7 @@
       "id": "LIGHT_B1_HOBBY_MAIN_3", "cell": "B1_HOBBY", "group": "LG_B1_HOBBY_MAIN",
       "type": "point", "position": [-5.20, 0.20, -19.73],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 6.29,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 2400.0, "range": 6.29,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -291,7 +293,7 @@
       "id": "LIGHT_B1_HOBBY_TABLE_1", "cell": "B1_HOBBY", "group": "LG_B1_HOBBY_TABLE",
       "type": "spot", "position": [-5.20, -0.05, -21.15],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "intensityLm": 500.0, "range": 5.21,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 5.21,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -377,7 +379,7 @@
       "id": "LIGHT_L0_HALL_GALLERY_1", "cell": "L0_HALL", "group": "LG_L0_HALL_GALLERY",
       "type": "spot", "position": [0.00, 3.15, -21.82],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 25.0, "coneOuterDeg": 40.0,
-      "colorK": 3000, "intensityLm": 220.0, "range": 5.37,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 220.0, "range": 5.37,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -385,7 +387,7 @@
       "id": "LIGHT_L0_HALL_GALLERY_2", "cell": "L0_HALL", "group": "LG_L0_HALL_GALLERY",
       "type": "spot", "position": [0.00, 3.15, -20.65],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 25.0, "coneOuterDeg": 40.0,
-      "colorK": 3000, "intensityLm": 220.0, "range": 4.61,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 220.0, "range": 4.61,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -393,7 +395,7 @@
       "id": "LIGHT_L0_HALL_GALLERY_3", "cell": "L0_HALL", "group": "LG_L0_HALL_GALLERY",
       "type": "spot", "position": [0.00, 3.15, -19.48],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 25.0, "coneOuterDeg": 40.0,
-      "colorK": 3000, "intensityLm": 220.0, "range": 5.37,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 220.0, "range": 5.37,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -477,7 +479,7 @@
       "id": "LIGHT_L0_FAMILY_MAIN_1", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
       "type": "spot", "position": [4.37, 3.02, -25.40],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "intensityLm": 1000.0, "range": 6.62,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 6.62,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -485,7 +487,7 @@
       "id": "LIGHT_L0_FAMILY_MAIN_2", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
       "type": "spot", "position": [6.53, 3.02, -25.40],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "intensityLm": 1000.0, "range": 6.62,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 6.62,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -493,7 +495,7 @@
       "id": "LIGHT_L0_FAMILY_MAIN_3", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
       "type": "spot", "position": [4.37, 3.02, -23.70],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "intensityLm": 1000.0, "range": 6.62,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 6.62,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -501,7 +503,7 @@
       "id": "LIGHT_L0_FAMILY_MAIN_4", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
       "type": "spot", "position": [6.53, 3.02, -23.70],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "intensityLm": 1000.0, "range": 6.62,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 6.62,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -511,7 +513,7 @@
       "id": "LIGHT_L0_FAMILY_MEDIA_1", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MEDIA",
       "type": "spot", "position": [3.60, 2.05, -22.55],
       "direction": [-1.0, 0.0, 0.0], "coneInnerDeg": 45.0, "coneOuterDeg": 110.0,
-      "colorK": 3000, "intensityLm": 400.0, "range": 3.50,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 3.50,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -611,7 +613,7 @@
       "id": "LIGHT_L0_OFFICE_DESK_1", "cell": "L0_OFFICE", "group": "LG_L0_OFFICE_DESK",
       "type": "spot", "position": [-10.45, 3.00, -16.30],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "intensityLm": 500.0, "range": 4.35,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 4.35,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -707,7 +709,7 @@
       "id": "LIGHT_L0_KITCHEN_MAIN_1", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
       "type": "spot", "position": [-4.73, 3.02, -25.73],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "intensityLm": 1000.0, "range": 8.42,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 8.42,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -715,7 +717,7 @@
       "id": "LIGHT_L0_KITCHEN_MAIN_2", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
       "type": "spot", "position": [0.10, 3.02, -26.05],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "intensityLm": 1000.0, "range": 8.42,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 8.42,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -723,7 +725,7 @@
       "id": "LIGHT_L0_KITCHEN_MAIN_3", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
       "type": "spot", "position": [-4.73, 3.02, -24.37],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "intensityLm": 1000.0, "range": 8.42,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 8.42,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -731,7 +733,7 @@
       "id": "LIGHT_L0_KITCHEN_MAIN_4", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_MAIN",
       "type": "spot", "position": [0.10, 3.02, -24.37],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "intensityLm": 1000.0, "range": 8.42,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 8.42,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
@@ -767,7 +769,7 @@
       "id": "LIGHT_L0_KITCHEN_UNDERCAB_1", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_UNDERCAB",
       "type": "point", "position": [-4.73, 3.20, -25.73],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 8.39,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 8.39,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -775,7 +777,7 @@
       "id": "LIGHT_L0_KITCHEN_UNDERCAB_2", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_UNDERCAB",
       "type": "point", "position": [-1.27, 3.20, -25.73],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 8.39,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 8.39,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -783,7 +785,7 @@
       "id": "LIGHT_L0_KITCHEN_UNDERCAB_3", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_UNDERCAB",
       "type": "point", "position": [-4.73, 3.20, -24.37],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 8.39,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 8.39,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -791,7 +793,7 @@
       "id": "LIGHT_L0_KITCHEN_UNDERCAB_4", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_UNDERCAB",
       "type": "point", "position": [-1.27, 3.20, -24.37],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 8.39,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 8.39,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -801,7 +803,7 @@
       "id": "LIGHT_L0_KITCHEN_SINK_1", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_SINK",
       "type": "spot", "position": [-3.00, 3.00, -25.05],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "intensityLm": 500.0, "range": 6.58,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 6.58,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -845,7 +847,7 @@
       "id": "LIGHT_L0_SUNROOM_BAR_1", "cell": "L0_SUNROOM", "group": "LG_L0_SUNROOM_BAR",
       "type": "spot", "position": [-2.00, 3.00, -29.60],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "intensityLm": 500.0, "range": 6.34,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 6.34,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -855,7 +857,7 @@
       "id": "LIGHT_L0_GARAGE_MAIN_1", "cell": "L0_GARAGE", "group": "LG_L0_GARAGE_MAIN",
       "type": "point", "position": [11.50, 4.25, -18.90],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 9.42,
+      "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -863,7 +865,7 @@
       "id": "LIGHT_L0_GARAGE_MAIN_2", "cell": "L0_GARAGE", "group": "LG_L0_GARAGE_MAIN",
       "type": "point", "position": [14.30, 4.25, -18.90],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 9.42,
+      "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -871,7 +873,7 @@
       "id": "LIGHT_L0_GARAGE_MAIN_3", "cell": "L0_GARAGE", "group": "LG_L0_GARAGE_MAIN",
       "type": "point", "position": [11.50, 4.25, -16.10],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 9.42,
+      "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -879,7 +881,7 @@
       "id": "LIGHT_L0_GARAGE_MAIN_4", "cell": "L0_GARAGE", "group": "LG_L0_GARAGE_MAIN",
       "type": "point", "position": [14.30, 4.25, -16.10],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 2400.0, "range": 9.42,
+      "colorK": 4000, "bulbClass": "fluorescent", "intensityLm": 2400.0, "range": 9.42,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -909,7 +911,7 @@
       "id": "LIGHT_CELL_FRIDGE_INTERIOR_LAMP_1", "cell": "CELL_FRIDGE_INTERIOR", "group": "LG_CELL_FRIDGE_INTERIOR_LAMP",
       "type": "emissive_only", "position": [1.20, 2.35, -26.70],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 60.0, "range": 2.35,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 60.0, "range": 2.35,
       "fixtureProp": null, "emissiveMaterialSlot": "bulb",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false
     },
@@ -975,7 +977,7 @@
       "id": "LIGHT_L1_HALL_ART_1", "cell": "L1_HALL", "group": "LG_L1_HALL_ART",
       "type": "spot", "position": [0.00, 6.05, -20.77],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 25.0, "coneOuterDeg": 40.0,
-      "colorK": 3000, "intensityLm": 220.0, "range": 4.59,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 220.0, "range": 4.59,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -983,7 +985,7 @@
       "id": "LIGHT_L1_HALL_ART_2", "cell": "L1_HALL", "group": "LG_L1_HALL_ART",
       "type": "spot", "position": [0.00, 6.05, -19.53],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 25.0, "coneOuterDeg": 40.0,
-      "colorK": 3000, "intensityLm": 220.0, "range": 4.59,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 220.0, "range": 4.59,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1135,7 +1137,7 @@
       "id": "LIGHT_L1_MASTER_BATH_VANITY_1", "cell": "L1_MASTER_BATH", "group": "LG_L1_MASTER_BATH_VANITY",
       "type": "point", "position": [-11.05, 6.10, -25.40],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 5.00,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 5.00,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1143,7 +1145,7 @@
       "id": "LIGHT_L1_MASTER_BATH_VANITY_2", "cell": "L1_MASTER_BATH", "group": "LG_L1_MASTER_BATH_VANITY",
       "type": "point", "position": [-11.05, 6.10, -23.70],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 5.00,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 5.00,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1163,7 +1165,7 @@
       "id": "LIGHT_L1_MASTER_CLOSET_MAIN_1", "cell": "L1_MASTER_CLOSET", "group": "LG_L1_MASTER_CLOSET_MAIN",
       "type": "point", "position": [-8.20, 6.10, -25.40],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 4.86,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 4.86,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1171,7 +1173,7 @@
       "id": "LIGHT_L1_MASTER_CLOSET_MAIN_2", "cell": "L1_MASTER_CLOSET", "group": "LG_L1_MASTER_CLOSET_MAIN",
       "type": "point", "position": [-8.20, 6.10, -23.70],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 4.86,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 4.86,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1181,7 +1183,7 @@
       "id": "LIGHT_L1_MASTER_CLOSET_MIRROR_1", "cell": "L1_MASTER_CLOSET", "group": "LG_L1_MASTER_CLOSET_MIRROR",
       "type": "point", "position": [-8.20, 6.10, -24.55],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 4.23,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 4.23,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1217,7 +1219,7 @@
       "id": "LIGHT_L1_BED2_DESK_1", "cell": "L1_BED2", "group": "LG_L1_BED2_DESK",
       "type": "spot", "position": [5.45, 5.90, -25.00],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "intensityLm": 500.0, "range": 4.98,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 4.98,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1301,7 +1303,7 @@
       "id": "LIGHT_L1_BED4_DESK_1", "cell": "L1_BED4", "group": "LG_L1_BED4_DESK",
       "type": "spot", "position": [-5.20, 5.90, -16.30],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "intensityLm": 500.0, "range": 4.75,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 4.75,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1329,7 +1331,7 @@
       "id": "LIGHT_L1_BATH2_VANITY_1", "cell": "L1_BATH2", "group": "LG_L1_BATH2_VANITY",
       "type": "point", "position": [-11.20, 6.10, -20.15],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 3.92,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 3.92,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1415,7 +1417,7 @@
       "id": "LIGHT_L1_BATH3_VANITY_1", "cell": "L1_BATH3", "group": "LG_L1_BATH3_VANITY",
       "type": "point", "position": [6.80, 6.10, -20.15],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 4.11,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 4.11,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1607,7 +1609,7 @@
       "id": "LIGHT_L2_HALL_W_ART_1", "cell": "L2_HALL_W", "group": "LG_L2_HALL_W_ART",
       "type": "spot", "position": [-5.95, 8.85, -19.83],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 25.0, "coneOuterDeg": 40.0,
-      "colorK": 3000, "intensityLm": 220.0, "range": 5.16,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 220.0, "range": 5.16,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1615,7 +1617,7 @@
       "id": "LIGHT_L2_HALL_W_ART_2", "cell": "L2_HALL_W", "group": "LG_L2_HALL_W_ART",
       "type": "spot", "position": [-5.95, 8.85, -19.07],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 25.0, "coneOuterDeg": 40.0,
-      "colorK": 3000, "intensityLm": 220.0, "range": 5.16,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 220.0, "range": 5.16,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1651,7 +1653,7 @@
       "id": "LIGHT_L2_LIBRARY_SHELVES_1", "cell": "L2_LIBRARY", "group": "LG_L2_LIBRARY_SHELVES",
       "type": "point", "position": [-6.20, 8.90, -16.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 5.85,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 5.85,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1659,7 +1661,7 @@
       "id": "LIGHT_L2_LIBRARY_SHELVES_2", "cell": "L2_LIBRARY", "group": "LG_L2_LIBRARY_SHELVES",
       "type": "point", "position": [-4.20, 8.90, -16.97],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 5.85,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 5.85,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1667,7 +1669,7 @@
       "id": "LIGHT_L2_LIBRARY_SHELVES_3", "cell": "L2_LIBRARY", "group": "LG_L2_LIBRARY_SHELVES",
       "type": "point", "position": [-6.20, 8.90, -15.63],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 5.85,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 5.85,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1675,7 +1677,7 @@
       "id": "LIGHT_L2_LIBRARY_SHELVES_4", "cell": "L2_LIBRARY", "group": "LG_L2_LIBRARY_SHELVES",
       "type": "point", "position": [-4.20, 8.90, -15.63],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 5.85,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 5.85,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1721,7 +1723,7 @@
       "id": "LIGHT_L2_BED6_SEWING_1", "cell": "L2_BED6", "group": "LG_L2_BED6_SEWING",
       "type": "spot", "position": [-10.45, 8.70, -16.30],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "intensityLm": 500.0, "range": 4.20,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 4.20,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1749,7 +1751,7 @@
       "id": "LIGHT_L2_BATH4_VANITY_1", "cell": "L2_BATH4", "group": "LG_L2_BATH4_VANITY",
       "type": "point", "position": [-11.20, 8.90, -20.15],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 3.85,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 3.85,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1877,7 +1879,7 @@
       "id": "LIGHT_L2_GAMES_ARCADE_1", "cell": "L2_GAMES", "group": "LG_L2_GAMES_ARCADE",
       "type": "point", "position": [-2.40, 8.90, -24.55],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 6.26,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 6.26,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -1951,7 +1953,7 @@
       "id": "LIGHT_L2_BATH5_VANITY_1", "cell": "L2_BATH5", "group": "LG_L2_BATH5_VANITY",
       "type": "point", "position": [6.80, 8.90, -20.15],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "intensityLm": 400.0, "range": 4.04,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 4.04,
       "fixtureProp": null, "emissiveMaterialSlot": "tube",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -2001,7 +2003,7 @@
       "id": "LIGHT_L3_ROOM_DESK_1", "cell": "L3_ROOM", "group": "LG_L3_ROOM_DESK",
       "type": "spot", "position": [-0.55, 12.30, -20.50],
       "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 30.0, "coneOuterDeg": 55.0,
-      "colorK": 3500, "intensityLm": 500.0, "range": 9.28,
+      "colorK": 3500, "bulbClass": "led", "intensityLm": 500.0, "range": 9.28,
       "fixtureProp": null, "emissiveMaterialSlot": null,
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -2089,7 +2091,7 @@
       "id": "LIGHT_EXT_DRIVEWAY_FLOOD_1", "cell": "EXT_DRIVEWAY", "group": "LG_EXT_DRIVEWAY_FLOOD",
       "type": "spot", "position": [13.20, 3.10, -13.25],
       "direction": [0.0, -0.71, 0.71], "coneInnerDeg": 40.0, "coneOuterDeg": 70.0,
-      "colorK": 4000, "intensityLm": 3000.0, "range": 14.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 3000.0, "range": 14.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": true, "bakedIntoLightmap": false, "defaultOn": false
     },
@@ -2152,7 +2154,7 @@
       "id": "LIGHT_EXT_SHED_MAIN_1", "cell": "EXT_SHED", "group": "LG_EXT_SHED_MAIN",
       "type": "point", "position": [-18.20, 2.25, -42.20],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 600.0, "range": 3.30,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 600.0, "range": 3.30,
       "fixtureProp": null, "emissiveMaterialSlot": "bulb",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
@@ -2165,7 +2167,7 @@
       "id": "LIGHT_EXT_STREET_1", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
       "type": "point", "position": [-100.00, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
       "duskSensor": true
@@ -2174,7 +2176,7 @@
       "id": "LIGHT_EXT_STREET_2", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
       "type": "point", "position": [-75.00, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
       "duskSensor": true
@@ -2183,7 +2185,7 @@
       "id": "LIGHT_EXT_STREET_3", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
       "type": "point", "position": [-50.00, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
       "duskSensor": true
@@ -2192,7 +2194,7 @@
       "id": "LIGHT_EXT_STREET_4", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
       "type": "point", "position": [-25.00, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
       "duskSensor": true
@@ -2201,7 +2203,7 @@
       "id": "LIGHT_EXT_STREET_5", "cell": "EXT_ROAD", "group": "LG_EXT_STREET",
       "type": "point", "position": [0.00, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
       "duskSensor": true
@@ -2210,7 +2212,7 @@
       "id": "LIGHT_EXT_STREET_6", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
       "type": "point", "position": [25.00, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
       "duskSensor": true
@@ -2219,7 +2221,7 @@
       "id": "LIGHT_EXT_STREET_7", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
       "type": "point", "position": [50.00, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
       "duskSensor": true
@@ -2228,7 +2230,7 @@
       "id": "LIGHT_EXT_STREET_8", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
       "type": "point", "position": [75.00, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
       "duskSensor": true
@@ -2237,7 +2239,7 @@
       "id": "LIGHT_EXT_STREET_9", "cell": "EXT_WORLD", "group": "LG_EXT_STREET",
       "type": "point", "position": [100.00, 8.00, 1.50],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 4000, "intensityLm": 12000.0, "range": 22.00,
+      "colorK": 4000, "bulbClass": "led", "intensityLm": 12000.0, "range": 22.00,
       "fixtureProp": null, "emissiveMaterialSlot": "lens",
       "castsBlobShadow": false, "bakedIntoLightmap": false, "defaultOn": false,
       "duskSensor": true

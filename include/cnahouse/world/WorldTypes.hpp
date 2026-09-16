@@ -142,6 +142,17 @@ namespace cnahouse::world
         EmissiveOnly,
     };
 
+    /// @brief Physical switch-on family for §53's visible bulb transition.
+    ///
+    /// This is authored independently of shape: a `tube` material slot may be an instant LED
+    /// strip or a fluorescent batten, and colour temperature alone cannot distinguish them.
+    enum class BulbClass : std::uint8_t
+    {
+        Filament,
+        Led,
+        Fluorescent,
+    };
+
     /// @brief §22.2's closed class vocabulary.
     ///
     /// Closed and parsed once, because the class is what the effect tier, the footstep sound and
@@ -264,6 +275,7 @@ namespace cnahouse::world
     [[nodiscard]] std::string_view ToStringView(OpeningKind value) noexcept;
     [[nodiscard]] std::string_view ToStringView(HingeSide value) noexcept;
     [[nodiscard]] std::string_view ToStringView(LightType value) noexcept;
+    [[nodiscard]] std::string_view ToStringView(BulbClass value) noexcept;
     [[nodiscard]] std::string_view ToStringView(AlphaMode value) noexcept;
     [[nodiscard]] std::string_view ToStringView(EffectTier value) noexcept;
     [[nodiscard]] std::string_view ToStringView(PropCollision value) noexcept;
@@ -278,6 +290,7 @@ namespace cnahouse::world
     [[nodiscard]] util::Result<OpeningKind> ParseOpeningKind(std::string_view text);
     [[nodiscard]] util::Result<HingeSide> ParseHingeSide(std::string_view text);
     [[nodiscard]] util::Result<LightType> ParseLightType(std::string_view text);
+    [[nodiscard]] util::Result<BulbClass> ParseBulbClass(std::string_view text);
     [[nodiscard]] util::Result<AlphaMode> ParseAlphaMode(std::string_view text);
     [[nodiscard]] util::Result<EffectTier> ParseEffectTier(std::string_view text);
     [[nodiscard]] util::Result<PropCollision> ParsePropCollision(std::string_view text);
@@ -603,6 +616,7 @@ namespace cnahouse::world
         util::Id cell;
         util::Id group;
         LightType type = LightType::Point;
+        BulbClass bulbClass = BulbClass::Filament;
         Microsoft::Xna::Framework::Vector3 position;
         Microsoft::Xna::Framework::Vector3 direction;
         float colorK = 2700.0F;

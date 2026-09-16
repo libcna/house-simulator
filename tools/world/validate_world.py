@@ -1012,6 +1012,7 @@ def rule_6_references(world: World) -> list[Problem]:
             check("stairs", index, field, flight.get(field), cells, "cell", have_cells)
 
     dusk_by_group: dict[str, bool] = {}
+    bulb_class_by_group: dict[str, str] = {}
     for index, light in enumerate(world.lights):
         check("lights", index, "cell", light.get("cell"), cells, "cell", have_cells)
         group = light.get("group")
@@ -1023,6 +1024,13 @@ def rule_6_references(world: World) -> list[Problem]:
                 "one group has one control"))
         else:
             dusk_by_group[group] = dusk
+        bulb_class = light.get("bulbClass", "filament")
+        if group in bulb_class_by_group and bulb_class_by_group[group] != bulb_class:
+            problems.append(Problem(
+                6, FILE_OF["lights"], f"lights/{index}/bulbClass",
+                f"group {group} mixes bulb classes; one baked group has one switch-on envelope"))
+        else:
+            bulb_class_by_group[group] = bulb_class
         if dusk and light.get("defaultOn", False):
             problems.append(Problem(
                 6, FILE_OF["lights"], f"lights/{index}/defaultOn",
@@ -2743,6 +2751,18 @@ def selftest() -> int:
         _, problems = validate(mixed_dir, wanted=[6])
         require(any("mixes dusk-sensor" in x.message for x in problems),
                 f"a group with both switch and dusk control is caught "
+                f"({[str(x) for x in problems]})")
+
+        mixed_bulbs = copy.deepcopy(base)
+        led_light = copy.deepcopy(row(mixed_bulbs, "lights", "LIGHT_HALL"))
+        led_light["id"] = "LIGHT_HALL_LED"
+        led_light["bulbClass"] = "led"
+        mixed_bulbs["lights"]["lights"].append(led_light)
+        mixed_bulbs_dir = workspace / "mixed-bulb-class"
+        write_fixture(mixed_bulbs_dir, mixed_bulbs)
+        _, problems = validate(mixed_bulbs_dir, wanted=[6])
+        require(any("mixes bulb classes" in x.message for x in problems),
+                f"a group with two switch-on envelopes is caught "
                 f"({[str(x) for x in problems]})")
 
         defaulted = copy.deepcopy(base)

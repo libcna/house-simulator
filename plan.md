@@ -14161,8 +14161,29 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             MaterialBinder tests pin per-draw colour multiplication; the live production pass test
             verifies the authored primary map is the opaque pass before additive groups;
             warning-clean max-4-core game/integration build.
-- [ ] HOUSE-01258 — Implement the switch-on transition per bulb class (filament ramp, instant LED, fluorescent flicker start)
+- [x] HOUSE-01258 — Implement the switch-on transition per bulb class (filament ramp, instant LED, fluorescent flicker start)
       dep: HOUSE-01256 · sys: lighting · plat: ALL · pri: MUST
+      note: `bulbClass` is an authored closed vocabulary, defaulting to the existing warm filament
+            when omitted. The canonical 243 fixtures resolve to **166 filament, 73 LED and four
+            fluorescent**, or 94/40/1 groups respectively. Both validators reject mixed classes
+            in one group because its one Tier-S atlas can follow only one switch-on envelope.
+      decision: `SwitchGroupState` remains the persistent target bit/dimmer; a separate shared
+            output is what the artificial atlas, room level and borrowed-light model consume.
+            Filament follows a smooth 0.12 s rise, LED is immediate, and fluorescent follows a
+            deterministic non-monotonic strike/drop/restrike curve that settles at 0.4 s. Off is
+            immediate. The first update snaps to loaded/default/dusk state so entering a saved
+            night does not replay every already-lit fixture.
+      verified: pure transition tests pin the three curves, non-finite/negative input and the two
+            fluorescent dropouts; an authored-world test toggles one real group of each class and
+            proves the same output reaches the group consumer. Loader vocabulary/default and both
+            mixed-group validators are covered. The focused 32 unit tests and all five Tier-S
+            `StaticGeometryPassTests` pass after the latter explicitly advances the 0.5 s needed
+            for its all-groups-on assertion. All **1,404** unit tests pass. The integration suite
+            has 122 passes and eight configured skips; its one order-sensitive transparent-pass
+            failure passes alone and predates this task. The render suite's 46 unchanged frames
+            pass; the two dark-season references were inspected and deliberately advanced to the
+            already-approved `HOUSE-01269` dusk-sensor output, then both pass byte-for-byte on a
+            second capture. No settled frame changed because of this task's transition envelope.
 - [ ] HOUSE-01259 — Implement fixture emissive materials and their on/off state
       dep: HOUSE-01258 · sys: rendering · plat: ALL · pri: MUST
 - [ ] HOUSE-01260 — Implement the additive glow quads for bulbs, with camera-exposure-dependent size and alpha

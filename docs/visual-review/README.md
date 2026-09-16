@@ -985,3 +985,20 @@ substitute for the still-missing visible fixtures and local porch light.
 `VISUAL-GATE-1` still **FAILS**. Next highest visible value is a real porch-lantern presentation
 and localized warm entrance pool within the existing Tier-S architecture, followed by façade/
 roof depth. Do not raise global night exposure to conceal the missing source.
+
+## Round 24 — temporal fixture prerequisite (no new still set)
+
+Commit: `HOUSE-01258` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+The fixed Round 23 images remain authoritative: initial loaded/dusk state deliberately snaps, so
+adding the 0.12 s filament rise, instant LED response and deterministic 0.4 s fluorescent
+flicker-start should not perturb a settled 22:00 still. This is recorded as a direct dependency of
+`HOUSE-01259`, not presented as visual progress by itself. The ranked defects are unchanged: the
+front still lacks physical lantern bodies/emissive shades and a local warm entrance pool, followed
+by façade/roof depth. Capture again when those emitters are actually visible.
+
+The two dark `SunSeasonRenderTests` references had still described the pre-`HOUSE-01269` exterior.
+Their 42.24%/41.46% deltas were opened and inspected: the only material change is the approved
+dusk-sensor readability already measured in Round 23 (porch frame, fence, lawn and road), not this
+task's settled-state transition. Those two references were intentionally advanced; all other 46
+render tests passed without a golden change.

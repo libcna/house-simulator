@@ -87,6 +87,13 @@
           "bakedIntoLightmap": {
             "type": "boolean"
           },
+          "bulbClass": {
+            "enum": [
+              "filament",
+              "led",
+              "fluorescent"
+            ]
+          },
           "castsBlobShadow": {
             "type": "boolean"
           },

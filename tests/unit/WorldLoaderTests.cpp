@@ -414,7 +414,7 @@ namespace
                 { "id": "LIGHT_L0_KITCHEN_SINK", "cell": "L0_KITCHEN",
                   "group": "LG_L0_KITCHEN_SINK", "type": "spot",
                   "position": [-4.0, 3.10, -26.0], "direction": [0.20, -0.90, 0.40],
-                  "colorK": 3000, "intensityLm": 420.0, "range": 4.0,
+                  "colorK": 3000, "bulbClass": "led", "intensityLm": 420.0, "range": 4.0,
                   "coneInnerDeg": 22.0, "coneOuterDeg": 38.0,
                   "fixtureProp": "PROP_L0_KITCHEN_DOWNLIGHT",
                   "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true,
@@ -2060,6 +2060,7 @@ namespace
         EXPECT_EQ(spot.cell, Intern("L0_KITCHEN"));
         EXPECT_EQ(spot.group, Intern("LG_L0_KITCHEN_SINK"));
         EXPECT_EQ(spot.type, world::LightType::Spot);
+        EXPECT_EQ(spot.bulbClass, world::BulbClass::Led);
         EXPECT_FLOAT_EQ(spot.position.Y, 3.10F);
         // All three components, and none of them the straight-down [0, -1, 0] a reader that
         // ignored the field might plausibly default to.
@@ -2114,6 +2115,21 @@ namespace
         world::WorldData::Contents contents;
         ASSERT_TRUE(world::WorldLoader::LoadLights(directory_, contents));
         EXPECT_EQ(contents.lights[0].type, world::LightType::Point);
+        EXPECT_EQ(contents.lights[0].bulbClass, world::BulbClass::Filament)
+            << "omitted bulbClass has the documented warm-bulb default";
+    }
+
+    TEST_F(WorldLoaderTest, AnUnknownBulbClassIsRefusedAtItsField)
+    {
+        Write("layout.lights.json",
+              R"({"schema": "cna-house/lights/1",
+                  "lights": [{"id": "L", "cell": "C", "group": "G", "type": "point",
+                              "bulbClass": "halogen-ish", "position": [0, 3, 0]}]})");
+        world::WorldData::Contents contents;
+        const auto lights = world::WorldLoader::LoadLights(directory_, contents);
+        ASSERT_FALSE(lights);
+        EXPECT_EQ(lights.Error().Code(), ErrorCode::InvalidData);
+        EXPECT_NE(lights.Error().Context().find("bulbClass"), std::string::npos) << lights.Error().ToString();
     }
 
     TEST_F(WorldLoaderTest, AColourTemperatureOutsideThePhysicalRangeIsRefused)

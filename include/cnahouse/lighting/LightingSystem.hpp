@@ -26,8 +26,9 @@ namespace cnahouse::environment
 
 namespace cnahouse::world
 {
+    enum class BulbClass : std::uint8_t;
     class WorldData;
-}
+} // namespace cnahouse::world
 
 namespace cnahouse::rendering
 {
@@ -49,6 +50,13 @@ namespace cnahouse::lighting
     /// and morning-off; a negative one advances them. The shifted clock keeps season and location
     /// in the same sun model used by the rest of the frame.
     [[nodiscard]] bool DuskSensorOn(const environment::SimClock& clock, util::Id fixture) noexcept;
+
+    /// @brief §53's deterministic switch-on envelope for one physical bulb family.
+    ///
+    /// Elapsed time is clamped at the family endpoint. Filament uses a smooth 0.12 s ramp, LED is
+    /// instant, and fluorescent follows a fixed non-monotonic strike curve before settling at
+    /// 0.4 s. Switching off is intentionally immediate and is applied by `LightingSystem`.
+    [[nodiscard]] float BulbTransitionLevel(world::BulbClass bulbClass, float elapsedSeconds) noexcept;
 
     /// @brief Calibrated diffuse sky energy for a baked weather-facing receiver.
     ///
@@ -138,6 +146,15 @@ namespace cnahouse::lighting
         bool SetGroupDimmer(util::Id group, float dimmer) noexcept;
 
         [[nodiscard]] const SwitchGroupState* FindGroup(util::Id group) const noexcept;
+
+        /// @brief The light actually emitted after bulb transition and dimmer, `[0, 1]`.
+        ///
+        /// `FindGroup()->Level()` remains the authored switch target. Draw paths, borrowed light
+        /// and room state use this output so they cannot disagree during a visible start-up.
+        [[nodiscard]] float GroupOutputLevel(util::Id group) const noexcept;
+
+        /// @brief The authored physical family shared by every fixture in one group.
+        [[nodiscard]] world::BulbClass GroupBulbClass(util::Id group) const noexcept;
 
         /// @brief True when the group's level is owned by §35.3 rather than a wall switch.
         [[nodiscard]] bool IsGroupDuskControlled(util::Id group) const noexcept;
@@ -275,11 +292,17 @@ namespace cnahouse::lighting
         };
 
         [[nodiscard]] SwitchGroupState* FindGroupMutable(util::Id group) noexcept;
+        [[nodiscard]] float GroupOutputLevel(std::size_t groupIndex) const noexcept;
+        void AdvanceBulbTransitions(float deltaSeconds) noexcept;
 
         std::vector<RoomLightState> cells_;
         std::vector<SwitchGroupState> groups_;
         std::vector<float> groupLumens_;
         std::vector<Microsoft::Xna::Framework::Vector3> groupColors_;
+        std::vector<world::BulbClass> groupBulbClasses_;
+        std::vector<float> groupTransitionElapsed_;
+        std::vector<float> groupTransitionLevels_;
+        std::vector<bool> groupPreviousOn_;
         std::vector<DuskFixture> duskFixtures_;
         std::vector<bool> duskControlledGroups_;
         std::vector<float> duskLitLumens_;
@@ -305,6 +328,7 @@ namespace cnahouse::lighting
         float cloudCover_ = 0.0F;
         bool sunComputed_ = false;
         bool moonKeyActive_ = false;
+        bool bulbTransitionsInitialized_ = false;
         util::Id cameraCell_;
         ExposureAdapter cameraExposure_;
         std::uint64_t computedForFrame_ = 0;

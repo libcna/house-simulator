@@ -2384,6 +2384,20 @@ namespace cnahouse::world
             }
             light.type = parsedType.Value();
 
+            const Result<std::string> bulbClass = row.OptionalString("bulbClass", "filament");
+            if (!bulbClass)
+            {
+                return bulbClass.Error().WithContext("layout.lights.json");
+            }
+            const Result<BulbClass> parsedBulbClass = ParseBulbClass(bulbClass.Value());
+            if (!parsedBulbClass)
+            {
+                return parsedBulbClass.Error()
+                    .WithContext(row.Path() + "/bulbClass")
+                    .WithContext("layout.lights.json");
+            }
+            light.bulbClass = parsedBulbClass.Value();
+
             const Result<Microsoft::Xna::Framework::Vector3> position = row.RequireVector3("position");
             if (!position)
             {

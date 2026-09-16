@@ -37,6 +37,7 @@
 namespace
 {
     using cnahouse::app::FrameContext;
+    using cnahouse::lighting::BulbTransitionLevel;
     using cnahouse::lighting::CelestialKeyLight;
     using cnahouse::lighting::DuskSensorOffsetMinutes;
     using cnahouse::lighting::DuskSensorOn;
@@ -105,6 +106,85 @@ namespace
     }
 
 } // namespace
+
+TEST(LightingSystemTests, ThreeBulbFamiliesHaveTheAuthoredSwitchOnShapes)
+{
+    using world::BulbClass;
+    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Led, 0.0F), 1.0F);
+    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Led, 0.01F), 1.0F);
+
+    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Filament, 0.0F), 0.0F);
+    EXPECT_NEAR(BulbTransitionLevel(BulbClass::Filament, 0.06F), 0.5F, 1.0e-6F);
+    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Filament, 0.12F), 1.0F);
+
+    const float firstStrike = BulbTransitionLevel(BulbClass::Fluorescent, 0.04F);
+    const float firstDrop = BulbTransitionLevel(BulbClass::Fluorescent, 0.08F);
+    const float restrike = BulbTransitionLevel(BulbClass::Fluorescent, 0.14F);
+    const float secondDrop = BulbTransitionLevel(BulbClass::Fluorescent, 0.20F);
+    EXPECT_GT(firstStrike, firstDrop);
+    EXPECT_GT(restrike, firstDrop);
+    EXPECT_GT(restrike, secondDrop);
+    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Fluorescent, 0.40F), 1.0F);
+    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Fluorescent, 8.0F), 1.0F);
+
+    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Filament, -1.0F), 0.0F);
+    EXPECT_FLOAT_EQ(BulbTransitionLevel(BulbClass::Filament, std::nan("")), 0.0F);
+}
+
+TEST(LightingSystemTests, AuthoredGroupsDriveOneSharedTransitionThroughEveryLightingConsumer)
+{
+    if (!ContentIsBuilt())
+    {
+        GTEST_SKIP() << "no content/world/layout.lights.json";
+    }
+    HouseLighting house;
+    LightingSystem& lighting = house.lighting;
+    const Id filament = Id::Of("LG_L0_KITCHEN_ISLAND");
+    const Id led = Id::Of("LG_L0_KITCHEN_UNDERCAB");
+    const Id fluorescent = Id::Of("LG_L0_GARAGE_MAIN");
+    EXPECT_EQ(lighting.GroupBulbClass(filament), world::BulbClass::Filament);
+    EXPECT_EQ(lighting.GroupBulbClass(led), world::BulbClass::Led);
+    EXPECT_EQ(lighting.GroupBulbClass(fluorescent), world::BulbClass::Fluorescent);
+
+    ASSERT_TRUE(lighting.SetGroupOn(filament, false));
+    ASSERT_TRUE(lighting.SetGroupOn(led, false));
+    ASSERT_TRUE(lighting.SetGroupOn(fluorescent, false));
+    lighting.Update(Frame(1));
+
+    ASSERT_TRUE(lighting.SetGroupOn(filament, true));
+    ASSERT_TRUE(lighting.SetGroupOn(led, true));
+    ASSERT_TRUE(lighting.SetGroupOn(fluorescent, true));
+    FrameContext strike = Frame(2);
+    strike.deltaSeconds = 0.04F;
+    lighting.Update(strike);
+    const float filamentFirst = lighting.GroupOutputLevel(filament);
+    const float fluorescentFirst = lighting.GroupOutputLevel(fluorescent);
+    EXPECT_GT(filamentFirst, 0.0F);
+    EXPECT_LT(filamentFirst, 1.0F);
+    EXPECT_FLOAT_EQ(lighting.GroupOutputLevel(led), 1.0F);
+    EXPECT_NEAR(fluorescentFirst, 0.85F, 1.0e-6F);
+
+    FrameContext dropout = Frame(3);
+    dropout.deltaSeconds = 0.04F;
+    lighting.Update(dropout);
+    EXPECT_GT(lighting.GroupOutputLevel(filament), filamentFirst);
+    EXPECT_LT(lighting.GroupOutputLevel(fluorescent), fluorescentFirst);
+
+    FrameContext settled = Frame(4);
+    settled.deltaSeconds = 0.50F;
+    lighting.Update(settled);
+    EXPECT_FLOAT_EQ(lighting.GroupOutputLevel(filament), 1.0F);
+    EXPECT_FLOAT_EQ(lighting.GroupOutputLevel(led), 1.0F);
+    EXPECT_FLOAT_EQ(lighting.GroupOutputLevel(fluorescent), 1.0F);
+
+    ASSERT_TRUE(lighting.SetGroupOn(filament, false));
+    ASSERT_TRUE(lighting.SetGroupOn(led, false));
+    ASSERT_TRUE(lighting.SetGroupOn(fluorescent, false));
+    lighting.Update(Frame(5));
+    EXPECT_FLOAT_EQ(lighting.GroupOutputLevel(filament), 0.0F);
+    EXPECT_FLOAT_EQ(lighting.GroupOutputLevel(led), 0.0F);
+    EXPECT_FLOAT_EQ(lighting.GroupOutputLevel(fluorescent), 0.0F);
+}
 
 TEST(LightingSystemTests, OutdoorBakedSkinUsesDaylightEnergyWithoutDisplaySkySaturation)
 {

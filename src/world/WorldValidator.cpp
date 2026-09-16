@@ -375,6 +375,7 @@ namespace cnahouse::world
             // A light is inside the cell it names. Automatic control is a property of the whole
             // group: one combined lightmap cannot be half wall-switched and half dusk-driven.
             std::map<Id, bool> duskByGroup;
+            std::map<Id, BulbClass> bulbClassByGroup;
             for (const Light& light : world.Lights())
             {
                 const Cell* cell = world.FindCell(light.cell);
@@ -394,6 +395,15 @@ namespace cnahouse::world
                              "lights/" + Name(light.id) + "/duskSensor",
                              "group " + Name(light.group) +
                                  " mixes dusk-sensor and non-dusk fixtures; one group has one control");
+                }
+                const auto [bulb, bulbInserted] = bulbClassByGroup.emplace(light.group, light.bulbClass);
+                if (!bulbInserted && bulb->second != light.bulbClass)
+                {
+                    sink.Add(6,
+                             "layout.lights.json",
+                             "lights/" + Name(light.id) + "/bulbClass",
+                             "group " + Name(light.group) +
+                                 " mixes bulb classes; one baked group has one switch-on envelope");
                 }
                 if (light.duskSensor && light.defaultOn)
                 {

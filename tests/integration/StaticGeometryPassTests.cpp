@@ -300,6 +300,7 @@ namespace
                     ASSERT_TRUE(lighting.SetGroupOn(binding.group, true));
                 }
                 frame.frameIndex = 3U;
+                frame.deltaSeconds = 0.5F;
                 lighting.Update(frame);
                 pass.Draw(context);
                 EXPECT_EQ(pass.StateChanges(), 6U)

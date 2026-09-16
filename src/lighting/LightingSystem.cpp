@@ -34,6 +34,57 @@ namespace cnahouse::lighting
         return environment::SunPositionFor(shifted).altitudeDeg <= kDuskAltitudeDeg;
     }
 
+    float BulbTransitionLevel(world::BulbClass bulbClass, float elapsedSeconds) noexcept
+    {
+        const float elapsed = std::isfinite(elapsedSeconds) ? std::max(elapsedSeconds, 0.0F) : 0.0F;
+        const auto segment = [elapsed](float startTime, float endTime, float startLevel, float endLevel)
+        {
+            const float t = std::clamp((elapsed - startTime) / (endTime - startTime), 0.0F, 1.0F);
+            return startLevel + (endLevel - startLevel) * t;
+        };
+
+        switch (bulbClass)
+        {
+            case world::BulbClass::Led:
+                return 1.0F;
+            case world::BulbClass::Filament:
+            {
+                constexpr float kRampSeconds = 0.12F;
+                const float t = std::clamp(elapsed / kRampSeconds, 0.0F, 1.0F);
+                return t * t * (3.0F - 2.0F * t);
+            }
+            case world::BulbClass::Fluorescent:
+                // A fixed strike pattern: flash, dropout, restrike, second dip, then settle.
+                // There is no RNG or wall clock here, so replay/capture timing stays deterministic.
+                if (elapsed < 0.04F)
+                {
+                    return segment(0.00F, 0.04F, 0.00F, 0.85F);
+                }
+                if (elapsed < 0.08F)
+                {
+                    return segment(0.04F, 0.08F, 0.85F, 0.05F);
+                }
+                if (elapsed < 0.14F)
+                {
+                    return segment(0.08F, 0.14F, 0.05F, 0.95F);
+                }
+                if (elapsed < 0.20F)
+                {
+                    return segment(0.14F, 0.20F, 0.95F, 0.15F);
+                }
+                if (elapsed < 0.28F)
+                {
+                    return segment(0.20F, 0.28F, 0.15F, 0.80F);
+                }
+                if (elapsed < 0.40F)
+                {
+                    return segment(0.28F, 0.40F, 0.80F, 1.00F);
+                }
+                return 1.0F;
+        }
+        return 0.0F;
+    }
+
     Microsoft::Xna::Framework::Vector3
     OutdoorSkyIrradianceFor(const Microsoft::Xna::Framework::Vector3& displaySky,
                             const Microsoft::Xna::Framework::Vector3& solarTint,
@@ -122,6 +173,7 @@ namespace cnahouse::lighting
                 groupLumens_.push_back(lumens);
                 const auto color = PlanckianRgb(light.colorK);
                 groupColors_.emplace_back(color.X * lumens, color.Y * lumens, color.Z * lumens);
+                groupBulbClasses_.push_back(light.bulbClass);
             }
             else
             {
@@ -149,6 +201,9 @@ namespace cnahouse::lighting
                 groupColors_[index].Z /= lumens;
             }
         }
+        groupTransitionElapsed_.resize(groups_.size());
+        groupTransitionLevels_.resize(groups_.size());
+        groupPreviousOn_.resize(groups_.size());
 
         // Automatic fixtures are still grouped into §23.3's one atlas per switch group. During
         // the sixteen-minute stagger the combined Tier-S atlas therefore uses the lumen-weighted
@@ -259,6 +314,7 @@ namespace cnahouse::lighting
             groups_[index].on = level > 0.0F;
             groups_[index].dimmer = level;
         }
+        AdvanceBulbTransitions(frame.deltaSeconds);
 
         daylight_.Evaluate(sun_.altitudeDeg, sun_.azimuthDeg, cloudCover_, daylightLevels_);
         for (std::size_t index = 0; index < cells_.size(); ++index)
@@ -279,7 +335,7 @@ namespace cnahouse::lighting
                 const util::Id group = cellGroupIds_[packed.first + offset];
                 const auto found = groupIndex_.find(group.Value());
                 const std::size_t groupIndex = found->second;
-                const float contribution = groups_[groupIndex].Level() * groupLumens_[groupIndex];
+                const float contribution = GroupOutputLevel(groupIndex) * groupLumens_[groupIndex];
                 lit += contribution;
                 colorLumens.X += groupColors_[groupIndex].X * contribution;
                 colorLumens.Y += groupColors_[groupIndex].Y * contribution;
@@ -342,6 +398,61 @@ namespace cnahouse::lighting
         return found == groupIndex_.end() ? nullptr : &groups_[found->second];
     }
 
+    float LightingSystem::GroupOutputLevel(util::Id group) const noexcept
+    {
+        const auto found = groupIndex_.find(group.Value());
+        return found == groupIndex_.end() ? 0.0F : GroupOutputLevel(found->second);
+    }
+
+    world::BulbClass LightingSystem::GroupBulbClass(util::Id group) const noexcept
+    {
+        const auto found = groupIndex_.find(group.Value());
+        return found == groupIndex_.end() ? world::BulbClass::Filament : groupBulbClasses_[found->second];
+    }
+
+    float LightingSystem::GroupOutputLevel(std::size_t groupIndex) const noexcept
+    {
+        if (groupIndex >= groups_.size() || !groups_[groupIndex].on)
+        {
+            return 0.0F;
+        }
+        return std::clamp(groupTransitionLevels_[groupIndex] * groups_[groupIndex].dimmer, 0.0F, 1.0F);
+    }
+
+    void LightingSystem::AdvanceBulbTransitions(float deltaSeconds) noexcept
+    {
+        if (!bulbTransitionsInitialized_)
+        {
+            for (std::size_t index = 0; index < groups_.size(); ++index)
+            {
+                groupPreviousOn_[index] = groups_[index].on;
+                groupTransitionLevels_[index] = groups_[index].on ? 1.0F : 0.0F;
+            }
+            bulbTransitionsInitialized_ = true;
+            return;
+        }
+
+        const float delta = std::isfinite(deltaSeconds) ? std::max(deltaSeconds, 0.0F) : 0.0F;
+        for (std::size_t index = 0; index < groups_.size(); ++index)
+        {
+            const bool on = groups_[index].on;
+            if (on != groupPreviousOn_[index])
+            {
+                groupPreviousOn_[index] = on;
+                groupTransitionElapsed_[index] = 0.0F;
+                groupTransitionLevels_[index] = 0.0F;
+            }
+            if (!on)
+            {
+                groupTransitionLevels_[index] = 0.0F;
+                continue;
+            }
+            groupTransitionElapsed_[index] += delta;
+            groupTransitionLevels_[index] =
+                BulbTransitionLevel(groupBulbClasses_[index], groupTransitionElapsed_[index]);
+        }
+    }
+
     bool LightingSystem::IsGroupDuskControlled(util::Id group) const noexcept
     {
         const auto found = groupIndex_.find(group.Value());
@@ -378,8 +489,7 @@ namespace cnahouse::lighting
         {
             return 0.0F;
         }
-        const SwitchGroupState* state = FindGroup(group);
-        return state == nullptr ? 0.0F : state->Level();
+        return GroupOutputLevel(group);
     }
 
     float LightingSystem::GroupLumens(util::Id group) const noexcept

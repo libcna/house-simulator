@@ -510,6 +510,11 @@ namespace
         {
             check(value, world::ParseLightType);
         }
+        for (const auto value :
+             {world::BulbClass::Filament, world::BulbClass::Led, world::BulbClass::Fluorescent})
+        {
+            check(value, world::ParseBulbClass);
+        }
         for (const auto value : {world::EffectTier::Basic,
                                  world::EffectTier::DualTexture,
                                  world::EffectTier::AlphaTest,

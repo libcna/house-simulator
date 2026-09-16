@@ -1,4 +1,36 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01269` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01258` checkpoint)
+
+Branch `develop`. Task-start HEAD `f5af4b81b923235bdaecbb9c02283f7176d99bde`
+(`HOUSE-01269`). This file belongs to the single `HOUSE-01258` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** This checkpoint is the shortest real dependency of
+visible fixture emissives rather than a claim that the fixed still image improved: the eleven
+Round 23 captures remain the canonical latest set.
+
+All 243 fixtures now resolve through the closed `bulbClass` vocabulary: 166 filament, 73 LED and
+four fluorescent, forming 94/40/1 internally consistent groups. Filament ramps smoothly over
+0.12 s, LED switches instantly, and the garage fluorescent follows a deterministic two-drop
+strike curve before settling at 0.4 s. A group's transition output is shared by its Tier-S atlas,
+room state and borrowed-light consumers; its persistent switch bit/dimmer remains the target.
+Loaded/default/dusk state snaps on the first update, and only a live off→on edge plays the start,
+so a 22:00 review does not replay the entire street.
+
+The schema, loader and Python/C++ validators know the new class and reject mixed envelopes inside
+one baked group. Focused validation, 32 unit tests, all five software-device
+`StaticGeometryPassTests` and all 1,404 unit tests pass. Integration reports 122 passes, eight
+configured skips and its pre-existing order-sensitive transparent-pass failure (1/1 alone). The
+render suite's 46 unchanged frames pass; `sun-season-03/04` were visibly inspected, identified as
+the intended carry-over from `HOUSE-01269` dusk lighting, intentionally advanced, and both pass on
+recapture. The world build rebuilt 14 stages in 24.41 s, including nav in 8.11 s. The complete
+`tools/ci/run_checks.sh` gate is green, including strict-XNA recompilation of 323 translation units.
+
+Next highest visible value remains `HOUSE-01259`: consume `GroupOutputLevel` for actual fixture
+emissive materials, beginning with real porch-lantern bodies/shades in the fixed exterior-front
+view. `HOUSE-01260` then adds restrained exposure-aware bulb glows; the still-dark façade and
+missing local entrance pool remain explicit defects. Do not raise global exposure.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-01269` checkpoint)
 
 Branch `develop`. Continuous visual-sprint start HEAD
 `238d6aed27c1e8662f0d118013ef08bb801ae018`; clean task-start HEAD

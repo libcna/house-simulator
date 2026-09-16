@@ -260,6 +260,16 @@ namespace
             EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a mixed-control light group";
         }
 
+        // Rule 6: one baked atlas cannot follow two physical switch-on envelopes.
+        {
+            auto contents = Fixture();
+            world::Light second = contents.lights.front();
+            second.id = Intern("LIGHT_HALL_LED");
+            second.bulbClass = world::BulbClass::Led;
+            contents.lights.push_back(second);
+            EXPECT_TRUE(Fired(ProblemsFor(std::move(contents)), 6)) << "a mixed-class light group";
+        }
+
         // Rule 6: an automatic fixture's initial state comes from the sun, never `defaultOn`.
         {
             auto contents = Fixture();

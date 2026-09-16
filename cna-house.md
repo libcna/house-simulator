@@ -5167,6 +5167,11 @@ decal. That is the right scope.
   fixture's emissive material lights, its glow quad appears, dynamic objects in the room pick it up
   as a directional light, and the 2-hop flood brightens the neighbours. A switch click plays at the
   plate's position.
+  `layout.lights.json` authors this as `bulbClass: filament | led | fluorescent`; omission is the
+  warm-filament default and a validator forbids mixed classes inside one baked group. One
+  deterministic transition output drives the atlas, room state and borrowed light. Initial/load
+  state snaps to its authored value; only a live off→on edge plays the start-up, so loading a night
+  exterior does not replay every street lamp.
 * Persistence: one bit per group plus a dimmer byte for the 6 dimmable groups.
 * Exterior lights: 2 porch lanterns, 1 garage flood, 2 rear terrace lights, 4 path lights,
   1 shed light, plus the 9 street lights and the neighbours' porch lights (not player-controlled).

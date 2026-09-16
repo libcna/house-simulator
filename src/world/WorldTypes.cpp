@@ -116,6 +116,12 @@ namespace cnahouse::world
             {LightType::EmissiveOnly, "emissive_only"},
         }};
 
+        constexpr std::array<std::pair<BulbClass, std::string_view>, 3> kBulbClasses{{
+            {BulbClass::Filament, "filament"},
+            {BulbClass::Led, "led"},
+            {BulbClass::Fluorescent, "fluorescent"},
+        }};
+
         constexpr std::array<std::pair<AlphaMode, std::string_view>, 3> kAlphaModes{{
             {AlphaMode::Opaque, "opaque"},
             {AlphaMode::Mask, "mask"},
@@ -236,6 +242,11 @@ namespace cnahouse::world
         return Spell(kLightTypes, value);
     }
 
+    std::string_view ToStringView(BulbClass value) noexcept
+    {
+        return Spell(kBulbClasses, value);
+    }
+
     std::string_view ToStringView(AlphaMode value) noexcept
     {
         return Spell(kAlphaModes, value);
@@ -299,6 +310,11 @@ namespace cnahouse::world
     util::Result<LightType> ParseLightType(std::string_view text)
     {
         return Read(kLightTypes, text, "light type");
+    }
+
+    util::Result<BulbClass> ParseBulbClass(std::string_view text)
+    {
+        return Read(kBulbClasses, text, "bulb class");
     }
 
     util::Result<AlphaMode> ParseAlphaMode(std::string_view text)

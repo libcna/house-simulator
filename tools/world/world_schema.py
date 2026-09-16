@@ -289,6 +289,7 @@ def build() -> dict[str, dict]:
         ["id", "cell", "group", "type", "position"],
         {"id": ID, "cell": ID, "group": ID,
          "type": {"enum": ["point", "spot", "directional", "area_proxy", "emissive_only"]},
+         "bulbClass": {"enum": ["filament", "led", "fluorescent"]},
          "position": VEC3, "direction": VEC3,
          "colorK": {"type": "number", "minimum": 1000, "maximum": 12000},
          "intensityLm": {"type": "number", "minimum": 0},

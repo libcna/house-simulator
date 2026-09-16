@@ -352,6 +352,7 @@ is a rule that quietly says nothing about half the stairs in the house.
       "id": "LIGHT_L0_KITCHEN_ISLAND_1",
       "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_ISLAND",
       "type": "point",                     // point | spot | directional | area_proxy | emissive_only
+      "bulbClass": "filament",             // filament | led | fluorescent; default filament
       "position": [-3.00, 2.85, -25.10], "direction": [0, -1, 0],
       "colorK": 2700,                      // kelvin, converted through a Planckian LUT
       "intensityLm": 800, "range": 6.0,
@@ -370,6 +371,11 @@ is a rule that quietly says nothing about half the stairs in the house.
 A light belongs to exactly one **group**, and a group is what a switch toggles and what a lightmap
 is baked per. `bakedIntoLightmap` and `castsBlobShadow` are independent: a baked light still needs
 a blob shadow for the dynamic objects the bake never saw.
+
+`bulbClass` drives §53's switch-on envelope and all fixtures in a group must agree: filament ramps
+over 0.12 s, LED is instant, and fluorescent has a deterministic 0.4 s flicker-start. It is explicit
+where the source is not the default warm filament; neither a `tube` material slot nor kelvin is a
+reliable technology detector.
 
 `duskSensor` is data, not a special-case group name. All fixtures in one group must agree. The
 lighting system applies each fixture's deterministic ±8 simulated-minute offset and uses the
