@@ -1027,6 +1027,8 @@ def rule_6_references(world: World) -> list[Problem]:
         check("openings", index, "swing", opening.get("swing"), cells, "cell", have_cells)
         check("openings", index, "material", opening.get("material"), materials, "material",
               have_materials)
+        check("openings", index, "panelMaterial", opening.get("panelMaterial"), materials,
+              "material", have_materials)
         check("openings", index, "shutterMaterial", opening.get("shutterMaterial"), materials,
               "material", have_materials)
         check("openings", index, "asset", opening.get("asset"), assets, "asset", have_assets)
@@ -1404,6 +1406,17 @@ def rule_7_openings(world: World) -> list[Problem]:
                 7, FILE_OF["openings"], f"openings/{index}/muntinPattern",
                 f"opening {opening.get('id')} assigns a sash grille/shutter treatment to "
                 f"non-double-hung type {opening.get('type')!r}"))
+
+        panel_material = opening.get("panelMaterial")
+        if panel_material is not None and (
+                opening.get("kind") != "door"
+                or opening.get("type") not in ("D_ENTRY", "D_GARAGE")
+                or not str(opening.get("material") or "").startswith("MAT_EXTERIOR_DOOR_")
+                or not str(panel_material).startswith("MAT_EXTERIOR_DOOR_")):
+            problems.append(Problem(
+                7, FILE_OF["openings"], f"openings/{index}/panelMaterial",
+                f"opening {opening.get('id')} assigns generated exterior panel material "
+                f"{panel_material!r} without an exterior D_ENTRY/D_GARAGE leaf"))
 
     for index, portal in enumerate(world.portals):
         kind = portal.get("kind")

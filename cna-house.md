@@ -984,6 +984,15 @@ settled roof planes: a 280 mm painted frieze and a 100 mm projecting crown sit b
 with 65–75 mm painted corner, header and rake trim. These finish layers are non-lightmapped detail
 and do not alter attic collision, drainage, ridge, pitch or eaves coordinates.
 
+The closed garage frontage (`HOUSE-00935`) is the existing canonical 4.86 × 2.35 m steel leaf,
+not a second facade prop. Five equal horizontal sections and four restrained raised panels per
+section give it spatial relief; the finish is a warm charcoal-grey exterior paint using the approved
+fine-paint maps. A slightly lighter sibling finish keeps the spatial panels readable in the strict
+Tier-S path rather than flattening them into a single coloured slab. The shell representation
+remains non-lightmapped and room-owned, while only those two narrow weather-facing material roles
+enter the exterior hierarchy. The opening, portal, threshold, collision and §54 five-segment
+animation contract do not move.
+
 Three above-grade storeys plus a habitable attic. This is what makes "several floors" believable
 rather than a stack of arbitrary levels: three-storey Colonials of this size were genuinely built,
 and the attic under a 7:12 roof over a 13.4 m span has real usable volume.

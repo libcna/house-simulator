@@ -1,4 +1,42 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-00934` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-00935` checkpoint)
+
+Branch `develop`. Task-start HEAD `9723a9d` (`HOUSE-00934`). This file belongs to the single
+`HOUSE-00935` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The canonical 4.86 × 2.35 m garage leaf remains owned by `L0_GARAGE`, but its painted body and
+panel roles now enter §25.6's exterior hierarchy independently of the culled room. Twenty shallow
+closed boxes form five horizontal sections with four raised panels each, on both faces, using two
+warm-charcoal variants of the approved fine-paint maps. The aperture, portal, threshold, collision,
+closed interaction state and §54 five-segment animation contract do not move.
+
+Before: Round 35's clear-day [front](visual-review/captures/house-00934-roofline-r1/exterior-front.png)
+looks through the full garage aperture. After: the identical
+[front](visual-review/captures/house-00935-garage-door-r1/exterior-front.png) is closed, while the
+new fixed [driveway view](visual-review/captures/house-00935-garage-door-r1/garage-approach.png)
+shows the 5 × 4 relief directly. The front changes 13,201 pixels (0.917%) and the strict close
+property-drive view changes 7.176%. The full
+[Round 36 set](visual-review/captures/house-00935-garage-door-r1) contains twelve fixed clear-day
+route/composition/facade cameras and every frame was opened.
+
+The shell is 57,065 triangles, with `L1_LANDING` worst at 2,362/3,500. The deterministic world now
+contains 599 chunks and 254 exterior hierarchy instances; `L0_GARAGE` is exactly its documented
+10-chunk exception. Ten actually changed strict references were inspected before selective
+advancement. All 1,407 unit tests and all 134 serial integration tests pass. All 48 active strict
+software-render cases pass, and the 18-pose culled/unculled comparison remains below its unchanged
+0.2% threshold at 0.1599% worst. Schema, generator, world/content and repository gates pass with
+`CNA_CNAEXT=OFF`.
+
+Next highest visible value is the empty, dark straight living-room camera: the alternate view has
+a real seating group, but circulation still sees an undecorated wall/chimney. After that, articulate
+the broad garage wall above the finished door, furnish dining, add kitchen practical clutter,
+deepen the family-room finish and improve the night facade. Preserve the bounded garage body/panel
+roles and room ownership; do not expose general garage trim or replace the spatial leaf with a
+facade billboard.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-00934` checkpoint)
 
 Branch `develop`. Task-start HEAD `f1301d2` (`HOUSE-00933`). This file belongs to the single
 `HOUSE-00934` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

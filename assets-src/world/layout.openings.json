@@ -626,7 +626,8 @@
       "leaf": { "width": 4.860, "height": 2.350, "thickness": 0.050 },
       "hinge": null, "swing": null,
       "frame": { "asset": null, "casing": 0.090 },
-      "asset": null, "material": "MAT_DOOR_STEEL",
+      "asset": null, "material": "MAT_EXTERIOR_DOOR_GARAGE_PAINTED",
+      "panelMaterial": "MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED",
       "solid": true, "lockable": true
     },
 

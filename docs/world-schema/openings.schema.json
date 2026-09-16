@@ -149,6 +149,9 @@
               "six_over_six"
             ]
           },
+          "panelMaterial": {
+            "$ref": "#/$defs/id"
+          },
           "portal": {
             "$ref": "#/$defs/id"
           },

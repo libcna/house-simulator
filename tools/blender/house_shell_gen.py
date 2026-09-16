@@ -641,6 +641,17 @@ ENTRY_HARDWARE_PROJECTION = 0.055
 ENTRY_DEADBOLT_SIZE = 0.065
 ENTRY_THRESHOLD_CAP = 0.009
 
+#: `HOUSE-00935`: the 4.86 m garage leaf is five real sectional bands rather than one blank slab.
+#: Each band carries four broad raised steel panels. Their 140 mm side margin, 90 mm inter-panel
+#: gap, 55 mm vertical reveal and 14 mm relief are ordinary carriage-door dimensions and remain
+#: small enough not to alter the authored opening or collision envelope.
+GARAGE_SECTION_COUNT = 5
+GARAGE_PANEL_COLUMNS = 4
+GARAGE_PANEL_SIDE_MARGIN = 0.140
+GARAGE_PANEL_GAP = 0.090
+GARAGE_PANEL_VERTICAL_REVEAL = 0.055
+GARAGE_PANEL_RELIEF = 0.014
+
 
 def entry_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
                             depth_lo: float, depth_hi: float, hinge: str):
@@ -707,6 +718,39 @@ def entry_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
                deadbolt_v - ENTRY_DEADBOLT_SIZE / 2.0,
                deadbolt_v + ENTRY_DEADBOLT_SIZE / 2.0,
                "exterior_door_hardware", "deadbolt", ENTRY_PANEL_RELIEF + 0.008)
+    return boxes
+
+
+def garage_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
+                             depth_lo: float, depth_hi: float):
+    """Five rows of four raised steel panels on both faces of a sectional garage leaf.
+
+    The returned shallow closed boxes use the leaf's narrowly authored panel-material sibling.
+    They finish the static closed representation without moving the aperture or pre-empting §54's
+    future five-segment animation, whose section count this geometry deliberately matches.
+    """
+    width = lu1 - lu0
+    height = lv1 - lv0
+    if width <= 0.0 or height <= 0.0 or depth_hi <= depth_lo:
+        return []
+    usable = width - 2.0 * GARAGE_PANEL_SIDE_MARGIN
+    usable -= (GARAGE_PANEL_COLUMNS - 1) * GARAGE_PANEL_GAP
+    panel_width = usable / GARAGE_PANEL_COLUMNS
+    section_height = height / GARAGE_SECTION_COUNT
+    boxes = []
+    for section in range(GARAGE_SECTION_COUNT):
+        panel_v0 = lv0 + section * section_height + GARAGE_PANEL_VERTICAL_REVEAL
+        panel_v1 = lv0 + (section + 1) * section_height - GARAGE_PANEL_VERTICAL_REVEAL
+        for column in range(GARAGE_PANEL_COLUMNS):
+            panel_u0 = (lu0 + GARAGE_PANEL_SIDE_MARGIN
+                        + column * (panel_width + GARAGE_PANEL_GAP))
+            panel_u1 = panel_u0 + panel_width
+            boxes.append((panel_u0, panel_u1, panel_v0, panel_v1,
+                          depth_lo - GARAGE_PANEL_RELIEF, depth_lo,
+                          "exterior_door_panel", "section_panel"))
+            boxes.append((panel_u0, panel_u1, panel_v0, panel_v1,
+                          depth_hi, depth_hi + GARAGE_PANEL_RELIEF,
+                          "exterior_door_panel", "section_panel"))
     return boxes
 
 
@@ -1047,6 +1091,21 @@ def cell_surface_materials(cell: dict, openings=(), portals=(), flights=(),
             f"multiple materials: {', '.join(sorted(exterior_doors))}")
     if exterior_doors:
         result["exterior_door"] = next(iter(exterior_doors))
+
+    exterior_door_panels = {
+        row.get("panelMaterial")
+        for row in openings
+        if row.get("kind") == "door"
+        and cell.get("id") in portal_cells.get(row.get("portal"), ())
+        and is_exterior_door_material(row.get("material"))
+        and row.get("panelMaterial")
+    }
+    if len(exterior_door_panels) > 1:
+        raise ValueError(
+            f"{cell.get('id')}: generated exterior door panels name multiple materials: "
+            f"{', '.join(sorted(exterior_door_panels))}")
+    if exterior_door_panels:
+        result["exterior_door_panel"] = next(iter(exterior_door_panels))
 
     stair_surfaces = {
         row.get("surface") for row in flights if row.get("fromCell") == cell.get("id")
@@ -1859,6 +1918,11 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         leaf_box(hu0 + 0.010, hu1 - 0.010, hv0 + THRESHOLD_THICK,
                                  hv0 + THRESHOLD_THICK + ENTRY_THRESHOLD_CAP,
                                  reveal_lo, reveal_hi, "exterior_door_hardware")
+                    if leaf_class == "exterior_door" and opening.get("type") == "D_GARAGE":
+                        for detail in garage_door_detail_boxes(
+                                lu0, lu1, lv0, lv1, middle - thickness / 2.0,
+                                middle + thickness / 2.0):
+                            leaf_box(*detail[:6], detail[6])
                     # The lining: the reveal's full depth, filling what the leaf does not.
                     leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "trim")
                     leaf_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
@@ -3785,6 +3849,27 @@ def selftest(output: Path) -> int:
     require(sectional.get("kind") == "door",
             "the sectional door is an `opening` of kind `door`, so `HOUSE-00455` cut it and "
             "`HOUSE-00456` lined it like any other")
+    reset_scene()
+    garage_shell = build_cell(
+        garage, garage_extent, neighbours=neighbours, construction=construction,
+        level=levels[garage["level"]], levels=levels, portals=all_portals,
+        openings=openings_by_portal, cells_by_id=cells)
+    garage_classes = [SURFACE_ORDER[polygon.material_index]
+                      for polygon in garage_shell.data.polygons]
+    expected_garage_panel_faces = GARAGE_SECTION_COUNT * GARAGE_PANEL_COLUMNS * 2 * 6
+    require(garage_classes.count("exterior_door") == 6,
+            "the closed garage frontage retains one six-face leaf body")
+    require(garage_classes.count("exterior_door_panel") == expected_garage_panel_faces,
+            f"and has five rows of four raised panels on both faces "
+            f"({garage_classes.count('exterior_door_panel')} faces)")
+    garage_materials = cell_surface_materials(
+        garage, openings_by_portal.values(), all_portals, cells_by_id=cells)
+    require(garage_materials["exterior_door"] == "MAT_EXTERIOR_DOOR_GARAGE_PAINTED",
+            f"and only its narrow weather-facing role enters the exterior hierarchy "
+            f"({garage_materials['exterior_door']})")
+    require(garage_materials["exterior_door_panel"]
+            == "MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED",
+            "while the opening row gives its raised panels a readable sibling finish")
 
     require(PORCH_COLUMNS == 4,
             f"§12.1 says the porch stands on FOUR square columns ({PORCH_COLUMNS})")

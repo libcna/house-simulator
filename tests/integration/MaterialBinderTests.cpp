@@ -180,7 +180,8 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 170U) << "HOUSE-00934 adds the unbaked dormer-siding finish";
+                EXPECT_EQ(binder.Count(), 172U)
+                    << "HOUSE-00935 adds the exterior-resident garage-door body and panel finishes";
                 const MaterialDesc* entryPanel = binder.Find(Id::Of("MAT_EXTERIOR_DOOR_PANEL_HARDWOOD"));
                 ASSERT_NE(entryPanel, nullptr);
                 EXPECT_EQ(entryPanel->kind, MaterialKind::Basic);
@@ -189,6 +190,16 @@ namespace
                 ASSERT_NE(entryHardware, nullptr);
                 EXPECT_EQ(entryHardware->kind, MaterialKind::Basic);
                 EXPECT_TRUE(entryHardware->lightingEnabled);
+                const MaterialDesc* garageDoor = binder.Find(Id::Of("MAT_EXTERIOR_DOOR_GARAGE_PAINTED"));
+                ASSERT_NE(garageDoor, nullptr);
+                EXPECT_EQ(garageDoor->kind, MaterialKind::Basic);
+                EXPECT_EQ(garageDoor->diffuseTexture, "Textures/Materials/paint_white_fine_albedo");
+                const MaterialDesc* garagePanel =
+                    binder.Find(Id::Of("MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED"));
+                ASSERT_NE(garagePanel, nullptr);
+                EXPECT_EQ(garagePanel->kind, MaterialKind::Basic);
+                EXPECT_EQ(garagePanel->diffuseTexture, garageDoor->diffuseTexture);
+                EXPECT_GT(garagePanel->diffuse[0], garageDoor->diffuse[0]);
                 const MaterialDesc* fixtureMetal = binder.Find(Id::Of("MAT_FIXTURE_DARK_BRONZE"));
                 ASSERT_NE(fixtureMetal, nullptr);
                 EXPECT_EQ(fixtureMetal->kind, MaterialKind::Basic);

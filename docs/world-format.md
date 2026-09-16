@@ -289,6 +289,8 @@ interactable. A double-hung window may additionally opt into the generated exter
 `"muntinPattern": "six_over_six"` and a `shutterMaterial` material id. The two fields are authored
 together: `six_over_six` means two columns by three rows in each sash, while `shutterMaterial`
 selects the finish for its paired louvered shutters. Windows without both fields remain plain.
+A generated raised-panel exterior door may similarly name `panelMaterial`; it selects the finish
+of spatial panel geometry independently from the leaf body without changing the portal or leaf.
 
 ```jsonc
 {

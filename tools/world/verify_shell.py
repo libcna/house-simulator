@@ -863,8 +863,8 @@ def selftest() -> int:
             f"({leafless[:4] if leafless else 'none missing'})")
     exterior_leaf_cells = sorted(cell_id for cell_id, surfaces in shell.items()
                                  if "exterior_door" in surfaces)
-    require(exterior_leaf_cells == ["L0_FOYER", "L1_LANDING"],
-            f"and HOUSE-00930's two weather-facing entry leaves retain their dedicated role "
+    require(exterior_leaf_cells == ["L0_FOYER", "L0_GARAGE", "L1_LANDING"],
+            f"and the two entries plus HOUSE-00935's garage leaf retain their dedicated role "
             f"({exterior_leaf_cells})")
     require(len(doors) - len(fillable) == 1,
             f"and the {len(doors) - len(fillable)} that is in no wall at all is the shed's -- an "

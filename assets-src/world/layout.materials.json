@@ -1705,6 +1705,33 @@
       "footstepSurface": "hardwood", "audioAbsorption": 0.16,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // Weather-facing closed representation of the canonical five-section garage door. The body
+    // is the slightly darker reveal behind its raised panels; both approved fine-paint roles are
+    // narrowly admitted without exposing ordinary garage trim or indoor steel.
+    {
+      "id": "MAT_EXTERIOR_DOOR_GARAGE_PAINTED", "class": "paint",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.78, 0.63, 0.48], "specularColor": [0.11, 0.12, 0.13],
+      "specularPower": 24.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.18, "specularBoost": 1.6, "powerBoost": 1.8 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "metal", "audioAbsorption": 0.04,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    {
+      "id": "MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED", "class": "paint",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [1.0, 0.76, 0.54], "specularColor": [0.11, 0.12, 0.13],
+      "specularPower": 24.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.18, "specularBoost": 1.6, "powerBoost": 1.8 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "metal", "audioAbsorption": 0.04,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     // Slightly darker hardwood makes the 32 mm raised panel moulding legible under the covered
     // porch without substituting paint or metal for millwork. It shares the leaf's approved maps.
     {

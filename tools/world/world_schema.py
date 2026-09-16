@@ -263,7 +263,7 @@ def build() -> dict[str, dict]:
          # id opts the same opening into the generated paired shutter assembly.
          "muntinPattern": {"enum": ["six_over_six"]},
          "shutterMaterial": ID,
-         "asset": ID_OR_NULL, "material": ID_OR_NULL,
+         "asset": ID_OR_NULL, "material": ID_OR_NULL, "panelMaterial": ID,
          "solid": BOOL, "lockable": BOOL})))
 
     schemas["stairs"] = envelope("stairs", "layout.stairs.json", rows("flights", obj(

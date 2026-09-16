@@ -14,6 +14,8 @@ mostly showed the neighboring family room and hid the kitchen's empty west side.
 kitchen poses move to a measured 1.04 m east-side aisle and an eleventh fixed pose is added just
 beyond the hall opening, angled toward the island and sink run. The other eight poses are unchanged.
 `HOUSE-01041` retains all eleven poses and four conditions for an exact lighting comparison.
+`HOUSE-00935` adds a twelfth pose on the driveway, looking squarely at the garage frontage; the
+prior cameras stay unchanged and remain the exact comparison set for the main route.
 
 ## Round 0 — visual-convergence baseline
 
@@ -1442,3 +1444,44 @@ under its unchanged 0.2% threshold at 0.1599% worst.
 `VISUAL-GATE-1` still **FAILS**. Highest visible value is now the broad flat garage/facade mass or
 the empty straight living-room composition; choose the shortest dependency-valid change with the
 largest improvement in the fixed captures rather than adding more invisible infrastructure.
+
+## Round 36 — closed and panelled sectional garage door
+
+Commit: `HOUSE-00935` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 35's [front](captures/house-00934-roofline-r1/exterior-front.png) looks through the
+entire 4.90 × 2.40 m garage aperture because its closed room-owned leaf used ordinary indoor steel
+and correctly vanished with `L0_GARAGE`. After: the identical
+[front camera](captures/house-00935-garage-door-r1/exterior-front.png) shows a closed warm-charcoal
+sectional door, and the new fixed [driveway camera](captures/house-00935-garage-door-r1/garage-approach.png)
+makes its five rows of four raised panels directly reviewable. The complete
+[Round 36 set](captures/house-00935-garage-door-r1) contains twelve fixed clear-day route,
+composition and facade cameras; every frame was opened and inspected.
+
+Ranked visible defects remaining:
+
+1. The straight living-room camera is still almost empty and substantially darker than the
+   alternate furnished composition; it is now the largest defect on the connected interior route.
+2. Above the finished door, the broad garage siding plane has no window, planting hierarchy or
+   other strong facade articulation and still reads as an oversized box.
+3. Dining furnishing is absent; kitchen practical clutter and family-room finish depth remain
+   visibly behind the primary furniture already present.
+4. The facade outside the localized porch/step spill remains too dark in the night approach.
+5. Several daylight interiors still have flat, dark ceiling/wall transitions despite valid baked
+   contribution and would benefit from later calibrated finish/lighting depth.
+
+Fixed: the canonical leaf remains in `L0_GARAGE`, but its body and panel finishes alone use the
+narrow exterior-door prefix consumed by §25.6. Twenty shallow closed boxes provide real 14 mm
+relief on both faces and match the future five-segment animation contract; a sibling fine-paint
+tint makes the relief readable in strict Tier S without a billboard or new renderer. Aperture,
+portal, threshold, collision and interaction data are untouched. The front frame changes 13,201
+pixels (0.917%) and the close strict property-drive frame changes 7.176%. The shell is 57,065
+triangles; the world contains 599 chunks and 254 exterior hierarchy instances.
+
+Ten strict references that actually see the leaf were compared and intentionally advanced;
+unaffected references were retained. All 48 active software-render cases pass, and the 18-pose
+culled/unculled comparison remains under its unchanged 0.2% threshold at 0.1599% worst.
+
+`VISUAL-GATE-1` still **FAILS**. Highest visible value is the empty straight living-room view,
+followed by garage-facade articulation and the remaining connected-route furnishing gaps. Do not
+undo the room ownership boundary or broaden the exterior-door prefix to ordinary indoor joinery.

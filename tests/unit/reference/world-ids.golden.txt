@@ -890,6 +890,8 @@ materials/materials	MAT_DECK_WOOD_WET
 materials/materials	MAT_DOOR_HARDWOOD
 materials/materials	MAT_DOOR_PAINTED
 materials/materials	MAT_DOOR_STEEL
+materials/materials	MAT_EXTERIOR_DOOR_GARAGE_PAINTED
+materials/materials	MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED
 materials/materials	MAT_EXTERIOR_DOOR_HARDWARE_BRONZE
 materials/materials	MAT_EXTERIOR_DOOR_HARDWOOD
 materials/materials	MAT_EXTERIOR_DOOR_PANEL_HARDWOOD

@@ -37,7 +37,7 @@
     "L0_DINING.glb": "sha256:ead93935c88e7028d2ff6796e675726e20f9f8450ba9e4a17f39ac2106e790ae",
     "L0_FAMILY.glb": "sha256:ee25be315a4d0e72680f74dd12debbe9aaa959b9e7477a32a6a7ab71829829c3",
     "L0_FOYER.glb": "sha256:1bbefa880d9268eb5c9aeda0efcca56c61ab1d2d1e63c3c63988ace03a5ad68c",
-    "L0_GARAGE.glb": "sha256:454bf432c3619a4cfc126b7ccd8856316d77b36b90c22bf146b4b78f8bbe6b1f",
+    "L0_GARAGE.glb": "sha256:2738875b726a70a880e3f774777d18039bfd82644c38bb153eb9fddb88b8010d",
     "L0_GARAGE_LOFT.glb": "sha256:7d7471c63340ea8587daa0d026bf165c4ce63eaff559cacc56820e70748c9769",
     "L0_HALL.glb": "sha256:395560109f747e7db5dbc0d929c457445875b84671b67caa381d09f844389abe",
     "L0_KITCHEN.glb": "sha256:6df2e908536a8ff72e0bf8cb4c85edbce8659dd913238c74c01bed9382c25736",
@@ -101,7 +101,7 @@
     "ROOF_MAIN.glb": "sha256:b2da678562982aaf5ead505816a59ba8c1ca605baa36838bec56e16cc4390ff3"
   },
   "generator": "tools/blender/house_shell_gen.py",
-  "generatorVersion": "sha256:9b1a0a30bd07e628a13f69047edf318c90f3153b9c0905e242e057f64f12a3dd",
+  "generatorVersion": "sha256:b29183228084b039d0789cc634cc5f8ce2594d35ab96a9fc8d64f6f655af6b7a",
   "origin": {
     "attribution": "",
     "kind": "generated",

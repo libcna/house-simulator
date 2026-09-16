@@ -13704,6 +13704,42 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
               with `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still FAILS: the broad facade/garage masses,
               empty straight living-room view, dining furnishing, kitchen practical clutter,
               family-room finish depth and dark night facade remain conspicuous.
+- [x] HOUSE-00935 — Close and finish the canonical sectional garage door in normal exterior rendering
+      dep: HOUSE-00377, HOUSE-00416, HOUSE-00467, HOUSE-00486, HOUSE-00907, HOUSE-00921, HOUSE-00934 · sys: world/content/exterior · plat: ALL · pri: MUST
+      note: (2026-09-16) Round 35's fixed front and property-drive views expose a 4.90 × 2.40 m
+            hole through the garage facade in the ordinary closed state. The shell correctly
+            builds the canonical leaf in `L0_GARAGE`, but its ordinary indoor `MAT_DOOR_STEEL`
+            role is correctly excluded from §25.6 while the room is portal-culled. Give this one
+            weather-facing leaf narrow exterior-door body/panel roles and measured five-section
+            spatial panel joinery. Preserve its opening, portal, collision, interaction state and
+            the phase-15 five-segment animation contract; do not expose general garage trim.
+      accept: identical fixed front and property-drive cameras show a closed, plausibly painted
+              4.86 × 2.35 m sectional door with five readable horizontal sections and restrained
+              raised-panel relief instead of a view through the garage; the leaf remains room-
+              owned, the exterior hierarchy admits only its dedicated body/panel roles, and the
+              existing aperture, threshold, five-segment interaction/collision data and future
+              animation contract remain unchanged; geometry is spatial, non-lightmapped and uses
+              approved material sources; shell/chunk budgets, strict render/culling and full
+              XNA/content gates pass; before/after images are inspected and `VISUAL-GATE-1` is
+              judged honestly
+      result: (2026-09-16) The existing room-owned 4.86 × 2.35 m leaf now reaches §25.6 through
+              two narrowly prefixed exterior-door roles instead of exposing ordinary garage
+              steel or trim. Its warm charcoal body carries twenty lighter, 14 mm-deep spatial
+              panels in the authored five-section/four-column grammar; both approved finishes
+              reuse the existing fine-paint maps and stay outside the lightmap receiver set. The
+              aperture, portal, threshold, collision, closed interaction state and future five-
+              segment animation data are unchanged. Round 36 adds a fixed driveway camera; all
+              twelve clear-day frames were opened. The identical front frame changes 13,201
+              pixels (0.917%), while the strict property-drive view changes 7.176%, replacing a
+              full garage-sized hole with a legible sectional door. The shell is 57,065 triangles
+              and the deterministic world is 599 chunks / 254 exterior instances. Ten changed
+              strict references were inspected and selectively advanced; all 1,407 unit and 134
+              integration tests pass, all 48 active software-render cases pass, and the 18-pose
+              culling comparison remains below 0.2% at 0.1599% worst. Full content/provenance/
+              strict-XNA gates pass with `CNA_CNAEXT=OFF`. `VISUAL-GATE-1` still FAILS: the empty,
+              dark straight living-room view is now the largest route defect, followed by the
+              broad garage wall above the new door, dining furnishing, kitchen practical clutter,
+              family-room finish depth and the dark night facade.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -18240,6 +18276,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-00935` | **New task, next free phase-12 id.** Route the already-authored closed garage leaf through the bounded exterior-door role and finish it as the five-section door its canonical data already declares. | Round 35's normal front frame sees through the entire 4.90 × 2.40 m opening because the room-owned leaf still uses ordinary indoor `MAT_DOOR_STEEL`, which §25.6 correctly culls with `L0_GARAGE`. Making all indoor metal or trim exterior-visible would leak the room; moving the leaf to an exterior cell would break portal ownership. A dedicated weather-facing finish is the same narrow architectural solution already proven by the entry door. |
 | 2026-09-16 | `HOUSE-00934` | **New task, next free phase-12 id.** Finish the settled hip/dormer geometry with a measured layered eave cornice, correct vertical dormer faces from shingles to approved siding, and add painted dormer trim without moving the roof or its collision envelope. | Round 34's fixed road view makes the remaining defect explicit: the four-storey facade ends at one thin line, while the five existing dormers read as dark boxes because `build_roof` assigns all eight of each dormer's faces to the shingle role. The architecture already calls for Colonial Revival massing and five gabled dormers; finish roles and joinery are missing, not a new roof design. |
 | 2026-09-16 | `HOUSE-00933` | **New task, next free phase-12 id.** Complete only §12.1's already-required front-window vocabulary: canonical `W_DH_*` rows opt into 6-over-6 grilles and black louvered shutters, generated as exterior-window detail through the existing shell/content path. | Round 33's fixed clear-day front still reads as a broad undifferentiated siding box. The source architecture explicitly specifies both missing elements, but `HOUSE-00457` implemented only frames, sashes, glass and the double-hung meeting rail. Data-authored patterns avoid a front-cell heuristic, and a narrow exterior-window material role avoids exposing general indoor trim. |
 | 2026-09-16 | `HOUSE-01282` | **New task, next free phase-16 id.** Add an explicit `spillCells` list for fixed sources illuminating adjacent unbaked static detail, and use it first for the canonical porch lamps → `EXT_WALK` front stair. Keep dynamic-object, group-control and exposure ownership in the source/receiver cells unchanged. | Round 32 proves the stair is a single 72-triangle Basic chunk correctly owned by its `fromCell`, `EXT_WALK`, while the two dusk-controlled 400 lm sources are correctly owned by `L0_PORCH`. The only local `EXT_WALK` group is the deliberately player-switched, initially-off path lighting. Reassigning the stair, making path lights automatic or lifting global night exposure would falsify one of those authored facts. |

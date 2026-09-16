@@ -17,6 +17,7 @@ REPO = Path(__file__).resolve().parents[2]
 SEED = 6840335469064670721
 POSES = (
     ("exterior-front", "0.00,0.00,5.20,0.0,3.0"),
+    ("garage-approach", "13.00,0.00,-4.00,0.0,0.0"),
     ("entrance-foyer", "0.00,0.60,-14.90,0.0,0.0"),
     ("foyer-facing-front", "0.00,0.60,-16.70,180.0,0.0"),
     ("central-hall", "0.00,0.60,-20.65,0.0,0.0"),

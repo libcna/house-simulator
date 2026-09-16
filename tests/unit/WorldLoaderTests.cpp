@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 170U)
-            << "HOUSE-00934 adds an unbaked outdoor siding variant for the dormers";
+        EXPECT_EQ(contents.materials.size(), 172U)
+            << "HOUSE-00935 adds weather-facing painted garage-door body and panel finishes";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3697,6 +3697,30 @@ namespace
         EXPECT_EQ(exteriorDoorAt->albedo, "Textures/Materials/wood_board_albedo");
         EXPECT_EQ(exteriorDoorAt->lightmapChannel, 0);
         EXPECT_EQ(exteriorDoorAt->effectTierS, world::EffectTier::Basic);
+
+        const auto garageDoorAt =
+            std::find_if(contents.materials.begin(),
+                         contents.materials.end(),
+                         [](const world::MaterialDef& material)
+                         { return material.id == Intern("MAT_EXTERIOR_DOOR_GARAGE_PAINTED"); });
+        ASSERT_NE(garageDoorAt, contents.materials.end());
+        EXPECT_EQ(garageDoorAt->materialClass, world::MaterialClass::Paint);
+        EXPECT_EQ(garageDoorAt->albedo, "Textures/Materials/paint_white_fine_albedo");
+        EXPECT_EQ(garageDoorAt->lightmapChannel, 0);
+        EXPECT_EQ(garageDoorAt->effectTierS, world::EffectTier::Basic);
+
+        const auto garagePanelAt =
+            std::find_if(contents.materials.begin(),
+                         contents.materials.end(),
+                         [](const world::MaterialDef& material)
+                         { return material.id == Intern("MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED"); });
+        ASSERT_NE(garagePanelAt, contents.materials.end());
+        EXPECT_EQ(garagePanelAt->materialClass, world::MaterialClass::Paint);
+        EXPECT_EQ(garagePanelAt->albedo, garageDoorAt->albedo);
+        EXPECT_EQ(garagePanelAt->lightmapChannel, 0);
+        EXPECT_EQ(garagePanelAt->effectTierS, world::EffectTier::Basic);
+        EXPECT_GT(garagePanelAt->tint.X, garageDoorAt->tint.X)
+            << "the raised panels must remain readable against the leaf body in Tier S";
 
         const auto exteriorDoorPanelAt =
             std::find_if(contents.materials.begin(),
