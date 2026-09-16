@@ -475,7 +475,39 @@ namespace cnahouse::rendering
                     }
                     const Vector3& sky = lighting_->OutdoorSkyIrradianceColor();
                     draw.colourMultiplier = Vector3(scale * sky.X, scale * sky.Y, scale * sky.Z);
-                    submit(draw, false, true);
+                    if (!submit(draw, false, true))
+                    {
+                        first = last;
+                        continue;
+                    }
+
+                    // An outer-skin run must not inherit the owning room's lamps, but a fixed
+                    // lamp in a neighbouring cell can have an explicit bake on this receiver.
+                    // Those cross-cell products are exactly the bindings not present in the
+                    // cell's control index. They consume the source group's global envelope;
+                    // adding that group to `cell.lightGroups` would incorrectly brighten the
+                    // foyer state/exposure and violate the world validator's ownership rule.
+                    for (const world::CellLightmapGroup& group : cell->lightmaps.artificial)
+                    {
+                        if (std::find(cell->lightGroups.begin(), cell->lightGroups.end(), group.group) !=
+                            cell->lightGroups.end())
+                        {
+                            continue;
+                        }
+                        const float groupLevel = lighting_->GroupOutputLevel(group.group);
+                        if (groupLevel <= 0.0F)
+                        {
+                            continue;
+                        }
+                        DrawParams spill = common;
+                        spill.lightmap = textures_(group.texture.contentName);
+                        const Vector3 groupColour = lighting_->GroupColor(group.group);
+                        const float groupScale = 0.5F * group.texture.scale * groupLevel * exposure;
+                        spill.colourMultiplier = Vector3(groupScale * groupColour.X,
+                                                         groupScale * groupColour.Y,
+                                                         groupScale * groupColour.Z);
+                        submit(spill, true, false);
+                    }
                     first = last;
                     continue;
                 }

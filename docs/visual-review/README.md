@@ -1080,3 +1080,44 @@ render suite needs no golden update. The 18-pose culled/unculled maximum remains
 `VISUAL-GATE-1` still **FAILS**. The next highest visible value is a local warm entrance pool using
 the approved Tier-S light assignment/receiver path, followed by façade/roof/porch form depth. Do
 not raise global exposure to conceal either defect.
+
+## Round 27 — baked cross-cell porch spill
+
+Commit: `HOUSE-01281` checkpoint (`2026-09-16`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 26's [fixture-glow set](captures/house-01260-night-r1). After: the same eleven fixed
+22:00 cameras in the [cross-cell spill set](captures/house-01281-porch-spill-r1), plus the exact
+[close night entrance](captures/house-01281-porch-spill-r1/exterior-approach-close.png) and matching
+[10:30 off-state](captures/house-01281-porch-spill-r1/exterior-approach-day-check.png). The fixed
+road, close-night and close-day frames were inspected at original resolution.
+
+Ranked visible defects remaining:
+
+1. The two wall pools are now spatially local and warm, but the unbaked `L0_PORCH` floor, steps and
+   columns remain almost uniformly dark. The pool therefore stops at the foyer-owned facade rather
+   than grounding the entrance as one illuminated architectural composition.
+2. Thin roof edges and the skeletal balcony/porch frame still dominate both day and night. The
+   close daylight view needs layered eaves, believable joinery and stronger facade depth.
+3. The broad night facade is still under-readable away from the two local pools; vegetation and
+   the road receive more obvious modelling than the house face.
+4. This receiver-focused change intentionally leaves the connected interior route unchanged:
+   kitchen practical clutter, family-room material depth and dining furnishing remain visible gaps.
+
+Fixed: the two canonical 400 lm porch sources now sit at the measured centre of their physical
+diffusers rather than 10 cm behind the facade. Their runtime ownership, dusk sensor and fixture
+links remain in `L0_PORCH`, while an explicit offline `bakeCells` receiver produces one additional
+128 px Tier-S atlas for the foyer shell. Only this foreign binding is admitted to the outside-facing
+skin; the foyer's own lamp groups remain excluded. At the exact close camera the paired fixture
+crop changes 54.64% of pixels and rises from mean RGB(15.68,13.19,11.70) to
+RGB(17.69,14.32,12.79). The facade crop changes 13.87%, while the porch-floor crop changes 0%,
+accurately exposing the next task instead of hiding it. The matching day world crop differs by only
+four pixels, proving the dusk-off presentation is materially unchanged.
+
+The generated atlas has measured peak 10.696699 and mean 0.00655984 before normalisation. Schema,
+semantic validation, subset promotion and the real renderer test cover the ownership boundary and
+reject an undeclared foreign binding.
+
+`VISUAL-GATE-1` still **FAILS**. Next highest visible value is to light the Basic-effect porch
+floor/steps/columns with the approved distance-attenuated approximation, then deepen the
+facade/roof/porch construction. Do not broaden the wall atlas or raise global exposure to fake the
+missing receiver classes.

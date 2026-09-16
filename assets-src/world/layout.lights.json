@@ -2069,18 +2069,20 @@
     // ---- LG_L0_PORCH_LANTERN x2 -- either side of the front door, on the dusk sensor
     {
       "id": "LIGHT_L0_PORCH_LANTERN_1", "cell": "L0_PORCH", "group": "LG_L0_PORCH_LANTERN",
-      "type": "point", "position": [-0.90, 2.62, -14.25],
+      "type": "point", "position": [-0.90, 2.62, -14.073],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
+      "bakeCells": ["L0_FOYER"],
       "fixtureProp": "PROP_L0_PORCH_LANTERN_1", "emissiveMaterialSlot": "LanternShade",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
       "duskSensor": true
     },
     {
       "id": "LIGHT_L0_PORCH_LANTERN_2", "cell": "L0_PORCH", "group": "LG_L0_PORCH_LANTERN",
-      "type": "point", "position": [0.90, 2.62, -14.25],
+      "type": "point", "position": [0.90, 2.62, -14.073],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 400.0, "range": 6.50,
+      "bakeCells": ["L0_FOYER"],
       "fixtureProp": "PROP_L0_PORCH_LANTERN_2", "emissiveMaterialSlot": "LanternShade",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
       "duskSensor": true

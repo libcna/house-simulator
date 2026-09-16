@@ -934,6 +934,10 @@ def rule_6_references(world: World) -> list[Problem]:
     portals = set(world.portal_by_id)
     assets = _asset_ids(world)
     light_groups = {row.get("group") for row in world.lights}
+    cross_cell_bake_groups: dict[str, set[str]] = {}
+    for light in world.lights:
+        for receiver in light.get("bakeCells", []) or []:
+            cross_cell_bake_groups.setdefault(receiver, set()).add(light.get("group"))
     interactables = {row.get("id") for row in world.interactables}
     props_by_id = {row.get("id"): row for row in world.props}
     nav_regions = {cell.get("navMeshRegion") for cell in world.cells
@@ -984,6 +988,22 @@ def rule_6_references(world: World) -> list[Problem]:
             check("cells", index, f"lightGroups/{group_index}", group, light_groups,
                   "light group (no light declares it)", "lights" in world.layout)
 
+        # Runtime deliberately identifies a foreign fixed spill as a binding that is not in the
+        # receiver's own control index. Make that inference safe: every such binding must be
+        # backed by an explicit offline `bakeCells` declaration on a real source light.
+        if have_lights and "lights" in world.layout:
+            listed = set(cell.get("lightGroups", []) or [])
+            allowed_foreign = cross_cell_bake_groups.get(cell.get("id"), set())
+            artificial = ((cell.get("lightmaps") or {}).get("artificial") or [])
+            for binding_index, binding in enumerate(artificial):
+                group = binding.get("group")
+                if group not in listed and group not in allowed_foreign:
+                    problems.append(Problem(
+                        6, FILE_OF["cells"],
+                        f"cells/{index}/lightmaps/artificial/{binding_index}/group",
+                        f"foreign lightmap group {group!r} has no source light that names "
+                        f"{cell.get('id')} in bakeCells"))
+
     for index, portal in enumerate(world.portals):
         for field in ("cellA", "cellB"):
             check("portals", index, field, portal.get(field), cells, "cell", have_cells)
@@ -1017,6 +1037,17 @@ def rule_6_references(world: World) -> list[Problem]:
     bulb_class_by_group: dict[str, str] = {}
     for index, light in enumerate(world.lights):
         check("lights", index, "cell", light.get("cell"), cells, "cell", have_cells)
+        for receiver_index, receiver in enumerate(light.get("bakeCells", []) or []):
+            check("lights", index, f"bakeCells/{receiver_index}", receiver, cells, "cell",
+                  have_cells)
+            if receiver == light.get("cell"):
+                problems.append(Problem(
+                    6, FILE_OF["lights"], f"lights/{index}/bakeCells/{receiver_index}",
+                    "bakeCells names only additional receivers; the owning cell is implicit"))
+            if not light.get("bakedIntoLightmap", True):
+                problems.append(Problem(
+                    6, FILE_OF["lights"], f"lights/{index}/bakeCells/{receiver_index}",
+                    "a runtime-only light cannot name an offline baked receiver"))
         fixture_prop = light.get("fixtureProp")
         check("lights", index, "fixtureProp", fixture_prop, set(props_by_id), "prop", have_props)
         fixture = props_by_id.get(fixture_prop)
@@ -2791,6 +2822,47 @@ def selftest() -> int:
         _, problems = validate(defaulted_dir, wanted=[6])
         require(any("must start off" in x.message for x in problems),
                 f"a dusk-controlled light cannot also be default-on "
+                f"({[str(x) for x in problems]})")
+
+        spill = copy.deepcopy(base)
+        row(spill, "lights", "LIGHT_HALL")["bakeCells"] = ["L0_NOWHERE"]
+        spill_dir = workspace / "unknown-bake-receiver"
+        write_fixture(spill_dir, spill)
+        _, problems = validate(spill_dir, wanted=[6])
+        require(any("bakeCells/0" in x.path and "known cell" in x.message for x in problems),
+                f"a cross-cell bake cannot name a receiver that does not exist "
+                f"({[str(x) for x in problems]})")
+
+        self_spill = copy.deepcopy(base)
+        row(self_spill, "lights", "LIGHT_HALL")["bakeCells"] = ["L0_HALL"]
+        self_spill_dir = workspace / "redundant-bake-receiver"
+        write_fixture(self_spill_dir, self_spill)
+        _, problems = validate(self_spill_dir, wanted=[6])
+        require(any("owning cell is implicit" in x.message for x in problems),
+                f"a redundant same-cell bake receiver is caught "
+                f"({[str(x) for x in problems]})")
+
+        foreign_binding = copy.deepcopy(base)
+        row(foreign_binding, "cells", "L0_FOYER")["lightmaps"] = {
+            "shellHash": "sha256:" + "0" * 64,
+            "daylight": None,
+            "artificial": [{"group": "LG_HALL", "contentName": "Test/Foreign",
+                            "scale": 1.0}],
+        }
+        foreign_binding_dir = workspace / "undeclared-foreign-binding"
+        write_fixture(foreign_binding_dir, foreign_binding)
+        _, problems = validate(foreign_binding_dir, wanted=[6])
+        require(any("has no source light" in x.message for x in problems),
+                f"a foreign lightmap binding requires an explicit source bakeCells declaration "
+                f"({[str(x) for x in problems]})")
+
+        declared_binding = copy.deepcopy(foreign_binding)
+        row(declared_binding, "lights", "LIGHT_HALL")["bakeCells"] = ["L0_FOYER"]
+        declared_binding_dir = workspace / "declared-foreign-binding"
+        write_fixture(declared_binding_dir, declared_binding)
+        _, problems = validate(declared_binding_dir, wanted=[6])
+        require(not problems,
+                f"the same foreign binding is valid when its source explicitly names the receiver "
                 f"({[str(x) for x in problems]})")
 
         # ...and a swing that names no cell is a reference to nothing, exactly like a missing

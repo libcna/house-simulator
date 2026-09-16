@@ -356,6 +356,7 @@ is a rule that quietly says nothing about half the stairs in the house.
       "position": [-3.00, 2.85, -25.10], "direction": [0, -1, 0],
       "colorK": 2700,                      // kelvin, converted through a Planckian LUT
       "intensityLm": 800, "range": 6.0,
+      "bakeCells": ["L0_HALL"],            // optional extra fixed receiver cells
       "coneInnerDeg": 30, "coneOuterDeg": 55,
       "fixtureProp": "PROP_L0_KITCHEN_PENDANT_1",
       "emissiveMaterialSlot": "shade",
@@ -371,6 +372,12 @@ is a rule that quietly says nothing about half the stairs in the house.
 A light belongs to exactly one **group**, and a group is what a switch toggles and what a lightmap
 is baked per. `bakedIntoLightmap` and `castsBlobShadow` are independent: a baked light still needs
 a blob shadow for the dynamic objects the bake never saw.
+
+`bakeCells` names only **additional fixed receivers** for the offline bake. The light still belongs
+to `cell`: its switch group, room state, exposure contribution, fixture link and dynamic-object
+selection do not move. This is for a source whose fixed spill crosses a cell boundary, such as a
+porch lantern illuminating the outside-facing foyer shell. The owning cell is implicit and must
+not be repeated; every named receiver must exist, and a runtime-only light cannot name one.
 
 `bulbClass` drives §53's switch-on envelope and all fixtures in a group must agree: filament ramps
 over 0.12 s, LED is instant, and fluorescent has a deterministic 0.4 s flicker-start. It is explicit

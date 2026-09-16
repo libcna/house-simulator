@@ -84,6 +84,13 @@
       "items": {
         "additionalProperties": false,
         "properties": {
+          "bakeCells": {
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
           "bakedIntoLightmap": {
             "type": "boolean"
           },

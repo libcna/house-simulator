@@ -87,7 +87,9 @@ namespace cnahouse::rendering
     /// group repeats identical geometry with additive blending and depth-equal/no-write; the live
     /// sky-tinted daylight atlas is the final additive pass. Room-resident outer skin instead uses
     /// its daylight atlas once as an opaque base under the unattenuated outdoor sky, never under
-    /// room lamps or window attenuation. Detail uses stock `BasicEffect`.
+    /// room lamps or window attenuation. An explicitly baked cross-cell group may still add its
+    /// fixed spill to that outside face (for example the porch lanterns on the foyer facade).
+    /// Detail uses stock `BasicEffect`.
     /// `--scene=blockout` retains the old unlit hashed palette
     /// deliberately, so a diagnostic can still separate surface classes without leaking into
     /// ordinary play.

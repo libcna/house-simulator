@@ -491,7 +491,7 @@
       "daylight": { "orientation": "N", "exposure": 0.35 },
       "lightGroups": ["LG_L0_FOYER_MAIN", "LG_L0_FOYER_ACCENT"],
       "lightmaps": {
-        "shellHash": "sha256:ddb9c29db0e409270b80aa95c63338d98e28f0bd54c72e31c8818a9b47e7be30",
+        "shellHash": "sha256:0958d238dad45b5cddf8835e65fc4d73df814b0a49b07c9ee7f69ad4123da453",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY",
           "scale": 1.0000001192092896
@@ -506,6 +506,11 @@
             "group": "LG_L0_FOYER_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN",
             "scale": 0.4898282289505005
+          },
+          {
+            "group": "LG_L0_PORCH_LANTERN",
+            "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_PORCH_LANTERN",
+            "scale": 10.696699142456055
           }
         ]
       },

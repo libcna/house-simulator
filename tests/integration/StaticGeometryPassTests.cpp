@@ -382,7 +382,7 @@ namespace
             allRequested.end());
     }
 
-    TEST(StaticGeometryPassTests, ProductionOuterSkinUsesOnlyItsOutdoorDaylightBake)
+    TEST(StaticGeometryPassTests, ProductionOuterSkinUsesOutdoorDaylightAndOnlyExplicitCrossCellSpill)
     {
         const std::string worldPath = std::string(CNAHOUSE_TEST_CONTENT_ROOT) + "/world";
         if (!std::filesystem::exists(worldPath + "/layout.cells.json"))
@@ -409,6 +409,16 @@ namespace
         ASSERT_TRUE(foyer->lightmaps.daylight.has_value());
         ASSERT_FALSE(foyer->lightmaps.artificial.empty())
             << "the test cannot prove room lamps were bypassed without one to bypass";
+        const auto crossCell = std::find_if(foyer->lightmaps.artificial.begin(),
+                                            foyer->lightmaps.artificial.end(),
+                                            [&](const cnahouse::world::CellLightmapGroup& binding)
+                                            {
+                                                return std::find(foyer->lightGroups.begin(),
+                                                                 foyer->lightGroups.end(),
+                                                                 binding.group) == foyer->lightGroups.end();
+                                            });
+        ASSERT_NE(crossCell, foyer->lightmaps.artificial.end())
+            << "the real facade needs one explicitly baked neighbouring fixture group";
         ASSERT_EQ(siding->effectTierS, cnahouse::world::EffectTier::DualTexture);
 
         ChunkLibrary library;
@@ -425,10 +435,15 @@ namespace
         library.chunks.push_back(std::move(chunk));
 
         std::vector<std::string> requested;
+        std::vector<std::string> dayRequested;
+        std::vector<std::string> nightRequested;
         std::uint32_t drawn = 0U;
-        std::uint32_t states = 0U;
-        Gfx::Blend blend = Gfx::Blend::Zero;
-        bool depthWrites = false;
+        std::uint32_t dayStates = 0U;
+        std::uint32_t nightStates = 0U;
+        Gfx::Blend dayBlend = Gfx::Blend::One;
+        Gfx::Blend nightBlend = Gfx::Blend::Zero;
+        bool dayDepthWrites = false;
+        bool nightDepthWrites = true;
         cnahouse::testsupport::DeviceHost host(
             [&](Gfx::GraphicsDevice& device)
             {
@@ -478,20 +493,53 @@ namespace
                 cnahouse::rendering::PassContext context{device, tracker, counters, 1.0F / 60.0F};
                 pass.Draw(context);
                 drawn = pass.ChunksDrawn();
-                states = pass.StateChanges();
-                blend = device.getBlendStateProperty().getColorDestinationBlendProperty();
-                depthWrites = device.getDepthStencilStateProperty().getDepthBufferWriteEnableProperty();
+                dayStates = pass.StateChanges();
+                dayRequested = requested;
+                dayBlend = device.getBlendStateProperty().getColorDestinationBlendProperty();
+                dayDepthWrites = device.getDepthStencilStateProperty().getDepthBufferWriteEnableProperty();
+
+                cnahouse::environment::CivilTime night = noon;
+                night.hour = 22;
+                clock.SetStandard(night);
+                frame.frameIndex = 2U;
+                frame.deltaSeconds = 0.5F;
+                lighting.Update(frame);
+                ASSERT_GT(lighting.GroupOutputLevel(crossCell->group), 0.0F);
+                requested.clear();
+                pass.Draw(context);
+                nightStates = pass.StateChanges();
+                nightRequested = requested;
+                nightBlend = device.getBlendStateProperty().getColorDestinationBlendProperty();
+                nightDepthWrites = device.getDepthStencilStateProperty().getDepthBufferWriteEnableProperty();
             });
         host.Run();
         ASSERT_TRUE(host.Ran());
         ASSERT_EQ(host.Failure(), "");
         EXPECT_EQ(drawn, 1U);
-        EXPECT_EQ(states, 1U) << "room lamps or additive interior daylight reached the outer skin";
-        ASSERT_EQ(requested.size(), 2U);
-        EXPECT_EQ(requested[0], siding->albedo);
-        EXPECT_EQ(requested[1], foyer->lightmaps.daylight->contentName);
-        EXPECT_EQ(blend, Gfx::Blend::Zero) << "the outdoor daylight bake was not the opaque base";
-        EXPECT_TRUE(depthWrites);
+        EXPECT_EQ(dayStates, 1U) << "room lamps or inactive cross-cell light reached the outer skin";
+        ASSERT_EQ(dayRequested.size(), 2U);
+        EXPECT_EQ(dayRequested[0], siding->albedo);
+        EXPECT_EQ(dayRequested[1], foyer->lightmaps.daylight->contentName);
+        EXPECT_EQ(dayBlend, Gfx::Blend::Zero) << "the outdoor daylight bake was not the opaque base";
+        EXPECT_TRUE(dayDepthWrites);
+
+        EXPECT_EQ(nightStates, 2U) << "the live porch group needs one additive facade spill";
+        ASSERT_EQ(nightRequested.size(), 3U);
+        EXPECT_EQ(nightRequested[0], siding->albedo);
+        EXPECT_EQ(nightRequested[1], foyer->lightmaps.daylight->contentName);
+        EXPECT_EQ(nightRequested[2], crossCell->texture.contentName);
+        for (const cnahouse::world::CellLightmapGroup& binding : foyer->lightmaps.artificial)
+        {
+            if (binding.group != crossCell->group)
+            {
+                EXPECT_EQ(
+                    std::find(nightRequested.begin(), nightRequested.end(), binding.texture.contentName),
+                    nightRequested.end())
+                    << "the foyer's own lamps must not leak onto its outside skin";
+            }
+        }
+        EXPECT_EQ(nightBlend, Gfx::Blend::One);
+        EXPECT_FALSE(nightDepthWrites);
     }
 
 } // namespace

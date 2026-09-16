@@ -14242,6 +14242,33 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             `SaveStoreTest` cases, and all 48 active software-render cases pass; the latter includes
             the 18-pose culled/unculled comparison at its unchanged 0.1603% worst case. No golden
             reference changed. Full static/XNA gates are recorded in the checkpoint handoff.
+- [x] HOUSE-01281 — Bake the porch lantern spill onto the adjacent foyer facade and render explicit cross-cell static-light bindings
+      dep: HOUSE-00910, HOUSE-00922, HOUSE-01256, HOUSE-01269 · sys: lighting, content, rendering · plat: ALL · pri: MUST
+      accept: the two canonical porch fixtures remain owned and controlled by `L0_PORCH`, but
+              name `L0_FOYER` as an additional fixed bake receiver; their generated `LM_ART`
+              product adds a warm spatial pool to the outside-facing foyer skin only while the
+              dusk group is live; foyer lamps still never reach that skin and the foyer's room
+              state/exposure does not inherit the porch group; normal daytime output is unchanged
+      note: (2026-09-16) **New task, next free phase-16 id.** Round 26 proves the physical shade
+            and restrained glow while the wall behind both sources remains black. `L0_PORCH` is
+            intentionally an unbaked exterior cell, and the facade receiver is canonically owned
+            by `L0_FOYER`; neither `HOUSE-01261`'s dynamic-object directions nor a larger glow
+            billboard can create the fixed wall pool §28.3 assigns to a lightmap. The minimal
+            general rule is therefore an optional offline-only list of additional receiver cells,
+            with runtime ownership and switching left untouched.
+      done: (2026-09-16) Both source rows now name `L0_FOYER` as an additional receiver and use
+            the measured physical diffuser centre rather than the old point 10 cm behind the wall.
+            The deterministic 256-sample subset bake produced a 128 px foreign group atlas with
+            peak 10.696699 and mean 0.00655984. Tier S admits only that foreign binding to the
+            outside-facing foyer skin; the foyer's own groups remain excluded and the automatic
+            daytime-off frame is materially unchanged. The close paired-source crop changes
+            54.64%, the facade crop 13.87%, and the Basic-effect porch-floor crop 0%, exposing the
+            next receiver task rather than hiding it with exposure. Schema, semantic and baker
+            self-tests pass; the validator rejects undeclared foreign bindings; all 1,404 unit,
+            10 save-store and 48 software-render cases pass without golden changes. The 124-case
+            non-save integration run had one unrelated timing-sensitive weather case fail once;
+            its immediate isolated rerun passed. Full static/XNA gates are recorded in the
+            checkpoint handoff.
 - [ ] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
 - [ ] HOUSE-01262 — Implement the point-light-as-directional approximation with distance attenuation
@@ -17924,6 +17951,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-16 | `HOUSE-01281` | **New task, next free phase-16 id.** Permit a fixed light to name additional fixed bake receivers without changing its canonical owning cell, and admit only those foreign bindings to an outside-facing skin. | Round 26 shows both real porch emitters live while their adjacent foyer-owned facade remains black. `L0_PORCH` is intentionally unbaked exterior geometry; moving the facade out of `L0_FOYER`, adding the porch group to the foyer's runtime control index, or enlarging the glow quad would each violate an existing architecture boundary. A measured bake also exposed the two old canonical point positions 10 cm behind the facade; the physical emissive sub-range places their centres at z -14.073, which now drives the bake, glow and later dynamic approximation consistently. |
 | 2026-09-16 | `HOUSE-00772` | Correct the task title's vegetation census from 9 property trees / 40 shrubs to **3 property trees / 60 shrubs**, without renumbering or adding placements. Route the already selected CC0 source models and their exact/fallback material roles through the existing static chunk, exterior BVH and collision paths. Add only the four exterior-cell chunk ceilings measured by the result. | §11.1 and the authoritative exterior file have always contained two mature role trees plus one small-tree role and sixty shrubs; the title was stale. The first real build measures 309 placements, 44 AlphaTest batches, 8 vertex-cap and 17 Reach-cap splits. `EXT_FRONTYARD_E`, `EXT_ROAD`, `EXT_SIDEYARD_W` and `EXT_WORLD` are landscape/residency regions rather than rooms; their exact source-material groups cannot be merged without erasing bark/leaf/flower/grass identity. A first screenshot iteration let mature crowns obscure the entrance, so the final positions/scales were selected from the unchanged front camera before completion. |
 | 2026-09-15 | `HOUSE-01038` | **New task, next free phase-13 id.** Deliver a small foyer furniture/light vertical slice through already completed static batching rather than falsely completing the full-house furnishing prerequisite chain. Adjust the foyer's explicit measured §17.4 ceiling from seven to nine, not the global six-chunk target. | The inspected Round 14 entrance/hall gameplay views remain empty and dim; `HOUSE-00986` requires all large grouped furniture acquisitions and generator tasks that are still legitimately open. Approved CC0 sources and the existing static chunk/Tier-S light paths permit a narrower dependency-valid checkpoint. The first build measured exactly two new close-range source-material groups (carved wood and upholstery); retaining them is necessary for real furniture rather than flattening both into architectural paint. All other per-cell ceilings, Reach and culling rules remain unchanged. |
 | 2026-09-15 | `HOUSE-01039` | **New task, next free phase-13 id.** Calibrate only the already authored kitchen main practical group and its selected Tier-S receivers as a visible hall→kitchen continuity checkpoint. Do not claim the large kitchen furnishing prerequisite or a new light renderer. | The same fixed Round 15 hall screenshot is warmly readable near the camera but black at the permanently open kitchen portal in all four review conditions. Existing `HOUSE-01265` borrowed-light behavior and deterministic subset lightmap promotion permit a narrow dependency-valid correction. The highest-impact visual defect is the threshold itself; the still-empty kitchen will remain a separate, explicit furnishing defect. |

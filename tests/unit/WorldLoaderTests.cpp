@@ -3932,8 +3932,8 @@ namespace
                                   std::size_t{0},
                                   [](std::size_t count, const world::Cell& cell)
                                   { return count + cell.lightmaps.artificial.size(); }),
-                  124U)
-            << "the canonical cell bindings cover every artificial group bake exactly once";
+                  125U)
+            << "the canonical bindings include 124 owned-room bakes and one explicit cross-cell spill";
 
         // 179 and 66 until `HOUSE-00491` retired §12.6's two `W_GABLE` louvres: they were in
         // "attic gable ends" and §12.1's roof is a hip with none, so both stood 1.44 m inside

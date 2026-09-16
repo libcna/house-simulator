@@ -294,6 +294,10 @@ def build() -> dict[str, dict]:
          "colorK": {"type": "number", "minimum": 1000, "maximum": 12000},
          "intensityLm": {"type": "number", "minimum": 0},
          "range": {"type": "number", "minimum": 0},
+         # Optional extra receiver cells for a baked spill. The light still belongs to `cell`
+         # for switching, exposure and dynamic-object assignment; this list only tells the
+         # offline baker that a fixed neighbouring shell can see it.
+         "bakeCells": {"type": "array", "items": ID, "uniqueItems": True},
          "coneInnerDeg": {"type": "number", "minimum": 0, "maximum": 180},
          "coneOuterDeg": {"type": "number", "minimum": 0, "maximum": 180},
          "fixtureProp": ID_OR_NULL, "emissiveMaterialSlot": {"anyOf": [STR, {"type": "null"}]},

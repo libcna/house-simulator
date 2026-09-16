@@ -231,7 +231,7 @@
       },
       "groups": [],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:ddb9c29db0e409270b80aa95c63338d98e28f0bd54c72e31c8818a9b47e7be30"
+      "shellHash": "sha256:0958d238dad45b5cddf8835e65fc4d73df814b0a49b07c9ee7f69ad4123da453"
     },
     {
       "cell": "L0_GARAGE",
@@ -798,9 +798,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "CELL_FREEZER_INTERIOR",
-    "CELL_FRIDGE_INTERIOR",
-    "L0_GARAGE_LOFT"
+    "L0_FOYER"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,

@@ -1069,7 +1069,10 @@ def main() -> int:
     with open(options["lights"], encoding="utf-8") as handle:
         document = json.loads(layout_io.strip_jsonc(handle.read()))
     cell = options["cell"]
-    lights = [light for light in document.get("lights", []) if light.get("cell") == cell]
+    # A fixed source can illuminate a neighbouring fixed shell. `cell` remains its runtime
+    # owner; `bakeCells` is an offline-only receiver list and never changes switching semantics.
+    lights = [light for light in document.get("lights", [])
+              if light.get("cell") == cell or cell in (light.get("bakeCells") or [])]
     create_light_objects(lights, lumens_per_radiant_watt)
 
     bake_cell(lights, cell, options["out"],

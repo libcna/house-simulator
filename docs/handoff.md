@@ -1,4 +1,46 @@
-# Visual-sprint handoff — 2026-09-16 (`HOUSE-01260` checkpoint)
+# Visual-sprint handoff — 2026-09-16 (`HOUSE-01281` checkpoint)
+
+Branch `develop`. Task-start HEAD `7fec420` (`HOUSE-01260`). This file belongs to the single
+`HOUSE-01281` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The real porch sources now illuminate the adjacent fixed facade rather than ending at their glow
+sprites. Each source stays canonically owned, switched and exposure-accounted by `L0_PORCH`, but
+names `L0_FOYER` as an additional offline receiver. The deterministic 256-sample bake adds one
+128 px artificial atlas (peak 10.696699, mean 0.00655984) to the foyer shell. Tier S keeps the
+outside skin's daylight atlas as its opaque base and admits only this explicitly foreign group as
+an additive live pass; foyer-owned lamps still cannot leak outside. A semantic check now rejects a
+foreign binding that has no matching `bakeCells` source declaration. The two point positions were
+also corrected from 10 cm behind the facade to the measured centres of their physical diffusers.
+
+Before: [Round 26 glow set](visual-review/captures/house-01260-night-r1). After: identical fixed
+views in [Round 27](visual-review/captures/house-01281-porch-spill-r1), plus the exact
+[close live entrance](visual-review/captures/house-01281-porch-spill-r1/exterior-approach-close.png)
+and [matching day/off state](visual-review/captures/house-01281-porch-spill-r1/exterior-approach-day-check.png).
+The exact close paired-source crop changes 54.64% and rises from mean RGB(15.68,13.19,11.70) to
+RGB(17.69,14.32,12.79); the facade crop changes 13.87%. The porch-floor crop changes 0% because
+that geometry remains unbaked Basic detail. The matching daylight world crop differs by only four
+pixels. The result is a restrained pair of local wall pools, not a global exposure increase.
+
+Verification is green for all 1,404 unit tests, all 10 SaveStore cases and all 48 active
+software-render cases, including the 18-pose culled/unculled comparison; no golden reference
+changed. The 124-case non-save integration run passed 123 cases and its one unrelated
+timing-sensitive live-weather case passed on immediate isolated rerun. The generated schema,
+semantic validator self-test, all thirteen authored-world rules, incremental world content build,
+Python compilation, deterministic Blender bake self-test, manifest/content checks and focused
+real-device renderer test also pass. `tools/ci/run_checks.sh` is green through all strict-XNA
+translation units with `CNA_CNAEXT=OFF`.
+
+Next highest visible value is the still-dark Basic-effect porch floor, steps and columns. Complete
+the approved per-object/distance-attenuated light assignment (`HOUSE-01261`/`HOUSE-01262`) or the
+smallest architecture-consistent receiver step, then deepen the skeletal roof/eaves, balcony and
+porch joinery. After the approach reads as one composition, return to kitchen practical clutter,
+family-room material depth and dining furnishing. Do not enlarge the glow billboards, broaden the
+facade atlas or raise global night exposure to conceal the missing receiver classes.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-16 (`HOUSE-01260` checkpoint)
 
 Branch `develop`. Task-start HEAD `03bf545` (`HOUSE-01259`). This file belongs to the single
 `HOUSE-01260` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

@@ -3323,6 +3323,14 @@ glows — is fixed even though its *intensity* is not. Baking captures the shape
 it. This is the technique lightmapped games used for twenty years and it is a perfect fit for
 `DualTextureEffect`, which XNA shipped *specifically* for lightmapping.
 
+> Implemented cross-cell receiver rule (2026-09-16, `HOUSE-01281`): a fixed light may optionally
+> name additional fixed `bakeCells` without changing its owning `cell`. The offline baker includes
+> it in those receiver atlases, while runtime room state and control ownership remain with the
+> source cell. On an outside-facing skin, Tier S rejects the owning room's artificial groups and
+> accepts only such explicitly baked foreign groups, scaled by their global live envelope. This
+> lets the porch lanterns illuminate the foyer-owned facade without making the foyer switch or
+> exposure state claim those lamps, duplicating geometry, or introducing a custom shader.
+
 ### 28.4 Daylight through windows
 
 For each cell with windows, once per second (and immediately on a weather or door/window event):
