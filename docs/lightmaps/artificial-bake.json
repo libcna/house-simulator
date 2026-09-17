@@ -465,9 +465,9 @@
             "LIGHT_L0_FOYER_ACCENT_1",
             "LIGHT_L0_FOYER_ACCENT_2"
           ],
-          "mean": 0.021172652343375786,
-          "peak": 0.1495114266872406,
-          "scale": 0.1495114266872406
+          "mean": 0.02079858355286316,
+          "peak": 0.14793236553668976,
+          "scale": 0.14793236553668976
         },
         {
           "group": "LG_L0_FOYER_MAIN",
@@ -475,24 +475,26 @@
           "lights": [
             "LIGHT_L0_FOYER_MAIN_1"
           ],
-          "mean": 0.039955489684237136,
-          "peak": 0.4898282289505005,
-          "scale": 0.4898282289505005
+          "mean": 0.039360952110852866,
+          "peak": 0.4852122366428375,
+          "scale": 0.4852122366428375
         },
         {
           "group": "LG_L0_PORCH_LANTERN",
           "image": "L0_FOYER_LM_LG_L0_PORCH_LANTERN.png",
           "lights": [
+            "LIGHT_L0_PORCH_CEILING_1",
+            "LIGHT_L0_PORCH_CEILING_2",
             "LIGHT_L0_PORCH_LANTERN_1",
             "LIGHT_L0_PORCH_LANTERN_2"
           ],
-          "mean": 0.006559840995297329,
-          "peak": 10.696699142456055,
-          "scale": 10.696699142456055
+          "mean": 0.009639916509529722,
+          "peak": 11.113598823547363,
+          "scale": 11.113598823547363
         }
       ],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:0958d238dad45b5cddf8835e65fc4d73df814b0a49b07c9ee7f69ad4123da453"
+      "shellHash": "sha256:eb0b90aa987f952d230df7614c61b73aacf8dbfadbb0b9d4070bf9e4639bc039"
     },
     {
       "cell": "L0_GARAGE",
@@ -685,10 +687,20 @@
           "mean": 0.00032344071535750384,
           "peak": 0.0995696410536766,
           "scale": 0.0995696410536766
+        },
+        {
+          "group": "LG_L0_PORCH_LANTERN",
+          "image": "L0_LIVING_LM_LG_L0_PORCH_LANTERN.png",
+          "lights": [
+            "LIGHT_L0_PORCH_CEILING_1"
+          ],
+          "mean": 0.001380257912802012,
+          "peak": 0.17550376057624817,
+          "scale": 0.17550376057624817
         }
       ],
       "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:1b3f499e239bddc5a64fd13b7c236c0f23030cff9fa0c5af7f9ffb8e16a4e393"
+      "shellHash": "sha256:fb1c7d352826cdb8411b189368914cd41df5aa342b91b5b7b8d73e85836642f6"
     },
     {
       "cell": "L0_MUDROOM",
@@ -758,12 +770,22 @@
       "daylight": null,
       "groups": [
         {
+          "group": "LG_L0_PORCH_LANTERN",
+          "image": "L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN.png",
+          "lights": [
+            "LIGHT_L0_PORCH_CEILING_2"
+          ],
+          "mean": 0.0012307316170432855,
+          "peak": 0.1749000996351242,
+          "scale": 0.1749000996351242
+        },
+        {
           "group": "LG_L0_STAIR_MAIN_MAIN",
           "image": "L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN.png",
           "lights": [
             "LIGHT_L0_STAIR_MAIN_MAIN_1"
           ],
-          "mean": 0.001746756788715342,
+          "mean": 0.0017463492613388504,
           "peak": 0.07684403657913208,
           "scale": 0.07684403657913208
         },
@@ -774,12 +796,13 @@
             "LIGHT_L0_STAIR_MAIN_STEP_1",
             "LIGHT_L0_STAIR_MAIN_STEP_2"
           ],
-          "mean": 0.00022438504403879126,
+          "mean": 0.0002244640810894472,
           "peak": 0.00444997102022171,
           "scale": 0.00444997102022171
         }
       ],
-      "shellHash": "sha256:a97b4b261b1062b9213eee85fe679713b5d9161ea25d3272087c29b5a501be64"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:da34267722f9ab496ba430a3ee667781d683eabe9da2b2c696d4c531406180db"
     },
     {
       "cell": "L0_STOR",
@@ -1904,12 +1927,13 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_LIVING"
+    "L0_LIVING",
+    "L0_STAIR_MAIN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1032539,
+  "sourceBytes": 1035602,
   "tool": "bake_house_lightmaps.py"
 }

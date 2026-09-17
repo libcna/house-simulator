@@ -361,6 +361,7 @@ is a rule that quietly says nothing about half the stairs in the house.
       "position": [-3.00, 2.85, -25.10], "direction": [0, -1, 0],
       "colorK": 2700,                      // kelvin, converted through a Planckian LUT
       "intensityLm": 800, "range": 6.0,
+      "bakeLumensPerRadiantWatt": 100,     // optional offline-only source calibration
       "bakeCells": ["L0_HALL"],            // optional extra fixed receiver cells
       "spillCells": ["EXT_TERRACE"],       // optional unbaked static-detail receivers
       "coneInnerDeg": 30, "coneOuterDeg": 55,
@@ -378,6 +379,13 @@ is a rule that quietly says nothing about half the stairs in the house.
 A light belongs to exactly one **group**, and a group is what a switch toggles and what a lightmap
 is baked per. `bakedIntoLightmap` and `castsBlobShadow` are independent: a baked light still needs
 a blob shadow for the dynamic objects the bake never saw.
+
+`bakeLumensPerRadiantWatt` is an optional positive calibration used only by the deterministic
+offline lightmap baker. Runtime lighting continues to consume `intensityLm` unchanged. Normally
+the bake command's one global value is sufficient; the per-source override is reserved for a
+physical source that crosses already calibrated receiver products made with different historical
+global values. It is included in the bake identity and sidecar, so changing it cannot silently
+reuse an incompatible atlas.
 
 `bakeCells` names only **additional fixed receivers** for the offline bake. The light still belongs
 to `cell`: its switch group, room state, exposure contribution, fixture link and dynamic-object

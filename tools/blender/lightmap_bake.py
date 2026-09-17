@@ -259,7 +259,13 @@ def create_light_objects(lights: list[dict],
         # household emitter. Keep it as the legacy default so old products remain reproducible;
         # a measured vertical slice may explicitly request a lower, documented white-light
         # efficacy. The sidecar and shell hash record that choice.
-        data.energy = float(light.get("intensityLm", 0.0)) / lumens_per_radiant_watt
+        source_efficacy = float(light.get("bakeLumensPerRadiantWatt",
+                                          lumens_per_radiant_watt))
+        if not math.isfinite(source_efficacy) or source_efficacy <= 0.0:
+            raise SystemExit(
+                f"lightmap_bake: {name} has invalid bakeLumensPerRadiantWatt "
+                f"{source_efficacy!r}")
+        data.energy = float(light.get("intensityLm", 0.0)) / source_efficacy
         data.color = (1.0, 1.0, 1.0)
         # Recessed rows sit 20 mm below the ceiling.  A 50 mm emitter intersects that receiver and
         # produces one white firefly; max-normalising against it crushes the whole useful atlas to
@@ -840,6 +846,16 @@ def selftest() -> int:
                 "an explicit broadband-white calibration changes radiometric power and the "
                 "recorded product hash without changing legacy bake identities")
         bpy.data.objects.remove(calibrated_object, do_unlink=True)
+        overridden = {**authored[0], "id": "OVERRIDDEN_SPOT",
+                      "bakeLumensPerRadiantWatt": 100.0}
+        create_light_objects([overridden])
+        overridden_object = bpy.data.objects.get("OVERRIDDEN_SPOT")
+        require(overridden_object is not None and
+                abs(overridden_object.data.energy - 6.83) < 1e-5 and
+                shell_hash([overridden]) != shell_hash(authored),
+                "a per-fixture calibration crosses legacy receiver-cell calibrations without "
+                "changing the global bake default")
+        bpy.data.objects.remove(overridden_object, do_unlink=True)
         select_lightmap_uv()
         image = make_bake_target(size)
 

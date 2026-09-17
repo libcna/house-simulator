@@ -143,7 +143,7 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "console wood and upholstered chair separate avoids repainting either as trim; "
                   "HOUSE-00930 isolates the weather-facing entry leaf for exterior residency; "
                   "HOUSE-00932 adds distinct raised-panel hardwood and bronze hardware groups"),
-    "L0_FAMILY": (24,
+    "L0_FAMILY": (25,
                   "measured with HOUSE-01037's first furnished media/seating group: five shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. Merging "
@@ -162,7 +162,9 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "warm woven bolster role while reusing the room's existing blue velvet and "
                   "canvas cloth for its cushion and narrow piping; the measured net increase is one. "
                   "HOUSE-01055 replaces the remaining pale armchair with a three-role chair; velvet "
-                  "replaces its old cushion while walnut and steel already exist, so 24 stays exact"),
+                  "replaces its old cushion while walnut and steel already exist. HOUSE-00938 "
+                  "splits the shared ceiling fixture's always-visible opal bowl from its switched "
+                  "emitter, adding one truthful glass role; 25 stays exact"),
     "L0_LIVING": (25,
                   "measured with HOUSE-01037's first furnished conversation group: six shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
@@ -203,7 +205,10 @@ CHUNK_BUDGET_EXCEPTIONS = {
                  "body chunk and one shared, independently switchable warm-diffuser chunk to "
                  "the porch's existing six architectural and planting finishes; HOUSE-00929's "
                  "covered-deck finish adds one measured MAT_SOFFIT_WHITE receiver/detail role "
-                 "rather than flattening the underside into painted column trim"),
+                 "rather than flattening the underside into painted column trim. HOUSE-00938 "
+                 "reuses two physical ceiling fixtures and adds only their shared always-visible "
+                 "opal-glass role; bronze and the switched emitter already exist in this cell, so "
+                 "the measured cell rises to eight and remains below the existing ceiling"),
 }
 
 # `HOUSE-00926`: a separate weather-facing frame keeps indoor skirting out of the outdoor BVH.

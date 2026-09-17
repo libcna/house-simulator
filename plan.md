@@ -13819,6 +13819,46 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 All 1,409 unit, 135 integration and 48 active render tests pass (eight disabled);
                 all eighteen culling pairs pass at 0.1342% worst (`l0-sunroom`). Full strict-XNA
                 and repository gates pass with CPU 0-5 / at most six workers.
+- [x] HOUSE-00938 — Add layered physical porch lighting to the night arrival
+      dep: HOUSE-00929, HOUSE-00937, HOUSE-01259, HOUSE-01269, HOUSE-01281, HOUSE-01282, HOUSE-01285 · sys: world/content/lighting/rendering · plat: ALL · pri: MUST
+      note: (2026-09-17) Round 56 leaves the facade outside the two hot door lanterns almost black
+            at 22:00. Reuse the approved measured family ceiling fixture in the two outer porch
+            bays, but separate its always-visible opal bowl from the switched emitter before using
+            it outdoors. Keep one automatic porch circuit, preserve the manual garage/path groups,
+            global exposure, canonical cell ownership and strict-XNA renderer.
+      accept: two physical semi-flush porch fixtures share `LG_L0_PORCH_LANTERN`, switch on through
+              the existing dusk contract and produce broad warm pools that reveal the soffit,
+              columns and facade flanks; the same source bakes only into its declared foyer/living/
+              stair receivers and spills only to `EXT_WALK`. The reused fixture remains plausible
+              when off in the fixed clear-day route and when on in the family room. Matched fifteen-
+              camera day/night review sets are inspected; content/provenance, unit, integration,
+              render, culling and strict-XNA gates pass with all compilation/heavy work restricted
+              to CPU 0-5 / at most six workers.
+      result: (2026-09-17) Two measured semi-flush fixtures now occupy the outer porch bays and
+              share the existing automatic dusk circuit as 1,000 lm / 2,700 K point sources. The
+              636-triangle reused fixture retains its 0.42 x 0.18 x 0.42 m bounds but separates an
+              always-visible opal bowl from its smaller switched diffuser, fixing the former black
+              off-state disc without changing family-room placement. Cross-cell lightmaps reach
+              only the declared foyer/living/stair receivers and spill stays limited to `EXT_WALK`;
+              an explicit positive offline-only source calibration reconciles their existing bake
+              products without changing runtime lumens, global exposure or manual path/garage
+              circuits. The world is 634 chunks / 96 cells / 62 static props / 257 exterior
+              instances / 53.446726 MB.
+      review: (2026-09-17) All forty-five frames in the matched fifteen-camera before-night,
+              final-night and final-day sets were opened. The night front-path frame changes
+              45.6233% of pixels above two levels (normalized MAE 0.005527): broad warm pools now
+              reveal the soffit, columns and facade flanks. The day frame changes 1.0713% (MAE
+              0.001336), and family composition changes 0.8158% by day / 0.8014% at night, confined
+              to the refined fixture. Four affected strict references were inspected pairwise and
+              advanced; six incidental within-tolerance rewrites were restored byte-for-byte.
+              The dark upper facade, underlit steps and empty garage frontage remain the largest
+              visible defects; `VISUAL-GATE-1` still FAILS.
+      verified: (2026-09-17) Schema, provenance/licence, stable-id, deterministic fixture and
+                lightmap checks pass. The unculled diagnostic remains bounded at 590 opaque
+                submissions / 44 cutouts / 98 state changes. All 1,409 unit, 135 integration and
+                49 active render tests pass (eight disabled); all eighteen culling pairs pass at
+                0.1342% worst (`l0-sunroom`). Full repository and strict-XNA gates pass with all
+                compilation/heavy work restricted to CPU 0-5 / at most six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19049,6 +19089,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-00938` | **New task, next free phase-12 id.** Reuse the measured semi-flush fixture for two physical porch sources, keep them on the existing dusk circuit and give their cross-cell bake an explicit per-source offline calibration. | Round 56 names the almost-black night facade outside two hot door lanterns as the largest arrival defect. Two outer-bay fixtures add layered architectural light without changing global exposure or converting the manual path/garage groups; separating always-visible glass from the switched optical disc also fixes the reused asset's off-state silhouette. |
 | 2026-09-17 | `HOUSE-00937` | **New task, next free phase-12 id.** Add sloped-ground material covers as a truthful exterior-data primitive, use it for two front foundation beds, and recompose only the existing approved foundation plants. | Round 55 names the sparse facade/garage arrival as the highest exterior defect. Existing foundation vegetation is incorrectly arranged as one continuous line beneath the elevated porch and into the driveway; two flanking beds use the existing mulch material and existing vegetation count without a download, a fake navigable path or a terrain-height change. |
 | 2026-09-17 | `HOUSE-00936` | **New task, next free phase-12 id.** Calibrate only the generated production lawn tint, preserve the approved texture/UV/runtime path, and make the generator prove exact ownership of its marker block. | Round 54 makes the large saturated lawn the dominant material defect in both fixed arrival frames. The first deterministic write also proved that fourteen independently authored vegetation rows had later been inserted inside this generator's replacement range; moving them intact after the END marker and rejecting any future unowned row is the smallest transparent data/tool correction. |
 | 2026-09-17 | `HOUSE-01059` | **New task, next free phase-13 id.** Calibrate only the direct celestial contribution on the existing weather-facing white window-frame role; preserve outdoor exposure, full sky ambient, shell ownership and the established exterior-window hierarchy. | Round 53 makes clipped clear-day apertures the largest route-level defect. Explicit debug-blockout inspection proves the dominant glare is the distinct frame/sash role rather than glass or room trim, and a controlled binary A/B proves the narrow stock-`BasicEffect` correction does not alter a no-window room. This is a visible Tier-S material-lighting calibration, not new renderer architecture. |

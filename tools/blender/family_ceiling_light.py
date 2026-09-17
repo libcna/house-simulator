@@ -20,6 +20,7 @@ from mathutils import Matrix
 
 COLOURS = {
     "FAMILY_CEILING_METAL": (0.11, 0.065, 0.035, 1.0),
+    "FamilyCeilingGlass": (0.82, 0.78, 0.70, 1.0),
     "FamilyCeilingDiffuser": (1.0, 0.84, 0.62, 1.0),
 }
 MATERIALS = {}
@@ -95,10 +96,16 @@ def author():
     diffuser = bpy.context.object
     diffuser.name = name_for("opal_diffuser")
     bake_world_vertices(diffuser)
-    diffuser.data.materials.append(material("FamilyCeilingDiffuser"))
+    diffuser.data.materials.append(material("FamilyCeilingGlass"))
     metre_uv(diffuser)
     for polygon in diffuser.data.polygons:
         polygon.use_smooth = True
+
+    # The opal bowl remains visible when the circuit is off. A separate, inset optical disc is
+    # the exact switched emitter, avoiding the old all-black daytime bowl without making the
+    # whole 420 mm fixture glow as a flat billboard at night.
+    cylinder("opal_emitter", (0.0, 0.003, 0.0), 0.006, 0.130,
+             "FamilyCeilingDiffuser", vertices=32)
 
     cylinder("bronze_trim", (0.0, 0.105, 0.0), 0.026, 0.210,
              "FAMILY_CEILING_METAL", vertices=40)

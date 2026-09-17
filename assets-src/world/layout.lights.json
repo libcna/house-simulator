@@ -2067,7 +2067,10 @@
     // positions of N1-N60, which `HOUSE-00391` authors; placing them first would be inventing
     // sixty houses to hang them on.
 
-    // ---- LG_L0_PORCH_LANTERN x2 -- either side of the front door, on the dusk sensor
+    // ---- LG_L0_PORCH_LANTERN x4 -- one dusk circuit: two door lanterns plus two broad
+    // ---- semi-flush porch lights. The reused opal fixtures sit in the two outer porch bays;
+    // ---- their broad point-source pools reveal the deck, columns and facade without lifting the
+    // ---- global night exposure or pretending the manual path/garage circuits are automatic.
     {
       "id": "LIGHT_L0_PORCH_LANTERN_1", "cell": "L0_PORCH", "group": "LG_L0_PORCH_LANTERN",
       "type": "point", "position": [-0.90, 2.62, -14.073],
@@ -2087,6 +2090,30 @@
       "bakeCells": ["L0_FOYER"],
       "spillCells": ["EXT_WALK"],
       "fixtureProp": "PROP_L0_PORCH_LANTERN_2", "emissiveMaterialSlot": "LanternShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+    {
+      "id": "LIGHT_L0_PORCH_CEILING_1", "cell": "L0_PORCH", "group": "LG_L0_PORCH_LANTERN",
+      "type": "point", "position": [-2.45, 3.17, -12.95],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2700, "intensityLm": 1000.0, "range": 7.28,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeCells": ["L0_FOYER", "L0_LIVING"],
+      "spillCells": ["EXT_WALK"],
+      "fixtureProp": "PROP_L0_PORCH_CEILING_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+    {
+      "id": "LIGHT_L0_PORCH_CEILING_2", "cell": "L0_PORCH", "group": "LG_L0_PORCH_LANTERN",
+      "type": "point", "position": [2.45, 3.17, -12.95],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2700, "intensityLm": 1000.0, "range": 7.28,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeCells": ["L0_FOYER", "L0_STAIR_MAIN"],
+      "spillCells": ["EXT_WALK"],
+      "fixtureProp": "PROP_L0_PORCH_CEILING_2", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
       "duskSensor": true
     },

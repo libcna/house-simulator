@@ -2442,3 +2442,53 @@ in `docs/handoff.md`. Compilation and heavy work stayed on CPU 0-5 / at most six
 debug blockout remains available. The next highest-value exterior work is believable night facade
 illumination and a better composed garage frontage; inside, wall dressing and contact grounding
 remain the strongest visible opportunities.
+
+## Round 57 — layered porch arrival lighting
+
+Commit: `HOUSE-00938` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: the complete fixed 22:00
+[night set](captures/house-00938-porch-layer-night-before) shows only the two hot door lanterns;
+the outer porch bays, soffit and facade flanks collapse almost completely into black. After: the
+matched fifteen-camera [night set](captures/house-00938-porch-layer-night-final) adds two physical
+warm semi-flush fixtures and broad overlapping pools, while the complete
+[clear-day set](captures/house-00938-porch-layer-day-final) proves that their off-state opal bowls
+remain readable instead of becoming black emissive discs. All 45 frames were opened, including the
+four family-room views affected by the refined shared fixture.
+
+Ranked visible defects remaining:
+
+1. The upper facade and garage frontage still become broad near-black planes at night; the garage
+   wall also remains empty and lacks human-scale composition by day.
+2. The close front steps stay underlit relative to the porch deck and door.
+3. The approved foundation plants are correctly composed but remain sparse and low-detail nearby.
+4. Blank interior wall bays and weak local furniture grounding still limit the inhabited feeling.
+5. Distant landscape/neighbour context continues to expose the finite presentation boundary.
+
+Fixed: `LG_L0_PORCH_LANTERN` remains one automatic dusk circuit but now owns two measured 1,000 lm,
+2,700 K point sources in the outer porch bays as well as the existing wall lanterns. Their fixed
+spill is explicitly limited to `EXT_WALK`; their lightmaps reach only `L0_FOYER` plus the physically
+adjacent living/stair facade owners. A per-source, offline-only 100 lm/radiant-watt calibration
+keeps one physical source consistent across receiver products that retain different historical
+global calibrations. The foyer porch atlas peaks at 11.1136; the new living/stair atlases peak at
+0.1755 / 0.1749. Runtime lumens, global exposure and the manual path/garage circuits are unchanged.
+
+The first 700 lm spot calibration was rejected after inspection because it exposed the fixture but
+left the facade black. The reused model was then rejected once more in its original form because
+its entire bowl was the switched emissive role and therefore became a black disk by day. The final
+636-triangle asset separates an always-visible opal bowl from a smaller switched optical disc,
+without changing its 0.42 × 0.18 × 0.42 m bounds. Against the baseline, the night front-path frame
+changes 656,975 pixels above two levels (45.6233%, normalized MAE 0.005527). The day frame changes
+1.0713% (MAE 0.001336); family composition changes 0.8158% by day and 0.8014% at night, confined to
+the refined fixture silhouette.
+
+Four strict references were opened pairwise and intentionally advanced: foyer stair (the promoted
+receiver product), blockout front walk (the two new fixture silhouettes), and the two dark seasonal
+front views (the intended dusk pools). Six references rewritten by the all-pose generators despite
+remaining within tolerance were restored byte-for-byte. The world is 634 chunks / 96 cells / 62
+props / 257 exterior instances / 53.446726 MB; the unculled diagnostic is 590 opaque submissions,
+44 cutouts and 98 state changes. Test and gate results are recorded in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is garage-front composition plus
+a controlled facade/step lighting layer, not a global night-exposure increase.

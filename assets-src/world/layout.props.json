@@ -840,6 +840,32 @@
       "collision": "none",
       "material": null,
       "interactable": null
+    },
+    {
+      "id": "PROP_L0_PORCH_CEILING_1",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_PORCH",
+      "position": [-2.45, 3.17, -12.95],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_PORCH_CEILING_2",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_PORCH",
+      "position": [2.45, 3.17, -12.95],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
     }
   ]
 }

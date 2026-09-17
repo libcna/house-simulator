@@ -299,6 +299,10 @@ def build() -> dict[str, dict]:
          "colorK": {"type": "number", "minimum": 1000, "maximum": 12000},
          "intensityLm": {"type": "number", "minimum": 0},
          "range": {"type": "number", "minimum": 0},
+         # Optional per-fixture radiometric calibration for the offline lightmap bake. This is
+         # useful when one physical source crosses receiver cells whose legacy products used
+         # different global calibrations; runtime still consumes the authored lumens unchanged.
+         "bakeLumensPerRadiantWatt": {"type": "number", "exclusiveMinimum": 0},
          # Optional extra receiver cells for a baked spill. The light still belongs to `cell`
          # for switching, exposure and dynamic-object assignment; this list only tells the
          # offline baker that a fixed neighbouring shell can see it.

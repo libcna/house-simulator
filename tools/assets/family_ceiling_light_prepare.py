@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate and validate HOUSE-01285's physical family-room fixtures."""
+"""Regenerate and validate the shared physical family/porch ceiling fixture."""
 
 from __future__ import annotations
 
@@ -27,12 +27,20 @@ TARGET_LAMP = REPO / "assets-src" / "Models" / "Furniture" / "Family" / "floor_l
 MANIFEST = REPO / "assets-src" / "assets.manifest.json"
 ASSET_ID = "MODEL_FIXTURE_FAMILY_CEILING"
 LAMP_ASSET_ID = "MODEL_FAMILY_FLOOR_LAMP_LIT"
-EXPECTED_MATERIALS = {"FAMILY_CEILING_METAL", "FamilyCeilingDiffuser"}
+EXPECTED_MATERIALS = {
+    "FAMILY_CEILING_METAL",
+    "FamilyCeilingGlass",
+    "FamilyCeilingDiffuser",
+}
 MAIN_POSITIONS = (
     [4.37, 3.12, -25.40],
     [6.53, 3.12, -25.40],
     [4.37, 3.12, -23.70],
     [6.53, 3.12, -23.70],
+)
+PORCH_POSITIONS = (
+    [-2.45, 3.17, -12.95],
+    [2.45, 3.17, -12.95],
 )
 
 
@@ -82,7 +90,8 @@ def validate_asset(path: Path, row: dict) -> tuple[list[float], int]:
         raise RuntimeError(f"manifest triangle count differs from measured {triangles}")
     if materials != EXPECTED_MATERIALS:
         raise RuntimeError(f"unexpected source finishes {sorted(materials)}")
-    for component in ("opal_diffuser", "bronze_trim", "ceiling_canopy", "lower_finial"):
+    for component in (
+            "opal_diffuser", "opal_emitter", "bronze_trim", "ceiling_canopy", "lower_finial"):
         if not any(component in name for name in names):
             raise RuntimeError(f"missing authored component {component}")
     problems = scale_check.check(path, "fixture", row["geometry"])
@@ -128,6 +137,29 @@ def validate_world() -> None:
                 light["emissiveMaterialSlot"] != "FamilyCeilingDiffuser" or \
                 not light["bakedIntoLightmap"] or not light["defaultOn"]:
             raise RuntimeError(f"family ceiling optical linkage changed: {light_id}")
+
+    for index, position in enumerate(PORCH_POSITIONS, 1):
+        prop_id = f"PROP_L0_PORCH_CEILING_{index}"
+        light_id = f"LIGHT_L0_PORCH_CEILING_{index}"
+        prop = props[prop_id]
+        light = lights[light_id]
+        expected_receiver = "L0_LIVING" if index == 1 else "L0_STAIR_MAIN"
+        if prop["asset"] != ASSET_ID or prop["cell"] != "L0_PORCH" or \
+                prop["position"] != position or prop["yawDeg"] != 0 or \
+                prop["scale"] != 1 or not prop["static"] or prop["collision"] != "none":
+            raise RuntimeError(f"canonical porch ceiling placement changed: {prop_id}")
+        if light["fixtureProp"] != prop_id or light["position"] != position or \
+                light["group"] != "LG_L0_PORCH_LANTERN" or light["type"] != "point" or \
+                light["direction"] != [0.0, -1.0, 0.0] or \
+                light["colorK"] != 2700 or "bulbClass" in light or \
+                light["intensityLm"] != 1000.0 or light["range"] != 7.28 or \
+                light["bakeLumensPerRadiantWatt"] != 100.0 or \
+                light["bakeCells"] != ["L0_FOYER", expected_receiver] or \
+                light["spillCells"] != ["EXT_WALK"] or \
+                light["emissiveMaterialSlot"] != "FamilyCeilingDiffuser" or \
+                not light["bakedIntoLightmap"] or light["defaultOn"] or \
+                not light["duskSensor"]:
+            raise RuntimeError(f"porch ceiling optical linkage changed: {light_id}")
 
     lamp = props["PROP_FAMILY_LAMP"]
     reading = lights["LIGHT_L0_FAMILY_READING_1"]

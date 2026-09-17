@@ -491,7 +491,7 @@
       "daylight": { "orientation": "N", "exposure": 0.35 },
       "lightGroups": ["LG_L0_FOYER_MAIN", "LG_L0_FOYER_ACCENT"],
       "lightmaps": {
-        "shellHash": "sha256:0958d238dad45b5cddf8835e65fc4d73df814b0a49b07c9ee7f69ad4123da453",
+        "shellHash": "sha256:eb0b90aa987f952d230df7614c61b73aacf8dbfadbb0b9d4070bf9e4639bc039",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY",
           "scale": 1.0000001192092896
@@ -500,17 +500,17 @@
           {
             "group": "LG_L0_FOYER_ACCENT",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT",
-            "scale": 0.1495114266872406
+            "scale": 0.14793236553668976
           },
           {
             "group": "LG_L0_FOYER_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN",
-            "scale": 0.4898282289505005
+            "scale": 0.4852122366428375
           },
           {
             "group": "LG_L0_PORCH_LANTERN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_PORCH_LANTERN",
-            "scale": 10.696699142456055
+            "scale": 11.113598823547363
           }
         ]
       },
@@ -562,12 +562,17 @@
       "daylight": { "orientation": "E", "exposure": 0.28 },
       "lightGroups": ["LG_L0_STAIR_MAIN_MAIN", "LG_L0_STAIR_MAIN_STEP"],
       "lightmaps": {
-        "shellHash": "sha256:a97b4b261b1062b9213eee85fe679713b5d9161ea25d3272087c29b5a501be64",
+        "shellHash": "sha256:da34267722f9ab496ba430a3ee667781d683eabe9da2b2c696d4c531406180db",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_STAIR_MAIN_LM_DAY",
           "scale": 1.000000238418579
         },
         "artificial": [
+          {
+            "group": "LG_L0_PORCH_LANTERN",
+            "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_PORCH_LANTERN",
+            "scale": 0.1749000996351242
+          },
           {
             "group": "LG_L0_STAIR_MAIN_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_STAIR_MAIN_LM_LG_L0_STAIR_MAIN_MAIN",
@@ -713,7 +718,7 @@
       "daylight": { "orientation": "NW", "exposure": 0.46 },
       "lightGroups": ["LG_L0_LIVING_MAIN", "LG_L0_LIVING_FIRE", "LG_L0_LIVING_PIANO"],
       "lightmaps": {
-        "shellHash": "sha256:1b3f499e239bddc5a64fd13b7c236c0f23030cff9fa0c5af7f9ffb8e16a4e393",
+        "shellHash": "sha256:fb1c7d352826cdb8411b189368914cd41df5aa342b91b5b7b8d73e85836642f6",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY",
           "scale": 1.000000238418579
@@ -733,6 +738,11 @@
             "group": "LG_L0_LIVING_PIANO",
             "contentName": "Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_PIANO",
             "scale": 0.0995696410536766
+          },
+          {
+            "group": "LG_L0_PORCH_LANTERN",
+            "contentName": "Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_PORCH_LANTERN",
+            "scale": 0.17550376057624817
           }
         ]
       },

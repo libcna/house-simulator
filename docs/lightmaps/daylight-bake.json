@@ -232,7 +232,7 @@
       },
       "groups": [],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:0958d238dad45b5cddf8835e65fc4d73df814b0a49b07c9ee7f69ad4123da453"
+      "shellHash": "sha256:eb0b90aa987f952d230df7614c61b73aacf8dbfadbb0b9d4070bf9e4639bc039"
     },
     {
       "cell": "L0_GARAGE",
@@ -297,7 +297,7 @@
       },
       "groups": [],
       "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:1b3f499e239bddc5a64fd13b7c236c0f23030cff9fa0c5af7f9ffb8e16a4e393"
+      "shellHash": "sha256:fb1c7d352826cdb8411b189368914cd41df5aa342b91b5b7b8d73e85836642f6"
     },
     {
       "cell": "L0_MUDROOM",
@@ -337,7 +337,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:a97b4b261b1062b9213eee85fe679713b5d9161ea25d3272087c29b5a501be64"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:da34267722f9ab496ba430a3ee667781d683eabe9da2b2c696d4c531406180db"
     },
     {
       "cell": "L0_STOR",
@@ -801,12 +802,13 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_LIVING"
+    "L0_LIVING",
+    "L0_STAIR_MAIN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 507957,
+  "sourceBytes": 508513,
   "tool": "bake_house_lightmaps.py"
 }

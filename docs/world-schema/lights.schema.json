@@ -91,6 +91,10 @@
             "type": "array",
             "uniqueItems": true
           },
+          "bakeLumensPerRadiantWatt": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
           "bakedIntoLightmap": {
             "type": "boolean"
           },

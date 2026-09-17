@@ -402,7 +402,7 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     EXPECT_FLOAT_EQ(hall->artificial, 0.0F);
 }
 
-TEST(LightingSystemTests, AllFifteenAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
+TEST(LightingSystemTests, AllSeventeenAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
 {
     if (!ContentIsBuilt())
     {
@@ -419,7 +419,7 @@ TEST(LightingSystemTests, AllFifteenAuthoredDuskFixturesFollowDayNightWithAVisib
     EXPECT_EQ(std::count_if(house.world.Lights().begin(),
                             house.world.Lights().end(),
                             [](const world::Light& light) { return light.duskSensor; }),
-              15);
+              17);
 
     cnahouse::environment::CivilTime time;
     time.year = 2031;
@@ -454,7 +454,7 @@ TEST(LightingSystemTests, AllFifteenAuthoredDuskFixturesFollowDayNightWithAVisib
         const float level = house.lighting.FindGroup(porch)->Level();
         sawPorchStagger = sawPorchStagger || (level > 0.0F && level < 1.0F);
     }
-    EXPECT_TRUE(sawPorchStagger) << "the two ±8-minute porch fixtures switched together";
+    EXPECT_TRUE(sawPorchStagger) << "the four staggered porch fixtures switched together";
 }
 
 TEST(LightingSystemTests, KitchenMainAndIslandDefaultOnAndTheirSwitchesRemoveBorrowedHallLight)
@@ -906,9 +906,11 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     ASSERT_TRUE(lights.slots[0].has_value());
     ASSERT_TRUE(lights.slots[1].has_value());
     ASSERT_TRUE(lights.slots[2].has_value());
-    const float dx = 0.90F;
-    const float dy = 0.57F - 2.62F;
-    const float dz = -12.95F - (-14.073F);
+    // The two broad semi-flush fixtures are the strongest direct porch sources at deck centre;
+    // the wall lanterns remain in the same group and dominate the closer door receiver below.
+    const float dx = 2.45F;
+    const float dy = 0.57F - 3.17F;
+    const float dz = 0.0F;
     const float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
     EXPECT_NEAR(lights.slots[0]->direction.X, dx / distance, 1.0e-6F);
     EXPECT_NEAR(lights.slots[0]->direction.Y, dy / distance, 1.0e-6F);
@@ -918,8 +920,9 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     EXPECT_NEAR(lights.slots[1]->direction.Z, dz / distance, 1.0e-6F);
     EXPECT_NEAR(lights.slots[0]->diffuseColor.X, lights.slots[1]->diffuseColor.X, 1.0e-6F)
         << "the symmetric porch receiver must retain equal energy after distance attenuation";
-    const float attenuation = PointLightAttenuation(distance, 6.50F);
-    EXPECT_NEAR(lights.slots[0]->diffuseColor.X, 0.5F * attenuation * PlanckianRgb(2400.0F).X, 1.0e-6F);
+    const float pointAttenuation = PointLightAttenuation(distance, 7.28F);
+    const float ceilingShare = 1000.0F * pointAttenuation / 2800.0F;
+    EXPECT_NEAR(lights.slots[0]->diffuseColor.X, ceilingShare * PlanckianRgb(2700.0F).X, 1.0e-6F);
     const float bounceLength = std::sqrt(dy * dy + dz * dz);
     EXPECT_NEAR(lights.slots[2]->direction.X, 0.0F, 1.0e-6F);
     EXPECT_NEAR(lights.slots[2]->direction.Y, -dy / bounceLength, 1.0e-6F);
@@ -941,6 +944,17 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     EXPECT_NEAR(receiverLights.slots[0]->direction.X, -receiverLights.slots[1]->direction.X, 1.0e-6F);
     EXPECT_GT(receiverLights.slots[0]->diffuseColor.X, receiverLights.slots[0]->diffuseColor.Z);
     EXPECT_FALSE(house.lighting.CrossCellReceiverLightsForObject(porch, centre).slots[0].has_value());
+
+    // The two outer fixtures also name only the two facade owners physically below their bays.
+    // This keeps the wide entry readable without leaking the porch group into unrelated rooms.
+    const ObjectLightAssignment livingFacade = house.lighting.CrossCellReceiverLightsForObject(
+        Id::Of("L0_LIVING"), Microsoft::Xna::Framework::Vector3(-3.0F, 1.7F, -14.15F));
+    const ObjectLightAssignment stairFacade = house.lighting.CrossCellReceiverLightsForObject(
+        Id::Of("L0_STAIR_MAIN"), Microsoft::Xna::Framework::Vector3(3.0F, 1.7F, -14.15F));
+    ASSERT_TRUE(livingFacade.slots[0].has_value());
+    ASSERT_TRUE(stairFacade.slots[0].has_value());
+    EXPECT_GT(livingFacade.slots[0]->diffuseColor.X, livingFacade.slots[0]->diffuseColor.Z);
+    EXPECT_GT(stairFacade.slots[0]->diffuseColor.X, stairFacade.slots[0]->diffuseColor.Z);
 
     // The front stair is fixed Basic detail in EXT_WALK. Its own path-light switch remains off,
     // so ordinary dynamic-object assignment is dark; the explicit static spill receives only the

@@ -1,4 +1,49 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-00937` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-00938` checkpoint)
+
+Branch `develop`. Task-start HEAD `7c327bc` (`HOUSE-00937`). This file belongs to the single
+`HOUSE-00938` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout remains available.
+
+The fixed night arrival now has layered physical porch lighting instead of two isolated hot door
+lanterns against an almost-black facade. Two measured semi-flush fixtures occupy the outer porch
+bays, join the existing automatic dusk circuit as 1,000 lm / 2,700 K sources and cast broad warm
+pools across the soffit, columns and facade flanks. Runtime lumens, global exposure and the manual
+garage/path groups are unchanged. Spill remains limited to `EXT_WALK`; selected cross-cell bakes
+reach only foyer plus the adjacent living/stair facade owners.
+
+All forty-five frames in the complete
+[before-night set](visual-review/captures/house-00938-porch-layer-night-before),
+[final night set](visual-review/captures/house-00938-porch-layer-night-final) and
+[final clear-day set](visual-review/captures/house-00938-porch-layer-day-final) were opened. The
+night front-path frame changes 45.6233% of pixels above two levels (normalized MAE 0.005527) and
+now reveals the porch architecture. The day frame changes 1.0713% (MAE 0.001336). The shared
+family fixture changes 0.8158% by day and 0.8014% at night, confined to its refined silhouette.
+Its final 636-triangle model separates an always-visible opal bowl from the smaller switched
+diffuser, so it no longer becomes a solid black disc when off while retaining its measured
+0.42 x 0.18 x 0.42 m bounds.
+
+The new living/stair porch atlases and promoted foyer product are deterministic; an explicit
+positive offline-only per-source calibration keeps one physical source consistent across receiver
+products with different historical global calibrations. Four changed strict references were
+opened pairwise and deliberately advanced. Six incidental within-tolerance generator rewrites were
+restored byte-for-byte. The world is 634 chunks / 96 cells / 62 static props / 257 exterior
+hierarchy instances / 53.446726 MB. The unculled diagnostic is 590 opaque submissions, 44 cutouts
+and 98 state changes.
+
+All 1,409 unit, 135 integration and 49 active render tests pass; eight render cases remain
+deliberately disabled. All eighteen culled/unculled poses pass at 0.1342% worst case
+(`l0-sunroom`). Schema, content/provenance, stable-id, deterministic asset/lightmap and complete
+repository/strict-XNA gates pass with compilation and heavy work restricted to CPU 0-5 / at most
+six workers.
+
+Next highest visible value: compose the empty garage frontage at human scale and add a controlled
+facade/step light layer without lifting global night exposure. The upper facade and garage remain
+broad dark planes at 22:00; the close front steps are also underlit. Inside, blank wall bays and
+weak local furniture grounding remain more valuable than new invisible infrastructure.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-00937` checkpoint)
 
 Branch `develop`. Task-start HEAD `b258976` (`HOUSE-00936`). This file belongs to the single
 `HOUSE-00937` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

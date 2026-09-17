@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 193U)
-            << "HOUSE-01057 adds the formal sofa's five source-exact finish roles";
+        EXPECT_EQ(contents.materials.size(), 194U)
+            << "HOUSE-00938 adds one always-visible opal fixture finish";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3650,8 +3650,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_FIXTURE_"); }),
-                  3)
-            << "HOUSE-01047 adds a neutral flood lens beside the lantern cage and diffuser";
+                  4)
+            << "HOUSE-00938 separates the shared fixture's opal bowl from its switched emitter";
 
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
@@ -3860,8 +3860,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return material.materialClass == world::MaterialClass::Glass; }),
-                  8)
-            << "HOUSE-01050 adds one deliberately opaque glass role for the inactive television";
+                  9)
+            << "HOUSE-00938 adds one opaque opal-glass role for the shared ceiling fixture";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3991,8 +3991,8 @@ namespace
                                   std::size_t{0},
                                   [](std::size_t count, const world::Cell& cell)
                                   { return count + cell.lightmaps.artificial.size(); }),
-                  125U)
-            << "the canonical bindings include 124 owned-room bakes and one explicit cross-cell spill";
+                  127U)
+            << "the canonical bindings include 124 owned-room bakes and three explicit cross-cell spills";
 
         // 179 and 66 until `HOUSE-00491` retired §12.6's two `W_GABLE` louvres: they were in
         // "attic gable ends" and §12.1's roof is a hip with none, so both stood 1.44 m inside
@@ -4050,7 +4050,8 @@ namespace
         // `HOUSE-00381` authored `B1` and `L0`, `HOUSE-00382` the three upper floors and
         // `HOUSE-00383` §53's exterior. §28.2 said 169 fixtures in 84 groups, and §13's own
         // per-room column never added up to that.
-        EXPECT_EQ(contents.lights.size(), 243U);
+        EXPECT_EQ(contents.lights.size(), 245U)
+            << "HOUSE-00938 adds the two physical outer-bay porch sources";
         std::map<cnahouse::util::Id, std::set<cnahouse::util::Id>> groupsIn;
         for (const world::Light& light : contents.lights)
         {
