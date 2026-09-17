@@ -13896,6 +13896,47 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 48 active render tests pass (eight disabled); all eighteen culling pairs pass at
                 0.1342% worst (`l0-sunroom`). Full repository and all 323 strict-XNA translation
                 units pass with compilation/heavy work restricted to CPU 0-5 / at most six workers.
+- [x] HOUSE-00940 — Finish canonical interior double doors as real paired joinery
+      dep: HOUSE-00377, HOUSE-00456, HOUSE-00486, HOUSE-00907, HOUSE-00932, HOUSE-01058 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-17) Round 58's fixed straight formal-living camera now has a finished piano
+            vignette but still terminates on a broad featureless timber rectangle. Source tracing
+            proves that every `D_DOUBLE` portal stores one 860 mm leaf while the static shell
+            generator incorrectly centres only that one leaf in the full 1.80 m pair opening and
+            turns the remaining width into lining. Generate the declared pair generally; use the
+            portal's existing translucent semantics for the living/office glazed pair rather than
+            hard-coding a room or adding a duplicate data flag.
+      accept: all four canonical `D_DOUBLE` openings render as two correctly scaled leaves with a
+              narrow centre clearance/astragal and physical lever hardware; opaque pairs have
+              restrained raised-panel millwork and the already-translucent living/office pair has
+              framed glass. Door apertures, portal ownership, collision, animation data and the
+              existing room palette assignments remain unchanged; the panel relief uses one
+              approved-map joinery role. Matched sixteen-camera review captures, including a focused
+              living-door view, are inspected; deterministic shell/content, unit, integration,
+              render, culling and strict-XNA gates pass with compilation/heavy work restricted to
+              CPU 0-5 / at most six workers.
+      result: (2026-09-17) The shell generator now interprets every `D_DOUBLE` schedule width as
+              one leaf, centres the full pair in its unchanged portal and emits an 8 mm meeting
+              gap, shallow astragal and two-sided paired lever/backplate hardware. The three opaque
+              portal pairs receive four restrained raised panels and a dedicated dark-hardwood
+              moulding role that reuses the approved broad-board maps; the already-translucent
+              living/office pair receives two framed panes per leaf. A sixteenth fixed review pose
+              looks squarely at the foyer/living pair. Six affected shells and the deterministic
+              world were rebuilt; the final world is 648 chunks / 96 cells / 64 static props / 258
+              exterior instances / 53.689714 MB.
+      review: (2026-09-17) All 32 matched clear-day/night frames were opened. Against Round 58,
+              the day living view changes 54,171 pixels above two channel levels (normalized MAE
+              0.001088), living composition 38,213 (0.004818), entrance/foyer 59,728 (0.001002),
+              dining 18,244 (0.000412) and central hall 6,293 (0.000320). The focused view proves
+              two full-width leaves, four outlined panels and paired handles; the living/office
+              view proves four glass panes and two handles. Six strict references were compared
+              pairwise and advanced only for the intended directly or transitively visible doors.
+              Formal-living lighting remains too dark and uneven; `VISUAL-GATE-1` still FAILS.
+      verified: (2026-09-17) Shell self-test, all thirteen world validators, deterministic chunk
+                build, 1,409 unit, 135 integration and 48 active render tests pass (eight disabled).
+                The unculled diagnostic is 604 opaque submissions / 44 cutouts / 99 state changes;
+                all eighteen culling pairs pass at 0.1338% worst (`l0-sunroom`). Full repository
+                and strict-XNA checks pass with compilation/heavy work restricted to CPU 0-5 / at
+                most six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19126,6 +19167,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-00940` | **New task, next free phase-12 id.** Interpret the already-authored `D_DOUBLE` leaf width as one member of its full portal pair, and generate opaque panelled or translucent glazed joinery from the portal's existing semantics. | Round 58's straight living view exposes a broad blank rectangle beside the finished piano. The opening schedule explicitly says its 860 mm row is “one leaf of a pair,” while the shell centres only that one leaf in a 1.80 m portal and fills the two 470 mm remnants as lining. Correcting the general static closed-leaf grammar improves all four formal-room pairs without a prop, room-name exception, new renderer or changed portal/collision dimensions. |
 | 2026-09-17 | `HOUSE-00939` | **New task, next free phase-12 id.** Reuse the measured wall lantern as two garage-door carriage lights on a separate dusk group while retaining the existing manual utility flood. After the first capture, refine “near apron” to “door/local jamb facade”; the manual flood retains the broad-apron role. | Round 57's fixed driveway frames show one broad empty garage wall by day and a near-black normal-play arrival at 22:00 because the central 4,000 K flood is correctly manual/off. Two short-range 2,400 K fixtures at the jambs supply human scale and bounded normal-night readability without global exposure, another asset or changing the utility-light contract. The rejected first capture proved that asking the range-bounded carriage lights to illuminate the terrain tile's distant centre conflicts with keeping the side fence dark and duplicates the authored utility flood rather than improving the physical composition. |
 | 2026-09-17 | `HOUSE-00938` | **New task, next free phase-12 id.** Reuse the measured semi-flush fixture for two physical porch sources, keep them on the existing dusk circuit and give their cross-cell bake an explicit per-source offline calibration. | Round 56 names the almost-black night facade outside two hot door lanterns as the largest arrival defect. Two outer-bay fixtures add layered architectural light without changing global exposure or converting the manual path/garage groups; separating always-visible glass from the switched optical disc also fixes the reused asset's off-state silhouette. |
 | 2026-09-17 | `HOUSE-00937` | **New task, next free phase-12 id.** Add sloped-ground material covers as a truthful exterior-data primitive, use it for two front foundation beds, and recompose only the existing approved foundation plants. | Round 55 names the sparse facade/garage arrival as the highest exterior defect. Existing foundation vegetation is incorrectly arranged as one continuous line beneath the elevated porch and into the driveway; two flanking beds use the existing mulch material and existing vegetation count without a download, a fake navigable path or a terrain-height change. |

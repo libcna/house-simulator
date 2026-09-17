@@ -2540,3 +2540,48 @@ state changes. Test and gate results are recorded in `docs/handoff.md`.
 debug blockout remains available. The next highest visible exterior value is a bounded front-step
 and upper-facade lighting layer; inside, restrained wall dressing and contact grounding remain the
 strongest opportunities.
+
+## Round 59 — paired formal interior joinery
+
+Commit: `HOUSE-00940` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 58's [living-room view](captures/house-00939-garage-lantern-day-final/living-room.png)
+ends at a broad timber rectangle because the shell centred one declared 860 mm leaf inside each
+1.80 m pair opening. After: the complete matched sixteen-camera
+[day](captures/house-00940-double-doors-day-final) and
+[night](captures/house-00940-double-doors-night-final) sets show real paired joinery. The added
+[focused view](captures/house-00940-double-doors-day-final/foyer-living-doors.png) makes the
+opaque panel geometry directly reviewable. All 32 final frames and all six strict-reference
+comparisons were opened.
+
+Ranked visible defects remaining:
+
+1. The formal living room remains too dark and unevenly balanced in both fixed scenarios; its
+   bright furniture edges and piano light compete with broad near-black walls and floor.
+2. Several large wall bays still lack restrained art or domestic detail, and weak contact shading
+   leaves some furniture insufficiently grounded.
+3. The upper facade and side wings remain broad dark planes at night; the garage frontage remains
+   sparse by day despite its new human-scale fixtures.
+4. Foundation planting is coherent but still sparse and low-detail at close range.
+5. Distant landscape and neighbour context expose the finite presentation boundary.
+
+Fixed: every canonical `D_DOUBLE` schedule width now means one leaf of its unchanged full portal.
+The generator centres both leaves around an 8 mm meeting clearance, covers it with a shallow
+astragal and gives both the working and dummy leaf two-sided lever/backplate hardware. Opaque pairs
+use two raised panels per leaf with real 55 mm moulding; the living/office portal's existing
+`translucent` semantic instead produces two framed panes per leaf. The darker panel role reuses the
+already approved broad-board maps, so no new bitmap or licence entered the repository. Portal
+ownership, collision, animation data, room palette assignments and renderer architecture are
+unchanged.
+
+Against Round 58, the day living-room view changes 54,171 pixels above two channel levels
+(normalized MAE 0.001088), living composition 38,213 (0.004818), entrance/foyer 59,728
+(0.001002), dining 18,244 (0.000412) and central hall 6,293 (0.000320). Six strict references were
+advanced only after pairwise inspection localized their differences to direct views of the doors
+or views through adjoining rooms/Juliet facade. The world is 648 chunks / 96 cells / 64 props /
+258 exterior instances / 53.689714 MB; the unculled diagnostic is 604 opaque submissions, 44
+cutouts and 99 state changes. Tests and gates are recorded in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest interior value is to rebalance formal-living
+light and contact grounding without lifting global exposure or inventing a new renderer.

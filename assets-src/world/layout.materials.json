@@ -1963,6 +1963,21 @@
       "footstepSurface": "hardwood", "audioAbsorption": 0.16,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // Darker raised moulding for the canonical formal double doors. It reuses the approved
+    // broad-board hardwood maps instead of introducing a texture solely to fake a line; the
+    // separate Basic role keeps real 55 mm millwork legible against the oak leaf at room scale.
+    {
+      "id": "MAT_DOOR_PANEL_HARDWOOD", "class": "wood",
+      "albedo": "Textures/Materials/wood_board_albedo",
+      "normal": "Textures/Materials/wood_board_normal", "lightmapChannel": 0,
+      "tint": [0.44, 0.28, 0.17], "specularColor": [0.04, 0.04, 0.04],
+      "specularPower": 32.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.28, "specularBoost": 2.4, "powerBoost": 3.0 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "hardwood", "audioAbsorption": 0.16,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     // Weather-facing D_ENTRY leaf. Its approved broad-board map reads as joinery at arm's length;
     // the floor-strip map used by ordinary room doors looked like horizontal parquet here. The
     // distinct id also keeps ordinary room joinery out of the exterior visibility hierarchy.

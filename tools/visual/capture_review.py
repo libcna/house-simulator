@@ -25,6 +25,10 @@ POSES = (
     # human-reviewable.
     ("front-path", "0.00,0.60,-8.50,0.0,0.0"),
     ("entrance-foyer", "0.00,0.60,-14.90,0.0,0.0"),
+    # HOUSE-00940: the route camera sees the foyer/living pair only at the extreme left edge and
+    # the living-room camera sees its unlit face. This measured foyer-side view keeps both raised
+    # panels, the centre meeting stile and the matched passage/dummy hardware reviewable.
+    ("foyer-living-doors", "0.40,0.60,-16.30,270.0,0.0"),
     ("foyer-facing-front", "0.00,0.60,-16.70,180.0,0.0"),
     ("central-hall", "0.00,0.60,-20.65,0.0,0.0"),
     ("kitchen-from-hall", "0.00,0.60,-23.55,285.0,0.0"),

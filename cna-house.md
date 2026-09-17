@@ -2021,6 +2021,15 @@ move them, not an assertion in either direction.
   separate deadbolt and a thin capped threshold. The relief uses the leaf's approved broad-board
   map with a darker hardwood tint; it and `MAT_EXTERIOR_DOOR_HARDWARE_BRONZE` join §25.6 through
   the existing `MAT_EXTERIOR_DOOR_*` contract, so ordinary room wood and metal remain portal-owned.
+  `HOUSE-00940` interprets a `D_DOUBLE` row's 860 mm width as the one leaf the schedule says it is,
+  and builds two leaves inside the unchanged 1.80 m portal with an 8 mm meeting clearance and a
+  shallow astragal. Opaque pairs use restrained two-panel millwork; the one portal already marked
+  `translucent` uses two framed panes per leaf instead of an opaque body. Both forms use physical
+  lever hardware and the existing room trim/glass/metal roles; opaque moulding uses
+  `MAT_DOOR_PANEL_HARDWOOD`, a BasicEffect reuse of the approved broad-board maps whose darker
+  stain keeps the real 55 mm relief readable at room scale. This is the static closed-shell
+  representation only: portal ownership, collision and the later two-leaf animation contract
+  stay data-driven and unchanged.
 
 ### 17.5 Directory layout
 

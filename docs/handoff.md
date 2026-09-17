@@ -1,4 +1,48 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-00939` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-00940` checkpoint)
+
+Branch `develop`. Task-start HEAD `c97d6a529cbed48c83bebd217a0d425bd48fdbed` (`HOUSE-00939`).
+This file belongs to the single `HOUSE-00940` commit; use that commit as the ending HEAD.
+**VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and explicit
+debug blockout remains available.
+
+All four canonical formal double-door openings now contain two real, correctly scaled leaves rather
+than one 860 mm leaf centred in a 1.80 m opening and flanked by broad false lining. The unchanged
+portal width contains an 8 mm meeting clearance, shallow astragal and paired two-sided hardware.
+Three opaque pairs use restrained two-panel-per-leaf millwork; the living/office portal's existing
+`translucent` semantic produces a framed four-pane glass pair. The new dark-hardwood panel role
+reuses approved broad-board maps. Portal ownership, collision, animation data, room palette
+assignments and strict-XNA runtime architecture are unchanged.
+
+All 32 frames in the matched sixteen-camera
+[clear-day set](visual-review/captures/house-00940-double-doors-day-final) and
+[normal-night set](visual-review/captures/house-00940-double-doors-night-final) were opened. The new
+[focused foyer/living view](visual-review/captures/house-00940-double-doors-day-final/foyer-living-doors.png)
+shows two full-width leaves, four outlined panels and paired handles; the
+[living composition](visual-review/captures/house-00940-double-doors-day-final/living-composition.png)
+shows four glazed panes and paired handles. Against Round 58, the day living-room view changes
+54,171 pixels above two channel levels (normalized MAE 0.001088), living composition 38,213
+(0.004818), entrance/foyer 59,728 (0.001002), dining 18,244 (0.000412) and central hall 6,293
+(0.000320).
+
+Six affected strict references were opened pairwise and deliberately advanced; each difference is
+the intended door seen directly, through an adjoining room, or at the Juliet facade. The world is
+648 chunks / 96 cells / 64 static props / 258 exterior hierarchy instances / 53.689714 MB. The
+unculled diagnostic is 604 opaque submissions, 44 cutouts and 99 state changes.
+
+Shell self-tests, all thirteen world validators, deterministic generation, all 1,409 unit and 135
+integration tests, and all 48 active software-render tests pass; eight capture-only render cases
+remain disabled. All eighteen culled/unculled poses pass at 0.1338% worst (`l0-sunroom`). Full
+repository/strict-XNA gate results are recorded in `plan.md`; compilation and heavy work stayed on
+CPU 0-5 / at most six workers.
+
+Next highest visible value: rebalance formal-living daylight/artificial light and contact grounding.
+The fixed composition currently has bright furniture/piano edges against broad near-black walls and
+floor. After that, blank interior wall bays, sparse day garage composition, the dark upper facade
+and close-range planting remain higher value than unrelated systems.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-00939` checkpoint)
 
 Branch `develop`. Task-start HEAD `8ec87b5` (`HOUSE-00938`). This file belongs to the single
 `HOUSE-00939` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

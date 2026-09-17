@@ -242,6 +242,23 @@ for shutter_cell in (
         previous_limit + 1,
         previous_reason + "; HOUSE-00933 adds one measured black-shutter finish group")
 
+# `HOUSE-00940`: the static closed-shell representation now honours D_DOUBLE's one-leaf schedule
+# as an actual pair.  A physical nickel-finished lever is one new non-receiver material in each
+# owner cell, while opaque pairs use one shared dark-hardwood moulding role; the already-
+# translucent living/office pair additionally introduces the existing indoor-glass role where
+# those cells previously had only weather-facing window glass.  The hall rises from four to six
+# and remains at the global target, so only the five measured existing exceptions change here.
+for double_door_cell, added, explanation in (
+        ("L0_FOYER", 2, "physical double-door hardware and raised hardwood panel roles"),
+        ("L0_DINING", 2, "physical double-door hardware and raised hardwood panel roles"),
+        ("L0_LIVING", 3, "double-door hardware, raised hardwood panels and translucent panes"),
+        ("L0_OFFICE", 2, "physical double-door hardware plus the declared translucent panes"),
+        ("L2_LANDING", 2, "physical double-door hardware and raised hardwood panel roles")):
+    previous_limit, previous_reason = CHUNK_BUDGET_EXCEPTIONS[double_door_cell]
+    CHUNK_BUDGET_EXCEPTIONS[double_door_cell] = (
+        previous_limit + added,
+        previous_reason + f"; HOUSE-00940 adds {explanation}")
+
 #: The vertex layouts, one per stock effect, with the attributes that effect actually reads.
 #: `MaterialBinder`'s `MaterialKind` is the same closed list of four; `Skinned` never appears here
 #: because a skinned prop is an animated one and animated props are not batched (§17.4).

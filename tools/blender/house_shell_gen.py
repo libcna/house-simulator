@@ -654,6 +654,26 @@ ENTRY_HARDWARE_PROJECTION = 0.055
 ENTRY_DEADBOLT_SIZE = 0.065
 ENTRY_THRESHOLD_CAP = 0.009
 
+#: `HOUSE-00940`: `D_DOUBLE` stores the width of one leaf while its portal stores the full pair.
+#: The closed-shell representation used to centre that single leaf in the 1.80 m opening and fill
+#: the remaining 470 mm bands with lining, which read as one featureless wall panel.  Eight
+#: millimetres is a normal meeting-stile clearance; the generated astragal overlaps it visually.
+#: Solid formal-room pairs use 55 mm raised mouldings and the translucent living/office pair uses
+#: 82 mm timber rails around two panes per leaf.  All dimensions are millwork sections, not
+#: percentages chosen from one screenshot; only the panel extents scale with an authored leaf.
+DOUBLE_DOOR_CENTER_GAP = 0.008
+DOUBLE_DOOR_ASTRAGAL = 0.050
+DOUBLE_DOOR_PANEL_MOULDING = 0.055
+DOUBLE_DOOR_PANEL_RELIEF = 0.020
+DOUBLE_DOOR_GLAZED_RAIL = 0.082
+DOUBLE_DOOR_GLAZED_MID_RAIL = 0.095
+DOUBLE_DOOR_GLASS_THICK = 0.010
+DOUBLE_DOOR_BACKPLATE_WIDTH = 0.046
+DOUBLE_DOOR_BACKPLATE_HEIGHT = 0.210
+DOUBLE_DOOR_LEVER_LENGTH = 0.125
+DOUBLE_DOOR_LEVER_HEIGHT = 0.020
+DOUBLE_DOOR_HARDWARE_PROJECTION = 0.045
+
 #: `HOUSE-00935`: the 4.86 m garage leaf is five real sectional bands rather than one blank slab.
 #: Each band carries four broad raised steel panels. Their 140 mm side margin, 90 mm inter-panel
 #: gap, 55 mm vertical reveal and 14 mm relief are ordinary carriage-door dimensions and remain
@@ -731,6 +751,109 @@ def entry_door_detail_boxes(lu0: float, lu1: float, lv0: float, lv1: float,
                deadbolt_v - ENTRY_DEADBOLT_SIZE / 2.0,
                deadbolt_v + ENTRY_DEADBOLT_SIZE / 2.0,
                "exterior_door_hardware", "deadbolt", ENTRY_PANEL_RELIEF + 0.008)
+    return boxes
+
+
+def double_door_boxes(hu0: float, hu1: float, lv0: float, lv1: float,
+                      depth_lo: float, depth_hi: float, leaf_width: float,
+                      translucent: bool):
+    """The two closed leaves, their millwork and hardware for one ``D_DOUBLE`` portal.
+
+    The returned tuples are ``(u0, u1, v0, v1, d0, d1, surface_class, part)``.  A translucent
+    portal receives framed glass rather than an opaque timber body; the portal already owns that
+    semantic distinction, so the generator does not infer glazing from a room name or duplicate
+    it in a new data flag.  Both faces carry relief/hardware because each adjacent cell owns its
+    own closed-shell representation until the phase-15 animated leaves replace it.
+    """
+    opening_width = hu1 - hu0
+    height = lv1 - lv0
+    if opening_width <= 0.0 or height <= 0.0 or depth_hi <= depth_lo or leaf_width <= 0.0:
+        return []
+    width = min(leaf_width, (opening_width - DOUBLE_DOOR_CENTER_GAP) / 2.0)
+    if width <= 0.0:
+        return []
+    pair_width = 2.0 * width + DOUBLE_DOOR_CENTER_GAP
+    pair_lo = (hu0 + hu1 - pair_width) / 2.0
+    leaves = ((pair_lo, pair_lo + width),
+              (pair_lo + width + DOUBLE_DOOR_CENTER_GAP, pair_lo + pair_width))
+    boxes = []
+
+    def box(u0, u1, v0, v1, d0, d1, klass, part):
+        if u1 - u0 > 1e-9 and v1 - v0 > 1e-9 and d1 - d0 > 1e-9:
+            boxes.append((u0, u1, v0, v1, d0, d1, klass, part))
+
+    def both_faces(u0, u1, v0, v1, klass, part, projection):
+        box(u0, u1, v0, v1, depth_lo - projection, depth_lo, klass, part)
+        box(u0, u1, v0, v1, depth_hi, depth_hi + projection, klass, part)
+
+    for leaf_index, (u0, u1) in enumerate(leaves):
+        if translucent:
+            rail = min(DOUBLE_DOOR_GLAZED_RAIL, width * 0.12, height * 0.05)
+            middle = lv0 + height * 0.43
+            box(u0, u0 + rail, lv0, lv1, depth_lo, depth_hi, "trim", "glazed_stile")
+            box(u1 - rail, u1, lv0, lv1, depth_lo, depth_hi, "trim", "glazed_stile")
+            box(u0 + rail, u1 - rail, lv0, lv0 + rail,
+                depth_lo, depth_hi, "trim", "glazed_rail")
+            box(u0 + rail, u1 - rail, lv1 - rail, lv1,
+                depth_lo, depth_hi, "trim", "glazed_rail")
+            box(u0 + rail, u1 - rail,
+                middle - DOUBLE_DOOR_GLAZED_MID_RAIL / 2.0,
+                middle + DOUBLE_DOOR_GLAZED_MID_RAIL / 2.0,
+                depth_lo, depth_hi, "trim", "glazed_mid_rail")
+            glass_depth = (depth_lo + depth_hi) / 2.0
+            for pane_v0, pane_v1 in (
+                    (lv0 + rail, middle - DOUBLE_DOOR_GLAZED_MID_RAIL / 2.0),
+                    (middle + DOUBLE_DOOR_GLAZED_MID_RAIL / 2.0, lv1 - rail)):
+                box(u0 + rail, u1 - rail, pane_v0, pane_v1,
+                    glass_depth - DOUBLE_DOOR_GLASS_THICK / 2.0,
+                    glass_depth + DOUBLE_DOOR_GLASS_THICK / 2.0,
+                    "glass", "glazed_pane")
+        else:
+            box(u0, u1, lv0, lv1, depth_lo, depth_hi, "trim", "leaf")
+            moulding = min(DOUBLE_DOOR_PANEL_MOULDING, width * 0.07, height * 0.030)
+            panel_u0, panel_u1 = u0 + width * 0.13, u1 - width * 0.13
+            for panel_v0, panel_v1 in (
+                    (lv0 + height * 0.08, lv0 + height * 0.37),
+                    (lv0 + height * 0.44, lv0 + height * 0.91)):
+                both_faces(panel_u0, panel_u1, panel_v0, panel_v0 + moulding,
+                           "interior_door_panel", "panel_moulding",
+                           DOUBLE_DOOR_PANEL_RELIEF)
+                both_faces(panel_u0, panel_u1, panel_v1 - moulding, panel_v1,
+                           "interior_door_panel", "panel_moulding",
+                           DOUBLE_DOOR_PANEL_RELIEF)
+                both_faces(panel_u0, panel_u0 + moulding, panel_v0 + moulding,
+                           panel_v1 - moulding, "interior_door_panel", "panel_moulding",
+                           DOUBLE_DOOR_PANEL_RELIEF)
+                both_faces(panel_u1 - moulding, panel_u1, panel_v0 + moulding,
+                           panel_v1 - moulding, "interior_door_panel", "panel_moulding",
+                           DOUBLE_DOOR_PANEL_RELIEF)
+
+        # The active leaf has working passage hardware and the inactive leaf has the matching
+        # dummy set common on formal paired doors.  Besides being honest joinery, the two meeting-
+        # stile sets make the pair readable at normal gameplay distance instead of leaving one
+        # tiny handle floating on what still looks like a single 1.8 m slab.
+        handle_u = u1 - width * 0.105 if leaf_index == 0 else u0 + width * 0.105
+        handle_v = lv0 + min(0.98, height * 0.47)
+        both_faces(handle_u - DOUBLE_DOOR_BACKPLATE_WIDTH / 2.0,
+                   handle_u + DOUBLE_DOOR_BACKPLATE_WIDTH / 2.0,
+                   handle_v - DOUBLE_DOOR_BACKPLATE_HEIGHT / 2.0,
+                   handle_v + DOUBLE_DOOR_BACKPLATE_HEIGHT / 2.0,
+                   "metal", "backplate", DOUBLE_DOOR_PANEL_RELIEF + 0.007)
+        lever_u0 = (handle_u - DOUBLE_DOOR_LEVER_LENGTH + 0.015
+                    if leaf_index == 0 else handle_u - 0.015)
+        lever_u1 = (handle_u + 0.015
+                    if leaf_index == 0 else handle_u + DOUBLE_DOOR_LEVER_LENGTH - 0.015)
+        both_faces(lever_u0, lever_u1,
+                   handle_v - DOUBLE_DOOR_LEVER_HEIGHT / 2.0,
+                   handle_v + DOUBLE_DOOR_LEVER_HEIGHT / 2.0,
+                   "metal", "lever", DOUBLE_DOOR_HARDWARE_PROJECTION)
+
+    # The inactive leaf carries a slim astragal over the centre clearance.  It is shallow and
+    # timber-finished, so the two actual leaves still read separately without a view-through slit.
+    centre = (hu0 + hu1) / 2.0
+    both_faces(centre - DOUBLE_DOOR_ASTRAGAL / 2.0,
+               centre + DOUBLE_DOOR_ASTRAGAL / 2.0,
+               lv0, lv1, "trim", "astragal", DOUBLE_DOOR_PANEL_RELIEF * 0.5)
     return boxes
 
 
@@ -938,6 +1061,7 @@ SURFACE_COLOURS = {
     "exterior_door": (0.55, 0.42, 0.30, 1.0),
     "exterior_door_panel": (0.44, 0.28, 0.17, 1.0),
     "exterior_door_hardware": (0.55, 0.34, 0.14, 1.0),
+    "interior_door_panel": (0.44, 0.28, 0.17, 1.0),
     "trim":      (0.96, 0.96, 0.94, 1.0),
     "glass":     (0.55, 0.72, 0.80, 0.35),
     "window_frame": (0.96, 0.94, 0.90, 1.0),
@@ -961,6 +1085,7 @@ SHELL_MATERIALS = {
     "exterior_door": "MAT_EXTERIOR_DOOR_HARDWOOD",
     "exterior_door_panel": "MAT_EXTERIOR_DOOR_PANEL_HARDWOOD",
     "exterior_door_hardware": "MAT_EXTERIOR_DOOR_HARDWARE_BRONZE",
+    "interior_door_panel": "MAT_DOOR_PANEL_HARDWOOD",
     "trim": "MAT_DOOR_PAINTED",
     "glass": "MAT_GLASS_CLEAR",
     "window_frame": "MAT_WINDOW_FRAME_WHITE",
@@ -1552,6 +1677,7 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
     openings = openings or {}
     cells_by_id = cells_by_id or {}
     portal_cells = {row["id"]: (row.get("cellA"), row.get("cellB")) for row in portals}
+    portals_by_id = {row["id"]: row for row in portals}
 
     classes: list[str] = []
     surface = {"class": "wall"}   # what the current pass is building; see `SURFACE_COLOURS`
@@ -1903,43 +2029,63 @@ def build_cell(cell: dict, extent: tuple[float, float], *, neighbours=(), constr
                         else:
                             solid(u0, u1, v0, v1, d0, d1, klass)
 
-                    # `trim`, and NOT a class of its own. A leaf in its own colour would be
-                    # easier to pick out, and it would be an eleventh blockout material -- which
-                    # pushes `L0_GARAGE` and the three attic stores past §17.4's six chunks a cell,
-                    # measured. A door is joinery: it belongs in the class that already holds the
-                    # architrave round it, the sash beside it and the skirting under it, and §18.3
-                    # keeps all four out of the bake for the same reason. §11's material table
-                    # separates them when it arrives.
-                    portal_pair = portal_cells.get(hole[4], ())
-                    weather_facing = any(
-                        (cells_by_id.get(adjacent) or {}).get("kind") == "exterior"
-                        for adjacent in portal_pair)
-                    leaf_class = ("exterior_door"
-                                  if weather_facing
-                                  and is_exterior_door_material(opening.get("material"))
-                                  else "trim")
-                    leaf_box(lu0, lu1, lv0, lv1,
-                             middle - thickness / 2.0, middle + thickness / 2.0, leaf_class)
-                    if leaf_class == "exterior_door" and opening.get("type") == "D_ENTRY":
-                        for detail in entry_door_detail_boxes(
-                                lu0, lu1, lv0, lv1, middle - thickness / 2.0,
-                                middle + thickness / 2.0, opening.get("hinge")):
+                    if opening.get("type") == "D_DOUBLE":
+                        # The schedule stores ONE 860 mm leaf while the 1.80 m portal carries the
+                        # pair.  Build both, and let the portal's existing translucency decide
+                        # whether they are solid panelled doors or framed glass doors.
+                        portal = portals_by_id.get(hole[4], {})
+                        depth_lo = middle - thickness / 2.0
+                        depth_hi = middle + thickness / 2.0
+                        details = double_door_boxes(
+                            hu0, hu1, lv0, lv1, depth_lo, depth_hi, width,
+                            portal.get("opacity") == "translucent")
+                        for detail in details:
                             leaf_box(*detail[:6], detail[6])
-                        # A thin bronze cap finishes the existing full-depth timber threshold.
-                        # It begins exactly at that board's top, so it neither changes the clear
-                        # opening nor introduces coincident faces.
-                        leaf_box(hu0 + 0.010, hu1 - 0.010, hv0 + THRESHOLD_THICK,
-                                 hv0 + THRESHOLD_THICK + ENTRY_THRESHOLD_CAP,
-                                 reveal_lo, reveal_hi, "exterior_door_hardware")
-                    if leaf_class == "exterior_door" and opening.get("type") == "D_GARAGE":
-                        for detail in garage_door_detail_boxes(
-                                lu0, lu1, lv0, lv1, middle - thickness / 2.0,
-                                middle + thickness / 2.0):
-                            leaf_box(*detail[:6], detail[6])
-                    # The lining: the reveal's full depth, filling what the leaf does not.
-                    leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "trim")
-                    leaf_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
-                    leaf_box(lu0, lu1, lv1, hv1, reveal_lo, reveal_hi, "trim")
+                        paired_width = min(width, ((hu1 - hu0) - DOUBLE_DOOR_CENTER_GAP) / 2.0)
+                        pair_span = paired_width * 2.0 + DOUBLE_DOOR_CENTER_GAP
+                        pair_lo = (hu0 + hu1 - pair_span) / 2.0
+                        pair_hi = pair_lo + pair_span
+                        leaf_box(hu0, pair_lo, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                        leaf_box(pair_hi, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                        leaf_box(pair_lo, pair_hi, lv1, hv1, reveal_lo, reveal_hi, "trim")
+                    else:
+                        # `trim`, and NOT a class of its own. A leaf in its own colour would be
+                        # easier to pick out, and it would be an eleventh blockout material --
+                        # which pushes `L0_GARAGE` and the three attic stores past §17.4's six
+                        # chunks a cell, measured. A door is joinery: it belongs in the class that
+                        # already holds the architrave round it, the sash beside it and the
+                        # skirting under it, and §18.3 keeps all four out of the bake for the same
+                        # reason. §11's material table separates them when it arrives.
+                        portal_pair = portal_cells.get(hole[4], ())
+                        weather_facing = any(
+                            (cells_by_id.get(adjacent) or {}).get("kind") == "exterior"
+                            for adjacent in portal_pair)
+                        leaf_class = ("exterior_door"
+                                      if weather_facing
+                                      and is_exterior_door_material(opening.get("material"))
+                                      else "trim")
+                        leaf_box(lu0, lu1, lv0, lv1,
+                                 middle - thickness / 2.0, middle + thickness / 2.0, leaf_class)
+                        if leaf_class == "exterior_door" and opening.get("type") == "D_ENTRY":
+                            for detail in entry_door_detail_boxes(
+                                    lu0, lu1, lv0, lv1, middle - thickness / 2.0,
+                                    middle + thickness / 2.0, opening.get("hinge")):
+                                leaf_box(*detail[:6], detail[6])
+                            # A thin bronze cap finishes the existing full-depth timber threshold.
+                            # It begins exactly at that board's top, so it neither changes the clear
+                            # opening nor introduces coincident faces.
+                            leaf_box(hu0 + 0.010, hu1 - 0.010, hv0 + THRESHOLD_THICK,
+                                     hv0 + THRESHOLD_THICK + ENTRY_THRESHOLD_CAP,
+                                     reveal_lo, reveal_hi, "exterior_door_hardware")
+                        if leaf_class == "exterior_door" and opening.get("type") == "D_GARAGE":
+                            for detail in garage_door_detail_boxes(
+                                    lu0, lu1, lv0, lv1, middle - thickness / 2.0,
+                                    middle + thickness / 2.0):
+                                leaf_box(*detail[:6], detail[6])
+                        # The lining: the reveal's full depth, filling what the leaf does not.
+                        leaf_box(hu0, lu0, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                        leaf_box(lu1, hu1, hv0, hv1, reveal_lo, reveal_hi, "trim")
+                        leaf_box(lu0, lu1, lv1, hv1, reveal_lo, reveal_hi, "trim")
 
                 for hu0, hu1, hv0, hv1, _portal_id in holes:
                     for corner_lo, corner_hi, along, look in (
@@ -3127,6 +3273,38 @@ def selftest(output: Path) -> int:
     require(not architrave_boards(0.0, 0.9, 0.0, 2.02, 0.0),
             "and an opening with no casing gets no architrave rather than three boards of nothing")
 
+    # `HOUSE-00940`: the schedule's D_DOUBLE width is one leaf, not the full opening.  Claim the
+    # grammar independently of the authored house first, so a later schedule change cannot make a
+    # broken generator and a weakened fixture agree with each other.
+    solid_pair = double_door_boxes(0.0, 1.80, 0.60, 2.70, -0.02, 0.02, 0.86, False)
+    solid_parts = [row[7] for row in solid_pair]
+    solid_classes = [row[6] for row in solid_pair]
+    require(solid_parts.count("leaf") == 2,
+            f"a solid D_DOUBLE is two 860 mm leaves, not one centred slab "
+            f"({solid_parts.count('leaf')})")
+    solid_leaves = [row for row in solid_pair if row[7] == "leaf"]
+    require(all(abs((row[1] - row[0]) - 0.86) < 1e-9 for row in solid_leaves)
+            and abs(solid_leaves[1][0] - solid_leaves[0][1]
+                    - DOUBLE_DOOR_CENTER_GAP) < 1e-9,
+            "and the authored leaf width survives with one measured centre clearance")
+    require(solid_parts.count("panel_moulding") == 32
+            and solid_classes.count("interior_door_panel") == 32
+            and solid_classes.count("metal") == 8
+            and solid_parts.count("astragal") == 2,
+            f"the solid pair carries two raised panels per leaf on both faces, matched two-sided "
+            f"lever sets and a two-sided astragal ({solid_parts.count('panel_moulding')}, "
+            f"{solid_classes.count('interior_door_panel')} accent, "
+            f"{solid_classes.count('metal')} metal, {solid_parts.count('astragal')})")
+    glazed_pair = double_door_boxes(0.0, 1.80, 0.60, 2.70, -0.02, 0.02, 0.86, True)
+    glazed_parts = [row[7] for row in glazed_pair]
+    glazed_classes = [row[6] for row in glazed_pair]
+    require(glazed_parts.count("leaf") == 0 and glazed_parts.count("glazed_pane") == 4,
+            f"a translucent D_DOUBLE is two framed two-pane leaves, not an opaque body "
+            f"({glazed_parts.count('glazed_pane')} panes)")
+    require(glazed_classes.count("trim") == 12 and glazed_classes.count("metal") == 8,
+            f"and its stiles, rails, astragal and matched two-sided levers remain physical joinery "
+            f"({glazed_classes.count('trim')} timber, {glazed_classes.count('metal')} metal boxes)")
+
     # ...and the builder READS it. The claim above is about the boards; this one is about the path
     # from the opening row to them, which a hard-coded 0.06 satisfies just as well until a door
     # has a different casing. Doubling one and seeing the mesh move is the difference.
@@ -3337,6 +3515,8 @@ def selftest(output: Path) -> int:
             and assigned["window_glass"] == "MAT_WINDOW_GLASS_CLEAR"
             and assigned["exterior"] == "MAT_SIDING_WARM_WHITE",
             "and the opening schedule supplies both indoor and weather-facing glass")
+    require(assigned["interior_door_panel"] == "MAT_DOOR_PANEL_HARDWOOD",
+            "and formal interior raised panels use their source-approved hardwood accent")
 
     foyer = cells["L0_FOYER"]
     foyer_extent = extent_of(foyer, levels[foyer["level"]])[0]
@@ -3344,6 +3524,12 @@ def selftest(output: Path) -> int:
                        construction=construction, level=levels[foyer["level"]], levels=levels,
                        portals=all_portals, openings=openings_by_portal, cells_by_id=cells)
     entry_classes = [SURFACE_ORDER[polygon.material_index] for polygon in entry.data.polygons]
+    require(entry_classes.count("metal") == 48,
+            f"the foyer's real D_DOUBLE path emits eight closed hardware boxes "
+            f"({entry_classes.count('metal')} faces)")
+    require(entry_classes.count("interior_door_panel") == 192,
+            f"and its four raised panel outlines per leaf retain a readable hardwood role "
+            f"({entry_classes.count('interior_door_panel')} faces)")
     require(entry_classes.count("exterior_door") == 6,
             "the weather-facing D_ENTRY leaf retains one closed six-face body")
     require(entry_classes.count("exterior_door_panel") == 192,
@@ -3821,6 +4007,14 @@ def selftest(output: Path) -> int:
                   for polygon in outer_built.data.polygons}
     require("exterior" in outer_used and "wall" in outer_used,
             f"while the living room keeps both its inner wall and its outer skin ({sorted(outer_used)})")
+    outer_classes = [SURFACE_ORDER[polygon.material_index]
+                     for polygon in outer_built.data.polygons]
+    require(outer_classes.count("metal") == 96,
+            f"and both of its D_DOUBLE portals take the paired path: two eight-box hardware sets "
+            f"({outer_classes.count('metal')} faces)")
+    require(outer_classes.count("interior_door_panel") == 192,
+            f"while only its solid pair carries raised hardwood panel moulding "
+            f"({outer_classes.count('interior_door_panel')} faces)")
     require(slab_here(porch, porch_extent, True) and not slab_here(porch, porch_extent, False),
             "the porch is a deck, so it has a floor and no ordinary exterior ceiling slab; "
             "its derived covered-deck soffit is separate")
