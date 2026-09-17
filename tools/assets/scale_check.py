@@ -113,6 +113,12 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "fixture-small": [("x", 0.04, 0.25, "small integrated fixture width"),
                       ("y", 0.005, 0.08, "small integrated fixture thickness"),
                       ("z", 0.04, 0.25, "small integrated fixture depth")],
+    # Wall-mounted fixtures pivot on the wall plane rather than a floor support point. The band
+    # remains deliberately broad across sconces and picture lights while still rejecting a
+    # centimetre/inch import or a fixture large enough to dominate a domestic wall bay.
+    "wall-light": [("x", 0.10, 1.50, "domestic wall-light width"),
+                   ("y", 0.05, 1.50, "domestic wall-light height"),
+                   ("z", 0.05, 0.75, "domestic wall-light projection")],
 }
 
 #: Categories that exist in the manifest but carry no size expectation. Listed explicitly so that a

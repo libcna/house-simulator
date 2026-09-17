@@ -76,6 +76,27 @@ the strict-XNA transparent pass; the reviewed Tier-S adaptation uses a dark 0.35
 which retains the soft trim silhouette without glow or the first capture's pale stipple. The
 existing `PROP_LIVING_SOFA` id, measured placement and collision semantics remain unchanged.
 
+## Formal living piano-wall vignette
+
+2026-09-17, HOUSE-01058. Round 52's fixed straight camera showed the piano against a nearly empty,
+dark wall: it lacked a seat and wall composition, and the existing default-on piano accent was a
+bare point with no physical source. No external download is needed. The bounded suite is original
+project-owned geometry generated deterministically in Blender, and it reuses approved canonical
+wood, leather, brass, canvas and warm-emissive materials through stock XNA effects.
+
+| Object | Measured bound (m) | LOD0 triangles | Review contract |
+|---|---:|---:|---|
+| Tufted piano bench | 1.000 × 0.486 × 0.400 | 3,360 | 0.478 m seat top; leather cushion, buttons, open timber base and grounded 12-triangle proxy |
+| Framed original artwork | 1.150 × 0.720 × 0.101 | 848 | layered timber/brass frame, blue geometric canvas; deterministic 24-sided disc detail |
+| Brass picture light | 0.680 × 0.200 × 0.220 | 700 | physical wall plate, arm, shade and exact linked warm diffuser role |
+
+The three placements retain a clear route around the piano. `LIGHT_L0_LIVING_PIANO_1` keeps its
+stable identity and switch group, but its visible fixture is now `PROP_LIVING_PIANO_LIGHT` and its
+450 lm / 2,400 K contribution is a 55/100-degree spot directed down across the composition rather
+than a broad invisible point. Only the selected `L0_LIVING` daylight and artificial atlases are
+rebaked. A first negative-X direction was rejected from the fixed screenshot because it placed the
+pool beside the artwork; the reviewed direction centres the warm pool over the piano and bench.
+
 ## Formal dining primary set
 
 2026-09-17, HOUSE-01048. No approved source in the established living-room kit contains a dining

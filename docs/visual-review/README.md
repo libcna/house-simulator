@@ -2258,3 +2258,55 @@ passes at 0.1342% worst case (`l0-sunroom`), and the full gate accepts all 323 s
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only; the next highest
 visible gain is to make the straight living/piano wall read as a furnished, naturally lit room,
 followed by aperture balance and the sparse exterior start composition.
+
+## Round 53 — illuminated formal piano-wall vignette
+
+Commit: `HOUSE-01058` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 52's [day straight-living view](captures/house-01057-formal-sofa-day-final/living-room.png)
+shows a small upright piano against a broad, dark and almost empty wall. After: the same camera in
+the [final clear-day set](captures/house-01058-piano-vignette-day-final) and
+[explicit-reading 22:00 set](captures/house-01058-piano-vignette-night-final) shows a grounded
+tufted bench, original framed blue artwork, physical brass picture light and localized warm pool.
+All fourteen views in both routes and a temporary pitched close view of the bench were opened at
+full resolution.
+
+Ranked visible defects remaining:
+
+1. Clear-day apertures, especially in the family room, still clip and overpower adjacent finishes.
+2. The broad exterior/garage start is materially coherent but sparse; its night composition is
+   especially dark and empty.
+3. Blank wall bays and restrained surface dressing elsewhere still limit the inhabited feeling.
+4. The formal room remains dark overall, and the older upright piano has a comparatively blocky
+   finish beside the new detailed vignette.
+5. Several close furniture/shell contacts still lack the local shadowing needed to feel fully
+   grounded.
+
+Fixed: three deterministic project-authored assets add a 1.000 m tufted bench with grounded proxy,
+a 1.150 m layered artwork and a 0.680 m physical picture light without external provenance. Their
+wood, leather, brass, canvas and warm-emissive roles reuse approved canonical materials. The
+existing stable 450 lm piano source now links to the visible diffuser as a 2,400 K spot with a
+3.20 m range, and only the `L0_LIVING` daylight/artificial atlases were rebaked at 256 samples.
+The local piano-atlas peak rises from 0.0188 to 0.0996; the main atlas peak remains 10.5507.
+
+The first route capture was rejected because source content had been rebuilt but the runtime's
+build-world deployment was stale: it showed the new pool without the objects. A negative-X cone
+experiment was also rejected because the pool fell beside the artwork. The accepted positive-X
+and downward direction centres the light over the composition. Against Round 52, the exact day /
+night straight views change 81.672% / 90.762% of pixels, with normalized MAE 0.024866 / 0.034780;
+the large full-frame difference is the intended replacement of a broad default-on point bake with
+a localized directional one, not a camera or exposure drift.
+
+The world is 632 chunks / 60 props / 256 exterior instances / 53.377344 MB, and the unculled
+diagnostic is 632 draws / 585 opaque submissions / 47 alpha cutouts / 96 state changes. Unit tests
+pass 1409/1409; all 135 labelled serial offscreen integration cases and all 49 active software
+render cases pass, with eight capture-only cases disabled. The inspected explicit
+`blockout-l0-living` reference advances for the three new silhouettes. The selected daylight bake
+also changes only 0.2313% of the `sun-season-01` frame around L0 windows; that single reference was
+inspected and accepted. Production first-person references remain unchanged. All eighteen
+culled/unculled poses pass at 0.1342% worst case (`l0-sunroom`), and the full gate accepts all 323
+strict-XNA translation units. Compilation and heavy work used CPU 0-5 / at most six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest route-level value is clear-day aperture balance,
+followed by the sparse exterior/garage start and additional restrained wall/surface dressing.

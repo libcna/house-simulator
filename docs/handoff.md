@@ -1,4 +1,49 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01057` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01058` checkpoint)
+
+Branch `develop`. Task-start HEAD `f88ac21` (`HOUSE-01057`). This file belongs to the single
+`HOUSE-01058` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The previously empty straight formal-living wall is now a bounded piano vignette: deterministic
+project-owned assets add a 1.000 x 0.486 x 0.400 m tufted bench with grounded proxy, a 1.150 x
+0.720 x 0.101195 m original framed artwork and a 0.680 x 0.1995 x 0.220 m physical brass picture
+light. Their GLB SHA-256 values are respectively
+`b849d084b9fe349e2e0547e3c3c6dcbbd682346246047b5c4453b7b571f33ffb`,
+`428b07df713505d297cf550872a9c22cf616d2ad53cc3e9d9bb0697493bc8c57` and
+`89e0d38fd96c95034604e8e2faf649c7b4f24fa834bef9244b490f02743d25ac`. All material roles reuse
+approved canonical finishes and introduce no external provenance.
+
+The existing stable `LIGHT_L0_LIVING_PIANO_1` now links to the visible diffuser as a 450 lm,
+2,400 K, 3.20 m spot with 55/100-degree cones. Only `L0_LIVING` daylight and artificial atlases
+were rebaked at 256 samples; the local piano-atlas peak rises from 0.0188 to 0.0996 while the main
+peak remains 10.5507. A stale-build deployment capture and a negative-X cone whose pool missed the
+artwork were rejected before the accepted positive-X/downward composition.
+
+The unchanged fourteen-camera [clear-day set](visual-review/captures/house-01058-piano-vignette-day-final)
+and [explicit-reading night set](visual-review/captures/house-01058-piano-vignette-night-final) were
+opened at full resolution. Against Round 52, exact straight-living pixels change 81.672% / 90.762%
+with normalized MAE 0.024866 / 0.034780. A temporary pitched close view confirms that the brown
+tufted bench is grounded and correctly scaled; the fixed level camera intentionally crops its near
+edge. The broad difference is the intended localized directional bake, not exposure drift.
+
+The world is 632 chunks / 60 props / 256 exterior hierarchy instances / 53.377344 MB. The unculled
+diagnostic is 632 draws / 96 state changes, including 47 alpha-tested chunks. Manifest, licensing,
+budget and 2,883 stable ids are current. Unit tests pass 1409/1409; all 135 labelled serial
+offscreen integration cases and all 49 active software-render cases pass with eight capture-only
+cases disabled. The inspected explicit `blockout-l0-living` reference advances for the new
+silhouettes, and `sun-season-01` advances only for a 0.2313% L0-window-localized daylight-bake
+difference; production first-person references stay accepted. All eighteen culled/unculled poses
+pass at 0.1342% worst case (`l0-sunroom`). The complete gate accepts all 323 strict-XNA units.
+Compilation and heavy tooling stayed on CPU 0-5 / at most six workers.
+
+The highest route-level defect is now clipped clear-day apertures, especially in the family room.
+The sparse exterior/garage start (particularly at night), blank wall bays and the older blocky
+piano finish follow. Continue from fixed cameras; do not add unrelated infrastructure or claim the
+full dependency-blocked room furnishing tasks.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01057` checkpoint)
 
 Branch `develop`. Task-start HEAD `c3bbc75` (`HOUSE-01056`). This file belongs to the single
 `HOUSE-01057` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

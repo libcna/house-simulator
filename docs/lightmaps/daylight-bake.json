@@ -296,7 +296,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:b02cb041138f87eff4a29a8d76651dd5f2f6df8b719b4bab38560b4a06e8220e"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:1b3f499e239bddc5a64fd13b7c236c0f23030cff9fa0c5af7f9ffb8e16a4e393"
     },
     {
       "cell": "L0_MUDROOM",
@@ -800,12 +801,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_FAMILY"
+    "L0_LIVING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 507117,
+  "sourceBytes": 507957,
   "tool": "bake_house_lightmaps.py"
 }

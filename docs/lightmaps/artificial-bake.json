@@ -659,9 +659,9 @@
             "LIGHT_L0_LIVING_FIRE_1",
             "LIGHT_L0_LIVING_FIRE_2"
           ],
-          "mean": 0.002577636481601109,
-          "peak": 0.01768873631954193,
-          "scale": 0.01768873631954193
+          "mean": 0.002576373012275877,
+          "peak": 0.017679672688245773,
+          "scale": 0.017679672688245773
         },
         {
           "group": "LG_L0_LIVING_MAIN",
@@ -672,9 +672,9 @@
             "LIGHT_L0_LIVING_MAIN_3",
             "LIGHT_L0_LIVING_MAIN_4"
           ],
-          "mean": 0.01103170248491604,
-          "peak": 10.550644874572754,
-          "scale": 10.550644874572754
+          "mean": 0.011014253929156826,
+          "peak": 10.550651550292969,
+          "scale": 10.550651550292969
         },
         {
           "group": "LG_L0_LIVING_PIANO",
@@ -682,12 +682,13 @@
           "lights": [
             "LIGHT_L0_LIVING_PIANO_1"
           ],
-          "mean": 0.0019247984166534677,
-          "peak": 0.018816860392689705,
-          "scale": 0.018816860392689705
+          "mean": 0.00032344071535750384,
+          "peak": 0.0995696410536766,
+          "scale": 0.0995696410536766
         }
       ],
-      "shellHash": "sha256:b02cb041138f87eff4a29a8d76651dd5f2f6df8b719b4bab38560b4a06e8220e"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:1b3f499e239bddc5a64fd13b7c236c0f23030cff9fa0c5af7f9ffb8e16a4e393"
     },
     {
       "cell": "L0_MUDROOM",
@@ -1903,12 +1904,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_FAMILY"
+    "L0_LIVING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1037167,
+  "sourceBytes": 1032539,
   "tool": "bake_house_lightmaps.py"
 }

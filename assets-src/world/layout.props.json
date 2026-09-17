@@ -381,6 +381,45 @@
       "interactable": null
     },
     {
+      "id": "PROP_LIVING_PIANO_BENCH",
+      "asset": "MODEL_FURNITURE_PIANO_BENCH",
+      "cell": "L0_LIVING",
+      "position": [-3.60, 0.60, -18.65],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "proxy",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_LIVING_PIANO_ART",
+      "asset": "MODEL_LIVING_PIANO_ART",
+      "cell": "L0_LIVING",
+      "position": [-2.24, 2.36, -18.65],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_LIVING_PIANO_LIGHT",
+      "asset": "MODEL_FIXTURE_LIVING_PICTURE_LIGHT",
+      "cell": "L0_LIVING",
+      "position": [-2.24, 2.82, -18.65],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_DINING_RUG",
       "asset": "MODEL_FURNITURE_RUG",
       "cell": "L0_DINING",

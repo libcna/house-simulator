@@ -585,10 +585,10 @@
     // ---- LG_L0_LIVING_PIANO x1
     {
       "id": "LIGHT_L0_LIVING_PIANO_1", "cell": "L0_LIVING", "group": "LG_L0_LIVING_PIANO",
-      "type": "point", "position": [-5.20, 1.70, -17.25],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2400, "intensityLm": 450.0, "range": 4.85,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "type": "spot", "position": [-2.55, 2.70, -18.65],
+      "direction": [0.35, -0.937, 0.0], "coneInnerDeg": 55.0, "coneOuterDeg": 100.0,
+      "colorK": 2400, "bulbClass": "led", "intensityLm": 450.0, "range": 3.20,
+      "fixtureProp": "PROP_LIVING_PIANO_LIGHT", "emissiveMaterialSlot": "PictureLightDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 

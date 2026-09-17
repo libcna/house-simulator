@@ -80,11 +80,11 @@ namespace
         const auto& list = game.RenderListForTesting();
         ASSERT_GT(list.Size(), 0U) << "the frame drew from an empty list";
         EXPECT_TRUE(list.IsSorted()) << "the pass read its slice, which is what sorts the list";
-        // HOUSE-01057's measured unculled house is 630 calls, over FOUR frames: a list that was not
+        // HOUSE-01058's measured unculled house is 632 calls, over FOUR frames: a list that was not
         // emptied between them would be four houses long and would still draw a correct-looking
         // picture. This diagnostic is still far below §71.2's 1,400-call worst-case envelope;
         // named visible poses protect its 620-call typical row.
-        EXPECT_LE(list.DrawCalls(), 630) << "the list was not cleared between frames";
+        EXPECT_LE(list.DrawCalls(), 632) << "the list was not cleared between frames";
 
         const cnahouse::debug::Counter* chunks = game.CountersForTesting().Find("static.chunks");
         const cnahouse::debug::Counter* states = game.CountersForTesting().Find("static.stateChanges");
@@ -129,8 +129,9 @@ namespace
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
         EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), opaque);
         // And the material was bound once per run, not once per chunk. The unculled diagnostic is
-        // measured at 96 after HOUSE-01057 adds four opaque source roles beside one alpha-tested
-        // fringe role, below §71.2's 210 worst case; visible poses protect the smaller culled rows.
+        // measured at 96 after HOUSE-01058 adds two chunks whose canonical materials already
+        // exist in the global sort, below §71.2's 210 worst case; visible poses protect the
+        // smaller culled rows.
         EXPECT_GT(states->Max(), 0);
         EXPECT_LE(states->Max(), 96);
         EXPECT_LT(states->Max(), chunks->Max() / 4)

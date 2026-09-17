@@ -14615,6 +14615,57 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             first-person references stay accepted. All 18 culled/unculled poses pass at 0.1342%
             worst case. The complete gate accepts all 323 strict-XNA translation units with
             compilation and heavy tooling restricted to CPU 0-5.
+- [x] HOUSE-01058 — Finish the formal-living piano wall as a measured illuminated vignette
+      dep: HOUSE-00215, HOUSE-00296, HOUSE-00911, HOUSE-01037, HOUSE-01258 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-17) Round 52 leaves the fixed straight living-room view dark and nearly empty:
+            the existing upright piano has neither a seat nor wall composition, while its bare
+            default-on accent source has no physical fixture. Add only the bounded objects and
+            selected-cell lighting needed to make this wall read as an intentional domestic scene;
+            keep the full `HOUSE-00988` furnishing task open.
+      accept: deterministically author a correctly scaled piano bench, original framed artwork and
+            physical picture-light fixture with explicit material roles, LOD suitability and a
+            grounded bench proxy. Place the three objects without obstructing circulation; bind the
+            existing stable piano light to the visible diffuser as a warm 450 lm spot and rebake
+            only `L0_LIVING` daylight/artificial atlases at the pinned quality. Capture and inspect
+            the same fourteen clear-day and explicit-reading night cameras; pass deterministic
+            content, budget, stable-id, collision, render, culling and strict-XNA gates with all
+            compilation and heavy tooling restricted to CPU 0-5 / six workers.
+      findings: (2026-09-17) The deterministic project-owned suite produces a 1.000 x 0.486 x
+            0.400 m, 3,360-triangle tufted bench with `living_piano_bench_COL`; a 1.150 x 0.720 x
+            0.101195 m, 848-triangle layered frame/original geometric canvas; and a 0.680 x 0.1995 x
+            0.220 m, 700-triangle brass picture light. Their exact GLB SHA-256 values are
+            b849d084b9fe349e2e0547e3c3c6dcbbd682346246047b5c4453b7b571f33ffb,
+            428b07df713505d297cf550872a9c22cf616d2ad53cc3e9d9bb0697493bc8c57 and
+            89e0d38fd96c95034604e8e2faf649c7b4f24fa834bef9244b490f02743d25ac.
+            Reusing approved piano wood, leather, brass, canvas and warm-emissive materials adds no
+            uncertain external provenance. The linked source remains `LIGHT_L0_LIVING_PIANO_1` and
+            now has a measured wall-plate fixture, 2,400 K LED metadata, 3.20 m range and 55/100
+            degree spot cones. The selected 256-sample bake raises its local piano-atlas peak from
+            0.0188 to 0.0996 while leaving the main atlas peak numerically unchanged at 10.5507.
+            Registering the fixture as a bounded `wall-light` makes its back plane, rather than a
+            floor support point, own the global origin check; no asset-specific exemption remains.
+      review: (2026-09-17) A first capture was rejected because it used the updated source tree with
+            a stale deployed build-world and therefore showed light but no new geometry. A second
+            cone aimed toward negative X placed the light pool beside the artwork; the accepted
+            positive-X/down direction centres it on the bench/piano composition. The fixed day and
+            night straight-living frames now show a physical brass light, framed blue artwork,
+            warm wall pool and grounded brown tufted bench. Against Round 52 they change 81.672% /
+            90.762% of exact pixels and have normalized MAE 0.024866 / 0.034780; this broad intended
+            change comes from replacing the old bare point bake with a directional default-on
+            vignette, not from a global exposure change. Both complete fourteen-camera routes and
+            a pitched close bench check were inspected at full resolution.
+      verified: (2026-09-17) Manifest, deterministic generation, wall-plane origin, scale, licence,
+            budget and 2,883 stable ids are current. The world is 632 chunks / 60 props / 256
+            exterior hierarchy instances / 53.377344 MB. The unculled diagnostic is 632 draws /
+            585 opaque submissions / 47 alpha cutouts / 96 state changes. Unit tests pass
+            1409/1409 and serial offscreen integration passes all 135 labelled cases, including
+            the world-content currentness gate. All 49 active software-render cases pass with
+            eight capture-only cases disabled. The inspected explicit `blockout-l0-living` golden
+            advances for the new silhouettes; `sun-season-01` advances only for 0.2313% of pixels
+            localized around L0 windows after the selected daylight bake. Production first-person
+            references remain accepted. All eighteen culled/unculled poses pass at 0.1342% worst
+            case (`l0-sunroom`). The complete gate accepts all 323 strict-XNA translation units
+            with compilation and heavy tooling restricted to CPU 0-5 / six workers.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -18885,6 +18936,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01058` | **New task, next free phase-13 id.** Add a measured bench, original artwork and physical picture light to the empty formal-living piano wall; reuse the existing stable accent source, rebake only `L0_LIVING` and keep full `HOUSE-00988` open. | Round 52 names the dark straight living view as the largest contained defect. Its piano already exists but lacks the objects required to read as a usable domestic vignette, and the nominal accent light has neither visible fixture nor a localized direction. This bounded authored suite has no licence ambiguity and exercises the approved prop, material, fixture and Tier-S lightmap paths without hard-coded room logic. |
 | 2026-09-17 | `HOUSE-01057` | **New task, next free phase-13 id.** Replace only the coarse formal-living sofa through an independently pinned, deterministic strict-XNA asset path; preserve the stable prop placement and keep full `HOUSE-00988` open. | Round 51 makes the pale sofa the largest contained furniture defect. The official Khronos `SheenWoodLeatherSofa` is CC BY 4.0, materially separated and already visually proven in the sibling catalogue, while the other inspected local candidate has one flat material despite 67,056 triangles. Source topology requires a weld-before-decimate correction; this is bounded asset preparation, not renderer architecture. |
 | 2026-09-17 | `HOUSE-01056` | **New task, next free phase-13 id.** Correct the shared approved coffee table's exact source-material binding and stale two-cell manifest use; preserve both canonical placements and keep the full `HOUSE-00988` / `HOUSE-00992` furnishing tasks open. | Round 50 makes the repeated palette-white tables the largest contained furniture defect. Isolated geometry inspection shows that the existing CC BY model already has detailed drawers, rounded edges, legs, LODs and a proxy; its sole visible role was simply bound to a white-room palette. The other approved local candidate is an end-height pedestal table, so substituting or vertically distorting it would lower physical credibility. |
 | 2026-09-17 | `HOUSE-01055` | **New task, next free phase-13 id.** Replace only the three existing pale route-armchair instances with one pinned, independently provenanced production chair; preserve stable prop placement and keep the full `HOUSE-00988` / `HOUSE-00992` furnishing tasks open. | Round 49 makes the old pale chairs the largest repeated local furniture defect. The official Khronos Wayfair `SheenChair` is CC0, metre-scale, materially separated and already visually proven in the referenced sibling, while a project-owned preparation can strip its label and unsupported sheen/variant metadata without copying CNAEXT architecture or importing uncertain texture provenance. One matched household chair used across two connected rooms is deliberate reuse, not procedural scattering. |
