@@ -130,6 +130,9 @@ run_gate "kitchen-builtins" python3 tools/assets/kitchen_builtins_prepare.py --c
 # HOUSE-01049: the measured counter stools and three restrained worktop groupings remain
 # reproducible from their authored Blender source, with exact material slots and placement.
 run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --check
+# HOUSE-01283: the island's three linked emitters reuse one deterministic close-range fixture;
+# the gate protects its physical shade/optical-point contract and canonical alignment.
+run_gate "kitchen-pendant" python3 tools/assets/kitchen_pendant_prepare.py --check
 # HOUSE-01045: the formal-room piano is a close-range deterministic authored asset, not a
 # one-off binary or a cuboid standing in for furniture.
 run_gate "living-piano" python3 tools/assets/living_piano_prepare.py --check

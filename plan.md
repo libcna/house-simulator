@@ -32,7 +32,9 @@ normal rendering, and `HOUSE-00923` restored canonical outdoor material parity a
 The first minimum real static prop kit (`HOUSE-01037`) uses completed
 `HOUSE-00215` batching without claiming `HOUSE-00971`'s unfinished dynamic/jitter/tint criteria.
 `HOUSE-01280` corrects the measured receiver/furniture lighting mismatch visible in its reviewed
-images. Round 9 proves the exterior material omission is fixed; `HOUSE-00924` removes the
+images. `HOUSE-01283` replaces the kitchen island's bare, wrongly oriented point sources with
+three physical downlighting pendants on the real long island axis. Round 9 proves the exterior
+material omission is fixed; `HOUSE-00924` removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
 from a dark room. Round 11 leaves the front façade and empty/dark entrance route as the largest
 defects; the chimney's flat source-texture presentation also needs inspection. Primary
@@ -14735,6 +14737,38 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             pass without a golden update; the 18-pose culled/unculled maximum remains 0.1599%.
             Full source/content/provenance and strict-XNA gates are recorded in the checkpoint
             handoff.
+- [x] HOUSE-01283 — Replace the kitchen island's bare point lights with physical calibrated pendants
+      dep: HOUSE-01040, HOUSE-01049, HOUSE-01256, HOUSE-01259, HOUSE-01260 · sys: world, content, lighting, rendering · plat: ALL · pri: MUST
+      accept: three deterministic, provenance-complete pendant props align over the long axis of
+              the canonical island; every source names its exact physical diffuser slot and uses
+              a downward, range-bounded spot rather than throwing energy through its opaque cap;
+              the existing island group remains switchable but starts on for the normal connected
+              route. Re-bake only its selected kitchen product, inspect fixed day and night views,
+              keep circulation/collision unchanged, and pass content, stock-XNA, render-reference
+              and culled-vs-unculled gates with compilation capped at six workers.
+      done: (2026-09-17) A deterministic project-authored 330 x 875 x 330 mm bronze bell pendant
+            with a separate frosted `PendantShade` diffuser is reused three times at x -4.05,
+            -3.30 and -2.55 m over z -24.62. The three former unlinked points ran along z and
+            illuminated the ceiling; their canonical sources now sit at y 2.45 m, aim down through
+            48/92 degree feathered cones, emit 700 lm at 2850 K and drive the exact shade slots.
+            The selected 256-sample island atlas peaks at 0.1518 rather than the rejected point
+            bake's 0.8003. The group starts on for normal play while retaining its authored switch.
+      review: (2026-09-17) Round 42 compares all thirteen fixed clear-day views from
+            `house-01049-kitchen-dressing-day-final` with
+            `house-01283-kitchen-pendants-day-final`; the hall-side and west-facing kitchen views
+            show three real shades, a localized warm island pool and no ceiling bloom. Matching
+            temporary 22:00 captures were opened at full resolution and prove that the fixture
+            hierarchy remains readable at night. The north cooking bay is still too dark and the
+            separate under-cabinet group remains incorrectly ceiling-positioned when explicitly on.
+      verified: (2026-09-17) The model regenerates byte-identically; bounds, triangle count, UV0,
+            origin, material slots, manifest/provenance, stable ids and all thirteen world rules
+            pass. The world build completes normally with navigation in 6.96 s and reports 617
+            chunks / 45 props; only `L0_KITCHEN` rises from 17 to its exact nineteen-chunk finish
+            boundary. Four inspected render references containing the new geometry or adjacent
+            exposure were intentionally advanced. Unit tests pass 1409/1409, integration tests
+            134/134 and all 48 active software-render cases pass; the 18-pose culled-vs-unculled
+            worst case is 0.1320%. The complete repository gate is green with 323 strict-XNA
+            translation units clean, with all compilation and heavy tooling capped at six cores.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -18461,6 +18495,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01283` | **New task, next free phase-16 id.** Replace the three existing island points with a deterministic physical pendant reused three times, align them to the real island's long axis, link exact diffuser emission, use downward spot semantics and raise only `L0_KITCHEN` from its measured 17-chunk exception to 19. | Round 41's fixed kitchen images identify flat, underexposed depth as the largest defect. Directly enabling the old unlinked points reveals a worse authoring error: they run along z beside the island and create a giant orange ceiling pool. A bounded bell shade, correct x-axis spacing and a selected spot bake improve both day and night normal play without global exposure, a renderer experiment or unrelated room work. |
 | 2026-09-17 | `HOUSE-01049` | **New task, next free phase-13 id.** Add a narrow measured kitchen-seating and worktop-dressing checkpoint through the existing deterministic static-prop path; raise only `L0_KITCHEN` from its measured 13-chunk exception to 17. | Round 40's three fixed kitchen cameras show completed cabinets, island and appliances surrounded by bare surfaces with no human-scale seating. Full `HOUSE-00990` remains dependency-blocked and calls for interactive inventory far beyond this visual defect. Three reused stools plus four composed object roles make the current route credible without scattering placeholder clutter; the first placement was moved 0.25 m under the island after the unchanged full-tour collision test proved its south aisle too narrow. |
 | 2026-09-17 | `HOUSE-01048` | **New task, next free phase-13 id.** Establish a measured primary dining composition and link a physical chandelier through the existing stock-XNA static-prop/light paths; raise only `L0_DINING` to its measured ten-chunk exception. | Round 39's fixed connected-route view shows a completely empty, nearly black 6.0 × 2.8 m room between already finished living and kitchen spaces. The full `HOUSE-00989` remains dependency-blocked on whole-house furnishing work, but a project-authored table/chair/fixture suite is dependency-valid now. The room has no exterior window, so its existing switchable 2700 K chandelier starts on like the other selected readable-route practicals rather than adding ambient light, a new renderer or a screenshot-only normal-play path. |
 | 2026-09-16 | `HOUSE-00935` | **New task, next free phase-12 id.** Route the already-authored closed garage leaf through the bounded exterior-door role and finish it as the five-section door its canonical data already declares. | Round 35's normal front frame sees through the entire 4.90 × 2.40 m opening because the room-owned leaf still uses ordinary indoor `MAT_DOOR_STEEL`, which §25.6 correctly culls with `L0_GARAGE`. Making all indoor metal or trim exterior-visible would leak the room; moving the leaf to an exterior cell would break portal ownership. A dedicated weather-facing finish is the same narrow architectural solution already proven by the entry door. |

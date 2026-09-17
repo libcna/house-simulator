@@ -54,6 +54,45 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_KITCHEN_PENDANT_1",
+      "asset": "MODEL_FIXTURE_KITCHEN_PENDANT",
+      "cell": "L0_KITCHEN",
+      "position": [-4.05, 2.43, -24.62],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_KITCHEN_PENDANT_2",
+      "asset": "MODEL_FIXTURE_KITCHEN_PENDANT",
+      "cell": "L0_KITCHEN",
+      "position": [-3.3, 2.43, -24.62],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_KITCHEN_PENDANT_3",
+      "asset": "MODEL_FIXTURE_KITCHEN_PENDANT",
+      "cell": "L0_KITCHEN",
+      "position": [-2.55, 2.43, -24.62],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_KITCHEN_REFRIGERATOR",
       "asset": "MODEL_KITCHEN_REFRIGERATOR",
       "cell": "L0_KITCHEN",

@@ -950,7 +950,7 @@
                        "LG_L0_KITCHEN_UNDERCAB",
                        "LG_L0_KITCHEN_SINK"],
       "lightmaps": {
-        "shellHash": "sha256:e0ae9c2799b2ccac09293cd1953609c99959246b8f640614f453c02c1ffa2427",
+        "shellHash": "sha256:9c9a035133394fc5dde8918fd133a951f1fc1267053c74da5943dd9b2691a625",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_KITCHEN_LM_DAY",
           "scale": 1.0000001192092896
@@ -959,7 +959,7 @@
           {
             "group": "LG_L0_KITCHEN_ISLAND",
             "contentName": "Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND",
-            "scale": 0.8002802133560181
+            "scale": 0.15177986025810242
           },
           {
             "group": "LG_L0_KITCHEN_MAIN",

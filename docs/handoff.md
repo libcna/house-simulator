@@ -1,4 +1,53 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01049` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01283` checkpoint)
+
+Branch `develop`. Task-start HEAD `820ceaa` (`HOUSE-01049`). This file belongs to the single
+`HOUSE-01283` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The kitchen island now has three real practicals rather than three invisible and incorrectly
+placed light points. A deterministic project-authored bronze bell pendant with a separate frosted
+diffuser is reused across the island's long x axis. Each existing 2850 K source sits at its physical
+shade, links that exact emissive material and aims down through a bounded spot cone. The group
+starts on for the normal connected route but retains its authored switch. The selected 256-sample
+island bake peaks at 0.1518, replacing the rejected point-light iteration's 0.8003 ceiling-heavy
+result without changing global exposure or renderer architecture.
+
+Before: Round 41's fixed [hall-side kitchen](visual-review/captures/house-01049-kitchen-dressing-day-final/kitchen-from-hall.png)
+has no physical island lights and little focal depth. After: the identical
+[final view](visual-review/captures/house-01283-kitchen-pendants-day-final/kitchen-from-hall.png) and
+[reverse kitchen view](visual-review/captures/house-01283-kitchen-pendants-day-final/kitchen-facing-west.png)
+show three coherent shades, lit diffusers and a localized warm island pool without an orange ceiling
+bloom. Every image in the complete
+[thirteen-camera clear-day set](visual-review/captures/house-01283-kitchen-pendants-day-final) was
+opened at full resolution; matched temporary 22:00 views were also captured and inspected.
+
+The model regenerates byte-identically and validates at 330 x 875 x 330 mm / 476 triangles with
+metre UV0, grounded support origin and two approved project-authored material roles. Three new
+stable props bring the world to 617 chunks / 45 props / 256 exterior hierarchy instances; only
+`L0_KITCHEN` rises from 17 to its exact measured 19-chunk boundary. A complete replacement world
+build finished normally, including navigation in 6.96 s. The old reported 19-hour navigation
+process was therefore a historical stuck bake, not a current requirement, and no new zombie was
+created.
+
+Only four strict references changed beyond tolerance. The explicit debug blockout kitchen gained
+the fixture silhouettes; the production kitchen gained their physical/lighted presentation; and
+the main-hall view into the kitchen plus adjacent hall corner reflect the now-live group/exposure.
+The corner changes only 0.6589% of pixels with maximum channel delta 3. All four actual/reference
+pairs were opened side by side and selectively advanced; no other golden was touched. All
+compilation and heavy tooling remain pinned to CPU 0-5 and no more than six workers. Unit tests
+pass 1409/1409, integration tests 134/134 and all 48 active software-render cases pass. The
+18-pose culled-vs-unculled worst case is 0.1320%, below its unchanged 0.2% limit. The complete
+repository gate is green with all 323 strict-XNA translation units clean.
+
+The largest visible defect is now the dark, blocky north cooking bay. Its separate nominal
+under-cabinet group is authored at ceiling height and makes ceiling spots when explicitly enabled;
+correct and physically represent that group rather than widening the island cones or lifting global
+exposure. After that, add restrained family-room secondary detail. The broad exterior composition
+also remains sparse beyond its now-coherent materials and practicals.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01049` checkpoint)
 
 Branch `develop`. Task-start HEAD `cf76d82` (`HOUSE-01048`). This file belongs to the single
 `HOUSE-01049` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

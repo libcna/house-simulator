@@ -276,7 +276,7 @@
       },
       "groups": [],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:e0ae9c2799b2ccac09293cd1953609c99959246b8f640614f453c02c1ffa2427"
+      "shellHash": "sha256:9c9a035133394fc5dde8918fd133a951f1fc1267053c74da5943dd9b2691a625"
     },
     {
       "cell": "L0_LAUNDRY",
@@ -800,8 +800,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "B1_UNDERSTAIR",
-    "L0_GARAGE"
+    "L0_KITCHEN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,

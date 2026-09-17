@@ -586,9 +586,9 @@
             "LIGHT_L0_KITCHEN_ISLAND_2",
             "LIGHT_L0_KITCHEN_ISLAND_3"
           ],
-          "mean": 0.09217108981059463,
-          "peak": 0.8002802133560181,
-          "scale": 0.8002802133560181
+          "mean": 0.008371901410593097,
+          "peak": 0.15177986025810242,
+          "scale": 0.15177986025810242
         },
         {
           "group": "LG_L0_KITCHEN_MAIN",
@@ -628,7 +628,7 @@
         }
       ],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:e0ae9c2799b2ccac09293cd1953609c99959246b8f640614f453c02c1ffa2427"
+      "shellHash": "sha256:9c9a035133394fc5dde8918fd133a951f1fc1267053c74da5943dd9b2691a625"
     },
     {
       "cell": "L0_LAUNDRY",
@@ -1903,13 +1903,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "B1_UNDERSTAIR",
-    "L0_GARAGE"
+    "L0_KITCHEN"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1035029,
+  "sourceBytes": 1034080,
   "tool": "bake_house_lightmaps.py"
 }

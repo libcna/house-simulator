@@ -1697,3 +1697,54 @@ including the unchanged 18-pose culled/unculled equivalence. Unit and integratio
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. The kitchen no
 longer reads as an empty fitted showroom, and the highest visible value has shifted from adding
 objects to calibrating believable daylight and depth along the kitchen/hall route.
+
+## Round 42 — physical kitchen pendants and bounded island light
+
+Commit: `HOUSE-01283` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 41's [hall-side kitchen view](captures/house-01049-kitchen-dressing-day-final/kitchen-from-hall.png)
+shows an occupied room whose island still has no physical lights and little focal depth. Directly
+switching on its three old unlinked points exposed a larger defect: they ran along z beside the
+long island and threw a broad orange patch onto the ceiling. After: the identical
+[final hall-side camera](captures/house-01283-kitchen-pendants-day-final/kitchen-from-hall.png) and
+[reverse kitchen camera](captures/house-01283-kitchen-pendants-day-final/kitchen-facing-west.png)
+show three bronze bell pendants, bright frosted diffusers and a localized warm pool on the island.
+All thirteen clear-day frames were opened at full resolution. Matching temporary 22:00 captures
+were also inspected and confirmed that the physical shades and downlight composition remain
+readable without an upward ceiling bloom.
+
+Ranked visible defects remaining:
+
+1. The north cooking bay remains dark and blocky beside the much clearer island composition.
+2. The separate nominal under-cabinet group is authored at ceiling height; when explicitly
+   switched on it creates ceiling spots instead of plausible worktop light.
+3. Family-room secondary objects and finish/lighting depth still lag the completed kitchen and
+   dining primary compositions.
+4. The broad exterior/garage composition remains sparse beyond its finished architectural shell
+   and bounded practicals.
+5. The clear-day hall-to-kitchen exposure is improved compositionally but remains dark compared
+   with the clipped exterior apertures.
+
+Fixed: one deterministic project-authored 330 x 875 x 330 mm bronze/frosted model is reused at
+three measured x positions over the island centreline. Each of the existing switch group's 700 lm,
+2850 K sources now sits at its physical diffuser, aims down through a 48/92 degree feathered cone
+and names the exact `PendantShade` emission slot. The group starts on in normal gameplay and
+retains its authored wall switch. A selected 256-sample rebake lowers the island atlas peak from
+the rejected point result of 0.8003 to 0.1518. The world is 617 chunks / 45 static props, with only
+`L0_KITCHEN` raised from its exact 17-chunk boundary to 19 for shared bronze and switched diffuser
+roles.
+
+The explicit blockout kitchen reference and production kitchen reference were advanced only after
+direct side-by-side inspection of the new silhouettes. The main-hall view into the kitchen and the
+adjacent hall-corner reference also changed from the now-live group/exposure; the latter changed by
+only 0.6589% with a maximum channel delta of 3. Both pairs were inspected before selective
+advancement. No other committed golden was changed.
+
+Verification passes 1409/1409 unit tests, 134/134 integration tests and all 48 active software-
+render cases. The unchanged 18-pose culled-vs-unculled gate peaks at 0.1320%, and the complete
+repository gate accepts all 323 strict-XNA translation units. Compilation and heavy tooling were
+capped to CPU 0-5 / six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and the island is
+now a believable lit focal point. Highest visible value is correcting and physically representing
+the cooking-bay/under-cabinet light, followed by restrained family-room secondary detail.

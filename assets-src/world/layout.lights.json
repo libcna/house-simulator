@@ -740,30 +740,30 @@
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
-    // ---- LG_L0_KITCHEN_ISLAND x3
+    // ---- LG_L0_KITCHEN_ISLAND x3 -- aligned over the island's long axis
     {
       "id": "LIGHT_L0_KITCHEN_ISLAND_1", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_ISLAND",
-      "type": "point", "position": [-3.00, 2.45, -26.08],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 1100.0, "range": 6.82,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [-4.05, 2.45, -24.62],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 48.0, "coneOuterDeg": 92.0,
+      "colorK": 2850, "bulbClass": "led", "intensityLm": 700.0, "range": 5.20,
+      "fixtureProp": "PROP_L0_KITCHEN_PENDANT_1", "emissiveMaterialSlot": "PendantShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_KITCHEN_ISLAND_2", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_ISLAND",
-      "type": "point", "position": [-3.00, 2.45, -25.05],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 1100.0, "range": 6.39,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [-3.30, 2.45, -24.62],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 48.0, "coneOuterDeg": 92.0,
+      "colorK": 2850, "bulbClass": "led", "intensityLm": 700.0, "range": 5.20,
+      "fixtureProp": "PROP_L0_KITCHEN_PENDANT_2", "emissiveMaterialSlot": "PendantShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_KITCHEN_ISLAND_3", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_ISLAND",
-      "type": "point", "position": [-3.00, 2.45, -24.02],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 1100.0, "range": 6.82,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
+      "type": "spot", "position": [-2.55, 2.45, -24.62],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 48.0, "coneOuterDeg": 92.0,
+      "colorK": 2850, "bulbClass": "led", "intensityLm": 700.0, "range": 5.20,
+      "fixtureProp": "PROP_L0_KITCHEN_PENDANT_3", "emissiveMaterialSlot": "PendantShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L0_KITCHEN_UNDERCAB x4

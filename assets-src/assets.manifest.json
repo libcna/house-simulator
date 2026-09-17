@@ -375,6 +375,46 @@
       ]
     },
     {
+      "id": "MODEL_FIXTURE_KITCHEN_PENDANT",
+      "category": "fixture",
+      "sourceFile": "assets-src/Models/Fixtures/kitchen_pendant.glb",
+      "sourceSha256": "ecd65c468428dca96936aef867986086e6a1d90e9045d6cff62c74d15a8b9270",
+      "contentName": "Models/Fixtures/kitchen_pendant",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Dark-bronze kitchen island pendant",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured pendant generated deterministically by tools/blender/kitchen_pendant.py for HOUSE-01283. A bronze bell blocks implausible upward spill while a separate physical frosted diffuser is the exact switched emissive slot. One asset is reused at three measured island positions; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.33,
+          0.875,
+          0.33
+        ],
+        "triangles": {
+          "LOD0": 476
+        }
+      },
+      "materialMap": {
+        "PENDANT_METAL": "MAT_FIXTURE_DARK_BRONZE",
+        "PendantShade": "MAT_FIXTURE_EMISSIVE_WARM"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
       "id": "MODEL_FIXTURE_PORCH_LANTERN",
       "category": "fixture",
       "sourceFile": "assets-src/Models/Fixtures/porch_lantern.glb",
@@ -20014,7 +20054,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_ISLAND.png",
-      "sourceSha256": "cb2e505c00a66debc74e77ea29d67dcd60794cb4f278a7da40bbc284d27f4d83",
+      "sourceSha256": "447c96aab6103ae849d2f64835473f23cf3ce1044a6e280ba323a1034c2e8063",
       "texture": {
         "width": 128,
         "height": 128,

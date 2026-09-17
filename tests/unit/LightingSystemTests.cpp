@@ -141,7 +141,7 @@ TEST(LightingSystemTests, AuthoredGroupsDriveOneSharedTransitionThroughEveryLigh
     }
     HouseLighting house;
     LightingSystem& lighting = house.lighting;
-    const Id filament = Id::Of("LG_L0_KITCHEN_ISLAND");
+    const Id filament = Id::Of("LG_L0_PANTRY_MAIN");
     const Id led = Id::Of("LG_L0_KITCHEN_UNDERCAB");
     const Id fluorescent = Id::Of("LG_L0_GARAGE_MAIN");
     EXPECT_EQ(lighting.GroupBulbClass(filament), world::BulbClass::Filament);
@@ -457,7 +457,7 @@ TEST(LightingSystemTests, AllFifteenAuthoredDuskFixturesFollowDayNightWithAVisib
     EXPECT_TRUE(sawPorchStagger) << "the two ±8-minute porch fixtures switched together";
 }
 
-TEST(LightingSystemTests, KitchenMainDefaultsOnAndItsSwitchRemovesBorrowedHallLight)
+TEST(LightingSystemTests, KitchenMainAndIslandDefaultOnAndTheirSwitchesRemoveBorrowedHallLight)
 {
     if (!ContentIsBuilt())
     {
@@ -466,9 +466,13 @@ TEST(LightingSystemTests, KitchenMainDefaultsOnAndItsSwitchRemovesBorrowedHallLi
     HouseLighting house;
     LightingSystem& lighting = house.lighting;
     const Id kitchenMain = Id::Of("LG_L0_KITCHEN_MAIN");
+    const Id kitchenIsland = Id::Of("LG_L0_KITCHEN_ISLAND");
     const SwitchGroupState* mainGroup = lighting.FindGroup(kitchenMain);
+    const SwitchGroupState* islandGroup = lighting.FindGroup(kitchenIsland);
     ASSERT_NE(mainGroup, nullptr);
+    ASSERT_NE(islandGroup, nullptr);
     ASSERT_TRUE(mainGroup->on) << "the canonical kitchen main practical should start on";
+    ASSERT_TRUE(islandGroup->on) << "the canonical kitchen island pendants should start on";
 
     // Isolate the permanent kitchen/hall cased opening from the already-on entry fixtures.
     ASSERT_TRUE(lighting.SetGroupOn(Id::Of("LG_L0_FOYER_MAIN"), false));
@@ -489,6 +493,7 @@ TEST(LightingSystemTests, KitchenMainDefaultsOnAndItsSwitchRemovesBorrowedHallLi
     EXPECT_GT(borrowedFromKitchen, 0.0F);
 
     ASSERT_TRUE(lighting.SetGroupOn(kitchenMain, false));
+    ASSERT_TRUE(lighting.SetGroupOn(kitchenIsland, false));
     lighting.Update(Frame(4));
     const RoomLightState* darkKitchen = lighting.FindCell(Id::Of("L0_KITCHEN"));
     const RoomLightState* darkHall = lighting.FindCell(Id::Of("L0_HALL"));
