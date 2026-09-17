@@ -1,4 +1,49 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01054` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01055` checkpoint)
+
+Branch `develop`. Task-start HEAD `77654f4` (`HOUSE-01054`). This file belongs to the single
+`HOUSE-01055` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The two broad pale formal-living chairs and the flat family chair now share Wayfair's `SheenChair`,
+distributed by Khronos glTF Sample Assets under CC0 1.0. The official 4,125,648-byte source is
+pinned at SHA-256
+`f0af2a2b102d28d540236306ae19f8fb36842df76bd38cf76f063f9bd2853399`. This repository's
+deterministic preparation removes the branded 128-triangle label, unused embedded maps and
+unsupported sheen/variant metadata, but retains the exact fabric, wood and metal roles, UV0 and
+39,808 visible triangles. It grounds/recentres the 0.826558 x 0.686247 x 0.570265 m chair and adds
+a twelve-triangle proxy. The committed 1,142,052-byte GLB is
+`02843a11e116875b95f7d707796e33eecf0ef5381a8fd60fd8a3243944254ae7`.
+
+Only `PROP_LIVING_CHAIR_GREEN`, `PROP_LIVING_CHAIR_PURPLE` and `PROP_FAMILY_CHAIR` change asset.
+Their stable ids, positions, yaws, scales and collision semantics do not move. A new warm
+mango/rust velvet role uses the approved fabric weave; the open frame and fasteners reuse existing
+piano wood and kitchen steel. The complete unchanged fourteen-camera
+[clear-day set](visual-review/captures/house-01055-sheen-chair-day-final) and
+[explicit-reading night set](visual-review/captures/house-01055-sheen-chair-night-final) were
+opened alongside two temporary close inspections. Compared with Round 49, day living-room/
+composition and family-room/composition changes are 4.881%, 3.646%, 2.680% and 1.476%; their night
+counterparts are 29.151%, 8.221%, 3.605% and 2.990%. The broad night masks have low MAE and inspect
+as localized chair silhouettes plus subpixel lighting differences, not a global exposure change.
+
+The world is 626 chunks / 57 props / 256 exterior hierarchy instances / 53.566591 MB.
+`L0_FAMILY` remains at its exact 24-chunk boundary and `L0_LIVING` is 20 against the existing
+21-chunk allowance. The unculled diagnostic is 626 draws / 93 state changes. Licence credits,
+budget report and 2,866 stable ids are current. Unit tests pass 1409/1409, serial offscreen
+integration tests pass 134/134 and all 49 active software-render cases pass with eight capture-only
+cases disabled. The deliberately inspected debug golden `blockout-l0-living` advances for the new
+silhouette; no production first-person reference needs replacement. Culled-vs-unculled remains
+0.1320% worst case (`l0-sunroom`). The complete repository gate accepts all 323 strict-XNA
+translation units. Compilation and heavy tooling were pinned to CPU 0-5 / six workers.
+
+The largest local furniture defects are now the old shared coffee tables and formal living sofa,
+followed by blank wall bays. Across the selected route, clipped clear-day apertures and sparse
+exterior/garage start framing still have greater image-scale impact. Continue from the fixed
+cameras with dependency-valid visible work; do not add unrelated hidden infrastructure or claim
+the broader blocked furnishing tasks.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01054` checkpoint)
 
 Branch `develop`. Task-start HEAD `22ead3f` (`HOUSE-01053`). This file belongs to the single
 `HOUSE-01054` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

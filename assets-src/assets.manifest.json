@@ -1316,6 +1316,53 @@
       ]
     },
     {
+      "id": "MODEL_FURNITURE_SHEEN_CHAIR",
+      "category": "chair",
+      "sourceFile": "assets-src/Models/Furniture/LivingRoom/sheen_chair.glb",
+      "sourceSha256": "02843a11e116875b95f7d707796e33eecf0ef5381a8fd60fd8a3243944254ae7",
+      "contentName": "Models/Furniture/LivingRoom/sheen_chair",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "SheenChair",
+        "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenChair",
+        "author": "Wayfair, LLC",
+        "retrieved": "2026-09-17",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "SheenChair (c) 2020 Wayfair, LLC, released under CC0 1.0 and distributed by the Khronos glTF Sample Assets project.",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-01055 deterministically keeps the exact fabric, wood and metal furniture roles with tools/assets/visual_slice_chair_prepare.py. The pinned upstream GLB is 4125648 bytes with SHA-256 f0af2a2b102d28d540236306ae19f8fb36842df76bd38cf76f063f9bd2853399. The small manufacturer label, embedded source textures and unsupported sheen/variant metadata are removed; positions are grounded/recentred and a twelve-triangle collision box is appended. See docs/licence-evidence/khronos-sheen-chair.md."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.826558,
+          0.686247,
+          0.570265
+        ],
+        "triangles": {
+          "LOD0": 39808
+        },
+        "collision": "SheenChair_COL",
+        "seatHeightMetres": 0.43
+      },
+      "materialMap": {
+        "fabric Mystere Mango Velvet": "MAT_FURNITURE_SHEEN_CHAIR_VELVET",
+        "wood Brown": "MAT_FURNITURE_PIANO_WOOD",
+        "metal": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L0_LIVING",
+        "L0_FAMILY"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_RUG",
       "category": "rug",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/rug.glb",

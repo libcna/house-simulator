@@ -145,6 +145,9 @@ run_gate "family-secondary" python3 tools/assets/family_secondary_prepare.py --c
 # HOUSE-01052: the close-range family sofa remains the pinned, attributed Wayfair geometry after
 # deterministic XNA-compatible variant selection, grounding and bounded proxy generation.
 run_gate "family-sofa" python3 tools/assets/family_sofa_prepare.py --check
+# HOUSE-01055: all three close-range route armchairs remain the pinned CC0 Wayfair geometry after
+# deterministic label removal, canonical material mapping, grounding and proxy generation.
+run_gate "visual-slice-chair" python3 tools/assets/visual_slice_chair_prepare.py --check
 # HOUSE-01053: the family focal wall retains the pinned CC0 low cabinet, exact canonical roles,
 # measured television gap and family-only placement without unsupported source metadata.
 run_gate "family-media-console" python3 tools/assets/family_media_console_prepare.py --check

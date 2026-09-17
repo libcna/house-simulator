@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 187U)
-            << "HOUSE-01054 adds the family dog bed's dedicated woven bolster role";
+        EXPECT_EQ(contents.materials.size(), 188U)
+            << "HOUSE-01055 adds the selected chair's dedicated mango-velvet role";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3638,8 +3638,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_FURNITURE_"); }),
-                  15)
-            << "HOUSE-01048 adds dining upholstery to the fourteen prior furniture materials";
+                  16)
+            << "HOUSE-01055 adds chair velvet to the fifteen prior furniture materials";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

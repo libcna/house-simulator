@@ -22,6 +22,24 @@ a claim that the house has physically rendered decorative glass.
 
 Deferred: a second sofa design and full decor density. A repeated copy in each of two different rooms is acceptable for the first playable slice, but further rooms should vary the seating language.
 
+## Shared route armchair replacement
+
+2026-09-17, HOUSE-01055. Round 49 showed that the two formal-living armchairs and the family-room
+armchair remained broad pale shapes after the family sofa and focal-wall work. Wayfair's
+`SheenChair` was selected from the already inspected sibling catalogue, but independently pinned,
+licensed and prepared here. The official Khronos source is CC0-1.0; its 128-triangle manufacturer
+label and unsupported material-extension metadata are deliberately not shipped.
+
+| Object | Measured bound (m) | LOD0 triangles | Review contract |
+|---|---:|---:|---|
+| SheenChair | 0.827 × 0.686 × 0.570 | 39,808 | 0.430 m seat; exact warm velvet, timber and metal roles; grounded 12-triangle proxy |
+
+All three existing route chairs retain their stable prop ids, measured positions and circulation
+clearances. Matching reuse reads as a deliberate household furniture set across the connected
+formal/family rooms; later rooms must not spread the same chair throughout the house. The source's
+embedded maps are unnecessary in the canonical static-prop path: approved metre-scale weave,
+board wood and brushed steel retain the three physical finishes through stock XNA effects.
+
 ## Formal dining primary set
 
 2026-09-17, HOUSE-01048. No approved source in the established living-room kit contains a dining

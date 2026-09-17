@@ -1635,6 +1635,21 @@
       "footstepSurface": "metal", "audioAbsorption": 0.02,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // HOUSE-01055: the selected Wayfair chair's warm mango velvet is retained as an intentional
+    // accent instead of flattening its shaped upholstery into the old pale White Room palette.
+    // A 7x repeat follows the source's authored weave scale through the stock-XNA material path.
+    {
+      "id": "MAT_FURNITURE_SHEEN_CHAIR_VELVET", "class": "fabric",
+      "albedo": "Textures/Materials/fabric_weave_albedo",
+      "normal": "Textures/Materials/fabric_weave_normal", "lightmapChannel": 0,
+      "tint": [0.78, 0.29, 0.12], "specularColor": [0.16, 0.065, 0.035],
+      "specularPower": 11.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [7.0, 7.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.58,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     // HOUSE-01285: the family-room lamp keeps the source's striped cloth when off, but its exact
     // outer-shade slot can now follow LG_L0_FAMILY_READING without making the living lamp glow.
     {

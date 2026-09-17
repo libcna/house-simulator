@@ -14489,6 +14489,50 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             capture-only cases disabled. No strict golden moves; culled-vs-unculled remains 0.1320%
             worst case. The complete repository gate accepts all 323 strict-XNA translation units.
             Compilation and heavy work use CPU 0-5 / at most six workers.
+- [x] HOUSE-01055 — Replace the remaining pale route armchairs with a finished production model
+      dep: HOUSE-00215, HOUSE-00296, HOUSE-01037, HOUSE-01052, HOUSE-01054 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-17) Round 49 leaves the two formal-living chairs and one family chair as the
+            flattest close-range seating on the route. The approved local catalogue contains
+            Wayfair's CC0 SheenChair, already visually proven in `living-room-simulator`; adopt it
+            through this repository's own strict-XNA preparation and provenance path.
+      accept: pin and verify the official Khronos URL/hash and CC0 evidence; discard the branded
+            label, embedded maps and unsupported sheen/variant metadata while preserving the exact
+            fabric, wood and metal source roles, UV0, metre scale and 39,808 visible triangles.
+            Ground/recentre the model, add a bounded twelve-triangle proxy, replace only the three
+            existing armchair prop assets without moving their stable ids or circulation layout,
+            and map a deliberate warm velvet accent plus approved wood/steel finishes. Capture and
+            inspect the unchanged fourteen-camera day and explicit-reading night routes; pass
+            content, licence, scale, origin, stable-ID, stock-XNA, render and culling gates with
+            compilation and heavy tooling capped at six CPUs.
+      findings: (2026-09-17) The 4,125,648-byte official SheenChair source is pinned at SHA-256
+            f0af2a2b102d28d540236306ae19f8fb36842df76bd38cf76f063f9bd2853399. Deterministic
+            preparation drops only the 128-triangle label and unsupported/unused metadata, retains
+            39,808 visible triangles with UV0 and exact fabric/wood/metal roles, grounds/recentres
+            the 0.826558 x 0.686247 x 0.570265 m geometry and adds a twelve-triangle proxy. The
+            1,142,052-byte result has SHA-256
+            02843a11e116875b95f7d707796e33eecf0ef5381a8fd60fd8a3243944254ae7. All three existing
+            prop ids, positions, yaws, scales and proxy collision semantics remain unchanged.
+      review: (2026-09-17) Full-resolution fixed views and two temporary close inspections accept
+            the domestic scale, grounded feet, open timber frame and separately readable warm
+            weave/wood/metal. The smaller real chair remains at the edge of the family composition
+            rather than being moved into the coffee-table clearance for a screenshot. Against
+            Round 49, day living-room/composition and family-room/composition frames change 4.881%,
+            3.646%, 2.680% and 1.476% (normalized MAE 0.000163, 0.007690, 0.003461 and 0.001659);
+            matched night frames change 29.151%, 8.221%, 3.605% and 2.990% (MAE 0.001231,
+            0.005960, 0.003311 and 0.001887). The broad low-MAE night coverage is subpixel lighting
+            noise; inspected furniture silhouettes are localized and intentional.
+      verified: (2026-09-17) Deterministic preparation, GLB, scale, origin, UV0, triangle, proxy,
+            source-hash, licence, manifest, budget, credits and 2,866 stable-id gates pass. The
+            world is 626 chunks / 57 props / 256 exterior hierarchy instances / 53.566591 MB;
+            `L0_FAMILY` remains at its exact 24-chunk boundary and `L0_LIVING` is 20 against its
+            unchanged 21-chunk allowance. The unculled diagnostic is 626 draws / 93 state changes.
+            Unit tests pass 1409/1409, serial offscreen integration tests pass 134/134 and all 49
+            active software-render cases pass with eight capture-only cases disabled. The one
+            inspected debug golden update is `blockout-l0-living`; production first-person
+            references remain within their accepted thresholds. All culled/unculled poses pass at
+            the unchanged 0.1320% worst case. The complete repository gate accepts all 323
+            strict-XNA translation units. Compilation and heavy work use CPU 0-5 / at most six
+            workers.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -18759,6 +18803,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01055` | **New task, next free phase-13 id.** Replace only the three existing pale route-armchair instances with one pinned, independently provenanced production chair; preserve stable prop placement and keep the full `HOUSE-00988` / `HOUSE-00992` furnishing tasks open. | Round 49 makes the old pale chairs the largest repeated local furniture defect. The official Khronos Wayfair `SheenChair` is CC0, metre-scale, materially separated and already visually proven in the referenced sibling, while a project-owned preparation can strip its label and unsupported sheen/variant metadata without copying CNAEXT architecture or importing uncertain texture provenance. One matched household chair used across two connected rooms is deliberate reuse, not procedural scattering. |
 | 2026-09-17 | `HOUSE-01054` | **New task, next free phase-13 id.** Refine the existing project-authored family dog bed in place, retain its stable world/nav identity and give its three physical textile roles coordinated canonical finishes; keep full `HOUSE-00992` open. | Round 48's media-wall view makes the green five-box bed the largest remaining local defect. The approved local catalogues contain no suitable real pet-bed model, while the existing deterministic source can produce rounded bolsters, continuous piping and tuft detail without licence ambiguity or architecture changes. Sharing its blue insert and narrow cord with existing family-room velvet/canvas keeps the measured chunk increase to one without flattening the distinct geometry. |
 | 2026-09-17 | `HOUSE-01053` | **New task, next free phase-13 id.** Replace only the coarse family-room media-unit instance with a deterministic extraction of the CC0 Bedroom low cabinet, reuse existing finishes and retain the independently approved television; keep full `HOUSE-00992` open. | Round 47's front-on image makes the tall pale fireplace silhouette the largest local defect after the sofa correction. The inspected source is a real low cabinet with drawer reveals and a slim steel frame at 780 triangles; it is a larger visible gain than adding more small clutter, and source-texture stripping avoids importing Bedroom textures whose independent provenance is less clear than the CC0 geometry. |
 | 2026-09-17 | `HOUSE-01052` | **New task, next free phase-13 id.** Replace only the family-room instance of the shared White Room leather sofa with a separately provenanced, deterministically prepared `GlamVelvetSofa`; preserve the existing living-room composition and keep the full `HOUSE-00992` task open. | Round 46 names the coarse pale family seating as the largest local defect. Direct source inspection and an isolated material render show substantially stronger silhouette, upholstery and leg detail at 4,196 triangles rather than the current asset's 35,040 visible triangles. The source is already licence-vetted in `living-room-simulator`, but its `KHR_materials_variants` metadata is outside CNB v1, so a small offline preparation step must select the navy role, remove only the unsupported alternatives and add the project proxy before the strict CNA path may use it. |

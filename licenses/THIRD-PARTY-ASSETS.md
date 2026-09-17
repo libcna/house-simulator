@@ -568,6 +568,7 @@ Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 - `SOUND_NOX_HUMAN_MALE_THROAT_CLEANING_VOICE_MALE_V2_THROAT_CLEANING_MONO_01` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 - `SOUND_NOX_HUMAN_MALE_THROAT_CLEANING_VOICE_MALE_V2_THROAT_CLEANING_MONO_02` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 - `MODEL_FAMILY_MEDIA_CONSOLE` — **Low cabinet extracted from Bedroom** by SlykDrako — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-17)
+- `MODEL_FURNITURE_SHEEN_CHAIR` — **SheenChair** by Wayfair, LLC — <https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenChair> (retrieved 2026-09-17)
 - `TEXTURE_MATERIAL_ASPHALT_ROAD_ALBEDO` — **ambientCG Asphalt033 1K-JPG** by ambientCG (Lennart Demes) — <https://ambientcg.com/a/Asphalt033> (retrieved 2026-09-13)
 - `TEXTURE_MATERIAL_ASPHALT_ROAD_NORMAL` — **ambientCG Asphalt033 1K-JPG** by ambientCG (Lennart Demes) — <https://ambientcg.com/a/Asphalt033> (retrieved 2026-09-13)
 - `TEXTURE_MATERIAL_ASPHALT_ROAD_ORM` — **ambientCG Asphalt033 1K-JPG** by ambientCG (Lennart Demes) — <https://ambientcg.com/a/Asphalt033> (retrieved 2026-09-13)
@@ -696,4 +697,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `46f26e21a7bfae6839206ffe632013eff6c79a35766945282996a82de85b3165`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `a855adb94342b104df468448fd8aebc8d88a4548aa01954f6b426134d471ecbf`.*

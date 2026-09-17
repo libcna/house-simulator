@@ -2114,3 +2114,55 @@ strict-XNA translation units.
 route-level gains now lie in daylight aperture balance and the exterior start composition; the
 largest contained family-room gain is replacing or materially improving the older armchairs and
 coffee table—not adding invisible infrastructure.
+
+## Round 50 — finished shared route armchair
+
+Commit: `HOUSE-01055` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 49's [day route](captures/house-01054-family-dog-bed-day-final) uses two broad pale
+formal-living chairs and one flat family chair. After: the identical fourteen cameras in the
+[final clear-day set](captures/house-01055-sheen-chair-day-final) and
+[explicit-reading 22:00 set](captures/house-01055-sheen-chair-night-final) show one coherent
+household chair with a warm mango/rust velvet seat, open brown timber frame and steel fasteners.
+All changed route frames and two temporary close inspections were opened at full resolution.
+
+Ranked visible defects remaining:
+
+1. Clear-day apertures remain clipped and visually overpower the selected connected rooms.
+2. The broad exterior/garage start framing remains materially coherent but sparse at player scale.
+3. The old shared coffee tables are now the flattest repeated close-range furniture assets.
+4. The formal living sofa remains an oversized grey block beside the now finer chair silhouette.
+5. Blank wall bays and restrained surface dressing still limit the inhabited feeling.
+
+Fixed: only `PROP_LIVING_CHAIR_GREEN`, `PROP_LIVING_CHAIR_PURPLE` and `PROP_FAMILY_CHAIR` change
+asset; their stable ids, positions, yaws, scales and collision semantics stay fixed. The official
+Wayfair/Khronos CC0 source is pinned independently. Deterministic preparation removes only the
+branded 128-triangle label, unused embedded maps and unsupported sheen/variant metadata, retaining
+39,808 visible triangles, UV0 and exact fabric/wood/metal roles. The accepted chair is grounded
+and recentred at 0.826558 x 0.686247 x 0.570265 m with a twelve-triangle collision proxy.
+
+Against Round 49, the day living-room/composition and family-room/composition pairs change 4.881%,
+3.646%, 2.680% and 1.476% of pixels with normalized MAE 0.000163, 0.007690, 0.003461 and 0.001659.
+Their night counterparts change 29.151%, 8.221%, 3.605% and 2.990% with normalized MAE 0.001231,
+0.005960, 0.003311 and 0.001887. The broad night masks have very low error magnitude; inspection
+confirms localized chair silhouettes plus subpixel lighting differences, not an exposure change.
+The smaller family chair remains at the camera edge because moving it inward would compromise the
+existing coffee-table clearance merely to improve one screenshot.
+
+The committed GLB is 1,142,052 bytes at SHA-256
+`02843a11e116875b95f7d707796e33eecf0ef5381a8fd60fd8a3243944254ae7`. The world is 626 chunks /
+57 props / 256 exterior hierarchy instances / 53.566591 MB. `L0_FAMILY` remains at its exact
+24-chunk boundary, `L0_LIVING` is 20 against its unchanged 21-chunk allowance, and the unculled
+diagnostic is 626 draws / 93 state changes. Licence, budget and 2,866 stable ids are current.
+
+Unit tests pass 1409/1409, serial offscreen integration tests pass 134/134 and all 49 active
+software-render cases pass with eight capture-only cases disabled. The inspected debug-blockout
+living golden advances only for the replacement silhouette; production first-person references
+stay accepted. The culled/unculled comparison remains 0.1320% worst case (`l0-sunroom`). The full
+gate accepts all 323 strict-XNA translation units with compilation and heavy work capped to CPU
+0-5 / six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and blockout
+colour remains available solely as an explicit diagnostic. The next contained furniture gain is
+the shared coffee table or formal living sofa; the highest route-level gains remain daylight
+aperture balance and a denser exterior start composition.

@@ -267,7 +267,7 @@
     },
     {
       "id": "PROP_LIVING_CHAIR_GREEN",
-      "asset": "MODEL_FURNITURE_LEATHER_ARMCHAIR_A",
+      "asset": "MODEL_FURNITURE_SHEEN_CHAIR",
       "cell": "L0_LIVING",
       "position": [
         -7.3,
@@ -284,7 +284,7 @@
     },
     {
       "id": "PROP_LIVING_CHAIR_PURPLE",
-      "asset": "MODEL_FURNITURE_LEATHER_ARMCHAIR_B",
+      "asset": "MODEL_FURNITURE_SHEEN_CHAIR",
       "cell": "L0_LIVING",
       "position": [
         -5.1,
@@ -594,7 +594,7 @@
     },
     {
       "id": "PROP_FAMILY_CHAIR",
-      "asset": "MODEL_FURNITURE_LEATHER_ARMCHAIR_B",
+      "asset": "MODEL_FURNITURE_SHEEN_CHAIR",
       "cell": "L0_FAMILY",
       "position": [
         4.15,
