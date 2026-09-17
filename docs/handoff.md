@@ -1,3 +1,55 @@
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01287` checkpoint)
+
+Branch `develop`. Task-start HEAD `d1978de5f3f45aac03ab2d6c56480525d4740bb7`
+(`HOUSE-01286`). This file belongs to the single `HOUSE-01287` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The front balcony's nominal bare point is now a real approved bronze/opal lantern mounted directly
+above its door. `PROP_L1_BALCONY_FRONT_LANTERN` uses the deterministic 330 x 607.5 x 310.5 mm
+fixture at the 5.80 m door head; its optical centre is [0,6.075,-14.073]. The existing stable
+source is a 600 lm / 2,700 K downward spot with a 60/100-degree feather and 6.27 m range. Its
+manual group starts on for the selected arrival state and remains switchable. Only `L1_LANDING`
+is an added receiver; no L2 spill, global exposure change or new renderer path was introduced.
+
+All 34 frames in the complete matched seventeen-camera
+[clear-day set](visual-review/captures/house-01287-balcony-lantern-day-final) and
+[normal-night set](visual-review/captures/house-01287-balcony-lantern-night-final) were inspected.
+The three-frame [off control](visual-review/captures/house-01287-balcony-lantern-controls-final)
+isolates the exact current source. The
+[day close view](visual-review/captures/house-01287-balcony-lantern-day-final/front-balcony-light.png)
+shows its physical mounting; the
+[night close view](visual-review/captures/house-01287-balcony-lantern-night-final/front-balcony-light.png)
+shows the bounded warm door pool. Off/on comparisons change 7,148 road pixels, 43,167 path pixels
+and 152,994 close pixels above two channel levels (normalized MAE 0.000400 / 0.001910 / 0.005104).
+
+The selected 256-sample atlas peaks at 2.9429 with mean 0.000702. Its source alone uses the
+documented 100 lm/W override under the receiver's historical global 683 lm/W calibration. An
+orange point-light billboard and a mistaken global-100 L1/L2 bake were both rejected after image
+and report inspection; neither survives in the tree. The two unrelated L1 groups remain near their
+prior values (12.7004 and 0.0256 peaks), and every L2 image, binding and id is unchanged.
+
+The world is 653 chunks / 96 cells / 69 static props / 260 exterior hierarchy instances /
+53.804232 MB. The unculled diagnostic is 609 opaque submissions, 44 cutouts and 99 state changes.
+Six strict facade references were opened pairwise and intentionally advanced: one blockout
+silhouette plus the production HUD/season views that see the new physical lamp. No unrelated
+golden moved.
+
+The permanent lantern gate pins geometry, placement, source/linkage, receiver and switch state.
+All thirteen world validators, all 1,409 unit and 135 integration tests, and all 48 active
+software-render tests pass; eight capture-only cases remain disabled. All eighteen
+culled-vs-unculled poses pass at 0.1338% worst (`l0-sunroom`). Stable-id (2,905 ids), manifest,
+lightmap, provenance/licence, budget and all 323 strict-XNA translation-unit gates pass.
+Compilation and heavy work stayed on CPU 0-5 / at most six workers.
+
+Next highest visible value: most of the upper/side facade and the garage apron/front yard remain
+broad black planes at night, while one correct balcony lantern should not fake-light the whole
+mansion. Add a physically bounded architectural layer or improve close step/yard readability;
+then address formal-living contact grounding and restrained wall dressing. Do not raise global
+night exposure or leave the vertical slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-17 (`HOUSE-01286` checkpoint)
 
 Branch `develop`. Task-start HEAD `5bb3abc5b739fb2ed117f333e8b239675d0e3b58`

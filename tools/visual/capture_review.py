@@ -24,6 +24,10 @@ POSES = (
     # in one deterministic frame so planting scale and accidental porch/driveway overlap remain
     # human-reviewable.
     ("front-path", "0.00,0.60,-8.50,0.0,0.0"),
+    # HOUSE-01287: stand on the canonical front balcony and look directly at its over-door
+    # lantern. The road view proves composition; this one proves physical scale, mounting height,
+    # daytime appearance and the bounded pool on the door rather than a floating debug source.
+    ("front-balcony-light", "0.00,3.65,-12.10,0.0,12.0"),
     ("entrance-foyer", "0.00,0.60,-14.90,0.0,0.0"),
     # HOUSE-00940: the route camera sees the foyer/living pair only at the extreme left edge and
     # the living-room camera sees its unlit face. This measured foyer-side view keeps both raised

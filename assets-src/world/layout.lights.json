@@ -1490,14 +1490,19 @@
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
 
-    // ---- LG_L1_BALCONY_FRONT_MAIN x1
+    // ---- LG_L1_BALCONY_FRONT_MAIN x1 -- the real over-door lantern on the front balcony.
+    // ---- Its manual group starts on for the playable arrival state and remains switchable from
+    // ---- the balcony; the explicit L1 receiver breaks up the otherwise black central facade.
     {
       "id": "LIGHT_L1_BALCONY_FRONT_MAIN_1", "cell": "L1_BALCONY_FRONT", "group": "LG_L1_BALCONY_FRONT_MAIN",
-      "type": "point", "position": [0.00, 7.95, -12.95],
+      "type": "spot", "position": [0.00, 6.075, -14.073],
       "direction": [0.0, -1.0, 0.0],
-      "colorK": 2400, "intensityLm": 300.0, "range": 6.27,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
-      "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
+      "coneInnerDeg": 60.0, "coneOuterDeg": 100.0,
+      "colorK": 2700, "intensityLm": 600.0, "range": 6.27,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeCells": ["L1_LANDING"],
+      "fixtureProp": "PROP_L1_BALCONY_FRONT_LANTERN", "emissiveMaterialSlot": "LanternShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
     // ---- LG_L2_LANDING_MAIN x2

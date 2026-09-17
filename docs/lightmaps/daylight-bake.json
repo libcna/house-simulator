@@ -488,7 +488,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "shellHash": "sha256:57218f4ce29c1c1320a4f37cf7727cb10cbedf59c1dc6a60eb1150fa3e450189"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:89eefe3b1a3759717eeb68660473d69891e7e2224746040cd7cc98c3cfee3a75"
     },
     {
       "cell": "L1_LINEN",
@@ -802,12 +803,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_LIVING"
+    "L1_LANDING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 508501,
+  "sourceBytes": 509603,
   "tool": "bake_house_lightmaps.py"
 }

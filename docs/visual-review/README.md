@@ -21,6 +21,9 @@ review camera; `HOUSE-01051` retains all fourteen unchanged for an exact furnish
 `HOUSE-00937` adds a fifteenth path-height front-door pose: the road camera retains the whole
 arrival composition, while this closer frame exposes foundation planting scale and porch/driveway
 overlap that the picket fence hides.
+`HOUSE-00940` adds a sixteenth foyer-side view of the formal paired doors without moving any prior
+camera. `HOUSE-01287` adds the seventeenth view on the front balcony, facing its over-door lantern;
+the road and path cameras retain the wider arrival comparison.
 
 ## Round 0 — visual-convergence baseline
 
@@ -2636,3 +2639,53 @@ recorded in `docs/handoff.md`; compilation and heavy work stayed on CPU 0-5 / at
 debug blockout remains available. The next highest visible value is bounded night illumination for
 the front facade/steps and garage apron, followed by formal-living contact grounding and restrained
 wall dressing.
+
+## Round 61 — physical front-balcony lantern
+
+Commit: `HOUSE-01287` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 60's [night road view](captures/house-01286-living-practicals-night-final/exterior-front.png)
+shows the central upper facade and balcony door as a continuous black plane. The authored balcony
+source was a bare point 2.15 m above the door head and 1.35 m in front of the facade, with no
+physical fixture or useful receiver. After: the complete matched seventeen-camera
+[day](captures/house-01287-balcony-lantern-day-final) and
+[night](captures/house-01287-balcony-lantern-night-final) sets add a real over-door lantern and
+bounded warm arrival pool. Three exact [off controls](captures/house-01287-balcony-lantern-controls-final)
+isolate its contribution. All 37 frames were inspected; both close controls and both road frames
+were opened at full resolution.
+
+Ranked visible defects remaining:
+
+1. Most of the upper and side facade remains a broad black plane at night; one correct balcony
+   practical should not fake-light the entire mansion.
+2. The garage apron, front yard and close steps remain underlit beyond their real local fixtures.
+3. The formal living room is readable but still brown-heavy, with weak furniture contact shading.
+4. Several broad interior wall bays need restrained art and domestic detail.
+5. Foundation planting and distant neighbour context remain sparse at close range.
+
+Fixed: `PROP_L1_BALCONY_FRONT_LANTERN` reuses the approved deterministic 330 x 607.5 x
+310.5 mm bronze/opal fixture directly above the balcony door. Its stable source moves to the real
+optical centre [0,6.075,-14.073], becomes a 600 lm / 2,700 K downward spot with a 60/100-degree
+feather and starts on while retaining the existing manual switch. Only `L1_LANDING` receives the
+foreign group. The new 256-sample atlas peaks at 2.9429 with mean 0.000702; its per-source
+100 lm/W calibration is baked under the receiver's historical global 683 lm/W setting, preserving
+the two unrelated landing groups and every L2 product.
+
+Against Round 60, road-front normalized MAE is 0.000444 by day and 0.000478 at night; the path
+view is 0.001786 / 0.001926. The exact current night off/on comparisons change 7,148 road pixels,
+43,167 path pixels and 152,994 close pixels above two channel levels, with normalized MAE
+0.000400 / 0.001910 / 0.005104 respectively. A first point-light attempt was rejected because it
+produced a large orange rectangle; an intermediate bake was also rejected after audit found its
+global 100 lm/W setting amplified unrelated L1 and L2 groups. Neither rejected output remains in
+the repository.
+
+The world is 653 chunks / 96 cells / 69 props / 260 exterior instances / 53.804232 MB. The
+unculled diagnostic is 609 opaque, 44 cutout and 99 state changes. Six strict references were
+selectively advanced after pairwise inspection; all 48 active render tests pass, all eighteen
+culling pairs stay below 0.2% at 0.1338% worst, and full gate results are in `docs/handoff.md`.
+Compilation and heavy work stayed on CPU 0-5 / at most six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest-value work is a physically bounded upper/side
+facade layer or close front-step/yard readability, then formal-living contact grounding and wall
+dressing—not a global night-exposure increase.

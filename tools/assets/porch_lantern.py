@@ -18,14 +18,20 @@ import hashlib
 import json
 import math
 import struct
+import sys
 import tempfile
 from pathlib import Path
 
 import gltf_io
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "world"))
+import layout_io  # noqa: E402
+
 REPO = Path(__file__).resolve().parents[2]
 TARGET = REPO / "assets-src" / "Models" / "Fixtures" / "porch_lantern.glb"
 MATERIALS = ("LanternMetal", "LanternShade")
+PROPS = REPO / "assets-src" / "world" / "layout.props.json"
+LIGHTS = REPO / "assets-src" / "world" / "layout.lights.json"
 
 
 class Mesh:
@@ -229,6 +235,33 @@ def validate(path: Path) -> tuple[int, list[float], str]:
     return triangles, bounds, hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def validate_front_balcony_instance() -> None:
+    """Keep HOUSE-01287's physical source, receiver and manual-control boundary pinned."""
+    props = {row["id"]: row for row in layout_io.load_file(PROPS, "props")["props"]}
+    lights = {row["id"]: row for row in layout_io.load_file(LIGHTS, "lights")["lights"]}
+    prop = props["PROP_L1_BALCONY_FRONT_LANTERN"]
+    light = lights["LIGHT_L1_BALCONY_FRONT_MAIN_1"]
+
+    if prop["asset"] != "MODEL_FIXTURE_PORCH_LANTERN" or \
+            prop["cell"] != "L1_BALCONY_FRONT" or \
+            prop["position"] != [0.0, 5.8, -14.11275] or prop["yawDeg"] != 0 or \
+            prop["scale"] != 1 or not prop["static"] or prop["collision"] != "none":
+        raise RuntimeError("canonical front-balcony lantern placement changed")
+    if light["cell"] != "L1_BALCONY_FRONT" or \
+            light["group"] != "LG_L1_BALCONY_FRONT_MAIN" or \
+            light["type"] != "spot" or light["position"] != [0.0, 6.075, -14.073] or \
+            light["direction"] != [0.0, -1.0, 0.0] or \
+            light["coneInnerDeg"] != 60.0 or light["coneOuterDeg"] != 100.0 or \
+            light["colorK"] != 2700 or light["intensityLm"] != 600.0 or \
+            light["range"] != 6.27 or light["bakeLumensPerRadiantWatt"] != 100.0 or \
+            light["bakeCells"] != ["L1_LANDING"] or \
+            light["fixtureProp"] != prop["id"] or \
+            light["emissiveMaterialSlot"] != "LanternShade" or \
+            not light["castsBlobShadow"] or not light["bakedIntoLightmap"] or \
+            not light["defaultOn"]:
+        raise RuntimeError("front-balcony lantern optical linkage changed")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--check", action="store_true")
@@ -244,6 +277,7 @@ def main() -> int:
             if candidate.read_bytes() != expected:
                 raise RuntimeError("committed porch lantern is not byte-identical to its generator")
         triangles, bounds, digest = validate(TARGET)
+        validate_front_balcony_instance()
     elif args.selftest:
         with tempfile.TemporaryDirectory(prefix="porch-lantern-selftest-") as scratch:
             target = Path(scratch) / TARGET.name

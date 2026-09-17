@@ -1142,21 +1142,26 @@
       "daylight": { "orientation": "N", "exposure": 0.42 },
       "lightGroups": ["LG_L1_LANDING_MAIN", "LG_L1_LANDING_SEAT"],
       "lightmaps": {
-        "shellHash": "sha256:57218f4ce29c1c1320a4f37cf7727cb10cbedf59c1dc6a60eb1150fa3e450189",
+        "shellHash": "sha256:89eefe3b1a3759717eeb68660473d69891e7e2224746040cd7cc98c3cfee3a75",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L1_LANDING_LM_DAY",
           "scale": 1.0000001192092896
         },
         "artificial": [
           {
+            "group": "LG_L1_BALCONY_FRONT_MAIN",
+            "contentName": "Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_BALCONY_FRONT_MAIN",
+            "scale": 2.942856788635254
+          },
+          {
             "group": "LG_L1_LANDING_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_MAIN",
-            "scale": 12.7000150680542
+            "scale": 12.700443267822266
           },
           {
             "group": "LG_L1_LANDING_SEAT",
             "contentName": "Textures/Lightmaps/Artificial/L1_LANDING_LM_LG_L1_LANDING_SEAT",
-            "scale": 0.025951264426112175
+            "scale": 0.025635143741965294
           }
         ]
       },

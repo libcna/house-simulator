@@ -33,7 +33,8 @@ The first minimum real static prop kit (`HOUSE-01037`) uses completed
 `HOUSE-00215` batching without claiming `HOUSE-00971`'s unfinished dynamic/jitter/tint criteria.
 `HOUSE-01280` corrects the measured receiver/furniture lighting mismatch visible in its reviewed
 images. `HOUSE-01283` replaces the kitchen island's bare, wrongly oriented point sources with
-three physical downlighting pendants on the real long island axis. Round 9 proves the exterior
+three physical downlighting pendants on the real long island axis. `HOUSE-01287` turns the nominal
+front-balcony point into a real over-door lantern with one bounded L1 receiver bake. Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924` removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
 from a dark room. Round 11 leaves the front façade and empty/dark entrance route as the largest
@@ -15482,6 +15483,49 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             render tests pass; all eighteen culling pairs pass at 0.1338% worst (`l0-sunroom`).
             Stable-id, lightmap/content, provenance, budget and all 323 strict-XNA translation-unit
             gates pass with compilation/heavy work restricted to CPU 0-5 / at most six workers.
+- [x] HOUSE-01287 — Give the front balcony a physical over-door lantern and bounded arrival pool
+      dep: HOUSE-00929, HOUSE-00932, HOUSE-00939, HOUSE-01256, HOUSE-01259, HOUSE-01260, HOUSE-01281 · sys: world, content, lighting, rendering · plat: ALL · pri: MUST
+      note: (2026-09-17) Round 60 leaves the central upper facade as the largest exterior night
+            defect. Its existing `LIGHT_L1_BALCONY_FRONT_MAIN_1` is an unlinked point at
+            [0,7.95,-12.95], 2.15 m above the balcony-door head and 1.35 m in front of its facade;
+            it is therefore neither a visible practical nor a credible source. Reuse the approved
+            wall lantern directly above that door, retain the existing manual group/switch and
+            add only the measured `L1_LANDING` foreign receiver. Do not invent L2 spill, raise
+            global exposure or make one fixture light the entire mansion.
+      accept: a correctly scaled bronze/opal lantern is visibly mounted above the L1 front-balcony
+              door by day; its linked 2,700 K source starts on for the selected normal-play arrival
+              state, remains manually switchable and produces a bounded warm pool on the door and
+              central balcony at night. Only `L1_LANDING` receives its selected deterministic bake;
+              no rejected L2 product survives. Matched seventeen-camera day/night sets plus exact
+              off controls are inspected, and deterministic asset/linkage, world, content, unit,
+              integration, render, culling, provenance and strict-XNA gates pass with compilation
+              and heavy work restricted to CPU 0-5 / at most six workers.
+      done: (2026-09-17) `PROP_L1_BALCONY_FRONT_LANTERN` reuses the approved project-authored
+            330 x 607.5 x 310.5 mm fixture at the real 5.80 m door head; its optical centre is
+            [0,6.075,-14.073]. The stable source becomes a 600 lm / 2,700 K downward spot with a
+            60/100-degree feather, 6.27 m range and a per-source 100 lm/W offline calibration.
+            It links the exact `LanternShade`, starts on and names only `L1_LANDING` as an extra
+            bake receiver. The global selected-cell calibration remains the historical 683 lm/W,
+            so the two pre-existing landing groups are not accidentally amplified.
+      review: (2026-09-17) Round 61 opens complete matched seventeen-camera clear-day and 22:00
+            sets plus three exact current `--light-off` controls. The day close view proves real
+            mounting scale and the night close view changes 152,994 pixels above two channel
+            levels (normalized MAE 0.005104) from an almost invisible door to a restrained warm
+            source and pool. The road-front control changes only 7,148 pixels (0.000400 MAE),
+            while the path view changes 43,167 (0.001910), proving useful local composition rather
+            than a broad exposure lift. A first point-light iteration was rejected as an orange
+            billboard; a later audit also rejected a global-100 bake that amplified unrelated
+            L1/L2 groups. The authoritative captures use the corrected 653-chunk deployment.
+      verified: (2026-09-17) The extended deterministic porch-lantern gate regenerates the
+            232-triangle fixture byte-for-byte and pins the balcony transform, exact optical link,
+            cone, receiver and switched/default state. Stable-id validation records 2,905 live ids;
+            manifest, lightmap, budget, licence and all thirteen world rules pass with no rejected
+            L2 product. The world is 653 chunks / 69 props / 260 exterior instances /
+            53.804232 MB; the unculled diagnostic is 609 opaque, 44 cutout and 99 state changes.
+            All 1,409 unit, 135 integration and 48 active software-render tests pass after six
+            intended facade references were inspected pairwise and selectively advanced. All
+            eighteen culling pairs pass at 0.1338% worst (`l0-sunroom`), and the complete repository
+            gate passes all 323 strict-XNA translation units with heavy work restricted to CPU 0-5.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -19208,6 +19252,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01287` | **New task, next free phase-16 id.** Replace the existing displaced front-balcony point with the approved physical wall lantern, give only its adjacent L1 landing shell an explicit selected bake and retain its existing manual group. | Round 60 names the broad black upper facade as the largest exterior defect. Source tracing finds a nominal balcony light 2.15 m above its door head, 1.35 m in front of the wall, unlinked to any prop and unbound to any useful receiver. A measured over-door practical improves both day composition and bounded night readability without global exposure, a new asset, an L2 light or renderer work. |
 | 2026-09-17 | `HOUSE-01286` | **New task, next free phase-16 id.** Reuse the approved physical semi-flush fixture for the four already-authored formal-living main sources, replace their near-ceiling point singularities with measured broad downward optics and promote only the selected-cell bake. | Round 59's largest remaining defect is the nearly black formal living room. A fixed-camera `--light-on=LG_L0_LIVING_MAIN` control proves this is not merely an off switch: the current atlas adds four tiny ceiling spots but leaves the room black. Bake evidence explains it quantitatively (10.5507 peak / 0.0110 mean) and the completed family fixture provides a dependency-valid 0.2292 peak / 0.0454 mean reference without a new asset, renderer or global-exposure change. |
 | 2026-09-17 | `HOUSE-00940` | **New task, next free phase-12 id.** Interpret the already-authored `D_DOUBLE` leaf width as one member of its full portal pair, and generate opaque panelled or translucent glazed joinery from the portal's existing semantics. | Round 58's straight living view exposes a broad blank rectangle beside the finished piano. The opening schedule explicitly says its 860 mm row is “one leaf of a pair,” while the shell centres only that one leaf in a 1.80 m portal and fills the two 470 mm remnants as lining. Correcting the general static closed-leaf grammar improves all four formal-room pairs without a prop, room-name exception, new renderer or changed portal/collision dimensions. |
 | 2026-09-17 | `HOUSE-00939` | **New task, next free phase-12 id.** Reuse the measured wall lantern as two garage-door carriage lights on a separate dusk group while retaining the existing manual utility flood. After the first capture, refine “near apron” to “door/local jamb facade”; the manual flood retains the broad-apron role. | Round 57's fixed driveway frames show one broad empty garage wall by day and a near-black normal-play arrival at 22:00 because the central 4,000 K flood is correctly manual/off. Two short-range 2,400 K fixtures at the jambs supply human scale and bounded normal-night readability without global exposure, another asset or changing the utility-light contract. The rejected first capture proved that asking the range-bounded carriage lights to illuminate the terrain tile's distant centre conflicts with keeping the side fence dark and duplicates the authored utility flood rather than improving the physical composition. |

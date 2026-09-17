@@ -3426,6 +3426,13 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > 0.1995 while mean useful irradiance rises from 0.0110 to 0.0323. The stock-XNA runtime,
 > exposure and room-state model are unchanged. Repeatable review-only `--light-on` and
 > `--light-off` overrides provide matched controls without rewriting canonical switch defaults.
+>
+> `HOUSE-01287` replaces the displaced bare front-balcony point with the approved physical
+> bronze/opal wall lantern above its real door. The stable manual group starts on for the selected
+> playable arrival state and drives a 600 lm / 2,700 K, 60/100-degree downward spot from the
+> fixture's optical centre. Only `L1_LANDING` is named as a foreign fixed receiver: its selected
+> atlas peaks at 2.9429 with mean 0.000702, while the global 683 lm/W calibration preserves the
+> pre-existing landing groups. No L2 receiver, global exposure change or renderer path is added.
 
 ### 28.4 Daylight through windows
 

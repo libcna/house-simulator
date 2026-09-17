@@ -1164,15 +1164,25 @@
       "daylight": null,
       "groups": [
         {
+          "group": "LG_L1_BALCONY_FRONT_MAIN",
+          "image": "L1_LANDING_LM_LG_L1_BALCONY_FRONT_MAIN.png",
+          "lights": [
+            "LIGHT_L1_BALCONY_FRONT_MAIN_1"
+          ],
+          "mean": 0.0007020779254240476,
+          "peak": 2.942856788635254,
+          "scale": 2.942856788635254
+        },
+        {
           "group": "LG_L1_LANDING_MAIN",
           "image": "L1_LANDING_LM_LG_L1_LANDING_MAIN.png",
           "lights": [
             "LIGHT_L1_LANDING_MAIN_1",
             "LIGHT_L1_LANDING_MAIN_2"
           ],
-          "mean": 0.009484548316760731,
-          "peak": 12.7000150680542,
-          "scale": 12.7000150680542
+          "mean": 0.009220867920534661,
+          "peak": 12.700443267822266,
+          "scale": 12.700443267822266
         },
         {
           "group": "LG_L1_LANDING_SEAT",
@@ -1180,12 +1190,13 @@
           "lights": [
             "LIGHT_L1_LANDING_SEAT_1"
           ],
-          "mean": 0.0032823433170313062,
-          "peak": 0.025951264426112175,
-          "scale": 0.025951264426112175
+          "mean": 0.003175419091678391,
+          "peak": 0.025635143741965294,
+          "scale": 0.025635143741965294
         }
       ],
-      "shellHash": "sha256:57218f4ce29c1c1320a4f37cf7727cb10cbedf59c1dc6a60eb1150fa3e450189"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:89eefe3b1a3759717eeb68660473d69891e7e2224746040cd7cc98c3cfee3a75"
     },
     {
       "cell": "L1_LINEN",
@@ -1938,12 +1949,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_LIVING"
+    "L1_LANDING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1044262,
+  "sourceBytes": 1044819,
   "tool": "bake_house_lightmaps.py"
 }
