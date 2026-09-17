@@ -2347,3 +2347,48 @@ work stayed on CPU 0-5 / at most six workers.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
 debug blockout remains available. The next highest visible value is denser, better-framed exterior
 arrival composition, followed by restrained wall dressing and contact/grounding improvement.
+
+## Round 55 — natural production-lawn balance
+
+Commit: `HOUSE-00936` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 54's [front](captures/house-01059-window-balance-day-final/exterior-front.png) and
+[garage](captures/house-01059-window-balance-day-final/garage-approach.png) views are dominated by
+a large saturated lime-green lawn. After: the identical cameras in the complete fourteen-view
+[clear-day set](captures/house-00936-lawn-material-day-final) show a restrained olive/earth-balanced
+lawn while preserving the approved source texture. All fourteen frames plus targeted fixed
+overcast and 22:00 exterior captures were inspected at full resolution.
+
+Ranked visible defects remaining:
+
+1. Foundation planting and the garage arrival are sparse, leaving broad lawn and wall areas with
+   little authored depth or human-scale composition.
+2. Blank interior wall bays and restrained surface dressing still limit the inhabited feeling.
+3. Several furniture/shell contacts lack local shadowing and read slightly ungrounded.
+4. The formal living room remains dark overall and its older upright piano is comparatively blocky.
+5. Distant landscape/neighbour context still exposes the finite property presentation.
+
+Fixed: `MAT_OUTDOOR_GRASS` remains a deterministic stock-XNA variant of the approved
+`MAT_GROUND_LAWN` row, with the same real albedo, UV scale, geometry and render path. Only its tint
+changes to `(0.82, 0.66, 0.88)`; exposure, daylight, vegetation, collision and explicit debug
+blockout remain unchanged. The front frame changes 291,539 pixels above two levels (20.2458%,
+normalized MAE 0.010875), moving the changed-pixel mean from RGB (69.950, 111.296, 35.359) to
+(68.251, 80.095, 43.025). The garage frame changes 159,554 pixels (11.0801%, MAE 0.006063), moving
+its changed-pixel mean from (70.631, 112.143, 35.720) to (68.832, 80.781, 43.511).
+
+The first generator write exposed fourteen later-authored vegetation material rows inside the
+outdoor generator's replacement markers. No data was lost: those rows were restored byte-for-byte
+and moved after the END marker. The generator now proves that its block contains exactly its 18
+declared ordered ids and rejects an injected unowned row. Two successive writes produce the same
+file SHA-256. Five affected seasonal/exterior goldens were compared pairwise and intentionally
+advanced; all other references remain unchanged.
+
+The rebuilt world remains 632 chunks / 96 cells / 256 exterior hierarchy instances / 53.377344 MB.
+All 1,409 unit, 135 integration and 48 active software-render tests pass, with eight capture-only
+render cases disabled. All eighteen culling pairs pass at 0.1342% worst case (`l0-sunroom`), and
+the complete gate accepts all 323 strict-XNA translation units. Compilation and heavy work stayed
+on CPU 0-5 / at most six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay continues to use real production materials. The
+next highest-value exterior change is authored foundation planting/mulch and arrival-scale detail,
+especially around the otherwise empty garage frontage.

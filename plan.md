@@ -13742,6 +13742,44 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
               dark straight living-room view is now the largest route defect, followed by the
               broad garage wall above the new door, dining furnishing, kitchen practical clutter,
               family-room finish depth and the dark night facade.
+- [x] HOUSE-00936 — Calibrate the canonical lawn material for a natural front-approach balance
+      dep: HOUSE-00903, HOUSE-00923, HOUSE-01266 · sys: content/materials/exterior · plat: ALL · pri: MUST
+      note: (2026-09-17) Round 54 leaves the broad saturated lawn as the largest single material
+            defect in both fixed arrival cameras. Keep the approved `grass_lawn_albedo` and its
+            real UV scale; correct only the derived outdoor-grass tint through the deterministic
+            material generator. Do not disguise the defect with exposure, replace the source map,
+            alter vegetation or change explicit debug blockout.
+      accept: the unchanged clear-day front and garage cameras show a restrained natural lawn
+              while retaining visible grass texture; targeted overcast and night captures remain
+              plausible; only references whose lawn pixels intentionally change are advanced
+              after inspection. The outdoor-material generator must own exactly its declared 18
+              rows and refuse to overwrite independently authored material rows. Content, unit,
+              integration, render, culling and strict-XNA gates pass with compilation/heavy work
+              restricted to CPU 0-5 / at most six workers.
+      result: (2026-09-17) `MAT_OUTDOOR_GRASS` remains a generated stock-XNA variant of the
+              approved canonical lawn row and now uses tint `(0.82, 0.66, 0.88)`. No texture,
+              UV, geometry, exposure, lighting, collision, hierarchy or blockout setting changes.
+              In the fixed front frame, 291,539 pixels above two levels change (20.2458%,
+              normalized MAE 0.010875); the changed-pixel mean moves from RGB
+              (69.950, 111.296, 35.359) to (68.251, 80.095, 43.025). The garage frame changes
+              159,554 pixels (11.0801%, MAE 0.006063), with its changed-pixel mean moving from
+              (70.631, 112.143, 35.720) to (68.832, 80.781, 43.511).
+      review: (2026-09-17) All fourteen unchanged clear-day cameras were captured and inspected;
+              targeted overcast and 22:00 exterior frames confirm the lawn neither glows nor
+              collapses unnaturally. The new palette is visibly olive/earth-balanced while the
+              real source texture remains legible. The next largest exterior defect is spatial:
+              sparse foundation planting and an empty garage arrival, not another global colour
+              correction. Five seasonal/exterior references were opened pairwise and deliberately
+              advanced; all other strict goldens remain byte-unchanged.
+      verified: (2026-09-17) Running the existing writer exposed fourteen later vegetation rows
+                accidentally placed inside its marker range. They were preserved and moved after
+                the END marker; the generator now checks exact ordered ownership of its eighteen
+                rows, and a negative injected `MAT_UNOWNED_TEST` is rejected. Two writes produce
+                the same file SHA-256. The rebuilt world remains 632 chunks / 96 cells / 256
+                exterior hierarchy instances / 53.377344 MB. All 1,409 unit, 135 integration and
+                48 active render tests pass (eight render cases remain deliberately disabled),
+                all eighteen culled/unculled poses pass at 0.1342% worst case (`l0-sunroom`), and
+                the complete strict-XNA gate accepts all 323 translation units.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -18972,6 +19010,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-00936` | **New task, next free phase-12 id.** Calibrate only the generated production lawn tint, preserve the approved texture/UV/runtime path, and make the generator prove exact ownership of its marker block. | Round 54 makes the large saturated lawn the dominant material defect in both fixed arrival frames. The first deterministic write also proved that fourteen independently authored vegetation rows had later been inserted inside this generator's replacement range; moving them intact after the END marker and rejecting any future unowned row is the smallest transparent data/tool correction. |
 | 2026-09-17 | `HOUSE-01059` | **New task, next free phase-13 id.** Calibrate only the direct celestial contribution on the existing weather-facing white window-frame role; preserve outdoor exposure, full sky ambient, shell ownership and the established exterior-window hierarchy. | Round 53 makes clipped clear-day apertures the largest route-level defect. Explicit debug-blockout inspection proves the dominant glare is the distinct frame/sash role rather than glass or room trim, and a controlled binary A/B proves the narrow stock-`BasicEffect` correction does not alter a no-window room. This is a visible Tier-S material-lighting calibration, not new renderer architecture. |
 | 2026-09-17 | `HOUSE-01058` | **New task, next free phase-13 id.** Add a measured bench, original artwork and physical picture light to the empty formal-living piano wall; reuse the existing stable accent source, rebake only `L0_LIVING` and keep full `HOUSE-00988` open. | Round 52 names the dark straight living view as the largest contained defect. Its piano already exists but lacks the objects required to read as a usable domestic vignette, and the nominal accent light has neither visible fixture nor a localized direction. This bounded authored suite has no licence ambiguity and exercises the approved prop, material, fixture and Tier-S lightmap paths without hard-coded room logic. |
 | 2026-09-17 | `HOUSE-01057` | **New task, next free phase-13 id.** Replace only the coarse formal-living sofa through an independently pinned, deterministic strict-XNA asset path; preserve the stable prop placement and keep full `HOUSE-00988` open. | Round 51 makes the pale sofa the largest contained furniture defect. The official Khronos `SheenWoodLeatherSofa` is CC BY 4.0, materially separated and already visually proven in the sibling catalogue, while the other inspected local candidate has one flat material despite 67,056 triangles. Source topology requires a weld-before-decimate correction; this is bounded asset preparation, not renderer architecture. |

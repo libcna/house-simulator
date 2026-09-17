@@ -1,4 +1,45 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01059` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-00936` checkpoint)
+
+Branch `develop`. Task-start HEAD `12a9d98` (`HOUSE-01059`). This file belongs to the single
+`HOUSE-00936` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The broad front and garage lawns no longer dominate the arrival as saturated lime-green. The
+generated `MAT_OUTDOOR_GRASS` continues to derive from the approved real `grass_lawn_albedo` row,
+but its production tint is now `(0.82, 0.66, 0.88)`. Texture, real UV scale, geometry, exposure,
+daylight, vegetation, collision and culling ownership do not change. In the fixed front frame,
+291,539 pixels above two levels change (20.2458%, normalized MAE 0.010875), moving the mean of the
+changed set from RGB (69.950, 111.296, 35.359) to (68.251, 80.095, 43.025). The garage frame
+changes 159,554 pixels (11.0801%, MAE 0.006063), moving its changed-pixel mean from
+(70.631, 112.143, 35.720) to (68.832, 80.781, 43.511).
+
+All fourteen unchanged cameras in the
+[final clear-day set](visual-review/captures/house-00936-lawn-material-day-final) were inspected.
+Targeted overcast and 22:00 exterior captures confirm that the new lawn remains plausible without
+glow or night lift. Five affected seasonal/exterior strict references were opened pairwise and
+intentionally advanced; no other golden moved.
+
+The generator run exposed a pre-existing ownership hazard: fourteen independently authored
+vegetation material rows had been placed inside the outdoor generator's replacement markers. They
+were restored intact after the END marker. The tool now requires its generated block to contain
+exactly its eighteen ordered ids, rejects a negative injected unowned id, and produces the same
+file SHA-256 on two writes. The rebuilt world remains 632 chunks / 96 cells / 256 exterior
+hierarchy instances / 53.377344 MB.
+
+All 1,409 unit tests, 135 integration tests and 48 active render tests pass; eight render cases
+remain deliberately disabled. All eighteen culled/unculled poses pass at 0.1342% worst case
+(`l0-sunroom`). The full gate accepts all 323 strict-XNA translation units. Compilation and heavy
+tooling stayed on CPU 0-5 / at most six workers.
+
+The largest remaining exterior defect is now spatial rather than chromatic: sparse foundation
+planting, no mulch-bed composition and an empty garage arrival. Blank interior wall bays, weak
+contact grounding, the comparatively blocky formal piano and finite distant landscape follow.
+Continue from the fixed cameras with authored foundation/arrival dressing, not another broad
+global colour adjustment.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01059` checkpoint)
 
 Branch `develop`. Task-start HEAD `acc387c` (`HOUSE-01058`). This file belongs to the single
 `HOUSE-01059` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -41,7 +42,7 @@ VARIANTS = (
     Variant("MAT_OUTDOOR_FENCE_BOARD", "MAT_SIDING_WARM_WHITE", (0.82, 0.77, 0.68)),
     Variant("MAT_OUTDOOR_FENCE_METAL", "MAT_METAL_GUTTER", (0.84, 0.85, 0.81)),
     Variant("MAT_OUTDOOR_GARDEN_WOOD", "MAT_DECK_WOOD", (0.68, 0.60, 0.47)),
-    Variant("MAT_OUTDOOR_GRASS", "MAT_GROUND_LAWN"),
+    Variant("MAT_OUTDOOR_GRASS", "MAT_GROUND_LAWN", (0.82, 0.66, 0.88)),
     Variant("MAT_OUTDOOR_GRAVEL", "MAT_GRAVEL_PATH"),
     Variant("MAT_OUTDOOR_LAWN_WORN", "MAT_GROUND_LAWN", (0.69, 0.68, 0.48)),
     Variant("MAT_OUTDOOR_MULCH", "MAT_SOIL_GARDEN", (0.54, 0.45, 0.35)),
@@ -77,7 +78,7 @@ def expected_rows(rows: dict[str, dict]) -> dict[str, dict]:
     return {variant.material_id: variant_row(variant, rows) for variant in VARIANTS}
 
 
-def problems(rows: dict[str, dict]) -> list[str]:
+def problems(rows: dict[str, dict], source: str) -> list[str]:
     issues = []
     ids = [variant.material_id for variant in VARIANTS]
     if len(ids) != len(set(ids)):
@@ -85,6 +86,16 @@ def problems(rows: dict[str, dict]) -> list[str]:
     required = set(outdoor_materials.ROLE_IDS.values()) | set(outdoor_materials.UNBAKED_VARIANTS.values())
     if set(ids) != required:
         issues.append(f"variant ids {sorted(ids)} do not match source-role and unbaked-shell maps")
+    if source.count(BEGIN) != 1 or source.count(END) != 1:
+        issues.append("generated markers are missing or duplicated")
+    else:
+        generated_block = source.split(BEGIN, 1)[1].split(END, 1)[0]
+        block_ids = re.findall(r'"id"\s*:\s*"([^"]+)"', generated_block)
+        if block_ids != sorted(ids):
+            issues.append(
+                "generated block must contain exactly the 18 owned outdoor variants; "
+                "move independently authored materials after its END marker"
+            )
     for variant in VARIANTS:
         if variant.base_id not in rows:
             issues.append(f"{variant.material_id} has no canonical source row {variant.base_id}")
@@ -124,8 +135,9 @@ def main() -> int:
     group.add_argument("--check", action="store_true")
     group.add_argument("--write", action="store_true")
     args = parser.parse_args()
+    source = MATERIALS_FILE.read_text(encoding="utf-8")
     rows = load_rows()
-    issues = problems(rows)
+    issues = problems(rows, source)
     if issues:
         for issue in issues:
             print(f"outdoor_static_materials: {issue}", file=sys.stderr)
@@ -142,10 +154,6 @@ def main() -> int:
         print(f"outdoor_static_materials: {len(generated)} stock-XNA outdoor variants clean")
         return 0
 
-    source = MATERIALS_FILE.read_text(encoding="utf-8")
-    if source.count(BEGIN) != 1 or source.count(END) != 1:
-        print("outdoor_static_materials: generated markers are missing or duplicated", file=sys.stderr)
-        return 1
     before, remainder = source.split(BEGIN, 1)
     _, after = remainder.split(END, 1)
     rendered = "\n".join(render_row(generated[material_id]) for material_id in sorted(generated))
