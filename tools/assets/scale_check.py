@@ -128,6 +128,9 @@ UNSIZED_CATEGORIES = {
     "houseplant": "§70.5 states no indoor-plant band; manifest bounds and room review own it",
     "media-console": "§70.5 states no media-furniture band; manifest bounds and room review own it",
     "occasional-table": "§70.5 states no coffee/side-table band; manifest bounds and room review own it",
+    "bookcase": "§70.5 states no bookcase band; manifest bounds and room review own it",
+    "pet-bed": "§70.5 states no pet-bed band; manifest bounds and linked nav bed own it",
+    "picture": "§70.5 states no wall-art band; manifest bounds and wall-plane origin own it",
     "rug": "§70.5 states no rug-size band; manifest bounds and room review own it",
     "television": "§70.5 states no television-size band; manifest bounds and room review own it",
 }

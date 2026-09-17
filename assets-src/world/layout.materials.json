@@ -1564,6 +1564,34 @@
       "footstepSurface": "rock", "audioAbsorption": 0.05,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // HOUSE-01051: a small shared set of muted book bindings keeps the family shelves varied
+    // without one material boundary per individual volume.
+    {
+      "id": "MAT_FAMILY_BOOK_SPINES", "class": "plastic",
+      "albedo": "Textures/Materials/paint_warm_fine_albedo",
+      "normal": "Textures/Materials/paint_warm_fine_normal", "lightmapChannel": 0,
+      "tint": [0.54, 0.22, 0.11], "specularColor": [0.05, 0.035, 0.025],
+      "specularPower": 10.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.15, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.16,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
+    // The print and dog-bed insert share a low-sheen blue woven surface; the physical raised
+    // shapes/frame keep the artwork from being a flat screenshot card.
+    {
+      "id": "MAT_FAMILY_ART_CANVAS", "class": "fabric",
+      "albedo": "Textures/Materials/fabric_plain_albedo",
+      "normal": "Textures/Materials/fabric_plain_normal", "lightmapChannel": 0,
+      "tint": [0.30, 0.48, 0.58], "specularColor": [0.025, 0.030, 0.035],
+      "specularPower": 4.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.52,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     // END VISUAL-SLICE FURNITURE MATERIALS
     // BEGIN FOYER FURNITURE MATERIALS (HOUSE-01038)
     {

@@ -16,6 +16,8 @@ beyond the hall opening, angled toward the island and sink run. The other eight 
 `HOUSE-01041` retains all eleven poses and four conditions for an exact lighting comparison.
 `HOUSE-00935` adds a twelfth pose on the driveway, looking squarely at the garage frontage; the
 prior cameras stay unchanged and remain the exact comparison set for the main route.
+`HOUSE-01050` adds the fourteenth, front-on family-media pose after the intervening exterior-approach
+review camera; `HOUSE-01051` retains all fourteen unchanged for an exact furnishing comparison.
 
 ## Round 0 — visual-convergence baseline
 
@@ -1842,3 +1844,48 @@ at most six workers.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. The next
 highest-value change is a measured family-room secondary furnishing/decor composition around this
 now-readable media focus, followed by local family lighting depth rather than global exposure.
+
+## Round 45 — family-room secondary composition
+
+Commit: `HOUSE-01051` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 44's [front media view](captures/house-01050-family-media-day-final/family-media.png)
+has a corrected television and hearth but a blank north wall, one isolated floor plant and no
+physical object for the canonical dog bed. After: the identical
+[final media view](captures/house-01051-family-secondary-day-final/family-media.png) and
+[reverse composition](captures/house-01051-family-secondary-day-final/family-composition.png)
+show a book-and-plant reading wall, framed art, physical bolster bed and a sofa-side table with a
+book. The final directory contains the complete unchanged fourteen-camera clear-day route; every
+frame was captured and the three family views were inspected together and against Round 44.
+
+Ranked visible defects remaining:
+
+1. Family-room daylight is still flat and dark away from the clipped windows; the new objects add
+   depth cues but do not receive the architectural shell's baked gradients.
+2. The pale sofa and mantel-like media source remain geometrically simple compared with the new
+   detailed casework and the formal living/dining compositions.
+3. The broad exterior/garage view is materially coherent but still sparse at player-start scale.
+4. Bright clear-day apertures overpower several hall-to-room views.
+5. Secondary objects in the other selected rooms remain sparse, especially wall art and purposeful
+   surface dressing outside the kitchen.
+
+Fixed: four deterministic project-authored assets add measured domestic roles without new runtime
+architecture or third-party licence risk. The 0.90 x 0.66 m dog bed is linked to
+`BED_DOG_FAMILY`; a 1.15 x 1.55 m bookcase carries eighteen deliberately varied volumes; a 0.52 m
+round table carries one reading book; and a 0.92 x 0.64 m framed abstract uses raised physical
+shapes rather than a copied image. The existing plant now dresses the bookcase top. The first
+visual iteration rejected an artwork embedded in the wall and an unreadably flat pet bed. The
+first bookcase position then failed the unchanged tour recovery check; its final right-wall
+position passes the full route. The wall-mounted instance does not enable its redundant proxy,
+while the freestanding table remains collidable.
+
+The matched media frame changes 99,234 pixels (6.89%) with normalized MAE 0.00393; the reverse
+composition changes 46,512 pixels (3.23%) with normalized MAE 0.00209. The world reaches 624
+chunks / 53 props, and only `L0_FAMILY` rises from seventeen to its exact measured 21-chunk
+exception. The deliberately unculled diagnostic measures 624 draws / 91 state changes, still well
+inside §71.2's 1,400 / 210 worst-case row; named visible-pose budgets and the 0.2% culling gate
+remain unchanged.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. Highest visible
+value is now local family-room lighting/readability, followed by the simplified pale seating/media
+silhouette and broader exterior composition—not additional invisible infrastructure.

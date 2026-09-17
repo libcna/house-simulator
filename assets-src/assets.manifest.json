@@ -1107,6 +1107,140 @@
       ]
     },
     {
+      "id": "MODEL_FAMILY_DOG_BED",
+      "category": "pet-bed",
+      "sourceFile": "assets-src/Models/Furniture/Family/dog_bed.glb",
+      "sourceSha256": "ed806f8308a403b3c6917c2cf3f0c312915931f2577b265ec2066fcd46d95b97",
+      "contentName": "Models/Furniture/Family/dog_bed",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Measured family-room dog bed",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored washable bolster bed from tools/blender/family_secondary_suite.py for HOUSE-01051; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.9, 0.26, 0.66],
+        "triangles": { "LOD0": 540 }
+      },
+      "materialMap": {
+        "FAMILY_TEXTILE": "MAT_FURNITURE_DINING_UPHOLSTERY",
+        "FAMILY_ART": "MAT_FAMILY_ART_CANVAS"
+      },
+      "usedIn": ["L0_FAMILY"]
+    },
+    {
+      "id": "MODEL_FAMILY_BOOKCASE",
+      "category": "bookcase",
+      "sourceFile": "assets-src/Models/Furniture/Family/bookcase.glb",
+      "sourceSha256": "069fe96ccccd0a2bf95a1e8b8b279252757cac918e1e84013175f0f2df8c040a",
+      "contentName": "Models/Furniture/Family/bookcase",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Measured family-room bookcase",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored walnut open bookcase with individually composed cloth-bound books from tools/blender/family_secondary_suite.py for HOUSE-01051; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.15, 1.55, 0.32],
+        "triangles": { "LOD0": 2700 },
+        "collision": "family_bookcase_COL"
+      },
+      "materialMap": {
+        "FAMILY_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "FAMILY_TEXTILE": "MAT_FURNITURE_DINING_UPHOLSTERY",
+        "FAMILY_BOOK": "MAT_FAMILY_BOOK_SPINES",
+        "FAMILY_ART": "MAT_FAMILY_ART_CANVAS"
+      },
+      "usedIn": ["L0_FAMILY"]
+    },
+    {
+      "id": "MODEL_FAMILY_SIDE_TABLE",
+      "category": "occasional-table",
+      "sourceFile": "assets-src/Models/Furniture/Family/side_table.glb",
+      "sourceSha256": "4fbbe8608ac26f868ab9c85d02eeb0c9bcb48195319c4a2ec816324a1f8b4d87",
+      "contentName": "Models/Furniture/Family/side_table",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Measured family-room side table",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored round walnut sofa table with lower shelf and reading book from tools/blender/family_secondary_suite.py for HOUSE-01051; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.52, 0.5945, 0.52],
+        "triangles": { "LOD0": 532 },
+        "collision": "family_side_table_COL"
+      },
+      "materialMap": {
+        "FAMILY_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "FAMILY_BOOK": "MAT_FAMILY_BOOK_SPINES"
+      },
+      "usedIn": ["L0_FAMILY"]
+    },
+    {
+      "id": "MODEL_FAMILY_WALL_ART",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Family/wall_art.glb",
+      "sourceSha256": "80bdd703ce6b0ccee1b034bca822d102005440fd5dcb5c57590e126231c52e65",
+      "contentName": "Models/Furniture/Family/wall_art",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Family-room framed abstract print",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored framed abstract wall composition from tools/blender/family_secondary_suite.py for HOUSE-01051; no third-party image, mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.92, 0.64, 0.063838],
+        "triangles": { "LOD0": 864 }
+      },
+      "materialMap": {
+        "FAMILY_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "FAMILY_TEXTILE": "MAT_FURNITURE_DINING_UPHOLSTERY",
+        "FAMILY_BOOK": "MAT_FAMILY_BOOK_SPINES",
+        "FAMILY_ART": "MAT_FAMILY_ART_CANVAS"
+      },
+      "usedIn": ["L0_FAMILY"]
+    },
+    {
       "id": "MODEL_FURNITURE_UPRIGHT_PIANO",
       "category": "upright-piano",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/upright_piano.glb",

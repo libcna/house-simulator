@@ -14329,6 +14329,44 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             software-render cases pass with eight capture-only cases disabled. No pixel golden is
             advanced. The complete repository gate is green across all 323 strict-XNA translation
             units. Compilation and heavy work use CPU 0-5 / at most six workers.
+- [x] HOUSE-01051 — Add measured secondary furnishing and lived-in detail to `L0_FAMILY`
+      dep: HOUSE-00215, HOUSE-00296, HOUSE-01037, HOUSE-01041, HOUSE-01050 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-17) Round 44 leaves the family room's focal wall readable but visually bare:
+            one isolated plant, blank wall area and no physical object for the already canonical dog
+            bed. Add a narrow deterministic secondary suite rather than claiming the blocked full
+            `HOUSE-00992` room task or scattering generic props.
+      accept: author a measured dog bed, bookcase with deliberately varied books, sofa-side table
+            with a reading object and framed wall composition through the approved project-authored
+            asset path; use metre UV0, grounded origins, shared coherent finishes and bounded proxy
+            geometry where it materially affects play. Link `BED_DOG_FAMILY` to the physical bed,
+            retain clear kitchen/hall/laundry circulation, keep the bookcase and plant composed as
+            one wall-side group, and pass deterministic source/hash, provenance, licence, scale,
+            stable-ID, content, collision, stock-XNA, render and culling gates. Capture and inspect
+            the unchanged fourteen-camera clear-day route, raise only the exactly measured
+            `L0_FAMILY` chunk boundary, and keep compilation/heavy tooling to six CPU cores.
+      findings: (2026-09-17) Four deterministic Ms-PL sources provide a 0.90 x 0.66 m bolster bed,
+            a 1.15 x 1.55 m open case with eighteen non-uniform books, a 0.52 m round table and a
+            raised-shape 0.92 x 0.64 m abstract print. Wood and cloth reuse approved close-range
+            finishes; two muted book/canvas roles retain controlled colour. The plant now dresses
+            the bookcase top instead of floating alone. The case asset retains a <=64-triangle
+            proxy for reuse, but its flush wall instance relies on the room wall: enabling the
+            redundant 0.32 m proxy altered the deterministic long walk and led it to the already
+            documented stair-well gap. The freestanding side table keeps its proxy.
+      review: (2026-09-17) The first capture rejected an artwork embedded in the north wall and a
+            dog bed too flat to read; the corrected print stands fully proud and taller bolsters
+            make the bed legible. A second placement at the north-wall centre failed the unchanged
+            tour's recovery axis, so the final case moves right of the laundry door and the plant
+            sits on its top. Against Round 44, the front media view changes 99,234 pixels (6.89%,
+            normalized MAE 0.00393) and now reads as an inhabited media/reading wall. Flat family
+            lighting and simple pale seating are the next visible defects.
+      verified: (2026-09-17) The permanent deterministic asset/world checker, all thirteen world
+            rules, licence, budget, scale, origin and 2,852-id checks pass. The final world is 624
+            chunks / 53 props; `L0_FAMILY` reaches exactly its documented 21-chunk boundary. Unit
+            tests pass 1409/1409, the writable-root offscreen integration suite passes 134/134,
+            and all 48 active software-render cases pass with eight capture-only cases disabled.
+            No pixel golden is advanced; culled-vs-unculled equivalence remains 0.1320% worst case.
+            The complete repository gate is green across all 323 strict-XNA translation units.
+            Compilation and heavy work use CPU 0-5 / at most six workers.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -18557,6 +18595,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01051` | **New task, next free phase-13 id.** Add a bounded deterministic family-room secondary suite, link the existing dog-bed nav role to a physical prop and raise only `L0_FAMILY` from its measured 17-chunk exception to 21. | Round 44's fixed family cameras make sparse secondary object density the highest repeated visible defect. Full `HOUSE-00992` remains dependency-blocked and covers broader furnishing/interactivity, while a dog bed, composed bookcase, side table and one restrained artwork are dependency-valid through the completed static-prop path. Two rejected placements were corrected from screenshots and unchanged collision tests rather than hidden behind exceptions. |
 | 2026-09-17 | `HOUSE-01050` | **New task, next free phase-13 id.** Split the inspected television and media-unit `BlackMarble` source roles from their erroneous shared cream upholstery mapping, add a permanent focal-wall review camera and raise only `L0_FAMILY` from its measured 15-chunk exception to 17. | Round 43 identifies sparse family-room finish depth as the next visible defect. A front-on capture proves the dominant focal objects already exist and are aligned, but their source roles were flattened into cream: the TV is a blank rectangle and the named black-marble component is lost. Correct manifest bindings have higher value and lower risk than replacing approved CC-BY geometry or adding a renderer special case; the full room furnishing task remains dependency-blocked and open. |
 | 2026-09-17 | `HOUSE-01284` | **New task, next free phase-16 id.** Replace the four existing nominal under-cabinet ceiling points with a deterministic hood-mounted puck reused four times, link each physical diffuser, preserve the original group ids/default-off 1600 lm weighting, rebake only `L0_KITCHEN` and raise its exact chunk boundary from 19 to 20. | Round 42 names the dark cooking bay and malformed task group as the highest visible defect. Explicitly enabling the old data creates four broad white ceiling spots because the sources sit at y 3.20 across the room and have no real fixtures. The range hood already supplies a measured mounting surface, so a short downward spot and selected bake correct the source without widening island cones, changing global exposure or adding renderer architecture. The bright-day group stays off because forcing it on made the fixed view objectively darker; the on-state is reviewed separately at 22:00. |
 | 2026-09-17 | `HOUSE-01283` | **New task, next free phase-16 id.** Replace the three existing island points with a deterministic physical pendant reused three times, align them to the real island's long axis, link exact diffuser emission, use downward spot semantics and raise only `L0_KITCHEN` from its measured 17-chunk exception to 19. | Round 41's fixed kitchen images identify flat, underexposed depth as the largest defect. Directly enabling the old unlinked points reveals a worse authoring error: they run along z beside the island and create a giant orange ceiling pool. A bounded bell shade, correct x-axis spacing and a selected spot bake improve both day and night normal play without global exposure, a renderer experiment or unrelated room work. |

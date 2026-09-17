@@ -1,4 +1,46 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01050` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01051` checkpoint)
+
+Branch `develop`. Task-start HEAD `50d8e45` (`HOUSE-01050`). This file belongs to the single
+`HOUSE-01051` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The family room now has a coherent secondary domestic layer rather than a corrected TV surrounded
+by blank wall. Four deterministic, project-authored Ms-PL models add a 0.90 x 0.66 m bolster dog
+bed, a 1.15 x 1.55 m open bookcase with eighteen non-uniform volumes, a 0.52 m round sofa table
+with a reading book, and a 0.92 x 0.64 m framed raised-shape abstract. The existing plant is composed
+on the bookcase top, and `BED_DOG_FAMILY` now names the physical bed prop. Wood/cloth reuse approved
+close-range finishes; two restrained book/canvas roles supply controlled accent colour.
+
+Before: Round 44's fixed [media wall](visual-review/captures/house-01050-family-media-day-final/family-media.png)
+is legible but sparse. After: the identical
+[final media view](visual-review/captures/house-01051-family-secondary-day-final/family-media.png),
+[reverse composition](visual-review/captures/house-01051-family-secondary-day-final/family-composition.png)
+and the directory's complete fourteen-camera route were captured and inspected. The media pair
+changes 99,234 pixels (6.89%, normalized MAE 0.00393); the reverse pair changes 46,512 (3.23%,
+normalized MAE 0.00209). The first iteration embedded the art in the wall and made the bed too
+flat; both were rejected. The first central bookcase placement failed the unchanged wall-recovery
+tour and was moved to the measured right-wall bay.
+
+The bookcase source retains a <=64-triangle proxy for reuse, but this flush wall instance relies
+on the existing wall collision. Enabling the redundant proxy changed the deterministic long walk
+and steered it into the project's already documented main-stair well gap; disabling only that
+instance restores the 20-minute walk while the freestanding side table remains collidable. The
+full focused camera/inside-geometry/property/cell walk set passes without exceptions.
+
+The built world is 624 chunks / 53 props / 256 exterior hierarchy instances / 53.2100 MB. Only
+`L0_FAMILY` rises from seventeen to its exact measured 21-chunk exception. The unculled diagnostic
+is 624 draws / 91 state changes, inside §71.2's 1,400 / 210 worst-case row; named visible poses
+continue to protect the typical row. Licence credits, content budget and 2,852 stable ids are
+regenerated/current. Final complete gate results are recorded in `plan.md`.
+
+No strict render golden requires advancement. The largest visible defect is now flat, dark
+family-room lighting around the detailed objects and very bright apertures, followed by the pale
+simple sofa/media silhouettes. The broad exterior/garage framing remains the next larger sparse
+area. Do not misreport this bounded checkpoint as completed `HOUSE-00992`.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01050` checkpoint)
 
 Branch `develop`. Task-start HEAD `9bfc4b7` (`HOUSE-01284`). This file belongs to the single
 `HOUSE-01050` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
