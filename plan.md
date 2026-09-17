@@ -15441,6 +15441,47 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             measured 21 to 23 chunks. Unit tests pass 1409/1409, serial offscreen integration tests
             135/135 and all 49 active software-render cases pass; culled-vs-unculled remains 0.1320%
             worst case. The complete repository gate is green with heavy work capped at six cores.
+- [x] HOUSE-01286 — Replace the formal living room's singular bare points with physical broad practicals
+      dep: HOUSE-00940, HOUSE-01058, HOUSE-01256, HOUSE-01259, HOUSE-01260, HOUSE-01285 · sys: world, content, lighting, rendering · plat: ALL · pri: MUST
+      note: (2026-09-17) Round 59 and a controlled existing-atlas A/B show that simply switching
+            `LG_L0_LIVING_MAIN` on leaves the walls and floor nearly black while adding four small
+            ceiling hot spots. Its four bare point sources sit only 20 mm below the ceiling; the
+            resulting atlas has a 10.5507 peak but only 0.0110 mean irradiance and loses nearly all
+            useful room distribution when normalized to RGBA8. Reuse the already approved measured
+            semi-flush fixture at the four unchanged source positions, move each optical origin to
+            its real lower diffuser, use the proven broad downward spot distribution and rebake only
+            `L0_LIVING`; do not raise global exposure or invent a renderer workaround.
+      accept: all four existing stable main sources link to physical opal/bronze fixtures at their
+              measured ceiling positions, use a plausible domestic flux and broad downward cone,
+              and start on so the selected normal-play route is readable without a debug command.
+              The regenerated main atlas has no near-ceiling singularity and visibly illuminates
+              walls, floor and furniture at both canonical day and night while retaining contrast.
+              Inspect matched sixteen-camera captures and explicit off/on controls; update only the
+              measured living chunk exception and intended render references. Deterministic asset,
+              provenance, content, unit, integration, render, culling and strict-XNA gates pass with
+              compilation/heavy work restricted to CPU 0-5 / at most six workers.
+      done: (2026-09-17) The four stable main sources retain their plan positions but now sit at
+            the lower optical face of four reused 420 x 180 x 420 mm bronze/opal semi-flush
+            fixtures. Each is a linked 1,200 lm / 3,000 K LED spot with a broad 72/140-degree
+            feather, 6.62 m range and selected-bake calibration; the normal new-game group starts
+            on. Review-only `--light-off` is the symmetric repeatable control for the existing
+            `--light-on`, so a default-on practical can be compared without mutating world data.
+      review: (2026-09-17) Round 60 compares complete fixed sixteen-camera day/night sets against
+            Round 59 and inspects four exact current off controls. The straight living view now
+            reads the piano, paired doors, walls and floor as one warm room instead of a tiny
+            picture-light island in black; composition shows two physical ceiling fixtures and
+            retained window/fireplace contrast. The day straight/composition frames change
+            1.430M / 1.309M pixels above two channel levels (normalized MAE 0.02413 / 0.03320);
+            night changes 1.430M / 1.307M (0.02342 / 0.03831). Adjacent-room views show only real
+            sight-line effects; no spill or global-exposure change was accepted.
+      verified: (2026-09-17) The deterministic shared-fixture check pins all four new placements,
+            optical links and bake semantics. The selected 256-sample main atlas now peaks at
+            0.1995 instead of 10.5507 while mean irradiance rises from 0.0110 to 0.0323. The world
+            is 651 chunks / 68 props / 53.787279 MB; the unculled diagnostic is 607 opaque, 44
+            cutout and 99 state changes. All 1,409 unit, 135 integration and 48 active software-
+            render tests pass; all eighteen culling pairs pass at 0.1338% worst (`l0-sunroom`).
+            Stable-id, lightmap/content, provenance, budget and all 323 strict-XNA translation-unit
+            gates pass with compilation/heavy work restricted to CPU 0-5 / at most six workers.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -19167,6 +19208,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01286` | **New task, next free phase-16 id.** Reuse the approved physical semi-flush fixture for the four already-authored formal-living main sources, replace their near-ceiling point singularities with measured broad downward optics and promote only the selected-cell bake. | Round 59's largest remaining defect is the nearly black formal living room. A fixed-camera `--light-on=LG_L0_LIVING_MAIN` control proves this is not merely an off switch: the current atlas adds four tiny ceiling spots but leaves the room black. Bake evidence explains it quantitatively (10.5507 peak / 0.0110 mean) and the completed family fixture provides a dependency-valid 0.2292 peak / 0.0454 mean reference without a new asset, renderer or global-exposure change. |
 | 2026-09-17 | `HOUSE-00940` | **New task, next free phase-12 id.** Interpret the already-authored `D_DOUBLE` leaf width as one member of its full portal pair, and generate opaque panelled or translucent glazed joinery from the portal's existing semantics. | Round 58's straight living view exposes a broad blank rectangle beside the finished piano. The opening schedule explicitly says its 860 mm row is “one leaf of a pair,” while the shell centres only that one leaf in a 1.80 m portal and fills the two 470 mm remnants as lining. Correcting the general static closed-leaf grammar improves all four formal-room pairs without a prop, room-name exception, new renderer or changed portal/collision dimensions. |
 | 2026-09-17 | `HOUSE-00939` | **New task, next free phase-12 id.** Reuse the measured wall lantern as two garage-door carriage lights on a separate dusk group while retaining the existing manual utility flood. After the first capture, refine “near apron” to “door/local jamb facade”; the manual flood retains the broad-apron role. | Round 57's fixed driveway frames show one broad empty garage wall by day and a near-black normal-play arrival at 22:00 because the central 4,000 K flood is correctly manual/off. Two short-range 2,400 K fixtures at the jambs supply human scale and bounded normal-night readability without global exposure, another asset or changing the utility-light contract. The rejected first capture proved that asking the range-bounded carriage lights to illuminate the terrain tile's distant centre conflicts with keeping the side fence dark and duplicates the authored utility flood rather than improving the physical composition. |
 | 2026-09-17 | `HOUSE-00938` | **New task, next free phase-12 id.** Reuse the measured semi-flush fixture for two physical porch sources, keep them on the existing dusk circuit and give their cross-cell bake an explicit per-source offline calibration. | Round 56 names the almost-black night facade outside two hot door lanterns as the largest arrival defect. Two outer-bay fixtures add layered architectural light without changing global exposure or converting the manual path/garage groups; separating always-visible glass from the switched optical disc also fixes the reused asset's off-state silhouette. |

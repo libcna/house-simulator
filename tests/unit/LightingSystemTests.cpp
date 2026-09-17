@@ -550,7 +550,7 @@ TEST(LightingSystemTests, FamilyMainDefaultsOnAndBorrowsThroughTheKitchenOpening
     EXPECT_LT(darkerKitchen->borrowed, borrowedFromFamily);
 }
 
-TEST(LightingSystemTests, LivingPianoAccentDefaultsOnWithoutEnablingMainCeilingGroup)
+TEST(LightingSystemTests, LivingPianoAccentAndPhysicalMainPracticalsDefaultOn)
 {
     if (!ContentIsBuilt())
     {
@@ -562,7 +562,7 @@ TEST(LightingSystemTests, LivingPianoAccentDefaultsOnWithoutEnablingMainCeilingG
     ASSERT_NE(piano, nullptr);
     ASSERT_NE(main, nullptr);
     EXPECT_TRUE(piano->on) << "the formal-room focal piece needs its authored accent";
-    EXPECT_FALSE(main->on) << "the arrival state must not flatten the room with every ceiling light";
+    EXPECT_TRUE(main->on) << "the broad physical practicals make the formal room readable";
 }
 
 TEST(LightingSystemTests, TurningOnEveryGroupInARoomLightsItExactlyFully)

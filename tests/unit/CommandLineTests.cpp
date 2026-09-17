@@ -46,6 +46,7 @@ namespace
                               "--weather=rain",
                               "--light-on=LG_EXT_DRIVEWAY_FLOOD",
                               "--light-on=LG_L0_GARAGE_MAIN",
+                              "--light-off=LG_L0_LIVING_MAIN",
                               "--screenshot=/tmp/shot.png",
                               "--log=world,content"});
         ASSERT_TRUE(options) << options.Error().ToString();
@@ -62,6 +63,8 @@ namespace
         ASSERT_EQ(options->lightGroupsOn.size(), 2u);
         EXPECT_EQ(options->lightGroupsOn[0], "LG_EXT_DRIVEWAY_FLOOD");
         EXPECT_EQ(options->lightGroupsOn[1], "LG_L0_GARAGE_MAIN");
+        ASSERT_EQ(options->lightGroupsOff.size(), 1u);
+        EXPECT_EQ(options->lightGroupsOff[0], "LG_L0_LIVING_MAIN");
         EXPECT_EQ(options->screenshot.value_or(""), "/tmp/shot.png");
         EXPECT_EQ(options->logCategories.value_or(""), "world,content");
     }

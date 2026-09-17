@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate and validate the shared physical family/porch ceiling fixture."""
+"""Regenerate and validate the shared physical living-space/porch ceiling fixture."""
 
 from __future__ import annotations
 
@@ -32,11 +32,17 @@ EXPECTED_MATERIALS = {
     "FamilyCeilingGlass",
     "FamilyCeilingDiffuser",
 }
-MAIN_POSITIONS = (
+FAMILY_POSITIONS = (
     [4.37, 3.12, -25.40],
     [6.53, 3.12, -25.40],
     [4.37, 3.12, -23.70],
     [6.53, 3.12, -23.70],
+)
+LIVING_POSITIONS = (
+    [-6.20, 3.12, -18.23],
+    [-4.20, 3.12, -18.23],
+    [-6.20, 3.12, -16.27],
+    [-4.20, 3.12, -16.27],
 )
 PORCH_POSITIONS = (
     [-2.45, 3.17, -12.95],
@@ -120,7 +126,7 @@ def validate_world() -> None:
     layout = layout_io.load_layout(REPO / "assets-src" / "world", ["props", "lights"])
     props = layout_io.by_id(layout_io.rows(layout, "props"), "prop")
     lights = layout_io.by_id(layout_io.rows(layout, "lights"), "light")
-    for index, position in enumerate(MAIN_POSITIONS, 1):
+    for index, position in enumerate(FAMILY_POSITIONS, 1):
         prop_id = f"PROP_L0_FAMILY_CEILING_{index}"
         light_id = f"LIGHT_L0_FAMILY_MAIN_{index}"
         prop = props[prop_id]
@@ -137,6 +143,25 @@ def validate_world() -> None:
                 light["emissiveMaterialSlot"] != "FamilyCeilingDiffuser" or \
                 not light["bakedIntoLightmap"] or not light["defaultOn"]:
             raise RuntimeError(f"family ceiling optical linkage changed: {light_id}")
+
+    for index, position in enumerate(LIVING_POSITIONS, 1):
+        prop_id = f"PROP_L0_LIVING_CEILING_{index}"
+        light_id = f"LIGHT_L0_LIVING_MAIN_{index}"
+        prop = props[prop_id]
+        light = lights[light_id]
+        if prop["asset"] != ASSET_ID or prop["cell"] != "L0_LIVING" or \
+                prop["position"] != position or prop["yawDeg"] != 0 or \
+                prop["scale"] != 1 or not prop["static"] or prop["collision"] != "none":
+            raise RuntimeError(f"canonical living ceiling placement changed: {prop_id}")
+        if light["fixtureProp"] != prop_id or light["position"] != position or \
+                light["type"] != "spot" or light["direction"] != [0.0, -1.0, 0.0] or \
+                light["coneInnerDeg"] != 72.0 or light["coneOuterDeg"] != 140.0 or \
+                light["colorK"] != 3000 or light["bulbClass"] != "led" or \
+                light["intensityLm"] != 1200.0 or light["range"] != 6.62 or \
+                light["bakeLumensPerRadiantWatt"] != 100.0 or \
+                light["emissiveMaterialSlot"] != "FamilyCeilingDiffuser" or \
+                not light["bakedIntoLightmap"] or not light["defaultOn"]:
+            raise RuntimeError(f"living ceiling optical linkage changed: {light_id}")
 
     for index, position in enumerate(PORCH_POSITIONS, 1):
         prop_id = f"PROP_L0_PORCH_CEILING_{index}"

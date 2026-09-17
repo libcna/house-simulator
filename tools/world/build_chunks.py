@@ -165,7 +165,7 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "replaces its old cushion while walnut and steel already exist. HOUSE-00938 "
                   "splits the shared ceiling fixture's always-visible opal bowl from its switched "
                   "emitter, adding one truthful glass role; 25 stays exact"),
-    "L0_LIVING": (25,
+    "L0_LIVING": (28,
                   "measured with HOUSE-01037's first furnished conversation group: six shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. The extra "
@@ -176,8 +176,10 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "HOUSE-01057 replaces the two-role pale sofa with five source-exact leather, "
                   "paisley, stripe, fringe and carved-frame roles; the measured net increase is "
                   "three. HOUSE-01058 reuses the room's leather, walnut and brass for its bench, "
-                  "while one woven art field and one switched diffuser add two draw roles; 25 "
-                  "stays exact"),
+                  "while one woven art field and one switched diffuser add two draw roles. "
+                  "HOUSE-01286 reuses a shared bronze body but adds one opal-glass role and one "
+                  "separately switched main-group emitter for four linked ceiling fixtures; 28 "
+                  "is the measured base exception"),
     "L0_DINING": (10,
                   "HOUSE-01048's measured formal composition: four shell finishes plus walnut, "
                   "brass, upholstered fabric, rug, chandelier metal and the independently switched "

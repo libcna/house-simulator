@@ -610,6 +610,13 @@ namespace cnahouse::app
                 throw std::runtime_error(std::format("--light-on names unknown authored group '{}'", name));
             }
         }
+        for (const std::string& name : options_.lightGroupsOff)
+        {
+            if (!lighting_->SetGroupOn(util::Id::Of(name), false))
+            {
+                throw std::runtime_error(std::format("--light-off names unknown authored group '{}'", name));
+            }
+        }
         if (blockoutChunks_ != nullptr && blockoutCells_ != nullptr && materialBinder_ != nullptr &&
             materialBinder_->Count() != 0U && caches_ != nullptr)
         {

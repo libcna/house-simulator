@@ -3418,6 +3418,14 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > exposure, switches and ordinary dynamic-object assignment remain local. The first use is the
 > `EXT_WALK` front stair receiving the adjacent porch lanterns without automatically enabling its
 > independently switched path-light group.
+>
+> `HOUSE-01286` replaces the formal living room's four bare near-ceiling points with linked
+> physical semi-flush practicals. Each stable source now originates at the lower opal diffuser,
+> uses a 1,200 lm / 3,000 K broad 72/140-degree downward spot and starts on in normal play. The
+> selected-cell rebake removes the old 10.5507 near-ceiling singularity: the main atlas peak is
+> 0.1995 while mean useful irradiance rises from 0.0110 to 0.0323. The stock-XNA runtime,
+> exposure and room-state model are unchanged. Repeatable review-only `--light-on` and
+> `--light-off` overrides provide matched controls without rewriting canonical switch defaults.
 
 ### 28.4 Daylight through windows
 

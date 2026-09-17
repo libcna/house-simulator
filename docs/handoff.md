@@ -1,3 +1,49 @@
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01286` checkpoint)
+
+Branch `develop`. Task-start HEAD `5bb3abc5b739fb2ed117f333e8b239675d0e3b58`
+(`HOUSE-00940`). This file belongs to the single `HOUSE-01286` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+The formal living room no longer depends on four invisible point sources 20 mm below the ceiling.
+Its stable main sources now link to four instances of the approved project-authored 420 x 180 x
+420 mm bronze/opal semi-flush fixture at their unchanged plan positions. Their optical origins sit
+at the real lower diffusers, and each uses a broad 72/140-degree downward distribution at 1,200 lm,
+3,000 K and 6.62 m range. The main group starts on for a readable normal-play route. The selected
+256-sample bake removes the old 10.5507 singular peak: peak is 0.1995 and useful mean irradiance
+rises from 0.0110 to 0.0323. Exposure, renderer architecture, room ownership, collision and portal
+visibility are unchanged.
+
+All 32 frames in the complete matched
+[clear-day set](visual-review/captures/house-01286-living-practicals-day-final) and
+[normal-night set](visual-review/captures/house-01286-living-practicals-night-final) were inspected.
+The four-frame [off control](visual-review/captures/house-01286-living-practicals-controls-final)
+uses the new repeatable review-only `--light-off` option against the exact same current scene. The
+[day living composition](visual-review/captures/house-01286-living-practicals-day-final/living-composition.png)
+and [night straight view](visual-review/captures/house-01286-living-practicals-night-final/living-room.png)
+show the physical fixtures and broad warm contribution most clearly. Against Round 59, the day
+straight/composition frames change about 1.430M / 1.309M pixels above two channel levels
+(normalized MAE 0.02413 / 0.03320); night changes 1.430M / 1.307M (0.02342 / 0.03831).
+
+Only the strict `blockout-l0-living` reference was deliberately advanced after pairwise inspection
+showed two new fixture silhouettes. Seven incidental regenerated exterior references were restored
+byte-for-byte. The world is 651 chunks / 96 cells / 68 static props / 258 exterior hierarchy
+instances / 53.787279 MB. The unculled diagnostic is 607 opaque submissions, 44 cutouts and 99
+state changes.
+
+Deterministic fixture/world/lightmap checks, all thirteen world validators, all 1,409 unit and 135
+integration tests, and all 48 active software-render tests pass; eight capture-only cases remain
+disabled. All eighteen culled/unculled poses pass at 0.1338% worst (`l0-sunroom`). Stable-id,
+provenance/licence, budget and all 323 strict-XNA translation-unit gates pass; compilation and
+heavy work stayed on CPU 0-5 / at most six workers.
+
+Next highest visible value: the upper facade, garage apron and front yard still collapse into broad
+black planes at night. After a bounded physical exterior-lighting layer, improve formal-living
+contact grounding and restrained wall dressing; do not raise global exposure or leave the visual
+slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-17 (`HOUSE-00940` checkpoint)
 
 Branch `develop`. Task-start HEAD `c97d6a529cbed48c83bebd217a0d425bd48fdbed` (`HOUSE-00939`).

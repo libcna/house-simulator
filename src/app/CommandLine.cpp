@@ -157,6 +157,8 @@ namespace cnahouse::app
                "  --weather=<name>            Weather archetype to start in\n"
                "  --light-on=<group>          Turn one authored group on for deterministic review;\n"
                "                              repeat for additional groups\n"
+               "  --light-off=<group>         Turn one authored group off for deterministic review;\n"
+               "                              repeat for additional groups\n"
                "  --no-audio                  Start with audio disabled\n"
                "  --no-cull                   Draw everything resident instead of §25's visible\n"
                "                              set -- the same switch as the `cull off` command\n"
@@ -409,6 +411,15 @@ namespace cnahouse::app
                     return value.Error();
                 }
                 options.lightGroupsOn.emplace_back(*value);
+            }
+            else if (argument.name == "--light-off")
+            {
+                auto value = requireValue("--light-off");
+                if (!value)
+                {
+                    return value.Error();
+                }
+                options.lightGroupsOff.emplace_back(*value);
             }
             else if (argument.name == "--screenshot")
             {

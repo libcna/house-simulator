@@ -101,6 +101,12 @@ namespace cnahouse::app
         /// authority. Visual review uses it to photograph a manually controlled practical in its
         /// real on-state without rewriting world data or pretending it belongs on a dusk sensor.
         std::vector<std::string> lightGroupsOn;
+        /// @brief Repeatable deterministic review override for a real authored group to be off.
+        ///
+        /// This is the matched control for `lightGroupsOn`: it lets a review prove what a
+        /// default-on practical contributes without changing canonical world data. Off is applied
+        /// after on if a caller deliberately names the same group in both lists.
+        std::vector<std::string> lightGroupsOff;
         /// @brief Take a screenshot to this path and exit.
         std::optional<std::string> screenshot;
         /// @brief Which drawn frame `--screenshot` captures. 1 is the first, and the default.

@@ -64,6 +64,8 @@ def main() -> int:
                         help="fixed time/weather review condition (default: clear-day)")
     parser.add_argument("--light-on", action="append", default=[], metavar="GROUP",
                         help="turn on an authored manual group for this review set (repeatable)")
+    parser.add_argument("--light-off", action="append", default=[], metavar="GROUP",
+                        help="turn off an authored group for this review set (repeatable)")
     args = parser.parse_args()
 
     binary = args.binary.resolve()
@@ -97,6 +99,7 @@ def main() -> int:
             "--freeze-time",
             f"--weather={weather}",
             *(f"--light-on={group}" for group in args.light_on),
+            *(f"--light-off={group}" for group in args.light_off),
             "--no-audio",
             "--screenshot-frame=3",
             f"--screenshot={output}",

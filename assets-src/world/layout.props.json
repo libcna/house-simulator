@@ -420,6 +420,58 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_LIVING_CEILING_1",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_LIVING",
+      "position": [-6.20, 3.12, -18.23],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_LIVING_CEILING_2",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_LIVING",
+      "position": [-4.20, 3.12, -18.23],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_LIVING_CEILING_3",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_LIVING",
+      "position": [-6.20, 3.12, -16.27],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_LIVING_CEILING_4",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_LIVING",
+      "position": [-4.20, 3.12, -16.27],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_DINING_RUG",
       "asset": "MODEL_FURNITURE_RUG",
       "cell": "L0_DINING",

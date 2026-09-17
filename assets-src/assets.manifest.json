@@ -644,7 +644,7 @@
       "residencyPack": "house-l0",
       "origin": {
         "kind": "authored",
-        "name": "Opal-glass family-room ceiling light",
+        "name": "Opal-glass semi-flush ceiling light",
         "licence": "Ms-PL",
         "licenceFile": "LICENSE",
         "attribution": "",
@@ -652,7 +652,7 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Project-authored measured semi-flush ceiling light generated deterministically by tools/blender/family_ceiling_light.py for HOUSE-01285 and refined for outdoor reuse by HOUSE-00938. The dark-bronze trim surrounds an always-visible opal bowl plus a smaller lower optical disc at the model origin; only that exact disc is the switched emissive slot. One asset is reused at four family-room and two front-porch positions; no third-party mesh or texture was copied."
+        "note": "Project-authored measured semi-flush ceiling light generated deterministically by tools/blender/family_ceiling_light.py for HOUSE-01285, refined for outdoor reuse by HOUSE-00938 and reused in the formal living room by HOUSE-01286. The dark-bronze trim surrounds an always-visible opal bowl plus a smaller lower optical disc at the model origin; only that exact disc is the switched emissive slot. One asset is reused at four family-room, four formal-living and two front-porch positions; no third-party mesh or texture was copied."
       },
       "geometry": {
         "unitScale": 1,
@@ -673,6 +673,7 @@
       },
       "usedIn": [
         "L0_FAMILY",
+        "L0_LIVING",
         "L0_PORCH"
       ]
     },
@@ -20847,7 +20848,7 @@
       "id": "TEXTURE_L0_LIVING_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY.png",
-      "sourceSha256": "b541f3d3b337d1964efddd776a57676411d066961e992c0e621e92f043934627",
+      "sourceSha256": "c1ecaa82919ba7d0c79db9b4d761f37cd333c8473863f1f9129885ec81b360bd",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20874,7 +20875,7 @@
       "id": "TEXTURE_L0_LIVING_LM_LG_L0_LIVING_FIRE",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_FIRE.png",
-      "sourceSha256": "27e8c3e73f5069c18aa531933ae86e05dea4f15ec4f2c00d2bb49cf625fb1d55",
+      "sourceSha256": "6645770b274754231d183fc4302116f81a03cc2c8b27612c606732a4cddf9364",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20901,7 +20902,7 @@
       "id": "TEXTURE_L0_LIVING_LM_LG_L0_LIVING_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_MAIN.png",
-      "sourceSha256": "0b36c6a0e60be5aa969c9b301535375763f7ecd482f70f41541bdc651ac6ee26",
+      "sourceSha256": "abb8f7bbe6ff8de4a75afc9113c89e9646f412b0c5b8028ca2f88231c3cf77fa",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20928,7 +20929,7 @@
       "id": "TEXTURE_L0_LIVING_LM_LG_L0_LIVING_PIANO",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_PIANO.png",
-      "sourceSha256": "8ad0ff79b58a5c84bf981f5946d2c8385ef877cffd1f210f500a0fb8060154a6",
+      "sourceSha256": "f9e9c4334c88d80975e00e9d3c89e6b99cbcf3f228735d4879d29969bef03302",
       "texture": {
         "width": 128,
         "height": 128,

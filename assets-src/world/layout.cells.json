@@ -718,7 +718,7 @@
       "daylight": { "orientation": "NW", "exposure": 0.46 },
       "lightGroups": ["LG_L0_LIVING_MAIN", "LG_L0_LIVING_FIRE", "LG_L0_LIVING_PIANO"],
       "lightmaps": {
-        "shellHash": "sha256:fb1c7d352826cdb8411b189368914cd41df5aa342b91b5b7b8d73e85836642f6",
+        "shellHash": "sha256:2cd7985a1aeadd40378bed97441aa7aba595892a9429cac46ee2627d07f89dad",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_LIVING_LM_DAY",
           "scale": 1.000000238418579
@@ -727,17 +727,17 @@
           {
             "group": "LG_L0_LIVING_FIRE",
             "contentName": "Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_FIRE",
-            "scale": 0.017679672688245773
+            "scale": 0.017560990527272224
           },
           {
             "group": "LG_L0_LIVING_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_MAIN",
-            "scale": 10.550651550292969
+            "scale": 0.19947990775108337
           },
           {
             "group": "LG_L0_LIVING_PIANO",
             "contentName": "Textures/Lightmaps/Artificial/L0_LIVING_LM_LG_L0_LIVING_PIANO",
-            "scale": 0.0995696410536766
+            "scale": 0.09956522285938263
           },
           {
             "group": "LG_L0_PORCH_LANTERN",

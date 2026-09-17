@@ -672,9 +672,9 @@
             "LIGHT_L0_LIVING_FIRE_1",
             "LIGHT_L0_LIVING_FIRE_2"
           ],
-          "mean": 0.002576373012275877,
-          "peak": 0.017679672688245773,
-          "scale": 0.017679672688245773
+          "mean": 0.0025685818328957523,
+          "peak": 0.017560990527272224,
+          "scale": 0.017560990527272224
         },
         {
           "group": "LG_L0_LIVING_MAIN",
@@ -685,9 +685,9 @@
             "LIGHT_L0_LIVING_MAIN_3",
             "LIGHT_L0_LIVING_MAIN_4"
           ],
-          "mean": 0.011014253929156826,
-          "peak": 10.550651550292969,
-          "scale": 10.550651550292969
+          "mean": 0.03228618451084685,
+          "peak": 0.19947990775108337,
+          "scale": 0.19947990775108337
         },
         {
           "group": "LG_L0_LIVING_PIANO",
@@ -695,9 +695,9 @@
           "lights": [
             "LIGHT_L0_LIVING_PIANO_1"
           ],
-          "mean": 0.00032344071535750384,
-          "peak": 0.0995696410536766,
-          "scale": 0.0995696410536766
+          "mean": 0.00032280098546848095,
+          "peak": 0.09956522285938263,
+          "scale": 0.09956522285938263
         },
         {
           "group": "LG_L0_PORCH_LANTERN",
@@ -711,7 +711,7 @@
         }
       ],
       "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:fb1c7d352826cdb8411b189368914cd41df5aa342b91b5b7b8d73e85836642f6"
+      "shellHash": "sha256:2cd7985a1aeadd40378bed97441aa7aba595892a9429cac46ee2627d07f89dad"
     },
     {
       "cell": "L0_MUDROOM",
@@ -1938,12 +1938,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_GARAGE"
+    "L0_LIVING"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1036264,
+  "sourceBytes": 1044262,
   "tool": "bake_house_lightmaps.py"
 }

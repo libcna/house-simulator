@@ -2585,3 +2585,54 @@ cutouts and 99 state changes. Tests and gates are recorded in `docs/handoff.md`.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
 debug blockout remains available. The next highest interior value is to rebalance formal-living
 light and contact grounding without lifting global exposure or inventing a new renderer.
+
+## Round 60 — physical formal-living practicals
+
+Commit: `HOUSE-01286` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 59's [day living view](captures/house-00940-double-doors-day-final/living-room.png)
+and [night living view](captures/house-00940-double-doors-night-final/living-room.png) leave the
+piano, paired doors, broad walls and most of the floor nearly black around one small picture-light
+pool. Merely forcing the old main group on produced four ceiling hot spots because its bare points
+sat 20 mm below the ceiling. After: the complete matched sixteen-camera
+[day](captures/house-01286-living-practicals-day-final) and
+[night](captures/house-01286-living-practicals-night-final) sets show four real semi-flush
+practicals and a broad warm room contribution. The four-frame
+[off controls](captures/house-01286-living-practicals-controls-final) isolate that contribution
+at both times. All 36 frames were inspected, with the living and adjoining views opened at full
+resolution.
+
+Ranked visible defects remaining:
+
+1. The upper facade, garage apron and front yard still collapse into broad black planes at night;
+   exterior arrival lighting is now the largest visible route defect.
+2. The formal living room is readable but remains dark and brown-heavy, with weak local contact
+   shading below its seating and tables.
+3. Several large interior wall bays still lack restrained art or domestic detail.
+4. The garage frontage and foundation planting remain sparse and comparatively low-detail by day.
+5. Distant landscape and neighbour context continue to expose the finite presentation boundary.
+
+Fixed: the four existing stable main sources now link to four reused, approved 420 x 180 x 420 mm
+bronze/opal fixtures at their unchanged plan positions. Their optical origins move from y 3.28 m
+to the real lower diffusers at y 3.12 m; each becomes a broad 72/140-degree downward spot emitting
+1,200 lm at 3,000 K. The group starts on in the normal new-game state. The selected 256-sample
+`L0_LIVING` rebake lowers the pathological main-atlas peak from 10.5507 to 0.1995 while increasing
+mean irradiance from 0.0110 to 0.0323. Global exposure, renderer architecture, neighbouring room
+state, collision and portal visibility are unchanged.
+
+Against Round 59, the day living-room frame changes about 1.430 million pixels above two channel
+levels (normalized MAE 0.02413) and living composition changes 1.309 million (0.03320). The night
+counterparts change 1.430 million (0.02342) and 1.307 million (0.03831). In the current exact
+off/on control, normalized MAE is 0.02548 / 0.03431 by day and 0.02568 / 0.04085 at night. The
+foyer/hall cameras change only through genuine sight lines; central hall remains within 0.018% MAE.
+
+Only the strict debug `blockout-l0-living` reference advances, after inspection showed exactly two
+new ceiling-fixture silhouettes; generated exterior references were restored byte-for-byte. The
+world is 651 chunks / 96 cells / 68 props / 258 exterior instances / 53.787279 MB. The unculled
+diagnostic is 607 opaque submissions, 44 cutouts and 99 state changes. Test and gate results are
+recorded in `docs/handoff.md`; compilation and heavy work stayed on CPU 0-5 / at most six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and the explicit
+debug blockout remains available. The next highest visible value is bounded night illumination for
+the front facade/steps and garage apron, followed by formal-living contact grounding and restrained
+wall dressing.
