@@ -127,6 +127,9 @@ run_gate "garage-floodlight" python3 tools/assets/garage_floodlight.py --check
 # HOUSE-01040: the project-authored close-range kitchen joinery must remain reproducible from
 # its measured Blender source, including the same small collidable GLBs and manifest hashes.
 run_gate "kitchen-builtins" python3 tools/assets/kitchen_builtins_prepare.py --check
+# HOUSE-01049: the measured counter stools and three restrained worktop groupings remain
+# reproducible from their authored Blender source, with exact material slots and placement.
+run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --check
 # HOUSE-01045: the formal-room piano is a close-range deterministic authored asset, not a
 # one-off binary or a cuboid standing in for furniture.
 run_gate "living-piano" python3 tools/assets/living_piano_prepare.py --check

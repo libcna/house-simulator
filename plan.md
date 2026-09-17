@@ -14253,6 +14253,47 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             dining silhouettes/spill were inspected and selectively advanced; all 49 active render
             cases pass, including 18-pose culled-vs-unculled equivalence. Compilation and heavy
             build work were capped at six workers / CPU 0–5.
+- [x] HOUSE-01049 — Give the primary kitchen composition human scale and controlled worktop detail
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-01040, HOUSE-01044, HOUSE-01048 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-17) Round 40's three fixed kitchen views expose the next largest connected-route
+            defect: technically finished cabinetry surrounds an entirely bare island and worktops,
+            so the room still reads as a fitted showroom. This narrow checkpoint adds reusable
+            human-scale seating and purposeful static objects through the established prop/content
+            path; it does not claim HOUSE-00990's 62 containers or interactive appliance inventory.
+      accept: three correctly scaled support-grounded counter stools align with the island without
+            obstructing the hall, family, pantry or dining circulation; a composed cutting board,
+            fruit bowl and produce gives the island a focal point; canisters dress the sink run and
+            a kettle identifies the cooking bay. Assets are deterministic project-authored models
+            with metre UV0, coherent approved finish mapping, explicit stool collision, grounded
+            origins, scale/provenance/stable-ID validation and controlled reuse. Capture and inspect
+            the same clear-day kitchen/hall/dining route views, raise only the exactly measured
+            kitchen chunk boundary, and pass content, navigation, stock-XNA, render and culling
+            gates with compilation capped at six workers.
+      findings: (2026-09-17) Four deterministic project-authored models provide a 0.46 × 0.955 ×
+            0.46 m walnut/sage counter stool reused three times, a 0.724 × 0.316 × 0.430 m island
+            board/bowl/produce composition, a 0.510 × 0.298 × 0.166 m canister group and a
+            0.460 × 0.423 × 0.250 m kettle. Fixed-order ellipsoid topology replaced Blender's
+            nondeterministic UV-sphere indices, making repeated clean-process GLBs byte-identical.
+            Existing approved wood, upholstery, steel, paint and ebonite maps are reused; one
+            non-emissive lemon finish supplies the controlled produce accent. The stool has an
+            explicit seat/frame collision proxy and measured 0.65 m seat height.
+      review: (2026-09-17) The matched Round 40 clear-day set at
+            `house-01048-dining-day-final` and final thirteen-view set at
+            `house-01049-kitchen-dressing-day-final` were opened and compared. The three kitchen
+            views now read as an occupied cooking/eating space rather than a bare fitted showroom.
+            An initial stool line at z=-23.70 failed the complete tour's south-wall recovery; the
+            final z=-23.95 placement tucks the seats 0.25 m under the island, leaves approximately
+            0.72 m behind them and passes the unchanged collision test. The largest remaining
+            defect is flat, underexposed daylight in the kitchen/hall, not missing micro-clutter.
+      verified: (2026-09-17) The permanent `kitchen-dressing` gate checks hashes, UV0, origins,
+            dimensions, finish slots, collision, manifest/provenance/stable ids and exact world
+            placement. Two world rebuilds complete normally with navigation in 6.93–9.04 s. The
+            world is 615 chunks / 42 static props; only `L0_KITCHEN` rises from its measured 13 to
+            17 chunks for the four distinct new finish roles. Unit tests pass 1409/1409,
+            integration registrations 134/134 and software-render cases 48/48, including the
+            18-pose culled-vs-unculled comparison. Only the two inspected kitchen goldens were
+            intentionally advanced. The full repository gate is green with all 323 strict-XNA
+            translation units clean. All compilation and heavy work used at most six CPU cores.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -18420,6 +18461,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01049` | **New task, next free phase-13 id.** Add a narrow measured kitchen-seating and worktop-dressing checkpoint through the existing deterministic static-prop path; raise only `L0_KITCHEN` from its measured 13-chunk exception to 17. | Round 40's three fixed kitchen cameras show completed cabinets, island and appliances surrounded by bare surfaces with no human-scale seating. Full `HOUSE-00990` remains dependency-blocked and calls for interactive inventory far beyond this visual defect. Three reused stools plus four composed object roles make the current route credible without scattering placeholder clutter; the first placement was moved 0.25 m under the island after the unchanged full-tour collision test proved its south aisle too narrow. |
 | 2026-09-17 | `HOUSE-01048` | **New task, next free phase-13 id.** Establish a measured primary dining composition and link a physical chandelier through the existing stock-XNA static-prop/light paths; raise only `L0_DINING` to its measured ten-chunk exception. | Round 39's fixed connected-route view shows a completely empty, nearly black 6.0 × 2.8 m room between already finished living and kitchen spaces. The full `HOUSE-00989` remains dependency-blocked on whole-house furnishing work, but a project-authored table/chair/fixture suite is dependency-valid now. The room has no exterior window, so its existing switchable 2700 K chandelier starts on like the other selected readable-route practicals rather than adding ambient light, a new renderer or a screenshot-only normal-play path. |
 | 2026-09-16 | `HOUSE-00935` | **New task, next free phase-12 id.** Route the already-authored closed garage leaf through the bounded exterior-door role and finish it as the five-section door its canonical data already declares. | Round 35's normal front frame sees through the entire 4.90 × 2.40 m opening because the room-owned leaf still uses ordinary indoor `MAT_DOOR_STEEL`, which §25.6 correctly culls with `L0_GARAGE`. Making all indoor metal or trim exterior-visible would leak the room; moving the leaf to an exterior cell would break portal ownership. A dedicated weather-facing finish is the same narrow architectural solution already proven by the entry door. |
 | 2026-09-16 | `HOUSE-00934` | **New task, next free phase-12 id.** Finish the settled hip/dormer geometry with a measured layered eave cornice, correct vertical dormer faces from shingles to approved siding, and add painted dormer trim without moving the roof or its collision envelope. | Round 34's fixed road view makes the remaining defect explicit: the four-storey facade ends at one thin line, while the five existing dormers read as dark boxes because `build_roof` assigns all eight of each dormer's faces to the shingle role. The architecture already calls for Colonial Revival massing and five gabled dormers; finish roles and joinery are missing, not a new roof design. |

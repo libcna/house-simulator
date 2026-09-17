@@ -38,3 +38,24 @@ approved walnut, brass, plain-fabric and warm-emissive source maps through stock
 Matching chair repetition is intentional furniture-set language, not procedural duplication.
 The room's four portal edges and measured end circulation own placement acceptance; later dressing
 may add a shallow credenza only if it preserves those routes.
+
+## Kitchen seating and worktop dressing
+
+2026-09-17, HOUSE-01049. Round 40 showed that the fitted cabinetry was materially coherent but
+still read as an unused showroom: the 2.32 m island had neither seating nor an object on it, and
+both visible worktops were empty. The selected set is deterministic and project-authored because
+none of the approved living-room imports supplied a scale-appropriate counter stool or kitchen
+objects. It reuses approved walnut, sage fabric, painted ceramic, black and brushed-steel finishes;
+only the lemon peel adds a new non-emissive stock-XNA material.
+
+| Object | Measured bound (m) | LOD0 triangles | Review contract |
+|---|---:|---:|---|
+| Counter stool | 0.460 × 0.955 × 0.460 | 1,256 | 0.650 m seat, footrest, low upholstered back; three matched uses |
+| Board, bowl and lemons | 0.724 × 0.316 × 0.430 | 3,844 | one controlled island focal group, seven shaped fruit pieces |
+| Three canisters | 0.510 × 0.298 × 0.166 | 732 | graduated ceramic bodies and separate steel lids/pulls |
+| Kettle | 0.460 × 0.423 × 0.250 | 1,028 | steel body/spout and readable four-part black handle |
+
+The stool trio occupies the island's south seating edge and retains the continuous east aisle
+between hall and family-room portals. Small objects deliberately have no collision; their authored
+grouping prevents dozens of tiny static bodies and keeps them from becoming procedural clutter.
+Full container inventory and interactive appliance states remain with HOUSE-00990.

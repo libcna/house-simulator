@@ -1655,3 +1655,45 @@ active software-render cases pass, including the unchanged 18-pose culled/uncull
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and the connected
 L0 route no longer crosses an empty dining blockout, but kitchen/family secondary detail and the
 remaining exterior composition are not yet at the gate's credible-house bar.
+
+## Round 41 — occupied kitchen island and worktops
+
+Commit: `HOUSE-01049` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 40's fixed [hall-side kitchen view](captures/house-01048-dining-day-final/kitchen-from-hall.png)
+shows a long bare island and empty worktops despite completed cabinetry and appliances. After: the
+identical [final camera](captures/house-01049-kitchen-dressing-day-final/kitchen-from-hall.png)
+shows three counter stools, a cutting-board/bowl/produce focal group, sink-run canisters and a
+kettle at the cooking bay. The matching [reverse view](captures/house-01049-kitchen-dressing-day-final/kitchen-facing-west.png)
+confirms the seats tuck under the island and the east aisle remains open. All thirteen images in
+the final clear-day set were captured from the clean fixed profile and opened for review.
+
+Ranked visible defects remaining:
+
+1. Daylight in the kitchen and central hall remains flat and underexposed; the north cooking bay
+   and ceiling/wall transitions lose depth while neighboring window apertures clip bright.
+2. The family room still needs controlled secondary objects and more convincing finish/lighting
+   depth around its existing primary seating and media composition.
+3. Dining needs restrained art, a sideboard or table setting, but its narrow circulation makes
+   indiscriminate clutter inappropriate.
+4. The broad exterior/garage composition remains sparse beyond its completed architectural shell
+   and bounded practicals.
+5. Several selected-room furnishings still inherit simpler unbaked object lighting than their
+   surrounding lightmapped shell.
+
+Fixed: four deterministic project-authored GLBs add one collision-bearing 0.65 m-seat-height stool
+reused three times and three deliberately composed countertop groups. Existing approved walnut,
+sage upholstery, steel, paint and ebonite sources are reused; a single subdued lemon finish adds
+produce colour without emission. The first stool line failed the unchanged full-house tour at the
+south kitchen wall, so the final line moves 0.25 m under the island and retains approximately
+0.72 m rear clearance. The world is 615 chunks / 42 static props, with only `L0_KITCHEN` raised to
+its exact measured 17-chunk boundary.
+
+Only `blockout-l0-kitchen` and `fp-l0-kitchen` changed beyond tolerance. Their actual/reference
+pairs were inspected and selectively advanced; the complete 48-case software-render suite passes,
+including the unchanged 18-pose culled/unculled equivalence. Unit and integration suites pass
+1409/1409 and 134/134 respectively.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. The kitchen no
+longer reads as an empty fitted showroom, and the highest visible value has shifted from adding
+objects to calibrating believable daylight and depth along the kitchen/hall route.

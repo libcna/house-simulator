@@ -66,6 +66,9 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "table-dining": [("y", 0.72, 0.78, "dining table top")],
     "desk": [("y", 0.72, 0.78, "desk top")],
     "chair": [("y", 0.42, 0.48, "chair seat")],
+    "stool-counter": [("x", 0.38, 0.58, "counter stool width"),
+                      ("y", 0.62, 0.70, "counter stool seat"),
+                      ("z", 0.38, 0.58, "counter stool depth")],
     "sofa": [("y", 0.38, 0.45, "sofa seat")],
     "bed": [("y", 0.48, 0.62, "bed mattress top")],
     "wc": [("y", 0.38, 0.45, "WC seat")],
@@ -91,6 +94,12 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "shrub": [("y", 0.45, 1.85, "shrub / bush height")],
     "flower": [("y", 0.20, 0.50, "flower clump height")],
     "grass-card": [("y", 0.20, 0.60, "grass-card height")],
+    # Countertop groupings span a kettle, canister trio and composed board/bowl/produce set.
+    # The deliberately broad three-axis band still catches centimetre/inch imports while the
+    # deterministic generator and manifest retain each exact measured AABB.
+    "kitchen-counter-decor": [("x", 0.10, 1.00, "countertop grouping width"),
+                              ("y", 0.10, 0.55, "countertop grouping height"),
+                              ("z", 0.10, 0.60, "countertop grouping depth")],
     # A pipeline fixture is not a real-world object, but it is still geometry with a size, and the
     # bug this table exists to catch -- a model authored in centimetres -- is exactly as possible
     # here as anywhere. The band is wide because the size is chosen to be legible in a screenshot;
@@ -183,7 +192,7 @@ def check(path: Path, category: str, geometry: dict | None = None) -> list[str]:
         # compared the whole Y bound and would reject every correctly proportioned armchair around
         # 0.84 m tall. Seat height cannot be recovered from an AABB, so it is an explicit measured
         # asset property in the same manifest geometry block that records the overall bounds.
-        if category in {"chair", "sofa"} and axis == "y":
+        if category in {"chair", "stool-counter", "sofa"} and axis == "y":
             seat = (geometry or {}).get("seatHeightMetres")
             if not isinstance(seat, (int, float)):
                 problems.append(

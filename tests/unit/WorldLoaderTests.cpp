@@ -3620,14 +3620,14 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 178U)
-            << "HOUSE-01048 adds one measured dining-upholstery finish";
+        EXPECT_EQ(contents.materials.size(), 179U)
+            << "HOUSE-01049 adds one measured non-emissive produce finish";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return IdRegistry::NameOf(material.id).starts_with("MAT_KITCHEN_"); }),
-                  4)
-            << "the authored kitchen kit loads all four close-range finishes through WorldLoader";
+                  5)
+            << "the authored kitchen kit loads all five close-range finishes through WorldLoader";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

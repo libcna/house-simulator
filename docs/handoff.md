@@ -1,4 +1,49 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01048` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01049` checkpoint)
+
+Branch `develop`. Task-start HEAD `cf76d82` (`HOUSE-01048`). This file belongs to the single
+`HOUSE-01049` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The primary kitchen now has human scale and controlled activity cues. Three project-authored
+walnut/sage counter stools sit at the island's west side; a cutting board, bowl and produce anchor
+the island; canisters dress the sink run; and a kettle identifies the cooking bay. The four source
+GLBs are deterministic across clean processes and have checked metre scale, UV0, grounded origin,
+material slots and stable ids. The stool has an explicit seat/frame collision proxy and a measured
+0.65 m seat height. All models and texture bindings are project-authored or reuse already approved
+sources; the generated credit and budget ledgers are current.
+
+Before: Round 40's fixed [hall-side view](visual-review/captures/house-01048-dining-day-final/kitchen-from-hall.png)
+shows a bare island and worktops. After: the identical [final view](visual-review/captures/house-01049-kitchen-dressing-day-final/kitchen-from-hall.png)
+shows the complete composition, while the [reverse kitchen view](visual-review/captures/house-01049-kitchen-dressing-day-final/kitchen-facing-west.png)
+proves the east aisle remains open. The complete
+[thirteen-camera clear-day set](visual-review/captures/house-01049-kitchen-dressing-day-final) was
+recaptured after final placement and every kitchen view was opened at full resolution.
+
+The first stool placement at z=-23.70 failed the unchanged whole-house tour at the south kitchen
+wall. Moving the line 0.25 m under the island to z=-23.95 leaves approximately 0.72 m behind the
+seats and passes the original test; no collision tolerance or route exception was added. The
+world is now 615 chunks / 42 static props / 256 exterior hierarchy instances. Only `L0_KITCHEN`
+rises from 13 to its exact measured 17-chunk exception, corresponding to walnut/board, upholstery,
+lemon-produce and black-appliance roles.
+
+Only the two strict kitchen references changed beyond tolerance. Both actual/reference pairs were
+opened and the intended stool/decor silhouettes were selectively advanced; all other committed
+goldens remain untouched. Direct verification passes 1409/1409 unit tests, 134/134 integration
+registrations and all 48 active software-render cases, including the 18-pose culled-vs-unculled
+comparison. Both world rebuilds finish normally (navigation 6.93–9.04 s), and all compilation,
+tests and heavy tooling were limited to CPU 0–5 / six workers. The complete repository gate is
+green with all 323 strict-XNA translation units clean; `git diff --check` is clean.
+
+The screenshot review changed the priority: more countertop clutter is no longer the largest
+visible gain. Daytime kitchen/hall lighting is too flat and the north cooking bay remains dark
+against bright windows. Next take the shortest dependency-valid lighting/calibration task that
+adds believable depth to those fixed cameras while preserving the Tier-S/Tier-E architecture,
+then add restrained family/dining secondary detail. Do not lift global exposure, widen unrelated
+lights or obscure the now-clear circulation with extra props.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01048` checkpoint)
 
 Branch `develop`. Task-start HEAD `43b6b40` (`HOUSE-01047`). This file belongs to the single
 `HOUSE-01048` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

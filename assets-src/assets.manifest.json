@@ -673,6 +673,48 @@
       ]
     },
     {
+      "id": "MODEL_FURNITURE_KITCHEN_COUNTER_STOOL",
+      "category": "stool-counter",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/counter_stool.glb",
+      "sourceSha256": "89373d613a5076b07e11e924bb2943284d5e0beddcad36a2a8740e2af20f975b",
+      "contentName": "Models/Furniture/Kitchen/counter_stool",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Upholstered kitchen counter stool",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured counter stool generated deterministically by tools/blender/kitchen_dressing.py for HOUSE-01049. Its 0.65 m seat, footrest, tapered walnut frame and low upholstered back are sized for the 0.94 m island while retaining the east circulation aisle. Approved project materials are bound during content build; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.46,
+          0.955,
+          0.46
+        ],
+        "seatHeightMetres": 0.65,
+        "triangles": {
+          "LOD0": 1256
+        },
+        "collision": "kitchen_stool_001_seat_frame_COL"
+      },
+      "materialMap": {
+        "KITCHEN_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "KITCHEN_FABRIC": "MAT_FURNITURE_DINING_UPHOLSTERY"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_LEATHER_ARMCHAIR_A",
       "category": "chair",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/leather_armchair_a.glb",
@@ -1235,6 +1277,126 @@
         "CAB_PAINT": "MAT_DOOR_PAINTED",
         "CAB_OAK": "MAT_DOOR_HARDWOOD",
         "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KITCHEN_CANISTERS",
+      "category": "kitchen-counter-decor",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/counter_canisters.glb",
+      "sourceSha256": "e21df47eab362dedfe22ee75a37a6984d30c76ef2d1c84e442fb9f8590bdfce4",
+      "contentName": "Models/Furniture/Kitchen/counter_canisters",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Three ceramic kitchen canisters",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic counter grouping from tools/blender/kitchen_dressing.py for HOUSE-01049: three differently sized ceramic canisters with separate brushed-steel lids and pulls. It uses already approved project finishes and contains no third-party mesh or texture."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.50976,
+          0.298,
+          0.1664
+        ],
+        "triangles": {
+          "LOD0": 732
+        }
+      },
+      "materialMap": {
+        "CAB_PAINT": "MAT_DOOR_PAINTED",
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KITCHEN_ISLAND_DRESSING",
+      "category": "kitchen-counter-decor",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/island_dressing.glb",
+      "sourceSha256": "f59a76e8e963c6027055b7a60503b057387d3711c9cf47e08d9383e2285b81b8",
+      "contentName": "Models/Furniture/Kitchen/island_dressing",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Kitchen island board, bowl and lemons",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic island focal grouping from tools/blender/kitchen_dressing.py for HOUSE-01049. A rounded walnut cutting board, footed bowl and seven individually shaped lemons supply controlled lived-in detail without procedural litter. Approved project finishes are bound during content build; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.723777,
+          0.316,
+          0.43
+        ],
+        "triangles": {
+          "LOD0": 3844
+        }
+      },
+      "materialMap": {
+        "KITCHEN_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "KITCHEN_PRODUCE": "MAT_KITCHEN_PRODUCE_LEMON"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
+      "id": "MODEL_PROP_KITCHEN_KETTLE",
+      "category": "kitchen-counter-decor",
+      "sourceFile": "assets-src/Models/Furniture/Kitchen/kettle.glb",
+      "sourceSha256": "ab7e465f11776e94709612298eb3c04030e522a76987234c4a796d8e9c65c73f",
+      "contentName": "Models/Furniture/Kitchen/kettle",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Brushed-steel kitchen kettle",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored deterministic domestic kettle from tools/blender/kitchen_dressing.py for HOUSE-01049. Its faceted steel body, spout, lid and four-part black handle provide a readable appliance silhouette at gameplay distance using approved project finishes; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.460454,
+          0.423,
+          0.25
+        ],
+        "triangles": {
+          "LOD0": 1028
+        }
+      },
+      "materialMap": {
+        "CAB_STEEL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "KITCHEN_BLACK": "MAT_FURNITURE_PIANO_EBONITE"
       },
       "usedIn": [
         "L0_KITCHEN"

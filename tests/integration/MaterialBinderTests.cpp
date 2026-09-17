@@ -180,7 +180,7 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 178U) << "HOUSE-01048 adds measured dining upholstery";
+                EXPECT_EQ(binder.Count(), 179U) << "HOUSE-01049 adds the island produce finish";
                 const MaterialDesc* entryPanel = binder.Find(Id::Of("MAT_EXTERIOR_DOOR_PANEL_HARDWOOD"));
                 ASSERT_NE(entryPanel, nullptr);
                 EXPECT_EQ(entryPanel->kind, MaterialKind::Basic);
@@ -227,6 +227,10 @@ namespace
                 const MaterialDesc* ovenGlass = binder.Find(Id::Of("MAT_KITCHEN_OVEN_GLASS"));
                 ASSERT_NE(ovenGlass, nullptr);
                 EXPECT_EQ(ovenGlass->kind, MaterialKind::Basic);
+                const MaterialDesc* kitchenProduce = binder.Find(Id::Of("MAT_KITCHEN_PRODUCE_LEMON"));
+                ASSERT_NE(kitchenProduce, nullptr);
+                EXPECT_EQ(kitchenProduce->kind, MaterialKind::Basic);
+                EXPECT_GT(kitchenProduce->diffuse[0], kitchenProduce->diffuse[2]);
                 const MaterialDesc* outdoorRoof = binder.Find(Id::Of("MAT_OUTDOOR_ROOF"));
                 ASSERT_NE(outdoorRoof, nullptr);
                 EXPECT_EQ(outdoorRoof->kind, MaterialKind::Basic);
