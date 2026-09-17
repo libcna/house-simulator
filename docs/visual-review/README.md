@@ -2166,3 +2166,52 @@ gate accepts all 323 strict-XNA translation units with compilation and heavy wor
 colour remains available solely as an explicit diagnostic. The next contained furniture gain is
 the shared coffee table or formal living sofa; the highest route-level gains remain daylight
 aperture balance and a denser exterior start composition.
+
+## Round 51 — finished shared coffee-table material
+
+Commit: `HOUSE-01056` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 50's [day route](captures/house-01055-sheen-chair-day-final) shows the same broad
+white low table in the formal living and family seating groups. After: the identical cameras in
+the [final clear-day set](captures/house-01056-coffee-table-day-final) and
+[explicit-reading 22:00 set](captures/house-01056-coffee-table-night-final) show a warm lacquered
+hardwood case whose rounded top, drawers and tapered legs remain readable. All eight affected
+living/family frames and both complete fourteen-frame routes were opened at full resolution.
+
+Ranked visible defects remaining:
+
+1. The unchanged straight living-room view is dark and nearly empty despite the furnished seating
+   group just outside its lens.
+2. The formal living sofa is now the coarsest pale block beside the finer chairs and wood table.
+3. Clear-day apertures remain clipped and overpower the family composition.
+4. The broad exterior/garage start framing remains materially coherent but sparse at player scale.
+5. Blank wall bays and restrained surface dressing still limit the inhabited feeling.
+
+Fixed: no geometry, placement or licence changed. The 680,908-byte White Room CC BY 3.0 model
+remains pinned at SHA-256
+`a7c48305a4dc657c5def55c1f476f5476e1be7512ae97a75712c594cbbb3533b`, with its 1.211165 x
+0.419303 x 0.523951 m bounds, 22,744-triangle visible LOD0, lower LODs and `TableLegs_COL` proxy.
+Its sole exact source role is now bound to the approved piano hardwood instead of cream/white-room
+palette; the manifest correctly declares both `L0_LIVING` and `L0_FAMILY` users.
+
+The first complete capture was rejected because ordinary CMake had not rebuilt the manifest-
+dependent canonical chunks. The world content graph rebuilt `chunks.bin` in 8.86 seconds and the
+deployment target synchronized it before final capture. Against Round 50, day living/family
+composition frames change 1.886% and 2.277% of pixels with normalized MAE 0.002934 and 0.003148;
+night counterparts change 4.546% and 2.481% with MAE 0.001802 and 0.002835. Direct views that do
+not show a table retain very low MAE, confirming a localized material correction rather than an
+exposure change.
+
+The deterministic world remains 626 chunks / 57 props / 256 exterior hierarchy instances /
+53.566591 MB; `L0_FAMILY` stays at its exact 24-chunk boundary and `L0_LIVING` remains 20 against
+its 21-chunk allowance. Unit tests pass 1409/1409, serial offscreen integration completes all 134
+cases without failure (126 pass, 8 intentional skips), and all 48 active software-render cases
+pass with eight capture-only cases disabled. No strict reference moves. The eighteen-pose culling
+comparison remains under its 0.2% limit at 0.1342% worst case (`l0-sunroom`). The complete gate is
+green across all 323 strict-XNA translation units. Compilation and heavy work were capped to CPU
+0-5 / six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and blockout
+colour remains explicit diagnostic output. The next contained furniture gain is the formal living
+sofa; the route-level priorities remain the dark/empty straight living view, clipped daylight
+apertures and sparse exterior start composition.

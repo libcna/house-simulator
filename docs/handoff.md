@@ -1,4 +1,46 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01055` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01056` checkpoint)
+
+Branch `develop`. Task-start HEAD `c5067e0` (`HOUSE-01055`). This file belongs to the single
+`HOUSE-01056` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The two shared White Room coffee tables no longer render as broad white blocks. Their existing
+680,908-byte CC BY 3.0 model remains byte-identical at SHA-256
+`a7c48305a4dc657c5def55c1f476f5476e1be7512ae97a75712c594cbbb3533b`, with 1.211165 x
+0.419303 x 0.523951 m bounds, 22,744 visible LOD0 triangles, lower LODs and `TableLegs_COL`
+proxy. Its sole `PaletteMaterial001` role now uses the approved warm lacquered piano hardwood;
+`PROP_LIVING_COFFEE` and `PROP_FAMILY_COFFEE` do not move. The manifest's stale one-cell `usedIn`
+metadata now names both real owners.
+
+The complete unchanged fourteen-camera
+[clear-day set](visual-review/captures/house-01056-coffee-table-day-final) and
+[explicit-reading night set](visual-review/captures/house-01056-coffee-table-night-final) were
+opened at full resolution. Compared with Round 50, day living/family composition changes are
+1.886% and 2.277% (normalized MAE 0.002934 / 0.003148); night changes are 4.546% and 2.481%
+(MAE 0.001802 / 0.002835). The first complete working capture was rejected because CMake had not
+rebuilt manifest-dependent `chunks.bin`; `tools/ci/build_content.py --only world` rebuilt it in
+8.86 seconds and CMake deployed it before either final set was accepted. The optimized navigation
+stage completed normally in 9.64 seconds, confirming that the former 19-hour process was stale,
+not representative.
+
+The deterministic world remains 626 chunks / 57 props / 256 exterior hierarchy instances /
+53.566591 MB. `L0_FAMILY` stays at its exact 24-chunk boundary and `L0_LIVING` remains 20 against
+its 21-chunk allowance; the unculled diagnostic remains 626 draws / 93 state changes. Manifest,
+packaging credits, budget and 2,866 stable ids are current. Unit tests pass 1409/1409, serial
+offscreen integration completes 134 cases without failure (126 pass, 8 intentional skips), and
+all 48 active software-render cases pass with eight capture-only cases disabled. No golden moves.
+The eighteen-pose culled/unculled comparison passes at 0.1342% worst case (`l0-sunroom`). The full
+gate accepts all 323 strict-XNA translation units. Compilation and heavy tooling were pinned to
+CPU 0-5 / six workers.
+
+The largest contained furniture defect is now the coarse pale formal living sofa. The unchanged
+straight living-room view is also dark and nearly empty, while clipped clear-day apertures and the
+sparse exterior/garage start frame remain larger route-level problems. Continue with visible work
+from the fixed cameras; do not add unrelated infrastructure or claim the broader furnishing tasks.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01055` checkpoint)
 
 Branch `develop`. Task-start HEAD `77654f4` (`HOUSE-01054`). This file belongs to the single
 `HOUSE-01055` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

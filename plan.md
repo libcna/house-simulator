@@ -14533,6 +14533,45 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             the unchanged 0.1320% worst case. The complete repository gate accepts all 323
             strict-XNA translation units. Compilation and heavy work use CPU 0-5 / at most six
             workers.
+- [x] HOUSE-01056 — Replace the shared route coffee tables' pale palette with finished hardwood
+      dep: HOUSE-00215, HOUSE-00296, HOUSE-01037, HOUSE-01055 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-17) Round 50 leaves the two repeated coffee tables as large white low blocks
+            even though their approved White Room source contains detailed drawers, rounded edges
+            and tapered legs. Source inspection finds one exact `PaletteMaterial001` role still
+            bound to the generic white-room palette; correct the production binding rather than
+            replacing sound geometry with a scale-inappropriate local pedestal table.
+      accept: preserve the pinned 680,908-byte CC BY 3.0 GLB, source hash, 1.211165 x 0.419303 x
+            0.523951 m bounds, 22,744-triangle LOD0, generated lower LODs and `TableLegs_COL` proxy;
+            do not move or rename either canonical prop. Bind the sole visible source role to an
+            approved stock-XNA hardwood finish, record both real owner cells in the manifest, and
+            capture/inspect the unchanged fourteen-camera clear-day and explicit-reading night
+            routes. Content, provenance, budget, render, culling and strict-XNA gates pass with
+            compilation and heavy tooling capped at six CPUs.
+      findings: (2026-09-17) An isolated render confirms that the existing model is a credible low
+            rectangular two-drawer table whose source detail was hidden by the pale binding. The
+            only other approved local candidate is a 0.6316 m-high carved pedestal/end table and
+            was rejected rather than distorted into coffee-table proportions. Both unchanged
+            table instances now use the already approved warm lacquered piano-wood material; the
+            manifest also corrects the stale `usedIn` list from only `L0_LIVING` to both
+            `L0_LIVING` and `L0_FAMILY`. Geometry, LOD, proxy, licence and world placement do not
+            change.
+      review: (2026-09-17) The first 28-frame capture was rejected because ordinary CMake had not
+            rebuilt manifest-dependent `chunks.bin`; the canonical world content graph rebuilt it
+            in 8.86 seconds and deployed the corrected file before final review. In the accepted
+            day set, living/family composition frames change 1.886% and 2.277% of pixels with
+            normalized MAE 0.002934 and 0.003148. Night counterparts change 4.546% and 2.481% with
+            MAE 0.001802 and 0.002835. All eight affected day/night living/family frames and the
+            complete fourteen-camera routes were opened at full resolution; the brown lacquered
+            bodies remain readable in both conditions without movement or global exposure change.
+      verified: (2026-09-17) The manifest validates all 872 rows; packaging credits, budget and
+            world content are current. The unchanged world remains 626 chunks / 57 props / 256
+            exterior hierarchy instances / 53.566591 MB, with `L0_FAMILY` exactly 24 chunks and
+            `L0_LIVING` 20 against its 21-chunk allowance. Unit tests pass 1409/1409; serial
+            offscreen integration completes 134 cases without failure (126 pass, 8 intentional
+            skips), and all 48 active software-render cases pass with eight capture-only cases
+            disabled. No golden moves. The 18-pose culled/unculled comparison passes at 0.1342%
+            worst case. The complete repository gate accepts all 323 strict-XNA translation units.
+            Compilation and heavy tooling use CPU 0-5 / at most six workers.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -18803,6 +18842,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01056` | **New task, next free phase-13 id.** Correct the shared approved coffee table's exact source-material binding and stale two-cell manifest use; preserve both canonical placements and keep the full `HOUSE-00988` / `HOUSE-00992` furnishing tasks open. | Round 50 makes the repeated palette-white tables the largest contained furniture defect. Isolated geometry inspection shows that the existing CC BY model already has detailed drawers, rounded edges, legs, LODs and a proxy; its sole visible role was simply bound to a white-room palette. The other approved local candidate is an end-height pedestal table, so substituting or vertically distorting it would lower physical credibility. |
 | 2026-09-17 | `HOUSE-01055` | **New task, next free phase-13 id.** Replace only the three existing pale route-armchair instances with one pinned, independently provenanced production chair; preserve stable prop placement and keep the full `HOUSE-00988` / `HOUSE-00992` furnishing tasks open. | Round 49 makes the old pale chairs the largest repeated local furniture defect. The official Khronos Wayfair `SheenChair` is CC0, metre-scale, materially separated and already visually proven in the referenced sibling, while a project-owned preparation can strip its label and unsupported sheen/variant metadata without copying CNAEXT architecture or importing uncertain texture provenance. One matched household chair used across two connected rooms is deliberate reuse, not procedural scattering. |
 | 2026-09-17 | `HOUSE-01054` | **New task, next free phase-13 id.** Refine the existing project-authored family dog bed in place, retain its stable world/nav identity and give its three physical textile roles coordinated canonical finishes; keep full `HOUSE-00992` open. | Round 48's media-wall view makes the green five-box bed the largest remaining local defect. The approved local catalogues contain no suitable real pet-bed model, while the existing deterministic source can produce rounded bolsters, continuous piping and tuft detail without licence ambiguity or architecture changes. Sharing its blue insert and narrow cord with existing family-room velvet/canvas keeps the measured chunk increase to one without flattening the distinct geometry. |
 | 2026-09-17 | `HOUSE-01053` | **New task, next free phase-13 id.** Replace only the coarse family-room media-unit instance with a deterministic extraction of the CC0 Bedroom low cabinet, reuse existing finishes and retain the independently approved television; keep full `HOUSE-00992` open. | Round 47's front-on image makes the tall pale fireplace silhouette the largest local defect after the sofa correction. The inspected source is a real low cabinet with drawer reveals and a slim steel frame at 780 triangles; it is a larger visible gain than adding more small clutter, and source-texture stripping avoids importing Bedroom textures whose independent provenance is less clear than the CC0 geometry. |

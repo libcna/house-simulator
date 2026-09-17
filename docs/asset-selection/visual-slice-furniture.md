@@ -40,6 +40,21 @@ formal/family rooms; later rooms must not spread the same chair throughout the h
 embedded maps are unnecessary in the canonical static-prop path: approved metre-scale weave,
 board wood and brushed steel retain the three physical finishes through stock XNA effects.
 
+## Shared route coffee-table finish
+
+2026-09-17, HOUSE-01056. The selected White Room coffee table remains the correct object: its
+1.211 x 0.419 x 0.524 m domestic proportions, two drawers, rounded case, tapered legs, three LODs
+and `TableLegs_COL` proxy are substantially stronger than its old gameplay image suggested. An
+isolated render proved that its sole visible `PaletteMaterial001` role—not its geometry—made both
+instances look like white blocks. The approved local carved pedestal table was also inspected and
+rejected for this use at 0.632 m high; non-uniform scaling would falsify its proportions.
+
+The exact table role now reuses the approved warm lacquered piano-wood finish through stock XNA
+`BasicEffect`. This keeps the original 680,908-byte CC BY 3.0 asset and its pinned
+`a7c48305a4dc657c5def55c1f476f5476e1be7512ae97a75712c594cbbb3533b` hash unchanged. Matching
+tables in the connected living and family rooms read as one household set; no further room should
+repeat this model without a later anti-repetition review.
+
 ## Formal dining primary set
 
 2026-09-17, HOUSE-01048. No approved source in the established living-room kit contains a dining

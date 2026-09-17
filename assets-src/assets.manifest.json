@@ -871,10 +871,11 @@
         "collision": "TableLegs_COL"
       },
       "materialMap": {
-        "PaletteMaterial001": "MAT_FURNITURE_WHITE_ROOM_PALETTE"
+        "PaletteMaterial001": "MAT_FURNITURE_PIANO_WOOD"
       },
       "usedIn": [
-        "L0_LIVING"
+        "L0_LIVING",
+        "L0_FAMILY"
       ]
     },
     {
