@@ -1,4 +1,54 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01285` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01052` checkpoint)
+
+Branch `develop`. Task-start HEAD `ac1296b` (`HOUSE-01285`). This file belongs to the single
+`HOUSE-01052` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The coarse pale family-room sofa has been replaced only in `L0_FAMILY` with Wayfair's curved
+`GlamVelvetSofa`, distributed by Khronos glTF Sample Assets under CC BY 4.0. The pinned upstream
+file is 3,149,844 bytes / SHA-256
+`67202c74a1a33377771f162dc7fad612a6c9bd51ee15124c488e9851d9ac5266`. A deterministic offline
+tool preserves its 4,196 visible triangles and UV0, selects the authored navy variant,
+recentres/grounds the 2.188443 x 0.787541 x 1.022829 m source, removes unsupported variants/PBR
+extensions plus unused embedded maps/light, and appends a twelve-triangle box proxy. The committed
+CNA-ready GLB is 128,624 bytes / SHA-256
+`d4aa1747e343b71a2bb246e9ee11630cb19573bccc017c2098317e34be17946b`; its exact fabric, frame and
+feet roles map to navy velvet, dark metal and existing steel finishes. The formal living sofa is
+unchanged.
+
+Before: Round 46's [day composition](visual-review/captures/house-01285-family-fixtures-day-final/family-composition.png)
+is dominated by a pale rectangular back. After: the complete unchanged fourteen-camera
+[clear-day set](visual-review/captures/house-01052-family-sofa-day-final) and
+[explicit-reading night set](visual-review/captures/house-01052-family-sofa-night-final) show a
+grounded blue/charcoal curved sofa with open legs and much stronger close-range silhouette. All
+six family frames were opened at full resolution. An initially darker velvet tint was rejected
+after the real room lighting made it nearly black. Day family-room/composition/media differences
+are 0.080%, 5.421% and 5.979%; the night counterparts are 2.823%, 8.213% and 7.272%. Direct
+inspection confirms the changes remain localized to the sofa rather than a global exposure edit.
+
+The world is 628 chunks / 57 props / 256 exterior hierarchy instances / 52.6681 MB. Only
+`L0_FAMILY` rises from its exact 23-chunk boundary to 25. The deliberately unculled diagnostic is
+628 draws / 94 state changes, comfortably inside §71.2's 1,400 / 210 row. Licence credits, budget
+report and 2,862 stable ids are current. One strict production golden is intentionally advanced:
+the changed family-room content affects eye adaptation through the open `fp-l0-hall` sightline by
+745 tolerance-filtered pixels (0.3234%, maximum channel delta 7). The pair and amplified diff were
+inspected; no other golden moves.
+
+Unit tests pass 1409/1409, serial offscreen integration tests pass 135/135 and all 49 active
+software-render cases pass with eight capture-only cases disabled. The eighteen-pose
+culled-vs-unculled gate remains 0.1320% worst case (`l0-sunroom`). The complete repository gate is
+green across all 323 strict-XNA translation units. Compilation and heavy tooling were pinned to
+CPU 0-5 and at most six workers.
+
+The largest local defect is now the pale mantel-like media unit and blank surround, followed by
+clipped clear-day apertures, the sparse exterior/garage start framing and older flat armchairs.
+Improve the family focal media silhouette or the exterior start according to the next fixed
+screenshots; do not add unrelated invisible infrastructure or claim the dependency-blocked full
+`HOUSE-00992` furnishing task.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01285` checkpoint)
 
 Branch `develop`. Task-start HEAD `c52b87d` (`HOUSE-01051`). This file belongs to the single
 `HOUSE-01285` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

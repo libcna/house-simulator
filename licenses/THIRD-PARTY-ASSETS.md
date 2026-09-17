@@ -58,6 +58,13 @@ Full text: [`licenses/cc-by-3.0/LICENCE.txt`](cc-by-3.0/LICENCE.txt)
 - `TEXTURE_FURNITURE_PLANT_LEAF` — **Furniture extracted from The Grey & White Room** by Wig42 — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
   - Attribution: The Grey & White Room by Wig42, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
 
+## CC-BY-4.0
+
+Full text: [`licenses/cc-by-4.0/LICENCE.txt`](cc-by-4.0/LICENCE.txt)
+
+- `MODEL_FAMILY_GLAM_VELVET_SOFA` — **GlamVelvetSofa** by Wayfair, LLC — <https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/GlamVelvetSofa> (retrieved 2026-09-17)
+  - Attribution: GlamVelvetSofa (c) 2021 Wayfair, LLC, licensed under CC BY 4.0; distributed by the Khronos glTF Sample Assets project.
+
 ## CC0-1.0
 
 Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
@@ -688,4 +695,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `7f3cb4eaba91a06b2db68569bce4aca7394a49fd74bc60ab3569b79a2d8002d2`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `d71200556c49088de09483c9ae4da7a8a3f1bdfc603f60fc5ec000182934bddd`.*

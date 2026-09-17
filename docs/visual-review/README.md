@@ -1948,3 +1948,59 @@ heavy tooling were capped to CPU 0-5 / six workers.
 now has believable visible sources and nighttime depth; the next highest visible value is replacing
 or materially improving its coarse pale sofa/media composition, followed by the sparse exterior
 start framing—not more hidden infrastructure.
+
+## Round 47 — verified close-range family sofa
+
+Commit: `HOUSE-01052` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 46's [clear-day reverse composition](captures/house-01285-family-fixtures-day-final/family-composition.png)
+is dominated by the shared White Room sofa's pale rectangular back. After: the identical camera in
+the complete fourteen-view [final clear-day set](captures/house-01052-family-sofa-day-final/family-composition.png)
+shows a grounded navy curved sofa with an upholstered silhouette and open metal legs. The same
+composition and media angles were inspected in the complete
+[explicit-reading 22:00 set](captures/house-01052-family-sofa-night-final); the richer silhouette
+and blue/charcoal finish remain readable under the room's practicals. All six matched family frames
+were opened at full resolution. An initial darker tint was rejected because it collapsed toward
+black under the real room lighting.
+
+Ranked visible defects remaining:
+
+1. The pale mantel-like media unit and its broad blank surround are now the coarsest family-room
+   focal geometry, particularly against the new curved sofa and detailed bookcase.
+2. Clear-day apertures remain clipped and overpower the room's interior surfaces.
+3. The broad exterior/garage start frame is materially coherent but still sparse at player scale.
+4. The two foreground armchairs and several other older assets remain flatter and more geometric
+   under stock `BasicEffect` than the new sofa.
+5. The selected route still needs restrained wall/surface dressing outside the kitchen and family
+   room before it feels consistently inhabited.
+
+Fixed: the family-only sofa now uses Wayfair's 4,196-triangle `GlamVelvetSofa`, pinned to its exact
+Khronos Sample Assets URL and SHA-256 under CC BY 4.0. A deterministic offline preparation keeps
+all visible geometry and UV0, selects the authored navy variant, recentres/grounds the source,
+removes unsupported material-variant/PBR metadata and unused embedded maps/light, and appends a
+twelve-triangle collision box. Three inspected source roles map to canonical velvet, dark frame
+and steel finishes. The formal living-room sofa and every placement outside `L0_FAMILY` remain
+unchanged.
+
+The day family-room/composition/media pairs change 0.080%, 5.421% and 5.979% of pixels with
+normalized MAE 0.000242, 0.006947 and 0.006400. Their night counterparts change 2.823%, 8.213%
+and 7.272% with normalized MAE 0.000495, 0.005772 and 0.005580. These localized differences match
+the sofa's visibility in each fixed camera rather than an exposure or global-palette edit.
+
+The prepared GLB is 128,624 bytes and regenerates byte-identically from the pinned 3,149,844-byte
+source. The world is 628 chunks / 57 props / 256 exterior hierarchy instances / 52.6681 MB. Only
+`L0_FAMILY` rises from its exact 23-chunk exception to 25 because the prior two-role sofa is replaced
+by three exact roles while the steel feet reuse an existing finish. The unculled diagnostic is 628
+draws / 94 state changes, still far below §71.2's 1,400 / 210 row.
+
+One strict production reference required intentional advancement: the sofa affects eye adaptation
+through the open family-room sightline in `fp-l0-hall`, changing 745 tolerance-filtered pixels
+(0.3234%, maximum channel delta 7). The before/actual pair and amplified difference were inspected;
+only that reference was replaced. Unit tests pass 1409/1409, serial offscreen integration tests
+pass 135/135, and the complete software-render suite passes with eight capture-only cases disabled.
+The eighteen-pose culled-vs-unculled gate remains 0.1320% worst case (`l0-sunroom`). Compilation
+and heavy work were capped to CPU 0-5 / six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. Highest visible
+value is now replacing or substantially improving the family media-unit silhouette, followed by
+the sparse exterior start framing and clipped clear-day apertures—not unrelated infrastructure.

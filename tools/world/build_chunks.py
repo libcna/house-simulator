@@ -141,7 +141,7 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "console wood and upholstered chair separate avoids repainting either as trim; "
                   "HOUSE-00930 isolates the weather-facing entry leaf for exterior residency; "
                   "HOUSE-00932 adds distinct raised-panel hardwood and bronze hardware groups"),
-    "L0_FAMILY": (23,
+    "L0_FAMILY": (25,
                   "measured with HOUSE-01037's first furnished media/seating group: five shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. Merging "
@@ -151,7 +151,9 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "HOUSE-01051 adds shared walnut, upholstery, cloth-art and book-binding roles "
                   "across four secondary props; reuse across those props keeps the increase to four. "
                   "HOUSE-01285 adds one shared bronze fixture body and one independently switched "
-                  "opal diffuser for four linked ceiling lights"),
+                  "opal diffuser for four linked ceiling lights. HOUSE-01052 replaces the coarse "
+                  "two-finish sofa with three exact source roles: canonical navy velvet, dark "
+                  "frame and existing steel feet; the net increase is two chunks"),
     "L0_LIVING": (20,
                   "measured with HOUSE-01037's first furnished conversation group: six shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "

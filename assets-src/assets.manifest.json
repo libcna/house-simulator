@@ -421,6 +421,52 @@
       ]
     },
     {
+      "id": "MODEL_FAMILY_GLAM_VELVET_SOFA",
+      "category": "sofa",
+      "sourceFile": "assets-src/Models/Furniture/Family/glam_velvet_sofa.glb",
+      "sourceSha256": "d4aa1747e343b71a2bb246e9ee11630cb19573bccc017c2098317e34be17946b",
+      "contentName": "Models/Furniture/Family/glam_velvet_sofa",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "GlamVelvetSofa",
+        "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/GlamVelvetSofa",
+        "author": "Wayfair, LLC",
+        "retrieved": "2026-09-17",
+        "licence": "CC-BY-4.0",
+        "licenceFile": "licenses/cc-by-4.0/LICENCE.txt",
+        "attribution": "GlamVelvetSofa (c) 2021 Wayfair, LLC, licensed under CC BY 4.0; distributed by the Khronos glTF Sample Assets project.",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-01052 selects the source's authored navy variant and prepares it deterministically with tools/assets/family_sofa_prepare.py. The pinned upstream GLB is 3149844 bytes with SHA-256 67202c74a1a33377771f162dc7fad612a6c9bd51ee15124c488e9851d9ac5266. Unsupported material-variant/PBR-extension metadata, its light and embedded unused maps are removed; positions are grounded/recentred and a twelve-triangle collision box is appended. See docs/licence-evidence/khronos-glam-velvet-sofa.md."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.188443,
+          0.787541,
+          1.022829
+        ],
+        "triangles": {
+          "LOD0": 4196
+        },
+        "collision": "GlamVelvetSofa_COL",
+        "seatHeightMetres": 0.43
+      },
+      "materialMap": {
+        "GlamVelvetSofa_legs": "MAT_FAMILY_SOFA_FRAME",
+        "GlamVelvetSofa_fabric_navy": "MAT_FAMILY_SOFA_VELVET",
+        "GlamVelvetSofa_feet": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L0_FAMILY"
+      ]
+    },
+    {
       "id": "MODEL_FAMILY_SIDE_TABLE",
       "category": "occasional-table",
       "sourceFile": "assets-src/Models/Furniture/Family/side_table.glb",

@@ -577,7 +577,7 @@
     },
     {
       "id": "PROP_FAMILY_SOFA",
-      "asset": "MODEL_FURNITURE_LEATHER_SOFA",
+      "asset": "MODEL_FAMILY_GLAM_VELVET_SOFA",
       "cell": "L0_FAMILY",
       "position": [
         6.65,
