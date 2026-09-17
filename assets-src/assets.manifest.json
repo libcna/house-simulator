@@ -1093,6 +1093,56 @@
       ]
     },
     {
+      "id": "MODEL_FURNITURE_FORMAL_SOFA",
+      "category": "sofa",
+      "sourceFile": "assets-src/Models/Furniture/LivingRoom/formal_sofa.glb",
+      "sourceSha256": "bdc5765e0a36fd5263661229635f1542bca4aadae99db348635ade3608ec5838",
+      "contentName": "Models/Furniture/LivingRoom/formal_sofa",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "SheenWoodLeatherSofa",
+        "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa",
+        "author": "Darmstadt Graphics Group GmbH",
+        "retrieved": "2026-09-17",
+        "licence": "CC-BY-4.0",
+        "licenceFile": "licenses/cc-by-4.0/LICENCE.txt",
+        "attribution": "SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-01057 prepares the pinned 10107912-byte source (SHA-256 5349e042ad41e695e89f1110230c4ee0c75b2bc62ef830c7016be6ecf665bfb6) with tools/blender/living_sofa_prepare.py. It welds duplicate triangle corners before reviewed decimation, scales the publisher delivery to its 2.20 m catalogue fit, emits LOD0/LOD1 and a bounded proxy, removes PBR-only runtime metadata, and extracts five authored base-colour maps at <=256 px. See docs/licence-evidence/khronos-sheenwood-leather-sofa.md."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          2.2,
+          0.901392,
+          0.744769
+        ],
+        "triangles": {
+          "LOD0": 9382,
+          "LOD1": 3278
+        },
+        "collision": "FormalSofa_COL",
+        "seatHeightMetres": 0.43
+      },
+      "materialMap": {
+        "Brown": "MAT_LIVING_SOFA_LEATHER",
+        "Paisley": "MAT_LIVING_SOFA_PAISLEY",
+        "Striped": "MAT_LIVING_SOFA_STRIPE",
+        "Fringe": "MAT_LIVING_SOFA_FRINGE",
+        "Frame": "MAT_LIVING_SOFA_FRAME",
+        "Frame_Fabric": "MAT_LIVING_SOFA_LEATHER"
+      },
+      "usedIn": [
+        "L0_LIVING"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_KITCHEN_COUNTER_STOOL",
       "category": "stool-counter",
       "sourceFile": "assets-src/Models/Furniture/Kitchen/counter_stool.glb",
@@ -19827,6 +19877,156 @@
         "commercialUse": true,
         "modification": true,
         "note": "Selected from the Bitterli scene dataset. Per-object geometry extracted in living-room-simulator; revalidated here with original material names/textures. See docs/licence-evidence/bitterli-rendering-resources.md and docs/asset-selection/visual-slice-furniture.md."
+      }
+    },
+    {
+      "id": "TEXTURE_LIVING_SOFA_FRAME",
+      "category": "furniture-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/LivingRoom/living_sofa_frame.png",
+      "sourceSha256": "7270fefe1d4c263268a6346c5bc50e983d50d337693a99ff93f0d33f6b722e83",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Furniture/LivingRoom/living_sofa_frame",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "SheenWoodLeatherSofa frame base colour",
+        "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa",
+        "author": "Darmstadt Graphics Group GmbH",
+        "retrieved": "2026-09-17",
+        "licence": "CC-BY-4.0",
+        "licenceFile": "licenses/cc-by-4.0/LICENCE.txt",
+        "attribution": "SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Base-colour image 10 extracted and reduced from 2048 px to 256 px by tools/blender/living_sofa_prepare.py; pinned model source/hash and complete evidence are recorded on MODEL_FURNITURE_FORMAL_SOFA."
+      }
+    },
+    {
+      "id": "TEXTURE_LIVING_SOFA_FRINGE",
+      "category": "furniture-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/LivingRoom/living_sofa_fringe.png",
+      "sourceSha256": "52abca7a753ef221399cce19dab29dcf289272848b45937de005e32ad5997da1",
+      "texture": {
+        "width": 256,
+        "height": 128,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGBA"
+      },
+      "contentName": "Textures/Furniture/LivingRoom/living_sofa_fringe",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "SheenWoodLeatherSofa fringe base colour",
+        "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa",
+        "author": "Darmstadt Graphics Group GmbH",
+        "retrieved": "2026-09-17",
+        "licence": "CC-BY-4.0",
+        "licenceFile": "licenses/cc-by-4.0/LICENCE.txt",
+        "attribution": "SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "RGBA base-colour image 7 extracted and reduced from 512 x 256 px to 256 x 128 px by tools/blender/living_sofa_prepare.py; pinned model source/hash and complete evidence are recorded on MODEL_FURNITURE_FORMAL_SOFA."
+      }
+    },
+    {
+      "id": "TEXTURE_LIVING_SOFA_LEATHER",
+      "category": "furniture-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/LivingRoom/living_sofa_leather.png",
+      "sourceSha256": "0fe7c73d9d01a0d52ef6f1c69aa410293ea0cb6ff1f39ceb2514ee90d130814f",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Furniture/LivingRoom/living_sofa_leather",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "SheenWoodLeatherSofa leather base colour",
+        "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa",
+        "author": "Darmstadt Graphics Group GmbH",
+        "retrieved": "2026-09-17",
+        "licence": "CC-BY-4.0",
+        "licenceFile": "licenses/cc-by-4.0/LICENCE.txt",
+        "attribution": "SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Shared Brown/Frame_Fabric base-colour image 0 extracted and reduced from 512 px to 256 px by tools/blender/living_sofa_prepare.py; pinned model source/hash and complete evidence are recorded on MODEL_FURNITURE_FORMAL_SOFA."
+      }
+    },
+    {
+      "id": "TEXTURE_LIVING_SOFA_PAISLEY",
+      "category": "furniture-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/LivingRoom/living_sofa_paisley.png",
+      "sourceSha256": "98d32d2e200722ef57fbf62d31ebd678e42eba22fd9999ef7fdb35812dab96aa",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Furniture/LivingRoom/living_sofa_paisley",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "SheenWoodLeatherSofa paisley base colour",
+        "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa",
+        "author": "Darmstadt Graphics Group GmbH",
+        "retrieved": "2026-09-17",
+        "licence": "CC-BY-4.0",
+        "licenceFile": "licenses/cc-by-4.0/LICENCE.txt",
+        "attribution": "SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Base-colour image 3 extracted and reduced from 1024 px to 256 px by tools/blender/living_sofa_prepare.py; pinned model source/hash and complete evidence are recorded on MODEL_FURNITURE_FORMAL_SOFA."
+      }
+    },
+    {
+      "id": "TEXTURE_LIVING_SOFA_STRIPE",
+      "category": "furniture-albedo",
+      "sourceFile": "assets-src/Textures/Furniture/LivingRoom/living_sofa_stripe.png",
+      "sourceSha256": "458c92283525a0ea2c0e9b7cd23138ca5691739ff796a0135e382198cb28f3bf",
+      "texture": {
+        "width": 256,
+        "height": 256,
+        "colourSpace": "sRGB",
+        "channelLayout": "RGB"
+      },
+      "contentName": "Textures/Furniture/LivingRoom/living_sofa_stripe",
+      "kind": "texture",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "SheenWoodLeatherSofa stripe base colour",
+        "url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa",
+        "author": "Darmstadt Graphics Group GmbH",
+        "retrieved": "2026-09-17",
+        "licence": "CC-BY-4.0",
+        "licenceFile": "licenses/cc-by-4.0/LICENCE.txt",
+        "attribution": "SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Base-colour image 5 retained at its authored 256 px by tools/blender/living_sofa_prepare.py; pinned model source/hash and complete evidence are recorded on MODEL_FURNITURE_FORMAL_SOFA."
       }
     },
     {

@@ -281,7 +281,7 @@ def validate_world() -> None:
             family["scale"] != 1 or family["collision"] != "proxy"):
         raise ValueError("family sofa canonical placement or collision changed")
     living = props["PROP_LIVING_SOFA"]
-    if living["asset"] != "MODEL_FURNITURE_LEATHER_SOFA":
+    if living["asset"] != "MODEL_FURNITURE_FORMAL_SOFA":
         raise ValueError("family-only replacement changed the formal-living sofa")
 
 

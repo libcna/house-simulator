@@ -62,6 +62,18 @@ Full text: [`licenses/cc-by-3.0/LICENCE.txt`](cc-by-3.0/LICENCE.txt)
 
 Full text: [`licenses/cc-by-4.0/LICENCE.txt`](cc-by-4.0/LICENCE.txt)
 
+- `MODEL_FURNITURE_FORMAL_SOFA` — **SheenWoodLeatherSofa** by Darmstadt Graphics Group GmbH — <https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa> (retrieved 2026-09-17)
+  - Attribution: SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.
+- `TEXTURE_LIVING_SOFA_FRAME` — **SheenWoodLeatherSofa frame base colour** by Darmstadt Graphics Group GmbH — <https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa> (retrieved 2026-09-17)
+  - Attribution: SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.
+- `TEXTURE_LIVING_SOFA_FRINGE` — **SheenWoodLeatherSofa fringe base colour** by Darmstadt Graphics Group GmbH — <https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa> (retrieved 2026-09-17)
+  - Attribution: SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.
+- `TEXTURE_LIVING_SOFA_LEATHER` — **SheenWoodLeatherSofa leather base colour** by Darmstadt Graphics Group GmbH — <https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa> (retrieved 2026-09-17)
+  - Attribution: SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.
+- `TEXTURE_LIVING_SOFA_PAISLEY` — **SheenWoodLeatherSofa paisley base colour** by Darmstadt Graphics Group GmbH — <https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa> (retrieved 2026-09-17)
+  - Attribution: SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.
+- `TEXTURE_LIVING_SOFA_STRIPE` — **SheenWoodLeatherSofa stripe base colour** by Darmstadt Graphics Group GmbH — <https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/SheenWoodLeatherSofa> (retrieved 2026-09-17)
+  - Attribution: SheenWoodLeatherSofa © 2024 Darmstadt Graphics Group GmbH, changes by Eric Chadwick, original model by Fran Calvente / Poly Haven; licensed CC BY 4.0.
 - `MODEL_FAMILY_GLAM_VELVET_SOFA` — **GlamVelvetSofa** by Wayfair, LLC — <https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/GlamVelvetSofa> (retrieved 2026-09-17)
   - Attribution: GlamVelvetSofa (c) 2021 Wayfair, LLC, licensed under CC BY 4.0; distributed by the Khronos glTF Sample Assets project.
 
@@ -697,4 +709,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `2f159bb6657ba270a789f583b8b7f25c3918b99ca75498f20508e2b3cf0431a6`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `a2ac012c82806428f5c4ee7945eeb7a17458ab9eaf5c50a2f753c1a3bc1edfaf`.*

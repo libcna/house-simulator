@@ -55,6 +55,27 @@ The exact table role now reuses the approved warm lacquered piano-wood finish th
 tables in the connected living and family rooms read as one household set; no further room should
 repeat this model without a later anti-repetition review.
 
+## Formal living sofa replacement
+
+2026-09-17, HOUSE-01057. Round 51 left the formal sofa as the last broad pale seating block in the
+living composition. Khronos's official `SheenWoodLeatherSofa` sample was selected from the sibling
+catalogue and independently pinned here under CC BY 4.0. The alternative local `fabric-sofa.glb`
+was rejected after geometry and material inspection: despite 67,056 triangles it exposes only one
+flat material role and would reproduce the same white-block defect at greater cost.
+
+| Object | Measured bound (m) | LOD0 / LOD1 triangles | Review contract |
+|---|---:|---:|---|
+| SheenWoodLeatherSofa | 2.200 × 0.901 × 0.745 | 9,382 / 3,278 | 0.430 m seat; leather, paisley, stripe, fringe and carved-frame finishes; 12-triangle proxy |
+
+The 46,492-triangle source stores duplicated disconnected triangle corners. Direct decimation tore
+visible holes through the arms and back, so deterministic preparation first welds identical
+vertices and only then simplifies the mesh. The accepted result preserves all six named source
+slots, UV0 and five authored base-colour maps while stripping unsupported PBR extensions and
+embedded runtime maps. The source's layered blended fringe accumulated into a bright outline in
+the strict-XNA transparent pass; the reviewed Tier-S adaptation uses a dark 0.35 alpha cutout,
+which retains the soft trim silhouette without glow or the first capture's pale stipple. The
+existing `PROP_LIVING_SOFA` id, measured placement and collision semantics remain unchanged.
+
 ## Formal dining primary set
 
 2026-09-17, HOUSE-01048. No approved source in the established living-room kit contains a dining

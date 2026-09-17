@@ -2215,3 +2215,46 @@ green across all 323 strict-XNA translation units. Compilation and heavy work we
 colour remains explicit diagnostic output. The next contained furniture gain is the formal living
 sofa; the route-level priorities remain the dark/empty straight living view, clipped daylight
 apertures and sparse exterior start composition.
+
+## Round 52 — finished formal living sofa
+
+Commit: `HOUSE-01057` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 51's [day living composition](captures/house-01056-coffee-table-day-final/living-composition.png)
+has a broad pale sofa block in the close foreground. After: the identical fourteen cameras in the
+[final clear-day set](captures/house-01057-formal-sofa-day-final) and
+[explicit-reading 22:00 set](captures/house-01057-formal-sofa-night-final) show a lower, detailed
+brown leather/paisley sofa with distinct cushions, carved frame and domestic 2.20 m width. Both
+complete routes and temporary close inspections were opened at full resolution.
+
+Ranked visible defects remaining:
+
+1. The unchanged straight living-room camera remains dark and nearly empty around its piano wall.
+2. Clear-day apertures still clip and overpower the family composition and several route views.
+3. The broad exterior/garage start framing is materially coherent but sparse at player scale.
+4. Blank wall bays and restrained surface dressing still limit the inhabited feeling.
+5. The formal room's very dark ambient light suppresses some of the new sofa's carved detail.
+
+Fixed: `PROP_LIVING_SOFA` alone changes asset; its id, position, yaw, scale and collision semantics
+stay fixed. The official 10,107,912-byte Khronos source and CC BY 4.0 provenance are pinned. A
+weld-before-decimate preparation avoids the holes made by direct simplification and produces a
+466,772-byte, 9,382-triangle LOD0, 3,278-triangle LOD1 and twelve-triangle proxy at
+2.200 x 0.901392 x 0.744769 m. Six exact source slots resolve to five authored base-colour roles.
+
+The first gameplay capture was rejected for pale alpha-cutout stipple. A true blend experiment
+was also rejected: the layered fringe planes accumulated into a bright continuous outline in the
+strict-XNA transparent pass. The accepted dark 0.35 alpha cutout preserves the trim without either
+artefact. Against Round 51, day/night living compositions change 5.640% / 5.688% of pixels with
+normalized MAE 0.006516 / 0.004382. At a 1% colour threshold the unchanged straight living view
+changes only 675 / 503 pixels, confirming a localized asset change rather than exposure drift.
+
+The world is 630 chunks / 57 props / 256 exterior instances / 53.057268 MB, with `L0_LIVING` at
+its exact 24-chunk exception and the unculled diagnostic at 630 draws / 96 state changes. Licence,
+budget and 2,877 stable ids are current. Unit tests pass 1409/1409, serial offscreen integration
+passes 134/134 and all 48 active software-render cases pass with eight capture-only cases disabled.
+Only the inspected explicit blockout living reference advances. The eighteen-pose culling check
+passes at 0.1342% worst case (`l0-sunroom`), and the full gate accepts all 323 strict-XNA units.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only; the next highest
+visible gain is to make the straight living/piano wall read as a furnished, naturally lit room,
+followed by aperture balance and the sparse exterior start composition.

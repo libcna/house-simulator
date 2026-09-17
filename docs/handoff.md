@@ -1,4 +1,43 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01056` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01057` checkpoint)
+
+Branch `develop`. Task-start HEAD `c3bbc75` (`HOUSE-01056`). This file belongs to the single
+`HOUSE-01057` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The coarse pale `PROP_LIVING_SOFA` now uses Khronos's `SheenWoodLeatherSofa`, independently pinned
+under CC BY 4.0. The official 10,107,912-byte source is SHA-256
+`5349e042ad41e695e89f1110230c4ee0c75b2bc62ef830c7016be6ecf665bfb6`. Deterministic preparation
+welds duplicated source corners before decimation, preserves six slots/five base-colour roles and
+produces a 466,772-byte GLB at
+`bdc5765e0a36fd5263661229635f1542bca4aadae99db348635ade3608ec5838`: 9,382-triangle LOD0,
+3,278-triangle LOD1, twelve-triangle proxy and 2.200 x 0.901392 x 0.744769 m bounds. The prop's
+stable id, position, yaw, scale and collision semantics do not move.
+
+The unchanged fourteen-camera [clear-day set](visual-review/captures/house-01057-formal-sofa-day-final)
+and [explicit-reading night set](visual-review/captures/house-01057-formal-sofa-night-final) were
+opened at full resolution. Against Round 51, day/night living compositions change 5.640% / 5.688%
+of pixels (normalized MAE 0.006516 / 0.004382); a 1% threshold leaves only 675 / 503 changed pixels
+in the unchanged straight living view. The first pale alpha cutout and a later bright blend-glow
+experiment were rejected; the accepted dark 0.35 Tier-S cutout retains soft fringe without either
+artefact. The sofa now reads as leather, paisley, striped cushions and carved timber rather than a
+single pale slab.
+
+The world is 630 chunks / 57 props / 256 exterior instances / 53.057268 MB. `L0_LIVING` reaches
+its exact 24-chunk exception; the unculled diagnostic is 630 draws / 96 state changes with 47
+alpha-tested chunks. Manifest, licence credits, budget and 2,877 stable ids are current. Unit tests
+pass 1409/1409, serial offscreen integration passes 134/134, and all 48 active software-render
+cases pass with eight capture-only cases disabled. The inspected debug `blockout-l0-living` golden
+alone advances; production references do not. Culled/unculled passes all eighteen poses at 0.1342%
+worst case. The full gate accepts all 323 strict-XNA units. Compilation and heavy tooling stayed on
+CPU 0-5 / at most six workers.
+
+The largest contained defect is now the dark, nearly empty straight living/piano-wall view. Clear
+aperture clipping and sparse exterior/garage start framing remain the larger route-level defects.
+Continue from the fixed cameras; do not add unrelated infrastructure or claim full room tasks.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01056` checkpoint)
 
 Branch `develop`. Task-start HEAD `c5067e0` (`HOUSE-01055`). This file belongs to the single
 `HOUSE-01056` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

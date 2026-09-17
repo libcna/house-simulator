@@ -250,7 +250,7 @@
     },
     {
       "id": "PROP_LIVING_SOFA",
-      "asset": "MODEL_FURNITURE_LEATHER_SOFA",
+      "asset": "MODEL_FURNITURE_FORMAL_SOFA",
       "cell": "L0_LIVING",
       "position": [
         -5.2,

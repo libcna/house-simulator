@@ -148,6 +148,9 @@ run_gate "family-sofa" python3 tools/assets/family_sofa_prepare.py --check
 # HOUSE-01055: all three close-range route armchairs remain the pinned CC0 Wayfair geometry after
 # deterministic label removal, canonical material mapping, grounding and proxy generation.
 run_gate "visual-slice-chair" python3 tools/assets/visual_slice_chair_prepare.py --check
+# HOUSE-01057: the formal sofa stays within the hero-furniture budget after topology-aware
+# preparation, retains its five authored base-colour maps and keeps a valid LOD/proxy ladder.
+run_gate "formal-living-sofa" python3 tools/blender/living_sofa_prepare.py --check
 # HOUSE-01053: the family focal wall retains the pinned CC0 low cabinet, exact canonical roles,
 # measured television gap and family-only placement without unsupported source metadata.
 run_gate "family-media-console" python3 tools/assets/family_media_console_prepare.py --check

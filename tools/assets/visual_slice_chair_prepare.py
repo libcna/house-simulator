@@ -277,7 +277,7 @@ def validate_world() -> None:
                 prop["position"] != position or prop["yawDeg"] != yaw or
                 prop["scale"] != 1 or prop["collision"] != "proxy"):
             raise ValueError(f"{prop_id} placement, scale or collision contract changed")
-    if props["PROP_LIVING_SOFA"]["asset"] != "MODEL_FURNITURE_LEATHER_SOFA":
+    if props["PROP_LIVING_SOFA"]["asset"] != "MODEL_FURNITURE_FORMAL_SOFA":
         raise ValueError("chair replacement changed the formal-living sofa")
     if props["PROP_FAMILY_SOFA"]["asset"] != "MODEL_FAMILY_GLAM_VELVET_SOFA":
         raise ValueError("chair replacement changed the family sofa")
