@@ -14769,6 +14769,35 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             134/134 and all 48 active software-render cases pass; the 18-pose culled-vs-unculled
             worst case is 0.1320%. The complete repository gate is green with 323 strict-XNA
             translation units clean, with all compilation and heavy tooling capped at six cores.
+- [x] HOUSE-01284 — Replace the false kitchen ceiling task points with physical range-hood pucks
+      dep: HOUSE-01044, HOUSE-01256, HOUSE-01259, HOUSE-01260, HOUSE-01283 · sys: world, content, lighting, rendering · plat: ALL · pri: MUST
+      accept: retain the four stable `LG_L0_KITCHEN_UNDERCAB` source ids and switch behavior, but
+              mount each source at a deterministic physical puck below the canonical range hood;
+              link the exact diffuser slot, replace broad ceiling points with bounded downward
+              spots, preserve the group's original default-off 1600 lm exposure weight, rebake
+              only `L0_KITCHEN`, and inspect fixed day plus explicit-on night views; normal day
+              must not acquire ceiling hot spots or a compensating global-exposure change
+      done: (2026-09-17) One project-authored 82 x 18 x 82 mm brushed-steel/frosted puck is reused
+            four times across the existing hood filter. The four stable 400 lm, 3000 K sources
+            now sit 10 mm below their lenses, aim down through 50/100 degree feathered cones,
+            stop at 2.40 m and name their exact `PuckDiffuser` slots. The manual group remains
+            default off, so a bright clear morning does not pretend that task lighting is always
+            needed. Its selected 256-sample atlas peaks at 0.2341 rather than the old ceiling-
+            distributed 8.6039 result. Steel reuses the kitchen-hardware role; only the separately
+            switched warm diffuser raises `L0_KITCHEN` from nineteen to twenty chunks.
+      review: (2026-09-17) Round 43 retains the two fixed explicit-on before images that expose
+            four white ceiling hot spots, then compares the full thirteen-view normal clear-day
+            set and the full thirteen-view explicit-on 22:00 set. The final day west view changes
+            by only mean RGB(0.0125,0.0126,0.0126)/255 from `HOUSE-01283`, proving the original
+            off-state exposure weight was preserved. The explicit-on result has no ceiling spots
+            and remains localized at the range. The cooking bay itself is still too dark and is
+            deliberately recorded as the next defect rather than claimed complete.
+      verified: (2026-09-17) The deterministic model is 216 triangles with metre UV0, grounded
+            optical origin, exact source hash and two approved project-authored material roles.
+            Its permanent checker protects model, placement, linked slot, cone, flux, range and
+            off state. All world/content, stock-XNA, render-reference, culling and full repository
+            gates are recorded in the checkpoint handoff; compilation and heavy tooling are
+            capped at CPU 0-5 / six workers.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -18495,6 +18524,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01284` | **New task, next free phase-16 id.** Replace the four existing nominal under-cabinet ceiling points with a deterministic hood-mounted puck reused four times, link each physical diffuser, preserve the original group ids/default-off 1600 lm weighting, rebake only `L0_KITCHEN` and raise its exact chunk boundary from 19 to 20. | Round 42 names the dark cooking bay and malformed task group as the highest visible defect. Explicitly enabling the old data creates four broad white ceiling spots because the sources sit at y 3.20 across the room and have no real fixtures. The range hood already supplies a measured mounting surface, so a short downward spot and selected bake correct the source without widening island cones, changing global exposure or adding renderer architecture. The bright-day group stays off because forcing it on made the fixed view objectively darker; the on-state is reviewed separately at 22:00. |
 | 2026-09-17 | `HOUSE-01283` | **New task, next free phase-16 id.** Replace the three existing island points with a deterministic physical pendant reused three times, align them to the real island's long axis, link exact diffuser emission, use downward spot semantics and raise only `L0_KITCHEN` from its measured 17-chunk exception to 19. | Round 41's fixed kitchen images identify flat, underexposed depth as the largest defect. Directly enabling the old unlinked points reveals a worse authoring error: they run along z beside the island and create a giant orange ceiling pool. A bounded bell shade, correct x-axis spacing and a selected spot bake improve both day and night normal play without global exposure, a renderer experiment or unrelated room work. |
 | 2026-09-17 | `HOUSE-01049` | **New task, next free phase-13 id.** Add a narrow measured kitchen-seating and worktop-dressing checkpoint through the existing deterministic static-prop path; raise only `L0_KITCHEN` from its measured 13-chunk exception to 17. | Round 40's three fixed kitchen cameras show completed cabinets, island and appliances surrounded by bare surfaces with no human-scale seating. Full `HOUSE-00990` remains dependency-blocked and calls for interactive inventory far beyond this visual defect. Three reused stools plus four composed object roles make the current route credible without scattering placeholder clutter; the first placement was moved 0.25 m under the island after the unchanged full-tour collision test proved its south aisle too narrow. |
 | 2026-09-17 | `HOUSE-01048` | **New task, next free phase-13 id.** Establish a measured primary dining composition and link a physical chandelier through the existing stock-XNA static-prop/light paths; raise only `L0_DINING` to its measured ten-chunk exception. | Round 39's fixed connected-route view shows a completely empty, nearly black 6.0 × 2.8 m room between already finished living and kitchen spaces. The full `HOUSE-00989` remains dependency-blocked on whole-house furnishing work, but a project-authored table/chair/fixture suite is dependency-valid now. The room has no exterior window, so its existing switchable 2700 K chandelier starts on like the other selected readable-route practicals rather than adding ambient light, a new renderer or a screenshot-only normal-play path. |

@@ -622,13 +622,13 @@
             "LIGHT_L0_KITCHEN_UNDERCAB_3",
             "LIGHT_L0_KITCHEN_UNDERCAB_4"
           ],
-          "mean": 0.04776386352092447,
-          "peak": 8.603860855102539,
-          "scale": 8.603860855102539
+          "mean": 0.008422138777164774,
+          "peak": 0.2341105192899704,
+          "scale": 0.2341105192899704
         }
       ],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:9c9a035133394fc5dde8918fd133a951f1fc1267053c74da5943dd9b2691a625"
+      "shellHash": "sha256:00509badae4dc23f43add68f88cbfd69d20a4ab643b415a99981ddf10c0f12e4"
     },
     {
       "cell": "L0_LAUNDRY",
@@ -1909,6 +1909,6 @@
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1034080,
+  "sourceBytes": 1038440,
   "tool": "bake_house_lightmaps.py"
 }

@@ -1,7 +1,55 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01283` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01284` checkpoint)
 
-Branch `develop`. Task-start HEAD `820ceaa` (`HOUSE-01049`). This file belongs to the single
-`HOUSE-01283` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+Branch `develop`. Task-start HEAD `5be2023` (`HOUSE-01283`). This file belongs to the single
+`HOUSE-01284` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The kitchen's nominal under-cabinet group is no longer four invisible ceiling points. One
+deterministic project-authored 82 x 18 x 82 mm brushed-steel/frosted puck is reused four times
+across the real range-hood filter. Each stable 400 lm, 3000 K source sits 10 mm below its linked
+`PuckDiffuser`, aims down through a bounded 50/100 degree spot and stops at 2.40 m. The group
+retains its original manual/default-off behavior and exact 1600 lm exposure weight.
+
+Before: explicitly enabling the malformed group creates four white ceiling hot spots in the fixed
+[west kitchen](visual-review/captures/house-01284-undercab-before-on/kitchen-facing-west.png) and
+[hall-side view](visual-review/captures/house-01284-undercab-before-on/kitchen-from-hall.png).
+After: the complete [thirteen-view normal day set](visual-review/captures/house-01284-range-task-day-final)
+preserves the bright-day presentation, while the complete
+[explicit-on 22:00 set](visual-review/captures/house-01284-range-task-night-on-final) proves the
+same real switch now controls hood-mounted sources without ceiling spots. Every frame was opened;
+the matching kitchen views were compared at full resolution. The final west-day image differs
+from `HOUSE-01283` by mean RGB only (0.0125,0.0126,0.0126)/255, confined to new geometry. A
+rejected always-on iteration darkened the whole day room through legitimate exposure adaptation
+and was not promoted merely to advertise the new fixture.
+
+The selected 256-sample task atlas peaks at 0.2341 instead of the old ceiling distribution's
+8.6039. The authored model regenerates byte-identically at 216 triangles with metre UV0, grounded
+optical origin, exact source hash and approved project-authored provenance. Puck steel reuses the
+kitchen hardware role; only the independent warm diffuser raises `L0_KITCHEN` from nineteen to
+its exact measured twenty-chunk boundary. The world is 618 chunks / 49 props / 256 exterior
+instances / 52.9115 MB. A complete incremental world build finished in 23.48 s, with navigation
+in 7.20 s; no long-running `build_nav.py` remains.
+
+No strict render reference changed beyond tolerance. Unit tests pass 1409/1409. The integration
+suite passes 126 ordinary cases under offscreen SDL; its 8 sandbox-home write cases fail only when
+the home directory is read-only, and all 10 `SaveStoreTest` cases pass with the required writable
+temporary `XDG_DATA_HOME`. All 48 active render tests pass, including the unchanged eighteen-pose
+culled/unculled worst case of 0.1320%. The complete repository gate is green with all 323
+strict-XNA translation units clean. All compilation and heavy tooling were pinned to CPU 0-5 and
+at most six workers.
+
+The cooking bay remains too dark and blocky even though its source placement is now physically
+correct; do not misreport that visual defect as solved. The next highest-value path is either a
+narrow stock-XNA-compatible range/material readability correction or, if that cannot make a
+clearly better fixed frame without global exposure tricks, restrained family-room secondary
+furniture/decor. The broad exterior/garage composition remains the next larger sparse area.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01283` checkpoint)
+
+Branch `develop`. Task-start HEAD `820ceaa` (`HOUSE-01049`). This section belongs to the single
+`HOUSE-01283` commit; use that commit as its ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
 gameplay remains production-material only and explicit blockout mode is unchanged.
 
 The kitchen island now has three real practicals rather than three invisible and incorrectly

@@ -415,6 +415,46 @@
       ]
     },
     {
+      "id": "MODEL_FIXTURE_KITCHEN_TASK_PUCK",
+      "category": "fixture-small",
+      "sourceFile": "assets-src/Models/Fixtures/kitchen_task_puck.glb",
+      "sourceSha256": "3685f5adf7823124b89a4556362bc86a3f29bbd68e88991956fca2adaa76e74d",
+      "contentName": "Models/Fixtures/kitchen_task_puck",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Brushed-steel range-hood task-light puck",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored measured puck generated deterministically by tools/blender/kitchen_task_puck.py for HOUSE-01284. Its shallow steel bezel mounts below the existing range-hood filter and its separate frosted diffuser is the exact switched emissive slot. One asset is reused at four measured hood positions; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.082,
+          0.018,
+          0.082
+        ],
+        "triangles": {
+          "LOD0": 216
+        }
+      },
+      "materialMap": {
+        "PUCK_METAL": "MAT_KITCHEN_HARDWARE_STEEL",
+        "PuckDiffuser": "MAT_FIXTURE_EMISSIVE_WARM"
+      },
+      "usedIn": [
+        "L0_KITCHEN"
+      ]
+    },
+    {
       "id": "MODEL_FIXTURE_PORCH_LANTERN",
       "category": "fixture",
       "sourceFile": "assets-src/Models/Fixtures/porch_lantern.glb",
@@ -20135,7 +20175,7 @@
       "id": "TEXTURE_L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_KITCHEN_LM_LG_L0_KITCHEN_UNDERCAB.png",
-      "sourceSha256": "6f413f3fa260c6dbe01b58a54cf7f150adf8c7ebd38ea6349fb23ee90e4e3b4b",
+      "sourceSha256": "c072666c979da6ba239a3fd46edd1db9b47d7c12fe57546040fec0e14d4d9a7d",
       "texture": {
         "width": 128,
         "height": 128,

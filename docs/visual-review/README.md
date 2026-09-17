@@ -1748,3 +1748,52 @@ capped to CPU 0-5 / six workers.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and the island is
 now a believable lit focal point. Highest visible value is correcting and physically representing
 the cooking-bay/under-cabinet light, followed by restrained family-room secondary detail.
+
+## Round 43 — physical range-hood task lights
+
+Commit: `HOUSE-01284` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: explicitly enabling the old nominal under-cabinet group in the fixed
+[west kitchen](captures/house-01284-undercab-before-on/kitchen-facing-west.png) and
+[hall-side kitchen](captures/house-01284-undercab-before-on/kitchen-from-hall.png) produces four
+white ceiling hot spots. The sources were actually unlinked points at y 3.20 m distributed over
+the room, not under cabinets or attached to any fixture. After: all thirteen normal clear-day
+views are in [the final day set](captures/house-01284-range-task-day-final), and all thirteen
+22:00 views with the real manual group explicitly switched on are in
+[the final night set](captures/house-01284-range-task-night-on-final). Every frame was opened; the
+matched kitchen views were also compared at full resolution.
+
+Ranked visible defects remaining:
+
+1. The cooking bay remains too dark and visually blocky even though its source is now physically
+   correct; the unbaked black range/hood materials receive too little local contrast.
+2. Family-room seating exists, but sparse secondary objects and flat grey surfaces make it lag the
+   living, dining and kitchen compositions.
+3. The broad exterior/garage frame remains sparse beyond its coherent shell, vegetation and
+   bounded practicals.
+4. Bright windows still overpower the hall-to-kitchen composition in clear daylight.
+5. Several selected-room furniture chunks remain simpler under stock `BasicEffect` lighting than
+   their lightmapped architectural surroundings.
+
+Fixed: one deterministic project-authored 82 x 18 x 82 mm brushed-steel puck with a separate
+frosted diffuser is reused four times across the existing range-hood filter. The four stable
+400 lm, 3000 K sources now sit 10 mm below the lenses, aim downward through 50/100 degree cones,
+stop at 2.40 m and link their exact `PuckDiffuser` slots. The selected 256-sample atlas peaks at
+0.2341 rather than the malformed ceiling distribution's 8.6039. The manual group retains its
+original default-off state and total 1600 lm weight: the fixed final west-day frame differs from
+Round 42 by mean RGB only (0.0125, 0.0126, 0.0126)/255, confined to the new geometry. A rejected
+[always-on clear-day set](captures/house-01284-range-task-day-r1) visibly darkened the whole room
+through correct exposure adaptation, so it was not promoted merely to make the new lights obvious.
+
+The world is 618 chunks / 49 props. Puck steel reuses the existing kitchen-hardware finish; only
+the independently switched warm diffuser raises `L0_KITCHEN` from nineteen to its exact measured
+twenty-chunk boundary. No collision, circulation, portal or culling rule changed. No strict render
+reference changed beyond tolerance: all 48 active render cases pass, and the eighteen-pose
+culled/unculled comparison remains at 0.1320% worst case. Unit tests pass 1409/1409; the integration
+run passes its 126 ordinary cases plus all 10 SaveStore cases with the required writable temporary
+data root. Compilation and heavy tooling were capped to CPU 0-5 / six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only, and the bogus
+ceiling spots are gone. The next work must produce a larger visible gain: first improve the dark
+cooking-bay material/local-readability boundary if it can be done within the approved stock-XNA
+path; otherwise move directly to the visibly sparse family-room composition.

@@ -107,6 +107,12 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "fixture": [("x", 0.05, 3.0, "content-pipeline fixture, legible at a few metres"),
                 ("y", 0.05, 3.0, "content-pipeline fixture, legible at a few metres"),
                 ("z", 0.05, 3.0, "content-pipeline fixture, legible at a few metres")],
+    # HOUSE-01284's flush task puck is deliberately much thinner than a pendant or wall pack.
+    # Keep all three axes bounded so a centimetre/inch import still fails without forcing a
+    # physically implausible 50 mm body merely to reuse the broad fixture band.
+    "fixture-small": [("x", 0.04, 0.25, "small integrated fixture width"),
+                      ("y", 0.005, 0.08, "small integrated fixture thickness"),
+                      ("z", 0.04, 0.25, "small integrated fixture depth")],
 }
 
 #: Categories that exist in the manifest but carry no size expectation. Listed explicitly so that a

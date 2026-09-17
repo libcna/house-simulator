@@ -766,37 +766,37 @@
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
-    // ---- LG_L0_KITCHEN_UNDERCAB x4
+    // ---- LG_L0_KITCHEN_UNDERCAB x4 -- integrated task pucks beneath the range hood
     {
       "id": "LIGHT_L0_KITCHEN_UNDERCAB_1", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_UNDERCAB",
-      "type": "point", "position": [-4.73, 3.20, -25.73],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 8.39,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "type": "spot", "position": [-7.50, 2.165, -25.375],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 50.0, "coneOuterDeg": 100.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 2.40,
+      "fixtureProp": "PROP_L0_KITCHEN_TASK_PUCK_1", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_L0_KITCHEN_UNDERCAB_2", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_UNDERCAB",
-      "type": "point", "position": [-1.27, 3.20, -25.73],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 8.39,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "type": "spot", "position": [-7.50, 2.165, -25.175],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 50.0, "coneOuterDeg": 100.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 2.40,
+      "fixtureProp": "PROP_L0_KITCHEN_TASK_PUCK_2", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_L0_KITCHEN_UNDERCAB_3", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_UNDERCAB",
-      "type": "point", "position": [-4.73, 3.20, -24.37],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 8.39,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "type": "spot", "position": [-7.50, 2.165, -24.975],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 50.0, "coneOuterDeg": 100.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 2.40,
+      "fixtureProp": "PROP_L0_KITCHEN_TASK_PUCK_3", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
     {
       "id": "LIGHT_L0_KITCHEN_UNDERCAB_4", "cell": "L0_KITCHEN", "group": "LG_L0_KITCHEN_UNDERCAB",
-      "type": "point", "position": [-1.27, 3.20, -24.37],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 8.39,
-      "fixtureProp": null, "emissiveMaterialSlot": "tube",
+      "type": "spot", "position": [-7.50, 2.165, -24.775],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 50.0, "coneOuterDeg": 100.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 400.0, "range": 2.40,
+      "fixtureProp": "PROP_L0_KITCHEN_TASK_PUCK_4", "emissiveMaterialSlot": "PuckDiffuser",
       "castsBlobShadow": false, "bakedIntoLightmap": true, "defaultOn": false
     },
 

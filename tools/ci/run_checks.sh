@@ -133,6 +133,9 @@ run_gate "kitchen-dressing" python3 tools/assets/kitchen_dressing_prepare.py --c
 # HOUSE-01283: the island's three linked emitters reuse one deterministic close-range fixture;
 # the gate protects its physical shade/optical-point contract and canonical alignment.
 run_gate "kitchen-pendant" python3 tools/assets/kitchen_pendant_prepare.py --check
+# HOUSE-01284: the existing range-task group is four physical hood-mounted pucks rather than
+# ceiling points; the gate protects the exact model, placement and short downward-light contract.
+run_gate "kitchen-task-puck" python3 tools/assets/kitchen_task_puck_prepare.py --check
 # HOUSE-01045: the formal-room piano is a close-range deterministic authored asset, not a
 # one-off binary or a cuboid standing in for furniture.
 run_gate "living-piano" python3 tools/assets/living_piano_prepare.py --check

@@ -93,6 +93,58 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_KITCHEN_TASK_PUCK_1",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK",
+      "cell": "L0_KITCHEN",
+      "position": [-7.50, 2.175, -25.375],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_KITCHEN_TASK_PUCK_2",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK",
+      "cell": "L0_KITCHEN",
+      "position": [-7.50, 2.175, -25.175],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_KITCHEN_TASK_PUCK_3",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK",
+      "cell": "L0_KITCHEN",
+      "position": [-7.50, 2.175, -24.975],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_KITCHEN_TASK_PUCK_4",
+      "asset": "MODEL_FIXTURE_KITCHEN_TASK_PUCK",
+      "cell": "L0_KITCHEN",
+      "position": [-7.50, 2.175, -24.775],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_KITCHEN_REFRIGERATOR",
       "asset": "MODEL_KITCHEN_REFRIGERATOR",
       "cell": "L0_KITCHEN",
