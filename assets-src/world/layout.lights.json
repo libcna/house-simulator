@@ -2052,7 +2052,8 @@
     },
     // ================================================================== the exterior lights
     // `HOUSE-00383`. §53's list, in full: 2 porch lanterns, 1 garage flood, 2 rear terrace
-    // lights, 4 path lights, 1 shed light and the 9 street lights. 19 fixtures in 6 groups.
+    // lights, 2 garage carriage lights, 4 path lights, 1 shed light and the 9 street lights.
+    // 21 fixtures in 7 groups.
     //
     // These are the only lights in the file whose height is measured from the ground rather than
     // down from a ceiling: an exterior cell's `yOverride` top is the sky at +20, and a lantern
@@ -2128,6 +2129,35 @@
       "spillCells": ["L0_GARAGE", "EXT_SIDEYARD_E"],
       "fixtureProp": "PROP_EXT_DRIVEWAY_FLOODLIGHT", "emissiveMaterialSlot": "FloodLens",
       "castsBlobShadow": true, "bakedIntoLightmap": false, "defaultOn": false
+    },
+
+    // ---- LG_EXT_GARAGE_LANTERN x2 -- automatic warm carriage lights at the two jambs. The
+    // ---- separate central flood remains a manual neutral utility light; these smaller sources
+    // ---- establish normal-play arrival scale and reveal the door/local jamb facade. The manual
+    // ---- utility light retains the separate job of illuminating the apron when requested.
+    {
+      "id": "LIGHT_EXT_GARAGE_LANTERN_1", "cell": "EXT_DRIVEWAY", "group": "LG_EXT_GARAGE_LANTERN",
+      "type": "point", "position": [10.20, 2.62, -13.1585],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 800.0, "range": 5.50,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeCells": ["L0_GARAGE"],
+      "spillCells": ["L0_GARAGE", "EXT_FRONTYARD_E"],
+      "fixtureProp": "PROP_EXT_GARAGE_LANTERN_1", "emissiveMaterialSlot": "LanternShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
+    },
+    {
+      "id": "LIGHT_EXT_GARAGE_LANTERN_2", "cell": "EXT_DRIVEWAY", "group": "LG_EXT_GARAGE_LANTERN",
+      "type": "point", "position": [16.20, 2.62, -13.1585],
+      "direction": [0.0, -1.0, 0.0],
+      "colorK": 2400, "intensityLm": 800.0, "range": 5.50,
+      "bakeLumensPerRadiantWatt": 100.0,
+      "bakeCells": ["L0_GARAGE"],
+      "spillCells": ["L0_GARAGE", "EXT_SIDEYARD_E"],
+      "fixtureProp": "PROP_EXT_GARAGE_LANTERN_2", "emissiveMaterialSlot": "LanternShade",
+      "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false,
+      "duskSensor": true
     },
 
     // ---- LG_EXT_TERRACE_MAIN x2 -- on the sunroom's north wall, over the terrace

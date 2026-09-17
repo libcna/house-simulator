@@ -243,7 +243,7 @@
       },
       "groups": [],
       "lumensPerRadiantWatt": 683.0,
-      "shellHash": "sha256:e3025f08b04f92d6ff66c7199fc930b11d2c840e0b50a562740fd553f065abfc"
+      "shellHash": "sha256:fef81498a7b75bb6435a7dd5da32a559f6531d5c53bbd04c0d13965a989c7c1b"
     },
     {
       "cell": "L0_GARAGE_LOFT",
@@ -802,8 +802,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_LIVING",
-    "L0_STAIR_MAIN"
+    "L0_GARAGE"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,

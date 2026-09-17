@@ -1,4 +1,46 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-00938` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-00939` checkpoint)
+
+Branch `develop`. Task-start HEAD `8ec87b5` (`HOUSE-00938`). This file belongs to the single
+`HOUSE-00939` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout remains available.
+
+The garage arrival now has two physical warm carriage lanterns instead of one small manual wall
+pack on a broad blank facade. The approved measured porch-lantern model is reused at the two
+sectional-door jambs; its new independent dusk group owns two 800 lm / 2,400 K / 5.5 m point
+sources. A selected-cell Tier-S artificial atlas makes their contribution reach `L0_GARAGE`, while
+explicit short-range receivers keep it local. The existing central 3,000 lm / 4,000 K utility
+flood remains manual and retains the separate job of lighting the apron.
+
+All thirty frames in the complete matched
+[clear-day set](visual-review/captures/house-00939-garage-lantern-day-final) and
+[normal-night set](visual-review/captures/house-00939-garage-lantern-night-final) were opened. A
+separate fixed manual-flood-on driveway frame was inspected as the control. Against the Round 57
+baseline, the night garage frame changes 94,586 pixels above two channel levels (6.5685%,
+normalized MAE 0.002168); the day frame changes only 2,505 pixels (0.1740%, MAE 0.000405). The
+road-front frame changes 1.4577% at night and 0.0917% by day. A rejected 400 lm physical-only first
+pass left the facade black and was not retained as the final review set.
+
+The garage lanterns add six stable ids and one deterministic 128 x 128 linear lightmap whose scale
+is 3.227118. The world is 635 chunks / 96 cells / 64 static props / 258 exterior hierarchy
+instances / 53.480631 MB. The unculled diagnostic is 591 opaque submissions, 44 cutouts and 98
+state changes. Two changed strict references were opened pairwise and deliberately advanced:
+`property-drive` adds exactly the two debug fixture silhouettes, and `sun-season-03` adds their
+automatic warm 06:00 pool. No unrelated golden moved.
+
+All 1,409 unit and 135 integration tests pass. The 48 active software-render cases pass after the
+two inspected reference advances; eight capture-only cases remain disabled. All eighteen
+culled/unculled poses pass at 0.1342% worst (`l0-sunroom`). Schema, provenance/licence, stable-id,
+deterministic lightmap/content and full repository/strict-XNA gate results are recorded in
+`plan.md`; compilation and heavy work stayed on CPU 0-5 / at most six workers.
+
+Next highest visible value: add a bounded front-step and upper-facade lighting layer without
+raising global night exposure. The garage wall is now human-scaled but still sparse by day, and
+the automatic lanterns correctly leave the broad apron to the manual utility flood. Inside, blank
+wall bays and weak furniture grounding remain more valuable than unrelated system work.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-00938` checkpoint)
 
 Branch `develop`. Task-start HEAD `7c327bc` (`HOUSE-00937`). This file belongs to the single
 `HOUSE-00938` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

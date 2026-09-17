@@ -2492,3 +2492,51 @@ props / 257 exterior instances / 53.446726 MB; the unculled diagnostic is 590 op
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
 debug blockout remains available. The next highest visible value is garage-front composition plus
 a controlled facade/step lighting layer, not a global night-exposure increase.
+
+## Round 58 — automatic garage carriage lights
+
+Commit: `HOUSE-00939` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 57's [clear-day driveway](captures/house-00938-porch-layer-day-final/garage-approach.png)
+has a broad garage wall with only one small central utility pack, while the matching
+[normal 22:00 view](captures/house-00938-porch-layer-night-final/garage-approach.png) is almost
+entirely black because that 4,000 K work light is deliberately manual. After: the complete matched
+fifteen-camera [day](captures/house-00939-garage-lantern-day-final) and
+[night](captures/house-00939-garage-lantern-night-final) sets add two physical carriage lanterns
+at the sectional-door jambs. All thirty final frames were opened; the fixed manual-flood-on
+driveway control was opened separately.
+
+Ranked visible defects remaining:
+
+1. The upper facade and side wings remain broad dark planes at night, and the close front steps
+   are underlit relative to the porch deck.
+2. The garage wall has human-scale fixtures now but remains sparse by day; the automatic lanterns
+   intentionally do not replace the manual flood's apron-lighting role.
+3. The approved foundation plants are correctly composed but remain sparse and low-detail nearby.
+4. Blank interior wall bays and weak local furniture grounding still limit the inhabited feeling.
+5. Distant landscape/neighbour context continues to expose the finite presentation boundary.
+
+Fixed: two instances of the existing approved measured porch lantern sit symmetrically at x 10.2
+and 16.2 m. Their separate dusk group owns two 800 lm / 2,400 K / 5.5 m point sources, explicit
+garage/front-east/side-east receivers and a selected-cell Tier-S `L0_GARAGE` atlas peaking at
+3.2271. The short range leaves the broad driveway, yard and side fence dark; the existing central
+3,000 lm utility flood remains manual and independently supplies the apron when requested. Global
+exposure, porch lighting, renderer architecture and strict-XNA API are unchanged.
+
+Against Round 57, the fixed night driveway changes 94,586 pixels above two channel levels
+(6.5685%, normalized MAE 0.002168); the door, two warm fixtures and their local jamb pools account
+for the change. The day driveway changes 2,505 pixels (0.1740%, MAE 0.000405), confined to the two
+fixture silhouettes. The road-front frame changes 1.4577% by night and 0.0917% by day. A first
+physical-fixture-only attempt was rejected after inspection because its 400 lm sources left the
+door and facade black; that non-final capture set was removed rather than preserved as evidence.
+
+Two strict references were opened pairwise and intentionally advanced: the debug driveway frame
+adds exactly the two fixture silhouettes, and the winter 06:00 seasonal frame adds their automatic
+warm pool. No unrelated golden moved. The world is 635 chunks / 96 cells / 64 props / 258 exterior
+instances / 53.480631 MB; the unculled diagnostic is 591 opaque submissions, 44 cutouts and 98
+state changes. Test and gate results are recorded in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible exterior value is a bounded front-step
+and upper-facade lighting layer; inside, restrained wall dressing and contact grounding remain the
+strongest opportunities.

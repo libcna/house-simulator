@@ -402,7 +402,7 @@ TEST(LightingSystemTests, InitialGroupsMatchAuthoredDefaultsAndEntryLightsCanBeS
     EXPECT_FLOAT_EQ(hall->artificial, 0.0F);
 }
 
-TEST(LightingSystemTests, AllSeventeenAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
+TEST(LightingSystemTests, AllNineteenAuthoredDuskFixturesFollowDayNightWithAVisibleStagger)
 {
     if (!ContentIsBuilt())
     {
@@ -411,15 +411,17 @@ TEST(LightingSystemTests, AllSeventeenAuthoredDuskFixturesFollowDayNightWithAVis
     HouseLighting house;
     house.clock.calendarDaysPerSimDay = 1.0;
     const Id porch = Id::Of("LG_L0_PORCH_LANTERN");
+    const Id garageLanterns = Id::Of("LG_EXT_GARAGE_LANTERN");
     const Id street = Id::Of("LG_EXT_STREET");
     const Id neighbours = Id::Of("LG_EXT_NEIGHBOUR_PORCH");
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(porch));
+    ASSERT_TRUE(house.lighting.IsGroupDuskControlled(garageLanterns));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(street));
     ASSERT_TRUE(house.lighting.IsGroupDuskControlled(neighbours));
     EXPECT_EQ(std::count_if(house.world.Lights().begin(),
                             house.world.Lights().end(),
                             [](const world::Light& light) { return light.duskSensor; }),
-              17);
+              19);
 
     cnahouse::environment::CivilTime time;
     time.year = 2031;
@@ -430,6 +432,7 @@ TEST(LightingSystemTests, AllSeventeenAuthoredDuskFixturesFollowDayNightWithAVis
     house.lighting.Update(Frame(200));
     EXPECT_FALSE(house.lighting.FindGroup(porch)->on);
     EXPECT_FLOAT_EQ(house.lighting.FindGroup(porch)->Level(), 0.0F);
+    EXPECT_FALSE(house.lighting.FindGroup(garageLanterns)->on);
     EXPECT_FALSE(house.lighting.FindGroup(street)->on);
     EXPECT_FALSE(house.lighting.FindGroup(neighbours)->on);
 
@@ -438,6 +441,8 @@ TEST(LightingSystemTests, AllSeventeenAuthoredDuskFixturesFollowDayNightWithAVis
     house.lighting.Update(Frame(201));
     EXPECT_TRUE(house.lighting.FindGroup(porch)->on);
     EXPECT_FLOAT_EQ(house.lighting.FindGroup(porch)->Level(), 1.0F);
+    EXPECT_TRUE(house.lighting.FindGroup(garageLanterns)->on);
+    EXPECT_FLOAT_EQ(house.lighting.FindGroup(garageLanterns)->Level(), 1.0F);
     EXPECT_TRUE(house.lighting.FindGroup(street)->on);
     EXPECT_FLOAT_EQ(house.lighting.FindGroup(street)->Level(), 1.0F);
     EXPECT_TRUE(house.lighting.FindGroup(neighbours)->on);
@@ -980,17 +985,31 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
     const Id garage = Id::Of("L0_GARAGE");
     const Id drivewayTerrain = Id::Of("EXT_SIDEYARD_E");
     const Id garageFlood = Id::Of("LG_EXT_DRIVEWAY_FLOOD");
+    const Id garageLanterns = Id::Of("LG_EXT_GARAGE_LANTERN");
     const Microsoft::Xna::Framework::Vector3 garageDoorCentre(13.20F, 1.35F, -13.30F);
     const Microsoft::Xna::Framework::Vector3 drivewayCentre(13.0F, 0.0F, -8.5F);
     const Microsoft::Xna::Framework::Vector3 outsideFloodCone(22.0F, 0.0F, -13.0F);
-    EXPECT_FALSE(house.lighting.StaticDetailLightsForObject(garage, garageDoorCentre).slots[0].has_value());
+    const ObjectLightAssignment garageLanternSpill =
+        house.lighting.StaticDetailLightsForObject(garage, garageDoorCentre);
+    const ObjectLightAssignment garageLanternReceiver =
+        house.lighting.CrossCellReceiverLightsForObject(garage, garageDoorCentre);
+    ASSERT_TRUE(garageLanternSpill.slots[0].has_value());
+    ASSERT_TRUE(garageLanternSpill.slots[1].has_value());
+    ASSERT_TRUE(garageLanternReceiver.slots[0].has_value());
+    ASSERT_TRUE(garageLanternReceiver.slots[1].has_value());
+    EXPECT_GT(garageLanternSpill.slots[0]->diffuseColor.X, garageLanternSpill.slots[0]->diffuseColor.Z);
+    EXPECT_GT(garageLanternSpill.spillDiffuseColor.X, garageLanternSpill.spillDiffuseColor.Z);
     EXPECT_FALSE(
         house.lighting.StaticDetailLightsForObject(drivewayTerrain, drivewayCentre).slots[0].has_value());
     ASSERT_TRUE(house.lighting.SetGroupOn(garageFlood, true));
     house.lighting.Update(Frame(31));
     EXPECT_FALSE(house.lighting.DirectionalLightsForObject(garage, garageDoorCentre).slots[0].has_value());
-    EXPECT_FALSE(
-        house.lighting.CrossCellReceiverLightsForObject(garage, garageDoorCentre).slots[0].has_value());
+    const ObjectLightAssignment receiverWithFlood =
+        house.lighting.CrossCellReceiverLightsForObject(garage, garageDoorCentre);
+    ASSERT_TRUE(receiverWithFlood.slots[0].has_value());
+    ASSERT_TRUE(receiverWithFlood.slots[1].has_value());
+    EXPECT_GT(receiverWithFlood.slots[0]->diffuseColor.X, receiverWithFlood.slots[0]->diffuseColor.Z)
+        << "the unbaked manual flood must not replace the warm carriage-light receiver pass";
     const ObjectLightAssignment garageSpill =
         house.lighting.StaticDetailLightsForObject(garage, garageDoorCentre);
     ASSERT_TRUE(garageSpill.slots[0].has_value());
@@ -1006,6 +1025,9 @@ TEST(LightingSystemTests, ObjectsReceiveFixtureKeyFillAndSurfaceTintedBounceInSt
         house.lighting.StaticDetailLightsForObject(drivewayTerrain, outsideFloodCone).slots[0].has_value());
     ASSERT_TRUE(house.lighting.SetGroupOn(garageFlood, false));
     house.lighting.Update(Frame(32));
+    EXPECT_TRUE(house.lighting.FindGroup(garageLanterns)->on)
+        << "the automatic carriage lights are independent of the manual work flood";
+    EXPECT_TRUE(house.lighting.StaticDetailLightsForObject(garage, garageDoorCentre).slots[0].has_value());
 
     ASSERT_TRUE(house.lighting.SetGroupOn(Id::Of("LG_L0_PORCH_LANTERN"), false));
     const ObjectLightAssignment dark = house.lighting.DirectionalLightsForObject(porch, centre);

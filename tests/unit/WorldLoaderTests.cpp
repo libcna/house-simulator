@@ -3991,8 +3991,8 @@ namespace
                                   std::size_t{0},
                                   [](std::size_t count, const world::Cell& cell)
                                   { return count + cell.lightmaps.artificial.size(); }),
-                  127U)
-            << "the canonical bindings include 124 owned-room bakes and three explicit cross-cell spills";
+                  128U)
+            << "the canonical bindings include 124 owned-room bakes and four explicit cross-cell bakes";
 
         // 179 and 66 until `HOUSE-00491` retired §12.6's two `W_GABLE` louvres: they were in
         // "attic gable ends" and §12.1's roof is a hip with none, so both stood 1.44 m inside
@@ -4050,8 +4050,8 @@ namespace
         // `HOUSE-00381` authored `B1` and `L0`, `HOUSE-00382` the three upper floors and
         // `HOUSE-00383` §53's exterior. §28.2 said 169 fixtures in 84 groups, and §13's own
         // per-room column never added up to that.
-        EXPECT_EQ(contents.lights.size(), 245U)
-            << "HOUSE-00938 adds the two physical outer-bay porch sources";
+        EXPECT_EQ(contents.lights.size(), 247U)
+            << "HOUSE-00939 adds the two physical garage carriage sources";
         std::map<cnahouse::util::Id, std::set<cnahouse::util::Id>> groupsIn;
         for (const world::Light& light : contents.lights)
         {
@@ -4065,7 +4065,7 @@ namespace
             (void)cell;
             distinct.insert(groups.begin(), groups.end());
         }
-        EXPECT_EQ(distinct.size(), 135U)
+        EXPECT_EQ(distinct.size(), 136U)
             << "§13's Lights column, §53's six exterior groups and the neighbours' porches";
 
         // §15.7 rule 6's index, asserted by the other implementation: a cell's `lightGroups` is

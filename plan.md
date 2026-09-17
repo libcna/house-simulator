@@ -13859,6 +13859,43 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 49 active render tests pass (eight disabled); all eighteen culling pairs pass at
                 0.1342% worst (`l0-sunroom`). Full repository and strict-XNA gates pass with all
                 compilation/heavy work restricted to CPU 0-5 / at most six workers.
+- [x] HOUSE-00939 — Add automatic carriage lanterns to the garage arrival
+      dep: HOUSE-00935, HOUSE-00938, HOUSE-01047, HOUSE-01259, HOUSE-01269 · sys: world/content/lighting/rendering · plat: ALL · pri: MUST
+      note: (2026-09-17) Round 57 leaves the normal-play garage approach as one broad empty wall
+            around a small central utility flood, and that deliberately manual flood is off in the
+            canonical 22:00 route. Reuse the approved measured wall lantern at the two garage-door
+            jambs on a separate dusk circuit. Preserve the manual 4,000 K work light, global night
+            exposure, exterior-cell ownership and strict-XNA renderer.
+      accept: two physical warm garage lanterns add believable human scale in the fixed clear-day
+              driveway view and independently reveal the door/local jamb facade in the fixed normal
+              clear-night view; their range and explicit spill receivers do not light the whole
+              apron, yard or side fence. The existing central flood remains manual, independently
+              reviewable and retains the apron-lighting role. Matched fifteen-camera day/night sets
+              are inspected; content/provenance,
+              unit, integration, render, culling and strict-XNA gates pass with compilation/heavy
+              work restricted to CPU 0-5 / at most six workers.
+      result: (2026-09-17) Two instances of the approved measured porch lantern now flank the
+              sectional door at x 10.2 and 16.2 m. Their separate automatic dusk group owns two
+              800 lm / 2,400 K / 5.5 m point sources, bounded explicit receivers and a deterministic
+              128 x 128 `L0_GARAGE` artificial atlas with scale 3.227118. The existing central
+              3,000 lm / 4,000 K work flood remains manual and retains the broad-apron role; global
+              exposure and the porch circuit are unchanged. The world is 635 chunks / 96 cells /
+              64 props / 258 exterior instances / 53.480631 MB.
+      review: (2026-09-17) All thirty frames in the matched fifteen-camera final day/night sets
+              were opened, plus a fixed manual-flood-on control. Against Round 57, the night
+              driveway changes 94,586 pixels above two channel levels (6.5685%, normalized MAE
+              0.002168); the day driveway changes only 2,505 pixels (0.1740%, MAE 0.000405). A
+              400 lm physical-only first pass was rejected because it left the facade black. The
+              two changed strict references were opened pairwise and advanced only after their
+              diffs proved the intended fixture silhouettes/warm pool; no unrelated golden moved.
+              The dark upper facade, underlit front steps and sparse day garage wall remain the
+              largest exterior defects; `VISUAL-GATE-1` still FAILS.
+      verified: (2026-09-17) Schema, provenance/licence, manifest, budget, stable-id and
+                deterministic asset/lightmap checks pass. The unculled diagnostic is 591 opaque
+                submissions / 44 cutouts / 98 state changes. All 1,409 unit, 135 integration and
+                48 active render tests pass (eight disabled); all eighteen culling pairs pass at
+                0.1342% worst (`l0-sunroom`). Full repository and all 323 strict-XNA translation
+                units pass with compilation/heavy work restricted to CPU 0-5 / at most six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19089,6 +19126,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-00939` | **New task, next free phase-12 id.** Reuse the measured wall lantern as two garage-door carriage lights on a separate dusk group while retaining the existing manual utility flood. After the first capture, refine “near apron” to “door/local jamb facade”; the manual flood retains the broad-apron role. | Round 57's fixed driveway frames show one broad empty garage wall by day and a near-black normal-play arrival at 22:00 because the central 4,000 K flood is correctly manual/off. Two short-range 2,400 K fixtures at the jambs supply human scale and bounded normal-night readability without global exposure, another asset or changing the utility-light contract. The rejected first capture proved that asking the range-bounded carriage lights to illuminate the terrain tile's distant centre conflicts with keeping the side fence dark and duplicates the authored utility flood rather than improving the physical composition. |
 | 2026-09-17 | `HOUSE-00938` | **New task, next free phase-12 id.** Reuse the measured semi-flush fixture for two physical porch sources, keep them on the existing dusk circuit and give their cross-cell bake an explicit per-source offline calibration. | Round 56 names the almost-black night facade outside two hot door lanterns as the largest arrival defect. Two outer-bay fixtures add layered architectural light without changing global exposure or converting the manual path/garage groups; separating always-visible glass from the switched optical disc also fixes the reused asset's off-state silhouette. |
 | 2026-09-17 | `HOUSE-00937` | **New task, next free phase-12 id.** Add sloped-ground material covers as a truthful exterior-data primitive, use it for two front foundation beds, and recompose only the existing approved foundation plants. | Round 55 names the sparse facade/garage arrival as the highest exterior defect. Existing foundation vegetation is incorrectly arranged as one continuous line beneath the elevated porch and into the driveway; two flanking beds use the existing mulch material and existing vegetation count without a download, a fake navigable path or a terrain-height change. |
 | 2026-09-17 | `HOUSE-00936` | **New task, next free phase-12 id.** Calibrate only the generated production lawn tint, preserve the approved texture/UV/runtime path, and make the generator prove exact ownership of its marker block. | Round 54 makes the large saturated lawn the dominant material defect in both fixed arrival frames. The first deterministic write also proved that fourteen independently authored vegetation rows had later been inserted inside this generator's replacement range; moving them intact after the END marker and rejecting any future unowned row is the smallest transparent data/tool correction. |

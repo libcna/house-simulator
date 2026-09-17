@@ -1043,12 +1043,17 @@
       "daylight": { "orientation": "E", "exposure": 0.26 },
       "lightGroups": ["LG_L0_GARAGE_MAIN", "LG_L0_GARAGE_OPENER"],
       "lightmaps": {
-        "shellHash": "sha256:e3025f08b04f92d6ff66c7199fc930b11d2c840e0b50a562740fd553f065abfc",
+        "shellHash": "sha256:fef81498a7b75bb6435a7dd5da32a559f6531d5c53bbd04c0d13965a989c7c1b",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_GARAGE_LM_DAY",
           "scale": 1.000000238418579
         },
         "artificial": [
+          {
+            "group": "LG_EXT_GARAGE_LANTERN",
+            "contentName": "Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_EXT_GARAGE_LANTERN",
+            "scale": 3.227118492126465
+          },
           {
             "group": "LG_L0_GARAGE_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_GARAGE_LM_LG_L0_GARAGE_MAIN",
@@ -2563,7 +2568,7 @@
       "acoustic": { "roomTone": "AMB_OUTDOOR", "absorption": 0.88, "reverbHint": "outdoor_open" },
       "thermal": { "heated": false, "ductBranch": null },
       "daylight": { "orientation": "SE", "exposure": 1.00 },
-      "lightGroups": ["LG_EXT_DRIVEWAY_FLOOD"],
+      "lightGroups": ["LG_EXT_DRIVEWAY_FLOOD", "LG_EXT_GARAGE_LANTERN"],
       "residencyPack": "exterior", "visibilityHint": "open"
     },
     {
