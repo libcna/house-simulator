@@ -479,34 +479,34 @@
     // ---- LG_L0_FAMILY_MAIN x4 -- selected living-space practicals, one switch
     {
       "id": "LIGHT_L0_FAMILY_MAIN_1", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
-      "type": "spot", "position": [4.37, 3.02, -25.40],
-      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 6.62,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "type": "spot", "position": [4.37, 3.12, -25.40],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
+      "fixtureProp": "PROP_L0_FAMILY_CEILING_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_FAMILY_MAIN_2", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
-      "type": "spot", "position": [6.53, 3.02, -25.40],
-      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 6.62,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "type": "spot", "position": [6.53, 3.12, -25.40],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
+      "fixtureProp": "PROP_L0_FAMILY_CEILING_2", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_FAMILY_MAIN_3", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
-      "type": "spot", "position": [4.37, 3.02, -23.70],
-      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 6.62,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "type": "spot", "position": [4.37, 3.12, -23.70],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
+      "fixtureProp": "PROP_L0_FAMILY_CEILING_3", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_FAMILY_MAIN_4", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_MAIN",
-      "type": "spot", "position": [6.53, 3.02, -23.70],
-      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 75.0, "coneOuterDeg": 140.0,
-      "colorK": 3000, "bulbClass": "led", "intensityLm": 1000.0, "range": 6.62,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "type": "spot", "position": [6.53, 3.12, -23.70],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 3000, "bulbClass": "led", "intensityLm": 1200.0, "range": 6.62,
+      "fixtureProp": "PROP_L0_FAMILY_CEILING_4", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
@@ -523,10 +523,10 @@
     // ---- LG_L0_FAMILY_READING x1 -- a floor lamp, switched at the lamp (§53)
     {
       "id": "LIGHT_L0_FAMILY_READING_1", "cell": "L0_FAMILY", "group": "LG_L0_FAMILY_READING",
-      "type": "point", "position": [5.45, 1.70, -24.55],
+      "type": "point", "position": [8.05, 1.997, -26.45],
       "direction": [0.0, -1.0, 0.0],
       "colorK": 2400, "intensityLm": 450.0, "range": 4.77,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "fixtureProp": "PROP_FAMILY_LAMP", "emissiveMaterialSlot": "LampshaderOuterBSDF",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": false
     },
 

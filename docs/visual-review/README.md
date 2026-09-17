@@ -1889,3 +1889,62 @@ remain unchanged.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. Highest visible
 value is now local family-room lighting/readability, followed by the simplified pale seating/media
 silhouette and broader exterior composition—not additional invisible infrastructure.
+
+## Round 46 — physical family-room practicals
+
+Commit: `HOUSE-01285` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 45's complete unchanged
+[clear-day set](captures/house-01051-family-secondary-day-final) shows a furnished but flat family
+room under a blank ceiling. The new complete
+[explicit-reading 22:00 baseline](captures/house-01285-family-fixtures-night-before) also proves
+that the visible floor-lamp shade stays dark while its nominal point lights the room from 3.15 m
+away. After: all fourteen matching cameras were recaptured for
+[normal clear day](captures/house-01285-family-fixtures-day-final) and
+[explicit-reading 22:00](captures/house-01285-family-fixtures-night-final). All four sets and the
+six matched family frames were opened at full resolution.
+
+Ranked visible defects remaining:
+
+1. The pale sofa and mantel-like media unit are still coarse, bright silhouettes compared with
+   the detailed bookcase and the stronger living/dining compositions.
+2. Clear-day apertures remain clipped and visually overpower interior receivers, especially in
+   the reverse family composition and connected hall views.
+3. The broad exterior/garage start frame is materially coherent but still sparse at player scale.
+4. Family-room wall treatment and controlled surface dressing remain restrained enough that the
+   large focal-wall bays feel unfinished.
+5. Several furniture chunks remain flatter under stock `BasicEffect` than the lightmapped shell.
+
+Fixed: one deterministic project-authored 420 x 180 x 420 mm semi-flush fixture is reused four
+times. A dark-bronze canopy, trim and finial frame the separately switched opal diffuser. The four
+stable main sources sit at their physical y 3.12 m optical faces, aim down through 72/140 degree
+spots and retain a warm 3000 K domestic distribution at 1200 lm each. The existing family floor
+lamp keeps its approved White Room geometry and texture provenance through a byte-identical
+derived asset identity; only that instance's shade receives the switched-emitter role. Its 450 lm
+reading source now sits at [8.05, 1.997, -26.45] and remains off until explicitly switched.
+
+The selected 256-sample main atlas peaks at 0.2292 rather than 0.1977. The corrected reading atlas
+peaks at 0.5822 rather than 0.1368 because it now originates at the shade. Day matched frames
+change 81.59–96.85% of pixels with normalized MAE 0.01334–0.02098; night matched frames change
+79.98–94.76% with normalized MAE 0.01181–0.01997. The broad pixel coverage is the expected selected
+room lightmap change, while direct inspection confirms that new silhouettes and gradients remain
+localized to the family room rather than a global exposure edit.
+
+An initial after capture was rejected: it revealed that the freshly generated repository
+`content/world/chunks.bin` had not yet been copied to the runtime's `build/content` tree and still
+reported 624 chunks. The CMake content target synchronized the two roots and compiled both new
+models; every promoted final frame explicitly reports 626 chunks. The rejected capture is not a
+review result.
+
+The world is 626 chunks / 57 props / 256 exterior hierarchy instances / 53.2886 MB. Only
+`L0_FAMILY` rises from its exact 21-chunk boundary to 23 for the shared bronze role and independent
+switched diffusers. The unculled diagnostic is 626 draws / 92 state changes, still far below
+§71.2's 1,400 / 210 row. Verification passes 1409/1409 unit tests, 135/135 serial offscreen
+integration tests and all 49 active software-render cases. The eighteen-pose culled/unculled gate
+still peaks at 0.1320% (`l0-sunroom`), and no strict golden required advancement. Compilation and
+heavy tooling were capped to CPU 0-5 / six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. The family room
+now has believable visible sources and nighttime depth; the next highest visible value is replacing
+or materially improving its coarse pale sofa/media composition, followed by the sparse exterior
+start framing—not more hidden infrastructure.

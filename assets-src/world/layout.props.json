@@ -524,6 +524,58 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_FAMILY_CEILING_1",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_FAMILY",
+      "position": [4.37, 3.12, -25.40],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_FAMILY_CEILING_2",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_FAMILY",
+      "position": [6.53, 3.12, -25.40],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_FAMILY_CEILING_3",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_FAMILY",
+      "position": [4.37, 3.12, -23.70],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_FAMILY_CEILING_4",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_FAMILY",
+      "position": [6.53, 3.12, -23.70],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_FAMILY_SOFA",
       "asset": "MODEL_FURNITURE_LEATHER_SOFA",
       "cell": "L0_FAMILY",
@@ -593,7 +645,7 @@
     },
     {
       "id": "PROP_FAMILY_LAMP",
-      "asset": "MODEL_FURNITURE_FLOOR_LAMP",
+      "asset": "MODEL_FAMILY_FLOOR_LAMP_LIT",
       "cell": "L0_FAMILY",
       "position": [
         8.05,

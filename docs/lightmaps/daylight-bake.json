@@ -221,7 +221,7 @@
       },
       "groups": [],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:6a5d0f0599d73a4fac0c34a479ee5d024cd5afc4c1871a00dcd423b80b16a183"
+      "shellHash": "sha256:84f9dbbd22ddbbb07332c569d17b2ae83d5dd7ab4678aaef38a5fb095a5b2f9f"
     },
     {
       "cell": "L0_FOYER",
@@ -800,7 +800,7 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_KITCHEN"
+    "L0_FAMILY"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,

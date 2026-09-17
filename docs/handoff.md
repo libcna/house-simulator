@@ -1,4 +1,55 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01051` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01285` checkpoint)
+
+Branch `develop`. Task-start HEAD `c52b87d` (`HOUSE-01051`). This file belongs to the single
+`HOUSE-01285` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The family room no longer obtains light from invisible practical points. One deterministic
+project-authored 420 x 180 x 420 mm semi-flush fixture is reused at the four stable main-source
+positions. Each physical fixture has dark-bronze trim and a separate opal diffuser, and its source
+sits at the diffuser's y 3.12 m optical face with a broad downward 72/140 degree spot, 1200 lm and
+3000 K. The visible family floor lamp now has its own byte-identical derived asset identity so its
+shade can follow only `LG_L0_FAMILY_READING`; the approved White Room geometry/textures and licence
+remain unchanged. The 450 lm reading source moves from the room centre onto that measured shade
+and remains off by default.
+
+Before: Round 45's complete [clear-day route](visual-review/captures/house-01051-family-secondary-day-final)
+has a blank ceiling, while the complete
+[explicit-reading night baseline](visual-review/captures/house-01285-family-fixtures-night-before)
+shows a dark lamp shade illuminated from 3.15 m away. After: the complete unchanged fourteen-camera
+[normal day set](visual-review/captures/house-01285-family-fixtures-day-final) and
+[explicit-reading night set](visual-review/captures/house-01285-family-fixtures-night-final) show
+four coherent ceiling practicals plus local warm light originating at the real shade. All six
+matched family frames were opened at full resolution. Day normalized MAE is 0.01334–0.02098 and
+night is 0.01181–0.01997; direct inspection confirms the broad changed-pixel coverage is the
+selected family-room rebake rather than global exposure.
+
+The selected 256-sample main atlas peaks at 0.2292 (formerly 0.1977); the corrected reading atlas
+peaks at 0.5822 (formerly 0.1368). The ceiling asset regenerates byte-identically at 512 triangles
+with metre scale, UV0, grounded optical origin and exact material slots. Its permanent checker also
+guards the copied lamp identity, source hashes, canonical placements, linked slots, cone/flux/range
+and switch defaults. Licence credits, budget report and 2,859 stable ids are current.
+
+The built world is 626 chunks / 57 props / 256 exterior hierarchy instances / 53.2886 MB. Only
+`L0_FAMILY` rises from its exact 21-chunk exception to 23. The unculled diagnostic is 626 draws /
+92 state changes, inside §71.2's 1,400 / 210 row. An initial capture exposed a stale 624-chunk copy
+in `build/content`; it was rejected, the CMake content target synchronized the generated world and
+compiled both models, and every final frame explicitly reports 626. No long-running navigation
+process remains.
+
+No strict render golden required advancement. Unit tests pass 1409/1409, serial offscreen
+integration tests 135/135 and all 49 active software-render cases pass. The eighteen-pose
+culled-vs-unculled gate remains 0.1320% worst case. All compilation and heavy tooling were pinned
+to CPU 0-5 and at most six workers; final complete gate details are recorded in `plan.md`.
+
+The largest visible defects are now the coarse pale sofa/media silhouettes, clipped clear-day
+apertures and sparse exterior/garage start framing. Improve the family focal composition or move
+to the exterior start view according to the next fixed screenshots; do not add unrelated invisible
+infrastructure or misreport this bounded fixture checkpoint as completed `HOUSE-00992`.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01051` checkpoint)
 
 Branch `develop`. Task-start HEAD `50d8e45` (`HOUSE-01050`). This file belongs to the single
 `HOUSE-01051` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

@@ -21,6 +21,8 @@ dependency notices are in [`../NOTICE.md`](../NOTICE.md). This file covers **con
 
 Full text: [`licenses/cc-by-3.0/LICENCE.txt`](cc-by-3.0/LICENCE.txt)
 
+- `MODEL_FAMILY_FLOOR_LAMP_LIT` — **Family-room switched variant of Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
+  - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
 - `MODEL_FURNITURE_COFFEE_TABLE` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
   - Attribution: The White Room by Jay-Artist, licensed CC BY 3.0. Furniture and texture assets adapted for cna-house.
 - `MODEL_FURNITURE_FLOOR_LAMP` — **Furniture extracted from The White Room** by Jay-Artist — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-15)
@@ -686,4 +688,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `7f5fd1446afa4d5779ab287ded5094beeaca114930834fbe9d27da8abbacb053`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `7f3cb4eaba91a06b2db68569bce4aca7394a49fd74bc60ab3569b79a2d8002d2`.*

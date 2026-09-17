@@ -1592,6 +1592,20 @@
       "footstepSurface": "carpet", "audioAbsorption": 0.52,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // HOUSE-01285: the family-room lamp keeps the source's striped cloth when off, but its exact
+    // outer-shade slot can now follow LG_L0_FAMILY_READING without making the living lamp glow.
+    {
+      "id": "MAT_FAMILY_READING_SHADE_EMISSIVE", "class": "emissive",
+      "albedo": "Textures/Furniture/LivingRoom/lamp_shade_stripes",
+      "normal": null, "lightmapChannel": 0,
+      "tint": [0.92, 0.84, 0.68], "specularColor": [0.0, 0.0, 0.0],
+      "specularPower": 1.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [1.0, 1.0],
+      "wetResponse": { "albedoDarken": 0.0, "specularBoost": 1.0, "powerBoost": 1.0 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "glass", "audioAbsorption": 0.08,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     // END VISUAL-SLICE FURNITURE MATERIALS
     // BEGIN FOYER FURNITURE MATERIALS (HOUSE-01038)
     {

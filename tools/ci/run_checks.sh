@@ -142,6 +142,9 @@ run_gate "family-media-finish" python3 tools/assets/family_media_finish.py --che
 # HOUSE-01051: four project-authored secondary props remain deterministic, measured, physically
 # finished and linked to the canonical family-room dog bed/placements.
 run_gate "family-secondary" python3 tools/assets/family_secondary_prepare.py --check
+# HOUSE-01285: the family room's four main lights are physical linked fixtures, and its existing
+# floor lamp emits from its real shade rather than from an unrelated bare point in the room.
+run_gate "family-ceiling-light" python3 tools/assets/family_ceiling_light_prepare.py --check
 # HOUSE-01045: the formal-room piano is a close-range deterministic authored asset, not a
 # one-off binary or a cuboid standing in for furniture.
 run_gate "living-piano" python3 tools/assets/living_piano_prepare.py --check

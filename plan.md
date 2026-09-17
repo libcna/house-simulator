@@ -14869,6 +14869,48 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             off state. All world/content, stock-XNA, render-reference, culling and full repository
             gates are recorded in the checkpoint handoff; compilation and heavy tooling are
             capped at CPU 0-5 / six workers.
+- [x] HOUSE-01285 — Replace the family room's bare practical points with physical linked fixtures
+      dep: HOUSE-01041, HOUSE-01051, HOUSE-01256, HOUSE-01259, HOUSE-01260 · sys: world, content, lighting, rendering · plat: ALL · pri: MUST
+      note: (2026-09-17) Round 45 shows a large blank ceiling over a furnished but flat/dark room.
+            Four default-on main lights already drive the approved Tier-S artificial atlas but
+            have no physical source, while the separately switched floor lamp's canonical point
+            sits 3.15 m away from its visible shade. Correct those authored sources and re-bake
+            only `L0_FAMILY`; do not compensate with global exposure or new renderer behavior.
+      accept: reuse one deterministic, measured semi-flush fixture at the four existing stable
+            main-light positions, link each exact opal diffuser slot, retain warm downward broad
+            distribution and a plausible domestic flux, and make the existing floor lamp emit
+            from its measured physical shade while remaining independently off by default. Inspect
+            unchanged fourteen-camera normal day and explicit-reading-light night sets; raise only
+            the measured family chunk exception and pass deterministic asset, provenance, content,
+            stock-XNA, render, collision and culling gates with heavy work capped at six CPU cores.
+      done: (2026-09-17) One deterministic project-authored 420 x 180 x 420 mm semi-flush fixture
+            is reused at the four existing family main-source positions. Its dark-bronze canopy,
+            trim and finial surround a separately switched opal `FamilyCeilingDiffuser`; each
+            stable source now sits at the diffuser's y 3.12 m optical face, aims down through a
+            72/140 degree feathered spot and emits a plausible 1200 lm at 3000 K. The family
+            floor lamp keeps the approved White Room geometry and texture provenance in a byte-
+            identical derived asset, but its shade alone receives a family-specific switched
+            emitter. The reading source moves from the unrelated room-centre point to the measured
+            shade at [8.05, 1.997, -26.45] and remains independently off by default.
+      review: (2026-09-17) Round 46 retains the unchanged fourteen-camera Round 45 day baseline
+            and a new fourteen-camera explicit-reading-light 22:00 before set, then compares them
+            with complete final day and night sets. All six matched family frames were opened at
+            full resolution. The formerly blank ceiling now carries four coherent practicals; at
+            night the real floor-lamp shade glows and creates a local warm pool instead of lighting
+            from 3.15 m away. A first capture was rejected when it exposed an unsynchronised
+            624-chunk build-tree copy; the final sets explicitly report the current 626 chunks.
+            Largest remaining defects are the coarse pale sofa/media silhouettes and broad sparse
+            exterior composition, not missing family-room light sources.
+      verified: (2026-09-17) The ceiling model regenerates byte-identically at 512 triangles with
+            metre scale, UV0, grounded optical origin and exact bronze/diffuser slots; the derived
+            lamp is byte-identical to its approved source except for manifest-level material
+            identity. Permanent checks cover both assets, source hashes, canonical placement,
+            linked slots and light semantics. The selected 256-sample family main atlas peaks at
+            0.2292 (formerly 0.1977), while the physically corrected reading atlas peaks at 0.5822
+            (formerly 0.1368). The world is 626 chunks / 57 props; only `L0_FAMILY` rises from its
+            measured 21 to 23 chunks. Unit tests pass 1409/1409, serial offscreen integration tests
+            135/135 and all 49 active software-render cases pass; culled-vs-unculled remains 0.1320%
+            worst case. The complete repository gate is green with heavy work capped at six cores.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -18595,6 +18637,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01285` | **New task, next free phase-16 id.** Replace four existing bare family main sources with one deterministic semi-flush fixture reused at their stable positions, move the independent reading source onto its visible floor-lamp shade through a family-specific derived material identity, rebake only `L0_FAMILY` and raise its exact chunk boundary from 21 to 23. | Round 45 makes the furnished room's blank ceiling and flat/dark depth the largest local defect. The main group already drives a Tier-S atlas but has no source geometry; the separately switched reading point is 3.15 m from the lamp it nominally represents. Reusing the global lamp asset with an emissive shade would make its living-room instance glow permanently, so the byte-identical derived family identity is the smallest data-only boundary that preserves independent switching without renderer or exposure changes. |
 | 2026-09-17 | `HOUSE-01051` | **New task, next free phase-13 id.** Add a bounded deterministic family-room secondary suite, link the existing dog-bed nav role to a physical prop and raise only `L0_FAMILY` from its measured 17-chunk exception to 21. | Round 44's fixed family cameras make sparse secondary object density the highest repeated visible defect. Full `HOUSE-00992` remains dependency-blocked and covers broader furnishing/interactivity, while a dog bed, composed bookcase, side table and one restrained artwork are dependency-valid through the completed static-prop path. Two rejected placements were corrected from screenshots and unchanged collision tests rather than hidden behind exceptions. |
 | 2026-09-17 | `HOUSE-01050` | **New task, next free phase-13 id.** Split the inspected television and media-unit `BlackMarble` source roles from their erroneous shared cream upholstery mapping, add a permanent focal-wall review camera and raise only `L0_FAMILY` from its measured 15-chunk exception to 17. | Round 43 identifies sparse family-room finish depth as the next visible defect. A front-on capture proves the dominant focal objects already exist and are aligned, but their source roles were flattened into cream: the TV is a blank rectangle and the named black-marble component is lost. Correct manifest bindings have higher value and lower risk than replacing approved CC-BY geometry or adding a renderer special case; the full room furnishing task remains dependency-blocked and open. |
 | 2026-09-17 | `HOUSE-01284` | **New task, next free phase-16 id.** Replace the four existing nominal under-cabinet ceiling points with a deterministic hood-mounted puck reused four times, link each physical diffuser, preserve the original group ids/default-off 1600 lm weighting, rebake only `L0_KITCHEN` and raise its exact chunk boundary from 19 to 20. | Round 42 names the dark cooking bay and malformed task group as the highest visible defect. Explicitly enabling the old data creates four broad white ceiling spots because the sources sit at y 3.20 across the room and have no real fixtures. The range hood already supplies a measured mounting surface, so a short downward spot and selected bake correct the source without widening island cones, changing global exposure or adding renderer architecture. The bright-day group stays off because forcing it on made the fixed view objectively darker; the on-state is reviewed separately at 22:00. |

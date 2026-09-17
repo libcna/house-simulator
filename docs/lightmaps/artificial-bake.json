@@ -426,9 +426,9 @@
             "LIGHT_L0_FAMILY_MAIN_3",
             "LIGHT_L0_FAMILY_MAIN_4"
           ],
-          "mean": 0.038498603315067256,
-          "peak": 0.19770842790603638,
-          "scale": 0.19770842790603638
+          "mean": 0.045382737018548835,
+          "peak": 0.22922636568546295,
+          "scale": 0.22922636568546295
         },
         {
           "group": "LG_L0_FAMILY_MEDIA",
@@ -446,13 +446,13 @@
           "lights": [
             "LIGHT_L0_FAMILY_READING_1"
           ],
-          "mean": 0.016951545227508382,
-          "peak": 0.13680057227611542,
-          "scale": 0.13680057227611542
+          "mean": 0.01883820436841436,
+          "peak": 0.5822224617004395,
+          "scale": 0.5822224617004395
         }
       ],
       "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:6a5d0f0599d73a4fac0c34a479ee5d024cd5afc4c1871a00dcd423b80b16a183"
+      "shellHash": "sha256:84f9dbbd22ddbbb07332c569d17b2ae83d5dd7ab4678aaef38a5fb095a5b2f9f"
     },
     {
       "cell": "L0_FOYER",
@@ -1903,12 +1903,12 @@
     }
   ],
   "promotedSubsetCells": [
-    "L0_KITCHEN"
+    "L0_FAMILY"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 8126464,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 1038440,
+  "sourceBytes": 1037167,
   "tool": "bake_house_lightmaps.py"
 }
