@@ -895,6 +895,8 @@ materials/materials	MAT_EXTERIOR_DOOR_GARAGE_PANEL_PAINTED
 materials/materials	MAT_EXTERIOR_DOOR_HARDWARE_BRONZE
 materials/materials	MAT_EXTERIOR_DOOR_HARDWOOD
 materials/materials	MAT_EXTERIOR_DOOR_PANEL_HARDWOOD
+materials/materials	MAT_FAMILY_MEDIA_STONE
+materials/materials	MAT_FAMILY_TV_SCREEN
 materials/materials	MAT_FIXTURE_DARK_BRONZE
 materials/materials	MAT_FIXTURE_EMISSIVE_NEUTRAL
 materials/materials	MAT_FIXTURE_EMISSIVE_WARM

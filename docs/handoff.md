@@ -1,4 +1,47 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01284` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01050` checkpoint)
+
+Branch `develop`. Task-start HEAD `9bfc4b7` (`HOUSE-01284`). This file belongs to the single
+`HOUSE-01050` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The family-room focal wall no longer presents its approved television as a cream blank rectangle.
+Inspection of the source glTF proves `TvScreen` and `TvBevel` deliberately share its sole coarse
+palette slot; that role now receives a dark blue-black opaque glass finish with a tight, restrained
+highlight. The separate media-unit source's named `BlackMarble` node now receives dark marble while
+its painted carcass remains pale. Geometry, transform, collision, portal, light and provenance data
+are unchanged.
+
+Before: the new deterministic [front-on view](visual-review/captures/house-01050-family-media-before/family-media.png)
+shows both focal roles flattened into cream upholstery. After: the identical
+[final view](visual-review/captures/house-01050-family-media-day-final/family-media.png) reads as an
+inactive TV above a contrasting stone base. The latter directory is the complete fourteen-camera
+clear-day route after adding the focal-wall blind spot to `capture_review.py`; every frame and the
+contact sheet were inspected. The matched frame changes 33,574 pixels (2.33%), with mean absolute
+normalized RGB difference 0.00461 (about 1.18/255), so the gain is intentionally local rather than
+an exposure or global-palette change.
+
+A permanent `family-media-finish` gate protects the exact source nodes, manifest mappings, bounded
+dark finishes and canonical prop alignment. The two restored material roles raise only
+`L0_FAMILY` from fifteen to its exact measured seventeen-chunk exception. The built world is 620
+chunks / 49 props / 256 exterior hierarchy instances / 52.9115 MB. Licence credits, content budget
+and stable IDs are regenerated/current; no asset source or licence changes.
+
+No strict render reference changed beyond tolerance. Unit tests pass 1409/1409. The complete
+serial offscreen integration suite passes 135/135. All 49 active render tests pass with the eight
+capture-only regeneration cases disabled; culled-vs-unculled equivalence remains green. The final
+repository gate is green across all 323 strict-XNA translation units. Compilation and heavy tooling
+were pinned to CPU 0-5 and no more than six workers.
+
+The family room is still visibly sparse: the pale mantel-like source, blank flanking walls/doors,
+isolated bright plant and flat focal-wall lighting now outrank further material tweaking. The next
+highest-value task should add a measured secondary composition—side storage/books, a dog bed,
+restrained art and one or two human-use objects—without obstructing the family/kitchen route, then
+reassess local lighting depth. The broad exterior/garage framing remains the next larger sparse
+area. Do not misreport this narrow focal correction as completed `HOUSE-00992`.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01284` checkpoint)
 
 Branch `develop`. Task-start HEAD `5be2023` (`HOUSE-01283`). This file belongs to the single
 `HOUSE-01284` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

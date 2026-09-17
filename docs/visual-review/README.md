@@ -1797,3 +1797,48 @@ data root. Compilation and heavy tooling were capped to CPU 0-5 / six workers.
 ceiling spots are gone. The next work must produce a larger visible gain: first improve the dark
 cooking-bay material/local-readability boundary if it can be done within the approved stock-XNA
 path; otherwise move directly to the visibly sparse family-room composition.
+
+## Round 44 — family-room focal materials
+
+Commit: `HOUSE-01050` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: the new fixed [front-on family-media view](captures/house-01050-family-media-before/family-media.png)
+shows the existing television as a cream blank rectangle because its sole imported palette slot
+was mapped to upholstery. The media unit source's explicitly named `BlackMarble` mesh was flattened
+into the same role. After: the identical [final view](captures/house-01050-family-media-day-final/family-media.png)
+reads immediately as a dark inactive television over a pale surround with a contrasting dark
+stone hearth/base. The final directory is the complete fourteen-camera clear-day route; its contact
+sheet and every frame were opened, and the focal pair was compared at full resolution.
+
+Ranked visible defects remaining:
+
+1. The family room still lacks restrained secondary furniture and decor; the large pale casework,
+   blank flanking doors/walls and isolated bright plant keep it behind the living/dining rooms.
+2. The media-unit geometry is a coarse mantel-like source rather than convincing contemporary
+   cabinetry; finish separation helps, but silhouette and object density remain weak.
+3. The family-room light is flat around the focal wall and the window remains much brighter than
+   its interior receivers.
+4. The broad exterior/garage frame remains sparse beyond its coherent architectural materials,
+   vegetation and bounded practicals.
+5. Several selected-room furniture chunks remain visibly simpler under stock `BasicEffect` than
+   their lightmapped architectural surroundings.
+
+Fixed: two manifest bindings now preserve inspected source semantics without replacing the
+approved CC-BY geometry. `TvScreen` and `TvBevel` share one coarse source slot and receive a dark
+blue-black opaque screen finish with a restrained tight highlight. The media unit keeps its cream
+painted carcass while its exact `BlackMarble` node receives dark marble. A permanent checker guards
+the source nodes, mappings, finish bounds and canonical alignment. The new fixed camera closes the
+review blind spot that allowed both focal objects to look blank in otherwise valid family captures.
+
+The matched frame changes 33,574 pixels (2.33%) with mean absolute normalized RGB difference
+0.00461 (about 1.18/255): a deliberately local but plainly visible correction. The world remains
+49 props and rises from 618 to 620 chunks solely for the two restored family roles; the exact
+`L0_FAMILY` boundary is seventeen. No collision, portal, light, exposure, placement, provenance or
+renderer rule changes, and no pixel golden required advancement. Verification passes 1409/1409
+unit tests, 135/135 serial offscreen integration tests and all 49 active software-render cases;
+eight capture-only cases remain disabled. Compilation and heavy work were pinned to CPU 0-5 and
+at most six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. The next
+highest-value change is a measured family-room secondary furnishing/decor composition around this
+now-readable media focus, followed by local family lighting depth rather than global exposure.

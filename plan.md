@@ -14296,6 +14296,39 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             18-pose culled-vs-unculled comparison. Only the two inspected kitchen goldens were
             intentionally advanced. The full repository gate is green with all 323 strict-XNA
             translation units clean. All compilation and heavy work used at most six CPU cores.
+- [x] HOUSE-01050 — Restore physical television and media-surround finishes in `L0_FAMILY`
+      dep: HOUSE-00215, HOUSE-00296, HOUSE-01037, HOUSE-01041 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-17) Round 43's family views still show a sparse room, and a new front-on
+            diagnostic exposes its largest focal defect: the television and the source media
+            unit's named `BlackMarble` mesh are both flattened into the same cream upholstery
+            role. Repair these inspected source roles through the existing manifest/material path;
+            do not replace approved geometry, add renderer logic or claim the dependency-blocked
+            full `HOUSE-00992` furnishing task.
+      accept: the approved television's sole source slot reads as a dark inactive glass panel and
+            the media unit's exact `BlackMarble` slot reads as dark stone while its painted carcass
+            remains separate; canonical placement, scale, provenance, collision and portal data do
+            not move. Add a permanent front-on family-media review camera, capture and inspect a
+            matched clear-day before/after pair plus the complete route, raise only the exactly
+            measured `L0_FAMILY` chunk boundary, and pass content, licence, stable-ID, stock-XNA,
+            render and culled-vs-unculled gates with compilation capped at six workers.
+      findings: (2026-09-17) The 44-triangle television source intentionally gives its screen and
+            bevel one coarse palette slot; it now maps to a restrained blue-black opaque Basic
+            finish with a tight highlight. The media source's `BlackMarble` node uses its second
+            palette slot, now independently mapped to dark marble while its first painted slot
+            stays cream. A permanent checker protects those exact source-node/material bindings,
+            dark-finish bounds, canonical alignment and the measured seventeen-chunk family limit.
+      review: (2026-09-17) The new fourteenth fixed camera looks squarely at the media wall. Its
+            matched before/after pair changes a blank cream television into a recognisable inactive
+            panel and restores a dark hearth/base below the pale surround. The broader family view
+            confirms the improvement is local and preserves the seating composition; sparse
+            secondary objects, pale casework and flat lighting remain explicit later defects.
+      verified: (2026-09-17) The focused source-role checker, all thirteen world rules, licence,
+            budget and stable-ID checks pass. The world builds and deploys at 620 chunks / 49
+            props; `L0_FAMILY` reaches exactly its documented seventeen-chunk boundary. Unit tests
+            pass 1409/1409, the serial offscreen integration suite passes 135/135 and all 49 active
+            software-render cases pass with eight capture-only cases disabled. No pixel golden is
+            advanced. The complete repository gate is green across all 323 strict-XNA translation
+            units. Compilation and heavy work use CPU 0-5 / at most six workers.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -18524,6 +18557,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01050` | **New task, next free phase-13 id.** Split the inspected television and media-unit `BlackMarble` source roles from their erroneous shared cream upholstery mapping, add a permanent focal-wall review camera and raise only `L0_FAMILY` from its measured 15-chunk exception to 17. | Round 43 identifies sparse family-room finish depth as the next visible defect. A front-on capture proves the dominant focal objects already exist and are aligned, but their source roles were flattened into cream: the TV is a blank rectangle and the named black-marble component is lost. Correct manifest bindings have higher value and lower risk than replacing approved CC-BY geometry or adding a renderer special case; the full room furnishing task remains dependency-blocked and open. |
 | 2026-09-17 | `HOUSE-01284` | **New task, next free phase-16 id.** Replace the four existing nominal under-cabinet ceiling points with a deterministic hood-mounted puck reused four times, link each physical diffuser, preserve the original group ids/default-off 1600 lm weighting, rebake only `L0_KITCHEN` and raise its exact chunk boundary from 19 to 20. | Round 42 names the dark cooking bay and malformed task group as the highest visible defect. Explicitly enabling the old data creates four broad white ceiling spots because the sources sit at y 3.20 across the room and have no real fixtures. The range hood already supplies a measured mounting surface, so a short downward spot and selected bake correct the source without widening island cones, changing global exposure or adding renderer architecture. The bright-day group stays off because forcing it on made the fixed view objectively darker; the on-state is reviewed separately at 22:00. |
 | 2026-09-17 | `HOUSE-01283` | **New task, next free phase-16 id.** Replace the three existing island points with a deterministic physical pendant reused three times, align them to the real island's long axis, link exact diffuser emission, use downward spot semantics and raise only `L0_KITCHEN` from its measured 17-chunk exception to 19. | Round 41's fixed kitchen images identify flat, underexposed depth as the largest defect. Directly enabling the old unlinked points reveals a worse authoring error: they run along z beside the island and create a giant orange ceiling pool. A bounded bell shade, correct x-axis spacing and a selected spot bake improve both day and night normal play without global exposure, a renderer experiment or unrelated room work. |
 | 2026-09-17 | `HOUSE-01049` | **New task, next free phase-13 id.** Add a narrow measured kitchen-seating and worktop-dressing checkpoint through the existing deterministic static-prop path; raise only `L0_KITCHEN` from its measured 13-chunk exception to 17. | Round 40's three fixed kitchen cameras show completed cabinets, island and appliances surrounded by bare surfaces with no human-scale seating. Full `HOUSE-00990` remains dependency-blocked and calls for interactive inventory far beyond this visual defect. Three reused stools plus four composed object roles make the current route credible without scattering placeholder clutter; the first placement was moved 0.25 m under the island after the unchanged full-tour collision test proved its south aisle too narrow. |

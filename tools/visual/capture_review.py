@@ -34,6 +34,10 @@ POSES = (
     ("kitchen-facing-west", "-1.10,0.60,-25.05,270.0,0.0"),
     ("family-room", "5.45,0.60,-24.55,270.0,0.0"),
     ("family-composition", "3.20,0.60,-25.80,90.0,0.0"),
+    # HOUSE-01050: the paired family-room views look across the seating and kitchen opening but
+    # barely exercise the television/media focal wall. This measured head-height view makes the
+    # source screen, surround finish and their alignment a permanent visual-review boundary.
+    ("family-media", "5.10,0.60,-26.25,180.0,0.0"),
 )
 SCENARIOS = {
     "clear-day": (10.5, "W_CLEAR"),

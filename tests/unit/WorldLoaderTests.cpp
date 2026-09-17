@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 179U)
-            << "HOUSE-01049 adds one measured non-emissive produce finish";
+        EXPECT_EQ(contents.materials.size(), 181U)
+            << "HOUSE-01050 adds the family television and media-stone roles";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
@@ -3860,8 +3860,8 @@ namespace
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)
                                 { return material.materialClass == world::MaterialClass::Glass; }),
-                  7)
-            << "HOUSE-01044 adds one deliberately opaque glass role for the range";
+                  8)
+            << "HOUSE-01050 adds one deliberately opaque glass role for the inactive television";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

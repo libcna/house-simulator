@@ -141,11 +141,13 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "console wood and upholstered chair separate avoids repainting either as trim; "
                   "HOUSE-00930 isolates the weather-facing entry leaf for exterior residency; "
                   "HOUSE-00932 adds distinct raised-panel hardwood and bronze hardware groups"),
-    "L0_FAMILY": (15,
+    "L0_FAMILY": (17,
                   "measured with HOUSE-01037's first furnished media/seating group: five shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
                   "Reach's per-draw primitive cap, plus one outside window-frame chunk. Merging "
-                  "cushion, leaf, shade and rug maps into generic paint would erase the detail"),
+                  "cushion, leaf, shade and rug maps into generic paint would erase the detail. "
+                  "HOUSE-01050 restores the source television and media-stone roles that were "
+                  "incorrectly flattened into cream upholstery; each is one required chunk"),
     "L0_LIVING": (20,
                   "measured with HOUSE-01037's first furnished conversation group: six shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "
