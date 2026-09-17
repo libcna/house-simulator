@@ -14403,6 +14403,51 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             7); no other golden moves. Culled-vs-unculled remains 0.1320% worst case. The complete
             repository gate accepts all 323 strict-XNA translation units. Compilation and heavy
             tooling use CPU 0-5 / at most six workers.
+- [x] HOUSE-01053 — Replace the mantel-like family media unit with a low contemporary console
+      dep: HOUSE-00215, HOUSE-00296, HOUSE-01050, HOUSE-01051, HOUSE-01052 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-17) Round 47 makes the tall pale fireplace-shaped source the largest local
+            defect. Deterministically extract the low cabinet from SlykDrako's CC0 Bedroom source,
+            discard its unrelated scene/textures and reuse the approved family wood/steel roles.
+            This remains a bounded focal-wall correction, not completion of `HOUSE-00992`.
+      accept: pin and verify the upstream Bedroom URL/hash and CC0 evidence; produce a deterministic
+            CNA-ready console with the exact wood/hardware source roles, metre scale, centred and
+            grounded origin, UV0, 780 visible triangles and a bounded twenty-four-triangle, two-box
+            plinth/case proxy. Replace
+            only `PROP_FAMILY_TV_UNIT`, preserve the separate approved television, lower that screen
+            to a measured gap over the new console and keep circulation clear. Capture and inspect
+            the unchanged fourteen-camera day route plus explicit-reading night route, add a
+            permanent asset/world gate, do not increase the measured `L0_FAMILY` chunk boundary,
+            and pass content, licence, stable-ID, stock-XNA, render and culling gates with compilation
+            and heavy tooling capped at six CPUs.
+      findings: (2026-09-17) SlykDrako's CC0 Bedroom cabinet contributes 780 visible triangles
+            across exact wood and steel roles. Deterministic preparation pins both the 4,892,652-
+            byte upstream GLB and 3,252,936-byte decoded/node-selected intermediate, strips all
+            source images/extensions, preserves UV0, applies inverse-transpose-corrected low-console
+            proportions and regenerates a 59,260-byte CNA-ready GLB at SHA-256
+            ffd8bf4e8accb70abfa20760bfc67a29058e5c73421e7fc758484da630e48338. A
+            24-triangle two-box proxy protects the plinth and central 1.097432 m case while leaving
+            the wider end overhangs out of circulation. The finished dimensions are 1.540038 x
+            0.653860 x 0.465029 m and the television retains a measured 0.061 m gap.
+      review: (2026-09-17) The first production capture rejected a uniform 1.55 scale because its
+            0.92 m height still read as a chest. The corrected 0.65 m version is unmistakably a low
+            walnut/steel console and removes the pale fireplace silhouette without changing room
+            lighting or the approved TV. Against Round 47, day family-room/composition/media frames
+            change 7.300%, 0.043% and 5.253% (normalized MAE 0.007810, 0.000101 and 0.005674);
+            night counterparts change 7.248%, 3.273% and 6.723% (MAE 0.005251, 0.000148 and
+            0.003871). The next local defects are the coarse green dog bed and flat older chairs;
+            clipped apertures and sparse exterior framing remain broader route defects.
+      verified: (2026-09-17) The pinned-source gate checks hashes, provenance, role mapping, UV0,
+            dimensions, normal-safe transformation, 780 visible triangles, the bounded two-part
+            proxy and exact family-only placement. The world is 626 chunks / 57 props / 256
+            exterior instances / 52.3695 MB; `L0_FAMILY` falls from 25 to its exact 23-chunk
+            boundary, and the unculled diagnostic is 626 draws / 93 state changes. The furnishing
+            change exposed that the long-walk test treated an authored descent through the exact
+            L0-to-B1 stair-well rectangle as a floor failure; its invariant now exempts only that
+            data-defined vertical opening. Unit tests pass 1409/1409, serial offscreen integration
+            tests pass 135/135 and all 49 active software-render cases pass with eight capture-only
+            cases disabled. No strict golden moves; culled-vs-unculled remains 0.1320% worst case.
+            The complete repository gate accepts all 323 strict-XNA translation units. Compilation
+            and heavy tooling use CPU 0-5 / at most six workers.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -18673,6 +18718,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01053` | **New task, next free phase-13 id.** Replace only the coarse family-room media-unit instance with a deterministic extraction of the CC0 Bedroom low cabinet, reuse existing finishes and retain the independently approved television; keep full `HOUSE-00992` open. | Round 47's front-on image makes the tall pale fireplace silhouette the largest local defect after the sofa correction. The inspected source is a real low cabinet with drawer reveals and a slim steel frame at 780 triangles; it is a larger visible gain than adding more small clutter, and source-texture stripping avoids importing Bedroom textures whose independent provenance is less clear than the CC0 geometry. |
 | 2026-09-17 | `HOUSE-01052` | **New task, next free phase-13 id.** Replace only the family-room instance of the shared White Room leather sofa with a separately provenanced, deterministically prepared `GlamVelvetSofa`; preserve the existing living-room composition and keep the full `HOUSE-00992` task open. | Round 46 names the coarse pale family seating as the largest local defect. Direct source inspection and an isolated material render show substantially stronger silhouette, upholstery and leg detail at 4,196 triangles rather than the current asset's 35,040 visible triangles. The source is already licence-vetted in `living-room-simulator`, but its `KHR_materials_variants` metadata is outside CNB v1, so a small offline preparation step must select the navy role, remove only the unsupported alternatives and add the project proxy before the strict CNA path may use it. |
 | 2026-09-17 | `HOUSE-01285` | **New task, next free phase-16 id.** Replace four existing bare family main sources with one deterministic semi-flush fixture reused at their stable positions, move the independent reading source onto its visible floor-lamp shade through a family-specific derived material identity, rebake only `L0_FAMILY` and raise its exact chunk boundary from 21 to 23. | Round 45 makes the furnished room's blank ceiling and flat/dark depth the largest local defect. The main group already drives a Tier-S atlas but has no source geometry; the separately switched reading point is 3.15 m from the lamp it nominally represents. Reusing the global lamp asset with an emissive shade would make its living-room instance glow permanently, so the byte-identical derived family identity is the smallest data-only boundary that preserves independent switching without renderer or exposure changes. |
 | 2026-09-17 | `HOUSE-01051` | **New task, next free phase-13 id.** Add a bounded deterministic family-room secondary suite, link the existing dog-bed nav role to a physical prop and raise only `L0_FAMILY` from its measured 17-chunk exception to 21. | Round 44's fixed family cameras make sparse secondary object density the highest repeated visible defect. Full `HOUSE-00992` remains dependency-blocked and covers broader furnishing/interactivity, while a dog bed, composed bookcase, side table and one restrained artwork are dependency-valid through the completed static-prop path. Two rejected placements were corrected from screenshots and unchanged collision tests rather than hidden behind exceptions. |

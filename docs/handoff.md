@@ -1,4 +1,56 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01052` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01053` checkpoint)
+
+Branch `develop`. Task-start HEAD `3ac476e` (`HOUSE-01052`). This file belongs to the single
+`HOUSE-01053` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The pale fireplace-shaped family media unit has been replaced only in `L0_FAMILY` with the low
+cabinet extracted from SlykDrako's Bedroom scene under CC0 1.0. Preparation independently pins the
+4,892,652-byte upstream GLB at SHA-256
+`30e26c0fe67da6b73612284598952011f7dc7f7319d5d9a802112147226ad2ba` and the exact 3,252,936-byte
+decoded/node-selected intermediate at
+`51bb4602e858dc8155ed6dca1ddab80ff459d5ff710a41e4c1a15340782054cc`. Source images and unsupported
+metadata are not distributed. The final 59,260-byte CNA-ready asset is
+`ffd8bf4e8accb70abfa20760bfc67a29058e5c73421e7fc758484da630e48338`.
+
+The accepted geometry retains all 780 visible triangles, normals and UV0. Its transformed dimensions
+are 1.540038 x 0.653860 x 0.465029 m; exact wood and hardware roles reuse the approved family walnut
+and kitchen steel. A deterministic 24-triangle two-box proxy covers the plinth and central 1.097432 m
+case without making the wider end overhangs narrow circulation. Only `PROP_FAMILY_TV_UNIT` changes
+asset. The separate approved TV is lowered to y 1.315 m, leaving a measured 61 mm gap. An initial
+0.921 m-high uniform-scale capture was opened and rejected because it still read as a chest.
+
+Before: Round 47's [day media view](visual-review/captures/house-01052-family-sofa-day-final/family-media.png)
+shows the tall pale unit. After: the complete unchanged fourteen-camera
+[clear-day set](visual-review/captures/house-01053-family-media-console-day-final) and
+[explicit-reading night set](visual-review/captures/house-01053-family-media-console-night-final)
+show the lower walnut/steel silhouette and correctly lowered screen. Day family-room/composition/
+media differences are 7.300%, 0.043% and 5.253%; night differences are 7.248%, 3.273% and 6.723%.
+All six family frames were opened at full resolution; the change is local, not an exposure edit.
+
+The world is 626 chunks / 57 props / 256 exterior hierarchy instances / 52.3695 MB. `L0_FAMILY`
+falls from its exact 25-chunk exception to 23 because both console finishes already exist in the
+room. The unculled diagnostic is 626 draws / 93 state changes. Licence credits, budget report and
+2,863 stable ids are current. No strict render reference changes.
+
+The new physical route exposed a long-walk false positive: a capsule descending through the exact
+authored `L0_STAIR_MAIN` to `B1_STAIR` horizontal portal can have its feet below L0 before its centre
+leaves the L0 cell. The assertion now exempts only the data-defined rectangle of a downward
+`stair_well`; undeclared holes still fail. A software-run weather tolerance also now follows its own
+machine-speed-independent intent with a two-simulated-minute bound. Unit tests pass 1409/1409,
+serial offscreen integration tests pass 135/135 and all 49 active software-render cases pass with
+eight capture-only cases disabled. Culled-vs-unculled remains 0.1320% worst case (`l0-sunroom`).
+The complete repository gate accepts all 323 strict-XNA translation units. Compilation and heavy
+tooling were pinned to CPU 0-5 / six workers.
+
+The largest local visible defect is now the geometric green dog bed, followed by the older flat
+family armchairs/coffee table and blank wall bays. Across the route, clipped clear-day apertures and
+sparse exterior/garage start framing remain higher-scale defects. Fix the largest visible one from
+the fixed cameras; do not add unrelated hidden infrastructure or claim completed `HOUSE-00992`.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01052` checkpoint)
 
 Branch `develop`. Task-start HEAD `ac1296b` (`HOUSE-01285`). This file belongs to the single
 `HOUSE-01052` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Protect the family room's finished television and media-surround material roles.
 
-The selected CC-BY source is deliberately reused rather than replaced.  Its material names are
-coarse: the 44-triangle television has one palette slot, while the media unit's `BlackMarble`
-node uses its second slot.  HOUSE-01050 maps those exact roles to dark physical finishes and keeps
-the two aligned canonical props in place.
+The selected CC-BY television remains in use and the former media unit remains a stable approved
+asset after HOUSE-01053 replaces that one instance. Their material names are coarse: the
+44-triangle television has one palette slot, while the legacy unit's `BlackMarble` node uses its
+second slot. HOUSE-01050 maps those exact roles to dark physical finishes; HOUSE-01053's dedicated
+checker owns the replacement console and measured TV/console alignment.
 """
 
 from __future__ import annotations
@@ -82,7 +83,7 @@ def check() -> None:
     props = layout_io.by_id(layout_io.rows(layout, "props"), "prop")
     tv_prop = props["PROP_FAMILY_TV"]
     unit_prop = props["PROP_FAMILY_TV_UNIT"]
-    if tv_prop["position"] != [4.1, 1.87, -22.26] or tv_prop["yawDeg"] != 90:
+    if tv_prop["position"] != [4.1, 1.315, -22.26] or tv_prop["yawDeg"] != 90:
         raise RuntimeError("television: canonical wall alignment changed")
     if unit_prop["position"] != [4.1, 0.6, -22.55] or unit_prop["yawDeg"] != 90:
         raise RuntimeError("media unit: canonical wall alignment changed")

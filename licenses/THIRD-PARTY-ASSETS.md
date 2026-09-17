@@ -567,6 +567,7 @@ Full text: [`licenses/cc0-1.0/LICENCE.txt`](cc0-1.0/LICENCE.txt)
 - `SOUND_NOX_HUMAN_MALE_THROAT_CLEANING_VOICE_MALE_V1_THROAT_CLEANING_MONO_04` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 - `SOUND_NOX_HUMAN_MALE_THROAT_CLEANING_VOICE_MALE_V2_THROAT_CLEANING_MONO_01` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
 - `SOUND_NOX_HUMAN_MALE_THROAT_CLEANING_VOICE_MALE_V2_THROAT_CLEANING_MONO_02` — **NOX Sound — Essentials Series SFX** by Nox_Sound — <https://nox-sound-design.itch.io/essentials-series-sfx-nox-sound> (retrieved 2026-09-07)
+- `MODEL_FAMILY_MEDIA_CONSOLE` — **Low cabinet extracted from Bedroom** by SlykDrako — <https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources> (retrieved 2026-09-17)
 - `TEXTURE_MATERIAL_ASPHALT_ROAD_ALBEDO` — **ambientCG Asphalt033 1K-JPG** by ambientCG (Lennart Demes) — <https://ambientcg.com/a/Asphalt033> (retrieved 2026-09-13)
 - `TEXTURE_MATERIAL_ASPHALT_ROAD_NORMAL` — **ambientCG Asphalt033 1K-JPG** by ambientCG (Lennart Demes) — <https://ambientcg.com/a/Asphalt033> (retrieved 2026-09-13)
 - `TEXTURE_MATERIAL_ASPHALT_ROAD_ORM` — **ambientCG Asphalt033 1K-JPG** by ambientCG (Lennart Demes) — <https://ambientcg.com/a/Asphalt033> (retrieved 2026-09-13)
@@ -695,4 +696,4 @@ Full text: [`licenses/us-gov-pd/LICENCE.txt`](us-gov-pd/LICENCE.txt)
 
 ---
 
-*Generated from `assets-src/assets.manifest.json`, sha256 `d71200556c49088de09483c9ae4da7a8a3f1bdfc603f60fc5ec000182934bddd`.*
+*Generated from `assets-src/assets.manifest.json`, sha256 `562335b2026ffec741f81fba684a19ebb7960d5741c134db70d198aaa28bd03e`.*

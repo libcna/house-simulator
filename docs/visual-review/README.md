@@ -2004,3 +2004,61 @@ and heavy work were capped to CPU 0-5 / six workers.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. Highest visible
 value is now replacing or substantially improving the family media-unit silhouette, followed by
 the sparse exterior start framing and clipped clear-day apertures—not unrelated infrastructure.
+
+## Round 48 — low family media console
+
+Commit: `HOUSE-01053` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 47's [front media view](captures/house-01052-family-sofa-day-final/family-media.png)
+is dominated by a tall pale fireplace-shaped unit under the approved television. After: the
+identical camera in the complete fourteen-view
+[final clear-day set](captures/house-01053-family-media-console-day-final) shows a low walnut and
+steel console with three readable drawer divisions and the television lowered to a measured
+61 mm gap. The complete [explicit-reading 22:00 set](captures/house-01053-family-media-console-night-final)
+confirms that the darker case remains readable under the room practicals. Both sets and their six
+family-room frames were opened at full resolution. An initial uniform-scale iteration was rejected:
+at 0.92 m high it still read as a chest. The accepted console is 0.654 m high.
+
+Ranked visible defects remaining:
+
+1. The green dog bed is now the coarsest family-room object and reads as a low geometric slab.
+2. Clear-day apertures remain clipped and overpower several connected-room views.
+3. The broad exterior/garage start frame is materially coherent but still sparse at player scale.
+4. The two older family armchairs and coffee table remain flatter than the sofa, bookcase and new
+   console.
+5. Blank focal-wall bays and sparse purposeful surface detail still limit the inhabited feeling.
+
+Fixed: SlykDrako's CC0 Bedroom cabinet is pinned at the raw upstream and decoded/node-selected
+stages. Deterministic preparation retains its 780 visible triangles, normals and UV0, removes all
+source images and unsupported metadata, transforms positions and normals into a 1.540 x 0.654 x
+0.465 m low-console proportion, and maps exact wood/hardware roles to existing family walnut and
+kitchen steel. A two-box, 24-triangle proxy covers the plinth and central 1.097 m case while the
+wider end overhangs do not narrow circulation. Only `PROP_FAMILY_TV_UNIT` changes asset; the
+approved television remains separate and all non-family furniture is unchanged.
+
+Against Round 47, the day family-room/composition/media pairs change 7.300%, 0.043% and 5.253% of
+pixels with normalized MAE 0.007810, 0.000101 and 0.005674. Their night counterparts change
+7.248%, 3.273% and 6.723% with normalized MAE 0.005251, 0.000148 and 0.003871. Inspection confirms
+that the focal-wall changes are the shorter console and lowered TV rather than a global exposure
+or lighting adjustment.
+
+The committed GLB is 59,260 bytes at SHA-256
+`ffd8bf4e8accb70abfa20760bfc67a29058e5c73421e7fc758484da630e48338`. The world is 626 chunks /
+57 props / 256 exterior hierarchy instances / 52.3695 MB. `L0_FAMILY` drops from its exact
+25-chunk exception to 23 because the replacement reuses two existing room roles and removes the
+old unit's unique finishes. The deliberately unculled diagnostic is 626 draws / 93 state changes.
+
+The altered physical route exposed a false assumption in the long random-walk assertion: a body
+descending through the exact authored `L0_STAIR_MAIN` to `B1_STAIR` horizontal portal can have its
+feet below L0 while its centre remains in L0. The corrected assertion exempts only positions inside
+that data-defined downward stair-well rectangle; undeclared floor holes still fail. Unit tests pass
+1409/1409, serial offscreen integration tests pass 135/135 and all 49 active software-render cases
+pass with eight capture-only cases disabled. No strict golden moves. The eighteen-pose
+culled-vs-unculled gate remains 0.1320% worst case (`l0-sunroom`). Compilation and heavy tooling
+were capped to CPU 0-5 / six workers; the complete repository gate accepts all 323 strict-XNA
+translation units.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. Highest local
+visible value is replacing the coarse dog bed or older flat chairs, while the larger route-level
+priorities are clipped daylight apertures and sparse exterior start framing—not unrelated hidden
+infrastructure.

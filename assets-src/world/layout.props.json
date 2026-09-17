@@ -679,7 +679,7 @@
     },
     {
       "id": "PROP_FAMILY_TV_UNIT",
-      "asset": "MODEL_FURNITURE_TV_UNIT",
+      "asset": "MODEL_FAMILY_MEDIA_CONSOLE",
       "cell": "L0_FAMILY",
       "position": [
         4.1,
@@ -700,7 +700,7 @@
       "cell": "L0_FAMILY",
       "position": [
         4.1,
-        1.87,
+        1.315,
         -22.26
       ],
       "yawDeg": 90,

@@ -467,6 +467,50 @@
       ]
     },
     {
+      "id": "MODEL_FAMILY_MEDIA_CONSOLE",
+      "category": "media-console",
+      "sourceFile": "assets-src/Models/Furniture/Family/media_console.glb",
+      "sourceSha256": "ffd8bf4e8accb70abfa20760bfc67a29058e5c73421e7fc758484da630e48338",
+      "contentName": "Models/Furniture/Family/media_console",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "derived",
+        "name": "Low cabinet extracted from Bedroom",
+        "url": "https://github.com/gkjohnson/3d-demo-data/tree/main/models/bitterli-rendering-resources",
+        "author": "SlykDrako",
+        "retrieved": "2026-09-17",
+        "licence": "CC0-1.0",
+        "licenceFile": "licenses/cc0-1.0/LICENCE.txt",
+        "attribution": "Bedroom by SlykDrako, released under CC0 1.0; converted by the Bitterli Rendering Resources and 3d-demo-data projects.",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "HOUSE-01053 deterministically prepares only Bedroom nodes WoodFurniture_0004 and StainlessSmooth_0003 with tools/assets/family_media_console_prepare.py. The pinned upstream GLB is 4892652 bytes with SHA-256 30e26c0fe67da6b73612284598952011f7dc7f7319d5d9a802112147226ad2ba; the exact glTF-Transform Draco-decoded/node-extracted intermediate is 3252936 bytes with SHA-256 51bb4602e858dc8155ed6dca1ddab80ff459d5ff710a41e4c1a15340782054cc. Source textures and unsupported metadata are removed, geometry and normals are proportioned as a low 0.65 m console and grounded/recentred. A twenty-four-triangle two-box proxy protects the plinth and central 1.097432 m case while excluding the wider end overhangs from the circulation footprint. See docs/licence-evidence/bitterli-bedroom-media-console.md."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.465029,
+          0.65386,
+          1.540038
+        ],
+        "triangles": {
+          "LOD0": 780
+        },
+        "collision": "FamilyMediaConsole_COL"
+      },
+      "materialMap": {
+        "MEDIA_CONSOLE_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "MEDIA_CONSOLE_HARDWARE": "MAT_KITCHEN_HARDWARE_STEEL"
+      },
+      "usedIn": [
+        "L0_FAMILY"
+      ]
+    },
+    {
       "id": "MODEL_FAMILY_SIDE_TABLE",
       "category": "occasional-table",
       "sourceFile": "assets-src/Models/Furniture/Family/side_table.glb",

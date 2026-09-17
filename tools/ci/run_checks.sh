@@ -145,6 +145,9 @@ run_gate "family-secondary" python3 tools/assets/family_secondary_prepare.py --c
 # HOUSE-01052: the close-range family sofa remains the pinned, attributed Wayfair geometry after
 # deterministic XNA-compatible variant selection, grounding and bounded proxy generation.
 run_gate "family-sofa" python3 tools/assets/family_sofa_prepare.py --check
+# HOUSE-01053: the family focal wall retains the pinned CC0 low cabinet, exact canonical roles,
+# measured television gap and family-only placement without unsupported source metadata.
+run_gate "family-media-console" python3 tools/assets/family_media_console_prepare.py --check
 # HOUSE-01285: the family room's four main lights are physical linked fixtures, and its existing
 # floor lamp emits from its real shade rather than from an unrelated bare point in the room.
 run_gate "family-ceiling-light" python3 tools/assets/family_ceiling_light_prepare.py --check

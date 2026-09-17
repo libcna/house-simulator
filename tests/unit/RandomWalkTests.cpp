@@ -96,6 +96,32 @@ namespace
         return level == nullptr ? -1e9F : level->ffl;
     }
 
+    /// A capsule can have its feet below the current level while its centre is still in that
+    /// level's stair cell: this is the valid transition through the exact authored rectangle of a
+    /// downward stair-well portal, including the short airborne step between ramp contacts. A drop
+    /// anywhere outside that declared opening remains a failure.
+    bool OnDownwardStair(const world::WorldData& data, cnahouse::util::Id cellId, const PlayerState& state)
+    {
+        const world::Cell* cell = data.FindCell(cellId);
+        const world::Level* level = cell == nullptr ? nullptr : data.FindLevel(cell->level);
+        if (level == nullptr)
+        {
+            return false;
+        }
+        for (const std::uint32_t index : data.PortalsOf(cellId))
+        {
+            const world::Portal& portal = data.Portals()[index];
+            if (portal.kind == world::PortalKind::StairWell && portal.axis == world::PlaneAxis::Y &&
+                portal.planeValue <= level->ffl + 1.0e-4F && state.position.X >= portal.minU &&
+                state.position.X <= portal.maxU && state.position.Z >= portal.minV &&
+                state.position.Z <= portal.maxV)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /// Where a portal is, in world space (§15.4's `u`/`v` convention).
     Vector3 PortalCentre(const world::Portal& portal)
     {
@@ -269,7 +295,7 @@ TEST(RandomWalkTests, TwentyMinutesOfWanderingStaysInTheHouse)
         // outdoors, where §11.5's ground is the terrain and the front walk is 0.60 m below L0's
         // FFL by construction -- an earlier version of this line counted that as a fall and let
         // every wedge after it through, which is a test that passes for the wrong reason.
-        if (!fell && indoors(data, tracker.Current()) &&
+        if (!fell && indoors(data, tracker.Current()) && !OnDownwardStair(data, tracker.Current(), state) &&
             state.position.Y - state.Rise() < levelFloor(data, tracker.Current()) - 0.60F)
         {
             fell = true;
