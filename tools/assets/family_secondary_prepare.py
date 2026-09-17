@@ -33,13 +33,14 @@ ASSETS = {
     "wall_art": ("MODEL_FAMILY_WALL_ART", "wall_art.glb", "picture", None),
 }
 EXPECTED_MATERIALS = {
-    "dog_bed": {"FAMILY_TEXTILE", "FAMILY_ART"},
+    "dog_bed": {"FAMILY_TEXTILE", "FAMILY_ART", "FAMILY_PIPING"},
     "bookcase": {"FAMILY_WOOD", "FAMILY_TEXTILE", "FAMILY_BOOK", "FAMILY_ART"},
     "side_table": {"FAMILY_WOOD", "FAMILY_BOOK"},
     "wall_art": {"FAMILY_WOOD", "FAMILY_TEXTILE", "FAMILY_BOOK", "FAMILY_ART"},
 }
 REQUIRED_COMPONENTS = {
-    "dog_bed": ("support_pad", "inner_cushion", "back_bolster", "side_bolster"),
+    "dog_bed": ("support_pad", "inner_cushion", "back_bolster", "side_bolster",
+                "base_piping", "cushion_piping", "cushion_button"),
     "bookcase": ("back", "side_", "shelf_", "book_"),
     "side_table": ("top", "lower_shelf", "leg_", "reading_book"),
     "wall_art": ("canvas", "frame_vertical", "frame_horizontal", "art_field"),

@@ -139,8 +139,8 @@ run_gate "kitchen-task-puck" python3 tools/assets/kitchen_task_puck_prepare.py -
 # HOUSE-01050: the living-room source's television and `BlackMarble` media slot must not regress
 # to the cream upholstery mapping that made the family focal wall a set of blank rectangles.
 run_gate "family-media-finish" python3 tools/assets/family_media_finish.py --check
-# HOUSE-01051: four project-authored secondary props remain deterministic, measured, physically
-# finished and linked to the canonical family-room dog bed/placements.
+# HOUSE-01051/HOUSE-01054: four project-authored secondary props remain deterministic, measured
+# and linked to canonical placements; the dog bed retains its finished soft component/material set.
 run_gate "family-secondary" python3 tools/assets/family_secondary_prepare.py --check
 # HOUSE-01052: the close-range family sofa remains the pinned, attributed Wayfair geometry after
 # deterministic XNA-compatible variant selection, grounding and bounded proxy generation.

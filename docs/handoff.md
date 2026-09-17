@@ -1,3 +1,44 @@
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01054` checkpoint)
+
+Branch `develop`. Task-start HEAD `22ead3f` (`HOUSE-01053`). This file belongs to the single
+`HOUSE-01054` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The green geometric family-room dog bed is gone. No approved local catalogue contained a suitable
+real pet bed, so the licence-safe project-authored `MODEL_FAMILY_DOG_BED` remains and its stable prop
+and nav identities do not move. The deterministic Blender source now generates a 0.960 x 0.310 x
+0.705 m rounded support, inset cushion, U-shaped bolsters, two continuous fabric cords and six
+covered buttons. The finished 343,260-byte GLB has 5,508 visible triangles, grounded origin, metre
+UV0, no proxy and SHA-256
+`e2b7324af59c72db316af52f54018c8a05529c6633ff9a73b56b4b8aec2d329c`.
+
+The outer bed uses one new warm woven canonical finish; its blue insert and narrow piping share the
+room's existing velvet/canvas roles. The resulting cost is one new static material chunk instead of
+three. Before: Round 48's [day media view](visual-review/captures/house-01053-family-media-console-day-final/family-media.png).
+After: the complete unchanged fourteen-camera
+[clear-day set](visual-review/captures/house-01054-family-dog-bed-day-final) and
+[explicit-reading night set](visual-review/captures/house-01054-family-dog-bed-night-final).
+Day family-room/composition/media differences are 2.334%, 0.052% and 1.949%; night differences are
+2.284%, 4.571% and 7.423%. All six family frames were opened at full resolution. One pre-review
+capture was rejected and overwritten after it exposed stale `build/content`; the CMake target then
+deployed both the 514,520-byte CNB and new world before the final captures.
+
+The world is 627 chunks / 57 props / 256 exterior hierarchy instances / 52.6674 MB. Only
+`L0_FAMILY` rises from its exact 23-chunk boundary to 24. The unculled diagnostic is 627 draws / 94
+state changes. Licence credits, budget report and 2,864 stable ids are current. Unit tests pass
+1409/1409, serial offscreen integration tests pass 134/134 and all 48 active software-render cases
+pass with eight capture-only cases disabled. No strict golden changes. Culled-vs-unculled remains
+0.1320% worst case (`l0-sunroom`). The complete repository gate accepts all 323 strict-XNA
+translation units. Compilation and heavy tooling were pinned to CPU 0-5 / six workers.
+
+The largest local defects are now the older flat family armchairs/coffee table, blank wall bays and
+dark focal corner. Across the selected route, clipped clear-day apertures and sparse exterior/
+garage start framing have greater image-scale impact. Continue with the highest visible value from
+the fixed cameras; do not add unrelated hidden infrastructure or claim the blocked full
+`HOUSE-00992` furnishing task.
+
+---
+
 # Visual-sprint handoff — 2026-09-17 (`HOUSE-01053` checkpoint)
 
 Branch `develop`. Task-start HEAD `3ac476e` (`HOUSE-01052`). This file belongs to the single

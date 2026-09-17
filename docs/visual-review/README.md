@@ -2062,3 +2062,55 @@ translation units.
 visible value is replacing the coarse dog bed or older flat chairs, while the larger route-level
 priorities are clipped daylight apertures and sparse exterior start framing—not unrelated hidden
 infrastructure.
+
+## Round 49 — finished family dog bed
+
+Commit: `HOUSE-01054` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 48's [front media view](captures/house-01053-family-media-console-day-final/family-media.png)
+ends in a green five-box slab beside the console. After: the identical camera in the complete
+fourteen-view [final clear-day set](captures/house-01054-family-dog-bed-day-final) shows a rounded
+warm bolster bed with an inset blue cushion, continuous sewn edges and six restrained tuft points.
+The complete [explicit-reading 22:00 set](captures/house-01054-family-dog-bed-night-final) confirms
+that the silhouette remains distinct under the room practicals. Both sets and all six matched
+family frames were opened at full resolution.
+
+Ranked visible defects remaining:
+
+1. Clear-day apertures remain clipped and visually overpower the selected connected rooms.
+2. The broad exterior/garage start framing remains materially coherent but sparse at player scale.
+3. The two older family armchairs and coffee table are now the flattest local furniture assets.
+4. Blank wall bays and restrained surface dressing still limit the inhabited feeling.
+5. The media wall and dog-bed corner are readable but remain darker than their ceiling practicals
+   suggest, especially at night.
+
+Fixed: the stable `MODEL_FAMILY_DOG_BED`, prop placement and linked nav role are preserved. Its
+deterministic project-authored generator replaces 540 triangles of simple beveled boxes with a
+0.960 x 0.310 x 0.705 m, 5,508-triangle soft composition: rounded support, inset cushion,
+U-shaped bolsters, two continuous fabric cords and six covered buttons. The new warm woven outer
+finish replaces green dining upholstery; the cushion and narrow piping reuse existing family
+velvet/canvas roles. This keeps the visual identities separate while adding only one material
+chunk. There is still no collision proxy, so pet navigation and player circulation are unchanged.
+
+Against Round 48, the day family-room/composition/media pairs change 2.334%, 0.052% and 1.949% of
+pixels with normalized MAE 0.001244, 0.000112 and 0.001023. Their night counterparts change
+2.284%, 4.571% and 7.423% with normalized MAE 0.000904, 0.000271 and 0.001019. The first capture
+was rejected because it exposed stale executable-relative deployed content; the CMake content
+target synchronized both the model and world before either final set was accepted.
+
+The committed GLB is 343,260 bytes at SHA-256
+`e2b7324af59c72db316af52f54018c8a05529c6633ff9a73b56b4b8aec2d329c`. The world is 627 chunks /
+57 props / 256 exterior hierarchy instances / 52.6674 MB. Only `L0_FAMILY` rises from its exact
+23-chunk boundary to 24, and the unculled diagnostic is 627 draws / 94 state changes. Licence,
+budget and 2,864 stable ids are current.
+
+Unit tests pass 1409/1409, serial offscreen integration tests pass 134/134 and all 48 active
+software-render cases pass with eight capture-only cases disabled. No strict pixel golden moves.
+The eighteen-pose culling comparison remains 0.1320% worst case (`l0-sunroom`). Compilation and
+heavy work were capped to CPU 0-5 / six workers; the complete repository gate accepts all 323
+strict-XNA translation units.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only. The largest
+route-level gains now lie in daylight aperture balance and the exterior start composition; the
+largest contained family-room gain is replacing or materially improving the older armchairs and
+coffee table—not adding invisible infrastructure.

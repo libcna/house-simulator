@@ -341,13 +341,13 @@
       "id": "MODEL_FAMILY_DOG_BED",
       "category": "pet-bed",
       "sourceFile": "assets-src/Models/Furniture/Family/dog_bed.glb",
-      "sourceSha256": "ed806f8308a403b3c6917c2cf3f0c312915931f2577b265ec2066fcd46d95b97",
+      "sourceSha256": "e2b7324af59c72db316af52f54018c8a05529c6633ff9a73b56b4b8aec2d329c",
       "contentName": "Models/Furniture/Family/dog_bed",
       "kind": "model",
       "residencyPack": "house-l0",
       "origin": {
         "kind": "authored",
-        "name": "Measured family-room dog bed",
+        "name": "Measured family-room soft bolster dog bed",
         "licence": "Ms-PL",
         "licenceFile": "LICENSE",
         "attribution": "",
@@ -355,23 +355,24 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Project-authored washable bolster bed from tools/blender/family_secondary_suite.py for HOUSE-01051; no third-party mesh or texture was copied."
+        "note": "Project-authored washable soft bolster bed from tools/blender/family_secondary_suite.py for HOUSE-01051 and refined with rounded upholstery, piping and tuft buttons for HOUSE-01054; no third-party mesh or texture was copied."
       },
       "geometry": {
         "unitScale": 1,
         "upAxis": "Y",
         "boundsMetres": [
-          0.9,
-          0.26,
-          0.66
+          0.96,
+          0.31,
+          0.705
         ],
         "triangles": {
-          "LOD0": 540
+          "LOD0": 5508
         }
       },
       "materialMap": {
-        "FAMILY_TEXTILE": "MAT_FURNITURE_DINING_UPHOLSTERY",
-        "FAMILY_ART": "MAT_FAMILY_ART_CANVAS"
+        "FAMILY_TEXTILE": "MAT_FAMILY_DOG_BED_BOLSTER",
+        "FAMILY_ART": "MAT_FAMILY_SOFA_VELVET",
+        "FAMILY_PIPING": "MAT_FAMILY_ART_CANVAS"
       },
       "usedIn": [
         "L0_FAMILY"

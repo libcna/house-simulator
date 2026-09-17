@@ -26,6 +26,7 @@ COLOURS = {
     "FAMILY_TEXTILE": (0.32, 0.45, 0.25, 1.0),
     "FAMILY_BOOK": (0.50, 0.16, 0.085, 1.0),
     "FAMILY_ART": (0.18, 0.32, 0.39, 1.0),
+    "FAMILY_PIPING": (0.70, 0.61, 0.50, 1.0),
 }
 MATERIALS = {}
 COUNTER = 0
@@ -80,7 +81,7 @@ def name_for(label: str) -> str:
 
 
 def box(label, location, size, finish="FAMILY_WOOD", bevel=0.006,
-        rotate_y_deg=0.0):
+        rotate_y_deg=0.0, bevel_segments=2):
     bpy.ops.mesh.primitive_cube_add(size=1.0, location=blender_xyz(location))
     obj = bpy.context.object
     obj.name = name_for(label)
@@ -92,11 +93,72 @@ def box(label, location, size, finish="FAMILY_WOOD", bevel=0.006,
     if bevel:
         modifier = obj.modifiers.new("softened_edge", "BEVEL")
         modifier.width = min(bevel, min(size) * 0.24)
-        modifier.segments = 2
+        modifier.segments = bevel_segments
         bpy.context.view_layer.objects.active = obj
         bpy.ops.object.modifier_apply(modifier=modifier.name)
     for polygon in obj.data.polygons:
         polygon.use_smooth = False
+    return obj
+
+
+def rounded_rectangle_piping(label, location, width, depth, corner_radius,
+                             tube_radius=0.008, finish="FAMILY_PIPING",
+                             corner_segments=6, tube_segments=8):
+    """Make a continuous fabric cord around a horizontal rounded rectangle."""
+    half_x = width * 0.5
+    half_z = depth * 0.5
+    centres = (
+        (half_x - corner_radius, half_z - corner_radius, 0.0),
+        (-half_x + corner_radius, half_z - corner_radius, 90.0),
+        (-half_x + corner_radius, -half_z + corner_radius, 180.0),
+        (half_x - corner_radius, -half_z + corner_radius, 270.0),
+    )
+    outline = []
+    for centre_x, centre_z, start_degrees in centres:
+        for step in range(corner_segments):
+            angle = math.radians(start_degrees + 90.0 * step / corner_segments)
+            outline.append((centre_x + corner_radius * math.cos(angle),
+                            centre_z + corner_radius * math.sin(angle)))
+
+    vertices = []
+    for index, (x, z) in enumerate(outline):
+        previous = outline[(index - 1) % len(outline)]
+        following = outline[(index + 1) % len(outline)]
+        tangent_x = following[0] - previous[0]
+        tangent_z = following[1] - previous[1]
+        length = math.hypot(tangent_x, tangent_z)
+        outward_x = tangent_z / length
+        outward_z = -tangent_x / length
+        for ring_index in range(tube_segments):
+            angle = 2.0 * math.pi * ring_index / tube_segments
+            radial = tube_radius * math.cos(angle)
+            gltf_point = (
+                location[0] + x + outward_x * radial,
+                location[1] + tube_radius * math.sin(angle),
+                location[2] + z + outward_z * radial,
+            )
+            vertices.append(blender_xyz(gltf_point))
+
+    faces = []
+    ring_count = len(outline)
+    for ring in range(ring_count):
+        following = (ring + 1) % ring_count
+        for segment in range(tube_segments):
+            next_segment = (segment + 1) % tube_segments
+            faces.append((ring * tube_segments + segment,
+                          following * tube_segments + segment,
+                          following * tube_segments + next_segment,
+                          ring * tube_segments + next_segment))
+
+    mesh = bpy.data.meshes.new(name_for(f"{label}_mesh"))
+    mesh.from_pydata(vertices, [], faces)
+    mesh.update()
+    obj = bpy.data.objects.new(name_for(label), mesh)
+    bpy.context.collection.objects.link(obj)
+    obj.data.materials.append(material(finish))
+    metre_uv(obj, 0.20)
+    for polygon in obj.data.polygons:
+        polygon.use_smooth = True
     return obj
 
 
@@ -132,16 +194,28 @@ def join_collision(parts, name: str):
 
 
 def author_dog_bed():
-    """A 0.90 x 0.66 m washable bolster bed, 0.26 m high."""
-    box("support_pad", (0.0, 0.060, 0.0), (0.90, 0.12, 0.66),
-        finish="FAMILY_TEXTILE", bevel=0.050)
-    box("inner_cushion", (0.0, 0.135, -0.025), (0.62, 0.11, 0.39),
-        finish="FAMILY_ART", bevel=0.040)
-    box("back_bolster", (0.0, 0.180, 0.255), (0.74, 0.16, 0.15),
-        finish="FAMILY_TEXTILE", bevel=0.070)
+    """A 0.97 x 0.71 m washable bolster bed with soft seams and tufted cushion."""
+    box("support_pad", (0.0, 0.060, 0.0), (0.96, 0.12, 0.70),
+        finish="FAMILY_TEXTILE", bevel=0.055, bevel_segments=6)
+    box("inner_cushion", (0.0, 0.160, -0.035), (0.68, 0.13, 0.43),
+        finish="FAMILY_ART", bevel=0.060, bevel_segments=8)
+    box("back_bolster", (0.0, 0.205, 0.270), (0.78, 0.21, 0.17),
+        finish="FAMILY_TEXTILE", bevel=0.080, bevel_segments=8)
     for side in (-1, 1):
-        box(f"side_bolster_{side}", (side * 0.375, 0.180, 0.0),
-            (0.15, 0.16, 0.54), finish="FAMILY_TEXTILE", bevel=0.070)
+        box(f"side_bolster_{side}", (side * 0.395, 0.205, 0.005),
+            (0.17, 0.21, 0.55), finish="FAMILY_TEXTILE", bevel=0.080,
+            bevel_segments=8)
+
+    rounded_rectangle_piping("base_piping", (0.0, 0.120, 0.0), 0.93, 0.67, 0.07)
+    rounded_rectangle_piping("cushion_piping", (0.0, 0.222, -0.035),
+                             0.65, 0.40, 0.08, tube_radius=0.007)
+    # Six shallow covered buttons break up the otherwise featureless cushion top without
+    # becoming loose clutter or collision geometry.
+    for row, z in enumerate((-0.105, 0.040)):
+        for column, x in enumerate((-0.205, 0.0, 0.205)):
+            vertical_cylinder(f"cushion_button_{row}_{column}",
+                              (x, 0.229, z), 0.010, 0.014,
+                              finish="FAMILY_PIPING", vertices=12)
 
 
 def add_book(row: int, index: int, x: float, shelf_y: float, width: float,

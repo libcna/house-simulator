@@ -180,7 +180,8 @@ namespace
             {
                 ASSERT_TRUE(binder.RegisterAll(contents.materials).HasValue());
                 EXPECT_EQ(binder.Count(), contents.materials.size());
-                EXPECT_EQ(binder.Count(), 186U) << "HOUSE-01052 adds the family sofa velvet and frame roles";
+                EXPECT_EQ(binder.Count(), 187U)
+                    << "HOUSE-01054 adds the family dog bed's dedicated woven bolster role";
                 const MaterialDesc* entryPanel = binder.Find(Id::Of("MAT_EXTERIOR_DOOR_PANEL_HARDWOOD"));
                 ASSERT_NE(entryPanel, nullptr);
                 EXPECT_EQ(entryPanel->kind, MaterialKind::Basic);

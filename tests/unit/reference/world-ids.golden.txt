@@ -897,6 +897,7 @@ materials/materials	MAT_EXTERIOR_DOOR_HARDWOOD
 materials/materials	MAT_EXTERIOR_DOOR_PANEL_HARDWOOD
 materials/materials	MAT_FAMILY_ART_CANVAS
 materials/materials	MAT_FAMILY_BOOK_SPINES
+materials/materials	MAT_FAMILY_DOG_BED_BOLSTER
 materials/materials	MAT_FAMILY_MEDIA_STONE
 materials/materials	MAT_FAMILY_READING_SHADE_EMISSIVE
 materials/materials	MAT_FAMILY_SOFA_FRAME
