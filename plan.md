@@ -14666,6 +14666,42 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             references remain accepted. All eighteen culled/unculled poses pass at 0.1342% worst
             case (`l0-sunroom`). The complete gate accepts all 323 strict-XNA translation units
             with compilation and heavy tooling restricted to CPU 0-5 / six workers.
+- [x] HOUSE-01059 — Preserve painted detail in sunlit exterior window frames
+      dep: HOUSE-00924, HOUSE-00925, HOUSE-00926, HOUSE-01266 · sys: rendering/materials · plat: ALL · pri: MUST
+      note: (2026-09-17) Round 53 makes clipped clear-day apertures the highest route-level defect.
+            Explicit blockout inspection identifies the glare as the distinct weather-facing
+            `MAT_WINDOW_FRAME_WHITE` role, not glass, room trim or global exposure. Keep the
+            exterior residency split and full outdoor sky term intact; calibrate only the stock-
+            `BasicEffect` direct celestial key used by that opaque painted detail.
+      accept: expose one deterministic policy function and prove that exterior window frames use a
+            restrained direct key while other open-sky detail and indoor daylight-gated detail keep
+            their existing scales. In normal production rendering reduce only the frame key; do
+            not alter adaptive exposure, glass, façade lightmaps, door lighting, culling or explicit
+            debug blockout. Capture and inspect the unchanged fourteen-camera clear-day route plus
+            targeted overcast/night family views; intentionally advance only affected strict
+            references and pass render, culling and strict-XNA gates with compilation/heavy work on
+            CPU 0-5 / at most six workers.
+      findings: (2026-09-17) The weather-facing frame already receives full scene-referred outdoor
+            sky ambient and exposure 1.0, then formerly added the full celestial key. On pale paint
+            this saturated moulding to an emissive-looking blue-white. A 0.30 frame-only key keeps
+            the sky response and material texture but restores profile and shade; other exterior
+            detail retains 1.0 and indoor Basic detail retains `0.10 * roomDaylight * exposure`.
+            The fixed family A/B changes 91,623 pixels above two levels (6.3627%, normalized MAE
+            0.012199): near-white pixels within the changed set fall from 52,843 to 15. A no-window
+            living control changes only 166 HUD/timing pixels, proving the correction is localized.
+      review: (2026-09-17) The complete fourteen-camera clear-day route was inspected together with
+            full-resolution family, façade, kitchen, foyer and living comparisons. The family
+            picture-window frame now reads as painted moulding rather than a glowing portal, the
+            distant exterior view stays visible, and the front façade remains coherent. Targeted
+            overcast and 22:00 captures retain plausible grey-sky and dark-window states. A separate
+            controlled 1.0/0.30 binary A/B was used because Round 53's living frames carried a
+            different explicit lighting state and were unsuitable for whole-frame attribution.
+      verified: (2026-09-17) The policy integration test passes. All twelve production first-person
+            poses pass after inspecting and intentionally advancing only the foyer-stair, kitchen
+            and master-bedroom references that contain the calibrated frame. All 1,409 unit, 135
+            integration and 48 active render tests pass (eight render tests remain deliberately
+            disabled). All eighteen culled/unculled poses pass at 0.1342% worst case
+            (`l0-sunroom`), and the complete gate accepts all 323 strict-XNA translation units.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -18936,6 +18972,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-01059` | **New task, next free phase-13 id.** Calibrate only the direct celestial contribution on the existing weather-facing white window-frame role; preserve outdoor exposure, full sky ambient, shell ownership and the established exterior-window hierarchy. | Round 53 makes clipped clear-day apertures the largest route-level defect. Explicit debug-blockout inspection proves the dominant glare is the distinct frame/sash role rather than glass or room trim, and a controlled binary A/B proves the narrow stock-`BasicEffect` correction does not alter a no-window room. This is a visible Tier-S material-lighting calibration, not new renderer architecture. |
 | 2026-09-17 | `HOUSE-01058` | **New task, next free phase-13 id.** Add a measured bench, original artwork and physical picture light to the empty formal-living piano wall; reuse the existing stable accent source, rebake only `L0_LIVING` and keep full `HOUSE-00988` open. | Round 52 names the dark straight living view as the largest contained defect. Its piano already exists but lacks the objects required to read as a usable domestic vignette, and the nominal accent light has neither visible fixture nor a localized direction. This bounded authored suite has no licence ambiguity and exercises the approved prop, material, fixture and Tier-S lightmap paths without hard-coded room logic. |
 | 2026-09-17 | `HOUSE-01057` | **New task, next free phase-13 id.** Replace only the coarse formal-living sofa through an independently pinned, deterministic strict-XNA asset path; preserve the stable prop placement and keep full `HOUSE-00988` open. | Round 51 makes the pale sofa the largest contained furniture defect. The official Khronos `SheenWoodLeatherSofa` is CC BY 4.0, materially separated and already visually proven in the sibling catalogue, while the other inspected local candidate has one flat material despite 67,056 triangles. Source topology requires a weld-before-decimate correction; this is bounded asset preparation, not renderer architecture. |
 | 2026-09-17 | `HOUSE-01056` | **New task, next free phase-13 id.** Correct the shared approved coffee table's exact source-material binding and stale two-cell manifest use; preserve both canonical placements and keep the full `HOUSE-00988` / `HOUSE-00992` furnishing tasks open. | Round 50 makes the repeated palette-white tables the largest contained furniture defect. Isolated geometry inspection shows that the existing CC BY model already has detailed drawers, rounded edges, legs, LODs and a proxy; its sole visible role was simply bound to a white-room palette. The other approved local candidate is an end-height pedestal table, so substituting or vertically distorting it would lower physical credibility. |

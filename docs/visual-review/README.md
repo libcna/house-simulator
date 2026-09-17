@@ -2310,3 +2310,40 @@ strict-XNA translation units. Compilation and heavy work used CPU 0-5 / at most 
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
 debug blockout remains available. The next highest route-level value is clear-day aperture balance,
 followed by the sparse exterior/garage start and additional restrained wall/surface dressing.
+
+## Round 54 — clear-day window-frame balance
+
+Commit: `HOUSE-01059` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 53's [family composition](captures/house-01058-piano-vignette-day-final/family-composition.png)
+has a picture-window frame whose full outdoor sky plus full celestial key clips most of its pale
+paint to blue-white. After: the identical camera in the complete fourteen-view
+[clear-day set](captures/house-01059-window-balance-day-final/family-composition.png) retains the
+frame's casing, sash depth and cool-sky response without changing the exterior view or lowering the
+room's exposure. Full-resolution family, façade, kitchen, foyer and living views were inspected;
+targeted overcast and 22:00 family captures confirm plausible grey and dark aperture states.
+
+Ranked visible defects remaining:
+
+1. The broad exterior/garage start remains materially coherent but sparse, especially at night.
+2. Blank wall bays and restrained secondary dressing still limit the inhabited feeling.
+3. Several furniture/shell contacts lack local shadowing and read slightly ungrounded.
+4. The formal living room remains dark overall and its older upright piano is comparatively blocky.
+5. Distant landscape/neighbour context still exposes the finite property presentation.
+
+Fixed: explicit debug-blockout inspection identified `MAT_WINDOW_FRAME_WHITE`, not glass or indoor
+trim. Production now keeps scene-referred exposure 1.0 and the full outdoor sky ambient, but applies
+0.30 of the direct celestial key to that opaque window role alone. Other open-sky detail keeps 1.0;
+indoor Basic detail keeps the existing `0.10 * roomDaylight * exposure` policy. The clear family
+A/B changes 91,623 pixels above two channel levels (6.3627%, normalized MAE 0.012199). Of those
+pixels, near-white values fall from 52,843 to 15. A no-window living control changes only 166
+HUD/timing pixels, so no room-wide exposure or lighting change is being hidden.
+
+Three production first-person references containing the affected frame were opened and
+intentionally advanced: foyer stair, kitchen and master bedroom. The other strict references remain
+unchanged. Tests and final gate results are recorded in `docs/handoff.md`; compilation and heavy
+work stayed on CPU 0-5 / at most six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is denser, better-framed exterior
+arrival composition, followed by restrained wall dressing and contact/grounding improvement.

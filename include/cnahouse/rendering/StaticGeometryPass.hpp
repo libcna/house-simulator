@@ -47,6 +47,17 @@ namespace cnahouse::rendering
                                                      bool exteriorFacing,
                                                      float cameraEffectExposure) noexcept;
 
+    /// @brief Stock-BasicEffect celestial-key scale for opaque architectural detail.
+    ///
+    /// Weather-facing window frames already receive the full outdoor sky ambient. Their pale
+    /// painted albedo therefore needs a restrained direct key to retain moulding detail instead
+    /// of clipping to emissive white. Other open-sky detail keeps the full key, while indoor
+    /// detail retains its daylight-gated window contribution.
+    [[nodiscard]] float BasicCelestialKeyScale(bool exteriorWindow,
+                                               bool skyOpen,
+                                               float effectExposure,
+                                               float roomDaylight) noexcept;
+
     /// @brief The one switch group shared by every linked fixture prop in @p chunk.
     ///
     /// The content build keeps independently switched emissive slots in separate chunks. An

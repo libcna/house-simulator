@@ -1,4 +1,40 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-01058` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-01059` checkpoint)
+
+Branch `develop`. Task-start HEAD `acc387c` (`HOUSE-01058`). This file belongs to the single
+`HOUSE-01059` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit blockout mode is unchanged.
+
+The family-room picture window no longer reads as an emissive blue-white rectangle. Debug-blockout
+inspection proved the clipped surface was the distinct weather-facing `MAT_WINDOW_FRAME_WHITE`
+role, not room trim or transparent glass. Its stock-`BasicEffect` path retains scene-referred
+exposure 1.0 and full outdoor sky ambient, but now receives 0.30 rather than 1.0 of the direct
+celestial key. Other outdoor detail and interior daylight policy do not change; the established
+window/exterior hierarchy and culling ownership remain intact.
+
+The fixed family A/B changes 91,623 pixels above two levels (6.3627%, normalized MAE 0.012199).
+Near-white pixels in that changed set fall from 52,843 to 15. A controlled no-window living A/B
+changes only 166 HUD/timing pixels. The complete fourteen-camera
+[clear-day set](visual-review/captures/house-01059-window-balance-day-final) was inspected along
+with full-resolution family, façade, kitchen, foyer and living comparisons. Temporary fixed
+overcast and 22:00 family captures confirm that the same frame remains plausible under grey sky and
+becomes appropriately dark at night.
+
+The three affected first-person references — foyer stair, kitchen and master bedroom — were
+opened, localized to their visible exterior frames and intentionally advanced; no other strict
+golden moved. A named integration test fixes the 0.30/1.0/indoor policy. All 1,409 unit tests, 135
+integration tests and 48 active render tests pass (eight render tests remain deliberately
+disabled). All eighteen culled/unculled poses pass at 0.1342% worst case (`l0-sunroom`). The
+complete strict-XNA gate accepts all 323 translation units. Compilation and heavy tooling stayed
+on CPU 0-5 / at most six workers.
+
+The largest remaining visible defect is the sparse exterior/garage arrival composition,
+particularly at night. Blank wall bays, weak local contact grounding, the blockier old piano and
+finite-looking distant landscape follow. Continue from fixed screenshots and do not return to
+unrelated invisible subsystems.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-01058` checkpoint)
 
 Branch `develop`. Task-start HEAD `f88ac21` (`HOUSE-01057`). This file belongs to the single
 `HOUSE-01058` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

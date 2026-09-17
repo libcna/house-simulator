@@ -99,6 +99,17 @@ namespace
         EXPECT_FLOAT_EQ(OpaqueReceiverEffectExposure(CellKind::Exterior, false, 1.0F), 1.0F);
     }
 
+    TEST(StaticGeometryPassTests, ExteriorWindowFramesRetainPaintDetailUnderTheSun)
+    {
+        using cnahouse::rendering::BasicCelestialKeyScale;
+        EXPECT_FLOAT_EQ(BasicCelestialKeyScale(true, true, 1.0F, 1.0F), 0.30F)
+            << "a full outdoor sun key clips pale window-frame paint after full sky ambient";
+        EXPECT_FLOAT_EQ(BasicCelestialKeyScale(false, true, 1.0F, 1.0F), 1.0F)
+            << "the window-only calibration must not dim other open-sky detail";
+        EXPECT_FLOAT_EQ(BasicCelestialKeyScale(false, false, 5.0F, 0.4F), 0.20F)
+            << "indoor Basic detail keeps the existing exposure and daylight-gated key";
+    }
+
     /// Two cells, two materials, one triangle each -- enough to be drawn and to be counted.
     ChunkLibrary TinyHouse()
     {

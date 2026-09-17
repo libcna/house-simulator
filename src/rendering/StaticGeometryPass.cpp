@@ -43,6 +43,20 @@ namespace cnahouse::rendering
         return cellKind == world::CellKind::Exterior || exteriorFacing ? 1.0F : cameraEffectExposure;
     }
 
+    float BasicCelestialKeyScale(bool exteriorWindow,
+                                 bool skyOpen,
+                                 float effectExposure,
+                                 float roomDaylight) noexcept
+    {
+        constexpr float kExteriorWindowKey = 0.30F;
+        constexpr float kIndoorWindowKey = 0.10F;
+        if (exteriorWindow)
+        {
+            return effectExposure * kExteriorWindowKey;
+        }
+        return effectExposure * (skyOpen ? 1.0F : kIndoorWindowKey * roomDaylight);
+    }
+
     util::Id FixtureGroupForChunk(const world::Chunk& chunk, std::span<const world::Light> lights) noexcept
     {
         util::Id group;
@@ -86,7 +100,6 @@ namespace cnahouse::rendering
         // trim to read: the foyer chair's fixed pixel rose from RGB(17,14,12) to RGB(53,37,23)
         // without altering any artificial-lightmapped architectural receiver.
         constexpr float kBasicSkyBounce = 0.18F;
-        constexpr float kBasicSunWindowKey = 0.10F;
         constexpr float kBasicFixtureAmbient = 0.20F;
         constexpr float kBasicFixtureKey = 0.22F;
 
@@ -710,7 +723,7 @@ namespace cnahouse::rendering
                                      draw.ambientLight.Z + exposure * kBasicFixtureAmbient * localBounce.Z));
                     }
                     const float directionalScale =
-                        celestial ? exposure * (skyOpen ? 1.0F : kBasicSunWindowKey * room->daylight)
+                        celestial ? BasicCelestialKeyScale(exteriorWindow, skyOpen, exposure, room->daylight)
                                   : exposure * kBasicFixtureKey;
                     for (std::size_t slot = 0; slot < objectLights.slots.size(); ++slot)
                     {
