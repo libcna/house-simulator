@@ -13780,6 +13780,45 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 48 active render tests pass (eight render cases remain deliberately disabled),
                 all eighteen culled/unculled poses pass at 0.1342% worst case (`l0-sunroom`), and
                 the complete strict-XNA gate accepts all 323 translation units.
+- [x] HOUSE-00937 — Compose real foundation beds along the playable front approach
+      dep: HOUSE-00392, HOUSE-00762, HOUSE-00772, HOUSE-00923, HOUSE-00936 · sys: world/content/exterior · plat: ALL · pri: MUST
+      note: (2026-09-17) Round 55 makes sparse foundation planting and the empty garage arrival
+            the largest exterior defect. The canonical plants already exist, but the original
+            continuous line puts shrubs and flowers below the raised porch and one shrub into the
+            driveway. Add two honest sloped-ground cover bands, then compose the existing approved
+            plants into the two facade flanks without increasing the canonical sixty-shrub count.
+            Do not invent a path, flatten drainage, download an asset or hide the result behind a
+            global material/lighting change.
+      accept: the unchanged front and garage cameras plus a new fixed path-height review camera
+              show two readable, mulched foundation beds with varied approved shrubs/flowers;
+              no plant lies below the raised porch or in the driveway, the porch and approach
+              surfaces remain unchanged, and the terrain generator proves that ground cover
+              changes material without flattening the lot. Canonical schema/content validation,
+              exact landscape chunk ceilings, render/culling and full strict-XNA gates pass;
+              all compilation/heavy work remains on CPU 0-5 / at most six workers.
+      result: (2026-09-17) Canonical exterior data now distinguishes sloped `groundCovers` from
+              navigable/flat paths. Two `MAT_OUTDOOR_MULCH` bands follow the original lot slope,
+              flank rather than cross the raised porch and stop before the driveway. The same
+              twelve foundation shrubs, ten gazanias and eight periwinkles are recomposed within
+              them; the canonical `VEG_SHRUB` total remains sixty and no asset was downloaded.
+              The front/garage cameras change 0.2554% / 1.1909% of pixels above two levels with
+              normalized MAE 0.0002760 / 0.0010399. Family views without the affected exterior are
+              byte-identical. A fifteenth fixed path-height camera makes planting scale and
+              porch/driveway overlap directly reviewable.
+      review: (2026-09-17) All fifteen clear-day frames and targeted fixed overcast/22:00
+              front-path captures were opened. The beds read as bounded ground finish and the
+              plants no longer sit below the porch or in the drive. Twelve strict references were
+              inspected pairwise and selectively advanced; every changed region is the intended
+              mulch or plant placement. The dark night facade and broad empty garage wall are now
+              the largest exterior defects; `VISUAL-GATE-1` still FAILS.
+      verified: (2026-09-17) Schema validation, the thirteen world rules, terrain check/selftest
+                and deterministic content build pass. Only `EXT_FRONTYARD_E` / `EXT_SIDEYARD_W`
+                rise to measured ceilings 13 / 12; regrouping the same vegetation merges three
+                alpha-test batches, so the world remains 632 chunks / 96 cells / 256 exterior
+                instances at 53.378992 MB. The unculled contract is 44 cutouts / 97 state changes.
+                All 1,409 unit, 135 integration and 48 active render tests pass (eight disabled);
+                all eighteen culling pairs pass at 0.1342% worst (`l0-sunroom`). Full strict-XNA
+                and repository gates pass with CPU 0-5 / at most six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19010,6 +19049,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-17 | `HOUSE-00937` | **New task, next free phase-12 id.** Add sloped-ground material covers as a truthful exterior-data primitive, use it for two front foundation beds, and recompose only the existing approved foundation plants. | Round 55 names the sparse facade/garage arrival as the highest exterior defect. Existing foundation vegetation is incorrectly arranged as one continuous line beneath the elevated porch and into the driveway; two flanking beds use the existing mulch material and existing vegetation count without a download, a fake navigable path or a terrain-height change. |
 | 2026-09-17 | `HOUSE-00936` | **New task, next free phase-12 id.** Calibrate only the generated production lawn tint, preserve the approved texture/UV/runtime path, and make the generator prove exact ownership of its marker block. | Round 54 makes the large saturated lawn the dominant material defect in both fixed arrival frames. The first deterministic write also proved that fourteen independently authored vegetation rows had later been inserted inside this generator's replacement range; moving them intact after the END marker and rejecting any future unowned row is the smallest transparent data/tool correction. |
 | 2026-09-17 | `HOUSE-01059` | **New task, next free phase-13 id.** Calibrate only the direct celestial contribution on the existing weather-facing white window-frame role; preserve outdoor exposure, full sky ambient, shell ownership and the established exterior-window hierarchy. | Round 53 makes clipped clear-day apertures the largest route-level defect. Explicit debug-blockout inspection proves the dominant glare is the distinct frame/sash role rather than glass or room trim, and a controlled binary A/B proves the narrow stock-`BasicEffect` correction does not alter a no-window room. This is a visible Tier-S material-lighting calibration, not new renderer architecture. |
 | 2026-09-17 | `HOUSE-01058` | **New task, next free phase-13 id.** Add a measured bench, original artwork and physical picture light to the empty formal-living piano wall; reuse the existing stable accent source, rebake only `L0_LIVING` and keep full `HOUSE-00988` open. | Round 52 names the dark straight living view as the largest contained defect. Its piano already exists but lacks the objects required to read as a usable domestic vignette, and the nominal accent light has neither visible fixture nor a localized direction. This bounded authored suite has no licence ambiguity and exercises the approved prop, material, fixture and Tier-S lightmap paths without hard-coded room logic. |

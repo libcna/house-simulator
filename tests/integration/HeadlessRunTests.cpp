@@ -122,18 +122,21 @@ namespace
             previousOpaque = &item;
             ++opaque;
         }
-        EXPECT_EQ(cutouts, 47U)
+        // HOUSE-00937 composes the same twelve foundation shrubs into two actual beds instead of
+        // filing a continuous under-porch/driveway line across more exterior cells. That merges
+        // three cell-scoped foliage batches without deleting an instance: 44 is the measured
+        // world-wide alpha-test slice, including the formal sofa fringe and two indoor plants.
+        EXPECT_EQ(cutouts, 44U)
             << "the formal sofa fringe, two indoor plant leaves and exterior foliage batches";
         EXPECT_EQ(opaque + cutouts, list.Size()) << "unexpected pass items entered the blockout list";
         // Every opaque item was drawn: nothing in that slice named a chunk the runtime could
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
         EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), opaque);
         // And the material was bound once per run, not once per chunk. The unculled diagnostic is
-        // measured at 96 after HOUSE-01058 adds two chunks whose canonical materials already
-        // exist in the global sort, below §71.2's 210 worst case; visible poses protect the
-        // smaller culled rows.
+        // measured at 97 after HOUSE-00937 adds the distinct foundation-mulch terrain role. That
+        // remains below §71.2's 210 worst case; visible poses protect the smaller culled rows.
         EXPECT_GT(states->Max(), 0);
-        EXPECT_LE(states->Max(), 96);
+        EXPECT_LE(states->Max(), 97);
         EXPECT_LT(states->Max(), chunks->Max() / 4)
             << "the sort bought nothing: the pass is rebinding almost per chunk";
         // The pass's own count and the list's agree, which is what says the two are counting the

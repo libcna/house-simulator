@@ -559,6 +559,9 @@ is placed as instance arrays so it can be drawn instanced where that measures fa
                              "bluestone", "mulch"] },
   "road":    { "centreline": [[-40.0, 0.0, 22.0], [40.0, 0.0, 22.0]], "width": 7.0,
                "material": "MAT_ASPHALT_01" },
+  "groundCovers": [ { "id": "COVER_FOUNDATION_MULCH_W",
+                        "boxes": [ { "x": [-12.8, -3.6], "z": [-14.0, -12.5] } ],
+                        "material": "MAT_OUTDOOR_MULCH" } ],
   "fences":  [ { "id": "FENCE_N", "asset": "MODEL_FENCE_PICKET_01", "path": [[-22.5,0.0,-24.0],[22.5,0.0,-24.0]],
                  "height": 1.80, "gate": "GATE_N1" } ],
   "neighbourhood": [ { "id": "NB_HOUSE_01", "asset": "MODEL_NB_HOUSE_01", "position": [-38.0, 0.0, 30.0],
@@ -579,6 +582,12 @@ and the garden path) and `structures` (the shed). Rule 6 checks that a gate hang
 fence and that a structure's `cell` exists; rule 10 checks that an enterable structure's footprint
 **contains** that cell's, because a shell that does not hold its own interior is a building drawn
 beside its inside.
+
+`HOUSE-00937` adds `groundCovers` for a finish such as foundation mulch that follows the generated
+terrain instead of flattening it. Each stable row owns one or more X/Z boxes and one canonical
+material. It is deliberately not a `path`: a cover changes the material index only, while a path
+may carry a fixed `y` and has walking/circulation semantics. The terrain generator rejects a cover
+material it cannot map rather than silently painting it as grass.
 
 A `neighbourhood` row's `asset` carries its **palette** since `HOUSE-00843`
 ([ADR-0013](decisions/ADR-0013-neighbourhood-asset-variants.md)): `MODEL_NB_HOUSE_A_CREAM` is

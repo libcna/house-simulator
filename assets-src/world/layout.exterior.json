@@ -120,6 +120,18 @@
       "y": 0.0, "material": "MAT_GRAVEL_PATH" }
   ],
 
+  // Mulched foundation beds flank the raised porch. They are ground finish, not paths or flat
+  // pads: `terrain_gen.py` keeps the lot's drainage slope and changes only the material class.
+  // Their inner edges stop at the porch, and the east bed stops before the driveway/apron.
+  "groundCovers": [
+    { "id": "COVER_FOUNDATION_MULCH_W",
+      "boxes": [{ "x": [-12.8, -3.6], "z": [-14.0, -12.5] }],
+      "material": "MAT_OUTDOOR_MULCH" },
+    { "id": "COVER_FOUNDATION_MULCH_E",
+      "boxes": [{ "x": [3.6, 8.9], "z": [-14.0, -12.5] }],
+      "material": "MAT_OUTDOOR_MULCH" }
+  ],
+
 
   // §11.4's neighbourhood: 60 buildings and the street furniture, none of it enterable.
   // `HOUSE-00391`. Positions are deterministic -- a fixed seed for the jitter -- so the street
@@ -515,18 +527,18 @@
       { "position": [-21.40, 0.00, -38.00], "yawDeg": 206.4, "scale": 1.16 },
       { "position": [-20.93, 0.00, -40.40], "yawDeg": 157.3, "scale": 0.94 },
       { "position": [-20.97, 0.00, -42.80], "yawDeg": 73.5, "scale": 0.98 },
-      { "position": [-12.11, 0.00, -13.43], "yawDeg": 60.9, "scale": 1.01 },
-      { "position": [-10.04, 0.00, -13.25], "yawDeg": 49.1, "scale": 0.85 },
-      { "position": [-8.08, 0.00, -13.22], "yawDeg": 264.2, "scale": 0.94 },
-      { "position": [-5.82, 0.00, -13.53], "yawDeg": 169.0, "scale": 0.83 },
-      { "position": [-3.97, 0.00, -13.30], "yawDeg": 278.2, "scale": 0.74 },
-      { "position": [-2.19, 0.00, -13.56], "yawDeg": 20.7, "scale": 0.99 },
-      { "position": [-0.18, 0.00, -13.31], "yawDeg": 147.1, "scale": 1.03 },
-      { "position": [1.96, 0.00, -13.44], "yawDeg": 198.7, "scale": 0.73 },
-      { "position": [4.01, 0.00, -13.37], "yawDeg": 297.8, "scale": 0.70 },
-      { "position": [6.23, 0.00, -13.44], "yawDeg": 254.0, "scale": 0.72 },
-      { "position": [8.18, 0.00, -13.24], "yawDeg": 268.3, "scale": 1.05 },
-      { "position": [9.96, 0.00, -13.28], "yawDeg": 289.8, "scale": 0.81 },
+      { "position": [-12.00, 0.00, -13.34], "yawDeg": 60.9, "scale": 1.08 },
+      { "position": [-10.70, 0.00, -13.04], "yawDeg": 49.1, "scale": 0.92 },
+      { "position": [-9.40, 0.00, -13.31], "yawDeg": 264.2, "scale": 1.02 },
+      { "position": [-8.10, 0.00, -13.02], "yawDeg": 169.0, "scale": 0.90 },
+      { "position": [-6.80, 0.00, -13.33], "yawDeg": 278.2, "scale": 0.84 },
+      { "position": [-5.50, 0.00, -13.06], "yawDeg": 20.7, "scale": 1.03 },
+      { "position": [-4.20, 0.00, -13.30], "yawDeg": 147.1, "scale": 1.10 },
+      { "position": [4.10, 0.00, -13.31], "yawDeg": 198.7, "scale": 0.82 },
+      { "position": [5.20, 0.00, -13.03], "yawDeg": 297.8, "scale": 0.86 },
+      { "position": [6.30, 0.00, -13.32], "yawDeg": 254.0, "scale": 0.80 },
+      { "position": [7.45, 0.00, -13.06], "yawDeg": 268.3, "scale": 1.08 },
+      { "position": [8.50, 0.00, -13.31], "yawDeg": 289.8, "scale": 0.90 },
       { "position": [-13.83, 0.00, -14.85], "yawDeg": 105.0, "scale": 1.08 },
       { "position": [-13.71, 0.00, -16.42], "yawDeg": 7.5, "scale": 1.10 },
       { "position": [-13.75, 0.00, -17.65], "yawDeg": 238.0, "scale": 0.86 },
@@ -761,26 +773,26 @@
     // walls, and the one at (-18.60, -40.30) was 0.10 m off its south wall, which any bed deeper
     // than 0.20 m overlaps.
     { "id": "VEG_BED", "asset": "MODEL_VEGETATION_FLOWER_GAZANIA", "instances": [
-      { "position": [-5.60, 0.00, -13.55], "yawDeg": 14.0, "scale": 0.92 },
-      { "position": [-4.75, 0.00, -13.62], "yawDeg": 79.0, "scale": 1.06 },
-      { "position": [-3.90, 0.00, -13.52], "yawDeg": 151.0, "scale": 0.96 },
-      { "position": [-3.05, 0.00, -13.66], "yawDeg": 228.0, "scale": 1.02 },
-      { "position": [-2.25, 0.00, -13.54], "yawDeg": 307.0, "scale": 0.90 },
-      { "position": [2.25, 0.00, -13.56], "yawDeg": 42.0, "scale": 0.94 },
-      { "position": [3.05, 0.00, -13.64], "yawDeg": 118.0, "scale": 1.08 },
-      { "position": [3.90, 0.00, -13.53], "yawDeg": 193.0, "scale": 0.98 },
-      { "position": [4.75, 0.00, -13.65], "yawDeg": 266.0, "scale": 1.04 },
-      { "position": [5.60, 0.00, -13.55], "yawDeg": 339.0, "scale": 0.91 }
+      { "position": [-7.30, 0.00, -12.82], "yawDeg": 14.0, "scale": 0.92 },
+      { "position": [-6.45, 0.00, -12.88], "yawDeg": 79.0, "scale": 1.06 },
+      { "position": [-5.60, 0.00, -12.78], "yawDeg": 151.0, "scale": 0.96 },
+      { "position": [-4.75, 0.00, -12.91], "yawDeg": 228.0, "scale": 1.02 },
+      { "position": [-3.90, 0.00, -12.80], "yawDeg": 307.0, "scale": 0.90 },
+      { "position": [3.90, 0.00, -12.82], "yawDeg": 42.0, "scale": 0.94 },
+      { "position": [4.75, 0.00, -12.90], "yawDeg": 118.0, "scale": 1.08 },
+      { "position": [5.60, 0.00, -12.79], "yawDeg": 193.0, "scale": 0.98 },
+      { "position": [6.45, 0.00, -12.91], "yawDeg": 266.0, "scale": 1.04 },
+      { "position": [7.30, 0.00, -12.81], "yawDeg": 339.0, "scale": 0.91 }
     ] },
     { "id": "VEG_BED_PERIWINKLE", "asset": "MODEL_VEGETATION_PERIWINKLE_PLANT", "instances": [
-      { "position": [-5.15, 0.00, -13.28], "yawDeg": 53.0, "scale": 1.04 },
-      { "position": [-4.30, 0.00, -13.36], "yawDeg": 127.0, "scale": 0.93 },
-      { "position": [-3.48, 0.00, -13.29], "yawDeg": 201.0, "scale": 1.07 },
-      { "position": [-2.65, 0.00, -13.38], "yawDeg": 279.0, "scale": 0.96 },
-      { "position": [2.65, 0.00, -13.37], "yawDeg": 18.0, "scale": 1.02 },
-      { "position": [3.48, 0.00, -13.28], "yawDeg": 96.0, "scale": 0.95 },
-      { "position": [4.30, 0.00, -13.37], "yawDeg": 172.0, "scale": 1.06 },
-      { "position": [5.15, 0.00, -13.29], "yawDeg": 248.0, "scale": 0.94 }
+      { "position": [-6.90, 0.00, -12.63], "yawDeg": 53.0, "scale": 1.04 },
+      { "position": [-6.05, 0.00, -12.70], "yawDeg": 127.0, "scale": 0.93 },
+      { "position": [-5.15, 0.00, -12.64], "yawDeg": 201.0, "scale": 1.07 },
+      { "position": [-4.30, 0.00, -12.72], "yawDeg": 279.0, "scale": 0.96 },
+      { "position": [4.30, 0.00, -12.71], "yawDeg": 18.0, "scale": 1.02 },
+      { "position": [5.15, 0.00, -12.63], "yawDeg": 96.0, "scale": 0.95 },
+      { "position": [6.05, 0.00, -12.71], "yawDeg": 172.0, "scale": 1.06 },
+      { "position": [6.90, 0.00, -12.64], "yawDeg": 248.0, "scale": 0.94 }
     ] },
     // Sparse authored grass clumps break the perfectly flat front lawn without replacing the
     // terrain material. HOUSE-00773 still owns wind/jitter rendering; these fixed placements use

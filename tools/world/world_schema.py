@@ -423,6 +423,12 @@ def build() -> dict[str, dict]:
                  "kind": {"enum": ["walk", "driveway", "sidewalk", "garden", "apron", "verge"]},
                  "boxes": {"type": "array", "items": BOX, "minItems": 1},
                  "y": NUM, "material": ID_OR_NULL})},
+            # Ground cover changes the terrain finish without flattening it. Foundation mulch is
+            # not a path; calling it one would make navigation/layout semantics dishonest.
+            "groundCovers": {"type": "array", "items": obj(
+                ["id", "boxes", "material"],
+                {"id": ID, "boxes": {"type": "array", "items": BOX, "minItems": 1},
+                 "material": ID})},
             # A structure with a `cell` is a BUILDING -- you stand inside it, and its heights
             # come from the cell and from `eavesY`/`ridgeY`. One without a cell is garden
             # furniture: §11.1's raised beds, its trellis and the compost bin, which have no

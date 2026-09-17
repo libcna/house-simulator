@@ -19,6 +19,11 @@ SEED = 6840335469064670721
 POSES = (
     ("exterior-front", "0.00,0.00,5.20,0.0,3.0"),
     ("garage-approach", "13.00,0.00,-4.00,0.0,0.0"),
+    # HOUSE-00937: the road camera proves the whole arrival composition but the fence hides its
+    # ground-level joinery. This path-height view keeps both foundation beds, porch and front door
+    # in one deterministic frame so planting scale and accidental porch/driveway overlap remain
+    # human-reviewable.
+    ("front-path", "0.00,0.60,-8.50,0.0,0.0"),
     ("entrance-foyer", "0.00,0.60,-14.90,0.0,0.0"),
     ("foyer-facing-front", "0.00,0.60,-16.70,180.0,0.0"),
     ("central-hall", "0.00,0.60,-20.65,0.0,0.0"),

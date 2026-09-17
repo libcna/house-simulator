@@ -18,6 +18,9 @@ beyond the hall opening, angled toward the island and sink run. The other eight 
 prior cameras stay unchanged and remain the exact comparison set for the main route.
 `HOUSE-01050` adds the fourteenth, front-on family-media pose after the intervening exterior-approach
 review camera; `HOUSE-01051` retains all fourteen unchanged for an exact furnishing comparison.
+`HOUSE-00937` adds a fifteenth path-height front-door pose: the road camera retains the whole
+arrival composition, while this closer frame exposes foundation planting scale and porch/driveway
+overlap that the picket fence hides.
 
 ## Round 0 — visual-convergence baseline
 
@@ -2392,3 +2395,50 @@ on CPU 0-5 / at most six workers.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay continues to use real production materials. The
 next highest-value exterior change is authored foundation planting/mulch and arrival-scale detail,
 especially around the otherwise empty garage frontage.
+
+## Round 56 — composed foundation planting
+
+Commit: `HOUSE-00937` checkpoint (`2026-09-17`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 55's [front](captures/house-00936-lawn-material-day-final/exterior-front.png) and
+[garage](captures/house-00936-lawn-material-day-final/garage-approach.png) frames show the approved
+plants as a thin continuous line, including vegetation below the raised porch and one shrub in the
+driveway, with lawn running directly to the foundation. After: the complete fifteen-view
+[clear-day set](captures/house-00937-foundation-planting-day-final) adds two readable mulched beds
+on the facade flanks and a fixed path-height review boundary. All fifteen frames and targeted fixed
+overcast/22:00 front-path captures were opened at full resolution.
+
+Ranked visible defects remaining:
+
+1. The night facade outside the two entrance sconces becomes almost black and loses architectural
+   depth; exterior fixture/light composition is now the largest arrival defect.
+2. The broad garage wall remains empty and lacks human-scale planting or useful facade detail.
+3. The approved foundation plant meshes are correctly placed but still sparse and comparatively
+   low-detail at close range.
+4. Blank interior wall bays and weak local furniture grounding still limit the inhabited feeling.
+5. Distant landscape/neighbour context continues to expose the finite presentation boundary.
+
+Fixed: canonical exterior data now distinguishes sloped `groundCovers` from navigable/flat paths.
+Two `MAT_OUTDOOR_MULCH` bands follow the original drainage slope and stop at the porch and driveway.
+The existing twelve foundation shrubs, ten gazanias and eight periwinkles are recomposed into those
+two flanks; the world still owns exactly sixty `VEG_SHRUB` instances and no new or unproven asset.
+The unchanged front frame changes 0.2554% of pixels above two levels (normalized MAE 0.0002760),
+while the driveway frame changes 1.1909% (0.0010399). Family views without the affected exterior
+remain exactly unchanged.
+
+The extra terrain role raises only the measured `EXT_FRONTYARD_E` and `EXT_SIDEYARD_W` ceilings to
+13 and 12 chunks respectively; regrouping the same plants merges three alpha-test batches, so the
+whole world remains 632 chunks / 96 cells / 256 exterior instances and is 53.378992 MB. Twelve
+strict references whose changed regions show only mulch/plant placement were inspected pairwise
+and intentionally advanced; all other goldens remain unchanged. The unculled integration contract
+is now 44 cutout batches and 97 state changes.
+
+All 1,409 unit and 135 integration tests pass. The 48-case software-render suite is green after
+selective reference review, with eight capture-only cases disabled; all eighteen culling pairs
+remain below 0.2% at 0.1342% worst case (`l0-sunroom`). Full repository gate results are recorded
+in `docs/handoff.md`. Compilation and heavy work stayed on CPU 0-5 / at most six workers.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay continues to use production materials and explicit
+debug blockout remains available. The next highest-value exterior work is believable night facade
+illumination and a better composed garage frontage; inside, wall dressing and contact grounding
+remain the strongest visible opportunities.

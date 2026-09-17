@@ -1,4 +1,50 @@
-# Visual-sprint handoff — 2026-09-17 (`HOUSE-00936` checkpoint)
+# Visual-sprint handoff — 2026-09-17 (`HOUSE-00937` checkpoint)
+
+Branch `develop`. Task-start HEAD `b258976` (`HOUSE-00936`). This file belongs to the single
+`HOUSE-00937` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout is unchanged.
+
+The playable front route now has two authored foundation beds rather than lawn plus a continuous
+thin vegetation line. Canonical exterior data has a truthful `groundCovers` primitive: it changes
+the terrain material while retaining the lot's drainage slope, unlike a path/pad. West/east bands
+use existing approved `MAT_OUTDOOR_MULCH`, flank the elevated porch and stop before the driveway.
+The same twelve foundation shrubs, ten gazanias and eight periwinkles were recomposed into those
+bands. No model or texture was downloaded; the world still contains exactly sixty `VEG_SHRUB`
+instances. Plants formerly beneath the porch and the shrub formerly in the drive are gone.
+
+All fifteen cameras in the
+[final clear-day set](visual-review/captures/house-00937-foundation-planting-day-final) were opened.
+`HOUSE-00937` adds the fixed path-height frame because the existing road view's picket fence hides
+the ground-level join. Targeted fixed overcast and 22:00 captures were also inspected. Against
+Round 55, the unchanged front frame changes 0.2554% of pixels above two levels (normalized MAE
+0.0002760); garage approach changes 1.1909% (0.0010399). Family views with no affected exterior
+are exactly unchanged. At night the material remains dark and plausible, while the almost-black
+facade outside the two entrance sconces is now the largest visible exterior defect.
+
+Terrain generation explicitly maps mulch/soil cover, proves both bed samples are mulch while the
+porch remains bluestone, and continues to prove material/height determinism and crack-free tiles.
+Only `EXT_FRONTYARD_E` and `EXT_SIDEYARD_W` gain the measured mulch role, at exact ceilings 13 and
+12. Regrouping the same plants merges three cell-scoped alpha-test batches, so the complete world
+remains 632 chunks / 96 cells / 256 exterior hierarchy instances and grows only from 53.377344 to
+53.378992 MB. The measured unculled integration contract is 44 cutout batches and 97 state changes.
+
+Twelve changed strict references were opened pairwise and deliberately advanced: six explicit
+blockout exterior views, `hud-season-01`, three property views and `sun-season-01/02`. Their changed
+regions contain only intended mulch/plant placement; no unrelated golden moved. All 1,409 unit,
+135 integration and 48 active render tests pass; eight render cases remain deliberately disabled.
+All eighteen culled/unculled poses pass at 0.1342% worst case (`l0-sunroom`). Schema validation,
+all thirteen world rules, terrain/content determinism and the full repository/strict-XNA gates pass
+with compilation and heavy work restricted to CPU 0-5 / at most six workers.
+
+Next highest visible value: give the night facade believable layered illumination beyond two hot
+sconces, then compose human-scale garage-front detail. Inside, blank wall bays and weak local
+furniture grounding remain higher-value than unrelated new systems. The approved foundation plant
+assets are now correctly composed but remain sparse/low-detail at close range; replace them only
+through a proven, licensed asset task rather than scaling malformed cutouts.
+
+---
+
+# Prior visual-sprint handoff — 2026-09-17 (`HOUSE-00936` checkpoint)
 
 Branch `develop`. Task-start HEAD `12a9d98` (`HOUSE-01059`). This file belongs to the single
 `HOUSE-00936` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal

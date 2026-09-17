@@ -110,6 +110,8 @@ BY_MATERIAL = {
     "MAT_ASPHALT_01": "asphalt",
     "MAT_GRAVEL_PATH": "gravel",
     "MAT_GROUND_LAWN": "grass",
+    "MAT_OUTDOOR_MULCH": "mulch",
+    "MAT_OUTDOOR_SOIL": "soil",
 }
 
 
@@ -150,6 +152,14 @@ def surfaces(directory: Path):
     for row in exterior.get("paths", []):
         name = BY_MATERIAL.get(row.get("material"), "grass")
         out.append((row["boxes"], row.get("y"), name))
+    # A ground cover follows the lot rather than creating a flat pad. Keeping it separate from
+    # `paths` prevents a flower bed from becoming navigable pavement in canonical data.
+    for row in exterior.get("groundCovers", []):
+        name = BY_MATERIAL.get(row.get("material"))
+        if name is None:
+            raise LayoutError(f"ground cover {row.get('id')} has unsupported material "
+                              f"{row.get('material')!r}")
+        out.append((row["boxes"], None, name))
     # The carriageway is asphalt between the kerbs, and the road row gives a centreline and a
     # width rather than a box.
     road = exterior.get("road") or {}
@@ -1189,6 +1199,9 @@ def selftest() -> int:
         require(at(0.0, -13.0) == (0.57, "bluestone"),
                 f"the porch at +0.57 is still a pad, paved by the walk over it "
                 f"({at(0.0, -13.0)})")
+        require(at(-8.0, -13.0)[1] == "mulch" and at(6.0, -13.0)[1] == "mulch",
+                f"the two foundation beds are material cover on the sloping ground "
+                f"({at(-8.0, -13.0)}, {at(6.0, -13.0)})")
         # And a height the encoding cannot hold is REFUSED rather than flattened.
         over = [10.0] + [0.0] * (WIDTH * HEIGHT - 1)
         caught = False

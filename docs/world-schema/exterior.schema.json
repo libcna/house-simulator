@@ -191,6 +191,33 @@
       },
       "type": "array"
     },
+    "groundCovers": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "boxes": {
+            "items": {
+              "$ref": "#/$defs/box"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "material": {
+            "$ref": "#/$defs/id"
+          }
+        },
+        "required": [
+          "id",
+          "boxes",
+          "material"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
     "kerbs": {
       "items": {
         "additionalProperties": false,
