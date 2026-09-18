@@ -1,3 +1,45 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-01061` checkpoint)
+
+Branch `develop`. Task-start HEAD `a06f081` (`HOUSE-01060`). This file belongs to the single
+`HOUSE-01061` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout remains available.
+
+The formal-living conversation group no longer disappears into a near-black charcoal field.
+`PROP_LIVING_RUG` keeps the approved 688-triangle rug geometry, 1.34 placed scale, 14 mm pile,
+position and collision-free semantics, but now uses the room-specific `MAT_LIVING_RUG_WOOL` role.
+That role reuses the approved neutral fabric weave/normal at 7x textile scale with a restrained
+oatmeal tint and low fabric specularity. Family and dining placements retain charcoal. No model or
+texture bytes, light, exposure, renderer logic, collision or room architecture changed.
+
+The canonical before frame is Round 64's
+[day composition](visual-review/captures/house-01060-fireplace-day-final/living-composition.png).
+The complete matched eighteen-camera after sets are
+[clear day](visual-review/captures/house-01061-living-rug-day-final) and
+[normal night](visual-review/captures/house-01061-living-rug-night-final). The
+[day rug](visual-review/captures/house-01061-living-rug-day-final/living-composition.png) and
+[night rug](visual-review/captures/house-01061-living-rug-night-final/living-composition.png) show
+the result directly. All 36 final frames were opened. Against Round 64, the fixed camera changes
+61,285 day pixels / 61,310 night pixels above two channel levels (4.2559% / 4.2576%; normalized
+MAE 0.002707 / 0.003098). The broad, low-amplitude shift separates seating from floor without a
+cream/glowing result. No strict golden moved.
+
+The world remains 661 chunks / 96 cells / 78 static props / 266 exterior hierarchy instances /
+54.249842 MB. Its 196 materials and 2,931 stable ids produce 617 opaque submissions, 44 cutouts and
+101 unculled state changes, inside §71.2. All 1,409 unit and 135 integration tests pass. All 48
+active software-render tests pass (eight capture-only generators remain disabled); all eighteen
+culled-vs-unculled pairs stay below 0.2%, at 0.0673% worst (`l0-sunroom`). Compilation and heavy
+tools stayed on CPU 0-5 / at most six workers. All project static gates and all 323 strict-XNA
+translation units pass.
+
+Largest remaining visible defects: the formal sofa remains a dark brown foreground mass and needs
+restrained soft dressing or nearby table detail; broad living/foyer/hall wall bays need domestic
+detail; the roof/dormer and far side elevations remain black outside bounded night sources; garage/
+yard and neighbour depth remain sparse. The next highest-value checkpoint is formal-living soft
+dressing/table detail, then foyer/hall wall dressing. Do not raise global exposure or leave the
+visual slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-01060` checkpoint)
 
 Branch `develop`. Task-start HEAD `e1bdf45de4d6ed799373888c6829eb25787b76e2`

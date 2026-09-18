@@ -133,11 +133,11 @@ namespace
         // not find. Alpha-tested leaves belong to AlphaTestPass, not this debug opaque pass.
         EXPECT_EQ(static_cast<std::size_t>(chunks->Max()), opaque);
         // And the material was bound once per run, not once per chunk. The unculled diagnostic
-        // is 100 after HOUSE-01060 adds the fireplace's approved marble and dark-iron roles while
-        // reusing existing wood, brass and canvas roles. That remains
+        // is 101 after HOUSE-01061 gives only the formal-room rug a woven-wool role while the
+        // charcoal role remains used elsewhere. That remains
         // below §71.2's 210 worst case; visible poses protect smaller rows.
         EXPECT_GT(states->Max(), 0);
-        EXPECT_LE(states->Max(), 100);
+        EXPECT_LE(states->Max(), 101);
         EXPECT_LT(states->Max(), chunks->Max() / 4)
             << "the sort bought nothing: the pass is rebinding almost per chunk";
         // The pass's own count and the list's agree, which is what says the two are counting the

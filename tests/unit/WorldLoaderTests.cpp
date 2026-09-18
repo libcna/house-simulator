@@ -3620,8 +3620,8 @@ namespace
         world::WorldData::Contents contents;
         const auto materials = world::WorldLoader::LoadMaterials(directory, contents);
         ASSERT_TRUE(materials) << materials.Error().ToString();
-        EXPECT_EQ(contents.materials.size(), 195U)
-            << "HOUSE-00940 adds one source-approved raised-hardwood double-door finish";
+        EXPECT_EQ(contents.materials.size(), 196U)
+            << "HOUSE-01061 adds one room-specific woven-wool rug finish";
         EXPECT_EQ(std::count_if(contents.materials.begin(),
                                 contents.materials.end(),
                                 [](const world::MaterialDef& material)

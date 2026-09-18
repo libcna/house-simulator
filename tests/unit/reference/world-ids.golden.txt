@@ -959,6 +959,7 @@ materials/materials	MAT_LIVING_SOFA_FRINGE
 materials/materials	MAT_LIVING_SOFA_LEATHER
 materials/materials	MAT_LIVING_SOFA_PAISLEY
 materials/materials	MAT_LIVING_SOFA_STRIPE
+materials/materials	MAT_LIVING_RUG_WOOL
 materials/materials	MAT_METAL_BALCONY
 materials/materials	MAT_METAL_GUTTER
 materials/materials	MAT_OUTDOOR_ASPHALT

@@ -5680,6 +5680,12 @@ projecting hearth: the existing shell already closes the tall body, and a second
 would create an artificial recovery pinch. Live embers, smoke, audio and interaction remain the
 separate `HOUSE-02691` concern.
 
+`HOUSE-01061` applies the same data-owned boundary to room-specific soft furnishing. The approved
+rug mesh remains shared by living, family and dining; only `PROP_LIVING_RUG` uses a canonical
+material override, `MAT_LIVING_RUG_WOOL`, which reuses the approved fabric weave/normal at 7x UV
+scale and a low-specular oatmeal tint. The family and dining placements retain charcoal. A palette
+choice therefore neither duplicates geometry nor becomes a room-name branch in runtime code.
+
 ---
 
 ## 60. Dog

@@ -2841,3 +2841,44 @@ and full test/gate results are recorded in `docs/handoff.md`.
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
 debug blockout remains available. The next highest visible value is formal-living contact/colour
 balance and restrained wall dressing, followed by foyer/hall detail—not unrelated subsystem work.
+
+## Round 65 — formal-living woven wool rug
+
+Commit: `HOUSE-01061` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 64's [living composition](captures/house-01060-fireplace-day-final/living-composition.png)
+has a nearly black 3 m-scale charcoal field that merges the brown seating into the walnut floor.
+After: the complete matched eighteen-camera
+[clear-day](captures/house-01061-living-rug-day-final) and
+[normal-night](captures/house-01061-living-rug-night-final) sets give only that placement a muted
+oatmeal wool finish. The [day composition](captures/house-01061-living-rug-day-final/living-composition.png)
+and [night composition](captures/house-01061-living-rug-night-final/living-composition.png) show
+the changed grounding plane directly. All 36 final frames were opened; family, dining and every
+route/exterior view retain their prior presentation.
+
+Ranked visible defects remaining:
+
+1. The large formal sofa remains a dark brown foreground mass with weak local contrast; restrained
+   textile dressing or a physically placed table/lamp grouping is now higher value than more rug
+   brightness.
+2. Broad formal-living, foyer and hall wall bays still need restrained art and domestic detail.
+3. The roof/dormer and far side elevations still collapse outside bounded night sources.
+4. Garage/side-yard terrain and distant neighbour context still lose depth at night.
+5. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+
+Fixed: `PROP_LIVING_RUG` keeps the approved 688-triangle real rug geometry, 1.34 placed scale,
+14 mm pile and collision-free placement. A canonical material override supplies the existing
+neutral fabric weave/normal at 7x textile scale, restrained oatmeal tint and low specularity. The
+shared source and charcoal material still serve family and dining; no asset byte, download, light,
+exposure, renderer path, room id or collision changed.
+
+Against Round 64, the fixed living composition changes 61,285 day pixels and 61,310 night pixels
+above two channel levels (4.2559% / 4.2576%; normalized MAE 0.002707 / 0.003098). This is a broad,
+low-amplitude correction: the rug reads clearly without becoming cream, flat or luminous. The
+world remains 661 chunks / 96 cells / 78 props / 266 exterior instances / 54.249842 MB; 196
+materials produce 617 opaque, 44 cutout and 101 unculled state changes. No strict golden moved,
+all eighteen culling pairs pass, and full test/gate results are recorded in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is restrained formal-living soft
+dressing/table detail, followed by foyer/hall wall dressing—not unrelated subsystem work.

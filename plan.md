@@ -39,8 +39,9 @@ front-balcony point into a real over-door lantern with one bounded L1 receiver b
 their manual circuit away. `HOUSE-01289` adds four physical foundation-bed uplights and selected
 L1/L2 facade bakes, replacing the remaining broad black night elevation with restrained warm
 vertical pools without raising global exposure. `HOUSE-01060` turns the formal living room's bare
-structural chimney into a measured room-side fireplace composition. Round 9 proves the exterior
-material omission is fixed; `HOUSE-00924`
+structural chimney into a measured room-side fireplace composition; `HOUSE-01061` separates its
+dark conversation group from the walnut floor with a room-specific woven wool rug. Round 9 proves
+the exterior material omission is fixed; `HOUSE-00924`
 removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
 from a dark room. Round 11 leaves the front façade and empty/dark entrance route as the largest
@@ -152,7 +153,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 36 | The blockout reads as a building |
-| 13 | Static furniture and dressing | 00971–01120 | 66 | Every room furnished to density |
+| 13 | Static furniture and dressing | 00971–01120 | 67 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
 | 16 | Lights and switches | 01251–01310 | 29 | The house can be lit — **first playable** |
@@ -14939,6 +14940,35 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             culled/unculled pairs pass at 0.0673% worst (`l0-sunroom`) against a 0.2% limit. The
             world is 661 chunks / 96 cells / 78 static props / 266 exterior instances /
             54.249842 MB; the unculled diagnostic is 617 opaque, 44 cutout and 100 state changes.
+- [x] HOUSE-01061 — Ground the formal-living conversation group with a woven wool rug finish
+      dep: HOUSE-00215, HOUSE-00296, HOUSE-00907, HOUSE-01037, HOUSE-01057, HOUSE-01060 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-18) Round 64 leaves the physically large rug under the sofa/chairs almost
+            black, merging the already brown-heavy seating group into the walnut floor. Keep its
+            approved real geometry, placement and scale; change only the room-specific textile
+            identity through canonical material data, not exposure, lights or a renderer branch.
+      accept: `PROP_LIVING_RUG` uses a dedicated plausible warm woven-wool role at real textile UV
+            scale while family/dining rugs retain charcoal; the fixed living composition gains
+            readable separation without looking cream, glowing or flat; no new texture download,
+            geometry, collision or runtime special case is introduced; matched day/night review,
+            content/world/material, render, culling and strict-XNA gates pass at six CPUs or fewer
+      result: (2026-09-18) Only `PROP_LIVING_RUG` now overrides its approved 1.682 x 1.113 m source
+            geometry with `MAT_LIVING_RUG_WOOL`. The role reuses the approved neutral fabric weave
+            and normal at 7x textile scale, with a restrained oatmeal tint and low fabric
+            specularity. The 1.34 placed scale, 14 mm pile geometry, placement and non-colliding
+            semantics are unchanged; the shared model and charcoal role still serve family and
+            dining. No asset bytes, lights, exposure, renderer code or room architecture changed.
+      review: All 36 Round 65 frames were opened. The fixed living composition changes 61,285 day
+            and 61,310 night pixels above two channel levels (4.2559% / 4.2576%; normalized MAE
+            0.002707 / 0.003098) against Round 64: a broad but deliberately low-amplitude material
+            change. The rug reads as muted woven wool, separates the seating from the walnut floor
+            and remains darker than the stone surround rather than becoming a cream light source.
+            No other canonical view exposes a regression, and no strict golden needed advancement.
+      verified: The world has 196 materials and 2,931 stable ids; its 661 chunks, 78 props, 266
+            exterior instances and 54.249842 MB upload are unchanged. The unculled diagnostic is
+            617 opaque / 44 cutout / 101 state changes, still inside §71.2. All 1,409 unit, 135
+            integration and 48 active render tests pass (eight capture-only tests remain disabled);
+            all eighteen culling pairs pass at 0.0673% worst (`l0-sunroom`) against 0.2%. All
+            project static gates and 323 strict-XNA translation units pass.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -19333,13 +19363,13 @@ Recorded so nobody has to re-derive the decision.
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 137 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 138 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 338** |
+| **Total** | **0–52** | **1 339** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19375,6 +19405,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-01061` | **New task, next free phase-13 id.** Give only the existing formal-living rug a room-specific woven wool material while retaining the approved geometry and full furnishing task. | Round 64 shows the 3 m-scale charcoal field merging the brown seating into the walnut floor. A canonical per-prop material override and existing approved textile maps can restore a believable anchoring plane without new assets, global exposure, light changes, runtime logic or claiming the dependency-blocked room furnishing task. |
 | 2026-09-18 | `HOUSE-01060` | **New task, next free phase-13 id.** Add a bounded room-side fireplace composition at the already canonical chimney/appliance position while leaving the full-room furnishing and future live-fire tasks open. | Round 63's living composition still reads as an engineering shell because a 0.60 x 1.10 m structural brick stack runs floor-to-roof with no hearth, surround, mantel or domestic focal treatment. A deterministic authored suite fixes that dominant contained defect through the approved static-prop/material path without renderer changes, unlicensed input or pretending that fire simulation is complete. |
 | 2026-09-18 | `HOUSE-01289` | **New task, next free phase-16 id.** Add four measured upward fixtures inside the two completed foundation beds, own them through a distinct dusk group and bake only eight explicitly named front L1/L2 receivers. | Round 62 leaves the multi-storey facade as the largest normal-night defect after the bounded door, porch, garage and walk layers are physical. An attempted existing garage-flood control only blew out the apron and did not reach the elevation. Foundation uplights provide a real source, visible daytime hardware and selected receiver boundary without global exposure, an oversized porch lamp, manual-circuit changes or renderer work. |
 | 2026-09-17 | `HOUSE-01288` | **New task, next free phase-16 id.** Replace the four existing unlinked front-walk points with measured physical bollards at their stable positions, preserve the independent manual circuit and start that circuit on only for the selected normal-play arrival. | Round 61 leaves the close gate-to-step route as an empty underlit strip. A forced-on fixed-camera control proves the four existing sources improve wayfinding but have no visible fixture, while their manual switch remains a useful player boundary. Physicalizing that authored layer improves both day composition and night arrival without dusk automation, broad fake terrain pools, global exposure or renderer work. |

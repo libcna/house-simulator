@@ -343,7 +343,7 @@
       "static": true,
       "lodGroup": null,
       "collision": "none",
-      "material": null,
+      "material": "MAT_LIVING_RUG_WOOL",
       "interactable": null
     },
     {
