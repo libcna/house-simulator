@@ -1011,6 +1011,32 @@
       "interactable": null
     },
     {
+      "id": "PROP_FAMILY_CURTAIN_NORTH",
+      "asset": "MODEL_FAMILY_WINDOW_TREATMENT",
+      "cell": "L0_FAMILY",
+      "position": [5.70, 0.6, -27.10],
+      "yawDeg": 180,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_FAMILY_CURTAIN_EAST",
+      "asset": "MODEL_FAMILY_WINDOW_TREATMENT",
+      "cell": "L0_FAMILY",
+      "position": [8.70, 0.6, -24.55],
+      "yawDeg": 90,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_EXT_FACADE_UPLIGHT_W1",
       "asset": "MODEL_FIXTURE_FACADE_UPLIGHT",
       "cell": "EXT_FRONTYARD_W",

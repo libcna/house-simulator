@@ -1288,7 +1288,7 @@ Footprint: the main block only, interior X −12.70 … +8.70, Z −27.10 … �
 | `L0_MUDROOM` | Mudroom | +4.90 … +8.70 | −18.30 … −14.30 | 15.2 | 1 | 1 | 2 | Bench, cubbies, boots, leashes, dog towel; doors to the garage and the laundry |
 | `L0_LAUNDRY` | Laundry room | +4.90 … +8.70 | −22.00 … −18.30 | 14.1 | 1 | — | 2 | Washer, dryer, folding counter, sink, STACK-D; no exterior wall (`HOUSE-00376`) |
 | `L0_WC1` | Powder room | +2.20 … +4.90 | −22.00 … −20.20 | 4.9 | 1 | — | 1 | WC + basin, STACK-A; no exterior wall (`HOUSE-00376`) |
-| `L0_FAMILY` | Family room | +2.20 … +8.70 | −27.10 … −22.00 | 33.2 | 3 | 2 | 2 | **Television**, sectional sofa, dog bed, bookshelves, media unit; two picture windows |
+| `L0_FAMILY` | Family room | +2.20 … +8.70 | −27.10 … −22.00 | 33.2 | 3 | 2 | 2 | **Television**, sectional sofa, dog bed, bookshelves, media unit; two picture windows with measured static-open curtains (`HOUSE-01067`) |
 | `L0_LIVING` | Formal living room | −8.20 … −2.20 | −20.20 … −14.30 | 35.4 | 3 | 2 | 3 | Fireplace on the west wall, piano, two armchairs; a bay window and a tall one |
 | `L0_OFFICE` | Study / office | −12.70 … −8.20 | −18.30 … −14.30 | 18.0 | 2 | 2 | 2 | Desk, office chair, bookcases, filing cabinet, globe; two tall windows |
 | `L0_WC2` | Guest powder room | −10.40 … −8.20 | −20.20 … −18.30 | 4.2 | 1 | — | 1 | STACK-B; no exterior wall (`HOUSE-00376`) |
@@ -2044,6 +2044,13 @@ surround pieces add 96 detail triangles to the existing white exterior-frame bat
 new role; the complete world remains 695 chunks / 273 exterior hierarchy instances and grows only
 to 57.702063 MB. The exterior hierarchy bounds include the new 55–95 mm projections, while the
 garage aperture, collision, portal, navigation and receiver-lightmap geometry remain unchanged.
+
+`HOUSE-01067` (2026-09-19) measures `L0_FAMILY` at exactly **26 chunks**. Its two picture-window
+treatments share one new woven-fabric role and the room's existing steel role, so 12,168 visible
+triangles add only one opaque draw/state. The complete world is 696 chunks / 94 props / 273
+exterior hierarchy instances / 58.178427 MB: 651 opaque submissions plus 45 cutouts at 108 opaque
+state changes. Both props are collision-free static dressing; no aperture, portal, glass,
+lightmap, light, collision or navigation geometry changes.
 
 `HOUSE-00930` (2026-09-16) isolates each weather-facing `D_ENTRY` leaf from ordinary hardwood
 joinery so the exterior hierarchy can retain it when its owning interior room is portal-culled.
@@ -5831,6 +5838,17 @@ three stock-`BasicEffect` ceramic/wool roles; existing walnut, brass, canvas and
 reused. The preparation gate builds explicit smooth ellipsoids instead of Blender operator-
 generated custom-normal data, so all three GLBs regenerate byte-for-byte while preserving scale,
 component, material, placement, wall-contact and circulation checks.
+
+`HOUSE-01067` applies the same data-owned soft-furnishing contract to the two dominant family-room
+picture windows. One 3.040 x 2.463002 x 0.153991 m / 6,084-triangle project-authored treatment is
+reused on the exact north and east wall planes. Each instance supplies two solidified gathered
+panels, ten header tabs, a steel rod, finials, brackets and restrained fabric-covered holdback
+rosettes while leaving a 2.06 m clear centre. The oatmeal wool-linen role reuses approved stock-XNA
+weave maps at measured scale; hardware reuses canonical steel. Both placements are collision-free
+and preserve glass, daylight, portals, views and circulation. They deliberately represent only the
+authored new-game open state: phase 45 still owns `blindFraction`, movement, light transmission and
+interaction. The preparation gate regenerates the GLB byte-for-byte and pins its hash, bounds,
+triangles, UV0, named components, material roles, support/wall origin and both world transforms.
 
 ---
 

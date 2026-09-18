@@ -1,3 +1,57 @@
+# Visual-sprint handoff — 2026-09-19 (`HOUSE-01067` checkpoint)
+
+Branch `develop`. Task-start HEAD `d5bd6117bb6a0d90e64d99b439651b28803cb405`
+(`HOUSE-00948`). This file belongs to the single `HOUSE-01067` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+Both dominant 2.40 x 1.60 m family-room picture windows now carry one reused, measured
+project-authored open treatment. Each instance provides full-height solidified seven-fold woven
+panels gathered around 1.17 m, ten header tabs, a 3.04 m steel rod, finials, brackets and small
+fabric-covered holdback rosettes while keeping a 2.06 m clear centre. The oatmeal wool-linen role
+uses approved stock-XNA weave maps and hardware reuses existing steel. Placements register to the
+exact north/east wall planes and finished floor and remain static/collision-free. Glass, portals,
+daylight, lights, collision, navigation and circulation did not move. This is deliberate open-state
+dressing only; phase 45 still owns interactive `blindFraction` and curtain motion.
+
+Round 79 supplies the before [day family composition](visual-review/captures/house-00948-garage-surround-day-r1/family-composition.png)
+and [22:00 family composition](visual-review/captures/house-00948-garage-surround-night-r1/family-composition.png).
+The complete retained after sets are [clear day](visual-review/captures/house-01067-family-curtains-day-final)
+and [normal night](visual-review/captures/house-01067-family-curtains-night-final). Both 21-frame
+contact sheets and all six direct family views were opened. Two narrow/dark panel iterations and
+one straight edge-on tieback were rejected. The final composition changes 55,634 day / 55,814
+night pixels above two channel levels (3.8635% / 3.8760%; normalized RGB MAE 0.013778 /
+0.003049). The windows now read as domestic parts of the room without covering their views.
+
+The world is 203 materials / 2,975 stable ids / 905 manifest rows / 696 chunks / 96 cells /
+94 static props / 273 exterior hierarchy instances / 58.178427 MB. `L0_FAMILY` is exactly 26
+chunks; the unculled diagnostic is 651 opaque + 45 cutout submissions and 108 opaque state
+changes. The 3.040 x 2.463002 x 0.153991 m / 6,084-triangle GLB regenerates byte-for-byte, and its
+permanent check pins UV0, components, material roles, scale/origin and both placements. Stable ids,
+world validation, compiled content, manifest, provenance/licence and budgets pass. All 1,409 unit,
+135 integration and 48 active software-render tests pass; all eighteen culled/unculled pairs remain
+below 0.2%, at 0.0558% worst (`l0-sunroom`). No strict golden changed. Heavy work and compilation
+stayed on CPU 0-5 / at most six workers. All project static gates pass and all 323 strict-XNA
+translation units are clean.
+
+The CMake tree's `world-content-current` wrapper still attempts an unrelated configure-time write
+to shared `~/deps/FNA3D`, which the sandbox correctly denies. The wrapper's exact stored action
+(copy current `content/world` into `build/content/world`) was run directly, as were the stored
+compile/link commands for the three changed test objects. No CNA, sharp-runtime or shared
+dependency was modified. Navigation was deliberately not rebuilt: both new props declare
+`collision: none`, and no aperture, collision or navigation input changed. No `build_nav.py`
+process is left running.
+
+Largest visible defects: the newly dressed family windows still look onto a sparse lawn/fence and
+simple neighbouring mass; the broad upper garage wall and repeated facade rhythm remain simple;
+formal living still has weak furniture/floor contact outside its bounded piano practical; secondary
+rooms/elevations remain sparse; several older hero furnishings have simpler geometry/material
+response than their now-finished context. The next highest-value checkpoint is the simple family
+exterior view or another large defect visible in the retained route—not interactive-curtain
+architecture, global exposure or unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-00948` checkpoint)
 
 Branch `develop`. Task-start HEAD `1040a02f445a7ab1943ee40859213ee6673dea16`

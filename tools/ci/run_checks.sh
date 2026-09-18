@@ -148,6 +148,9 @@ run_gate "family-media-finish" python3 tools/assets/family_media_finish.py --che
 # HOUSE-01051/HOUSE-01054: four project-authored secondary props remain deterministic, measured
 # and linked to canonical placements; the dog bed retains its finished soft component/material set.
 run_gate "family-secondary" python3 tools/assets/family_secondary_prepare.py --check
+# HOUSE-01067: both dominant family-room picture windows retain measured, physically gathered
+# open curtains aligned to their true wall planes without pretending to implement blind state.
+run_gate "family-window-treatment" python3 tools/assets/family_window_treatment_prepare.py --check
 # HOUSE-01052: the close-range family sofa remains the pinned, attributed Wayfair geometry after
 # deterministic XNA-compatible variant selection, grounding and bounded proxy generation.
 run_gate "family-sofa" python3 tools/assets/family_sofa_prepare.py --check

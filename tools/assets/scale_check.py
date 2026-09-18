@@ -128,6 +128,11 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "throw-blanket": [("x", 0.30, 1.20, "folded throw width"),
                       ("y", 0.30, 1.20, "draped throw height"),
                       ("z", 0.30, 1.50, "draped throw depth")],
+    # Full-height paired dressing around a domestic picture window. All three axes matter: a
+    # centimetre import can otherwise remain centred on the correct wall and merely look absent.
+    "window-treatment": [("x", 2.50, 3.50, "picture-window rod and curtain width"),
+                         ("y", 2.20, 2.80, "full-length curtain height"),
+                         ("z", 0.05, 0.30, "rod and gathered-fabric wall projection")],
     "tabletop-decor": [("x", 0.40, 0.90, "composed tabletop vignette width"),
                        ("y", 0.08, 0.35, "tabletop vignette height"),
                        ("z", 0.20, 0.55, "composed tabletop vignette depth")],

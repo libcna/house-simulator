@@ -62,7 +62,9 @@ two shared bluestone-inlay batches, without changing its physical surface or cir
 `HOUSE-00947` gives the canonical sectional leaf four real top-row lites and physical operating
 hardware. `HOUSE-00948` frames that leaf with layered painted pilasters, plinths, capitals, frieze
 and crown, breaking the garage wing's largest remaining flat facade edge without changing the
-opening or adding a draw role.
+opening or adding a draw role. `HOUSE-01067` returns the scheduler indoors and gives both dominant
+family-room picture windows measured open woven curtains, physical support hardware and domestic
+scale without claiming phase 45's later interactive blind state.
 Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
@@ -15497,6 +15499,45 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             against 0.2%. Deterministic regeneration, content, provenance/licence, all project
             static gates and 323 strict-XNA translation units pass with compilation and heavy work
             restricted to CPU 0-5.
+- [x] HOUSE-01067 — Dress both family-room picture windows with measured open curtains
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-00907, HOUSE-01052, HOUSE-01054, HOUSE-01285 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-19) Round 79's complete route sheets show the family room's two dominant
+            2.40 x 1.60 m apertures as bare framed holes despite the room's otherwise established
+            seating, media, secondary props and physical light. Add static open dressing through
+            the approved prop/material path without pretending to implement phase 45's future
+            `blindFraction`, changing the glass/portal or blocking the view and circulation.
+      accept: deterministically author one reusable full-height paired treatment with gathered
+            woven panels, real thickness and folds, header tabs, rod, finials, brackets and
+            restrained holdbacks; align two instances to the exact north/east wall planes and
+            finished floor, preserve the open centre of both windows, use real-scale UV0 and only
+            approved stock-XNA fabric/steel roles, add no collision or runtime room branch, capture
+            and inspect matched 21-camera day/night sets, and pass regeneration, scale, origin,
+            world/content, budget, render, culling, provenance and strict-XNA gates with heavy work
+            capped at six CPUs
+      result: One deterministic 3.040 x 2.463002 x 0.153991 m / 6,084-triangle authored GLB is
+            reused at the north and east `W_PICTURE` wall planes. Each treatment has two
+            solidified seven-fold panels gathered around 1.17 m, ten physical header tabs, a
+            3.04 m steel rod, finials, brackets and small fabric-covered holdback rosettes. The
+            2.06 m centre stays open. Both placements are static and collision-free; they add one
+            oatmeal wool-linen role while sharing existing kitchen steel. No downloaded source,
+            portal/glass/light/collision/nav mutation or interactive blind claim was added. The
+            permanent preparation gate pins byte regeneration, hash, bounds, triangles, UV0,
+            components, roles, scale, origin and both canonical placements.
+      review: All 42 Round 80 clear-day/normal-night frames and both contact sheets were opened.
+            Two rejected panel-width/brightness iterations and the edge-on straight tieback were
+            corrected before the retained set. Against Round 79, `family-composition` changes
+            55,634 day / 55,814 night pixels above two channel levels (3.8635% / 3.8760%;
+            normalized RGB MAE 0.013778 / 0.003049). The broad apertures now read as intentional
+            domestic windows while retaining the view, sill, sofa group and night exterior.
+            No strict render reference changed.
+      verified: The world has 203 materials, 2,975 stable ids and 905 manifest rows; its 696 chunks,
+            94 props, 273 exterior instances and 58.178427 MB upload remain inside budget.
+            `L0_FAMILY` is exactly 26 chunks; the unculled diagnostic is 651 opaque / 45 cutout /
+            108 state changes. All 1,409 unit, 135 integration and 48 active software-render cases
+            pass (eight capture-only generators remain disabled); all eighteen culling pairs pass
+            at 0.0558% worst (`l0-sunroom`) against 0.2%. Deterministic regeneration, stable ids,
+            world/content, provenance/licence and project static gates pass; all 323 strict-XNA
+            translation units are clean, with compilation and heavy work restricted to CPU 0-5.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -19927,19 +19968,19 @@ Recorded so nobody has to re-derive the decision.
 
 ## Task count
 
-**1 347 numbered tasks across 53 phases.**
+**1 348 numbered tasks across 53 phases.**
 
 | Phase group | Phases | Tasks |
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 145 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 146 |
 | Interaction framework and the systems built on it | 14–21 | 160 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 347** |
+| **Total** | **0–52** | **1 348** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19975,6 +20016,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-19 | `HOUSE-01067` | **New task, next free phase-13 id.** Add one reusable measured open-curtain treatment to both family-room picture windows while leaving later interactive blinds and the full room-furnishing task open. | Round 79's complete day/night sheets expose the two broad bare apertures as the largest immediately actionable interior defect. A deterministic static treatment can reuse the approved fabric/steel and prop paths, preserve the glass, light, portals, view and circulation, and add domestic scale without a download, renderer branch, collision/nav change or false completion of `HOUSE-00992`/phase 45. |
 | 2026-09-18 | `HOUSE-00948` | **New task, next free phase-12 id.** Add a data-selected, measured Colonial surround to the weather side of the canonical sectional opening while retaining the existing aperture, simulation envelope and white exterior-frame batch. | Round 78's fixed garage view ranks the unarticulated siding-to-door edge as the largest immediately actionable facade defect. Eight deterministic painted-millwork boxes supply architectural depth with no download, new material role, renderer change, collision/navigation change or licence decision. |
 | 2026-09-18 | `HOUSE-00947` | **New task, next free phase-12 id.** Add data-selected top-row glazing and measured pull hardware to the canonical sectional door without changing its simulation envelope. | Round 77's fixed garage view ranks the broad, nearly featureless 4.86 m leaf as the largest remaining facade surface. Existing exterior glass, bronze hardware and deterministic shell grammar can supply believable residential detail with one new chunk and no asset acquisition, portal/collision change or renderer work. |
 | 2026-09-18 | `HOUSE-00946` | **New task, next free phase-12 id.** Add path-bound fine surface detail for measured concrete control joints and bluestone edge/transverse inlays without changing the canonical physical driveway. | Round 76's fixed garage view is still dominated by one uninterrupted grey slab. Existing stock-XNA terrain batching, the approved bluestone/asphalt materials and the path's exact boxes can supply construction scale with two shared roles; a first 30 mm-only capture was rejected because the detail disappeared at review distance. |

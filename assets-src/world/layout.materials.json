@@ -1636,6 +1636,21 @@
       "footstepSurface": "carpet", "audioAbsorption": 0.52,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // HOUSE-01067: a warm oatmeal wool-linen treatment gives both broad family picture windows
+    // human scale without closing them or inventing phase 45's interactive blind state. The
+    // approved woven maps run at domestic textile scale through the ordinary stock-XNA path.
+    {
+      "id": "MAT_FAMILY_CURTAIN_WOOL", "class": "fabric",
+      "albedo": "Textures/Materials/fabric_weave_albedo",
+      "normal": "Textures/Materials/fabric_weave_normal", "lightmapChannel": 0,
+      "tint": [0.94, 0.87, 0.76], "specularColor": [0.035, 0.030, 0.024],
+      "specularPower": 4.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": true, "uvScale": [5.0, 5.0],
+      "wetResponse": { "albedoDarken": 0.12, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "carpet", "audioAbsorption": 0.65,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     // HOUSE-01054: the family dog bed no longer borrows green dining upholstery. Its rounded
     // outer bolster gets a warm woven identity; the inset and tiny sewn cord deliberately share
     // the family sofa velvet and existing blue canvas for a coherent room palette and one rather

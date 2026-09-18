@@ -3508,3 +3508,48 @@ debug blockout remains available. The next checkpoint should reduce the broad up
 mass or add another truthful facade-scale cue; the already-authored parked car is not useful until
 its neighbourhood/prop runtime path actually renders it. Do not substitute global exposure or an
 unrelated subsystem.
+
+## Round 80 — measured open family-room curtains
+
+Commit: `HOUSE-01067` checkpoint (`2026-09-19`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 79's [day family composition](captures/house-00948-garage-surround-day-r1/family-composition.png)
+and matching [22:00 view](captures/house-00948-garage-surround-night-r1/family-composition.png)
+show an otherwise furnished and physically lit family room whose two dominant 2.40 x 1.60 m
+picture windows remain bare framed apertures. After: the complete twenty-one-camera
+[clear-day](captures/house-01067-family-curtains-day-final) and
+[normal-night](captures/house-01067-family-curtains-night-final) sets add one measured treatment
+reused on both real wall planes. Both contact sheets and the family composition/media/full-room
+views were opened at full size.
+
+Ranked visible defects remaining:
+
+1. The family-room windows now read domestically, but their exterior view remains a simple lawn,
+   fence and neighbouring mass with little depth or planting composition.
+2. The broad upper garage wall and repeated facade/window rhythm remain simple beyond the finished
+   opening, roof and driveway layers.
+3. Formal living still has weak furniture/floor contact outside its bounded piano practical,
+   especially in the room-wide night composition.
+4. Secondary rooms and elevations outside the connected slice remain sparse.
+5. Several interior hero furnishings still have simpler source geometry/material response than
+   the newly finished architectural and textile context around them.
+
+Fixed: one deterministic 3.040 x 2.463002 x 0.153991 m / 6,084-triangle authored GLB supplies
+solidified seven-fold panels, gathered waists, ten physical header tabs, a 3.04 m rod, finials,
+wall brackets and restrained fabric-covered holdback rosettes. The two static collision-free
+placements register to the north/east picture-window wall and floor planes. A 2.06 m open centre
+preserves each view. Oatmeal wool-linen uses the approved weave maps at real textile scale; all
+hardware shares existing steel. Two rejected iterations corrected panels that were too narrow and
+dark, then replaced a straight edge-on tieback that read as a projecting stick. This is static
+open dressing only; phase 45 still owns interactive blinds, transmission and motion.
+
+Against Round 79, `family-composition` changes 55,634 day / 55,814 night pixels above two channel
+levels (3.8635% / 3.8760%; normalized RGB MAE 0.013778 / 0.003049). `family-media` changes only
+4,059 / 4,373 pixels (0.2819% / 0.3037%; 0.000669 / 0.000262), as expected from its nearly
+orthogonal glimpse. No strict golden changed; all 48 active software-render tests and all eighteen
+culled/unculled pairs pass, with the latter still 0.0558% worst at `l0-sunroom`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next checkpoint should address the screenshot-ranked simple
+family exterior view or another large truthful route defect—not interactive-curtain architecture,
+global exposure or an unrelated subsystem.

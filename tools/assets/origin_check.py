@@ -49,6 +49,7 @@ WALL_MOUNTED = {
     "radiator",
     "wall-light",
     "mirror",
+    "window-treatment",
 }
 
 #: Floor-supported architectural objects which also register against a wall plane. Unlike a
