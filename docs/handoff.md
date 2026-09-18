@@ -1,3 +1,45 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-01063` checkpoint)
+
+Branch `develop`. Task-start HEAD `2c24ff0` (`HOUSE-01062`). This file belongs to the single
+`HOUSE-01063` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout remains available.
+
+The formal living room's blank south-wall bay and untouched coffee table now read as one restrained
+composition. A deterministic project-authored paired botanical relief contributes layered mats,
+blue canvases, walnut frames and original brass stems/leaves at 1.420 x 0.780 x 0.092678 m and
+3,448 triangles. A separate 0.719177 x 0.131327 x 0.259200 m / 2,016-triangle vignette contributes
+two real hardbacks, an elliptical brass tray and a low stone bowl. The collision-free placements
+meet the real wall and exact 1.019303 m table top. One UV0 paper role was added rather than
+incorrectly applying UV2-dependent shell paint; all other finishes reuse approved canonical roles.
+
+The canonical before frame is Round 66's
+[day composition](visual-review/captures/house-01062-sofa-throw-day-final/living-composition.png).
+The complete matched eighteen-camera after sets are
+[clear day](visual-review/captures/house-01063-surface-dressing-day-final) and
+[normal night](visual-review/captures/house-01063-surface-dressing-night-final). The
+[day composition](visual-review/captures/house-01063-surface-dressing-day-final/living-composition.png)
+and [night composition](visual-review/captures/house-01063-surface-dressing-night-final/living-composition.png)
+show the result directly. All 36 final frames were opened. Against Round 66, the fixed camera
+changes 114,830 day / 143,585 night pixels above two channel levels (7.9743% / 9.9712%; normalized
+MAE 0.006476 / 0.006010). Only the intended room composition changes and no strict golden moved.
+
+The world is 664 chunks / 96 cells / 81 static props / 266 exterior hierarchy instances /
+54.590303 MB. Its 198 materials, 899 manifest rows and 2,939 stable ids produce 620 opaque
+submissions, 44 cutouts and 103 unculled state changes, inside §71.2. All 1,409 unit and 135
+integration tests pass. All 48 active software-render cases pass (four driver-signature cases skip;
+eight capture-only generators remain disabled); all eighteen culled-vs-unculled pairs stay below
+0.2%, at 0.0558% worst (`l0-sunroom`). Compilation and heavy tools stayed on CPU 0-5 / at most six
+workers. All project static gates and all 323 strict-XNA translation units pass.
+
+Largest remaining visible defects: the foyer and long hall still have broad blank wall bays and
+little domestic identity; formal living is still dark/brown-heavy and its older upright piano is
+comparatively coarse; the roof/dormer and far-side elevations remain black outside bounded night
+sources; garage/yard and neighbour depth remain sparse. The next highest-value checkpoint is
+foyer/hall wall and console dressing, then the screenshot-ranked formal-piano or route defect. Do
+not raise global exposure or leave the visual slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-01062` checkpoint)
 
 Branch `develop`. Task-start HEAD `4333296` (`HOUSE-01061`). This file belongs to the single

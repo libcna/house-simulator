@@ -292,6 +292,32 @@
       "interactable": null
     },
     {
+      "id": "PROP_LIVING_WALL_ART_PAIR",
+      "asset": "MODEL_LIVING_WALL_ART_PAIR",
+      "cell": "L0_LIVING",
+      "position": [-5.2, 2.17, -20.18],
+      "yawDeg": 180,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_LIVING_TABLE_DRESSING",
+      "asset": "MODEL_LIVING_TABLE_DRESSING",
+      "cell": "L0_LIVING",
+      "position": [-6.3, 1.019303, -17.55],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_LIVING_CHAIR_GREEN",
       "asset": "MODEL_FURNITURE_SHEEN_CHAIR",
       "cell": "L0_LIVING",

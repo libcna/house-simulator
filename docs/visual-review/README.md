@@ -2921,3 +2921,44 @@ visually inspected and advanced; all eighteen culling pairs pass. Full gate resu
 `VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
 debug blockout remains available. The next highest visible value is restrained formal-living wall
 art and table-scale lived-in detail, followed by foyer/hall wall dressing—not unrelated systems.
+
+## Round 67 — formal-living wall and table composition
+
+Commit: `HOUSE-01063` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 66's [living composition](captures/house-01062-sofa-throw-day-final/living-composition.png)
+leaves the broad south-wall bay and the entire coffee-table top blank. After: the complete matched
+eighteen-camera [clear-day](captures/house-01063-surface-dressing-day-final) and
+[normal-night](captures/house-01063-surface-dressing-night-final) sets add a paired botanical relief
+and one controlled books/tray/bowl vignette. The [day composition](captures/house-01063-surface-dressing-day-final/living-composition.png)
+and [night composition](captures/house-01063-surface-dressing-night-final/living-composition.png)
+show both surfaces directly. All 36 frames were opened at full resolution; no route, exterior or
+neighboring room view gained a new defect.
+
+Ranked visible defects remaining:
+
+1. The foyer and long central hall still have broad blank wall bays and limited domestic identity.
+2. Formal living remains dark and brown-heavy despite the improved focal, textile and surface
+   layers; its older upright piano is now the most visibly coarse hero object in that room.
+3. The roof/dormer and far side elevations still collapse outside bounded night sources.
+4. Garage/side-yard terrain and distant-neighbour context still lose depth at night.
+5. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+
+Fixed: a deterministic 3,448-triangle paired relief uses layered mats, blue canvases, walnut frames
+and original brass botanical stems/leaves; a separate 2,016-triangle tabletop suite contains two
+finite-thickness hardbacks, an elliptical brass tray and a low sculptural stone bowl. The art is
+within 20 mm of the canonical south wall and the vignette sits on the coffee table's exact
+1.019303 m top. Both placements are collision-free. Existing approved room roles are reused except
+for one fine-cream non-lightmapped paper role; close prop UV0 is therefore not misrepresented as
+shell UV2. No download, light, renderer, portal, exposure or runtime room branch was added.
+
+Against Round 66, the fixed composition changes 114,830 day pixels and 143,585 night pixels above
+two channel levels (7.9743% / 9.9712%; normalized MAE 0.006476 / 0.006010). The world is 664 chunks
+/ 96 cells / 81 props / 266 exterior instances / 54.590303 MB; 198 materials produce 620 opaque,
+44 cutout and 103 unculled state changes. No strict golden moved. All eighteen culling pairs pass at
+0.0558% worst (`l0-sunroom`), and full test/gate results are recorded in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is foyer/hall wall and console
+dressing, followed by the coarse formal piano or another screenshot-ranked route defect—not an
+unrelated subsystem.

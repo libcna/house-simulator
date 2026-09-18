@@ -5694,6 +5694,16 @@ approved weave maps but does not make every use of that shared texture the same 
 deterministic preparation gate pins the 1,460-triangle geometry, component names, source hash,
 material role and placement, keeping this close-range dressing out of runtime special cases.
 
+`HOUSE-01063` treats a wall bay and its nearby coffee table as one restrained visual composition
+while keeping their data ownership separate. The 3,448-triangle paired botanical relief registers
+to the real south-wall plane; the 2,016-triangle books/tray/bowl vignette registers to the measured
+1.019303 m table top. Both are collision-free static props and neither changes circulation or
+runtime logic. Existing walnut, brass, canvas, book-binding and stone roles are reused. The relief's
+cream paper is deliberately a new stock-`BasicEffect` role: close prop geometry has UV0 but no UV2,
+so borrowing a shell-paint `DualTextureEffect` role would falsely require a lightmap channel. The
+preparation gate regenerates both GLBs byte-for-byte and pins their hashes, bounds, components,
+material slots and exact supporting planes.
+
 ---
 
 ## 60. Dog

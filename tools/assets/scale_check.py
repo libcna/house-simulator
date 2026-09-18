@@ -128,6 +128,9 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "throw-blanket": [("x", 0.30, 1.20, "folded throw width"),
                       ("y", 0.30, 1.20, "draped throw height"),
                       ("z", 0.30, 1.50, "draped throw depth")],
+    "tabletop-decor": [("x", 0.40, 0.90, "composed tabletop vignette width"),
+                       ("y", 0.08, 0.35, "tabletop vignette height"),
+                       ("z", 0.20, 0.55, "composed tabletop vignette depth")],
 }
 
 #: Categories that exist in the manifest but carry no size expectation. Listed explicitly so that a

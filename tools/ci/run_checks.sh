@@ -166,6 +166,9 @@ run_gate "living-fireplace" python3 tools/assets/living_fireplace_prepare.py --c
 # HOUSE-01062: the camera-near formal-sofa arm retains a deterministic curved, thick, fringed
 # textile accent in exact physical contact, without a collision or copied sofa geometry.
 run_gate "living-sofa-throw" python3 tools/assets/living_sofa_throw_prepare.py --check
+# HOUSE-01063: paired wall relief and measured coffee-table vignette remain byte-deterministic,
+# collision-free and registered to the real wall/table support surfaces.
+run_gate "living-surface-dressing" python3 tools/assets/living_surface_dressing_prepare.py --check
 # HOUSE-01053: the family focal wall retains the pinned CC0 low cabinet, exact canonical roles,
 # measured television gap and family-only placement without unsupported source metadata.
 run_gate "family-media-console" python3 tools/assets/family_media_console_prepare.py --check

@@ -1528,6 +1528,21 @@
       "footstepSurface": "carpet", "audioAbsorption": 0.62,
       "effectTierS": "Basic", "effectTierE": "RoomLit"
     },
+    // HOUSE-01063: wall-art mats and finite book page blocks are loose dressing, not shell
+    // lightmap receivers. Keep their approved fine paper grain in the stock Basic path rather
+    // than borrowing MAT_PAINT_IVORY's UV2-dependent DualTexture role.
+    {
+      "id": "MAT_LIVING_ART_PAPER", "class": "plastic",
+      "albedo": "Textures/Materials/paint_white_fine_albedo",
+      "normal": "Textures/Materials/paint_white_fine_normal", "lightmapChannel": 0,
+      "tint": [0.88, 0.82, 0.70], "specularColor": [0.018, 0.016, 0.013],
+      "specularPower": 3.0, "alphaMode": "opaque", "alpha": 1.0,
+      "alphaCutoff": null, "twoSided": false, "uvScale": [4.0, 4.0],
+      "wetResponse": { "albedoDarken": 0.18, "specularBoost": 1.1, "powerBoost": 1.1 },
+      "snowResponse": { "coverable": false, "slopeLimitDeg": 0.0 },
+      "footstepSurface": "wood", "audioAbsorption": 0.24,
+      "effectTierS": "Basic", "effectTierE": "RoomLit"
+    },
     {
       "id": "MAT_FURNITURE_LAMP_SHADE", "class": "fabric",
       "albedo": "Textures/Furniture/LivingRoom/lamp_shade_stripes",
