@@ -3287,3 +3287,48 @@ worst (`l0-sunroom`).
 debug blockout remains available. The next highest-value checkpoint is physical roof-edge detail
 (ridge/hip caps, flashing and gutters) followed by honest bounded night-exterior depth around the
 garage/side yard—not a global exposure lift or an unrelated subsystem.
+
+## Round 75 — physical roof edges and rainwater goods
+
+Commit: `HOUSE-00944` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 74's [front exterior](captures/house-00943-asphalt-shingle-day-r1/exterior-front.png)
+and [garage approach](captures/house-00943-asphalt-shingle-day-r1/garage-approach.png) have the
+correct shingle surface but uncapped hip/dormer seams, a black metal ridge-vent bar and gutters
+whose generated boxes omit the outward longitudinal face. After: the complete twenty-one-camera
+[clear-day](captures/house-00944-roof-edge-day-r1) and
+[normal-night](captures/house-00944-roof-edge-night-r1) sets add physical finish derived from the
+same authoritative planes and drainage coordinates. Both 21-frame contact sheets, four full-size
+exteriors and enlarged before/after roof crops were opened.
+
+Ranked visible defects remaining:
+
+1. The canonical 22:00 garage approach and side yard are still nearly black outside the two small
+   carriage pools; the driveway, fence and neighbour depth disappear.
+2. The main roof/dormer silhouette remains honestly dark at 22:00 with the Moon below the horizon;
+   a fake moon key or global exposure lift remains the wrong fix.
+3. Garage/side-yard terrain and distant-neighbour context remain sparse even by day.
+4. Facade massing and its repeated window rhythm remain simple at road distance.
+5. Formal living retains weak furniture/floor contact away from the bounded piano practical.
+
+Fixed: all eight principal/garage hips carry four-face 220 mm shingle caps; all five dormers carry
+180 mm ridge caps and two 55 mm cheek-flashing ribbons. The existing continuous ridge vent keeps
+its canonical size and ventilation semantics but finally uses the shingle finish specified by the
+architecture. Each roof's four incomplete square strips become closed six-fold K-profile gutters;
+the six downspouts become closed tubes without moving their heads or terrain splash/audio points.
+The first capture was rejected because the existing gutter material's literal zero diffuse tint
+turned the complete profile into an ink outline. A restrained 0.18/0.20/0.22 charcoal calibration
+keeps black painted metal while allowing its folds to read.
+
+Against Round 74, `exterior-front` changes 11,161 day / 10,400 night pixels above two channel
+levels (0.7751% / 0.7222%; normalized RGB MAE 0.002110 / 0.000513), and `garage-approach` changes
+18,378 / 16,721 (1.2763% / 1.1612%; 0.003279 / 0.000637). `front-path`, the close walk and balcony
+controls remain 0.15--0.47%; `family-media` remains at 0.0606% day / 0.0506% night capture noise.
+The seven affected exterior blockout poses, overview blockout, HUD, four property poses and four
+season references were inspected before deliberate advancement; two bulk-generator interior
+drifts of 63 pixels and one pixel were rejected and restored. Normal gameplay remains production
+materials and the explicit diagnostic palette remains available.
+
+`VISUAL-GATE-1` still **FAILS**. The next highest-value checkpoint is bounded, physically sourced
+night depth around the garage/side yard plus enough day context to stop the wing reading in an
+empty plane—not unrelated systems or a global exposure change.

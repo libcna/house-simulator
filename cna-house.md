@@ -984,6 +984,18 @@ settled roof planes: a 280 mm painted frieze and a 100 mm projecting crown sit b
 with 65–75 mm painted corner, header and rake trim. These finish layers are non-lightmapped detail
 and do not alter attic collision, drainage, ridge, pitch or eaves coordinates.
 
+The covering's exposed seams and rainwater goods receive the same derived finish discipline
+(`HOUSE-00944`). Each canonical hip has a 220 mm shingle-over cap lifted only 35 mm at its centre;
+the five dormers use 180 mm ridge caps and 55 mm dark-metal cheek flashing. The continuous ridge
+vent remains the one `roof_geometry.ridge_vent` defines but uses the shingle finish its construction
+already specifies, not gutter metal. Four six-fold K-profile gutters per roof use the settled
+120 mm nominal drainage section with a 12 mm rolled lip, and all six data-derived downspouts are
+closed four-sided tubes to their existing terrain splash points. These are non-lightmapped finish
+faces. Roof planes, dormer
+holes, collision, eaves, drainage heads, splash/audio positions and the lightmap receiver set do
+not move. The brushed gutter finish is charcoal rather than zero-diffuse black so its folded form
+can respond to the existing stock-XNA lighting path.
+
 The closed garage frontage (`HOUSE-00935`) is the existing canonical 4.86 × 2.35 m steel leaf,
 not a second facade prop. Five equal horizontal sections and four restrained raised panels per
 section give it spatial relief; the finish is a warm charcoal-grey exterior paint using the approved

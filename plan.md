@@ -53,6 +53,8 @@ the facade's generic bare-wood map with measured painted clapboard at real-world
 four-panel joinery and physical lever hardware without changing their portal/collision contract.
 `HOUSE-00943` replaces the roof's acknowledged square ceramic-tile surrogate with physically
 scaled project-authored asphalt shingles and aligns every course to the true sloping roof surface.
+`HOUSE-00944` finishes that weather surface with physical hip/dormer caps, cheek flashing and
+complete K-profile rainwater goods instead of incomplete black strips.
 Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
@@ -14075,6 +14077,52 @@ performance scenarios; the `F4`/`F5` overlays exist and are useful.
                 pairs remain below 0.2% at 0.0558% worst (`l0-sunroom`). `tools/ci/run_checks.sh`
                 passes including 323 strict-XNA translation units, with heavy work pinned to CPU
                 0-5 / six workers.
+- [x] HOUSE-00944 — Finish the canonical roof edges and rainwater goods as physical architectural detail
+      dep: HOUSE-00461, HOUSE-00462, HOUSE-00468, HOUSE-00776, HOUSE-00934, HOUSE-00943 · sys: content/materials · plat: TOOL · pri: MUST
+      accept: (1) both canonical hip roofs carry measured shingle-over caps on all four hips, and
+              all five dormers carry a physical ridge cap plus narrow cheek flashing; (2) the
+              existing ridge vent reads as its specified shingle-over cap rather than generic
+              black gutter metal; (3) every eave uses a complete folded K-profile gutter and every
+              canonical downspout is a closed four-sided tube, while drainage heads/splash points,
+              roof planes, collision, lightmaps and portal/culling architecture remain unchanged;
+              (4) matched 21-camera day/night review proves the added edge depth without global
+              exposure, a new renderer or a downloaded asset
+      verify: shell selftest/material/manifest/determinism; world/chunk/content validators; matched
+              fixed visual review; inspected strict reference advances; unit, integration,
+              render, culling and strict-XNA gates
+      note: (2026-09-18) Round 74 makes the remaining roof defect geometric: the main and garage
+            planes end on un-capped hip seams; each dormer has painted front rake boards but no
+            ridge cap or cheek flashing; and the original gutter loop emits only four faces of an
+            axis-aligned box, omitting the outward longitudinal face from the road-facing runs.
+            Preserve `roof_geometry.roof_planes` and the six canonical drainage locations. Add
+            only non-lightmapped finish derived from those authoritative surfaces. The specified
+            shingle-over ridge vent also keeps its geometry but moves from gutter metal to the roof
+            finish. A first in-game pass exposed `MAT_METAL_GUTTER`'s literal zero diffuse tint as
+            an ink-black outline; retain the approved brushed-metal source/specular response and
+            calibrate only its painted charcoal tint.
+      review: (2026-09-18) Round 75 retains complete 21-view clear-day and normal-night sets, all
+              opened as contact sheets; full-size front/garage images and enlarged before/after
+              roof crops were inspected. Against Round 74, `exterior-front` changes 11,161 day /
+              10,400 night pixels above two channel levels (0.7751% / 0.7222%; normalized RGB MAE
+              0.002110 / 0.000513), and `garage-approach` changes 18,378 / 16,721 (1.2763% /
+              1.1612%; 0.003279 / 0.000637). The path/balcony controls remain 0.15--0.47%, while
+              `family-media` stays at 0.0606% day / 0.0506% night capture noise. Day views now
+              show capped hip seams, a folded gutter edge and a shingle-finished ridge vent rather
+              than the former floating black bar. Night honestly remains dark away from bounded
+              practicals. `VISUAL-GATE-1` still FAILS; sparse and nearly black garage/side-yard
+              context is now the highest visible defect.
+      verified: (2026-09-18) The shell selftest measures four hips / sixteen cap faces per roof,
+                six finish faces per dormer, eight faces per closed gutter run and 287 slope-metric
+                roof edges at 0.0000032 m worst error with zero level-course drift. Two fresh full
+                runs regenerate all 99 shell files byte-identically; shell material/manifest and
+                all thirteen world rules pass. The retained world is 688 chunks / 96 cells / 89
+                props / 266 exterior instances / 57.041895 MB. Seventeen roof-affected strict
+                references were individually inspected and deliberately advanced; two unrelated
+                bulk-generator interior drifts were rejected and restored. All 1,409 unit, 135
+                integration and 48 active software-render tests pass; eighteen culled/unculled
+                pairs remain below 0.2% at 0.0558% worst (`l0-sunroom`). `tools/ci/run_checks.sh`
+                passes every content/provenance/material gate and all 323 strict-XNA translation
+                units, with compilation and heavy work pinned to CPU 0-5 / six workers.
 - [ ] HOUSE-00918 — Phase-12 review: does the house read as a real building yet?
       dep: HOUSE-00917 · sys: — · plat: ALL · pri: MUST
 
@@ -19766,6 +19814,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-00944` | **New task, next free phase-12 id.** Add physical caps/flashing and complete the canonical rainwater-good geometry while leaving roof planes, collision, drainage data and lightmaps authoritative. | Round 74's fixed daylight review ranks the uncapped hip/dormer seams and almost invisible incomplete gutter strips immediately behind the corrected shingle surface. Source inspection confirms the original gutter loop emits no outward longitudinal face on the road-facing runs and assigns the explicitly shingle-over ridge vent to zero-tint black gutter metal. Derived non-lightmapped finish in the existing shell generator is the smallest dependency-valid correction; changing exposure or another global material cannot supply missing silhouettes. |
 | 2026-09-18 | `HOUSE-00943` | **New task, next free phase-12 id.** Replace the acknowledged `Tiles140` roof surrogate with a deterministic asphalt-shingle pair and slope-metric UV0 while preserving every stable roof material id and runtime effect contract. | Round 73 still ranks roof/dormer readability as the largest architectural defect. Direct source inspection proves the roof is literally using a square ceramic floor texture because the first fixed library had no roofing map. A project-authored pair through the existing stock-XNA material path is the smallest dependency-valid correction; changing exposure or inventing moonlight would hide rather than fix the surface. |
 | 2026-09-18 | `HOUSE-00942` | **New task, next free phase-12 id.** Add an explicit data-selected four-panel treatment and physical lever hardware to five close-route generated single leaves while leaving the full door population and later animated-door tasks open. | Round 72's family-media and hall views expose large plain painted slabs after the connected rooms, fixtures and furniture around them have converged. The existing deterministic shell/joinery and approved steel material can correct those high-frequency route defects without a room-id branch, download, renderer change, portal/collision change or a false claim that all interior doors are final. |
 | 2026-09-18 | `HOUSE-00941` | **New task, next free phase-12 id.** Replace only the three canonical siding finishes and their generated state/layout derivatives with a deterministic painted-clapboard material at six courses per world metre. | Round 71's fixed clear-day road/path images make the source mismatch visible across the largest surface in the frame: `MAT_SIDING_*` uses ambientCG `Wood095`, a generic orange bare board with broad grain bands rather than the Colonial Revival horizontal siding specified by §12.1. A project-authored tileable albedo/normal pair corrects material identity and scale through the existing stock-XNA path without geometry, exposure, renderer or lightmap changes. The same source remains independently available for doors, furniture and other legitimate bare wood. |

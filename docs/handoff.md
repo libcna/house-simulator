@@ -1,3 +1,54 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-00944` checkpoint)
+
+Branch `develop`. Task-start HEAD `4ed85cc2af0a6fa6652f82e895aac452a690723c`
+(`HOUSE-00943`). This file belongs to the single `HOUSE-00944` commit; use that commit as the
+ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal gameplay remains production-material only and
+explicit debug blockout remains available.
+
+Both canonical hip roofs now finish their existing planes instead of ending at bare seams: every
+hip carries a four-face 220 mm shingle-over cap, each of the five dormers has a 180 mm ridge cap
+and two 55 mm cheek-flashing ribbons, and the existing ridge vent uses its specified shingle finish
+rather than black gutter metal. Each roof has four closed six-fold K-profile gutters using the
+120 mm nominal section plus a 12 mm rolled lip. All six data-derived downspouts are closed tubes.
+The geometry is derived from the authoritative roof/drainage data; planes, holes, collision,
+portals, lightmap receivers, gutter heads and splash/audio coordinates did not move. The approved
+brushed gutter material was calibrated from zero diffuse to charcoal 0.18/0.20/0.22 after the first
+capture proved literal black hid the completed profile. No asset download or runtime/API change was
+made; CNAEXT remains off.
+
+Round 74 supplies the before [front exterior](visual-review/captures/house-00943-asphalt-shingle-day-r1/exterior-front.png)
+and [garage approach](visual-review/captures/house-00943-asphalt-shingle-day-r1/garage-approach.png).
+The complete retained after sets are [clear day](visual-review/captures/house-00944-roof-edge-day-r1)
+and [normal night](visual-review/captures/house-00944-roof-edge-night-r1). All 42 frames were opened
+as contact sheets; both direct exterior views and enlarged roof crops were inspected. Against
+Round 74, `exterior-front` changes 11,161 day / 10,400 night pixels above two channel levels
+(0.7751% / 0.7222%; normalized RGB MAE 0.002110 / 0.000513), while `garage-approach` changes
+18,378 / 16,721 (1.2763% / 1.1612%; 0.003279 / 0.000637). Daylight now reveals capped hips,
+folded gutter depth and no floating black ridge bar. Night remains honestly dark outside bounded
+practicals; no false moon key or global exposure lift was introduced.
+
+The world is 688 chunks / 96 cells / 89 static props / 266 exterior hierarchy instances /
+57.041895 MB. The shell selftest proves four hips / sixteen cap faces per roof, six new finish
+faces per dormer, eight faces per closed gutter and slope-metric UV error no worse than 0.0000032 m.
+Two fresh runs regenerate all 99 shell files byte-identically. Seventeen affected strict references
+were opened and deliberately advanced; unrelated 63-pixel and one-pixel interior generator drifts
+were rejected and restored. All 1,409 unit, 135 integration and 48 active software-render tests
+pass. All eighteen culled-vs-unculled pairs remain below 0.2%, at 0.0558% worst (`l0-sunroom`).
+`tools/ci/run_checks.sh` passes every repository/content/provenance gate and all 323 strict-XNA
+translation units. Heavy work and compilation stayed on CPU 0-5 / at most six workers. The existing
+CMake tree still cannot auto-reconfigure in this sandbox because an unrelated sharp-runtime glob
+would write shared `~/deps/FNA3D`; configured binaries were used without modifying CNA,
+sharp-runtime or shared dependencies.
+
+Largest visible defects: the 22:00 garage approach and side yard lose driveway, fence and neighbour
+depth beyond two small carriage pools; that area remains sparse in daylight too. Roof/dormer
+silhouette is appropriately dark while the canonical Moon is below the horizon. Facade massing and
+window rhythm remain simple, and formal living has weak furniture/floor contact outside its piano
+practical. The next highest-value work is bounded physically sourced garage/side-yard night depth
+plus enough daytime context—not global exposure, fake moonlight or an unrelated subsystem.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-00943` checkpoint)
 
 Branch `develop`. Task-start HEAD `eef24dca714258ed6eebd021207663b1501bc384` (`HOUSE-00942`).

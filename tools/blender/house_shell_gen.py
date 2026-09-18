@@ -1471,6 +1471,18 @@ GRADE_Y = 0.0
 #: has to clear it by.
 GUTTER_SECTION = 0.12
 DOWNSPOUT_SECTION = 0.10
+#: `HOUSE-00944`: the roof planes are the weather surface, not the complete edge finish. Asphalt
+#: caps overlap every hip and the small dormer ridges; a low lift keeps them readable without
+#: changing the settled collision/silhouette envelope into a second roof. The narrow metal ribbon
+#: beside each dormer cheek is ordinary step-flashing, deliberately detail rather than a lightmap
+#: receiver. All dimensions are in the ordinary 50--220 mm range for domestic roofing.
+ROOF_HIP_CAP_WIDTH = 0.22
+DORMER_RIDGE_CAP_WIDTH = 0.18
+ROOF_CAP_CENTRE_LIFT = 0.035
+ROOF_CAP_EDGE_LIFT = 0.012
+ROOF_CAP_EDGE_THICKNESS = 0.018
+DORMER_FLASHING_WIDTH = 0.055
+DORMER_FLASHING_LIFT = 0.010
 #: The ridge vent is `roof_geometry.ridge_vent`'s since `HOUSE-00491` -- one definition, and the
 #: one the ventilation decision is written against. `HOUSE-00468` drew a flat lid floating above
 #: the ridge from constants of its own; that was two answers to the same question and the flat one
@@ -2708,6 +2720,148 @@ def dormer_finish_faces(rect_u: tuple, rect_v: tuple, plane_z: float, outer: tup
     ]
 
 
+def roof_hip_lines(outer: tuple, eaves_y: float, pitch: float) -> list[tuple]:
+    """The four eave-corner-to-ridge hip lines of one rectangular hip roof.
+
+    These are finish lines only. ``roof_geometry.roof_planes`` remains the authoritative surface
+    and collision answer; deriving its four shared edges here gives those edges a shingle cap
+    without moving a plane or creating a second roof definition.
+    """
+    x0, x1, z0, z1 = outer
+    dx, dz = x1 - x0, z1 - z0
+    half = min(dx, dz) / 2.0
+    top = eaves_y + half * pitch
+    if dx >= dz:
+        middle = (z0 + z1) / 2.0
+        low = (x0 + half, top, middle)
+        high = (x1 - half, top, middle)
+    else:
+        middle = (x0 + x1) / 2.0
+        low = (middle, top, z0 + half)
+        high = (middle, top, z1 - half)
+    return [
+        ((x0, eaves_y, z0), low),
+        ((x0, eaves_y, z1), low),
+        ((x1, eaves_y, z0), high),
+        ((x1, eaves_y, z1), high),
+    ]
+
+
+def shingle_cap_faces(start: tuple, end: tuple, width: float, surface_height,
+                      start_inset: float = 0.0, end_inset: float = 0.0) -> list[tuple]:
+    """Four outward faces for a shallow shingle cap following an arbitrary roof edge.
+
+    The cap's two top ribbons meet 35 mm above the shared edge and land 12 mm above the two roof
+    surfaces. Two slim outer edges supply real silhouette thickness. ``surface_height`` is the
+    existing roof below the detail; the cap never becomes collision or a lightmap receiver.
+    """
+    vx, vy, vz = (end[index] - start[index] for index in range(3))
+    length = math.sqrt(vx * vx + vy * vy + vz * vz)
+    horizontal = math.hypot(vx, vz)
+    if length <= start_inset + end_inset + 1.0e-6 or horizontal <= 1.0e-6:
+        return []
+    a = tuple(start[index] + (end[index] - start[index]) * start_inset / length
+              for index in range(3))
+    b = tuple(end[index] - (end[index] - start[index]) * end_inset / length
+              for index in range(3))
+    px = -vz / horizontal * width / 2.0
+    pz = vx / horizontal * width / 2.0
+
+    def section(point):
+        left = (point[0] + px,
+                surface_height(point[0] + px, point[2] + pz) + ROOF_CAP_EDGE_LIFT,
+                point[2] + pz)
+        centre = (point[0], point[1] + ROOF_CAP_CENTRE_LIFT, point[2])
+        right = (point[0] - px,
+                 surface_height(point[0] - px, point[2] - pz) + ROOF_CAP_EDGE_LIFT,
+                 point[2] - pz)
+        return left, centre, right
+
+    a_left, a_centre, a_right = section(a)
+    b_left, b_centre, b_right = section(b)
+    left_low_a = (a_left[0], a_left[1] - ROOF_CAP_EDGE_THICKNESS, a_left[2])
+    left_low_b = (b_left[0], b_left[1] - ROOF_CAP_EDGE_THICKNESS, b_left[2])
+    right_low_a = (a_right[0], a_right[1] - ROOF_CAP_EDGE_THICKNESS, a_right[2])
+    right_low_b = (b_right[0], b_right[1] - ROOF_CAP_EDGE_THICKNESS, b_right[2])
+    return [
+        ([a_left, b_left, b_centre, a_centre], (0.0, 1.0, 0.0)),
+        ([a_centre, b_centre, b_right, a_right], (0.0, 1.0, 0.0)),
+        ([a_left, left_low_a, left_low_b, b_left], (px, 0.0, pz)),
+        ([a_right, b_right, right_low_b, right_low_a], (-px, 0.0, -pz)),
+    ]
+
+
+def dormer_roof_detail_faces(rect_u: tuple, rect_v: tuple, plane_z: float, outer: tuple,
+                              eaves_y: float, pitch: float) -> list[tuple]:
+    """Shingle ridge cap and metal cheek flashing for one existing wall dormer.
+
+    Each returned row is ``(corners, outward, surfaceClass)``. The same settled dormer metrics as
+    ``dormer_shell`` place these details; they do not alter its hole, planes or collision.
+    """
+    u0, u1 = rect_u[0] - DORMER_CHEEK, rect_u[1] + DORMER_CHEEK
+    head = rect_v[1] + DORMER_HEAD
+    middle = (u0 + u1) / 2.0
+    ridge_y = head + ((u1 - u0) / 2.0) * pitch
+    outward = 1.0 if abs(plane_z - outer[3]) < abs(plane_z - outer[2]) else -1.0
+    eaves_z = outer[3] if outward > 0.0 else outer[2]
+    back = eaves_z - outward * ((ridge_y - eaves_y) / pitch)
+
+    def dormer_height(x, _z):
+        return ridge_y - abs(x - middle) * pitch
+
+    details = [(corners, face_outward, "roof") for corners, face_outward in
+               shingle_cap_faces((middle, ridge_y, plane_z), (middle, ridge_y, back),
+                                 DORMER_RIDGE_CAP_WIDTH, dormer_height, 0.03, 0.03)]
+
+    def main_height(z):
+        return eaves_y + abs(eaves_z - z) * pitch + DORMER_FLASHING_LIFT
+
+    for edge, side in ((u0, -1.0), (u1, 1.0)):
+        outer_edge = edge + side * DORMER_FLASHING_WIDTH
+        details.append(([(edge, main_height(plane_z), plane_z),
+                         (outer_edge, main_height(plane_z), plane_z),
+                         (outer_edge, main_height(back), back),
+                         (edge, main_height(back), back)],
+                        (0.0, 1.0, 0.0), "metal"))
+    return details
+
+
+def gutter_profile_faces(start: tuple, end: tuple, outward: tuple,
+                         bottom: float) -> list[tuple]:
+    """A closed six-point K-style gutter prism along one eave.
+
+    The old gutter emitted only four faces of an axis-aligned box. On the front/rear eaves it had
+    no outward face at all, so the canonical road view could barely see it. This profile stays
+    inside the same 120 mm section and drainage head while adding the fascia back, sloped base,
+    folded front and lip that make a domestic gutter read from below.
+    """
+    section = (
+        (-0.035, bottom + 0.115),
+        (-0.025, bottom + 0.025),
+        (0.040, bottom),
+        (0.075, bottom + 0.055),
+        (0.080, bottom + 0.120),
+        (0.050, bottom + 0.132),
+    )
+
+    def point(anchor, profile):
+        offset, y = profile
+        return (anchor[0] + outward[0] * offset, y,
+                anchor[2] + outward[2] * offset)
+
+    faces = []
+    for index, here in enumerate(section):
+        following = section[(index + 1) % len(section)]
+        dt, dy = following[0] - here[0], following[1] - here[1]
+        wanted = (outward[0] * dy, -dt, outward[2] * dy)
+        faces.append(([point(start, here), point(start, following),
+                       point(end, following), point(end, here)], wanted))
+    dx, dz = end[0] - start[0], end[2] - start[2]
+    faces.append(([point(start, profile) for profile in reversed(section)], (-dx, 0.0, -dz)))
+    faces.append(([point(end, profile) for profile in section], (dx, 0.0, dz)))
+    return faces
+
+
 def nonplanar_quad(points, tolerance: float = 1.0e-6) -> bool:
     """Whether four world points need explicit triangles rather than one twisted polygon."""
     if len(points) != 4:
@@ -2785,7 +2939,9 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
         for corners, face_outward in dormer_finish_faces(
                 rect_u, rect_v, plane_z, outer, eaves_y, pitch):
             add(corners, face_outward, "trim")
-
+        for corners, face_outward, klass in dormer_roof_detail_faces(
+                rect_u, rect_v, plane_z, outer, eaves_y, pitch):
+            add(corners, face_outward, klass)
 
     # The fascia: a board round the eaves edge, hanging below it, and the soffit closing the
     # underside back to the wall. Without them you see the roof planes end in mid-air.
@@ -2830,23 +2986,18 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
 
     # `HOUSE-00468`: a gutter along each eaves edge, a downspout at each corner, and a vent along
     # the ridge. The gutter hangs on the fascia, so its height comes from the fascia's.
+    # `HOUSE-00944` keeps the same drainage line but replaces the incomplete square strips with a
+    # closed K-style profile whose outward face and folded lip remain visible from ground level.
     gutter_y = eaves_y - FASCIA_DEPTH
-    for side_x in (False, True):
-        for at in ((x0, x1) if side_x else (z0, z1)):
-            if side_x:
-                box_of = (at - GUTTER_SECTION / 2.0, at + GUTTER_SECTION / 2.0,
-                          gutter_y, gutter_y + GUTTER_SECTION, z0, z1)
-            else:
-                box_of = (x0, x1, gutter_y, gutter_y + GUTTER_SECTION,
-                          at - GUTTER_SECTION / 2.0, at + GUTTER_SECTION / 2.0)
-            for value, outward in ((box_of[0], (-1.0, 0.0, 0.0)), (box_of[1], (1.0, 0.0, 0.0))):
-                add([(value, box_of[2], box_of[4]), (value, box_of[3], box_of[4]),
-                     (value, box_of[3], box_of[5]), (value, box_of[2], box_of[5])], outward,
-                    "metal")
-            for value, outward in ((box_of[2], (0.0, -1.0, 0.0)), (box_of[3], (0.0, 1.0, 0.0))):
-                add([(box_of[0], value, box_of[4]), (box_of[1], value, box_of[4]),
-                     (box_of[1], value, box_of[5]), (box_of[0], value, box_of[5])], outward,
-                    "metal")
+    gutter_runs = (
+        ((x0, gutter_y, z0), (x1, gutter_y, z0), (0.0, 0.0, -1.0)),
+        ((x0, gutter_y, z1), (x1, gutter_y, z1), (0.0, 0.0, 1.0)),
+        ((x0, gutter_y, z0), (x0, gutter_y, z1), (-1.0, 0.0, 0.0)),
+        ((x1, gutter_y, z0), (x1, gutter_y, z1), (1.0, 0.0, 0.0)),
+    )
+    for start, end, run_outward in gutter_runs:
+        for corners, face_outward in gutter_profile_faces(start, end, run_outward, gutter_y):
+            add(corners, face_outward, "metal")
     # `HOUSE-00776`: the pipes, from `roof_geometry.house_downspouts` rather than from a loop over
     # this roof's four corners. Two of the eight corners are UNDER the other roof -- the garage
     # wing projects from the house's east wall -- so a pipe at each of them is a pipe indoors, and
@@ -2855,18 +3006,30 @@ def build_roof(name: str, box: tuple, construction: dict, dormers=(), eaves=None
     half_spout = DOWNSPOUT_SECTION / 2.0
     for spout in spouts or ():
         corner_x, corner_z, foot = spout["x"], spout["z"], spout.get("groundY", 0.0)
-        for value, outward in ((corner_x - half_spout, (-1.0, 0.0, 0.0)),
-                               (corner_x + half_spout, (1.0, 0.0, 0.0))):
-            add([(value, foot, corner_z - half_spout), (value, gutter_y, corner_z - half_spout),
-                 (value, gutter_y, corner_z + half_spout), (value, foot, corner_z + half_spout)],
-                outward, "metal")
+        add_box((corner_x - half_spout, corner_x + half_spout, foot, gutter_y,
+                 corner_z - half_spout, corner_z + half_spout), "metal")
+
+    # `HOUSE-00944`: overlap the exposed seam between each pair of main roof planes with a narrow
+    # shingle cap. The first 160 mm is inset from the eaves corner so the 220 mm ribbon stays on
+    # the existing roof footprint; the planes, ridge, drainage and collision remain unchanged.
+    roof_equations = roof_geometry.plane_equations(roof_planes(outer, eaves_y, pitch))
+
+    def main_roof_height(x, z):
+        return roof_geometry.roof_height(roof_equations, x, z)
+
+    for start, end in roof_hip_lines(outer, eaves_y, pitch):
+        for corners, face_outward in shingle_cap_faces(
+                start, end, ROOF_HIP_CAP_WIDTH, main_roof_height, 0.16, 0.02):
+            add(corners, face_outward, "roof")
     # §12.1's ridge vent (`HOUSE-00468`, rebuilt by `HOUSE-00491`): the exhaust half of the attic
     # ventilation that replaced the two impossible gable louvres. `metal`, like the gutters and
     # downspouts it shares a class with, and a BOX straddling the ridge rather than the flat lid
     # this drew before -- a cap over a cut slot is what a shingle-over ridge vent is, and a lid
     # floating 0.08 m above the apex was a lid floating above the apex.
     for corners, outward in roof_geometry.ridge_vent(outer, eaves_y, pitch):
-        add(corners, outward, "metal")
+        # It is explicitly a shingle-over vent. The old generic black gutter metal made it a long
+        # floating black bar in the road view; the geometry is right and the finish was not.
+        add(corners, outward, "roof")
 
     mesh = bpy.data.meshes.new(f"{name}_mesh")
     mesh.from_pydata(vertices, [], faces)
@@ -3984,6 +4147,22 @@ def selftest(output: Path) -> int:
             "and every painted dormer board projects from the existing front without moving its "
             "roof hole or collision shell")
 
+    dormer_edge_detail = dormer_roof_detail_faces(
+        subject_dormer[0], subject_dormer[1], subject_dormer[2], outer, eaves_y,
+        float(construction["roofPitch"]))
+    dormer_ridge_y = front_top + ((subject_dormer[0][1] - subject_dormer[0][0]
+                                  + 2.0 * DORMER_CHEEK) / 2.0) \
+        * float(construction["roofPitch"])
+    require(len(dormer_edge_detail) == 6
+            and sum(klass == "roof" for _corners, _outward, klass in dormer_edge_detail) == 4
+            and sum(klass == "metal" for _corners, _outward, klass in dormer_edge_detail) == 2,
+            f"HOUSE-00944 gives one dormer a four-face shingle ridge cap and two cheek-flashing "
+            f"ribbons ({len(dormer_edge_detail)} faces)")
+    require(all(max(point[1] for point in corners) > dormer_ridge_y
+                for corners, _outward, klass in dormer_edge_detail[:2] if klass == "roof"),
+            "and both upper ridge-cap ribbons rise above the existing dormer ridge instead of "
+            "being coplanar and z-fighting")
+
     eave_boxes = eave_finish_boxes(outer, eaves_y)
     require(len(eave_boxes) == 8,
             f"the main eaves gain four frieze and four crown runs ({len(eave_boxes)})")
@@ -3991,6 +4170,35 @@ def selftest(output: Path) -> int:
                 - (eaves_y - FASCIA_DEPTH - EAVE_CROWN_HEIGHT
                    - EAVE_FRIEZE_HEIGHT)) < 1e-9,
             "and their measured depth sits below, rather than moving, the settled fascia edge")
+
+    hip_lines = roof_hip_lines(outer, eaves_y, float(construction["roofPitch"]))
+    equations = roof_geometry.plane_equations(planes)
+    hip_caps = [face for start, end in hip_lines for face in shingle_cap_faces(
+        start, end, ROOF_HIP_CAP_WIDTH,
+        lambda x, z: roof_geometry.roof_height(equations, x, z), 0.16, 0.02)]
+    require(len(hip_lines) == 4 and len(hip_caps) == 16,
+            f"the rectangular roof has four shared hips and four cap faces on each "
+            f"({len(hip_lines)} lines / {len(hip_caps)} faces)")
+    require(all(max(point[1] for point in corners) >
+                    max(roof_geometry.roof_height(equations, point[0], point[2])
+                        for point in corners)
+                for corners, _outward in hip_caps[:2]),
+            "and the cap centre is physical relief above the authoritative planes, not painted "
+            "lines on them")
+
+    gutter_probe = gutter_profile_faces((outer[0], 0.0, outer[2]),
+                                        (outer[1], 0.0, outer[2]),
+                                        (0.0, 0.0, -1.0), eaves_y - FASCIA_DEPTH)
+    require(len(gutter_probe) == 8,
+            f"one K gutter has six longitudinal profile faces and two end caps "
+            f"({len(gutter_probe)})")
+    gutter_points = [point for corners, _outward in gutter_probe for point in corners]
+    require(max(point[2] for point in gutter_points) - min(point[2] for point in gutter_points)
+            <= GUTTER_SECTION + 1.0e-9
+            and max(point[1] for point in gutter_points) - min(point[1] for point in gutter_points)
+            <= GUTTER_SECTION + 0.013,
+            "and its folded silhouette remains within the settled 120 mm drainage section plus "
+            "a 12 mm rolled lip")
 
     reset_scene()
     plain_roof = build_roof("ROOF_PLAIN", main_box, construction)
@@ -4015,6 +4223,8 @@ def selftest(output: Path) -> int:
                               dormer_shell(one[0], one[1], one[2], outer, eaves_y, pitch_here),
                               dormer=True)
                       + len(dormer_finish_faces(
+                          one[0], one[1], one[2], outer, eaves_y, pitch_here))
+                      + len(dormer_roof_detail_faces(
                           one[0], one[1], one[2], outer, eaves_y, pitch_here))
                       for one in dormer_list))
     require(len(dormered.data.polygons) == expected,
@@ -4066,11 +4276,12 @@ def selftest(output: Path) -> int:
     require(len(dormered.data.polygons) == expected,
             "the roof's face count is the cut planes, the dormers, the eaves boards and the "
             "structure")
-    # planes, fascia, soffit, four gutters of four faces, one closed six-face ridge-vent box --
-    # and NO downspouts,
+    # planes, fascia, soffit, four eight-face K gutters, sixteen hip-cap faces, one closed
+    # six-face ridge-vent box -- and NO downspouts,
     # since `HOUSE-00776`: they are `roof_geometry.house_downspouts`'s to place, because two of the
     # eight corners are under the other roof, and a roof built without that list has none.
-    bare = plain_roof_faces - (4 + 4 + 4 + 4 * 4 + 6 + len(eave_boxes) * 6)
+    bare = plain_roof_faces - (4 + 4 + 4 + 4 * len(gutter_probe) + len(hip_caps) + 6
+                               + len(eave_boxes) * 6)
     require(bare == expected_rafters + 2,
             f"a rafter every {RAFTER_SPACING * 1000:.0f} mm over the ridge's {ridge_run:.2f} m, "
             f"both slopes, and a purlin under each ({bare} against {expected_rafters + 2})")
