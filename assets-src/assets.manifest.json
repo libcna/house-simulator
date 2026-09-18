@@ -693,7 +693,7 @@
         "redistributeDerived": true,
         "commercialUse": true,
         "modification": true,
-        "note": "Project-authored measured semi-flush ceiling light generated deterministically by tools/blender/family_ceiling_light.py for HOUSE-01285, refined for outdoor reuse by HOUSE-00938 and reused in the formal living room by HOUSE-01286. The dark-bronze trim surrounds an always-visible opal bowl plus a smaller lower optical disc at the model origin; only that exact disc is the switched emissive slot. One asset is reused at four family-room, four formal-living and two front-porch positions; no third-party mesh or texture was copied."
+        "note": "Project-authored measured semi-flush ceiling light generated deterministically by tools/blender/family_ceiling_light.py for HOUSE-01285, refined for outdoor reuse by HOUSE-00938, reused in the formal living room by HOUSE-01286 and extended to the foyer/hall by HOUSE-01290. The dark-bronze trim surrounds an always-visible opal bowl plus a smaller lower optical disc at the model origin; only that exact disc is the switched emissive slot. One asset is reused at four family-room, four formal-living, two front-porch, one foyer and two hall positions; no third-party mesh or texture was copied."
       },
       "geometry": {
         "unitScale": 1,
@@ -714,6 +714,8 @@
       },
       "usedIn": [
         "L0_FAMILY",
+        "L0_FOYER",
+        "L0_HALL",
         "L0_LIVING",
         "L0_PORCH"
       ]
@@ -961,6 +963,49 @@
       ]
     },
     {
+      "id": "MODEL_FOYER_CONSOLE_DRESSING",
+      "category": "console-decor",
+      "sourceFile": "assets-src/Models/Furniture/Foyer/console_dressing.glb",
+      "sourceSha256": "ba4d6d61d63c0266aef803990756f1d24960e0d2e70ccc14556e5279255c6803",
+      "contentName": "Models/Furniture/Foyer/console_dressing",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Foyer console arrival vignette",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored vase/branch, standing photograph and key-tray composition generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01064. It uses only original geometry and approved canonical material roles; no third-party mesh, image or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.940995,
+          0.84,
+          0.3242
+        ],
+        "triangles": {
+          "LOD0": 2644
+        }
+      },
+      "materialMap": {
+        "ARRIVAL_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "ARRIVAL_BRASS": "MAT_FURNITURE_PIANO_BRASS",
+        "ARRIVAL_CANVAS": "MAT_FAMILY_ART_CANVAS",
+        "ARRIVAL_CREAM": "MAT_LIVING_ART_PAPER",
+        "ARRIVAL_CERAMIC": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": [
+        "L0_FOYER"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_COFFEE_TABLE",
       "category": "occasional-table",
       "sourceFile": "assets-src/Models/Furniture/LivingRoom/coffee_table.glb",
@@ -1182,117 +1227,6 @@
       ]
     },
     {
-      "id": "MODEL_LIVING_SOFA_THROW",
-      "category": "throw-blanket",
-      "sourceFile": "assets-src/Models/Furniture/LivingRoom/living_sofa_throw.glb",
-      "sourceSha256": "4574eaec3989d1a7ca69fb53558ed09d02ad64611cd7b8035adabb92dae066b0",
-      "contentName": "Models/Furniture/LivingRoom/living_sofa_throw",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "Formal-sofa draped woven throw",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored curved, solidified and fringed sofa throw generated deterministically by tools/blender/living_sofa_throw.py for HOUSE-01062. It is tailored to the camera-near arm of the separately licensed formal sofa but copies no source geometry or image. Approved project fabric maps are reused through a dedicated canonical material role."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [0.470347, 0.647536, 0.621618],
-        "triangles": {
-          "LOD0": 1460
-        }
-      },
-      "materialMap": {
-        "THROW_WOOL": "MAT_LIVING_THROW_WOOL"
-      },
-      "usedIn": [
-        "L0_LIVING"
-      ]
-    },
-    {
-      "id": "MODEL_LIVING_WALL_ART_PAIR",
-      "category": "picture",
-      "sourceFile": "assets-src/Models/Furniture/LivingRoom/living_wall_art_pair.glb",
-      "sourceSha256": "dab08190043940cce04a0b72ff8bcc9a907978f2bdc14967c8ad64c18f5f3ff8",
-      "contentName": "Models/Furniture/LivingRoom/living_wall_art_pair",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "Formal-living paired botanical relief",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored paired botanical wall relief generated deterministically by tools/blender/living_surface_dressing.py for HOUSE-01063. Layered mats, canvases, walnut frames and original brass stems/leaves use approved canonical material roles; no third-party image, mesh or texture was copied."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [1.42, 0.78, 0.092678],
-        "triangles": {
-          "LOD0": 3448
-        }
-      },
-      "materialMap": {
-        "DRESSING_WOOD": "MAT_FURNITURE_PIANO_WOOD",
-        "DRESSING_BRASS": "MAT_FURNITURE_PIANO_BRASS",
-        "DRESSING_CANVAS": "MAT_FAMILY_ART_CANVAS",
-        "DRESSING_CREAM": "MAT_LIVING_ART_PAPER"
-      },
-      "usedIn": [
-        "L0_LIVING"
-      ]
-    },
-    {
-      "id": "MODEL_LIVING_TABLE_DRESSING",
-      "category": "tabletop-decor",
-      "sourceFile": "assets-src/Models/Furniture/LivingRoom/living_table_dressing.glb",
-      "sourceSha256": "62eaad61b61fb033bc727a0a100970343040972e8e3197fc12cbd71dade9d1a3",
-      "contentName": "Models/Furniture/LivingRoom/living_table_dressing",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "Formal-living coffee-table vignette",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored composed tabletop group generated deterministically by tools/blender/living_surface_dressing.py for HOUSE-01063. Two finite-thickness hardbacks, an elliptical brass tray and a low sculptural stone bowl reuse approved canonical material roles; no third-party mesh or texture was copied."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [0.719177, 0.131327, 0.2592],
-        "triangles": {
-          "LOD0": 2016
-        }
-      },
-      "materialMap": {
-        "DRESSING_BRASS": "MAT_FURNITURE_PIANO_BRASS",
-        "DRESSING_CREAM": "MAT_LIVING_ART_PAPER",
-        "DRESSING_BOOK": "MAT_FAMILY_BOOK_SPINES",
-        "DRESSING_STONE": "MAT_KITCHEN_COUNTER_STONE"
-      },
-      "usedIn": [
-        "L0_LIVING"
-      ]
-    },
-    {
       "id": "MODEL_FURNITURE_FOYER_ARMCHAIR",
       "category": "chair",
       "sourceFile": "assets-src/Models/Furniture/Foyer/upholstered_armchair.glb",
@@ -1377,119 +1311,6 @@
       },
       "usedIn": [
         "L0_FOYER"
-      ]
-    },
-    {
-      "id": "MODEL_FOYER_CONSOLE_DRESSING",
-      "category": "console-decor",
-      "sourceFile": "assets-src/Models/Furniture/Foyer/console_dressing.glb",
-      "sourceSha256": "ba4d6d61d63c0266aef803990756f1d24960e0d2e70ccc14556e5279255c6803",
-      "contentName": "Models/Furniture/Foyer/console_dressing",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "Foyer console arrival vignette",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored vase/branch, standing photograph and key-tray composition generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01064. It uses only original geometry and approved canonical material roles; no third-party mesh, image or texture was copied."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [0.940995, 0.84, 0.3242],
-        "triangles": {
-          "LOD0": 2644
-        }
-      },
-      "materialMap": {
-        "ARRIVAL_WOOD": "MAT_FURNITURE_PIANO_WOOD",
-        "ARRIVAL_BRASS": "MAT_FURNITURE_PIANO_BRASS",
-        "ARRIVAL_CANVAS": "MAT_FAMILY_ART_CANVAS",
-        "ARRIVAL_CREAM": "MAT_LIVING_ART_PAPER",
-        "ARRIVAL_CERAMIC": "MAT_FOYER_CERAMIC"
-      },
-      "usedIn": [
-        "L0_FOYER"
-      ]
-    },
-    {
-      "id": "MODEL_HALL_RUNNER",
-      "category": "rug",
-      "sourceFile": "assets-src/Models/Furniture/Hall/hall_runner.glb",
-      "sourceSha256": "fcc235247a38242f4e5399171efc55b84dc8b2f5618133f570e48bff250543d8",
-      "contentName": "Models/Furniture/Hall/hall_runner",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "Central-hall woven runner",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored physically thick wool runner with raised border, diamond rhythm and individual end fringe generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01064. Approved project weave maps are bound by the canonical material table; no third-party mesh or texture was copied."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [1.14, 0.0205, 3.96],
-        "triangles": {
-          "LOD0": 3856
-        }
-      },
-      "materialMap": {
-        "ARRIVAL_RUNNER_BASE": "MAT_HALL_RUNNER_WOOL",
-        "ARRIVAL_RUNNER_BORDER": "MAT_HALL_RUNNER_BORDER_WOOL"
-      },
-      "usedIn": [
-        "L0_HALL"
-      ]
-    },
-    {
-      "id": "MODEL_HALL_PORTAL_ART_PAIR",
-      "category": "picture",
-      "sourceFile": "assets-src/Models/Furniture/Hall/portal_art_pair.glb",
-      "sourceSha256": "0ca79480f60da7ce6f326263efe3f26e7d2e48eae8e57033b353d7e08dd778a2",
-      "contentName": "Models/Furniture/Hall/portal_art_pair",
-      "kind": "model",
-      "residencyPack": "house-l0",
-      "origin": {
-        "kind": "authored",
-        "name": "Kitchen-portal paired raised relief",
-        "licence": "Ms-PL",
-        "licenceFile": "LICENSE",
-        "attribution": "",
-        "redistributeSource": true,
-        "redistributeDerived": true,
-        "commercialUse": true,
-        "modification": true,
-        "note": "Project-authored matched but asymmetric raised relief pair generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01064. The single asset deliberately leaves the canonical kitchen portal empty and occupies only its two wall flanks; no third-party image, mesh or texture was copied."
-      },
-      "geometry": {
-        "unitScale": 1,
-        "upAxis": "Y",
-        "boundsMetres": [3.92, 1.05, 0.10876],
-        "triangles": {
-          "LOD0": 2624
-        }
-      },
-      "materialMap": {
-        "ARRIVAL_WOOD": "MAT_FURNITURE_PIANO_WOOD",
-        "ARRIVAL_BRASS": "MAT_FURNITURE_PIANO_BRASS",
-        "ARRIVAL_CANVAS": "MAT_FAMILY_ART_CANVAS",
-        "ARRIVAL_CREAM": "MAT_LIVING_ART_PAPER"
-      },
-      "usedIn": [
-        "L0_HALL"
       ]
     },
     {
@@ -1980,6 +1801,88 @@
       ]
     },
     {
+      "id": "MODEL_HALL_PORTAL_ART_PAIR",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Hall/portal_art_pair.glb",
+      "sourceSha256": "0ca79480f60da7ce6f326263efe3f26e7d2e48eae8e57033b353d7e08dd778a2",
+      "contentName": "Models/Furniture/Hall/portal_art_pair",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Kitchen-portal paired raised relief",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored matched but asymmetric raised relief pair generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01064. The single asset deliberately leaves the canonical kitchen portal empty and occupies only its two wall flanks; no third-party image, mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          3.92,
+          1.05,
+          0.10876
+        ],
+        "triangles": {
+          "LOD0": 2624
+        }
+      },
+      "materialMap": {
+        "ARRIVAL_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "ARRIVAL_BRASS": "MAT_FURNITURE_PIANO_BRASS",
+        "ARRIVAL_CANVAS": "MAT_FAMILY_ART_CANVAS",
+        "ARRIVAL_CREAM": "MAT_LIVING_ART_PAPER"
+      },
+      "usedIn": [
+        "L0_HALL"
+      ]
+    },
+    {
+      "id": "MODEL_HALL_RUNNER",
+      "category": "rug",
+      "sourceFile": "assets-src/Models/Furniture/Hall/hall_runner.glb",
+      "sourceSha256": "fcc235247a38242f4e5399171efc55b84dc8b2f5618133f570e48bff250543d8",
+      "contentName": "Models/Furniture/Hall/hall_runner",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Central-hall woven runner",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored physically thick wool runner with raised border, diamond rhythm and individual end fringe generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01064. Approved project weave maps are bound by the canonical material table; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.14,
+          0.0205,
+          3.96
+        ],
+        "triangles": {
+          "LOD0": 3856
+        }
+      },
+      "materialMap": {
+        "ARRIVAL_RUNNER_BASE": "MAT_HALL_RUNNER_WOOL",
+        "ARRIVAL_RUNNER_BORDER": "MAT_HALL_RUNNER_BORDER_WOOL"
+      },
+      "usedIn": [
+        "L0_HALL"
+      ]
+    },
+    {
       "id": "MODEL_HUMAN_FEMALE_BASE_RESEARCH",
       "category": "avatar",
       "sourceFile": "assets-src/Models/Characters/human_female_base.glb",
@@ -2272,6 +2175,129 @@
         "PIANO_WOOD": "MAT_FURNITURE_PIANO_WOOD",
         "LIVING_ART_CANVAS": "MAT_FAMILY_ART_CANVAS",
         "PIANO_BRASS": "MAT_FURNITURE_PIANO_BRASS"
+      },
+      "usedIn": [
+        "L0_LIVING"
+      ]
+    },
+    {
+      "id": "MODEL_LIVING_SOFA_THROW",
+      "category": "throw-blanket",
+      "sourceFile": "assets-src/Models/Furniture/LivingRoom/living_sofa_throw.glb",
+      "sourceSha256": "4574eaec3989d1a7ca69fb53558ed09d02ad64611cd7b8035adabb92dae066b0",
+      "contentName": "Models/Furniture/LivingRoom/living_sofa_throw",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Formal-sofa draped woven throw",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored curved, solidified and fringed sofa throw generated deterministically by tools/blender/living_sofa_throw.py for HOUSE-01062. It is tailored to the camera-near arm of the separately licensed formal sofa but copies no source geometry or image. Approved project fabric maps are reused through a dedicated canonical material role."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.470347,
+          0.647536,
+          0.621618
+        ],
+        "triangles": {
+          "LOD0": 1460
+        }
+      },
+      "materialMap": {
+        "THROW_WOOL": "MAT_LIVING_THROW_WOOL"
+      },
+      "usedIn": [
+        "L0_LIVING"
+      ]
+    },
+    {
+      "id": "MODEL_LIVING_TABLE_DRESSING",
+      "category": "tabletop-decor",
+      "sourceFile": "assets-src/Models/Furniture/LivingRoom/living_table_dressing.glb",
+      "sourceSha256": "62eaad61b61fb033bc727a0a100970343040972e8e3197fc12cbd71dade9d1a3",
+      "contentName": "Models/Furniture/LivingRoom/living_table_dressing",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Formal-living coffee-table vignette",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored composed tabletop group generated deterministically by tools/blender/living_surface_dressing.py for HOUSE-01063. Two finite-thickness hardbacks, an elliptical brass tray and a low sculptural stone bowl reuse approved canonical material roles; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          0.719177,
+          0.131327,
+          0.2592
+        ],
+        "triangles": {
+          "LOD0": 2016
+        }
+      },
+      "materialMap": {
+        "DRESSING_BRASS": "MAT_FURNITURE_PIANO_BRASS",
+        "DRESSING_CREAM": "MAT_LIVING_ART_PAPER",
+        "DRESSING_BOOK": "MAT_FAMILY_BOOK_SPINES",
+        "DRESSING_STONE": "MAT_KITCHEN_COUNTER_STONE"
+      },
+      "usedIn": [
+        "L0_LIVING"
+      ]
+    },
+    {
+      "id": "MODEL_LIVING_WALL_ART_PAIR",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/LivingRoom/living_wall_art_pair.glb",
+      "sourceSha256": "dab08190043940cce04a0b72ff8bcc9a907978f2bdc14967c8ad64c18f5f3ff8",
+      "contentName": "Models/Furniture/LivingRoom/living_wall_art_pair",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Formal-living paired botanical relief",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored paired botanical wall relief generated deterministically by tools/blender/living_surface_dressing.py for HOUSE-01063. Layered mats, canvases, walnut frames and original brass stems/leaves use approved canonical material roles; no third-party image, mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [
+          1.42,
+          0.78,
+          0.092678
+        ],
+        "triangles": {
+          "LOD0": 3448
+        }
+      },
+      "materialMap": {
+        "DRESSING_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "DRESSING_BRASS": "MAT_FURNITURE_PIANO_BRASS",
+        "DRESSING_CANVAS": "MAT_FAMILY_ART_CANVAS",
+        "DRESSING_CREAM": "MAT_LIVING_ART_PAPER"
       },
       "usedIn": [
         "L0_LIVING"
@@ -20658,7 +20684,7 @@
       "id": "TEXTURE_L0_FOYER_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY.png",
-      "sourceSha256": "a323decb8816d024c26afacaec4a9e68338097afbaa8991adfbe0b7409ab31cc",
+      "sourceSha256": "b037bc3e1f95224c6d54fe85fb0b3358e6b8b194bc15c6e46ccdd0f487a4afdd",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20685,7 +20711,7 @@
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_FOYER_ACCENT",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT.png",
-      "sourceSha256": "033d136d5075461e13d277994d8c2cf84e2bf48becb11dd39891d2263b86000f",
+      "sourceSha256": "7506dfeb5f14fe0ed314fdc3b5899acd84fe413d61509eae776e35bf12c8f2cd",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20712,7 +20738,7 @@
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_FOYER_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN.png",
-      "sourceSha256": "f7330c87987515c5a1c83131dff3ee1eda0696108500d9aa20a19c5a70ff0e85",
+      "sourceSha256": "6c1c65ea3eb5800d621b15f80f460a989c4c604049f11d6eeef4003cea9083d2",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20739,7 +20765,7 @@
       "id": "TEXTURE_L0_FOYER_LM_LG_L0_PORCH_LANTERN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_PORCH_LANTERN.png",
-      "sourceSha256": "998df6544e0773c7bd9fe28212413575394cbef25253ac6790a3d17d8ba030f1",
+      "sourceSha256": "78c61b4f39fb9cf3c108b7dad0b34713ae4236bcb40f1ca7df0d5e25eb34745c",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20928,7 +20954,7 @@
       "id": "TEXTURE_L0_HALL_LM_DAY",
       "category": "lightmap-daylight",
       "sourceFile": "assets-src/Textures/Lightmaps/Daylight/L0_HALL_LM_DAY.png",
-      "sourceSha256": "d0807dd946cd620f34b9cedb13968ee600c1a698feb517a8dd10e74a0e7621cc",
+      "sourceSha256": "c693f53cc6801d7cbdbc82051848a6ccb0bd913c4264dcab86d11e939fd8866a",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20955,7 +20981,7 @@
       "id": "TEXTURE_L0_HALL_LM_LG_L0_HALL_GALLERY",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_GALLERY.png",
-      "sourceSha256": "0deee36d10122f8c581f83ac380196b21ab6dd6df4808f0579172cb26a0e911c",
+      "sourceSha256": "2fe9c2e4157bab6b2ab21b30b750b4e731c0c972b652ebfd3c2981ee9515c088",
       "texture": {
         "width": 128,
         "height": 128,
@@ -20982,7 +21008,7 @@
       "id": "TEXTURE_L0_HALL_LM_LG_L0_HALL_MAIN",
       "category": "lightmap-artificial",
       "sourceFile": "assets-src/Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_MAIN.png",
-      "sourceSha256": "330c224a57890ee29a8c789f4224893343a3a1bf3ec0c4fb804b91c27f45d7f3",
+      "sourceSha256": "3fc52029a6e75e5527d6f71f60b356224a7a659308563171bbc6538f2ca0bbba",
       "texture": {
         "width": 128,
         "height": 128,

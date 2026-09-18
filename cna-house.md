@@ -3450,6 +3450,15 @@ it. This is the technique lightmapped games used for twenty years and it is a pe
 > per-source 5 lm-per-radiant-watt offline calibration. This calibration is an artistic conversion
 > inside the bake tool, not fixture efficacy, and leaves the global 683 value untouched. No L0
 > receiver, global exposure change, renderer path or manual-circuit ownership is added.
+>
+> `HOUSE-01290` physicalises the one foyer and two hall main sources with the same approved
+> semi-flush practical at the existing source positions. Their optical centres now sit in the
+> opal diffuser plane at 3.12 m below the 3.30 m ceiling; the former points are broad downward
+> 72/140-degree spots linked to the fixture's `FamilyCeilingDiffuser` slot. The 1,100 lm foyer
+> source uses a source-local 13.5 lm-per-radiant-watt bake calibration and the two 900 lm hall
+> sources use 18.75, preserving their established peaks at 0.4852 and 0.5133 while distributing
+> useful mean irradiance to 0.0686 and 0.1155. These are offline artistic conversions only: the
+> 2,700 K groups, ranges, switches, default-on state, stock-XNA runtime and exposure are unchanged.
 
 ### 28.4 Daylight through windows
 

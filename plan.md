@@ -44,7 +44,9 @@ dark conversation group from the walnut floor with a room-specific woven wool ru
 breaks up the remaining foreground sofa mass with a physically draped textile accent; and
 `HOUSE-01063` dresses one blank wall bay and the bare coffee table with a coherent formal-room
 set. `HOUSE-01064` carries that restrained surface-dressing discipline into the empty foyer/hall
-arrival with a runner, console objects and portal-flanking art. Round 9 proves the exterior
+arrival with a runner, console objects and portal-flanking art. `HOUSE-01290` replaces the three
+remaining bare foyer/hall main-light points with physical ceiling fixtures. The next screenshot-
+ranked route defect is the broad under-dressed foyer/hall side wall. Round 9 proves the exterior
 material omission is fixed; `HOUSE-00924`
 removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
@@ -160,7 +162,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 13 | Static furniture and dressing | 00971–01120 | 70 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
-| 16 | Lights and switches | 01251–01310 | 29 | The house can be lit — **first playable** |
+| 16 | Lights and switches | 01251–01310 | 30 | The house can be lit — **first playable** |
 | 17 | Containers | 01311–01360 | 13 | 214 things open with contents |
 | 18 | Kitchen and refrigerator | 01361–01410 | 23 | |
 | 19 | Plumbing and water | 01411–01460 | 19 | |
@@ -15789,6 +15791,48 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             daylight-occlusion guard were inspected and selectively advanced; all eighteen
             culling pairs remain below 0.2%. Content, budget, licence/provenance and strict-XNA
             gates pass with compilation/heavy work restricted to CPU 0-5 / at most six workers.
+- [x] HOUSE-01290 — Replace the foyer and hall main-light points with physical ceiling fixtures
+      dep: HOUSE-01064, HOUSE-01256, HOUSE-01264, HOUSE-01285, HOUSE-01286 · sys: world, content, lighting, rendering · plat: ALL · pri: MUST
+      note: (2026-09-18) Round 68 makes the warm but physically unsupported ceiling pools the
+            largest remaining foyer/hall defect. Reuse the approved semi-flush practical at the
+            one foyer and two hall main-source positions, move each optical centre from the old
+            hanging point to the actual 3.12 m diffuser plane and retain the established groups,
+            temperature, lumens, ranges and default-on behavior.
+      accept: three correctly scaled approved ceiling fixtures meet the 3.30 m L0 ceiling and link
+            their exact optical slot to the existing main groups; broad downward optics replace
+            bare point singularities without changing switches, global exposure, renderer,
+            collision, portals or navigation. Deterministically rebake and inspect only the foyer
+            and hall receiver cells, capture the matched day/night route, and pass content,
+            budget, render, culling, provenance and strict-XNA gates with all compilation/heavy
+            work restricted to CPU 0-5 / at most six workers
+      done: (2026-09-18) Reused the approved 636-triangle semi-flush practical at the exact one
+            foyer and two hall source positions, with its 0.18 m body meeting the 3.30 m ceiling
+            and each optical centre at the 3.12 m opal diffuser plane. The former points are now
+            linked 2,700 K broad downward spots using the existing groups, switches and default-on
+            state: 1,100 lm / 4.00 m in the foyer and 900 lm / 5.17 m in the hall. Source-local
+            offline calibrations of 13.5 and 18.75 lm per radiant watt retain the old useful peaks
+            without the bare-point singularity; the selected main atlases measure 0.4852 peak /
+            0.0686 mean and 0.5133 / 0.1155. Only complete `L0_FOYER` and `L0_HALL` daylight and
+            artificial receiver products were deterministically promoted. Runtime exposure,
+            renderer, collision, portals, navigation and all other cells remain unchanged.
+      review: Round 69's matched eighteen-view clear-day and normal-night sets were all opened.
+            Against Round 68, `entrance-foyer` changes 1,025,453 day / 1,026,530 night pixels above
+            two channel levels (71.2120% / 71.2868%; normalized MAE 0.066187 / 0.067866),
+            `central-hall` changes 864,055 / 866,342 (60.0038% / 60.1626%; 0.051109 / 0.051378),
+            `foyer-facing-front` changes 1,114,931 / 1,115,481 (77.4258% / 77.4640%; 0.065195 /
+            0.066741), and `foyer-living-doors` changes 1,081,521 / 1,083,132 (75.1056% /
+            75.2175%; 0.070736 / 0.072324). The large bounded differences are the accepted warm
+            fixture distribution and visible source silhouettes; established exterior and room
+            compositions remain intact. No strict golden moved.
+      verified: The world has 201 materials, 902 manifest rows and 2,951 stable ids; its 681
+            chunks, 87 props, 266 exterior instances and 55.192247 MB upload remain in budget.
+            The unculled diagnostic is 637 opaque / 44 cutout / 106 state changes. All 1,409 unit,
+            135 integration and 48 active render registrations pass (44 execute and four
+            driver-signature cases skip; the four skipped pixel references also pass separately
+            under software rasterisation; eight capture-only generators remain disabled). All
+            eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`) against 0.2%. Content,
+            provenance/licence and project static gates plus all 323 strict-XNA translation units
+            pass with compilation and heavy work restricted to CPU 0-5 / at most six workers.
 - [x] HOUSE-01261 — Implement the per-object three-directional-light assignment (key/fill/bounce) for dynamic objects
       dep: HOUSE-01251, HOUSE-00892 · sys: lighting · plat: ALL · pri: MUST
       accept: `BasicEffect` and `SkinnedEffect` receive the same stable key/fill/bounce slot
@@ -19474,12 +19518,12 @@ Recorded so nobody has to re-derive the decision.
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
 | Exterior, neighbourhood, materials, furnishing | 10–13 | 141 |
-| Interaction framework and the systems built on it | 14–21 | 159 |
+| Interaction framework and the systems built on it | 14–21 | 160 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 342** |
+| **Total** | **0–52** | **1 343** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19515,6 +19559,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-01290` | **New task, next free phase-16 id.** Reuse the approved semi-flush fixture for the one foyer and two hall main sources, relocate their optics to the real diffuser plane and rebake only the two affected receiver cells. | Round 68 resolves the hall floor, terminal wall and console but exposes three warm ceiling pools with no physical source. The existing deterministic fixture and established main groups can correct that visible cause without a new asset, global exposure, renderer work, switch change or unrelated subsystem. |
 | 2026-09-18 | `HOUSE-01064` | **New task, next free phase-13 id.** Finish the currently bare foyer console, hall floor and two end-wall flanks as one bounded arrival composition while keeping full room-density tasks open. | Round 67's fixed foyer/hall cameras show these three connected surfaces as the largest remaining domestic-identity defect. Deterministic project-authored dressing can finish them through the approved prop/material path without a download, collision, light change, runtime branch or false completion of `HOUSE-00986`/`HOUSE-00987`. |
 | 2026-09-18 | `HOUSE-01063` | **New task, next free phase-13 id.** Treat one empty wall bay and the existing bare coffee table as a single restrained formal-room dressing checkpoint while leaving the full furnishing task open. | Round 66 confirms that more broad colour correction is lower value than human-scale evidence of use. A deterministic paired relief and measured books/tray/bowl vignette can reuse approved room roles and finish two prominent surfaces without unbounded clutter, a download, lighting change or runtime branch. |
 | 2026-09-18 | `HOUSE-01062` | **New task, next free phase-13 id.** Add one tailored static throw over the camera-near arm of the completed formal sofa while leaving the source sofa, lighting and full-room furnishing task intact. | Round 65's lighter rug exposes the remaining closest brown sofa end as the largest contained mass. A deterministic folded textile with real thickness/fringe and an existing approved woven role adds controlled lived-in contrast without recolouring third-party hero geometry, changing exposure or creating a generic primitive placeholder. |

@@ -491,7 +491,7 @@
       "daylight": { "orientation": "N", "exposure": 0.35 },
       "lightGroups": ["LG_L0_FOYER_MAIN", "LG_L0_FOYER_ACCENT"],
       "lightmaps": {
-        "shellHash": "sha256:eb0b90aa987f952d230df7614c61b73aacf8dbfadbb0b9d4070bf9e4639bc039",
+        "shellHash": "sha256:08b5b2eeea3ad95f883cb470b3c6b1ed46021547e311ac2bafa064e4e267fbf8",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_FOYER_LM_DAY",
           "scale": 1.0000001192092896
@@ -500,17 +500,17 @@
           {
             "group": "LG_L0_FOYER_ACCENT",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_ACCENT",
-            "scale": 0.14793236553668976
+            "scale": 0.02149265818297863
           },
           {
             "group": "LG_L0_FOYER_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_FOYER_MAIN",
-            "scale": 0.4852122366428375
+            "scale": 0.48515766859054565
           },
           {
             "group": "LG_L0_PORCH_LANTERN",
             "contentName": "Textures/Lightmaps/Artificial/L0_FOYER_LM_LG_L0_PORCH_LANTERN",
-            "scale": 11.113598823547363
+            "scale": 1.63023841381073
           }
         ]
       },
@@ -527,21 +527,21 @@
       "thermal": { "heated": true, "ductBranch": "DUCT_L0_CENTRE" },
       "lightGroups": ["LG_L0_HALL_MAIN", "LG_L0_HALL_GALLERY"],
       "lightmaps": {
-        "shellHash": "sha256:d0f6f27d58ba6ca23ed7198b3976b1a2244748b6c4f18705149f374f72ed132f",
+        "shellHash": "sha256:a84d07ea49583fc73fc50afbe328809b52256a6c7e70f65b5dbf8b693e5d6870",
         "daylight": {
           "contentName": "Textures/Lightmaps/Daylight/L0_HALL_LM_DAY",
-          "scale": 0.7765084505081177
+          "scale": 0.7665742039680481
         },
         "artificial": [
           {
             "group": "LG_L0_HALL_GALLERY",
             "contentName": "Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_GALLERY",
-            "scale": 0.017625274136662483
+            "scale": 0.002580862259492278
           },
           {
             "group": "LG_L0_HALL_MAIN",
             "contentName": "Textures/Lightmaps/Artificial/L0_HALL_LM_LG_L0_HALL_MAIN",
-            "scale": 0.5134106278419495
+            "scale": 0.5132596492767334
           }
         ]
       },

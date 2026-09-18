@@ -231,8 +231,8 @@
         "skyStrength": 1.0
       },
       "groups": [],
-      "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:eb0b90aa987f952d230df7614c61b73aacf8dbfadbb0b9d4070bf9e4639bc039"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:08b5b2eeea3ad95f883cb470b3c6b1ed46021547e311ac2bafa064e4e267fbf8"
     },
     {
       "cell": "L0_GARAGE",
@@ -260,12 +260,12 @@
       "cell": "L0_HALL",
       "daylight": {
         "image": "L0_HALL_LM_DAY.png",
-        "scale": 0.7765084505081177,
+        "scale": 0.7665742039680481,
         "skyStrength": 1.0
       },
       "groups": [],
-      "lumensPerRadiantWatt": 100.0,
-      "shellHash": "sha256:d0f6f27d58ba6ca23ed7198b3976b1a2244748b6c4f18705149f374f72ed132f"
+      "lumensPerRadiantWatt": 683.0,
+      "shellHash": "sha256:a84d07ea49583fc73fc50afbe328809b52256a6c7e70f65b5dbf8b693e5d6870"
     },
     {
       "cell": "L0_KITCHEN",
@@ -811,19 +811,13 @@
     }
   ],
   "promotedSubsetCells": [
-    "L1_BED3",
-    "L1_BED4",
-    "L1_BED5",
-    "L1_STAIR_MAIN",
-    "L2_BED6",
-    "L2_LIBRARY",
-    "L2_STAIR_ATTIC",
-    "L2_STAIR_MAIN"
+    "L0_FOYER",
+    "L0_HALL"
   ],
   "reusedCells": 78,
   "rgba8Bytes": 5111808,
   "samples": 256,
   "seed": 20260907,
-  "sourceBytes": 517277,
+  "sourceBytes": 517545,
   "tool": "bake_house_lightmaps.py"
 }

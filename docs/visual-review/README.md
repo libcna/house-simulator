@@ -3007,3 +3007,49 @@ unculled state changes. No strict golden moved. All eighteen culling pairs pass 
 debug blockout remains available. The next highest visible value is physical foyer/hall ceiling
 fixtures and a restrained side-wall/gallery layer, followed by the coarse formal piano or another
 screenshot-ranked route defect—not an unrelated subsystem.
+
+## Round 69 — physical foyer and hall ceiling fixtures
+
+Commit: `HOUSE-01290` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 68's [entrance](captures/house-01064-arrival-dressing-day-final/entrance-foyer.png)
+and [central hall](captures/house-01064-arrival-dressing-night-final/central-hall.png) show warm
+light pools with no physical ceiling source. After: the complete matched eighteen-camera
+[clear-day](captures/house-01290-arrival-fixtures-day-final) and
+[normal-night](captures/house-01290-arrival-fixtures-night-final) sets show one foyer and two hall
+semi-flush practicals with broad warm distribution. All 36 final frames were opened at full
+resolution. A first default-calibration bake was rejected because it made the walls nearly black;
+only the corrected selected-cell bake was retained.
+
+Ranked visible defects remaining:
+
+1. Broad foyer and hall side-wall bays remain under-dressed; the gallery/circulation identity is
+   still weaker than the completed terminal wall and console composition.
+2. Formal living remains dark and brown-heavy; its older upright piano is the coarsest close hero
+   object along the furnished route.
+3. The roof, dormers and far-side elevations still collapse outside bounded night sources.
+4. Garage/side-yard terrain and distant-neighbour context lose depth at night.
+5. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+
+Fixed: the approved 636-triangle semi-flush asset is reused at the three exact source positions.
+Its 0.18 m body meets the 3.30 m ceiling and its opal optical slot sits at 3.12 m. The former bare
+points are linked 2,700 K 72/140-degree downward spots on the same groups, switches and default-on
+state. Source-local offline bake calibrations preserve the established useful peaks while removing
+the singularity: foyer main is 0.4852 peak / 0.0686 mean and hall main is 0.5133 / 0.1155. Only
+complete `L0_FOYER` and `L0_HALL` receiver products were promoted; no exposure, renderer, collision,
+portal, navigation or unrelated-cell change was made.
+
+Against Round 68, `entrance-foyer` changes 1,025,453 day / 1,026,530 night pixels above two
+channel levels (71.2120% / 71.2868%; normalized MAE 0.066187 / 0.067866), `central-hall` changes
+864,055 / 866,342 (60.0038% / 60.1626%; 0.051109 / 0.051378), `foyer-facing-front` changes
+1,114,931 / 1,115,481 (77.4258% / 77.4640%; 0.065195 / 0.066741), and
+`foyer-living-doors` changes 1,081,521 / 1,083,132 (75.1056% / 75.2175%; 0.070736 / 0.072324).
+The world is 681 chunks / 96 cells / 87 props / 266 exterior instances / 55.192247 MB; 201
+materials produce 637 opaque, 44 cutout and 106 unculled state changes. No strict golden moved.
+All eighteen culling pairs pass at 0.0558% worst (`l0-sunroom`); full test/gate results are in
+`docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is a restrained foyer/hall
+side-wall gallery layer, followed by the coarse formal piano or another screenshot-ranked route
+defect—not an unrelated subsystem.

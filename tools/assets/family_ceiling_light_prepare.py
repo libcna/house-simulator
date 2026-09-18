@@ -44,6 +44,11 @@ LIVING_POSITIONS = (
     [-6.20, 3.12, -16.27],
     [-4.20, 3.12, -16.27],
 )
+FOYER_POSITION = [0.00, 3.12, -16.30]
+HALL_POSITIONS = (
+    [0.00, 3.12, -22.10],
+    [0.00, 3.12, -20.35],
+)
 PORCH_POSITIONS = (
     [-2.45, 3.17, -12.95],
     [2.45, 3.17, -12.95],
@@ -162,6 +167,29 @@ def validate_world() -> None:
                 light["emissiveMaterialSlot"] != "FamilyCeilingDiffuser" or \
                 not light["bakedIntoLightmap"] or not light["defaultOn"]:
             raise RuntimeError(f"living ceiling optical linkage changed: {light_id}")
+
+    arrival = (("L0_FOYER", "FOYER", (FOYER_POSITION,), 1100.0, 4.00, 13.5),
+               ("L0_HALL", "HALL", HALL_POSITIONS, 900.0, 5.17, 18.75))
+    for cell, stem, positions, lumens, light_range, bake_calibration in arrival:
+        for index, position in enumerate(positions, 1):
+            prop_id = f"PROP_{cell}_CEILING_{index}"
+            light_id = f"LIGHT_{cell}_MAIN_{index}"
+            prop = props[prop_id]
+            light = lights[light_id]
+            if prop["asset"] != ASSET_ID or prop["cell"] != cell or \
+                    prop["position"] != position or prop["yawDeg"] != 0 or \
+                    prop["scale"] != 1 or not prop["static"] or prop["collision"] != "none" or \
+                    abs(position[1] + 0.18 - 3.30) > 0.000001:
+                raise RuntimeError(f"canonical {stem.lower()} ceiling placement changed: {prop_id}")
+            if light["fixtureProp"] != prop_id or light["position"] != position or \
+                    light["type"] != "spot" or light["direction"] != [0.0, -1.0, 0.0] or \
+                    light["coneInnerDeg"] != 72.0 or light["coneOuterDeg"] != 140.0 or \
+                    light["colorK"] != 2700 or light["bulbClass"] != "led" or \
+                    light["intensityLm"] != lumens or light["range"] != light_range or \
+                    light["bakeLumensPerRadiantWatt"] != bake_calibration or \
+                    light["emissiveMaterialSlot"] != "FamilyCeilingDiffuser" or \
+                    not light["bakedIntoLightmap"] or not light["defaultOn"]:
+                raise RuntimeError(f"{stem.lower()} ceiling optical linkage changed: {light_id}")
 
     for index, position in enumerate(PORCH_POSITIONS, 1):
         prop_id = f"PROP_L0_PORCH_CEILING_{index}"

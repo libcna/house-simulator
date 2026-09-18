@@ -333,10 +333,11 @@
     // ---- LG_L0_FOYER_MAIN x1
     {
       "id": "LIGHT_L0_FOYER_MAIN_1", "cell": "L0_FOYER", "group": "LG_L0_FOYER_MAIN",
-      "type": "point", "position": [0.00, 2.45, -16.30],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 1100.0, "range": 4.00,
-      "fixtureProp": null, "emissiveMaterialSlot": "shade",
+      "type": "spot", "position": [0.00, 3.12, -16.30],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 2700, "bulbClass": "led", "intensityLm": 1100.0, "range": 4.00,
+      "bakeLumensPerRadiantWatt": 13.5,
+      "fixtureProp": "PROP_L0_FOYER_CEILING_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 
@@ -361,18 +362,20 @@
     // ---- LG_L0_HALL_MAIN x2
     {
       "id": "LIGHT_L0_HALL_MAIN_1", "cell": "L0_HALL", "group": "LG_L0_HALL_MAIN",
-      "type": "point", "position": [0.00, 2.45, -22.10],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 900.0, "range": 5.17,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "type": "spot", "position": [0.00, 3.12, -22.10],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 2700, "bulbClass": "led", "intensityLm": 900.0, "range": 5.17,
+      "bakeLumensPerRadiantWatt": 18.75,
+      "fixtureProp": "PROP_L0_HALL_CEILING_1", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
     {
       "id": "LIGHT_L0_HALL_MAIN_2", "cell": "L0_HALL", "group": "LG_L0_HALL_MAIN",
-      "type": "point", "position": [0.00, 2.45, -20.35],
-      "direction": [0.0, -1.0, 0.0],
-      "colorK": 2700, "intensityLm": 900.0, "range": 5.17,
-      "fixtureProp": null, "emissiveMaterialSlot": null,
+      "type": "spot", "position": [0.00, 3.12, -20.35],
+      "direction": [0.0, -1.0, 0.0], "coneInnerDeg": 72.0, "coneOuterDeg": 140.0,
+      "colorK": 2700, "bulbClass": "led", "intensityLm": 900.0, "range": 5.17,
+      "bakeLumensPerRadiantWatt": 18.75,
+      "fixtureProp": "PROP_L0_HALL_CEILING_2", "emissiveMaterialSlot": "FamilyCeilingDiffuser",
       "castsBlobShadow": true, "bakedIntoLightmap": true, "defaultOn": true
     },
 

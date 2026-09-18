@@ -563,6 +563,45 @@
       "interactable": null
     },
     {
+      "id": "PROP_L0_FOYER_CEILING_1",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_FOYER",
+      "position": [0.00, 3.12, -16.30],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_HALL_CEILING_1",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_HALL",
+      "position": [0.00, 3.12, -22.10],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_L0_HALL_CEILING_2",
+      "asset": "MODEL_FIXTURE_FAMILY_CEILING",
+      "cell": "L0_HALL",
+      "position": [0.00, 3.12, -20.35],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_DINING_RUG",
       "asset": "MODEL_FURNITURE_RUG",
       "cell": "L0_DINING",
