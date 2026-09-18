@@ -5704,6 +5704,17 @@ so borrowing a shell-paint `DualTextureEffect` role would falsely require a ligh
 preparation gate regenerates both GLBs byte-for-byte and pins their hashes, bounds, components,
 material slots and exact supporting planes.
 
+`HOUSE-01064` extends that bounded surface-dressing contract across the foyer-to-hall arrival.
+One 1.140 x 0.0205 x 3.960 m woven runner stays collision-free and leaves at least 1.20 m clear on
+each side of the long hall; one paired 3.920 x 1.050 x 0.10876 m relief occupies only the two end-
+wall flanks around the unchanged kitchen portal; and one 0.940995 x 0.840 x 0.3242 m vase,
+photograph and key-tray group rests on the existing foyer console's exact 1.207883 m top. These
+remain three data-owned props rather than one runtime room branch. Close geometry uses UV0 with
+three stock-`BasicEffect` ceramic/wool roles; existing walnut, brass, canvas and paper roles are
+reused. The preparation gate builds explicit smooth ellipsoids instead of Blender operator-
+generated custom-normal data, so all three GLBs regenerate byte-for-byte while preserving scale,
+component, material, placement, wall-contact and circulation checks.
+
 ---
 
 ## 60. Dog

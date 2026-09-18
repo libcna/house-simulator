@@ -143,12 +143,18 @@ CHUNK_BUDGET_EXCEPTIONS = {
                   "plus the stair to the loft, glazing, trim and an outside window-frame chunk; "
                   "HOUSE-00935 adds separately exterior-resident painted sectional leaf and "
                   "raised-panel roles"),
-    "L0_FOYER": (12,
+    "L0_FOYER": (17,
                   "HOUSE-01038's measured entrance: six shell finishes and an outside window "
                   "frame plus two source-specific CC0 furniture albedos. Keeping the carved "
                   "console wood and upholstered chair separate avoids repainting either as trim; "
                   "HOUSE-00930 isolates the weather-facing entry leaf for exterior residency; "
-                  "HOUSE-00932 adds distinct raised-panel hardwood and bronze hardware groups"),
+                  "HOUSE-00932 adds distinct raised-panel hardwood and bronze hardware groups; "
+                  "HOUSE-01064 reuses four canonical formal-room finishes and adds one ceramic "
+                  "role for the supported console vignette"),
+    "L0_HALL": (12,
+                "six existing shell/door finish groups plus HOUSE-01064's four canonical relief "
+                "finishes and two distinct woven-runner roles. The paired relief is one end-wall "
+                "asset whose empty centre preserves the kitchen portal; 12 is measured"),
     "L0_FAMILY": (25,
                   "measured with HOUSE-01037's first furnished media/seating group: five shell "
                   "finishes plus eight source-specific furniture albedos and one split to respect "

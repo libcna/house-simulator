@@ -1,3 +1,50 @@
+# Visual-sprint handoff — 2026-09-18 (`HOUSE-01064` checkpoint)
+
+Branch `develop`. Task-start HEAD `22e4181` (`HOUSE-01063`). This file belongs to the single
+`HOUSE-01064` commit; use that commit as the ending HEAD. **VISUAL-GATE-1 still FAILS.** Normal
+gameplay remains production-material only and explicit debug blockout remains available.
+
+The foyer-to-hall arrival no longer presents a long bare floor, empty console and two blank end-
+wall flanks. A deterministic project-authored suite contributes a physically thick 1.140 x 0.0205
+x 3.960 m runner with raised border/motif/fringe, a 3.920 x 1.050 x 0.10876 m paired original
+relief around the kitchen portal, and a 0.940995 x 0.840 x 0.3242 m vase/photograph/key-tray
+vignette. The collision-free runner leaves at least 1.20 m side clearance, the art remains within
+20 mm of the real wall without covering the portal, and the vignette meets the existing console's
+exact 1.207883 m top. Three UV0 stock-Basic ceramic/wool roles were added; approved walnut, brass,
+canvas and paper roles are reused. A byte-varying Blender UV-sphere attempt was rejected; explicit
+ellipsoid topology now gives all three GLBs stable, independently regenerated hashes.
+
+The canonical before views are Round 67's
+[entrance](visual-review/captures/house-01063-surface-dressing-day-final/entrance-foyer.png),
+[central hall](visual-review/captures/house-01063-surface-dressing-day-final/central-hall.png) and
+[reverse foyer](visual-review/captures/house-01063-surface-dressing-day-final/foyer-facing-front.png).
+The complete matched eighteen-camera after sets are
+[clear day](visual-review/captures/house-01064-arrival-dressing-day-final) and
+[normal night](visual-review/captures/house-01064-arrival-dressing-night-final). All 36 frames were
+opened. Against Round 67, `central-hall` changes 93,952 day / 93,407 night pixels above two channel
+levels (6.5244% / 6.4866%; normalized MAE 0.006916 / 0.006834), `entrance-foyer` changes 27,542 /
+27,119 (1.9126% / 1.8833%; 0.002513 / 0.002200), and `foyer-facing-front` changes 22,947 /
+23,160 (1.5935% / 1.6083%; 0.001144 / 0.001185). No strict golden moved.
+
+The world is 675 chunks / 96 cells / 84 static props / 266 exterior hierarchy instances /
+55.119074 MB. Its 201 materials, 902 manifest rows and 2,948 stable ids produce 631 opaque
+submissions, 44 cutouts and 106 unculled state changes, inside §71.2. All 1,409 unit and 135
+integration tests pass. All 48 active software-render registrations pass (44 execute, four
+driver-signature cases skip; eight capture-only generators remain disabled); all eighteen culled-
+vs-unculled pairs stay below 0.2%, at 0.0558% worst (`l0-sunroom`). Compilation and heavy tools
+stayed on CPU 0-5 / at most six workers. All project static gates and all 323 strict-XNA
+translation units pass.
+
+Largest remaining visible defects: foyer/hall lighting pools still lack convincing physical
+ceiling fixtures and their broad side walls remain under-dressed beyond the bounded terminal
+composition; formal living is dark/brown-heavy and its upright piano is comparatively coarse;
+the roof/dormer and far-side elevations remain black outside bounded night sources; garage/yard
+and neighbor depth remain sparse. The next highest-value checkpoint is physical foyer/hall ceiling
+fixtures plus a restrained side-wall/gallery layer, then the formal piano or the next screenshot-
+ranked route defect. Do not raise global exposure or leave the slice for unrelated systems.
+
+---
+
 # Visual-sprint handoff — 2026-09-18 (`HOUSE-01063` checkpoint)
 
 Branch `develop`. Task-start HEAD `2c24ff0` (`HOUSE-01062`). This file belongs to the single

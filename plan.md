@@ -43,7 +43,9 @@ structural chimney into a measured room-side fireplace composition; `HOUSE-01061
 dark conversation group from the walnut floor with a room-specific woven wool rug; `HOUSE-01062`
 breaks up the remaining foreground sofa mass with a physically draped textile accent; and
 `HOUSE-01063` dresses one blank wall bay and the bare coffee table with a coherent formal-room
-set. Round 9 proves the exterior material omission is fixed; `HOUSE-00924`
+set. `HOUSE-01064` carries that restrained surface-dressing discipline into the empty foyer/hall
+arrival with a runner, console objects and portal-flanking art. Round 9 proves the exterior
+material omission is fixed; `HOUSE-00924`
 removes the
 exposure-scaled glass tint, and `HOUSE-00925` keeps outdoor receivers from clipping when viewed
 from a dark room. Round 11 leaves the front façade and empty/dark entrance route as the largest
@@ -155,7 +157,7 @@ the gate named). Nothing requested has been downgraded to make the plan shorter.
 | 10 | Exterior and property | 00761–00840 | 25 | Terrain, fences, gates, drive, garden |
 | 11 | Neighbourhood background | 00841–00890 | 17 | The house is not floating in nothing |
 | 12 | Materials and textures | 00891–00970 | 36 | The blockout reads as a building |
-| 13 | Static furniture and dressing | 00971–01120 | 69 | Every room furnished to density |
+| 13 | Static furniture and dressing | 00971–01120 | 70 | Every room furnished to density |
 | 14 | Interactable framework | 01121–01180 | 26 | The 12 behaviours and the data model |
 | 15 | Doors and windows | 01181–01250 | 22 | Portals are dynamic |
 | 16 | Lights and switches | 01251–01310 | 29 | The house can be lit — **first playable** |
@@ -15036,6 +15038,47 @@ and `micro` sets, respects the anti-repetition rules, and ends with a render-tes
             capture-only generators remain disabled); all eighteen culling pairs pass at 0.0558%
             worst (`l0-sunroom`) against 0.2%. All project static gates and 323 strict-XNA
             translation units pass with compilation and heavy work restricted to CPU 0-5.
+- [x] HOUSE-01064 — Finish the foyer-to-hall arrival with one measured surface-dressing composition
+      dep: HOUSE-00215, HOUSE-00220, HOUSE-00296, HOUSE-01038, HOUSE-01039, HOUSE-01063 · sys: content/world · plat: TOOL · pri: MUST
+      note: (2026-09-18) Round 67 makes the empty wall flanks around the kitchen portal, the bare
+            foyer console and the unanchored hall floor the largest connected-route defect. Add a
+            restrained paired portal composition, one long runner and one purposeful console
+            vignette without claiming the blocked full-density foyer/hall tasks.
+      accept: deterministically author original portal-flanking reliefs, a physically thick woven
+            runner and a vase/frame/key-tray console group; use metre-scale UV0 and approved
+            stock-XNA material roles; register them to the real end wall, finished hall floor and
+            exact existing console top without floating, clipping, collision, portal obstruction
+            or circulation loss; prove provenance, scale, component set, exact placement and byte
+            regeneration; capture and inspect the matched day/night route; and pass content,
+            budget, render, culling and strict-XNA gates with heavy work capped at six CPUs
+      result: A deterministic three-asset suite now gives the continuous arrival a domestic focal:
+            a 1.140 x 0.0205 x 3.960 m / 3,856-triangle bordered and fringed woven runner, a
+            3.920 x 1.050 x 0.10876 m / 2,624-triangle paired original relief and a 0.940995 x
+            0.840 x 0.3242 m / 2,644-triangle console vignette with vase/branch, standing
+            photograph, key tray and keys. The runner leaves at least 1.20 m clear at each side,
+            the relief stays within 20 mm of the actual end wall without covering the kitchen
+            portal and the vignette rests on the existing console's exact 1.207883 m top. Three
+            UV0 stock-Basic ceramic/wool roles join approved reused walnut, brass, canvas and paper
+            roles; no collision, light, renderer, exposure, runtime branch or download was added.
+            Explicit generated ellipsoids remove Blender UV-sphere custom-normal byte variance, so
+            all three committed GLBs regenerate to their pinned hashes. The canonical day/night
+            sets are `house-01064-arrival-dressing-{day,night}-final`.
+      review: All 36 Round 68 frames were opened. The runner anchors the long axis while retaining
+            circulation, the relief pair turns the kitchen portal into a deliberate terminal view,
+            and the console reads as used rather than bare; neighboring rooms and the exterior
+            retain their established presentation. Against Round 67, `central-hall` changes
+            93,952 day / 93,407 night pixels above two channel levels (6.5244% / 6.4866%; MAE
+            0.006916 / 0.006834), `entrance-foyer` changes 27,542 / 27,119 (1.9126% / 1.8833%;
+            0.002513 / 0.002200), and `foyer-facing-front` changes 22,947 / 23,160 (1.5935% /
+            1.6083%; 0.001144 / 0.001185). No strict golden moved.
+      verified: The world has 201 materials, 2,948 stable ids and 902 manifest rows; its 675 chunks,
+            84 props, 266 exterior instances and 55.119074 MB upload remain inside budget. The
+            unculled diagnostic is 631 opaque / 44 cutout / 106 state changes. All 1,409 unit, 135
+            integration and 48 active render registrations pass (44 execute, four driver-signature
+            cases skip and eight capture-only generators remain disabled); all eighteen culling
+            pairs pass at 0.0558% worst (`l0-sunroom`) against 0.2%. All project static gates and
+            323 strict-XNA translation units pass with compilation and heavy work restricted to
+            CPU 0-5.
 - [ ] HOUSE-00986 — Furnish `L0_FOYER` and `L0_PORCH`
       dep: HOUSE-00973…HOUSE-00985 · sys: world · plat: TOOL · pri: MUST
 - [ ] HOUSE-00987 — Furnish `L0_HALL` (including the gallery wall placement)
@@ -19430,13 +19473,13 @@ Recorded so nobody has to re-derive the decision.
 |---|---|---|
 | Foundations, capability proof, build, pipeline, assets | 0–4 | 238 |
 | World data, blockout, collision, camera, visibility | 5–9 | 218 |
-| Exterior, neighbourhood, materials, furnishing | 10–13 | 140 |
+| Exterior, neighbourhood, materials, furnishing | 10–13 | 141 |
 | Interaction framework and the systems built on it | 14–21 | 159 |
 | Time, sun, moon, stars, sky, weather | 22–30 | 155 |
 | Audio, room-aware audio, animals, avatar, animation | 31–38 | 162 |
 | Persistence, reset, optimisation, streaming, debug, tests, polish, stabilisation | 39–46 | 188 |
 | Web, Android, release | 47–52 | 77 |
-| **Total** | **0–52** | **1 341** |
+| **Total** | **0–52** | **1 342** |
 The **ID ranges reserved** in the phase index are larger than the tasks written, deliberately:
 every phase has headroom so that inserted work takes a fresh ID inside its own phase and never
 disturbs an existing one.
@@ -19472,6 +19515,7 @@ evidence that it fails.
 
 | Date | Task | Correction | Why |
 |---|---|---|---|
+| 2026-09-18 | `HOUSE-01064` | **New task, next free phase-13 id.** Finish the currently bare foyer console, hall floor and two end-wall flanks as one bounded arrival composition while keeping full room-density tasks open. | Round 67's fixed foyer/hall cameras show these three connected surfaces as the largest remaining domestic-identity defect. Deterministic project-authored dressing can finish them through the approved prop/material path without a download, collision, light change, runtime branch or false completion of `HOUSE-00986`/`HOUSE-00987`. |
 | 2026-09-18 | `HOUSE-01063` | **New task, next free phase-13 id.** Treat one empty wall bay and the existing bare coffee table as a single restrained formal-room dressing checkpoint while leaving the full furnishing task open. | Round 66 confirms that more broad colour correction is lower value than human-scale evidence of use. A deterministic paired relief and measured books/tray/bowl vignette can reuse approved room roles and finish two prominent surfaces without unbounded clutter, a download, lighting change or runtime branch. |
 | 2026-09-18 | `HOUSE-01062` | **New task, next free phase-13 id.** Add one tailored static throw over the camera-near arm of the completed formal sofa while leaving the source sofa, lighting and full-room furnishing task intact. | Round 65's lighter rug exposes the remaining closest brown sofa end as the largest contained mass. A deterministic folded textile with real thickness/fringe and an existing approved woven role adds controlled lived-in contrast without recolouring third-party hero geometry, changing exposure or creating a generic primitive placeholder. |
 | 2026-09-18 | `HOUSE-01061` | **New task, next free phase-13 id.** Give only the existing formal-living rug a room-specific woven wool material while retaining the approved geometry and full furnishing task. | Round 64 shows the 3 m-scale charcoal field merging the brown seating into the walnut floor. A canonical per-prop material override and existing approved textile maps can restore a believable anchoring plane without new assets, global exposure, light changes, runtime logic or claiming the dependency-blocked room furnishing task. |

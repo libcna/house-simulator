@@ -131,6 +131,9 @@ CATEGORIES: dict[str, list[tuple[str, float, float, str]]] = {
     "tabletop-decor": [("x", 0.40, 0.90, "composed tabletop vignette width"),
                        ("y", 0.08, 0.35, "tabletop vignette height"),
                        ("z", 0.20, 0.55, "composed tabletop vignette depth")],
+    "console-decor": [("x", 0.60, 1.30, "composed console vignette width"),
+                      ("y", 0.40, 0.95, "console vignette height"),
+                      ("z", 0.15, 0.45, "composed console vignette depth")],
 }
 
 #: Categories that exist in the manifest but carry no size expectation. Listed explicitly so that a

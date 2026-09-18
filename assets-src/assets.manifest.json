@@ -1380,6 +1380,119 @@
       ]
     },
     {
+      "id": "MODEL_FOYER_CONSOLE_DRESSING",
+      "category": "console-decor",
+      "sourceFile": "assets-src/Models/Furniture/Foyer/console_dressing.glb",
+      "sourceSha256": "ba4d6d61d63c0266aef803990756f1d24960e0d2e70ccc14556e5279255c6803",
+      "contentName": "Models/Furniture/Foyer/console_dressing",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Foyer console arrival vignette",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored vase/branch, standing photograph and key-tray composition generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01064. It uses only original geometry and approved canonical material roles; no third-party mesh, image or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [0.940995, 0.84, 0.3242],
+        "triangles": {
+          "LOD0": 2644
+        }
+      },
+      "materialMap": {
+        "ARRIVAL_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "ARRIVAL_BRASS": "MAT_FURNITURE_PIANO_BRASS",
+        "ARRIVAL_CANVAS": "MAT_FAMILY_ART_CANVAS",
+        "ARRIVAL_CREAM": "MAT_LIVING_ART_PAPER",
+        "ARRIVAL_CERAMIC": "MAT_FOYER_CERAMIC"
+      },
+      "usedIn": [
+        "L0_FOYER"
+      ]
+    },
+    {
+      "id": "MODEL_HALL_RUNNER",
+      "category": "rug",
+      "sourceFile": "assets-src/Models/Furniture/Hall/hall_runner.glb",
+      "sourceSha256": "fcc235247a38242f4e5399171efc55b84dc8b2f5618133f570e48bff250543d8",
+      "contentName": "Models/Furniture/Hall/hall_runner",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Central-hall woven runner",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored physically thick wool runner with raised border, diamond rhythm and individual end fringe generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01064. Approved project weave maps are bound by the canonical material table; no third-party mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [1.14, 0.0205, 3.96],
+        "triangles": {
+          "LOD0": 3856
+        }
+      },
+      "materialMap": {
+        "ARRIVAL_RUNNER_BASE": "MAT_HALL_RUNNER_WOOL",
+        "ARRIVAL_RUNNER_BORDER": "MAT_HALL_RUNNER_BORDER_WOOL"
+      },
+      "usedIn": [
+        "L0_HALL"
+      ]
+    },
+    {
+      "id": "MODEL_HALL_PORTAL_ART_PAIR",
+      "category": "picture",
+      "sourceFile": "assets-src/Models/Furniture/Hall/portal_art_pair.glb",
+      "sourceSha256": "0ca79480f60da7ce6f326263efe3f26e7d2e48eae8e57033b353d7e08dd778a2",
+      "contentName": "Models/Furniture/Hall/portal_art_pair",
+      "kind": "model",
+      "residencyPack": "house-l0",
+      "origin": {
+        "kind": "authored",
+        "name": "Kitchen-portal paired raised relief",
+        "licence": "Ms-PL",
+        "licenceFile": "LICENSE",
+        "attribution": "",
+        "redistributeSource": true,
+        "redistributeDerived": true,
+        "commercialUse": true,
+        "modification": true,
+        "note": "Project-authored matched but asymmetric raised relief pair generated deterministically by tools/blender/foyer_hall_dressing.py for HOUSE-01064. The single asset deliberately leaves the canonical kitchen portal empty and occupies only its two wall flanks; no third-party image, mesh or texture was copied."
+      },
+      "geometry": {
+        "unitScale": 1,
+        "upAxis": "Y",
+        "boundsMetres": [3.92, 1.05, 0.10876],
+        "triangles": {
+          "LOD0": 2624
+        }
+      },
+      "materialMap": {
+        "ARRIVAL_WOOD": "MAT_FURNITURE_PIANO_WOOD",
+        "ARRIVAL_BRASS": "MAT_FURNITURE_PIANO_BRASS",
+        "ARRIVAL_CANVAS": "MAT_FAMILY_ART_CANVAS",
+        "ARRIVAL_CREAM": "MAT_LIVING_ART_PAPER"
+      },
+      "usedIn": [
+        "L0_HALL"
+      ]
+    },
+    {
       "id": "MODEL_FURNITURE_KITCHEN_COUNTER_STOOL",
       "category": "stool-counter",
       "sourceFile": "assets-src/Models/Furniture/Kitchen/counter_stool.glb",

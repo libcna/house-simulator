@@ -169,6 +169,9 @@ run_gate "living-sofa-throw" python3 tools/assets/living_sofa_throw_prepare.py -
 # HOUSE-01063: paired wall relief and measured coffee-table vignette remain byte-deterministic,
 # collision-free and registered to the real wall/table support surfaces.
 run_gate "living-surface-dressing" python3 tools/assets/living_surface_dressing_prepare.py --check
+# HOUSE-01064: the foyer/hall runner, console vignette and portal-flanking relief remain
+# byte-deterministic, collision-free and registered to their real support/wall surfaces.
+run_gate "foyer-hall-dressing" python3 tools/assets/foyer_hall_dressing_prepare.py --check
 # HOUSE-01053: the family focal wall retains the pinned CC0 low cabinet, exact canonical roles,
 # measured television gap and family-only placement without unsupported source metadata.
 run_gate "family-media-console" python3 tools/assets/family_media_console_prepare.py --check

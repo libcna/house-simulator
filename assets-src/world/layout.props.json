@@ -28,6 +28,45 @@
       "interactable": null
     },
     {
+      "id": "PROP_FOYER_CONSOLE_DRESSING",
+      "asset": "MODEL_FOYER_CONSOLE_DRESSING",
+      "cell": "L0_FOYER",
+      "position": [1.39, 1.207883, -14.52],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_HALL_RUNNER",
+      "asset": "MODEL_HALL_RUNNER",
+      "cell": "L0_HALL",
+      "position": [0.0, 0.602, -20.65],
+      "yawDeg": 0,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
+      "id": "PROP_HALL_PORTAL_ART_PAIR",
+      "asset": "MODEL_HALL_PORTAL_ART_PAIR",
+      "cell": "L0_HALL",
+      "position": [0.0, 1.9, -22.98],
+      "yawDeg": 180,
+      "scale": 1,
+      "static": true,
+      "lodGroup": null,
+      "collision": "none",
+      "material": null,
+      "interactable": null
+    },
+    {
       "id": "PROP_L0_KITCHEN_NORTH_BASE_RUN",
       "asset": "MODEL_KITCHEN_NORTH_BASE_RUN",
       "cell": "L0_KITCHEN",

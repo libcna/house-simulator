@@ -2962,3 +2962,48 @@ two channel levels (7.9743% / 9.9712%; normalized MAE 0.006476 / 0.006010). The 
 debug blockout remains available. The next highest visible value is foyer/hall wall and console
 dressing, followed by the coarse formal piano or another screenshot-ranked route defect—not an
 unrelated subsystem.
+
+## Round 68 — foyer-to-hall arrival composition
+
+Commit: `HOUSE-01064` checkpoint (`2026-09-18`; exact HEAD in `docs/handoff.md`).
+
+Before: Round 67's [entrance](captures/house-01063-surface-dressing-day-final/entrance-foyer.png),
+[central hall](captures/house-01063-surface-dressing-day-final/central-hall.png) and
+[reverse foyer](captures/house-01063-surface-dressing-day-final/foyer-facing-front.png) leave a
+long bare floor, two blank kitchen-portal flanks and an empty console. After: the complete matched
+eighteen-camera [clear-day](captures/house-01064-arrival-dressing-day-final) and
+[normal-night](captures/house-01064-arrival-dressing-night-final) sets show a warm bordered runner,
+paired reliefs and a supported vase/photograph/key-tray group. All 36 frames were opened at full
+resolution; no exterior, neighboring-room or established furnishing view gained a visible defect.
+
+Ranked visible defects remaining:
+
+1. The foyer and hall light pools still lack convincing physical ceiling fixtures, and their broad
+   side walls remain under-dressed beyond this deliberately bounded terminal composition.
+2. Formal living remains dark and brown-heavy; its older upright piano is now the coarsest close
+   hero object along the furnished route.
+3. The roof, dormers and far-side elevations still collapse outside bounded night sources.
+4. Garage/side-yard terrain and distant-neighbour context lose depth at night.
+5. The simple facade massing and repetitive window rhythm remain conspicuous by day.
+
+Fixed: a deterministic 3,856-triangle runner owns a 14 mm woven body, raised ochre borders,
+five repeated diamonds and physical fringe while preserving at least 1.20 m side clearance. A
+2,624-triangle paired original relief registers within 20 mm of the real kitchen-end wall without
+covering the portal. A 2,644-triangle console vignette sits on the existing table's exact
+1.207883 m top and uses an explicitly generated smooth ceramic silhouette, branch, photograph,
+tray and keys. All three props are collision-free. Existing approved roles are reused except for
+one pale ceramic and two runner-wool stock-Basic roles. No download, light, exposure, renderer,
+portal or runtime room branch was added.
+
+Against Round 67, `central-hall` changes 93,952 day / 93,407 night pixels above two channel levels
+(6.5244% / 6.4866%; normalized MAE 0.006916 / 0.006834), `entrance-foyer` changes 27,542 /
+27,119 (1.9126% / 1.8833%; 0.002513 / 0.002200), and `foyer-facing-front` changes 22,947 /
+23,160 (1.5935% / 1.6083%; 0.001144 / 0.001185). The world is 675 chunks / 96 cells / 84 props /
+266 exterior instances / 55.119074 MB; 201 materials produce 631 opaque, 44 cutout and 106
+unculled state changes. No strict golden moved. All eighteen culling pairs pass at 0.0558% worst
+(`l0-sunroom`); complete test and gate results are recorded in `docs/handoff.md`.
+
+`VISUAL-GATE-1` still **FAILS**. Normal gameplay remains production-material only and explicit
+debug blockout remains available. The next highest visible value is physical foyer/hall ceiling
+fixtures and a restrained side-wall/gallery layer, followed by the coarse formal piano or another
+screenshot-ranked route defect—not an unrelated subsystem.
